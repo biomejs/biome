@@ -90,8 +90,8 @@ use biome_js_syntax::{
     JsObjectBindingPatternShorthandProperty, JsReturnStatement, JsSetterClassMember,
     JsSetterObjectMember, JsSwitchStatement, JsSyntaxKind, JsSyntaxNode, JsThisExpression,
     JsThrowStatement, JsTryFinallyStatement, JsTryStatement, JsVariableDeclarationClause,
-    JsVariableKind, JsVariableStatement, JsWhileStatement, JsWithStatement, TsDeclareStatement,
-    binding_ext::AnyJsBindingDeclaration,
+    JsVariableDeclarator, JsVariableKind, JsVariableStatement, JsWhileStatement, JsWithStatement,
+    TsDeclareStatement, binding_ext::AnyJsBindingDeclaration,
 };
 use biome_js_type_info::{
     AnyPredicateFunction, DestructureField, RawTypeData, RawTypeId, TypeReference,
@@ -422,7 +422,10 @@ pub(crate) enum FlowWriteEffect {
 /// reach it. Biome's flow does the same with a solve whose state is that type,
 /// instead of a declared type that writes narrow. A read in another function,
 /// as in a closure, has an implicit `any` in TypeScript (TS7005), so the
-/// variable keeps its declared type outside the root that declares it.
+/// variable doesn't narrow outside the root that declares it. Such a read
+/// keeps the declared type when that type covers every write of the
+/// variable, and is Unknown otherwise (see
+/// [`RootCollector::add_outer_evolving_reads`]).
 #[derive(Clone, Copy, Debug, Default, Eq, Hash, PartialEq)]
 pub(crate) enum FlowEvolving {
     /// A subject whose writes narrow its declared type.
@@ -699,6 +702,10 @@ pub(crate) struct RootFlow {
     /// writes, with how each type evolves. The root declares every such
     /// variable.
     pub(crate) evolving: FxHashMap<FlowSubjectId, FlowEvolving>,
+    /// The variables in [`Self::evolving`] that a `var` declares. A path that
+    /// doesn't pass the declarator, as a read before it, gives them
+    /// `undefined`.
+    pub(crate) hoisted: FxHashSet<FlowSubjectId>,
     /// The capture point of each variable that the root continues from an
     /// enclosing root, keyed by the variable. When the root runs, such a
     /// variable starts with its type where the enclosing root creates the
@@ -981,6 +988,23 @@ impl RootFlow {
         self.evolving.get(&subject).copied().unwrap_or_default()
     }
 
+    /// Returns whether `subject`, an array whose type evolves with its
+    /// writes, is an array at every read: no path reaches a read without
+    /// passing its declarator, and every write adds values to it or assigns
+    /// it an empty array literal.
+    pub(crate) fn is_always_array(&self, subject: FlowSubjectId) -> bool {
+        !self.hoisted.contains(&subject)
+            && self.writes.iter().all(|write| {
+                write.subject != subject
+                    || matches!(
+                        write.effect,
+                        FlowWriteEffect::Elements(_)
+                            | FlowWriteEffect::EmptyArray
+                            | FlowWriteEffect::Wildcard
+                    )
+            })
+    }
+
     /// Returns whether a write of `subject`, a variable whose type evolves
     /// with its writes, gives it a type that no value in
     /// [`Self::subject_writes`] stands for: a write whose value Biome can't
@@ -1105,6 +1129,7 @@ pub(crate) fn build_reachability(
             assignment_only: FxHashSet::default(),
             uninitialized: FxHashSet::default(),
             evolving: FxHashMap::default(),
+            hoisted: FxHashSet::default(),
             captures: FxHashMap::default(),
             calls: calls.into_iter().map(|(call, _)| call).collect(),
             subject_calls: FxHashMap::default(),
@@ -1298,6 +1323,7 @@ impl FlowPredicate {
                 assignment_only: FxHashSet::default(),
                 uninitialized: FxHashSet::default(),
                 evolving: FxHashMap::default(),
+                hoisted: FxHashSet::default(),
                 captures: FxHashMap::default(),
                 calls: calls.into_iter().map(|(call, _)| call).collect(),
                 subject_calls,
@@ -1357,6 +1383,13 @@ pub(crate) struct ModuleFlow {
     /// that TypeScript infers from its body, keyed by the function's trimmed
     /// range. Its call points are not in [`Self::calls`].
     predicates: FxHashMap<TextRange, FlowPredicate>,
+    /// The reads of variables whose types evolve with their writes as
+    /// variables that are Unknown, keyed by range. Each read lies in code
+    /// that the root declaring its variable doesn't run in its own flow, as
+    /// a closure, and a write of the variable may assign a value that the
+    /// variable's declared type lacks. See
+    /// [`RootCollector::add_outer_evolving_reads`].
+    outer_evolving_reads: FxHashSet<TextRange>,
 }
 
 impl ModuleFlow {
@@ -1434,6 +1467,7 @@ impl ModuleFlow {
             );
         }
         flow.predicates = collect_predicates(model, raw_types, &mut collector.functions);
+        collector.add_outer_evolving_reads(&mut flow);
         for (range, reads) in collector.binding_reads {
             match reads {
                 BindingReads::PropertyOnly { instance_tested } => {
@@ -1561,6 +1595,12 @@ impl ModuleFlow {
                 self.call_only_candidates.remove(&range);
             }
         }
+    }
+
+    /// Returns whether the read at `range` is Unknown, as
+    /// [`Self::outer_evolving_reads`] describes.
+    pub(crate) fn is_outer_evolving_read(&self, range: TextRange) -> bool {
+        self.outer_evolving_reads.contains(&range)
     }
 
     /// Returns the flow of the read at `range`, an identifier or a member
@@ -1795,7 +1835,7 @@ impl RootCollector<'_> {
             written,
             mut captures,
             initializers,
-            hoisted,
+            mut hoisted,
             ..
         }) = build_root(
             root,
@@ -1851,8 +1891,10 @@ impl RootCollector<'_> {
         // variable evolving. So does any other write of a variable initialized
         // with `null` or `undefined`, because its declared type can lack the
         // type of the write, which then gives the reads that it reaches
-        // Unknown. A variable without an initializer already has the declared
-        // type Unknown, and an array `unknown[]`, so such writes need no
+        // Unknown, and of an array that a `var` declares, whose declared type
+        // lacks the `undefined` of a path that doesn't pass the declarator.
+        // A variable without an initializer already has the declared type
+        // Unknown, and another array has `unknown[]`, so such writes need no
         // solve for them.
         let mut written_after: FxHashSet<FlowSubjectId> = FxHashSet::default();
         let mut typed: FxHashSet<FlowSubjectId> = FxHashSet::default();
@@ -1884,7 +1926,10 @@ impl RootCollector<'_> {
                     typed.contains(&subject)
                         || (initialized.contains(&subject) && written_after.contains(&subject))
                 }
-                FlowEvolving::Array => typed.contains(&subject),
+                FlowEvolving::Array => {
+                    typed.contains(&subject)
+                        || (hoisted.contains(&subject) && written_after.contains(&subject))
+                }
                 FlowEvolving::None => false,
             });
             match subject {
@@ -1896,6 +1941,7 @@ impl RootCollector<'_> {
                 }
             }
         }
+        hoisted.retain(|subject| evolving.contains_key(subject));
         let mut uninitialized = self.uninitialized_subjects(root, &subjects, &eligible);
         uninitialized.retain(|subject| !evolving.contains_key(subject));
         // A write mentions its subject where it can change the subject's
@@ -1938,10 +1984,7 @@ impl RootCollector<'_> {
                 write_mentioned.insert(write.subject);
             }
         }
-        for subject in hoisted
-            .iter()
-            .filter(|subject| evolving.contains_key(subject))
-        {
+        for subject in &hoisted {
             mentions.push((0, *subject));
         }
         // A subject that may be read before it is assigned, such as a `var`,
@@ -2093,8 +2136,8 @@ impl RootCollector<'_> {
             })
             .collect();
         // A read of a variable whose type evolves with its writes has an
-        // implicit `any` in a closure in TypeScript (TS7005), so it keeps its
-        // declared type there.
+        // implicit `any` in a closure in TypeScript (TS7005), so it doesn't
+        // continue the flow there. `add_outer_evolving_reads` types it.
         let (captured, assumed_initialized) = if captures.is_empty() {
             (Vec::new(), FxHashSet::default())
         } else if evolving.is_empty() {
@@ -2485,6 +2528,7 @@ impl RootCollector<'_> {
                 subject_writes,
                 uninitialized,
                 evolving,
+                hoisted,
                 assignment_only,
                 captures: FxHashMap::default(),
                 calls: calls.into_iter().map(|(call, _)| call).collect(),
@@ -2659,6 +2703,60 @@ impl RootCollector<'_> {
         }
     }
 
+    /// Records in [`ModuleFlow::outer_evolving_reads`] the reads of each
+    /// variable whose type evolves with its writes as a variable that lie in
+    /// code that the root declaring the variable doesn't run in its own flow,
+    /// and makes them and the expressions that evaluate them candidates.
+    ///
+    /// TypeScript gives such a read an implicit `any` (TS7005). Biome keeps
+    /// the variable's declared type there, which joins its initializer with
+    /// the values of some assignments in other scopes, only when that type
+    /// covers every write of the variable (see [`builder::covers_writes`]).
+    /// Otherwise the read is Unknown, so that it isn't narrower than the
+    /// values that the writes assign. A variable without an initializer
+    /// already has the declared type Unknown, so its reads need nothing.
+    fn add_outer_evolving_reads(&self, flow: &mut ModuleFlow) {
+        let model = self.model;
+        for binding in model.all_bindings() {
+            if binding.all_writes().next().is_none()
+                || evolving_declaration(&binding, model) != FlowEvolving::Variable
+            {
+                continue;
+            }
+            let Some(AnyJsBindingDeclaration::JsVariableDeclarator(declarator)) =
+                binding.tree().declaration()
+            else {
+                continue;
+            };
+            if declarator.initializer().is_none() {
+                continue;
+            }
+            let Some(root) = flow_root_of(&declarator) else {
+                continue;
+            };
+            let reads: Vec<_> = binding
+                .all_reads()
+                .filter_map(|read| {
+                    read.syntax()
+                        .parent()
+                        .and_then(JsIdentifierExpression::cast)
+                })
+                .filter(|identifier| !runs_in_flow_of(identifier, &root))
+                .collect();
+            if reads.is_empty() || builder::covers_writes(&binding, model) {
+                continue;
+            }
+            for identifier in reads {
+                let expression = AnyFlowExpression::from(identifier);
+                flow.outer_evolving_reads.insert(expression.range());
+                flow.insert_candidate(&expression, None, None);
+                for ancestor in expression.evaluated_ancestors() {
+                    flow.insert_candidate(&ancestor, None, None);
+                }
+            }
+        }
+    }
+
     /// Returns the range of `binding` when its reads can narrow, in the root
     /// that declares it and in the roots nested in that one. Each root still
     /// checks the writes of the variable with [`Self::writes_are_modeled`].
@@ -2682,7 +2780,8 @@ impl RootCollector<'_> {
     /// A variable whose type evolves narrows whatever its collected type is,
     /// because that type doesn't follow its writes. TypeScript gives such a
     /// variable an implicit `any` (TS7005) outside the function that declares
-    /// it, so it keeps its declared type in nested roots, including closures.
+    /// it, so it doesn't narrow in nested roots, including closures, where
+    /// [`Self::add_outer_evolving_reads`] types its reads.
     /// A variable that nothing writes, and that no call or element assignment
     /// adds values to, has the type of its initializer everywhere. That type
     /// is its collected type, so it narrows as any other variable.
@@ -3593,6 +3692,46 @@ const BINDING_PATTERN_KINDS: SyntaxKindSet<JsLanguage> = JsArrayBindingPattern::
     .union(JsObjectBindingPatternRest::KIND_SET)
     .union(JsObjectBindingPatternShorthandProperty::KIND_SET);
 
+/// Returns the execution root whose flow runs `declarator`: the closest root
+/// around it that isn't inline code running in the flow of the root around
+/// it (see [`AnyInlineCode::runs_inline`]).
+fn flow_root_of(declarator: &JsVariableDeclarator) -> Option<AnyJsControlFlowRoot> {
+    declarator
+        .syntax()
+        .ancestors()
+        .skip(1)
+        .filter_map(AnyJsControlFlowRoot::cast)
+        .find(|root| !AnyInlineCode::cast_ref(root.syntax()).is_some_and(|code| code.runs_inline()))
+}
+
+/// Returns whether `root` runs the read `identifier` in its own flow. Code
+/// in a nested root that isn't inline code running in the flow of `root`
+/// stops the read, and so does code that `root` doesn't run in its flow: a
+/// class member other than a function, as a field initializer, a decorator,
+/// the computed key of a member, a type, a `declare` statement, or the body
+/// of a `with` statement.
+fn runs_in_flow_of(identifier: &JsIdentifierExpression, root: &AnyJsControlFlowRoot) -> bool {
+    for ancestor in identifier.syntax().ancestors().skip(1) {
+        let kind = ancestor.kind();
+        if AnyJsControlFlowRoot::can_cast(kind) {
+            if ancestor == *root.syntax() {
+                return true;
+            }
+            if !AnyInlineCode::cast_ref(&ancestor).is_some_and(|code| code.runs_inline()) {
+                return false;
+            }
+        } else if CLOSURE_BARRIER_KINDS.matches(kind)
+            || (JsComputedMemberName::can_cast(kind)
+                && ancestor
+                    .parent()
+                    .is_some_and(|member| MEMBER_KINDS.matches(member.kind())))
+        {
+            return false;
+        }
+    }
+    false
+}
+
 /// Returns how TypeScript types the variable `binding` from its writes.
 ///
 /// The variable must be declared by a declarator of a `let`, a `const`, or a
@@ -4213,9 +4352,10 @@ mod tests {
         // type other than the declared type, apart from a `var` read before
         // its declarator. A write without a value, as `w++`, counts, because
         // it makes the read Unknown. The declared type stays for a read in a
-        // closure or in a nested root, for a variable without such a write,
-        // and for an array that an `async` function called where it is
-        // defined adds to. A function that runs inline adds in the flow.
+        // closure of a variable without an initializer, which is Unknown, for
+        // a variable without such a write, and for an array that an `async`
+        // function called where it is defined adds to. A function that runs
+        // inline adds in the flow.
         for (marker, expression, evolving) in [
             ("before", "x", None),
             ("after", "x", Some(FlowEvolving::Variable)),
@@ -4226,7 +4366,6 @@ mod tests {
             ("invoked", "b", Some(FlowEvolving::Array)),
             ("async", "d", None),
             ("hoisted", "v", Some(FlowEvolving::Variable)),
-            ("nested", "m", None),
         ] {
             let range = marked(SOURCE, marker, expression);
             let kind = info.flow.read(range).map(|read| {
@@ -4241,6 +4380,12 @@ mod tests {
                 "{marker}"
             );
         }
+        // A read in a nested root has no flow. It is a candidate that is
+        // Unknown when a write may assign a value that the declared type
+        // lacks, as `m = 1` in the scope that declares `m`.
+        let nested = marked(SOURCE, "nested", "m");
+        assert!(info.flow.read(nested).is_none());
+        assert!(info.flow.is_candidate(nested) && info.flow.is_outer_evolving_read(nested));
     }
 
     #[test]

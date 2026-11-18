@@ -209,13 +209,20 @@ pub(in crate::db) fn flow_assigned_types<'db>(
 /// given the array's type `state` at the read. The result is an array of the
 /// element type of `state`.
 ///
-/// Returns `None`, so that the read keeps its declared type, in two cases.
-/// When nothing has been added to the array, TypeScript gives the read an
-/// implicit `any[]` (TS7005). When the element type is `Unknown` or `state`
-/// is not an array, a write that reaches the read assigns or adds a value
-/// that Biome can't type as TypeScript does.
+/// The read is `Unknown` when `state` is not an array, or has a member that
+/// isn't one: a write that reaches the read may assign a value other than an
+/// array, or a path reaches it without passing the declarator of a `var`.
+/// The declared type, `unknown[]`, lacks such a value.
+///
+/// Returns `None`, so that the read keeps its declared type, in two cases,
+/// where `unknown[]` is wider than TypeScript's type. When nothing has been
+/// added to the array, TypeScript gives the read an implicit `any[]`
+/// (TS7005). When the element type is `Unknown`, a write that reaches the
+/// read adds a value that Biome can't type as TypeScript does.
 fn evolving_array_read<'db>(db: &'db dyn ModuleDb, state: TypeData<'db>) -> Option<TypeData<'db>> {
-    let element = evolving_array_element(db, state)?;
+    let Some(element) = evolving_array_element(db, state) else {
+        return Some(TypeData::Unknown);
+    };
     (!matches!(element, TypeData::NeverKeyword | TypeData::Unknown)).then(|| array_of(db, element))
 }
 
@@ -698,14 +705,24 @@ impl<'db> ResolutionCtx<'db, '_> {
     /// variable starts from its type at the capture point, where the
     /// enclosing root creates the closure (see [`Self::narrow_captured`]).
     ///
+    /// A read of a variable whose type evolves with its writes, in code that
+    /// the root declaring it doesn't run in its own flow, is Unknown when
+    /// collection recorded it so (see
+    /// [`ModuleFlow::is_outer_evolving_read`]).
+    ///
     /// Returns `None` when collection kept no flow for the read, when no
     /// runtime test can change the variable's type, or when narrowing leaves
     /// it unchanged.
+    ///
+    /// [`ModuleFlow::is_outer_evolving_read`]: crate::js_module_info::flow::ModuleFlow::is_outer_evolving_read
     pub(super) fn narrow_reference(
         &mut self,
         identifier: &JsIdentifierExpression,
     ) -> Option<TypeData<'db>> {
         let info = self.js_info;
+        if info.flow.is_outer_evolving_read(identifier.range()) {
+            return Some(TypeData::Unknown);
+        }
         let read = info.flow.read(identifier.range())?;
         let root = info.flow.root(read.root)?;
         let &FlowSubject::Binding(binding) = root.subject(read.subject)? else {
@@ -799,8 +816,13 @@ impl<'db> ResolutionCtx<'db, '_> {
     /// A variable is Unknown where a write that reaches the read assigns a
     /// value that Biome can't type as TypeScript does, unless the variable's
     /// declared type covers the value, as [`FlowAssigned::covered`]
-    /// describes. An array keeps its declared type there instead, because
-    /// that type, `unknown[]`, is wider than TypeScript's.
+    /// describes. An array is Unknown where a write that reaches the read
+    /// assigns such a value or one that isn't an array, and where a path
+    /// reaches the read without passing the declarator of a `var`, because
+    /// its declared type, `unknown[]`, lacks those values. An array keeps
+    /// that declared type where a write adds a value that Biome can't type,
+    /// or where nothing has been added since an empty array literal, because
+    /// `unknown[]` is wider than TypeScript's type there.
     ///
     /// Two cases need no solve:
     ///
@@ -810,7 +832,9 @@ impl<'db> ResolutionCtx<'db, '_> {
     ///   type then already is the value's type, as for
     ///   `let x = null; x = null`, or is wider, as Unknown for
     ///   `let x; x = null` and `unknown[]` for `const a = []; a.push(null)`.
-    ///   An array ignores the writes whose values Biome can't type.
+    ///   An array ignores the values that Biome can't type, and qualifies
+    ///   only when it is an array at every read, as
+    ///   [`RootFlow::is_always_array`] describes.
     /// - When every write of a variable gives `null`, `undefined`, or a value
     ///   that Biome can't type, and at least one gives such a value, the read
     ///   is Unknown. A solve could give `null` or `undefined` at a read that
@@ -851,6 +875,11 @@ impl<'db> ResolutionCtx<'db, '_> {
                 if types
                     .iter()
                     .all(|ty| *ty == TypeData::Unknown || is_unit(ty))
+                    && self
+                        .js_info
+                        .flow
+                        .root(read.root)?
+                        .is_always_array(read.subject)
                 {
                     return None;
                 }
@@ -3214,10 +3243,12 @@ impl<'db> ResolutionCtx<'db, '_> {
     ///
     /// A variable takes the type of the assigned value. An array starts again
     /// at `Array<never>` for an empty array literal, takes the type of another
-    /// assigned array, and adds a value to the element type of `ty`. A write
-    /// whose value Biome can't type as TypeScript does gives `Unknown`, so a
-    /// variable is Unknown at the reads that it reaches, and an array keeps its
-    /// declared type there.
+    /// assigned array, and adds a value to the element type of `ty`. An
+    /// assignment whose value Biome can't type as TypeScript does, or whose
+    /// value is not an array for an array, gives `Unknown`, so the subject is
+    /// Unknown at the reads that it reaches. A value that Biome can't type
+    /// that a write adds to an array gives an array of `Unknown`, so the array
+    /// keeps its declared type there.
     fn apply_evolving_write(
         &self,
         root: &RootFlow,
@@ -3251,24 +3282,28 @@ impl<'db> ResolutionCtx<'db, '_> {
                     TypeData::Unknown
                 }
             }
-            (FlowEvolving::Array, FlowWriteEffect::Elements(Some(value))) => {
-                let value = assigned(value);
+            // A value that Biome can't type gives `Array<Unknown>`, because
+            // `Unknown` absorbs the other members of a union.
+            (FlowEvolving::Array, FlowWriteEffect::Elements(value)) => {
+                let value = value.map_or(TypeData::Unknown, assigned);
                 match evolving_array_element(db, ty) {
-                    Some(element) if value != TypeData::Unknown => {
+                    Some(element) => {
                         array_of(db, TypeData::union_from_types(db, vec![element, value]))
                     }
-                    Some(_) | None => TypeData::Unknown,
+                    None => TypeData::Unknown,
                 }
             }
             (
+                FlowEvolving::None | FlowEvolving::Variable,
+                FlowWriteEffect::Elements(_) | FlowWriteEffect::EmptyArray,
+            )
+            | (
                 FlowEvolving::None | FlowEvolving::Variable | FlowEvolving::Array,
                 FlowWriteEffect::Assign(_)
                 | FlowWriteEffect::CompoundLike(_)
                 | FlowWriteEffect::Compound
                 | FlowWriteEffect::Undefined
-                | FlowWriteEffect::Reset
-                | FlowWriteEffect::Elements(_)
-                | FlowWriteEffect::EmptyArray,
+                | FlowWriteEffect::Reset,
             ) => TypeData::Unknown,
         }
     }
@@ -4627,6 +4662,7 @@ mod tests {
             assignment_only: Default::default(),
             uninitialized: Default::default(),
             evolving: Default::default(),
+            hoisted: Default::default(),
             captures: Default::default(),
             calls: Box::default(),
             subject_calls: Default::default(),

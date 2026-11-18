@@ -31,3 +31,12 @@ function computedOrReplaced() {
 	if (!result) result = fallback;
 	return result;
 }
+
+// A variable read in another function can hold any value that the code
+// assigns to it, as `0` below, so checking it only for `null` and
+// `undefined` would change the result.
+let count = null;
+function counted() {
+	return count || 10;
+}
+count = 0;

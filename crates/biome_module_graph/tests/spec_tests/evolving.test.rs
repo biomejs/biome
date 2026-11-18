@@ -280,8 +280,9 @@ fn evolving_arrays_take_the_types_of_their_elements() {
 // TypeScript 7.0.2 (`tsc --strict`) gives each read below a narrower type
 // than Biome, in the comment after it. Biome keeps the declared type where
 // only the initializer reaches the read, where nothing but `null`, or nothing
-// but `undefined`, is assigned, in a closure or a nested function, where
-// TypeScript reports an implicit `any` (TS7005), and for an array to which a
+// but `undefined`, is assigned, in a closure or a nested function of a
+// variable without an initializer, where TypeScript reports an implicit `any`
+// (TS7005), and for an array to which a
 // write that reaches the read adds a value that Biome may type differently
 // from TypeScript, or to which an `async` function called where it is defined
 // adds. A value that reads such a variable has Biome's type for it, which is
@@ -536,6 +537,151 @@ fn evolving_variables_are_unknown_after_writes_that_biome_cant_type() {
             ("v24", "x", &["Unknown"]),
             ("v42", "x", &["Unknown"]),
             ("v45", "x", &["Unknown"]),
+        ],
+    );
+}
+
+// TypeScript 7.0.2 (`tsc --strict`) gives each read below the type in the
+// comment after it, and reports TS2322 at each assignment of a value that
+// isn't an array. An array whose type evolves with its writes is Unknown where
+// a write that reaches the read may assign it something other than an array,
+// and where a read of a `var` comes before its declarator. Its declared type,
+// `unknown[]`, lacks the values that such a write assigns and the `undefined`
+// that such a read gets.
+#[test]
+fn evolving_arrays_are_unknown_where_they_may_hold_another_value() {
+    assert_writes(
+        r#"
+        function k1() { let a = []; a.push(1); if (c) a = null; /*k1*/a; } // any[]
+        function k2() { let a = []; a.push(1); if (c) a = null; /*k2*/a?.length; } // number
+        function k3() { /*k3*/a; var a = []; a.push(1); } // undefined
+        function k4() { /*k4*/a; var a = []; a.push(null); } // undefined
+        function k5() { let a = []; a.push(1); a = f<string | null>(); /*k5*/a; } // any[]
+        function k6() { let a = []; a.push(1); a = store.load(); /*k6*/a; } // any[]
+        function k7() { let a = []; if (c) a = null; /*k7*/a; } // any[]
+        function k8() { let a = []; a.push(1); if (c) a = n; a.push(2); /*k8*/a; } // any[]
+        function k16() { /*k16*/a; var a = []; a.push(...vs); } // undefined
+        function k17() { if (c) { var a = []; a.push(1); } /*k17*/a; } // number[] | undefined
+        "#,
+        &[
+            ("k1", "a", &["Unknown"]),
+            ("k2", "a?.length", &["Unknown"]),
+            ("k3", "a", &["Unknown"]),
+            ("k4", "a", &["Unknown"]),
+            ("k5", "a", &["Unknown"]),
+            ("k6", "a", &["Unknown"]),
+            ("k7", "a", &["Unknown"]),
+            ("k8", "a", &["Unknown"]),
+            ("k16", "a", &["Unknown"]),
+            ("k17", "a", &["Unknown"]),
+        ],
+    );
+}
+
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type,
+// or a narrower one in the comment after it. An array whose type evolves with
+// its writes is an array at each read that only arrays reach. It keeps its
+// declared type, `unknown[]`, where nothing has been added to it since an
+// empty array literal, where TypeScript reports an implicit `any[]` (TS7005),
+// and where a value that Biome can't type as TypeScript does was added to it.
+#[test]
+fn evolving_arrays_stay_arrays_where_only_arrays_reach_them() {
+    assert_writes(
+        r#"
+        function k4b() { var a = []; a.push(null); /*k4b*/a; }
+        function k9() { let a = []; a.push(1); if (c) a = [2]; /*k9*/a; }
+        function k10() { let a = []; a.push(1); if (c) a = vs; /*k10*/a; }
+        function k12() { let a = []; a.push(1); a.push(store.load()); /*k12*/a; } // number[]
+        function k13() { let a = []; a.push(1); if (c) a.push(...vs); /*k13*/a; } // number[]
+        function k14() { let a = []; a.push(1); if (c) a = null; a = []; /*k14*/a; } // any[]
+        function k15() { let a = []; a.push(1); if (c) a = f<string[]>(); /*k15*/a; } // string[] | number[]
+        "#,
+        &[
+            ("k4b", "a", &["instanceof Array<null>"]),
+            ("k9", "a", &["instanceof Array<number>"]),
+            ("k10", "a", &["instanceof Array<number>"]),
+            ("k12", "a", &["instanceof Array<unknown>"]),
+            ("k13", "a", &["instanceof Array<unknown>"]),
+            ("k14", "a", &["instanceof Array<unknown>"]),
+            ("k15", "a", &["instanceof Array<string | number>"]),
+        ],
+    );
+}
+
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below `any` and reports
+// an implicit `any` (TS7005). A variable whose type evolves with its writes is
+// Unknown in code that the function declaring it doesn't run in its own flow,
+// as a closure, a nested function, or a field initializer, when a write of it
+// assigns a value that its declared type may lack: a write in the scope of the
+// declaration, as in a body of `if` without braces or in `c && (x = v)`, a
+// compound assignment, `++`, destructuring, the head of a `for...of` loop, or
+// a value that reads another such variable.
+#[test]
+fn evolving_variables_are_unknown_in_other_functions_after_writes_they_lack() {
+    assert_writes(
+        r#"
+        let m1 = null; function o1() { if (/*o1*/m1) {} } m1 = n;
+        let m2 = null; function o2() { return /*o2*/m2 || 10; } m2 = 5;
+        var m3 = null; function o3() { return /*o3*/m3; } m3 = "a";
+        function o4() { let x = null; const g = () => /*o4*/x; x = 1; return g; }
+        function o5() { let x = null; const g = () => /*o5*/x; c && (x = 1); return g; }
+        function o6() { let x = null; const g = () => /*o6*/x; if (c) x = 1; return g; }
+        function o7() { let x = null; const g = () => /*o7*/x; if (c) { x += 1; } return g; }
+        function o8() { let x = null; const g = () => /*o8*/x; if (c) { [x] = [1]; } return g; }
+        function o9() { let x = null; const g = () => /*o9*/x; if (c) { for (x of vs) {} } return g; }
+        function o10() { let x = null; const g = () => /*o10*/x; if (c) { x = 0; x++; } return g; }
+        function o11() { let y = null; y = 1; let x = null; const g = () => /*o11*/x; const h = () => { x = y; }; return [g, h]; }
+        function o12() { let x = null; class A { v = /*o12*/x; } x = 1; return A; }
+        function o13() { let x = null; const g = () => { const h = () => /*o13*/x; return h; }; x = 1; return g; }
+        function o14() { let x = null; function g() { /*o14*/x; } x = 1; return g; }
+        "#,
+        &[
+            ("o1", "m1", &["Unknown"]),
+            ("o2", "m2", &["Unknown"]),
+            ("o3", "m3", &["Unknown"]),
+            ("o4", "x", &["Unknown"]),
+            ("o5", "x", &["Unknown"]),
+            ("o6", "x", &["Unknown"]),
+            ("o7", "x", &["Unknown"]),
+            ("o8", "x", &["Unknown"]),
+            ("o9", "x", &["Unknown"]),
+            ("o10", "x", &["Unknown"]),
+            ("o11", "x", &["Unknown"]),
+            ("o12", "x", &["Unknown"]),
+            ("o13", "x", &["Unknown"]),
+            ("o14", "x", &["Unknown"]),
+        ],
+    );
+}
+
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type,
+// or `any` (TS7005) in the comment after it. A variable whose type evolves
+// with its writes keeps its declared type in code that the function declaring
+// it doesn't run in its own flow when that type covers every write: each one
+// is an `=` or logical assignment in a scope other than the declaration's,
+// including a function called where it is defined. Inline code, a function
+// called where it is defined or a static block, runs in the flow of the
+// function around it, and a variable that nothing writes doesn't evolve.
+#[test]
+fn evolving_variables_keep_their_declared_type_in_other_functions_that_covers_their_writes() {
+    assert_writes(
+        r#"
+        let m4 = null; function o20() { /*o20*/m4; } function w20() { m4 = 1; } // any
+        function o21() { let x = null; const g = () => /*o21*/x; if (c) { x = 1; } return g; } // any
+        function o22() { let x = null; const g = () => /*o22*/x; (() => { x = 1; })(); return g; } // any
+        function o23() { let x = null; (() => /*o23*/x)(); x = 1; }
+        function o24() { let x = null; class A { static { /*o24*/x; } } x = 1; return A; }
+        function o25() { let x = null; const g = () => /*o25*/x; return g; }
+        function o26() { let x = null; const g = () => /*o26*/x; const h = () => { x ??= "a"; }; return [g, h]; } // any
+        "#,
+        &[
+            ("o20", "m4", &["null", "number: 1"]),
+            ("o21", "x", &["null", "number: 1"]),
+            ("o22", "x", &["null", "number: 1"]),
+            ("o23", "x", &["null"]),
+            ("o24", "x", &["null"]),
+            ("o25", "x", &["null"]),
+            ("o26", "x", &["null", "string: a"]),
         ],
     );
 }

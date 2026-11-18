@@ -26,12 +26,13 @@ use biome_js_syntax::{
     JsCallExpression, JsClassExpression, JsClassMemberList, JsComputedMemberAssignment,
     JsComputedMemberName, JsDecorator, JsDoWhileStatement, JsExport, JsForInStatement,
     JsForOfStatement, JsForStatement, JsFunctionExpression, JsGetterClassMember,
-    JsGetterObjectMember, JsIdentifierExpression, JsIfStatement, JsInitializerClause, JsLanguage,
-    JsMethodClassMember, JsMethodObjectMember, JsParameters, JsParenthesizedExpression,
-    JsSetterClassMember, JsSetterObjectMember, JsStaticInitializationBlockClassMember,
-    JsStaticMemberExpression, JsSwitchStatement, JsSyntaxNode, JsThisExpression, JsUnaryExpression,
-    JsUnaryOperator, JsVariableDeclarator, JsWhileStatement, T, TsDeclareStatement,
-    TsExternalModuleDeclaration, TsGlobalDeclaration, TsInterfaceDeclaration,
+    JsGetterObjectMember, JsIdentifierAssignment, JsIdentifierExpression, JsIfStatement,
+    JsInitializerClause, JsLanguage, JsMethodClassMember, JsMethodObjectMember, JsParameters,
+    JsParenthesizedAssignment, JsParenthesizedExpression, JsSetterClassMember,
+    JsSetterObjectMember, JsStaticInitializationBlockClassMember, JsStaticMemberExpression,
+    JsSwitchStatement, JsSyntaxNode, JsThisExpression, JsUnaryExpression, JsUnaryOperator,
+    JsVariableDeclarator, JsWhileStatement, T, TsDeclareStatement, TsExternalModuleDeclaration,
+    TsGlobalDeclaration, TsInterfaceDeclaration, TsNonNullAssertionAssignment,
     TsNonNullAssertionExpression, TsTypeAnnotation, binding_ext::AnyJsBindingDeclaration,
 };
 use biome_js_type_info::{DestructureField, own_returns};
@@ -944,6 +945,115 @@ enum UntypedValue {
     /// function that returns a value that reads a variable whose type evolves
     /// with its writes, or its operands exceed [`MAX_VALUE_STEPS`].
     Other,
+}
+
+/// Returns whether `expression`, outside the functions that it creates, reads
+/// a variable whose type evolves with its writes, as `evolving` gives it for
+/// the variable's declaration.
+fn reads_evolving_variable(
+    expression: &AnyJsExpression,
+    model: &SemanticModel,
+    mut evolving: impl FnMut(TextRange) -> FlowEvolving,
+) -> bool {
+    let mut events = expression.syntax().preorder_of_kinds(EVOLVING_READ_KINDS);
+    while let Some(event) = events.next() {
+        let WalkEvent::Enter(node) = event else {
+            continue;
+        };
+        if AnyJsControlFlowRoot::can_cast(node.kind()) {
+            events.skip_subtree();
+            continue;
+        }
+        if let Some(binding) = JsIdentifierExpression::cast(node)
+            .and_then(|identifier| identifier.name().ok())
+            .and_then(|name| model.binding(&name))
+            && evolving(binding.range()) != FlowEvolving::None
+        {
+            return true;
+        }
+    }
+    false
+}
+
+/// Returns whether the declared type of `binding`, a variable whose type
+/// evolves with its writes as a variable, includes the type that Biome gives
+/// `right`, the value that an assignment with `=`, `??=`, `||=`, or `&&=` to
+/// `identifier` writes. `reads_evolving` tells whether a value reads a
+/// variable whose type evolves with its writes.
+///
+/// The declared type of such a variable joins its initializer with the values
+/// of these assignments when they lie in a scope other than the one that
+/// declares the variable, as `x = v` in `let x = null; if (c) { x = v; }`, so
+/// the assignment must lie in such a scope. The value must not read a
+/// variable whose type evolves with its writes, directly or through a value
+/// that a local function it calls returns, and Biome must not type it
+/// narrower than TypeScript for a reason other than a call to a function
+/// whose return type Biome infers; see [`value_callees`].
+fn covers_value(
+    identifier: &JsIdentifierAssignment,
+    binding: &Binding,
+    right: &AnyJsExpression,
+    model: &SemanticModel,
+    mut reads_evolving: impl FnMut(&AnyJsExpression) -> bool,
+) -> bool {
+    model.scope(identifier.syntax()).id() != binding.scope().id()
+        && !reads_evolving(right)
+        && !matches!(
+            value_callees(right, model, reads_evolving),
+            Err(UntypedValue::Other)
+        )
+}
+
+/// Returns whether the declared type of `binding`, a variable whose type
+/// evolves with its writes as a variable, includes the value of every write
+/// of it after its initializer. Each write must be an assignment with `=`,
+/// `??=`, `||=`, or `&&=` to the variable, in parentheses, with `!`, or
+/// neither, for which [`covers_value`] holds. The declared type may lack the
+/// value of any other write, as a compound assignment, `++`, destructuring,
+/// or the head of a `for...of` loop.
+pub(super) fn covers_writes(binding: &Binding, model: &SemanticModel) -> bool {
+    let mut evolving: FxHashMap<TextRange, FlowEvolving> = FxHashMap::default();
+    binding.all_writes().all(|write| {
+        let Some(identifier) = JsIdentifierAssignment::cast(write.syntax()) else {
+            return false;
+        };
+        let Some(right) = assigned_operand(&identifier) else {
+            return false;
+        };
+        covers_value(&identifier, binding, &right, model, |value| {
+            reads_evolving_variable(value, model, |range| {
+                *evolving.entry(range).or_insert_with(|| {
+                    model
+                        .as_binding_by_range(range)
+                        .map_or(FlowEvolving::None, |binding| {
+                            evolving_declaration(&binding, model)
+                        })
+                })
+            })
+        })
+    })
+}
+
+/// Returns the value that an assignment with `=`, `??=`, `||=`, or `&&=`
+/// writes to `identifier`, in parentheses, with `!`, or neither, or `None`
+/// when `identifier` is the target of another write.
+fn assigned_operand(identifier: &JsIdentifierAssignment) -> Option<AnyJsExpression> {
+    let mut parent = identifier.syntax().parent()?;
+    while JsParenthesizedAssignment::can_cast(parent.kind())
+        || TsNonNullAssertionAssignment::can_cast(parent.kind())
+    {
+        parent = parent.parent()?;
+    }
+    let assignment = JsAssignmentExpression::cast(parent)?;
+    matches!(
+        assignment.operator().ok()?,
+        JsAssignmentOperator::Assign
+            | JsAssignmentOperator::NullishCoalescingAssign
+            | JsAssignmentOperator::LogicalOrAssign
+            | JsAssignmentOperator::LogicalAndAssign
+    )
+    .then(|| assignment.right().ok())
+    .flatten()
 }
 
 /// Returns the callees that the reading context must confirm as annotated
@@ -3657,16 +3767,9 @@ impl RootBuilder<'_, '_> {
     /// with `=`, `??=`, `||=`, or `&&=` writes includes the type that Biome
     /// gives `right`, the assigned value.
     ///
-    /// The variable must be `target`, in parentheses or with `!`, and its
-    /// type must evolve with its writes as a variable. The declared type of
-    /// such a variable joins its initializer with the values of these
-    /// assignments when they lie in a scope other than the one that declares
-    /// the variable, as `x = v` in `let x = null; if (c) { x = v; }`, so the
-    /// assignment must lie in such a scope. The value must not read a
-    /// variable whose type evolves with its writes, directly or through a
-    /// value that a local function it calls returns, and Biome must not type
-    /// it narrower than TypeScript for a reason other than a call to a
-    /// function whose return type Biome infers; see [`value_callees`].
+    /// The variable must be `target`, in parentheses or with `!`, its type
+    /// must evolve with its writes as a variable, and [`covers_value`] must
+    /// hold for the assignment.
     fn is_covered(&mut self, target: &AnyJsAssignment, right: &AnyJsExpression) -> bool {
         let mut target = target.clone();
         let identifier = loop {
@@ -3693,12 +3796,9 @@ impl RootBuilder<'_, '_> {
         };
         let model = self.model;
         self.evolving(binding.range()) == FlowEvolving::Variable
-            && model.scope(identifier.syntax()).id() != binding.scope().id()
-            && !self.reads_evolving(right)
-            && !matches!(
-                value_callees(right, model, |value| self.reads_evolving(value)),
-                Err(UntypedValue::Other)
-            )
+            && covers_value(&identifier, &binding, right, model, |value| {
+                self.reads_evolving(value)
+            })
     }
 
     /// Returns the value of `expression` as a write assigns it, or `None`
@@ -3768,25 +3868,8 @@ impl RootBuilder<'_, '_> {
         if let Some(reads) = self.evolving_values.get(&range) {
             return *reads;
         }
-        let mut reads = false;
-        let mut events = expression.syntax().preorder_of_kinds(EVOLVING_READ_KINDS);
-        while let Some(event) = events.next() {
-            let WalkEvent::Enter(node) = event else {
-                continue;
-            };
-            if AnyJsControlFlowRoot::can_cast(node.kind()) {
-                events.skip_subtree();
-                continue;
-            }
-            if let Some(binding) = JsIdentifierExpression::cast(node)
-                .and_then(|identifier| identifier.name().ok())
-                .and_then(|name| self.model.binding(&name))
-                && self.evolving(binding.range()) != FlowEvolving::None
-            {
-                reads = true;
-                break;
-            }
-        }
+        let model = self.model;
+        let reads = reads_evolving_variable(expression, model, |range| self.evolving(range));
         self.evolving_values.insert(range, reads);
         reads
     }
