@@ -362,20 +362,24 @@ fn assert_writes(source: &str, reads: &[(&str, &str, &[&str])]) {
 // TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
 // A write whose value Biome types as TypeScript does gives the variable that
 // value's type: a call to a function or a method with a return type
-// annotation, including an imported one and one from the lib, `await` of
-// such a call, `new` with type arguments, and a conditional expression of
+// annotation, including an imported one and one from the lib, a call to a
+// local function without one whose returned values Biome types so, `await`
+// of such a call, `new` with type arguments, and a conditional expression of
 // such values.
 #[test]
 fn evolving_variables_take_the_types_of_writes_that_biome_types() {
     assert_writes(
         r#"
         function t01() { let x = null; x = computeAnnotated(); /*t01*/x; }
+        function t02() { let x = null; x = computeInferred(); /*t02*/x; }
+        function t03() { let x = null; x = computeArrow(); /*t03*/x; }
         function t04() { let x = null; x = loadAnnotated(); /*t04*/x; }
         function t08() { let x = null; x = service.method(); /*t08*/x; }
         function t09() { let x = null; x = k.annotated(); /*t09*/x; }
         function t11() { let x = null; x = map.get(s); /*t11*/x; }
         function t13() { let x = null; x = s.trim(); /*t13*/x; }
         async function t15() { let x = null; x = await fetchNumber(); /*t15*/x; }
+        async function t16() { let x = null; x = await fetchLocal(); /*t16*/x; }
         async function t18() { let x = null; x = await fetchAnnotated(); /*t18*/x; }
         function t19() { let x = null; x = new C(); /*t19*/x; }
         function t20() { let x = null; x = new Map<string, number>(); /*t20*/x; }
@@ -386,15 +390,19 @@ fn evolving_variables_take_the_types_of_writes_that_biome_types() {
         function t59() { let x = null; x = store.load(); x = 1; /*t59*/x; }
         function t79() { let x = null; const g = () => { x = store.load(); }; x = 1; /*t79*/x; }
         function t91() { let x = null; /*t91*/x; }
+        function t92() { let x = null; if (c) { x = 1; } x = computeArrow(); /*t92*/x; }
         "#,
         &[
             ("t01", "x", &["number"]),
+            ("t02", "x", &["number"]),
+            ("t03", "x", &["number"]),
             ("t04", "x", &["number"]),
             ("t08", "x", &["number"]),
             ("t09", "x", &["number"]),
             ("t11", "x", &["number", "undefined"]),
             ("t13", "x", &["string"]),
             ("t15", "x", &["number"]),
+            ("t16", "x", &["number"]),
             (
                 "t18",
                 "x",
@@ -409,6 +417,7 @@ fn evolving_variables_take_the_types_of_writes_that_biome_types() {
             ("t59", "x", &["number"]),
             ("t79", "x", &["number"]),
             ("t91", "x", &["null"]),
+            ("t92", "x", &["number"]),
         ],
     );
 }
@@ -416,12 +425,12 @@ fn evolving_variables_take_the_types_of_writes_that_biome_types() {
 // TypeScript 7.0.2 (`tsc --strict`) gives each read below the type in the
 // comment after it. A write that reaches the read assigns a value that Biome
 // may type differently from TypeScript, and the variable's declared type
-// doesn't include that value, so the read is Unknown: a call to a function
-// or a method whose return type Biome infers, or `await` of one, the lib's
-// `JSON.parse`, `new Map()` without type arguments, `[]`, a function, `typeof`,
-// a compound or compound-like assignment, a value that reads a variable
-// whose type evolves with its writes, destructuring, and the head of a
-// `for...of` loop. The declared type includes the initializer and the values
+// doesn't include that value, so the read is Unknown: a call to an imported
+// function or a method whose return type Biome infers, or `await` of one, the
+// lib's `JSON.parse`, `new Map()` without type arguments, `[]`, a function,
+// `typeof`, a compound or compound-like assignment, a value that reads a
+// variable whose type evolves with its writes, destructuring, and the head of
+// a `for...of` loop. The declared type includes the initializer and the values
 // of `=` and logical assignments in scopes other than the declaration's, so
 // not a write in the same block, in a body of `if` or `while` without braces,
 // or in `c && (x = v)`.
@@ -429,15 +438,12 @@ fn evolving_variables_take_the_types_of_writes_that_biome_types() {
 fn evolving_variables_are_unknown_after_writes_that_biome_cant_type() {
     assert_writes(
         r#"
-        function t02() { let x = null; x = computeInferred(); /*t02*/x; } // number
-        function t03() { let x = null; x = computeArrow(); /*t03*/x; } // number
         function t05() { let x = null; x = loadInferred(); /*t05*/x; } // number
         function t06() { let x = null; x = store.load(); /*t06*/x; } // number
         function t07() { let x = null; x = literal.method(); /*t07*/x; } // number
         function t10() { let x = null; x = k.inferred(); /*t10*/x; } // number
         function t12() { let x = null; x = vs.find((v) => v > 1); /*t12*/x; } // number | undefined
         function t14() { let x = null; x = JSON.parse(s); /*t14*/x; } // any
-        async function t16() { let x = null; x = await fetchLocal(); /*t16*/x; } // number
         async function t17() { let x = null; x = await fetchInferred(); /*t17*/x; } // { id: number; }
         function t21() { let x = null; x = new Map(); /*t21*/x; } // Map<any, any>
         function t22() { let x = null; x = []; /*t22*/x; } // any[]
@@ -473,7 +479,6 @@ fn evolving_variables_are_unknown_after_writes_that_biome_cant_type() {
         function t86() { let x = null; x = store.load(); if (c) { x = 1; } /*t86*/x; } // number
         function t88() { let x = null; while (c) x = store.load(), /*t88*/x; } // number
         function t90() { let x = null; x = c ? store.load() : null; if (x !== null) { /*t90*/x; } } // number
-        function t92() { let x = null; if (c) { x = 1; } x = computeArrow(); /*t92*/x; } // number
         function v2() { let x; x = 1; x++; /*v2*/x; } // number
         function v23() { let x; x = []; x.push(1); /*v23*/x; } // number[]
         function v24() { let x; x = () => 1; /*v24*/x; } // () => number
@@ -481,15 +486,12 @@ fn evolving_variables_are_unknown_after_writes_that_biome_cant_type() {
         function v45() { let x; x = { m() { return 1; } }; /*v45*/x; } // { m(): number }
         "#,
         &[
-            ("t02", "x", &["Unknown"]),
-            ("t03", "x", &["Unknown"]),
             ("t05", "x", &["Unknown"]),
             ("t06", "x", &["Unknown"]),
             ("t07", "x", &["Unknown"]),
             ("t10", "x", &["Unknown"]),
             ("t12", "x", &["Unknown"]),
             ("t14", "x", &["Unknown"]),
-            ("t16", "x", &["Unknown"]),
             ("t17", "x", &["Unknown"]),
             ("t21", "x", &["Unknown"]),
             ("t22", "x", &["Unknown"]),
@@ -526,7 +528,6 @@ fn evolving_variables_are_unknown_after_writes_that_biome_cant_type() {
             ("t86", "x", &["Unknown"]),
             ("t88", "x", &["Unknown"]),
             ("t90", "x", &["Unknown"]),
-            ("t92", "x", &["Unknown"]),
             ("v2", "x", &["Unknown"]),
             ("v23", "x", &["Unknown"]),
             ("v24", "x", &["Unknown"]),
