@@ -1488,11 +1488,24 @@ fn test_resolve_rejects_bare_export_targets() {
     );
     fs.insert("/node_modules/dep/package.json".into(), r#"{"name":"dep"}"#);
     fs.insert("/node_modules/dep/style.css".into(), "");
+    fs.insert(
+        "/node_modules/array/package.json".into(),
+        r#"{"name":"array","exports":{".":["dep/style.css"]}}"#,
+    );
+    fs.insert(
+        "/node_modules/fallback/package.json".into(),
+        r#"{"name":"fallback","exports":{".":["dep/style.css","./main.css"]}}"#,
+    );
+    fs.insert("/node_modules/fallback/main.css".into(), "");
     assert_eq!(
         resolve("#dep", Utf8Path::new("/src"), &fs, &sass_options()),
         Ok(Utf8PathBuf::from("/node_modules/dep/style.css"))
     );
-    for specifier in ["cycle", "string"] {
+    assert_eq!(
+        resolve("fallback", Utf8Path::new("/src"), &fs, &sass_options()),
+        Ok(Utf8PathBuf::from("/node_modules/fallback/main.css"))
+    );
+    for specifier in ["cycle", "string", "array"] {
         assert_eq!(
             resolve(specifier, Utf8Path::new("/src"), &fs, &sass_options()),
             Err(ResolveError::InvalidMappingTarget),

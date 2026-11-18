@@ -814,13 +814,23 @@ fn resolve_target_value(
             }
             None => resolve_string(target.as_str()),
         },
-        JsonValue::Array(targets) => targets
-            .iter()
-            .find_map(|target| {
-                resolve_target_value(target, glob_replacement, field, package_path, fs, options)
-                    .ok()
-            })
-            .ok_or(ResolveError::NotFound),
+        JsonValue::Array(targets) => {
+            let mut last_error = ResolveError::NotFound;
+            for target in targets.iter() {
+                match resolve_target_value(
+                    target,
+                    glob_replacement,
+                    field,
+                    package_path,
+                    fs,
+                    options,
+                ) {
+                    Ok(path) => return Ok(path),
+                    Err(error) => last_error = error,
+                }
+            }
+            Err(last_error)
+        }
         // A `null` target explicitly excludes the subpath from resolution.
         JsonValue::Null => Err(ResolveError::NotFound),
         _ => Err(ResolveError::InvalidMappingTarget),
