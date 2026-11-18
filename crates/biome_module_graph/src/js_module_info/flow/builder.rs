@@ -655,11 +655,25 @@ const EVOLVING_READ_KINDS: SyntaxKindSet<JsLanguage> =
 /// Limits the operands that [`value_callees`] visits.
 const MAX_VALUE_STEPS: usize = 32;
 
+/// Why Biome may type a value narrower than TypeScript does, as
+/// [`value_callees`] finds it.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+enum UntypedValue {
+    /// The value can be the result of a call to a function whose return type
+    /// Biome infers. When an assignment in a scope other than the declaration
+    /// of a variable whose type evolves with its writes assigns such a value,
+    /// the variable's declared type includes the type that Biome infers.
+    InferredReturn,
+    /// The value can be the result of `typeof`, or its operands exceed
+    /// [`MAX_VALUE_STEPS`].
+    Other,
+}
+
 /// Returns the callees whose return types must come from annotations before
 /// a write reduces by the value of `expression`. The reading context
-/// confirms them. Returns `None` when Biome may type the value narrower than
-/// TypeScript does, so that a write of it gives the subject its declared
-/// type.
+/// confirms them. Returns an error when Biome may type the value narrower
+/// than TypeScript does, so that a write of it gives the subject its declared
+/// type, or Unknown for a variable whose type evolves with its writes.
 ///
 /// The values that `expression` can give are visited through parentheses,
 /// the branches of a conditional expression, the operands of `&&`, `||`, and
@@ -668,19 +682,26 @@ const MAX_VALUE_STEPS: usize = 32;
 /// only when Biome's type of its object has it. Among them:
 ///
 /// - A call depends on where the return type of its callee comes from; see
-///   [`callee_return`]. An inferred return type gives `None`, because Biome
-///   infers the return type of a function without a return type annotation
-///   without the `undefined` of an end that the function can reach.
-/// - `typeof` gives `None`, because Biome types it as the one kind of value
-///   that the operand's type has, where TypeScript gives every kind.
+///   [`callee_return`]. An inferred return type gives
+///   [`UntypedValue::InferredReturn`], because Biome infers the return type
+///   of a function without a return type annotation without the `undefined`
+///   of an end that the function can reach.
+/// - `typeof` gives [`UntypedValue::Other`], because Biome types it as the
+///   one kind of value that the operand's type has, where TypeScript gives
+///   every kind.
 ///
-/// Also returns `None` when the operands exceed [`MAX_VALUE_STEPS`].
-fn value_callees(expression: &AnyJsExpression, model: &SemanticModel) -> Option<Vec<FlowCallee>> {
+/// Also returns [`UntypedValue::Other`] when the operands exceed
+/// [`MAX_VALUE_STEPS`].
+fn value_callees(
+    expression: &AnyJsExpression,
+    model: &SemanticModel,
+) -> Result<Vec<FlowCallee>, UntypedValue> {
     let mut pending = vec![expression.clone()];
     let mut callees = Vec::new();
     let mut remaining = MAX_VALUE_STEPS;
+    let mut inferred = false;
     while let Some(expression) = pending.pop() {
-        remaining = remaining.checked_sub(1)?;
+        remaining = remaining.checked_sub(1).ok_or(UntypedValue::Other)?;
         match expression {
             AnyJsExpression::JsParenthesizedExpression(parenthesized) => {
                 pending.extend(parenthesized.expression().ok());
@@ -702,13 +723,13 @@ fn value_callees(expression: &AnyJsExpression, model: &SemanticModel) -> Option<
             AnyJsExpression::JsUnaryExpression(unary)
                 if unary.operator() == Ok(JsUnaryOperator::Typeof) =>
             {
-                return None;
+                return Err(UntypedValue::Other);
             }
             AnyJsExpression::JsCallExpression(call) => {
-                let callee = call.callee().ok()?;
+                let callee = call.callee().map_err(|_| UntypedValue::Other)?;
                 match callee_return(&callee, model) {
                     CalleeReturn::Annotated => {}
-                    CalleeReturn::Inferred => return None,
+                    CalleeReturn::Inferred => inferred = true,
                     CalleeReturn::Resolved(callee) => callees.push(callee),
                 }
                 if call.is_optional_chain() {
@@ -724,7 +745,11 @@ fn value_callees(expression: &AnyJsExpression, model: &SemanticModel) -> Option<
             _ => {}
         }
     }
-    Some(callees)
+    if inferred {
+        Err(UntypedValue::InferredReturn)
+    } else {
+        Ok(callees)
+    }
 }
 
 /// Where the return type of the callee of a call comes from, as far as the
@@ -2360,11 +2385,10 @@ impl RootBuilder<'_, '_> {
                     if restarts {
                         return Ok(FlowWriteEffect::EmptyArray);
                     }
-                    let value = builder.assigned_value(value, &[])?;
                     Ok(if compound_like {
-                        FlowWriteEffect::CompoundLike(value)
+                        FlowWriteEffect::CompoundLike(builder.assigned_value(value, &[])?)
                     } else {
-                        FlowWriteEffect::Assign(value)
+                        FlowWriteEffect::Assign(builder.assignment_value(&target, &right, value)?)
                     })
                 })?;
                 return self.element_write(&target, value, flow);
@@ -2389,7 +2413,9 @@ impl RootBuilder<'_, '_> {
         let right_flow = self.evaluate(right.syntax(), right_flow, depth + 1)?;
         let value = self.assigned_expression(&right);
         let right_flow = self.write_target(&target, right_flow, |builder| {
-            Ok(FlowWriteEffect::Assign(builder.assigned_value(value, &[])?))
+            Ok(FlowWriteEffect::Assign(
+                builder.assignment_value(&target, &right, value)?,
+            ))
         })?;
         let skip_flow = self.target_condition(flow, &target, skip_right)?;
         self.join_two(skip_flow, right_flow)
@@ -2922,18 +2948,91 @@ impl RootBuilder<'_, '_> {
             .flatten()
             .copied()
             .collect();
-        let assigned = FlowAssigned {
+        self.intern_assigned(FlowAssigned {
             value,
             steps: steps.into(),
             callees,
-        };
+            covered: false,
+        })
+        .map(Some)
+    }
+
+    /// Returns the index of `assigned` in [`Self::assigned`], adding it when
+    /// it is new.
+    fn intern_assigned(&mut self, assigned: FlowAssigned) -> Build<u32> {
         if let Some(index) = self.assigned_ids.get(&assigned) {
-            return Ok(Some(*index));
+            return Ok(*index);
         }
         let index = u32::try_from(self.assigned.len()).map_err(|_| Unsupported)?;
         self.assigned.push(assigned.clone());
         self.assigned_ids.insert(assigned, index);
-        Ok(Some(index))
+        Ok(index)
+    }
+
+    /// Returns the index of the value that an assignment with `=`, `??=`,
+    /// `||=`, or `&&=` writes to `target`, as `right` in `x = right`, given
+    /// `value`, the value that [`Self::assigned_expression`] gave for
+    /// `right`. The value is covered, as [`FlowAssigned::covered`] describes,
+    /// when [`Self::is_covered`] holds.
+    fn assignment_value(
+        &mut self,
+        target: &AnyJsAssignment,
+        right: &AnyJsExpression,
+        value: Option<FlowAssignedValue>,
+    ) -> Build<Option<u32>> {
+        if !self.is_covered(target, right) {
+            return self.assigned_value(value, &[]);
+        }
+        self.intern_assigned(FlowAssigned {
+            value: FlowAssignedValue::Expression(right.range()),
+            steps: Box::default(),
+            callees: Box::default(),
+            covered: true,
+        })
+        .map(Some)
+    }
+
+    /// Returns whether the declared type of the variable that an assignment
+    /// with `=`, `??=`, `||=`, or `&&=` writes includes the type that Biome
+    /// gives `right`, the assigned value.
+    ///
+    /// The variable must be `target`, in parentheses or with `!`, and its
+    /// type must evolve with its writes as a variable. The declared type of
+    /// such a variable joins its initializer with the values of these
+    /// assignments when they lie in a scope other than the one that declares
+    /// the variable, as `x = v` in `let x = null; if (c) { x = v; }`, so the
+    /// assignment must lie in such a scope. The value must not read a
+    /// variable whose type evolves with its writes, and Biome must not type
+    /// it narrower than TypeScript for a reason other than a call to a
+    /// function whose return type Biome infers; see [`value_callees`].
+    fn is_covered(&mut self, target: &AnyJsAssignment, right: &AnyJsExpression) -> bool {
+        let mut target = target.clone();
+        let identifier = loop {
+            let inner = match target {
+                AnyJsAssignment::JsIdentifierAssignment(identifier) => break identifier,
+                AnyJsAssignment::JsParenthesizedAssignment(assignment) => assignment.assignment(),
+                AnyJsAssignment::TsNonNullAssertionAssignment(assignment) => {
+                    assignment.assignment()
+                }
+                AnyJsAssignment::JsBogusAssignment(_)
+                | AnyJsAssignment::JsComputedMemberAssignment(_)
+                | AnyJsAssignment::JsStaticMemberAssignment(_)
+                | AnyJsAssignment::TsAsAssignment(_)
+                | AnyJsAssignment::TsSatisfiesAssignment(_)
+                | AnyJsAssignment::TsTypeAssertionAssignment(_) => return false,
+            };
+            let Ok(inner) = inner else {
+                return false;
+            };
+            target = inner;
+        };
+        let Some(binding) = self.model.binding(&identifier) else {
+            return false;
+        };
+        self.evolving(binding.range()) == FlowEvolving::Variable
+            && self.model.scope(identifier.syntax()).id() != binding.scope().id()
+            && !self.reads_evolving(right)
+            && !matches!(value_callees(right, self.model), Err(UntypedValue::Other))
     }
 
     /// Returns the value of `expression` as a write assigns it, or `None`
@@ -2952,7 +3051,7 @@ impl RootBuilder<'_, '_> {
         if self.reads_evolving(expression) {
             return false;
         }
-        let Some(callees) = value_callees(expression, self.model) else {
+        let Ok(callees) = value_callees(expression, self.model) else {
             return false;
         };
         if !callees.is_empty() {
@@ -4305,6 +4404,30 @@ mod tests {
             "function f(c) { let e = null; e = c; let y: string | null = c; y = e; read(y); }",
         );
         assert!(contains(&built.paths("y", 2), "y:Reset"));
+    }
+
+    #[test]
+    fn assignments_in_other_scopes_have_values_that_declared_types_cover() {
+        // The declared type of a variable whose type evolves with its writes
+        // includes the values of `=` and logical assignments in scopes other
+        // than its declaration. Values that Biome may type narrower than
+        // TypeScript for a reason other than an inferred return type, as
+        // `typeof` and a read of such a variable, are left out, and so are
+        // compound and compound-like assignments.
+        let built = function(
+            "function f(c, o, n) { let x = null; let y = null; x = o.m(); if (c) { x = o.m(); x ??= h(); x = typeof c; x = y; x = n + 1; x += 1; } { let z = null; z = o.m(); read(z); } read(x); }",
+        );
+        let covered: Vec<_> = built
+            .root()
+            .assigned
+            .iter()
+            .filter(|assigned| assigned.covered)
+            .map(|assigned| match assigned.value {
+                FlowAssignedValue::Expression(range) => &built.source[range],
+                FlowAssignedValue::IterableValue(_) | FlowAssignedValue::Key => "",
+            })
+            .collect();
+        assert_eq!(covered, ["o.m()", "h()"]);
     }
 
     #[test]

@@ -157,7 +157,14 @@ a path on its own `this`. Its parts live in `src/js_module_info/flow/`:
   the variables that they add to. A value that Biome may type narrower than
   TypeScript (`value_callees`), or that reads a variable whose type evolves
   with its writes (`reads_evolving`), whose declared type doesn't follow
-  them, gets none, so the write gives the declared type. A call
+  them, gets none, so the write gives the declared type, or `Unknown` for a
+  variable whose type evolves with its writes. The value of an assignment
+  with `=`, `??=`, `||=`, or `&&=` to such a variable in a scope other than
+  its declaration is covered instead (`FlowAssigned::covered`, as
+  `is_covered` decides) when an inferred return type is the only reason
+  Biome may type it narrower: the collector's declared type joins those
+  values (`widen_binding_from_writable_references`), so the write gives
+  Biome's type for the value. A call
   whose callee's annotation the syntax doesn't show, an import or a method
   (`FlowCallee`), is kept in `FlowAssigned::callees`, and the reading
   context confirms it where it resolves the assigned types
@@ -469,8 +476,10 @@ its collected type, but only in the root that declares it
 there. One that nothing writes or adds to narrows as any other variable.
 An array also needs a write node for every addition that runs in the root's
 flow (`mutations_are_modeled`). Such a variable stays a subject only when a
-write node other than its initializer gives it a value, and only those
-write nodes mention it, so only the reads that they reach become
+write node other than its initializer gives it a value, or, for a variable
+initialized with `null` or `undefined`, when it has any write node other
+than its initializer, and only those write nodes mention it, so only the
+reads that they reach become
 candidates, together with the reads of a `var` with an initializer that the
 start reaches (`BuiltRoot::hoisted`), where it is still `undefined`.
 `RootFlow::evolving` records how each such subject evolves, and none is in
@@ -593,13 +602,19 @@ at `Array<never>` and each `Elements` write extends with the value's type,
 so a join gives a union of arrays whose element types
 `evolving_array_element` unions at the read. Their assigned types are
 widened by `evolving_assigned_type`, which gives `Unknown` for a value that
-Biome may type otherwise than TypeScript, and a write of the subject without
-such a value gives `Unknown`. A read whose state is `Unknown`, or an array to which nothing
-was added, keeps its declared type (`evolving_array_read`). Runtime tests
-narrow a variable from its incoming type, which stands for its declared
-type, and never narrow an array. When the values that the root assigns
-are all `null` or all `undefined`, apart from undetermined ones, the read
-keeps its declared type without a solve.
+Biome may type otherwise than TypeScript, apart from a covered value, which
+gives Biome's type with its literal types widened, and a write of the
+subject without such a value gives `Unknown`. A variable whose state is
+`Unknown` is Unknown at the read, while an array whose state is `Unknown`,
+or to which nothing was added, keeps its declared type
+(`evolving_array_read`). Runtime tests narrow a variable from its incoming
+type, which stands for its declared type, and never narrow an array. When
+the values that the root assigns are all `null` or all `undefined`, and
+every write of a variable assigns a value, the read keeps its declared type
+without a solve, and an array ignores undetermined values there. When every
+write of a variable gives `null`, `undefined`, or `Unknown`, and at least
+one gives `Unknown` (`RootFlow::has_valueless_write`), the read is `Unknown`
+without a solve.
 
 Complete module inference evaluates flow candidates in its own resolution
 context instead of through `infer_flow_expression_type`,

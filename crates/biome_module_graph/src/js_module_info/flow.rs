@@ -344,7 +344,8 @@ pub(crate) struct FlowWrite {
 ///
 /// An index refers to [`RootFlow::assigned`], the value that the write
 /// assigns. A write whose value Biome can't type as TypeScript does has no
-/// index, so the subject gets its declared type there.
+/// index, so the subject gets its declared type there, or Unknown when its
+/// type evolves with its writes as a variable.
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub(crate) enum FlowWriteEffect {
     /// An assignment of a value, as `x = v`, `x ??= v` where the right
@@ -427,6 +428,18 @@ pub(crate) struct FlowAssigned {
     /// be. A write reduces by the value only after the reading context
     /// confirms that the return types of these callees come from annotations.
     pub(crate) callees: Box<[FlowCallee]>,
+    /// Whether the declared type of the variable that the write assigns
+    /// includes the type that Biome gives the value, as for `x = v` in
+    /// `let x = null; if (c) { x = v; }`. Where Biome may type such a value
+    /// differently from TypeScript, the variable takes the type that Biome
+    /// gives it instead of Unknown.
+    ///
+    /// Only the value of an assignment with `=`, `??=`, `||=`, or `&&=` to a
+    /// variable whose type evolves with its writes, in a scope other than the
+    /// variable's declaration, is covered. Biome may type it narrower than
+    /// TypeScript only because it can be the result of a call to a function
+    /// whose return type Biome infers.
+    pub(crate) covered: bool,
 }
 
 /// The callee of a call whose result a value can be, when collection can't
@@ -733,6 +746,22 @@ impl RootFlow {
     /// type.
     pub(crate) fn evolving(&self, subject: FlowSubjectId) -> FlowEvolving {
         self.evolving.get(&subject).copied().unwrap_or_default()
+    }
+
+    /// Returns whether a write of `subject`, a variable whose type evolves
+    /// with its writes, gives it a type that no value in
+    /// [`Self::subject_writes`] stands for: a write whose value Biome can't
+    /// type as TypeScript does, as `x = typeof y`, or a compound or
+    /// compound-like assignment, as `x += 1` or `x = x + 1`. Such a write
+    /// makes the variable Unknown at the reads that it reaches.
+    pub(crate) fn has_valueless_write(&self, subject: FlowSubjectId) -> bool {
+        self.writes.iter().any(|write| {
+            write.subject == subject
+                && !matches!(
+                    write.effect,
+                    FlowWriteEffect::Assign(Some(_)) | FlowWriteEffect::Wildcard
+                )
+        })
     }
 
     /// Returns the capture point where the variable `subject` continues the
@@ -1202,33 +1231,52 @@ impl RootCollector<'_> {
                     || self.mutations_are_modeled(*range, root, &written))
         });
         // A variable whose type evolves with its writes can have a type other
-        // than its declared type only after a write, other than its
-        // initializer, whose value Biome may type as TypeScript does. A
-        // variable without such a write keeps its declared type at every read,
-        // without a solve.
-        let typed: FxHashSet<FlowSubjectId> = (0..)
-            .zip(&nodes)
-            .filter_map(|(id, node)| match node {
-                FlowNode::Write { write, .. } if !initializers.contains(&id) => {
-                    writes.get(*write as usize)
-                }
-                FlowNode::Write { .. }
-                | FlowNode::Start
-                | FlowNode::Join(_)
-                | FlowNode::Condition { .. } => None,
-            })
-            .filter(|write| {
-                matches!(
-                    write.effect,
-                    FlowWriteEffect::Assign(Some(_)) | FlowWriteEffect::Elements(Some(_))
-                )
-            })
-            .map(|write| write.subject)
-            .collect();
+        // than its declared type only after a write other than its
+        // initializer. Such a variable without such a write keeps its
+        // declared type at every read, without a solve.
+        //
+        // A write whose value Biome may type as TypeScript does keeps the
+        // variable evolving. So does any other write of a variable initialized
+        // with `null` or `undefined`, because its declared type can lack the
+        // type of the write, which then gives the reads that it reaches
+        // Unknown. A variable without an initializer already has the declared
+        // type Unknown, and an array `unknown[]`, so such writes need no
+        // solve for them.
+        let mut written_after: FxHashSet<FlowSubjectId> = FxHashSet::default();
+        let mut typed: FxHashSet<FlowSubjectId> = FxHashSet::default();
+        let mut initialized: FxHashSet<FlowSubjectId> = FxHashSet::default();
+        for (id, node) in (0..).zip(&nodes) {
+            let FlowNode::Write { write, .. } = node else {
+                continue;
+            };
+            let Some(write) = writes.get(*write as usize) else {
+                continue;
+            };
+            if initializers.contains(&id) {
+                initialized.insert(write.subject);
+                continue;
+            }
+            written_after.insert(write.subject);
+            if matches!(
+                write.effect,
+                FlowWriteEffect::Assign(Some(_)) | FlowWriteEffect::Elements(Some(_))
+            ) {
+                typed.insert(write.subject);
+            }
+        }
         let mut evolving: FxHashMap<FlowSubjectId, FlowEvolving> = FxHashMap::default();
         for (range, kind) in evolving_ranges {
-            match subjects.get(&FlowSubject::Binding(range)) {
-                Some(subject) if typed.contains(&subject) && eligible.contains(&range) => {
+            let subject = subjects.get(&FlowSubject::Binding(range));
+            let evolves = subject.is_some_and(|subject| match kind {
+                FlowEvolving::Variable => {
+                    typed.contains(&subject)
+                        || (initialized.contains(&subject) && written_after.contains(&subject))
+                }
+                FlowEvolving::Array => typed.contains(&subject),
+                FlowEvolving::None => false,
+            });
+            match subject {
+                Some(subject) if evolves && eligible.contains(&range) => {
                     evolving.insert(subject, kind);
                 }
                 Some(_) | None => {
@@ -3104,7 +3152,7 @@ mod tests {
     }
 
     #[test]
-    fn evolving_declarations_narrow_where_a_typed_write_reaches_them() {
+    fn evolving_declarations_narrow_where_a_write_reaches_them() {
         const SOURCE: &str = r#"
             declare function read(): number;
             declare const c: boolean;
@@ -3116,7 +3164,10 @@ mod tests {
                 const g = () => /*closure*/x;
                 let u = null;
                 u = read();
-                /*untyped*/u;
+                /*called*/u;
+                let w = null;
+                w++;
+                /*valueless*/w;
                 const a = [];
                 a.push(1);
                 /*array*/a;
@@ -3133,17 +3184,19 @@ mod tests {
             function h() { /*nested*/m; }
         "#;
         let info = module(SOURCE);
-        // Only a read that a write with a value reaches, after the
-        // initializer, has a type other than the declared type, apart from a
-        // `var` read before its declarator. The declared type stays for a read
-        // in a closure or in a nested root, for a variable without such a
-        // write, and for an array that a function called where it is defined
-        // adds to.
+        // Only a read that a write other than the initializer reaches has a
+        // type other than the declared type, apart from a `var` read before
+        // its declarator. A write without a value, as `w++`, counts, because
+        // it makes the read Unknown. The declared type stays for a read in a
+        // closure or in a nested root, for a variable without such a write,
+        // and for an array that a function called where it is defined adds
+        // to.
         for (marker, expression, evolving) in [
             ("before", "x", None),
             ("after", "x", Some(FlowEvolving::Variable)),
             ("closure", "x", None),
-            ("untyped", "u", Some(FlowEvolving::Variable)),
+            ("called", "u", Some(FlowEvolving::Variable)),
+            ("valueless", "w", Some(FlowEvolving::Variable)),
             ("array", "a", Some(FlowEvolving::Array)),
             ("invoked", "b", None),
             ("hoisted", "v", Some(FlowEvolving::Variable)),

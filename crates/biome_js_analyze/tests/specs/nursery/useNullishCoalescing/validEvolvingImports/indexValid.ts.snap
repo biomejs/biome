@@ -1,0 +1,24 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: indexValid.ts
+---
+# Input
+```ts
+// should not generate diagnostics
+// A `let` initialized with `null` takes the type of the value that the code
+// assigns to it, as in TypeScript. Biome can't type a call to an imported
+// function whose return type is inferred as TypeScript does, so after such a
+// write the variable can hold `0`, and replacing `||` with `??` would change
+// the result.
+
+import { load } from "./libraryValid";
+
+declare const fallback: number;
+
+function loaded() {
+	let result = null;
+	result = load();
+	return result || fallback;
+}
+
+```
