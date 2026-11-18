@@ -1422,6 +1422,54 @@ fn test_resolve_sass_bare_urls_fall_back_to_packages() {
         Ok(Utf8PathBuf::from("/node_modules/local/index.scss"))
     );
 }
+
+#[test]
+fn test_resolve_sass_ignores_query_and_fragment() {
+    let fs = sass_fs(&["/src/_card.scss"]);
+    for specifier in ["./card.scss?v=1", "./card?v=1", "card#section"] {
+        assert_eq!(
+            resolve_sass_in_src(&fs, specifier, SassLoadRule::Module),
+            Ok(Utf8PathBuf::from("/src/_card.scss")),
+            "{specifier}"
+        );
+    }
+}
+
+#[test]
+fn test_resolve_sass_trailing_slash_names_directory() {
+    let fs = sass_fs(&["/src/_theme.scss", "/src/theme/_index.scss"]);
+    for (specifier, expected) in [
+        ("./theme", "/src/_theme.scss"),
+        ("./theme/", "/src/theme/_index.scss"),
+        ("theme/", "/src/theme/_index.scss"),
+    ] {
+        assert_eq!(
+            resolve_sass_in_src(&fs, specifier, SassLoadRule::Module),
+            Ok(Utf8PathBuf::from(expected)),
+            "{specifier}"
+        );
+    }
+}
+
+#[test]
+fn test_resolve_sass_index_in_symlinked_directory() {
+    let base_dir = get_fixtures_path("resolver_cases_1");
+    let fs = OsFileSystem::new(base_dir.clone());
+    for specifier in ["./linked_folder", "linked_folder/"] {
+        assert_eq!(
+            resolve_sass(
+                specifier,
+                &base_dir,
+                &fs,
+                SassLoadRule::Module,
+                &sass_options()
+            ),
+            Ok(Utf8PathBuf::from(format!("{base_dir}/folder/_index.scss"))),
+            "{specifier}"
+        );
+    }
+}
+
 #[test]
 fn test_resolve_rejects_bare_export_targets() {
     let fs = MemoryFileSystem::default();

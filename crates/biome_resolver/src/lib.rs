@@ -438,7 +438,14 @@ fn resolve_import_alias(
         .as_object()
         .ok_or(ResolveError::InvalidMappingTarget)?;
 
-    resolve_target_mapping(specifier, imports, package_path, fs, options)
+    resolve_target_mapping(
+        specifier,
+        imports,
+        MappingField::Imports,
+        package_path,
+        fs,
+        options,
+    )
 }
 
 /// Resolves the given `subpath` inside the given `package_path` using the
@@ -454,19 +461,36 @@ fn resolve_export(
 
     match exports {
         JsonValue::Object(mapping) => {
-            resolve_target_mapping(subpath, mapping, package_path, fs, options).or_else(|err| {
-                match err {
-                    ResolveError::NotFound => {
-                        // exports can match directly on conditions too:
-                        resolve_target_value(exports, None, package_path, fs, options)
-                    }
-                    err => Err(err),
+            resolve_target_mapping(
+                subpath,
+                mapping,
+                MappingField::Exports,
+                package_path,
+                fs,
+                options,
+            )
+            .or_else(|err| match err {
+                ResolveError::NotFound => {
+                    // exports can match directly on conditions too:
+                    resolve_target_value(
+                        exports,
+                        None,
+                        MappingField::Exports,
+                        package_path,
+                        fs,
+                        options,
+                    )
                 }
+                err => Err(err),
             })
         }
-        JsonValue::String(target) => {
-            resolve_target_string(target.as_str(), package_path, fs, options)
-        }
+        JsonValue::String(target) => resolve_target_string(
+            target.as_str(),
+            MappingField::Exports,
+            package_path,
+            fs,
+            options,
+        ),
         _ => Err(ResolveError::InvalidMappingTarget),
     }
 }
@@ -490,13 +514,14 @@ fn resolve_export(
 fn resolve_target_mapping(
     subpath: &str,
     mapping: &JsonObject,
+    field: MappingField,
     package_path: &Utf8Path,
     fs: &dyn ResolverFsProxy,
     options: &ResolveOptions,
 ) -> Result<Utf8PathBuf, ResolveError> {
     let (target, glob_replacement) =
         matching_target_mapping(subpath, mapping).ok_or(ResolveError::NotFound)?;
-    resolve_target_value(target, glob_replacement, package_path, fs, options)
+    resolve_target_value(target, glob_replacement, field, package_path, fs, options)
 }
 
 fn matching_target_mapping<'a>(
@@ -718,13 +743,21 @@ fn tsconfig_cycle_key(fs: &dyn ResolverFsProxy, path: &Utf8Path) -> Utf8PathBuf 
     }
 }
 
+/// The `package.json` field a target mapping comes from.
+#[derive(Clone, Copy, Eq, PartialEq)]
+enum MappingField {
+    Imports,
+    Exports,
+}
+
 /// Resolves the given `target` string from a target mapping.
 ///
-/// When a target is found in the `imports` or `exports` mapping, it can point
-/// to either a relative path or a dependency. If it's a relative path,
-/// `package_path` is used to resolve it.
+/// A target is a path relative to `package_path`, which must start with `./`.
+/// A target in `imports` can also name a dependency, but one in `exports`
+/// can't, which also keeps a package from exporting itself in a cycle.
 fn resolve_target_string(
     target: &str,
+    field: MappingField,
     package_path: &Utf8Path,
     fs: &dyn ResolverFsProxy,
     options: &ResolveOptions,
@@ -732,6 +765,8 @@ fn resolve_target_string(
     if target.starts_with("./") {
         let options = options.without_extensions_or_manifests();
         resolve_relative_path(target, package_path, fs, &options)
+    } else if field == MappingField::Exports {
+        Err(ResolveError::InvalidMappingTarget)
     } else {
         resolve_dependency(target, package_path, fs, options)
     }
@@ -749,11 +784,12 @@ fn resolve_target_string(
 fn resolve_target_value(
     target: &JsonValue,
     glob_replacement: Option<&str>,
+    field: MappingField,
     package_path: &Utf8Path,
     fs: &dyn ResolverFsProxy,
     options: &ResolveOptions,
 ) -> Result<Utf8PathBuf, ResolveError> {
-    let resolve_string = |target| resolve_target_string(target, package_path, fs, options);
+    let resolve_string = |target| resolve_target_string(target, field, package_path, fs, options);
 
     match target {
         JsonValue::Object(targets) => {
@@ -762,6 +798,7 @@ fn resolve_target_value(
                     return resolve_target_value(
                         target,
                         glob_replacement,
+                        field,
                         package_path,
                         fs,
                         options,
@@ -780,7 +817,8 @@ fn resolve_target_value(
         JsonValue::Array(targets) => targets
             .iter()
             .find_map(|target| {
-                resolve_target_value(target, glob_replacement, package_path, fs, options).ok()
+                resolve_target_value(target, glob_replacement, field, package_path, fs, options)
+                    .ok()
             })
             .ok_or(ResolveError::NotFound),
         // A `null` target explicitly excludes the subpath from resolution.
