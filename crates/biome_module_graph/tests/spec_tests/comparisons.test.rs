@@ -432,7 +432,7 @@ fn comparisons_with_constants_narrow_discriminants_and_loose_nullish_tests() {
 // `D` is `never` where the comparisons run, so they compare with no value and
 // narrow nothing. Biome takes `D` as `false` there, so it gives `false`,
 // which is narrower than TypeScript in code that TypeScript types as
-// impossible, as the Limits in `NARROWING.md` describe.
+// impossible, as the deliberate choices in `NARROWING.md` describe.
 #[test]
 fn comparisons_with_constants_that_a_condition_makes_impossible_narrow() {
     assert_reads(
