@@ -7,7 +7,7 @@ expression: valid.jsx
 /* should not generate diagnostics */
 import Link from "next/link";
 
-export function Links({ href }) {
+export function Links({ href, props }) {
 	return (
 		<>
 			<Link href="/about">About, with next/link</Link>
@@ -17,6 +17,7 @@ export function Links({ href }) {
 			<a href={`/blog/${href}`}>Template literal</a>
 			<a href="/about" target="_blank">About, in a new tab</a>
 			<a href="/about" download>About, downloaded</a>
+			<a href="/about" {...props}>About, overridable by a spread</a>
 			<a href="https://example.com/about">Other origin</a>
 			<a href="//example.com/about">Protocol-relative URL</a>
 			<a href="about">Relative URL</a>

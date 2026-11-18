@@ -5,7 +5,7 @@ expression: invalid.jsx
 # Input
 ```jsx
 /* should generate diagnostics */
-export function Links() {
+export function Links({ props }) {
 	return (
 		<>
 			<a href="/">Home</a>
@@ -21,6 +21,9 @@ export function Links() {
 			<a href="/shop/shoes/red">Shop, optional catch-all</a>
 			<a href={"/about"}>About, in an expression</a>
 			<a target="_self" href="/about">About, in the same tab</a>
+			<a {...props} href="/about">About, after a spread</a>
+			<a href="/team">Team, app router in src</a>
+			<a href="/careers">Careers, pages router in src</a>
 		</>
 	);
 }
@@ -291,7 +294,7 @@ invalid.jsx:16:7 lint/nursery/noHtmlLinkForPages ━━━━━━━━━━�
   > 16 │ 			<a href={"/about"}>About, in an expression</a>
        │ 			   ^^^^^^^^^^^^^^^
     17 │ 			<a target="_self" href="/about">About, in the same tab</a>
-    18 │ 		</>
+    18 │ 			<a {...props} href="/about">About, after a spread</a>
   
   i An <a> element reloads the whole document, so the client loses its state and downloads the page's scripts again.
   
@@ -313,8 +316,77 @@ invalid.jsx:17:22 lint/nursery/noHtmlLinkForPages ━━━━━━━━━━
     16 │ 			<a href={"/about"}>About, in an expression</a>
   > 17 │ 			<a target="_self" href="/about">About, in the same tab</a>
        │ 			                  ^^^^^^^^^^^^^
-    18 │ 		</>
-    19 │ 	);
+    18 │ 			<a {...props} href="/about">About, after a spread</a>
+    19 │ 			<a href="/team">Team, app router in src</a>
+  
+  i An <a> element reloads the whole document, so the client loses its state and downloads the page's scripts again.
+  
+  i Use <Link /> from next/link instead, which navigates on the client and prefetches the page.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/7650 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:18:18 lint/nursery/noHtmlLinkForPages ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This <a> element navigates to /about, a page of this Next.js app.
+  
+    16 │ 			<a href={"/about"}>About, in an expression</a>
+    17 │ 			<a target="_self" href="/about">About, in the same tab</a>
+  > 18 │ 			<a {...props} href="/about">About, after a spread</a>
+       │ 			              ^^^^^^^^^^^^^
+    19 │ 			<a href="/team">Team, app router in src</a>
+    20 │ 			<a href="/careers">Careers, pages router in src</a>
+  
+  i An <a> element reloads the whole document, so the client loses its state and downloads the page's scripts again.
+  
+  i Use <Link /> from next/link instead, which navigates on the client and prefetches the page.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/7650 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:19:7 lint/nursery/noHtmlLinkForPages ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This <a> element navigates to /team, a page of this Next.js app.
+  
+    17 │ 			<a target="_self" href="/about">About, in the same tab</a>
+    18 │ 			<a {...props} href="/about">About, after a spread</a>
+  > 19 │ 			<a href="/team">Team, app router in src</a>
+       │ 			   ^^^^^^^^^^^^
+    20 │ 			<a href="/careers">Careers, pages router in src</a>
+    21 │ 		</>
+  
+  i An <a> element reloads the whole document, so the client loses its state and downloads the page's scripts again.
+  
+  i Use <Link /> from next/link instead, which navigates on the client and prefetches the page.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/7650 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:20:7 lint/nursery/noHtmlLinkForPages ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This <a> element navigates to /careers, a page of this Next.js app.
+  
+    18 │ 			<a {...props} href="/about">About, after a spread</a>
+    19 │ 			<a href="/team">Team, app router in src</a>
+  > 20 │ 			<a href="/careers">Careers, pages router in src</a>
+       │ 			   ^^^^^^^^^^^^^^^
+    21 │ 		</>
+    22 │ 	);
   
   i An <a> element reloads the whole document, so the client loses its state and downloads the page's scripts again.
   

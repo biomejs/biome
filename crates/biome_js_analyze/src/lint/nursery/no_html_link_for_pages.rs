@@ -113,6 +113,9 @@ impl Rule for NoHtmlLinkForPages {
         }
 
         let href = element.find_attribute_by_name("href")?;
+        if element.has_trailing_spread_prop(&href) {
+            return None;
+        }
         let href_value = href.as_static_value()?;
         let path = path_of_internal_href(href_value.text())?;
         let (package_path, _) = ctx

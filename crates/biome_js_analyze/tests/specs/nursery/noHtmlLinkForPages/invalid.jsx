@@ -1,5 +1,5 @@
 /* should generate diagnostics */
-export function Links() {
+export function Links({ props }) {
 	return (
 		<>
 			<a href="/">Home</a>
@@ -15,6 +15,9 @@ export function Links() {
 			<a href="/shop/shoes/red">Shop, optional catch-all</a>
 			<a href={"/about"}>About, in an expression</a>
 			<a target="_self" href="/about">About, in the same tab</a>
+			<a {...props} href="/about">About, after a spread</a>
+			<a href="/team">Team, app router in src</a>
+			<a href="/careers">Careers, pages router in src</a>
 		</>
 	);
 }
