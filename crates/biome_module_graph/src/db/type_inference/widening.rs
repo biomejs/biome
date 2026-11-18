@@ -67,8 +67,12 @@ const MAX_WRAPPER_STEPS: usize = 16;
 /// `is_return_values`, the value is the union of the values that a function
 /// returns, and has the fresh literal types of each of them. Other values,
 /// such as calls, member accesses, assertions such as `1 as 1`, and the
-/// literal types of a union that a type annotation writes, have none. The
-/// search visits at most 64 raw types and keeps what it found when it stops.
+/// literal types of a union that a type annotation writes, have none.
+///
+/// The search visits at most 64 raw types, and at most 1024 scopes for the
+/// declaration of each name. When it stops at either limit, it returns every
+/// kind, because widening every literal kind is never narrower than
+/// TypeScript.
 pub(super) fn fresh_literal_kinds(
     db: &dyn ModuleDb,
     module: ModuleInfo,
@@ -112,6 +116,7 @@ struct FreshLiteralSearch<'a> {
 impl FreshLiteralSearch<'_> {
     fn visit(&mut self, module: ModuleInfo, js_info: &JsModuleInfo, reference: &TypeReference) {
         if self.remaining == 0 {
+            self.kinds = FreshLiteralKinds::all();
             return;
         }
         self.remaining -= 1;
@@ -247,7 +252,8 @@ impl FreshLiteralSearch<'_> {
 
     /// Visits the value that `name`, read in the scope `scope_id`, refers to
     /// when it names a `const` declared without a type annotation, or an
-    /// import.
+    /// import. Takes every kind as fresh when the declaration of `name` lies
+    /// beyond [`MAX_SCOPE_STEPS`] scopes.
     fn visit_name(
         &mut self,
         module: ModuleInfo,
@@ -269,6 +275,7 @@ impl FreshLiteralSearch<'_> {
             };
             scope = parent;
         }
+        self.kinds = FreshLiteralKinds::all();
     }
 
     /// Visits the value of `binding` when it is a `const` declared without a
