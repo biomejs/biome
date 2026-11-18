@@ -142,7 +142,7 @@ impl Rule for NoHtmlLinkForPages {
                 },
             )
             .note(markup! {
-                "An "<Emphasis>"<a>"</Emphasis>" element reloads the whole document, so the client loses its state."
+                "An "<Emphasis>"<a>"</Emphasis>" element to another page loads a new document, so the client loses its state."
             })
             .note(markup! {
                 "Use "<Emphasis>"<Link />"</Emphasis>" from "<Emphasis>"next/link"</Emphasis>" instead, which navigates on the client and prefetches the page."

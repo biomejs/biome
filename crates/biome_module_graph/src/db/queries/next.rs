@@ -75,15 +75,14 @@ fn route_of_file(router: &str, path: &[&str]) -> Option<Box<[Box<str>]>> {
                 .collect()
         }
         "pages" => {
-            if file_stem.starts_with('_') {
-                return None;
-            }
             let route: Vec<&str> = directories
                 .iter()
                 .copied()
                 .chain((file_stem != "index").then_some(file_stem))
                 .collect();
-            if route.first() == Some(&"api") {
+            if route.first() == Some(&"api")
+                || matches!(route.as_slice(), ["_app" | "_document" | "_error"])
+            {
                 return None;
             }
             route
