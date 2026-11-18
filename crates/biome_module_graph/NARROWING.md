@@ -262,7 +262,8 @@ These results match TypeScript's and can surprise a reader:
 Every narrowing result keeps these rules:
 
 1. At any read, Biome's narrowed type is never narrower than TypeScript's
-   narrowed type at the same read.
+   narrowed type at the same read, with TypeScript run over the files that
+   Biome indexes.
 2. When inference cannot decide, the read keeps its declared type. When a
    work limit or a query cycle stops the computation, the read has type
    Unknown instead.
@@ -280,6 +281,20 @@ A few limits below describe reads that are narrower than TypeScript's, most
 of them in code that TypeScript types as impossible or finds unreachable.
 Each of those limits says so.
 
+Biome doesn't read `tsconfig.json`, so it can't know which files a
+project's TypeScript program contains, and rule 1 compares with TypeScript
+run over the files that Biome indexes instead. The augmentations in those
+files add members and bases to the types that tests compare. For a
+particular `tsconfig.json`, a read can therefore be narrower than
+TypeScript's when
+[the program leaves out a declaration file with an augmentation](#a-declaration-file-augmentation-that-the-program-leaves-out-still-applies),
+and a call can select another overload when
+[the program lists two augmenting files in another order than their paths](#overloads-that-augmentations-add-are-tried-in-the-order-of-module-paths).
+A read can also be narrower than TypeScript's over the files that Biome
+indexes when
+[a TypeScript file without imports or exports declares global interfaces](#top-level-interfaces-become-globals-only-in-declaration-files).
+These are deliberate choices.
+
 ## Deliberate choices
 
 Some of TypeScript's narrowing is unsound: the narrowed type leaves out
@@ -288,9 +303,10 @@ when the sound result loses narrowing that idiomatic code relies on and the
 unsound case needs unusual code. When a sound result keeps TypeScript's
 precision, Biome uses it instead, and differs from TypeScript.
 
-Each choice below is either a difference from TypeScript or an unsound result
-that Biome copies, with the reason for it. Matching TypeScript, or making a
-copied result sound, changes the trade-off that the reason describes.
+Each choice below is a difference from TypeScript, an unsound result that
+Biome copies, or a result that depends on the files that Biome indexes, with
+the reason for it. Matching TypeScript, or making a copied result sound,
+changes the trade-off that the reason describes.
 
 ### Differences from TypeScript
 
@@ -678,6 +694,119 @@ Destructuring reads `kind`, then runs the default of `x`, then reads `v`, so
 elements, as in `{ kind, [key()]: x, v }`, runs code at the same point and
 keeps the narrowing too. Stopping the narrowing there would lose it in
 patterns such as `{ kind, items = load(), v }`.
+
+### Augmentations and the files that Biome indexes
+
+An augmentation adds interfaces to a declaration that another file owns. A
+`declare module "./shapes"` block adds them to the exports of `./shapes`,
+and a `declare global` block or a declaration file without imports or
+exports adds them to the globals. TypeScript merges the augmentations of the
+files in its program, which `tsconfig.json` selects with options such as
+`files`, `include`, and `moduleDetection`. Biome doesn't read
+`tsconfig.json`, so it merges the augmentations of every file that it
+indexes instead, in the order of their paths.
+
+The choices below are where not reading `tsconfig.json` makes a read
+narrower than TypeScript's for a particular `tsconfig.json`.
+
+#### A declaration-file augmentation that the program leaves out still applies
+
+```ts
+// shapes.ts
+export interface Cat { kind: "cat" }
+export interface Dog { kind: "dog" }
+// cats.d.ts, which the program leaves out
+export {};
+declare module "./shapes" { interface Cat { purrs: true } }
+
+pet: Cat | Dog; if (!("purrs" in pet)) pet
+// TypeScript: Cat | Dog. Biome: Dog.
+```
+
+A declaration file that Biome indexes can be missing from the program, as
+one in another package of a monorepo or one outside the `include` patterns
+of `tsconfig.json`. Biome merges its augmentation, so `Cat` declares `purrs`
+and the false branch of `in` removes `Cat`. The false branches of
+`instanceof` and of type-guard functions remove members in the same way.
+With the augmentation above and
+`isPurring(v: unknown): v is { purrs: true }`, the false branch of
+`isPurring(pet)` gives `Dog`. With a class `Animal` in `shapes.ts` and
+`declare module "./shapes" { interface Cat extends Animal {} }` in such a
+file, so does the false branch of `pet instanceof Animal`. TypeScript gives
+`Cat | Dog` in both. A rule such as `noUnnecessaryConditions` can then
+report a check in that branch as unnecessary, as `case "cat":` in
+`switch (pet.kind)`, although the program needs it.
+
+Without `tsconfig.json`, Biome can't tell such a file from one that the
+program contains. Treating what augmentations add as undecided would keep
+these false branches as TypeScript gives them for every `tsconfig.json`, but
+`in`, `instanceof`, and type-guard functions would then narrow nothing by an
+augmented member or base, even in a project whose program contains the
+augmentation.
+
+#### Top-level interfaces become globals only in declaration files
+
+```ts
+// polyfills.ts, without imports or exports
+interface String { format(): string }
+
+interface Fmt { format(): string }
+declare function isFmt(v: unknown): v is Fmt;
+x: string | Fmt; if (isFmt(x)) x
+// TypeScript: string | Fmt. Biome: Fmt.
+```
+
+TypeScript treats a file without imports or exports as a script, whose
+top-level declarations are globals, so `polyfills.ts` gives every string a
+`format` method and `string` matches `Fmt`. Biome adds a project's
+interfaces to the globals only from `declare global` blocks and from
+declaration files without imports or exports, so it ignores the interface
+in `polyfills.ts` and removes `string` from the true branch. This read is
+narrower than TypeScript's even over the files that Biome indexes. A rule
+such as `noUnnecessaryConditions` can then report a check in that branch as
+unnecessary, although `x` can be a string there.
+
+Whether `polyfills.ts` is a script depends on the `moduleDetection` option
+of `tsconfig.json`, which Biome doesn't read. With `"force"`, TypeScript
+treats every file that isn't a declaration file as a module, so the
+interface stays local to `polyfills.ts` and TypeScript gives `Fmt` too.
+Reading such interfaces as globals would make Biome narrower under
+`"force"` instead: with `x: string | Fmt | null`, the false branch of
+`isFmt(x)` would give `null`, where TypeScript gives `string | null`. An
+interface in a `declare global` block of a module, or at the top level of a
+declaration file without imports or exports, is a global under every
+setting, and Biome reads it.
+
+#### Overloads that augmentations add are tried in the order of module paths
+
+```ts
+// a.ts
+export interface X { f(v: unknown): 1 }
+// b.ts
+declare module "./a" { interface X { f(v: unknown): 2 } }
+export {};
+// c.ts
+declare module "./a" { interface X { f(v: unknown): 3 } }
+export {};
+
+x: X; x.f(0)
+// TypeScript, with c.ts before b.ts in the program: 2. Biome: 3.
+```
+
+TypeScript merges augmentations in the order of the program's files, which
+`tsc --listFiles` prints, and tries the overloads of a later declaration
+first. Biome has no program, so it orders the augmenting modules by path,
+and the overloads of `c.ts` come first. When the program lists the two files
+in the order of their paths, TypeScript gives `3` too. A call selects
+another overload only when overloads from two augmenting modules both
+accept its arguments. A rule such as `noUnnecessaryConditions` can then
+report `case 2:` in `switch (x.f(0))` as never matching, although the
+program selects the overload that returns `2`.
+
+The order of paths doesn't depend on the order in which Biome finds the
+files, so every run gives the same result. Treating such a call as
+undecided would lose its result even where the program lists the files in
+the order of their paths.
 
 ## Limits
 
@@ -1651,16 +1780,15 @@ read narrower than TypeScript's, it says so.
   TypeScript. Their members count after the target's own, so the target's own
   declaration of a property decides its type and whether it is readonly.
   The overloads of their methods are tried before the target's, those of the
-  augmenting module with the last path first, where TypeScript follows the
-  order of the program's files.
+  augmenting module with the last path first, where TypeScript follows
+  [the order of the program's files](#overloads-that-augmentations-add-are-tried-in-the-order-of-module-paths).
 - Augmentations merge from every module that Biome indexes, which can be
-  more or fewer files than the program of a project's `tsconfig`. An
-  augmentation in a file that the program leaves out, such as a file outside
-  its `include`, can make the false branch of `instanceof` and of a
-  type-guard function narrower than that program's TypeScript: with
-  `declare module "./shapes" { interface X extends Base {} }` in such a file,
-  `x: X | C` gives `C` in the false branch of `x instanceof Base`, where
-  TypeScript gives `X | C`.
+  more or fewer files than the program of a project's `tsconfig.json`, and
+  the top-level interfaces of a TypeScript file without imports or exports
+  that isn't a declaration file aren't globals. Both can make a read narrower
+  than TypeScript's, as the
+  [deliberate choices about augmentations](#augmentations-and-the-files-that-biome-indexes)
+  describe.
 - Only interfaces merge from these declarations. Namespaces and variables
   that a `declare global` block or a module augmentation declares, as
   `namespace NodeJS { interface ProcessEnv {} }` or `var __DEV__: boolean`,
