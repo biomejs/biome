@@ -504,6 +504,7 @@ define_categories! {
     "lint/nursery/useConsistentTupleLabels": "https://biomejs.dev/linter/rules/use-consistent-tuple-labels",
     "lint/nursery/useConsistentUnicodeBom": "https://biomejs.dev/linter/rules/use-consistent-unicode-bom",
     "lint/nursery/useControlLabel": "https://biomejs.dev/linter/rules/use-control-label",
+    "lint/nursery/useConvexAccessControl": "https://biomejs.dev/linter/rules/use-convex-access-control",
     "lint/nursery/useDescribeFunctionTitle": "https://biomejs.dev/linter/rules/use-describe-function-title",
     "lint/nursery/useDisposables": "https://biomejs.dev/linter/rules/use-disposables",
     "lint/nursery/useEarlyContinue": "https://biomejs.dev/linter/rules/use-early-continue",

@@ -4205,6 +4205,11 @@ export interface Nursery {
 	 */
 	useControlLabel?: UseControlLabelConfiguration;
 	/**
+	 * Require public Convex functions to call an access control function.
+	 * See https://biomejs.dev/linter/rules/use-convex-access-control
+	 */
+	useConvexAccessControl?: UseConvexAccessControlConfiguration;
+	/**
 	 * Require passing an imported function as a test suite title instead of a string with its name.
 	 * See https://biomejs.dev/linter/rules/use-describe-function-title
 	 */
@@ -7688,6 +7693,9 @@ export type UseConsistentUnicodeBomConfiguration =
 export type UseControlLabelConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseControlLabelOptions;
+export type UseConvexAccessControlConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseConvexAccessControlOptions;
 export type UseDescribeFunctionTitleConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseDescribeFunctionTitleOptions;
@@ -11427,6 +11435,10 @@ export interface RuleWithUseControlLabelOptions {
 	level: RulePlainConfiguration;
 	options?: UseControlLabelOptions;
 }
+export interface RuleWithUseConvexAccessControlOptions {
+	level: RulePlainConfiguration;
+	options?: UseConvexAccessControlOptions;
+}
 export interface RuleWithUseDescribeFunctionTitleOptions {
 	/**
 	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
@@ -14747,6 +14759,21 @@ export interface UseConsistentUnicodeBomOptions {
  * Configuration for the `useControlLabel` lint rule.
  */
 export type UseControlLabelOptions = {};
+export interface UseConvexAccessControlOptions {
+	/**
+	 * Names of functions that count as access control functions, in addition to the names
+	 * matched by `prefixes`.
+	 */
+	functions?: string[];
+	/**
+	 * Words that start the name of an access control function. A name matches a prefix when it's
+	 * the prefix on its own, or the prefix followed by an uppercase letter or `_`.
+	 *
+	 * Setting this option replaces the default prefixes: `assert`, `can`, `check`, `ensure`,
+	 * `has` and `require`.
+	 */
+	prefixes?: string[];
+}
 export type UseDescribeFunctionTitleOptions = {};
 export type UseDisposablesOptions = {};
 export interface UseEarlyContinueOptions {
@@ -16915,6 +16942,7 @@ export type Category =
 	| "lint/nursery/useConsistentTupleLabels"
 	| "lint/nursery/useConsistentUnicodeBom"
 	| "lint/nursery/useControlLabel"
+	| "lint/nursery/useConvexAccessControl"
 	| "lint/nursery/useDescribeFunctionTitle"
 	| "lint/nursery/useDisposables"
 	| "lint/nursery/useEarlyContinue"
