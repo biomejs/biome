@@ -1,0 +1,19 @@
+# should generate diagnostics
+name: CI
+on: push
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test
+        run: cargo test
+      - run: echo "Hello"
+        env:
+          FOO: bar
+  other:
+    name: Other
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Other"
