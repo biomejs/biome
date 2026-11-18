@@ -1,12 +1,10 @@
 //! Queries over the pages of Next.js applications.
 
-use crate::{ModuleDb, ModuleGraphGeneration};
-use camino::Utf8PathBuf;
+use crate::ModuleDb;
+use biome_resolver::ResolverPathData;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct NextPage {
-    /// The directory that contains `app`/`pages`, or `src/app`/`src/pages`.
-    pub project_path: Utf8PathBuf,
     /// The URL segments of the page, without route groups and parallel route
     /// slots. Dynamic segments are kept as written, such as `[slug]`,
     /// `[...slug]`, or `[[...slug]]`.
@@ -49,17 +47,19 @@ impl NextPage {
 /// The default `pageExtensions` of Next.js.
 const PAGE_EXTENSIONS: [&str; 4] = ["tsx", "ts", "jsx", "js"];
 
-/// Returns the pages of all projects: rules keep those of their own project.
+/// Returns the pages of the Next.js app in the directory of `project`, which
+/// contains `app`/`pages` or `src/app`/`src/pages`.
 ///
 /// Reads only module paths, not their kind, which changes on every edit.
 #[salsa::tracked(returns(deref))]
-pub fn next_pages(db: &dyn ModuleDb, generation: ModuleGraphGeneration) -> Vec<NextPage> {
-    let _ = generation.value(db);
+pub fn next_pages(db: &dyn ModuleDb, project: ResolverPathData) -> Vec<NextPage> {
+    let project_path = project.path(db);
 
     let mut pages = Vec::new();
     db.for_each_module(&mut |module| {
         let path = module.path(db);
-        if let Some(extension) = path.extension()
+        if path.starts_with(project_path)
+            && let Some(extension) = path.extension()
             && PAGE_EXTENSIONS.contains(&extension)
             && let Some(file_stem) = path.file_stem()
             && let Some(directory) = path.parent()
@@ -109,15 +109,15 @@ pub fn next_pages(db: &dyn ModuleDb, generation: ModuleGraphGeneration) -> Vec<N
                         _ => continue,
                     };
 
-                    let project_path = if parent.file_name() == Some("src") {
+                    let page_project_path = if parent.file_name() == Some("src") {
                         parent.parent().unwrap_or(parent)
                     } else {
                         parent
                     };
-                    pages.push(NextPage {
-                        project_path: project_path.to_path_buf(),
-                        route,
-                    });
+                    // A nested project keeps its own pages.
+                    if page_project_path == project_path {
+                        pages.push(NextPage { route });
+                    }
                 }
             }
         }
@@ -131,7 +131,6 @@ mod tests {
 
     fn page(route: &[&str]) -> NextPage {
         NextPage {
-            project_path: Utf8PathBuf::from("/"),
             route: route.iter().copied().map(Box::from).collect(),
         }
     }

@@ -1,7 +1,6 @@
 use biome_fs::{BiomePath, MemoryFileSystem};
-use biome_module_graph::{
-    ModuleGraphGeneration, ModuleInfoKind, NextPage, next_pages, resolve_js_module,
-};
+use biome_module_graph::{ModuleInfoKind, NextPage, next_pages, resolve_js_module};
+use biome_resolver::ResolverDb;
 use biome_service::db::WorkspaceDb;
 use biome_test_utils::get_added_js_paths;
 use camino::Utf8Path;
@@ -33,14 +32,15 @@ fn module_db(paths: &[&str]) -> (MemoryFileSystem, WorkspaceDb) {
     (fs, db)
 }
 
-fn pages(db: &WorkspaceDb) -> &[NextPage] {
-    next_pages(db, ModuleGraphGeneration::get(db))
+fn pages<'db>(db: &'db WorkspaceDb, project: &str) -> &'db [NextPage] {
+    let project = db
+        .resolver_paths()
+        .get_or_create(db, Utf8Path::new(project));
+    next_pages(db, project)
 }
 
 fn links_to_page(db: &WorkspaceDb, project: &str, path: &str) -> bool {
-    pages(db)
-        .iter()
-        .any(|page| page.project_path == Utf8Path::new(project) && page.matches(path))
+    pages(db, project).iter().any(|page| page.matches(path))
 }
 
 #[test]
@@ -54,7 +54,7 @@ fn reads_pages_of_both_routers() {
         "/web/pages/stores/index.js",
     ]);
 
-    assert_eq!(pages(&db).len(), 6);
+    assert_eq!(pages(&db, "/web").len(), 6);
     for path in [
         "/",
         "/about",
@@ -80,7 +80,7 @@ fn ignores_files_that_are_not_pages() {
         "/web/components/button.jsx",
     ]);
 
-    assert!(pages(&db).is_empty());
+    assert!(pages(&db, "/web").is_empty());
 }
 
 #[test]
@@ -102,6 +102,18 @@ fn pages_are_scoped_to_their_project() {
     assert!(!links_to_page(&db, "/repo/apps/web", "/guide"));
     assert!(links_to_page(&db, "/repo/apps/docs", "/guide"));
     assert!(!links_to_page(&db, "/repo/apps/docs", "/about"));
+}
+
+#[test]
+fn pages_of_nested_projects_are_scoped_to_them() {
+    let (_, db) = module_db(&[
+        "/web/app/page.jsx",
+        "/web/packages/inner/app/about/page.jsx",
+    ]);
+
+    assert!(!links_to_page(&db, "/web", "/about"));
+    assert!(links_to_page(&db, "/web/packages/inner", "/about"));
+    assert!(!links_to_page(&db, "/web/packages/inner", "/"));
 }
 
 #[test]

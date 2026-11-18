@@ -6,7 +6,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::jsx_ext::AnyJsxElement;
 use biome_languages::JsFileSource;
-use biome_module_graph::{ModuleGraphGeneration, next_pages};
+use biome_module_graph::next_pages;
 use biome_package::PackageJson;
 use biome_rowan::{AstNode, TextRange};
 use biome_rule_options::no_html_link_for_pages::NoHtmlLinkForPagesOptions;
@@ -139,9 +139,10 @@ impl Rule for NoHtmlLinkForPages {
             .get_service::<Option<(Utf8PathBuf, Arc<PackageJson>)>>()?
             .as_ref()?;
         let db = ctx.db();
-        let links_to_page = next_pages(db, ModuleGraphGeneration::get(db))
+        let project = db.resolver_paths().get_or_create(db, package_path);
+        let links_to_page = next_pages(db, project)
             .iter()
-            .any(|page| page.project_path == *package_path && page.matches(path));
+            .any(|page| page.matches(path));
 
         links_to_page.then(|| HtmlLinkToPage {
             href_range: href.range(),
