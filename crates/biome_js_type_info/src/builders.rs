@@ -119,8 +119,8 @@ fn flatten_compound_type<'db>(
 /// its union operands, which is the same type, less simplified.
 pub(crate) const MAX_DISTRIBUTED_MEMBERS: usize = 32;
 
-/// Builds intersections normalized by the rules that TypeScript applies, each
-/// of which gives a type with the same values:
+/// Builds intersections in a normal form, by rules that each give a type with
+/// the same values as the intersection:
 ///
 /// - nested intersections are flattened, duplicates removed, and `never`
 ///   absorbs the other operands;
@@ -137,6 +137,12 @@ pub(crate) const MAX_DISTRIBUTED_MEMBERS: usize = 32;
 ///   from [`Self::without_merging`]. A property that several operands
 ///   declare has the intersection of their types, and is optional only when
 ///   every operand declares it optional (see [`merge_members`]).
+///
+/// TypeScript applies the same rules except two, which change how a type is
+/// written but not its values. It removes `{}` only next to another object
+/// type, so it keeps `string & {}` where this builder gives `string`, and it
+/// never merges object operands, so it keeps `Foo & Bar` where this builder
+/// gives one anonymous type.
 ///
 /// The builder doesn't resolve handles. An operand that is a handle, a type
 /// parameter, or another type whose values the builder can't tell stays as it
