@@ -55,6 +55,9 @@ pub(crate) struct MigratePayload<'a> {
     pub(crate) configuration_file_path: Utf8PathBuf,
     pub(crate) sub_command: Option<MigrateSubCommand>,
     pub(crate) nested_configuration_files: Vec<BiomePath>,
+    /// The configuration of the root configuration file, merged with the
+    /// configurations it extends.
+    pub(crate) resolved_configuration: Option<Configuration>,
 }
 
 pub(crate) fn run(migrate_payload: MigratePayload) -> Result<(), CliDiagnostic> {
@@ -65,12 +68,14 @@ pub(crate) fn run(migrate_payload: MigratePayload) -> Result<(), CliDiagnostic> 
         configuration_file_path,
         sub_command,
         nested_configuration_files,
+        resolved_configuration,
     } = migrate_payload;
     let workspace = &*session.app.workspace;
     let console = session.app.console;
 
+    let root_configuration_path: BiomePath = configuration_file_path.into();
     let mut configuration_list = BTreeSet::default();
-    configuration_list.insert(configuration_file_path.into());
+    configuration_list.insert(root_configuration_path.clone());
     configuration_list.extend(nested_configuration_files);
     let mut diagnostic_result = MigrationResultDiagnostic::default();
 
@@ -82,6 +87,11 @@ pub(crate) fn run(migrate_payload: MigratePayload) -> Result<(), CliDiagnostic> 
             project_key,
             sub_command: sub_command.as_ref(),
             write,
+            resolved_configuration: if configuration_file_path == root_configuration_path {
+                resolved_configuration.as_ref()
+            } else {
+                None
+            },
         };
 
         let result = migrate_file(migrate_file_payload)?;
@@ -102,6 +112,9 @@ struct MigrateFile<'a> {
     pub(crate) write: bool,
     pub(crate) configuration_file_path: &'a BiomePath,
     pub(crate) sub_command: Option<&'a MigrateSubCommand>,
+    /// The configuration of this file, merged with the configurations it
+    /// extends. It is `None` for nested configuration files.
+    pub(crate) resolved_configuration: Option<&'a Configuration>,
 }
 
 #[derive(Debug, Default)]
@@ -182,6 +195,7 @@ fn migrate_file(payload: MigrateFile) -> Result<MigrationFileResult, CliDiagnost
         write,
         configuration_file_path,
         sub_command,
+        resolved_configuration,
     } = payload;
     let mut cache = NodeCache::default();
     let fs = workspace.fs();
@@ -230,11 +244,16 @@ fn migrate_file(payload: MigrateFile) -> Result<MigrationFileResult, CliDiagnost
                 return Ok(MigrationFileResult::HasErrors);
             };
             let old_biome_config = biome_config.clone();
-            let prettier_biome_config = prettier_config.try_into().map_err(|err| {
-                CliDiagnostic::MigrateError(MigrationDiagnostic {
-                    reason: format!("{err:#}",),
-                })
-            })?;
+            let prettier_biome_config: Configuration =
+                prettier_config.try_into().map_err(|err| {
+                    CliDiagnostic::MigrateError(MigrationDiagnostic {
+                        reason: format!("{err:#}",),
+                    })
+                })?;
+            let mut format_configuration = resolved_configuration
+                .cloned()
+                .unwrap_or_else(|| biome_config.clone());
+            format_configuration.merge_with(prettier_biome_config.clone());
             biome_config.merge_with(prettier_biome_config);
             if let Ok(ignore_patterns) = ignorefile::read_ignore_file(fs, prettier::IGNORE_FILE) {
                 if !ignore_patterns.patterns.is_empty() {
@@ -270,10 +289,16 @@ fn migrate_file(payload: MigrateFile) -> Result<MigrationFileResult, CliDiagnost
                     inline_config: None,
                     editor_features: None,
                 })?;
+                // The project settings still hold the configuration read before
+                // the migration. The inline configuration replaces each of its
+                // sections as a whole, so it must also carry the options this
+                // file inherits through `extends`. Nested configuration files
+                // don't provide them, so their inherited options that the
+                // migration doesn't set fall back to the defaults.
                 let printed = workspace.format_file(FormatFileParams {
                     project_key,
                     path: biome_path,
-                    inline_config: None,
+                    inline_config: Some(format_configuration),
                 })?;
                 if write {
                     biome_config_file.set_content(printed.as_code().as_bytes())?;

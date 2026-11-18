@@ -684,3 +684,92 @@ fn prettier_migrate_bracket_spacing() {
         result,
     ));
 }
+
+#[test]
+fn prettier_migrate_write_formats_with_migrated_options() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let configuration = r#"{ "formatter": { "indentStyle": "tab" } }"#;
+    let prettier = r#"{}"#;
+
+    let configuration_path = Utf8Path::new("biome.json");
+    fs.insert(configuration_path.into(), configuration.as_bytes());
+
+    let prettier_path = Utf8Path::new(".prettierrc");
+    fs.insert(prettier_path.into(), prettier.as_bytes());
+
+    let (fs, migrate_result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["migrate", "prettier", "--write"].as_slice()),
+    );
+
+    assert!(
+        migrate_result.is_ok(),
+        "run_cli returned {migrate_result:?}"
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["format", configuration_path.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli rerun returned {result:?}");
+    let result = migrate_result.followed_by(result);
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "prettier_migrate_write_formats_with_migrated_options",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn prettier_migrate_write_keeps_extended_formatter_options() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let base = r#"{ "formatter": { "indentStyle": "tab", "trailingNewline": false } }"#;
+    let configuration = r#"{ "extends": ["./base.json"] }"#;
+    let prettier = r#"{}"#;
+
+    fs.insert(Utf8Path::new("base.json").into(), base.as_bytes());
+
+    let configuration_path = Utf8Path::new("biome.json");
+    fs.insert(configuration_path.into(), configuration.as_bytes());
+
+    let prettier_path = Utf8Path::new(".prettierrc");
+    fs.insert(prettier_path.into(), prettier.as_bytes());
+
+    let (fs, migrate_result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["migrate", "prettier", "--write"].as_slice()),
+    );
+
+    assert!(
+        migrate_result.is_ok(),
+        "run_cli returned {migrate_result:?}"
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["format", configuration_path.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli rerun returned {result:?}");
+    let result = migrate_result.followed_by(result);
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "prettier_migrate_write_keeps_extended_formatter_options",
+        fs,
+        console,
+        result,
+    ));
+}

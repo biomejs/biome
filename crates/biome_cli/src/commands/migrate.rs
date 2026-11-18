@@ -22,6 +22,9 @@ pub(crate) struct MigrateCommandPayload {
     pub(crate) sub_command: Option<MigrateSubCommand>,
     pub(crate) configuration_file_path: Option<Utf8PathBuf>,
     pub(crate) configuration_directory_path: Option<Utf8PathBuf>,
+    /// The configuration of the root configuration file, merged with the
+    /// configurations it extends.
+    pub(crate) resolved_configuration: Option<Configuration>,
 }
 
 pub(crate) struct MigrateExecution {
@@ -147,6 +150,7 @@ impl CustomExecutionCmd for MigrateCommandPayload {
             configuration_file_path: self.configuration_file_path.clone().unwrap(),
             sub_command: self.sub_command.clone(),
             nested_configuration_files: configuration_files,
+            resolved_configuration: self.resolved_configuration.take(),
         };
         crate::execute::migrate::run(payload)
     }
@@ -161,6 +165,7 @@ impl CustomExecutionCmd for MigrateCommandPayload {
     ) -> Result<Configuration, WorkspaceError> {
         self.configuration_file_path = loaded_file;
         self.configuration_directory_path = loaded_directory;
+        self.resolved_configuration = Some(loaded_configuration.clone());
         Ok(loaded_configuration)
     }
 }
