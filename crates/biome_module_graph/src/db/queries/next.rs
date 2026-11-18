@@ -17,6 +17,10 @@ impl NextPage {
     /// Returns whether the URL `path`, without query and fragment, leads to
     /// this page.
     pub fn matches(&self, path: &str) -> bool {
+        // Like `@next/next/no-html-link-for-pages`, dynamic segments don't
+        // match file names such as `report.pdf`, which are usually served
+        // from `public`.
+        let is_dynamic_value = |segment: &str| !segment.contains('.');
         let mut segments = path.split('/').filter(|segment| !segment.is_empty());
         for route_segment in &self.route {
             if route_segment.starts_with("[[...") {
@@ -55,80 +59,70 @@ pub fn next_pages(db: &dyn ModuleDb, generation: ModuleGraphGeneration) -> Vec<N
     let mut pages = Vec::new();
     db.for_each_module(&mut |module| {
         let path = module.path(db);
-        if !path
-            .extension()
-            .is_some_and(|extension| PAGE_EXTENSIONS.contains(&extension))
+        if let Some(extension) = path.extension()
+            && PAGE_EXTENSIONS.contains(&extension)
+            && let Some(file_stem) = path.file_stem()
+            && let Some(directory) = path.parent()
         {
-            return;
-        }
-        let (Some(file_stem), Some(directory)) = (path.file_stem(), path.parent()) else {
-            return;
-        };
+            for router in directory.ancestors() {
+                if let Some(router_name) = router.file_name()
+                    && let Some(parent) = router.parent()
+                    && let Ok(directories) = directory.strip_prefix(router)
+                {
+                    let directories = directories.components().map(|component| component.as_str());
 
-        for router in directory.ancestors() {
-            let (Some(router_name), Some(parent)) = (router.file_name(), router.parent()) else {
-                continue;
-            };
-            let Ok(directories) = directory.strip_prefix(router) else {
-                continue;
-            };
-            let directories = directories.components().map(|component| component.as_str());
-
-            let route = match router_name {
-                "app" => {
-                    // Private folders and intercepted routes don't define URLs of their own.
-                    if file_stem != "page"
-                        || directories.clone().any(|directory| {
-                            directory.starts_with('_') || directory.starts_with("(.")
-                        })
-                    {
-                        continue;
-                    }
-                    directories
-                        .filter(|directory| {
-                            let is_route_group =
-                                directory.starts_with('(') && directory.ends_with(')');
-                            !is_route_group && !directory.starts_with('@')
-                        })
-                        .map(Box::from)
-                        .collect()
-                }
-                "pages" => {
-                    let route: Box<[Box<str>]> = directories
-                        .chain((file_stem != "index").then_some(file_stem))
-                        .map(Box::from)
-                        .collect();
-                    let is_page = match route.as_ref() {
-                        [first, ..] if first.as_ref() == "api" => false,
-                        [only] => !matches!(only.as_ref(), "_app" | "_document" | "_error"),
-                        _ => true,
+                    let route = match router_name {
+                        "app" => {
+                            // Private folders and intercepted routes don't define
+                            // URLs of their own.
+                            if file_stem != "page"
+                                || directories.clone().any(|directory| {
+                                    directory.starts_with('_') || directory.starts_with("(.")
+                                })
+                            {
+                                continue;
+                            }
+                            directories
+                                .filter(|directory| {
+                                    let is_route_group =
+                                        directory.starts_with('(') && directory.ends_with(')');
+                                    !is_route_group && !directory.starts_with('@')
+                                })
+                                .map(Box::from)
+                                .collect()
+                        }
+                        "pages" => {
+                            let route: Box<[Box<str>]> = directories
+                                .chain((file_stem != "index").then_some(file_stem))
+                                .map(Box::from)
+                                .collect();
+                            let is_page = match route.as_ref() {
+                                [first, ..] if first.as_ref() == "api" => false,
+                                [only] => !matches!(only.as_ref(), "_app" | "_document" | "_error"),
+                                _ => true,
+                            };
+                            if !is_page {
+                                continue;
+                            }
+                            route
+                        }
+                        _ => continue,
                     };
-                    if !is_page {
-                        continue;
-                    }
-                    route
-                }
-                _ => continue,
-            };
 
-            let project_path = if parent.file_name() == Some("src") {
-                parent.parent().unwrap_or(parent)
-            } else {
-                parent
-            };
-            pages.push(NextPage {
-                project_path: project_path.to_path_buf(),
-                route,
-            });
+                    let project_path = if parent.file_name() == Some("src") {
+                        parent.parent().unwrap_or(parent)
+                    } else {
+                        parent
+                    };
+                    pages.push(NextPage {
+                        project_path: project_path.to_path_buf(),
+                        route,
+                    });
+                }
+            }
         }
     });
     pages
-}
-
-/// Like `@next/next/no-html-link-for-pages`, dynamic segments don't match file
-/// names such as `report.pdf`, which are usually served from `public`.
-fn is_dynamic_value(segment: &str) -> bool {
-    !segment.contains('.')
 }
 
 #[cfg(test)]
@@ -185,11 +179,5 @@ mod tests {
         assert!(shop.matches("/shop/shoes/red"));
         assert!(!shop.matches("/shop/catalog.pdf"));
         assert!(!shop.matches("/store"));
-    }
-
-    #[test]
-    fn is_dynamic_value_rejects_file_names() {
-        assert!(is_dynamic_value("hello-world"));
-        assert!(!is_dynamic_value("report.pdf"));
     }
 }

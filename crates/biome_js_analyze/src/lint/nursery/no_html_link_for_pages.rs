@@ -129,7 +129,12 @@ impl Rule for NoHtmlLinkForPages {
             return None;
         }
         let href_value = href.as_static_value()?;
-        let path = path_of_internal_href(href_value.text())?;
+        let href_text = href_value.text();
+        // An `href` to another origin can't lead to a page of this app.
+        if !href_text.starts_with('/') || href_text.starts_with("//") {
+            return None;
+        }
+        let path = &href_text[..href_text.find(['?', '#']).unwrap_or(href_text.len())];
         let (package_path, _) = ctx
             .get_service::<Option<(Utf8PathBuf, Arc<PackageJson>)>>()?
             .as_ref()?;
@@ -161,13 +166,4 @@ impl Rule for NoHtmlLinkForPages {
             }),
         )
     }
-}
-
-/// Strips the query and fragment, and rejects `href`s to other origins.
-fn path_of_internal_href(href: &str) -> Option<&str> {
-    if !href.starts_with('/') || href.starts_with("//") {
-        return None;
-    }
-    let end = href.find(['?', '#']).unwrap_or(href.len());
-    Some(&href[..end])
 }
