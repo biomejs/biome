@@ -1,13 +1,18 @@
-# Biome Type Architecture
+# Biome type architecture
 
 Biome's type inference is designed for incremental IDE use. Any module can be
-replaced while analysis is running, so cross-module types must remain tracked by
+replaced while analysis is running, so cross-module types remain tracked by
 Salsa rather than copied between module-graph entries.
 
-In this guide, the **collector** is the module-local phase that walks syntax and
-records declarations and expressions as raw type information. It does not query
-the database or resolve types across modules. **Collection** is the process of
-producing that raw information.
+This guide describes how types are represented, collected from syntax,
+resolved at different levels, and normalized. The engine that resolves them,
+its requests and tracked queries, and narrowing are in the module-graph
+guide, [`../biome_module_graph/CONTRIBUTING.md`](../biome_module_graph/CONTRIBUTING.md).
+
+In this guide, the **collector** is the module-local phase that walks syntax
+and records declarations and expressions as raw type information. It does not
+query the database or resolve types across modules. **Collection** is the
+process of producing that raw information.
 
 For example, collection turns this TypeScript:
 
@@ -26,10 +31,10 @@ result   = TypeofExpression::Call(callee: identity, arguments: [1])
 ```
 
 The collector preserves the relationship between `T`, the parameter, and the
-return type. It records the call as a deferred expression; it does not yet infer
+return type. It records the call as a deferred expression; it does not infer
 that `result` has the type of `1`.
 
-## Two Type Worlds
+## Two type worlds
 
 The type system has two intentionally separate representations.
 
@@ -60,101 +65,142 @@ enum RawTypeId {
 }
 ```
 
-`RawTypeId::Local` addresses the current module's raw table. A global ID names a
-canonical database-native global. Neither should be inspected as an inferred
-type without resolution.
+`RawTypeId::Local` addresses the current module's raw table. A global ID names
+a canonical database-native global. Neither is inspected as an inferred type
+without resolution.
+
+Lint rules see a third, analyzer-facing view: `InferredType` in
+[`inferred_type.rs`](src/inferred_type.rs), which offers bounded inspection
+helpers over inferred data.
+
+## Where the code lives
+
+| Concern | Location |
+| --- | --- |
+| Raw representation | `src/type_data.rs` |
+| Collection from syntax | `src/local_inference.rs`, and `src/js_module_info/collector.rs` in `biome_module_graph` for module-level collection |
+| Module-local raw table | `src/type_store.rs` (`TypeStore`, `RawTypeCollector`) |
+| Inferred representation and the `TypeDb` trait | `src/interned_types.rs`, with the public names in `src/resolved.rs` |
+| Analyzer-facing type | `src/inferred_type.rs` |
+| Union and intersection builders | `src/builders.rs` |
+| Bounded transformations, such as generic substitution | `src/type_transform.rs` |
+| Conditional types, assignability, subtyping, and the relations that narrowing asks about | `src/type_relation.rs` |
+| Narrowing operations and the raw checks that flow collection uses | `src/narrowing.rs` |
+| Primitive kinds of fresh literal types | `src/literal_widening.rs` |
+| Global types | `src/globals.rs` |
+| Collector tests | `tests/local_inference.rs`, `tests/type_data.rs` |
+
+The narrowing operations implement the solve that the module-graph guide
+describes in
+[Flow-sensitive expression reads](../biome_module_graph/CONTRIBUTING.md#flow-sensitive-expression-reads).
 
 ## Collection
 
 Local inference in [`local_inference.rs`](src/local_inference.rs) derives raw
-types from syntax. For example, `a + b` becomes a deferred expression containing
-references to `a` and `b`; the collector does not attempt to discover their
-cross-module values.
+types from syntax. For example, `a + b` becomes a deferred expression
+containing references to `a` and `b`; the collector does not attempt to
+discover their cross-module values.
 
-[`RawTypeCollector`](src/type_store.rs) is the narrow interface used during this
-phase. It registers raw values and creates local references. Imports and scoped
-qualifiers remain explicit so later database queries can resolve them against
-the current module graph and semantic model.
+[`RawTypeCollector`](src/type_store.rs) is the narrow interface used during
+this phase. It registers raw values and creates local references. Imports and
+scoped qualifiers remain explicit so later database queries can resolve them
+against the current module graph and semantic model.
+
+### Deduplication and scopes
 
 The collector deduplicates raw values by content, so equal values share one
 `TypeId`. Classes, interfaces, and namespaces also record a scope, so two
 declarations with the same contents, such as `class K { k = 1 }` in two
-namespaces, stay two types. A class or an interface records the scope that it
-opens. A namespace records the scope that declares its outermost enclosing
-namespace, together with the names of the enclosing namespaces, so the
-namespaces that TypeScript merges, those of one name declared by one scope or
-one namespace, still share one type and its members. The inferred
-`InternedClass` and `InternedInterface` keep the scope, so two such
-declarations stay apart after their handles are resolved. Generated globals
-have no scope.
+namespaces, stay two types:
 
-Deduplication also means that a raw literal type doesn't tell where it comes
-from: the `1` of `let n = 1` and the `1` of `let n: 1` are one `TypeId`.
-TypeScript widens the first to `number`, because a literal expression has a
-*fresh* literal type, which widens where the value initializes a location
-that the program can assign later. So the collector marks those locations
-instead of the types: a `let` or `var` variable, a class field that isn't
-`readonly`, a parameter with a default value, an element of an array that a
-destructuring pattern takes apart, and a return type inferred from a
-function's body get a `TypeofExpression::WidenedLiteral` around the value's
-type, when the value may have a fresh literal type and no type annotation
-declares the location. A member access on a name, as `E.A`, may have one,
-because the name may be an enum, whose members have fresh literal types.
-Object literals and other array literals need no
-marker, because their kind already says that they are mutable. Type
-assertions, as `1 as 1` and `1 as const`, stay behind a raw `Reference`, so
-nothing takes their literal types as fresh. Resolution in the module graph
-decides which literal types are fresh from the raw expressions behind the
-value, as
-[`widening.rs`](../biome_module_graph/src/db/type_inference/widening.rs)
-describes, and widens them.
+- A class or an interface records the scope that it opens.
+- A namespace records the scope that declares its outermost enclosing
+  namespace, together with the names of the enclosing namespaces, so the
+  namespaces that TypeScript merges, those of one name declared by one scope
+  or one namespace, still share one type and its members.
+- The inferred `InternedClass` and `InternedInterface` keep the scope, so two
+  such declarations stay apart after their handles are resolved.
+- Generated globals have no scope.
 
-An enum is a value and a type in TypeScript. `EnumTypes` in
+### Fresh literal types
+
+Deduplication means that a raw literal type doesn't tell where it comes from:
+the `1` of `let n = 1` and the `1` of `let n: 1` are one `TypeId`. TypeScript
+widens the first to `number`, because a literal expression has a *fresh*
+literal type, which widens where the value initializes a location that the
+program can assign later.
+
+So the collector marks those locations instead of the types: a `let` or
+`var` variable, a class field that isn't `readonly`, a parameter with a
+default value, an element of an array that a destructuring pattern takes
+apart, and a return type inferred from a function's body get a
+`TypeofExpression::WidenedLiteral` around the value's type, when the value may
+have a fresh literal type and no type annotation declares the location. A
+member access on a name, as `E.A`, may have one, because the name may be an
+enum, whose members have fresh literal types. Object literals and other array
+literals need no marker, because their kind already says that they are
+mutable. Type assertions, as `1 as 1` and `1 as const`, stay behind a raw
+`Reference`, so nothing takes their literal types as fresh.
+
+Resolution in the module graph decides which literal types are fresh from the
+raw expressions behind the value, and widens them
+([`widening.rs`](../biome_module_graph/src/db/type_inference/widening.rs)).
+
+### Enums
+
+An enum is a value and a type. `EnumTypes` in
 [`local_inference.rs`](src/local_inference.rs) gives the name of an enum
-declaration a `TypeData::MergedReference`: its type is the union of the
-types of the members, and its value an object with a readonly property per
-member, plus a `[n: number]: string` index signature for the reverse
-mapping when a member is a number. TypeScript gives each member a literal
-type of its own, which it displays by the member's name; Biome gives it the
-plain literal type of the member's value, as `0` for `E.A`, so every type
-has TypeScript's values. Collection computes the values from syntax as
-TypeScript evaluates them: literals, operators, and earlier members, with
-`0` and increments for members without an initializer. When it can't, the
-member is `number` or `string` when the syntax shows the kind of its value,
-and Unknown otherwise, because TypeScript also evaluates references to
-constants and to other enums, which can be strings. A computed number gets a
-literal type only when its decimal spelling is one that collection can
-borrow, an integer from 0 to 255, and is `number` otherwise. The members are
-bindings of their own, typed by the module collector, which gives the
-enum's name and its members Unknown when the scope declares the name more
-than once, as two declarations of the enum or an enum and a namespace that
-TypeScript merges.
+declaration a `TypeData::MergedReference`: its type is the union of the types
+of the members, and its value an object with a readonly property per member,
+plus a `[n: number]: string` index signature for the reverse mapping when a
+member is a number. Each member has the plain literal type of its value, as
+`0` for `E.A`; how that differs from TypeScript is in the
+[Enums limits](../biome_module_graph/NARROWING.md#enums).
+
+Collection computes the values from syntax as TypeScript evaluates them:
+literals, operators, and earlier members, with `0` and increments for members
+without an initializer. When it can't, the member is `number` or `string`
+when the syntax shows the kind of its value, and Unknown otherwise, because
+TypeScript also evaluates references to constants and to other enums, which
+can be strings. A computed number gets a literal type only when its decimal
+spelling is one that collection can borrow, an integer from 0 to 255, and is
+`number` otherwise.
+
+The members are bindings of their own, typed by the module collector, which
+gives the enum's name and its members Unknown when the scope declares the
+name more than once, as two declarations of the enum or an enum and a
+namespace that TypeScript merges.
+
+### Inferred return types
 
 A return type inferred from a function's body counts only the `return`
 statements of the function's own code (`own_returns`), not those of nested
-functions, methods, accessors, or classes, and is `void` when none of them
-has a value. A function also returns `undefined` when a path reaches the end
-of its body, which depends on its control flow: a call that never returns or
-an exhaustive `switch` can end every path. When the last statement of the
-body may complete, the collector adds a
-`TypeofExpression::ImplicitReturn` to the union of the returned values, and
-resolution in the module graph gives `undefined` or `never` from the
-reachability of the function's end. A conversion without the module's flow
-gives `undefined`, which is never narrower than TypeScript's type.
+functions, methods, accessors, or classes, and is `void` when none of them has
+a value.
 
-A function without a return type annotation whose body returns a boolean
-test of a parameter may have a type predicate that TypeScript infers from
-the body, as `(v: unknown) => typeof v === "string"` has `v is string`.
-Only the module's flow can tell, so the collector gives such a function
+A function also returns `undefined` when a path reaches the end of its body,
+which depends on its control flow: a call that never returns or an exhaustive
+`switch` can end every path. When the last statement of the body may
+complete, the collector adds a `TypeofExpression::ImplicitReturn` to the union
+of the returned values, and resolution in the module graph gives `undefined`
+or `never` from the reachability of the function's end. A conversion without
+the module's flow gives `undefined`, which is never narrower than
+TypeScript's type.
+
+A function without a return type annotation whose body returns a boolean test
+of a parameter may have a type predicate that TypeScript infers from the
+body, as `(v: unknown) => typeof v === "string"` has `v is string`. Only the
+module's flow can tell, so the collector gives such a function
 `ReturnType::InferredPredicate` (`inferred_predicate_parameter` decides the
-shape and the parameter), which holds the parameter's name, the plain
-return type, and a reference to a `TypeofExpression::InferredPredicate`
-that the module graph resolves to the target, or to Unknown when there is
-none. The conversion to the inferred representation gives
-`ReturnType::Predicate` with the target, or `ReturnType::Type` with the
-plain return type for Unknown, so inferred types never hold the marker. A
-conversion without the module's flow gives the plain return type, which is
-never narrower than TypeScript's type.
+shape and the parameter). It holds the parameter's name, the plain return
+type, and a reference to a `TypeofExpression::InferredPredicate` that the
+module graph resolves to the target, or to Unknown when there is none. The
+conversion to the inferred representation gives `ReturnType::Predicate` with
+the target, or `ReturnType::Type` with the plain return type for Unknown, so
+inferred types never hold the marker. A conversion without the module's flow
+gives the plain return type, which is never narrower than TypeScript's type.
+
+### Merged declarations and contributions
 
 Interfaces of one name in one scope, and a class with the interfaces of its
 name, are one type in TypeScript. The module collector merges each such set
@@ -162,12 +208,13 @@ into one raw `Interface` or `Class`, with the scope of the class or the first
 interface, and gives it to every binding of the set. A class keeps its own
 `extends`, the parent class, which is a value; the `extends` clauses of the
 interfaces become its `interface_bases`, which are instance types, as an
-interface's `extends` clauses are. The inferred `InternedClass` groups both
-in `ClassParents`, so a reader of a class's parents destructures it and
-decides about each kind: instance-side walks, such as member lookup, which
-`in` and type predicates also use, and the derivation that `instanceof`
-tests, follow both, while static members, constructors, and `super` come
-from the parent class only.
+interface's `extends` clauses are.
+
+The inferred `InternedClass` groups both in `ClassParents`, so a reader of a
+class's parents destructures it and decides about each kind. Instance-side
+walks follow both: member lookup, which `in` and type predicates also use,
+and the derivation that `instanceof` tests. Static members, constructors, and
+`super` come from the parent class only.
 
 Interfaces that other modules merge into a declaration, through a module
 augmentation, a `declare global` block, or a declaration script, are its
@@ -178,64 +225,50 @@ declarations before its `extends` clauses or interface bases, and its
 `contributions` field counts them (`TypeData::with_contributions`). A reader
 of parents that doesn't know about contributions treats them as bases, so it
 sees their members and their `extends` clauses. Member lookup, which needs
-TypeScript's order, searches them before a class's parent class and merges
-the overloads of their methods with the target's.
+TypeScript's order, searches them before a class's parent class and merges the
+overloads of their methods with the target's.
 
-## Inference Layers
+## Inference levels
 
-The type system can answer type questions at three levels. These levels are
-alternatives, not stages that every operation must run in sequence. Each level
-looks at a wider part of the program and therefore records more dependencies.
+The type system answers type questions at three levels. The levels are
+alternatives, not stages that every operation runs in sequence. Each level
+looks at a wider part of the program and therefore records more
+dependencies.
 
-Start with the question the caller needs to answer:
-
-1. **What facts did the collector record in this module?** Inspect raw local
-   information.
-2. **What is the answer for this particular reference or expression?** Run a
-   targeted query.
-3. **What are the inferred types for this module as a whole?** Infer the
-   complete module.
+| Question | Level |
+| --- | --- |
+| What facts did the collector record in this module? | Raw local information |
+| What is the answer for this reference or expression? | Targeted on-demand resolution |
+| What are the inferred types of this module as a whole? | Complete module inference |
 
 A wider level is not inherently more correct. Use it only when the answer
-depends on information that a narrower level does not inspect.
+depends on information that a narrower level doesn't inspect.
 
-### Raw Local Information
+### Raw local information
 
-Raw local information is the output of the collection phase. It describes syntax
-and declarations from one module using `RawTypeData` and `TypeReference`.
+Raw local information is the output of collection. It describes syntax and
+declarations from one module using `RawTypeData` and `TypeReference`.
 Deferred expressions preserve their operands, callees, arguments, and member
 references without evaluating them.
 
-In the `identity(1)` example, this level can show that `result` is initialized by
-a call to `identity` with the argument `1`:
+In the `identity(1)` example, this level shows that `result` is initialized
+by a call to `identity` with the argument `1`. It cannot substitute `1` for
+`T` or determine the call's return type. It has no database access and cannot
+inspect another module's raw table directly.
 
-```text
-result = TypeofExpression::Call(callee: identity, arguments: [1])
-```
+### Targeted on-demand resolution
 
-It cannot yet substitute `1` for `T` or determine the call's return type. Use
-this level when the recorded structure is enough. It has no database access and
-cannot inspect another module's raw table directly.
+Targeted resolution answers one semantic question, such as the type of an
+expression, of a call's result, or of a binding or reference. It starts from
+the corresponding raw reference and evaluates only the paths needed for that
+answer. Those paths may resolve qualifiers, follow imports and exports,
+inspect globals, or evaluate expressions. The query records only the
+module-graph dependencies it reaches and does not infer unrelated
+declarations or expressions in the module.
 
-### Targeted On-Demand Resolution
-
-Targeted resolution answers one semantic question, such as:
-- What's the type returned by this expression?
-- What's the type returned by this function call?
-- What's the type of this binding or reference?
-
-It starts from the corresponding raw reference and evaluates only the paths needed for that answer.
-Those paths may resolve qualifiers, follow imports and exports, inspect globals,
-or evaluate expressions.
-
-Use this level when raw structure is insufficient but the caller does not need
-the rest of the module's inferred types. The query records only the module-graph
-dependencies it reaches and does not materialize every inferred type in the
-module.
-
-For example, a targeted query for the type of `result` resolves the `identity`
-signature, matches `T` to the argument's numeric literal type, and substitutes
-that type into the return position:
+For example, a targeted query for the type of `result` resolves the
+`identity` signature, matches `T` to the argument's numeric literal type, and
+substitutes that type into the return position:
 
 ```text
 type of result = 1
@@ -253,24 +286,17 @@ let result_type = infer_binding_type(db, input);
 
 `infer_expression_type` accepts an `ExpressionTypeInput` for the equivalent
 expression lookup. Both queries return `None` when the requested range was not
-collected or the module does not support inference. Normalize the returned type
-only when the operation requires a normalized result; see
-[Handles and Normalization](#handles-and-normalization).
+collected or the module does not support inference. Normalize the returned
+type only when the operation requires a normalized result; see
+[Handles and normalization](#handles-and-normalization).
 
-The query does not infer unrelated declarations or expressions in the module.
+### Complete module inference
 
-### Complete Module Inference
-
-Complete inference converts a module's raw type, expression, and binding tables
-into `InferredModuleTypes`. Resolving imports may invoke complete inference for
-other modules, so this layer can evaluate a cross-module dependency graph. Its
-tracked result is reusable by other consumers that may need many related inferred values
-or a normalized view of the module's types.
-
-Use this level when the operation concerns the module as a whole or would
-otherwise repeat many targeted queries. Do not use it merely because a single
-raw reference is unresolved; a targeted query may be able to resolve that
-reference without inferring unrelated declarations.
+Complete inference converts a module's raw type, expression, and binding
+tables into `InferredModuleTypes`. Resolving imports may invoke complete
+inference for other modules, so this level can evaluate a cross-module
+dependency graph. Its tracked result is reusable by consumers that need many
+related inferred values or a normalized view of the module's types.
 
 For the same example, complete inference evaluates every recorded binding and
 expression in the module. Its result includes the resolved call alongside the
@@ -285,19 +311,18 @@ Targeted and complete inference produce the same type for `result`. Complete
 inference additionally materializes the other inferred types so consumers can
 reuse them as one module-wide result.
 
-## Database Inference
+`infer_module_types`, in
+[`module_types.rs`](../biome_module_graph/src/db/queries/type_inference/module_types.rs),
+is the tracked query. External consumers call `infer_module_types_bottom_up`,
+whose untracked iterative walk warms imports innermost-first. This avoids deep
+Rust and Salsa revalidation stacks while preserving backdating at each tracked
+module query. Backdating means that Salsa keeps the revision in which a
+query's result last changed when running the query again produces the same
+result, so a dependent query doesn't rerun only because its dependency was
+checked again.
 
-`infer_module_types` is the tracked dependency query in
-[`queries.rs`](../biome_module_graph/src/db/queries.rs). External consumers call
-`infer_module_types_bottom_up`, whose nontracked iterative walk warms imports
-innermost-first. This avoids deep Rust and Salsa revalidation stacks while
-preserving backdating at each tracked module query. Backdating means that Salsa
-keeps the previous `changed_at` revision when running the query again produces
-the same result. This avoids rerunning a dependent query solely because the
-dependency was checked again.
-
-`resolve_raw_types` converts a module's raw table into `InferredModuleTypes`.
-The result contains:
+`resolve_raw_types` converts a module's raw table into `InferredModuleTypes`,
+which contains:
 
 - the module key used by local inferred handles;
 - the resolved type table;
@@ -309,61 +334,36 @@ Imports are resolved through tracked module queries. Globals come from the
 memoized database-native global table. Expression evaluation and structural
 normalization happen in the module graph, not in the collector.
 
-## Choosing an Inference Layer
+### Choosing a level
 
-Use the narrowest layer that can satisfy the operation's contract:
-
-1. Raw local information
-2. Targeted on-demand resolution
-3. Complete module or cross-module inference
-
-Choose based on the answer the operation promises, not on the representation it
-happens to receive. Receiving a raw reference does not require staying at the
-raw level, and needing one resolved value does not justify inferring the complete
-module.
-
-The `identity(1)` example therefore has three valid views: a deferred call at
-the raw level, the type `1` from a targeted query, and a module-wide result that
-contains both the inferred function and the type `1`. The required view depends
-on the caller's question.
-
-Raw traversal must preserve the module that owns each reference. Follow imported
-references into their owning module rather than copying them or interpreting
-them against the importing module's type table. Resolve the narrowest reference
-that contains the required information. Avoid resolving its enclosing function,
-call, object, or module unless that structure affects the result.
-
-An inconclusive result does not automatically select the next level. The
-caller's contract decides whether to escalate or preserve the result as
-unknown.
-
-### Escalation and Resolution Boundaries
+Choose the narrowest level that satisfies the operation's contract, based on
+the answer that the operation promises rather than the representation it
+receives. Receiving a raw reference doesn't require staying at the raw level,
+and needing one resolved value doesn't justify inferring the complete module.
+A raw reference that is unresolved is a reason to run a targeted query, not
+complete inference.
 
 Before implementing an inference operation, define:
 
-1. The exact information it needs.
-2. The narrowest layer capable of producing that information.
-3. The conditions that require escalation.
-4. The meaning of an inconclusive result.
-5. The maximum scope that may be resolved.
-
-Escalation only broadens the part of the type graph being inspected. It must not
-change the meaning of the operation or turn missing information into a positive
-or negative answer. Move to a broader layer only when the narrower layer cannot
-satisfy the operation's contract.
-
-If an operation handles argument-dependent generics, overloads, or compound
-types, a targeted path must preserve those semantics. It must return an
-inconclusive result or escalate when it cannot do so.
+1. the exact information it needs;
+2. the narrowest level capable of producing that information;
+3. the conditions that require escalation;
+4. the meaning of an inconclusive result;
+5. the maximum scope that may be resolved.
 
 Before resolving a type, determine which declarations and expressions the
-resolution may visit; whether parameters, arguments, members, or imports affect
-the answer; and whether the operation needs one selected path or the complete
-type. A resolution boundary is too broad when it traverses data that cannot
-affect the requested result.
+resolution may visit; whether parameters, arguments, members, or imports
+affect the answer; and whether the operation needs one selected path or the
+complete type. A resolution boundary is too broad when it traverses data that
+cannot affect the requested result.
 
-Use the following control flow for operations that can answer from more than one
-inference layer:
+Raw traversal preserves the module that owns each reference. Follow imported
+references into their owning module rather than copying them or interpreting
+them against the importing module's type table. Resolve the narrowest
+reference that contains the required information, not its enclosing function,
+call, object, or module, unless that structure affects the result.
+
+An operation that can answer from more than one level follows this order:
 
 ```text
 inspect raw structure
@@ -372,17 +372,22 @@ inspect raw structure
 -> return an inconclusive result or escalate according to the caller's contract
 ```
 
-The caller must explicitly define whether an inconclusive result triggers
-broader inference or remains unknown.
+An inconclusive result doesn't select the next level by itself; the caller's
+contract decides whether to escalate or keep the result unknown. Escalation
+only broadens the part of the type graph being inspected. It never changes
+the meaning of the operation or turns missing information into a positive or
+negative answer. A targeted path that handles argument-dependent generics,
+overloads, or compound types preserves those semantics, or returns an
+inconclusive result or escalates when it can't.
 
-## Handles and Normalization
+## Handles and normalization
 
-Inference queries do not always return a fully expanded type tree. A result may
-contain a **handle**: a compact ID that points to type data stored elsewhere.
-`InferredTypeData::Local` contains a module key and a local type ID, so the pair
-continues to identify the correct type after crossing an import boundary.
-`GlobalType` similarly identifies a canonical global without copying its
-definition into every result.
+Inference queries do not always return a fully expanded type tree. A result
+may contain a **handle**: a compact ID that points to type data stored
+elsewhere. `InferredTypeData::Local` contains a module key and a local type
+ID, so the pair continues to identify the correct type after crossing an
+import boundary. `GlobalType` similarly identifies a canonical global without
+copying its definition into every result.
 
 A local handle can be pictured as the following simplified value:
 
@@ -396,48 +401,47 @@ Local {
 This means "type entry 3 owned by module 17." The handle identifies where the
 type is stored; it does not contain the type definition itself.
 
-**Normalization** is the operation that follows handles reachable from an
-inferred type, and simplifies wrappers so a consumer can inspect the represented
-structure instead of its storage indirections. It does not infer the complete
-module or change the type's meaning. Types that contain no handles or
-normalizable wrappers are returned unchanged.
+**Normalization** follows the handles reachable from an inferred type and
+simplifies wrappers, so a consumer can inspect the represented structure
+instead of its storage indirections. It does not infer the complete module or
+change the type's meaning. Types that contain no handles or normalizable
+wrappers are returned unchanged.
 
-For example, inference may defensively wrap a reference before it knows whether
-the reference names a class or another type. Once the target resolves to
-`Number`, normalization can remove the redundant instance wrappers:
+For example, inference may defensively wrap a reference before it knows
+whether the reference names a class or another type. Once the target resolves
+to `Number`, normalization can remove the redundant instance wrappers:
 
 ```text
 before: InstanceOf(InstanceOf(Number))
 after:  Number
 ```
 
-An `InstanceOf` wrapper remains when it distinguishes a class instance from the
-class itself or carries generic arguments.
+An `InstanceOf` wrapper remains when it distinguishes a class instance from
+the class itself or carries generic arguments.
 
-Consumers must call `normalize_type` or use an `InferredModuleTypes` lookup
-before inspecting values that may contain handles. Normalization resolves local
+Consumers call `normalize_type` or use an `InferredModuleTypes` lookup before
+inspecting values that may contain handles. Normalization resolves local
 handles, expands non-nominal globals, unwraps deferred `typeof` values, and
-collapses structural wrappers. Cycles and exhausted walks degrade to `Unknown`.
+collapses structural wrappers. Cycles and exhausted walks degrade to
+`Unknown`.
 
-For the `identity(1)` example, call inference performs the generic substitution
-and infers the numeric literal type `1`. That type contains no handles or
-wrappers, so normalization leaves it as `1`. Normalization does not perform the
-generic substitution itself.
+Normalization does not perform generic substitution: in the `identity(1)`
+example, call inference infers the numeric literal type `1`, which contains no
+handles or wrappers, so normalization leaves it as `1`. It does instantiate a
+generic alias whose body is an intersection or contains a conditional type,
+once its type arguments refer to no type parameter. So
+`NonNullable<string | null>`, whose body is `T & {}`, normalizes to `string`.
+Other generic aliases stay instances of their declarations.
 
-Normalization does instantiate a generic alias whose body is an intersection
-or contains a conditional type, once its type arguments refer to no type
-parameter. So `NonNullable<string | null>`, whose body is `T & {}`, normalizes
-to `string`. Other generic aliases stay instances of their declarations.
-
-## Unions and Intersections
+## Unions and intersections
 
 Build unions and intersections with `TypeData::union_from_types` and
 `TypeData::intersection_from_types`, which normalize them in
 [`builders.rs`](src/builders.rs). Every rule there gives a type with the same
-values as the type written, as TypeScript's own normalization does, so it never
-makes a type narrower. Rebuilding a type from its slots, as substitution and
-normalization do, runs the builders again, so the rules apply once handles are
-resolved.
+values as the type written, as TypeScript's own normalization does, so it
+never makes a type narrower. Rebuilding a type from its slots, as
+substitution and normalization do, runs the builders again, so the rules
+apply once handles are resolved.
 
 The intersection builder:
 
@@ -455,10 +459,10 @@ The intersection builder:
   functions, or namespaces into one anonymous type, which loses their names.
 
 Narrowing builds its intersections with `intersect_narrowed` in
-[`narrowing.rs`](src/narrowing.rs), which applies every rule above except
-the merging, so each operand keeps the declaration it names. A later
-`instanceof` or type predicate compares the operands of `B & A` with `A` by
-declaration, which it can't do for a merged anonymous type.
+[`narrowing.rs`](src/narrowing.rs), which applies every rule above except the
+merging, so each operand keeps the declaration it names. A later `instanceof`
+or type predicate compares the operands of `B & A` with `A` by declaration,
+which it can't do for a merged anonymous type.
 
 A property that several merged operands declare has the intersection of their
 types, where an optional property's type includes `undefined`, and it is
@@ -469,54 +473,51 @@ model, and the union is wider. Member lookup reads a property of an
 intersection that isn't merged the same way: only the operands that declare
 it count, not their index signatures or the apparent members of primitives.
 
-The builders don't resolve handles. A rule that needs to know the values of an
-operand, such as whether it can be `null`, doesn't apply to a handle, a type
-parameter, or another type the builder can't tell, so the intersection keeps
-that operand. A new rule must keep this property: when the builder can't tell,
-the type stays as written, less simplified but never narrower.
+The builders don't resolve handles. A rule that needs to know the values of
+an operand, such as whether it can be `null`, doesn't apply to a handle, a
+type parameter, or another type that the builder can't tell, so the
+intersection keeps that operand. A new rule keeps this property: when the
+builder can't tell, the type stays as written, less simplified but never
+narrower.
 
 ## Cycles
 
 Salsa invokes `infer_module_types_cycle_result` when tracked module inference
-encounters an import cycle. The fallback computes the root's strongly connected
-component and resolves the requested module with `CycleFallback`. Imports that
-would re-enter the component are suppressed, while imports outside it remain
-tracked normally.
+encounters an import cycle. The fallback computes the root's strongly
+connected component and resolves the requested module with `CycleFallback`.
+Imports that would re-enter the component are suppressed, while imports
+outside it remain tracked normally.
 
-Raw self-references use local handles. During raw conversion, re-entering a type
-currently being resolved returns its stable local handle; the outer resolution
-then stores the completed value in the module table.
+Raw self-references use local handles. During raw conversion, re-entering a
+type currently being resolved returns its stable local handle; the outer
+resolution then stores the completed value in the module table.
 
-This re-entry check belongs to one resolution context. Recursion across modules
-relies on tracked queries, import budgets, and the shared declaration evaluator
-instead; see [Resolver helpers](../biome_module_graph/CONTRIBUTING.md#resolver-helpers).
+This re-entry check belongs to one resolution context. Recursion across
+modules relies on tracked queries, import budgets, and the shared declaration
+evaluator instead; see
+[Resolver helpers](../biome_module_graph/CONTRIBUTING.md#resolver-helpers).
 
-## Work Limits and Inconclusive Results
+## Work limits and inconclusive results
 
-Walks over types and modules must terminate even when the input is recursive,
+Walks over types and modules terminate even when the input is recursive,
 cyclic, or too large to inspect completely. Such walks use deterministic local
-work limits. Reaching a limit is not evidence that a requested condition is true
-or false; it means the operation could not finish reliably.
+work limits. Reaching a limit is not evidence that a requested condition is
+true or false; it means the operation could not finish reliably.
 
-When inference cannot finish, it must preserve that uncertainty. The value used
-to represent "could not determine" depends on the API's return type:
+When inference cannot finish, it preserves that uncertainty. The value that
+represents "could not determine" depends on the API's return type:
 
 - An API that returns a type uses `Unknown`.
-- A predicate that returns `Option<bool>` uses `Some(true)` when inference proves
-  the predicate, `Some(false)` when it disproves the predicate, and `None` when
-  neither answer is reliable. The predicate's name and documentation define
-  what is being proved.
-- An analyzer-facing classification request uses `TypeInferenceClassification::Indeterminate`.
+- A predicate that returns `Option<bool>` uses `Some(true)` when inference
+  proves the predicate, `Some(false)` when it disproves the predicate, and
+  `None` when neither answer is reliable. The predicate's name and
+  documentation define what is being proved.
+- An analyzer-facing classification request uses
+  `TypeInferenceClassification::Indeterminate`, as the module-graph guide's
+  [Result semantics](../biome_module_graph/CONTRIBUTING.md#result-semantics)
+  describe.
 
-Classification requests expose three possible results:
-
-```text
-Match         = the available information proves the condition
-NoMatch       = the available information disproves the condition
-Indeterminate = inference cannot reach a reliable conclusion
-```
-
-For a diagnostic that requires a positive match, handle the classification
+A diagnostic that requires a positive match handles the classification
 explicitly:
 
 ```rust,ignore
@@ -527,18 +528,17 @@ match classification {
 ```
 
 `Indeterminate` may represent unresolved or ambiguous data, a cycle, or an
-exhausted work limit. Each request documents how it maps lower-level failures to
-its public result. If an operation reaches its work limit, it may retry with a
-broader inference layer only when the caller explicitly requires that behavior.
-Otherwise, it returns an inconclusive result.
+exhausted work limit. Each request documents how it maps lower-level failures
+to its public result. An operation that reaches its work limit retries with a
+broader inference level only when the caller explicitly requires that
+behavior; otherwise, it returns an inconclusive result.
 
-## Module Index Invalidation
+## Module index invalidation
 
-
-Every dynamic module-path lookup must read `ModuleDb::module_graph_generation`.
-Structural registry mutations acquire the pending Salsa setter before publishing
-map changes and commit the new generation afterward. This prevents a reader from
-observing a new map under an old generation.
+Every dynamic module-path lookup reads `ModuleDb::module_graph_generation`.
+Structural registry mutations acquire the pending Salsa setter before
+publishing map changes and commit the new generation afterward. This prevents
+a reader from observing a new map under an old generation.
 
 ## Testing
 
@@ -548,21 +548,42 @@ Test the narrowest public boundary affected by the change:
   from syntax. Their snapshots show module-local identities and deferred
   expressions, not resolved cross-module types.
 - Query tests under `biome_module_graph/tests/spec_tests` verify targeted
-  lookup, call inference, normalization, imports, cycles, and complete module
-  inference. Place a test with the query family whose behavior changed.
+  lookup, call inference, normalization, imports, cycles, narrowing, and
+  complete module inference. Place a test with the query family or the
+  narrowing topic whose behavior changed.
 - Request tests in `spec_tests/requests.test.rs` verify analyzer-facing
-  contracts through `execute_type_inference_request`, including the distinction
-  between `Match`, `NoMatch`, and `Indeterminate`.
+  contracts through `execute_type_inference_request`, including the
+  distinction between `Match`, `NoMatch`, and `Indeterminate`.
 - Type-aware analyzer fixtures verify the final diagnostic behavior after the
   request result reaches a lint rule.
 
 A semantic test proves the returned type or classification. Add the affected
 generic, overload, compound, import, ambiguity, or cycle shape only when the
-changed path traverses it. Do not use complete-module inference merely to test a
-targeted query.
+changed path traverses it. Test a targeted query through the query, not
+through complete-module inference.
 
-When a change narrows or widens resolution scope, add query-event assertions for
-the scope itself. Assert which tracked query runs and which unrelated query does
-not run, especially for parameters, call arguments, imports, normalization, and
-`infer_module_types`. Invalidation and backdating changes also assert behavior
-after the relevant database input changes.
+When a change narrows or widens resolution scope, add query-event assertions
+for the scope itself. Assert which tracked query runs and which unrelated
+query does not run, especially for parameters, call arguments, imports,
+normalization, and `infer_module_types`. Invalidation and backdating changes
+also assert behavior after the relevant database input changes. The
+module-graph guide describes these
+[Salsa execution tests](../biome_module_graph/CONTRIBUTING.md#salsa-execution-tests).
+
+## Review checklist
+
+- [ ] Raw data stays deferred: the collector resolves nothing across modules
+      and records unresolved operands as `TypeReference` values.
+- [ ] A new raw variant has its conversion to the inferred representation,
+      and every match, traversal, and formatter over raw and inferred data
+      handles it.
+- [ ] Inferred data stays owned by the module that declares it, including
+      contributions, which stay handles.
+- [ ] Builders and normalization never make a type narrower, and keep an
+      operand as written when they can't tell its values.
+- [ ] The operation uses the narrowest inference level that satisfies its
+      contract, and escalation is explicit in the caller's contract.
+- [ ] Recursive walks have a work limit, and reaching it preserves
+      uncertainty as `Unknown`, `None`, or `Indeterminate`.
+- [ ] Collector snapshots were reviewed as behavior, and query tests prove
+      the inferred result.
