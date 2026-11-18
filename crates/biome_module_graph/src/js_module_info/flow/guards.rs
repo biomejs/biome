@@ -138,16 +138,19 @@ pub(crate) enum FlowGuard {
     /// [`RootFlow::switches`]: super::RootFlow::switches
     Bypass { switch: u32, guard: usize },
     /// The guard at this index, which holds where no case of a `switch` on a
-    /// value or on `typeof` of one matches, applied to every incoming type
-    /// except one with an `unknown` member, which stays as it is.
+    /// value or on `typeof` of one matches. An incoming type with an
+    /// `unknown` member stays as it is. A member that is a type parameter, or
+    /// an intersection with one, stays as it is unless the guard leaves it no
+    /// value, when it is removed. The guard narrows the other members.
     ///
     /// Other tests narrow `unknown` as `{} | null | undefined`, so
-    /// `x !== null` gives `{} | undefined`. Where no case of such a `switch`
-    /// matches, TypeScript removes the matched values from the type as a
-    /// whole instead, and `unknown` keeps every value, so
-    /// `switch (x) { case null: break; default: x }` reads `unknown` there.
-    /// `switch (true)` tests each case as a condition, as an `if` does, so its
-    /// guards need no such wrapper.
+    /// `x !== null` gives `{} | undefined`, and a type parameter `T` to an
+    /// intersection, so `x !== null` gives `T & ({} | undefined)`. Where no
+    /// case of such a `switch` matches, TypeScript instead removes the
+    /// members whose every value a case covers and keeps the others whole, so
+    /// `switch (x) { case null: break; default: x }` reads `unknown` or `T`
+    /// there. `switch (true)` tests each case as a condition, as an `if`
+    /// does, so its guards need no such wrapper.
     Unmatched(usize),
     /// The call point at index `call` in [`RootFlow::calls`], whose result
     /// is truthy when `positive` is true and falsy otherwise. A statement

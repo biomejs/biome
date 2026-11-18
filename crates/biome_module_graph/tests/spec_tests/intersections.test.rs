@@ -1039,6 +1039,72 @@ mod narrowing {
     }
 
     // TypeScript 7.0.2 (`tsc --strict`) gives each read the type in the
+    // comment of its line, in order: the read in the case clause, then the
+    // read in `default` or after the statement. Where no case of a `switch`
+    // on a value or on `typeof` of one matches, TypeScript removes the
+    // members of the type that every case value or kind covers and keeps the
+    // others as they are, so a type parameter stays whole unless its
+    // constraint leaves it no value that passes. An `if` with the same test
+    // gives an intersection. Biome keeps `T` where TypeScript gives `never`.
+    #[test]
+    fn switch_defaults_keep_type_parameters() {
+        let source = format!(
+            "{DECLARATIONS}{}",
+            r#"
+            function f1<T>(x: T) { switch (x) { case null: case undefined: p([/*f1*/x] as const); break; default: p([/*f1Default*/x] as const); } } // T; T
+            function f2<T>(x: T) { switch (typeof x) { case "undefined": p([/*f2*/x] as const); break; default: p([/*f2Default*/x] as const); } } // T & undefined; T
+            function f3<T>(x: T | null) { switch (x) { case null: p([/*f3*/x] as const); break; default: p([/*f3Default*/x] as const); } } // T | null; T
+            function f4<T>(x: T) { switch (x) { case null: break; } p([/*f4After*/x] as const); } // T
+            function f5<T>(x: T) { switch (x) { case undefined: p([/*f5*/x] as const); break; default: p([/*f5Default*/x] as const); } } // T; T
+            function f6<T>(x: T) { switch (x) { case null: p([/*f6*/x] as const); break; default: p([/*f6Default*/x] as const); } } // T; T
+            function f7<T>(o: { v: T }) { switch (o.v) { case null: p([/*f7*/o.v] as const); break; default: p([/*f7Default*/o.v] as const); } } // T; T
+            function f8<T>(x: T | undefined) { switch (typeof x) { case "undefined": p([/*f8*/x] as const); break; default: p([/*f8Default*/x] as const); } } // (T & undefined) | undefined; T
+            function f9<T>(x: T) { if (x !== undefined) { switch (x) { case null: p([/*f9*/x] as const); break; default: p([/*f9Default*/x] as const); } } } // T & null; T & {}
+            function f10<T extends string | undefined>(x: T) { switch (typeof x) { case "undefined": p([/*f10*/x] as const); break; default: p([/*f10Default*/x] as const); } } // T & undefined; T
+            function f11<T>(x: T | string) { switch (typeof x) { case "string": p([/*f11*/x] as const); break; default: p([/*f11Default*/x] as const); } } // string | (T & string); T
+            function f12<T>(x: T) { switch (typeof x) { case "undefined": return; } p([/*f12After*/x] as const); } // T
+            function f13<T>(x: T | null) { switch (x) { case null: return; } p([/*f13After*/x] as const); } // T
+            function f14<T extends null>(x: T) { switch (x) { case null: p([/*f14*/x] as const); break; default: p([/*f14Default*/x] as const); } } // T; never
+            function f15<T>(x: T | null | undefined) { switch (x) { case null: case undefined: p([/*f15*/x] as const); break; default: p([/*f15Default*/x] as const); } } // T | null | undefined; T
+            "#
+        );
+        assert_reads(
+            &source,
+            &[
+                ("f1", "x", &["instanceof T"]),
+                ("f1Default", "x", &["instanceof T"]),
+                ("f2", "x", &["instanceof T & undefined"]),
+                ("f2Default", "x", &["instanceof T"]),
+                ("f3", "x", &["instanceof T", "null"]),
+                ("f3Default", "x", &["instanceof T"]),
+                ("f4After", "x", &["instanceof T"]),
+                ("f5", "x", &["instanceof T"]),
+                ("f5Default", "x", &["instanceof T"]),
+                ("f6", "x", &["instanceof T"]),
+                ("f6Default", "x", &["instanceof T"]),
+                ("f7", "o.v", &["instanceof T"]),
+                ("f7Default", "o.v", &["instanceof T"]),
+                ("f8", "x", &["instanceof T & undefined", "undefined"]),
+                ("f8Default", "x", &["instanceof T"]),
+                // `T & null`: as at `L81_59`, Biome removes no `T & {}`
+                // where the value equals `null`.
+                ("f9", "x", &[T_EMPTY, "instanceof T & null"]),
+                ("f9Default", "x", &[T_EMPTY]),
+                ("f10", "x", &["instanceof T & undefined"]),
+                ("f10Default", "x", &["instanceof T"]),
+                ("f11", "x", &["instanceof T & string", "string"]),
+                ("f11Default", "x", &["instanceof T"]),
+                ("f12After", "x", &["instanceof T"]),
+                ("f13After", "x", &["instanceof T"]),
+                ("f14", "x", &["instanceof T"]),
+                ("f14Default", "x", &["instanceof T"]),
+                ("f15", "x", &["instanceof T", "null", "undefined"]),
+                ("f15Default", "x", &["instanceof T"]),
+            ],
+        );
+    }
+
+    // TypeScript 7.0.2 (`tsc --strict`) gives each read the type in the
     // comment of its line, in order. A `this is T` or `asserts this is T`
     // predicate whose target the class doesn't relate to gives the
     // intersection, which normalization merges into an instance of an

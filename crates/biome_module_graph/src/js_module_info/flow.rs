@@ -622,6 +622,14 @@ pub(crate) struct RootFlow {
     /// The subjects in [`Self::property_only`] that a test other than one of
     /// a property narrows. Their declared type need not be a union.
     pub(crate) instance_tested: FxHashSet<FlowSubjectId>,
+    /// The subjects with reads that a runtime test able to narrow `any`
+    /// tests: `typeof` with a primitive kind or `"undefined"`, `instanceof`,
+    /// `in` with a private name, a comparison of `constructor`, or a call to
+    /// a local type-guard function (see [`FlowTest::narrows_any`]). Every
+    /// other test and every write keeps `any`, so a subject whose declared
+    /// type is `any` needs no solve unless it is here or one of its call
+    /// points narrows.
+    pub(crate) any_tested: FxHashSet<FlowSubjectId>,
     /// The [`FlowSubject::Pattern`] of each element whose reads a test of the
     /// pattern can reach, keyed by the element's subject. Each such read is
     /// also a read point of the pattern, so that the declared type of the
@@ -877,6 +885,12 @@ impl RootFlow {
         self.instance_tested.contains(&subject)
     }
 
+    /// Returns whether a runtime test able to narrow `any` tests `subject`,
+    /// as [`Self::any_tested`] describes.
+    pub(crate) fn is_any_tested(&self, subject: FlowSubjectId) -> bool {
+        self.any_tested.contains(&subject)
+    }
+
     /// Returns whether a [`FlowGuard::ReadonlyPath`] guard may narrow
     /// `subject`, as [`Self::readonly_tested`] describes.
     pub(crate) fn is_readonly_tested(&self, subject: FlowSubjectId) -> bool {
@@ -1044,6 +1058,7 @@ pub(crate) fn build_reachability(
             read_points: FxHashMap::default(),
             property_only: FxHashSet::default(),
             instance_tested: FxHashSet::default(),
+            any_tested: FxHashSet::default(),
             pattern_elements: FxHashMap::default(),
             readonly_tested: FxHashSet::default(),
             only_readonly_tested: FxHashSet::default(),
@@ -2094,6 +2109,19 @@ impl RootCollector<'_> {
             instance_tested.retain(|subject| property_only.contains(subject));
             readonly_tested.retain(|subject| read_points.contains_key(subject));
             only_readonly_tested.retain(|subject| readonly_tested.contains(subject));
+            let any_tested = guards
+                .iter()
+                .filter_map(|guard| {
+                    if let FlowGuard::Test { subject, test, .. } = guard
+                        && test.narrows_any()
+                        && read_points.contains_key(subject)
+                    {
+                        Some(*subject)
+                    } else {
+                        None
+                    }
+                })
+                .collect();
             let read_points: FxHashMap<_, _> = read_points
                 .into_iter()
                 .map(|(subject, mut points)| {
@@ -2152,6 +2180,7 @@ impl RootCollector<'_> {
                 subjects: subjects.into_subjects().into_boxed_slice(),
                 property_only,
                 instance_tested,
+                any_tested,
                 pattern_elements,
                 readonly_tested,
                 only_readonly_tested,

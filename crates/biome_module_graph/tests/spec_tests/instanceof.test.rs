@@ -685,6 +685,61 @@ fn private_names_narrow_to_the_class_that_declares_them() {
 }
 
 // TypeScript 7.0.2 (`tsc --strict`) gives each read the type in the comment
+// of its line, in order. A static private name is a property of the class
+// that declares it, not of the classes derived from it. Where `#s in x` is
+// false, TypeScript removes the class only when it is the whole type of `x`;
+// a union keeps every member, the class included, because it compares each
+// member with the class by derivation, and a class is not derived from
+// itself. Where TypeScript gives an intersection with the class, Biome keeps
+// the type of `x`.
+#[test]
+fn static_private_names_remove_the_class_only_when_it_is_the_whole_type() {
+    assert_reads(
+        r#"
+        class P {
+            static #s = 2;
+            static s1(x: typeof P | Date) { if (#s in x) /*s1*/x; else /*s1Else*/x; } // typeof P; Date | typeof P
+            static s2(x: typeof P) { if (#s in x) /*s2*/x; else /*s2Else*/x; } // typeof P; never
+            static s3(x: typeof P | typeof Q) { if (#s in x) /*s3*/x; else /*s3Else*/x; } // typeof P; typeof P | typeof Q
+            static s4(x: typeof Q | Date) { if (#s in x) /*s4*/x; else /*s4Else*/x; } // (Date | typeof Q) & typeof P; Date | typeof Q
+            static s5(x: P | typeof P) { if (#s in x) /*s5*/x; else /*s5Else*/x; } // typeof P; P | typeof P
+            static s6(x: typeof P | Date) { if (x instanceof Date) return; if (#s in x) /*s6*/x; else /*s6Else*/x; } // typeof P; never
+            static s7(x: typeof P | string) { if (typeof x === "string") return; if (!(#s in x)) /*s7Else*/x; } // never
+            static s8<T extends object>(x: T | typeof P) { if (#s in x) /*s8*/x; else /*s8Else*/x; } // T & typeof P; T | typeof P
+            static s9(x: typeof P | null) { if (x && !(#s in x)) /*s9Else*/x; } // never
+        }
+        class Q extends P { static q = 1 }
+        "#,
+        &[
+            ("s1", "x", &[CLASS_P]),
+            ("s1Else", "x", &[CLASS_P, "instanceof Date"]),
+            ("s2", "x", &[CLASS_P]),
+            ("s2Else", "x", &["unknown"]),
+            ("s3", "x", &[CLASS_P]),
+            // `typeof P | typeof Q`: Biome reads the declared type of `x`
+            // as Unknown, as it does without the test.
+            ("s3Else", "x", &["unknown"]),
+            ("s4", "x", &[CLASS_Q, "instanceof Date"]),
+            ("s4Else", "x", &[CLASS_Q, "instanceof Date"]),
+            ("s5", "x", &[CLASS_P]),
+            // `P | typeof P`: as for `s3Else`.
+            ("s5Else", "x", &["unknown"]),
+            ("s6", "x", &[CLASS_P]),
+            ("s6Else", "x", &["unknown"]),
+            ("s7Else", "x", &["unknown"]),
+            ("s8", "x", &[CLASS_P]),
+            ("s8Else", "x", &[CLASS_P, "instanceof T"]),
+            ("s9Else", "x", &["unknown"]),
+        ],
+    );
+}
+
+/// How the reads below name the class `P` itself.
+const CLASS_P: &str = r#"class "P" { extends: none implements: [] type_args: [] }"#;
+/// How the reads below name the class `Q` itself, which extends `P`.
+const CLASS_Q: &str = r#"class "Q" { extends: class "P" { extends: none implements: [] type_args: [] } implements: [] type_args: [] }"#;
+
+// TypeScript 7.0.2 (`tsc --strict`) gives each read the type in the comment
 // of its line, in order. `x.constructor === C` keeps the members that `C` may
 // have constructed: an instance of the class `C` itself, but not of a class
 // derived from it, or another member when it is assignable to the type of
