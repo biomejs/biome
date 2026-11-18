@@ -1,0 +1,53 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/nesting/nested_pseudo_class_function_indent.css
+---
+
+# Input
+
+```css
+#notifications-toolbar {
+	&:has(> #tab-notification-deck-template, > #tab-notification-deck:where([selected-view=""], :not([selected-view])), > #tab-notification-deck > [slot="selected"]:empty) {
+		display: none;
+	}
+
+	.toolbar-item:not(.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, .bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb) {
+		color: red;
+	}
+
+	> .toolbar-item:is(.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, .bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb) {
+		color: red;
+	}
+}
+
+```
+
+
+# Formatted
+
+```css
+#notifications-toolbar {
+	&:has(
+		> #tab-notification-deck-template,
+		> #tab-notification-deck:where([selected-view=""], :not([selected-view])),
+		> #tab-notification-deck > [slot="selected"]:empty
+	) {
+		display: none;
+	}
+
+	.toolbar-item:not(
+		.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa,
+		.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+	) {
+		color: red;
+	}
+
+	> .toolbar-item:is(
+			.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa,
+			.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+		) {
+		color: red;
+	}
+}
+
+```
