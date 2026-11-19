@@ -1139,13 +1139,13 @@ fn discriminants_held_at_the_top_level_follow_exports() {
 }
 
 // TypeScript 7.0.2 (`tsc --strict`) narrows every read below, giving
-// `Circle` or the first tuple. Biome keeps the declared type at every read
-// except `inSwitch` and `forOf`. It doesn't follow `s!` and keys that are
-// spelled differently from the property, loose equality doesn't narrow an
-// object, a read in a closure never sees the test, and a `const`
-// exported by an `export { ... }` list holds nothing. A test inside a
-// `switch` or a `for...of` loop narrows as anywhere else, so `inSwitch` and
-// `forOf` give `Circle`, as in TypeScript.
+// `Circle` or the first tuple. A test inside a `switch`, a `for...of` loop,
+// or a closure that reads the variables of its enclosing function narrows as
+// anywhere else, so Biome also gives `Circle` at `inSwitch`, `forOf`,
+// `closure`, and `patternClosure`. Biome keeps the declared type at the
+// other reads, because it doesn't follow `s!` and keys that are spelled
+// differently from the property, loose equality doesn't narrow an object,
+// and a `const` exported by an `export { ... }` list holds nothing.
 #[test]
 fn discriminant_constants_that_biome_does_not_follow_keep_the_object() {
     assert_reads(
@@ -1171,7 +1171,7 @@ fn discriminant_constants_that_biome_does_not_follow_keep_the_object() {
         &[
             ("nonNull", "s", &["Circle", "Square"]),
             ("loose", "s", &["Circle", "Square"]),
-            ("closure", "s", &["Circle", "Square"]),
+            ("closure", "s", &["Circle"]),
             ("escapedString", "s", &["Circle", "Square"]),
             (
                 "hexadecimal",
@@ -1180,7 +1180,7 @@ fn discriminant_constants_that_biome_does_not_follow_keep_the_object() {
             ),
             ("template", "s", &["Circle", "Square"]),
             ("escapedStringKey", "s", &["Circle", "Square"]),
-            ("patternClosure", "s", &["Circle", "Square"]),
+            ("patternClosure", "s", &["Circle"]),
             ("looseKey", "s", &["Circle", "Square"]),
             (
                 "hexadecimalKey",
@@ -1533,15 +1533,16 @@ fn destructured_elements_that_do_not_narrow_each_other() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives `number` at every read below.
-// Biome keeps the declared type: loose `==` with a literal doesn't narrow an
-// object, an element under a default of an enclosing pattern never
-// narrows because its declared type ignores the default, and a read in a
-// closure never sees the test. Biome also gives an element destructured from
-// `s!`, a parameter destructured in a function that a variable annotation
-// types, and the parameters of a function typed by a rest parameter whose
-// type is a union of tuples the declared type `unknown`, which no test
-// narrows.
+// TypeScript 7.0.2 (`tsc --strict`) gives `number` at every read below. A
+// test in a closure narrows the pattern of the enclosing function there, as
+// in TypeScript, so `closure` gives `number`. Biome keeps the declared type
+// at `loose` and `enclosingDefault`, because loose `==` with a literal
+// doesn't narrow an object, and an element under a default of an
+// enclosing pattern never narrows because its declared type ignores the
+// default. Biome also gives the declared type `unknown`, which no test
+// narrows, to an element destructured from `s!`, a parameter destructured in
+// a function that a variable annotation types, and the parameters of a
+// function typed by a rest parameter whose type is a union of tuples.
 #[test]
 fn destructured_elements_that_biome_does_not_narrow_yet() {
     assert_element_reads(
@@ -1557,7 +1558,7 @@ fn destructured_elements_that_biome_does_not_narrow_yet() {
         &[
             ("loose", "v", &["number", "string"]),
             ("enclosingDefault", "v", &["number", "string"]),
-            ("closure", "v", &["number", "string"]),
+            ("closure", "v", &["number"]),
             ("nonNull", "v", &["unknown"]),
             ("contextual", "v", &["unknown"]),
             ("dependent", "x", &["unknown"]),

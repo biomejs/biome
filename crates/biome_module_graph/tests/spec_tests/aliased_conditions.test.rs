@@ -317,8 +317,11 @@ fn inlined_conditions_narrow_module_constants_and_nested_lets() {
 }
 
 // TypeScript 7.0.2 (`tsc --strict`) gives every read below `string`. Biome
-// keeps `string | null` where the read is in a closure and its variable is
-// declared outside it, because no fact enters a nested function.
+// keeps `string | null` at `readInClosure`, where the test is outside the
+// closure that reads the variable, because no fact enters a nested function.
+// A test in the function that reads a variable of an enclosing root narrows
+// it there, also through an aliased condition that an enclosing root
+// declares.
 #[test]
 fn aliases_inside_and_around_nested_functions() {
     use InferredTypeData::{Null, String};
@@ -334,8 +337,8 @@ fn aliases_inside_and_around_nested_functions() {
     assert_reads(
         SOURCE,
         &[
-            ("moduleAlias", "outer", &[String, Null]),
-            ("testedInClosure", "x", &[String, Null]),
+            ("moduleAlias", "outer", &[String]),
+            ("testedInClosure", "x", &[String]),
             ("readInClosure", "x", &[String, Null]),
             ("nested", "y", &[String]),
         ],

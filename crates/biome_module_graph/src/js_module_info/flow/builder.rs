@@ -444,6 +444,18 @@ fn is_compound_like(right: &AnyJsExpression) -> bool {
     })
 }
 
+/// Returns whether `declarator` is part of a `var` declaration, whose
+/// variables a read can reach before the declarator.
+fn is_var(declarator: &JsVariableDeclarator) -> bool {
+    match declarator.declaration() {
+        Some(AnyJsVariableDeclaration::JsVariableDeclaration(declaration)) => declaration.is_var(),
+        Some(AnyJsVariableDeclaration::JsForVariableDeclaration(declaration)) => {
+            declaration.is_var()
+        }
+        None => false,
+    }
+}
+
 /// Limits the operands that [`value_callees`] visits.
 const MAX_VALUE_STEPS: usize = 32;
 
@@ -1364,15 +1376,25 @@ impl RootBuilder<'_, '_> {
         let header = self.push(FlowNode::Join(vec![flow]))?;
         let mut flow = match statement.initializer().map_err(|_| Unsupported)? {
             // Each iteration assigns the variables of a declaration after the
-            // defaults of its pattern, but the graph has no write point for
-            // them. None is needed because the header also joins the entry,
-            // where the variables and their paths have their declared types.
-            // Facts on the back edge from an earlier iteration therefore
-            // cannot narrow a read below its declared type. A `let`, `const`,
-            // or `using` declaration is scoped to the loop, so no test before
-            // the loop can mention its variables. Biome never narrows a `var`.
+            // defaults of its pattern. A `let`, `const`, or `using` declaration
+            // needs no write point: its variables are scoped to the loop, so no
+            // test or write before the loop can mention them. They have their
+            // declared types at the entry, which the header joins. Facts on the
+            // back edge from an earlier iteration therefore cannot narrow a
+            // read below its declared type. A `var` is hoisted, so code before
+            // the loop can test or write it. Each iteration writes a `var`
+            // without a value, which gives it its declared type.
             AnyJsForInOrOfInitializer::JsForVariableDeclaration(declaration) => {
-                self.declaration(&declaration.into(), header, 0)?
+                let flow = self.declaration(&declaration.clone().into(), header, 0)?;
+                match declaration
+                    .declarator()
+                    .and_then(|declarator| declarator.id())
+                {
+                    Ok(pattern) if declaration.is_var() => {
+                        self.binding_writes(&pattern, None, &[], flow, 0)?
+                    }
+                    Ok(_) | Err(_) => flow,
+                }
             }
             // An assignment target is written each iteration, after the
             // pattern is evaluated, with a key for `for...in` and an element
@@ -2728,18 +2750,20 @@ impl RootBuilder<'_, '_> {
     /// Evaluates the declarators of `declaration`, which lies at `depth`, in
     /// order from `incoming`, and returns the flow after them.
     ///
-    /// Each declarator evaluates its binding pattern as
-    /// [`Self::binding_pattern`] describes, then its initializer, as
-    /// TypeScript's binder does, although the initializer runs first at
-    /// runtime. TypeScript's types after a write in one of them, as in
-    /// `const [a = (x = 1)] = [x]`, follow that order. A declarator with a
-    /// type annotation then writes the variables it declares, as
-    /// [`Self::binding_writes`] describes. Other declarators add no write
-    /// point, because the declared type of the variable is the type of the
-    /// initializer, and the write would reduce it to that same type. A
-    /// declarator without an initializer, as in a `for...of` head or
-    /// `let x!: T`, evaluates only its pattern. `using` and `await using`
-    /// declarations evaluate as `const` does.
+    /// Each declarator evaluates its binding pattern, with
+    /// [`Self::binding_pattern`], then its initializer. The initializer runs
+    /// first at runtime, but TypeScript's types after a write in one of them,
+    /// as in `const [a = (x = 1)] = [x]`, follow this order. A declarator with
+    /// a type annotation then writes the variables it declares with the
+    /// initializer's value. A `var` declarator without one also writes its
+    /// variables, because a read before the declarator sees the variable as
+    /// `undefined`. That write has no value and gives the variables their
+    /// declared types. A write of the initializer's value would give the same
+    /// types, because the declared type of such a variable is the type of the
+    /// initializer. Other declarators add no write point, because no read
+    /// comes before them. A declarator without an initializer, as in a
+    /// `for...of` head or `let x!: T`, evaluates only its pattern. `using` and
+    /// `await using` declarations evaluate as `const` does.
     fn declaration(
         &mut self,
         declaration: &AnyJsVariableDeclaration,
@@ -2775,11 +2799,13 @@ impl RootBuilder<'_, '_> {
         if let Some(initializer) = declarator.initializer() {
             let expression = initializer.expression().map_err(|_| Unsupported)?;
             flow = self.evaluate(expression.syntax(), flow, depth + 1)?;
-            if declarator.variable_annotation().is_some()
-                && let Some(pattern) = &pattern
-            {
-                let value = self.assigned_expression(&expression);
-                flow = self.binding_writes(pattern, value, &[], flow, depth + 1)?;
+            if let Some(pattern) = &pattern {
+                if declarator.variable_annotation().is_some() {
+                    let value = self.assigned_expression(&expression);
+                    flow = self.binding_writes(pattern, value, &[], flow, depth + 1)?;
+                } else if is_var(declarator) {
+                    flow = self.binding_writes(pattern, None, &[], flow, depth + 1)?;
+                }
             }
         }
         Ok(flow)
@@ -3585,10 +3611,12 @@ mod tests {
         let built = function("function f(obj) { for (const k in obj) read(obj); after(obj); }");
         assert_eq!(built.paths("obj", 2), [facts(&["!obj:Nullish"])]);
         assert_eq!(built.paths("obj", 3), [Vec::<String>::new()]);
+        // Each iteration also writes a `var`, which code before the loop can
+        // test.
         let built = function("function f(obj) { for (var k in obj?.v) read(obj); }");
         assert_eq!(
             sorted_paths(&built, "obj", 2),
-            [facts(&["!obj.v:Nullish", "!obj:Nullish"])]
+            [facts(&["!obj.v:Nullish", "!obj:Nullish", "k:Reset"])]
         );
         // Only a head that declares one variable narrows.
         for source in [
@@ -3707,6 +3735,29 @@ mod tests {
             "function f() { let x: number | undefined = g(); read(x); function g() { return 1; } }",
         );
         assert_eq!(built.paths("x", 1), [facts(&["x:Reset"])]);
+    }
+
+    #[test]
+    fn var_declarators_and_loop_heads_write_their_variables() {
+        // A read can come before a `var` declarator, so a declarator without
+        // an annotation writes its variables too, and so does each iteration
+        // of a loop whose head declares them.
+        let built = function(
+            "function f(c, list) { read(vx, pa); var vx = c, { pa } = c; read(vx, pa); for (var vk of list) read(vk); }",
+        );
+        assert_eq!(built.paths("vx", 0), [Vec::<String>::new()]);
+        for name in ["vx", "pa"] {
+            assert_eq!(
+                sorted_paths(&built, name, 2),
+                [facts(&["pa:Reset", "vx:Reset"])],
+                "{name}"
+            );
+        }
+        assert!(contains(&built.paths("vk", 1), "vk:Reset"));
+        let built =
+            function("function f(c, list) { let y = c; for (const k of list) read(y, k); }");
+        assert_eq!(built.paths("y", 1), [Vec::<String>::new()]);
+        assert_eq!(built.paths("k", 1), [Vec::<String>::new()]);
     }
 
     #[test]

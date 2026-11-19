@@ -303,10 +303,11 @@ fn writes_to_the_path_a_prefix_or_any_property_narrow_or_cancel_narrowing() {
 
 // TypeScript 7.0.2 (`tsc --strict`) gives `string | null` at `arrow` and
 // `declaration`, because property narrowing never reaches a function created
-// later. It gives `string` at `iife` and `enclosing`, where Biome is wider. The
-// body of a function called where it is defined does not continue the outer
-// flow, and a path narrows only in the execution root that declares its
-// variable.
+// later. It gives `string` at `iife`, where Biome is wider, because the body
+// of a function called where it is defined does not continue the outer flow.
+// TypeScript and Biome both give `string` at `enclosing`, because a path
+// on a variable of an enclosing function narrows by the tests of the function
+// that reads it.
 #[test]
 fn reads_in_nested_functions_see_no_property_facts() {
     use InferredTypeData::{Null, String};
@@ -326,7 +327,7 @@ fn reads_in_nested_functions_see_no_property_facts() {
             ("arrow", "o.v", &[String, Null]),
             ("declaration", "o.v", &[String, Null]),
             ("iife", "o.v", &[String, Null]),
-            ("enclosing", "o.v", &[String, Null]),
+            ("enclosing", "o.v", &[String]),
         ],
     );
 }

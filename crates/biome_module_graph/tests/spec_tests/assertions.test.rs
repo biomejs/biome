@@ -450,7 +450,8 @@ fn assertions_respect_binding_identity_writes_and_existing_subject_restrictions(
         ("localCallee", "value", &[Number]),
         ("parameterCallee", "value", &[String, Number]),
         ("let", "value", &[String]),
-        ("var", "other", &[String, Number]),
+        // TypeScript 7.0.2 (`tsc --strict`) narrows a `var` too.
+        ("var", "other", &[String]),
         // TypeScript 7.0.2 (`tsc --strict`) gives `number` after the write,
         // and `never` after the assertion of the written argument, which
         // Biome reads as Unknown.
