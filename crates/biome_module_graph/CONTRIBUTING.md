@@ -569,9 +569,11 @@ when its own code contains:
   initializer whose type annotation is a union or that destructures a
   pattern, the head of a `for...of` loop that assigns a target, a call of
   `push` or `unshift` on a variable when the root also declares a variable
-  without a type annotation initialized with `[]`, or a declarator of a `var`
-  without a type annotation initialized with `null`, `undefined`, or `[]`
-  (`is_evolving_var`), which is `undefined` before the declarator runs;
+  without a type annotation initialized with `[]`, a declarator of a `let`
+  or a `var` without a type annotation and without an initializer, which is
+  `undefined` until a write, or of a `var` without a type annotation
+  initialized with `null`, `undefined`, or `[]`, which is `undefined` before
+  the declarator runs (`is_evolving_var`);
 - a statement call that may assert (`is_statement_call`, `may_assert`): the
   callee is a dotted name, and the call passes an argument or calls a
   method. A root that only such calls select is built only when one of their
@@ -683,9 +685,11 @@ the arguments run, and the value of an element assignment with `=`
 assignment of `[]` an `EmptyArray` one. `WrittenTargets::mutations` lists the
 variables that they add to.
 
-**Optional chains.** The code after an optional chain continues from the
-flow after its root, unless a key or an argument has a write node; then each
-`?.`'s short circuit joins the chain's end. A `?.` whose object the raw tables
+**Optional chains.** A chain runs through non-null assertions, as
+`x?.a!.b(x)` does at runtime, but parentheses end it (`inner_link`). The code
+after an optional chain continues from the flow after its root, unless a key
+or an argument has a write node; then each `?.`'s short circuit joins the
+chain's end. A `?.` whose object the raw tables
 show can't be nullish (`raw_may_be_nullish`), such as a variable that holds
 an object literal, adds no condition, so it doesn't make the object a tested
 subject.
@@ -881,9 +885,10 @@ The behavior of each kind of test is in
   `any`. An imported name can be an alias of a primitive, so it doesn't count
   as an object type, and a target of `any` or `unknown` makes the function
   unsupported.
-- **Statement calls and assertions.** After each statement call, the builder
-  adds a condition node (`statement_calls`), so the call and its arguments
-  still use the types from before it. For a local assertion function,
+- **Statement calls and assertions.** After each statement call, the
+  expression of an expression statement or an operand of the comma operator
+  anywhere, the builder adds a condition node (`statement_calls`), so the
+  call and its arguments still use the types from before it. For a local assertion function,
   `asserts value is T` becomes a runtime test of the argument, and
   `asserts value` decomposes the argument as a condition that holds.
 - **Call points.** A call whose callee is a dotted name, and that no local
@@ -935,8 +940,8 @@ The behavior of each kind of test is in
   that a pattern destructured, so such a guard is never marked as aliased,
   and it applies inside an inlined aliased condition too.
 - **`in`.** A test `"a" in x` becomes a runtime test of `x` (`FlowTest::In`)
-  whose key is a string or decimal integer literal, spelled as a property
-  path requires. The decomposed condition lists `x` with the objects of
+  whose key is a string, template, or decimal integer literal, spelled as a
+  property path requires (`literal_key`). The decomposed condition lists `x` with the objects of
   property guards, because `in` narrows only a type with an object type,
   `unknown`, or a type parameter. It adds no property guard. A test `#p in x`
   becomes a runtime test of `x` that holds the range at which inference finds
@@ -1088,17 +1093,18 @@ The rules behind these fields:
   narrow whatever its collected type, but only in the root that declares it
   (`declared_range`): `eligible_range` refuses it to nested roots and
   `closure_reads` skips it. One that nothing writes or adds to narrows as any
-  other variable, unless it is a `var` that a read can reach before its
-  declarator runs (`may_read_before_declarator`): a read starts before the
-  declarator, or the declarator is nested in another statement. An array
-  also needs a write node for every addition that runs in the root's flow
+  other variable, unless it is declared without an initializer, or it is a
+  `var` that a read can reach before its declarator runs
+  (`may_read_before_declarator`): a read starts before the declarator, or
+  the declarator is nested in another statement. An array also needs a write
+  node for every addition that runs in the root's flow
   (`mutations_are_modeled`). Such a variable stays a subject only when a
   write node other than its initializer gives it a value, or, for a
-  variable initialized with `null` or `undefined`, when it has any write
-  node other than its initializer, or when it is such a `var`. Only those
-  write nodes mention it, so only the reads that they reach become
-  candidates, together with the reads of a `var` with an initializer that
-  the start reaches (`BuiltRoot::hoisted`). No such subject is in
+  variable, when it has any write node other than its initializer, has no
+  initializer, or is such a `var`. Only those write nodes mention it, so only
+  the reads that they reach become candidates, together with the reads that
+  the start reaches of a variable without an initializer and of a `var` with
+  an initializer (`BuiltRoot::hoisted`). No such subject is in
   `RootFlow::uninitialized` or `RootFlow::assignment_only`.
 - **Patterns and paths.** A pattern can narrow when its elements can and none
   of them is written. A read of an element is also kept when a test of the
@@ -1356,12 +1362,11 @@ without such a value gives `Unknown`. A variable whose state is `Unknown` is
 Unknown at the read, while an array whose state is `Unknown`, or to which
 nothing was added, keeps its declared type (`evolving_array_read`). Runtime
 tests narrow a variable from its incoming type and never narrow an array.
-When the values that the root assigns are all `null` or all `undefined`, and
-every write of a variable assigns a value, the read keeps its declared type
-without a solve, and an array ignores undetermined values there. When every
-write of a variable gives `null`, `undefined`, or `Unknown`, and at least one
-gives `Unknown` (`RootFlow::has_valueless_write`), the read is `Unknown`
-without a solve.
+When the root adds only undetermined values, or nothing, to an array that is
+an array at every read, the read keeps its declared type without a solve.
+When every write of a variable gives `null`, `undefined`, or `Unknown`, and at
+least one gives `Unknown` (`RootFlow::has_valueless_write`), the read is
+`Unknown` without a solve.
 
 **Expressions.** `flow_expressions.rs` uses narrowed operands when inferring
 member accesses, calls, logical and conditional expressions, `await`, the

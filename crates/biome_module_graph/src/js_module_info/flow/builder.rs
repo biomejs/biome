@@ -750,6 +750,33 @@ fn never_has(expression: &AnyJsExpression, truthy: bool, remaining: &mut usize) 
 /// operand: the key of a computed member access, as `k` in `x?.[k]`, or the
 /// arguments of a call, as `y` in `x?.f(y)`. A `?.` before such a link
 /// evaluates the operand only when its object is not nullish.
+/// Returns the link of a chain that `object`, the object of another link,
+/// is, looking through non-null assertions, as `x?.a` in `x?.a!.b`. A
+/// non-null assertion doesn't end an optional chain, because `x?.a!.b` runs
+/// as `x?.a.b`, while parentheses do.
+pub(super) fn inner_link(object: &AnyJsExpression) -> Option<AnyJsOptionalChainExpression> {
+    let mut object = object.clone();
+    while let AnyJsExpression::TsNonNullAssertionExpression(assertion) = object {
+        object = assertion.expression().ok()?;
+    }
+    AnyJsOptionalChainExpression::cast(object.into_syntax())
+}
+
+/// Returns whether `link` belongs to an optional chain: it or a link inside
+/// it, through non-null assertions as [`inner_link`] finds them, has `?.`.
+fn is_optional_chain(link: &AnyJsOptionalChainExpression) -> bool {
+    let mut link = link.clone();
+    loop {
+        if link.is_optional() {
+            return true;
+        }
+        match link.object().ok().and_then(|object| inner_link(&object)) {
+            Some(inner) => link = inner,
+            None => return false,
+        }
+    }
+}
+
 pub(super) fn has_operands(link: &AnyJsOptionalChainExpression) -> bool {
     match link {
         AnyJsOptionalChainExpression::JsStaticMemberExpression(_) => false,
@@ -2098,9 +2125,10 @@ impl RootBuilder<'_, '_> {
     /// the types from before it. The statement calls are those that
     /// TypeScript adds to the flow: the expression itself when it is a call,
     /// and each operand of the comma operator that is a call, through any
-    /// parentheses around the comma expression. A call in parentheses, as in
-    /// `(assert(x));`, is none. The operands run in order, so a write in an
-    /// operand comes before the next operand.
+    /// parentheses around the comma expression. [`Self::evaluate`] adds the
+    /// operands of a comma expression elsewhere, as in `return (assert(x), x)`.
+    /// A call in parentheses, as in `(assert(x));`, is none. The operands run
+    /// in order, so a write in an operand comes before the next operand.
     ///
     /// Returns `None` when a call of a local function that never returns ends
     /// the path, so the operands after it don't run. A call point whose
@@ -2959,7 +2987,7 @@ impl RootBuilder<'_, '_> {
             return Ok(incoming);
         }
         if let Some(chain) = AnyJsOptionalChainExpression::cast_ref(node)
-            && chain.is_optional_chain()
+            && is_optional_chain(&chain)
         {
             return self.optional_chain(&chain, incoming, depth);
         }
@@ -3034,6 +3062,17 @@ impl RootBuilder<'_, '_> {
                 };
                 self.join_branches(test_flow, positive, negative)
             }
+            // Each operand of the comma operator that is a call is a statement
+            // call, wherever the comma expression is.
+            Some(AnyJsExpression::JsSequenceExpression(sequence)) => {
+                let left = sequence.left().map_err(|_| Unsupported)?;
+                let right = sequence.right().map_err(|_| Unsupported)?;
+                let end = match self.statement_calls(&left, incoming, depth + 1)? {
+                    Some(flow) => self.statement_calls(&right, flow, depth + 1)?,
+                    None => None,
+                };
+                self.inline_end(end)
+            }
             _ => self.children(node, incoming, depth),
         }
     }
@@ -3086,7 +3125,8 @@ impl RootBuilder<'_, '_> {
     /// the key or arguments of each link outward. Parentheses end a chain, as
     /// for [`AnyJsOptionalChainExpression::is_optional_chain`] and the
     /// receivers of a runtime test, so the root of `(x?.a)?.b(y)` is
-    /// `(x?.a)`.
+    /// `(x?.a)`. A non-null assertion doesn't, as in TypeScript, so `x` is not
+    /// nullish in the arguments of `x?.a!.b(x)`.
     ///
     /// When its object is nullish, a `?.` gives `undefined` without evaluating
     /// the rest of the chain. So each `?.` that a key or arguments follow adds
@@ -3117,7 +3157,7 @@ impl RootBuilder<'_, '_> {
         let mut link = chain.clone();
         let root = loop {
             let object = link.object().map_err(|_| Unsupported)?;
-            let inner = AnyJsOptionalChainExpression::cast_ref(object.syntax());
+            let inner = inner_link(&object);
             links.push((link, object));
             match inner {
                 Some(inner) => {
@@ -3825,7 +3865,9 @@ impl RootBuilder<'_, '_> {
         };
         let ranges = match value {
             FlowAssignedValue::Expression(range) => Some(range),
-            FlowAssignedValue::IterableValue(_) | FlowAssignedValue::Key => None,
+            FlowAssignedValue::BooleanLiteral(_)
+            | FlowAssignedValue::IterableValue(_)
+            | FlowAssignedValue::Key => None,
         };
         let callees = ranges
             .into_iter()
@@ -3920,6 +3962,14 @@ impl RootBuilder<'_, '_> {
     /// when Biome can't type it as TypeScript does, as for `typeof` or a call
     /// to a method whose return type Biome infers; see [`value_callees`].
     fn assigned_expression(&mut self, expression: &AnyJsExpression) -> Option<FlowAssignedValue> {
+        if matches!(
+            expression.clone().omit_parentheses(),
+            AnyJsExpression::AnyJsLiteralExpression(
+                AnyJsLiteralExpression::JsBooleanLiteralExpression(_)
+            )
+        ) {
+            return Some(FlowAssignedValue::BooleanLiteral(expression.range()));
+        }
         self.check_value(expression)
             .then(|| FlowAssignedValue::Expression(expression.range()))
     }
@@ -5412,7 +5462,9 @@ mod tests {
             .iter()
             .filter(|assigned| assigned.covered)
             .map(|assigned| match assigned.value {
-                FlowAssignedValue::Expression(range) => &built.source[range],
+                FlowAssignedValue::Expression(range) | FlowAssignedValue::BooleanLiteral(range) => {
+                    &built.source[range]
+                }
                 FlowAssignedValue::IterableValue(_) | FlowAssignedValue::Key => "",
             })
             .collect();

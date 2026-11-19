@@ -822,17 +822,10 @@ impl<'db> ResolutionCtx<'db, '_> {
     ///
     /// Two cases need no solve:
     ///
-    /// - When the values that the root assigns are all `null` or all
-    ///   `undefined`, and every other write of a variable assigns a value,
-    ///   this returns `None`, so that the read keeps its declared type. That
-    ///   type then already is the value's type, as for
-    ///   `let x = null; x = null`, or is wider, as Unknown for
-    ///   `let x; x = null` and `unknown[]` for `const a = []; a.push(null)`.
-    ///   A `var` whose values are all `null` is solved, because a path that
-    ///   doesn't pass its declarator gives `undefined`.
-    ///   An array ignores the values that Biome can't type, and qualifies
-    ///   only when it is an array at every read, as
-    ///   [`RootFlow::is_always_array`] describes.
+    /// - When the root adds to an array only values that Biome can't type,
+    ///   or nothing, and the array is an array at every read, as
+    ///   [`RootFlow::is_always_array`] describes, this returns `None`, so
+    ///   that the read keeps its declared type, `unknown[]`.
     /// - When every write of a variable gives `null`, `undefined`, or a value
     ///   that Biome can't type, and at least one gives such a value, the read
     ///   is Unknown. A solve could give `null` or `undefined` at a read that
@@ -846,44 +839,22 @@ impl<'db> ResolutionCtx<'db, '_> {
     ) -> Option<TypeData<'db>> {
         let assigned = self.flow_assigned_types(read.root, read.subject);
         let types = assigned.map_or(&[][..], |assigned| assigned.types(self.db).as_ref());
-        let mut unit = None;
-        let mut is_unit = |ty: &TypeData<'db>| {
-            matches!(ty, TypeData::Null | TypeData::Undefined) && *unit.get_or_insert(*ty) == *ty
-        };
         match evolving {
             FlowEvolving::Variable => {
                 if types.iter().all(|ty| {
                     matches!(ty, TypeData::Null | TypeData::Undefined | TypeData::Unknown)
-                }) {
-                    if types.contains(&TypeData::Unknown)
-                        || self
-                            .js_info
-                            .flow
-                            .root(read.root)?
-                            .has_valueless_write(read.subject)
-                    {
-                        return Some(TypeData::Unknown);
-                    }
-                    // A path that doesn't pass the declarator of a `var`
-                    // gives `undefined`, which a declared type of `null`
-                    // lacks.
-                    if types.iter().all(is_unit)
-                        && (unit != Some(TypeData::Null)
-                            || !self
-                                .js_info
-                                .flow
-                                .root(read.root)?
-                                .hoisted
-                                .contains(&read.subject))
-                    {
-                        return None;
-                    }
+                }) && (types.contains(&TypeData::Unknown)
+                    || self
+                        .js_info
+                        .flow
+                        .root(read.root)?
+                        .has_valueless_write(read.subject))
+                {
+                    return Some(TypeData::Unknown);
                 }
             }
             FlowEvolving::Array => {
-                if types
-                    .iter()
-                    .all(|ty| *ty == TypeData::Unknown || is_unit(ty))
+                if types.iter().all(|ty| *ty == TypeData::Unknown)
                     && self
                         .js_info
                         .flow
@@ -1521,7 +1492,7 @@ impl<'db> ResolutionCtx<'db, '_> {
             // subtype of TypeScript's type. A subtype is assignable to every
             // member that TypeScript's type is assignable to, so the reduction
             // never gives a narrower type than TypeScript's.
-            FlowAssignedValue::Expression(range) => {
+            FlowAssignedValue::Expression(range) | FlowAssignedValue::BooleanLiteral(range) => {
                 let reference = self.js_info.raw_expressions.get(&range)?.clone();
                 let ty = self.resolve(&reference);
                 // TypeScript widens the literal types of the properties of an
@@ -3210,10 +3181,20 @@ impl<'db> ResolutionCtx<'db, '_> {
                 }),
             None => Some(TypeData::Undefined),
         };
+        let is_boolean_literal = value
+            .and_then(|value| root.assigned.get(value as usize))
+            .is_some_and(|assigned| {
+                matches!(assigned.value, FlowAssignedValue::BooleanLiteral(_))
+                    && assigned.steps.is_empty()
+            });
         let narrowed = match assigned {
-            Some(assigned) => {
-                narrow_by_assignment(self.db, declared, assigned, self.narrowing_resolver())
-            }
+            Some(assigned) => narrow_by_assignment(
+                self.db,
+                declared,
+                assigned,
+                is_boolean_literal,
+                self.narrowing_resolver(),
+            ),
             None => declared,
         };
         solve.writes.insert(index, narrowed);

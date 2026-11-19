@@ -5,10 +5,10 @@ expression: invalidEvaluationOrder.ts
 # Input
 ```ts
 // should generate diagnostics
-// The key and the arguments after `?.` see its object as not nullish, the
-// defaults of destructuring patterns and parameters see the narrowing before
-// them, and the right operand of a logical assignment sees the test of its
-// target, as in TypeScript.
+// The key and the arguments after `?.` see its object as not nullish, also
+// after a non-null assertion in the chain, the defaults of destructuring
+// patterns and parameters see the narrowing before them, and the right operand
+// of a logical assignment sees the test of its target, as in TypeScript.
 
 type Options = { v: string | null; w: number; f(value: unknown): void };
 
@@ -18,6 +18,10 @@ function receiverInArguments(o: Options | undefined) {
 
 function receiverInLaterLink(o: { g(): Options } | undefined) {
 	o?.g().f(o?.g);
+}
+
+function receiverAfterNonNullAssertion(o: { inner?: Options } | undefined) {
+	o?.inner!.f(o?.inner);
 }
 
 function parameterDefault(o: Options | undefined, w = o && o?.w) {
@@ -90,25 +94,49 @@ invalidEvaluationOrder.ts:14:11 lint/suspicious/noUnnecessaryConditions ━━�
 ```
 
 ```
-invalidEvaluationOrder.ts:17:60 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidEvaluationOrder.ts:18:14 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unnecessary optional chaining.
   
-    15 │ }
-    16 │ 
-  > 17 │ function parameterDefault(o: Options | undefined, w = o && o?.w) {
+    17 │ function receiverAfterNonNullAssertion(o: { inner?: Options } | undefined) {
+  > 18 │ 	o?.inner!.f(o?.inner);
+       │ 	            ^
+    19 │ }
+    20 │ 
+  
+  i Replace ?. with ..
+  
+    17 │ function receiverAfterNonNullAssertion(o: { inner?: Options } | undefined) {
+  > 18 │ 	o?.inner!.f(o?.inner);
+       │ 	             ^^
+    19 │ }
+    20 │ 
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+invalidEvaluationOrder.ts:21:60 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    19 │ }
+    20 │ 
+  > 21 │ function parameterDefault(o: Options | undefined, w = o && o?.w) {
        │                                                            ^
-    18 │ 	return w;
-    19 │ }
+    22 │ 	return w;
+    23 │ }
   
   i Replace ?. with ..
   
-    15 │ }
-    16 │ 
-  > 17 │ function parameterDefault(o: Options | undefined, w = o && o?.w) {
+    19 │ }
+    20 │ 
+  > 21 │ function parameterDefault(o: Options | undefined, w = o && o?.w) {
        │                                                             ^^
-    18 │ 	return w;
-    19 │ }
+    22 │ 	return w;
+    23 │ }
   
   i The receiver is guaranteed to be non-nullish.
   
@@ -116,25 +144,25 @@ invalidEvaluationOrder.ts:17:60 lint/suspicious/noUnnecessaryConditions ━━�
 ```
 
 ```
-invalidEvaluationOrder.ts:23:15 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidEvaluationOrder.ts:27:15 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unnecessary optional chaining.
   
-    21 │ function destructuringDefault(o: Options | undefined, source: { a?: number }) {
-    22 │ 	if (o) {
-  > 23 │ 		const { a = o?.w } = source;
+    25 │ function destructuringDefault(o: Options | undefined, source: { a?: number }) {
+    26 │ 	if (o) {
+  > 27 │ 		const { a = o?.w } = source;
        │ 		            ^
-    24 │ 		return a;
-    25 │ 	}
+    28 │ 		return a;
+    29 │ 	}
   
   i Replace ?. with ..
   
-    21 │ function destructuringDefault(o: Options | undefined, source: { a?: number }) {
-    22 │ 	if (o) {
-  > 23 │ 		const { a = o?.w } = source;
+    25 │ function destructuringDefault(o: Options | undefined, source: { a?: number }) {
+    26 │ 	if (o) {
+  > 27 │ 		const { a = o?.w } = source;
        │ 		             ^^
-    24 │ 		return a;
-    25 │ 	}
+    28 │ 		return a;
+    29 │ 	}
   
   i The receiver is guaranteed to be non-nullish.
   
@@ -142,23 +170,23 @@ invalidEvaluationOrder.ts:23:15 lint/suspicious/noUnnecessaryConditions ━━�
 ```
 
 ```
-invalidEvaluationOrder.ts:32:14 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidEvaluationOrder.ts:36:14 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unnecessary optional chaining.
   
-    31 │ function logicalAssignmentDiscriminant(s: Empty | Named) {
-  > 32 │ 	s.kind ||= (s.options?.f(0), "named");
+    35 │ function logicalAssignmentDiscriminant(s: Empty | Named) {
+  > 36 │ 	s.kind ||= (s.options?.f(0), "named");
        │ 	            ^^^^^^^^^
-    33 │ }
-    34 │ 
+    37 │ }
+    38 │ 
   
   i Replace ?. with ..
   
-    31 │ function logicalAssignmentDiscriminant(s: Empty | Named) {
-  > 32 │ 	s.kind ||= (s.options?.f(0), "named");
+    35 │ function logicalAssignmentDiscriminant(s: Empty | Named) {
+  > 36 │ 	s.kind ||= (s.options?.f(0), "named");
        │ 	                     ^^
-    33 │ }
-    34 │ 
+    37 │ }
+    38 │ 
   
   i The receiver is guaranteed to be non-nullish.
   

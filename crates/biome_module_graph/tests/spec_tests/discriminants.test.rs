@@ -1138,10 +1138,11 @@ fn discriminants_held_at_the_top_level_follow_exports() {
 // `Circle` or the first tuple. A test inside a `switch`, a `for...of` loop,
 // or a closure that reads the variables of its enclosing function narrows as
 // anywhere else, so Biome also gives `Circle` at `inSwitch`, `forOf`,
-// `closure`, and `patternClosure`. Biome keeps the declared type at the
-// other reads, because it doesn't follow `s!` and keys that are spelled
-// differently from the property, and a `const` exported by an
-// `export { ... }` list holds nothing.
+// `closure`, and `patternClosure`, and a template literal without
+// substitutions names the property it spells, so `template` gives `Circle`.
+// Biome keeps the declared type at the other reads, because it doesn't
+// follow `s!` and keys that are spelled differently from the property, and a
+// `const` exported by an `export { ... }` list holds nothing.
 #[test]
 fn discriminant_constants_that_biome_does_not_follow_keep_the_object() {
     assert_reads(
@@ -1171,7 +1172,7 @@ fn discriminant_constants_that_biome_does_not_follow_keep_the_object() {
                 "t",
                 &["[string: a, number]", "[string: b, string]"],
             ),
-            ("template", "s", &["Circle", "Square"]),
+            ("template", "s", &["Circle"]),
             ("escapedStringKey", "s", &["Circle", "Square"]),
             ("patternClosure", "s", &["Circle"]),
             (
@@ -1448,7 +1449,7 @@ fn aliased_conditions_narrow_destructured_elements() {
 // A destructured element that is tested itself starts from its property on the
 // narrowed pattern, and so does an optional property, which keeps `undefined`.
 // Destructuring throws on `null` and `undefined`, so the pattern narrows as if
-// its initializer had neither.
+// its initializer had neither, as for a non-null assertion.
 #[test]
 fn destructured_elements_start_from_the_narrowed_pattern() {
     assert_element_reads(
@@ -1459,12 +1460,21 @@ fn destructured_elements_start_from_the_narrowed_pattern() {
         function optional(o: O) { const { kind, v } = o; if (kind === "c") /*optional*/v; }
         function narrowedInitializer(s: S | undefined) { if (!s) return; const { kind, v } = s; if (kind === "c") /*narrowedInitializer*/v; }
         function nullish(s: S | undefined) { const { kind, v } = s ?? g; if (kind === "c") /*nullish*/v; }
+        function nonNull(s: S | undefined) { const { kind, v } = s!; if (kind === "c") /*nonNull*/v; /*nonNullKind*/kind; }
+        function nonNullElement(s: S | undefined) { const { kind, v } = s!; /*nonNullElement*/v; }
+        function nonNullTuple(t: ["a", number] | ["b", string] | undefined) { const [k, x] = t!; if (k === "a") /*nonNullTuple*/x; }
+        function parenthesizedNonNull(s: S | null) { const { kind, v } = (s)!; if (kind === "c") /*parenthesizedNonNull*/v; }
         "#,
         &[
             ("tested", "v", &["string"]),
             ("optional", "v", &["number", "undefined"]),
             ("narrowedInitializer", "v", &["number"]),
             ("nullish", "v", &["number"]),
+            ("nonNull", "v", &["number"]),
+            ("nonNullKind", "kind", &["string: c", "string: s"]),
+            ("nonNullElement", "v", &["number", "string"]),
+            ("nonNullTuple", "x", &["number"]),
+            ("parenthesizedNonNull", "v", &["number"]),
         ],
     );
 }
@@ -1531,10 +1541,10 @@ fn destructured_elements_that_do_not_narrow_each_other() {
 // narrows the pattern as `===` does, so `loose` gives `number`. Biome keeps
 // the declared type at `enclosingDefault`, because an element under a
 // default of an enclosing pattern never narrows because its declared type
-// ignores the default. Biome also gives the declared type `unknown`, which no test
-// narrows, to an element destructured from `s!`, a parameter destructured in
-// a function that a variable annotation types, and the parameters of a
-// function typed by a rest parameter whose type is a union of tuples.
+// ignores the default. Biome also gives the declared type `unknown`, which no
+// test narrows, to a parameter destructured in a function that a variable
+// annotation types, and the parameters of a function typed by a rest
+// parameter whose type is a union of tuples.
 #[test]
 fn destructured_elements_that_biome_does_not_narrow_yet() {
     assert_element_reads(
@@ -1543,7 +1553,6 @@ fn destructured_elements_that_biome_does_not_narrow_yet() {
         function enclosingDefault(w: { a?: S }) { const { a: { kind, v } = g } = w; if (kind === "c") /*enclosingDefault*/v; }
         function closure(s: S) { const { kind, v } = s; const h = () => { if (kind === "c") /*closure*/v; }; }
 
-        function nonNull(s: S | undefined) { const { kind, v } = s!; if (kind === "c") /*nonNull*/v; }
         const contextual: (s: S) => void = ({ kind, v }) => { if (kind === "c") /*contextual*/v; };
         const dependent: (...args: ["a", number] | ["b", string]) => void = (k, x) => { if (k === "a") /*dependent*/x; };
         "#,
@@ -1551,7 +1560,6 @@ fn destructured_elements_that_biome_does_not_narrow_yet() {
             ("loose", "v", &["number"]),
             ("enclosingDefault", "v", &["number", "string"]),
             ("closure", "v", &["number"]),
-            ("nonNull", "v", &["unknown"]),
             ("contextual", "v", &["unknown"]),
             ("dependent", "x", &["unknown"]),
         ],

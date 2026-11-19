@@ -42,3 +42,10 @@ function rest(...[state, data]: ["loaded", { size: number }] | ["failed", null])
 		return data?.size;
 	}
 }
+
+function asserted(result: Result | undefined) {
+	const { state, data } = result!;
+	if (state === "loaded") {
+		return data?.size;
+	}
+}

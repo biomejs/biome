@@ -6,7 +6,8 @@ expression: invalidVariableKinds.ts
 ```ts
 // A `var`, a module variable, and a parameter of an enclosing function
 // narrow by the tests and writes of the function that reads them, as in
-// TypeScript, so each condition below can't change.
+// TypeScript, which assumes a `var` without an initializer assigned there, so
+// each condition below can't change.
 
 interface Timer {
 	cancel(): void;
@@ -41,29 +42,37 @@ function parameter(timer: Timer | null) {
 	};
 }
 
+var pending: Timer | null;
+
+function declaredWithoutValue() {
+	if (pending !== null) {
+		pending?.cancel();
+	}
+}
+
 ```
 
 # Diagnostics
 ```
-invalidVariableKinds.ts:16:2 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidVariableKinds.ts:17:2 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unnecessary optional chaining.
   
-    14 │ function hoisted() {
-    15 │ 	var timer: Timer | null = make();
-  > 16 │ 	timer?.cancel();
+    15 │ function hoisted() {
+    16 │ 	var timer: Timer | null = make();
+  > 17 │ 	timer?.cancel();
        │ 	^^^^^
-    17 │ }
-    18 │ 
+    18 │ }
+    19 │ 
   
   i Replace ?. with ..
   
-    14 │ function hoisted() {
-    15 │ 	var timer: Timer | null = make();
-  > 16 │ 	timer?.cancel();
+    15 │ function hoisted() {
+    16 │ 	var timer: Timer | null = make();
+  > 17 │ 	timer?.cancel();
        │ 	     ^^
-    17 │ }
-    18 │ 
+    18 │ }
+    19 │ 
   
   i The receiver is guaranteed to be non-nullish.
   
@@ -71,25 +80,25 @@ invalidVariableKinds.ts:16:2 lint/suspicious/noUnnecessaryConditions ━━━�
 ```
 
 ```
-invalidVariableKinds.ts:21:3 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidVariableKinds.ts:22:3 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unnecessary optional chaining.
   
-    19 │ function enclosing() {
-    20 │ 	if (current !== null) {
-  > 21 │ 		current?.cancel();
+    20 │ function enclosing() {
+    21 │ 	if (current !== null) {
+  > 22 │ 		current?.cancel();
        │ 		^^^^^^^
-    22 │ 	}
-    23 │ }
+    23 │ 	}
+    24 │ }
   
   i Replace ?. with ..
   
-    19 │ function enclosing() {
-    20 │ 	if (current !== null) {
-  > 21 │ 		current?.cancel();
+    20 │ function enclosing() {
+    21 │ 	if (current !== null) {
+  > 22 │ 		current?.cancel();
        │ 		       ^^
-    22 │ 	}
-    23 │ }
+    23 │ 	}
+    24 │ }
   
   i The receiver is guaranteed to be non-nullish.
   
@@ -97,25 +106,25 @@ invalidVariableKinds.ts:21:3 lint/suspicious/noUnnecessaryConditions ━━━�
 ```
 
 ```
-invalidVariableKinds.ts:27:2 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidVariableKinds.ts:28:2 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unnecessary optional chaining.
   
-    25 │ function writes() {
-    26 │ 	current = make();
-  > 27 │ 	current?.cancel();
+    26 │ function writes() {
+    27 │ 	current = make();
+  > 28 │ 	current?.cancel();
        │ 	^^^^^^^
-    28 │ }
-    29 │ 
+    29 │ }
+    30 │ 
   
   i Replace ?. with ..
   
-    25 │ function writes() {
-    26 │ 	current = make();
-  > 27 │ 	current?.cancel();
+    26 │ function writes() {
+    27 │ 	current = make();
+  > 28 │ 	current?.cancel();
        │ 	       ^^
-    28 │ }
-    29 │ 
+    29 │ }
+    30 │ 
   
   i The receiver is guaranteed to be non-nullish.
   
@@ -123,25 +132,51 @@ invalidVariableKinds.ts:27:2 lint/suspicious/noUnnecessaryConditions ━━━�
 ```
 
 ```
-invalidVariableKinds.ts:33:4 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidVariableKinds.ts:34:4 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unnecessary optional chaining.
   
-    31 │ 	return () => {
-    32 │ 		if (timer) {
-  > 33 │ 			timer?.cancel();
+    32 │ 	return () => {
+    33 │ 		if (timer) {
+  > 34 │ 			timer?.cancel();
        │ 			^^^^^
-    34 │ 		}
-    35 │ 	};
+    35 │ 		}
+    36 │ 	};
   
   i Replace ?. with ..
   
-    31 │ 	return () => {
-    32 │ 		if (timer) {
-  > 33 │ 			timer?.cancel();
+    32 │ 	return () => {
+    33 │ 		if (timer) {
+  > 34 │ 			timer?.cancel();
        │ 			     ^^
-    34 │ 		}
-    35 │ 	};
+    35 │ 		}
+    36 │ 	};
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+invalidVariableKinds.ts:43:3 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    41 │ function declaredWithoutValue() {
+    42 │ 	if (pending !== null) {
+  > 43 │ 		pending?.cancel();
+       │ 		^^^^^^^
+    44 │ 	}
+    45 │ }
+  
+  i Replace ?. with ..
+  
+    41 │ function declaredWithoutValue() {
+    42 │ 	if (pending !== null) {
+  > 43 │ 		pending?.cancel();
+       │ 		       ^^
+    44 │ 	}
+    45 │ }
   
   i The receiver is guaranteed to be non-nullish.
   

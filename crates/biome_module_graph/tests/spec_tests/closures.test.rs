@@ -953,20 +953,35 @@ fn inline_functions_that_biome_narrows_less() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives `string` at `v`, by the check in
-// `g`. Biome keeps the declared type of a `var` that the top level of a
-// module declares without an initializer, also in a function that checks it.
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the type in its
+// comment. A function nested in the code that declares a `var` assumes it
+// assigned, also when it has no initializer and nothing writes it. It doesn't
+// assume so for such a `let`, and TypeScript reports TS2454 at its reads and
+// gives them the declared type.
 #[test]
-fn functions_read_a_top_level_var_without_an_initializer() {
+fn functions_assume_a_var_of_the_code_around_them_assigned() {
     assert_reads(
         r#"
         var v: string | null;
         function g() { if (v !== null) /*v*/v; }
+        function outer() {
+            var w: string | null;
+            function inner() { if (w !== null) /*w*/w; }
+            const arrow = () => { if (w !== null) /*arrow*/w; };
+            let l: string | null;
+            function letInner() { if (l !== null) /*l*/l; }
+        }
         export {};
         "#,
         &[
             // TypeScript: `string`.
-            ("v", "v", &["null", "string"]),
+            ("v", "v", &["string"]),
+            // TypeScript: `string`.
+            ("w", "w", &["string"]),
+            // TypeScript: `string`.
+            ("arrow", "w", &["string"]),
+            // TypeScript: `string | null`, with TS2454.
+            ("l", "l", &["null", "string"]),
         ],
     );
 }

@@ -6,7 +6,9 @@ expression: invalidEvolvingTypes.ts
 ```ts
 // A `let` declared without an initializer, or with `null` or `undefined`,
 // takes its type from the values that the code assigns to it, as in
-// TypeScript, so each condition below can't change.
+// TypeScript, and is `undefined` before any of them, and an array that starts
+// empty takes the types of the values added to it, so each condition below
+// can't change.
 
 interface Timer {
 	cancel(): void;
@@ -26,29 +28,49 @@ function initializedWithNull() {
 	timer?.cancel();
 }
 
+function clearedOnly() {
+	let timer;
+	timer = null;
+	if (timer) {
+	}
+}
+
+function neverAssigned() {
+	let timer;
+	if (timer) {
+	}
+}
+
+function onlyNulls() {
+	const slots = [];
+	slots.push(null);
+	if (slots[0]) {
+	}
+}
+
 ```
 
 # Diagnostics
 ```
-invalidEvolvingTypes.ts:14:2 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidEvolvingTypes.ts:16:2 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unnecessary optional chaining.
   
-    12 │ 	let timer;
-    13 │ 	timer = make();
-  > 14 │ 	timer?.cancel();
+    14 │ 	let timer;
+    15 │ 	timer = make();
+  > 16 │ 	timer?.cancel();
        │ 	^^^^^
-    15 │ }
-    16 │ 
+    17 │ }
+    18 │ 
   
   i Replace ?. with ..
   
-    12 │ 	let timer;
-    13 │ 	timer = make();
-  > 14 │ 	timer?.cancel();
+    14 │ 	let timer;
+    15 │ 	timer = make();
+  > 16 │ 	timer?.cancel();
        │ 	     ^^
-    15 │ }
-    16 │ 
+    17 │ }
+    18 │ 
   
   i The receiver is guaranteed to be non-nullish.
   
@@ -56,27 +78,84 @@ invalidEvolvingTypes.ts:14:2 lint/suspicious/noUnnecessaryConditions ━━━�
 ```
 
 ```
-invalidEvolvingTypes.ts:20:2 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidEvolvingTypes.ts:22:2 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unnecessary optional chaining.
   
-    18 │ 	let timer = null;
-    19 │ 	timer = make();
-  > 20 │ 	timer?.cancel();
+    20 │ 	let timer = null;
+    21 │ 	timer = make();
+  > 22 │ 	timer?.cancel();
        │ 	^^^^^
-    21 │ }
-    22 │ 
+    23 │ }
+    24 │ 
   
   i Replace ?. with ..
   
-    18 │ 	let timer = null;
-    19 │ 	timer = make();
-  > 20 │ 	timer?.cancel();
+    20 │ 	let timer = null;
+    21 │ 	timer = make();
+  > 22 │ 	timer?.cancel();
        │ 	     ^^
-    21 │ }
-    22 │ 
+    23 │ }
+    24 │ 
   
   i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+invalidEvolvingTypes.ts:28:6 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition is always falsy.
+  
+    26 │ 	let timer;
+    27 │ 	timer = null;
+  > 28 │ 	if (timer) {
+       │ 	    ^^^^^
+    29 │ 	}
+    30 │ }
+  
+  i The value's type can never be truthy, so this check is redundant.
+  
+  i Remove the condition and the code it guards, or check the value you meant to test.
+  
+
+```
+
+```
+invalidEvolvingTypes.ts:34:6 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition is always falsy.
+  
+    32 │ function neverAssigned() {
+    33 │ 	let timer;
+  > 34 │ 	if (timer) {
+       │ 	    ^^^^^
+    35 │ 	}
+    36 │ }
+  
+  i The value's type can never be truthy, so this check is redundant.
+  
+  i Remove the condition and the code it guards, or check the value you meant to test.
+  
+
+```
+
+```
+invalidEvolvingTypes.ts:41:6 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition is always falsy.
+  
+    39 │ 	const slots = [];
+    40 │ 	slots.push(null);
+  > 41 │ 	if (slots[0]) {
+       │ 	    ^^^^^^^^
+    42 │ 	}
+    43 │ }
+  
+  i The value's type can never be truthy, so this check is redundant.
+  
+  i Remove the condition and the code it guards, or check the value you meant to test.
   
 
 ```

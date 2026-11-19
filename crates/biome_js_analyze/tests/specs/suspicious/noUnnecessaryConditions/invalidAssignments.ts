@@ -37,3 +37,9 @@ class Scheduler {
 		this.timer?.cancel();
 	}
 }
+
+function enabled() {
+	let ready: boolean | undefined = true;
+	if (ready) {
+	}
+}

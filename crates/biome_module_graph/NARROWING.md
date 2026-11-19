@@ -96,6 +96,7 @@ right operand of a logical assignment. Biome splits a condition through `!`,
 | `every` | `xs: (string \| number)[]; if (xs.every(isString)) xs` | `string[]` |
 | `filter` and `find` | `xs: (string \| undefined)[]; xs.filter((x) => x !== undefined)` | `string[]` |
 | An optional chain | `x: { y: number } \| undefined; if (x?.y === -1) x` | `{ y: number }` |
+| The key and the arguments after `?.`, also after `!` | `x: { a?: { b(v: unknown): void } } \| undefined; x?.a!.b(x)` | `{ a?: { b(v: unknown): void } }` at the argument |
 
 A type-guard function selects its overload by the types of the arguments at
 the call, which a check before the call can narrow. Literal type arguments
@@ -140,8 +141,10 @@ Biome writes `{ b: 1 } & Record<"a", unknown>` as `{ b: 1; a: unknown }`, and
 | `switch (true)` | `x: string \| number \| null; switch (true) { case typeof x === "string": break; case x === null: break; default: x }` | `number` |
 | An exhaustive `switch` | `x: boolean \| null \| undefined; y: string \| null; switch (x) { case true: case false: case null: case undefined: if (y === null) return; } y` | `string` |
 | An assignment | `x: string \| number; [x] = ["a"]; x` | `string` |
+| A `true` or `false` literal assigned to a union with `boolean` | `let b: boolean \| undefined = true; b` | `true` |
 | A declarator with a type annotation | `const { a }: { a: string \| number } = { a: 1 }; a` | `number` |
 | A `let` without a type annotation | `let x = null; if (c) x = 1; x` | `null \| number` |
+| A `let` without an initializer, before a write | `let x; x` | `undefined` |
 | An array without a type annotation | `let a = []; a.push(1); a` | `number[]` |
 | An assertion function | `assertString(v: unknown): asserts v is string; x: string \| number; (assertString(x), x)` | `string` at the last `x` |
 | A function that returns `never` | `fail(): never; x: string \| null; if (x === null) fail(); x` | `string` |
@@ -274,7 +277,6 @@ result is wider unless the effect says otherwise, so a rule can miss a report.
 | --- | --- | --- | --- |
 | `var x: string \| number = 1; var x: string \| number = "a"; x` | `string` | `string \| number` | `noUnnecessaryConditions` can miss an unnecessary check of `x`. |
 | `x: any; if (typeof x.v === "string") x.v` | `any` | Unknown | A rule can miss a report on `x.v`. |
-| `try { g(); } catch ({ message }) { message }` | `any`, with an error | Unknown | A rule can miss a report on `message`. |
 | `xs: AsyncIterable<string \| null>; for await (const v of xs) { if (v) v }` | `string` | Unknown | A rule can miss a report on `v`. |
 | `o: { a?: string \| number }; const { a = 0 } = o; if (typeof a === "string") a` | `string` | `string \| number` | `noUnnecessaryConditions` can miss an unnecessary check of `a`. |
 | `x: string; x !== null ? 1 : x` | `1` | Unknown | A rule can miss a report on the conditional. |
@@ -291,7 +293,6 @@ reports in it.
 | Code | TypeScript | Biome | Effect on rules |
 | --- | --- | --- | --- |
 | `let top: string \| null = f(); if (top) () => top`, at the top level of a module | `string` | `string \| null` | `noUnnecessaryConditions` can miss an unnecessary check of `top` in the closure. |
-| `var v: string \| null; function f() { if (v !== null) v }` | `string` | `string \| null` | `noUnnecessaryConditions` can miss an unnecessary check of `v`. |
 | `x: string \| number; ((y) => { y })(x)` | `string \| number` | Unknown | A rule can miss a report on `y`. |
 
 ### Writes
@@ -300,14 +301,18 @@ reports in it.
 | --- | --- | --- | --- |
 | `x: string \| null; let y: string \| null = f(); if (x) { y = x; y }` | `string` | `string \| null` | `noUnnecessaryConditions` can miss an unnecessary check of `y`. |
 | `class K { m() { return 1; } }; k: K; let x: number \| undefined = k.m(); x` | `number` | `number \| undefined` | `noUnnecessaryConditions` can miss an unnecessary `?.` on `x`. |
-| `let b: boolean \| undefined = true; b` | `true` | `boolean` | `noUnnecessaryConditions` can miss that `b` is always `true`. |
+| `let b: boolean = true; b` | `true` | `boolean` | `noUnnecessaryConditions` can miss that `b` is always `true`. |
+| `const T = true; let b: boolean \| undefined = T; b` | `true` | `boolean` | `noUnnecessaryConditions` can miss that `b` is always `true`. |
 | `let x: number \| string = 1; x = x + 1; x` | `number` | `number \| string` | A rule can miss that `x` is a number. |
 | `xs: string[]; let x: string \| number = 1; [x] = xs; x` | `string` | `string \| number` | `noUnnecessaryConditions` can miss an unnecessary check of `x`. |
 
-A write assigns the type of its value without narrowing. A destructuring
-target keeps its declared type when it reads an element of an array, as in
-`[x] = xs` and `[[x]] = [["a"]]`, or when its default supplies the value, as
-in `[x = 1] = []`. A call reduces the assigned type only when its callee has a
+A write assigns the type of its value without narrowing. Only a `true` or
+`false` literal, in parentheses or not, narrows a `boolean` member of the
+declared union, because Biome gives some comparisons, as `1 === 1`, the type
+`true`, where TypeScript gives `boolean`. A destructuring target keeps its
+declared type when it reads an element of an array, as in `[x] = xs` and
+`[[x]] = [["a"]]`, or when its default supplies the value, as in
+`[x = 1] = []`. A call reduces the assigned type only when its callee has a
 return type annotation or is a local function whose returned values Biome can
 type. A value that a declaration file types as `typeof` a function, as
 `declare const f: typeof impl`, has a return type annotation only when that
@@ -324,10 +329,7 @@ their writes, as in TypeScript. The code below uses
 | --- | --- | --- | --- |
 | `let x = null; x = store.load(); x` | `number` | Unknown | A rule can miss a report on `x`. |
 | `let x = null; x = 0; x++; x` | `number` | Unknown | A rule can miss a report on `x`. |
-| `let x; x = null; x` | `null` | Unknown | A rule can miss a report on `x`. |
-| `let x; x` | `undefined` | Unknown | A rule can miss a report on `x`. |
 | `let a = []; a.push(1); if (c) a = null; a` | `any[]`, with an error | Unknown | A rule can miss a report on `a`. |
-| `const a = []; a.push(null); a` | `null[]` | `unknown[]` | A rule can miss a report on the elements of `a`. |
 | `let a = []; a.push(1); a.push(store.load()); a` | `number[]` | `unknown[]` | A rule can miss a report on the elements of `a`. |
 | `var v = null; function read() { return v; } v = "a";`, the read in `read` | `any`, with an error | Unknown | A rule can miss a report on `v`. |
 | `let w = null; function read() { w } function write() { w = 1; }`, the read in `read` | `any`, with an error | `null \| 1` | Rules see the values that the writes assign, where TypeScript reports an implicit `any`. |
@@ -347,14 +349,14 @@ in TypeScript, and an array is Unknown there.
 
 | Code | TypeScript | Biome | Effect on rules |
 | --- | --- | --- | --- |
-| ``o: { a: string \| null }; if (o[`a`]) o.a`` | `string` | `string \| null` | `noUnnecessaryConditions` can miss an unnecessary check of `o.a`. |
 | `x: { z?: { w: string } } \| undefined; if ((x?.z)?.w) x` | `{ z?: { w: string } }` | `{ z?: { w: string } } \| undefined` | `noUnnecessaryConditions` can miss an unnecessary `?.` on `x`. |
 | `o: { v: string \| null }; if (o.v) o.v; o!.v = null;` | `string` | `string \| null` | `noUnnecessaryConditions` can miss an unnecessary check of `o.v`. |
 
 A write through `o!.v` or `(o as T).v` stops `o.v` from narrowing anywhere in
-the function, also before the write. Only a string literal without escapes or
-a decimal integer literal from 0 to 2^53 - 1 is a key of a path, as `o["v"]`
-or `t[0]`.
+the function, also before the write. Only a string literal or a template
+literal without substitutions, neither with escapes, or a decimal integer
+literal from 0 to 2^53 - 1 is a key of a path, as `o["v"]`, ``o[`v`]``, or
+`t[0]`.
 
 ### `this`
 
@@ -374,7 +376,6 @@ These rows use `type S = { kind: "c"; v: number } | { kind: "s"; v: string }`.
 
 | Code | TypeScript | Biome | Effect on rules |
 | --- | --- | --- | --- |
-| `s: S \| undefined; const { kind, v } = s!; if (kind === "c") v` | `number` | Unknown | A rule can miss a report on `v`. |
 | `const f: (s: S) => void = ({ kind, v }) => { if (kind === "c") v }` | `number` | Unknown | A rule can miss a report on `v`. |
 | `const f: (...args: ["a", number] \| ["b", string]) => void = (k, x) => { if (k === "a") x }` | `number` | Unknown | A rule can miss a report on `x`. |
 
@@ -472,13 +473,13 @@ or a computed key.
 | `x: string \| number; if (isFoo(x)) x` | `(string \| number) & Foo` | `string \| number` | A rule can miss a report on `x`. |
 | `interface Same { a: number }; x: Same \| Bar; if (isFoo(x)) {} else x` | `Bar` | `Same \| Bar` | `noUnnecessaryConditions` can miss an unnecessary check of `x`. |
 | `isObj(v: unknown): v is {}; x: unknown; if (isObj(x)) {} else x` | `null \| undefined` | `unknown` | `noUnnecessaryConditions` can miss an unnecessary check of `x`. |
-| `x: string \| number; return (assertString(x), x)` | `string` | `string \| number` | A rule can miss a report on the returned `x`. |
 | `x: { y: string \| number } \| undefined; if (isString(x?.y)) x` | `{ y: string \| number }` | `{ y: string \| number } \| undefined` | `noUnnecessaryConditions` can miss an unnecessary `?.` on `x`. |
 
 Biome skips an earlier overload only when no narrowing could make it accept
 the arguments, and narrows only the true branch where TypeScript might infer
 a type argument differently, as from `y` in the fourth row. A call asserts or
-ends a path only as a statement, when every name along the callee has an
+ends a path only as a statement or as an operand of the comma operator, as
+`return (assertString(x), x)`, when every name along the callee has an
 explicit type, as TypeScript requires.
 
 ### Inferred type predicates
@@ -498,7 +499,6 @@ only statement, a `return`.
 | Code | TypeScript | Biome | Effect on rules |
 | --- | --- | --- | --- |
 | `x: T, with T extends null; switch (x) { case null: break; default: x }` | `never` | `T` | A rule can miss that `default` never runs. |
-| `x: { a?: { b(v: unknown): void } } \| undefined; x?.a!.b(x)`, the argument | `{ a?: { b(v: unknown): void } }` | `{ a?: { b(v: unknown): void } } \| undefined` | A rule can miss a report on the argument. |
 | `interface O6 { f(x: string): 2; f(x: "a"): 1 }; o6: O6; o6.f("a")` | `1` | `2` | Disjoint: `noUnnecessaryConditions` can report `case 1:` on the result as never matching. |
 
 Biome tries the overloads of one declaration in their written order, where

@@ -188,6 +188,14 @@ const annotatedObjectMethod = {
 
 (() => value)();
 
+function returnsDestructuredCatchVariable() {
+	try {
+		return "";
+	} catch ({ message }) {
+		return message;
+	}
+}
+
 ```
 
 # Diagnostics
@@ -1075,6 +1083,28 @@ invalid.ts:183:8 lint/nursery/noUnsafeReturn ━━━━━━━━━━━�
   > 183 │ (() => value)();
         │        ^^^^^
     184 │ 
+    185 │ function returnsDestructuredCatchVariable() {
+  
+  i TypeScript doesn't check values of type any, so callers can misuse the returned value without any error.
+  
+  i Give the returned value a specific type. If the type isn't known in advance, use unknown instead, which requires callers to check the value before using it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:189:3 lint/nursery/noUnsafeReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function returns a value of type any.
+  
+    187 │ 		return "";
+    188 │ 	} catch ({ message }) {
+  > 189 │ 		return message;
+        │ 		^^^^^^^^^^^^^^^
+    190 │ 	}
+    191 │ }
   
   i TypeScript doesn't check values of type any, so callers can misuse the returned value without any error.
   

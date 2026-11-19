@@ -1,8 +1,8 @@
 // should generate diagnostics
-// The key and the arguments after `?.` see its object as not nullish, the
-// defaults of destructuring patterns and parameters see the narrowing before
-// them, and the right operand of a logical assignment sees the test of its
-// target, as in TypeScript.
+// The key and the arguments after `?.` see its object as not nullish, also
+// after a non-null assertion in the chain, the defaults of destructuring
+// patterns and parameters see the narrowing before them, and the right operand
+// of a logical assignment sees the test of its target, as in TypeScript.
 
 type Options = { v: string | null; w: number; f(value: unknown): void };
 
@@ -12,6 +12,10 @@ function receiverInArguments(o: Options | undefined) {
 
 function receiverInLaterLink(o: { g(): Options } | undefined) {
 	o?.g().f(o?.g);
+}
+
+function receiverAfterNonNullAssertion(o: { inner?: Options } | undefined) {
+	o?.inner!.f(o?.inner);
 }
 
 function parameterDefault(o: Options | undefined, w = o && o?.w) {

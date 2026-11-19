@@ -1009,9 +1009,10 @@ fn named_binding(qualifier: &TypeReferenceQualifier, model: &SemanticModel) -> O
 /// returns, or returns `None` when it narrows nothing.
 ///
 /// A statement call is the expression of an expression statement, or an
-/// operand of the comma operator there, without parentheses around it. These
-/// are the calls that TypeScript adds to the flow. For example,
-/// `(assert(x));` is none, while `(assert(x), 0);` is one.
+/// operand of the comma operator anywhere, without parentheses around it.
+/// These are the calls that TypeScript adds to the flow. For example,
+/// `(assert(x));` is none, while `(assert(x), 0);` and
+/// `return (assert(x), x);` have one.
 ///
 /// A call of a local assertion function applies its contract here, as
 /// [`GuardFunctions::guard`] reads it. `asserts value is T` tests an argument
@@ -5006,7 +5007,7 @@ mod tests {
                 "const { [`kind`]: k } = value;",
                 "k === 'a'",
                 Truthy,
-                vec![],
+                vec!["value[kind]~"],
             ),
         ] {
             let program = format!(
@@ -5112,6 +5113,7 @@ mod tests {
             (r#""a" in value"#, Falsy, "value", false),
             (r#"!("a" in value)"#, Truthy, "value", false),
             ("0 in value", Truthy, "value", true),
+            ("`a` in value", Truthy, "value", true),
             (r#"("a") in (value)"#, Truthy, "value", true),
             (r#""a" in value.v"#, Truthy, "value.v", true),
             // `in` narrows no receiver of an optional chain.
@@ -5146,7 +5148,7 @@ mod tests {
             assert_eq!(actual, positive, "{source}");
             let program = decomposed.model.root().syntax().text_trimmed().to_string();
             assert!(
-                matches!(&program[key], r#""a""# | "0"),
+                matches!(&program[key], r#""a""# | "0" | "`a`"),
                 "{source}: {}",
                 &program[key]
             );
@@ -5156,7 +5158,7 @@ mod tests {
     #[test]
     fn in_with_a_key_that_is_not_a_literal_name_tests_nothing() {
         for program in [
-            r#"function f(value) { if (`a` in value) {} }"#,
+            r#"function f(value) { if (`a${b}` in value) {} }"#,
             r#"function f(value) { if ("\u0061" in value) {} }"#,
             "function f(value) { if (0x0 in value) {} }",
             "function f(value) { if (1.0 in value) {} }",

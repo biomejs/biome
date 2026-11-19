@@ -1,6 +1,7 @@
 // A `var`, a module variable, and a parameter of an enclosing function
 // narrow by the tests and writes of the function that reads them, as in
-// TypeScript, so each condition below can't change.
+// TypeScript, which assumes a `var` without an initializer assigned there, so
+// each condition below can't change.
 
 interface Timer {
 	cancel(): void;
@@ -33,4 +34,12 @@ function parameter(timer: Timer | null) {
 			timer?.cancel();
 		}
 	};
+}
+
+var pending: Timer | null;
+
+function declaredWithoutValue() {
+	if (pending !== null) {
+		pending?.cancel();
+	}
 }
