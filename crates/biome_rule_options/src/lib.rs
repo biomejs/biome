@@ -64,6 +64,7 @@ pub mod no_constructor_return;
 pub mod no_continue;
 pub mod no_control_characters_in_regex;
 pub mod no_convex_duplicate_indexes;
+pub mod no_convex_query_filter;
 pub mod no_convex_top_of_hour_crons;
 pub mod no_dangerously_set_inner_html;
 pub mod no_dangerously_set_inner_html_with_children;
