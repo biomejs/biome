@@ -50,7 +50,7 @@ describe("Biome WebAssembly formatContent", () => {
 			});
 
 			expect(result.content).toEqual(
-				"function f() {\n" + " ".repeat(indentWidth) + "return 1;\n}\n",
+				`function f() {\n${" ".repeat(indentWidth)}return 1;\n}\n`,
 			);
 			expect(result.diagnostics).toEqual([]);
 		},
