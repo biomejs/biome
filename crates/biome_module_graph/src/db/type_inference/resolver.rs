@@ -38,7 +38,7 @@ use biome_js_type_info::{
         TypeMemberKind as InferredTypeMemberKind, TypeSubstitution as InferredTypeSubstitution,
     },
 };
-use biome_rowan::{Text, TextRange};
+use biome_rowan::{Text, TextRange, TextSize};
 use rustc_hash::{FxHashMap, FxHashSet};
 use salsa::plumbing::AsId;
 use std::{
@@ -251,6 +251,11 @@ pub(in crate::db) struct ResolutionCtx<'db, 'a> {
     /// Flow results this context evaluates itself, or `None` when flow
     /// candidates go through the flow queries.
     pub(in crate::db::type_inference) local_flow: Option<Box<LocalFlow<'db>>>,
+    /// While the types of a call point's arguments are read, the offset where
+    /// that call starts: reads then narrow only by the call points that end
+    /// before it, and evaluate flow in this context without caching, because
+    /// their results differ from those of ordinary reads.
+    pub(in crate::db::type_inference) calls_before: Option<TextSize>,
     /// The contributions that other modules make to this module's
     /// declarations, read on the first interface or class that this context
     /// resolves.
@@ -346,6 +351,7 @@ impl<'db, 'a> ResolutionCtx<'db, 'a> {
             in_progress_reads: Cell::new(0),
             member_lookups: FxHashMap::default(),
             local_flow: None,
+            calls_before: None,
             contributions: None,
         }
     }

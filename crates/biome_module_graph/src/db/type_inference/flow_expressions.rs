@@ -189,6 +189,15 @@ impl<'db> ResolutionCtx<'db, '_> {
             AnyFlowExpression::JsCallExpression(call) => {
                 let callee_expression = call.callee().ok()?;
                 let callee = self.flow_operand(&callee_expression);
+                // A method read from a narrowed object checks the constraints
+                // of its type parameters with that object's type arguments.
+                let receiver = match (callee, callee_expression.clone().omit_parentheses()) {
+                    (Some(_), AnyJsExpression::JsStaticMemberExpression(member)) => member
+                        .object()
+                        .ok()
+                        .and_then(|object| self.flow_operand(&object)),
+                    _ => None,
+                };
                 let mut overrides = Vec::new();
                 for argument in call.arguments().ok()?.args().iter() {
                     let AnyJsCallArgument::AnyJsExpression(argument) = argument.ok()? else {
@@ -214,8 +223,13 @@ impl<'db> ResolutionCtx<'db, '_> {
                 let arguments = raw.arguments.clone();
                 let raw_callee = raw.callee.clone();
                 let callee = callee.unwrap_or_else(|| self.resolve(&raw_callee));
-                let result =
-                    self.resolve_call_expression_with_overrides(callee, &arguments, &overrides);
+                let result = self.resolve_call_expression_with_overrides(
+                    callee,
+                    &arguments,
+                    &overrides,
+                    &raw_callee,
+                    receiver,
+                );
                 Some(if call.is_optional_chain() {
                     self.optional_chain_result(callee, result)
                 } else {
@@ -345,7 +359,14 @@ impl<'db> ResolutionCtx<'db, '_> {
     /// Returns the flow-sensitive type of the expression at `range`, or
     /// `None` when it is not a flow candidate or narrowing leaves its type
     /// unchanged.
+    ///
+    /// While the arguments of a call point are read (see
+    /// [`ResolutionCtx::calls_before`]), the type is evaluated in this
+    /// context without caching.
     pub(super) fn flow_operand_at(&mut self, range: TextRange) -> Option<TypeData<'db>> {
+        if self.calls_before.is_some() {
+            return self.uncached_flow_expression_type(range);
+        }
         if self.evaluates_flow_locally() {
             return self.local_flow_expression_type(range);
         }

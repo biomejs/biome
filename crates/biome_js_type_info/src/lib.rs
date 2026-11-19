@@ -55,6 +55,7 @@ pub use return_type_relation::{
 };
 pub use stringification::{StringificationMode, StringificationUsefulness};
 pub use type_data::*;
+pub use type_relation::{is_assignable_to, is_subtype_of};
 pub use type_store::{RawTypeCollector, TypeStore, UnionCollector};
 
 pub use format_inferred_type_info::{

@@ -333,12 +333,18 @@ a path on its own `this`. Its parts live in `src/js_module_info/flow/`:
   A call whose callee is a dotted name, an identifier or `this` followed by
   `.name` accesses, and that no local function decides from its collected
   signature (`GuardFunctions::calls_local_function`), is a call point
-  (`FlowCall`), whose guard is `FlowGuard::Call`. Its effect depends on the
+  (`FlowCall`), whose guard is `FlowGuard::Call`. A local function whose
+  collected type is generic or has overloads, one of them returning a type
+  predicate, an assertion, or `never` (`selects_signature_by_arguments`),
+  decides nothing at collection, because the call's arguments select its
+  signature. Its effect depends on the
   callee's signature, which only inference resolves, so collection records
   the subjects that it may narrow: its subject arguments, the subject of the
   object of its callee, which `this is T` narrows, and, for a statement
   call, the subjects of each argument decomposed as a condition that holds,
-  whose guard `FlowCallArgument::condition` keeps for `asserts value`. A call
+  whose guard `FlowCallArgument::condition` keeps for `asserts value`. It
+  also records the range of each argument (`FlowCallArgument::range`),
+  where inference reads its type at the call. A call
   in a condition is a call point only when it passes a subject
   (`condition_call_point`). A statement call is one whenever its callee
   follows TypeScript's explicit-type rule as far as the syntax tells
@@ -748,8 +754,31 @@ return a type predicate, and a statement call takes that of its callee's
 explicit type, which must assert. `has_explicit_callee` checks an import
 through the declaration that it names (`imported_declaration_is_explicit`)
 and each member access through the declared type of its object
-(`has_explicit_member`). A generic signature or more than one signature
-gives no effect. `FlowGuard::Call` then narrows the argument or the object
+(`has_explicit_member`). A callee with a generic signature or several
+signatures, one of them with a type predicate, an assertion, or a `never`
+return type, takes the signature that the call's arguments select
+(`select_effect_signature` in `flow_signatures.rs`), as TypeScript's
+overload resolution selects it: the signatures in their order, each with
+the type arguments that the arguments infer from a few parameter shapes
+(`instantiate_signature`), and the first one that
+`signature_accepts_arguments` accepts under TypeScript's subtype relation.
+An acceptance is conclusive only where that relation and the matching that
+call inference uses for return types agree. TypeScript checks the arguments
+with their types at the call, which are narrower than Biome's wherever
+Biome lacks a narrowing, so a signature before the accepted one is skipped
+only when no narrowing of the arguments makes it acceptable
+(`rejects_every_narrowing`) or when it narrows as the accepted one does;
+otherwise the call has no effect. A type argument that may be wider than
+TypeScript's, such as one inferred from an argument other than the one that
+the call narrows, or a literal type whose widening Biome can't tell, lets
+the call narrow only where it is truthy (`narrows_falsy` on
+`FlowCallEffect::Predicate`). The arguments have their types at the call:
+a subject argument its flow-sensitive type, read with `calls_before` set on
+the context (`argument_type_at_call`), so that only the call points that end
+before the call apply. Such a read never depends on the effect that it
+helps decide, so selection has no cycle, and the context evaluates it
+without the flow queries and caches, whose results apply every call point.
+`FlowGuard::Call` then narrows the argument or the object
 that the signature names with `narrow_by_type_predicate`, or applies the
 argument's decomposed condition for `asserts value`. Lookups share each
 effect through `infer_flow_call_effect`, keyed by the range of the call;
@@ -1165,6 +1194,14 @@ collapsing them to `Unknown`.
 Expected-argument inference may resolve the callee and every sibling argument
 before matching signatures. Count this as one request with multiple tracked
 query executions; do not describe it as a single constant-cost projection.
+
+Return-type inference resolves the object that a method is read from, as
+`xs` in `xs.filter(isString)`, only when a type parameter's constraint names
+a type parameter of the method's class or interface (`CallReceiver`),
+because resolving an object such as a namespace import can build its whole
+export list. The signature that a call point selects resolves the types of
+the call's arguments in the reading context, but only for callees with a
+generic or overloaded signature that can narrow or end the path.
 
 ## Result semantics
 

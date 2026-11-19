@@ -12,6 +12,7 @@ use rustc_hash::{FxHashMap, FxHashSet};
 mod expressions;
 mod flow;
 mod flow_expressions;
+mod flow_signatures;
 mod globals;
 mod imports;
 mod lookup;
@@ -29,8 +30,9 @@ pub(in crate::db) use imports::{
     resolve_export_type_on_demand,
 };
 pub(in crate::db) use lookup::{
-    apply_substitutions_to_root_body, find_member_type_on_demand, find_value_member_type_on_demand,
-    resolve_local_type_on_demand, substitutions_for_instance,
+    apply_substitutions, apply_substitutions_to_root_body, find_member_type_on_demand,
+    find_value_member_type_on_demand, receiver_substitutions, resolve_local_type_on_demand,
+    substitutions_for_instance,
 };
 pub(in crate::db) use promise_classification::{
     PromiseClassification, classify_expression_array_promise, classify_expression_function_return,

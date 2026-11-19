@@ -507,10 +507,22 @@ pub(crate) struct FlowCall {
     /// The arguments in order, up to the first spread argument, which can
     /// pass any value to the parameters from its position on.
     pub(crate) arguments: Box<[FlowCallArgument]>,
-    /// The subject of the object that the callee reads its function from,
-    /// such as `n` in `n.isLeaf()`. A `this is T` or `asserts this`
+    /// The object that the callee reads its function from, such as `n` in
+    /// `n.isLeaf()`, when it is a subject. A `this is T` or `asserts this`
     /// signature narrows it.
-    pub(crate) receiver: Option<FlowSubjectId>,
+    pub(crate) receiver: Option<FlowCallReceiver>,
+}
+
+/// The object that a call point's callee reads its function from, when it is
+/// a subject.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub(crate) struct FlowCallReceiver {
+    pub(crate) subject: FlowSubjectId,
+    /// The range of the object without parentheses, where inference reads
+    /// the object's type at the call to check a constraint that names a type
+    /// parameter of the object's type, as `S extends T` in
+    /// `xs.every(isString)`.
+    pub(crate) range: TextRange,
 }
 
 /// Where a call point sits. The position decides how TypeScript finds the
@@ -565,6 +577,9 @@ pub(crate) enum FlowCallRoot {
 /// An argument of a call point.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub(crate) struct FlowCallArgument {
+    /// The range of the argument without parentheses, where inference reads
+    /// its type at the call when the callee's signature depends on it.
+    pub(crate) range: TextRange,
     /// The subject that the argument reads, without parentheses, which a type
     /// predicate or an assertion of its parameter narrows.
     pub(crate) subject: Option<FlowSubjectId>,

@@ -484,6 +484,50 @@ pub(crate) fn is_subtype<'db>(
     check.is_assignable(source, target)
 }
 
+/// Returns whether a value of the normalized type `source` is assignable to
+/// `target` under TypeScript's assignability relation, as when TypeScript
+/// checks an argument against a parameter.
+///
+/// Returns `Some(true)` or `Some(false)` only when Biome can tell, and `None`
+/// when it can't, as for an unresolved type, a type parameter that is not
+/// substituted, a class that can declare private members, and a comparison
+/// that runs out of its budget. `resolve` resolves handles as for
+/// [`crate::narrow_type`].
+pub fn is_assignable_to<'db>(
+    db: &'db dyn TypeDb,
+    source: TypeData<'db>,
+    target: TypeData<'db>,
+    mut resolve: impl FnMut(TypeData<'db>) -> TypeData<'db>,
+) -> Option<bool> {
+    let resolve: &mut TypeResolver<'db, '_> = &mut resolve;
+    match AssignabilityCheck::new(db, resolve, &[]).is_assignable(source, target) {
+        Assignability::Assignable => Some(true),
+        Assignability::NotAssignable => Some(false),
+        Assignability::Undetermined => None,
+    }
+}
+
+/// Returns whether the normalized type `source` is a subtype of `target`
+/// under TypeScript's subtype relation, which overload resolution tries
+/// before assignability (see [`is_subtype`] for how it differs).
+///
+/// Returns `Some(true)` or `Some(false)` only when Biome can tell, and `None`
+/// when it can't, as [`is_assignable_to`] describes. `resolve` resolves
+/// handles as for [`crate::narrow_type`].
+pub fn is_subtype_of<'db>(
+    db: &'db dyn TypeDb,
+    source: TypeData<'db>,
+    target: TypeData<'db>,
+    mut resolve: impl FnMut(TypeData<'db>) -> TypeData<'db>,
+) -> Option<bool> {
+    let resolve: &mut TypeResolver<'db, '_> = &mut resolve;
+    match is_subtype(db, source, target, resolve) {
+        Assignability::Assignable => Some(true),
+        Assignability::NotAssignable => Some(false),
+        Assignability::Undetermined => None,
+    }
+}
+
 /// Returns whether the normalized type `ty` is `{}`, which every value other
 /// than `null` and `undefined` has.
 pub(crate) fn is_empty_object_type<'db>(
@@ -2396,6 +2440,14 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
     }
 
     /// Compares function signatures that declare no type parameters.
+    ///
+    /// A target that returns a type predicate or an assertion accepts only a
+    /// source of the same kind about the same parameter, whose type is
+    /// assignable to the target's, as in TypeScript. So
+    /// `(v: unknown) => v is string` is assignable to
+    /// `(value: string | number) => value is string`. A source with another
+    /// return type is undetermined, because TypeScript infers a type
+    /// predicate for some functions without a return type annotation.
     fn is_signature_assignable(
         &mut self,
         source: InternedFunction<'db>,
@@ -2413,7 +2465,38 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
             (ReturnType::Asserts(_), ReturnType::Type(target)) => {
                 self.is_assignable(TypeData::VoidKeyword, *target)
             }
-            (_, ReturnType::Predicate(_) | ReturnType::Asserts(_)) => Assignability::Undetermined,
+            (ReturnType::Predicate(source_predicate), ReturnType::Predicate(target_predicate)) => {
+                self.is_predicate_assignable(
+                    (
+                        source,
+                        &source_predicate.parameter_name,
+                        source_predicate.ty,
+                    ),
+                    (
+                        target,
+                        &target_predicate.parameter_name,
+                        target_predicate.ty,
+                    ),
+                )
+            }
+            (ReturnType::Asserts(source_assertion), ReturnType::Asserts(target_assertion)) => self
+                .is_predicate_assignable(
+                    (
+                        source,
+                        &source_assertion.parameter_name,
+                        source_assertion.ty,
+                    ),
+                    (
+                        target,
+                        &target_assertion.parameter_name,
+                        target_assertion.ty,
+                    ),
+                ),
+            (ReturnType::Predicate(_), ReturnType::Asserts(_))
+            | (ReturnType::Asserts(_), ReturnType::Predicate(_)) => Assignability::NotAssignable,
+            (ReturnType::Type(_), ReturnType::Predicate(_) | ReturnType::Asserts(_)) => {
+                Assignability::Undetermined
+            }
         };
         if return_result == Assignability::NotAssignable {
             return Assignability::NotAssignable;
@@ -2435,6 +2518,31 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
         );
         self.parameter_position = outer_position;
         result
+    }
+
+    /// Compares the type predicate or the assertion of `source` with that of
+    /// `target`, each given as its function, the name of the parameter that
+    /// it tests, and its type.
+    ///
+    /// The two must test `this` or the parameter at the same position, not
+    /// counting a `this` parameter, and the source's type must be assignable
+    /// to the target's. The comparison is undetermined when a name matches no
+    /// parameter, or matches more than one.
+    fn is_predicate_assignable(
+        &mut self,
+        (source, source_name, source_ty): (InternedFunction<'db>, &Text, TypeData<'db>),
+        (target, target_name, target_ty): (InternedFunction<'db>, &Text, TypeData<'db>),
+    ) -> Assignability {
+        let (Some(source_subject), Some(target_subject)) = (
+            predicate_subject(self.db, source, source_name),
+            predicate_subject(self.db, target, target_name),
+        ) else {
+            return Assignability::Undetermined;
+        };
+        if source_subject != target_subject {
+            return Assignability::NotAssignable;
+        }
+        self.is_assignable(source_ty, target_ty)
     }
 
     /// Compares parameter lists, combining the outcome with `initial_result`.
@@ -3909,6 +4017,41 @@ fn constructor_parameters<'db>(
         .iter()
         .map(|parameter| parameter.parameter.clone())
         .collect()
+}
+
+/// What the type predicate or the assertion of a signature tests.
+#[derive(Clone, Copy, Eq, PartialEq)]
+enum PredicateSubject {
+    /// `this`, as in `this is T`.
+    This,
+    /// The parameter at this position, not counting a `this` parameter.
+    Parameter(usize),
+}
+
+/// Returns what a type predicate or an assertion of `function` that names
+/// `name` tests, or `None` when `name` names no parameter or more than one.
+fn predicate_subject<'db>(
+    db: &'db dyn TypeDb,
+    function: InternedFunction<'db>,
+    name: &Text,
+) -> Option<PredicateSubject> {
+    let name = name.text();
+    if name == "this" {
+        return Some(PredicateSubject::This);
+    }
+    let mut matching = function
+        .parameters(db)
+        .iter()
+        .filter(|parameter| !parameter.is_this())
+        .enumerate()
+        .filter(|(_, parameter)| {
+            matches!(parameter, FunctionParameter::Named(named) if named.name.text() == name)
+        });
+    let (index, _) = matching.next()?;
+    matching
+        .next()
+        .is_none()
+        .then_some(PredicateSubject::Parameter(index))
 }
 
 fn parameters_without_this<'db>(

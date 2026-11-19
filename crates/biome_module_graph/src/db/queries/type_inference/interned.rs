@@ -130,11 +130,15 @@ pub(crate) enum FlowCallEffect<'db> {
     None,
     /// A call in a condition whose signature returns a type predicate, such
     /// as `value is T`. The call narrows the operand that `parameter` names
-    /// to `target` where it is truthy, and removes `target` from the operand
-    /// where it is falsy.
+    /// to `target` where it is truthy, and, with `narrows_falsy`, removes
+    /// `target` from the operand where it is falsy. Without it, `target` may
+    /// be wider than TypeScript's, as when Biome can't tell the type
+    /// arguments that TypeScript infers, and removing it could remove values
+    /// that TypeScript keeps.
     Predicate {
         parameter: FlowCallParameter,
         target: InferredTypeData<'db>,
+        narrows_falsy: bool,
     },
     /// A statement call whose signature asserts, such as `asserts value is T`,
     /// or `asserts value` without a `target`. The call narrows the operand

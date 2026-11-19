@@ -1,0 +1,37 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: callbackTypePredicates.ts
+---
+# Input
+```ts
+// should generate diagnostics
+
+declare function isString(input: unknown): input is string;
+declare const values: (string | number)[];
+
+if (values.find(isString)) {
+}
+
+```
+
+# Diagnostics
+```
+callbackTypePredicates.ts:6:5 lint/nursery/useStrictBooleanExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This condition uses a nullable string.
+  
+    4 │ declare const values: (string | number)[];
+    5 │ 
+  > 6 │ if (values.find(isString)) {
+      │     ^^^^^^^^^^^^^^^^^^^^^
+    7 │ }
+    8 │ 
+  
+  i This check treats empty strings and nullish values alike.
+  
+  i Check for nullish values and empty strings explicitly, or use Boolean() to test truthiness.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

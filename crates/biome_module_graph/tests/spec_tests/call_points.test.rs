@@ -311,9 +311,7 @@ fn this_type_predicates_narrow_their_receiver() {
         &[
             ("L27_58", "n", &["instanceof LeafNode"]),
             ("L27_80", "n", &["instanceof BranchNode"]),
-            // TypeScript gives `LeafNode`, which Biome can't compare with the
-            // declared `TreeNode`, as for other instances of classes.
-            ("L28_45", "n", &["instanceof TreeNode"]),
+            ("L28_45", "n", &["instanceof LeafNode"]),
             ("L29_69", "o2.n", &["instanceof LeafNode"]),
             // TypeScript gives `this & { tag: 1 }`. Biome keeps the declared
             // type where TypeScript gives an intersection.
@@ -348,7 +346,6 @@ fn calls_without_a_single_signature_or_a_dotted_callee_keep_their_types() {
         function q15(x: string | number, g?: (v: unknown) => v is string) { if (g?.(x)) /*L30_81*/x; else /*L30_103*/x; } // L30
         function q18(x: string | number, a: any) { if (a.isS(x)) /*L33_58*/x; } // L33
         function q19(x: string | number, g: ((v: unknown) => v is string) | ((v: unknown) => v is number)) { if (g(x)) /*L34_112*/x; } // L34
-        function q20(x: string | number, g: { (v: unknown): v is string; (v: unknown, w: unknown): boolean }) { if (g(x)) /*L35_115*/x; } // L35
         function q21(x: string | number) { if (isString(...[x])) /*L36_58*/x; } // L36
         function q24(x: string | number) { if (c.isS.call(c, x)) /*L41_58*/x; } // L41
         "#,
@@ -363,9 +360,6 @@ fn calls_without_a_single_signature_or_a_dotted_callee_keep_their_types() {
             ("L30_103", "x", &["number", "string"]),
             ("L33_58", "x", &["number", "string"]),
             ("L34_112", "x", &["number", "string"]),
-            // TypeScript gives `string` by overload resolution, which Biome
-            // doesn't do for call points.
-            ("L35_115", "x", &["number", "string"]),
             ("L36_58", "x", &["number", "string"]),
             ("L41_58", "x", &["number", "string"]),
         ],
@@ -594,6 +588,555 @@ fn lookups_resolve_each_call_point_once() {
         &[
             ("then", "x", &["string"]),
             ("after", "x", &["number", "string"]),
+        ],
+    );
+}
+
+/// Declarations that the tests of generic and overloaded type predicates
+/// share.
+const GENERIC: &str = r#"
+        declare function f<T>(): T;
+        declare function isNonNull<T>(v: T | null): v is T;
+        declare function isDefined<T>(v: T | null | undefined): v is T;
+        declare function isOf<T>(v: unknown, sample: T): v is T;
+        declare function isNotNullish<T>(v: T): v is NonNullable<T>;
+        declare function assertDefined<T>(v: T): asserts v is NonNullable<T>;
+        declare function isS(v: string | number): v is string;
+        declare function isS(v: boolean): boolean;
+        declare function isB(v: boolean): boolean;
+        declare function isB(v: string | number): v is string;
+        declare function isString(v: unknown): v is string;
+        declare function isNumber(v: unknown): v is number;
+"#;
+
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type,
+// except where a comment says otherwise. A generic type-guard function
+// narrows by the type arguments that the call infers, and an overloaded one by
+// the first signature that accepts the arguments. `every` narrows its object
+// through `this is S[]`, with `S` inferred from the type predicate of its
+// callback.
+#[test]
+fn generic_and_overloaded_type_predicates_narrow() {
+    let source = format!(
+        "{GENERIC}{}",
+        r#"
+        function g1(x: string | null) { if (isNonNull(x)) /*L15_53*/x; else /*L15_75*/x; } // L15
+        function g2(x: string | null | undefined) { if (isDefined(x)) /*L16_65*/x; } // L16
+        function g3(x: string | number) { if (isOf(x, "a")) /*L17_55*/x; } // L17
+        function g4(x: string | null) { if (isNotNullish(x)) /*L18_56*/x; } // L18
+        function g5(x: string | null) { assertDefined(x); /*L19_53*/x; } // L19
+        function g6(x: string | null) { if (isNonNull<string>(x)) /*L20_61*/x; } // L20
+        function g7(x: string | number) { if (isS(x)) /*L21_49*/x; } // L21
+        function g8(x: string | number) { if (isB(x)) /*L22_49*/x; } // L22
+        function g9(xs: (string | number)[]) { if (xs.every(isString)) /*L23_66*/xs; else /*L23_89*/xs; } // L23
+        function g10(xs: (string | number)[]) { if (xs.every((v): v is string => typeof v === "string")) /*L24_100*/xs; } // L24
+        function g11(xs: (string | number)[]) { if (xs.every((v) => typeof v === "string")) /*L25_87*/xs; } // L25
+        function g12(xs: readonly (string | number)[]) { if (xs.every(isString)) /*L26_76*/xs; } // L26
+        function g15(xs: (string | number)[]) { if (xs.some(isString)) /*L29_66*/xs; } // L29
+        function g16(t: [string | number, string | number]) { if (t.every(isString)) /*L30_80*/t; } // L30
+        function g17(xs: (string | number)[] | null) { if (xs?.every(isString)) /*L31_75*/xs; } // L31
+        function g18(x: string | number | boolean) { if (isS(x as string | number)) /*L32_79*/x; } // L32
+        function g19<T>(x: T | null) { if (isNonNull(x)) /*L33_52*/x; } // L33
+        function g20(xs: (string | number)[]) { if (xs.every(isString) && xs.every(isNumber)) /*L34_89*/xs; } // L34
+        function g21(xs: (string | number)[]) { if (xs.filter(isString).length) /*L35_75*/xs; } // L35
+        "#
+    );
+    assert_reads(
+        &source,
+        &[
+            ("L15_53", "x", &["string"]),
+            ("L15_75", "x", &["null"]),
+            ("L16_65", "x", &["string"]),
+            ("L17_55", "x", &["string: a"]),
+            // TypeScript gives `string`. Biome keeps the declared type,
+            // because `NonNullable<string | null>` is an intersection.
+            ("L18_56", "x", &["null", "string"]),
+            ("L19_53", "x", &["null", "string"]),
+            ("L20_61", "x", &["string"]),
+            ("L21_49", "x", &["string"]),
+            ("L22_49", "x", &["string"]),
+            ("L23_66", "xs", &["instanceof Array<string>"]),
+            ("L23_89", "xs", &["instanceof Array<string | number>"]),
+            // TypeScript gives `string[]`. Biome types the callback's
+            // parameter `v` from no annotation, so it can't tell whether the
+            // first signature of `every` accepts the callback.
+            ("L24_100", "xs", &["instanceof Array<string | number>"]),
+            // TypeScript gives `string[]` through the type predicate that it
+            // infers for the callback, which Biome doesn't infer.
+            ("L25_87", "xs", &["instanceof Array<string | number>"]),
+            ("L26_76", "xs", &["Readonly instanceof Array<string>"]),
+            ("L29_66", "xs", &["instanceof Array<string | number>"]),
+            // TypeScript gives `[string | number, string | number] &
+            // string[]`. Biome keeps the declared type where TypeScript gives
+            // an intersection.
+            ("L30_80", "t", &["[string | number, string | number]"]),
+            ("L31_75", "xs", &["instanceof Array<string>"]),
+            ("L32_79", "x", &["boolean", "number", "string"]),
+            // TypeScript gives `T`. Biome can't compare `T` with `null`, so it
+            // keeps the declared type.
+            ("L33_52", "x", &["instanceof T", "null"]),
+            ("L34_89", "xs", &["instanceof Array<string>"]),
+            ("L35_75", "xs", &["instanceof Array<string | number>"]),
+        ],
+    );
+}
+
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type,
+// except where a comment says otherwise. The call's arguments select the
+// signature with their types at the call, which a test before the call can
+// narrow. A signature before the one that accepts the arguments, which
+// Biome can't skip whatever narrowing gives them, leaves the call without a
+// signature.
+#[test]
+fn overload_selection_uses_argument_types_at_the_call() {
+    assert_reads(
+        r#"
+        declare function isNonNull<T>(v: T | null): v is T;
+        function a1(x: string | null | undefined) { if (isNonNull(x)) /*a1then*/x; else /*a1else*/x; }
+        class P1 { a = 1 } class P2 { a = 1 }
+        declare function k(v: unknown, c: P1): v is string;
+        declare function k(v: unknown, c: unknown): v is number;
+        function a2(x: string | number, c: P2) { if (k(x, c)) /*a2*/x; }
+        function a3(x: "a" | "b" | null, c: boolean) { while (c) { if (isNonNull(x)) { /*a3*/x; } } }
+        declare const m: { is(v: string): v is "a"; is(v: number): v is 1 };
+        function a8(x: "a" | "b") { if (m.is(x)) /*a8*/x; }
+        function a8b(x: 1 | 2) { if (m.is(x)) /*a8b*/x; }
+        declare function isS(v: string): v is "a";
+        declare function isS(v: string | number): v is string;
+        function a10(x: "a" | "b" | number) { if (typeof x === "string") { if (isS(x)) /*a10*/x; } }
+        declare function isArrOf<T>(v: unknown, sample: T): v is T[];
+        function a11(x: string[] | number[]) { if (isArrOf(x, "a")) /*a11*/x; }
+        function a15(x: string | null) { if (!isNonNull(x)) return; /*a15*/x; }
+        declare function isNonNullO<T>(v: T | null): v is T;
+        declare function isNonNullO(v: unknown, w: unknown): boolean;
+        function a16(x: string | null) { if (isNonNullO(x)) /*a16*/x; }
+        declare function guard(input: string): input is string;
+        declare function guard(input: unknown): input is number;
+        function a17(x: string | number) { if (guard(x)) /*a17then*/x; else /*a17else*/x; }
+        declare function unused<T>(input: unknown): input is string;
+        function a18(x: string | number) { if (unused(x)) /*a18*/x; }
+        declare function plain(input: unknown): input is string;
+        function a19(x: string | number) { if (plain<unknown>(x)) /*a19*/x; }
+        declare function f(x: string, y: string): x is "a";
+        declare function f(x: string, y: unknown): x is string;
+        function a20(x: "a" | "b" | null, y: any) { if (typeof x === "string" && f(x, y)) /*a20*/x; }
+        declare function g(x: unknown, o: { a?: number }): x is "a";
+        declare function g(x: unknown, o: {}): x is string;
+        function a21(x: "a" | "b" | 1, o: {}) { if (g(x, o)) /*a21*/x; }
+        "#,
+        &[
+            ("a1then", "x", &["string", "undefined"]),
+            ("a1else", "x", &["null"]),
+            // TypeScript gives `string`, because `P2` has the members of
+            // `P1`. Biome can't tell that an instance of one class is
+            // assignable to another, which can declare private members.
+            ("a2", "x", &["number", "string"]),
+            ("a3", "x", &["string: a", "string: b"]),
+            ("a8", "x", &["string: a"]),
+            ("a8b", "x", &["number: 1"]),
+            ("a10", "x", &["string: a"]),
+            ("a11", "x", &["instanceof Array<string>"]),
+            ("a15", "x", &["string"]),
+            ("a16", "x", &["string"]),
+            // TypeScript gives `number` and `string`. A test that Biome
+            // doesn't decompose could narrow `x` to `string`, which the first
+            // signature accepts.
+            ("a17then", "x", &["number", "string"]),
+            ("a17else", "x", &["number", "string"]),
+            ("a18", "x", &["string"]),
+            // TypeScript gives `string`, and reports TS2558 for a type
+            // argument of a function without type parameters. Biome keeps the
+            // declared type when a call passes type arguments to a local
+            // type-guard function without type parameters.
+            ("a19", "x", &["number", "string"]),
+            // TypeScript takes the second signature, because `any` is a
+            // subtype only of `any` and `unknown`. Biome takes none, because
+            // a test could narrow `y` to `string`, so `x` keeps its type,
+            // which is the same here.
+            ("a20", "x", &["string: a", "string: b"]),
+            // TypeScript gives `"a" | "b"` through the second signature,
+            // because `{}` is not a subtype of `{ a?: number }`. A test that
+            // Biome doesn't decompose could narrow `o` to a type that the
+            // first signature accepts.
+            ("a21", "x", &["number: 1", "string: a", "string: b"]),
+        ],
+    );
+}
+
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type,
+// except where a comment says otherwise. TypeScript selects the signature by
+// the argument types at the call, which a test that Biome doesn't decompose
+// can make narrower than Biome's, as `isStr`, whose type predicate TypeScript
+// infers, does for `x`. Biome skips a signature only when no narrowing of the
+// arguments can make it accept them, so a call that depends on such a
+// narrowing narrows nothing, and a call with a type argument inferred from an
+// argument other than the one that it narrows narrows only where it is
+// truthy.
+#[test]
+fn overload_selection_skips_only_signatures_that_reject_every_narrowing() {
+    assert_reads(
+        r#"
+        const isStr = (v: unknown) => typeof v === "string";
+        declare function g(v: string): v is "a";
+        declare function g(v: string | number): v is string;
+        function s1(x: string | number) { if (isStr(x) && !g(x)) /*s1*/x; }
+        function s2(x: string | number) { if (isStr(x) && g(x)) /*s2*/x; }
+        declare function h(v: string): v is "a";
+        declare function h(v: string | number): v is string;
+        function s3(x: "a" | "b") { if (h(x)) /*s3then*/x; else /*s3else*/x; }
+        declare function m(v: number): v is 1;
+        declare function m(v: string): v is "a";
+        function s4(x: "a" | "b") { if (m(x)) /*s4then*/x; else /*s4else*/x; }
+        class A { a = 1; }
+        const isA = (v: unknown) => v instanceof A;
+        declare function k(x: unknown, o: { a?: number }): x is "a";
+        declare function k(x: unknown, o: {}): x is string;
+        function s5(x: "a" | "b" | 1, o: {}) { if (isA(o) && !k(x, o)) /*s5*/x; }
+        function s6(x: "a" | "b" | 1, o: {}) { if (isA(o) && k(x, o)) /*s6*/x; }
+        declare function q(v: "a"): v is "a";
+        declare function q(v: string): v is "b";
+        declare const K: "a";
+        function s7(x: string) { if (x === K && q(x)) /*s7*/x; }
+        function s8(x: string) { if (q(x)) /*s8then*/x; else /*s8else*/x; }
+        declare function isOf<T>(v: unknown, sample: T): v is T;
+        function s9(x: string | number | boolean, y: string | number) { if (isStr(y) && !isOf(x, y)) /*s9*/x; }
+        function s10(x: string | number | boolean, y: string | number) { if (isStr(y) && isOf(x, y)) /*s10*/x; }
+        declare function same(input: string): input is string;
+        declare function same(input: unknown): input is string;
+        function s11(x: string | null) { if (same(x)) /*s11then*/x; else /*s11else*/x; }
+        "#,
+        &[
+            // TypeScript gives `string`. Biome doesn't infer the type
+            // predicate of `isStr`, so `x` may be `number` at the call, and
+            // the first signature of `g` accepts the `string` that
+            // TypeScript sees.
+            ("s1", "x", &["number", "string"]),
+            // TypeScript gives `"a"`.
+            ("s2", "x", &["number", "string"]),
+            // The first signature accepts every member of `x`.
+            ("s3then", "x", &["string: a"]),
+            ("s3else", "x", &["string: b"]),
+            // No narrowing of `x` gives a `number`, so `m` takes its second
+            // signature.
+            ("s4then", "x", &["string: a"]),
+            ("s4else", "x", &["string: b"]),
+            // TypeScript gives `"b" | 1`, because `isA`, whose type
+            // predicate TypeScript infers, narrows `o` to `A`, which the
+            // first signature accepts.
+            ("s5", "x", &["number: 1", "string: a", "string: b"]),
+            // TypeScript gives `"a"`.
+            ("s6", "x", &["number: 1", "string: a", "string: b"]),
+            // TypeScript gives `"a"`, because the comparison with `K`
+            // narrows `x` to `"a"`, which the first signature of `q`
+            // accepts.
+            ("s7", "x", &["string"]),
+            // TypeScript gives `"b"`. A test that Biome doesn't decompose
+            // could narrow `x` to `"a"` before the call, as in `s7`.
+            ("s8then", "x", &["string"]),
+            ("s8else", "x", &["string"]),
+            // TypeScript gives `number | boolean`. `T` is `string` in
+            // TypeScript, while Biome infers `string | number` from `y`.
+            ("s9", "x", &["boolean", "number", "string"]),
+            // TypeScript gives `string`.
+            ("s10", "x", &["number", "string"]),
+            // Both signatures narrow alike, so it doesn't matter which one
+            // TypeScript selects.
+            ("s11then", "x", &["string"]),
+            ("s11else", "x", &["null"]),
+        ],
+    );
+}
+
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type,
+// except where a comment says otherwise. TypeScript keeps the literal type
+// that a type parameter infers from an argument when the type parameter has
+// a primitive or literal constraint, when the argument's literal type isn't
+// fresh, as that of a declared or annotated variable, and when the type
+// parameter is at the top level of the type predicate, also through an
+// intersection. Otherwise it widens the literal type, as `"a"` to `string`.
+#[test]
+fn literal_type_arguments_widen_as_typescript_widens_them() {
+    assert_reads(
+        r#"
+        declare function hasKind<K extends string>(v: unknown, kind: K): v is { kind: K };
+        function l1(s: { kind: "a"; x: 1 } | { kind: "b"; y: 2 } | number) { if (hasKind(s, "a")) /*l1then*/s; else /*l1else*/s; }
+        declare function hasTag<K>(v: unknown, tag: K): v is { tag: K };
+        declare function hasTagIn<K extends "a" | "b">(v: unknown, tag: K): v is { tag: K };
+        function l2(s: { tag: "a" } | { tag: "b" } | number) { if (hasTagIn(s, "a")) /*l2then*/s; else /*l2else*/s; }
+        function l3(s: { tag: "a" } | { tag: "b" } | number) { if (hasTag(s, "a")) /*l3then*/s; else /*l3else*/s; }
+        declare const lit: "a";
+        function l4(s: { tag: "a" } | { tag: "b" } | number) { if (hasTag(s, lit)) /*l4then*/s; else /*l4else*/s; }
+        function l5(s: { tag: "a" } | { tag: "b" } | number, y: "a") { if (hasTag(s, y)) /*l5then*/s; else /*l5else*/s; }
+        declare function isK<K>(v: unknown, k: K): v is K & string;
+        function l6(s: "a" | "b" | number) { if (isK(s, "a")) /*l6then*/s; else /*l6else*/s; }
+        function l7(s: { tag: "a" } | { tag: "b" } | number, y: string) { if (y === "a" && hasTag(s, y)) /*l7*/s; }
+        function l8(s: { tag: "a" } | { tag: "b" } | number, y: string) { if (y === "a" && !hasTag(s, y)) /*l8*/s; }
+        const c = "a";
+        function l9(s: { tag: "a" } | { tag: "b" } | number) { if (hasTag(s, c)) /*l9then*/s; else /*l9else*/s; }
+        "#,
+        &[
+            (
+                "l1then",
+                "s",
+                &[
+                    "Object { prototype: No prototype members: [\"kind\": string: a, \"x\": number: 1] }",
+                ],
+            ),
+            (
+                "l1else",
+                "s",
+                &[
+                    "Object { prototype: No prototype members: [\"kind\": string: b, \"y\": number: 2] }",
+                    "number",
+                ],
+            ),
+            (
+                "l2then",
+                "s",
+                &["Object { prototype: No prototype members: [\"tag\": string: a] }"],
+            ),
+            (
+                "l2else",
+                "s",
+                &[
+                    "Object { prototype: No prototype members: [\"tag\": string: b] }",
+                    "number",
+                ],
+            ),
+            (
+                "l3then",
+                "s",
+                &[
+                    "Object { prototype: No prototype members: [\"tag\": string: a] }",
+                    "Object { prototype: No prototype members: [\"tag\": string: b] }",
+                ],
+            ),
+            ("l3else", "s", &["number"]),
+            (
+                "l4then",
+                "s",
+                &["Object { prototype: No prototype members: [\"tag\": string: a] }"],
+            ),
+            (
+                "l4else",
+                "s",
+                &[
+                    "Object { prototype: No prototype members: [\"tag\": string: b] }",
+                    "number",
+                ],
+            ),
+            (
+                "l5then",
+                "s",
+                &["Object { prototype: No prototype members: [\"tag\": string: a] }"],
+            ),
+            (
+                "l5else",
+                "s",
+                &[
+                    "Object { prototype: No prototype members: [\"tag\": string: b] }",
+                    "number",
+                ],
+            ),
+            ("l6then", "s", &["string: a"]),
+            ("l6else", "s", &["number", "string: b"]),
+            (
+                "l7",
+                "s",
+                &[
+                    "Object { prototype: No prototype members: [\"tag\": string: a] }",
+                    "Object { prototype: No prototype members: [\"tag\": string: b] }",
+                ],
+            ),
+            // TypeScript gives `number`, because the comparison gives `y`
+            // a fresh literal type. Biome can't tell whether a narrowed
+            // literal type is fresh, so a false call removes nothing.
+            (
+                "l8",
+                "s",
+                &[
+                    "Object { prototype: No prototype members: [\"tag\": string: a] }",
+                    "Object { prototype: No prototype members: [\"tag\": string: b] }",
+                    "number",
+                ],
+            ),
+            (
+                "l9then",
+                "s",
+                &[
+                    "Object { prototype: No prototype members: [\"tag\": string: a] }",
+                    "Object { prototype: No prototype members: [\"tag\": string: b] }",
+                ],
+            ),
+            ("l9else", "s", &["number"]),
+        ],
+    );
+}
+
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type,
+// except where a comment says otherwise. A statement call of a generic or an
+// overloaded assertion function asserts through the signature that the
+// arguments select.
+#[test]
+fn generic_and_overloaded_assertions_narrow() {
+    assert_reads(
+        r#"
+        declare function assertIsDefined<T>(v: T | undefined): asserts v is T;
+        function a6(x: string | undefined) { assertIsDefined(x); /*a6*/x; }
+        declare function truthy<T>(input: unknown): asserts input;
+        function a7(x: string | null) { truthy(x); /*a7*/x; }
+        declare function check(input: string): asserts input;
+        declare function check(input: unknown): asserts input is string;
+        function a9(x: string | null) { check(x); /*a9*/x; }
+        "#,
+        &[
+            ("a6", "x", &["string"]),
+            ("a7", "x", &["string"]),
+            // TypeScript gives `string` through the second signature. A test
+            // that Biome doesn't decompose could narrow `x` to `string`,
+            // which the first signature accepts.
+            ("a9", "x", &["null", "string"]),
+        ],
+    );
+}
+
+// TypeScript 7.0.2 (`tsc --strict`) gives `string` in each read. An imported
+// generic type-guard function narrows as a local one does.
+#[test]
+fn imported_generic_type_guard_functions_narrow() {
+    assert_reads_with(
+        r#"
+        import { isNonNull, assertIsDefined } from "./generic";
+        function a(x: string | null) { if (isNonNull(x)) /*condition*/x; }
+        function b(x: string | undefined) { assertIsDefined(x); /*statement*/x; }
+        "#,
+        &[(
+            "/src/generic.ts",
+            r#"
+            export declare function isNonNull<T>(v: T | null): v is T;
+            export declare function assertIsDefined<T>(v: T | undefined): asserts v is T;
+            "#,
+        )],
+        &[
+            ("condition", "x", &["string"]),
+            ("statement", "x", &["string"]),
+        ],
+    );
+}
+
+// TypeScript 7.0.2 (`tsc --strict`) gives every call below the expected type,
+// except where a comment says otherwise. `filter` and `find` infer `S` from
+// the type predicate of their callback, when `S` satisfies its constraint,
+// `S extends T`, with `T` the element type of the array.
+#[test]
+fn callback_type_predicates_infer_call_results() {
+    assert_reads(
+        r#"
+        declare function isString(v: unknown): v is string;
+        function g13(xs: (string | number)[]) { /*L27_43*/xs.filter(isString); } // L27
+        function g14(xs: (string | number)[]) { /*L28_43*/xs.find(isString); } // L28
+        function a12(xs: (string | number)[]) { const s = xs.filter(isString); /*a12*/s; }
+        function a13(xs: (string | number)[]) { /*a13*/xs.filter((v): v is string => typeof v === "string"); }
+        function a4(nums: number[]) { /*a4*/nums.filter(isString); }
+        "#,
+        &[
+            (
+                "L27_43",
+                "xs.filter(isString)",
+                &["instanceof Array<string>"],
+            ),
+            ("L28_43", "xs.find(isString)", &["string", "undefined"]),
+            ("a12", "s", &["instanceof Array<string>"]),
+            (
+                "a13",
+                "xs.filter((v): v is string => typeof v === \"string\")",
+                &["instanceof Array<string>"],
+            ),
+            // TypeScript gives `number[]` through the second signature of
+            // `filter`, because `string` doesn't satisfy `S extends number`.
+            // Biome selects the first signature for the call's result and
+            // infers nothing for `S` there.
+            (
+                "a4",
+                "nums.filter(isString)",
+                &["instanceof Array<S extends T>"],
+            ),
+        ],
+    );
+}
+
+// TypeScript 7.0.2 (`tsc --strict`) gives `number[]` in every read below. A
+// constraint that names a type parameter of the array, as `S extends T` in
+// `filter` and `every`, reads it from the array's type at the call, which
+// `xs.every(isNumber)` narrows to `number[]`, so `S = string` violates it.
+#[test]
+fn constraints_read_the_receiver_at_the_call() {
+    assert_reads(
+        r#"
+        declare function isNumber(v: unknown): v is number;
+        declare function isString(v: unknown): v is string;
+        function r1(xs: (string | number)[]) { if (xs.every(isNumber)) /*r1*/xs.filter(isString); }
+        function r2(xs: (string | number)[]) { if (xs.every(isNumber) && xs.every(isString)) /*r2*/xs; }
+        function r3(xs: (string | number)[]) { if (xs.every(isNumber) && !xs.every(isString)) /*r3*/xs; }
+        function r4(xs: (string | number)[]) { if (xs.every(isNumber)) { const r = xs.filter(isString); /*r4*/r; } }
+        "#,
+        &[
+            // Biome selects the first signature of `filter` for the call's
+            // result and infers nothing for `S` there.
+            (
+                "r1",
+                "xs.filter(isString)",
+                &["instanceof Array<S extends T>"],
+            ),
+            ("r2", "xs", &["instanceof Array<number>"]),
+            ("r3", "xs", &["instanceof Array<number>"]),
+            // Narrower than TypeScript: the type of `r` comes from its
+            // initializer without narrowing, where `xs` is
+            // `(string | number)[]`, so `S = string` satisfies `S extends T`.
+            ("r4", "r", &["instanceof Array<string>"]),
+        ],
+    );
+}
+
+// TypeScript 7.0.2 (`tsc --strict`) gives `string` in the branch and
+// `string | null` after it. Lookups resolve the effect of a generic call point
+// once, through the tracked query that the reads of the subject share, and
+// infer no module completely to type its arguments.
+#[test]
+fn lookups_resolve_each_generic_call_point_once() {
+    const SOURCE: &str = r#"
+        declare function isNonNull<T>(v: T | null): v is T;
+        function f(x: string | null) {
+            if (isNonNull(x)) { /*then*/x; }
+            /*after*/x;
+        }
+    "#;
+    let (db, module) = narrowing_db_with(SOURCE, &[]);
+    db.clear_salsa_events();
+    for (marker, expected) in [("then", &["string"][..]), ("after", &["null", "string"])] {
+        let range = marked_range(SOURCE, marker, "x");
+        let ty = execute_type_inference_request(
+            &db,
+            TypeInferenceCaller::new("test", "callPoints"),
+            NormalizedExpressionTypeRequest::new(module, range),
+        )
+        .unwrap();
+        assert_eq!(variant_names(&db, ty), expected, "{marker}");
+    }
+    let events = db.take_salsa_events();
+    assert_eq!(
+        function_query_will_execute_count_by_name(&db, "infer_flow_call_effect", &events),
+        1
+    );
+    assert_eq!(
+        function_query_will_execute_count_by_name(&db, "infer_module_types", &events),
+        0
+    );
+    assert_reads(
+        SOURCE,
+        &[
+            ("then", "x", &["string"]),
+            ("after", "x", &["null", "string"]),
         ],
     );
 }

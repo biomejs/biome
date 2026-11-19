@@ -80,11 +80,7 @@ pub(super) fn fresh_literal_kinds(
     reference: &TypeReference,
     is_return_values: bool,
 ) -> FreshLiteralKinds {
-    let mut search = FreshLiteralSearch {
-        db,
-        remaining: MAX_FRESH_LITERAL_STEPS,
-        kinds: FreshLiteralKinds::default(),
-    };
+    let mut search = FreshLiteralSearch::new(db);
     let returned_values = match reference {
         TypeReference::Resolved(id)
             if is_return_values && id.level() == TypeResolverLevel::Thin =>
@@ -107,16 +103,49 @@ pub(super) fn fresh_literal_kinds(
     search.kinds
 }
 
+/// Returns the kinds of the fresh literal types of the value in `module`
+/// whose collected type is `reference`, as [`fresh_literal_kinds`] finds
+/// them, or `None` when Biome can't tell them.
+///
+/// Biome can't tell them when the search stops at a limit, and when the
+/// value comes from an expression whose type TypeScript can give a fresh
+/// literal type that no literal expression of the value shows: a call, as
+/// `id(1)`, an `await`, a read of a member, as of a `static readonly`
+/// property or of a `const` in a namespace, and a destructured element.
+pub(super) fn known_fresh_literal_kinds(
+    db: &dyn ModuleDb,
+    module: ModuleInfo,
+    js_info: &JsModuleInfo,
+    reference: &TypeReference,
+) -> Option<FreshLiteralKinds> {
+    let mut search = FreshLiteralSearch::new(db);
+    search.visit(module, js_info, reference);
+    (!search.untraced).then_some(search.kinds)
+}
+
 struct FreshLiteralSearch<'a> {
     db: &'a dyn ModuleDb,
     remaining: usize,
     kinds: FreshLiteralKinds,
+    /// Whether the search stopped at a limit or met a value whose fresh
+    /// literal types it can't trace (see [`known_fresh_literal_kinds`]).
+    untraced: bool,
 }
 
-impl FreshLiteralSearch<'_> {
+impl<'a> FreshLiteralSearch<'a> {
+    fn new(db: &'a dyn ModuleDb) -> Self {
+        Self {
+            db,
+            remaining: MAX_FRESH_LITERAL_STEPS,
+            kinds: FreshLiteralKinds::default(),
+            untraced: false,
+        }
+    }
+
     fn visit(&mut self, module: ModuleInfo, js_info: &JsModuleInfo, reference: &TypeReference) {
         if self.remaining == 0 {
             self.kinds = FreshLiteralKinds::all();
+            self.untraced = true;
             return;
         }
         self.remaining -= 1;
@@ -186,26 +215,28 @@ impl FreshLiteralSearch<'_> {
                     self.visit(module, js_info, &expression.left);
                     self.visit(module, js_info, &expression.right);
                 }
-                // A widened value has no fresh literal type left, and the
-                // end of a function gives `undefined` or nothing. Biome can't
-                // tell whether the others give one, as `id(1)` and `await 1`
-                // do, so it takes them as giving none.
-                RawTypeofExpression::WidenedLiteral(_)
-                | RawTypeofExpression::ImplicitReturn(_)
-                | RawTypeofExpression::Addition(_)
-                | RawTypeofExpression::Await(_)
-                | RawTypeofExpression::BitwiseNot(_)
+                // Biome can't tell whether these give a fresh literal type,
+                // as `id(1)` and `await 1` do, so it takes them as giving
+                // none, and records that it can't tell.
+                RawTypeofExpression::Await(_)
                 | RawTypeofExpression::Call(_)
                 | RawTypeofExpression::CallArgument(_)
                 | RawTypeofExpression::ComputedMember(_)
                 | RawTypeofExpression::Destructure(_)
                 | RawTypeofExpression::Index(_)
                 | RawTypeofExpression::OptionalChainIndex(_)
+                | RawTypeofExpression::StaticMember(_)
+                | RawTypeofExpression::OptionalChainStaticMember(_) => self.untraced = true,
+                // A widened value has no fresh literal type left, and the
+                // end of a function gives `undefined` or nothing. The others
+                // give no literal type, or one that a declaration states.
+                RawTypeofExpression::WidenedLiteral(_)
+                | RawTypeofExpression::ImplicitReturn(_)
+                | RawTypeofExpression::Addition(_)
+                | RawTypeofExpression::BitwiseNot(_)
                 | RawTypeofExpression::IterableValueOf(_)
                 | RawTypeofExpression::New(_)
                 | RawTypeofExpression::Parameter(_)
-                | RawTypeofExpression::StaticMember(_)
-                | RawTypeofExpression::OptionalChainStaticMember(_)
                 | RawTypeofExpression::Super(_)
                 | RawTypeofExpression::This(_)
                 | RawTypeofExpression::Typeof(_) => {}
@@ -278,6 +309,7 @@ impl FreshLiteralSearch<'_> {
             scope = parent;
         }
         self.kinds = FreshLiteralKinds::all();
+        self.untraced = true;
     }
 
     /// Visits the value of `binding` when it is a `const` declared without a
@@ -379,6 +411,26 @@ impl<'db> ResolutionCtx<'db, '_> {
         self.widen_literals_of_kinds(ty, is_return_type, |ctx| {
             fresh_literal_kinds(ctx.db, ctx.module, ctx.js_info, value, is_return_type)
         })
+    }
+
+    /// Returns `ty`, the resolved type of the value whose collected type is
+    /// `value`, with its fresh literal types widened, and whether Biome could
+    /// tell which literal types are fresh (see [`known_fresh_literal_kinds`]).
+    /// When it can't, every literal type of `ty` widens, which can be wider
+    /// than TypeScript.
+    pub(super) fn widen_known_fresh_literals(
+        &mut self,
+        value: &TypeReference,
+        ty: InferredTypeData<'db>,
+    ) -> (InferredTypeData<'db>, bool) {
+        let mut is_known = true;
+        let widened = self.widen_literals_of_kinds(ty, false, |ctx| {
+            known_fresh_literal_kinds(ctx.db, ctx.module, ctx.js_info, value).unwrap_or_else(|| {
+                is_known = false;
+                FreshLiteralKinds::all()
+            })
+        });
+        (widened, is_known)
     }
 
     /// Returns `ty` with every primitive literal type that it includes
