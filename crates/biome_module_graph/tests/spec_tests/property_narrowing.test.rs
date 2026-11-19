@@ -565,9 +565,10 @@ fn literal_key_writes_narrow_their_path() {
 // read. Two keys match only when both are literals that name the same
 // property. `-0` is not a literal, and `"01"` names a different property than
 // `1`. An integer literal above 2^53 - 1 names the property of the nearest
-// number, so `9007199254740993` names `"9007199254740992"`. TypeScript also
-// matches other spellings of a key, such as `0x0`, `1e0`, a template literal,
-// and an escape. Biome does not, so its type is wider for those reads.
+// number, so `9007199254740993` names `"9007199254740992"`. A template
+// literal without substitutions names the property it spells, as in
+// TypeScript. TypeScript also matches other spellings of a key, such as `0x0`,
+// `1e0`, and an escape. Biome does not, so its type is wider for those reads.
 #[test]
 fn keys_that_name_other_properties_do_not_match() {
     use InferredTypeData::{Null, String};
@@ -587,6 +588,7 @@ fn keys_that_name_other_properties_do_not_match() {
             if (t[0x0]) { /*hex*/t[0]; } // string
             if (o[1e0]) { /*exponent*/o["1"]; } // string
             if (o[`a`]) { /*template*/o.a; } // string
+            if (o.a) { /*templateRead*/o[`a`]; } // string
             if (o["\u0061"]) { /*escape*/o.a; } // string
         }
     "#;
@@ -600,7 +602,8 @@ fn keys_that_name_other_properties_do_not_match() {
             ("large", r#"r["12345678901234567890"]"#, &[String, Null]),
             ("hex", "t[0]", &[String, Null]),
             ("exponent", r#"o["1"]"#, &[String, Null]),
-            ("template", "o.a", &[String, Null]),
+            ("template", "o.a", &[String]),
+            ("templateRead", "o[`a`]", &[String]),
             ("escape", "o.a", &[String, Null]),
         ],
     );

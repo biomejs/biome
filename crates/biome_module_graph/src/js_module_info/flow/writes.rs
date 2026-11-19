@@ -558,6 +558,7 @@ mod tests {
             "delete o['v']",
             "(o as any)['v'] = null",
             "o['v'] ??= 1",
+            "o[`v`] = null",
         ] {
             assert_eq!(cancelled(body), ["o.v", "o.v.w", "o.v.w.x"], "{body}");
         }
@@ -592,7 +593,7 @@ mod tests {
             "o[0x0] = null",
             "o[1e0] = null",
             "o[9007199254740993] = null",
-            "o[`v`] = null",
+            "o[`v${k}`] = null",
             "o['\\u0076'] = null",
             "o[('v')] = null",
         ] {

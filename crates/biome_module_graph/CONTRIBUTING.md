@@ -940,8 +940,8 @@ The behavior of each kind of test is in
   that a pattern destructured, so such a guard is never marked as aliased,
   and it applies inside an inlined aliased condition too.
 - **`in`.** A test `"a" in x` becomes a runtime test of `x` (`FlowTest::In`)
-  whose key is a string or decimal integer literal, spelled as a property
-  path requires. The decomposed condition lists `x` with the objects of
+  whose key is a string, template, or decimal integer literal, spelled as a
+  property path requires (`literal_key`). The decomposed condition lists `x` with the objects of
   property guards, because `in` narrows only a type with an object type,
   `unknown`, or a type parameter. It adds no property guard. A test `#p in x`
   becomes a runtime test of `x` that holds the range at which inference finds
