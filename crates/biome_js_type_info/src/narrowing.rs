@@ -811,15 +811,43 @@ pub fn narrow_by_property<'db>(
     ty: InferredTypeData<'db>,
     declared: InferredTypeData<'db>,
     test: PropertyTest<'_, 'db>,
+    resolve: impl FnMut(InferredTypeData<'db>) -> InferredTypeData<'db>,
+) -> InferredTypeData<'db> {
+    narrow_by_property_tests(db, ty, declared, &[test], resolve)
+}
+
+/// Narrows `ty` by runtime tests of one of its properties that all hold, as
+/// [`narrow_by_property`] narrows it by one, but with the property values
+/// that pass every test: the members whose property type shares a value
+/// with what the tests leave together stay. So where neither `kind === "a"`
+/// nor `kind === "b"` holds, `{ kind: "a" | "b" } | { kind: "c" }` gives
+/// `{ kind: "c" }`, as in the `default` clause of a `switch`. Applying the
+/// tests one by one keeps both members, as TypeScript does for
+/// `kind !== "a" && kind !== "b"`.
+///
+/// Every test names the same property, and the first test tells whether the
+/// tests read it through an optional chain. Returns `ty` without tests.
+pub fn narrow_by_property_tests<'db>(
+    db: &'db dyn TypeDb,
+    ty: InferredTypeData<'db>,
+    declared: InferredTypeData<'db>,
+    tests: &[PropertyTest<'_, 'db>],
     mut resolve: impl FnMut(InferredTypeData<'db>) -> InferredTypeData<'db>,
 ) -> InferredTypeData<'db> {
+    let Some(test) = tests.first() else {
+        return ty;
+    };
     if is_narrowing_invariant(ty)
         || ty == InferredTypeData::NeverKeyword
         || !may_narrow_by_property(db, declared)
     {
         return ty;
     }
-    let Some(predicate) = PreparedPredicate::new(db, test.predicate) else {
+    let Some(predicates) = tests
+        .iter()
+        .map(|test| Some((PreparedPredicate::new(db, test.predicate)?, test.positive)))
+        .collect::<Option<Vec<_>>>()
+    else {
         return ty;
     };
     let resolve: &mut TypeResolver<'db, '_> = &mut resolve;
@@ -859,10 +887,12 @@ pub fn narrow_by_property<'db>(
     if has_nullish {
         property_types.push(InferredTypeData::Undefined);
     }
-    let property = InferredTypeData::union_from_types(db, property_types);
-    let narrowed = narrow_prepared(db, property, &predicate, test.positive, resolve);
-    if narrowed == InferredTypeData::NeverKeyword {
-        return narrowed;
+    let mut narrowed = InferredTypeData::union_from_types(db, property_types);
+    for (predicate, positive) in &predicates {
+        narrowed = narrow_prepared(db, narrowed, predicate, *positive, resolve);
+        if narrowed == InferredTypeData::NeverKeyword {
+            return narrowed;
+        }
     }
     let Some(remaining_values) = union_members(db, narrowed, &mut remaining).and_then(|types| {
         types

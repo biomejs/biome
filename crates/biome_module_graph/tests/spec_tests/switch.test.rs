@@ -479,23 +479,37 @@ fn discriminant_cases_narrow_the_object() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives `{ kind: "c"; y: 2 }` at both
-// reads, because its `default` removes every member whose discriminant is one
-// of the case values, even when the discriminant is a union of them. Biome
-// removes a member only when a single case removes all its values, so it
-// keeps both members, which is wider.
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
+// Its `default` removes every member whose discriminant is one of the case
+// values, even when the discriminant is a union of them, through a `const`
+// that holds the property and through an element of a destructuring pattern
+// too. An `if` that tests each value in turn keeps such a member, at
+// `separateIf`.
 #[test]
-fn default_keeps_members_whose_discriminant_is_a_union_of_case_values() {
+fn default_removes_members_whose_discriminant_is_a_union_of_case_values() {
     assert_reads(
         r#"
         interface AB { kind: "a" | "b"; x: 1 }
         interface C { kind: "c"; y: 2 }
+        interface D { kind: "c" | "d"; z: 3 }
+        type P = { kind: "a" | "b"; v: number } | { kind: "c"; v: string };
         function f13(s: AB | C) { switch (s.kind) { case "a": case "b": break; default: /*group*/s; } }
         function f14(s: AB | C) { switch (s.kind) { case "a": break; case "b": break; default: /*separate*/s; } }
+        function f15(s: AB | C | undefined) { switch (s?.kind) { case "a": case "b": break; default: /*optional*/s; } }
+        function f16(s: AB | C | D) { switch (s.kind) { case "a": case "b": case "c": break; default: /*partial*/s; } }
+        function f17(s: AB | C) { const k = s.kind; switch (k) { case "a": case "b": break; default: /*held*/s; } }
+        function f18(s: P) { const { kind, v } = s; switch (kind) { case "a": case "b": break; default: /*element*/v; /*pattern*/s; } }
+        function f19(s: AB | C) { if (s.kind !== "a" && s.kind !== "b") /*separateIf*/s; }
         "#,
         &[
-            ("group", "s", &["AB", "C"]),
-            ("separate", "s", &["AB", "C"]),
+            ("group", "s", &["C"]),
+            ("separate", "s", &["C"]),
+            ("optional", "s", &["C", "undefined"]),
+            ("partial", "s", &["D"]),
+            ("held", "s", &["C"]),
+            ("element", "v", &["string"]),
+            ("pattern", "s", &["[\"kind\": string: c, \"v\": string]"]),
+            ("separateIf", "s", &["AB", "C"]),
         ],
     );
 }

@@ -61,7 +61,7 @@ use biome_js_type_info::{
     instantiate_intersection_alias, is_narrowing_invariant, is_type_parameter_or_intersection,
     may_narrow_by_instanceof, may_narrow_by_property, narrow_by_assignment, narrow_by_constructor,
     narrow_by_in_operator, narrow_by_instanceof, narrow_by_private_name, narrow_by_property,
-    narrow_by_type_predicate, narrow_type, type_parameter_constraint,
+    narrow_by_property_tests, narrow_by_type_predicate, narrow_type, type_parameter_constraint,
 };
 use biome_rowan::{AstNode, NodeOrToken, Text, TextRange, TextSize, TokenText};
 use rustc_hash::FxHashMap;
@@ -3011,7 +3011,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                     .iter()
                     .any(|member| is_type_parameter_or_intersection(self.db, *member))
                 {
-                    return self.apply_guard(root, *guard, solve, ty, remaining);
+                    return self.apply_unmatched(root, *guard, solve, ty, remaining);
                 }
                 // Where no case matches, TypeScript removes the members whose
                 // every value a case covers and keeps the others whole. So a
@@ -3034,7 +3034,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                 let removed_type_parameter = kept.len() + others.len() < members.len();
                 if !others.is_empty() {
                     let others = TypeData::union_from_types(self.db, others);
-                    let narrowed = self.apply_guard(root, *guard, solve, others, remaining)?;
+                    let narrowed = self.apply_unmatched(root, *guard, solve, others, remaining)?;
                     if !removed_type_parameter && narrowed == others {
                         return Some(ty);
                     }
@@ -3067,6 +3067,77 @@ impl<'db> ResolutionCtx<'db, '_> {
                 }
             }
         })
+    }
+
+    /// Returns `ty` after the guard at `guard`, which holds where no case of a
+    /// `switch` matches, or `None` when the flow work limit runs out.
+    ///
+    /// When cases test the same property of the subject, as `s.kind` in
+    /// `switch (s.kind)`, the property values that every case leaves decide
+    /// which members stay, as in TypeScript. So
+    /// `{ kind: "a" | "b" } | { kind: "c" }` gives `{ kind: "c" }` after
+    /// `case "a": case "b":`, although each case alone keeps both members.
+    fn apply_unmatched(
+        &mut self,
+        root: &RootFlow,
+        guard: usize,
+        solve: &mut GuardSolve<'db>,
+        ty: TypeData<'db>,
+        remaining: &mut usize,
+    ) -> Option<TypeData<'db>> {
+        let narrowed = self.apply_guard(root, guard, solve, ty, remaining)?;
+        if solve.evolving == FlowEvolving::Array {
+            return Some(narrowed);
+        }
+        let mut tests = Vec::new();
+        let mut pending = vec![guard];
+        while let Some(index) = pending.pop() {
+            match root.guards.get(index) {
+                Some(FlowGuard::Both {
+                    left,
+                    right,
+                    sequential: true,
+                }) => pending.extend([*left, *right]),
+                Some(FlowGuard::Property {
+                    object,
+                    key: PropertyKey::Name(name),
+                    test,
+                    positive: false,
+                    optional_chain,
+                    ..
+                }) if *object == solve.subject => {
+                    if tests.first().is_some_and(|first: &PropertyTest| {
+                        first.name != name.text() || first.optional_chain != *optional_chain
+                    }) {
+                        return Some(narrowed);
+                    }
+                    if let Some(predicate) = self.test_predicate(*test, solve) {
+                        tests.push(PropertyTest {
+                            name: name.text(),
+                            predicate,
+                            positive: false,
+                            optional_chain: *optional_chain,
+                        });
+                    }
+                }
+                _ => {}
+            }
+        }
+        if tests.len() < 2 {
+            return Some(narrowed);
+        }
+        let declared = if solve.evolving == FlowEvolving::Variable {
+            ty
+        } else {
+            solve.declared
+        };
+        Some(narrow_by_property_tests(
+            self.db,
+            narrowed,
+            declared,
+            &tests,
+            self.narrowing_resolver(),
+        ))
     }
 
     /// Returns whether the guard at `guard`, which holds where no case of a
