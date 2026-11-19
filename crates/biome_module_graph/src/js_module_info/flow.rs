@@ -3398,9 +3398,9 @@ impl RootCollector<'_> {
     /// nested in the one that declares it, a `let` counts only when it has
     /// no initializer and no definite assignment (see
     /// [`is_definite_assignment`]), as in TypeScript, so a `let` that only
-    /// `++` assigns counts. A `var` counts there only when it has no
-    /// initializer and no write at all, where TypeScript assumes every `var`
-    /// initialized. A property of `this`, as `this.x` but not `this.x.y`,
+    /// `++` assigns counts. A `var` never counts there, because TypeScript
+    /// assumes every `var` initialized. A property of `this`, as `this.x` but
+    /// not `this.x.y`,
     /// counts in a constructor, and in an arrow function that it calls where
     /// it is defined, when its key names a field of the constructor's class
     /// that is not `static`, has no initializer and no `!`, and is not
@@ -3997,9 +3997,7 @@ fn is_uninitialized_declaration(binding: &Binding, enclosed: bool) -> bool {
     match kind {
         Ok(JsVariableKind::Let) if enclosed => !initialized && !is_definitely_assigned(binding),
         Ok(JsVariableKind::Let) => !initialized,
-        Ok(JsVariableKind::Var) => {
-            !enclosed || (!initialized && binding.all_writes().next().is_none())
-        }
+        Ok(JsVariableKind::Var) => !enclosed,
         Ok(JsVariableKind::Const | JsVariableKind::Using) | Err(_) => false,
     }
 }

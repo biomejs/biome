@@ -276,8 +276,8 @@ fn imported_bindings_narrow() {
 // variable that an enclosing root declares by its own tests and writes,
 // from the declared type. Writes in other functions and in the enclosing
 // root never change its type there. A `let` without an initializer that
-// nothing writes may be read before it is assigned (TS2454). Biome reads
-// such a `var` the same way, where TypeScript assumes it initialized.
+// nothing writes may be read before it is assigned (TS2454), while such a
+// `var` is assumed initialized.
 #[test]
 fn variables_of_enclosing_roots_narrow_by_the_reading_root() {
     assert_reads(
@@ -332,8 +332,7 @@ fn variables_of_enclosing_roots_narrow_by_the_reading_root() {
             ("o13", "config.v", &["string"]),
             ("o14", "x", &["string"]),
             ("u7", "x", &["null", "string"]),
-            // TypeScript: `string`.
-            ("outerVar", "w2", &["null", "string"]),
+            ("outerVar", "w2", &["string"]),
             ("writtenElsewhere", "g2", &["string"]),
             ("writtenAround", "g3", &["string"]),
             ("callback", "g5", &["string"]),

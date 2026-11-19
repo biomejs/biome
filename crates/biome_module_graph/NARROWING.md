@@ -292,7 +292,6 @@ reports in it.
 | Code | TypeScript | Biome | Effect on rules |
 | --- | --- | --- | --- |
 | `let top: string \| null = f(); if (top) () => top`, at the top level of a module | `string` | `string \| null` | `noUnnecessaryConditions` can miss an unnecessary check of `top` in the closure. |
-| `var v: string \| null; function f() { if (v !== null) v }` | `string` | `string \| null` | `noUnnecessaryConditions` can miss an unnecessary check of `v`. |
 | `x: string \| number; ((y) => { y })(x)` | `string \| number` | Unknown | A rule can miss a report on `y`. |
 
 ### Writes
