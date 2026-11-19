@@ -438,8 +438,7 @@ fn any_keeps_its_type_for_other_tests() {
             ("L20_46", "x", &["any"]),
             ("L36_39", "x", &["any"]),
             ("L37_45", "x", &["any"]),
-            // `any`: Biome doesn't type a property of `any`.
-            ("L11_54", "x.v", &["Unknown"]),
+            ("L11_54", "x.v", &["any"]),
             ("L16_36", "x", &["any"]),
             ("L27_41", "x", &["any"]),
             ("L29_42", "o.v", &["any"]),
@@ -655,14 +654,11 @@ fn instance_tested_any_narrows_as_annotated_any() {
             ("L26_82", "d", &["instanceof A"]),
             ("L27_69", "a", &["instanceof A"]),
             ("L27_91", "a", &["any"]),
-            // `A`
-            ("L28_68", "a", &["Unknown"]),
+            ("L28_68", "a", &["instanceof A"]),
             ("L29_64", "d", &["Foo"]),
             ("L29_86", "d", &["any"]),
-            // `any`
-            ("L30_47", "x.v", &["Unknown"]),
-            // `A`
-            ("L31_62", "a", &["Unknown"]),
+            ("L30_47", "x.v", &["any"]),
+            ("L31_62", "a", &["instanceof A"]),
         ],
     );
 }
@@ -709,6 +705,50 @@ fn type_predicates_with_an_empty_object_target_narrow_unknown_in_their_else_bran
             // TypeScript: `null | undefined`. `{}` and an empty interface are
             // subtypes of each other, so Biome keeps `{}`.
             ("interface", "x", &["unknown"]),
+        ],
+    );
+}
+
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type,
+// except where a comment gives TypeScript's type. A property of `any`, and a
+// variable that a destructuring pattern takes from `any` by a property name,
+// are `any`. TypeScript narrows such a variable, but never a property path
+// whose object is `any` at the read.
+#[test]
+fn properties_of_any_are_any() {
+    assert_reads(
+        r#"
+        export {};
+        declare const s: string;
+        class A { a = 1 }
+        function a1(x: any) { /*plain*/x.v; }
+        function a4(x: any) { const { a } = x; /*destructured*/a; if (a instanceof A) /*destructuredThen*/a; }
+        function a6() { const d = JSON.parse(s); if (d.v instanceof A) /*inferredObject*/d.v; }
+        function a8(x: any) { if (x.v.w) /*nested*/x.v.w; }
+        function a9(x: any) { if (x instanceof A) /*narrowedObject*/x.a; }
+        function a10(o: { d: any }) { if (typeof o.d.v === "string") /*property*/o.d.v; }
+        function a11(x: any) { /*optional*/x?.v; }
+        function a12(x: any) { const { a = 1 } = x; /*defaulted*/a; }
+        function a13(x: any) { if (x.v) { /*member*/x.v.length; } }
+        function a3(x: any) { if (typeof x["v"] === "string") /*elementAccess*/x["v"]; }
+        function a7(x: any) { const [b] = x; /*arrayPattern*/b; }
+        "#,
+        &[
+            ("plain", "x.v", &["any"]),
+            ("destructured", "a", &["any"]),
+            ("destructuredThen", "a", &["instanceof A"]),
+            ("inferredObject", "d.v", &["any"]),
+            ("nested", "x.v.w", &["any"]),
+            ("narrowedObject", "x.a", &["number"]),
+            ("property", "o.d.v", &["any"]),
+            ("optional", "x?.v", &["any"]),
+            ("defaulted", "a", &["any"]),
+            ("member", "x.v.length", &["any"]),
+            // TypeScript: `string`. Biome doesn't narrow a property path on
+            // a variable declared `any`.
+            ("elementAccess", "x[\"v\"]", &["any"]),
+            // TypeScript: `any`. Biome types an element of `any` as Unknown.
+            ("arrayPattern", "b", &["Unknown"]),
         ],
     );
 }
