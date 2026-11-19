@@ -1,0 +1,10 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validOutsideConvex.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+const apiKey = process.env.GIPHY_KEY;
+
+```

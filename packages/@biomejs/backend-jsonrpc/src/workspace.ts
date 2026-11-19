@@ -3060,6 +3060,11 @@ export interface Nursery {
 	 */
 	noConvexDuplicateIndexes?: NoConvexDuplicateIndexesConfiguration;
 	/**
+	 * Disallow process.env in Convex functions.
+	 * See https://biomejs.dev/linter/rules/no-convex-process-env
+	 */
+	noConvexProcessEnv?: NoConvexProcessEnvConfiguration;
+	/**
 	 * Disallow calling .filter() on a Convex database query.
 	 * See https://biomejs.dev/linter/rules/no-convex-query-filter
 	 */
@@ -7021,6 +7026,9 @@ export type NoConstantComparisonsConfiguration =
 export type NoConvexDuplicateIndexesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoConvexDuplicateIndexesOptions;
+export type NoConvexProcessEnvConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoConvexProcessEnvOptions;
 export type NoConvexQueryFilterConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoConvexQueryFilterOptions;
@@ -10258,6 +10266,14 @@ export interface RuleWithNoConstantComparisonsOptions {
 export interface RuleWithNoConvexDuplicateIndexesOptions {
 	level: RulePlainConfiguration;
 	options?: NoConvexDuplicateIndexesOptions;
+}
+export interface RuleWithNoConvexProcessEnvOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: NoConvexProcessEnvOptions;
 }
 export interface RuleWithNoConvexQueryFilterOptions {
 	level: RulePlainConfiguration;
@@ -14136,6 +14152,7 @@ export type NoConfusingArraySpliceOptions = {};
 export type NoConsoleSpacesOptions = {};
 export type NoConstantComparisonsOptions = {};
 export type NoConvexDuplicateIndexesOptions = {};
+export type NoConvexProcessEnvOptions = {};
 export type NoConvexQueryFilterOptions = {};
 export type NoConvexTopOfHourCronsOptions = {};
 export type NoDanglingUnderscoreOptions = {};
@@ -16726,6 +16743,7 @@ export type Category =
 	| "lint/nursery/noConsoleSpaces"
 	| "lint/nursery/noConstantComparisons"
 	| "lint/nursery/noConvexDuplicateIndexes"
+	| "lint/nursery/noConvexProcessEnv"
 	| "lint/nursery/noConvexQueryFilter"
 	| "lint/nursery/noConvexTopOfHourCrons"
 	| "lint/nursery/noDanglingUnderscore"
