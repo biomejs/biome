@@ -295,6 +295,13 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
             biome_rule_options::no_control_characters_in_regex::NoControlCharactersInRegexOptions,
         >(),
     ));
+    result.push((
+        "nursery",
+        "noConvexDuplicateIndexes",
+        TypeId::of::<
+            biome_rule_options::no_convex_duplicate_indexes::NoConvexDuplicateIndexesOptions,
+        >(),
+    ));
     result.push(("nursery", "noConvexTopOfHourCrons", TypeId::of::<biome_rule_options::no_convex_top_of_hour_crons::NoConvexTopOfHourCronsOptions>()));
     result.push((
         "security",

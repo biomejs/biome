@@ -4084,6 +4084,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoConvexDuplicateIndexesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoConvexDuplicateIndexesOptions" }
+			]
+		},
+		"NoConvexDuplicateIndexesOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoConvexTopOfHourCronsConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -9686,6 +9696,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noConvexDuplicateIndexes": {
+					"description": "Disallow Convex database indexes whose fields are the first fields of another index on the same table.\nSee https://biomejs.dev/linter/rules/no-convex-duplicate-indexes",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoConvexDuplicateIndexesConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noConvexTopOfHourCrons": {
 					"description": "Disallow scheduling Convex cron jobs at the start of the hour.\nSee https://biomejs.dev/linter/rules/no-convex-top-of-hour-crons",
 					"anyOf": [
@@ -13644,6 +13661,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoControlCharactersInRegexOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoConvexDuplicateIndexesOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoConvexDuplicateIndexesOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
