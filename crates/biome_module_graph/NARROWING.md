@@ -119,6 +119,7 @@ These results match TypeScript's and can surprise a reader.
 | A type-guard function with an unrelated target | `x: Bar; if (isFoo(x)) x` | `Bar & Foo` |
 | A type-guard function for `{}` on `unknown` | `isObj(v: unknown): v is {}; x: unknown; if (isObj(x)) {} else x` | `null \| undefined` |
 | `typeof` that replaces an object type | `interface Len { length: number }; x: number \| Len; if (typeof x === "string") x` | `string` |
+| `typeof` with a string that names no kind of value | `x: string \| Foo; if (typeof x === "strin") x` | `Foo` |
 | `any` with `typeof` | `x: any; if (typeof x === "string") x` | `string` |
 | `any` with other checks | `x: any; if (x === "a") x` | `any` |
 | A property of `any` | `x: any; if (typeof x.v === "string") x.v` | `any` |
@@ -177,6 +178,7 @@ precision, Biome uses it instead and differs from TypeScript.
 | The falsy part of `number` in `&&` | `n: number; t: string; n && t` | `string \| 0` | `number \| string` | `-0` and `NaN` are falsy too, so rules don't take the falsy result as `0`. |
 | Falsiness and object types | `interface Len { length: number }; x: Len \| undefined; if (!x) x` | `undefined` | `Len \| undefined` | `""` is a falsy `Len`, so `noUnnecessaryConditions` doesn't call a check of `x` there unnecessary. |
 | `typeof` and object types | `x: string \| Len \| null; if (typeof x !== "object") x` | `string` | `string \| Len` | A string can be a `Len`, so rules keep `Len` in that branch. |
+| A failed `typeof` test with a string that names no kind of value | `x: string \| Foo; if (typeof x === "strin") {} else x` | `string` | `string \| Foo` | A `Foo` has the `typeof` `"object"`, so rules keep `Foo` in that branch. |
 | A write through a key that isn't a literal | `o: { v: string \| null }; k: "v"; if (o.v) { o[k] = null; o.v }` | `string` | `string \| null` | `o[k]` can write `o.v`, so `noUnnecessaryConditions` doesn't call a later check of `o.v` unnecessary. |
 | A private name and a string key | `if (this.#x) this["#x"]` | `string` | `string \| null` | `this["#x"]` is another value, so rules don't apply the check of `this.#x` to it. |
 | A `const` that holds a property, after a write | `const k = s.kind; s.kind = "s"; if (k === "c") s` | `Circle` | `Circle \| Square` | `k` holds the value from before the write, so rules don't take `s` as a `Circle`. |
@@ -442,7 +444,8 @@ string.
 | `x: T, with T extends string \| null \| undefined; if (x !== null) x` | `T & {}` | `(T & {}) \| (T & undefined)` | `noUnnecessaryConditions` can miss an unnecessary check of `x` against `undefined`. |
 | `class L { length = 0 }; x: L \| number; if (typeof x === "string") x` | `string` | `L` | A rule can miss a report on `x`. |
 | `interface Pad { padStart(n: number): string }; x: Pad \| number; if (typeof x === "string") x` | `string` | `Pad` | A rule can miss a report on `x`. |
-| `x: string \| number; switch (typeof x) { case "strin": x }` | `never` | `string \| number` | A rule can miss that the case never matches. |
+| `x: string \| Foo; switch (typeof x) { case "": x }` | `never` | `Foo` | A rule can miss that the case never matches. |
+| `x: any; if (typeof x === "strin") x` | `object` | `any` | A rule can miss a report on `x`. |
 | `x: string \| void; if (typeof x === "string") x` | `string` | Unknown | A rule can miss a report on `x`. |
 
 A narrowed read of a type with a `void` member is Unknown, because a function

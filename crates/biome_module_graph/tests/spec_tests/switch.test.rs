@@ -566,13 +566,64 @@ fn typeof_cases_narrow_the_operand() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives every read below but `invalid` the
-// expected type. A case that is neither a string literal nor a template
-// literal without substitutions makes no case of
-// `switch (typeof x)` narrow, and a `typeof` case narrows only the operand,
-// not the object that holds it or the pattern that declares it. TypeScript
-// gives `never` for an invalid kind (`"strin"`), where Biome keeps the
-// declared type, which is wider.
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type,
+// and `string` at `otherDefault` and `otherElse`, `object` at `otherUnknown`
+// and `otherAny`, and `never` at `empty`. A `typeof` test with a string that names no kind of
+// value, which TypeScript reports, holds only for an object type, so it keeps
+// the members that can be objects, other than `null`, or functions.
+// TypeScript also removes the object types where the test fails, although an
+// ordinary object gives `"object"`, so Biome keeps the incoming type there,
+// which is wider. With `unknown`, Biome also keeps `Function`, with `any`, it
+// keeps `any`, and an empty string narrows as any other string that names no
+// kind, all wider.
+#[test]
+fn typeof_tests_with_strings_that_name_no_kind_keep_object_types() {
+    assert_reads(
+        r#"
+        function t1(x: string | Foo) { switch (typeof x) { case "strin": /*other*/x; break; default: /*otherDefault*/x; } }
+        function t2(x: string | (() => void)) { switch (typeof x) { case "strin": /*otherFunction*/x; } }
+        function t3(x: string | object | null) { switch (typeof x) { case "strin": /*otherNull*/x; } }
+        function t4(x: unknown) { switch (typeof x) { case "strin": /*otherUnknown*/x; break; default: /*otherUnknownDefault*/x; } }
+        function t5(x: string | number) { switch (typeof x) { case "strin": case "string": /*group*/x; break; default: /*groupDefault*/x; } }
+        function t6(x: string | Foo, y: string | null) { switch (typeof x) { case "string": case "object": case "strin": if (y === null) return; } /*exhaustive*/y; }
+        function t7(x: string | Foo) { switch (typeof x) { case "": /*empty*/x; } }
+        function t8(x: string | Foo) { if (typeof x === "strin") /*otherIf*/x; else /*otherElse*/x; }
+        function t9(o: { v: string | Foo } | undefined) { if (typeof o?.v === "strin") /*receiver*/o; }
+        function t10(x: any) { if (typeof x === "strin") /*otherAny*/x; }
+        "#,
+        &[
+            ("other", "x", &["Foo"]),
+            // TypeScript: `string`.
+            ("otherDefault", "x", &["Foo", "string"]),
+            (
+                "otherFunction",
+                "x",
+                &["sync Function { accepts: { params: [] type_args: [] } returns: void }"],
+            ),
+            ("otherNull", "x", &["object"]),
+            // TypeScript: `object`.
+            ("otherUnknown", "x", &["instanceof Function", "object"]),
+            ("otherUnknownDefault", "x", &["unknown"]),
+            ("group", "x", &["string"]),
+            ("groupDefault", "x", &["number"]),
+            ("exhaustive", "y", &["string"]),
+            // TypeScript: `never`.
+            ("empty", "x", &["Foo"]),
+            ("otherIf", "x", &["Foo"]),
+            // TypeScript: `string`.
+            ("otherElse", "x", &["Foo", "string"]),
+            ("receiver", "o", &["[\"v\": string | instanceof Foo]"]),
+            // TypeScript: `object`.
+            ("otherAny", "x", &["any"]),
+        ],
+    );
+}
+
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type,
+// and `never` at `invalid`, where Biome gives its Unknown type. A case that is
+// neither a string literal nor a template literal without substitutions makes
+// no case of `switch (typeof x)` narrow, and a `typeof` case narrows only the
+// operand, not the object that holds it or the pattern that declares it.
 #[test]
 fn typeof_switches_narrow_only_their_operand() {
     assert_reads(
@@ -596,7 +647,7 @@ fn typeof_switches_narrow_only_their_operand() {
                     "[\"k\": string: a, \"a\": number: 1]",
                 ],
             ),
-            ("invalid", "x", &["number", "string"]),
+            ("invalid", "x", &["Unknown"]),
             ("template", "x", &["string"]),
             ("templateDefault", "x", &["number"]),
             ("templateIf", "x", &["string"]),

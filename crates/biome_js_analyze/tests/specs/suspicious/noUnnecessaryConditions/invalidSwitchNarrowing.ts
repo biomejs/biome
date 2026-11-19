@@ -32,6 +32,13 @@ function caseOfTypeof(value: string | number | null) {
 	}
 }
 
+function caseOfStringThatNamesNoKind(value: { size: number } | null) {
+	switch (typeof value) {
+		case "strin":
+			return value?.size;
+	}
+}
+
 function switchOnTrue(value: string | null) {
 	switch (true) {
 		case value !== null:
