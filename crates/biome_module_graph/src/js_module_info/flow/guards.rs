@@ -1009,9 +1009,10 @@ fn named_binding(qualifier: &TypeReferenceQualifier, model: &SemanticModel) -> O
 /// returns, or returns `None` when it narrows nothing.
 ///
 /// A statement call is the expression of an expression statement, or an
-/// operand of the comma operator there, without parentheses around it. These
-/// are the calls that TypeScript adds to the flow. For example,
-/// `(assert(x));` is none, while `(assert(x), 0);` is one.
+/// operand of the comma operator anywhere, without parentheses around it.
+/// These are the calls that TypeScript adds to the flow. For example,
+/// `(assert(x));` is none, while `(assert(x), 0);` and
+/// `return (assert(x), x);` have one.
 ///
 /// A call of a local assertion function applies its contract here, as
 /// [`GuardFunctions::guard`] reads it. `asserts value is T` tests an argument

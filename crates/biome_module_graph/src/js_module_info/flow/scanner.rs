@@ -416,21 +416,15 @@ fn is_evaluation_condition(node: &JsSyntaxNode) -> bool {
 
 /// Returns whether `call` is a statement call, one that TypeScript adds to
 /// the flow: the expression of an expression statement, or an operand of the
-/// comma operator there, through any parentheses around the comma
-/// expression. A call in parentheses is none, as in `(assert(x));`.
+/// comma operator, wherever the comma expression is. A call in parentheses
+/// is none, as in `(assert(x));`.
 fn is_statement_call(call: &JsCallExpression) -> bool {
-    let mut parent = call.syntax().parent();
-    let mut in_sequence = false;
-    while let Some(node) = parent {
-        match node.kind() {
-            JsSyntaxKind::JS_EXPRESSION_STATEMENT => return true,
-            JsSyntaxKind::JS_SEQUENCE_EXPRESSION => in_sequence = true,
-            JsSyntaxKind::JS_PARENTHESIZED_EXPRESSION if in_sequence => {}
-            _ => return false,
-        }
-        parent = node.parent();
-    }
-    false
+    call.syntax().parent().is_some_and(|parent| {
+        matches!(
+            parent.kind(),
+            JsSyntaxKind::JS_EXPRESSION_STATEMENT | JsSyntaxKind::JS_SEQUENCE_EXPRESSION
+        )
+    })
 }
 
 /// Returns whether a statement call `call` may call an assertion, as far as

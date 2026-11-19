@@ -474,13 +474,13 @@ or a computed key.
 | `x: string \| number; if (isFoo(x)) x` | `(string \| number) & Foo` | `string \| number` | A rule can miss a report on `x`. |
 | `interface Same { a: number }; x: Same \| Bar; if (isFoo(x)) {} else x` | `Bar` | `Same \| Bar` | `noUnnecessaryConditions` can miss an unnecessary check of `x`. |
 | `isObj(v: unknown): v is {}; x: unknown; if (isObj(x)) {} else x` | `null \| undefined` | `unknown` | `noUnnecessaryConditions` can miss an unnecessary check of `x`. |
-| `x: string \| number; return (assertString(x), x)` | `string` | `string \| number` | A rule can miss a report on the returned `x`. |
 | `x: { y: string \| number } \| undefined; if (isString(x?.y)) x` | `{ y: string \| number }` | `{ y: string \| number } \| undefined` | `noUnnecessaryConditions` can miss an unnecessary `?.` on `x`. |
 
 Biome skips an earlier overload only when no narrowing could make it accept
 the arguments, and narrows only the true branch where TypeScript might infer
 a type argument differently, as from `y` in the fourth row. A call asserts or
-ends a path only as a statement, when every name along the callee has an
+ends a path only as a statement or as an operand of the comma operator, as
+`return (assertString(x), x)`, when every name along the callee has an
 explicit type, as TypeScript requires.
 
 ### Inferred type predicates

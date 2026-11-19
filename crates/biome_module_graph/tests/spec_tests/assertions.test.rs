@@ -499,10 +499,8 @@ fn assertions_narrow_despite_a_following_eval() {
 }
 
 // TypeScript 7.0.2 (`tsc --strict`) also narrows the reads after
-// `assertString?.(value)`. It narrows after the calls in `return` and
-// `throw` too, because it adds a call that is an operand of the comma
-// operator to the flow wherever the comma operator appears. Biome keeps the
-// declared type in these cases, which is wider.
+// `assertString?.(value)`. Biome keeps the declared type there, which is
+// wider.
 #[test]
 fn optional_and_nested_assertion_calls_preserve_incoming_types() {
     use InferredTypeData::{Number, String};
@@ -518,8 +516,6 @@ fn optional_and_nested_assertion_calls_preserve_incoming_types() {
         "void assertString(value); /*read*/value;",
         "result = assertString(value); /*read*/value;",
         "const assigned = assertString(value); /*read*/value;",
-        "return (assertString(value), /*read*/value);",
-        "throw (assertString(value), /*read*/value);",
         "assertString(...[value]); /*read*/value;",
     ] {
         let source = format!(
