@@ -12,9 +12,10 @@ use biome_js_control_flow::{AnyJsControlFlowRoot, is_truthy_literal};
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
     AnyJsBindingPattern, AnyJsClassMember, AnyJsExpression, AnyJsForInOrOfInitializer,
-    AnyJsFunction, AnyJsFunctionBody, AnyJsStatement, AnyJsSwitchClause, AnyTsType,
-    JsDoWhileStatement, JsForInStatement, JsForOfStatement, JsForStatement, JsIdentifierExpression,
-    JsIfStatement, JsLanguage, JsSwitchStatement, JsSyntaxNode, JsWhileStatement, T,
+    AnyJsFunction, AnyJsFunctionBody, AnyJsStatement, AnyJsSwitchClause, AnyJsTryStatement,
+    AnyTsType, JsDoWhileStatement, JsForInStatement, JsForOfStatement, JsForStatement,
+    JsIdentifierExpression, JsIfStatement, JsLanguage, JsSwitchStatement, JsSyntaxNode,
+    JsWhileStatement, T,
 };
 use biome_rowan::{
     AstNode, AstNodeList, AstSeparatedList, SyntaxKindSet, SyntaxResult, TokenText,
@@ -102,9 +103,9 @@ type Build<T> = Result<T, Unsupported>;
 /// unreachable code records no reads.
 ///
 /// The builder models the control flow of blocks, `if`, `while`, `do...while`,
-/// `for`, `for...in`, `for...of`, `switch`, labeled statements, `break`,
-/// `continue`, `return`, and `throw`. Any other statement, such as `try` or a
-/// class declaration, is an opaque region: the builder evaluates its
+/// `for`, `for...in`, `for...of`, `switch`, `try`, labeled statements,
+/// `break`, `continue`, `return`, and `throw`. Any other statement, such as a
+/// class or enum declaration, is an opaque region: the builder evaluates its
 /// expressions in source order from the flow before it, and the code after it
 /// continues from that evaluation.
 /// A condition inside a region narrows only the rest of the expression that
@@ -143,6 +144,9 @@ pub(super) fn build_root(
         reads: Vec::new(),
         switches: Vec::new(),
         jumps: Vec::new(),
+        exceptions: Vec::new(),
+        returns: Vec::new(),
+        records_reads: true,
         current: Some(0),
         remaining_visits: MAX_SYNTAX_NODES,
     };
@@ -479,6 +483,27 @@ struct RootBuilder<'a, 'raw> {
     reads: Vec<BuiltRead>,
     switches: Vec<BuiltSwitch>,
     jumps: Vec<JumpTarget>,
+    /// The joins that exceptions reach, one for each enclosing try block or
+    /// catch clause, innermost last. Each join is the start of the catch clause
+    /// or finally block that handles an exception thrown inside its block.
+    ///
+    /// Each join starts with the flow where its block starts and gains the end
+    /// of each finally block nested in the block. The graph has no write
+    /// points, so no point inside the block is wider than its start, and the
+    /// join needs no other predecessor. A point that can widen a subject, such
+    /// as a write, must also be added to the innermost join, as in TypeScript.
+    exceptions: Vec<FlowNodeId>,
+    /// The flows that reach a finally block from a `return`, one list for each
+    /// enclosing `try` statement with a finally block, innermost last.
+    ///
+    /// A list holds the flow at each `return` in the statement's try block or
+    /// catch clause, because the finally block runs before the function
+    /// returns. It also holds the end of each finally block nested there that
+    /// such a `return` reached.
+    returns: Vec<Vec<FlowNodeId>>,
+    /// Whether evaluation records reads. It is false while the builder builds
+    /// a finally block a second time, because the first build recorded them.
+    records_reads: bool,
     /// The incoming flow of the next statement, or `None` when unreachable.
     current: Option<FlowNodeId>,
     remaining_visits: usize,
@@ -581,7 +606,19 @@ impl RootBuilder<'_, '_> {
                 self.current = Some(flow);
                 Ok(())
             }
-            AnyJsStatement::JsReturnStatement(_) | AnyJsStatement::JsThrowStatement(_) => {
+            AnyJsStatement::JsReturnStatement(_) => {
+                let flow = self.evaluate(statement.syntax(), current, 0)?;
+                if let Some(returns) = self.returns.last_mut() {
+                    returns.push(flow);
+                }
+                self.current = None;
+                Ok(())
+            }
+            // Inside a try block or catch clause, the exception needs no edge
+            // to the innermost join in `exceptions`. That join already holds
+            // the start of the block, which is never narrower than the flow at
+            // the `throw`.
+            AnyJsStatement::JsThrowStatement(_) => {
                 self.evaluate(statement.syntax(), current, 0)?;
                 self.current = None;
                 Ok(())
@@ -604,6 +641,15 @@ impl RootBuilder<'_, '_> {
             }
             AnyJsStatement::JsSwitchStatement(statement) => {
                 self.switch_statement(&statement, current, label)
+            }
+            // A label on a `try` statement is not a jump target. A root with a
+            // `break` to such a label has no flow, because
+            // `has_complete_statements` rejects it before the build.
+            AnyJsStatement::JsTryStatement(statement) => {
+                self.try_statement(&statement.into(), current)
+            }
+            AnyJsStatement::JsTryFinallyStatement(statement) => {
+                self.try_statement(&statement.into(), current)
             }
             AnyJsStatement::JsBreakStatement(_) | AnyJsStatement::JsContinueStatement(_) => {
                 let jump = Jump::from_statement(&statement).ok_or(Unsupported)?;
@@ -1132,6 +1178,102 @@ impl RootBuilder<'_, '_> {
         kinds
     }
 
+    /// Builds `statement` from `current`, following TypeScript's control flow
+    /// for `try` statements.
+    ///
+    /// An exception can leave the try block at any point. Because the graph
+    /// has no write points, none of those points is wider than the start of
+    /// the block, so the catch clause starts from the flow before the
+    /// statement. See [`Self::exceptions`]. The normal exits are the ends of
+    /// the try block and of the catch clause. `break` and `continue` reach
+    /// their targets directly, without passing through the finally block, as
+    /// in TypeScript.
+    ///
+    /// Without a finally block, the code after the statement continues from
+    /// the normal exits. A finally block is built twice:
+    /// - The first build starts from every way into the block: the normal
+    ///   exits, the join of the exceptions from the try block, or from the
+    ///   catch clause when there is one, and each `return` in either. It
+    ///   records the reads of the block. Its end joins the enclosing
+    ///   [`Self::exceptions`] and, when a `return` reached the block, the
+    ///   enclosing [`Self::returns`]. These joins can be wider than
+    ///   TypeScript's, because TypeScript joins there the block as reached
+    ///   only from the exceptions, or only from the `return`s.
+    /// - The second build starts from the normal exits only and records no
+    ///   reads. The code after the statement continues from its end, because
+    ///   that code runs only when the try block or the catch clause completed
+    ///   normally. TypeScript gives that code the same flow.
+    ///
+    /// Without a normal exit, the code after the statement is unreachable.
+    fn try_statement(&mut self, statement: &AnyJsTryStatement, current: FlowNodeId) -> Build<()> {
+        let finally = statement.finally_clause();
+        // A finally block is built twice, so the work doubles with each
+        // finally block that encloses a `try` statement. Every build pushes
+        // this join, so the node limit bounds that work even when the blocks
+        // evaluate nothing.
+        let exception = self.push(FlowNode::Join(vec![current]))?;
+        self.exceptions.push(exception);
+        if finally.is_some() {
+            self.returns.push(Vec::new());
+        }
+        if let Ok(body) = statement.body() {
+            self.statements(body.syntax())?;
+        }
+        let mut normal_exits: Vec<_> = self.current.into_iter().collect();
+        let mut exception = self.exceptions.pop().ok_or(Unsupported)?;
+        if let Some(clause) = statement.catch_clause() {
+            let start = exception;
+            exception = self.push(FlowNode::Join(vec![start]))?;
+            self.exceptions.push(exception);
+            // The declaration runs the defaults of a destructuring pattern.
+            self.current = Some(match clause.declaration() {
+                Some(declaration) => self.evaluate(declaration.syntax(), start, 0)?,
+                None => start,
+            });
+            if let Ok(body) = clause.body() {
+                self.statements(body.syntax())?;
+            }
+            normal_exits.extend(self.current);
+            exception = self.exceptions.pop().ok_or(Unsupported)?;
+        }
+        let Some(finally) = finally else {
+            self.current = self.join(normal_exits)?;
+            return Ok(());
+        };
+        let returns = self.returns.pop().ok_or(Unsupported)?;
+        let body = finally.body().ok();
+        self.current = self.join(
+            normal_exits
+                .iter()
+                .copied()
+                .chain(std::iter::once(exception))
+                .chain(returns.iter().copied()),
+        )?;
+        if let Some(body) = &body {
+            self.statements(body.syntax())?;
+        }
+        let Some(end) = self.current else {
+            return Ok(());
+        };
+        if let Some(outer) = self.exceptions.last().copied() {
+            self.add_predecessor(outer, end)?;
+        }
+        if !returns.is_empty()
+            && let Some(outer) = self.returns.last_mut()
+        {
+            outer.push(end);
+        }
+        self.current = self.join(normal_exits)?;
+        if self.current.is_some()
+            && let Some(body) = &body
+        {
+            let records_reads = std::mem::replace(&mut self.records_reads, false);
+            self.statements(body.syntax())?;
+            self.records_reads = records_reads;
+        }
+        Ok(())
+    }
+
     /// Records reads and branches while evaluating `node` from `incoming`, and
     /// returns the flow after it.
     fn evaluate(
@@ -1155,10 +1297,11 @@ impl RootBuilder<'_, '_> {
             return Ok(incoming);
         }
         if let Some(identifier) = JsIdentifierExpression::cast_ref(node) {
-            if let Some(subject) = identifier
-                .name()
-                .ok()
-                .and_then(|name| self.subjects.reference(self.model, &name))
+            if self.records_reads
+                && let Some(subject) = identifier
+                    .name()
+                    .ok()
+                    .and_then(|name| self.subjects.reference(self.model, &name))
             {
                 self.reads.push(BuiltRead {
                     expression: AnyFlowExpression::JsIdentifierExpression(identifier),
@@ -1175,7 +1318,8 @@ impl RootBuilder<'_, '_> {
                 | AnyJsExpression::JsComputedMemberExpression(_)),
             ) => {
                 let flow = self.children(node, incoming, depth)?;
-                if let Some(subject) = subject_of(&expression, self.model, &mut self.subjects)
+                if self.records_reads
+                    && let Some(subject) = subject_of(&expression, self.model, &mut self.subjects)
                     && let Some(expression) = AnyFlowExpression::cast(expression.into_syntax())
                 {
                     self.reads.push(BuiltRead {
@@ -1783,9 +1927,9 @@ mod tests {
     #[test]
     fn reads_in_regions_keep_the_facts_from_before_them() {
         let built = function(
-            "function f(q, y) { if (q) { try { read(q); } catch (e) { read(q); } finally { read(q); } class C extends read(q) {} enum E { A = read(q) } after(q); } }",
+            "function f(q, y) { if (q) { class C extends read(q) {} enum E { A = read(q) } after(q); } }",
         );
-        for occurrence in 2..=7 {
+        for occurrence in 2..=4 {
             assert_eq!(
                 built.paths("q", occurrence),
                 [vec!["q:Truthy".to_owned()]],
@@ -1795,58 +1939,139 @@ mod tests {
     }
 
     #[test]
-    fn regions_narrow_only_within_expressions() {
+    fn catch_clauses_start_from_the_flow_before_try() {
         let built = function(
-            "function f(x, b) { try { b && read(b); if (!x) return; read(x); } catch {} after(x); }",
+            "function f(x) { try { if (!x) return; read(x); } catch { read(x); } after(x); }",
         );
-        assert!(contains(&built.paths("b", 2), "b:Truthy"));
-        // The `if` and the `return` inside the region are not modeled.
-        for occurrence in [2, 3] {
-            let paths = built.paths("x", occurrence);
-            assert!(
-                paths.iter().flatten().all(|fact| !fact.contains('x')),
-                "{occurrence}: {paths:?}"
-            );
-        }
+        assert_eq!(built.paths("x", 2), [facts(&["x:Truthy"])]);
+        assert_eq!(built.paths("x", 3), [Vec::<String>::new()]);
+        // The code after the statement continues from the ends of the try
+        // block and of the catch clause.
+        assert_eq!(
+            sorted_paths(&built, "x", 4),
+            [Vec::new(), facts(&["x:Truthy"])]
+        );
+        // A catch clause that ends the path leaves the try block's end.
+        let built = function(
+            "function f(x) { try { if (!x) throw x; } catch ({ a = read(x) }) { return; } after(x); }",
+        );
+        assert_eq!(built.paths("x", 3), [Vec::<String>::new()]);
+        assert_eq!(built.paths("x", 4), [facts(&["x:Truthy"])]);
     }
 
     #[test]
-    fn jumps_leaving_regions_carry_the_entry_state() {
-        // `break` out of a `try`: the exit after the loop joins the loop's own
-        // exit with the state before the region.
-        let built = function(
-            "function f(x, y) { while (y) { if (x) { try { break; } catch {} } return; } after(x); }",
+    fn finally_blocks_are_built_twice() {
+        let built =
+            function("function f(x) { try { if (!x) return; } finally { read(x); } after(x); }");
+        // The first build starts from the end of the try block, its
+        // exceptions, and its `return`.
+        assert_eq!(
+            sorted_paths(&built, "x", 2),
+            [Vec::new(), facts(&["!x:Truthy"]), facts(&["x:Truthy"])]
         );
-        let paths = built.paths("x", 2);
-        assert_eq!(paths.len(), 2, "{paths:?}");
-        assert!(paths.iter().any(|path| path == &["!y:Truthy"]));
-        assert!(paths.iter().any(|path| path == &["x:Truthy", "y:Truthy"]));
-
-        // `continue` out of a `try` reaches the test of a `do...while` loop.
-        let built = function(
-            "function f(x) { do { if (x) { try { continue; } finally {} } return; } while (read(x)); }",
+        let range = built.range("x", 2);
+        assert_eq!(
+            built
+                .root()
+                .reads
+                .iter()
+                .filter(|read| read.expression.range() == range)
+                .count(),
+            1
         );
-        assert_eq!(built.paths("x", 2), [vec!["x:Truthy".to_owned()]]);
+        // The second build starts from the normal exits only, and the code
+        // after the statement continues from its end.
+        assert_eq!(built.paths("x", 3), [facts(&["x:Truthy"])]);
+        let built = function(
+            "function f(x, y) { try { if (!x) return; } catch { return; } finally { if (!y) return; } after(x); }",
+        );
+        assert_eq!(
+            sorted_paths(&built, "x", 2),
+            [facts(&["x:Truthy", "y:Truthy"])]
+        );
+        // Without a normal exit, the code after the statement is
+        // unreachable.
+        let built = function("function f(x) { try { return; } finally { read(x); } after(x); }");
+        assert!(built.point("x", 1).is_some());
+        assert_eq!(built.point("x", 2), None);
     }
 
     #[test]
-    fn labeled_breaks_leave_regions() {
+    fn finally_blocks_reach_the_joins_of_the_enclosing_try() {
         let built = function(
-            "function f(x) { done: { if (x) { try { break done; } catch {} } return; } after(x); }",
+            "function f(x) { try { try { return; } finally { read(x); } } finally { read(x); } }",
         );
-        assert_eq!(built.paths("x", 2), [vec!["x:Truthy".to_owned()]]);
+        let inner = built.point("x", 1).unwrap();
+        let outer = built.point("x", 2).unwrap();
+        let FlowNode::Join(predecessors) = &built.root().nodes[outer as usize] else {
+            panic!("a finally block starts at a join");
+        };
+        // The `return` passes through both finally blocks.
+        assert!(predecessors.contains(&inner), "{predecessors:?}");
+        // So does an exception, through the join of the outer try block.
+        assert!(predecessors.iter().any(|predecessor| matches!(
+            &built.root().nodes[*predecessor as usize],
+            FlowNode::Join(exceptions) if exceptions.contains(&inner)
+        )));
     }
 
     #[test]
-    fn regions_connect_each_target_once() {
+    fn nested_finally_blocks_stop_at_the_node_limit() {
+        let nested = |depth: usize| {
+            format!(
+                "function f(x) {{ if (x) read(x); {}{} }}",
+                "try {} finally { ".repeat(depth),
+                "}".repeat(depth)
+            )
+        };
+        assert!(function(&nested(3)).root.is_some());
+        // Each build of a finally block builds the one nested in it twice, so
+        // the innermost one would be built 2^20 times.
+        assert!(function(&nested(20)).root.is_none());
+    }
+
+    #[test]
+    fn jumps_leave_try_statements_with_the_flow_where_they_are() {
+        let built = function(
+            "function f(x, y) { while (y) { try { if (x) break; } catch {} return; } after(x); }",
+        );
+        assert_eq!(
+            sorted_paths(&built, "x", 2),
+            [facts(&["!y:Truthy"]), facts(&["x:Truthy", "y:Truthy"])]
+        );
+        // `continue` reaches the test of a `do...while` loop without passing
+        // through the finally block.
+        let built = function(
+            "function f(x) { do { try { if (x) continue; } finally {} return; } while (read(x)); }",
+        );
+        assert_eq!(built.paths("x", 2), [facts(&["x:Truthy"])]);
+    }
+
+    #[test]
+    fn labeled_breaks_leave_try_statements() {
+        let built = function(
+            "function f(x) { done: { try { if (x) break done; } catch {} return; } after(x); }",
+        );
+        assert_eq!(built.paths("x", 2), [facts(&["x:Truthy"])]);
+    }
+
+    #[test]
+    fn each_jump_leaves_a_try_statement_from_its_own_flow() {
         let built = function(
             "function f(x, y) { while (true) { if (x) { try { if (y) break; break; } catch { break; } } return; } after(x); }",
         );
-        assert_eq!(built.paths("x", 2), [vec!["x:Truthy".to_owned()]]);
+        assert_eq!(
+            sorted_paths(&built, "x", 2),
+            [
+                facts(&["!y:Truthy", "x:Truthy"]),
+                facts(&["x:Truthy"]),
+                facts(&["x:Truthy", "y:Truthy"])
+            ]
+        );
     }
 
     #[test]
-    fn jumps_to_statements_inside_a_region_do_not_leave_it() {
+    fn jumps_to_statements_inside_a_try_statement_stay_inside_it() {
         for source in [
             "function f(x, y) { while (true) { try { while (y) { break; } } catch {} return; } after(x); }",
             "function f(x, y) { while (true) { try { for (const v of y) { continue; } } finally {} return; } after(x); }",
@@ -1860,7 +2085,7 @@ mod tests {
     }
 
     #[test]
-    fn regions_need_a_target_for_each_jump() {
+    fn statements_need_their_syntax_and_a_target_for_each_jump() {
         for source in [
             "function f(x) { if (x) read(x); return; try { if () dead(x); } catch {} }",
             "function f(x) { if (x) read(x); return; switch () {} }",

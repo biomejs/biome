@@ -412,17 +412,15 @@ These limits apply to every *Supported* and *Partial* row below:
 - Variables whose declared type is `any`, or includes a part that inference
   cannot determine, never narrow.
 - An execution root gets no narrowing at all when its own code, outside nested
-  functions, contains a `with` statement or a syntax error, or when it is very
-  large or deeply nested.
-- Biome does not model the control flow inside a `try` statement yet. A
-  read inside one has the type from just before the statement, narrowed
+  functions, contains a `with` statement, a syntax error, or a `break` to the
+  label of a `try` statement, as in `out: try { break out; } finally {}`, or
+  when it is very large or deeply nested.
+- Class and enum declarations, namespaces, `import x = require()`, and
+  `declare` statements do not stop narrowing. A read in a class or enum
+  declaration, such as in its `extends` clause or in the initializer of an
+  enum member, has the type from just before the declaration, narrowed
   further only by the rest of the expression that contains the read, as in
-  `x && x.length`. An `if`, a `return`, a loop, or a `switch` inside the
-  statement narrows nothing. The code after the statement continues with the
-  types from just before it, and so does the target of a `break` or
-  `continue` that leaves the statement. Class and enum declarations,
-  namespaces, `import x = require()`, and `declare` statements do not stop
-  narrowing either.
+  `x && x.length`.
 - A `switch` statement without `default` is exhaustive when every value that
   its discriminant can have at the statement matches a case, as in
   TypeScript. Biome finds one exhaustive only when every case is a string,
@@ -657,8 +655,11 @@ whose result is not tested, do not narrow.
 
 | Behaviour | Example | TypeScript | Status |
 | --- | --- | --- | --- |
+| `catch` starts from the state before `try` | `x: string \| null; try { if (x === null) throw 0; x } catch { x }` | `string` in the try block, `string \| null` in the catch clause | Supported: an exception can leave the try block at any point, so a test in the try block never narrows the catch clause. |
+| The code after a `try` sees its tests when the catch clause ends the path | `x: string \| null; try { if (x === null) return; f(); } catch { return; } x` | `string` | Supported: the code after the statement continues from the ends of the try block and of the catch clause. A catch clause that completes normally starts from the state before `try`, so `try { if (x === null) return; } catch {} x` gives `string \| null`. |
+| `finally` joins every way into it; the code after it only the normal exits | `x: string \| null; try { if (x === null) return; } finally { x } x` | `string \| null` in the finally block, `string` after it | Supported: the finally block sees the ends of the try block and of the catch clause, the exceptions, and each `return` in them. The code after the statement runs only when the try block or the catch clause ended normally, and the tests in the finally block narrow it too: `try { f(); } finally { if (x === null) throw 0; } x` gives `string`. Without a normal end, as in `try { return; } finally {}`, the code after the statement is unreachable. As in TypeScript, `break` and `continue` reach their target without passing through the finally block. |
 | `catch` and `finally` see every assignment in `try` | `let x: string \| number = "a"; try { x = 1; f(); } catch { x }` | `string \| number` | Not yet |
-| A `catch` variable is `unknown` and narrows | `try { f(); } catch (e) { e instanceof Error && e.message }` | `e` is `Error` in `e.message` | Supported: a `catch` variable has its annotation, `unknown` or `any`, or `unknown` without one, and narrows as other variables do. A test in an `if` statement inside the `catch` clause doesn't narrow yet, as the limits above describe for `try` statements. A variable of a destructuring pattern, as `message` in `catch ({ message })`, is Unknown, where TypeScript gives `any` after an error. |
+| A `catch` variable is `unknown`, or its annotation | `try { f(); } catch (e) { if (e instanceof Error) e.message }` | `e` is `Error` in `e.message` | Supported: a `catch` variable has its annotation, `unknown` or `any`, or `unknown` without one, and narrows as other variables do. A variable of a destructuring pattern, as `message` in `catch ({ message })`, is Unknown, where TypeScript gives `any` after an error. |
 
 ### Optional chaining
 

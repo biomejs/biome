@@ -36,8 +36,8 @@ declare_node_union! {
 /// [`MAX_ROOT_NODES`] syntax nodes, and uses only syntax the flow builder
 /// supports.
 ///
-/// The builder treats statements it does not model, such as `try`, as opaque
-/// regions, so they do not reject a root. A root is not
+/// The builder treats statements it does not model, such as a class
+/// declaration, as opaque regions, so they do not reject a root. A root is not
 /// selected when its own syntax, outside nested roots, contains a `with`
 /// statement, bogus syntax, or nesting deeper than [`MAX_DEPTH`]. A `with`
 /// statement changes what the names inside it refer to, and TypeScript types
@@ -388,7 +388,7 @@ mod tests {
     }
 
     #[test]
-    fn statements_the_builder_does_not_model_keep_their_root() {
+    fn statements_other_than_with_keep_their_root() {
         for body in [
             "try { read(x); } catch (error) { read(error); }",
             "try { read(x); } finally { read(x); }",
