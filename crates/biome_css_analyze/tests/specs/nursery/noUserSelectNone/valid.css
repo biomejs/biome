@@ -1,0 +1,18 @@
+/* should not generate diagnostics */
+
+.text {
+	user-select: text;
+	user-select: auto;
+	user-select: none auto;
+	-webkit-user-select: all;
+	-moz-user-select: inherit;
+	color: none;
+	--user-select: none;
+	user-select: var(--selection, none);
+}
+
+@supports (user-select: none) {
+	.button {
+		user-select: text;
+	}
+}

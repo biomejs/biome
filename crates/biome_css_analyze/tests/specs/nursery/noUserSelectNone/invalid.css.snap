@@ -1,0 +1,136 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalid.css
+---
+# Input
+```css
+/* should generate diagnostics */
+
+.button {
+	user-select: none;
+	-webkit-user-select: none;
+	-moz-user-select: NONE;
+	user-select: n\6f ne;
+}
+
+.nested {
+	& .child {
+		user-select: none;
+	}
+}
+```
+
+# Diagnostics
+```
+invalid.css:4:15 lint/nursery/noUserSelectNone ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid disabling text selection with user-select: none.
+  
+    3 │ .button {
+  > 4 │ 	user-select: none;
+      │ 	             ^^^^
+    5 │ 	-webkit-user-select: none;
+    6 │ 	-moz-user-select: NONE;
+  
+  i Disabling text selection can prevent users from selecting and copying text.
+  
+  i Allow selection unless the element needs to prevent it.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9034 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:5:23 lint/nursery/noUserSelectNone ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid disabling text selection with user-select: none.
+  
+    3 │ .button {
+    4 │ 	user-select: none;
+  > 5 │ 	-webkit-user-select: none;
+      │ 	                     ^^^^
+    6 │ 	-moz-user-select: NONE;
+    7 │ 	user-select: n\6f ne;
+  
+  i Disabling text selection can prevent users from selecting and copying text.
+  
+  i Allow selection unless the element needs to prevent it.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9034 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:6:20 lint/nursery/noUserSelectNone ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid disabling text selection with user-select: none.
+  
+    4 │ 	user-select: none;
+    5 │ 	-webkit-user-select: none;
+  > 6 │ 	-moz-user-select: NONE;
+      │ 	                  ^^^^
+    7 │ 	user-select: n\6f ne;
+    8 │ }
+  
+  i Disabling text selection can prevent users from selecting and copying text.
+  
+  i Allow selection unless the element needs to prevent it.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9034 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:7:15 lint/nursery/noUserSelectNone ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid disabling text selection with user-select: none.
+  
+    5 │ 	-webkit-user-select: none;
+    6 │ 	-moz-user-select: NONE;
+  > 7 │ 	user-select: n\6f ne;
+      │ 	             ^^^^^^^
+    8 │ }
+    9 │ 
+  
+  i Disabling text selection can prevent users from selecting and copying text.
+  
+  i Allow selection unless the element needs to prevent it.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9034 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:12:16 lint/nursery/noUserSelectNone ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid disabling text selection with user-select: none.
+  
+    10 │ .nested {
+    11 │ 	& .child {
+  > 12 │ 		user-select: none;
+       │ 		             ^^^^
+    13 │ 	}
+    14 │ }
+  
+  i Disabling text selection can prevent users from selecting and copying text.
+  
+  i Allow selection unless the element needs to prevent it.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9034 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
