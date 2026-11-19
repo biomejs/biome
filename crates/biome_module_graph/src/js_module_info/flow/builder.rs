@@ -21,19 +21,20 @@ use biome_js_syntax::{
     AnyJsFormalParameter, AnyJsFunction, AnyJsFunctionBody, AnyJsLiteralExpression, AnyJsName,
     AnyJsObjectAssignmentPatternMember, AnyJsObjectBindingPatternMember, AnyJsObjectMemberName,
     AnyJsOptionalChainExpression, AnyJsParameter, AnyJsStatement, AnyJsSwitchClause,
-    AnyJsTryStatement, AnyJsVariableDeclaration, AnyTsType, AnyTsTypeMember, ClassMemberName,
-    JsArrowFunctionExpression, JsAssignmentExpression, JsAssignmentOperator, JsBinaryOperator,
-    JsCallExpression, JsClassExpression, JsClassMemberList, JsComputedMemberAssignment,
-    JsComputedMemberName, JsDecorator, JsDoWhileStatement, JsExport, JsForInStatement,
-    JsForOfStatement, JsForStatement, JsFunctionExpression, JsGetterClassMember,
+    AnyJsTryStatement, AnyJsVariableDeclaration, AnyTsName, AnyTsType, AnyTsTypeMember,
+    ClassMemberName, JsArrowFunctionExpression, JsAssignmentExpression, JsAssignmentOperator,
+    JsBinaryOperator, JsCallExpression, JsClassExpression, JsClassMemberList,
+    JsComputedMemberAssignment, JsComputedMemberName, JsDecorator, JsDoWhileStatement, JsExport,
+    JsForInStatement, JsForOfStatement, JsForStatement, JsFunctionExpression, JsGetterClassMember,
     JsGetterObjectMember, JsIdentifierAssignment, JsIdentifierExpression, JsIfStatement,
     JsInitializerClause, JsLanguage, JsMethodClassMember, JsMethodObjectMember, JsParameters,
-    JsParenthesizedAssignment, JsParenthesizedExpression, JsSetterClassMember,
-    JsSetterObjectMember, JsStaticInitializationBlockClassMember, JsStaticMemberExpression,
-    JsSwitchStatement, JsSyntaxNode, JsThisExpression, JsUnaryExpression, JsUnaryOperator,
-    JsVariableDeclarator, JsWhileStatement, T, TsDeclareStatement, TsExternalModuleDeclaration,
-    TsGlobalDeclaration, TsInterfaceDeclaration, TsNonNullAssertionAssignment,
-    TsNonNullAssertionExpression, TsTypeAnnotation, binding_ext::AnyJsBindingDeclaration,
+    JsParenthesizedAssignment, JsParenthesizedExpression, JsReferenceIdentifier,
+    JsSetterClassMember, JsSetterObjectMember, JsStaticInitializationBlockClassMember,
+    JsStaticMemberExpression, JsSwitchStatement, JsSyntaxNode, JsThisExpression, JsUnaryExpression,
+    JsUnaryOperator, JsVariableDeclarator, JsWhileStatement, T, TsDeclareStatement,
+    TsExternalModuleDeclaration, TsGlobalDeclaration, TsInterfaceDeclaration,
+    TsNonNullAssertionAssignment, TsNonNullAssertionExpression, TsTypeAnnotation,
+    binding_ext::AnyJsBindingDeclaration,
 };
 use biome_js_type_info::{DestructureField, own_returns};
 use biome_rowan::{
@@ -785,7 +786,7 @@ fn is_compound_like(right: &AnyJsExpression) -> bool {
 
 /// Returns whether `declarator` is part of a `var` declaration, whose
 /// variables a read can reach before the declarator.
-fn is_var(declarator: &JsVariableDeclarator) -> bool {
+pub(super) fn is_var(declarator: &JsVariableDeclarator) -> bool {
     match declarator.declaration() {
         Some(AnyJsVariableDeclaration::JsVariableDeclaration(declaration)) => declaration.is_var(),
         Some(AnyJsVariableDeclaration::JsForVariableDeclaration(declaration)) => {
@@ -1224,8 +1225,10 @@ pub(crate) enum CalleeReturn {
     ///
     /// For an import, it is the declaration that the import names, in the
     /// module that declares it. That declaration is annotated in a
-    /// declaration file, and elsewhere follows the rules for a local variable
-    /// (see [`declaration_return`]).
+    /// declaration file, unless its type annotation is `typeof` of a
+    /// variable, which counts as that variable does (see
+    /// [`declared_return`]). Elsewhere it follows the rules for a local
+    /// variable (see [`declaration_return`]).
     ///
     /// For a member, every type that its object can have must get the member
     /// from the lib, from a declaration file, or from methods with a return
@@ -1233,7 +1236,9 @@ pub(crate) enum CalleeReturn {
     /// type that a declaration file declares, or a class or an interface that
     /// declares such methods or inherits them, without a merged interface
     /// that another module declares. [`member_return`] finds the methods in a
-    /// class or an interface.
+    /// class or an interface. A property that a declaration file types as
+    /// `typeof` of a variable counts as that variable does (see
+    /// [`declared_member_returns`]).
     Resolved(FlowCallee),
 }
 
@@ -1521,6 +1526,114 @@ fn is_function_type(annotation: Option<TsTypeAnnotation>) -> bool {
     annotation
         .and_then(|annotation| annotation.ty().ok())
         .is_some_and(|ty| matches!(ty, AnyTsType::TsFunctionType(_)))
+}
+
+/// What the type annotation of a value in a declaration file tells about the
+/// return type of a call of the value. A declaration file has no function
+/// bodies, so the return type comes from an annotation, unless the value's
+/// annotation is `typeof` of another value: a call then returns what a call
+/// of that value returns, which can come from a function body elsewhere.
+pub(crate) enum DeclaredReturn {
+    /// The annotation isn't such a query, so it states the return type.
+    Stated,
+    /// The annotation is `typeof` of this variable, as `f` in `typeof f`.
+    Queried(JsReferenceIdentifier),
+    /// The annotation is `typeof` of a qualified name or of an import, as in
+    /// `typeof ns.f` and `typeof import("./a")`, which Biome doesn't follow.
+    Unfollowed,
+}
+
+impl DeclaredReturn {
+    fn from_annotation(annotation: Option<TsTypeAnnotation>) -> Self {
+        let mut ty = annotation.and_then(|annotation| annotation.ty().ok());
+        while let Some(AnyTsType::TsParenthesizedType(parenthesized)) = &ty {
+            ty = parenthesized.ty().ok();
+        }
+        match ty {
+            Some(AnyTsType::TsTypeofType(query)) => match query.expression_name() {
+                Ok(AnyTsName::JsReferenceIdentifier(name)) => Self::Queried(name),
+                Ok(AnyTsName::TsQualifiedName(_)) | Err(_) => Self::Unfollowed,
+            },
+            Some(AnyTsType::TsImportType(import)) if import.typeof_token().is_some() => {
+                Self::Unfollowed
+            }
+            _ => Self::Stated,
+        }
+    }
+}
+
+/// Returns what the type annotation of the variable that `binding` declares
+/// tells about the return type of a call of the variable, for a declaration
+/// in a declaration file. A declaration other than a variable states its
+/// return type.
+pub(crate) fn declared_return(binding: &Binding) -> DeclaredReturn {
+    let Some(AnyJsBindingDeclaration::JsVariableDeclarator(declarator)) =
+        binding.tree().declaration()
+    else {
+        return DeclaredReturn::Stated;
+    };
+    DeclaredReturn::from_annotation(
+        declarator
+            .variable_annotation()
+            .and_then(|annotation| annotation.type_annotation().ok().flatten()),
+    )
+}
+
+/// Returns what the type annotations of the properties named `name` that
+/// `owner` declares itself tell about the return type of a call of the
+/// property, for a class or an interface in a declaration file. A method
+/// states its return type, so only properties count, `static` or not. A
+/// private name is spelled with its `#`, as local inference stores member
+/// names.
+pub(crate) fn declared_member_returns(
+    owner: &AnyMemberDeclaration,
+    name: &str,
+) -> Vec<DeclaredReturn> {
+    let mut returns = Vec::new();
+    match owner {
+        AnyMemberDeclaration::AnyJsClass(class) => {
+            for member in class.members() {
+                let is_named = member
+                    .name()
+                    .ok()
+                    .flatten()
+                    .and_then(|member_name| member_name.name())
+                    .is_some_and(|member_name| match member_name {
+                        ClassMemberName::Private(own) => name.strip_prefix('#') == Some(own.text()),
+                        ClassMemberName::Public(own) => own.text() == name,
+                    });
+                if !is_named {
+                    continue;
+                }
+                let annotation = match member {
+                    AnyJsClassMember::JsPropertyClassMember(property) => property
+                        .property_annotation()
+                        .and_then(|annotation| annotation.type_annotation().ok().flatten()),
+                    AnyJsClassMember::TsPropertySignatureClassMember(property) => property
+                        .property_annotation()
+                        .and_then(|annotation| annotation.type_annotation().ok().flatten()),
+                    _ => continue,
+                };
+                returns.push(DeclaredReturn::from_annotation(annotation));
+            }
+        }
+        AnyMemberDeclaration::TsInterfaceDeclaration(interface) => {
+            for member in interface.members() {
+                let AnyTsTypeMember::TsPropertySignatureTypeMember(property) = member else {
+                    continue;
+                };
+                if property
+                    .name()
+                    .ok()
+                    .and_then(|member_name| member_name.name())
+                    .is_some_and(|member_name| member_name.text() == name)
+                {
+                    returns.push(DeclaredReturn::from_annotation(property.type_annotation()));
+                }
+            }
+        }
+    }
+    returns
 }
 
 declare_node_union! {

@@ -567,9 +567,11 @@ when its own code contains:
   its chain;
 - a write: an assignment, `++`, `--`, `delete`, a declarator with an
   initializer whose type annotation is a union or that destructures a
-  pattern, the head of a `for...of` loop that assigns a target, or a call of
+  pattern, the head of a `for...of` loop that assigns a target, a call of
   `push` or `unshift` on a variable when the root also declares a variable
-  without a type annotation initialized with `[]`;
+  without a type annotation initialized with `[]`, or a declarator of a `var`
+  without a type annotation initialized with `null`, `undefined`, or `[]`
+  (`is_evolving_var`), which is `undefined` before the declarator runs;
 - a statement call that may assert (`is_statement_call`, `may_assert`): the
   callee is a dotted name, and the call passes an argument or calls a
   method. A root that only such calls select is built only when one of their
@@ -623,7 +625,9 @@ value; an optional call of inline code runs the body before its arguments.
 **Paths that no value takes.** A branch that a condition written as the
 literal `true` or `false` never takes has no flow (`never_has_outcome`).
 Neither does the code after a statement call of a local function that never
-returns (`GuardFunctions::local_call_ends`). Reads there are not recorded, so
+returns (`GuardFunctions::local_call_ends`), because its return type
+annotation is `never`, in place or through the module's type aliases
+(`annotated_return`). Reads there are not recorded, so
 they keep their declared types, and such a path adds nothing where it joins
 the others. The syntax that counts is in
 [Statements and calls](./NARROWING.md#statements-and-calls).
@@ -660,7 +664,11 @@ syntax can't show, an import or a method (`FlowCallee`), is kept in
 names, and a method by every type of its object, which must get the method
 from the lib, from a declaration file, or from a class or interface that
 declares it with a return type annotation (`member_return`, which reads the
-declaration that the type's scope records).
+declaration that the type's scope records). A declaration file declares only
+annotated functions, but a variable or a property that it types as `typeof`
+of a variable returns what that variable returns, so the reading context
+follows the variable (`declared_return`, `declared_member_returns`,
+`followed_return_is_annotated`).
 
 **Variables whose type evolves.** A `let` or `var` without a type annotation
 whose initializer is missing, `null`, or `undefined` takes the types of the
@@ -884,19 +892,22 @@ The behavior of each kind of test is in
   whose guard is `FlowGuard::Call`. A local function that is generic or
   overloaded, with an overload that returns a type predicate, an assertion,
   or `never` (`selects_signature_by_arguments`), decides nothing at
-  collection, because the call's arguments select its signature. A call in a
-  condition is a call point only when it passes a subject
-  (`condition_call_point`). A statement call is one whenever its callee
-  follows TypeScript's explicit-type rule as far as the syntax tells
-  (`statement_callee`), even when it passes no subject, because its signature
-  can end the path; the reading context checks each member access along the
-  callee (`FlowCallKind::Statement`). Collection records the subjects that a
-  call point may narrow: its subject arguments, the subject of the callee's
-  object, which `this is T` narrows, and, for a statement call, the subjects
-  of each argument decomposed as a condition that holds, whose guard
-  `FlowCallArgument::condition` keeps for `asserts value`. It also records the
-  range of each argument (`FlowCallArgument::range`), where inference reads
-  its type at the call, whether the argument is always false
+  collection, because the call's arguments select its signature. Nor does a
+  statement call of a local function whose return type annotation names an
+  import, in place or through the module's type aliases
+  (`AnnotatedReturn::Undecided`), because only inference can tell whether
+  that type is `never`. A call in a condition is a call point only when it
+  passes a subject (`condition_call_point`). A statement call is one whenever
+  its callee follows TypeScript's explicit-type rule as far as the syntax
+  tells (`statement_callee`), even when it passes no subject, because its
+  signature can end the path; the reading context checks each member access
+  along the callee (`FlowCallKind::Statement`). Collection records the
+  subjects that a call point may narrow: its subject arguments, the subject of
+  the callee's object, which `this is T` narrows, and, for a statement call,
+  the subjects of each argument decomposed as a condition that holds, whose
+  guard `FlowCallArgument::condition` keeps for `asserts value`. It also
+  records the range of each argument (`FlowCallArgument::range`), where
+  inference reads its type at the call, whether the argument is always false
   (`FlowCallArgument::is_false`), and whether the return type of a callee
   that is a name comes from an annotation (the `annotated` field of
   `FlowCallKind::Statement`).
@@ -1077,15 +1088,18 @@ The rules behind these fields:
   narrow whatever its collected type, but only in the root that declares it
   (`declared_range`): `eligible_range` refuses it to nested roots and
   `closure_reads` skips it. One that nothing writes or adds to narrows as any
-  other variable. An array also needs a write node for every addition that
-  runs in the root's flow (`mutations_are_modeled`). Such a variable stays a
-  subject only when a write node other than its initializer gives it a
-  value, or, for a variable initialized with `null` or `undefined`, when it
-  has any write node other than its initializer, and only those write nodes
-  mention it, so only the reads that they reach become candidates, together
-  with the reads of a `var` with an initializer that the start reaches
-  (`BuiltRoot::hoisted`). No such subject
-  is in `RootFlow::uninitialized` or `RootFlow::assignment_only`.
+  other variable, unless it is a `var` that a read can reach before its
+  declarator runs (`may_read_before_declarator`): a read starts before the
+  declarator, or the declarator is nested in another statement. An array
+  also needs a write node for every addition that runs in the root's flow
+  (`mutations_are_modeled`). Such a variable stays a subject only when a
+  write node other than its initializer gives it a value, or, for a
+  variable initialized with `null` or `undefined`, when it has any write
+  node other than its initializer, or when it is such a `var`. Only those
+  write nodes mention it, so only the reads that they reach become
+  candidates, together with the reads of a `var` with an initializer that
+  the start reaches (`BuiltRoot::hoisted`). No such subject is in
+  `RootFlow::uninitialized` or `RootFlow::assignment_only`.
 - **Patterns and paths.** A pattern can narrow when its elements can and none
   of them is written. A read of an element is also kept when a test of the
   pattern reaches it: its point becomes a read point of the pattern. A
@@ -1178,9 +1192,12 @@ same subject match.
   the enclosing root's own capture, so a chain of closures resolves outward.
   A `let` that may be read before it is assigned keeps the `undefined` of its
   start along the chain. A read in a closure starts it without `undefined`
-  when some code assigns it (`FlowCapture::assumes_initialized`,
+  when some code assigns it without reading it first, with `=`, a logical
+  assignment, a destructuring assignment, or the head of a `for...in` or
+  `for...of` loop (`is_definite_assignment`, `FlowCapture::assumes_initialized`,
   `FlowRead::assumes_initialized`), and otherwise gets the declared type where
-  `undefined` remains although the declared type lacks it.
+  `undefined` remains although the declared type lacks it, so a `let` that
+  only `++` or `+=` assigns keeps its declared type there.
 - **Subject classes.** A subject in `RootFlow::property_only` starts from
   `property_baseline` instead of `narrowing_baseline`. It has no baseline, so
   its reads keep their declared types without a solve, unless its flattened
@@ -1408,7 +1425,8 @@ and keeps it per call.
 reaches decides, after the cheap gates and once its baseline exists, which of
 those calls never return (`ending_calls`). Their effect is
 `FlowCallEffect::Ends` when the return type annotation of the signature's
-declaration is `never` (`has_annotated_callee`), or when an `asserts value`
+declaration is `never`, in place or through type aliases, which
+`flow_baseline` follows (`has_annotated_callee`), or when an `asserts value`
 signature gets an argument that is always false. Such an effect narrows
 nothing, so `FlowSubjectRootInput::calls` leaves it out. A read that no path
 reaches without crossing one of these calls keeps its declared type without a

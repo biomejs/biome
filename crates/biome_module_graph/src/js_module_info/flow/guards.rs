@@ -15,13 +15,13 @@ use biome_js_syntax::{
     AnyJsClassMemberName, AnyJsExpression, AnyJsFormalParameter, AnyJsFunction, AnyJsInProperty,
     AnyJsLiteralExpression, AnyJsMemberExpression, AnyJsName, AnyJsObjectMember,
     AnyJsOptionalChainExpression, AnyJsParameter, AnyJsSwitchClause, AnyJsTemplateElement,
-    AnyJsVariableDeclaration, AnyTsEnumMemberName, AnyTsReturnType, AnyTsType, JsBinaryOperator,
-    JsCallExpression, JsComputedMemberName, JsDecorator, JsIdentifierExpression, JsLanguage,
-    JsLogicalOperator, JsModule, JsPrivateName, JsScript, JsStaticMemberExpression,
+    AnyJsVariableDeclaration, AnyTsEnumMemberName, AnyTsName, AnyTsReturnType, AnyTsType,
+    JsBinaryOperator, JsCallExpression, JsComputedMemberName, JsDecorator, JsIdentifierExpression,
+    JsLanguage, JsLogicalOperator, JsModule, JsPrivateName, JsScript, JsStaticMemberExpression,
     JsSwitchStatement, JsSyntaxKind, JsSyntaxToken, JsTemplateExpression, JsThisExpression,
     JsUnaryOperator, JsVariableDeclarator, JsVariableKind, JsVariableStatement, T,
-    TsDeclareStatement, TsEnumDeclaration, binding_ext::AnyJsBindingDeclaration, inner_string_text,
-    unescape_js_identifier,
+    TsDeclareStatement, TsEnumDeclaration, TsQualifiedName, binding_ext::AnyJsBindingDeclaration,
+    inner_string_text, unescape_js_identifier,
 };
 use biome_js_type_info::{
     Function, FunctionParameter, RawPredicateTarget, RawTypeData, RawTypeId, ReturnType,
@@ -526,11 +526,13 @@ impl<'a> GuardFunctions<'a> {
     /// returns, judging from the function's declaration.
     ///
     /// A function declaration or a `declare function` never returns when its
-    /// return type annotation is `never` and its collected type is one
-    /// signature that is not generic. TypeScript ends the path only when the
-    /// `never` comes from an annotation. A local assertion function with
-    /// `asserts value` never returns when its tested argument is always false
-    /// (see [`is_false_expression`]). Inference decides a call of any other
+    /// return type annotation is `never`, written in place or through type
+    /// aliases that the module declares, and its collected type is one
+    /// signature that is not generic (see [`Self::local_return`]).
+    /// TypeScript ends the path only when the `never` comes from an
+    /// annotation. A local assertion function with `asserts value` never
+    /// returns when its tested argument is always false (see
+    /// [`is_false_expression`]). Inference decides a call of any other
     /// callee as a call point.
     pub(super) fn local_call_ends(
         &mut self,
@@ -545,13 +547,23 @@ impl<'a> GuardFunctions<'a> {
             return guard.kind == GuardKind::TruthyAssertion
                 && is_false_expression(&argument, &mut remaining);
         }
+        self.local_return(call, model) == AnnotatedReturn::Never
+    }
+
+    /// Returns what the return type annotation of the local function that
+    /// `call` calls tells about whether the call returns, as
+    /// [`annotated_return`] reads it, when the function is a function
+    /// declaration or a `declare function` whose collected type is one
+    /// signature that is not generic. Returns [`AnnotatedReturn::Other`] for
+    /// any other callee.
+    fn local_return(&self, call: &JsCallExpression, model: &SemanticModel) -> AnnotatedReturn {
         let Some(AnyJsExpression::JsIdentifierExpression(callee)) =
             call.callee().ok().map(AnyJsExpression::omit_parentheses)
         else {
-            return false;
+            return AnnotatedReturn::Other;
         };
         let Some(function) = callee.name().ok().and_then(|name| model.binding(&name)) else {
-            return false;
+            return AnnotatedReturn::Other;
         };
         let annotation = match function.tree().declaration() {
             Some(AnyJsBindingDeclaration::JsFunctionDeclaration(declaration)) => {
@@ -560,23 +572,25 @@ impl<'a> GuardFunctions<'a> {
             Some(AnyJsBindingDeclaration::TsDeclareFunctionDeclaration(declaration)) => {
                 declaration.return_type_annotation()
             }
-            _ => return false,
+            _ => return AnnotatedReturn::Other,
         };
-        let returns_never = annotation
-            .and_then(|annotation| annotation.ty().ok())
-            .is_some_and(|ty| matches!(ty, AnyTsReturnType::AnyTsType(AnyTsType::TsNeverType(_))));
         // An overload set is a callable object, not a single function, and
         // TypeScript resolves which of its signatures a call takes.
-        returns_never
-            && matches!(
-                self.raw_binding_types.get(&function.range()),
-                Some(TypeReference::Resolved(RawTypeId::Local(id)))
-                    if matches!(
-                        self.raw_types.get(id.index()),
-                        Some(RawTypeData::Function(signature))
-                            if signature.type_parameters.is_empty()
-                    )
-            )
+        let is_single_signature = matches!(
+            self.raw_binding_types.get(&function.range()),
+            Some(TypeReference::Resolved(RawTypeId::Local(id)))
+                if matches!(
+                    self.raw_types.get(id.index()),
+                    Some(RawTypeData::Function(signature))
+                        if signature.type_parameters.is_empty()
+                )
+        );
+        match annotation.and_then(|annotation| annotation.ty().ok()) {
+            Some(AnyTsReturnType::AnyTsType(ty)) if is_single_signature => {
+                annotated_return(ty, model)
+            }
+            _ => AnnotatedReturn::Other,
+        }
     }
 
     /// Returns whether `call` calls a function whose collected signature
@@ -586,7 +600,9 @@ impl<'a> GuardFunctions<'a> {
     /// [`Self::guard`] reads that signature. Such a call is never a call
     /// point, because a call point would resolve the same signature, except
     /// in a condition when the signature leaves the type predicate to
-    /// inference (see [`Self::calls_inferred_predicate`]).
+    /// inference (see [`Self::calls_inferred_predicate`]), and in a statement
+    /// when its return type annotation names a type that only inference can
+    /// resolve (see [`AnnotatedReturn::Undecided`]).
     ///
     /// A function whose collected type needs the call's arguments to select
     /// its signature, as [`Self::selects_signature_by_arguments`] checks, is
@@ -1002,9 +1018,12 @@ fn named_binding(qualifier: &TypeReferenceQualifier, model: &SemanticModel) -> O
 /// that is a subject against the guard's target, and `asserts value`
 /// decomposes the argument as a condition that holds, so
 /// `assert(value !== null)` excludes `null` from `value`. A call of another
-/// local function narrows nothing. Any other call whose callee passes
-/// TypeScript's explicit-type rule, as [`statement_callee`] checks, is a
-/// call point. Its condition mentions every subject that it may narrow.
+/// local function narrows nothing, and is a call point only when its return
+/// type annotation names a type that only inference can resolve, which may
+/// be `never` (see [`AnnotatedReturn::Undecided`]). Any other call whose
+/// callee passes TypeScript's explicit-type rule, as [`statement_callee`]
+/// checks, is a call point. Its condition mentions every subject that it may
+/// narrow.
 pub(super) fn decompose_statement_call(
     call: &JsCallExpression,
     model: &SemanticModel,
@@ -1013,12 +1032,16 @@ pub(super) fn decompose_statement_call(
     guards: &mut Vec<FlowGuard>,
 ) -> Option<DecomposedCondition> {
     if !functions.calls_local_function(call, model) {
-        let mut decomposer = Decomposer::new(model, functions, subjects, guards);
-        let guard = decomposer.statement_call_point(call)?;
-        return Some(decomposer.finish(guard, std::iter::empty()));
+        return decompose_call_point(call, model, functions, subjects, guards);
     }
     let mut remaining = MAX_CONDITION_STEPS;
-    let (guard, function, argument) = functions.guard_call(call, model, &mut remaining)?;
+    let Some((guard, function, argument)) = functions.guard_call(call, model, &mut remaining)
+    else {
+        if functions.local_return(call, model) == AnnotatedReturn::Undecided {
+            return decompose_call_point(call, model, functions, subjects, guards);
+        }
+        return None;
+    };
     match guard.kind {
         GuardKind::Predicate { .. } => None,
         GuardKind::TruthyAssertion => Some(decompose_condition(
@@ -1062,6 +1085,116 @@ pub(super) fn decompose_statement_call(
             })
         }
     }
+}
+
+/// Decomposes `call`, a statement call, as a call point, whose effect
+/// inference resolves (see [`Decomposer::statement_call_point`]).
+fn decompose_call_point(
+    call: &JsCallExpression,
+    model: &SemanticModel,
+    functions: &mut GuardFunctions,
+    subjects: &mut FlowSubjectTable,
+    guards: &mut Vec<FlowGuard>,
+) -> Option<DecomposedCondition> {
+    let mut decomposer = Decomposer::new(model, functions, subjects, guards);
+    let guard = decomposer.statement_call_point(call)?;
+    Some(decomposer.finish(guard, std::iter::empty()))
+}
+
+/// Limits the parentheses and type aliases that [`annotated_return`] follows
+/// in one return type annotation.
+const MAX_RETURN_ALIAS_STEPS: usize = 16;
+
+/// What the return type annotation of a function tells, from the syntax of
+/// one module, about whether a call of the function returns.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub(super) enum AnnotatedReturn {
+    /// The annotation is `never`, written in place or through a chain of
+    /// type aliases that the module declares, so a call never returns.
+    Never,
+    /// The annotation names an import, or a member of one such as
+    /// `types.Never`, in place or at the end of a chain of the module's type
+    /// aliases. Only inference can resolve it.
+    Undecided,
+    /// Any other annotation. A call returns as far as the syntax tells, even
+    /// where TypeScript resolves the annotation to `never`, as it does for
+    /// `G<string>` with `type G<T> = never`, a union of `never` types, a
+    /// member of a namespace that the module declares, or a type alias that
+    /// a declaration file declares globally. A name that no scope declares
+    /// gets no call point, because inference resolves it only to a type of
+    /// the lib or to an interface that merges into one, never to `never`.
+    Other,
+}
+
+/// Reads `ty`, the return type annotation of a function, as
+/// [`AnnotatedReturn`] describes, following parentheses and the type aliases
+/// without type parameters that the module declares. A chain longer than
+/// [`MAX_RETURN_ALIAS_STEPS`], such as one of aliases that name each other,
+/// is [`AnnotatedReturn::Other`].
+fn annotated_return(mut ty: AnyTsType, model: &SemanticModel) -> AnnotatedReturn {
+    for _ in 0..MAX_RETURN_ALIAS_STEPS {
+        let reference = match ty {
+            AnyTsType::TsNeverType(_) => return AnnotatedReturn::Never,
+            AnyTsType::TsParenthesizedType(parenthesized) => match parenthesized.ty() {
+                Ok(inner) => {
+                    ty = inner;
+                    continue;
+                }
+                Err(_) => return AnnotatedReturn::Other,
+            },
+            AnyTsType::TsReferenceType(reference) if reference.type_arguments().is_none() => {
+                reference
+            }
+            _ => return AnnotatedReturn::Other,
+        };
+        let name = match reference.name() {
+            Ok(AnyTsName::JsReferenceIdentifier(name)) => name,
+            Ok(AnyTsName::TsQualifiedName(qualified)) => {
+                return if qualifies_import(qualified, model) {
+                    AnnotatedReturn::Undecided
+                } else {
+                    AnnotatedReturn::Other
+                };
+            }
+            Err(_) => return AnnotatedReturn::Other,
+        };
+        let Some(binding) = model.binding(&name) else {
+            return AnnotatedReturn::Other;
+        };
+        if binding.is_imported() {
+            return AnnotatedReturn::Undecided;
+        }
+        ty = match binding.tree().declaration() {
+            Some(AnyJsBindingDeclaration::TsTypeAliasDeclaration(alias))
+                if alias.type_parameters().is_none() =>
+            {
+                match alias.ty() {
+                    Ok(aliased) => aliased,
+                    Err(_) => return AnnotatedReturn::Other,
+                }
+            }
+            _ => return AnnotatedReturn::Other,
+        };
+    }
+    AnnotatedReturn::Other
+}
+
+/// Returns whether the name that `qualified`, a qualified type name such as
+/// `types.Never`, starts at is an import.
+fn qualifies_import(qualified: TsQualifiedName, model: &SemanticModel) -> bool {
+    let mut left = qualified.left();
+    for _ in 0..MAX_RETURN_ALIAS_STEPS {
+        match left {
+            Ok(AnyTsName::JsReferenceIdentifier(name)) => {
+                return model
+                    .binding(&name)
+                    .is_some_and(|binding| binding.is_imported());
+            }
+            Ok(AnyTsName::TsQualifiedName(qualified)) => left = qualified.left(),
+            Err(_) => return false,
+        }
+    }
+    false
 }
 
 /// Returns the decoded parameter `name`.

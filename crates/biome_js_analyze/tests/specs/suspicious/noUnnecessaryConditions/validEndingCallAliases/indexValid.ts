@@ -1,0 +1,31 @@
+/* should not generate diagnostics */
+// A call whose return type is `never` through a type alias ends the path, as
+// in TypeScript, so the code after it is unreachable and its reads keep their
+// declared types. A type alias of `void` ends nothing.
+
+import type { Never } from "./typesValid";
+
+type LocalNever = never;
+type Void = void;
+declare function failLocal(message: string): LocalNever;
+declare function failImported(message: string): Never;
+declare function warn(message: string): Void;
+
+function local(value: string | null) {
+	if (value !== null) {
+		failLocal("unexpected");
+		return value?.length;
+	}
+}
+
+function imported(value: string | null) {
+	if (value !== null) {
+		failImported("unexpected");
+		return value?.length;
+	}
+}
+
+function voidAlias(value: string | null) {
+	if (value === null) warn("missing");
+	return value?.length;
+}

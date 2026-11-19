@@ -7,7 +7,8 @@ expression: validClosures.ts
 // should not generate diagnostics
 // Each condition below stays necessary: the variable is assigned after the
 // closure is created or inside a function, the function that reads it is a
-// declaration or is created before the test, or the variable is a `var`.
+// declaration or is created before the test, the variable is a `var`, or only
+// `++` assigns it, so the closure may read it before any assignment.
 
 interface Timer {
 	cancel(): void;
@@ -53,6 +54,15 @@ function hoisted() {
 	if (timer !== null) {
 		return () => timer?.cancel();
 	}
+}
+
+function incrementedOnly(ready: boolean) {
+	let count: number | null;
+	if (ready) count++;
+	return () => {
+		if (count === null) return;
+		return count?.toFixed();
+	};
 }
 
 ```

@@ -62,7 +62,8 @@ mod subjects;
 mod writes;
 
 pub(crate) use builder::{
-    AnyMemberDeclaration, CalleeReturn, declaration_return, member_explicitness, member_return,
+    AnyMemberDeclaration, CalleeReturn, DeclaredReturn, declaration_return,
+    declared_member_returns, declared_return, member_explicitness, member_return,
 };
 pub(crate) use expressions::AnyFlowExpression;
 pub(crate) use guards::{
@@ -79,18 +80,22 @@ use biome_js_syntax::{
     AnyJsClass, AnyJsClassMember, AnyJsExpression, AnyJsFunction, AnyJsLiteralExpression,
     AnyJsVariableDeclaration, AnyTsType, AnyTsVariableAnnotation, JsArrayBindingPattern,
     JsArrayBindingPatternElement, JsArrayBindingPatternElementList,
-    JsArrayBindingPatternRestElement, JsBreakStatement, JsClassDeclaration,
-    JsClassExportDefaultDeclaration, JsComputedMemberName, JsConstructorClassMember,
-    JsContinueStatement, JsDecorator, JsDoWhileStatement, JsExpressionStatement, JsForInStatement,
-    JsForOfStatement, JsForStatement, JsFunctionExpression, JsGetterClassMember,
-    JsGetterObjectMember, JsIdentifierAssignment, JsIdentifierBinding, JsIdentifierExpression,
-    JsIfStatement, JsLanguage, JsMethodClassMember, JsMethodObjectMember, JsObjectBindingPattern,
-    JsObjectBindingPatternProperty, JsObjectBindingPatternPropertyList, JsObjectBindingPatternRest,
-    JsObjectBindingPatternShorthandProperty, JsReturnStatement, JsSetterClassMember,
-    JsSetterObjectMember, JsSwitchStatement, JsSyntaxKind, JsSyntaxNode, JsThisExpression,
-    JsThrowStatement, JsTryFinallyStatement, JsTryStatement, JsVariableDeclarationClause,
-    JsVariableDeclarator, JsVariableKind, JsVariableStatement, JsWhileStatement, JsWithStatement,
-    TsDeclareStatement, binding_ext::AnyJsBindingDeclaration,
+    JsArrayBindingPatternRestElement, JsAssignmentExpression, JsAssignmentOperator,
+    JsBreakStatement, JsClassDeclaration, JsClassExportDefaultDeclaration, JsComputedMemberName,
+    JsConstructorClassMember, JsContinueStatement, JsDecorator, JsDoWhileStatement,
+    JsExpressionStatement, JsForInStatement, JsForOfStatement, JsForStatement, JsFunctionBody,
+    JsFunctionExpression, JsGetterClassMember, JsGetterObjectMember, JsIdentifierAssignment,
+    JsIdentifierBinding, JsIdentifierExpression, JsIfStatement, JsLanguage, JsMethodClassMember,
+    JsMethodObjectMember, JsModule, JsObjectBindingPattern, JsObjectBindingPatternProperty,
+    JsObjectBindingPatternPropertyList, JsObjectBindingPatternRest,
+    JsObjectBindingPatternShorthandProperty, JsParenthesizedAssignment, JsPostUpdateExpression,
+    JsPreUpdateExpression, JsReturnStatement, JsScript, JsSetterClassMember, JsSetterObjectMember,
+    JsStaticInitializationBlockClassMember, JsSwitchStatement, JsSyntaxKind, JsSyntaxNode,
+    JsThisExpression, JsThrowStatement, JsTryFinallyStatement, JsTryStatement,
+    JsVariableDeclarationClause, JsVariableDeclarator, JsVariableKind, JsVariableStatement,
+    JsWhileStatement, JsWithStatement, TsAsAssignment, TsDeclareStatement, TsModuleBlock,
+    TsNonNullAssertionAssignment, TsSatisfiesAssignment, TsTypeAssertionAssignment,
+    binding_ext::AnyJsBindingDeclaration,
 };
 use biome_js_type_info::{
     AnyPredicateFunction, DestructureField, RawTypeData, RawTypeId, TypeReference,
@@ -756,10 +761,13 @@ pub(crate) struct FlowCapture {
     /// `switch` statement as exhaustive only when its cases start before this
     /// offset.
     pub(crate) start: TextSize,
-    /// Whether some code assigns the variable. A read in a closure then
-    /// assumes the variable assigned where it is declared, as in TypeScript,
-    /// so a `let` without an initializer starts there without `undefined`. A
-    /// `let` that nothing assigns keeps `undefined`.
+    /// Whether some code assigns the variable without reading it first, with
+    /// `=`, a logical assignment, a destructuring assignment, or the head of
+    /// a `for...in` or `for...of` loop. A read in a closure then assumes the
+    /// variable assigned where it is declared, as in TypeScript, so a `let`
+    /// without an initializer starts there without `undefined`. A `let` that
+    /// nothing else assigns, such as one that only `++` assigns, keeps
+    /// `undefined`.
     pub(crate) assumes_initialized: bool,
 }
 
@@ -1151,10 +1159,10 @@ pub(crate) struct FlowRead {
     /// The subject the read refers to, in its root's subject table.
     pub(crate) subject: FlowSubjectId,
     /// Whether the read lies in a closure that the root creates and reads a
-    /// variable that some code assigns. Such a read assumes the variable
-    /// assigned where it is declared, as in TypeScript (see
-    /// [`FlowCapture::assumes_initialized`]). False for a read in the root's
-    /// own code.
+    /// variable that some code assigns without reading it first. Such a read
+    /// assumes the variable assigned where it is declared, as in TypeScript
+    /// (see [`FlowCapture::assumes_initialized`]). False for a read in the
+    /// root's own code.
     pub(crate) assumes_initialized: bool,
 }
 
@@ -1713,7 +1721,7 @@ struct PendingCapture {
     subject: FlowSubjectId,
     /// Where that closure starts.
     start: TextSize,
-    /// Whether some code assigns the variable, as
+    /// Whether some code assigns the variable without reading it first, as
     /// [`FlowCapture::assumes_initialized`] describes.
     assumes_initialized: bool,
 }
@@ -1858,8 +1866,9 @@ impl RootCollector<'_> {
         });
         // A variable whose type evolves with its writes can have a type other
         // than its declared type only after a write other than its
-        // initializer. Such a variable without such a write keeps its
-        // declared type at every read, without a solve.
+        // initializer, or, for a `var`, on a path that skips its declarator.
+        // Such a variable without either keeps its declared type at every
+        // read, without a solve.
         //
         // A write whose value Biome may type as TypeScript does keeps the
         // variable evolving. So does any other write of a variable initialized
@@ -1895,14 +1904,26 @@ impl RootCollector<'_> {
         let mut evolving: FxHashMap<FlowSubjectId, FlowEvolving> = FxHashMap::default();
         for (range, kind) in evolving_ranges {
             let subject = subjects.get(&FlowSubject::Binding(range));
+            // A read before the declarator of a `var` is `undefined`, which
+            // its declared type lacks, so such a variable evolves without a
+            // write after the initializer too.
+            let read_before = |subject| {
+                hoisted.contains(&subject)
+                    && self
+                        .model
+                        .as_binding_by_range(range)
+                        .is_some_and(|binding| may_read_before_declarator(&binding))
+            };
             let evolves = subject.is_some_and(|subject| match kind {
                 FlowEvolving::Variable => {
                     typed.contains(&subject)
                         || (initialized.contains(&subject) && written_after.contains(&subject))
+                        || read_before(subject)
                 }
                 FlowEvolving::Array => {
                     typed.contains(&subject)
                         || (hoisted.contains(&subject) && written_after.contains(&subject))
+                        || read_before(subject)
                 }
                 FlowEvolving::None => false,
             });
@@ -2758,7 +2779,9 @@ impl RootCollector<'_> {
     /// [`Self::add_outer_evolving_reads`] types its reads.
     /// A variable that nothing writes, and that no call or element assignment
     /// adds values to, has the type of its initializer everywhere. That type
-    /// is its collected type, so it narrows as any other variable.
+    /// is its collected type, so it narrows as any other variable. A `var`
+    /// that a read can reach before its declarator runs is the exception,
+    /// because it is `undefined` there (see [`may_read_before_declarator`]).
     fn declared_range(
         &mut self,
         binding: &JsIdentifierBinding,
@@ -2775,7 +2798,12 @@ impl RootCollector<'_> {
             return None;
         }
         let evolving = match evolving_declaration(&declared, self.model) {
-            FlowEvolving::Variable if declared.all_writes().next().is_none() => FlowEvolving::None,
+            FlowEvolving::Variable
+                if declared.all_writes().next().is_none()
+                    && !may_read_before_declarator(&declared) =>
+            {
+                FlowEvolving::None
+            }
             FlowEvolving::Array
                 if declared.all_writes().next().is_none()
                     && !declared.all_reads().any(|read| {
@@ -2783,7 +2811,8 @@ impl RootCollector<'_> {
                             .parent()
                             .and_then(JsIdentifierExpression::cast)
                             .is_some_and(|identifier| builder::is_array_mutation(&identifier))
-                    }) =>
+                    })
+                    && !may_read_before_declarator(&declared) =>
             {
                 FlowEvolving::None
             }
@@ -2840,11 +2869,12 @@ impl RootCollector<'_> {
     /// [`Self::continues_to`]).
     ///
     /// A read that no nested root keeps is added to `reads` at the capture
-    /// point, so the root narrows it there. When some code assigns its
-    /// variable, its range is among the returned ranges, which mark the reads
-    /// that [`FlowRead::assumes_initialized`] describes. For a read that a
-    /// nested root keeps, the returned [`PendingCapture`] names the outermost
-    /// root that keeps the read or continues from it. That root starts the
+    /// point, so the root narrows it there. When a definite assignment (see
+    /// [`is_definite_assignment`]) assigns its variable, its range is among
+    /// the returned ranges, which mark the reads that
+    /// [`FlowRead::assumes_initialized`] describes. For a read that a nested
+    /// root keeps, the returned [`PendingCapture`] names the outermost root
+    /// that keeps the read or continues from it. That root starts the
     /// variable from its type at the capture point.
     #[expect(
         clippy::too_many_arguments,
@@ -2892,10 +2922,11 @@ impl RootCollector<'_> {
             if rule == CaptureRule::Never {
                 continue;
             }
-            let assumes_initialized = matches!(rule, CaptureRule::After(_));
             let Some(binding) = self.model.as_binding_by_range(range) else {
                 continue;
             };
+            let assumes_initialized =
+                matches!(rule, CaptureRule::After(_)) && is_definitely_assigned(&binding);
             let Some(subject) = subjects.intern(FlowSubject::Binding(range)) else {
                 continue;
             };
@@ -3330,14 +3361,16 @@ impl RootCollector<'_> {
     /// loop, and a `var` always does, because its declaration is hoisted
     /// above every declarator. Neither counts with a definite assignment
     /// assertion, as `let x!: T`, or in a `declare` statement. In a root
-    /// nested in the one that declares it, a `let` or a `var` counts only
-    /// when it has no initializer and no write at all. TypeScript treats such
-    /// a `let` the same way but assumes such a `var` initialized there. A
-    /// property of `this`, as `this.x` but not `this.x.y`, counts in a
-    /// constructor, and in an arrow function that it calls where it is
-    /// defined, when its key names a field of the constructor's class that is
-    /// not `static`, has no initializer and no `!`, and is not declared with
-    /// `declare` or `accessor`, as in TypeScript.
+    /// nested in the one that declares it, a `let` counts only when it has
+    /// no initializer and no definite assignment (see
+    /// [`is_definite_assignment`]), as in TypeScript, so a `let` that only
+    /// `++` assigns counts. A `var` counts there only when it has no
+    /// initializer and no write at all, where TypeScript assumes every `var`
+    /// initialized. A property of `this`, as `this.x` but not `this.x.y`,
+    /// counts in a constructor, and in an arrow function that it calls where
+    /// it is defined, when its key names a field of the constructor's class
+    /// that is not `static`, has no initializer and no `!`, and is not
+    /// declared with `declare` or `accessor`, as in TypeScript.
     fn uninitialized_subjects(
         &self,
         root: &AnyJsControlFlowRoot,
@@ -3655,6 +3688,59 @@ fn assignment_position(target: &JsIdentifierAssignment, declared_at: TextSize) -
     position
 }
 
+/// Returns whether some code gives `binding` a value without reading it
+/// first (see [`is_definite_assignment`]).
+fn is_definitely_assigned(binding: &Binding) -> bool {
+    let declaration = binding.syntax();
+    binding.all_writes().any(|write| {
+        JsIdentifierAssignment::cast(write.syntax_near(&declaration))
+            .is_some_and(|target| is_definite_assignment(&target))
+    })
+}
+
+/// Returns whether the write to `target` gives the variable a value without
+/// reading it first, as TypeScript requires before it assumes a `let`
+/// without an initializer assigned in a closure: an assignment with `=`,
+/// `??=`, `||=`, or `&&=`, a destructuring assignment, or the head of a
+/// `for...in` or `for...of` loop. `++`, `--`, and compound assignments such
+/// as `+=` read the variable first. An assignment through `as`, `satisfies`,
+/// or `<T>` doesn't count either.
+fn is_definite_assignment(target: &JsIdentifierAssignment) -> bool {
+    let Some(parent) = target
+        .syntax()
+        .ancestors()
+        .skip(1)
+        .find(|ancestor| !TRANSPARENT_ASSIGNMENT_KINDS.matches(ancestor.kind()))
+    else {
+        return false;
+    };
+    if let Some(assignment) = JsAssignmentExpression::cast_ref(&parent) {
+        return matches!(
+            assignment.operator(),
+            Ok(JsAssignmentOperator::Assign
+                | JsAssignmentOperator::NullishCoalescingAssign
+                | JsAssignmentOperator::LogicalOrAssign
+                | JsAssignmentOperator::LogicalAndAssign)
+        );
+    }
+    // What remains is a destructuring pattern or a loop head.
+    !INDEFINITE_ASSIGNMENT_KINDS.matches(parent.kind())
+}
+
+/// The wrappers of an assignment target that keep its write definite:
+/// parentheses and `!`.
+const TRANSPARENT_ASSIGNMENT_KINDS: SyntaxKindSet<JsLanguage> =
+    JsParenthesizedAssignment::KIND_SET.union(TsNonNullAssertionAssignment::KIND_SET);
+
+/// The parents of an assignment target, other than an assignment
+/// expression, whose write isn't definite: `++` and `--`, which read the
+/// variable first, and the type assertions `as`, `satisfies`, and `<T>`.
+const INDEFINITE_ASSIGNMENT_KINDS: SyntaxKindSet<JsLanguage> = JsPreUpdateExpression::KIND_SET
+    .union(JsPostUpdateExpression::KIND_SET)
+    .union(TsAsAssignment::KIND_SET)
+    .union(TsSatisfiesAssignment::KIND_SET)
+    .union(TsTypeAssertionAssignment::KIND_SET);
+
 /// Binding patterns, with their elements and lists, which can enclose a binding.
 const BINDING_PATTERN_KINDS: SyntaxKindSet<JsLanguage> = JsArrayBindingPattern::KIND_SET
     .union(JsArrayBindingPatternElement::KIND_SET)
@@ -3779,6 +3865,50 @@ fn evolving_declaration(binding: &Binding, model: &SemanticModel) -> FlowEvolvin
     }
 }
 
+/// Returns whether a read of the `var` that `binding` declares can come
+/// before its declarator runs, where the variable is still `undefined`: a
+/// read starts before the declarator, or the declarator's statement is nested
+/// in another statement, so a path can skip it, as in
+/// `if (c) { var x = null; } x`. Returns false for any other declaration.
+///
+/// A `var` statement directly in the body of the function, the static block,
+/// the namespace, or the module that holds the variable runs on every path
+/// to a read after it.
+fn may_read_before_declarator(binding: &Binding) -> bool {
+    let Some(AnyJsBindingDeclaration::JsVariableDeclarator(declarator)) =
+        binding.tree().declaration()
+    else {
+        return false;
+    };
+    let Some(AnyJsVariableDeclaration::JsVariableDeclaration(declaration)) =
+        declarator.declaration()
+    else {
+        return false;
+    };
+    if !declaration.is_var() {
+        return false;
+    }
+    let declared_at = declarator.syntax().text_trimmed_range().start();
+    if binding
+        .all_reads()
+        .any(|read| read.range_start() < declared_at)
+    {
+        return true;
+    }
+    !declaration
+        .parent::<JsVariableStatement>()
+        .and_then(|statement| statement.syntax().grand_parent())
+        .is_some_and(|holder| VAR_HOLDER_KINDS.matches(holder.kind()))
+}
+
+/// The bodies whose statement lists hold a `var` directly: functions, static
+/// blocks, namespaces, and modules and scripts.
+const VAR_HOLDER_KINDS: SyntaxKindSet<JsLanguage> = JsFunctionBody::KIND_SET
+    .union(JsStaticInitializationBlockClassMember::KIND_SET)
+    .union(TsModuleBlock::KIND_SET)
+    .union(JsModule::KIND_SET)
+    .union(JsScript::KIND_SET);
+
 /// Returns whether `binding` is declared by a `let` or a `var` that may be
 /// read before it is assigned, in the root that declares it, or in a root
 /// nested in that one when `enclosed` is true. See
@@ -3820,11 +3950,12 @@ fn is_uninitialized_declaration(binding: &Binding, enclosed: bool) -> bool {
         }
         None => return false,
     };
-    let never_assigned = || !initialized && binding.all_writes().next().is_none();
     match kind {
-        Ok(JsVariableKind::Let) if enclosed => never_assigned(),
+        Ok(JsVariableKind::Let) if enclosed => !initialized && !is_definitely_assigned(binding),
         Ok(JsVariableKind::Let) => !initialized,
-        Ok(JsVariableKind::Var) => !enclosed || never_assigned(),
+        Ok(JsVariableKind::Var) => {
+            !enclosed || (!initialized && binding.all_writes().next().is_none())
+        }
         Ok(JsVariableKind::Const | JsVariableKind::Using) | Err(_) => false,
     }
 }

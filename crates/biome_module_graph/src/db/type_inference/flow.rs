@@ -31,12 +31,13 @@ use crate::db::queries::{
     resolve_callable_function,
 };
 use crate::js_module_info::flow::{
-    AnyMemberDeclaration, CalleeReturn, FlowAssigned, FlowAssignedValue, FlowCall, FlowCallKind,
-    FlowCallRoot, FlowCallee, FlowCapture, FlowComparedValue, FlowEvolving, FlowGuard, FlowNode,
-    FlowNodeId, FlowPredicate, FlowRead, FlowSubject, FlowSubjectId, FlowSwitch, FlowTest,
-    FlowWriteEffect, PropertyKey, ReachabilityGraph, RootFlow, UnitValue, binding_unit_value,
-    build_reachability, declaration_return, enum_member_name_range, enum_member_unit_value,
-    guard_signature, member_explicitness, member_key, member_return,
+    AnyMemberDeclaration, CalleeReturn, DeclaredReturn, FlowAssigned, FlowAssignedValue, FlowCall,
+    FlowCallKind, FlowCallRoot, FlowCallee, FlowCapture, FlowComparedValue, FlowEvolving,
+    FlowGuard, FlowNode, FlowNodeId, FlowPredicate, FlowRead, FlowSubject, FlowSubjectId,
+    FlowSwitch, FlowTest, FlowWriteEffect, PropertyKey, ReachabilityGraph, RootFlow, UnitValue,
+    binding_unit_value, build_reachability, declaration_return, declared_member_returns,
+    declared_return, enum_member_name_range, enum_member_unit_value, guard_signature,
+    member_explicitness, member_key, member_return,
 };
 use crate::module_graph::ModuleInfoKind;
 use crate::type_inference::TypeInferenceClassification;
@@ -47,7 +48,7 @@ use crate::{
 use biome_js_control_flow::AnyJsControlFlowRoot;
 use biome_js_semantic::ScopeId;
 use biome_js_syntax::{
-    AnyJsExpression, JsIdentifierExpression, TsDeclareStatement,
+    AnyJsExpression, JsIdentifierExpression, JsReferenceIdentifier, TsDeclareStatement,
     binding_ext::AnyJsBindingDeclaration,
 };
 use biome_js_type_info::interned_types::{
@@ -827,6 +828,8 @@ impl<'db> ResolutionCtx<'db, '_> {
     ///   type then already is the value's type, as for
     ///   `let x = null; x = null`, or is wider, as Unknown for
     ///   `let x; x = null` and `unknown[]` for `const a = []; a.push(null)`.
+    ///   A `var` whose values are all `null` is solved, because a path that
+    ///   doesn't pass its declarator gives `undefined`.
     ///   An array ignores the values that Biome can't type, and qualifies
     ///   only when it is an array at every read, as
     ///   [`RootFlow::is_always_array`] describes.
@@ -861,7 +864,18 @@ impl<'db> ResolutionCtx<'db, '_> {
                     {
                         return Some(TypeData::Unknown);
                     }
-                    if types.iter().all(is_unit) {
+                    // A path that doesn't pass the declarator of a `var`
+                    // gives `undefined`, which a declared type of `null`
+                    // lacks.
+                    if types.iter().all(is_unit)
+                        && (unit != Some(TypeData::Null)
+                            || !self
+                                .js_info
+                                .flow
+                                .root(read.root)?
+                                .hoisted
+                                .contains(&read.subject))
+                    {
                         return None;
                     }
                 }
@@ -1792,7 +1806,8 @@ impl<'db> ResolutionCtx<'db, '_> {
     /// declared type is, and a target of `any` or `unknown` narrows nothing.
     ///
     /// The effect of a statement call is [`FlowCallEffect::Ends`] when the
-    /// return type annotation of its signature's declaration is `never` (see
+    /// return type annotation of its signature's declaration is `never`,
+    /// written in place or through type aliases (see
     /// [`Self::has_annotated_callee`]), or when its signature is
     /// `asserts value` and the asserted argument is always false.
     fn resolve_call_effect(&mut self, call: &FlowCall) -> Option<FlowCallEffect<'db>> {
@@ -1869,10 +1884,11 @@ impl<'db> ResolutionCtx<'db, '_> {
             ReturnType::Type(ty) => {
                 // TypeScript ends the path at a statement call only when the
                 // return type annotation of the signature's declaration is
-                // `never`.
+                // `never`, in place or through type aliases. Flattening
+                // follows the aliases and drops `never` from a union, so an
+                // alias of a union, such as `never | string`, isn't `never`.
                 let (root, steps, annotated) = callee_steps?;
-                let returns_never = resolve_local_type_on_demand(self.db, *ty)
-                    == TypeData::NeverKeyword
+                let returns_never = self.flow_baseline(*ty) == Some(TypeData::NeverKeyword)
                     && self.has_annotated_callee(root, steps, annotated);
                 return returns_never.then_some(FlowCallEffect::Ends);
             }
@@ -3859,72 +3875,160 @@ fn classify_imported_enum_member(
 /// Returns whether the return type of a call to the imported binding at
 /// `binding` in `js_info`, the module `module`, comes from an annotation.
 /// For a namespace import, the callee is the export that `member` names.
-///
-/// The import is followed through re-exports to the module that declares the
-/// export. A binding that an import declares there is followed in turn, at
-/// most 16 of them. Another binding is annotated in a declaration file,
-/// because a declaration file declares only annotated functions. Elsewhere
-/// it is annotated when its declaration has a return type annotation or a
-/// function type annotation; see [`declaration_return`].
+/// See [`followed_return_is_annotated`].
 fn imported_return_is_annotated(
+    db: &dyn ModuleDb,
+    module: ModuleInfo,
+    js_info: &JsModuleInfo,
+    binding: TextRange,
+    member: Option<&Text>,
+) -> bool {
+    followed_return_is_annotated(db, module, js_info, FollowedCallee::Import(binding, member))
+}
+
+/// A callee that [`followed_return_is_annotated`] follows to the declaration
+/// that gives its return type.
+enum FollowedCallee<'a> {
+    /// The binding at this range, which an import declares, with the name of
+    /// the export for a namespace import.
+    Import(TextRange, Option<&'a Text>),
+    /// The variable that a declaration file types with `typeof`, as `f` in
+    /// `typeof f`.
+    Queried(JsReferenceIdentifier),
+}
+
+/// Returns whether the return type of a call to `callee`, found in
+/// `js_info`, the module `module`, comes from an annotation.
+///
+/// An import is followed through re-exports to the module that declares the
+/// export. A binding that an import declares there is followed in turn. In a
+/// declaration file, a declaration is annotated, because a declaration file
+/// declares only annotated functions, unless its type annotation is `typeof`
+/// of a variable: that variable is followed in turn, and a variable that the
+/// file doesn't declare is a global of the lib or of a declaration file,
+/// which is annotated. At most [`MAX_IMPORT_STEPS`] imports and queries are
+/// followed. Elsewhere a declaration is annotated when it has a return type
+/// annotation or a function type annotation; see [`declaration_return`].
+fn followed_return_is_annotated(
     db: &dyn ModuleDb,
     mut module: ModuleInfo,
     js_info: &JsModuleInfo,
-    mut binding: TextRange,
-    mut member: Option<&Text>,
+    mut callee: FollowedCallee,
 ) -> bool {
     let mut info = js_info;
     for _ in 0..MAX_IMPORT_STEPS {
-        let Some(TypeReference::Import(import)) = info.raw_binding_types.get(&binding) else {
-            return false;
-        };
-        let name = match &import.symbol {
-            ImportSymbol::Named(name) => name.clone(),
-            ImportSymbol::Default => Text::new_static("default"),
-            ImportSymbol::All => match member.take() {
-                Some(member) => member.clone(),
-                None => return false,
-            },
-        };
-        let resolved =
-            resolve_module_import(db, module, &import.specifier, ResolutionMode::JavaScript);
-        let Some(target) = resolved
-            .path()
-            .as_path()
-            .and_then(|path| db.module_for_path(path))
-        else {
-            return false;
-        };
-        let ExportOriginResult::Found {
-            module: origin,
-            name,
-        } = find_export_origin(db, target, name)
-        else {
-            return false;
-        };
-        let ModuleInfoKind::Js(origin_info) = origin.kind(db) else {
-            return false;
-        };
-        let Some(JsExport::Own(JsOwnExport::Binding(declaration))) =
-            origin_info.exports.get(name.text())
-        else {
-            return false;
-        };
-        let Some(declared) = origin_info.semantic_model.as_binding_by_range(*declaration) else {
-            return false;
-        };
-        match declaration_return(&declared) {
-            CalleeReturn::Resolved(FlowCallee::Import(next)) => {
+        let declared = match callee {
+            FollowedCallee::Import(binding, member) => {
+                let Some(TypeReference::Import(import)) = info.raw_binding_types.get(&binding)
+                else {
+                    return false;
+                };
+                let name = match &import.symbol {
+                    ImportSymbol::Named(name) => name.clone(),
+                    ImportSymbol::Default => Text::new_static("default"),
+                    ImportSymbol::All => match member {
+                        Some(member) => member.clone(),
+                        None => return false,
+                    },
+                };
+                let resolved = resolve_module_import(
+                    db,
+                    module,
+                    &import.specifier,
+                    ResolutionMode::JavaScript,
+                );
+                let Some(target) = resolved
+                    .path()
+                    .as_path()
+                    .and_then(|path| db.module_for_path(path))
+                else {
+                    return false;
+                };
+                let ExportOriginResult::Found {
+                    module: origin,
+                    name,
+                } = find_export_origin(db, target, name)
+                else {
+                    return false;
+                };
+                let ModuleInfoKind::Js(origin_info) = origin.kind(db) else {
+                    return false;
+                };
+                let Some(JsExport::Own(JsOwnExport::Binding(declaration))) =
+                    origin_info.exports.get(name.text())
+                else {
+                    return false;
+                };
+                let Some(declared) = origin_info.semantic_model.as_binding_by_range(*declaration)
+                else {
+                    return false;
+                };
                 module = origin;
                 info = origin_info;
-                binding = next;
+                declared
             }
-            _ if is_declaration_file(db, origin) => return true,
+            FollowedCallee::Queried(name) => match info.semantic_model.binding(&name) {
+                Some(declared) => declared,
+                None => return true,
+            },
+        };
+        callee = match declaration_return(&declared) {
+            CalleeReturn::Resolved(FlowCallee::Import(next)) => FollowedCallee::Import(next, None),
+            _ if is_declaration_file(db, module) => match declared_return(&declared) {
+                DeclaredReturn::Stated => return true,
+                DeclaredReturn::Queried(name) => FollowedCallee::Queried(name),
+                DeclaredReturn::Unfollowed => return false,
+            },
             CalleeReturn::Annotated => return true,
             CalleeReturn::Inferred | CalleeReturn::Resolved(FlowCallee::Member(_)) => return false,
-        }
+        };
     }
     false
+}
+
+/// Returns the scope that `ty` records when it is a class or an interface.
+fn member_scope(db: &dyn ModuleDb, ty: TypeData) -> Option<ScopeId> {
+    if let TypeData::Class(class) = ty {
+        class.scope_id(db)
+    } else if let TypeData::Interface(interface) = ty {
+        interface.scope_id(db)
+    } else {
+        None
+    }
+}
+
+/// Returns whether a call of each property named `name` that the class or
+/// the interface whose scope is `scope_id` declares itself, in the
+/// declaration file `module`, has a return type from an annotation. A
+/// property typed `typeof` of a variable has one only when that variable
+/// does (see [`followed_return_is_annotated`]); see [`declared_member_returns`]
+/// for the other members.
+fn declared_members_are_annotated(
+    db: &dyn ModuleDb,
+    module: ModuleInfo,
+    scope_id: Option<ScopeId>,
+    name: &str,
+) -> bool {
+    let Some(scope_id) = scope_id else {
+        return false;
+    };
+    let ModuleInfoKind::Js(info) = module.kind(db) else {
+        return false;
+    };
+    let Some(declaration) =
+        AnyMemberDeclaration::cast(info.semantic_model.scope_from_id(scope_id).syntax())
+    else {
+        return false;
+    };
+    declared_member_returns(&declaration, name)
+        .into_iter()
+        .all(|declared| match declared {
+            DeclaredReturn::Stated => true,
+            DeclaredReturn::Queried(name) => {
+                followed_return_is_annotated(db, module, info, FollowedCallee::Queried(name))
+            }
+            DeclaredReturn::Unfollowed => false,
+        })
 }
 
 /// Returns the operand of `call` that the type predicate or the assertion of
@@ -4311,7 +4415,12 @@ fn has_explicit_member(db: &dyn ModuleDb, ty: TypeData, name: &str) -> bool {
 ///   with a return type annotation, or inherits it from such types; see
 ///   [`own_member`].
 ///
-/// `null` and `undefined` have no members to call.
+/// A class or an interface of a declaration file, including one that a
+/// declaration file merges into a lib global, can declare the member as a
+/// property typed `typeof` of a variable. A call of it returns what a call
+/// of that variable returns, so the variable must have a return type from an
+/// annotation too (see [`declared_members_are_annotated`]). `null` and
+/// `undefined` have no members to call.
 fn has_annotated_member(db: &dyn ModuleDb, ty: TypeData, name: &str) -> bool {
     // Each type comes with whether a value of it is an instance, as the
     // object of a call of a class's method is.
@@ -4324,10 +4433,23 @@ fn has_annotated_member(db: &dyn ModuleDb, ty: TypeData, name: &str) -> bool {
         remaining = left;
         match ty {
             TypeData::GlobalType(id) => {
-                if !global_contributions(db, id).iter().all(|(module, _)| {
-                    module_for_key(db, *module)
-                        .is_some_and(|module| is_declaration_file(db, module))
-                }) {
+                if !global_contributions(db, id)
+                    .iter()
+                    .all(|(module, type_id)| {
+                        module_for_key(db, *module).is_some_and(|module| {
+                            is_declaration_file(db, module)
+                                && infer_local_type(db, LocalTypeInput::new(db, module, *type_id))
+                                    .is_some_and(|contribution| {
+                                        declared_members_are_annotated(
+                                            db,
+                                            module,
+                                            member_scope(db, contribution),
+                                            name,
+                                        )
+                                    })
+                        })
+                    })
+                {
                     return false;
                 }
             }
@@ -4367,6 +4489,9 @@ fn has_annotated_member(db: &dyn ModuleDb, ty: TypeData, name: &str) -> bool {
                     let parents: Vec<_> = extends.iter().chain(interface_bases).copied().collect();
                     // A call of a class itself reads its static members.
                     let own = if in_declaration_file {
+                        if !declared_members_are_annotated(db, module, class.scope_id(db), name) {
+                            return false;
+                        }
                         OwnMember::Inherited
                     } else if instance {
                         own_member(
@@ -4384,6 +4509,10 @@ fn has_annotated_member(db: &dyn ModuleDb, ty: TypeData, name: &str) -> bool {
                     (parents, own)
                 } else if let TypeData::Interface(interface) = resolved {
                     let own = if in_declaration_file {
+                        if !declared_members_are_annotated(db, module, interface.scope_id(db), name)
+                        {
+                            return false;
+                        }
                         OwnMember::Inherited
                     } else {
                         own_member(

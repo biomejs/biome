@@ -1,0 +1,83 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: index.ts
+---
+# Input
+```ts
+// should generate diagnostics
+// The declaration file types `kindOf` as `typeof` a function without a return
+// type annotation, so a call of it returns what TypeScript infers for that
+// function: every result of `typeof`. The `switch` misses cases.
+
+import { kindOf } from "./declarations";
+
+type Kind =
+	| "bigint"
+	| "boolean"
+	| "function"
+	| "number"
+	| "object"
+	| "string"
+	| "symbol"
+	| "undefined";
+
+export function describe(value: string) {
+	let kind: Kind;
+	kind = kindOf(value);
+	switch (kind) {
+		case "string":
+			return "text";
+	}
+}
+
+```
+
+# Diagnostics
+```
+index.ts:21:2 lint/nursery/useExhaustiveSwitchCases  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The switch statement is not exhaustive.
+  
+    19 │ 	let kind: Kind;
+    20 │ 	kind = kindOf(value);
+  > 21 │ 	switch (kind) {
+       │ 	^^^^^^^^^^^^^^^
+  > 22 │ 		case "string":
+  > 23 │ 			return "text";
+  > 24 │ 	}
+       │ 	^
+    25 │ }
+    26 │ 
+  
+  i Some variants of the union type are not handled here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i These cases are missing:
+  
+  - "bigint"
+  - "boolean"
+  - "function"
+  - "number"
+  - "object"
+  - "symbol"
+  - "undefined"
+  
+  i Unsafe fix: Add the missing cases to the switch statement.
+  
+    21 21 │     switch (kind) {
+    22 22 │       case "string":
+    23    │ - → → → return·"text";
+       23 │ + → → → return·"text";
+       24 │ + → → case·"bigint":·throw·new·Error("TODO:·Not·implemented·yet");
+       25 │ + → → case·"boolean":·throw·new·Error("TODO:·Not·implemented·yet");
+       26 │ + → → case·"function":·throw·new·Error("TODO:·Not·implemented·yet");
+       27 │ + → → case·"number":·throw·new·Error("TODO:·Not·implemented·yet");
+       28 │ + → → case·"object":·throw·new·Error("TODO:·Not·implemented·yet");
+       29 │ + → → case·"symbol":·throw·new·Error("TODO:·Not·implemented·yet");
+       30 │ + → → case·"undefined":·throw·new·Error("TODO:·Not·implemented·yet");
+    24 31 │     }
+    25 32 │   }
+  
+
+```

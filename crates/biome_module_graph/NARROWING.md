@@ -145,6 +145,7 @@ Biome writes `{ b: 1 } & Record<"a", unknown>` as `{ b: 1; a: unknown }`, and
 | An array without a type annotation | `let a = []; a.push(1); a` | `number[]` |
 | An assertion function | `assertString(v: unknown): asserts v is string; x: string \| number; (assertString(x), x)` | `string` at the last `x` |
 | A function that returns `never` | `fail(): never; x: string \| null; if (x === null) fail(); x` | `string` |
+| A function that returns `never` through a type alias | `type Never = never; fail(): Never; x: string \| null; if (x === null) fail(); x` | `string` |
 | A closure | `const x: string \| null = f(); if (x) () => x` | `string` |
 | Inline code | `x: string \| null; (() => { while (true) { if (x !== null) break; } })(); x` | `string` |
 | A branch that a check makes impossible | `x: Date; if (x instanceof Date) {} else x` | Unknown |
@@ -219,14 +220,14 @@ TypeScript treats as unreachable, impossible, or erroneous:
   discriminant to `never` through a check that Biome doesn't narrow by, as
   after `if (x === f()) return;`;
 - after a call that never returns that Biome doesn't recognize, as
-  `failAll(xs)` with `failAll<T>(v: T[]): never`, or `fail()` with
-  `fail(): Never` and `type Never = never`, or that comes after the first 64
-  statement calls of a function, and in closures created there;
+  `failAll(xs)` with `failAll<T>(v: T[]): never`, or `fail()` when `never`
+  comes from a generic type alias, as in `fail(): G<string>` with
+  `type G<T> = never`, from a type alias that a declaration file declares
+  globally, or from a type alias in the signature of a generic or overloaded
+  function of the module, or that comes after the first 64 statement calls of
+  a function, and in closures created there;
 - after a call that never returns that Biome drops when a function exceeds its
-  work budget, or that is part of a query cycle;
-- in a closure that reads a `let` that only `++` assigns, as `n` in
-  `let n: number | null; const g = () => { if (n !== null) n }; n++;`, where
-  TypeScript reports a use before assignment and gives `number | null`.
+  work budget, or that is part of a query cycle.
 
 TypeScript merges the augmentations of the files in its program, which
 `tsconfig.json` selects with options such as `include` and
@@ -308,11 +309,9 @@ target keeps its declared type when it reads an element of an array, as in
 `[x] = xs` and `[[x]] = [["a"]]`, or when its default supplies the value, as
 in `[x = 1] = []`. A call reduces the assigned type only when its callee has a
 return type annotation or is a local function whose returned values Biome can
-type. An export of a declaration file, or a member of an interface that a
-declaration file declares, typed `typeof` a function without a return type
-annotation counts as annotated, so a call of it assigns the return type that
-Biome infers for that function. A member of a type literal typed that way
-doesn't count.
+type. A value that a declaration file types as `typeof` a function, as
+`declare const f: typeof impl`, has a return type annotation only when that
+function has one.
 
 ### Variables whose type evolves with their writes
 
@@ -327,7 +326,6 @@ their writes, as in TypeScript. The code below uses
 | `let x = null; x = 0; x++; x` | `number` | Unknown | A rule can miss a report on `x`. |
 | `let x; x = null; x` | `null` | Unknown | A rule can miss a report on `x`. |
 | `let x; x` | `undefined` | Unknown | A rule can miss a report on `x`. |
-| `x; var x = null;`, the read before the declarator | `undefined` | `null` | Disjoint: rules see `null` where `x` is `undefined`. |
 | `let a = []; a.push(1); if (c) a = null; a` | `any[]`, with an error | Unknown | A rule can miss a report on `a`. |
 | `const a = []; a.push(null); a` | `null[]` | `unknown[]` | A rule can miss a report on the elements of `a`. |
 | `let a = []; a.push(1); a.push(store.load()); a` | `number[]` | `unknown[]` | A rule can miss a report on the elements of `a`. |
@@ -341,9 +339,9 @@ variable. A write in a nested block, as in
 `let x = null; if (c) { x = store.load(); } x`, gives `null | number`, as in
 TypeScript. A read in another function keeps the declared type only when every
 write is an `=` or a logical assignment outside the scope of the declaration,
-as in the last row. A read before the declarator of such a `var` is
-`undefined`, as in TypeScript, only when a write after the declarator assigns
-the variable.
+as in the last row. A read that a path reaches without passing the
+declarator of such a `var`, as in `x; var x = null;`, is `undefined` there, as
+in TypeScript, and an array is Unknown there.
 
 ### Property paths
 
