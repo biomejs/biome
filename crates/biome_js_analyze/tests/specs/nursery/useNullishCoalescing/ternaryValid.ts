@@ -1,6 +1,6 @@
-// should not generate diagnostics
+/* should not generate diagnostics */
 
-// Already using ??
+// Already using `??`
 declare const x: string | null;
 const a = x ?? 'default';
 
@@ -16,7 +16,7 @@ const e = d !== null ? 'something_else' : 'fallback';
 declare const f: string;
 const g = f === 'foo' ? f : 'bar';
 
-// Typeof check
+// `typeof` check
 declare const t: string | null;
 const h = typeof t === 'string' ? t : 'default';
 
@@ -35,12 +35,12 @@ declare const s1: string | null;
 declare const s2: string | null;
 const k = s1 !== null && s2 !== undefined ? s1 : 'default';
 
-// Optional property that also accepts null: `=== null` misses undefined
+// Optional property that also accepts `null`
 interface UserInput { fruits?: string[] | null }
 declare const userInput: UserInput;
 const l = userInput.fruits === null ? [] : userInput.fruits;
 
-// Strict single check that misses a nullish variant of the type
+// Strict check that misses a nullish variant
 declare const nu: string | null | undefined;
 const m1 = nu !== null ? nu : 'default';
 const m2 = nu === undefined ? 'default' : nu;
@@ -57,10 +57,90 @@ const m6 = ss2 === undefined ? 'default' : ss2;
 declare const ss7: string | void;
 const m7 = ss7 !== null ? ss7 : 'default';
 
-// Compound check that tests the same literal twice still misses `undefined`
+// Compound check of the same literal twice
 declare const cp1: string | null | undefined;
 const m8 = cp1 !== null && cp1 !== null ? cp1 : 'default';
 
-// Call subject: still not reported, because `=== null` misses `undefined` in the return type
+// Call in the subject
 declare function maybeLater(): string | null | undefined;
 const m9 = maybeLater() === null ? 'default' : maybeLater();
+
+declare function foo(): string | null;
+const m10 = foo() !== null ? foo() : 'default';
+
+declare class Bar { value: string | null }
+const m11 = new Bar().value !== null ? new Bar().value : 'default';
+
+// `!=` under `||` and `==` under `&&`
+declare const loose: string | null | undefined;
+const m12 = loose != null || loose != undefined ? loose : 'default';
+const m13 = loose == null && loose == undefined ? 'default' : loose;
+
+// Compound side comparing two nullish values
+const m14 = null === null || loose === undefined ? 'default' : loose;
+const m15 = loose !== undefined && undefined != null ? loose : 'default';
+
+// Compound with a different value
+declare const other: string | null;
+const m16 = loose !== null && other !== undefined ? loose : 'default';
+
+// The test and the branch read different values
+declare const pair: { a: string; b: string } | null;
+declare const key1: 'a' | 'b';
+declare const key2: 'a' | 'b';
+declare const strings: (string | null)[];
+declare const factory: { f(): { a: string | null } };
+const m17 = pair?.a != null ? pair.b : 'z';
+const m18 = pair?.[key1] != null ? pair[key2] : 'z';
+const m19 = strings[0] != null ? strings[1] : 'z';
+const m20 = factory.f().a != null ? factory.f().a : 'z';
+
+// Inverted branches
+declare const w: string | null;
+const m21 = w !== null ? 'default' : w;
+const m22 = w === null ? w : 'default';
+
+// Falsy test
+declare const falsy: string | null;
+const m23 = !falsy ? 'default' : falsy;
+
+// The test and the branch read different parts of the same value
+declare const o3: { a: string } | null;
+declare const o4: { a: { b: string } | null };
+declare const p1: { a: string | null };
+declare const p2: { a: string | null };
+declare const idx: (string | null)[];
+declare let position: number;
+const m24 = o3 != null ? o3.a : 'z';
+const m25 = o4.a != null ? o4.a.b : 'z';
+const m26 = p1.a != null ? p2.a : 'z';
+const m27 = idx[position++] != null ? idx[position++] : 'z';
+
+export async function awaited(pr: Promise<string | null>) {
+	return (await pr) != null ? await pr : 'z';
+}
+
+// Strict compounds that don't check for a missing value
+declare const s3: string | null | undefined;
+declare const fb: string;
+const m28 = s3 !== null || s3 !== undefined ? s3 : fb;
+const m29 = s3 === null && s3 === undefined ? fb : s3;
+const m30 = s3 !== null && s3 !== undefined && s3 !== 'a' ? s3 : fb;
+
+// Private name and string key are different properties
+class PrivateNames {
+	#p: string | null = null;
+
+	compare() {
+		return this.#p != null ? this['#p'] : 'default';
+	}
+}
+
+// `void 0` is not recognized as `undefined`
+declare const voided: string | undefined;
+const m31 = voided !== void 0 ? voided : 'default';
+
+// `undefined` shadowed by a parameter
+export function shadowedUndefined(undefined: string, shadowedValue: string | undefined) {
+	return shadowedValue !== undefined ? shadowedValue : 'default';
+}

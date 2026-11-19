@@ -6,7 +6,8 @@
 				"useNullishCoalescing": {
 					"level": "error",
 					"options": {
-						"ignoreIfStatements": false
+						"ignoreBooleanCoercion": true,
+						"ignoreConditionalTests": false
 					}
 				}
 			}

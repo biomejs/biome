@@ -1,0 +1,270 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: ignoreMixedLogicalExpressionsEnabled.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+
+declare const a: string | null;
+declare const b: string;
+declare const c: string;
+
+// `||` as an operand of `&&`: not reported
+const r1 = (a || 'default') && b;
+
+// `||` with a `&&` operand: not reported
+const r2 = a || (b && c);
+
+// `||` as the left operand of `&&`: not reported
+const r3 = (a || b) && c;
+
+// `||` inside nested `&&`: not reported
+const r4 = (a || b) && c && b;
+
+// `||=` with a `&&` right-hand side: not reported
+declare let assignMixed: string | null;
+assignMixed ||= b && c;
+
+// Chained `||` with a parenthesized `&&` operand: not reported
+declare const x: string | null;
+declare const y: string;
+declare const z: string;
+declare const w: string;
+const r5 = x || y || (z && w);
+
+// Chained `||` with an unparenthesized `&&` operand: not reported
+const r6 = x || y || z && w;
+
+// `||=` whose right-hand side is a `||` with a `&&` operand: not reported
+declare let chainAssign: string | null;
+chainAssign ||= y || (z && w);
+
+// Nested `||=` with a `&&` in the inner right-hand side: only the inner `||=` is not reported
+declare let outerAssign: string | null;
+declare let innerAssign: string | null;
+outerAssign ||= innerAssign ||= b && c;
+
+// The same with parentheses around the inner `||=`
+declare let parenOuter: string | null;
+declare let parenInner: string | null;
+parenOuter ||= (parenInner ||= b && c);
+
+// `||=` with a `&&` right-hand side inside `||`: the `||=` is not reported, both `||` are
+declare const left: string | null;
+declare const right: string | null;
+declare let tailAssign: string | null;
+const r9 = (left || right) || (tailAssign ||= z && w);
+
+declare let nestedAssign: string | null;
+const r10 = x || (nestedAssign ||= b && c);
+
+// `||` operand of a `||=` under `&&`: the `||=` is not reported, the `||` is
+declare let wrapAssign: string | null;
+const r11 = (wrapAssign ||= x || y) && c;
+
+// `||` without `&&`
+declare const d: string | null;
+const r7 = d || 'default';
+
+declare const e: number | undefined;
+const r8 = e || 0;
+
+// `||=` without `&&`
+declare let assignPlain: string | null;
+assignPlain ||= 'default';
+
+// `&&` as the left operand of a `||` chain: not reported
+declare const lead: string | null;
+const r12 = (lead && b) || c;
+const r13 = (lead && b) || c || d;
+
+```
+
+# Diagnostics
+```
+ignoreMixedLogicalExpressionsEnabled.ts:40:13 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━
+
+  i Use ??= instead of ||=.
+  
+    38 │ declare let outerAssign: string | null;
+    39 │ declare let innerAssign: string | null;
+  > 40 │ outerAssign ||= innerAssign ||= b && c;
+       │             ^^^
+    41 │ 
+    42 │ // The same with parentheses around the inner `||=`
+  
+  i The ||= operator assigns when the left side is falsy, while ??= only assigns when it is null or undefined.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+ignoreMixedLogicalExpressionsEnabled.ts:45:12 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━
+
+  i Use ??= instead of ||=.
+  
+    43 │ declare let parenOuter: string | null;
+    44 │ declare let parenInner: string | null;
+  > 45 │ parenOuter ||= (parenInner ||= b && c);
+       │            ^^^
+    46 │ 
+    47 │ // `||=` with a `&&` right-hand side inside `||`: the `||=` is not reported, both `||` are
+  
+  i The ||= operator assigns when the left side is falsy, while ??= only assigns when it is null or undefined.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+ignoreMixedLogicalExpressionsEnabled.ts:51:28 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+    49 │ declare const right: string | null;
+    50 │ declare let tailAssign: string | null;
+  > 51 │ const r9 = (left || right) || (tailAssign ||= z && w);
+       │                            ^^
+    52 │ 
+    53 │ declare let nestedAssign: string | null;
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+ignoreMixedLogicalExpressionsEnabled.ts:51:18 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+    49 │ declare const right: string | null;
+    50 │ declare let tailAssign: string | null;
+  > 51 │ const r9 = (left || right) || (tailAssign ||= z && w);
+       │                  ^^
+    52 │ 
+    53 │ declare let nestedAssign: string | null;
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+ignoreMixedLogicalExpressionsEnabled.ts:54:15 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+    53 │ declare let nestedAssign: string | null;
+  > 54 │ const r10 = x || (nestedAssign ||= b && c);
+       │               ^^
+    55 │ 
+    56 │ // `||` operand of a `||=` under `&&`: the `||=` is not reported, the `||` is
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+ignoreMixedLogicalExpressionsEnabled.ts:58:31 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+    56 │ // `||` operand of a `||=` under `&&`: the `||=` is not reported, the `||` is
+    57 │ declare let wrapAssign: string | null;
+  > 58 │ const r11 = (wrapAssign ||= x || y) && c;
+       │                               ^^
+    59 │ 
+    60 │ // `||` without `&&`
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+ignoreMixedLogicalExpressionsEnabled.ts:62:14 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+    60 │ // `||` without `&&`
+    61 │ declare const d: string | null;
+  > 62 │ const r7 = d || 'default';
+       │              ^^
+    63 │ 
+    64 │ declare const e: number | undefined;
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+ignoreMixedLogicalExpressionsEnabled.ts:65:14 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+    64 │ declare const e: number | undefined;
+  > 65 │ const r8 = e || 0;
+       │              ^^
+    66 │ 
+    67 │ // `||=` without `&&`
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+ignoreMixedLogicalExpressionsEnabled.ts:69:13 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━
+
+  i Use ??= instead of ||=.
+  
+    67 │ // `||=` without `&&`
+    68 │ declare let assignPlain: string | null;
+  > 69 │ assignPlain ||= 'default';
+       │             ^^^
+    70 │ 
+    71 │ // `&&` as the left operand of a `||` chain: not reported
+  
+  i The ||= operator assigns when the left side is falsy, while ??= only assigns when it is null or undefined.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

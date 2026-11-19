@@ -1,4 +1,4 @@
-// ||= with nullish types should suggest ??=
+/* should generate diagnostics */
 
 // Union with null
 declare let a: string | null;
@@ -19,14 +19,14 @@ d ||= 'value';
 let e: undefined = undefined;
 e ||= 'value';
 
-// Object-shaped annotation with null: no proven truthiness, so no safe fix.
+// Object union with `null`: no fix
 declare let obj: { a: string } | null;
 obj ||= { a: 'default' };
 
-// Mixed nullish + falsy types (no safe fix)
+// Number union with `null`: no fix
 declare let mixed: number | null;
 mixed ||= 100;
 
-// Boolean union (no safe fix - false is falsy but not nullish)
+// Boolean union with `null`: no fix
 declare let flag: boolean | null;
 flag ||= true;

@@ -2,11 +2,11 @@
 use crate::numbers::parse_js_number;
 use crate::static_value::StaticValue;
 use crate::{
-    AnyJsArrayElement, AnyJsArrowFunctionParameters, AnyJsCallArgument, AnyJsClassMemberName,
-    AnyJsExpression, AnyJsFunctionBody, AnyJsLiteralExpression, AnyJsName, AnyJsObjectMember,
-    AnyJsObjectMemberName, AnyJsTemplateElement, AnyTsEnumMemberName, JsArrayExpression,
-    JsArrayHole, JsAssignmentExpression, JsBinaryExpression, JsCallArgumentList, JsCallArguments,
-    JsCallExpression, JsComputedMemberAssignment, JsComputedMemberExpression,
+    AnyJsArrayElement, AnyJsArrowFunctionParameters, AnyJsAssignment, AnyJsCallArgument,
+    AnyJsClassMemberName, AnyJsExpression, AnyJsFunctionBody, AnyJsLiteralExpression, AnyJsName,
+    AnyJsObjectMember, AnyJsObjectMemberName, AnyJsTemplateElement, AnyTsEnumMemberName,
+    JsArrayExpression, JsArrayHole, JsAssignmentExpression, JsBinaryExpression, JsCallArgumentList,
+    JsCallArguments, JsCallExpression, JsComputedMemberAssignment, JsComputedMemberExpression,
     JsConditionalExpression, JsDoWhileStatement, JsForStatement, JsIdentifierExpression,
     JsIfStatement, JsLiteralMemberName, JsLogicalExpression, JsNewExpression,
     JsNumberLiteralExpression, JsObjectExpression, JsPostUpdateExpression, JsPreUpdateExpression,
@@ -765,6 +765,22 @@ impl JsRegexLiteralExpression {
         ));
         let flags = token_text.slice(TextRange::new(TextSize::from(end_slash_pos + 1), len));
         Ok((pattern, flags))
+    }
+}
+
+impl AnyJsAssignment {
+    /// Returns the assignment target inside any parentheses, such as `a` in `((a)) = b`.
+    pub fn omit_parentheses(self) -> Self {
+        let first = self
+            .as_js_parenthesized_assignment()
+            .and_then(|assignment| assignment.assignment().ok());
+
+        iter::successors(first, |assignment| {
+            let parenthesized = assignment.as_js_parenthesized_assignment()?;
+            parenthesized.assignment().ok()
+        })
+        .last()
+        .unwrap_or(self)
     }
 }
 
@@ -2862,6 +2878,32 @@ mod test {
             let expression = extract_ts_expression(source).omit_type_wrappers().unwrap();
             assert_eq!(
                 expression.syntax().text_trimmed(),
+                *expected,
+                "Unexpected result for: {source}"
+            );
+        }
+    }
+
+    #[test]
+    fn assignment_omit_parentheses() {
+        const CASES: &[(&str, &str)] = &[
+            ("a = 1;", "a"),
+            ("(a) = 1;", "a"),
+            ("(((a.b))) = 1;", "a.b"),
+            ("((a as T)) = 1;", "a as T"),
+        ];
+        for (source, expected) in CASES {
+            let target = extract_ts_expression(source)
+                .as_js_assignment_expression()
+                .unwrap()
+                .left()
+                .unwrap()
+                .as_any_js_assignment()
+                .unwrap()
+                .clone()
+                .omit_parentheses();
+            assert_eq!(
+                target.syntax().text_trimmed(),
                 *expected,
                 "Unexpected result for: {source}"
             );
