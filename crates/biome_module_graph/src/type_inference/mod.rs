@@ -22,9 +22,10 @@ pub use request::{
     execute_type_inference_request,
 };
 pub use requests::{
-    ArrayOfPromisesClassificationRequest, CallableMemberRequest, ExpectedCallArgumentTypeRequest,
-    ExpectedConstructorArgumentTypeRequest, FunctionReturnTypeRequest, MemberReturnTypeRequest,
-    NormalizedBindingTypeRequest, NormalizedExpressionTypeRequest, PromiseClassificationRequest,
+    ArrayOfPromisesClassificationRequest, CallableMemberRequest, EnumMemberClassificationRequest,
+    ExpectedCallArgumentTypeRequest, ExpectedConstructorArgumentTypeRequest,
+    FunctionReturnTypeRequest, MemberReturnTypeRequest, NormalizedBindingTypeRequest,
+    NormalizedExpressionTypeRequest, PromiseClassificationRequest,
     PromiseReturningFunctionClassificationRequest, ThenableClassificationRequest,
     TypeInferenceArgument, TypeInferenceSource, UnreachableCodeClassificationRequest,
 };

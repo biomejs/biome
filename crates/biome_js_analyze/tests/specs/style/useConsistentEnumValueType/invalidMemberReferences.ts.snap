@@ -1,0 +1,44 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidMemberReferences.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+
+// `C` has the number value of `A`, and `D` the string value of `B`.
+enum Mixed {
+	A = 1,
+	B = "b",
+	C = A,
+	D = B,
+}
+
+```
+
+# Diagnostics
+```
+invalidMemberReferences.ts:6:2 lint/style/useConsistentEnumValueType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Inconsistent enum value type.
+  
+    4 │ enum Mixed {
+    5 │ 	A = 1,
+  > 6 │ 	B = "b",
+      │ 	^^^^^^^
+    7 │ 	C = A,
+    8 │ 	D = B,
+  
+  i Another inconsistent enum value type.
+  
+     6 │ 	B = "b",
+     7 │ 	C = A,
+   > 8 │ 	D = B,
+       │ 	^^^^^
+     9 │ }
+    10 │ 
+  
+  i Mixing number and string enums can be confusing. Make sure to use a consistent value type within your enum.
+  
+
+```

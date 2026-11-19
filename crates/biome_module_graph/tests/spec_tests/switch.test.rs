@@ -334,27 +334,55 @@ fn cases_narrow_by_unit_values() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) narrows `e` to `E.A` and `E.B`, and `x`
-// to `"a"` at `nonNull`, and gives `number` at `nan`. Biome doesn't infer the
-// type of an enum, so its members aren't unit values, and a discriminant that
-// isn't a subject, such as `x!`, narrows nothing. Biome keeps the declared
-// type, which is wider.
+// TypeScript 7.0.2 (`tsc --strict`) narrows `x` to `"a"` at `nonNull`, and
+// gives `number` at `nan`. A discriminant that isn't a subject, such as `x!`,
+// narrows nothing, so Biome keeps the declared type, which is wider.
 #[test]
 fn cases_that_biome_does_not_compare_keep_the_declared_type() {
     assert_reads(
         r#"
-        enum E { A, B }
-        function f19(e: E) { /*enumDeclared*/e; switch (e) { case E.A: /*enum*/e; break; default: /*enumDefault*/e; } }
         function f43(x: number) { switch (x) { case NaN: /*nan*/x; } }
         function f45(x: ABC) { switch (x!) { case "a": /*nonNull*/x; } }
         "#,
         &[
-            // Biome doesn't infer the type of a variable of an enum type.
-            ("enumDeclared", "e", &["Unknown"]),
-            ("enum", "e", &["Unknown"]),
-            ("enumDefault", "e", &["Unknown"]),
             ("nan", "x", &["number"]),
             ("nonNull", "x", &["string: a", "string: b", "string: c"]),
+        ],
+    );
+}
+
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the values of the
+// expected type, displaying `E` for `0 | 1`, `E.A` for `0`, and `E.B` for
+// `1`, and `never` at `enumAfter`, where Biome gives its Unknown type. A
+// case that is a member of an enum, written as `E.A` or `S["B"]`, local or
+// imported, narrows as a case of its value does and counts toward
+// exhaustiveness. TypeScript also finds the switch on `g` exhaustive and
+// gives `string` at `computed`, but Biome doesn't compute the value of
+// `G.C`, so it isn't a unit value there, and Biome keeps the path that
+// matches no case, which is wider.
+#[test]
+fn enum_cases_narrow_and_count_toward_exhaustiveness() {
+    assert_reads_importing(
+        r#"
+        import { EE } from "./constants.ts";
+        enum E { A, B }
+        enum S { A = "a", B = "b" }
+        enum G { A = 1, B = A * 2, C = "c".length }
+        function w1(e: E) { /*enumDeclared*/e; switch (e) { case E.A: /*enum*/e; break; default: /*enumDefault*/e; } }
+        function w2(e: E) { switch (e) { case E.A: return 1; case E.B: return 2; } /*enumAfter*/e; }
+        function w3(s: S, y: string | null) { switch (s) { case S.A: if (y === null) return; break; case S["B"]: if (y === null) return; } /*stringEnum*/y; }
+        function w4(e: EE, y: string | null) { switch (e) { case EE.A: case EE.B: if (y === null) return; } /*imported*/y; }
+        function w5(g: G, y: string | null) { switch (g) { case G.A: case G.B: case G.C: if (y === null) return; } /*computed*/y; }
+        "#,
+        r#"export enum EE { A, B }"#,
+        &[
+            ("enumDeclared", "e", &["number: 0", "number: 1"]),
+            ("enum", "e", &["number: 0"]),
+            ("enumDefault", "e", &["number: 1"]),
+            ("enumAfter", "e", &["Unknown"]),
+            ("stringEnum", "y", &["string"]),
+            ("imported", "y", &["string"]),
+            ("computed", "y", &["null", "string"]),
         ],
     );
 }
@@ -853,21 +881,38 @@ fn switches_with_cases_that_are_not_unit_values_are_not_exhaustive() {
 }
 
 // TypeScript 7.0.2 (`tsc --strict`) gives `string | null` at both reads,
+// because the comparisons with enum members before the switch narrow `x` to
+// `never`, so no case type covers it. Biome narrows by the members too, so it
+// doesn't find the switch exhaustive either.
+#[test]
+fn switches_after_comparisons_with_enum_members_are_not_exhaustive() {
+    assert_reads(
+        r#"
+        enum E { A = "a" }
+        enum N { Z, O }
+        function h(x: "a" | "b", y: string | null) { if (x === E.A) return; if (x === "b") return; switch (x) { case "a": if (y === null) return; } /*enum*/y; }
+        function h2(x: 0 | 1, y: string | null) { if (x === N.Z) return; if (x === 1) return; switch (x) { case 0: if (y === null) return; } /*numeric*/y; }
+        "#,
+        &[
+            ("enum", "y", &["null", "string"]),
+            ("numeric", "y", &["null", "string"]),
+        ],
+    );
+}
+
+// TypeScript 7.0.2 (`tsc --strict`) gives `string | null` at the read below,
 // because the comparisons before the switch narrow `x` to `never`, so no case
-// type covers it. Biome doesn't compare with an enum member or a variable
-// with a type annotation, so `x` is `"a"` at the switch, and the switch is
-// exhaustive. `y` reads as `string`, which is narrower than TypeScript in
-// code that TypeScript types as impossible, as the Limits in `NARROWING.md`
-// describe.
+// type covers it. Biome doesn't compare with a variable with a type
+// annotation, so `x` is `"a"` at the switch, and the switch is exhaustive.
+// `y` reads as `string`, which is narrower than TypeScript in code that
+// TypeScript types as impossible, as the Limits in `NARROWING.md` describe.
 #[test]
 fn switches_after_comparisons_that_biome_does_not_decompose_can_be_exhaustive() {
     assert_reads(
         r#"
-        enum E { A = "a" }
-        function h(x: "a" | "b", y: string | null) { if (x === E.A) return; if (x === "b") return; switch (x) { case "a": if (y === null) return; } /*enum*/y; }
         function g(x: "a" | "b", y: string | null, k: "a") { if (x === k) return; if (x === "b") return; switch (x) { case "a": if (y === null) return; } /*annotated*/y; }
         "#,
-        &[("enum", "y", &["string"]), ("annotated", "y", &["string"])],
+        &[("annotated", "y", &["string"])],
     );
 }
 

@@ -1,0 +1,35 @@
+/* should not generate diagnostics */
+
+// TypeScript gives a member of an enum the type of the enum, so converting the
+// member to a string or a number changes its type.
+enum Ids {
+    A = "a",
+    B = "b",
+}
+
+enum Counts {
+    One = 1,
+    Two = 2,
+}
+
+const enum ConstIds {
+    A = "a",
+}
+
+declare enum DeclaredIds {
+    A = "a",
+}
+
+String(Ids.A);
+Ids.A.toString();
+Ids["A"].toString();
+(Ids.A).toString();
+Ids.A + "";
+"" + Ids.A;
+Ids.A + ``;
+ConstIds.A.toString();
+DeclaredIds.A.toString();
+
+Number(Counts.One);
++Counts.One;
+~~Counts["Two"];

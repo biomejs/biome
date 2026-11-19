@@ -7,14 +7,14 @@ use biome_js_syntax::{
     AnyJsArrowFunctionParameters, AnyJsBindingPattern, AnyJsCombinedSpecifier, AnyJsDeclaration,
     AnyJsExportDefaultDeclaration, AnyJsExpression, AnyJsImportClause, JsArrowFunctionExpression,
     JsAssignmentExpression, JsCatchDeclaration, JsForVariableDeclaration, JsFormalParameter,
-    JsLanguage, JsRestParameter, JsSyntaxNode, JsVariableDeclaration, TsGlobalDeclaration,
-    TsInferType, TsInterfaceDeclaration, TsMappedType, TsModuleDeclaration, TsTypeParameter,
-    inner_string_text,
+    JsLanguage, JsRestParameter, JsSyntaxNode, JsVariableDeclaration, TsEnumDeclaration,
+    TsEnumMember, TsEnumMemberList, TsGlobalDeclaration, TsInferType, TsInterfaceDeclaration,
+    TsLiteralEnumMemberName, TsMappedType, TsModuleDeclaration, TsTypeParameter, inner_string_text,
 };
 use biome_js_type_info::{
-    Class, Function, FunctionParameter, FunctionParameterBinding, GenericTypeParameter, Interface,
-    Literal, RawTypeCollector, RawTypeData, RawTypeId, TypeData, TypeId, TypeImportQualifier,
-    TypeMember, TypeMemberKind, TypeReference, TypeStore, UnionCollector,
+    Class, EnumTypes, Function, FunctionParameter, FunctionParameterBinding, GenericTypeParameter,
+    Interface, Literal, RawTypeCollector, RawTypeData, RawTypeId, TypeData, TypeId,
+    TypeImportQualifier, TypeMember, TypeMemberKind, TypeReference, TypeStore, UnionCollector,
     global_type_id_for_type_name, resolved::InferredLocalTypeId,
 };
 use biome_rowan::{AstNode, SyntaxKindSet, Text, TextRange, TokenText};
@@ -59,6 +59,10 @@ pub(super) struct JsModuleInfoCollector {
 
     /// Variable declarations.
     variable_declarations: FxHashMap<JsSyntaxNode, Box<[(Text, TypeReference)]>>,
+
+    /// The types of the enum declarations whose name or members have had
+    /// their types inferred, by the range of the declaration.
+    enum_declarations: FxHashMap<TextRange, EnumTypes>,
 
     /// Map of parsed declarations, for caching purposes.
     parsed_expressions: FxHashMap<TextRange, TypeId>,
@@ -177,6 +181,7 @@ impl JsModuleInfoCollector {
             bindings,
             function_parameters: FxHashMap::default(),
             variable_declarations: FxHashMap::default(),
+            enum_declarations: FxHashMap::default(),
             parsed_expressions: FxHashMap::default(),
             import_paths: ImportPathMap::default(),
             exports: Vec::new(),
@@ -1010,8 +1015,16 @@ impl JsModuleInfoCollector {
             });
         }
 
+        // Each member of an enum is a binding of its own, inside the enum.
+        if let Some(name) = TsLiteralEnumMemberName::cast_ref(node) {
+            return self.enum_member_type(&name);
+        }
+
         for ancestor in node.ancestors() {
             if let Some(decl) = AnyJsDeclaration::cast_ref(&ancestor) {
+                if let AnyJsDeclaration::TsEnumDeclaration(declaration) = &decl {
+                    return self.enum_types(declaration).declaration.clone();
+                }
                 let ty = if let Some(typed_bindings) = decl
                     .as_js_variable_declaration()
                     .and_then(|decl| self.variable_declarations.get(decl.syntax()))
@@ -1095,6 +1108,93 @@ impl JsModuleInfoCollector {
         }
 
         TypeReference::unknown()
+    }
+
+    /// Returns the type of the enum member whose name is `name`, the literal
+    /// type of its value as [`EnumTypes`] computes it, or Unknown.
+    ///
+    /// Also gives that type to each read of the member by its name, as `A`
+    /// in `B = A` inside the enum. The semantic model resolves such a read to
+    /// the member, but a name lookup in the enum's scope, as the collected
+    /// type of the read does, doesn't find members.
+    fn enum_member_type(&mut self, name: &TsLiteralEnumMemberName) -> TypeReference {
+        let Some(declaration) = name
+            .parent::<TsEnumMember>()
+            .and_then(|member| member.parent::<TsEnumMemberList>())
+            .and_then(|members| members.parent::<TsEnumDeclaration>())
+        else {
+            return TypeReference::unknown();
+        };
+        let range = name.range();
+        let ty = self
+            .enum_types(&declaration)
+            .members
+            .iter()
+            .find_map(|(member, ty)| (*member == range).then(|| ty.clone()))
+            .unwrap_or_default();
+        if let Some(binding) = self.semantic_model.as_binding_by_range(range) {
+            let mut reads = binding.all_reads().peekable();
+            if reads.peek().is_some() {
+                let id = self.raw_resolved_id(&ty);
+                for read in reads {
+                    let range = read.syntax().text_trimmed_range();
+                    if let Some(expression) = self.parsed_expressions.get_mut(&range) {
+                        *expression = id;
+                    }
+                }
+            }
+        }
+        ty
+    }
+
+    /// Returns the types of `declaration` and its members, computing them on
+    /// first use.
+    ///
+    /// An enum whose name another declaration of its scope declares too, as a
+    /// second declaration of the enum or a namespace, merges with it in
+    /// TypeScript. Biome doesn't merge them, so the name and the members of
+    /// such an enum have Unknown types.
+    fn enum_types(&mut self, declaration: &TsEnumDeclaration) -> &EnumTypes {
+        let range = declaration.range();
+        if !self.enum_declarations.contains_key(&range) {
+            let types = if self.is_merged_enum(declaration) {
+                EnumTypes::default()
+            } else {
+                let scope_id = self.semantic_model.scope(declaration.syntax()).id();
+                EnumTypes::from_ts_enum_declaration(self, scope_id, declaration)
+            };
+            self.enum_declarations.insert(range, types);
+        }
+        &self.enum_declarations[&range]
+    }
+
+    /// Returns whether the scope that declares the name of `declaration`
+    /// declares that name more than once. An enum without a name counts as
+    /// merged.
+    fn is_merged_enum(&self, declaration: &TsEnumDeclaration) -> bool {
+        let Ok(id) = declaration.id() else {
+            return true;
+        };
+        let range = id.range();
+        let Some(enum_binding) = self.bindings.iter().find(|binding| binding.range == range) else {
+            return true;
+        };
+        let scope_id = self.declaring_scope(enum_binding);
+        self.bindings.iter().any(|binding| {
+            binding.range != range
+                && binding.name == enum_binding.name
+                && self.declaring_scope(binding) == scope_id
+        })
+    }
+
+    /// Returns the scope that declares `binding`: the scope that its
+    /// declaration hoists it to, as the scope around an enum, a class, or a
+    /// namespace for its name, or the scope around the binding otherwise.
+    fn declaring_scope(&self, binding: &JsBindingData) -> ScopeId {
+        self.semantic_model
+            .as_binding_by_range(binding.range)
+            .and_then(|declared| self.semantic_model.scope_hoisted_to(&declared.syntax()))
+            .map_or(binding.scope_id, |scope| scope.id())
     }
 
     /// Type of the variable `binding_name` that the `catch` clause `catch`

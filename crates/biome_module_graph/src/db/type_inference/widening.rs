@@ -12,7 +12,10 @@
 //! types of its operands, and a `const` declared without a type annotation
 //! passes on those of its initializer, so `let m = n` also declares `m` as
 //! `number`. A literal type that an annotation or `as const` declares is not
-//! fresh and stays.
+//! fresh and stays. A member of an enum, read as `E.A`, has a fresh literal
+//! type too, which TypeScript widens to the enum's type. Biome widens it to
+//! the primitive type of the member's literal, which holds the enum's values
+//! and more.
 //!
 //! Collection wraps the value of each mutable location in a
 //! [`TypeofWidenedLiteralExpression`](biome_js_type_info::TypeofWidenedLiteralExpression),
@@ -33,14 +36,15 @@
 
 use super::imports::{ExportOriginResult, find_export_origin};
 use super::resolver::ResolutionCtx;
+use crate::js_module_info::flow::enum_member_name_range;
 use crate::module_graph::{ModuleInfo, ModuleInfoKind};
 use crate::{JsExport, JsModuleInfo, JsOwnExport, ModuleDb, ResolutionMode, resolve_module_import};
 use biome_js_semantic::{Binding, ScopeId};
 use biome_js_syntax::binding_ext::AnyJsBindingDeclaration;
 use biome_js_type_info::{
-    FreshLiteralKinds, ImportSymbol, Object as RawObject, ObjectKind, PrimitiveLiteralKind,
-    RawTypeData, RawTypeId, TypeImportQualifier, TypeReference, TypeResolverLevel,
-    TypeofExpression as RawTypeofExpression,
+    FreshLiteralKinds, ImportSymbol, Literal, Object as RawObject, ObjectKind,
+    PrimitiveLiteralKind, RawTypeData, RawTypeId, TypeImportQualifier, TypeReference,
+    TypeResolverLevel, TypeofExpression as RawTypeofExpression,
     TypeofWidenedLiteralExpression as RawTypeofWidenedLiteralExpression,
     interned_types::{InternedObject as InferredObject, TypeData as InferredTypeData},
     widen_literal_of_kinds,
@@ -62,12 +66,14 @@ const MAX_WRAPPER_STEPS: usize = 16;
 ///
 /// A value has the fresh literal type of a literal expression, of an operand
 /// of a conditional or logical expression, of a unary minus applied to a
-/// number or bigint literal, and of the initializer of a `const` declared
-/// without a type annotation that it names, also through an import. With
+/// number or bigint literal, of a member of an enum, read as `E.A` or
+/// `E["A"]` where `E` names the enum or an import of it, and of the
+/// initializer of a `const` declared without a type annotation that it
+/// names, also through an import. With
 /// `is_return_values`, the value is the union of the values that a function
 /// returns, and has the fresh literal types of each of them. Other values,
-/// such as calls, member accesses, assertions such as `1 as 1`, and the
-/// literal types of a union that a type annotation writes, have none.
+/// such as calls, other member accesses, assertions such as `1 as 1`, and
+/// the literal types of a union that a type annotation writes, have none.
 ///
 /// The search visits at most 64 raw types, and at most 1024 scopes for the
 /// declaration of each name. When it stops at either limit, it returns every
@@ -105,13 +111,16 @@ pub(super) fn fresh_literal_kinds(
 
 /// Returns the kinds of the fresh literal types of the value in `module`
 /// whose collected type is `reference`, as [`fresh_literal_kinds`] finds
-/// them, or `None` when Biome can't tell them.
+/// them, or `None` when Biome can't tell them or can't widen them as
+/// TypeScript does.
 ///
 /// Biome can't tell them when the search stops at a limit, and when the
 /// value comes from an expression whose type TypeScript can give a fresh
 /// literal type that no literal expression of the value shows: a call, as
 /// `id(1)`, an `await`, a read of a member, as of a `static readonly`
-/// property or of a `const` in a namespace, and a destructured element.
+/// property or of a `const` in a namespace, and a destructured element. A
+/// read of an enum member also gives `None`, because TypeScript widens its
+/// literal type to the enum's type, and Biome to a primitive type.
 pub(super) fn known_fresh_literal_kinds(
     db: &dyn ModuleDb,
     module: ModuleInfo,
@@ -127,8 +136,9 @@ struct FreshLiteralSearch<'a> {
     db: &'a dyn ModuleDb,
     remaining: usize,
     kinds: FreshLiteralKinds,
-    /// Whether the search stopped at a limit or met a value whose fresh
-    /// literal types it can't trace (see [`known_fresh_literal_kinds`]).
+    /// Whether the search stopped at a limit, or met a value whose fresh
+    /// literal types it can't trace or that TypeScript widens to another
+    /// type, as an enum member (see [`known_fresh_literal_kinds`]).
     untraced: bool,
 }
 
@@ -215,18 +225,30 @@ impl<'a> FreshLiteralSearch<'a> {
                     self.visit(module, js_info, &expression.left);
                     self.visit(module, js_info, &expression.right);
                 }
+                // Biome can't widen a member read as TypeScript does: it
+                // can't trace the fresh literal types of most members, and
+                // widens those of an enum member to a primitive type, where
+                // TypeScript widens them to the enum's type.
+                RawTypeofExpression::StaticMember(expression)
+                | RawTypeofExpression::OptionalChainStaticMember(expression) => {
+                    self.untraced = true;
+                    self.visit_enum_member(module, js_info, &expression.object, &expression.member);
+                }
+                RawTypeofExpression::ComputedMember(expression) => {
+                    self.untraced = true;
+                    if let Some(key) = raw_string_literal(js_info, &expression.member) {
+                        self.visit_enum_member(module, js_info, &expression.object, key);
+                    }
+                }
                 // Biome can't tell whether these give a fresh literal type,
                 // as `id(1)` and `await 1` do, so it takes them as giving
                 // none, and records that it can't tell.
                 RawTypeofExpression::Await(_)
                 | RawTypeofExpression::Call(_)
                 | RawTypeofExpression::CallArgument(_)
-                | RawTypeofExpression::ComputedMember(_)
                 | RawTypeofExpression::Destructure(_)
                 | RawTypeofExpression::Index(_)
-                | RawTypeofExpression::OptionalChainIndex(_)
-                | RawTypeofExpression::StaticMember(_)
-                | RawTypeofExpression::OptionalChainStaticMember(_) => self.untraced = true,
+                | RawTypeofExpression::OptionalChainIndex(_) => self.untraced = true,
                 // A widened value has no fresh literal type left, and the
                 // end of a function gives `undefined` or nothing. The others
                 // give no literal type, or one that a declaration states.
@@ -294,19 +316,74 @@ impl<'a> FreshLiteralSearch<'a> {
         scope_id: ScopeId,
         name: &str,
     ) {
-        let model = &js_info.semantic_model;
-        let mut scope = model.scope_from_id(scope_id);
-        for _ in 0..MAX_SCOPE_STEPS {
-            if let Some(reference) = scope.get_binding_reference(name) {
-                if let Some(binding) = model.binding_by_id(reference.value_ty_or_ty()) {
-                    self.visit_binding(module, js_info, &binding);
+        match binding_named(js_info, scope_id, name) {
+            Ok(Some(binding)) => self.visit_binding(module, js_info, &binding),
+            Ok(None) => {}
+            Err(ScopeLimit) => {
+                self.kinds = FreshLiteralKinds::all();
+                self.untraced = true;
+            }
+        }
+    }
+
+    /// Visits the member named `member` of the enum that `object`, the
+    /// collected type of the object of a member access, names: an enum
+    /// declaration of `module`, or one that an import of `module` binds,
+    /// followed through re-exports and other imports. Takes every kind as
+    /// fresh when the declaration of the enum's name lies beyond
+    /// [`MAX_SCOPE_STEPS`] scopes, or when the imports outlast the steps that
+    /// the search has left.
+    fn visit_enum_member(
+        &mut self,
+        mut module: ModuleInfo,
+        js_info: &JsModuleInfo,
+        object: &TypeReference,
+        member: &str,
+    ) {
+        let mut js_info = js_info;
+        let Some((scope_id, name)) = object_name(js_info, object) else {
+            return;
+        };
+        let mut binding = match binding_named(js_info, scope_id, name) {
+            Ok(Some(binding)) => binding,
+            Ok(None) => return,
+            Err(ScopeLimit) => {
+                self.kinds = FreshLiteralKinds::all();
+                return;
+            }
+        };
+        while self.remaining > 0 {
+            self.remaining -= 1;
+            if let Some(AnyJsBindingDeclaration::TsEnumDeclaration(declaration)) =
+                binding.tree().declaration()
+            {
+                if let Some(range) = enum_member_name_range(&declaration, member)
+                    && let Some(TypeReference::Resolved(id)) = js_info.raw_binding_types.get(&range)
+                    && id.level() == TypeResolverLevel::Thin
+                    && let Some(RawTypeData::Literal(literal)) =
+                        js_info.raw_types.get(id.id().index())
+                    && let Some(kind) = PrimitiveLiteralKind::from_literal_expression(literal)
+                {
+                    self.kinds |= kind;
                 }
                 return;
             }
-            let Some(parent) = scope.parent() else {
+            let Some(TypeReference::Import(import)) =
+                js_info.raw_binding_types.get(&binding.range())
+            else {
                 return;
             };
-            scope = parent;
+            let Some((origin, origin_info, JsExport::Own(JsOwnExport::Binding(range)))) =
+                self.import_origin(module, import)
+            else {
+                return;
+            };
+            let Some(next) = origin_info.semantic_model.as_binding_by_range(*range) else {
+                return;
+            };
+            module = origin;
+            js_info = origin_info;
+            binding = next;
         }
         self.kinds = FreshLiteralKinds::all();
         self.untraced = true;
@@ -332,13 +409,44 @@ impl<'a> FreshLiteralSearch<'a> {
     /// Visits the value of the `const` that `import` names in the module
     /// that declares it.
     fn visit_import(&mut self, module: ModuleInfo, import: &TypeImportQualifier) {
-        if import.type_only {
+        let Some((module, js_info, export)) = self.import_origin(module, import) else {
             return;
+        };
+        match export {
+            JsExport::Own(JsOwnExport::Binding(range)) => {
+                if let Some(binding) = js_info.semantic_model.as_binding_by_range(*range) {
+                    self.visit_binding(module, js_info, &binding);
+                }
+            }
+            // The value of `export default 1`.
+            JsExport::Own(JsOwnExport::Type(type_id)) => {
+                let value = TypeReference::Resolved(RawTypeId::Local(*type_id));
+                self.visit(module, js_info, &value);
+            }
+            JsExport::Own(JsOwnExport::Namespace(_))
+            | JsExport::OwnType(_)
+            | JsExport::Reexport(_)
+            | JsExport::ReexportType(_) => {}
+        }
+    }
+
+    /// Returns the module that declares what the value import `import` of
+    /// `module` names, followed through re-exports, with that module's
+    /// information and the export that declares it. Returns `None` for a
+    /// type-only import, a namespace import, and an import that doesn't
+    /// resolve to an export of a JavaScript module.
+    fn import_origin(
+        &self,
+        module: ModuleInfo,
+        import: &TypeImportQualifier,
+    ) -> Option<(ModuleInfo, &'a JsModuleInfo, &'a JsExport)> {
+        if import.type_only {
+            return None;
         }
         let name = match &import.symbol {
             ImportSymbol::Named(name) => name.clone(),
             ImportSymbol::Default => Text::new_static("default"),
-            ImportSymbol::All => return,
+            ImportSymbol::All => return None,
         };
         let resolved = resolve_module_import(
             self.db,
@@ -346,40 +454,85 @@ impl<'a> FreshLiteralSearch<'a> {
             &import.specifier,
             ResolutionMode::JavaScript,
         );
-        let Some(target) = resolved
-            .path()
-            .as_path()
-            .and_then(|path| self.db.module_for_path(path))
-        else {
-            return;
-        };
+        let target = self.db.module_for_path(resolved.path().as_path()?)?;
         let ExportOriginResult::Found { module, name } = find_export_origin(self.db, target, name)
         else {
-            return;
+            return None;
         };
         let ModuleInfoKind::Js(js_info) = module.kind(self.db) else {
-            return;
+            return None;
         };
-        match js_info.exports.get(name.text()) {
-            Some(JsExport::Own(JsOwnExport::Binding(range))) => {
-                if let Some(binding) = js_info.semantic_model.as_binding_by_range(*range) {
-                    self.visit_binding(module, js_info, &binding);
-                }
-            }
-            // The value of `export default 1`.
-            Some(JsExport::Own(JsOwnExport::Type(type_id))) => {
-                let value = TypeReference::Resolved(RawTypeId::Local(*type_id));
-                self.visit(module, js_info, &value);
-            }
-            Some(
-                JsExport::Own(JsOwnExport::Namespace(_))
-                | JsExport::OwnType(_)
-                | JsExport::Reexport(_)
-                | JsExport::ReexportType(_),
-            )
-            | None => {}
-        }
+        Some((module, js_info, js_info.exports.get(name.text())?))
     }
+}
+
+/// Reports that the declaration of a name lies beyond [`MAX_SCOPE_STEPS`]
+/// scopes from where the name is read.
+struct ScopeLimit;
+
+/// Returns the binding that `name`, read in the scope `scope_id` of
+/// `js_info`, refers to, or `None` when no scope declares `name`. Returns
+/// [`ScopeLimit`] when the declaration lies beyond [`MAX_SCOPE_STEPS`]
+/// scopes.
+fn binding_named(
+    js_info: &JsModuleInfo,
+    scope_id: ScopeId,
+    name: &str,
+) -> Result<Option<Binding>, ScopeLimit> {
+    let model = &js_info.semantic_model;
+    let mut scope = model.scope_from_id(scope_id);
+    for _ in 0..MAX_SCOPE_STEPS {
+        if let Some(reference) = scope.get_binding_reference(name) {
+            return Ok(model.binding_by_id(reference.value_ty_or_ty()));
+        }
+        let Some(parent) = scope.parent() else {
+            return Ok(None);
+        };
+        scope = parent;
+    }
+    Err(ScopeLimit)
+}
+
+/// Returns the scope and the name that `object`, the collected type of an
+/// expression, reads when the expression is an identifier, as `E` in `E.A`.
+fn object_name<'a>(
+    js_info: &'a JsModuleInfo,
+    object: &'a TypeReference,
+) -> Option<(ScopeId, &'a Text)> {
+    let qualifier = match object {
+        TypeReference::Qualifier(qualifier) => qualifier,
+        TypeReference::Resolved(id) if id.level() == TypeResolverLevel::Thin => {
+            let Some(RawTypeData::Reference(TypeReference::Qualifier(qualifier))) =
+                js_info.raw_types.get(id.id().index())
+            else {
+                return None;
+            };
+            qualifier
+        }
+        TypeReference::Resolved(_) | TypeReference::Import(_) => return None,
+    };
+    if !qualifier.type_parameters.is_empty() {
+        return None;
+    }
+    Some((qualifier.scope_id, qualifier.path.identifier()?))
+}
+
+/// Returns the text of the string literal that `reference`, the collected
+/// type of an expression, is, as the key `"A"` of `E["A"]`.
+fn raw_string_literal<'a>(js_info: &'a JsModuleInfo, reference: &TypeReference) -> Option<&'a str> {
+    let TypeReference::Resolved(id) = reference else {
+        return None;
+    };
+    if id.level() != TypeResolverLevel::Thin {
+        return None;
+    }
+    let RawTypeData::Literal(literal) = js_info.raw_types.get(id.id().index())? else {
+        return None;
+    };
+    let Literal::String(text) = literal.as_ref() else {
+        return None;
+    };
+    Some(text.as_str())
 }
 
 impl<'db> ResolutionCtx<'db, '_> {

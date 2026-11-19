@@ -3,12 +3,12 @@ use biome_module_graph::{
     ExpressionTypeInput, infer_expression_type,
     type_inference::{
         ArrayOfPromisesClassificationRequest, CallableMemberRequest,
-        ExpectedCallArgumentTypeRequest, ExpectedConstructorArgumentTypeRequest,
-        FunctionReturnTypeRequest, MemberReturnTypeRequest, NormalizedExpressionTypeRequest,
-        PromiseClassificationRequest, PromiseReturningFunctionClassificationRequest,
-        ThenableClassificationRequest, TypeInferenceArgument, TypeInferenceCaller,
-        TypeInferenceClassification, TypeInferenceRequestMetadata, TypeInferenceSource,
-        execute_type_inference_request,
+        EnumMemberClassificationRequest, ExpectedCallArgumentTypeRequest,
+        ExpectedConstructorArgumentTypeRequest, FunctionReturnTypeRequest, MemberReturnTypeRequest,
+        NormalizedExpressionTypeRequest, PromiseClassificationRequest,
+        PromiseReturningFunctionClassificationRequest, ThenableClassificationRequest,
+        TypeInferenceArgument, TypeInferenceCaller, TypeInferenceClassification,
+        TypeInferenceRequestMetadata, TypeInferenceSource, execute_type_inference_request,
     },
 };
 
@@ -616,5 +616,74 @@ fn thenable_request_checks_callback_signatures_without_whole_module_inference() 
         let events = db.take_salsa_events();
         assert_function_query_was_not_run(&db, infer_expression_type, input, &events);
         assert_function_query_was_not_run(&db, infer_module_types, module, &events);
+    }
+}
+
+#[test]
+fn enum_member_request_reads_declarations_and_follows_imports() {
+    const IDS: &str = r#"
+        export enum Ids { A = "a", "B" = "b" }
+        export const Plain = { A: "a" };
+    "#;
+    const REEXPORT: &str = r#"export { Ids as Renamed } from "./ids.ts";"#;
+    const SOURCE: &str = r#"
+        import { Ids, Plain } from "./ids.ts";
+        import { Renamed } from "./reexport.ts";
+        import { Missing } from "./missing.ts";
+        enum Local { A = 1 }
+        const Object = { A: 1 };
+        Local.A; Local["A"]; (Local.A); Local.Z; Local?.A; Local;
+        const Held = Local;
+        Object.A; Held.A;
+        Ids.A; Ids["B"]; Ids.Z; Renamed.A; Plain.A; Missing.A;
+        enum Shadowed { A = 1 }
+        function shadow(Shadowed: { A: number }) { Shadowed.A; }
+    "#;
+    let fs = MemoryFileSystem::default();
+    fs.insert("/src/ids.ts".into(), IDS);
+    fs.insert("/src/reexport.ts".into(), REEXPORT);
+    fs.insert("/src/index.ts".into(), SOURCE);
+    let db = build_js_test_module_db(
+        &fs,
+        &["/src/ids.ts", "/src/reexport.ts", "/src/index.ts"],
+        true,
+    );
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    for (snippet, expected) in [
+        ("Local.A", TypeInferenceClassification::Match),
+        ("Local[\"A\"]", TypeInferenceClassification::Match),
+        ("(Local.A)", TypeInferenceClassification::Match),
+        ("Local.Z", TypeInferenceClassification::NoMatch),
+        ("Local?.A", TypeInferenceClassification::NoMatch),
+        ("Local;", TypeInferenceClassification::NoMatch),
+        ("Object.A", TypeInferenceClassification::NoMatch),
+        ("Held.A", TypeInferenceClassification::NoMatch),
+        ("Ids.A", TypeInferenceClassification::Match),
+        ("Ids[\"B\"]", TypeInferenceClassification::Match),
+        ("Ids.Z", TypeInferenceClassification::NoMatch),
+        ("Renamed.A", TypeInferenceClassification::Match),
+        ("Plain.A", TypeInferenceClassification::NoMatch),
+        ("Missing.A", TypeInferenceClassification::Indeterminate),
+        ("Shadowed.A", TypeInferenceClassification::NoMatch),
+    ] {
+        let expression = snippet.trim_end_matches(';');
+        let start = SOURCE
+            .find(snippet)
+            .unwrap_or_else(|| panic!("{snippet} must exist"));
+        let range = TextRange::at(
+            u32::try_from(start).unwrap().into(),
+            u32::try_from(expression.len()).unwrap().into(),
+        );
+        assert_eq!(
+            execute_type_inference_request(
+                &db,
+                TypeInferenceCaller::new("test", "enumMember"),
+                EnumMemberClassificationRequest::new(module, range),
+            ),
+            expected,
+            "{snippet}"
+        );
     }
 }

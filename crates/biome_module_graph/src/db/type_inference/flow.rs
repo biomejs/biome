@@ -34,9 +34,11 @@ use crate::js_module_info::flow::{
     FlowCallRoot, FlowCallee, FlowCapture, FlowEvolving, FlowGuard, FlowNode, FlowNodeId, FlowRead,
     FlowSubject, FlowSubjectId, FlowSwitch, FlowTest, FlowWriteEffect, PropertyKey,
     ReachabilityGraph, RootFlow, UnitValue, binding_unit_value, build_reachability,
-    declaration_return, guard_signature, member_explicitness, member_return,
+    declaration_return, enum_member_name_range, enum_member_unit_value, guard_signature,
+    member_explicitness, member_key, member_return,
 };
 use crate::module_graph::ModuleInfoKind;
+use crate::type_inference::TypeInferenceClassification;
 use crate::{
     JsExport, JsModuleInfo, JsOwnExport, ModuleDb, ModuleInfo, ResolutionMode, module_for_key,
     resolve_module_import,
@@ -59,7 +61,7 @@ use biome_js_type_info::{
     narrow_by_instanceof, narrow_by_private_name, narrow_by_property, narrow_by_type_predicate,
     narrow_type,
 };
-use biome_rowan::{AstNode, NodeOrToken, Text, TextRange, TextSize};
+use biome_rowan::{AstNode, NodeOrToken, Text, TextRange, TextSize, TokenText};
 use rustc_hash::FxHashMap;
 use std::collections::VecDeque;
 
@@ -305,9 +307,10 @@ enum FlatteningError {
 /// calls found to end the path, one bit each, the results of the
 /// property guards, `in` tests, `instanceof` tests, and calls to type-guard
 /// functions applied so far, keyed by guard index and incoming type, the
-/// values of the imported variables that [`FlowTest::Imported`] compares
-/// with, found so far, keyed by declaration, and the type that each write
-/// of the subject that assigns a value gives it.
+/// values of the imported variables and enum members that
+/// [`FlowTest::Imported`] compares with, found so far, keyed by declaration
+/// or by the range of the member's name, and the type that each write of the
+/// subject that assigns a value gives it.
 struct GuardSolve<'db> {
     /// The subject that the solve narrows.
     subject: FlowSubjectId,
@@ -325,8 +328,10 @@ struct GuardSolve<'db> {
     calls: Option<FlowCallEffects<'db>>,
     ends: u64,
     properties: FxHashMap<(usize, TypeData<'db>), TypeData<'db>>,
-    /// The values of the imported variables that [`FlowTest::Imported`]
-    /// compares with, found so far, keyed by declaration.
+    /// The values of the imported variables and enum members that
+    /// [`FlowTest::Imported`] compares with, found so far, keyed by the
+    /// declaration of the variable, or by the range of the member's name for
+    /// a member.
     imported: FxHashMap<TextRange, Option<TypeData<'db>>>,
     /// The type that each write of the subject that assigns a value gives it,
     /// keyed by write index.
@@ -2109,14 +2114,16 @@ impl<'db> ResolutionCtx<'db, '_> {
             == Some(TypeData::NeverKeyword)
     }
 
-    /// Returns whether every imported variable that the guard at `guard`
-    /// compares the subject of `solve` with holds a unit value in the module
-    /// that declares it.
+    /// Returns whether every imported variable and every enum member that the
+    /// guard at `guard` compares the subject of `solve` with holds a unit
+    /// value.
     ///
     /// TypeScript finds a `switch` statement exhaustive only when the type of
-    /// every case is a unit type. A case that compares with an imported
-    /// variable that holds no unit value narrows nothing, so without this
-    /// check the remaining cases alone would make the statement exhaustive.
+    /// every case is a unit type. A case that compares with a value that
+    /// Biome can't find a unit value for, as an imported variable whose
+    /// initializer isn't a literal or an enum member whose value collection
+    /// doesn't compute, narrows nothing, so without this check the remaining
+    /// cases alone would make the statement exhaustive.
     fn compares_with_unit_values(
         &mut self,
         root: &RootFlow,
@@ -2136,10 +2143,22 @@ impl<'db> ResolutionCtx<'db, '_> {
                 }
                 Some(FlowGuard::Test {
                     subject,
-                    test: FlowTest::Imported { binding, .. },
+                    test:
+                        FlowTest::Imported {
+                            binding, member, ..
+                        },
                     ..
                 }) if *subject == solve.subject => {
-                    if self.imported_value(*binding, solve).is_none() {
+                    if self.imported_value(*binding, *member, solve).is_none() {
+                        return false;
+                    }
+                }
+                Some(FlowGuard::Test {
+                    subject,
+                    test: FlowTest::EnumMember(member),
+                    ..
+                }) if *subject == solve.subject => {
+                    if self.enum_member_value(*member).is_none() {
                         return false;
                     }
                 }
@@ -2612,6 +2631,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                         | FlowTest::Null
                         | FlowTest::Literal(_)
                         | FlowTest::Undefined { .. }
+                        | FlowTest::EnumMember(_)
                         | FlowTest::Imported { .. } => ty,
                     };
                     solve.properties.insert((index, ty), narrowed);
@@ -3108,9 +3128,9 @@ impl<'db> ResolutionCtx<'db, '_> {
     ///
     /// Returns `None` for a call to a type-guard function, an `in` test, and an
     /// `instanceof` test, which have no predicate. Also returns `None` for a
-    /// comparison with an imported variable that holds no unit value, or, with
-    /// loose equality, that holds a unit value other than `null` or
-    /// `undefined`, because such a comparison narrows nothing.
+    /// comparison with an imported variable or an enum member that holds no
+    /// unit value, or, with loose equality, that holds a unit value other than
+    /// `null` or `undefined`, because such a comparison narrows nothing.
     fn test_predicate(
         &mut self,
         test: FlowTest,
@@ -3129,8 +3149,15 @@ impl<'db> ResolutionCtx<'db, '_> {
                 NarrowingPredicate::Literal(TypeData::Undefined)
             }
             FlowTest::Undefined { strict: false } => NarrowingPredicate::Nullish,
-            FlowTest::Imported { binding, strict } => {
-                match (self.imported_value(binding, solve)?, strict) {
+            FlowTest::EnumMember(member) => {
+                NarrowingPredicate::Literal(self.enum_member_value(member)?)
+            }
+            FlowTest::Imported {
+                binding,
+                member,
+                strict,
+            } => {
+                match (self.imported_value(binding, member, solve)?, strict) {
                     (value, true) => NarrowingPredicate::Literal(value),
                     (TypeData::Null | TypeData::Undefined, false) => NarrowingPredicate::Nullish,
                     // Loose equality with any other value doesn't narrow the
@@ -3149,7 +3176,9 @@ impl<'db> ResolutionCtx<'db, '_> {
     }
 
     /// Returns the unit value that the imported variable declared at `binding`
-    /// holds in the module that declares it, or `None` when it holds none.
+    /// holds in the module that declares it, or, when `member` is the range
+    /// of a member's name, the value of that member of the enum that the
+    /// variable imports. Returns `None` when there is no such unit value.
     ///
     /// The result is kept in `solve`, so a loop that applies the test again
     /// doesn't follow the import again. [`imported_unit_value`] lists the
@@ -3157,14 +3186,27 @@ impl<'db> ResolutionCtx<'db, '_> {
     fn imported_value(
         &mut self,
         binding: TextRange,
+        member: Option<TextRange>,
         solve: &mut GuardSolve<'db>,
     ) -> Option<TypeData<'db>> {
-        if let Some(value) = solve.imported.get(&binding) {
+        let key = member.unwrap_or(binding);
+        if let Some(value) = solve.imported.get(&key) {
             return *value;
         }
-        let value = imported_unit_value(self.db, self.module, self.js_info, binding);
-        solve.imported.insert(binding, value);
+        let value = imported_unit_value(self.db, self.module, self.js_info, binding, member);
+        solve.imported.insert(key, value);
         value
+    }
+
+    /// Returns the literal type that collection gives the member of an enum
+    /// of this module whose name is at `member`, or `None` when collection
+    /// gives it another type, because it doesn't compute the member's value.
+    fn enum_member_value(&self, member: TextRange) -> Option<TypeData<'db>> {
+        raw_literal_type(
+            self.db,
+            self.js_info,
+            self.js_info.raw_binding_types.get(&member)?,
+        )
     }
 
     /// Returns `ty` narrowed by a call to the type-guard function declared at
@@ -3214,27 +3256,37 @@ const MAX_IMPORT_STEPS: usize = 16;
 
 /// Returns the unit value that the imported variable declared at `binding` in
 /// `js_info`, the module `module`, holds: `null`, `undefined`, or a string,
-/// number, bigint, or boolean literal type.
+/// number, bigint, or boolean literal type. When `member` is the range of a
+/// member's name in `js_info`, as `A` in `E.A`, returns the value of that
+/// member of the enum that the variable imports instead: the literal type
+/// that collection gives the member in the module that declares the enum.
 ///
 /// The import is followed through re-exports to the module that declares the
 /// variable. When that variable is a `const` that names another imported
-/// variable, the search continues with that import, through at most 16
-/// imports in all. The value comes from the syntax of the declarations and the
-/// raw type of the literal, without resolving any type, so it is the same in
-/// every resolution context.
+/// variable or a member of an imported enum, or is itself an import, the
+/// search continues with that import, through at most 16 imports in all. The
+/// value comes from the syntax of the declarations and the raw type of the
+/// literal, without resolving any type, so it is the same in every
+/// resolution context.
 ///
 /// Returns `None` for a type-only import, a namespace import, an import that
-/// doesn't resolve to a single declaration, an export that isn't a variable, a
-/// variable that holds no unit value, and more than 16 imports.
-/// An export that isn't a variable includes `export default "a"`, which
+/// doesn't resolve to a single declaration, an export that isn't a variable
+/// or, for a member, an enum, a variable that holds no unit value, a member
+/// whose value collection doesn't compute, and more than 16 imports. An
+/// export that isn't a variable includes `export default "a"`, which
 /// TypeScript narrows by.
 fn imported_unit_value<'db>(
     db: &'db dyn ModuleDb,
     mut module: ModuleInfo,
     js_info: &JsModuleInfo,
     mut binding: TextRange,
+    member: Option<TextRange>,
 ) -> Option<TypeData<'db>> {
     let mut info = js_info;
+    let mut member = match member {
+        Some(member) => Some(member_name_at(js_info, member)?),
+        None => None,
+    };
     for _ in 0..MAX_IMPORT_STEPS {
         let TypeReference::Import(import) = info.raw_binding_types.get(&binding)? else {
             return None;
@@ -3268,11 +3320,49 @@ fn imported_unit_value<'db>(
         let declared = origin_info
             .semantic_model
             .as_binding_by_range(*declaration)?;
+        if let Some(name) = &member {
+            if let Some(AnyJsBindingDeclaration::TsEnumDeclaration(enum_declaration)) =
+                declared.tree().declaration()
+            {
+                let range = enum_member_name_range(&enum_declaration, name.text())?;
+                return raw_literal_type(
+                    db,
+                    origin_info,
+                    origin_info.raw_binding_types.get(&range)?,
+                );
+            }
+            if !declared.is_imported() {
+                return None;
+            }
+            module = origin;
+            info = origin_info;
+            binding = *declaration;
+            continue;
+        }
         match binding_unit_value(&declared, &origin_info.semantic_model)? {
             UnitValue::Null => return Some(TypeData::Null),
             UnitValue::Undefined => return Some(TypeData::Undefined),
-            UnitValue::Literal(literal) => return raw_literal_type(db, origin_info, literal),
-            UnitValue::Imported(next) => {
+            UnitValue::Literal(literal) => {
+                return raw_literal_type(
+                    db,
+                    origin_info,
+                    origin_info.raw_expressions.get(&literal)?,
+                );
+            }
+            UnitValue::EnumMember(name) => {
+                return raw_literal_type(
+                    db,
+                    origin_info,
+                    origin_info.raw_binding_types.get(&name)?,
+                );
+            }
+            UnitValue::Imported {
+                binding: next,
+                member: next_member,
+            } => {
+                if let Some(next_member) = next_member {
+                    member = Some(member_name_at(origin_info, next_member)?);
+                }
                 module = origin;
                 info = origin_info;
                 binding = next;
@@ -3280,6 +3370,153 @@ fn imported_unit_value<'db>(
         }
     }
     None
+}
+
+/// Returns the name of a member that the token at `range` in `js_info` gives,
+/// as `A` in `E.A` or in `E["A"]`.
+fn member_name_at(js_info: &JsModuleInfo, range: TextRange) -> Option<TokenText> {
+    let token = js_info
+        .semantic_model
+        .root()
+        .syntax()
+        .covering_element(range)
+        .into_token()?;
+    Some(member_key(&token))
+}
+
+/// Classifies whether the expression at `range` in `js_info`, the module
+/// `module`, reads a member of an enum through an identifier that names the
+/// enum, as `E.A` and `E["A"]` do, also inside parentheses.
+///
+/// The identifier names an enum when it binds to an enum declaration of the
+/// module, or to an import that names one; see
+/// [`classify_imported_enum_member`]. The syntax and the semantic models of
+/// the modules decide it, without inferring any type.
+///
+/// Returns [`TypeInferenceClassification::NoMatch`] for other expressions,
+/// including `E?.A`, a member that the enum doesn't declare with an
+/// identifier or a string literal as its name, and a member read through a
+/// variable that holds the enum. Returns
+/// [`TypeInferenceClassification::Indeterminate`] when no expression has
+/// exactly that range, or when the import can't be followed.
+pub(in crate::db) fn classify_enum_member(
+    db: &dyn ModuleDb,
+    module: ModuleInfo,
+    js_info: &JsModuleInfo,
+    range: TextRange,
+) -> TypeInferenceClassification {
+    let start = match js_info
+        .semantic_model
+        .root()
+        .syntax()
+        .covering_element(range)
+    {
+        NodeOrToken::Node(node) => Some(node),
+        NodeOrToken::Token(token) => token.parent(),
+    };
+    let Some(expression) = start
+        .into_iter()
+        .flat_map(|node| node.ancestors())
+        .filter_map(AnyJsExpression::cast)
+        .find(|expression| expression.range() == range)
+    else {
+        return TypeInferenceClassification::Indeterminate;
+    };
+    match enum_member_unit_value(&expression.omit_parentheses(), &js_info.semantic_model) {
+        Some(UnitValue::EnumMember(_)) => TypeInferenceClassification::Match,
+        Some(UnitValue::Imported {
+            binding,
+            member: Some(member),
+        }) => match member_name_at(js_info, member) {
+            Some(member) => {
+                classify_imported_enum_member(db, module, js_info, binding, member.text())
+            }
+            None => TypeInferenceClassification::Indeterminate,
+        },
+        Some(
+            UnitValue::Null
+            | UnitValue::Undefined
+            | UnitValue::Literal(_)
+            | UnitValue::Imported { member: None, .. },
+        )
+        | None => TypeInferenceClassification::NoMatch,
+    }
+}
+
+/// Classifies whether the variable that an import declares at `binding` in
+/// `js_info`, the module `module`, names an enum that has a member named
+/// `member`.
+///
+/// The import is followed through re-exports to the module that declares
+/// the variable. When an import declares the variable there too, the search
+/// continues with that import, through at most 16 imports in all.
+///
+/// Returns [`TypeInferenceClassification::NoMatch`] when the declaration
+/// isn't an enum, as a `const` or a namespace import, or is an enum without
+/// a member of that name written as an identifier or a string literal.
+/// Returns [`TypeInferenceClassification::Indeterminate`] for an import that
+/// doesn't resolve to a single declaration, and after 16 imports.
+fn classify_imported_enum_member(
+    db: &dyn ModuleDb,
+    mut module: ModuleInfo,
+    js_info: &JsModuleInfo,
+    mut binding: TextRange,
+    member: &str,
+) -> TypeInferenceClassification {
+    let mut info = js_info;
+    for _ in 0..MAX_IMPORT_STEPS {
+        let Some(TypeReference::Import(import)) = info.raw_binding_types.get(&binding) else {
+            return TypeInferenceClassification::Indeterminate;
+        };
+        let name = match &import.symbol {
+            ImportSymbol::Named(name) => name.clone(),
+            ImportSymbol::Default => Text::new_static("default"),
+            ImportSymbol::All => return TypeInferenceClassification::NoMatch,
+        };
+        let resolved =
+            resolve_module_import(db, module, &import.specifier, ResolutionMode::JavaScript);
+        let Some(target) = resolved
+            .path()
+            .as_path()
+            .and_then(|path| db.module_for_path(path))
+        else {
+            return TypeInferenceClassification::Indeterminate;
+        };
+        let ExportOriginResult::Found {
+            module: origin,
+            name,
+        } = find_export_origin(db, target, name)
+        else {
+            return TypeInferenceClassification::Indeterminate;
+        };
+        let ModuleInfoKind::Js(origin_info) = origin.kind(db) else {
+            return TypeInferenceClassification::Indeterminate;
+        };
+        let Some(JsExport::Own(JsOwnExport::Binding(declaration))) =
+            origin_info.exports.get(name.text())
+        else {
+            return TypeInferenceClassification::NoMatch;
+        };
+        let Some(declared) = origin_info.semantic_model.as_binding_by_range(*declaration) else {
+            return TypeInferenceClassification::Indeterminate;
+        };
+        if let Some(AnyJsBindingDeclaration::TsEnumDeclaration(enum_declaration)) =
+            declared.tree().declaration()
+        {
+            return if enum_member_name_range(&enum_declaration, member).is_some() {
+                TypeInferenceClassification::Match
+            } else {
+                TypeInferenceClassification::NoMatch
+            };
+        }
+        if !declared.is_imported() {
+            return TypeInferenceClassification::NoMatch;
+        }
+        module = origin;
+        info = origin_info;
+        binding = *declaration;
+    }
+    TypeInferenceClassification::Indeterminate
 }
 
 /// Returns whether the return type of a call to the imported binding at
@@ -3984,15 +4221,16 @@ fn is_declaration_file(db: &dyn ModuleDb, module: ModuleInfo) -> bool {
     })
 }
 
-/// Returns the type of the expression at `range` in `js_info` when its raw
-/// type is a string, number, bigint, or boolean literal, converted without a
-/// resolution context, because a literal refers to no other type.
+/// Returns the type that `reference`, a raw type reference of `js_info`,
+/// refers to when it is a string, number, bigint, or boolean literal,
+/// converted without a resolution context, because a literal refers to no
+/// other type.
 fn raw_literal_type<'db>(
     db: &'db dyn ModuleDb,
     js_info: &JsModuleInfo,
-    range: TextRange,
+    reference: &TypeReference,
 ) -> Option<TypeData<'db>> {
-    let TypeReference::Resolved(RawTypeId::Local(id)) = js_info.raw_expressions.get(&range)? else {
+    let TypeReference::Resolved(RawTypeId::Local(id)) = reference else {
         return None;
     };
     let raw = js_info.raw_types.get(id.index())?;
