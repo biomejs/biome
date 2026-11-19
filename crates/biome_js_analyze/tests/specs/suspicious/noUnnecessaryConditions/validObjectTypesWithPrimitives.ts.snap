@@ -1,0 +1,59 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validObjectTypesWithPrimitives.ts
+---
+# Input
+```ts
+// should not generate diagnostics
+// A falsy primitive can have each object type below, so a falsy test keeps
+// it, and the nested tests are not constant. TypeScript keeps only `{}` and
+// generics, but `""` has `length` and `0` has `valueOf`.
+
+interface Sized {
+	length: number;
+}
+
+interface Numeric {
+	valueOf(): number;
+}
+
+class Measured {
+	length = 0;
+}
+
+function sized(value: Sized | undefined) {
+	if (!value) {
+		if (value) {
+		}
+	}
+}
+
+function numeric(value: Numeric | null) {
+	if (!value) {
+		if (value) {
+		}
+	}
+}
+
+function emptyObject(value: {} | undefined) {
+	if (!value) {
+		if (value) {
+		}
+	}
+}
+
+function classInstance(value: Measured | undefined) {
+	if (!value) {
+		if (value) {
+		}
+	}
+}
+
+function generic<T extends { id: number }>(value: T | undefined) {
+	if (!value) {
+		if (value) {
+		}
+	}
+}
+
+```
