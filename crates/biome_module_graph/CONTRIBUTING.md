@@ -95,8 +95,8 @@ one of its own variables or a path on its own `this`. Its parts live in
 
 - `scanner.rs` selects roots while the module visitor walks the syntax tree,
   so collection never walks the whole module again. A root is selected when
-  its own code contains a condition or, in a module with an `asserts`
-  annotation, a standalone call. It also records whether the root's own code
+  its own code contains a condition, counting every `switch` statement, or,
+  in a module with an `asserts` annotation, a standalone call. It also records whether the root's own code
   uses `this`, so a root whose only subjects are paths on `this` still gets a
   graph. The scanner rejects a root when its own code contains a `with`
   statement or bogus syntax, and a root over its node or depth limit. Declaration files (`.d.ts`, `.d.mts`, `.d.cts`, in any letter
@@ -111,9 +111,18 @@ one of its own variables or a path on its own `this`. Its parts live in
   analyzes a class field that has an initializer apart from the code around
   the class. It also skips `declare` statements, which never run.
 - The builder models the control flow of blocks, `if`, `while`, `do...while`,
-  `for`, labeled statements, `break`, `continue`, `return`, and `throw`. Any
-  other statement, such as `switch`, `try`, `for...in`, or `for...of`, is an
-  opaque region. The builder evaluates the expressions of a region in source
+  `for`, `switch`, labeled statements, `break`, `continue`, `return`, and
+  `throw`, as TypeScript's binder does. A `switch` evaluates every case test
+  from the flow after its discriminant. Its clauses form groups, a run of
+  clauses without statements followed by the next clause, and a group's
+  statements start from the join of a condition for each of its cases, a
+  condition that no case matched when the group contains `default`, and the
+  fall-through from the group before. Without `default`, the code after the
+  statement also continues from the bypass, the condition that no case
+  matched. `switch (true)` chains the conditions instead, as TypeScript's
+  `narrowTypeBySwitchOnTrue` does: a group starts where every case before it
+  failed to match. Any other statement, such as `try`, `for...in`, or
+  `for...of`, is an opaque region. The builder evaluates the expressions of a region in source
   order from the flow point before it, without modelling the branches and
   jumps inside it, and the next statement continues from the result. For each
   `break` or `continue` inside the region that targets a statement outside it,
@@ -220,6 +229,22 @@ one of its own variables or a path on its own `this`. Its parts live in
   condition lists `x` with the objects of property guards, because `in` too
   narrows only a union with two object types. It adds no property guard:
   TypeScript narrows no object through `"a" in s.k`.
+  A case of a `switch` becomes the condition that `discriminant === test`
+  holds (`decompose_switch_case`), so a case on `s.kind` adds the property
+  guard on `s`, and a case on a `const` that holds a property or on an
+  element of a pattern adds the guards that a test of it adds. The
+  discriminant decides how cases narrow (`SwitchKind`). A case of
+  `switch (typeof x)` is `typeof x === test`, without property or pattern
+  guards, because TypeScript narrows only the operand there, and a single
+  case that isn't a string literal makes no case narrow. A case of
+  `switch (true)` is its test when it is truthy. The condition that a case
+  did not match never tests the receivers of an optional chain, as in
+  TypeScript, and for `switch (true)` it decomposes the test as falsy only
+  when the test gives a boolean (`is_boolean_valued`). A `switch` that
+  TypeScript can find exhaustive, without `default`, on a subject or `typeof`
+  of one, with cases that all test a unit value or a kind of value, wraps
+  its bypass guard in `FlowGuard::Bypass` and is recorded in
+  `RootFlow::switches`, at most 64 per root.
   A test `x instanceof C` becomes a runtime test of `x` that holds the range
   of `C`, which inference resolves only when the test can narrow. The
   decomposed condition lists `x` with the objects of property guards, and
@@ -270,7 +295,9 @@ one of its own variables or a path on its own `this`. Its parts live in
   root's `this`, so `super.v = x` cancels `this.v`.
 
 Collection then keeps only the reads that a runtime test of their subject can
-reach, and only for subjects that can narrow. A read of an element of a
+reach, and only for subjects that can narrow. It keeps a recorded `switch`
+only when its bypass reaches a kept read, and lists those reads' points in
+`RootFlow::bypassed` with the statements whose bypass reaches them. A read of an element of a
 pattern is also kept when a test of the pattern reaches it: its point becomes
 a read point of the pattern, and `RootFlow::pattern_elements` maps the
 element to the pattern. A subject that conditions narrow only through
@@ -374,6 +401,21 @@ and paths without such guards share their solves as before. A path in
 check resolves through the context that evaluates the read, so in complete
 module inference it reads the types that context already holds, and that
 context keeps the answer per root and subject.
+
+A read whose point the bypass of a recorded `switch` reaches, and that comes
+after the statement's cases in the source, decides once its baseline exists
+whether that statement is exhaustive (`switch_is_exhaustive`), as
+TypeScript's `computeExhaustiveSwitchStatement` does: the guard of the
+bypass, applied to the type of the discriminant's read at the statement,
+must leave `never`. That type is the read's flow-sensitive type when
+narrowing changes it, and its ordinary type otherwise. The answer is part of
+the key of the solve queries (`FlowSubjectRootInput::exhaustive`, one bit per
+statement), and `FlowGuard::Bypass` gives `never` in a solve whose key has
+its bit. A read never asks about a statement whose cases come after it, so
+the read of a discriminant never needs its own statement's answer. Lookups
+share the answer through `infer_flow_switch_exhaustive`; complete module
+inference decides it in its own context and keeps it per root and
+statement.
 
 `src/db/type_inference/flow.rs` applies each runtime test with `narrow_type`
 from `biome_js_type_info`. Where branches meet, or a loop returns to an earlier
