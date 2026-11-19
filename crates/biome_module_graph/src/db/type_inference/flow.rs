@@ -822,17 +822,12 @@ impl<'db> ResolutionCtx<'db, '_> {
     ///
     /// Two cases need no solve:
     ///
-    /// - When the values that the root assigns are all `null` or all
-    ///   `undefined`, and every other write of a variable assigns a value,
-    ///   this returns `None`, so that the read keeps its declared type. That
-    ///   type then already is the value's type, as for
-    ///   `let x = null; x = null`, or is wider, as Unknown for
-    ///   `let x; x = null` and `unknown[]` for `const a = []; a.push(null)`.
-    ///   A `var` whose values are all `null` is solved, because a path that
-    ///   doesn't pass its declarator gives `undefined`.
-    ///   An array ignores the values that Biome can't type, and qualifies
-    ///   only when it is an array at every read, as
-    ///   [`RootFlow::is_always_array`] describes.
+    /// - When the values that the root adds to an array are all `null` or
+    ///   all `undefined`, apart from values that Biome can't type, and the
+    ///   array is an array at every read, as [`RootFlow::is_always_array`]
+    ///   describes, this returns `None`, so that the read keeps its declared
+    ///   type, `unknown[]`, which is wider than `null[]` for
+    ///   `const a = []; a.push(null)`.
     /// - When every write of a variable gives `null`, `undefined`, or a value
     ///   that Biome can't type, and at least one gives such a value, the read
     ///   is Unknown. A solve could give `null` or `undefined` at a read that
@@ -854,30 +849,14 @@ impl<'db> ResolutionCtx<'db, '_> {
             FlowEvolving::Variable => {
                 if types.iter().all(|ty| {
                     matches!(ty, TypeData::Null | TypeData::Undefined | TypeData::Unknown)
-                }) {
-                    if types.contains(&TypeData::Unknown)
-                        || self
-                            .js_info
-                            .flow
-                            .root(read.root)?
-                            .has_valueless_write(read.subject)
-                    {
-                        return Some(TypeData::Unknown);
-                    }
-                    // A path that doesn't pass the declarator of a `var`
-                    // gives `undefined`, which a declared type of `null`
-                    // lacks.
-                    if types.iter().all(is_unit)
-                        && (unit != Some(TypeData::Null)
-                            || !self
-                                .js_info
-                                .flow
-                                .root(read.root)?
-                                .hoisted
-                                .contains(&read.subject))
-                    {
-                        return None;
-                    }
+                }) && (types.contains(&TypeData::Unknown)
+                    || self
+                        .js_info
+                        .flow
+                        .root(read.root)?
+                        .has_valueless_write(read.subject))
+                {
+                    return Some(TypeData::Unknown);
                 }
             }
             FlowEvolving::Array => {

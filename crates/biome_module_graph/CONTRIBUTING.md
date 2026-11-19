@@ -569,9 +569,11 @@ when its own code contains:
   initializer whose type annotation is a union or that destructures a
   pattern, the head of a `for...of` loop that assigns a target, a call of
   `push` or `unshift` on a variable when the root also declares a variable
-  without a type annotation initialized with `[]`, or a declarator of a `var`
-  without a type annotation initialized with `null`, `undefined`, or `[]`
-  (`is_evolving_var`), which is `undefined` before the declarator runs;
+  without a type annotation initialized with `[]`, a declarator of a `let`
+  or a `var` without a type annotation and without an initializer, which is
+  `undefined` until a write, or of a `var` without a type annotation
+  initialized with `null`, `undefined`, or `[]`, which is `undefined` before
+  the declarator runs (`is_evolving_var`);
 - a statement call that may assert (`is_statement_call`, `may_assert`): the
   callee is a dotted name, and the call passes an argument or calls a
   method. A root that only such calls select is built only when one of their
@@ -1088,17 +1090,18 @@ The rules behind these fields:
   narrow whatever its collected type, but only in the root that declares it
   (`declared_range`): `eligible_range` refuses it to nested roots and
   `closure_reads` skips it. One that nothing writes or adds to narrows as any
-  other variable, unless it is a `var` that a read can reach before its
-  declarator runs (`may_read_before_declarator`): a read starts before the
-  declarator, or the declarator is nested in another statement. An array
-  also needs a write node for every addition that runs in the root's flow
+  other variable, unless it is declared without an initializer, or it is a
+  `var` that a read can reach before its declarator runs
+  (`may_read_before_declarator`): a read starts before the declarator, or
+  the declarator is nested in another statement. An array also needs a write
+  node for every addition that runs in the root's flow
   (`mutations_are_modeled`). Such a variable stays a subject only when a
   write node other than its initializer gives it a value, or, for a
-  variable initialized with `null` or `undefined`, when it has any write
-  node other than its initializer, or when it is such a `var`. Only those
-  write nodes mention it, so only the reads that they reach become
-  candidates, together with the reads of a `var` with an initializer that
-  the start reaches (`BuiltRoot::hoisted`). No such subject is in
+  variable, when it has any write node other than its initializer, has no
+  initializer, or is such a `var`. Only those write nodes mention it, so only
+  the reads that they reach become candidates, together with the reads that
+  the start reaches of a variable without an initializer and of a `var` with
+  an initializer (`BuiltRoot::hoisted`). No such subject is in
   `RootFlow::uninitialized` or `RootFlow::assignment_only`.
 - **Patterns and paths.** A pattern can narrow when its elements can and none
   of them is written. A read of an element is also kept when a test of the
@@ -1356,9 +1359,9 @@ without such a value gives `Unknown`. A variable whose state is `Unknown` is
 Unknown at the read, while an array whose state is `Unknown`, or to which
 nothing was added, keeps its declared type (`evolving_array_read`). Runtime
 tests narrow a variable from its incoming type and never narrow an array.
-When the values that the root assigns are all `null` or all `undefined`, and
-every write of a variable assigns a value, the read keeps its declared type
-without a solve, and an array ignores undetermined values there. When every
+When the values that the root adds to an array that is an array at every
+read are all `null` or all `undefined`, apart from undetermined values, the
+read keeps its declared type without a solve. When every
 write of a variable gives `null`, `undefined`, or `Unknown`, and at least one
 gives `Unknown` (`RootFlow::has_valueless_write`), the read is `Unknown`
 without a solve.

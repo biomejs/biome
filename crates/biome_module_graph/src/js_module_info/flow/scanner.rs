@@ -2,12 +2,13 @@ use super::builder::{AnyInlineCode, MAX_DEPTH, has_operands, is_var, mutated_arr
 use biome_js_control_flow::AnyJsControlFlowRoot;
 use biome_js_syntax::{
     AnyJsBinding, AnyJsBindingPattern, AnyJsExpression, AnyJsForInOrOfInitializer,
-    AnyJsLiteralExpression, AnyJsOptionalChainExpression, AnyTsReturnType, AnyTsType,
-    JsAssignmentExpression, JsAssignmentOperator, JsCallExpression, JsConditionalExpression,
-    JsDoWhileStatement, JsForInStatement, JsForOfStatement, JsForStatement, JsIdentifierBinding,
-    JsIfStatement, JsLogicalExpression, JsPostUpdateExpression, JsPreUpdateExpression,
-    JsSwitchStatement, JsSyntaxKind, JsSyntaxNode, JsUnaryExpression, JsUnaryOperator,
-    JsVariableDeclarator, JsWhileStatement, TsDeclareFunctionDeclaration,
+    AnyJsLiteralExpression, AnyJsOptionalChainExpression, AnyJsVariableDeclaration,
+    AnyTsReturnType, AnyTsType, JsAssignmentExpression, JsAssignmentOperator, JsCallExpression,
+    JsConditionalExpression, JsDoWhileStatement, JsForInStatement, JsForOfStatement,
+    JsForStatement, JsIdentifierBinding, JsIfStatement, JsLogicalExpression,
+    JsPostUpdateExpression, JsPreUpdateExpression, JsSwitchStatement, JsSyntaxKind, JsSyntaxNode,
+    JsUnaryExpression, JsUnaryOperator, JsVariableDeclarator, JsVariableKind, JsWhileStatement,
+    TsDeclareFunctionDeclaration,
 };
 use biome_rowan::{AstNode, AstSeparatedList, SyntaxKind, TextRange, declare_node_union};
 use std::ops::Range;
@@ -502,20 +503,31 @@ fn is_write(node: &JsSyntaxNode) -> bool {
     })
 }
 
-/// Returns whether `declarator` declares a `var` without a type annotation
-/// whose initializer is `null`, `undefined`, or an empty array literal, in
-/// parentheses or not. Such a variable's type evolves with its writes, and it
-/// is `undefined` until the declarator runs.
+/// Returns whether `declarator` declares, without a type annotation, a `let`
+/// or a `var` without an initializer, or a `var` whose initializer is `null`,
+/// `undefined`, or an empty array literal, in parentheses or not. Such a
+/// variable's type evolves with its writes, and it is `undefined` until a
+/// write or its declarator runs.
 fn is_evolving_var(declarator: &JsVariableDeclarator) -> bool {
-    if declarator.variable_annotation().is_some() || !is_var(declarator) {
+    if declarator.variable_annotation().is_some() {
         return false;
     }
     let Some(initializer) = declarator
         .initializer()
         .and_then(|initializer| initializer.expression().ok())
     else {
-        return false;
+        return matches!(
+            declarator.declaration(),
+            Some(AnyJsVariableDeclaration::JsVariableDeclaration(declaration))
+                if matches!(
+                    declaration.variable_kind(),
+                    Ok(JsVariableKind::Let | JsVariableKind::Var)
+                )
+        );
     };
+    if !is_var(declarator) {
+        return false;
+    }
     match initializer.omit_parentheses() {
         AnyJsExpression::AnyJsLiteralExpression(
             AnyJsLiteralExpression::JsNullLiteralExpression(_),
@@ -578,10 +590,10 @@ struct OpenRoot {
     /// annotation that an empty array literal initializes, whose type may
     /// evolve with its writes.
     has_empty_array: bool,
-    /// Whether the root's own code declares a `var` whose type evolves with
-    /// its writes and whose declarator has an initializer, as
-    /// [`is_evolving_var`] decides it. A read before the declarator gives
-    /// such a variable `undefined`.
+    /// Whether the root's own code declares a variable whose type evolves
+    /// with its writes and that a read can find `undefined` although no write
+    /// reaches it, as [`is_evolving_var`] decides it: a `let` or a `var`
+    /// without an initializer, or a `var` with one, before its declarator.
     has_evolving_var: bool,
     /// Whether the root's own code reads `this`.
     has_this: bool,
@@ -816,23 +828,27 @@ mod tests {
     }
 
     #[test]
-    fn vars_whose_type_evolves_select_their_root() {
+    fn variables_whose_type_evolves_select_their_root() {
         for source in [
             "function f() { x; var x = null; }",
             "function f() { x; var x = (undefined); }",
             "function f() { a; var a = []; }",
+            "function f() { x; var x; }",
+            "function f() { let x; x; }",
         ] {
             assert_eq!(selected(source), [source], "{source}");
         }
         // Only a `var` without a type annotation whose initializer is `null`,
         // `undefined`, or an empty array literal is `undefined` before its
-        // declarator and takes the types of its writes after it.
+        // declarator and takes the types of its writes after it. A `let` or a
+        // `var` without an initializer is `undefined` until a write.
         for source in [
             "function f() { x; let x = null; }",
-            "function f() { x; var x; }",
             "function f() { x; var x: null = null; }",
+            "function f() { let x: null; x; }",
             "function f() { x; var x = 0; }",
             "function f() { x; var x = [0]; }",
+            "function f() { for (let x of xs) x; }",
         ] {
             assert!(selected(source).is_empty(), "{source}");
         }
