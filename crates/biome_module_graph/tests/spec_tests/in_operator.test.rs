@@ -143,6 +143,7 @@ fn in_keeps_the_members_that_declare_the_property() {
         function objectMember(x: A | B) { if ("toString" in x) /*objectMember*/x; else /*objectMemberElse*/x; }
         function indexedObjectMember(x: A | B | Dict) { if ("toString" in x) /*indexed*/x; else /*indexedElse*/x; }
         function parenthesized(x: A | B) { if (("a") in (x)) /*parenthesized*/x; }
+        function template(x: A | B) { if (`a` in x) /*template*/x; }
         function property(x: A | B) { if ("a" in x) /*property*/x.a; }
         function operand(x: A | B) { "a" in x && /*operand*/x; }
         function conditional(x: A | B) { "a" in x ? /*conditional*/x : x; }
@@ -181,6 +182,7 @@ fn in_keeps_the_members_that_declare_the_property() {
             ("indexed", "x", &["A", "B", "Dict"]),
             ("indexedElse", "x", &["unknown"]),
             ("parenthesized", "x", &["A"]),
+            ("template", "x", &["A"]),
             ("property", "x.a", &["number: 1"]),
             ("operand", "x", &["A"]),
             ("conditional", "x", &["A"]),
@@ -337,7 +339,6 @@ fn in_keeps_the_declared_type_where_biome_cannot_tell() {
     assert_reads(
         r##"
         function constKey(x: A | B) { const k = "a"; if (k in x) /*constKey*/x; }
-        function template(x: A | B) { if (`a` in x) /*template*/x; }
         function escapedKey(x: A | B) { if ("\u0061" in x) /*escapedKey*/x; }
         function hex(x: A | B) { if (0x0 in x) /*hex*/x; }
         function functionMember(x: A | (() => void)) { if ("call" in x) /*functionMember*/x; else /*functionMemberElse*/x; }
@@ -353,8 +354,6 @@ fn in_keeps_the_declared_type_where_biome_cannot_tell() {
         &[
             // `A`
             ("constKey", "x", &["A", "B"]),
-            // `A`
-            ("template", "x", &["A", "B"]),
             // `A`
             ("escapedKey", "x", &["A", "B"]),
             // `(A | B) & Record<0, unknown>`

@@ -1138,10 +1138,11 @@ fn discriminants_held_at_the_top_level_follow_exports() {
 // `Circle` or the first tuple. A test inside a `switch`, a `for...of` loop,
 // or a closure that reads the variables of its enclosing function narrows as
 // anywhere else, so Biome also gives `Circle` at `inSwitch`, `forOf`,
-// `closure`, and `patternClosure`. Biome keeps the declared type at the
-// other reads, because it doesn't follow `s!` and keys that are spelled
-// differently from the property, and a `const` exported by an
-// `export { ... }` list holds nothing.
+// `closure`, and `patternClosure`, and a template literal without
+// substitutions names the property it spells, so `template` gives `Circle`.
+// Biome keeps the declared type at the other reads, because it doesn't
+// follow `s!` and keys that are spelled differently from the property, and a
+// `const` exported by an `export { ... }` list holds nothing.
 #[test]
 fn discriminant_constants_that_biome_does_not_follow_keep_the_object() {
     assert_reads(
@@ -1171,7 +1172,7 @@ fn discriminant_constants_that_biome_does_not_follow_keep_the_object() {
                 "t",
                 &["[string: a, number]", "[string: b, string]"],
             ),
-            ("template", "s", &["Circle", "Square"]),
+            ("template", "s", &["Circle"]),
             ("escapedStringKey", "s", &["Circle", "Square"]),
             ("patternClosure", "s", &["Circle"]),
             (

@@ -349,14 +349,14 @@ in TypeScript, and an array is Unknown there.
 
 | Code | TypeScript | Biome | Effect on rules |
 | --- | --- | --- | --- |
-| ``o: { a: string \| null }; if (o[`a`]) o.a`` | `string` | `string \| null` | `noUnnecessaryConditions` can miss an unnecessary check of `o.a`. |
 | `x: { z?: { w: string } } \| undefined; if ((x?.z)?.w) x` | `{ z?: { w: string } }` | `{ z?: { w: string } } \| undefined` | `noUnnecessaryConditions` can miss an unnecessary `?.` on `x`. |
 | `o: { v: string \| null }; if (o.v) o.v; o!.v = null;` | `string` | `string \| null` | `noUnnecessaryConditions` can miss an unnecessary check of `o.v`. |
 
 A write through `o!.v` or `(o as T).v` stops `o.v` from narrowing anywhere in
-the function, also before the write. Only a string literal without escapes or
-a decimal integer literal from 0 to 2^53 - 1 is a key of a path, as `o["v"]`
-or `t[0]`.
+the function, also before the write. Only a string literal or a template
+literal without substitutions, neither with escapes, or a decimal integer
+literal from 0 to 2^53 - 1 is a key of a path, as `o["v"]`, ``o[`v`]``, or
+`t[0]`.
 
 ### `this`
 

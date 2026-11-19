@@ -14,14 +14,14 @@ use biome_js_syntax::{
     AnyJsArrayBindingPatternElement, AnyJsAssignment, AnyJsBindingPattern, AnyJsClass,
     AnyJsClassMember, AnyJsClassMemberName, AnyJsExpression, AnyJsFunction, AnyJsGetter,
     AnyJsLiteralExpression, AnyJsName, AnyJsObjectBindingPatternMember, AnyJsObjectMemberName,
-    AnyJsParameter, AnyJsPropertyModifier, AnyJsSetter, AnyTsPropertyAnnotation,
-    AnyTsPropertySignatureModifier, JsArrayBindingPatternElement, JsArrowFunctionExpression,
-    JsConstructorClassMember, JsFormalParameter, JsFunctionBody, JsIdentifierBinding,
-    JsInitializerClause, JsLanguage, JsMethodClassMember, JsMethodObjectMember,
-    JsObjectBindingPatternProperty, JsObjectBindingPatternShorthandProperty, JsObjectExpression,
-    JsParameters, JsPropertyClassMember, JsRestParameter, JsSyntaxKind, JsSyntaxNode,
-    JsSyntaxToken, JsVariableDeclarator, binding_ext::AnyJsBindingDeclaration, inner_string_text,
-    unescape_js_identifier,
+    AnyJsParameter, AnyJsPropertyModifier, AnyJsSetter, AnyJsTemplateElement,
+    AnyTsPropertyAnnotation, AnyTsPropertySignatureModifier, JsArrayBindingPatternElement,
+    JsArrowFunctionExpression, JsConstructorClassMember, JsFormalParameter, JsFunctionBody,
+    JsIdentifierBinding, JsInitializerClause, JsLanguage, JsMethodClassMember,
+    JsMethodObjectMember, JsObjectBindingPatternProperty, JsObjectBindingPatternShorthandProperty,
+    JsObjectExpression, JsParameters, JsPropertyClassMember, JsRestParameter, JsSyntaxKind,
+    JsSyntaxNode, JsSyntaxToken, JsVariableDeclarator, binding_ext::AnyJsBindingDeclaration,
+    inner_string_text, unescape_js_identifier,
 };
 use biome_rowan::{
     AstNode, AstNodeList, AstSeparatedList, SyntaxKindSet, Text, TextRange, TokenText,
@@ -239,22 +239,24 @@ pub(super) fn member_name_key(name: &AnyJsObjectMemberName) -> Option<PropertyKe
 
 /// Returns the key of the property that the element access key `key` names
 /// when its spelling is the property's name: a string literal without escapes,
-/// such as `"v"`, or a decimal integer literal from `0` to 2^53 - 1 without
-/// leading zeros or separators, such as `0`.
+/// such as `"v"`, a template literal without a tag, substitutions, escapes, or
+/// carriage returns, such as `` `v` ``, or a decimal integer literal from `0`
+/// to 2^53 - 1 without leading zeros or separators, such as `0`.
 ///
 /// JavaScript converts a number key to a string, and such an integer converts
 /// to its own digits, so `t[0]` reads the same property as `t["0"]`. A string
-/// key reads the property it spells, so `o["v"]` reads the same property as
-/// `o.v`.
+/// key reads the property it spells, so `o["v"]` and ``o[`v`]`` read the same
+/// property as `o.v`. A template literal reads a carriage return as a line
+/// feed, so its text isn't the name of the property then.
 ///
 /// Returns `None` for every other key, including a number literal that
 /// converts to other text, such as `0x0`, `1e0`, `1.0`, or `1_0`, and an
-/// expression that is not a literal, such as `k`, `-0`, or a template literal.
-/// An integer literal above 2^53 - 1 can also convert to other text, as
-/// `9007199254740993` converts to `"9007199254740992"`.
+/// expression that is not a literal, such as `k` or `-0`. An integer literal
+/// above 2^53 - 1 can also convert to other text, as `9007199254740993`
+/// converts to `"9007199254740992"`.
 #[expect(
     clippy::wildcard_enum_match_arm,
-    reason = "Only string and number literals can name a property by their spelling."
+    reason = "Only string, template, and number literals can name a property by their spelling."
 )]
 pub(super) fn literal_key(key: &AnyJsExpression) -> Option<PropertyKey> {
     match key {
@@ -264,6 +266,17 @@ pub(super) fn literal_key(key: &AnyJsExpression) -> Option<PropertyKey> {
         AnyJsExpression::AnyJsLiteralExpression(
             AnyJsLiteralExpression::JsNumberLiteralExpression(number),
         ) => decimal_integer_key(&number.value_token().ok()?),
+        AnyJsExpression::JsTemplateExpression(template) if template.tag().is_none() => {
+            let mut elements = template.elements().iter();
+            match (elements.next(), elements.next()) {
+                (None, _) => Some(PropertyKey::Name(Text::default())),
+                (Some(AnyJsTemplateElement::JsTemplateChunkElement(chunk)), None) => {
+                    let text = chunk.template_chunk_token().ok()?.token_text_trimmed();
+                    (!text.contains(['\\', '\r'])).then(|| PropertyKey::Name(text.into()))
+                }
+                _ => None,
+            }
+        }
         _ => None,
     }
 }
@@ -914,7 +927,7 @@ mod tests {
     fn literal_keys_name_the_property_they_spell() {
         assert_eq!(
             subjects(
-                r#"o["v"]; o['v']; o?.["v"]; (o)["v"].w; o.v["w"]; o[0]; o["0"]; o["01"]; o[""]; o[9007199254740991];"#
+                r#"o["v"]; o['v']; o?.["v"]; (o)["v"].w; o.v["w"]; o[0]; o["0"]; o["01"]; o[""]; o[9007199254740991]; o[`v`]; o[``];"#
             ),
             [
                 Some("o.v".to_owned()),
@@ -927,6 +940,8 @@ mod tests {
                 Some("o.01".to_owned()),
                 Some("o.".to_owned()),
                 Some("o.9007199254740991".to_owned()),
+                Some("o.v".to_owned()),
+                Some("o.".to_owned()),
             ]
         );
     }
@@ -935,9 +950,9 @@ mod tests {
     fn keys_spelled_differently_from_their_property_are_not_subjects() {
         assert_eq!(
             subjects(
-                r#"o[-0]; o[0x0]; o[0b0]; o[0o0]; o[1e0]; o[1.0]; o[.5]; o[1_0]; o[1n]; o[9007199254740992]; o[12345678901234567890]; o["\u0076"]; o['\x76']; o[`v`]; o[("v")]; o[true]; o[null];"#
+                r#"o[-0]; o[0x0]; o[0b0]; o[0o0]; o[1e0]; o[1.0]; o[.5]; o[1_0]; o[1n]; o[9007199254740992]; o[12345678901234567890]; o["\u0076"]; o['\x76']; o[`\x76`]; o[`${k}`]; o[t`v`]; o[("v")]; o[true]; o[null];"#
             ),
-            vec![None; 17]
+            vec![None; 19]
         );
     }
 
