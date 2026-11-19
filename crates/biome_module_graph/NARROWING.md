@@ -126,6 +126,7 @@ These results match TypeScript's and can surprise a reader.
 | A property of `any` | `x: any; if (typeof x.v === "string") x.v` | `any` |
 | `any` from inference | `const y = JSON.parse(t); if (typeof y === "string") y` | `string` |
 | Truthiness of a type parameter | `x: T; if (x) x` | `T & {}` |
+| Falsiness of a type parameter whose constraint has no falsy value | `x: T \| undefined, with T extends Foo; if (!x) x` | `undefined` |
 | `typeof` on a type parameter | `x: T; if (typeof x === "string") x` | `T & string` |
 | `switch` on a type parameter | `x: T; switch (x) { case null: case undefined: break; default: x }` | `T` |
 | `switch` on a type parameter whose constraint a case covers | `x: T, with T extends null; switch (x) { case null: break; default: x }` | Unknown |
@@ -209,10 +210,11 @@ precision, Biome uses it instead and differs from TypeScript.
 | Overloads that augmentations add | `x: X; x.f(0)` | `2` | `3` | Biome has no program file order, so `noUnnecessaryConditions` can report `case 2:` as never matching. |
 
 Falsy branches remove only the object types that no falsy primitive can
-have, such as `interface Foo { a: number }`. Loose `==` removes a literal of
-another kind only when `==` is certainly false for it, as for a string without
-digits compared with a number. `delete o["v"]` gives `o.v` its declared type,
-where TypeScript ignores it.
+have, such as `interface Foo { a: number }`, and only the type parameters
+whose constraints are such types. Loose `==` removes a literal of another kind
+only when `==` is certainly false for it, as for a string without digits
+compared with a number. `delete o["v"]` gives `o.v` its declared type, where
+TypeScript ignores it.
 
 TypeScript widens a literal type when the value is fresh, as `1` in
 `let n = 1`. Biome keeps the literal type where it can't tell whether the
@@ -451,7 +453,6 @@ annotation and is declared before the enum, as TypeScript requires.
 
 | Code | TypeScript | Biome | Effect on rules |
 | --- | --- | --- | --- |
-| `x: T \| undefined, with T extends Foo; if (!x) x` | `undefined` | `T \| undefined` | `noUnnecessaryConditions` can miss an unnecessary check of `x`. |
 | `x: T, with T extends string \| null \| undefined; if (x !== null) x` | `T & {}` | `(T & {}) \| (T & undefined)` | `noUnnecessaryConditions` can miss an unnecessary check of `x` against `undefined`. |
 | `class L { length = 0 }; x: L \| number; if (typeof x === "string") x` | `string` | `L` | A rule can miss a report on `x`. |
 | `interface Pad { padStart(n: number): string }; x: Pad \| number; if (typeof x === "string") x` | `string` | `Pad` | A rule can miss a report on `x`. |

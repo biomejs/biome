@@ -654,8 +654,9 @@ mod narrowing {
                 ("L27_93", "y", &["instanceof T"]),
                 ("L28_58", "x", &[T_EMPTY]),
                 ("L29_49", "x", &["instanceof T"]),
-                // Biome keeps `T` where its constraint leaves no value.
-                ("L29_71", "x", &["instanceof T"]),
+                // The falsy branch removes `T`, whose constraint has no
+                // falsy value.
+                ("L29_71", "x", &["Unknown"]),
                 ("L30_53", "x", &["instanceof T"]),
                 ("L80_62", "x", &["instanceof T & string"]),
                 // `T & {}` has no `null` operand that Biome removes.

@@ -3120,11 +3120,14 @@ fn narrow_unknown<'db>(
 ///
 /// A test that every value of the constraint passes keeps `ty`, as for
 /// `x != null` with `T extends {}`, and so does a test that none passes,
-/// where TypeScript gives `never`. Every other test and branch keeps `ty`,
-/// as equality with another literal and the falsy branch do, and so does a
-/// constraint that refers to another type parameter at its top level, as
-/// `T extends U | null` does, which Biome doesn't narrow. `siblings` tells
-/// which nullish values the other members of the narrowed union are.
+/// where TypeScript gives `never`, except for the falsy branch: it gives
+/// `never` when no value of the constraint is falsy, as with `T extends Foo`
+/// for `interface Foo { a: number }`, as in TypeScript, and keeps `ty`
+/// otherwise. Every other test and branch keeps `ty`, as equality with
+/// another literal does, and so does a constraint that refers to another
+/// type parameter at its top level, as `T extends U | null` does, which Biome
+/// doesn't narrow. `siblings` tells which nullish values the other members of
+/// the narrowed union are.
 fn narrow_type_parameter<'db>(
     db: &'db dyn TypeDb,
     ty: InferredTypeData<'db>,
@@ -3159,6 +3162,13 @@ fn narrow_type_parameter<'db>(
         {
             return if passes(&PreparedPredicate::Nullish, true).is_some() {
                 intersect_narrowed(db, ty, empty_object(db))
+            } else {
+                ty
+            };
+        }
+        (PreparedPredicate::Truthy, false) => {
+            return if constraint.is_some() && passes(predicate, false).is_none() {
+                InferredTypeData::NeverKeyword
             } else {
                 ty
             };
@@ -5187,7 +5197,12 @@ mod tests {
             generic,
             InferredTypeData::instance_of(&db, generic, Box::default()),
         ] {
-            assert_eq!(narrow_type(&db, ty, NarrowingPredicate::Truthy, false), ty);
+            // No value of the constraint is falsy, so the falsy branch
+            // removes the type parameter, as in TypeScript.
+            assert_eq!(
+                narrow_type(&db, ty, NarrowingPredicate::Truthy, false),
+                InferredTypeData::NeverKeyword
+            );
             for kind in typeof_kinds() {
                 assert_eq!(
                     narrow_type(&db, ty, NarrowingPredicate::Typeof(kind), true),
@@ -7634,7 +7649,16 @@ mod tests {
                 true,
                 strings,
             ),
-            (objects, NarrowingPredicate::Truthy, false, objects),
+            // The falsy branch removes a type parameter whose constraint has
+            // no falsy value, as TypeScript does, and keeps one whose
+            // constraint has one.
+            (
+                objects,
+                NarrowingPredicate::Truthy,
+                false,
+                InferredTypeData::NeverKeyword,
+            ),
+            (strings, NarrowingPredicate::Truthy, false, strings),
             // No value of the constraint is `null`.
             (optional, null, false, optional),
             (
