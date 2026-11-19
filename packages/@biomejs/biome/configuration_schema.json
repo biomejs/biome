@@ -11711,6 +11711,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useTanstackQueryQueryOptions": {
+					"description": "Require TanStack Query options to be created with queryOptions().\nSee https://biomejs.dev/linter/rules/use-tanstack-query-query-options",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseTanstackQueryQueryOptionsConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useTanstackQueryStableQueryClient": {
 					"description": "Require the TanStack Query QueryClient to be created once, not on every render.\nSee https://biomejs.dev/linter/rules/use-tanstack-query-stable-query-client",
 					"anyOf": [
@@ -20877,6 +20884,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseTanstackQueryQueryOptionsOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseTanstackQueryQueryOptionsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseTanstackQueryStableQueryClientOptions": {
 			"type": "object",
 			"properties": {
@@ -27140,6 +27156,16 @@
 			]
 		},
 		"UseTanstackQueryMutationPropertyOrderOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseTanstackQueryQueryOptionsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseTanstackQueryQueryOptionsOptions" }
+			]
+		},
+		"UseTanstackQueryQueryOptionsOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},

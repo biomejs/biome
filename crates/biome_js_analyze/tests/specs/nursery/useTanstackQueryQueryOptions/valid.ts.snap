@@ -1,0 +1,30 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+import type { QueryClient, useQuery } from "@tanstack/react-query";
+import { type useQueryClient, queryOptions } from "@tanstack/react-query";
+
+const todosOptions = queryOptions({ queryKey: ["todos"], queryFn: fetchTodos });
+
+// A name that is imported as a type isn't a function of TanStack Query.
+useQuery({ queryKey: ["todos"], queryFn: fetchTodos });
+useQueryClient().getQueryData(["todos"]);
+
+// A query client that is only known by its type isn't checked.
+function update(queryClient: QueryClient) {
+	queryClient.setQueryData(["todos"], []);
+}
+
+class Service {
+	constructor(private readonly queryClient: QueryClient) {}
+
+	refresh() {
+		return this.queryClient.invalidateQueries({ queryKey: ["todos"] });
+	}
+}
+
+```
