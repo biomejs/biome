@@ -117,9 +117,11 @@ These results match TypeScript's and can surprise a reader.
 | `instanceof` on `unknown` | `x: unknown; if (x instanceof Map) x` | `Map<any, any>` |
 | `in` where no member declares the key | `x: { b: 1 }; if ("a" in x) x` | `{ b: 1 } & Record<"a", unknown>` |
 | A type-guard function with an unrelated target | `x: Bar; if (isFoo(x)) x` | `Bar & Foo` |
+| A type-guard function for `{}` on `unknown` | `isObj(v: unknown): v is {}; x: unknown; if (isObj(x)) {} else x` | `null \| undefined` |
 | `typeof` that replaces an object type | `interface Len { length: number }; x: number \| Len; if (typeof x === "string") x` | `string` |
 | `any` with `typeof` | `x: any; if (typeof x === "string") x` | `string` |
 | `any` with other checks | `x: any; if (x === "a") x` | `any` |
+| A property of `any` | `x: any; if (typeof x.v === "string") x.v` | `any` |
 | `any` from inference | `const y = JSON.parse(t); if (typeof y === "string") y` | `string` |
 | Truthiness of a type parameter | `x: T; if (x) x` | `T & {}` |
 | `typeof` on a type parameter | `x: T; if (typeof x === "string") x` | `T & string` |
@@ -276,7 +278,8 @@ result is wider unless the effect says otherwise, so a rule can miss a report.
 | Code | TypeScript | Biome | Effect on rules |
 | --- | --- | --- | --- |
 | `var x: string \| number = 1; var x: string \| number = "a"; x` | `string` | `string \| number` | `noUnnecessaryConditions` can miss an unnecessary check of `x`. |
-| `x: any; if (typeof x.v === "string") x.v` | `any` | Unknown | A rule can miss a report on `x.v`. |
+| `x: any; if (typeof x["v"] === "string") x["v"]` | `string` | `any` | A rule can miss a report on `x["v"]`. |
+| `x: any; const [b] = x; b` | `any` | Unknown | A rule can miss a report on `b`. |
 | `xs: AsyncIterable<string \| null>; for await (const v of xs) { if (v) v }` | `string` | Unknown | A rule can miss a report on `v`. |
 | `o: { a?: string \| number }; const { a = 0 } = o; if (typeof a === "string") a` | `string` | `string \| number` | `noUnnecessaryConditions` can miss an unnecessary check of `a`. |
 | `x: string; x !== null ? 1 : x` | `1` | Unknown | A rule can miss a report on the conditional. |
@@ -364,11 +367,10 @@ literal from 0 to 2^53 - 1 is a key of a path, as `o["v"]`, ``o[`v`]``, or
 | --- | --- | --- | --- |
 | `class S { static s: string \| null; static m() { if (this.s) this.s } }` | `string` | Unknown | A rule can miss a report on `this.s`. |
 | `use({ x: null, n() { if (this.x) this.x } })`, with `use(o: { x: string \| null; n(): void })` | `string` | Unknown | A rule can miss a report on `this.x`. |
-| `class T { x: string \| null = null; m(this: T) { if (this.x) this.x } }` | `string` | `string \| null` | `noUnnecessaryConditions` can miss an unnecessary check of `this.x`. |
 
 A path on `this` narrows in methods, accessors, and constructors of a class or
-of an object literal assigned to a variable, and in arrow functions inside
-them.
+of an object literal assigned to a variable, in a function or method whose
+`this` parameter has a type annotation, and in arrow functions inside them.
 
 ### Destructuring
 
@@ -465,14 +467,14 @@ or a computed key.
 
 | Code | TypeScript | Biome | Effect on rules |
 | --- | --- | --- | --- |
-| `u: { isS(v: unknown): v is string }; x: string \| number; if (u["isS"](x)) x` | `string` | `string \| number` | `noUnnecessaryConditions` can miss an unnecessary check of `x`. |
+| `get: () => (v: unknown) => v is string; x: string \| number; if (get()(x)) x` | `string` | `string \| number` | `noUnnecessaryConditions` can miss an unnecessary check of `x`. |
 | `xs: (string \| number)[]; if (xs.every((x) => typeof x === "string")) xs` | `string[]` | `(string \| number)[]` | A rule can miss a report on the elements of `xs`. |
 | `q(v: "a"): v is "a"; q(v: string): v is "b"; x: string; if (q(x)) x` | `"b"` | `string` | `noUnnecessaryConditions` can miss an unnecessary check of `x`. |
 | `isOf<T>(v: unknown, sample: T): v is T; x: string \| number \| boolean; y: string \| number; if (isString(y) && !isOf(x, y)) x` | `number \| boolean` | `string \| number \| boolean` | `noUnnecessaryConditions` can miss an unnecessary check of `x`. |
 | `class P1 { a = 1 }; class P2 { a = 1 }; k(v: unknown, c: P1): v is string; k(v: unknown, c: unknown): v is number; x: string \| number; c: P2; if (k(x, c)) x` | `string` | `string \| number` | `noUnnecessaryConditions` can miss an unnecessary check of `x`. |
 | `x: string \| number; if (isFoo(x)) x` | `(string \| number) & Foo` | `string \| number` | A rule can miss a report on `x`. |
 | `interface Same { a: number }; x: Same \| Bar; if (isFoo(x)) {} else x` | `Bar` | `Same \| Bar` | `noUnnecessaryConditions` can miss an unnecessary check of `x`. |
-| `isObj(v: unknown): v is {}; x: unknown; if (isObj(x)) {} else x` | `null \| undefined` | `unknown` | `noUnnecessaryConditions` can miss an unnecessary check of `x`. |
+| `interface Empty {}; isEmpty(v: unknown): v is Empty; x: unknown; if (isEmpty(x)) {} else x` | `null \| undefined` | `unknown` | `noUnnecessaryConditions` can miss an unnecessary check of `x`. |
 | `x: { y: string \| number } \| undefined; if (isString(x?.y)) x` | `{ y: string \| number }` | `{ y: string \| number } \| undefined` | `noUnnecessaryConditions` can miss an unnecessary `?.` on `x`. |
 
 Biome skips an earlier overload only when no narrowing could make it accept
@@ -486,23 +488,23 @@ explicit type, as TypeScript requires.
 
 | Code | TypeScript | Biome | Effect on rules |
 | --- | --- | --- | --- |
-| `const defaulted = (v: string \| null = null) => v !== null; x: string \| null; if (defaulted(x)) x` | `string` | `string \| null` | `noUnnecessaryConditions` can miss an unnecessary check of `x`. |
 | `const isObj = (v: unknown) => typeof v === "object" && v !== null; x: unknown; if (isObj(x)) x` | `object` | `unknown` | A rule can miss a report on `x`. |
 | `function isDefined<T>(v: T \| undefined) { return v !== undefined; }; x: string \| undefined; if (isDefined(x)) x` | `string` | `string \| undefined` | `noUnnecessaryConditions` can miss an unnecessary `?.` on `x`. |
 
 Biome infers a type predicate only when the body is a single boolean check of
-a parameter without a default value, written as the arrow's body or as the
-only statement, a `return`.
+a parameter, written as the arrow's body or as the only statement, a
+`return`. A parameter with a default value also needs a type annotation.
 
 ### `switch`, optional chains, and overloads
 
 | Code | TypeScript | Biome | Effect on rules |
 | --- | --- | --- | --- |
 | `x: T, with T extends null; switch (x) { case null: break; default: x }` | `never` | `T` | A rule can miss that `default` never runs. |
-| `interface O6 { f(x: string): 2; f(x: "a"): 1 }; o6: O6; o6.f("a")` | `1` | `2` | Disjoint: `noUnnecessaryConditions` can report `case 1:` on the result as never matching. |
+| ``interface U { f(x: string): 2; f(x: `a`): 1 }; u: U; u.f("a")`` | `1` | `2` | Disjoint: `noUnnecessaryConditions` can report `case 1:` on the result as never matching. |
 
-Biome tries the overloads of one declaration in their written order, where
-TypeScript tries those with a parameter of a literal type first.
+Biome tries the overloads with a parameter of a literal type first, as
+TypeScript does. It doesn't select an overload for a string argument through
+a parameter with a template literal type, as in the second row.
 
 ### Declarations and globals
 

@@ -674,9 +674,12 @@ impl TypeData {
                 TypeofThisOrSuperExpression::from_any_js_expression(scope_id, expr),
             )),
             AnyJsExpression::JsTemplateExpression(expr) => Self::from_js_template_expression(expr),
-            AnyJsExpression::JsThisExpression(_) => Self::from(TypeofExpression::This(
-                TypeofThisOrSuperExpression::from_any_js_expression(scope_id, expr),
-            )),
+            AnyJsExpression::JsThisExpression(_) => match this_parameter_type(expr) {
+                Some(annotation) => Self::from_any_ts_type(collector, scope_id, &annotation),
+                None => Self::from(TypeofExpression::This(
+                    TypeofThisOrSuperExpression::from_any_js_expression(scope_id, expr),
+                )),
+            },
             AnyJsExpression::TsAsExpression(expr) => {
                 let Ok(annotation) = expr.ty() else {
                     return Self::unknown();
@@ -3086,9 +3089,10 @@ impl TypeMember {
     ///
     /// Method signatures with the same name form one member, so that a call
     /// selects the overload that accepts its arguments. The type of that
-    /// member has one call signature per overload, in declaration order. An
-    /// optional method is optional as a whole. Members that can't be
-    /// collected are `None`.
+    /// member has one call signature per overload, in the order that
+    /// TypeScript tries them (see [`specialized_first`]). The call signatures
+    /// of the type itself are in that order too. An optional method is
+    /// optional as a whole. Members that can't be collected are `None`.
     ///
     /// In this example, `listen` is one member with two call signatures. A
     /// call with a single argument, such as `listen({})`, selects the second
@@ -3155,7 +3159,7 @@ impl TypeMember {
             }
         }
 
-        collected
+        let mut members: Vec<_> = collected
             .into_iter()
             .map(|collected| match collected {
                 CollectedMember::Direct(member) => member,
@@ -3174,15 +3178,37 @@ impl TypeMember {
                     Some(member)
                 }
             })
-            .collect()
+            .collect();
+        // The call signatures of the type are its overloads, which keep their
+        // positions among the other members.
+        let positions: Vec<_> = (0..members.len())
+            .filter(|index| {
+                members[*index]
+                    .as_ref()
+                    .is_some_and(|member| member.kind == TypeMemberKind::CallSignature)
+            })
+            .collect();
+        if positions.len() > 1 {
+            let signatures: Vec<_> = positions
+                .iter()
+                .filter_map(|index| members[*index].take())
+                .collect();
+            let signatures = specialized_first(collector, signatures, |member| &member.ty);
+            for (index, signature) in positions.into_iter().zip(signatures) {
+                members[index] = Some(signature);
+            }
+        }
+        members
     }
 
-    /// Returns an object type with one call signature per overload, in
-    /// declaration order.
+    /// Returns an object type with one call signature per overload, in the
+    /// order that TypeScript tries them for a call (see
+    /// [`specialized_first`]).
     fn overload_set_type(
         collector: &mut dyn RawTypeCollector,
         signatures: Vec<TypeReference>,
     ) -> TypeReference {
+        let signatures = specialized_first(collector, signatures, |ty| ty);
         collector.reference_to_owned_data(TypeData::object_with_members(
             signatures
                 .into_iter()
@@ -3193,6 +3219,28 @@ impl TypeMember {
                 .collect(),
         ))
     }
+}
+
+/// Returns the overloads of one declaration in the order that TypeScript
+/// tries them for a call: those with a parameter of a literal type first
+/// (see [`Function::is_specialized`]), then the others, each group in
+/// declaration order. `signature` returns the type of an overload.
+///
+/// For example, with `f(x: string): 2; f(x: "a"): 1`, `f("a")` is `1`.
+pub fn specialized_first<T>(
+    collector: &dyn RawTypeCollector,
+    overloads: Vec<T>,
+    signature: impl Fn(&T) -> &TypeReference,
+) -> Vec<T> {
+    let (mut specialized, others): (Vec<_>, Vec<_>) = overloads.into_iter().partition(|overload| {
+        matches!(
+            collector.get_by_reference(signature(overload)),
+            Some(TypeData::Function(function))
+                if function.is_specialized(|ty| collector.get_by_reference(ty))
+        )
+    });
+    specialized.extend(others);
+    specialized
 }
 
 /// Registers the function type of a method signature and returns it with the
@@ -3422,6 +3470,57 @@ fn is_direct_class_or_object_member(node: &JsSyntaxNode) -> bool {
             }
         })
         .unwrap_or_default()
+}
+
+/// The nodes that give the code inside them a `this` that no `this`
+/// parameter declares: class members other than methods, the getters and
+/// setters of an object literal, and classes, which a walk reaches from their
+/// decorators or `extends` clause.
+const THIS_WITHOUT_PARAMETER_KINDS: SyntaxKindSet<JsLanguage> = AnyJsClassMember::KIND_SET
+    .union(AnyJsClass::KIND_SET)
+    .union(JsGetterObjectMember::KIND_SET)
+    .union(JsSetterObjectMember::KIND_SET);
+
+/// Returns the type annotation of the `this` parameter that declares the type
+/// of `expr`, a `this` expression, as `T` in `function f(this: T) { this }`.
+///
+/// The parameter belongs to the nearest function or method around `expr`
+/// that isn't an arrow function, because an arrow function has the `this` of
+/// the code around it. Returns `None` when that function or method declares
+/// no `this` parameter with a type annotation, when `expr` is in the
+/// decorators or computed key of a method, which run with the `this` around
+/// the class or object, and when a class member, a getter, or a setter gives
+/// `expr` its `this` first.
+fn this_parameter_type(expr: &AnyJsExpression) -> Option<AnyTsType> {
+    let mut child = expr.syntax().clone();
+    for node in expr.syntax().ancestors().skip(1) {
+        let parameters = if JsArrowFunctionExpression::can_cast(node.kind()) {
+            child = node;
+            continue;
+        } else if let Some(function) = AnyJsFunction::cast_ref(&node) {
+            match function.parameters().ok()? {
+                AnyJsArrowFunctionParameters::JsParameters(parameters) => parameters,
+                AnyJsArrowFunctionParameters::AnyJsBinding(_) => return None,
+            }
+        } else if let Some(method) = JsMethodClassMember::cast_ref(&node) {
+            method.parameters().ok()?
+        } else if let Some(method) = JsMethodObjectMember::cast_ref(&node) {
+            method.parameters().ok()?
+        } else if THIS_WITHOUT_PARAMETER_KINDS.matches(node.kind()) {
+            return None;
+        } else {
+            child = node;
+            continue;
+        };
+        if !JsFunctionBody::can_cast(child.kind()) && !JsParameters::can_cast(child.kind()) {
+            return None;
+        }
+        let AnyJsParameter::TsThisParameter(parameter) = parameters.items().first()?.ok()? else {
+            return None;
+        };
+        return parameter.type_annotation()?.ty().ok();
+    }
+    None
 }
 
 impl TypeofThisOrSuperExpression {
@@ -4646,9 +4745,9 @@ fn with_inferred_predicate(
 /// value mentions, and it takes only the first such parameter, skipping
 /// `this`, rest, and destructured parameters and those annotated `boolean`,
 /// which TypeScript skips too. That parameter must be named without escapes,
-/// have no default value, never be assigned anywhere in the function, and
-/// get its type from an annotation or, without one, from the call that the
-/// function is passed to. The value must also test it directly, as
+/// never be assigned anywhere in the function, and get its type from an
+/// annotation or, without one and without a default value, from the call
+/// that the function is passed to. The value must also test it directly, as
 /// [`tests_name`] describes, because inferring a type predicate costs a
 /// resolution of the parameter's type, which is wasted on a value such as
 /// `query(builder)` or `builder.done()`. Otherwise the function gets no type
@@ -4723,10 +4822,13 @@ pub fn inferred_predicate_parameter(
         if is_boolean && formal.question_mark_token().is_none() {
             continue;
         }
-        let is_typed = annotation.is_some() || function.is_call_argument();
+        // TypeScript tests the annotated type of a parameter, whatever its
+        // default value. Without an annotation, the default value takes part
+        // in the parameter's type, so such a parameter gets no type predicate.
+        let is_typed =
+            annotation.is_some() || (function.is_call_argument() && formal.initializer().is_none());
         let mut steps = MAX_BOOLEAN_STEPS;
         if !is_typed
-            || formal.initializer().is_some()
             || text.contains('\\')
             || !tests_name(&returned, text, &mut steps)
             || assigns_name(function, text)

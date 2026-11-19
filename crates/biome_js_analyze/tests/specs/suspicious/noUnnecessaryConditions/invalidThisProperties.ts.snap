@@ -6,7 +6,8 @@ expression: invalidThisProperties.ts
 ```ts
 // should generate diagnostics
 // A property of `this` narrows like a property of a variable in a method, in
-// an arrow function in a field initializer, and in an object literal method:
+// an arrow function in a field initializer, in an object literal method, and
+// in a function or method whose `this` parameter gives `this` its type:
 // after the test, `this.timer` and `this.#pending` cannot be nullish at the
 // optional chains, as in TypeScript.
 
@@ -47,29 +48,45 @@ const scheduler = {
 	},
 };
 
+function stopTimer(this: { timer: Timer | null }) {
+	if (this.timer) {
+		this.timer?.cancel();
+	}
+}
+
+class Poller {
+	timer: Timer | null = null;
+
+	stop(this: Poller) {
+		if (this.timer) {
+			this.timer?.cancel();
+		}
+	}
+}
+
 ```
 
 # Diagnostics
 ```
-invalidThisProperties.ts:17:4 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidThisProperties.ts:18:4 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unnecessary optional chaining.
   
-    15 │ 	stop() {
-    16 │ 		if (this.timer) {
-  > 17 │ 			this.timer?.cancel();
+    16 │ 	stop() {
+    17 │ 		if (this.timer) {
+  > 18 │ 			this.timer?.cancel();
        │ 			^^^^^^^^^^
-    18 │ 		}
-    19 │ 	}
+    19 │ 		}
+    20 │ 	}
   
   i Replace ?. with ..
   
-    15 │ 	stop() {
-    16 │ 		if (this.timer) {
-  > 17 │ 			this.timer?.cancel();
+    16 │ 	stop() {
+    17 │ 		if (this.timer) {
+  > 18 │ 			this.timer?.cancel();
        │ 			          ^^
-    18 │ 		}
-    19 │ 	}
+    19 │ 		}
+    20 │ 	}
   
   i The receiver is guaranteed to be non-nullish.
   
@@ -77,25 +94,25 @@ invalidThisProperties.ts:17:4 lint/suspicious/noUnnecessaryConditions ━━━�
 ```
 
 ```
-invalidThisProperties.ts:25:3 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidThisProperties.ts:26:3 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unnecessary optional chaining.
   
-    23 │ 			return;
-    24 │ 		}
-  > 25 │ 		this.#pending?.cancel();
+    24 │ 			return;
+    25 │ 		}
+  > 26 │ 		this.#pending?.cancel();
        │ 		^^^^^^^^^^^^^
-    26 │ 	}
-    27 │ 
+    27 │ 	}
+    28 │ 
   
   i Replace ?. with ..
   
-    23 │ 			return;
-    24 │ 		}
-  > 25 │ 		this.#pending?.cancel();
+    24 │ 			return;
+    25 │ 		}
+  > 26 │ 		this.#pending?.cancel();
        │ 		             ^^
-    26 │ 	}
-    27 │ 
+    27 │ 	}
+    28 │ 
   
   i The receiver is guaranteed to be non-nullish.
   
@@ -103,25 +120,25 @@ invalidThisProperties.ts:25:3 lint/suspicious/noUnnecessaryConditions ━━━�
 ```
 
 ```
-invalidThisProperties.ts:30:4 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidThisProperties.ts:31:4 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unnecessary optional chaining.
   
-    28 │ 	onIdle = () => {
-    29 │ 		if (this.timer !== null) {
-  > 30 │ 			this.timer?.cancel();
+    29 │ 	onIdle = () => {
+    30 │ 		if (this.timer !== null) {
+  > 31 │ 			this.timer?.cancel();
        │ 			^^^^^^^^^^
-    31 │ 		}
-    32 │ 	};
+    32 │ 		}
+    33 │ 	};
   
   i Replace ?. with ..
   
-    28 │ 	onIdle = () => {
-    29 │ 		if (this.timer !== null) {
-  > 30 │ 			this.timer?.cancel();
+    29 │ 	onIdle = () => {
+    30 │ 		if (this.timer !== null) {
+  > 31 │ 			this.timer?.cancel();
        │ 			          ^^
-    31 │ 		}
-    32 │ 	};
+    32 │ 		}
+    33 │ 	};
   
   i The receiver is guaranteed to be non-nullish.
   
@@ -129,25 +146,77 @@ invalidThisProperties.ts:30:4 lint/suspicious/noUnnecessaryConditions ━━━�
 ```
 
 ```
-invalidThisProperties.ts:39:4 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidThisProperties.ts:40:4 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unnecessary optional chaining.
   
-    37 │ 	stop() {
-    38 │ 		if (this.timer) {
-  > 39 │ 			this.timer?.cancel();
+    38 │ 	stop() {
+    39 │ 		if (this.timer) {
+  > 40 │ 			this.timer?.cancel();
        │ 			^^^^^^^^^^
-    40 │ 		}
-    41 │ 	},
+    41 │ 		}
+    42 │ 	},
   
   i Replace ?. with ..
   
-    37 │ 	stop() {
-    38 │ 		if (this.timer) {
-  > 39 │ 			this.timer?.cancel();
+    38 │ 	stop() {
+    39 │ 		if (this.timer) {
+  > 40 │ 			this.timer?.cancel();
        │ 			          ^^
-    40 │ 		}
-    41 │ 	},
+    41 │ 		}
+    42 │ 	},
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+invalidThisProperties.ts:47:3 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    45 │ function stopTimer(this: { timer: Timer | null }) {
+    46 │ 	if (this.timer) {
+  > 47 │ 		this.timer?.cancel();
+       │ 		^^^^^^^^^^
+    48 │ 	}
+    49 │ }
+  
+  i Replace ?. with ..
+  
+    45 │ function stopTimer(this: { timer: Timer | null }) {
+    46 │ 	if (this.timer) {
+  > 47 │ 		this.timer?.cancel();
+       │ 		          ^^
+    48 │ 	}
+    49 │ }
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+invalidThisProperties.ts:56:4 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    54 │ 	stop(this: Poller) {
+    55 │ 		if (this.timer) {
+  > 56 │ 			this.timer?.cancel();
+       │ 			^^^^^^^^^^
+    57 │ 		}
+    58 │ 	}
+  
+  i Replace ?. with ..
+  
+    54 │ 	stop(this: Poller) {
+    55 │ 		if (this.timer) {
+  > 56 │ 			this.timer?.cancel();
+       │ 			          ^^
+    57 │ 		}
+    58 │ 	}
   
   i The receiver is guaranteed to be non-nullish.
   

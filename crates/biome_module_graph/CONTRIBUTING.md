@@ -891,12 +891,13 @@ The behavior of each kind of test is in
   call and its arguments still use the types from before it. For a local assertion function,
   `asserts value is T` becomes a runtime test of the argument, and
   `asserts value` decomposes the argument as a condition that holds.
-- **Call points.** A call whose callee is a dotted name, and that no local
-  function decides from its collected signature
-  (`GuardFunctions::calls_local_function`), is a call point (`FlowCall`),
-  whose guard is `FlowGuard::Call`. A local function that is generic or
-  overloaded, with an overload that returns a type predicate, an assertion,
-  or `never` (`selects_signature_by_arguments`), decides nothing at
+- **Call points.** A call whose callee is a dotted name, or in a condition an
+  identifier or `this` followed by property and element accesses
+  (`is_access_chain`), and that no local function decides from its collected
+  signature (`GuardFunctions::calls_local_function`), is a call point
+  (`FlowCall`), whose guard is `FlowGuard::Call`. A local function that is
+  generic or overloaded, with an overload that returns a type predicate, an
+  assertion, or `never` (`selects_signature_by_arguments`), decides nothing at
   collection, because the call's arguments select its signature. Nor does a
   statement call of a local function whose return type annotation names an
   import, in place or through the module's type aliases

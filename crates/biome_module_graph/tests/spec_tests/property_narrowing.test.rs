@@ -815,16 +815,15 @@ fn static_members_keep_paths_on_this_unnarrowed() {
 
 // TypeScript 7.0.2 (`tsc --strict`) narrows every read below to `string`,
 // because an object literal method takes `this` from the object, or from its
-// contextual type, and a function or method with a `this` parameter from the
-// parameter.
+// contextual type.
 // Biome finds the object or class only through a variable it initializes or a
 // class name. Otherwise it types `this` from the enclosing class or object
 // literal, so `argument` and `classArgument` read the field of `K` and
-// `nested` the field of `o`, or not at all, and it ignores `this` parameters.
-// It narrows no path on `this` there.
+// `nested` the field of `o`, or not at all. It narrows no path on `this`
+// there.
 #[test]
 fn paths_on_this_stay_unnarrowed_where_biome_types_this_otherwise() {
-    use InferredTypeData::{Null, Number, String, Unknown};
+    use InferredTypeData::{Null, Number, Unknown};
     const SOURCE: &str = r#"
         declare function use(o: { x: string | null; n(): void }): void;
         declare function take(c: unknown): void;
@@ -837,8 +836,6 @@ fn paths_on_this_stay_unnarrowed_where_biome_types_this_otherwise() {
             }
         }
         use({ x: null, n() { if (this.x) { /*module*/this.x; } } });
-        function f(this: { x: string | null }) { if (this.x) { /*function*/this.x; } }
-        class T { x: string | null = null; m(this: T) { if (this.x) { /*thisParameter*/this.x; } } }
     "#;
     assert_reads(
         SOURCE,
@@ -847,8 +844,41 @@ fn paths_on_this_stay_unnarrowed_where_biome_types_this_otherwise() {
             ("nested", "this.x", &[Number, Null]),
             ("classArgument", "this.x", &[Number, Null]),
             ("module", "this.x", &[Unknown]),
-            ("function", "this.x", &[Unknown]),
-            ("thisParameter", "this.x", &[String, Null]),
+        ],
+    );
+}
+
+// TypeScript 7.0.2 (`tsc --strict`) narrows every read below to `string`,
+// because a function or method with a `this` parameter takes `this` from the
+// parameter's type annotation, and so does an arrow function created in one.
+// A comment gives TypeScript's type where Biome's differs.
+#[test]
+fn paths_on_this_narrow_under_a_this_parameter() {
+    use InferredTypeData::{String, Unknown};
+    const SOURCE: &str = r#"
+        class T { x: string | null = null; m(this: T) { if (this.x) { /*class*/this.x; } } }
+        function f(this: { x: string | null }) { if (this.x) { /*function*/this.x; } }
+        class O { x: number | null = null; m(this: { x: string | null }) { if (this.x) { /*otherType*/this.x; } } }
+        const o = { x: null as number | null, m(this: { x: string | null }) { if (this.x) { /*object*/this.x; } } };
+        class A { x: string | null = null; m(this: A) { const g = () => { if (this.x) { /*arrow*/this.x; } }; g(); } }
+        class S { static s: string | null; static m(this: typeof S) { if (this.s) { /*static*/this.s; } } }
+        const fe = function (this: { x: string | null }) { if (this.x) { /*expression*/this.x; } };
+        interface I { x: string | null }
+        function fi(this: I) { if (this.x !== null) { /*interface*/this.x; } }
+    "#;
+    assert_reads(
+        SOURCE,
+        &[
+            ("class", "this.x", &[String]),
+            ("function", "this.x", &[String]),
+            ("otherType", "this.x", &[String]),
+            ("object", "this.x", &[String]),
+            ("arrow", "this.x", &[String]),
+            // TypeScript: `string`. Biome reads a static property through
+            // `typeof S` as Unknown, also without narrowing.
+            ("static", "this.s", &[Unknown]),
+            ("expression", "this.x", &[String]),
+            ("interface", "this.x", &[String]),
         ],
     );
 }

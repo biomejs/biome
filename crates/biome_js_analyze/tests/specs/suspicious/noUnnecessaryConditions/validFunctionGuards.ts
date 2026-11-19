@@ -42,9 +42,3 @@ function optionalCalleeThatIsFalsy(value: string | null, guard: ((input: unknown
 		return value?.length;
 	}
 }
-
-function guardWithoutDottedCallee(value: string | null, guards: Array<(input: unknown) => input is string>) {
-	if (guards[0](value)) {
-		return value?.length;
-	}
-}

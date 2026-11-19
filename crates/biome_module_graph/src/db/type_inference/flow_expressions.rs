@@ -57,7 +57,13 @@ impl<'db> ResolutionCtx<'db, '_> {
                 self.flow_operand(&parenthesized.expression().ok()?)
             }
             AnyFlowExpression::JsStaticMemberExpression(member) => {
-                let object = self.flow_operand(&member.object().ok()?);
+                let object_expression = member.object().ok()?;
+                let object = self.flow_operand(&object_expression);
+                // TypeScript types a property of `any` as `any` and never
+                // narrows it.
+                if object == Some(TypeData::AnyKeyword) {
+                    return object;
+                }
                 // The declared type of a property path is the type of this
                 // access, computed on the object's narrowed type when the
                 // object has one.
@@ -83,7 +89,13 @@ impl<'db> ResolutionCtx<'db, '_> {
                         }
                     }
                     None if self.js_info.flow.read(member.range()).is_some() => {
-                        self.raw_operand(&AnyJsExpression::from(member.clone()))?
+                        let declared = self.raw_operand(&AnyJsExpression::from(member.clone()))?;
+                        if declared == TypeData::AnyKeyword
+                            && self.raw_operand(&object_expression) == Some(TypeData::AnyKeyword)
+                        {
+                            return None;
+                        }
+                        declared
                     }
                     None => return None,
                 };

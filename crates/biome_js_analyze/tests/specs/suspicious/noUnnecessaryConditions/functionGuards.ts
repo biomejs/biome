@@ -115,3 +115,15 @@ function optionalGuard(value: string | null, guard: ((input: unknown) => input i
 function libraryGuard(value: string[] | null) {
 	if (Array.isArray(value)) return value?.length;
 }
+
+function elementAccessGuard(value: string | null, guards: Array<(input: unknown) => input is string>) {
+	if (guards[0](value)) {
+		return value?.length;
+	}
+}
+
+function keyedGuard(value: string | null, guards: { isString(input: unknown): input is string }) {
+	if (guards["isString"](value)) {
+		return value?.length;
+	}
+}

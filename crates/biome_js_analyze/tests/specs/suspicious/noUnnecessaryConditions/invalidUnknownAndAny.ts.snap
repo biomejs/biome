@@ -6,12 +6,16 @@ expression: invalidUnknownAndAny.ts
 ```ts
 // should generate diagnostics
 // A truthy or non-nullish `unknown` is `{}`, `typeof` with `"object"` narrows
-// `unknown` to `object | null`, and `any` narrows by `typeof` with a primitive
-// kind, `instanceof`, and type-guard functions, also when it comes from an
-// alias or from inference, so a check that the narrowed value can't fail is
-// reported, as in TypeScript.
+// `unknown` to `object | null`, the `else` branch of a type guard for `{}`
+// leaves `unknown` only `null | undefined`, and `any` narrows by `typeof` with
+// a primitive kind, `instanceof`, and type-guard functions, also when it comes
+// from an alias, from inference, or from a property of `any` that a
+// destructuring pattern takes, so a check that the narrowed value can't fail
+// is reported, as in TypeScript.
 
 type Loose = any;
+
+declare function isPresent(value: unknown): value is {};
 
 function notNullish(value: unknown) {
 	if (value != null) {
@@ -28,6 +32,15 @@ function truthy(value: unknown) {
 function objectNotNull(value: unknown) {
 	if (typeof value === "object" && value !== null) {
 		return value?.toString();
+	}
+}
+
+function notPresent(value: unknown) {
+	if (isPresent(value)) {
+		return value;
+	}
+	if (value) {
+		return value;
 	}
 }
 
@@ -62,29 +75,40 @@ function parsedInstance(text: string) {
 	}
 }
 
+class Handle {
+	close() {}
+}
+
+function destructuredInstance(value: any) {
+	const { handle } = value;
+	if (handle instanceof Handle) {
+		handle?.close();
+	}
+}
+
 ```
 
 # Diagnostics
 ```
-invalidUnknownAndAny.ts:12:10 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidUnknownAndAny.ts:16:10 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unnecessary nullish coalescing.
   
-    10 │ function notNullish(value: unknown) {
-    11 │ 	if (value != null) {
-  > 12 │ 		return value ?? 1;
+    14 │ function notNullish(value: unknown) {
+    15 │ 	if (value != null) {
+  > 16 │ 		return value ?? 1;
        │ 		       ^^^^^
-    13 │ 	}
-    14 │ }
+    17 │ 	}
+    18 │ }
   
   i Drop ?? and the fallback expression.
   
-    10 │ function notNullish(value: unknown) {
-    11 │ 	if (value != null) {
-  > 12 │ 		return value ?? 1;
+    14 │ function notNullish(value: unknown) {
+    15 │ 	if (value != null) {
+  > 16 │ 		return value ?? 1;
        │ 		             ^^
-    13 │ 	}
-    14 │ }
+    17 │ 	}
+    18 │ }
   
   i The left-hand side is guaranteed to be non-nullish, so the fallback is unreachable.
   
@@ -92,25 +116,25 @@ invalidUnknownAndAny.ts:12:10 lint/suspicious/noUnnecessaryConditions ━━━�
 ```
 
 ```
-invalidUnknownAndAny.ts:18:10 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidUnknownAndAny.ts:22:10 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unnecessary nullish coalescing.
   
-    16 │ function truthy(value: unknown) {
-    17 │ 	if (value) {
-  > 18 │ 		return value ?? 1;
+    20 │ function truthy(value: unknown) {
+    21 │ 	if (value) {
+  > 22 │ 		return value ?? 1;
        │ 		       ^^^^^
-    19 │ 	}
-    20 │ }
+    23 │ 	}
+    24 │ }
   
   i Drop ?? and the fallback expression.
   
-    16 │ function truthy(value: unknown) {
-    17 │ 	if (value) {
-  > 18 │ 		return value ?? 1;
+    20 │ function truthy(value: unknown) {
+    21 │ 	if (value) {
+  > 22 │ 		return value ?? 1;
        │ 		             ^^
-    19 │ 	}
-    20 │ }
+    23 │ 	}
+    24 │ }
   
   i The left-hand side is guaranteed to be non-nullish, so the fallback is unreachable.
   
@@ -118,25 +142,25 @@ invalidUnknownAndAny.ts:18:10 lint/suspicious/noUnnecessaryConditions ━━━�
 ```
 
 ```
-invalidUnknownAndAny.ts:24:10 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidUnknownAndAny.ts:28:10 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unnecessary optional chaining.
   
-    22 │ function objectNotNull(value: unknown) {
-    23 │ 	if (typeof value === "object" && value !== null) {
-  > 24 │ 		return value?.toString();
+    26 │ function objectNotNull(value: unknown) {
+    27 │ 	if (typeof value === "object" && value !== null) {
+  > 28 │ 		return value?.toString();
        │ 		       ^^^^^
-    25 │ 	}
-    26 │ }
+    29 │ 	}
+    30 │ }
   
   i Replace ?. with ..
   
-    22 │ function objectNotNull(value: unknown) {
-    23 │ 	if (typeof value === "object" && value !== null) {
-  > 24 │ 		return value?.toString();
+    26 │ function objectNotNull(value: unknown) {
+    27 │ 	if (typeof value === "object" && value !== null) {
+  > 28 │ 		return value?.toString();
        │ 		            ^^
-    25 │ 	}
-    26 │ }
+    29 │ 	}
+    30 │ }
   
   i The receiver is guaranteed to be non-nullish.
   
@@ -144,25 +168,44 @@ invalidUnknownAndAny.ts:24:10 lint/suspicious/noUnnecessaryConditions ━━━�
 ```
 
 ```
-invalidUnknownAndAny.ts:30:10 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidUnknownAndAny.ts:36:6 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition is always falsy.
+  
+    34 │ 		return value;
+    35 │ 	}
+  > 36 │ 	if (value) {
+       │ 	    ^^^^^
+    37 │ 		return value;
+    38 │ 	}
+  
+  i The value's type can never be truthy, so this check is redundant.
+  
+  i Remove the condition and the code it guards, or check the value you meant to test.
+  
+
+```
+
+```
+invalidUnknownAndAny.ts:43:10 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unnecessary nullish coalescing.
   
-    28 │ function anyString(value: any) {
-    29 │ 	if (typeof value === "string") {
-  > 30 │ 		return value ?? "";
+    41 │ function anyString(value: any) {
+    42 │ 	if (typeof value === "string") {
+  > 43 │ 		return value ?? "";
        │ 		       ^^^^^
-    31 │ 	}
-    32 │ }
+    44 │ 	}
+    45 │ }
   
   i Drop ?? and the fallback expression.
   
-    28 │ function anyString(value: any) {
-    29 │ 	if (typeof value === "string") {
-  > 30 │ 		return value ?? "";
+    41 │ function anyString(value: any) {
+    42 │ 	if (typeof value === "string") {
+  > 43 │ 		return value ?? "";
        │ 		             ^^
-    31 │ 	}
-    32 │ }
+    44 │ 	}
+    45 │ }
   
   i The left-hand side is guaranteed to be non-nullish, so the fallback is unreachable.
   
@@ -170,77 +213,25 @@ invalidUnknownAndAny.ts:30:10 lint/suspicious/noUnnecessaryConditions ━━━�
 ```
 
 ```
-invalidUnknownAndAny.ts:36:10 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidUnknownAndAny.ts:49:10 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unnecessary optional chaining.
   
-    34 │ function anyInstance(value: any) {
-    35 │ 	if (value instanceof Error) {
-  > 36 │ 		return value?.message;
+    47 │ function anyInstance(value: any) {
+    48 │ 	if (value instanceof Error) {
+  > 49 │ 		return value?.message;
        │ 		       ^^^^^
-    37 │ 	}
-    38 │ }
+    50 │ 	}
+    51 │ }
   
   i Replace ?. with ..
   
-    34 │ function anyInstance(value: any) {
-    35 │ 	if (value instanceof Error) {
-  > 36 │ 		return value?.message;
+    47 │ function anyInstance(value: any) {
+    48 │ 	if (value instanceof Error) {
+  > 49 │ 		return value?.message;
        │ 		            ^^
-    37 │ 	}
-    38 │ }
-  
-  i The receiver is guaranteed to be non-nullish.
-  
-
-```
-
-```
-invalidUnknownAndAny.ts:42:10 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Unnecessary optional chaining.
-  
-    40 │ function anyArray(value: any) {
-    41 │ 	if (Array.isArray(value)) {
-  > 42 │ 		return value?.length;
-       │ 		       ^^^^^
-    43 │ 	}
-    44 │ }
-  
-  i Replace ?. with ..
-  
-    40 │ function anyArray(value: any) {
-    41 │ 	if (Array.isArray(value)) {
-  > 42 │ 		return value?.length;
-       │ 		            ^^
-    43 │ 	}
-    44 │ }
-  
-  i The receiver is guaranteed to be non-nullish.
-  
-
-```
-
-```
-invalidUnknownAndAny.ts:48:10 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Unnecessary optional chaining.
-  
-    46 │ function aliasInstance(value: Loose) {
-    47 │ 	if (value instanceof Error) {
-  > 48 │ 		return value?.message;
-       │ 		       ^^^^^
-    49 │ 	}
-    50 │ }
-  
-  i Replace ?. with ..
-  
-    46 │ function aliasInstance(value: Loose) {
-    47 │ 	if (value instanceof Error) {
-  > 48 │ 		return value?.message;
-       │ 		            ^^
-    49 │ 	}
-    50 │ }
+    50 │ 	}
+    51 │ }
   
   i The receiver is guaranteed to be non-nullish.
   
@@ -252,21 +243,99 @@ invalidUnknownAndAny.ts:55:10 lint/suspicious/noUnnecessaryConditions ━━━�
 
   ! Unnecessary optional chaining.
   
-    53 │ 	const value = JSON.parse(text);
-    54 │ 	if (value instanceof Error) {
-  > 55 │ 		return value?.message;
+    53 │ function anyArray(value: any) {
+    54 │ 	if (Array.isArray(value)) {
+  > 55 │ 		return value?.length;
        │ 		       ^^^^^
     56 │ 	}
     57 │ }
   
   i Replace ?. with ..
   
-    53 │ 	const value = JSON.parse(text);
-    54 │ 	if (value instanceof Error) {
-  > 55 │ 		return value?.message;
+    53 │ function anyArray(value: any) {
+    54 │ 	if (Array.isArray(value)) {
+  > 55 │ 		return value?.length;
        │ 		            ^^
     56 │ 	}
     57 │ }
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+invalidUnknownAndAny.ts:61:10 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    59 │ function aliasInstance(value: Loose) {
+    60 │ 	if (value instanceof Error) {
+  > 61 │ 		return value?.message;
+       │ 		       ^^^^^
+    62 │ 	}
+    63 │ }
+  
+  i Replace ?. with ..
+  
+    59 │ function aliasInstance(value: Loose) {
+    60 │ 	if (value instanceof Error) {
+  > 61 │ 		return value?.message;
+       │ 		            ^^
+    62 │ 	}
+    63 │ }
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+invalidUnknownAndAny.ts:68:10 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    66 │ 	const value = JSON.parse(text);
+    67 │ 	if (value instanceof Error) {
+  > 68 │ 		return value?.message;
+       │ 		       ^^^^^
+    69 │ 	}
+    70 │ }
+  
+  i Replace ?. with ..
+  
+    66 │ 	const value = JSON.parse(text);
+    67 │ 	if (value instanceof Error) {
+  > 68 │ 		return value?.message;
+       │ 		            ^^
+    69 │ 	}
+    70 │ }
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+invalidUnknownAndAny.ts:79:3 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    77 │ 	const { handle } = value;
+    78 │ 	if (handle instanceof Handle) {
+  > 79 │ 		handle?.close();
+       │ 		^^^^^^
+    80 │ 	}
+    81 │ }
+  
+  i Replace ?. with ..
+  
+    77 │ 	const { handle } = value;
+    78 │ 	if (handle instanceof Handle) {
+  > 79 │ 		handle?.close();
+       │ 		      ^^
+    80 │ 	}
+    81 │ }
   
   i The receiver is guaranteed to be non-nullish.
   

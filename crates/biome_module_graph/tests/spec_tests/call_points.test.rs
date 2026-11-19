@@ -328,7 +328,8 @@ fn this_type_predicates_narrow_their_receiver() {
 // TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type,
 // except where a comment says otherwise. A callee of `any`, a union of
 // callees, a spread argument, and `.call` narrow nothing, and an optional call
-// narrows only where it is truthy.
+// narrows only where it is truthy. An element access is a callee like a
+// property access.
 #[test]
 fn calls_without_a_single_signature_or_a_dotted_callee_keep_their_types() {
     assert_reads(
@@ -355,11 +356,9 @@ fn calls_without_a_single_signature_or_a_dotted_callee_keep_their_types() {
         function q24(x: string | number) { if (c.isS.call(c, x)) /*L41_58*/x; } // L41
         "#,
         &[
-            // TypeScript gives `string`. Biome narrows nothing, because an
-            // element access is no dotted name.
-            ("L25_53", "x", &["number", "string"]),
-            // TypeScript gives `string`. Biome narrows nothing, because a
-            // call result is no dotted name.
+            ("L25_53", "x", &["string"]),
+            // TypeScript gives `string`. Biome narrows nothing, because the
+            // callee starts at a call result.
             ("L26_90", "x", &["number", "string"]),
             ("L30_81", "x", &["string"]),
             ("L30_103", "x", &["number", "string"]),
@@ -1201,6 +1200,43 @@ fn type_guard_functions_narrow_no_receiver_of_an_optional_chain() {
                 ],
             ),
             ("property", "x?.y", &["string"]),
+        ],
+    );
+}
+
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type. A
+// callee of a call in a condition can read its function through element
+// accesses. A `this is T` signature narrows the object of a property access,
+// as in `o["n"].isLeaf()`, but not of an element access, as in
+// `n["isLeaf"]()`.
+#[test]
+fn type_guard_calls_narrow_through_element_accesses() {
+    assert_reads(
+        r#"
+        type Guard = (v: unknown) => v is string;
+        declare const list: ((v: unknown) => v is string)[];
+        declare const i: number;
+        declare const opt: { isS(v: unknown): v is string } | undefined;
+        declare const rec: Record<string, (v: unknown) => v is string>;
+        class TreeNode { isLeaf(): this is LeafNode { return false; } }
+        class LeafNode extends TreeNode { value = 1; }
+        function e2(x: string | number, guards: [Guard]) { if (guards[0](x)) /*tuple*/x; else /*tupleElse*/x; }
+        function e4(x: string | number) { if (list[i](x)) /*array*/x; }
+        function e5(x: string | number) { if (opt?.["isS"](x)) /*optional*/x; }
+        function e7(x: string | number) { if (rec["k"](x)) /*record*/x; }
+        function e8(n: TreeNode) { if (n["isLeaf"]()) /*elementReceiver*/n; }
+        function e9(o: { n: TreeNode }) { if (o["n"].isLeaf()) /*receiver*/o.n; }
+        function e12(x: string | number, guards: [Guard]) { if (!(guards)[0](x)) /*negated*/x; }
+        "#,
+        &[
+            ("tuple", "x", &["string"]),
+            ("tupleElse", "x", &["number"]),
+            ("array", "x", &["string"]),
+            ("optional", "x", &["string"]),
+            ("record", "x", &["string"]),
+            ("elementReceiver", "n", &["instanceof TreeNode"]),
+            ("receiver", "o.n", &["instanceof LeafNode"]),
+            ("negated", "x", &["number"]),
         ],
     );
 }

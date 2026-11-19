@@ -22,3 +22,11 @@ function narrowedAfterReturn(value: string | null) {
 function filteredElements(values: (string | null)[]) {
 	return values.filter((value) => value !== null).map((value) => value ?? "");
 }
+
+const isPresentOrDefault = (value: string | null = null) => value !== null;
+
+function defaultedParameter(value: string | null) {
+	if (isPresentOrDefault(value)) {
+		return value ?? "";
+	}
+}

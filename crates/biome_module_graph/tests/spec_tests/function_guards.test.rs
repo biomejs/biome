@@ -766,26 +766,28 @@ fn long_signatures_names_and_parenthesized_callees_narrow() {
 }
 
 // TypeScript 7.0.2 (`tsc --strict`) gives every `then` read the target and
-// every `else` read `unknown`, except that a target of `{}` gives
-// `null | undefined` and `void` gives `{} | null` in the `else` branch, where
-// Biome keeps `unknown`.
+// every `else` read the type paired with the target. The `else` branch tests
+// `unknown` as `{} | null | undefined` and removes each member that the target
+// keeps as it is.
 #[test]
 fn predicate_targets_narrow_unknown_to_the_target() {
-    for target in [
-        "{}",
-        "{ name: string }",
-        "object",
-        "string | number",
-        "string & {}",
-        "Promise<void>",
-        "string[]",
-        "void",
+    for (target, otherwise) in [
+        ("{}", "null | undefined"),
+        ("{ name: string }", "unknown"),
+        ("object", "unknown"),
+        ("string | number", "unknown"),
+        ("string & {}", "unknown"),
+        ("Promise<void>", "unknown"),
+        ("string[]", "unknown"),
+        ("void", "{} | null"),
     ] {
         let source = format!(
             r#"
                 declare function guard(input: unknown): input is {target};
                 declare const expected: {target};
+                declare const otherwise: {otherwise};
                 /*expected*/expected;
+                /*otherwise*/otherwise;
                 function inspect(value: unknown) {{
                     if (guard(value)) {{ /*then*/value; }} else {{ /*else*/value; }}
                 }}
@@ -798,9 +800,10 @@ fn predicate_targets_narrow_unknown_to_the_target() {
             expected,
             "{target}: then"
         );
+        let otherwise = normalized_type_at(&db, module, &source, "otherwise", "otherwise");
         assert_eq!(
             normalized_type_at(&db, module, &source, "else", "value"),
-            InferredTypeData::UnknownKeyword,
+            otherwise,
             "{target}: else"
         );
         assert_no_whole_module_inference(&db, &db.take_salsa_events());
