@@ -4268,6 +4268,11 @@ export interface Nursery {
 	 */
 	useTanstackQueryInfiniteQueryPropertyOrder?: UseTanstackQueryInfiniteQueryPropertyOrderConfiguration;
 	/**
+	 * Require TanStack Query options to be created with queryOptions().
+	 * See https://biomejs.dev/linter/rules/use-tanstack-query-query-options
+	 */
+	useTanstackQueryQueryOptions?: UseTanstackQueryQueryOptionsConfiguration;
+	/**
 	 * Require the TanStack Query QueryClient to be created once, not on every render.
 	 * See https://biomejs.dev/linter/rules/use-tanstack-query-stable-query-client
 	 */
@@ -7460,6 +7465,9 @@ export type UseTailwindVariablesShorthandConfiguration =
 export type UseTanstackQueryInfiniteQueryPropertyOrderConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseTanstackQueryInfiniteQueryPropertyOrderOptions;
+export type UseTanstackQueryQueryOptionsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseTanstackQueryQueryOptionsOptions;
 export type UseTanstackQueryStableQueryClientConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseTanstackQueryStableQueryClientOptions;
@@ -11081,6 +11089,10 @@ export interface RuleWithUseTanstackQueryInfiniteQueryPropertyOrderOptions {
 	level: RulePlainConfiguration;
 	options?: UseTanstackQueryInfiniteQueryPropertyOrderOptions;
 }
+export interface RuleWithUseTanstackQueryQueryOptionsOptions {
+	level: RulePlainConfiguration;
+	options?: UseTanstackQueryQueryOptionsOptions;
+}
 export interface RuleWithUseTanstackQueryStableQueryClientOptions {
 	/**
 	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
@@ -14116,6 +14128,7 @@ export type UseTailwindSortedClassesOptions = {};
 export type UseTailwindStaticClassStringsOptions = {};
 export type UseTailwindVariablesShorthandOptions = {};
 export type UseTanstackQueryInfiniteQueryPropertyOrderOptions = {};
+export type UseTanstackQueryQueryOptionsOptions = {};
 export type UseTanstackQueryStableQueryClientOptions = {};
 export type UseTopLevelHeadingOptions = {};
 export type UseUnaryMinusOptions = {};
@@ -16079,6 +16092,7 @@ export type Category =
 	| "lint/nursery/useTailwindStaticClassStrings"
 	| "lint/nursery/useTailwindVariablesShorthand"
 	| "lint/nursery/useTanstackQueryInfiniteQueryPropertyOrder"
+	| "lint/nursery/useTanstackQueryQueryOptions"
 	| "lint/nursery/useTanstackQueryStableQueryClient"
 	| "lint/nursery/useTopLevelHeading"
 	| "lint/nursery/useUnaryMinus"

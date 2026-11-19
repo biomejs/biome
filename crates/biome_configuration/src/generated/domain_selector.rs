@@ -175,6 +175,7 @@ static TANSTACKQUERY_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new
         RuleFilter::Rule("nursery", "noTanstackQueryRestDestructuring"),
         RuleFilter::Rule("nursery", "noTanstackQueryVoidQueryFn"),
         RuleFilter::Rule("nursery", "useTanstackQueryInfiniteQueryPropertyOrder"),
+        RuleFilter::Rule("nursery", "useTanstackQueryQueryOptions"),
         RuleFilter::Rule("nursery", "useTanstackQueryStableQueryClient"),
     ]
 });
