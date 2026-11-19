@@ -150,6 +150,7 @@ is exhaustive when its cases cover every member of the constraint.
 | A `switch` case | `switch (s.kind) { case "c": s }` | `Circle` |
 | A `switch` case on `x!` | `x: "a" \| "b" \| "c"; switch (x!) { case "a": x }` | `"a"` |
 | `default` | `switch (s.kind) { case "c": break; default: s }` | `Square` |
+| `default` after cases that cover a discriminant together | `interface AB { kind: "a" \| "b"; x: 1 }; interface C { kind: "c"; y: 2 }; s: AB \| C; switch (s.kind) { case "a": case "b": break; default: s }` | `C` |
 | `switch (true)` | `x: string \| number \| null; switch (true) { case typeof x === "string": break; case x === null: break; default: x }` | `number` |
 | An exhaustive `switch` | `x: boolean \| null \| undefined; y: string \| null; switch (x) { case true: case false: case null: case undefined: if (y === null) return; } y` | `string` |
 | An assignment | `x: string \| number; [x] = ["a"]; x` | `string` |
@@ -398,7 +399,6 @@ These rows use `type S = { kind: "c"; v: number } | { kind: "s"; v: string }`.
 | --- | --- | --- | --- |
 | `type Result<T> = { ok: true; value: T } \| { ok: false; error: string }; r: Result<number>; if (r.ok) r` | `{ ok: true; value: number }` | `Result<number>` | A rule can miss a report on `r`. |
 | `o: { k: { a: 1 }; x: 1 } \| { k: "x"; y: 2 }; if (o.k === "x") o` | `{ k: "x"; y: 2 }` | both members | A rule can miss a report on `o`. |
-| `interface AB { kind: "a" \| "b"; x: 1 }; interface C { kind: "c"; y: 2 }; s: AB \| C; switch (s.kind) { case "a": case "b": break; default: s }` | `C` | `AB \| C` | A rule can miss a report on `s` in `default`. |
 | `kindC(): "c"; if (s.kind === kindC()) s` | `Circle` | `Circle \| Square` | A rule can miss a report on `s`. |
 
 ### Aliased conditions

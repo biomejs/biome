@@ -70,3 +70,16 @@ function afterExhaustiveSwitchOnTypeParameter<K extends "a" | "b">(
 	}
 	return label?.length;
 }
+
+type Pending = { state: "idle" | "loading"; data: null };
+type Done = { state: "done"; data: string };
+
+function defaultAfterUnionDiscriminant(result: Pending | Done) {
+	switch (result.state) {
+		case "idle":
+		case "loading":
+			break;
+		default:
+			return result.data?.length;
+	}
+}
