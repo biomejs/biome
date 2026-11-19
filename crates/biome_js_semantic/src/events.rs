@@ -3,14 +3,15 @@
 use JsSyntaxKind::*;
 use biome_js_syntax::binding_ext::{AnyJsBindingDeclaration, AnyJsIdentifierBinding};
 use biome_js_syntax::{
-    AnyJsIdentifierUsage, JsDirective, JsLanguage, JsSyntaxKind, JsSyntaxNode, TextRange,
+    AnyJsIdentifierReference, JsDirective, JsLanguage, JsSyntaxKind, JsSyntaxNode, TextRange,
     TsTypeParameterName, inner_string_text,
 };
 use biome_js_syntax::{AnyJsImportClause, AnyJsNamedImportSpecifier, AnyTsType};
 
 use crate::JsDeclarationKind;
-use biome_rowan::TextSize;
-use biome_rowan::{AstNode, SyntaxNodeOptionExt, TokenText, syntax::Preorder};
+use biome_rowan::{
+    AstNode, RawSyntaxKind, SyntaxKindSet, SyntaxNodeOptionExt, Text, TextSize, syntax::Preorder,
+};
 use rustc_hash::FxHashMap;
 use std::collections::VecDeque;
 use std::mem;
@@ -133,6 +134,7 @@ impl SemanticEvent {
 /// use biome_js_parser::*;
 /// use biome_js_syntax::*;
 /// use biome_js_semantic::*;
+/// use biome_languages::JsFileSource;
 /// let tree = parse("let a = 1", JsFileSource::js_script(), JsParserOptions::default());
 /// let mut extractor = SemanticEventExtractor::default();
 /// for e in tree.syntax().preorder() {
@@ -172,8 +174,8 @@ pub struct SemanticEventExtractor {
 /// Allocating two bindings allows to for properly detecting type and value shadowing in inner scopes.
 #[derive(Debug, Hash, Eq, PartialEq, Clone)]
 enum BindingName {
-    Type(TokenText),
-    Value(TokenText),
+    Type(Text),
+    Value(Text),
 }
 impl BindingName {
     /// Turn a type into a value and a value into a type.
@@ -301,12 +303,90 @@ struct ScopeOptions {
     implies_strict_mode: bool,
 }
 
+/// Returns the set of `kinds`, for building sets of [JsSyntaxKind] in constants.
+pub(crate) const fn kind_set(kinds: &[JsSyntaxKind]) -> SyntaxKindSet<JsLanguage> {
+    let mut set = SyntaxKindSet::EMPTY;
+    let mut index = 0;
+    while index < kinds.len() {
+        set = set.union(SyntaxKindSet::from_raw(RawSyntaxKind(kinds[index] as u16)));
+        index += 1;
+    }
+    set
+}
+
 impl SemanticEventExtractor {
+    /// The kinds of the nodes that [Self::enter] and [Self::leave] read.
+    ///
+    /// Passing only the events of these nodes, such as the ones of
+    /// [biome_rowan::SyntaxNode::preorder_of_kinds], extracts the same events
+    /// as passing the events of every node.
+    pub const VISITED_KINDS: SyntaxKindSet<JsLanguage> = kind_set(&[
+        TS_DECLARE_STATEMENT,
+        TS_EXPORT_DECLARE_CLAUSE,
+        JS_IDENTIFIER_BINDING,
+        TS_IDENTIFIER_BINDING,
+        TS_TYPE_PARAMETER_NAME,
+        TS_LITERAL_ENUM_MEMBER_NAME,
+        JS_REFERENCE_IDENTIFIER,
+        JSX_REFERENCE_IDENTIFIER,
+        JS_IDENTIFIER_ASSIGNMENT,
+        JS_MODULE,
+        TS_DECLARATION_MODULE,
+        JS_SCRIPT,
+        JS_EXPRESSION_TEMPLATE_ROOT,
+        JS_SVELTE_DECLARATION_ROOT,
+        JS_SVELTE_LEGACY_CONST_ROOT,
+        JS_SVELTE_SNIPPET_ROOT,
+        JS_VUE_SLOT_PROPS_ROOT,
+        JS_VUE_GENERIC_ROOT,
+        JS_DIRECTIVE,
+        JS_CONSTRUCTOR_CLASS_MEMBER,
+        JS_METHOD_CLASS_MEMBER,
+        JS_GETTER_CLASS_MEMBER,
+        JS_SETTER_CLASS_MEMBER,
+        JS_FUNCTION_DECLARATION,
+        JS_FUNCTION_EXPRESSION,
+        JS_ARROW_FUNCTION_EXPRESSION,
+        JS_METHOD_OBJECT_MEMBER,
+        JS_GETTER_OBJECT_MEMBER,
+        JS_SETTER_OBJECT_MEMBER,
+        JS_FUNCTION_EXPORT_DEFAULT_DECLARATION,
+        JS_FUNCTION_BODY,
+        JS_CLASS_DECLARATION,
+        JS_CLASS_EXPORT_DEFAULT_DECLARATION,
+        JS_CLASS_EXPRESSION,
+        JS_STATIC_INITIALIZATION_BLOCK_CLASS_MEMBER,
+        TS_MODULE_DECLARATION,
+        TS_ENUM_DECLARATION,
+        TS_EXTERNAL_MODULE_DECLARATION,
+        TS_INTERFACE_DECLARATION,
+        TS_TYPE_ALIAS_DECLARATION,
+        TS_DECLARE_FUNCTION_DECLARATION,
+        TS_DECLARE_FUNCTION_EXPORT_DEFAULT_DECLARATION,
+        TS_CALL_SIGNATURE_TYPE_MEMBER,
+        TS_CONSTRUCT_SIGNATURE_TYPE_MEMBER,
+        TS_CONSTRUCTOR_SIGNATURE_CLASS_MEMBER,
+        TS_METHOD_SIGNATURE_CLASS_MEMBER,
+        TS_METHOD_SIGNATURE_TYPE_MEMBER,
+        TS_GETTER_SIGNATURE_CLASS_MEMBER,
+        TS_SETTER_SIGNATURE_CLASS_MEMBER,
+        TS_INDEX_SIGNATURE_CLASS_MEMBER,
+        TS_INDEX_SIGNATURE_TYPE_MEMBER,
+        JS_BLOCK_STATEMENT,
+        JS_FOR_STATEMENT,
+        JS_FOR_OF_STATEMENT,
+        JS_FOR_IN_STATEMENT,
+        JS_SWITCH_STATEMENT,
+        JS_CATCH_CLAUSE,
+    ])
+    .union(AnyTsType::KIND_SET);
+
     /// See [SemanticEvent] for a more detailed description of which events [JsSyntaxNode] generates.
     #[inline]
     pub fn enter(&mut self, node: &JsSyntaxNode) {
         // IMPORTANT: If you push a scope for a given node type, don't forget to
         // update `Self::leave`. You should also edit [SemanticModelBuilder::push_node].
+        // If you read a new node kind, add it to [Self::VISITED_KINDS].
         match node.kind() {
             TS_DECLARE_STATEMENT | TS_EXPORT_DECLARE_CLAUSE => {
                 self.is_ambient_context = true;
@@ -319,7 +399,9 @@ impl SemanticEventExtractor {
             }
 
             JS_REFERENCE_IDENTIFIER | JSX_REFERENCE_IDENTIFIER | JS_IDENTIFIER_ASSIGNMENT => {
-                self.enter_identifier_usage(AnyJsIdentifierUsage::unwrap_cast(node.clone()));
+                self.enter_identifier_reference(AnyJsIdentifierReference::unwrap_cast(
+                    node.clone(),
+                ));
             }
 
             JS_MODULE => {
@@ -356,7 +438,12 @@ impl SemanticEventExtractor {
                 );
             }
 
-            JS_EXPRESSION_TEMPLATE_ROOT | JS_SVELTE_SNIPPET_ROOT => {
+            JS_EXPRESSION_TEMPLATE_ROOT
+            | JS_SVELTE_DECLARATION_ROOT
+            | JS_SVELTE_LEGACY_CONST_ROOT
+            | JS_SVELTE_SNIPPET_ROOT
+            | JS_VUE_SLOT_PROPS_ROOT
+            | JS_VUE_GENERIC_ROOT => {
                 self.push_scope(
                     node.text_trimmed_range(),
                     ScopeHoisting::DontHoistDeclarationsToParent,
@@ -539,7 +626,7 @@ impl SemanticEventExtractor {
         let mut hoisted_scope_id = None;
         let mut declaration_kind = JsDeclarationKind::Unknown;
         let is_exported = if let Ok(name_token) = node.name_token() {
-            let name = name_token.token_text_trimmed();
+            let name = crate::identifier_name(name_token.token_text_trimmed());
             if let Some(declaration) = node.declaration() {
                 let info = BindingInfo::new(
                     name_token.text_trimmed_range().start(),
@@ -575,7 +662,7 @@ impl SemanticEventExtractor {
                         self.push_binding(hoisted_scope_id, BindingName::Value(name), info);
                     }
                     AnyJsBindingDeclaration::JsFunctionDeclaration(_) => {
-                        declaration_kind = JsDeclarationKind::HoistedValue;
+                        declaration_kind = JsDeclarationKind::Function;
                         let is_in_strict_mode = self
                             .scopes
                             .last()
@@ -587,8 +674,12 @@ impl SemanticEventExtractor {
                         };
                         self.push_binding(hoisted_scope_id, BindingName::Value(name), info);
                     }
-                    AnyJsBindingDeclaration::TsDeclareFunctionDeclaration(_)
-                    | AnyJsBindingDeclaration::TsDeclareFunctionExportDefaultDeclaration(_)
+                    AnyJsBindingDeclaration::TsDeclareFunctionDeclaration(_) => {
+                        declaration_kind = JsDeclarationKind::Function;
+                        hoisted_scope_id = self.scope_index_to_hoist_declarations(1);
+                        self.push_binding(hoisted_scope_id, BindingName::Value(name), info);
+                    }
+                    AnyJsBindingDeclaration::TsDeclareFunctionExportDefaultDeclaration(_)
                     | AnyJsBindingDeclaration::JsFunctionExportDefaultDeclaration(_) => {
                         declaration_kind = JsDeclarationKind::HoistedValue;
                         hoisted_scope_id = self.scope_index_to_hoist_declarations(1);
@@ -596,8 +687,11 @@ impl SemanticEventExtractor {
                     }
                     AnyJsBindingDeclaration::TsEnumMember(_) => {
                         declaration_kind = JsDeclarationKind::Enum;
-                        // Handle quoted names.
-                        let name = inner_string_text(&name_token);
+                        let name = if name_token.kind() == JS_STRING_LITERAL {
+                            inner_string_text(&name_token).into()
+                        } else {
+                            name
+                        };
                         self.push_binding(None, BindingName::Value(name.clone()), info.clone());
                         self.push_binding(None, BindingName::Type(name), info);
                     }
@@ -747,7 +841,7 @@ impl SemanticEventExtractor {
                         declaration_kind = if imports_only_types {
                             JsDeclarationKind::ImportType
                         } else {
-                            JsDeclarationKind::from_node(node.syntax())
+                            JsDeclarationKind::Import
                         };
                         if !imports_only_types {
                             self.push_binding(None, BindingName::Value(name.clone()), info.clone());
@@ -802,14 +896,14 @@ impl SemanticEventExtractor {
         }
     }
 
-    fn enter_identifier_usage(&mut self, node: AnyJsIdentifierUsage) {
+    fn enter_identifier_reference(&mut self, node: AnyJsIdentifierReference) {
         let range = node.syntax().text_trimmed_range();
         let Ok(name_token) = node.value_token() else {
             return;
         };
-        let name = name_token.token_text_trimmed();
+        let name = crate::identifier_name(name_token.token_text_trimmed());
         match node {
-            AnyJsIdentifierUsage::JsReferenceIdentifier(node) => {
+            AnyJsIdentifierReference::JsReferenceIdentifier(node) => {
                 let Some(parent) = node.syntax().parent() else {
                     self.push_reference(
                         BindingName::Value(name),
@@ -850,6 +944,20 @@ impl SemanticEventExtractor {
                                 self.push_reference(
                                     BindingName::Type(name),
                                     Reference::Export(range),
+                                );
+                            }
+                            JS_COMPUTED_MEMBER_NAME
+                                if matches!(
+                                    grand_parent.parent().kind(),
+                                    Some(
+                                        TS_PROPERTY_SIGNATURE_CLASS_MEMBER
+                                            | TS_INITIALIZED_PROPERTY_SIGNATURE_CLASS_MEMBER
+                                    )
+                                ) =>
+                            {
+                                self.push_reference(
+                                    BindingName::Value(name),
+                                    Reference::AmbientRead(range),
                                 );
                             }
                             _ => {
@@ -908,14 +1016,14 @@ impl SemanticEventExtractor {
                     }
                 }
             }
-            AnyJsIdentifierUsage::JsxReferenceIdentifier(_) => {
+            AnyJsIdentifierReference::JsxReferenceIdentifier(_) => {
                 if name.text() == "this" {
                     // Ignore `this` in JSX. e.g. `<this.foo />`.
                     return;
                 }
                 self.push_reference(BindingName::Value(name), Reference::Read(range));
             }
-            AnyJsIdentifierUsage::JsIdentifierAssignment(_) => {
+            AnyJsIdentifierReference::JsIdentifierAssignment(_) => {
                 self.push_reference(BindingName::Value(name), Reference::Write(range));
             }
         }
@@ -934,7 +1042,11 @@ impl SemanticEventExtractor {
             JS_MODULE
             | JS_SCRIPT
             | JS_EXPRESSION_TEMPLATE_ROOT
+            | JS_SVELTE_DECLARATION_ROOT
+            | JS_SVELTE_LEGACY_CONST_ROOT
             | JS_SVELTE_SNIPPET_ROOT
+            | JS_VUE_SLOT_PROPS_ROOT
+            | JS_VUE_GENERIC_ROOT
             | TS_DECLARATION_MODULE
             | JS_FUNCTION_DECLARATION
             | JS_FUNCTION_EXPORT_DEFAULT_DECLARATION
@@ -1035,18 +1147,14 @@ impl SemanticEventExtractor {
             return None;
         }
         let store_name = self.flavor.store_reference_name(name.text())?;
-        let store_name_start = name.len() - TextSize::from(u32::try_from(store_name.len()).ok()?);
-        Some(BindingName::Value(
-            name.clone()
-                .slice(TextRange::new(store_name_start, name.len())),
-        ))
+        Some(BindingName::Value(store_name.to_string().into()))
     }
 
     fn push_infers_in_scope(&mut self) {
         let infers = mem::take(&mut self.infers);
         for infer in infers {
             if let Ok(name_token) = infer.ident_token() {
-                let name = name_token.token_text_trimmed();
+                let name = crate::identifier_name(name_token.token_text_trimmed());
                 let name_range = name_token.text_trimmed_range();
                 let binding_info =
                     BindingInfo::new(name_range.start(), JsSyntaxKind::TS_INFER_TYPE);
@@ -1441,6 +1549,7 @@ impl Iterator for SemanticEventIterator {
 /// use biome_js_parser::*;
 /// use biome_js_syntax::*;
 /// use biome_js_semantic::*;
+/// use biome_languages::JsFileSource;
 /// let tree = parse("let a = 1", JsFileSource::js_script(), JsParserOptions::default());
 /// for e in semantic_events(tree.syntax()) {
 ///     dbg!(e);

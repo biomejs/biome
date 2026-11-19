@@ -2,10 +2,14 @@
 //!
 mod ast;
 mod css_kinds_src;
+mod diagnostic_categories;
 mod formatter;
 mod generate_analyzer;
 pub mod generate_analyzer_rule_options;
+#[cfg(feature = "global_types")]
+pub mod generate_global_types;
 mod generate_grit_mappings;
+mod generate_js_plugin_ast;
 mod generate_macros;
 pub mod generate_new_analyzer_rule;
 mod generate_node_factory;
@@ -29,11 +33,12 @@ mod html_kinds_src;
 mod kind_src;
 mod language_kind;
 pub mod move_rule;
+pub mod promote_rules;
 mod termcolorful;
 mod unicode;
 
 use bpaf::Bpaf;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 use crate::generate_new_analyzer_rule::Category;
 use xtask_glue::{Mode, Result, glue::fs2};
@@ -105,12 +110,25 @@ pub enum TaskCommand {
     Configuration,
     #[bpaf(command)]
     MigrateEslint,
+    #[bpaf(command)]
+    MigrateStylelint,
+    /// Prints the metadata of every rule, and the upstream rules they reference, as JSON
+    #[bpaf(command, long("rules-metadata"))]
+    RulesMetadata {
+        /// Write the JSON to this file instead of stdout. Relative paths are resolved against the repository root.
+        #[bpaf(long("out"), argument("PATH"))]
+        out: Option<std::path::PathBuf>,
+    },
     /// Generate the JSON schema for the Biome configuration file format
     #[bpaf(command)]
     Schema,
     /// Generate TypeScript definitions for the JavaScript bindings to the Workspace API
     #[bpaf(command)]
     Bindings,
+    /// Generates the built-in global type declarations from the TypeScript standard library.
+    #[cfg(feature = "global_types")]
+    #[bpaf(command, long("global-types"))]
+    GlobalTypes,
     /// It updates the file that contains licenses
     #[bpaf(command)]
     License,
@@ -123,6 +141,12 @@ pub enum TaskCommand {
     /// Generates Baseline data for CSS features from web-features
     #[bpaf(command, long("css-baseline"))]
     CssBaseline,
+    /// Generates CSS keywords from @webref/css
+    #[bpaf(command, long("css-keywords"))]
+    CssKeywords,
+    /// Generates e18e module replacement data
+    #[bpaf(command, long("module-replacements"))]
+    ModuleReplacements,
     /// Creates a new lint rule
     #[bpaf(command, long("new-lintrule"))]
     NewRule {
@@ -147,6 +171,13 @@ pub enum TaskCommand {
         /// Name of the rule
         #[bpaf(long("group"), argument("STRING"))]
         group: String,
+    },
+    /// Promotes nursery lint rules described by a JSON manifest
+    #[bpaf(command, long("promote-rules"))]
+    PromoteRules {
+        /// Path to the promotion manifest
+        #[bpaf(long("manifest"), argument("PATH"))]
+        manifest: PathBuf,
     },
     /// Runs ALL the codegen
     #[bpaf(command)]

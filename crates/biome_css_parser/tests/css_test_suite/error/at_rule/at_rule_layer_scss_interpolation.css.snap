@@ -1,0 +1,230 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+@layer #{$layers};
+
+@layer reset, theme-#{$name};
+
+@layer components {}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        CssAtRule {
+            at_token: AT@0..1 "@" [] [],
+            rule: CssLayerAtRule {
+                layer_token: LAYER_KW@1..7 "layer" [] [Whitespace(" ")],
+                layer: CssBogusLayer {
+                    items: [
+                        CssBogus {
+                            items: [
+                                CssBogus {
+                                    items: [
+                                        CssBogusSupportsCondition {
+                                            items: [
+                                                ScssInterpolatedIdentifierPartList [
+                                                    ScssInterpolation {
+                                                        hash_token: HASH@7..8 "#" [] [],
+                                                        l_curly_token: L_CURLY@8..9 "{" [] [],
+                                                        value: ScssExpression {
+                                                            items: ScssExpressionItemList [
+                                                                ScssVariable {
+                                                                    dollar_token: DOLLAR@9..10 "$" [] [],
+                                                                    name: CssIdentifier {
+                                                                        value_token: IDENT@10..16 "layers" [] [],
+                                                                    },
+                                                                },
+                                                            ],
+                                                        },
+                                                        r_curly_token: R_CURLY@16..17 "}" [] [],
+                                                    },
+                                                ],
+                                            ],
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                        SEMICOLON@17..18 ";" [] [],
+                    ],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@18..21 "@" [Newline("\n"), Newline("\n")] [],
+            rule: CssLayerAtRule {
+                layer_token: LAYER_KW@21..27 "layer" [] [Whitespace(" ")],
+                layer: CssBogusLayer {
+                    items: [
+                        CssBogus {
+                            items: [
+                                CssLayerNameList [
+                                    CssIdentifier {
+                                        value_token: IDENT@27..32 "reset" [] [],
+                                    },
+                                ],
+                                COMMA@32..34 "," [] [Whitespace(" ")],
+                                CssBogus {
+                                    items: [
+                                        CssBogusSupportsCondition {
+                                            items: [
+                                                ScssInterpolatedIdentifierPartList [
+                                                    CssIdentifier {
+                                                        value_token: IDENT@34..40 "theme-" [] [],
+                                                    },
+                                                    ScssInterpolation {
+                                                        hash_token: HASH@40..41 "#" [] [],
+                                                        l_curly_token: L_CURLY@41..42 "{" [] [],
+                                                        value: ScssExpression {
+                                                            items: ScssExpressionItemList [
+                                                                ScssVariable {
+                                                                    dollar_token: DOLLAR@42..43 "$" [] [],
+                                                                    name: CssIdentifier {
+                                                                        value_token: IDENT@43..47 "name" [] [],
+                                                                    },
+                                                                },
+                                                            ],
+                                                        },
+                                                        r_curly_token: R_CURLY@47..48 "}" [] [],
+                                                    },
+                                                ],
+                                            ],
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                        SEMICOLON@48..49 ";" [] [],
+                    ],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@49..52 "@" [Newline("\n"), Newline("\n")] [],
+            rule: CssLayerAtRule {
+                layer_token: LAYER_KW@52..58 "layer" [] [Whitespace(" ")],
+                layer: CssLayerDeclaration {
+                    references: CssLayerReferenceList [
+                        CssLayerNameList [
+                            CssIdentifier {
+                                value_token: IDENT@58..69 "components" [] [Whitespace(" ")],
+                            },
+                        ],
+                    ],
+                    block: CssRuleBlock {
+                        l_curly_token: L_CURLY@69..70 "{" [] [],
+                        rules: CssRuleList [],
+                        r_curly_token: R_CURLY@70..71 "}" [] [],
+                    },
+                },
+            },
+        },
+    ],
+    eof_token: EOF@71..72 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..72
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..71
+    0: CSS_AT_RULE@0..18
+      0: AT@0..1 "@" [] []
+      1: CSS_LAYER_AT_RULE@1..18
+        0: LAYER_KW@1..7 "layer" [] [Whitespace(" ")]
+        1: CSS_BOGUS_LAYER@7..18
+          0: CSS_BOGUS@7..17
+            0: CSS_BOGUS@7..17
+              0: CSS_BOGUS_SUPPORTS_CONDITION@7..17
+                0: SCSS_INTERPOLATED_IDENTIFIER_PART_LIST@7..17
+                  0: SCSS_INTERPOLATION@7..17
+                    0: HASH@7..8 "#" [] []
+                    1: L_CURLY@8..9 "{" [] []
+                    2: SCSS_EXPRESSION@9..16
+                      0: SCSS_EXPRESSION_ITEM_LIST@9..16
+                        0: SCSS_VARIABLE@9..16
+                          0: DOLLAR@9..10 "$" [] []
+                          1: CSS_IDENTIFIER@10..16
+                            0: IDENT@10..16 "layers" [] []
+                    3: R_CURLY@16..17 "}" [] []
+          1: SEMICOLON@17..18 ";" [] []
+    1: CSS_AT_RULE@18..49
+      0: AT@18..21 "@" [Newline("\n"), Newline("\n")] []
+      1: CSS_LAYER_AT_RULE@21..49
+        0: LAYER_KW@21..27 "layer" [] [Whitespace(" ")]
+        1: CSS_BOGUS_LAYER@27..49
+          0: CSS_BOGUS@27..48
+            0: CSS_LAYER_NAME_LIST@27..32
+              0: CSS_IDENTIFIER@27..32
+                0: IDENT@27..32 "reset" [] []
+            1: COMMA@32..34 "," [] [Whitespace(" ")]
+            2: CSS_BOGUS@34..48
+              0: CSS_BOGUS_SUPPORTS_CONDITION@34..48
+                0: SCSS_INTERPOLATED_IDENTIFIER_PART_LIST@34..48
+                  0: CSS_IDENTIFIER@34..40
+                    0: IDENT@34..40 "theme-" [] []
+                  1: SCSS_INTERPOLATION@40..48
+                    0: HASH@40..41 "#" [] []
+                    1: L_CURLY@41..42 "{" [] []
+                    2: SCSS_EXPRESSION@42..47
+                      0: SCSS_EXPRESSION_ITEM_LIST@42..47
+                        0: SCSS_VARIABLE@42..47
+                          0: DOLLAR@42..43 "$" [] []
+                          1: CSS_IDENTIFIER@43..47
+                            0: IDENT@43..47 "name" [] []
+                    3: R_CURLY@47..48 "}" [] []
+          1: SEMICOLON@48..49 ";" [] []
+    2: CSS_AT_RULE@49..71
+      0: AT@49..52 "@" [Newline("\n"), Newline("\n")] []
+      1: CSS_LAYER_AT_RULE@52..71
+        0: LAYER_KW@52..58 "layer" [] [Whitespace(" ")]
+        1: CSS_LAYER_DECLARATION@58..71
+          0: CSS_LAYER_REFERENCE_LIST@58..69
+            0: CSS_LAYER_NAME_LIST@58..69
+              0: CSS_IDENTIFIER@58..69
+                0: IDENT@58..69 "components" [] [Whitespace(" ")]
+          1: CSS_RULE_BLOCK@69..71
+            0: L_CURLY@69..70 "{" [] []
+            1: CSS_RULE_LIST@70..70
+            2: R_CURLY@70..71 "}" [] []
+  2: EOF@71..72 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+at_rule_layer_scss_interpolation.css:1:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × SCSS interpolated layer names are an SCSS only feature. Convert your file to an SCSS file or remove the syntax.
+  
+  > 1 │ @layer #{$layers};
+      │        ^^^^^^^^^^
+    2 │ 
+    3 │ @layer reset, theme-#{$name};
+  
+at_rule_layer_scss_interpolation.css:3:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × SCSS interpolated layer names are an SCSS only feature. Convert your file to an SCSS file or remove the syntax.
+  
+    1 │ @layer #{$layers};
+    2 │ 
+  > 3 │ @layer reset, theme-#{$name};
+      │               ^^^^^^^^^^^^^^
+    4 │ 
+    5 │ @layer components {}
+  
+```

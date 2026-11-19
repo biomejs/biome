@@ -1,0 +1,31 @@
+@supports ($: grid) {
+  .incomplete-variable {
+    display: grid;
+  }
+}
+
+.after-incomplete-variable {
+  display: block;
+}
+
+@supports (#{} and (display: grid)) {
+  .empty-interpolation {
+    display: grid;
+  }
+}
+
+.after-empty-interpolation {
+  display: block;
+}
+
+$property: display;
+
+@supports ($property: grid {
+  .missing-query-close {
+    display: grid;
+  }
+}
+
+.after-missing-query-close {
+  display: block;
+}

@@ -8,9 +8,23 @@ info: markdown/inline_links.md
 ```md
 [hello](#world)
 
+[*](#styling-footnote)
+
 [  spaced  ](#link)
 
+somethong [ fff   ](   f) ssss
+
+somethong [    ](   f) ssss
+
 [link](https://example.com "title")
+
+[link](https://example.com "")
+
+[link](https://example.com '')
+
+[link](https://example.com " ")
+
+[link](https://example.com ' ')
 
 [link](https://example.com "  spaced title  ")
 
@@ -19,6 +33,10 @@ text with [inline](link) in the middle
 [link with **bold**](url)
 
 [foo](<https://example.com>)
+
+[encoded](https://www.google.fr/()foo->bar)
+
+[encoded](<https://www.google.fr/()foo-%3Ebar>)
 
 ```
 
@@ -28,9 +46,23 @@ text with [inline](link) in the middle
 ```md
 [hello](#world)
 
-[  spaced  ](#link)
+[\*](#styling-footnote)
+
+[ spaced ](#link)
+
+somethong [ fff ](f) ssss
+
+somethong [ ](f) ssss
 
 [link](https://example.com "title")
+
+[link](https://example.com)
+
+[link](https://example.com)
+
+[link](https://example.com " ")
+
+[link](https://example.com " ")
 
 [link](https://example.com "  spaced title  ")
 
@@ -39,5 +71,9 @@ text with [inline](link) in the middle
 [link with **bold**](url)
 
 [foo](<https://example.com>)
+
+[encoded](<https://www.google.fr/()foo-%3Ebar>)
+
+[encoded](<https://www.google.fr/()foo-%3Ebar>)
 
 ```

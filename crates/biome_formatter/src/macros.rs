@@ -102,7 +102,7 @@ macro_rules! dbg_write {
     ($dst:expr, [$($arg:expr),+ $(,)?]) => {{
         use $crate::BufferExtensions;
         let mut count = 0;
-        let mut inspect = $dst.inspect(|element: &FormatElement| {
+        let mut inspect = $dst.inspect(|element| {
             std::eprintln!(
                 "[{}:{}][{}] = {element:#?}",
                 std::file!(), std::line!(), count
@@ -337,19 +337,18 @@ macro_rules! best_fitting {
 mod tests {
     use crate::prelude::*;
     use crate::{FormatState, SimpleFormatOptions, VecBuffer};
-    use biome_rowan::TextSize;
 
     struct TestFormat;
 
-    impl Format<()> for TestFormat {
-        fn fmt(&self, f: &mut Formatter<()>) -> FormatResult<()> {
+    impl Format<SimpleFormatContext> for TestFormat {
+        fn fmt(&self, f: &mut Formatter<SimpleFormatContext>) -> FormatResult<()> {
             write!(f, [token("test")])
         }
     }
 
     #[test]
     fn test_single_element() {
-        let mut state = FormatState::new(());
+        let mut state = FormatState::new(SimpleFormatContext::default());
         let mut buffer = VecBuffer::new(&mut state);
 
         write![&mut buffer, [TestFormat]].unwrap();
@@ -362,7 +361,7 @@ mod tests {
 
     #[test]
     fn test_multiple_elements() {
-        let mut state = FormatState::new(());
+        let mut state = FormatState::new(SimpleFormatContext::default());
         let mut buffer = VecBuffer::new(&mut state);
 
         write![
@@ -397,7 +396,7 @@ mod tests {
                 best_fitting![
                     format_args![text(
                         "Something that will not fit on a line with 30 character print width.",
-                        TextSize::default()
+                        None
                     )],
                     format_args![
                         group(&format_args![

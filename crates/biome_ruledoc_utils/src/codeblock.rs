@@ -1,14 +1,11 @@
-use std::str::FromStr;
-
 use anyhow::{Result, bail};
 use biome_analyze::AnalyzerOptions;
 use biome_configuration::Configuration;
 use biome_fs::BiomePath;
-use biome_service::{
-    settings::{ServiceLanguage, Settings},
-    workspace::DocumentFileSource,
-};
+use biome_languages::DocumentFileSource;
+use biome_service::settings::{ServiceLanguage, Settings};
 use camino::Utf8PathBuf;
+use std::str::FromStr;
 
 /// Represents a single code block used for evaluating doc tests.
 ///
@@ -16,7 +13,7 @@ use camino::Utf8PathBuf;
 /// snippet, contain configuration to be applied to another code block, or be
 /// part of an in-memory file system used to run examples for rules with
 /// multi-file analysis.
-#[derive(Default)]
+#[derive(Debug, Default)]
 pub struct CodeBlock {
     /// The language tag of this code block.
     pub tag: String,
@@ -60,13 +57,7 @@ pub enum OptionsParsingMode {
 }
 
 impl CodeBlock {
-    pub fn create_analyzer_options<L>(
-        &self,
-        config: Option<Configuration>,
-    ) -> Result<AnalyzerOptions>
-    where
-        L: ServiceLanguage,
-    {
+    pub fn create_settings(&self, config: Option<Configuration>) -> Result<Settings> {
         let mut settings = Settings::default();
 
         if self.use_options {
@@ -80,18 +71,25 @@ impl CodeBlock {
             settings.merge_with_configuration(config, None, vec![])?;
         }
 
-        let language_settings = &L::lookup_settings(&settings.languages).linter;
-        let environment = L::resolve_environment(&settings);
-        let suppression_reason = None;
+        Ok(settings)
+    }
 
-        Ok(L::resolve_analyzer_options(
-            &settings,
-            language_settings,
-            environment,
-            &BiomePath::new(self.file_path()),
-            &self.document_file_source(),
-            suppression_reason,
-        ))
+    pub fn create_analyzer_options<L>(
+        &self,
+        config: Option<Configuration>,
+    ) -> Result<AnalyzerOptions>
+    where
+        L: ServiceLanguage,
+    {
+        let settings = self.create_settings(config)?;
+        let path = BiomePath::new(self.file_path());
+
+        Ok(settings
+            .analyzer_options::<L>(
+                &settings.matching_override_indices(path.as_path()),
+                &self.document_file_source(),
+            )
+            .with_file_path(path.as_path()))
     }
 
     pub fn document_file_source(&self) -> DocumentFileSource {
@@ -171,7 +169,23 @@ impl FromStr for CodeBlock {
 
 /// Normalizes a file path to an absolute path for easier module graph path
 /// resolution.
-fn normalize_file_path(path: &str) -> String {
-    let path = path.trim_start_matches("./").trim_start_matches("../");
+pub(crate) fn normalize_file_path(path: &str) -> String {
+    let path = path
+        .trim_start_matches('/')
+        .trim_start_matches("./")
+        .trim_start_matches("../");
     format!("/{path}")
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn normalizes_file_paths_to_virtual_absolute_paths() {
+        for path in ["file.js", "./file.js", "../file.js", "/file.js"] {
+            let code_block = CodeBlock::from_str(&format!("js file={path}")).unwrap();
+            assert_eq!(code_block.explicit_file_path(), Some("/file.js"));
+        }
+    }
 }

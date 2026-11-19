@@ -21,4 +21,13 @@ impl FormatNodeRule<SvelteIfClosingBlock> for FormatSvelteIfClosingBlock {
             ]
         )
     }
+
+    fn fmt_leading_comments(
+        &self,
+        _node: &SvelteIfClosingBlock,
+        _f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        // handled by element list formatter
+        Ok(())
+    }
 }

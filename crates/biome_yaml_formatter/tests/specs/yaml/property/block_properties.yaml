@@ -1,0 +1,17 @@
+sequence: !!seq
+  - !!str a
+  - !!map
+    key: !!str value
+
+sequence:
+  !!seq
+  - !!str a
+  - !!map
+    key: !!str value
+
+mapping: !!map
+  key: !!str value
+
+mapping:
+  !!map
+  key: !!str value

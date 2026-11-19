@@ -1,3 +1,4 @@
+use super::expect_scss_semicolon_at_rule;
 use super::parameter::parse_scss_parameter_list;
 use crate::parser::CssParser;
 use crate::syntax::ValueParsingContext;
@@ -43,7 +44,7 @@ pub(crate) fn parse_scss_include_at_rule(p: &mut CssParser) -> ParsedSyntax {
     if using_clause.is_present() || p.at(T!['{']) {
         parse_declaration_or_rule_list_block(p);
     } else {
-        p.expect(T![;]);
+        expect_scss_semicolon_at_rule(p);
     }
 
     Present(m.complete(p, SCSS_INCLUDE_AT_RULE))

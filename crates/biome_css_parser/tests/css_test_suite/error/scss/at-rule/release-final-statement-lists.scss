@@ -1,0 +1,19 @@
+.a {
+  @extend %base @debug "x";
+  width: 1px;
+}
+.b {
+  @import "theme.css" screen @warn "x";
+  width: 1px;
+}
+.empty {
+  @import;
+  @debug "empty";
+  width: 1px;
+}
+.trailing {
+  @import "one.css",;
+  @warn "trailing";
+  width: 1px;
+}
+.after { height: 2px; }

@@ -1,0 +1,3 @@
+export type Small = -1 | 0 | 0x1 | 0b10 | 0o3 | 0.5 | 1000;
+export type Large = 0x1000000000000081 | 2;
+export type Missing = -1 | 16 | 0x10 | 0b10000 | 0o20 | 0x1000000000000081;

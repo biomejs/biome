@@ -2,7 +2,7 @@ use biome_analyze::context::RuleContext;
 use biome_analyze::{Ast, FixKind, Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_html_syntax::HtmlAttribute;
+use biome_html_syntax::AnyHtmlAttribute;
 use biome_html_syntax::element_ext::AnyHtmlTagElement;
 use biome_rowan::{AstNode, BatchMutationExt, TextRange};
 use biome_rule_options::no_positive_tabindex::NoPositiveTabindexOptions;
@@ -10,9 +10,12 @@ use biome_rule_options::no_positive_tabindex::NoPositiveTabindexOptions;
 use crate::HtmlRuleAction;
 
 declare_lint_rule! {
-    /// Prevent the usage of positive integers on `tabindex` attribute.
+    /// Disallow positive values for the `tabindex` attribute.
     ///
-    /// Avoid positive `tabindex` attribute values to synchronize the flow of the page with keyboard tab order.
+    /// Keyboard focus determines which element receives keyboard input. A positive `tabindex`
+    /// overrides the page's natural focus order and can make keyboard navigation unpredictable.
+    /// Use `0` to include an element in the natural order, or `-1` to exclude it from keyboard
+    /// navigation while keeping it focusable through code.
     ///
     /// ## Accessibility guidelines
     ///
@@ -44,7 +47,7 @@ declare_lint_rule! {
         version: "2.4.0",
         name: "noPositiveTabindex",
         language: "html",
-        sources: &[RuleSource::EslintJsxA11y("tabindex-no-positive").same(), RuleSource::HtmlEslint("no-positive-tabindex").same()],
+        sources: &[RuleSource::EslintJsxA11y("tabindex-no-positive").inspired(), RuleSource::HtmlEslint("no-positive-tabindex").same()],
         recommended: true,
         severity: Severity::Error,
         fix_kind: FixKind::Unsafe,
@@ -52,7 +55,7 @@ declare_lint_rule! {
 }
 
 pub struct NoPositiveTabindexState {
-    attribute: HtmlAttribute,
+    attribute: AnyHtmlAttribute,
     value_range: TextRange,
 }
 
@@ -64,13 +67,11 @@ impl Rule for NoPositiveTabindex {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let element = ctx.query();
-        let tabindex_attribute = element.find_attribute_by_name("tabindex")?;
-        let initializer = tabindex_attribute.initializer()?;
-        let value = initializer.value().ok()?;
-        let string_value = value.string_value()?;
-        let value_range = value.range();
+        let tabindex_attribute = element.find_attribute_or_vue_binding("tabindex")?;
+        let string_value = tabindex_attribute.as_static_value()?;
+        let value_range = string_value.range();
 
-        if !is_tabindex_valid(&string_value) {
+        if !is_tabindex_valid(string_value.text()) {
             return Some(NoPositiveTabindexState {
                 attribute: tabindex_attribute,
                 value_range,
@@ -110,6 +111,10 @@ impl Rule for NoPositiveTabindex {
             markup! { "Remove the "<Emphasis>"tabindex"</Emphasis>" attribute." }.to_owned(),
             mutation,
         ))
+    }
+
+    fn text_range(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<TextRange> {
+        Some(ctx.query().range())
     }
 }
 

@@ -1,0 +1,45 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidAmbientDeclarations.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+import { Grid, generateObject } from "./ambientDeclarations";
+
+```
+
+# Diagnostics
+```
+invalidAmbientDeclarations.ts:2:10 lint/suspicious/noDeprecatedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Deprecated import: Use Grid2.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ import { Grid, generateObject } from "./ambientDeclarations";
+      │          ^^^^
+    3 │ 
+  
+  i An @deprecated annotation indicates the author doesn't want you to rely on this import anymore.
+  
+  i You should probably import a different symbol instead.
+  
+
+```
+
+```
+invalidAmbientDeclarations.ts:2:16 lint/suspicious/noDeprecatedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Deprecated import: Use generateText.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ import { Grid, generateObject } from "./ambientDeclarations";
+      │                ^^^^^^^^^^^^^^
+    3 │ 
+  
+  i An @deprecated annotation indicates the author doesn't want you to rely on this import anymore.
+  
+  i You should probably import a different symbol instead.
+  
+
+```

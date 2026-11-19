@@ -23,7 +23,7 @@ info: svelte/await_complex_expression.svelte
 # Formatted
 
 ```svelte
-{#await fetchUser(userId).then(u => u.profile)}
+{#await fetchUser(userId).then((u) => u.profile)}
 	<p>Loading user profile...</p>
 {:then profile}
 	<div>

@@ -1,0 +1,4 @@
+$gap: 2px;
+@supports (- -space: $gap) { a { color: red; } }
+@import "bare.css" supports(- -space: $gap);
+@import "grouped.css" supports((- -space: $gap));

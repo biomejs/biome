@@ -6,6 +6,8 @@ use biome_markdown_syntax::{MdTextual, MdTextualFields};
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatMdTextual {
     print_mode: TextPrintMode,
+    should_escape: bool,
+    normalize_task_state: bool,
 }
 impl FormatNodeRule<MdTextual> for FormatMdTextual {
     fn fmt_fields(&self, node: &MdTextual, f: &mut MarkdownFormatter) -> FormatResult<()> {
@@ -13,7 +15,17 @@ impl FormatNodeRule<MdTextual> for FormatMdTextual {
 
         let value_token = value_token?;
 
-        if self.print_mode.is_remove() {
+        if self.normalize_task_state && value_token.text() == "X" {
+            write!(
+                f,
+                [format_replaced(
+                    &value_token,
+                    &text("x", Some(value_token.text_range().start()))
+                )]
+            )
+        } else if self.should_escape {
+            write!(f, [token("\\"), value_token.format()])
+        } else if self.print_mode.is_remove() {
             format_removed(&value_token).fmt(f)
         } else if self.print_mode.is_clean() {
             // Clean mode: strip spaces/tabs but preserve newlines.
@@ -29,7 +41,7 @@ impl FormatNodeRule<MdTextual> for FormatMdTextual {
                     f,
                     [format_replaced(
                         &value_token,
-                        &text(cleaned, value_token.text_trimmed_range().start())
+                        &text(cleaned, Some(value_token.text_trimmed_range().start()))
                     )]
                 )
             }
@@ -58,7 +70,7 @@ impl FormatNodeRule<MdTextual> for FormatMdTextual {
                                 if i > 0 {
                                     write!(f, [hard_space()])?;
                                 }
-                                write!(f, [text(word, position)])?;
+                                write!(f, [text(word, Some(position))])?;
                             }
                             if has_trailing_ws {
                                 write!(f, [hard_space()])?;
@@ -74,7 +86,7 @@ impl FormatNodeRule<MdTextual> for FormatMdTextual {
                 f,
                 [format_replaced(
                     &value_token,
-                    &text(trimmed_text, value_token.text_trimmed_range().start())
+                    &text(trimmed_text, Some(value_token.text_trimmed_range().start()))
                 )]
             )
         } else if self.print_mode.is_trim_start() {
@@ -83,18 +95,7 @@ impl FormatNodeRule<MdTextual> for FormatMdTextual {
                 f,
                 [format_replaced(
                     &value_token,
-                    &text(trimmed_text, value_token.text_trimmed_range().start())
-                )]
-            )
-        } else if self.print_mode.is_keep_leading_spaces() {
-            // Preserve the leading whitespace trivia as literal text so that
-            // continuation-line indentation inside list items is kept.
-            let full_text = value_token.text();
-            write!(
-                f,
-                [format_replaced(
-                    &value_token,
-                    &text(full_text, value_token.text_range().start())
+                    &text(trimmed_text, Some(value_token.text_trimmed_range().start()))
                 )]
             )
         } else {
@@ -106,6 +107,8 @@ impl FormatNodeRule<MdTextual> for FormatMdTextual {
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatMdTextualOptions {
     pub(crate) print_mode: TextPrintMode,
+    pub(crate) should_escape: bool,
+    pub(crate) normalize_task_state: bool,
 }
 
 impl FormatRuleWithOptions<MdTextual> for FormatMdTextual {
@@ -113,6 +116,8 @@ impl FormatRuleWithOptions<MdTextual> for FormatMdTextual {
 
     fn with_options(mut self, options: Self::Options) -> Self {
         self.print_mode = options.print_mode;
+        self.should_escape = options.should_escape;
+        self.normalize_task_state = options.normalize_task_state;
         self
     }
 }

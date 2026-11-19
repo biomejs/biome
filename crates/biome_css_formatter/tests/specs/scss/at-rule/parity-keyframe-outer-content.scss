@@ -1,0 +1,9 @@
+@mixin animation($name){
+@keyframes #{$name}{
+// Around the content statement.
+@content; // After the content statement.
+}
+}
+
+@include animation(pulse){from{opacity:0;}to{opacity:1;}}
+.after-content{color:red;}

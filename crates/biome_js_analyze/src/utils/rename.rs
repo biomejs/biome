@@ -4,11 +4,11 @@ use biome_diagnostics::{Diagnostic, Location, Severity};
 use biome_js_factory::make;
 use biome_js_semantic::{ReferencesExtensions, SemanticModel};
 use biome_js_syntax::{
-    AnyJsIdentifierUsage, JsIdentifierAssignment, JsIdentifierBinding, JsLanguage,
+    AnyJsIdentifierReference, JsIdentifierAssignment, JsIdentifierBinding, JsLanguage,
     JsReferenceIdentifier, JsSyntaxKind, JsSyntaxNode, T, TextRange, TsIdentifierBinding,
     binding_ext::AnyJsIdentifierBinding,
 };
-use biome_rowan::{AstNode, BatchMutation, SyntaxNodeCast, TriviaPieceKind};
+use biome_rowan::{AstNode, BatchMutation, SyntaxNodeCast};
 use serde::{Deserialize, Serialize};
 use std::fmt;
 
@@ -253,10 +253,11 @@ impl RenameSymbolExtensions for BatchMutation<JsLanguage> {
             }
 
             let reference_syntax = reference.syntax();
-            let Some(id_usage) = AnyJsIdentifierUsage::cast_ref(&reference_syntax) else {
+            let Some(identifier_reference) = AnyJsIdentifierReference::cast_ref(&reference_syntax)
+            else {
                 continue;
             };
-            let Ok(prev_ref_token) = id_usage.value_token() else {
+            let Ok(prev_ref_token) = identifier_reference.value_token() else {
                 continue;
             };
 
@@ -271,7 +272,7 @@ impl RenameSymbolExtensions for BatchMutation<JsLanguage> {
                 let trailing_trivia = prev_ref_token.trailing_trivia().pieces();
                 let new_property = make::js_property_object_member(
                     make::js_literal_member_name(prev_ref_token.with_trailing_trivia([])).into(),
-                    make::token(T![:]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+                    make::token(T![:]).with_trailing_space(),
                     make::js_identifier_expression(make::js_reference_identifier(
                         new_name.append_trivia_pieces(trailing_trivia),
                     ))

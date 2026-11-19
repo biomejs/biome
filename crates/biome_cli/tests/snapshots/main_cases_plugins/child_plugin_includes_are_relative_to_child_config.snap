@@ -1,0 +1,97 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome lint '<TEMP_DIR>/child_plugin_includes_are_relative_to_child_config'
+```
+
+## `biome.json`
+
+```json
+{ "root": true }
+```
+
+## `packages/mobile/biome.json`
+
+```json
+{
+  "root": false,
+  "plugins": [
+    {
+      "path": "./biome/root-relative.grit",
+      "includes": ["packages/mobile/src/**"]
+    },
+    { "path": "./biome/child-relative.grit", "includes": ["src/**"] }
+  ]
+}
+```
+
+## `packages/mobile/biome/child-relative.grit`
+
+```grit
+`Object.assign($args)` where {
+    register_diagnostic(span = $args, message = "Pattern relative to the child directory")
+}
+```
+
+## `packages/mobile/biome/root-relative.grit`
+
+```grit
+`Object.assign($args)` where {
+    register_diagnostic(span = $args, message = "Pattern relative to the root directory")
+}
+```
+
+## `packages/mobile/lib/file.js`
+
+```js
+Object.assign({}, value);
+
+```
+
+## `packages/mobile/src/file.js`
+
+```js
+Object.assign({}, value);
+
+```
+
+## `src/file.js`
+
+```js
+Object.assign({}, value);
+
+```
+
+# Termination Message
+
+```block
+lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+packages/mobile/src/file.js:1:15 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Pattern relative to the child directory
+  
+  > 1 │ Object.assign({}, value);
+      │               ^^^^^^^^^
+    2 │ 
+  
+
+```
+
+```block
+Checked 7 files in <TIME>. No fixes applied.
+Found 1 error.
+```

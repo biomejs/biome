@@ -2,13 +2,19 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
+## Command
+
+```shell
+biome check file.ts
+```
+
 ## `biome.json`
 
 ```json
 {
   "linter": {
     "rules": {
-      "recommended": true,
+      "preset": "recommended",
       "correctness": {
         "noUndeclaredVariables": "error"
       }

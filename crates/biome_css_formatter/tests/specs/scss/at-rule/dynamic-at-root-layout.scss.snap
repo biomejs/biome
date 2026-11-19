@@ -1,0 +1,119 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/at-rule/dynamic-at-root-layout.scss
+---
+
+# Input
+
+```scss
+$query: "without: rule";
+$mode: without;
+$rules: media supports;
+@at-root( "with" + "out" : media ){.computed{color:red}}
+@at-root( $query ){.whole{color:red}}
+@at-root($query) /* trailing query */{.trailing-query{color:red}}
+@at-root(/* modifier */ $mode : $rules /* rules */){.comments{color:red}}
+@at-root(/* modifier */ without:media){.leading{color:red}}
+@at-root(without /* modifier */:media){.trailing{color:red}}
+@at-root( with : rule   media ){.literal{color:red}}
+@at-root(without:/* Exclude surrounding media and supports rules, but keep style rules. */ $rules){.long-comment{color:red}}
+.parent {
+@at-root(
+// query
+$query
+){.raw-lines{color:red}}
+@at-root(without:
+// first
+// second
+media supports){.rule-lines{color:red}}
+@at-root(without:/* first */ /* second */ media supports){.rule-blocks{color:red}}
+@at-root(without:/* first */ /* Exclude surrounding media and supports rules. */ $rules){.packed-comments{color:red}}
+}
+
+```
+
+
+# Formatted
+
+```scss
+$query: "without: rule";
+$mode: without;
+$rules: media supports;
+@at-root ("with" + "out": media) {
+	.computed {
+		color: red;
+	}
+}
+@at-root ($query) {
+	.whole {
+		color: red;
+	}
+}
+@at-root ($query) /* trailing query */ {
+	.trailing-query {
+		color: red;
+	}
+}
+@at-root (/* modifier */ $mode: $rules /* rules */) {
+	.comments {
+		color: red;
+	}
+}
+@at-root (/* modifier */ without: media) {
+	.leading {
+		color: red;
+	}
+}
+@at-root (without /* modifier */: media) {
+	.trailing {
+		color: red;
+	}
+}
+@at-root (with: rule media) {
+	.literal {
+		color: red;
+	}
+}
+@at-root (
+	without:
+		/* Exclude surrounding media and supports rules, but keep style rules. */
+		$rules
+) {
+	.long-comment {
+		color: red;
+	}
+}
+.parent {
+	@at-root (
+		// query
+		$query
+	) {
+		.raw-lines {
+			color: red;
+		}
+	}
+	@at-root (
+		without: // first
+		// second
+		media supports
+	) {
+		.rule-lines {
+			color: red;
+		}
+	}
+	@at-root (without: /* first */ /* second */ media supports) {
+		.rule-blocks {
+			color: red;
+		}
+	}
+	@at-root (
+		without: /* first */ /* Exclude surrounding media and supports rules. */
+			$rules
+	) {
+		.packed-comments {
+			color: red;
+		}
+	}
+}
+
+```

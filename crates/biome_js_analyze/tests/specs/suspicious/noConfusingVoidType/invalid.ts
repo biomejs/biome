@@ -43,3 +43,4 @@ type ConditionalType<T> = {
 type ManyVoid = readonly void[];
 function foo(arr: readonly void[]) {}
 type invalidVoidUnion = void | Map<string, number>;
+type voidNeverStringUnion = void | never | string;

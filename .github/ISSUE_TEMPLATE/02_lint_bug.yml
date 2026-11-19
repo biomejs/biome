@@ -1,7 +1,7 @@
 name: 💅 Linter bug report
 description: Report a bug or regression of the linter
-title: "💅 <TITLE>"
-labels: [ "S-Needs triage" ]
+title: '💅 <TITLE>'
+labels: ['S-Needs triage']
 type: Bug
 body:
   - type: markdown
@@ -19,13 +19,13 @@ body:
       description: Run the command `biome rage --linter` and paste its output here. Please review it, in case there are sensitive information you don't want to share.
       value: |
         <details>
-        
+
         ```bash
 
         Paste output here
-        
+
         ```
-        
+
         </details>
     validations:
       required: true

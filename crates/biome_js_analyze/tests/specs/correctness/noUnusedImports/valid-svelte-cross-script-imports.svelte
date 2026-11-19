@@ -1,0 +1,24 @@
+<!-- should not generate diagnostics -->
+<script module lang="ts">
+import { tick } from "svelte";
+
+// `Snippet` is imported in the instance <script> below, but referenced here.
+export interface Props {
+  row?: Snippet;
+}
+</script>
+
+<script lang="ts">
+import type { Snippet } from "svelte";
+
+const { row }: Props = $props();
+
+// `tick` is imported in the module <script> above, but used only here.
+async function refresh() {
+  await tick();
+}
+
+refresh();
+</script>
+
+<div>{row}</div>

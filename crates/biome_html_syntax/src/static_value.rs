@@ -1,6 +1,6 @@
 use biome_rowan::TextRange;
 
-use crate::{HtmlSyntaxKind, HtmlSyntaxToken};
+use crate::{HtmlSyntaxKind, HtmlSyntaxToken, unquote};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 /// static values defined in JavaScript's expressions
@@ -58,17 +58,23 @@ impl StaticValue {
             | Self::BigInt(token) => token.text_trimmed(),
             Self::String(token) => {
                 let text = token.text_trimmed();
-                if matches!(token.kind(), HtmlSyntaxKind::HTML_STRING_LITERAL) {
-                    // SAFETY: string literal token have a delimiters at the start and the end of the string
-                    return &text[1..text.len() - 1];
-                }
-                text
+                // Strip outer HTML attribute delimiter quotes
+                let inner = if text.len() >= 2
+                    && matches!(token.kind(), HtmlSyntaxKind::HTML_STRING_LITERAL)
+                {
+                    // SAFETY: delimiter is a single ASCII character at both ends
+                    &text[1..text.len() - 1]
+                } else {
+                    text
+                };
+                // Also strip JS string literal quotes (e.g. Vue binding :attr="'value'" yields inner = 'value')
+                unquote(inner)
             }
             Self::EmptyString(_) => "",
         }
     }
 
-    /// Return teh range of the static value.
+    /// Return the range of the static value.
     ///
     /// ## Examples
     ///
@@ -100,10 +106,9 @@ impl StaticValue {
     /// ```
     /// use biome_html_syntax::static_value::StaticValue;
     /// use biome_html_factory::make;
-    /// use biome_rowan::TriviaPieceKind;
     ///
     /// let str_literal = make::html_string_literal("foo")
-    ///     .with_leading_trivia(vec![(TriviaPieceKind::Whitespace, " ")]);
+    ///     .with_leading_space();
     /// assert!(StaticValue::String(str_literal).is_not_string_constant("bar"));
     /// ```
     pub fn is_not_string_constant(&self, text: &str) -> bool {
@@ -122,10 +127,9 @@ impl StaticValue {
     /// ```
     /// use biome_html_syntax::static_value::StaticValue;
     /// use biome_html_factory::make;
-    /// use biome_rowan::TriviaPieceKind;
     ///
     /// let str_literal = make::html_string_literal("foo")
-    ///     .with_leading_trivia(vec![(TriviaPieceKind::Whitespace, " ")]);
+    ///     .with_leading_space();
     /// assert_eq!(StaticValue::String(str_literal).as_string_constant().unwrap(), "foo");
     /// ```
     pub fn as_string_constant(&self) -> Option<&str> {

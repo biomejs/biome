@@ -1,0 +1,37 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: anonymousDefaultExport.tsx
+---
+# Input
+```tsx
+export default function ({ a }) {
+	return <div>{a}</div>;
+}
+
+```
+
+# Diagnostics
+```
+anonymousDefaultExport.tsx:2:15 lint/correctness/noSolidDestructuredProps ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This variable shouldn't be destructured.
+  
+    1 │ export default function ({ a }) {
+  > 2 │ 	return <div>{a}</div>;
+      │ 	             ^
+    3 │ }
+    4 │ 
+  
+  i This is where the props were destructured.
+  
+  > 1 │ export default function ({ a }) {
+      │                          ^^^^^
+    2 │ 	return <div>{a}</div>;
+    3 │ }
+  
+  i In Solid, props must be used with property accesses (props.foo) to preserve reactivity.
+  
+  i Remove the destructuring and use props.foo instead.
+  
+
+```

@@ -1,0 +1,57 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: ignorePrimitivesDisabled.ts
+---
+# Input
+```ts
+// Tests for ignorePrimitives: false
+// The option is present but disabled, so primitive operands still report.
+
+declare const s: string | null;
+declare const n: number | null;
+
+const r1 = s || 'x';
+const r2 = n || 0;
+
+```
+
+# Diagnostics
+```
+ignorePrimitivesDisabled.ts:7:14 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+    5 │ declare const n: number | null;
+    6 │ 
+  > 7 │ const r1 = s || 'x';
+      │              ^^
+    8 │ const r2 = n || 0;
+    9 │ 
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+ignorePrimitivesDisabled.ts:8:14 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+    7 │ const r1 = s || 'x';
+  > 8 │ const r2 = n || 0;
+      │              ^^
+    9 │ 
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

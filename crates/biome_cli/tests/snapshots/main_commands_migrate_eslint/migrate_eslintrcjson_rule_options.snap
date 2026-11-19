@@ -2,6 +2,12 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
+## Command
+
+```shell
+biome migrate eslint --include-inspired
+```
+
 ## `biome.json`
 
 ```json
@@ -102,7 +108,7 @@ biome.json migrate ━━━━━━━━━━━━━━━━━━━━�
         2 │ + → "linter":·{
         3 │ + → → "enabled":·true,
         4 │ + → → "rules":·{
-        5 │ + → → → "recommended":·false,
+        5 │ + → → → "preset":·"none",
         6 │ + → → → "a11y":·{
         7 │ + → → → → "useValidAriaRole":·{
         8 │ + → → → → → "level":·"error",

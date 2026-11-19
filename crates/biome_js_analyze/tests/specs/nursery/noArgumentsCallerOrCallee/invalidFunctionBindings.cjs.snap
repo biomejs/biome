@@ -1,0 +1,63 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidFunctionBindings.cjs
+---
+# Input
+```cjs
+// should generate diagnostics
+
+function outer(arguments) {
+    return function inner() {
+        return arguments.callee;
+    };
+}
+
+function redeclared() {
+    var arguments;
+    return arguments.caller;
+}
+
+```
+
+# Diagnostics
+```
+invalidFunctionBindings.cjs:5:16 lint/nursery/noArgumentsCallerOrCallee ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not use arguments.callee.
+  
+    3 │ function outer(arguments) {
+    4 │     return function inner() {
+  > 5 │         return arguments.callee;
+      │                ^^^^^^^^^^^^^^^^
+    6 │     };
+    7 │ }
+  
+  i These deprecated properties are forbidden in strict mode and prevent JavaScript optimizations.
+  
+  i Refer to the function by name for recursion, and pass the caller explicitly if you need to access it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidFunctionBindings.cjs:11:12 lint/nursery/noArgumentsCallerOrCallee ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not use arguments.caller.
+  
+     9 │ function redeclared() {
+    10 │     var arguments;
+  > 11 │     return arguments.caller;
+       │            ^^^^^^^^^^^^^^^^
+    12 │ }
+    13 │ 
+  
+  i These deprecated properties are forbidden in strict mode and prevent JavaScript optimizations.
+  
+  i Refer to the function by name for recursion, and pass the caller explicitly if you need to access it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

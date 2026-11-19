@@ -26,7 +26,11 @@ Another paragraph
 [escaped\]bracket]: /url
 
 [trailing-spaces]: /url   
+[next-definition]: /url
 
 [invalid-trailing]: /url invalid
 
 [angle-trailing]: </url> invalid
+
+[invalid-next-line-title]: /url
+  "title" trailing

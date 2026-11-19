@@ -1,0 +1,10 @@
+{
+  "formatter": {
+    "lineWidth": 40
+  },
+  "yaml": {
+    "formatter": {
+      "bracketSpacing": true
+    }
+  }
+}

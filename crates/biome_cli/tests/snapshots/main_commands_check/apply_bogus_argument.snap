@@ -2,11 +2,16 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
+## Command
+
+```shell
+biome check fix.js --write --unsafe
+```
+
 ## `fix.js`
 
 ```js
 function _13_1_3_fun(arguments) { }
-
 ```
 
 # Termination Message
@@ -29,7 +34,6 @@ fix.js:1:22 parse ━━━━━━━━━━━━━━━━━━━━�
   
   > 1 │ function _13_1_3_fun(arguments) { }
       │                      ^^^^^^^^^
-    2 │ 
   
 
 ```

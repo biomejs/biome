@@ -1,0 +1,185 @@
+use std::collections::BTreeMap;
+
+use biome_configuration::{Configuration, HtmlConfiguration};
+use biome_css_parser::{CssParserOptions, parse_css};
+use biome_db::Source;
+use biome_fs::{BiomePath, MemoryFileSystem, OsFileSystem};
+use biome_languages::{CssFileSource, DocumentFileSource, HtmlFileSource, JsonFileSource};
+use biome_module_graph::{
+    ModuleInfoKind, resolve_css_module, resolve_html_module, resolve_js_module,
+};
+use biome_resolver::FsWithResolverProxy;
+use biome_service::Workspace;
+use biome_service::db::WorkspaceDb;
+use biome_service::settings::ModuleGraphResolutionKind;
+use biome_service::test_utils::setup_workspace_and_open_project;
+use biome_service::workspace::UpdateSettingsParams;
+use biome_test_utils::{get_added_js_paths, get_css_added_paths};
+use camino::{Utf8Path, Utf8PathBuf};
+use std::sync::Arc;
+
+type HtmlTestFile<'a> = (&'a str, &'a str, HtmlFileSource);
+
+/// A filesystem whose files a test database can read.
+pub trait TestFs: FsWithResolverProxy {
+    /// Returns a handle to the same files, for the resolver of a database.
+    fn share(&self) -> Arc<dyn FsWithResolverProxy>;
+}
+
+impl TestFs for MemoryFileSystem {
+    fn share(&self) -> Arc<dyn FsWithResolverProxy> {
+        Arc::new(Self::from_files(self.files.0.clone()))
+    }
+}
+
+impl TestFs for OsFileSystem {
+    fn share(&self) -> Arc<dyn FsWithResolverProxy> {
+        Arc::new(Self {
+            working_directory: self.working_directory.clone(),
+        })
+    }
+}
+
+pub fn add_js_modules(
+    db: &mut WorkspaceDb,
+    fs: &dyn FsWithResolverProxy,
+    paths: &[BiomePath],
+    infer_types: bool,
+) {
+    for (path, root, semantic_model) in get_added_js_paths(fs, paths) {
+        let (info, _, _) = resolve_js_module(&*db, root, path, semantic_model, infer_types);
+        db.update_or_insert_module(path.as_path().to_path_buf(), ModuleInfoKind::Js(info));
+    }
+}
+
+pub fn add_css_modules(db: &mut WorkspaceDb, fs: &dyn FsWithResolverProxy, paths: &[BiomePath]) {
+    for (path, root) in get_css_added_paths(fs, paths) {
+        let (info, _, _) = resolve_css_module(&*db, root, path);
+        db.update_or_insert_module(path.as_path().to_path_buf(), ModuleInfoKind::Css(info));
+    }
+}
+
+pub fn build_js_db(fs: &impl TestFs, paths: &[BiomePath], infer_types: bool) -> WorkspaceDb {
+    let mut db = WorkspaceDb::new(fs.share());
+    add_js_modules(&mut db, fs, paths, infer_types);
+    db
+}
+
+/// Indexes a JSON document, such as a manifest, as a parsed source.
+///
+/// This uses setters, so resolutions already computed from the filesystem are
+/// invalidated, like when the workspace opens a manifest.
+pub fn add_json_file(db: &mut WorkspaceDb, path: &Utf8Path, source: &str) {
+    db.upsert_file(
+        path,
+        source,
+        DocumentFileSource::Json(JsonFileSource::json()),
+    );
+}
+
+pub fn build_css_db(files: &[(&str, &str)]) -> (MemoryFileSystem, WorkspaceDb) {
+    let fs = MemoryFileSystem::default();
+    for (path, source) in files {
+        fs.insert((*path).into(), *source);
+    }
+    let paths = files
+        .iter()
+        .map(|(path, _)| BiomePath::new(*path))
+        .collect::<Vec<_>>();
+    let mut db = WorkspaceDb::new(fs.share());
+    add_css_modules(&mut db, &fs, &paths);
+
+    let source_index = db.insert_source(DocumentFileSource::Css(CssFileSource::css()));
+    for (path, source) in files {
+        let parsed = Source::new(
+            &db,
+            Utf8PathBuf::from(*path),
+            (*source).into(),
+            source_index,
+        );
+        db.insert_file(Utf8Path::new(path), parsed);
+    }
+    (fs, db)
+}
+
+/// Builds a database of CSS files that may use Tailwind CSS directives.
+pub fn build_tailwind_css_db(files: &[(&str, &str)]) -> WorkspaceDb {
+    let fs = MemoryFileSystem::default();
+    for (path, source) in files {
+        fs.insert((*path).into(), *source);
+    }
+    let mut db = WorkspaceDb::new(fs.share());
+    for (path, source) in files {
+        let parse = parse_css(
+            source,
+            CssFileSource::css(),
+            CssParserOptions::default().allow_tailwind_directives(),
+        );
+        assert!(
+            parse.diagnostics().is_empty(),
+            "Unexpected diagnostics: {:?}",
+            parse.diagnostics()
+        );
+        let path = BiomePath::new(*path);
+        let (info, _, _) = resolve_css_module(&db, parse.tree(), &path);
+        db.update_or_insert_module(path.as_path().to_path_buf(), ModuleInfoKind::Css(info));
+    }
+    db
+}
+
+pub fn build_html_db(fs: &MemoryFileSystem, files: &[HtmlTestFile<'_>]) -> WorkspaceDb {
+    let mut db = WorkspaceDb::new(fs.share());
+    for (path, source, file_source) in files {
+        let path = BiomePath::new(*path);
+        let source_index = db.insert_source(DocumentFileSource::Html(*file_source));
+        let parsed_source = Source::new(
+            &db,
+            path.as_path().to_path_buf(),
+            (*source).into(),
+            source_index,
+        );
+        db.insert_file(path.as_path(), parsed_source);
+        let (info, _, _) = resolve_html_module(&db, &path).unwrap();
+        db.update_or_insert_module(path.as_path().to_path_buf(), ModuleInfoKind::Html(info));
+    }
+    db
+}
+
+pub fn build_module_db_via_workspace(files: &[(&str, &str)]) -> WorkspaceDb {
+    let fs = MemoryFileSystem::default();
+    for (path, source) in files {
+        fs.insert(Utf8PathBuf::from(*path), *source);
+    }
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/src");
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            configuration: Configuration {
+                html: Some(HtmlConfiguration {
+                    experimental_full_support_enabled: Some(true.into()),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            },
+            workspace_directory: None,
+            extended_configurations: vec![],
+            module_graph_resolution_kind: ModuleGraphResolutionKind::Modules,
+        })
+        .unwrap();
+    workspace.index_files_for_test(
+        project_key,
+        files.iter().map(|(path, _)| {
+            let path = BiomePath::new(*path);
+            let source = DocumentFileSource::from_well_known(path.as_path(), true);
+            (path, source)
+        }),
+    );
+    workspace.get_module_db_for_test()
+}
+
+pub fn snapshot_files(files: &[(&str, &str)]) -> BTreeMap<String, String> {
+    files
+        .iter()
+        .map(|(path, source)| ((*path).into(), (*source).into()))
+        .collect()
+}

@@ -1,6 +1,7 @@
 <!-- should not generate diagnostics -->
 <script setup>
 const supported = ref(true);
+const disabled = ref(false);
 const enabled = ref(false);
 const count = ref(0);
 const isActive = ref(false);
@@ -17,16 +18,22 @@ function handleClick() {
 <template>
   <!-- v-on shorthand with function call -->
   <button @click="toggleCaptions()">Toggle</button>
-  
+
   <!-- v-on shorthand with function reference -->
   <button @click="handleClick">Click</button>
-  
+
   <!-- v-bind shorthand with expression -->
   <button :disabled="!supported">Disabled</button>
-  
+
+  <!-- v-bind same-name shorthand -->
+  <button :disabled>Same-name shorthand</button>
+
+  <!-- v-bind directive same-name shorthand -->
+  <button v-bind:disabled>Directive same-name shorthand</button>
+
   <!-- v-if directive -->
   <div v-if="count > 0">Count: {{ count }}</div>
-  
+
   <!-- v-show directive -->
   <div v-show="isActive">Active</div>
 </template>

@@ -1,0 +1,6 @@
+# should generate diagnostics
+type Item10 { id: ID! }
+type Item9 { id: ID! }
+type b { id: ID! }
+type B { id: ID! }
+type A { id: ID! }

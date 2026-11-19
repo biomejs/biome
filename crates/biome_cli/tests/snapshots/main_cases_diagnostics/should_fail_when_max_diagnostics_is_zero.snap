@@ -2,6 +2,12 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
+## Command
+
+```shell
+biome ci --max-diagnostics 0 src
+```
+
 ## `src/file.js`
 
 ```js

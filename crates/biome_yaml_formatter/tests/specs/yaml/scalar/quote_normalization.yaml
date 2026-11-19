@@ -1,0 +1,7 @@
+- 'plain text'
+- 'has ''single'' quotes'
+- "has \"double\" quotes"
+- '\n not an escape'
+- "tab\tescape"
+- "''"
+- '""'

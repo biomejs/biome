@@ -2,13 +2,19 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
+## Command
+
+```shell
+biome lint --write --unsafe .
+```
+
 ## `biome.json`
 
 ```json
 {
   "linter": {
     "rules": {
-      "recommended": true
+      "preset": "recommended"
     }
   },
   "overrides": [
@@ -16,7 +22,7 @@ expression: redactor(content)
       "includes": ["test.js"],
       "linter": {
         "rules": {
-          "recommended": false
+          "preset": "none"
         }
       }
     }

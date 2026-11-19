@@ -43,15 +43,18 @@
 //! be decided with full context.
 
 use biome_markdown_syntax::{
-    AnyMdBlock, AnyMdCodeBlock, AnyMdInline, AnyMdLeafBlock, MarkdownLanguage, MdAutolink,
-    MdBlockList, MdBullet, MdBulletListItem, MdContinuationIndent, MdDocument, MdEntityReference,
+    AnyMdBlock, AnyMdCodeBlock, AnyMdInline, AnyMdLeafBlock, GfmStrikethrough, GfmTable,
+    GfmTableCell, GfmTableDelimiterCell, GfmTaskListItem, MarkdownLanguage, MdAutolink,
+    MdBlockList, MdBullet, MdBulletListItem, MdContinuationIndent, MdEntityReference,
     MdFencedCodeBlock, MdHardLine, MdHeader, MdHtmlBlock, MdIndentCodeBlock, MdInlineCode,
     MdInlineEmphasis, MdInlineHtml, MdInlineImage, MdInlineItalic, MdInlineItemList, MdInlineLink,
     MdLinkDestination, MdLinkLabel, MdLinkReferenceDefinition, MdLinkTitle, MdNewline,
     MdOrderedListItem, MdParagraph, MdQuote, MdQuotePrefix, MdReferenceImage, MdReferenceLink,
-    MdReferenceLinkLabel, MdSetextHeader, MdSoftBreak, MdTextual, MdThematicBreakBlock,
+    MdReferenceLinkLabel, MdRoot, MdSetextHeader, MdTextual, MdThematicBreakBlock,
 };
-use biome_rowan::{AstNode, AstNodeList, Direction, SyntaxNode, TextRange, WalkEvent};
+use biome_rowan::{
+    AstNode, AstNodeList, AstSeparatedList, Direction, SyntaxNode, TextRange, WalkEvent,
+};
 use percent_encoding::{AsciiSet, CONTROLS, utf8_percent_encode};
 use std::collections::HashMap;
 
@@ -365,7 +368,7 @@ pub struct HtmlRenderContext {
 impl HtmlRenderContext {
     /// Create a new rendering context from parsed document data.
     pub fn new(
-        document: &MdDocument,
+        document: &MdRoot,
         list_tightness: &[ListTightness],
         list_item_indents: &[ListItemIndent],
         quote_indents: &[QuoteIndent],
@@ -414,7 +417,7 @@ impl HtmlRenderContext {
 
 /// Render a markdown document to HTML.
 pub fn document_to_html(
-    document: &MdDocument,
+    document: &MdRoot,
     list_tightness: &[ListTightness],
     list_item_indents: &[ListItemIndent],
     quote_indents: &[QuoteIndent],
@@ -428,7 +431,7 @@ pub fn document_to_html(
 // ============================================================================
 
 /// Collect link reference definitions from the document.
-fn collect_link_definitions(document: &MdDocument) -> HashMap<String, (String, Option<String>)> {
+fn collect_link_definitions(document: &MdRoot) -> HashMap<String, (String, Option<String>)> {
     let mut definitions = HashMap::new();
     let link_definitions: Vec<_> = document
         .syntax()
@@ -646,10 +649,7 @@ impl<'a> HtmlRenderer<'a> {
             }
         }
 
-        self.buffers
-            .pop()
-            .map(|buffer| buffer.content)
-            .unwrap_or_default()
+        self.buffers.pop().map_or_default(|buffer| buffer.content)
     }
 
     fn enter(&mut self, node: SyntaxNode<MarkdownLanguage>) {
@@ -883,7 +883,7 @@ impl<'a> HtmlRenderer<'a> {
                 .and_then(biome_markdown_syntax::MdInlineItemList::cast)
                 .is_some();
             if is_inline {
-                let content = collect_raw_inline_text(&html.content());
+                let content = collect_html_content_text(&html.content());
                 self.push_str(&content);
             } else {
                 let block_indent = self.block_indent(html.syntax().text_trimmed_range());
@@ -896,6 +896,13 @@ impl<'a> HtmlRenderer<'a> {
 
         if MdThematicBreakBlock::cast(node.clone()).is_some() {
             self.push_str("<hr />\n");
+            return;
+        }
+
+        if let Some(table) = GfmTable::cast(node.clone()) {
+            let content = render_table(&table, self.ctx);
+            self.push_str(&content);
+            self.opaque_depth = Some(self.depth);
             return;
         }
 
@@ -920,6 +927,11 @@ impl<'a> HtmlRenderer<'a> {
 
         if MdInlineItalic::cast(node.clone()).is_some() {
             self.push_str("<em>");
+            return;
+        }
+
+        if GfmStrikethrough::cast(node.clone()).is_some() {
+            self.push_str("<del>");
             return;
         }
 
@@ -1049,8 +1061,18 @@ impl<'a> HtmlRenderer<'a> {
             return;
         }
 
-        if MdSoftBreak::cast(node.clone()).is_some() {
-            self.push_str("\n");
+        if let Some(task_list_item) = GfmTaskListItem::cast(node.clone()) {
+            let checked = task_list_item
+                .state()
+                .ok()
+                .and_then(|state| state.value_token().ok())
+                .is_some_and(|token| matches!(token.text().as_bytes(), b"x" | b"X"));
+            if checked {
+                self.push_str("<input checked=\"\" disabled=\"\" type=\"checkbox\">");
+            } else {
+                self.push_str("<input disabled=\"\" type=\"checkbox\">");
+            }
+            self.opaque_depth = Some(self.depth);
             return;
         }
 
@@ -1189,6 +1211,11 @@ impl<'a> HtmlRenderer<'a> {
             return;
         }
 
+        if GfmStrikethrough::cast(node.clone()).is_some() {
+            self.push_str("</del>");
+            return;
+        }
+
         if MdInlineLink::cast(node.clone()).is_some() {
             self.suppressed_inline_nodes.pop();
             self.push_str("</a>");
@@ -1257,6 +1284,106 @@ impl<'a> HtmlRenderer<'a> {
             .last()
             .and_then(|state| state.block_indents.get(&range).copied())
             .unwrap_or_default()
+    }
+}
+
+const MAX_AUTOCOMPLETED_TABLE_CELLS: usize = 0x80000;
+
+fn render_table(table: &GfmTable, ctx: &HtmlRenderContext) -> String {
+    render_table_with_limit(table, ctx, MAX_AUTOCOMPLETED_TABLE_CELLS)
+}
+
+fn render_table_with_limit(
+    table: &GfmTable,
+    ctx: &HtmlRenderContext,
+    max_autocompleted_cells: usize,
+) -> String {
+    let Ok(header) = table.header() else {
+        return String::new();
+    };
+    let Ok(delimiter) = table.delimiter() else {
+        return String::new();
+    };
+
+    let header_cells: Vec<_> = header.cells().iter().filter_map(Result::ok).collect();
+    let alignments: Vec<_> = delimiter
+        .cells()
+        .iter()
+        .filter_map(Result::ok)
+        .map(|cell| table_alignment(&cell))
+        .collect();
+    let mut out = String::new();
+
+    out.push_str("<table>\n<thead>\n<tr>\n");
+    for (index, cell) in header_cells.iter().enumerate() {
+        render_table_cell(
+            "th",
+            Some(cell),
+            alignments.get(index).copied().flatten(),
+            ctx,
+            &mut out,
+        );
+    }
+    out.push_str("</tr>\n</thead>\n");
+
+    if table.body().iter().next().is_some() {
+        out.push_str("<tbody>\n");
+        let mut autocompleted_cells = 0usize;
+        for row in table.body().iter() {
+            let cells: Vec<_> = row.cells().iter().filter_map(Result::ok).collect();
+            let source_cell_count = cells.len().min(alignments.len());
+            let missing_cell_count = alignments.len().saturating_sub(source_cell_count);
+            let remaining_autocompleted_cells =
+                max_autocompleted_cells.saturating_sub(autocompleted_cells);
+            let autocompleted_in_row = missing_cell_count.min(remaining_autocompleted_cells);
+            autocompleted_cells += autocompleted_in_row;
+            let rendered_cell_count = source_cell_count + autocompleted_in_row;
+
+            out.push_str("<tr>\n");
+            for (index, alignment) in alignments.iter().take(rendered_cell_count).enumerate() {
+                render_table_cell("td", cells.get(index), *alignment, ctx, &mut out);
+            }
+            out.push_str("</tr>\n");
+        }
+        out.push_str("</tbody>\n");
+    }
+
+    out.push_str("</table>\n");
+    out
+}
+
+fn render_table_cell(
+    tag: &str,
+    cell: Option<&GfmTableCell>,
+    alignment: Option<&str>,
+    ctx: &HtmlRenderContext,
+    out: &mut String,
+) {
+    out.push('<');
+    out.push_str(tag);
+    if let Some(alignment) = alignment {
+        out.push_str(" align=\"");
+        out.push_str(alignment);
+        out.push('"');
+    }
+    out.push('>');
+    if let Some(cell) = cell {
+        out.push_str(&HtmlRenderer::new(ctx).render(cell.content().syntax()));
+    }
+    out.push_str("</");
+    out.push_str(tag);
+    out.push_str(">\n");
+}
+
+fn table_alignment(cell: &GfmTableDelimiterCell) -> Option<&'static str> {
+    match (
+        cell.l_colon_token().is_some(),
+        cell.r_colon_token().is_some(),
+    ) {
+        (true, true) => Some("center"),
+        (true, false) => Some("left"),
+        (false, true) => Some("right"),
+        (false, false) => None,
     }
 }
 
@@ -1330,31 +1457,12 @@ fn strip_paragraph_indent(
 
 /// Render an ATX header (# style).
 fn header_level(header: &MdHeader) -> usize {
-    // Count total hash characters in the before list.
-    // The lexer emits all consecutive `#` chars as a single HASH token,
-    // so we sum the text lengths of all hash tokens.
-    // Use text_trimmed() to exclude any leading trivia (indentation whitespace).
-    header
-        .before()
-        .iter()
-        .filter_map(|h| h.hash_token().ok())
-        .map(|tok| tok.text_trimmed().len())
-        .sum::<usize>()
-        .clamp(1, 6)
+    header.level().clamp(1, 6)
 }
 
 /// Render a setext header (underline style).
 fn setext_header_level(header: &MdSetextHeader) -> usize {
-    if let Ok(underline) = header.underline_token() {
-        let text = underline.text();
-        if text.trim_start().starts_with('=') {
-            1
-        } else {
-            2
-        }
-    } else {
-        1
-    }
+    header.level()
 }
 
 // ============================================================================
@@ -1495,7 +1603,7 @@ fn render_html_block(
 ) {
     // Prepend the block prefix indent (now in explicit slot, not trivia)
     let mut content = indent_list_text(&html.indent());
-    content.push_str(&collect_raw_inline_text(&html.content()));
+    content.push_str(&collect_html_content_text(&html.content()));
     if list_indent > 0 {
         content = strip_indent_preserve_tabs(&content, list_indent);
     }
@@ -1523,7 +1631,19 @@ fn render_textual(text: &MdTextual, out: &mut String) {
 fn render_inline_code(code: &MdInlineCode, out: &mut String) {
     out.push_str("<code>");
 
-    let content = collect_raw_inline_text(&code.content());
+    let mut content = String::new();
+    for item in code.content().iter() {
+        if !matches!(item, AnyMdInline::MdQuotePrefix(_)) {
+            collect_raw_inline_item(&item, &mut content);
+        }
+    }
+    if code
+        .syntax()
+        .ancestors()
+        .any(|ancestor| GfmTableCell::can_cast(ancestor.kind()))
+    {
+        content = unescape_table_cell_pipes(&content);
+    }
     // Code spans: normalize line endings to spaces
     let content = content.replace('\n', " ");
     // Code spans: strip one leading/trailing space if content has both
@@ -1540,6 +1660,35 @@ fn render_inline_code(code: &MdInlineCode, out: &mut String) {
 
     out.push_str(&escape_html(&content));
     out.push_str("</code>");
+}
+
+fn unescape_table_cell_pipes(text: &str) -> String {
+    let mut output = String::with_capacity(text.len());
+    let mut chars = text.chars().peekable();
+
+    while let Some(char) = chars.next() {
+        if char != '\\' {
+            output.push(char);
+            continue;
+        }
+
+        let mut backslashes = 1;
+        while chars.next_if_eq(&'\\').is_some() {
+            backslashes += 1;
+        }
+        if backslashes % 2 == 1 && chars.next_if_eq(&'|').is_some() {
+            for _ in 1..backslashes {
+                output.push('\\');
+            }
+            output.push('|');
+        } else {
+            for _ in 0..backslashes {
+                output.push('\\');
+            }
+        }
+    }
+
+    output
 }
 
 fn resolve_reference_label<L, F>(
@@ -1586,8 +1735,16 @@ fn render_autolink(autolink: &MdAutolink, out: &mut String) {
 
 /// Render inline HTML.
 fn render_inline_html(html: &MdInlineHtml, out: &mut String) {
-    let content = collect_raw_inline_text(&html.value());
-    out.push_str(&content);
+    if let Ok(token) = html.value_token() {
+        for comment in token
+            .leading_trivia()
+            .pieces()
+            .filter_map(|piece| piece.as_comments())
+        {
+            out.push_str(comment.text());
+        }
+        out.push_str(token.text_trimmed());
+    }
 }
 
 /// Render an entity reference into the current buffer.
@@ -1675,6 +1832,18 @@ fn collect_inline_text(list: &biome_markdown_syntax::MdInlineItemList) -> String
 }
 
 /// Collect raw inline text without processing escapes.
+/// The raw text of HTML block content: a single literal token holding the
+/// whole content verbatim, container prefixes included.
+fn collect_html_content_text(
+    content: &biome_rowan::SyntaxResult<biome_markdown_syntax::MdHtmlContent>,
+) -> String {
+    content
+        .as_ref()
+        .ok()
+        .and_then(|content| content.value_token().ok())
+        .map_or_else(String::new, |token| token.text().to_string())
+}
+
 fn collect_raw_inline_text(list: &biome_markdown_syntax::MdInlineItemList) -> String {
     let mut text = String::new();
     for item in list.iter() {
@@ -1691,11 +1860,13 @@ fn collect_raw_inline_item(item: &AnyMdInline, out: &mut String) {
                 out.push_str(token.text());
             }
         }
-        AnyMdInline::MdSoftBreak(_) => {
-            out.push('\n');
-        }
         AnyMdInline::MdHardLine(_) => {
             out.push('\n');
+        }
+        AnyMdInline::MdCodeContent(code) => {
+            if let Ok(token) = code.value_token() {
+                out.push_str(token.text());
+            }
         }
         _ => {
             // For other inline elements, collect their tokens
@@ -1908,6 +2079,9 @@ fn extract_alt_text_inline(inline: &AnyMdInline, ctx: &HtmlRenderContext, out: &
         AnyMdInline::MdInlineItalic(italic) => {
             out.push_str(&extract_alt_text(&italic.content(), ctx));
         }
+        AnyMdInline::GfmStrikethrough(strikethrough) => {
+            out.push_str(&extract_alt_text(&strikethrough.content(), ctx));
+        }
         AnyMdInline::MdInlineCode(code) => {
             // Plain text only — no <code> tags for alt attribute
             let content = collect_raw_inline_text(&code.content());
@@ -1941,7 +2115,7 @@ fn extract_alt_text_inline(inline: &AnyMdInline, ctx: &HtmlRenderContext, out: &
             let content = collect_raw_inline_text(&autolink.value());
             out.push_str(&content);
         }
-        AnyMdInline::MdHardLine(_) | AnyMdInline::MdSoftBreak(_) => {
+        AnyMdInline::MdHardLine(_) => {
             out.push(' ');
         }
         AnyMdInline::MdEntityReference(entity) => {
@@ -1956,6 +2130,15 @@ fn extract_alt_text_inline(inline: &AnyMdInline, ctx: &HtmlRenderContext, out: &
                 }
             }
         }
+        AnyMdInline::GfmTaskListItem(task_list_item) => {
+            out.push('[');
+            if let Ok(state) = task_list_item.state()
+                && let Ok(token) = state.value_token()
+            {
+                out.push_str(token.text());
+            }
+            out.push(']');
+        }
         AnyMdInline::MdInlineHtml(_) | AnyMdInline::MdHtmlBlock(_) => {
             // HTML tags are stripped in alt text
         }
@@ -1964,6 +2147,12 @@ fn extract_alt_text_inline(inline: &AnyMdInline, ctx: &HtmlRenderContext, out: &
         }
         AnyMdInline::MdIndentToken(_) => {
             // Indent tokens don't contribute text to alt attributes
+        }
+        AnyMdInline::MdCodeContent(_) => {
+            // Fenced code content never appears inside link or image text
+        }
+        AnyMdInline::MdxInlineExpression(_) | AnyMdInline::MdxJsxInlineTag(_) => {
+            // MDX expressions and tags produce JavaScript, not CommonMark text
         }
     }
 }
@@ -2045,10 +2234,11 @@ fn list_item_required_indent(entry: &ListItemIndent) -> usize {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::parse_markdown;
+    use crate::{MarkdownParserOptions, parse_markdown, parse_markdown_with_cache};
+    use biome_rowan::NodeCache;
 
     fn render(input: &str) -> String {
-        let parsed = parse_markdown(input);
+        let parsed = parse_markdown(input, MarkdownParserOptions::default());
         document_to_html(
             &parsed.tree(),
             parsed.list_tightness(),
@@ -2074,7 +2264,7 @@ mod tests {
 
     #[test]
     fn test_simple_paragraph() {
-        let parsed = parse_markdown("Hello, world!\n");
+        let parsed = parse_markdown("Hello, world!\n", MarkdownParserOptions::default());
         let html = document_to_html(
             &parsed.tree(),
             parsed.list_tightness(),
@@ -2085,8 +2275,38 @@ mod tests {
     }
 
     #[test]
+    fn test_table_autocompleted_cells_are_bounded() {
+        let input = "a | b | c | d\n--- | --- | --- | ---\nx\ny\nz\n";
+        let mut cache = NodeCache::default();
+        let parsed = parse_markdown_with_cache(
+            input,
+            &mut cache,
+            MarkdownParserOptions::default().with_gfm(true),
+        );
+        let tree = parsed.tree();
+        let table = tree
+            .syntax()
+            .descendants()
+            .find_map(GfmTable::cast)
+            .expect("input must parse as a table");
+        let context = HtmlRenderContext::new(
+            &tree,
+            parsed.list_tightness(),
+            parsed.list_item_indents(),
+            parsed.quote_indents(),
+        );
+
+        let html = render_table_with_limit(&table, &context, 2);
+
+        assert_eq!(html.matches("<td>").count(), 5);
+        assert!(html.contains("<td>x</td>"));
+        assert!(html.contains("<td>y</td>"));
+        assert!(html.contains("<td>z</td>"));
+    }
+
+    #[test]
     fn test_atx_header() {
-        let parsed = parse_markdown("# Hello\n");
+        let parsed = parse_markdown("# Hello\n", MarkdownParserOptions::default());
         let html = document_to_html(
             &parsed.tree(),
             parsed.list_tightness(),
@@ -2098,7 +2318,7 @@ mod tests {
 
     #[test]
     fn test_emphasis() {
-        let parsed = parse_markdown("*italic* and **bold**\n");
+        let parsed = parse_markdown("*italic* and **bold**\n", MarkdownParserOptions::default());
         let html = document_to_html(
             &parsed.tree(),
             parsed.list_tightness(),
@@ -2109,46 +2329,65 @@ mod tests {
     }
 
     #[test]
+    fn test_forward_reference_scopes_emphasis() {
+        assert_eq!(
+            render("*[foo*][ref]\n\n[ref]: /uri\n"),
+            "<p>*<a href=\"/uri\">foo*</a></p>\n"
+        );
+        assert_eq!(
+            render("[foo *bar][ref]*\n\n[ref]: /uri\n"),
+            "<p><a href=\"/uri\">foo *bar</a>*</p>\n"
+        );
+        assert_eq!(
+            render("# [foo][ref]  \n\n[ref]: /uri\n"),
+            "<h1><a href=\"/uri\">foo</a></h1>\n"
+        );
+    }
+
+    #[test]
     fn test_emphasis_complex_cases() {
         // Test: Nested
-        let parsed = parse_markdown("**bold *and italic* text**\n");
+        let parsed = parse_markdown(
+            "**bold *and italic* text**\n",
+            MarkdownParserOptions::default(),
+        );
         assert_eq!(
             parsed.syntax().kind(),
-            biome_markdown_syntax::MarkdownSyntaxKind::MD_DOCUMENT,
+            biome_markdown_syntax::MarkdownSyntaxKind::MD_ROOT,
             "Nested failed: {}",
             parsed.syntax()
         );
 
         // Test: Rule of 3
-        let parsed = parse_markdown("***bold italic***\n");
+        let parsed = parse_markdown("***bold italic***\n", MarkdownParserOptions::default());
         assert_eq!(
             parsed.syntax().kind(),
-            biome_markdown_syntax::MarkdownSyntaxKind::MD_DOCUMENT,
+            biome_markdown_syntax::MarkdownSyntaxKind::MD_ROOT,
             "Rule of 3 failed: {}",
             parsed.syntax()
         );
 
         // Test: Multiple runs
-        let parsed = parse_markdown("*a **b** c*\n");
+        let parsed = parse_markdown("*a **b** c*\n", MarkdownParserOptions::default());
         assert_eq!(
             parsed.syntax().kind(),
-            biome_markdown_syntax::MarkdownSyntaxKind::MD_DOCUMENT,
+            biome_markdown_syntax::MarkdownSyntaxKind::MD_ROOT,
             "Multiple runs failed: {}",
             parsed.syntax()
         );
 
         // Test: Overlapping
-        let parsed = parse_markdown("*foo**bar**baz*\n");
+        let parsed = parse_markdown("*foo**bar**baz*\n", MarkdownParserOptions::default());
         assert_eq!(
             parsed.syntax().kind(),
-            biome_markdown_syntax::MarkdownSyntaxKind::MD_DOCUMENT,
+            biome_markdown_syntax::MarkdownSyntaxKind::MD_ROOT,
             "Overlapping failed: {}",
             parsed.syntax()
         );
 
         // Test: Unbalanced emphasis (CommonMark example 442)
         // **foo* should produce *<em>foo</em>
-        let parsed = parse_markdown("**foo*\n");
+        let parsed = parse_markdown("**foo*\n", MarkdownParserOptions::default());
         let html = document_to_html(
             &parsed.tree(),
             parsed.list_tightness(),
@@ -2167,7 +2406,7 @@ mod tests {
     fn test_example_431() {
         // Test: Example 431 - nested emphasis with triple star closer
         // **foo *bar*** should produce <strong>foo <em>bar</em></strong>
-        let parsed = parse_markdown("**foo *bar***\n");
+        let parsed = parse_markdown("**foo *bar***\n", MarkdownParserOptions::default());
         let html = document_to_html(
             &parsed.tree(),
             parsed.list_tightness(),
@@ -2214,7 +2453,7 @@ mod tests {
     fn test_paren_depth_limit_in_destination() {
         let dest = format!("x{}y{}", "(".repeat(32), ")".repeat(32));
         let input = format!("[a]({dest})\n");
-        let parsed = parse_markdown(&input);
+        let parsed = parse_markdown(&input, MarkdownParserOptions::default());
         let html = document_to_html(
             &parsed.tree(),
             parsed.list_tightness(),
@@ -2229,7 +2468,7 @@ mod tests {
     fn test_paren_depth_limit_exceeded_in_destination() {
         let dest = format!("x{}y{}", "(".repeat(33), ")".repeat(33));
         let input = format!("[a]({dest})\n");
-        let parsed = parse_markdown(&input);
+        let parsed = parse_markdown(&input, MarkdownParserOptions::default());
         let html = document_to_html(
             &parsed.tree(),
             parsed.list_tightness(),
@@ -2274,7 +2513,7 @@ mod tests {
 
     #[test]
     fn test_hard_line_break_at_end_of_block_is_literal() {
-        let parsed = parse_markdown("foo\\\\\n");
+        let parsed = parse_markdown("foo\\\\\n", MarkdownParserOptions::default());
         let html = document_to_html(
             &parsed.tree(),
             parsed.list_tightness(),
@@ -2286,7 +2525,10 @@ mod tests {
 
     #[test]
     fn test_hard_break_in_blockquote() {
-        let parsed = parse_markdown("> foo  \n> bar  \n>\n> baz");
+        let parsed = parse_markdown(
+            "> foo  \n> bar  \n>\n> baz",
+            MarkdownParserOptions::default(),
+        );
         let html = document_to_html(
             &parsed.tree(),
             parsed.list_tightness(),
@@ -2301,7 +2543,10 @@ mod tests {
 
     #[test]
     fn test_hard_break_nested_quote_in_list() {
-        let parsed = parse_markdown("- > quoted  \n  > line  \n  >\n  > next para\n\n- after\n");
+        let parsed = parse_markdown(
+            "- > quoted  \n  > line  \n  >\n  > next para\n\n- after\n",
+            MarkdownParserOptions::default(),
+        );
         let html = document_to_html(
             &parsed.tree(),
             parsed.list_tightness(),
@@ -2318,7 +2563,7 @@ mod tests {
     fn test_tight_list_marker_split() {
         // Two tight lists separated by blank line with different markers
         let input = "- foo\n- bar\n\n* baz\n";
-        let parsed = parse_markdown(input);
+        let parsed = parse_markdown(input, MarkdownParserOptions::default());
         let html = document_to_html(
             &parsed.tree(),
             parsed.list_tightness(),
@@ -2334,7 +2579,7 @@ mod tests {
     #[test]
     fn test_tight_list_basic() {
         let input = "- foo\n- bar\n";
-        let parsed = parse_markdown(input);
+        let parsed = parse_markdown(input, MarkdownParserOptions::default());
         let html = document_to_html(
             &parsed.tree(),
             parsed.list_tightness(),
@@ -2347,7 +2592,7 @@ mod tests {
     #[test]
     fn test_loose_list_same_marker() {
         let input = "- foo\n\n- bar\n";
-        let parsed = parse_markdown(input);
+        let parsed = parse_markdown(input, MarkdownParserOptions::default());
         let html = document_to_html(
             &parsed.tree(),
             parsed.list_tightness(),
@@ -2364,7 +2609,7 @@ mod tests {
     fn test_ordered_delim_split_tight() {
         // Different ordered delimiters across blank line → separate tight lists
         let input = "1. First\n2. Second\n\n1) Third\n2) Fourth\n";
-        let parsed = parse_markdown(input);
+        let parsed = parse_markdown(input, MarkdownParserOptions::default());
         let html = document_to_html(
             &parsed.tree(),
             parsed.list_tightness(),
@@ -2381,7 +2626,7 @@ mod tests {
     fn test_cross_type_split_tight() {
         // Bullet → ordered across blank line → separate tight lists
         let input = "- bullet\n\n1. ordered\n";
-        let parsed = parse_markdown(input);
+        let parsed = parse_markdown(input, MarkdownParserOptions::default());
         let html = document_to_html(
             &parsed.tree(),
             parsed.list_tightness(),
@@ -2396,7 +2641,7 @@ mod tests {
 
     #[test]
     fn test_tight_bullet_list_in_blockquote() {
-        let parsed = parse_markdown("> - a\n> - b\n");
+        let parsed = parse_markdown("> - a\n> - b\n", MarkdownParserOptions::default());
         let html = document_to_html(
             &parsed.tree(),
             parsed.list_tightness(),
@@ -2411,7 +2656,7 @@ mod tests {
 
     #[test]
     fn test_tight_ordered_list_in_blockquote() {
-        let parsed = parse_markdown("> 1. a\n> 2. b\n");
+        let parsed = parse_markdown("> 1. a\n> 2. b\n", MarkdownParserOptions::default());
         let html = document_to_html(
             &parsed.tree(),
             parsed.list_tightness(),
@@ -2426,7 +2671,7 @@ mod tests {
 
     #[test]
     fn test_tight_three_item_bullet_list_in_blockquote() {
-        let parsed = parse_markdown("> - a\n> - b\n> - c\n");
+        let parsed = parse_markdown("> - a\n> - b\n> - c\n", MarkdownParserOptions::default());
         let html = document_to_html(
             &parsed.tree(),
             parsed.list_tightness(),
@@ -2441,7 +2686,7 @@ mod tests {
 
     #[test]
     fn test_tight_list_not_in_blockquote() {
-        let parsed = parse_markdown("- a\n- b\n");
+        let parsed = parse_markdown("- a\n- b\n", MarkdownParserOptions::default());
         let html = document_to_html(
             &parsed.tree(),
             parsed.list_tightness(),

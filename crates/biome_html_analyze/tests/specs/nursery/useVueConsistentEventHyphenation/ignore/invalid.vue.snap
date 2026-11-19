@@ -1,0 +1,76 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<template>
+  <!-- `ignore` matches whole event names only -->
+  <VueComponent @customEventName="onEvent" />
+  <!-- `ignoreTags` matches tag names exactly -->
+  <IgnoredComponentTwo @otherEvent="onEvent" />
+</template>
+
+```
+
+# Diagnostics
+```
+invalid.vue:4:18 lint/nursery/useVueConsistentEventHyphenation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The event name customEventName isn't hyphenated.
+  
+    2 │ <template>
+    3 │   <!-- `ignore` matches whole event names only -->
+  > 4 │   <VueComponent @customEventName="onEvent" />
+      │                  ^^^^^^^^^^^^^^^
+    5 │   <!-- `ignoreTags` matches tag names exactly -->
+    6 │   <IgnoredComponentTwo @otherEvent="onEvent" />
+  
+  i Vue matches event listeners regardless of their casing, so mixing camelCase and kebab-case event names makes templates inconsistent.
+  
+  i This project requires hyphenated (kebab-case) event names.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Rename the event to custom-event-name.
+  
+    2 2 │   <template>
+    3 3 │     <!-- `ignore` matches whole event names only -->
+    4   │ - ··<VueComponent·@customEventName="onEvent"·/>
+      4 │ + ··<VueComponent·@custom-event-name="onEvent"·/>
+    5 5 │     <!-- `ignoreTags` matches tag names exactly -->
+    6 6 │     <IgnoredComponentTwo @otherEvent="onEvent" />
+  
+
+```
+
+```
+invalid.vue:6:25 lint/nursery/useVueConsistentEventHyphenation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The event name otherEvent isn't hyphenated.
+  
+    4 │   <VueComponent @customEventName="onEvent" />
+    5 │   <!-- `ignoreTags` matches tag names exactly -->
+  > 6 │   <IgnoredComponentTwo @otherEvent="onEvent" />
+      │                         ^^^^^^^^^^
+    7 │ </template>
+    8 │ 
+  
+  i Vue matches event listeners regardless of their casing, so mixing camelCase and kebab-case event names makes templates inconsistent.
+  
+  i This project requires hyphenated (kebab-case) event names.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Rename the event to other-event.
+  
+    4 4 │     <VueComponent @customEventName="onEvent" />
+    5 5 │     <!-- `ignoreTags` matches tag names exactly -->
+    6   │ - ··<IgnoredComponentTwo·@otherEvent="onEvent"·/>
+      6 │ + ··<IgnoredComponentTwo·@other-event="onEvent"·/>
+    7 7 │   </template>
+    8 8 │   
+  
+
+```

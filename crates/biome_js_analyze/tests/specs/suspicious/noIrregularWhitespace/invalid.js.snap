@@ -24,6 +24,11 @@ expression: invalid.js
 /* \u{202f} */ const foo = 'thing';
 /* \u{205f} */ const foo = 'thing';
 /* \u{3000} */ const　foo　=　'thing';
+　const leading = 1;
+function indented() {
+  return 1; // \u{2003} before a comment
+}
+ 
 
 ```
 
@@ -1055,7 +1060,7 @@ invalid.js:19:21 lint/suspicious/noIrregularWhitespace ━━━━━━━━�
   > 19 │ /* \u{205f} */ const␠foo␠=␠'thing';
        │                     ^
     20 │ /* \u{3000} */ const␠foo␠=␠'thing';
-    21 │ 
+    21 │ ␠const leading = 1;
   
   i Irregular whitespaces can cause issues to other parsers, and make the code harder to debug.
   
@@ -1074,7 +1079,7 @@ invalid.js:19:25 lint/suspicious/noIrregularWhitespace ━━━━━━━━�
   > 19 │ /* \u{205f} */ const␠foo␠=␠'thing';
        │                         ^
     20 │ /* \u{3000} */ const␠foo␠=␠'thing';
-    21 │ 
+    21 │ ␠const leading = 1;
   
   i Irregular whitespaces can cause issues to other parsers, and make the code harder to debug.
   
@@ -1093,7 +1098,7 @@ invalid.js:19:27 lint/suspicious/noIrregularWhitespace ━━━━━━━━�
   > 19 │ /* \u{205f} */ const␠foo␠=␠'thing';
        │                           ^
     20 │ /* \u{3000} */ const␠foo␠=␠'thing';
-    21 │ 
+    21 │ ␠const leading = 1;
   
   i Irregular whitespaces can cause issues to other parsers, and make the code harder to debug.
   
@@ -1111,7 +1116,8 @@ invalid.js:20:21 lint/suspicious/noIrregularWhitespace ━━━━━━━━�
     19 │ /* \u{205f} */ const␠foo␠=␠'thing';
   > 20 │ /* \u{3000} */ const␠foo␠=␠'thing';
        │                     ^
-    21 │ 
+    21 │ ␠const leading = 1;
+    22 │ function indented() {
   
   i Irregular whitespaces can cause issues to other parsers, and make the code harder to debug.
   
@@ -1129,7 +1135,8 @@ invalid.js:20:25 lint/suspicious/noIrregularWhitespace ━━━━━━━━�
     19 │ /* \u{205f} */ const␠foo␠=␠'thing';
   > 20 │ /* \u{3000} */ const␠foo␠=␠'thing';
        │                         ^
-    21 │ 
+    21 │ ␠const leading = 1;
+    22 │ function indented() {
   
   i Irregular whitespaces can cause issues to other parsers, and make the code harder to debug.
   
@@ -1147,7 +1154,83 @@ invalid.js:20:27 lint/suspicious/noIrregularWhitespace ━━━━━━━━�
     19 │ /* \u{205f} */ const␠foo␠=␠'thing';
   > 20 │ /* \u{3000} */ const␠foo␠=␠'thing';
        │                           ^
-    21 │ 
+    21 │ ␠const leading = 1;
+    22 │ function indented() {
+  
+  i Irregular whitespaces can cause issues to other parsers, and make the code harder to debug.
+  
+  i Replace the irregular whitespaces with normal whitespaces or tabs.
+  
+
+```
+
+```
+invalid.js:21:1 lint/suspicious/noIrregularWhitespace ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Irregular whitespaces found.
+  
+    19 │ /* \u{205f} */ const␠foo␠=␠'thing';
+    20 │ /* \u{3000} */ const␠foo␠=␠'thing';
+  > 21 │ ␠const leading = 1;
+       │ ^
+    22 │ function indented() {
+    23 │ ␠␠return 1;␠// \u{2003} before a comment
+  
+  i Irregular whitespaces can cause issues to other parsers, and make the code harder to debug.
+  
+  i Replace the irregular whitespaces with normal whitespaces or tabs.
+  
+
+```
+
+```
+invalid.js:23:1 lint/suspicious/noIrregularWhitespace ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Irregular whitespaces found.
+  
+    21 │ ␠const leading = 1;
+    22 │ function indented() {
+  > 23 │ ␠␠return 1;␠// \u{2003} before a comment
+       │ ^^
+    24 │ }
+    25 │ ␠
+  
+  i Irregular whitespaces can cause issues to other parsers, and make the code harder to debug.
+  
+  i Replace the irregular whitespaces with normal whitespaces or tabs.
+  
+
+```
+
+```
+invalid.js:23:12 lint/suspicious/noIrregularWhitespace ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Irregular whitespaces found.
+  
+    21 │ ␠const leading = 1;
+    22 │ function indented() {
+  > 23 │ ␠␠return 1;␠// \u{2003} before a comment
+       │            ^
+    24 │ }
+    25 │ ␠
+  
+  i Irregular whitespaces can cause issues to other parsers, and make the code harder to debug.
+  
+  i Replace the irregular whitespaces with normal whitespaces or tabs.
+  
+
+```
+
+```
+invalid.js:25:1 lint/suspicious/noIrregularWhitespace ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Irregular whitespaces found.
+  
+    23 │ ␠␠return 1;␠// \u{2003} before a comment
+    24 │ }
+  > 25 │ ␠
+       │ ^
+    26 │ 
   
   i Irregular whitespaces can cause issues to other parsers, and make the code harder to debug.
   

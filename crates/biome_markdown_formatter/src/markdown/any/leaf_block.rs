@@ -9,6 +9,7 @@ impl FormatRule<AnyMdLeafBlock> for FormatAnyMdLeafBlock {
     fn fmt(&self, node: &AnyMdLeafBlock, f: &mut MarkdownFormatter) -> FormatResult<()> {
         match node {
             AnyMdLeafBlock::AnyMdCodeBlock(node) => node.format().fmt(f),
+            AnyMdLeafBlock::GfmTable(node) => node.format().fmt(f),
             AnyMdLeafBlock::MdContinuationIndent(node) => node.format().fmt(f),
             AnyMdLeafBlock::MdHeader(node) => node.format().fmt(f),
             AnyMdLeafBlock::MdHtmlBlock(node) => node.format().fmt(f),
@@ -17,6 +18,9 @@ impl FormatRule<AnyMdLeafBlock> for FormatAnyMdLeafBlock {
             AnyMdLeafBlock::MdParagraph(node) => node.format().fmt(f),
             AnyMdLeafBlock::MdSetextHeader(node) => node.format().fmt(f),
             AnyMdLeafBlock::MdThematicBreakBlock(node) => node.format().fmt(f),
+            AnyMdLeafBlock::MdxBlockExpression(node) => node.format().fmt(f),
+            AnyMdLeafBlock::MdxEsmBlock(node) => node.format().fmt(f),
+            AnyMdLeafBlock::MdxJsxBlockTag(node) => node.format().fmt(f),
         }
     }
 }

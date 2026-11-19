@@ -1,0 +1,67 @@
+/* should generate diagnostics */
+@mixin descending {
+  .mixin-parent .mixin-target {}
+  .mixin-target {}
+}
+@include descending;
+
+@mixin content-wrapper {
+  @content;
+}
+@include content-wrapper {
+  .include-parent .include-target {}
+  .include-target {}
+}
+
+@at-root {
+  .at-root-parent .at-root-target {}
+  .at-root-target {}
+}
+
+.outer {
+  @at-root {
+    .nested-at-root-parent .nested-at-root-target {}
+    .nested-at-root-target {}
+  }
+
+  @at-root {
+    & .amp-at-root-parent .amp-at-root-target {}
+    & .amp-at-root-target {}
+  }
+
+  @at-root (with: rule) {
+    .with-rule-parent .with-rule-target {}
+    .with-rule-target {}
+  }
+
+  @at-root (without: rule) {
+    .without-rule-parent .without-rule-target {}
+    .without-rule-target {}
+  }
+}
+
+$condition: true;
+@if $condition {
+  .if-parent .if-target {}
+  .if-target {}
+} @else {
+  .else-parent .else-target {}
+  .else-target {}
+}
+
+@for $index from 1 through 2 {
+  .for-parent .for-target {}
+  .for-target {}
+}
+
+@each $name in first, second {
+  .each-parent .each-target {}
+  .each-target {}
+}
+
+$count: 0;
+@while $count < 1 {
+  .while-parent .while-target {}
+  .while-target {}
+  $count: $count + 1;
+}

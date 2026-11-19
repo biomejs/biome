@@ -30,6 +30,12 @@ article {
 x-Foo {
 }
 
+unknown::view-transition-group(page) {
+}
+
+::cue(unknown) {
+}
+
 ```
 
 # Diagnostics
@@ -44,6 +50,8 @@ invalid.css:1:1 lint/correctness/noUnknownTypeSelector ━━━━━━━━�
     3 │ 
   
   i See MDN web docs for more details.
+  
+  i A selector for an element that does not exist never matches, so its styles are never applied.
   
   i Consider replacing the unknown type selector with valid one.
   
@@ -64,6 +72,8 @@ invalid.css:4:4 lint/correctness/noUnknownTypeSelector ━━━━━━━━�
   
   i See MDN web docs for more details.
   
+  i A selector for an element that does not exist never matches, so its styles are never applied.
+  
   i Consider replacing the unknown type selector with valid one.
   
 
@@ -82,6 +92,8 @@ invalid.css:7:1 lint/correctness/noUnknownTypeSelector ━━━━━━━━�
     9 │ 
   
   i See MDN web docs for more details.
+  
+  i A selector for an element that does not exist never matches, so its styles are never applied.
   
   i Consider replacing the unknown type selector with valid one.
   
@@ -102,6 +114,8 @@ invalid.css:10:6 lint/correctness/noUnknownTypeSelector ━━━━━━━━
   
   i See MDN web docs for more details.
   
+  i A selector for an element that does not exist never matches, so its styles are never applied.
+  
   i Consider replacing the unknown type selector with valid one.
   
 
@@ -121,6 +135,8 @@ invalid.css:13:1 lint/correctness/noUnknownTypeSelector ━━━━━━━━
   
   i See MDN web docs for more details.
   
+  i A selector for an element that does not exist never matches, so its styles are never applied.
+  
   i Consider replacing the unknown type selector with valid one.
   
 
@@ -138,6 +154,8 @@ invalid.css:17:1 lint/correctness/noUnknownTypeSelector ━━━━━━━━
     19 │ 
   
   i See MDN web docs for more details.
+  
+  i A selector for an element that does not exist never matches, so its styles are never applied.
   
   i Consider replacing the unknown type selector with valid one.
   
@@ -158,6 +176,8 @@ invalid.css:20:1 lint/correctness/noUnknownTypeSelector ━━━━━━━━
   
   i See MDN web docs for more details.
   
+  i A selector for an element that does not exist never matches, so its styles are never applied.
+  
   i Consider replacing the unknown type selector with valid one.
   
 
@@ -176,6 +196,50 @@ invalid.css:24:1 lint/correctness/noUnknownTypeSelector ━━━━━━━━
     26 │ 
   
   i See MDN web docs for more details.
+  
+  i A selector for an element that does not exist never matches, so its styles are never applied.
+  
+  i Consider replacing the unknown type selector with valid one.
+  
+
+```
+
+```
+invalid.css:27:1 lint/correctness/noUnknownTypeSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unknown type selector is not allowed.
+  
+    25 │ }
+    26 │ 
+  > 27 │ unknown::view-transition-group(page) {
+       │ ^^^^^^^
+    28 │ }
+    29 │ 
+  
+  i See MDN web docs for more details.
+  
+  i A selector for an element that does not exist never matches, so its styles are never applied.
+  
+  i Consider replacing the unknown type selector with valid one.
+  
+
+```
+
+```
+invalid.css:30:7 lint/correctness/noUnknownTypeSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unknown type selector is not allowed.
+  
+    28 │ }
+    29 │ 
+  > 30 │ ::cue(unknown) {
+       │       ^^^^^^^
+    31 │ }
+    32 │ 
+  
+  i See MDN web docs for more details.
+  
+  i A selector for an element that does not exist never matches, so its styles are never applied.
   
   i Consider replacing the unknown type selector with valid one.
   

@@ -84,7 +84,10 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "useSelfClosingElements",
         language: "js",
-        sources: &[RuleSource::EslintStylistic("jsx-self-closing-comp").same()],
+        sources: &[
+            RuleSource::EslintReact("self-closing-comp").same(),
+            RuleSource::EslintStylistic("jsx-self-closing-comp").same(),
+        ],
         recommended: false,
         severity: Severity::Information,
         fix_kind: FixKind::Safe,
@@ -103,7 +106,7 @@ impl Rule for UseSelfClosingElements {
             .opening_element()
             .is_ok_and(|node| node.name().is_ok_and(|name| name.as_jsx_name().is_some()));
 
-        if node.children().is_empty() && !(ctx.options().ignore_html_elements() && is_html_element)
+        if node.elements().is_empty() && !(ctx.options().ignore_html_elements() && is_html_element)
         {
             Some(())
         } else {
@@ -116,9 +119,12 @@ impl Rule for UseSelfClosingElements {
             rule_category!(),
             ctx.query().range(),
             markup! {
-                "JSX elements without children should be marked as self-closing. In JSX, it is valid for any element to be self-closing."
+                "JSX elements without children should be marked as self-closing."
             },
-        ))
+        )
+        .note(markup! {
+            "In JSX, it is valid for any element to be self-closing, and the shorter form is easier to read."
+        }))
     }
 
     fn action(ctx: &RuleContext<Self>, _: &Self::State) -> Option<JsRuleAction> {
@@ -162,9 +168,14 @@ impl Rule for UseSelfClosingElements {
             l_angle_token.ok()?,
             name.ok()?,
             attributes,
-            JsSyntaxToken::new_detached(T![/], &slash_token, leading_trivia, []),
             r_angle_token,
-        );
+        )
+        .with_slash_token(JsSyntaxToken::new_detached(
+            T![/],
+            &slash_token,
+            leading_trivia,
+            [],
+        ));
         if let Some(type_arguments) = type_arguments {
             self_closing_element_builder =
                 self_closing_element_builder.with_type_arguments(type_arguments);

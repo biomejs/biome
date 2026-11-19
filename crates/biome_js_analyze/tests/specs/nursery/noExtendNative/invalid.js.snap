@@ -1,0 +1,303 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+
+// Direct prototype assignment.
+Object.prototype.extra = "a";
+Array.prototype.times = function () {};
+String.prototype["x"] = 1;
+
+// Computed prototype access via bracket on prototype property.
+Number["prototype"]["y"] = 2;
+
+// Object.defineProperty / defineProperties on a native prototype.
+Object.defineProperty(Array.prototype, "times", { value: 999 });
+Object.defineProperties(String.prototype, { foo: { value: 1 } });
+
+// Parenthesized prototype expression.
+(Array.prototype).times = 1;
+(Object["prototype"]).x = 2;
+
+// Parenthesized object with prototype access.
+(Array).prototype.times = 1;
+
+// Computed method name on defineProperty.
+Object["defineProperty"](String.prototype, "x", { value: 1 });
+
+// Parenthesized callee object.
+(Object).defineProperty(Number.prototype, "x", { value: 1 });
+
+// WeakRef and FinalizationRegistry.
+WeakRef.prototype.foo = 1;
+FinalizationRegistry.prototype.foo = 1;
+
+```
+
+# Diagnostics
+```
+invalid.js:4:1 lint/nursery/noExtendNative ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid extending the prototype of 'Object'.
+  
+    3 │ // Direct prototype assignment.
+  > 4 │ Object.prototype.extra = "a";
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ Array.prototype.times = function () {};
+    6 │ String.prototype["x"] = 1;
+  
+  i Patching a native prototype leaks the property into every value of that type and can collide with other code.
+  
+  i Use a subclass or a standalone helper instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:5:1 lint/nursery/noExtendNative ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid extending the prototype of 'Array'.
+  
+    3 │ // Direct prototype assignment.
+    4 │ Object.prototype.extra = "a";
+  > 5 │ Array.prototype.times = function () {};
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ String.prototype["x"] = 1;
+    7 │ 
+  
+  i Patching a native prototype leaks the property into every value of that type and can collide with other code.
+  
+  i Use a subclass or a standalone helper instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:6:1 lint/nursery/noExtendNative ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid extending the prototype of 'String'.
+  
+    4 │ Object.prototype.extra = "a";
+    5 │ Array.prototype.times = function () {};
+  > 6 │ String.prototype["x"] = 1;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ 
+    8 │ // Computed prototype access via bracket on prototype property.
+  
+  i Patching a native prototype leaks the property into every value of that type and can collide with other code.
+  
+  i Use a subclass or a standalone helper instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:9:1 lint/nursery/noExtendNative ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid extending the prototype of 'Number'.
+  
+     8 │ // Computed prototype access via bracket on prototype property.
+   > 9 │ Number["prototype"]["y"] = 2;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ 
+    11 │ // Object.defineProperty / defineProperties on a native prototype.
+  
+  i Patching a native prototype leaks the property into every value of that type and can collide with other code.
+  
+  i Use a subclass or a standalone helper instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:12:1 lint/nursery/noExtendNative ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid extending the prototype of 'Array'.
+  
+    11 │ // Object.defineProperty / defineProperties on a native prototype.
+  > 12 │ Object.defineProperty(Array.prototype, "times", { value: 999 });
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │ Object.defineProperties(String.prototype, { foo: { value: 1 } });
+    14 │ 
+  
+  i Patching a native prototype leaks the property into every value of that type and can collide with other code.
+  
+  i Use a subclass or a standalone helper instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:13:1 lint/nursery/noExtendNative ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid extending the prototype of 'String'.
+  
+    11 │ // Object.defineProperty / defineProperties on a native prototype.
+    12 │ Object.defineProperty(Array.prototype, "times", { value: 999 });
+  > 13 │ Object.defineProperties(String.prototype, { foo: { value: 1 } });
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    14 │ 
+    15 │ // Parenthesized prototype expression.
+  
+  i Patching a native prototype leaks the property into every value of that type and can collide with other code.
+  
+  i Use a subclass or a standalone helper instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:16:1 lint/nursery/noExtendNative ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid extending the prototype of 'Array'.
+  
+    15 │ // Parenthesized prototype expression.
+  > 16 │ (Array.prototype).times = 1;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    17 │ (Object["prototype"]).x = 2;
+    18 │ 
+  
+  i Patching a native prototype leaks the property into every value of that type and can collide with other code.
+  
+  i Use a subclass or a standalone helper instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:17:1 lint/nursery/noExtendNative ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid extending the prototype of 'Object'.
+  
+    15 │ // Parenthesized prototype expression.
+    16 │ (Array.prototype).times = 1;
+  > 17 │ (Object["prototype"]).x = 2;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    18 │ 
+    19 │ // Parenthesized object with prototype access.
+  
+  i Patching a native prototype leaks the property into every value of that type and can collide with other code.
+  
+  i Use a subclass or a standalone helper instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:20:1 lint/nursery/noExtendNative ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid extending the prototype of 'Array'.
+  
+    19 │ // Parenthesized object with prototype access.
+  > 20 │ (Array).prototype.times = 1;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    21 │ 
+    22 │ // Computed method name on defineProperty.
+  
+  i Patching a native prototype leaks the property into every value of that type and can collide with other code.
+  
+  i Use a subclass or a standalone helper instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:23:1 lint/nursery/noExtendNative ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid extending the prototype of 'String'.
+  
+    22 │ // Computed method name on defineProperty.
+  > 23 │ Object["defineProperty"](String.prototype, "x", { value: 1 });
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    24 │ 
+    25 │ // Parenthesized callee object.
+  
+  i Patching a native prototype leaks the property into every value of that type and can collide with other code.
+  
+  i Use a subclass or a standalone helper instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:26:1 lint/nursery/noExtendNative ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid extending the prototype of 'Number'.
+  
+    25 │ // Parenthesized callee object.
+  > 26 │ (Object).defineProperty(Number.prototype, "x", { value: 1 });
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    27 │ 
+    28 │ // WeakRef and FinalizationRegistry.
+  
+  i Patching a native prototype leaks the property into every value of that type and can collide with other code.
+  
+  i Use a subclass or a standalone helper instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:29:1 lint/nursery/noExtendNative ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid extending the prototype of 'WeakRef'.
+  
+    28 │ // WeakRef and FinalizationRegistry.
+  > 29 │ WeakRef.prototype.foo = 1;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    30 │ FinalizationRegistry.prototype.foo = 1;
+    31 │ 
+  
+  i Patching a native prototype leaks the property into every value of that type and can collide with other code.
+  
+  i Use a subclass or a standalone helper instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:30:1 lint/nursery/noExtendNative ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid extending the prototype of 'FinalizationRegistry'.
+  
+    28 │ // WeakRef and FinalizationRegistry.
+    29 │ WeakRef.prototype.foo = 1;
+  > 30 │ FinalizationRegistry.prototype.foo = 1;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    31 │ 
+  
+  i Patching a native prototype leaks the property into every value of that type and can collide with other code.
+  
+  i Use a subclass or a standalone helper instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

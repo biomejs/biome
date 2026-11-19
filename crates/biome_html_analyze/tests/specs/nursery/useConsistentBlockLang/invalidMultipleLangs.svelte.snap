@@ -1,0 +1,56 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalidMultipleLangs.svelte
+---
+# Input
+```svelte
+<!-- should generate diagnostics -->
+<style>
+</style>
+
+<style lang="css">
+</style>
+
+```
+
+# Diagnostics
+```
+invalidMultipleLangs.svelte:2:1 lint/nursery/useConsistentBlockLang ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This <style> block is missing the lang attribute.
+  
+    1 │ <!-- should generate diagnostics -->
+  > 2 │ <style>
+      │ ^^^^^^^
+    3 │ </style>
+    4 │ 
+  
+  i This project restricts the languages of <style> blocks so that every component is written the same way.
+  
+  i The lang attribute of <style> blocks must be one of scss, less.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidMultipleLangs.svelte:5:8 lint/nursery/useConsistentBlockLang ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The language css isn't allowed in <style> blocks.
+  
+    3 │ </style>
+    4 │ 
+  > 5 │ <style lang="css">
+      │        ^^^^^^^^^^
+    6 │ </style>
+    7 │ 
+  
+  i This project restricts the languages of <style> blocks so that every component is written the same way.
+  
+  i The lang attribute of <style> blocks must be one of scss, less.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

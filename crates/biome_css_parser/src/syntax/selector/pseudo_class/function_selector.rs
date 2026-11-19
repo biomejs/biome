@@ -4,24 +4,25 @@ use crate::syntax::css_modules::{
     slotted_or_deep_not_allowed,
 };
 use crate::syntax::parse_error::expected_selector;
-use crate::syntax::selector::{
-    eat_or_recover_selector_function_close_token, parse_selector,
-    recover_selector_function_parameter,
-};
+use crate::syntax::selector::{SelectorList, eat_or_recover_selector_function_close_token};
 use crate::syntax::{CssSyntaxFeatures, parse_regular_identifier};
-use biome_css_syntax::CssSyntaxKind::CSS_PSEUDO_CLASS_FUNCTION_SELECTOR;
-use biome_css_syntax::CssSyntaxKind::*;
-use biome_css_syntax::T;
+use biome_css_syntax::{CssSyntaxKind::*, T, decode_css_identifier};
+use biome_parser::parse_lists::ParseSeparatedList;
 use biome_parser::parsed_syntax::ParsedSyntax;
 use biome_parser::parsed_syntax::ParsedSyntax::{Absent, Present};
-use biome_parser::{Parser, SyntaxFeature};
+use biome_parser::{Parser, SyntaxFeature, token_set};
 
 /// Checks if the current parser position is at a pseudo-class function selector for CSS Modules and SFC Vue.
 ///
 /// This function determines if the parser is currently positioned at the start of a `:local` or `:global`.
 #[inline]
 pub(crate) fn is_at_pseudo_class_function_selector(p: &mut CssParser) -> bool {
-    p.at_ts(CSS_MODULES_SCOPE_SET) && p.nth_at(1, T!['('])
+    (p.at_ts(CSS_MODULES_SCOPE_SET)
+        || matches!(
+            decode_css_identifier(p.cur_text()).as_ref(),
+            "local" | "global"
+        ))
+        && p.nth_at(1, T!['('])
 }
 
 #[inline]
@@ -69,19 +70,23 @@ fn parse_pseudo_selector(p: &mut CssParser) -> ParsedSyntax {
     parse_regular_identifier(p).ok();
     p.bump(T!['(']);
 
-    let kind = match parse_selector(p) {
-        Present(selector) => {
-            if eat_or_recover_selector_function_close_token(p, selector, expected_selector) {
-                CSS_PSEUDO_CLASS_FUNCTION_SELECTOR
-            } else {
-                CSS_BOGUS_PSEUDO_CLASS
-            }
-        }
-        Absent => {
-            recover_selector_function_parameter(p, expected_selector);
-            p.expect(T![')']);
-            CSS_BOGUS_PSEUDO_CLASS
-        }
+    let list = SelectorList::default()
+        .with_end_kind_ts(token_set!(T![')']))
+        .disable_recovery()
+        .parse_list(p);
+    let list_range = list.range(p);
+
+    if list_range.is_empty() && p.at(T![')']) {
+        let diagnostic = expected_selector(p, list_range);
+        p.error(diagnostic);
+    }
+
+    let kind = if eat_or_recover_selector_function_close_token(p, list, expected_selector)
+        && !list_range.is_empty()
+    {
+        CSS_PSEUDO_CLASS_FUNCTION_SELECTOR_LIST
+    } else {
+        CSS_BOGUS_PSEUDO_CLASS
     };
 
     Present(m.complete(p, kind))

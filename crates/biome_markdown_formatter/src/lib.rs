@@ -1,34 +1,49 @@
+mod bullet_list;
 mod comments;
 pub mod context;
 mod cst;
 mod generated;
+mod gfm;
 mod markdown;
+mod mdx;
 mod prelude;
+mod quote;
 mod shared;
 mod trivia;
 mod verbatim;
 pub(crate) mod words;
 
+use crate::comments::FormatMarkdownLeadingComments;
 pub(crate) use crate::context::MarkdownFormatContext;
 use crate::prelude::{format_bogus_node, format_suppressed_node};
 pub(crate) use crate::trivia::*;
 use crate::{context::MdFormatOptions, cst::FormatMdSyntaxToken};
 use biome_formatter::{
-    FormatContext, FormatLanguage, FormatResult, Formatted, TransformSourceMap, prelude::*, write,
+    FormatContext, FormatLanguage, FormatResult, Formatted, TransformSourceMap, rowan::prelude::*,
+    write,
 };
 use biome_markdown_syntax::{MarkdownLanguage, MarkdownSyntaxNode};
-use biome_rowan::AstNode;
+use biome_rowan::{AstNode, TextRange};
 
 pub(crate) type MarkdownFormatter<'buf> = Formatter<'buf, MarkdownFormatContext>;
 
 #[derive(Debug, Clone, Default)]
 pub struct MdFormatLanguage {
     options: MdFormatOptions,
+    embedded_node_ranges: Vec<TextRange>,
 }
 
 impl MdFormatLanguage {
     pub fn new(options: MdFormatOptions) -> Self {
-        Self { options }
+        Self {
+            options,
+            embedded_node_ranges: Vec::new(),
+        }
+    }
+
+    pub fn with_embedded_node_ranges(mut self, embedded_node_ranges: Vec<TextRange>) -> Self {
+        self.embedded_node_ranges = embedded_node_ranges;
+        self
     }
 }
 
@@ -39,11 +54,12 @@ impl FormatLanguage for MdFormatLanguage {
 
     fn create_context(
         self,
-        _root: &MarkdownSyntaxNode,
+        root: &MarkdownSyntaxNode,
         source_map: Option<TransformSourceMap>,
         _delegate_fmt_embedded_nodes: bool,
     ) -> MarkdownFormatContext {
-        MarkdownFormatContext::new(self.options.clone()).with_source_map(source_map)
+        MarkdownFormatContext::new(self.options, root, source_map)
+            .with_embedded_node_ranges(self.embedded_node_ranges)
     }
 
     fn options(&self) -> &<Self::Context as FormatContext>::Options {
@@ -88,7 +104,7 @@ where
 
 /// Implement [AsFormat] for [Option] when `T` implements [AsFormat]
 ///
-/// Allows to call format on optional AST fields without having to unwrap the field first.
+/// Allows calling format on optional AST fields without having to unwrap the field first.
 impl<T, C> AsFormat<C> for Option<T>
 where
     T: AsFormat<C>,
@@ -125,7 +141,7 @@ where
 
 /// Implement [IntoFormat] for [Option] when `T` implements [IntoFormat]
 ///
-/// Allows to call format on optional AST fields without having to unwrap the field first.
+/// Allows calling format on optional AST fields without having to unwrap the field first.
 impl<T, Context> IntoFormat<Context> for Option<T>
 where
     T: IntoFormat<Context>,
@@ -237,7 +253,8 @@ where
     fn fmt_fields(&self, node: &N, f: &mut MarkdownFormatter) -> FormatResult<()>;
 
     fn fmt_leading_comments(&self, node: &N, f: &mut MarkdownFormatter) -> FormatResult<()> {
-        format_leading_comments(node.syntax()).fmt(f)
+        let comments = f.context().comments().clone();
+        FormatMarkdownLeadingComments(comments.leading_comments(node.syntax())).fmt(f)
     }
 
     fn fmt_dangling_comments(&self, node: &N, f: &mut MarkdownFormatter) -> FormatResult<()> {
@@ -252,9 +269,21 @@ where
 }
 
 /// Main entry point for formatting a Markdown file
+///
+/// `embedded_node_ranges` contains the content ranges of the embedded snippets
+/// whose formatting is delegated to the formatter of their language. The nodes
+/// holding these snippets are emitted as embedded tags, which the caller fills
+/// with [Formatted::format_embedded]. With no ranges, embedded content is
+/// printed as it's written.
 pub fn format_node(
     options: MdFormatOptions,
     root: &MarkdownSyntaxNode,
+    embedded_node_ranges: Vec<TextRange>,
 ) -> FormatResult<Formatted<MarkdownFormatContext>> {
-    biome_formatter::format_node(root, MdFormatLanguage::new(options), false)
+    let delegate_fmt_embedded_nodes = !embedded_node_ranges.is_empty();
+    biome_formatter::format_node(
+        root,
+        MdFormatLanguage::new(options).with_embedded_node_ranges(embedded_node_ranges),
+        delegate_fmt_embedded_nodes,
+    )
 }

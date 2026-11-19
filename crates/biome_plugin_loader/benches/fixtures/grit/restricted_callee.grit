@@ -1,0 +1,4 @@
+`$fn($args)` where {
+    $fn <: or { `eval`, `setTimeout`, `setInterval` },
+    register_diagnostic(span = $fn, message = "Restricted callee")
+}

@@ -9,8 +9,8 @@ impl FormatRule<CssRuleList> for FormatCssRuleList {
         // lines from the input, so we can use `join_nodes_with_hardline`.
         let mut join = f.join_nodes_with_hardline();
 
-        for rule in node {
-            join.entry(rule.syntax(), &format_or_verbatim(rule.format()));
+        for item in node {
+            join.entry(item.syntax(), &format_or_verbatim(item.format()));
         }
 
         join.finish()

@@ -1,0 +1,17 @@
+@use "sass:map";
+$query:"without: rule";
+$rules:media supports;
+.namespace{@at-root($query){.overlay{position:fixed}}}
+@at-root(without:$rules){.rules{color:red}}
+@at-root("with" + "out":media){.quoted{color:blue}}
+@at-root(without:media   supports){.static{color:green}}
+@at-root(map.get((mode:without,description:"a deliberately long label that makes the query exceed a normal formatting line"),mode):media supports){.long-query{color:red}}
+@media screen and (min-width:40rem){
+@supports(display:grid){
+.ancestor{
+@at-root($query){.query-filtered{color:purple}}
+@at-root(map.get((mode:without,description:"a deliberately long label that makes the query exceed a normal formatting line"),mode):map.get((excluded:media),excluded)){.computed-filtered{color:orange}}
+@at-root(without:$rules){.rules-filtered{color:teal}}
+}
+}
+}

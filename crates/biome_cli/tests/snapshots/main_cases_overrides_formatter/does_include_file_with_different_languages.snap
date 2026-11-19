@@ -2,6 +2,12 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
+## Command
+
+```shell
+biome format --write test.js test2.js test.css
+```
+
 ## `biome.json`
 
 ```json
@@ -29,10 +35,9 @@ expression: redactor(content)
 ## `test.css`
 
 ```css
-[class='foo'] {
-  background-image: url('/path/to/file.jpg');
+[class="foo"] {
+  background-image: url("/path/to/file.jpg");
 }
-
 ```
 
 ## `test.js`

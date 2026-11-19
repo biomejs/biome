@@ -1,0 +1,4 @@
+.condition{width:if(sass(true):1px + 2px;else:0);height:1px}
+.expression{width:if(style(--enabled:true):1px + 2px;else:0);height:1px}
+.priority{color:if(style(--enabled:true):red !important;else:blue);height:1px}
+.after{display:block}

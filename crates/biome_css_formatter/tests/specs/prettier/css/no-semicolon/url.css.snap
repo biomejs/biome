@@ -1,6 +1,5 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
-assertion_line: 249
 info: css/no-semicolon/url.css
 ---
 
@@ -33,16 +32,24 @@ info: css/no-semicolon/url.css
 
 # Errors
 ```
-url.css:2:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+url.css:1:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected `,` but instead found `l`
+  × Expected a media query but instead found 'ur
+      l'.
   
-    1 │ @import ur
+  > 1 │ @import ur
+      │         ^^
   > 2 │   l(//fonts.googleapis.com/css?family=Open+Sans:400,400italic);
       │   ^
     3 │ 
   
-  i Remove l
+  i Expected a media query here.
+  
+  > 1 │ @import ur
+      │         ^^
+  > 2 │   l(//fonts.googleapis.com/css?family=Open+Sans:400,400italic);
+      │   ^
+    3 │ 
   
 url.css:2:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

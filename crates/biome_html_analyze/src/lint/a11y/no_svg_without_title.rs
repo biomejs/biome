@@ -1,22 +1,22 @@
-use biome_analyze::{Ast, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
+use biome_analyze::{Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_html_syntax::{AnyHtmlElement, HtmlAttribute, HtmlElementList, HtmlFileSource};
+use biome_html_syntax::{AnyHtmlElement, HtmlAttribute, HtmlElementList, T};
 use biome_rowan::AstNode;
 use biome_rule_options::no_svg_without_title::NoSvgWithoutTitleOptions;
-use biome_string_case::StrLikeExtension;
 
-use crate::{a11y::is_aria_hidden_true, utils::is_html_tag};
-
-const NAME_REQUIRED_ROLES: &[&str] = &["img", "image", "graphics-document", "graphics-symbol"];
+use crate::Aria;
+use crate::a11y::is_aria_hidden_true;
 
 declare_lint_rule! {
-    /// Enforces the usage of the `title` element for the `svg` element.
+    /// Require a supported labeling pattern for non-decorative SVG elements.
     ///
-    /// It is not possible to specify the `alt` attribute for the `svg` as for the `img`.
-    /// To make svg accessible, the following methods are available:
-    /// - provide the `title` element as the first child to `svg`
-    /// - provide `role="img"` and `aria-label` or `aria-labelledby` to `svg`
+    /// An `<svg>` cannot use the `alt` attribute available to `<img>`. The rule accepts a non-empty
+    /// `<title>` as the first child. An SVG with an image role may instead have an `aria-label`
+    /// attribute, or an `aria-labelledby` value that matches a child element's `id`. The rule checks
+    /// that `aria-label` exists but does not check whether its value is empty.
+    ///
+    /// Decorative SVGs marked with `aria-hidden="true"` or `role="presentation"` are ignored.
     ///
     /// ## Examples
     ///
@@ -121,17 +121,15 @@ declare_lint_rule! {
 }
 
 impl Rule for NoSvgWithoutTitle {
-    type Query = Ast<AnyHtmlElement>;
+    type Query = Aria<AnyHtmlElement>;
     type State = ();
     type Signals = Option<Self::State>;
     type Options = NoSvgWithoutTitleOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-        let source_type = ctx.source_type::<HtmlFileSource>();
-
         let tag_element = node.clone().as_any_html_tag_element()?;
-        if !is_html_tag(&tag_element, source_type, "svg") {
+        if tag_element.tag_name_kind() != Some(T![svg]) {
             return None;
         }
 
@@ -148,38 +146,22 @@ impl Rule for NoSvgWithoutTitle {
             }
         }
 
-        // TODO: use `aria_roles.has_name_required_image_role` of aria crate
-        // Checks if a `svg` element has role='img' and title/aria-label/aria-labelledby attribute
-        let Some(role_attribute) = node.find_attribute_by_name("role") else {
-            return Some(());
-        };
+        if ctx.aria_roles().has_name_required_image_role(node) {
+            let aria_label_attribute = node.find_attribute_by_name("aria-label");
+            if aria_label_attribute.is_some() {
+                return None;
+            }
 
-        let role_attribute_value = role_attribute.initializer()?.value().ok()?;
-        let Some(role_attribute_text) = role_attribute_value
-            .as_html_string()?
-            .inner_string_text()
-            .ok()
-        else {
-            return Some(());
-        };
-
-        let role_text = role_attribute_text.to_ascii_lowercase_cow();
-        if role_text.trim().is_empty() {
-            return Some(());
-        }
-
-        // Check if any of the space-separated roles are valid
-        let has_name_required_role = role_text
-            .split_whitespace()
-            .any(|role| NAME_REQUIRED_ROLES.contains(&role));
-
-        if has_name_required_role {
-            let aria_label = node.find_attribute_by_name("aria-label");
-            let aria_labelledby = node.find_attribute_by_name("aria-labelledby");
-            let is_valid_a11y_attribute = aria_label.is_some()
-                || is_valid_attribute_value(aria_labelledby, &html_element.children())
-                    .unwrap_or(false);
-            if is_valid_a11y_attribute {
+            let aria_labelledby_attribute = node.find_attribute_by_name("aria-labelledby");
+            if let Some(aria_labelledby_attribute) = aria_labelledby_attribute
+                && let Some(aria_labelledby_html_attribute) =
+                    aria_labelledby_attribute.as_html_attribute()
+                && is_valid_attribute_value(
+                    aria_labelledby_html_attribute,
+                    &html_element.children(),
+                )
+                .unwrap_or(false)
+            {
                 return None;
             }
             Some(())
@@ -221,17 +203,19 @@ fn has_valid_title_element(html_child_list: &HtmlElementList) -> Option<bool> {
 
 /// Checks if the given attribute is attached to the `svg` element and the attribute value is used by the `id` of the child element.
 fn is_valid_attribute_value(
-    attribute: Option<HtmlAttribute>,
+    attribute: &HtmlAttribute,
     html_child_list: &HtmlElementList,
 ) -> Option<bool> {
-    let attribute_value = attribute?.initializer()?.value().ok()?;
+    let attribute_value = attribute.initializer()?.value().ok()?;
     let is_used_attribute = html_child_list
         .into_iter()
         .filter_map(|child| {
             let html_element = child.as_html_element()?;
-            let maybe_attribute = html_element.find_attribute_by_name("id");
-            let child_attribute_value = maybe_attribute?.initializer()?.value().ok()?;
-            let is_valid = attribute_value.string_value() == child_attribute_value.string_value();
+            let id_attribute = html_element.find_attribute_by_name("id")?;
+            let id_html_attribute = id_attribute.as_html_attribute()?;
+            let child_attribute_value = id_html_attribute.initializer()?.value().ok()?;
+            let is_valid = attribute_value.as_static_value()?.text()
+                == child_attribute_value.as_static_value()?.text();
             Some(is_valid)
         })
         .any(|x| x);

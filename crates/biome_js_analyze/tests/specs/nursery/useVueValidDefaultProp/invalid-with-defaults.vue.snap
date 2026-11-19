@@ -1,0 +1,167 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-with-defaults.vue
+---
+# Input
+```vue
+<script setup lang="ts">
+/* should generate diagnostics */
+interface Props {
+  a?: string;
+  b?: number;
+  c?: boolean;
+  d?: string[];
+  e?: { foo: string };
+  f?: string | number;
+  g?: () => void;
+}
+
+withDefaults(defineProps<Props>(), {
+  a: 42,
+  b: "s",
+  c: {},
+  d: [],
+  e: { foo: "foo" },
+  f: [42],
+  g: 10,
+});
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-with-defaults.vue:14:6 lint/nursery/useVueValidDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The default value of the prop a doesn't match the type of the prop.
+  
+    13 │ withDefaults(defineProps<Props>(), {
+  > 14 │   a: 42,
+       │      ^^
+    15 │   b: "s",
+    16 │   c: {},
+  
+  i The prop accepts String.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-with-defaults.vue:15:6 lint/nursery/useVueValidDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The default value of the prop b doesn't match the type of the prop.
+  
+    13 │ withDefaults(defineProps<Props>(), {
+    14 │   a: 42,
+  > 15 │   b: "s",
+       │      ^^^
+    16 │   c: {},
+    17 │   d: [],
+  
+  i The prop accepts Number.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-with-defaults.vue:16:6 lint/nursery/useVueValidDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The default value of the prop c doesn't match the type of the prop.
+  
+    14 │   a: 42,
+    15 │   b: "s",
+  > 16 │   c: {},
+       │      ^^
+    17 │   d: [],
+    18 │   e: { foo: "foo" },
+  
+  i The prop accepts Boolean.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-with-defaults.vue:17:6 lint/nursery/useVueValidDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The default value of the prop d isn't returned from a function.
+  
+    15 │   b: "s",
+    16 │   c: {},
+  > 17 │   d: [],
+       │      ^^
+    18 │   e: { foo: "foo" },
+    19 │   f: [42],
+  
+  i An object or array written directly as a default value is shared by every instance of the component. Changing it in one instance changes it in all of them.
+  
+  i Return the value from a function instead, such as () => [] or () => ({}).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-with-defaults.vue:18:6 lint/nursery/useVueValidDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The default value of the prop e isn't returned from a function.
+  
+    16 │   c: {},
+    17 │   d: [],
+  > 18 │   e: { foo: "foo" },
+       │      ^^^^^^^^^^^^^^
+    19 │   f: [42],
+    20 │   g: 10,
+  
+  i An object or array written directly as a default value is shared by every instance of the component. Changing it in one instance changes it in all of them.
+  
+  i Return the value from a function instead, such as () => [] or () => ({}).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-with-defaults.vue:19:6 lint/nursery/useVueValidDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The default value of the prop f doesn't match the type of the prop.
+  
+    17 │   d: [],
+    18 │   e: { foo: "foo" },
+  > 19 │   f: [42],
+       │      ^^^^
+    20 │   g: 10,
+    21 │ });
+  
+  i The prop accepts String or Number.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-with-defaults.vue:20:6 lint/nursery/useVueValidDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The default value of the prop g doesn't match the type of the prop.
+  
+    18 │   e: { foo: "foo" },
+    19 │   f: [42],
+  > 20 │   g: 10,
+       │      ^^
+    21 │ });
+    22 │ </script>
+  
+  i The prop accepts Function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

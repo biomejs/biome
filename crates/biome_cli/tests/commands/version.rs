@@ -1,8 +1,8 @@
+use crate::TestArgs as Args;
 use crate::snap_test::SnapshotPayload;
 use crate::{assert_cli_snapshot, run_cli};
 use biome_console::BufferConsole;
 use biome_fs::MemoryFileSystem;
-use bpaf::Args;
 
 #[test]
 fn ok() {

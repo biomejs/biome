@@ -1,0 +1,30 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: vue/with-plugins/script-lang.vue
+---
+
+# Input
+
+```vue
+<script lang="uppercase-rocks">
+hello,
+world!
+</script>
+
+```
+
+
+# Error
+```text
+reformat: output mismatch
+--- re-formatted
++++ formatted
+@@ -1,6 +1,5 @@
+ <script lang="uppercase-rocks">
+ 
+-
+ hello,
+ world!
+ </script>
+
+```

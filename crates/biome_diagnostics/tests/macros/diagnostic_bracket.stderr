@@ -1,0 +1,5 @@
+error: failed to parse "diagnostic" attribute: expected parentheses
+ --> tests/macros/diagnostic_bracket.rs:4:13
+  |
+4 | #[diagnostic[category = "internalError/io"]]
+  |             ^

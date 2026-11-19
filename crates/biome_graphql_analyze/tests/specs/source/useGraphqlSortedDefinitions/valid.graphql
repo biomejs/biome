@@ -1,0 +1,34 @@
+# should not generate diagnostics
+extend type Account {
+  id: ID!
+}
+
+directive @auth on FIELD_DEFINITION
+
+fragment Fields on User {
+  id
+}
+
+enum Role {
+  ADMIN
+}
+
+type User {
+  id: ID!
+}
+
+type Zed {
+  id: ID!
+}
+
+mutation Zeta {
+  field
+}
+
+schema {
+  query: Query
+}
+
+{
+  field
+}

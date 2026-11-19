@@ -1,7 +1,7 @@
 .foo {
   @include transition(min-height ($spacer/2) ease-in-out);
 }
-
+// Biome intentionally normalizes slash binary expressions to operator spacing.
 .bar {
   @include transition(min-height, $spacer/2, ease-in-out);
 }

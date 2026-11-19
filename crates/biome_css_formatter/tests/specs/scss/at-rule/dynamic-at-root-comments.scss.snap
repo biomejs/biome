@@ -1,0 +1,103 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/at-rule/dynamic-at-root-comments.scss
+---
+
+# Input
+
+```scss
+$query:"without: rule";
+$mode:without;
+$rules:media supports;
+.namespace{
+@at-root(/* whole query */ $query /* before close */){.overlay{position:fixed}}
+}
+@at-root(/* modifier */ $mode /* before colon */ : /* rules */ $rules /* end */){.clause{color:red}}
+@at-root(
+// query comment
+$query
+){.line-comment{color:blue}}
+@at-root(without:
+// rules comment
+media supports
+){.rules-comment{color:green}}
+@media print{
+@supports(display:flex){
+.comment-ancestor{
+@at-root(/* whole query */ $query /* before close */){.comment-query-filtered{color:purple}}
+@at-root(/* modifier */ $mode /* before colon */ : /* rules */ $rules /* end */){.comment-clause-filtered{color:orange}}
+@at-root(without:
+// rules comment
+media
+){.comment-media-filtered{color:teal}}
+}
+}
+}
+
+```
+
+
+# Formatted
+
+```scss
+$query: "without: rule";
+$mode: without;
+$rules: media supports;
+.namespace {
+	@at-root (/* whole query */ $query /* before close */) {
+		.overlay {
+			position: fixed;
+		}
+	}
+}
+@at-root (
+	/* modifier */ $mode /* before colon */: /* rules */ $rules /* end */
+) {
+	.clause {
+		color: red;
+	}
+}
+@at-root (
+	// query comment
+	$query
+) {
+	.line-comment {
+		color: blue;
+	}
+}
+@at-root (
+	without: // rules comment
+	media supports
+) {
+	.rules-comment {
+		color: green;
+	}
+}
+@media print {
+	@supports (display: flex) {
+		.comment-ancestor {
+			@at-root (/* whole query */ $query /* before close */) {
+				.comment-query-filtered {
+					color: purple;
+				}
+			}
+			@at-root (
+				/* modifier */ $mode /* before colon */: /* rules */ $rules /* end */
+			) {
+				.comment-clause-filtered {
+					color: orange;
+				}
+			}
+			@at-root (
+				without: // rules comment
+				media
+			) {
+				.comment-media-filtered {
+					color: teal;
+				}
+			}
+		}
+	}
+}
+
+```

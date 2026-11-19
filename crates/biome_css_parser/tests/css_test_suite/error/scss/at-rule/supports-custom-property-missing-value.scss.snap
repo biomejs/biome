@@ -1,0 +1,322 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+@supports (--empty:) {
+  .empty {
+    color: purple;
+  }
+}
+
+@supports (--line-comment-only: // silent
+) {
+  .line-comment-only {
+    color: orange;
+  }
+}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        CssAtRule {
+            at_token: AT@0..1 "@" [] [],
+            rule: CssSupportsAtRule {
+                declarator: CssSupportsAtRuleDeclarator {
+                    supports_token: SUPPORTS_KW@1..10 "supports" [] [Whitespace(" ")],
+                    condition: CssSupportsFeatureDeclaration {
+                        l_paren_token: L_PAREN@10..11 "(" [] [],
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssDashedIdentifier {
+                                    value_token: IDENT@11..18 "--empty" [] [],
+                                },
+                                colon_token: COLON@18..19 ":" [] [],
+                                value: CssCustomPropertyValue {
+                                    components: CssCustomPropertyComponentList [],
+                                },
+                            },
+                            important: missing (optional),
+                        },
+                        r_paren_token: R_PAREN@19..21 ")" [] [Whitespace(" ")],
+                    },
+                },
+                block: CssRuleBlock {
+                    l_curly_token: L_CURLY@21..22 "{" [] [],
+                    rules: CssRuleList [
+                        CssQualifiedRule {
+                            prelude: CssSelectorList [
+                                CssCompoundSelector {
+                                    nesting_selectors: CssNestedSelectorList [],
+                                    simple_selector: missing (optional),
+                                    sub_selectors: CssSubSelectorList [
+                                        CssClassSelector {
+                                            dot_token: DOT@22..26 "." [Newline("\n"), Whitespace("  ")] [],
+                                            name: CssCustomIdentifier {
+                                                value_token: IDENT@26..32 "empty" [] [Whitespace(" ")],
+                                            },
+                                        },
+                                    ],
+                                },
+                            ],
+                            block: CssDeclarationOrRuleBlock {
+                                l_curly_token: L_CURLY@32..33 "{" [] [],
+                                items: CssDeclarationOrRuleList [
+                                    CssDeclarationWithSemicolon {
+                                        declaration: CssDeclaration {
+                                            property: CssGenericProperty {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@33..43 "color" [Newline("\n"), Whitespace("    ")] [],
+                                                },
+                                                colon_token: COLON@43..45 ":" [] [Whitespace(" ")],
+                                                value: ScssExpression {
+                                                    items: ScssExpressionItemList [
+                                                        CssIdentifier {
+                                                            value_token: IDENT@45..51 "purple" [] [],
+                                                        },
+                                                    ],
+                                                },
+                                            },
+                                            important: missing (optional),
+                                        },
+                                        semicolon_token: SEMICOLON@51..52 ";" [] [],
+                                    },
+                                ],
+                                r_curly_token: R_CURLY@52..56 "}" [Newline("\n"), Whitespace("  ")] [],
+                            },
+                        },
+                    ],
+                    r_curly_token: R_CURLY@56..58 "}" [Newline("\n")] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@58..61 "@" [Newline("\n"), Newline("\n")] [],
+            rule: CssSupportsAtRule {
+                declarator: CssSupportsAtRuleDeclarator {
+                    supports_token: SUPPORTS_KW@61..70 "supports" [] [Whitespace(" ")],
+                    condition: CssSupportsFeatureDeclaration {
+                        l_paren_token: L_PAREN@70..71 "(" [] [],
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssDashedIdentifier {
+                                    value_token: IDENT@71..90 "--line-comment-only" [] [],
+                                },
+                                colon_token: COLON@90..101 ":" [] [Whitespace(" "), Comments("// silent")],
+                                value: CssCustomPropertyValue {
+                                    components: CssCustomPropertyComponentList [],
+                                },
+                            },
+                            important: missing (optional),
+                        },
+                        r_paren_token: R_PAREN@101..104 ")" [Newline("\n")] [Whitespace(" ")],
+                    },
+                },
+                block: CssRuleBlock {
+                    l_curly_token: L_CURLY@104..105 "{" [] [],
+                    rules: CssRuleList [
+                        CssQualifiedRule {
+                            prelude: CssSelectorList [
+                                CssCompoundSelector {
+                                    nesting_selectors: CssNestedSelectorList [],
+                                    simple_selector: missing (optional),
+                                    sub_selectors: CssSubSelectorList [
+                                        CssClassSelector {
+                                            dot_token: DOT@105..109 "." [Newline("\n"), Whitespace("  ")] [],
+                                            name: CssCustomIdentifier {
+                                                value_token: IDENT@109..127 "line-comment-only" [] [Whitespace(" ")],
+                                            },
+                                        },
+                                    ],
+                                },
+                            ],
+                            block: CssDeclarationOrRuleBlock {
+                                l_curly_token: L_CURLY@127..128 "{" [] [],
+                                items: CssDeclarationOrRuleList [
+                                    CssDeclarationWithSemicolon {
+                                        declaration: CssDeclaration {
+                                            property: CssGenericProperty {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@128..138 "color" [Newline("\n"), Whitespace("    ")] [],
+                                                },
+                                                colon_token: COLON@138..140 ":" [] [Whitespace(" ")],
+                                                value: ScssExpression {
+                                                    items: ScssExpressionItemList [
+                                                        CssIdentifier {
+                                                            value_token: IDENT@140..146 "orange" [] [],
+                                                        },
+                                                    ],
+                                                },
+                                            },
+                                            important: missing (optional),
+                                        },
+                                        semicolon_token: SEMICOLON@146..147 ";" [] [],
+                                    },
+                                ],
+                                r_curly_token: R_CURLY@147..151 "}" [Newline("\n"), Whitespace("  ")] [],
+                            },
+                        },
+                    ],
+                    r_curly_token: R_CURLY@151..153 "}" [Newline("\n")] [],
+                },
+            },
+        },
+    ],
+    eof_token: EOF@153..154 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..154
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..153
+    0: CSS_AT_RULE@0..58
+      0: AT@0..1 "@" [] []
+      1: CSS_SUPPORTS_AT_RULE@1..58
+        0: CSS_SUPPORTS_AT_RULE_DECLARATOR@1..21
+          0: SUPPORTS_KW@1..10 "supports" [] [Whitespace(" ")]
+          1: CSS_SUPPORTS_FEATURE_DECLARATION@10..21
+            0: L_PAREN@10..11 "(" [] []
+            1: CSS_DECLARATION@11..19
+              0: CSS_GENERIC_PROPERTY@11..19
+                0: CSS_DASHED_IDENTIFIER@11..18
+                  0: IDENT@11..18 "--empty" [] []
+                1: COLON@18..19 ":" [] []
+                2: CSS_CUSTOM_PROPERTY_VALUE@19..19
+                  0: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@19..19
+              1: (empty)
+            2: R_PAREN@19..21 ")" [] [Whitespace(" ")]
+        1: CSS_RULE_BLOCK@21..58
+          0: L_CURLY@21..22 "{" [] []
+          1: CSS_RULE_LIST@22..56
+            0: CSS_QUALIFIED_RULE@22..56
+              0: CSS_SELECTOR_LIST@22..32
+                0: CSS_COMPOUND_SELECTOR@22..32
+                  0: CSS_NESTED_SELECTOR_LIST@22..22
+                  1: (empty)
+                  2: CSS_SUB_SELECTOR_LIST@22..32
+                    0: CSS_CLASS_SELECTOR@22..32
+                      0: DOT@22..26 "." [Newline("\n"), Whitespace("  ")] []
+                      1: CSS_CUSTOM_IDENTIFIER@26..32
+                        0: IDENT@26..32 "empty" [] [Whitespace(" ")]
+              1: CSS_DECLARATION_OR_RULE_BLOCK@32..56
+                0: L_CURLY@32..33 "{" [] []
+                1: CSS_DECLARATION_OR_RULE_LIST@33..52
+                  0: CSS_DECLARATION_WITH_SEMICOLON@33..52
+                    0: CSS_DECLARATION@33..51
+                      0: CSS_GENERIC_PROPERTY@33..51
+                        0: CSS_IDENTIFIER@33..43
+                          0: IDENT@33..43 "color" [Newline("\n"), Whitespace("    ")] []
+                        1: COLON@43..45 ":" [] [Whitespace(" ")]
+                        2: SCSS_EXPRESSION@45..51
+                          0: SCSS_EXPRESSION_ITEM_LIST@45..51
+                            0: CSS_IDENTIFIER@45..51
+                              0: IDENT@45..51 "purple" [] []
+                      1: (empty)
+                    1: SEMICOLON@51..52 ";" [] []
+                2: R_CURLY@52..56 "}" [Newline("\n"), Whitespace("  ")] []
+          2: R_CURLY@56..58 "}" [Newline("\n")] []
+    1: CSS_AT_RULE@58..153
+      0: AT@58..61 "@" [Newline("\n"), Newline("\n")] []
+      1: CSS_SUPPORTS_AT_RULE@61..153
+        0: CSS_SUPPORTS_AT_RULE_DECLARATOR@61..104
+          0: SUPPORTS_KW@61..70 "supports" [] [Whitespace(" ")]
+          1: CSS_SUPPORTS_FEATURE_DECLARATION@70..104
+            0: L_PAREN@70..71 "(" [] []
+            1: CSS_DECLARATION@71..101
+              0: CSS_GENERIC_PROPERTY@71..101
+                0: CSS_DASHED_IDENTIFIER@71..90
+                  0: IDENT@71..90 "--line-comment-only" [] []
+                1: COLON@90..101 ":" [] [Whitespace(" "), Comments("// silent")]
+                2: CSS_CUSTOM_PROPERTY_VALUE@101..101
+                  0: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@101..101
+              1: (empty)
+            2: R_PAREN@101..104 ")" [Newline("\n")] [Whitespace(" ")]
+        1: CSS_RULE_BLOCK@104..153
+          0: L_CURLY@104..105 "{" [] []
+          1: CSS_RULE_LIST@105..151
+            0: CSS_QUALIFIED_RULE@105..151
+              0: CSS_SELECTOR_LIST@105..127
+                0: CSS_COMPOUND_SELECTOR@105..127
+                  0: CSS_NESTED_SELECTOR_LIST@105..105
+                  1: (empty)
+                  2: CSS_SUB_SELECTOR_LIST@105..127
+                    0: CSS_CLASS_SELECTOR@105..127
+                      0: DOT@105..109 "." [Newline("\n"), Whitespace("  ")] []
+                      1: CSS_CUSTOM_IDENTIFIER@109..127
+                        0: IDENT@109..127 "line-comment-only" [] [Whitespace(" ")]
+              1: CSS_DECLARATION_OR_RULE_BLOCK@127..151
+                0: L_CURLY@127..128 "{" [] []
+                1: CSS_DECLARATION_OR_RULE_LIST@128..147
+                  0: CSS_DECLARATION_WITH_SEMICOLON@128..147
+                    0: CSS_DECLARATION@128..146
+                      0: CSS_GENERIC_PROPERTY@128..146
+                        0: CSS_IDENTIFIER@128..138
+                          0: IDENT@128..138 "color" [Newline("\n"), Whitespace("    ")] []
+                        1: COLON@138..140 ":" [] [Whitespace(" ")]
+                        2: SCSS_EXPRESSION@140..146
+                          0: SCSS_EXPRESSION_ITEM_LIST@140..146
+                            0: CSS_IDENTIFIER@140..146
+                              0: IDENT@140..146 "orange" [] []
+                      1: (empty)
+                    1: SEMICOLON@146..147 ";" [] []
+                2: R_CURLY@147..151 "}" [Newline("\n"), Whitespace("  ")] []
+          2: R_CURLY@151..153 "}" [Newline("\n")] []
+  2: EOF@153..154 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+supports-custom-property-missing-value.scss:1:20 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+  > 1 │ @supports (--empty:) {
+      │                    ^
+    2 │   .empty {
+    3 │     color: purple;
+  
+  i Expected one of:
+  
+  - identifier
+  - string
+  - number
+  - dimension
+  - ratio
+  - custom property
+  - function
+  
+supports-custom-property-missing-value.scss:8:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+     7 │ @supports (--line-comment-only: // silent
+   > 8 │ ) {
+       │ ^
+     9 │   .line-comment-only {
+    10 │     color: orange;
+  
+  i Expected one of:
+  
+  - identifier
+  - string
+  - number
+  - dimension
+  - ratio
+  - custom property
+  - function
+  
+```

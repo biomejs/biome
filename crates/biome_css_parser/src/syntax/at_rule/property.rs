@@ -7,9 +7,9 @@ use biome_parser::prelude::ParsedSyntax::Absent;
 use biome_parser::token_set;
 use biome_parser::{Parser, parsed_syntax::ParsedSyntax};
 
+use super::name::parse_dashed_at_rule_name;
 use crate::parser::CssParser;
 use crate::syntax::block::parse_declaration_block;
-use crate::syntax::parse_dashed_identifier;
 use crate::syntax::parse_error::expected_dashed_identifier;
 
 #[inline]
@@ -40,7 +40,7 @@ pub(crate) fn parse_property_at_rule_declarator(p: &mut CssParser) -> ParsedSynt
     let m = p.start();
     p.bump(T![property]);
 
-    let decl_kind = if parse_dashed_identifier(p)
+    let decl_kind = if parse_dashed_at_rule_name(p)
         .or_recover_with_token_set(
             p,
             &ParseRecoveryTokenSet::new(CSS_BOGUS, PROPERTY_RECOVERY_SET)

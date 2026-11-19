@@ -2,6 +2,12 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
+## Command
+
+```shell
+biome check file.js
+```
+
 ## `biome.json`
 
 ```json
@@ -48,11 +54,20 @@ biome.json:6:13 deserialize ━━━━━━━━━━━━━━━━━�
   i Known keys:
   
   - recommended
+  - preset
+  - noBeforeInteractiveScriptOutsideDocument
   - noChildrenProp
+  - noComponentHookFactories
   - noConstAssign
   - noConstantCondition
   - noConstantMathMinMaxClamp
   - noConstructorReturn
+  - noDuplicateArgumentNames
+  - noDuplicateAttributes
+  - noDuplicateEnumValueNames
+  - noDuplicateFieldDefinitionNames
+  - noDuplicateInputFieldNames
+  - noDuplicateVariableNames
   - noEmptyCharacterClassInRegex
   - noEmptyPattern
   - noGlobalDirnameFilename
@@ -64,15 +79,18 @@ biome.json:6:13 deserialize ━━━━━━━━━━━━━━━━━�
   - noInvalidGridAreas
   - noInvalidPositionAtImportRule
   - noInvalidUseBeforeDeclaration
+  - noJsxNamespace
   - noMissingVarFunction
   - noNestedComponentDefinitions
   - noNextAsyncClientComponent
   - noNodejsModules
   - noNonoctalDecimalEscape
+  - noPlaywrightMissingAwait
   - noPrecisionLoss
   - noPrivateImports
   - noProcessGlobal
   - noQwikUseVisibleTask
+  - noReactNativeRawText
   - noReactPropAssignments
   - noRenderReturnValue
   - noRestrictedElements
@@ -98,6 +116,7 @@ biome.json:6:13 deserialize ━━━━━━━━━━━━━━━━━�
   - noUnsafeOptionalChaining
   - noUnusedFunctionParameters
   - noUnusedImports
+  - noUnusedInstantiation
   - noUnusedLabels
   - noUnusedPrivateClassMembers
   - noUnusedVariables
@@ -105,25 +124,48 @@ biome.json:6:13 deserialize ━━━━━━━━━━━━━━━━━�
   - noVoidTypeReturn
   - noVueDataObjectDeclaration
   - noVueDuplicateKeys
+  - noVueImportCompilerMacros
+  - noVueRefAsOperand
   - noVueReservedKeys
   - noVueReservedProps
   - noVueSetupPropsReactivityLoss
+  - noVueVIfWithVFor
+  - noVueVOnNumberValues
   - useExhaustiveDependencies
   - useGraphqlNamedOperations
   - useHookAtTopLevel
   - useImageSize
   - useImportExtensions
+  - useInlineScriptId
   - useIsNan
   - useJsonImportAttributes
   - useJsxKeyInIterable
+  - useLoneAnonymousOperation
   - useParseIntRadix
+  - usePlaywrightValidDescribeCallback
   - useQwikClasslist
+  - useQwikLoaderLocation
   - useQwikMethodUsage
   - useQwikValidLexicalScope
+  - useReactAsyncServerFunction
+  - useReactNativePlatformComponents
   - useSingleJsDocAsterisk
   - useUniqueElementIds
   - useValidForDirection
   - useValidTypeof
+  - useVueVForKey
+  - useVueValidTemplateRoot
+  - useVueValidVBind
+  - useVueValidVCloak
+  - useVueValidVElse
+  - useVueValidVElseIf
+  - useVueValidVFor
+  - useVueValidVHtml
+  - useVueValidVIf
+  - useVueValidVOn
+  - useVueValidVOnce
+  - useVueValidVPre
+  - useVueValidVText
   - useYield
   
 
@@ -144,32 +186,49 @@ biome.json:9:13 deserialize ━━━━━━━━━━━━━━━━━�
   i Known keys:
   
   - recommended
+  - preset
   - noCommonJs
+  - noContinue
   - noDefaultExport
   - noDescendingSpecificity
   - noDoneCallback
   - noEnum
+  - noExcessiveClassesPerFile
+  - noExcessiveLinesPerFile
   - noExportedImports
   - noHeadElement
+  - noHexColors
   - noImplicitBoolean
+  - noIncrementDecrement
   - noInferrableTypes
+  - noInlineStyles
   - noJsxLiterals
   - noMagicNumbers
+  - noMultiAssign
+  - noMultilineString
   - noNamespace
   - noNegationElse
   - noNestedTernary
   - noNonNullAssertion
   - noParameterAssign
   - noParameterProperties
+  - noPlaywrightElementHandle
+  - noPlaywrightEval
+  - noPlaywrightWaitForSelector
   - noProcessEnv
+  - noReactNativeLiteralColors
   - noRestrictedGlobals
   - noRestrictedImports
   - noRestrictedTypes
+  - noRootType
   - noShoutyConstants
   - noSubstr
+  - noTernary
+  - noTopLevelLiterals
   - noUnusedTemplateLiteral
   - noUselessElse
   - noValueAtRule
+  - noVueOptionsApi
   - noYodaExpression
   - useArrayLiterals
   - useAsConstAssertion
@@ -182,14 +241,21 @@ biome.json:9:13 deserialize ━━━━━━━━━━━━━━━━━�
   - useConsistentArrowReturn
   - useConsistentBuiltinInstantiation
   - useConsistentCurlyBraces
+  - useConsistentEnumValueType
+  - useConsistentGraphqlDescriptions
   - useConsistentMemberAccessibility
+  - useConsistentMethodSignatures
   - useConsistentObjectDefinitions
+  - useConsistentTestIt
   - useConsistentTypeDefinitions
   - useConst
   - useDefaultParameterLast
   - useDefaultSwitchClause
   - useDeprecatedReason
+  - useDestructuring
+  - useDomQuerySelector
   - useEnumInitializers
+  - useErrorCause
   - useExplicitLengthCheck
   - useExponentiationOperator
   - useExportType
@@ -197,10 +263,15 @@ biome.json:9:13 deserialize ━━━━━━━━━━━━━━━━━�
   - useFilenamingConvention
   - useForOf
   - useFragmentSyntax
+  - useGlobalThis
   - useGraphqlNamingConvention
   - useGroupedAccessorPairs
   - useImportType
+  - useImportsFirst
+  - useInputName
   - useLiteralEnumMembers
+  - useLoneExecutableDefinition
+  - useNamedCaptureGroup
   - useNamingConvention
   - useNodeAssertStrict
   - useNodejsImportProtocol
@@ -209,16 +280,30 @@ biome.json:9:13 deserialize ━━━━━━━━━━━━━━━━━�
   - useObjectSpread
   - useReactFunctionComponents
   - useReadonlyClassProperties
+  - useReduceTypeParameter
   - useSelfClosingElements
   - useShorthandAssign
   - useShorthandFunctionType
   - useSingleVarDeclarator
+  - useSpreadOverApply
   - useSymbolDescription
   - useTemplate
+  - useTestHooksInOrder
+  - useTestHooksOnTop
+  - useThisInClassMethods
   - useThrowNewError
   - useThrowOnlyError
   - useTrimStartEnd
+  - useUnicodeRegex
   - useUnifiedTypeSignatures
+  - useVarsOnTop
+  - useVueConsistentDefinePropsDeclaration
+  - useVueConsistentVBindStyle
+  - useVueConsistentVOnStyle
+  - useVueDefineMacrosOrder
+  - useVueHyphenatedAttributes
+  - useVueMultiWordComponentNames
+  - useVueNextTickPromise
   
 
 ```

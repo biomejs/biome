@@ -1,0 +1,149 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.svelte
+---
+# Input
+```svelte
+<!-- should generate diagnostics -->
+<script>
+	export let name;
+	export let count = 0, label = "label";
+	export var legacy;
+
+	let className = "";
+	export { className as class };
+
+	let shorthand;
+	export { shorthand };
+
+	let { first } = someObject;
+	export { first };
+</script>
+
+<p class={className}>{name} {count} {label} {legacy} {shorthand} {first}</p>
+
+```
+
+# Diagnostics
+```
+invalid.svelte:3:2 lint/nursery/noSvelteExportLet ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Declaring component props with export let is legacy Svelte syntax.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <script>
+  > 3 │ 	export let name;
+      │ 	^^^^^^^^^^
+    4 │ 	export let count = 0, label = "label";
+    5 │ 	export var legacy;
+  
+  i Svelte 5 declares props with the $props() rune. Declaring props with export makes the component run in legacy mode, and is a compile error in runes mode.
+  
+  i Destructure the props from $props() instead, for example: let { name } = $props();. See the Svelte 5 migration guide.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:4:2 lint/nursery/noSvelteExportLet ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Declaring component props with export let is legacy Svelte syntax.
+  
+    2 │ <script>
+    3 │ 	export let name;
+  > 4 │ 	export let count = 0, label = "label";
+      │ 	^^^^^^^^^^
+    5 │ 	export var legacy;
+    6 │ 
+  
+  i Svelte 5 declares props with the $props() rune. Declaring props with export makes the component run in legacy mode, and is a compile error in runes mode.
+  
+  i Destructure the props from $props() instead, for example: let { name } = $props();. See the Svelte 5 migration guide.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:5:2 lint/nursery/noSvelteExportLet ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Declaring component props with export var is legacy Svelte syntax.
+  
+    3 │ 	export let name;
+    4 │ 	export let count = 0, label = "label";
+  > 5 │ 	export var legacy;
+      │ 	^^^^^^^^^^
+    6 │ 
+    7 │ 	let className = "";
+  
+  i Svelte 5 declares props with the $props() rune. Declaring props with export makes the component run in legacy mode, and is a compile error in runes mode.
+  
+  i Destructure the props from $props() instead, for example: let { name } = $props();. See the Svelte 5 migration guide.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:8:11 lint/nursery/noSvelteExportLet ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Exporting className declares a component prop with legacy Svelte syntax.
+  
+     7 │ 	let className = "";
+   > 8 │ 	export { className as class };
+       │ 	         ^^^^^^^^^^^^^^^^^^
+     9 │ 
+    10 │ 	let shorthand;
+  
+  i Svelte 5 declares props with the $props() rune. Declaring props with export makes the component run in legacy mode, and is a compile error in runes mode.
+  
+  i Destructure the props from $props() instead, for example: let { name } = $props();. See the Svelte 5 migration guide.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:11:11 lint/nursery/noSvelteExportLet ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Exporting shorthand declares a component prop with legacy Svelte syntax.
+  
+    10 │ 	let shorthand;
+  > 11 │ 	export { shorthand };
+       │ 	         ^^^^^^^^^
+    12 │ 
+    13 │ 	let { first } = someObject;
+  
+  i Svelte 5 declares props with the $props() rune. Declaring props with export makes the component run in legacy mode, and is a compile error in runes mode.
+  
+  i Destructure the props from $props() instead, for example: let { name } = $props();. See the Svelte 5 migration guide.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:14:11 lint/nursery/noSvelteExportLet ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Exporting first declares a component prop with legacy Svelte syntax.
+  
+    13 │ 	let { first } = someObject;
+  > 14 │ 	export { first };
+       │ 	         ^^^^^
+    15 │ </script>
+    16 │ 
+  
+  i Svelte 5 declares props with the $props() rune. Declaring props with export makes the component run in legacy mode, and is a compile error in runes mode.
+  
+  i Destructure the props from $props() instead, for example: let { name } = $props();. See the Svelte 5 migration guide.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

@@ -78,17 +78,35 @@ pub fn css_number(value_token: SyntaxToken) -> CssNumber {
 }
 pub fn css_parenthesized_expression(
     l_paren_token: SyntaxToken,
-    expression: CssComponentValueList,
     r_paren_token: SyntaxToken,
-) -> CssParenthesizedExpression {
-    CssParenthesizedExpression::unwrap_cast(SyntaxNode::new_detached(
-        TailwindSyntaxKind::CSS_PARENTHESIZED_EXPRESSION,
-        [
-            Some(SyntaxElement::Token(l_paren_token)),
-            Some(SyntaxElement::Node(expression.into_syntax())),
-            Some(SyntaxElement::Token(r_paren_token)),
-        ],
-    ))
+) -> CssParenthesizedExpressionBuilder {
+    CssParenthesizedExpressionBuilder {
+        l_paren_token,
+        r_paren_token,
+        expression: None,
+    }
+}
+pub struct CssParenthesizedExpressionBuilder {
+    l_paren_token: SyntaxToken,
+    r_paren_token: SyntaxToken,
+    expression: Option<AnyCssExpression>,
+}
+impl CssParenthesizedExpressionBuilder {
+    pub fn with_expression(mut self, expression: AnyCssExpression) -> Self {
+        self.expression = Some(expression);
+        self
+    }
+    pub fn build(self) -> CssParenthesizedExpression {
+        CssParenthesizedExpression::unwrap_cast(SyntaxNode::new_detached(
+            TailwindSyntaxKind::CSS_PARENTHESIZED_EXPRESSION,
+            [
+                Some(SyntaxElement::Token(self.l_paren_token)),
+                self.expression
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                Some(SyntaxElement::Token(self.r_paren_token)),
+            ],
+        ))
+    }
 }
 pub fn css_percentage(value_token: SyntaxToken, remainder_token: SyntaxToken) -> CssPercentage {
     CssPercentage::unwrap_cast(SyntaxNode::new_detached(
@@ -129,7 +147,7 @@ pub fn css_string(value_token: SyntaxToken) -> CssString {
 }
 pub fn css_unary_expression(
     operator_token: SyntaxToken,
-    argument: AnyCssValue,
+    argument: AnyCssExpression,
 ) -> CssUnaryExpression {
     CssUnaryExpression::unwrap_cast(SyntaxNode::new_detached(
         TailwindSyntaxKind::CSS_UNARY_EXPRESSION,
@@ -265,31 +283,67 @@ pub fn tw_arbitrary_variant(
         ],
     ))
 }
-pub fn tw_css_variable_value(
-    l_paren_token: SyntaxToken,
+pub fn tw_arbitrary_variant_segment(
+    l_brack_token: SyntaxToken,
     value_token: SyntaxToken,
-    r_paren_token: SyntaxToken,
-) -> TwCssVariableValue {
-    TwCssVariableValue::unwrap_cast(SyntaxNode::new_detached(
-        TailwindSyntaxKind::TW_CSS_VARIABLE_VALUE,
+    r_brack_token: SyntaxToken,
+) -> TwArbitraryVariantSegment {
+    TwArbitraryVariantSegment::unwrap_cast(SyntaxNode::new_detached(
+        TailwindSyntaxKind::TW_ARBITRARY_VARIANT_SEGMENT,
         [
-            Some(SyntaxElement::Token(l_paren_token)),
+            Some(SyntaxElement::Token(l_brack_token)),
             Some(SyntaxElement::Token(value_token)),
-            Some(SyntaxElement::Token(r_paren_token)),
+            Some(SyntaxElement::Token(r_brack_token)),
         ],
     ))
 }
-pub fn tw_data_attribute(
-    data_token: SyntaxToken,
-    minus_token: SyntaxToken,
-    value: AnyTwDataAttributeValue,
-) -> TwDataAttribute {
-    TwDataAttribute::unwrap_cast(SyntaxNode::new_detached(
-        TailwindSyntaxKind::TW_DATA_ATTRIBUTE,
+pub fn tw_css_variable_value(
+    l_paren_token: SyntaxToken,
+    value: CssParameterList,
+    r_paren_token: SyntaxToken,
+) -> TwCssVariableValueBuilder {
+    TwCssVariableValueBuilder {
+        l_paren_token,
+        value,
+        r_paren_token,
+        type_hint: None,
+    }
+}
+pub struct TwCssVariableValueBuilder {
+    l_paren_token: SyntaxToken,
+    value: CssParameterList,
+    r_paren_token: SyntaxToken,
+    type_hint: Option<TwTypeHint>,
+}
+impl TwCssVariableValueBuilder {
+    pub fn with_type_hint(mut self, type_hint: TwTypeHint) -> Self {
+        self.type_hint = Some(type_hint);
+        self
+    }
+    pub fn build(self) -> TwCssVariableValue {
+        TwCssVariableValue::unwrap_cast(SyntaxNode::new_detached(
+            TailwindSyntaxKind::TW_CSS_VARIABLE_VALUE,
+            [
+                Some(SyntaxElement::Token(self.l_paren_token)),
+                self.type_hint
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                Some(SyntaxElement::Node(self.value.into_syntax())),
+                Some(SyntaxElement::Token(self.r_paren_token)),
+            ],
+        ))
+    }
+}
+pub fn tw_css_variable_variant_segment(
+    l_paren_token: SyntaxToken,
+    value: CssParameterList,
+    r_paren_token: SyntaxToken,
+) -> TwCssVariableVariantSegment {
+    TwCssVariableVariantSegment::unwrap_cast(SyntaxNode::new_detached(
+        TailwindSyntaxKind::TW_CSS_VARIABLE_VARIANT_SEGMENT,
         [
-            Some(SyntaxElement::Token(data_token)),
-            Some(SyntaxElement::Token(minus_token)),
+            Some(SyntaxElement::Token(l_paren_token)),
             Some(SyntaxElement::Node(value.into_syntax())),
+            Some(SyntaxElement::Token(r_paren_token)),
         ],
     ))
 }
@@ -300,6 +354,7 @@ pub fn tw_full_candidate(
     TwFullCandidateBuilder {
         variants,
         candidate,
+        legacy_important_token: None,
         negative_token: None,
         excl_token: None,
     }
@@ -307,10 +362,15 @@ pub fn tw_full_candidate(
 pub struct TwFullCandidateBuilder {
     variants: TwVariantList,
     candidate: AnyTwCandidate,
+    legacy_important_token: Option<SyntaxToken>,
     negative_token: Option<SyntaxToken>,
     excl_token: Option<SyntaxToken>,
 }
 impl TwFullCandidateBuilder {
+    pub fn with_legacy_important_token(mut self, legacy_important_token: SyntaxToken) -> Self {
+        self.legacy_important_token = Some(legacy_important_token);
+        self
+    }
     pub fn with_negative_token(mut self, negative_token: SyntaxToken) -> Self {
         self.negative_token = Some(negative_token);
         self
@@ -324,6 +384,8 @@ impl TwFullCandidateBuilder {
             TailwindSyntaxKind::TW_FULL_CANDIDATE,
             [
                 Some(SyntaxElement::Node(self.variants.into_syntax())),
+                self.legacy_important_token
+                    .map(|token| SyntaxElement::Token(token)),
                 self.negative_token.map(|token| SyntaxElement::Token(token)),
                 Some(SyntaxElement::Node(self.candidate.into_syntax())),
                 self.excl_token.map(|token| SyntaxElement::Token(token)),
@@ -367,20 +429,6 @@ impl TwFunctionalCandidateBuilder {
         ))
     }
 }
-pub fn tw_functional_variant(
-    base_token: SyntaxToken,
-    minus_token: SyntaxToken,
-    value: AnyTwValue,
-) -> TwFunctionalVariant {
-    TwFunctionalVariant::unwrap_cast(SyntaxNode::new_detached(
-        TailwindSyntaxKind::TW_FUNCTIONAL_VARIANT,
-        [
-            Some(SyntaxElement::Token(base_token)),
-            Some(SyntaxElement::Token(minus_token)),
-            Some(SyntaxElement::Node(value.into_syntax())),
-        ],
-    ))
-}
 pub fn tw_modifier(slash_token: SyntaxToken, value: AnyTwValue) -> TwModifier {
     TwModifier::unwrap_cast(SyntaxNode::new_detached(
         TailwindSyntaxKind::TW_MODIFIER,
@@ -393,6 +441,12 @@ pub fn tw_modifier(slash_token: SyntaxToken, value: AnyTwValue) -> TwModifier {
 pub fn tw_named_value(value_token: SyntaxToken) -> TwNamedValue {
     TwNamedValue::unwrap_cast(SyntaxNode::new_detached(
         TailwindSyntaxKind::TW_NAMED_VALUE,
+        [Some(SyntaxElement::Token(value_token))],
+    ))
+}
+pub fn tw_named_variant_segment(value_token: SyntaxToken) -> TwNamedVariantSegment {
+    TwNamedVariantSegment::unwrap_cast(SyntaxNode::new_detached(
+        TailwindSyntaxKind::TW_NAMED_VARIANT_SEGMENT,
         [Some(SyntaxElement::Token(value_token))],
     ))
 }
@@ -419,16 +473,22 @@ pub fn tw_root(candidates: TwCandidateList, eof_token: SyntaxToken) -> TwRootBui
         candidates,
         eof_token,
         bom_token: None,
+        leading_whitespace_token: None,
     }
 }
 pub struct TwRootBuilder {
     candidates: TwCandidateList,
     eof_token: SyntaxToken,
     bom_token: Option<SyntaxToken>,
+    leading_whitespace_token: Option<SyntaxToken>,
 }
 impl TwRootBuilder {
     pub fn with_bom_token(mut self, bom_token: SyntaxToken) -> Self {
         self.bom_token = Some(bom_token);
+        self
+    }
+    pub fn with_leading_whitespace_token(mut self, leading_whitespace_token: SyntaxToken) -> Self {
+        self.leading_whitespace_token = Some(leading_whitespace_token);
         self
     }
     pub fn build(self) -> TwRoot {
@@ -436,23 +496,82 @@ impl TwRootBuilder {
             TailwindSyntaxKind::TW_ROOT,
             [
                 self.bom_token.map(|token| SyntaxElement::Token(token)),
+                self.leading_whitespace_token
+                    .map(|token| SyntaxElement::Token(token)),
                 Some(SyntaxElement::Node(self.candidates.into_syntax())),
                 Some(SyntaxElement::Token(self.eof_token)),
             ],
         ))
     }
 }
-pub fn tw_static_candidate(base_token: SyntaxToken) -> TwStaticCandidate {
-    TwStaticCandidate::unwrap_cast(SyntaxNode::new_detached(
-        TailwindSyntaxKind::TW_STATIC_CANDIDATE,
-        [Some(SyntaxElement::Token(base_token))],
+pub fn tw_static_candidate(base_token: SyntaxToken) -> TwStaticCandidateBuilder {
+    TwStaticCandidateBuilder {
+        base_token,
+        modifier: None,
+    }
+}
+pub struct TwStaticCandidateBuilder {
+    base_token: SyntaxToken,
+    modifier: Option<AnyTwModifier>,
+}
+impl TwStaticCandidateBuilder {
+    pub fn with_modifier(mut self, modifier: AnyTwModifier) -> Self {
+        self.modifier = Some(modifier);
+        self
+    }
+    pub fn build(self) -> TwStaticCandidate {
+        TwStaticCandidate::unwrap_cast(SyntaxNode::new_detached(
+            TailwindSyntaxKind::TW_STATIC_CANDIDATE,
+            [
+                Some(SyntaxElement::Token(self.base_token)),
+                self.modifier
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+            ],
+        ))
+    }
+}
+pub fn tw_type_hint(name_token: SyntaxToken, colon_token: SyntaxToken) -> TwTypeHint {
+    TwTypeHint::unwrap_cast(SyntaxNode::new_detached(
+        TailwindSyntaxKind::TW_TYPE_HINT,
+        [
+            Some(SyntaxElement::Token(name_token)),
+            Some(SyntaxElement::Token(colon_token)),
+        ],
     ))
 }
-pub fn tw_static_variant(base_token: SyntaxToken) -> TwStaticVariant {
-    TwStaticVariant::unwrap_cast(SyntaxNode::new_detached(
-        TailwindSyntaxKind::TW_STATIC_VARIANT,
-        [Some(SyntaxElement::Token(base_token))],
-    ))
+pub fn tw_variant_expression(segments: TwVariantSegmentList) -> TwVariantExpressionBuilder {
+    TwVariantExpressionBuilder {
+        segments,
+        glued_value: None,
+        modifier: None,
+    }
+}
+pub struct TwVariantExpressionBuilder {
+    segments: TwVariantSegmentList,
+    glued_value: Option<TwArbitraryVariantSegment>,
+    modifier: Option<AnyTwModifier>,
+}
+impl TwVariantExpressionBuilder {
+    pub fn with_glued_value(mut self, glued_value: TwArbitraryVariantSegment) -> Self {
+        self.glued_value = Some(glued_value);
+        self
+    }
+    pub fn with_modifier(mut self, modifier: AnyTwModifier) -> Self {
+        self.modifier = Some(modifier);
+        self
+    }
+    pub fn build(self) -> TwVariantExpression {
+        TwVariantExpression::unwrap_cast(SyntaxNode::new_detached(
+            TailwindSyntaxKind::TW_VARIANT_EXPRESSION,
+            [
+                Some(SyntaxElement::Node(self.segments.into_syntax())),
+                self.glued_value
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                self.modifier
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+            ],
+        ))
+    }
 }
 pub fn css_component_value_list<I>(items: I) -> CssComponentValueList
 where
@@ -499,16 +618,25 @@ where
         }),
     ))
 }
-pub fn tw_candidate_list<I>(items: I) -> TwCandidateList
+pub fn tw_candidate_list<I, S>(items: I, separators: S) -> TwCandidateList
 where
     I: IntoIterator<Item = AnyTwFullCandidate>,
     I::IntoIter: ExactSizeIterator,
+    S: IntoIterator<Item = TailwindSyntaxToken>,
+    S::IntoIter: ExactSizeIterator,
 {
+    let mut items = items.into_iter();
+    let mut separators = separators.into_iter();
+    let length = items.len() + separators.len();
     TwCandidateList::unwrap_cast(SyntaxNode::new_detached(
         TailwindSyntaxKind::TW_CANDIDATE_LIST,
-        items
-            .into_iter()
-            .map(|item| Some(item.into_syntax().into())),
+        (0..length).map(|index| {
+            if index % 2 == 0 {
+                Some(items.next()?.into_syntax().into())
+            } else {
+                Some(separators.next()?.into())
+            }
+        }),
     ))
 }
 pub fn tw_variant_list<I, S>(items: I, separators: S) -> TwVariantList
@@ -523,6 +651,27 @@ where
     let length = items.len() + separators.len();
     TwVariantList::unwrap_cast(SyntaxNode::new_detached(
         TailwindSyntaxKind::TW_VARIANT_LIST,
+        (0..length).map(|index| {
+            if index % 2 == 0 {
+                Some(items.next()?.into_syntax().into())
+            } else {
+                Some(separators.next()?.into())
+            }
+        }),
+    ))
+}
+pub fn tw_variant_segment_list<I, S>(items: I, separators: S) -> TwVariantSegmentList
+where
+    I: IntoIterator<Item = AnyTwVariantSegment>,
+    I::IntoIter: ExactSizeIterator,
+    S: IntoIterator<Item = TailwindSyntaxToken>,
+    S::IntoIter: ExactSizeIterator,
+{
+    let mut items = items.into_iter();
+    let mut separators = separators.into_iter();
+    let length = items.len() + separators.len();
+    TwVariantSegmentList::unwrap_cast(SyntaxNode::new_detached(
+        TailwindSyntaxKind::TW_VARIANT_SEGMENT_LIST,
         (0..length).map(|index| {
             if index % 2 == 0 {
                 Some(items.next()?.into_syntax().into())
@@ -589,6 +738,16 @@ where
 {
     TwBogusVariant::unwrap_cast(SyntaxNode::new_detached(
         TailwindSyntaxKind::TW_BOGUS_VARIANT,
+        slots,
+    ))
+}
+pub fn tw_bogus_variant_segment<I>(slots: I) -> TwBogusVariantSegment
+where
+    I: IntoIterator<Item = Option<SyntaxElement>>,
+    I::IntoIter: ExactSizeIterator,
+{
+    TwBogusVariantSegment::unwrap_cast(SyntaxNode::new_detached(
+        TailwindSyntaxKind::TW_BOGUS_VARIANT_SEGMENT,
         slots,
     ))
 }

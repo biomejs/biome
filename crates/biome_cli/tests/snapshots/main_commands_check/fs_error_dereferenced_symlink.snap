@@ -2,6 +2,12 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
+## Command
+
+```shell
+biome check '<TEMP_DIR>/check_rome_test_broken_symlink'
+```
+
 # Termination Message
 
 ```block
@@ -22,9 +28,12 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
 # Emitted Messages
 
 ```block
-broken_symlink internalError/fs ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+broken_symlink fs/dereferencedSymlink ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Dereferenced symlink.
+    
+    Caused by:
+      <OS_ERROR>
   
   i Biome encountered a file system entry that is a broken symbolic link.
   

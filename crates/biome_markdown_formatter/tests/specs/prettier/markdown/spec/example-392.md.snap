@@ -17,12 +17,12 @@ info: markdown/spec/example-392.md
 --- Prettier
 +++ Biome
 @@ -1 +1 @@
--\*\*\*\* is not an empty strong emphasis
-+**** is not an empty strong emphasis
+-**** is not an empty strong emphasis
++\*\*\*\* is not an empty strong emphasis
 ```
 
 # Output
 
 ```md
-**** is not an empty strong emphasis
+\*\*\*\* is not an empty strong emphasis
 ```

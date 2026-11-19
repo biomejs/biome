@@ -2,6 +2,12 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
+## Command
+
+```shell
+biome check src/file.css
+```
+
 ## `biome.json`
 
 ```json
@@ -25,7 +31,6 @@ body {
   color: red;
   display: block;
 }
-
 ```
 
 # Termination Message

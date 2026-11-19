@@ -1,4 +1,3 @@
-<!-- should not generate diagnostics -->
 ---
 const classes = ["a", "b"];
 const greeting = "hello";
@@ -7,6 +6,7 @@ const textColor = "red";
 const visibilityOpts = { rootMargin: "200px" };
 const idleOpts = { timeout: 500 };
 ---
+<!-- should not generate diagnostics -->
 
 <div class:list={classes}>Content</div>
 <p set:text={greeting} />

@@ -1,0 +1,16 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: App.jsx
+---
+# Input
+```jsx
+/* should not generate diagnostics */
+
+import "./app.css";
+import { Page } from "./Page.jsx";
+
+export function App() {
+	return <div className="app"><Page /></div>;
+}
+
+```

@@ -8,6 +8,7 @@ use biome_analyze_macros::RuleSourceVariantIndex;
 use biome_console::fmt::{Display, Formatter};
 use biome_console::{MarkupBuf, markup};
 use biome_diagnostics::location::AsSpan;
+use biome_diagnostics::serde::Advices as SerializableAdvices;
 use biome_diagnostics::{
     Advices, Category, Diagnostic, DiagnosticTags, Location, LogCategory, MessageAndDescription,
     Visit,
@@ -48,6 +49,8 @@ pub struct RuleMetadata {
     /// Use this field to tag the rule as being worked, which means the rule is still far from being completed.
     /// Possible bugs should be reported in that issue.
     pub issue_number: Option<&'static str>,
+    /// A preset this rule belongs to.
+    pub rule_presets: &'static [RulePreset],
 }
 
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
@@ -132,7 +135,7 @@ pub enum RuleSource<'a> {
     EslintNext(&'a str),
     /// Rules from [Eslint Plugin No Secrets](https://github.com/nickdeis/eslint-plugin-no-secrets)
     EslintNoSecrets(&'a str),
-    /// Rules from [Eslint Plugin Package.json](https://github.com/JoshuaKGoldberg/eslint-plugin-package-json)
+    /// Rules from [Eslint Plugin Package.json](https://github.com/michaelfaith/eslint-plugin-package-json)
     EslintPackageJson(&'a str),
     /// Rules from [Eslint Plugin Package.json Dependencies](https://github.com/idan-at/eslint-plugin-package-json-dependencies)
     EslintPackageJsonDependencies(&'a str),
@@ -164,14 +167,22 @@ pub enum RuleSource<'a> {
     EslintReactDom(&'a str),
     /// A subset of RSC rules from [eslint-react.xyz](https://eslint-react.xyz/)
     EslintReactRsc(&'a str),
+    /// A subset of React naming convention rules from [eslint-react.xyz](https://eslint-react.xyz/)
+    EslintReactNamingConvention(&'a str),
     /// Rules from [Eslint Plugin Regexp](https://github.com/ota-meshi/eslint-plugin-regexp)
     EslintRegexp(&'a str),
+    /// Rules from [@shadcn/lint](https://github.com/shadcn-ui/lint).
+    EslintShadcn(&'a str),
     /// Rules from [Eslint Plugin Solid](https://github.com/solidjs-community/eslint-plugin-solid)
     EslintSolid(&'a str),
+    /// Rules from [Eslint Plugin Svelte](https://github.com/sveltejs/eslint-plugin-svelte)
+    EslintSvelte(&'a str),
     /// Rules from [Eslint Plugin Sonar](https://github.com/SonarSource/eslint-plugin-sonarjs)
     EslintSonarJs(&'a str),
     /// Rules from [Eslint Plugin Stylistic](https://eslint.style)
     EslintStylistic(&'a str),
+    /// Rules from [Eslint Plugin Tailwindcss](https://github.com/francoismassart/eslint-plugin-tailwindcss)
+    EslintTailwindcss(&'a str),
     /// Rules from [Eslint Plugin Typescript](https://typescript-eslint.io)
     EslintTypeScript(&'a str),
     /// Rules from [Eslint Plugin Unicorn](https://github.com/sindresorhus/eslint-plugin-unicorn)
@@ -200,10 +211,26 @@ pub enum RuleSource<'a> {
     EslintYml(&'a str),
     /// Rules from [Eslint CSS](https://github.com/eslint/css)
     EslintCss(&'a str),
+    /// Rules from [Eslint Plugin Astro](https://ota-meshi.github.io/eslint-plugin-astro/)
+    EslintAstro(&'a str),
     /// Rules from [Eslint Plugin Drizzle](https://orm.drizzle.team/docs/eslint-plugin)
     EslintDrizzle(&'a str),
+    /// Rules from [Convex ESLint Plugin](https://docs.convex.dev/linting/eslint)
+    EslintConvex(&'a str),
+    /// Action for https://github.com/keithamus/sort-package-json
+    SortPackageJson,
+    /// Rules from [Sherif](https://github.com/QuiiBz/sherif)
+    Sherif(&'a str),
     /// Rules from [Eslint Plugin Typescript Sort Keys](https://github.com/infctr/eslint-plugin-typescript-sort-keys)
     EslintTypescriptSortKeys(&'a str),
+    /// Rules from [markdownlint](https://github.com/DavidAnson/markdownlint)
+    MarkdownLint(&'a str, &'a str),
+    /// Rules from [TanStack Query ESLint Plugin](https://tanstack.com/query/latest/docs/eslint/eslint-plugin-query)
+    EslintTanstackQuery(&'a str),
+    /// Rules from [stylelint-scss](https://github.com/stylelint-scss/stylelint-scss)
+    StylelintScss(&'a str),
+    /// Rules from the `oxc` plugin of [Oxlint](https://oxc.rs/docs/guide/usage/linter)
+    Oxc(&'a str),
 }
 
 impl<'a> std::fmt::Display for RuleSource<'a> {
@@ -245,10 +272,16 @@ impl<'a> std::fmt::Display for RuleSource<'a> {
             Self::EslintReactJsx(_) => write!(f, "eslint-plugin-react-jsx"),
             Self::EslintReactDom(_) => write!(f, "eslint-plugin-react-dom"),
             Self::EslintReactRsc(_) => write!(f, "eslint-plugin-react-rsc"),
+            Self::EslintReactNamingConvention(_) => {
+                write!(f, "eslint-plugin-react-naming-convention")
+            }
             Self::EslintRegexp(_) => write!(f, "eslint-plugin-regexp"),
+            Self::EslintShadcn(_) => write!(f, "@shadcn/lint"),
             Self::EslintSolid(_) => write!(f, "eslint-plugin-solid"),
+            Self::EslintSvelte(_) => write!(f, "eslint-plugin-svelte"),
             Self::EslintSonarJs(_) => write!(f, "eslint-plugin-sonarjs"),
             Self::EslintStylistic(_) => write!(f, "@stylistic/eslint-plugin"),
+            Self::EslintTailwindcss(_) => write!(f, "eslint-plugin-tailwindcss"),
             Self::EslintTypeScript(_) => write!(f, "typescript-eslint"),
             Self::EslintUnicorn(_) => write!(f, "eslint-plugin-unicorn"),
             Self::EslintUnusedImports(_) => write!(f, "eslint-plugin-unused-imports"),
@@ -263,8 +296,16 @@ impl<'a> std::fmt::Display for RuleSource<'a> {
             Self::EslintMarkdown(_) => write!(f, "@eslint/markdown"),
             Self::EslintYml(_) => write!(f, "eslint-plugin-yml"),
             Self::EslintCss(_) => write!(f, "@eslint/css"),
+            Self::EslintAstro(_) => write!(f, "eslint-plugin-astro"),
             Self::EslintDrizzle(_) => write!(f, "eslint-plugin-drizzle"),
+            Self::EslintConvex(_) => write!(f, "@convex-dev/eslint-plugin"),
+            Self::SortPackageJson => write!(f, "sort-package-json"),
+            Self::Sherif(_) => write!(f, "Sherif"),
             Self::EslintTypescriptSortKeys(_) => write!(f, "eslint-plugin-typescript-sort-keys"),
+            Self::MarkdownLint(_, _) => write!(f, "markdownlint"),
+            Self::EslintTanstackQuery(_) => write!(f, "@tanstack/eslint-plugin-query"),
+            Self::StylelintScss(_) => write!(f, "stylelint-scss"),
+            Self::Oxc(_) => write!(f, "Oxlint"),
         }
     }
 }
@@ -330,10 +371,14 @@ impl<'a> RuleSource<'a> {
             | Self::EslintReactJsx(rule_name)
             | Self::EslintReactDom(rule_name)
             | Self::EslintReactRsc(rule_name)
+            | Self::EslintReactNamingConvention(rule_name)
             | Self::EslintRegexp(rule_name)
+            | Self::EslintShadcn(rule_name)
             | Self::EslintSolid(rule_name)
+            | Self::EslintSvelte(rule_name)
             | Self::EslintSonarJs(rule_name)
             | Self::EslintStylistic(rule_name)
+            | Self::EslintTailwindcss(rule_name)
             | Self::EslintTypeScript(rule_name)
             | Self::EslintUnicorn(rule_name)
             | Self::EslintUnusedImports(rule_name)
@@ -348,8 +393,16 @@ impl<'a> RuleSource<'a> {
             | Self::EslintJson(rule_name)
             | Self::EslintMarkdown(rule_name)
             | Self::EslintYml(rule_name)
+            | Self::EslintAstro(rule_name)
             | Self::EslintDrizzle(rule_name)
-            | Self::EslintTypescriptSortKeys(rule_name) => rule_name,
+            | Self::EslintConvex(rule_name)
+            | Self::EslintTypescriptSortKeys(rule_name)
+            | Self::EslintTanstackQuery(rule_name)
+            | Self::StylelintScss(rule_name)
+            | Self::Oxc(rule_name)
+            | Self::MarkdownLint(_, rule_name)
+            | Self::Sherif(rule_name) => rule_name,
+            Self::SortPackageJson => "sort-package-json",
         }
     }
 
@@ -359,7 +412,10 @@ impl<'a> RuleSource<'a> {
             | Self::DenoLint(_)
             | Self::Eslint(_)
             | Self::GraphqlSchemaLinter(_)
-            | Self::Stylelint(_) => "",
+            | Self::MarkdownLint(_, _)
+            | Self::SortPackageJson
+            | Self::Stylelint(_)
+            | Self::Sherif(_) => "",
             Self::EslintBarrelFiles(_) => "barrel-files",
             Self::EslintGraphql(_) => "@graphql-eslint",
             Self::EslintImport(_) => "import",
@@ -387,8 +443,11 @@ impl<'a> RuleSource<'a> {
             Self::EslintReactJsx(_) => "react-jsx",
             Self::EslintReactDom(_) => "react-dom",
             Self::EslintReactRsc(_) => "react-rsc",
+            Self::EslintReactNamingConvention(_) => "react-naming-convention",
             Self::EslintRegexp(_) => "regexp",
+            Self::EslintShadcn(_) => "shadcn",
             Self::EslintSolid(_) => "solid",
+            Self::EslintSvelte(_) => "svelte",
             Self::EslintSonarJs(_) => "sonarjs",
             Self::EslintStylistic(_) => "@stylistic",
             Self::EslintTypeScript(_) => "@typescript-eslint",
@@ -401,12 +460,18 @@ impl<'a> RuleSource<'a> {
             Self::EslintPlaywright(_) => "playwright",
             Self::EslintE18e(_) => "e18e",
             Self::EslintBetterTailwindcss(_) => "better-tailwindcss",
+            Self::EslintTailwindcss(_) => "tailwindcss",
             Self::EslintJson(_) => "json",
             Self::EslintMarkdown(_) => "markdown",
             Self::EslintYml(_) => "yml",
             Self::EslintCss(_) => "css",
+            Self::EslintAstro(_) => "astro",
             Self::EslintDrizzle(_) => "drizzle",
+            Self::EslintConvex(_) => "@convex-dev",
             Self::EslintTypescriptSortKeys(_) => "typescript-sort-keys",
+            Self::EslintTanstackQuery(_) => "@tanstack/query",
+            Self::StylelintScss(_) => "scss",
+            Self::Oxc(_) => "oxc",
         }
     }
 
@@ -422,6 +487,7 @@ impl<'a> RuleSource<'a> {
         match self {
             Self::Clippy(rule_name) => format!("https://rust-lang.github.io/rust-clippy/master/#{rule_name}"),
             Self::DenoLint(rule_name) => format!("https://lint.deno.land/rules/{rule_name}"),
+            Self::MarkdownLint(rule_id, _) => format!("https://github.com/DavidAnson/markdownlint/blob/main/doc/{rule_id}.md"),
             Self::Eslint(rule_name) => format!("https://eslint.org/docs/latest/rules/{rule_name}"),
             Self::EslintBarrelFiles(rule_name) => format!("https://github.com/thepassle/eslint-plugin-barrel-files/blob/main/docs/rules/{rule_name}.md"),
             Self::EslintE18e(_) => "https://github.com/e18e/eslint-plugin".to_string(),
@@ -436,7 +502,7 @@ impl<'a> RuleSource<'a> {
             Self::EslintN(rule_name) => format!("https://github.com/eslint-community/eslint-plugin-n/blob/master/docs/rules/{rule_name}.md"),
             Self::EslintNext(rule_name) => format!("https://nextjs.org/docs/messages/{rule_name}"),
             Self::EslintNoSecrets(_) => "https://github.com/nickdeis/eslint-plugin-no-secrets/blob/master/README.md".to_string(),
-            Self::EslintPackageJson(rule_name) => format!("https://github.com/JoshuaKGoldberg/eslint-plugin-package-json/blob/main/docs/rules/{rule_name}.md"),
+            Self::EslintPackageJson(rule_name) => format!("https://eslint-plugin-package-json.dev/rules/{}{rule_name}", eslint_package_json_rule_directory(rule_name)),
             Self::EslintPackageJsonDependencies(rule_name) => format!("https://github.com/idan-at/eslint-plugin-package-json-dependencies/blob/master/docs/rules/{rule_name}.md"),
             Self::EslintPerfectionist(rule_name) => format!("https://perfectionist.dev/rules/{rule_name}"),
             Self::EslintPromise(rule_name) => format!("https://github.com/eslint-community/eslint-plugin-promise/blob/main/docs/rules/{rule_name}.md"),
@@ -452,10 +518,14 @@ impl<'a> RuleSource<'a> {
             Self::EslintReactJsx(rule_name) => format!("https://eslint-react.xyz/docs/rules/jsx-{rule_name}"),
             Self::EslintReactDom(rule_name) => format!("https://eslint-react.xyz/docs/rules/dom-{rule_name}"),
             Self::EslintReactRsc(rule_name) => format!("https://eslint-react.xyz/docs/rules/rsc-{rule_name}"),
+            Self::EslintReactNamingConvention(rule_name) => format!("https://eslint-react.xyz/docs/rules/naming-convention-{rule_name}"),
             Self::EslintRegexp(rule_name) => format!("https://ota-meshi.github.io/eslint-plugin-regexp/rules/{rule_name}.html"),
+            Self::EslintShadcn(rule_name) => format!("https://github.com/shadcn-ui/lint/blob/main/docs/rules/{rule_name}.md"),
             Self::EslintSolid(rule_name) => format!("https://github.com/solidjs-community/eslint-plugin-solid/blob/main/packages/eslint-plugin-solid/docs/{rule_name}.md"),
+            Self::EslintSvelte(rule_name) => format!("https://sveltejs.github.io/eslint-plugin-svelte/rules/{rule_name}/"),
             Self::EslintSonarJs(rule_name) => format!("https://github.com/SonarSource/eslint-plugin-sonarjs/blob/HEAD/docs/rules/{rule_name}.md"),
             Self::EslintStylistic(rule_name) => format!("https://eslint.style/rules/default/{rule_name}"),
+            Self::EslintTailwindcss(rule_name) => format!("https://github.com/francoismassart/eslint-plugin-tailwindcss/blob/master/docs/rules/{rule_name}.md"),
             Self::EslintTypeScript(rule_name) => format!("https://typescript-eslint.io/rules/{rule_name}"),
             Self::EslintUnicorn(rule_name) => format!("https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/{rule_name}.md"),
             Self::EslintUnusedImports(rule_name) => format!("https://github.com/sweepline/eslint-plugin-unused-imports/blob/master/docs/rules/{rule_name}.md"),
@@ -470,13 +540,35 @@ impl<'a> RuleSource<'a> {
             Self::EslintMarkdown(rule_name) => format!("https://github.com/eslint/markdown/blob/main/docs/rules/{rule_name}.md"),
             Self::EslintYml(rule_name) => format!("https://ota-meshi.github.io/eslint-plugin-yml/rules/{rule_name}.html"),
             Self::EslintCss(rule_name) => format!("https://github.com/eslint/css/blob/main/docs/rules/{rule_name}.md"),
+            Self::EslintAstro(rule_name) => format!("https://ota-meshi.github.io/eslint-plugin-astro/rules/{rule_name}"),
             Self::EslintDrizzle(rule_name) => format!("https://orm.drizzle.team/docs/eslint-plugin#{rule_name}"),
+            Self::EslintConvex(rule_name) => format!("https://docs.convex.dev/linting/overview#{rule_name}"),
+            Self::SortPackageJson => "https://github.com/keithamus/sort-package-json".to_string(),
+            Self::Sherif(rule_name) => format!("https://github.com/QuiiBz/sherif#{rule_name}"),
             Self::EslintTypescriptSortKeys(rule_name) => format!("https://github.com/infctr/eslint-plugin-typescript-sort-keys/blob/master/docs/rules/{rule_name}.md"),
+            Self::EslintTanstackQuery(rule_name) => format!("https://tanstack.com/query/latest/docs/eslint/{rule_name}"),
+            Self::StylelintScss(rule_name) => format!("https://github.com/stylelint-scss/stylelint-scss/blob/master/src/rules/{rule_name}/README.md"),
+            Self::Oxc(rule_name) => format!("https://oxc.rs/docs/guide/usage/linter/rules/oxc/{rule_name}"),
         }
     }
 
     pub fn as_url_and_rule_name(&self) -> (String, &'a str) {
         (self.to_rule_url(), self.as_rule_name())
+    }
+
+    /// Whether this source is one of the [eslint-react.xyz](https://eslint-react.xyz/)
+    /// subset plugins (react-x, react-dom, react-jsx, react-rsc, react-naming-convention)
+    /// that the umbrella `@eslint-react/eslint-plugin` plugin ([`Self::EslintReactXyz`])
+    /// re-exports.
+    pub const fn is_eslint_react_xyz_subset(&self) -> bool {
+        matches!(
+            self,
+            Self::EslintReactX(_)
+                | Self::EslintReactJsx(_)
+                | Self::EslintReactDom(_)
+                | Self::EslintReactRsc(_)
+                | Self::EslintReactNamingConvention(_)
+        )
     }
 
     /// Original ESLint rule
@@ -493,11 +585,16 @@ impl<'a> RuleSource<'a> {
                 | Self::Eslint(_)
                 | Self::GraphqlSchemaLinter(_)
                 | Self::Stylelint(_)
+                | Self::StylelintScss(_)
+                | Self::SortPackageJson
+                | Self::Sherif(_)
+                | Self::MarkdownLint(_, _)
+                | Self::Oxc(_)
         )
     }
 
     pub const fn is_stylelint(&self) -> bool {
-        matches!(self, Self::Stylelint(_))
+        matches!(self, Self::Stylelint(_) | Self::StylelintScss(_))
     }
 }
 
@@ -516,6 +613,28 @@ impl RuleSource<'static> {
             kind: RuleSourceKind::Inspired,
             source: self,
         }
+    }
+}
+
+/// Returns the directory that holds the documentation page of the
+/// `eslint-plugin-package-json` rule `rule_name`, relative to
+/// <https://eslint-plugin-package-json.dev/rules/>.
+///
+/// The site groups the rules named `require-<property>` and `valid-<property>`
+/// under `require-properties/` and `valid-properties/`. The returned directory
+/// ends with a slash. It is empty for the rules that the site keeps directly
+/// in `rules/`.
+fn eslint_package_json_rule_directory(rule_name: &str) -> &'static str {
+    match rule_name {
+        // These rules share a prefix with the grouped rules, but the site
+        // doesn't group them.
+        "require-attribution"
+        | "require-package-json-export"
+        | "valid-peerDependenciesMeta-relationship"
+        | "valid-repository-directory" => "",
+        _ if rule_name.starts_with("require-") => "require-properties/",
+        _ if rule_name.starts_with("valid-") => "valid-properties/",
+        _ => "",
     }
 }
 
@@ -559,6 +678,10 @@ impl RuleSourceKind {
 #[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub enum RuleDomain {
+    /// Astro framework rules
+    Astro,
+    /// Convex backend rules
+    Convex,
     /// Drizzle ORM rules
     Drizzle,
     /// React library rules
@@ -573,12 +696,16 @@ pub enum RuleDomain {
     Next,
     /// Qwik framework rules
     Qwik,
+    /// Svelte framework rules
+    Svelte,
     /// Vue.js framework rules
     Vue,
     /// For rules that require querying multiple files inside a project
     Project,
     /// Tailwind CSS rules
     Tailwind,
+    /// TanStack Query rules
+    TanstackQuery,
     /// Turborepo build system rules
     Turborepo,
     /// Playwright testing framework rules
@@ -591,6 +718,8 @@ impl Display for RuleDomain {
     fn fmt(&self, fmt: &mut Formatter) -> std::io::Result<()> {
         // use lower case naming, it needs to match the name of the configuration
         match self {
+            Self::Astro => fmt.write_str("astro"),
+            Self::Convex => fmt.write_str("convex"),
             Self::Drizzle => fmt.write_str("drizzle"),
             Self::React => fmt.write_str("react"),
             Self::ReactNative => fmt.write_str("reactNative"),
@@ -598,9 +727,11 @@ impl Display for RuleDomain {
             Self::Solid => fmt.write_str("solid"),
             Self::Next => fmt.write_str("next"),
             Self::Qwik => fmt.write_str("qwik"),
+            Self::Svelte => fmt.write_str("svelte"),
             Self::Vue => fmt.write_str("vue"),
             Self::Project => fmt.write_str("project"),
             Self::Tailwind => fmt.write_str("tailwind"),
+            Self::TanstackQuery => fmt.write_str("tanstackQuery"),
             Self::Turborepo => fmt.write_str("turborepo"),
             Self::Playwright => fmt.write_str("playwright"),
             Self::Types => fmt.write_str("types"),
@@ -627,6 +758,8 @@ impl RuleDomain {
     /// If the array is empty, it means that the rules that belong to a certain domain won't enable themselves automatically.
     pub const fn manifest_dependencies(self) -> &'static [&'static (&'static str, &'static str)] {
         match self {
+            Self::Astro => &[&("astro", ">=1.0.0")],
+            Self::Convex => &[&("convex", ">=1.0.0")],
             Self::React => &[&("react", ">=16.0.0")],
             Self::ReactNative => &[&("react-native", ">=0.60.0")],
             Self::Test => &[
@@ -641,9 +774,17 @@ impl RuleDomain {
                 &("@builder.io/qwik", ">=1.0.0"),
                 &("@qwik.dev/core", ">=2.0.0"),
             ],
+            Self::Svelte => &[&("svelte", ">=3.0.0")],
             Self::Vue => &[&("vue", ">=3.0.0")],
             Self::Project => &[],
-            Self::Tailwind => &[&("tailwindcss", ">=3.0.0")],
+            Self::Tailwind => &[&("tailwindcss", ">=4.0.0")],
+            Self::TanstackQuery => &[
+                &("@tanstack/react-query", ">=4.0.0"),
+                &("@tanstack/preact-query", ">=5.0.0"),
+                &("@tanstack/solid-query", ">=4.0.0"),
+                &("@tanstack/svelte-query", ">=4.0.0"),
+                &("@tanstack/vue-query", ">=4.0.0"),
+            ],
             Self::Turborepo => &[&("turbo", ">=1.0.0")],
             Self::Playwright => &[&("@playwright/test", ">=1.0.0")],
             Self::Types => &[],
@@ -654,6 +795,8 @@ impl RuleDomain {
     /// Global identifiers that should be added to the `globals` of the [crate::AnalyzerConfiguration] type
     pub const fn globals(self) -> &'static [&'static str] {
         match self {
+            Self::Astro => &[],
+            Self::Convex => &[],
             Self::React => &[],
             Self::ReactNative => &[],
             Self::Test => &[
@@ -683,9 +826,11 @@ impl RuleDomain {
             Self::Solid => &[],
             Self::Next => &[],
             Self::Qwik => &[],
+            Self::Svelte => &[],
             Self::Vue => &[],
             Self::Project => &[],
             Self::Tailwind => &[],
+            Self::TanstackQuery => &[],
             Self::Turborepo => &[],
             Self::Playwright => &["test", "expect"],
             Self::Types => &[],
@@ -695,15 +840,19 @@ impl RuleDomain {
 
     pub const fn as_str(&self) -> &'static str {
         match self {
+            Self::Astro => "astro",
+            Self::Convex => "convex",
             Self::React => "react",
             Self::ReactNative => "reactNative",
             Self::Test => "test",
             Self::Solid => "solid",
             Self::Next => "next",
             Self::Qwik => "qwik",
+            Self::Svelte => "svelte",
             Self::Vue => "vue",
             Self::Project => "project",
             Self::Tailwind => "tailwind",
+            Self::TanstackQuery => "tanstackQuery",
             Self::Turborepo => "turborepo",
             Self::Playwright => "playwright",
             Self::Types => "types",
@@ -713,6 +862,9 @@ impl RuleDomain {
 
     pub const fn as_description(&self) -> &'static str {
         match self {
+            Self::Astro => {
+                "Use this domain inside Astro projects. This domain enables rules that are specific to Astro projects."
+            }
             Self::React => {
                 "Use this domain inside React projects. It enables a set of rules that can help catching bugs and enforce correct practices. This domain enables rules that might conflict with the Solid domain."
             }
@@ -725,12 +877,18 @@ impl RuleDomain {
             Self::Solid => {
                 "Use this domain inside Solid projects. This domain enables rules that might conflict with the React domain."
             }
+            Self::Convex => {
+                "Use this domain inside Convex projects. This domain enables rules that are specific to Convex."
+            }
             Self::Next => "Use this domain inside Next.js projects.",
             Self::Playwright => {
                 "Use this domain inside Playwright test projects. This domain enables rules that help enforce best practices and catch common mistakes when writing Playwright tests."
             }
             Self::Project => {
                 "This domain contains rules that perform project-level analysis. This includes our module graph for dependency resolution. When enabling rules that belong to this domain, Biome will scan the entire project. The scanning phase will have a performance impact on the linting process. See the documentation on our [scanner](/internals/architecture/#scanner) to learn more about the scanner."
+            }
+            Self::Svelte => {
+                "Use this domain inside Svelte projects. This domain enables rules that are specific to Svelte projects."
             }
             Self::Vue => {
                 "Use this domain inside Vue projects. This domain enables rules that are specific to Vue projects."
@@ -740,6 +898,9 @@ impl RuleDomain {
             }
             Self::Tailwind => {
                 "Use this domain inside Tailwind CSS projects. This domain enables rules that are specific to Tailwind CSS."
+            }
+            Self::TanstackQuery => {
+                "Use this domain inside projects that use TanStack Query. This domain enables rules that are specific to TanStack Query."
             }
             Self::Turborepo => {
                 "Use this domain inside Turborepo projects. This domain enables rules that are specific to Turborepo projects."
@@ -757,15 +918,19 @@ impl FromStr for RuleDomain {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
+            "astro" => Ok(Self::Astro),
+            "convex" => Ok(Self::Convex),
             "react" => Ok(Self::React),
             "reactNative" => Ok(Self::ReactNative),
             "test" => Ok(Self::Test),
             "solid" => Ok(Self::Solid),
             "next" => Ok(Self::Next),
             "qwik" => Ok(Self::Qwik),
+            "svelte" => Ok(Self::Svelte),
             "vue" => Ok(Self::Vue),
             "project" => Ok(Self::Project),
             "tailwind" => Ok(Self::Tailwind),
+            "tanstackQuery" => Ok(Self::TanstackQuery),
             "turborepo" => Ok(Self::Turborepo),
             "playwright" => Ok(Self::Playwright),
             "types" => Ok(Self::Types),
@@ -794,6 +959,7 @@ impl RuleMetadata {
             severity: Severity::Information,
             domains: &[],
             issue_number: None,
+            rule_presets: &[],
         }
     }
 
@@ -834,6 +1000,11 @@ impl RuleMetadata {
 
     pub const fn issue_number(mut self, issue_number: Option<&'static str>) -> Self {
         self.issue_number = issue_number;
+        self
+    }
+
+    pub const fn rule_presets(mut self, rule_presets: &'static [RulePreset]) -> Self {
+        self.rule_presets = rule_presets;
         self
     }
 
@@ -1026,6 +1197,16 @@ macro_rules! declare_source_rule {
             }
         );
 
+        // Declare a new `rule_category!` macro in the module context that
+        // expands to the category of this rule
+        // This is implemented by calling the `group_category!` macro from the
+        // parent module (that should be declared by a call to `declare_group!`)
+        // and providing it with the name of this rule as a string literal token
+        #[expect(unused_macros)]
+        macro_rules! rule_category {
+            () => { super::group_category!( $name ) };
+        }
+
         /// This macro returns the corresponding [ActionCategory] to use inside the [RuleAction]
         #[expect(unused_macros)]
         macro_rules! rule_action_category {
@@ -1054,7 +1235,7 @@ macro_rules! declare_lint_group {
         $vis enum $id {}
 
         impl $crate::RuleGroup for $id {
-            type Language = <( $( $( $rule )::* , )* ) as $crate::GroupLanguage>::Language;
+            type Language = <super::Category as $crate::GroupCategory>::Language;
             type Category = super::Category;
 
             const NAME: &'static str = $name;
@@ -1091,7 +1272,7 @@ macro_rules! declare_assist_group {
         $vis enum $id {}
 
         impl $crate::RuleGroup for $id {
-            type Language = <( $( $( $rule )::* , )* ) as $crate::GroupLanguage>::Language;
+            type Language = <super::Category as $crate::GroupCategory>::Language;
             type Category = super::Category;
 
             const NAME: &'static str = $name;
@@ -1128,7 +1309,7 @@ macro_rules! declare_syntax_group {
         $vis enum $id {}
 
         impl $crate::RuleGroup for $id {
-            type Language = <( $( $( $rule )::* , )* ) as $crate::GroupLanguage>::Language;
+            type Language = <super::Category as $crate::GroupCategory>::Language;
             type Category = super::Category;
 
             const NAME: &'static str = $name;
@@ -1171,11 +1352,11 @@ pub trait GroupCategory {
 
 #[macro_export]
 macro_rules! declare_category {
-    ( $vis:vis $id:ident { kind: $kind:ident, groups: [ $( $( $group:ident )::* , )* ] } ) => {
+    ( $vis:vis $id:ident { kind: $kind:ident, language: $language:ty, groups: [ $( $( $group:ident )::* , )* ] } ) => {
         $vis enum $id {}
 
         impl $crate::GroupCategory for $id {
-            type Language = <( $( $( $group )::* , )* ) as $crate::CategoryLanguage>::Language;
+            type Language = $language;
 
             const CATEGORY: $crate::RuleCategory = $crate::RuleCategory::$kind;
 
@@ -1187,57 +1368,6 @@ macro_rules! declare_category {
         pub(self) use $id as Category;
     };
 }
-
-/// This trait is implemented for tuples of [Rule] types of size 1 to 29 if the
-/// query type of all the rules in the tuple share the same associated
-/// [Language] (which is then aliased as the `Language` associated type on
-/// [GroupLanguage] itself). It is used to ensure all the rules in a given
-/// group are all querying the same underlying language
-pub trait GroupLanguage {
-    type Language: Language;
-}
-
-/// This trait is implemented for tuples of [Rule] types of size 1 to 29 if the
-/// language of all the groups in the tuple share the same associated
-/// [Language] (which is then aliased as the `Language` associated type on
-/// [CategoryLanguage] itself). It is used to ensure all the groups in a given
-/// category are all querying the same underlying language
-pub trait CategoryLanguage {
-    type Language: Language;
-}
-
-/// Helper macro for implementing [GroupLanguage] on a large number of tuple types at once
-macro_rules! impl_group_language {
-    ( $head:ident $( , $rest:ident )* ) => {
-        impl<$head $( , $rest )*> GroupLanguage for ($head, $( $rest ),*)
-        where
-            $head: Rule $( , $rest: Rule, <$rest as Rule>::Query: Queryable<Language = RuleLanguage<$head>> )*
-        {
-            type Language = RuleLanguage<$head>;
-        }
-
-        impl<$head $( , $rest )*> CategoryLanguage for ($head, $( $rest ),*)
-        where
-            $head: RuleGroup $( , $rest: RuleGroup<Language = <$head as RuleGroup>::Language> )*
-        {
-            type Language = <$head as RuleGroup>::Language;
-        }
-
-        impl_group_language!( $( $rest ),* );
-    };
-
-    () => {};
-}
-
-impl_group_language!(
-    T00, T01, T02, T03, T04, T05, T06, T07, T08, T09, T10, T11, T12, T13, T14, T15, T16, T17, T18,
-    T19, T20, T21, T22, T23, T24, T25, T26, T27, T28, T29, T30, T31, T32, T33, T34, T35, T36, T37,
-    T38, T39, T40, T41, T42, T43, T44, T45, T46, T47, T48, T49, T50, T51, T52, T53, T54, T55, T56,
-    T57, T58, T59, T60, T61, T62, T63, T64, T65, T66, T67, T68, T69, T70, T71, T72, T73, T74, T75,
-    T76, T77, T78, T79, T80, T81, T82, T83, T84, T85, T86, T87, T88, T89, T90, T91, T92, T93, T94,
-    T95, T96, T97, T98, T99, T100, T101, T102, T103, T104, T105, T106, T107, T108, T109, T110,
-    T111, T112, T113, T114, T115
-);
 
 /// Trait implemented by all analysis rules: declares interest to a certain AstNode type,
 /// and a callback function to be executed on all nodes matching the query to possibly
@@ -1374,43 +1504,13 @@ pub trait Rule: RuleMeta + Sized {
     where
         Self: 'static,
     {
-        let category = <Self::Group as RuleGroup>::Category::CATEGORY;
-        if matches!(
-            category,
-            RuleCategory::Lint | RuleCategory::Action | RuleCategory::Syntax
-        ) {
-            let rule_category = format!(
-                "{}/{}/{}",
-                category.as_suppression_category(),
-                <Self::Group as RuleGroup>::NAME,
-                Self::METADATA.name
-            );
-            let suppression_text = format!("biome-ignore-all {rule_category}");
-            let root = ctx.root();
-
-            if let Some(first_token) = root.syntax().first_token() {
-                let mut mutation = root.begin();
-                let comment =
-                    suppression_action.suppression_top_level_comment(suppression_text.as_str());
-                suppression_action.apply_top_level_suppression(
-                    &mut mutation,
-                    first_token,
-                    comment.as_str(),
-                );
-                let message = if category == RuleCategory::Action {
-                    "action"
-                } else {
-                    "rule"
-                };
-                return Some(SuppressAction {
-                    mutation,
-                    message:
-                        markup! { "Suppress " {message} " " {rule_category} " for the whole file."}
-                            .to_owned(),
-                });
-            }
-        }
-        None
+        build_top_level_suppression(
+            ctx.root(),
+            <Self::Group as RuleGroup>::Category::CATEGORY,
+            <Self::Group as RuleGroup>::NAME,
+            Self::METADATA.name,
+            suppression_action,
+        )
     }
 
     /// Create a code action that allows you to suppress the rule. The function
@@ -1424,44 +1524,15 @@ pub trait Rule: RuleMeta + Sized {
     where
         Self: 'static,
     {
-        // if the rule belongs to `Lint`, we auto generate an action to suppress the rule
-        let category = <Self::Group as RuleGroup>::Category::CATEGORY;
-        if matches!(
-            category,
-            RuleCategory::Lint | RuleCategory::Action | RuleCategory::Syntax
-        ) {
-            let rule_category = format!(
-                "{}/{}/{}",
-                category.as_suppression_category(),
-                <Self::Group as RuleGroup>::NAME,
-                Self::METADATA.name
-            );
-            let suppression_text = format!("biome-ignore {rule_category}");
-            let root = ctx.root();
-            let token = root.syntax().token_at_offset(text_range.start());
-            let mut mutation = root.begin();
-            suppression_action.inline_suppression(SuppressionCommentEmitterPayload {
-                suppression_text: suppression_text.as_str(),
-                mutation: &mut mutation,
-                token_offset: token,
-                diagnostic_text_range: text_range,
-                suppression_reason: suppression_reason.unwrap_or("<explanation>"),
-            });
-
-            let message = if category == RuleCategory::Action {
-                "action"
-            } else {
-                "rule"
-            };
-
-            Some(SuppressAction {
-                mutation,
-                message: markup! { "Suppress " {message} " " {rule_category} " for this line."}
-                    .to_owned(),
-            })
-        } else {
-            None
-        }
+        build_inline_suppression(
+            ctx.root(),
+            text_range,
+            <Self::Group as RuleGroup>::Category::CATEGORY,
+            <Self::Group as RuleGroup>::NAME,
+            Self::METADATA.name,
+            suppression_action,
+            suppression_reason,
+        )
     }
 
     /// Returns a mutation to apply to the code
@@ -1469,6 +1540,101 @@ pub trait Rule: RuleMeta + Sized {
         _ctx: &RuleContext<Self>,
         _state: &Self::State,
     ) -> Option<BatchMutation<RuleLanguage<Self>>> {
+        None
+    }
+}
+pub(crate) fn build_top_level_suppression<L: Language>(
+    root: L::Root,
+    category: RuleCategory,
+    group_name: &str,
+    rule_name: &str,
+    suppression_action: &dyn SuppressionAction<Language = L>,
+) -> Option<SuppressAction<L>> {
+    if matches!(
+        category,
+        RuleCategory::Lint | RuleCategory::Action | RuleCategory::Syntax
+    ) {
+        let rule_category = format!(
+            "{}/{}/{}",
+            category.as_suppression_category(),
+            group_name,
+            rule_name
+        );
+        let suppression_text = format!("biome-ignore-all {rule_category}");
+
+        if let Some(first_token) = root.syntax().first_token() {
+            let mut mutation = root.begin();
+            let comment =
+                suppression_action.suppression_top_level_comment(suppression_text.as_str());
+            suppression_action.apply_top_level_suppression(
+                &mut mutation,
+                first_token,
+                comment.as_str(),
+            );
+            let message = if category == RuleCategory::Action {
+                "action"
+            } else {
+                "rule"
+            };
+            return Some(SuppressAction {
+                mutation,
+                message:
+                    markup! { "Suppress " {message} " " {rule_category} " for the whole file."}
+                        .to_owned(),
+            });
+        }
+    }
+    None
+}
+
+/// Shared by [Rule::inline_suppression] and plugin signals, and kept outside
+/// the trait so it is monomorphized once per language instead of once per rule.
+pub(crate) fn build_inline_suppression<L: Language>(
+    root: L::Root,
+    text_range: &TextRange,
+    category: RuleCategory,
+    group_name: &str,
+    rule_name: &str,
+    suppression_action: &dyn SuppressionAction<Language = L>,
+    suppression_reason: Option<&str>,
+) -> Option<SuppressAction<L>> {
+    // if the rule belongs to `Lint`, we auto generate an action to suppress the rule
+    if matches!(
+        category,
+        RuleCategory::Lint | RuleCategory::Action | RuleCategory::Syntax
+    ) {
+        let rule_category = format!(
+            "{}/{}/{}",
+            category.as_suppression_category(),
+            group_name,
+            rule_name
+        );
+        let suppression_text = format!("biome-ignore {rule_category}");
+        let token = root.syntax().token_at_offset(text_range.start());
+        let mut mutation = root.begin();
+        suppression_action.inline_suppression(SuppressionCommentEmitterPayload {
+            suppression_text: suppression_text.as_str(),
+            mutation: &mut mutation,
+            token_offset: token,
+            diagnostic_text_range: text_range,
+            suppression_reason: suppression_reason.unwrap_or("<explanation>"),
+        });
+        if mutation.is_empty() {
+            return None;
+        }
+
+        let message = if category == RuleCategory::Action {
+            "action"
+        } else {
+            "rule"
+        };
+
+        Some(SuppressAction {
+            mutation,
+            message: markup! { "Suppress " {message} " " {rule_category} " for this line."}
+                .to_owned(),
+        })
+    } else {
         None
     }
 }
@@ -1485,12 +1651,6 @@ pub struct RuleDiagnostic {
     pub(crate) severity: Severity,
 
     advice_offset: Option<TextSize>,
-}
-
-impl RuleDiagnostic {
-    pub(crate) fn set_advice_offset(&mut self, offset: TextSize) {
-        self.advice_offset = Some(offset);
-    }
 }
 
 impl Diagnostic for RuleDiagnostic {
@@ -1557,6 +1717,10 @@ impl Advices for RuleDiagnostic {
             visitor.record_list(&list)?;
         }
 
+        for advices in &self.rule_advice.parent_advices {
+            advices.record(visitor)?;
+        }
+
         Ok(())
     }
 }
@@ -1567,6 +1731,8 @@ pub struct RuleAdvice {
     pub(crate) details: Vec<Detail>,
     pub(crate) notes: Vec<(LogCategory, MarkupBuf)>,
     pub(crate) suggestion_list: Option<SuggestionList>,
+    /// Advices provided by other diagnostics
+    pub(crate) parent_advices: Vec<SerializableAdvices>,
 }
 
 #[derive(Clone, Debug, Default)]
@@ -1596,6 +1762,13 @@ impl RuleDiagnostic {
             rule_advice: RuleAdvice::default(),
             severity: Severity::default(),
             advice_offset: None,
+        }
+    }
+
+    pub(crate) fn set_advice_offset(&mut self, offset: TextSize) {
+        self.advice_offset = Some(offset);
+        for advices in &mut self.rule_advice.parent_advices {
+            advices.offset_by(offset);
         }
     }
 
@@ -1653,6 +1826,14 @@ impl RuleDiagnostic {
     /// Adds a footer to this [`RuleDiagnostic`], with the `Info` log category.
     pub fn note(self, msg: impl Display) -> Self {
         self.footer(LogCategory::Info, msg)
+    }
+
+    /// Attaches advice emitted by `advices`.
+    pub fn with_advices(mut self, advices: impl Advices) -> Self {
+        self.rule_advice
+            .parent_advices
+            .push(SerializableAdvices::new(&advices));
+        self
     }
 
     /// It creates a new footer note which contains a message and a list of possible suggestions.
@@ -1731,4 +1912,34 @@ impl<L: Language> RuleAction<L> {
 pub struct SuppressAction<L: Language> {
     pub message: MarkupBuf,
     pub mutation: BatchMutation<L>,
+}
+
+// NOTE: you must update the JSON schema representation of [biome_configuration::PresetConfig] every time you add a new variant
+/// A preset configuration for enabling a set of rules.
+#[cfg_attr(
+    feature = "serde",
+    derive(
+        serde::Serialize,
+        serde::Deserialize,
+        biome_deserialize_macros::Deserializable,
+        biome_deserialize_macros::Merge
+    )
+)]
+#[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
+#[derive(Clone, Debug, Eq, PartialEq)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+pub enum RulePreset {
+    /// A set of rules that are enabled by default.
+    Recommended,
+}
+
+impl FromStr for RulePreset {
+    type Err = &'static str;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "recommended" => Ok(Self::Recommended),
+            _ => Err("Invalid rule preset."),
+        }
+    }
 }

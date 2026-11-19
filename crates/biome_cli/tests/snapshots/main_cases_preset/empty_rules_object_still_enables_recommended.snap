@@ -1,0 +1,32 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome lint --write --unsafe test.js
+```
+
+## `biome.json`
+
+```json
+{
+  "linter": {
+    "rules": {}
+  }
+}
+```
+
+## `test.js`
+
+```js
+
+
+```
+
+# Emitted Messages
+
+```block
+Checked 1 file in <TIME>. Fixed 1 file.
+```

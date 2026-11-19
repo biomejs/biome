@@ -1,0 +1,211 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalidScriptTs.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<script lang="js">
+</script>
+
+<script setup>
+</script>
+
+<script setup lang>
+</script>
+
+<script lang setup>
+</script>
+
+<script setup lang="">
+</script>
+
+<script setup lang = 'js' generic="T">
+</script>
+
+<script/>
+
+```
+
+# Diagnostics
+```
+invalidScriptTs.vue:2:9 lint/nursery/useConsistentBlockLang  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The language js isn't allowed in <script> blocks.
+  
+    1 │ <!-- should generate diagnostics -->
+  > 2 │ <script lang="js">
+      │         ^^^^^^^^^
+    3 │ </script>
+    4 │ 
+  
+  i This project restricts the languages of <script> blocks so that every component is written the same way.
+  
+  i The lang attribute of <script> blocks must be ts.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Set the lang attribute to ts.
+  
+     1  1 │   <!-- should generate diagnostics -->
+     2    │ - <script·lang="js">
+        2 │ + <script·lang="ts">
+     3  3 │   </script>
+     4  4 │   
+  
+
+```
+
+```
+invalidScriptTs.vue:5:1 lint/nursery/useConsistentBlockLang  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This <script> block is missing the lang attribute.
+  
+    3 │ </script>
+    4 │ 
+  > 5 │ <script setup>
+      │ ^^^^^^^^^^^^^^
+    6 │ </script>
+    7 │ 
+  
+  i This project restricts the languages of <script> blocks so that every component is written the same way.
+  
+  i The lang attribute of <script> blocks must be ts.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Set the lang attribute to ts.
+  
+    5 │ <script·setup·lang="ts">
+      │              ++++++++++ 
+
+```
+
+```
+invalidScriptTs.vue:8:1 lint/nursery/useConsistentBlockLang  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This <script> block is missing the lang attribute.
+  
+     6 │ </script>
+     7 │ 
+   > 8 │ <script setup lang>
+       │ ^^^^^^^^^^^^^^^^^^^
+     9 │ </script>
+    10 │ 
+  
+  i This project restricts the languages of <script> blocks so that every component is written the same way.
+  
+  i The lang attribute of <script> blocks must be ts.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Set the lang attribute to ts.
+  
+    8 │ <script·setup·lang="ts">
+      │                   +++++ 
+
+```
+
+```
+invalidScriptTs.vue:11:1 lint/nursery/useConsistentBlockLang  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This <script> block is missing the lang attribute.
+  
+     9 │ </script>
+    10 │ 
+  > 11 │ <script lang setup>
+       │ ^^^^^^^^^^^^^^^^^^^
+    12 │ </script>
+    13 │ 
+  
+  i This project restricts the languages of <script> blocks so that every component is written the same way.
+  
+  i The lang attribute of <script> blocks must be ts.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Set the lang attribute to ts.
+  
+    11 │ <script·lang="ts"·setup>
+       │             +++++       
+
+```
+
+```
+invalidScriptTs.vue:14:15 lint/nursery/useConsistentBlockLang  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The language  isn't allowed in <script> blocks.
+  
+    12 │ </script>
+    13 │ 
+  > 14 │ <script setup lang="">
+       │               ^^^^^^^
+    15 │ </script>
+    16 │ 
+  
+  i This project restricts the languages of <script> blocks so that every component is written the same way.
+  
+  i The lang attribute of <script> blocks must be ts.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Set the lang attribute to ts.
+  
+    14 │ <script·setup·lang="ts">
+       │                     ++  
+
+```
+
+```
+invalidScriptTs.vue:17:15 lint/nursery/useConsistentBlockLang  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The language js isn't allowed in <script> blocks.
+  
+    15 │ </script>
+    16 │ 
+  > 17 │ <script setup lang = 'js' generic="T">
+       │               ^^^^^^^^^^^
+    18 │ </script>
+    19 │ 
+  
+  i This project restricts the languages of <script> blocks so that every component is written the same way.
+  
+  i The lang attribute of <script> blocks must be ts.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Set the lang attribute to ts.
+  
+    15 15 │   </script>
+    16 16 │   
+    17    │ - <script·setup·lang·=·'js'·generic="T">
+       17 │ + <script·setup·lang="ts"·generic="T">
+    18 18 │   </script>
+    19 19 │   
+  
+
+```
+
+```
+invalidScriptTs.vue:20:1 lint/nursery/useConsistentBlockLang  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This <script> block is missing the lang attribute.
+  
+    18 │ </script>
+    19 │ 
+  > 20 │ <script/>
+       │ ^^^^^^^^^
+    21 │ 
+  
+  i This project restricts the languages of <script> blocks so that every component is written the same way.
+  
+  i The lang attribute of <script> blocks must be ts.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Set the lang attribute to ts.
+  
+    20 │ <script·lang="ts"/>
+       │        ++++++++++  
+
+```

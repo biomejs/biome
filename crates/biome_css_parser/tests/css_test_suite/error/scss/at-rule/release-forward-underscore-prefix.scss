@@ -1,0 +1,18 @@
+@forward './button' as components_;
+@forward './after-underscore' as next_*;
+@forward './button' as components-;
+@forward './after-hyphen' as next_*;
+@forward './button' as *;
+@forward './after-identifier' as next_*;
+@forward './button' as components_
+@forward './after-no-semicolon' as next_*;
+@forward './button' as components_ *;
+@forward './after-space' as next_*;
+@forward './button' as components-/* gap */*;
+@forward './after-comment' as next_*;
+@forward './button' as components - *;
+@forward './after-stray-minus' as next_*;
+@forward './button' as -*;
+@forward './after-missing-identifier' as next_*;
+@forward './button' as components\5f  *;
+@forward './after-escape-gap' as next_*;

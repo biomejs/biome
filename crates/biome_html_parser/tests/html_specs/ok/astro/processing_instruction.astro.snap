@@ -1,0 +1,273 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```astro
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10" {...Astro.props}>
+	<?foo bar?>
+	<circle cx="5" cy="5" r="4" />
+</svg>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    processing_instruction: HtmlProcessingInstruction {
+        start_token: PI_START@0..2 "<?" [] [],
+        target: HtmlTagName {
+            value_token: HTML_LITERAL@2..6 "xml" [] [Whitespace(" ")],
+        },
+        attributes: HtmlAttributeList [
+            HtmlAttribute {
+                name: HtmlAttributeName {
+                    value_token: HTML_LITERAL@6..13 "version" [] [],
+                },
+                initializer: HtmlAttributeInitializerClause {
+                    eq_token: EQ@13..14 "=" [] [],
+                    value: HtmlString {
+                        value_token: HTML_STRING_LITERAL@14..20 "\"1.0\"" [] [Whitespace(" ")],
+                    },
+                },
+            },
+            HtmlAttribute {
+                name: HtmlAttributeName {
+                    value_token: HTML_LITERAL@20..28 "encoding" [] [],
+                },
+                initializer: HtmlAttributeInitializerClause {
+                    eq_token: EQ@28..29 "=" [] [],
+                    value: HtmlString {
+                        value_token: HTML_STRING_LITERAL@29..36 "\"UTF-8\"" [] [],
+                    },
+                },
+            },
+        ],
+        end_token: PI_END@36..38 "?>" [] [],
+    },
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@38..40 "<" [Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: SVG_KW@40..44 "svg" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    HtmlAttribute {
+                        name: HtmlAttributeName {
+                            value_token: HTML_LITERAL@44..49 "xmlns" [] [],
+                        },
+                        initializer: HtmlAttributeInitializerClause {
+                            eq_token: EQ@49..50 "=" [] [],
+                            value: HtmlString {
+                                value_token: HTML_STRING_LITERAL@50..79 "\"http://www.w3.org/2000/svg\"" [] [Whitespace(" ")],
+                            },
+                        },
+                    },
+                    HtmlAttribute {
+                        name: HtmlAttributeName {
+                            value_token: HTML_LITERAL@79..86 "viewBox" [] [],
+                        },
+                        initializer: HtmlAttributeInitializerClause {
+                            eq_token: EQ@86..87 "=" [] [],
+                            value: HtmlString {
+                                value_token: HTML_STRING_LITERAL@87..99 "\"0 0 10 10\"" [] [Whitespace(" ")],
+                            },
+                        },
+                    },
+                    HtmlSpreadAttribute {
+                        l_curly_token: L_CURLY@99..100 "{" [] [],
+                        dotdotdot_token: DOT3@100..103 "..." [] [],
+                        argument: HtmlTextExpression {
+                            html_literal_token: HTML_LITERAL@103..114 "Astro.props" [] [],
+                        },
+                        r_curly_token: R_CURLY@114..115 "}" [] [],
+                    },
+                ],
+                r_angle_token: R_ANGLE@115..116 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlProcessingInstruction {
+                    start_token: PI_START@116..120 "<?" [Newline("\n"), Whitespace("\t")] [],
+                    target: HtmlTagName {
+                        value_token: HTML_LITERAL@120..124 "foo" [] [Whitespace(" ")],
+                    },
+                    attributes: HtmlAttributeList [
+                        HtmlAttribute {
+                            name: HtmlAttributeName {
+                                value_token: HTML_LITERAL@124..127 "bar" [] [],
+                            },
+                            initializer: missing (optional),
+                        },
+                    ],
+                    end_token: PI_END@127..129 "?>" [] [],
+                },
+                HtmlSelfClosingElement {
+                    l_angle_token: L_ANGLE@129..132 "<" [Newline("\n"), Whitespace("\t")] [],
+                    name: HtmlTagName {
+                        value_token: CIRCLE_KW@132..139 "circle" [] [Whitespace(" ")],
+                    },
+                    attributes: HtmlAttributeList [
+                        HtmlAttribute {
+                            name: HtmlAttributeName {
+                                value_token: HTML_LITERAL@139..141 "cx" [] [],
+                            },
+                            initializer: HtmlAttributeInitializerClause {
+                                eq_token: EQ@141..142 "=" [] [],
+                                value: HtmlString {
+                                    value_token: HTML_STRING_LITERAL@142..146 "\"5\"" [] [Whitespace(" ")],
+                                },
+                            },
+                        },
+                        HtmlAttribute {
+                            name: HtmlAttributeName {
+                                value_token: HTML_LITERAL@146..148 "cy" [] [],
+                            },
+                            initializer: HtmlAttributeInitializerClause {
+                                eq_token: EQ@148..149 "=" [] [],
+                                value: HtmlString {
+                                    value_token: HTML_STRING_LITERAL@149..153 "\"5\"" [] [Whitespace(" ")],
+                                },
+                            },
+                        },
+                        HtmlAttribute {
+                            name: HtmlAttributeName {
+                                value_token: HTML_LITERAL@153..154 "r" [] [],
+                            },
+                            initializer: HtmlAttributeInitializerClause {
+                                eq_token: EQ@154..155 "=" [] [],
+                                value: HtmlString {
+                                    value_token: HTML_STRING_LITERAL@155..159 "\"4\"" [] [Whitespace(" ")],
+                                },
+                            },
+                        },
+                    ],
+                    slash_token: SLASH@159..160 "/" [] [],
+                    r_angle_token: R_ANGLE@160..161 ">" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@161..163 "<" [Newline("\n")] [],
+                slash_token: SLASH@163..164 "/" [] [],
+                name: HtmlTagName {
+                    value_token: SVG_KW@164..167 "svg" [] [],
+                },
+                r_angle_token: R_ANGLE@167..168 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@168..169 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..169
+  0: (empty)
+  1: (empty)
+  2: HTML_PROCESSING_INSTRUCTION@0..38
+    0: PI_START@0..2 "<?" [] []
+    1: HTML_TAG_NAME@2..6
+      0: HTML_LITERAL@2..6 "xml" [] [Whitespace(" ")]
+    2: HTML_ATTRIBUTE_LIST@6..36
+      0: HTML_ATTRIBUTE@6..20
+        0: HTML_ATTRIBUTE_NAME@6..13
+          0: HTML_LITERAL@6..13 "version" [] []
+        1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@13..20
+          0: EQ@13..14 "=" [] []
+          1: HTML_STRING@14..20
+            0: HTML_STRING_LITERAL@14..20 "\"1.0\"" [] [Whitespace(" ")]
+      1: HTML_ATTRIBUTE@20..36
+        0: HTML_ATTRIBUTE_NAME@20..28
+          0: HTML_LITERAL@20..28 "encoding" [] []
+        1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@28..36
+          0: EQ@28..29 "=" [] []
+          1: HTML_STRING@29..36
+            0: HTML_STRING_LITERAL@29..36 "\"UTF-8\"" [] []
+    3: PI_END@36..38 "?>" [] []
+  3: (empty)
+  4: HTML_ELEMENT_LIST@38..168
+    0: HTML_ELEMENT@38..168
+      0: HTML_OPENING_ELEMENT@38..116
+        0: L_ANGLE@38..40 "<" [Newline("\n")] []
+        1: HTML_TAG_NAME@40..44
+          0: SVG_KW@40..44 "svg" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@44..115
+          0: HTML_ATTRIBUTE@44..79
+            0: HTML_ATTRIBUTE_NAME@44..49
+              0: HTML_LITERAL@44..49 "xmlns" [] []
+            1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@49..79
+              0: EQ@49..50 "=" [] []
+              1: HTML_STRING@50..79
+                0: HTML_STRING_LITERAL@50..79 "\"http://www.w3.org/2000/svg\"" [] [Whitespace(" ")]
+          1: HTML_ATTRIBUTE@79..99
+            0: HTML_ATTRIBUTE_NAME@79..86
+              0: HTML_LITERAL@79..86 "viewBox" [] []
+            1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@86..99
+              0: EQ@86..87 "=" [] []
+              1: HTML_STRING@87..99
+                0: HTML_STRING_LITERAL@87..99 "\"0 0 10 10\"" [] [Whitespace(" ")]
+          2: HTML_SPREAD_ATTRIBUTE@99..115
+            0: L_CURLY@99..100 "{" [] []
+            1: DOT3@100..103 "..." [] []
+            2: HTML_TEXT_EXPRESSION@103..114
+              0: HTML_LITERAL@103..114 "Astro.props" [] []
+            3: R_CURLY@114..115 "}" [] []
+        3: R_ANGLE@115..116 ">" [] []
+      1: HTML_ELEMENT_LIST@116..161
+        0: HTML_PROCESSING_INSTRUCTION@116..129
+          0: PI_START@116..120 "<?" [Newline("\n"), Whitespace("\t")] []
+          1: HTML_TAG_NAME@120..124
+            0: HTML_LITERAL@120..124 "foo" [] [Whitespace(" ")]
+          2: HTML_ATTRIBUTE_LIST@124..127
+            0: HTML_ATTRIBUTE@124..127
+              0: HTML_ATTRIBUTE_NAME@124..127
+                0: HTML_LITERAL@124..127 "bar" [] []
+              1: (empty)
+          3: PI_END@127..129 "?>" [] []
+        1: HTML_SELF_CLOSING_ELEMENT@129..161
+          0: L_ANGLE@129..132 "<" [Newline("\n"), Whitespace("\t")] []
+          1: HTML_TAG_NAME@132..139
+            0: CIRCLE_KW@132..139 "circle" [] [Whitespace(" ")]
+          2: HTML_ATTRIBUTE_LIST@139..159
+            0: HTML_ATTRIBUTE@139..146
+              0: HTML_ATTRIBUTE_NAME@139..141
+                0: HTML_LITERAL@139..141 "cx" [] []
+              1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@141..146
+                0: EQ@141..142 "=" [] []
+                1: HTML_STRING@142..146
+                  0: HTML_STRING_LITERAL@142..146 "\"5\"" [] [Whitespace(" ")]
+            1: HTML_ATTRIBUTE@146..153
+              0: HTML_ATTRIBUTE_NAME@146..148
+                0: HTML_LITERAL@146..148 "cy" [] []
+              1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@148..153
+                0: EQ@148..149 "=" [] []
+                1: HTML_STRING@149..153
+                  0: HTML_STRING_LITERAL@149..153 "\"5\"" [] [Whitespace(" ")]
+            2: HTML_ATTRIBUTE@153..159
+              0: HTML_ATTRIBUTE_NAME@153..154
+                0: HTML_LITERAL@153..154 "r" [] []
+              1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@154..159
+                0: EQ@154..155 "=" [] []
+                1: HTML_STRING@155..159
+                  0: HTML_STRING_LITERAL@155..159 "\"4\"" [] [Whitespace(" ")]
+          3: SLASH@159..160 "/" [] []
+          4: R_ANGLE@160..161 ">" [] []
+      2: HTML_CLOSING_ELEMENT@161..168
+        0: L_ANGLE@161..163 "<" [Newline("\n")] []
+        1: SLASH@163..164 "/" [] []
+        2: HTML_TAG_NAME@164..167
+          0: SVG_KW@164..167 "svg" [] []
+        3: R_ANGLE@167..168 ">" [] []
+  5: EOF@168..169 "" [Newline("\n")] []
+
+```

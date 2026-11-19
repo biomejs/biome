@@ -4,6 +4,7 @@ use crate::reporter::github::{GithubReporter, GithubReporterVisitor};
 use crate::reporter::gitlab::{GitLabReporter, GitLabReporterVisitor};
 use crate::reporter::json::{JsonReporter, JsonReporterVisitor};
 use crate::reporter::junit::{JunitReporter, JunitReporterVisitor};
+use crate::reporter::profilers::{ProfilersReporter, ProfilersReporterVisitor};
 use crate::reporter::rdjson::{RdJsonReporter, RdJsonReporterVisitor};
 use crate::reporter::sarif::{SarifReporter, SarifReporterVisitor};
 use crate::reporter::summary::{SummaryReporter, SummaryReporterVisitor};
@@ -40,6 +41,7 @@ impl Finalizer for DefaultFinalizer {
             mut summary,
             evaluated_paths,
             mut diagnostics,
+            traversal_errors,
         } = result;
 
         diagnostics.sort_unstable_by(|a, b| match a.severity().cmp(&b.severity()) {
@@ -114,11 +116,29 @@ impl Finalizer for DefaultFinalizer {
                 working_directory: fs.working_directory().clone(),
                 evaluated_paths: evaluated_paths.clone(),
             };
-            reporter.write(&mut console_reporter_writer, &mut ConsoleReporterVisitor)?;
+            reporter.write(
+                &mut console_reporter_writer,
+                &mut ConsoleReporterVisitor { concise: false },
+            )?;
         }
 
+        let reporter = ProfilersReporter {
+            execution,
+            summary,
+            verbose: cli_options.verbose,
+        };
+        let mut visitor = ProfilersReporterVisitor::new(
+            fs.working_directory().clone(),
+            execution.is_rule_profiling_enabled(),
+            execution.is_type_inference_profiling_enabled(),
+        );
+        reporter.write(&mut ConsoleReporterWriter(console), &mut visitor)?;
+
         // Processing emitted error diagnostics, exit with a non-zero code
-        if processed.saturating_sub(skipped) == 0 && !cli_options.no_errors_on_unmatched {
+        if processed.saturating_sub(skipped) == 0
+            && traversal_errors == 0
+            && !cli_options.no_errors_on_unmatched
+        {
             Err(CliDiagnostic::no_files_processed(
                 execution.as_diagnostic_category(),
                 paths,
@@ -177,7 +197,7 @@ fn print_to_reporter(params: PrintToReporter) -> Result<(), CliDiagnostic> {
 
     let mut console_reporter_writer = ConsoleReporterWriter(console);
     match cli_reporter.kind {
-        CliReporterKind::Default => {
+        CliReporterKind::Default | CliReporterKind::Concise => {
             let reporter = ConsoleReporter {
                 summary,
                 diagnostics_payload,
@@ -187,9 +207,19 @@ fn print_to_reporter(params: PrintToReporter) -> Result<(), CliDiagnostic> {
                 evaluated_paths: evaluated_paths.clone(),
             };
             if cli_reporter.is_file_report() {
-                reporter.write(file_reporter_writer, &mut ConsoleReporterVisitor)?;
+                reporter.write(
+                    file_reporter_writer,
+                    &mut ConsoleReporterVisitor {
+                        concise: matches!(cli_reporter.kind, CliReporterKind::Concise),
+                    },
+                )?;
             } else {
-                reporter.write(&mut console_reporter_writer, &mut ConsoleReporterVisitor)?;
+                reporter.write(
+                    &mut console_reporter_writer,
+                    &mut ConsoleReporterVisitor {
+                        concise: matches!(cli_reporter.kind, CliReporterKind::Concise),
+                    },
+                )?;
             }
         }
         CliReporterKind::Summary => {
@@ -209,8 +239,8 @@ fn print_to_reporter(params: PrintToReporter) -> Result<(), CliDiagnostic> {
         }
         CliReporterKind::Json | CliReporterKind::JsonPretty => {
             console_reporter_writer.error(markup! {
-                            <Warn>"The "<Emphasis>"--json"</Emphasis>" option is "<Underline>"unstable/experimental"</Underline>" and its output might change between patches/minor releases."</Warn>
-                        });
+                <Warn>"The `json` and `json-pretty` reporters are experimental and may change in patch releases."</Warn>
+            });
             let reporter = JsonReporter {
                 summary,
                 diagnostics_payload,

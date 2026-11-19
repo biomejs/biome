@@ -157,6 +157,9 @@ impl Rule for NoEmptySource {
             )
             .note(markup! {
                 "Empty sources can clutter the codebase and increase cognitive load; deleting empty sources can help reduce it."
+            })
+            .note(markup! {
+                "Delete the file, or add the code it is meant to contain."
             }),
         )
     }

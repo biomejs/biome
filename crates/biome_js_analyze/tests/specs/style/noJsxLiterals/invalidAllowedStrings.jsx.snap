@@ -7,7 +7,6 @@ expression: invalidAllowedStrings.jsx
 // should generate diagnostics
 <>
 	<div>allowed</div>
-	<div>allowed   </div>
 	<>test</>
 </>
 
@@ -23,35 +22,16 @@ class Comp1 extends Component {
 
 # Diagnostics
 ```
-invalidAllowedStrings.jsx:4:7 lint/style/noJsxLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidAllowedStrings.jsx:4:4 lint/style/noJsxLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Incorrect use of string literal detected.
   
     2 │ <>
     3 │ 	<div>allowed</div>
-  > 4 │ 	<div>allowed   </div>
-      │ 	     ^^^^^^^^^^
-    5 │ 	<>test</>
-    6 │ </>
-  
-  i String literals in JSX can make code harder to maintain and internationalize.
-  
-  i Consider avoiding hardcoded strings entirely.
-  
-
-```
-
-```
-invalidAllowedStrings.jsx:5:4 lint/style/noJsxLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i Incorrect use of string literal detected.
-  
-    3 │ 	<div>allowed</div>
-    4 │ 	<div>allowed   </div>
-  > 5 │ 	<>test</>
+  > 4 │ 	<>test</>
       │ 	  ^^^^
-    6 │ </>
-    7 │ 
+    5 │ </>
+    6 │ 
   
   i String literals in JSX can make code harder to maintain and internationalize.
   
@@ -61,16 +41,16 @@ invalidAllowedStrings.jsx:5:4 lint/style/noJsxLiterals ━━━━━━━━�
 ```
 
 ```
-invalidAllowedStrings.jsx:11:43 lint/style/noJsxLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidAllowedStrings.jsx:10:43 lint/style/noJsxLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Incorrect use of string literal detected.
   
-     9 │ class Comp1 extends Component {
-    10 │ 	render() {
-  > 11 │ 		const varObjectTest = { testKey : (<div>test</div>) };
+     8 │ class Comp1 extends Component {
+     9 │ 	render() {
+  > 10 │ 		const varObjectTest = { testKey : (<div>test</div>) };
        │ 		                                        ^^^^
-    12 │ 		return varObjectTest.testKey;
-    13 │ 	}
+    11 │ 		return varObjectTest.testKey;
+    12 │ 	}
   
   i String literals in JSX can make code harder to maintain and internationalize.
   

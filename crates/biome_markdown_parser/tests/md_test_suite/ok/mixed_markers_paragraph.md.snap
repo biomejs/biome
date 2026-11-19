@@ -16,8 +16,9 @@ expression: snapshot
 ## AST
 
 ```
-MdDocument {
+MdRoot {
     bom_token: missing (optional),
+    frontmatter: missing (optional),
     value: MdBlockList [
         MdBulletListItem {
             md_bullet_list: MdBulletList [
@@ -38,7 +39,6 @@ MdDocument {
                                     value_token: MD_TEXTUAL_LITERAL@5..6 "\n" [] [],
                                 },
                             ],
-                            hard_line: missing (optional),
                         },
                     ],
                 },
@@ -66,7 +66,6 @@ MdDocument {
                                     value_token: MD_TEXTUAL_LITERAL@13..14 "\n" [] [],
                                 },
                             ],
-                            hard_line: missing (optional),
                         },
                     ],
                 },
@@ -80,9 +79,10 @@ MdDocument {
 ## CST
 
 ```
-0: MD_DOCUMENT@0..14
+0: MD_ROOT@0..14
   0: (empty)
-  1: MD_BLOCK_LIST@0..14
+  1: (empty)
+  2: MD_BLOCK_LIST@0..14
     0: MD_BULLET_LIST_ITEM@0..6
       0: MD_BULLET_LIST@0..6
         0: MD_BULLET@0..6
@@ -98,7 +98,6 @@ MdDocument {
                   0: MD_TEXTUAL_LITERAL@2..5 "bar" [] []
                 1: MD_TEXTUAL@5..6
                   0: MD_TEXTUAL_LITERAL@5..6 "\n" [] []
-              1: (empty)
     1: MD_NEWLINE@6..7
       0: NEWLINE@6..7 "\n" [] []
     2: MD_BULLET_LIST_ITEM@7..14
@@ -116,7 +115,6 @@ MdDocument {
                   0: MD_TEXTUAL_LITERAL@9..13 "item" [] []
                 1: MD_TEXTUAL@13..14
                   0: MD_TEXTUAL_LITERAL@13..14 "\n" [] []
-              1: (empty)
-  2: EOF@14..14 "" [] []
+  3: EOF@14..14 "" [] []
 
 ```

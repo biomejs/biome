@@ -2,6 +2,12 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
+## Command
+
+```shell
+biome migrate eslint
+```
+
 ## `biome.json`
 
 ```json
@@ -27,7 +33,7 @@ biome.json migrate ━━━━━━━━━━━━━━━━━━━━�
   i Configuration file can be updated.
   
     1   │ - {·"linter":·{·"enabled":·true·}·}
-      1 │ + {·"linter":·{·"enabled":·true,·"rules":·{·"recommended":·false·}·}·}
+      1 │ + {·"linter":·{·"enabled":·true,·"rules":·{·"preset":·"none"·}·}·}
       2 │ + 
   
 

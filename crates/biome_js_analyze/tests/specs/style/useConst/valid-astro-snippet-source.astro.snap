@@ -4,10 +4,10 @@ expression: valid-astro-snippet-source.astro
 ---
 # Input
 ```astro
-<!-- should not generate diagnostics -->
 ---
 let hello = "Hello World";
 ---
+<!-- should not generate diagnostics -->
 
 <html>
     <span>{hello}</span>

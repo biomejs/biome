@@ -1,0 +1,20 @@
+/* should not generate diagnostics */
+
+class Foo {
+    accessor value = this.defaultValue;
+}
+
+const object = {
+    validator(this: TrackedModel, value: Date | null) {
+        const getValue = () => this.value;
+        return getValue() === value;
+    },
+};
+
+function validator(this: TrackedModel) {
+    return this.value;
+}
+
+const functionExpression = function (this: TrackedModel) {
+    return this.value;
+};

@@ -1,0 +1,14 @@
+{
+  "biome": {},
+  "eslint": {
+    "rules": {
+      "vue/no-restricted-html-elements": [
+        "error",
+        "marquee",
+        { "element": ["a", "RouterLink"], "message": "Prefer the use of <NuxtLink> component" },
+        { "element": "blink" },
+        { "element": "marquee", "message": "Do not use deprecated HTML tags" }
+      ]
+    }
+  }
+}

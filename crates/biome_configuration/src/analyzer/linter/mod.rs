@@ -2,7 +2,12 @@ mod rules;
 
 use crate::bool::Bool;
 use biome_analyze::RuleDomain;
+use biome_console::markup;
+use biome_deserialize::{
+    DeserializableValidator, DeserializationContext, DeserializationDiagnostic, TextRange,
+};
 use biome_deserialize_macros::{Deserializable, Merge};
+use biome_diagnostics::{DiagnosticTags, Severity};
 #[cfg(feature = "cli")]
 use bpaf::Bpaf;
 pub use rules::*;
@@ -16,38 +21,67 @@ pub type LinterEnabled = Bool<true>;
 #[cfg_attr(feature = "cli", derive(Bpaf))]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
+#[deserializable(with_validator)]
 pub struct LinterConfiguration {
-    /// if `false`, it disables the feature and the linter won't be executed. `true` by default
+    /// Enables or disables the linter. Defaults to `true`.
     #[cfg_attr(feature = "cli", bpaf(hide))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub enabled: Option<LinterEnabled>,
 
-    /// List of rules
+    /// The lint-rule configuration.
     #[cfg_attr(feature = "cli", bpaf(pure(Default::default()), optional, hide))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub rules: Option<Rules>,
 
-    /// A list of glob patterns. The analyzer will handle only those files/folders that will
-    /// match these patterns.
+    /// A list of glob patterns selecting files to lint. If omitted, all files selected by
+    /// `files.includes` remain eligible for linting. An empty list selects no files. This option can
+    /// only narrow the files selected by `files.includes`.
     #[cfg_attr(feature = "cli", bpaf(pure(Default::default()), hide))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub includes: Option<Vec<biome_glob::NormalizedGlob>>,
 
-    /// An object where the keys are the names of the domains, and the values are `all`, `recommended`, or `none`.
+    /// Configures rules associated with a framework, library, project-wide analysis, or type
+    /// analysis. Keys are domain names and values are `all`, `recommended`, or `none`.
+    /// Enabling rules from the `project` or `types` domains activates project and dependency
+    /// scanning. The `types` domain also enables type-aware resolution.
     #[cfg_attr(feature = "cli", bpaf(hide, pure(Default::default())))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub domains: Option<RuleDomains>,
+}
+
+impl DeserializableValidator for LinterConfiguration {
+    fn validate<S>(
+        &mut self,
+        ctx: &mut dyn DeserializationContext<State = S>,
+        _name: &str,
+        range: TextRange,
+    ) -> bool {
+        if let Some(rules) = self.rules.as_ref()
+            && rules.recommended.is_some()
+        {
+            ctx.report(DeserializationDiagnostic::new("The use of the recommended field has been deprecated, and will removed in the next major version of Biome. Use preset instead.").with_range(range).with_custom_severity(Severity::Information).with_tags(DiagnosticTags::DEPRECATED_CODE).with_command("Migrate the configuration with the proper command", "biome migrate"));
+
+            if rules.preset.is_some() {
+                ctx.report(DeserializationDiagnostic::new(markup! {
+                    "The "<Emphasis>"recommended"</Emphasis>" field and the "<Emphasis>"preset"</Emphasis>" field cannot be used together."
+                }).with_range(range).with_custom_severity(Severity::Warning).with_tags(DiagnosticTags::DEPRECATED_CODE).with_note(markup! {
+                    "Remove the "<Emphasis>"recommended"</Emphasis>" field."
+                }));
+            }
+        }
+        true
+    }
 }
 
 #[derive(Clone, Copy, Debug, Deserialize, Deserializable, Eq, PartialEq, Serialize, Merge)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub enum RuleDomainValue {
-    /// Enables all the rules that belong to this domain
+    /// Enables all rules in the domain.
     All,
-    /// Disables all the rules that belong to this domain
+    /// Disables the domain.
     None,
-    /// Enables only the recommended rules for this domain
+    /// Enables the domain's recommended non-nursery rules.
     Recommended,
 }
 
@@ -69,17 +103,28 @@ impl schemars::JsonSchema for RuleDomains {
     }
 
     fn json_schema(generator: &mut schemars::SchemaGenerator) -> schemars::Schema {
-        let _names = generator.subschema_for::<RuleDomain>();
+        let domain_schema = <RuleDomain as schemars::JsonSchema>::json_schema(generator);
         let _values = generator.subschema_for::<RuleDomainValue>();
-        schemars::json_schema!({
+        let mut properties = schemars::json_schema!({});
+        for domain in domain_schema
+            .get("oneOf")
+            .and_then(|value| value.as_array())
+            .into_iter()
+            .flatten()
+            .filter_map(|schema| schema.get("const").and_then(|value| value.as_str()))
+        {
+            properties.insert(
+                domain.into(),
+                schemars::json_schema!({ "$ref": "#/$defs/RuleDomainValue" }).into(),
+            );
+        }
+
+        let mut schema = schemars::json_schema!({
             "type": "object",
-            "propertyNames": {
-                "$ref": "#/$defs/RuleDomain"
-            },
-            "additionalProperties": {
-                "$ref": "#/$defs/RuleDomainValue"
-            }
-        })
+            "additionalProperties": false
+        });
+        schema.insert("properties".into(), properties.into());
+        schema
     }
 }
 

@@ -24,9 +24,9 @@ biome_configuration      = { workspace = true, features = ["cli"] }
 biome_console            = { workspace = true }
 biome_css_analyze        = { workspace = true }
 biome_css_syntax         = { workspace = true }
-biome_deserialize        = { workspace = true }
+biome_deserialize        = { workspace = true, features = ["serde"] }
 biome_deserialize_macros = { workspace = true }
-biome_diagnostics        = { workspace = true, features = ["bpaf", "std"] }
+biome_diagnostics        = { workspace = true, features = ["bpaf", "notify", "std"] }
 biome_flags              = { workspace = true }
 biome_formatter          = { workspace = true }
 biome_fs                 = { workspace = true }
@@ -44,22 +44,33 @@ biome_json_factory       = { workspace = true }
 biome_json_formatter     = { workspace = true }
 biome_json_parser        = { workspace = true }
 biome_json_syntax        = { workspace = true }
+biome_languages          = { workspace = true, features = ["lang_json"] }
 biome_lsp                = { workspace = true }
+biome_markdown_analyze   = { workspace = true }
+biome_markdown_syntax    = { workspace = true }
 biome_migrate            = { workspace = true }
+biome_module_graph       = { workspace = true }
+biome_package            = { workspace = true }
+biome_plugin_loader      = { workspace = true }
 biome_resolver           = { workspace = true }
 biome_rowan              = { workspace = true }
 biome_rule_options       = { workspace = true }
-biome_service            = { workspace = true, features = ["lang_graphql", "plugins"] }
+biome_service            = { workspace = true, features = ["stable"] }
 biome_text_edit          = { workspace = true }
+biome_yaml_analyze       = { workspace = true }
+biome_yaml_syntax        = { workspace = true }
 bpaf                     = { workspace = true, features = ["bright-color", "docgen"] }
 camino                   = { workspace = true }
 crossbeam                = { workspace = true }
+indexmap                 = { workspace = true }
+notify                   = { workspace = true }
 papaya                   = { workspace = true }
 path-absolutize          = { workspace = true }
-quick-junit              = "0.6.0"
+quick-junit              = { workspace = true }
 rayon                    = { workspace = true }
 regex                    = { workspace = true }
 rustc-hash               = { workspace = true }
+self_update              = { workspace = true, features = ["github", "rustls", "ureq"] }
 serde                    = { workspace = true, features = ["derive"] }
 serde_json               = { workspace = true }
 smallvec                 = { workspace = true }
@@ -75,35 +86,39 @@ tokio                    = { workspace = true, features = [
   "time"
 ] }
 tracing                  = { workspace = true }
-tracing-appender         = "0.2.4"
+tracing-appender         = { workspace = true }
 tracing-subscriber       = { workspace = true, features = ["env-filter", "json"] }
-tracing-tree             = "0.4.1"
+tracing-tree             = { workspace = true }
+ureq                     = { workspace = true }
 
 [dev-dependencies]
 biome_css_formatter  = { path = "../biome_css_formatter" }
+biome_css_parser     = { path = "../biome_css_parser" }
 biome_js_formatter   = { path = "../biome_js_formatter" }
 biome_json_formatter = { path = "../biome_json_formatter" }
 biome_json_parser    = { path = "../biome_json_parser" }
 directories          = { workspace = true }
 insta                = { workspace = true }
 regex                = { workspace = true }
-serial_test          = "3.3.1"
+serial_test          = { workspace = true }
 tests_macros         = { workspace = true }
 tokio                = { workspace = true, features = ["io-util"] }
 
 [target.'cfg(all(target_family="unix", not(all(target_arch = "aarch64", target_env = "musl"))))'.dependencies]
 tikv-jemallocator = { workspace = true }
 
-[target.'cfg(unix)'.dependencies]
-libc  = "0.2.184"
+[target."cfg(unix)".dependencies]
+libc  = { workspace = true }
 tokio = { workspace = true, features = ["process"] }
 
-[target.'cfg(windows)'.dependencies]
-mimalloc = { workspace = true }
+[target."cfg(windows)".dependencies]
+# Not used directly; pins the allocator version pulled in by mimalloc.
+libmimalloc-sys = { workspace = true }
+mimalloc        = { workspace = true }
 
 [features]
-docgen    = ["bpaf/docgen"]
-js_plugin = ["biome_service/js_plugin"]
+docgen   = ["bpaf/docgen"]
+unstable = []
 
 [lints]
 workspace = true

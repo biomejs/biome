@@ -12,7 +12,7 @@ static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
 
 #[cfg(all(
     any(target_os = "macos", target_os = "linux"),
-    not(target_env = "musl"),
+    not(all(target_env = "musl", target_arch = "aarch64")),
 ))]
 #[global_allocator]
 static GLOBAL: tikv_jemallocator::Jemalloc = tikv_jemallocator::Jemalloc;
@@ -79,7 +79,7 @@ fn bench_parser(criterion: &mut Criterion) {
 
         group.bench_with_input(BenchmarkId::new(&id, "uncached"), &code, |b, _| {
             b.iter(|| {
-                black_box(parse_markdown(code));
+                black_box(parse_markdown(code, MarkdownParserOptions::default()));
             })
         });
 

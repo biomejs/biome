@@ -3,7 +3,7 @@
 //! Separator comments are attached before formatting so renderers only need to
 //! print leading, trailing, or dangling comments.
 
-use crate::utils::comment_trivia::is_trailing_comment_on_node;
+use crate::utils::comment_trivia::{is_block_style_comment, is_trailing_comment_on_node};
 use crate::utils::scss_expression::is_self_breaking_value;
 use biome_css_syntax::{
     CssLanguage, CssParameterList, CssSyntaxKind, CssSyntaxNode, ScssIncludeArgumentList,
@@ -27,7 +27,10 @@ pub(crate) fn place_map_trailing_separator_comment(
 
 /// Places comments that follow a list separator.
 ///
-/// Example: `$list: a, // next\nb;`.
+/// ```scss
+/// $list: a, // next
+/// b;
+/// ```
 pub(crate) fn place_list_trailing_separator_comment(
     list_expression: &ScssListExpression,
     preceding_element: &ScssListExpressionElement,
@@ -201,7 +204,10 @@ fn place_line_separator_comment(
 
 /// Keeps Prettier-style line comments that were written before the separator.
 ///
-/// Example: `@include mix(1px // note\n, 2px)`.
+/// ```scss
+/// @include mix(1px // note
+/// , 2px);
+/// ```
 fn should_keep_line_comment_trailing(
     comment: &DecoratedComment<CssLanguage>,
     preceding_node: &CssSyntaxNode,
@@ -295,8 +301,7 @@ fn is_block_group_before_map_closing(
     };
 
     let Some(comma) = node
-        .last_token()
-        .and_then(|token| token.next_token())
+        .next_token()
         .filter(|token| token.kind() == CssSyntaxKind::COMMA)
     else {
         return false;
@@ -306,13 +311,12 @@ fn is_block_group_before_map_closing(
         return false;
     }
 
+    debug_assert_eq!(comma.next_token().as_ref(), Some(closing_paren));
+
     comma
-        .trailing_trivia()
-        .pieces()
-        .chain(closing_paren.leading_trivia().pieces())
+        .trivia_after()
         .filter(|piece| {
-            piece.is_comments()
-                && piece.text().starts_with("/*")
+            is_block_style_comment(piece)
                 && piece.text_range().start() >= comma.text_trimmed_range().end()
                 && piece.text_range().end() <= closing_paren.text_trimmed_range().start()
         })
@@ -328,14 +332,12 @@ fn is_trailing_separator_comment(
 ) -> bool {
     let comment_piece = comment.piece().as_piece();
 
-    node.last_token()
-        .and_then(|token| token.next_token())
-        .is_some_and(|token| {
-            token.kind() == CssSyntaxKind::COMMA
-                && token == comment_piece.token()
-                && token
-                    .trailing_trivia()
-                    .text_range()
-                    .contains_range(comment_piece.text_range())
-        })
+    node.next_token().is_some_and(|token| {
+        token.kind() == CssSyntaxKind::COMMA
+            && token == comment_piece.token()
+            && token
+                .trailing_trivia()
+                .text_range()
+                .contains_range(comment_piece.text_range())
+    })
 }

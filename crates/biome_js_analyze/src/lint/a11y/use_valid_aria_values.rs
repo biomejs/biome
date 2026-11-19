@@ -53,7 +53,10 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "useValidAriaValues",
         language: "jsx",
-        sources: &[RuleSource::EslintJsxA11y("aria-proptypes").same()],
+        sources: &[
+            RuleSource::EslintJsxA11y("aria-proptypes").same(),
+            RuleSource::EslintAstro("jsx-a11y/aria-proptypes").same(),
+        ],
         recommended: true,
         severity: Severity::Error,
     }
@@ -98,7 +101,10 @@ impl Rule for UseValidAriaValues {
             markup! {
                 "The value of the ARIA attribute "<Emphasis>{attribute_name}</Emphasis>" is not correct."
             },
-        );
+        )
+        .note(markup! {
+            "Assistive technologies may ignore an ARIA attribute with an invalid value, or report incorrect information to the user."
+        });
         let diagnostic = match state.property_type {
             AriaValueType::Boolean => {
                 diagnostic.footer_list(
@@ -176,6 +182,8 @@ impl Rule for UseValidAriaValues {
                 )
             }
         };
-        Some(diagnostic)
+        Some(diagnostic.note(markup! {
+            "Change the value of the attribute to one of the supported values."
+        }))
     }
 }

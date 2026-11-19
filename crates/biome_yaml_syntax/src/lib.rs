@@ -2,14 +2,30 @@
 
 #[macro_use]
 mod generated;
-mod file_source;
+mod anchor_ext;
+mod block_ext;
+mod flow_ext;
+mod map_ext;
 mod syntax_node;
 
 pub use self::generated::*;
-use biome_rowan::{AstNode, RawSyntaxKind};
+use biome_rowan::{AstNode, RawSyntaxKind, TokenText};
 pub use biome_rowan::{TextLen, TextRange, TextSize, TokenAtOffset, TriviaPieceKind, WalkEvent};
-pub use file_source::YamlFileSource;
+pub use block_ext::{AnyYamlBlockScalar, AnyYamlEntryValue};
+pub use flow_ext::AnyYamlFlowScalar;
 pub use syntax_node::*;
+
+/// Returns the range of `text` without its opening quote, and without its closing `quote` when
+/// it has one.
+fn range_without_quotes(text: &str, quote: char) -> TextRange {
+    let len = text.text_len();
+    let end = if len > TextSize::from(1) && text.ends_with(quote) {
+        len - TextSize::from(1)
+    } else {
+        len
+    };
+    TextRange::new(TextSize::from(1), end)
+}
 
 impl From<u16> for YamlSyntaxKind {
     fn from(d: u16) -> Self {
@@ -87,4 +103,28 @@ impl TryFrom<YamlSyntaxKind> for TriviaPieceKind {
             _ => Err(()),
         }
     }
+}
+
+/// Similar to [YamlSyntaxToken::token_text_trimmed()], but removes the quotes of string literals.
+///
+/// ## Examples
+///
+/// ```
+/// use biome_yaml_syntax::{YamlSyntaxKind, YamlSyntaxToken, inner_string_text};
+///
+/// let a = YamlSyntaxToken::new_detached(YamlSyntaxKind::SINGLE_QUOTED_LITERAL, "'inner_string_text'", [], []);
+/// let b = YamlSyntaxToken::new_detached(YamlSyntaxKind::DOUBLE_QUOTED_LITERAL, "\"inner_string_text\"", [], []);
+/// assert_eq!(inner_string_text(&a), inner_string_text(&b));
+/// ```
+pub fn inner_string_text(token: &YamlSyntaxToken) -> TokenText {
+    let text = token.token_text_trimmed();
+    let range = match token.kind() {
+        YamlSyntaxKind::SINGLE_QUOTED_LITERAL => range_without_quotes(&text, '\''),
+        YamlSyntaxKind::DOUBLE_QUOTED_LITERAL => range_without_quotes(&text, '"'),
+        YamlSyntaxKind::PLAIN_LITERAL => {
+            TextRange::up_to(text.trim_end_matches([' ', '\t']).text_len())
+        }
+        _ => return text,
+    };
+    text.slice(range)
 }

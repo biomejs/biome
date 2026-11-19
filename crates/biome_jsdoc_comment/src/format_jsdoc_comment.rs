@@ -1,16 +1,17 @@
 use crate::JsdocComment;
-use biome_formatter::prelude::*;
+use biome_formatter::rowan::RowanSource;
+use biome_formatter::rowan::prelude::*;
 use biome_formatter::{
     FormatContext, FormatOptions, IndentStyle, IndentWidth, LineEnding, LineWidth,
     SourceMapGeneration, TrailingNewline, TransformSourceMap, format_args, write,
 };
-use biome_rowan::TextSize;
 use std::ops::Deref;
 
 pub struct JsDocFormatContext;
 
 impl FormatContext for JsDocFormatContext {
     type Options = JsCommentFormatOptions;
+    type Source = RowanSource;
 
     fn options(&self) -> &Self::Options {
         &JsCommentFormatOptions
@@ -62,7 +63,7 @@ impl Format<JsDocFormatContext> for JsdocComment {
         let comment = format_with(|f| {
             let mut joiner = f.join_with(hard_line_break());
             comment.lines().for_each(|line| {
-                joiner.entry(&format_args![text(line.trim(), TextSize::default()),]);
+                joiner.entry(&format_args![text(line.trim(), None),]);
             });
             joiner.finish()
         });

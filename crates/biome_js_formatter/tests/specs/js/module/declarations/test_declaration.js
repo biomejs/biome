@@ -32,3 +32,29 @@ describe("with retry option", { retry: 2 }, () => {
 it("with timeout option", { timeout: 5000 }, () => {
   console.log("test");
 });
+
+// Chained table test
+test.concurrent.each(arr)(
+  "works as expected", () => {
+  expect();
+});
+
+suite("test", () => {
+  it(``, async () => {
+  });
+});
+
+suite(`${foo + bar}`, 
+  () => {}
+);
+
+suite("with retry option", { retry: 2 }, () => {
+  it("does something", () => {});
+});
+
+fsuite("focused suite", () => {});
+
+xsuite("skipped suite", () => {});
+
+test.suite("test suite", () => {});
+

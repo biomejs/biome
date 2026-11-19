@@ -1,0 +1,29 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+x * 2;
+x / 2;
+x * -2;
+x / -2;
+-1 * -1;
+-1 / -1;
+-1 / x;
+-1 / (a + b);
+x * -1n;
+x / -1n;
+-1n * x;
+-1n / x;
+x ** -1;
+x - 1;
+x + -1;
+x % -1;
+x & -1;
+x * 1;
+x * +1;
+x * -"1";
+
+```

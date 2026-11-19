@@ -47,6 +47,8 @@ invalid.ts:2:3 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━
     3 │ 
     4 │ 	get ["p2"](): number
   
+  i A literal key is easier to read, and tools such as type checkers and minifiers can understand the property name.
+  
   i Unsafe fix: Use a literal key instead.
   
     2 │ → ["p1"]:·number
@@ -65,6 +67,8 @@ invalid.ts:4:7 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━
       │ 	     ^^^^
     5 │ 
     6 │ 	set ["p2"](x: number)
+  
+  i A literal key is easier to read, and tools such as type checkers and minifiers can understand the property name.
   
   i Unsafe fix: Use a literal key instead.
   
@@ -85,6 +89,8 @@ invalid.ts:6:7 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━
     7 │ 
     8 │ 	["m1"](): void
   
+  i A literal key is easier to read, and tools such as type checkers and minifiers can understand the property name.
+  
   i Unsafe fix: Use a literal key instead.
   
     6 │ → set·["p2"](x:·number)
@@ -103,6 +109,8 @@ invalid.ts:8:3 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━
        │ 	 ^^^^
      9 │ 
     10 │ 	[""]: number
+  
+  i A literal key is easier to read, and tools such as type checkers and minifiers can understand the property name.
   
   i Unsafe fix: Use a literal key instead.
   
@@ -123,6 +131,8 @@ invalid.ts:10:3 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━�
     11 │ }
     12 │ 
   
+  i A literal key is easier to read, and tools such as type checkers and minifiers can understand the property name.
+  
   i Unsafe fix: Use a literal key instead.
   
     10 │ → [""]:·number
@@ -140,6 +150,8 @@ invalid.ts:14:3 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━�
        │ 	 ^^^^
     15 │ 
     16 │ 	get ["p2"](): number
+  
+  i A literal key is easier to read, and tools such as type checkers and minifiers can understand the property name.
   
   i Unsafe fix: Use a literal key instead.
   
@@ -160,6 +172,8 @@ invalid.ts:16:7 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━�
     17 │ 
     18 │ 	set ["p2"](x: number)
   
+  i A literal key is easier to read, and tools such as type checkers and minifiers can understand the property name.
+  
   i Unsafe fix: Use a literal key instead.
   
     16 │ → get·["p2"]():·number
@@ -178,6 +192,8 @@ invalid.ts:18:7 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━�
        │ 	     ^^^^
     19 │ 
     20 │ 	["m1"](): void
+  
+  i A literal key is easier to read, and tools such as type checkers and minifiers can understand the property name.
   
   i Unsafe fix: Use a literal key instead.
   
@@ -198,6 +214,8 @@ invalid.ts:20:3 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━�
     21 │ 
     22 │ 	[""]: number
   
+  i A literal key is easier to read, and tools such as type checkers and minifiers can understand the property name.
+  
   i Unsafe fix: Use a literal key instead.
   
     20 │ → ["m1"]():·void
@@ -217,6 +235,8 @@ invalid.ts:22:3 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━�
     23 │ }
     24 │ 
   
+  i A literal key is easier to read, and tools such as type checkers and minifiers can understand the property name.
+  
   i Unsafe fix: Use a literal key instead.
   
     22 │ → [""]:·number
@@ -234,6 +254,8 @@ invalid.ts:26:3 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━�
        │ 	 ^^^
     27 │ 	["B"],
     28 │ }
+  
+  i A literal key is easier to read, and tools such as type checkers and minifiers can understand the property name.
   
   i Unsafe fix: Use a literal key instead.
   
@@ -253,6 +275,8 @@ invalid.ts:27:3 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━�
        │ 	 ^^^
     28 │ }
     29 │ 
+  
+  i A literal key is easier to read, and tools such as type checkers and minifiers can understand the property name.
   
   i Unsafe fix: Use a literal key instead.
   

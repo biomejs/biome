@@ -1,13 +1,15 @@
 use crate::JsonCommentStyle;
 use crate::comments::{FormatJsonLeadingComment, JsonComments};
 use biome_deserialize_macros::{Deserializable, Merge};
+use biome_formatter::rowan::RowanSource;
 use biome_formatter::separated::TrailingSeparator;
-use biome_formatter::{BracketSpacing, Expand, IndentWidth, prelude::*};
+use biome_formatter::{BracketSpacing, DelimiterSpacing, Expand, IndentWidth, rowan::prelude::*};
 use biome_formatter::{
     CstFormatContext, FormatContext, FormatOptions, IndentStyle, LineEnding, LineWidth,
     TrailingNewline, TransformSourceMap,
 };
-use biome_json_syntax::{JsonFileSource, JsonLanguage};
+use biome_json_syntax::JsonLanguage;
+use biome_languages::JsonFileSource;
 use std::default::Default;
 use std::fmt;
 use std::rc::Rc;
@@ -38,6 +40,7 @@ impl JsonFormatContext {
 
 impl FormatContext for JsonFormatContext {
     type Options = JsonFormatOptions;
+    type Source = RowanSource;
 
     fn options(&self) -> &Self::Options {
         &self.options
@@ -58,7 +61,7 @@ impl CstFormatContext for JsonFormatContext {
     }
 }
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Default, Clone, PartialEq)]
 pub struct JsonFormatOptions {
     indent_style: IndentStyle,
     indent_width: IndentWidth,
@@ -68,12 +71,14 @@ pub struct JsonFormatOptions {
     trailing_commas: TrailingCommas,
     expand: Expand,
     bracket_spacing: BracketSpacing,
+    delimiter_spacing: DelimiterSpacing,
     /// Whether to add a trailing newline at the end of the file. Defaults to true.
     trailing_newline: TrailingNewline,
     /// The kind of file
     _file_source: JsonFileSource,
 }
 
+/// Controls trailing commas in multiline JSON arrays and objects.
 #[derive(Clone, Copy, Debug, Default, Eq, Hash, Deserializable, Merge, PartialEq)]
 #[cfg_attr(
     feature = "serde",
@@ -82,9 +87,11 @@ pub struct JsonFormatOptions {
 )]
 pub enum TrailingCommas {
     #[default]
-    /// The formatter will remove the trailing commas.
+    /// Removes trailing commas.
     None,
-    /// The trailing commas are allowed and advised in JSON and JSONC files.
+    /// Adds trailing commas wherever the JSON formatter supports them. Use this only for JSON
+    /// variants that allow trailing commas, and ensure `json.parser.allowTrailingCommas` is enabled
+    /// or automatically detected for those files.
     All,
 }
 
@@ -119,15 +126,14 @@ impl schemars::JsonSchema for TrailingCommas {
         schemars::json_schema!({
             "type": "string",
             "enum": ["none", "all"],
-            "description": "Print trailing commas wherever possible in multi-line comma-separated syntactic structures for JSON files."
+            "description": "Controls trailing commas in multiline JSON arrays and objects. Use `all` only for JSON variants that allow trailing commas, and ensure `json.parser.allowTrailingCommas` is enabled or automatically detected for those files."
         })
     }
 }
 
 impl JsonFormatOptions {
-    pub fn new(file_source: JsonFileSource) -> Self {
+    pub fn new() -> Self {
         Self {
-            _file_source: file_source,
             trailing_newline: TrailingNewline::default(),
             ..Default::default()
         }
@@ -168,6 +174,11 @@ impl JsonFormatOptions {
         self
     }
 
+    pub fn with_delimiter_spacing(mut self, delimiter_spacing: DelimiterSpacing) -> Self {
+        self.delimiter_spacing = delimiter_spacing;
+        self
+    }
+
     pub fn with_trailing_newline(mut self, trailing_newline: TrailingNewline) -> Self {
         self.trailing_newline = trailing_newline;
         self
@@ -197,6 +208,10 @@ impl JsonFormatOptions {
         self.bracket_spacing = bracket_spacing;
     }
 
+    pub fn set_delimiter_spacing(&mut self, delimiter_spacing: DelimiterSpacing) {
+        self.delimiter_spacing = delimiter_spacing;
+    }
+
     /// Set `expand_lists`
     pub fn set_expand(&mut self, expand: Expand) {
         self.expand = expand;
@@ -208,6 +223,10 @@ impl JsonFormatOptions {
 
     pub fn bracket_spacing(&self) -> BracketSpacing {
         self.bracket_spacing
+    }
+
+    pub fn delimiter_spacing(&self) -> DelimiterSpacing {
+        self.delimiter_spacing
     }
 
     pub fn expand(&self) -> Expand {
@@ -261,6 +280,7 @@ impl fmt::Display for JsonFormatOptions {
         writeln!(f, "Trailing commas: {}", self.trailing_commas)?;
         writeln!(f, "Expand: {}", self.expand)?;
         writeln!(f, "Bracket spacing: {}", self.bracket_spacing.value())?;
+        writeln!(f, "Delimiter spacing: {}", self.delimiter_spacing.value())?;
         writeln!(f, "Trailing newline: {}", self.trailing_newline.value())
     }
 }

@@ -1,0 +1,11 @@
+@font-face {
+  @include ;
+  font-family: Example;
+}
+
+@keyframes fade {
+  from {
+    @if { opacity: 0; }
+    opacity: 1;
+  }
+}

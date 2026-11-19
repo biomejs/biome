@@ -1,6 +1,9 @@
 use biome_cli::CliDiagnostic;
 use biome_console::fmt::{Formatter, Termcolor};
-use biome_console::{BufferConsole, Markup, markup};
+use biome_console::{BufferConsole, Markup, Message, markup};
+use biome_css_formatter::context::CssFormatOptions;
+use biome_css_formatter::format_node as format_css_node;
+use biome_css_parser::{CssParserOptions, parse_css};
 use biome_diagnostics::termcolor::NoColor;
 use biome_diagnostics::{Error, print_diagnostic_to_string};
 use biome_formatter::{IndentStyle, IndentWidth};
@@ -8,6 +11,7 @@ use biome_fs::{ConfigName, FileSystemExt, MemoryFileSystem};
 use biome_json_formatter::context::JsonFormatOptions;
 use biome_json_formatter::format_node;
 use biome_json_parser::{JsonParserOptions, parse_json};
+use biome_languages::CssFileSource;
 use camino::{Utf8Path, Utf8PathBuf};
 use directories::ProjectDirs;
 use regex::Regex;
@@ -26,6 +30,69 @@ static DURATION_REGEX: LazyLock<Regex> =
     LazyLock::new(|| Regex::new("\"duration\":\\s*[0-9]+").unwrap());
 static SCANNER_DURATION_REGEX: LazyLock<Regex> =
     LazyLock::new(|| Regex::new("\"scannerDuration\":\\s*[0-9]+").unwrap());
+static OS_ERROR_REGEX: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"(?m)(?P<prefix>Caused by:\n\s+).+ \(os error \d+\)").unwrap());
+
+pub struct TestArgs(Vec<String>);
+
+impl<T> From<&[T]> for TestArgs
+where
+    T: AsRef<str>,
+{
+    fn from(value: &[T]) -> Self {
+        Self(value.iter().map(|arg| arg.as_ref().to_string()).collect())
+    }
+}
+
+impl<const N: usize> From<&[&str; N]> for TestArgs {
+    fn from(value: &[&str; N]) -> Self {
+        Self::from(value.as_slice())
+    }
+}
+
+impl TestArgs {
+    pub fn into_arguments(self) -> Vec<String> {
+        self.0
+    }
+}
+
+pub struct CliRunResult {
+    commands: Vec<Vec<String>>,
+    result: Result<(), CliDiagnostic>,
+}
+
+impl CliRunResult {
+    pub fn new(command: Vec<String>, result: Result<(), CliDiagnostic>) -> Self {
+        Self {
+            commands: vec![command],
+            result,
+        }
+    }
+
+    pub fn is_ok(&self) -> bool {
+        self.result.is_ok()
+    }
+
+    pub fn is_err(&self) -> bool {
+        self.result.is_err()
+    }
+
+    pub fn followed_by(mut self, mut next: Self) -> Self {
+        self.commands.append(&mut next.commands);
+        next.commands = self.commands;
+        next
+    }
+
+    pub fn into_parts(self) -> (Vec<Vec<String>>, Result<(), CliDiagnostic>) {
+        (self.commands, self.result)
+    }
+}
+
+impl std::fmt::Debug for CliRunResult {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        self.result.fmt(f)
+    }
+}
 
 #[derive(Default)]
 struct InMessages {
@@ -33,12 +100,13 @@ struct InMessages {
 }
 
 pub(crate) struct CliSnapshot {
+    commands: Vec<Vec<String>>,
     /// input messages, coming from different sources
     in_messages: InMessages,
     /// the configuration, if set
     /// First string is the content
     /// Second string is the name
-    pub configuration_list: Vec<(String, String)>,
+    pub configuration_list: BTreeMap<String, String>,
     /// file name -> content
     pub files: BTreeMap<String, String>,
     /// messages written in console
@@ -48,10 +116,12 @@ pub(crate) struct CliSnapshot {
 }
 
 impl CliSnapshot {
-    pub fn from_result(result: Result<(), CliDiagnostic>) -> Self {
+    pub fn from_result(result: CliRunResult) -> Self {
+        let (commands, result) = result.into_parts();
         Self {
+            commands,
             in_messages: InMessages::default(),
-            configuration_list: vec![],
+            configuration_list: BTreeMap::default(),
             files: BTreeMap::default(),
             messages: Vec::new(),
             termination: result.err().map(Error::from),
@@ -63,7 +133,9 @@ impl CliSnapshot {
     pub fn emit_content_snapshot(&self) -> String {
         let mut content = String::new();
 
-        for (configuration, file_name) in &self.configuration_list {
+        write_command_snapshot(&mut content, &self.commands);
+
+        for (file_name, configuration) in &self.configuration_list {
             let file_name = redact_snapshot(file_name).unwrap_or(file_name.into());
             let redacted = redact_snapshot(configuration).unwrap_or(String::new().into());
             let parsed = parse_json(
@@ -100,12 +172,37 @@ impl CliSnapshot {
                     redact_snapshot(file_content).unwrap_or(String::new().into());
 
                 let _ = write!(content, "## `{redacted_name}`\n\n");
-                let _ = write!(content, "```{extension}");
-                content.push('\n');
-                content.push_str(&redacted_content);
-                content.push('\n');
-                content.push_str("```");
-                content.push_str("\n\n")
+
+                if extension == "css" {
+                    // Format CSS with the same pipeline used for biome.json.
+                    let parsed = parse_css(
+                        &redacted_content,
+                        CssFileSource::css(),
+                        CssParserOptions::default(),
+                    );
+                    let formatted = format_css_node(
+                        CssFormatOptions::default()
+                            .with_indent_style(IndentStyle::Space)
+                            .with_indent_width(IndentWidth::default()),
+                        &parsed.syntax(),
+                    )
+                    .expect("formatted CSS")
+                    .print()
+                    .expect("printed CSS");
+
+                    content.push_str("```css");
+                    content.push('\n');
+                    content.push_str(formatted.as_code());
+                    content.push_str("```");
+                    content.push_str("\n\n");
+                } else {
+                    let _ = write!(content, "```{extension}");
+                    content.push('\n');
+                    content.push_str(&redacted_content);
+                    content.push('\n');
+                    content.push_str("```");
+                    content.push_str("\n\n");
+                }
             }
         }
 
@@ -154,6 +251,40 @@ impl CliSnapshot {
     }
 }
 
+fn write_command_snapshot(content: &mut String, commands: &[Vec<String>]) {
+    content.push_str("## Command\n\n```shell\n");
+
+    for command in commands {
+        content.push_str("biome");
+        for argument in command {
+            content.push(' ');
+            let argument = redact_snapshot(argument).unwrap_or(argument.into());
+            write_shell_argument(content, &argument);
+        }
+        content.push('\n');
+    }
+
+    content.push_str("```\n\n");
+}
+
+fn write_shell_argument(content: &mut String, argument: &str) {
+    if !argument.is_empty()
+        && argument.bytes().all(|byte| {
+            byte.is_ascii_alphanumeric()
+                || matches!(
+                    byte,
+                    b'_' | b'-' | b'.' | b'/' | b':' | b'=' | b'+' | b',' | b'@' | b'%'
+                )
+        })
+    {
+        content.push_str(argument);
+    } else {
+        content.push('\'');
+        content.push_str(&argument.replace('\'', "'\"'\"'"));
+        content.push('\'');
+    }
+}
+
 fn redact_snapshot(input: &str) -> Option<Cow<'_, str>> {
     let mut output = Cow::Borrowed(input);
 
@@ -177,15 +308,12 @@ fn redact_snapshot(input: &str) -> Option<Cow<'_, str>> {
         let found = matched.start()..matched.end();
         let matched_text = matched.as_str();
         // Preserve the whitespace after the colon
-        let whitespace = matched_text
-            .split_once(':')
-            .map(|(_, after)| {
-                after
-                    .chars()
-                    .take_while(|c| c.is_whitespace())
-                    .collect::<String>()
-            })
-            .unwrap_or_default();
+        let whitespace = matched_text.split_once(':').map_or_default(|(_, after)| {
+            after
+                .chars()
+                .take_while(|c| c.is_whitespace())
+                .collect::<String>()
+        });
         let replacement = format!("\"duration\":{whitespace}\"<TIME>\"");
         output.to_mut().replace_range(found, &replacement);
     }
@@ -194,17 +322,22 @@ fn redact_snapshot(input: &str) -> Option<Cow<'_, str>> {
         let found = matched.start()..matched.end();
         let matched_text = matched.as_str();
         // Preserve the whitespace after the colon
-        let whitespace = matched_text
-            .split_once(':')
-            .map(|(_, after)| {
-                after
-                    .chars()
-                    .take_while(|c| c.is_whitespace())
-                    .collect::<String>()
-            })
-            .unwrap_or_default();
+        let whitespace = matched_text.split_once(':').map_or_default(|(_, after)| {
+            after
+                .chars()
+                .take_while(|c| c.is_whitespace())
+                .collect::<String>()
+        });
         let replacement = format!("\"scannerDuration\":{whitespace}\"<TIME>\"");
         output.to_mut().replace_range(found, &replacement);
+    }
+
+    if OS_ERROR_REGEX.is_match(&output) {
+        output = Cow::Owned(
+            OS_ERROR_REGEX
+                .replace_all(&output, "${prefix}<OS_ERROR>")
+                .into_owned(),
+        );
     }
 
     // Normalize the name of the current executable to "biome"
@@ -260,14 +393,53 @@ fn redact_snapshot(input: &str) -> Option<Cow<'_, str>> {
     Some(output)
 }
 
+/// A temp-dir path found in snapshot output is only a *real* path occurrence
+/// when it starts at a boundary. If the preceding character is a path/glob/word
+/// character (e.g. the `*` in the glob `**/build`), the match is a coincidental
+/// substring and must be left verbatim. See
+/// <https://github.com/biomejs/biome/issues/5197>.
+fn is_redaction_boundary(prev: Option<char>) -> bool {
+    match prev {
+        None => true,
+        Some(c) => !(c.is_alphanumeric() || matches!(c, '*' | '?' | '_' | '-' | '.' | '/' | '\\')),
+    }
+}
+
 /// Replace the path to the temporary directory with "<TEMP_DIR>"
 /// And normalizes the count of `-` at the end of the diagnostic
 fn replace_temp_dir(input: Cow<str>) -> Cow<str> {
+    let temp_dir = temp_dir().display().to_string();
+    replace_temp_dir_with_separator(input, &temp_dir, MAIN_SEPARATOR)
+}
+
+/// Replaces every occurrence of `temp_dir` with "<TEMP_DIR>", whether the output spells it with
+/// the platform `separator` or with `/`.
+///
+/// Some commands print paths with `/` on every platform, so on Windows the same directory can
+/// appear in both spellings.
+fn replace_temp_dir_with_separator<'a>(
+    input: Cow<'a, str>,
+    temp_dir: &str,
+    separator: char,
+) -> Cow<'a, str> {
+    // A root directory consists only of separators. It is kept whole, because an empty pattern
+    // matches at every position and the replacement would never advance.
+    let trimmed = temp_dir.trim_end_matches(separator);
+    let temp_dir = if trimmed.is_empty() {
+        temp_dir
+    } else {
+        trimmed
+    };
+    let output = replace_temp_dir_impl(input, temp_dir);
+    if separator == '/' {
+        return output;
+    }
+    replace_temp_dir_impl(output, &temp_dir.replace(separator, "/"))
+}
+
+fn replace_temp_dir_impl<'a>(input: Cow<'a, str>, temp_dir: &str) -> Cow<'a, str> {
     let mut result = String::new();
     let mut rest = input.as_ref();
-
-    let temp_dir = temp_dir().display().to_string();
-    let temp_dir = temp_dir.trim_end_matches(MAIN_SEPARATOR);
 
     while let Some(index) = rest.find(temp_dir) {
         let (before, after) = rest.split_at(index);
@@ -275,6 +447,19 @@ fn replace_temp_dir(input: Cow<str>) -> Cow<str> {
         // Normalize /var and /private/var on macOS
         #[cfg(target_os = "macos")]
         let before = before.trim_end_matches("/private");
+
+        // Only redact genuine path occurrences. A short temp dir (e.g. `/build`
+        // in the nixpkgs sandbox) would otherwise clobber legitimate output that
+        // merely contains it, such as the `**/build` glob. See issue #5197.
+        if !is_redaction_boundary(before.chars().next_back()) {
+            // Keep the original text verbatim, including any `/private` prefix
+            // that was stripped above on macOS (that trimming is only meant for
+            // the redaction branch below).
+            let end = index + temp_dir.len();
+            result.push_str(&rest[..end]);
+            rest = &rest[end..];
+            continue;
+        }
 
         result.push_str(before);
         result.push_str("<TEMP_DIR>");
@@ -430,7 +615,7 @@ impl From<SnapshotPayload<'_>> for CliSnapshot {
             {
                 cli_snapshot
                     .configuration_list
-                    .push((content.to_string(), file.to_string()));
+                    .insert(file.to_string(), content.to_string());
             } else {
                 cli_snapshot
                     .files
@@ -446,9 +631,7 @@ impl From<SnapshotPayload<'_>> for CliSnapshot {
         }
 
         for message in &console.out_buffer {
-            let content = markup_to_string(markup! {
-                {message.content}
-            });
+            let content = message_to_string(message);
             cli_snapshot.messages.push(content)
         }
 
@@ -465,12 +648,25 @@ pub fn markup_to_string(markup: Markup) -> String {
     String::from_utf8(buffer).unwrap()
 }
 
+pub fn message_to_string(message: &Message) -> String {
+    if message.is_raw {
+        message
+            .content
+            .0
+            .iter()
+            .map(|node| node.content.as_str())
+            .collect()
+    } else {
+        markup_to_string(markup! {{message.content}})
+    }
+}
+
 pub struct SnapshotPayload<'a> {
     pub module_path: &'a str,
     pub test_name: &'a str,
     pub fs: MemoryFileSystem,
     pub console: BufferConsole,
-    pub result: Result<(), CliDiagnostic>,
+    pub result: CliRunResult,
 }
 
 impl<'a> SnapshotPayload<'a> {
@@ -479,7 +675,7 @@ impl<'a> SnapshotPayload<'a> {
         test_name: &'a str,
         fs: MemoryFileSystem,
         console: BufferConsole,
-        result: Result<(), CliDiagnostic>,
+        result: CliRunResult,
     ) -> Self {
         Self {
             module_path,
@@ -534,4 +730,93 @@ pub fn assert_file_contents(fs: &MemoryFileSystem, path: &Utf8Path, expected_con
         content, expected_content,
         "file {path} doesn't match the expected content (right)",
     );
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::borrow::Cow;
+
+    /// Regression test for <https://github.com/biomejs/biome/issues/5197>: a
+    /// `/build` temp dir (as used in the nixpkgs build sandbox) must not clobber
+    /// the legitimate `**/build` glob that appears in snapshot output.
+    #[test]
+    fn temp_dir_redaction_keeps_glob_substring() {
+        let input = Cow::Borrowed(r#""includes": ["**", "!**/build"]"#);
+        assert_eq!(
+            replace_temp_dir_impl(input, "/build"),
+            r#""includes": ["**", "!**/build"]"#
+        );
+    }
+
+    #[test]
+    fn temp_dir_redaction_replaces_real_path() {
+        let input = Cow::Borrowed(r#"{"path": "/build/file.js"}"#);
+        assert_eq!(
+            replace_temp_dir_impl(input, "/build"),
+            r#"{"path": "<TEMP_DIR>/file.js"}"#
+        );
+    }
+
+    #[test]
+    fn temp_dir_redaction_replaces_windows_path_with_either_separator() {
+        let temp_dir = r"C:\Users\ADMINI~1\AppData\Local\Temp\";
+        let input = Cow::Borrowed(
+            r"lint C:\Users\ADMINI~1\AppData\Local\Temp\project\file.js for C:/Users/ADMINI~1/AppData/Local/Temp/project/src/file.ts.",
+        );
+        assert_eq!(
+            replace_temp_dir_with_separator(input, temp_dir, '\\'),
+            r"lint <TEMP_DIR>\project\file.js for <TEMP_DIR>/project/src/file.ts."
+        );
+    }
+
+    #[test]
+    fn temp_dir_redaction_keeps_root_directory_pattern() {
+        let input = Cow::Borrowed(r#"{"path": "/build/file.js", "includes": ["**/build"]}"#);
+        assert_eq!(
+            replace_temp_dir_with_separator(input, "/", '/'),
+            r#"{"path": "<TEMP_DIR>build/file.js", "includes": ["**/build"]}"#
+        );
+    }
+
+    #[test]
+    fn os_error_redaction_preserves_cause_chain() {
+        let input = "Cannot read file.\n\nCaused by:\n  No such file or directory (os error 2)";
+
+        assert_eq!(
+            redact_snapshot(input),
+            Some(Cow::Borrowed(
+                "Cannot read file.\n\nCaused by:\n  <OS_ERROR>"
+            ))
+        );
+    }
+
+    #[test]
+    fn command_snapshot_redacts_and_quotes_temp_path() {
+        let path = temp_dir().join("file with space.js").display().to_string();
+        let mut content = String::new();
+
+        write_command_snapshot(&mut content, &[vec!["check".into(), path]]);
+
+        assert_eq!(
+            content,
+            "## Command\n\n```shell\nbiome check '<TEMP_DIR>/file with space.js'\n```\n\n"
+        );
+    }
+
+    #[test]
+    fn command_snapshot_lists_each_invocation() {
+        let mut content = String::new();
+        let commands = [
+            vec!["check".into(), "file.js".into()],
+            vec!["lint".into(), "--write".into(), "file.js".into()],
+        ];
+
+        write_command_snapshot(&mut content, &commands);
+
+        assert_eq!(
+            content,
+            "## Command\n\n```shell\nbiome check file.js\nbiome lint --write file.js\n```\n\n"
+        );
+    }
 }

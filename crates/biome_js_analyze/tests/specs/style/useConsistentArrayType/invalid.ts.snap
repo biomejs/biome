@@ -30,6 +30,8 @@ invalid.ts:1:12 lint/style/useConsistentArrayType  FIXABLE  ━━━━━━�
     2 │ let invalid1: Array<foo, Array<string>>;
     3 │ let invalid2: Promise<Array<string>>;
   
+  i Using one array type syntax throughout the code makes it consistent and easier to read.
+  
   i Unsafe fix: Use shorthand T[] syntax to replace
   
      1    │ - let·valid:·Array<foo>;
@@ -50,6 +52,8 @@ invalid.ts:2:15 lint/style/useConsistentArrayType  FIXABLE  ━━━━━━�
       │               ^^^^^^^^^^^^^^^^^^^^^^^^^
     3 │ let invalid2: Promise<Array<string>>;
     4 │ let invalid3: Array<Foo<Bar>>;
+  
+  i Using one array type syntax throughout the code makes it consistent and easier to read.
   
   i Unsafe fix: Use shorthand T[] syntax to replace
   
@@ -73,6 +77,8 @@ invalid.ts:2:26 lint/style/useConsistentArrayType  FIXABLE  ━━━━━━�
     3 │ let invalid2: Promise<Array<string>>;
     4 │ let invalid3: Array<Foo<Bar>>;
   
+  i Using one array type syntax throughout the code makes it consistent and easier to read.
+  
   i Unsafe fix: Use shorthand T[] syntax to replace
   
      1  1 │   let valid: Array<foo>;
@@ -95,6 +101,8 @@ invalid.ts:3:23 lint/style/useConsistentArrayType  FIXABLE  ━━━━━━�
       │                       ^^^^^^^^^^^^^
     4 │ let invalid3: Array<Foo<Bar>>;
     5 │ let invalid4: Array<[number, number]>;
+  
+  i Using one array type syntax throughout the code makes it consistent and easier to read.
   
   i Unsafe fix: Use shorthand T[] syntax to replace
   
@@ -120,6 +128,8 @@ invalid.ts:4:15 lint/style/useConsistentArrayType  FIXABLE  ━━━━━━�
     5 │ let invalid4: Array<[number, number]>;
     6 │ 
   
+  i Using one array type syntax throughout the code makes it consistent and easier to read.
+  
   i Unsafe fix: Use shorthand T[] syntax to replace
   
      2  2 │   let invalid1: Array<foo, Array<string>>;
@@ -143,6 +153,8 @@ invalid.ts:5:15 lint/style/useConsistentArrayType  FIXABLE  ━━━━━━�
       │               ^^^^^^^^^^^^^^^^^^^^^^^
     6 │ 
     7 │ let readonlyInvalid1: ReadonlyArray<foo>;
+  
+  i Using one array type syntax throughout the code makes it consistent and easier to read.
   
   i Unsafe fix: Use shorthand T[] syntax to replace
   
@@ -168,6 +180,8 @@ invalid.ts:7:23 lint/style/useConsistentArrayType  FIXABLE  ━━━━━━�
     8 │ let readonlyInvalid2: Promise<ReadonlyArray<string>>;
     9 │ let readonlyInvalid3: ReadonlyArray<Foo<Bar>>;
   
+  i Using one array type syntax throughout the code makes it consistent and easier to read.
+  
   i Unsafe fix: Use shorthand readonly T[] syntax to replace
   
      5  5 │   let invalid4: Array<[number, number]>;
@@ -190,6 +204,8 @@ invalid.ts:8:31 lint/style/useConsistentArrayType  FIXABLE  ━━━━━━�
        │                               ^^^^^^^^^^^^^^^^^^^^^
      9 │ let readonlyInvalid3: ReadonlyArray<Foo<Bar>>;
     10 │ let readonlyInvalid4: ReadonlyArray<[number, number]>;
+  
+  i Using one array type syntax throughout the code makes it consistent and easier to read.
   
   i Unsafe fix: Use shorthand readonly T[] syntax to replace
   
@@ -215,6 +231,8 @@ invalid.ts:9:23 lint/style/useConsistentArrayType  FIXABLE  ━━━━━━�
     10 │ let readonlyInvalid4: ReadonlyArray<[number, number]>;
     11 │ let readonlyInvalid5: ReadonlyArray<ReadonlyArray<number>>;
   
+  i Using one array type syntax throughout the code makes it consistent and easier to read.
+  
   i Unsafe fix: Use shorthand readonly T[] syntax to replace
   
      7  7 │   let readonlyInvalid1: ReadonlyArray<foo>;
@@ -238,6 +256,8 @@ invalid.ts:10:23 lint/style/useConsistentArrayType  FIXABLE  ━━━━━━�
        │                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     11 │ let readonlyInvalid5: ReadonlyArray<ReadonlyArray<number>>;
     12 │ let readonlyInvalid6: ReadonlyArray<ReadonlyArray<ReadonlyArray<number>>>;
+  
+  i Using one array type syntax throughout the code makes it consistent and easier to read.
   
   i Unsafe fix: Use shorthand readonly T[] syntax to replace
   
@@ -263,6 +283,8 @@ invalid.ts:11:23 lint/style/useConsistentArrayType  FIXABLE  ━━━━━━�
     12 │ let readonlyInvalid6: ReadonlyArray<ReadonlyArray<ReadonlyArray<number>>>;
     13 │ 
   
+  i Using one array type syntax throughout the code makes it consistent and easier to read.
+  
   i Unsafe fix: Use shorthand readonly T[] syntax to replace
   
      9  9 │   let readonlyInvalid3: ReadonlyArray<Foo<Bar>>;
@@ -287,6 +309,8 @@ invalid.ts:11:37 lint/style/useConsistentArrayType  FIXABLE  ━━━━━━�
     12 │ let readonlyInvalid6: ReadonlyArray<ReadonlyArray<ReadonlyArray<number>>>;
     13 │ 
   
+  i Using one array type syntax throughout the code makes it consistent and easier to read.
+  
   i Unsafe fix: Use shorthand readonly T[] syntax to replace
   
      9  9 │   let readonlyInvalid3: ReadonlyArray<Foo<Bar>>;
@@ -310,6 +334,8 @@ invalid.ts:12:23 lint/style/useConsistentArrayType  FIXABLE  ━━━━━━�
        │                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     13 │ 
   
+  i Using one array type syntax throughout the code makes it consistent and easier to read.
+  
   i Unsafe fix: Use shorthand readonly T[] syntax to replace
   
     10 10 │   let readonlyInvalid4: ReadonlyArray<[number, number]>;
@@ -332,6 +358,8 @@ invalid.ts:12:37 lint/style/useConsistentArrayType  FIXABLE  ━━━━━━�
        │                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     13 │ 
   
+  i Using one array type syntax throughout the code makes it consistent and easier to read.
+  
   i Unsafe fix: Use shorthand readonly T[] syntax to replace
   
     10 10 │   let readonlyInvalid4: ReadonlyArray<[number, number]>;
@@ -353,6 +381,8 @@ invalid.ts:12:51 lint/style/useConsistentArrayType  FIXABLE  ━━━━━━�
   > 12 │ let readonlyInvalid6: ReadonlyArray<ReadonlyArray<ReadonlyArray<number>>>;
        │                                                   ^^^^^^^^^^^^^^^^^^^^^
     13 │ 
+  
+  i Using one array type syntax throughout the code makes it consistent and easier to read.
   
   i Unsafe fix: Use shorthand readonly T[] syntax to replace
   

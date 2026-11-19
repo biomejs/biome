@@ -1,0 +1,15 @@
+.values {
+  --raw: #app #ABCG #12px;
+  after-raw: red;
+  identifier: #app;
+  after-identifier: red;
+  hex-prefix: #ABCG;
+  after-prefix: #ABC;
+  hex-five: #abcde;
+  after-five: #ABCDEF;
+  numeric: #12345;
+  after-numeric: #ABCD;
+  bare: #;
+  after-bare: red;
+}
+#app { color: #ABCDEF12; }

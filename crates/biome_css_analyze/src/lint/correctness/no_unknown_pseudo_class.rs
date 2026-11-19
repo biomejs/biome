@@ -1,33 +1,42 @@
-use crate::{
-    keywords::{WEBKIT_SCROLLBAR_PSEUDO_CLASSES, WEBKIT_SCROLLBAR_PSEUDO_ELEMENTS},
-    utils::{
-        is_css_module_pseudo_class, is_custom_selector, is_known_pseudo_class,
-        is_page_pseudo_class, vendor_prefixed,
-    },
+#![expect(
+    clippy::disallowed_methods,
+    reason = "This rule needs the complete pseudo-class syntax."
+)]
+
+use crate::utils::{
+    is_css_module_pseudo_class, is_custom_selector, is_known_pseudo_class, is_page_pseudo_class,
+    vendor_prefixed,
 };
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_css_syntax::{
-    AnyCssSelectorIdentifier, CssBogusPseudoClass, CssFileSource, CssPageSelectorPseudo,
+    AnyCssSelectorIdentifier, CssBogusPseudoClass, CssPageSelectorPseudo,
     CssPseudoClassFunctionCompoundSelector, CssPseudoClassFunctionCompoundSelectorList,
     CssPseudoClassFunctionIdentifier, CssPseudoClassFunctionNth,
     CssPseudoClassFunctionRelativeSelectorList, CssPseudoClassFunctionSelector,
     CssPseudoClassFunctionSelectorList, CssPseudoClassFunctionValueList, CssPseudoClassIdentifier,
     CssPseudoElementSelector, CssSyntaxToken, ScssInterpolatedPseudoClassFunction,
+    keywords::{WEBKIT_SCROLLBAR_PSEUDO_CLASSES, WEBKIT_SCROLLBAR_PSEUDO_ELEMENTS},
 };
 use biome_diagnostics::Severity;
+use biome_languages::CssFileSource;
 use biome_rowan::{AstNode, TextRange, declare_node_union};
 use biome_rule_options::no_unknown_pseudo_class::NoUnknownPseudoClassOptions;
 use biome_string_case::StrLikeExtension;
 
 declare_lint_rule! {
-    /// Disallow unknown pseudo-class selectors.
+    /// Disallow unrecognized pseudo-class selectors.
     ///
-    /// For details on known pseudo-class, see the [MDN web docs](https://developer.mozilla.org/en-US/docs/Web/CSS/Pseudo-classes)
+    /// A pseudo-class begins with `:` and selects an element in a particular state or position, as
+    /// in `:hover` or `:first-child`. Vendor-prefixed pseudo-classes are allowed. See
+    /// [MDN's pseudo-class reference](https://developer.mozilla.org/en-US/docs/Web/CSS/Pseudo-classes).
     ///
-    /// This rule ignores vendor-prefixed pseudo-class selectors.
+    /// ## SCSS limitations
+    ///
+    /// Pseudo-class names containing SCSS interpolation are ignored because the emitted name cannot
+    /// be determined statically.
     ///
     /// ## Examples
     ///
@@ -67,7 +76,8 @@ declare_lint_rule! {
     ///
     /// ### `ignore`
     ///
-    /// A list of unknown pseudo-class names to ignore (case-insensitive).
+    /// Lists additional pseudo-class names to allow, without regard to letter case. Defaults to an
+    /// empty list.
     ///
     /// ```json,options
     /// {
@@ -94,6 +104,7 @@ declare_lint_rule! {
         sources: &[RuleSource::Stylelint("selector-pseudo-class-no-unknown").same()],
     }
 }
+
 declare_node_union! {
   pub AnyPseudoLike =
       CssPseudoClassFunctionCompoundSelector
@@ -108,52 +119,6 @@ declare_node_union! {
       | ScssInterpolatedPseudoClassFunction
       | CssBogusPseudoClass
       | CssPageSelectorPseudo
-}
-
-impl AnyPseudoLike {
-    fn name(&self) -> Option<CssSyntaxToken> {
-        let ident = match self {
-            Self::CssBogusPseudoClass(_) => return None,
-            Self::CssPseudoClassFunctionCompoundSelector(selector) => selector.name(),
-            Self::CssPseudoClassFunctionCompoundSelectorList(selector_list) => selector_list.name(),
-            Self::CssPseudoClassFunctionIdentifier(ident) => ident.name(),
-            Self::CssPseudoClassFunctionNth(func_nth) => func_nth.name(),
-            Self::CssPseudoClassFunctionRelativeSelectorList(selector_list) => selector_list.name(),
-            Self::CssPseudoClassFunctionSelector(selector) => selector.name(),
-            Self::CssPseudoClassFunctionSelectorList(selector_list) => selector_list.name(),
-            Self::CssPseudoClassFunctionValueList(func_value_list) => func_value_list.name(),
-            Self::CssPseudoClassIdentifier(ident) => {
-                return css_selector_identifier_token(ident.name().ok()?);
-            }
-            Self::ScssInterpolatedPseudoClassFunction(_) => return None,
-            Self::CssPageSelectorPseudo(page_pseudo) => page_pseudo.selector(),
-        };
-
-        ident.ok()?.value_token().ok()
-    }
-
-    fn name_range(&self) -> Option<TextRange> {
-        self.name().map(|name| name.text_trimmed_range())
-    }
-}
-
-fn css_selector_identifier_token(name: AnyCssSelectorIdentifier) -> Option<CssSyntaxToken> {
-    // `:foo-#{$name}` cannot be validated before Sass interpolation is resolved.
-    name.as_css_identifier()?.value_token().ok()
-}
-
-fn is_webkit_pseudo_class(node: &AnyPseudoLike) -> bool {
-    let mut prev_element = node.syntax().parent().and_then(|p| p.prev_sibling());
-    while let Some(prev) = &prev_element {
-        let maybe_selector = CssPseudoElementSelector::cast_ref(prev);
-        if let Some(selector) = maybe_selector.as_ref() {
-            return WEBKIT_SCROLLBAR_PSEUDO_ELEMENTS
-                .contains(&selector.to_trimmed_text().trim_matches(':'));
-        };
-        prev_element = prev.prev_sibling();
-    }
-
-    false
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -211,6 +176,9 @@ impl Rule for NoUnknownPseudoClass {
         if is_valid_class
             || should_ignore(lower_name, ctx.options())
             || file_source.is_css_modules() && is_css_module_pseudo_class(lower_name)
+            // Vue uses `:deep()` to apply scoped styles to child components.
+            // https://vuejs.org/api/sfc-css-features.html#deep-selectors
+            || file_source.is_vue_embedded() && lower_name == "deep"
         {
             None
         } else {
@@ -232,9 +200,15 @@ impl Rule for NoUnknownPseudoClass {
             rule_category!(),
             span,
             markup! {
-                "Unexpected unknown pseudo-class "<Emphasis>{ class_name }</Emphasis>" "
+                "Unexpected unknown pseudo-class "<Emphasis>{ class_name }</Emphasis>"."
             },
-        );
+        )
+        .note(markup! {
+            "Browsers ignore a rule when its selector contains an unknown pseudo-class, so the styles are never applied."
+        })
+        .note(markup! {
+            "Check the spelling of the pseudo-class, or replace it with one that exists."
+        });
         match class_type {
             PseudoClassType::PagePseudoClass => {
                 diag = diag.note(markup! {
@@ -255,6 +229,56 @@ impl Rule for NoUnknownPseudoClass {
         Some(diag)
     }
 }
+
+impl AnyPseudoLike {
+    fn name(&self) -> Option<CssSyntaxToken> {
+        let ident = match self {
+            Self::CssBogusPseudoClass(_) => return None,
+            Self::CssPseudoClassFunctionCompoundSelector(selector) => selector.name(),
+            Self::CssPseudoClassFunctionCompoundSelectorList(selector_list) => selector_list.name(),
+            Self::CssPseudoClassFunctionIdentifier(ident) => ident.name(),
+            Self::CssPseudoClassFunctionNth(func_nth) => func_nth.name(),
+            Self::CssPseudoClassFunctionRelativeSelectorList(selector_list) => selector_list.name(),
+            Self::CssPseudoClassFunctionSelector(selector) => selector.name(),
+            Self::CssPseudoClassFunctionSelectorList(selector_list) => selector_list.name(),
+            Self::CssPseudoClassFunctionValueList(func_value_list) => func_value_list.name(),
+            Self::CssPseudoClassIdentifier(ident) => {
+                return css_selector_identifier_token(ident.name().ok()?);
+            }
+            Self::ScssInterpolatedPseudoClassFunction(_) => return None,
+            Self::CssPageSelectorPseudo(page_pseudo) => {
+                return css_selector_identifier_token(page_pseudo.selector().ok()?);
+            }
+        };
+
+        ident.ok()?.value_token().ok()
+    }
+
+    fn name_range(&self) -> Option<TextRange> {
+        self.name().map(|name| name.text_trimmed_range())
+    }
+}
+
+fn css_selector_identifier_token(name: AnyCssSelectorIdentifier) -> Option<CssSyntaxToken> {
+    // `:foo-#{$name}` cannot be validated before SCSS interpolation is resolved.
+    name.as_css_identifier()?.value_token().ok()
+}
+
+fn is_webkit_pseudo_class(node: &AnyPseudoLike) -> bool {
+    let mut prev_element = node.syntax().parent().and_then(|p| p.prev_sibling());
+    while let Some(prev) = &prev_element {
+        let maybe_selector = CssPseudoElementSelector::cast_ref(prev);
+        if let Some(selector) = maybe_selector.as_ref() {
+            return WEBKIT_SCROLLBAR_PSEUDO_ELEMENTS
+                .contains(&selector.to_trimmed_text().trim_matches(':'));
+        };
+        prev_element = prev.prev_sibling();
+    }
+
+    false
+}
+
+
 
 fn should_ignore(name: &str, options: &NoUnknownPseudoClassOptions) -> bool {
     for ignore_pattern in &options.ignore {

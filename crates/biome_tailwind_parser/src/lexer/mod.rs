@@ -1,11 +1,12 @@
 mod base_name_store;
 mod tests;
 
-use crate::lexer::base_name_store::{BASENAME_STORE, is_delimiter};
+use crate::lexer::base_name_store::is_delimiter;
+pub use crate::lexer::base_name_store::{BASENAME_STORE, BaseNameStore};
 use crate::token_source::TailwindLexContext;
 use biome_parser::diagnostic::ParseDiagnostic;
 use biome_parser::lexer::{Lexer, LexerCheckpoint, LexerWithCheckpoint, ReLexer, TokenFlags};
-use biome_rowan::{SyntaxKind, TextLen};
+use biome_rowan::TextLen;
 use biome_tailwind_syntax::T;
 use biome_tailwind_syntax::TailwindSyntaxKind::*;
 use biome_tailwind_syntax::{TailwindSyntaxKind, TextSize};
@@ -20,9 +21,10 @@ pub(crate) struct TailwindLexer<'src> {
     current_start: TextSize,
     diagnostics: Vec<ParseDiagnostic>,
     current_flags: TokenFlags,
-    preceding_line_break: bool,
     after_newline: bool,
     unicode_bom_length: usize,
+    /// The dashed basenames to match, [BASENAME_STORE] unless the project declares more.
+    base_names: &'src BaseNameStore,
 }
 
 impl<'src> TailwindLexer<'src> {
@@ -34,16 +36,21 @@ impl<'src> TailwindLexer<'src> {
             current_start: TextSize::default(),
             diagnostics: Vec::new(),
             current_flags: TokenFlags::empty(),
-            preceding_line_break: false,
             after_newline: false,
             unicode_bom_length: 0,
+            base_names: &BASENAME_STORE,
         }
+    }
+
+    pub(crate) fn with_base_names(mut self, base_names: &'src BaseNameStore) -> Self {
+        self.base_names = base_names;
+        self
     }
 
     fn consume_token(&mut self, current: u8) -> TailwindSyntaxKind {
         let dispatched = lookup_byte(current);
         match dispatched {
-            WHS => self.consume_newline_or_whitespaces(),
+            WHS => self.consume_whitespace_token(),
             PNO => self.consume_byte(T!['(']),
             PNC => self.consume_byte(T![')']),
             BTO => self.consume_byte(T!['[']),
@@ -57,7 +64,17 @@ impl<'src> TailwindLexer<'src> {
             PRC => self.consume_byte(T![%]),
             EXL => self.consume_byte(T![!]),
             SLH => self.consume_byte(T![/]),
-            IDT | ZER | DIG => self.consume_base(),
+            // `@` can begin a candidate (`@container` sets container-type)
+            // as well as a variant (`@sm:`), so it lexes as a base; when it
+            // turns out to be a variant, `parse_variant_expression` re-lexes
+            // it as a segment.
+            IDT | ZER | DIG | AT_ => self.consume_base(),
+            // `*` only ever begins a variant (`*:flex`, `**:flex`). The
+            // first token of a class is lexed here before
+            // `parse_variant_expression` re-lexes it as a segment, so emit
+            // a segment name rather than an error token — otherwise the
+            // error token's diagnostic survives the re-lex.
+            MUL => self.consume_variant_segment_name(),
             _ => {
                 if self.position == 0
                     && let Some((bom, bom_size)) = self.consume_potential_bom(UNICODE_BOM)
@@ -73,7 +90,7 @@ impl<'src> TailwindLexer<'src> {
     fn consume_token_saw_negative(&mut self, current: u8) -> TailwindSyntaxKind {
         let dispatched = lookup_byte(current);
         match dispatched {
-            WHS => self.consume_newline_or_whitespaces(),
+            WHS => self.consume_whitespace_token(),
             PNO => self.consume_byte(T!['(']),
             PNC => self.consume_byte(T![')']),
             BTO => self.consume_byte(T!['[']),
@@ -96,10 +113,12 @@ impl<'src> TailwindLexer<'src> {
         match dispatched {
             PNO => self.consume_byte(T!['(']),
             PNC => self.consume_byte(T![')']),
-            BTO => self.consume_byte(T!['[']),
             BTC => self.consume_byte(T![']']),
-            WHS => self.consume_newline_or_whitespaces(),
+            WHS => self.consume_whitespace_token(),
+            // A selector can itself start with `[` (`[[data-state=open]_&]`),
+            // so check for the selector before lexing `[` as a bracket.
             _ if self.current_kind == T!['['] => self.consume_bracketed_thing(TW_SELECTOR, BTC),
+            BTO => self.consume_byte(T!['[']),
             _ => self.consume_named_value(),
         }
     }
@@ -112,7 +131,7 @@ impl<'src> TailwindLexer<'src> {
             PNC => self.consume_byte(T![')']),
             BTO => self.consume_byte(T!['[']),
             BTC => self.consume_byte(T![']']),
-            WHS => self.consume_newline_or_whitespaces(),
+            WHS => self.consume_whitespace_token(),
             COL => self.consume_byte(T![:]),
             _ if self.current_kind == T!['['] => self.consume_bracketed_thing(TW_PROPERTY, COL),
             _ if self.current_kind == T![:] => self.consume_token_css_value(current),
@@ -120,15 +139,45 @@ impl<'src> TailwindLexer<'src> {
         }
     }
 
-    fn consume_token_css_value(&mut self, current: u8) -> TailwindSyntaxKind {
+    fn consume_token_variant_segment(&mut self, current: u8) -> TailwindSyntaxKind {
         let dispatched = lookup_byte(current);
         match dispatched {
-            WHS => self.consume_newline_or_whitespaces(),
+            WHS => self.consume_whitespace_token(),
             PNO => self.consume_byte(T!['(']),
             PNC => self.consume_byte(T![')']),
             BTO => self.consume_byte(T!['[']),
             BTC => self.consume_byte(T![']']),
             COL => self.consume_byte(T![:]),
+            MIN => self.consume_byte(T![-]),
+            EXL => self.consume_byte(T![!]),
+            SLH => self.consume_byte(T![/]),
+            // `@` (container queries: `@sm`, `@max-lg`) and `*`/`**` (child /
+            // descendant variants) begin a variant-segment name.
+            IDT | ZER | DIG | AT_ | MUL => self.consume_variant_segment_name(),
+            _ => self.consume_unexpected_character(),
+        }
+    }
+
+    fn consume_token_css_value(&mut self, current: u8) -> TailwindSyntaxKind {
+        let dispatched = lookup_byte(current);
+        match dispatched {
+            WHS => self.consume_whitespace_token(),
+            PNO => self.consume_byte(T!['(']),
+            PNC => self.consume_byte(T![')']),
+            BTO => self.consume_byte(T!['[']),
+            BTC => self.consume_byte(T![']']),
+            COL => self.consume_byte(T![:]),
+            // In math functions, Tailwind adds whitespace around a `-` that
+            // directly follows a value (`calc(100svh-var(--header))` becomes
+            // `calc(100svh - var(--header))`), so it is a binary operator
+            // rather than the start of a negative number or an identifier.
+            // The lexer does not track the enclosing function, so this also
+            // applies outside math functions.
+            //
+            // This deviates from the CSS Syntax spec and `biome_css_parser`,
+            // which require whitespace around `-` in math functions and lex
+            // `100svh-var` as one dimension with the unit `svh-var`.
+            MIN if self.is_after_css_value() => self.consume_byte(T![-]),
             MIN if self.peek_byte().is_some_and(is_css_identifier_start) => {
                 self.consume_css_identifier()
             }
@@ -138,6 +187,7 @@ impl<'src> TailwindLexer<'src> {
                 self.consume_css_number()
             }
             IDT if current == b'_' => self.consume_css_underscore_whitespace(),
+            IDT if self.current_kind == CSS_DIMENSION_VALUE => self.consume_css_unit(),
             IDT => self.consume_css_identifier(),
             QOT => self.consume_css_string(current),
             HAS => self.consume_css_color(),
@@ -155,7 +205,7 @@ impl<'src> TailwindLexer<'src> {
     fn consume_token_css_url_raw_value(&mut self, current: u8) -> TailwindSyntaxKind {
         match lookup_byte(current) {
             PNC => self.consume_byte(T![')']),
-            WHS => self.consume_newline_or_whitespaces(),
+            WHS => self.consume_whitespace_token(),
             QOT => self.consume_css_string(current),
             _ => self.consume_css_url_raw_value(),
         }
@@ -222,7 +272,7 @@ impl<'src> TailwindLexer<'src> {
 
         if self.current_byte() == Some(b'%') {
             CSS_PERCENTAGE_VALUE
-        } else if self.current_byte().is_some_and(is_css_identifier_start) {
+        } else if self.current_byte().is_some_and(is_css_unit_continue) {
             CSS_DIMENSION_VALUE
         } else {
             CSS_NUMBER_LITERAL
@@ -238,91 +288,67 @@ impl<'src> TailwindLexer<'src> {
         }
     }
 
+    /// Whether the byte before the current position can end a value: an ASCII
+    /// letter or digit, `%`, or `)`. Identifiers consume a following `-`, so a
+    /// letter here ends a unit or a hex color.
+    fn is_after_css_value(&self) -> bool {
+        self.position
+            .checked_sub(1)
+            .and_then(|index| self.source.as_bytes().get(index))
+            .is_some_and(|byte| byte.is_ascii_alphanumeric() || matches!(byte, b'%' | b')'))
+    }
+
     fn consume_css_identifier(&mut self) -> TailwindSyntaxKind {
         let start = self.position;
-        while self.current_byte().is_some_and(is_css_identifier_continue) {
+        // Tailwind keeps underscores in custom property names instead of
+        // decoding them to spaces (`bg-(--a_b)` is `var(--a_b)`), and CSS
+        // allows non-ASCII characters in them.
+        let is_custom_property = self.source.as_bytes()[start..].starts_with(b"--");
+        while let Some(byte) = self.current_byte() {
+            if is_css_identifier_continue(byte) {
+                self.advance(1);
+            } else if is_custom_property && (byte == b'_' || !byte.is_ascii()) {
+                let char = self.current_char_unchecked();
+                self.advance(char.len_utf8());
+            } else {
+                break;
+            }
+        }
+
+        css_identifier_kind(&self.source.as_bytes()[start..self.position])
+    }
+
+    /// Consumes the unit of a dimension. Unlike an identifier, a unit stops at
+    /// `-`, which is a binary operator in `100svh-var(--header)`.
+    ///
+    /// This deviates from the CSS Syntax spec and `biome_css_parser`, where the
+    /// unit is a full identifier and includes `-` (`svh-var`). It follows
+    /// Tailwind, which inserts whitespace around the `-` instead.
+    fn consume_css_unit(&mut self) -> TailwindSyntaxKind {
+        let start = self.position;
+        while self.current_byte().is_some_and(is_css_unit_continue) {
             self.advance(1);
         }
 
-        match &self.source.as_bytes()[start..self.position] {
-            b"url" => URL_KW,
-            b"var" => VAR_KW,
-            b"em" => EM_KW,
-            b"rem" => REM_KW,
-            b"ex" => EX_KW,
-            b"rex" => REX_KW,
-            b"cap" => CAP_KW,
-            b"rcap" => RCAP_KW,
-            b"ch" => CH_KW,
-            b"rch" => RCH_KW,
-            b"ic" => IC_KW,
-            b"ric" => RIC_KW,
-            b"lh" => LH_KW,
-            b"rlh" => RLH_KW,
-            b"vw" => VW_KW,
-            b"svw" => SVW_KW,
-            b"lvw" => LVW_KW,
-            b"dvw" => DVW_KW,
-            b"vh" => VH_KW,
-            b"svh" => SVH_KW,
-            b"lvh" => LVH_KW,
-            b"dvh" => DVH_KW,
-            b"vi" => VI_KW,
-            b"svi" => SVI_KW,
-            b"lvi" => LVI_KW,
-            b"dvi" => DVI_KW,
-            b"vb" => VB_KW,
-            b"svb" => SVB_KW,
-            b"lvb" => LVB_KW,
-            b"dvb" => DVB_KW,
-            b"vmin" => VMIN_KW,
-            b"svmin" => SVMIN_KW,
-            b"lvmin" => LVMIN_KW,
-            b"dvmin" => DVMIN_KW,
-            b"vmax" => VMAX_KW,
-            b"svmax" => SVMAX_KW,
-            b"lvmax" => LVMAX_KW,
-            b"dvmax" => DVMAX_KW,
-            b"cm" => CM_KW,
-            b"mm" => MM_KW,
-            b"q" => Q_KW,
-            b"in" => IN_KW,
-            b"pc" => PC_KW,
-            b"pt" => PT_KW,
-            b"px" => PX_KW,
-            b"mozmm" => MOZMM_KW,
-            b"rpx" => RPX_KW,
-            b"cqw" => CQW_KW,
-            b"cqh" => CQH_KW,
-            b"cqi" => CQI_KW,
-            b"cqb" => CQB_KW,
-            b"cqmin" => CQMIN_KW,
-            b"cqmax" => CQMAX_KW,
-            b"deg" => DEG_KW,
-            b"grad" => GRAD_KW,
-            b"rad" => RAD_KW,
-            b"turn" => TURN_KW,
-            b"s" => S_KW,
-            b"ms" => MS_KW,
-            b"hz" => HZ_KW,
-            b"khz" => KHZ_KW,
-            b"dpi" => DPI_KW,
-            b"dpcm" => DPCM_KW,
-            b"dppx" => DPPX_KW,
-            b"x" => X_KW,
-            b"fr" => FR_KW,
-            _ => IDENT,
-        }
+        css_identifier_kind(&self.source.as_bytes()[start..self.position])
     }
 
     fn consume_css_string(&mut self, quote: u8) -> TailwindSyntaxKind {
         self.advance(1);
         while let Some(byte) = self.current_byte() {
+            if lookup_byte(byte) == WHS {
+                break;
+            }
+
             self.advance(1);
             if byte == quote {
                 break;
             }
-            if byte == b'\\' && !self.is_eof() {
+            if byte == b'\\'
+                && self
+                    .current_byte()
+                    .is_some_and(|escaped| lookup_byte(escaped) != WHS)
+            {
                 self.advance(1);
             }
         }
@@ -344,6 +370,31 @@ impl<'src> TailwindLexer<'src> {
         while self.current_byte() == Some(b'_') {
             self.advance(1);
         }
+        CSS_WHITESPACE
+    }
+
+    fn consume_whitespace_token(&mut self) -> TailwindSyntaxKind {
+        while let Some(byte) = self.current_byte() {
+            if lookup_byte(byte) != WHS {
+                break;
+            }
+
+            match byte {
+                b'\t' | b' ' | b'\r' | b'\n' => self.advance(1),
+                _ => {
+                    let start = self.text_position();
+                    self.advance(1);
+                    self.push_diagnostic(
+                        ParseDiagnostic::new(
+                            "The CSS standard only allows tabs, whitespace, carriage return and line feed whitespace.",
+                            start..self.text_position(),
+                        )
+                        .with_hint("Use a regular whitespace character instead."),
+                    );
+                }
+            }
+        }
+
         WHITESPACE
     }
 
@@ -379,8 +430,18 @@ impl<'src> TailwindLexer<'src> {
             return TW_BASE;
         }
 
+        // Tailwind takes everything before the first `-[` or `-(` as the root of a
+        // candidate with an arbitrary value or a CSS variable, whether or not the root
+        // is a known utility (`foo-bar-[1px]` has the root `foo-bar`). Without this,
+        // an unknown dashed root would end at its first `-` and leave the bracket
+        // inside a named value.
+        if let Some(arbitrary_end) = arbitrary_value_base_end(slice) {
+            self.advance(arbitrary_end);
+            return TW_BASE;
+        }
+
         // Fallback to dashed-basename trie matching for cases with '-' inside the basename
-        let dashed_end = BASENAME_STORE.matcher(slice).base_end();
+        let dashed_end = self.base_names.matcher(slice).base_end();
         self.advance(dashed_end);
 
         if dashed_end == 4 && &slice[..dashed_end] == b"data" {
@@ -409,26 +470,43 @@ impl<'src> TailwindLexer<'src> {
         if numbers_only { TW_NUMBER } else { TW_VALUE }
     }
 
-    /// After seeing a '-', we usually lex a value. However, if the next bytes are "data"
-    /// and they are followed by another '-', this is a Tailwind data-attribute variant.
-    /// In that case, emit DATA_KW so the parser can recognize `TwDataAttribute`.
     fn consume_after_dash(&mut self) -> TailwindSyntaxKind {
         self.assert_current_char_boundary();
-
-        let bytes = self.source.as_bytes();
-        let slice = &bytes[self.position..];
-
-        if slice.len() >= 5 && &slice[..4] == b"data" && slice[4] == b'-' {
-            // Advance past "data" only. The following '-' will be emitted as its own token.
-            self.advance(4);
-            return DATA_KW;
-        }
 
         if self.current_byte() == Some(b'[') {
             return self.consume_byte(T!['[']);
         }
 
         self.consume_named_value()
+    }
+
+    /// Consume a named variant segment in its own lexing context, so it does not
+    /// reuse utility base or value token kinds.
+    fn consume_variant_segment_name(&mut self) -> TailwindSyntaxKind {
+        self.assert_current_char_boundary();
+
+        let bytes = self.source.as_bytes();
+        let slice = &bytes[self.position..];
+        let mut end = 0usize;
+        while end < slice.len() {
+            let byte = slice[end];
+            if is_variant_segment_name_boundary(byte) || !byte.is_ascii() {
+                break;
+            }
+            end += 1;
+        }
+        self.advance(end);
+
+        while let Some(byte) = self.current_byte() {
+            if is_variant_segment_name_boundary(byte) {
+                break;
+            }
+
+            let char = self.current_char_unchecked();
+            self.advance(char.len_utf8());
+        }
+
+        TW_VARIANT_SEGMENT
     }
 
     fn consume_modifier(&mut self) -> TailwindSyntaxKind {
@@ -439,7 +517,9 @@ impl<'src> TailwindLexer<'src> {
         while let Some(byte) = self.current_byte() {
             let dispatched = lookup_byte(byte);
             let char = self.current_char_unchecked();
-            if matches!(dispatched, WHS | EXL | PRC) {
+            // A `:` ends the modifier: it means the modifier belonged to a
+            // variant (`group-hover/menu:flex`), never to a candidate.
+            if matches!(dispatched, WHS | EXL | PRC | COL) {
                 break;
             }
             if !matches!(dispatched, ZER | DIG | PRD) {
@@ -473,7 +553,7 @@ impl<'src> TailwindLexer<'src> {
                 bracket_depth += 1;
             } else if dispatched == BTC && bracket_depth > 0 {
                 bracket_depth -= 1;
-            } else if (dispatched == looking_for || dispatched == WHS) && bracket_depth == 0 {
+            } else if dispatched == WHS || (dispatched == looking_for && bracket_depth == 0) {
                 break;
             }
             let char = self.current_char_unchecked();
@@ -513,7 +593,7 @@ impl<'src> TailwindLexer<'src> {
 }
 
 impl<'src> Lexer<'src> for TailwindLexer<'src> {
-    const NEWLINE: Self::Kind = NEWLINE;
+    const NEWLINE: Self::Kind = WHITESPACE;
     const WHITESPACE: Self::Kind = WHITESPACE;
     type Kind = TailwindSyntaxKind;
     type LexContext = TailwindLexContext;
@@ -548,6 +628,9 @@ impl<'src> Lexer<'src> for TailwindLexer<'src> {
                     TailwindLexContext::ArbitraryCandidate => {
                         self.consume_token_arbitrary_candidate(current)
                     }
+                    TailwindLexContext::VariantSegment => {
+                        self.consume_token_variant_segment(current)
+                    }
                     TailwindLexContext::CssValue => self.consume_token_css_value(current),
                     TailwindLexContext::CssUrlRawValue => {
                         self.consume_token_css_url_raw_value(current)
@@ -561,15 +644,16 @@ impl<'src> Lexer<'src> for TailwindLexer<'src> {
             .set(TokenFlags::PRECEDING_LINE_BREAK, self.after_newline);
         self.current_kind = kind;
 
-        if !kind.is_trivia() {
-            self.after_newline = false;
-        }
+        self.after_newline = kind == WHITESPACE
+            && self.source[self.current_range()]
+                .bytes()
+                .any(|byte| matches!(byte, b'\r' | b'\n'));
 
         kind
     }
 
     fn has_preceding_line_break(&self) -> bool {
-        self.preceding_line_break
+        self.current_flags.has_preceding_line_break()
     }
 
     fn has_unicode_escape(&self) -> bool {
@@ -642,10 +726,105 @@ impl<'src> ReLexer<'src> for TailwindLexer<'src> {
     }
 }
 
+fn css_identifier_kind(text: &[u8]) -> TailwindSyntaxKind {
+    match text {
+        b"url" => URL_KW,
+        b"var" => VAR_KW,
+        b"em" => EM_KW,
+        b"rem" => REM_KW,
+        b"ex" => EX_KW,
+        b"rex" => REX_KW,
+        b"cap" => CAP_KW,
+        b"rcap" => RCAP_KW,
+        b"ch" => CH_KW,
+        b"rch" => RCH_KW,
+        b"ic" => IC_KW,
+        b"ric" => RIC_KW,
+        b"lh" => LH_KW,
+        b"rlh" => RLH_KW,
+        b"vw" => VW_KW,
+        b"svw" => SVW_KW,
+        b"lvw" => LVW_KW,
+        b"dvw" => DVW_KW,
+        b"vh" => VH_KW,
+        b"svh" => SVH_KW,
+        b"lvh" => LVH_KW,
+        b"dvh" => DVH_KW,
+        b"vi" => VI_KW,
+        b"svi" => SVI_KW,
+        b"lvi" => LVI_KW,
+        b"dvi" => DVI_KW,
+        b"vb" => VB_KW,
+        b"svb" => SVB_KW,
+        b"lvb" => LVB_KW,
+        b"dvb" => DVB_KW,
+        b"vmin" => VMIN_KW,
+        b"svmin" => SVMIN_KW,
+        b"lvmin" => LVMIN_KW,
+        b"dvmin" => DVMIN_KW,
+        b"vmax" => VMAX_KW,
+        b"svmax" => SVMAX_KW,
+        b"lvmax" => LVMAX_KW,
+        b"dvmax" => DVMAX_KW,
+        b"cm" => CM_KW,
+        b"mm" => MM_KW,
+        b"q" => Q_KW,
+        b"in" => IN_KW,
+        b"pc" => PC_KW,
+        b"pt" => PT_KW,
+        b"px" => PX_KW,
+        b"mozmm" => MOZMM_KW,
+        b"rpx" => RPX_KW,
+        b"cqw" => CQW_KW,
+        b"cqh" => CQH_KW,
+        b"cqi" => CQI_KW,
+        b"cqb" => CQB_KW,
+        b"cqmin" => CQMIN_KW,
+        b"cqmax" => CQMAX_KW,
+        b"deg" => DEG_KW,
+        b"grad" => GRAD_KW,
+        b"rad" => RAD_KW,
+        b"turn" => TURN_KW,
+        b"s" => S_KW,
+        b"ms" => MS_KW,
+        b"hz" => HZ_KW,
+        b"khz" => KHZ_KW,
+        b"dpi" => DPI_KW,
+        b"dpcm" => DPCM_KW,
+        b"dppx" => DPPX_KW,
+        b"x" => X_KW,
+        b"fr" => FR_KW,
+        _ => IDENT,
+    }
+}
+
+/// Returns the position of the first `-[` or `-(` before a delimiter, which ends
+/// the basename of a candidate with an arbitrary value or a CSS variable.
+fn arbitrary_value_base_end(slice: &[u8]) -> Option<usize> {
+    slice
+        .windows(2)
+        .take_while(|pair| !is_delimiter(lookup_byte(pair[0])))
+        .position(|pair| pair[0] == b'-' && matches!(pair[1], b'[' | b'('))
+}
+
 fn is_css_identifier_start(byte: u8) -> bool {
     byte != b'_' && matches!(lookup_byte(byte), IDT | MIN)
 }
 
 fn is_css_identifier_continue(byte: u8) -> bool {
     byte != b'_' && matches!(lookup_byte(byte), IDT | MIN | DIG | ZER)
+}
+
+fn is_css_unit_continue(byte: u8) -> bool {
+    byte != b'_' && lookup_byte(byte) == IDT
+}
+
+#[inline]
+fn is_variant_segment_name_boundary(byte: u8) -> bool {
+    // `[` ends a segment name so a glued arbitrary value (`@[400px]`)
+    // lexes as its own bracketed segment rather than part of the name.
+    matches!(
+        lookup_byte(byte),
+        WHS | COL | MIN | SLH | EXL | BTO | BTC | PNC
+    )
 }

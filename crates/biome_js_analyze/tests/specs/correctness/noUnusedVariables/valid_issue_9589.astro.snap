@@ -4,13 +4,13 @@ expression: valid_issue_9589.astro
 ---
 # Input
 ```astro
-<!-- should not generate diagnostics-->
 ---
 import { SectionRow } from "./Section.astro"
 const foregroundColor = "rgb(221 243 228)";
 const backgroundColor = "rgb(24 121 78)";
 const message = "Astro is awesome!";
 ---
+<!-- should not generate diagnostics-->
 <SectionRow
 	title="A section title."
 	description="<p>A section description.</p>"

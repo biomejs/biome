@@ -1,0 +1,60 @@
+---
+source: crates/biome_cli/src/execute/migrate/eslint_to_biome.rs
+expression: svelte_with_options.jsonc
+---
+## ESLint Config
+
+```json
+{
+	"rules": {
+		"svelte/no-restricted-html-elements": [
+			"error",
+			"marquee",
+			"h1",
+			{
+				"elements": ["h2", "h3"],
+				"message": "Use the Heading component instead."
+			},
+			{ "elements": ["blink"] },
+			{ "elements": ["marquee"], "message": "Use CSS animations instead." },
+			{ "elements": ["h1"], "message": "Use the Title component instead." },
+			{ "elements": ["h1"], "message": "Only one title per page." }
+		]
+	}
+}
+
+```
+
+## Biome Config Before Migration
+
+```json
+{}
+
+```
+
+## Biome Config After Migration
+
+```json
+{
+	"linter": {
+		"rules": {
+			"preset": "none",
+			"correctness": {
+				"noRestrictedElements": {
+					"level": "error",
+					"options": {
+						"elements": {
+							"marquee": "Use CSS animations instead.",
+							"h1": "Use the Title component instead.",
+							"h2": "Use the Heading component instead.",
+							"h3": "Use the Heading component instead.",
+							"blink": "TODO: Add a custom message here."
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+```

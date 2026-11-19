@@ -1,0 +1,117 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-define-component.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+import { defineComponent } from "vue";
+import { sampleMixin } from "./mixin";
+
+export const ArrayEmits = defineComponent({
+	emits: ["change", "close"],
+	methods: {
+		close() {
+			this.$emit("close");
+			this.$emit("change", 1);
+		},
+	},
+});
+
+export const ObjectEmits = defineComponent({
+	emits: { close: null, change(value) { return true; } },
+	setup(props, { emit }) {
+		emit("close");
+		emit("change", 1);
+	},
+});
+
+export const SetupContext = defineComponent({
+	emits: ["close"],
+	setup(props, context) {
+		context.emit("close");
+	},
+});
+
+export const DynamicName = defineComponent({
+	emits: ["close"],
+	methods: {
+		forward(name) {
+			this.$emit(name);
+			this.$emit();
+			this.$emit(1);
+			this.$emit(`close-${name}`);
+		},
+	},
+});
+
+export const Mixins = defineComponent({
+	mixins: [sampleMixin],
+	emits: ["close"],
+	methods: {
+		open() {
+			this.$emit("open");
+		},
+	},
+});
+
+export const Extends = defineComponent({
+	extends: sampleMixin,
+	methods: {
+		open() {
+			this.$emit("open");
+		},
+	},
+});
+
+export const UnknownEmits = defineComponent({
+	emits: eventNames,
+	methods: {
+		open() {
+			this.$emit("open");
+		},
+	},
+});
+
+export const SpreadEmits = defineComponent({
+	emits: [...baseEvents, "close"],
+	methods: {
+		open() {
+			this.$emit("open");
+		},
+	},
+});
+
+export const SpreadOptions = defineComponent({
+	...baseOptions,
+	methods: {
+		open() {
+			this.$emit("open");
+		},
+	},
+});
+
+export const NotTheInstance = defineComponent({
+	emits: ["close"],
+	methods: {
+		open() {
+			this.child.$emit("open");
+			$emit("open");
+			this.emit("open");
+		},
+	},
+});
+
+export const OtherContextMembers = defineComponent({
+	emits: ["close"],
+	setup(props, context) {
+		context.fire("open");
+		context.$emit("open");
+	},
+});
+
+function outside() {
+	this.$emit("open");
+}
+
+```

@@ -1,0 +1,49 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: exportTypeDeclaration.tsx
+---
+# Input
+```tsx
+// should generate diagnostics
+
+import { useCallback } from "react";
+
+export type Props = { id: string };
+
+export interface Handlers {
+    onGo(): void;
+}
+
+export enum Mode {
+    Default,
+}
+
+export function Component({ id }: Props) {
+    const go = useCallback(() => console.log(id), []);
+    return <button type="button" onClick={go}>go</button>;
+}
+
+```
+
+# Diagnostics
+```
+exportTypeDeclaration.tsx:16:46 lint/nursery/useReactCompiler ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This memoization dependency list is incomplete or contains unnecessary values.
+  
+    15 │ export function Component({ id }: Props) {
+  > 16 │     const go = useCallback(() => console.log(id), []);
+       │                                              ^^
+    17 │     return <button type="button" onClick={go}>go</button>;
+    18 │ }
+  
+  i Missing dependencies can produce stale values, while extra dependencies can cause avoidable recomputation.
+  
+  i Include every value used by the memoized callback, and remove values that do not affect it.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/10974 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

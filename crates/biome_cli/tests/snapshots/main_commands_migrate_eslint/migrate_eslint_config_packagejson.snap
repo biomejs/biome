@@ -2,6 +2,12 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
+## Command
+
+```shell
+biome migrate eslint
+```
+
 ## `biome.json`
 
 ```json
@@ -35,13 +41,18 @@ biome.json migrate ━━━━━━━━━━━━━━━━━━━━�
        2 │ + → "linter":·{
        3 │ + → → "enabled":·true,
        4 │ + → → "rules":·{
-       5 │ + → → → "recommended":·false,
-       6 │ + → → → "suspicious":·{·"noDoubleEquals":·"warn"·}
-       7 │ + → → },
-       8 │ + → → "includes":·["**",·"dist",·"**/test",·"!test/x/**"]
-       9 │ + → }
-      10 │ + }
-      11 │ + 
+       5 │ + → → → "preset":·"none",
+       6 │ + → → → "suspicious":·{
+       7 │ + → → → → "noDoubleEquals":·{
+       8 │ + → → → → → "level":·"warn",
+       9 │ + → → → → → "options":·{·"ignoreNull":·false·}
+      10 │ + → → → → }
+      11 │ + → → → }
+      12 │ + → → },
+      13 │ + → → "includes":·["**",·"dist",·"**/test",·"!test/x/**"]
+      14 │ + → }
+      15 │ + }
+      16 │ + 
   
 
 ```

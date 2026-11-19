@@ -1,0 +1,15 @@
+---
+source: crates/biome_markdown_analyze/tests/spec_tests.rs
+expression: empty_quote_before_title.md
+---
+# Input
+```md
+<!-- should not generate diagnostics -->
+
+>
+
+# One
+
+# Two
+
+```

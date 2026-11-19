@@ -1,0 +1,12 @@
+@media ($feature + "" >= 40rem) { .inside {} }
+@media (40rem <= $feature + "") { .inside {} }
+@media (20rem < $feature + "" <= 80rem) { .inside {} }
+@media (range-name() >= 40rem) { .inside {} }
+@media (40rem <= range-name()) { .inside {} }
+@media (20rem < range-name() <= 80rem) { .inside {} }
+@media (range-name(): 40rem) { .inside {} }
+@media ("min" + "-width": 40rem) { .inside {} }
+@import "wide-layout.css" screen and ($feature + "" >= 40rem);
+@media (#{$feature} + "" >= 40rem) { .inside {} }
+@media ("#{$feature}" >= 40rem) { .inside {} }
+.following { color: green; }

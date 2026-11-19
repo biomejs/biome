@@ -1,0 +1,11 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: suppression.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+// biome-ignore lint/nursery/noMeaninglessVoidOperator: intentional discarded value
+void 1;
+
+```

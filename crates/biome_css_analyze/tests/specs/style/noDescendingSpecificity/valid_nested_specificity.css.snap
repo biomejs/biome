@@ -1,0 +1,23 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: valid_nested_specificity.css
+---
+# Input
+```css
+/* should not generate diagnostics */
+
+/* Each `&` contributes the parent specificity, so `& & .c` is more specific than `& .c` */
+.a {
+  & .c {}
+  & & .c {}
+}
+
+/* The `&` refers to the nearest parent, whose specificity includes its ancestors */
+.x {
+  .y {
+    & .d {}
+    html body & .d {}
+  }
+}
+
+```

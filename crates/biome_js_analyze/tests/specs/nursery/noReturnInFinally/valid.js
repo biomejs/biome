@@ -1,0 +1,11 @@
+/* should not generate diagnostics */
+
+Promise.resolve(1).finally(() => { console.log(2) })
+
+Promise.reject(4).finally(() => { console.log(2) })
+
+Promise.reject(4).finally(() => {})
+
+myPromise.finally(() => {});
+
+Promise.resolve(1).finally(function () { })

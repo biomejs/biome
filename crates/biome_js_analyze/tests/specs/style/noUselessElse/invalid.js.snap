@@ -115,7 +115,7 @@ function f (x) {
 ```
 invalid.js:4:7 lint/style/noUselessElse  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This else clause can be omitted because previous branches break early.
+  i This else clause is unnecessary.
   
     2 │     if (x < 0) {
     3 │         throw new RangeError();
@@ -126,6 +126,8 @@ invalid.js:4:7 lint/style/noUselessElse  FIXABLE  ━━━━━━━━━━
       │     ^
     7 │ }
     8 │ 
+  
+  i The previous branches break early, so the code in the else clause only runs when none of them matched. The clause adds a level of nesting without changing behavior.
   
   i Safe fix: Omit the else clause.
   
@@ -144,7 +146,7 @@ invalid.js:4:7 lint/style/noUselessElse  FIXABLE  ━━━━━━━━━━
 ```
 invalid.js:13:7 lint/style/noUselessElse  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This else clause can be omitted because previous branches break early.
+  i This else clause is unnecessary.
   
     11 │     if (x < 0) {
     12 │         throw new RangeError();
@@ -155,6 +157,8 @@ invalid.js:13:7 lint/style/noUselessElse  FIXABLE  ━━━━━━━━━�
        │     ^
     16 │     h();
     17 │ }
+  
+  i The previous branches break early, so the code in the else clause only runs when none of them matched. The clause adds a level of nesting without changing behavior.
   
   i Safe fix: Omit the else clause.
   
@@ -173,7 +177,7 @@ invalid.js:13:7 lint/style/noUselessElse  FIXABLE  ━━━━━━━━━�
 ```
 invalid.js:22:7 lint/style/noUselessElse  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This else clause can be omitted because previous branches break early.
+  i This else clause is unnecessary.
   
     20 │     if (x < 0) {
     21 │         throw new RangeError();
@@ -181,6 +185,8 @@ invalid.js:22:7 lint/style/noUselessElse  FIXABLE  ━━━━━━━━━�
        │       ^^^^^^^^^^^^^^
     23 │ }
     24 │ 
+  
+  i The previous branches break early, so the code in the else clause only runs when none of them matched. The clause adds a level of nesting without changing behavior.
   
   i Safe fix: Omit the else clause.
   
@@ -192,7 +198,7 @@ invalid.js:22:7 lint/style/noUselessElse  FIXABLE  ━━━━━━━━━�
 ```
 invalid.js:28:5 lint/style/noUselessElse  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This else clause can be omitted because previous branches break early.
+  i This else clause is unnecessary.
   
     26 │     if (x < 0)
     27 │         throw new RangeError();
@@ -202,6 +208,8 @@ invalid.js:28:5 lint/style/noUselessElse  FIXABLE  ━━━━━━━━━�
        │         ^^^^^^^^^
     30 │ }
     31 │ 
+  
+  i The previous branches break early, so the code in the else clause only runs when none of them matched. The clause adds a level of nesting without changing behavior.
   
   i Safe fix: Omit the else clause.
   
@@ -213,7 +221,7 @@ invalid.js:28:5 lint/style/noUselessElse  FIXABLE  ━━━━━━━━━�
 ```
 invalid.js:35:7 lint/style/noUselessElse  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This else clause can be omitted because previous branches break early.
+  i This else clause is unnecessary.
   
     33 │     if (x < 0) {
     34 │         throw new RangeError();
@@ -227,6 +235,8 @@ invalid.js:35:7 lint/style/noUselessElse  FIXABLE  ━━━━━━━━━�
     40 │ }
     41 │ 
   
+  i The previous branches break early, so the code in the else clause only runs when none of them matched. The clause adds a level of nesting without changing behavior.
+  
   i Safe fix: Omit the else clause.
   
     35 │ ····}·else·if·(x·===·0)·{
@@ -237,7 +247,7 @@ invalid.js:35:7 lint/style/noUselessElse  FIXABLE  ━━━━━━━━━�
 ```
 invalid.js:37:7 lint/style/noUselessElse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This else clause can be omitted because previous branches break early.
+  i This else clause is unnecessary.
   
     35 │     } else if (x === 0) {
     36 │         return 1;
@@ -249,13 +259,15 @@ invalid.js:37:7 lint/style/noUselessElse ━━━━━━━━━━━━━
     40 │ }
     41 │ 
   
+  i The previous branches break early, so the code in the else clause only runs when none of them matched. The clause adds a level of nesting without changing behavior.
+  
 
 ```
 
 ```
 invalid.js:46:11 lint/style/noUselessElse  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This else clause can be omitted because previous branches break early.
+  i This else clause is unnecessary.
   
     44 │         if (x < 0) {
     45 │             break;
@@ -266,6 +278,8 @@ invalid.js:46:11 lint/style/noUselessElse  FIXABLE  ━━━━━━━━━�
        │         ^
     49 │     }
     50 │     return x;
+  
+  i The previous branches break early, so the code in the else clause only runs when none of them matched. The clause adds a level of nesting without changing behavior.
   
   i Safe fix: Omit the else clause.
   
@@ -284,7 +298,7 @@ invalid.js:46:11 lint/style/noUselessElse  FIXABLE  ━━━━━━━━━�
 ```
 invalid.js:57:11 lint/style/noUselessElse  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This else clause can be omitted because previous branches break early.
+  i This else clause is unnecessary.
   
     55 │         if (x < 0) {
     56 │             break;
@@ -295,6 +309,8 @@ invalid.js:57:11 lint/style/noUselessElse  FIXABLE  ━━━━━━━━━�
        │         ^
     60 │     }
     61 │     return x;
+  
+  i The previous branches break early, so the code in the else clause only runs when none of them matched. The clause adds a level of nesting without changing behavior.
   
   i Safe fix: Omit the else clause.
   
@@ -313,7 +329,7 @@ invalid.js:57:11 lint/style/noUselessElse  FIXABLE  ━━━━━━━━━�
 ```
 invalid.js:73:7 lint/style/noUselessElse  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This else clause can be omitted because previous branches break early.
+  i This else clause is unnecessary.
   
     71 │                 return x;
     72 │         }
@@ -324,6 +340,8 @@ invalid.js:73:7 lint/style/noUselessElse  FIXABLE  ━━━━━━━━━�
        │     ^
     76 │ }
     77 │ 
+  
+  i The previous branches break early, so the code in the else clause only runs when none of them matched. The clause adds a level of nesting without changing behavior.
   
   i Safe fix: Omit the else clause.
   
@@ -342,7 +360,7 @@ invalid.js:73:7 lint/style/noUselessElse  FIXABLE  ━━━━━━━━━�
 ```
 invalid.js:88:13 lint/style/noUselessElse  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This else clause can be omitted because previous branches break early.
+  i This else clause is unnecessary.
   
     86 │                 return x;
     87 │         }
@@ -355,6 +373,8 @@ invalid.js:88:13 lint/style/noUselessElse  FIXABLE  ━━━━━━━━━�
        │     ^
     93 │     // 2
     94 │ } // 3
+  
+  i The previous branches break early, so the code in the else clause only runs when none of them matched. The clause adds a level of nesting without changing behavior.
   
   i Safe fix: Omit the else clause.
   
@@ -375,7 +395,7 @@ invalid.js:88:13 lint/style/noUselessElse  FIXABLE  ━━━━━━━━━�
 ```
 invalid.js:101:5 lint/style/noUselessElse  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This else clause can be omitted because previous branches break early.
+  i This else clause is unnecessary.
   
      99 │     }
     100 │     // Some explanations
@@ -386,6 +406,8 @@ invalid.js:101:5 lint/style/noUselessElse  FIXABLE  ━━━━━━━━━�
         │     ^
     104 │ }
     105 │ 
+  
+  i The previous branches break early, so the code in the else clause only runs when none of them matched. The clause adds a level of nesting without changing behavior.
   
   i Safe fix: Omit the else clause.
   

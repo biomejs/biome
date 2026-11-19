@@ -1,0 +1,104 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/at-rule/parity-unknown-prelude-strings.scss
+---
+
+# Input
+
+```scss
+$name:foo;
+@foo   "before #{"inner"} after";
+@foo 'before #{'inner'} after';
+@foo "before #{'inner'} after";
+@foo "outer #{"nested #{'inner'}"} after";
+@foo "before #{
+  "inner"
+} after";
+@#{$name} "before #{"inner"} after"{.item{color:red;}}
+@custom-#{$name}-end 'before #{'inner'} after';
+@custom-#{$name} "before #{"inner"} after"{.item{color:red;}}
+@foo /* before */ "a#{/* inside */ "b"}c" /* after */ token;
+@#{$name}/* boundary */"a#{"b"}c";
+@foo prefix"a#{"b"}c"suffix#{"end"};
+@foo "escaped \"quote\" #{"inner"} and \\ end";
+@foo 'escaped \'quote\' #{'inner'} end';
+@foo fn(";{}() #{"};)("}") ["#{';'}"]{.item{color:red;}}
+@foo url("http://#{")"}.com/");
+@foo url('http://#{')'}.com/');
+@foo url(prefix"before #{"inner"} after"suffix);
+@foo url(http://#{")"}.com/);
+@foo url(https://#{$name}/), "foo#{'ba' + 'r'}baz"{.item{color:red;}}
+@foo url(1 2);
+@foo url($path + ".css");
+@foo url({token:value});
+@foo src(foo bar);
+@foo #{"before #{"inner"} after"};
+@foo #{1 + 2};
+@foo "plain ;{}() string";
+.control{content:"before #{"inner"} after";other:'before #{'inner'} after';}
+// biome-ignore format: preserve the complete at-rule
+@#{$name}    "before #{"inner"} after"{.item{color:red;}}
+.following{color:green;}
+
+```
+
+
+# Formatted
+
+```scss
+$name: foo;
+@foo "before #{"inner"} after";
+@foo 'before #{'inner'} after';
+@foo "before #{'inner'} after";
+@foo "outer #{"nested #{'inner'}"} after";
+@foo "before #{
+  "inner"
+} after";
+@#{$name} "before #{"inner"} after" {
+	.item {
+		color: red;
+	}
+}
+@custom-#{$name}-end 'before #{'inner'} after';
+@custom-#{$name} "before #{"inner"} after" {
+	.item {
+		color: red;
+	}
+}
+@foo /* before */ "a#{/* inside */ "b"}c" /* after */ token;
+@#{$name} /* boundary */ "a#{"b"}c";
+@foo prefix"a#{"b"}c"suffix#{"end"};
+@foo "escaped \"quote\" #{"inner"} and \\ end";
+@foo 'escaped \'quote\' #{'inner'} end';
+@foo fn(";{}() #{"};)("}") ["#{';'}"] {
+	.item {
+		color: red;
+	}
+}
+@foo url("http://#{")"}.com/");
+@foo url('http://#{')'}.com/');
+@foo url(prefix"before #{"inner"} after"suffix);
+@foo url(http://#{")"}.com/);
+@foo url(https://#{$name}/), "foo#{'ba' + 'r'}baz" {
+	.item {
+		color: red;
+	}
+}
+@foo url(1 2);
+@foo url($path + ".css");
+@foo url({token:value});
+@foo src(foo bar);
+@foo #{"before #{"inner"} after"};
+@foo #{1 + 2};
+@foo "plain ;{}() string";
+.control {
+	content: "before #{"inner"} after";
+	other: "before #{"inner"} after";
+}
+// biome-ignore format: preserve the complete at-rule
+@#{$name}    "before #{"inner"} after"{.item{color:red;}}
+.following {
+	color: green;
+}
+
+```

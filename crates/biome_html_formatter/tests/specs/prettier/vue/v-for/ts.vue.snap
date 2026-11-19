@@ -1,0 +1,186 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: vue/v-for/ts.vue
+---
+
+# Input
+
+```vue
+<script lang="ts"></script>
+<template>
+<div
+v-for="a:number       of x as number[]"
+v-for="[ a  , b]   : [   string,string ]     of x as Array<     [string, string]>"
+v-for="  a  of list.map( (x:any): unknown     => x.foo.bar)"
+v-for="([longLongProp, longLongProp, [longLongProp, longLongProp='Hello, Prettier!', [longLongProp, longLongProp, anotherLongLongProp=[longLongProp, longLongProp, anotherLongLongProp, yetAnotherLongLongProp], yetAnotherLongLongProp], yetAnotherLongLongProp], yetAnotherLongLongProp], index) of longLongLongLongLongLongLongLongList"
+>
+</div>
+</template>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,32 +1,10 @@
+ <script lang="ts"></script>
+ <template>
+   <div
+-    v-for="a: number of x as number[]"
+-    v-for="[a, b]: [string, string] of x as Array<[string, string]>"
+-    v-for="a of list.map((x: any): unknown => x.foo.bar)"
+-    v-for="(
+-      [
+-        longLongProp,
+-        longLongProp,
+-        [
+-          longLongProp,
+-          longLongProp = 'Hello, Prettier!',
+-          [
+-            longLongProp,
+-            longLongProp,
+-            anotherLongLongProp = [
+-              longLongProp,
+-              longLongProp,
+-              anotherLongLongProp,
+-              yetAnotherLongLongProp,
+-            ],
+-            yetAnotherLongLongProp,
+-          ],
+-          yetAnotherLongLongProp,
+-        ],
+-        yetAnotherLongLongProp,
+-      ],
+-      index
+-    ) of longLongLongLongLongLongLongLongList"
+-  ></div>
++v-for="a:number       of x as number[]"
++v-for="[ a  , b]   : [   string,string ]     of x as Array<     [string, string]>"
++v-for="  a  of list.map( (x:any): unknown     => x.foo.bar)"
++v-for="([longLongProp, longLongProp, [longLongProp, longLongProp='Hello, Prettier!', [longLongProp, longLongProp, anotherLongLongProp=[longLongProp, longLongProp, anotherLongLongProp, yetAnotherLongLongProp], yetAnotherLongLongProp], yetAnotherLongLongProp], yetAnotherLongLongProp], index) of longLongLongLongLongLongLongLongList"
++>
++</div>
+ </template>
+```
+
+# Output
+
+```vue
+<script lang="ts"></script>
+<template>
+  <div
+v-for="a:number       of x as number[]"
+v-for="[ a  , b]   : [   string,string ]     of x as Array<     [string, string]>"
+v-for="  a  of list.map( (x:any): unknown     => x.foo.bar)"
+v-for="([longLongProp, longLongProp, [longLongProp, longLongProp='Hello, Prettier!', [longLongProp, longLongProp, anotherLongLongProp=[longLongProp, longLongProp, anotherLongLongProp, yetAnotherLongLongProp], yetAnotherLongLongProp], yetAnotherLongLongProp], yetAnotherLongLongProp], index) of longLongLongLongLongLongLongLongList"
+>
+</div>
+</template>
+```
+
+# Errors
+```
+ts.vue:4:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected `in` or `of` in the v-for directive.
+  
+    2 │ <template>
+    3 │ <div
+  > 4 │ v-for="a:number       of x as number[]"
+      │         ^
+    5 │ v-for="[ a  , b]   : [   string,string ]     of x as Array<     [string, string]>"
+    6 │ v-for="  a  of list.map( (x:any): unknown     => x.foo.bar)"
+  
+  i Use in or of between the binding and iterable expression.
+  
+ts.vue:4:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `"` but instead found `number       of x as number[]`
+  
+    2 │ <template>
+    3 │ <div
+  > 4 │ v-for="a:number       of x as number[]"
+      │          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ v-for="[ a  , b]   : [   string,string ]     of x as Array<     [string, string]>"
+    6 │ v-for="  a  of list.map( (x:any): unknown     => x.foo.bar)"
+  
+  i Remove number       of x as number[]
+  
+ts.vue:4:39 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an attribute but instead found '"
+    v-for="[ a  , b]   : [   string,string ]     of x as Array<     [string, string]>"
+    v-for="  a  of list.map( (x:any): unknown     => x.foo.bar)"
+    v-for="([longLongProp, longLongProp, [longLongProp, longLongProp='Hello, Prettier!', [longLongProp, longLongProp, anotherLongLongProp=[longLongProp, longLongProp, anotherLongLongProp, yetAnotherLongLongProp], yetAnotherLongLongProp], yetAnotherLongLongProp], yetAnotherLongLongProp], index) of longLongLongLongLongLongLongLongList"
+    >'.
+  
+     2 │ <template>
+     3 │ <div
+   > 4 │ v-for="a:number       of x as number[]"
+       │                                       ^
+   > 5 │ v-for="[ a  , b]   : [   string,string ]     of x as Array<     [string, string]>"
+   > 6 │ v-for="  a  of list.map( (x:any): unknown     => x.foo.bar)"
+   > 7 │ v-for="([longLongProp, longLongProp, [longLongProp, longLongProp='Hello, Prettier!', [longLongProp, longLongProp, anotherLongLongProp=[longLongProp, longLongProp, anotherLongLongProp, yetAnotherLongLongProp], yetAnotherLongLongProp], yetAnotherLongLongProp], yetAnotherLongLongProp], index) of longLongLongLongLongLongLongLongList"
+   > 8 │ >
+       │ ^
+     9 │ </div>
+    10 │ </template>
+  
+  i Expected an attribute here.
+  
+     2 │ <template>
+     3 │ <div
+   > 4 │ v-for="a:number       of x as number[]"
+       │                                       ^
+   > 5 │ v-for="[ a  , b]   : [   string,string ]     of x as Array<     [string, string]>"
+   > 6 │ v-for="  a  of list.map( (x:any): unknown     => x.foo.bar)"
+   > 7 │ v-for="([longLongProp, longLongProp, [longLongProp, longLongProp='Hello, Prettier!', [longLongProp, longLongProp, anotherLongLongProp=[longLongProp, longLongProp, anotherLongLongProp, yetAnotherLongLongProp], yetAnotherLongLongProp], yetAnotherLongLongProp], yetAnotherLongLongProp], index) of longLongLongLongLongLongLongLongList"
+   > 8 │ >
+       │ ^
+     9 │ </div>
+    10 │ </template>
+  
+ts.vue:5:59 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unescaped `<` bracket character. Expected a tag or escaped character.
+  
+    3 │ <div
+    4 │ v-for="a:number       of x as number[]"
+  > 5 │ v-for="[ a  , b]   : [   string,string ]     of x as Array<     [string, string]>"
+      │                                                           ^
+    6 │ v-for="  a  of list.map( (x:any): unknown     => x.foo.bar)"
+    7 │ v-for="([longLongProp, longLongProp, [longLongProp, longLongProp='Hello, Prettier!', [longLongProp, longLongProp, anotherLongLongProp=[longLongProp, longLongProp, anotherLongLongProp, yetAnotherLongLongProp], yetAnotherLongLongProp], yetAnotherLongLongProp], yetAnotherLongLongProp], index) of longLongLongLongLongLongLongLongList"
+  
+  i Replace this character with `&lt;` to escape it.
+  
+ts.vue:9:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an attribute but instead found '<'.
+  
+     7 │ v-for="([longLongProp, longLongProp, [longLongProp, longLongProp='Hello, Prettier!', [longLongProp, longLongProp, anotherLongLongProp=[longLongProp, longLongProp, anotherLongLongProp, yetAnotherLongLongProp], yetAnotherLongLongProp], yetAnotherLongLongProp], yetAnotherLongLongProp], index) of longLongLongLongLongLongLongLongList"
+     8 │ >
+   > 9 │ </div>
+       │ ^
+    10 │ </template>
+    11 │ 
+  
+  i Expected an attribute here.
+  
+     7 │ v-for="([longLongProp, longLongProp, [longLongProp, longLongProp='Hello, Prettier!', [longLongProp, longLongProp, anotherLongLongProp=[longLongProp, longLongProp, anotherLongLongProp, yetAnotherLongLongProp], yetAnotherLongLongProp], yetAnotherLongLongProp], yetAnotherLongLongProp], index) of longLongLongLongLongLongLongLongList"
+     8 │ >
+   > 9 │ </div>
+       │ ^
+    10 │ </template>
+    11 │ 
+  
+
+```
+
+# Lines exceeding max width of 80 characters
+```
+    5: v-for="[ a  , b]   : [   string,string ]     of x as Array<     [string, string]>"
+    7: v-for="([longLongProp, longLongProp, [longLongProp, longLongProp='Hello, Prettier!', [longLongProp, longLongProp, anotherLongLongProp=[longLongProp, longLongProp, anotherLongLongProp, yetAnotherLongLongProp], yetAnotherLongLongProp], yetAnotherLongLongProp], yetAnotherLongLongProp], index) of longLongLongLongLongLongLongLongList"
+```

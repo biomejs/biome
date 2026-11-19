@@ -1,0 +1,42 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/value/release-if-function-head.scss
+---
+
+# Input
+
+```scss
+@use "sass:list";
+
+.a{
+ font-family:if;
+ selected:if(sass(true):if);
+ fallback:if(sass(false): serif;else :if);
+ sequence:if(sass(true):if  serif);
+ nested:if(sass(true):if(sass(false): serif;else :if));
+ commented: list.length(if/**/(not false));
+}
+.comments{font-family:if(sass(true): /* before */ if /* after */);other:if(sass(false):serif;else:/* fallback */if)}
+
+```
+
+
+# Formatted
+
+```scss
+@use "sass:list";
+
+.a {
+	font-family: if;
+	selected: if(sass(true): if);
+	fallback: if(sass(false): serif; else: if);
+	sequence: if(sass(true): if serif);
+	nested: if(sass(true): if(sass(false): serif; else: if));
+	commented: list.length(if /**/ (not false));
+}
+.comments {
+	font-family: if(sass(true): /* before */ if /* after */);
+	other: if(sass(false): serif; else: /* fallback */ if);
+}
+
+```

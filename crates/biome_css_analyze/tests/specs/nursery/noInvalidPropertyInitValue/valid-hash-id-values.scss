@@ -1,0 +1,11 @@
+/* should not generate diagnostics */
+@property --hex-color {
+  syntax: "<color>";
+  inherits: false;
+  initial-value: #ABC;
+}
+@property --dynamic-color {
+  syntax: "<color>";
+  inherits: false;
+  initial-value: #ABC#{G};
+}

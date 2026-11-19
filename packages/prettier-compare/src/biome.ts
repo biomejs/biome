@@ -50,11 +50,21 @@ export async function formatWithBiome(
 				indentStyle: "space",
 				indentWidth: 2,
 			},
+			markdown: {
+				parser: {
+					gfm: true,
+				},
+			},
 			html: {
 				experimentalFullSupportEnabled: true,
 				formatter: {
 					enabled: true,
 					selfCloseVoidElements: "always",
+				},
+			},
+			yaml: {
+				formatter: {
+					enabled: true,
 				},
 			},
 		});

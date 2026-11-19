@@ -1,9 +1,11 @@
 use crate::{
-    grit_analysis_ext::GritAnalysisExt, grit_target_language::GritTargetParser,
+    grit_analysis_ext::GritAnalysisExt,
+    grit_target_language::{GritTargetParser, metavariable_ranges},
     grit_tree::GritTargetTree,
 };
-use biome_css_parser::{CssParserOptions, parse_css};
-use biome_css_syntax::{CssFileSource, CssLanguage};
+use biome_css_parser::{CssParserOptions, parse_css, parse_css_with_metavariables};
+use biome_css_syntax::CssLanguage;
+use biome_languages::CssFileSource;
 use biome_parser::AnyParse;
 use camino::Utf8Path;
 use grit_util::{AnalysisLogs, FileOrigin, Parser, SnippetTree};
@@ -40,11 +42,7 @@ impl Parser for GritCssParser {
         logs: &mut AnalysisLogs,
         _old_tree: FileOrigin<'_, GritTargetTree>,
     ) -> Option<GritTargetTree> {
-        let parse_result = parse_css(
-            body,
-            CssFileSource::css(),
-            CssParserOptions::default().allow_metavariables(),
-        );
+        let parse_result = parse_css(body, CssFileSource::css(), CssParserOptions::default());
 
         for diagnostic in parse_result.diagnostics() {
             logs.push(diagnostic.to_log(path));
@@ -67,10 +65,11 @@ impl Parser for GritCssParser {
             |src: &str| src.len() as u32
         };
 
-        let parse_result = parse_css(
+        let parse_result = parse_css_with_metavariables(
             &context,
             CssFileSource::css(),
-            CssParserOptions::default().allow_metavariables(),
+            CssParserOptions::default(),
+            &metavariable_ranges(&context),
         );
 
         SnippetTree {

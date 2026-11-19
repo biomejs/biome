@@ -1,0 +1,15 @@
+{
+  "linter": {
+    "rules": {
+      "nursery": {
+        "useConsistentFunctionStyle": {
+          "level": "on",
+          "options": {
+            "style": "declaration",
+            "allowArrowFunctions": true
+          }
+        }
+      }
+    }
+  }
+}

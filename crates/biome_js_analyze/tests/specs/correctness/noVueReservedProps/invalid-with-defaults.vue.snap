@@ -1,0 +1,32 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-with-defaults.vue
+---
+# Input
+```vue
+<script setup lang="ts">
+/* should generate diagnostics */
+withDefaults(defineProps<{ key?: string }>(), {
+  key: "key",
+});
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-with-defaults.vue:3:28 lint/correctness/noVueReservedProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × key is a reserved attribute and cannot be used as props.
+  
+    1 │ <script setup lang="ts">
+    2 │ /* should generate diagnostics */
+  > 3 │ withDefaults(defineProps<{ key?: string }>(), {
+      │                            ^^^
+    4 │   key: "key",
+    5 │ });
+  
+  i Rename the prop to avoid possible conflicts.
+  
+
+```

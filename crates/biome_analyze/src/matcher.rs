@@ -2,7 +2,7 @@ use crate::{
     AnalyzerOptions, AnalyzerSignal, Phases, QueryMatch, Rule, RuleCategory, RuleFilter, RuleGroup,
     ServiceBag, SuppressionAction,
 };
-use biome_rowan::{Language, TextRange};
+use biome_rowan::{Language, SyntaxKindSet, TextRange};
 use std::fmt::Display;
 use std::{
     any::{Any, TypeId},
@@ -17,6 +17,19 @@ use std::{
 pub trait QueryMatcher<L: Language> {
     /// Execute a single query match
     fn match_query(&mut self, params: MatchQueryParams<L>);
+
+    /// Returns the kinds of [SyntaxNode](biome_rowan::SyntaxNode) queries that
+    /// can run a rule in `phase`, or `None` if the matcher can't tell. Queries
+    /// for nodes of other kinds must have no effect.
+    fn syntax_query_kinds(&self, phase: Phases) -> Option<SyntaxKindSet<L>> {
+        let _ = phase;
+        None
+    }
+
+    /// Returns whether rule matching stopped after a panic.
+    fn has_panicked(&self) -> bool {
+        false
+    }
 }
 
 /// Parameters provided to [QueryMatcher::match_query] and require to run lint rules
@@ -105,6 +118,12 @@ impl Display for RuleKey {
     }
 }
 
+impl biome_console::fmt::Display for RuleKey {
+    fn fmt(&self, fmt: &mut biome_console::fmt::Formatter) -> std::io::Result<()> {
+        write!(fmt, "{}/{}", self.group, self.rule)
+    }
+}
+
 impl RuleKey {
     pub fn new(group: &'static str, rule: &'static str) -> Self {
         Self { group, rule }
@@ -142,6 +161,7 @@ impl PartialEq<RuleKey> for RuleFilter<'static> {
 pub enum SignalRuleKey {
     Rule(RuleKey),
     Plugin(Box<str>),
+    Internal,
 }
 
 impl From<RuleKey> for SignalRuleKey {
@@ -154,7 +174,7 @@ impl From<RuleKey> for SignalRuleKey {
 pub struct SignalEntry<'phase, L: Language> {
     /// Boxed analyzer signal to be emitted
     pub signal: Box<dyn AnalyzerSignal<L> + 'phase>,
-    /// Unique identifier for the rule that emitted this signal
+    /// Origin of this signal, used when matching suppression comments
     pub rule: SignalRuleKey,
     /// Optional rule instances being suppressed
     pub instances: Box<[Box<str>]>,
@@ -187,6 +207,10 @@ impl<L: Language> PartialEq for SignalEntry<'_, L> {
 
 /// Adapter type wrapping a [QueryMatcher] type with a function that can be
 /// used to inspect the query matches emitted by the analyzer
+///
+/// It reports [QueryMatcher::syntax_query_kinds] of the wrapped matcher, so
+/// the function doesn't see syntax node queries the wrapped matcher would
+/// ignore when the analyzer skips those nodes.
 pub struct InspectMatcher<F, I> {
     func: F,
     inner: I,
@@ -215,17 +239,27 @@ where
         (self.func)(&params);
         self.inner.match_query(params);
     }
+
+    fn syntax_query_kinds(&self, phase: Phases) -> Option<SyntaxKindSet<L>> {
+        self.inner.syntax_query_kinds(phase)
+    }
+
+    fn has_panicked(&self) -> bool {
+        self.inner.has_panicked()
+    }
 }
 
 #[cfg(test)]
 mod tests {
+
     use super::MatchQueryParams;
     use crate::{
         Analyzer, AnalyzerContext, AnalyzerSignal, ApplySuppression, ControlFlow, MetadataRegistry,
-        Never, Phases, QueryMatcher, RuleCategory, RuleKey, ServiceBag, SignalEntry,
+        Never, Phases, QueryMatcher, RuleCategory, RuleKey, ServiceBag, SignalEntry, Suppression,
         SuppressionAction, SyntaxVisitor, signals::DiagnosticSignal,
     };
     use crate::{AnalyzerOptions, AnalyzerSuppression};
+    use crate::{EmbeddedSignalInspector, SnippetAnalyzer};
     use biome_diagnostics::{Diagnostic, Severity};
     use biome_diagnostics::{DiagnosticExt, category};
     use biome_rowan::{
@@ -233,6 +267,44 @@ mod tests {
         raw_language::{RawLanguage, RawLanguageKind, RawLanguageRoot, RawSyntaxTreeBuilder},
     };
     use std::convert::Infallible;
+    use std::sync::LazyLock;
+
+    struct TestAction;
+
+    impl SuppressionAction for TestAction {
+        type Language = RawLanguage;
+
+        fn find_token_for_inline_suppression(
+            &self,
+            _: SyntaxToken<Self::Language>,
+        ) -> Option<ApplySuppression<Self::Language>> {
+            None
+        }
+
+        fn apply_inline_suppression(
+            &self,
+            _: &mut BatchMutation<Self::Language>,
+            _: ApplySuppression<Self::Language>,
+            _: &str,
+            _: &str,
+            _: &TextRange,
+        ) {
+            unreachable!("")
+        }
+
+        fn apply_top_level_suppression(
+            &self,
+            _: &mut BatchMutation<Self::Language>,
+            _: SyntaxToken<Self::Language>,
+            _: &str,
+        ) {
+            unreachable!("")
+        }
+
+        fn suppression_top_level_comment(&self, _suppression_text: &str) -> String {
+            unreachable!("")
+        }
+    }
 
     struct SuppressionMatcher;
 
@@ -371,70 +443,41 @@ mod tests {
             ControlFlow::Continue(())
         };
 
-        fn parse_suppression_comment(
-            comment: &str,
-            _piece_range: TextRange,
-        ) -> Vec<Result<AnalyzerSuppression<'_>, Infallible>> {
-            comment
-                .trim_start_matches("//")
-                .split(' ')
-                .map(|rule_str| {
-                    AnalyzerSuppression::rule(
-                        RuleCategory::Lint,
-                        rule_str,
-                        (
-                            "",
-                            TextRange::new(TextSize::of(rule_str), TextSize::of(rule_str)),
-                        ),
-                    )
-                })
-                .map(Ok)
-                .collect()
+        struct TestSuppression;
+
+        impl Suppression for TestSuppression {
+            type Diagnostic = Infallible;
+
+            fn parse_comment<'a>(
+                &self,
+                comment: &'a str,
+                _piece_range: TextRange,
+            ) -> Vec<Result<AnalyzerSuppression<'a>, Infallible>> {
+                comment
+                    .trim_start_matches("//")
+                    .split(' ')
+                    .map(|rule_str| {
+                        AnalyzerSuppression::rule(
+                            RuleCategory::Lint,
+                            rule_str,
+                            (
+                                "",
+                                TextRange::new(TextSize::of(rule_str), TextSize::of(rule_str)),
+                            ),
+                        )
+                    })
+                    .map(Ok)
+                    .collect()
+            }
         }
 
         let mut metadata = MetadataRegistry::default();
         metadata.insert_rule("group", "rule");
 
-        struct TestAction;
-
-        impl SuppressionAction for TestAction {
-            type Language = RawLanguage;
-
-            fn find_token_for_inline_suppression(
-                &self,
-                _: SyntaxToken<Self::Language>,
-            ) -> Option<ApplySuppression<Self::Language>> {
-                None
-            }
-
-            fn apply_inline_suppression(
-                &self,
-                _: &mut BatchMutation<Self::Language>,
-                _: ApplySuppression<Self::Language>,
-                _: &str,
-                _: &str,
-            ) {
-                unreachable!("")
-            }
-
-            fn apply_top_level_suppression(
-                &self,
-                _: &mut BatchMutation<Self::Language>,
-                _: SyntaxToken<Self::Language>,
-                _: &str,
-            ) {
-                unreachable!("")
-            }
-
-            fn suppression_top_level_comment(&self, _suppression_text: &str) -> String {
-                unreachable!("")
-            }
-        }
-
         let mut analyzer = Analyzer::new(
             &metadata,
             SuppressionMatcher,
-            parse_suppression_comment,
+            Box::new(TestSuppression),
             Box::new(TestAction),
             &mut emit_signal,
         );
@@ -477,5 +520,163 @@ mod tests {
                 ),
             ]
         );
+    }
+
+    #[expect(clippy::type_complexity)]
+    #[test]
+    fn host_comment_suppresses_signal_from_snippet() {
+        struct HostSuppression;
+
+        impl Suppression for HostSuppression {
+            type Diagnostic = Infallible;
+
+            fn parse_comment<'a>(
+                &self,
+                text: &'a str,
+                _range: TextRange,
+            ) -> Vec<Result<AnalyzerSuppression<'a>, Self::Diagnostic>> {
+                vec![Ok(AnalyzerSuppression::rule(
+                    RuleCategory::Lint,
+                    text.trim_start_matches("//"),
+                    ("reason", TextRange::default()),
+                ))]
+            }
+        }
+
+        struct RawSnippet {
+            root: RawLanguageRoot,
+            diagnostics: Vec<TextRange>,
+            ran: bool,
+        }
+
+        impl SnippetAnalyzer<Never> for RawSnippet {
+            type Output = (bool, Vec<TextRange>);
+
+            fn diagnostics_offset(&self) -> TextSize {
+                TextSize::from(13)
+            }
+
+            fn metadata(&self) -> &'static MetadataRegistry {
+                static METADATA: LazyLock<MetadataRegistry> = LazyLock::new(|| {
+                    let mut metadata = MetadataRegistry::default();
+                    metadata.insert_rule("group", "rule");
+                    metadata
+                });
+                &METADATA
+            }
+
+            fn run(&mut self, inspector: EmbeddedSignalInspector<'_, '_>) -> ControlFlow<Never> {
+                self.ran = true;
+                let metadata = self.metadata();
+                let mut emit_signal =
+                    |signal: &dyn AnalyzerSignal<RawLanguage>| -> ControlFlow<Never> {
+                        self.diagnostics
+                            .push(signal.diagnostic().expect("diagnostic").get_span().unwrap());
+                        ControlFlow::Continue(())
+                    };
+                let mut snippet_analyzer = Analyzer::new(
+                    metadata,
+                    SuppressionMatcher,
+                    Box::new(HostSuppression),
+                    Box::new(TestAction),
+                    &mut emit_signal,
+                );
+                snippet_analyzer
+                    .add_visitor(Phases::Syntax, Box::<SyntaxVisitor<RawLanguage>>::default());
+                let result = snippet_analyzer.run_snippet(
+                    AnalyzerContext {
+                        root: self.root.clone(),
+                        range: None,
+                        services: ServiceBag::default(),
+                        options: &AnalyzerOptions::default(),
+                    },
+                    inspector,
+                );
+                assert!(result.is_none());
+                ControlFlow::Continue(())
+            }
+
+            fn into_output(self: Box<Self>) -> Self::Output {
+                (self.ran, self.diagnostics)
+            }
+        }
+
+        let host_root = {
+            let mut builder = RawSyntaxTreeBuilder::new();
+            builder.start_node(RawLanguageKind::ROOT);
+            builder.start_node(RawLanguageKind::SEPARATED_EXPRESSION_LIST);
+            builder.start_node(RawLanguageKind::LITERAL_EXPRESSION);
+            builder.token(RawLanguageKind::STRING_TOKEN, "0000000000000");
+            builder.finish_node();
+            builder.start_node(RawLanguageKind::LITERAL_EXPRESSION);
+            builder.token_with_trivia(
+                RawLanguageKind::STRING_TOKEN,
+                "//group/rule\n\"warn_here\"",
+                &[
+                    TriviaPiece::single_line_comment(12),
+                    TriviaPiece::newline(1),
+                ],
+                &[],
+            );
+            builder.finish_node();
+            builder.finish_node();
+            builder.finish_node();
+            RawLanguageRoot::unwrap_cast(builder.finish())
+        };
+        let snippet_root = {
+            let mut builder = RawSyntaxTreeBuilder::new();
+            builder.start_node(RawLanguageKind::ROOT);
+            builder.start_node(RawLanguageKind::SEPARATED_EXPRESSION_LIST);
+            builder.start_node(RawLanguageKind::LITERAL_EXPRESSION);
+            builder.token_with_trivia(
+                RawLanguageKind::STRING_TOKEN,
+                "//group/rule\n\"warn_here\"",
+                &[
+                    TriviaPiece::single_line_comment(12),
+                    TriviaPiece::newline(1),
+                ],
+                &[],
+            );
+            builder.finish_node();
+            builder.finish_node();
+            builder.finish_node();
+            RawLanguageRoot::unwrap_cast(builder.finish())
+        };
+
+        let host_metadata = MetadataRegistry::default();
+        let mut host_diagnostics = Vec::new();
+        let mut emit_host_signal =
+            |signal: &dyn AnalyzerSignal<RawLanguage>| -> ControlFlow<Never> {
+                host_diagnostics.push(signal.diagnostic().expect("diagnostic"));
+                ControlFlow::Continue(())
+            };
+        let host_analyzer = Analyzer::new(
+            &host_metadata,
+            SuppressionMatcher,
+            Box::new(HostSuppression),
+            Box::new(TestAction),
+            &mut emit_host_signal,
+        );
+        let mut snippets: Vec<Box<dyn SnippetAnalyzer<Never, Output = (bool, Vec<TextRange>)>>> =
+            vec![Box::new(RawSnippet {
+                root: snippet_root,
+                diagnostics: Vec::new(),
+                ran: false,
+            })];
+
+        let result = host_analyzer.run_with_snippets(
+            AnalyzerContext {
+                root: host_root,
+                range: None,
+                services: ServiceBag::default(),
+                options: &AnalyzerOptions::default(),
+            },
+            &mut snippets,
+        );
+        assert!(result.is_none());
+        assert!(host_diagnostics.is_empty());
+        let (ran, snippet_diagnostics) = snippets.pop().unwrap().into_output();
+        assert!(ran);
+        assert!(snippet_diagnostics.is_empty());
     }
 }

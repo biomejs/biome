@@ -16,6 +16,6 @@ info: svelte/directive_use_basic.svelte
 
 ```svelte
 <div use:clickOutside>Click outside handler</div>
-<button use:longpress={{duration: 500}}>Long press me</button>
+<button use:longpress={{ duration: 500 }}>Long press me</button>
 
 ```

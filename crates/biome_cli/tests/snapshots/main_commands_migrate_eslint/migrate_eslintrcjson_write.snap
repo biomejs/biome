@@ -2,6 +2,12 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
+## Command
+
+```shell
+biome migrate eslint --write
+```
+
 ## `biome.json`
 
 ```json
@@ -9,11 +15,17 @@ expression: redactor(content)
   "linter": {
     "enabled": true,
     "rules": {
-      "recommended": false,
+      "preset": "none",
       "complexity": { "noUselessLabel": "error", "useLiteralKeys": "off" },
       "security": { "noGlobalEval": "warn" },
       "style": { "useDefaultParameterLast": "off" },
-      "suspicious": { "noDoubleEquals": "warn", "useGetterReturn": "error" }
+      "suspicious": {
+        "noDoubleEquals": {
+          "level": "warn",
+          "options": { "ignoreNull": false }
+        },
+        "useGetterReturn": "error"
+      }
     },
     "includes": ["**", "**/*.test.js"]
   },
@@ -21,7 +33,16 @@ expression: redactor(content)
   "overrides": [
     {
       "includes": ["bin/*.js", "lib/*.js", "!*.test.js"],
-      "linter": { "rules": { "suspicious": { "noDoubleEquals": "off" } } }
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "noDoubleEquals": {
+              "level": "off",
+              "options": { "ignoreNull": false }
+            }
+          }
+        }
+      }
     }
   ]
 }

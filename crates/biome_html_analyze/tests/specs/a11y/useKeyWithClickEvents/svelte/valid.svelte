@@ -1,0 +1,15 @@
+<!-- should not generate diagnostics -->
+
+<!-- onclick with keyboard handlers -->
+<div onclick="handleClick()" onkeydown="handleKeyDown()"></div>
+<div onclick={handleClick} onkeydown={handleKeyDown}></div>
+
+<!-- inherently keyboard-accessible elements -->
+<button onclick="handleClick()">Submit</button>
+<a onclick="handleClick()" href="https://example.com">Link</a>
+
+<!-- hidden from screen reader -->
+<div onclick="handleClick()" aria-hidden="true">content</div>
+
+<!-- PascalCase elements are custom components — skip -->
+<MyComponent onclick="handleClick()">content</MyComponent>

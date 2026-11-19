@@ -1,0 +1,11 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: valid.zero.css
+---
+# Input
+```css
+/* should not generate diagnostics */
+:root { --foo: 1px; }
+html { --foo: 1px; }
+
+```

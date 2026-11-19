@@ -1,6 +1,6 @@
 [package]
 name                 = "biome_plugin_loader"
-version              = "0.0.1"
+version.workspace    = true
 authors.workspace    = true
 edition.workspace    = true
 description          = "Functionality for loading plugins and caching them in memory"
@@ -11,6 +11,11 @@ keywords.workspace   = true
 categories.workspace = true
 publish              = true
 
+[[bench]]
+harness           = false
+name              = "plugins"
+required-features = ["js_plugin"]
+
 [dependencies]
 biome_analyze            = { workspace = true }
 biome_console            = { workspace = true }
@@ -19,38 +24,55 @@ biome_deserialize        = { workspace = true, features = ["serde"] }
 biome_deserialize_macros = { workspace = true }
 biome_diagnostics        = { workspace = true }
 biome_fs                 = { workspace = true }
+biome_glob               = { workspace = true, features = ["biome_deserialize", "serde"] }
 biome_grit_patterns      = { workspace = true }
 biome_js_runtime         = { workspace = true, optional = true }
 biome_js_syntax          = { workspace = true }
 biome_json_parser        = { workspace = true }
 biome_json_syntax        = { workspace = true }
+biome_languages          = { workspace = true, features = ["lang_js"] }
+biome_manifest           = { workspace = true }
 biome_parser             = { workspace = true }
 biome_resolver           = { workspace = true }
 biome_rowan              = { workspace = true }
+biome_text_edit          = { workspace = true }
 biome_text_size          = { workspace = true }
 boa_engine               = { workspace = true, optional = true }
 camino                   = { workspace = true }
 grit-pattern-matcher     = { workspace = true }
 grit-util                = { workspace = true }
 papaya                   = { workspace = true }
+parking_lot              = { workspace = true, optional = true }
 rustc-hash               = { workspace = true }
 schemars                 = { workspace = true, optional = true }
 serde                    = { workspace = true }
 
 [dev-dependencies]
-biome_js_parser = { path = "../biome_js_parser" }
-insta           = { workspace = true }
+biome_js_analyze   = { path = "../biome_js_analyze" }
+biome_js_formatter = { path = "../biome_js_formatter" }
+biome_js_parser    = { path = "../biome_js_parser" }
+biome_js_semantic  = { path = "../biome_js_semantic" }
+biome_languages    = { path = "../biome_languages", features = ["lang_js"] }
+divan              = { workspace = true }
+insta              = { workspace = true }
+serde_json         = { workspace = true }
 
-[target.'cfg(unix)'.dependencies]
+[target.'cfg(all(target_family="unix", not(all(target_arch = "aarch64", target_env = "musl"))))'.dev-dependencies]
+tikv-jemallocator = { workspace = true }
+
+[target.'cfg(target_os = "windows")'.dev-dependencies]
+mimalloc = { workspace = true }
+
+[target."cfg(unix)".dependencies]
 libc = { workspace = true, optional = true }
 
-[target.'cfg(windows)'.dependencies]
+[target."cfg(windows)".dependencies]
 windows = { workspace = true, features = ["Win32_System_Threading"], optional = true }
 
 [features]
 default   = []
-js_plugin = ["dep:biome_js_runtime", "dep:boa_engine", "dep:libc", "dep:windows"]
-schema    = ["dep:schemars"]
+js_plugin = ["dep:biome_js_runtime", "dep:boa_engine", "dep:libc", "dep:parking_lot", "dep:windows"]
+schema    = ["biome_glob/schema", "biome_manifest/schema", "dep:schemars"]
 
 [lints]
 workspace = true

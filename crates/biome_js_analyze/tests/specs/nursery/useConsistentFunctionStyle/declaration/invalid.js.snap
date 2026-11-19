@@ -1,0 +1,447 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+// should generate diagnostics
+const foo = function() {};
+let arrow = () => {};
+var named = function inner() {};
+const parenthesized = (((function() {})));
+const parenthesizedArrow = (() => {});
+const asyncArrow = async () => {};
+const generator = function* () {};
+export const exported = function() {}, exportedArrow = () => {};
+for (let loop = () => {}; condition;) {}
+const nestedFunction = () => { function inner() { this; } };
+const nestedArrow = () => () => this;
+const nestedMethod = () => ({ method() { return this; } });
+const nestedGetter = () => ({ get value() { return this; } });
+const { destructured } = function() {};
+
+const nestedSetter = () => ({ set value(value) { this.value = value; } });
+const nestedClassMethod = () => class { method() { return this; } };
+const nestedConstructor = () => class { constructor() { this.value = 0; } };
+const nestedClassGetter = () => class { get value() { return this; } };
+const nestedClassSetter = () => class { set value(value) { this.value = value; } };
+
+```
+
+# Diagnostics
+```
+invalid.js:2:7 lint/nursery/useConsistentFunctionStyle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Function declarations are required here, but this is an expression.
+  
+    1 │ // should generate diagnostics
+  > 2 │ const foo = function() {};
+      │       ^^^
+    3 │ let arrow = () => {};
+    4 │ var named = function inner() {};
+  
+  i Using a consistent function style makes function definitions easier to recognize.
+  
+  i Use a function declaration.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:3:5 lint/nursery/useConsistentFunctionStyle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Function declarations are required here, but this is an expression.
+  
+    1 │ // should generate diagnostics
+    2 │ const foo = function() {};
+  > 3 │ let arrow = () => {};
+      │     ^^^^^
+    4 │ var named = function inner() {};
+    5 │ const parenthesized = (((function() {})));
+  
+  i Using a consistent function style makes function definitions easier to recognize.
+  
+  i Use a function declaration.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:4:5 lint/nursery/useConsistentFunctionStyle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Function declarations are required here, but this is an expression.
+  
+    2 │ const foo = function() {};
+    3 │ let arrow = () => {};
+  > 4 │ var named = function inner() {};
+      │     ^^^^^
+    5 │ const parenthesized = (((function() {})));
+    6 │ const parenthesizedArrow = (() => {});
+  
+  i Using a consistent function style makes function definitions easier to recognize.
+  
+  i Use a function declaration.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:5:7 lint/nursery/useConsistentFunctionStyle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Function declarations are required here, but this is an expression.
+  
+    3 │ let arrow = () => {};
+    4 │ var named = function inner() {};
+  > 5 │ const parenthesized = (((function() {})));
+      │       ^^^^^^^^^^^^^
+    6 │ const parenthesizedArrow = (() => {});
+    7 │ const asyncArrow = async () => {};
+  
+  i Using a consistent function style makes function definitions easier to recognize.
+  
+  i Use a function declaration.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:6:7 lint/nursery/useConsistentFunctionStyle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Function declarations are required here, but this is an expression.
+  
+    4 │ var named = function inner() {};
+    5 │ const parenthesized = (((function() {})));
+  > 6 │ const parenthesizedArrow = (() => {});
+      │       ^^^^^^^^^^^^^^^^^^
+    7 │ const asyncArrow = async () => {};
+    8 │ const generator = function* () {};
+  
+  i Using a consistent function style makes function definitions easier to recognize.
+  
+  i Use a function declaration.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:7:7 lint/nursery/useConsistentFunctionStyle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Function declarations are required here, but this is an expression.
+  
+    5 │ const parenthesized = (((function() {})));
+    6 │ const parenthesizedArrow = (() => {});
+  > 7 │ const asyncArrow = async () => {};
+      │       ^^^^^^^^^^
+    8 │ const generator = function* () {};
+    9 │ export const exported = function() {}, exportedArrow = () => {};
+  
+  i Using a consistent function style makes function definitions easier to recognize.
+  
+  i Use a function declaration.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:8:7 lint/nursery/useConsistentFunctionStyle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Function declarations are required here, but this is an expression.
+  
+     6 │ const parenthesizedArrow = (() => {});
+     7 │ const asyncArrow = async () => {};
+   > 8 │ const generator = function* () {};
+       │       ^^^^^^^^^
+     9 │ export const exported = function() {}, exportedArrow = () => {};
+    10 │ for (let loop = () => {}; condition;) {}
+  
+  i Using a consistent function style makes function definitions easier to recognize.
+  
+  i Use a function declaration.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:9:14 lint/nursery/useConsistentFunctionStyle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Function declarations are required here, but this is an expression.
+  
+     7 │ const asyncArrow = async () => {};
+     8 │ const generator = function* () {};
+   > 9 │ export const exported = function() {}, exportedArrow = () => {};
+       │              ^^^^^^^^
+    10 │ for (let loop = () => {}; condition;) {}
+    11 │ const nestedFunction = () => { function inner() { this; } };
+  
+  i Using a consistent function style makes function definitions easier to recognize.
+  
+  i Use a function declaration.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:9:40 lint/nursery/useConsistentFunctionStyle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Function declarations are required here, but this is an expression.
+  
+     7 │ const asyncArrow = async () => {};
+     8 │ const generator = function* () {};
+   > 9 │ export const exported = function() {}, exportedArrow = () => {};
+       │                                        ^^^^^^^^^^^^^
+    10 │ for (let loop = () => {}; condition;) {}
+    11 │ const nestedFunction = () => { function inner() { this; } };
+  
+  i Using a consistent function style makes function definitions easier to recognize.
+  
+  i Use a function declaration.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:10:10 lint/nursery/useConsistentFunctionStyle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Function declarations are required here, but this is an expression.
+  
+     8 │ const generator = function* () {};
+     9 │ export const exported = function() {}, exportedArrow = () => {};
+  > 10 │ for (let loop = () => {}; condition;) {}
+       │          ^^^^
+    11 │ const nestedFunction = () => { function inner() { this; } };
+    12 │ const nestedArrow = () => () => this;
+  
+  i Using a consistent function style makes function definitions easier to recognize.
+  
+  i Use a function declaration.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:11:7 lint/nursery/useConsistentFunctionStyle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Function declarations are required here, but this is an expression.
+  
+     9 │ export const exported = function() {}, exportedArrow = () => {};
+    10 │ for (let loop = () => {}; condition;) {}
+  > 11 │ const nestedFunction = () => { function inner() { this; } };
+       │       ^^^^^^^^^^^^^^
+    12 │ const nestedArrow = () => () => this;
+    13 │ const nestedMethod = () => ({ method() { return this; } });
+  
+  i Using a consistent function style makes function definitions easier to recognize.
+  
+  i Use a function declaration.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:12:7 lint/nursery/useConsistentFunctionStyle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Function declarations are required here, but this is an expression.
+  
+    10 │ for (let loop = () => {}; condition;) {}
+    11 │ const nestedFunction = () => { function inner() { this; } };
+  > 12 │ const nestedArrow = () => () => this;
+       │       ^^^^^^^^^^^
+    13 │ const nestedMethod = () => ({ method() { return this; } });
+    14 │ const nestedGetter = () => ({ get value() { return this; } });
+  
+  i Using a consistent function style makes function definitions easier to recognize.
+  
+  i Use a function declaration.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:13:7 lint/nursery/useConsistentFunctionStyle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Function declarations are required here, but this is an expression.
+  
+    11 │ const nestedFunction = () => { function inner() { this; } };
+    12 │ const nestedArrow = () => () => this;
+  > 13 │ const nestedMethod = () => ({ method() { return this; } });
+       │       ^^^^^^^^^^^^
+    14 │ const nestedGetter = () => ({ get value() { return this; } });
+    15 │ const { destructured } = function() {};
+  
+  i Using a consistent function style makes function definitions easier to recognize.
+  
+  i Use a function declaration.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:14:7 lint/nursery/useConsistentFunctionStyle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Function declarations are required here, but this is an expression.
+  
+    12 │ const nestedArrow = () => () => this;
+    13 │ const nestedMethod = () => ({ method() { return this; } });
+  > 14 │ const nestedGetter = () => ({ get value() { return this; } });
+       │       ^^^^^^^^^^^^
+    15 │ const { destructured } = function() {};
+    16 │ 
+  
+  i Using a consistent function style makes function definitions easier to recognize.
+  
+  i Use a function declaration.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:15:7 lint/nursery/useConsistentFunctionStyle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Function declarations are required here, but this is an expression.
+  
+    13 │ const nestedMethod = () => ({ method() { return this; } });
+    14 │ const nestedGetter = () => ({ get value() { return this; } });
+  > 15 │ const { destructured } = function() {};
+       │       ^^^^^^^^^^^^^^^^
+    16 │ 
+    17 │ const nestedSetter = () => ({ set value(value) { this.value = value; } });
+  
+  i Using a consistent function style makes function definitions easier to recognize.
+  
+  i Use a function declaration.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:17:7 lint/nursery/useConsistentFunctionStyle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Function declarations are required here, but this is an expression.
+  
+    15 │ const { destructured } = function() {};
+    16 │ 
+  > 17 │ const nestedSetter = () => ({ set value(value) { this.value = value; } });
+       │       ^^^^^^^^^^^^
+    18 │ const nestedClassMethod = () => class { method() { return this; } };
+    19 │ const nestedConstructor = () => class { constructor() { this.value = 0; } };
+  
+  i Using a consistent function style makes function definitions easier to recognize.
+  
+  i Use a function declaration.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:18:7 lint/nursery/useConsistentFunctionStyle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Function declarations are required here, but this is an expression.
+  
+    17 │ const nestedSetter = () => ({ set value(value) { this.value = value; } });
+  > 18 │ const nestedClassMethod = () => class { method() { return this; } };
+       │       ^^^^^^^^^^^^^^^^^
+    19 │ const nestedConstructor = () => class { constructor() { this.value = 0; } };
+    20 │ const nestedClassGetter = () => class { get value() { return this; } };
+  
+  i Using a consistent function style makes function definitions easier to recognize.
+  
+  i Use a function declaration.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:19:7 lint/nursery/useConsistentFunctionStyle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Function declarations are required here, but this is an expression.
+  
+    17 │ const nestedSetter = () => ({ set value(value) { this.value = value; } });
+    18 │ const nestedClassMethod = () => class { method() { return this; } };
+  > 19 │ const nestedConstructor = () => class { constructor() { this.value = 0; } };
+       │       ^^^^^^^^^^^^^^^^^
+    20 │ const nestedClassGetter = () => class { get value() { return this; } };
+    21 │ const nestedClassSetter = () => class { set value(value) { this.value = value; } };
+  
+  i Using a consistent function style makes function definitions easier to recognize.
+  
+  i Use a function declaration.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:20:7 lint/nursery/useConsistentFunctionStyle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Function declarations are required here, but this is an expression.
+  
+    18 │ const nestedClassMethod = () => class { method() { return this; } };
+    19 │ const nestedConstructor = () => class { constructor() { this.value = 0; } };
+  > 20 │ const nestedClassGetter = () => class { get value() { return this; } };
+       │       ^^^^^^^^^^^^^^^^^
+    21 │ const nestedClassSetter = () => class { set value(value) { this.value = value; } };
+    22 │ 
+  
+  i Using a consistent function style makes function definitions easier to recognize.
+  
+  i Use a function declaration.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:21:7 lint/nursery/useConsistentFunctionStyle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Function declarations are required here, but this is an expression.
+  
+    19 │ const nestedConstructor = () => class { constructor() { this.value = 0; } };
+    20 │ const nestedClassGetter = () => class { get value() { return this; } };
+  > 21 │ const nestedClassSetter = () => class { set value(value) { this.value = value; } };
+       │       ^^^^^^^^^^^^^^^^^
+    22 │ 
+  
+  i Using a consistent function style makes function definitions easier to recognize.
+  
+  i Use a function declaration.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

@@ -1,0 +1,2 @@
+@at-root(namespace.$defaultAtRoot){.box{position:absolute}}
+@at-root(without:namespace.$excludedRules){.rules{color:red}}

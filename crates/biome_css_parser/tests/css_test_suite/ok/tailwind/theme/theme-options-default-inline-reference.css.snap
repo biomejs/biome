@@ -1,0 +1,101 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+@theme default inline reference {
+	--color-brand: red;
+}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        CssAtRule {
+            at_token: AT@0..1 "@" [] [],
+            rule: TwThemeAtRule {
+                theme_token: THEME_KW@1..7 "theme" [] [Whitespace(" ")],
+                options: TwThemeOptionList [
+                    CssIdentifier {
+                        value_token: IDENT@7..15 "default" [] [Whitespace(" ")],
+                    },
+                    CssIdentifier {
+                        value_token: IDENT@15..22 "inline" [] [Whitespace(" ")],
+                    },
+                    CssIdentifier {
+                        value_token: IDENT@22..32 "reference" [] [Whitespace(" ")],
+                    },
+                ],
+                block: CssDeclarationOrRuleBlock {
+                    l_curly_token: L_CURLY@32..33 "{" [] [],
+                    items: CssDeclarationOrRuleList [
+                        CssDeclarationWithSemicolon {
+                            declaration: CssDeclaration {
+                                property: CssGenericProperty {
+                                    name: CssDashedIdentifier {
+                                        value_token: IDENT@33..48 "--color-brand" [Newline("\n"), Whitespace("\t")] [],
+                                    },
+                                    colon_token: COLON@48..50 ":" [] [Whitespace(" ")],
+                                    value: CssGenericComponentValueList [
+                                        CssIdentifier {
+                                            value_token: IDENT@50..53 "red" [] [],
+                                        },
+                                    ],
+                                },
+                                important: missing (optional),
+                            },
+                            semicolon_token: SEMICOLON@53..54 ";" [] [],
+                        },
+                    ],
+                    r_curly_token: R_CURLY@54..56 "}" [Newline("\n")] [],
+                },
+            },
+        },
+    ],
+    eof_token: EOF@56..57 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..57
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..56
+    0: CSS_AT_RULE@0..56
+      0: AT@0..1 "@" [] []
+      1: TW_THEME_AT_RULE@1..56
+        0: THEME_KW@1..7 "theme" [] [Whitespace(" ")]
+        1: TW_THEME_OPTION_LIST@7..32
+          0: CSS_IDENTIFIER@7..15
+            0: IDENT@7..15 "default" [] [Whitespace(" ")]
+          1: CSS_IDENTIFIER@15..22
+            0: IDENT@15..22 "inline" [] [Whitespace(" ")]
+          2: CSS_IDENTIFIER@22..32
+            0: IDENT@22..32 "reference" [] [Whitespace(" ")]
+        2: CSS_DECLARATION_OR_RULE_BLOCK@32..56
+          0: L_CURLY@32..33 "{" [] []
+          1: CSS_DECLARATION_OR_RULE_LIST@33..54
+            0: CSS_DECLARATION_WITH_SEMICOLON@33..54
+              0: CSS_DECLARATION@33..53
+                0: CSS_GENERIC_PROPERTY@33..53
+                  0: CSS_DASHED_IDENTIFIER@33..48
+                    0: IDENT@33..48 "--color-brand" [Newline("\n"), Whitespace("\t")] []
+                  1: COLON@48..50 ":" [] [Whitespace(" ")]
+                  2: CSS_GENERIC_COMPONENT_VALUE_LIST@50..53
+                    0: CSS_IDENTIFIER@50..53
+                      0: IDENT@50..53 "red" [] []
+                1: (empty)
+              1: SEMICOLON@53..54 ";" [] []
+          2: R_CURLY@54..56 "}" [Newline("\n")] []
+  2: EOF@56..57 "" [Newline("\n")] []
+
+```

@@ -18,8 +18,9 @@ expression: snapshot
 ## AST
 
 ```
-MdDocument {
+MdRoot {
     bom_token: missing (optional),
+    frontmatter: missing (optional),
     value: MdBlockList [
         MdQuote {
             prefix: MdQuotePrefix {
@@ -37,7 +38,6 @@ MdDocument {
                             value_token: MD_TEXTUAL_LITERAL@13..14 "\n" [] [],
                         },
                     ],
-                    hard_line: missing (optional),
                 },
                 MdQuotePrefix {
                     pre_marker_indent: MdQuoteIndentList [],
@@ -60,7 +60,6 @@ MdDocument {
                                     value_token: MD_TEXTUAL_LITERAL@29..30 "\n" [] [],
                                 },
                             ],
-                            hard_line: missing (optional),
                         },
                         MdQuotePrefix {
                             pre_marker_indent: MdQuoteIndentList [],
@@ -88,7 +87,6 @@ MdDocument {
                                             value_token: MD_TEXTUAL_LITERAL@47..48 "\n" [] [],
                                         },
                                     ],
-                                    hard_line: missing (optional),
                                 },
                             ],
                         },
@@ -115,7 +113,6 @@ MdDocument {
                             value_token: MD_TEXTUAL_LITERAL@64..65 "\n" [] [],
                         },
                     ],
-                    hard_line: missing (optional),
                 },
             ],
         },
@@ -127,9 +124,10 @@ MdDocument {
 ## CST
 
 ```
-0: MD_DOCUMENT@0..65
+0: MD_ROOT@0..65
   0: (empty)
-  1: MD_BLOCK_LIST@0..65
+  1: (empty)
+  2: MD_BLOCK_LIST@0..65
     0: MD_QUOTE@0..48
       0: MD_QUOTE_PREFIX@0..2
         0: MD_QUOTE_INDENT_LIST@0..0
@@ -142,7 +140,6 @@ MdDocument {
               0: MD_TEXTUAL_LITERAL@2..13 "Outer quote" [] []
             1: MD_TEXTUAL@13..14
               0: MD_TEXTUAL_LITERAL@13..14 "\n" [] []
-          1: (empty)
         1: MD_QUOTE_PREFIX@14..15
           0: MD_QUOTE_INDENT_LIST@14..14
           1: R_ANGLE@14..15 ">" [] []
@@ -159,7 +156,6 @@ MdDocument {
                   0: MD_TEXTUAL_LITERAL@17..29 "Nested quote" [] []
                 1: MD_TEXTUAL@29..30
                   0: MD_TEXTUAL_LITERAL@29..30 "\n" [] []
-              1: (empty)
             1: MD_QUOTE_PREFIX@30..31
               0: MD_QUOTE_INDENT_LIST@30..30
               1: R_ANGLE@30..31 ">" [] []
@@ -180,7 +176,6 @@ MdDocument {
                       0: MD_TEXTUAL_LITERAL@34..47 "Deeply nested" [] []
                     1: MD_TEXTUAL@47..48
                       0: MD_TEXTUAL_LITERAL@47..48 "\n" [] []
-                  1: (empty)
     1: MD_NEWLINE@48..49
       0: NEWLINE@48..49 "\n" [] []
     2: MD_QUOTE@49..65
@@ -195,7 +190,6 @@ MdDocument {
               0: MD_TEXTUAL_LITERAL@51..64 "Back to outer" [] []
             1: MD_TEXTUAL@64..65
               0: MD_TEXTUAL_LITERAL@64..65 "\n" [] []
-          1: (empty)
-  2: EOF@65..65 "" [] []
+  3: EOF@65..65 "" [] []
 
 ```

@@ -15,8 +15,9 @@ expression: snapshot
 ## AST
 
 ```
-MdDocument {
+MdRoot {
     bom_token: missing (optional),
+    frontmatter: missing (optional),
     value: MdBlockList [
         MdQuote {
             prefix: MdQuotePrefix {
@@ -61,7 +62,6 @@ MdDocument {
                                 },
                                 MdParagraph {
                                     list: MdInlineItemList [],
-                                    hard_line: missing (optional),
                                 },
                                 MdNewline {
                                     value_token: NEWLINE@13..14 "\n" [] [],
@@ -108,9 +108,10 @@ MdDocument {
 ## CST
 
 ```
-0: MD_DOCUMENT@0..21
+0: MD_ROOT@0..21
   0: (empty)
-  1: MD_BLOCK_LIST@0..21
+  1: (empty)
+  2: MD_BLOCK_LIST@0..21
     0: MD_QUOTE@0..21
       0: MD_QUOTE_PREFIX@0..2
         0: MD_QUOTE_INDENT_LIST@0..0
@@ -144,7 +145,6 @@ MdDocument {
                   6: (empty)
                 1: MD_PARAGRAPH@13..13
                   0: MD_INLINE_ITEM_LIST@13..13
-                  1: (empty)
                 2: MD_NEWLINE@13..14
                   0: NEWLINE@13..14 "\n" [] []
                 3: MD_QUOTE_PREFIX@14..16
@@ -165,6 +165,6 @@ MdDocument {
                       0: MINUS@19..20 "-" [] []
         1: MD_NEWLINE@20..21
           0: NEWLINE@20..21 "\n" [] []
-  2: EOF@21..21 "" [] []
+  3: EOF@21..21 "" [] []
 
 ```

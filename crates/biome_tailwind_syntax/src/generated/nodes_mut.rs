@@ -104,11 +104,11 @@ impl CssParenthesizedExpression {
                 .splice_slots(0usize..=0usize, once(Some(element.into()))),
         )
     }
-    pub fn with_expression(self, element: CssComponentValueList) -> Self {
-        Self::unwrap_cast(
-            self.syntax
-                .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
-        )
+    pub fn with_expression(self, element: Option<AnyCssExpression>) -> Self {
+        Self::unwrap_cast(self.syntax.splice_slots(
+            1usize..=1usize,
+            once(element.map(|element| element.into_syntax().into())),
+        ))
     }
     pub fn with_r_paren_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
@@ -180,7 +180,7 @@ impl CssUnaryExpression {
                 .splice_slots(0usize..=0usize, once(Some(element.into()))),
         )
     }
-    pub fn with_argument(self, element: AnyCssValue) -> Self {
+    pub fn with_argument(self, element: AnyCssExpression) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
@@ -313,8 +313,8 @@ impl TwArbitraryVariant {
         )
     }
 }
-impl TwCssVariableValue {
-    pub fn with_l_paren_token(self, element: SyntaxToken) -> Self {
+impl TwArbitraryVariantSegment {
+    pub fn with_l_brack_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(0usize..=0usize, once(Some(element.into()))),
@@ -326,30 +326,56 @@ impl TwCssVariableValue {
                 .splice_slots(1usize..=1usize, once(Some(element.into()))),
         )
     }
-    pub fn with_r_paren_token(self, element: SyntaxToken) -> Self {
+    pub fn with_r_brack_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(2usize..=2usize, once(Some(element.into()))),
         )
     }
 }
-impl TwDataAttribute {
-    pub fn with_data_token(self, element: SyntaxToken) -> Self {
+impl TwCssVariableValue {
+    pub fn with_l_paren_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(0usize..=0usize, once(Some(element.into()))),
         )
     }
-    pub fn with_minus_token(self, element: SyntaxToken) -> Self {
-        Self::unwrap_cast(
-            self.syntax
-                .splice_slots(1usize..=1usize, once(Some(element.into()))),
-        )
+    pub fn with_type_hint(self, element: Option<TwTypeHint>) -> Self {
+        Self::unwrap_cast(self.syntax.splice_slots(
+            1usize..=1usize,
+            once(element.map(|element| element.into_syntax().into())),
+        ))
     }
-    pub fn with_value(self, element: AnyTwDataAttributeValue) -> Self {
+    pub fn with_value(self, element: CssParameterList) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(2usize..=2usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+    pub fn with_r_paren_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(3usize..=3usize, once(Some(element.into()))),
+        )
+    }
+}
+impl TwCssVariableVariantSegment {
+    pub fn with_l_paren_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_value(self, element: CssParameterList) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+    pub fn with_r_paren_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(2usize..=2usize, once(Some(element.into()))),
         )
     }
 }
@@ -360,22 +386,28 @@ impl TwFullCandidate {
                 .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
         )
     }
-    pub fn with_negative_token(self, element: Option<SyntaxToken>) -> Self {
+    pub fn with_legacy_important_token(self, element: Option<SyntaxToken>) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(1usize..=1usize, once(element.map(|element| element.into()))),
         )
     }
+    pub fn with_negative_token(self, element: Option<SyntaxToken>) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(2usize..=2usize, once(element.map(|element| element.into()))),
+        )
+    }
     pub fn with_candidate(self, element: AnyTwCandidate) -> Self {
         Self::unwrap_cast(
             self.syntax
-                .splice_slots(2usize..=2usize, once(Some(element.into_syntax().into()))),
+                .splice_slots(3usize..=3usize, once(Some(element.into_syntax().into()))),
         )
     }
     pub fn with_excl_token(self, element: Option<SyntaxToken>) -> Self {
         Self::unwrap_cast(
             self.syntax
-                .splice_slots(3usize..=3usize, once(element.map(|element| element.into()))),
+                .splice_slots(4usize..=4usize, once(element.map(|element| element.into()))),
         )
     }
 }
@@ -405,26 +437,6 @@ impl TwFunctionalCandidate {
         ))
     }
 }
-impl TwFunctionalVariant {
-    pub fn with_base_token(self, element: SyntaxToken) -> Self {
-        Self::unwrap_cast(
-            self.syntax
-                .splice_slots(0usize..=0usize, once(Some(element.into()))),
-        )
-    }
-    pub fn with_minus_token(self, element: SyntaxToken) -> Self {
-        Self::unwrap_cast(
-            self.syntax
-                .splice_slots(1usize..=1usize, once(Some(element.into()))),
-        )
-    }
-    pub fn with_value(self, element: AnyTwValue) -> Self {
-        Self::unwrap_cast(
-            self.syntax
-                .splice_slots(2usize..=2usize, once(Some(element.into_syntax().into()))),
-        )
-    }
-}
 impl TwModifier {
     pub fn with_slash_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
@@ -440,6 +452,14 @@ impl TwModifier {
     }
 }
 impl TwNamedValue {
+    pub fn with_value_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
+        )
+    }
+}
+impl TwNamedVariantSegment {
     pub fn with_value_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
             self.syntax
@@ -476,16 +496,22 @@ impl TwRoot {
                 .splice_slots(0usize..=0usize, once(element.map(|element| element.into()))),
         )
     }
+    pub fn with_leading_whitespace_token(self, element: Option<SyntaxToken>) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(1usize..=1usize, once(element.map(|element| element.into()))),
+        )
+    }
     pub fn with_candidates(self, element: TwCandidateList) -> Self {
         Self::unwrap_cast(
             self.syntax
-                .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
+                .splice_slots(2usize..=2usize, once(Some(element.into_syntax().into()))),
         )
     }
     pub fn with_eof_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
             self.syntax
-                .splice_slots(2usize..=2usize, once(Some(element.into()))),
+                .splice_slots(3usize..=3usize, once(Some(element.into()))),
         )
     }
 }
@@ -496,12 +522,44 @@ impl TwStaticCandidate {
                 .splice_slots(0usize..=0usize, once(Some(element.into()))),
         )
     }
+    pub fn with_modifier(self, element: Option<AnyTwModifier>) -> Self {
+        Self::unwrap_cast(self.syntax.splice_slots(
+            1usize..=1usize,
+            once(element.map(|element| element.into_syntax().into())),
+        ))
+    }
 }
-impl TwStaticVariant {
-    pub fn with_base_token(self, element: SyntaxToken) -> Self {
+impl TwTypeHint {
+    pub fn with_name_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(0usize..=0usize, once(Some(element.into()))),
         )
+    }
+    pub fn with_colon_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(1usize..=1usize, once(Some(element.into()))),
+        )
+    }
+}
+impl TwVariantExpression {
+    pub fn with_segments(self, element: TwVariantSegmentList) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+    pub fn with_glued_value(self, element: Option<TwArbitraryVariantSegment>) -> Self {
+        Self::unwrap_cast(self.syntax.splice_slots(
+            1usize..=1usize,
+            once(element.map(|element| element.into_syntax().into())),
+        ))
+    }
+    pub fn with_modifier(self, element: Option<AnyTwModifier>) -> Self {
+        Self::unwrap_cast(self.syntax.splice_slots(
+            2usize..=2usize,
+            once(element.map(|element| element.into_syntax().into())),
+        ))
     }
 }

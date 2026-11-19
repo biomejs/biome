@@ -2,6 +2,12 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
+## Command
+
+```shell
+biome lint file1.js
+```
+
 ## `biome.json`
 
 ```json
@@ -50,32 +56,49 @@ biome.json:5:17 deserialize ━━━━━━━━━━━━━━━━━�
   i Known keys:
   
   - recommended
+  - preset
   - noCommonJs
+  - noContinue
   - noDefaultExport
   - noDescendingSpecificity
   - noDoneCallback
   - noEnum
+  - noExcessiveClassesPerFile
+  - noExcessiveLinesPerFile
   - noExportedImports
   - noHeadElement
+  - noHexColors
   - noImplicitBoolean
+  - noIncrementDecrement
   - noInferrableTypes
+  - noInlineStyles
   - noJsxLiterals
   - noMagicNumbers
+  - noMultiAssign
+  - noMultilineString
   - noNamespace
   - noNegationElse
   - noNestedTernary
   - noNonNullAssertion
   - noParameterAssign
   - noParameterProperties
+  - noPlaywrightElementHandle
+  - noPlaywrightEval
+  - noPlaywrightWaitForSelector
   - noProcessEnv
+  - noReactNativeLiteralColors
   - noRestrictedGlobals
   - noRestrictedImports
   - noRestrictedTypes
+  - noRootType
   - noShoutyConstants
   - noSubstr
+  - noTernary
+  - noTopLevelLiterals
   - noUnusedTemplateLiteral
   - noUselessElse
   - noValueAtRule
+  - noVueOptionsApi
   - noYodaExpression
   - useArrayLiterals
   - useAsConstAssertion
@@ -88,14 +111,21 @@ biome.json:5:17 deserialize ━━━━━━━━━━━━━━━━━�
   - useConsistentArrowReturn
   - useConsistentBuiltinInstantiation
   - useConsistentCurlyBraces
+  - useConsistentEnumValueType
+  - useConsistentGraphqlDescriptions
   - useConsistentMemberAccessibility
+  - useConsistentMethodSignatures
   - useConsistentObjectDefinitions
+  - useConsistentTestIt
   - useConsistentTypeDefinitions
   - useConst
   - useDefaultParameterLast
   - useDefaultSwitchClause
   - useDeprecatedReason
+  - useDestructuring
+  - useDomQuerySelector
   - useEnumInitializers
+  - useErrorCause
   - useExplicitLengthCheck
   - useExponentiationOperator
   - useExportType
@@ -103,10 +133,15 @@ biome.json:5:17 deserialize ━━━━━━━━━━━━━━━━━�
   - useFilenamingConvention
   - useForOf
   - useFragmentSyntax
+  - useGlobalThis
   - useGraphqlNamingConvention
   - useGroupedAccessorPairs
   - useImportType
+  - useImportsFirst
+  - useInputName
   - useLiteralEnumMembers
+  - useLoneExecutableDefinition
+  - useNamedCaptureGroup
   - useNamingConvention
   - useNodeAssertStrict
   - useNodejsImportProtocol
@@ -115,16 +150,30 @@ biome.json:5:17 deserialize ━━━━━━━━━━━━━━━━━�
   - useObjectSpread
   - useReactFunctionComponents
   - useReadonlyClassProperties
+  - useReduceTypeParameter
   - useSelfClosingElements
   - useShorthandAssign
   - useShorthandFunctionType
   - useSingleVarDeclarator
+  - useSpreadOverApply
   - useSymbolDescription
   - useTemplate
+  - useTestHooksInOrder
+  - useTestHooksOnTop
+  - useThisInClassMethods
   - useThrowNewError
   - useThrowOnlyError
   - useTrimStartEnd
+  - useUnicodeRegex
   - useUnifiedTypeSignatures
+  - useVarsOnTop
+  - useVueConsistentDefinePropsDeclaration
+  - useVueConsistentVBindStyle
+  - useVueConsistentVOnStyle
+  - useVueDefineMacrosOrder
+  - useVueHyphenatedAttributes
+  - useVueMultiWordComponentNames
+  - useVueNextTickPromise
   
 
 ```

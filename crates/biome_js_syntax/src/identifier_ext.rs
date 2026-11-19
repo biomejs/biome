@@ -8,10 +8,10 @@ use biome_rowan::{
 };
 
 declare_node_union! {
-    pub AnyJsIdentifierUsage = JsReferenceIdentifier | JsIdentifierAssignment | JsxReferenceIdentifier
+    pub AnyJsIdentifierReference = JsReferenceIdentifier | JsIdentifierAssignment | JsxReferenceIdentifier
 }
 
-impl AnyJsIdentifierUsage {
+impl AnyJsIdentifierReference {
     pub fn value_token(&self) -> SyntaxResult<JsSyntaxToken> {
         match self {
             Self::JsReferenceIdentifier(node) => node.value_token(),
@@ -40,7 +40,7 @@ impl AnyJsIdentifierUsage {
     }
 }
 
-pub enum IdentifierUsageKind {
+pub enum IdentifierReferenceKind {
     TypeValue,
     Type,
     Value,
@@ -51,10 +51,9 @@ impl JsLiteralExportName {
     ///
     /// ```
     /// use biome_js_factory::make;
-    /// use biome_rowan::TriviaPieceKind;
     ///
     /// let export_name = make::js_literal_export_name(make::js_string_literal("foo")
-    ///     .with_leading_trivia(vec![(TriviaPieceKind::Whitespace, " ")]));
+    ///     .with_leading_space());
     /// assert_eq!(export_name.inner_string_text().unwrap().text(), "foo");
     /// ```
     pub fn inner_string_text(&self) -> SyntaxResult<TokenText> {

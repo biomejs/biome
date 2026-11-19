@@ -1,0 +1,58 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/embeds/disabled/embeds.md
+---
+
+# Input
+
+```md
+---
+title:    Biome
+---
+
+#   Embeds
+
+```js
+const   value   =   {a:1,b:2}
+```
+
+```js
+function () {}
+```
+
+```
+
+
+# Options
+
+```json
+{
+  "markdown": {
+    "parser": {
+      "frontmatter": true
+    },
+    "formatter": {
+      "formatEmbeds": false
+    }
+  }
+}
+```
+
+# Formatted
+
+```md
+---
+title:    Biome
+---
+
+# Embeds
+
+```js
+const   value   =   {a:1,b:2}
+```
+
+```js
+function () {}
+```
+
+```

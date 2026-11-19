@@ -17,6 +17,7 @@ foo<br>bar
 HtmlRoot {
     bom_token: missing (optional),
     frontmatter: missing (optional),
+    processing_instruction: missing (optional),
     directive: missing (optional),
     html: HtmlElementList [
         HtmlContent {
@@ -25,7 +26,7 @@ HtmlRoot {
         HtmlSelfClosingElement {
             l_angle_token: L_ANGLE@3..4 "<" [] [],
             name: HtmlTagName {
-                value_token: HTML_LITERAL@4..6 "br" [] [],
+                value_token: BR_KW@4..6 "br" [] [],
             },
             attributes: HtmlAttributeList [],
             slash_token: missing (optional),
@@ -46,18 +47,19 @@ HtmlRoot {
   0: (empty)
   1: (empty)
   2: (empty)
-  3: HTML_ELEMENT_LIST@0..10
+  3: (empty)
+  4: HTML_ELEMENT_LIST@0..10
     0: HTML_CONTENT@0..3
       0: HTML_LITERAL@0..3 "foo" [] []
     1: HTML_SELF_CLOSING_ELEMENT@3..7
       0: L_ANGLE@3..4 "<" [] []
       1: HTML_TAG_NAME@4..6
-        0: HTML_LITERAL@4..6 "br" [] []
+        0: BR_KW@4..6 "br" [] []
       2: HTML_ATTRIBUTE_LIST@6..6
       3: (empty)
       4: R_ANGLE@6..7 ">" [] []
     2: HTML_CONTENT@7..10
       0: HTML_LITERAL@7..10 "bar" [] []
-  4: EOF@10..11 "" [Newline("\n")] []
+  5: EOF@10..11 "" [Newline("\n")] []
 
 ```

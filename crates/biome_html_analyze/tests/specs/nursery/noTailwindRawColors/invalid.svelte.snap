@@ -1,0 +1,200 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.svelte
+---
+# Input
+```svelte
+<!-- should generate diagnostics -->
+<div class="bg-pink-500"></div>
+<div class='hover:text-white/80 dark:border-slate-950'></div>
+<div CLASS="ring-offset-black"></div>
+<div title="é" class="
+  [&:nth-child(2)]:border-t-red-500/50!"></div>
+<div class="from-blue-500 via-cyan-500 to-teal-500"></div>
+<svg class="fill-white stroke-red-500"></svg>
+<custom-card class="bg-pink-500"></custom-card>
+
+```
+
+# Diagnostics
+```
+invalid.svelte:2:13 lint/nursery/noTailwindRawColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind CSS class uses a raw palette color.
+  
+    1 │ <!-- should generate diagnostics -->
+  > 2 │ <div class="bg-pink-500"></div>
+      │             ^^^^^^^^^^^
+    3 │ <div class='hover:text-white/80 dark:border-slate-950'></div>
+    4 │ <div CLASS="ring-offset-black"></div>
+  
+  i Raw palette colors couple components to specific colors, making design-system changes harder.
+  
+  i Use a color from your design system. Check your Tailwind config for the available colors.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:3:38 lint/nursery/noTailwindRawColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind CSS class uses a raw palette color.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <div class="bg-pink-500"></div>
+  > 3 │ <div class='hover:text-white/80 dark:border-slate-950'></div>
+      │                                      ^^^^^^^^^^^^^^^^
+    4 │ <div CLASS="ring-offset-black"></div>
+    5 │ <div title="é" class="
+  
+  i Raw palette colors couple components to specific colors, making design-system changes harder.
+  
+  i Use a color from your design system. Check your Tailwind config for the available colors.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:6:20 lint/nursery/noTailwindRawColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind CSS class uses a raw palette color.
+  
+    4 │ <div CLASS="ring-offset-black"></div>
+    5 │ <div title="é" class="
+  > 6 │   [&:nth-child(2)]:border-t-red-500/50!"></div>
+      │                    ^^^^^^^^^^^^^^^^^^^
+    7 │ <div class="from-blue-500 via-cyan-500 to-teal-500"></div>
+    8 │ <svg class="fill-white stroke-red-500"></svg>
+  
+  i Raw palette colors couple components to specific colors, making design-system changes harder.
+  
+  i Use a color from your design system. Check your Tailwind config for the available colors.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:7:13 lint/nursery/noTailwindRawColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind CSS class uses a raw palette color.
+  
+    5 │ <div title="é" class="
+    6 │   [&:nth-child(2)]:border-t-red-500/50!"></div>
+  > 7 │ <div class="from-blue-500 via-cyan-500 to-teal-500"></div>
+      │             ^^^^^^^^^^^^^
+    8 │ <svg class="fill-white stroke-red-500"></svg>
+    9 │ <custom-card class="bg-pink-500"></custom-card>
+  
+  i Raw palette colors couple components to specific colors, making design-system changes harder.
+  
+  i Use a color from your design system. Check your Tailwind config for the available colors.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:7:27 lint/nursery/noTailwindRawColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind CSS class uses a raw palette color.
+  
+    5 │ <div title="é" class="
+    6 │   [&:nth-child(2)]:border-t-red-500/50!"></div>
+  > 7 │ <div class="from-blue-500 via-cyan-500 to-teal-500"></div>
+      │                           ^^^^^^^^^^^^
+    8 │ <svg class="fill-white stroke-red-500"></svg>
+    9 │ <custom-card class="bg-pink-500"></custom-card>
+  
+  i Raw palette colors couple components to specific colors, making design-system changes harder.
+  
+  i Use a color from your design system. Check your Tailwind config for the available colors.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:7:40 lint/nursery/noTailwindRawColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind CSS class uses a raw palette color.
+  
+    5 │ <div title="é" class="
+    6 │   [&:nth-child(2)]:border-t-red-500/50!"></div>
+  > 7 │ <div class="from-blue-500 via-cyan-500 to-teal-500"></div>
+      │                                        ^^^^^^^^^^^
+    8 │ <svg class="fill-white stroke-red-500"></svg>
+    9 │ <custom-card class="bg-pink-500"></custom-card>
+  
+  i Raw palette colors couple components to specific colors, making design-system changes harder.
+  
+  i Use a color from your design system. Check your Tailwind config for the available colors.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:8:24 lint/nursery/noTailwindRawColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind CSS class uses a raw palette color.
+  
+     6 │   [&:nth-child(2)]:border-t-red-500/50!"></div>
+     7 │ <div class="from-blue-500 via-cyan-500 to-teal-500"></div>
+   > 8 │ <svg class="fill-white stroke-red-500"></svg>
+       │                        ^^^^^^^^^^^^^^
+     9 │ <custom-card class="bg-pink-500"></custom-card>
+    10 │ 
+  
+  i Raw palette colors couple components to specific colors, making design-system changes harder.
+  
+  i Use a color from your design system. Check your Tailwind config for the available colors.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:9:21 lint/nursery/noTailwindRawColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind CSS class uses a raw palette color.
+  
+     7 │ <div class="from-blue-500 via-cyan-500 to-teal-500"></div>
+     8 │ <svg class="fill-white stroke-red-500"></svg>
+   > 9 │ <custom-card class="bg-pink-500"></custom-card>
+       │                     ^^^^^^^^^^^
+    10 │ 
+  
+  i Raw palette colors couple components to specific colors, making design-system changes harder.
+  
+  i Use a color from your design system. Check your Tailwind config for the available colors.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

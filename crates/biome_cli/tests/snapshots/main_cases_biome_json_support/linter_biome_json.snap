@@ -2,13 +2,19 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
+## Command
+
+```shell
+biome lint --write fix.js
+```
+
 ## `biome.json`
 
 ```json
 {
   "linter": {
     "rules": {
-      "recommended": true,
+      "preset": "recommended",
       "suspicious": {
         "noDebugger": "off"
       }

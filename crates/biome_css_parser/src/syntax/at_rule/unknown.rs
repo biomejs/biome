@@ -1,21 +1,24 @@
+use crate::lexer::CssLexContext;
 use crate::parser::CssParser;
 use crate::syntax::block::parse_declaration_or_rule_list_block;
 use crate::syntax::scss::{
-    is_at_scss_interpolation, parse_scss_interpolation_or_identifier,
-    parse_scss_regular_interpolation,
+    expect_scss_semicolon_at_rule, is_at_scss_interpolated_name_with_suffixes,
+    is_at_scss_interpolated_string, is_at_scss_interpolation,
+    parse_scss_interpolated_name_with_suffixes, parse_scss_interpolated_string,
+    parse_scss_interpolated_url_value, parse_scss_regular_interpolation,
 };
+use crate::syntax::value::function::is_nth_at_adjacent_l_paren;
 use crate::syntax::{CssSyntaxFeatures, is_at_identifier, parse_regular_identifier};
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::T;
-use biome_parser::CompletedMarker;
-use biome_parser::ParserProgress;
 use biome_parser::parsed_syntax::ParsedSyntax::Present;
 use biome_parser::prelude::ParsedSyntax::Absent;
 use biome_parser::prelude::*;
+use biome_parser::{CompletedMarker, Marker, ParserProgress};
 
 #[inline]
 pub(crate) fn is_at_unknown_at_rule(p: &mut CssParser) -> bool {
-    is_at_identifier(p) || CssSyntaxFeatures::Scss.is_supported(p) && is_at_scss_interpolation(p)
+    is_at_identifier(p)
 }
 
 /// Parses an unknown CSS at-rule, including Sass plain-CSS passthroughs.
@@ -37,27 +40,62 @@ pub(crate) fn parse_unknown_at_rule(p: &mut CssParser) -> ParsedSyntax {
     let m = p.start();
 
     // Guarded by `is_at_unknown_at_rule`.
-    parse_unknown_at_rule_name(p).ok();
+    parse_regular_identifier(p).ok();
     parse_unknown_at_rule_components(p);
 
+    complete_unknown_at_rule(p, m)
+}
+
+/// Returns whether an at-rule name starts with interpolation or continues into it.
+///
+/// ```scss
+/// @key#{$suffix} fade {}
+/// @#{$name} token;
+/// ```
+#[inline]
+pub(crate) fn is_at_scss_interpolated_unknown_at_rule(p: &mut CssParser) -> bool {
+    is_at_scss_interpolated_name_with_suffixes(p)
+}
+
+/// Keeps adjacent name fragments separate from an unknown SCSS at-rule's prelude.
+///
+/// Example:
+/// ```scss
+/// @#{$rule-name} #{$value};
+/// @custom-#{$name}-suffix token;
+/// ```
+///
+/// Docs: https://sass-lang.com/documentation/at-rules/css/
+#[inline]
+pub(crate) fn parse_scss_interpolated_unknown_at_rule(p: &mut CssParser) -> ParsedSyntax {
+    if !is_at_scss_interpolated_unknown_at_rule(p) {
+        return Absent;
+    }
+
+    let m = p.start();
+
+    // Guarded by `is_at_scss_interpolated_unknown_at_rule`.
+    parse_scss_interpolated_name_with_suffixes(p).ok();
+    parse_scss_unknown_at_rule_components(p);
+
+    complete_unknown_at_rule(p, m)
+}
+
+#[inline]
+fn complete_unknown_at_rule(p: &mut CssParser, m: Marker) -> ParsedSyntax {
     let kind = if p.at(T!['{']) {
         parse_declaration_or_rule_list_block(p);
         CSS_UNKNOWN_BLOCK_AT_RULE
     } else {
-        p.expect(T![;]);
+        if CssSyntaxFeatures::Scss.is_supported(p) {
+            expect_scss_semicolon_at_rule(p);
+        } else {
+            p.expect(T![;]);
+        }
         CSS_UNKNOWN_VALUE_AT_RULE
     };
 
     Present(m.complete(p, kind))
-}
-
-#[inline]
-fn parse_unknown_at_rule_name(p: &mut CssParser) -> ParsedSyntax {
-    if CssSyntaxFeatures::Scss.is_supported(p) {
-        parse_scss_interpolation_or_identifier(p)
-    } else {
-        parse_regular_identifier(p)
-    }
 }
 
 /// Parses the generic at-rule prelude before `;` or a top-level block.
@@ -66,23 +104,78 @@ fn parse_unknown_at_rule_name(p: &mut CssParser) -> ParsedSyntax {
 /// body balanced while the final `{` starts the at-rule block.
 #[inline]
 fn parse_unknown_at_rule_components(p: &mut CssParser) -> CompletedMarker {
+    parse_unknown_at_rule_components_with(p, consume_unknown_at_rule_component)
+}
+
+#[inline]
+fn parse_scss_unknown_at_rule_components(p: &mut CssParser) -> CompletedMarker {
+    parse_unknown_at_rule_components_with(p, consume_scss_unknown_at_rule_component)
+}
+
+#[inline]
+fn parse_unknown_at_rule_components_with(
+    p: &mut CssParser,
+    mut parse_component: impl FnMut(&mut CssParser) -> bool,
+) -> CompletedMarker {
     let m = p.start();
     let mut progress = ParserProgress::default();
     let mut balance = UnknownAtRuleComponentBalance::default();
 
     while !balance.is_at_end(p) {
         progress.assert_progressing(p);
-
-        if CssSyntaxFeatures::Scss.is_supported(p) && is_at_scss_interpolation(p) {
-            // `@unknown #{$value};`: keep interpolation structured inside the
-            // otherwise token-shaped generic prelude.
-            parse_scss_regular_interpolation(p).ok();
-        } else {
+        if !parse_component(p) {
             balance.bump(p);
         }
     }
 
     m.complete(p, CSS_UNKNOWN_AT_RULE_COMPONENT_LIST)
+}
+
+#[inline]
+fn consume_unknown_at_rule_component(p: &mut CssParser) -> bool {
+    if CssSyntaxFeatures::Scss.is_supported(p) {
+        consume_scss_unknown_at_rule_component(p)
+    } else {
+        false
+    }
+}
+
+/// Consumes embedded SCSS without exposing its delimiters to the prelude loop.
+///
+/// ```scss
+/// @foo "before #{"inner"} after";
+/// @foo #{";{}()"};
+/// ```
+#[inline]
+fn consume_scss_unknown_at_rule_component(p: &mut CssParser) -> bool {
+    if is_at_scss_interpolated_string(p) {
+        parse_scss_interpolated_string(p, CssLexContext::Regular).ok();
+        true
+    } else if is_at_scss_interpolation(p) {
+        parse_scss_regular_interpolation(p).ok();
+        true
+    } else {
+        consume_scss_unknown_at_rule_url(p)
+    }
+}
+
+/// Keeps `//` inside `@foo url(https://#{$host}/);` out of comment trivia.
+/// Other URL bodies remain in the enclosing raw prelude loop.
+#[inline]
+fn consume_scss_unknown_at_rule_url(p: &mut CssParser) -> bool {
+    if !p.at(T![url]) || !is_nth_at_adjacent_l_paren(p, 1) {
+        return false;
+    }
+
+    p.bump(T![url]);
+    let context = p.source().url_body_lex_context(true);
+    if matches!(context, CssLexContext::ScssUrlValue { .. }) {
+        p.bump_with_context(T!['('], context);
+        parse_scss_interpolated_url_value(p, context).ok();
+        p.expect(T![')']);
+    }
+
+    true
 }
 
 /// Tracks nested delimiters inside an unknown at-rule prelude.

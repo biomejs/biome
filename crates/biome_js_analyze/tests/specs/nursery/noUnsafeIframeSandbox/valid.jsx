@@ -1,0 +1,16 @@
+/* should not generate diagnostics */
+const Valid1 = () => (
+	<>
+		<a sandbox="allow-scripts allow-same-origin" />
+		<iframe sandbox="" />
+		<iframe sandbox={null} />
+		<iframe sandbox={undefined} />
+		<iframe sandbox={sandboxValue} />
+		<iframe sandbox="allow-downloads" />
+		<iframe sandbox="allow-scripts" />
+		<iframe sandbox="allow-same-origin" />
+		<iframe sandbox="allow-downloads allow-scripts" />
+		<iframe sandbox="allow-downloads allow-same-origin" />
+		<iframe sandbox="allow-downloads allow-scripts allow-forms" />
+	</>
+);

@@ -1,0 +1,44 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/value/parity-attr-variable-names.scss
+---
+
+# Input
+
+```scss
+$name: data-title; $gap:2px; $ns:card;
+.label::before{content:attr(  $name  );}
+.typed{width:attr($name  px ,$gap  *2);height:attr($name type(<length>),2px);}
+.controls{width:attr( #{$name} px,2px);content:attr(#{$ns}-label);}
+.comments{content:attr(/* before */ $name /* after */);width:attr($name/* type */ px/* comma */,/* fallback */ $gap*2/* close */);}
+
+```
+
+
+# Formatted
+
+```scss
+$name: data-title;
+$gap: 2px;
+$ns: card;
+.label::before {
+	content: attr($name);
+}
+.typed {
+	width: attr($name px, $gap * 2);
+	height: attr($name type(<length>), 2px);
+}
+.controls {
+	width: attr(#{$name} px, 2px);
+	content: attr(#{$ns}-label);
+}
+.comments {
+	content: attr(/* before */ $name /* after */);
+	width: attr(
+		$name /* type */
+		px /* comma */,
+		/* fallback */ $gap * 2 /* close */
+	);
+}
+
+```

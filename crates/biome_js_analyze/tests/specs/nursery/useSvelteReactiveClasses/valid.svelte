@@ -1,0 +1,89 @@
+<!-- should not generate diagnostics -->
+<script>
+	import { SvelteMap, SvelteSet, SvelteDate, SvelteURL, SvelteURLSearchParams } from "svelte/reactivity";
+	import { Map as OtherMap } from "package";
+
+	const date = new Date(8.64e15);
+	date.getTime();
+	date.toISOString();
+
+	const map = new Map([[1, "one"]]);
+	console.log(Map.groupBy([1], () => "group"));
+	map.get(1);
+	map.has(1);
+	map.forEach((value) => console.log(value));
+	map.size;
+
+	const set = new Set([1, 2]);
+	set.has(1);
+	set.keys();
+
+	const url = new URL("https://svelte.dev/");
+	console.log(url.port, url.href);
+	const port = url.port;
+
+	const params = new URLSearchParams("foo=1&bar=2");
+	params.entries();
+	params.get("foo");
+
+	const reactiveDate = new SvelteDate();
+	reactiveDate.setMonth(1);
+	const reactiveMap = new SvelteMap();
+	reactiveMap.set(1, "one");
+	const reactiveSet = new SvelteSet();
+	reactiveSet.add(1);
+	const reactiveUrl = new SvelteURL("https://svelte.dev/");
+	reactiveUrl.port = "80";
+	const reactiveParams = new SvelteURLSearchParams();
+	reactiveParams.append("foo", "1");
+
+	// Mutations of other objects
+	const other = new Map();
+	unrelated.set(1, "one");
+	other.set;
+	other.get(1).set(2);
+
+	// The instance is replaced, not mutated
+	let replaced = $state(new Map());
+	replaced = new Map([...replaced, [1, "one"]]);
+
+	// Arguments of other calls are not followed
+	const passed = new Set();
+	consume(passed).add(1);
+	const copy = new Set(passed);
+
+	// Temporary instances
+	new Map().set(1, "one");
+	const midnight = new Date(new Date().setHours(0, 0, 0, 0));
+	function nextPage(page) {
+		const url = new URL(page.url);
+		url.pathname = page.url.pathname;
+		url.searchParams.set("p", "2");
+		return url.toString();
+	}
+	function unique(items) {
+		const seen = new Set();
+		items.forEach((item) => seen.add(item));
+		return [...seen];
+	}
+	const derived = $derived.by(() => {
+		const counts = new Map();
+		counts.set("a", 1);
+		return counts;
+	});
+	class Local {
+		method() {
+			const params = new URLSearchParams();
+			params.append("a", "1");
+		}
+		get date() {
+			const date = new Date();
+			date.setFullYear(2000);
+			return date;
+		}
+	}
+
+	// Classes that are not the built-in ones
+	const shadowed = new OtherMap();
+	shadowed.set(1, "one");
+</script>

@@ -1,0 +1,9 @@
+@media   (a)   and   #{"(b) and (c)"}{x{y:z}}
+
+@media   (a)   or   #{"(b) or (c)"}{x{y:z}}
+
+@media   a   and   not   #{"(b)"}{x{y:z}}
+
+@media   #{a}   and   not   (b){x{y:z}}
+
+@media   not   #{"(a)"}{x{y:z}}

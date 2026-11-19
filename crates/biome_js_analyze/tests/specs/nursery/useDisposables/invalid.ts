@@ -46,3 +46,15 @@ class AsyncDisposableClass implements AsyncDisposable {
 }
 
 const asyncDisposableInstance = new AsyncDisposableClass();
+
+const valueReturningDisposable = {
+  [Symbol.dispose]() {
+    return 1;
+  }
+};
+
+const promiseLikeDisposable = {
+  [Symbol.asyncDispose](): PromiseLike<void> {
+    return Promise.resolve();
+  }
+};

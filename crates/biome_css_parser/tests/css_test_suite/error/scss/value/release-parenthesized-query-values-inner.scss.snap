@@ -1,0 +1,238 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+@media (max-width: ((1px) {.card {color:red}} .after-inner {width:1px}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        CssAtRule {
+            at_token: AT@0..1 "@" [] [],
+            rule: CssMediaAtRule {
+                declarator: CssMediaAtRuleDeclarator {
+                    media_token: MEDIA_KW@1..7 "media" [] [Whitespace(" ")],
+                    queries: CssMediaQueryList [
+                        CssBogusMediaQuery {
+                            items: [
+                                CssBogus {
+                                    items: [
+                                        L_PAREN@7..8 "(" [] [],
+                                        CssBogus {
+                                            items: [
+                                                CssIdentifier {
+                                                    value_token: IDENT@8..17 "max-width" [] [],
+                                                },
+                                                COLON@17..19 ":" [] [Whitespace(" ")],
+                                                CssBogus {
+                                                    items: [
+                                                        CssBogus {
+                                                            items: [
+                                                                CssBogus {
+                                                                    items: [
+                                                                        L_PAREN@19..20 "(" [] [],
+                                                                        CssBogus {
+                                                                            items: [
+                                                                                CssBogus {
+                                                                                    items: [
+                                                                                        CssBogus {
+                                                                                            items: [
+                                                                                                CssBogus {
+                                                                                                    items: [
+                                                                                                        ScssParenthesizedExpression {
+                                                                                                            l_paren_token: L_PAREN@20..21 "(" [] [],
+                                                                                                            expression: ScssExpression {
+                                                                                                                items: ScssExpressionItemList [
+                                                                                                                    CssRegularDimension {
+                                                                                                                        value_token: CSS_NUMBER_LITERAL@21..22 "1" [] [],
+                                                                                                                        unit_token: IDENT@22..24 "px" [] [],
+                                                                                                                    },
+                                                                                                                ],
+                                                                                                            },
+                                                                                                            r_paren_token: R_PAREN@24..26 ")" [] [Whitespace(" ")],
+                                                                                                        },
+                                                                                                        CssBogusPropertyValue {
+                                                                                                            items: [
+                                                                                                                L_CURLY@26..27 "{" [] [],
+                                                                                                                DOT@27..28 "." [] [],
+                                                                                                                IDENT@28..33 "card" [] [Whitespace(" ")],
+                                                                                                                L_CURLY@33..34 "{" [] [],
+                                                                                                                IDENT@34..39 "color" [] [],
+                                                                                                            ],
+                                                                                                        },
+                                                                                                    ],
+                                                                                                },
+                                                                                            ],
+                                                                                        },
+                                                                                        COLON@39..40 ":" [] [],
+                                                                                        CssBogus {
+                                                                                            items: [
+                                                                                                CssBogus {
+                                                                                                    items: [
+                                                                                                        CssIdentifier {
+                                                                                                            value_token: IDENT@40..43 "red" [] [],
+                                                                                                        },
+                                                                                                        CssBogusPropertyValue {
+                                                                                                            items: [
+                                                                                                                R_CURLY@43..44 "}" [] [],
+                                                                                                                R_CURLY@44..46 "}" [] [Whitespace(" ")],
+                                                                                                                DOT@46..47 "." [] [],
+                                                                                                                IDENT@47..59 "after-inner" [] [Whitespace(" ")],
+                                                                                                                L_CURLY@59..60 "{" [] [],
+                                                                                                                IDENT@60..65 "width" [] [],
+                                                                                                                COLON@65..66 ":" [] [],
+                                                                                                                CSS_DIMENSION_VALUE@66..67 "1" [] [],
+                                                                                                                PX_KW@67..69 "px" [] [],
+                                                                                                                R_CURLY@69..70 "}" [] [],
+                                                                                                            ],
+                                                                                                        },
+                                                                                                    ],
+                                                                                                },
+                                                                                            ],
+                                                                                        },
+                                                                                    ],
+                                                                                },
+                                                                            ],
+                                                                        },
+                                                                    ],
+                                                                },
+                                                            ],
+                                                        },
+                                                    ],
+                                                },
+                                            ],
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                    ],
+                },
+                block: CssBogusBlock {
+                    items: [],
+                },
+            },
+        },
+    ],
+    eof_token: EOF@70..71 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..71
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..70
+    0: CSS_AT_RULE@0..70
+      0: AT@0..1 "@" [] []
+      1: CSS_MEDIA_AT_RULE@1..70
+        0: CSS_MEDIA_AT_RULE_DECLARATOR@1..70
+          0: MEDIA_KW@1..7 "media" [] [Whitespace(" ")]
+          1: CSS_MEDIA_QUERY_LIST@7..70
+            0: CSS_BOGUS_MEDIA_QUERY@7..70
+              0: CSS_BOGUS@7..70
+                0: L_PAREN@7..8 "(" [] []
+                1: CSS_BOGUS@8..70
+                  0: CSS_IDENTIFIER@8..17
+                    0: IDENT@8..17 "max-width" [] []
+                  1: COLON@17..19 ":" [] [Whitespace(" ")]
+                  2: CSS_BOGUS@19..70
+                    0: CSS_BOGUS@19..70
+                      0: CSS_BOGUS@19..70
+                        0: L_PAREN@19..20 "(" [] []
+                        1: CSS_BOGUS@20..70
+                          0: CSS_BOGUS@20..70
+                            0: CSS_BOGUS@20..39
+                              0: CSS_BOGUS@20..39
+                                0: SCSS_PARENTHESIZED_EXPRESSION@20..26
+                                  0: L_PAREN@20..21 "(" [] []
+                                  1: SCSS_EXPRESSION@21..24
+                                    0: SCSS_EXPRESSION_ITEM_LIST@21..24
+                                      0: CSS_REGULAR_DIMENSION@21..24
+                                        0: CSS_NUMBER_LITERAL@21..22 "1" [] []
+                                        1: IDENT@22..24 "px" [] []
+                                  2: R_PAREN@24..26 ")" [] [Whitespace(" ")]
+                                1: CSS_BOGUS_PROPERTY_VALUE@26..39
+                                  0: L_CURLY@26..27 "{" [] []
+                                  1: DOT@27..28 "." [] []
+                                  2: IDENT@28..33 "card" [] [Whitespace(" ")]
+                                  3: L_CURLY@33..34 "{" [] []
+                                  4: IDENT@34..39 "color" [] []
+                            1: COLON@39..40 ":" [] []
+                            2: CSS_BOGUS@40..70
+                              0: CSS_BOGUS@40..70
+                                0: CSS_IDENTIFIER@40..43
+                                  0: IDENT@40..43 "red" [] []
+                                1: CSS_BOGUS_PROPERTY_VALUE@43..70
+                                  0: R_CURLY@43..44 "}" [] []
+                                  1: R_CURLY@44..46 "}" [] [Whitespace(" ")]
+                                  2: DOT@46..47 "." [] []
+                                  3: IDENT@47..59 "after-inner" [] [Whitespace(" ")]
+                                  4: L_CURLY@59..60 "{" [] []
+                                  5: IDENT@60..65 "width" [] []
+                                  6: COLON@65..66 ":" [] []
+                                  7: CSS_DIMENSION_VALUE@66..67 "1" [] []
+                                  8: PX_KW@67..69 "px" [] []
+                                  9: R_CURLY@69..70 "}" [] []
+        1: CSS_BOGUS_BLOCK@70..70
+  2: EOF@70..71 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+release-parenthesized-query-values-inner.scss:1:27 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a SCSS expression but instead found '{.card {color'.
+  
+  > 1 │ @media (max-width: ((1px) {.card {color:red}} .after-inner {width:1px}
+      │                           ^^^^^^^^^^^^^
+    2 │ 
+  
+  i Expected a SCSS expression here.
+  
+  > 1 │ @media (max-width: ((1px) {.card {color:red}} .after-inner {width:1px}
+      │                           ^^^^^^^^^^^^^
+    2 │ 
+  
+release-parenthesized-query-values-inner.scss:1:44 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a SCSS expression but instead found '}} .after-inner {width:1px}'.
+  
+  > 1 │ @media (max-width: ((1px) {.card {color:red}} .after-inner {width:1px}
+      │                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ 
+  
+  i Expected a SCSS expression here.
+  
+  > 1 │ @media (max-width: ((1px) {.card {color:red}} .after-inner {width:1px}
+      │                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ 
+  
+release-parenthesized-query-values-inner.scss:2:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `)` but instead the file ends
+  
+    1 │ @media (max-width: ((1px) {.card {color:red}} .after-inner {width:1px}
+  > 2 │ 
+      │ 
+  
+  i the file ends here
+  
+    1 │ @media (max-width: ((1px) {.card {color:red}} .after-inner {width:1px}
+  > 2 │ 
+      │ 
+  
+```

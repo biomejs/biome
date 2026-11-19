@@ -1,0 +1,139 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/expression/single-element-list.scss
+---
+
+# Input
+
+```scss
+@use "sass:list";
+@use "sass:meta";
+@use "theme" with ($items:(1px 2px,));
+
+$single:(  1px   2px , );
+$scalar:( 1px ,);
+$bare:1px   2px,;
+$nested:((1px,2px),);
+$bracketed:[1px   2px,];
+$empty-item:((),);
+$grouped:(1px   2px);
+$multiple:(1px,2px,);
+$empty:();
+$map:(items:(1px 2px,), (1px 2px,):group);
+$before:(1px 2px /* before comma */ ,);
+$after:(1px 2px, /* after comma */ );
+$line-before:(1px 2px // before comma
+,);
+$line-after:(1px 2px, // after comma
+);
+$long:(first-very-long-list-item second-very-long-list-item third-very-long-list-item fourth-very-long-list-item,);
+
+// biome-ignore format: keep the original layout
+$suppressed:( 1px   2px , );
+
+@function echo($value){@return $value;}
+@mixin report($value){count:list.length($value);separator:list.separator($value);}
+
+.a{
+z-index:list.length($single);
+content:"#{list.separator($single)}";
+scalar:list.length($scalar);
+bare:list.length($bare);
+nested:meta.inspect($nested);
+bracketed:list.length($bracketed);
+empty-item:list.length($empty-item);
+map:meta.inspect($map);
+call:list.length(echo((1px 2px,)));
+module:list.length(theme.$items);
+@include report((1px 2px,));
+@include report($value:(1px 2px,));
+@include report($value:(1px 2px, /* final item */));
+}
+
+@each $item in (1px 2px,){.item{value:$item;}}
+
+```
+
+
+# Formatted
+
+```scss
+@use "sass:list";
+@use "sass:meta";
+@use "theme" with (
+	$items: (
+		1px 2px,
+	)
+);
+
+$single: (1px 2px,);
+$scalar: (1px,);
+$bare: 1px 2px,;
+$nested: ((1px, 2px),);
+$bracketed: [1px 2px,];
+$empty-item: ((),);
+$grouped: (1px 2px);
+$multiple: (1px, 2px);
+$empty: ();
+$map: (
+	items: (
+		1px 2px,
+	),
+	(1px 2px,): group,
+);
+$before: (1px 2px /* before comma */,);
+$after: (1px 2px, /* after comma */);
+$line-before: (
+	1px 2px, // before comma
+);
+$line-after: (
+	1px 2px, // after comma
+);
+$long: (
+	first-very-long-list-item second-very-long-list-item third-very-long-list-item
+		fourth-very-long-list-item,
+);
+
+// biome-ignore format: keep the original layout
+$suppressed:( 1px   2px , );
+
+@function echo($value) {
+	@return $value;
+}
+@mixin report($value) {
+	count: list.length($value);
+	separator: list.separator($value);
+}
+
+.a {
+	z-index: list.length($single);
+	content: "#{list.separator($single)}";
+	scalar: list.length($scalar);
+	bare: list.length($bare);
+	nested: meta.inspect($nested);
+	bracketed: list.length($bracketed);
+	empty-item: list.length($empty-item);
+	map: meta.inspect($map);
+	call: list.length(echo((1px 2px,)));
+	module: list.length(theme.$items);
+	@include report((1px 2px,));
+	@include report(
+		$value: (
+			1px 2px,
+		)
+	);
+	@include report(
+		$value: (
+			1px 2px,
+			/* final item */
+		)
+	);
+}
+
+@each $item in (1px 2px,) {
+	.item {
+		value: $item;
+	}
+}
+
+```

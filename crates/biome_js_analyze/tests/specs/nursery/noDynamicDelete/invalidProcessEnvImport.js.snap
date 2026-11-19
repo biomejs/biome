@@ -1,0 +1,33 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidProcessEnvImport.js
+---
+# Input
+```js
+/* should generate diagnostics */
+import process from "node:process";
+
+const name = "FOO";
+delete process.env[name];
+
+```
+
+# Diagnostics
+```
+invalidProcessEnvImport.js:5:20 lint/nursery/noDynamicDelete ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid using delete with an environment variable name that is computed at runtime.
+  
+    4 │ const name = "FOO";
+  > 5 │ delete process.env[name];
+      │                    ^^^^
+    6 │ 
+  
+  i Removing environment variables by a changing name makes it hard to tell which variables get removed.
+  
+  i Delete each environment variable by its name instead, for example delete process.env.API_KEY.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

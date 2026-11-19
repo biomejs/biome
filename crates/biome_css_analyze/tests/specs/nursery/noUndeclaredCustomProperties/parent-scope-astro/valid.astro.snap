@@ -1,0 +1,23 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: valid.astro
+---
+# Input
+```astro
+---
+import Child from "./invalid.astro";
+import "./global.css";
+---
+<!-- should not generate diagnostics -->
+
+<style is:global>
+:root { --global-color: green; }
+</style>
+<style>
+:root { --local-color: red; }
+:global(:root) { --selector-global-color: blue; }
+</style>
+
+<Child />
+
+```

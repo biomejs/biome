@@ -293,57 +293,39 @@ pub trait Lexer<'src> {
         }
     }
 
-    /// Check if the lexer starts a grit metavariable
-    fn is_metavariable_start(&mut self) -> bool {
-        let current_char = self.current_char_unchecked();
-        if current_char == 'µ' {
-            let current_char_length = current_char.len_utf8();
-            // µ[a-zA-Z_][a-zA-Z0-9_]*
-            if matches!(
-                self.byte_at(current_char_length),
-                Some(b'a'..=b'z' | b'A'..=b'Z' | b'_')
-            ) {
-                return true;
-            }
-
-            // µ...
-            if self.byte_at(current_char_length) == Some(b'.')
-                && self.byte_at(current_char_length + 1) == Some(b'.')
-                && self.byte_at(current_char_length + 2) == Some(b'.')
-            {
-                return true;
-            }
-        }
-        false
+    /// Returns the ranges of the Grit metavariables in the source, sorted by
+    /// their start.
+    fn metavariable_ranges(&self) -> &[TextRange] {
+        &[]
     }
 
-    /// Consume a grit metavariable(µ\[a-zA-Z_]\[a-zA-Z0-9_]*|µ...)
-    /// <https://github.com/getgrit/gritql/blob/8f3f077d078ccaf0618510bba904a06309c2435e/resources/language-metavariables/tree-sitter-css/grammar.js#L388>
+    /// Check if a Grit metavariable starts at the current position.
+    #[inline]
+    fn is_metavariable_start(&self) -> bool {
+        let ranges = self.metavariable_ranges();
+        !ranges.is_empty() && metavariable_end(ranges, self.position()).is_some()
+    }
+
+    /// Consume the Grit metavariable that starts at the current position.
     fn consume_metavariable<T>(&mut self, kind: T) -> T {
         debug_assert!(self.is_metavariable_start());
 
-        // SAFETY: We know the current character is µ.
-        let current_char = self.current_char_unchecked();
-        self.advance(current_char.len_utf8());
-
-        if self.current_byte() == Some(b'.') {
-            // SAFETY: We know that the current token is µ...
-            self.advance(3);
-        } else {
-            // µ[a-zA-Z_][a-zA-Z0-9_]*
-            self.advance(1);
-            while let Some(chr) = self.current_byte() {
-                match chr {
-                    b'a'..=b'z' | b'A'..=b'Z' | b'0'..=b'9' | b'_' => {
-                        self.advance(1);
-                    }
-                    _ => break,
-                }
-            }
+        if let Some(end) = metavariable_end(self.metavariable_ranges(), self.position()) {
+            self.advance(end - self.position());
         }
 
         kind
     }
+}
+
+/// Returns the end offset of the metavariable in `ranges` that starts at
+/// `position`.
+fn metavariable_end(ranges: &[TextRange], position: usize) -> Option<usize> {
+    let position = TextSize::from(position as u32);
+    ranges
+        .binary_search_by_key(&position, |range| range.start())
+        .ok()
+        .map(|index| ranges[index].end().into())
 }
 
 pub trait ReLexer<'src>: Lexer<'src> + LexerWithCheckpoint<'src> {
@@ -743,7 +725,10 @@ where
         // Jump right to where we've left of last time rather than going through all tokens again.
         let mut remaining = n - self.lookahead.non_trivia_len();
         let current_length = self.lookahead.all_len();
-        let iter = self.lookahead_iter().skip(current_length);
+        let iter = LookaheadIterator {
+            buffered: self,
+            nth: current_length,
+        };
 
         for item in iter {
             if !item.kind().is_trivia() {
@@ -814,6 +799,13 @@ impl<'t, Lex: LexerWithCheckpoint<'t>> Iterator for LookaheadIterator<'_, 't, Le
         // because of the diagnostic.
         let checkpoint = lexer.checkpoint();
         debug_assert_eq!(kind, checkpoint.current_kind);
+        // Use the kind `next_token` returned instead of reading it back from the lexer. The
+        // compiler widens that read to cover the neighboring flags, and a load spanning several
+        // separate stores cannot be forwarded from them, which stalls on every lookahead token.
+        let checkpoint = LexerCheckpoint {
+            current_kind: kind,
+            ..checkpoint
+        };
         let lookahead = LookaheadToken::from(&checkpoint);
 
         self.buffered.lookahead.push_back(checkpoint);

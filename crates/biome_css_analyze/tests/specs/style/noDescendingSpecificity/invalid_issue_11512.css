@@ -1,0 +1,12 @@
+/* should generate diagnostics */
+.a th {
+    color: red;
+}
+
+.a .b .c th {
+    color: green;
+}
+
+.a .b th {
+    color: blue;
+}

@@ -18,11 +18,11 @@ info: markdown/spec/example-473.md
 +++ Biome
 @@ -1 +1 @@
 -[link](/url 'title ""')
-+[link](/url "title \"&quot;")
++[link](/url 'title "&quot;')
 ```
 
 # Output
 
 ```md
-[link](/url "title \"&quot;")
+[link](/url 'title "&quot;')
 ```

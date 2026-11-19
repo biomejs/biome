@@ -17,3 +17,11 @@ some code
 ```rust,  ignore   expect_diagnostics
     fn main() {}
 ```
+
+```   
+some code
+```
+
+```  rust  
+    fn main() {}
+```

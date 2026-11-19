@@ -1,0 +1,57 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 196
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+obj & obj.a;
+options | {};
+
+```
+
+# Diagnostics
+```
+invalid.ts:2:5 lint/nursery/noAccidentalBitwiseOperators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The bitwise operator & is used where the logical operator && was likely intended.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ obj & obj.a;
+      │     ^
+    3 │ options | {};
+    4 │ 
+  
+  i Bitwise operators always evaluate both sides and turn them into numbers, so the result is not the value of either side.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace & with &&.
+  
+    2 │ obj·&&·obj.a;
+      │      +       
+
+```
+
+```
+invalid.ts:3:9 lint/nursery/noAccidentalBitwiseOperators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The bitwise operator | is used where the logical operator || was likely intended.
+  
+    1 │ /* should generate diagnostics */
+    2 │ obj & obj.a;
+  > 3 │ options | {};
+      │         ^
+    4 │ 
+  
+  i Bitwise operators always evaluate both sides and turn them into numbers, so the result is not the value of either side.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace | with ||.
+  
+    3 │ options·||·{};
+      │          +    
+
+```

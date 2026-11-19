@@ -62,8 +62,8 @@ impl Rule for NoSuspiciousSemicolonInJsx {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
         if let Some(children) = match node {
-            AnyJsxTag::JsxElement(element) => Some(element.children()),
-            AnyJsxTag::JsxFragment(fragment) => Some(fragment.children()),
+            AnyJsxTag::JsxElement(element) => Some(element.elements()),
+            AnyJsxTag::JsxFragment(fragment) => Some(fragment.elements()),
             _ => None,
         } {
             let has_semicolon = has_suspicious_semicolon(&children);
@@ -105,7 +105,7 @@ fn has_suspicious_semicolon(node: &JsxChildList) -> Option<TextRange> {
         }
 
         c.as_jsx_element()
-            .and_then(|e| has_suspicious_semicolon(&e.children()));
+            .and_then(|e| has_suspicious_semicolon(&e.elements()));
 
         None
     })

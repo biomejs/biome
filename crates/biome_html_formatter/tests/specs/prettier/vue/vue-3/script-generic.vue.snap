@@ -1,0 +1,182 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: vue/vue-3/script-generic.vue
+---
+
+# Input
+
+```vue
+<script setup lang="ts" generic="T"></script>
+
+<script setup lang="ts" generic="T extends Type1 & Type2 & (Type3 | Type4), U"></script>
+
+<script setup lang="ts" generic="T extends Type1 & Type2 & (Type3 | Type4), U extends string | number | boolean"></script>
+
+<script setup lang="ts" generic="T extends | 'loooooooooooooooooooooooooooooooooong' | 'looooooooooooooooooooooooooooooooooong', U extends LooooooooooooooooooooooooooooooooongType<AnotherLoooooooooooooooongType<NonNullable<Record<string, (Type1 & Type2 & (LoooooooooooooooooooooongType3 | LoooooooooooooooooooooongType4)) | null>[string]>>>, C" ></script>
+
+<script setup lang="ts" generic="
+
+
+                                        // comment 1:
+T 
+extends string &
+
+'loooooooooooooooooooooooooooooooooooooooooooooooooooooooooong',
+/**
+       * comment 2
+ */
+        U extends number, // comment 3
+        
+        /** comment 4 */ C extends MyType
+
+
+        "></script>
+
+<template>
+  <!-- should not format it here -->
+  <not-script setup lang="ts" generic="T extends Type1 & Type2 & (Type3 | Type4), U extends string | number | boolean"></not-script>
+</template>
+
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -9,52 +9,35 @@
+ <script
+   setup
+   lang="ts"
+-  generic="
+-    T extends Type1 & Type2 & (Type3 | Type4),
+-    U extends string | number | boolean
+-  "
++  generic="T extends Type1 & Type2 & (Type3 | Type4), U extends string | number | boolean"
+ ></script>
+ 
+ <script
+   setup
+   lang="ts"
+-  generic="
+-    T extends
+-      | 'loooooooooooooooooooooooooooooooooong'
+-      | 'looooooooooooooooooooooooooooooooooong',
+-    U extends LooooooooooooooooooooooooooooooooongType<
+-      AnotherLoooooooooooooooongType<
+-        NonNullable<
+-          Record<
+-            string,
+-            | (Type1 &
+-                Type2 &
+-                (
+-                  | LoooooooooooooooooooooongType3
+-                  | LoooooooooooooooooooooongType4
+-                ))
+-            | null
+-          >[string]
+-        >
+-      >
+-    >,
+-    C
+-  "
++  generic="T extends | 'loooooooooooooooooooooooooooooooooong' | 'looooooooooooooooooooooooooooooooooong', U extends LooooooooooooooooooooooooooooooooongType<AnotherLoooooooooooooooongType<NonNullable<Record<string, (Type1 & Type2 & (LoooooooooooooooooooooongType3 | LoooooooooooooooooooooongType4)) | null>[string]>>>, C"
+ ></script>
+ 
+ <script
+   setup
+   lang="ts"
+   generic="
+-    // comment 1:
+-    T extends string &
+-      'loooooooooooooooooooooooooooooooooooooooooooooooooooooooooong',
+-    /**
+-     * comment 2
+-     */
+-    U extends number, // comment 3
+-    /** comment 4 */ C extends MyType
+-  "
++
++
++                                        // comment 1:
++T 
++extends string &
++
++'loooooooooooooooooooooooooooooooooooooooooooooooooooooooooong',
++/**
++       * comment 2
++ */
++        U extends number, // comment 3
++        
++        /** comment 4 */ C extends MyType
++
++
++        "
+ ></script>
+ 
+ <template>
+```
+
+# Output
+
+```vue
+<script setup lang="ts" generic="T"></script>
+
+<script
+  setup
+  lang="ts"
+  generic="T extends Type1 & Type2 & (Type3 | Type4), U"
+></script>
+
+<script
+  setup
+  lang="ts"
+  generic="T extends Type1 & Type2 & (Type3 | Type4), U extends string | number | boolean"
+></script>
+
+<script
+  setup
+  lang="ts"
+  generic="T extends | 'loooooooooooooooooooooooooooooooooong' | 'looooooooooooooooooooooooooooooooooong', U extends LooooooooooooooooooooooooooooooooongType<AnotherLoooooooooooooooongType<NonNullable<Record<string, (Type1 & Type2 & (LoooooooooooooooooooooongType3 | LoooooooooooooooooooooongType4)) | null>[string]>>>, C"
+></script>
+
+<script
+  setup
+  lang="ts"
+  generic="
+
+
+                                        // comment 1:
+T 
+extends string &
+
+'loooooooooooooooooooooooooooooooooooooooooooooooooooooooooong',
+/**
+       * comment 2
+ */
+        U extends number, // comment 3
+        
+        /** comment 4 */ C extends MyType
+
+
+        "
+></script>
+
+<template>
+  <!-- should not format it here -->
+  <not-script
+    setup
+    lang="ts"
+    generic="T extends Type1 & Type2 & (Type3 | Type4), U extends string | number | boolean"
+  ></not-script>
+</template>
+```
+
+# Lines exceeding max width of 80 characters
+```
+   12:   generic="T extends Type1 & Type2 & (Type3 | Type4), U extends string | number | boolean"
+   18:   generic="T extends | 'loooooooooooooooooooooooooooooooooong' | 'looooooooooooooooooooooooooooooooooong', U extends LooooooooooooooooooooooooooooooooongType<AnotherLoooooooooooooooongType<NonNullable<Record<string, (Type1 & Type2 & (LoooooooooooooooooooooongType3 | LoooooooooooooooooooooongType4)) | null>[string]>>>, C"
+   48:     generic="T extends Type1 & Type2 & (Type3 | Type4), U extends string | number | boolean"
+```

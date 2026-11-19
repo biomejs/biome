@@ -1,0 +1,43 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: scss-control-flow.invalid.scss
+---
+# Input
+```css
+/* should generate diagnostics */
+$condition: true;
+.selector {
+  @if $condition {
+    color: red;
+    color: blue;
+  }
+}
+
+```
+
+# Diagnostics
+```
+scss-control-flow.invalid.scss:6:5 lint/suspicious/noDuplicateProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate properties can lead to unexpected behavior and may override previous declarations unintentionally.
+  
+    4 │   @if $condition {
+    5 │     color: red;
+  > 6 │     color: blue;
+      │     ^^^^^
+    7 │   }
+    8 │ }
+  
+  i color is already defined here.
+  
+    3 │ .selector {
+    4 │   @if $condition {
+  > 5 │     color: red;
+      │     ^^^^^
+    6 │     color: blue;
+    7 │   }
+  
+  i Remove or rename the duplicate property to ensure consistent styling.
+  
+
+```

@@ -42,11 +42,35 @@ declare_lint_rule! {
     /// <span></span>
     /// ```
     ///
+    /// ## Options
+    ///
+    /// ### `ignoreElements`
+    ///
+    /// An array of element names that the rule ignores. The comparison is case-insensitive.
+    ///
+    /// Default: `[]`
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///         "ignoreElements": ["button"]
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// ```jsx,use_options
+    /// <button role='button'></button>
+    /// ```
+    ///
     pub NoRedundantRoles {
         version: "1.0.0",
         name: "noRedundantRoles",
         language: "jsx",
-        sources: &[RuleSource::EslintJsxA11y("no-redundant-roles").same()],
+        sources: &[
+            RuleSource::EslintJsxA11y("no-redundant-roles").same(),
+            RuleSource::HtmlEslint("no-redundant-role").inspired(),
+            RuleSource::EslintAstro("jsx-a11y/no-redundant-roles").same(),
+        ],
         recommended: true,
         severity: Severity::Error,
         fix_kind: FixKind::Unsafe,
@@ -67,6 +91,17 @@ impl Rule for NoRedundantRoles {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
 
+        let element_name = node.name_value_token().ok()?;
+        let element_name = element_name.text_trimmed();
+        if ctx
+            .options()
+            .ignore_elements()
+            .iter()
+            .any(|ignored| ignored.eq_ignore_ascii_case(element_name))
+        {
+            return None;
+        }
+
         let role_attribute = node.find_attribute_by_name("role")?;
         let role_attribute_value = role_attribute.initializer()?.value().ok()?;
         let explicit_role = AriaRole::from_roles(role_attribute_value.as_static_value()?.text())?;
@@ -85,13 +120,18 @@ impl Rule for NoRedundantRoles {
         let role_attribute = binding.text();
         let element_name = ctx.query().name().ok()?.as_jsx_name()?.value_token().ok()?;
         let element_name = element_name.text_trimmed();
-        Some(RuleDiagnostic::new(
-            rule_category!(),
-            state.redundant_attribute_value.range(),
-            markup! {
-                "Using the role attribute '"{role_attribute}"' on the '"{element_name}"' element is redundant, because it is implied by its semantic."
-            },
-        ))
+        Some(
+            RuleDiagnostic::new(
+                rule_category!(),
+                state.redundant_attribute_value.range(),
+                markup! {
+                    "Using the role attribute '"{role_attribute}"' on the '"{element_name}"' element is redundant."
+                },
+            )
+            .note(markup! {
+                "The element already has this role because of its semantics, so the attribute has no effect."
+            }),
+        )
     }
 
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {

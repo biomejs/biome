@@ -1,0 +1,27 @@
+<!-- should generate diagnostics -->
+<a href={link.url} target="_blank" rel="noopener" title={label} aria-label={label}>
+    <svg aria-hidden="true">
+        <use href={`/assets/icons/icon-${link.type}.svg#icon-${link.type}`} />
+    </svg>
+</a>
+
+{
+    <a href={link.url} target="_blank" rel="noopener" title={label} aria-label={label}>
+        <svg aria-hidden="true">
+            <use href={`/assets/icons/icon-${link.type}.svg#icon-${link.type}`} />
+        </svg>
+    </a>
+}
+
+{mylinks.map((link) => {
+    const label =
+        link.title ||
+        (link.type === 'email' ? link.url.replace('mailto:', '') : `${person.name} | ${link.type}`);
+    return (
+        <a href={link.url} target="_blank" rel="noopener" title={label} aria-label={label}>
+            <svg aria-hidden="true">
+                <use href={`/assets/icons/icon-${link.type}.svg#icon-${link.type}`} />
+            </svg>
+        </a>
+    );
+})}

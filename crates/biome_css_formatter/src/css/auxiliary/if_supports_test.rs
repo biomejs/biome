@@ -14,13 +14,18 @@ impl FormatNodeRule<CssIfSupportsTest> for FormatCssIfSupportsTest {
             r_paren_token,
         } = node.as_fields();
 
+        let should_insert_space = f.options().delimiter_spacing().value();
+
         write!(
             f,
             [
-                supports_token.format(),
+                supports_token.format()?.with_text_case(CssCase::Preserve),
                 group(&format_args![
                     l_paren_token.format(),
-                    soft_block_indent(&test.format()),
+                    soft_block_indent_with_maybe_space(
+                        &test?.format().with_text_case(CssCase::Preserve),
+                        should_insert_space
+                    ),
                     r_paren_token.format()
                 ])
             ]

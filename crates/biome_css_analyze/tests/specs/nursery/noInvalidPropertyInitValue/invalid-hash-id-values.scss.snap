@@ -1,0 +1,62 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalid-hash-id-values.scss
+---
+# Input
+```css
+/* should generate diagnostics */
+@property --hash-string {
+  syntax: "<color>";
+  inherits: false;
+  initial-value: #ABCG;
+}
+@property --short-string {
+  syntax: "<color>";
+  inherits: false;
+  initial-value: #ab;
+}
+
+```
+
+# Diagnostics
+```
+invalid-hash-id-values.scss:5:18 lint/nursery/noInvalidPropertyInitValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The initial-value does not match the registered property syntax.
+  
+    3 │   syntax: "<color>";
+    4 │   inherits: false;
+  > 5 │   initial-value: #ABCG;
+      │                  ^^^^^
+    6 │ }
+    7 │ @property --short-string {
+  
+  i A mismatched initial value prevents the custom property from being registered.
+  
+  i Use an initial value accepted by the syntax descriptor.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-hash-id-values.scss:10:18 lint/nursery/noInvalidPropertyInitValue ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The initial-value does not match the registered property syntax.
+  
+     8 │   syntax: "<color>";
+     9 │   inherits: false;
+  > 10 │   initial-value: #ab;
+       │                  ^^^
+    11 │ }
+    12 │ 
+  
+  i A mismatched initial value prevents the custom property from being registered.
+  
+  i Use an initial value accepted by the syntax descriptor.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

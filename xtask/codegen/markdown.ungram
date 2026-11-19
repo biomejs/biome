@@ -40,11 +40,27 @@ SyntaxElement = SyntaxElement
 // Needed by the infrastructure
 MdBogus = SyntaxElement*
 MdBogusBlock = SyntaxElement*
+// Bullet-list recovery node: completed by `or_recover_with_token_set` in
+// `biome_markdown_parser/src/syntax/list.rs` when an expected bullet fails
+// to parse mid-list.
+MdBogusBullet = SyntaxElement*
 
-MdDocument =
+MdRoot =
   bom: 'UNICODE_BOM'?
+  frontmatter: MdFrontmatter?
   value: MdBlockList
   eof: 'EOF'
+
+// ---
+// content
+// ---
+// ^^^^^^^
+MdFrontmatter =
+	l_fence: '---'
+	content: MdFrontmatterContent
+	r_fence: '---'
+
+MdFrontmatterContent = value: 'md_frontmatter_literal'
 
 MdBlockList = AnyMdBlock*
 
@@ -64,6 +80,10 @@ AnyMdLeafBlock =
 	| MdParagraph
 	| MdNewline
 	| MdContinuationIndent
+	| GfmTable
+	| MdxEsmBlock
+	| MdxBlockExpression
+	| MdxJsxBlockTag
 
 AnyMdContainerBlock =
 	MdQuote
@@ -126,12 +146,15 @@ MdFencedCodeBlock =
 
 MdCodeNameList = MdTextual*
 
+MdCodeContent = value: 'md_code_literal'
+
 // <div>
 // ^^^^^
-// html block - content is stored as raw text (multiple textual tokens)
 MdHtmlBlock =
 	indent: MdIndentTokenList
-	content: MdInlineItemList
+	content: MdHtmlContent
+
+MdHtmlContent = value: 'md_html_literal'
 
 // [foo]: /url "title"
 // ^^^^^^^^^^^^^^^^^^^
@@ -192,6 +215,8 @@ MdQuotePrefix =
 	marker: '>'
 	post_marker_space: 'md_quote_post_marker_space'?
 
+MdQuotePrefixList = MdQuotePrefix*
+
 // Single pre-marker indent token (MdHash/MdHashList pattern).
 MdQuoteIndent = 'md_quote_pre_marker_indent'
 MdQuoteIndentList = MdQuoteIndent*
@@ -238,7 +263,6 @@ MdListMarkerPrefix =
 // Another block paragraph
 MdParagraph =
 	list: MdInlineItemList
-	hard_line: MdHardLine?
 
 MdInlineItemList = AnyMdInline*
 
@@ -255,11 +279,15 @@ AnyMdInline =
 	| MdInlineHtml
 	| MdEntityReference
 	| MdHtmlBlock
+	| MdCodeContent
 	| MdHardLine
-	| MdSoftBreak
 	| MdTextual
+	| GfmStrikethrough
+	| GfmTaskListItem
 	| MdQuotePrefix
 	| MdIndentToken
+	| MdxInlineExpression
+	| MdxJsxInlineTag
 
 
 // *italic*
@@ -350,7 +378,7 @@ MdAutolink =
 // Raw inline HTML per CommonMark §6.8
 // Includes: open tags, closing tags, comments, processing instructions,
 // declarations, and CDATA sections
-MdInlineHtml = value: MdInlineItemList
+MdInlineHtml = value: 'md_html_literal'
 
 // &amp;
 // ^^^^^
@@ -381,6 +409,112 @@ MdNewline = value: 'NEWLINE'
 MdContinuationIndent = indent: MdIndentTokenList
 
 MdHardLine = value: 'md_hard_line_literal'
-MdSoftBreak = value: 'md_soft_break_literal'
 MdTextual = value: 'md_textual_literal'
-MdIndent = value: 'md_indent_chunk_literal'
+
+// ==================================
+// GitHub Flavoured Markdown (GFM)
+// ==================================
+
+GfmTaskListItem =
+	l_bracket: '['
+	// State is generic on purpose, the parser will take care of checking for `x`/whitespace
+	state: MdTextual
+	r_bracket: ']'
+
+GfmStrikethrough =
+	l_fence: '~~'
+	content: MdInlineItemList
+	r_fence: '~~'
+
+// | Header |
+// | ------ |
+// | Cell   |
+// ^^^^^^^^^^
+GfmTable =
+	header: GfmTableRow
+	delimiter: GfmTableDelimiterRow
+	body: GfmTableRowList
+
+GfmTableRowList = GfmTableRow*
+
+// | Header |
+// ^^^^^^^^^^
+GfmTableRow =
+	quote_prefixes: MdQuotePrefixList
+	l_pipe: '|'?
+	cells: GfmTableCellList
+	r_pipe: '|'?
+	newline: 'NEWLINE'?
+
+GfmTableCellList = (GfmTableCell ('|' GfmTableCell)*)
+
+// Header
+// ^^^^^^
+GfmTableCell = content: MdInlineItemList
+
+// | :--- |
+// ^^^^^^^^^
+GfmTableDelimiterRow =
+	quote_prefixes: MdQuotePrefixList
+	l_pipe: '|'?
+	cells: GfmTableDelimiterCellList
+	r_pipe: '|'?
+	newline: 'NEWLINE'?
+
+GfmTableDelimiterCellList = (GfmTableDelimiterCell ('|' GfmTableDelimiterCell)*)
+
+// :---
+// ^^^^
+GfmTableDelimiterCell =
+	l_colon: ':'?
+	dashes: GfmTableDelimiterDashList
+	r_colon: ':'?
+
+GfmTableDelimiterDashList = GfmTableDelimiterDash*
+
+// -
+// ^
+GfmTableDelimiterDash = '-'
+
+// ==================================
+// MDX
+// ==================================
+
+// import { Chart } from "./chart.js"
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+// Top-level `import` and `export` statements, up to the next blank line.
+// The content is JavaScript and is parsed as an embedded snippet.
+MdxEsmBlock = content: 'mdx_esm_literal'
+
+// {props.title}
+// ^^^^^^^^^^^^^
+// An expression that is alone on its line. Spaces and tabs before it are
+// whitespace trivia, because MDX gives them no meaning.
+MdxBlockExpression =
+	l_curly: '{'
+	content: MdxExpressionContent?
+	r_curly: '}'
+
+// Hello, {props.name}!
+//        ^^^^^^^^^^^^
+MdxInlineExpression =
+	l_curly: '{'
+	content: MdxExpressionContent?
+	r_curly: '}'
+
+// The JavaScript between the braces of an expression, parsed as an embedded
+// snippet. An empty expression `{}` has no content.
+MdxExpressionContent = value: 'mdx_expression_literal'
+
+// <Note type="tip">
+// ^^^^^^^^^^^^^^^^^
+// A JSX tag on a line that holds only tags and expressions. Each tag is its
+// own node: an opening tag and its closing tag are siblings around the
+// Markdown between them. The tag is parsed as an embedded JSX snippet.
+// Spaces and tabs before it are whitespace trivia, because MDX gives them no
+// meaning.
+MdxJsxBlockTag = value: 'mdx_jsx_tag_literal'
+
+// Some <Badge>new</Badge> text
+//      ^^^^^^^   ^^^^^^^^
+MdxJsxInlineTag = value: 'mdx_jsx_tag_literal'

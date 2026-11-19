@@ -1,0 +1,16 @@
+{
+	"name": "my-package",
+	"cpu": [
+		"arm",
+		"arm64",
+		"ia32",
+		"loong64",
+		"mips",
+		"mipsel",
+		"ppc64",
+		"riscv64",
+		"s390",
+		"s390x",
+		"x64"
+	]
+}

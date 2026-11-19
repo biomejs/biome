@@ -27,6 +27,8 @@ inJsx.jsx:2:5 lint/correctness/noVoidElementsWithChildren  FIXABLE  ━━━━
     3 │     <img alt="some text">invalid child</img>
     4 │     <img alt="some text" dangerouslySetInnerHTML={{ __html: "text" }}></img>
   
+  i React throws an error when it renders a void element that has children or sets dangerouslySetInnerHTML.
+  
   i Unsafe fix: Remove the children.
   
     2 │ ····<br>invalid·child</br>
@@ -45,6 +47,8 @@ inJsx.jsx:3:5 lint/correctness/noVoidElementsWithChildren  FIXABLE  ━━━━
       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     4 │     <img alt="some text" dangerouslySetInnerHTML={{ __html: "text" }}></img>
     5 │     <img alt="some text" children={"some child"}></img>
+  
+  i React throws an error when it renders a void element that has children or sets dangerouslySetInnerHTML.
   
   i Unsafe fix: Remove the children.
   
@@ -65,6 +69,8 @@ inJsx.jsx:4:5 lint/correctness/noVoidElementsWithChildren  FIXABLE  ━━━━
     5 │     <img alt="some text" children={"some child"}></img>
     6 │     <img alt="some text" children={"some child"} />
   
+  i React throws an error when it renders a void element that has children or sets dangerouslySetInnerHTML.
+  
   i Unsafe fix: Remove the dangerouslySetInnerHTML prop.
   
     4 │ ····<img·alt="some·text"·dangerouslySetInnerHTML={{·__html:·"text"·}}></img>
@@ -83,6 +89,8 @@ inJsx.jsx:5:5 lint/correctness/noVoidElementsWithChildren  FIXABLE  ━━━━
       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     6 │     <img alt="some text" children={"some child"} />
     7 │     <img alt="some text" dangerouslySetInnerHTML={{ __html: "text" }} >invalid child</img>
+  
+  i React throws an error when it renders a void element that has children or sets dangerouslySetInnerHTML.
   
   i Unsafe fix: Remove the children.
   
@@ -103,6 +111,8 @@ inJsx.jsx:6:5 lint/correctness/noVoidElementsWithChildren  FIXABLE  ━━━━
     7 │     <img alt="some text" dangerouslySetInnerHTML={{ __html: "text" }} >invalid child</img>
     8 │ </>
   
+  i React throws an error when it renders a void element that has children or sets dangerouslySetInnerHTML.
+  
   i Unsafe fix: Remove the children.
   
     6 │ ····<img·alt="some·text"·children={"some·child"}·/>
@@ -121,6 +131,8 @@ inJsx.jsx:7:5 lint/correctness/noVoidElementsWithChildren  FIXABLE  ━━━━
       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     8 │ </>
     9 │ 
+  
+  i React throws an error when it renders a void element that has children or sets dangerouslySetInnerHTML.
   
   i Unsafe fix: Remove the children and the dangerouslySetInnerHTML prop.
   

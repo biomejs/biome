@@ -1,0 +1,7 @@
+/* should not generate diagnostics */
+const tuple = ["value", 1] as const;
+const object = <const>{ value: "value" };
+
+declare let mutable;
+(mutable as const) = "value";
+(<const>mutable) = "value";

@@ -27,8 +27,8 @@ impl FormatRule<CssParameterList> for FormatCssParameterList {
         let mut is_first = true;
         let mut previous_was_keyword_argument = false;
 
-        for (element, formatted) in node.elements().zip(separated) {
-            let element_node = element.node().ok();
+        for formatted in separated {
+            let element_node = formatted.node().ok();
 
             if is_first {
                 is_first = false;
@@ -80,7 +80,13 @@ fn is_var_function_parameter_list(node: &CssParameterList) -> bool {
 
 /// Keeps a blank line after SCSS keyword parameters.
 ///
-/// Example: `foo($a: 1,\n\n$b: 2)` keeps the empty line before `$b`.
+/// ```scss
+/// foo(
+///   $a: 1,
+///
+///   $b: 2
+/// )
+/// ```
 fn should_preserve_blank_line_before_parameter(
     parameter: Option<&AnyCssExpression>,
     previous_was_keyword_argument: bool,
@@ -96,7 +102,10 @@ fn is_scss_keyword_parameter(parameter: Option<&AnyCssExpression>) -> bool {
 
 /// Keeps a closing line comment attached to a final SCSS spread argument.
 ///
-/// Example: `@include mix($args... // comment\n)`.
+/// ```scss
+/// @include mix($args... // comment
+/// );
+/// ```
 fn should_inline_arbitrary_argument_closing_comment(
     node: &CssParameterList,
     f: &CssFormatter,
@@ -106,7 +115,7 @@ fn should_inline_arbitrary_argument_closing_comment(
             .dangling_comments(node.syntax())
             .iter()
             .all(|comment| comment.kind().is_line())
-        && node.iter().last().is_some_and(|parameter| {
+        && node.iter().next_back().is_some_and(|parameter| {
             parameter.is_ok_and(|node| expression_ends_with_arbitrary_argument(&node))
         })
 }

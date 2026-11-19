@@ -1,6 +1,5 @@
 ---
 source: crates/biome_markdown_parser/tests/spec_test.rs
-assertion_line: 190
 expression: snapshot
 ---
 
@@ -29,8 +28,9 @@ expression: snapshot
 ## AST
 
 ```
-MdDocument {
+MdRoot {
     bom_token: missing (optional),
+    frontmatter: missing (optional),
     value: MdBlockList [
         MdBulletListItem {
             md_bullet_list: MdBulletList [
@@ -55,7 +55,6 @@ MdDocument {
                                         value_token: MD_TEXTUAL_LITERAL@3..7 " Foo" [] [],
                                     },
                                 ],
-                                hard_line: missing (optional),
                             },
                             after: MdHashList [],
                         },
@@ -81,10 +80,7 @@ MdDocument {
                                     value_token: MD_TEXTUAL_LITERAL@13..14 "\n" [] [],
                                 },
                                 MdIndentToken {
-                                    md_indent_char_token: MD_INDENT_CHAR@14..15 " " [] [],
-                                },
-                                MdIndentToken {
-                                    md_indent_char_token: MD_INDENT_CHAR@15..16 " " [] [],
+                                    md_indent_char_token: MD_INDENT_CHAR@14..16 "  " [] [],
                                 },
                             ],
                             underline_token: MD_SETEXT_UNDERLINE_LITERAL@16..19 "---" [] [],
@@ -95,10 +91,7 @@ MdDocument {
                         MdContinuationIndent {
                             indent: MdIndentTokenList [
                                 MdIndentToken {
-                                    md_indent_char_token: MD_INDENT_CHAR@20..21 " " [] [],
-                                },
-                                MdIndentToken {
-                                    md_indent_char_token: MD_INDENT_CHAR@21..22 " " [] [],
+                                    md_indent_char_token: MD_INDENT_CHAR@20..22 "  " [] [],
                                 },
                             ],
                         },
@@ -111,7 +104,6 @@ MdDocument {
                                     value_token: MD_TEXTUAL_LITERAL@25..26 "\n" [] [],
                                 },
                             ],
-                            hard_line: missing (optional),
                         },
                         MdNewline {
                             value_token: NEWLINE@26..27 "\n" [] [],
@@ -130,7 +122,10 @@ MdDocument {
                             indent: MdIndentTokenList [],
                             before: MdHashList [
                                 MdHash {
-                                    hash_token: HASH@29..31 "##" [] [],
+                                    hash_token: HASH@29..30 "#" [] [],
+                                },
+                                MdHash {
+                                    hash_token: HASH@30..31 "#" [] [],
                                 },
                             ],
                             content: MdParagraph {
@@ -139,7 +134,6 @@ MdDocument {
                                         value_token: MD_TEXTUAL_LITERAL@31..39 " Level 2" [] [],
                                     },
                                 ],
-                                hard_line: missing (optional),
                             },
                             after: MdHashList [],
                         },
@@ -167,7 +161,13 @@ MdDocument {
                             indent: MdIndentTokenList [],
                             before: MdHashList [
                                 MdHash {
-                                    hash_token: HASH@43..46 "###" [] [],
+                                    hash_token: HASH@43..44 "#" [] [],
+                                },
+                                MdHash {
+                                    hash_token: HASH@44..45 "#" [] [],
+                                },
+                                MdHash {
+                                    hash_token: HASH@45..46 "#" [] [],
                                 },
                             ],
                             content: MdParagraph {
@@ -176,7 +176,6 @@ MdDocument {
                                         value_token: MD_TEXTUAL_LITERAL@46..54 " Level 3" [] [],
                                     },
                                 ],
-                                hard_line: missing (optional),
                             },
                             after: MdHashList [],
                         },
@@ -204,7 +203,22 @@ MdDocument {
                             indent: MdIndentTokenList [],
                             before: MdHashList [
                                 MdHash {
-                                    hash_token: HASH@58..64 "######" [] [],
+                                    hash_token: HASH@58..59 "#" [] [],
+                                },
+                                MdHash {
+                                    hash_token: HASH@59..60 "#" [] [],
+                                },
+                                MdHash {
+                                    hash_token: HASH@60..61 "#" [] [],
+                                },
+                                MdHash {
+                                    hash_token: HASH@61..62 "#" [] [],
+                                },
+                                MdHash {
+                                    hash_token: HASH@62..63 "#" [] [],
+                                },
+                                MdHash {
+                                    hash_token: HASH@63..64 "#" [] [],
                                 },
                             ],
                             content: MdParagraph {
@@ -213,7 +227,6 @@ MdDocument {
                                         value_token: MD_TEXTUAL_LITERAL@64..72 " Level 6" [] [],
                                     },
                                 ],
-                                hard_line: missing (optional),
                             },
                             after: MdHashList [],
                         },
@@ -246,7 +259,6 @@ MdDocument {
                                         value_token: MD_TEXTUAL_LITERAL@77..91 " Trailing hash" [] [],
                                     },
                                 ],
-                                hard_line: missing (optional),
                             },
                             after: MdHashList [
                                 MdHash {
@@ -287,7 +299,6 @@ MdDocument {
                                         value_token: MD_TEXTUAL_LITERAL@99..115 " Ordered heading" [] [],
                                     },
                                 ],
-                                hard_line: missing (optional),
                             },
                             after: MdHashList [],
                         },
@@ -308,7 +319,10 @@ MdDocument {
                             indent: MdIndentTokenList [],
                             before: MdHashList [
                                 MdHash {
-                                    hash_token: HASH@119..121 "##" [] [],
+                                    hash_token: HASH@119..120 "#" [] [],
+                                },
+                                MdHash {
+                                    hash_token: HASH@120..121 "#" [] [],
                                 },
                             ],
                             content: MdParagraph {
@@ -317,7 +331,6 @@ MdDocument {
                                         value_token: MD_TEXTUAL_LITERAL@121..137 " Ordered level 2" [] [],
                                     },
                                 ],
-                                hard_line: missing (optional),
                             },
                             after: MdHashList [],
                         },
@@ -336,9 +349,10 @@ MdDocument {
 ## CST
 
 ```
-0: MD_DOCUMENT@0..138
+0: MD_ROOT@0..138
   0: (empty)
-  1: MD_BLOCK_LIST@0..138
+  1: (empty)
+  2: MD_BLOCK_LIST@0..138
     0: MD_BULLET_LIST_ITEM@0..39
       0: MD_BULLET_LIST@0..39
         0: MD_BULLET@0..8
@@ -357,7 +371,6 @@ MdDocument {
                 0: MD_INLINE_ITEM_LIST@3..7
                   0: MD_TEXTUAL@3..7
                     0: MD_TEXTUAL_LITERAL@3..7 " Foo" [] []
-                1: (empty)
               3: MD_HASH_LIST@7..7
             1: MD_NEWLINE@7..8
               0: NEWLINE@7..8 "\n" [] []
@@ -374,26 +387,21 @@ MdDocument {
                   0: MD_TEXTUAL_LITERAL@10..13 "Bar" [] []
                 1: MD_TEXTUAL@13..14
                   0: MD_TEXTUAL_LITERAL@13..14 "\n" [] []
-                2: MD_INDENT_TOKEN@14..15
-                  0: MD_INDENT_CHAR@14..15 " " [] []
-                3: MD_INDENT_TOKEN@15..16
-                  0: MD_INDENT_CHAR@15..16 " " [] []
+                2: MD_INDENT_TOKEN@14..16
+                  0: MD_INDENT_CHAR@14..16 "  " [] []
               1: MD_SETEXT_UNDERLINE_LITERAL@16..19 "---" [] []
             1: MD_NEWLINE@19..20
               0: NEWLINE@19..20 "\n" [] []
             2: MD_CONTINUATION_INDENT@20..22
               0: MD_INDENT_TOKEN_LIST@20..22
-                0: MD_INDENT_TOKEN@20..21
-                  0: MD_INDENT_CHAR@20..21 " " [] []
-                1: MD_INDENT_TOKEN@21..22
-                  0: MD_INDENT_CHAR@21..22 " " [] []
+                0: MD_INDENT_TOKEN@20..22
+                  0: MD_INDENT_CHAR@20..22 "  " [] []
             3: MD_PARAGRAPH@22..26
               0: MD_INLINE_ITEM_LIST@22..26
                 0: MD_TEXTUAL@22..25
                   0: MD_TEXTUAL_LITERAL@22..25 "baz" [] []
                 1: MD_TEXTUAL@25..26
                   0: MD_TEXTUAL_LITERAL@25..26 "\n" [] []
-              1: (empty)
             4: MD_NEWLINE@26..27
               0: NEWLINE@26..27 "\n" [] []
         2: MD_BULLET@27..39
@@ -406,13 +414,14 @@ MdDocument {
             0: MD_HEADER@29..39
               0: MD_INDENT_TOKEN_LIST@29..29
               1: MD_HASH_LIST@29..31
-                0: MD_HASH@29..31
-                  0: HASH@29..31 "##" [] []
+                0: MD_HASH@29..30
+                  0: HASH@29..30 "#" [] []
+                1: MD_HASH@30..31
+                  0: HASH@30..31 "#" [] []
               2: MD_PARAGRAPH@31..39
                 0: MD_INLINE_ITEM_LIST@31..39
                   0: MD_TEXTUAL@31..39
                     0: MD_TEXTUAL_LITERAL@31..39 " Level 2" [] []
-                1: (empty)
               3: MD_HASH_LIST@39..39
     1: MD_NEWLINE@39..40
       0: NEWLINE@39..40 "\n" [] []
@@ -430,13 +439,16 @@ MdDocument {
             0: MD_HEADER@43..54
               0: MD_INDENT_TOKEN_LIST@43..43
               1: MD_HASH_LIST@43..46
-                0: MD_HASH@43..46
-                  0: HASH@43..46 "###" [] []
+                0: MD_HASH@43..44
+                  0: HASH@43..44 "#" [] []
+                1: MD_HASH@44..45
+                  0: HASH@44..45 "#" [] []
+                2: MD_HASH@45..46
+                  0: HASH@45..46 "#" [] []
               2: MD_PARAGRAPH@46..54
                 0: MD_INLINE_ITEM_LIST@46..54
                   0: MD_TEXTUAL@46..54
                     0: MD_TEXTUAL_LITERAL@46..54 " Level 3" [] []
-                1: (empty)
               3: MD_HASH_LIST@54..54
     4: MD_NEWLINE@54..55
       0: NEWLINE@54..55 "\n" [] []
@@ -454,13 +466,22 @@ MdDocument {
             0: MD_HEADER@58..72
               0: MD_INDENT_TOKEN_LIST@58..58
               1: MD_HASH_LIST@58..64
-                0: MD_HASH@58..64
-                  0: HASH@58..64 "######" [] []
+                0: MD_HASH@58..59
+                  0: HASH@58..59 "#" [] []
+                1: MD_HASH@59..60
+                  0: HASH@59..60 "#" [] []
+                2: MD_HASH@60..61
+                  0: HASH@60..61 "#" [] []
+                3: MD_HASH@61..62
+                  0: HASH@61..62 "#" [] []
+                4: MD_HASH@62..63
+                  0: HASH@62..63 "#" [] []
+                5: MD_HASH@63..64
+                  0: HASH@63..64 "#" [] []
               2: MD_PARAGRAPH@64..72
                 0: MD_INLINE_ITEM_LIST@64..72
                   0: MD_TEXTUAL@64..72
                     0: MD_TEXTUAL_LITERAL@64..72 " Level 6" [] []
-                1: (empty)
               3: MD_HASH_LIST@72..72
             1: MD_NEWLINE@72..73
               0: NEWLINE@72..73 "\n" [] []
@@ -482,7 +503,6 @@ MdDocument {
                 0: MD_INLINE_ITEM_LIST@77..91
                   0: MD_TEXTUAL@77..91
                     0: MD_TEXTUAL_LITERAL@77..91 " Trailing hash" [] []
-                1: (empty)
               3: MD_HASH_LIST@91..93
                 0: MD_HASH@91..93
                   0: HASH@91..93 "#" [Whitespace(" ")] []
@@ -508,7 +528,6 @@ MdDocument {
                 0: MD_INLINE_ITEM_LIST@99..115
                   0: MD_TEXTUAL@99..115
                     0: MD_TEXTUAL_LITERAL@99..115 " Ordered heading" [] []
-                1: (empty)
               3: MD_HASH_LIST@115..115
             1: MD_NEWLINE@115..116
               0: NEWLINE@115..116 "\n" [] []
@@ -522,16 +541,17 @@ MdDocument {
             0: MD_HEADER@119..137
               0: MD_INDENT_TOKEN_LIST@119..119
               1: MD_HASH_LIST@119..121
-                0: MD_HASH@119..121
-                  0: HASH@119..121 "##" [] []
+                0: MD_HASH@119..120
+                  0: HASH@119..120 "#" [] []
+                1: MD_HASH@120..121
+                  0: HASH@120..121 "#" [] []
               2: MD_PARAGRAPH@121..137
                 0: MD_INLINE_ITEM_LIST@121..137
                   0: MD_TEXTUAL@121..137
                     0: MD_TEXTUAL_LITERAL@121..137 " Ordered level 2" [] []
-                1: (empty)
               3: MD_HASH_LIST@137..137
     10: MD_NEWLINE@137..138
       0: NEWLINE@137..138 "\n" [] []
-  2: EOF@138..138 "" [] []
+  3: EOF@138..138 "" [] []
 
 ```

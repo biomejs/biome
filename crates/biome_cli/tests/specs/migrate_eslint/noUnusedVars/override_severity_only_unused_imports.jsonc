@@ -1,0 +1,16 @@
+{
+  "biome": {},
+  "eslint": {
+    "rules": {
+      "unused-imports/no-unused-vars": ["off", { "ignoreUsingDeclarations": true }]
+    },
+    "overrides": [
+      {
+        "files": ["*.ts"],
+        "rules": {
+          "unused-imports/no-unused-vars": "warn"
+        }
+      }
+    ]
+  }
+}

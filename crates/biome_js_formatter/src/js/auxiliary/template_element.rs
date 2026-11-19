@@ -1,16 +1,19 @@
 use crate::prelude::*;
-use biome_formatter::prelude::tag::Tag;
+use biome_formatter::rowan::Tag;
 use biome_formatter::{
     CstFormatContext, FormatRuleWithOptions, RemoveSoftLinesBuffer, format_args, write,
 };
 
 use crate::context::TabWidth;
 use crate::js::expressions::array_expression::FormatJsArrayExpressionOptions;
-use crate::js::lists::template_element_list::TemplateElementIndention;
-use biome_js_syntax::{
-    AnyJsExpression, JsSyntaxNode, JsSyntaxToken, JsTemplateElement, TsTemplateElement,
+use crate::js::lists::template_element_list::{
+    TemplateElementIndention, embedded_source_range, source_range,
 };
-use biome_rowan::{AstNode, NodeOrToken, SyntaxResult, declare_node_union};
+use biome_js_syntax::{
+    AnyJsExpression, JsSyntaxNode, JsSyntaxToken, JsTemplateElement, JsTemplateElementList,
+    TsTemplateElement,
+};
+use biome_rowan::{AstNode, NodeOrToken, SyntaxResult, TextRange, declare_node_union};
 
 enum TemplateElementLayout {
     /// Tries to format the expression on a single line regardless of the print width.
@@ -41,8 +44,26 @@ impl FormatNodeRule<JsTemplateElement> for FormatJsTemplateElement {
         formatter: &mut JsFormatter,
     ) -> FormatResult<()> {
         let element = AnyTemplateElement::from(node.clone());
+        let is_embedded = node.parent::<JsTemplateElementList>().is_some_and(|list| {
+            embedded_source_range(formatter, list.syntax().text_trimmed_range()).is_some()
+        });
 
-        FormatTemplateElement::new(element, self.options).fmt(formatter)
+        FormatTemplateElement::new(element, self.options)
+            .embedded(is_embedded)
+            .fmt(formatter)
+    }
+
+    fn embedded_node_range(
+        &self,
+        node: &JsTemplateElement,
+        f: &mut JsFormatter,
+    ) -> Option<TextRange> {
+        // The interpolations of an embedded template are inserted into the
+        // embedded document by the embedding service.
+        let list = node.parent::<JsTemplateElementList>()?;
+        embedded_source_range(f, list.syntax().text_trimmed_range())?;
+
+        Some(source_range(f, node.syntax().text_trimmed_range()))
     }
 }
 
@@ -62,11 +83,22 @@ pub struct TemplateElementOptions {
 pub(crate) struct FormatTemplateElement {
     element: AnyTemplateElement,
     options: TemplateElementOptions,
+    /// Whether the element is an interpolation of an embedded template.
+    is_embedded: bool,
 }
 
 impl FormatTemplateElement {
     pub(crate) fn new(element: AnyTemplateElement, options: TemplateElementOptions) -> Self {
-        Self { element, options }
+        Self {
+            element,
+            options,
+            is_embedded: false,
+        }
+    }
+
+    pub(crate) fn embedded(mut self, is_embedded: bool) -> Self {
+        self.is_embedded = is_embedded;
+        self
     }
 }
 
@@ -159,12 +191,24 @@ impl Format<JsFormatContext> for FormatTemplateElement {
             }
         });
 
+        let r_curly = format_with(|f: &mut JsFormatter| {
+            if f.options().delimiter_spacing().value() {
+                write!(f, [space(), self.element.r_curly_token().format()])
+            } else {
+                write!(f, [self.element.r_curly_token().format()])
+            }
+        });
+
+        let format_inner_with_closing = format_with(|f: &mut JsFormatter| {
+            write!(f, [format_inner, line_suffix_boundary(), r_curly])
+        });
+
         let format_indented = format_with(|f: &mut JsFormatter| {
             if self.options.after_new_line {
-                write!(f, [dedent_to_root(&format_inner)])
+                write!(f, [dedent_to_root(&format_inner_with_closing)])
             } else {
                 write_with_indention(
-                    &format_inner,
+                    &format_inner_with_closing,
                     self.options.indention,
                     f.options().tab_width(),
                     f,
@@ -172,15 +216,51 @@ impl Format<JsFormatContext> for FormatTemplateElement {
             }
         });
 
-        write!(
-            f,
-            [group(&format_args![
-                self.element.dollar_curly_token().format(),
-                format_indented,
-                line_suffix_boundary(),
-                self.element.r_curly_token().format()
-            ])]
-        )
+        let dollar_curly = format_with(|f: &mut JsFormatter| {
+            if f.options().delimiter_spacing().value() {
+                write!(f, [self.element.dollar_curly_token().format(), space()])
+            } else {
+                write!(f, [self.element.dollar_curly_token().format()])
+            }
+        });
+
+        if self.is_embedded {
+            // The interpolations of an embedded template are inserted into the
+            // layout of the embedded document, so they don't keep the single
+            // line or the alignment of the template, like in Prettier.
+            let expression = format_with(|f| match &interned_expression {
+                Some(element) => f.write_element(element.clone()),
+                None => Ok(()),
+            });
+            let has_comments = f
+                .context()
+                .comments()
+                .has_comments(&self.element.inner_syntax()?);
+
+            return if has_comments {
+                write!(
+                    f,
+                    [group(&format_args![
+                        dollar_curly,
+                        soft_block_indent(&expression),
+                        line_suffix_boundary(),
+                        r_curly
+                    ])]
+                )
+            } else {
+                write!(
+                    f,
+                    [group(&format_args![
+                        dollar_curly,
+                        expression,
+                        line_suffix_boundary(),
+                        r_curly
+                    ])]
+                )
+            };
+        }
+
+        write!(f, [group(&format_args![dollar_curly, format_indented])])
     }
 }
 
@@ -265,7 +345,7 @@ where
         if spaces == 0 {
             write!(f, [format_indented])
         } else {
-            write!(f, [align(spaces, &format_indented)])
+            write!(f, [align(" ".repeat(spaces as usize), &format_indented)])
         }
     });
 

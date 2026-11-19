@@ -1,1 +1,5 @@
 @media (#{$dyn}) and (unknown-feature) {}
+
+@media ($min < unknown-feature) {}
+@media ($min < width) and ($min < unknown-feature < $max) {}
+@media (#{$feature}) and ($min + 1rem < unknown-feature < $max - 1rem) {}

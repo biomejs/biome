@@ -1,0 +1,18 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validForwarding.tsx
+---
+# Input
+```tsx
+/* should not generate diagnostics */
+class Base<T> {
+    constructor(public value: T) {}
+}
+
+class Narrowed extends Base<string | number> {
+    constructor(value: string) {
+        super(value);
+    }
+}
+
+```

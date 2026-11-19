@@ -2,6 +2,12 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
+## Command
+
+```shell
+biome check --linter-enabled=false --assist-enabled=true --write --unsafe --stdin-file-path mock.js
+```
+
 # Input messages
 
 ```block

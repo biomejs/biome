@@ -1,0 +1,140 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: class_scopes.js
+---
+# Input
+```js
+// should generate diagnostics
+const instanceField = () => class { value = this; };
+const staticField = () => class { static value = this; };
+const privateField = () => class { #value = this; };
+const staticBlock = () => class { static { this.value = 0; } };
+const inheritedField = () => class extends Base { value = super.value; };
+const inheritedStaticBlock = () => class extends Base { static { super.method(); } };
+
+```
+
+# Diagnostics
+```
+class_scopes.js:2:7 lint/nursery/useConsistentFunctionStyle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Function declarations are required here, but this is an expression.
+  
+    1 │ // should generate diagnostics
+  > 2 │ const instanceField = () => class { value = this; };
+      │       ^^^^^^^^^^^^^
+    3 │ const staticField = () => class { static value = this; };
+    4 │ const privateField = () => class { #value = this; };
+  
+  i Using a consistent function style makes function definitions easier to recognize.
+  
+  i Use a function declaration.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+class_scopes.js:3:7 lint/nursery/useConsistentFunctionStyle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Function declarations are required here, but this is an expression.
+  
+    1 │ // should generate diagnostics
+    2 │ const instanceField = () => class { value = this; };
+  > 3 │ const staticField = () => class { static value = this; };
+      │       ^^^^^^^^^^^
+    4 │ const privateField = () => class { #value = this; };
+    5 │ const staticBlock = () => class { static { this.value = 0; } };
+  
+  i Using a consistent function style makes function definitions easier to recognize.
+  
+  i Use a function declaration.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+class_scopes.js:4:7 lint/nursery/useConsistentFunctionStyle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Function declarations are required here, but this is an expression.
+  
+    2 │ const instanceField = () => class { value = this; };
+    3 │ const staticField = () => class { static value = this; };
+  > 4 │ const privateField = () => class { #value = this; };
+      │       ^^^^^^^^^^^^
+    5 │ const staticBlock = () => class { static { this.value = 0; } };
+    6 │ const inheritedField = () => class extends Base { value = super.value; };
+  
+  i Using a consistent function style makes function definitions easier to recognize.
+  
+  i Use a function declaration.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+class_scopes.js:5:7 lint/nursery/useConsistentFunctionStyle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Function declarations are required here, but this is an expression.
+  
+    3 │ const staticField = () => class { static value = this; };
+    4 │ const privateField = () => class { #value = this; };
+  > 5 │ const staticBlock = () => class { static { this.value = 0; } };
+      │       ^^^^^^^^^^^
+    6 │ const inheritedField = () => class extends Base { value = super.value; };
+    7 │ const inheritedStaticBlock = () => class extends Base { static { super.method(); } };
+  
+  i Using a consistent function style makes function definitions easier to recognize.
+  
+  i Use a function declaration.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+class_scopes.js:6:7 lint/nursery/useConsistentFunctionStyle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Function declarations are required here, but this is an expression.
+  
+    4 │ const privateField = () => class { #value = this; };
+    5 │ const staticBlock = () => class { static { this.value = 0; } };
+  > 6 │ const inheritedField = () => class extends Base { value = super.value; };
+      │       ^^^^^^^^^^^^^^
+    7 │ const inheritedStaticBlock = () => class extends Base { static { super.method(); } };
+    8 │ 
+  
+  i Using a consistent function style makes function definitions easier to recognize.
+  
+  i Use a function declaration.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+class_scopes.js:7:7 lint/nursery/useConsistentFunctionStyle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Function declarations are required here, but this is an expression.
+  
+    5 │ const staticBlock = () => class { static { this.value = 0; } };
+    6 │ const inheritedField = () => class extends Base { value = super.value; };
+  > 7 │ const inheritedStaticBlock = () => class extends Base { static { super.method(); } };
+      │       ^^^^^^^^^^^^^^^^^^^^
+    8 │ 
+  
+  i Using a consistent function style makes function definitions easier to recognize.
+  
+  i Use a function declaration.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

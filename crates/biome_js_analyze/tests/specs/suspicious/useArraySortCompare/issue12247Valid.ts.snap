@@ -1,0 +1,15 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: issue12247Valid.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+declare const tuple: [number, number];
+tuple.sort();
+tuple.toSorted();
+
+const constArray = [3, 1, 2] as const;
+constArray.toSorted();
+
+```

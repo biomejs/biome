@@ -4,8 +4,9 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{
     AnyJsFunctionBody, JsArrowFunctionExpression, JsAssignmentExpression, JsExpressionStatement,
-    JsFileSource, JsForStatement, JsParenthesizedExpression, JsSequenceExpression,
+    JsForStatement, JsParenthesizedExpression, JsSequenceExpression,
 };
+use biome_languages::JsFileSource;
 use biome_rowan::AstNode;
 use biome_rule_options::no_assign_in_expressions::NoAssignInExpressionsOptions;
 

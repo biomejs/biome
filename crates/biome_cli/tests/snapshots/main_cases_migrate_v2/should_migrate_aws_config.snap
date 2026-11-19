@@ -2,6 +2,12 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
+## Command
+
+```shell
+biome migrate --write
+```
+
 ## `biome.json`
 
 ```json
@@ -19,7 +25,7 @@ expression: redactor(content)
   },
   "linter": {
     "rules": {
-      "recommended": true,
+      "preset": "recommended",
       "complexity": {
         "noForEach": "off"
       },

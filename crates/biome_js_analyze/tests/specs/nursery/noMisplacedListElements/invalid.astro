@@ -1,0 +1,5 @@
+<!-- should generate diagnostics -->
+{visible && <div><li>Conditional item</li></div>}
+{visible ? <section><li /></section> : null}
+{items.map((item) => <div><li>{item}</li></div>)}
+<ul>{items.map((item) => <div><li>{item}</li></div>)}</ul>

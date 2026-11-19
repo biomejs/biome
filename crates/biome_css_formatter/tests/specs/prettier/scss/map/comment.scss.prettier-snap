@@ -18,4 +18,6 @@ $map: (
 
 $map: (/* comment */);
 
-$map: (// comment);
+$map: (
+  // comment
+);

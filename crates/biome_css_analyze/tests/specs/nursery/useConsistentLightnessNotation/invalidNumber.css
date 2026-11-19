@@ -1,0 +1,11 @@
+/* should generate diagnostics */
+a { color: oklch(85% 0.17 88); }
+a { color: oklab(86% 0.2 154); }
+a { color: lch(85% 0.17 88); }
+a { color: lab(86% 0.2 154); }
+a { color: oklch(8.5% 0 0); }
+a { color: oklch(100% 0 0); }
+a { color: oklch(0% 0 0); }
+a { color: oklch(85.50% 0 0); }
+a { color: oklch(from red 50% c h); }
+a { color: oklch(5e1% 0 0); }

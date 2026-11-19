@@ -1,0 +1,1 @@
+.grid { grid-template-columns: [not] 1fr [not false] 1fr [start end]; }

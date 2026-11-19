@@ -18,7 +18,8 @@
 //! - array;
 //! - maps of key-value pairs (covers objects).
 //!
-//! It currently supports the JSON data format. See [biome_deserialize::json] for more details.
+//! It currently supports the JSON data format, see [biome_deserialize::json] for more details,
+//! and the YAML data format behind the `yaml` feature, see [biome_deserialize::yaml].
 //!
 //! The two most important traits are [Deserializable] and [DeserializableValue].
 //!
@@ -37,6 +38,8 @@ mod impls;
 pub mod json;
 mod merge;
 mod validator;
+#[cfg(feature = "yaml")]
+pub mod yaml;
 
 use biome_diagnostics::{Error, Severity};
 pub use biome_rowan::{Text, TextRange};
@@ -81,9 +84,9 @@ pub trait Deserializable: Sized {
     /// Returns the deserialized form of `value`, or `None` if it failed.
     /// Any diagnostics emitted during deserialization are reported via `ctx`.
     /// `name` corresponds to the name used in a diagnostic to designate the deserialized value.
-    fn deserialize(
-        ctx: &mut impl DeserializationContext,
-        value: &impl DeserializableValue,
+    fn deserialize<V: DeserializableValue>(
+        ctx: &mut dyn DeserializationContext<State = V::State>,
+        value: &V,
         name: &str,
     ) -> Option<Self>;
 }
@@ -93,35 +96,72 @@ pub trait Deserializable: Sized {
 /// We provide a default implementation [DefaultDeserializationContext].
 /// Creating a own context implementation allows you to customize how diagnostics are reported.
 pub trait DeserializationContext {
+    /// The state that the context carries during a deserialization.
+    ///
+    /// It's the [DeserializableValue::State] of the deserialized values, which read and update
+    /// it with [Self::state] and [Self::state_mut]. It's `()` when the values don't need one.
+    type State;
+
     fn id(&self) -> Option<&str>;
     fn report(&mut self, diagnostic: DeserializationDiagnostic);
+    fn state(&self) -> &Self::State;
+    fn state_mut(&mut self) -> &mut Self::State;
+
+    /// Enters a named property before its value is deserialized.
+    fn enter_property(&mut self, _name: &str, _key_range: TextRange, _value_range: TextRange) {}
+
+    /// Exits the property most recently passed to [`Self::enter_property`].
+    fn exit_property(&mut self) {}
+
+    /// Enters an array element before its value is deserialized.
+    fn enter_index(&mut self, _index: usize, _range: TextRange) {}
+
+    /// Exits the array element most recently passed to [`Self::enter_index`].
+    fn exit_index(&mut self) {}
 }
 
 /// Default implementation for [DeserializationContext].
 ///
 /// This implementation stores all reporetd diagnostics inside a vector.
 #[derive(Debug, Default)]
-pub struct DefaultDeserializationContext<'a> {
+pub struct DefaultDeserializationContext<'a, State = ()> {
     pub diagnostics: Vec<Error>,
     pub id: Option<&'a str>,
+    pub state: State,
 }
 impl<'a> DefaultDeserializationContext<'a> {
     fn new(id: &'a str) -> Self {
+        Self::with_state(id, ())
+    }
+}
+impl<'a, State> DefaultDeserializationContext<'a, State> {
+    fn with_state(id: &'a str, state: State) -> Self {
         Self {
             diagnostics: Default::default(),
             id: Some(id),
+            state,
         }
     }
 }
-impl DeserializationContext for DefaultDeserializationContext<'_> {
+impl<State> DeserializationContext for DefaultDeserializationContext<'_, State> {
+    type State = State;
+
     // Identifier of the deserialized root value.
     fn id(&self) -> Option<&str> {
         self.id
     }
 
-    /// Report `diagnostc` to the user.
-    fn report(&mut self, diagnostc: DeserializationDiagnostic) {
-        self.diagnostics.push(Error::from(diagnostc));
+    /// Report `diagnostic` to the user.
+    fn report(&mut self, diagnostic: DeserializationDiagnostic) {
+        self.diagnostics.push(Error::from(diagnostic));
+    }
+
+    fn state(&self) -> &Self::State {
+        &self.state
+    }
+
+    fn state_mut(&mut self) -> &mut Self::State {
+        &mut self.state
     }
 }
 
@@ -129,22 +169,227 @@ impl DeserializationContext for DefaultDeserializationContext<'_> {
 ///
 /// This trait should only be implemented when adding the support for a new data format.
 /// See [biome_deserialize::json] for an example of an implementation.
-pub trait DeserializableValue: Sized {
+pub trait DeserializableValue {
+    /// The state that this value reads and updates during its deserialization.
+    ///
+    /// The value can only be deserialized with a context whose [DeserializationContext::State]
+    /// is the same type. It's `()` when the value doesn't need one.
+    type State;
+
     /// Range in the source content of this value
     fn range(&self) -> TextRange;
 
-    /// Returns the deserialized form of this value using `visitor`.
-    /// Any diagnostics emitted during deserialization are appended to `diagnostics`.
-    /// `name` corresponds to the name used in a diagnostic to designate the value.
-    fn deserialize<V: DeserializationVisitor>(
+    /// Visits this value with a type-erased visitor.
+    ///
+    /// This is the method data formats implement: because it is not generic,
+    /// the traversal of the format's AST is compiled once instead of once per
+    /// deserialized type. Use [Self::deserialize] to deserialize a value.
+    fn deserialize_erased(
         &self,
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext<State = Self::State>,
+        visitor: &mut dyn ErasedDeserializationVisitor<Self::State>,
+        name: &str,
+    );
+
+    /// Returns the deserialized form of this value using `visitor`.
+    /// Any diagnostics emitted during deserialization are reported via `ctx`.
+    /// `name` corresponds to the name used in a diagnostic to designate the value.
+    fn deserialize<V: DeserializationVisitor<Self::State>>(
+        &self,
+        ctx: &mut dyn DeserializationContext<State = Self::State>,
         visitor: V,
         name: &str,
-    ) -> Option<V::Output>;
+    ) -> Option<V::Output>
+    where
+        Self: Sized,
+    {
+        let mut erased = ErasedVisitor {
+            visitor: Some(visitor),
+            output: None,
+        };
+        self.deserialize_erased(ctx, &mut erased, name);
+        erased.output
+    }
 
     /// Returns the type of this value.
-    fn visitable_type(&self) -> Option<DeserializableType>;
+    fn visitable_type(
+        &self,
+        ctx: &mut dyn DeserializationContext<State = Self::State>,
+    ) -> Option<DeserializableType>;
+}
+
+impl<S> DeserializableValue for Box<dyn DeserializableValue<State = S>> {
+    type State = S;
+
+    fn range(&self) -> TextRange {
+        (**self).range()
+    }
+
+    fn deserialize_erased(
+        &self,
+        ctx: &mut dyn DeserializationContext<State = S>,
+        visitor: &mut dyn ErasedDeserializationVisitor<S>,
+        name: &str,
+    ) {
+        (**self).deserialize_erased(ctx, visitor, name)
+    }
+
+    fn visitable_type(
+        &self,
+        ctx: &mut dyn DeserializationContext<State = S>,
+    ) -> Option<DeserializableType> {
+        (**self).visitable_type(ctx)
+    }
+}
+
+/// Iterator over the key-value pairs of a map, as passed to
+/// [DeserializationVisitor::visit_map].
+pub type MapMembers<'a, S> = dyn ExactSizeIterator<
+        Item = Option<(
+            Box<dyn DeserializableValue<State = S>>,
+            Box<dyn DeserializableValue<State = S>>,
+        )>,
+    > + 'a;
+
+/// Object-safe counterpart of [DeserializationVisitor], used by
+/// [DeserializableValue::deserialize_erased].
+///
+/// You should never need to implement this trait: every
+/// [DeserializationVisitor] is adapted to it automatically by
+/// [DeserializableValue::deserialize].
+pub trait ErasedDeserializationVisitor<S> {
+    /// The visited value is `null`.
+    fn visit_null(
+        &mut self,
+        ctx: &mut dyn DeserializationContext<State = S>,
+        range: TextRange,
+        name: &str,
+    );
+
+    /// The visited value is a `bool`.
+    fn visit_bool(
+        &mut self,
+        ctx: &mut dyn DeserializationContext<State = S>,
+        value: bool,
+        range: TextRange,
+        name: &str,
+    );
+
+    /// The visited value is a number (integer or float), represented by a string.
+    fn visit_number(
+        &mut self,
+        ctx: &mut dyn DeserializationContext<State = S>,
+        value: TextNumber,
+        range: TextRange,
+        name: &str,
+    );
+
+    /// The visited value is a `string`.
+    fn visit_str(
+        &mut self,
+        ctx: &mut dyn DeserializationContext<State = S>,
+        value: Text,
+        range: TextRange,
+        name: &str,
+    );
+
+    /// The visited value is an array-like (array, list, vector) structure.
+    fn visit_array(
+        &mut self,
+        ctx: &mut dyn DeserializationContext<State = S>,
+        items: &mut dyn ExactSizeIterator<Item = Option<Box<dyn DeserializableValue<State = S>>>>,
+        range: TextRange,
+        name: &str,
+    );
+
+    /// The visited value is a `map` (key-value pairs).
+    fn visit_map(
+        &mut self,
+        ctx: &mut dyn DeserializationContext<State = S>,
+        members: &mut MapMembers<'_, S>,
+        range: TextRange,
+        name: &str,
+    );
+}
+
+/// Adapts a [DeserializationVisitor] to [ErasedDeserializationVisitor],
+/// carrying the visitor in and its output out of the type-erased traversal.
+struct ErasedVisitor<S, V: DeserializationVisitor<S>> {
+    visitor: Option<V>,
+    output: Option<V::Output>,
+}
+
+impl<S, V: DeserializationVisitor<S>> ErasedDeserializationVisitor<S> for ErasedVisitor<S, V> {
+    fn visit_null(
+        &mut self,
+        ctx: &mut dyn DeserializationContext<State = S>,
+        range: TextRange,
+        name: &str,
+    ) {
+        if let Some(visitor) = self.visitor.take() {
+            self.output = visitor.visit_null(ctx, range, name);
+        }
+    }
+
+    fn visit_bool(
+        &mut self,
+        ctx: &mut dyn DeserializationContext<State = S>,
+        value: bool,
+        range: TextRange,
+        name: &str,
+    ) {
+        if let Some(visitor) = self.visitor.take() {
+            self.output = visitor.visit_bool(ctx, value, range, name);
+        }
+    }
+
+    fn visit_number(
+        &mut self,
+        ctx: &mut dyn DeserializationContext<State = S>,
+        value: TextNumber,
+        range: TextRange,
+        name: &str,
+    ) {
+        if let Some(visitor) = self.visitor.take() {
+            self.output = visitor.visit_number(ctx, value, range, name);
+        }
+    }
+
+    fn visit_str(
+        &mut self,
+        ctx: &mut dyn DeserializationContext<State = S>,
+        value: Text,
+        range: TextRange,
+        name: &str,
+    ) {
+        if let Some(visitor) = self.visitor.take() {
+            self.output = visitor.visit_str(ctx, value, range, name);
+        }
+    }
+
+    fn visit_array(
+        &mut self,
+        ctx: &mut dyn DeserializationContext<State = S>,
+        items: &mut dyn ExactSizeIterator<Item = Option<Box<dyn DeserializableValue<State = S>>>>,
+        range: TextRange,
+        name: &str,
+    ) {
+        if let Some(visitor) = self.visitor.take() {
+            self.output = visitor.visit_array(ctx, items, range, name);
+        }
+    }
+
+    fn visit_map(
+        &mut self,
+        ctx: &mut dyn DeserializationContext<State = S>,
+        members: &mut MapMembers<'_, S>,
+        range: TextRange,
+        name: &str,
+    ) {
+        if let Some(visitor) = self.visitor.take() {
+            self.output = visitor.visit_map(ctx, members, range, name);
+        }
+    }
 }
 
 /// This trait represents a visitor that walks through a [DeserializableValue].
@@ -164,10 +409,13 @@ pub trait DeserializableValue: Sized {
 /// Most of the time you should implement [Deserializable] and rely on existing deserializable types.
 /// You should use a visitor only when you deserialize a `struct` or a union of several types.
 ///
+/// `S` is the [state](DeserializationContext::State) of the context that the `visit_` methods
+/// receive. A visitor that doesn't use the state implements the trait for any `S`.
+///
 /// ## Examples
 ///
 /// ```
-/// use biome_deserialize::{DeserializationDiagnostic, Deserializable, DeserializationContext, DeserializableValue, DeserializationVisitor, Text, DeserializableTypes};
+/// use biome_deserialize::{DeserializationDiagnostic, Deserializable, DeserializationContext, DeserializableValue, DeserializationVisitor, MapMembers, Text, DeserializableTypes};
 /// use biome_rowan::TextRange;
 ///
 /// #[derive(Debug, Eq, PartialEq)]
@@ -176,9 +424,9 @@ pub trait DeserializableValue: Sized {
 /// }
 ///
 /// impl Deserializable for Person {
-///     fn deserialize(
-///         ctx: &mut impl DeserializationContext,
-///         value: &impl DeserializableValue,
+///     fn deserialize<V: DeserializableValue>(
+///         ctx: &mut dyn DeserializationContext<State = V::State>,
+///         value: &V,
 ///         name: &str,
 ///     ) -> Option<Self> {
 ///         value.deserialize(ctx, PersonVisitor, name)
@@ -186,14 +434,14 @@ pub trait DeserializableValue: Sized {
 /// }
 ///
 /// struct PersonVisitor;
-/// impl DeserializationVisitor for PersonVisitor {
+/// impl<S> DeserializationVisitor<S> for PersonVisitor {
 ///     type Output = Person;
 ///     const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::MAP;
 ///
 ///     fn visit_map(
 ///         self,
-///         ctx: &mut impl DeserializationContext,
-///         members: impl Iterator<Item = Option<(impl DeserializableValue, impl DeserializableValue)>>,
+///         ctx: &mut dyn DeserializationContext<State = S>,
+///         members: &mut MapMembers<'_, S>,
 ///         range: TextRange,
 ///         _name: &str,
 ///     ) -> Option<Self::Output> {
@@ -230,7 +478,7 @@ pub trait DeserializableValue: Sized {
 /// ```
 ///
 /// ```
-/// use biome_deserialize::{DeserializationDiagnostic, Deserializable, DeserializationContext, DeserializableValue, DeserializationVisitor, Text, DeserializableTypes};
+/// use biome_deserialize::{DeserializationDiagnostic, Deserializable, DeserializationContext, DeserializableValue, DeserializationVisitor, MapMembers, Text, DeserializableTypes};
 /// use biome_rowan::TextRange;
 ///
 /// #[derive(Debug, Eq, PartialEq)]
@@ -240,9 +488,9 @@ pub trait DeserializableValue: Sized {
 /// }
 ///
 /// impl Deserializable for Union {
-///     fn deserialize(
-///         ctx: &mut impl DeserializationContext,
-///         value: &impl DeserializableValue,
+///     fn deserialize<V: DeserializableValue>(
+///         ctx: &mut dyn DeserializationContext<State = V::State>,
+///         value: &V,
 ///         name: &str,
 ///     ) -> Option<Self> {
 ///         value.deserialize(ctx, UnionVisitor, name)
@@ -250,13 +498,13 @@ pub trait DeserializableValue: Sized {
 /// }
 ///
 /// struct UnionVisitor;
-/// impl DeserializationVisitor for UnionVisitor {
+/// impl<S> DeserializationVisitor<S> for UnionVisitor {
 ///     type Output = Union;
 ///     const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::BOOL.union(DeserializableTypes::STR);
 ///
 ///     fn visit_bool(
 ///         self,
-///         ctx: &mut impl DeserializationContext,
+///         ctx: &mut dyn DeserializationContext<State = S>,
 ///         value: bool,
 ///         range: TextRange,
 ///         _name: &str,
@@ -266,7 +514,7 @@ pub trait DeserializableValue: Sized {
 ///
 ///     fn visit_str(
 ///         self,
-///         ctx: &mut impl DeserializationContext,
+///         ctx: &mut dyn DeserializationContext<State = S>,
 ///         value: Text,
 ///         range: TextRange,
 ///         _name: &str,
@@ -288,7 +536,7 @@ pub trait DeserializableValue: Sized {
 /// assert!(!deserialized.has_errors());
 /// assert_eq!(deserialized.into_deserialized(), Some(Union::Bool(true)));
 /// ```
-pub trait DeserializationVisitor: Sized {
+pub trait DeserializationVisitor<S>: Sized {
     /// The type of the deserialized form of the visited value.
     type Output;
 
@@ -301,7 +549,7 @@ pub trait DeserializationVisitor: Sized {
     /// The expected type is retrieved from [Self::EXPECTED_TYPE].
     fn visit_null(
         self,
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext<State = S>,
         range: TextRange,
         name: &str,
     ) -> Option<Self::Output> {
@@ -324,7 +572,7 @@ pub trait DeserializationVisitor: Sized {
     /// The expected type is retrieved from [Self::EXPECTED_TYPE].
     fn visit_bool(
         self,
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext<State = S>,
         _value: bool,
         range: TextRange,
         name: &str,
@@ -349,7 +597,7 @@ pub trait DeserializationVisitor: Sized {
     /// The expected type is retrieved from [Self::EXPECTED_TYPE].
     fn visit_number(
         self,
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext<State = S>,
         _value: TextNumber,
         range: TextRange,
         name: &str,
@@ -373,7 +621,7 @@ pub trait DeserializationVisitor: Sized {
     /// The expected type is retrieved from [Self::EXPECTED_TYPE].
     fn visit_str(
         self,
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext<State = S>,
         _value: Text,
         range: TextRange,
         name: &str,
@@ -397,8 +645,8 @@ pub trait DeserializationVisitor: Sized {
     /// The expected type is retrieved from [Self::EXPECTED_TYPE].
     fn visit_array(
         self,
-        ctx: &mut impl DeserializationContext,
-        _items: impl ExactSizeIterator<Item = Option<impl DeserializableValue>>,
+        ctx: &mut dyn DeserializationContext<State = S>,
+        _items: &mut dyn ExactSizeIterator<Item = Option<Box<dyn DeserializableValue<State = S>>>>,
         range: TextRange,
         name: &str,
     ) -> Option<Self::Output> {
@@ -421,10 +669,8 @@ pub trait DeserializationVisitor: Sized {
     /// The expected type is retrieved from [Self::EXPECTED_TYPE].
     fn visit_map(
         self,
-        ctx: &mut impl DeserializationContext,
-        _members: impl ExactSizeIterator<
-            Item = Option<(impl DeserializableValue, impl DeserializableValue)>,
-        >,
+        ctx: &mut dyn DeserializationContext<State = S>,
+        _members: &mut MapMembers<'_, S>,
         range: TextRange,
         name: &str,
     ) -> Option<Self::Output> {

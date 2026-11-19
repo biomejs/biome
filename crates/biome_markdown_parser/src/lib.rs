@@ -1,14 +1,17 @@
 #![deny(clippy::use_self)]
 
 use biome_markdown_factory::MarkdownSyntaxFactory;
-use biome_markdown_syntax::{MarkdownLanguage, MarkdownSyntaxNode, MdDocument};
-use biome_parser::{AnyParse, NodeParse, prelude::ParseDiagnostic, tree_sink::LosslessTreeSink};
-use biome_rowan::{AstNode, NodeCache};
+use biome_markdown_syntax::{MarkdownLanguage, MarkdownSyntaxNode, MdRoot};
+use biome_parser::tree_sink::{LosslessTreeSink, OffsetLosslessTreeSink};
+use biome_parser::{
+    AnyParse, EmbeddedNodeParse, NodeParse, SyntaxFeature, prelude::ParseDiagnostic,
+};
+use biome_rowan::{AstNode, NodeCache, SyntaxNodeWithOffset, TextSize};
 use parser::MarkdownParser;
 use syntax::parse_document;
 
+mod inline_phase;
 mod lexer;
-mod link_reference;
 mod parser;
 mod syntax;
 mod token_source;
@@ -25,11 +28,47 @@ pub use to_html::document_to_html;
 
 pub(crate) type MarkdownLosslessTreeSink<'source> =
     LosslessTreeSink<'source, MarkdownLanguage, MarkdownSyntaxFactory>;
+pub(crate) type MarkdownOffsetLosslessTreeSink<'source> =
+    OffsetLosslessTreeSink<'source, MarkdownLanguage, MarkdownSyntaxFactory>;
 
-/// Parse markdown source code with default options.
-pub fn parse_markdown(source: &str) -> MarkdownParse {
+fn parse_common(source: &str, options: &MarkdownParserOptions) -> parser::MarkdownParserOutput {
+    let mut parser = MarkdownParser::new(source, options.clone());
+
+    parse_document(&mut parser);
+
+    let mut output = parser.finish();
+    if !inline_phase::parse_deferred_inlines(source, options, &mut output) {
+        output.deferred_inlines.clear();
+    }
+    debug_assert!(output.deferred_inlines.is_empty());
+    output
+}
+
+/// Adds the diagnostics that need the whole tree, such as JSX tags that don't
+/// pair up, to the parse diagnostics of an MDX document.
+fn add_mdx_tree_diagnostics(
+    root: &MarkdownSyntaxNode,
+    options: &MarkdownParserOptions,
+    diagnostics: &mut Vec<ParseDiagnostic>,
+) {
+    #[cfg(feature = "lang_mdx")]
+    if options.is_mdx() {
+        let tree_diagnostics = syntax::jsx_tag_pairing_diagnostics(root);
+        if !tree_diagnostics.is_empty() {
+            *diagnostics = biome_parser::diagnostic::merge_diagnostics(
+                std::mem::take(diagnostics),
+                tree_diagnostics,
+            );
+        }
+    }
+    #[cfg(not(feature = "lang_mdx"))]
+    let _ = (root, options, diagnostics);
+}
+
+/// Parse markdown source code with the given options.
+pub fn parse_markdown(source: &str, options: MarkdownParserOptions) -> MarkdownParse {
     let mut cache = NodeCache::default();
-    parse_markdown_with_cache(source, &mut cache, MarkdownParserOptions::default())
+    parse_markdown_with_cache(source, &mut cache, options)
 }
 
 /// Parse markdown source code with custom options and a node cache.
@@ -38,26 +77,19 @@ pub fn parse_markdown_with_cache(
     cache: &mut NodeCache,
     options: MarkdownParserOptions,
 ) -> MarkdownParse {
-    let link_definitions =
-        link_reference::collect_link_reference_definitions(source, options.clone());
-    let mut parser = MarkdownParser::new(source, options);
-    parser.set_link_reference_definitions(link_definitions);
+    let output = parse_common(source, &options);
 
-    parse_document(&mut parser);
-
-    let (events, diagnostics, trivia, list_tightness, list_item_indents, quote_indents) =
-        parser.finish();
-
-    let mut tree_sink = MarkdownLosslessTreeSink::with_cache(source, &trivia, cache);
-    biome_parser::event::process(&mut tree_sink, events, diagnostics);
-    let (green, diagnostics) = tree_sink.finish();
+    let mut tree_sink = MarkdownLosslessTreeSink::with_cache(source, &output.trivia, cache);
+    biome_parser::event::process(&mut tree_sink, output.events, output.diagnostics);
+    let (green, mut diagnostics) = tree_sink.finish();
+    add_mdx_tree_diagnostics(&green, &options, &mut diagnostics);
 
     MarkdownParse::new(
         green,
         diagnostics,
-        list_tightness,
-        list_item_indents,
-        quote_indents,
+        output.list_tightness,
+        output.list_item_indents,
+        output.quote_indents,
     )
 }
 
@@ -126,8 +158,8 @@ impl MarkdownParse {
     ///
     /// # Panics
     /// Panics if the node represented by this parse result mismatches.
-    pub fn tree(&self) -> MdDocument {
-        MdDocument::unwrap_cast(self.syntax())
+    pub fn tree(&self) -> MdRoot {
+        MdRoot::unwrap_cast(self.syntax())
     }
 }
 
@@ -136,5 +168,154 @@ impl From<MarkdownParse> for AnyParse {
         let root = parse.syntax();
         let diagnostics = parse.into_diagnostics();
         NodeParse::new(root.as_send().unwrap(), diagnostics).into()
+    }
+}
+
+/// Parses Markdown `source` with a `base_offset` for embedded content.
+pub fn parse_markdown_with_offset(
+    source: &str,
+    base_offset: TextSize,
+    options: MarkdownParserOptions,
+) -> MarkdownOffsetParse {
+    parse_markdown_with_offset_and_cache(source, base_offset, &mut NodeCache::default(), options)
+}
+
+/// Parses Markdown `source` with a `base_offset` and `cache` for embedded content.
+pub fn parse_markdown_with_offset_and_cache(
+    source: &str,
+    base_offset: TextSize,
+    cache: &mut NodeCache,
+    options: MarkdownParserOptions,
+) -> MarkdownOffsetParse {
+    let output = parse_common(source, &options);
+
+    let mut tree_sink =
+        MarkdownOffsetLosslessTreeSink::with_cache(source, &output.trivia, cache, base_offset);
+    biome_parser::event::process(&mut tree_sink, output.events, output.diagnostics);
+    let (root, mut diagnostics) = tree_sink.finish();
+    add_mdx_tree_diagnostics(root.inner(), &options, &mut diagnostics);
+
+    MarkdownOffsetParse::new(
+        root,
+        diagnostics,
+        output.list_tightness,
+        output.list_item_indents,
+        output.quote_indents,
+    )
+}
+
+/// A utility struct for managing the result of an offset-aware Markdown parser job.
+#[derive(Clone, Debug)]
+pub struct MarkdownOffsetParse {
+    root: SyntaxNodeWithOffset<MarkdownLanguage>,
+    diagnostics: Vec<ParseDiagnostic>,
+    list_tightness: Vec<parser::ListTightness>,
+    list_item_indents: Vec<parser::ListItemIndent>,
+    quote_indents: Vec<parser::QuoteIndent>,
+}
+
+impl MarkdownOffsetParse {
+    pub fn new(
+        root: SyntaxNodeWithOffset<MarkdownLanguage>,
+        diagnostics: Vec<ParseDiagnostic>,
+        list_tightness: Vec<parser::ListTightness>,
+        list_item_indents: Vec<parser::ListItemIndent>,
+        quote_indents: Vec<parser::QuoteIndent>,
+    ) -> Self {
+        Self {
+            root,
+            diagnostics,
+            list_tightness,
+            list_item_indents,
+            quote_indents,
+        }
+    }
+
+    /// Returns the offset-aware syntax node represented by this parse result.
+    pub fn syntax(&self) -> SyntaxNodeWithOffset<MarkdownLanguage> {
+        self.root.clone()
+    }
+
+    /// Returns the diagnostics which occurred when parsing.
+    pub fn diagnostics(&self) -> &[ParseDiagnostic] {
+        &self.diagnostics
+    }
+
+    /// Retrieves the diagnostics which occurred when parsing.
+    pub fn into_diagnostics(self) -> Vec<ParseDiagnostic> {
+        self.diagnostics
+    }
+
+    /// Returns `true` if the parser encountered errors.
+    pub fn has_errors(&self) -> bool {
+        self.diagnostics
+            .iter()
+            .any(|diagnostic| diagnostic.is_error())
+    }
+
+    /// Returns the recorded tight/loose information for list nodes.
+    pub fn list_tightness(&self) -> &[parser::ListTightness] {
+        &self.list_tightness
+    }
+
+    /// Returns the recorded indentation information for list items.
+    pub fn list_item_indents(&self) -> &[parser::ListItemIndent] {
+        &self.list_item_indents
+    }
+
+    /// Returns the recorded indentation information for block quotes.
+    pub fn quote_indents(&self) -> &[parser::QuoteIndent] {
+        &self.quote_indents
+    }
+
+    /// Converts this parse into a typed AST node.
+    ///
+    /// # Panics
+    /// Panics if the node represented by this parse result mismatches.
+    pub fn tree(&self) -> MdRoot {
+        MdRoot::unwrap_cast(self.root.inner().clone())
+    }
+
+    /// Returns the base offset applied to this parse result.
+    pub fn base_offset(&self) -> TextSize {
+        self.root.base_offset()
+    }
+
+    /// Converts back to the underlying parse result, discarding offset information.
+    pub fn into_inner(self) -> MarkdownParse {
+        MarkdownParse::new(
+            self.root.into_inner(),
+            self.diagnostics,
+            self.list_tightness,
+            self.list_item_indents,
+            self.quote_indents,
+        )
+    }
+}
+
+impl From<MarkdownOffsetParse> for AnyParse {
+    fn from(parse: MarkdownOffsetParse) -> Self {
+        let root = parse.syntax();
+        let diagnostics = parse.into_diagnostics();
+        EmbeddedNodeParse::new(root.as_embedded_send(), diagnostics).into()
+    }
+}
+
+pub(crate) enum MarkdownSyntaxFeatures {
+    /// GitHub Flavored Markdown extensions.
+    Gfm,
+    /// The MDX variant, which adds ESM, expressions, and JSX, and drops
+    /// indented code, HTML, and autolinks.
+    Mdx,
+}
+
+impl SyntaxFeature for MarkdownSyntaxFeatures {
+    type Parser<'source> = MarkdownParser<'source>;
+
+    fn is_supported(&self, p: &Self::Parser<'_>) -> bool {
+        match self {
+            Self::Gfm => p.options().gfm,
+            Self::Mdx => p.options().is_mdx(),
+        }
     }
 }

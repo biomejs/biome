@@ -1,0 +1,115 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/at-rule/dynamic-at-root.scss
+---
+
+# Input
+
+```scss
+@use "sass:map";
+$query:"without: rule";
+$rules:media supports;
+.namespace{@at-root($query){.overlay{position:fixed}}}
+@at-root(without:$rules){.rules{color:red}}
+@at-root("with" + "out":media){.quoted{color:blue}}
+@at-root(without:media   supports){.static{color:green}}
+@at-root(map.get((mode:without,description:"a deliberately long label that makes the query exceed a normal formatting line"),mode):media supports){.long-query{color:red}}
+@media screen and (min-width:40rem){
+@supports(display:grid){
+.ancestor{
+@at-root($query){.query-filtered{color:purple}}
+@at-root(map.get((mode:without,description:"a deliberately long label that makes the query exceed a normal formatting line"),mode):map.get((excluded:media),excluded)){.computed-filtered{color:orange}}
+@at-root(without:$rules){.rules-filtered{color:teal}}
+}
+}
+}
+
+```
+
+
+# Formatted
+
+```scss
+@use "sass:map";
+$query: "without: rule";
+$rules: media supports;
+.namespace {
+	@at-root ($query) {
+		.overlay {
+			position: fixed;
+		}
+	}
+}
+@at-root (without: $rules) {
+	.rules {
+		color: red;
+	}
+}
+@at-root ("with" + "out": media) {
+	.quoted {
+		color: blue;
+	}
+}
+@at-root (without: media supports) {
+	.static {
+		color: green;
+	}
+}
+@at-root (
+	map.get(
+		(
+			mode: without,
+			description:
+				"a deliberately long label that makes the query exceed a normal formatting line",
+		),
+		mode
+	): media supports
+) {
+	.long-query {
+		color: red;
+	}
+}
+@media screen and (min-width: 40rem) {
+	@supports (display: grid) {
+		.ancestor {
+			@at-root ($query) {
+				.query-filtered {
+					color: purple;
+				}
+			}
+			@at-root (
+				map.get(
+					(
+						mode: without,
+						description:
+							"a deliberately long label that makes the query exceed a normal formatting line",
+					),
+					mode
+				):
+					map.get(
+						(
+							excluded: media,
+						),
+						excluded
+					)
+			) {
+				.computed-filtered {
+					color: orange;
+				}
+			}
+			@at-root (without: $rules) {
+				.rules-filtered {
+					color: teal;
+				}
+			}
+		}
+	}
+}
+
+```
+
+# Lines exceeding max width of 80 characters
+```
+   31: 				"a deliberately long label that makes the query exceed a normal formatting line",
+   53: 							"a deliberately long label that makes the query exceed a normal formatting line",
+```

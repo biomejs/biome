@@ -349,8 +349,8 @@ impl CssParenthesizedExpression {
     pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
-    pub fn expression(&self) -> CssComponentValueList {
-        support::list(&self.syntax, 1usize)
+    pub fn expression(&self) -> Option<AnyCssExpression> {
+        support::node(&self.syntax, 1usize)
     }
     pub fn r_paren_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 2usize)
@@ -367,7 +367,7 @@ impl Serialize for CssParenthesizedExpression {
 #[derive(Serialize)]
 pub struct CssParenthesizedExpressionFields {
     pub l_paren_token: SyntaxResult<SyntaxToken>,
-    pub expression: CssComponentValueList,
+    pub expression: Option<AnyCssExpression>,
     pub r_paren_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -553,7 +553,7 @@ impl CssUnaryExpression {
     pub fn operator(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
-    pub fn argument(&self) -> SyntaxResult<AnyCssValue> {
+    pub fn argument(&self) -> SyntaxResult<AnyCssExpression> {
         support::required_node(&self.syntax, 1usize)
     }
 }
@@ -568,7 +568,7 @@ impl Serialize for CssUnaryExpression {
 #[derive(Serialize)]
 pub struct CssUnaryExpressionFields {
     pub operator: SyntaxResult<SyntaxToken>,
-    pub argument: SyntaxResult<AnyCssValue>,
+    pub argument: SyntaxResult<AnyCssExpression>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssUnknownDimension {
@@ -846,6 +846,51 @@ pub struct TwArbitraryVariantFields {
     pub r_brack_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct TwArbitraryVariantSegment {
+    pub(crate) syntax: SyntaxNode,
+}
+impl TwArbitraryVariantSegment {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> TwArbitraryVariantSegmentFields {
+        TwArbitraryVariantSegmentFields {
+            l_brack_token: self.l_brack_token(),
+            value_token: self.value_token(),
+            r_brack_token: self.r_brack_token(),
+        }
+    }
+    pub fn l_brack_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn value_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn r_brack_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 2usize)
+    }
+}
+impl Serialize for TwArbitraryVariantSegment {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct TwArbitraryVariantSegmentFields {
+    pub l_brack_token: SyntaxResult<SyntaxToken>,
+    pub value_token: SyntaxResult<SyntaxToken>,
+    pub r_brack_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct TwCssVariableValue {
     pub(crate) syntax: SyntaxNode,
 }
@@ -862,18 +907,22 @@ impl TwCssVariableValue {
     pub fn as_fields(&self) -> TwCssVariableValueFields {
         TwCssVariableValueFields {
             l_paren_token: self.l_paren_token(),
-            value_token: self.value_token(),
+            type_hint: self.type_hint(),
+            value: self.value(),
             r_paren_token: self.r_paren_token(),
         }
     }
     pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
-    pub fn value_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 1usize)
+    pub fn type_hint(&self) -> Option<TwTypeHint> {
+        support::node(&self.syntax, 1usize)
+    }
+    pub fn value(&self) -> CssParameterList {
+        support::list(&self.syntax, 2usize)
     }
     pub fn r_paren_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 2usize)
+        support::required_token(&self.syntax, 3usize)
     }
 }
 impl Serialize for TwCssVariableValue {
@@ -887,14 +936,15 @@ impl Serialize for TwCssVariableValue {
 #[derive(Serialize)]
 pub struct TwCssVariableValueFields {
     pub l_paren_token: SyntaxResult<SyntaxToken>,
-    pub value_token: SyntaxResult<SyntaxToken>,
+    pub type_hint: Option<TwTypeHint>,
+    pub value: CssParameterList,
     pub r_paren_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
-pub struct TwDataAttribute {
+pub struct TwCssVariableVariantSegment {
     pub(crate) syntax: SyntaxNode,
 }
-impl TwDataAttribute {
+impl TwCssVariableVariantSegment {
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -904,24 +954,24 @@ impl TwDataAttribute {
     pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
         Self { syntax }
     }
-    pub fn as_fields(&self) -> TwDataAttributeFields {
-        TwDataAttributeFields {
-            data_token: self.data_token(),
-            minus_token: self.minus_token(),
+    pub fn as_fields(&self) -> TwCssVariableVariantSegmentFields {
+        TwCssVariableVariantSegmentFields {
+            l_paren_token: self.l_paren_token(),
             value: self.value(),
+            r_paren_token: self.r_paren_token(),
         }
     }
-    pub fn data_token(&self) -> SyntaxResult<SyntaxToken> {
+    pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
-    pub fn minus_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 1usize)
+    pub fn value(&self) -> CssParameterList {
+        support::list(&self.syntax, 1usize)
     }
-    pub fn value(&self) -> SyntaxResult<AnyTwDataAttributeValue> {
-        support::required_node(&self.syntax, 2usize)
+    pub fn r_paren_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 2usize)
     }
 }
-impl Serialize for TwDataAttribute {
+impl Serialize for TwCssVariableVariantSegment {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
@@ -930,10 +980,10 @@ impl Serialize for TwDataAttribute {
     }
 }
 #[derive(Serialize)]
-pub struct TwDataAttributeFields {
-    pub data_token: SyntaxResult<SyntaxToken>,
-    pub minus_token: SyntaxResult<SyntaxToken>,
-    pub value: SyntaxResult<AnyTwDataAttributeValue>,
+pub struct TwCssVariableVariantSegmentFields {
+    pub l_paren_token: SyntaxResult<SyntaxToken>,
+    pub value: CssParameterList,
+    pub r_paren_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct TwFullCandidate {
@@ -952,6 +1002,7 @@ impl TwFullCandidate {
     pub fn as_fields(&self) -> TwFullCandidateFields {
         TwFullCandidateFields {
             variants: self.variants(),
+            legacy_important_token: self.legacy_important_token(),
             negative_token: self.negative_token(),
             candidate: self.candidate(),
             excl_token: self.excl_token(),
@@ -960,14 +1011,17 @@ impl TwFullCandidate {
     pub fn variants(&self) -> TwVariantList {
         support::list(&self.syntax, 0usize)
     }
-    pub fn negative_token(&self) -> Option<SyntaxToken> {
+    pub fn legacy_important_token(&self) -> Option<SyntaxToken> {
         support::token(&self.syntax, 1usize)
     }
+    pub fn negative_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 2usize)
+    }
     pub fn candidate(&self) -> SyntaxResult<AnyTwCandidate> {
-        support::required_node(&self.syntax, 2usize)
+        support::required_node(&self.syntax, 3usize)
     }
     pub fn excl_token(&self) -> Option<SyntaxToken> {
-        support::token(&self.syntax, 3usize)
+        support::token(&self.syntax, 4usize)
     }
 }
 impl Serialize for TwFullCandidate {
@@ -981,6 +1035,7 @@ impl Serialize for TwFullCandidate {
 #[derive(Serialize)]
 pub struct TwFullCandidateFields {
     pub variants: TwVariantList,
+    pub legacy_important_token: Option<SyntaxToken>,
     pub negative_token: Option<SyntaxToken>,
     pub candidate: SyntaxResult<AnyTwCandidate>,
     pub excl_token: Option<SyntaxToken>,
@@ -1034,51 +1089,6 @@ pub struct TwFunctionalCandidateFields {
     pub minus_token: SyntaxResult<SyntaxToken>,
     pub value: SyntaxResult<AnyTwValue>,
     pub modifier: Option<AnyTwModifier>,
-}
-#[derive(Clone, PartialEq, Eq, Hash)]
-pub struct TwFunctionalVariant {
-    pub(crate) syntax: SyntaxNode,
-}
-impl TwFunctionalVariant {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn as_fields(&self) -> TwFunctionalVariantFields {
-        TwFunctionalVariantFields {
-            base_token: self.base_token(),
-            minus_token: self.minus_token(),
-            value: self.value(),
-        }
-    }
-    pub fn base_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 0usize)
-    }
-    pub fn minus_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 1usize)
-    }
-    pub fn value(&self) -> SyntaxResult<AnyTwValue> {
-        support::required_node(&self.syntax, 2usize)
-    }
-}
-impl Serialize for TwFunctionalVariant {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        self.as_fields().serialize(serializer)
-    }
-}
-#[derive(Serialize)]
-pub struct TwFunctionalVariantFields {
-    pub base_token: SyntaxResult<SyntaxToken>,
-    pub minus_token: SyntaxResult<SyntaxToken>,
-    pub value: SyntaxResult<AnyTwValue>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct TwModifier {
@@ -1153,6 +1163,41 @@ impl Serialize for TwNamedValue {
 }
 #[derive(Serialize)]
 pub struct TwNamedValueFields {
+    pub value_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct TwNamedVariantSegment {
+    pub(crate) syntax: SyntaxNode,
+}
+impl TwNamedVariantSegment {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> TwNamedVariantSegmentFields {
+        TwNamedVariantSegmentFields {
+            value_token: self.value_token(),
+        }
+    }
+    pub fn value_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+}
+impl Serialize for TwNamedVariantSegment {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct TwNamedVariantSegmentFields {
     pub value_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -1247,6 +1292,7 @@ impl TwRoot {
     pub fn as_fields(&self) -> TwRootFields {
         TwRootFields {
             bom_token: self.bom_token(),
+            leading_whitespace_token: self.leading_whitespace_token(),
             candidates: self.candidates(),
             eof_token: self.eof_token(),
         }
@@ -1254,11 +1300,14 @@ impl TwRoot {
     pub fn bom_token(&self) -> Option<SyntaxToken> {
         support::token(&self.syntax, 0usize)
     }
+    pub fn leading_whitespace_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 1usize)
+    }
     pub fn candidates(&self) -> TwCandidateList {
-        support::list(&self.syntax, 1usize)
+        support::list(&self.syntax, 2usize)
     }
     pub fn eof_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 2usize)
+        support::required_token(&self.syntax, 3usize)
     }
 }
 impl Serialize for TwRoot {
@@ -1272,6 +1321,7 @@ impl Serialize for TwRoot {
 #[derive(Serialize)]
 pub struct TwRootFields {
     pub bom_token: Option<SyntaxToken>,
+    pub leading_whitespace_token: Option<SyntaxToken>,
     pub candidates: TwCandidateList,
     pub eof_token: SyntaxResult<SyntaxToken>,
 }
@@ -1292,10 +1342,14 @@ impl TwStaticCandidate {
     pub fn as_fields(&self) -> TwStaticCandidateFields {
         TwStaticCandidateFields {
             base_token: self.base_token(),
+            modifier: self.modifier(),
         }
     }
     pub fn base_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
+    }
+    pub fn modifier(&self) -> Option<AnyTwModifier> {
+        support::node(&self.syntax, 1usize)
     }
 }
 impl Serialize for TwStaticCandidate {
@@ -1309,12 +1363,13 @@ impl Serialize for TwStaticCandidate {
 #[derive(Serialize)]
 pub struct TwStaticCandidateFields {
     pub base_token: SyntaxResult<SyntaxToken>,
+    pub modifier: Option<AnyTwModifier>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
-pub struct TwStaticVariant {
+pub struct TwTypeHint {
     pub(crate) syntax: SyntaxNode,
 }
-impl TwStaticVariant {
+impl TwTypeHint {
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -1324,16 +1379,20 @@ impl TwStaticVariant {
     pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
         Self { syntax }
     }
-    pub fn as_fields(&self) -> TwStaticVariantFields {
-        TwStaticVariantFields {
-            base_token: self.base_token(),
+    pub fn as_fields(&self) -> TwTypeHintFields {
+        TwTypeHintFields {
+            name_token: self.name_token(),
+            colon_token: self.colon_token(),
         }
     }
-    pub fn base_token(&self) -> SyntaxResult<SyntaxToken> {
+    pub fn name_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
+    pub fn colon_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
 }
-impl Serialize for TwStaticVariant {
+impl Serialize for TwTypeHint {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
@@ -1342,8 +1401,54 @@ impl Serialize for TwStaticVariant {
     }
 }
 #[derive(Serialize)]
-pub struct TwStaticVariantFields {
-    pub base_token: SyntaxResult<SyntaxToken>,
+pub struct TwTypeHintFields {
+    pub name_token: SyntaxResult<SyntaxToken>,
+    pub colon_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct TwVariantExpression {
+    pub(crate) syntax: SyntaxNode,
+}
+impl TwVariantExpression {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> TwVariantExpressionFields {
+        TwVariantExpressionFields {
+            segments: self.segments(),
+            glued_value: self.glued_value(),
+            modifier: self.modifier(),
+        }
+    }
+    pub fn segments(&self) -> TwVariantSegmentList {
+        support::list(&self.syntax, 0usize)
+    }
+    pub fn glued_value(&self) -> Option<TwArbitraryVariantSegment> {
+        support::node(&self.syntax, 1usize)
+    }
+    pub fn modifier(&self) -> Option<AnyTwModifier> {
+        support::node(&self.syntax, 2usize)
+    }
+}
+impl Serialize for TwVariantExpression {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct TwVariantExpressionFields {
+    pub segments: TwVariantSegmentList,
+    pub glued_value: Option<TwArbitraryVariantSegment>,
+    pub modifier: Option<AnyTwModifier>,
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssDimension {
@@ -1367,7 +1472,6 @@ impl AnyCssDimension {
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssExpression {
     CssBinaryExpression(CssBinaryExpression),
-    CssComponentValueList(CssComponentValueList),
     CssListOfComponentValuesExpression(CssListOfComponentValuesExpression),
     CssParenthesizedExpression(CssParenthesizedExpression),
     CssUnaryExpression(CssUnaryExpression),
@@ -1376,12 +1480,6 @@ impl AnyCssExpression {
     pub fn as_css_binary_expression(&self) -> Option<&CssBinaryExpression> {
         match &self {
             Self::CssBinaryExpression(item) => Some(item),
-            _ => None,
-        }
-    }
-    pub fn as_css_component_value_list(&self) -> Option<&CssComponentValueList> {
-        match &self {
-            Self::CssComponentValueList(item) => Some(item),
             _ => None,
         }
     }
@@ -1593,39 +1691,6 @@ impl AnyTwCandidate {
     }
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
-pub enum AnyTwDataAttributeValue {
-    TwArbitraryValue(TwArbitraryValue),
-    TwBogusValue(TwBogusValue),
-    TwNamedValue(TwNamedValue),
-    TwNumberValue(TwNumberValue),
-}
-impl AnyTwDataAttributeValue {
-    pub fn as_tw_arbitrary_value(&self) -> Option<&TwArbitraryValue> {
-        match &self {
-            Self::TwArbitraryValue(item) => Some(item),
-            _ => None,
-        }
-    }
-    pub fn as_tw_bogus_value(&self) -> Option<&TwBogusValue> {
-        match &self {
-            Self::TwBogusValue(item) => Some(item),
-            _ => None,
-        }
-    }
-    pub fn as_tw_named_value(&self) -> Option<&TwNamedValue> {
-        match &self {
-            Self::TwNamedValue(item) => Some(item),
-            _ => None,
-        }
-    }
-    pub fn as_tw_number_value(&self) -> Option<&TwNumberValue> {
-        match &self {
-            Self::TwNumberValue(item) => Some(item),
-            _ => None,
-        }
-    }
-}
-#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyTwFullCandidate {
     TwBogusCandidate(TwBogusCandidate),
     TwFullCandidate(TwFullCandidate),
@@ -1668,7 +1733,6 @@ pub enum AnyTwValue {
     TwArbitraryValue(TwArbitraryValue),
     TwBogusValue(TwBogusValue),
     TwCssVariableValue(TwCssVariableValue),
-    TwDataAttribute(TwDataAttribute),
     TwNamedValue(TwNamedValue),
     TwNumberValue(TwNumberValue),
     TwPercentageValue(TwPercentageValue),
@@ -1689,12 +1753,6 @@ impl AnyTwValue {
     pub fn as_tw_css_variable_value(&self) -> Option<&TwCssVariableValue> {
         match &self {
             Self::TwCssVariableValue(item) => Some(item),
-            _ => None,
-        }
-    }
-    pub fn as_tw_data_attribute(&self) -> Option<&TwDataAttribute> {
-        match &self {
-            Self::TwDataAttribute(item) => Some(item),
             _ => None,
         }
     }
@@ -1721,9 +1779,7 @@ impl AnyTwValue {
 pub enum AnyTwVariant {
     TwArbitraryVariant(TwArbitraryVariant),
     TwBogusVariant(TwBogusVariant),
-    TwDataAttribute(TwDataAttribute),
-    TwFunctionalVariant(TwFunctionalVariant),
-    TwStaticVariant(TwStaticVariant),
+    TwVariantExpression(TwVariantExpression),
 }
 impl AnyTwVariant {
     pub fn as_tw_arbitrary_variant(&self) -> Option<&TwArbitraryVariant> {
@@ -1738,21 +1794,42 @@ impl AnyTwVariant {
             _ => None,
         }
     }
-    pub fn as_tw_data_attribute(&self) -> Option<&TwDataAttribute> {
+    pub fn as_tw_variant_expression(&self) -> Option<&TwVariantExpression> {
         match &self {
-            Self::TwDataAttribute(item) => Some(item),
+            Self::TwVariantExpression(item) => Some(item),
             _ => None,
         }
     }
-    pub fn as_tw_functional_variant(&self) -> Option<&TwFunctionalVariant> {
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub enum AnyTwVariantSegment {
+    TwArbitraryVariantSegment(TwArbitraryVariantSegment),
+    TwBogusVariantSegment(TwBogusVariantSegment),
+    TwCssVariableVariantSegment(TwCssVariableVariantSegment),
+    TwNamedVariantSegment(TwNamedVariantSegment),
+}
+impl AnyTwVariantSegment {
+    pub fn as_tw_arbitrary_variant_segment(&self) -> Option<&TwArbitraryVariantSegment> {
         match &self {
-            Self::TwFunctionalVariant(item) => Some(item),
+            Self::TwArbitraryVariantSegment(item) => Some(item),
             _ => None,
         }
     }
-    pub fn as_tw_static_variant(&self) -> Option<&TwStaticVariant> {
+    pub fn as_tw_bogus_variant_segment(&self) -> Option<&TwBogusVariantSegment> {
         match &self {
-            Self::TwStaticVariant(item) => Some(item),
+            Self::TwBogusVariantSegment(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_tw_css_variable_variant_segment(&self) -> Option<&TwCssVariableVariantSegment> {
+        match &self {
+            Self::TwCssVariableVariantSegment(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_tw_named_variant_segment(&self) -> Option<&TwNamedVariantSegment> {
+        match &self {
+            Self::TwNamedVariantSegment(item) => Some(item),
             _ => None,
         }
     }
@@ -2190,7 +2267,10 @@ impl std::fmt::Debug for CssParenthesizedExpression {
                     "l_paren_token",
                     &support::DebugSyntaxResult(self.l_paren_token()),
                 )
-                .field("expression", &self.expression())
+                .field(
+                    "expression",
+                    &support::DebugOptionalElement(self.expression()),
+                )
                 .field(
                     "r_paren_token",
                     &support::DebugSyntaxResult(self.r_paren_token()),
@@ -2802,6 +2882,64 @@ impl From<TwArbitraryVariant> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl AstNode for TwArbitraryVariantSegment {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(TW_ARBITRARY_VARIANT_SEGMENT as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == TW_ARBITRARY_VARIANT_SEGMENT
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for TwArbitraryVariantSegment {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TwArbitraryVariantSegment")
+                .field(
+                    "l_brack_token",
+                    &support::DebugSyntaxResult(self.l_brack_token()),
+                )
+                .field(
+                    "value_token",
+                    &support::DebugSyntaxResult(self.value_token()),
+                )
+                .field(
+                    "r_brack_token",
+                    &support::DebugSyntaxResult(self.r_brack_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("TwArbitraryVariantSegment").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<TwArbitraryVariantSegment> for SyntaxNode {
+    fn from(n: TwArbitraryVariantSegment) -> Self {
+        n.syntax
+    }
+}
+impl From<TwArbitraryVariantSegment> for SyntaxElement {
+    fn from(n: TwArbitraryVariantSegment) -> Self {
+        n.syntax.into()
+    }
+}
 impl AstNode for TwCssVariableValue {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -2835,9 +2973,10 @@ impl std::fmt::Debug for TwCssVariableValue {
                     &support::DebugSyntaxResult(self.l_paren_token()),
                 )
                 .field(
-                    "value_token",
-                    &support::DebugSyntaxResult(self.value_token()),
+                    "type_hint",
+                    &support::DebugOptionalElement(self.type_hint()),
                 )
+                .field("value", &self.value())
                 .field(
                     "r_paren_token",
                     &support::DebugSyntaxResult(self.r_paren_token()),
@@ -2860,12 +2999,12 @@ impl From<TwCssVariableValue> for SyntaxElement {
         n.syntax.into()
     }
 }
-impl AstNode for TwDataAttribute {
+impl AstNode for TwCssVariableVariantSegment {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(TW_DATA_ATTRIBUTE as u16));
+        SyntaxKindSet::from_raw(RawSyntaxKind(TW_CSS_VARIABLE_VARIANT_SEGMENT as u16));
     fn can_cast(kind: SyntaxKind) -> bool {
-        kind == TW_DATA_ATTRIBUTE
+        kind == TW_CSS_VARIABLE_VARIANT_SEGMENT
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         if Self::can_cast(syntax.kind()) {
@@ -2881,34 +3020,37 @@ impl AstNode for TwDataAttribute {
         self.syntax
     }
 }
-impl std::fmt::Debug for TwDataAttribute {
+impl std::fmt::Debug for TwCssVariableVariantSegment {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
         let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
             DEPTH.set(current_depth + 1);
-            f.debug_struct("TwDataAttribute")
-                .field("data_token", &support::DebugSyntaxResult(self.data_token()))
+            f.debug_struct("TwCssVariableVariantSegment")
                 .field(
-                    "minus_token",
-                    &support::DebugSyntaxResult(self.minus_token()),
+                    "l_paren_token",
+                    &support::DebugSyntaxResult(self.l_paren_token()),
                 )
-                .field("value", &support::DebugSyntaxResult(self.value()))
+                .field("value", &self.value())
+                .field(
+                    "r_paren_token",
+                    &support::DebugSyntaxResult(self.r_paren_token()),
+                )
                 .finish()
         } else {
-            f.debug_struct("TwDataAttribute").finish()
+            f.debug_struct("TwCssVariableVariantSegment").finish()
         };
         DEPTH.set(current_depth);
         result
     }
 }
-impl From<TwDataAttribute> for SyntaxNode {
-    fn from(n: TwDataAttribute) -> Self {
+impl From<TwCssVariableVariantSegment> for SyntaxNode {
+    fn from(n: TwCssVariableVariantSegment) -> Self {
         n.syntax
     }
 }
-impl From<TwDataAttribute> for SyntaxElement {
-    fn from(n: TwDataAttribute) -> Self {
+impl From<TwCssVariableVariantSegment> for SyntaxElement {
+    fn from(n: TwCssVariableVariantSegment) -> Self {
         n.syntax.into()
     }
 }
@@ -2941,6 +3083,10 @@ impl std::fmt::Debug for TwFullCandidate {
             DEPTH.set(current_depth + 1);
             f.debug_struct("TwFullCandidate")
                 .field("variants", &self.variants())
+                .field(
+                    "legacy_important_token",
+                    &support::DebugOptionalElement(self.legacy_important_token()),
+                )
                 .field(
                     "negative_token",
                     &support::DebugOptionalElement(self.negative_token()),
@@ -3018,58 +3164,6 @@ impl From<TwFunctionalCandidate> for SyntaxNode {
 }
 impl From<TwFunctionalCandidate> for SyntaxElement {
     fn from(n: TwFunctionalCandidate) -> Self {
-        n.syntax.into()
-    }
-}
-impl AstNode for TwFunctionalVariant {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(TW_FUNCTIONAL_VARIANT as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == TW_FUNCTIONAL_VARIANT
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for TwFunctionalVariant {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("TwFunctionalVariant")
-                .field("base_token", &support::DebugSyntaxResult(self.base_token()))
-                .field(
-                    "minus_token",
-                    &support::DebugSyntaxResult(self.minus_token()),
-                )
-                .field("value", &support::DebugSyntaxResult(self.value()))
-                .finish()
-        } else {
-            f.debug_struct("TwFunctionalVariant").finish()
-        };
-        DEPTH.set(current_depth);
-        result
-    }
-}
-impl From<TwFunctionalVariant> for SyntaxNode {
-    fn from(n: TwFunctionalVariant) -> Self {
-        n.syntax
-    }
-}
-impl From<TwFunctionalVariant> for SyntaxElement {
-    fn from(n: TwFunctionalVariant) -> Self {
         n.syntax.into()
     }
 }
@@ -3171,6 +3265,56 @@ impl From<TwNamedValue> for SyntaxNode {
 }
 impl From<TwNamedValue> for SyntaxElement {
     fn from(n: TwNamedValue) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for TwNamedVariantSegment {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(TW_NAMED_VARIANT_SEGMENT as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == TW_NAMED_VARIANT_SEGMENT
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for TwNamedVariantSegment {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TwNamedVariantSegment")
+                .field(
+                    "value_token",
+                    &support::DebugSyntaxResult(self.value_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("TwNamedVariantSegment").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<TwNamedVariantSegment> for SyntaxNode {
+    fn from(n: TwNamedVariantSegment) -> Self {
+        n.syntax
+    }
+}
+impl From<TwNamedVariantSegment> for SyntaxElement {
+    fn from(n: TwNamedVariantSegment) -> Self {
         n.syntax.into()
     }
 }
@@ -3310,6 +3454,10 @@ impl std::fmt::Debug for TwRoot {
                     "bom_token",
                     &support::DebugOptionalElement(self.bom_token()),
                 )
+                .field(
+                    "leading_whitespace_token",
+                    &support::DebugOptionalElement(self.leading_whitespace_token()),
+                )
                 .field("candidates", &self.candidates())
                 .field("eof_token", &support::DebugSyntaxResult(self.eof_token()))
                 .finish()
@@ -3359,6 +3507,7 @@ impl std::fmt::Debug for TwStaticCandidate {
             DEPTH.set(current_depth + 1);
             f.debug_struct("TwStaticCandidate")
                 .field("base_token", &support::DebugSyntaxResult(self.base_token()))
+                .field("modifier", &support::DebugOptionalElement(self.modifier()))
                 .finish()
         } else {
             f.debug_struct("TwStaticCandidate").finish()
@@ -3377,12 +3526,12 @@ impl From<TwStaticCandidate> for SyntaxElement {
         n.syntax.into()
     }
 }
-impl AstNode for TwStaticVariant {
+impl AstNode for TwTypeHint {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(TW_STATIC_VARIANT as u16));
+        SyntaxKindSet::from_raw(RawSyntaxKind(TW_TYPE_HINT as u16));
     fn can_cast(kind: SyntaxKind) -> bool {
-        kind == TW_STATIC_VARIANT
+        kind == TW_TYPE_HINT
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         if Self::can_cast(syntax.kind()) {
@@ -3398,29 +3547,85 @@ impl AstNode for TwStaticVariant {
         self.syntax
     }
 }
-impl std::fmt::Debug for TwStaticVariant {
+impl std::fmt::Debug for TwTypeHint {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
         let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
             DEPTH.set(current_depth + 1);
-            f.debug_struct("TwStaticVariant")
-                .field("base_token", &support::DebugSyntaxResult(self.base_token()))
+            f.debug_struct("TwTypeHint")
+                .field("name_token", &support::DebugSyntaxResult(self.name_token()))
+                .field(
+                    "colon_token",
+                    &support::DebugSyntaxResult(self.colon_token()),
+                )
                 .finish()
         } else {
-            f.debug_struct("TwStaticVariant").finish()
+            f.debug_struct("TwTypeHint").finish()
         };
         DEPTH.set(current_depth);
         result
     }
 }
-impl From<TwStaticVariant> for SyntaxNode {
-    fn from(n: TwStaticVariant) -> Self {
+impl From<TwTypeHint> for SyntaxNode {
+    fn from(n: TwTypeHint) -> Self {
         n.syntax
     }
 }
-impl From<TwStaticVariant> for SyntaxElement {
-    fn from(n: TwStaticVariant) -> Self {
+impl From<TwTypeHint> for SyntaxElement {
+    fn from(n: TwTypeHint) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for TwVariantExpression {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(TW_VARIANT_EXPRESSION as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == TW_VARIANT_EXPRESSION
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for TwVariantExpression {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TwVariantExpression")
+                .field("segments", &self.segments())
+                .field(
+                    "glued_value",
+                    &support::DebugOptionalElement(self.glued_value()),
+                )
+                .field("modifier", &support::DebugOptionalElement(self.modifier()))
+                .finish()
+        } else {
+            f.debug_struct("TwVariantExpression").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<TwVariantExpression> for SyntaxNode {
+    fn from(n: TwVariantExpression) -> Self {
+        n.syntax
+    }
+}
+impl From<TwVariantExpression> for SyntaxElement {
+    fn from(n: TwVariantExpression) -> Self {
         n.syntax.into()
     }
 }
@@ -3489,11 +3694,6 @@ impl From<CssBinaryExpression> for AnyCssExpression {
         Self::CssBinaryExpression(node)
     }
 }
-impl From<CssComponentValueList> for AnyCssExpression {
-    fn from(node: CssComponentValueList) -> Self {
-        Self::CssComponentValueList(node)
-    }
-}
 impl From<CssListOfComponentValuesExpression> for AnyCssExpression {
     fn from(node: CssListOfComponentValuesExpression) -> Self {
         Self::CssListOfComponentValuesExpression(node)
@@ -3512,7 +3712,6 @@ impl From<CssUnaryExpression> for AnyCssExpression {
 impl AstNode for AnyCssExpression {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = CssBinaryExpression::KIND_SET
-        .union(CssComponentValueList::KIND_SET)
         .union(CssListOfComponentValuesExpression::KIND_SET)
         .union(CssParenthesizedExpression::KIND_SET)
         .union(CssUnaryExpression::KIND_SET);
@@ -3520,7 +3719,6 @@ impl AstNode for AnyCssExpression {
         matches!(
             kind,
             CSS_BINARY_EXPRESSION
-                | CSS_COMPONENT_VALUE_LIST
                 | CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION
                 | CSS_PARENTHESIZED_EXPRESSION
                 | CSS_UNARY_EXPRESSION
@@ -3529,9 +3727,6 @@ impl AstNode for AnyCssExpression {
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
             CSS_BINARY_EXPRESSION => Self::CssBinaryExpression(CssBinaryExpression { syntax }),
-            CSS_COMPONENT_VALUE_LIST => {
-                Self::CssComponentValueList(CssComponentValueList::cast(syntax)?)
-            }
             CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION => {
                 Self::CssListOfComponentValuesExpression(CssListOfComponentValuesExpression {
                     syntax,
@@ -3548,7 +3743,6 @@ impl AstNode for AnyCssExpression {
     fn syntax(&self) -> &SyntaxNode {
         match self {
             Self::CssBinaryExpression(it) => it.syntax(),
-            Self::CssComponentValueList(it) => it.syntax(),
             Self::CssListOfComponentValuesExpression(it) => it.syntax(),
             Self::CssParenthesizedExpression(it) => it.syntax(),
             Self::CssUnaryExpression(it) => it.syntax(),
@@ -3557,7 +3751,6 @@ impl AstNode for AnyCssExpression {
     fn into_syntax(self) -> SyntaxNode {
         match self {
             Self::CssBinaryExpression(it) => it.into_syntax(),
-            Self::CssComponentValueList(it) => it.into_syntax(),
             Self::CssListOfComponentValuesExpression(it) => it.into_syntax(),
             Self::CssParenthesizedExpression(it) => it.into_syntax(),
             Self::CssUnaryExpression(it) => it.into_syntax(),
@@ -3568,7 +3761,6 @@ impl std::fmt::Debug for AnyCssExpression {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::CssBinaryExpression(it) => std::fmt::Debug::fmt(it, f),
-            Self::CssComponentValueList(it) => std::fmt::Debug::fmt(it, f),
             Self::CssListOfComponentValuesExpression(it) => std::fmt::Debug::fmt(it, f),
             Self::CssParenthesizedExpression(it) => std::fmt::Debug::fmt(it, f),
             Self::CssUnaryExpression(it) => std::fmt::Debug::fmt(it, f),
@@ -3579,7 +3771,6 @@ impl From<AnyCssExpression> for SyntaxNode {
     fn from(n: AnyCssExpression) -> Self {
         match n {
             AnyCssExpression::CssBinaryExpression(it) => it.into_syntax(),
-            AnyCssExpression::CssComponentValueList(it) => it.into_syntax(),
             AnyCssExpression::CssListOfComponentValuesExpression(it) => it.into_syntax(),
             AnyCssExpression::CssParenthesizedExpression(it) => it.into_syntax(),
             AnyCssExpression::CssUnaryExpression(it) => it.into_syntax(),
@@ -4060,91 +4251,6 @@ impl From<AnyTwCandidate> for SyntaxElement {
         node.into()
     }
 }
-impl From<TwArbitraryValue> for AnyTwDataAttributeValue {
-    fn from(node: TwArbitraryValue) -> Self {
-        Self::TwArbitraryValue(node)
-    }
-}
-impl From<TwBogusValue> for AnyTwDataAttributeValue {
-    fn from(node: TwBogusValue) -> Self {
-        Self::TwBogusValue(node)
-    }
-}
-impl From<TwNamedValue> for AnyTwDataAttributeValue {
-    fn from(node: TwNamedValue) -> Self {
-        Self::TwNamedValue(node)
-    }
-}
-impl From<TwNumberValue> for AnyTwDataAttributeValue {
-    fn from(node: TwNumberValue) -> Self {
-        Self::TwNumberValue(node)
-    }
-}
-impl AstNode for AnyTwDataAttributeValue {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> = TwArbitraryValue::KIND_SET
-        .union(TwBogusValue::KIND_SET)
-        .union(TwNamedValue::KIND_SET)
-        .union(TwNumberValue::KIND_SET);
-    fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(
-            kind,
-            TW_ARBITRARY_VALUE | TW_BOGUS_VALUE | TW_NAMED_VALUE | TW_NUMBER_VALUE
-        )
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        let res = match syntax.kind() {
-            TW_ARBITRARY_VALUE => Self::TwArbitraryValue(TwArbitraryValue { syntax }),
-            TW_BOGUS_VALUE => Self::TwBogusValue(TwBogusValue { syntax }),
-            TW_NAMED_VALUE => Self::TwNamedValue(TwNamedValue { syntax }),
-            TW_NUMBER_VALUE => Self::TwNumberValue(TwNumberValue { syntax }),
-            _ => return None,
-        };
-        Some(res)
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        match self {
-            Self::TwArbitraryValue(it) => it.syntax(),
-            Self::TwBogusValue(it) => it.syntax(),
-            Self::TwNamedValue(it) => it.syntax(),
-            Self::TwNumberValue(it) => it.syntax(),
-        }
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        match self {
-            Self::TwArbitraryValue(it) => it.into_syntax(),
-            Self::TwBogusValue(it) => it.into_syntax(),
-            Self::TwNamedValue(it) => it.into_syntax(),
-            Self::TwNumberValue(it) => it.into_syntax(),
-        }
-    }
-}
-impl std::fmt::Debug for AnyTwDataAttributeValue {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::TwArbitraryValue(it) => std::fmt::Debug::fmt(it, f),
-            Self::TwBogusValue(it) => std::fmt::Debug::fmt(it, f),
-            Self::TwNamedValue(it) => std::fmt::Debug::fmt(it, f),
-            Self::TwNumberValue(it) => std::fmt::Debug::fmt(it, f),
-        }
-    }
-}
-impl From<AnyTwDataAttributeValue> for SyntaxNode {
-    fn from(n: AnyTwDataAttributeValue) -> Self {
-        match n {
-            AnyTwDataAttributeValue::TwArbitraryValue(it) => it.into_syntax(),
-            AnyTwDataAttributeValue::TwBogusValue(it) => it.into_syntax(),
-            AnyTwDataAttributeValue::TwNamedValue(it) => it.into_syntax(),
-            AnyTwDataAttributeValue::TwNumberValue(it) => it.into_syntax(),
-        }
-    }
-}
-impl From<AnyTwDataAttributeValue> for SyntaxElement {
-    fn from(n: AnyTwDataAttributeValue) -> Self {
-        let node: SyntaxNode = n.into();
-        node.into()
-    }
-}
 impl From<TwBogusCandidate> for AnyTwFullCandidate {
     fn from(node: TwBogusCandidate) -> Self {
         Self::TwBogusCandidate(node)
@@ -4279,11 +4385,6 @@ impl From<TwCssVariableValue> for AnyTwValue {
         Self::TwCssVariableValue(node)
     }
 }
-impl From<TwDataAttribute> for AnyTwValue {
-    fn from(node: TwDataAttribute) -> Self {
-        Self::TwDataAttribute(node)
-    }
-}
 impl From<TwNamedValue> for AnyTwValue {
     fn from(node: TwNamedValue) -> Self {
         Self::TwNamedValue(node)
@@ -4304,7 +4405,6 @@ impl AstNode for AnyTwValue {
     const KIND_SET: SyntaxKindSet<Language> = TwArbitraryValue::KIND_SET
         .union(TwBogusValue::KIND_SET)
         .union(TwCssVariableValue::KIND_SET)
-        .union(TwDataAttribute::KIND_SET)
         .union(TwNamedValue::KIND_SET)
         .union(TwNumberValue::KIND_SET)
         .union(TwPercentageValue::KIND_SET);
@@ -4314,7 +4414,6 @@ impl AstNode for AnyTwValue {
             TW_ARBITRARY_VALUE
                 | TW_BOGUS_VALUE
                 | TW_CSS_VARIABLE_VALUE
-                | TW_DATA_ATTRIBUTE
                 | TW_NAMED_VALUE
                 | TW_NUMBER_VALUE
                 | TW_PERCENTAGE_VALUE
@@ -4325,7 +4424,6 @@ impl AstNode for AnyTwValue {
             TW_ARBITRARY_VALUE => Self::TwArbitraryValue(TwArbitraryValue { syntax }),
             TW_BOGUS_VALUE => Self::TwBogusValue(TwBogusValue { syntax }),
             TW_CSS_VARIABLE_VALUE => Self::TwCssVariableValue(TwCssVariableValue { syntax }),
-            TW_DATA_ATTRIBUTE => Self::TwDataAttribute(TwDataAttribute { syntax }),
             TW_NAMED_VALUE => Self::TwNamedValue(TwNamedValue { syntax }),
             TW_NUMBER_VALUE => Self::TwNumberValue(TwNumberValue { syntax }),
             TW_PERCENTAGE_VALUE => Self::TwPercentageValue(TwPercentageValue { syntax }),
@@ -4338,7 +4436,6 @@ impl AstNode for AnyTwValue {
             Self::TwArbitraryValue(it) => it.syntax(),
             Self::TwBogusValue(it) => it.syntax(),
             Self::TwCssVariableValue(it) => it.syntax(),
-            Self::TwDataAttribute(it) => it.syntax(),
             Self::TwNamedValue(it) => it.syntax(),
             Self::TwNumberValue(it) => it.syntax(),
             Self::TwPercentageValue(it) => it.syntax(),
@@ -4349,7 +4446,6 @@ impl AstNode for AnyTwValue {
             Self::TwArbitraryValue(it) => it.into_syntax(),
             Self::TwBogusValue(it) => it.into_syntax(),
             Self::TwCssVariableValue(it) => it.into_syntax(),
-            Self::TwDataAttribute(it) => it.into_syntax(),
             Self::TwNamedValue(it) => it.into_syntax(),
             Self::TwNumberValue(it) => it.into_syntax(),
             Self::TwPercentageValue(it) => it.into_syntax(),
@@ -4362,7 +4458,6 @@ impl std::fmt::Debug for AnyTwValue {
             Self::TwArbitraryValue(it) => std::fmt::Debug::fmt(it, f),
             Self::TwBogusValue(it) => std::fmt::Debug::fmt(it, f),
             Self::TwCssVariableValue(it) => std::fmt::Debug::fmt(it, f),
-            Self::TwDataAttribute(it) => std::fmt::Debug::fmt(it, f),
             Self::TwNamedValue(it) => std::fmt::Debug::fmt(it, f),
             Self::TwNumberValue(it) => std::fmt::Debug::fmt(it, f),
             Self::TwPercentageValue(it) => std::fmt::Debug::fmt(it, f),
@@ -4375,7 +4470,6 @@ impl From<AnyTwValue> for SyntaxNode {
             AnyTwValue::TwArbitraryValue(it) => it.into_syntax(),
             AnyTwValue::TwBogusValue(it) => it.into_syntax(),
             AnyTwValue::TwCssVariableValue(it) => it.into_syntax(),
-            AnyTwValue::TwDataAttribute(it) => it.into_syntax(),
             AnyTwValue::TwNamedValue(it) => it.into_syntax(),
             AnyTwValue::TwNumberValue(it) => it.into_syntax(),
             AnyTwValue::TwPercentageValue(it) => it.into_syntax(),
@@ -4398,45 +4492,27 @@ impl From<TwBogusVariant> for AnyTwVariant {
         Self::TwBogusVariant(node)
     }
 }
-impl From<TwDataAttribute> for AnyTwVariant {
-    fn from(node: TwDataAttribute) -> Self {
-        Self::TwDataAttribute(node)
-    }
-}
-impl From<TwFunctionalVariant> for AnyTwVariant {
-    fn from(node: TwFunctionalVariant) -> Self {
-        Self::TwFunctionalVariant(node)
-    }
-}
-impl From<TwStaticVariant> for AnyTwVariant {
-    fn from(node: TwStaticVariant) -> Self {
-        Self::TwStaticVariant(node)
+impl From<TwVariantExpression> for AnyTwVariant {
+    fn from(node: TwVariantExpression) -> Self {
+        Self::TwVariantExpression(node)
     }
 }
 impl AstNode for AnyTwVariant {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = TwArbitraryVariant::KIND_SET
         .union(TwBogusVariant::KIND_SET)
-        .union(TwDataAttribute::KIND_SET)
-        .union(TwFunctionalVariant::KIND_SET)
-        .union(TwStaticVariant::KIND_SET);
+        .union(TwVariantExpression::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         matches!(
             kind,
-            TW_ARBITRARY_VARIANT
-                | TW_BOGUS_VARIANT
-                | TW_DATA_ATTRIBUTE
-                | TW_FUNCTIONAL_VARIANT
-                | TW_STATIC_VARIANT
+            TW_ARBITRARY_VARIANT | TW_BOGUS_VARIANT | TW_VARIANT_EXPRESSION
         )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
             TW_ARBITRARY_VARIANT => Self::TwArbitraryVariant(TwArbitraryVariant { syntax }),
             TW_BOGUS_VARIANT => Self::TwBogusVariant(TwBogusVariant { syntax }),
-            TW_DATA_ATTRIBUTE => Self::TwDataAttribute(TwDataAttribute { syntax }),
-            TW_FUNCTIONAL_VARIANT => Self::TwFunctionalVariant(TwFunctionalVariant { syntax }),
-            TW_STATIC_VARIANT => Self::TwStaticVariant(TwStaticVariant { syntax }),
+            TW_VARIANT_EXPRESSION => Self::TwVariantExpression(TwVariantExpression { syntax }),
             _ => return None,
         };
         Some(res)
@@ -4445,18 +4521,14 @@ impl AstNode for AnyTwVariant {
         match self {
             Self::TwArbitraryVariant(it) => it.syntax(),
             Self::TwBogusVariant(it) => it.syntax(),
-            Self::TwDataAttribute(it) => it.syntax(),
-            Self::TwFunctionalVariant(it) => it.syntax(),
-            Self::TwStaticVariant(it) => it.syntax(),
+            Self::TwVariantExpression(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
             Self::TwArbitraryVariant(it) => it.into_syntax(),
             Self::TwBogusVariant(it) => it.into_syntax(),
-            Self::TwDataAttribute(it) => it.into_syntax(),
-            Self::TwFunctionalVariant(it) => it.into_syntax(),
-            Self::TwStaticVariant(it) => it.into_syntax(),
+            Self::TwVariantExpression(it) => it.into_syntax(),
         }
     }
 }
@@ -4465,9 +4537,7 @@ impl std::fmt::Debug for AnyTwVariant {
         match self {
             Self::TwArbitraryVariant(it) => std::fmt::Debug::fmt(it, f),
             Self::TwBogusVariant(it) => std::fmt::Debug::fmt(it, f),
-            Self::TwDataAttribute(it) => std::fmt::Debug::fmt(it, f),
-            Self::TwFunctionalVariant(it) => std::fmt::Debug::fmt(it, f),
-            Self::TwStaticVariant(it) => std::fmt::Debug::fmt(it, f),
+            Self::TwVariantExpression(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
@@ -4476,14 +4546,108 @@ impl From<AnyTwVariant> for SyntaxNode {
         match n {
             AnyTwVariant::TwArbitraryVariant(it) => it.into_syntax(),
             AnyTwVariant::TwBogusVariant(it) => it.into_syntax(),
-            AnyTwVariant::TwDataAttribute(it) => it.into_syntax(),
-            AnyTwVariant::TwFunctionalVariant(it) => it.into_syntax(),
-            AnyTwVariant::TwStaticVariant(it) => it.into_syntax(),
+            AnyTwVariant::TwVariantExpression(it) => it.into_syntax(),
         }
     }
 }
 impl From<AnyTwVariant> for SyntaxElement {
     fn from(n: AnyTwVariant) -> Self {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
+impl From<TwArbitraryVariantSegment> for AnyTwVariantSegment {
+    fn from(node: TwArbitraryVariantSegment) -> Self {
+        Self::TwArbitraryVariantSegment(node)
+    }
+}
+impl From<TwBogusVariantSegment> for AnyTwVariantSegment {
+    fn from(node: TwBogusVariantSegment) -> Self {
+        Self::TwBogusVariantSegment(node)
+    }
+}
+impl From<TwCssVariableVariantSegment> for AnyTwVariantSegment {
+    fn from(node: TwCssVariableVariantSegment) -> Self {
+        Self::TwCssVariableVariantSegment(node)
+    }
+}
+impl From<TwNamedVariantSegment> for AnyTwVariantSegment {
+    fn from(node: TwNamedVariantSegment) -> Self {
+        Self::TwNamedVariantSegment(node)
+    }
+}
+impl AstNode for AnyTwVariantSegment {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> = TwArbitraryVariantSegment::KIND_SET
+        .union(TwBogusVariantSegment::KIND_SET)
+        .union(TwCssVariableVariantSegment::KIND_SET)
+        .union(TwNamedVariantSegment::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(
+            kind,
+            TW_ARBITRARY_VARIANT_SEGMENT
+                | TW_BOGUS_VARIANT_SEGMENT
+                | TW_CSS_VARIABLE_VARIANT_SEGMENT
+                | TW_NAMED_VARIANT_SEGMENT
+        )
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            TW_ARBITRARY_VARIANT_SEGMENT => {
+                Self::TwArbitraryVariantSegment(TwArbitraryVariantSegment { syntax })
+            }
+            TW_BOGUS_VARIANT_SEGMENT => {
+                Self::TwBogusVariantSegment(TwBogusVariantSegment { syntax })
+            }
+            TW_CSS_VARIABLE_VARIANT_SEGMENT => {
+                Self::TwCssVariableVariantSegment(TwCssVariableVariantSegment { syntax })
+            }
+            TW_NAMED_VARIANT_SEGMENT => {
+                Self::TwNamedVariantSegment(TwNamedVariantSegment { syntax })
+            }
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            Self::TwArbitraryVariantSegment(it) => it.syntax(),
+            Self::TwBogusVariantSegment(it) => it.syntax(),
+            Self::TwCssVariableVariantSegment(it) => it.syntax(),
+            Self::TwNamedVariantSegment(it) => it.syntax(),
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            Self::TwArbitraryVariantSegment(it) => it.into_syntax(),
+            Self::TwBogusVariantSegment(it) => it.into_syntax(),
+            Self::TwCssVariableVariantSegment(it) => it.into_syntax(),
+            Self::TwNamedVariantSegment(it) => it.into_syntax(),
+        }
+    }
+}
+impl std::fmt::Debug for AnyTwVariantSegment {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::TwArbitraryVariantSegment(it) => std::fmt::Debug::fmt(it, f),
+            Self::TwBogusVariantSegment(it) => std::fmt::Debug::fmt(it, f),
+            Self::TwCssVariableVariantSegment(it) => std::fmt::Debug::fmt(it, f),
+            Self::TwNamedVariantSegment(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyTwVariantSegment> for SyntaxNode {
+    fn from(n: AnyTwVariantSegment) -> Self {
+        match n {
+            AnyTwVariantSegment::TwArbitraryVariantSegment(it) => it.into_syntax(),
+            AnyTwVariantSegment::TwBogusVariantSegment(it) => it.into_syntax(),
+            AnyTwVariantSegment::TwCssVariableVariantSegment(it) => it.into_syntax(),
+            AnyTwVariantSegment::TwNamedVariantSegment(it) => it.into_syntax(),
+        }
+    }
+}
+impl From<AnyTwVariantSegment> for SyntaxElement {
+    fn from(n: AnyTwVariantSegment) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
@@ -4523,11 +4687,6 @@ impl std::fmt::Display for AnyTwCandidate {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
-impl std::fmt::Display for AnyTwDataAttributeValue {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(self.syntax(), f)
-    }
-}
 impl std::fmt::Display for AnyTwFullCandidate {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -4544,6 +4703,11 @@ impl std::fmt::Display for AnyTwValue {
     }
 }
 impl std::fmt::Display for AnyTwVariant {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AnyTwVariantSegment {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -4648,12 +4812,17 @@ impl std::fmt::Display for TwArbitraryVariant {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for TwArbitraryVariantSegment {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for TwCssVariableValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
-impl std::fmt::Display for TwDataAttribute {
+impl std::fmt::Display for TwCssVariableVariantSegment {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -4668,17 +4837,17 @@ impl std::fmt::Display for TwFunctionalCandidate {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
-impl std::fmt::Display for TwFunctionalVariant {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(self.syntax(), f)
-    }
-}
 impl std::fmt::Display for TwModifier {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
 impl std::fmt::Display for TwNamedValue {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for TwNamedVariantSegment {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -4703,7 +4872,12 @@ impl std::fmt::Display for TwStaticCandidate {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
-impl std::fmt::Display for TwStaticVariant {
+impl std::fmt::Display for TwTypeHint {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for TwVariantExpression {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -5044,7 +5218,63 @@ impl From<TwBogusVariant> for SyntaxElement {
         n.syntax.into()
     }
 }
-biome_rowan::declare_node_union! { pub AnyTwBogusNode = CssBogusPropertyValue | TwBogus | TwBogusCandidate | TwBogusModifier | TwBogusValue | TwBogusVariant }
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub struct TwBogusVariantSegment {
+    syntax: SyntaxNode,
+}
+impl TwBogusVariantSegment {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn items(&self) -> SyntaxElementChildren {
+        support::elements(&self.syntax)
+    }
+}
+impl AstNode for TwBogusVariantSegment {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(TW_BOGUS_VARIANT_SEGMENT as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == TW_BOGUS_VARIANT_SEGMENT
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for TwBogusVariantSegment {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("TwBogusVariantSegment")
+            .field("items", &DebugSyntaxElementChildren(self.items()))
+            .finish()
+    }
+}
+impl From<TwBogusVariantSegment> for SyntaxNode {
+    fn from(n: TwBogusVariantSegment) -> Self {
+        n.syntax
+    }
+}
+impl From<TwBogusVariantSegment> for SyntaxElement {
+    fn from(n: TwBogusVariantSegment) -> Self {
+        n.syntax.into()
+    }
+}
+biome_rowan::declare_node_union! { pub AnyTwBogusNode = CssBogusPropertyValue | TwBogus | TwBogusCandidate | TwBogusModifier | TwBogusValue | TwBogusVariant | TwBogusVariantSegment }
 #[derive(Clone, Eq, PartialEq, Hash)]
 pub struct CssComponentValueList {
     syntax_list: SyntaxList,
@@ -5343,7 +5573,7 @@ impl Serialize for TwCandidateList {
         seq.end()
     }
 }
-impl AstNodeList for TwCandidateList {
+impl AstSeparatedList for TwCandidateList {
     type Language = Language;
     type Node = AnyTwFullCandidate;
     fn syntax_list(&self) -> &SyntaxList {
@@ -5356,19 +5586,19 @@ impl AstNodeList for TwCandidateList {
 impl Debug for TwCandidateList {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         f.write_str("TwCandidateList ")?;
-        f.debug_list().entries(self.iter()).finish()
+        f.debug_list().entries(self.elements()).finish()
     }
 }
-impl IntoIterator for &TwCandidateList {
-    type Item = AnyTwFullCandidate;
-    type IntoIter = AstNodeListIterator<Language, AnyTwFullCandidate>;
+impl IntoIterator for TwCandidateList {
+    type Item = SyntaxResult<AnyTwFullCandidate>;
+    type IntoIter = AstSeparatedListNodesIterator<Language, AnyTwFullCandidate>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }
 }
-impl IntoIterator for TwCandidateList {
-    type Item = AnyTwFullCandidate;
-    type IntoIter = AstNodeListIterator<Language, AnyTwFullCandidate>;
+impl IntoIterator for &TwCandidateList {
+    type Item = SyntaxResult<AnyTwFullCandidate>;
+    type IntoIter = AstSeparatedListNodesIterator<Language, AnyTwFullCandidate>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }
@@ -5451,6 +5681,88 @@ impl IntoIterator for TwVariantList {
 impl IntoIterator for &TwVariantList {
     type Item = SyntaxResult<AnyTwVariant>;
     type IntoIter = AstSeparatedListNodesIterator<Language, AnyTwVariant>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+#[derive(Clone, Eq, PartialEq, Hash)]
+pub struct TwVariantSegmentList {
+    syntax_list: SyntaxList,
+}
+impl TwVariantSegmentList {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self {
+            syntax_list: syntax.into_list(),
+        }
+    }
+}
+impl AstNode for TwVariantSegmentList {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(TW_VARIANT_SEGMENT_LIST as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == TW_VARIANT_SEGMENT_LIST
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self {
+                syntax_list: syntax.into_list(),
+            })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        self.syntax_list.node()
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax_list.into_node()
+    }
+}
+impl Serialize for TwVariantSegmentList {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut seq = serializer.serialize_seq(Some(self.len()))?;
+        for e in self.iter() {
+            seq.serialize_element(&e)?;
+        }
+        seq.end()
+    }
+}
+impl AstSeparatedList for TwVariantSegmentList {
+    type Language = Language;
+    type Node = AnyTwVariantSegment;
+    fn syntax_list(&self) -> &SyntaxList {
+        &self.syntax_list
+    }
+    fn into_syntax_list(self) -> SyntaxList {
+        self.syntax_list
+    }
+}
+impl Debug for TwVariantSegmentList {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.write_str("TwVariantSegmentList ")?;
+        f.debug_list().entries(self.elements()).finish()
+    }
+}
+impl IntoIterator for TwVariantSegmentList {
+    type Item = SyntaxResult<AnyTwVariantSegment>;
+    type IntoIter = AstSeparatedListNodesIterator<Language, AnyTwVariantSegment>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+impl IntoIterator for &TwVariantSegmentList {
+    type Item = SyntaxResult<AnyTwVariantSegment>;
+    type IntoIter = AstSeparatedListNodesIterator<Language, AnyTwVariantSegment>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }

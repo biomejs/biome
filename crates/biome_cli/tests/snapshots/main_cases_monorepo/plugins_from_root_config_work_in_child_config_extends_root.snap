@@ -2,18 +2,10 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
-## `packages/mobile/biome.json`
+## Command
 
-```json
-{
-  "extends": "//",
-  "linter": {
-    "enabled": true,
-    "rules": {
-      "recommended": true
-    }
-  }
-}
+```shell
+biome lint '<TEMP_DIR>/plugins_from_root_config_work_in_child_config_extends_root/packages/mobile/src/file.js'
 ```
 
 ## `biome.json`
@@ -25,7 +17,21 @@ expression: redactor(content)
   "linter": {
     "enabled": true,
     "rules": {
-      "recommended": true
+      "preset": "recommended"
+    }
+  }
+}
+```
+
+## `packages/mobile/biome.json`
+
+```json
+{
+  "extends": "//",
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "preset": "recommended"
     }
   }
 }

@@ -1,6 +1,6 @@
 use biome_configuration::Configuration;
 use biome_deserialize::json::deserialize_from_json_str;
-use biome_fs::{BiomePath, FileSystem, OsFileSystem};
+use biome_fs::{BiomePath, FileSystem, MemoryFileSystem, OsFileSystem};
 use biome_json_parser::JsonParserOptions;
 use camino::Utf8PathBuf;
 
@@ -9,6 +9,37 @@ use crate::scanner::WorkspaceScannerBridge;
 use crate::settings::ModuleGraphResolutionKind;
 use crate::test_utils::setup_workspace_and_open_project;
 use crate::workspace::{GetFileContentParams, ScanKind, ScanProjectParams, UpdateSettingsParams};
+
+#[test]
+fn scan_project_result_does_not_expose_source_file_candidates() {
+    const SOURCE: &str = "const value = 1;";
+
+    let fs = MemoryFileSystem::default();
+    let file_path = Utf8PathBuf::from("/project/file.js");
+    fs.insert(file_path.clone(), SOURCE);
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/project");
+
+    let result = workspace
+        .scan_project(ScanProjectParams {
+            project_key,
+            watch: false,
+            force: false,
+            scan_kind: ScanKind::Project,
+            verbose: false,
+        })
+        .unwrap();
+
+    let content = workspace
+        .get_file_content(GetFileContentParams {
+            project_key,
+            path: BiomePath::new(file_path),
+        })
+        .unwrap();
+
+    assert_eq!(content, SOURCE);
+    assert!(result.configuration_files.is_empty());
+}
 
 #[test]
 #[cfg(any(target_os = "linux", target_os = "macos"))]

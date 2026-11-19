@@ -1,0 +1,727 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: embeddedClasses.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<template>
+  <div :class="['w-4 h-4', selected && 'px-2 py-2']" />
+  <div v-bind:class="{ 'mr-3 ml-3': active }" />
+  <div :class="active ? `w-4 h-4` : 'px-2 py-2'" />
+  <div :class="['w-4 h-4', [active && 'px-2 py-2']]" />
+  <div :class="{ ['mr-3 ml-3']: active }" />
+  <div :class="`w-4 h-4 ${active ? 'px-2 py-2' : 'mr-3 ml-3'}`" />
+  <div :class="classes || 'w-4 h-4'" />
+  <div :class="classes ?? 'px-2 py-2'" />
+  <div :class="(ignored, 'w-4 h-4')" />
+  <div :class="'w-4 h-4 ' + extra" />
+  <div :class="[...['w-4 h-4']]" />
+  <div :class="{...{'px-2 py-2': active}}" />
+  <div :class="cached = 'w-4 h-4'" />
+  <div :class="cached += ' w-4 h-4'" />
+  <div :class="cached ??= 'w-4 h-4'" />
+</template>
+
+```
+
+# Diagnostics
+```
+embeddedClasses.vue:3:18 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These Tailwind classes can be replaced with a shorthand class.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <template>
+  > 3 │   <div :class="['w-4 h-4', selected && 'px-2 py-2']" />
+      │                  ^^^
+    4 │   <div v-bind:class="{ 'mr-3 ml-3': active }" />
+    5 │   <div :class="active ? `w-4 h-4` : 'px-2 py-2'" />
+  
+  i Compressible utility used here.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <template>
+  > 3 │   <div :class="['w-4 h-4', selected && 'px-2 py-2']" />
+      │                      ^^^
+    4 │   <div v-bind:class="{ 'mr-3 ml-3': active }" />
+    5 │   <div :class="active ? `w-4 h-4` : 'px-2 py-2'" />
+  
+  i Using fewer classes reduces duplication and improves readability.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the Tailwind shorthand classes.
+  
+  - ['w-4·h-4',·selected·&&·'px-2·py-2']
+  + ['size-4',·selected·&&·'px-2·py-2']
+  
+
+```
+
+```
+embeddedClasses.vue:3:41 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These Tailwind classes can be replaced with a shorthand class.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <template>
+  > 3 │   <div :class="['w-4 h-4', selected && 'px-2 py-2']" />
+      │                                         ^^^^
+    4 │   <div v-bind:class="{ 'mr-3 ml-3': active }" />
+    5 │   <div :class="active ? `w-4 h-4` : 'px-2 py-2'" />
+  
+  i Compressible utility used here.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <template>
+  > 3 │   <div :class="['w-4 h-4', selected && 'px-2 py-2']" />
+      │                                              ^^^^
+    4 │   <div v-bind:class="{ 'mr-3 ml-3': active }" />
+    5 │   <div :class="active ? `w-4 h-4` : 'px-2 py-2'" />
+  
+  i Using fewer classes reduces duplication and improves readability.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the Tailwind shorthand classes.
+  
+  - ['w-4·h-4',·selected·&&·'px-2·py-2']
+  + ['w-4·h-4',·selected·&&·'p-2']
+  
+
+```
+
+```
+embeddedClasses.vue:4:30 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These Tailwind classes can be replaced with a shorthand class.
+  
+    2 │ <template>
+    3 │   <div :class="['w-4 h-4', selected && 'px-2 py-2']" />
+  > 4 │   <div v-bind:class="{ 'mr-3 ml-3': active }" />
+      │                              ^^^^
+    5 │   <div :class="active ? `w-4 h-4` : 'px-2 py-2'" />
+    6 │   <div :class="['w-4 h-4', [active && 'px-2 py-2']]" />
+  
+  i Compressible utility used here.
+  
+    2 │ <template>
+    3 │   <div :class="['w-4 h-4', selected && 'px-2 py-2']" />
+  > 4 │   <div v-bind:class="{ 'mr-3 ml-3': active }" />
+      │                         ^^^^
+    5 │   <div :class="active ? `w-4 h-4` : 'px-2 py-2'" />
+    6 │   <div :class="['w-4 h-4', [active && 'px-2 py-2']]" />
+  
+  i Using fewer classes reduces duplication and improves readability.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the Tailwind shorthand classes.
+  
+  - {·'mr-3·ml-3':·active·}
+  + {·'mx-3':·active·}
+  
+
+```
+
+```
+embeddedClasses.vue:5:26 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These Tailwind classes can be replaced with a shorthand class.
+  
+    3 │   <div :class="['w-4 h-4', selected && 'px-2 py-2']" />
+    4 │   <div v-bind:class="{ 'mr-3 ml-3': active }" />
+  > 5 │   <div :class="active ? `w-4 h-4` : 'px-2 py-2'" />
+      │                          ^^^
+    6 │   <div :class="['w-4 h-4', [active && 'px-2 py-2']]" />
+    7 │   <div :class="{ ['mr-3 ml-3']: active }" />
+  
+  i Compressible utility used here.
+  
+    3 │   <div :class="['w-4 h-4', selected && 'px-2 py-2']" />
+    4 │   <div v-bind:class="{ 'mr-3 ml-3': active }" />
+  > 5 │   <div :class="active ? `w-4 h-4` : 'px-2 py-2'" />
+      │                              ^^^
+    6 │   <div :class="['w-4 h-4', [active && 'px-2 py-2']]" />
+    7 │   <div :class="{ ['mr-3 ml-3']: active }" />
+  
+  i Using fewer classes reduces duplication and improves readability.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the Tailwind shorthand classes.
+  
+  - active·?·`w-4·h-4`·:·'px-2·py-2'
+  + active·?·`size-4`·:·'px-2·py-2'
+  
+
+```
+
+```
+embeddedClasses.vue:5:38 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These Tailwind classes can be replaced with a shorthand class.
+  
+    3 │   <div :class="['w-4 h-4', selected && 'px-2 py-2']" />
+    4 │   <div v-bind:class="{ 'mr-3 ml-3': active }" />
+  > 5 │   <div :class="active ? `w-4 h-4` : 'px-2 py-2'" />
+      │                                      ^^^^
+    6 │   <div :class="['w-4 h-4', [active && 'px-2 py-2']]" />
+    7 │   <div :class="{ ['mr-3 ml-3']: active }" />
+  
+  i Compressible utility used here.
+  
+    3 │   <div :class="['w-4 h-4', selected && 'px-2 py-2']" />
+    4 │   <div v-bind:class="{ 'mr-3 ml-3': active }" />
+  > 5 │   <div :class="active ? `w-4 h-4` : 'px-2 py-2'" />
+      │                                           ^^^^
+    6 │   <div :class="['w-4 h-4', [active && 'px-2 py-2']]" />
+    7 │   <div :class="{ ['mr-3 ml-3']: active }" />
+  
+  i Using fewer classes reduces duplication and improves readability.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the Tailwind shorthand classes.
+  
+  - active·?·`w-4·h-4`·:·'px-2·py-2'
+  + active·?·`w-4·h-4`·:·'p-2'
+  
+
+```
+
+```
+embeddedClasses.vue:6:18 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These Tailwind classes can be replaced with a shorthand class.
+  
+    4 │   <div v-bind:class="{ 'mr-3 ml-3': active }" />
+    5 │   <div :class="active ? `w-4 h-4` : 'px-2 py-2'" />
+  > 6 │   <div :class="['w-4 h-4', [active && 'px-2 py-2']]" />
+      │                  ^^^
+    7 │   <div :class="{ ['mr-3 ml-3']: active }" />
+    8 │   <div :class="`w-4 h-4 ${active ? 'px-2 py-2' : 'mr-3 ml-3'}`" />
+  
+  i Compressible utility used here.
+  
+    4 │   <div v-bind:class="{ 'mr-3 ml-3': active }" />
+    5 │   <div :class="active ? `w-4 h-4` : 'px-2 py-2'" />
+  > 6 │   <div :class="['w-4 h-4', [active && 'px-2 py-2']]" />
+      │                      ^^^
+    7 │   <div :class="{ ['mr-3 ml-3']: active }" />
+    8 │   <div :class="`w-4 h-4 ${active ? 'px-2 py-2' : 'mr-3 ml-3'}`" />
+  
+  i Using fewer classes reduces duplication and improves readability.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the Tailwind shorthand classes.
+  
+  - ['w-4·h-4',·[active·&&·'px-2·py-2']]
+  + ['size-4',·[active·&&·'px-2·py-2']]
+  
+
+```
+
+```
+embeddedClasses.vue:6:40 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These Tailwind classes can be replaced with a shorthand class.
+  
+    4 │   <div v-bind:class="{ 'mr-3 ml-3': active }" />
+    5 │   <div :class="active ? `w-4 h-4` : 'px-2 py-2'" />
+  > 6 │   <div :class="['w-4 h-4', [active && 'px-2 py-2']]" />
+      │                                        ^^^^
+    7 │   <div :class="{ ['mr-3 ml-3']: active }" />
+    8 │   <div :class="`w-4 h-4 ${active ? 'px-2 py-2' : 'mr-3 ml-3'}`" />
+  
+  i Compressible utility used here.
+  
+    4 │   <div v-bind:class="{ 'mr-3 ml-3': active }" />
+    5 │   <div :class="active ? `w-4 h-4` : 'px-2 py-2'" />
+  > 6 │   <div :class="['w-4 h-4', [active && 'px-2 py-2']]" />
+      │                                             ^^^^
+    7 │   <div :class="{ ['mr-3 ml-3']: active }" />
+    8 │   <div :class="`w-4 h-4 ${active ? 'px-2 py-2' : 'mr-3 ml-3'}`" />
+  
+  i Using fewer classes reduces duplication and improves readability.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the Tailwind shorthand classes.
+  
+  - ['w-4·h-4',·[active·&&·'px-2·py-2']]
+  + ['w-4·h-4',·[active·&&·'p-2']]
+  
+
+```
+
+```
+embeddedClasses.vue:7:25 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These Tailwind classes can be replaced with a shorthand class.
+  
+    5 │   <div :class="active ? `w-4 h-4` : 'px-2 py-2'" />
+    6 │   <div :class="['w-4 h-4', [active && 'px-2 py-2']]" />
+  > 7 │   <div :class="{ ['mr-3 ml-3']: active }" />
+      │                         ^^^^
+    8 │   <div :class="`w-4 h-4 ${active ? 'px-2 py-2' : 'mr-3 ml-3'}`" />
+    9 │   <div :class="classes || 'w-4 h-4'" />
+  
+  i Compressible utility used here.
+  
+    5 │   <div :class="active ? `w-4 h-4` : 'px-2 py-2'" />
+    6 │   <div :class="['w-4 h-4', [active && 'px-2 py-2']]" />
+  > 7 │   <div :class="{ ['mr-3 ml-3']: active }" />
+      │                    ^^^^
+    8 │   <div :class="`w-4 h-4 ${active ? 'px-2 py-2' : 'mr-3 ml-3'}`" />
+    9 │   <div :class="classes || 'w-4 h-4'" />
+  
+  i Using fewer classes reduces duplication and improves readability.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the Tailwind shorthand classes.
+  
+  - {·['mr-3·ml-3']:·active·}
+  + {·['mx-3']:·active·}
+  
+
+```
+
+```
+embeddedClasses.vue:8:17 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These Tailwind classes can be replaced with a shorthand class.
+  
+     6 │   <div :class="['w-4 h-4', [active && 'px-2 py-2']]" />
+     7 │   <div :class="{ ['mr-3 ml-3']: active }" />
+   > 8 │   <div :class="`w-4 h-4 ${active ? 'px-2 py-2' : 'mr-3 ml-3'}`" />
+       │                 ^^^
+     9 │   <div :class="classes || 'w-4 h-4'" />
+    10 │   <div :class="classes ?? 'px-2 py-2'" />
+  
+  i Compressible utility used here.
+  
+     6 │   <div :class="['w-4 h-4', [active && 'px-2 py-2']]" />
+     7 │   <div :class="{ ['mr-3 ml-3']: active }" />
+   > 8 │   <div :class="`w-4 h-4 ${active ? 'px-2 py-2' : 'mr-3 ml-3'}`" />
+       │                     ^^^
+     9 │   <div :class="classes || 'w-4 h-4'" />
+    10 │   <div :class="classes ?? 'px-2 py-2'" />
+  
+  i Using fewer classes reduces duplication and improves readability.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the Tailwind shorthand classes.
+  
+  - `w-4·h-4·${active·?·'px-2·py-2'·:·'mr-3·ml-3'}`
+  + `size-4·${active·?·'px-2·py-2'·:·'mr-3·ml-3'}`
+  
+
+```
+
+```
+embeddedClasses.vue:8:37 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These Tailwind classes can be replaced with a shorthand class.
+  
+     6 │   <div :class="['w-4 h-4', [active && 'px-2 py-2']]" />
+     7 │   <div :class="{ ['mr-3 ml-3']: active }" />
+   > 8 │   <div :class="`w-4 h-4 ${active ? 'px-2 py-2' : 'mr-3 ml-3'}`" />
+       │                                     ^^^^
+     9 │   <div :class="classes || 'w-4 h-4'" />
+    10 │   <div :class="classes ?? 'px-2 py-2'" />
+  
+  i Compressible utility used here.
+  
+     6 │   <div :class="['w-4 h-4', [active && 'px-2 py-2']]" />
+     7 │   <div :class="{ ['mr-3 ml-3']: active }" />
+   > 8 │   <div :class="`w-4 h-4 ${active ? 'px-2 py-2' : 'mr-3 ml-3'}`" />
+       │                                          ^^^^
+     9 │   <div :class="classes || 'w-4 h-4'" />
+    10 │   <div :class="classes ?? 'px-2 py-2'" />
+  
+  i Using fewer classes reduces duplication and improves readability.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the Tailwind shorthand classes.
+  
+  - `w-4·h-4·${active·?·'px-2·py-2'·:·'mr-3·ml-3'}`
+  + `w-4·h-4·${active·?·'p-2'·:·'mr-3·ml-3'}`
+  
+
+```
+
+```
+embeddedClasses.vue:8:56 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These Tailwind classes can be replaced with a shorthand class.
+  
+     6 │   <div :class="['w-4 h-4', [active && 'px-2 py-2']]" />
+     7 │   <div :class="{ ['mr-3 ml-3']: active }" />
+   > 8 │   <div :class="`w-4 h-4 ${active ? 'px-2 py-2' : 'mr-3 ml-3'}`" />
+       │                                                        ^^^^
+     9 │   <div :class="classes || 'w-4 h-4'" />
+    10 │   <div :class="classes ?? 'px-2 py-2'" />
+  
+  i Compressible utility used here.
+  
+     6 │   <div :class="['w-4 h-4', [active && 'px-2 py-2']]" />
+     7 │   <div :class="{ ['mr-3 ml-3']: active }" />
+   > 8 │   <div :class="`w-4 h-4 ${active ? 'px-2 py-2' : 'mr-3 ml-3'}`" />
+       │                                                   ^^^^
+     9 │   <div :class="classes || 'w-4 h-4'" />
+    10 │   <div :class="classes ?? 'px-2 py-2'" />
+  
+  i Using fewer classes reduces duplication and improves readability.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the Tailwind shorthand classes.
+  
+  - `w-4·h-4·${active·?·'px-2·py-2'·:·'mr-3·ml-3'}`
+  + `w-4·h-4·${active·?·'px-2·py-2'·:·'mx-3'}`
+  
+
+```
+
+```
+embeddedClasses.vue:9:28 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These Tailwind classes can be replaced with a shorthand class.
+  
+     7 │   <div :class="{ ['mr-3 ml-3']: active }" />
+     8 │   <div :class="`w-4 h-4 ${active ? 'px-2 py-2' : 'mr-3 ml-3'}`" />
+   > 9 │   <div :class="classes || 'w-4 h-4'" />
+       │                            ^^^
+    10 │   <div :class="classes ?? 'px-2 py-2'" />
+    11 │   <div :class="(ignored, 'w-4 h-4')" />
+  
+  i Compressible utility used here.
+  
+     7 │   <div :class="{ ['mr-3 ml-3']: active }" />
+     8 │   <div :class="`w-4 h-4 ${active ? 'px-2 py-2' : 'mr-3 ml-3'}`" />
+   > 9 │   <div :class="classes || 'w-4 h-4'" />
+       │                                ^^^
+    10 │   <div :class="classes ?? 'px-2 py-2'" />
+    11 │   <div :class="(ignored, 'w-4 h-4')" />
+  
+  i Using fewer classes reduces duplication and improves readability.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the Tailwind shorthand classes.
+  
+  - classes·||·'w-4·h-4'
+  + classes·||·'size-4'
+  
+
+```
+
+```
+embeddedClasses.vue:10:28 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These Tailwind classes can be replaced with a shorthand class.
+  
+     8 │   <div :class="`w-4 h-4 ${active ? 'px-2 py-2' : 'mr-3 ml-3'}`" />
+     9 │   <div :class="classes || 'w-4 h-4'" />
+  > 10 │   <div :class="classes ?? 'px-2 py-2'" />
+       │                            ^^^^
+    11 │   <div :class="(ignored, 'w-4 h-4')" />
+    12 │   <div :class="'w-4 h-4 ' + extra" />
+  
+  i Compressible utility used here.
+  
+     8 │   <div :class="`w-4 h-4 ${active ? 'px-2 py-2' : 'mr-3 ml-3'}`" />
+     9 │   <div :class="classes || 'w-4 h-4'" />
+  > 10 │   <div :class="classes ?? 'px-2 py-2'" />
+       │                                 ^^^^
+    11 │   <div :class="(ignored, 'w-4 h-4')" />
+    12 │   <div :class="'w-4 h-4 ' + extra" />
+  
+  i Using fewer classes reduces duplication and improves readability.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the Tailwind shorthand classes.
+  
+  - classes·??·'px-2·py-2'
+  + classes·??·'p-2'
+  
+
+```
+
+```
+embeddedClasses.vue:11:27 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These Tailwind classes can be replaced with a shorthand class.
+  
+     9 │   <div :class="classes || 'w-4 h-4'" />
+    10 │   <div :class="classes ?? 'px-2 py-2'" />
+  > 11 │   <div :class="(ignored, 'w-4 h-4')" />
+       │                           ^^^
+    12 │   <div :class="'w-4 h-4 ' + extra" />
+    13 │   <div :class="[...['w-4 h-4']]" />
+  
+  i Compressible utility used here.
+  
+     9 │   <div :class="classes || 'w-4 h-4'" />
+    10 │   <div :class="classes ?? 'px-2 py-2'" />
+  > 11 │   <div :class="(ignored, 'w-4 h-4')" />
+       │                               ^^^
+    12 │   <div :class="'w-4 h-4 ' + extra" />
+    13 │   <div :class="[...['w-4 h-4']]" />
+  
+  i Using fewer classes reduces duplication and improves readability.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the Tailwind shorthand classes.
+  
+  - (ignored,·'w-4·h-4')
+  + (ignored,·'size-4')
+  
+
+```
+
+```
+embeddedClasses.vue:12:17 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These Tailwind classes can be replaced with a shorthand class.
+  
+    10 │   <div :class="classes ?? 'px-2 py-2'" />
+    11 │   <div :class="(ignored, 'w-4 h-4')" />
+  > 12 │   <div :class="'w-4 h-4 ' + extra" />
+       │                 ^^^
+    13 │   <div :class="[...['w-4 h-4']]" />
+    14 │   <div :class="{...{'px-2 py-2': active}}" />
+  
+  i Compressible utility used here.
+  
+    10 │   <div :class="classes ?? 'px-2 py-2'" />
+    11 │   <div :class="(ignored, 'w-4 h-4')" />
+  > 12 │   <div :class="'w-4 h-4 ' + extra" />
+       │                     ^^^
+    13 │   <div :class="[...['w-4 h-4']]" />
+    14 │   <div :class="{...{'px-2 py-2': active}}" />
+  
+  i Using fewer classes reduces duplication and improves readability.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the Tailwind shorthand classes.
+  
+  - 'w-4·h-4·'·+·extra
+  + 'size-4·'·+·extra
+  
+
+```
+
+```
+embeddedClasses.vue:13:22 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These Tailwind classes can be replaced with a shorthand class.
+  
+    11 │   <div :class="(ignored, 'w-4 h-4')" />
+    12 │   <div :class="'w-4 h-4 ' + extra" />
+  > 13 │   <div :class="[...['w-4 h-4']]" />
+       │                      ^^^
+    14 │   <div :class="{...{'px-2 py-2': active}}" />
+    15 │   <div :class="cached = 'w-4 h-4'" />
+  
+  i Compressible utility used here.
+  
+    11 │   <div :class="(ignored, 'w-4 h-4')" />
+    12 │   <div :class="'w-4 h-4 ' + extra" />
+  > 13 │   <div :class="[...['w-4 h-4']]" />
+       │                          ^^^
+    14 │   <div :class="{...{'px-2 py-2': active}}" />
+    15 │   <div :class="cached = 'w-4 h-4'" />
+  
+  i Using fewer classes reduces duplication and improves readability.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the Tailwind shorthand classes.
+  
+  - [...['w-4·h-4']]
+  + [...['size-4']]
+  
+
+```
+
+```
+embeddedClasses.vue:14:22 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These Tailwind classes can be replaced with a shorthand class.
+  
+    12 │   <div :class="'w-4 h-4 ' + extra" />
+    13 │   <div :class="[...['w-4 h-4']]" />
+  > 14 │   <div :class="{...{'px-2 py-2': active}}" />
+       │                      ^^^^
+    15 │   <div :class="cached = 'w-4 h-4'" />
+    16 │   <div :class="cached += ' w-4 h-4'" />
+  
+  i Compressible utility used here.
+  
+    12 │   <div :class="'w-4 h-4 ' + extra" />
+    13 │   <div :class="[...['w-4 h-4']]" />
+  > 14 │   <div :class="{...{'px-2 py-2': active}}" />
+       │                           ^^^^
+    15 │   <div :class="cached = 'w-4 h-4'" />
+    16 │   <div :class="cached += ' w-4 h-4'" />
+  
+  i Using fewer classes reduces duplication and improves readability.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the Tailwind shorthand classes.
+  
+  - {...{'px-2·py-2':·active}}
+  + {...{'p-2':·active}}
+  
+
+```
+
+```
+embeddedClasses.vue:15:26 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These Tailwind classes can be replaced with a shorthand class.
+  
+    13 │   <div :class="[...['w-4 h-4']]" />
+    14 │   <div :class="{...{'px-2 py-2': active}}" />
+  > 15 │   <div :class="cached = 'w-4 h-4'" />
+       │                          ^^^
+    16 │   <div :class="cached += ' w-4 h-4'" />
+    17 │   <div :class="cached ??= 'w-4 h-4'" />
+  
+  i Compressible utility used here.
+  
+    13 │   <div :class="[...['w-4 h-4']]" />
+    14 │   <div :class="{...{'px-2 py-2': active}}" />
+  > 15 │   <div :class="cached = 'w-4 h-4'" />
+       │                              ^^^
+    16 │   <div :class="cached += ' w-4 h-4'" />
+    17 │   <div :class="cached ??= 'w-4 h-4'" />
+  
+  i Using fewer classes reduces duplication and improves readability.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the Tailwind shorthand classes.
+  
+  - cached·=·'w-4·h-4'
+  + cached·=·'size-4'
+  
+
+```
+
+```
+embeddedClasses.vue:16:28 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These Tailwind classes can be replaced with a shorthand class.
+  
+    14 │   <div :class="{...{'px-2 py-2': active}}" />
+    15 │   <div :class="cached = 'w-4 h-4'" />
+  > 16 │   <div :class="cached += ' w-4 h-4'" />
+       │                            ^^^
+    17 │   <div :class="cached ??= 'w-4 h-4'" />
+    18 │ </template>
+  
+  i Compressible utility used here.
+  
+    14 │   <div :class="{...{'px-2 py-2': active}}" />
+    15 │   <div :class="cached = 'w-4 h-4'" />
+  > 16 │   <div :class="cached += ' w-4 h-4'" />
+       │                                ^^^
+    17 │   <div :class="cached ??= 'w-4 h-4'" />
+    18 │ </template>
+  
+  i Using fewer classes reduces duplication and improves readability.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the Tailwind shorthand classes.
+  
+  - cached·+=·'·w-4·h-4'
+  + cached·+=·'·size-4'
+  
+
+```
+
+```
+embeddedClasses.vue:17:28 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These Tailwind classes can be replaced with a shorthand class.
+  
+    15 │   <div :class="cached = 'w-4 h-4'" />
+    16 │   <div :class="cached += ' w-4 h-4'" />
+  > 17 │   <div :class="cached ??= 'w-4 h-4'" />
+       │                            ^^^
+    18 │ </template>
+    19 │ 
+  
+  i Compressible utility used here.
+  
+    15 │   <div :class="cached = 'w-4 h-4'" />
+    16 │   <div :class="cached += ' w-4 h-4'" />
+  > 17 │   <div :class="cached ??= 'w-4 h-4'" />
+       │                                ^^^
+    18 │ </template>
+    19 │ 
+  
+  i Using fewer classes reduces duplication and improves readability.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the Tailwind shorthand classes.
+  
+  - cached·??=·'w-4·h-4'
+  + cached·??=·'size-4'
+  
+
+```

@@ -1,0 +1,13 @@
+$root: 1;
+
+.rule {
+  $local: 2;
+}
+
+@page {
+  $page: 3;
+}
+
+@font-face {
+  $font: 4;
+}

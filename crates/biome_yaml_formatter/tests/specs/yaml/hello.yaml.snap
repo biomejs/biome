@@ -17,9 +17,3 @@ foo: bar
 foo: bar
 
 ```
-
-
-
-## Unimplemented nodes/tokens
-
-"foo: bar\n" => 0..9

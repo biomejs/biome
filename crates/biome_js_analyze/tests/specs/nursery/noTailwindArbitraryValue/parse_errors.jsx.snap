@@ -1,0 +1,31 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: parse_errors.jsx
+---
+# Input
+```jsx
+/* should generate diagnostics */
+<div className="hover:" />;
+
+```
+
+# Diagnostics
+```
+parse_errors.jsx:2:17 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a candidate but instead found 'hover:'.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ <div className="hover:" />;
+      │                 ^^^^^^
+    3 │ 
+  
+  i Expected a candidate here.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ <div className="hover:" />;
+      │                 ^^^^^^
+    3 │ 
+  
+
+```

@@ -43,7 +43,7 @@ impl FromStr for RuleCategory {
         match s {
             "syntax" => Ok(Self::Syntax),
             "lint" => Ok(Self::Lint),
-            "action" => Ok(Self::Action),
+            "assist" => Ok(Self::Action),
             "transformation" => Ok(Self::Transformation),
             _ => Err("Invalid rule category"),
         }
@@ -486,5 +486,26 @@ impl RuleCategoriesBuilder {
 
     pub fn build(self) -> RuleCategories {
         RuleCategories(self.flags)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::RuleCategory;
+    use std::str::FromStr;
+
+    #[test]
+    fn suppression_categories_round_trip() {
+        for category in [
+            RuleCategory::Syntax,
+            RuleCategory::Lint,
+            RuleCategory::Action,
+            RuleCategory::Transformation,
+        ] {
+            assert_eq!(
+                RuleCategory::from_str(category.as_suppression_category()),
+                Ok(category)
+            );
+        }
     }
 }

@@ -61,6 +61,53 @@ declare_lint_rule! {
     }
 }
 
+impl Rule for NoDocumentCookie {
+    type Query = Semantic<JsAssignmentExpression>;
+    type State = ();
+    type Signals = Option<Self::State>;
+    type Options = NoDocumentCookieOptions;
+
+    fn run(ctx: &RuleContext<Self>) -> Self::Signals {
+        let node = ctx.query();
+
+        let left = node.left().ok()?;
+
+        let any_assignment = left.as_any_js_assignment()?;
+
+        let expr = match any_assignment {
+            AnyJsAssignment::JsStaticMemberAssignment(assignment) => assignment.object().ok()?,
+            AnyJsAssignment::JsComputedMemberAssignment(assignment) => assignment.object().ok()?,
+            _ => {
+                return None;
+            }
+        };
+
+        is_global_document(&expr, ctx.model())?;
+
+        is_cookie(any_assignment)?;
+
+        Some(())
+    }
+
+    fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
+        let node = ctx.query();
+        Some(
+            RuleDiagnostic::new(
+                rule_category!(),
+                node.range(),
+                markup! {
+                    "Direct assigning to "<Emphasis>"document.cookie"</Emphasis>" is not recommended."
+                },
+            )
+            .note(markup! {
+                "Writing to "<Emphasis>"document.cookie"</Emphasis>" directly is error-prone, because the value is a string that must be built and escaped by hand. It is also a synchronous API that can slow the page down."
+            })
+            .note(markup! {
+                "Consider using the "<Hyperlink href = "https://developer.mozilla.org/en-US/docs/Web/API/CookieStore">"Cookie Store API"</Hyperlink>"."
+            }),
+        )
+    }
+}
 fn identifier_is_global_document(
     reference: &JsReferenceIdentifier,
     name: &StaticValue,
@@ -102,7 +149,7 @@ fn is_cookie(assignment: &AnyJsAssignment) -> Option<()> {
         AnyJsAssignment::JsStaticMemberAssignment(static_assignment) => {
             let property = static_assignment.member().ok()?;
 
-            if property.to_trimmed_text().text() != COOKIE {
+            if property.as_js_name()?.value_token().ok()?.text_trimmed() != COOKIE {
                 return None;
             };
         }
@@ -124,49 +171,4 @@ fn is_cookie(assignment: &AnyJsAssignment) -> Option<()> {
     }
 
     Some(())
-}
-
-impl Rule for NoDocumentCookie {
-    type Query = Semantic<JsAssignmentExpression>;
-    type State = ();
-    type Signals = Option<Self::State>;
-    type Options = NoDocumentCookieOptions;
-
-    fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let node = ctx.query();
-
-        let left = node.left().ok()?;
-
-        let any_assignment = left.as_any_js_assignment()?;
-
-        let expr = match any_assignment {
-            AnyJsAssignment::JsStaticMemberAssignment(assignment) => assignment.object().ok()?,
-            AnyJsAssignment::JsComputedMemberAssignment(assignment) => assignment.object().ok()?,
-            _ => {
-                return None;
-            }
-        };
-
-        is_global_document(&expr, ctx.model())?;
-
-        is_cookie(any_assignment)?;
-
-        Some(())
-    }
-
-    fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
-        let node = ctx.query();
-        Some(
-            RuleDiagnostic::new(
-                rule_category!(),
-                node.range(),
-                markup! {
-                    "Direct assigning to "<Emphasis>"document.cookie"</Emphasis>" is not recommended."
-                },
-            )
-            .note(markup! {
-                "Consider using the "<Hyperlink href = "https://developer.mozilla.org/en-US/docs/Web/API/CookieStore">"Cookie Store API"</Hyperlink>"."
-            }),
-        )
-    }
 }

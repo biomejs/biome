@@ -15,7 +15,7 @@ impl FormatNodeRule<CssPageAtRule> for FormatCssPageAtRule {
         write!(
             f,
             [
-                page_token.format(),
+                page_token.format()?.with_text_case(CssCase::Lowercase),
                 space(),
                 group(&indent(&selectors.format())),
                 space(),

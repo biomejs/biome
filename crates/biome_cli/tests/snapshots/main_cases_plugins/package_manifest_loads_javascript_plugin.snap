@@ -1,0 +1,84 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome lint '<TEMP_DIR>/package_manifest_loads_javascript_plugin/test.js'
+```
+
+## `biome.json`
+
+```json
+{ "plugins": ["@scope/plugin/noAssign"] }
+```
+
+## `node_modules/@scope/plugin/biome-manifest.json`
+
+```json
+{
+    "version": 1,
+    "plugins": { "rules": [{ "noAssign": "rules/noAssign.js" }] }
+}
+```
+
+## `node_modules/@scope/plugin/package.json`
+
+```json
+{ "name": "@scope/plugin" }
+```
+
+## `node_modules/@scope/plugin/rules/noAssign.js`
+
+```js
+import { ast, defineRule, registerDiagnostic } from "@biomejs/runtime/plugin";
+
+export const noAssign = defineRule({
+    query: ast("JS_CALL_EXPRESSION"),
+    run(node) {
+        registerDiagnostic(node, "error", "Do not use Object.assign");
+    },
+});
+```
+
+## `test.js`
+
+```js
+// biome-ignore lint/plugin/@scope/plugin/noAssign: compatibility
+Object.assign({});
+Object.assign({});
+
+```
+
+# Termination Message
+
+```block
+lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+test.js:3:1 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Do not use Object.assign
+  
+    1 │ // biome-ignore lint/plugin/@scope/plugin/noAssign: compatibility
+    2 │ Object.assign({});
+  > 3 │ Object.assign({});
+      │ ^^^^^^^^^^^^^^^^^
+    4 │ 
+  
+
+```
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+Found 1 error.
+```

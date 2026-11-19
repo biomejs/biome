@@ -2,6 +2,12 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
+## Command
+
+```shell
+biome check --write --unsafe file.svelte
+```
+
 ## `biome.json`
 
 ```json
@@ -18,7 +24,6 @@ expression: redactor(content)
 
 ```svelte
 <script lang="ts">
-import s from "src/utils";
 import { sure } from "sure.js";
 import z from "zod";
 
@@ -28,7 +33,7 @@ interface Props {
 
 let schema = z.object().optional();
 schema + sure();
-const props: Props = { title: "Hello" };
+const _props: Props = { title: "Hello" };
 </script>
 
 <html>
@@ -63,16 +68,16 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
 # Emitted Messages
 
 ```block
-file.svelte:15:1 lint/a11y/useHtmlLang ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+file.svelte:14:1 lint/a11y/useHtmlLang ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Provide a lang attribute when using the html element.
   
-    13 │ </script>
-    14 │ 
-  > 15 │ <html>
+    12 │ </script>
+    13 │ 
+  > 14 │ <html>
        │ ^^^^^^
-    16 │ 	<head>
-    17 │ 		<title>Svelte</title>
+    15 │ 	<head>
+    16 │ 		<title>Svelte</title>
   
   i Setting a lang attribute on HTML document elements configures the language used by screen readers when no user default is specified.
   
@@ -80,16 +85,18 @@ file.svelte:15:1 lint/a11y/useHtmlLang ━━━━━━━━━━━━━�
 ```
 
 ```block
-file.svelte:24:15 lint/a11y/useGenericFontNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+file.svelte:23:15 lint/a11y/useGenericFontNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Generic font family missing.
   
-    22 │ <style>
-    23 │ #id {
-  > 24 │ 	font-family: comic-sans;
+    21 │ <style>
+    22 │ #id {
+  > 23 │ 	font-family: comic-sans;
        │ 	             ^^^^^^^^^^
-    25 │ }
-    26 │ .class {
+    24 │ }
+    25 │ .class {
+  
+  i If none of the listed font families is available, the browser falls back to its default font, which can look very different from the intended design.
   
   i Consider adding a generic font family as a fallback.
   

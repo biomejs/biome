@@ -49,6 +49,10 @@ invalid_each.svelte:9:12 lint/correctness/noUndeclaredVariables ━━━━━�
     10 │ {/each}
     11 │ 
   
+  i Using an undeclared variable at runtime can throw a ReferenceError. It often points to a typo or a missing import.
+  
+  i Declare or import the variable, or fix its name.
+  
   i By default, Biome recognizes browser and Node.js globals.
     You can ignore more globals using the javascript.globals configuration.
   
@@ -65,6 +69,10 @@ invalid_each.svelte:13:12 lint/correctness/noUndeclaredVariables ━━━━━
        │            ^
     14 │ {/each}
     15 │ 
+  
+  i Using an undeclared variable at runtime can throw a ReferenceError. It often points to a typo or a missing import.
+  
+  i Declare or import the variable, or fix its name.
   
   i By default, Biome recognizes browser and Node.js globals.
     You can ignore more globals using the javascript.globals configuration.
@@ -83,6 +91,10 @@ invalid_each.svelte:21:12 lint/correctness/noUndeclaredVariables ━━━━━
     22 │ {/each}
     23 │ 
   
+  i Using an undeclared variable at runtime can throw a ReferenceError. It often points to a typo or a missing import.
+  
+  i Declare or import the variable, or fix its name.
+  
   i By default, Biome recognizes browser and Node.js globals.
     You can ignore more globals using the javascript.globals configuration.
   
@@ -99,6 +111,10 @@ invalid_each.svelte:25:12 lint/correctness/noUndeclaredVariables ━━━━━
        │            ^^^^^^
     26 │ {/each}
     27 │ 
+  
+  i Using an undeclared variable at runtime can throw a ReferenceError. It often points to a typo or a missing import.
+  
+  i Declare or import the variable, or fix its name.
   
   i By default, Biome recognizes browser and Node.js globals.
     You can ignore more globals using the javascript.globals configuration.
@@ -117,6 +133,10 @@ invalid_each.svelte:28:23 lint/correctness/noUndeclaredVariables ━━━━━
        │                       ^^^
     29 │     <span>{item.name}</span>
     30 │ {/each}
+  
+  i Using an undeclared variable at runtime can throw a ReferenceError. It often points to a typo or a missing import.
+  
+  i Declare or import the variable, or fix its name.
   
   i By default, Biome recognizes browser and Node.js globals.
     You can ignore more globals using the javascript.globals configuration.

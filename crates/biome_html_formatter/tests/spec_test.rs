@@ -1,7 +1,6 @@
 use biome_configuration::{Configuration, HtmlConfiguration, html::HtmlFormatterConfiguration};
 use biome_formatter_test::spec::{SpecSnapshot, SpecTestFile};
-use biome_html_syntax::HtmlFileSource;
-use biome_service::workspace::DocumentFileSource;
+use biome_languages::{DocumentFileSource, HtmlFileSource};
 use camino::Utf8Path;
 
 pub fn run(spec_input_file: &str, _expected_file: &str, test_directory: &str, _file_type: &str) {
@@ -15,6 +14,7 @@ pub fn run(spec_input_file: &str, _expected_file: &str, test_directory: &str, _f
 
     let config = Configuration {
         html: Some(HtmlConfiguration {
+            experimental_full_support_enabled: Some(true.into()),
             formatter: Some(HtmlFormatterConfiguration {
                 enabled: Some(true.into()),
                 ..Default::default()

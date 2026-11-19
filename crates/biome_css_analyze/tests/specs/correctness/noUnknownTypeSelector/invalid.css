@@ -23,3 +23,9 @@ article {
 
 x-Foo {
 }
+
+unknown::view-transition-group(page) {
+}
+
+::cue(unknown) {
+}

@@ -1,0 +1,12 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: valid.html
+---
+# Input
+```html
+﻿
+<!-- should not generate diagnostics -->
+<!-- biome-ignore-all lint/nursery/useConsistentUnicodeBom: encoding required -->
+<div>text</div>
+
+```

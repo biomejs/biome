@@ -1,76 +1,125 @@
-use crate::css_module_info::{CssImport, CssImports, CssModuleInfo};
-use crate::module_graph::ModuleGraphFsProxy;
-use biome_css_syntax::{AnyCssImportUrl, AnyCssRoot};
-use biome_resolver::{ResolveOptions, ResolvedPath, resolve};
-use biome_rowan::{AstNode, Text, WalkEvent};
-use camino::Utf8Path;
-use std::ops::DerefMut;
+use crate::css_module_info::{
+    CssImport, CssImports, CssModuleInfo, TailwindImport, TailwindStylesheet,
+};
+use biome_css_syntax::selector_ext::AnyCssPseudoClassFunctionSelector;
+use biome_css_syntax::{
+    AnyCssImportUrl, AnyCssRoot, CssClassSelector, CssImportAtRule, CssLanguage,
+    TwCustomVariantAtRule, TwThemeAtRule, TwUtilityAtRule,
+};
+use biome_rowan::{AstNode, SyntaxKindSet, Text, TextRange, TokenText, WalkEvent};
+use indexmap::IndexMap;
 
-pub const SUPPORTED_EXTENSIONS: &[&str] = &["css"];
+const VISITED_KINDS: SyntaxKindSet<CssLanguage> = AnyCssImportUrl::KIND_SET
+    .union(CssImportAtRule::KIND_SET)
+    .union(TwThemeAtRule::KIND_SET)
+    .union(TwUtilityAtRule::KIND_SET)
+    .union(TwCustomVariantAtRule::KIND_SET)
+    .union(AnyCssPseudoClassFunctionSelector::KIND_SET)
+    .union(CssClassSelector::KIND_SET);
 
-pub(crate) struct CssModuleVisitor<'a> {
+pub(crate) struct CssModuleVisitor {
     root: AnyCssRoot,
-    directory: &'a Utf8Path,
-    fs_proxy: &'a ModuleGraphFsProxy<'a>,
 }
 
-impl<'a> CssModuleVisitor<'a> {
-    pub(crate) fn new(
-        root: AnyCssRoot,
-        directory: &'a Utf8Path,
-        fs_proxy: &'a ModuleGraphFsProxy,
-    ) -> Self {
-        Self {
-            root,
-            directory,
-            fs_proxy,
-        }
+impl CssModuleVisitor {
+    pub(crate) fn new(root: AnyCssRoot) -> Self {
+        Self { root }
     }
 
-    pub(crate) fn visit(self) -> CssModuleInfo {
+    pub(crate) fn visit(mut self) -> CssModuleInfo {
         let mut imports = CssImports::default();
-        let iter = self.root.syntax().preorder();
-        for event in iter {
+        let mut classes: IndexMap<TextRange, TokenText> = IndexMap::default();
+        let mut tailwind = TailwindStylesheet::default();
+        let mut tailwind_imports = Vec::new();
+        // Tracks nesting depth inside `:global(...)` pseudo-class selectors.
+        // Class selectors inside `:global()` are globally scoped and cannot be
+        // statically traced to specific `class="..."` references, so we skip them.
+        let mut global_depth: u32 = 0;
+
+        let root = self.root.syntax().clone();
+        for event in root.preorder_of_kinds(VISITED_KINDS) {
             match event {
                 WalkEvent::Enter(node) => {
-                    if let Some(node) = AnyCssImportUrl::cast(node) {
+                    if let Some(node) = AnyCssImportUrl::cast(node.clone()) {
                         self.visit_any_css_import_url(node, &mut imports);
+                    } else if let Some(import) = CssImportAtRule::cast_ref(&node) {
+                        // Tailwind CSS inlines `@import "./theme.css"`, but not
+                        // `@import url("./theme.css")`.
+                        if let Ok(AnyCssImportUrl::CssString(url)) = import.url()
+                            && let Ok(specifier) = url.inner_string_text()
+                        {
+                            tailwind_imports.push(TailwindImport {
+                                import: CssImport {
+                                    range: url.range(),
+                                    specifier: specifier.into(),
+                                },
+                                position: tailwind.end(),
+                            });
+                        }
+                    } else if let Some(theme) = TwThemeAtRule::cast_ref(&node) {
+                        tailwind.visit_theme(&theme);
+                    } else if let Some(utility) = TwUtilityAtRule::cast_ref(&node) {
+                        tailwind.visit_utility(&utility);
+                    } else if let Some(variant) = TwCustomVariantAtRule::cast_ref(&node) {
+                        tailwind.visit_custom_variant(&variant);
+                    } else if let Some(pseudo_fn) =
+                        AnyCssPseudoClassFunctionSelector::cast(node.clone())
+                    {
+                        if pseudo_fn.is_global_pseudo() {
+                            global_depth += 1;
+                        }
+                    } else if global_depth == 0
+                        && let Some(class_selector) = CssClassSelector::cast(node)
+                    {
+                        Self::visit_class_selector(class_selector, &mut classes);
                     }
                 }
-                WalkEvent::Leave(_) => {}
+                WalkEvent::Leave(node) => {
+                    if let Some(pseudo_fn) = AnyCssPseudoClassFunctionSelector::cast(node)
+                        && pseudo_fn.is_global_pseudo()
+                    {
+                        global_depth = global_depth.saturating_sub(1);
+                    }
+                }
             }
         }
 
-        CssModuleInfo::new(imports)
+        CssModuleInfo::new(
+            imports,
+            classes,
+            tailwind,
+            tailwind_imports.into_boxed_slice(),
+        )
     }
 
-    fn visit_any_css_import_url(&self, node: AnyCssImportUrl, imports: &mut CssImports) {
+    /// Extracts the class name from a `CssClassSelector` and inserts the
+    /// `TokenText` into the set.
+    ///
+    /// Each token represents a single class name (e.g., "header" from `.header`).
+    fn visit_class_selector(node: CssClassSelector, classes: &mut IndexMap<TextRange, TokenText>) {
+        if let Ok(name) = node.name()
+            && let Some(name) = name.as_css_custom_identifier()
+            && let Ok(token) = name.value_token()
+        {
+            // Store the range of the class name token (without the dot)
+            classes
+                .entry(token.text_trimmed_range())
+                .or_insert_with(|| token.token_text_trimmed());
+        }
+    }
+
+    fn visit_any_css_import_url(&mut self, node: AnyCssImportUrl, imports: &mut CssImports) {
         let Some(specifier) = node.inner_string_text() else {
             return;
         };
 
-        let resolved_path = self.resolved_path_from_specifier(&specifier);
-
         let text: Text = specifier.into();
-        imports.deref_mut().insert(
+        imports.push(
             text.clone(),
             CssImport {
+                range: node.range(),
                 specifier: text,
-                resolved_path,
             },
         );
-    }
-
-    fn resolved_path_from_specifier(&self, specifier: &str) -> ResolvedPath {
-        let options = ResolveOptions {
-            assume_relative: true,
-            condition_names: &[],
-            default_files: &[],
-            extensions: SUPPORTED_EXTENSIONS,
-            extension_aliases: &[],
-            ..Default::default()
-        };
-        let resolved_path = resolve(specifier, self.directory, self.fs_proxy, &options);
-        ResolvedPath::new(resolved_path)
     }
 }

@@ -1,0 +1,28 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/at_rule/release-forward-underscore-prefix.css
+---
+
+# Input
+
+```css
+@forward "./button" as components_*;
+@forward "./button" as components-*;
+@forward "./button" as components*;
+.native{color:red;width:1px}
+
+```
+
+
+# Formatted
+
+```css
+@forward "./button" as components_*;
+@forward "./button" as components-*;
+@forward "./button" as components*;
+.native {
+	color: red;
+	width: 1px;
+}
+
+```

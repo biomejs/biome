@@ -10,7 +10,17 @@ use biome_js_syntax::{
 use biome_rowan::AstNode;
 
 #[derive(Debug, Clone, Default)]
-pub struct FormatJsxTagExpression;
+pub struct FormatJsxTagExpression {
+    skip_comments: bool,
+}
+
+impl FormatJsxTagExpression {
+    pub(crate) fn without_comments() -> Self {
+        Self {
+            skip_comments: true,
+        }
+    }
+}
 
 impl FormatNodeRule<JsxTagExpression> for FormatJsxTagExpression {
     fn fmt_fields(&self, node: &JsxTagExpression, f: &mut JsFormatter) -> FormatResult<()> {
@@ -21,9 +31,9 @@ impl FormatNodeRule<JsxTagExpression> for FormatJsxTagExpression {
                 write![
                     f,
                     [
-                        format_leading_comments(node.syntax()),
+                        (!self.skip_comments).then_some(format_leading_comments(node.syntax())),
                         node.tag().format(),
-                        format_trailing_comments(node.syntax())
+                        (!self.skip_comments).then_some(format_trailing_comments(node.syntax()))
                     ]
                 ]
             }
@@ -39,9 +49,10 @@ impl FormatNodeRule<JsxTagExpression> for FormatJsxTagExpression {
                     write!(
                         f,
                         [soft_block_indent(&format_args![
-                            format_leading_comments(node.syntax()),
+                            (!self.skip_comments).then_some(format_leading_comments(node.syntax())),
                             node.tag().format(),
-                            format_trailing_comments(node.syntax())
+                            (!self.skip_comments)
+                                .then_some(format_trailing_comments(node.syntax()))
                         ])]
                     )?;
 

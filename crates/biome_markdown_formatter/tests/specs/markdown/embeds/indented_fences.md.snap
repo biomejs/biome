@@ -1,0 +1,47 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/embeds/indented_fences.md
+---
+
+# Input
+
+```md
+  ```js
+  const   value = `first
+  second`;
+  ```
+
+   ```css
+   a{color:red}
+   ```
+
+```
+
+
+# Options
+
+```json
+{
+  "markdown": {
+    "parser": {
+      "frontmatter": true
+    }
+  }
+}
+```
+
+# Formatted
+
+```md
+```js
+const value = `first
+second`;
+```
+
+```css
+a {
+	color: red;
+}
+```
+
+```

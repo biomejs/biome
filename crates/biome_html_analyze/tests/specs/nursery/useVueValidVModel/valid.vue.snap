@@ -1,0 +1,49 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+assertion_line: 121
+expression: valid.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<template>
+  <input v-model="foo">
+  <input type="text" v-model.lazy="foo">
+  <input type="number" v-model.number="foo">
+  <input type="password" v-model.trim="foo">
+  <input type="checkbox" v-model="foo.bar">
+  <input type="radio" v-model="foo">
+  <textarea v-model="foo"></textarea>
+  <select v-model="foo"></select>
+  <your-component v-model="foo"></your-component>
+  <MyComponent v-model="foo"></MyComponent>
+  <MyComponent v-model:aaa="a"></MyComponent>
+  <MyComponent v-model:aaa.modifier="a"></MyComponent>
+  <MyComponent v-model.modifier="a"></MyComponent>
+  <MyComponent v-model:aaa.modifier.modifierTwo="a"></MyComponent>
+  <MyComponent v-model.modifier.modifierTwo="a"></MyComponent>
+  <custom-element v-model="foo"></custom-element>
+  <foo v-model="bar"></foo>
+  <div is="vue:MyComponent" v-model="foo"></div>
+  <div :is="component" v-model="foo"></div>
+  <component :is="component" v-model="foo"></component>
+  <input :type="a" v-model="b">
+  <input v-bind:type="a" v-model="b">
+  <div v-for="x in list"><input v-model="x.foo"></div>
+  <div v-for="x in list"><input v-model="foo[x]"></div>
+  <div v-for="x in list"><input v-model="foo[x - 1]"></div>
+  <div v-for="x in list"><input v-model="foo[`${x}`]"></div>
+  <div v-for="x in list"><input v-model="foo[`prefix_${x}`]"></div>
+  <div v-for="x in list"><input v-model="foo[x ? x : '_']"></div>
+  <div v-for="x in list"><input v-model="foo[x || '_']"></div>
+  <div v-for="x in list"><input v-model="foo[x()]"></div>
+  <div v-for="x in list"><input v-model="foo[typeof x]"></div>
+  <div v-for="x in list"><input v-model="foo[tag`${x}`]"></div>
+  <MyComponent v-slot="{ item }"><input v-model="item.name"></MyComponent>
+  <MyComponent v-for="item in list" v-slot="{ row }" v-model="row"></MyComponent>
+  <svg>
+    <MyComponent v-model="slotProps"></MyComponent>
+  </svg>
+</template>
+
+```

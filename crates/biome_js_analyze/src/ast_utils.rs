@@ -1,10 +1,18 @@
 use biome_js_semantic::{BindingExtensions, SemanticModel};
 use biome_js_syntax::{
     AnyFunctionLike, AnyJsArrayElement, AnyJsExpression, AnyJsLiteralExpression,
-    AnyJsTemplateElement, JsAssignmentOperator, JsLanguage, JsLogicalOperator, JsModule,
-    JsSyntaxKind, JsSyntaxNode, JsSyntaxToken, JsUnaryOperator,
+    AnyJsTemplateElement, JsAssignmentOperator, JsAwaitExpression, JsCaseClause,
+    JsDoWhileStatement, JsElseClause, JsExportDefaultExpressionClause, JsExpressionStatement,
+    JsForInStatement, JsForOfStatement, JsForStatement, JsIfStatement, JsInExpression,
+    JsInstanceofExpression, JsLanguage, JsLogicalOperator, JsModule, JsNewExpression,
+    JsReturnStatement, JsSyntaxKind, JsSyntaxNode, JsSyntaxToken, JsThrowStatement,
+    JsUnaryExpression, JsUnaryOperator, JsWhileStatement, JsWithStatement, JsYieldArgument,
+    JsYieldExpression, T,
 };
-use biome_rowan::{AstNode, AstSeparatedList, TriviaPiece};
+use biome_parser::{TokenSet, token_set};
+use biome_rowan::{AstNode, AstSeparatedList, SyntaxKindSet, TriviaPiece};
+
+pub(crate) mod dom;
 
 /// Add any leading and trailing trivia from given source node to the token.
 ///
@@ -62,6 +70,127 @@ fn add_trailing_trivia(trivia: &mut Vec<TriviaPiece>, text: &mut String, node: &
     if !token.kind().is_punct() && token.leading_trivia().pieces().next().is_none() {
         text.push(' ');
         trivia.push(TriviaPiece::whitespace(1));
+    }
+}
+
+/// Returns whether an identifier-like replacement needs leading whitespace at this expression.
+///
+/// JavaScript permits punctuation-prefixed expressions to touch a preceding keyword, as in
+/// `return!value`. If a replacement starts with an identifier-like token, omitting the whitespace
+/// would instead produce a different token such as `returnvalue`. This also applies to keyword
+/// operators and to expression positions following `yield`, `else`, `do`, or `case`.
+pub(crate) fn needs_space_before_identifier_expression_replacement(
+    expression: &AnyJsExpression,
+) -> bool {
+    let Some(parent) = expression.syntax().parent() else {
+        return false;
+    };
+
+    if EXPRESSION_REPLACEMENT_SEPARATOR_PARENT_KINDS.matches(parent.kind())
+        || JsUnaryExpression::cast_ref(&parent).is_some_and(|expression| {
+            matches!(
+                expression.operator(),
+                Ok(JsUnaryOperator::Typeof | JsUnaryOperator::Void | JsUnaryOperator::Delete)
+            )
+        })
+    {
+        return true;
+    }
+
+    if let Some(argument) = JsYieldArgument::cast_ref(&parent) {
+        return argument.star_token().is_none()
+            && parent.parent().is_some_and(|parent| {
+                EXPRESSION_REPLACEMENT_SEPARATOR_PARENT_KINDS.matches(parent.kind())
+            });
+    }
+
+    JsExpressionStatement::can_cast(parent.kind())
+        && parent.parent().is_some_and(|parent| {
+            EXPRESSION_REPLACEMENT_SEPARATOR_PARENT_KINDS.matches(parent.kind())
+        })
+}
+
+const EXPRESSION_REPLACEMENT_SEPARATOR_PARENT_KINDS: SyntaxKindSet<JsLanguage> =
+    JsExportDefaultExpressionClause::KIND_SET
+        .union(JsInstanceofExpression::KIND_SET)
+        .union(JsYieldExpression::KIND_SET)
+        .union(JsReturnStatement::KIND_SET)
+        .union(JsThrowStatement::KIND_SET)
+        .union(JsNewExpression::KIND_SET)
+        .union(JsAwaitExpression::KIND_SET)
+        .union(JsInExpression::KIND_SET)
+        .union(JsForOfStatement::KIND_SET)
+        .union(JsForInStatement::KIND_SET)
+        .union(JsDoWhileStatement::KIND_SET)
+        .union(JsElseClause::KIND_SET)
+        .union(JsCaseClause::KIND_SET);
+
+/// Returns `true` if `expression` begins an expression statement, and the token
+/// before it doesn't end the previous statement.
+///
+/// A replacement for such an expression can't start with `(` or `-`, because
+/// automatic semicolon insertion doesn't separate the two statements. For example,
+/// replacing `x * -1` below with `-x` produces `foo - x`:
+///
+/// ```js
+/// foo
+/// x * -1
+/// ```
+///
+/// Tokens that end a statement include `;`, `{`, the `}` of a block or function
+/// body, and the `)` that closes the condition of an `if` statement or a loop.
+pub(crate) fn starts_unterminated_statement(expression: &AnyJsExpression) -> bool {
+    let Some(first_token) = expression.syntax().first_token() else {
+        return false;
+    };
+    let is_statement_start = expression
+        .syntax()
+        .ancestors()
+        .find_map(JsExpressionStatement::cast)
+        .and_then(|statement| statement.syntax().first_token())
+        .is_some_and(|token| token == first_token);
+    if !is_statement_start {
+        return false;
+    }
+    let Some(previous) = first_token.prev_token() else {
+        return false;
+    };
+    !terminates_statement(&previous)
+}
+
+const STATEMENT_TERMINATORS: TokenSet<JsSyntaxKind> =
+    token_set![T![;], T!['{'], T![:], T![else], T![do]];
+
+const CONTROL_FLOW_STATEMENT_KINDS: SyntaxKindSet<JsLanguage> = JsIfStatement::KIND_SET
+    .union(JsWhileStatement::KIND_SET)
+    .union(JsDoWhileStatement::KIND_SET)
+    .union(JsForStatement::KIND_SET)
+    .union(JsForInStatement::KIND_SET)
+    .union(JsForOfStatement::KIND_SET)
+    .union(JsWithStatement::KIND_SET);
+
+/// Returns `true` if a `(` or `-` after `token` starts a new statement instead of
+/// continuing an expression.
+fn terminates_statement(token: &JsSyntaxToken) -> bool {
+    if STATEMENT_TERMINATORS.contains(token.kind()) {
+        return true;
+    }
+    match token.kind() {
+        T![')'] => token
+            .parent()
+            .is_some_and(|parent| CONTROL_FLOW_STATEMENT_KINDS.matches(parent.kind())),
+        T!['}'] => {
+            let Some(mut parent) = token.parent() else {
+                return false;
+            };
+            if parent.kind() == JsSyntaxKind::JS_FUNCTION_BODY
+                && let Some(grand_parent) = parent.parent()
+            {
+                parent = grand_parent;
+            }
+            !AnyJsExpression::can_cast(parent.kind())
+        }
+        _ => false,
     }
 }
 
@@ -265,15 +394,13 @@ fn is_logical_identity(node: AnyJsExpression, operator: JsLogicalOperator) -> bo
 
                 let is_left_logical_identify = node
                     .left()
-                    .ok()
-                    .is_some_and(|left| is_logical_identity(left, operator));
+                    .is_ok_and(|left| is_logical_identity(left, operator));
                 if is_left_logical_identify {
                     return true;
                 }
 
                 node.right()
-                    .ok()
-                    .is_some_and(|right| is_logical_identity(right, operator))
+                    .is_ok_and(|right| is_logical_identity(right, operator))
             } else {
                 false
             }
@@ -377,7 +504,8 @@ pub fn is_function_boundary(kind: JsSyntaxKind) -> bool {
 #[cfg(test)]
 mod tests {
     use biome_js_parser::JsParserOptions;
-    use biome_js_syntax::{AnyJsLiteralExpression, JsFileSource};
+    use biome_js_syntax::AnyJsLiteralExpression;
+    use biome_languages::JsFileSource;
     use biome_rowan::SyntaxNodeCast;
 
     use super::get_boolean_value;

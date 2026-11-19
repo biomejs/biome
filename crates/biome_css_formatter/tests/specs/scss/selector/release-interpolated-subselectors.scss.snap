@@ -1,0 +1,40 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/selector/release-interpolated-subselectors.scss
+---
+
+# Input
+
+```scss
+$suffix:   ".active" ;
+.card:not( /* excluded */.disabled )#{ /* suffix */ $suffix }{color:red}
+.card[ data-state ]#{ $suffix /* attribute suffix */ }{color:blue}
+.card:not(.disabled)  #{ /* descendant */$suffix}{color:red}
+.card[data-state]
+#{$suffix}{color:blue}
+.card:not(.disabled)#{$suffix}Tail{color:red}
+
+```
+
+
+# Formatted
+
+```scss
+$suffix: ".active";
+.card:not(/* excluded */ .disabled)#{ /* suffix */ $suffix } {
+	color: red;
+}
+.card[data-state]#{ $suffix /* attribute suffix */ } {
+	color: blue;
+}
+.card:not(.disabled) #{ /* descendant */ $suffix} {
+	color: red;
+}
+.card[data-state] #{$suffix} {
+	color: blue;
+}
+.card:not(.disabled)#{$suffix}Tail {
+	color: red;
+}
+
+```

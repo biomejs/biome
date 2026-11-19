@@ -1,45 +1,40 @@
 use std::{borrow::Cow, cmp::Ordering, ops::Not};
 
 use biome_analyze::{
-    Ast, FixKind, Rule, RuleAction, RuleDiagnostic, RuleSource,
+    Ast, FixKind, Rule, RuleAction, RuleDiagnostic, RuleSource, RuleSuppressions,
     context::RuleContext,
     declare_source_rule,
     utils::{is_separated_list_sorted_by, sorted_separated_list_by},
 };
 use biome_console::markup;
 use biome_deserialize::TextRange;
-use biome_diagnostics::{Applicability, category};
+use biome_diagnostics::Applicability;
 use biome_js_factory::make;
 use biome_js_syntax::{
     AnyJsExpression, AnyJsObjectMember, JsLanguage, JsObjectExpression, JsObjectMemberList, T,
 };
-use biome_rowan::{AstNode, BatchMutationExt, SyntaxResult, SyntaxToken, TriviaPieceKind};
+use biome_rowan::{AstNode, BatchMutationExt, SyntaxResult, SyntaxToken, WalkEvent};
 use biome_rule_options::use_sorted_keys::{SortOrder, UseSortedKeysOptions};
 use biome_string_case::comparable_token::ComparableToken;
 
 use crate::JsRuleAction;
 
 declare_source_rule! {
-    /// Sort properties of a JS object in natural order.
+    /// Sort the properties of a JavaScript object.
     ///
-    /// [Natural order](https://en.wikipedia.org/wiki/Natural_sort_order) means
-    /// that uppercase letters come before lowercase letters (e.g. `A` < `a` <
-    /// `B` < `b`) and numbers are compared in a human way (e.g. `9` < `10`).
+    /// By default, the action uses
+    /// [natural order](https://en.wikipedia.org/wiki/Natural_sort_order): uppercase letters come
+    /// before lowercase letters (`A` before `a`), and numbers are compared by value (`item9`
+    /// before `item10`).
     ///
-    /// This rule will consider spread/calculated keys e.g [k]: 1 as
-    /// non-sortable. Instead, whenever it encounters a non-sortable key, it
-    /// will sort all the previous sortable keys up until the nearest
-    /// non-sortable key, if one exist. This prevents breaking the override of
-    /// certain keys using spread keys.
+    /// Spread properties such as `...other` and computed property names such as `[key]` cannot be
+    /// safely reordered. Each one forms a boundary; the action sorts named properties on each side
+    /// independently. This preserves the order in which spread properties can replace earlier
+    /// values.
     ///
-    /// Sorting the keys of an object technically changes the semantics of the
-    /// program. It affects the result of operations like
-    /// `Object.getOwnPropertyNames`. Since ES2020, operations like `for-in`
-    /// loops, `Object.keys`, and `JSON.stringify` are guaranteed to process
-    /// string keys in insertion order.
-    ///
-    /// In cases where the order of such operations is important, you can
-    /// disable the assist action using a suppression comment:
+    /// Object property order is observable. Sorting can change the results of
+    /// `Object.getOwnPropertyNames`, `Object.keys`, `JSON.stringify`, and `for...in` loops. If code
+    /// relies on the original order, disable the action with a suppression comment:
     ///
     /// `// biome-ignore assist/source/useSortedKeys`
     ///
@@ -88,12 +83,13 @@ declare_source_rule! {
     /// ```
     ///
     /// ## Options
-    /// This actions accepts following options
     ///
     /// ### `sortOrder`
-    /// This options supports `natural` and `lexicographic` values. Where as `natural` is the default.
     ///
-    /// Following will apply the natural sort order.
+    /// Selects `natural` or `lexicographic` ordering. Natural ordering compares numbers by value
+    /// and is the default. Lexicographic ordering compares property names character by character.
+    ///
+    /// The following configuration uses natural order:
     ///
     /// ```json,options
     /// {
@@ -102,6 +98,7 @@ declare_source_rule! {
     ///     }
     /// }
     /// ```
+    ///
     /// ```js,use_options,expect_diff
     /// const obj = {
     ///     val13: 1,
@@ -112,7 +109,7 @@ declare_source_rule! {
     /// };
     /// ```
     ///
-    /// Following will apply the lexicographic sort order.
+    /// The following configuration uses lexicographic order.
     ///
     /// ```json,options
     /// {
@@ -121,6 +118,7 @@ declare_source_rule! {
     ///     }
     /// }
     /// ```
+    ///
     /// ```js,use_options,expect_diff
     /// const obj = {
     ///     val13: 1,
@@ -132,12 +130,11 @@ declare_source_rule! {
     /// ```
     ///
     /// ### `groupByNesting`
-    /// When enabled, groups object keys by their value's nesting depth before sorting alphabetically.
-    /// Simple values (primitives, single-line arrays, and single-line objects) are sorted first,
-    /// followed by nested values (multi-line arrays and multi-line objects).
     ///
-    /// > Default: `false`
-    ///
+    /// Groups properties by the shape of their values before sorting by name. Simple values, such
+    /// as strings, numbers, booleans, `null`, and single-line arrays or objects, come first.
+    /// Multi-line arrays and objects, functions, classes, and object methods come afterward.
+    /// Defaults to `false`.
     ///
     /// ```json,options
     /// {
@@ -146,7 +143,7 @@ declare_source_rule! {
     ///     }
     /// }
     /// ```
-    /// ```js,use_options,expect_diagnostic
+    /// ```js,use_options,expect_diff
     /// const obj = {
     ///     name: "Sample",
     ///     details: {
@@ -166,6 +163,132 @@ declare_source_rule! {
     }
 }
 
+impl Rule for UseSortedKeys {
+    type Query = Ast<JsObjectMemberList>;
+    type State = ();
+    type Signals = Option<Self::State>;
+    type Options = UseSortedKeysOptions;
+
+    fn run(ctx: &RuleContext<Self>) -> Self::Signals {
+        let options = ctx.options();
+        let sort_order = options.sort_order.unwrap_or_default();
+        let comparator = match sort_order {
+            SortOrder::Natural => ComparableToken::ascii_nat_cmp,
+            SortOrder::Lexicographic => ComparableToken::lexicographic_cmp,
+        };
+
+        if options.group_by_nesting.unwrap_or(false) {
+            is_separated_list_sorted_by(
+                ctx.query(),
+                |node| {
+                    let depth = get_member_depth(node)?;
+                    let name = node.name().map(ComparableToken::new)?;
+                    Some((depth, name))
+                },
+                |(d1, n1), (d2, n2)| d1.cmp(d2).then_with(|| comparator(n1, n2)),
+            )
+            .ok()?
+            .not()
+            .then_some(())
+        } else {
+            is_separated_list_sorted_by(
+                ctx.query(),
+                |node| node.name().map(ComparableToken::new),
+                comparator,
+            )
+            .ok()?
+            .not()
+            .then_some(())
+        }
+    }
+
+    fn suppressed_nodes(
+        ctx: &RuleContext<Self>,
+        _state: &Self::State,
+        suppressions: &mut RuleSuppressions<JsLanguage>,
+    ) {
+        for event in ctx
+            .query()
+            .syntax()
+            .preorder_of_kinds(JsObjectMemberList::KIND_SET)
+            .skip(1)
+        {
+            if let WalkEvent::Enter(node) = event {
+                suppressions.suppress_node(node);
+            }
+        }
+    }
+
+    fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
+        let options = ctx.options();
+        let message = if options.group_by_nesting.unwrap_or(false) {
+            markup! {
+                "The object properties are not sorted by nesting level and key."
+            }
+        } else {
+            markup! {
+                "The object properties are not sorted by key."
+            }
+        };
+        Some(RuleDiagnostic::new(
+            rule_category!(),
+            ctx.query().range(),
+            message,
+        ))
+    }
+
+    fn text_range(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<TextRange> {
+        ctx.query()
+            .syntax()
+            .ancestors()
+            .skip(1)
+            .find_map(JsObjectExpression::cast)
+            .map(|object| object.range())
+    }
+
+    fn action(ctx: &RuleContext<Self>, _: &Self::State) -> Option<JsRuleAction> {
+        let list = ctx.query();
+        let options = ctx.options();
+        let sort_order = options.sort_order.unwrap_or_default();
+        let comparator = match sort_order {
+            SortOrder::Natural => ComparableToken::ascii_nat_cmp,
+            SortOrder::Lexicographic => ComparableToken::lexicographic_cmp,
+        };
+
+        let new_list = if options.group_by_nesting.unwrap_or(false) {
+            sorted_separated_list_by(
+                list,
+                |node| {
+                    let depth = get_member_depth(node)?;
+                    let name = node.name().map(ComparableToken::new)?;
+                    Some((depth, name))
+                },
+                || make::token(T![,]).with_trailing_space(),
+                |(d1, n1), (d2, n2)| d1.cmp(d2).then_with(|| comparator(n1, n2)),
+            )
+            .ok()?
+        } else {
+            sorted_separated_list_by(
+                list,
+                |node| node.name().map(ComparableToken::new),
+                || make::token(T![,]).with_trailing_space(),
+                comparator,
+            )
+            .ok()?
+        };
+
+        let mut mutation = ctx.root().begin();
+        mutation.replace_node_discard_trivia(list.clone(), new_list);
+
+        Some(RuleAction::new(
+            rule_action_category!(),
+            Applicability::Always,
+            markup! { "Sort the object properties by key." },
+            mutation,
+        ))
+    }
+}
+
 /// Checks if an object/array spans multiple lines by examining CST trivia.
 /// For non-empty containers, checks the first token of the members/elements.
 /// For empty containers, checks the closing brace/bracket token.
@@ -174,10 +297,7 @@ fn has_multiline_content(
     closing_token: SyntaxResult<SyntaxToken<JsLanguage>>,
 ) -> bool {
     members_first_token.map_or_else(
-        || {
-            closing_token
-                .is_ok_and(|token| token.has_leading_newline())
-        },
+        || closing_token.is_ok_and(|token| token.has_leading_newline()),
         |token| token.has_leading_newline(),
     )
 }
@@ -223,114 +343,5 @@ fn get_member_depth(node: &AnyJsObjectMember) -> Option<Ordering> {
         | AnyJsObjectMember::JsGetterObjectMember(_)
         | AnyJsObjectMember::JsSetterObjectMember(_) => Some(Ordering::Greater),
         _ => None,
-    }
-}
-
-impl Rule for UseSortedKeys {
-    type Query = Ast<JsObjectMemberList>;
-    type State = ();
-    type Signals = Option<Self::State>;
-    type Options = UseSortedKeysOptions;
-
-    fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let options = ctx.options();
-        let sort_order = options.sort_order.unwrap_or_default();
-        let comparator = match sort_order {
-            SortOrder::Natural => ComparableToken::ascii_nat_cmp,
-            SortOrder::Lexicographic => ComparableToken::lexicographic_cmp,
-        };
-
-        if options.group_by_nesting.unwrap_or(false) {
-            is_separated_list_sorted_by(
-                ctx.query(),
-                |node| {
-                    let depth = get_member_depth(node)?;
-                    let name = node.name().map(ComparableToken::new)?;
-                    Some((depth, name))
-                },
-                |(d1, n1), (d2, n2)| d1.cmp(d2).then_with(|| comparator(n1, n2)),
-            )
-            .ok()?
-            .not()
-            .then_some(())
-        } else {
-            is_separated_list_sorted_by(
-                ctx.query(),
-                |node| node.name().map(ComparableToken::new),
-                comparator,
-            )
-            .ok()?
-            .not()
-            .then_some(())
-        }
-    }
-
-    fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
-        let options = ctx.options();
-        let message = if options.group_by_nesting.unwrap_or(false) {
-            markup! {
-                "The object properties are not sorted by nesting level and key."
-            }
-        } else {
-            markup! {
-                "The object properties are not sorted by key."
-            }
-        };
-        Some(RuleDiagnostic::new(
-            category!("assist/source/useSortedKeys"),
-            ctx.query().range(),
-            message,
-        ))
-    }
-
-    fn text_range(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<TextRange> {
-        ctx.query()
-            .syntax()
-            .ancestors()
-            .skip(1)
-            .find_map(JsObjectExpression::cast)
-            .map(|object| object.range())
-    }
-
-    fn action(ctx: &RuleContext<Self>, _: &Self::State) -> Option<JsRuleAction> {
-        let list = ctx.query();
-        let options = ctx.options();
-        let sort_order = options.sort_order.unwrap_or_default();
-        let comparator = match sort_order {
-            SortOrder::Natural => ComparableToken::ascii_nat_cmp,
-            SortOrder::Lexicographic => ComparableToken::lexicographic_cmp,
-        };
-
-        let new_list = if options.group_by_nesting.unwrap_or(false) {
-            sorted_separated_list_by(
-                list,
-                |node| {
-                    let depth = get_member_depth(node)?;
-                    let name = node.name().map(ComparableToken::new)?;
-                    Some((depth, name))
-                },
-                || make::token(T![,]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
-                |(d1, n1), (d2, n2)| d1.cmp(d2).then_with(|| comparator(n1, n2)),
-            )
-            .ok()?
-        } else {
-            sorted_separated_list_by(
-                list,
-                |node| node.name().map(ComparableToken::new),
-                || make::token(T![,]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
-                comparator,
-            )
-            .ok()?
-        };
-
-        let mut mutation = ctx.root().begin();
-        mutation.replace_node_discard_trivia(list.clone(), new_list);
-
-        Some(RuleAction::new(
-            rule_action_category!(),
-            Applicability::Always,
-            markup! { "Sort the object properties by key." },
-            mutation,
-        ))
     }
 }

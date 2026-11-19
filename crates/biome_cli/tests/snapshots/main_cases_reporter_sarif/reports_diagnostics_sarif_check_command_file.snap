@@ -2,6 +2,12 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
+## Command
+
+```shell
+biome format --reporter=sarif --reporter-file=file.json main.ts index.ts
+```
+
 ## `file.json`
 
 ```json

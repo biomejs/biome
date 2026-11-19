@@ -21,7 +21,9 @@ info: svelte/whitespace/issue-8584-w-newline.svelte
 # Formatted
 
 ```svelte
-<script></script>
+<script>
+const framework = "Astro";
+</script>
 
 <h1>
 	Hello, {framework}

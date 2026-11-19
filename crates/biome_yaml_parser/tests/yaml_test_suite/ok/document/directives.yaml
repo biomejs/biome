@@ -1,0 +1,9 @@
+%YAML 1.2 # comment
+%FOO  bar baz
+---
+...
+%YAML1.2
+---
+...
+%TAG ! tag:clarkevans.com,2002:
+---

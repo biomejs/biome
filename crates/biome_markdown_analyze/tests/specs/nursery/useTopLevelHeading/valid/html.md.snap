@@ -1,0 +1,12 @@
+---
+source: crates/biome_markdown_analyze/tests/spec_tests.rs
+expression: html.md
+---
+# Input
+```md
+<!-- should not generate diagnostics -->
+<div>HTML content</div>
+
+## Second level heading
+
+```

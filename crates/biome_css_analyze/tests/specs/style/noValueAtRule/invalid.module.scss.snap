@@ -1,0 +1,28 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalid.module.scss
+---
+# Input
+```css
+/* should generate diagnostics */
+@value primary: #bf4040;
+
+```
+
+# Diagnostics
+```
+invalid.module.scss:2:1 lint/style/noValueAtRule ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use of @value rule is disallowed
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ @value primary: #bf4040;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ 
+  
+  i Using @value is not recommended, consider using CSS variables instead.
+  
+  i See MDN web docs for more details.
+  
+
+```

@@ -1,0 +1,67 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: comments.js
+---
+# Input
+```js
+/* should generate diagnostics */
+test('call', async ({ page }) => {
+    // a leading comment
+    expect(page.locator('body')).toBeVisible(); // a trailing comment
+});
+
+test('combinator', async ({ page }) => {
+    // a leading comment
+    Promise.all([
+        expect(page.locator('.one')).toBeVisible(),
+    ]); // a trailing comment
+});
+
+```
+
+# Diagnostics
+```
+comments.js:4:5 lint/correctness/noPlaywrightMissingAwait  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Async matcher toBeVisible must be awaited or returned.
+  
+    2 │ test('call', async ({ page }) => {
+    3 │     // a leading comment
+  > 4 │     expect(page.locator('body')).toBeVisible(); // a trailing comment
+      │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ });
+    6 │ 
+  
+  i Async matchers return a Promise that must be handled.
+  
+  i Add await before the expression or return it from the function.
+  
+  i Unsafe fix: Add await before the call.
+  
+    4 │ ····await·expect(page.locator('body')).toBeVisible();·//·a·trailing·comment
+      │     ++++++                                                                 
+
+```
+
+```
+comments.js:10:9 lint/correctness/noPlaywrightMissingAwait  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Async matcher toBeVisible must be awaited or returned.
+  
+     8 │     // a leading comment
+     9 │     Promise.all([
+  > 10 │         expect(page.locator('.one')).toBeVisible(),
+       │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    11 │     ]); // a trailing comment
+    12 │ });
+  
+  i Async matchers return a Promise that must be handled.
+  
+  i Add await before the expression or return it from the function.
+  
+  i Unsafe fix: Add await before the Promise combinator.
+  
+    9 │ ····await·Promise.all([
+      │     ++++++             
+
+```

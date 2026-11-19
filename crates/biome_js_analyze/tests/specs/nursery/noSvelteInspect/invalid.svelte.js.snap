@@ -1,0 +1,40 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.svelte.js
+---
+# Input
+```js
+/* should generate diagnostics */
+export function createCounter() {
+	let count = $state(0);
+	$inspect(count);
+	return {
+		get count() {
+			return count;
+		},
+	};
+}
+
+```
+
+# Diagnostics
+```
+invalid.svelte.js:4:2 lint/nursery/noSvelteInspect ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected use of the $inspect rune.
+  
+    2 │ export function createCounter() {
+    3 │ 	let count = $state(0);
+  > 4 │ 	$inspect(count);
+      │ 	^^^^^^^^
+    5 │ 	return {
+    6 │ 		get count() {
+  
+  i $inspect is a debugging aid that logs values to the console during development, and is usually left over from a debugging session.
+  
+  i Remove the $inspect call once you're done debugging.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

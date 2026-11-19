@@ -1,0 +1,267 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidClassExpressions.jsx
+---
+# Input
+```jsx
+// should generate diagnostics
+<div className={["bg-pink-500", [active && "hover:text-red-500/80"]]} />;
+<div className={{ "border-slate-950": active }} />;
+<div className={{ ["bg-pink-500"]: active }} />;
+<div className={[...["bg-pink-500"]]} />;
+<div className={{ ...{ "bg-pink-500": active } }} />;
+<div className={classes ?? "bg-pink-500"} />;
+<div className={`bg-primary ${active ? "bg-pink-500" : "text-red-500"}`} />;
+clsx(`bg-pink-500 ${active ? "text-red-500" : "text-primary"}`);
+
+```
+
+# Diagnostics
+```
+invalidClassExpressions.jsx:2:19 lint/nursery/noTailwindRawColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind CSS class uses a raw palette color.
+  
+    1 │ // should generate diagnostics
+  > 2 │ <div className={["bg-pink-500", [active && "hover:text-red-500/80"]]} />;
+      │                   ^^^^^^^^^^^
+    3 │ <div className={{ "border-slate-950": active }} />;
+    4 │ <div className={{ ["bg-pink-500"]: active }} />;
+  
+  i Raw palette colors couple components to specific colors, making design-system changes harder.
+  
+  i Use a color from your design system. Check your Tailwind config for the available colors.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidClassExpressions.jsx:2:51 lint/nursery/noTailwindRawColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind CSS class uses a raw palette color.
+  
+    1 │ // should generate diagnostics
+  > 2 │ <div className={["bg-pink-500", [active && "hover:text-red-500/80"]]} />;
+      │                                                   ^^^^^^^^^^^^^^^
+    3 │ <div className={{ "border-slate-950": active }} />;
+    4 │ <div className={{ ["bg-pink-500"]: active }} />;
+  
+  i Raw palette colors couple components to specific colors, making design-system changes harder.
+  
+  i Use a color from your design system. Check your Tailwind config for the available colors.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidClassExpressions.jsx:3:20 lint/nursery/noTailwindRawColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind CSS class uses a raw palette color.
+  
+    1 │ // should generate diagnostics
+    2 │ <div className={["bg-pink-500", [active && "hover:text-red-500/80"]]} />;
+  > 3 │ <div className={{ "border-slate-950": active }} />;
+      │                    ^^^^^^^^^^^^^^^^
+    4 │ <div className={{ ["bg-pink-500"]: active }} />;
+    5 │ <div className={[...["bg-pink-500"]]} />;
+  
+  i Raw palette colors couple components to specific colors, making design-system changes harder.
+  
+  i Use a color from your design system. Check your Tailwind config for the available colors.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidClassExpressions.jsx:4:21 lint/nursery/noTailwindRawColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind CSS class uses a raw palette color.
+  
+    2 │ <div className={["bg-pink-500", [active && "hover:text-red-500/80"]]} />;
+    3 │ <div className={{ "border-slate-950": active }} />;
+  > 4 │ <div className={{ ["bg-pink-500"]: active }} />;
+      │                     ^^^^^^^^^^^
+    5 │ <div className={[...["bg-pink-500"]]} />;
+    6 │ <div className={{ ...{ "bg-pink-500": active } }} />;
+  
+  i Raw palette colors couple components to specific colors, making design-system changes harder.
+  
+  i Use a color from your design system. Check your Tailwind config for the available colors.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidClassExpressions.jsx:5:23 lint/nursery/noTailwindRawColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind CSS class uses a raw palette color.
+  
+    3 │ <div className={{ "border-slate-950": active }} />;
+    4 │ <div className={{ ["bg-pink-500"]: active }} />;
+  > 5 │ <div className={[...["bg-pink-500"]]} />;
+      │                       ^^^^^^^^^^^
+    6 │ <div className={{ ...{ "bg-pink-500": active } }} />;
+    7 │ <div className={classes ?? "bg-pink-500"} />;
+  
+  i Raw palette colors couple components to specific colors, making design-system changes harder.
+  
+  i Use a color from your design system. Check your Tailwind config for the available colors.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidClassExpressions.jsx:6:25 lint/nursery/noTailwindRawColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind CSS class uses a raw palette color.
+  
+    4 │ <div className={{ ["bg-pink-500"]: active }} />;
+    5 │ <div className={[...["bg-pink-500"]]} />;
+  > 6 │ <div className={{ ...{ "bg-pink-500": active } }} />;
+      │                         ^^^^^^^^^^^
+    7 │ <div className={classes ?? "bg-pink-500"} />;
+    8 │ <div className={`bg-primary ${active ? "bg-pink-500" : "text-red-500"}`} />;
+  
+  i Raw palette colors couple components to specific colors, making design-system changes harder.
+  
+  i Use a color from your design system. Check your Tailwind config for the available colors.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidClassExpressions.jsx:7:29 lint/nursery/noTailwindRawColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind CSS class uses a raw palette color.
+  
+    5 │ <div className={[...["bg-pink-500"]]} />;
+    6 │ <div className={{ ...{ "bg-pink-500": active } }} />;
+  > 7 │ <div className={classes ?? "bg-pink-500"} />;
+      │                             ^^^^^^^^^^^
+    8 │ <div className={`bg-primary ${active ? "bg-pink-500" : "text-red-500"}`} />;
+    9 │ clsx(`bg-pink-500 ${active ? "text-red-500" : "text-primary"}`);
+  
+  i Raw palette colors couple components to specific colors, making design-system changes harder.
+  
+  i Use a color from your design system. Check your Tailwind config for the available colors.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidClassExpressions.jsx:8:41 lint/nursery/noTailwindRawColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind CSS class uses a raw palette color.
+  
+     6 │ <div className={{ ...{ "bg-pink-500": active } }} />;
+     7 │ <div className={classes ?? "bg-pink-500"} />;
+   > 8 │ <div className={`bg-primary ${active ? "bg-pink-500" : "text-red-500"}`} />;
+       │                                         ^^^^^^^^^^^
+     9 │ clsx(`bg-pink-500 ${active ? "text-red-500" : "text-primary"}`);
+    10 │ 
+  
+  i Raw palette colors couple components to specific colors, making design-system changes harder.
+  
+  i Use a color from your design system. Check your Tailwind config for the available colors.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidClassExpressions.jsx:8:57 lint/nursery/noTailwindRawColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind CSS class uses a raw palette color.
+  
+     6 │ <div className={{ ...{ "bg-pink-500": active } }} />;
+     7 │ <div className={classes ?? "bg-pink-500"} />;
+   > 8 │ <div className={`bg-primary ${active ? "bg-pink-500" : "text-red-500"}`} />;
+       │                                                         ^^^^^^^^^^^^
+     9 │ clsx(`bg-pink-500 ${active ? "text-red-500" : "text-primary"}`);
+    10 │ 
+  
+  i Raw palette colors couple components to specific colors, making design-system changes harder.
+  
+  i Use a color from your design system. Check your Tailwind config for the available colors.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidClassExpressions.jsx:9:7 lint/nursery/noTailwindRawColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind CSS class uses a raw palette color.
+  
+     7 │ <div className={classes ?? "bg-pink-500"} />;
+     8 │ <div className={`bg-primary ${active ? "bg-pink-500" : "text-red-500"}`} />;
+   > 9 │ clsx(`bg-pink-500 ${active ? "text-red-500" : "text-primary"}`);
+       │       ^^^^^^^^^^^
+    10 │ 
+  
+  i Raw palette colors couple components to specific colors, making design-system changes harder.
+  
+  i Use a color from your design system. Check your Tailwind config for the available colors.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidClassExpressions.jsx:9:31 lint/nursery/noTailwindRawColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind CSS class uses a raw palette color.
+  
+     7 │ <div className={classes ?? "bg-pink-500"} />;
+     8 │ <div className={`bg-primary ${active ? "bg-pink-500" : "text-red-500"}`} />;
+   > 9 │ clsx(`bg-pink-500 ${active ? "text-red-500" : "text-primary"}`);
+       │                               ^^^^^^^^^^^^
+    10 │ 
+  
+  i Raw palette colors couple components to specific colors, making design-system changes harder.
+  
+  i Use a color from your design system. Check your Tailwind config for the available colors.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

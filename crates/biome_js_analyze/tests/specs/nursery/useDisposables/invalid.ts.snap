@@ -53,6 +53,18 @@ class AsyncDisposableClass implements AsyncDisposable {
 
 const asyncDisposableInstance = new AsyncDisposableClass();
 
+const valueReturningDisposable = {
+  [Symbol.dispose]() {
+    return 1;
+  }
+};
+
+const promiseLikeDisposable = {
+  [Symbol.asyncDispose](): PromiseLike<void> {
+    return Promise.resolve();
+  }
+};
+
 ```
 
 # Diagnostics
@@ -224,6 +236,7 @@ invalid.ts:48:7 lint/nursery/useDisposables  FIXABLE  ━━━━━━━━�
   > 48 │ const asyncDisposableInstance = new AsyncDisposableClass();
        │       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     49 │ 
+    50 │ const valueReturningDisposable = {
   
   i The object implements the AsyncDisposable interface, which is intended to be disposed after use with await using syntax.
   
@@ -238,6 +251,76 @@ invalid.ts:48:7 lint/nursery/useDisposables  FIXABLE  ━━━━━━━━�
     48    │ - const·asyncDisposableInstance·=·new·AsyncDisposableClass();
        48 │ + await·using·asyncDisposableInstance·=·new·AsyncDisposableClass();
     49 49 │   
+    50 50 │   const valueReturningDisposable = {
+  
+
+```
+
+```
+invalid.ts:50:7 lint/nursery/useDisposables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Disposable object is assigned here but never disposed.
+  
+    48 │ const asyncDisposableInstance = new AsyncDisposableClass();
+    49 │ 
+  > 50 │ const valueReturningDisposable = {
+       │       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 51 │   [Symbol.dispose]() {
+  > 52 │     return 1;
+  > 53 │   }
+  > 54 │ };
+       │ ^
+    55 │ 
+    56 │ const promiseLikeDisposable = {
+  
+  i The object implements the Disposable interface, which is intended to be disposed after use with using syntax.
+  
+  i Not disposing the object properly can lead some resource or memory leak.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add the using keyword to dispose the object when leaving the scope.
+  
+    48 48 │   const asyncDisposableInstance = new AsyncDisposableClass();
+    49 49 │   
+    50    │ - const·valueReturningDisposable·=·{
+       50 │ + using·valueReturningDisposable·=·{
+    51 51 │     [Symbol.dispose]() {
+    52 52 │       return 1;
+  
+
+```
+
+```
+invalid.ts:56:7 lint/nursery/useDisposables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Disposable object is assigned here but never disposed.
+  
+    54 │ };
+    55 │ 
+  > 56 │ const promiseLikeDisposable = {
+       │       ^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 57 │   [Symbol.asyncDispose](): PromiseLike<void> {
+  > 58 │     return Promise.resolve();
+  > 59 │   }
+  > 60 │ };
+       │ ^
+    61 │ 
+  
+  i The object implements the AsyncDisposable interface, which is intended to be disposed after use with await using syntax.
+  
+  i Not disposing the object properly can lead some resource or memory leak.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add the using keyword to dispose the object when leaving the scope.
+  
+    54 54 │   };
+    55 55 │   
+    56    │ - const·promiseLikeDisposable·=·{
+       56 │ + await·using·promiseLikeDisposable·=·{
+    57 57 │     [Symbol.asyncDispose](): PromiseLike<void> {
+    58 58 │       return Promise.resolve();
   
 
 ```

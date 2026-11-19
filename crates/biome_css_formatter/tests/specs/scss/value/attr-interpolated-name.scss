@@ -1,0 +1,6 @@
+.a::after {
+  content:attr( #{$name} );
+  content: attr(data-#{$name});
+  content: attr(#{$name}-Label   raw-string);
+  content: attr(#{$name} type(<number>),0);
+}

@@ -1,16 +1,18 @@
+use crate::services::database::ResolvedImports;
 use biome_analyze::{
     Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{AnyJsImportClause, AnyJsImportLike, JsModuleSource};
-use biome_module_graph::{JsImportPath, JsModuleInfo, ModuleGraph, SUPPORTED_EXTENSIONS};
+use biome_module_graph::{
+    JsExportedSymbolLookup, ModuleDb, ModuleInfo, ModuleInfoKind, SUPPORTED_EXTENSIONS,
+    SymbolFromModuleInfo, find_js_exported_symbol,
+};
 use biome_resolver::ResolveError;
 use biome_rowan::{AstNode, Text, TextRange, TokenText};
 use biome_rule_options::no_unresolved_imports::NoUnresolvedImportsOptions;
 use camino::{Utf8Path, Utf8PathBuf};
-
-use crate::services::module_graph::ResolvedImports;
 
 declare_lint_rule! {
     /// Warn when importing non-existing exports.
@@ -95,26 +97,31 @@ impl Rule for NoUnresolvedImports {
     type Options = NoUnresolvedImportsOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let Some(module_info) = ctx.module_info_for_path(ctx.file_path()) else {
+        let Some(owner) = ctx.module_info_for_path(ctx.file_path()) else {
+            return Vec::new();
+        };
+        let ModuleInfoKind::Js(module_info) = owner.kind(ctx.db()) else {
             return Vec::new();
         };
 
         let node = ctx.query();
-        let Some(JsImportPath { resolved_path, .. }) = module_info.get_import_path_by_js_node(node)
-        else {
+        let Some(import_path) = module_info.get_import_path_by_js_node(node) else {
             return Vec::new();
         };
+        let resolved = import_path.resolve_js(ctx.db(), owner);
 
         let Some(specifier) = node.inner_string_text() else {
             return Vec::new();
         };
 
-        let resolved_path = match resolved_path.as_deref() {
+        let resolved_path = match resolved.path().as_deref() {
             Ok(resolved_path) => resolved_path,
             Err(resolve_error) => {
-                // Node.js built-ins (e.g. `node:fs`, `node:path`) are valid
+                // Runtime built-ins (e.g. `node:fs`, `bun:sqlite`) are valid
                 // imports — they simply cannot be resolved to a file path.
-                if *resolve_error == ResolveError::NodeBuiltIn {
+                if *resolve_error == ResolveError::NodeBuiltIn
+                    || *resolve_error == ResolveError::BunBuiltIn
+                {
                     return Vec::new();
                 }
 
@@ -138,7 +145,7 @@ impl Rule for NoUnresolvedImports {
         };
 
         let options = GetUnresolvedImportsOptions {
-            module_graph: ctx.module_graph(),
+            module_db: ctx.db(),
             specifier,
             target_info,
         };
@@ -158,8 +165,7 @@ impl Rule for NoUnresolvedImports {
     fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         let cwd = Utf8PathBuf::from(
             std::env::current_dir()
-                .map(|cwd| cwd.to_string_lossy().to_string())
-                .unwrap_or_default(),
+                .map_or_default(|cwd| cwd.to_string_lossy().to_string()),
         );
 
         // Use the relative path if possible.
@@ -236,14 +242,14 @@ impl Rule for NoUnresolvedImports {
 }
 
 struct GetUnresolvedImportsOptions<'a> {
-    /// The module graph to use for further lookups.
-    module_graph: &'a ModuleGraph,
+    /// The module database to use for further lookups.
+    module_db: &'a dyn ModuleDb,
 
     /// The path of the module we're importing from.
     specifier: TokenText,
 
     /// Module info of the module we're importing from.
-    target_info: JsModuleInfo,
+    target_info: ModuleInfo,
 }
 
 fn get_unresolved_imports_from_module_source(
@@ -266,8 +272,11 @@ fn get_unresolved_imports_from_module_source(
 }
 
 fn has_exported_symbol(import_name: &Text, options: &GetUnresolvedImportsOptions) -> bool {
-    options
-        .target_info
-        .find_js_exported_symbol(options.module_graph, import_name.text())
-        .is_some()
+    let lookup = find_js_exported_symbol(
+        options.module_db,
+        SymbolFromModuleInfo::new(options.module_db, import_name.text(), options.target_info),
+    );
+    // `Unknown` means a re-export target could not be resolved, so the symbol
+    // may exist. Only report symbols that are missing for certain.
+    !matches!(lookup, JsExportedSymbolLookup::Missing)
 }

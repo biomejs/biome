@@ -1,0 +1,20 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-plain-block-mixins.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<script>
+import emitsFoo from "./emitsFoo";
+
+export default {
+  mixins: [emitsFoo],
+};
+</script>
+
+<script setup>
+defineEmits(["foo"]);
+</script>
+
+```

@@ -2,22 +2,10 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
-## `packages/lib/biome.json`
+## Command
 
-```json
-{
-  "root": false,
-  "extends": "//",
-  "formatter": {
-    "indentStyle": "space",
-    "indentWidth": 8
-  },
-  "javascript": {
-    "formatter": {
-      "quoteStyle": "double"
-    }
-  }
-}
+```shell
+biome format '<TEMP_DIR>/should_extend_from_the_root_config'
 ```
 
 ## `biome.json`
@@ -32,6 +20,24 @@ expression: redactor(content)
   "javascript": {
     "formatter": {
       "quoteStyle": "single"
+    }
+  }
+}
+```
+
+## `packages/lib/biome.json`
+
+```json
+{
+  "root": false,
+  "extends": "//",
+  "formatter": {
+    "indentStyle": "space",
+    "indentWidth": 8
+  },
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "double"
     }
   }
 }

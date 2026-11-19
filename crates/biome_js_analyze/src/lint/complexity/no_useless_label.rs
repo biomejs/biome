@@ -88,7 +88,10 @@ impl Rule for NoUselessLabel {
             markup! {
                 "Unnecessary "<Emphasis>"label"</Emphasis>"."
             },
-        ))
+        )
+        .note(markup! {
+            "The statement already applies to the innermost enclosing loop or switch, so the label has no effect."
+        }))
     }
 
     fn action(ctx: &RuleContext<Self>, _: &Self::State) -> Option<JsRuleAction> {

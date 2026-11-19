@@ -1,19 +1,22 @@
+use crate::lexer::HtmlLexerOptions;
 use crate::token_source::{
-    HtmlLexContext, HtmlReLexContext, HtmlTokenSource, HtmlTokenSourceCheckpoint,
+    HtmlFramework, HtmlLexContext, HtmlReLexContext, HtmlTokenSource, HtmlTokenSourceCheckpoint,
     TextExpressionKind,
 };
 use biome_html_factory::HtmlSyntaxFactory;
-use biome_html_syntax::{
-    HtmlFileSource, HtmlLanguage, HtmlSyntaxKind, HtmlTextExpressions, HtmlVariant,
-};
+use biome_html_syntax::{HtmlLanguage, HtmlSyntaxKind};
+use biome_languages::HtmlFileSource;
+use biome_languages::html::{HtmlTextExpressions, HtmlVariant};
 use biome_parser::diagnostic::{ParseDiagnostic, merge_diagnostics};
 use biome_parser::event::Event;
 use biome_parser::prelude::*;
-use biome_parser::tree_sink::LosslessTreeSink;
+use biome_parser::tree_sink::{LosslessTreeSink, OffsetLosslessTreeSink};
 use biome_parser::{Parser, ParserContext, ParserContextCheckpoint};
 
 pub(crate) type HtmlLosslessTreeSink<'source> =
     LosslessTreeSink<'source, HtmlLanguage, HtmlSyntaxFactory>;
+pub(crate) type HtmlOffsetLosslessTreeSink<'source> =
+    OffsetLosslessTreeSink<'source, HtmlLanguage, HtmlSyntaxFactory>;
 
 pub(crate) struct HtmlParser<'source> {
     context: ParserContext<HtmlSyntaxKind>,
@@ -23,9 +26,18 @@ pub(crate) struct HtmlParser<'source> {
 
 impl<'source> HtmlParser<'source> {
     pub fn new(source: &'source str, options: HtmlParserOptions) -> Self {
+        let framework = options.framework();
+        let lexer_options = HtmlLexerOptions {
+            framework,
+            text_expression: options.text_expression,
+        };
         Self {
             context: ParserContext::default(),
-            source: HtmlTokenSource::from_str(source),
+            source: HtmlTokenSource::from_str(
+                source,
+                HtmlLexContext::Regular { framework },
+                lexer_options,
+            ),
             options,
         }
     }
@@ -67,6 +79,20 @@ impl<'source> HtmlParser<'source> {
         // `state` is not checkpointed because it (currently) only contains
         // scoped properties that aren't only dependent on checkpoints and
         // should be reset manually when the scope of their use is exited.
+    }
+
+    /// Execute a lookahead operation without consuming tokens.
+    ///
+    /// Saves a checkpoint, executes the provided closure, then rewinds to
+    /// the checkpoint. The closure's return value is passed through.
+    pub fn lookahead<F, R>(&mut self, op: F) -> R
+    where
+        F: FnOnce(&mut Self) -> R,
+    {
+        let checkpoint = self.checkpoint();
+        let result = op(self);
+        self.rewind(checkpoint);
+        result
     }
 
     /// Re-lexes the current token in the specified context. Returns the kind
@@ -131,9 +157,24 @@ pub struct HtmlParserOptions {
     pub(crate) vue: bool,
     pub(crate) svelte: bool,
     pub(crate) is_html: bool,
+    pub(crate) angular: bool,
 }
 
 impl HtmlParserOptions {
+    pub(crate) fn framework(&self) -> HtmlFramework {
+        if self.vue {
+            HtmlFramework::Vue
+        } else if self.svelte {
+            HtmlFramework::Svelte
+        } else if self.frontmatter {
+            HtmlFramework::Astro
+        } else if self.angular {
+            HtmlFramework::Angular
+        } else {
+            HtmlFramework::Plain
+        }
+    }
+
     pub fn with_single_text_expression(mut self) -> Self {
         self.text_expression = Some(TextExpressionKind::Single);
         self
@@ -166,8 +207,21 @@ impl HtmlParserOptions {
         self
     }
 
+    pub fn set_vue(&mut self, value: bool) {
+        self.vue = value;
+    }
+
     pub fn with_svelte(mut self) -> Self {
         self.svelte = true;
+        self
+    }
+
+    pub fn set_angular(&mut self, value: bool) {
+        self.angular = value;
+    }
+
+    pub fn with_angular(mut self) -> Self {
+        self.angular = true;
         self
     }
 
@@ -198,6 +252,9 @@ impl From<&HtmlFileSource> for HtmlParserOptions {
             }
             HtmlVariant::Svelte => {
                 options = options.with_single_text_expression().with_svelte();
+            }
+            HtmlVariant::Angular => {
+                options = options.with_double_text_expression().with_angular();
             }
         }
 

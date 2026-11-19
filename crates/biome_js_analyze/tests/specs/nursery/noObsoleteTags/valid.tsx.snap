@@ -1,0 +1,12 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.tsx
+---
+# Input
+```tsx
+/* should not generate diagnostics */
+const content = <span>Text</span>;
+const component = <Font<string> />;
+const member = <UI.font<string> />;
+
+```

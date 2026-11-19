@@ -134,6 +134,48 @@ fn basic_multiple() {
 }
 
 #[test]
+fn whitespace_includes_newlines() {
+    assert_lex!(
+        " \t\r\n\n ",
+        WHITESPACE:6,
+    );
+}
+
+#[test]
+fn css_underscore_whitespace_has_its_own_kind() {
+    assert_lex!(
+        TailwindLexContext::CssValue,
+        "foo__bar",
+        IDENT:3,
+        CSS_WHITESPACE:2,
+        IDENT:3,
+    );
+}
+
+#[test]
+fn css_strings_stop_at_whitespace() {
+    assert_lex!(
+        TailwindLexContext::CssValue,
+        "\"foo bar\"",
+        CSS_STRING_LITERAL:4,
+        WHITESPACE:1,
+        IDENT:3,
+        CSS_STRING_LITERAL:1,
+    );
+}
+
+#[test]
+fn nested_brackets_stop_at_whitespace() {
+    assert_lex!(
+        "[foo[bar baz]]",
+        L_BRACKET:1,
+        TW_SELECTOR:7,
+        WHITESPACE:1,
+        TW_BASE:5,
+    );
+}
+
+#[test]
 fn basic_modifier() {
     assert_lex!(
         "bg-primary/10",
@@ -250,11 +292,44 @@ fn arbitrary_css_underscores_are_whitespace() {
         "0px_2px_4px",
         CSS_DIMENSION_VALUE:1,
         PX_KW:2,
+        CSS_WHITESPACE:1,
+        CSS_DIMENSION_VALUE:1,
+        PX_KW:2,
+        CSS_WHITESPACE:1,
+        CSS_DIMENSION_VALUE:1,
+        PX_KW:2,
+    );
+}
+
+#[test]
+fn arbitrary_css_minus_after_value_is_an_operator() {
+    assert_lex!(
+        TailwindLexContext::CssValue,
+        "100svh-var 1px-2px 100-1 50%-1 (1)-1",
+        CSS_DIMENSION_VALUE:3,
+        SVH_KW:3,
+        DASH:1,
+        VAR_KW:3,
         WHITESPACE:1,
         CSS_DIMENSION_VALUE:1,
         PX_KW:2,
-        WHITESPACE:1,
+        DASH:1,
         CSS_DIMENSION_VALUE:1,
         PX_KW:2,
+        WHITESPACE:1,
+        CSS_NUMBER_LITERAL:3,
+        DASH:1,
+        CSS_NUMBER_LITERAL:1,
+        WHITESPACE:1,
+        CSS_PERCENTAGE_VALUE:2,
+        PERCENT:1,
+        DASH:1,
+        CSS_NUMBER_LITERAL:1,
+        WHITESPACE:1,
+        L_PAREN:1,
+        CSS_NUMBER_LITERAL:1,
+        R_PAREN:1,
+        DASH:1,
+        CSS_NUMBER_LITERAL:1,
     );
 }

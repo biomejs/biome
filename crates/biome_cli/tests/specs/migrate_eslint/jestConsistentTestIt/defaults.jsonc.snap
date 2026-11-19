@@ -22,8 +22,8 @@ expression: defaults.jsonc
 {
 	"linter": {
 		"rules": {
-			"recommended": false,
-			"nursery": {
+			"preset": "none",
+			"style": {
 				"useConsistentTestIt": {
 					"level": "error",
 					"options": { "function": "test", "withinDescribe": "it" }

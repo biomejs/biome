@@ -2,6 +2,12 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
+## Command
+
+```shell
+biome lint check.js
+```
+
 ## `biome.json`
 
 ```json
@@ -37,12 +43,39 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
 # Emitted Messages
 
 ```block
+biome.json:2:13 deserialize  DEPRECATED  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The use of the recommended field has been deprecated, and will removed in the next major version of Biome. Use preset instead.
+  
+     1 │ {
+   > 2 │   "linter": {
+       │             ^
+   > 3 │     "rules": {
+   > 4 │         "recommended": false,
+   > 5 │         "correctness": {
+   > 6 │             "recommended": true
+   > 7 │         }
+   > 8 │     }
+   > 9 │   }
+       │   ^
+    10 │ }
+  
+  i Migrate the configuration with the proper command
+  
+  $ biome migrate
+  
+
+```
+
+```block
 check.js:1:1 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Use Symbol() instead of new Symbol().
   
   > 1 │ new Symbol("");
       │ ^^^^^^^^^^^^^^
+  
+  i Calling this builtin the wrong way throws a TypeError at runtime.
   
   i Unsafe fix: Remove new keyword.
   

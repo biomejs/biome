@@ -2,20 +2,27 @@ use crate::CliDiagnostic;
 use crate::runner::collector::Collector;
 use crate::runner::execution::Execution;
 use crate::runner::handler::Handler;
-use crate::runner::process_file::{Message, MessageStat, ProcessFile};
+use crate::runner::process_file::{ChangedFile, Message, MessageStat, ProcessFile};
 use biome_diagnostics::{Error, Severity};
 use biome_fs::{BiomePath, FileSystem, PathInterner, TraversalContext, TraversalScope};
 use biome_service::Workspace;
 use biome_service::projects::ProjectKey;
+use biome_service::workspace::{ChangeFileParams, FeaturesSupported};
 use camino::Utf8PathBuf;
 use crossbeam::channel::{Sender, unbounded};
-use papaya::{HashSet, HashSetRef, LocalGuard};
+use papaya::{HashMap, HashSet, HashSetRef, LocalGuard};
 use std::hash::RandomState;
 use std::marker::PhantomData;
+use std::sync::Mutex;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::thread;
 use std::time::{Duration, Instant};
 use tracing::instrument;
+
+pub enum CrawlPath {
+    String(String),
+    Path(Utf8PathBuf),
+}
 
 pub trait Crawler<Output> {
     type Handler: Handler;
@@ -34,7 +41,8 @@ pub trait Crawler<Output> {
         workspace: &dyn Workspace,
         fs: &dyn FileSystem,
         project_key: ProjectKey,
-        inputs: Vec<String>,
+        use_server: bool,
+        inputs: Vec<CrawlPath>,
         collector: Self::Collector,
         max_diagnostics: u32,
         diagnostic_level: Severity,
@@ -48,30 +56,42 @@ pub trait Crawler<Output> {
                 .spawn_scoped(s, || collector.run(receiver, recv_files, execution))
                 .expect("failed to spawn console thread");
 
-            // The traversal context is scoped to ensure all the channels it
-            // contains are properly closed once the traversal finishes
-            let (elapsed, evaluated_paths) = Self::crawl_inputs(
+            let ctx = CrawlerOptions::new(
                 fs,
-                inputs,
-                // Don't move it. If ctx is declared outside of this function, it doesn't
-                // go out of scope, causing a deadlock because the main thread waits for
-                // ctx to be dropped
-                &CrawlerOptions::new(
-                    fs,
-                    workspace,
-                    project_key,
-                    interner,
-                    sender,
-                    execution,
-                    max_diagnostics,
-                    diagnostic_level,
-                ),
+                workspace,
+                project_key,
+                use_server,
+                interner,
+                sender,
+                execution,
+                max_diagnostics,
+                diagnostic_level,
             );
+            let (elapsed, evaluated_paths) = Self::crawl_inputs(fs, inputs, &ctx);
+
+            if use_server {
+                for changed_file in ctx.take_changed_files() {
+                    let result = workspace.change_file(ChangeFileParams {
+                        project_key,
+                        path: changed_file.path,
+                        content: changed_file.content,
+                        version: changed_file.version,
+                        inline_config: None,
+                        editor_features: None,
+                    })?;
+                    for diagnostic in result.diagnostics {
+                        ctx.push_message(Message::from(diagnostic));
+                    }
+                }
+            }
+
+            // Close the message sender before waiting for the collector.
+            drop(ctx);
             // wait for the main thread to finish
             handler.join().unwrap();
 
-            (elapsed, evaluated_paths)
-        });
+            Ok::<_, CliDiagnostic>((elapsed, evaluated_paths))
+        })?;
 
         execution.on_post_crawl(workspace)?;
         let result = collector.result(duration);
@@ -82,13 +102,16 @@ pub trait Crawler<Output> {
     /// run it to completion, returning the duration of the process and the evaluated paths
     fn crawl_inputs<'a>(
         fs: &'a dyn FileSystem,
-        inputs: Vec<String>,
+        inputs: Vec<CrawlPath>,
         ctx: &'a CrawlerOptions<Self::Handler, Self::ProcessFile>,
     ) -> (Duration, Vec<BiomePath>) {
         let start = Instant::now();
         fs.traversal(Box::new(move |scope: &dyn TraversalScope| {
             for input in inputs {
-                scope.evaluate(ctx, Utf8PathBuf::from(input));
+                match input {
+                    CrawlPath::Path(input) => scope.evaluate(ctx, input),
+                    CrawlPath::String(input) => scope.evaluate(ctx, Utf8PathBuf::from(input)),
+                };
             }
         }));
 
@@ -109,7 +132,7 @@ pub trait Crawler<Output> {
 }
 
 pub trait CrawlerContext: TraversalContext {
-    fn increment_changed(&self, path: &BiomePath);
+    fn increment_changed(&self, path: &BiomePath, changed_file: ChangedFile);
     fn increment_unchanged(&self);
     fn increment_matches(&self, num_matches: usize);
     fn increment_skipped(&self);
@@ -119,6 +142,8 @@ pub trait CrawlerContext: TraversalContext {
     fn workspace(&self) -> &dyn Workspace;
     fn project_key(&self) -> ProjectKey;
     fn execution(&self) -> &dyn Execution;
+    fn insert_file_features(&self, path: BiomePath, features: FeaturesSupported);
+    fn get_file_features(&self, path: &BiomePath) -> Option<FeaturesSupported>;
 }
 
 /// Context object shared between directory traversal tasks
@@ -143,6 +168,12 @@ pub(crate) struct CrawlerOptions<'ctx, 'app, H, P> {
     pub(crate) messages: Sender<Message>,
     /// List of paths that should be processed
     pub(crate) evaluated_paths: papaya::HashSet<BiomePath>,
+    /// File features already computed during path evaluation.
+    pub(crate) file_features: papaya::HashMap<BiomePath, FeaturesSupported>,
+    /// Final contents written by crawler workers.
+    pub(crate) changed_files: Mutex<Vec<ChangedFile>>,
+    /// Whether final contents must be synchronized with a persistent workspace.
+    synchronize_workspace: bool,
     /// Maximum number of diagnostics to pull from the workspace.
     pub(crate) max_diagnostics: u32,
     /// Minimum severity for diagnostics to be included.
@@ -160,8 +191,11 @@ where
     H: Handler,
     P: ProcessFile,
 {
-    fn increment_changed(&self, path: &BiomePath) {
+    fn increment_changed(&self, path: &BiomePath, changed_file: ChangedFile) {
         self.changed.fetch_add(1, Ordering::Relaxed);
+        if self.synchronize_workspace {
+            self.changed_files.lock().unwrap().push(changed_file);
+        }
         let guard = self.evaluated_paths.pin();
         guard.remove(path);
         guard.insert(path.to_written());
@@ -173,7 +207,7 @@ where
     }
 
     fn increment_matches(&self, num_matches: usize) {
-        self.push_message(Message::Stats(MessageStat::Matches));
+        self.push_message(Message::Stats(MessageStat::Matches(num_matches)));
         self.matches.fetch_add(num_matches, Ordering::Relaxed);
     }
 
@@ -202,6 +236,14 @@ where
     fn execution(&self) -> &dyn Execution {
         self.execution
     }
+
+    fn insert_file_features(&self, path: BiomePath, features: FeaturesSupported) {
+        self.file_features.pin().insert(path, features);
+    }
+
+    fn get_file_features(&self, path: &BiomePath) -> Option<FeaturesSupported> {
+        self.file_features.pin().get(path).cloned()
+    }
 }
 
 impl<'ctx, 'app, I, P> CrawlerOptions<'ctx, 'app, I, P>
@@ -214,6 +256,7 @@ where
         fs: &'app dyn FileSystem,
         workspace: &'ctx dyn Workspace,
         project_key: ProjectKey,
+        synchronize_workspace: bool,
         interner: PathInterner,
         sender: Sender<Message>,
         execution: &'app dyn Execution,
@@ -227,6 +270,9 @@ where
             interner,
             messages: sender,
             evaluated_paths: HashSet::default(),
+            file_features: HashMap::default(),
+            changed_files: Mutex::new(Vec::new()),
+            synchronize_workspace,
             handler: I::default(),
             changed: AtomicUsize::new(0),
             unchanged: AtomicUsize::new(0),
@@ -237,6 +283,10 @@ where
             diagnostic_level,
             _p: PhantomData::<P>,
         }
+    }
+
+    fn take_changed_files(&self) -> Vec<ChangedFile> {
+        std::mem::take(&mut *self.changed_files.lock().unwrap())
     }
 }
 
@@ -253,8 +303,12 @@ where
         self.evaluated_paths.pin()
     }
 
-    fn push_diagnostic(&self, error: Error) {
-        self.push_message(error.into());
+    fn push_diagnostic(&self, diagnostic: Error) {
+        let is_traversal_error = diagnostic.severity() >= Severity::Error;
+        self.push_message(Message::Error {
+            diagnostic,
+            is_traversal_error,
+        });
     }
 
     #[instrument(level = "debug", skip(self, biome_path))]

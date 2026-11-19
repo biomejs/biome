@@ -1,0 +1,49 @@
+---
+source: crates/biome_cli/src/execute/migrate/eslint_to_biome.rs
+expression: default_languages.jsonc
+---
+## ESLint Config
+
+```json
+{
+	"rules": {
+		"vue/block-lang": [
+			"warn",
+			{
+				"docs": { "allowNoLang": false },
+				"script": { "lang": "js" },
+				"template": {}
+			}
+		]
+	}
+}
+
+```
+
+## Biome Config Before Migration
+
+```json
+{}
+
+```
+
+## Biome Config After Migration
+
+```json
+{
+	"linter": {
+		"rules": {
+			"preset": "none",
+			"nursery": {
+				"useConsistentBlockLang": {
+					"level": "warn",
+					"options": {
+						"blocks": { "script": { "lang": ["js"], "allowNoLang": true } }
+					}
+				}
+			}
+		}
+	}
+}
+
+```

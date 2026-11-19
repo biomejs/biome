@@ -12,6 +12,6 @@ abstract class Test extends Base {
     protected readonly abstract i: string;
     protected abstract readonly j: string;
     protected override readonly base1: string;
-    private static accessor readonly k: string;
-    protected abstract accessor readonly l: string;
+    private static accessor k: string;
+    protected abstract accessor l: string;
 }

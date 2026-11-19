@@ -1,0 +1,188 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.jsx
+---
+# Input
+```jsx
+/* should generate diagnostics */
+const ArrowComponent = (props) => {
+    return <div>{props.name}</div>;
+};
+
+const ExpressionComponent = function (props) {
+    return <div>{props.name}</div>;
+};
+
+const ConciseBodyComponent = (props) => <div>{props.name}</div>;
+
+const MemoComponent = memo((props) => {
+    return <div>{props.name}</div>;
+});
+
+const MemoWithComparatorComponent = memo((props) => {
+    return <div>{props.name}</div>;
+}, areEqual);
+
+AssignedComponent = (props) => {
+    return <div>{props.name}</div>;
+};
+
+```
+
+# Diagnostics
+```
+invalid.jsx:2:7 lint/nursery/useReactFunctionComponentDefinition  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The React component ArrowComponent is defined as an arrow function.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const ArrowComponent = (props) => {
+      │       ^^^^^^^^^^^^^^
+    3 │     return <div>{props.name}</div>;
+    4 │ };
+  
+  i Mixing component definition styles makes component declarations harder to scan.
+  
+  i Rewrite this component as a function declaration or configure `namedComponents` to allow an arrow function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use a function declaration for this component.
+  
+     1  1 │   /* should generate diagnostics */
+     2    │ - const·ArrowComponent·=·(props)·=>·{
+        2 │ + function·ArrowComponent·(props)·{
+     3  3 │       return <div>{props.name}</div>;
+     4    │ - };
+        4 │ + }
+     5  5 │   
+     6  6 │   const ExpressionComponent = function (props) {
+  
+
+```
+
+```
+invalid.jsx:6:7 lint/nursery/useReactFunctionComponentDefinition  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The React component ExpressionComponent is defined as a function expression.
+  
+    4 │ };
+    5 │ 
+  > 6 │ const ExpressionComponent = function (props) {
+      │       ^^^^^^^^^^^^^^^^^^^
+    7 │     return <div>{props.name}</div>;
+    8 │ };
+  
+  i Mixing component definition styles makes component declarations harder to scan.
+  
+  i Rewrite this component as a function declaration or configure `namedComponents` to allow a function expression.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use a function declaration for this component.
+  
+     4  4 │   };
+     5  5 │   
+     6    │ - const·ExpressionComponent·=·function·(props)·{
+        6 │ + function·ExpressionComponent·(props)·{
+     7  7 │       return <div>{props.name}</div>;
+     8    │ - };
+        8 │ + }
+     9  9 │   
+    10 10 │   const ConciseBodyComponent = (props) => <div>{props.name}</div>;
+  
+
+```
+
+```
+invalid.jsx:10:7 lint/nursery/useReactFunctionComponentDefinition  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The React component ConciseBodyComponent is defined as an arrow function.
+  
+     8 │ };
+     9 │ 
+  > 10 │ const ConciseBodyComponent = (props) => <div>{props.name}</div>;
+       │       ^^^^^^^^^^^^^^^^^^^^
+    11 │ 
+    12 │ const MemoComponent = memo((props) => {
+  
+  i Mixing component definition styles makes component declarations harder to scan.
+  
+  i Rewrite this component as a function declaration or configure `namedComponents` to allow an arrow function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use a function declaration for this component.
+  
+     8  8 │   };
+     9  9 │   
+    10    │ - const·ConciseBodyComponent·=·(props)·=>·<div>{props.name}</div>;
+       10 │ + function·ConciseBodyComponent·(props)·{·return·<div>{props.name}</div>;·}
+    11 11 │   
+    12 12 │   const MemoComponent = memo((props) => {
+  
+
+```
+
+```
+invalid.jsx:12:7 lint/nursery/useReactFunctionComponentDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The React component MemoComponent is defined as an arrow function.
+  
+    10 │ const ConciseBodyComponent = (props) => <div>{props.name}</div>;
+    11 │ 
+  > 12 │ const MemoComponent = memo((props) => {
+       │       ^^^^^^^^^^^^^
+    13 │     return <div>{props.name}</div>;
+    14 │ });
+  
+  i Mixing component definition styles makes component declarations harder to scan.
+  
+  i Rewrite this component as a function declaration or configure `namedComponents` to allow an arrow function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:16:7 lint/nursery/useReactFunctionComponentDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The React component MemoWithComparatorComponent is defined as an arrow function.
+  
+    14 │ });
+    15 │ 
+  > 16 │ const MemoWithComparatorComponent = memo((props) => {
+       │       ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    17 │     return <div>{props.name}</div>;
+    18 │ }, areEqual);
+  
+  i Mixing component definition styles makes component declarations harder to scan.
+  
+  i Rewrite this component as a function declaration or configure `namedComponents` to allow an arrow function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:20:1 lint/nursery/useReactFunctionComponentDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The React component AssignedComponent is defined as an arrow function.
+  
+    18 │ }, areEqual);
+    19 │ 
+  > 20 │ AssignedComponent = (props) => {
+       │ ^^^^^^^^^^^^^^^^^
+    21 │     return <div>{props.name}</div>;
+    22 │ };
+  
+  i Mixing component definition styles makes component declarations harder to scan.
+  
+  i Rewrite this component as a function declaration or configure `namedComponents` to allow an arrow function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

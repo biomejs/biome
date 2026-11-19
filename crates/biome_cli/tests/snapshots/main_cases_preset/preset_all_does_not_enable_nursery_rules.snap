@@ -1,0 +1,36 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome lint test.js
+```
+
+## `biome.json`
+
+```json
+{
+  "linter": {
+    "rules": {
+      "preset": "all"
+    }
+  }
+}
+```
+
+## `test.js`
+
+```js
+export function getContext() {
+    return this;
+}
+
+```
+
+# Emitted Messages
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+```

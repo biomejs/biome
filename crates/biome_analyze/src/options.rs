@@ -1,4 +1,4 @@
-use camino::Utf8PathBuf;
+use camino::{Utf8Path, Utf8PathBuf};
 use rustc_hash::FxHashMap;
 
 use crate::{FixKind, Rule, RuleKey};
@@ -8,11 +8,11 @@ use std::sync::Arc;
 
 /// A convenient new type data structure to store the options that belong to a rule
 #[derive(Debug)]
-pub struct RuleOptions(TypeId, Box<dyn Any>, Option<FixKind>);
+pub struct RuleOptions(TypeId, Box<dyn Any + Send + Sync>, Option<FixKind>);
 
 impl RuleOptions {
     /// Creates a new [RuleOptions]
-    pub fn new<O: 'static>(options: O, fix_kind: Option<FixKind>) -> Self {
+    pub fn new<O: 'static + Send + Sync>(options: O, fix_kind: Option<FixKind>) -> Self {
         Self(TypeId::of::<O>(), Box::new(options), fix_kind)
     }
 
@@ -52,11 +52,22 @@ impl AnalyzerRules {
     }
 }
 
+#[derive(Clone, Debug, Default)]
+struct AnalyzerRulesHandle(Arc<AnalyzerRules>);
+
+impl PartialEq for AnalyzerRulesHandle {
+    fn eq(&self, other: &Self) -> bool {
+        Arc::ptr_eq(&self.0, &other.0)
+    }
+}
+
+impl Eq for AnalyzerRulesHandle {}
+
 /// A data structured derived from the `biome.json` file
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Clone, Eq, PartialEq)]
 pub struct AnalyzerConfiguration {
     /// A list of rules and their options
-    pub(crate) rules: AnalyzerRules,
+    rules: AnalyzerRulesHandle,
 
     /// A collection of bindings that the analyzers should consider as "external".
     ///
@@ -82,11 +93,14 @@ pub struct AnalyzerConfiguration {
     /// The JSX fragment factory function identifier (e.g., "Fragment")
     /// Only applies when jsx_runtime is ReactClassic.
     jsx_fragment_factory: Option<Box<str>>,
+
+    /// Configures which attributes and functions contain Tailwind classes.
+    tailwind: TailwindOptions,
 }
 
 impl AnalyzerConfiguration {
     pub fn with_rules(mut self, rules: AnalyzerRules) -> Self {
-        self.rules = rules;
+        self.rules = AnalyzerRulesHandle(Arc::new(rules));
         self
     }
 
@@ -129,24 +143,37 @@ impl AnalyzerConfiguration {
         self.preferred_indentation = preferred_indentation;
         self
     }
+
+    pub fn with_tailwind(mut self, tailwind: TailwindOptions) -> Self {
+        self.tailwind = tailwind;
+        self
+    }
 }
 
 /// A set of information useful to the analyzer infrastructure
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Clone, Eq, PartialEq)]
 pub struct AnalyzerOptions {
     /// A data structured derived from the [`biome.json`] file
     pub(crate) configuration: AnalyzerConfiguration,
 
     /// The file that is being analyzed
-    pub file_path: Arc<Utf8PathBuf>,
+    pub file_path: Utf8PathBuf,
 
     /// Suppression reason used when applying a suppression code action
     pub(crate) suppression_reason: Option<String>,
+
+    /// The working directory for the caller.
+    pub working_directory: Arc<Option<Utf8PathBuf>>,
 }
 
 impl AnalyzerOptions {
     pub fn with_file_path(mut self, file_path: impl Into<Utf8PathBuf>) -> Self {
-        self.file_path = Arc::new(file_path.into());
+        self.file_path = file_path.into();
+        self
+    }
+
+    pub fn with_working_directory(mut self, working_directory: impl Into<Utf8PathBuf>) -> Self {
+        self.working_directory = Arc::new(Some(working_directory.into()));
         self
     }
 
@@ -198,6 +225,7 @@ impl AnalyzerOptions {
     {
         self.configuration
             .rules
+            .0
             .get_rule_options::<R::Options>(&RuleKey::rule::<R>())
             .cloned()
     }
@@ -208,6 +236,7 @@ impl AnalyzerOptions {
     {
         self.configuration
             .rules
+            .0
             .get_rule_fix_kind(&RuleKey::rule::<R>())
     }
 
@@ -222,9 +251,72 @@ impl AnalyzerOptions {
     pub fn preferred_indentation(&self) -> PreferredIndentation {
         self.configuration.preferred_indentation
     }
+
+    pub fn tailwind(&self) -> &TailwindOptions {
+        &self.configuration.tailwind
+    }
 }
 
-#[derive(Clone, Copy, Debug, Default)]
+/// User-provided names that Tailwind-aware analyzer queries use to identify class strings.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct TailwindOptions {
+    attributes: Option<Arc<[Box<str>]>>,
+    merge_functions: Option<Arc<[Box<str>]>>,
+    variant_functions: Option<Arc<[Box<str>]>>,
+    stylesheet: Option<Utf8PathBuf>,
+}
+
+impl TailwindOptions {
+    /// Creates analyzer options from optional replacement lists.
+    pub fn new(
+        attributes: Option<Box<[Box<str>]>>,
+        merge_functions: Option<Box<[Box<str>]>>,
+        variant_functions: Option<Box<[Box<str>]>>,
+    ) -> Self {
+        Self {
+            attributes: attributes.map(Arc::from),
+            merge_functions: merge_functions.map(Arc::from),
+            variant_functions: variant_functions.map(Arc::from),
+            stylesheet: None,
+        }
+    }
+
+    /// Sets the path of the stylesheet that holds the Tailwind CSS
+    /// configuration.
+    pub fn with_stylesheet(mut self, stylesheet: Option<Utf8PathBuf>) -> Self {
+        self.stylesheet = stylesheet;
+        self
+    }
+
+    /// Returns the path of the stylesheet that holds the Tailwind CSS
+    /// configuration, if one is configured.
+    pub fn stylesheet(&self) -> Option<&Utf8Path> {
+        self.stylesheet.as_deref()
+    }
+
+    /// Returns the configured attribute replacement list, or `None` when defaults apply.
+    pub fn attributes(&self) -> Option<&[Box<str>]> {
+        self.attributes.as_deref()
+    }
+
+    /// Returns the configured merge function replacement list, or `None` when defaults apply.
+    pub fn merge_functions(&self) -> Option<&[Box<str>]> {
+        self.merge_functions.as_deref()
+    }
+
+    /// Returns the configured variant function replacement list, or `None` when defaults apply.
+    pub fn variant_functions(&self) -> Option<&[Box<str>]> {
+        self.variant_functions.as_deref()
+    }
+}
+
+impl Default for TailwindOptions {
+    fn default() -> Self {
+        Self::new(None, None, None)
+    }
+}
+
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
 pub enum PreferredIndentation {
     /// Use tabs for indentation.
     #[default]
@@ -245,7 +337,7 @@ impl PreferredIndentation {
     }
 }
 
-#[derive(Clone, Copy, Debug, Default)]
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
 pub enum PreferredQuote {
     /// Double quotes
     #[default]

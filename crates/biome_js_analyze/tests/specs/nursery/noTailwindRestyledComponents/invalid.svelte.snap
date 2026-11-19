@@ -1,0 +1,107 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.svelte
+---
+# Input
+```svelte
+<!-- should generate diagnostics -->
+<script>
+	let active = true;
+</script>
+
+<Button class={active ? "rounded-none" : "bg-red-500"} />
+<Card.Root class={"shadow-lg"} />
+<my-button class={"p-4"}></my-button>
+
+```
+
+# Diagnostics
+```
+invalid.svelte:6:26 lint/nursery/noTailwindRestyledComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind utility restyles a component.
+  
+    4 │ </script>
+    5 │ 
+  > 6 │ <Button class={active ? "rounded-none" : "bg-red-500"} />
+      │                          ^^^^^^^^^^^^
+    7 │ <Card.Root class={"shadow-lg"} />
+    8 │ <my-button class={"p-4"}></my-button>
+  
+  i The design system should manage the component's appearance.
+  
+  i Use a supported component variant or move this style into the component's definition.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:6:43 lint/nursery/noTailwindRestyledComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind utility restyles a component.
+  
+    4 │ </script>
+    5 │ 
+  > 6 │ <Button class={active ? "rounded-none" : "bg-red-500"} />
+      │                                           ^^^^^^^^^^
+    7 │ <Card.Root class={"shadow-lg"} />
+    8 │ <my-button class={"p-4"}></my-button>
+  
+  i The design system should manage the component's appearance.
+  
+  i Use a supported component variant or move this style into the component's definition.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:7:20 lint/nursery/noTailwindRestyledComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind utility restyles a component.
+  
+    6 │ <Button class={active ? "rounded-none" : "bg-red-500"} />
+  > 7 │ <Card.Root class={"shadow-lg"} />
+      │                    ^^^^^^^^^
+    8 │ <my-button class={"p-4"}></my-button>
+    9 │ 
+  
+  i The design system should manage the component's appearance.
+  
+  i Use a supported component variant or move this style into the component's definition.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:8:20 lint/nursery/noTailwindRestyledComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind utility restyles a component.
+  
+    6 │ <Button class={active ? "rounded-none" : "bg-red-500"} />
+    7 │ <Card.Root class={"shadow-lg"} />
+  > 8 │ <my-button class={"p-4"}></my-button>
+      │                    ^^^
+    9 │ 
+  
+  i The design system should manage the component's appearance.
+  
+  i Use a supported component variant or move this style into the component's definition.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

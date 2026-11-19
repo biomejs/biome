@@ -1,0 +1,134 @@
+//! Normalization and generic substitution of types returned by inference
+//! queries.
+//!
+//! Inferred types may contain local handles and structural global references.
+//! Normalization resolves those references throughout wrappers such as unions,
+//! intersections, tuples, instances, merged references, and `typeof` types.
+//! Types that cannot contain these references are returned unchanged.
+//!
+//! Substitution rewrites a type without resolving any references, so it reads
+//! no module inputs and cannot join an inference cycle.
+
+use super::{NormalizeTypeInput, TypeSubstitutionInput};
+use crate::ModuleDb;
+use crate::db::type_inference::{
+    normalize_structural_type, normalize_type_cycle_result, resolve_local_type_on_demand,
+};
+use crate::type_inference::profiling::{
+    TypeInferenceProfileOrigin, TypeInferenceQueryKind, execute_query,
+};
+use biome_js_type_info::interned_types::{TypeData as InferredTypeData, TypeTransformResult};
+
+// #region NORMALIZATION QUERIES
+
+/// Resolves local handles and simplifies structural wrappers in `input.ty`.
+///
+/// A local-handle cycle retains the repeated symbolic handle. A Salsa query
+/// cycle, invalid structural rebuild, or exhausted normalization budget returns
+/// [`InferredTypeData::Unknown`].
+#[salsa::tracked(returns(copy), cycle_result=normalize_type_cycle_result)]
+pub fn normalize_type<'db>(
+    db: &'db dyn ModuleDb,
+    input: NormalizeTypeInput<'db>,
+) -> InferredTypeData<'db> {
+    execute_query(
+        TypeInferenceQueryKind::Normalization,
+        TypeInferenceProfileOrigin::Inherited,
+        "normalize_type",
+        || {
+            let ty = input.ty(db);
+            if !type_needs_normalization(ty) {
+                return ty;
+            }
+            normalize_structural_type(db, ty, |ty| resolve_local_type_on_demand(db, ty))
+                .unwrap_or(InferredTypeData::Unknown)
+        },
+    )
+}
+
+/// Replaces generic references in `input.ty` with `input.substitutions`.
+///
+/// Substitutions apply simultaneously and are not applied again inside their
+/// replacements. A nested declaration that redeclares a generic keeps its own
+/// references, as described on [`InferredTypeData::substitute_types`]. An
+/// exhausted substitution budget or an invalid structural rebuild returns
+/// [`InferredTypeData::Unknown`].
+///
+/// Member lookup applies the same instance substitutions whenever it reaches
+/// the same member, so this query shares one result across those lookups.
+#[salsa::tracked(returns(copy))]
+pub(crate) fn substitute_types<'db>(
+    db: &'db dyn ModuleDb,
+    input: TypeSubstitutionInput<'db>,
+) -> InferredTypeData<'db> {
+    execute_query(
+        TypeInferenceQueryKind::Normalization,
+        TypeInferenceProfileOrigin::Inherited,
+        "substitute_types",
+        || {
+            input
+                .ty(db)
+                .substitute_types(db, input.substitutions(db))
+                .map_or(InferredTypeData::Unknown, |ty| ty)
+        },
+    )
+}
+
+/// Replaces generic references inside the root declaration of `input.ty`,
+/// applying `input.substitutions` one after another.
+///
+/// Unlike [`substitute_types`], the root's own type parameters are kept, as
+/// described on [`InferredTypeData::substitute_type_in_root_body`]. Each
+/// substitution also applies inside the replacements of the ones before it. An
+/// exhausted substitution budget or an invalid structural rebuild returns
+/// [`InferredTypeData::Unknown`].
+///
+/// Call inference instantiates the same generic signature with the same type
+/// arguments for repeated calls, so this query shares one result across them.
+#[salsa::tracked(returns(copy))]
+pub(crate) fn substitute_types_in_root_body<'db>(
+    db: &'db dyn ModuleDb,
+    input: TypeSubstitutionInput<'db>,
+) -> InferredTypeData<'db> {
+    execute_query(
+        TypeInferenceQueryKind::Normalization,
+        TypeInferenceProfileOrigin::Inherited,
+        "substitute_types_in_root_body",
+        || {
+            let mut ty = input.ty(db);
+            for substitution in input.substitutions(db) {
+                match ty.substitute_type_in_root_body(db, *substitution) {
+                    TypeTransformResult::Transformed(substituted) => ty = substituted,
+                    TypeTransformResult::LimitExceeded | TypeTransformResult::InvalidRebuild => {
+                        return InferredTypeData::Unknown;
+                    }
+                }
+            }
+            ty
+        },
+    )
+}
+
+// #endregion
+
+// #region QUERY HELPER FUNCTIONS
+
+fn type_needs_normalization(ty: InferredTypeData<'_>) -> bool {
+    matches!(
+        ty,
+        InferredTypeData::InstanceOf(_)
+            | InferredTypeData::IndexedAccess(_)
+            | InferredTypeData::MappedType(_)
+            | InferredTypeData::Extends(_)
+            | InferredTypeData::TypeOperator(_)
+            | InferredTypeData::Intersection(_)
+            | InferredTypeData::Local(_)
+            | InferredTypeData::MergedReference(_)
+            | InferredTypeData::Tuple(_)
+            | InferredTypeData::TypeofType(_)
+            | InferredTypeData::TypeofValue(_)
+            | InferredTypeData::Union(_)
+    )
+}
+
+// #endregion

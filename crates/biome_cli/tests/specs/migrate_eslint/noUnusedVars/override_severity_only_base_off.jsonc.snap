@@ -1,0 +1,54 @@
+---
+source: crates/biome_cli/src/execute/migrate/eslint_to_biome.rs
+expression: override_severity_only_base_off.jsonc
+---
+## ESLint Config
+
+```json
+{
+	"overrides": [
+		{
+			"files": ["*.ts"],
+			"rules": { "@typescript-eslint/no-unused-vars": "error" }
+		}
+	],
+	"rules": { "no-unused-vars": "off" }
+}
+
+```
+
+## Biome Config Before Migration
+
+```json
+{}
+
+```
+
+## Biome Config After Migration
+
+```json
+{
+	"linter": {
+		"rules": { "preset": "none", "correctness": { "noUnusedVariables": "off" } }
+	},
+	"overrides": [
+		{
+			"includes": ["*.ts"],
+			"linter": {
+				"rules": {
+					"correctness": {
+						"noUnusedVariables": {
+							"level": "error",
+							"options": {
+								"ignoreRestSiblings": false,
+								"ignoreUsingDeclarations": false
+							}
+						}
+					}
+				}
+			}
+		}
+	]
+}
+
+```

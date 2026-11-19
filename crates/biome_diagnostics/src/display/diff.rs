@@ -8,7 +8,7 @@ use biome_text_edit::{ChangeTag, CompressedOp, TextEdit};
 
 use super::frame::{
     CODE_FRAME_CONTEXT_LINES, IntoIter, OneIndexed, PrintInvisiblesOptions, TAB_WIDTH,
-    calculate_print_width, print_invisibles, text_width,
+    calculate_print_width, print_invisibles, terminal_width, text_width,
 };
 
 const MAX_PATCH_LINES: usize = 150;
@@ -407,10 +407,16 @@ fn print_short_diff(
         </Emphasis>
     })?;
 
+    let displayed_line = DisplayDiffLine::new(&entry.diffs);
     let mut at_line_start = true;
-    let last_index = entry.diffs.len().saturating_sub(1);
+    let last_index = displayed_line.ops.len().saturating_sub(1);
 
-    for (i, (tag, text)) in entry.diffs.iter().enumerate() {
+    if displayed_line.has_leading_ellipsis {
+        fmt.write_markup(markup! { <Dim>"..."</Dim> })?;
+        at_line_start = false;
+    }
+
+    for (i, (tag, text)) in displayed_line.ops.iter().enumerate() {
         let is_changed = *tag != ChangeTag::Equal;
         let options = PrintInvisiblesOptions {
             ignore_leading_tabs: false,
@@ -439,6 +445,10 @@ fn print_short_diff(
         }
     }
 
+    if displayed_line.has_trailing_ellipsis {
+        fmt.write_markup(markup! { <Dim>"..."</Dim> })?;
+    }
+
     fmt.write_str("\n")?;
 
     let no_length = calculate_print_width(index);
@@ -448,7 +458,13 @@ fn print_short_diff(
         </Emphasis>
     })?;
 
-    for (tag, text) in &entry.diffs {
+    if displayed_line.has_leading_ellipsis {
+        for _ in 0..text_width("...") {
+            fmt.write_markup(markup! { " " })?;
+        }
+    }
+
+    for (tag, text) in &displayed_line.ops {
         let marker = match tag {
             ChangeTag::Equal => markup! { " " },
             ChangeTag::Delete => markup! { <Error>"-"</Error> },
@@ -537,7 +553,7 @@ fn print_full_diff(
             let line = FormatDiffLine {
                 is_equal: line_type == ChangeTag::Equal,
                 normalize_context_tabs: has_changed_lines_with_leading_tabs,
-                ops: &line.diffs,
+                line: DisplayDiffLine::new(&line.diffs),
             };
 
             match line_type {
@@ -587,7 +603,7 @@ fn print_full_diff(
             let line = FormatDiffLine {
                 is_equal: line_type == ChangeTag::Equal,
                 normalize_context_tabs: has_changed_lines_with_leading_tabs,
-                ops: &line.diffs,
+                line: DisplayDiffLine::new(&line.diffs),
             };
 
             match line_type {
@@ -630,15 +646,20 @@ struct FormatDiffLine<'a> {
     /// When true, replace leading tabs on context lines with `TAB_WIDTH`
     /// spaces so they align with the `→ ` rendering on changed lines.
     normalize_context_tabs: bool,
-    ops: &'a [(ChangeTag, &'a str)],
+    line: DisplayDiffLine<'a>,
 }
 
 impl fmt::Display for FormatDiffLine<'_> {
     fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> io::Result<()> {
         let mut at_line_start = true;
-        let last_index = self.ops.len().saturating_sub(1);
+        let last_index = self.line.ops.len().saturating_sub(1);
 
-        for (i, (tag, text)) in self.ops.iter().enumerate() {
+        if self.line.has_leading_ellipsis {
+            fmt.write_markup(markup! { <Dim>"..."</Dim> })?;
+            at_line_start = false;
+        }
+
+        for (i, (tag, text)) in self.line.ops.iter().enumerate() {
             let is_changed = *tag != ChangeTag::Equal;
 
             // For context (equal) lines, replace leading tabs with
@@ -679,8 +700,95 @@ impl fmt::Display for FormatDiffLine<'_> {
             }
         }
 
+        if self.line.has_trailing_ellipsis {
+            fmt.write_markup(markup! { <Dim>"..."</Dim> })?;
+        }
+
         Ok(())
     }
+}
+
+struct DisplayDiffLine<'a> {
+    ops: Vec<(ChangeTag, &'a str)>,
+    has_leading_ellipsis: bool,
+    has_trailing_ellipsis: bool,
+}
+
+impl<'a> DisplayDiffLine<'a> {
+    fn new(ops: &'a [(ChangeTag, &'a str)]) -> Self {
+        let terminal_width = terminal_width();
+        let max_line_width = terminal_width.saturating_mul(4);
+        let line_width = ops.iter().map(|(_, text)| text_width(text)).sum::<usize>();
+
+        if line_width <= max_line_width {
+            return Self {
+                ops: ops.to_vec(),
+                has_leading_ellipsis: false,
+                has_trailing_ellipsis: false,
+            };
+        }
+
+        let changed_start_width = ops
+            .iter()
+            .take_while(|(tag, _)| *tag == ChangeTag::Equal)
+            .map(|(_, text)| text_width(text))
+            .sum::<usize>();
+        let changed_width = ops
+            .iter()
+            .filter(|(tag, _)| *tag != ChangeTag::Equal)
+            .map(|(_, text)| text_width(text))
+            .sum::<usize>();
+        let changed_center_width = changed_start_width.saturating_add(changed_width / 2);
+        let window_start_width = if changed_width > terminal_width {
+            changed_start_width.saturating_sub(terminal_width / 4)
+        } else {
+            changed_center_width.saturating_sub(terminal_width / 2)
+        };
+        let window_end_width = window_start_width.saturating_add(terminal_width);
+
+        let mut current_width = 0usize;
+        let mut displayed_ops = Vec::new();
+
+        for (tag, text) in ops {
+            let op_start_width = current_width;
+            let op_width = text_width(text);
+            let op_end_width = op_start_width.saturating_add(op_width);
+            current_width = op_end_width;
+
+            if op_end_width <= window_start_width || op_start_width >= window_end_width {
+                continue;
+            }
+
+            let start_width = window_start_width.saturating_sub(op_start_width);
+            let end_width = window_end_width
+                .min(op_end_width)
+                .saturating_sub(op_start_width);
+            let start = byte_index_at_width(text, start_width);
+            let end = byte_index_at_width(text, end_width).max(start);
+
+            displayed_ops.push((*tag, &text[start..end]));
+        }
+
+        Self {
+            ops: displayed_ops,
+            has_leading_ellipsis: window_start_width > 0,
+            has_trailing_ellipsis: window_end_width < line_width,
+        }
+    }
+}
+
+fn byte_index_at_width(text: &str, width: usize) -> usize {
+    let mut current_width = 0usize;
+
+    for (byte_index, char) in text.char_indices() {
+        let next_width = current_width + super::frame::char_width(char);
+        if next_width > width {
+            return byte_index;
+        }
+        current_width = next_width;
+    }
+
+    text.len()
 }
 
 struct ElementWrapper<'a, W: ?Sized>(&'a mut W, MarkupElement<'static>);

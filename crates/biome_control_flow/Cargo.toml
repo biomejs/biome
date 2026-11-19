@@ -1,6 +1,6 @@
 [package]
 name                 = "biome_control_flow"
-version              = "0.5.7"
+version.workspace    = true
 authors.workspace    = true
 edition.workspace    = true
 description          = "Utilities to build control flow graph for biome_js_analyze"

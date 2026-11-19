@@ -1,6 +1,6 @@
 [package]
 name                 = "biome_project_layout"
-version              = "0.0.1"
+version.workspace    = true
 authors.workspace    = true
 edition.workspace    = true
 description          = "Data structure for tracking projects and their packages"

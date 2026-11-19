@@ -1,0 +1,78 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+function foo() {
+	const foo1 = 1;
+	const foo2 = 2;
+	const foo3 = 3;
+	const foo4 = 4;
+	const foo5 = 5;
+	const foo6 = 6;
+	const foo7 = 7;
+	const foo8 = 8;
+	const foo9 = 9;
+	const foo10 = 10;
+	const foo11 = 11;
+}
+
+const bar = () => {
+	const foo1 = 1;
+	const foo2 = 2;
+	const foo3 = 3;
+	const foo4 = 4;
+	const foo5 = 5;
+	const foo6 = 6;
+	const foo7 = 7;
+	const foo8 = 8;
+	const foo9 = 9;
+	const foo10 = 10;
+	const foo11 = 11;
+};
+
+```
+
+# Diagnostics
+```
+invalid.js:2:1 lint/nursery/noExcessiveStatementsPerFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function has too many statements (11). Maximum allowed is 10.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ function foo() {
+      │ ^^^^^^^^^^^^^^
+    3 │ 	const foo1 = 1;
+    4 │ 	const foo2 = 2;
+  
+  i Functions with many statements are harder to read, test, and maintain.
+  
+  i Consider splitting this function into smaller functions.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:16:13 lint/nursery/noExcessiveStatementsPerFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function has too many statements (11). Maximum allowed is 10.
+  
+    14 │ }
+    15 │ 
+  > 16 │ const bar = () => {
+       │             ^^^^^
+    17 │ 	const foo1 = 1;
+    18 │ 	const foo2 = 2;
+  
+  i Functions with many statements are harder to read, test, and maintain.
+  
+  i Consider splitting this function into smaller functions.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

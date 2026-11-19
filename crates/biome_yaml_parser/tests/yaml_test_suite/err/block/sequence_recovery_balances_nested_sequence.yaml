@@ -1,0 +1,4 @@
+- valid # terminate the plain scalar
+  @
+  - nested
+- next

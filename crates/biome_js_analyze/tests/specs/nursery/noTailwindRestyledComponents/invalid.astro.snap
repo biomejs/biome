@@ -1,0 +1,81 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.astro
+---
+# Input
+```astro
+---
+// should generate diagnostics
+---
+<Button class={"rounded-none"} />
+<Card.Root class:list={["shadow-lg", { "p-4": true }]} />
+
+```
+
+# Diagnostics
+```
+invalid.astro:4:17 lint/nursery/noTailwindRestyledComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind utility restyles a component.
+  
+    2 │ // should generate diagnostics
+    3 │ ---
+  > 4 │ <Button class={"rounded-none"} />
+      │                 ^^^^^^^^^^^^
+    5 │ <Card.Root class:list={["shadow-lg", { "p-4": true }]} />
+    6 │ 
+  
+  i The design system should manage the component's appearance.
+  
+  i Use a supported component variant or move this style into the component's definition.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.astro:5:26 lint/nursery/noTailwindRestyledComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind utility restyles a component.
+  
+    3 │ ---
+    4 │ <Button class={"rounded-none"} />
+  > 5 │ <Card.Root class:list={["shadow-lg", { "p-4": true }]} />
+      │                          ^^^^^^^^^
+    6 │ 
+  
+  i The design system should manage the component's appearance.
+  
+  i Use a supported component variant or move this style into the component's definition.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.astro:5:41 lint/nursery/noTailwindRestyledComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind utility restyles a component.
+  
+    3 │ ---
+    4 │ <Button class={"rounded-none"} />
+  > 5 │ <Card.Root class:list={["shadow-lg", { "p-4": true }]} />
+      │                                         ^^^
+    6 │ 
+  
+  i The design system should manage the component's appearance.
+  
+  i Use a supported component variant or move this style into the component's definition.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

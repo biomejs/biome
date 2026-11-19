@@ -1,0 +1,5 @@
+@container #{$query} {}
+
+@container not #{$query} {}
+
+@container (width > 400px) {}

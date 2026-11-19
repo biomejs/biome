@@ -1,0 +1,53 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.jsonc
+---
+# Input
+```cjs
+foo === bar
+```
+
+# Input
+```cjs
+foo !== bar
+```
+
+# Input
+```cjs
+!(foo === bar)
+```
+
+# Input
+```cjs
+!(foo !== bar)
+```
+
+# Input
+```cjs
+!foo == bar
+```
+
+# Input
+```cjs
+!foo != bar
+```
+
+# Input
+```cjs
+!!foo === bar
+```
+
+# Input
+```cjs
+if (a !== b) {}
+```
+
+# Input
+```cjs
+!foo instanceof bar
+```
+
+# Input
+```cjs
+!foo in bar
+```

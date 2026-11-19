@@ -10,17 +10,18 @@ use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, TextRange};
 use biome_rule_options::no_biome_first_exception::NoBiomeFirstExceptionOptions;
 
 declare_lint_rule! {
-    /// Prevents the misuse of glob patterns inside the `files.includes` field.
+    /// Disallow ineffective ordering in `files.includes` patterns.
     ///
-    /// ## Leading of negated patterns
-    /// If the first pattern of `files.includes` starts with the leading `!`, Biome won't have any file to crawl. Generally,
-    /// it is a good practice to declare the files/folders to include first, and then the files/folder to ignore.
+    /// A pattern beginning with `!` excludes matching paths. If an exclusion is first, no earlier
+    /// pattern has included files for it to remove, so Biome matches no files. Start with an
+    /// inclusion pattern, then add exclusions.
     ///
-    /// Check the [official documentation](https://biomejs.dev/guides/configure-biome/#exclude-files-via-configuration) for more examples.
+    /// See the [file exclusion guide](https://biomejs.dev/guides/configure-biome/#exclude-files-via-configuration)
+    /// for more examples.
     ///
-    /// ### Examples
+    /// ## Examples
     ///
-    /// #### Invalid
+    /// ### Invalid
     ///
     /// ```json,ignore
     /// {
@@ -30,7 +31,7 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
-    /// #### Valid
+    /// ### Valid
     ///
     /// ```json,ignore
     /// {
@@ -40,12 +41,13 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
-    /// ## Leading with catch-all `**`
+    /// ## Extended configurations
     ///
-    /// If the user configuration file extends from other sources (other configuration files or libraries), and those files contain the catch-all glob `**` in `files.includes`,
-    /// the rule will trigger a violation if also the user configuration file has a `**`.
+    /// The catch-all pattern `**` includes every path. When an extended configuration already
+    /// starts with `**`, repeating that pattern at the start of the local configuration is
+    /// redundant. Keep the inherited catch-all and add only the local exclusions.
     ///
-    /// #### Invalid
+    /// ### Invalid
     ///
     /// ```jsonc,ignore
     /// // biome.json
@@ -62,6 +64,18 @@ declare_lint_rule! {
     /// {
     ///     "files": {
     ///         "includes": ["**", "!**/dist"]
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// ### Valid
+    ///
+    /// ```jsonc,ignore
+    /// // biome.json
+    /// {
+    ///     "extends": ["./base.json"],
+    ///     "files": {
+    ///         "includes": ["!**/test"]
     ///     }
     /// }
     /// ```

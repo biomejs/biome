@@ -1,0 +1,12 @@
+@use "sass:math";
+$device:768px;
+@media  screen and ( max-width:/* before */( /* inner */$device  -  1px/* inner end */ )/* after */ ){.card{display:block}}
+@media (min-width: ( /* outer */( $device +  1px )/* nested end */ ) ){.nested{display:block}}
+@media (width >= ( $device - 1px )) and (400px<width<900px){.range{display:block}}
+@media (aspect-ratio:16/9) and (min-width:calc(100vw - 1px)){.native{display:block}}
+@container style(--tokens: 16/9 + 1px and (foo)){.raw{display:block}}
+@media (400px<width<( /* upper */$device + 1px )){.upper{display:block}}
+@media (max-width:( $device - 1px )/* tail */+  2px){.continued{display:block}}
+@function below($value){@return $value - 1px;}
+@media (max-width:( below( /* arg */below($device) )) ){.nested-call{display:block}}
+@media (min-width:(math.div( $device ,2))){.qualified-call{display:block}}

@@ -31,6 +31,9 @@ pub enum ResolveError {
     /// The specifier referenced a Node.js built-in module instead of a path.
     NodeBuiltIn,
 
+    /// The specifier referenced a Bun built-in module instead of a path.
+    BunBuiltIn,
+
     /// The resolver did its best, but couldn't find what you were looking for.
     NotFound,
 }
@@ -47,6 +50,7 @@ impl Display for ResolveError {
             Self::InvalidPackageSpecifier => f.write_str("invalid package name"),
             Self::ManifestNotFound => f.write_str("no package.json manifest found"),
             Self::NodeBuiltIn => f.write_str("resolved to a Node.js built-in"),
+            Self::BunBuiltIn => f.write_str("resolved to a Bun built-in"),
             Self::NotFound => f.write_str("module not found"),
         }
     }

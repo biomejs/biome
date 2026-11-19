@@ -1,0 +1,17 @@
+/* should generate diagnostics */
+$condition: true;
+@if $condition {
+  .conditional {}
+  .conditional {}
+}
+
+@mixin duplicates {
+  .mixin-selector {}
+  .mixin-selector {}
+}
+@include duplicates;
+
+@for $index from 1 through 2 {
+  .loop-selector {}
+  .loop-selector {}
+}

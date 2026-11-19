@@ -1,0 +1,192 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidAllowedPrefixes.js
+---
+# Input
+```js
+/* should generate diagnostics */
+describe("Get /users", () => {});
+it("The GET handler", () => {});
+test("POST", () => {});
+test("POST users", () => {});
+test(`DELETE /users`, () => {});
+test("Elan", () => {});
+
+```
+
+# Diagnostics
+```
+invalidAllowedPrefixes.js:2:10 lint/nursery/useLowercaseTestTitle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This test title starts with an uppercase letter.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ describe("Get /users", () => {});
+      │          ^^^^^^^^^^^^
+    3 │ it("The GET handler", () => {});
+    4 │ test("POST", () => {});
+  
+  i Test titles that consistently start with a lowercase letter make test reports easier to read.
+  
+  i Change the first letter of the title to lowercase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Lowercase the first letter of the title.
+  
+    1 1 │   /* should generate diagnostics */
+    2   │ - describe("Get·/users",·()·=>·{});
+      2 │ + describe("get·/users",·()·=>·{});
+    3 3 │   it("The GET handler", () => {});
+    4 4 │   test("POST", () => {});
+  
+
+```
+
+```
+invalidAllowedPrefixes.js:3:4 lint/nursery/useLowercaseTestTitle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This test title starts with an uppercase letter.
+  
+    1 │ /* should generate diagnostics */
+    2 │ describe("Get /users", () => {});
+  > 3 │ it("The GET handler", () => {});
+      │    ^^^^^^^^^^^^^^^^^
+    4 │ test("POST", () => {});
+    5 │ test("POST users", () => {});
+  
+  i Test titles that consistently start with a lowercase letter make test reports easier to read.
+  
+  i Change the first letter of the title to lowercase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Lowercase the first letter of the title.
+  
+    1 1 │   /* should generate diagnostics */
+    2 2 │   describe("Get /users", () => {});
+    3   │ - it("The·GET·handler",·()·=>·{});
+      3 │ + it("the·GET·handler",·()·=>·{});
+    4 4 │   test("POST", () => {});
+    5 5 │   test("POST users", () => {});
+  
+
+```
+
+```
+invalidAllowedPrefixes.js:4:6 lint/nursery/useLowercaseTestTitle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This test title starts with an uppercase letter.
+  
+    2 │ describe("Get /users", () => {});
+    3 │ it("The GET handler", () => {});
+  > 4 │ test("POST", () => {});
+      │      ^^^^^^
+    5 │ test("POST users", () => {});
+    6 │ test(`DELETE /users`, () => {});
+  
+  i Test titles that consistently start with a lowercase letter make test reports easier to read.
+  
+  i Change the first letter of the title to lowercase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Lowercase the first letter of the title.
+  
+    2 2 │   describe("Get /users", () => {});
+    3 3 │   it("The GET handler", () => {});
+    4   │ - test("POST",·()·=>·{});
+      4 │ + test("pOST",·()·=>·{});
+    5 5 │   test("POST users", () => {});
+    6 6 │   test(`DELETE /users`, () => {});
+  
+
+```
+
+```
+invalidAllowedPrefixes.js:5:6 lint/nursery/useLowercaseTestTitle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This test title starts with an uppercase letter.
+  
+    3 │ it("The GET handler", () => {});
+    4 │ test("POST", () => {});
+  > 5 │ test("POST users", () => {});
+      │      ^^^^^^^^^^^^
+    6 │ test(`DELETE /users`, () => {});
+    7 │ test("Elan", () => {});
+  
+  i Test titles that consistently start with a lowercase letter make test reports easier to read.
+  
+  i Change the first letter of the title to lowercase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Lowercase the first letter of the title.
+  
+    3 3 │   it("The GET handler", () => {});
+    4 4 │   test("POST", () => {});
+    5   │ - test("POST·users",·()·=>·{});
+      5 │ + test("pOST·users",·()·=>·{});
+    6 6 │   test(`DELETE /users`, () => {});
+    7 7 │   test("Elan", () => {});
+  
+
+```
+
+```
+invalidAllowedPrefixes.js:6:6 lint/nursery/useLowercaseTestTitle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This test title starts with an uppercase letter.
+  
+    4 │ test("POST", () => {});
+    5 │ test("POST users", () => {});
+  > 6 │ test(`DELETE /users`, () => {});
+      │      ^^^^^^^^^^^^^^^
+    7 │ test("Elan", () => {});
+    8 │ 
+  
+  i Test titles that consistently start with a lowercase letter make test reports easier to read.
+  
+  i Change the first letter of the title to lowercase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Lowercase the first letter of the title.
+  
+    4 4 │   test("POST", () => {});
+    5 5 │   test("POST users", () => {});
+    6   │ - test(`DELETE·/users`,·()·=>·{});
+      6 │ + test(`dELETE·/users`,·()·=>·{});
+    7 7 │   test("Elan", () => {});
+    8 8 │   
+  
+
+```
+
+```
+invalidAllowedPrefixes.js:7:6 lint/nursery/useLowercaseTestTitle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This test title starts with an uppercase letter.
+  
+    5 │ test("POST users", () => {});
+    6 │ test(`DELETE /users`, () => {});
+  > 7 │ test("Elan", () => {});
+      │      ^^^^^^
+    8 │ 
+  
+  i Test titles that consistently start with a lowercase letter make test reports easier to read.
+  
+  i Change the first letter of the title to lowercase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Lowercase the first letter of the title.
+  
+    5 5 │   test("POST users", () => {});
+    6 6 │   test(`DELETE /users`, () => {});
+    7   │ - test("Elan",·()·=>·{});
+      7 │ + test("elan",·()·=>·{});
+    8 8 │   
+  
+
+```

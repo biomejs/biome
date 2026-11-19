@@ -1,0 +1,21 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: valid.scss
+---
+# Input
+```css
+/* should not generate diagnostics */
+$family: Arial;
+.element {
+  font-family: $family, sans-serif;
+}
+
+@function font-stack() {
+  @return Arial;
+}
+
+.dynamic-function {
+  font-family: Arial, font-stack();
+}
+
+```

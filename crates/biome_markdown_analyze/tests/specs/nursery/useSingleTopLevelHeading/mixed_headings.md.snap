@@ -1,0 +1,46 @@
+---
+source: crates/biome_markdown_analyze/tests/spec_tests.rs
+expression: mixed_headings.md
+---
+# Input
+```md
+<!-- should generate diagnostics -->
+
+# Title
+
+Another Title
+=============
+
+```
+
+# Diagnostics
+```
+mixed_headings.md:5:1 lint/nursery/useSingleTopLevelHeading ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This document has more than one top-level heading.
+  
+    3 │ # Title
+    4 │ 
+  > 5 │ Another Title
+      │ ^^^^^^^^^^^^^
+  > 6 │ =============
+      │ ^^^^^^^^^^^^^
+    7 │ 
+  
+  i The other top-level heading is here.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ 
+  > 3 │ # Title
+      │ ^^^^^^^
+    4 │ 
+    5 │ Another Title
+  
+  i A single top-level heading acts as the document's title. Additional ones break document outlines, tables of contents, and the structure produced when converting to HTML.
+  
+  i Demote this heading to a lower level, or move its section into its own document.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

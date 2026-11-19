@@ -73,10 +73,10 @@ div {
 	a: attr(data-percentage %, 100%);
 	a: attr(data-size type(<length># | <percentage>+));
 
-	a: attr(width rem);
-	a: attr(data-test Hz);
-	a: attr(data-test kHz);
-	a: attr(data-test Q);
+	a: attr(width REM);
+	a: attr(data-test hz);
+	a: attr(data-test khz);
+	a: attr(data-test q);
 
 	a: attr(
 		a

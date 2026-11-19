@@ -3,12 +3,12 @@ use crate::js::auxiliary::template_chunk_element::AnyTemplateChunkElement;
 use crate::js::auxiliary::template_element::{AnyTemplateElement, TemplateElementOptions};
 use crate::prelude::*;
 use crate::utils::test_each_template::EachTemplateTable;
-use biome_formatter::FormatRuleWithOptions;
+use biome_formatter::{FormatContext, FormatRuleWithOptions};
 use biome_js_syntax::{
     AnyJsTemplateElement, AnyTsTemplateElement, JsLanguage, JsTemplateElementList,
     TsTemplateElementList,
 };
-use biome_rowan::{AstNodeListIterator, declare_node_union};
+use biome_rowan::{AstNode, AstNodeListIterator, TextRange, declare_node_union};
 use std::iter::FusedIterator;
 
 #[derive(Debug, Clone, Default)]
@@ -31,10 +31,41 @@ impl FormatRule<JsTemplateElementList> for FormatJsTemplateElementList {
     fn fmt(&self, node: &JsTemplateElementList, f: &mut JsFormatter) -> FormatResult<()> {
         if self.options.is_test_each_pattern {
             EachTemplateTable::from(node, f)?.fmt(f)
+        } else if let Some(range) = embedded_source_range(f, node.syntax().text_trimmed_range()) {
+            let content = AnyTemplateElementList::JsTemplateElementList(node.clone());
+            let embedded = FormatEmbedded::new(range, &content, f)?;
+            embedded.fmt(f)
         } else {
             AnyTemplateElementList::JsTemplateElementList(node.clone()).fmt(f)
         }
     }
+}
+
+/// Returns the source range of the template content at `transformed_range`,
+/// if the embedding service parsed it as an embedded language.
+pub(crate) fn embedded_source_range(
+    f: &JsFormatter,
+    transformed_range: TextRange,
+) -> Option<TextRange> {
+    let embedded_node_ranges = f.context().embedded_node_ranges();
+    if embedded_node_ranges.is_empty() {
+        return None;
+    }
+
+    // The formatter works with a transformed tree (parentheses removed by
+    // JsFormatSyntaxRewriter), but the embedding service stores ranges from
+    // the original tree.
+    let source_range = source_range(f, transformed_range);
+    embedded_node_ranges
+        .contains(&source_range)
+        .then_some(source_range)
+}
+
+/// Maps `transformed_range` back to the original source positions.
+pub(crate) fn source_range(f: &JsFormatter, transformed_range: TextRange) -> TextRange {
+    f.context()
+        .source_map()
+        .map_or(transformed_range, |map| map.source_range(transformed_range))
 }
 
 #[derive(Debug, Copy, Clone, Default)]

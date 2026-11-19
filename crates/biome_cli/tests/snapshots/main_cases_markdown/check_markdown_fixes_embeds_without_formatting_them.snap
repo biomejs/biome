@@ -1,0 +1,39 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome check --write --unsafe file.md
+```
+
+## `biome.json`
+
+```json
+{
+  "markdown": {
+    "formatter": {
+      "formatEmbeds": false
+    },
+    "analyzeEmbeds": true
+  }
+}
+```
+
+## `file.md`
+
+```md
+# Embeds
+
+```js
+console.log(   1)
+```
+
+```
+
+# Emitted Messages
+
+```block
+Checked 1 file in <TIME>. Fixed 1 file.
+```

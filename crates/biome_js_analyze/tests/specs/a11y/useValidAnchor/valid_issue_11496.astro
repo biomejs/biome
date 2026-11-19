@@ -1,0 +1,12 @@
+<!-- should not generate diagnostics -->
+<a href="https://example.com">ok</a>
+<a {href}>ok</a>
+
+{
+	(
+		<>
+			<a href="https://example.com">ok</a>
+			<a {href}>ok</a>
+		</>
+	)
+}

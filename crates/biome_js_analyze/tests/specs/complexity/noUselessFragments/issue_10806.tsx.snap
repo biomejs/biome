@@ -1,0 +1,137 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: issue_10806.tsx
+---
+# Input
+```tsx
+/* should generate diagnostics */
+const cases = (
+    <>
+        <Component
+            overlays={
+                <>
+                    <div className="overlay" />
+                </>
+            }
+        />
+        <Component nested={<><><span /></></>} />
+        <Component expression={<>{value}</>} />
+        <Component emptyExpression={<>{}</>} />
+    </>
+);
+
+```
+
+# Diagnostics
+```
+issue_10806.tsx:6:17 lint/complexity/noUselessFragments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This fragment is unnecessary.
+  
+     4 │         <Component
+     5 │             overlays={
+   > 6 │                 <>
+       │                 ^^
+   > 7 │                     <div className="overlay" />
+   > 8 │                 </>
+       │                 ^^^
+     9 │             }
+    10 │         />
+  
+  i A fragment is redundant if it contains only one child, or if it is the child of a html element, and is not a keyed fragment.
+  
+  i Unsafe fix: Remove the Fragment
+  
+     3  3 │       <>
+     4  4 │           <Component
+     5    │ - ············overlays={
+     6    │ - ················<>
+     7    │ - ····················<div·className="overlay"·/>
+     8    │ - ················</>
+     9    │ - ············}
+        5 │ + ············overlays={<div·className="overlay"·/>}
+    10  6 │           />
+    11  7 │           <Component nested={<><><span /></></>} />
+  
+
+```
+
+```
+issue_10806.tsx:11:28 lint/complexity/noUselessFragments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This fragment is unnecessary.
+  
+     9 │             }
+    10 │         />
+  > 11 │         <Component nested={<><><span /></></>} />
+       │                            ^^^^^^^^^^^^^^^^^^
+    12 │         <Component expression={<>{value}</>} />
+    13 │         <Component emptyExpression={<>{}</>} />
+  
+  i A fragment is redundant if it contains only one child, or if it is the child of a html element, and is not a keyed fragment.
+  
+  i Unsafe fix: Remove the Fragment
+  
+    11 │ ········<Component·nested={<><><span·/></></>}·/>
+       │                               --     ---         
+
+```
+
+```
+issue_10806.tsx:11:30 lint/complexity/noUselessFragments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This fragment is unnecessary.
+  
+     9 │             }
+    10 │         />
+  > 11 │         <Component nested={<><><span /></></>} />
+       │                              ^^^^^^^^^^^^^
+    12 │         <Component expression={<>{value}</>} />
+    13 │         <Component emptyExpression={<>{}</>} />
+  
+  i A fragment is redundant if it contains only one child, or if it is the child of a html element, and is not a keyed fragment.
+  
+  i Unsafe fix: Remove the Fragment
+  
+    11 │ ········<Component·nested={<><><span·/></></>}·/>
+       │                               --     ---         
+
+```
+
+```
+issue_10806.tsx:12:32 lint/complexity/noUselessFragments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This fragment is unnecessary.
+  
+    10 │         />
+    11 │         <Component nested={<><><span /></></>} />
+  > 12 │         <Component expression={<>{value}</>} />
+       │                                ^^^^^^^^^^^^
+    13 │         <Component emptyExpression={<>{}</>} />
+    14 │     </>
+  
+  i A fragment is redundant if it contains only one child, or if it is the child of a html element, and is not a keyed fragment.
+  
+  i Unsafe fix: Remove the Fragment
+  
+    12 │ ········<Component·expression={<>{value}</>}·/>
+       │                                ---     ----    
+
+```
+
+```
+issue_10806.tsx:13:37 lint/complexity/noUselessFragments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This fragment is unnecessary.
+  
+    11 │         <Component nested={<><><span /></></>} />
+    12 │         <Component expression={<>{value}</>} />
+  > 13 │         <Component emptyExpression={<>{}</>} />
+       │                                     ^^^^^^^
+    14 │     </>
+    15 │ );
+  
+  i A fragment is redundant if it contains only one child, or if it is the child of a html element, and is not a keyed fragment.
+  
+
+```

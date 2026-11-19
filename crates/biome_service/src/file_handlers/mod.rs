@@ -1,560 +1,142 @@
+// Some structs are used conditionally in some language-gated functions, so we
+// add this **allow**.
+#![allow(dead_code)]
+
+#[cfg(feature = "lang_js")]
 pub mod astro;
+#[cfg(feature = "lang_css")]
 pub(crate) mod css;
 #[cfg(feature = "lang_graphql")]
 pub(crate) mod graphql;
 #[cfg(feature = "lang_grit")]
 pub(crate) mod grit;
+#[cfg(feature = "lang_html")]
 pub(crate) mod html;
 mod ignore;
+#[cfg(feature = "lang_js")]
 pub(crate) mod javascript;
 pub(crate) mod json;
 #[cfg(feature = "lang_md")]
 pub(crate) mod md;
+#[cfg(all(feature = "lang_js", feature = "lang_html"))]
 pub mod svelte;
 mod unknown;
+#[cfg(all(feature = "lang_js", feature = "lang_html"))]
 pub mod vue;
 #[cfg(feature = "lang_yaml")]
 pub(crate) mod yaml;
 
-use self::{
-    css::CssFileHandler, javascript::JsFileHandler, json::JsonFileHandler,
-    unknown::UnknownFileHandler,
-};
+#[cfg(feature = "lang_css")]
+use self::css::CssFileHandler;
+#[cfg(feature = "lang_js")]
+use self::javascript::JsFileHandler;
+use self::{json::JsonFileHandler, unknown::UnknownFileHandler};
 use crate::WorkspaceError;
+use crate::db::WorkspaceDb;
+use crate::embed::EmbedContent;
+#[cfg(feature = "lang_js")]
 pub use crate::file_handlers::astro::AstroFileHandler;
 #[cfg(feature = "lang_graphql")]
 use crate::file_handlers::graphql::GraphqlFileHandler;
 use crate::file_handlers::ignore::IgnoreFileHandler;
+#[cfg(all(feature = "lang_js", feature = "lang_html"))]
 pub use crate::file_handlers::svelte::SvelteFileHandler;
+#[cfg(all(feature = "lang_js", feature = "lang_html"))]
 pub use crate::file_handlers::vue::VueFileHandler;
-use crate::settings::{Settings, SettingsWithEditor};
+use crate::settings::{Settings, SettingsIdentity, SettingsWithEditor};
 use crate::utils::growth_guard::GrowthGuard;
-use crate::workspace::document::services::embedded_bindings::EmbeddedBuilder;
 use crate::workspace::{
-    AnyEmbeddedSnippet, CodeAction, DocumentServices, FixAction, FixFileMode, FixFileResult,
-    GetSyntaxTreeResult, PatternId, PullActionsResult, PullDiagnosticsAndActionsResult,
+    CodeAction, DefinitionReference, FixAction, FixFileMode, GetSyntaxTreeResult,
+    GoToDefinitionResult, PatternId, PullActionsResult, PullDiagnosticsAndActionsResult,
     RenameResult, SearchQuery,
 };
+use biome_analyze::options::JsxRuntime;
 use biome_analyze::{
     ActionFilter, AnalyzerAction, AnalyzerDiagnostic, AnalyzerOptions, AnalyzerPluginVec,
-    AnalyzerSignal, ControlFlow, FixKind, GroupCategory, Never, Queryable, RegistryVisitor, Rule,
-    RuleCategories, RuleCategory, RuleError, RuleFilter, RuleGroup,
+    AnalyzerSignal, ControlFlow, EmbeddedSignalInspector, FixKind, GroupCategory, Never,
+    PLUGIN_GROUP, Queryable, RegistryVisitor, Rule, RuleCategories, RuleCategory, RuleError,
+    RuleFilter, RuleGroup, SnippetAnalyzer,
 };
 use biome_configuration::Rules;
-use biome_configuration::analyzer::{AnalyzerSelector, RuleDomainValue};
-use biome_configuration::vcs::{GIT_IGNORE_FILE_NAME, IGNORE_FILE_NAME};
-use biome_console::fmt::Formatter;
+use biome_configuration::analyzer::assist::Actions;
+use biome_configuration::analyzer::{AnalyzerSelector, RuleDomainValue, RuleDomains};
+#[cfg(feature = "lang_css")]
 use biome_css_analyze::METADATA as css_metadata;
-use biome_css_syntax::{CssFileSource, CssLanguage};
+#[cfg(feature = "lang_css")]
+use biome_css_syntax::CssLanguage;
+use biome_db::Source;
 use biome_diagnostics::{Applicability, Diagnostic, DiagnosticExt, Error, Severity, category};
-use biome_formatter::{FormatContext, FormatResult, Formatted, Printed, SourceMapGeneration};
+#[cfg(feature = "html_embeds")]
+use biome_embeds::EmbeddedData;
+use biome_formatter::rowan::Printed;
 use biome_fs::BiomePath;
 #[cfg(feature = "lang_graphql")]
 use biome_graphql_analyze::METADATA as graphql_metadata;
 #[cfg(feature = "lang_graphql")]
-use biome_graphql_syntax::{GraphqlFileSource, GraphqlLanguage};
-use biome_html_syntax::{HtmlFileSource, HtmlLanguage};
+use biome_graphql_syntax::GraphqlLanguage;
+#[cfg(feature = "lang_html")]
+use biome_html_syntax::HtmlLanguage;
+#[cfg(feature = "lang_js")]
 use biome_js_analyze::METADATA as js_metadata;
+#[cfg(feature = "lang_js")]
 use biome_js_parser::{JsParserOptions, parse};
-use biome_js_syntax::{
-    AnyJsModuleItem, EmbeddingKind, JsFileSource, JsLanguage, JsxAttribute, JsxAttributeList,
-    Language, LanguageVariant, SvelteFileKind, TextRange, TextSize,
-};
+#[cfg(feature = "lang_js")]
+use biome_js_syntax::{AnyJsModuleItem, JsLanguage, JsxAttribute, JsxAttributeList};
 use biome_json_analyze::METADATA as json_metadata;
-use biome_json_syntax::{JsonFileSource, JsonLanguage};
-use biome_module_graph::ModuleGraph;
-use biome_package::PackageJson;
+use biome_json_syntax::JsonLanguage;
+#[cfg(feature = "lang_js")]
+use biome_languages::javascript::{
+    JsEmbeddingKind, JsFileSource, Language, LanguageVariant, SvelteFileKind,
+};
+use biome_languages::{DocumentFileSource, LanguageDb};
+#[cfg(feature = "module_graph")]
+use biome_module_graph::ModuleDb;
+use biome_package::{Dependencies, PackageJson};
 use biome_parser::AnyParse;
+use biome_parser::db::SourceExt;
+use biome_parser::db::{AnalyzedSource, SnippetRef};
 use biome_project_layout::ProjectLayout;
-use biome_rowan::{BatchMutation, FileSourceError, NodeCache, SendNode, SyntaxNode, TokenText};
-use biome_string_case::StrLikeExtension;
-use camino::Utf8Path;
-use either::Either;
+#[cfg(feature = "lang_js")]
+use biome_rowan::TokenText;
+use biome_rowan::{BatchMutation, NodeCache, SendNode, SyntaxNode, TextRange, TextSize};
+use biome_text_edit::TextEdit;
+use camino::{Utf8Path, Utf8PathBuf};
+#[cfg(feature = "lang_html")]
 use html::HtmlFileHandler;
+#[cfg(feature = "lang_js")]
 pub use javascript::JsFormatterSettings;
 use rustc_hash::FxHashSet;
+#[cfg(test)]
+use salsa::plumbing::ZalsaDatabase;
 use std::borrow::Cow;
 use std::collections::HashSet;
+use std::hash::{Hash, Hasher};
+#[cfg(feature = "module_graph")]
+use std::rc::Rc;
 use std::sync::Arc;
-use tracing::instrument;
 
-#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
-#[derive(
-    Debug, Clone, Default, Copy, Eq, PartialEq, Hash, serde::Serialize, serde::Deserialize,
-)]
-pub enum DocumentFileSource {
-    Js(JsFileSource),
-    Json(JsonFileSource),
-    Css(CssFileSource),
-    #[cfg(feature = "lang_graphql")]
-    Graphql(GraphqlFileSource),
-    Html(HtmlFileSource),
-    #[cfg(feature = "lang_grit")]
-    Grit(biome_grit_syntax::file_source::GritFileSource),
-    #[cfg(feature = "lang_md")]
-    Markdown(biome_markdown_syntax::MdFileSource),
-    #[cfg(feature = "lang_yaml")]
-    Yaml(biome_yaml_syntax::YamlFileSource),
-    // Ignore files
-    Ignore,
-    #[default]
-    Unknown,
-}
+/// Characters that will enable the format on type
+pub const ON_TYPE_CHARS: &[char] = &['}', ']', ')'];
 
-impl From<JsFileSource> for DocumentFileSource {
-    fn from(value: JsFileSource) -> Self {
-        Self::Js(value)
-    }
-}
-
-impl From<JsonFileSource> for DocumentFileSource {
-    fn from(value: JsonFileSource) -> Self {
-        Self::Json(value)
-    }
-}
-
-impl From<CssFileSource> for DocumentFileSource {
-    fn from(value: CssFileSource) -> Self {
-        Self::Css(value)
-    }
-}
-#[cfg(feature = "lang_graphql")]
-impl From<GraphqlFileSource> for DocumentFileSource {
-    fn from(value: GraphqlFileSource) -> Self {
-        Self::Graphql(value)
-    }
-}
-
-impl From<HtmlFileSource> for DocumentFileSource {
-    fn from(value: HtmlFileSource) -> Self {
-        Self::Html(value)
-    }
-}
-
-#[cfg(feature = "lang_grit")]
-impl From<biome_grit_syntax::file_source::GritFileSource> for DocumentFileSource {
-    fn from(value: biome_grit_syntax::file_source::GritFileSource) -> Self {
-        Self::Grit(value)
-    }
-}
-
-#[cfg(feature = "lang_md")]
-impl From<biome_markdown_syntax::MdFileSource> for DocumentFileSource {
-    fn from(value: biome_markdown_syntax::MdFileSource) -> Self {
-        Self::Markdown(value)
-    }
-}
-
-#[cfg(feature = "lang_yaml")]
-impl From<biome_yaml_syntax::YamlFileSource> for DocumentFileSource {
-    fn from(value: biome_yaml_syntax::YamlFileSource) -> Self {
-        Self::Yaml(value)
-    }
-}
-
-impl From<&Utf8Path> for DocumentFileSource {
-    fn from(path: &Utf8Path) -> Self {
-        Self::from_path(path, false)
-    }
-}
-
-impl DocumentFileSource {
-    fn try_from_well_known(
-        path: &Utf8Path,
-        experimental_full_html_support: bool,
-    ) -> Result<Self, FileSourceError> {
-        if let Ok(file_source) = JsonFileSource::try_from_well_known(path) {
-            return Ok(file_source.into());
-        }
-        if experimental_full_html_support {
-            if let Ok(file_source) = HtmlFileSource::try_from_well_known(path) {
-                return Ok(file_source.into());
-            }
-            if let Ok(file_source) = JsFileSource::try_from_well_known(path) {
-                return Ok(file_source.into());
-            }
-        } else {
-            if let Ok(file_source) = JsFileSource::try_from_well_known(path) {
-                return Ok(file_source.into());
-            }
-            if let Ok(file_source) = HtmlFileSource::try_from_well_known(path) {
-                return Ok(file_source.into());
-            }
-        }
-
-        if let Ok(file_source) = CssFileSource::try_from_well_known(path) {
-            return Ok(file_source.into());
-        }
-        #[cfg(feature = "lang_graphql")]
-        if let Ok(file_source) = GraphqlFileSource::try_from_well_known(path) {
-            return Ok(file_source.into());
-        }
-
-        #[cfg(feature = "lang_md")]
-        if let Ok(file_source) = biome_markdown_syntax::MdFileSource::try_from_well_known(path) {
-            return Ok(file_source.into());
-        }
-
-        #[cfg(feature = "lang_yaml")]
-        if let Ok(file_source) = biome_yaml_syntax::YamlFileSource::try_from_well_known(path) {
-            return Ok(file_source.into());
-        }
-
-        Err(FileSourceError::UnknownFileName)
+pub(crate) fn matches_on_type_char(value: &str) -> bool {
+    if value.len() != 1 || value.is_empty() {
+        return false;
     }
 
-    /// Returns the document file source corresponding to this file name from well-known files
-    pub fn from_well_known(path: &Utf8Path, experimental_full_html_support: bool) -> Self {
-        Self::try_from_well_known(path, experimental_full_html_support).unwrap_or(Self::Unknown)
-    }
-
-    fn try_from_extension(
-        extension: &str,
-        experimental_full_html_support: bool,
-    ) -> Result<Self, FileSourceError> {
-        // Order here is important
-        if experimental_full_html_support {
-            if let Ok(file_source) = HtmlFileSource::try_from_extension(extension) {
-                return Ok(file_source.into());
-            }
-            if let Ok(file_source) = JsFileSource::try_from_extension(extension) {
-                return Ok(file_source.into());
-            }
-        } else {
-            if let Ok(file_source) = JsFileSource::try_from_extension(extension) {
-                return Ok(file_source.into());
-            }
-
-            if let Ok(file_source) = HtmlFileSource::try_from_extension(extension) {
-                return Ok(file_source.into());
-            }
-        }
-
-        if let Ok(file_source) = JsonFileSource::try_from_extension(extension) {
-            return Ok(file_source.into());
-        }
-        if let Ok(file_source) = CssFileSource::try_from_extension(extension) {
-            return Ok(file_source.into());
-        }
-        #[cfg(feature = "lang_graphql")]
-        if let Ok(file_source) = GraphqlFileSource::try_from_extension(extension) {
-            return Ok(file_source.into());
-        }
-        #[cfg(feature = "lang_grit")]
-        if let Ok(file_source) =
-            biome_grit_syntax::file_source::GritFileSource::try_from_extension(extension)
-        {
-            return Ok(file_source.into());
-        }
-        #[cfg(feature = "lang_md")]
-        if let Ok(file_source) = biome_markdown_syntax::MdFileSource::try_from_extension(extension)
-        {
-            return Ok(file_source.into());
-        }
-        #[cfg(feature = "lang_yaml")]
-        if let Ok(file_source) = biome_yaml_syntax::YamlFileSource::try_from_extension(extension) {
-            return Ok(file_source.into());
-        }
-        Err(FileSourceError::UnknownExtension)
-    }
-
-    /// Returns the document file source corresponding to this file extension
-    pub fn from_extension(extension: &str, experimental_full_html_support: bool) -> Self {
-        Self::try_from_extension(extension, experimental_full_html_support).unwrap_or(Self::Unknown)
-    }
-
-    #[instrument(level = "debug", fields(result))]
-    fn try_from_language_id(language_id: &str) -> Result<Self, FileSourceError> {
-        if let Ok(file_source) = JsonFileSource::try_from_language_id(language_id) {
-            return Ok(file_source.into());
-        }
-        if let Ok(file_source) = JsFileSource::try_from_language_id(language_id) {
-            return Ok(file_source.into());
-        }
-        if let Ok(file_source) = CssFileSource::try_from_language_id(language_id) {
-            return Ok(file_source.into());
-        }
-        #[cfg(feature = "lang_graphql")]
-        if let Ok(file_source) = GraphqlFileSource::try_from_language_id(language_id) {
-            return Ok(file_source.into());
-        }
-        if let Ok(file_source) = HtmlFileSource::try_from_language_id(language_id) {
-            return Ok(file_source.into());
-        }
-        #[cfg(feature = "lang_grit")]
-        if let Ok(file_source) =
-            biome_grit_syntax::file_source::GritFileSource::try_from_language_id(language_id)
-        {
-            return Ok(file_source.into());
-        }
-        #[cfg(feature = "lang_md")]
-        if let Ok(file_source) =
-            biome_markdown_syntax::MdFileSource::try_from_language_id(language_id)
-        {
-            return Ok(file_source.into());
-        }
-
-        #[cfg(feature = "lang_yaml")]
-        if let Ok(file_source) =
-            biome_yaml_syntax::YamlFileSource::try_from_language_id(language_id)
-        {
-            return Ok(file_source.into());
-        }
-        Err(FileSourceError::UnknownLanguageId)
-    }
-
-    /// Returns the document file source corresponding to this language ID
-    ///
-    /// See the [LSP spec] and [VS Code spec] for a list of language identifiers
-    ///
-    /// [LSP spec]: https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textDocumentItem
-    /// [VS Code spec]: https://code.visualstudio.com/docs/languages/identifiers
-    pub fn from_language_id(language_id: &str) -> Self {
-        Self::try_from_language_id(language_id).unwrap_or(Self::Unknown)
-    }
-
-    pub(crate) fn try_from_path(
-        path: &Utf8Path,
-        experimental_full_html_support: bool,
-    ) -> Result<Self, FileSourceError> {
-        if let Ok(file_source) = Self::try_from_well_known(path, experimental_full_html_support) {
-            return Ok(file_source);
-        }
-
-        let filename = path
-            .file_name()
-            // We assume the file extensions are case-insensitive.
-            // Thus, we normalize the filrname to lowercase.
-            .map(|filename| filename.to_ascii_lowercase_cow());
-
-        // We assume the file extensions are case-insensitive
-        // and we use the lowercase form of them for pattern matching
-        // TODO: This should be extracted to a dedicated function, maybe in biome_fs
-        // because the same logic is also used in JsFileSource::try_from
-        // and we may support more and more extensions with more than one dots.
-        let extension = &match filename {
-            // Ignore files are extensionless files, so they need to be handled in particular way
-            Some(filename) if filename == GIT_IGNORE_FILE_NAME || filename == IGNORE_FILE_NAME => {
-                return Ok(Self::Ignore);
-            }
-            Some(filename) if filename.ends_with(".d.ts") => Cow::Borrowed("d.ts"),
-            Some(filename) if filename.ends_with(".d.mts") => Cow::Borrowed("d.mts"),
-            Some(filename) if filename.ends_with(".d.cts") => Cow::Borrowed("d.cts"),
-            _ => path
-                .extension()
-                // We assume the file extensions are case-insensitive.
-                // Thus, we normalize the extension to lowercase.
-                .map(|ext| ext.to_ascii_lowercase_cow())
-                .ok_or(FileSourceError::MissingFileExtension)?,
-        };
-
-        Self::try_from_extension(extension.as_ref(), experimental_full_html_support)
-    }
-
-    /// Returns the document file source corresponding to the file path
-    pub fn from_path(path: &Utf8Path, experimental_full_html_support: bool) -> Self {
-        Self::try_from_path(path, experimental_full_html_support).unwrap_or(Self::Unknown)
-    }
-
-    /// Returns the document file source if it's not unknown, otherwise returns `other`.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use biome_js_syntax::JsFileSource;
-    /// use biome_json_syntax::JsonFileSource;
-    /// use biome_service::workspace::DocumentFileSource;
-    /// let x = DocumentFileSource::from(JsFileSource::js_module());
-    /// let y = DocumentFileSource::Unknown;
-    /// assert_eq!(x.or(y), JsFileSource::js_module().into());
-    ///
-    /// let x = DocumentFileSource::Unknown;
-    /// let y = DocumentFileSource::from(JsFileSource::js_module());
-    /// assert_eq!(x.or(y), JsFileSource::js_module().into());
-    ///
-    /// let x = DocumentFileSource::from(JsFileSource::js_module());
-    /// let y = DocumentFileSource::from(JsonFileSource::json());
-    /// assert_eq!(x.or(y), JsFileSource::js_module().into());
-    ///
-    /// let x = DocumentFileSource::Unknown;
-    /// let y = DocumentFileSource::Unknown;
-    /// assert_eq!(x.or(y), DocumentFileSource::Unknown);
-    /// ```
-    pub fn or(self, other: Self) -> Self {
-        if self != Self::Unknown { self } else { other }
-    }
-
-    pub const fn is_javascript_like(&self) -> bool {
-        matches!(self, Self::Js(_))
-    }
-
-    pub const fn is_json_like(&self) -> bool {
-        matches!(self, Self::Json(_))
-    }
-
-    pub const fn is_css_like(&self) -> bool {
-        matches!(self, Self::Css(_))
-    }
-
-    pub fn to_js_file_source(&self) -> Option<JsFileSource> {
-        match self {
-            Self::Js(file_source) => Some(*file_source),
-            _ => None,
-        }
-    }
-
-    pub fn to_json_file_source(&self) -> Option<JsonFileSource> {
-        match self {
-            Self::Json(json) => Some(*json),
-            _ => None,
-        }
-    }
-
-    #[cfg(feature = "lang_graphql")]
-    pub fn to_graphql_file_source(&self) -> Option<GraphqlFileSource> {
-        match self {
-            Self::Graphql(graphql) => Some(*graphql),
-            _ => None,
-        }
-    }
-    #[cfg(feature = "lang_grit")]
-    pub fn to_grit_file_source(&self) -> Option<biome_grit_syntax::file_source::GritFileSource> {
-        match self {
-            Self::Grit(grit) => Some(*grit),
-            _ => None,
-        }
-    }
-
-    pub fn to_css_file_source(&self) -> Option<CssFileSource> {
-        match self {
-            Self::Css(css) => Some(*css),
-            _ => None,
-        }
-    }
-
-    pub fn to_html_file_source(&self) -> Option<HtmlFileSource> {
-        match self {
-            Self::Html(html) => Some(*html),
-            _ => None,
-        }
-    }
-
-    #[cfg(feature = "lang_md")]
-    pub fn to_markdown_file_source(&self) -> Option<biome_markdown_syntax::MdFileSource> {
-        match self {
-            Self::Markdown(markdown) => Some(*markdown),
-            _ => None,
-        }
-    }
-
-    /// The file can be parsed
-    pub fn can_parse(path: &Utf8Path) -> bool {
-        let file_source = Self::from(path);
-        match file_source {
-            #[cfg(feature = "lang_grit")]
-            Self::Grit(_) => true,
-            #[cfg(feature = "lang_md")]
-            Self::Markdown(_) => true,
-            #[cfg(feature = "lang_yaml")]
-            Self::Yaml(_) => true,
-            #[cfg(feature = "lang_graphql")]
-            Self::Graphql(_) => true,
-            Self::Js(_) | Self::Css(_) | Self::Json(_) | Self::Html(_) => true,
-            Self::Ignore => false,
-            Self::Unknown => false,
-        }
-    }
-
-    /// The file can be read from the file system
-    pub fn can_read(path: &Utf8Path) -> bool {
-        let file_source = Self::from(path);
-        match file_source {
-            #[cfg(feature = "lang_grit")]
-            Self::Grit(_) => true,
-            #[cfg(feature = "lang_md")]
-            Self::Markdown(_) => true,
-            #[cfg(feature = "lang_yaml")]
-            Self::Yaml(_) => true,
-            #[cfg(feature = "lang_graphql")]
-            Self::Graphql(_) => true,
-            Self::Js(_) | Self::Css(_) | Self::Json(_) | Self::Html(_) => true,
-            Self::Ignore => true,
-            Self::Unknown => false,
-        }
-    }
-
-    /// Whether this file can contain embedded nodes
-    pub fn can_contain_embeds(path: &Utf8Path, experimental_full_html_support: bool) -> bool {
-        let file_source = Self::from_path(path, experimental_full_html_support);
-        match file_source {
-            #[cfg(feature = "lang_grit")]
-            Self::Grit(_) => true,
-            #[cfg(feature = "lang_md")]
-            Self::Markdown(_) => false, // it will, but not yet
-            #[cfg(feature = "lang_yaml")]
-            Self::Yaml(_) => false,
-            #[cfg(feature = "lang_graphql")]
-            Self::Graphql(_) => true,
-            Self::Html(_) | Self::Js(_) => true,
-            Self::Css(_) | Self::Json(_) | Self::Ignore | Self::Unknown => false,
-        }
-    }
-}
-
-impl std::fmt::Display for DocumentFileSource {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter) -> std::fmt::Result {
-        match self {
-            Self::Js(js) => {
-                let is_jsx = js.is_jsx();
-                if js.is_typescript() {
-                    if is_jsx {
-                        write!(fmt, "TSX")
-                    } else {
-                        write!(fmt, "TypeScript")
-                    }
-                } else if is_jsx {
-                    write!(fmt, "JSX")
-                } else {
-                    write!(fmt, "JavaScript")
-                }
-            }
-            Self::Json(json) => {
-                if json.allow_comments() {
-                    write!(fmt, "JSONC")
-                } else {
-                    write!(fmt, "JSON")
-                }
-            }
-            Self::Css(_) => write!(fmt, "CSS"),
-            #[cfg(feature = "lang_graphql")]
-            Self::Graphql(_) => write!(fmt, "GraphQL"),
-            Self::Html(_) => write!(fmt, "HTML"),
-            #[cfg(feature = "lang_grit")]
-            Self::Grit(_) => write!(fmt, "Grit"),
-            #[cfg(feature = "lang_md")]
-            Self::Markdown(_) => write!(fmt, "Markdown"),
-            Self::Ignore => write!(fmt, "Ignore"),
-            #[cfg(feature = "lang_yaml")]
-            Self::Yaml(_) => write!(fmt, "YAML"),
-            Self::Unknown => write!(fmt, "Unknown"),
-        }
-    }
-}
-
-impl biome_console::fmt::Display for DocumentFileSource {
-    fn fmt(&self, fmt: &mut Formatter) -> std::io::Result<()> {
-        fmt.write_fmt(format_args!("{self}"))
-    }
+    // SATEFY: we checked that we have exactly one character.
+    ON_TYPE_CHARS.contains(&value.chars().next().unwrap())
 }
 
 pub struct FixAllParams<'a> {
-    pub(crate) parse: AnyParse,
+    pub(crate) parsed_source: ParsedOrigin,
     pub(crate) fix_file_mode: FixFileMode,
     pub(crate) settings: &'a SettingsWithEditor<'a>,
-    /// Whether it should format the code action
-    pub(crate) should_format: bool,
     pub(crate) biome_path: &'a BiomePath,
-    pub(crate) module_graph: Arc<ModuleGraph>,
+    pub(crate) workspace_db: WorkspaceDb,
+    #[cfg(feature = "html_embeds")]
+    pub(crate) embedded_data: Option<Arc<EmbeddedData>>,
+    #[cfg(feature = "module_graph")]
+    pub(crate) module_db: Rc<dyn ModuleDb>,
     pub(crate) project_layout: Arc<ProjectLayout>,
     pub(crate) document_file_source: DocumentFileSource,
     pub(crate) only: &'a [AnalyzerSelector],
@@ -563,11 +145,306 @@ pub struct FixAllParams<'a> {
     pub(crate) suppression_reason: Option<String>,
     pub(crate) enabled_rules: &'a [AnalyzerSelector],
     pub(crate) plugins: AnalyzerPluginVec,
-    pub(crate) document_services: &'a DocumentServices,
-    /// The initial indentation level to apply when printing formatted code.
-    /// Used by embedded language handlers (Svelte, Vue) to preserve
-    /// `indentScriptAndStyle` indentation during fix-all operations.
-    pub(crate) embeds_initial_indent: u16,
+    pub(crate) working_directory: Option<&'a Utf8Path>,
+    pub(crate) collect_final_diagnostics: bool,
+}
+
+/// A small wrapper for the parsed file.
+#[derive(Clone, Debug)]
+pub(crate) enum ParsedOrigin {
+    /// The parse result has been queried from the database.
+    Workspace(AnalyzedSource),
+    /// The parse result has been generated from the server during an in-flight operation, and it won't
+    /// be saved back to the workspace. This is usually used for in-memory operations or stateless operations.
+    Interned {
+        parse: AnyParse,
+        diagnostic_offset: Option<TextSize>,
+        snippets: Vec<ParsedSnippetOrigin>,
+    },
+}
+
+#[derive(Clone, Debug)]
+pub(crate) enum ParsedSnippetOrigin {
+    /// The parse result has been queried from the database.
+    Workspace(SnippetRef),
+    /// The parse result has been generated from the server during an in-flight operation, and it won't
+    /// be saved back to the workspace. This is usually used for in-memory operations or stateless operations.
+    Interned {
+        parse: AnyParse,
+        content: EmbedContent,
+        file_source: DocumentFileSource,
+    },
+}
+
+impl ParsedSnippetOrigin {
+    pub(crate) fn parsed_origin(&self) -> ParsedOrigin {
+        match self {
+            Self::Workspace(snippet) => snippet.clone().into(),
+            Self::Interned { parse, content, .. } => {
+                ParsedOrigin::interned(parse.clone(), Some(content.content_offset))
+            }
+        }
+    }
+
+    pub(crate) fn file_source(&self, db: &WorkspaceDb) -> Option<DocumentFileSource> {
+        match self {
+            Self::Workspace(snippet) => db.source_from_index(snippet.document_source_index()),
+            Self::Interned { file_source, .. } => Some(*file_source),
+        }
+    }
+
+    pub(crate) fn element_range(&self) -> TextRange {
+        match self {
+            Self::Workspace(snippet) => snippet.element_range(),
+            Self::Interned { content, .. } => content.element_range,
+        }
+    }
+
+    pub(crate) fn content_range(&self) -> TextRange {
+        match self {
+            Self::Workspace(snippet) => snippet.content_range(),
+            Self::Interned { content, .. } => content.content_range,
+        }
+    }
+
+    pub(crate) fn content_offset(&self) -> TextSize {
+        match self {
+            Self::Workspace(snippet) => snippet.content_offset(),
+            Self::Interned { content, .. } => content.content_offset,
+        }
+    }
+
+    pub(crate) fn diagnostics(&self) -> &[biome_parser::diagnostic::ParseDiagnostic] {
+        match self {
+            Self::Workspace(snippet) => snippet.parsed().diagnostics(),
+            Self::Interned { parse, .. } => parse.diagnostics(),
+        }
+    }
+
+    pub(crate) fn serde_diagnostics(&self) -> Vec<biome_diagnostics::serde::Diagnostic> {
+        match self {
+            Self::Workspace(snippet) => snippet.serde_diagnostics(),
+            Self::Interned { parse, .. } => parse.clone().into_serde_diagnostics(),
+        }
+    }
+
+    pub(crate) fn has_errors(&self) -> bool {
+        self.diagnostics()
+            .iter()
+            .any(|diagnostic| diagnostic.severity() >= Severity::Error)
+    }
+
+    pub(crate) fn error_count(&self) -> usize {
+        self.diagnostics()
+            .iter()
+            .filter(|diagnostic| diagnostic.severity() >= Severity::Error)
+            .count()
+    }
+}
+
+impl ParsedOrigin {
+    /// Returns the document in the database, or `None` when the parse result
+    /// isn't stored in it.
+    pub(crate) fn document(&self) -> Option<Source> {
+        match self {
+            Self::Workspace(source) => Some(source.document()),
+            Self::Interned { .. } => None,
+        }
+    }
+
+    pub(crate) fn snippets<'a>(&'a self, db: &'a WorkspaceDb) -> SnippetsIterator<'a> {
+        match self {
+            Self::Workspace(AnalyzedSource::Source(source)) => {
+                SnippetsIterator::from_source(*source, db)
+            }
+            Self::Workspace(AnalyzedSource::Snippet(_)) => SnippetsIterator::Interned([].iter()),
+            Self::Interned { snippets, .. } => SnippetsIterator::Interned(snippets.iter()),
+        }
+    }
+
+    pub(crate) fn interned(parse: AnyParse, diagnostic_offset: Option<TextSize>) -> Self {
+        Self::Interned {
+            parse,
+            diagnostic_offset,
+            snippets: Vec::new(),
+        }
+    }
+
+    pub(crate) fn interned_document(parse: AnyParse, snippets: Vec<ParsedSnippetOrigin>) -> Self {
+        Self::Interned {
+            parse,
+            diagnostic_offset: None,
+            snippets,
+        }
+    }
+
+    pub(crate) fn tree<N>(&self, db: &WorkspaceDb) -> N
+    where
+        N: biome_rowan::AstNode,
+        N::Language: 'static,
+    {
+        match self {
+            Self::Workspace(source) => source.tree(db),
+            Self::Interned { parse, .. } => parse.tree(),
+        }
+    }
+
+    pub(crate) fn syntax<L>(&self, db: &WorkspaceDb) -> SyntaxNode<L>
+    where
+        L: biome_rowan::Language + 'static,
+    {
+        match self {
+            Self::Workspace(source) => source.syntax(db),
+            Self::Interned { parse, .. } => parse.syntax(),
+        }
+    }
+
+    pub(crate) fn parse(&self, db: &WorkspaceDb) -> AnyParse {
+        match self {
+            Self::Workspace(source) => source.any_parse(db).clone(),
+            Self::Interned { parse, .. } => parse.clone(),
+        }
+    }
+
+    pub(crate) fn send_node(&self, db: &WorkspaceDb) -> SendNode {
+        match self {
+            Self::Workspace(source) => source.any_parse(db).unwrap_as_send_node(),
+            Self::Interned { parse, .. } => parse.unwrap_as_send_node(),
+        }
+    }
+
+    pub(crate) fn diagnostics<'a>(
+        &'a self,
+        db: &'a WorkspaceDb,
+    ) -> &'a [biome_parser::diagnostic::ParseDiagnostic] {
+        match self {
+            Self::Workspace(source) => source.diagnostics(db),
+            Self::Interned { parse, .. } => parse.diagnostics(),
+        }
+    }
+
+    pub(crate) fn serde_diagnostics(
+        &self,
+        db: &WorkspaceDb,
+    ) -> Vec<biome_diagnostics::serde::Diagnostic> {
+        match self {
+            Self::Workspace(source) => source.serde_diagnostics(db),
+            Self::Interned { parse, .. } => parse.clone().into_serde_diagnostics(),
+        }
+    }
+
+    pub(crate) fn diagnostic_offset(&self) -> Option<TextSize> {
+        match self {
+            Self::Workspace(source) => source.diagnostic_offset(),
+            Self::Interned {
+                diagnostic_offset, ..
+            } => *diagnostic_offset,
+        }
+    }
+}
+
+impl From<AnalyzedSource> for ParsedOrigin {
+    fn from(source: AnalyzedSource) -> Self {
+        Self::Workspace(source)
+    }
+}
+
+impl From<Source> for ParsedOrigin {
+    fn from(source: Source) -> Self {
+        Self::Workspace(source.into())
+    }
+}
+
+impl From<SnippetRef> for ParsedOrigin {
+    fn from(source: SnippetRef) -> Self {
+        Self::Workspace(source.into())
+    }
+}
+
+impl From<AnyParse> for ParsedOrigin {
+    fn from(parse: AnyParse) -> Self {
+        Self::interned(parse, None)
+    }
+}
+
+pub(crate) enum SnippetsIterator<'a> {
+    /// The snippets of a parsed source.
+    Workspace(std::vec::IntoIter<SnippetRef>),
+    Interned(std::slice::Iter<'a, ParsedSnippetOrigin>),
+}
+
+impl<'a> SnippetsIterator<'a> {
+    /// Iterates over the snippets of `source`.
+    pub(crate) fn from_source(source: Source, db: &WorkspaceDb) -> Self {
+        let snippets: Vec<_> = source
+            .snippets(db)
+            .iter()
+            .map(|snippet| snippet.to_ref(db))
+            .collect();
+        Self::Workspace(snippets.into_iter())
+    }
+
+    /// Excludes host-owned template comments from guest analysis, and every
+    /// snippet of a Markdown file whose `markdown.analyzeEmbeds` is disabled. The unfiltered iterator remains available for formatting and
+    /// host suppression extraction.
+    pub(crate) fn for_analysis(
+        self,
+        host: &'a ParsedOrigin,
+        source: DocumentFileSource,
+        settings: &Settings,
+        path: &Utf8Path,
+        db: &'a WorkspaceDb,
+    ) -> impl Iterator<Item = ParsedSnippetOrigin> + 'a {
+        let _ = (settings, path);
+        #[cfg(feature = "md_embeds")]
+        let skips_markdown_snippets = source.to_markdown_file_source().is_some()
+            && !md::analyze_embeds_enabled(settings, path);
+        self.filter(move |snippet| {
+            let _ = (host, source, snippet, db);
+            #[cfg(feature = "md_embeds")]
+            if skips_markdown_snippets {
+                return false;
+            }
+            #[cfg(feature = "html_embeds")]
+            if html::is_astro_template_comment(host, source, snippet, db) {
+                return false;
+            }
+            true
+        })
+    }
+
+    /// Excludes the snippets whose syntax errors don't stop formatting the
+    /// containing file: the formatter of a Markdown file keeps such snippets as
+    /// written.
+    pub(crate) fn blocking_formatting(
+        self,
+        source: DocumentFileSource,
+    ) -> impl Iterator<Item = ParsedSnippetOrigin> + 'a {
+        let _ = source;
+        #[cfg(feature = "lang_md")]
+        let blocks = source.to_markdown_file_source().is_none();
+        #[cfg(not(feature = "lang_md"))]
+        let blocks = true;
+        self.filter(move |_| blocks)
+    }
+}
+
+impl Iterator for SnippetsIterator<'_> {
+    type Item = ParsedSnippetOrigin;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        match self {
+            Self::Workspace(snippets) => snippets.next().map(ParsedSnippetOrigin::Workspace),
+            Self::Interned(snippets) => snippets.next().cloned(),
+        }
+    }
+}
+
+pub(crate) struct FixedFileResult {
+    pub(crate) root: SendNode,
+    pub(crate) skipped_suggested_fixes: u32,
+    pub(crate) actions: Vec<FixAction>,
+    pub(crate) errors: usize,
 }
 
 #[derive(Default)]
@@ -579,6 +456,7 @@ pub struct Capabilities {
     pub(crate) formatter: FormatterCapabilities,
     pub(crate) search: SearchCapabilities,
     pub(crate) enabled_for_path: EnabledForPath,
+    pub(crate) editors: EditorCapabilities,
 }
 
 #[derive(Clone)]
@@ -589,19 +467,21 @@ pub struct ParseResult {
 
 #[derive(Default)]
 pub struct ParseEmbedResult {
-    pub(crate) nodes: Vec<(AnyEmbeddedSnippet, DocumentFileSource)>,
+    pub(crate) nodes: Vec<(AnyParse, EmbedContent, DocumentFileSource)>,
 }
 
-type Parse =
+pub(crate) struct ParseEmbeddedParams<'a, 'settings> {
+    pub(crate) any_parse: &'a AnyParse,
+    pub(crate) path: &'a BiomePath,
+    pub(crate) file_source: &'a DocumentFileSource,
+    pub(crate) settings: &'a SettingsWithEditor<'settings>,
+    pub(crate) node_cache: &'a mut NodeCache,
+}
+
+pub(crate) type Parse =
     fn(&BiomePath, DocumentFileSource, &str, &SettingsWithEditor, &mut NodeCache) -> ParseResult;
-type ParseEmbeddedNodes = fn(
-    &AnyParse,
-    &BiomePath,
-    &DocumentFileSource,
-    &SettingsWithEditor,
-    &mut NodeCache,
-    &mut EmbeddedBuilder,
-) -> ParseEmbedResult;
+type ParseEmbeddedNodes =
+    for<'a, 'settings> fn(ParseEmbeddedParams<'a, 'settings>) -> ParseEmbedResult;
 #[derive(Default)]
 pub struct ParserCapabilities {
     /// Parse a file
@@ -610,18 +490,20 @@ pub struct ParserCapabilities {
     pub(crate) parse_embedded_nodes: Option<ParseEmbeddedNodes>,
 }
 
-type DebugSyntaxTree = fn(&BiomePath, AnyParse) -> GetSyntaxTreeResult;
-type DebugControlFlow = fn(AnyParse, TextSize) -> String;
+type DebugSyntaxTree = fn(&BiomePath, AnalyzedSource, WorkspaceDb) -> GetSyntaxTreeResult;
+type DebugControlFlow = fn(AnalyzedSource, TextSize, WorkspaceDb) -> String;
 type DebugFormatterIR = fn(
     &BiomePath,
     &DocumentFileSource,
-    AnyParse,
+    AnalyzedSource,
     &SettingsWithEditor,
+    WorkspaceDb,
 ) -> Result<String, WorkspaceError>;
-type DebugTypeInfo =
-    fn(&BiomePath, Option<AnyParse>, Arc<ModuleGraph>) -> Result<String, WorkspaceError>;
-type DebugRegisteredTypes = fn(&BiomePath, AnyParse) -> Result<String, WorkspaceError>;
-type DebugSemanticModel = fn(&BiomePath, AnyParse) -> Result<String, WorkspaceError>;
+type DebugTypeInfo = fn(AnalyzedSource, WorkspaceDb) -> Result<String, WorkspaceError>;
+type DebugRegisteredTypes =
+    fn(&BiomePath, AnalyzedSource, WorkspaceDb) -> Result<String, WorkspaceError>;
+type DebugSemanticModel =
+    fn(&BiomePath, AnalyzedSource, WorkspaceDb) -> Result<String, WorkspaceError>;
 
 #[derive(Default)]
 pub struct DebugCapabilities {
@@ -639,47 +521,78 @@ pub struct DebugCapabilities {
     pub(crate) debug_semantic_model: Option<DebugSemanticModel>,
 }
 
-#[derive(Debug)]
 pub(crate) struct LintParams<'a> {
-    pub(crate) parse: AnyParse,
+    pub(crate) parsed_source: ParsedOrigin,
     pub(crate) settings: &'a SettingsWithEditor<'a>,
     pub(crate) language: DocumentFileSource,
     pub(crate) path: &'a BiomePath,
     pub(crate) only: &'a [AnalyzerSelector],
     pub(crate) skip: &'a [AnalyzerSelector],
     pub(crate) categories: RuleCategories,
-    pub(crate) module_graph: Arc<ModuleGraph>,
+    pub(crate) workspace_db: WorkspaceDb,
+    #[cfg(feature = "html_embeds")]
+    pub(crate) embedded_data: Option<Arc<EmbeddedData>>,
+    #[cfg(feature = "module_graph")]
+    pub(crate) module_db: Rc<dyn ModuleDb>,
     pub(crate) project_layout: Arc<ProjectLayout>,
     pub(crate) suppression_reason: Option<String>,
     pub(crate) enabled_selectors: &'a [AnalyzerSelector],
     pub(crate) plugins: AnalyzerPluginVec,
     pub(crate) pull_code_actions: bool,
-    pub(crate) diagnostic_offset: Option<TextSize>,
-    pub(crate) document_services: &'a DocumentServices,
-    pub(crate) snippet_services: Option<&'a DocumentServices>,
+    pub(crate) working_directory: Option<&'a Utf8Path>,
     pub(crate) max_diagnostics: Option<u32>,
     pub(crate) diagnostic_level: Severity,
     /// When true, promote assist diagnostics (`assist/*`) to error severity.
     pub(crate) enforce_assist: bool,
 }
 
+impl<'a> LintParams<'a> {
+    /// Builds lint parameters for a snippet using the containing file's settings.
+    pub(crate) fn for_snippet(
+        &self,
+        snippet: &ParsedSnippetOrigin,
+        language: DocumentFileSource,
+    ) -> Self {
+        Self {
+            parsed_source: snippet.parsed_origin(),
+            settings: self.settings,
+            language,
+            path: self.path,
+            only: self.only,
+            skip: self.skip,
+            categories: self.categories,
+            workspace_db: self.workspace_db.clone(),
+            #[cfg(feature = "html_embeds")]
+            embedded_data: self.embedded_data.clone(),
+            #[cfg(feature = "module_graph")]
+            module_db: self.module_db.clone(),
+            project_layout: self.project_layout.clone(),
+            suppression_reason: self.suppression_reason.clone(),
+            enabled_selectors: self.enabled_selectors,
+            plugins: self.plugins.clone(),
+            pull_code_actions: self.pull_code_actions,
+            working_directory: self.working_directory,
+            max_diagnostics: self.max_diagnostics,
+            diagnostic_level: self.diagnostic_level,
+            enforce_assist: self.enforce_assist,
+        }
+    }
+}
+
 pub(crate) struct DiagnosticsAndActionsParams<'a> {
-    pub(crate) parse: AnyParse,
+    pub(crate) parsed_source: AnalyzedSource,
     pub(crate) settings: &'a SettingsWithEditor<'a>,
     pub(crate) language: DocumentFileSource,
     pub(crate) path: &'a BiomePath,
     pub(crate) only: &'a [AnalyzerSelector],
     pub(crate) skip: &'a [AnalyzerSelector],
     pub(crate) categories: RuleCategories,
-    pub(crate) module_graph: Arc<ModuleGraph>,
+    pub(crate) workspace_db: WorkspaceDb,
     pub(crate) project_layout: Arc<ProjectLayout>,
     pub(crate) suppression_reason: Option<String>,
     pub(crate) enabled_selectors: &'a [AnalyzerSelector],
     pub(crate) plugins: AnalyzerPluginVec,
-    pub(crate) diagnostic_offset: Option<TextSize>,
-    pub(crate) document_services: &'a DocumentServices,
-    // Services attached to the current embedded snippet, when diagnostics are run on snippets.
-    pub(crate) snippet_services: Option<&'a DocumentServices>,
+    pub(crate) working_directory: Option<&'a Utf8Path>,
 }
 
 #[derive(Debug, Default)]
@@ -689,6 +602,69 @@ pub(crate) struct LintResults {
     pub(crate) skipped_diagnostics: u32,
     pub(crate) infos: usize,
     pub(crate) warnings: usize,
+}
+
+impl LintResults {
+    pub(crate) fn extend(&mut self, other: Self) {
+        self.diagnostics.extend(other.diagnostics);
+        self.errors += other.errors;
+        self.skipped_diagnostics += other.skipped_diagnostics;
+        self.infos += other.infos;
+        self.warnings += other.warnings;
+    }
+}
+
+/// Runs a guest-language linter and retains its diagnostics for the containing file.
+pub(crate) struct LintSnippetAnalyzer<'a> {
+    params: LintParams<'a>,
+    offset: TextSize,
+    metadata: &'static biome_analyze::MetadataRegistry,
+    lint: for<'guest, 'registry> fn(
+        &LintParams<'_>,
+        Option<EmbeddedSignalInspector<'guest, 'registry>>,
+    ) -> LintResults,
+    result: LintResults,
+}
+
+impl<'a> LintSnippetAnalyzer<'a> {
+    pub(crate) fn new(
+        params: LintParams<'a>,
+        offset: TextSize,
+        metadata: &'static biome_analyze::MetadataRegistry,
+        lint: for<'guest, 'registry> fn(
+            &LintParams<'_>,
+            Option<EmbeddedSignalInspector<'guest, 'registry>>,
+        ) -> LintResults,
+    ) -> Self {
+        Self {
+            params,
+            offset,
+            metadata,
+            lint,
+            result: LintResults::default(),
+        }
+    }
+}
+
+impl SnippetAnalyzer<Never> for LintSnippetAnalyzer<'_> {
+    type Output = LintResults;
+
+    fn diagnostics_offset(&self) -> TextSize {
+        self.offset
+    }
+
+    fn metadata(&self) -> &'static biome_analyze::MetadataRegistry {
+        self.metadata
+    }
+
+    fn run(&mut self, inspector: EmbeddedSignalInspector<'_, '_>) -> ControlFlow<Never> {
+        self.result = (self.lint)(&self.params, Some(inspector));
+        ControlFlow::Continue(())
+    }
+
+    fn into_output(self: Box<Self>) -> Self::Output {
+        self.result
+    }
 }
 
 pub(crate) struct ProcessLint<'a> {
@@ -707,9 +683,9 @@ pub(crate) struct ProcessLint<'a> {
 }
 
 impl<'a> ProcessLint<'a> {
-    pub(crate) fn new(params: &LintParams<'a>) -> Self {
+    pub(crate) fn new(params: &'a LintParams<'_>) -> Self {
         Self {
-            diagnostic_count: params.parse.diagnostics().len() as u32,
+            diagnostic_count: params.parsed_source.diagnostics(&params.workspace_db).len() as u32,
             errors: Default::default(),
             warnings: Default::default(),
             infos: Default::default(),
@@ -721,12 +697,9 @@ impl<'a> ProcessLint<'a> {
             ignores_suppression_comment: !params.categories.contains(RuleCategory::Lint)
                 || !params.only.is_empty()
                 || !params.skip.is_empty(),
-            rules: params
-                .settings
-                .as_ref()
-                .as_linter_rules(params.path.as_path()),
+            rules: params.settings.linter_rules(),
             pull_code_actions: params.pull_code_actions,
-            diagnostic_offset: params.diagnostic_offset,
+            diagnostic_offset: params.parsed_source.diagnostic_offset(),
             max_diagnostics: params.max_diagnostics,
             diagnostic_level: params.diagnostic_level,
             enforce_assist: params.enforce_assist,
@@ -738,6 +711,7 @@ impl<'a> ProcessLint<'a> {
         signal: &dyn AnalyzerSignal<L>,
     ) -> ControlFlow {
         if let Some(mut diagnostic) = signal.diagnostic() {
+            let is_internal = diagnostic.tags().is_internal();
             if self.ignores_suppression_comment
                 && diagnostic.category() == Some(category!("suppressions/unused"))
             {
@@ -778,9 +752,10 @@ impl<'a> ProcessLint<'a> {
                 Severity::Hint => {}
             }
 
-            if self
-                .max_diagnostics
-                .is_none_or(|max_diagnostics| self.diagnostic_count <= max_diagnostics)
+            if is_internal
+                || self
+                    .max_diagnostics
+                    .is_none_or(|max_diagnostics| self.diagnostic_count <= max_diagnostics)
             {
                 if self.pull_code_actions {
                     for action in signal.actions(ActionFilter::rule_fix()) {
@@ -864,15 +839,11 @@ pub(crate) struct ProcessFixAll<'a> {
 }
 
 impl<'a> ProcessFixAll<'a> {
-    pub(crate) fn new(
-        params: &'a FixAllParams,
-        rules: Option<Cow<'a, Rules>>,
-        syntax_len: u32,
-    ) -> Self {
+    pub(crate) fn new(params: &'a FixAllParams, syntax_len: u32) -> Self {
         Self {
             fix_file_mode: &params.fix_file_mode,
             errors: 0,
-            rules,
+            rules: params.settings.linter_rules(),
             skipped_suggested_fixes: 0,
             actions: Vec::new(),
             growth_guard: GrowthGuard::new(syntax_len),
@@ -1061,39 +1032,58 @@ impl<'a> ProcessFixAll<'a> {
         Ok(Some(()))
     }
 
-    /// Finish processing the fix all actions. Returns the result of the fix-all actions. The `format_tree`
-    /// is a closure that must return the new code (formatted, if needed).
-    ///
-    /// `initial_indent` specifies the base indentation level for printing. This is used by
-    /// embedded language handlers (e.g. Svelte, Vue) to preserve `indentScriptAndStyle`
-    /// indentation when formatting during fix-all operations.
-    pub(crate) fn finish<F, C>(
-        self,
-        format_tree: F,
-        initial_indent: u16,
-    ) -> Result<FixFileResult, WorkspaceError>
-    where
-        F: FnOnce() -> Result<Either<FormatResult<Formatted<C>>, String>, WorkspaceError>,
-        C: FormatContext,
-    {
-        let code = match format_tree()? {
-            Either::Left(printed) => {
-                if initial_indent > 0 {
-                    printed?
-                        .print_with_indent(initial_indent, SourceMapGeneration::Disabled)?
-                        .into_code()
-                } else {
-                    printed?.print()?.into_code()
-                }
-            }
-            Either::Right(string) => string,
-        };
-        Ok(FixFileResult {
-            code,
+    /// Record a text-edit-based fix (e.g. from a plugin rewrite) that was
+    /// applied outside of the normal mutation path.
+    pub(crate) fn record_text_edit_fix(
+        &mut self,
+        range: TextRange,
+        new_text_len: u32,
+        rule_name: Option<(&'static str, &'static str)>,
+    ) -> Result<(), WorkspaceError> {
+        self.actions.push(FixAction {
+            rule_name: rule_name.map(|(g, r)| (Cow::Borrowed(g), Cow::Borrowed(r))),
+            range,
+        });
+        if !self.growth_guard.check(new_text_len) {
+            return Err(WorkspaceError::RuleError(
+                RuleError::ConflictingRuleFixesError {
+                    rules: self
+                        .actions
+                        .iter()
+                        .rev()
+                        .take(10)
+                        .filter_map(|action| action.rule_name.clone())
+                        .collect::<HashSet<_>>()
+                        .into_iter()
+                        .collect(),
+                },
+            ));
+        }
+        Ok(())
+    }
+
+    /// Apply a plugin text edit if present and the text actually changed.
+    /// Returns `Some(new_text)` if the edit was applied, `None` otherwise.
+    pub(crate) fn apply_plugin_text_edit(
+        &mut self,
+        (range, edit): (TextRange, TextEdit),
+        current_text: &str,
+    ) -> Result<Option<String>, WorkspaceError> {
+        let new_text = edit.new_string(current_text);
+        if new_text == current_text {
+            return Ok(None);
+        }
+        self.record_text_edit_fix(range, new_text.len() as u32, Some(("plugin", "anonymous")))?;
+        Ok(Some(new_text))
+    }
+
+    pub(crate) fn finish(self, root: SendNode) -> FixedFileResult {
+        FixedFileResult {
+            root,
             skipped_suggested_fixes: self.skipped_suggested_fixes,
             actions: self.actions,
             errors: self.errors,
-        })
+        }
     }
 }
 
@@ -1130,7 +1120,7 @@ impl ProcessDiagnosticsAndActions {
                     offset: None,
                 })
                 .collect();
-            if !actions.is_empty() {
+            if !actions.is_empty() || diagnostic.tags().is_internal() {
                 if let Some(offset) = &self.diagnostic_offset {
                     diagnostic.add_diagnostic_offset(*offset);
                 }
@@ -1152,11 +1142,11 @@ impl ProcessDiagnosticsAndActions {
 }
 
 pub(crate) struct CodeActionsParams<'a> {
-    pub(crate) parse: AnyParse,
+    pub(crate) parsed_source: AnalyzedSource,
     pub(crate) range: Option<TextRange>,
     pub(crate) settings: &'a SettingsWithEditor<'a>,
     pub(crate) path: &'a BiomePath,
-    pub(crate) module_graph: Arc<ModuleGraph>,
+    pub(crate) workspace_db: WorkspaceDb,
     pub(crate) project_layout: Arc<ProjectLayout>,
     pub(crate) language: DocumentFileSource,
     pub(crate) only: &'a [AnalyzerSelector],
@@ -1165,12 +1155,9 @@ pub(crate) struct CodeActionsParams<'a> {
     pub(crate) enabled_rules: &'a [AnalyzerSelector],
     pub(crate) plugins: AnalyzerPluginVec,
     pub(crate) categories: RuleCategories,
-    pub(crate) action_offset: Option<TextSize>,
-    pub(crate) document_services: &'a DocumentServices,
+    pub(crate) working_directory: Option<&'a Utf8Path>,
     /// When `false`, actions are returned with `suggestion: None` (no mutations computed).
     pub(crate) compute_actions: bool,
-    // Services attached to the current embedded snippet, when actions are run on snippets.
-    pub(crate) snippet_services: Option<&'a DocumentServices>,
 }
 
 pub(crate) struct UpdateSnippetsNodes {
@@ -1180,13 +1167,25 @@ pub(crate) struct UpdateSnippetsNodes {
     /// host's nesting level. When `false`, `new_code` already has the
     /// right shape and can be spliced back as-is.
     pub(crate) needs_reindent: bool,
+    /// Ranges inside `new_code` that must not be re-indented: the bodies of
+    /// template literals and multi-line block comments. Lines that begin
+    /// inside one of these ranges are left as-is instead of receiving the
+    /// host element's indentation prefix.
+    pub(crate) verbatim_ranges: Vec<TextRange>,
 }
 
 type Lint = fn(LintParams) -> LintResults;
 type CodeActions = fn(CodeActionsParams) -> PullActionsResult;
-type FixAll = fn(FixAllParams) -> Result<FixFileResult, WorkspaceError>;
-type Rename = fn(&BiomePath, AnyParse, TextSize, String) -> Result<RenameResult, WorkspaceError>;
-type UpdateSnippets = fn(AnyParse, Vec<UpdateSnippetsNodes>) -> Result<SendNode, WorkspaceError>;
+type FixAll = fn(FixAllParams) -> Result<Option<FixedFileResult>, WorkspaceError>;
+type Rename = fn(
+    &BiomePath,
+    AnalyzedSource,
+    TextSize,
+    String,
+    WorkspaceDb,
+) -> Result<RenameResult, WorkspaceError>;
+type UpdateSnippets =
+    fn(ParsedOrigin, WorkspaceDb, Vec<UpdateSnippetsNodes>) -> Result<SendNode, WorkspaceError>;
 type PullDiagnosticsAndActions = fn(DiagnosticsAndActionsParams) -> PullDiagnosticsAndActionsResult;
 
 #[derive(Default)]
@@ -1208,38 +1207,45 @@ pub struct AnalyzerCapabilities {
 type Format = fn(
     &BiomePath,
     &DocumentFileSource,
-    AnyParse,
+    ParsedOrigin,
     &SettingsWithEditor,
+    WorkspaceDb,
 ) -> Result<Printed, WorkspaceError>;
 type FormatRange = fn(
     &BiomePath,
     &DocumentFileSource,
-    AnyParse,
+    AnalyzedSource,
     &SettingsWithEditor,
     TextRange,
+    WorkspaceDb,
 ) -> Result<Printed, WorkspaceError>;
 type FormatOnType = fn(
     &BiomePath,
     &DocumentFileSource,
-    AnyParse,
+    AnalyzedSource,
     &SettingsWithEditor,
     TextSize,
+    WorkspaceDb,
 ) -> Result<Printed, WorkspaceError>;
+
+pub(crate) fn format_on_type_noop(offset: TextSize) -> Printed {
+    // The LSP layer treats `range: None` as a whole-file replacement.
+    Printed::new(
+        String::new(),
+        Some(TextRange::at(offset, TextSize::from(0))),
+        Vec::new(),
+        Vec::new(),
+    )
+}
 
 type FormatEmbedded = fn(
     &BiomePath,
     &DocumentFileSource,
-    AnyParse,
+    ParsedOrigin,
     &SettingsWithEditor,
-    Vec<FormatEmbedNode>,
+    Vec<ParsedSnippetOrigin>,
+    WorkspaceDb,
 ) -> Result<Printed, WorkspaceError>;
-
-#[derive(Debug)]
-pub(crate) struct FormatEmbedNode {
-    pub(crate) range: TextRange,
-    pub(crate) node: AnyParse,
-    pub(crate) source: DocumentFileSource,
-}
 
 #[derive(Default)]
 pub(crate) struct FormatterCapabilities {
@@ -1258,10 +1264,11 @@ type Enabled = fn(&Utf8Path, &SettingsWithEditor) -> bool;
 type Search = fn(
     &BiomePath,
     &DocumentFileSource,
-    AnyParse,
+    AnalyzedSource,
     &dyn SearchQuery,
     &SettingsWithEditor,
     PatternId,
+    WorkspaceDb,
 ) -> Result<Vec<TextRange>, WorkspaceError>;
 
 #[derive(Default)]
@@ -1278,6 +1285,29 @@ pub(crate) struct EnabledForPath {
     pub(crate) search: Option<Enabled>,
 }
 
+#[derive(Default)]
+pub(crate) struct EditorCapabilities {
+    pub(crate) resolve_binding: Option<ResolveBinding>,
+    pub(crate) resolve_definition: Option<ResolveDefinition>,
+}
+
+pub(crate) struct ResolveBindingParams {
+    pub(crate) parsed_source: AnalyzedSource,
+    pub(crate) cursor_offset: TextSize,
+    pub(crate) workspace_db: WorkspaceDb,
+    pub(crate) path: Utf8PathBuf,
+}
+
+pub(crate) struct ResolveDefinitionParams<'a> {
+    pub(crate) path: &'a BiomePath,
+    pub(crate) definition_ref: &'a DefinitionReference,
+    pub(crate) workspace_db: WorkspaceDb,
+    pub(crate) parsed_source: AnalyzedSource,
+}
+
+type ResolveBinding = fn(ResolveBindingParams) -> Option<DefinitionReference>;
+type ResolveDefinition = fn(ResolveDefinitionParams) -> Option<GoToDefinitionResult>;
+
 /// Main trait to use to add a new language to Biome
 pub(crate) trait ExtensionHandler {
     /// Capabilities that can applied to a file
@@ -1288,15 +1318,21 @@ pub(crate) trait ExtensionHandler {
 
 /// Features available for each language
 pub(crate) struct Features {
+    #[cfg(feature = "lang_js")]
     js: JsFileHandler,
     json: JsonFileHandler,
+    #[cfg(feature = "lang_css")]
     css: CssFileHandler,
+    #[cfg(feature = "lang_js")]
     astro: AstroFileHandler,
+    #[cfg(all(feature = "lang_js", feature = "lang_html"))]
     vue: VueFileHandler,
+    #[cfg(all(feature = "lang_js", feature = "lang_html"))]
     svelte: SvelteFileHandler,
     unknown: UnknownFileHandler,
     #[cfg(feature = "lang_graphql")]
     graphql: GraphqlFileHandler,
+    #[cfg(feature = "lang_html")]
     html: HtmlFileHandler,
     #[cfg(feature = "lang_grit")]
     grit: grit::GritFileHandler,
@@ -1310,14 +1346,20 @@ pub(crate) struct Features {
 impl Features {
     pub(crate) fn new() -> Self {
         Self {
+            #[cfg(feature = "lang_js")]
             js: JsFileHandler {},
             json: JsonFileHandler {},
+            #[cfg(feature = "lang_css")]
             css: CssFileHandler {},
+            #[cfg(feature = "lang_js")]
             astro: AstroFileHandler {},
+            #[cfg(all(feature = "lang_js", feature = "lang_html"))]
             svelte: SvelteFileHandler {},
+            #[cfg(all(feature = "lang_js", feature = "lang_html"))]
             vue: VueFileHandler {},
             #[cfg(feature = "lang_graphql")]
             graphql: GraphqlFileHandler {},
+            #[cfg(feature = "lang_html")]
             html: HtmlFileHandler {},
             #[cfg(feature = "lang_grit")]
             grit: grit::GritFileHandler {},
@@ -1331,28 +1373,54 @@ impl Features {
     }
 
     /// Returns the [Capabilities] associated with a document source.
-    pub(crate) fn get_capabilities(&self, language_hint: DocumentFileSource) -> Capabilities {
+    ///
+    /// ## Warning
+    ///
+    /// This method is deprecated and shouldn't be used unless you're working on a feature for the deprecated
+    /// partial support of vue/svelte/astro
+    // TODO: remove match once we remove vue/astro/svelte handlers
+    pub(crate) fn get_deprecated_capabilities(
+        &self,
+        language_hint: DocumentFileSource,
+    ) -> Capabilities {
         match language_hint {
-            // TODO: remove match once we remove vue/astro/svelte handlers
+            #[cfg(feature = "lang_js")]
             DocumentFileSource::Js(source) => match source.as_embedding_kind() {
-                EmbeddingKind::Astro { .. } => self.astro.capabilities(),
-                EmbeddingKind::Vue { .. } => self.vue.capabilities(),
+                // Only whole-file frontmatter documents use the fence-slicing Astro handler.
+                JsEmbeddingKind::Astro {
+                    frontmatter: true, ..
+                } => self.astro.capabilities(),
+                JsEmbeddingKind::Astro {
+                    frontmatter: false, ..
+                } => self.js.capabilities(),
+                #[cfg(feature = "lang_html")]
+                JsEmbeddingKind::Vue { .. } => self.vue.capabilities(),
+                #[cfg(not(feature = "lang_html"))]
+                JsEmbeddingKind::Vue { .. } => self.js.capabilities(),
                 // `.svelte.ts` / `.svelte.js` are full JS/TS modules with Svelte
                 // semantics; `.svelte` component documents still use the Svelte handler.
-                EmbeddingKind::Svelte {
-                    kind: SvelteFileKind::SourceModule,
+                JsEmbeddingKind::Svelte {
+                    file_kind: SvelteFileKind::SourceModule,
                     ..
                 } => self.js.capabilities(),
-                EmbeddingKind::Svelte {
-                    kind: SvelteFileKind::Component,
+                #[cfg(feature = "lang_html")]
+                JsEmbeddingKind::Svelte {
+                    file_kind: SvelteFileKind::Component,
                     ..
                 } => self.svelte.capabilities(),
-                EmbeddingKind::None => self.js.capabilities(),
+                #[cfg(not(feature = "lang_html"))]
+                JsEmbeddingKind::Svelte {
+                    file_kind: SvelteFileKind::Component,
+                    ..
+                } => self.js.capabilities(),
+                JsEmbeddingKind::None => self.js.capabilities(),
             },
             DocumentFileSource::Json(_) => self.json.capabilities(),
+            #[cfg(feature = "lang_css")]
             DocumentFileSource::Css(_) => self.css.capabilities(),
             #[cfg(feature = "lang_graphql")]
             DocumentFileSource::Graphql(_) => self.graphql.capabilities(),
+            #[cfg(feature = "lang_html")]
             DocumentFileSource::Html(_) => self.html.capabilities(),
             #[cfg(feature = "lang_grit")]
             DocumentFileSource::Grit(_) => self.grit.capabilities(),
@@ -1362,6 +1430,47 @@ impl Features {
             DocumentFileSource::Yaml(_) => self.yaml.capabilities(),
             DocumentFileSource::Ignore => self.ignore.capabilities(),
             DocumentFileSource::Unknown => self.unknown.capabilities(),
+            #[expect(
+                clippy::allow_attributes,
+                reason = "`unreachable_patterns` is feature-dependent here; `expect(unreachable_patterns)` is unfulfilled in reduced language builds."
+            )]
+            #[allow(
+                unreachable_patterns,
+                reason = "The fallback is reachable when dependency feature unification exposes source variants without enabling their handlers."
+            )]
+            _ => self.unknown.capabilities(),
+        }
+    }
+
+    /// Returns the [Capabilities] associated with a document source.
+    pub(crate) fn get_real_capabilities(&self, language_hint: DocumentFileSource) -> Capabilities {
+        match language_hint {
+            #[cfg(feature = "lang_js")]
+            DocumentFileSource::Js(_) => self.js.capabilities(),
+            DocumentFileSource::Json(_) => self.json.capabilities(),
+            #[cfg(feature = "lang_css")]
+            DocumentFileSource::Css(_) => self.css.capabilities(),
+            #[cfg(feature = "lang_graphql")]
+            DocumentFileSource::Graphql(_) => self.graphql.capabilities(),
+            #[cfg(feature = "lang_html")]
+            DocumentFileSource::Html(_) => self.html.capabilities(),
+            #[cfg(feature = "lang_grit")]
+            DocumentFileSource::Grit(_) => self.grit.capabilities(),
+            #[cfg(feature = "lang_md")]
+            DocumentFileSource::Markdown(_) => self.markdown.capabilities(),
+            #[cfg(feature = "lang_yaml")]
+            DocumentFileSource::Yaml(_) => self.yaml.capabilities(),
+            DocumentFileSource::Ignore => self.ignore.capabilities(),
+            DocumentFileSource::Unknown => self.unknown.capabilities(),
+            #[expect(
+                clippy::allow_attributes,
+                reason = "`unreachable_patterns` is feature-dependent here; `expect(unreachable_patterns)` is unfulfilled in reduced language builds."
+            )]
+            #[allow(
+                unreachable_patterns,
+                reason = "The fallback is reachable when dependency feature unification exposes source variants without enabling their handlers."
+            )]
+            _ => self.unknown.capabilities(),
         }
     }
 }
@@ -1392,12 +1501,16 @@ pub(crate) fn is_diagnostic_error(
 }
 
 #[derive(Default)]
+#[cfg(feature = "lang_js")]
 pub struct ParsedLangAndSetup {
     language: Language,
     variant: LanguageVariant,
     setup: bool,
+    /// Whether the Svelte `<script>` has the `module` attribute, or the legacy `context="module"`.
+    module: bool,
 }
 
+#[cfg(feature = "lang_js")]
 fn get_module_item_attributes(item: AnyJsModuleItem) -> Option<JsxAttributeList> {
     let expression = item
         .as_any_js_statement()?
@@ -1409,18 +1522,20 @@ fn get_module_item_attributes(item: AnyJsModuleItem) -> Option<JsxAttributeList>
     Some(opening_element.attributes())
 }
 
+#[cfg(feature = "lang_js")]
 fn get_attribute_value(attribute: &JsxAttribute) -> Option<TokenText> {
     let attribute_value = attribute.initializer()?.value().ok()?;
     let attribute_inner_string = attribute_value.as_jsx_string()?.inner_string_text().ok()?;
     Some(attribute_inner_string)
 }
 
-/// Parse the "lang" and "setup" attributes from the opening tag of the "\<script\>" block in Svelte or Vue files.
+/// Parse the "lang", "setup", and "module" attributes from the opening tag of the "\<script\>" block in Svelte or Vue files.
 /// This function will return the language based on the existence or the value of the "lang" attribute.
 /// We use the JSX parser at the moment to parse the opening tag. So the opening tag should be first
 /// matched by regular expressions.
 ///
 // TODO: We should change the parser when HTMLish languages are supported.
+#[cfg(feature = "lang_js")]
 pub(crate) fn parse_lang_and_setup_from_script_opening_tag(
     script_opening_tag: &str,
 ) -> ParsedLangAndSetup {
@@ -1444,6 +1559,14 @@ pub(crate) fn parse_lang_and_setup_from_script_opening_tag(
         };
         if attributes.find_by_name("setup").is_some() {
             lang_and_setup.setup = true;
+        }
+        if attributes.find_by_name("module").is_some()
+            || attributes
+                .find_by_name("context")
+                .and_then(|attribute| get_attribute_value(&attribute))
+                .is_some_and(|value| value.text() == "module")
+        {
+            lang_and_setup.module = true;
         }
         if let Some(lang_attribute) = attributes.find_by_name("lang")
             && let Some(lang_value) = get_attribute_value(&lang_attribute)
@@ -1485,6 +1608,7 @@ struct SyntaxVisitor<'a> {
     pub(crate) enabled_rules: Vec<RuleFilter<'a>>,
 }
 
+#[cfg(feature = "lang_js")]
 impl RegistryVisitor<JsLanguage> for SyntaxVisitor<'_> {
     fn record_category<C: GroupCategory<Language = JsLanguage>>(&mut self) {
         if C::CATEGORY == RuleCategory::Syntax {
@@ -1522,6 +1646,7 @@ impl RegistryVisitor<JsonLanguage> for SyntaxVisitor<'_> {
     }
 }
 
+#[cfg(feature = "lang_css")]
 impl RegistryVisitor<CssLanguage> for SyntaxVisitor<'_> {
     fn record_category<C: GroupCategory<Language = CssLanguage>>(&mut self) {
         if C::CATEGORY == RuleCategory::Syntax {
@@ -1561,6 +1686,7 @@ impl RegistryVisitor<GraphqlLanguage> for SyntaxVisitor<'_> {
     }
 }
 
+#[cfg(feature = "lang_html")]
 impl RegistryVisitor<HtmlLanguage> for SyntaxVisitor<'_> {
     fn record_category<C: GroupCategory<Language = HtmlLanguage>>(&mut self) {
         if C::CATEGORY == RuleCategory::Syntax {
@@ -1589,150 +1715,85 @@ struct LintVisitor<'a, 'b> {
     /// Set of rules that have a code fix, regardless of whether they are enabled.
     /// Used after `finish()` to derive the fixable subset of `enabled_rules`.
     pub(crate) rules_with_fix: FxHashSet<RuleFilter<'a>>,
-    // lint_params: &'b LintParams<'a>,
-    only: Option<&'b [AnalyzerSelector]>,
-    skip: Option<&'b [AnalyzerSelector]>,
-    settings: &'b Settings,
-    path: Option<&'b Utf8Path>,
-    package_json: Option<PackageJson>,
-    analyzer_options: &'b mut AnalyzerOptions,
+    rules: Option<&'b Rules>,
+    domains: Option<&'b RuleDomains>,
+    explicitly_enabled_rules: &'b FxHashSet<RuleFilter<'static>>,
+    globals: &'b mut Vec<Box<str>>,
 }
 
 impl<'a, 'b> LintVisitor<'a, 'b> {
     pub(crate) fn new(
-        only: Option<&'b [AnalyzerSelector]>,
-        skip: Option<&'b [AnalyzerSelector]>,
-        settings: &'b Settings,
-        path: Option<&'b Utf8Path>,
-        package_json: Option<PackageJson>,
-        analyzer_options: &'b mut AnalyzerOptions,
+        rules: Option<&'b Rules>,
+        domains: Option<&'b RuleDomains>,
+        explicitly_enabled_rules: &'b FxHashSet<RuleFilter<'static>>,
+        globals: &'b mut Vec<Box<str>>,
     ) -> Self {
         Self {
             enabled_rules: Default::default(),
             disabled_rules: Default::default(),
             rules_with_fix: Default::default(),
-            only,
-            skip,
-            settings,
-            path,
-            package_json,
-            analyzer_options,
+            rules,
+            domains,
+            explicitly_enabled_rules,
+            globals,
         }
     }
 
-    /// It loops over the domains of the current rule, and check each domain specify
-    /// a dependency.
-    fn record_rule_from_manifest<R, L>(&mut self, rule_filter: RuleFilter<'static>)
-    where
-        L: biome_rowan::Language,
-        R: Rule<Query: Queryable<Language = L, Output: Clone>> + 'static,
-    {
-        let group = <R::Group as RuleGroup>::NAME;
-        // Nursery rules must be enabled only when they are enabled from the group
-        if group == "nursery" {
-            return;
-        }
-
-        let path = self.path.expect("File path");
-
-        let is_recommended = R::METADATA.recommended;
-        let recommended_enabled = self.settings.linter_recommended_enabled();
-        if !is_recommended || !recommended_enabled {
-            return;
-        }
-
-        let no_only = self.only.is_some_and(|only| only.is_empty());
-        if !no_only {
-            return;
-        }
-
-        let domains = self.settings.as_linter_domains(path);
-        if let Some(manifest) = &self.package_json {
-            for domain in R::METADATA.domains {
-                if domains
-                    .as_ref()
-                    .is_some_and(|domains| domains.contains_key(domain))
-                {
-                    continue;
-                }
-
-                let matches_a_dependency = domain
-                    .manifest_dependencies()
-                    .iter()
-                    .any(|(dependency, range)| manifest.matches_dependency(dependency, range));
-
-                if matches_a_dependency {
-                    self.enabled_rules.insert(rule_filter);
-                    self.analyzer_options
-                        .push_globals(domain.globals().iter().copied().map(Into::into));
-                }
-            }
-        }
-    }
-
-    /// It inspects the [RuleDomain] of the configuration, and if the current rule belongs to at least a configured domain, it's enabled.
+    /// Applies configured domains to the rule.
     ///
-    /// As per business logic, rules that have domains can be recommended, however they shouldn't be enabled when `linter.rules.recommended` is `true`.
-    ///
-    /// This means that
+    /// Global recommended presets exclude rules with domains. A matching domain
+    /// set to `all` enables the rule, `recommended` enables it only when the rule
+    /// is recommended, and `none` disables it unless another matching domain
+    /// enables it.
     fn record_rule_from_domains<R, L>(&mut self, rule_filter: RuleFilter<'static>)
     where
         L: biome_rowan::Language,
         R: Rule<Query: Queryable<Language = L, Output: Clone>> + 'static,
     {
-        let no_only = self.only.is_some_and(|only| only.is_empty());
         let group = <R::Group as RuleGroup>::NAME;
         // Nursery rules must be enabled only when they are enabled from the group
         if group == "nursery" {
             return;
         }
-        if !no_only {
-            return;
-        }
-
-        let domains = self
-            .settings
-            .as_linter_domains(self.path.expect("File path"));
-
         // no domains, no need to record the rule
-        if domains.as_ref().is_none_or(|d| d.is_empty()) {
+        if self.domains.is_none_or(|domains| domains.is_empty()) {
             return;
         }
 
-        // If the rule is recommended, and it has some domains, it should be disabled, but only if the configuration doesn't enable some domains.
-        if R::METADATA.recommended
-            && !R::METADATA.domains.is_empty()
-            && domains.as_ref().is_none_or(|d| d.is_empty())
-        {
-            self.disabled_rules.insert(rule_filter);
-            return;
-        }
-
+        let mut enabled = false;
+        let mut disabled = false;
         for rule_domain in R::METADATA.domains {
-            if let Some((configured_domain, configured_domain_value)) = domains
-                .as_ref()
+            if let Some((configured_domain, configured_domain_value)) = self
+                .domains
                 .and_then(|domains| domains.get_key_value(rule_domain))
             {
                 match configured_domain_value {
                     RuleDomainValue::All => {
-                        self.enabled_rules.insert(rule_filter);
-                        self.analyzer_options.push_globals(
-                            configured_domain.globals().iter().copied().map(Into::into),
-                        );
+                        enabled = true;
+                        self.globals
+                            .extend(configured_domain.globals().iter().copied().map(Into::into));
                     }
                     RuleDomainValue::None => {
-                        self.disabled_rules.insert(rule_filter);
+                        disabled = true;
                     }
                     RuleDomainValue::Recommended => {
                         if R::METADATA.recommended {
-                            self.enabled_rules.insert(rule_filter);
-                            self.analyzer_options.push_globals(
+                            enabled = true;
+                            self.globals.extend(
                                 configured_domain.globals().iter().copied().map(Into::into),
                             );
                         }
                     }
                 }
             }
+        }
+
+        // A rule that belongs to several domains stays enabled as long as at least one
+        // of them enables it, even if another one is set to `none`.
+        if enabled {
+            self.enabled_rules.insert(rule_filter);
+        } else if disabled {
+            self.disabled_rules.insert(rule_filter);
         }
     }
 
@@ -1741,24 +1802,17 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
     ) -> (
         FxHashSet<RuleFilter<'a>>,
         FxHashSet<RuleFilter<'a>>,
-        Vec<RuleFilter<'a>>,
+        FxHashSet<RuleFilter<'a>>,
     ) {
-        let has_only_filter = self.only.is_none_or(|only| !only.is_empty());
-        let rules = self
-            .settings
-            .as_linter_rules(self.path.expect("Path to be set"))
-            .unwrap_or_default();
-        if !has_only_filter {
-            self.enabled_rules.extend(rules.as_enabled_rules());
-            self.disabled_rules.extend(rules.as_disabled_rules());
+        let rules = self.rules.cloned().unwrap_or_default();
+        // A rule enabled explicitly in the configuration stays enabled even if
+        // one of its domains is disabled.
+        for rule_filter in self.explicitly_enabled_rules {
+            self.disabled_rules.remove(rule_filter);
         }
-        let fixable_rules = self
-            .enabled_rules
-            .iter()
-            .filter(|rule| self.rules_with_fix.contains(rule))
-            .copied()
-            .collect();
-        (self.enabled_rules, self.disabled_rules, fixable_rules)
+        self.enabled_rules.extend(rules.as_enabled_rules());
+        self.disabled_rules.extend(rules.as_disabled_rules());
+        (self.enabled_rules, self.disabled_rules, self.rules_with_fix)
     }
 
     fn push_rule<R, L>(&mut self, rule_filter: Option<RuleFilter<'static>>)
@@ -1771,48 +1825,7 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
             return;
         };
 
-        // first we want to register rules via "magic default"
-        self.record_rule_from_manifest::<R, L>(rule_filter);
-        // then we want to register rules
         self.record_rule_from_domains::<R, L>(rule_filter);
-
-        // Do not report unused suppression comment diagnostics if:
-        // - it is a syntax-only analyzer pass, or
-        // - if a single rule is run.
-        if let Some(only) = self.only {
-            for selector in only {
-                match selector {
-                    AnalyzerSelector::Rule(selector) => {
-                        let filter = RuleFilter::from(selector);
-                        if filter.match_rule::<R>() && filter.match_group::<R::Group>() {
-                            self.enabled_rules.insert(filter);
-                        }
-                    }
-                    AnalyzerSelector::Domain(selector) => {
-                        if selector.match_rule::<R>() {
-                            self.enabled_rules.extend(selector.as_rule_filters());
-                        }
-                    }
-                }
-            }
-        }
-        if let Some(skip) = self.skip {
-            for selector in skip {
-                match selector {
-                    AnalyzerSelector::Rule(selector) => {
-                        let filter = RuleFilter::from(selector);
-                        if filter.match_rule::<R>() && filter.match_group::<R::Group>() {
-                            self.disabled_rules.insert(filter);
-                        }
-                    }
-                    AnalyzerSelector::Domain(selector) => {
-                        if selector.match_rule::<R>() {
-                            self.disabled_rules.extend(selector.as_rule_filters());
-                        }
-                    }
-                }
-            }
-        }
 
         if R::METADATA.fix_kind != FixKind::None {
             self.rules_with_fix.insert(rule_filter);
@@ -1820,6 +1833,7 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
     }
 }
 
+#[cfg(feature = "lang_js")]
 impl RegistryVisitor<JsLanguage> for LintVisitor<'_, '_> {
     fn record_category<C: GroupCategory<Language = JsLanguage>>(&mut self) {
         if C::CATEGORY == RuleCategory::Lint {
@@ -1866,6 +1880,7 @@ impl RegistryVisitor<JsonLanguage> for LintVisitor<'_, '_> {
     }
 }
 
+#[cfg(feature = "lang_css")]
 impl RegistryVisitor<CssLanguage> for LintVisitor<'_, '_> {
     fn record_category<C: GroupCategory<Language = CssLanguage>>(&mut self) {
         if C::CATEGORY == RuleCategory::Lint {
@@ -1915,6 +1930,7 @@ impl RegistryVisitor<GraphqlLanguage> for LintVisitor<'_, '_> {
     }
 }
 
+#[cfg(feature = "lang_html")]
 impl RegistryVisitor<HtmlLanguage> for LintVisitor<'_, '_> {
     fn record_category<C: GroupCategory<Language = HtmlLanguage>>(&mut self) {
         if C::CATEGORY == RuleCategory::Lint {
@@ -1939,33 +1955,295 @@ impl RegistryVisitor<HtmlLanguage> for LintVisitor<'_, '_> {
     }
 }
 
+#[derive(Clone, Debug, Default, PartialEq)]
+struct ManifestVisitorResult {
+    enabled_rules: Vec<RuleFilter<'static>>,
+    fixable_rules: Vec<RuleFilter<'static>>,
+    globals: Vec<Box<str>>,
+}
+
+/// A package manifest whose identity includes only dependency matching data.
+#[derive(Clone, Debug)]
+struct ManifestDependencies(PackageJson);
+
+impl ManifestDependencies {
+    fn matches_dependency(&self, specifier: &str, range: &str) -> bool {
+        self.0.matches_dependency(specifier, range)
+    }
+}
+
+impl PartialEq for ManifestDependencies {
+    fn eq(&self, other: &Self) -> bool {
+        dependencies_equal(&self.0.dependencies, &other.0.dependencies)
+            && dependencies_equal(&self.0.dev_dependencies, &other.0.dev_dependencies)
+            && dependencies_equal(&self.0.peer_dependencies, &other.0.peer_dependencies)
+            && catalogs_equal(self.0.catalog.as_ref(), other.0.catalog.as_ref())
+    }
+}
+
+impl Eq for ManifestDependencies {}
+
+impl Hash for ManifestDependencies {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.0.dependencies.0.hash(state);
+        self.0.dev_dependencies.0.hash(state);
+        self.0.peer_dependencies.0.hash(state);
+
+        let Some(catalog) = &self.0.catalog else {
+            false.hash(state);
+            return;
+        };
+        true.hash(state);
+        catalog.default.as_ref().map(|items| &items.0).hash(state);
+
+        let mut named = catalog.named.iter().collect::<Vec<_>>();
+        named.sort_unstable_by_key(|(name, _)| *name);
+        for (name, dependencies) in named {
+            name.hash(state);
+            dependencies.0.hash(state);
+        }
+    }
+}
+
+fn dependencies_equal(left: &Dependencies, right: &Dependencies) -> bool {
+    left.0 == right.0
+}
+
+fn catalogs_equal(
+    left: Option<&biome_package::Catalogs>,
+    right: Option<&biome_package::Catalogs>,
+) -> bool {
+    match (left, right) {
+        (None, None) => true,
+        (Some(left), Some(right)) => {
+            match (&left.default, &right.default) {
+                (None, None) => {}
+                (Some(left), Some(right)) if dependencies_equal(left, right) => {}
+                _ => return false,
+            }
+            left.named.len() == right.named.len()
+                && left.named.iter().all(|(name, dependencies)| {
+                    right
+                        .named
+                        .get(name.as_ref())
+                        .is_some_and(|other| dependencies_equal(dependencies, other))
+                })
+        }
+        _ => false,
+    }
+}
+
+struct ManifestVisitor<'a> {
+    domains: Option<&'a RuleDomains>,
+    manifest: &'a ManifestDependencies,
+    recommended_enabled: bool,
+    enabled_rules: FxHashSet<RuleFilter<'static>>,
+    fixable_rules: FxHashSet<RuleFilter<'static>>,
+    globals: Vec<Box<str>>,
+}
+
+impl<'a> ManifestVisitor<'a> {
+    fn new(
+        domains: Option<&'a RuleDomains>,
+        manifest: &'a ManifestDependencies,
+        recommended_enabled: bool,
+    ) -> Self {
+        Self {
+            domains,
+            manifest,
+            recommended_enabled,
+            enabled_rules: FxHashSet::default(),
+            fixable_rules: FxHashSet::default(),
+            globals: Vec::new(),
+        }
+    }
+
+    fn push_rule<R, L>(&mut self, rule_filter: Option<RuleFilter<'static>>)
+    where
+        R: Rule<Options: Default, Query: Queryable<Language = L, Output: Clone>> + 'static,
+        L: biome_rowan::Language,
+    {
+        let Some(rule_filter) = rule_filter.filter(|rule_filter| rule_filter.match_rule::<R>())
+        else {
+            return;
+        };
+        if <R::Group as RuleGroup>::NAME == "nursery"
+            || !R::METADATA.recommended
+            || !self.recommended_enabled
+        {
+            return;
+        }
+
+        for domain in R::METADATA.domains {
+            if self
+                .domains
+                .is_some_and(|domains| domains.contains_key(domain))
+            {
+                continue;
+            }
+            if domain
+                .manifest_dependencies()
+                .iter()
+                .any(|(dependency, range)| self.manifest.matches_dependency(dependency, range))
+            {
+                self.enabled_rules.insert(rule_filter);
+                if R::METADATA.fix_kind != FixKind::None {
+                    self.fixable_rules.insert(rule_filter);
+                }
+                self.globals
+                    .extend(domain.globals().iter().copied().map(Into::into));
+            }
+        }
+    }
+
+    fn finish(self) -> ManifestVisitorResult {
+        ManifestVisitorResult {
+            enabled_rules: self.enabled_rules.into_iter().collect(),
+            fixable_rules: self.fixable_rules.into_iter().collect(),
+            globals: self.globals,
+        }
+    }
+}
+
+#[cfg(feature = "lang_js")]
+impl RegistryVisitor<JsLanguage> for ManifestVisitor<'_> {
+    fn record_category<C: GroupCategory<Language = JsLanguage>>(&mut self) {
+        if C::CATEGORY == RuleCategory::Lint {
+            C::record_groups(self)
+        }
+    }
+
+    fn record_group<G: RuleGroup<Language = JsLanguage>>(&mut self) {
+        G::record_rules(self)
+    }
+
+    fn record_rule<R>(&mut self)
+    where
+        R: Rule<Options: Default, Query: Queryable<Language = JsLanguage, Output: Clone>> + 'static,
+    {
+        self.push_rule::<R, <R::Query as Queryable>::Language>(
+            js_metadata
+                .find_rule(R::Group::NAME, R::METADATA.name)
+                .map(RuleFilter::from),
+        )
+    }
+}
+
+impl RegistryVisitor<JsonLanguage> for ManifestVisitor<'_> {
+    fn record_category<C: GroupCategory<Language = JsonLanguage>>(&mut self) {
+        if C::CATEGORY == RuleCategory::Lint {
+            C::record_groups(self)
+        }
+    }
+
+    fn record_group<G: RuleGroup<Language = JsonLanguage>>(&mut self) {
+        G::record_rules(self)
+    }
+
+    fn record_rule<R>(&mut self)
+    where
+        R: Rule<Options: Default, Query: Queryable<Language = JsonLanguage, Output: Clone>>
+            + 'static,
+    {
+        self.push_rule::<R, <R::Query as Queryable>::Language>(
+            json_metadata
+                .find_rule(R::Group::NAME, R::METADATA.name)
+                .map(RuleFilter::from),
+        )
+    }
+}
+
+#[cfg(feature = "lang_css")]
+impl RegistryVisitor<CssLanguage> for ManifestVisitor<'_> {
+    fn record_category<C: GroupCategory<Language = CssLanguage>>(&mut self) {
+        if C::CATEGORY == RuleCategory::Lint {
+            C::record_groups(self)
+        }
+    }
+
+    fn record_group<G: RuleGroup<Language = CssLanguage>>(&mut self) {
+        G::record_rules(self)
+    }
+
+    fn record_rule<R>(&mut self)
+    where
+        R: Rule<Options: Default, Query: Queryable<Language = CssLanguage, Output: Clone>>
+            + 'static,
+    {
+        self.push_rule::<R, <R::Query as Queryable>::Language>(
+            css_metadata
+                .find_rule(R::Group::NAME, R::METADATA.name)
+                .map(RuleFilter::from),
+        )
+    }
+}
+
+#[cfg(feature = "lang_graphql")]
+impl RegistryVisitor<GraphqlLanguage> for ManifestVisitor<'_> {
+    fn record_category<C: GroupCategory<Language = GraphqlLanguage>>(&mut self) {
+        if C::CATEGORY == RuleCategory::Lint {
+            C::record_groups(self)
+        }
+    }
+
+    fn record_group<G: RuleGroup<Language = GraphqlLanguage>>(&mut self) {
+        G::record_rules(self)
+    }
+
+    fn record_rule<R>(&mut self)
+    where
+        R: Rule<Options: Default, Query: Queryable<Language = GraphqlLanguage, Output: Clone>>
+            + 'static,
+    {
+        self.push_rule::<R, <R::Query as Queryable>::Language>(
+            graphql_metadata
+                .find_rule(R::Group::NAME, R::METADATA.name)
+                .map(RuleFilter::from),
+        )
+    }
+}
+
+#[cfg(feature = "lang_html")]
+impl RegistryVisitor<HtmlLanguage> for ManifestVisitor<'_> {
+    fn record_category<C: GroupCategory<Language = HtmlLanguage>>(&mut self) {
+        if C::CATEGORY == RuleCategory::Lint {
+            C::record_groups(self)
+        }
+    }
+
+    fn record_group<G: RuleGroup<Language = HtmlLanguage>>(&mut self) {
+        G::record_rules(self)
+    }
+
+    fn record_rule<R>(&mut self)
+    where
+        R: Rule<Options: Default, Query: Queryable<Language = HtmlLanguage, Output: Clone>>
+            + 'static,
+    {
+        self.push_rule::<R, <R::Query as Queryable>::Language>(
+            biome_html_analyze::METADATA
+                .find_rule(R::Group::NAME, R::METADATA.name)
+                .map(RuleFilter::from),
+        )
+    }
+}
+
 struct AssistsVisitor<'a, 'b> {
-    settings: &'b Settings,
     enabled_rules: Vec<RuleFilter<'a>>,
     disabled_rules: Vec<RuleFilter<'a>>,
     /// Set of rules that have a code fix, regardless of whether they are enabled.
     /// Used after `finish()` to derive the fixable subset of `enabled_rules`.
     rules_with_fix: FxHashSet<RuleFilter<'a>>,
-    only: Option<&'b [AnalyzerSelector]>,
-    skip: Option<&'b [AnalyzerSelector]>,
-    path: Option<&'b Utf8Path>,
+    actions: Option<&'b Actions>,
 }
 
 impl<'a, 'b> AssistsVisitor<'a, 'b> {
-    pub(crate) fn new(
-        only: Option<&'b [AnalyzerSelector]>,
-        skip: Option<&'b [AnalyzerSelector]>,
-        settings: &'b Settings,
-        path: Option<&'b Utf8Path>,
-    ) -> Self {
+    pub(crate) fn new(actions: Option<&'b Actions>) -> Self {
         Self {
             enabled_rules: vec![],
             disabled_rules: vec![],
             rules_with_fix: Default::default(),
-            settings,
-            path,
-            only,
-            skip,
+            actions,
         }
     }
 
@@ -1976,45 +2254,6 @@ impl<'a, 'b> AssistsVisitor<'a, 'b> {
         // We deem refactors **safe**, other assists aren't safe
         if R::Group::NAME != "source" {
             return;
-        }
-
-        // Do not report unused suppression comment diagnostics if:
-        // - it is a syntax-only analyzer pass, or
-        // - if a single rule is run.
-        if let Some(only) = self.only {
-            for selector in only {
-                match selector {
-                    AnalyzerSelector::Rule(rule) => {
-                        let filter = RuleFilter::from(rule);
-                        if filter.match_rule::<R>() {
-                            self.enabled_rules.push(filter)
-                        }
-                    }
-                    AnalyzerSelector::Domain(domain) => {
-                        if domain.match_rule::<R>() {
-                            self.enabled_rules.extend(domain.as_rule_filters());
-                        }
-                    }
-                }
-            }
-        }
-
-        if let Some(skip) = self.skip {
-            for selector in skip {
-                match selector {
-                    AnalyzerSelector::Rule(rule) => {
-                        let filter = RuleFilter::from(rule);
-                        if filter.match_rule::<R>() {
-                            self.disabled_rules.push(filter)
-                        }
-                    }
-                    AnalyzerSelector::Domain(domain) => {
-                        if domain.match_rule::<R>() {
-                            self.disabled_rules.extend(domain.as_rule_filters());
-                        }
-                    }
-                }
-            }
         }
 
         if R::METADATA.fix_kind != FixKind::None {
@@ -2030,27 +2269,16 @@ impl<'a, 'b> AssistsVisitor<'a, 'b> {
     ) -> (
         Vec<RuleFilter<'a>>,
         Vec<RuleFilter<'a>>,
-        Vec<RuleFilter<'a>>,
+        FxHashSet<RuleFilter<'a>>,
     ) {
-        let has_only_filter = self.only.is_none_or(|only| !only.is_empty());
-        let rules = self
-            .settings
-            .as_assist_actions(self.path.expect("Path to be set"))
-            .unwrap_or_default();
-        if !has_only_filter {
-            self.enabled_rules.extend(rules.as_enabled_rules());
-            self.disabled_rules.extend(rules.as_disabled_rules());
-        }
-        let fixable_rules = self
-            .enabled_rules
-            .iter()
-            .filter(|rule| self.rules_with_fix.contains(rule))
-            .copied()
-            .collect();
-        (self.enabled_rules, self.disabled_rules, fixable_rules)
+        let actions = self.actions.map_or_default(Cow::Borrowed);
+        self.enabled_rules.extend(actions.as_enabled_rules());
+        self.disabled_rules.extend(actions.as_disabled_rules());
+        (self.enabled_rules, self.disabled_rules, self.rules_with_fix)
     }
 }
 
+#[cfg(feature = "lang_js")]
 impl RegistryVisitor<JsLanguage> for AssistsVisitor<'_, '_> {
     fn record_category<C: GroupCategory<Language = JsLanguage>>(&mut self) {
         if C::CATEGORY == RuleCategory::Action {
@@ -2082,6 +2310,7 @@ impl RegistryVisitor<JsonLanguage> for AssistsVisitor<'_, '_> {
     }
 }
 
+#[cfg(feature = "lang_css")]
 impl RegistryVisitor<CssLanguage> for AssistsVisitor<'_, '_> {
     fn record_category<C: GroupCategory<Language = CssLanguage>>(&mut self) {
         if C::CATEGORY == RuleCategory::Action {
@@ -2115,6 +2344,7 @@ impl RegistryVisitor<GraphqlLanguage> for AssistsVisitor<'_, '_> {
     }
 }
 
+#[cfg(feature = "lang_html")]
 impl RegistryVisitor<HtmlLanguage> for AssistsVisitor<'_, '_> {
     fn record_category<C: GroupCategory<Language = HtmlLanguage>>(&mut self) {
         if C::CATEGORY == RuleCategory::Action {
@@ -2131,17 +2361,196 @@ impl RegistryVisitor<HtmlLanguage> for AssistsVisitor<'_, '_> {
     }
 }
 
-/// Result of building the analyzer visitor: the resolved rule filters and options.
-pub(crate) struct AnalyzerVisitorResult<'a> {
-    pub(crate) enabled_rules: Vec<RuleFilter<'a>>,
-    pub(crate) disabled_rules: Vec<RuleFilter<'a>>,
-    pub(crate) analyzer_options: AnalyzerOptions,
-    /// Subset of `enabled_rules` that have a code fix (`FixKind::Safe` or `FixKind::Unsafe`).
-    pub(crate) fixable_rules: Vec<RuleFilter<'a>>,
+#[derive(Clone, Debug, PartialEq)]
+struct AnalyzerVisitorComputedResult {
+    syntax_rules: Vec<RuleFilter<'static>>,
+    configured_enabled_rules: Vec<RuleFilter<'static>>,
+    configured_disabled_rules: Vec<RuleFilter<'static>>,
+    rules_with_fix: FxHashSet<RuleFilter<'static>>,
+    globals: Vec<Box<str>>,
 }
 
-pub(crate) struct AnalyzerVisitorBuilder<'a> {
-    settings: &'a Settings,
+#[salsa::interned]
+struct AnalyzerInput {
+    settings: SettingsIdentity,
+    override_indices: Box<[usize]>,
+}
+
+#[salsa::interned]
+struct ManifestAnalyzerInput {
+    settings: SettingsIdentity,
+    override_indices: Box<[usize]>,
+    manifest: ManifestDependencies,
+}
+
+#[salsa::tracked]
+fn resolved_analyzer_visitor<'db>(
+    db: &'db dyn salsa::Database,
+    input: AnalyzerInput<'db>,
+) -> AnalyzerVisitorComputedResult {
+    compute_analyzer_visitor(input.settings(db).as_ref(), input.override_indices(db))
+}
+
+#[cfg(test)]
+pub(crate) fn analyzer_input_count_for_test(db: &WorkspaceDb) -> usize {
+    let query_db = db.settings_query_db();
+    AnalyzerInput::ingredient(query_db.zalsa())
+        .entries(query_db.zalsa())
+        .count()
+}
+
+#[salsa::tracked]
+fn resolved_manifest_visitor<'db>(
+    db: &'db dyn salsa::Database,
+    input: ManifestAnalyzerInput<'db>,
+) -> ManifestVisitorResult {
+    compute_manifest_visitor(
+        input.settings(db).as_ref(),
+        input.override_indices(db),
+        input.manifest(db),
+    )
+}
+
+#[cfg(test)]
+pub(crate) fn resolved_manifest_visitor_for_test(
+    db: &WorkspaceDb,
+    settings: SettingsIdentity,
+    override_indices: Box<[usize]>,
+    manifest: PackageJson,
+) {
+    let query_db = db.settings_query_db();
+    let input = ManifestAnalyzerInput::new(
+        &query_db,
+        settings,
+        override_indices,
+        ManifestDependencies(manifest),
+    );
+    resolved_manifest_visitor(&query_db, input);
+}
+
+fn compute_analyzer_visitor(
+    settings: &Settings,
+    override_indices: &[usize],
+) -> AnalyzerVisitorComputedResult {
+    let mut syntax = SyntaxVisitor::default();
+
+    #[cfg(feature = "lang_js")]
+    biome_js_analyze::visit_registry(&mut syntax);
+    #[cfg(feature = "lang_css")]
+    biome_css_analyze::visit_registry(&mut syntax);
+    biome_json_analyze::visit_registry(&mut syntax);
+    #[cfg(feature = "lang_graphql")]
+    biome_graphql_analyze::visit_registry(&mut syntax);
+    #[cfg(feature = "lang_html")]
+    biome_html_analyze::visit_registry(&mut syntax);
+
+    let linter_rules = settings.as_linter_rules_by_indices(override_indices);
+    let linter_domains = settings.as_linter_domains_by_indices(override_indices);
+    let explicitly_enabled_rules =
+        settings.as_linter_explicitly_enabled_rules_by_indices(override_indices);
+    let assist_actions = settings.as_assist_actions_by_indices(override_indices);
+
+    let mut globals = Vec::new();
+    let mut lint = LintVisitor::new(
+        linter_rules.as_deref(),
+        linter_domains.as_deref(),
+        &explicitly_enabled_rules,
+        &mut globals,
+    );
+
+    #[cfg(feature = "lang_js")]
+    biome_js_analyze::visit_registry(&mut lint);
+    #[cfg(feature = "lang_css")]
+    biome_css_analyze::visit_registry(&mut lint);
+    biome_json_analyze::visit_registry(&mut lint);
+    #[cfg(feature = "lang_graphql")]
+    biome_graphql_analyze::visit_registry(&mut lint);
+    #[cfg(feature = "lang_html")]
+    biome_html_analyze::visit_registry(&mut lint);
+    let (linter_enabled_rules, linter_disabled_rules, mut rules_with_fix) = lint.finish();
+
+    let mut assist = AssistsVisitor::new(assist_actions.as_deref());
+
+    #[cfg(feature = "lang_js")]
+    biome_js_analyze::visit_registry(&mut assist);
+    #[cfg(feature = "lang_css")]
+    biome_css_analyze::visit_registry(&mut assist);
+    biome_json_analyze::visit_registry(&mut assist);
+    #[cfg(feature = "lang_graphql")]
+    biome_graphql_analyze::visit_registry(&mut assist);
+    #[cfg(feature = "lang_html")]
+    biome_html_analyze::visit_registry(&mut assist);
+    let (assists_enabled_rules, assists_disabled_rules, assists_rules_with_fix) = assist.finish();
+    rules_with_fix.extend(assists_rules_with_fix);
+
+    AnalyzerVisitorComputedResult {
+        syntax_rules: syntax.enabled_rules,
+        configured_enabled_rules: linter_enabled_rules
+            .into_iter()
+            .chain(assists_enabled_rules)
+            .collect(),
+        configured_disabled_rules: linter_disabled_rules
+            .into_iter()
+            .chain(assists_disabled_rules)
+            .collect(),
+        rules_with_fix,
+        globals,
+    }
+}
+
+fn compute_manifest_visitor(
+    settings: &Settings,
+    override_indices: &[usize],
+    manifest: &ManifestDependencies,
+) -> ManifestVisitorResult {
+    let domains = settings.as_linter_domains_by_indices(override_indices);
+    let mut visitor = ManifestVisitor::new(
+        domains.as_deref(),
+        manifest,
+        settings.linter_recommended_enabled(),
+    );
+
+    #[cfg(feature = "lang_js")]
+    biome_js_analyze::visit_registry(&mut visitor);
+    #[cfg(feature = "lang_css")]
+    biome_css_analyze::visit_registry(&mut visitor);
+    biome_json_analyze::visit_registry(&mut visitor);
+    #[cfg(feature = "lang_graphql")]
+    biome_graphql_analyze::visit_registry(&mut visitor);
+    #[cfg(feature = "lang_html")]
+    biome_html_analyze::visit_registry(&mut visitor);
+
+    visitor.finish()
+}
+
+fn extend_rule_filters(
+    filters: &mut Vec<RuleFilter<'static>>,
+    selectors: Option<&[AnalyzerSelector]>,
+) {
+    let Some(selectors) = selectors else {
+        return;
+    };
+    for selector in selectors {
+        match selector {
+            AnalyzerSelector::Rule(rule) => filters.push(RuleFilter::from(rule)),
+            AnalyzerSelector::Domain(domain) => filters.extend(domain.as_rule_filters()),
+            AnalyzerSelector::Plugin => {}
+        }
+    }
+}
+
+/// Result of building the analyzer visitor: the resolved rule filters and options.
+pub(crate) struct AnalyzerVisitorResult {
+    pub(crate) enabled_rules: Vec<RuleFilter<'static>>,
+    pub(crate) disabled_rules: Vec<RuleFilter<'static>>,
+    pub(crate) analyzer_options: AnalyzerOptions,
+    /// Subset of `enabled_rules` that have a code fix (`FixKind::Safe` or `FixKind::Unsafe`).
+    pub(crate) fixable_rules: Vec<RuleFilter<'static>>,
+}
+
+pub(crate) struct AnalyzerVisitorBuilder<'a, 'settings> {
+    settings: &'a SettingsWithEditor<'settings>,
+    db: &'a WorkspaceDb,
     only: Option<&'a [AnalyzerSelector]>,
     skip: Option<&'a [AnalyzerSelector]>,
     path: Option<&'a Utf8Path>,
@@ -2150,10 +2559,15 @@ pub(crate) struct AnalyzerVisitorBuilder<'a> {
     analyzer_options: AnalyzerOptions,
 }
 
-impl<'b> AnalyzerVisitorBuilder<'b> {
-    pub(crate) fn new(settings: &'b Settings, analyzer_options: AnalyzerOptions) -> Self {
+impl<'a, 'settings> AnalyzerVisitorBuilder<'a, 'settings> {
+    pub(crate) fn new(
+        settings: &'a SettingsWithEditor<'settings>,
+        db: &'a WorkspaceDb,
+        analyzer_options: AnalyzerOptions,
+    ) -> Self {
         Self {
             settings,
+            db,
             only: None,
             skip: None,
             path: None,
@@ -2164,25 +2578,25 @@ impl<'b> AnalyzerVisitorBuilder<'b> {
     }
 
     #[must_use]
-    pub(crate) fn with_only(mut self, only: &'b [AnalyzerSelector]) -> Self {
+    pub(crate) fn with_only(mut self, only: &'a [AnalyzerSelector]) -> Self {
         self.only = Some(only);
         self
     }
 
     #[must_use]
-    pub(crate) fn with_skip(mut self, skip: &'b [AnalyzerSelector]) -> Self {
+    pub(crate) fn with_skip(mut self, skip: &'a [AnalyzerSelector]) -> Self {
         self.skip = Some(skip);
         self
     }
 
     #[must_use]
-    pub(crate) fn with_path(mut self, path: &'b Utf8Path) -> Self {
+    pub(crate) fn with_path(mut self, path: &'a Utf8Path) -> Self {
         self.path = Some(path);
         self
     }
 
     #[must_use]
-    pub(crate) fn with_enabled_selectors(mut self, enabled_rules: &'b [AnalyzerSelector]) -> Self {
+    pub(crate) fn with_enabled_selectors(mut self, enabled_rules: &'a [AnalyzerSelector]) -> Self {
         self.enabled_selectors = Some(enabled_rules);
         self
     }
@@ -2194,43 +2608,98 @@ impl<'b> AnalyzerVisitorBuilder<'b> {
     }
 
     #[must_use]
-    pub(crate) fn finish(self) -> AnalyzerVisitorResult<'b> {
-        let mut analyzer_options = self.analyzer_options;
-        let mut disabled_rules = vec![];
-        let mut enabled_rules = vec![];
+    pub(crate) fn finish(self) -> AnalyzerVisitorResult {
+        let query = self.settings.query();
+        let (selected_settings, query_db, computed) =
+            if let Some(inline_settings) = query.inline_settings() {
+                let selected_settings = inline_settings.clone();
+                let computed =
+                    compute_analyzer_visitor(selected_settings.as_ref(), query.override_indices());
+                (selected_settings, None, computed)
+            } else {
+                let selected_settings = query
+                    .selection()
+                    .selected_settings(self.db, query.project());
+                let query_db = self.db.settings_query_db();
+                let input = AnalyzerInput::new(
+                    &query_db,
+                    selected_settings.clone(),
+                    query.override_indices(),
+                );
+                let computed = resolved_analyzer_visitor(&query_db, input).clone();
+                (selected_settings, Some(query_db), computed)
+            };
 
-        if let Some(enabled_selectors) = self.enabled_selectors {
-            for selector in enabled_selectors {
-                match selector {
-                    AnalyzerSelector::Rule(rule) => {
-                        enabled_rules.push(RuleFilter::from(rule));
-                    }
-                    AnalyzerSelector::Domain(domain) => {
-                        enabled_rules.extend(domain.as_rule_filters())
-                    }
-                }
-            }
+        let AnalyzerVisitorComputedResult {
+            syntax_rules,
+            configured_enabled_rules,
+            configured_disabled_rules,
+            rules_with_fix,
+            globals: configured_globals,
+        } = computed;
+
+        let mut enabled_rules = Vec::new();
+        extend_rule_filters(&mut enabled_rules, self.enabled_selectors);
+        enabled_rules.extend(syntax_rules);
+        extend_rule_filters(&mut enabled_rules, self.only);
+
+        let mut disabled_rules = Vec::new();
+        extend_rule_filters(&mut disabled_rules, self.skip);
+
+        let use_configured_rules = self.only.is_some_and(|only| only.is_empty());
+        let mut globals = Vec::new();
+        if use_configured_rules {
+            enabled_rules.extend(configured_enabled_rules);
+            disabled_rules.extend(configured_disabled_rules);
+            globals = configured_globals;
         }
-        let mut syntax = SyntaxVisitor::default();
 
-        biome_js_analyze::visit_registry(&mut syntax);
-        biome_css_analyze::visit_registry(&mut syntax);
-        biome_json_analyze::visit_registry(&mut syntax);
-        #[cfg(feature = "lang_graphql")]
-        biome_graphql_analyze::visit_registry(&mut syntax);
-        biome_html_analyze::visit_registry(&mut syntax);
-        enabled_rules.extend(syntax.enabled_rules);
+        let only_excludes_plugins = self
+            .only
+            .is_some_and(|only| !only.is_empty() && !only.contains(&AnalyzerSelector::Plugin));
+        let plugins_skipped = self
+            .skip
+            .is_some_and(|skip| skip.contains(&AnalyzerSelector::Plugin));
+        if only_excludes_plugins || plugins_skipped {
+            disabled_rules.push(RuleFilter::Group(PLUGIN_GROUP));
+        }
 
-        let package_json = self
-            .path
-            .and_then(|path| self.project_layout.find_node_manifest_for_path(path))
-            .map(|(_, manifest)| manifest);
+        if use_configured_rules
+            && let Some((_, manifest)) = self
+                .path
+                .and_then(|path| self.project_layout.find_node_manifest_for_path(path))
+        {
+            let manifest = ManifestDependencies(manifest);
+            let manifest_result = if let Some(query_db) = &query_db {
+                let input = ManifestAnalyzerInput::new(
+                    query_db,
+                    selected_settings.clone(),
+                    query.override_indices(),
+                    manifest,
+                );
+                resolved_manifest_visitor(query_db, input).clone()
+            } else {
+                compute_manifest_visitor(
+                    selected_settings.as_ref(),
+                    query.override_indices(),
+                    &manifest,
+                )
+            };
+            enabled_rules.extend(manifest_result.enabled_rules);
+            globals.extend(manifest_result.globals);
+        }
 
-        // Query tsconfig.json for JSX factory settings if jsx_runtime is ReactClassic
-        // and the factory settings are not already set
+        let fixable_rules = enabled_rules
+            .iter()
+            .filter(|rule| rules_with_fix.contains(rule))
+            .copied()
+            .collect();
+
+        let mut analyzer_options = self.analyzer_options;
+        analyzer_options.push_globals(globals);
+
         if let Some(path) = self.path
-            && analyzer_options.jsx_runtime()
-                == Some(biome_analyze::options::JsxRuntime::ReactClassic)
+            && analyzer_options.jsx_runtime() == Some(JsxRuntime::ReactClassic)
         {
             if analyzer_options.jsx_factory().is_none() {
                 let factory = self
@@ -2239,7 +2708,7 @@ impl<'b> AnalyzerVisitorBuilder<'b> {
                         tsconfig.jsx_factory_identifier().map(|s| s.to_string())
                     })
                     .flatten();
-                analyzer_options.set_jsx_factory(factory.map(|s| s.into()));
+                analyzer_options.set_jsx_factory(factory.map(Into::into));
             }
             if analyzer_options.jsx_fragment_factory().is_none() {
                 let fragment_factory = self
@@ -2250,44 +2719,9 @@ impl<'b> AnalyzerVisitorBuilder<'b> {
                             .map(|s| s.to_string())
                     })
                     .flatten();
-                analyzer_options.set_jsx_fragment_factory(fragment_factory.map(|s| s.into()));
+                analyzer_options.set_jsx_fragment_factory(fragment_factory.map(Into::into));
             }
         }
-
-        let mut lint = LintVisitor::new(
-            self.only,
-            self.skip,
-            self.settings,
-            self.path,
-            package_json,
-            &mut analyzer_options,
-        );
-
-        biome_js_analyze::visit_registry(&mut lint);
-        biome_css_analyze::visit_registry(&mut lint);
-        biome_json_analyze::visit_registry(&mut lint);
-        #[cfg(feature = "lang_graphql")]
-        biome_graphql_analyze::visit_registry(&mut lint);
-        biome_html_analyze::visit_registry(&mut lint);
-        let (linter_enabled_rules, linter_disabled_rules, linter_fixable_rules) = lint.finish();
-        enabled_rules.extend(linter_enabled_rules);
-        disabled_rules.extend(linter_disabled_rules);
-
-        let mut assist = AssistsVisitor::new(self.only, self.skip, self.settings, self.path);
-
-        biome_js_analyze::visit_registry(&mut assist);
-        biome_css_analyze::visit_registry(&mut assist);
-        biome_json_analyze::visit_registry(&mut assist);
-        #[cfg(feature = "lang_graphql")]
-        biome_graphql_analyze::visit_registry(&mut assist);
-        biome_html_analyze::visit_registry(&mut assist);
-        let (assists_enabled_rules, assists_disabled_rules, assists_fixable_rules) =
-            assist.finish();
-        enabled_rules.extend(assists_enabled_rules);
-        disabled_rules.extend(assists_disabled_rules);
-
-        let mut fixable_rules = linter_fixable_rules;
-        fixable_rules.extend(assists_fixable_rules);
 
         AnalyzerVisitorResult {
             enabled_rules,
@@ -2297,16 +2731,79 @@ impl<'b> AnalyzerVisitorBuilder<'b> {
         }
     }
 }
+
 #[cfg(test)]
 mod tests {
     use super::{DocumentFileSource, Features};
+    #[cfg(feature = "lang_js")]
+    use super::{ManifestDependencies, compute_analyzer_visitor, compute_manifest_visitor};
+    #[cfg(feature = "lang_js")]
+    use crate::settings::Settings;
+    #[cfg(feature = "lang_js")]
+    use biome_analyze::{RuleDomain, RuleFilter};
+    #[cfg(feature = "lang_js")]
+    use biome_package::{Dependencies, PackageJson};
     use camino::Utf8Path;
+
+    #[cfg(feature = "lang_js")]
+    #[test]
+    fn manifest_dependencies_enable_recommended_domain_rules() {
+        let manifest = PackageJson {
+            dev_dependencies: Dependencies(
+                vec![("vitest".into(), "^1.0.0".into())].into_boxed_slice(),
+            ),
+            ..PackageJson::default()
+        };
+        let result =
+            compute_manifest_visitor(&Settings::default(), &[], &ManifestDependencies(manifest));
+        let no_focused_tests = RuleFilter::Rule("suspicious", "noFocusedTests");
+
+        assert!(result.enabled_rules.contains(&no_focused_tests));
+        assert!(result.fixable_rules.contains(&no_focused_tests));
+        assert!(
+            result
+                .globals
+                .iter()
+                .any(|global| global.as_ref() == "test")
+        );
+    }
+
+    #[cfg(feature = "lang_js")]
+    #[test]
+    fn tailwind_domain_requires_tailwind_4() {
+        let activates_tailwind_domain = |version: &str| {
+            let manifest = PackageJson {
+                dependencies: Dependencies(
+                    vec![("tailwindcss".into(), version.into())].into_boxed_slice(),
+                ),
+                ..PackageJson::default()
+            };
+            RuleDomain::Tailwind
+                .manifest_dependencies()
+                .iter()
+                .any(|(dependency, range)| manifest.matches_dependency(dependency, range))
+        };
+
+        assert!(activates_tailwind_domain("^4.0.0"));
+        assert!(!activates_tailwind_domain("^3.4.17"));
+    }
+
+    #[cfg(feature = "lang_js")]
+    #[test]
+    fn default_assist_actions_enable_organize_imports() {
+        let result = compute_analyzer_visitor(&Settings::default(), &[]);
+        let organize_imports = RuleFilter::Rule("source", "organizeImports");
+
+        assert!(result.configured_enabled_rules.contains(&organize_imports));
+        assert!(result.rules_with_fix.contains(&organize_imports));
+    }
 
     #[test]
     fn svelte_source_modules_use_js_capabilities() {
         let features = Features::new();
         let path = Utf8Path::new("file.svelte.js");
-        let capabilities = features.get_capabilities(DocumentFileSource::from_path(path, false));
+        let capabilities =
+            features.get_deprecated_capabilities(DocumentFileSource::from_path(path, false));
 
         assert!(capabilities.analyzer.rename.is_some());
         assert!(capabilities.analyzer.pull_diagnostics_and_actions.is_some());
@@ -2316,7 +2813,8 @@ mod tests {
     fn svelte_typescript_source_modules_use_js_capabilities() {
         let features = Features::new();
         let path = Utf8Path::new("file.svelte.ts");
-        let capabilities = features.get_capabilities(DocumentFileSource::from_path(path, false));
+        let capabilities =
+            features.get_deprecated_capabilities(DocumentFileSource::from_path(path, false));
 
         assert!(capabilities.analyzer.rename.is_some());
         assert!(capabilities.analyzer.pull_diagnostics_and_actions.is_some());
@@ -2326,7 +2824,8 @@ mod tests {
     fn svelte_component_files_keep_svelte_capabilities() {
         let features = Features::new();
         let path = Utf8Path::new("file.svelte");
-        let capabilities = features.get_capabilities(DocumentFileSource::from_path(path, false));
+        let capabilities =
+            features.get_deprecated_capabilities(DocumentFileSource::from_path(path, false));
 
         assert!(capabilities.analyzer.rename.is_none());
         assert!(capabilities.analyzer.pull_diagnostics_and_actions.is_none());

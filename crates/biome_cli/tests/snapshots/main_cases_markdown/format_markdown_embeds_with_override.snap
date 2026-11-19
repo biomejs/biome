@@ -1,0 +1,50 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome format --write file.md docs/file.md
+```
+
+## `biome.json`
+
+```json
+{
+  "overrides": [
+    {
+      "includes": ["docs/**"],
+      "markdown": {
+        "formatter": {
+          "formatEmbeds": false
+        }
+      }
+    }
+  ]
+}
+```
+
+## `docs/file.md`
+
+```md
+```js
+const   value   =   {a:1,b:2}
+```
+
+```
+
+## `file.md`
+
+```md
+```js
+const value = { a: 1, b: 2 };
+```
+
+```
+
+# Emitted Messages
+
+```block
+Formatted 2 files in <TIME>. Fixed 1 file.
+```

@@ -1,0 +1,28 @@
+$name: brand;
+$pseudo: first;
+
+@position-try --try-#{$name}2 { top: 0; }
+@color-profile --profile-#{$name}2 { src: url("a.icc"); }
+@custom-media --media-#{$name}2 (min-width: 1px);
+@counter-style counter-#{$name}2 { system: cyclic; symbols: "*"; }
+@font-feature-values Font#{$name}2 { @swash { fancy: 1; } }
+@page page-#{$name}2:#{$pseudo} { margin: 1in; }
+@namespace ns-#{$name}2 url("http://example.com");
+
+@position-try --try-#{$name} { top: 0; }
+@position-try --#{$name}-end { left: 0; }
+@color-profile --profile-#{$name} { src: url("a.icc"); }
+@color-profile #{$name} { src: url("b.icc"); }
+@custom-media --media-#{$name} (min-width: 1px);
+@custom-media --#{$name} true;
+@counter-style counter-#{$name} { system: cyclic; symbols: "*"; }
+@counter-style #{$name} { system: cyclic; symbols: "*"; }
+@counter-style -#{$name} { system: cyclic; symbols: "*"; }
+@font-feature-values Font #{$name}, #{$name}-Sans, "Font #{$name}" {
+  @swash { fancy: 1; }
+}
+@page page-#{$name}:#{$pseudo}, #{$name}:left { margin: 1in; }
+@page :#{$pseudo} { margin: 1in; }
+@namespace ns-#{$name} url("http://example.com");
+@namespace #{$name} "http://example.com";
+@namespace url-#{$name} url("http://example.com");

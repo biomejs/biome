@@ -1,0 +1,3 @@
+!(a ||
+  <Component /> // trailing
+);

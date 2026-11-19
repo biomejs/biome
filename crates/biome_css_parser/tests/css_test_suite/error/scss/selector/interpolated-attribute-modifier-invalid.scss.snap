@@ -44,7 +44,7 @@ CssRoot {
                                             items: [
                                                 CssBogus {
                                                     items: [
-                                                        CssBogus {
+                                                        CssBogusIfTestBooleanExpr {
                                                             items: [
                                                                 HASH@11..12 "#" [] [],
                                                                 L_CURLY@12..13 "{" [] [],
@@ -116,7 +116,7 @@ CssRoot {
                     0: CSS_STRING_LITERAL@7..11 "\"x\"" [] [Whitespace(" ")]
                 2: CSS_BOGUS_SUPPORTS_CONDITION@11..21
                   0: CSS_BOGUS@11..21
-                    0: CSS_BOGUS@11..21
+                    0: CSS_BOGUS_IF_TEST_BOOLEAN_EXPR@11..21
                       0: HASH@11..12 "#" [] []
                       1: L_CURLY@12..13 "{" [] []
                       2: CSS_BOGUS@13..20

@@ -16,7 +16,14 @@ impl FormatNodeRule<ScssForwardAtRule> for FormatScssForwardAtRule {
             semicolon_token,
         } = node.as_fields();
 
-        write!(f, [forward_token.format(), space(), url.format()])?;
+        write!(
+            f,
+            [
+                forward_token.format()?.with_text_case(CssCase::Lowercase),
+                space(),
+                url.format()
+            ]
+        )?;
 
         if let Some(as_clause) = as_clause {
             write!(f, [space(), as_clause.format()])?;
@@ -30,6 +37,10 @@ impl FormatNodeRule<ScssForwardAtRule> for FormatScssForwardAtRule {
             write!(f, [space(), with_clause.format()])?;
         }
 
-        write!(f, [semicolon_token.format()])
+        if let Some(semicolon_token) = semicolon_token {
+            write!(f, [semicolon_token.format()])
+        } else {
+            write!(f, [token(";")])
+        }
     }
 }

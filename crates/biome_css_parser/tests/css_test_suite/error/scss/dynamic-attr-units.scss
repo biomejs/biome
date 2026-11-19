@@ -1,0 +1,7 @@
+.card {
+  width: attr(data-width $, 10px);
+  height: attr(data-height #{$unit, 1px);
+  color: red;
+}
+@container card attr(data-width $unit, 10px) { .css-only { display: block; } }
+.after { display: block; }

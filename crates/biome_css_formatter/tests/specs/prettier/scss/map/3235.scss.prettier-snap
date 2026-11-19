@@ -69,9 +69,7 @@ $o-grid-default-config: (
 );
 
 $map: (
-  key: (
-    value,
-  ),
+  key: (value),
   other-key: (
     key: other-other-value,
   ),

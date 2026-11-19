@@ -1,12 +1,7 @@
-use std::any::type_name;
-use std::collections::{BTreeMap, HashMap};
-use std::fmt::Display;
-use std::slice;
-use std::str::FromStr;
-
-use super::*;
 use crate::WorkspaceSettings;
-use anyhow::{Context, Error, Result, bail};
+use crate::capabilities::DEFAULT_CODE_ACTION_CAPABILITIES;
+use crate::server_test_utils::*;
+use anyhow::{Context, Result};
 use biome_analyze::RuleCategories;
 use biome_configuration::analyzer::RuleSelector;
 use biome_configuration::analyzer::assist::AssistConfiguration;
@@ -14,83 +9,45 @@ use biome_configuration::{Configuration, FormatterConfiguration, LinterConfigura
 use biome_diagnostics::PrintDescription;
 use biome_fs::{BiomePath, MemoryFileSystem, TemporaryFs};
 use biome_service::workspace::{
-    FileContent, GetFileContentParams, GetModuleGraphParams, GetModuleGraphResult,
-    GetSyntaxTreeParams, GetSyntaxTreeResult, OpenFileParams, OpenFileResult, OpenProjectParams,
-    OpenProjectResult, PullDiagnosticsParams, PullDiagnosticsResult, ScanKind, ScanProjectParams,
-    ScanProjectResult,
+    FileContent, FileExistsParams, GetFileContentParams, GetModuleGraphParams,
+    GetModuleGraphResult, GetSyntaxTreeParams, GetSyntaxTreeResult, OpenFileParams, OpenFileResult,
+    OpenProjectParams, OpenProjectResult, PullDiagnosticsParams, PullDiagnosticsResult, ScanKind,
+    ScanProjectParams, ScanProjectResult,
 };
 use biome_service::{Watcher, WatcherOptions};
-use camino::Utf8PathBuf;
-use futures::channel::mpsc::{Sender, channel};
-use futures::{Sink, SinkExt, Stream, StreamExt};
-use serde::Serialize;
-use serde::de::DeserializeOwned;
-use serde_json::{from_value, to_value};
-use tokio::time::{Duration, sleep, timeout};
-use tower::timeout::Timeout;
-use tower::{Service, ServiceExt};
-use tower_lsp_server::LspService;
-use tower_lsp_server::jsonrpc::{self, Request, Response};
+use futures::channel::mpsc::channel;
+use serde_json::from_value;
+use std::collections::{BTreeMap, HashMap};
+use std::str::FromStr;
+use std::sync::Arc;
+use std::time::Duration;
+use tokio::task::spawn_blocking;
+use tokio::time::sleep;
 use tower_lsp_server::ls_types::{
-    self as lsp, ClientCapabilities, CodeDescription, DidChangeConfigurationParams,
-    DidChangeTextDocumentParams, DidCloseTextDocumentParams, DidOpenTextDocumentParams,
-    DidSaveTextDocumentParams, DocumentFormattingParams, FormattingOptions, InitializeParams,
-    InitializeResult, InitializedParams, Position, PublishDiagnosticsParams, Range,
-    TextDocumentContentChangeEvent, TextDocumentIdentifier, TextDocumentItem, TextEdit, Uri,
-    VersionedTextDocumentIdentifier, WorkDoneProgressParams, WorkspaceFolder,
+    self as lsp, ClientCapabilities, CodeAction, CodeActionContext, CodeActionKind,
+    CodeActionOrCommand, CodeActionParams, CodeActionResponse, CodeDescription, Diagnostic,
+    DiagnosticRelatedInformation, DiagnosticSeverity, DidChangeConfigurationParams,
+    DidCloseTextDocumentParams, DidOpenTextDocumentParams, DidSaveTextDocumentParams,
+    DocumentFormattingParams, DocumentRangeFormattingParams, FormattingOptions, InitializeParams,
+    InitializeResult, Location, MessageType, NumberOrString, PartialResultParams, Position,
+    PublishDiagnosticsParams, Range, ShowMessageParams, TextDocumentContentChangeEvent,
+    TextDocumentIdentifier, TextDocumentItem, TextEdit, Uri, WorkDoneProgressParams, WorkspaceEdit,
+    WorkspaceFolder,
 };
 
-/// Statically build an [Uri] instance that points to the file at `$path`
-/// within the workspace. The filesystem path contained in the return URI is
-/// guaranteed to be a valid path for the underlying operating system, but
-/// doesn't have to refer to an existing file on the host machine.
-macro_rules! uri {
-    ($path:literal) => {
-        if cfg!(windows) {
-            lsp::Uri::from_str(concat!("file:///z%3A/workspace/", $path)).unwrap()
-        } else {
-            lsp::Uri::from_str(concat!("file:///workspace/", $path)).unwrap()
-        }
-    };
+#[test]
+fn catches_regular_panics_as_panic_errors() {
+    let result: std::result::Result<
+        std::result::Result<(), salsa::Cancelled>,
+        biome_diagnostics::panic::PanicError,
+    > = super::catch_lsp_operation(|| panic!("boom"));
+
+    let error = result.expect_err("regular panic should be caught as a panic error");
+    assert!(error.info.contains("boom"), "{error:?}");
 }
 
-macro_rules! await_notification {
-    ($channel:expr) => {
-        sleep(Duration::from_millis(1000)).await;
-
-        timeout(Duration::from_secs(2), $channel.changed())
-            .await
-            .expect("expected notification within timeout")
-            .expect("expected notification");
-    };
-}
-
-macro_rules! clear_notifications {
-    ($channel:expr) => {
-        // On Windows, wait until any previous event has been delivered.
-        // On macOS, wait until the fsevents watcher sets up before receiving the first event.
-        let duration = if cfg!(any(target_os = "windows", target_os = "macos")) {
-            Duration::from_secs(1)
-        } else {
-            Duration::from_millis(200)
-        };
-        sleep(duration).await;
-
-        if $channel
-            .has_changed()
-            .expect("Channel should not be closed")
-        {
-            let _ = $channel.changed().await;
-        }
-    };
-}
-
-fn to_utf8_file_path_buf(uri: Uri) -> Utf8PathBuf {
-    Utf8PathBuf::from_path_buf(uri.to_file_path().unwrap().to_path_buf()).unwrap()
-}
-
-fn fixable_diagnostic(line: u32) -> Result<Diagnostic> {
-    Ok(Diagnostic {
+fn fixable_diagnostic(line: u32) -> Result<lsp::Diagnostic> {
+    Ok(lsp::Diagnostic {
         range: Range {
             start: Position { line, character: 3 },
             end: Position {
@@ -98,8 +55,8 @@ fn fixable_diagnostic(line: u32) -> Result<Diagnostic> {
                 character: 11,
             },
         },
-        severity: Some(DiagnosticSeverity::ERROR),
-        code: Some(NumberOrString::String(String::from(
+        severity: Some(lsp::DiagnosticSeverity::ERROR),
+        code: Some(lsp::NumberOrString::String(String::from(
             "lint/suspicious/noCompareNegZero",
         ))),
         code_description: None,
@@ -109,426 +66,6 @@ fn fixable_diagnostic(line: u32) -> Result<Diagnostic> {
         tags: None,
         data: None,
     })
-}
-
-struct Server {
-    service: Timeout<LspService<LSPServer>>,
-}
-
-impl Server {
-    fn new(service: LspService<LSPServer>) -> Self {
-        Self {
-            service: Timeout::new(service, Duration::from_secs(1)),
-        }
-    }
-
-    async fn notify<P>(&mut self, method: &'static str, params: P) -> Result<()>
-    where
-        P: Serialize,
-    {
-        self.service
-            .ready()
-            .await
-            .map_err(Error::msg)
-            .context("ready() returned an error")?
-            .call(
-                Request::build(method)
-                    .params(to_value(&params).context("failed to serialize params")?)
-                    .finish(),
-            )
-            .await
-            .map_err(Error::msg)
-            .context("call() returned an error")
-            .and_then(|res| {
-                if let Some(res) = res {
-                    bail!("shutdown returned {:?}", res)
-                } else {
-                    Ok(())
-                }
-            })
-    }
-
-    async fn request<P, R>(
-        &mut self,
-        method: &'static str,
-        id: &'static str,
-        params: P,
-    ) -> Result<Option<R>>
-    where
-        P: Serialize,
-        R: DeserializeOwned,
-    {
-        self.service
-            .ready()
-            .await
-            .map_err(Error::msg)
-            .context("ready() returned an error")?
-            .call(
-                Request::build(method)
-                    .id(id)
-                    .params(to_value(&params).context("failed to serialize params")?)
-                    .finish(),
-            )
-            .await
-            .map_err(Error::msg)
-            .context("call() returned an error")?
-            .map(|res| {
-                let (_, body) = res.into_parts();
-
-                let body =
-                    body.with_context(|| format!("response to {method:?} contained an error"))?;
-
-                from_value(body.clone()).with_context(|| {
-                    format!(
-                        "failed to deserialize type {} from response {body:?}",
-                        type_name::<R>()
-                    )
-                })
-            })
-            .transpose()
-    }
-
-    /// Basic implementation of the `initialize` request for tests
-    // The `root_path` field is deprecated, but we still need to specify it
-    #[expect(deprecated)]
-    async fn initialize(&mut self) -> Result<()> {
-        let _res: InitializeResult = self
-            .request(
-                "initialize",
-                "_init",
-                InitializeParams {
-                    process_id: None,
-                    root_path: None,
-                    root_uri: Some(uri!("")),
-                    initialization_options: None,
-                    capabilities: ClientCapabilities::default(),
-                    trace: None,
-                    workspace_folders: None,
-                    client_info: None,
-                    locale: None,
-                    work_done_progress_params: Default::default(),
-                },
-            )
-            .await?
-            .context("initialize returned None")?;
-
-        Ok(())
-    }
-
-    /// Like [`Self::initialize`] but advertises `codeAction/resolve` support.
-    #[expect(deprecated)]
-    async fn initialize_with_resolve_support(&mut self) -> Result<()> {
-        let _res: InitializeResult = self
-            .request(
-                "initialize",
-                "_init",
-                InitializeParams {
-                    process_id: None,
-                    root_path: None,
-                    root_uri: Some(uri!("")),
-                    initialization_options: None,
-                    capabilities: ClientCapabilities {
-                        text_document: Some(TextDocumentClientCapabilities {
-                            code_action: Some(CodeActionClientCapabilities {
-                                resolve_support: Some(CodeActionCapabilityResolveSupport {
-                                    properties: vec!["edit".to_string()],
-                                }),
-                                ..Default::default()
-                            }),
-                            ..Default::default()
-                        }),
-                        ..Default::default()
-                    },
-                    trace: None,
-                    workspace_folders: None,
-                    client_info: None,
-                    locale: None,
-                    work_done_progress_params: Default::default(),
-                },
-            )
-            .await?
-            .context("initialize returned None")?;
-
-        Ok(())
-    }
-
-    /// It creates two projects, one at folder `test_one` and the other in `test_two`.
-    ///
-    /// Hence, the two roots will be `/workspace/test_one` and `/workspace/test_two`
-    // The `root_path` field is deprecated, but we still need to specify it
-    #[expect(deprecated)]
-    async fn initialize_projects(&mut self) -> Result<()> {
-        let _res: InitializeResult = self
-            .request(
-                "initialize",
-                "_init",
-                InitializeParams {
-                    process_id: None,
-                    root_path: None,
-                    root_uri: Some(uri!("/")),
-                    initialization_options: None,
-                    capabilities: ClientCapabilities::default(),
-                    trace: None,
-                    workspace_folders: Some(vec![
-                        WorkspaceFolder {
-                            name: "test_one".to_string(),
-                            uri: uri!("test_one"),
-                        },
-                        WorkspaceFolder {
-                            name: "test_two".to_string(),
-                            uri: uri!("test_two"),
-                        },
-                    ]),
-                    client_info: None,
-                    locale: None,
-                    work_done_progress_params: Default::default(),
-                },
-            )
-            .await?
-            .context("initialize returned None")?;
-
-        Ok(())
-    }
-
-    /// Basic implementation of the `initialized` notification for tests
-    async fn initialized(&mut self) -> Result<()> {
-        self.notify("initialized", InitializedParams {}).await
-    }
-
-    /// Basic implementation of the `shutdown` notification for tests
-    async fn shutdown(&mut self) -> Result<()> {
-        self.service
-            .ready()
-            .await
-            .map_err(Error::msg)
-            .context("ready() returned an error")?
-            .call(Request::build("shutdown").finish())
-            .await
-            .map_err(Error::msg)
-            .context("call() returned an error")
-            .and_then(|res| {
-                if let Some(res) = res {
-                    bail!("shutdown returned {:?}", res)
-                } else {
-                    Ok(())
-                }
-            })
-    }
-
-    async fn open_document(&mut self, text: impl Display) -> Result<()> {
-        self.notify(
-            "textDocument/didOpen",
-            DidOpenTextDocumentParams {
-                text_document: TextDocumentItem {
-                    uri: uri!("document.js"),
-                    language_id: String::from("javascript"),
-                    version: 0,
-                    text: text.to_string(),
-                },
-            },
-        )
-        .await
-    }
-
-    async fn open_untitled_document(&mut self, text: impl Display) -> Result<()> {
-        self.notify(
-            "textDocument/didOpen",
-            DidOpenTextDocumentParams {
-                text_document: TextDocumentItem {
-                    uri: uri!("untitled-1"),
-                    language_id: String::from("javascript"),
-                    version: 0,
-                    text: text.to_string(),
-                },
-            },
-        )
-        .await
-    }
-
-    /// Opens a document with given contents and given name. The name must contain the extension too
-    async fn open_named_document(
-        &mut self,
-        text: impl Display,
-        document_name: Uri,
-        language: impl Display,
-    ) -> Result<()> {
-        self.notify(
-            "textDocument/didOpen",
-            DidOpenTextDocumentParams {
-                text_document: TextDocumentItem {
-                    uri: document_name,
-                    language_id: language.to_string(),
-                    version: 0,
-                    text: text.to_string(),
-                },
-            },
-        )
-        .await
-    }
-
-    /// When calling this function, remember to insert the file inside the memory file system
-    async fn load_configuration(&mut self) -> Result<()> {
-        self.notify(
-            "workspace/didChangeConfiguration",
-            DidChangeConfigurationParams {
-                settings: to_value(())?,
-            },
-        )
-        .await
-    }
-
-    /// When calling this function, remember to insert the file inside the memory file system
-    async fn load_configuration_with_settings<V>(&mut self, value: V) -> Result<()>
-    where
-        V: Serialize,
-    {
-        self.notify(
-            "workspace/didChangeConfiguration",
-            DidChangeConfigurationParams {
-                settings: to_value(value)?,
-            },
-        )
-        .await
-    }
-
-    async fn change_document(
-        &mut self,
-        version: i32,
-        content_changes: Vec<TextDocumentContentChangeEvent>,
-    ) -> Result<()> {
-        self.notify(
-            "textDocument/didChange",
-            DidChangeTextDocumentParams {
-                text_document: VersionedTextDocumentIdentifier {
-                    uri: uri!("document.js"),
-                    version,
-                },
-                content_changes,
-            },
-        )
-        .await
-    }
-
-    async fn close_document(&mut self) -> Result<()> {
-        self.notify(
-            "textDocument/didClose",
-            DidCloseTextDocumentParams {
-                text_document: TextDocumentIdentifier {
-                    uri: uri!("document.js"),
-                },
-            },
-        )
-        .await
-    }
-
-    /// Basic implementation of the `biome/shutdown` request for tests
-    async fn biome_shutdown(&mut self) -> Result<()> {
-        self.request::<_, ()>("biome/shutdown", "_biome_shutdown", ())
-            .await?
-            .context("biome/shutdown returned None")?;
-        Ok(())
-    }
-}
-
-/// Number of notifications buffered by the server-to-client channel before it starts blocking the current task
-const CHANNEL_BUFFER_SIZE: usize = 8;
-
-#[derive(Debug, PartialEq, Eq)]
-enum ServerNotification {
-    PublishDiagnostics(PublishDiagnosticsParams),
-    ShowMessage(ShowMessageParams),
-}
-impl ServerNotification {
-    pub fn is_publish_diagnostics(&self) -> bool {
-        matches!(self, Self::PublishDiagnostics(_))
-    }
-
-    pub fn is_show_message(&self) -> bool {
-        matches!(self, Self::ShowMessage(_))
-    }
-}
-
-async fn wait_for_notification(
-    receiver: &mut (impl Stream<Item = ServerNotification> + Unpin),
-    check: impl Fn(&ServerNotification) -> bool,
-) -> Option<ServerNotification> {
-    loop {
-        let notification = tokio::select! {
-            msg = receiver.next() => msg,
-            _ = sleep(Duration::from_secs(3)) => {
-                panic!("timed out waiting for the server to send diagnostics")
-            }
-        };
-
-        match notification {
-            Some(notification) => {
-                if check(&notification) {
-                    return Some(notification);
-                }
-            }
-            None => break None,
-        }
-    }
-}
-
-/// Basic handler for requests and notifications coming from the server for tests
-async fn client_handler<I, O>(stream: I, sink: O, notify: Sender<ServerNotification>) -> Result<()>
-where
-    I: Stream<Item = Request> + Unpin,
-    O: Sink<Response> + Unpin,
-{
-    client_handler_with_settings(stream, sink, notify, WorkspaceSettings::default()).await
-}
-
-/// Handler for requests and notifications coming from the server for tests with custom settings
-async fn client_handler_with_settings<I, O>(
-    mut stream: I,
-    mut sink: O,
-    mut notify: Sender<ServerNotification>,
-    settings: WorkspaceSettings,
-) -> Result<()>
-where
-    // This function has to be generic as `RequestStream` and `ResponseSink`
-    // are not exported from `tower_lsp` and cannot be named in the signature
-    I: Stream<Item = Request> + Unpin,
-    O: Sink<Response> + Unpin,
-{
-    while let Some(req) = stream.next().await {
-        let params = req.params().expect("invalid request").clone();
-        if let Some(notification) = match req.method() {
-            "textDocument/publishDiagnostics" => Some(ServerNotification::PublishDiagnostics(
-                from_value(params).expect("invalid params"),
-            )),
-            "window/showMessage" => Some(ServerNotification::ShowMessage(
-                from_value(params).expect("invalid params"),
-            )),
-            _ => None,
-        } {
-            match notify.send(notification).await {
-                Ok(_) => continue,
-                Err(_) => break,
-            }
-        }
-
-        let id = match req.id() {
-            Some(id) => id,
-            None => continue,
-        };
-
-        let res = match req.method() {
-            "workspace/configuration" => {
-                let result =
-                    to_value(slice::from_ref(&settings)).context("failed to serialize settings")?;
-
-                Response::from_ok(id.clone(), result)
-            }
-            _ => Response::from_error(id.clone(), jsonrpc::Error::method_not_found()),
-        };
-
-        sink.send(res).await.ok();
-    }
-
-    Ok(())
 }
 
 #[tokio::test]
@@ -595,6 +132,14 @@ fn create_document_content_change_event() -> Vec<TextDocumentContentChangeEvent>
             text: String::from("statement"),
         },
     ]
+}
+
+fn full_document_change(text: impl Into<String>) -> Vec<TextDocumentContentChangeEvent> {
+    vec![TextDocumentContentChangeEvent {
+        range: None,
+        range_length: None,
+        text: text.into(),
+    }]
 }
 
 const EXPECTED_CST: &str = "0: JS_MODULE@0..57
@@ -754,7 +299,8 @@ async fn lifecycle_with_multiple_connections() -> Result<()> {
         reader.abort();
     }
 
-    // Second connection, the document will still be there:
+    // Second connection: the first one disconnected without closing its
+    // document, so the document was closed for it.
     {
         let (service, client) = factory.create().into_inner();
         let (stream, sink) = client.split();
@@ -780,8 +326,8 @@ async fn lifecycle_with_multiple_connections() -> Result<()> {
             .await?
             .expect("open_project returned an error");
 
-        let res: GetSyntaxTreeResult = server
-            .request(
+        let result = server
+            .request::<_, GetSyntaxTreeResult>(
                 "biome/get_syntax_tree",
                 "get_syntax_tree",
                 GetSyntaxTreeParams {
@@ -789,10 +335,9 @@ async fn lifecycle_with_multiple_connections() -> Result<()> {
                     path: BiomePath::try_from(uri!("document.js").to_file_path().unwrap()).unwrap(),
                 },
             )
-            .await?
-            .expect("get_syntax_tree returned None");
+            .await;
 
-        assert_eq!(res.cst, EXPECTED_CST);
+        assert!(result.is_err(), "the document was closed: {result:?}");
 
         server.shutdown().await?;
         reader.abort();
@@ -1034,6 +579,88 @@ async fn pull_diagnostics() -> Result<()> {
     );
 
     server.close_document().await?;
+
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn debounces_diagnostics_after_rapid_changes() -> Result<()> {
+    let factory = ServerFactory::default();
+    let (service, client) = factory.create().into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let (sender, mut receiver) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    server.initialize().await?;
+    server.initialized().await?;
+
+    server.open_document("const a = 1; a = 2;").await?;
+    let _ = wait_for_notification(&mut receiver, |n| n.is_publish_diagnostics()).await;
+
+    server
+        .change_document(1, full_document_change("const b = 1; b = 2;"))
+        .await?;
+    server
+        .change_document(2, full_document_change("const c = 1; c = 2;"))
+        .await?;
+
+    let notification = wait_for_notification(&mut receiver, |n| n.is_publish_diagnostics()).await;
+    let Some(ServerNotification::PublishDiagnostics(params)) = notification else {
+        panic!("expected publishDiagnostics notification");
+    };
+
+    assert_eq!(params.version, Some(2));
+
+    server.close_document().await?;
+
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn does_not_publish_debounced_diagnostics_after_close() -> Result<()> {
+    let factory = ServerFactory::default();
+    let (service, client) = factory.create().into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let (sender, mut receiver) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    server.initialize().await?;
+    server.initialized().await?;
+
+    server.open_document("const a = 1; a = 2;").await?;
+    let _ = wait_for_notification(&mut receiver, |n| n.is_publish_diagnostics()).await;
+
+    server
+        .change_document(1, full_document_change("const b = 1; b = 2;"))
+        .await?;
+    server.close_document().await?;
+
+    let notification = wait_for_notification(&mut receiver, |n| n.is_publish_diagnostics()).await;
+    assert_eq!(
+        notification,
+        Some(ServerNotification::PublishDiagnostics(
+            PublishDiagnosticsParams {
+                uri: uri!("document.js"),
+                version: None,
+                diagnostics: vec![],
+            }
+        ))
+    );
+
+    wait_for_no_notification(&mut receiver, Duration::from_millis(750), |n| {
+        n.is_publish_diagnostics()
+    })
+    .await;
 
     server.shutdown().await?;
     reader.abort();
@@ -1452,6 +1079,106 @@ async fn pull_quick_fixes() -> Result<()> {
 
     server.close_document().await?;
 
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn pull_suppressions_when_query_and_signal_ranges_are_disjoint() -> Result<()> {
+    let factory = ServerFactory::default();
+    let (service, client) = factory.create().into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let (sender, _) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    server.initialize().await?;
+    server.initialized().await?;
+
+    server
+        .open_document("import * as foo from \"foo\";\nconst key = \"bar\";\nfoo[key];")
+        .await?;
+
+    let diagnostic = Diagnostic {
+        range: Range {
+            start: Position {
+                line: 2,
+                character: 0,
+            },
+            end: Position {
+                line: 2,
+                character: 8,
+            },
+        },
+        severity: Some(DiagnosticSeverity::WARNING),
+        code: Some(NumberOrString::String(String::from(
+            "lint/performance/noDynamicNamespaceImportAccess",
+        ))),
+        source: Some(String::from("biome")),
+        message: String::from("Avoid accessing namespace imports dynamically."),
+        ..Default::default()
+    };
+
+    let res: CodeActionResponse = server
+        .request(
+            "textDocument/codeAction",
+            "pull_code_actions",
+            CodeActionParams {
+                text_document: TextDocumentIdentifier {
+                    uri: uri!("document.js"),
+                },
+                range: Range {
+                    start: Position {
+                        line: 2,
+                        character: 4,
+                    },
+                    end: Position {
+                        line: 2,
+                        character: 4,
+                    },
+                },
+                context: CodeActionContext {
+                    diagnostics: vec![diagnostic.clone()],
+                    only: Some(vec![CodeActionKind::QUICKFIX]),
+                    ..Default::default()
+                },
+                work_done_progress_params: WorkDoneProgressParams {
+                    work_done_token: None,
+                },
+                partial_result_params: PartialResultParams {
+                    partial_result_token: None,
+                },
+            },
+        )
+        .await?
+        .context("codeAction returned None")?;
+
+    let action_kinds: Vec<_> = res
+        .iter()
+        .map(|action| match action {
+            CodeActionOrCommand::CodeAction(action) => {
+                assert_eq!(
+                    action.diagnostics.as_deref(),
+                    Some(std::slice::from_ref(&diagnostic))
+                );
+                assert!(action.edit.is_some());
+                action.kind.clone().unwrap()
+            }
+            CodeActionOrCommand::Command(_) => panic!("expected code action"),
+        })
+        .collect();
+    assert_eq!(
+        action_kinds,
+        [
+            CodeActionKind::new("quickfix.suppressRule.inline.biome"),
+            CodeActionKind::new("quickfix.suppressRule.topLevel.biome"),
+        ]
+    );
+
+    server.close_document().await?;
     server.shutdown().await?;
     reader.abort();
 
@@ -1985,6 +1712,402 @@ async fn plugin_load_error_show_message() -> Result<()> {
 }
 
 #[tokio::test]
+async fn configuration_parse_error_show_message() -> Result<()> {
+    let fs = MemoryFileSystem::default();
+    let config = r#"{
+        "formatter": { "enabled": true },
+    }"#;
+
+    fs.insert(to_utf8_file_path_buf(uri!("biome.json")), config);
+
+    let factory = ServerFactory::new_with_fs(Arc::new(fs));
+    let (service, client) = factory.create().into_inner();
+
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let (sender, mut receiver) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    server.initialize().await?;
+    server.initialized().await?;
+
+    server.load_configuration().await?;
+
+    server.open_document("let a = 1;").await?;
+
+    let notification = wait_for_notification(&mut receiver, |n| n.is_show_message()).await;
+
+    assert_eq!(notification, Some(ServerNotification::ShowMessage(ShowMessageParams {
+        typ: MessageType::WARNING,
+        message: "The configuration file has errors. Biome won't process files until the configuration is fixed.".to_string(),
+    })));
+
+    // The document isn't processed while the configuration is broken.
+    let res: Option<Option<Vec<TextEdit>>> = server
+        .request(
+            "textDocument/formatting",
+            "formatting",
+            DocumentFormattingParams {
+                text_document: TextDocumentIdentifier {
+                    uri: uri!("document.js"),
+                },
+                options: FormattingOptions {
+                    tab_size: 4,
+                    insert_spaces: false,
+                    properties: HashMap::default(),
+                    trim_trailing_whitespace: None,
+                    insert_final_newline: None,
+                    trim_final_newlines: None,
+                },
+                work_done_progress_params: WorkDoneProgressParams {
+                    work_done_token: None,
+                },
+            },
+        )
+        .await?;
+    assert_eq!(res.flatten(), None);
+
+    // Opening another document doesn't repeat the warning. `didOpen` returns once
+    // the server has handled it, so the sleep only lets the client handler forward
+    // anything the server already sent.
+    server
+        .open_named_document("let b = 2;", uri!("other.js"), "javascript")
+        .await?;
+    sleep(Duration::from_millis(300)).await;
+    while let Ok(notification) = receiver.try_recv() {
+        assert!(
+            !notification.is_show_message(),
+            "unexpected notification: {notification:?}"
+        );
+    }
+
+    server.close_document().await?;
+
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn editorconfig_parse_error_show_message() -> Result<()> {
+    let fs = MemoryFileSystem::default();
+    let config = r#"{
+        "formatter": { "useEditorconfig": true }
+    }"#;
+
+    fs.insert(to_utf8_file_path_buf(uri!("biome.json")), config);
+    fs.insert(
+        to_utf8_file_path_buf(uri!(".editorconfig")),
+        "[*]\nindent_style = banana\n",
+    );
+
+    let factory = ServerFactory::new_with_fs(Arc::new(fs));
+    let (service, client) = factory.create().into_inner();
+
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let (sender, mut receiver) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    server.initialize().await?;
+    server.initialized().await?;
+
+    server.load_configuration().await?;
+
+    server.open_document("let a = 1;").await?;
+
+    let notification = wait_for_notification(&mut receiver, |n| n.is_show_message()).await;
+
+    assert_eq!(notification, Some(ServerNotification::ShowMessage(ShowMessageParams {
+        typ: MessageType::WARNING,
+        message: "The .editorconfig file has errors. Biome won't process files until the file is fixed or its usage is disabled.".to_string(),
+    })));
+
+    server.close_document().await?;
+
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn plugin_rewrite_pull_diagnostics() -> Result<()> {
+    let fs = MemoryFileSystem::default();
+
+    let config = r#"{
+        "plugins": ["useConsoleInfo.grit"],
+        "linter": {
+            "rules": { "recommended": false }
+        }
+    }"#;
+
+    let plugin = br#"language js
+
+`console.log($msg)` as $call where {
+    register_diagnostic(
+        span = $call,
+        message = "Use console.info instead of console.log.",
+        severity = "warn"
+    ),
+    $call => `console.info($msg)`
+}"#;
+
+    fs.insert(to_utf8_file_path_buf(uri!("biome.json")), config);
+    fs.insert(to_utf8_file_path_buf(uri!("useConsoleInfo.grit")), plugin);
+
+    let factory = ServerFactory::new_with_fs(Arc::new(fs));
+    let (service, client) = factory.create().into_inner();
+
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let (sender, mut receiver) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    server.initialize().await?;
+    server.initialized().await?;
+
+    server.load_configuration().await?;
+
+    server
+        .open_named_document("console.log(\"hello\");", uri!("document.js"), "javascript")
+        .await?;
+
+    let notification = wait_for_notification(&mut receiver, |n| n.is_publish_diagnostics()).await;
+
+    // Verify that the plugin diagnostic is emitted
+    if let Some(ServerNotification::PublishDiagnostics(params)) = &notification {
+        assert!(
+            !params.diagnostics.is_empty(),
+            "Expected at least one diagnostic"
+        );
+        let diag = &params.diagnostics[0];
+        assert_eq!(diag.severity, Some(lsp::DiagnosticSeverity::WARNING));
+        assert_eq!(
+            diag.code,
+            Some(lsp::NumberOrString::String(String::from("plugin")))
+        );
+        assert!(
+            diag.message.contains("console.info"),
+            "Diagnostic message should mention console.info, got: {}",
+            diag.message
+        );
+    } else {
+        panic!("Expected PublishDiagnostics, got {notification:?}");
+    }
+
+    server.close_document().await?;
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn pull_plugin_code_action_at_diagnostic_start() -> Result<()> {
+    let fs = MemoryFileSystem::default();
+    let config = r#"{
+        "plugins": ["useConsoleInfo.grit"],
+        "linter": {
+            "rules": { "recommended": false }
+        }
+    }"#;
+    let plugin = br#"language js
+
+`console.log($msg)` as $call where {
+    register_diagnostic(
+        span = $call,
+        message = "Use console.info instead of console.log.",
+        severity = "warn"
+    ),
+    $call => `console.info($msg)`
+}"#;
+
+    fs.insert(to_utf8_file_path_buf(uri!("biome.json")), config);
+    fs.insert(to_utf8_file_path_buf(uri!("useConsoleInfo.grit")), plugin);
+
+    let factory = ServerFactory::new_with_fs(Arc::new(fs));
+    let (service, client) = factory.create().into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let (sender, mut receiver) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    server.initialize().await?;
+    server.initialized().await?;
+    server.load_configuration().await?;
+    server
+        .open_named_document("console.log(\"hello\");", uri!("document.js"), "javascript")
+        .await?;
+
+    let notification = wait_for_notification(&mut receiver, |n| n.is_publish_diagnostics()).await;
+    let Some(ServerNotification::PublishDiagnostics(params)) = notification else {
+        panic!("expected plugin diagnostics");
+    };
+    let [diagnostic] = params.diagnostics.as_slice() else {
+        panic!("expected one plugin diagnostic: {params:?}");
+    };
+
+    let res: CodeActionResponse = server
+        .request(
+            "textDocument/codeAction",
+            "pull_code_actions",
+            CodeActionParams {
+                text_document: TextDocumentIdentifier {
+                    uri: uri!("document.js"),
+                },
+                range: Range {
+                    start: Position {
+                        line: 0,
+                        character: 0,
+                    },
+                    end: Position {
+                        line: 0,
+                        character: 0,
+                    },
+                },
+                context: CodeActionContext {
+                    diagnostics: vec![diagnostic.clone()],
+                    only: Some(vec![CodeActionKind::QUICKFIX]),
+                    ..Default::default()
+                },
+                work_done_progress_params: WorkDoneProgressParams {
+                    work_done_token: None,
+                },
+                partial_result_params: PartialResultParams {
+                    partial_result_token: None,
+                },
+            },
+        )
+        .await?
+        .context("codeAction returned None")?;
+
+    let plugin_kind = Some(CodeActionKind::new("quickfix.biome.plugin"));
+    let [action] = res
+        .iter()
+        .filter_map(|action| match action {
+            CodeActionOrCommand::CodeAction(action) if action.kind == plugin_kind => Some(action),
+            _ => None,
+        })
+        .collect::<Vec<_>>()[..]
+    else {
+        panic!("expected one plugin code action: {res:?}");
+    };
+    assert_eq!(action.title, "Rewrite suggested by plugin `useConsoleInfo`");
+    assert!(action.edit.is_some());
+
+    server.close_document().await?;
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn pull_js_plugin_code_action_when_query_and_diagnostic_ranges_are_disjoint() -> Result<()> {
+    let fs = MemoryFileSystem::default();
+    let config = r#"{
+        "plugins": ["renameReference.js"],
+        "linter": {
+            "rules": { "recommended": false }
+        }
+    }"#;
+    let plugin = br#"import { ast, createMutation, defineRule, factory, registerDiagnostic } from "@biomejs/runtime/plugin";
+
+export const renameReference = defineRule({
+    query: ast("JS_REFERENCE_IDENTIFIER", { semantic: true }),
+    run(node, { model }) {
+        const binding = model.binding(node);
+        if (!binding) return;
+
+        const mutation = createMutation(binding.syntax());
+        mutation.replaceToken(node.token("valueToken"), factory.token("IDENT", "renamed"));
+        registerDiagnostic(binding.syntax(), "warning", "Rename the reference.", {
+            mutation,
+            message: "Rename reference",
+            kind: "safe",
+        });
+    },
+});"#;
+
+    fs.insert(to_utf8_file_path_buf(uri!("biome.json")), config);
+    fs.insert(to_utf8_file_path_buf(uri!("renameReference.js")), plugin);
+
+    let factory = ServerFactory::new_with_fs(Arc::new(fs));
+    let (service, client) = factory.create().into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let (sender, mut receiver) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    server.initialize().await?;
+    server.initialized().await?;
+    server.load_configuration().await?;
+    server
+        .open_named_document("let value = 1;\nvalue;", uri!("document.js"), "javascript")
+        .await?;
+
+    let notification = wait_for_notification(&mut receiver, |n| n.is_publish_diagnostics()).await;
+    let Some(ServerNotification::PublishDiagnostics(params)) = notification else {
+        panic!("expected plugin diagnostics");
+    };
+    let [diagnostic] = params.diagnostics.as_slice() else {
+        panic!("expected one plugin diagnostic: {params:?}");
+    };
+
+    let res: CodeActionResponse = server
+        .request(
+            "textDocument/codeAction",
+            "pull_code_actions",
+            CodeActionParams {
+                text_document: TextDocumentIdentifier {
+                    uri: uri!("document.js"),
+                },
+                range: diagnostic.range,
+                context: CodeActionContext {
+                    diagnostics: vec![diagnostic.clone()],
+                    only: Some(vec![CodeActionKind::QUICKFIX]),
+                    ..Default::default()
+                },
+                work_done_progress_params: WorkDoneProgressParams {
+                    work_done_token: None,
+                },
+                partial_result_params: PartialResultParams {
+                    partial_result_token: None,
+                },
+            },
+        )
+        .await?
+        .context("codeAction returned None")?;
+
+    let plugin_kind = Some(CodeActionKind::new("quickfix.biome.plugin"));
+    let [action] = res
+        .iter()
+        .filter_map(|action| match action {
+            CodeActionOrCommand::CodeAction(action) if action.kind == plugin_kind => Some(action),
+            _ => None,
+        })
+        .collect::<Vec<_>>()[..]
+    else {
+        panic!("expected one JavaScript plugin code action: {res:?}");
+    };
+    assert_eq!(action.title, "Rename reference");
+    assert!(action.edit.is_some());
+
+    server.close_document().await?;
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}
+
+#[tokio::test]
 async fn pull_diagnostics_for_css_files() -> Result<()> {
     let fs = MemoryFileSystem::default();
     let config = r#"{
@@ -2045,6 +2168,157 @@ async fn pull_diagnostics_for_css_files() -> Result<()> {
                     }),
                     source: Some(String::from("biome")),
                     message: String::from("Unknown property is not allowed.",),
+                    related_information: None,
+                    tags: None,
+                    data: None,
+                }],
+            }
+        ))
+    );
+
+    server.close_document().await?;
+
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn pull_diagnostics_for_htm_files() -> Result<()> {
+    let fs = MemoryFileSystem::default();
+    let config = r#"{
+        "html": {
+            "linter": { "enabled": true }
+        }
+    }"#;
+
+    fs.insert(to_utf8_file_path_buf(uri!("biome.json")), config);
+
+    let factory = ServerFactory::new_with_fs(Arc::new(fs));
+    let (service, client) = factory.create().into_inner();
+
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let (sender, mut receiver) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    server.initialize().await?;
+    server.initialized().await?;
+
+    server.load_configuration().await?;
+
+    let invalid_html = r#"<div scope="col"></div>"#;
+    server
+        // VS Code assigns the `html` language identifier to `.htm` files.
+        .open_named_document(invalid_html, uri!("document.htm"), "html")
+        .await?;
+
+    let notification = wait_for_notification(&mut receiver, |n| n.is_publish_diagnostics()).await;
+
+    assert_eq!(
+        notification,
+        Some(ServerNotification::PublishDiagnostics(
+            PublishDiagnosticsParams {
+                uri: uri!("document.htm"),
+                version: Some(0),
+                diagnostics: vec![Diagnostic {
+                    range: Range {
+                        start: Position {
+                            line: 0,
+                            character: 5,
+                        },
+                        end: Position {
+                            line: 0,
+                            character: 16,
+                        },
+                    },
+                    severity: Some(DiagnosticSeverity::ERROR),
+                    code: Some(NumberOrString::String(String::from(
+                        "lint/a11y/noHeaderScope"
+                    ))),
+                    code_description: Some(CodeDescription {
+                        href: "https://biomejs.dev/linter/rules/no-header-scope".parse()?
+                    }),
+                    source: Some(String::from("biome")),
+                    message: String::from(
+                        "Avoid using the scope attribute on elements other than th elements.",
+                    ),
+                    related_information: None,
+                    tags: None,
+                    data: None,
+                }],
+            }
+        ))
+    );
+
+    server.close_document().await?;
+
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn pull_diagnostics_for_svg_files() -> Result<()> {
+    let fs = MemoryFileSystem::default();
+    let config = r#"{
+        "html": {
+            "formatter": { "enabled": true }
+        }
+    }"#;
+
+    fs.insert(to_utf8_file_path_buf(uri!("biome.json")), config);
+
+    let factory = ServerFactory::new_with_fs(Arc::new(fs));
+    let (service, client) = factory.create().into_inner();
+
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let (sender, mut receiver) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    server.initialize().await?;
+    server.initialized().await?;
+
+    server.load_configuration().await?;
+
+    let incorrect_config = r#"<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="red" /></svg>"#;
+    server
+        .open_named_document(incorrect_config, uri!("document.svg"), "xml")
+        .await?;
+
+    let notification = wait_for_notification(&mut receiver, |n| n.is_publish_diagnostics()).await;
+
+    assert_eq!(
+        notification,
+        Some(ServerNotification::PublishDiagnostics(
+            PublishDiagnosticsParams {
+                uri: uri!("document.svg"),
+                version: Some(0),
+                diagnostics: vec![Diagnostic {
+                    range: Range {
+                        start: Position {
+                            line: 0,
+                            character: 0,
+                        },
+                        end: Position {
+                            line: 0,
+                            character: 112,
+                        },
+                    },
+                    severity: Some(DiagnosticSeverity::ERROR),
+                    code: Some(NumberOrString::String(String::from(
+                        "lint/a11y/noSvgWithoutTitle"
+                    ))),
+                    code_description: Some(CodeDescription {
+                        href: "https://biomejs.dev/linter/rules/no-svg-without-title".parse()?
+                    }),
+                    source: Some(String::from("biome")),
+                    message: String::from("Alternative text title element cannot be empty",),
                     related_information: None,
                     tags: None,
                     data: None,
@@ -2627,6 +2901,224 @@ export { describe, test, z };
 }
 
 #[tokio::test]
+async fn organize_imports_embedded_offsets_issue_8177() -> Result<()> {
+    let imports = "import { ref } from 'vue'
+import { useMagicKeys } from '@vueuse/core'
+import { useRemoteModel } from '~/models/remote-model'
+import { useLogModel } from '~/models/log-model'
+import { useUiModel } from '~/models/ui-model'
+";
+    let sorted = "import { useMagicKeys } from '@vueuse/core'
+import { ref } from 'vue'
+import { useLogModel } from '~/models/log-model'
+import { useRemoteModel } from '~/models/remote-model'
+import { useUiModel } from '~/models/ui-model'
+";
+    for (uri, language, prefix, suffix) in [
+        (
+            uri!("document.vue"),
+            "vue",
+            "<template>\n    <v-app-bar>\n        \n    </v-app-bar>\n</template>\n\n<script setup lang=\"ts\">\n",
+            "</script>\n",
+        ),
+        (
+            uri!("document.svelte"),
+            "svelte",
+            "<div>é</div>\n<script lang=\"ts\">\n",
+            "</script>\n",
+        ),
+        (uri!("document.astro"), "astro", "---\n", "---\n<div />\n"),
+    ] {
+        for full_support in [false, true] {
+            for resolve in [false, true] {
+                let fs = MemoryFileSystem::default();
+                fs.insert(
+                    to_utf8_file_path_buf(uri!("biome.json")),
+                    serde_json::json!({
+                        "linter": { "enabled": false },
+                        "html": { "experimentalFullSupportEnabled": full_support }
+                    })
+                    .to_string(),
+                );
+                let factory = ServerFactory::new_with_fs(Arc::new(fs));
+                let (service, client) = factory.create().into_inner();
+                let (stream, sink) = client.split();
+                let mut server = Server::new(service);
+                let (sender, _receiver) = channel(CHANNEL_BUFFER_SIZE);
+                let reader = tokio::spawn(client_handler(stream, sink, sender));
+                if resolve {
+                    server.initialize_with_resolve_support().await?;
+                } else {
+                    server.initialize().await?;
+                }
+                server.initialized().await?;
+                let input = format!("{prefix}{imports}{suffix}");
+                server
+                    .open_named_document(&input, uri.clone(), language)
+                    .await?;
+                let actions: CodeActionResponse = server
+                    .request(
+                        "textDocument/codeAction",
+                        "code_actions",
+                        CodeActionParams {
+                            text_document: TextDocumentIdentifier { uri: uri.clone() },
+                            range: Range::new(
+                                Position::default(),
+                                Position::new(input.lines().count() as u32, 0),
+                            ),
+                            context: CodeActionContext {
+                                diagnostics: vec![],
+                                only: Some(vec![CodeActionKind::new(
+                                    "source.organizeImports.biome",
+                                )]),
+                                trigger_kind: None,
+                            },
+                            work_done_progress_params: Default::default(),
+                            partial_result_params: Default::default(),
+                        },
+                    )
+                    .await?
+                    .context("codeAction returned None")?;
+                assert_eq!(
+                    actions.len(),
+                    1,
+                    "{language}, full={full_support}, resolve={resolve}"
+                );
+                let CodeActionOrCommand::CodeAction(mut action) =
+                    actions.into_iter().next().unwrap()
+                else {
+                    panic!("Expected a code action");
+                };
+                if resolve {
+                    assert!(action.edit.is_none());
+                    action = server
+                        .request("codeAction/resolve", "resolve_code_action", action)
+                        .await?
+                        .context("codeAction/resolve returned None")?;
+                }
+                let edits = action.edit.unwrap().changes.unwrap().remove(&uri).unwrap();
+                assert!(!edits.is_empty());
+                let changes = edits
+                    .into_iter()
+                    .rev()
+                    .map(|edit| TextDocumentContentChangeEvent {
+                        range: Some(edit.range),
+                        range_length: None,
+                        text: edit.new_text,
+                    })
+                    .collect();
+                let output = crate::utils::apply_document_changes(
+                    biome_lsp_converters::negotiated_encoding(&ClientCapabilities::default()),
+                    input,
+                    changes,
+                );
+                assert_eq!(
+                    output,
+                    format!("{prefix}{sorted}{suffix}"),
+                    "{language}, full={full_support}, resolve={resolve}"
+                );
+                server.shutdown().await?;
+                reader.abort();
+            }
+        }
+    }
+    Ok(())
+}
+
+#[tokio::test]
+async fn pull_action_in_astro_expression_after_frontmatter_issue_12433() -> Result<()> {
+    let uri = uri!("document.astro");
+    let input = "---\nconst value = true;\n---\n{true && <div class=\"px-2 p-4\" />}\n";
+    for resolve in [false, true] {
+        let fs = MemoryFileSystem::default();
+        fs.insert(
+            to_utf8_file_path_buf(uri!("biome.json")),
+            serde_json::json!({
+                "html": { "experimentalFullSupportEnabled": true },
+                "linter": {
+                    "rules": {
+                        "recommended": false,
+                        "nursery": { "useTailwindSortedClasses": "error" }
+                    }
+                }
+            })
+            .to_string(),
+        );
+        let factory = ServerFactory::new_with_fs(Arc::new(fs));
+        let (service, client) = factory.create().into_inner();
+        let (stream, sink) = client.split();
+        let mut server = Server::new(service);
+        let (sender, _receiver) = channel(CHANNEL_BUFFER_SIZE);
+        let reader = tokio::spawn(client_handler(stream, sink, sender));
+        if resolve {
+            server.initialize_with_resolve_support().await?;
+        } else {
+            server.initialize().await?;
+        }
+        server.initialized().await?;
+        server
+            .open_named_document(input, uri.clone(), "astro")
+            .await?;
+
+        // The cursor sits on the first class name.
+        let cursor = Position::new(3, 21);
+        let actions: CodeActionResponse = server
+            .request(
+                "textDocument/codeAction",
+                "code_actions",
+                CodeActionParams {
+                    text_document: TextDocumentIdentifier { uri: uri.clone() },
+                    range: Range::new(cursor, cursor),
+                    context: CodeActionContext {
+                        diagnostics: vec![],
+                        only: Some(vec![CodeActionKind::new(
+                            "quickfix.biome.nursery.useTailwindSortedClasses",
+                        )]),
+                        trigger_kind: None,
+                    },
+                    work_done_progress_params: Default::default(),
+                    partial_result_params: Default::default(),
+                },
+            )
+            .await?
+            .context("codeAction returned None")?;
+        assert_eq!(actions.len(), 1, "resolve={resolve}");
+        let CodeActionOrCommand::CodeAction(mut action) = actions.into_iter().next().unwrap()
+        else {
+            panic!("Expected a code action");
+        };
+        if resolve {
+            action = server
+                .request("codeAction/resolve", "resolve_code_action", action)
+                .await?
+                .context("codeAction/resolve returned None")?;
+        }
+        let edits = action.edit.unwrap().changes.unwrap().remove(&uri).unwrap();
+        let changes = edits
+            .into_iter()
+            .rev()
+            .map(|edit| TextDocumentContentChangeEvent {
+                range: Some(edit.range),
+                range_length: None,
+                text: edit.new_text,
+            })
+            .collect();
+        let output = crate::utils::apply_document_changes(
+            biome_lsp_converters::negotiated_encoding(&ClientCapabilities::default()),
+            input.to_string(),
+            changes,
+        );
+        assert_eq!(
+            output, "---\nconst value = true;\n---\n{true && <div class=\"p-4 px-2\" />}\n",
+            "resolve={resolve}"
+        );
+        server.shutdown().await?;
+        reader.abort();
+    }
+    Ok(())
+}
+
+#[tokio::test]
 async fn does_not_pull_action_for_disabled_rule_in_override_issue_2782() -> Result<()> {
     let fs = MemoryFileSystem::default();
     let config = r#"{
@@ -2940,6 +3432,145 @@ async fn pull_fix_all() -> Result<()> {
     server.shutdown().await?;
     reader.abort();
 
+    Ok(())
+}
+
+async fn fix_all_edit(
+    config: &str,
+    document: &str,
+    document_uri: Uri,
+    language: &str,
+) -> Result<String> {
+    let fs = MemoryFileSystem::default();
+    fs.insert(to_utf8_file_path_buf(uri!("biome.json")), config);
+
+    let factory = ServerFactory::new_with_fs(Arc::new(fs));
+    let (service, client) = factory.create().into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let (sender, _) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    server.initialize().await?;
+    server.initialized().await?;
+    server.load_configuration().await?;
+    server
+        .open_named_document(document, document_uri.clone(), language)
+        .await?;
+
+    let res: CodeActionResponse = server
+        .request(
+            "textDocument/codeAction",
+            "pull_code_actions",
+            CodeActionParams {
+                text_document: TextDocumentIdentifier {
+                    uri: document_uri.clone(),
+                },
+                range: Range {
+                    start: Position {
+                        line: 0,
+                        character: 0,
+                    },
+                    end: Position {
+                        line: 0,
+                        character: 0,
+                    },
+                },
+                context: CodeActionContext {
+                    diagnostics: vec![],
+                    only: Some(vec![CodeActionKind::new("source.fixAll.biome")]),
+                    ..Default::default()
+                },
+                work_done_progress_params: WorkDoneProgressParams {
+                    work_done_token: None,
+                },
+                partial_result_params: PartialResultParams {
+                    partial_result_token: None,
+                },
+            },
+        )
+        .await?
+        .context("codeAction returned None")?;
+
+    let [CodeActionOrCommand::CodeAction(action)] = res.as_slice() else {
+        panic!("expected one fix-all action: {res:?}");
+    };
+    let edit = action.edit.as_ref().context("expected edit")?;
+    let changes = edit.changes.as_ref().context("expected changes")?;
+    let edits = changes
+        .get(&document_uri)
+        .context("expected edits for document")?;
+    let [edit] = edits.as_slice() else {
+        panic!("expected one full-document edit: {edits:?}");
+    };
+    let new_text = edit.new_text.clone();
+
+    server
+        .notify(
+            "textDocument/didClose",
+            DidCloseTextDocumentParams {
+                text_document: TextDocumentIdentifier { uri: document_uri },
+            },
+        )
+        .await?;
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(new_text)
+}
+
+#[tokio::test]
+async fn fix_all_respects_format_with_errors() -> Result<()> {
+    let config = r#"{
+        "formatter": { "formatWithErrors": false },
+        "linter": {
+            "rules": {
+                "recommended": false,
+                "style": { "useConst": "on" }
+            }
+        }
+    }"#;
+    let new_text = fix_all_edit(
+        config,
+        "let a = 1; this is not valid javascript",
+        uri!("document.js"),
+        "javascript",
+    )
+    .await?;
+
+    assert_eq!(new_text, "const a = 1; this is not valid javascript");
+    Ok(())
+}
+
+#[tokio::test]
+async fn fix_all_does_not_format_embedded_code_with_errors() -> Result<()> {
+    let config = r#"{
+        "html": {
+            "experimentalFullSupportEnabled": true,
+            "formatter": { "enabled": true },
+            "linter": { "enabled": true }
+        },
+        "formatter": { "formatWithErrors": false },
+        "linter": {
+            "rules": {
+                "recommended": false,
+                "style": { "useConst": "on" }
+            }
+        }
+    }"#;
+    let new_text = fix_all_edit(
+        config,
+        "<script>let a = 1; this is not valid javascript</script>",
+        uri!("document.html"),
+        "html",
+    )
+    .await?;
+
+    assert_eq!(
+        new_text,
+        "<script>const a = 1; this is not valid javascript</script>"
+    );
     Ok(())
 }
 
@@ -3834,6 +4465,178 @@ async fn pull_source_assist_action() -> Result<()> {
     Ok(())
 }
 
+async fn apply_source_action(
+    server: &mut Server,
+    uri: &Uri,
+    input: &str,
+    resolve: bool,
+) -> Result<String> {
+    let actions: CodeActionResponse = server
+        .request(
+            "textDocument/codeAction",
+            "pull_code_actions",
+            CodeActionParams {
+                text_document: TextDocumentIdentifier { uri: uri.clone() },
+                range: Range::new(
+                    Position::new(0, 0),
+                    Position::new(input.lines().count() as u32, 0),
+                ),
+                context: CodeActionContext {
+                    diagnostics: vec![],
+                    only: Some(vec![CodeActionKind::new("source.biome")]),
+                    ..Default::default()
+                },
+                work_done_progress_params: Default::default(),
+                partial_result_params: Default::default(),
+            },
+        )
+        .await?
+        .context("codeAction returned None")?;
+
+    let [CodeActionOrCommand::CodeAction(action)] = actions.as_slice() else {
+        panic!("expected one source action: {actions:?}");
+    };
+    let mut action = action.clone();
+    if resolve && action.edit.is_none() {
+        action = server
+            .request("codeAction/resolve", "resolve_code_action", action)
+            .await?
+            .context("codeAction/resolve returned None")?;
+    }
+
+    let edits = action
+        .edit
+        .context("expected edit")?
+        .changes
+        .context("expected changes")?
+        .remove(uri)
+        .context("expected edits for document")?;
+    let changes = edits
+        .into_iter()
+        .rev()
+        .map(|edit| TextDocumentContentChangeEvent {
+            range: Some(edit.range),
+            range_length: None,
+            text: edit.new_text,
+        })
+        .collect();
+
+    Ok(crate::utils::apply_document_changes(
+        biome_lsp_converters::negotiated_encoding(&ClientCapabilities::default()),
+        input.to_string(),
+        changes,
+    ))
+}
+
+#[tokio::test]
+async fn source_assists_suppress_nested_actions() -> Result<()> {
+    for (config, uri, language, input, after_first_action, expected) in [
+        (
+            r#"{
+                "assist": {
+                    "actions": {
+                        "source": {
+                            "useSortedKeys": "on"
+                        }
+                    }
+                }
+            }"#,
+            uri!("file.ts"),
+            "typescript",
+            "const test = {\n\taVar: 1,\n\tcVar: 2,\n\tbVar: {\n\t\ta: 3,\n\t\tb: 4,\n\t\td: 6,\n\t\tc: 5,\n\t}\n}\n",
+            "const test = {\n\taVar: 1,\n\tbVar: {\n\t\ta: 3,\n\t\tb: 4,\n\t\td: 6,\n\t\tc: 5,\n\t}, \n\tcVar: 2\n}\n",
+            "const test = {\n\taVar: 1,\n\tbVar: {\n\t\ta: 3,\n\t\tb: 4,\n\t\tc: 5,\n\t\td: 6,\n\t}, \n\tcVar: 2\n}\n",
+        ),
+        (
+            r#"{
+                "assist": {
+                    "actions": {
+                        "source": {
+                            "useSortedKeys": "on"
+                        }
+                    }
+                }
+            }"#,
+            uri!("file.json"),
+            "json",
+            "{\"a\":1,\"c\":2,\"b\":{\"a\":3,\"d\":6,\"c\":5}}\n",
+            "{\"a\":1,\"b\":{\"a\":3,\"d\":6,\"c\":5},\"c\":2}\n",
+            "{\"a\":1,\"b\":{\"a\":3,\"c\":5,\"d\":6},\"c\":2}\n",
+        ),
+        (
+            r#"{
+                "graphql": {
+                    "assist": {
+                        "enabled": true
+                    }
+                },
+                "assist": {
+                    "actions": {
+                        "source": {
+                            "useSortedSelectionSet": "on"
+                        }
+                    }
+                }
+            }"#,
+            uri!("file.graphql"),
+            "graphql",
+            "query {\n\tz {\n\t\tz\n\t\ta\n\t}\n\ta\n}\n",
+            "query {\n\ta\n\tz {\n\t\tz\n\t\ta\n\t}\n}\n",
+            "query {\n\ta\n\tz {\n\t\ta\n\t\tz\n\t}\n}\n",
+        ),
+    ] {
+        for resolve in [false, true] {
+            let fs = MemoryFileSystem::default();
+            fs.insert(to_utf8_file_path_buf(uri!("biome.json")), config);
+
+            let factory = ServerFactory::new_with_fs(Arc::new(fs));
+            let (service, client) = factory.create().into_inner();
+            let (stream, sink) = client.split();
+            let mut server = Server::new(service);
+            let (sender, _) = channel(CHANNEL_BUFFER_SIZE);
+            let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+            if resolve {
+                server.initialize_with_resolve_support().await?;
+            } else {
+                server.initialize().await?;
+            }
+            server.initialized().await?;
+            server
+                .open_named_document(input, uri.clone(), language)
+                .await?;
+
+            let output = apply_source_action(&mut server, &uri, input, resolve).await?;
+            assert_eq!(output, after_first_action, "{language}, resolve={resolve}");
+
+            server
+                .notify(
+                    "textDocument/didChange",
+                    lsp::DidChangeTextDocumentParams {
+                        text_document: lsp::VersionedTextDocumentIdentifier {
+                            uri: uri.clone(),
+                            version: 1,
+                        },
+                        content_changes: vec![TextDocumentContentChangeEvent {
+                            range: None,
+                            range_length: None,
+                            text: output.clone(),
+                        }],
+                    },
+                )
+                .await?;
+
+            let output = apply_source_action(&mut server, &uri, &output, resolve).await?;
+            assert_eq!(output, expected, "{language}, resolve={resolve}");
+
+            server.shutdown().await?;
+            reader.abort();
+        }
+    }
+
+    Ok(())
+}
+
 #[tokio::test]
 #[ignore]
 async fn watcher_updates_module_graph_simple() -> Result<()> {
@@ -3881,8 +4684,9 @@ export function bar() {
     let mut factory = ServerFactory::new(true, instruction_channel.sender.clone());
 
     let workspace = factory.workspace();
+    let db_state = factory.db_state();
     spawn_blocking(move || {
-        workspace.start_watcher(watcher);
+        workspace.start_watcher(&db_state, watcher);
     });
 
     let (service, client) = factory.create().into_inner();
@@ -3934,6 +4738,7 @@ export function bar() {
                 document_file_source: None,
                 persist_node_cache: false,
                 inline_config: None,
+                editor_features: None,
             },
         )
         .await?
@@ -4069,6 +4874,207 @@ export function bar() {
 }
 
 #[tokio::test]
+#[ignore = "Currently flaky, and fails from time to time. To review later"]
+async fn watcher_updates_tailwind_stylesheet() -> Result<()> {
+    const THEME_WITH_BRAND: &str = "@theme {\n    --color-brand: #00f;\n}\n";
+    const THEME_WITHOUT_BRAND: &str = "@theme {\n}\n";
+
+    // ARRANGE: `bg-brand` is only known through the theme that `app.css`
+    // imports, so the class list is only unsorted while the theme defines it.
+    let mut fs = TemporaryFs::new("watcher_updates_tailwind_stylesheet");
+    fs.create_file(
+        "app.css",
+        "@import \"tailwindcss\";\n@import \"./theme.css\";\n",
+    );
+    fs.create_file("theme.css", THEME_WITH_BRAND);
+    fs.create_file(
+        "App.jsx",
+        "export const a = <div className=\"bg-brand flex\" />;\n",
+    );
+
+    let (watcher, instruction_channel) = Watcher::new(WatcherOptions::default())?;
+    let mut factory = ServerFactory::new(true, instruction_channel.sender.clone());
+    let workspace = factory.workspace();
+    let db_state = factory.db_state();
+    spawn_blocking(move || {
+        workspace.start_watcher(&db_state, watcher);
+    });
+    let (service, client) = factory.create().into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+    let (sender, _) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+    server.initialize().await?;
+
+    let OpenProjectResult { project_key } = server
+        .request(
+            "biome/open_project",
+            "open_project",
+            OpenProjectParams {
+                path: fs.working_directory.clone().into(),
+                open_uninitialized: true,
+            },
+        )
+        .await?
+        .expect("open_project returned an error");
+
+    // These tests don't load `biome.json`, so the settings are sent directly.
+    let _: biome_service::workspace::UpdateSettingsResult = server
+        .request(
+            "biome/update_settings",
+            "update_settings",
+            biome_service::workspace::UpdateSettingsParams {
+                project_key,
+                configuration: Configuration {
+                    tailwind: Some(biome_configuration::TailwindConfiguration {
+                        stylesheet: Some("./app.css".into()),
+                        ..Default::default()
+                    }),
+                    ..Default::default()
+                },
+                workspace_directory: Some(fs.working_directory.clone().into()),
+                extended_configurations: Vec::new(),
+                module_graph_resolution_kind: Default::default(),
+            },
+        )
+        .await?
+        .expect("update_settings returned an error");
+
+    let result: ScanProjectResult = server
+        .request(
+            "biome/scan_project",
+            "scan_project",
+            ScanProjectParams {
+                project_key,
+                watch: true,
+                force: false,
+                scan_kind: ScanKind::Project,
+                verbose: false,
+            },
+        )
+        .await?
+        .expect("scan_project returned an error");
+    assert_eq!(result.diagnostics.len(), 0);
+
+    let _: OpenFileResult = server
+        .request(
+            "biome/open_file",
+            "open_file",
+            OpenFileParams {
+                project_key,
+                path: fs.working_directory.join("App.jsx").into(),
+                content: FileContent::FromServer,
+                document_file_source: None,
+                persist_node_cache: false,
+                inline_config: None,
+                editor_features: None,
+            },
+        )
+        .await?
+        .expect("open_file returned an error");
+
+    // ACT: Pull diagnostics.
+    let result: PullDiagnosticsResult = server
+        .request(
+            "biome/pull_diagnostics",
+            "pull_diagnostics",
+            PullDiagnosticsParams {
+                project_key,
+                path: fs.working_directory.join("App.jsx").into(),
+                categories: RuleCategories::all(),
+                only: Vec::new(),
+                skip: Vec::new(),
+                enabled_rules: vec![
+                    RuleSelector::Rule("nursery", "useTailwindSortedClasses").into(),
+                ],
+                include_code_fix: false,
+                inline_config: None,
+                max_diagnostics: None,
+                diagnostic_level: biome_diagnostics::Severity::Hint,
+                enforce_assist: false,
+            },
+        )
+        .await?
+        .expect("pull_diagnostics returned an error");
+
+    // ASSERT: `bg-brand` is a known color, so it sorts after `flex`.
+    assert_eq!(result.diagnostics.len(), 1);
+    assert_eq!(
+        PrintDescription(&result.diagnostics[0]).to_string(),
+        "These CSS classes should be sorted."
+    );
+
+    // ARRANGE: Remove `--color-brand` from the imported theme.
+    clear_notifications!(factory.service_rx);
+    fs.create_file("theme.css", THEME_WITHOUT_BRAND);
+    await_notification!(factory.service_rx);
+
+    // ACT: Pull diagnostics.
+    let result: PullDiagnosticsResult = server
+        .request(
+            "biome/pull_diagnostics",
+            "pull_diagnostics",
+            PullDiagnosticsParams {
+                project_key,
+                path: fs.working_directory.join("App.jsx").into(),
+                categories: RuleCategories::all(),
+                only: Vec::new(),
+                skip: Vec::new(),
+                enabled_rules: vec![
+                    RuleSelector::Rule("nursery", "useTailwindSortedClasses").into(),
+                ],
+                include_code_fix: false,
+                inline_config: None,
+                max_diagnostics: None,
+                diagnostic_level: biome_diagnostics::Severity::Hint,
+                enforce_assist: false,
+            },
+        )
+        .await?
+        .expect("pull_diagnostics returned an error");
+
+    // ASSERT: `bg-brand` is unknown now, so it keeps its place in front.
+    assert_eq!(result.diagnostics.len(), 0);
+
+    // ARRANGE: Restore `--color-brand`.
+    clear_notifications!(factory.service_rx);
+    fs.create_file("theme.css", THEME_WITH_BRAND);
+    await_notification!(factory.service_rx);
+
+    // ACT: Pull diagnostics.
+    let result: PullDiagnosticsResult = server
+        .request(
+            "biome/pull_diagnostics",
+            "pull_diagnostics",
+            PullDiagnosticsParams {
+                project_key,
+                path: fs.working_directory.join("App.jsx").into(),
+                categories: RuleCategories::all(),
+                only: Vec::new(),
+                skip: Vec::new(),
+                enabled_rules: vec![
+                    RuleSelector::Rule("nursery", "useTailwindSortedClasses").into(),
+                ],
+                include_code_fix: false,
+                inline_config: None,
+                max_diagnostics: None,
+                diagnostic_level: biome_diagnostics::Severity::Hint,
+                enforce_assist: false,
+            },
+        )
+        .await?
+        .expect("pull_diagnostics returned an error");
+
+    // ASSERT: The diagnostic is expected to reappear.
+    assert_eq!(result.diagnostics.len(), 1);
+
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}
+
+#[tokio::test]
 #[ignore]
 async fn watcher_updates_module_graph_with_directories() -> Result<()> {
     const FOO_CONTENT: &str = r#"import { bar } from "./utils/bar.ts";
@@ -4109,8 +5115,9 @@ export function bar() {
     let mut factory = ServerFactory::new(true, instruction_channel.sender.clone());
 
     let workspace = factory.workspace();
+    let db_state = factory.db_state();
     spawn_blocking(move || {
-        workspace.start_watcher(watcher);
+        workspace.start_watcher(&db_state, watcher);
     });
 
     let (service, client) = factory.create().into_inner();
@@ -4162,6 +5169,7 @@ export function bar() {
                 document_file_source: None,
                 persist_node_cache: false,
                 inline_config: None,
+                editor_features: None,
             },
         )
         .await?
@@ -4292,8 +5300,9 @@ async fn should_open_and_update_nested_files() -> Result<()> {
     let mut factory = ServerFactory::new(true, instruction_channel.sender.clone());
 
     let workspace = factory.workspace();
+    let db_state = factory.db_state();
     spawn_blocking(move || {
-        workspace.start_watcher(watcher);
+        workspace.start_watcher(&db_state, watcher);
     });
 
     let (service, client) = factory.create().into_inner();
@@ -4555,6 +5564,63 @@ async fn pull_diagnostics_monorepo() -> Result<()> {
     assert_diagnostic_code(&notification, "noConstAssign");
 
     server.close_document().await?;
+
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn scan_project_describes_nested_root_configuration() -> Result<()> {
+    let mut fs = TemporaryFs::new("scan_project_describes_nested_root_configuration");
+    fs.create_file("biome.json", r#"{ "root": true }"#);
+    fs.create_file("packages/lib/biome.json", r#"{ "root": true }"#);
+
+    let (_watcher, instruction_channel) = Watcher::new(WatcherOptions::default())?;
+    let factory = ServerFactory::new(true, instruction_channel.sender.clone());
+    let (service, client) = factory.create().into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let (sender, _) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    server.initialize().await?;
+
+    let OpenProjectResult { project_key } = server
+        .request(
+            "biome/open_project",
+            "open_project",
+            OpenProjectParams {
+                path: fs.working_directory.clone().into(),
+                open_uninitialized: true,
+            },
+        )
+        .await?
+        .expect("open_project returned an error");
+
+    let result: ScanProjectResult = server
+        .request(
+            "biome/scan_project",
+            "scan_project",
+            ScanProjectParams {
+                project_key,
+                watch: false,
+                force: false,
+                scan_kind: ScanKind::Project,
+                verbose: false,
+            },
+        )
+        .await?
+        .expect("scan_project returned an error");
+
+    // The language server logs these diagnostics to the client using their description.
+    assert_eq!(result.diagnostics.len(), 1);
+    assert_eq!(
+        PrintDescription(&result.diagnostics[0]).to_string(),
+        "Found a nested root configuration, but there's already a root configuration."
+    );
 
     server.shutdown().await?;
     reader.abort();
@@ -5432,6 +6498,135 @@ async fn relative_configuration_path_resolves_against_correct_workspace_folder()
     Ok(())
 }
 
+/// Regression test for <https://github.com/biomejs/biome/issues/9566>.
+///
+/// In a multi-root workspace, a configuration that fails to load in one workspace
+/// folder must not disable lint/assist diagnostics for files in another, healthy
+/// workspace folder.
+#[tokio::test]
+#[expect(deprecated)]
+async fn broken_configuration_in_one_workspace_folder_does_not_disable_another() -> Result<()> {
+    let fs = MemoryFileSystem::default();
+
+    // `good` has a valid config that enables a lint rule; `bad` has a malformed
+    // config that cannot be parsed, so loading it yields an error status.
+    let good_config = r#"{
+        "linter": {
+            "rules": {
+                "recommended": false,
+                "suspicious": { "noDoubleEquals": "error" }
+            }
+        }
+    }"#;
+    let bad_config = r#"{ "linter": { "rules": "#;
+
+    fs.insert(to_utf8_file_path_buf(uri!("good/biome.json")), good_config);
+    fs.insert(to_utf8_file_path_buf(uri!("bad/biome.json")), bad_config);
+
+    let factory = ServerFactory::new_with_fs(Arc::new(fs));
+    let (service, client) = factory.create().into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let (sender, mut receiver) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    let _res: InitializeResult = server
+        .request(
+            "initialize",
+            "_init",
+            InitializeParams {
+                process_id: None,
+                root_path: None,
+                root_uri: Some(uri!("/")),
+                initialization_options: None,
+                capabilities: ClientCapabilities::default(),
+                trace: None,
+                workspace_folders: Some(vec![
+                    WorkspaceFolder {
+                        name: "good".to_string(),
+                        uri: uri!("good"),
+                    },
+                    WorkspaceFolder {
+                        name: "bad".to_string(),
+                        uri: uri!("bad"),
+                    },
+                ]),
+                client_info: None,
+                locale: None,
+                work_done_progress_params: Default::default(),
+            },
+        )
+        .await?
+        .context("initialize returned None")?;
+
+    server.initialized().await?;
+
+    let good_uri = uri!("good/document.js");
+
+    // Open the healthy file: it must produce a lint diagnostic.
+    server
+        .open_named_document("a == b;", good_uri.clone(), "javascript")
+        .await?;
+
+    let notification = wait_for_notification(
+        &mut receiver,
+        |n| matches!(n, ServerNotification::PublishDiagnostics(params) if params.uri == good_uri),
+    )
+    .await;
+    let Some(ServerNotification::PublishDiagnostics(params)) = notification else {
+        panic!("Expected PublishDiagnostics for the healthy file, got {notification:?}");
+    };
+    assert!(
+        !params.diagnostics.is_empty(),
+        "Expected a lint diagnostic for the healthy file on open"
+    );
+
+    // Open a file in the folder with the broken configuration. Its configuration
+    // fails to load; previously this overwrote the shared status.
+    server
+        .open_named_document("a == b;", uri!("bad/document.js"), "javascript")
+        .await?;
+
+    // Re-trigger diagnostics for the healthy file. The lint diagnostic must still
+    // be reported, proving the broken folder did not disable the healthy one.
+    server
+        .notify(
+            "textDocument/didChange",
+            lsp::DidChangeTextDocumentParams {
+                text_document: lsp::VersionedTextDocumentIdentifier {
+                    uri: good_uri.clone(),
+                    version: 1,
+                },
+                content_changes: vec![TextDocumentContentChangeEvent {
+                    range: None,
+                    range_length: None,
+                    text: "a == b;".to_string(),
+                }],
+            },
+        )
+        .await?;
+
+    let notification = wait_for_notification(
+        &mut receiver,
+        |n| matches!(n, ServerNotification::PublishDiagnostics(params) if params.uri == good_uri),
+    )
+    .await;
+    let Some(ServerNotification::PublishDiagnostics(params)) = notification else {
+        panic!("Expected PublishDiagnostics for the healthy file, got {notification:?}");
+    };
+    assert!(
+        !params.diagnostics.is_empty(),
+        "The healthy file must keep its lint diagnostic even after a sibling \
+         workspace folder failed to load its configuration"
+    );
+
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}
+
 /// Verifies that an absolute `configurationPath` (e.g. `C:/shared-config/biome.json`)
 /// pointing to a file outside the workspace roots properly attributes the registered
 /// project to the workspace root, so that files opened inside the workspace are
@@ -5655,6 +6850,9 @@ fn assert_diagnostic_code(server_notification: &ServerNotification, code: &str) 
         ServerNotification::ShowMessage(_) => {
             panic!("Unexpected notification: {server_notification:?}",);
         }
+        ServerNotification::RegisterCapability(_) | ServerNotification::UnregisterCapability(_) => {
+            panic!("Unexpected notification: {server_notification:?}",);
+        }
     }
 }
 
@@ -5664,6 +6862,9 @@ fn assert_diagnostics_count(server_notification: &ServerNotification, expected_c
             assert_eq!(publish.diagnostics.len(), expected_count)
         }
         ServerNotification::ShowMessage(_) => {
+            panic!("Unexpected notification: {server_notification:?}",);
+        }
+        ServerNotification::RegisterCapability(_) | ServerNotification::UnregisterCapability(_) => {
             panic!("Unexpected notification: {server_notification:?}",);
         }
     }
@@ -5743,19 +6944,18 @@ async fn change_document_inverted_range_does_not_panic() -> Result<()> {
     Ok(())
 }
 
-/// Regression test: the LSP server should not crash when the client sends
-/// `didChangeWatchedFiles.dynamicRegistration: true` but no `workspaceFolders`
-/// in `InitializeParams`. This is valid per the LSP spec — `workspaceFolders`
-/// is optional and some clients only send `rootUri`.
-#[tokio::test]
 #[expect(deprecated)]
-async fn initialize_without_workspace_folders_does_not_panic() -> Result<()> {
+async fn registered_watched_files(
+    root_uri: Option<Uri>,
+    workspace_folders: Option<Vec<WorkspaceFolder>>,
+    relative_pattern_support: Option<bool>,
+) -> Result<lsp::DidChangeWatchedFilesRegistrationOptions> {
     let factory = ServerFactory::default();
     let (service, client) = factory.create().into_inner();
     let (stream, sink) = client.split();
     let mut server = Server::new(service);
 
-    let (sender, _) = channel(CHANNEL_BUFFER_SIZE);
+    let (sender, mut receiver) = channel(CHANNEL_BUFFER_SIZE);
     let reader = tokio::spawn(client_handler(stream, sink, sender));
 
     let _res: InitializeResult = server
@@ -5765,14 +6965,14 @@ async fn initialize_without_workspace_folders_does_not_panic() -> Result<()> {
             InitializeParams {
                 process_id: None,
                 root_path: None,
-                root_uri: Some(uri!("")),
+                root_uri,
                 initialization_options: None,
                 capabilities: ClientCapabilities {
                     workspace: Some(lsp::WorkspaceClientCapabilities {
                         did_change_watched_files: Some(
                             lsp::DidChangeWatchedFilesClientCapabilities {
                                 dynamic_registration: Some(true),
-                                relative_pattern_support: None,
+                                relative_pattern_support,
                             },
                         ),
                         ..Default::default()
@@ -5780,7 +6980,7 @@ async fn initialize_without_workspace_folders_does_not_panic() -> Result<()> {
                     ..Default::default()
                 },
                 trace: None,
-                workspace_folders: None,
+                workspace_folders,
                 client_info: None,
                 locale: None,
                 work_done_progress_params: Default::default(),
@@ -5789,14 +6989,294 @@ async fn initialize_without_workspace_folders_does_not_panic() -> Result<()> {
         .await?
         .context("initialize returned None")?;
 
-    // `initialized` triggers `setup_capabilities` which registers file watchers.
-    // Before the fix, this panicked because it tried to parse a filesystem path as a URI.
     server.initialized().await?;
+
+    let notification = wait_for_notification(&mut receiver, |notification| {
+        matches!(
+            notification,
+            ServerNotification::RegisterCapability(_) | ServerNotification::UnregisterCapability(_)
+        )
+    })
+    .await;
+    let Some(ServerNotification::RegisterCapability(params)) = notification else {
+        panic!("Expected a watched-file registration, got {notification:?}");
+    };
+    let registration = params
+        .registrations
+        .into_iter()
+        .find(|registration| registration.id == "biome_did_change_watched_files")
+        .context("watched-file registration not found")?;
+    let options = from_value(
+        registration
+            .register_options
+            .context("watched-file registration has no options")?,
+    )?;
+
+    server.load_configuration().await?;
+    wait_for_no_notification(&mut receiver, Duration::from_millis(250), |notification| {
+        matches!(
+            notification,
+            ServerNotification::RegisterCapability(_) | ServerNotification::UnregisterCapability(_)
+        )
+    })
+    .await;
 
     server.shutdown().await?;
     reader.abort();
 
+    Ok(options)
+}
+
+fn assert_relative_watched_files(
+    options: lsp::DidChangeWatchedFilesRegistrationOptions,
+    expected_bases: &[lsp::OneOf<WorkspaceFolder, Uri>],
+) {
+    let expected_patterns = [
+        "**/biome.{json,jsonc}",
+        "**/.biome.{json,jsonc}",
+        ".editorconfig",
+        "pnpm-workspace.yaml",
+        "**/.gitignore",
+        "**/.ignore",
+    ];
+    assert_eq!(
+        options.watchers.len(),
+        expected_bases.len() * expected_patterns.len()
+    );
+
+    for (watchers, expected_base) in options
+        .watchers
+        .chunks_exact(expected_patterns.len())
+        .zip(expected_bases)
+    {
+        for (watcher, expected_pattern) in watchers.iter().zip(expected_patterns) {
+            assert_eq!(watcher.kind, Some(lsp::WatchKind::all()));
+            assert_eq!(
+                watcher.glob_pattern,
+                lsp::GlobPattern::Relative(lsp::RelativePattern {
+                    base_uri: expected_base.clone(),
+                    pattern: expected_pattern.to_string(),
+                })
+            );
+        }
+    }
+}
+
+fn assert_string_watched_files(
+    options: lsp::DidChangeWatchedFilesRegistrationOptions,
+    expected_bases: &[Uri],
+) {
+    let expected_patterns = [
+        "**/biome.{json,jsonc}",
+        "**/.biome.{json,jsonc}",
+        ".editorconfig",
+        "pnpm-workspace.yaml",
+        "**/.gitignore",
+        "**/.ignore",
+    ];
+    assert_eq!(
+        options.watchers.len(),
+        expected_bases.len() * expected_patterns.len()
+    );
+
+    for (watchers, expected_base) in options
+        .watchers
+        .chunks_exact(expected_patterns.len())
+        .zip(expected_bases)
+    {
+        let base_path = expected_base.to_file_path().unwrap();
+        let base_path = base_path.to_string_lossy();
+        let separator = if base_path.ends_with('/') || base_path.ends_with('\\') {
+            ""
+        } else {
+            "/"
+        };
+        for (watcher, expected_pattern) in watchers.iter().zip(expected_patterns) {
+            assert_eq!(watcher.kind, Some(lsp::WatchKind::all()));
+            assert_eq!(
+                watcher.glob_pattern,
+                lsp::GlobPattern::String(format!("{base_path}{separator}{expected_pattern}"))
+            );
+        }
+    }
+}
+
+#[tokio::test]
+async fn registers_relative_watched_files_for_workspace_folders() -> Result<()> {
+    let folders = vec![
+        WorkspaceFolder {
+            name: "test_one".to_string(),
+            uri: uri!("test_one"),
+        },
+        WorkspaceFolder {
+            name: "test_two".to_string(),
+            uri: uri!("test_two"),
+        },
+    ];
+    let options =
+        registered_watched_files(Some(uri!("fallback")), Some(folders.clone()), Some(true)).await?;
+
+    assert_relative_watched_files(
+        options,
+        &folders
+            .into_iter()
+            .map(lsp::OneOf::Left)
+            .collect::<Vec<_>>(),
+    );
+    Ok(())
+}
+
+#[tokio::test]
+async fn registers_relative_watched_files_from_root_uri() -> Result<()> {
+    let root_uri = uri!("root");
+    for workspace_folders in [None, Some(Vec::new())] {
+        let options =
+            registered_watched_files(Some(root_uri.clone()), workspace_folders, Some(true)).await?;
+        assert_relative_watched_files(options, &[lsp::OneOf::Right(root_uri.clone())]);
+    }
+    Ok(())
+}
+
+#[tokio::test]
+async fn registers_string_watched_files_without_relative_pattern_support() -> Result<()> {
+    let folders = vec![
+        WorkspaceFolder {
+            name: "test_one".to_string(),
+            uri: uri!("test_one"),
+        },
+        WorkspaceFolder {
+            name: "test_two".to_string(),
+            uri: uri!("test_two"),
+        },
+    ];
+    let expected_bases = folders
+        .iter()
+        .map(|folder| folder.uri.clone())
+        .collect::<Vec<_>>();
+
+    for relative_pattern_support in [None, Some(false)] {
+        let options = registered_watched_files(
+            Some(uri!("fallback")),
+            Some(folders.clone()),
+            relative_pattern_support,
+        )
+        .await?;
+        assert_string_watched_files(options, &expected_bases);
+    }
+    Ok(())
+}
+
+#[tokio::test]
+async fn escapes_workspace_paths_in_string_watched_files() -> Result<()> {
+    let folder_uri = Uri::from_str(if cfg!(windows) {
+        "file:///z%3A/workspace/%5Btest%5D"
+    } else {
+        "file:///workspace/%5Btest%5D%5Cdir"
+    })?;
+    let options = registered_watched_files(
+        None,
+        Some(vec![WorkspaceFolder {
+            name: "test".to_string(),
+            uri: folder_uri,
+        }]),
+        None,
+    )
+    .await?;
+
+    let expected = if cfg!(windows) {
+        "z:/workspace/[[]test[]]/**/biome.{json,jsonc}"
+    } else {
+        "/workspace/[[]test[]]\\dir/**/biome.{json,jsonc}"
+    };
+    assert_eq!(
+        options.watchers[0].glob_pattern,
+        lsp::GlobPattern::String(expected.to_string())
+    );
     Ok(())
 }
 
 // #endregion
+
+/// Each connection to the server is a separate client: opening a file doesn't
+/// replace the content of the clients that already have it open, and a file
+/// that only one client opened doesn't exist for the others.
+#[tokio::test]
+async fn connections_keep_their_own_content() -> Result<()> {
+    const EDITOR_CONTENT: &str = "let editor = 1;";
+
+    let factory = ServerFactory::default();
+    let (editor_service, editor_client) = factory.create().into_inner();
+    let (editor_stream, editor_sink) = editor_client.split();
+    let mut editor = Server::new(editor_service);
+    let (editor_sender, _) = channel(CHANNEL_BUFFER_SIZE);
+    let editor_reader = tokio::spawn(client_handler(editor_stream, editor_sink, editor_sender));
+    let (other_service, other_client) = factory.create().into_inner();
+    let (other_stream, other_sink) = other_client.split();
+    let mut other = Server::new(other_service);
+    let (other_sender, _) = channel(CHANNEL_BUFFER_SIZE);
+    let other_reader = tokio::spawn(client_handler(other_stream, other_sink, other_sender));
+
+    editor.initialize().await?;
+    editor.initialized().await?;
+    other.initialize().await?;
+    other.initialized().await?;
+    editor.open_document(EDITOR_CONTENT).await?;
+
+    let path = BiomePath::try_from(uri!("document.js").to_file_path().unwrap()).unwrap();
+    let OpenProjectResult { project_key } = other
+        .request(
+            "biome/open_project",
+            "open_project",
+            OpenProjectParams {
+                path: BiomePath::new(""),
+                open_uninitialized: true,
+            },
+        )
+        .await?
+        .context("open_project returned an error")?;
+    let exists: bool = other
+        .request(
+            "biome/file_exists",
+            "file_exists",
+            FileExistsParams {
+                file_path: path.clone(),
+            },
+        )
+        .await?
+        .context("file_exists returned an error")?;
+    assert!(!exists);
+
+    let _: OpenFileResult = other
+        .request(
+            "biome/open_file",
+            "open_file",
+            OpenFileParams {
+                project_key,
+                path: path.clone(),
+                content: FileContent::from_client("let other = 2;"),
+                document_file_source: None,
+                persist_node_cache: false,
+                inline_config: None,
+                editor_features: None,
+            },
+        )
+        .await?
+        .context("open_file returned an error")?;
+    let content: String = editor
+        .request(
+            "biome/get_file_content",
+            "get_file_content",
+            GetFileContentParams { project_key, path },
+        )
+        .await?
+        .context("get_file_content returned an error")?;
+    assert_eq!(content, EDITOR_CONTENT);
+
+    editor.close_document().await?;
+    editor.shutdown().await?;
+    other.shutdown().await?;
+    editor_reader.abort();
+    other_reader.abort();
+
+    Ok(())
+}

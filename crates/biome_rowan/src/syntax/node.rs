@@ -1,9 +1,10 @@
 use crate::green::GreenElement;
 use crate::syntax::SyntaxTrivia;
+use crate::syntax::borrowed_token::{BorrowedTokensIterator, BorrowedTokensWithCommentsIterator};
 use crate::syntax::element::{SyntaxElement, SyntaxElementKey};
 use crate::{
-    AstNode, Direction, GreenNode, Language, NodeOrToken, SyntaxKind, SyntaxList, SyntaxNodeText,
-    SyntaxToken, SyntaxTriviaPiece, TokenAtOffset, WalkEvent, cursor,
+    AstNode, Direction, GreenNode, Language, NodeOrToken, SyntaxKind, SyntaxKindSet, SyntaxList,
+    SyntaxNodeText, SyntaxToken, SyntaxTriviaPiece, TokenAtOffset, WalkEvent, cursor,
 };
 use biome_text_size::{TextRange, TextSize};
 #[cfg(feature = "serde")]
@@ -250,9 +251,10 @@ impl<L: Language> SyntaxNode<L> {
         self.raw.parent().map(Self::from)
     }
 
-    /// Returns the grandparent.
+    /// Returns the parent of this node's parent, or [None] if this node has no
+    /// grandparent.
     pub fn grand_parent(&self) -> Option<Self> {
-        self.parent().and_then(|parent| parent.parent())
+        self.raw.grand_parent().map(Self::from)
     }
 
     /// Returns the index of this node inside of its parent
@@ -265,11 +267,35 @@ impl<L: Language> SyntaxNode<L> {
         self.raw.ancestors().map(Self::from)
     }
 
+    /// Returns the topmost node of the tree containing this node.
+    pub fn tree_top(&self) -> Self {
+        Self::from(self.raw.tree_top())
+    }
+
     pub fn children(&self) -> SyntaxNodeChildren<L> {
         SyntaxNodeChildren {
             raw: self.raw.children(),
             _p: PhantomData,
         }
+    }
+
+    /// Returns the direct child nodes whose kinds are in `kinds`.
+    ///
+    /// Rejected children are filtered before their syntax nodes are allocated.
+    pub fn children_of_kinds(
+        &self,
+        kinds: SyntaxKindSet<L>,
+    ) -> impl Iterator<Item = Self> + Clone + use<L> {
+        self.raw.children_of_kinds(kinds).map(Self::from)
+    }
+
+    /// Returns the slot at `index`, or [None] if this node has no slot with that index.
+    ///
+    /// Use it to read a single slot. Unlike `slots().nth(index)`, it doesn't create an
+    /// iterator that holds another reference to this node.
+    #[inline]
+    pub fn slot(&self, index: usize) -> Option<SyntaxSlot<L>> {
+        self.raw.slot(index).map(SyntaxSlot::from)
     }
 
     /// Returns an iterator over all the slots of this syntax node.
@@ -287,6 +313,18 @@ impl<L: Language> SyntaxNode<L> {
         }
     }
 
+    /// Returns the direct child elements whose kinds are in `kinds`.
+    ///
+    /// Rejected children are filtered before their syntax elements are allocated.
+    pub fn children_with_tokens_of_kinds(
+        &self,
+        kinds: SyntaxKindSet<L>,
+    ) -> impl Iterator<Item = SyntaxElement<L>> + Clone + use<L> {
+        self.raw
+            .children_with_tokens_of_kinds(kinds)
+            .map(SyntaxElement::from)
+    }
+
     pub fn tokens(&self) -> impl DoubleEndedIterator<Item = SyntaxToken<L>> + '_ {
         self.raw.tokens().map(SyntaxToken::from)
     }
@@ -294,6 +332,12 @@ impl<L: Language> SyntaxNode<L> {
     pub fn first_child(&self) -> Option<Self> {
         self.raw.first_child().map(Self::from)
     }
+
+    /// Returns the first direct child node whose kind is in `kinds`.
+    pub fn first_child_of_kinds(&self, kinds: SyntaxKindSet<L>) -> Option<Self> {
+        self.raw.first_child_of_kinds(kinds).map(Self::from)
+    }
+
     pub fn last_child(&self) -> Option<Self> {
         self.raw.last_child().map(Self::from)
     }
@@ -301,6 +345,17 @@ impl<L: Language> SyntaxNode<L> {
     pub fn first_child_or_token(&self) -> Option<SyntaxElement<L>> {
         self.raw.first_child_or_token().map(NodeOrToken::from)
     }
+
+    /// Returns the first direct child element whose kind is in `kinds`.
+    pub fn first_child_or_token_of_kinds(
+        &self,
+        kinds: SyntaxKindSet<L>,
+    ) -> Option<SyntaxElement<L>> {
+        self.raw
+            .first_child_or_token_of_kinds(kinds)
+            .map(SyntaxElement::from)
+    }
+
     pub fn last_child_or_token(&self) -> Option<SyntaxElement<L>> {
         self.raw.last_child_or_token().map(NodeOrToken::from)
     }
@@ -308,6 +363,12 @@ impl<L: Language> SyntaxNode<L> {
     pub fn next_sibling(&self) -> Option<Self> {
         self.raw.next_sibling().map(Self::from)
     }
+
+    /// Returns the next sibling node whose kind is in `kinds`.
+    pub fn next_sibling_of_kinds(&self, kinds: SyntaxKindSet<L>) -> Option<Self> {
+        self.raw.next_sibling_of_kinds(kinds).map(Self::from)
+    }
+
     pub fn prev_sibling(&self) -> Option<Self> {
         self.raw.prev_sibling().map(Self::from)
     }
@@ -315,6 +376,17 @@ impl<L: Language> SyntaxNode<L> {
     pub fn next_sibling_or_token(&self) -> Option<SyntaxElement<L>> {
         self.raw.next_sibling_or_token().map(NodeOrToken::from)
     }
+
+    /// Returns the next sibling element whose kind is in `kinds`.
+    pub fn next_sibling_or_token_of_kinds(
+        &self,
+        kinds: SyntaxKindSet<L>,
+    ) -> Option<SyntaxElement<L>> {
+        self.raw
+            .next_sibling_or_token_of_kinds(kinds)
+            .map(SyntaxElement::from)
+    }
+
     pub fn prev_sibling_or_token(&self) -> Option<SyntaxElement<L>> {
         self.raw.prev_sibling_or_token().map(NodeOrToken::from)
     }
@@ -326,6 +398,40 @@ impl<L: Language> SyntaxNode<L> {
     /// Return the rightmost token in the subtree of this node.
     pub fn last_token(&self) -> Option<SyntaxToken<L>> {
         self.raw.last_token().map(SyntaxToken::from)
+    }
+
+    /// Returns the token immediately after this node's subtree.
+    pub fn next_token(&self) -> Option<SyntaxToken<L>> {
+        self.raw.next_token().map(SyntaxToken::from)
+    }
+
+    /// Returns the token immediately before this node's subtree.
+    pub fn prev_token(&self) -> Option<SyntaxToken<L>> {
+        self.raw.prev_token().map(SyntaxToken::from)
+    }
+
+    /// Returns the trivia before this node's first token, in source order.
+    ///
+    /// Returns an empty iterator if this node contains no tokens.
+    pub fn trivia_before(
+        &self,
+    ) -> impl DoubleEndedIterator<Item = SyntaxTriviaPiece<L>> + Clone + use<L> {
+        self.first_token()
+            .map(|token| token.trivia_before())
+            .into_iter()
+            .flatten()
+    }
+
+    /// Returns the trivia after this node's last token, in source order.
+    ///
+    /// Returns an empty iterator if this node contains no tokens.
+    pub fn trivia_after(
+        &self,
+    ) -> impl DoubleEndedIterator<Item = SyntaxTriviaPiece<L>> + Clone + use<L> {
+        self.last_token()
+            .map(|token| token.trivia_after())
+            .into_iter()
+            .flatten()
     }
 
     pub fn siblings(&self, direction: Direction) -> impl Iterator<Item = Self> + use<L> {
@@ -388,6 +494,45 @@ impl<L: Language> SyntaxNode<L> {
         }
     }
 
+    /// Traverses the subtree rooted at the current node in preorder and yields
+    /// only the nodes whose kind is in `kinds`. The current node is yielded when
+    /// its kind is in `kinds`.
+    ///
+    /// The events are the ones [Self::preorder] yields for those nodes, in the
+    /// same order. Nodes of other kinds are still traversed, but no [SyntaxNode]
+    /// is allocated for them unless one of their descendants is yielded. Prefer
+    /// this method over filtering [Self::preorder] when `kinds` covers a small
+    /// part of the tree.
+    ///
+    /// ```
+    /// # use biome_rowan::raw_language::{RawLanguage, RawLanguageKind, RawSyntaxTreeBuilder};
+    /// # use biome_rowan::{SyntaxKindSet, WalkEvent};
+    /// let mut builder = RawSyntaxTreeBuilder::new();
+    /// builder.start_node(RawLanguageKind::ROOT);
+    /// builder.start_node(RawLanguageKind::EXPRESSION_LIST);
+    /// builder.start_node(RawLanguageKind::LITERAL_EXPRESSION);
+    /// builder.token(RawLanguageKind::NUMBER_TOKEN, "1");
+    /// builder.finish_node();
+    /// builder.finish_node();
+    /// builder.finish_node();
+    /// let root = builder.finish();
+    ///
+    /// let literals = SyntaxKindSet::<RawLanguage>::of(RawLanguageKind::LITERAL_EXPRESSION);
+    /// let events: Vec<_> = root
+    ///     .preorder_of_kinds(literals)
+    ///     .map(|event| match event {
+    ///         WalkEvent::Enter(node) => format!("enter {:?}", node.kind()),
+    ///         WalkEvent::Leave(node) => format!("leave {:?}", node.kind()),
+    ///     })
+    ///     .collect();
+    /// assert_eq!(events, ["enter LITERAL_EXPRESSION", "leave LITERAL_EXPRESSION"]);
+    /// ```
+    pub fn preorder_of_kinds(&self, kinds: SyntaxKindSet<L>) -> PreorderOfKinds<'_, L> {
+        PreorderOfKinds {
+            raw: self.raw.preorder_matching(kinds),
+        }
+    }
+
     /// Traverse the subtree rooted at the current node (including the current
     /// node) in preorder, including tokens.
     pub fn preorder_with_tokens(&self, direction: Direction) -> PreorderWithTokens<L> {
@@ -402,6 +547,70 @@ impl<L: Language> SyntaxNode<L> {
             raw: self.raw.preorder_tokens(direction),
             _p: PhantomData,
         }
+    }
+
+    /// Returns the tokens in this node's subtree in source order.
+    ///
+    /// Unlike [Self::descendants_tokens], this doesn't allocate for every
+    /// token. Prefer it when the tokens are only read for their kind, text,
+    /// position, or trivia. The returned tokens can't navigate the tree.
+    ///
+    /// ```
+    /// use biome_rowan::raw_language::{RawLanguage, RawLanguageKind, RawSyntaxTreeBuilder};
+    /// use biome_rowan::*;
+    /// let node = RawSyntaxTreeBuilder::wrap_with_node(RawLanguageKind::ROOT, |builder| {
+    ///     builder.token_with_trivia(
+    ///         RawLanguageKind::LET_TOKEN,
+    ///         "// a\nlet ",
+    ///         &[TriviaPiece::single_line_comment(4), TriviaPiece::newline(1)],
+    ///         &[TriviaPiece::whitespace(1)],
+    ///     );
+    ///     builder.token(RawLanguageKind::SEMICOLON_TOKEN, ";");
+    /// });
+    /// let mut tokens = node.borrowed_tokens();
+    ///
+    /// let token = tokens.next().unwrap();
+    /// assert_eq!(token.kind(), RawLanguageKind::LET_TOKEN);
+    /// assert_eq!(token.text_trimmed_range(), TextRange::new(5.into(), 8.into()));
+    /// let comment = token.leading_trivia_pieces().next().unwrap();
+    /// assert!(comment.kind().is_comment());
+    /// assert_eq!(comment.text(), "// a");
+    ///
+    /// assert_eq!(tokens.next().unwrap().text(), ";");
+    /// assert!(tokens.next().is_none());
+    /// ```
+    pub fn borrowed_tokens(&self) -> BorrowedTokensIterator<'_, L> {
+        BorrowedTokensIterator::new(self.raw.green(), self.raw.text_range().start())
+    }
+
+    /// Returns the tokens in this node's subtree whose leading or trailing
+    /// trivia contains a comment, in source order.
+    ///
+    /// This is [Self::borrowed_tokens] without the tokens that have no
+    /// comments, but it never enters a subtree without comments, so it
+    /// visits far fewer tokens when comments are sparse.
+    ///
+    /// ```
+    /// use biome_rowan::raw_language::{RawLanguage, RawLanguageKind, RawSyntaxTreeBuilder};
+    /// use biome_rowan::*;
+    /// let node = RawSyntaxTreeBuilder::wrap_with_node(RawLanguageKind::ROOT, |builder| {
+    ///     builder.token(RawLanguageKind::LET_TOKEN, "let");
+    ///     builder.token_with_trivia(
+    ///         RawLanguageKind::SEMICOLON_TOKEN,
+    ///         "; // a",
+    ///         &[],
+    ///         &[TriviaPiece::whitespace(1), TriviaPiece::single_line_comment(4)],
+    ///     );
+    /// });
+    /// let mut tokens = node.borrowed_tokens_with_comments();
+    ///
+    /// let token = tokens.next().unwrap();
+    /// assert_eq!(token.kind(), RawLanguageKind::SEMICOLON_TOKEN);
+    /// assert_eq!(token.text_range(), TextRange::new(3.into(), 9.into()));
+    /// assert!(tokens.next().is_none());
+    /// ```
+    pub fn borrowed_tokens_with_comments(&self) -> BorrowedTokensWithCommentsIterator<'_, L> {
+        BorrowedTokensWithCommentsIterator::new(self.raw.green(), self.raw.text_range().start())
     }
 
     /// Find a token in the subtree corresponding to this node, which covers the offset.
@@ -427,6 +636,19 @@ impl<L: Language> SyntaxNode<L> {
         self.raw
             .child_or_token_at_range(range)
             .map(SyntaxElement::from)
+    }
+
+    /// Returns the first node with the given range and kind on the path that
+    /// repeated calls to [Self::child_or_token_at_range] take from this node,
+    /// this node included.
+    pub(crate) fn descendant_at_range_with_kind(
+        &self,
+        range: TextRange,
+        kind: L::Kind,
+    ) -> Option<Self> {
+        self.raw
+            .descendant_at_range_with_kind(range, kind.to_raw())
+            .map(Self::from)
     }
 
     /// Returns an independent copy of the subtree rooted at this node.
@@ -461,6 +683,37 @@ impl<L: Language> SyntaxNode<L> {
                     .into_iter()
                     .map(|element| element.map(cursor::SyntaxElement::from)),
             ),
+            _p: PhantomData,
+        }
+    }
+
+    /// Return a clone of this node in which each slot named in `edits` is
+    /// replaced with the elements of its replacement, which may be empty to
+    /// remove the slot.
+    ///
+    /// `edits` is expected in ascending slot order. An edit is ignored if its
+    /// index is not greater than the index of an earlier edit, or if it is past
+    /// the last slot. For edits in ascending order without duplicates that
+    /// only name existing slots, the result is the same as calling
+    /// [Self::splice_slots] once per edit in descending order, but the slots
+    /// are copied only once.
+    #[must_use = "syntax elements are immutable, the result of update methods must be propagated to have any effect"]
+    pub(crate) fn splice_many_slots<E, R>(self, edits: E) -> Self
+    where
+        E: IntoIterator<Item = (usize, R)>,
+        R: IntoIterator<Item = Option<SyntaxElement<L>>>,
+    {
+        Self {
+            raw: self
+                .raw
+                .splice_many_slots(edits.into_iter().map(|(index, replacement)| {
+                    (
+                        index,
+                        replacement
+                            .into_iter()
+                            .map(|element| element.map(cursor::SyntaxElement::from)),
+                    )
+                })),
             _p: PhantomData,
         }
     }
@@ -706,16 +959,97 @@ impl<L: Language> SyntaxNode<L> {
         SyntaxList::new(self)
     }
 
-    /// Whether the node contains any comments. This function checks
-    /// **all the descendants** of the current node.
+    /// Whether any token in this node's subtree has leading or trailing comments.
+    #[inline]
     pub fn has_comments_descendants(&self) -> bool {
-        self.descendants_tokens(Direction::Next)
-            .any(|tok| tok.has_trailing_comments() || tok.has_leading_comments())
+        self.raw.green().has_comments()
+    }
+
+    /// Whether any token in this node's subtree has skipped trivia.
+    #[inline]
+    pub fn has_skipped_descendants(&self) -> bool {
+        self.raw.green().has_skipped()
     }
 
     /// It checks if the current node has trailing or leading trivia
     pub fn has_comments_direct(&self) -> bool {
         self.has_trailing_comments() || self.has_leading_comments()
+    }
+
+    /// Whether any comment sits between this node's first and last token.
+    ///
+    /// The leading trivia of the first token and the trailing trivia of the last token are
+    /// ignored, because [BatchMutation::replace_node](crate::BatchMutation::replace_node) carries
+    /// them over to the replacement. Fixes that rebuild a node from parts use this to decide
+    /// whether rebuilding would lose a comment.
+    ///
+    /// ```
+    /// use biome_rowan::raw_language::{RawLanguage, RawLanguageKind, RawSyntaxTreeBuilder};
+    /// use biome_rowan::*;
+    ///
+    /// // `/* a */ let /* b */ a; /* c */`
+    /// let node = RawSyntaxTreeBuilder::wrap_with_node(RawLanguageKind::ROOT, |builder| {
+    ///     builder.token_with_trivia(
+    ///         RawLanguageKind::LET_TOKEN,
+    ///         "/* a */ let /* b */",
+    ///         &[TriviaPiece::multi_line_comment(7), TriviaPiece::whitespace(1)],
+    ///         &[TriviaPiece::whitespace(1), TriviaPiece::multi_line_comment(7)],
+    ///     );
+    ///     builder.token_with_trivia(RawLanguageKind::STRING_TOKEN, " a", &[TriviaPiece::whitespace(1)], &[]);
+    ///     builder.token_with_trivia(
+    ///         RawLanguageKind::SEMICOLON_TOKEN,
+    ///         "; /* c */",
+    ///         &[],
+    ///         &[TriviaPiece::whitespace(1), TriviaPiece::multi_line_comment(7)],
+    ///     );
+    /// });
+    /// assert!(node.has_inner_comments());
+    ///
+    /// // `/* a */ let a; /* c */`
+    /// let node = RawSyntaxTreeBuilder::wrap_with_node(RawLanguageKind::ROOT, |builder| {
+    ///     builder.token_with_trivia(
+    ///         RawLanguageKind::LET_TOKEN,
+    ///         "/* a */ let",
+    ///         &[TriviaPiece::multi_line_comment(7), TriviaPiece::whitespace(1)],
+    ///         &[],
+    ///     );
+    ///     builder.token_with_trivia(RawLanguageKind::STRING_TOKEN, " a", &[TriviaPiece::whitespace(1)], &[]);
+    ///     builder.token_with_trivia(
+    ///         RawLanguageKind::SEMICOLON_TOKEN,
+    ///         "; /* c */",
+    ///         &[],
+    ///         &[TriviaPiece::whitespace(1), TriviaPiece::multi_line_comment(7)],
+    ///     );
+    /// });
+    /// assert!(!node.has_inner_comments());
+    ///
+    /// // `/* a */ let /* b */`
+    /// let node = RawSyntaxTreeBuilder::wrap_with_node(RawLanguageKind::ROOT, |builder| {
+    ///     builder.token_with_trivia(
+    ///         RawLanguageKind::LET_TOKEN,
+    ///         "/* a */ let /* b */",
+    ///         &[TriviaPiece::multi_line_comment(7), TriviaPiece::whitespace(1)],
+    ///         &[TriviaPiece::whitespace(1), TriviaPiece::multi_line_comment(7)],
+    ///     );
+    /// });
+    /// assert!(!node.has_inner_comments());
+    /// ```
+    pub fn has_inner_comments(&self) -> bool {
+        let mut tokens = self.descendants_tokens(Direction::Next).peekable();
+        let Some(first) = tokens.next() else {
+            return false;
+        };
+        if tokens.peek().is_some() && first.has_trailing_comments() {
+            return true;
+        }
+        while let Some(token) = tokens.next() {
+            if token.has_leading_comments()
+                || (tokens.peek().is_some() && token.has_trailing_comments())
+            {
+                return true;
+            }
+        }
+        false
     }
 
     /// It checks if the current node has comments at the edges:
@@ -841,6 +1175,13 @@ pub struct SendNode {
 }
 
 impl SendNode {
+    /// Consumes this node and returns its source text.
+    pub fn into_source_text(self) -> String {
+        let mut source = String::with_capacity(self.green.text_len().into());
+        self.green.write_source_text(&mut source);
+        source
+    }
+
     /// Downcast this handle back into a [SyntaxNode]
     ///
     /// Returns `None` if the specified language `L` is not the one this node
@@ -904,6 +1245,10 @@ impl EmbeddedSendNode {
             offset: self.offset,
         }
     }
+
+    pub fn offset(&self) -> TextSize {
+        self.offset
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -947,6 +1292,7 @@ impl<L: Language> Iterator for SyntaxElementChildren<L> {
     }
 }
 
+#[derive(Clone, Debug)]
 pub struct Preorder<L: Language> {
     raw: cursor::Preorder,
     _p: PhantomData<L>,
@@ -959,6 +1305,25 @@ impl<L: Language> Preorder<L> {
 }
 
 impl<L: Language> Iterator for Preorder<L> {
+    type Item = WalkEvent<SyntaxNode<L>>;
+    fn next(&mut self) -> Option<Self::Item> {
+        self.raw.next().map(|it| it.map(SyntaxNode::from))
+    }
+}
+
+pub struct PreorderOfKinds<'a, L: Language> {
+    raw: cursor::PreorderMatching<'a, L>,
+}
+
+impl<L: Language> PreorderOfKinds<'_, L> {
+    /// Skips the descendants of the node of the last [WalkEvent::Enter], so
+    /// the next event is the [WalkEvent::Leave] of that node.
+    pub fn skip_subtree(&mut self) {
+        self.raw.skip_subtree()
+    }
+}
+
+impl<L: Language> Iterator for PreorderOfKinds<'_, L> {
     type Item = WalkEvent<SyntaxNode<L>>;
     fn next(&mut self) -> Option<Self::Item> {
         self.raw.next().map(|it| it.map(SyntaxNode::from))
@@ -1002,6 +1367,7 @@ impl<L: Language> Iterator for PreorderTokens<L> {
     }
 }
 
+#[derive(Clone, Debug)]
 pub struct PreorderWithTokens<L: Language> {
     raw: cursor::PreorderWithTokens,
     _p: PhantomData<L>,
@@ -1067,6 +1433,7 @@ impl<L: Language> SyntaxSlot<L> {
 }
 
 impl<L: Language> From<cursor::SyntaxSlot> for SyntaxSlot<L> {
+    #[inline]
     fn from(raw: cursor::SyntaxSlot) -> Self {
         match raw {
             cursor::SyntaxSlot::Node(node) => Self::Node(node.into()),
@@ -1209,12 +1576,7 @@ where
     }
 
     /// Create a [Send] + [Sync] handle to this node.
-    ///
-    /// ### Panics
-    ///
-    /// It panics if the `base_offset` isn't greater than zero
     pub fn as_embedded_send(&self) -> EmbeddedSendNode {
-        debug_assert!(self.offset > 0.into(), "range must be greater than 0");
         EmbeddedSendNode {
             green: self.node.green_node(),
             offset: self.offset,

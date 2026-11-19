@@ -8,10 +8,10 @@ use biome_rowan::AstNode;
 use biome_rule_options::use_deprecated_reason::UseDeprecatedReasonOptions;
 
 declare_lint_rule! {
-    /// Require specifying the reason argument when using `@deprecated` directive
+    /// Require a reason when using the `@deprecated` directive.
     ///
-    /// This rule checks the parameter of `@deprecated` directive for the use of reason argument,
-    /// suggesting user to add it in case the argument is missing.
+    /// A deprecation reason tells schema users why a field or value should no longer be used and
+    /// what they should use instead. Add the `reason` argument whenever `@deprecated` appears.
     ///
     /// ## Examples
     ///

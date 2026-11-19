@@ -1,0 +1,71 @@
+<!-- should not generate diagnostics -->
+<script>
+	let a = $state({ b: 1 });
+
+	const plain = $derived(a.b);
+
+	const multiStatement = $derived.by(() => {
+		const c = a.b * 2;
+		return c + 1;
+	});
+
+	const conditionalReturn = $derived.by(() => {
+		if (a.b > 0) {
+			return a.b;
+		}
+		return 0;
+	});
+
+	const withParams = $derived.by((x) => x + a.b);
+
+	const withParam = $derived.by(x => x + a.b);
+
+	const asyncArrow = $derived.by(async () => await Promise.resolve(a.b));
+
+	const asyncFunction = $derived.by(async function () {
+		return a.b;
+	});
+
+	const generator = $derived.by(function* () {
+		yield a.b;
+	});
+
+	const emptyReturn = $derived.by(() => {
+		return;
+	});
+
+	const emptyBody = $derived.by(() => {});
+
+	const directive = $derived.by(function () {
+		"use strict";
+		return a.b;
+	});
+
+	const usesThis = $derived.by(function () {
+		return this;
+	});
+
+	const usesArguments = $derived.by(function () {
+		return arguments.length;
+	});
+
+	const usesNewTarget = $derived.by(function () {
+		return new.target;
+	});
+
+	const reference = $derived.by(getValue);
+
+	const extraArgument = $derived.by(() => a.b, a);
+
+	const computed = $derived["by"](() => a.b);
+
+	const otherRune = $state.raw(() => a.b);
+
+	const otherObject = derived.by(() => a.b);
+
+	function getValue() {
+		return a.b;
+	}
+</script>
+
+{plain}

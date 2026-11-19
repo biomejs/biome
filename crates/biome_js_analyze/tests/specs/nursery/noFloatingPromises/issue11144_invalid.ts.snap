@@ -1,0 +1,101 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: issue11144_invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+let promise: Promise<void> | undefined;
+
+const sleep = async (ms: number) => {
+	await new Promise((resolve) => setTimeout(resolve, ms));
+};
+
+export const main = async () => {
+	if (!promise) {
+		promise = sleep(1000);
+	}
+
+	// The optional Promise is never handled on either path.
+	promise;
+};
+
+export const assignOnly = async () => {
+	// Storing the Promise does not handle it, so the reference below floats.
+	promise = sleep(1000);
+	promise;
+};
+
+export const callOnly = async () => {
+	sleep(1000);
+};
+
+```
+
+# Diagnostics
+```
+issue11144_invalid.ts:14:2 lint/nursery/noFloatingPromises  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    13 │ 	// The optional Promise is never handled on either path.
+  > 14 │ 	promise;
+       │ 	^^^^^^^^
+    15 │ };
+    16 │ 
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add await operator.
+  
+    14 │ → await·promise;
+       │   ++++++        
+
+```
+
+```
+issue11144_invalid.ts:20:2 lint/nursery/noFloatingPromises  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    18 │ 	// Storing the Promise does not handle it, so the reference below floats.
+    19 │ 	promise = sleep(1000);
+  > 20 │ 	promise;
+       │ 	^^^^^^^^
+    21 │ };
+    22 │ 
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add await operator.
+  
+    20 │ → await·promise;
+       │   ++++++        
+
+```
+
+```
+issue11144_invalid.ts:24:2 lint/nursery/noFloatingPromises  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    23 │ export const callOnly = async () => {
+  > 24 │ 	sleep(1000);
+       │ 	^^^^^^^^^^^^
+    25 │ };
+    26 │ 
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add await operator.
+  
+    24 │ → await·sleep(1000);
+       │   ++++++            
+
+```

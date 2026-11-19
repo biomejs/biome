@@ -1,0 +1,43 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid-slots-option.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<script lang="ts">
+import { defineComponent, type SlotsType } from "vue";
+
+export default defineComponent({
+    slots: Object as SlotsType<{
+        default: { msg: string };
+    }>,
+});
+</script>
+
+<template>
+    <slot name="footer" />
+</template>
+
+```
+
+# Diagnostics
+```
+invalid-slots-option.vue:13:17 lint/nursery/noVueUndeclaredSlots ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The slot footer isn't declared.
+  
+    12 │ <template>
+  > 13 │     <slot name="footer" />
+       │                 ^^^^^^
+    14 │ </template>
+    15 │ 
+  
+  i Without a declaration, the content that parent components pass to this slot isn't type checked.
+  
+  i Declare the slot with defineSlots() in <script setup>, or with the slots option of the component.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

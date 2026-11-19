@@ -84,13 +84,15 @@ globalThis.globalThis["eval"]("foo");
 ```
 invalid.js:2:1 lint/security/noGlobalEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × eval() exposes to security risks and performance issues.
+  × Do not use eval().
   
     1 │ var foo = "foo";
   > 2 │ eval(foo);
       │ ^^^^
     3 │ 
     4 │ eval("foo");
+  
+  i eval() runs code from a string. This exposes the program to security risks, such as code injection, and can cause performance issues.
   
   i See the MDN web docs for more details.
   
@@ -102,7 +104,7 @@ invalid.js:2:1 lint/security/noGlobalEval ━━━━━━━━━━━━�
 ```
 invalid.js:4:1 lint/security/noGlobalEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × eval() exposes to security risks and performance issues.
+  × Do not use eval().
   
     2 │ eval(foo);
     3 │ 
@@ -110,6 +112,8 @@ invalid.js:4:1 lint/security/noGlobalEval ━━━━━━━━━━━━�
       │ ^^^^
     5 │ 
     6 │ (0, eval)("foo");
+  
+  i eval() runs code from a string. This exposes the program to security risks, such as code injection, and can cause performance issues.
   
   i See the MDN web docs for more details.
   
@@ -121,7 +125,7 @@ invalid.js:4:1 lint/security/noGlobalEval ━━━━━━━━━━━━�
 ```
 invalid.js:6:5 lint/security/noGlobalEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × eval() exposes to security risks and performance issues.
+  × Do not use eval().
   
     4 │ eval("foo");
     5 │ 
@@ -129,6 +133,8 @@ invalid.js:6:5 lint/security/noGlobalEval ━━━━━━━━━━━━�
       │     ^^^^
     7 │ 
     8 │ (0, window.eval)("foo");
+  
+  i eval() runs code from a string. This exposes the program to security risks, such as code injection, and can cause performance issues.
   
   i See the MDN web docs for more details.
   
@@ -140,7 +146,7 @@ invalid.js:6:5 lint/security/noGlobalEval ━━━━━━━━━━━━�
 ```
 invalid.js:8:5 lint/security/noGlobalEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × eval() exposes to security risks and performance issues.
+  × Do not use eval().
   
      6 │ (0, eval)("foo");
      7 │ 
@@ -148,6 +154,8 @@ invalid.js:8:5 lint/security/noGlobalEval ━━━━━━━━━━━━�
        │     ^^^^^^^^^^^
      9 │ 
     10 │ (0, window["eval"])("foo");
+  
+  i eval() runs code from a string. This exposes the program to security risks, such as code injection, and can cause performance issues.
   
   i See the MDN web docs for more details.
   
@@ -159,7 +167,7 @@ invalid.js:8:5 lint/security/noGlobalEval ━━━━━━━━━━━━�
 ```
 invalid.js:10:5 lint/security/noGlobalEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × eval() exposes to security risks and performance issues.
+  × Do not use eval().
   
      8 │ (0, window.eval)("foo");
      9 │ 
@@ -167,6 +175,8 @@ invalid.js:10:5 lint/security/noGlobalEval ━━━━━━━━━━━━�
        │     ^^^^^^^^^^^^^^
     11 │ 
     12 │ var EVAL = eval;
+  
+  i eval() runs code from a string. This exposes the program to security risks, such as code injection, and can cause performance issues.
   
   i See the MDN web docs for more details.
   
@@ -178,7 +188,7 @@ invalid.js:10:5 lint/security/noGlobalEval ━━━━━━━━━━━━�
 ```
 invalid.js:12:12 lint/security/noGlobalEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × eval() exposes to security risks and performance issues.
+  × Do not use eval().
   
     10 │ (0, window["eval"])("foo");
     11 │ 
@@ -186,6 +196,8 @@ invalid.js:12:12 lint/security/noGlobalEval ━━━━━━━━━━━━
        │            ^^^^
     13 │ EVAL("foo");
     14 │ 
+  
+  i eval() runs code from a string. This exposes the program to security risks, such as code injection, and can cause performance issues.
   
   i See the MDN web docs for more details.
   
@@ -197,7 +209,7 @@ invalid.js:12:12 lint/security/noGlobalEval ━━━━━━━━━━━━
 ```
 invalid.js:45:4 lint/security/noGlobalEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × eval() exposes to security risks and performance issues.
+  × Do not use eval().
   
     43 │ (function (exe) {
     44 │ 	exe("foo");
@@ -205,6 +217,8 @@ invalid.js:45:4 lint/security/noGlobalEval ━━━━━━━━━━━━�
        │    ^^^^
     46 │ 
     47 │ window.eval("foo");
+  
+  i eval() runs code from a string. This exposes the program to security risks, such as code injection, and can cause performance issues.
   
   i See the MDN web docs for more details.
   
@@ -216,7 +230,7 @@ invalid.js:45:4 lint/security/noGlobalEval ━━━━━━━━━━━━�
 ```
 invalid.js:47:1 lint/security/noGlobalEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × eval() exposes to security risks and performance issues.
+  × Do not use eval().
   
     45 │ })(eval);
     46 │ 
@@ -224,6 +238,8 @@ invalid.js:47:1 lint/security/noGlobalEval ━━━━━━━━━━━━�
        │ ^^^^^^^^^^^
     48 │ 
     49 │ window.window.eval("foo");
+  
+  i eval() runs code from a string. This exposes the program to security risks, such as code injection, and can cause performance issues.
   
   i See the MDN web docs for more details.
   
@@ -235,7 +251,7 @@ invalid.js:47:1 lint/security/noGlobalEval ━━━━━━━━━━━━�
 ```
 invalid.js:49:1 lint/security/noGlobalEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × eval() exposes to security risks and performance issues.
+  × Do not use eval().
   
     47 │ window.eval("foo");
     48 │ 
@@ -243,6 +259,8 @@ invalid.js:49:1 lint/security/noGlobalEval ━━━━━━━━━━━━�
        │ ^^^^^^^^^^^^^^^^^^
     50 │ 
     51 │ window.window["eval"]("foo");
+  
+  i eval() runs code from a string. This exposes the program to security risks, such as code injection, and can cause performance issues.
   
   i See the MDN web docs for more details.
   
@@ -254,7 +272,7 @@ invalid.js:49:1 lint/security/noGlobalEval ━━━━━━━━━━━━�
 ```
 invalid.js:51:1 lint/security/noGlobalEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × eval() exposes to security risks and performance issues.
+  × Do not use eval().
   
     49 │ window.window.eval("foo");
     50 │ 
@@ -262,6 +280,8 @@ invalid.js:51:1 lint/security/noGlobalEval ━━━━━━━━━━━━�
        │ ^^^^^^^^^^^^^^^^^^^^^
     52 │ 
     53 │ this.eval("foo");
+  
+  i eval() runs code from a string. This exposes the program to security risks, such as code injection, and can cause performance issues.
   
   i See the MDN web docs for more details.
   
@@ -273,7 +293,7 @@ invalid.js:51:1 lint/security/noGlobalEval ━━━━━━━━━━━━�
 ```
 invalid.js:62:12 lint/security/noGlobalEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × eval() exposes to security risks and performance issues.
+  × Do not use eval().
   
     60 │ }
     61 │ 
@@ -281,6 +301,8 @@ invalid.js:62:12 lint/security/noGlobalEval ━━━━━━━━━━━━
        │            ^^^^^^^^^^^^^^^
     63 │ EVAL("foo");
     64 │ 
+  
+  i eval() runs code from a string. This exposes the program to security risks, such as code injection, and can cause performance issues.
   
   i See the MDN web docs for more details.
   
@@ -292,7 +314,7 @@ invalid.js:62:12 lint/security/noGlobalEval ━━━━━━━━━━━━
 ```
 invalid.js:65:1 lint/security/noGlobalEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × eval() exposes to security risks and performance issues.
+  × Do not use eval().
   
     63 │ EVAL("foo");
     64 │ 
@@ -300,6 +322,8 @@ invalid.js:65:1 lint/security/noGlobalEval ━━━━━━━━━━━━�
        │ ^^^^^^^^^^^^^^^
     66 │ 
     67 │ globalThis.globalThis.eval("foo");
+  
+  i eval() runs code from a string. This exposes the program to security risks, such as code injection, and can cause performance issues.
   
   i See the MDN web docs for more details.
   
@@ -311,7 +335,7 @@ invalid.js:65:1 lint/security/noGlobalEval ━━━━━━━━━━━━�
 ```
 invalid.js:67:1 lint/security/noGlobalEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × eval() exposes to security risks and performance issues.
+  × Do not use eval().
   
     65 │ globalThis.eval("foo");
     66 │ 
@@ -319,6 +343,8 @@ invalid.js:67:1 lint/security/noGlobalEval ━━━━━━━━━━━━�
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
     68 │ 
     69 │ globalThis.globalThis["eval"]("foo");
+  
+  i eval() runs code from a string. This exposes the program to security risks, such as code injection, and can cause performance issues.
   
   i See the MDN web docs for more details.
   
@@ -330,7 +356,7 @@ invalid.js:67:1 lint/security/noGlobalEval ━━━━━━━━━━━━�
 ```
 invalid.js:69:1 lint/security/noGlobalEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × eval() exposes to security risks and performance issues.
+  × Do not use eval().
   
     67 │ globalThis.globalThis.eval("foo");
     68 │ 
@@ -338,6 +364,8 @@ invalid.js:69:1 lint/security/noGlobalEval ━━━━━━━━━━━━�
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     70 │ 
     71 │ (0, globalThis.eval)("foo");
+  
+  i eval() runs code from a string. This exposes the program to security risks, such as code injection, and can cause performance issues.
   
   i See the MDN web docs for more details.
   
@@ -349,7 +377,7 @@ invalid.js:69:1 lint/security/noGlobalEval ━━━━━━━━━━━━�
 ```
 invalid.js:71:5 lint/security/noGlobalEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × eval() exposes to security risks and performance issues.
+  × Do not use eval().
   
     69 │ globalThis.globalThis["eval"]("foo");
     70 │ 
@@ -357,6 +385,8 @@ invalid.js:71:5 lint/security/noGlobalEval ━━━━━━━━━━━━�
        │     ^^^^^^^^^^^^^^^
     72 │ 
     73 │ (0, globalThis["eval"])("foo");
+  
+  i eval() runs code from a string. This exposes the program to security risks, such as code injection, and can cause performance issues.
   
   i See the MDN web docs for more details.
   
@@ -368,13 +398,15 @@ invalid.js:71:5 lint/security/noGlobalEval ━━━━━━━━━━━━�
 ```
 invalid.js:73:5 lint/security/noGlobalEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × eval() exposes to security risks and performance issues.
+  × Do not use eval().
   
     71 │ (0, globalThis.eval)("foo");
     72 │ 
   > 73 │ (0, globalThis["eval"])("foo");
        │     ^^^^^^^^^^^^^^^^^^
     74 │ 
+  
+  i eval() runs code from a string. This exposes the program to security risks, such as code injection, and can cause performance issues.
   
   i See the MDN web docs for more details.
   

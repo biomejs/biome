@@ -23,7 +23,7 @@ impl Rule for UseNamingConventionEnumMemberCase {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
         let name = node.name().ok()?;
-        let text = name.inner_string_text()?.ok()?;
+        let text = name.inner_string_text()?;
         if text.text() == "enumMemberCase" {
             let value = node.value().ok()?;
             let value = value.as_json_string_value()?.inner_string_text().ok()?;
@@ -89,7 +89,7 @@ impl Rule for UseNamingConventionEnumMemberCase {
         let parent = node.parent::<JsonMemberList>()?;
         let conventions = parent.into_iter().find_map(|member| {
             let member = member.ok()?;
-            let member_name = member.name().ok()?.inner_string_text()?.ok()?;
+            let member_name = member.name().ok()?.inner_string_text()?;
             if member_name.text() == "conventions"
                 && let Ok(AnyJsonValue::JsonArrayValue(conventions)) = member.value()
             {
@@ -112,15 +112,13 @@ impl Rule for UseNamingConventionEnumMemberCase {
             mutation.remove_node(node.clone());
             if let Some(trailing_comma) = node
                 .syntax()
-                .last_token()
-                .and_then(|ignore_last_token| ignore_last_token.next_token())
+                .next_token()
                 .filter(|next_token| next_token.kind() == T![,])
             {
                 mutation.remove_token(trailing_comma);
             } else if let Some(leading_comma) = node
                 .syntax()
-                .first_token()
-                .and_then(|ignore_last_token| ignore_last_token.prev_token())
+                .prev_token()
                 .filter(|prev_token| prev_token.kind() == T![,])
             {
                 mutation.remove_token(leading_comma);

@@ -1359,9 +1359,33 @@ fn parse_primary_expression(p: &mut JsParser, context: ExpressionContext) -> Par
             p.bump_any();
 
             if p.eat(T![.]) {
-                if p.eat(T![defer]) || p.eat(T![source]) {
-                    // Parse the call arguments
-                    parse_import_call_expression(p, context, m)
+                if p.at(T![defer]) || p.at(T![source]) {
+                    let phase = p.cur_range();
+                    p.bump_any();
+                    if p.at(T!['(']) {
+                        // Parse the call arguments
+                        parse_import_call_expression(p, context, m)
+                    } else {
+                        let recovered = ParseRecoveryTokenSet::new(
+                            JS_BOGUS_EXPRESSION,
+                            STMT_RECOVERY_SET.union(EXPR_RECOVERY_SET).union(token_set![
+                                T![,],
+                                T!['}'],
+                                T![:]
+                            ]),
+                        )
+                        .enable_recovery_on_line_break()
+                        .recover(p);
+
+                        let range = if let Ok(marker) = &recovered {
+                            TextRange::new(phase.start(), marker.range(p).end())
+                        } else {
+                            phase
+                        };
+                        p.error(js_parse_error::expected_import_call(p, range, phase));
+
+                        m.complete(p, JS_BOGUS_EXPRESSION)
+                    }
                 } else if p.at(T![ident]) && p.text(p.cur_range()) == "meta" {
                     p.bump_remap(META);
                     m.complete(p, JS_IMPORT_META_EXPRESSION)
@@ -1558,7 +1582,7 @@ pub(crate) fn is_nth_at_identifier_or_keyword(p: &mut JsParser, n: usize) -> boo
 // test_err js template_literal
 // let a = `foo ${}`
 // let b = `${a a}`
-fn parse_template_literal(
+pub(crate) fn parse_template_literal(
     p: &mut JsParser,
     marker: Marker,
     in_optional_chain: bool,
@@ -1766,7 +1790,7 @@ fn parse_call_expression_rest(
         // Cloning here is necessary because parsing out the type arguments may rewind in which
         // case we want to return the `lhs`.
         let m = match lhs.kind(p) {
-            TS_INSTANTIATION_EXPRESSION if !p.at(T![?.]) => lhs.clone().undo_completion(p),
+            TS_INSTANTIATION_EXPRESSION if p.at(T!['(']) => lhs.clone().undo_completion(p),
             _ => lhs.clone().precede(p),
         };
 

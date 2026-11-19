@@ -48,7 +48,7 @@ JsModule {
                         attributes: JsxAttributeList [],
                         r_angle_token: R_ANGLE@38..39 ">" [] [],
                     },
-                    children: JsxChildList [],
+                    elements: JsxChildList [],
                     closing_element: JsxClosingElement {
                         l_angle_token: L_ANGLE@39..40 "<" [] [],
                         slash_token: SLASH@40..62 "/" [Newline("\n"), Comments("/* some comment */"), Whitespace(" ")] [Whitespace(" ")],

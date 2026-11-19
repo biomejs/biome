@@ -2,6 +2,12 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
+## Command
+
+```shell
+biome lint --only=suspicious/inexistant check.js
+```
+
 ## `check.js`
 
 ```js

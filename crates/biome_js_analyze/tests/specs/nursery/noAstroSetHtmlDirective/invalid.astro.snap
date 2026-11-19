@@ -1,0 +1,60 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.astro
+---
+# Input
+```astro
+<!-- should generate diagnostics -->
+{show && <span set:html={content} />}
+
+{
+    show && (
+        <div>
+            <span set:html={content} />
+        </div>
+    )
+}
+
+```
+
+# Diagnostics
+```
+invalid.astro:2:16 lint/nursery/noAstroSetHtmlDirective ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The set:html directive inserts unescaped HTML.
+  
+    1 │ <!-- should generate diagnostics -->
+  > 2 │ {show && <span set:html={content} />}
+      │                ^^^^^^^^^^^^^^^^^^
+    3 │ 
+    4 │ {
+  
+  i Using set:html can introduce cross-site scripting vulnerabilities.
+  
+  i Use a regular Astro expression to render text, or suppress this diagnostic with an explanation if raw HTML is required.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.astro:7:19 lint/nursery/noAstroSetHtmlDirective ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The set:html directive inserts unescaped HTML.
+  
+    5 │     show && (
+    6 │         <div>
+  > 7 │             <span set:html={content} />
+      │                   ^^^^^^^^^^^^^^^^^^
+    8 │         </div>
+    9 │     )
+  
+  i Using set:html can introduce cross-site scripting vulnerabilities.
+  
+  i Use a regular Astro expression to render text, or suppress this diagnostic with an explanation if raw HTML is required.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

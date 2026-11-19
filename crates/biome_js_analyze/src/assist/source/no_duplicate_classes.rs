@@ -8,7 +8,7 @@ use biome_analyze::{
     declare_source_rule,
 };
 use biome_console::markup;
-use biome_diagnostics::{Applicability, category};
+use biome_diagnostics::Applicability;
 use biome_js_factory::make::{
     js_literal_member_name, js_string_literal, js_string_literal_expression,
     js_string_literal_single_quotes, js_template_chunk, js_template_chunk_element, jsx_string,
@@ -17,12 +17,13 @@ use biome_rowan::{AstNode, BatchMutationExt};
 use biome_rule_options::no_duplicate_classes::NoDuplicateClassesOptions;
 
 declare_source_rule! {
-    /// Remove duplicate CSS classes.
+    /// Remove repeated CSS class names.
     ///
-    /// Detects and removes duplicate CSS classes in JSX `class` and `className` attributes,
-    /// as well as in utility function calls like `clsx`, `cn`, `cva`, etc.
-    ///
-    /// Duplicate classes are redundant and can indicate copy-paste errors or merge conflicts.
+    /// The action checks JSX `class` and `className` attributes by default. It can also check
+    /// additional attributes, function calls, and tagged templates configured by name. A tagged
+    /// template is a template literal with a function name immediately before its opening backtick.
+    /// Duplicate class names are redundant and often indicate a copy-and-paste mistake or merge
+    /// conflict.
     ///
     /// ## Examples
     ///
@@ -36,8 +37,38 @@ declare_source_rule! {
     ///
     /// ## Options
     ///
-    /// Use the `attributes` option to specify additional JSX attributes to check.
-    /// Use the `functions` option to specify utility functions to check (e.g., `clsx`, `cn`, `cva`).
+    /// ### `attributes`
+    ///
+    /// Adds JSX attributes to check alongside `class` and `className`. Defaults to an empty list.
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///         "attributes": ["tw"]
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// ```jsx,use_options,expect_diff
+    /// <div tw="flex flex" />
+    /// ```
+    ///
+    /// ### `functions`
+    ///
+    /// Lists utility functions or tagged templates whose strings contain CSS classes. Defaults to
+    /// an empty list.
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///         "functions": ["clsx"]
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// ```js,use_options,expect_diff
+    /// const className = clsx("p-4 p-4");
+    /// ```
     ///
     pub NoDuplicateClasses {
         version: "2.4.0",
@@ -85,7 +116,7 @@ impl Rule for NoDuplicateClasses {
 
     fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         Some(duplicate_classes_diagnostic(
-            category!("assist/source/noDuplicateClasses"),
+            rule_category!(),
             ctx.query().range(),
             &state.duplicates,
         ))

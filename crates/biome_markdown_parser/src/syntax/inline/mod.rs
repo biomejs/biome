@@ -35,14 +35,28 @@
 //! 2. Not preceded by punctuation, OR followed by whitespace/punctuation
 //!
 //! Underscore (`_`) has additional intraword restrictions (§6.2 rules 2, 5, 7, 8).
+//!
+//! # CJK-friendly Amendments
+//!
+//! CommonMark rejects `**テスト。**テスト` because the closing run sits between
+//! punctuation and a letter, a position that is common in Chinese, Japanese,
+//! and Korean text written without spaces. When
+//! [`MarkdownParserOptions::with_cjk_friendly_emphasis`](crate::MarkdownParserOptions::with_cjk_friendly_emphasis)
+//! is enabled, the flanking rules follow the
+//! [CommonMark CJK-friendly amendments](https://github.com/tats-u/markdown-cjk-friendly/blob/main/specification.md):
+//! punctuation next to a run doesn't prevent flanking when either side is a CJK
+//! character. Delimiter runs that touch neither CJK characters nor variation
+//! selectors keep their CommonMark flanking, but they can still pair
+//! differently: in `**テスト。**テスト a**`, the middle run closes the first
+//! one, so the last run stays unmatched instead of closing the middle one.
 
 use biome_markdown_syntax::MarkdownSyntaxKind;
 use biome_markdown_syntax::T;
 use biome_markdown_syntax::kind::MarkdownSyntaxKind::*;
-use biome_parser::Parser;
 use biome_parser::prelude::ParsedSyntax;
+use biome_parser::{Parser, SyntaxFeature};
 
-use crate::MarkdownParser;
+use crate::{MarkdownParser, MarkdownSyntaxFeatures};
 
 mod code_span;
 mod emphasis;
@@ -50,7 +64,7 @@ mod entities;
 mod html;
 mod links;
 
-pub(crate) use emphasis::EmphasisContext;
+pub(crate) use emphasis::{EmphasisContext, is_non_emoji_variation_selector};
 pub(crate) use html::is_inline_html;
 
 enum InlineLinksPolicy {
@@ -76,7 +90,7 @@ fn parse_inline_item_list_until_impl(
         // Per CommonMark, link text can span lines, but blank lines end the link.
         // Check for blank line (NEWLINE followed by NEWLINE or EOF after optional whitespace)
         if p.at(NEWLINE) {
-            if p.at_blank_line() {
+            if p.is_at_blank_line() {
                 break; // Blank line ends link text
             }
             // Single newline inside link text - consume and continue
@@ -100,12 +114,17 @@ fn parse_inline_item_list_until_impl(
             continue;
         }
 
-        // Autolinks and inline HTML can contain `]`
+        // Autolinks, inline HTML, and MDX tags can contain `]`
         if p.at(L_ANGLE) {
             if html::parse_autolink(p).is_present() {
                 continue;
             }
             if html::parse_inline_html(p).is_present() {
+                continue;
+            }
+            if MarkdownSyntaxFeatures::Mdx.is_supported(p)
+                && super::parse_mdx_inline_tag(p).is_present()
+            {
                 continue;
             }
             let _ = super::parse_textual(p);
@@ -192,6 +211,10 @@ fn nested_link_starts_here(p: &mut MarkdownParser) -> bool {
                 return false;
             }
 
+            if code_span::skip_code_span_in_lookahead(p) || html::skip_inline_html_in_lookahead(p) {
+                continue;
+            }
+
             if p.at(L_BRACK) {
                 depth += 1;
                 p.bump(L_BRACK);
@@ -205,7 +228,10 @@ fn nested_link_starts_here(p: &mut MarkdownParser) -> bool {
                     continue;
                 }
                 p.bump(R_BRACK);
-                return p.at(L_PAREN) || p.at(L_BRACK);
+                // Check text as well as token kind: in Regular context `(`
+                // lexes as plain text, and this runs inside a lookahead
+                // where re-lexing is not possible.
+                return p.at(L_PAREN) || p.at(L_BRACK) || p.cur_text().starts_with('(');
             }
 
             p.bump(p.cur());
@@ -219,7 +245,7 @@ fn parse_any_inline_no_links(p: &mut MarkdownParser) -> ParsedSyntax {
     }
 
     if p.at(BANG) && p.nth_at(1, L_BRACK) {
-        return links::parse_inline_image(p);
+        return links::parse_image_or_reference(p);
     }
 
     parse_any_inline(p)
@@ -255,6 +281,13 @@ pub(crate) fn parse_any_inline(p: &mut MarkdownParser) -> ParsedSyntax {
         // This handles cases like `**foo*` where opener is at offset 1.
         p.force_relex_emphasis_inline();
         super::parse_textual(p)
+    } else if p.at(DOUBLE_TILDE) && MarkdownSyntaxFeatures::Gfm.is_supported(p) {
+        let result = emphasis::parse_inline_strikethrough(p);
+        if result.is_absent() {
+            super::parse_textual(p)
+        } else {
+            result
+        }
     } else if p.at(T![*]) || p.at(UNDERSCORE) {
         // Try italic, fall back to literal text if flanking rules fail
         let result = emphasis::parse_inline_italic(p);
@@ -265,7 +298,7 @@ pub(crate) fn parse_any_inline(p: &mut MarkdownParser) -> ParsedSyntax {
         }
     } else if p.at(BANG) && p.nth_at(1, L_BRACK) {
         // Try image, fall back to literal text if parsing fails
-        let result = links::parse_inline_image(p);
+        let result = links::parse_image_or_reference(p);
         if result.is_absent() {
             super::parse_textual(p)
         } else {
@@ -290,11 +323,24 @@ pub(crate) fn parse_any_inline(p: &mut MarkdownParser) -> ParsedSyntax {
         if result.is_present() {
             return result;
         }
+        if MarkdownSyntaxFeatures::Mdx.is_supported(p) {
+            let result = super::parse_mdx_inline_tag(p);
+            if result.is_present() {
+                return result;
+            }
+        }
         // Fall back to textual
         super::parse_textual(p)
     } else if p.at(MD_ENTITY_LITERAL) {
         // Entity or numeric character reference (already validated by lexer)
         entities::parse_entity_reference(p)
+    } else if p.at(T!['{']) && MarkdownSyntaxFeatures::Mdx.is_supported(p) {
+        let result = super::parse_mdx_inline_expression(p);
+        if result.is_absent() {
+            super::parse_textual(p)
+        } else {
+            result
+        }
     } else {
         super::parse_textual(p)
     }

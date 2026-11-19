@@ -45,7 +45,10 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "useKeyWithMouseEvents",
         language: "jsx",
-        sources: &[RuleSource::EslintJsxA11y("mouse-events-have-key-events").same()],
+        sources: &[
+            RuleSource::EslintJsxA11y("mouse-events-have-key-events").same(),
+            RuleSource::EslintAstro("jsx-a11y/mouse-events-have-key-events").same(),
+        ],
         recommended: true,
         severity: Severity::Error,
     }

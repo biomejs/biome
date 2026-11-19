@@ -1,0 +1,25 @@
+/* should generate diagnostics */
+
+/* The `&` resolves to `.x .y`, so `html body & .d` is (0,3,2), more specific than `.x .y .d` */
+.x {
+  .y {
+    html body & .d {}
+  }
+}
+.x .y .d {}
+
+/* Selectors nested inside `@container` are compared with each other */
+.a {
+  @container (min-width: 1px) {
+    & .b .c {}
+    & .c {}
+  }
+}
+
+/* Selectors nested inside `@starting-style` are compared with each other */
+.e {
+  @starting-style {
+    & .f .g {}
+    & .g {}
+  }
+}

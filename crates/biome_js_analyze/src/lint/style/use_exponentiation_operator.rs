@@ -96,7 +96,10 @@ impl Rule for UseExponentiationOperator {
             rule_category!(),
             ctx.query().range(),
             "Use the '**' operator instead of 'Math.pow'.",
-        ))
+        )
+        .note(markup! {
+            "The exponentiation operator is shorter, and it does not need a function call."
+        }))
     }
 
     fn action(ctx: &RuleContext<Self>, _: &Self::State) -> Option<JsRuleAction> {

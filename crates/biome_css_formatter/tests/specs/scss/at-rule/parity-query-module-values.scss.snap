@@ -1,0 +1,87 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/at-rule/parity-query-module-values.scss
+---
+
+# Input
+
+```scss
+@use "tokens" as Breakpoints;
+$tablet:32rem;
+@media  ( min-width : /* before */ Breakpoints.$tablet /* after */ ){.a{display:block}}
+@media (min-width: ( Breakpoints.$tablet )){.grouped{display:block}}
+@media (min-width:Breakpoints.$tablet +  1rem){.arithmetic{display:block}}
+@media ( /* feature */ width >= Breakpoints.$tablet /* boundary */ ){.comparison{display:block}}
+@media ( Breakpoints.$tablet <= width ){.reverse{display:block}}
+@media (Breakpoints.$tablet<=width<80rem){.lower{display:block}}
+@media (30rem<width<=Breakpoints.$tablet){.upper{display:block}}
+@media (80rem>width>=Breakpoints.$tablet){.descending{display:block}}
+@media (min-width:$tablet){.plain-variable{display:block}}
+@media (min-width:48rem) and (aspect-ratio:16/9){.native{display:block}}
+
+/* biome-ignore format: preserve the authored query layout */
+@media ( min-width: Breakpoints.$tablet ){.suppressed{display:block}}
+
+```
+
+
+# Formatted
+
+```scss
+@use "tokens" as Breakpoints;
+$tablet: 32rem;
+@media (/* before */ min-width: Breakpoints.$tablet /* after */) {
+	.a {
+		display: block;
+	}
+}
+@media (min-width: (Breakpoints.$tablet)) {
+	.grouped {
+		display: block;
+	}
+}
+@media (min-width: Breakpoints.$tablet + 1rem) {
+	.arithmetic {
+		display: block;
+	}
+}
+@media (/* feature */ width >= Breakpoints.$tablet /* boundary */) {
+	.comparison {
+		display: block;
+	}
+}
+@media (Breakpoints.$tablet <= width) {
+	.reverse {
+		display: block;
+	}
+}
+@media (Breakpoints.$tablet <= width < 80rem) {
+	.lower {
+		display: block;
+	}
+}
+@media (30rem < width <= Breakpoints.$tablet) {
+	.upper {
+		display: block;
+	}
+}
+@media (80rem > width >= Breakpoints.$tablet) {
+	.descending {
+		display: block;
+	}
+}
+@media (min-width: $tablet) {
+	.plain-variable {
+		display: block;
+	}
+}
+@media (min-width: 48rem) and (aspect-ratio: 16 / 9) {
+	.native {
+		display: block;
+	}
+}
+
+/* biome-ignore format: preserve the authored query layout */
+@media ( min-width: Breakpoints.$tablet ){.suppressed{display:block}}
+
+```

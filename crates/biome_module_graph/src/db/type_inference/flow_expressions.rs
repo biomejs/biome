@@ -1,0 +1,300 @@
+//! Evaluates affected runtime operands by source occurrence, leaving structural
+//! type resolution and its context-independent caches unchanged.
+
+use super::ResolutionCtx;
+use super::flow::MAX_FLOW_TYPE_STEPS;
+use crate::db::queries::{ExpressionTypeInput, infer_flow_expression_type};
+use crate::js_module_info::flow::AnyFlowExpression;
+use biome_js_syntax::{AnyJsCallArgument, AnyJsExpression, AnyJsName, JsLogicalOperator};
+use biome_js_type_info::{
+    NarrowingPredicate, RawTypeData, RawTypeId, TypeReference, TypeofExpression, falsy_values,
+    interned_types::{Literal, TypeData},
+    narrow_type,
+};
+use biome_rowan::{AstNode, AstSeparatedList};
+use std::borrow::Cow;
+
+/// Limits how many [evaluated ancestors](AnyFlowExpression::evaluated_ancestors)
+/// an evaluated expression may have.
+///
+/// Evaluating an expression queries its operands, and nested tracked queries
+/// run on the call stack. Each operand has one more evaluated ancestor than the
+/// expression that queries it, so this bounds the depth of that recursion.
+const MAX_FLOW_EXPRESSION_DEPTH: usize = 48;
+
+impl<'db> ResolutionCtx<'db, '_> {
+    /// Infers `expression` at its source occurrence from refined operands.
+    ///
+    /// Returns `None` when no operand is refined, when [`AnyFlowExpression::is_evaluated`]
+    /// rejects the expression, or when it has more than
+    /// [`MAX_FLOW_EXPRESSION_DEPTH`] evaluated ancestors.
+    pub(super) fn resolve_flow_expression(
+        &mut self,
+        expression: &AnyFlowExpression,
+    ) -> Option<TypeData<'db>> {
+        if !expression.is_evaluated()
+            || expression
+                .evaluated_ancestors()
+                .nth(MAX_FLOW_EXPRESSION_DEPTH)
+                .is_some()
+        {
+            return None;
+        }
+        match expression {
+            AnyFlowExpression::JsIdentifierExpression(identifier) => {
+                self.narrow_reference(identifier)
+            }
+            AnyFlowExpression::JsParenthesizedExpression(parenthesized) => {
+                self.flow_operand(&parenthesized.expression().ok()?)
+            }
+            AnyFlowExpression::JsStaticMemberExpression(member) => {
+                let object = self.flow_operand(&member.object().ok()?);
+                // The declared type of a property path is the type of this
+                // access, computed on the object's narrowed type when the
+                // object has one.
+                let declared = match object {
+                    Some(object) => {
+                        let name = member.member().ok()?;
+                        let token = name.value_token().ok()?;
+                        // Class members store a private name with its `#`.
+                        let name = if matches!(name, AnyJsName::JsPrivateName(_)) {
+                            Cow::Owned(format!("#{}", token.text_trimmed()))
+                        } else {
+                            Cow::Borrowed(token.text_trimmed())
+                        };
+                        let result = self
+                            .resolve_static_member_expression(object, &name)
+                            .unwrap_or(TypeData::Unknown);
+                        if member.is_optional_chain() {
+                            self.optional_chain_result(object, result)
+                        } else {
+                            result
+                        }
+                    }
+                    None if self.js_info.flow.read(member.range()).is_some() => {
+                        self.raw_operand(&AnyJsExpression::from(member.clone()))?
+                    }
+                    None => return None,
+                };
+                match self.narrow_path(member.range(), declared) {
+                    Some(narrowed) => Some(narrowed),
+                    None => object.is_some().then_some(declared),
+                }
+            }
+            AnyFlowExpression::JsComputedMemberExpression(member) => {
+                let object_expression = member.object().ok()?;
+                let member_expression = member.member().ok()?;
+                let object = self.flow_operand(&object_expression);
+                let key = self.flow_operand(&member_expression);
+                // The declared type of a property path with a literal key is
+                // the type of this access, computed on the narrowed types of
+                // the object and the key when they have them.
+                let declared = if object.is_none() && key.is_none() {
+                    self.js_info.flow.read(member.range())?;
+                    self.raw_operand(&AnyJsExpression::from(member.clone()))?
+                } else {
+                    let object = object.or_else(|| self.raw_operand(&object_expression))?;
+                    let key = key.or_else(|| self.raw_operand(&member_expression))?;
+                    let result = self
+                        .resolve_computed_member_expression(object, key)
+                        .unwrap_or(TypeData::Unknown);
+                    if member.is_optional_chain() {
+                        self.optional_chain_result(object, result)
+                    } else {
+                        result
+                    }
+                };
+                match self.narrow_path(member.range(), declared) {
+                    Some(narrowed) => Some(narrowed),
+                    None => (object.is_some() || key.is_some()).then_some(declared),
+                }
+            }
+            AnyFlowExpression::JsLogicalExpression(logical) => {
+                let left_expression = logical.left().ok()?;
+                let right_expression = logical.right().ok()?;
+                let left = self.flow_operand(&left_expression);
+                let right = self.flow_operand(&right_expression);
+                if left.is_none() && right.is_none() {
+                    return None;
+                }
+                let left = left.or_else(|| self.raw_operand(&left_expression))?;
+                let operator = logical.operator().ok()?;
+                let (predicate, retained) = match operator {
+                    JsLogicalOperator::LogicalAnd => (NarrowingPredicate::Truthy, false),
+                    JsLogicalOperator::LogicalOr => (NarrowingPredicate::Truthy, true),
+                    JsLogicalOperator::NullishCoalescing => (NarrowingPredicate::Nullish, false),
+                };
+                let continuing = narrow_type(self.db, left, predicate, !retained);
+                if continuing == TypeData::NeverKeyword {
+                    return Some(left);
+                }
+                let right = right.or_else(|| self.raw_operand(&right_expression))?;
+                // `&&` returns its left operand only when the operand is falsy,
+                // so a `string` or `bigint` operand contributes `""` or `0n`,
+                // although a read in a falsy branch keeps the broad type.
+                let retained = if operator == JsLogicalOperator::LogicalAnd {
+                    falsy_values(self.db, left)
+                } else {
+                    narrow_type(self.db, left, predicate, retained)
+                };
+                Some(TypeData::union_from_types(self.db, vec![retained, right]))
+            }
+            AnyFlowExpression::JsConditionalExpression(conditional) => {
+                let test_expression = conditional.test().ok()?;
+                let consequent_expression = conditional.consequent().ok()?;
+                let alternate_expression = conditional.alternate().ok()?;
+                let test = self.flow_operand(&test_expression);
+                let consequent = self.flow_operand(&consequent_expression);
+                let alternate = self.flow_operand(&alternate_expression);
+                if test.is_none() && consequent.is_none() && alternate.is_none() {
+                    return None;
+                }
+                let test = test.or_else(|| self.raw_operand(&test_expression))?;
+                if narrow_type(self.db, test, NarrowingPredicate::Truthy, true)
+                    == TypeData::NeverKeyword
+                {
+                    return alternate.or_else(|| self.raw_operand(&alternate_expression));
+                }
+                if narrow_type(self.db, test, NarrowingPredicate::Truthy, false)
+                    == TypeData::NeverKeyword
+                {
+                    return consequent.or_else(|| self.raw_operand(&consequent_expression));
+                }
+                let consequent = consequent.or_else(|| self.raw_operand(&consequent_expression))?;
+                let alternate = alternate.or_else(|| self.raw_operand(&alternate_expression))?;
+                Some(TypeData::union_from_types(
+                    self.db,
+                    vec![consequent, alternate],
+                ))
+            }
+            AnyFlowExpression::JsCallExpression(call) => {
+                let callee_expression = call.callee().ok()?;
+                let callee = self.flow_operand(&callee_expression);
+                let mut overrides = Vec::new();
+                for argument in call.arguments().ok()?.args().iter() {
+                    let AnyJsCallArgument::AnyJsExpression(argument) = argument.ok()? else {
+                        return None;
+                    };
+                    overrides.push(self.flow_operand(&argument));
+                }
+                if callee.is_none() && overrides.iter().all(Option::is_none) {
+                    return None;
+                }
+                let TypeReference::Resolved(RawTypeId::Local(id)) =
+                    self.js_info.raw_expressions.get(&call.range())?
+                else {
+                    return None;
+                };
+                let RawTypeData::TypeofExpression(raw) = self.js_info.raw_types.get(id.index())?
+                else {
+                    return None;
+                };
+                let TypeofExpression::Call(raw) = raw.as_ref() else {
+                    return None;
+                };
+                let arguments = raw.arguments.clone();
+                let raw_callee = raw.callee.clone();
+                let callee = callee.unwrap_or_else(|| self.resolve(&raw_callee));
+                let result =
+                    self.resolve_call_expression_with_overrides(callee, &arguments, &overrides);
+                Some(if call.is_optional_chain() {
+                    self.optional_chain_result(callee, result)
+                } else {
+                    result
+                })
+            }
+            AnyFlowExpression::JsAwaitExpression(await_expression) => {
+                let argument = self.flow_operand(&await_expression.argument().ok()?)?;
+                Some(
+                    self.resolve_await_expression(argument)
+                        .unwrap_or(TypeData::Unknown),
+                )
+            }
+            AnyFlowExpression::JsSequenceExpression(sequence) => {
+                self.flow_operand(&sequence.right().ok()?)
+            }
+            AnyFlowExpression::JsBinaryExpression(binary) => {
+                let left_expression = binary.left().ok()?;
+                let right_expression = binary.right().ok()?;
+                let left = self.flow_operand(&left_expression);
+                let right = self.flow_operand(&right_expression);
+                if left.is_none() && right.is_none() {
+                    return None;
+                }
+                let left = left.or_else(|| self.raw_operand(&left_expression))?;
+                let right = right.or_else(|| self.raw_operand(&right_expression))?;
+                if !self.primitive_addition_operand(left) || !self.primitive_addition_operand(right)
+                {
+                    return Some(TypeData::Unknown);
+                }
+                Some(
+                    self.resolve_addition_expression(left, right)
+                        .unwrap_or(TypeData::Unknown),
+                )
+            }
+        }
+    }
+
+    /// Returns whether `ty` is a primitive or a union of primitives, so adding
+    /// it cannot run a user-defined `valueOf` or `toString` method.
+    ///
+    /// Returns false for an empty union and when the union members, nested
+    /// unions included, exceed [`MAX_FLOW_TYPE_STEPS`].
+    #[expect(
+        clippy::wildcard_enum_match_arm,
+        reason = "Only primitive addition coercions are modeled."
+    )]
+    fn primitive_addition_operand(&self, ty: TypeData<'db>) -> bool {
+        let mut pending = vec![ty];
+        for _ in 0..MAX_FLOW_TYPE_STEPS {
+            let Some(ty) = pending.pop() else {
+                return true;
+            };
+            let primitive = match ty {
+                TypeData::Union(union) => {
+                    let types = union.types(self.db);
+                    pending.extend(types.iter().copied());
+                    !types.is_empty()
+                }
+                TypeData::BigInt
+                | TypeData::Boolean
+                | TypeData::Null
+                | TypeData::Number
+                | TypeData::String
+                | TypeData::Undefined => true,
+                TypeData::Literal(literal) => matches!(
+                    literal.literal(self.db),
+                    Literal::BigInt(_)
+                        | Literal::Boolean(_)
+                        | Literal::Number(_)
+                        | Literal::String(_)
+                        | Literal::Template(_)
+                ),
+                _ => false,
+            };
+            if !primitive {
+                return false;
+            }
+        }
+        false
+    }
+
+    fn flow_operand(&mut self, expression: &AnyJsExpression) -> Option<TypeData<'db>> {
+        if self.evaluates_flow_locally() {
+            return self.local_flow_expression_type(expression.range());
+        }
+        infer_flow_expression_type(
+            self.db,
+            ExpressionTypeInput::new(self.db, self.module, expression.range()),
+        )
+    }
+
+    fn raw_operand(&mut self, expression: &AnyJsExpression) -> Option<TypeData<'db>> {
+        let reference = self
+            .js_info
+            .raw_expressions
+            .get(&expression.range())?
+            .clone();
+        Some(self.resolve(&reference))
+    }
+}

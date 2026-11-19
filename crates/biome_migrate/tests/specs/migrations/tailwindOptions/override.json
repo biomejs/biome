@@ -1,0 +1,14 @@
+{
+  "overrides": [
+    {
+      "includes": ["src/**"],
+      "linter": {
+        "rules": {
+          "nursery": {
+            "useSortedClasses": { "level": "error", "options": { "functions": ["clsx"] } }
+          }
+        }
+      }
+    }
+  ]
+}

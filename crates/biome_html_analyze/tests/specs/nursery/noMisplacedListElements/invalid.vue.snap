@@ -1,0 +1,234 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<template>
+    <div><li /></div>
+    <ul><div><li>Indirect child</li></div></ul>
+    <div><template v-if="visible"><li>Conditional item</li></template></div>
+    <div><template v-for="item in items" :key="item"><li>{{ item }}</li></template></div>
+    <div><transition><li v-if="visible">Transition item</li></transition></div>
+    <div><keep-alive><li>Cached item</li></keep-alive></div>
+    <div><slot><li>Slot fallback item</li></slot></div>
+    <div>
+        <template v-if="a"><li>First</li></template>
+        <template v-else-if="b"><li>Second</li></template>
+        <template v-else><li>Third</li></template>
+    </div>
+</template>
+
+```
+
+# Diagnostics
+```
+invalid.vue:3:10 lint/nursery/noMisplacedListElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This <li> element is outside a list container.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <template>
+  > 3 │     <div><li /></div>
+      │          ^^^^^^
+    4 │     <ul><div><li>Indirect child</li></div></ul>
+    5 │     <div><template v-if="visible"><li>Conditional item</li></template></div>
+  
+  i List items need a list container to form a valid HTML list.
+  
+  i Make this element a direct child of <ul>, <ol>, or <menu>.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:4:14 lint/nursery/noMisplacedListElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This <li> element is outside a list container.
+  
+    2 │ <template>
+    3 │     <div><li /></div>
+  > 4 │     <ul><div><li>Indirect child</li></div></ul>
+      │              ^^^^
+    5 │     <div><template v-if="visible"><li>Conditional item</li></template></div>
+    6 │     <div><template v-for="item in items" :key="item"><li>{{ item }}</li></template></div>
+  
+  i List items need a list container to form a valid HTML list.
+  
+  i Make this element a direct child of <ul>, <ol>, or <menu>.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:5:35 lint/nursery/noMisplacedListElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This <li> element is outside a list container.
+  
+    3 │     <div><li /></div>
+    4 │     <ul><div><li>Indirect child</li></div></ul>
+  > 5 │     <div><template v-if="visible"><li>Conditional item</li></template></div>
+      │                                   ^^^^
+    6 │     <div><template v-for="item in items" :key="item"><li>{{ item }}</li></template></div>
+    7 │     <div><transition><li v-if="visible">Transition item</li></transition></div>
+  
+  i List items need a list container to form a valid HTML list.
+  
+  i Make this element a direct child of <ul>, <ol>, or <menu>.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:6:54 lint/nursery/noMisplacedListElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This <li> element is outside a list container.
+  
+    4 │     <ul><div><li>Indirect child</li></div></ul>
+    5 │     <div><template v-if="visible"><li>Conditional item</li></template></div>
+  > 6 │     <div><template v-for="item in items" :key="item"><li>{{ item }}</li></template></div>
+      │                                                      ^^^^
+    7 │     <div><transition><li v-if="visible">Transition item</li></transition></div>
+    8 │     <div><keep-alive><li>Cached item</li></keep-alive></div>
+  
+  i List items need a list container to form a valid HTML list.
+  
+  i Make this element a direct child of <ul>, <ol>, or <menu>.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:7:22 lint/nursery/noMisplacedListElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This <li> element is outside a list container.
+  
+    5 │     <div><template v-if="visible"><li>Conditional item</li></template></div>
+    6 │     <div><template v-for="item in items" :key="item"><li>{{ item }}</li></template></div>
+  > 7 │     <div><transition><li v-if="visible">Transition item</li></transition></div>
+      │                      ^^^^^^^^^^^^^^^^^^^
+    8 │     <div><keep-alive><li>Cached item</li></keep-alive></div>
+    9 │     <div><slot><li>Slot fallback item</li></slot></div>
+  
+  i List items need a list container to form a valid HTML list.
+  
+  i Make this element a direct child of <ul>, <ol>, or <menu>.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:8:22 lint/nursery/noMisplacedListElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This <li> element is outside a list container.
+  
+     6 │     <div><template v-for="item in items" :key="item"><li>{{ item }}</li></template></div>
+     7 │     <div><transition><li v-if="visible">Transition item</li></transition></div>
+   > 8 │     <div><keep-alive><li>Cached item</li></keep-alive></div>
+       │                      ^^^^
+     9 │     <div><slot><li>Slot fallback item</li></slot></div>
+    10 │     <div>
+  
+  i List items need a list container to form a valid HTML list.
+  
+  i Make this element a direct child of <ul>, <ol>, or <menu>.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:9:16 lint/nursery/noMisplacedListElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This <li> element is outside a list container.
+  
+     7 │     <div><transition><li v-if="visible">Transition item</li></transition></div>
+     8 │     <div><keep-alive><li>Cached item</li></keep-alive></div>
+   > 9 │     <div><slot><li>Slot fallback item</li></slot></div>
+       │                ^^^^
+    10 │     <div>
+    11 │         <template v-if="a"><li>First</li></template>
+  
+  i List items need a list container to form a valid HTML list.
+  
+  i Make this element a direct child of <ul>, <ol>, or <menu>.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:11:28 lint/nursery/noMisplacedListElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This <li> element is outside a list container.
+  
+     9 │     <div><slot><li>Slot fallback item</li></slot></div>
+    10 │     <div>
+  > 11 │         <template v-if="a"><li>First</li></template>
+       │                            ^^^^
+    12 │         <template v-else-if="b"><li>Second</li></template>
+    13 │         <template v-else><li>Third</li></template>
+  
+  i List items need a list container to form a valid HTML list.
+  
+  i Make this element a direct child of <ul>, <ol>, or <menu>.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:12:33 lint/nursery/noMisplacedListElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This <li> element is outside a list container.
+  
+    10 │     <div>
+    11 │         <template v-if="a"><li>First</li></template>
+  > 12 │         <template v-else-if="b"><li>Second</li></template>
+       │                                 ^^^^
+    13 │         <template v-else><li>Third</li></template>
+    14 │     </div>
+  
+  i List items need a list container to form a valid HTML list.
+  
+  i Make this element a direct child of <ul>, <ol>, or <menu>.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:13:26 lint/nursery/noMisplacedListElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This <li> element is outside a list container.
+  
+    11 │         <template v-if="a"><li>First</li></template>
+    12 │         <template v-else-if="b"><li>Second</li></template>
+  > 13 │         <template v-else><li>Third</li></template>
+       │                          ^^^^
+    14 │     </div>
+    15 │ </template>
+  
+  i List items need a list container to form a valid HTML list.
+  
+  i Make this element a direct child of <ul>, <ol>, or <menu>.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

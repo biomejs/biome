@@ -1,0 +1,13 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: valid_allowed_colors.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<template>
+<div class="bg-pink-500 hover:text-white/80 dark:border-black!"></div>
+<div class="ring-pink-500/50 mask-linear-from-black bg-[#ff00aa]"></div>
+</template>
+
+```

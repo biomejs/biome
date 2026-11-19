@@ -21,6 +21,366 @@ use std::fmt::{Debug, Formatter};
 #[doc = r" the slots are not statically known."]
 pub(crate) const SLOT_MAP_EMPTY_VALUE: u8 = u8::MAX;
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct GfmStrikethrough {
+    pub(crate) syntax: SyntaxNode,
+}
+impl GfmStrikethrough {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> GfmStrikethroughFields {
+        GfmStrikethroughFields {
+            l_fence_token: self.l_fence_token(),
+            content: self.content(),
+            r_fence_token: self.r_fence_token(),
+        }
+    }
+    pub fn l_fence_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn content(&self) -> MdInlineItemList {
+        support::list(&self.syntax, 1usize)
+    }
+    pub fn r_fence_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 2usize)
+    }
+}
+impl Serialize for GfmStrikethrough {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct GfmStrikethroughFields {
+    pub l_fence_token: SyntaxResult<SyntaxToken>,
+    pub content: MdInlineItemList,
+    pub r_fence_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct GfmTable {
+    pub(crate) syntax: SyntaxNode,
+}
+impl GfmTable {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> GfmTableFields {
+        GfmTableFields {
+            header: self.header(),
+            delimiter: self.delimiter(),
+            body: self.body(),
+        }
+    }
+    pub fn header(&self) -> SyntaxResult<GfmTableRow> {
+        support::required_node(&self.syntax, 0usize)
+    }
+    pub fn delimiter(&self) -> SyntaxResult<GfmTableDelimiterRow> {
+        support::required_node(&self.syntax, 1usize)
+    }
+    pub fn body(&self) -> GfmTableRowList {
+        support::list(&self.syntax, 2usize)
+    }
+}
+impl Serialize for GfmTable {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct GfmTableFields {
+    pub header: SyntaxResult<GfmTableRow>,
+    pub delimiter: SyntaxResult<GfmTableDelimiterRow>,
+    pub body: GfmTableRowList,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct GfmTableCell {
+    pub(crate) syntax: SyntaxNode,
+}
+impl GfmTableCell {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> GfmTableCellFields {
+        GfmTableCellFields {
+            content: self.content(),
+        }
+    }
+    pub fn content(&self) -> MdInlineItemList {
+        support::list(&self.syntax, 0usize)
+    }
+}
+impl Serialize for GfmTableCell {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct GfmTableCellFields {
+    pub content: MdInlineItemList,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct GfmTableDelimiterCell {
+    pub(crate) syntax: SyntaxNode,
+}
+impl GfmTableDelimiterCell {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> GfmTableDelimiterCellFields {
+        GfmTableDelimiterCellFields {
+            l_colon_token: self.l_colon_token(),
+            dashes: self.dashes(),
+            r_colon_token: self.r_colon_token(),
+        }
+    }
+    pub fn l_colon_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 0usize)
+    }
+    pub fn dashes(&self) -> GfmTableDelimiterDashList {
+        support::list(&self.syntax, 1usize)
+    }
+    pub fn r_colon_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 2usize)
+    }
+}
+impl Serialize for GfmTableDelimiterCell {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct GfmTableDelimiterCellFields {
+    pub l_colon_token: Option<SyntaxToken>,
+    pub dashes: GfmTableDelimiterDashList,
+    pub r_colon_token: Option<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct GfmTableDelimiterDash {
+    pub(crate) syntax: SyntaxNode,
+}
+impl GfmTableDelimiterDash {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> GfmTableDelimiterDashFields {
+        GfmTableDelimiterDashFields {
+            minus_token: self.minus_token(),
+        }
+    }
+    pub fn minus_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+}
+impl Serialize for GfmTableDelimiterDash {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct GfmTableDelimiterDashFields {
+    pub minus_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct GfmTableDelimiterRow {
+    pub(crate) syntax: SyntaxNode,
+}
+impl GfmTableDelimiterRow {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> GfmTableDelimiterRowFields {
+        GfmTableDelimiterRowFields {
+            quote_prefixes: self.quote_prefixes(),
+            l_pipe_token: self.l_pipe_token(),
+            cells: self.cells(),
+            r_pipe_token: self.r_pipe_token(),
+            newline_token: self.newline_token(),
+        }
+    }
+    pub fn quote_prefixes(&self) -> MdQuotePrefixList {
+        support::list(&self.syntax, 0usize)
+    }
+    pub fn l_pipe_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 1usize)
+    }
+    pub fn cells(&self) -> GfmTableDelimiterCellList {
+        support::list(&self.syntax, 2usize)
+    }
+    pub fn r_pipe_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 3usize)
+    }
+    pub fn newline_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 4usize)
+    }
+}
+impl Serialize for GfmTableDelimiterRow {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct GfmTableDelimiterRowFields {
+    pub quote_prefixes: MdQuotePrefixList,
+    pub l_pipe_token: Option<SyntaxToken>,
+    pub cells: GfmTableDelimiterCellList,
+    pub r_pipe_token: Option<SyntaxToken>,
+    pub newline_token: Option<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct GfmTableRow {
+    pub(crate) syntax: SyntaxNode,
+}
+impl GfmTableRow {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> GfmTableRowFields {
+        GfmTableRowFields {
+            quote_prefixes: self.quote_prefixes(),
+            l_pipe_token: self.l_pipe_token(),
+            cells: self.cells(),
+            r_pipe_token: self.r_pipe_token(),
+            newline_token: self.newline_token(),
+        }
+    }
+    pub fn quote_prefixes(&self) -> MdQuotePrefixList {
+        support::list(&self.syntax, 0usize)
+    }
+    pub fn l_pipe_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 1usize)
+    }
+    pub fn cells(&self) -> GfmTableCellList {
+        support::list(&self.syntax, 2usize)
+    }
+    pub fn r_pipe_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 3usize)
+    }
+    pub fn newline_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 4usize)
+    }
+}
+impl Serialize for GfmTableRow {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct GfmTableRowFields {
+    pub quote_prefixes: MdQuotePrefixList,
+    pub l_pipe_token: Option<SyntaxToken>,
+    pub cells: GfmTableCellList,
+    pub r_pipe_token: Option<SyntaxToken>,
+    pub newline_token: Option<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct GfmTaskListItem {
+    pub(crate) syntax: SyntaxNode,
+}
+impl GfmTaskListItem {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> GfmTaskListItemFields {
+        GfmTaskListItemFields {
+            l_bracket_token: self.l_bracket_token(),
+            state: self.state(),
+            r_bracket_token: self.r_bracket_token(),
+        }
+    }
+    pub fn l_bracket_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn state(&self) -> SyntaxResult<MdTextual> {
+        support::required_node(&self.syntax, 1usize)
+    }
+    pub fn r_bracket_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 2usize)
+    }
+}
+impl Serialize for GfmTaskListItem {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct GfmTaskListItemFields {
+    pub l_bracket_token: SyntaxResult<SyntaxToken>,
+    pub state: SyntaxResult<MdTextual>,
+    pub r_bracket_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct MdAutolink {
     pub(crate) syntax: SyntaxNode,
 }
@@ -141,6 +501,41 @@ pub struct MdBulletListItemFields {
     pub md_bullet_list: MdBulletList,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct MdCodeContent {
+    pub(crate) syntax: SyntaxNode,
+}
+impl MdCodeContent {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> MdCodeContentFields {
+        MdCodeContentFields {
+            value_token: self.value_token(),
+        }
+    }
+    pub fn value_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+}
+impl Serialize for MdCodeContent {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct MdCodeContentFields {
+    pub value_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct MdContinuationIndent {
     pub(crate) syntax: SyntaxNode,
 }
@@ -174,51 +569,6 @@ impl Serialize for MdContinuationIndent {
 #[derive(Serialize)]
 pub struct MdContinuationIndentFields {
     pub indent: MdIndentTokenList,
-}
-#[derive(Clone, PartialEq, Eq, Hash)]
-pub struct MdDocument {
-    pub(crate) syntax: SyntaxNode,
-}
-impl MdDocument {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn as_fields(&self) -> MdDocumentFields {
-        MdDocumentFields {
-            bom_token: self.bom_token(),
-            value: self.value(),
-            eof_token: self.eof_token(),
-        }
-    }
-    pub fn bom_token(&self) -> Option<SyntaxToken> {
-        support::token(&self.syntax, 0usize)
-    }
-    pub fn value(&self) -> MdBlockList {
-        support::list(&self.syntax, 1usize)
-    }
-    pub fn eof_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 2usize)
-    }
-}
-impl Serialize for MdDocument {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        self.as_fields().serialize(serializer)
-    }
-}
-#[derive(Serialize)]
-pub struct MdDocumentFields {
-    pub bom_token: Option<SyntaxToken>,
-    pub value: MdBlockList,
-    pub eof_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct MdEntityReference {
@@ -314,6 +664,86 @@ pub struct MdFencedCodeBlockFields {
     pub content: MdInlineItemList,
     pub r_fence_indent: MdIndentTokenList,
     pub r_fence: Option<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct MdFrontmatter {
+    pub(crate) syntax: SyntaxNode,
+}
+impl MdFrontmatter {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> MdFrontmatterFields {
+        MdFrontmatterFields {
+            l_fence_token: self.l_fence_token(),
+            content: self.content(),
+            r_fence_token: self.r_fence_token(),
+        }
+    }
+    pub fn l_fence_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn content(&self) -> SyntaxResult<MdFrontmatterContent> {
+        support::required_node(&self.syntax, 1usize)
+    }
+    pub fn r_fence_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 2usize)
+    }
+}
+impl Serialize for MdFrontmatter {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct MdFrontmatterFields {
+    pub l_fence_token: SyntaxResult<SyntaxToken>,
+    pub content: SyntaxResult<MdFrontmatterContent>,
+    pub r_fence_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct MdFrontmatterContent {
+    pub(crate) syntax: SyntaxNode,
+}
+impl MdFrontmatterContent {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> MdFrontmatterContentFields {
+        MdFrontmatterContentFields {
+            value_token: self.value_token(),
+        }
+    }
+    pub fn value_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+}
+impl Serialize for MdFrontmatterContent {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct MdFrontmatterContentFields {
+    pub value_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct MdHardLine {
@@ -458,8 +888,8 @@ impl MdHtmlBlock {
     pub fn indent(&self) -> MdIndentTokenList {
         support::list(&self.syntax, 0usize)
     }
-    pub fn content(&self) -> MdInlineItemList {
-        support::list(&self.syntax, 1usize)
+    pub fn content(&self) -> SyntaxResult<MdHtmlContent> {
+        support::required_node(&self.syntax, 1usize)
     }
 }
 impl Serialize for MdHtmlBlock {
@@ -473,13 +903,13 @@ impl Serialize for MdHtmlBlock {
 #[derive(Serialize)]
 pub struct MdHtmlBlockFields {
     pub indent: MdIndentTokenList,
-    pub content: MdInlineItemList,
+    pub content: SyntaxResult<MdHtmlContent>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
-pub struct MdIndent {
+pub struct MdHtmlContent {
     pub(crate) syntax: SyntaxNode,
 }
-impl MdIndent {
+impl MdHtmlContent {
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -489,8 +919,8 @@ impl MdIndent {
     pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
         Self { syntax }
     }
-    pub fn as_fields(&self) -> MdIndentFields {
-        MdIndentFields {
+    pub fn as_fields(&self) -> MdHtmlContentFields {
+        MdHtmlContentFields {
             value_token: self.value_token(),
         }
     }
@@ -498,7 +928,7 @@ impl MdIndent {
         support::required_token(&self.syntax, 0usize)
     }
 }
-impl Serialize for MdIndent {
+impl Serialize for MdHtmlContent {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
@@ -507,7 +937,7 @@ impl Serialize for MdIndent {
     }
 }
 #[derive(Serialize)]
-pub struct MdIndentFields {
+pub struct MdHtmlContentFields {
     pub value_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -686,11 +1116,11 @@ impl MdInlineHtml {
     }
     pub fn as_fields(&self) -> MdInlineHtmlFields {
         MdInlineHtmlFields {
-            value: self.value(),
+            value_token: self.value_token(),
         }
     }
-    pub fn value(&self) -> MdInlineItemList {
-        support::list(&self.syntax, 0usize)
+    pub fn value_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
     }
 }
 impl Serialize for MdInlineHtml {
@@ -703,7 +1133,7 @@ impl Serialize for MdInlineHtml {
 }
 #[derive(Serialize)]
 pub struct MdInlineHtmlFields {
-    pub value: MdInlineItemList,
+    pub value_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct MdInlineImage {
@@ -1190,16 +1620,10 @@ impl MdParagraph {
         Self { syntax }
     }
     pub fn as_fields(&self) -> MdParagraphFields {
-        MdParagraphFields {
-            list: self.list(),
-            hard_line: self.hard_line(),
-        }
+        MdParagraphFields { list: self.list() }
     }
     pub fn list(&self) -> MdInlineItemList {
         support::list(&self.syntax, 0usize)
-    }
-    pub fn hard_line(&self) -> Option<MdHardLine> {
-        support::node(&self.syntax, 1usize)
     }
 }
 impl Serialize for MdParagraph {
@@ -1213,7 +1637,6 @@ impl Serialize for MdParagraph {
 #[derive(Serialize)]
 pub struct MdParagraphFields {
     pub list: MdInlineItemList,
-    pub hard_line: Option<MdHardLine>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct MdQuote {
@@ -1486,6 +1909,56 @@ pub struct MdReferenceLinkLabelFields {
     pub r_brack_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct MdRoot {
+    pub(crate) syntax: SyntaxNode,
+}
+impl MdRoot {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> MdRootFields {
+        MdRootFields {
+            bom_token: self.bom_token(),
+            frontmatter: self.frontmatter(),
+            value: self.value(),
+            eof_token: self.eof_token(),
+        }
+    }
+    pub fn bom_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 0usize)
+    }
+    pub fn frontmatter(&self) -> Option<MdFrontmatter> {
+        support::node(&self.syntax, 1usize)
+    }
+    pub fn value(&self) -> MdBlockList {
+        support::list(&self.syntax, 2usize)
+    }
+    pub fn eof_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 3usize)
+    }
+}
+impl Serialize for MdRoot {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct MdRootFields {
+    pub bom_token: Option<SyntaxToken>,
+    pub frontmatter: Option<MdFrontmatter>,
+    pub value: MdBlockList,
+    pub eof_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct MdSetextHeader {
     pub(crate) syntax: SyntaxNode,
 }
@@ -1524,41 +1997,6 @@ impl Serialize for MdSetextHeader {
 pub struct MdSetextHeaderFields {
     pub content: MdInlineItemList,
     pub underline_token: SyntaxResult<SyntaxToken>,
-}
-#[derive(Clone, PartialEq, Eq, Hash)]
-pub struct MdSoftBreak {
-    pub(crate) syntax: SyntaxNode,
-}
-impl MdSoftBreak {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn as_fields(&self) -> MdSoftBreakFields {
-        MdSoftBreakFields {
-            value_token: self.value_token(),
-        }
-    }
-    pub fn value_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 0usize)
-    }
-}
-impl Serialize for MdSoftBreak {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        self.as_fields().serialize(serializer)
-    }
-}
-#[derive(Serialize)]
-pub struct MdSoftBreakFields {
-    pub value_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct MdTextual {
@@ -1665,6 +2103,236 @@ impl Serialize for MdThematicBreakChar {
 pub struct MdThematicBreakCharFields {
     pub value: SyntaxResult<SyntaxToken>,
 }
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct MdxBlockExpression {
+    pub(crate) syntax: SyntaxNode,
+}
+impl MdxBlockExpression {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> MdxBlockExpressionFields {
+        MdxBlockExpressionFields {
+            l_curly_token: self.l_curly_token(),
+            content: self.content(),
+            r_curly_token: self.r_curly_token(),
+        }
+    }
+    pub fn l_curly_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn content(&self) -> Option<MdxExpressionContent> {
+        support::node(&self.syntax, 1usize)
+    }
+    pub fn r_curly_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 2usize)
+    }
+}
+impl Serialize for MdxBlockExpression {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct MdxBlockExpressionFields {
+    pub l_curly_token: SyntaxResult<SyntaxToken>,
+    pub content: Option<MdxExpressionContent>,
+    pub r_curly_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct MdxEsmBlock {
+    pub(crate) syntax: SyntaxNode,
+}
+impl MdxEsmBlock {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> MdxEsmBlockFields {
+        MdxEsmBlockFields {
+            content_token: self.content_token(),
+        }
+    }
+    pub fn content_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+}
+impl Serialize for MdxEsmBlock {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct MdxEsmBlockFields {
+    pub content_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct MdxExpressionContent {
+    pub(crate) syntax: SyntaxNode,
+}
+impl MdxExpressionContent {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> MdxExpressionContentFields {
+        MdxExpressionContentFields {
+            value_token: self.value_token(),
+        }
+    }
+    pub fn value_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+}
+impl Serialize for MdxExpressionContent {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct MdxExpressionContentFields {
+    pub value_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct MdxInlineExpression {
+    pub(crate) syntax: SyntaxNode,
+}
+impl MdxInlineExpression {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> MdxInlineExpressionFields {
+        MdxInlineExpressionFields {
+            l_curly_token: self.l_curly_token(),
+            content: self.content(),
+            r_curly_token: self.r_curly_token(),
+        }
+    }
+    pub fn l_curly_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn content(&self) -> Option<MdxExpressionContent> {
+        support::node(&self.syntax, 1usize)
+    }
+    pub fn r_curly_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 2usize)
+    }
+}
+impl Serialize for MdxInlineExpression {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct MdxInlineExpressionFields {
+    pub l_curly_token: SyntaxResult<SyntaxToken>,
+    pub content: Option<MdxExpressionContent>,
+    pub r_curly_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct MdxJsxBlockTag {
+    pub(crate) syntax: SyntaxNode,
+}
+impl MdxJsxBlockTag {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> MdxJsxBlockTagFields {
+        MdxJsxBlockTagFields {
+            value_token: self.value_token(),
+        }
+    }
+    pub fn value_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+}
+impl Serialize for MdxJsxBlockTag {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct MdxJsxBlockTagFields {
+    pub value_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct MdxJsxInlineTag {
+    pub(crate) syntax: SyntaxNode,
+}
+impl MdxJsxInlineTag {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> MdxJsxInlineTagFields {
+        MdxJsxInlineTagFields {
+            value_token: self.value_token(),
+        }
+    }
+    pub fn value_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+}
+impl Serialize for MdxJsxInlineTag {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct MdxJsxInlineTagFields {
+    pub value_token: SyntaxResult<SyntaxToken>,
+}
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyMdBlock {
     AnyMdContainerBlock(AnyMdContainerBlock),
@@ -1745,7 +2413,10 @@ impl AnyMdContainerBlock {
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyMdInline {
+    GfmStrikethrough(GfmStrikethrough),
+    GfmTaskListItem(GfmTaskListItem),
     MdAutolink(MdAutolink),
+    MdCodeContent(MdCodeContent),
     MdEntityReference(MdEntityReference),
     MdHardLine(MdHardLine),
     MdHtmlBlock(MdHtmlBlock),
@@ -1759,13 +2430,32 @@ pub enum AnyMdInline {
     MdQuotePrefix(MdQuotePrefix),
     MdReferenceImage(MdReferenceImage),
     MdReferenceLink(MdReferenceLink),
-    MdSoftBreak(MdSoftBreak),
     MdTextual(MdTextual),
+    MdxInlineExpression(MdxInlineExpression),
+    MdxJsxInlineTag(MdxJsxInlineTag),
 }
 impl AnyMdInline {
+    pub fn as_gfm_strikethrough(&self) -> Option<&GfmStrikethrough> {
+        match &self {
+            Self::GfmStrikethrough(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_gfm_task_list_item(&self) -> Option<&GfmTaskListItem> {
+        match &self {
+            Self::GfmTaskListItem(item) => Some(item),
+            _ => None,
+        }
+    }
     pub fn as_md_autolink(&self) -> Option<&MdAutolink> {
         match &self {
             Self::MdAutolink(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_md_code_content(&self) -> Option<&MdCodeContent> {
+        match &self {
+            Self::MdCodeContent(item) => Some(item),
             _ => None,
         }
     }
@@ -1847,15 +2537,21 @@ impl AnyMdInline {
             _ => None,
         }
     }
-    pub fn as_md_soft_break(&self) -> Option<&MdSoftBreak> {
-        match &self {
-            Self::MdSoftBreak(item) => Some(item),
-            _ => None,
-        }
-    }
     pub fn as_md_textual(&self) -> Option<&MdTextual> {
         match &self {
             Self::MdTextual(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_mdx_inline_expression(&self) -> Option<&MdxInlineExpression> {
+        match &self {
+            Self::MdxInlineExpression(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_mdx_jsx_inline_tag(&self) -> Option<&MdxJsxInlineTag> {
+        match &self {
+            Self::MdxJsxInlineTag(item) => Some(item),
             _ => None,
         }
     }
@@ -1863,6 +2559,7 @@ impl AnyMdInline {
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyMdLeafBlock {
     AnyMdCodeBlock(AnyMdCodeBlock),
+    GfmTable(GfmTable),
     MdContinuationIndent(MdContinuationIndent),
     MdHeader(MdHeader),
     MdHtmlBlock(MdHtmlBlock),
@@ -1871,11 +2568,20 @@ pub enum AnyMdLeafBlock {
     MdParagraph(MdParagraph),
     MdSetextHeader(MdSetextHeader),
     MdThematicBreakBlock(MdThematicBreakBlock),
+    MdxBlockExpression(MdxBlockExpression),
+    MdxEsmBlock(MdxEsmBlock),
+    MdxJsxBlockTag(MdxJsxBlockTag),
 }
 impl AnyMdLeafBlock {
     pub fn as_any_md_code_block(&self) -> Option<&AnyMdCodeBlock> {
         match &self {
             Self::AnyMdCodeBlock(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_gfm_table(&self) -> Option<&GfmTable> {
+        match &self {
+            Self::GfmTable(item) => Some(item),
             _ => None,
         }
     }
@@ -1927,6 +2633,24 @@ impl AnyMdLeafBlock {
             _ => None,
         }
     }
+    pub fn as_mdx_block_expression(&self) -> Option<&MdxBlockExpression> {
+        match &self {
+            Self::MdxBlockExpression(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_mdx_esm_block(&self) -> Option<&MdxEsmBlock> {
+        match &self {
+            Self::MdxEsmBlock(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_mdx_jsx_block_tag(&self) -> Option<&MdxJsxBlockTag> {
+        match &self {
+            Self::MdxJsxBlockTag(item) => Some(item),
+            _ => None,
+        }
+    }
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyMdThematicBreakPart {
@@ -1945,6 +2669,437 @@ impl AnyMdThematicBreakPart {
             Self::MdThematicBreakChar(item) => Some(item),
             _ => None,
         }
+    }
+}
+impl AstNode for GfmStrikethrough {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(GFM_STRIKETHROUGH as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == GFM_STRIKETHROUGH
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for GfmStrikethrough {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("GfmStrikethrough")
+                .field(
+                    "l_fence_token",
+                    &support::DebugSyntaxResult(self.l_fence_token()),
+                )
+                .field("content", &self.content())
+                .field(
+                    "r_fence_token",
+                    &support::DebugSyntaxResult(self.r_fence_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("GfmStrikethrough").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<GfmStrikethrough> for SyntaxNode {
+    fn from(n: GfmStrikethrough) -> Self {
+        n.syntax
+    }
+}
+impl From<GfmStrikethrough> for SyntaxElement {
+    fn from(n: GfmStrikethrough) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for GfmTable {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(GFM_TABLE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == GFM_TABLE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for GfmTable {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("GfmTable")
+                .field("header", &support::DebugSyntaxResult(self.header()))
+                .field("delimiter", &support::DebugSyntaxResult(self.delimiter()))
+                .field("body", &self.body())
+                .finish()
+        } else {
+            f.debug_struct("GfmTable").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<GfmTable> for SyntaxNode {
+    fn from(n: GfmTable) -> Self {
+        n.syntax
+    }
+}
+impl From<GfmTable> for SyntaxElement {
+    fn from(n: GfmTable) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for GfmTableCell {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(GFM_TABLE_CELL as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == GFM_TABLE_CELL
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for GfmTableCell {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("GfmTableCell")
+                .field("content", &self.content())
+                .finish()
+        } else {
+            f.debug_struct("GfmTableCell").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<GfmTableCell> for SyntaxNode {
+    fn from(n: GfmTableCell) -> Self {
+        n.syntax
+    }
+}
+impl From<GfmTableCell> for SyntaxElement {
+    fn from(n: GfmTableCell) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for GfmTableDelimiterCell {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(GFM_TABLE_DELIMITER_CELL as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == GFM_TABLE_DELIMITER_CELL
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for GfmTableDelimiterCell {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("GfmTableDelimiterCell")
+                .field(
+                    "l_colon_token",
+                    &support::DebugOptionalElement(self.l_colon_token()),
+                )
+                .field("dashes", &self.dashes())
+                .field(
+                    "r_colon_token",
+                    &support::DebugOptionalElement(self.r_colon_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("GfmTableDelimiterCell").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<GfmTableDelimiterCell> for SyntaxNode {
+    fn from(n: GfmTableDelimiterCell) -> Self {
+        n.syntax
+    }
+}
+impl From<GfmTableDelimiterCell> for SyntaxElement {
+    fn from(n: GfmTableDelimiterCell) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for GfmTableDelimiterDash {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(GFM_TABLE_DELIMITER_DASH as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == GFM_TABLE_DELIMITER_DASH
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for GfmTableDelimiterDash {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("GfmTableDelimiterDash")
+                .field(
+                    "minus_token",
+                    &support::DebugSyntaxResult(self.minus_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("GfmTableDelimiterDash").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<GfmTableDelimiterDash> for SyntaxNode {
+    fn from(n: GfmTableDelimiterDash) -> Self {
+        n.syntax
+    }
+}
+impl From<GfmTableDelimiterDash> for SyntaxElement {
+    fn from(n: GfmTableDelimiterDash) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for GfmTableDelimiterRow {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(GFM_TABLE_DELIMITER_ROW as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == GFM_TABLE_DELIMITER_ROW
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for GfmTableDelimiterRow {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("GfmTableDelimiterRow")
+                .field("quote_prefixes", &self.quote_prefixes())
+                .field(
+                    "l_pipe_token",
+                    &support::DebugOptionalElement(self.l_pipe_token()),
+                )
+                .field("cells", &self.cells())
+                .field(
+                    "r_pipe_token",
+                    &support::DebugOptionalElement(self.r_pipe_token()),
+                )
+                .field(
+                    "newline_token",
+                    &support::DebugOptionalElement(self.newline_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("GfmTableDelimiterRow").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<GfmTableDelimiterRow> for SyntaxNode {
+    fn from(n: GfmTableDelimiterRow) -> Self {
+        n.syntax
+    }
+}
+impl From<GfmTableDelimiterRow> for SyntaxElement {
+    fn from(n: GfmTableDelimiterRow) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for GfmTableRow {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(GFM_TABLE_ROW as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == GFM_TABLE_ROW
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for GfmTableRow {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("GfmTableRow")
+                .field("quote_prefixes", &self.quote_prefixes())
+                .field(
+                    "l_pipe_token",
+                    &support::DebugOptionalElement(self.l_pipe_token()),
+                )
+                .field("cells", &self.cells())
+                .field(
+                    "r_pipe_token",
+                    &support::DebugOptionalElement(self.r_pipe_token()),
+                )
+                .field(
+                    "newline_token",
+                    &support::DebugOptionalElement(self.newline_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("GfmTableRow").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<GfmTableRow> for SyntaxNode {
+    fn from(n: GfmTableRow) -> Self {
+        n.syntax
+    }
+}
+impl From<GfmTableRow> for SyntaxElement {
+    fn from(n: GfmTableRow) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for GfmTaskListItem {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(GFM_TASK_LIST_ITEM as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == GFM_TASK_LIST_ITEM
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for GfmTaskListItem {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("GfmTaskListItem")
+                .field(
+                    "l_bracket_token",
+                    &support::DebugSyntaxResult(self.l_bracket_token()),
+                )
+                .field("state", &support::DebugSyntaxResult(self.state()))
+                .field(
+                    "r_bracket_token",
+                    &support::DebugSyntaxResult(self.r_bracket_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("GfmTaskListItem").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<GfmTaskListItem> for SyntaxNode {
+    fn from(n: GfmTaskListItem) -> Self {
+        n.syntax
+    }
+}
+impl From<GfmTaskListItem> for SyntaxElement {
+    fn from(n: GfmTaskListItem) -> Self {
+        n.syntax.into()
     }
 }
 impl AstNode for MdAutolink {
@@ -2097,6 +3252,56 @@ impl From<MdBulletListItem> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl AstNode for MdCodeContent {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(MD_CODE_CONTENT as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == MD_CODE_CONTENT
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for MdCodeContent {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("MdCodeContent")
+                .field(
+                    "value_token",
+                    &support::DebugSyntaxResult(self.value_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("MdCodeContent").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<MdCodeContent> for SyntaxNode {
+    fn from(n: MdCodeContent) -> Self {
+        n.syntax
+    }
+}
+impl From<MdCodeContent> for SyntaxElement {
+    fn from(n: MdCodeContent) -> Self {
+        n.syntax.into()
+    }
+}
 impl AstNode for MdContinuationIndent {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -2141,58 +3346,6 @@ impl From<MdContinuationIndent> for SyntaxNode {
 }
 impl From<MdContinuationIndent> for SyntaxElement {
     fn from(n: MdContinuationIndent) -> Self {
-        n.syntax.into()
-    }
-}
-impl AstNode for MdDocument {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(MD_DOCUMENT as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == MD_DOCUMENT
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for MdDocument {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("MdDocument")
-                .field(
-                    "bom_token",
-                    &support::DebugOptionalElement(self.bom_token()),
-                )
-                .field("value", &self.value())
-                .field("eof_token", &support::DebugSyntaxResult(self.eof_token()))
-                .finish()
-        } else {
-            f.debug_struct("MdDocument").finish()
-        };
-        DEPTH.set(current_depth);
-        result
-    }
-}
-impl From<MdDocument> for SyntaxNode {
-    fn from(n: MdDocument) -> Self {
-        n.syntax
-    }
-}
-impl From<MdDocument> for SyntaxElement {
-    fn from(n: MdDocument) -> Self {
         n.syntax.into()
     }
 }
@@ -2295,6 +3448,111 @@ impl From<MdFencedCodeBlock> for SyntaxNode {
 }
 impl From<MdFencedCodeBlock> for SyntaxElement {
     fn from(n: MdFencedCodeBlock) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for MdFrontmatter {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(MD_FRONTMATTER as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == MD_FRONTMATTER
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for MdFrontmatter {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("MdFrontmatter")
+                .field(
+                    "l_fence_token",
+                    &support::DebugSyntaxResult(self.l_fence_token()),
+                )
+                .field("content", &support::DebugSyntaxResult(self.content()))
+                .field(
+                    "r_fence_token",
+                    &support::DebugSyntaxResult(self.r_fence_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("MdFrontmatter").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<MdFrontmatter> for SyntaxNode {
+    fn from(n: MdFrontmatter) -> Self {
+        n.syntax
+    }
+}
+impl From<MdFrontmatter> for SyntaxElement {
+    fn from(n: MdFrontmatter) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for MdFrontmatterContent {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(MD_FRONTMATTER_CONTENT as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == MD_FRONTMATTER_CONTENT
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for MdFrontmatterContent {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("MdFrontmatterContent")
+                .field(
+                    "value_token",
+                    &support::DebugSyntaxResult(self.value_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("MdFrontmatterContent").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<MdFrontmatterContent> for SyntaxNode {
+    fn from(n: MdFrontmatterContent) -> Self {
+        n.syntax
+    }
+}
+impl From<MdFrontmatterContent> for SyntaxElement {
+    fn from(n: MdFrontmatterContent) -> Self {
         n.syntax.into()
     }
 }
@@ -2474,7 +3732,7 @@ impl std::fmt::Debug for MdHtmlBlock {
             DEPTH.set(current_depth + 1);
             f.debug_struct("MdHtmlBlock")
                 .field("indent", &self.indent())
-                .field("content", &self.content())
+                .field("content", &support::DebugSyntaxResult(self.content()))
                 .finish()
         } else {
             f.debug_struct("MdHtmlBlock").finish()
@@ -2493,12 +3751,12 @@ impl From<MdHtmlBlock> for SyntaxElement {
         n.syntax.into()
     }
 }
-impl AstNode for MdIndent {
+impl AstNode for MdHtmlContent {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(MD_INDENT as u16));
+        SyntaxKindSet::from_raw(RawSyntaxKind(MD_HTML_CONTENT as u16));
     fn can_cast(kind: SyntaxKind) -> bool {
-        kind == MD_INDENT
+        kind == MD_HTML_CONTENT
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         if Self::can_cast(syntax.kind()) {
@@ -2514,32 +3772,32 @@ impl AstNode for MdIndent {
         self.syntax
     }
 }
-impl std::fmt::Debug for MdIndent {
+impl std::fmt::Debug for MdHtmlContent {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
         let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
             DEPTH.set(current_depth + 1);
-            f.debug_struct("MdIndent")
+            f.debug_struct("MdHtmlContent")
                 .field(
                     "value_token",
                     &support::DebugSyntaxResult(self.value_token()),
                 )
                 .finish()
         } else {
-            f.debug_struct("MdIndent").finish()
+            f.debug_struct("MdHtmlContent").finish()
         };
         DEPTH.set(current_depth);
         result
     }
 }
-impl From<MdIndent> for SyntaxNode {
-    fn from(n: MdIndent) -> Self {
+impl From<MdHtmlContent> for SyntaxNode {
+    fn from(n: MdHtmlContent) -> Self {
         n.syntax
     }
 }
-impl From<MdIndent> for SyntaxElement {
-    fn from(n: MdIndent) -> Self {
+impl From<MdHtmlContent> for SyntaxElement {
+    fn from(n: MdHtmlContent) -> Self {
         n.syntax.into()
     }
 }
@@ -2772,7 +4030,10 @@ impl std::fmt::Debug for MdInlineHtml {
         let result = if current_depth < 16 {
             DEPTH.set(current_depth + 1);
             f.debug_struct("MdInlineHtml")
-                .field("value", &self.value())
+                .field(
+                    "value_token",
+                    &support::DebugSyntaxResult(self.value_token()),
+                )
                 .finish()
         } else {
             f.debug_struct("MdInlineHtml").finish()
@@ -3356,10 +4617,6 @@ impl std::fmt::Debug for MdParagraph {
             DEPTH.set(current_depth + 1);
             f.debug_struct("MdParagraph")
                 .field("list", &self.list())
-                .field(
-                    "hard_line",
-                    &support::DebugOptionalElement(self.hard_line()),
-                )
                 .finish()
         } else {
             f.debug_struct("MdParagraph").finish()
@@ -3699,6 +4956,62 @@ impl From<MdReferenceLinkLabel> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl AstNode for MdRoot {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(MD_ROOT as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == MD_ROOT
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for MdRoot {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("MdRoot")
+                .field(
+                    "bom_token",
+                    &support::DebugOptionalElement(self.bom_token()),
+                )
+                .field(
+                    "frontmatter",
+                    &support::DebugOptionalElement(self.frontmatter()),
+                )
+                .field("value", &self.value())
+                .field("eof_token", &support::DebugSyntaxResult(self.eof_token()))
+                .finish()
+        } else {
+            f.debug_struct("MdRoot").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<MdRoot> for SyntaxNode {
+    fn from(n: MdRoot) -> Self {
+        n.syntax
+    }
+}
+impl From<MdRoot> for SyntaxElement {
+    fn from(n: MdRoot) -> Self {
+        n.syntax.into()
+    }
+}
 impl AstNode for MdSetextHeader {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -3747,56 +5060,6 @@ impl From<MdSetextHeader> for SyntaxNode {
 }
 impl From<MdSetextHeader> for SyntaxElement {
     fn from(n: MdSetextHeader) -> Self {
-        n.syntax.into()
-    }
-}
-impl AstNode for MdSoftBreak {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(MD_SOFT_BREAK as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == MD_SOFT_BREAK
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for MdSoftBreak {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("MdSoftBreak")
-                .field(
-                    "value_token",
-                    &support::DebugSyntaxResult(self.value_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("MdSoftBreak").finish()
-        };
-        DEPTH.set(current_depth);
-        result
-    }
-}
-impl From<MdSoftBreak> for SyntaxNode {
-    fn from(n: MdSoftBreak) -> Self {
-        n.syntax
-    }
-}
-impl From<MdSoftBreak> for SyntaxElement {
-    fn from(n: MdSoftBreak) -> Self {
         n.syntax.into()
     }
 }
@@ -3941,6 +5204,316 @@ impl From<MdThematicBreakChar> for SyntaxNode {
 }
 impl From<MdThematicBreakChar> for SyntaxElement {
     fn from(n: MdThematicBreakChar) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for MdxBlockExpression {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(MDX_BLOCK_EXPRESSION as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == MDX_BLOCK_EXPRESSION
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for MdxBlockExpression {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("MdxBlockExpression")
+                .field(
+                    "l_curly_token",
+                    &support::DebugSyntaxResult(self.l_curly_token()),
+                )
+                .field("content", &support::DebugOptionalElement(self.content()))
+                .field(
+                    "r_curly_token",
+                    &support::DebugSyntaxResult(self.r_curly_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("MdxBlockExpression").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<MdxBlockExpression> for SyntaxNode {
+    fn from(n: MdxBlockExpression) -> Self {
+        n.syntax
+    }
+}
+impl From<MdxBlockExpression> for SyntaxElement {
+    fn from(n: MdxBlockExpression) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for MdxEsmBlock {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(MDX_ESM_BLOCK as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == MDX_ESM_BLOCK
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for MdxEsmBlock {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("MdxEsmBlock")
+                .field(
+                    "content_token",
+                    &support::DebugSyntaxResult(self.content_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("MdxEsmBlock").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<MdxEsmBlock> for SyntaxNode {
+    fn from(n: MdxEsmBlock) -> Self {
+        n.syntax
+    }
+}
+impl From<MdxEsmBlock> for SyntaxElement {
+    fn from(n: MdxEsmBlock) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for MdxExpressionContent {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(MDX_EXPRESSION_CONTENT as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == MDX_EXPRESSION_CONTENT
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for MdxExpressionContent {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("MdxExpressionContent")
+                .field(
+                    "value_token",
+                    &support::DebugSyntaxResult(self.value_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("MdxExpressionContent").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<MdxExpressionContent> for SyntaxNode {
+    fn from(n: MdxExpressionContent) -> Self {
+        n.syntax
+    }
+}
+impl From<MdxExpressionContent> for SyntaxElement {
+    fn from(n: MdxExpressionContent) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for MdxInlineExpression {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(MDX_INLINE_EXPRESSION as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == MDX_INLINE_EXPRESSION
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for MdxInlineExpression {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("MdxInlineExpression")
+                .field(
+                    "l_curly_token",
+                    &support::DebugSyntaxResult(self.l_curly_token()),
+                )
+                .field("content", &support::DebugOptionalElement(self.content()))
+                .field(
+                    "r_curly_token",
+                    &support::DebugSyntaxResult(self.r_curly_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("MdxInlineExpression").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<MdxInlineExpression> for SyntaxNode {
+    fn from(n: MdxInlineExpression) -> Self {
+        n.syntax
+    }
+}
+impl From<MdxInlineExpression> for SyntaxElement {
+    fn from(n: MdxInlineExpression) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for MdxJsxBlockTag {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(MDX_JSX_BLOCK_TAG as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == MDX_JSX_BLOCK_TAG
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for MdxJsxBlockTag {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("MdxJsxBlockTag")
+                .field(
+                    "value_token",
+                    &support::DebugSyntaxResult(self.value_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("MdxJsxBlockTag").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<MdxJsxBlockTag> for SyntaxNode {
+    fn from(n: MdxJsxBlockTag) -> Self {
+        n.syntax
+    }
+}
+impl From<MdxJsxBlockTag> for SyntaxElement {
+    fn from(n: MdxJsxBlockTag) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for MdxJsxInlineTag {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(MDX_JSX_INLINE_TAG as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == MDX_JSX_INLINE_TAG
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for MdxJsxInlineTag {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("MdxJsxInlineTag")
+                .field(
+                    "value_token",
+                    &support::DebugSyntaxResult(self.value_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("MdxJsxInlineTag").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<MdxJsxInlineTag> for SyntaxNode {
+    fn from(n: MdxJsxInlineTag) -> Self {
+        n.syntax
+    }
+}
+impl From<MdxJsxInlineTag> for SyntaxElement {
+    fn from(n: MdxJsxInlineTag) -> Self {
         n.syntax.into()
     }
 }
@@ -4161,9 +5734,24 @@ impl From<AnyMdContainerBlock> for SyntaxElement {
         node.into()
     }
 }
+impl From<GfmStrikethrough> for AnyMdInline {
+    fn from(node: GfmStrikethrough) -> Self {
+        Self::GfmStrikethrough(node)
+    }
+}
+impl From<GfmTaskListItem> for AnyMdInline {
+    fn from(node: GfmTaskListItem) -> Self {
+        Self::GfmTaskListItem(node)
+    }
+}
 impl From<MdAutolink> for AnyMdInline {
     fn from(node: MdAutolink) -> Self {
         Self::MdAutolink(node)
+    }
+}
+impl From<MdCodeContent> for AnyMdInline {
+    fn from(node: MdCodeContent) -> Self {
+        Self::MdCodeContent(node)
     }
 }
 impl From<MdEntityReference> for AnyMdInline {
@@ -4231,19 +5819,27 @@ impl From<MdReferenceLink> for AnyMdInline {
         Self::MdReferenceLink(node)
     }
 }
-impl From<MdSoftBreak> for AnyMdInline {
-    fn from(node: MdSoftBreak) -> Self {
-        Self::MdSoftBreak(node)
-    }
-}
 impl From<MdTextual> for AnyMdInline {
     fn from(node: MdTextual) -> Self {
         Self::MdTextual(node)
     }
 }
+impl From<MdxInlineExpression> for AnyMdInline {
+    fn from(node: MdxInlineExpression) -> Self {
+        Self::MdxInlineExpression(node)
+    }
+}
+impl From<MdxJsxInlineTag> for AnyMdInline {
+    fn from(node: MdxJsxInlineTag) -> Self {
+        Self::MdxJsxInlineTag(node)
+    }
+}
 impl AstNode for AnyMdInline {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> = MdAutolink::KIND_SET
+    const KIND_SET: SyntaxKindSet<Language> = GfmStrikethrough::KIND_SET
+        .union(GfmTaskListItem::KIND_SET)
+        .union(MdAutolink::KIND_SET)
+        .union(MdCodeContent::KIND_SET)
         .union(MdEntityReference::KIND_SET)
         .union(MdHardLine::KIND_SET)
         .union(MdHtmlBlock::KIND_SET)
@@ -4257,12 +5853,16 @@ impl AstNode for AnyMdInline {
         .union(MdQuotePrefix::KIND_SET)
         .union(MdReferenceImage::KIND_SET)
         .union(MdReferenceLink::KIND_SET)
-        .union(MdSoftBreak::KIND_SET)
-        .union(MdTextual::KIND_SET);
+        .union(MdTextual::KIND_SET)
+        .union(MdxInlineExpression::KIND_SET)
+        .union(MdxJsxInlineTag::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         matches!(
             kind,
-            MD_AUTOLINK
+            GFM_STRIKETHROUGH
+                | GFM_TASK_LIST_ITEM
+                | MD_AUTOLINK
+                | MD_CODE_CONTENT
                 | MD_ENTITY_REFERENCE
                 | MD_HARD_LINE
                 | MD_HTML_BLOCK
@@ -4276,13 +5876,17 @@ impl AstNode for AnyMdInline {
                 | MD_QUOTE_PREFIX
                 | MD_REFERENCE_IMAGE
                 | MD_REFERENCE_LINK
-                | MD_SOFT_BREAK
                 | MD_TEXTUAL
+                | MDX_INLINE_EXPRESSION
+                | MDX_JSX_INLINE_TAG
         )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
+            GFM_STRIKETHROUGH => Self::GfmStrikethrough(GfmStrikethrough { syntax }),
+            GFM_TASK_LIST_ITEM => Self::GfmTaskListItem(GfmTaskListItem { syntax }),
             MD_AUTOLINK => Self::MdAutolink(MdAutolink { syntax }),
+            MD_CODE_CONTENT => Self::MdCodeContent(MdCodeContent { syntax }),
             MD_ENTITY_REFERENCE => Self::MdEntityReference(MdEntityReference { syntax }),
             MD_HARD_LINE => Self::MdHardLine(MdHardLine { syntax }),
             MD_HTML_BLOCK => Self::MdHtmlBlock(MdHtmlBlock { syntax }),
@@ -4296,15 +5900,19 @@ impl AstNode for AnyMdInline {
             MD_QUOTE_PREFIX => Self::MdQuotePrefix(MdQuotePrefix { syntax }),
             MD_REFERENCE_IMAGE => Self::MdReferenceImage(MdReferenceImage { syntax }),
             MD_REFERENCE_LINK => Self::MdReferenceLink(MdReferenceLink { syntax }),
-            MD_SOFT_BREAK => Self::MdSoftBreak(MdSoftBreak { syntax }),
             MD_TEXTUAL => Self::MdTextual(MdTextual { syntax }),
+            MDX_INLINE_EXPRESSION => Self::MdxInlineExpression(MdxInlineExpression { syntax }),
+            MDX_JSX_INLINE_TAG => Self::MdxJsxInlineTag(MdxJsxInlineTag { syntax }),
             _ => return None,
         };
         Some(res)
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
+            Self::GfmStrikethrough(it) => it.syntax(),
+            Self::GfmTaskListItem(it) => it.syntax(),
             Self::MdAutolink(it) => it.syntax(),
+            Self::MdCodeContent(it) => it.syntax(),
             Self::MdEntityReference(it) => it.syntax(),
             Self::MdHardLine(it) => it.syntax(),
             Self::MdHtmlBlock(it) => it.syntax(),
@@ -4318,13 +5926,17 @@ impl AstNode for AnyMdInline {
             Self::MdQuotePrefix(it) => it.syntax(),
             Self::MdReferenceImage(it) => it.syntax(),
             Self::MdReferenceLink(it) => it.syntax(),
-            Self::MdSoftBreak(it) => it.syntax(),
             Self::MdTextual(it) => it.syntax(),
+            Self::MdxInlineExpression(it) => it.syntax(),
+            Self::MdxJsxInlineTag(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
+            Self::GfmStrikethrough(it) => it.into_syntax(),
+            Self::GfmTaskListItem(it) => it.into_syntax(),
             Self::MdAutolink(it) => it.into_syntax(),
+            Self::MdCodeContent(it) => it.into_syntax(),
             Self::MdEntityReference(it) => it.into_syntax(),
             Self::MdHardLine(it) => it.into_syntax(),
             Self::MdHtmlBlock(it) => it.into_syntax(),
@@ -4338,15 +5950,19 @@ impl AstNode for AnyMdInline {
             Self::MdQuotePrefix(it) => it.into_syntax(),
             Self::MdReferenceImage(it) => it.into_syntax(),
             Self::MdReferenceLink(it) => it.into_syntax(),
-            Self::MdSoftBreak(it) => it.into_syntax(),
             Self::MdTextual(it) => it.into_syntax(),
+            Self::MdxInlineExpression(it) => it.into_syntax(),
+            Self::MdxJsxInlineTag(it) => it.into_syntax(),
         }
     }
 }
 impl std::fmt::Debug for AnyMdInline {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
+            Self::GfmStrikethrough(it) => std::fmt::Debug::fmt(it, f),
+            Self::GfmTaskListItem(it) => std::fmt::Debug::fmt(it, f),
             Self::MdAutolink(it) => std::fmt::Debug::fmt(it, f),
+            Self::MdCodeContent(it) => std::fmt::Debug::fmt(it, f),
             Self::MdEntityReference(it) => std::fmt::Debug::fmt(it, f),
             Self::MdHardLine(it) => std::fmt::Debug::fmt(it, f),
             Self::MdHtmlBlock(it) => std::fmt::Debug::fmt(it, f),
@@ -4360,15 +5976,19 @@ impl std::fmt::Debug for AnyMdInline {
             Self::MdQuotePrefix(it) => std::fmt::Debug::fmt(it, f),
             Self::MdReferenceImage(it) => std::fmt::Debug::fmt(it, f),
             Self::MdReferenceLink(it) => std::fmt::Debug::fmt(it, f),
-            Self::MdSoftBreak(it) => std::fmt::Debug::fmt(it, f),
             Self::MdTextual(it) => std::fmt::Debug::fmt(it, f),
+            Self::MdxInlineExpression(it) => std::fmt::Debug::fmt(it, f),
+            Self::MdxJsxInlineTag(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
 impl From<AnyMdInline> for SyntaxNode {
     fn from(n: AnyMdInline) -> Self {
         match n {
+            AnyMdInline::GfmStrikethrough(it) => it.into_syntax(),
+            AnyMdInline::GfmTaskListItem(it) => it.into_syntax(),
             AnyMdInline::MdAutolink(it) => it.into_syntax(),
+            AnyMdInline::MdCodeContent(it) => it.into_syntax(),
             AnyMdInline::MdEntityReference(it) => it.into_syntax(),
             AnyMdInline::MdHardLine(it) => it.into_syntax(),
             AnyMdInline::MdHtmlBlock(it) => it.into_syntax(),
@@ -4382,8 +6002,9 @@ impl From<AnyMdInline> for SyntaxNode {
             AnyMdInline::MdQuotePrefix(it) => it.into_syntax(),
             AnyMdInline::MdReferenceImage(it) => it.into_syntax(),
             AnyMdInline::MdReferenceLink(it) => it.into_syntax(),
-            AnyMdInline::MdSoftBreak(it) => it.into_syntax(),
             AnyMdInline::MdTextual(it) => it.into_syntax(),
+            AnyMdInline::MdxInlineExpression(it) => it.into_syntax(),
+            AnyMdInline::MdxJsxInlineTag(it) => it.into_syntax(),
         }
     }
 }
@@ -4391,6 +6012,11 @@ impl From<AnyMdInline> for SyntaxElement {
     fn from(n: AnyMdInline) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
+    }
+}
+impl From<GfmTable> for AnyMdLeafBlock {
+    fn from(node: GfmTable) -> Self {
+        Self::GfmTable(node)
     }
 }
 impl From<MdContinuationIndent> for AnyMdLeafBlock {
@@ -4433,9 +6059,25 @@ impl From<MdThematicBreakBlock> for AnyMdLeafBlock {
         Self::MdThematicBreakBlock(node)
     }
 }
+impl From<MdxBlockExpression> for AnyMdLeafBlock {
+    fn from(node: MdxBlockExpression) -> Self {
+        Self::MdxBlockExpression(node)
+    }
+}
+impl From<MdxEsmBlock> for AnyMdLeafBlock {
+    fn from(node: MdxEsmBlock) -> Self {
+        Self::MdxEsmBlock(node)
+    }
+}
+impl From<MdxJsxBlockTag> for AnyMdLeafBlock {
+    fn from(node: MdxJsxBlockTag) -> Self {
+        Self::MdxJsxBlockTag(node)
+    }
+}
 impl AstNode for AnyMdLeafBlock {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = AnyMdCodeBlock::KIND_SET
+        .union(GfmTable::KIND_SET)
         .union(MdContinuationIndent::KIND_SET)
         .union(MdHeader::KIND_SET)
         .union(MdHtmlBlock::KIND_SET)
@@ -4443,23 +6085,31 @@ impl AstNode for AnyMdLeafBlock {
         .union(MdNewline::KIND_SET)
         .union(MdParagraph::KIND_SET)
         .union(MdSetextHeader::KIND_SET)
-        .union(MdThematicBreakBlock::KIND_SET);
+        .union(MdThematicBreakBlock::KIND_SET)
+        .union(MdxBlockExpression::KIND_SET)
+        .union(MdxEsmBlock::KIND_SET)
+        .union(MdxJsxBlockTag::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         match kind {
-            MD_CONTINUATION_INDENT
+            GFM_TABLE
+            | MD_CONTINUATION_INDENT
             | MD_HEADER
             | MD_HTML_BLOCK
             | MD_LINK_REFERENCE_DEFINITION
             | MD_NEWLINE
             | MD_PARAGRAPH
             | MD_SETEXT_HEADER
-            | MD_THEMATIC_BREAK_BLOCK => true,
+            | MD_THEMATIC_BREAK_BLOCK
+            | MDX_BLOCK_EXPRESSION
+            | MDX_ESM_BLOCK
+            | MDX_JSX_BLOCK_TAG => true,
             k if AnyMdCodeBlock::can_cast(k) => true,
             _ => false,
         }
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
+            GFM_TABLE => Self::GfmTable(GfmTable { syntax }),
             MD_CONTINUATION_INDENT => Self::MdContinuationIndent(MdContinuationIndent { syntax }),
             MD_HEADER => Self::MdHeader(MdHeader { syntax }),
             MD_HTML_BLOCK => Self::MdHtmlBlock(MdHtmlBlock { syntax }),
@@ -4470,6 +6120,9 @@ impl AstNode for AnyMdLeafBlock {
             MD_PARAGRAPH => Self::MdParagraph(MdParagraph { syntax }),
             MD_SETEXT_HEADER => Self::MdSetextHeader(MdSetextHeader { syntax }),
             MD_THEMATIC_BREAK_BLOCK => Self::MdThematicBreakBlock(MdThematicBreakBlock { syntax }),
+            MDX_BLOCK_EXPRESSION => Self::MdxBlockExpression(MdxBlockExpression { syntax }),
+            MDX_ESM_BLOCK => Self::MdxEsmBlock(MdxEsmBlock { syntax }),
+            MDX_JSX_BLOCK_TAG => Self::MdxJsxBlockTag(MdxJsxBlockTag { syntax }),
             _ => {
                 if let Some(any_md_code_block) = AnyMdCodeBlock::cast(syntax) {
                     return Some(Self::AnyMdCodeBlock(any_md_code_block));
@@ -4481,6 +6134,7 @@ impl AstNode for AnyMdLeafBlock {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
+            Self::GfmTable(it) => it.syntax(),
             Self::MdContinuationIndent(it) => it.syntax(),
             Self::MdHeader(it) => it.syntax(),
             Self::MdHtmlBlock(it) => it.syntax(),
@@ -4489,11 +6143,15 @@ impl AstNode for AnyMdLeafBlock {
             Self::MdParagraph(it) => it.syntax(),
             Self::MdSetextHeader(it) => it.syntax(),
             Self::MdThematicBreakBlock(it) => it.syntax(),
+            Self::MdxBlockExpression(it) => it.syntax(),
+            Self::MdxEsmBlock(it) => it.syntax(),
+            Self::MdxJsxBlockTag(it) => it.syntax(),
             Self::AnyMdCodeBlock(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
+            Self::GfmTable(it) => it.into_syntax(),
             Self::MdContinuationIndent(it) => it.into_syntax(),
             Self::MdHeader(it) => it.into_syntax(),
             Self::MdHtmlBlock(it) => it.into_syntax(),
@@ -4502,6 +6160,9 @@ impl AstNode for AnyMdLeafBlock {
             Self::MdParagraph(it) => it.into_syntax(),
             Self::MdSetextHeader(it) => it.into_syntax(),
             Self::MdThematicBreakBlock(it) => it.into_syntax(),
+            Self::MdxBlockExpression(it) => it.into_syntax(),
+            Self::MdxEsmBlock(it) => it.into_syntax(),
+            Self::MdxJsxBlockTag(it) => it.into_syntax(),
             Self::AnyMdCodeBlock(it) => it.into_syntax(),
         }
     }
@@ -4510,6 +6171,7 @@ impl std::fmt::Debug for AnyMdLeafBlock {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::AnyMdCodeBlock(it) => std::fmt::Debug::fmt(it, f),
+            Self::GfmTable(it) => std::fmt::Debug::fmt(it, f),
             Self::MdContinuationIndent(it) => std::fmt::Debug::fmt(it, f),
             Self::MdHeader(it) => std::fmt::Debug::fmt(it, f),
             Self::MdHtmlBlock(it) => std::fmt::Debug::fmt(it, f),
@@ -4518,6 +6180,9 @@ impl std::fmt::Debug for AnyMdLeafBlock {
             Self::MdParagraph(it) => std::fmt::Debug::fmt(it, f),
             Self::MdSetextHeader(it) => std::fmt::Debug::fmt(it, f),
             Self::MdThematicBreakBlock(it) => std::fmt::Debug::fmt(it, f),
+            Self::MdxBlockExpression(it) => std::fmt::Debug::fmt(it, f),
+            Self::MdxEsmBlock(it) => std::fmt::Debug::fmt(it, f),
+            Self::MdxJsxBlockTag(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
@@ -4525,6 +6190,7 @@ impl From<AnyMdLeafBlock> for SyntaxNode {
     fn from(n: AnyMdLeafBlock) -> Self {
         match n {
             AnyMdLeafBlock::AnyMdCodeBlock(it) => it.into_syntax(),
+            AnyMdLeafBlock::GfmTable(it) => it.into_syntax(),
             AnyMdLeafBlock::MdContinuationIndent(it) => it.into_syntax(),
             AnyMdLeafBlock::MdHeader(it) => it.into_syntax(),
             AnyMdLeafBlock::MdHtmlBlock(it) => it.into_syntax(),
@@ -4533,6 +6199,9 @@ impl From<AnyMdLeafBlock> for SyntaxNode {
             AnyMdLeafBlock::MdParagraph(it) => it.into_syntax(),
             AnyMdLeafBlock::MdSetextHeader(it) => it.into_syntax(),
             AnyMdLeafBlock::MdThematicBreakBlock(it) => it.into_syntax(),
+            AnyMdLeafBlock::MdxBlockExpression(it) => it.into_syntax(),
+            AnyMdLeafBlock::MdxEsmBlock(it) => it.into_syntax(),
+            AnyMdLeafBlock::MdxJsxBlockTag(it) => it.into_syntax(),
         }
     }
 }
@@ -4632,6 +6301,46 @@ impl std::fmt::Display for AnyMdThematicBreakPart {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for GfmStrikethrough {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for GfmTable {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for GfmTableCell {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for GfmTableDelimiterCell {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for GfmTableDelimiterDash {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for GfmTableDelimiterRow {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for GfmTableRow {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for GfmTaskListItem {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for MdAutolink {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -4647,12 +6356,12 @@ impl std::fmt::Display for MdBulletListItem {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
-impl std::fmt::Display for MdContinuationIndent {
+impl std::fmt::Display for MdCodeContent {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
-impl std::fmt::Display for MdDocument {
+impl std::fmt::Display for MdContinuationIndent {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -4663,6 +6372,16 @@ impl std::fmt::Display for MdEntityReference {
     }
 }
 impl std::fmt::Display for MdFencedCodeBlock {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for MdFrontmatter {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for MdFrontmatterContent {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -4687,7 +6406,7 @@ impl std::fmt::Display for MdHtmlBlock {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
-impl std::fmt::Display for MdIndent {
+impl std::fmt::Display for MdHtmlContent {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -4802,12 +6521,12 @@ impl std::fmt::Display for MdReferenceLinkLabel {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
-impl std::fmt::Display for MdSetextHeader {
+impl std::fmt::Display for MdRoot {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
-impl std::fmt::Display for MdSoftBreak {
+impl std::fmt::Display for MdSetextHeader {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -4823,6 +6542,36 @@ impl std::fmt::Display for MdThematicBreakBlock {
     }
 }
 impl std::fmt::Display for MdThematicBreakChar {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for MdxBlockExpression {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for MdxEsmBlock {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for MdxExpressionContent {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for MdxInlineExpression {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for MdxJsxBlockTag {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for MdxJsxInlineTag {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -4939,7 +6688,391 @@ impl From<MdBogusBlock> for SyntaxElement {
         n.syntax.into()
     }
 }
-biome_rowan::declare_node_union! { pub AnyMdBogusNode = MdBogus | MdBogusBlock }
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub struct MdBogusBullet {
+    syntax: SyntaxNode,
+}
+impl MdBogusBullet {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn items(&self) -> SyntaxElementChildren {
+        support::elements(&self.syntax)
+    }
+}
+impl AstNode for MdBogusBullet {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(MD_BOGUS_BULLET as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == MD_BOGUS_BULLET
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for MdBogusBullet {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("MdBogusBullet")
+            .field("items", &DebugSyntaxElementChildren(self.items()))
+            .finish()
+    }
+}
+impl From<MdBogusBullet> for SyntaxNode {
+    fn from(n: MdBogusBullet) -> Self {
+        n.syntax
+    }
+}
+impl From<MdBogusBullet> for SyntaxElement {
+    fn from(n: MdBogusBullet) -> Self {
+        n.syntax.into()
+    }
+}
+biome_rowan::declare_node_union! { pub AnyMdBogusNode = MdBogus | MdBogusBlock | MdBogusBullet }
+#[derive(Clone, Eq, PartialEq, Hash)]
+pub struct GfmTableCellList {
+    syntax_list: SyntaxList,
+}
+impl GfmTableCellList {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self {
+            syntax_list: syntax.into_list(),
+        }
+    }
+}
+impl AstNode for GfmTableCellList {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(GFM_TABLE_CELL_LIST as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == GFM_TABLE_CELL_LIST
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self {
+                syntax_list: syntax.into_list(),
+            })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        self.syntax_list.node()
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax_list.into_node()
+    }
+}
+impl Serialize for GfmTableCellList {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut seq = serializer.serialize_seq(Some(self.len()))?;
+        for e in self.iter() {
+            seq.serialize_element(&e)?;
+        }
+        seq.end()
+    }
+}
+impl AstSeparatedList for GfmTableCellList {
+    type Language = Language;
+    type Node = GfmTableCell;
+    fn syntax_list(&self) -> &SyntaxList {
+        &self.syntax_list
+    }
+    fn into_syntax_list(self) -> SyntaxList {
+        self.syntax_list
+    }
+}
+impl Debug for GfmTableCellList {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.write_str("GfmTableCellList ")?;
+        f.debug_list().entries(self.elements()).finish()
+    }
+}
+impl IntoIterator for GfmTableCellList {
+    type Item = SyntaxResult<GfmTableCell>;
+    type IntoIter = AstSeparatedListNodesIterator<Language, GfmTableCell>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+impl IntoIterator for &GfmTableCellList {
+    type Item = SyntaxResult<GfmTableCell>;
+    type IntoIter = AstSeparatedListNodesIterator<Language, GfmTableCell>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+#[derive(Clone, Eq, PartialEq, Hash)]
+pub struct GfmTableDelimiterCellList {
+    syntax_list: SyntaxList,
+}
+impl GfmTableDelimiterCellList {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self {
+            syntax_list: syntax.into_list(),
+        }
+    }
+}
+impl AstNode for GfmTableDelimiterCellList {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(GFM_TABLE_DELIMITER_CELL_LIST as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == GFM_TABLE_DELIMITER_CELL_LIST
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self {
+                syntax_list: syntax.into_list(),
+            })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        self.syntax_list.node()
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax_list.into_node()
+    }
+}
+impl Serialize for GfmTableDelimiterCellList {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut seq = serializer.serialize_seq(Some(self.len()))?;
+        for e in self.iter() {
+            seq.serialize_element(&e)?;
+        }
+        seq.end()
+    }
+}
+impl AstSeparatedList for GfmTableDelimiterCellList {
+    type Language = Language;
+    type Node = GfmTableDelimiterCell;
+    fn syntax_list(&self) -> &SyntaxList {
+        &self.syntax_list
+    }
+    fn into_syntax_list(self) -> SyntaxList {
+        self.syntax_list
+    }
+}
+impl Debug for GfmTableDelimiterCellList {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.write_str("GfmTableDelimiterCellList ")?;
+        f.debug_list().entries(self.elements()).finish()
+    }
+}
+impl IntoIterator for GfmTableDelimiterCellList {
+    type Item = SyntaxResult<GfmTableDelimiterCell>;
+    type IntoIter = AstSeparatedListNodesIterator<Language, GfmTableDelimiterCell>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+impl IntoIterator for &GfmTableDelimiterCellList {
+    type Item = SyntaxResult<GfmTableDelimiterCell>;
+    type IntoIter = AstSeparatedListNodesIterator<Language, GfmTableDelimiterCell>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+#[derive(Clone, Eq, PartialEq, Hash)]
+pub struct GfmTableDelimiterDashList {
+    syntax_list: SyntaxList,
+}
+impl GfmTableDelimiterDashList {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self {
+            syntax_list: syntax.into_list(),
+        }
+    }
+}
+impl AstNode for GfmTableDelimiterDashList {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(GFM_TABLE_DELIMITER_DASH_LIST as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == GFM_TABLE_DELIMITER_DASH_LIST
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self {
+                syntax_list: syntax.into_list(),
+            })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        self.syntax_list.node()
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax_list.into_node()
+    }
+}
+impl Serialize for GfmTableDelimiterDashList {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut seq = serializer.serialize_seq(Some(self.len()))?;
+        for e in self.iter() {
+            seq.serialize_element(&e)?;
+        }
+        seq.end()
+    }
+}
+impl AstNodeList for GfmTableDelimiterDashList {
+    type Language = Language;
+    type Node = GfmTableDelimiterDash;
+    fn syntax_list(&self) -> &SyntaxList {
+        &self.syntax_list
+    }
+    fn into_syntax_list(self) -> SyntaxList {
+        self.syntax_list
+    }
+}
+impl Debug for GfmTableDelimiterDashList {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.write_str("GfmTableDelimiterDashList ")?;
+        f.debug_list().entries(self.iter()).finish()
+    }
+}
+impl IntoIterator for &GfmTableDelimiterDashList {
+    type Item = GfmTableDelimiterDash;
+    type IntoIter = AstNodeListIterator<Language, GfmTableDelimiterDash>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+impl IntoIterator for GfmTableDelimiterDashList {
+    type Item = GfmTableDelimiterDash;
+    type IntoIter = AstNodeListIterator<Language, GfmTableDelimiterDash>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+#[derive(Clone, Eq, PartialEq, Hash)]
+pub struct GfmTableRowList {
+    syntax_list: SyntaxList,
+}
+impl GfmTableRowList {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self {
+            syntax_list: syntax.into_list(),
+        }
+    }
+}
+impl AstNode for GfmTableRowList {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(GFM_TABLE_ROW_LIST as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == GFM_TABLE_ROW_LIST
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self {
+                syntax_list: syntax.into_list(),
+            })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        self.syntax_list.node()
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax_list.into_node()
+    }
+}
+impl Serialize for GfmTableRowList {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut seq = serializer.serialize_seq(Some(self.len()))?;
+        for e in self.iter() {
+            seq.serialize_element(&e)?;
+        }
+        seq.end()
+    }
+}
+impl AstNodeList for GfmTableRowList {
+    type Language = Language;
+    type Node = GfmTableRow;
+    fn syntax_list(&self) -> &SyntaxList {
+        &self.syntax_list
+    }
+    fn into_syntax_list(self) -> SyntaxList {
+        self.syntax_list
+    }
+}
+impl Debug for GfmTableRowList {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.write_str("GfmTableRowList ")?;
+        f.debug_list().entries(self.iter()).finish()
+    }
+}
+impl IntoIterator for &GfmTableRowList {
+    type Item = GfmTableRow;
+    type IntoIter = AstNodeListIterator<Language, GfmTableRow>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+impl IntoIterator for GfmTableRowList {
+    type Item = GfmTableRow;
+    type IntoIter = AstNodeListIterator<Language, GfmTableRow>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
 #[derive(Clone, Eq, PartialEq, Hash)]
 pub struct MdBlockList {
     syntax_list: SyntaxList,
@@ -5510,6 +7643,88 @@ impl IntoIterator for &MdQuoteIndentList {
 impl IntoIterator for MdQuoteIndentList {
     type Item = MdQuoteIndent;
     type IntoIter = AstNodeListIterator<Language, MdQuoteIndent>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+#[derive(Clone, Eq, PartialEq, Hash)]
+pub struct MdQuotePrefixList {
+    syntax_list: SyntaxList,
+}
+impl MdQuotePrefixList {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self {
+            syntax_list: syntax.into_list(),
+        }
+    }
+}
+impl AstNode for MdQuotePrefixList {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(MD_QUOTE_PREFIX_LIST as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == MD_QUOTE_PREFIX_LIST
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self {
+                syntax_list: syntax.into_list(),
+            })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        self.syntax_list.node()
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax_list.into_node()
+    }
+}
+impl Serialize for MdQuotePrefixList {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut seq = serializer.serialize_seq(Some(self.len()))?;
+        for e in self.iter() {
+            seq.serialize_element(&e)?;
+        }
+        seq.end()
+    }
+}
+impl AstNodeList for MdQuotePrefixList {
+    type Language = Language;
+    type Node = MdQuotePrefix;
+    fn syntax_list(&self) -> &SyntaxList {
+        &self.syntax_list
+    }
+    fn into_syntax_list(self) -> SyntaxList {
+        self.syntax_list
+    }
+}
+impl Debug for MdQuotePrefixList {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.write_str("MdQuotePrefixList ")?;
+        f.debug_list().entries(self.iter()).finish()
+    }
+}
+impl IntoIterator for &MdQuotePrefixList {
+    type Item = MdQuotePrefix;
+    type IntoIter = AstNodeListIterator<Language, MdQuotePrefix>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+impl IntoIterator for MdQuotePrefixList {
+    type Item = MdQuotePrefix;
+    type IntoIter = AstNodeListIterator<Language, MdQuotePrefix>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }

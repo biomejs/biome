@@ -2,6 +2,12 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
+## Command
+
+```shell
+biome format --indent-width=-1 file.js
+```
+
 # Termination Message
 
 ```block

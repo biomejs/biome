@@ -1,0 +1,188 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidWildcards.jsx
+---
+# Input
+```jsx
+/* should generate diagnostics */
+<div className="bg-red-500" />;
+<div className="hover:bg-[#fff]/50" />;
+<div className="shadow-md" />;
+<div className="max-w-md" />;
+<div className="[color:red]" />;
+<div className="-mt-4" />;
+<div className="group-focus:p-2" />;
+<div className="peer-hover:p-2" />;
+<div className="[&_p]:p-2" />;
+
+```
+
+# Diagnostics
+```
+invalidWildcards.jsx:2:17 lint/nursery/noTailwindRestrictedClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The Tailwind CSS class bg-red-500 isn't allowed in this project.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ <div className="bg-red-500" />;
+      │                 ^^^^^^^^^^
+    3 │ <div className="hover:bg-[#fff]/50" />;
+    4 │ <div className="shadow-md" />;
+  
+  i Use a semantic background class.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidWildcards.jsx:3:23 lint/nursery/noTailwindRestrictedClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The Tailwind CSS class bg-[#fff] isn't allowed in this project.
+  
+    1 │ /* should generate diagnostics */
+    2 │ <div className="bg-red-500" />;
+  > 3 │ <div className="hover:bg-[#fff]/50" />;
+      │                       ^^^^^^^^^
+    4 │ <div className="shadow-md" />;
+    5 │ <div className="max-w-md" />;
+  
+  i Use a semantic background class.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidWildcards.jsx:4:17 lint/nursery/noTailwindRestrictedClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The Tailwind CSS class shadow-md isn't allowed in this project.
+  
+    2 │ <div className="bg-red-500" />;
+    3 │ <div className="hover:bg-[#fff]/50" />;
+  > 4 │ <div className="shadow-md" />;
+      │                 ^^^^^^^^^
+    5 │ <div className="max-w-md" />;
+    6 │ <div className="[color:red]" />;
+  
+  i Use the project size scale.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidWildcards.jsx:5:17 lint/nursery/noTailwindRestrictedClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The Tailwind CSS class max-w-md isn't allowed in this project.
+  
+    3 │ <div className="hover:bg-[#fff]/50" />;
+    4 │ <div className="shadow-md" />;
+  > 5 │ <div className="max-w-md" />;
+      │                 ^^^^^^^^
+    6 │ <div className="[color:red]" />;
+    7 │ <div className="-mt-4" />;
+  
+  i Use the project size scale.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidWildcards.jsx:6:17 lint/nursery/noTailwindRestrictedClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The Tailwind CSS class [color:red] isn't allowed in this project.
+  
+    4 │ <div className="shadow-md" />;
+    5 │ <div className="max-w-md" />;
+  > 6 │ <div className="[color:red]" />;
+      │                 ^^^^^^^^^^^
+    7 │ <div className="-mt-4" />;
+    8 │ <div className="group-focus:p-2" />;
+  
+  i Use a text color utility.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidWildcards.jsx:7:17 lint/nursery/noTailwindRestrictedClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The Tailwind CSS class -mt-4 isn't allowed in this project.
+  
+    5 │ <div className="max-w-md" />;
+    6 │ <div className="[color:red]" />;
+  > 7 │ <div className="-mt-4" />;
+      │                 ^^^^^
+    8 │ <div className="group-focus:p-2" />;
+    9 │ <div className="peer-hover:p-2" />;
+  
+  i Avoid negative spacing.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidWildcards.jsx:8:17 lint/nursery/noTailwindRestrictedClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The Tailwind CSS variant group-focus isn't allowed in this project.
+  
+     6 │ <div className="[color:red]" />;
+     7 │ <div className="-mt-4" />;
+   > 8 │ <div className="group-focus:p-2" />;
+       │                 ^^^^^^^^^^^
+     9 │ <div className="peer-hover:p-2" />;
+    10 │ <div className="[&_p]:p-2" />;
+  
+  i Use the group component instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidWildcards.jsx:9:17 lint/nursery/noTailwindRestrictedClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The Tailwind CSS variant peer-hover isn't allowed in this project.
+  
+     7 │ <div className="-mt-4" />;
+     8 │ <div className="group-focus:p-2" />;
+   > 9 │ <div className="peer-hover:p-2" />;
+       │                 ^^^^^^^^^^
+    10 │ <div className="[&_p]:p-2" />;
+    11 │ 
+  
+  i Hover styles are not allowed.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidWildcards.jsx:10:17 lint/nursery/noTailwindRestrictedClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The Tailwind CSS variant [&_p] isn't allowed in this project.
+  
+     8 │ <div className="group-focus:p-2" />;
+     9 │ <div className="peer-hover:p-2" />;
+  > 10 │ <div className="[&_p]:p-2" />;
+       │                 ^^^^^
+    11 │ 
+  
+  i Add a named variant instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

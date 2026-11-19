@@ -22,6 +22,7 @@ expression: snapshot
 HtmlRoot {
     bom_token: missing (optional),
     frontmatter: missing (optional),
+    processing_instruction: missing (optional),
     directive: missing (optional),
     html: HtmlElementList [
         SvelteIfBlock {
@@ -37,7 +38,7 @@ HtmlRoot {
                         opening_element: HtmlOpeningElement {
                             l_angle_token: L_ANGLE@51..54 "<" [Newline("\n"), Whitespace("\t")] [],
                             name: HtmlTagName {
-                                value_token: HTML_LITERAL@54..55 "p" [] [],
+                                value_token: P_KW@54..55 "p" [] [],
                             },
                             attributes: HtmlAttributeList [],
                             r_angle_token: R_ANGLE@55..56 ">" [] [],
@@ -51,7 +52,7 @@ HtmlRoot {
                             l_angle_token: L_ANGLE@64..65 "<" [] [],
                             slash_token: SLASH@65..66 "/" [] [],
                             name: HtmlTagName {
-                                value_token: HTML_LITERAL@66..67 "p" [] [],
+                                value_token: P_KW@66..67 "p" [] [],
                             },
                             r_angle_token: R_ANGLE@67..68 ">" [] [],
                         },
@@ -68,7 +69,7 @@ HtmlRoot {
                         opening_element: HtmlOpeningElement {
                             l_angle_token: L_ANGLE@76..79 "<" [Newline("\n"), Whitespace("\t")] [],
                             name: HtmlTagName {
-                                value_token: HTML_LITERAL@79..80 "p" [] [],
+                                value_token: P_KW@79..80 "p" [] [],
                             },
                             attributes: HtmlAttributeList [],
                             r_angle_token: R_ANGLE@80..81 ">" [] [],
@@ -82,7 +83,7 @@ HtmlRoot {
                             l_angle_token: L_ANGLE@90..91 "<" [] [],
                             slash_token: SLASH@91..92 "/" [] [],
                             name: HtmlTagName {
-                                value_token: HTML_LITERAL@92..93 "p" [] [],
+                                value_token: P_KW@92..93 "p" [] [],
                             },
                             r_angle_token: R_ANGLE@93..94 ">" [] [],
                         },
@@ -107,7 +108,8 @@ HtmlRoot {
   0: (empty)
   1: (empty)
   2: (empty)
-  3: HTML_ELEMENT_LIST@0..100
+  3: (empty)
+  4: HTML_ELEMENT_LIST@0..100
     0: SVELTE_IF_BLOCK@0..100
       0: SVELTE_IF_OPENING_BLOCK@0..68
         0: SV_CURLY_HASH@0..21 "{#" [Comments("<!-- if / else -->"), Newline("\n")] []
@@ -120,7 +122,7 @@ HtmlRoot {
             0: HTML_OPENING_ELEMENT@51..56
               0: L_ANGLE@51..54 "<" [Newline("\n"), Whitespace("\t")] []
               1: HTML_TAG_NAME@54..55
-                0: HTML_LITERAL@54..55 "p" [] []
+                0: P_KW@54..55 "p" [] []
               2: HTML_ATTRIBUTE_LIST@55..55
               3: R_ANGLE@55..56 ">" [] []
             1: HTML_ELEMENT_LIST@56..64
@@ -130,7 +132,7 @@ HtmlRoot {
               0: L_ANGLE@64..65 "<" [] []
               1: SLASH@65..66 "/" [] []
               2: HTML_TAG_NAME@66..67
-                0: HTML_LITERAL@66..67 "p" [] []
+                0: P_KW@66..67 "p" [] []
               3: R_ANGLE@67..68 ">" [] []
       1: SVELTE_ELSE_IF_CLAUSE_LIST@68..68
       2: SVELTE_ELSE_CLAUSE@68..94
@@ -142,7 +144,7 @@ HtmlRoot {
             0: HTML_OPENING_ELEMENT@76..81
               0: L_ANGLE@76..79 "<" [Newline("\n"), Whitespace("\t")] []
               1: HTML_TAG_NAME@79..80
-                0: HTML_LITERAL@79..80 "p" [] []
+                0: P_KW@79..80 "p" [] []
               2: HTML_ATTRIBUTE_LIST@80..80
               3: R_ANGLE@80..81 ">" [] []
             1: HTML_ELEMENT_LIST@81..90
@@ -152,12 +154,12 @@ HtmlRoot {
               0: L_ANGLE@90..91 "<" [] []
               1: SLASH@91..92 "/" [] []
               2: HTML_TAG_NAME@92..93
-                0: HTML_LITERAL@92..93 "p" [] []
+                0: P_KW@92..93 "p" [] []
               3: R_ANGLE@93..94 ">" [] []
       3: SVELTE_IF_CLOSING_BLOCK@94..100
         0: SV_CURLY_SLASH@94..97 "{/" [Newline("\n")] []
         1: IF_KW@97..99 "if" [] []
         2: R_CURLY@99..100 "}" [] []
-  4: EOF@100..101 "" [Newline("\n")] []
+  5: EOF@100..101 "" [Newline("\n")] []
 
 ```

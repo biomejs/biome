@@ -7,8 +7,8 @@ use biome_js_syntax::{
     AnyJsCallArgument, AnyJsExpression, JsCallArgumentList, JsCallExpression,
     JsConditionalExpression, JsNewExpression, JsSyntaxKind,
 };
-use biome_js_type_info::{Type, TypeMemberKind};
-use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, TriviaPieceKind};
+use biome_module_graph::type_inference::TypeInferenceClassification;
+use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt};
 use biome_rule_options::no_misused_promises::NoMisusedPromisesOptions;
 
 use crate::{JsRuleAction, ast_utils::is_in_async_function, services::typed::Typed};
@@ -108,12 +108,31 @@ impl Rule for NoMisusedPromises {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let expression = ctx.query();
-        let ty = ctx.type_of_expression(expression);
-        if ty.is_function() {
-            find_misused_promise_returning_callback(ctx, expression, &ty)
-        } else {
-            find_misused_promise_expression(expression, &ty)
+        if let Some(state) = misused_promise_expression_state(expression) {
+            return match ctx.classify_expression_as_promise(expression) {
+                TypeInferenceClassification::Match => Some(state),
+                TypeInferenceClassification::NoMatch => None,
+                TypeInferenceClassification::Indeterminate => {
+                    (ctx.type_of_expression(expression)?.is_promise_instance() == Some(true))
+                        .then_some(state)
+                }
+            };
         }
+        if expression.as_any_js_literal_expression().is_some()
+            || !expression
+                .syntax()
+                .parent()
+                .is_some_and(|parent| JsCallArgumentList::can_cast(parent.kind()))
+        {
+            return None;
+        }
+
+        if ctx.classify_expression_as_promise_returning_function(expression)
+            != TypeInferenceClassification::Match
+        {
+            return None;
+        }
+        find_misused_promise_returning_callback(ctx, expression)
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
@@ -194,13 +213,12 @@ impl Rule for NoMisusedPromises {
         }
 
         let mut mutation = ctx.root().begin();
-        let await_expression = AnyJsExpression::JsAwaitExpression(make::js_await_expression(
-            make::token(JsSyntaxKind::AWAIT_KW)
-                .with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
-            expression.clone().trim_leading_trivia()?,
-        ));
-
-        mutation.replace_node(expression.clone(), await_expression);
+        mutation.wrap_node(expression.clone(), |expression| {
+            AnyJsExpression::JsAwaitExpression(make::js_await_expression(
+                make::token(JsSyntaxKind::AWAIT_KW).with_trailing_space(),
+                expression,
+            ))
+        });
         Some(JsRuleAction::new(
             ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
@@ -210,18 +228,18 @@ impl Rule for NoMisusedPromises {
     }
 }
 
-fn find_misused_promise_expression(
+fn misused_promise_expression_state(
     expression: &AnyJsExpression,
-    ty: &Type,
 ) -> Option<NoMisusedPromisesState> {
     let parent = expression.syntax().parent()?;
     let state = match parent.kind() {
         JsSyntaxKind::JS_CONDITIONAL_EXPRESSION
-            if JsConditionalExpression::cast(parent)
-                .is_some_and(|conditional| conditional.test().is_ok_and(|test| test == *expression))
-            => {
-                NoMisusedPromisesState::Conditional
-            }
+            if JsConditionalExpression::cast(parent).is_some_and(|conditional| {
+                conditional.test().is_ok_and(|test| test == *expression)
+            }) =>
+        {
+            NoMisusedPromisesState::Conditional
+        }
         JsSyntaxKind::JS_DO_WHILE_STATEMENT => NoMisusedPromisesState::Conditional,
         JsSyntaxKind::JS_IF_STATEMENT => NoMisusedPromisesState::Conditional,
         JsSyntaxKind::JS_SPREAD => NoMisusedPromisesState::Spread,
@@ -229,30 +247,13 @@ fn find_misused_promise_expression(
         _ => return None,
     };
 
-    // Uncomment the following line for debugging convenience:
-    //let printed = format!("type of {expression:?} = {ty:?}");
-    let is_promise = ty.is_promise_instance();
-    let is_maybe_promise = ty.has_variant(|ty| ty.is_promise_instance());
-    let should_signal = is_promise || is_maybe_promise;
-    should_signal.then_some(state)
+    Some(state)
 }
 
 fn find_misused_promise_returning_callback(
     ctx: &RuleContext<NoMisusedPromises>,
     expression: &AnyJsExpression,
-    ty: &Type,
 ) -> Option<NoMisusedPromisesState> {
-    let callback = ty.as_function()?;
-
-    let return_ty = callback.return_type.as_type()?;
-    let return_ty = ty.resolve(return_ty)?;
-
-    let should_signal =
-        return_ty.is_promise_instance() || return_ty.has_variant(|ty| ty.is_promise_instance());
-    if !should_signal {
-        return None;
-    }
-
     let argument = expression
         .syntax()
         .ancestors()
@@ -262,39 +263,57 @@ fn find_misused_promise_returning_callback(
         .iter()
         .position(|arg| arg.is_ok_and(|arg| arg == argument))?;
 
-    let argument_ty = if let Some(call_expression) = argument_list
+    let call_expression = argument_list
         .syntax()
         .ancestors()
         .skip(1)
-        .find_map(JsCallExpression::cast)
-    {
-        let callee_ty = ctx.type_of_expression(&call_expression.callee().ok()?);
-        let function = callee_ty.as_function()?;
-        callee_ty.resolve(function.parameters.get(argument_index)?.ty())?
-    } else if let Some(new_expression) = argument_list
-        .syntax()
-        .ancestors()
-        .skip(1)
-        .find_map(JsNewExpression::cast)
-    {
-        let callee_ty = ctx.type_of_expression(&new_expression.callee().ok()?);
-        let class = callee_ty.as_class()?;
-        let constructor = class
-            .members
-            .iter()
-            .find(|member| member.kind == TypeMemberKind::Constructor)?;
-        let constructor_ty = callee_ty.resolve(&constructor.ty)?;
-        let constructor = constructor_ty.as_function()?;
-        constructor_ty.resolve(constructor.parameters.get(argument_index)?.ty())?
+        .find_map(JsCallExpression::cast);
+    let argument_ty = if let Some(call_expression) = &call_expression {
+        ctx.expected_argument_type(
+            &call_expression.callee().ok()?,
+            &argument_list,
+            argument_index,
+            false,
+        )?
     } else {
-        return None;
+        let new_expression = argument_list
+            .syntax()
+            .ancestors()
+            .skip(1)
+            .find_map(JsNewExpression::cast)?;
+        ctx.expected_argument_type(
+            &new_expression.callee().ok()?,
+            &argument_list,
+            argument_index,
+            true,
+        )?
     };
 
-    if argument_ty.is_function_with_return_type(|ty| ty.is_conditional()) {
+    // Array methods such as `filter` declare a type guard overload, and use the
+    // callback's result as a condition whichever overload applies. Other callees
+    // may pair a type guard overload with one that accepts a Promise.
+    if argument_ty.function_returns_type_predicate()
+        && call_expression.is_some_and(|call| is_array_method_call(ctx, &call))
+    {
         Some(NoMisusedPromisesState::ConditionalReturn)
-    } else if argument_ty.is_function_with_return_type(|ty| ty.is_void_keyword()) {
+    } else if argument_ty.function_returns_void() {
         Some(NoMisusedPromisesState::VoidReturn)
     } else {
         None
     }
+}
+
+/// Returns whether `call` invokes a method on an array or a tuple, such as
+/// `items.filter(callback)`.
+fn is_array_method_call(ctx: &RuleContext<NoMisusedPromises>, call: &JsCallExpression) -> bool {
+    let Ok(AnyJsExpression::JsStaticMemberExpression(callee)) =
+        call.callee().map(AnyJsExpression::omit_parentheses)
+    else {
+        return false;
+    };
+    callee
+        .object()
+        .ok()
+        .and_then(|object| ctx.type_of_expression(&object))
+        .is_some_and(|ty| ty.is_all_array_or_tuple())
 }

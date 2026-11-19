@@ -105,6 +105,12 @@ fn get_untrimmed_callee_name(call: &JsCallExpression) -> Option<JsSyntaxToken> {
     }
 
     if let Some(member_expression) = callee.as_js_static_member_expression() {
+        if member_expression
+            .object()
+            .is_ok_and(|object| object.as_js_call_expression().is_some())
+        {
+            return None;
+        }
         return member_expression.member().ok()?.value_token().ok();
     }
 
@@ -296,7 +302,7 @@ mod test {
     use crate::react::hooks::is_react_hook_call;
     use biome_js_parser::JsParserOptions;
     use biome_js_semantic::{SemanticModelOptions, semantic_model};
-    use biome_js_syntax::JsFileSource;
+    use biome_languages::JsFileSource;
 
     #[test]
     fn test_is_react_hook_call() {

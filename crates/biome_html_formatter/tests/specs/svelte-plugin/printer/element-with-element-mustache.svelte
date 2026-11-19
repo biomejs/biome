@@ -1,0 +1,4 @@
+<div>
+    <MyIcon />
+    {score}
+</div>

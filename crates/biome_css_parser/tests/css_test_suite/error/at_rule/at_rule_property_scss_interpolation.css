@@ -1,0 +1,7 @@
+@property --#{$name} {
+  syntax: "<color>";
+}
+
+@property --accent {
+  syntax: "<color>";
+}

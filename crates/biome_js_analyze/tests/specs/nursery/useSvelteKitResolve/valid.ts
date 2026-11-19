@@ -1,0 +1,13 @@
+/* should not generate diagnostics */
+import { goto } from "$app/navigation";
+import type { ResolvedPathname } from "$app/types";
+
+function navigate(path: ResolvedPathname) {
+	goto(path);
+}
+
+const path: ResolvedPathname = getPath();
+goto(path);
+
+declare let definitePath: ResolvedPathname;
+goto(definitePath);

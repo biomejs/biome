@@ -2,11 +2,17 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
+## Command
+
+```shell
+biome search '`"foo"`' file.js file.css
+```
+
 ## `file.css`
 
 ```css
 div {
-    color: green;
+  color: green;
 }
 ```
 

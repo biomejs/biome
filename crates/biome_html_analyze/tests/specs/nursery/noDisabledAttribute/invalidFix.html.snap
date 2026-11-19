@@ -1,0 +1,351 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalidFix.html
+---
+# Input
+```html
+<!-- should generate diagnostics -->
+<button disabled>Save</button>
+<button disabled="false">Save</button>
+<input type="submit" disabled>
+<div role="button" disabled>Save</div>
+<button disabled aria-disabled="true">Save</button>
+
+<input disabled>
+<input type="text" disabled="disabled" name="email">
+<textarea disabled></textarea>
+<input type="text" disabled readonly>
+
+<select disabled></select>
+<input type="checkbox" disabled>
+<select disabled aria-disabled="true"></select>
+
+<fieldset disabled></fieldset>
+
+```
+
+# Diagnostics
+```
+invalidFix.html:2:9 lint/nursery/noDisabledAttribute  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the native disabled attribute on this button.
+  
+    1 │ <!-- should generate diagnostics -->
+  > 2 │ <button disabled>Save</button>
+      │         ^^^^^^^^
+    3 │ <button disabled="false">Save</button>
+    4 │ <input type="submit" disabled>
+  
+  i A disabled form control can't receive keyboard focus, so it can't be reached with the Tab key.
+  
+  i Replace it with aria-disabled, which only exposes the disabled state to assistive technology. It does not suppress pointer or keyboard activation, form submission or validation, or apply disabled styling. Implement those behaviors, including forced-colors styling.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use aria-disabled instead.
+  
+    2 │ <button·aria-disabled="true">Save</button>
+      │         +++++        +++++++              
+
+```
+
+```
+invalidFix.html:3:9 lint/nursery/noDisabledAttribute  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the native disabled attribute on this button.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <button disabled>Save</button>
+  > 3 │ <button disabled="false">Save</button>
+      │         ^^^^^^^^^^^^^^^^
+    4 │ <input type="submit" disabled>
+    5 │ <div role="button" disabled>Save</div>
+  
+  i A disabled form control can't receive keyboard focus, so it can't be reached with the Tab key.
+  
+  i Replace it with aria-disabled, which only exposes the disabled state to assistive technology. It does not suppress pointer or keyboard activation, form submission or validation, or apply disabled styling. Implement those behaviors, including forced-colors styling.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use aria-disabled instead.
+  
+     1  1 │   <!-- should generate diagnostics -->
+     2  2 │   <button disabled>Save</button>
+     3    │ - <button·disabled="false">Save</button>
+        3 │ + <button·aria-disabled="true">Save</button>
+     4  4 │   <input type="submit" disabled>
+     5  5 │   <div role="button" disabled>Save</div>
+  
+
+```
+
+```
+invalidFix.html:4:22 lint/nursery/noDisabledAttribute  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the native disabled attribute on this button.
+  
+    2 │ <button disabled>Save</button>
+    3 │ <button disabled="false">Save</button>
+  > 4 │ <input type="submit" disabled>
+      │                      ^^^^^^^^
+    5 │ <div role="button" disabled>Save</div>
+    6 │ <button disabled aria-disabled="true">Save</button>
+  
+  i A disabled form control can't receive keyboard focus, so it can't be reached with the Tab key.
+  
+  i Replace it with aria-disabled, which only exposes the disabled state to assistive technology. It does not suppress pointer or keyboard activation, form submission or validation, or apply disabled styling. Implement those behaviors, including forced-colors styling.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use aria-disabled instead.
+  
+    4 │ <input·type="submit"·aria-disabled="true">
+      │                      +++++        +++++++ 
+
+```
+
+```
+invalidFix.html:5:20 lint/nursery/noDisabledAttribute  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The disabled attribute has no effect on this element.
+  
+    3 │ <button disabled="false">Save</button>
+    4 │ <input type="submit" disabled>
+  > 5 │ <div role="button" disabled>Save</div>
+      │                    ^^^^^^^^
+    6 │ <button disabled aria-disabled="true">Save</button>
+    7 │ 
+  
+  i The button role changes accessibility semantics but does not add native button behavior.
+  
+  i Replace it with aria-disabled, which only exposes the disabled state to assistive technology. It does not suppress pointer or keyboard activation, form submission or validation, or apply disabled styling. Implement those behaviors, including forced-colors styling.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use aria-disabled instead.
+  
+    5 │ <div·role="button"·aria-disabled="true">Save</div>
+      │                    +++++        +++++++           
+
+```
+
+```
+invalidFix.html:6:9 lint/nursery/noDisabledAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the native disabled attribute on this button.
+  
+    4 │ <input type="submit" disabled>
+    5 │ <div role="button" disabled>Save</div>
+  > 6 │ <button disabled aria-disabled="true">Save</button>
+      │         ^^^^^^^^
+    7 │ 
+    8 │ <input disabled>
+  
+  i A disabled form control can't receive keyboard focus, so it can't be reached with the Tab key.
+  
+  i Replace it with aria-disabled, which only exposes the disabled state to assistive technology. It does not suppress pointer or keyboard activation, form submission or validation, or apply disabled styling. Implement those behaviors, including forced-colors styling.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidFix.html:8:8 lint/nursery/noDisabledAttribute  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the native disabled attribute on this field.
+  
+     6 │ <button disabled aria-disabled="true">Save</button>
+     7 │ 
+   > 8 │ <input disabled>
+       │        ^^^^^^^^
+     9 │ <input type="text" disabled="disabled" name="email">
+    10 │ <textarea disabled></textarea>
+  
+  i A disabled form control can't receive keyboard focus, so it can't be reached with the Tab key.
+  
+  i Replace it with readonly, which keeps the field focusable and prevents edits. Unlike a disabled field, a read-only field is still submitted with its form and doesn't get disabled styling.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use readonly instead.
+  
+     6  6 │   <button disabled aria-disabled="true">Save</button>
+     7  7 │   
+     8    │ - <input·disabled>
+        8 │ + <input·readonly>
+     9  9 │   <input type="text" disabled="disabled" name="email">
+    10 10 │   <textarea disabled></textarea>
+  
+
+```
+
+```
+invalidFix.html:9:20 lint/nursery/noDisabledAttribute  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the native disabled attribute on this field.
+  
+     8 │ <input disabled>
+   > 9 │ <input type="text" disabled="disabled" name="email">
+       │                    ^^^^^^^^^^^^^^^^^^^
+    10 │ <textarea disabled></textarea>
+    11 │ <input type="text" disabled readonly>
+  
+  i A disabled form control can't receive keyboard focus, so it can't be reached with the Tab key.
+  
+  i Replace it with readonly, which keeps the field focusable and prevents edits. Unlike a disabled field, a read-only field is still submitted with its form and doesn't get disabled styling.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use readonly instead.
+  
+     7  7 │   
+     8  8 │   <input disabled>
+     9    │ - <input·type="text"·disabled="disabled"·name="email">
+        9 │ + <input·type="text"·readonly·name="email">
+    10 10 │   <textarea disabled></textarea>
+    11 11 │   <input type="text" disabled readonly>
+  
+
+```
+
+```
+invalidFix.html:10:11 lint/nursery/noDisabledAttribute  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the native disabled attribute on this field.
+  
+     8 │ <input disabled>
+     9 │ <input type="text" disabled="disabled" name="email">
+  > 10 │ <textarea disabled></textarea>
+       │           ^^^^^^^^
+    11 │ <input type="text" disabled readonly>
+    12 │ 
+  
+  i A disabled form control can't receive keyboard focus, so it can't be reached with the Tab key.
+  
+  i Replace it with readonly, which keeps the field focusable and prevents edits. Unlike a disabled field, a read-only field is still submitted with its form and doesn't get disabled styling.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use readonly instead.
+  
+     8  8 │   <input disabled>
+     9  9 │   <input type="text" disabled="disabled" name="email">
+    10    │ - <textarea·disabled></textarea>
+       10 │ + <textarea·readonly></textarea>
+    11 11 │   <input type="text" disabled readonly>
+    12 12 │   
+  
+
+```
+
+```
+invalidFix.html:11:20 lint/nursery/noDisabledAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the native disabled attribute on this field.
+  
+     9 │ <input type="text" disabled="disabled" name="email">
+    10 │ <textarea disabled></textarea>
+  > 11 │ <input type="text" disabled readonly>
+       │                    ^^^^^^^^
+    12 │ 
+    13 │ <select disabled></select>
+  
+  i A disabled form control can't receive keyboard focus, so it can't be reached with the Tab key.
+  
+  i Replace it with readonly, which keeps the field focusable and prevents edits. Unlike a disabled field, a read-only field is still submitted with its form and doesn't get disabled styling.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidFix.html:13:9 lint/nursery/noDisabledAttribute  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the native disabled attribute on this form control.
+  
+    11 │ <input type="text" disabled readonly>
+    12 │ 
+  > 13 │ <select disabled></select>
+       │         ^^^^^^^^
+    14 │ <input type="checkbox" disabled>
+    15 │ <select disabled aria-disabled="true"></select>
+  
+  i A disabled form control can't receive keyboard focus, so it can't be reached with the Tab key.
+  
+  i Replace it with aria-disabled, which only exposes the disabled state to assistive technology. It does not suppress pointer or keyboard activation, form submission or validation, or apply disabled styling. Implement those behaviors, including forced-colors styling.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use aria-disabled instead.
+  
+    13 │ <select·aria-disabled="true"></select>
+       │         +++++        +++++++          
+
+```
+
+```
+invalidFix.html:14:24 lint/nursery/noDisabledAttribute  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the native disabled attribute on this form control.
+  
+    13 │ <select disabled></select>
+  > 14 │ <input type="checkbox" disabled>
+       │                        ^^^^^^^^
+    15 │ <select disabled aria-disabled="true"></select>
+    16 │ 
+  
+  i A disabled form control can't receive keyboard focus, so it can't be reached with the Tab key.
+  
+  i Replace it with aria-disabled, which only exposes the disabled state to assistive technology. It does not suppress pointer or keyboard activation, form submission or validation, or apply disabled styling. Implement those behaviors, including forced-colors styling.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use aria-disabled instead.
+  
+    14 │ <input·type="checkbox"·aria-disabled="true">
+       │                        +++++        +++++++ 
+
+```
+
+```
+invalidFix.html:15:9 lint/nursery/noDisabledAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the native disabled attribute on this form control.
+  
+    13 │ <select disabled></select>
+    14 │ <input type="checkbox" disabled>
+  > 15 │ <select disabled aria-disabled="true"></select>
+       │         ^^^^^^^^
+    16 │ 
+    17 │ <fieldset disabled></fieldset>
+  
+  i A disabled form control can't receive keyboard focus, so it can't be reached with the Tab key.
+  
+  i Replace it with aria-disabled, which only exposes the disabled state to assistive technology. It does not suppress pointer or keyboard activation, form submission or validation, or apply disabled styling. Implement those behaviors, including forced-colors styling.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidFix.html:17:11 lint/nursery/noDisabledAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the native disabled attribute on this fieldset.
+  
+    15 │ <select disabled aria-disabled="true"></select>
+    16 │ 
+  > 17 │ <fieldset disabled></fieldset>
+       │           ^^^^^^^^
+    18 │ 
+  
+  i A disabled fieldset disables every form control inside it, so none of them can be reached with the Tab key.
+  
+  i Mark each form control inside the fieldset instead: use readonly on fields that support it and aria-disabled on other controls.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

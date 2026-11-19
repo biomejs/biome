@@ -1,0 +1,32 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: ts/declaration/declared_string_property.ts
+---
+
+# Input
+
+```ts
+class A {
+	declare "a-b": 0;
+	declare "c-d" = 1;
+}
+
+class B {declare "e-f":0;declare "g-h"=1;}
+
+```
+
+
+# Formatted
+
+```ts
+class A {
+	declare "a-b": 0;
+	declare "c-d" = 1;
+}
+
+class B {
+	declare "e-f": 0;
+	declare "g-h" = 1;
+}
+
+```

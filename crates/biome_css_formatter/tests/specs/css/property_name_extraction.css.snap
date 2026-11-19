@@ -1,0 +1,61 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/property_name_extraction.css
+---
+
+# Input
+
+```css
+.grid{grid-template-columns:1fr
+ 2fr;
+GrId-TeMpLaTe-ArEaS:"header header"
+ "main side";}
+
+.trivia{/* leading */  grid-template-rows /* trailing */ :auto
+ 1fr;}
+
+.escaped{\67rid-template-columns:1fr
+ 2fr;}
+
+.values{margin:1px
+ 2px;
+box-shadow:1px 2px black,3px 4px gray;
+--grid-template-columns:1fr
+ 2fr;
+--shadow:1px 2px black,3px 4px gray;}
+
+```
+
+
+# Formatted
+
+```css
+.grid {
+	grid-template-columns:
+		1fr
+		2fr;
+	grid-template-areas:
+		"header header"
+		"main side";
+}
+
+.trivia {
+	/* leading */ grid-template-rows/* trailing */ :
+		auto
+		1fr;
+}
+
+.escaped {
+	\67rid-template-columns: 1fr 2fr;
+}
+
+.values {
+	margin: 1px 2px;
+	box-shadow:
+		1px 2px black,
+		3px 4px gray;
+	--grid-template-columns: 1fr 2fr;
+	--shadow: 1px 2px black, 3px 4px gray;
+}
+
+```

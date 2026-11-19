@@ -1,0 +1,6 @@
+@use   "sass:list";
+
+$ordinary:   column\73/**/(1fr,2fr);
+$interpolated:   #{"column"}\73/**/(1fr,2fr);
+
+.deferred{ordinary:list.length($ordinary);interpolated:list.length($interpolated)}

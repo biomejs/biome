@@ -1,0 +1,49 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: multilevel.jsx
+---
+# Input
+```jsx
+// should generate diagnostics
+
+import "./level1.css";
+
+export function Level1() {
+	return <div className="level1 undefined-at-level1">Level 1</div>;
+}
+
+```
+
+# Diagnostics
+```
+multilevel.jsx:6:32 lint/nursery/noUndeclaredClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The CSS class undefined-at-level1 is not defined in any imported stylesheet.
+  
+    5 │ export function Level1() {
+  > 6 │ 	return <div className="level1 undefined-at-level1">Level 1</div>;
+      │ 	                              ^^^^^^^^^^^^^^^^^^^
+    7 │ }
+    8 │ 
+  
+  i Referencing undefined classes often indicates a typo or a missing stylesheet, and will result in elements not being styled as intended.
+  
+  i Checked import tree:
+    
+    multilevel.jsx (this file) -> which imports level1.css
+      └─ imported by:
+        └─ • level2.jsx -> which imports level2.css
+          └─ imported by:
+            └─ • level3.jsx -> which imports level3.css
+              └─ imported by:
+                └─ • level4.jsx -> which imports level4.css
+  
+  
+  i Either import a CSS file that defines this class or remove this class name.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9156 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

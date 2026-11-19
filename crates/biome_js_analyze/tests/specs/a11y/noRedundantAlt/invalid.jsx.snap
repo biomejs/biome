@@ -42,6 +42,8 @@ invalid.jsx:2:18 lint/a11y/noRedundantAlt ━━━━━━━━━━━━�
   
   i Screen readers announce img elements as "images", so it is not necessary to redeclare this in alternative text.
   
+  i Remove the word if descriptive alt text remains. Otherwise, replace it with a description of what the image shows.
+  
 
 ```
 
@@ -58,6 +60,8 @@ invalid.jsx:3:18 lint/a11y/noRedundantAlt ━━━━━━━━━━━━�
     5 │ let a = <img alt="PhOtO of friend." />;
   
   i Screen readers announce img elements as "images", so it is not necessary to redeclare this in alternative text.
+  
+  i Remove the word if descriptive alt text remains. Otherwise, replace it with a description of what the image shows.
   
 
 ```
@@ -76,6 +80,8 @@ invalid.jsx:4:18 lint/a11y/noRedundantAlt ━━━━━━━━━━━━�
   
   i Screen readers announce img elements as "images", so it is not necessary to redeclare this in alternative text.
   
+  i Remove the word if descriptive alt text remains. Otherwise, replace it with a description of what the image shows.
+  
 
 ```
 
@@ -92,6 +98,8 @@ invalid.jsx:5:18 lint/a11y/noRedundantAlt ━━━━━━━━━━━━�
     7 │ let a = <img alt="piCTUre of friend." />;
   
   i Screen readers announce img elements as "images", so it is not necessary to redeclare this in alternative text.
+  
+  i Remove the word if descriptive alt text remains. Otherwise, replace it with a description of what the image shows.
   
 
 ```
@@ -110,6 +118,8 @@ invalid.jsx:6:18 lint/a11y/noRedundantAlt ━━━━━━━━━━━━�
   
   i Screen readers announce img elements as "images", so it is not necessary to redeclare this in alternative text.
   
+  i Remove the word if descriptive alt text remains. Otherwise, replace it with a description of what the image shows.
+  
 
 ```
 
@@ -126,6 +136,8 @@ invalid.jsx:7:18 lint/a11y/noRedundantAlt ━━━━━━━━━━━━�
     9 │ let a = <img alt="photo of cool person" aria-hidden={false} />;
   
   i Screen readers announce img elements as "images", so it is not necessary to redeclare this in alternative text.
+  
+  i Remove the word if descriptive alt text remains. Otherwise, replace it with a description of what the image shows.
   
 
 ```
@@ -144,6 +156,8 @@ invalid.jsx:8:18 lint/a11y/noRedundantAlt ━━━━━━━━━━━━�
   
   i Screen readers announce img elements as "images", so it is not necessary to redeclare this in alternative text.
   
+  i Remove the word if descriptive alt text remains. Otherwise, replace it with a description of what the image shows.
+  
 
 ```
 
@@ -160,6 +174,8 @@ invalid.jsx:9:18 lint/a11y/noRedundantAlt ━━━━━━━━━━━━�
     11 │ let a = <img alt="image of cool person" aria-hidden={false} />;
   
   i Screen readers announce img elements as "images", so it is not necessary to redeclare this in alternative text.
+  
+  i Remove the word if descriptive alt text remains. Otherwise, replace it with a description of what the image shows.
   
 
 ```
@@ -178,6 +194,8 @@ invalid.jsx:10:18 lint/a11y/noRedundantAlt ━━━━━━━━━━━━�
   
   i Screen readers announce img elements as "images", so it is not necessary to redeclare this in alternative text.
   
+  i Remove the word if descriptive alt text remains. Otherwise, replace it with a description of what the image shows.
+  
 
 ```
 
@@ -194,6 +212,8 @@ invalid.jsx:11:18 lint/a11y/noRedundantAlt ━━━━━━━━━━━━�
     13 │ let a = <img alt="photo" {...this.props} />;
   
   i Screen readers announce img elements as "images", so it is not necessary to redeclare this in alternative text.
+  
+  i Remove the word if descriptive alt text remains. Otherwise, replace it with a description of what the image shows.
   
 
 ```
@@ -212,6 +232,8 @@ invalid.jsx:12:18 lint/a11y/noRedundantAlt ━━━━━━━━━━━━�
   
   i Screen readers announce img elements as "images", so it is not necessary to redeclare this in alternative text.
   
+  i Remove the word if descriptive alt text remains. Otherwise, replace it with a description of what the image shows.
+  
 
 ```
 
@@ -228,6 +250,8 @@ invalid.jsx:13:18 lint/a11y/noRedundantAlt ━━━━━━━━━━━━�
     15 │ let a = <img alt="picture" {...this.props} />;
   
   i Screen readers announce img elements as "images", so it is not necessary to redeclare this in alternative text.
+  
+  i Remove the word if descriptive alt text remains. Otherwise, replace it with a description of what the image shows.
   
 
 ```
@@ -246,6 +270,8 @@ invalid.jsx:14:18 lint/a11y/noRedundantAlt ━━━━━━━━━━━━�
   
   i Screen readers announce img elements as "images", so it is not necessary to redeclare this in alternative text.
   
+  i Remove the word if descriptive alt text remains. Otherwise, replace it with a description of what the image shows.
+  
 
 ```
 
@@ -262,6 +288,8 @@ invalid.jsx:15:18 lint/a11y/noRedundantAlt ━━━━━━━━━━━━�
     17 │ let a = <img alt={`photo doing ${things}`} {...this.props} />;
   
   i Screen readers announce img elements as "images", so it is not necessary to redeclare this in alternative text.
+  
+  i Remove the word if descriptive alt text remains. Otherwise, replace it with a description of what the image shows.
   
 
 ```
@@ -280,6 +308,8 @@ invalid.jsx:16:18 lint/a11y/noRedundantAlt ━━━━━━━━━━━━�
   
   i Screen readers announce img elements as "images", so it is not necessary to redeclare this in alternative text.
   
+  i Remove the word if descriptive alt text remains. Otherwise, replace it with a description of what the image shows.
+  
 
 ```
 
@@ -296,6 +326,8 @@ invalid.jsx:17:18 lint/a11y/noRedundantAlt ━━━━━━━━━━━━�
     19 │ let a = <img alt={`picture doing ${picture}`} {...this.props} />;
   
   i Screen readers announce img elements as "images", so it is not necessary to redeclare this in alternative text.
+  
+  i Remove the word if descriptive alt text remains. Otherwise, replace it with a description of what the image shows.
   
 
 ```
@@ -314,6 +346,8 @@ invalid.jsx:18:18 lint/a11y/noRedundantAlt ━━━━━━━━━━━━�
   
   i Screen readers announce img elements as "images", so it is not necessary to redeclare this in alternative text.
   
+  i Remove the word if descriptive alt text remains. Otherwise, replace it with a description of what the image shows.
+  
 
 ```
 
@@ -330,6 +364,8 @@ invalid.jsx:19:18 lint/a11y/noRedundantAlt ━━━━━━━━━━━━�
     21 │ let a = <img alt={`image doing ${image}`} {...this.props} />;
   
   i Screen readers announce img elements as "images", so it is not necessary to redeclare this in alternative text.
+  
+  i Remove the word if descriptive alt text remains. Otherwise, replace it with a description of what the image shows.
   
 
 ```
@@ -348,6 +384,8 @@ invalid.jsx:20:18 lint/a11y/noRedundantAlt ━━━━━━━━━━━━�
   
   i Screen readers announce img elements as "images", so it is not necessary to redeclare this in alternative text.
   
+  i Remove the word if descriptive alt text remains. Otherwise, replace it with a description of what the image shows.
+  
 
 ```
 
@@ -363,6 +401,8 @@ invalid.jsx:21:18 lint/a11y/noRedundantAlt ━━━━━━━━━━━━�
     22 │ 
   
   i Screen readers announce img elements as "images", so it is not necessary to redeclare this in alternative text.
+  
+  i Remove the word if descriptive alt text remains. Otherwise, replace it with a description of what the image shows.
   
 
 ```

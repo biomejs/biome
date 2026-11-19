@@ -1,0 +1,25 @@
+<!-- should not generate diagnostics -->
+<script>
+export default {
+  emits: {
+    change: null,
+    update: (value) => true,
+    remove: value => true,
+    select(value) {
+      return true;
+    },
+    spread: (...values) => true,
+  },
+  methods: {
+    onChange() {
+      this.$emit("change");
+      this.$emit("update", value);
+      this.$emit("remove", { a, b });
+      this.$emit("spread", ...values);
+    },
+  },
+  setup(props, context) {
+    context.emit("change", value);
+  },
+};
+</script>

@@ -2,6 +2,12 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
+## Command
+
+```shell
+biome lint fix.js
+```
+
 ## `biome.json`
 
 ```json
@@ -12,7 +18,7 @@ expression: redactor(content)
   "linter": {
     "enabled": true,
     "rules": {
-      "recommended": true,
+      "preset": "recommended",
       "complexity": {
         "noUselessSwitchCase": "off"
       }
@@ -42,6 +48,8 @@ fix.js:3:1 lint/complexity/useFlatMap  FIXABLE  ━━━━━━━━━━�
   > 3 │ array.map((sentence) => sentence.split(" ")).flat();
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     4 │ 		
+  
+  i Using .flatMap() avoids the creation of an intermediate array.
   
   i Safe fix: Replace the chain with .flatMap().
   

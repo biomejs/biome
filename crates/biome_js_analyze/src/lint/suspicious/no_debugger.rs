@@ -30,7 +30,10 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noDebugger",
         language: "js",
-        sources: &[RuleSource::Eslint("no-debugger").same()],
+        sources: &[
+            RuleSource::Eslint("no-debugger").same(),
+            RuleSource::DenoLint("no-debugger").same(),
+        ],
         recommended: true,
         severity: Severity::Error,
         fix_kind: FixKind::Unsafe,
@@ -57,7 +60,10 @@ impl Rule for NoDebugger {
                 "This is an unexpected use of the "<Emphasis>"debugger"</Emphasis>" statement."
             }
             .to_owned(),
-        ))
+        )
+        .note(markup! {
+            "A "<Emphasis>"debugger"</Emphasis>" statement pauses the program when a debugger is open. It is meant for debugging only, and it should not be left in code that is shipped."
+        }))
     }
 
     fn action(ctx: &RuleContext<Self>, _: &Self::State) -> Option<JsRuleAction> {

@@ -1,0 +1,3 @@
+.a {
+  background-color: rgba($color: (#808080), $alpha: 0.9);
+}

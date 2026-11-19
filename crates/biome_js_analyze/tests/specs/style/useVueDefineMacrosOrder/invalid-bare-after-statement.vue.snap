@@ -1,0 +1,44 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-bare-after-statement.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<script setup lang="ts">
+defineProps<{ a?: boolean }>();
+const x = 1;
+defineEmits<{ e: [] }>();
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-bare-after-statement.vue:5:1 lint/style/useVueDefineMacrosOrder  FIXABLE  ━━━━━━━━━━━━━━━━━━
+
+  i defineEmits macro is out of order.
+  
+    3 │ defineProps<{ a?: boolean }>();
+    4 │ const x = 1;
+  > 5 │ defineEmits<{ e: [] }>();
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ </script>
+    7 │ 
+  
+  i Macros defined in <script setup> should be ordered as follows: defineModel, defineProps, defineEmits
+  
+  i and be placed before any non-macro statements, except for type declarations, imports, exports or debugger statements.
+  
+  i Unsafe fix: Reorder compiler macros.
+  
+    1 1 │   
+    2 2 │   defineProps<{ a?: boolean }>();
+    3   │ - const·x·=·1;
+    4   │ - defineEmits<{·e:·[]·}>();
+      3 │ + defineEmits<{·e:·[]·}>();
+      4 │ + const·x·=·1;
+    5 5 │   
+  
+
+```

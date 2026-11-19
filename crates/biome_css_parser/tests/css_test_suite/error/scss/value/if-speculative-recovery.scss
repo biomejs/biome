@@ -1,0 +1,27 @@
+.a {
+  color: if(sass(true) red; else: blue);
+  width: 1px;
+}
+.after-modern { height: 2px; }
+.b {
+  color: if(style((--x: 1)), red;
+  width: 3px;
+}
+.after-legacy { height: 4px; }
+
+.missing-colon {
+  color: if(style(--enabled: true) red; else: blue);
+  width: 1px;
+}
+.missing-colon-comma { color: if(style(--enabled: true) red, blue); width: 1px; }
+.missing-colon-end { color: if(style(--enabled: true) red); width: 1px; }
+.missing-operand {
+  color: if(not : red; else: blue);
+  width: 1px;
+}
+$x: red;
+.interpolation {
+  color: if(style((--x: if(sass(true): "#{$x +}"; else: blue))): green; else: black);
+  width: 1px;
+}
+.after { height: 2px; }

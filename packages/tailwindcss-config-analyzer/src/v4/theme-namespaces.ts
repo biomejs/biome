@@ -33,6 +33,8 @@ export const THEME_NAMESPACES = [
 	{ variant: "Ease", cssPrefix: "--ease-" },
 	{ variant: "Animate", cssPrefix: "--animate-" },
 	{ variant: "BackgroundImage", cssPrefix: "--background-image-" },
+	{ variant: "GridTemplateColumns", cssPrefix: "--grid-template-columns-" },
+	{ variant: "GridTemplateRows", cssPrefix: "--grid-template-rows-" },
 ] as const;
 
 export type ThemeNamespaceVariant =

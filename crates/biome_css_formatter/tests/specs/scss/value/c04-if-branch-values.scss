@@ -1,0 +1,37 @@
+@use "sass:math";
+@use "sass:meta";
+$map:if(sass(false):(first:1px + 2px);else:(else:(4px,5px)));
+.true{width:if(sass(true):1px+2px;else:4px+5px);padding:if(sass(true):1px+2px 4px*2;else:5px 7px);font-family:if(sass(true):serif,monospace;else:system-ui,sans-serif);color:red if(sass(true):!important;else:null)}
+.false{width:if(sass(false):(1px+2px)*3;else:(4px+5px)*2);padding:if(sass(false):1px 2px;else:3px 4px);font-family:if(sass(false):serif,monospace;else:system-ui,sans-serif);color:red if(sass(false):!important;else:null)}
+.maps{content:meta.inspect($map);other:meta.inspect(if(sass(true):(left:1px+2px,right:(3px,4px));else:(none:0)))}
+.nested{width:if(sass(true):math.max(1px+2px,2px)+if(sass(false):1px;else:2px+3px);else:0)}
+.literal{value:if(sass(true):before else after;else:else);list:meta.inspect(if(sass(false):first,else,last;else:else,last));uppercase:meta.inspect(if(sass(true):INITIAL;else:INHERIT))}
+.native{width:if(media(width > 400px):1px+2px;else:4px+5px);height:if(supports(display: grid):1px+2px;else:0);padding:if(style(--enabled: true):1px 2px;else:3px 4px)}
+.comments{width:if(/*condition*/sass(true)/*colon*/:/*value*/1px/*operator*/+2px/*end*/;/*next*/else:/*fallback*/0/*close*/)}
+@mixin emit($value){.include{content:meta.inspect($value)}}
+@include emit(if(sass(true):1px+2px,4px;else:5px,6px));
+.suppressed{width:if(sass(true):
+// biome-ignore format: preserve this branch value
+1px+   2px;else:0)}
+.line-comments{width:if(sass(true):
+// branch
+1px+2px;else: // fallback
+3px+4px)}
+.line-comments{width:if(sass(true): // branch
+1px+2px;else:
+// fallback
+3px+4px)}
+.suppressed-inline{width:if(sass(true): // biome-ignore format: preserve this branch value
+1px+   2px;else:3px+4px)}
+.nested-comments{width:if(media(width > 400px): // outer
+if(sass(false):
+// inner
+1px+2px;else:3px);else:0)}
+.mixed-comments{width:if(sass(true):
+/* block */
+// line
+1px+2px;else:0)}
+@include emit(if(sass(true): // numeric value
+1px+2px;else:0));
+@include emit(if(sass(true): // biome-ignore format: preserve this branch value
+1px+   2px;else:3px+4px));

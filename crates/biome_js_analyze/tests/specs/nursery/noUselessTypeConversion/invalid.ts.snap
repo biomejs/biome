@@ -579,6 +579,30 @@ invalid.ts:44:1 lint/nursery/noUselessTypeConversion ━━━━━━━━━
 ```
 
 ```
+invalid.ts:45:1 lint/nursery/noUselessTypeConversion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid applying `~~` to an integer value.
+  
+    44 │ ~~1;
+  > 45 │ ~~-1;
+       │ ^^^^
+    46 │ 
+    47 │ declare const threeOrFour: 3 | 4;
+  
+  i This expression already evaluates to an integer-like number.
+  
+  i This expression already evaluates to an integer-like number, so the double bitwise NOT has no effect.
+  
+  i Redundant conversions make it harder to see that the value already has the expected number type.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9752 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
 invalid.ts:48:1 lint/nursery/noUselessTypeConversion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Avoid applying `~~` to an integer value.

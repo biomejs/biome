@@ -1,0 +1,33 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/suppression_spacing_nested_list.md
+---
+
+# Input
+
+```md
+- parent
+  <!-- biome-ignore lint: this remains attached to the nested list -->
+  - adjacent child
+
+- parent
+  <!-- biome-ignore lint: this remains separated from the nested list -->
+
+  - separated child
+
+```
+
+
+# Formatted
+
+```md
+- parent
+  <!-- biome-ignore lint: this remains attached to the nested list -->
+  - adjacent child
+
+- parent
+  <!-- biome-ignore lint: this remains separated from the nested list -->
+
+  - separated child
+
+```

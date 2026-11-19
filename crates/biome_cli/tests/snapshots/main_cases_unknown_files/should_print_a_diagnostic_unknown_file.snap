@@ -2,15 +2,21 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
+## Command
+
+```shell
+biome format format.unknown format.js
+```
+
 ## `format.js`
 
 ```js
   statement(  )  
 ```
 
-## `format.yml`
+## `format.unknown`
 
-```yml
+```unknown
 
 ```
 

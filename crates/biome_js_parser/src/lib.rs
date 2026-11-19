@@ -80,7 +80,8 @@ pub use crate::{
     parse::*,
 };
 use biome_js_factory::JsSyntaxFactory;
-use biome_js_syntax::{JsSyntaxKind, LanguageVariant};
+use biome_js_syntax::JsSyntaxKind;
+use biome_languages::javascript::LanguageVariant;
 use biome_parser::tree_sink::LosslessTreeSink;
 pub(crate) use parser::{JsParser, ParseRecoveryTokenSet};
 pub(crate) use state::{JsParserState, StrictMode};
@@ -92,6 +93,7 @@ pub enum JsSyntaxFeature {
     StrictMode,
     TypeScript,
     Jsx,
+    Astro,
 }
 
 impl SyntaxFeature for JsSyntaxFeature {
@@ -102,7 +104,12 @@ impl SyntaxFeature for JsSyntaxFeature {
             Self::SloppyMode => p.state().strict().is_none(),
             Self::StrictMode => p.state().strict().is_some(),
             Self::TypeScript => p.source_type().language().is_typescript(),
-            Self::Jsx => p.source_type().variant() == LanguageVariant::Jsx,
+            // Astro frontmatter is plain TS, where `<` opens a type assertion.
+            Self::Jsx => {
+                p.source_type().variant() == LanguageVariant::Jsx
+                    && !p.source_type().as_embedding_kind().is_astro_frontmatter()
+            }
+            Self::Astro => p.source_type().as_embedding_kind().is_astro_template(),
         }
     }
 }

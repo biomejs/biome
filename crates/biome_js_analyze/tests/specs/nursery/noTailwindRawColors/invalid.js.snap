@@ -1,0 +1,105 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+// should generate diagnostics
+clsx("bg-pink-500", { "text-white": active });
+cn("hover:border-red-500/50");
+tw`ring-black`;
+tw.div`bg-slate-950`;
+cva("bg-primary", { variants: { tone: { danger: "bg-red-500" } } });
+
+```
+
+# Diagnostics
+```
+invalid.js:2:7 lint/nursery/noTailwindRawColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind CSS class uses a raw palette color.
+  
+    1 │ // should generate diagnostics
+  > 2 │ clsx("bg-pink-500", { "text-white": active });
+      │       ^^^^^^^^^^^
+    3 │ cn("hover:border-red-500/50");
+    4 │ tw`ring-black`;
+  
+  i Raw palette colors couple components to specific colors, making design-system changes harder.
+  
+  i Use a color from your design system. Check your Tailwind config for the available colors.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:3:11 lint/nursery/noTailwindRawColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind CSS class uses a raw palette color.
+  
+    1 │ // should generate diagnostics
+    2 │ clsx("bg-pink-500", { "text-white": active });
+  > 3 │ cn("hover:border-red-500/50");
+      │           ^^^^^^^^^^^^^^^^^
+    4 │ tw`ring-black`;
+    5 │ tw.div`bg-slate-950`;
+  
+  i Raw palette colors couple components to specific colors, making design-system changes harder.
+  
+  i Use a color from your design system. Check your Tailwind config for the available colors.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:5:8 lint/nursery/noTailwindRawColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind CSS class uses a raw palette color.
+  
+    3 │ cn("hover:border-red-500/50");
+    4 │ tw`ring-black`;
+  > 5 │ tw.div`bg-slate-950`;
+      │        ^^^^^^^^^^^^
+    6 │ cva("bg-primary", { variants: { tone: { danger: "bg-red-500" } } });
+    7 │ 
+  
+  i Raw palette colors couple components to specific colors, making design-system changes harder.
+  
+  i Use a color from your design system. Check your Tailwind config for the available colors.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:6:50 lint/nursery/noTailwindRawColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind CSS class uses a raw palette color.
+  
+    4 │ tw`ring-black`;
+    5 │ tw.div`bg-slate-950`;
+  > 6 │ cva("bg-primary", { variants: { tone: { danger: "bg-red-500" } } });
+      │                                                  ^^^^^^^^^^
+    7 │ 
+  
+  i Raw palette colors couple components to specific colors, making design-system changes harder.
+  
+  i Use a color from your design system. Check your Tailwind config for the available colors.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

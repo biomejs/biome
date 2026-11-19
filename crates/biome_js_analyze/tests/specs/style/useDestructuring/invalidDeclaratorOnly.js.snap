@@ -1,0 +1,61 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidDeclaratorOnly.js
+---
+# Input
+```js
+/* should generate diagnostics */
+/* assignment disabled, only declarations should fire */
+{
+	var foo = array[0];
+}
+{
+	var foo = object.foo;
+}
+{
+	foo = array[0];
+}
+{
+	foo = object.foo;
+}
+
+```
+
+# Diagnostics
+```
+invalidDeclaratorOnly.js:4:6 lint/style/useDestructuring ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use array destructuring instead of accessing array elements by index.
+  
+    2 │ /* assignment disabled, only declarations should fire */
+    3 │ {
+  > 4 │ 	var foo = array[0];
+      │ 	    ^^^^^^^^^^^^^^
+    5 │ }
+    6 │ {
+  
+  i Array destructuring is more readable and expressive than accessing individual elements by index.
+  
+  i Replace the array index access with array destructuring syntax.
+  
+
+```
+
+```
+invalidDeclaratorOnly.js:7:6 lint/style/useDestructuring ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use object destructuring instead of accessing object properties.
+  
+    5 │ }
+    6 │ {
+  > 7 │ 	var foo = object.foo;
+      │ 	    ^^^^^^^^^^^^^^^^
+    8 │ }
+    9 │ {
+  
+  i Object destructuring is more readable and expressive than accessing individual properties.
+  
+  i Replace the property access with object destructuring syntax.
+  
+
+```

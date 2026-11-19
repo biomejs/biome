@@ -1,0 +1,7 @@
+$name:data-width;$x:2px;$fn:var;
+@container card attr(data-width px, 2px){.a{color:red}}
+@container card unknown(attr(data-x type(<length>), var(--x, 2px))){.b{height:1px}}
+@container card attr(#{$name} px, 2px){.c{color:green}}
+@container card attr(data-label, /* empty */){.d{color:blue}}
+@container card attr(data-x px, $x){.e{padding:1px}}
+@container card attr(data-x px, #{$fn}(--x, 2px)){.f{height:2px}}

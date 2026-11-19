@@ -1,0 +1,22 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome format --write file.yaml
+```
+
+## `file.yaml`
+
+```yaml
+items: [1, 2]
+
+```
+
+# Emitted Messages
+
+```block
+Formatted 1 file in <TIME>. Fixed 1 file.
+```

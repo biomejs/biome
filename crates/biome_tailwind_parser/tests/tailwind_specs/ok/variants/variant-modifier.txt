@@ -1,0 +1,1 @@
+group-hover/menu:flex peer-checked/foo:flex @sm/main:flex @[400px]:flex @[400px]/name:flex group-hover/[.5]:flex bg-red-500/50 w-1/2

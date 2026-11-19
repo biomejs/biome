@@ -1,0 +1,87 @@
+---
+source: crates/biome_js_type_info/tests/utils.rs
+expression: content
+---
+## Input
+
+```ts
+function nullable<T>(value: { readonly [K in keyof T]: T[K] }): {
+	[K in keyof T]: T[K] | null;
+} {
+	return value;
+}
+
+```
+
+## Result
+
+```
+sync Function "nullable" {
+  accepts: {
+    params: [
+      required value: Local TypeId(5)
+    ]
+    type_args: [Local TypeId(0)]
+  }
+  returns: Local TypeId(8)
+}
+```
+
+## Registered types
+
+```
+Module TypeId(0) => T
+
+Module TypeId(1) => K
+
+Module TypeId(2) => instanceof unresolved reference "T" (scope ID: 0)
+
+Module TypeId(3) => instanceof unresolved reference "K" (scope ID: 0)
+
+Module TypeId(4) => IndexedAccessType {
+    object: Resolved(
+        Local TypeId(2),
+    ),
+    index: Resolved(
+        Local TypeId(3),
+    ),
+}
+
+Module TypeId(5) => MappedType {
+    type_parameter: Resolved(
+        Local TypeId(1),
+    ),
+    keys: Keyof(
+        Resolved(
+            Local TypeId(2),
+        ),
+    ),
+    ty: Resolved(
+        Local TypeId(4),
+    ),
+    readonly_modifier: Some(
+        Add,
+    ),
+    optional_modifier: None,
+}
+
+Module TypeId(6) => null
+
+Module TypeId(7) => Local TypeId(4) | Local TypeId(6)
+
+Module TypeId(8) => MappedType {
+    type_parameter: Resolved(
+        Local TypeId(1),
+    ),
+    keys: Keyof(
+        Resolved(
+            Local TypeId(2),
+        ),
+    ),
+    ty: Resolved(
+        Local TypeId(7),
+    ),
+    readonly_modifier: None,
+    optional_modifier: None,
+}
+```

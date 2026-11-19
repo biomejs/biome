@@ -1,15 +1,19 @@
 pub mod assist;
 pub mod linter;
+pub mod presets;
 
 use crate::analyzer::assist::Actions;
 pub use crate::analyzer::linter::*;
+use crate::analyzer::presets::PresetConfig;
 use biome_analyze::options::RuleOptions;
-use biome_analyze::{FixKind, Rule, RuleCategory, RuleDomain, RuleFilter};
+use biome_analyze::{FixKind, PLUGIN_GROUP, Rule, RuleCategory, RuleDomain, RuleFilter};
+use biome_console::markup;
 use biome_deserialize::{
     Deserializable, DeserializableType, DeserializableValue, DeserializationContext, Merge,
 };
 use biome_deserialize_macros::{Deserializable, Merge};
 use biome_diagnostics::Severity;
+use biome_string_case::Case;
 use rustc_hash::FxHashSet;
 #[cfg(feature = "schema")]
 use schemars::JsonSchema;
@@ -25,12 +29,12 @@ pub enum RuleConfiguration<T: Default + Merge> {
     WithOptions(RuleWithOptions<T>),
 }
 impl<T: Default + Merge + Deserializable> Deserializable for RuleConfiguration<T> {
-    fn deserialize(
-        ctx: &mut impl DeserializationContext,
-        value: &impl DeserializableValue,
+    fn deserialize<V: DeserializableValue>(
+        ctx: &mut dyn DeserializationContext<State = V::State>,
+        value: &V,
         rule_name: &str,
     ) -> Option<Self> {
-        if value.visitable_type()? == DeserializableType::Str {
+        if value.visitable_type(ctx)? == DeserializableType::Str {
             Deserializable::deserialize(ctx, value, rule_name).map(Self::Plain)
         } else {
             Deserializable::deserialize(ctx, value, rule_name).map(|rule| Self::WithOptions(rule))
@@ -74,7 +78,7 @@ impl<T: Clone + Default + Merge> Merge for RuleConfiguration<T> {
         }
     }
 }
-impl<T: Clone + Default + Merge + 'static + Debug> RuleConfiguration<T> {
+impl<T: Clone + Default + Merge + Send + Sync + 'static + Debug> RuleConfiguration<T> {
     pub fn get_options(&self) -> Option<RuleOptions> {
         match self {
             Self::Plain(_) => None,
@@ -134,12 +138,12 @@ impl<T: Default + Merge> Default for RuleFixConfiguration<T> {
     }
 }
 impl<T: Default + Merge + Deserializable> Deserializable for RuleFixConfiguration<T> {
-    fn deserialize(
-        ctx: &mut impl DeserializationContext,
-        value: &impl DeserializableValue,
+    fn deserialize<V: DeserializableValue>(
+        ctx: &mut dyn DeserializationContext<State = V::State>,
+        value: &V,
         rule_name: &str,
     ) -> Option<Self> {
-        if value.visitable_type()? == DeserializableType::Str {
+        if value.visitable_type(ctx)? == DeserializableType::Str {
             Deserializable::deserialize(ctx, value, rule_name).map(Self::Plain)
         } else {
             Deserializable::deserialize(ctx, value, rule_name).map(|rule| Self::WithOptions(rule))
@@ -183,7 +187,7 @@ impl<T: Clone + Default + Merge> Merge for RuleFixConfiguration<T> {
         }
     }
 }
-impl<T: Clone + Default + Merge + 'static> RuleFixConfiguration<T> {
+impl<T: Clone + Default + Merge + Send + Sync + 'static> RuleFixConfiguration<T> {
     pub fn get_options(&self) -> Option<RuleOptions> {
         match self {
             Self::Plain(_) => None,
@@ -284,14 +288,15 @@ impl From<RuleAssistPlainConfiguration> for Severity {
 #[serde(rename_all = "camelCase")]
 pub enum RulePlainConfiguration {
     #[default]
+    /// Disables the rule.
     Off,
-    /// Enables the rule using the default severity of the rule
+    /// Enables the rule using its individual default severity.
     On,
-    /// Enables the rule, and it will emit a diagnostic with information severity
+    /// Enables the rule and emits diagnostics with information severity.
     Info,
-    /// Enables the rule, and it will emit a diagnostic with warning severity
+    /// Enables the rule and emits diagnostics with warning severity.
     Warn,
-    /// Enables the rule, and it will emit a diagnostic with error severity
+    /// Enables the rule and emits diagnostics with error severity.
     Error,
 }
 
@@ -302,12 +307,12 @@ pub enum RuleAssistConfiguration<T: Default> {
     WithOptions(RuleAssistWithOptions<T>),
 }
 impl<T: Default + Deserializable> Deserializable for RuleAssistConfiguration<T> {
-    fn deserialize(
-        ctx: &mut impl DeserializationContext,
-        value: &impl DeserializableValue,
+    fn deserialize<V: DeserializableValue>(
+        ctx: &mut dyn DeserializationContext<State = V::State>,
+        value: &V,
         name: &str,
     ) -> Option<Self> {
-        if value.visitable_type()? == DeserializableType::Str {
+        if value.visitable_type(ctx)? == DeserializableType::Str {
             Deserializable::deserialize(ctx, value, name).map(Self::Plain)
         } else {
             Deserializable::deserialize(ctx, value, name).map(|rule| Self::WithOptions(rule))
@@ -351,7 +356,7 @@ impl<T: Clone + Default> Merge for RuleAssistConfiguration<T> {
         }
     }
 }
-impl<T: Clone + Default + 'static> RuleAssistConfiguration<T> {
+impl<T: Clone + Default + Send + Sync + 'static> RuleAssistConfiguration<T> {
     pub fn get_options(&self) -> Option<RuleOptions> {
         match self {
             Self::Plain(_) => None,
@@ -405,7 +410,9 @@ where
 #[serde(rename_all = "camelCase")]
 pub enum RuleAssistPlainConfiguration {
     #[default]
+    /// Disables the assist rule.
     Off,
+    /// Enables the assist rule.
     On,
 }
 impl RuleAssistPlainConfiguration {
@@ -429,6 +436,7 @@ impl Merge for RuleAssistPlainConfiguration {
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct RuleAssistWithOptions<T: Default> {
     /// The severity of the emitted diagnostics by the rule
+    #[deserializable(required)]
     pub level: RuleAssistPlainConfiguration,
     /// Rule's options
     pub options: T,
@@ -459,7 +467,8 @@ where
             "properties": {
                 "level": level_schema,
                 "options": options_schema,
-            }
+            },
+            "additionalProperties": false,
         })
     }
 }
@@ -470,6 +479,7 @@ where
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct RuleWithOptions<T: Default + Merge> {
     /// The severity of the emitted diagnostics by the rule
+    #[deserializable(required)]
     pub level: RulePlainConfiguration,
     /// Rule's options
     #[serde(default)]
@@ -516,8 +526,10 @@ where
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct RuleWithFixOptions<T: Default + Merge> {
     /// The severity of the emitted diagnostics by the rule
+    #[deserializable(required)]
     pub level: RulePlainConfiguration,
-    /// The kind of the code actions emitted by the rule
+    /// Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and
+    /// `unsafe` reclassify its applicability. This setting does not change the fix itself.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub fix: Option<FixKind>,
     /// Rule's options
@@ -545,7 +557,12 @@ where
     fn json_schema(generator: &mut schemars::generate::SchemaGenerator) -> schemars::Schema {
         // Generate schemas for the inner types
         let level_schema = generator.subschema_for::<RulePlainConfiguration>();
-        let fix_schema = generator.subschema_for::<Option<FixKind>>();
+        let mut fix_schema = generator.subschema_for::<Option<FixKind>>();
+        fix_schema.insert(
+            "description".to_string(),
+            "Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself."
+                .into(),
+        );
         let options_schema = generator.subschema_for::<T>();
 
         // Create an object schema with level, fix, and options properties
@@ -566,16 +583,15 @@ where
 pub enum AnalyzerSelector {
     Rule(RuleSelector),
     Domain(DomainSelector),
+    Plugin,
 }
 
 impl AnalyzerSelector {
-    pub fn match_rule<R>(&self) -> bool
-    where
-        R: Rule,
-    {
+    pub fn match_rule_name(&self, group_name: &str, rule_name: &str) -> bool {
         match self {
-            Self::Rule(rule) => rule.match_rule::<R>(),
-            Self::Domain(domain) => domain.match_rule::<R>(),
+            Self::Rule(rule) => rule.match_rule_name(group_name, rule_name),
+            Self::Domain(domain) => domain.match_rule_name(group_name, rule_name),
+            Self::Plugin => false,
         }
     }
 }
@@ -603,6 +619,7 @@ impl Display for AnalyzerSelector {
         match self {
             Self::Rule(group) => Display::fmt(group, f),
             Self::Domain(domain) => Display::fmt(domain, f),
+            Self::Plugin => f.write_str(PLUGIN_GROUP),
         }
     }
 }
@@ -611,6 +628,23 @@ impl FromStr for AnalyzerSelector {
     type Err = &'static str;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
+        // The reserved `plugin` group selects every analyzer plugin. Accept `plugin` and,
+        // for parity with the rule syntax, the `plugin/plugin` alias (each optionally with
+        // a `lint/` prefix). Plugins have no per-instance identity, so any other
+        // `plugin/<name>` is rejected.
+        let plugin_selector = s.strip_prefix("lint/").unwrap_or(s);
+        if plugin_selector == PLUGIN_GROUP || plugin_selector == "plugin/plugin" {
+            return Ok(Self::Plugin);
+        }
+        if plugin_selector
+            .strip_prefix(PLUGIN_GROUP)
+            .is_some_and(|rest| rest.starts_with('/'))
+        {
+            return Err(
+                "Per-plugin selection is not supported. Use `plugin` to target all plugins.",
+            );
+        }
+
         RuleSelector::from_str(s)
             .map(Self::Rule)
             .or(DomainSelector::from_str(s).map(Self::Domain))
@@ -623,6 +657,7 @@ impl serde::Serialize for AnalyzerSelector {
         match self {
             Self::Rule(rule) => rule.serialize(serializer),
             Self::Domain(domain) => domain.serialize(serializer),
+            Self::Plugin => serializer.serialize_str(PLUGIN_GROUP),
         }
     }
 }
@@ -674,6 +709,44 @@ impl Display for RuleSelector {
             Self::Group(group) => write!(f, "{group}",),
             Self::Rule(group, rule) => write!(f, "{group}/{rule}",),
         }
+    }
+}
+
+impl biome_console::fmt::Display for AnalyzerSelector {
+    fn fmt(&self, f: &mut biome_console::fmt::Formatter) -> std::io::Result<()> {
+        match self {
+            Self::Rule(rule) => f.write_markup(markup! {{rule}}),
+            Self::Domain(domain) => f.write_markup(markup! {{domain}}),
+            Self::Plugin => f.write_str("plugin/plugin"),
+        }
+    }
+}
+
+impl biome_console::fmt::Display for RuleSelector {
+    fn fmt(&self, f: &mut biome_console::fmt::Formatter) -> std::io::Result<()> {
+        match self {
+            Self::Group(group) => {
+                let link = format!("https://biomejs.dev/linter/#{}", group);
+                f.write_markup(markup! {
+                    <Hyperlink href={link}>{group}</Hyperlink>
+                })
+            }
+            Self::Rule(group, rule) => {
+                let rule = Case::Kebab.convert(rule);
+                f.write_markup(markup! {
+                    <Hyperlink href={format!("https://biomejs.dev/linter/rules/{}/", rule)}>{group}"/"{rule}</Hyperlink>
+                })
+            }
+        }
+    }
+}
+
+impl biome_console::fmt::Display for DomainSelector {
+    fn fmt(&self, f: &mut biome_console::fmt::Formatter) -> std::io::Result<()> {
+        let link = format!("https://biomejs.dev/linter/domains/#{}", self.0);
+        f.write_markup(markup! {
+            <Hyperlink href={link}>{Case::Upper.convert(self.0)}</Hyperlink>
+        })
     }
 }
 
@@ -735,7 +808,14 @@ impl RuleSelector {
     where
         R: Rule,
     {
-        RuleFilter::from(*self).match_rule::<R>()
+        self.match_rule_name(
+            <R::Group as biome_analyze::RuleGroup>::NAME,
+            R::METADATA.name,
+        )
+    }
+
+    fn match_rule_name(&self, group_name: &str, rule_name: &str) -> bool {
+        RuleFilter::from(*self).match_rule_name(group_name, rule_name)
     }
 }
 
@@ -940,12 +1020,14 @@ impl<'de> serde::Deserialize<'de> for DomainSelector {
 
 pub trait RuleGroupExt: Default + Merge + Debug + From<GroupPlainConfiguration> {
     /// Retrieves the recommended rules
-    fn is_recommended_true(&self) -> bool;
+    fn is_preset_recommended(&self) -> bool;
     fn is_recommended_unset(&self) -> bool;
     fn get_enabled_rules(&self) -> FxHashSet<RuleFilter<'static>>;
     fn get_disabled_rules(&self) -> FxHashSet<RuleFilter<'static>>;
     /// Checks if, given a rule name, matches one of the rules contained in this category
     fn has_rule(rule_name: &str) -> Option<&'static str>;
+    /// Returns the rule filters that belong to the given analyzer preset
+    fn preset_as_filters(preset: PresetConfig) -> &'static [RuleFilter<'static>];
     /// Select preset rules
     // Preset rules shouldn't populate disabled rules
     // because that will make specific rules cannot be enabled later.
@@ -956,7 +1038,7 @@ pub trait RuleGroupExt: Default + Merge + Debug + From<GroupPlainConfiguration> 
     fn all_rules_as_filters() -> &'static [RuleFilter<'static>];
     fn collect_preset_rules(
         &self,
-        parent_is_recommended: bool,
+        parent_preset: PresetConfig,
         enabled_rules: &mut FxHashSet<RuleFilter<'static>>,
     );
     fn get_rule_configuration(
@@ -1032,15 +1114,15 @@ where
 #[serde(rename_all = "camelCase")]
 pub enum GroupPlainConfiguration {
     #[default]
-    /// It disables all the rules of this group
+    /// Disables all rules in the group.
     Off,
-    /// It enables all the rules of this group, with their default severity
+    /// Enables all rules in the group using each rule's individual default severity.
     On,
-    /// It enables all the rules of this group, and set their severity to "info"
+    /// Enables all rules in the group with information severity.
     Info,
-    /// It enables all the rules of this group, and set their severity to "warn"
+    /// Enables all rules in the group with warning severity.
     Warn,
-    /// It enables all the rules of this group, and set their severity to "error+"
+    /// Enables all rules in the group with error severity.
     Error,
 }
 
@@ -1117,7 +1199,7 @@ where
 
     pub(crate) fn collect_preset_rules(
         &self,
-        parent_is_recommended: bool,
+        parent_preset: PresetConfig,
         enabled_rules: &mut FxHashSet<RuleFilter<'static>>,
     ) {
         match self {
@@ -1126,7 +1208,7 @@ where
                     enabled_rules.extend(G::non_domain_rules_as_filters());
                 }
             }
-            Self::Group(group) => group.collect_preset_rules(parent_is_recommended, enabled_rules),
+            Self::Group(group) => group.collect_preset_rules(parent_preset, enabled_rules),
         }
     }
 }
@@ -1167,12 +1249,12 @@ where
 }
 
 impl<G: Deserializable> Deserializable for SeverityOrGroup<G> {
-    fn deserialize(
-        ctx: &mut impl DeserializationContext,
-        value: &impl DeserializableValue,
+    fn deserialize<V: DeserializableValue>(
+        ctx: &mut dyn DeserializationContext<State = V::State>,
+        value: &V,
         name: &str,
     ) -> Option<Self> {
-        if value.visitable_type()? == DeserializableType::Str {
+        if value.visitable_type(ctx)? == DeserializableType::Str {
             Deserializable::deserialize(ctx, value, name).map(SeverityOrGroup::Plain)
         } else {
             Deserializable::deserialize(ctx, value, name).map(SeverityOrGroup::<G>::Group)
@@ -1253,6 +1335,34 @@ mod test {
         assert_eq!(
             RuleSelector::from_str("assist/source/useSortedKeys").unwrap(),
             RuleSelector::Rule("source", "useSortedKeys")
+        );
+    }
+
+    #[test]
+    fn parses_plugin_selector() {
+        use crate::analyzer::AnalyzerSelector;
+
+        for selector in [
+            "plugin",
+            "lint/plugin",
+            "plugin/plugin",
+            "lint/plugin/plugin",
+        ] {
+            assert_eq!(
+                AnalyzerSelector::from_str(selector).unwrap(),
+                AnalyzerSelector::Plugin,
+                "{selector} should parse as the plugin selector"
+            );
+        }
+    }
+
+    #[test]
+    fn rejects_per_plugin_selector() {
+        use crate::analyzer::AnalyzerSelector;
+
+        assert_eq!(
+            AnalyzerSelector::from_str("plugin/foo"),
+            Err("Per-plugin selection is not supported. Use `plugin` to target all plugins.")
         );
     }
 }

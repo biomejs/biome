@@ -1,0 +1,87 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/value/parity-function-adjacency-comments.scss
+---
+
+# Input
+
+```scss
+@use   "sass:list";
+@use   "sass:meta";
+
+$empty:   columns/**/(1fr, 2fr);
+$block:   columns/* value */(1fr, 2fr);
+$multiline:   columns/*
+   value
+*/(1fr, 2fr);
+$line:   columns// value
+(1fr, 2fr);
+$bare:   #{"columns"}/* value */(1fr, 2fr);
+$partial:   col#{"umns"}/*
+   value
+*/(1fr, 2fr);
+$terminated-hex:   column\73 /**/(1fr, 2fr);
+$literal-space:   columns\ /**/(1fr, 2fr);
+$interpolated-literal-space:   #{"columns"}\ /**/(1fr, 2fr);
+
+.comments{
+   counts:   list.length($empty) list.length($block) list.length($multiline) list.length($line);
+   interpolation:   list.length($bare) list.length($partial);
+   escaped:   list.length($terminated-hex);
+   literal-space:   meta.inspect($literal-space);
+   interpolated-literal-space:   meta.inspect($interpolated-literal-space);
+   escaped-call:   list.length(column\73 (1fr, 2fr));
+   escaped-group:   list.length(column\73   (1fr, 2fr));
+   direct:   columns/*
+      direct
+   */(1fr, 2fr);
+}
+
+/* biome-ignore format:   retain the authored boundary */
+.keep{value:columns /* keep */ (1fr,2fr)}
+
+```
+
+
+# Formatted
+
+```scss
+@use "sass:list";
+@use "sass:meta";
+
+$empty: columns /**/ (1fr, 2fr);
+$block: columns /* value */ (1fr, 2fr);
+$multiline: columns /*
+   value
+*/
+	(1fr, 2fr);
+$line: columns // value
+	(1fr, 2fr);
+$bare: #{"columns"} /* value */ (1fr, 2fr);
+$partial: col#{"umns"} /*
+   value
+*/
+	(1fr, 2fr);
+$terminated-hex: column\73  /**/ (1fr, 2fr);
+$literal-space: columns\  /**/ (1fr, 2fr);
+$interpolated-literal-space: #{"columns"}\  /**/ (1fr, 2fr);
+
+.comments {
+	counts: list.length($empty) list.length($block) list.length($multiline)
+		list.length($line);
+	interpolation: list.length($bare) list.length($partial);
+	escaped: list.length($terminated-hex);
+	literal-space: meta.inspect($literal-space);
+	interpolated-literal-space: meta.inspect($interpolated-literal-space);
+	escaped-call: list.length(column\73 (1fr, 2fr));
+	escaped-group: list.length(column\73  (1fr, 2fr));
+	direct: columns /*
+      direct
+   */
+		(1fr, 2fr);
+}
+
+/* biome-ignore format:   retain the authored boundary */
+.keep{value:columns /* keep */ (1fr,2fr)}
+
+```

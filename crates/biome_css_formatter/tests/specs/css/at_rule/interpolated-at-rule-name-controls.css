@@ -1,0 +1,5 @@
+@custom-theme   token;
+@unknown#token{color:red;}
+@unknown#{color:red;}
+@unknown   token{.item{color:red;}}
+@media(color){.item{color:red;}}

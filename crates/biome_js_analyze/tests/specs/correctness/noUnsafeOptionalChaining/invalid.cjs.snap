@@ -24,5 +24,9 @@ invalid.cjs:1:10 lint/correctness/noUnsafeOptionalChaining ━━━━━━━
       │ ^^^^^^^^^^^^^^^^^^
     2 │ 
   
+  i Optional chaining produces undefined when the value before ?. is null or undefined, and this operation does not accept undefined.
+  
+  i Provide a fallback value, for example (a?.b ?? {}), or check that the value is defined before using it.
+  
 
 ```

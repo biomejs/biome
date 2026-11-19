@@ -34,7 +34,10 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "useValidLang",
         language: "jsx",
-        sources: &[RuleSource::EslintJsxA11y("lang").same()],
+        sources: &[
+            RuleSource::EslintJsxA11y("lang").same(),
+            RuleSource::EslintAstro("jsx-a11y/lang").same(),
+        ],
         recommended: true,
         severity: Severity::Error,
     }
@@ -145,7 +148,10 @@ impl Rule for UseValidLang {
             markup! {
                 "Provide a valid value for the "<Emphasis>"lang"</Emphasis>" attribute."
             },
-        );
+        )
+        .note(markup! {
+            "Screen readers use the language to choose how to pronounce the text. An invalid value can make them read the content with the wrong voice."
+        });
         diagnostic = match state.invalid_kind {
             InvalidKind::Language => {
                 let languages = biome_aria_metadata::languages();
@@ -177,7 +183,9 @@ impl Rule for UseValidLang {
 
                 diagnostic.footer_list("Some of valid scripts:", scripts)
             }
-            InvalidKind::Value => diagnostic,
+            InvalidKind::Value => diagnostic.note(markup! {
+                "Use a valid language tag, for example "<Emphasis>"en"</Emphasis>" or "<Emphasis>"en-US"</Emphasis>"."
+            }),
         };
         Some(diagnostic)
     }

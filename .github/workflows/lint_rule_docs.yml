@@ -6,18 +6,25 @@ on:
       - main
       - next
     paths:
-      # Run only when we change the analyze crates
-      - "**/biome_*_analyze/**/*.rs"
-      - "**/biome_analyze/**/*.rs"
+      - '**/biome_*_analyze/**/*.rs'
+      - '**/biome_analyze/**/*.rs'
+      - 'crates/biome_configuration_macros/**'
+      - 'crates/biome_markdown_parser/**'
+      - 'crates/biome_markdown_syntax/**'
+      - 'crates/biome_ruledoc/**'
+      - 'xtask/rules_check/**'
   push:
     branches:
       - main
       - next
     paths:
-      # Run only when we change the analyze crates
-      - "**/biome_*_analyze/**/*.rs"
-      - "**/biome_analyze/**/*.rs"
-
+      - '**/biome_*_analyze/**/*.rs'
+      - '**/biome_analyze/**/*.rs'
+      - 'crates/biome_configuration_macros/**'
+      - 'crates/biome_markdown_parser/**'
+      - 'crates/biome_markdown_syntax/**'
+      - 'crates/biome_ruledoc/**'
+      - 'xtask/rules_check/**'
 
 # Cancel jobs when the PR is updated
 concurrency:
@@ -35,7 +42,7 @@ jobs:
     runs-on: depot-ubuntu-24.04-arm-16
     steps:
       - name: Checkout PR Branch
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Install toolchain
         uses: moonrepo/setup-rust@abb2d32350334249b178c401e5ec5836e0cd88d3 # v1.3.0
         with:

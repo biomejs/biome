@@ -109,7 +109,9 @@ fn location_report_to_json(location: &LocationReport) -> AnyJsonValue {
         json_member(
             AnyJsonMemberName::JsonMemberName(json_member_name(json_string_literal("path"))),
             token(T![:]),
-            AnyJsonValue::JsonStringValue(json_string_value(json_string_literal(&location.path))),
+            AnyJsonValue::JsonStringValue(json_string_value(json_string_literal(&json_escape(
+                &location.path,
+            )))),
         ),
         json_member(
             AnyJsonMemberName::JsonMemberName(json_member_name(json_string_literal("start"))),

@@ -1,6 +1,5 @@
 use crate::lexer::{CssLexContext, CssStringQuote};
 use crate::parser::CssParser;
-use crate::syntax::CssSyntaxFeatures;
 use crate::syntax::parse_error::expected_string;
 use crate::syntax::scss::expression::{
     parse_scss_inner_expression_in_string_until, parse_scss_interpolation_prefix,
@@ -12,7 +11,6 @@ use biome_css_syntax::CssSyntaxKind::{
 };
 use biome_css_syntax::{CssSyntaxKind, T, TextRange};
 use biome_parser::Parser;
-use biome_parser::SyntaxFeature;
 use biome_parser::diagnostic::ParseDiagnostic;
 use biome_parser::parse_lists::ParseNodeList;
 use biome_parser::parse_recovery::{ParseRecoveryTokenSet, RecoveryResult};
@@ -25,7 +23,7 @@ const SCSS_INTERPOLATION_END_TOKEN_SET: biome_parser::TokenSet<CssSyntaxKind> =
 
 #[inline]
 pub(crate) fn is_at_scss_interpolated_string(p: &mut CssParser) -> bool {
-    CssSyntaxFeatures::Scss.is_supported(p) && p.at(SCSS_STRING_QUOTE)
+    p.at(SCSS_STRING_QUOTE)
 }
 
 /// Parses an SCSS string with embedded interpolations such as
@@ -33,7 +31,10 @@ pub(crate) fn is_at_scss_interpolated_string(p: &mut CssParser) -> bool {
 ///
 /// Docs: https://sass-lang.com/documentation/interpolation/
 #[inline]
-pub(crate) fn parse_scss_interpolated_string(p: &mut CssParser) -> ParsedSyntax {
+pub(crate) fn parse_scss_interpolated_string(
+    p: &mut CssParser,
+    closing_context: CssLexContext,
+) -> ParsedSyntax {
     if !is_at_scss_interpolated_string(p) {
         return Absent;
     }
@@ -48,8 +49,8 @@ pub(crate) fn parse_scss_interpolated_string(p: &mut CssParser) -> ParsedSyntax 
     p.bump_with_context(SCSS_STRING_QUOTE, context);
     ScssInterpolatedStringPartList::new(quote).parse_list(p);
 
-    if p.at(SCSS_STRING_QUOTE) {
-        p.bump_with_context(SCSS_STRING_QUOTE, CssLexContext::Regular);
+    if !p.eat_with_context(SCSS_STRING_QUOTE, closing_context) {
+        p.error(expected_string(p, p.cur_range()));
     }
 
     Present(m.complete(p, SCSS_INTERPOLATED_STRING))
@@ -98,7 +99,8 @@ impl ParseNodeList for ScssInterpolatedStringPartList {
     ) -> RecoveryResult {
         parsed_element.or_recover_with_token_set(
             p,
-            &ParseRecoveryTokenSet::new(CSS_BOGUS, SCSS_INTERPOLATED_STRING_PART_LIST_RECOVERY_SET),
+            &ParseRecoveryTokenSet::new(CSS_BOGUS, SCSS_INTERPOLATED_STRING_PART_LIST_RECOVERY_SET)
+                .enable_recovery_on_line_break(),
             expected_scss_string_part,
         )
     }

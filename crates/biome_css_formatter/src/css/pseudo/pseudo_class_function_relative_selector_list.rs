@@ -1,5 +1,5 @@
-use crate::css::value::identifier::FormatCssIdentifierOptions;
 use crate::prelude::*;
+use crate::utils::case::pseudo_identifier_case;
 use biome_css_syntax::{
     CssPseudoClassFunctionRelativeSelectorList, CssPseudoClassFunctionRelativeSelectorListFields,
 };
@@ -22,14 +22,19 @@ impl FormatNodeRule<CssPseudoClassFunctionRelativeSelectorList>
             r_paren_token,
         } = node.as_fields();
 
+        let should_insert_space = f.options().delimiter_spacing().value();
+        let name = name?;
+
         write!(
             f,
             [
-                name.format()?
-                    .with_options(FormatCssIdentifierOptions::default().with_lowercasing()),
+                name.format().with_text_case(pseudo_identifier_case(&name)),
                 group(&format_args![
                     l_paren_token.format(),
-                    soft_block_indent(&relative_selectors.format()),
+                    soft_block_indent_with_maybe_space(
+                        &relative_selectors.format(),
+                        should_insert_space
+                    ),
                     r_paren_token.format()
                 ])
             ]

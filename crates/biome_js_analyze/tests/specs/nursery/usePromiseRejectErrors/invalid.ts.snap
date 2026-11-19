@@ -1,0 +1,143 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+Promise.reject("failure" as string);
+Promise.reject("failure" satisfies string);
+Promise.reject(<string>"failure");
+Promise.reject(undefined!);
+new Promise<void>((resolve, reject: (reason: unknown) => void) => reject(5));
+new Promise<number>(function(this: void, resolve, reject) {
+    reject(5);
+});
+
+```
+
+# Diagnostics
+```
+invalid.ts:2:1 lint/nursery/usePromiseRejectErrors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Promise rejection reason is not an Error object.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ Promise.reject("failure" as string);
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ Promise.reject("failure" satisfies string);
+    4 │ Promise.reject(<string>"failure");
+  
+  i Error objects capture a stack trace that helps locate the cause of a rejection.
+  
+  i Pass an Error object to preserve debugging information.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:3:1 lint/nursery/usePromiseRejectErrors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Promise rejection reason is not an Error object.
+  
+    1 │ /* should generate diagnostics */
+    2 │ Promise.reject("failure" as string);
+  > 3 │ Promise.reject("failure" satisfies string);
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ Promise.reject(<string>"failure");
+    5 │ Promise.reject(undefined!);
+  
+  i Error objects capture a stack trace that helps locate the cause of a rejection.
+  
+  i Pass an Error object to preserve debugging information.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:4:1 lint/nursery/usePromiseRejectErrors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Promise rejection reason is not an Error object.
+  
+    2 │ Promise.reject("failure" as string);
+    3 │ Promise.reject("failure" satisfies string);
+  > 4 │ Promise.reject(<string>"failure");
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ Promise.reject(undefined!);
+    6 │ new Promise<void>((resolve, reject: (reason: unknown) => void) => reject(5));
+  
+  i Error objects capture a stack trace that helps locate the cause of a rejection.
+  
+  i Pass an Error object to preserve debugging information.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:5:1 lint/nursery/usePromiseRejectErrors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Promise rejection reason is not an Error object.
+  
+    3 │ Promise.reject("failure" satisfies string);
+    4 │ Promise.reject(<string>"failure");
+  > 5 │ Promise.reject(undefined!);
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ new Promise<void>((resolve, reject: (reason: unknown) => void) => reject(5));
+    7 │ new Promise<number>(function(this: void, resolve, reject) {
+  
+  i Error objects capture a stack trace that helps locate the cause of a rejection.
+  
+  i Pass an Error object to preserve debugging information.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:6:67 lint/nursery/usePromiseRejectErrors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Promise rejection reason is not an Error object.
+  
+    4 │ Promise.reject(<string>"failure");
+    5 │ Promise.reject(undefined!);
+  > 6 │ new Promise<void>((resolve, reject: (reason: unknown) => void) => reject(5));
+      │                                                                   ^^^^^^^^^
+    7 │ new Promise<number>(function(this: void, resolve, reject) {
+    8 │     reject(5);
+  
+  i Error objects capture a stack trace that helps locate the cause of a rejection.
+  
+  i Pass an Error object to preserve debugging information.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:8:5 lint/nursery/usePromiseRejectErrors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Promise rejection reason is not an Error object.
+  
+     6 │ new Promise<void>((resolve, reject: (reason: unknown) => void) => reject(5));
+     7 │ new Promise<number>(function(this: void, resolve, reject) {
+   > 8 │     reject(5);
+       │     ^^^^^^^^^
+     9 │ });
+    10 │ 
+  
+  i Error objects capture a stack trace that helps locate the cause of a rejection.
+  
+  i Pass an Error object to preserve debugging information.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

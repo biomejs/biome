@@ -133,8 +133,7 @@ impl GitLabDiagnostics<'_> {
 
         let check_name = diagnostic
             .category()
-            .map(|category| category.name())
-            .unwrap_or_default();
+            .map_or_default(|category| category.name());
 
         calculate_hash(&Fingerprint {
             check_name,
@@ -157,13 +156,7 @@ impl Display for GitLabDiagnostics<'_> {
             .diagnostics
             .iter()
             .filter(|d| d.severity() >= payload.diagnostic_level)
-            .filter(|d| {
-                if *verbose {
-                    d.tags().is_verbose()
-                } else {
-                    true
-                }
-            })
+            .filter(|d| !d.tags().is_verbose() || *verbose)
             .filter_map(|biome_diagnostic| {
                 let absolute_path = match biome_diagnostic.location().resource {
                     Some(Resource::File(file)) => Some(file),
@@ -222,8 +215,7 @@ impl<'a> GitLabDiagnostic<'a> {
         };
         let check_name = diagnostic
             .category()
-            .map(|category| category.name())
-            .unwrap_or_default();
+            .map_or_default(|category| category.name());
 
         Some(GitLabDiagnostic {
             severity: match diagnostic.severity() {

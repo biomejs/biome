@@ -19,6 +19,9 @@ impl FormatRule<AnyCssContainerQueryInParens> for FormatAnyCssContainerQueryInPa
             AnyCssContainerQueryInParens::CssContainerStyleQueryInParens(node) => {
                 node.format().fmt(f)
             }
+            AnyCssContainerQueryInParens::ScssContainerInterpolatedQuery(node) => {
+                node.format().fmt(f)
+            }
         }
     }
 }

@@ -1,7 +1,8 @@
-use biome_formatter::Printed;
+use biome_formatter::rowan::Printed;
 use biome_js_formatter::context::JsFormatOptions;
 use biome_js_parser::JsParserOptions;
-use biome_js_syntax::{AnyJsRoot, JsFileSource};
+use biome_js_syntax::AnyJsRoot;
+use biome_languages::JsFileSource;
 use biome_rowan::AstNode;
 use biome_test_utils::BenchCase;
 use criterion::{BenchmarkId, Criterion, Throughput, black_box, criterion_group, criterion_main};
@@ -13,7 +14,7 @@ static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
 
 #[cfg(all(
     any(target_os = "macos", target_os = "linux"),
-    not(target_env = "musl"),
+    not(all(target_env = "musl", target_arch = "aarch64")),
 ))]
 #[global_allocator]
 static GLOBAL: tikv_jemallocator::Jemalloc = tikv_jemallocator::Jemalloc;
@@ -48,7 +49,7 @@ fn bench_js_formatter(criterion: &mut Criterion) {
                             let formatted = biome_js_formatter::format_node(
                                 JsFormatOptions::default(),
                                 root.syntax(),
-                                false,
+                                Vec::new(),
                             )
                             .unwrap();
                             let printed = formatted.print();

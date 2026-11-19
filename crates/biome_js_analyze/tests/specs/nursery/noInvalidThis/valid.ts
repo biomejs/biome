@@ -1,0 +1,31 @@
+/* should not generate diagnostics */
+interface SomeType {
+	prop: string;
+}
+function foo(this: SomeType) {
+	this.prop;
+}
+z(function (x, this: Context) {
+	console.log(x, this);
+});
+describe("foo", () => {
+	it("does something", function (this: Mocha.Context) {
+		this.timeout(100);
+	});
+});
+const Typed: Foo = function () {
+	this.a = 0;
+};
+function withDefault(Ctor: Foo = function () {
+	this.a = 0;
+}) {}
+class A {
+	private a = this;
+	constructor(private b = this.a) {}
+}
+obj.foo = function () {
+	this.a = 0;
+} as Foo;
+obj.bar = (function () {
+	this.a = 0;
+})!;

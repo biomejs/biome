@@ -26,17 +26,36 @@ impl FormatNodeRule<TsIndexSignatureTypeMember> for FormatTsIndexSignatureTypeMe
             write!(f, [readonly_token.format(), space()])?;
         }
 
-        write![
-            f,
-            [
-                group(&format_args![
-                    l_brack_token.format(),
-                    soft_block_indent(&format_args![parameter.format()]),
-                    r_brack_token.format(),
-                ]),
-                type_annotation.format(),
-                FormatTypeMemberSeparator::new(separator_token.as_ref()),
+        let delimiter_spacing = f.options().delimiter_spacing().value();
+
+        if delimiter_spacing {
+            write![
+                f,
+                [
+                    group(&format_args![
+                        l_brack_token.format(),
+                        space(),
+                        soft_block_indent(&format_args![parameter.format()]),
+                        space(),
+                        r_brack_token.format(),
+                    ]),
+                    type_annotation.format(),
+                    FormatTypeMemberSeparator::new(separator_token.as_ref()),
+                ]
             ]
-        ]
+        } else {
+            write![
+                f,
+                [
+                    group(&format_args![
+                        l_brack_token.format(),
+                        soft_block_indent(&format_args![parameter.format()]),
+                        r_brack_token.format(),
+                    ]),
+                    type_annotation.format(),
+                    FormatTypeMemberSeparator::new(separator_token.as_ref()),
+                ]
+            ]
+        }
     }
 }

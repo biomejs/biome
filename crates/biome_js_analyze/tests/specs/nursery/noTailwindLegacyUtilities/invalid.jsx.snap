@@ -1,0 +1,1403 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.jsx
+---
+# Input
+```jsx
+// should generate diagnostics
+<div className="bg-gradient-to-t bg-gradient-to-tr bg-gradient-to-r bg-gradient-to-br" />;
+<div className="bg-gradient-to-b bg-gradient-to-bl bg-gradient-to-l bg-gradient-to-tl" />;
+<div className="bg-left-top bg-right-top bg-left-bottom bg-right-bottom" />;
+<div className="object-left-top object-right-top object-left-bottom object-right-bottom" />;
+<div className="max-w-screen-sm md:max-w-screen-lg" />;
+<div className="overflow-ellipsis decoration-slice decoration-clone" />;
+<div className="flex-grow flex-grow-0 flex-shrink flex-shrink-0 flex-grow-[2]" />;
+<div className="order-none break-words" />;
+<div className="start-auto start-full -start-full start-px -start-px start-4 start-1/2" />;
+<div className="end-auto end-full -end-full end-px -end-px -end-4 end-[3px]" />;
+<div className={'hover:flex-grow!'} />;
+<div className={active ? "flex-grow" : "flex-shrink"} />;
+<div className={`p-4 ${extra} md:flex-grow`} />;
+<div className={clsx("flex-grow", { "order-none": active })} />;
+
+```
+
+# Diagnostics
+```
+invalid.jsx:2:17 lint/nursery/noTailwindLegacyUtilities  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Tailwind CSS class bg-gradient-to-t is a legacy name.
+  
+    1 │ // should generate diagnostics
+  > 2 │ <div className="bg-gradient-to-t bg-gradient-to-tr bg-gradient-to-r bg-gradient-to-br" />;
+      │                 ^^^^^^^^^^^^^^^^
+    3 │ <div className="bg-gradient-to-b bg-gradient-to-bl bg-gradient-to-l bg-gradient-to-tl" />;
+    4 │ <div className="bg-left-top bg-right-top bg-left-bottom bg-right-bottom" />;
+  
+  i Tailwind CSS renamed this utility and only keeps the old name for backward compatibility.
+  
+  i Use bg-linear-to-t instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use the current class name.
+  
+     1  1 │   // should generate diagnostics
+     2    │ - <div·className="bg-gradient-to-t·bg-gradient-to-tr·bg-gradient-to-r·bg-gradient-to-br"·/>;
+        2 │ + <div·className="bg-linear-to-t·bg-gradient-to-tr·bg-gradient-to-r·bg-gradient-to-br"·/>;
+     3  3 │   <div className="bg-gradient-to-b bg-gradient-to-bl bg-gradient-to-l bg-gradient-to-tl" />;
+     4  4 │   <div className="bg-left-top bg-right-top bg-left-bottom bg-right-bottom" />;
+  
+
+```
+
+```
+invalid.jsx:2:34 lint/nursery/noTailwindLegacyUtilities  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Tailwind CSS class bg-gradient-to-tr is a legacy name.
+  
+    1 │ // should generate diagnostics
+  > 2 │ <div className="bg-gradient-to-t bg-gradient-to-tr bg-gradient-to-r bg-gradient-to-br" />;
+      │                                  ^^^^^^^^^^^^^^^^^
+    3 │ <div className="bg-gradient-to-b bg-gradient-to-bl bg-gradient-to-l bg-gradient-to-tl" />;
+    4 │ <div className="bg-left-top bg-right-top bg-left-bottom bg-right-bottom" />;
+  
+  i Tailwind CSS renamed this utility and only keeps the old name for backward compatibility.
+  
+  i Use bg-linear-to-tr instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use the current class name.
+  
+     1  1 │   // should generate diagnostics
+     2    │ - <div·className="bg-gradient-to-t·bg-gradient-to-tr·bg-gradient-to-r·bg-gradient-to-br"·/>;
+        2 │ + <div·className="bg-gradient-to-t·bg-linear-to-tr·bg-gradient-to-r·bg-gradient-to-br"·/>;
+     3  3 │   <div className="bg-gradient-to-b bg-gradient-to-bl bg-gradient-to-l bg-gradient-to-tl" />;
+     4  4 │   <div className="bg-left-top bg-right-top bg-left-bottom bg-right-bottom" />;
+  
+
+```
+
+```
+invalid.jsx:2:52 lint/nursery/noTailwindLegacyUtilities  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Tailwind CSS class bg-gradient-to-r is a legacy name.
+  
+    1 │ // should generate diagnostics
+  > 2 │ <div className="bg-gradient-to-t bg-gradient-to-tr bg-gradient-to-r bg-gradient-to-br" />;
+      │                                                    ^^^^^^^^^^^^^^^^
+    3 │ <div className="bg-gradient-to-b bg-gradient-to-bl bg-gradient-to-l bg-gradient-to-tl" />;
+    4 │ <div className="bg-left-top bg-right-top bg-left-bottom bg-right-bottom" />;
+  
+  i Tailwind CSS renamed this utility and only keeps the old name for backward compatibility.
+  
+  i Use bg-linear-to-r instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use the current class name.
+  
+     1  1 │   // should generate diagnostics
+     2    │ - <div·className="bg-gradient-to-t·bg-gradient-to-tr·bg-gradient-to-r·bg-gradient-to-br"·/>;
+        2 │ + <div·className="bg-gradient-to-t·bg-gradient-to-tr·bg-linear-to-r·bg-gradient-to-br"·/>;
+     3  3 │   <div className="bg-gradient-to-b bg-gradient-to-bl bg-gradient-to-l bg-gradient-to-tl" />;
+     4  4 │   <div className="bg-left-top bg-right-top bg-left-bottom bg-right-bottom" />;
+  
+
+```
+
+```
+invalid.jsx:2:69 lint/nursery/noTailwindLegacyUtilities  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Tailwind CSS class bg-gradient-to-br is a legacy name.
+  
+    1 │ // should generate diagnostics
+  > 2 │ <div className="bg-gradient-to-t bg-gradient-to-tr bg-gradient-to-r bg-gradient-to-br" />;
+      │                                                                     ^^^^^^^^^^^^^^^^^
+    3 │ <div className="bg-gradient-to-b bg-gradient-to-bl bg-gradient-to-l bg-gradient-to-tl" />;
+    4 │ <div className="bg-left-top bg-right-top bg-left-bottom bg-right-bottom" />;
+  
+  i Tailwind CSS renamed this utility and only keeps the old name for backward compatibility.
+  
+  i Use bg-linear-to-br instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use the current class name.
+  
+     1  1 │   // should generate diagnostics
+     2    │ - <div·className="bg-gradient-to-t·bg-gradient-to-tr·bg-gradient-to-r·bg-gradient-to-br"·/>;
+        2 │ + <div·className="bg-gradient-to-t·bg-gradient-to-tr·bg-gradient-to-r·bg-linear-to-br"·/>;
+     3  3 │   <div className="bg-gradient-to-b bg-gradient-to-bl bg-gradient-to-l bg-gradient-to-tl" />;
+     4  4 │   <div className="bg-left-top bg-right-top bg-left-bottom bg-right-bottom" />;
+  
+
+```
+
+```
+invalid.jsx:3:17 lint/nursery/noTailwindLegacyUtilities  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Tailwind CSS class bg-gradient-to-b is a legacy name.
+  
+    1 │ // should generate diagnostics
+    2 │ <div className="bg-gradient-to-t bg-gradient-to-tr bg-gradient-to-r bg-gradient-to-br" />;
+  > 3 │ <div className="bg-gradient-to-b bg-gradient-to-bl bg-gradient-to-l bg-gradient-to-tl" />;
+      │                 ^^^^^^^^^^^^^^^^
+    4 │ <div className="bg-left-top bg-right-top bg-left-bottom bg-right-bottom" />;
+    5 │ <div className="object-left-top object-right-top object-left-bottom object-right-bottom" />;
+  
+  i Tailwind CSS renamed this utility and only keeps the old name for backward compatibility.
+  
+  i Use bg-linear-to-b instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use the current class name.
+  
+     1  1 │   // should generate diagnostics
+     2  2 │   <div className="bg-gradient-to-t bg-gradient-to-tr bg-gradient-to-r bg-gradient-to-br" />;
+     3    │ - <div·className="bg-gradient-to-b·bg-gradient-to-bl·bg-gradient-to-l·bg-gradient-to-tl"·/>;
+        3 │ + <div·className="bg-linear-to-b·bg-gradient-to-bl·bg-gradient-to-l·bg-gradient-to-tl"·/>;
+     4  4 │   <div className="bg-left-top bg-right-top bg-left-bottom bg-right-bottom" />;
+     5  5 │   <div className="object-left-top object-right-top object-left-bottom object-right-bottom" />;
+  
+
+```
+
+```
+invalid.jsx:3:34 lint/nursery/noTailwindLegacyUtilities  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Tailwind CSS class bg-gradient-to-bl is a legacy name.
+  
+    1 │ // should generate diagnostics
+    2 │ <div className="bg-gradient-to-t bg-gradient-to-tr bg-gradient-to-r bg-gradient-to-br" />;
+  > 3 │ <div className="bg-gradient-to-b bg-gradient-to-bl bg-gradient-to-l bg-gradient-to-tl" />;
+      │                                  ^^^^^^^^^^^^^^^^^
+    4 │ <div className="bg-left-top bg-right-top bg-left-bottom bg-right-bottom" />;
+    5 │ <div className="object-left-top object-right-top object-left-bottom object-right-bottom" />;
+  
+  i Tailwind CSS renamed this utility and only keeps the old name for backward compatibility.
+  
+  i Use bg-linear-to-bl instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use the current class name.
+  
+     1  1 │   // should generate diagnostics
+     2  2 │   <div className="bg-gradient-to-t bg-gradient-to-tr bg-gradient-to-r bg-gradient-to-br" />;
+     3    │ - <div·className="bg-gradient-to-b·bg-gradient-to-bl·bg-gradient-to-l·bg-gradient-to-tl"·/>;
+        3 │ + <div·className="bg-gradient-to-b·bg-linear-to-bl·bg-gradient-to-l·bg-gradient-to-tl"·/>;
+     4  4 │   <div className="bg-left-top bg-right-top bg-left-bottom bg-right-bottom" />;
+     5  5 │   <div className="object-left-top object-right-top object-left-bottom object-right-bottom" />;
+  
+
+```
+
+```
+invalid.jsx:3:52 lint/nursery/noTailwindLegacyUtilities  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Tailwind CSS class bg-gradient-to-l is a legacy name.
+  
+    1 │ // should generate diagnostics
+    2 │ <div className="bg-gradient-to-t bg-gradient-to-tr bg-gradient-to-r bg-gradient-to-br" />;
+  > 3 │ <div className="bg-gradient-to-b bg-gradient-to-bl bg-gradient-to-l bg-gradient-to-tl" />;
+      │                                                    ^^^^^^^^^^^^^^^^
+    4 │ <div className="bg-left-top bg-right-top bg-left-bottom bg-right-bottom" />;
+    5 │ <div className="object-left-top object-right-top object-left-bottom object-right-bottom" />;
+  
+  i Tailwind CSS renamed this utility and only keeps the old name for backward compatibility.
+  
+  i Use bg-linear-to-l instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use the current class name.
+  
+     1  1 │   // should generate diagnostics
+     2  2 │   <div className="bg-gradient-to-t bg-gradient-to-tr bg-gradient-to-r bg-gradient-to-br" />;
+     3    │ - <div·className="bg-gradient-to-b·bg-gradient-to-bl·bg-gradient-to-l·bg-gradient-to-tl"·/>;
+        3 │ + <div·className="bg-gradient-to-b·bg-gradient-to-bl·bg-linear-to-l·bg-gradient-to-tl"·/>;
+     4  4 │   <div className="bg-left-top bg-right-top bg-left-bottom bg-right-bottom" />;
+     5  5 │   <div className="object-left-top object-right-top object-left-bottom object-right-bottom" />;
+  
+
+```
+
+```
+invalid.jsx:3:69 lint/nursery/noTailwindLegacyUtilities  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Tailwind CSS class bg-gradient-to-tl is a legacy name.
+  
+    1 │ // should generate diagnostics
+    2 │ <div className="bg-gradient-to-t bg-gradient-to-tr bg-gradient-to-r bg-gradient-to-br" />;
+  > 3 │ <div className="bg-gradient-to-b bg-gradient-to-bl bg-gradient-to-l bg-gradient-to-tl" />;
+      │                                                                     ^^^^^^^^^^^^^^^^^
+    4 │ <div className="bg-left-top bg-right-top bg-left-bottom bg-right-bottom" />;
+    5 │ <div className="object-left-top object-right-top object-left-bottom object-right-bottom" />;
+  
+  i Tailwind CSS renamed this utility and only keeps the old name for backward compatibility.
+  
+  i Use bg-linear-to-tl instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use the current class name.
+  
+     1  1 │   // should generate diagnostics
+     2  2 │   <div className="bg-gradient-to-t bg-gradient-to-tr bg-gradient-to-r bg-gradient-to-br" />;
+     3    │ - <div·className="bg-gradient-to-b·bg-gradient-to-bl·bg-gradient-to-l·bg-gradient-to-tl"·/>;
+        3 │ + <div·className="bg-gradient-to-b·bg-gradient-to-bl·bg-gradient-to-l·bg-linear-to-tl"·/>;
+     4  4 │   <div className="bg-left-top bg-right-top bg-left-bottom bg-right-bottom" />;
+     5  5 │   <div className="object-left-top object-right-top object-left-bottom object-right-bottom" />;
+  
+
+```
+
+```
+invalid.jsx:4:17 lint/nursery/noTailwindLegacyUtilities  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Tailwind CSS class bg-left-top is a legacy name.
+  
+    2 │ <div className="bg-gradient-to-t bg-gradient-to-tr bg-gradient-to-r bg-gradient-to-br" />;
+    3 │ <div className="bg-gradient-to-b bg-gradient-to-bl bg-gradient-to-l bg-gradient-to-tl" />;
+  > 4 │ <div className="bg-left-top bg-right-top bg-left-bottom bg-right-bottom" />;
+      │                 ^^^^^^^^^^^
+    5 │ <div className="object-left-top object-right-top object-left-bottom object-right-bottom" />;
+    6 │ <div className="max-w-screen-sm md:max-w-screen-lg" />;
+  
+  i Tailwind CSS renamed this utility and only keeps the old name for backward compatibility.
+  
+  i Use bg-top-left instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use the current class name.
+  
+     2  2 │   <div className="bg-gradient-to-t bg-gradient-to-tr bg-gradient-to-r bg-gradient-to-br" />;
+     3  3 │   <div className="bg-gradient-to-b bg-gradient-to-bl bg-gradient-to-l bg-gradient-to-tl" />;
+     4    │ - <div·className="bg-left-top·bg-right-top·bg-left-bottom·bg-right-bottom"·/>;
+        4 │ + <div·className="bg-top-left·bg-right-top·bg-left-bottom·bg-right-bottom"·/>;
+     5  5 │   <div className="object-left-top object-right-top object-left-bottom object-right-bottom" />;
+     6  6 │   <div className="max-w-screen-sm md:max-w-screen-lg" />;
+  
+
+```
+
+```
+invalid.jsx:4:29 lint/nursery/noTailwindLegacyUtilities  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Tailwind CSS class bg-right-top is a legacy name.
+  
+    2 │ <div className="bg-gradient-to-t bg-gradient-to-tr bg-gradient-to-r bg-gradient-to-br" />;
+    3 │ <div className="bg-gradient-to-b bg-gradient-to-bl bg-gradient-to-l bg-gradient-to-tl" />;
+  > 4 │ <div className="bg-left-top bg-right-top bg-left-bottom bg-right-bottom" />;
+      │                             ^^^^^^^^^^^^
+    5 │ <div className="object-left-top object-right-top object-left-bottom object-right-bottom" />;
+    6 │ <div className="max-w-screen-sm md:max-w-screen-lg" />;
+  
+  i Tailwind CSS renamed this utility and only keeps the old name for backward compatibility.
+  
+  i Use bg-top-right instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use the current class name.
+  
+     2  2 │   <div className="bg-gradient-to-t bg-gradient-to-tr bg-gradient-to-r bg-gradient-to-br" />;
+     3  3 │   <div className="bg-gradient-to-b bg-gradient-to-bl bg-gradient-to-l bg-gradient-to-tl" />;
+     4    │ - <div·className="bg-left-top·bg-right-top·bg-left-bottom·bg-right-bottom"·/>;
+        4 │ + <div·className="bg-left-top·bg-top-right·bg-left-bottom·bg-right-bottom"·/>;
+     5  5 │   <div className="object-left-top object-right-top object-left-bottom object-right-bottom" />;
+     6  6 │   <div className="max-w-screen-sm md:max-w-screen-lg" />;
+  
+
+```
+
+```
+invalid.jsx:4:42 lint/nursery/noTailwindLegacyUtilities  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Tailwind CSS class bg-left-bottom is a legacy name.
+  
+    2 │ <div className="bg-gradient-to-t bg-gradient-to-tr bg-gradient-to-r bg-gradient-to-br" />;
+    3 │ <div className="bg-gradient-to-b bg-gradient-to-bl bg-gradient-to-l bg-gradient-to-tl" />;
+  > 4 │ <div className="bg-left-top bg-right-top bg-left-bottom bg-right-bottom" />;
+      │                                          ^^^^^^^^^^^^^^
+    5 │ <div className="object-left-top object-right-top object-left-bottom object-right-bottom" />;
+    6 │ <div className="max-w-screen-sm md:max-w-screen-lg" />;
+  
+  i Tailwind CSS renamed this utility and only keeps the old name for backward compatibility.
+  
+  i Use bg-bottom-left instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use the current class name.
+  
+     2  2 │   <div className="bg-gradient-to-t bg-gradient-to-tr bg-gradient-to-r bg-gradient-to-br" />;
+     3  3 │   <div className="bg-gradient-to-b bg-gradient-to-bl bg-gradient-to-l bg-gradient-to-tl" />;
+     4    │ - <div·className="bg-left-top·bg-right-top·bg-left-bottom·bg-right-bottom"·/>;
+        4 │ + <div·className="bg-left-top·bg-right-top·bg-bottom-left·bg-right-bottom"·/>;
+     5  5 │   <div className="object-left-top object-right-top object-left-bottom object-right-bottom" />;
+     6  6 │   <div className="max-w-screen-sm md:max-w-screen-lg" />;
+  
+
+```
+
+```
+invalid.jsx:4:57 lint/nursery/noTailwindLegacyUtilities  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Tailwind CSS class bg-right-bottom is a legacy name.
+  
+    2 │ <div className="bg-gradient-to-t bg-gradient-to-tr bg-gradient-to-r bg-gradient-to-br" />;
+    3 │ <div className="bg-gradient-to-b bg-gradient-to-bl bg-gradient-to-l bg-gradient-to-tl" />;
+  > 4 │ <div className="bg-left-top bg-right-top bg-left-bottom bg-right-bottom" />;
+      │                                                         ^^^^^^^^^^^^^^^
+    5 │ <div className="object-left-top object-right-top object-left-bottom object-right-bottom" />;
+    6 │ <div className="max-w-screen-sm md:max-w-screen-lg" />;
+  
+  i Tailwind CSS renamed this utility and only keeps the old name for backward compatibility.
+  
+  i Use bg-bottom-right instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use the current class name.
+  
+     2  2 │   <div className="bg-gradient-to-t bg-gradient-to-tr bg-gradient-to-r bg-gradient-to-br" />;
+     3  3 │   <div className="bg-gradient-to-b bg-gradient-to-bl bg-gradient-to-l bg-gradient-to-tl" />;
+     4    │ - <div·className="bg-left-top·bg-right-top·bg-left-bottom·bg-right-bottom"·/>;
+        4 │ + <div·className="bg-left-top·bg-right-top·bg-left-bottom·bg-bottom-right"·/>;
+     5  5 │   <div className="object-left-top object-right-top object-left-bottom object-right-bottom" />;
+     6  6 │   <div className="max-w-screen-sm md:max-w-screen-lg" />;
+  
+
+```
+
+```
+invalid.jsx:5:17 lint/nursery/noTailwindLegacyUtilities  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Tailwind CSS class object-left-top is a legacy name.
+  
+    3 │ <div className="bg-gradient-to-b bg-gradient-to-bl bg-gradient-to-l bg-gradient-to-tl" />;
+    4 │ <div className="bg-left-top bg-right-top bg-left-bottom bg-right-bottom" />;
+  > 5 │ <div className="object-left-top object-right-top object-left-bottom object-right-bottom" />;
+      │                 ^^^^^^^^^^^^^^^
+    6 │ <div className="max-w-screen-sm md:max-w-screen-lg" />;
+    7 │ <div className="overflow-ellipsis decoration-slice decoration-clone" />;
+  
+  i Tailwind CSS renamed this utility and only keeps the old name for backward compatibility.
+  
+  i Use object-top-left instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use the current class name.
+  
+     3  3 │   <div className="bg-gradient-to-b bg-gradient-to-bl bg-gradient-to-l bg-gradient-to-tl" />;
+     4  4 │   <div className="bg-left-top bg-right-top bg-left-bottom bg-right-bottom" />;
+     5    │ - <div·className="object-left-top·object-right-top·object-left-bottom·object-right-bottom"·/>;
+        5 │ + <div·className="object-top-left·object-right-top·object-left-bottom·object-right-bottom"·/>;
+     6  6 │   <div className="max-w-screen-sm md:max-w-screen-lg" />;
+     7  7 │   <div className="overflow-ellipsis decoration-slice decoration-clone" />;
+  
+
+```
+
+```
+invalid.jsx:5:33 lint/nursery/noTailwindLegacyUtilities  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Tailwind CSS class object-right-top is a legacy name.
+  
+    3 │ <div className="bg-gradient-to-b bg-gradient-to-bl bg-gradient-to-l bg-gradient-to-tl" />;
+    4 │ <div className="bg-left-top bg-right-top bg-left-bottom bg-right-bottom" />;
+  > 5 │ <div className="object-left-top object-right-top object-left-bottom object-right-bottom" />;
+      │                                 ^^^^^^^^^^^^^^^^
+    6 │ <div className="max-w-screen-sm md:max-w-screen-lg" />;
+    7 │ <div className="overflow-ellipsis decoration-slice decoration-clone" />;
+  
+  i Tailwind CSS renamed this utility and only keeps the old name for backward compatibility.
+  
+  i Use object-top-right instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use the current class name.
+  
+     3  3 │   <div className="bg-gradient-to-b bg-gradient-to-bl bg-gradient-to-l bg-gradient-to-tl" />;
+     4  4 │   <div className="bg-left-top bg-right-top bg-left-bottom bg-right-bottom" />;
+     5    │ - <div·className="object-left-top·object-right-top·object-left-bottom·object-right-bottom"·/>;
+        5 │ + <div·className="object-left-top·object-top-right·object-left-bottom·object-right-bottom"·/>;
+     6  6 │   <div className="max-w-screen-sm md:max-w-screen-lg" />;
+     7  7 │   <div className="overflow-ellipsis decoration-slice decoration-clone" />;
+  
+
+```
+
+```
+invalid.jsx:5:50 lint/nursery/noTailwindLegacyUtilities  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Tailwind CSS class object-left-bottom is a legacy name.
+  
+    3 │ <div className="bg-gradient-to-b bg-gradient-to-bl bg-gradient-to-l bg-gradient-to-tl" />;
+    4 │ <div className="bg-left-top bg-right-top bg-left-bottom bg-right-bottom" />;
+  > 5 │ <div className="object-left-top object-right-top object-left-bottom object-right-bottom" />;
+      │                                                  ^^^^^^^^^^^^^^^^^^
+    6 │ <div className="max-w-screen-sm md:max-w-screen-lg" />;
+    7 │ <div className="overflow-ellipsis decoration-slice decoration-clone" />;
+  
+  i Tailwind CSS renamed this utility and only keeps the old name for backward compatibility.
+  
+  i Use object-bottom-left instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use the current class name.
+  
+     3  3 │   <div className="bg-gradient-to-b bg-gradient-to-bl bg-gradient-to-l bg-gradient-to-tl" />;
+     4  4 │   <div className="bg-left-top bg-right-top bg-left-bottom bg-right-bottom" />;
+     5    │ - <div·className="object-left-top·object-right-top·object-left-bottom·object-right-bottom"·/>;
+        5 │ + <div·className="object-left-top·object-right-top·object-bottom-left·object-right-bottom"·/>;
+     6  6 │   <div className="max-w-screen-sm md:max-w-screen-lg" />;
+     7  7 │   <div className="overflow-ellipsis decoration-slice decoration-clone" />;
+  
+
+```
+
+```
+invalid.jsx:5:69 lint/nursery/noTailwindLegacyUtilities  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Tailwind CSS class object-right-bottom is a legacy name.
+  
+    3 │ <div className="bg-gradient-to-b bg-gradient-to-bl bg-gradient-to-l bg-gradient-to-tl" />;
+    4 │ <div className="bg-left-top bg-right-top bg-left-bottom bg-right-bottom" />;
+  > 5 │ <div className="object-left-top object-right-top object-left-bottom object-right-bottom" />;
+      │                                                                     ^^^^^^^^^^^^^^^^^^^
+    6 │ <div className="max-w-screen-sm md:max-w-screen-lg" />;
+    7 │ <div className="overflow-ellipsis decoration-slice decoration-clone" />;
+  
+  i Tailwind CSS renamed this utility and only keeps the old name for backward compatibility.
+  
+  i Use object-bottom-right instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use the current class name.
+  
+     3  3 │   <div className="bg-gradient-to-b bg-gradient-to-bl bg-gradient-to-l bg-gradient-to-tl" />;
+     4  4 │   <div className="bg-left-top bg-right-top bg-left-bottom bg-right-bottom" />;
+     5    │ - <div·className="object-left-top·object-right-top·object-left-bottom·object-right-bottom"·/>;
+        5 │ + <div·className="object-left-top·object-right-top·object-left-bottom·object-bottom-right"·/>;
+     6  6 │   <div className="max-w-screen-sm md:max-w-screen-lg" />;
+     7  7 │   <div className="overflow-ellipsis decoration-slice decoration-clone" />;
+  
+
+```
+
+```
+invalid.jsx:6:17 lint/nursery/noTailwindLegacyUtilities  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Tailwind CSS class max-w-screen-sm is a legacy name.
+  
+    4 │ <div className="bg-left-top bg-right-top bg-left-bottom bg-right-bottom" />;
+    5 │ <div className="object-left-top object-right-top object-left-bottom object-right-bottom" />;
+  > 6 │ <div className="max-w-screen-sm md:max-w-screen-lg" />;
+      │                 ^^^^^^^^^^^^^^^
+    7 │ <div className="overflow-ellipsis decoration-slice decoration-clone" />;
+    8 │ <div className="flex-grow flex-grow-0 flex-shrink flex-shrink-0 flex-grow-[2]" />;
+  
+  i Tailwind CSS renamed this utility and only keeps the old name for backward compatibility.
+  
+  i Use max-w-(--breakpoint-sm) instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use the current class name.
+  
+     4  4 │   <div className="bg-left-top bg-right-top bg-left-bottom bg-right-bottom" />;
+     5  5 │   <div className="object-left-top object-right-top object-left-bottom object-right-bottom" />;
+     6    │ - <div·className="max-w-screen-sm·md:max-w-screen-lg"·/>;
+        6 │ + <div·className="max-w-(--breakpoint-sm)·md:max-w-screen-lg"·/>;
+     7  7 │   <div className="overflow-ellipsis decoration-slice decoration-clone" />;
+     8  8 │   <div className="flex-grow flex-grow-0 flex-shrink flex-shrink-0 flex-grow-[2]" />;
+  
+
+```
+
+```
+invalid.jsx:6:36 lint/nursery/noTailwindLegacyUtilities  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Tailwind CSS class max-w-screen-lg is a legacy name.
+  
+    4 │ <div className="bg-left-top bg-right-top bg-left-bottom bg-right-bottom" />;
+    5 │ <div className="object-left-top object-right-top object-left-bottom object-right-bottom" />;
+  > 6 │ <div className="max-w-screen-sm md:max-w-screen-lg" />;
+      │                                    ^^^^^^^^^^^^^^^
+    7 │ <div className="overflow-ellipsis decoration-slice decoration-clone" />;
+    8 │ <div className="flex-grow flex-grow-0 flex-shrink flex-shrink-0 flex-grow-[2]" />;
+  
+  i Tailwind CSS renamed this utility and only keeps the old name for backward compatibility.
+  
+  i Use max-w-(--breakpoint-lg) instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use the current class name.
+  
+     4  4 │   <div className="bg-left-top bg-right-top bg-left-bottom bg-right-bottom" />;
+     5  5 │   <div className="object-left-top object-right-top object-left-bottom object-right-bottom" />;
+     6    │ - <div·className="max-w-screen-sm·md:max-w-screen-lg"·/>;
+        6 │ + <div·className="max-w-screen-sm·md:max-w-(--breakpoint-lg)"·/>;
+     7  7 │   <div className="overflow-ellipsis decoration-slice decoration-clone" />;
+     8  8 │   <div className="flex-grow flex-grow-0 flex-shrink flex-shrink-0 flex-grow-[2]" />;
+  
+
+```
+
+```
+invalid.jsx:7:17 lint/nursery/noTailwindLegacyUtilities  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Tailwind CSS class overflow-ellipsis is a legacy name.
+  
+    5 │ <div className="object-left-top object-right-top object-left-bottom object-right-bottom" />;
+    6 │ <div className="max-w-screen-sm md:max-w-screen-lg" />;
+  > 7 │ <div className="overflow-ellipsis decoration-slice decoration-clone" />;
+      │                 ^^^^^^^^^^^^^^^^^
+    8 │ <div className="flex-grow flex-grow-0 flex-shrink flex-shrink-0 flex-grow-[2]" />;
+    9 │ <div className="order-none break-words" />;
+  
+  i Tailwind CSS renamed this utility and only keeps the old name for backward compatibility.
+  
+  i Use text-ellipsis instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use the current class name.
+  
+     5  5 │   <div className="object-left-top object-right-top object-left-bottom object-right-bottom" />;
+     6  6 │   <div className="max-w-screen-sm md:max-w-screen-lg" />;
+     7    │ - <div·className="overflow-ellipsis·decoration-slice·decoration-clone"·/>;
+        7 │ + <div·className="text-ellipsis·decoration-slice·decoration-clone"·/>;
+     8  8 │   <div className="flex-grow flex-grow-0 flex-shrink flex-shrink-0 flex-grow-[2]" />;
+     9  9 │   <div className="order-none break-words" />;
+  
+
+```
+
+```
+invalid.jsx:7:35 lint/nursery/noTailwindLegacyUtilities  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Tailwind CSS class decoration-slice is a legacy name.
+  
+    5 │ <div className="object-left-top object-right-top object-left-bottom object-right-bottom" />;
+    6 │ <div className="max-w-screen-sm md:max-w-screen-lg" />;
+  > 7 │ <div className="overflow-ellipsis decoration-slice decoration-clone" />;
+      │                                   ^^^^^^^^^^^^^^^^
+    8 │ <div className="flex-grow flex-grow-0 flex-shrink flex-shrink-0 flex-grow-[2]" />;
+    9 │ <div className="order-none break-words" />;
+  
+  i Tailwind CSS renamed this utility and only keeps the old name for backward compatibility.
+  
+  i Use box-decoration-slice instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use the current class name.
+  
+    7 │ <div·className="overflow-ellipsis·box-decoration-slice·decoration-clone"·/>;
+      │                                   ++++                                      
+
+```
+
+```
+invalid.jsx:7:52 lint/nursery/noTailwindLegacyUtilities  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Tailwind CSS class decoration-clone is a legacy name.
+  
+    5 │ <div className="object-left-top object-right-top object-left-bottom object-right-bottom" />;
+    6 │ <div className="max-w-screen-sm md:max-w-screen-lg" />;
+  > 7 │ <div className="overflow-ellipsis decoration-slice decoration-clone" />;
+      │                                                    ^^^^^^^^^^^^^^^^
+    8 │ <div className="flex-grow flex-grow-0 flex-shrink flex-shrink-0 flex-grow-[2]" />;
+    9 │ <div className="order-none break-words" />;
+  
+  i Tailwind CSS renamed this utility and only keeps the old name for backward compatibility.
+  
+  i Use box-decoration-clone instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use the current class name.
+  
+    7 │ <div·className="overflow-ellipsis·decoration-slice·box-decoration-clone"·/>;
+      │                                                    ++++                     
+
+```
+
+```
+invalid.jsx:8:17 lint/nursery/noTailwindLegacyUtilities  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Tailwind CSS class flex-grow is a legacy name.
+  
+     6 │ <div className="max-w-screen-sm md:max-w-screen-lg" />;
+     7 │ <div className="overflow-ellipsis decoration-slice decoration-clone" />;
+   > 8 │ <div className="flex-grow flex-grow-0 flex-shrink flex-shrink-0 flex-grow-[2]" />;
+       │                 ^^^^^^^^^
+     9 │ <div className="order-none break-words" />;
+    10 │ <div className="start-auto start-full -start-full start-px -start-px start-4 start-1/2" />;
+  
+  i Tailwind CSS renamed this utility and only keeps the old name for backward compatibility.
+  
+  i Use grow instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use the current class name.
+  
+    8 │ <div·className="flex-grow·flex-grow-0·flex-shrink·flex-shrink-0·flex-grow-[2]"·/>;
+      │                 -----                                                             
+
+```
+
+```
+invalid.jsx:8:27 lint/nursery/noTailwindLegacyUtilities  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Tailwind CSS class flex-grow-0 is a legacy name.
+  
+     6 │ <div className="max-w-screen-sm md:max-w-screen-lg" />;
+     7 │ <div className="overflow-ellipsis decoration-slice decoration-clone" />;
+   > 8 │ <div className="flex-grow flex-grow-0 flex-shrink flex-shrink-0 flex-grow-[2]" />;
+       │                           ^^^^^^^^^^^
+     9 │ <div className="order-none break-words" />;
+    10 │ <div className="start-auto start-full -start-full start-px -start-px start-4 start-1/2" />;
+  
+  i Tailwind CSS renamed this utility and only keeps the old name for backward compatibility.
+  
+  i Use grow-0 instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use the current class name.
+  
+    8 │ <div·className="flex-grow·flex-grow-0·flex-shrink·flex-shrink-0·flex-grow-[2]"·/>;
+      │                           -----                                                   
+
+```
+
+```
+invalid.jsx:8:39 lint/nursery/noTailwindLegacyUtilities  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Tailwind CSS class flex-shrink is a legacy name.
+  
+     6 │ <div className="max-w-screen-sm md:max-w-screen-lg" />;
+     7 │ <div className="overflow-ellipsis decoration-slice decoration-clone" />;
+   > 8 │ <div className="flex-grow flex-grow-0 flex-shrink flex-shrink-0 flex-grow-[2]" />;
+       │                                       ^^^^^^^^^^^
+     9 │ <div className="order-none break-words" />;
+    10 │ <div className="start-auto start-full -start-full start-px -start-px start-4 start-1/2" />;
+  
+  i Tailwind CSS renamed this utility and only keeps the old name for backward compatibility.
+  
+  i Use shrink instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use the current class name.
+  
+    8 │ <div·className="flex-grow·flex-grow-0·flex-shrink·flex-shrink-0·flex-grow-[2]"·/>;
+      │                                       -----                                       
+
+```
+
+```
+invalid.jsx:8:51 lint/nursery/noTailwindLegacyUtilities  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Tailwind CSS class flex-shrink-0 is a legacy name.
+  
+     6 │ <div className="max-w-screen-sm md:max-w-screen-lg" />;
+     7 │ <div className="overflow-ellipsis decoration-slice decoration-clone" />;
+   > 8 │ <div className="flex-grow flex-grow-0 flex-shrink flex-shrink-0 flex-grow-[2]" />;
+       │                                                   ^^^^^^^^^^^^^
+     9 │ <div className="order-none break-words" />;
+    10 │ <div className="start-auto start-full -start-full start-px -start-px start-4 start-1/2" />;
+  
+  i Tailwind CSS renamed this utility and only keeps the old name for backward compatibility.
+  
+  i Use shrink-0 instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use the current class name.
+  
+    8 │ <div·className="flex-grow·flex-grow-0·flex-shrink·flex-shrink-0·flex-grow-[2]"·/>;
+      │                                                   -----                           
+
+```
+
+```
+invalid.jsx:8:65 lint/nursery/noTailwindLegacyUtilities  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Tailwind CSS class flex-grow-[2] is a legacy name.
+  
+     6 │ <div className="max-w-screen-sm md:max-w-screen-lg" />;
+     7 │ <div className="overflow-ellipsis decoration-slice decoration-clone" />;
+   > 8 │ <div className="flex-grow flex-grow-0 flex-shrink flex-shrink-0 flex-grow-[2]" />;
+       │                                                                 ^^^^^^^^^^^^^
+     9 │ <div className="order-none break-words" />;
+    10 │ <div className="start-auto start-full -start-full start-px -start-px start-4 start-1/2" />;
+  
+  i Tailwind CSS renamed this utility and only keeps the old name for backward compatibility.
+  
+  i Use grow-[2] instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use the current class name.
+  
+    8 │ <div·className="flex-grow·flex-grow-0·flex-shrink·flex-shrink-0·flex-grow-[2]"·/>;
+      │                                                                 -----             
+
+```
+
+```
+invalid.jsx:9:17 lint/nursery/noTailwindLegacyUtilities  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Tailwind CSS class order-none is a legacy name.
+  
+     7 │ <div className="overflow-ellipsis decoration-slice decoration-clone" />;
+     8 │ <div className="flex-grow flex-grow-0 flex-shrink flex-shrink-0 flex-grow-[2]" />;
+   > 9 │ <div className="order-none break-words" />;
+       │                 ^^^^^^^^^^
+    10 │ <div className="start-auto start-full -start-full start-px -start-px start-4 start-1/2" />;
+    11 │ <div className="end-auto end-full -end-full end-px -end-px -end-4 end-[3px]" />;
+  
+  i Tailwind CSS renamed this utility and only keeps the old name for backward compatibility.
+  
+  i Use order-0 instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use the current class name.
+  
+     7  7 │   <div className="overflow-ellipsis decoration-slice decoration-clone" />;
+     8  8 │   <div className="flex-grow flex-grow-0 flex-shrink flex-shrink-0 flex-grow-[2]" />;
+     9    │ - <div·className="order-none·break-words"·/>;
+        9 │ + <div·className="order-0·break-words"·/>;
+    10 10 │   <div className="start-auto start-full -start-full start-px -start-px start-4 start-1/2" />;
+    11 11 │   <div className="end-auto end-full -end-full end-px -end-px -end-4 end-[3px]" />;
+  
+
+```
+
+```
+invalid.jsx:9:28 lint/nursery/noTailwindLegacyUtilities  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Tailwind CSS class break-words is a legacy name.
+  
+     7 │ <div className="overflow-ellipsis decoration-slice decoration-clone" />;
+     8 │ <div className="flex-grow flex-grow-0 flex-shrink flex-shrink-0 flex-grow-[2]" />;
+   > 9 │ <div className="order-none break-words" />;
+       │                            ^^^^^^^^^^^
+    10 │ <div className="start-auto start-full -start-full start-px -start-px start-4 start-1/2" />;
+    11 │ <div className="end-auto end-full -end-full end-px -end-px -end-4 end-[3px]" />;
+  
+  i Tailwind CSS renamed this utility and only keeps the old name for backward compatibility.
+  
+  i Use wrap-break-word instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use the current class name.
+  
+     7  7 │   <div className="overflow-ellipsis decoration-slice decoration-clone" />;
+     8  8 │   <div className="flex-grow flex-grow-0 flex-shrink flex-shrink-0 flex-grow-[2]" />;
+     9    │ - <div·className="order-none·break-words"·/>;
+        9 │ + <div·className="order-none·wrap-break-word"·/>;
+    10 10 │   <div className="start-auto start-full -start-full start-px -start-px start-4 start-1/2" />;
+    11 11 │   <div className="end-auto end-full -end-full end-px -end-px -end-4 end-[3px]" />;
+  
+
+```
+
+```
+invalid.jsx:10:17 lint/nursery/noTailwindLegacyUtilities  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Tailwind CSS class start-auto is a legacy name.
+  
+     8 │ <div className="flex-grow flex-grow-0 flex-shrink flex-shrink-0 flex-grow-[2]" />;
+     9 │ <div className="order-none break-words" />;
+  > 10 │ <div className="start-auto start-full -start-full start-px -start-px start-4 start-1/2" />;
+       │                 ^^^^^^^^^^
+    11 │ <div className="end-auto end-full -end-full end-px -end-px -end-4 end-[3px]" />;
+    12 │ <div className={'hover:flex-grow!'} />;
+  
+  i Tailwind CSS renamed this utility and only keeps the old name for backward compatibility.
+  
+  i Use inset-s-auto instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use the current class name.
+  
+     8  8 │   <div className="flex-grow flex-grow-0 flex-shrink flex-shrink-0 flex-grow-[2]" />;
+     9  9 │   <div className="order-none break-words" />;
+    10    │ - <div·className="start-auto·start-full·-start-full·start-px·-start-px·start-4·start-1/2"·/>;
+       10 │ + <div·className="inset-s-auto·start-full·-start-full·start-px·-start-px·start-4·start-1/2"·/>;
+    11 11 │   <div className="end-auto end-full -end-full end-px -end-px -end-4 end-[3px]" />;
+    12 12 │   <div className={'hover:flex-grow!'} />;
+  
+
+```
+
+```
+invalid.jsx:10:28 lint/nursery/noTailwindLegacyUtilities  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Tailwind CSS class start-full is a legacy name.
+  
+     8 │ <div className="flex-grow flex-grow-0 flex-shrink flex-shrink-0 flex-grow-[2]" />;
+     9 │ <div className="order-none break-words" />;
+  > 10 │ <div className="start-auto start-full -start-full start-px -start-px start-4 start-1/2" />;
+       │                            ^^^^^^^^^^
+    11 │ <div className="end-auto end-full -end-full end-px -end-px -end-4 end-[3px]" />;
+    12 │ <div className={'hover:flex-grow!'} />;
+  
+  i Tailwind CSS renamed this utility and only keeps the old name for backward compatibility.
+  
+  i Use inset-s-full instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use the current class name.
+  
+     8  8 │   <div className="flex-grow flex-grow-0 flex-shrink flex-shrink-0 flex-grow-[2]" />;
+     9  9 │   <div className="order-none break-words" />;
+    10    │ - <div·className="start-auto·start-full·-start-full·start-px·-start-px·start-4·start-1/2"·/>;
+       10 │ + <div·className="start-auto·inset-s-full·-start-full·start-px·-start-px·start-4·start-1/2"·/>;
+    11 11 │   <div className="end-auto end-full -end-full end-px -end-px -end-4 end-[3px]" />;
+    12 12 │   <div className={'hover:flex-grow!'} />;
+  
+
+```
+
+```
+invalid.jsx:10:39 lint/nursery/noTailwindLegacyUtilities  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Tailwind CSS class -start-full is a legacy name.
+  
+     8 │ <div className="flex-grow flex-grow-0 flex-shrink flex-shrink-0 flex-grow-[2]" />;
+     9 │ <div className="order-none break-words" />;
+  > 10 │ <div className="start-auto start-full -start-full start-px -start-px start-4 start-1/2" />;
+       │                                       ^^^^^^^^^^^
+    11 │ <div className="end-auto end-full -end-full end-px -end-px -end-4 end-[3px]" />;
+    12 │ <div className={'hover:flex-grow!'} />;
+  
+  i Tailwind CSS renamed this utility and only keeps the old name for backward compatibility.
+  
+  i Use -inset-s-full instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use the current class name.
+  
+     8  8 │   <div className="flex-grow flex-grow-0 flex-shrink flex-shrink-0 flex-grow-[2]" />;
+     9  9 │   <div className="order-none break-words" />;
+    10    │ - <div·className="start-auto·start-full·-start-full·start-px·-start-px·start-4·start-1/2"·/>;
+       10 │ + <div·className="start-auto·start-full·-inset-s-full·start-px·-start-px·start-4·start-1/2"·/>;
+    11 11 │   <div className="end-auto end-full -end-full end-px -end-px -end-4 end-[3px]" />;
+    12 12 │   <div className={'hover:flex-grow!'} />;
+  
+
+```
+
+```
+invalid.jsx:10:51 lint/nursery/noTailwindLegacyUtilities  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Tailwind CSS class start-px is a legacy name.
+  
+     8 │ <div className="flex-grow flex-grow-0 flex-shrink flex-shrink-0 flex-grow-[2]" />;
+     9 │ <div className="order-none break-words" />;
+  > 10 │ <div className="start-auto start-full -start-full start-px -start-px start-4 start-1/2" />;
+       │                                                   ^^^^^^^^
+    11 │ <div className="end-auto end-full -end-full end-px -end-px -end-4 end-[3px]" />;
+    12 │ <div className={'hover:flex-grow!'} />;
+  
+  i Tailwind CSS renamed this utility and only keeps the old name for backward compatibility.
+  
+  i Use inset-s-px instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use the current class name.
+  
+     8  8 │   <div className="flex-grow flex-grow-0 flex-shrink flex-shrink-0 flex-grow-[2]" />;
+     9  9 │   <div className="order-none break-words" />;
+    10    │ - <div·className="start-auto·start-full·-start-full·start-px·-start-px·start-4·start-1/2"·/>;
+       10 │ + <div·className="start-auto·start-full·-start-full·inset-s-px·-start-px·start-4·start-1/2"·/>;
+    11 11 │   <div className="end-auto end-full -end-full end-px -end-px -end-4 end-[3px]" />;
+    12 12 │   <div className={'hover:flex-grow!'} />;
+  
+
+```
+
+```
+invalid.jsx:10:60 lint/nursery/noTailwindLegacyUtilities  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Tailwind CSS class -start-px is a legacy name.
+  
+     8 │ <div className="flex-grow flex-grow-0 flex-shrink flex-shrink-0 flex-grow-[2]" />;
+     9 │ <div className="order-none break-words" />;
+  > 10 │ <div className="start-auto start-full -start-full start-px -start-px start-4 start-1/2" />;
+       │                                                            ^^^^^^^^^
+    11 │ <div className="end-auto end-full -end-full end-px -end-px -end-4 end-[3px]" />;
+    12 │ <div className={'hover:flex-grow!'} />;
+  
+  i Tailwind CSS renamed this utility and only keeps the old name for backward compatibility.
+  
+  i Use -inset-s-px instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use the current class name.
+  
+     8  8 │   <div className="flex-grow flex-grow-0 flex-shrink flex-shrink-0 flex-grow-[2]" />;
+     9  9 │   <div className="order-none break-words" />;
+    10    │ - <div·className="start-auto·start-full·-start-full·start-px·-start-px·start-4·start-1/2"·/>;
+       10 │ + <div·className="start-auto·start-full·-start-full·start-px·-inset-s-px·start-4·start-1/2"·/>;
+    11 11 │   <div className="end-auto end-full -end-full end-px -end-px -end-4 end-[3px]" />;
+    12 12 │   <div className={'hover:flex-grow!'} />;
+  
+
+```
+
+```
+invalid.jsx:10:70 lint/nursery/noTailwindLegacyUtilities  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Tailwind CSS class start-4 is a legacy name.
+  
+     8 │ <div className="flex-grow flex-grow-0 flex-shrink flex-shrink-0 flex-grow-[2]" />;
+     9 │ <div className="order-none break-words" />;
+  > 10 │ <div className="start-auto start-full -start-full start-px -start-px start-4 start-1/2" />;
+       │                                                                      ^^^^^^^
+    11 │ <div className="end-auto end-full -end-full end-px -end-px -end-4 end-[3px]" />;
+    12 │ <div className={'hover:flex-grow!'} />;
+  
+  i Tailwind CSS renamed this utility and only keeps the old name for backward compatibility.
+  
+  i Use inset-s-4 instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use the current class name.
+  
+     8  8 │   <div className="flex-grow flex-grow-0 flex-shrink flex-shrink-0 flex-grow-[2]" />;
+     9  9 │   <div className="order-none break-words" />;
+    10    │ - <div·className="start-auto·start-full·-start-full·start-px·-start-px·start-4·start-1/2"·/>;
+       10 │ + <div·className="start-auto·start-full·-start-full·start-px·-start-px·inset-s-4·start-1/2"·/>;
+    11 11 │   <div className="end-auto end-full -end-full end-px -end-px -end-4 end-[3px]" />;
+    12 12 │   <div className={'hover:flex-grow!'} />;
+  
+
+```
+
+```
+invalid.jsx:10:78 lint/nursery/noTailwindLegacyUtilities  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Tailwind CSS class start-1/2 is a legacy name.
+  
+     8 │ <div className="flex-grow flex-grow-0 flex-shrink flex-shrink-0 flex-grow-[2]" />;
+     9 │ <div className="order-none break-words" />;
+  > 10 │ <div className="start-auto start-full -start-full start-px -start-px start-4 start-1/2" />;
+       │                                                                              ^^^^^^^^^
+    11 │ <div className="end-auto end-full -end-full end-px -end-px -end-4 end-[3px]" />;
+    12 │ <div className={'hover:flex-grow!'} />;
+  
+  i Tailwind CSS renamed this utility and only keeps the old name for backward compatibility.
+  
+  i Use inset-s-1/2 instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use the current class name.
+  
+     8  8 │   <div className="flex-grow flex-grow-0 flex-shrink flex-shrink-0 flex-grow-[2]" />;
+     9  9 │   <div className="order-none break-words" />;
+    10    │ - <div·className="start-auto·start-full·-start-full·start-px·-start-px·start-4·start-1/2"·/>;
+       10 │ + <div·className="start-auto·start-full·-start-full·start-px·-start-px·start-4·inset-s-1/2"·/>;
+    11 11 │   <div className="end-auto end-full -end-full end-px -end-px -end-4 end-[3px]" />;
+    12 12 │   <div className={'hover:flex-grow!'} />;
+  
+
+```
+
+```
+invalid.jsx:11:17 lint/nursery/noTailwindLegacyUtilities  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Tailwind CSS class end-auto is a legacy name.
+  
+     9 │ <div className="order-none break-words" />;
+    10 │ <div className="start-auto start-full -start-full start-px -start-px start-4 start-1/2" />;
+  > 11 │ <div className="end-auto end-full -end-full end-px -end-px -end-4 end-[3px]" />;
+       │                 ^^^^^^^^
+    12 │ <div className={'hover:flex-grow!'} />;
+    13 │ <div className={active ? "flex-grow" : "flex-shrink"} />;
+  
+  i Tailwind CSS renamed this utility and only keeps the old name for backward compatibility.
+  
+  i Use inset-e-auto instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use the current class name.
+  
+     9  9 │   <div className="order-none break-words" />;
+    10 10 │   <div className="start-auto start-full -start-full start-px -start-px start-4 start-1/2" />;
+    11    │ - <div·className="end-auto·end-full·-end-full·end-px·-end-px·-end-4·end-[3px]"·/>;
+       11 │ + <div·className="inset-e-auto·end-full·-end-full·end-px·-end-px·-end-4·end-[3px]"·/>;
+    12 12 │   <div className={'hover:flex-grow!'} />;
+    13 13 │   <div className={active ? "flex-grow" : "flex-shrink"} />;
+  
+
+```
+
+```
+invalid.jsx:11:26 lint/nursery/noTailwindLegacyUtilities  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Tailwind CSS class end-full is a legacy name.
+  
+     9 │ <div className="order-none break-words" />;
+    10 │ <div className="start-auto start-full -start-full start-px -start-px start-4 start-1/2" />;
+  > 11 │ <div className="end-auto end-full -end-full end-px -end-px -end-4 end-[3px]" />;
+       │                          ^^^^^^^^
+    12 │ <div className={'hover:flex-grow!'} />;
+    13 │ <div className={active ? "flex-grow" : "flex-shrink"} />;
+  
+  i Tailwind CSS renamed this utility and only keeps the old name for backward compatibility.
+  
+  i Use inset-e-full instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use the current class name.
+  
+     9  9 │   <div className="order-none break-words" />;
+    10 10 │   <div className="start-auto start-full -start-full start-px -start-px start-4 start-1/2" />;
+    11    │ - <div·className="end-auto·end-full·-end-full·end-px·-end-px·-end-4·end-[3px]"·/>;
+       11 │ + <div·className="end-auto·inset-e-full·-end-full·end-px·-end-px·-end-4·end-[3px]"·/>;
+    12 12 │   <div className={'hover:flex-grow!'} />;
+    13 13 │   <div className={active ? "flex-grow" : "flex-shrink"} />;
+  
+
+```
+
+```
+invalid.jsx:11:35 lint/nursery/noTailwindLegacyUtilities  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Tailwind CSS class -end-full is a legacy name.
+  
+     9 │ <div className="order-none break-words" />;
+    10 │ <div className="start-auto start-full -start-full start-px -start-px start-4 start-1/2" />;
+  > 11 │ <div className="end-auto end-full -end-full end-px -end-px -end-4 end-[3px]" />;
+       │                                   ^^^^^^^^^
+    12 │ <div className={'hover:flex-grow!'} />;
+    13 │ <div className={active ? "flex-grow" : "flex-shrink"} />;
+  
+  i Tailwind CSS renamed this utility and only keeps the old name for backward compatibility.
+  
+  i Use -inset-e-full instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use the current class name.
+  
+     9  9 │   <div className="order-none break-words" />;
+    10 10 │   <div className="start-auto start-full -start-full start-px -start-px start-4 start-1/2" />;
+    11    │ - <div·className="end-auto·end-full·-end-full·end-px·-end-px·-end-4·end-[3px]"·/>;
+       11 │ + <div·className="end-auto·end-full·-inset-e-full·end-px·-end-px·-end-4·end-[3px]"·/>;
+    12 12 │   <div className={'hover:flex-grow!'} />;
+    13 13 │   <div className={active ? "flex-grow" : "flex-shrink"} />;
+  
+
+```
+
+```
+invalid.jsx:11:45 lint/nursery/noTailwindLegacyUtilities  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Tailwind CSS class end-px is a legacy name.
+  
+     9 │ <div className="order-none break-words" />;
+    10 │ <div className="start-auto start-full -start-full start-px -start-px start-4 start-1/2" />;
+  > 11 │ <div className="end-auto end-full -end-full end-px -end-px -end-4 end-[3px]" />;
+       │                                             ^^^^^^
+    12 │ <div className={'hover:flex-grow!'} />;
+    13 │ <div className={active ? "flex-grow" : "flex-shrink"} />;
+  
+  i Tailwind CSS renamed this utility and only keeps the old name for backward compatibility.
+  
+  i Use inset-e-px instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use the current class name.
+  
+     9  9 │   <div className="order-none break-words" />;
+    10 10 │   <div className="start-auto start-full -start-full start-px -start-px start-4 start-1/2" />;
+    11    │ - <div·className="end-auto·end-full·-end-full·end-px·-end-px·-end-4·end-[3px]"·/>;
+       11 │ + <div·className="end-auto·end-full·-end-full·inset-e-px·-end-px·-end-4·end-[3px]"·/>;
+    12 12 │   <div className={'hover:flex-grow!'} />;
+    13 13 │   <div className={active ? "flex-grow" : "flex-shrink"} />;
+  
+
+```
+
+```
+invalid.jsx:11:52 lint/nursery/noTailwindLegacyUtilities  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Tailwind CSS class -end-px is a legacy name.
+  
+     9 │ <div className="order-none break-words" />;
+    10 │ <div className="start-auto start-full -start-full start-px -start-px start-4 start-1/2" />;
+  > 11 │ <div className="end-auto end-full -end-full end-px -end-px -end-4 end-[3px]" />;
+       │                                                    ^^^^^^^
+    12 │ <div className={'hover:flex-grow!'} />;
+    13 │ <div className={active ? "flex-grow" : "flex-shrink"} />;
+  
+  i Tailwind CSS renamed this utility and only keeps the old name for backward compatibility.
+  
+  i Use -inset-e-px instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use the current class name.
+  
+     9  9 │   <div className="order-none break-words" />;
+    10 10 │   <div className="start-auto start-full -start-full start-px -start-px start-4 start-1/2" />;
+    11    │ - <div·className="end-auto·end-full·-end-full·end-px·-end-px·-end-4·end-[3px]"·/>;
+       11 │ + <div·className="end-auto·end-full·-end-full·end-px·-inset-e-px·-end-4·end-[3px]"·/>;
+    12 12 │   <div className={'hover:flex-grow!'} />;
+    13 13 │   <div className={active ? "flex-grow" : "flex-shrink"} />;
+  
+
+```
+
+```
+invalid.jsx:11:60 lint/nursery/noTailwindLegacyUtilities  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Tailwind CSS class -end-4 is a legacy name.
+  
+     9 │ <div className="order-none break-words" />;
+    10 │ <div className="start-auto start-full -start-full start-px -start-px start-4 start-1/2" />;
+  > 11 │ <div className="end-auto end-full -end-full end-px -end-px -end-4 end-[3px]" />;
+       │                                                            ^^^^^^
+    12 │ <div className={'hover:flex-grow!'} />;
+    13 │ <div className={active ? "flex-grow" : "flex-shrink"} />;
+  
+  i Tailwind CSS renamed this utility and only keeps the old name for backward compatibility.
+  
+  i Use -inset-e-4 instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use the current class name.
+  
+     9  9 │   <div className="order-none break-words" />;
+    10 10 │   <div className="start-auto start-full -start-full start-px -start-px start-4 start-1/2" />;
+    11    │ - <div·className="end-auto·end-full·-end-full·end-px·-end-px·-end-4·end-[3px]"·/>;
+       11 │ + <div·className="end-auto·end-full·-end-full·end-px·-end-px·-inset-e-4·end-[3px]"·/>;
+    12 12 │   <div className={'hover:flex-grow!'} />;
+    13 13 │   <div className={active ? "flex-grow" : "flex-shrink"} />;
+  
+
+```
+
+```
+invalid.jsx:11:67 lint/nursery/noTailwindLegacyUtilities  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Tailwind CSS class end-[3px] is a legacy name.
+  
+     9 │ <div className="order-none break-words" />;
+    10 │ <div className="start-auto start-full -start-full start-px -start-px start-4 start-1/2" />;
+  > 11 │ <div className="end-auto end-full -end-full end-px -end-px -end-4 end-[3px]" />;
+       │                                                                   ^^^^^^^^^
+    12 │ <div className={'hover:flex-grow!'} />;
+    13 │ <div className={active ? "flex-grow" : "flex-shrink"} />;
+  
+  i Tailwind CSS renamed this utility and only keeps the old name for backward compatibility.
+  
+  i Use inset-e-[3px] instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use the current class name.
+  
+     9  9 │   <div className="order-none break-words" />;
+    10 10 │   <div className="start-auto start-full -start-full start-px -start-px start-4 start-1/2" />;
+    11    │ - <div·className="end-auto·end-full·-end-full·end-px·-end-px·-end-4·end-[3px]"·/>;
+       11 │ + <div·className="end-auto·end-full·-end-full·end-px·-end-px·-end-4·inset-e-[3px]"·/>;
+    12 12 │   <div className={'hover:flex-grow!'} />;
+    13 13 │   <div className={active ? "flex-grow" : "flex-shrink"} />;
+  
+
+```
+
+```
+invalid.jsx:12:24 lint/nursery/noTailwindLegacyUtilities  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Tailwind CSS class flex-grow is a legacy name.
+  
+    10 │ <div className="start-auto start-full -start-full start-px -start-px start-4 start-1/2" />;
+    11 │ <div className="end-auto end-full -end-full end-px -end-px -end-4 end-[3px]" />;
+  > 12 │ <div className={'hover:flex-grow!'} />;
+       │                        ^^^^^^^^^
+    13 │ <div className={active ? "flex-grow" : "flex-shrink"} />;
+    14 │ <div className={`p-4 ${extra} md:flex-grow`} />;
+  
+  i Tailwind CSS renamed this utility and only keeps the old name for backward compatibility.
+  
+  i Use grow instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use the current class name.
+  
+    10 10 │   <div className="start-auto start-full -start-full start-px -start-px start-4 start-1/2" />;
+    11 11 │   <div className="end-auto end-full -end-full end-px -end-px -end-4 end-[3px]" />;
+    12    │ - <div·className={'hover:flex-grow!'}·/>;
+       12 │ + <div·className={'hover:grow!'}·/>;
+    13 13 │   <div className={active ? "flex-grow" : "flex-shrink"} />;
+    14 14 │   <div className={`p-4 ${extra} md:flex-grow`} />;
+  
+
+```
+
+```
+invalid.jsx:13:27 lint/nursery/noTailwindLegacyUtilities  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Tailwind CSS class flex-grow is a legacy name.
+  
+    11 │ <div className="end-auto end-full -end-full end-px -end-px -end-4 end-[3px]" />;
+    12 │ <div className={'hover:flex-grow!'} />;
+  > 13 │ <div className={active ? "flex-grow" : "flex-shrink"} />;
+       │                           ^^^^^^^^^
+    14 │ <div className={`p-4 ${extra} md:flex-grow`} />;
+    15 │ <div className={clsx("flex-grow", { "order-none": active })} />;
+  
+  i Tailwind CSS renamed this utility and only keeps the old name for backward compatibility.
+  
+  i Use grow instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use the current class name.
+  
+    13 │ <div·className={active·?·"flex-grow"·:·"flex-shrink"}·/>;
+       │                           -----                          
+
+```
+
+```
+invalid.jsx:13:41 lint/nursery/noTailwindLegacyUtilities  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Tailwind CSS class flex-shrink is a legacy name.
+  
+    11 │ <div className="end-auto end-full -end-full end-px -end-px -end-4 end-[3px]" />;
+    12 │ <div className={'hover:flex-grow!'} />;
+  > 13 │ <div className={active ? "flex-grow" : "flex-shrink"} />;
+       │                                         ^^^^^^^^^^^
+    14 │ <div className={`p-4 ${extra} md:flex-grow`} />;
+    15 │ <div className={clsx("flex-grow", { "order-none": active })} />;
+  
+  i Tailwind CSS renamed this utility and only keeps the old name for backward compatibility.
+  
+  i Use shrink instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use the current class name.
+  
+    13 │ <div·className={active·?·"flex-grow"·:·"flex-shrink"}·/>;
+       │                                         -----            
+
+```
+
+```
+invalid.jsx:14:34 lint/nursery/noTailwindLegacyUtilities  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Tailwind CSS class flex-grow is a legacy name.
+  
+    12 │ <div className={'hover:flex-grow!'} />;
+    13 │ <div className={active ? "flex-grow" : "flex-shrink"} />;
+  > 14 │ <div className={`p-4 ${extra} md:flex-grow`} />;
+       │                                  ^^^^^^^^^
+    15 │ <div className={clsx("flex-grow", { "order-none": active })} />;
+    16 │ 
+  
+  i Tailwind CSS renamed this utility and only keeps the old name for backward compatibility.
+  
+  i Use grow instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use the current class name.
+  
+    12 12 │   <div className={'hover:flex-grow!'} />;
+    13 13 │   <div className={active ? "flex-grow" : "flex-shrink"} />;
+    14    │ - <div·className={`p-4·${extra}·md:flex-grow`}·/>;
+       14 │ + <div·className={`p-4·${extra}·md:grow`}·/>;
+    15 15 │   <div className={clsx("flex-grow", { "order-none": active })} />;
+    16 16 │   
+  
+
+```
+
+```
+invalid.jsx:15:23 lint/nursery/noTailwindLegacyUtilities  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Tailwind CSS class flex-grow is a legacy name.
+  
+    13 │ <div className={active ? "flex-grow" : "flex-shrink"} />;
+    14 │ <div className={`p-4 ${extra} md:flex-grow`} />;
+  > 15 │ <div className={clsx("flex-grow", { "order-none": active })} />;
+       │                       ^^^^^^^^^
+    16 │ 
+  
+  i Tailwind CSS renamed this utility and only keeps the old name for backward compatibility.
+  
+  i Use grow instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use the current class name.
+  
+    15 │ <div·className={clsx("flex-grow",·{·"order-none":·active·})}·/>;
+       │                       -----                                     
+
+```
+
+```
+invalid.jsx:15:38 lint/nursery/noTailwindLegacyUtilities  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Tailwind CSS class order-none is a legacy name.
+  
+    13 │ <div className={active ? "flex-grow" : "flex-shrink"} />;
+    14 │ <div className={`p-4 ${extra} md:flex-grow`} />;
+  > 15 │ <div className={clsx("flex-grow", { "order-none": active })} />;
+       │                                      ^^^^^^^^^^
+    16 │ 
+  
+  i Tailwind CSS renamed this utility and only keeps the old name for backward compatibility.
+  
+  i Use order-0 instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use the current class name.
+  
+    13 13 │   <div className={active ? "flex-grow" : "flex-shrink"} />;
+    14 14 │   <div className={`p-4 ${extra} md:flex-grow`} />;
+    15    │ - <div·className={clsx("flex-grow",·{·"order-none":·active·})}·/>;
+       15 │ + <div·className={clsx("flex-grow",·{·"order-0":·active·})}·/>;
+    16 16 │   
+  
+
+```

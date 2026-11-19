@@ -12,7 +12,11 @@ use biome_rowan::{AstNode, AstNodeList, BatchMutationExt};
 use biome_rule_options::use_valid_aria_props::UseValidAriaPropsOptions;
 
 declare_lint_rule! {
-    /// Ensures that ARIA properties `aria-*` are all valid.
+    /// Disallow unknown `aria-*` attributes.
+    ///
+    /// ARIA (Accessible Rich Internet Applications) attributes describe an element to assistive
+    /// technologies. Browsers ignore misspelled or unknown ARIA attributes, so users may not
+    /// receive the element's intended name, state, or other accessibility information.
     ///
     /// ## Examples
     ///
@@ -26,13 +30,22 @@ declare_lint_rule! {
     /// <div aria-lorem="foobar" />;
     /// ```
     ///
+    /// ### Valid
+    ///
+    /// ```jsx
+    /// <input aria-label="Search" />
+    /// ```
+    ///
     /// ## Accessibility guidelines
     /// - [WCAG 4.1.2](https://www.w3.org/WAI/WCAG21/Understanding/name-role-value)
     pub UseValidAriaProps {
         version: "1.0.0",
         name: "useValidAriaProps",
         language: "jsx",
-        sources: &[RuleSource::EslintJsxA11y("aria-props").same()],
+        sources: &[
+            RuleSource::EslintJsxA11y("aria-props").same(),
+            RuleSource::EslintAstro("jsx-a11y/aria-props").same(),
+        ],
         recommended: true,
         severity: Severity::Error,
         fix_kind: FixKind::Unsafe,
@@ -87,7 +100,9 @@ impl Rule for UseValidAriaProps {
             markup! {
                     <Emphasis>{attribute_name.text_trimmed()}</Emphasis>" is not a valid ARIA attribute."
                 },
-        ))
+        ).note(markup! {
+            "Assistive technologies ignore ARIA attributes that do not exist, so the attribute has no effect. It is often a typo."
+        }))
     }
 
     fn action(ctx: &RuleContext<Self>, attribute: &Self::State) -> Option<JsRuleAction> {

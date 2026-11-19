@@ -1,9 +1,13 @@
 use biome_fs::{BiomePath, FileSystem, MemoryFileSystem};
 use biome_js_parser::JsParserOptions;
 use biome_js_semantic::{SemanticModelOptions, semantic_model};
-use biome_js_syntax::{AnyJsRoot, JsFileSource};
-use biome_module_graph::ModuleGraph;
-use biome_project_layout::ProjectLayout;
+use biome_js_syntax::AnyJsRoot;
+use biome_languages::JsFileSource;
+use biome_module_graph::{
+    ModuleDb, ModuleInfo, ModuleInfoKind, resolve_js_module, traverse_import_tree_for_classes,
+};
+use biome_service::db::WorkspaceDb;
+use camino::Utf8PathBuf;
 use divan::Bencher;
 use std::sync::Arc;
 
@@ -13,7 +17,7 @@ static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
 
 #[cfg(all(
     any(target_os = "macos", target_os = "linux"),
-    not(target_env = "musl"),
+    not(all(target_env = "musl", target_arch = "aarch64")),
 ))]
 #[global_allocator]
 static GLOBAL: tikv_jemallocator::Jemalloc = tikv_jemallocator::Jemalloc;
@@ -71,15 +75,73 @@ fn bench_index_d_ts(bencher: Bencher, name: &str) {
             (fs, path, root, semantic_model)
         })
         .bench_local_values(|(fs, path, root, semantic_model)| {
-            let module_graph = ModuleGraph::default();
-            module_graph.update_graph_for_js_paths(
-                &fs,
-                &ProjectLayout::default(),
-                &[(&path, root, semantic_model)],
-                true,
-            );
-            divan::black_box(&module_graph);
+            let db = WorkspaceDb::new(Arc::new(MemoryFileSystem::from_files(fs.files.0.clone())));
+            let (module_info, _, _) = resolve_js_module(&db, root, &path, semantic_model, true);
+            divan::black_box(&module_info);
         });
+}
+
+fn upward_traversal_chain_sizes() -> impl Iterator<Item = usize> {
+    [32, 128, 512].into_iter()
+}
+
+#[divan::bench(args = upward_traversal_chain_sizes())]
+fn bench_upward_traversal_chain_single_start(bencher: Bencher, module_count: usize) {
+    bencher
+        .with_inputs(|| build_upward_traversal_chain(module_count))
+        .bench_local_values(|(db, modules)| {
+            divan::black_box(traverse_import_tree_for_classes(&db, modules[0]));
+            (db, modules)
+        });
+}
+
+#[divan::bench(args = upward_traversal_chain_sizes())]
+fn bench_upward_traversal_chain_all_starts(bencher: Bencher, module_count: usize) {
+    bencher
+        .with_inputs(|| build_upward_traversal_chain(module_count))
+        .bench_local_values(|(db, modules)| {
+            for module in &modules {
+                divan::black_box(traverse_import_tree_for_classes(&db, *module));
+            }
+            (db, modules)
+        });
+}
+
+fn build_upward_traversal_chain(module_count: usize) -> (WorkspaceDb, Vec<ModuleInfo>) {
+    let fs = MemoryFileSystem::default();
+    let paths = (0..module_count)
+        .map(|index| Utf8PathBuf::from(format!("/chain/c-{index}.js")))
+        .collect::<Vec<_>>();
+
+    for (index, path) in paths.iter().enumerate() {
+        let source = if index == 0 {
+            "export const value = 0;".to_string()
+        } else {
+            format!(
+                "import './c-{}.js'; export const value = {index};",
+                index - 1
+            )
+        };
+        fs.insert(path.clone(), source);
+    }
+
+    let mut db = WorkspaceDb::new(Arc::new(MemoryFileSystem::from_files(fs.files.0.clone())));
+    for path in &paths {
+        let path = BiomePath::new(path.clone());
+        let root = get_js_root(&fs, &path);
+        let semantic_model = Arc::new(semantic_model(&root, SemanticModelOptions::default()));
+        let (module_info, _, _) = resolve_js_module(&db, root, &path, semantic_model, false);
+        db.update_or_insert_module(
+            path.as_path().to_path_buf(),
+            ModuleInfoKind::Js(module_info),
+        );
+    }
+
+    let modules = paths
+        .iter()
+        .map(|path| db.module_for_path(path).expect("module must be indexed"))
+        .collect();
+    (db, modules)
 }
 
 fn get_js_root(fs: &dyn FileSystem, path: &BiomePath) -> AnyJsRoot {

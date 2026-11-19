@@ -1,0 +1,7 @@
+/* should not generate diagnostics */
+$color: red;
+@import "theme.css";
+.element {
+  color: $color;
+}
+@import "theme";

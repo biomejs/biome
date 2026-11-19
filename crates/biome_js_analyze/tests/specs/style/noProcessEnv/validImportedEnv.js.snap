@@ -1,0 +1,11 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validImportedEnv.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+import { env } from './config';
+env.FOO;
+
+```

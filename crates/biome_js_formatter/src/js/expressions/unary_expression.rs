@@ -1,12 +1,27 @@
 use crate::prelude::*;
 
 use biome_formatter::{format_args, write};
-use biome_js_syntax::JsUnaryExpression;
+use biome_js_syntax::binary_like_expression::AnyJsBinaryLikeExpression;
 use biome_js_syntax::parentheses::NeedsParentheses;
+use biome_js_syntax::{AnyJsExpression, JsSyntaxKind, JsSyntaxNode, JsUnaryExpression};
 use biome_js_syntax::{JsUnaryExpressionFields, JsUnaryOperator};
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsUnaryExpression;
+
+impl FormatJsUnaryExpression {
+    pub(crate) fn can_omit_argument_parentheses(argument: &JsSyntaxNode, f: &JsFormatter) -> bool {
+        AnyJsBinaryLikeExpression::can_cast(argument.kind())
+            && argument
+                .parent()
+                .is_some_and(|parent| parent.kind() == JsSyntaxKind::JS_UNARY_EXPRESSION)
+            && f.comments()
+                .leading_comments(argument)
+                .iter()
+                .any(|comment| comment.kind().is_line())
+            && !f.comments().is_suppressed(argument)
+    }
+}
 
 impl FormatNodeRule<JsUnaryExpression> for FormatJsUnaryExpression {
     fn fmt_fields(&self, node: &JsUnaryExpression, f: &mut JsFormatter) -> FormatResult<()> {
@@ -30,19 +45,42 @@ impl FormatNodeRule<JsUnaryExpression> for FormatJsUnaryExpression {
             write!(f, [space()])?;
         }
 
+        // Add delimiter spacing after logical not operator (!) when enabled
+        // Only add space after the LAST ! in a chain (e.g., !! a, not ! ! a)
+        let should_insert_space = f.options().delimiter_spacing().value();
+        let is_logical_not = operation == JsUnaryOperator::LogicalNot;
+
+        // Check if the argument is also a logical not - if so, don't add space here
+        let argument_is_logical_not = matches!(
+            &argument,
+            AnyJsExpression::JsUnaryExpression(unary) if unary.operator() == Ok(JsUnaryOperator::LogicalNot)
+        );
+
+        // Only add delimiter spacing if this is logical not AND arg is NOT another logical not
+        let add_delimiter_space = is_logical_not && should_insert_space && !argument_is_logical_not;
+
+        let maybe_not_space = format_with(|f| {
+            if add_delimiter_space {
+                write!(f, [space()])
+            } else {
+                Ok(())
+            }
+        });
+
         if f.comments().has_comments(argument.syntax())
             && !f.comments().is_suppressed(argument.syntax())
         {
             write!(
                 f,
                 [group(&format_args![
+                    maybe_not_space,
                     token("("),
-                    soft_block_indent(&argument.format()),
+                    soft_block_indent_with_maybe_space(&argument.format(), add_delimiter_space),
                     token(")")
                 ])]
             )
         } else {
-            write![f, [argument.format()]]
+            write![f, [maybe_not_space, argument.format()]]
         }
     }
 

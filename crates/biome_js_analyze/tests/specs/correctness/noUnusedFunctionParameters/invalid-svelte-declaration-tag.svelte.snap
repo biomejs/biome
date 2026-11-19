@@ -1,0 +1,37 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-svelte-declaration-tag.svelte
+---
+# Input
+```svelte
+<!-- should generate diagnostics -->
+{#snippet render(used, unused)}
+	{const value = used}
+	{value}
+{/snippet}
+
+{@render render(1, 2)}
+
+```
+
+# Diagnostics
+```
+invalid-svelte-declaration-tag.svelte:2:24 lint/correctness/noUnusedFunctionParameters  FIXABLE  ━━━━━━━━━━
+
+  ! This parameter unused is unused.
+  
+    1 │ <!-- should generate diagnostics -->
+  > 2 │ {#snippet render(used, unused)}
+      │                        ^^^^^^
+    3 │ 	{const value = used}
+    4 │ 	{value}
+  
+  i Unused parameters might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: If this is intentional, prepend unused with an underscore.
+  
+  - render(used,·unused)
+  + render(used,·_unused)
+  
+
+```

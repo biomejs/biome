@@ -1,8 +1,8 @@
+use crate::TestArgs as Args;
 use crate::run_cli;
 use crate::snap_test::{SnapshotPayload, assert_cli_snapshot};
 use biome_console::BufferConsole;
 use biome_fs::MemoryFileSystem;
-use bpaf::Args;
 use camino::Utf8Path;
 
 #[test]
@@ -740,6 +740,162 @@ insert_final_newline = false
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "should_support_insert_final_newline",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn should_apply_section_with_nested_alternates() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let editorconfig = Utf8Path::new(".editorconfig");
+    fs.insert(
+        editorconfig.into(),
+        r#"
+root = true
+
+[*]
+indent_style = space
+indent_size = 4
+
+[{*.{js,json},biome.jsonc}]
+indent_size = 2
+"#,
+    );
+
+    let test_file = Utf8Path::new("test.json");
+    let contents = r#"{
+    "test": 1
+}
+"#;
+    fs.insert(test_file.into(), contents);
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "format",
+                "--write",
+                "--use-editorconfig=true",
+                test_file.as_str(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "should_apply_section_with_nested_alternates",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn should_apply_section_with_bracket_expression_in_alternates() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let editorconfig = Utf8Path::new(".editorconfig");
+    fs.insert(
+        editorconfig.into(),
+        r#"
+root = true
+
+[*]
+indent_style = space
+indent_size = 4
+
+[{[ab],c}.json]
+indent_size = 2
+"#,
+    );
+
+    let test_file = Utf8Path::new("a.json");
+    let contents = r#"{
+    "test": 1
+}
+"#;
+    fs.insert(test_file.into(), contents);
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "format",
+                "--write",
+                "--use-editorconfig=true",
+                test_file.as_str(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "should_apply_section_with_bracket_expression_in_alternates",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn should_treat_unbalanced_braces_literally() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let editorconfig = Utf8Path::new(".editorconfig");
+    fs.insert(
+        editorconfig.into(),
+        r#"
+root = true
+
+[*]
+indent_style = space
+indent_size = 4
+
+[{a,b}}.json]
+indent_size = 2
+"#,
+    );
+
+    let test_file = Utf8Path::new("{a,b}}.json");
+    let contents = r#"{
+    "test": 1
+}
+"#;
+    fs.insert(test_file.into(), contents);
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "format",
+                "--write",
+                "--use-editorconfig=true",
+                test_file.as_str(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "should_treat_unbalanced_braces_literally",
         fs,
         console,
         result,

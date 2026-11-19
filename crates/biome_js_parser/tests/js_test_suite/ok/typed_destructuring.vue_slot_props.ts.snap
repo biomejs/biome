@@ -1,0 +1,104 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```ts
+{ value }: { value: ValueType }
+
+```
+
+
+## AST
+
+```
+JsVueSlotPropsRoot {
+    parameters: JsParameterList [
+        JsFormalParameter {
+            decorators: JsDecoratorList [],
+            binding: JsObjectBindingPattern {
+                l_curly_token: L_CURLY@0..2 "{" [] [Whitespace(" ")],
+                properties: JsObjectBindingPatternPropertyList [
+                    JsObjectBindingPatternShorthandProperty {
+                        identifier: JsIdentifierBinding {
+                            name_token: IDENT@2..8 "value" [] [Whitespace(" ")],
+                        },
+                        init: missing (optional),
+                    },
+                ],
+                r_curly_token: R_CURLY@8..9 "}" [] [],
+            },
+            question_mark_token: missing (optional),
+            type_annotation: TsTypeAnnotation {
+                colon_token: COLON@9..11 ":" [] [Whitespace(" ")],
+                ty: TsObjectType {
+                    l_curly_token: L_CURLY@11..13 "{" [] [Whitespace(" ")],
+                    members: TsTypeMemberList [
+                        TsPropertySignatureTypeMember {
+                            readonly_token: missing (optional),
+                            name: JsLiteralMemberName {
+                                value: IDENT@13..18 "value" [] [],
+                            },
+                            optional_token: missing (optional),
+                            type_annotation: TsTypeAnnotation {
+                                colon_token: COLON@18..20 ":" [] [Whitespace(" ")],
+                                ty: TsReferenceType {
+                                    name: JsReferenceIdentifier {
+                                        value_token: IDENT@20..30 "ValueType" [] [Whitespace(" ")],
+                                    },
+                                    type_arguments: missing (optional),
+                                },
+                            },
+                            separator_token: missing (optional),
+                        },
+                    ],
+                    r_curly_token: R_CURLY@30..31 "}" [] [],
+                },
+            },
+            initializer: missing (optional),
+        },
+    ],
+    eof_token: EOF@31..32 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_VUE_SLOT_PROPS_ROOT@0..32
+  0: JS_PARAMETER_LIST@0..31
+    0: JS_FORMAL_PARAMETER@0..31
+      0: JS_DECORATOR_LIST@0..0
+      1: JS_OBJECT_BINDING_PATTERN@0..9
+        0: L_CURLY@0..2 "{" [] [Whitespace(" ")]
+        1: JS_OBJECT_BINDING_PATTERN_PROPERTY_LIST@2..8
+          0: JS_OBJECT_BINDING_PATTERN_SHORTHAND_PROPERTY@2..8
+            0: JS_IDENTIFIER_BINDING@2..8
+              0: IDENT@2..8 "value" [] [Whitespace(" ")]
+            1: (empty)
+        2: R_CURLY@8..9 "}" [] []
+      2: (empty)
+      3: TS_TYPE_ANNOTATION@9..31
+        0: COLON@9..11 ":" [] [Whitespace(" ")]
+        1: TS_OBJECT_TYPE@11..31
+          0: L_CURLY@11..13 "{" [] [Whitespace(" ")]
+          1: TS_TYPE_MEMBER_LIST@13..30
+            0: TS_PROPERTY_SIGNATURE_TYPE_MEMBER@13..30
+              0: (empty)
+              1: JS_LITERAL_MEMBER_NAME@13..18
+                0: IDENT@13..18 "value" [] []
+              2: (empty)
+              3: TS_TYPE_ANNOTATION@18..30
+                0: COLON@18..20 ":" [] [Whitespace(" ")]
+                1: TS_REFERENCE_TYPE@20..30
+                  0: JS_REFERENCE_IDENTIFIER@20..30
+                    0: IDENT@20..30 "ValueType" [] [Whitespace(" ")]
+                  1: (empty)
+              4: (empty)
+          2: R_CURLY@30..31 "}" [] []
+      4: (empty)
+  1: EOF@31..32 "" [Newline("\n")] []
+
+```

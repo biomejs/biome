@@ -1,12 +1,15 @@
 use crate::CssCommentStyle;
+use crate::utils::case::CssCase;
+use biome_formatter::rowan::RowanSource;
 use biome_formatter::{
     CstFormatContext, FormatContext, FormatOptions, IndentStyle, LineEnding, LineWidth,
     TrailingNewline, TransformSourceMap,
 };
-use biome_formatter::{IndentWidth, QuoteStyle, prelude::*};
+use biome_formatter::{DelimiterSpacing, IndentWidth, QuoteStyle, rowan::prelude::*};
 
 use crate::comments::{CssComments, FormatCssLeadingComment};
-use biome_css_syntax::{CssFileSource, CssLanguage};
+use biome_css_syntax::{CssLanguage, TextRange};
+use biome_languages::CssFileSource;
 use std::fmt;
 use std::rc::Rc;
 
@@ -16,6 +19,9 @@ pub struct CssFormatContext {
     /// The comments of the nodes and tokens in the program.
     comments: Rc<CssComments>,
     source_map: Option<TransformSourceMap>,
+    identifier_case: CssCase,
+    /// Ranges of the metavariables that are written as embedded elements.
+    metavariable_ranges: Box<[TextRange]>,
 }
 
 impl CssFormatContext {
@@ -24,6 +30,8 @@ impl CssFormatContext {
             options,
             comments: Rc::new(comments),
             source_map: None,
+            identifier_case: CssCase::Auto,
+            metavariable_ranges: Box::default(),
         }
     }
 
@@ -31,10 +39,35 @@ impl CssFormatContext {
         self.source_map = source_map;
         self
     }
+
+    pub fn with_metavariable_ranges(mut self, metavariable_ranges: Box<[TextRange]>) -> Self {
+        self.metavariable_ranges = metavariable_ranges;
+        self
+    }
+
+    /// Returns the ranges of the metavariables inside `range`.
+    pub(crate) fn metavariable_ranges_in(
+        &self,
+        range: TextRange,
+    ) -> impl Iterator<Item = TextRange> {
+        self.metavariable_ranges
+            .iter()
+            .copied()
+            .filter(move |metavariable| range.contains_range(*metavariable))
+    }
+
+    pub(crate) fn identifier_case(&self) -> CssCase {
+        self.identifier_case
+    }
+
+    pub(crate) fn replace_identifier_case(&mut self, case: CssCase) -> CssCase {
+        std::mem::replace(&mut self.identifier_case, case)
+    }
 }
 
 impl FormatContext for CssFormatContext {
     type Options = CssFormatOptions;
+    type Source = RowanSource;
 
     fn options(&self) -> &Self::Options {
         &self.options
@@ -62,6 +95,7 @@ pub struct CssFormatOptions {
     line_ending: LineEnding,
     line_width: LineWidth,
     quote_style: QuoteStyle,
+    delimiter_spacing: DelimiterSpacing,
     /// Whether to add a trailing newline at the end of the file. Defaults to true.
     trailing_newline: TrailingNewline,
     _file_source: CssFileSource,
@@ -76,6 +110,7 @@ impl CssFormatOptions {
             line_ending: LineEnding::default(),
             line_width: LineWidth::default(),
             quote_style: QuoteStyle::default(),
+            delimiter_spacing: DelimiterSpacing::default(),
             trailing_newline: TrailingNewline::default(),
         }
     }
@@ -105,6 +140,11 @@ impl CssFormatOptions {
         self
     }
 
+    pub fn with_delimiter_spacing(mut self, delimiter_spacing: DelimiterSpacing) -> Self {
+        self.delimiter_spacing = delimiter_spacing;
+        self
+    }
+
     pub fn with_trailing_newline(mut self, trailing_newline: TrailingNewline) -> Self {
         self.trailing_newline = trailing_newline;
         self
@@ -130,12 +170,20 @@ impl CssFormatOptions {
         self.quote_style = quote_style;
     }
 
+    pub fn set_delimiter_spacing(&mut self, delimiter_spacing: DelimiterSpacing) {
+        self.delimiter_spacing = delimiter_spacing;
+    }
+
     pub fn set_trailing_newline(&mut self, trailing_newline: TrailingNewline) {
         self.trailing_newline = trailing_newline;
     }
 
     pub fn quote_style(&self) -> QuoteStyle {
         self.quote_style
+    }
+
+    pub fn delimiter_spacing(&self) -> DelimiterSpacing {
+        self.delimiter_spacing
     }
 
     pub fn trailing_newline(&self) -> TrailingNewline {
@@ -176,6 +224,7 @@ impl fmt::Display for CssFormatOptions {
         writeln!(f, "Line ending: {}", self.line_ending)?;
         writeln!(f, "Line width: {}", self.line_width.value())?;
         writeln!(f, "Quote style: {}", self.quote_style)?;
+        writeln!(f, "Delimiter spacing: {}", self.delimiter_spacing.value())?;
         writeln!(f, "Trailing newline: {}", self.trailing_newline.value())
     }
 }

@@ -1,19 +1,26 @@
-use std::{fmt, rc::Rc};
-
+use crate::comments::{FormatMarkdownLeadingComment, MarkdownCommentStyle};
+use biome_deserialize_macros::{Deserializable, Merge};
+use biome_formatter::rowan::RowanSource;
 use biome_formatter::{
     CstFormatContext, FormatContext, FormatOptions, IndentStyle, IndentWidth, LineEnding,
     LineWidth, TrailingNewline, TransformSourceMap, comments::Comments, printer::PrinterOptions,
 };
-use biome_markdown_syntax::MarkdownLanguage;
-
-use crate::comments::{FormatMarkdownLeadingComment, MarkdownCommentStyle};
+use biome_languages::MdFileSource;
+use biome_markdown_syntax::{MarkdownLanguage, MarkdownSyntaxNode};
+use biome_rowan::TextRange;
+use std::{fmt, rc::Rc, str::FromStr};
 
 pub type MarkdownComments = Comments<MarkdownLanguage>;
 
+#[derive(Debug, Clone)]
 pub struct MarkdownFormatContext {
     source_map: Option<TransformSourceMap>,
     options: MdFormatOptions,
     comments: Rc<MarkdownComments>,
+
+    /// Content ranges of the embedded snippets whose formatting is delegated to
+    /// the formatter of their language, sorted by position.
+    embedded_node_ranges: Vec<TextRange>,
 }
 
 #[derive(Debug, Default, Clone, PartialEq)]
@@ -23,6 +30,52 @@ pub struct MdFormatOptions {
     line_ending: LineEnding,
     line_width: LineWidth,
     trailing_newline: TrailingNewline,
+    prose_wrap: ProseWrap,
+    file_source: MdFileSource,
+}
+
+/// Controls whether Biome keeps, adds, or removes line breaks in Markdown paragraphs.
+///
+/// Manual line breaks are always kept. In Markdown, a manual line break is created by ending a
+/// line with two spaces or a backslash.
+#[derive(Debug, Default, Clone, Copy, Deserializable, Eq, Hash, Merge, PartialEq)]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Serialize, serde::Deserialize),
+    serde(rename_all = "camelCase")
+)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+pub enum ProseWrap {
+    /// Keep line breaks as written in the source file. This is the default.
+    #[default]
+    Preserve,
+    /// Wrap paragraphs to fit the configured `lineWidth`.
+    Always,
+    /// Remove line breaks from paragraphs so that each paragraph is on one line.
+    Never,
+}
+
+impl fmt::Display for ProseWrap {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            ProseWrap::Preserve => write!(f, "preserve"),
+            ProseWrap::Always => write!(f, "always"),
+            ProseWrap::Never => write!(f, "never"),
+        }
+    }
+}
+
+impl FromStr for ProseWrap {
+    type Err = &'static str;
+
+    fn from_str(value: &str) -> Result<Self, Self::Err> {
+        match value {
+            "preserve" => Ok(Self::Preserve),
+            "always" => Ok(Self::Always),
+            "never" => Ok(Self::Never),
+            _ => Err("Unsupported value for this option"),
+        }
+    }
 }
 
 impl CstFormatContext for MarkdownFormatContext {
@@ -62,13 +115,15 @@ impl FormatOptions for MdFormatOptions {
 }
 
 impl MdFormatOptions {
-    pub fn new() -> Self {
+    pub fn new(file_source: MdFileSource) -> Self {
         Self {
+            file_source,
             indent_style: IndentStyle::default(),
             indent_width: IndentWidth::default(),
             line_ending: LineEnding::default(),
             line_width: LineWidth::default(),
             trailing_newline: TrailingNewline::default(),
+            prose_wrap: ProseWrap::default(),
         }
     }
 
@@ -96,14 +151,62 @@ impl MdFormatOptions {
         self.trailing_newline = trailing_newline;
         self
     }
+
+    pub fn with_prose_wrap(mut self, prose_wrap: ProseWrap) -> Self {
+        self.prose_wrap = prose_wrap;
+        self
+    }
+
+    pub fn set_indent_style(&mut self, indent_style: IndentStyle) {
+        self.indent_style = indent_style;
+    }
+
+    pub fn set_indent_width(&mut self, indent_width: IndentWidth) {
+        self.indent_width = indent_width;
+    }
+
+    pub fn set_line_ending(&mut self, line_ending: LineEnding) {
+        self.line_ending = line_ending;
+    }
+
+    pub fn set_line_width(&mut self, line_width: LineWidth) {
+        self.line_width = line_width;
+    }
+
+    pub fn set_trailing_newline(&mut self, trailing_newline: TrailingNewline) {
+        self.trailing_newline = trailing_newline;
+    }
+
+    pub fn prose_wrap(&self) -> ProseWrap {
+        self.prose_wrap
+    }
+
+    pub fn set_prose_wrap(&mut self, prose_wrap: ProseWrap) {
+        self.prose_wrap = prose_wrap;
+    }
+
+    /// Returns the file source that the document was parsed with, including whether
+    /// its emphasis follows the CommonMark CJK-friendly amendments.
+    pub fn file_source(&self) -> MdFileSource {
+        self.file_source
+    }
 }
 
 impl MarkdownFormatContext {
-    pub fn new(options: MdFormatOptions) -> Self {
+    pub fn new(
+        options: MdFormatOptions,
+        root: &MarkdownSyntaxNode,
+        source_map: Option<TransformSourceMap>,
+    ) -> Self {
         Self {
             options,
-            comments: Rc::new(MarkdownComments::default()),
-            source_map: None,
+            comments: Rc::new(MarkdownComments::from_node(
+                root,
+                &MarkdownCommentStyle,
+                source_map.as_ref(),
+            )),
+            source_map,
+            embedded_node_ranges: Vec::new(),
         }
     }
 
@@ -112,13 +215,34 @@ impl MarkdownFormatContext {
         self
     }
 
+    /// Sets the content ranges of the snippets whose formatting is delegated.
+    ///
+    /// The ranges can come in any order. They're sorted here because
+    /// [Self::is_embedded_node_range] looks them up with a binary search.
+    pub fn with_embedded_node_ranges(mut self, mut embedded_node_ranges: Vec<TextRange>) -> Self {
+        embedded_node_ranges.sort_unstable_by_key(|range| (range.start(), range.end()));
+        self.embedded_node_ranges = embedded_node_ranges;
+        self
+    }
+
     pub fn comments(&self) -> &MarkdownComments {
         &self.comments
+    }
+
+    /// Returns `true` when the embedded snippet whose content spans `range` is
+    /// formatted by the formatter of its language.
+    pub fn is_embedded_node_range(&self, range: TextRange) -> bool {
+        self.embedded_node_ranges
+            .binary_search_by_key(&(range.start(), range.end()), |range| {
+                (range.start(), range.end())
+            })
+            .is_ok()
     }
 }
 
 impl FormatContext for MarkdownFormatContext {
     type Options = MdFormatOptions;
+    type Source = RowanSource;
 
     fn options(&self) -> &Self::Options {
         &self.options
@@ -135,6 +259,7 @@ impl fmt::Display for MdFormatOptions {
         writeln!(f, "Indent width: {}", self.indent_width.value())?;
         writeln!(f, "Line ending: {}", self.line_ending)?;
         writeln!(f, "Line width: {}", self.line_width.value())?;
-        writeln!(f, "Trailing newline: {}", self.trailing_newline.value())
+        writeln!(f, "Trailing newline: {}", self.trailing_newline.value())?;
+        writeln!(f, "Prose wrap: {}", self.prose_wrap)
     }
 }

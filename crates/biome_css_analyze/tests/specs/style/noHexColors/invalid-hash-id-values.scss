@@ -1,0 +1,6 @@
+/* should generate diagnostics */
+$three: #ABC;
+$four: #ABCD;
+$six: #ABCDEF;
+$eight: #ABCDEF12;
+.colors { color: #ABC; string: #ABCG; }

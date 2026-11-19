@@ -2,6 +2,12 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
+## Command
+
+```shell
+biome lint issue4623.js
+```
+
 ## `biome.json`
 
 ```json
@@ -37,6 +43,31 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
 # Emitted Messages
+
+```block
+biome.json:2:15 deserialize  DEPRECATED  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The use of the recommended field has been deprecated, and will removed in the next major version of Biome. Use preset instead.
+  
+     1 │ {
+   > 2 │     "linter": {
+       │               ^
+   > 3 │         "rules": {
+   > 4 │             "recommended": false,
+   > 5 │             "suspicious": {
+   > 6 │                 "noCommentText": "on"
+   > 7 │             }
+   > 8 │         }
+   > 9 │     }
+       │     ^
+    10 │ }
+  
+  i Migrate the configuration with the proper command
+  
+  $ biome migrate
+  
+
+```
 
 ```block
 issue4623.js:3:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -81,14 +112,12 @@ issue4623.js:2:2 lint/suspicious/noCommentText  FIXABLE  ━━━━━━━�
       │  ^^
     3 │ }
   
+  i In JSX children, text that starts with // or /* is rendered as text. It is not treated as a comment.
+  
   i Unsafe fix: Wrap the comments with braces
   
-    1 1 │   <b
-    2 2 │    //
-      3 │ + 
-      4 │ + ·{/*··*/}
-    3 5 │   }
-  
+    2 │ ·{/*··*/}
+      │  + ++++ +
 
 ```
 

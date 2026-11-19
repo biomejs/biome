@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use crate::utils::case::pseudo_name_case;
 use biome_css_syntax::{CssPseudoClassIdentifier, CssPseudoClassIdentifierFields};
 use biome_formatter::write;
 
@@ -11,7 +12,9 @@ impl FormatNodeRule<CssPseudoClassIdentifier> for FormatCssPseudoClassIdentifier
         f: &mut CssFormatter,
     ) -> FormatResult<()> {
         let CssPseudoClassIdentifierFields { name } = node.as_fields();
+        let name = name?;
+        let case = pseudo_name_case(&name);
 
-        write!(f, [name.format()])
+        write!(f, [name.format().with_text_case(case)])
     }
 }

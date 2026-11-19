@@ -2,6 +2,12 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
+## Command
+
+```shell
+biome check index.ts
+```
+
 ## `biome.json`
 
 ```json
@@ -13,7 +19,7 @@ expression: redactor(content)
   "linter": {
     "enabled": true,
     "rules": {
-      "recommended": true,
+      "preset": "recommended",
       "correctness": { "noUnusedImports": "off" }
     }
   }

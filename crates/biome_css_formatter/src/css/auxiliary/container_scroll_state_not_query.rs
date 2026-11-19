@@ -11,6 +11,13 @@ impl FormatNodeRule<CssContainerScrollStateNotQuery> for FormatCssContainerScrol
     ) -> FormatResult<()> {
         let CssContainerScrollStateNotQueryFields { not_token, query } = node.as_fields();
 
-        write!(f, [not_token.format(), space(), query.format()])
+        write!(
+            f,
+            [
+                not_token.format()?.with_text_case(CssCase::Preserve),
+                space(),
+                query.format()
+            ]
+        )
     }
 }

@@ -50,13 +50,14 @@ pub fn is_separated_list_sorted_by<'a, L: Language + 'a, N: AstNode<Language = L
 /// Chunks are sorted separately.
 ///
 /// This sort is stable (i.e., does not reorder equal elements).
-pub fn sorted_separated_list_by<'a, L: Language + 'a, List, Node, Key>(
+pub fn sorted_separated_list_by<'a, L, List, Node, Key>(
     list: &List,
     get_key: impl Fn(&Node) -> Option<Key>,
     make_separator: fn() -> SyntaxToken<L>,
     comparator: impl Fn(&Key, &Key) -> Ordering,
 ) -> Result<List, SyntaxError>
 where
+    L: Language + 'a,
     List: AstSeparatedList<Language = L, Node = Node> + AstNode<Language = L> + 'a,
     Node: AstNode<Language = L> + 'a,
 {
@@ -117,7 +118,7 @@ where
 /// It allows you to add missing separators and remove an extra separator.
 /// Usually, you collect every pair of nodes and separators in a vector and then pass a mutable iterator to `fix_separators`.
 ///
-/// See [sorted_separated_list_by] as a usage example.
+/// See [`sorted_separated_list_by`] as a usage example.
 pub fn fix_separators<'a, L: Language + 'a, N: AstNode<Language = L> + 'a>(
     // Mutable iterator of a list of nodes and their optional separators
     iter: impl std::iter::ExactSizeIterator<Item = (&'a mut N, &'a mut Option<SyntaxToken<L>>)>,
@@ -159,30 +160,170 @@ pub fn fix_separators<'a, L: Language + 'a, N: AstNode<Language = L> + 'a>(
     }
 }
 
+/// Splits the list into two new lists according to a partitioning function.
+///
+/// Every item of `list` is passed to `partition` that decides if the item is
+/// part of the left or the right returned list.
+/// The `partition` function can change the passed item before returning it.
+/// This allows supporting cases where the passed AST node must be modified.
+///
+/// This function returns `None` if it encounters a buggy item or
+/// if `partition` returns `None` for at least one item.
+///
+/// The trailing separators are moved with their node.
+pub fn split_separated_list<'a, L, List, Node>(
+    list: &List,
+    partition: impl Fn(Node) -> Option<either::Either<Node, Node>>,
+) -> Option<(List, List)>
+where
+    L: Language + 'a,
+    List: AstSeparatedList<Language = L, Node = Node> + AstNode<Language = L> + 'a,
+    Node: AstNode<Language = L> + 'a,
+{
+    let mut left_items = Vec::with_capacity(list.len());
+    let mut left_separators = Vec::with_capacity(list.len());
+    let mut right_items = Vec::with_capacity(list.len());
+    let mut right_separators = Vec::with_capacity(list.len());
+
+    for AstSeparatedElement {
+        node,
+        trailing_separator,
+    } in list.elements()
+    {
+        // Abort the split if a node is buggy or if `partition` returns `None`.
+        let node = node.ok()?;
+        let trailing_separator = trailing_separator.ok()?;
+        let (items, separators, node) = match partition(node)? {
+            either::Either::Left(node) => (&mut left_items, &mut left_separators, node),
+            either::Either::Right(node) => (&mut right_items, &mut right_separators, node),
+        };
+        items.push(node);
+        if let Some(trailing_separator) = trailing_separator {
+            separators.push(trailing_separator);
+        }
+    }
+
+    let mut left_items = left_items.into_iter();
+    let mut left_separators = left_separators.into_iter();
+    let left_list = List::unwrap_cast(SyntaxNode::new_detached(
+        list.syntax().kind(),
+        (0..left_items.len() + left_separators.len()).map(|index| {
+            if index % 2 == 0 {
+                Some(left_items.next()?.into_syntax().into())
+            } else {
+                Some(left_separators.next()?.into())
+            }
+        }),
+    ));
+
+    let mut right_items = right_items.into_iter();
+    let mut right_separators = right_separators.into_iter();
+    let right_list = List::unwrap_cast(SyntaxNode::new_detached(
+        list.syntax().kind(),
+        (0..right_items.len() + right_separators.len()).map(|index| {
+            if index % 2 == 0 {
+                Some(right_items.next()?.into_syntax().into())
+            } else {
+                Some(right_separators.next()?.into())
+            }
+        }),
+    ));
+
+    Some((left_list, right_list))
+}
+
 /// Counts lines in a syntax tree, used by `noExcessiveLinesPerFile`.
 ///
 /// When `skip_blank_lines` is true, counts tokens with leading newlines (excluding blank lines).
-/// When false, counts all newline characters in leading trivia (trailing trivia is trimmed
-/// to prevent double-counting). Returns total + 1 to account for the first line.
+/// When false, counts all newline trivia pieces in leading trivia.
+/// EOF tokens and newlines inside comments or token text are excluded.
+/// Returns total + 1 to account for the first line.
 pub fn count_lines_in_file<L: Language>(
     node: &SyntaxNode<L>,
     is_eof_token: impl Fn(&SyntaxToken<L>) -> bool,
     skip_blank_lines: bool,
 ) -> usize {
-    node.descendants()
-        .flat_map(|descendant| descendant.tokens().collect::<Vec<_>>())
-        .filter(|token| !is_eof_token(token))
-        .fold(0, |acc, token| {
-            if skip_blank_lines {
-                return acc + token.has_leading_newline() as usize;
+    let mut count = 0;
+    for descendant in node.descendants() {
+        for token in descendant.tokens() {
+            if is_eof_token(&token) {
+                continue;
             }
+            if skip_blank_lines {
+                count += token.has_leading_newline() as usize;
+            } else {
+                count += token
+                    .leading_trivia()
+                    .pieces()
+                    .filter(|piece| piece.is_newline())
+                    .count();
+            }
+        }
+    }
+    count + 1
+}
 
-            acc + token
-                .trim_trailing_trivia()
-                .leading_trivia()
-                .pieces()
-                .filter(|piece| piece.is_newline())
-                .count()
-        })
-        + 1 // Add 1 for the first line
+#[cfg(test)]
+mod tests {
+    use super::count_lines_in_file;
+    use biome_rowan::{
+        SyntaxNode, TriviaPiece,
+        raw_language::{RawLanguage, RawLanguageKind, RawSyntaxTreeBuilder},
+    };
+
+    fn assert_line_counts(node: &SyntaxNode<RawLanguage>, all: usize, non_blank: usize) {
+        for (skip_blank_lines, expected) in [(false, all), (true, non_blank)] {
+            assert_eq!(
+                count_lines_in_file(
+                    node,
+                    |token| token.kind() == RawLanguageKind::EOF,
+                    skip_blank_lines,
+                ),
+                expected,
+                "skip_blank_lines={skip_blank_lines}, tree={node:#?}",
+            );
+        }
+    }
+
+    #[test]
+    fn count_lines_in_file_empty_tree() {
+        let root = RawSyntaxTreeBuilder::wrap_with_node(RawLanguageKind::ROOT, |_| {});
+        assert_line_counts(&root, 1, 1);
+    }
+
+    #[test]
+    fn count_lines_in_file_uses_only_non_eof_leading_newline_pieces() {
+        for (newline, len) in [("\n", 1), ("\r\n", 2)] {
+            let root = RawSyntaxTreeBuilder::wrap_with_node(RawLanguageKind::ROOT, |builder| {
+                builder.token(RawLanguageKind::NUMBER_TOKEN, "0");
+                for _ in 0..2 {
+                    builder.start_node(RawLanguageKind::LITERAL_EXPRESSION);
+                    builder.token_with_trivia(
+                        RawLanguageKind::STRING_TOKEN,
+                        &format!("/*{newline}*/{newline}{newline} \"a{newline}b\" /*c*/{newline} "),
+                        &[
+                            TriviaPiece::multi_line_comment(4 + len),
+                            TriviaPiece::newline(len),
+                            TriviaPiece::newline(len),
+                            TriviaPiece::whitespace(1),
+                        ],
+                        &[
+                            TriviaPiece::whitespace(1),
+                            TriviaPiece::multi_line_comment(5),
+                            TriviaPiece::newline(len),
+                            TriviaPiece::whitespace(1),
+                        ],
+                    );
+                    builder.finish_node();
+                }
+                builder.token_with_trivia(
+                    RawLanguageKind::EOF,
+                    newline,
+                    &[TriviaPiece::newline(len)],
+                    &[],
+                );
+            });
+            assert_line_counts(&root, 5, 3);
+        }
+    }
 }

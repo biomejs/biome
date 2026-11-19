@@ -5,10 +5,11 @@ mod configs;
 mod snap_test;
 
 #[cfg(test)]
-use snap_test::assert_cli_snapshot;
+use snap_test::{CliRunResult, TestArgs, assert_cli_snapshot};
 
-use biome_cli::{CliDiagnostic, CliSession, biome_command};
+use biome_cli::{CliDiagnostic, CliSession, Watcher, biome_command};
 use biome_console::{BufferConsole, Console, ConsoleExt, markup};
+use biome_flags::MemoryEnvironment;
 use biome_fs::{MemoryFileSystem, OsFileSystem};
 use biome_resolver::FsWithResolverProxy;
 use biome_service::App;
@@ -29,7 +30,7 @@ return { something }
 
 mod main {
     use super::*;
-    use bpaf::Args;
+    use crate::TestArgs as Args;
 
     #[test]
     fn unknown_command() {
@@ -131,6 +132,7 @@ mod main {
 
 mod configuration {
     use super::*;
+    use crate::TestArgs as Args;
     use crate::configs::{
         CONFIG_ALL_FIELDS, CONFIG_BAD_LINE_WIDTH, CONFIG_INCORRECT_GLOBALS,
         CONFIG_INCORRECT_GLOBALS_V2, CONFIG_LINTER_WRONG_RULE,
@@ -138,7 +140,6 @@ mod configuration {
     use crate::snap_test::SnapshotPayload;
     use biome_console::BufferConsole;
     use biome_fs::MemoryFileSystem;
-    use bpaf::Args;
     use camino::Utf8Path;
 
     #[test]
@@ -308,13 +309,30 @@ mod configuration {
     }
 }
 
+fn run_cli_session(session: CliSession<'_>, args: TestArgs) -> CliRunResult {
+    let arguments = args.into_arguments();
+    let command = biome_command().run_inner(bpaf::Args::from(arguments.as_slice()));
+    let result = match command {
+        Ok(command) => session.run(command),
+        Err(failure) => {
+            if let ParseFailure::Stdout(help, _) = &failure {
+                session.app.console.log(markup! {{help.to_string()}});
+                Ok(())
+            } else {
+                Err(CliDiagnostic::parse_error_bpaf(failure))
+            }
+        }
+    };
+    CliRunResult::new(arguments, result)
+}
+
 /// Create an [App] instance using the provided [FileSystem] and [Console]
 /// instance, and using an in-process "remote" instance of the workspace
 pub(crate) fn run_cli(
     fs: MemoryFileSystem,
     console: &mut dyn Console,
-    args: bpaf::Args,
-) -> (MemoryFileSystem, Result<(), CliDiagnostic>) {
+    args: TestArgs,
+) -> (MemoryFileSystem, CliRunResult) {
     let files = fs.files.clone();
 
     let result = run_cli_with_dyn_fs(Box::new(fs), console, args);
@@ -332,14 +350,40 @@ pub(crate) fn run_cli(
 pub(crate) fn run_cli_with_dyn_fs(
     fs: Box<dyn FsWithResolverProxy>,
     console: &mut dyn Console,
-    args: bpaf::Args,
-) -> Result<(), CliDiagnostic> {
+    args: TestArgs,
+) -> CliRunResult {
+    run_cli_with_session_options(fs, console, args, MemoryEnvironment::default())
+}
+
+/// Like [run_cli], with commands reading environment variables from
+/// `environment` instead of an empty environment.
+pub(crate) fn run_cli_with_environment(
+    fs: MemoryFileSystem,
+    console: &mut dyn Console,
+    args: TestArgs,
+    environment: MemoryEnvironment,
+) -> (MemoryFileSystem, CliRunResult) {
+    let files = fs.files.clone();
+
+    let result = run_cli_with_session_options(Box::new(fs), console, args, environment);
+
+    let fs = MemoryFileSystem::from_files(files);
+
+    (fs, result)
+}
+
+fn run_cli_with_session_options(
+    fs: Box<dyn FsWithResolverProxy>,
+    console: &mut dyn Console,
+    args: TestArgs,
+    environment: MemoryEnvironment,
+) -> CliRunResult {
     use biome_cli::SocketTransport;
     use biome_lsp::ServerFactory;
     use biome_service::{WorkspaceRef, workspace};
     use tokio::io::{duplex, split};
 
-    let factory = ServerFactory::new_with_fs(Arc::new(OsFileSystem::new(
+    let factory = ServerFactory::new_cli_test_with_fs(Arc::new(OsFileSystem::new(
         fs.working_directory().unwrap_or_default(),
     )));
     let connection = factory.create();
@@ -359,20 +403,34 @@ pub(crate) fn run_cli_with_dyn_fs(
     let workspace = workspace::client(transport, fs).unwrap();
     let app = App::new(console, WorkspaceRef::Owned(workspace));
 
-    let mut session = CliSession { app };
-    let command = biome_command().run_inner(args);
-    match command {
-        Ok(command) => session.run(command),
-        Err(failure) => {
-            if let ParseFailure::Stdout(help, _) = &failure {
-                let console = &mut session.app.console;
-                console.log(markup! {{help.to_string()}});
-                Ok(())
-            } else {
-                Err(CliDiagnostic::parse_error_bpaf(failure))
-            }
-        }
-    }
+    let session = CliSession {
+        app,
+        watcher_factory: None,
+        environment: Arc::new(environment),
+    };
+    run_cli_session(session, args)
+}
+
+/// Create an [App] instance with an in-process workspace and an injected
+/// watcher factory. Used by watch-mode tests to feed a scripted
+/// [`biome_cli::MockWatcher`] into the runner.
+pub(crate) fn run_cli_with_watcher_factory(
+    fs: Box<dyn FsWithResolverProxy>,
+    console: &mut dyn Console,
+    args: TestArgs,
+    watcher_factory: Box<dyn Fn() -> Box<dyn Watcher> + Send + Sync>,
+) -> CliRunResult {
+    use biome_service::{WorkspaceRef, workspace};
+
+    let workspace = workspace::server(Arc::from(fs), None);
+    let app = App::new(console, WorkspaceRef::Owned(workspace));
+
+    let session = CliSession {
+        app,
+        watcher_factory: Some(watcher_factory),
+        environment: Arc::new(MemoryEnvironment::default()),
+    };
+    run_cli_session(session, args)
 }
 
 /// Create an [App] instance using the provided [FileSystem] and [Console]
@@ -380,8 +438,8 @@ pub(crate) fn run_cli_with_dyn_fs(
 pub(crate) fn run_cli_with_server_workspace(
     fs: MemoryFileSystem,
     console: &mut dyn Console,
-    args: bpaf::Args,
-) -> (MemoryFileSystem, Result<(), CliDiagnostic>) {
+    args: TestArgs,
+) -> (MemoryFileSystem, CliRunResult) {
     use biome_service::{WorkspaceRef, workspace};
 
     let files = fs.files.clone();
@@ -389,20 +447,12 @@ pub(crate) fn run_cli_with_server_workspace(
     let workspace = workspace::server(Arc::new(fs), None);
     let app = App::new(console, WorkspaceRef::Owned(workspace));
 
-    let mut session = CliSession { app };
-    let command = biome_command().run_inner(args);
-    let result = match command {
-        Ok(command) => session.run(command),
-        Err(failure) => {
-            if let ParseFailure::Stdout(help, _) = &failure {
-                let console = &mut session.app.console;
-                console.log(markup! {{help.to_string()}});
-                Ok(())
-            } else {
-                Err(CliDiagnostic::parse_error_bpaf(failure))
-            }
-        }
+    let session = CliSession {
+        app,
+        watcher_factory: None,
+        environment: Arc::new(MemoryEnvironment::default()),
     };
+    let result = run_cli_session(session, args);
 
     // This is a little bit of a workaround to allow us to easily create
     // a snapshot of the files even though the original file system was

@@ -2,10 +2,6 @@
   "$schema": "./packages/@biomejs/biome/configuration_schema.json",
   "assist": {
     "enabled": true,
-    "includes": [
-      "**",
-      "!./packages/@biomejs/biome/configuration_schema.json"
-    ],
     "actions": {
       "source": {
         "useSortedKeys": "off",
@@ -25,6 +21,7 @@
       "**/packages/prettier-compare/**",
       "**/packages/tailwindcss-config-analyzer/**",
       "**/benchmark/**",
+      "**/.github/**",
       "plugins/*.js",
       "scripts/**",
       "!**/crates",
@@ -34,20 +31,24 @@
       "!**/undefined",
       "!**/benchmark/target",
       "!**/benches",
+      "!!**/e2e-tests",
       "!!**/target",
-      "!!.cargo"
-    ]
-  },
-  "formatter": {
-    "includes": [
-      "**",
-      "!**/configuration_schema.json"
+      "!!.cargo",
+      "!!packages/@biomejs/runtime/type-tests",
+      "!!**/configuration_schema.json",
+      "!!**/manifest_schema.json",
+      "!!**/CHANGELOG.md"
     ]
   },
   "json": {
     "formatter": {
       "indentStyle": "space",
       "lineWidth": 1
+    }
+  },
+  "yaml": {
+    "formatter": {
+      "quoteStyle": "single"
     }
   },
   "linter": {

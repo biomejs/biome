@@ -12,14 +12,14 @@ set windows-powershell := true
 # Installs the tools needed to develop
 install-tools:
 	cargo install cargo-binstall
-	cargo binstall cargo-insta wasm-opt
+	cargo binstall cargo-insta@1.48.0 wasm-opt cargo-deny
 	cargo binstall wasm-bindgen-cli --version 0.2.117
 	pnpm install
 
 # Upgrades the tools needed to develop
 upgrade-tools:
 	cargo install cargo-binstall --force
-	cargo binstall cargo-insta wasm-opt --force
+	cargo binstall cargo-insta@1.48.0 wasm-opt cargo-deny --force
 	cargo binstall wasm-bindgen-cli --version 0.2.117 --force
 
 # Generate all files across crates and tools. You rarely want to use it locally.
@@ -41,7 +41,7 @@ gen-types:
 
 # Generates the JSON Schema of the configuration
 gen-schema:
-  cargo codegen-schema
+  cargo run -p xtask_codegen --features schema -- schema
 
 # Generates code generated files for the linter
 gen-analyzer:
@@ -60,22 +60,37 @@ gen-rules:
 gen-css-baseline:
   cargo run -p xtask_codegen --features xtask_codegen/external_data -- css-baseline
 
+# Generates CSS keywords from @webref/css
+gen-css-keywords:
+  cargo run -p xtask_codegen --features xtask_codegen/external_data -- css-keywords
+
+# Generates module-replacements data from e18e
+gen-module-replacements:
+  cargo run -p xtask_codegen --features xtask_codegen/external_data -- module-replacements
+
 gen-configuration:
   cargo run -p xtask_codegen --features configuration -- configuration
 
-# Generates code for eslint migration
+# Generates code for eslint and stylelint migration
 gen-migrate:
   cargo run -p xtask_codegen --features configuration -- migrate-eslint
+  cargo run -p xtask_codegen --features configuration -- migrate-stylelint
+
+# Exports every lint rule and assist action as JSON, with the upstream rules they implement and the ones Biome deliberately doesn't support. Prints to stdout unless given `--out <path>`.
+export-rule-metadata *args='':
+  cargo run -p xtask_codegen --features rules_metadata -- rules-metadata {{args}}
 
 # Generates the initial files for all formatter crates
 gen-formatter *args='':
   cargo run -p xtask_codegen -- formatter {{args}}
 
+gen-global-types:
+  cargo run -p xtask_codegen --features global_types -- global-types
+
 # Generates the Tailwind CSS preset for utility class sorting
 [working-directory: 'packages/tailwindcss-config-analyzer']
 gen-tw:
-  pnpm build
-  pnpm execute
+  pnpm execute:v4
 
 # Build WASM for bundler target (development)
 build-wasm-bundler-dev:
@@ -86,8 +101,8 @@ build-wasm-bundler-dev:
     --typescript
 
 # Build WASM for bundler target (release)
-build-wasm-bundler:
-  cargo build --lib --target wasm32-unknown-unknown --release -p biome_wasm
+build-wasm-bundler *args='':
+  cargo build --lib --target wasm32-unknown-unknown --release -p biome_wasm {{args}}
   wasm-bindgen target/wasm32-unknown-unknown/release/biome_wasm.wasm \
     --out-dir packages/@biomejs/wasm-bundler \
     --no-demangle \
@@ -100,15 +115,15 @@ build-wasm-bundler:
 
 # Build WASM for Node.js target (development)
 build-wasm-node-dev:
-  cargo build --lib --target wasm32-unknown-unknown -p biome_wasm
+  cargo build --lib --target wasm32-unknown-unknown -p biome_wasm --features unstable
   wasm-bindgen target/wasm32-unknown-unknown/debug/biome_wasm.wasm \
     --out-dir packages/@biomejs/wasm-nodejs \
     --target nodejs \
     --typescript
 
 # Build WASM for Node.js target (release)
-build-wasm-node:
-  cargo build --lib --target wasm32-unknown-unknown --release -p biome_wasm
+build-wasm-node *args='':
+  cargo build --lib --target wasm32-unknown-unknown --release -p biome_wasm {{args}}
   wasm-bindgen target/wasm32-unknown-unknown/release/biome_wasm.wasm \
     --out-dir packages/@biomejs/wasm-nodejs \
     --no-demangle \
@@ -188,6 +203,16 @@ new-graphql-assistrule rulename:
   cargo run -p xtask_codegen -- new-lintrule --kind=graphql --category=assist --name={{rulename}}
   just gen-analyzer
 
+# Creates a new markdown lint rule with the given name. Name has to be camel case.
+new-markdown-lintrule rulename:
+  cargo run -p xtask_codegen -- new-lintrule --kind=markdown --category=lint --name={{rulename}}
+  just gen-analyzer
+
+# Creates a new markdown assist rule with the given name. Name has to be camel case.
+new-markdown-assistrule rulename:
+  cargo run -p xtask_codegen -- new-lintrule --kind=markdown --category=assist --name={{rulename}}
+  just gen-analyzer
+
 # Creates a new html lint rule with the given name. Name has to be camel case.
 new-html-lintrule rulename:
   cargo run -p xtask_codegen -- new-lintrule --kind=html --category=lint --name={{rulename}}
@@ -203,10 +228,24 @@ new-html-vue-lintrule rulename:
   cargo run -p xtask_codegen -- new-lintrule --kind=html-vue --category=lint --name={{rulename}}
   just gen-analyzer
 
+# Creates a new yaml lint rule with the given name. Name has to be camel case.
+new-yaml-lintrule rulename:
+  cargo run -p xtask_codegen -- new-lintrule --kind=yaml --category=lint --name={{rulename}}
+  just gen-analyzer
+
+# Creates a new yaml assist rule with the given name. Name has to be camel case.
+new-yaml-assistrule rulename:
+  cargo run -p xtask_codegen -- new-lintrule --kind=yaml --category=assist --name={{rulename}}
+  just gen-analyzer
+
 # Promotes a rule from the nursery group to a new group
 move-rule rulename group:
   cargo run -p xtask_codegen -- move-rule --group={{group}} --name={{rulename}}
   cargo run -p xtask_codegen -- analyzer
+
+# Promotes nursery lint rules described by a JSON manifest
+promote-rules manifest:
+  cargo run -p xtask_codegen -- promote-rules --manifest={{manifest}}
 
 # Format Rust files and TOML files
 format:
@@ -261,17 +300,49 @@ update-commonmark-spec version:
 	./scripts/update-commonmark-spec.sh {{version}}
 
 # Tests a lint rule. The name of the rule needs to be camel case
-test-lintrule name:
+test-lintrule rulename:
+  just test-js-lintrule {{rulename}}
+  just test-json-lintrule {{rulename}}
+  just test-css-lintrule {{rulename}}
+  just test-graphql-lintrule {{rulename}}
+  just test-html-lintrule {{rulename}}
+  just test-markdown-lintrule {{rulename}}
+  just test-yaml-lintrule {{rulename}}
+
+# Test a js lint rule. The name of the rule needs to be camel case
+test-js-lintrule rulename:
   just _touch crates/biome_js_analyze/tests/spec_tests.rs
+  cargo test -p biome_js_analyze -- {{snakecase(rulename)}} --show-output
+
+# Test a json lint rule. The name of the rule needs to be camel case
+test-json-lintrule rulename:
   just _touch crates/biome_json_analyze/tests/spec_tests.rs
+  cargo test -p biome_json_analyze -- {{snakecase(rulename)}} --show-output
+
+# Test a css lint rule. The name of the rule needs to be camel case
+test-css-lintrule rulename:
   just _touch crates/biome_css_analyze/tests/spec_tests.rs
+  cargo test -p biome_css_analyze -- {{snakecase(rulename)}} --show-output
+
+# Test a graphql lint rule. The name of the rule needs to be camel case
+test-graphql-lintrule rulename:
   just _touch crates/biome_graphql_analyze/tests/spec_tests.rs
+  cargo test -p biome_graphql_analyze -- {{snakecase(rulename)}} --show-output
+
+# Test a html lint rule. The name of the rule needs to be camel case
+test-html-lintrule rulename:
   just _touch crates/biome_html_analyze/tests/spec_tests.rs
-  cargo test -p biome_js_analyze -- {{snakecase(name)}} --show-output
-  cargo test -p biome_json_analyze -- {{snakecase(name)}} --show-output
-  cargo test -p biome_css_analyze -- {{snakecase(name)}} --show-output
-  cargo test -p biome_graphql_analyze -- {{snakecase(name)}} --show-output
-  cargo test -p biome_html_analyze -- {{snakecase(name)}} --show-output
+  cargo test -p biome_html_analyze -- {{snakecase(rulename)}} --show-output
+
+# Test a markdown lint rule. The name of the rule needs to be camel case
+test-markdown-lintrule rulename:
+  just _touch crates/biome_markdown_analyze/tests/spec_tests.rs
+  cargo test -p biome_markdown_analyze -- {{snakecase(rulename)}} --show-output
+
+# Test a yaml lint rule. The name of the rule needs to be camel case
+test-yaml-lintrule rulename:
+  just _touch crates/biome_yaml_analyze/tests/spec_tests.rs
+  cargo test -p biome_yaml_analyze -- {{snakecase(rulename)}} --show-output
 
 # Tests a lint rule. The name of the rule needs to be camel case
 test-transformation name:

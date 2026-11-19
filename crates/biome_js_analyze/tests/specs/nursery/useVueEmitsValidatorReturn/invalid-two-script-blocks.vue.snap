@@ -1,0 +1,71 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 196
+expression: invalid-two-script-blocks.vue
+---
+# Input
+```vue
+<script>
+/* should generate diagnostics */
+export default {
+  emits: {
+    close() {},
+  },
+};
+</script>
+
+<script setup>
+defineEmits({
+  open() {
+    return;
+  },
+});
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-two-script-blocks.vue:5:5 lint/nursery/useVueEmitsValidatorReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The validator of the event close never returns a value.
+  
+    3 │ export default {
+    4 │   emits: {
+  > 5 │     close() {},
+      │     ^^^^^^^^^^
+    6 │   },
+    7 │ };
+  
+  i Vue prints a warning in development mode each time the event is emitted, because the validator never accepts its values.
+  
+  i Return true when the values of the event are valid, and false otherwise.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-two-script-blocks.vue:12:3 lint/nursery/useVueEmitsValidatorReturn ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The validator of the event open never returns a value.
+  
+    10 │ <script setup>
+    11 │ defineEmits({
+  > 12 │   open() {
+       │   ^^^^^^^^
+  > 13 │     return;
+  > 14 │   },
+       │   ^
+    15 │ });
+    16 │ </script>
+  
+  i Vue prints a warning in development mode each time the event is emitted, because the validator never accepts its values.
+  
+  i Return true when the values of the event are valid, and false otherwise.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

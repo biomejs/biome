@@ -1,0 +1,13 @@
+%base { color: red; }
+.a { @extend %base }
+.b { @extend %missing !optional }
+.c { @import "theme.css" }
+.d { @foo bar }
+.explicit { @extend %base; @import "theme.css"; @foo bar; color: blue; }
+.extend-comment { @extend %base // target
+  /* close extend */ }
+.import-comment { @import "theme.css" // target
+  /* close import */ }
+.unknown-comment { @foo bar // value
+  /* close unknown */ }
+.after { width: 1px; }

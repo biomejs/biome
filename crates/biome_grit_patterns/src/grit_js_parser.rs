@@ -1,9 +1,11 @@
 use crate::{
-    grit_analysis_ext::GritAnalysisExt, grit_target_language::GritTargetParser,
+    grit_analysis_ext::GritAnalysisExt,
+    grit_target_language::{GritTargetParser, metavariable_ranges},
     grit_tree::GritTargetTree,
 };
-use biome_js_parser::{JsParserOptions, parse};
-use biome_js_syntax::{JsFileSource, JsLanguage};
+use biome_js_parser::{JsParserOptions, parse, parse_with_metavariables};
+use biome_js_syntax::JsLanguage;
+use biome_languages::JsFileSource;
 use biome_parser::AnyParse;
 use camino::Utf8Path;
 use grit_util::{AnalysisLogs, FileOrigin, Parser, SnippetTree};
@@ -48,11 +50,7 @@ impl Parser for GritJsParser {
         logs: &mut AnalysisLogs,
         _old_tree: FileOrigin<'_, GritTargetTree>,
     ) -> Option<GritTargetTree> {
-        let parse_result = parse(
-            body,
-            JsFileSource::tsx(),
-            JsParserOptions::default().with_metavariables(),
-        );
+        let parse_result = parse(body, JsFileSource::tsx(), JsParserOptions::default());
 
         for diagnostic in parse_result.diagnostics() {
             logs.push(diagnostic.to_log(path));
@@ -69,16 +67,11 @@ impl Parser for GritJsParser {
     ) -> SnippetTree<GritTargetTree> {
         let context = format!("{prefix}{source}{postfix}");
 
-        let len = if cfg!(target_arch = "wasm32") {
-            |src: &str| src.chars().count() as u32
-        } else {
-            |src: &str| src.len() as u32
-        };
-
-        let parse_result = parse(
+        let parse_result = parse_with_metavariables(
             &context,
             JsFileSource::tsx(),
-            JsParserOptions::default().with_metavariables(),
+            JsParserOptions::default(),
+            &metavariable_ranges(&context),
         );
 
         SnippetTree {
@@ -86,8 +79,8 @@ impl Parser for GritJsParser {
             source: source.to_owned(),
             prefix,
             postfix,
-            snippet_start: (len(prefix) + len(source) - len(source.trim_start())),
-            snippet_end: (len(prefix) + len(source.trim_end())),
+            snippet_start: (prefix.len() + source.len() - source.trim_start().len()) as u32,
+            snippet_end: (prefix.len() + source.trim_end().len()) as u32,
         }
     }
 }

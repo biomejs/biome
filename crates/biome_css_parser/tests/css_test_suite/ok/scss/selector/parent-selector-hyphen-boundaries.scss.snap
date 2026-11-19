@@ -1,0 +1,564 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+.component {
+  &--#{$state} {}
+  &#{$state}-- {}
+  &#{$state}-- div {}
+  &--- {}
+  &-- {}
+
+  &--active {}
+  & --#{$state} {}
+}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@0..1 "." [] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@1..11 "component" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@11..12 "{" [] [],
+                items: CssDeclarationOrRuleList [
+                    CssNestedQualifiedRule {
+                        prelude: CssRelativeSelectorList [
+                            CssRelativeSelector {
+                                combinator: missing (optional),
+                                selector: CssCompoundSelector {
+                                    nesting_selectors: CssNestedSelectorList [
+                                        ScssParentSelector {
+                                            amp_token: AMP@12..16 "&" [Newline("\n"), Whitespace("  ")] [],
+                                            suffix: ScssParentSelectorSuffix {
+                                                items: ScssParentSelectorSuffixPartList [
+                                                    ScssParentSelectorSuffixHyphen {
+                                                        minus_token: MINUS@16..17 "-" [] [],
+                                                    },
+                                                    ScssParentSelectorSuffixHyphen {
+                                                        minus_token: MINUS@17..18 "-" [] [],
+                                                    },
+                                                    ScssInterpolation {
+                                                        hash_token: HASH@18..19 "#" [] [],
+                                                        l_curly_token: L_CURLY@19..20 "{" [] [],
+                                                        value: ScssExpression {
+                                                            items: ScssExpressionItemList [
+                                                                ScssVariable {
+                                                                    dollar_token: DOLLAR@20..21 "$" [] [],
+                                                                    name: CssIdentifier {
+                                                                        value_token: IDENT@21..26 "state" [] [],
+                                                                    },
+                                                                },
+                                                            ],
+                                                        },
+                                                        r_curly_token: R_CURLY@26..28 "}" [] [Whitespace(" ")],
+                                                    },
+                                                ],
+                                            },
+                                        },
+                                    ],
+                                    simple_selector: missing (optional),
+                                    sub_selectors: CssSubSelectorList [],
+                                },
+                            },
+                        ],
+                        block: CssDeclarationOrRuleBlock {
+                            l_curly_token: L_CURLY@28..29 "{" [] [],
+                            items: CssDeclarationOrRuleList [],
+                            r_curly_token: R_CURLY@29..30 "}" [] [],
+                        },
+                    },
+                    CssNestedQualifiedRule {
+                        prelude: CssRelativeSelectorList [
+                            CssRelativeSelector {
+                                combinator: missing (optional),
+                                selector: CssCompoundSelector {
+                                    nesting_selectors: CssNestedSelectorList [
+                                        ScssParentSelector {
+                                            amp_token: AMP@30..34 "&" [Newline("\n"), Whitespace("  ")] [],
+                                            suffix: ScssParentSelectorSuffix {
+                                                items: ScssParentSelectorSuffixPartList [
+                                                    ScssInterpolation {
+                                                        hash_token: HASH@34..35 "#" [] [],
+                                                        l_curly_token: L_CURLY@35..36 "{" [] [],
+                                                        value: ScssExpression {
+                                                            items: ScssExpressionItemList [
+                                                                ScssVariable {
+                                                                    dollar_token: DOLLAR@36..37 "$" [] [],
+                                                                    name: CssIdentifier {
+                                                                        value_token: IDENT@37..42 "state" [] [],
+                                                                    },
+                                                                },
+                                                            ],
+                                                        },
+                                                        r_curly_token: R_CURLY@42..43 "}" [] [],
+                                                    },
+                                                    ScssParentSelectorSuffixHyphen {
+                                                        minus_token: MINUS@43..44 "-" [] [],
+                                                    },
+                                                    ScssParentSelectorSuffixHyphen {
+                                                        minus_token: MINUS@44..46 "-" [] [Whitespace(" ")],
+                                                    },
+                                                ],
+                                            },
+                                        },
+                                    ],
+                                    simple_selector: missing (optional),
+                                    sub_selectors: CssSubSelectorList [],
+                                },
+                            },
+                        ],
+                        block: CssDeclarationOrRuleBlock {
+                            l_curly_token: L_CURLY@46..47 "{" [] [],
+                            items: CssDeclarationOrRuleList [],
+                            r_curly_token: R_CURLY@47..48 "}" [] [],
+                        },
+                    },
+                    CssNestedQualifiedRule {
+                        prelude: CssRelativeSelectorList [
+                            CssRelativeSelector {
+                                combinator: missing (optional),
+                                selector: CssComplexSelector {
+                                    left: CssCompoundSelector {
+                                        nesting_selectors: CssNestedSelectorList [
+                                            ScssParentSelector {
+                                                amp_token: AMP@48..52 "&" [Newline("\n"), Whitespace("  ")] [],
+                                                suffix: ScssParentSelectorSuffix {
+                                                    items: ScssParentSelectorSuffixPartList [
+                                                        ScssInterpolation {
+                                                            hash_token: HASH@52..53 "#" [] [],
+                                                            l_curly_token: L_CURLY@53..54 "{" [] [],
+                                                            value: ScssExpression {
+                                                                items: ScssExpressionItemList [
+                                                                    ScssVariable {
+                                                                        dollar_token: DOLLAR@54..55 "$" [] [],
+                                                                        name: CssIdentifier {
+                                                                            value_token: IDENT@55..60 "state" [] [],
+                                                                        },
+                                                                    },
+                                                                ],
+                                                            },
+                                                            r_curly_token: R_CURLY@60..61 "}" [] [],
+                                                        },
+                                                        ScssParentSelectorSuffixHyphen {
+                                                            minus_token: MINUS@61..62 "-" [] [],
+                                                        },
+                                                        ScssParentSelectorSuffixHyphen {
+                                                            minus_token: MINUS@62..63 "-" [] [],
+                                                        },
+                                                    ],
+                                                },
+                                            },
+                                        ],
+                                        simple_selector: missing (optional),
+                                        sub_selectors: CssSubSelectorList [],
+                                    },
+                                    combinator: CSS_SPACE_LITERAL@63..64 " " [] [],
+                                    right: CssCompoundSelector {
+                                        nesting_selectors: CssNestedSelectorList [],
+                                        simple_selector: CssTypeSelector {
+                                            namespace: missing (optional),
+                                            ident: CssIdentifier {
+                                                value_token: IDENT@64..68 "div" [] [Whitespace(" ")],
+                                            },
+                                        },
+                                        sub_selectors: CssSubSelectorList [],
+                                    },
+                                },
+                            },
+                        ],
+                        block: CssDeclarationOrRuleBlock {
+                            l_curly_token: L_CURLY@68..69 "{" [] [],
+                            items: CssDeclarationOrRuleList [],
+                            r_curly_token: R_CURLY@69..70 "}" [] [],
+                        },
+                    },
+                    CssNestedQualifiedRule {
+                        prelude: CssRelativeSelectorList [
+                            CssRelativeSelector {
+                                combinator: missing (optional),
+                                selector: CssCompoundSelector {
+                                    nesting_selectors: CssNestedSelectorList [
+                                        ScssParentSelector {
+                                            amp_token: AMP@70..74 "&" [Newline("\n"), Whitespace("  ")] [],
+                                            suffix: ScssParentSelectorSuffix {
+                                                items: ScssParentSelectorSuffixPartList [
+                                                    CssIdentifier {
+                                                        value_token: IDENT@74..78 "---" [] [Whitespace(" ")],
+                                                    },
+                                                ],
+                                            },
+                                        },
+                                    ],
+                                    simple_selector: missing (optional),
+                                    sub_selectors: CssSubSelectorList [],
+                                },
+                            },
+                        ],
+                        block: CssDeclarationOrRuleBlock {
+                            l_curly_token: L_CURLY@78..79 "{" [] [],
+                            items: CssDeclarationOrRuleList [],
+                            r_curly_token: R_CURLY@79..80 "}" [] [],
+                        },
+                    },
+                    CssNestedQualifiedRule {
+                        prelude: CssRelativeSelectorList [
+                            CssRelativeSelector {
+                                combinator: missing (optional),
+                                selector: CssCompoundSelector {
+                                    nesting_selectors: CssNestedSelectorList [
+                                        ScssParentSelector {
+                                            amp_token: AMP@80..84 "&" [Newline("\n"), Whitespace("  ")] [],
+                                            suffix: ScssParentSelectorSuffix {
+                                                items: ScssParentSelectorSuffixPartList [
+                                                    ScssParentSelectorSuffixHyphen {
+                                                        minus_token: MINUS@84..85 "-" [] [],
+                                                    },
+                                                    ScssParentSelectorSuffixHyphen {
+                                                        minus_token: MINUS@85..87 "-" [] [Whitespace(" ")],
+                                                    },
+                                                ],
+                                            },
+                                        },
+                                    ],
+                                    simple_selector: missing (optional),
+                                    sub_selectors: CssSubSelectorList [],
+                                },
+                            },
+                        ],
+                        block: CssDeclarationOrRuleBlock {
+                            l_curly_token: L_CURLY@87..88 "{" [] [],
+                            items: CssDeclarationOrRuleList [],
+                            r_curly_token: R_CURLY@88..89 "}" [] [],
+                        },
+                    },
+                    CssNestedQualifiedRule {
+                        prelude: CssRelativeSelectorList [
+                            CssRelativeSelector {
+                                combinator: missing (optional),
+                                selector: CssCompoundSelector {
+                                    nesting_selectors: CssNestedSelectorList [
+                                        ScssParentSelector {
+                                            amp_token: AMP@89..94 "&" [Newline("\n"), Newline("\n"), Whitespace("  ")] [],
+                                            suffix: ScssParentSelectorSuffix {
+                                                items: ScssParentSelectorSuffixPartList [
+                                                    CssIdentifier {
+                                                        value_token: IDENT@94..103 "--active" [] [Whitespace(" ")],
+                                                    },
+                                                ],
+                                            },
+                                        },
+                                    ],
+                                    simple_selector: missing (optional),
+                                    sub_selectors: CssSubSelectorList [],
+                                },
+                            },
+                        ],
+                        block: CssDeclarationOrRuleBlock {
+                            l_curly_token: L_CURLY@103..104 "{" [] [],
+                            items: CssDeclarationOrRuleList [],
+                            r_curly_token: R_CURLY@104..105 "}" [] [],
+                        },
+                    },
+                    CssNestedQualifiedRule {
+                        prelude: CssRelativeSelectorList [
+                            CssRelativeSelector {
+                                combinator: missing (optional),
+                                selector: CssComplexSelector {
+                                    left: CssCompoundSelector {
+                                        nesting_selectors: CssNestedSelectorList [
+                                            CssNestedSelector {
+                                                amp_token: AMP@105..109 "&" [Newline("\n"), Whitespace("  ")] [],
+                                            },
+                                        ],
+                                        simple_selector: missing (optional),
+                                        sub_selectors: CssSubSelectorList [],
+                                    },
+                                    combinator: CSS_SPACE_LITERAL@109..110 " " [] [],
+                                    right: CssCompoundSelector {
+                                        nesting_selectors: CssNestedSelectorList [],
+                                        simple_selector: CssTypeSelector {
+                                            namespace: missing (optional),
+                                            ident: ScssInterpolatedIdentifier {
+                                                items: ScssInterpolatedIdentifierPartList [
+                                                    ScssInterpolatedIdentifierHyphen {
+                                                        minus_token: MINUS@110..111 "-" [] [],
+                                                    },
+                                                    ScssInterpolatedIdentifierHyphen {
+                                                        minus_token: MINUS@111..112 "-" [] [],
+                                                    },
+                                                    ScssInterpolation {
+                                                        hash_token: HASH@112..113 "#" [] [],
+                                                        l_curly_token: L_CURLY@113..114 "{" [] [],
+                                                        value: ScssExpression {
+                                                            items: ScssExpressionItemList [
+                                                                ScssVariable {
+                                                                    dollar_token: DOLLAR@114..115 "$" [] [],
+                                                                    name: CssIdentifier {
+                                                                        value_token: IDENT@115..120 "state" [] [],
+                                                                    },
+                                                                },
+                                                            ],
+                                                        },
+                                                        r_curly_token: R_CURLY@120..122 "}" [] [Whitespace(" ")],
+                                                    },
+                                                ],
+                                            },
+                                        },
+                                        sub_selectors: CssSubSelectorList [],
+                                    },
+                                },
+                            },
+                        ],
+                        block: CssDeclarationOrRuleBlock {
+                            l_curly_token: L_CURLY@122..123 "{" [] [],
+                            items: CssDeclarationOrRuleList [],
+                            r_curly_token: R_CURLY@123..124 "}" [] [],
+                        },
+                    },
+                ],
+                r_curly_token: R_CURLY@124..126 "}" [Newline("\n")] [],
+            },
+        },
+    ],
+    eof_token: EOF@126..127 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..127
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..126
+    0: CSS_QUALIFIED_RULE@0..126
+      0: CSS_SELECTOR_LIST@0..11
+        0: CSS_COMPOUND_SELECTOR@0..11
+          0: CSS_NESTED_SELECTOR_LIST@0..0
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@0..11
+            0: CSS_CLASS_SELECTOR@0..11
+              0: DOT@0..1 "." [] []
+              1: CSS_CUSTOM_IDENTIFIER@1..11
+                0: IDENT@1..11 "component" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@11..126
+        0: L_CURLY@11..12 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@12..124
+          0: CSS_NESTED_QUALIFIED_RULE@12..30
+            0: CSS_RELATIVE_SELECTOR_LIST@12..28
+              0: CSS_RELATIVE_SELECTOR@12..28
+                0: (empty)
+                1: CSS_COMPOUND_SELECTOR@12..28
+                  0: CSS_NESTED_SELECTOR_LIST@12..28
+                    0: SCSS_PARENT_SELECTOR@12..28
+                      0: AMP@12..16 "&" [Newline("\n"), Whitespace("  ")] []
+                      1: SCSS_PARENT_SELECTOR_SUFFIX@16..28
+                        0: SCSS_PARENT_SELECTOR_SUFFIX_PART_LIST@16..28
+                          0: SCSS_PARENT_SELECTOR_SUFFIX_HYPHEN@16..17
+                            0: MINUS@16..17 "-" [] []
+                          1: SCSS_PARENT_SELECTOR_SUFFIX_HYPHEN@17..18
+                            0: MINUS@17..18 "-" [] []
+                          2: SCSS_INTERPOLATION@18..28
+                            0: HASH@18..19 "#" [] []
+                            1: L_CURLY@19..20 "{" [] []
+                            2: SCSS_EXPRESSION@20..26
+                              0: SCSS_EXPRESSION_ITEM_LIST@20..26
+                                0: SCSS_VARIABLE@20..26
+                                  0: DOLLAR@20..21 "$" [] []
+                                  1: CSS_IDENTIFIER@21..26
+                                    0: IDENT@21..26 "state" [] []
+                            3: R_CURLY@26..28 "}" [] [Whitespace(" ")]
+                  1: (empty)
+                  2: CSS_SUB_SELECTOR_LIST@28..28
+            1: CSS_DECLARATION_OR_RULE_BLOCK@28..30
+              0: L_CURLY@28..29 "{" [] []
+              1: CSS_DECLARATION_OR_RULE_LIST@29..29
+              2: R_CURLY@29..30 "}" [] []
+          1: CSS_NESTED_QUALIFIED_RULE@30..48
+            0: CSS_RELATIVE_SELECTOR_LIST@30..46
+              0: CSS_RELATIVE_SELECTOR@30..46
+                0: (empty)
+                1: CSS_COMPOUND_SELECTOR@30..46
+                  0: CSS_NESTED_SELECTOR_LIST@30..46
+                    0: SCSS_PARENT_SELECTOR@30..46
+                      0: AMP@30..34 "&" [Newline("\n"), Whitespace("  ")] []
+                      1: SCSS_PARENT_SELECTOR_SUFFIX@34..46
+                        0: SCSS_PARENT_SELECTOR_SUFFIX_PART_LIST@34..46
+                          0: SCSS_INTERPOLATION@34..43
+                            0: HASH@34..35 "#" [] []
+                            1: L_CURLY@35..36 "{" [] []
+                            2: SCSS_EXPRESSION@36..42
+                              0: SCSS_EXPRESSION_ITEM_LIST@36..42
+                                0: SCSS_VARIABLE@36..42
+                                  0: DOLLAR@36..37 "$" [] []
+                                  1: CSS_IDENTIFIER@37..42
+                                    0: IDENT@37..42 "state" [] []
+                            3: R_CURLY@42..43 "}" [] []
+                          1: SCSS_PARENT_SELECTOR_SUFFIX_HYPHEN@43..44
+                            0: MINUS@43..44 "-" [] []
+                          2: SCSS_PARENT_SELECTOR_SUFFIX_HYPHEN@44..46
+                            0: MINUS@44..46 "-" [] [Whitespace(" ")]
+                  1: (empty)
+                  2: CSS_SUB_SELECTOR_LIST@46..46
+            1: CSS_DECLARATION_OR_RULE_BLOCK@46..48
+              0: L_CURLY@46..47 "{" [] []
+              1: CSS_DECLARATION_OR_RULE_LIST@47..47
+              2: R_CURLY@47..48 "}" [] []
+          2: CSS_NESTED_QUALIFIED_RULE@48..70
+            0: CSS_RELATIVE_SELECTOR_LIST@48..68
+              0: CSS_RELATIVE_SELECTOR@48..68
+                0: (empty)
+                1: CSS_COMPLEX_SELECTOR@48..68
+                  0: CSS_COMPOUND_SELECTOR@48..63
+                    0: CSS_NESTED_SELECTOR_LIST@48..63
+                      0: SCSS_PARENT_SELECTOR@48..63
+                        0: AMP@48..52 "&" [Newline("\n"), Whitespace("  ")] []
+                        1: SCSS_PARENT_SELECTOR_SUFFIX@52..63
+                          0: SCSS_PARENT_SELECTOR_SUFFIX_PART_LIST@52..63
+                            0: SCSS_INTERPOLATION@52..61
+                              0: HASH@52..53 "#" [] []
+                              1: L_CURLY@53..54 "{" [] []
+                              2: SCSS_EXPRESSION@54..60
+                                0: SCSS_EXPRESSION_ITEM_LIST@54..60
+                                  0: SCSS_VARIABLE@54..60
+                                    0: DOLLAR@54..55 "$" [] []
+                                    1: CSS_IDENTIFIER@55..60
+                                      0: IDENT@55..60 "state" [] []
+                              3: R_CURLY@60..61 "}" [] []
+                            1: SCSS_PARENT_SELECTOR_SUFFIX_HYPHEN@61..62
+                              0: MINUS@61..62 "-" [] []
+                            2: SCSS_PARENT_SELECTOR_SUFFIX_HYPHEN@62..63
+                              0: MINUS@62..63 "-" [] []
+                    1: (empty)
+                    2: CSS_SUB_SELECTOR_LIST@63..63
+                  1: CSS_SPACE_LITERAL@63..64 " " [] []
+                  2: CSS_COMPOUND_SELECTOR@64..68
+                    0: CSS_NESTED_SELECTOR_LIST@64..64
+                    1: CSS_TYPE_SELECTOR@64..68
+                      0: (empty)
+                      1: CSS_IDENTIFIER@64..68
+                        0: IDENT@64..68 "div" [] [Whitespace(" ")]
+                    2: CSS_SUB_SELECTOR_LIST@68..68
+            1: CSS_DECLARATION_OR_RULE_BLOCK@68..70
+              0: L_CURLY@68..69 "{" [] []
+              1: CSS_DECLARATION_OR_RULE_LIST@69..69
+              2: R_CURLY@69..70 "}" [] []
+          3: CSS_NESTED_QUALIFIED_RULE@70..80
+            0: CSS_RELATIVE_SELECTOR_LIST@70..78
+              0: CSS_RELATIVE_SELECTOR@70..78
+                0: (empty)
+                1: CSS_COMPOUND_SELECTOR@70..78
+                  0: CSS_NESTED_SELECTOR_LIST@70..78
+                    0: SCSS_PARENT_SELECTOR@70..78
+                      0: AMP@70..74 "&" [Newline("\n"), Whitespace("  ")] []
+                      1: SCSS_PARENT_SELECTOR_SUFFIX@74..78
+                        0: SCSS_PARENT_SELECTOR_SUFFIX_PART_LIST@74..78
+                          0: CSS_IDENTIFIER@74..78
+                            0: IDENT@74..78 "---" [] [Whitespace(" ")]
+                  1: (empty)
+                  2: CSS_SUB_SELECTOR_LIST@78..78
+            1: CSS_DECLARATION_OR_RULE_BLOCK@78..80
+              0: L_CURLY@78..79 "{" [] []
+              1: CSS_DECLARATION_OR_RULE_LIST@79..79
+              2: R_CURLY@79..80 "}" [] []
+          4: CSS_NESTED_QUALIFIED_RULE@80..89
+            0: CSS_RELATIVE_SELECTOR_LIST@80..87
+              0: CSS_RELATIVE_SELECTOR@80..87
+                0: (empty)
+                1: CSS_COMPOUND_SELECTOR@80..87
+                  0: CSS_NESTED_SELECTOR_LIST@80..87
+                    0: SCSS_PARENT_SELECTOR@80..87
+                      0: AMP@80..84 "&" [Newline("\n"), Whitespace("  ")] []
+                      1: SCSS_PARENT_SELECTOR_SUFFIX@84..87
+                        0: SCSS_PARENT_SELECTOR_SUFFIX_PART_LIST@84..87
+                          0: SCSS_PARENT_SELECTOR_SUFFIX_HYPHEN@84..85
+                            0: MINUS@84..85 "-" [] []
+                          1: SCSS_PARENT_SELECTOR_SUFFIX_HYPHEN@85..87
+                            0: MINUS@85..87 "-" [] [Whitespace(" ")]
+                  1: (empty)
+                  2: CSS_SUB_SELECTOR_LIST@87..87
+            1: CSS_DECLARATION_OR_RULE_BLOCK@87..89
+              0: L_CURLY@87..88 "{" [] []
+              1: CSS_DECLARATION_OR_RULE_LIST@88..88
+              2: R_CURLY@88..89 "}" [] []
+          5: CSS_NESTED_QUALIFIED_RULE@89..105
+            0: CSS_RELATIVE_SELECTOR_LIST@89..103
+              0: CSS_RELATIVE_SELECTOR@89..103
+                0: (empty)
+                1: CSS_COMPOUND_SELECTOR@89..103
+                  0: CSS_NESTED_SELECTOR_LIST@89..103
+                    0: SCSS_PARENT_SELECTOR@89..103
+                      0: AMP@89..94 "&" [Newline("\n"), Newline("\n"), Whitespace("  ")] []
+                      1: SCSS_PARENT_SELECTOR_SUFFIX@94..103
+                        0: SCSS_PARENT_SELECTOR_SUFFIX_PART_LIST@94..103
+                          0: CSS_IDENTIFIER@94..103
+                            0: IDENT@94..103 "--active" [] [Whitespace(" ")]
+                  1: (empty)
+                  2: CSS_SUB_SELECTOR_LIST@103..103
+            1: CSS_DECLARATION_OR_RULE_BLOCK@103..105
+              0: L_CURLY@103..104 "{" [] []
+              1: CSS_DECLARATION_OR_RULE_LIST@104..104
+              2: R_CURLY@104..105 "}" [] []
+          6: CSS_NESTED_QUALIFIED_RULE@105..124
+            0: CSS_RELATIVE_SELECTOR_LIST@105..122
+              0: CSS_RELATIVE_SELECTOR@105..122
+                0: (empty)
+                1: CSS_COMPLEX_SELECTOR@105..122
+                  0: CSS_COMPOUND_SELECTOR@105..109
+                    0: CSS_NESTED_SELECTOR_LIST@105..109
+                      0: CSS_NESTED_SELECTOR@105..109
+                        0: AMP@105..109 "&" [Newline("\n"), Whitespace("  ")] []
+                    1: (empty)
+                    2: CSS_SUB_SELECTOR_LIST@109..109
+                  1: CSS_SPACE_LITERAL@109..110 " " [] []
+                  2: CSS_COMPOUND_SELECTOR@110..122
+                    0: CSS_NESTED_SELECTOR_LIST@110..110
+                    1: CSS_TYPE_SELECTOR@110..122
+                      0: (empty)
+                      1: SCSS_INTERPOLATED_IDENTIFIER@110..122
+                        0: SCSS_INTERPOLATED_IDENTIFIER_PART_LIST@110..122
+                          0: SCSS_INTERPOLATED_IDENTIFIER_HYPHEN@110..111
+                            0: MINUS@110..111 "-" [] []
+                          1: SCSS_INTERPOLATED_IDENTIFIER_HYPHEN@111..112
+                            0: MINUS@111..112 "-" [] []
+                          2: SCSS_INTERPOLATION@112..122
+                            0: HASH@112..113 "#" [] []
+                            1: L_CURLY@113..114 "{" [] []
+                            2: SCSS_EXPRESSION@114..120
+                              0: SCSS_EXPRESSION_ITEM_LIST@114..120
+                                0: SCSS_VARIABLE@114..120
+                                  0: DOLLAR@114..115 "$" [] []
+                                  1: CSS_IDENTIFIER@115..120
+                                    0: IDENT@115..120 "state" [] []
+                            3: R_CURLY@120..122 "}" [] [Whitespace(" ")]
+                    2: CSS_SUB_SELECTOR_LIST@122..122
+            1: CSS_DECLARATION_OR_RULE_BLOCK@122..124
+              0: L_CURLY@122..123 "{" [] []
+              1: CSS_DECLARATION_OR_RULE_LIST@123..123
+              2: R_CURLY@123..124 "}" [] []
+        2: R_CURLY@124..126 "}" [Newline("\n")] []
+  2: EOF@126..127 "" [Newline("\n")] []
+
+```

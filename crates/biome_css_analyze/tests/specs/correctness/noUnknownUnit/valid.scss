@@ -1,0 +1,11 @@
+/* should not generate diagnostics */
+$size: 10px;
+.element {
+  width: $size;
+}
+
+.custom-property-hex {
+  --digit-led: #4566a8;
+  --digit-led-alpha: #1a2b3c4d;
+  --letter-led: #ff0000;
+}

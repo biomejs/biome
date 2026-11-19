@@ -1,0 +1,50 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<script>
+export default {
+  props: {
+    value: String,
+    list: Array,
+    user: Object,
+  },
+  data() {
+    return {
+      localValue: this.value,
+      localList: [...this.list],
+    };
+  },
+  methods: {
+    readProps() {
+      console.log(this.value, this.list.length, this.user.name);
+      return this.list.map((item) => item.id);
+    },
+    emitUpdate() {
+      this.$emit("update:value", "test");
+    },
+    updateLocal() {
+      this.localValue = "test";
+      this.localList.push(1);
+    },
+    shadowedByParameter(value) {
+      value = "test";
+      return value;
+    },
+  },
+};
+</script>
+
+<template>
+  <input :value="value" @input="$emit('update:value', $event.target.value)" />
+  <input v-model="localValue" />
+  <div v-for="item in list" :key="item.id" @click="item.selected = true">
+    {{ item.name }}
+  </div>
+  <button @click="localList.push(user.name)">Add</button>
+</template>
+
+```

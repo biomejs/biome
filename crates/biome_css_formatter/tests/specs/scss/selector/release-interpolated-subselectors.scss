@@ -1,0 +1,7 @@
+$suffix:   ".active" ;
+.card:not( /* excluded */.disabled )#{ /* suffix */ $suffix }{color:red}
+.card[ data-state ]#{ $suffix /* attribute suffix */ }{color:blue}
+.card:not(.disabled)  #{ /* descendant */$suffix}{color:red}
+.card[data-state]
+#{$suffix}{color:blue}
+.card:not(.disabled)#{$suffix}Tail{color:red}

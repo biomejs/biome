@@ -1,0 +1,19 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: directive/with-system-id.html
+---
+
+# Input
+
+```html
+<!DOCTYPE HTML SYSTEM "about:legacy-compat">
+
+```
+
+
+# Formatted
+
+```html
+<!DOCTYPE html SYSTEM "about:legacy-compat">
+
+```

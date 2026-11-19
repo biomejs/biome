@@ -74,6 +74,14 @@ a {
     }
 };
 
+:root {
+  --page-margin: 1in;
+}
+
+@page {
+  margin: --page-margin;
+}
+
 ```
 
 _Note: The parser emitted 2 diagnostics which are not shown here._
@@ -93,6 +101,8 @@ invalid.css:4:12 lint/correctness/noMissingVarFunction ━━━━━━━━�
   
   i CSS variables should be used with the 'var()' function to ensure proper fallback behavior and browser compatibility.
   
+  i Wrap the variable in 'var()', for example var(--foo).
+  
 
 ```
 
@@ -109,6 +119,8 @@ invalid.css:10:12 lint/correctness/noMissingVarFunction ━━━━━━━━
     12 │ 
   
   i CSS variables should be used with the 'var()' function to ensure proper fallback behavior and browser compatibility.
+  
+  i Wrap the variable in 'var()', for example var(--bar).
   
 
 ```
@@ -127,6 +139,8 @@ invalid.css:18:12 lint/correctness/noMissingVarFunction ━━━━━━━━
   
   i CSS variables should be used with the 'var()' function to ensure proper fallback behavior and browser compatibility.
   
+  i Wrap the variable in 'var()', for example var(--baz).
+  
 
 ```
 
@@ -143,6 +157,8 @@ invalid.css:26:30 lint/correctness/noMissingVarFunction ━━━━━━━━
     28 │ 
   
   i CSS variables should be used with the 'var()' function to ensure proper fallback behavior and browser compatibility.
+  
+  i Wrap the variable in 'var()', for example var(--aaaa).
   
 
 ```
@@ -161,6 +177,8 @@ invalid.css:34:12 lint/correctness/noMissingVarFunction ━━━━━━━━
   
   i CSS variables should be used with the 'var()' function to ensure proper fallback behavior and browser compatibility.
   
+  i Wrap the variable in 'var()', for example var(--bbbb).
+  
 
 ```
 
@@ -177,6 +195,8 @@ invalid.css:42:18 lint/correctness/noMissingVarFunction ━━━━━━━━
     44 │ 
   
   i CSS variables should be used with the 'var()' function to ensure proper fallback behavior and browser compatibility.
+  
+  i Wrap the variable in 'var()', for example var(--cccc).
   
 
 ```
@@ -195,6 +215,8 @@ invalid.css:51:12 lint/correctness/noMissingVarFunction ━━━━━━━━
   
   i CSS variables should be used with the 'var()' function to ensure proper fallback behavior and browser compatibility.
   
+  i Wrap the variable in 'var()', for example var(--dddd).
+  
 
 ```
 
@@ -211,6 +233,8 @@ invalid.css:52:12 lint/correctness/noMissingVarFunction ━━━━━━━━
     54 │ 
   
   i CSS variables should be used with the 'var()' function to ensure proper fallback behavior and browser compatibility.
+  
+  i Wrap the variable in 'var()', for example var(--eeee).
   
 
 ```
@@ -229,6 +253,8 @@ invalid.css:59:12 lint/correctness/noMissingVarFunction ━━━━━━━━
   
   i CSS variables should be used with the 'var()' function to ensure proper fallback behavior and browser compatibility.
   
+  i Wrap the variable in 'var()', for example var(--ffff).
+  
 
 ```
 
@@ -246,6 +272,8 @@ invalid.css:60:12 lint/correctness/noMissingVarFunction ━━━━━━━━
   
   i CSS variables should be used with the 'var()' function to ensure proper fallback behavior and browser compatibility.
   
+  i Wrap the variable in 'var()', for example var(--gggg).
+  
 
 ```
 
@@ -262,6 +290,26 @@ invalid.css:67:14 lint/correctness/noMissingVarFunction ━━━━━━━━
     69 │ };
   
   i CSS variables should be used with the 'var()' function to ensure proper fallback behavior and browser compatibility.
+  
+  i Wrap the variable in 'var()', for example var(--foo).
+  
+
+```
+
+```
+invalid.css:76:11 lint/correctness/noMissingVarFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × CSS variables '--page-margin' is used without the 'var()' function
+  
+    75 │ @page {
+  > 76 │   margin: --page-margin;
+       │           ^^^^^^^^^^^^^
+    77 │ }
+    78 │ 
+  
+  i CSS variables should be used with the 'var()' function to ensure proper fallback behavior and browser compatibility.
+  
+  i Wrap the variable in 'var()', for example var(--page-margin).
   
 
 ```

@@ -16,6 +16,7 @@ f<T> != f<T>;
 f<T> === f<T>;
 f<T> !== f<T>;
 f<T> <= f<T>;
+f<T> << f<T>;
 f<T> instanceof f<T>;
 f<T> in {};
 f<T> as {};

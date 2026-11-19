@@ -15,6 +15,8 @@ $INVALID.js lint/style/useFilenamingConvention ━━━━━━━━━━━
 
   i The filename should be in camelCase or kebab-case or snake_case or equal to the name of an export.
   
+  i A consistent filename style makes files easier to find. It also avoids problems on file systems that ignore letter case.
+  
   i The filename could be renamed to one of the following names:
     $invalid.js
   

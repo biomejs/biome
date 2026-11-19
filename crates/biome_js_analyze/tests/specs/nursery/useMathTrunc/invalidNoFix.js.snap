@@ -1,0 +1,162 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidNoFix.js
+---
+# Input
+```js
+/* should generate diagnostics */
+const a = ~~(/* keep */ 1 + 2 / 3.4);
+const b = /* keep */ ~ /* drop */ ~ 3.4;
+const c = x /* keep */ << 0;
+const d = 3.4 /* drop */ | /* drop */ 0;
+const e = parseInt(/* comment */ String(number), 10);
+const f = parseInt(String /* comment */ (number), 10);
+const g = parseInt(String(number), /* comment */ 10);
+
+```
+
+# Diagnostics
+```
+invalidNoFix.js:2:11 lint/nursery/useMathTrunc ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use Math.trunc() instead of ~~.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const a = ~~(/* keep */ 1 + 2 / 3.4);
+      │           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ const b = /* keep */ ~ /* drop */ ~ 3.4;
+    4 │ const c = x /* keep */ << 0;
+  
+  i Bitwise operations turn the number into a 32-bit integer first, so numbers above 2147483647 or below -2147483648 give wrong results.
+  
+  i Math.trunc() removes the decimal part of any number and states the intent clearly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidNoFix.js:3:22 lint/nursery/useMathTrunc ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use Math.trunc() instead of ~~.
+  
+    1 │ /* should generate diagnostics */
+    2 │ const a = ~~(/* keep */ 1 + 2 / 3.4);
+  > 3 │ const b = /* keep */ ~ /* drop */ ~ 3.4;
+      │                      ^^^^^^^^^^^^^^^^^^
+    4 │ const c = x /* keep */ << 0;
+    5 │ const d = 3.4 /* drop */ | /* drop */ 0;
+  
+  i Bitwise operations turn the number into a 32-bit integer first, so numbers above 2147483647 or below -2147483648 give wrong results.
+  
+  i Math.trunc() removes the decimal part of any number and states the intent clearly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidNoFix.js:4:11 lint/nursery/useMathTrunc ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use Math.trunc() instead of << 0.
+  
+    2 │ const a = ~~(/* keep */ 1 + 2 / 3.4);
+    3 │ const b = /* keep */ ~ /* drop */ ~ 3.4;
+  > 4 │ const c = x /* keep */ << 0;
+      │           ^^^^^^^^^^^^^^^^^
+    5 │ const d = 3.4 /* drop */ | /* drop */ 0;
+    6 │ const e = parseInt(/* comment */ String(number), 10);
+  
+  i Bitwise operations turn the number into a 32-bit integer first, so numbers above 2147483647 or below -2147483648 give wrong results.
+  
+  i Math.trunc() removes the decimal part of any number and states the intent clearly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidNoFix.js:5:11 lint/nursery/useMathTrunc ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use Math.trunc() instead of | 0.
+  
+    3 │ const b = /* keep */ ~ /* drop */ ~ 3.4;
+    4 │ const c = x /* keep */ << 0;
+  > 5 │ const d = 3.4 /* drop */ | /* drop */ 0;
+      │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ const e = parseInt(/* comment */ String(number), 10);
+    7 │ const f = parseInt(String /* comment */ (number), 10);
+  
+  i Bitwise operations turn the number into a 32-bit integer first, so numbers above 2147483647 or below -2147483648 give wrong results.
+  
+  i Math.trunc() removes the decimal part of any number and states the intent clearly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidNoFix.js:6:11 lint/nursery/useMathTrunc ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use Math.trunc() instead of parseInt(String(...), 10).
+  
+    4 │ const c = x /* keep */ << 0;
+    5 │ const d = 3.4 /* drop */ | /* drop */ 0;
+  > 6 │ const e = parseInt(/* comment */ String(number), 10);
+      │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ const f = parseInt(String /* comment */ (number), 10);
+    8 │ const g = parseInt(String(number), /* comment */ 10);
+  
+  i Very large and very small numbers turn into strings such as "1e+21", which parseInt() reads as 1.
+  
+  i Math.trunc() removes the decimal part of any number and states the intent clearly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidNoFix.js:7:11 lint/nursery/useMathTrunc ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use Math.trunc() instead of parseInt(String(...), 10).
+  
+    5 │ const d = 3.4 /* drop */ | /* drop */ 0;
+    6 │ const e = parseInt(/* comment */ String(number), 10);
+  > 7 │ const f = parseInt(String /* comment */ (number), 10);
+      │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ const g = parseInt(String(number), /* comment */ 10);
+    9 │ 
+  
+  i Very large and very small numbers turn into strings such as "1e+21", which parseInt() reads as 1.
+  
+  i Math.trunc() removes the decimal part of any number and states the intent clearly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidNoFix.js:8:11 lint/nursery/useMathTrunc ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use Math.trunc() instead of parseInt(String(...), 10).
+  
+    6 │ const e = parseInt(/* comment */ String(number), 10);
+    7 │ const f = parseInt(String /* comment */ (number), 10);
+  > 8 │ const g = parseInt(String(number), /* comment */ 10);
+      │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    9 │ 
+  
+  i Very large and very small numbers turn into strings such as "1e+21", which parseInt() reads as 1.
+  
+  i Math.trunc() removes the decimal part of any number and states the intent clearly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

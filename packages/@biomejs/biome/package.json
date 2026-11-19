@@ -1,6 +1,6 @@
 {
   "name": "@biomejs/biome",
-  "version": "2.4.16",
+  "version": "2.6.8",
   "bin": {
     "biome": "bin/biome"
   },
@@ -17,6 +17,7 @@
   "files": [
     "bin/biome",
     "configuration_schema.json",
+    "manifest_schema.json",
     "README.md",
     "LICENSE-APACHE",
     "LICENSE-MIT",
@@ -46,13 +47,15 @@
     "provenance": true
   },
   "optionalDependencies": {
-    "@biomejs/cli-win32-x64": "2.4.16",
-    "@biomejs/cli-win32-arm64": "2.4.16",
-    "@biomejs/cli-darwin-x64": "2.4.16",
-    "@biomejs/cli-darwin-arm64": "2.4.16",
-    "@biomejs/cli-linux-x64": "2.4.16",
-    "@biomejs/cli-linux-arm64": "2.4.16",
-    "@biomejs/cli-linux-x64-musl": "2.4.16",
-    "@biomejs/cli-linux-arm64-musl": "2.4.16"
+    "@biomejs/cli-win32-x64": "2.6.8",
+    "@biomejs/cli-win32-arm64": "2.6.8",
+    "@biomejs/cli-darwin-x64": "2.6.8",
+    "@biomejs/cli-darwin-arm64": "2.6.8",
+    "@biomejs/cli-linux-x64": "2.6.8",
+    "@biomejs/cli-linux-arm64": "2.6.8",
+    "@biomejs/cli-linux-x64-musl": "2.6.8",
+    "@biomejs/cli-linux-arm64-musl": "2.6.8",
+    "@biomejs/cli-android-x64": "2.6.8",
+    "@biomejs/cli-android-arm64": "2.6.8"
   }
 }

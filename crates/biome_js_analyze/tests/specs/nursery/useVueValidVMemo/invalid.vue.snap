@@ -1,0 +1,429 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<template>
+  <div v-memo="{x}" />
+  <div v-memo="a ? {b} : c+d" />
+  <div v-memo="(a,{b},c(),d+1)" />
+  <div v-memo="()=>42" />
+  <div v-memo="function () { return [] }" />
+  <div v-memo="a=42" />
+  <div v-memo="'string'" />
+  <div v-memo="42" />
+  <div v-memo="null" />
+  <div v-memo="`template ${x}`" />
+  <div v-memo="!x" />
+  <div v-memo="typeof x" />
+  <div v-memo="x++" />
+  <div v-memo="--x" />
+  <div v-memo="'a' in x" />
+  <div v-memo="x instanceof Array" />
+  <div v-memo="class {}" />
+  <div v-memo="({ x })" />
+</template>
+
+```
+
+# Diagnostics
+```
+invalid.vue:3:16 lint/nursery/useVueValidVMemo ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The value of v-memo must be an array, but this expression never produces one.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <template>
+  > 3 │   <div v-memo="{x}" />
+      │                ^^^
+    4 │   <div v-memo="a ? {b} : c+d" />
+    5 │   <div v-memo="(a,{b},c(),d+1)" />
+  
+  i Vue skips updating this element until one of the values in the v-memo array changes, so it needs an array to compare.
+  
+  i Put the values in square brackets, for example v-memo="[item.id, selected]".
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:4:20 lint/nursery/useVueValidVMemo ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The value of v-memo must be an array, but this expression never produces one.
+  
+    2 │ <template>
+    3 │   <div v-memo="{x}" />
+  > 4 │   <div v-memo="a ? {b} : c+d" />
+      │                    ^^^
+    5 │   <div v-memo="(a,{b},c(),d+1)" />
+    6 │   <div v-memo="()=>42" />
+  
+  i Vue skips updating this element until one of the values in the v-memo array changes, so it needs an array to compare.
+  
+  i Put the values in square brackets, for example v-memo="[item.id, selected]".
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:4:26 lint/nursery/useVueValidVMemo ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The value of v-memo must be an array, but this expression never produces one.
+  
+    2 │ <template>
+    3 │   <div v-memo="{x}" />
+  > 4 │   <div v-memo="a ? {b} : c+d" />
+      │                          ^^^
+    5 │   <div v-memo="(a,{b},c(),d+1)" />
+    6 │   <div v-memo="()=>42" />
+  
+  i Vue skips updating this element until one of the values in the v-memo array changes, so it needs an array to compare.
+  
+  i Put the values in square brackets, for example v-memo="[item.id, selected]".
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:5:27 lint/nursery/useVueValidVMemo ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The value of v-memo must be an array, but this expression never produces one.
+  
+    3 │   <div v-memo="{x}" />
+    4 │   <div v-memo="a ? {b} : c+d" />
+  > 5 │   <div v-memo="(a,{b},c(),d+1)" />
+      │                           ^^^
+    6 │   <div v-memo="()=>42" />
+    7 │   <div v-memo="function () { return [] }" />
+  
+  i Vue skips updating this element until one of the values in the v-memo array changes, so it needs an array to compare.
+  
+  i Put the values in square brackets, for example v-memo="[item.id, selected]".
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:6:16 lint/nursery/useVueValidVMemo ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The value of v-memo must be an array, but this expression never produces one.
+  
+    4 │   <div v-memo="a ? {b} : c+d" />
+    5 │   <div v-memo="(a,{b},c(),d+1)" />
+  > 6 │   <div v-memo="()=>42" />
+      │                ^^^^^^
+    7 │   <div v-memo="function () { return [] }" />
+    8 │   <div v-memo="a=42" />
+  
+  i Vue skips updating this element until one of the values in the v-memo array changes, so it needs an array to compare.
+  
+  i Put the values in square brackets, for example v-memo="[item.id, selected]".
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:7:16 lint/nursery/useVueValidVMemo ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The value of v-memo must be an array, but this expression never produces one.
+  
+    5 │   <div v-memo="(a,{b},c(),d+1)" />
+    6 │   <div v-memo="()=>42" />
+  > 7 │   <div v-memo="function () { return [] }" />
+      │                ^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │   <div v-memo="a=42" />
+    9 │   <div v-memo="'string'" />
+  
+  i Vue skips updating this element until one of the values in the v-memo array changes, so it needs an array to compare.
+  
+  i Put the values in square brackets, for example v-memo="[item.id, selected]".
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:8:18 lint/nursery/useVueValidVMemo ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The value of v-memo must be an array, but this expression never produces one.
+  
+     6 │   <div v-memo="()=>42" />
+     7 │   <div v-memo="function () { return [] }" />
+   > 8 │   <div v-memo="a=42" />
+       │                  ^^
+     9 │   <div v-memo="'string'" />
+    10 │   <div v-memo="42" />
+  
+  i Vue skips updating this element until one of the values in the v-memo array changes, so it needs an array to compare.
+  
+  i Put the values in square brackets, for example v-memo="[item.id, selected]".
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:9:16 lint/nursery/useVueValidVMemo ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The value of v-memo must be an array, but this expression never produces one.
+  
+     7 │   <div v-memo="function () { return [] }" />
+     8 │   <div v-memo="a=42" />
+   > 9 │   <div v-memo="'string'" />
+       │                ^^^^^^^^
+    10 │   <div v-memo="42" />
+    11 │   <div v-memo="null" />
+  
+  i Vue skips updating this element until one of the values in the v-memo array changes, so it needs an array to compare.
+  
+  i Put the values in square brackets, for example v-memo="[item.id, selected]".
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:10:16 lint/nursery/useVueValidVMemo ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The value of v-memo must be an array, but this expression never produces one.
+  
+     8 │   <div v-memo="a=42" />
+     9 │   <div v-memo="'string'" />
+  > 10 │   <div v-memo="42" />
+       │                ^^
+    11 │   <div v-memo="null" />
+    12 │   <div v-memo="`template ${x}`" />
+  
+  i Vue skips updating this element until one of the values in the v-memo array changes, so it needs an array to compare.
+  
+  i Put the values in square brackets, for example v-memo="[item.id, selected]".
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:11:16 lint/nursery/useVueValidVMemo ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The value of v-memo must be an array, but this expression never produces one.
+  
+     9 │   <div v-memo="'string'" />
+    10 │   <div v-memo="42" />
+  > 11 │   <div v-memo="null" />
+       │                ^^^^
+    12 │   <div v-memo="`template ${x}`" />
+    13 │   <div v-memo="!x" />
+  
+  i Vue skips updating this element until one of the values in the v-memo array changes, so it needs an array to compare.
+  
+  i Put the values in square brackets, for example v-memo="[item.id, selected]".
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:12:16 lint/nursery/useVueValidVMemo ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The value of v-memo must be an array, but this expression never produces one.
+  
+    10 │   <div v-memo="42" />
+    11 │   <div v-memo="null" />
+  > 12 │   <div v-memo="`template ${x}`" />
+       │                ^^^^^^^^^^^^^^^
+    13 │   <div v-memo="!x" />
+    14 │   <div v-memo="typeof x" />
+  
+  i Vue skips updating this element until one of the values in the v-memo array changes, so it needs an array to compare.
+  
+  i Put the values in square brackets, for example v-memo="[item.id, selected]".
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:13:16 lint/nursery/useVueValidVMemo ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The value of v-memo must be an array, but this expression never produces one.
+  
+    11 │   <div v-memo="null" />
+    12 │   <div v-memo="`template ${x}`" />
+  > 13 │   <div v-memo="!x" />
+       │                ^^
+    14 │   <div v-memo="typeof x" />
+    15 │   <div v-memo="x++" />
+  
+  i Vue skips updating this element until one of the values in the v-memo array changes, so it needs an array to compare.
+  
+  i Put the values in square brackets, for example v-memo="[item.id, selected]".
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:14:16 lint/nursery/useVueValidVMemo ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The value of v-memo must be an array, but this expression never produces one.
+  
+    12 │   <div v-memo="`template ${x}`" />
+    13 │   <div v-memo="!x" />
+  > 14 │   <div v-memo="typeof x" />
+       │                ^^^^^^^^
+    15 │   <div v-memo="x++" />
+    16 │   <div v-memo="--x" />
+  
+  i Vue skips updating this element until one of the values in the v-memo array changes, so it needs an array to compare.
+  
+  i Put the values in square brackets, for example v-memo="[item.id, selected]".
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:15:16 lint/nursery/useVueValidVMemo ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The value of v-memo must be an array, but this expression never produces one.
+  
+    13 │   <div v-memo="!x" />
+    14 │   <div v-memo="typeof x" />
+  > 15 │   <div v-memo="x++" />
+       │                ^^^
+    16 │   <div v-memo="--x" />
+    17 │   <div v-memo="'a' in x" />
+  
+  i Vue skips updating this element until one of the values in the v-memo array changes, so it needs an array to compare.
+  
+  i Put the values in square brackets, for example v-memo="[item.id, selected]".
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:16:16 lint/nursery/useVueValidVMemo ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The value of v-memo must be an array, but this expression never produces one.
+  
+    14 │   <div v-memo="typeof x" />
+    15 │   <div v-memo="x++" />
+  > 16 │   <div v-memo="--x" />
+       │                ^^^
+    17 │   <div v-memo="'a' in x" />
+    18 │   <div v-memo="x instanceof Array" />
+  
+  i Vue skips updating this element until one of the values in the v-memo array changes, so it needs an array to compare.
+  
+  i Put the values in square brackets, for example v-memo="[item.id, selected]".
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:17:16 lint/nursery/useVueValidVMemo ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The value of v-memo must be an array, but this expression never produces one.
+  
+    15 │   <div v-memo="x++" />
+    16 │   <div v-memo="--x" />
+  > 17 │   <div v-memo="'a' in x" />
+       │                ^^^^^^^^
+    18 │   <div v-memo="x instanceof Array" />
+    19 │   <div v-memo="class {}" />
+  
+  i Vue skips updating this element until one of the values in the v-memo array changes, so it needs an array to compare.
+  
+  i Put the values in square brackets, for example v-memo="[item.id, selected]".
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:18:16 lint/nursery/useVueValidVMemo ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The value of v-memo must be an array, but this expression never produces one.
+  
+    16 │   <div v-memo="--x" />
+    17 │   <div v-memo="'a' in x" />
+  > 18 │   <div v-memo="x instanceof Array" />
+       │                ^^^^^^^^^^^^^^^^^^
+    19 │   <div v-memo="class {}" />
+    20 │   <div v-memo="({ x })" />
+  
+  i Vue skips updating this element until one of the values in the v-memo array changes, so it needs an array to compare.
+  
+  i Put the values in square brackets, for example v-memo="[item.id, selected]".
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:19:16 lint/nursery/useVueValidVMemo ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The value of v-memo must be an array, but this expression never produces one.
+  
+    17 │   <div v-memo="'a' in x" />
+    18 │   <div v-memo="x instanceof Array" />
+  > 19 │   <div v-memo="class {}" />
+       │                ^^^^^^^^
+    20 │   <div v-memo="({ x })" />
+    21 │ </template>
+  
+  i Vue skips updating this element until one of the values in the v-memo array changes, so it needs an array to compare.
+  
+  i Put the values in square brackets, for example v-memo="[item.id, selected]".
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:20:17 lint/nursery/useVueValidVMemo ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The value of v-memo must be an array, but this expression never produces one.
+  
+    18 │   <div v-memo="x instanceof Array" />
+    19 │   <div v-memo="class {}" />
+  > 20 │   <div v-memo="({ x })" />
+       │                 ^^^^^
+    21 │ </template>
+    22 │ 
+  
+  i Vue skips updating this element until one of the values in the v-memo array changes, so it needs an array to compare.
+  
+  i Put the values in square brackets, for example v-memo="[item.id, selected]".
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

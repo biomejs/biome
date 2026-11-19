@@ -1,0 +1,41 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: Button.astro
+---
+# Input
+```astro
+<!-- should generate diagnostics -->
+<button class="btn-invalid">This class does not exist</button>
+
+```
+
+# Diagnostics
+```
+Button.astro:2:16 lint/nursery/noUndeclaredClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The CSS class btn-invalid is not defined in any available stylesheet.
+  
+    1 │ <!-- should generate diagnostics -->
+  > 2 │ <button class="btn-invalid">This class does not exist</button>
+      │                ^^^^^^^^^^^
+    3 │ 
+  
+  i Referencing undefined classes often indicates a typo or a missing stylesheet, and will result in elements not being styled as intended.
+  
+  i Checked import tree:
+    
+    Button.astro (this file)
+      └─ imported by:
+        └─ • Page.astro
+          └─ imported by:
+            └─ • App.astro -> which imports app.css
+  
+  
+  i Either define this class in a `<style>` block, import a CSS file that contains it, or remove this class name.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9156 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

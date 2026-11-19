@@ -1,0 +1,32 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalid.scss
+---
+# Input
+```css
+/* should generate diagnostics */
+#app {
+  &.foo.bar.baz {}
+}
+
+```
+
+# Diagnostics
+```
+invalid.scss:3:3 lint/complexity/noExcessiveSelectorClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Expected this selector to have no more than 1 class selector, but found 3.
+  
+    1 │ /* should generate diagnostics */
+    2 │ #app {
+  > 3 │   &.foo.bar.baz {}
+      │   ^^^^^^^^^^^^^
+    4 │ }
+    5 │ 
+  
+  i Selectors with too many chained classes are harder to read, override, and reuse.
+  
+  i Reduce the number of class selectors in this selector, or split it into simpler selectors.
+  
+
+```

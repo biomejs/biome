@@ -1,0 +1,11 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: exports.ts
+---
+# Input
+```ts
+export type OptionalNumber = number | undefined;
+export declare function readNumber(): OptionalNumber;
+export declare function assert(value: unknown): asserts value;
+
+```

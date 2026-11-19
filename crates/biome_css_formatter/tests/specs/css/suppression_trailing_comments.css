@@ -3,3 +3,8 @@
 	background: linear-gradient( 90deg, red,   blue ); /* keep this trailing comment after the suppressed declaration */
 	color: red;
 }
+
+/* before rule */
+/* biome-ignore format: preserve the entire rule */
+.suppressed { /* first */ color:   red; /* between */ margin:1px  2px; /* last */ } /* after rule */
+.formatted{color:blue;}

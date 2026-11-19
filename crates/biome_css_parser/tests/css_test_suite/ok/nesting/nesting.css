@@ -174,3 +174,8 @@ article {
 		}
 	}
 }
+
+.foo {
+	color: blue;
+	&_title { color: green; }
+}

@@ -22,8 +22,8 @@ expression: numeric_option.jsonc
 {
 	"linter": {
 		"rules": {
-			"recommended": false,
-			"nursery": {
+			"preset": "none",
+			"complexity": {
 				"noExcessiveNestedCallbacks": {
 					"level": "error",
 					"options": { "max": 4 }

@@ -1,0 +1,3 @@
+CssDeclaration() as $node where {
+    $node <: range(start_line=2, end_line=2)
+}

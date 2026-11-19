@@ -1,0 +1,11 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+const foo1 = (bar => bar as number)();
+const foo2 = (<T,>(bar: T) => bar)(1);
+
+```

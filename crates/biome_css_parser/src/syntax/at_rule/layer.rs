@@ -1,8 +1,9 @@
 use crate::parser::CssParser;
 
+use crate::syntax::CssSyntaxFeatures;
 use crate::syntax::block::parse_conditional_block;
-use crate::syntax::parse_error::expected_identifier;
-use crate::syntax::parse_regular_identifier;
+use crate::syntax::parse_error::{expected_identifier, scss_only_syntax_error};
+use crate::syntax::scss::parse_scss_interpolated_name;
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::parse_lists::ParseSeparatedList;
@@ -107,7 +108,7 @@ impl ParseSeparatedList for LayerNameList {
         // allow them as well.
         //
         // https://drafts.csswg.org/css-cascade-5/#typedef-layer-name
-        parse_regular_identifier(p)
+        parse_layer_name(p)
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
@@ -129,4 +130,30 @@ impl ParseSeparatedList for LayerNameList {
     fn separating_element_kind(&mut self) -> Self::Kind {
         T![.]
     }
+}
+
+/// Parses a plain or SCSS-interpolated layer name.
+///
+/// A standalone interpolation may expand to a whole layer list, but it still
+/// occupies a single name slot in the CST.
+///
+/// ```scss
+/// @layer #{$layers};
+/// @layer theme-#{$name}.base {}
+/// ```
+#[inline]
+fn parse_layer_name(p: &mut CssParser) -> ParsedSyntax {
+    let Present(name) = parse_scss_interpolated_name(p) else {
+        return Absent;
+    };
+
+    if name.kind(p) != SCSS_INTERPOLATED_IDENTIFIER {
+        return Present(name);
+    }
+
+    CssSyntaxFeatures::Scss.parse_exclusive_syntax(
+        p,
+        |_| Present(name),
+        |p, marker| scss_only_syntax_error(p, "SCSS interpolated layer names", marker.range(p)),
+    )
 }

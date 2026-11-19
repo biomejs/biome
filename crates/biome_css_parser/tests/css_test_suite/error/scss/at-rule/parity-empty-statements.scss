@@ -1,0 +1,5 @@
+$missing:;; .after-variable { height: 2px }
+@supports (display: grid); .after-supports { display: grid }
+@media screen { ;; ??? ;;; .after-junk { width: 1px }; } .after-media { width: 2px }
+@if true { .first { color: red } };;; @else { .second { color: blue } } .after-else { color: red }
+@media print { ;; .before-eof { color: red }; .after-eof { color: blue }

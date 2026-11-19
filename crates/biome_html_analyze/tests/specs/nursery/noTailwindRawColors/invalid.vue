@@ -1,0 +1,11 @@
+<!-- should generate diagnostics -->
+<template>
+<div class="bg-pink-500"></div>
+<div class='hover:text-white/80 dark:border-slate-950'></div>
+<div CLASS="ring-offset-black"></div>
+<div title="é" class="
+  [&:nth-child(2)]:border-t-red-500/50!"></div>
+<div class="from-blue-500 via-cyan-500 to-teal-500"></div>
+<svg class="fill-white stroke-red-500"></svg>
+<custom-card class="bg-pink-500"></custom-card>
+</template>

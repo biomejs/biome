@@ -8,14 +8,18 @@ impl FormatNodeRule<TwThemeAtRule> for FormatTwThemeAtRule {
     fn fmt_fields(&self, node: &TwThemeAtRule, f: &mut CssFormatter) -> FormatResult<()> {
         let TwThemeAtRuleFields {
             theme_token,
-            name,
+            options,
             block,
         } = node.as_fields();
 
-        write!(f, [theme_token.format()])?;
-        if let Some(name) = name {
-            write!(f, [space(), name.format()])?;
-        }
-        write!(f, [space(), block.format()])
+        write!(
+            f,
+            [
+                theme_token.format()?.with_text_case(CssCase::Lowercase),
+                options.format(),
+                space(),
+                block.format()
+            ]
+        )
     }
 }

@@ -1,0 +1,187 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+// should generate diagnostics
+function foo() {}
+async function bar() {}
+function* generator() {}
+export function exported() {}
+export async function* exportedGenerator() {}
+if (condition) { function nested() {} }
+switch (value) { case 0: function inCase() {} }
+function separateExport() {}
+export { separateExport };
+
+
+```
+
+# Diagnostics
+```
+invalid.js:2:10 lint/nursery/useConsistentFunctionStyle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Function expressions are required here, but this is a declaration.
+  
+    1 │ // should generate diagnostics
+  > 2 │ function foo() {}
+      │          ^^^
+    3 │ async function bar() {}
+    4 │ function* generator() {}
+  
+  i Using a consistent function style makes function definitions easier to recognize.
+  
+  i Use a function expression assigned to a variable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:3:16 lint/nursery/useConsistentFunctionStyle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Function expressions are required here, but this is a declaration.
+  
+    1 │ // should generate diagnostics
+    2 │ function foo() {}
+  > 3 │ async function bar() {}
+      │                ^^^
+    4 │ function* generator() {}
+    5 │ export function exported() {}
+  
+  i Using a consistent function style makes function definitions easier to recognize.
+  
+  i Use a function expression assigned to a variable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:4:11 lint/nursery/useConsistentFunctionStyle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Function expressions are required here, but this is a declaration.
+  
+    2 │ function foo() {}
+    3 │ async function bar() {}
+  > 4 │ function* generator() {}
+      │           ^^^^^^^^^
+    5 │ export function exported() {}
+    6 │ export async function* exportedGenerator() {}
+  
+  i Using a consistent function style makes function definitions easier to recognize.
+  
+  i Use a function expression assigned to a variable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:5:17 lint/nursery/useConsistentFunctionStyle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Function expressions are required here, but this is a declaration.
+  
+    3 │ async function bar() {}
+    4 │ function* generator() {}
+  > 5 │ export function exported() {}
+      │                 ^^^^^^^^
+    6 │ export async function* exportedGenerator() {}
+    7 │ if (condition) { function nested() {} }
+  
+  i Using a consistent function style makes function definitions easier to recognize.
+  
+  i Use a function expression assigned to a variable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:6:24 lint/nursery/useConsistentFunctionStyle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Function expressions are required here, but this is a declaration.
+  
+    4 │ function* generator() {}
+    5 │ export function exported() {}
+  > 6 │ export async function* exportedGenerator() {}
+      │                        ^^^^^^^^^^^^^^^^^
+    7 │ if (condition) { function nested() {} }
+    8 │ switch (value) { case 0: function inCase() {} }
+  
+  i Using a consistent function style makes function definitions easier to recognize.
+  
+  i Use a function expression assigned to a variable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:7:27 lint/nursery/useConsistentFunctionStyle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Function expressions are required here, but this is a declaration.
+  
+    5 │ export function exported() {}
+    6 │ export async function* exportedGenerator() {}
+  > 7 │ if (condition) { function nested() {} }
+      │                           ^^^^^^
+    8 │ switch (value) { case 0: function inCase() {} }
+    9 │ function separateExport() {}
+  
+  i Using a consistent function style makes function definitions easier to recognize.
+  
+  i Use a function expression assigned to a variable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:8:35 lint/nursery/useConsistentFunctionStyle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Function expressions are required here, but this is a declaration.
+  
+     6 │ export async function* exportedGenerator() {}
+     7 │ if (condition) { function nested() {} }
+   > 8 │ switch (value) { case 0: function inCase() {} }
+       │                                   ^^^^^^
+     9 │ function separateExport() {}
+    10 │ export { separateExport };
+  
+  i Using a consistent function style makes function definitions easier to recognize.
+  
+  i Use a function expression assigned to a variable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:9:10 lint/nursery/useConsistentFunctionStyle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Function expressions are required here, but this is a declaration.
+  
+     7 │ if (condition) { function nested() {} }
+     8 │ switch (value) { case 0: function inCase() {} }
+   > 9 │ function separateExport() {}
+       │          ^^^^^^^^^^^^^^
+    10 │ export { separateExport };
+    11 │ 
+  
+  i Using a consistent function style makes function definitions easier to recognize.
+  
+  i Use a function expression assigned to a variable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

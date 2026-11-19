@@ -1,0 +1,96 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalidConstruction.svelte
+---
+# Input
+```svelte
+<!-- should generate diagnostics -->
+<div class="p-4 {classes} text-white"></div>
+<div class="{classes}"></div>
+<div class="p-4 {"text-white"}"></div>
+<div class="{first} {second}"></div>
+
+```
+
+# Diagnostics
+```
+invalidConstruction.svelte:2:12 lint/nursery/useTailwindStaticClassStrings ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This class string is constructed dynamically.
+  
+    1 │ <!-- should generate diagnostics -->
+  > 2 │ <div class="p-4 {classes} text-white"></div>
+      │            ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ <div class="{classes}"></div>
+    4 │ <div class="p-4 {"text-white"}"></div>
+  
+  i Tailwind scans source text for complete class names.
+  
+  i Use complete class names, choosing between them with a conditional expression or a lookup.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidConstruction.svelte:3:12 lint/nursery/useTailwindStaticClassStrings ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This class string is constructed dynamically.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <div class="p-4 {classes} text-white"></div>
+  > 3 │ <div class="{classes}"></div>
+      │            ^^^^^^^^^^^
+    4 │ <div class="p-4 {"text-white"}"></div>
+    5 │ <div class="{first} {second}"></div>
+  
+  i Tailwind scans source text for complete class names.
+  
+  i Use complete class names, choosing between them with a conditional expression or a lookup.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidConstruction.svelte:4:12 lint/nursery/useTailwindStaticClassStrings ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This class string is constructed dynamically.
+  
+    2 │ <div class="p-4 {classes} text-white"></div>
+    3 │ <div class="{classes}"></div>
+  > 4 │ <div class="p-4 {"text-white"}"></div>
+      │            ^^^^^^^^^^^^^^^^^^^^
+    5 │ <div class="{first} {second}"></div>
+    6 │ 
+  
+  i Tailwind scans source text for complete class names.
+  
+  i Use complete class names, choosing between them with a conditional expression or a lookup.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidConstruction.svelte:5:12 lint/nursery/useTailwindStaticClassStrings ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This class string is constructed dynamically.
+  
+    3 │ <div class="{classes}"></div>
+    4 │ <div class="p-4 {"text-white"}"></div>
+  > 5 │ <div class="{first} {second}"></div>
+      │            ^^^^^^^^^^^^^^^^^^
+    6 │ 
+  
+  i Tailwind scans source text for complete class names.
+  
+  i Use complete class names, choosing between them with a conditional expression or a lookup.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

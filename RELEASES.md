@@ -10,6 +10,8 @@ The team doesn't provide ETAs (Estimated Time of Arrival). The team believes tha
 
 We publish pre-releases of the main `@biomejs/biome` package twice a week. These releases are built from `main`, they are meant for testing and verifying that bugs are fixed.
 
+Occasionally, we will also **unstable** releases, which might contain new features not currently available in the stable channel.
+
 These releases are published to `pkg.pr.new`, and an automated message is sent on [Discord](https://biomejs.dev/chat), in the `#release` channel.
 
 > [!WARNING]
@@ -35,6 +37,5 @@ Stable releases are published on GitHub, and `npmjs.org` under the `latest` tag.
 The Biome internal crates are published on `crates.io` on demand to avoid too much work on our end.
 You can reach us out on [discord](https://biomejs.dev/chat) if you require a version of the crates to be published.
 
-As for now, no changelogs or tags are published when new crates are released.
-
-All Biome crates are published under a single version.
+All Biome crates are published under a single version (either patch or minor), and they are tagged with a
+single git tag.

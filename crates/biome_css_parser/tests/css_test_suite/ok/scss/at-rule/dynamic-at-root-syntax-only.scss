@@ -1,0 +1,9 @@
+@at-root (without media) {
+  .root-only { color: red; }
+}
+@at-root (unknown-mode: media) {
+  .literal-modifier { color: blue; }
+}
+@at-root (namespace.$defaultAtRoot) {
+  .namespaced { color: green; }
+}

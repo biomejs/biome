@@ -1,0 +1,554 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+@forward './button' as components_*;
+@forward './button' as components-*;
+@forward './button' as components_* show $components_gap, components_reset;
+@forward './button' as components_* hide components_internal;
+@forward './button' as components_* with ($gap: 4px);
+@forward './button' as components_* show $components_gap, components_reset with ($components_gap: 4px !default);
+@forward './button' as Components_*;
+@forward './button' as components*;
+@forward './button' as components1*;
+@forward './button' as show*;
+@forward './button' as components\5f *;
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        CssAtRule {
+            at_token: AT@0..1 "@" [] [],
+            rule: ScssForwardAtRule {
+                forward_token: FORWARD_KW@1..9 "forward" [] [Whitespace(" ")],
+                url: CssString {
+                    value_token: CSS_STRING_LITERAL@9..20 "'./button'" [] [Whitespace(" ")],
+                },
+                as_clause: ScssForwardAsClause {
+                    as_token: AS_KW@20..23 "as" [] [Whitespace(" ")],
+                    prefix: CssIdentifier {
+                        value_token: IDENT@23..34 "components_" [] [],
+                    },
+                    star_token: STAR@34..35 "*" [] [],
+                },
+                visibility_clause: missing (optional),
+                with_clause: missing (optional),
+                semicolon_token: SEMICOLON@35..36 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@36..38 "@" [Newline("\n")] [],
+            rule: ScssForwardAtRule {
+                forward_token: FORWARD_KW@38..46 "forward" [] [Whitespace(" ")],
+                url: CssString {
+                    value_token: CSS_STRING_LITERAL@46..57 "'./button'" [] [Whitespace(" ")],
+                },
+                as_clause: ScssForwardAsClause {
+                    as_token: AS_KW@57..60 "as" [] [Whitespace(" ")],
+                    prefix: CssIdentifier {
+                        value_token: IDENT@60..71 "components-" [] [],
+                    },
+                    star_token: STAR@71..72 "*" [] [],
+                },
+                visibility_clause: missing (optional),
+                with_clause: missing (optional),
+                semicolon_token: SEMICOLON@72..73 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@73..75 "@" [Newline("\n")] [],
+            rule: ScssForwardAtRule {
+                forward_token: FORWARD_KW@75..83 "forward" [] [Whitespace(" ")],
+                url: CssString {
+                    value_token: CSS_STRING_LITERAL@83..94 "'./button'" [] [Whitespace(" ")],
+                },
+                as_clause: ScssForwardAsClause {
+                    as_token: AS_KW@94..97 "as" [] [Whitespace(" ")],
+                    prefix: CssIdentifier {
+                        value_token: IDENT@97..108 "components_" [] [],
+                    },
+                    star_token: STAR@108..110 "*" [] [Whitespace(" ")],
+                },
+                visibility_clause: ScssShowClause {
+                    show_token: SHOW_KW@110..115 "show" [] [Whitespace(" ")],
+                    members: ScssModuleMemberList [
+                        ScssVariable {
+                            dollar_token: DOLLAR@115..116 "$" [] [],
+                            name: CssIdentifier {
+                                value_token: IDENT@116..130 "components_gap" [] [],
+                            },
+                        },
+                        COMMA@130..132 "," [] [Whitespace(" ")],
+                        CssIdentifier {
+                            value_token: IDENT@132..148 "components_reset" [] [],
+                        },
+                    ],
+                },
+                with_clause: missing (optional),
+                semicolon_token: SEMICOLON@148..149 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@149..151 "@" [Newline("\n")] [],
+            rule: ScssForwardAtRule {
+                forward_token: FORWARD_KW@151..159 "forward" [] [Whitespace(" ")],
+                url: CssString {
+                    value_token: CSS_STRING_LITERAL@159..170 "'./button'" [] [Whitespace(" ")],
+                },
+                as_clause: ScssForwardAsClause {
+                    as_token: AS_KW@170..173 "as" [] [Whitespace(" ")],
+                    prefix: CssIdentifier {
+                        value_token: IDENT@173..184 "components_" [] [],
+                    },
+                    star_token: STAR@184..186 "*" [] [Whitespace(" ")],
+                },
+                visibility_clause: ScssHideClause {
+                    hide_token: HIDE_KW@186..191 "hide" [] [Whitespace(" ")],
+                    members: ScssModuleMemberList [
+                        CssIdentifier {
+                            value_token: IDENT@191..210 "components_internal" [] [],
+                        },
+                    ],
+                },
+                with_clause: missing (optional),
+                semicolon_token: SEMICOLON@210..211 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@211..213 "@" [Newline("\n")] [],
+            rule: ScssForwardAtRule {
+                forward_token: FORWARD_KW@213..221 "forward" [] [Whitespace(" ")],
+                url: CssString {
+                    value_token: CSS_STRING_LITERAL@221..232 "'./button'" [] [Whitespace(" ")],
+                },
+                as_clause: ScssForwardAsClause {
+                    as_token: AS_KW@232..235 "as" [] [Whitespace(" ")],
+                    prefix: CssIdentifier {
+                        value_token: IDENT@235..246 "components_" [] [],
+                    },
+                    star_token: STAR@246..248 "*" [] [Whitespace(" ")],
+                },
+                visibility_clause: missing (optional),
+                with_clause: ScssWithClause {
+                    with_token: WITH_KW@248..253 "with" [] [Whitespace(" ")],
+                    configurations: ScssModuleConfigurationList {
+                        l_paren_token: L_PAREN@253..254 "(" [] [],
+                        items: ScssModuleConfigurationItemList [
+                            ScssModuleConfiguration {
+                                name: ScssVariable {
+                                    dollar_token: DOLLAR@254..255 "$" [] [],
+                                    name: CssIdentifier {
+                                        value_token: IDENT@255..258 "gap" [] [],
+                                    },
+                                },
+                                colon_token: COLON@258..260 ":" [] [Whitespace(" ")],
+                                value: ScssExpression {
+                                    items: ScssExpressionItemList [
+                                        CssRegularDimension {
+                                            value_token: CSS_NUMBER_LITERAL@260..261 "4" [] [],
+                                            unit_token: IDENT@261..263 "px" [] [],
+                                        },
+                                    ],
+                                },
+                                modifier: missing (optional),
+                            },
+                        ],
+                        r_paren_token: R_PAREN@263..264 ")" [] [],
+                    },
+                },
+                semicolon_token: SEMICOLON@264..265 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@265..267 "@" [Newline("\n")] [],
+            rule: ScssForwardAtRule {
+                forward_token: FORWARD_KW@267..275 "forward" [] [Whitespace(" ")],
+                url: CssString {
+                    value_token: CSS_STRING_LITERAL@275..286 "'./button'" [] [Whitespace(" ")],
+                },
+                as_clause: ScssForwardAsClause {
+                    as_token: AS_KW@286..289 "as" [] [Whitespace(" ")],
+                    prefix: CssIdentifier {
+                        value_token: IDENT@289..300 "components_" [] [],
+                    },
+                    star_token: STAR@300..302 "*" [] [Whitespace(" ")],
+                },
+                visibility_clause: ScssShowClause {
+                    show_token: SHOW_KW@302..307 "show" [] [Whitespace(" ")],
+                    members: ScssModuleMemberList [
+                        ScssVariable {
+                            dollar_token: DOLLAR@307..308 "$" [] [],
+                            name: CssIdentifier {
+                                value_token: IDENT@308..322 "components_gap" [] [],
+                            },
+                        },
+                        COMMA@322..324 "," [] [Whitespace(" ")],
+                        CssIdentifier {
+                            value_token: IDENT@324..341 "components_reset" [] [Whitespace(" ")],
+                        },
+                    ],
+                },
+                with_clause: ScssWithClause {
+                    with_token: WITH_KW@341..346 "with" [] [Whitespace(" ")],
+                    configurations: ScssModuleConfigurationList {
+                        l_paren_token: L_PAREN@346..347 "(" [] [],
+                        items: ScssModuleConfigurationItemList [
+                            ScssModuleConfiguration {
+                                name: ScssVariable {
+                                    dollar_token: DOLLAR@347..348 "$" [] [],
+                                    name: CssIdentifier {
+                                        value_token: IDENT@348..362 "components_gap" [] [],
+                                    },
+                                },
+                                colon_token: COLON@362..364 ":" [] [Whitespace(" ")],
+                                value: ScssExpression {
+                                    items: ScssExpressionItemList [
+                                        CssRegularDimension {
+                                            value_token: CSS_NUMBER_LITERAL@364..365 "4" [] [],
+                                            unit_token: IDENT@365..368 "px" [] [Whitespace(" ")],
+                                        },
+                                    ],
+                                },
+                                modifier: ScssVariableModifier {
+                                    excl_token: BANG@368..369 "!" [] [],
+                                    value: DEFAULT_KW@369..376 "default" [] [],
+                                },
+                            },
+                        ],
+                        r_paren_token: R_PAREN@376..377 ")" [] [],
+                    },
+                },
+                semicolon_token: SEMICOLON@377..378 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@378..380 "@" [Newline("\n")] [],
+            rule: ScssForwardAtRule {
+                forward_token: FORWARD_KW@380..388 "forward" [] [Whitespace(" ")],
+                url: CssString {
+                    value_token: CSS_STRING_LITERAL@388..399 "'./button'" [] [Whitespace(" ")],
+                },
+                as_clause: ScssForwardAsClause {
+                    as_token: AS_KW@399..402 "as" [] [Whitespace(" ")],
+                    prefix: CssIdentifier {
+                        value_token: IDENT@402..413 "Components_" [] [],
+                    },
+                    star_token: STAR@413..414 "*" [] [],
+                },
+                visibility_clause: missing (optional),
+                with_clause: missing (optional),
+                semicolon_token: SEMICOLON@414..415 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@415..417 "@" [Newline("\n")] [],
+            rule: ScssForwardAtRule {
+                forward_token: FORWARD_KW@417..425 "forward" [] [Whitespace(" ")],
+                url: CssString {
+                    value_token: CSS_STRING_LITERAL@425..436 "'./button'" [] [Whitespace(" ")],
+                },
+                as_clause: ScssForwardAsClause {
+                    as_token: AS_KW@436..439 "as" [] [Whitespace(" ")],
+                    prefix: CssIdentifier {
+                        value_token: IDENT@439..449 "components" [] [],
+                    },
+                    star_token: STAR@449..450 "*" [] [],
+                },
+                visibility_clause: missing (optional),
+                with_clause: missing (optional),
+                semicolon_token: SEMICOLON@450..451 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@451..453 "@" [Newline("\n")] [],
+            rule: ScssForwardAtRule {
+                forward_token: FORWARD_KW@453..461 "forward" [] [Whitespace(" ")],
+                url: CssString {
+                    value_token: CSS_STRING_LITERAL@461..472 "'./button'" [] [Whitespace(" ")],
+                },
+                as_clause: ScssForwardAsClause {
+                    as_token: AS_KW@472..475 "as" [] [Whitespace(" ")],
+                    prefix: CssIdentifier {
+                        value_token: IDENT@475..486 "components1" [] [],
+                    },
+                    star_token: STAR@486..487 "*" [] [],
+                },
+                visibility_clause: missing (optional),
+                with_clause: missing (optional),
+                semicolon_token: SEMICOLON@487..488 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@488..490 "@" [Newline("\n")] [],
+            rule: ScssForwardAtRule {
+                forward_token: FORWARD_KW@490..498 "forward" [] [Whitespace(" ")],
+                url: CssString {
+                    value_token: CSS_STRING_LITERAL@498..509 "'./button'" [] [Whitespace(" ")],
+                },
+                as_clause: ScssForwardAsClause {
+                    as_token: AS_KW@509..512 "as" [] [Whitespace(" ")],
+                    prefix: CssIdentifier {
+                        value_token: IDENT@512..516 "show" [] [],
+                    },
+                    star_token: STAR@516..517 "*" [] [],
+                },
+                visibility_clause: missing (optional),
+                with_clause: missing (optional),
+                semicolon_token: SEMICOLON@517..518 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@518..520 "@" [Newline("\n")] [],
+            rule: ScssForwardAtRule {
+                forward_token: FORWARD_KW@520..528 "forward" [] [Whitespace(" ")],
+                url: CssString {
+                    value_token: CSS_STRING_LITERAL@528..539 "'./button'" [] [Whitespace(" ")],
+                },
+                as_clause: ScssForwardAsClause {
+                    as_token: AS_KW@539..542 "as" [] [Whitespace(" ")],
+                    prefix: CssIdentifier {
+                        value_token: IDENT@542..556 "components\\5f " [] [],
+                    },
+                    star_token: STAR@556..557 "*" [] [],
+                },
+                visibility_clause: missing (optional),
+                with_clause: missing (optional),
+                semicolon_token: SEMICOLON@557..558 ";" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@558..559 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..559
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..558
+    0: CSS_AT_RULE@0..36
+      0: AT@0..1 "@" [] []
+      1: SCSS_FORWARD_AT_RULE@1..36
+        0: FORWARD_KW@1..9 "forward" [] [Whitespace(" ")]
+        1: CSS_STRING@9..20
+          0: CSS_STRING_LITERAL@9..20 "'./button'" [] [Whitespace(" ")]
+        2: SCSS_FORWARD_AS_CLAUSE@20..35
+          0: AS_KW@20..23 "as" [] [Whitespace(" ")]
+          1: CSS_IDENTIFIER@23..34
+            0: IDENT@23..34 "components_" [] []
+          2: STAR@34..35 "*" [] []
+        3: (empty)
+        4: (empty)
+        5: SEMICOLON@35..36 ";" [] []
+    1: CSS_AT_RULE@36..73
+      0: AT@36..38 "@" [Newline("\n")] []
+      1: SCSS_FORWARD_AT_RULE@38..73
+        0: FORWARD_KW@38..46 "forward" [] [Whitespace(" ")]
+        1: CSS_STRING@46..57
+          0: CSS_STRING_LITERAL@46..57 "'./button'" [] [Whitespace(" ")]
+        2: SCSS_FORWARD_AS_CLAUSE@57..72
+          0: AS_KW@57..60 "as" [] [Whitespace(" ")]
+          1: CSS_IDENTIFIER@60..71
+            0: IDENT@60..71 "components-" [] []
+          2: STAR@71..72 "*" [] []
+        3: (empty)
+        4: (empty)
+        5: SEMICOLON@72..73 ";" [] []
+    2: CSS_AT_RULE@73..149
+      0: AT@73..75 "@" [Newline("\n")] []
+      1: SCSS_FORWARD_AT_RULE@75..149
+        0: FORWARD_KW@75..83 "forward" [] [Whitespace(" ")]
+        1: CSS_STRING@83..94
+          0: CSS_STRING_LITERAL@83..94 "'./button'" [] [Whitespace(" ")]
+        2: SCSS_FORWARD_AS_CLAUSE@94..110
+          0: AS_KW@94..97 "as" [] [Whitespace(" ")]
+          1: CSS_IDENTIFIER@97..108
+            0: IDENT@97..108 "components_" [] []
+          2: STAR@108..110 "*" [] [Whitespace(" ")]
+        3: SCSS_SHOW_CLAUSE@110..148
+          0: SHOW_KW@110..115 "show" [] [Whitespace(" ")]
+          1: SCSS_MODULE_MEMBER_LIST@115..148
+            0: SCSS_VARIABLE@115..130
+              0: DOLLAR@115..116 "$" [] []
+              1: CSS_IDENTIFIER@116..130
+                0: IDENT@116..130 "components_gap" [] []
+            1: COMMA@130..132 "," [] [Whitespace(" ")]
+            2: CSS_IDENTIFIER@132..148
+              0: IDENT@132..148 "components_reset" [] []
+        4: (empty)
+        5: SEMICOLON@148..149 ";" [] []
+    3: CSS_AT_RULE@149..211
+      0: AT@149..151 "@" [Newline("\n")] []
+      1: SCSS_FORWARD_AT_RULE@151..211
+        0: FORWARD_KW@151..159 "forward" [] [Whitespace(" ")]
+        1: CSS_STRING@159..170
+          0: CSS_STRING_LITERAL@159..170 "'./button'" [] [Whitespace(" ")]
+        2: SCSS_FORWARD_AS_CLAUSE@170..186
+          0: AS_KW@170..173 "as" [] [Whitespace(" ")]
+          1: CSS_IDENTIFIER@173..184
+            0: IDENT@173..184 "components_" [] []
+          2: STAR@184..186 "*" [] [Whitespace(" ")]
+        3: SCSS_HIDE_CLAUSE@186..210
+          0: HIDE_KW@186..191 "hide" [] [Whitespace(" ")]
+          1: SCSS_MODULE_MEMBER_LIST@191..210
+            0: CSS_IDENTIFIER@191..210
+              0: IDENT@191..210 "components_internal" [] []
+        4: (empty)
+        5: SEMICOLON@210..211 ";" [] []
+    4: CSS_AT_RULE@211..265
+      0: AT@211..213 "@" [Newline("\n")] []
+      1: SCSS_FORWARD_AT_RULE@213..265
+        0: FORWARD_KW@213..221 "forward" [] [Whitespace(" ")]
+        1: CSS_STRING@221..232
+          0: CSS_STRING_LITERAL@221..232 "'./button'" [] [Whitespace(" ")]
+        2: SCSS_FORWARD_AS_CLAUSE@232..248
+          0: AS_KW@232..235 "as" [] [Whitespace(" ")]
+          1: CSS_IDENTIFIER@235..246
+            0: IDENT@235..246 "components_" [] []
+          2: STAR@246..248 "*" [] [Whitespace(" ")]
+        3: (empty)
+        4: SCSS_WITH_CLAUSE@248..264
+          0: WITH_KW@248..253 "with" [] [Whitespace(" ")]
+          1: SCSS_MODULE_CONFIGURATION_LIST@253..264
+            0: L_PAREN@253..254 "(" [] []
+            1: SCSS_MODULE_CONFIGURATION_ITEM_LIST@254..263
+              0: SCSS_MODULE_CONFIGURATION@254..263
+                0: SCSS_VARIABLE@254..258
+                  0: DOLLAR@254..255 "$" [] []
+                  1: CSS_IDENTIFIER@255..258
+                    0: IDENT@255..258 "gap" [] []
+                1: COLON@258..260 ":" [] [Whitespace(" ")]
+                2: SCSS_EXPRESSION@260..263
+                  0: SCSS_EXPRESSION_ITEM_LIST@260..263
+                    0: CSS_REGULAR_DIMENSION@260..263
+                      0: CSS_NUMBER_LITERAL@260..261 "4" [] []
+                      1: IDENT@261..263 "px" [] []
+                3: (empty)
+            2: R_PAREN@263..264 ")" [] []
+        5: SEMICOLON@264..265 ";" [] []
+    5: CSS_AT_RULE@265..378
+      0: AT@265..267 "@" [Newline("\n")] []
+      1: SCSS_FORWARD_AT_RULE@267..378
+        0: FORWARD_KW@267..275 "forward" [] [Whitespace(" ")]
+        1: CSS_STRING@275..286
+          0: CSS_STRING_LITERAL@275..286 "'./button'" [] [Whitespace(" ")]
+        2: SCSS_FORWARD_AS_CLAUSE@286..302
+          0: AS_KW@286..289 "as" [] [Whitespace(" ")]
+          1: CSS_IDENTIFIER@289..300
+            0: IDENT@289..300 "components_" [] []
+          2: STAR@300..302 "*" [] [Whitespace(" ")]
+        3: SCSS_SHOW_CLAUSE@302..341
+          0: SHOW_KW@302..307 "show" [] [Whitespace(" ")]
+          1: SCSS_MODULE_MEMBER_LIST@307..341
+            0: SCSS_VARIABLE@307..322
+              0: DOLLAR@307..308 "$" [] []
+              1: CSS_IDENTIFIER@308..322
+                0: IDENT@308..322 "components_gap" [] []
+            1: COMMA@322..324 "," [] [Whitespace(" ")]
+            2: CSS_IDENTIFIER@324..341
+              0: IDENT@324..341 "components_reset" [] [Whitespace(" ")]
+        4: SCSS_WITH_CLAUSE@341..377
+          0: WITH_KW@341..346 "with" [] [Whitespace(" ")]
+          1: SCSS_MODULE_CONFIGURATION_LIST@346..377
+            0: L_PAREN@346..347 "(" [] []
+            1: SCSS_MODULE_CONFIGURATION_ITEM_LIST@347..376
+              0: SCSS_MODULE_CONFIGURATION@347..376
+                0: SCSS_VARIABLE@347..362
+                  0: DOLLAR@347..348 "$" [] []
+                  1: CSS_IDENTIFIER@348..362
+                    0: IDENT@348..362 "components_gap" [] []
+                1: COLON@362..364 ":" [] [Whitespace(" ")]
+                2: SCSS_EXPRESSION@364..368
+                  0: SCSS_EXPRESSION_ITEM_LIST@364..368
+                    0: CSS_REGULAR_DIMENSION@364..368
+                      0: CSS_NUMBER_LITERAL@364..365 "4" [] []
+                      1: IDENT@365..368 "px" [] [Whitespace(" ")]
+                3: SCSS_VARIABLE_MODIFIER@368..376
+                  0: BANG@368..369 "!" [] []
+                  1: DEFAULT_KW@369..376 "default" [] []
+            2: R_PAREN@376..377 ")" [] []
+        5: SEMICOLON@377..378 ";" [] []
+    6: CSS_AT_RULE@378..415
+      0: AT@378..380 "@" [Newline("\n")] []
+      1: SCSS_FORWARD_AT_RULE@380..415
+        0: FORWARD_KW@380..388 "forward" [] [Whitespace(" ")]
+        1: CSS_STRING@388..399
+          0: CSS_STRING_LITERAL@388..399 "'./button'" [] [Whitespace(" ")]
+        2: SCSS_FORWARD_AS_CLAUSE@399..414
+          0: AS_KW@399..402 "as" [] [Whitespace(" ")]
+          1: CSS_IDENTIFIER@402..413
+            0: IDENT@402..413 "Components_" [] []
+          2: STAR@413..414 "*" [] []
+        3: (empty)
+        4: (empty)
+        5: SEMICOLON@414..415 ";" [] []
+    7: CSS_AT_RULE@415..451
+      0: AT@415..417 "@" [Newline("\n")] []
+      1: SCSS_FORWARD_AT_RULE@417..451
+        0: FORWARD_KW@417..425 "forward" [] [Whitespace(" ")]
+        1: CSS_STRING@425..436
+          0: CSS_STRING_LITERAL@425..436 "'./button'" [] [Whitespace(" ")]
+        2: SCSS_FORWARD_AS_CLAUSE@436..450
+          0: AS_KW@436..439 "as" [] [Whitespace(" ")]
+          1: CSS_IDENTIFIER@439..449
+            0: IDENT@439..449 "components" [] []
+          2: STAR@449..450 "*" [] []
+        3: (empty)
+        4: (empty)
+        5: SEMICOLON@450..451 ";" [] []
+    8: CSS_AT_RULE@451..488
+      0: AT@451..453 "@" [Newline("\n")] []
+      1: SCSS_FORWARD_AT_RULE@453..488
+        0: FORWARD_KW@453..461 "forward" [] [Whitespace(" ")]
+        1: CSS_STRING@461..472
+          0: CSS_STRING_LITERAL@461..472 "'./button'" [] [Whitespace(" ")]
+        2: SCSS_FORWARD_AS_CLAUSE@472..487
+          0: AS_KW@472..475 "as" [] [Whitespace(" ")]
+          1: CSS_IDENTIFIER@475..486
+            0: IDENT@475..486 "components1" [] []
+          2: STAR@486..487 "*" [] []
+        3: (empty)
+        4: (empty)
+        5: SEMICOLON@487..488 ";" [] []
+    9: CSS_AT_RULE@488..518
+      0: AT@488..490 "@" [Newline("\n")] []
+      1: SCSS_FORWARD_AT_RULE@490..518
+        0: FORWARD_KW@490..498 "forward" [] [Whitespace(" ")]
+        1: CSS_STRING@498..509
+          0: CSS_STRING_LITERAL@498..509 "'./button'" [] [Whitespace(" ")]
+        2: SCSS_FORWARD_AS_CLAUSE@509..517
+          0: AS_KW@509..512 "as" [] [Whitespace(" ")]
+          1: CSS_IDENTIFIER@512..516
+            0: IDENT@512..516 "show" [] []
+          2: STAR@516..517 "*" [] []
+        3: (empty)
+        4: (empty)
+        5: SEMICOLON@517..518 ";" [] []
+    10: CSS_AT_RULE@518..558
+      0: AT@518..520 "@" [Newline("\n")] []
+      1: SCSS_FORWARD_AT_RULE@520..558
+        0: FORWARD_KW@520..528 "forward" [] [Whitespace(" ")]
+        1: CSS_STRING@528..539
+          0: CSS_STRING_LITERAL@528..539 "'./button'" [] [Whitespace(" ")]
+        2: SCSS_FORWARD_AS_CLAUSE@539..557
+          0: AS_KW@539..542 "as" [] [Whitespace(" ")]
+          1: CSS_IDENTIFIER@542..556
+            0: IDENT@542..556 "components\\5f " [] []
+          2: STAR@556..557 "*" [] []
+        3: (empty)
+        4: (empty)
+        5: SEMICOLON@557..558 ";" [] []
+  2: EOF@558..559 "" [Newline("\n")] []
+
+```

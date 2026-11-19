@@ -10,6 +10,13 @@ impl FormatNodeRule<CssReturnsStatement> for FormatCssReturnsStatement {
     fn fmt_fields(&self, node: &CssReturnsStatement, f: &mut CssFormatter) -> FormatResult<()> {
         let CssReturnsStatementFields { ty, returns_token } = node.as_fields();
 
-        write!(f, [returns_token.format(), space(), ty.format(),])
+        write!(
+            f,
+            [
+                returns_token.format()?.with_text_case(CssCase::Preserve),
+                space(),
+                ty.format(),
+            ]
+        )
     }
 }

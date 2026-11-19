@@ -100,8 +100,8 @@ pub trait JsBatchMutation {
     /// ```
     fn replace_jsx_element_with_own_children(&mut self, element: &AnyJsxChild) -> bool {
         let children = match element {
-            AnyJsxChild::JsxElement(element) => element.children(),
-            AnyJsxChild::JsxFragment(fragment) => fragment.children(),
+            AnyJsxChild::JsxElement(element) => element.elements(),
+            AnyJsxChild::JsxFragment(fragment) => fragment.elements(),
             _ => return false,
         };
         self.add_jsx_elements_replacing_element(element, children)
@@ -405,9 +405,7 @@ impl JsBatchMutation for BatchMutation<JsLanguage> {
         let Some(pieces) = node.first_leading_trivia().map(|trivia| trivia.pieces()) else {
             return;
         };
-        let (sibling, new_sibling) = if let Some(next_sibling) =
-            node.last_token().and_then(|x| x.next_token())
-        {
+        let (sibling, new_sibling) = if let Some(next_sibling) = node.next_token() {
             let mut next_sibling_leading_trivia = next_sibling.leading_trivia().pieces().peekable();
             // Remove next newline
             next_sibling_leading_trivia.next_if(|piece| piece.is_newline());

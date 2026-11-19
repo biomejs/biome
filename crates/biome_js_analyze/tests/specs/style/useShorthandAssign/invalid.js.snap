@@ -41,6 +41,8 @@ invalid.js:1:1 lint/style/useShorthandAssign  FIXABLE  ━━━━━━━━�
     2 │ a = a - 1;
     3 │ a = a * 1;
   
+  i The shorthand operator is shorter and does not repeat the name of the variable.
+  
   i Unsafe fix: Use += instead.
   
      1    │ - a·=·a·+·1;
@@ -61,6 +63,8 @@ invalid.js:2:1 lint/style/useShorthandAssign  FIXABLE  ━━━━━━━━�
       │ ^^^^^^^^^
     3 │ a = a * 1;
     4 │ a = 1 * a;
+  
+  i The shorthand operator is shorter and does not repeat the name of the variable.
   
   i Unsafe fix: Use -= instead.
   
@@ -84,6 +88,8 @@ invalid.js:3:1 lint/style/useShorthandAssign  FIXABLE  ━━━━━━━━�
       │ ^^^^^^^^^
     4 │ a = 1 * a;
     5 │ a = a / 1;
+  
+  i The shorthand operator is shorter and does not repeat the name of the variable.
   
   i Unsafe fix: Use *= instead.
   
@@ -109,6 +115,8 @@ invalid.js:4:1 lint/style/useShorthandAssign  FIXABLE  ━━━━━━━━�
     5 │ a = a / 1;
     6 │ a = a % 1;
   
+  i The shorthand operator is shorter and does not repeat the name of the variable.
+  
   i Unsafe fix: Use *= instead.
   
      2  2 │   a = a - 1;
@@ -132,6 +140,8 @@ invalid.js:5:1 lint/style/useShorthandAssign  FIXABLE  ━━━━━━━━�
       │ ^^^^^^^^^
     6 │ a = a % 1;
     7 │ a = a << 1;
+  
+  i The shorthand operator is shorter and does not repeat the name of the variable.
   
   i Unsafe fix: Use /= instead.
   
@@ -157,6 +167,8 @@ invalid.js:6:1 lint/style/useShorthandAssign  FIXABLE  ━━━━━━━━�
     7 │ a = a << 1;
     8 │ a = a >> 1;
   
+  i The shorthand operator is shorter and does not repeat the name of the variable.
+  
   i Unsafe fix: Use %= instead.
   
      4  4 │   a = 1 * a;
@@ -180,6 +192,8 @@ invalid.js:7:1 lint/style/useShorthandAssign  FIXABLE  ━━━━━━━━�
       │ ^^^^^^^^^^
     8 │ a = a >> 1;
     9 │ a = a >>> 1;
+  
+  i The shorthand operator is shorter and does not repeat the name of the variable.
   
   i Unsafe fix: Use <<= instead.
   
@@ -205,6 +219,8 @@ invalid.js:8:1 lint/style/useShorthandAssign  FIXABLE  ━━━━━━━━�
      9 │ a = a >>> 1;
     10 │ a = a & 1;
   
+  i The shorthand operator is shorter and does not repeat the name of the variable.
+  
   i Unsafe fix: Use >>= instead.
   
      6  6 │   a = a % 1;
@@ -228,6 +244,8 @@ invalid.js:9:1 lint/style/useShorthandAssign  FIXABLE  ━━━━━━━━�
        │ ^^^^^^^^^^^
     10 │ a = a & 1;
     11 │ a = 1 & a;
+  
+  i The shorthand operator is shorter and does not repeat the name of the variable.
   
   i Unsafe fix: Use >>>= instead.
   
@@ -253,6 +271,8 @@ invalid.js:10:1 lint/style/useShorthandAssign  FIXABLE  ━━━━━━━━
     11 │ a = 1 & a;
     12 │ a = a ^ 1;
   
+  i The shorthand operator is shorter and does not repeat the name of the variable.
+  
   i Unsafe fix: Use &= instead.
   
      8  8 │   a = a >> 1;
@@ -276,6 +296,8 @@ invalid.js:11:1 lint/style/useShorthandAssign  FIXABLE  ━━━━━━━━
        │ ^^^^^^^^^
     12 │ a = a ^ 1;
     13 │ a = 1 ^ a;
+  
+  i The shorthand operator is shorter and does not repeat the name of the variable.
   
   i Unsafe fix: Use &= instead.
   
@@ -301,6 +323,8 @@ invalid.js:12:1 lint/style/useShorthandAssign  FIXABLE  ━━━━━━━━
     13 │ a = 1 ^ a;
     14 │ a = a | 1;
   
+  i The shorthand operator is shorter and does not repeat the name of the variable.
+  
   i Unsafe fix: Use ^= instead.
   
     10 10 │   a = a & 1;
@@ -324,6 +348,8 @@ invalid.js:13:1 lint/style/useShorthandAssign  FIXABLE  ━━━━━━━━
        │ ^^^^^^^^^
     14 │ a = a | 1;
     15 │ a = 1 | a;
+  
+  i The shorthand operator is shorter and does not repeat the name of the variable.
   
   i Unsafe fix: Use ^= instead.
   
@@ -349,6 +375,8 @@ invalid.js:14:1 lint/style/useShorthandAssign  FIXABLE  ━━━━━━━━
     15 │ a = 1 | a;
     16 │ a = a ** 1;
   
+  i The shorthand operator is shorter and does not repeat the name of the variable.
+  
   i Unsafe fix: Use |= instead.
   
     12 12 │   a = a ^ 1;
@@ -372,6 +400,8 @@ invalid.js:15:1 lint/style/useShorthandAssign  FIXABLE  ━━━━━━━━
        │ ^^^^^^^^^
     16 │ a = a ** 1;
     17 │ this.a = this.a + 1;
+  
+  i The shorthand operator is shorter and does not repeat the name of the variable.
   
   i Unsafe fix: Use |= instead.
   
@@ -397,6 +427,8 @@ invalid.js:16:1 lint/style/useShorthandAssign  FIXABLE  ━━━━━━━━
     17 │ this.a = this.a + 1;
     18 │ this.a = this.a + b
   
+  i The shorthand operator is shorter and does not repeat the name of the variable.
+  
   i Unsafe fix: Use **= instead.
   
     14 14 │   a = a | 1;
@@ -420,6 +452,8 @@ invalid.js:17:1 lint/style/useShorthandAssign  FIXABLE  ━━━━━━━━
        │ ^^^^^^^^^^^^^^^^^^^
     18 │ this.a = this.a + b
     19 │ this.a = this.a + this.b
+  
+  i The shorthand operator is shorter and does not repeat the name of the variable.
   
   i Unsafe fix: Use += instead.
   
@@ -445,6 +479,8 @@ invalid.js:18:1 lint/style/useShorthandAssign  FIXABLE  ━━━━━━━━
     19 │ this.a = this.a + this.b
     20 │ a = (a) + 1;
   
+  i The shorthand operator is shorter and does not repeat the name of the variable.
+  
   i Unsafe fix: Use += instead.
   
     16 16 │   a = a ** 1;
@@ -468,6 +504,8 @@ invalid.js:19:1 lint/style/useShorthandAssign  FIXABLE  ━━━━━━━━
        │ ^^^^^^^^^^^^^^^^^^^^^^^^
     20 │ a = (a) + 1;
     21 │ x = (x + y);
+  
+  i The shorthand operator is shorter and does not repeat the name of the variable.
   
   i Unsafe fix: Use += instead.
   
@@ -493,6 +531,8 @@ invalid.js:20:1 lint/style/useShorthandAssign  FIXABLE  ━━━━━━━━
     21 │ x = (x + y);
     22 │ x[0] = x[0] - y
   
+  i The shorthand operator is shorter and does not repeat the name of the variable.
+  
   i Unsafe fix: Use += instead.
   
     18 18 │   this.a = this.a + b
@@ -516,6 +556,8 @@ invalid.js:21:1 lint/style/useShorthandAssign  FIXABLE  ━━━━━━━━
        │ ^^^^^^^^^^^
     22 │ x[0] = x[0] - y
     23 │ window.a = window.a + 1;
+  
+  i The shorthand operator is shorter and does not repeat the name of the variable.
   
   i Unsafe fix: Use += instead.
   
@@ -541,6 +583,8 @@ invalid.js:22:1 lint/style/useShorthandAssign  FIXABLE  ━━━━━━━━
     23 │ window.a = window.a + 1;
     24 │ 
   
+  i The shorthand operator is shorter and does not repeat the name of the variable.
+  
   i Unsafe fix: Use -= instead.
   
     20 20 │   a = (a) + 1;
@@ -563,6 +607,8 @@ invalid.js:23:1 lint/style/useShorthandAssign  FIXABLE  ━━━━━━━━
   > 23 │ window.a = window.a + 1;
        │ ^^^^^^^^^^^^^^^^^^^^^^^
     24 │ 
+  
+  i The shorthand operator is shorter and does not repeat the name of the variable.
   
   i Unsafe fix: Use += instead.
   

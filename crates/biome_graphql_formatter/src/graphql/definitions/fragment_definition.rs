@@ -11,12 +11,18 @@ impl FormatNodeRule<GraphqlFragmentDefinition> for FormatGraphqlFragmentDefiniti
         f: &mut GraphqlFormatter,
     ) -> FormatResult<()> {
         let GraphqlFragmentDefinitionFields {
+            description,
             fragment_token,
             name,
+            variables,
             type_condition,
             directives,
             selection_set,
         } = node.as_fields();
+
+        if let Some(description) = description {
+            write!(f, [description.format(), hard_line_break()])?;
+        }
 
         write!(
             f,
@@ -24,6 +30,7 @@ impl FormatNodeRule<GraphqlFragmentDefinition> for FormatGraphqlFragmentDefiniti
                 fragment_token.format(),
                 space(),
                 name.format(),
+                variables.format(),
                 space(),
                 type_condition.format(),
                 directives.format(),

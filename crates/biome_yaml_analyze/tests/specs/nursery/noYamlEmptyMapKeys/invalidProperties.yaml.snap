@@ -1,0 +1,165 @@
+---
+source: crates/biome_yaml_analyze/tests/spec_tests.rs
+assertion_line: 122
+expression: invalidProperties.yaml
+---
+# Input
+```yaml
+# should generate diagnostics
+- !!str : tagged key
+- &anchor : anchored key
+- ? !!str
+  : tagged explicit key
+- ? &anchor2
+  : anchored explicit key
+- { !!str : tagged flow key, &anchor3 : anchored flow key }
+- !!map
+  : mapping with a tag
+
+```
+
+# Diagnostics
+```
+invalidProperties.yaml:2:9 lint/nursery/noYamlEmptyMapKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This map entry has an empty key.
+  
+    1 │ # should generate diagnostics
+  > 2 │ - !!str : tagged key
+      │         ^
+    3 │ - &anchor : anchored key
+    4 │ - ? !!str
+  
+  i An empty key is usually a mistake. Tools that read this file can reject it, or read it as null or as empty text.
+  
+  i Write a key for this entry, or remove the entry.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidProperties.yaml:3:11 lint/nursery/noYamlEmptyMapKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This map entry has an empty key.
+  
+    1 │ # should generate diagnostics
+    2 │ - !!str : tagged key
+  > 3 │ - &anchor : anchored key
+      │           ^
+    4 │ - ? !!str
+    5 │   : tagged explicit key
+  
+  i An empty key is usually a mistake. Tools that read this file can reject it, or read it as null or as empty text.
+  
+  i Write a key for this entry, or remove the entry.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidProperties.yaml:4:3 lint/nursery/noYamlEmptyMapKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This map entry has an empty key.
+  
+    2 │ - !!str : tagged key
+    3 │ - &anchor : anchored key
+  > 4 │ - ? !!str
+      │   ^
+    5 │   : tagged explicit key
+    6 │ - ? &anchor2
+  
+  i An empty key is usually a mistake. Tools that read this file can reject it, or read it as null or as empty text.
+  
+  i Write a key for this entry, or remove the entry.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidProperties.yaml:6:3 lint/nursery/noYamlEmptyMapKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This map entry has an empty key.
+  
+    4 │ - ? !!str
+    5 │   : tagged explicit key
+  > 6 │ - ? &anchor2
+      │   ^
+    7 │   : anchored explicit key
+    8 │ - { !!str : tagged flow key, &anchor3 : anchored flow key }
+  
+  i An empty key is usually a mistake. Tools that read this file can reject it, or read it as null or as empty text.
+  
+  i Write a key for this entry, or remove the entry.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidProperties.yaml:8:11 lint/nursery/noYamlEmptyMapKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This map entry has an empty key.
+  
+     6 │ - ? &anchor2
+     7 │   : anchored explicit key
+   > 8 │ - { !!str : tagged flow key, &anchor3 : anchored flow key }
+       │           ^
+     9 │ - !!map
+    10 │   : mapping with a tag
+  
+  i An empty key is usually a mistake. Tools that read this file can reject it, or read it as null or as empty text.
+  
+  i Write a key for this entry, or remove the entry.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidProperties.yaml:8:39 lint/nursery/noYamlEmptyMapKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This map entry has an empty key.
+  
+     6 │ - ? &anchor2
+     7 │   : anchored explicit key
+   > 8 │ - { !!str : tagged flow key, &anchor3 : anchored flow key }
+       │                                       ^
+     9 │ - !!map
+    10 │   : mapping with a tag
+  
+  i An empty key is usually a mistake. Tools that read this file can reject it, or read it as null or as empty text.
+  
+  i Write a key for this entry, or remove the entry.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidProperties.yaml:10:3 lint/nursery/noYamlEmptyMapKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This map entry has an empty key.
+  
+     8 │ - { !!str : tagged flow key, &anchor3 : anchored flow key }
+     9 │ - !!map
+  > 10 │   : mapping with a tag
+       │   ^
+    11 │ 
+  
+  i An empty key is usually a mistake. Tools that read this file can reject it, or read it as null or as empty text.
+  
+  i Write a key for this entry, or remove the entry.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

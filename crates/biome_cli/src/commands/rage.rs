@@ -1,24 +1,25 @@
+use crate::cli_options::CliOptions;
 use crate::commands::daemon::read_most_recent_log_file;
 use crate::service::enumerate_pipes;
 use crate::{CliDiagnostic, CliSession, VERSION, service};
 use biome_analyze::RuleFilter;
+use biome_configuration::Rules;
 use biome_configuration::analyzer::{DomainSelector, RuleDomainValue};
-use biome_configuration::{ConfigurationPathHint, Rules};
 use biome_console::fmt::{Display, Formatter};
 use biome_console::{
     ConsoleExt, DebugDisplay, DisplayOption, HorizontalLine, KeyValuePair, Padding, SOFT_LINE, fmt,
     markup,
 };
 use biome_diagnostics::termcolor::{ColorChoice, WriteColor};
-use biome_diagnostics::{PrintDescription, termcolor};
+use biome_diagnostics::{PrintDescription, Severity, termcolor};
 use biome_flags::biome_env;
 use biome_fs::OsFileSystem;
 use biome_resolver::FsWithResolverProxy;
 use biome_service::Workspace;
-use biome_service::configuration::{LoadedConfiguration, load_configuration};
+use biome_service::configuration::load_configuration;
 use biome_service::settings::Settings;
 use biome_service::workspace::{RageEntry, RageParams, client};
-use camino::Utf8PathBuf;
+use camino::{Utf8Path, Utf8PathBuf};
 use std::collections::BTreeSet;
 use std::{env, io, ops::Deref};
 use terminal_size::terminal_size;
@@ -27,6 +28,7 @@ use tokio::runtime::Runtime;
 /// Handler for the `rage` command
 pub(crate) fn rage(
     session: CliSession,
+    cli_options: &CliOptions,
     daemon_logs: bool,
     formatter: bool,
     linter: bool,
@@ -52,7 +54,7 @@ pub(crate) fn rage(
     {EnvVarOs("JS_RUNTIME_NAME")}
     {EnvVarOs("NODE_PACKAGE_MANAGER")}
 
-    {RageConfiguration { fs: session.app.workspace.fs(), formatter, linter }}
+    {RageConfiguration { fs: session.app.workspace.fs(), formatter, linter, cli_options }}
     {WorkspaceRage(session.app.workspace.deref())}
     ));
 
@@ -199,29 +201,33 @@ struct RageConfiguration<'a> {
     fs: &'a dyn FsWithResolverProxy,
     formatter: bool,
     linter: bool,
+    cli_options: &'a CliOptions,
 }
 
 impl Display for RageConfiguration<'_> {
     fn fmt(&self, fmt: &mut Formatter) -> io::Result<()> {
         Section("Biome Configuration").fmt(fmt)?;
 
-        match load_configuration(self.fs, ConfigurationPathHint::default()) {
+        let working_dir = self.fs.working_directory().unwrap_or_default();
+        let path_hint = self
+            .cli_options
+            .as_configuration_path_hint(working_dir.as_path());
+        match load_configuration(self.fs, path_hint) {
             Ok(loaded_configuration) => {
-                if loaded_configuration.directory_path.is_none() {
+                if loaded_configuration.directory_path().is_none() {
                     markup! {
                         {KeyValuePair::new("Status", markup!(<Dim>"Not set"</Dim>))}
                         {ConfigPath("unset")}
                     }
                     .fmt(fmt)?;
                 } else {
-                    let LoadedConfiguration {
-                        configuration,
-                        diagnostics,
-                        directory_path,
-                        file_path,
-                        extended_configurations,
-                        loaded_location: _,
-                    } = loaded_configuration;
+                    let configuration = loaded_configuration.resolved_configuration();
+                    let extended_configurations = loaded_configuration.extended_configurations();
+                    let directory_path = loaded_configuration
+                        .directory_path()
+                        .map(Utf8Path::to_path_buf);
+                    let file_path = loaded_configuration.file_path().map(Utf8Path::to_path_buf);
+                    let diagnostics = loaded_configuration.diagnostics;
                     let vcs_enabled = configuration.is_vcs_enabled();
                     let mut settings = Settings::default();
                     settings
@@ -233,6 +239,12 @@ impl Display for RageConfiguration<'_> {
                         .unwrap();
 
                     let status = if !diagnostics.is_empty() {
+                        let max_severity = diagnostics
+                            .iter()
+                            .map(|d| d.severity())
+                            .max()
+                            .unwrap_or_default();
+
                         for diagnostic in diagnostics {
                             (markup! {
                                  {KeyValuePair::new("Error", markup!{
@@ -241,9 +253,17 @@ impl Display for RageConfiguration<'_> {
                             })
                             .fmt(fmt)?;
                         }
-                        markup!(<Dim>"Loaded with errors"</Dim>)
+                        match max_severity {
+                            Severity::Hint | Severity::Information => {
+                                markup!(<Dim>"Loaded successfully."</Dim>)
+                            }
+                            Severity::Warning => markup!(<Dim>"Loaded with warnings."</Dim>),
+                            Severity::Fatal | Severity::Error => {
+                                markup!(<Dim>"Loaded with errors."</Dim>)
+                            }
+                        }
                     } else {
-                        markup!(<Dim>"Loaded successfully"</Dim>)
+                        markup!(<Dim>"Loaded successfully."</Dim>)
                     };
 
                     let config_path = file_path.as_ref().map_or_else(
@@ -370,6 +390,19 @@ impl Display for RageConfiguration<'_> {
                             {RageConfigurationLintRules("Enabled rules", enabled_rules)}
                         ).fmt(fmt)?;
                     }
+
+                    let files_configuration = configuration.get_files_configuration();
+                    let includes = files_configuration.includes.as_ref().map(|list| {
+                        list.iter()
+                            .map(|glob| glob.to_string())
+                            .collect::<Vec<_>>()
+                            .join(", ")
+                    });
+                    markup! (
+                            {Section("Files")}
+                            {KeyValuePair::new("Ignore Unknown", markup!({DisplayOption(files_configuration.ignore_unknown)}))}
+                            {KeyValuePair::new("Includes", markup!({DisplayOption(includes)}))}
+                        ).fmt(fmt)?;
                 }
             }
             Err(err) => markup! (

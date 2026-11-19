@@ -23,6 +23,9 @@ pub use adapters::BpafError;
 #[cfg(feature = "std")]
 pub use adapters::{IoError, StdError};
 
+#[cfg(feature = "notify")]
+pub use adapters::NotifyError;
+
 mod suggestion;
 
 pub use self::adapters::SerdeJsonError;

@@ -322,8 +322,24 @@ CssRoot {
                                         CssUrlFunction {
                                             name: URL_KW@211..214 "url" [] [],
                                             l_paren_token: L_PAREN@214..215 "(" [] [],
-                                            value: CssUrlValueRaw {
-                                                value_token: CSS_URL_VALUE_RAW_LITERAL@215..222 "#{$raw}" [] [],
+                                            value: ScssInterpolatedUrlValue {
+                                                parts: ScssInterpolatedUrlValuePartList [
+                                                    ScssInterpolation {
+                                                        hash_token: HASH@215..216 "#" [] [],
+                                                        l_curly_token: L_CURLY@216..217 "{" [] [],
+                                                        value: ScssExpression {
+                                                            items: ScssExpressionItemList [
+                                                                ScssVariable {
+                                                                    dollar_token: DOLLAR@217..218 "$" [] [],
+                                                                    name: CssIdentifier {
+                                                                        value_token: IDENT@218..221 "raw" [] [],
+                                                                    },
+                                                                },
+                                                            ],
+                                                        },
+                                                        r_curly_token: R_CURLY@221..222 "}" [] [],
+                                                    },
+                                                ],
                                             },
                                             modifiers: CssUrlModifierList [],
                                             r_paren_token: R_PAREN@222..223 ")" [] [],
@@ -610,8 +626,18 @@ CssRoot {
                     0: CSS_URL_FUNCTION@211..223
                       0: URL_KW@211..214 "url" [] []
                       1: L_PAREN@214..215 "(" [] []
-                      2: CSS_URL_VALUE_RAW@215..222
-                        0: CSS_URL_VALUE_RAW_LITERAL@215..222 "#{$raw}" [] []
+                      2: SCSS_INTERPOLATED_URL_VALUE@215..222
+                        0: SCSS_INTERPOLATED_URL_VALUE_PART_LIST@215..222
+                          0: SCSS_INTERPOLATION@215..222
+                            0: HASH@215..216 "#" [] []
+                            1: L_CURLY@216..217 "{" [] []
+                            2: SCSS_EXPRESSION@217..221
+                              0: SCSS_EXPRESSION_ITEM_LIST@217..221
+                                0: SCSS_VARIABLE@217..221
+                                  0: DOLLAR@217..218 "$" [] []
+                                  1: CSS_IDENTIFIER@218..221
+                                    0: IDENT@218..221 "raw" [] []
+                            3: R_CURLY@221..222 "}" [] []
                       3: CSS_URL_MODIFIER_LIST@222..222
                       4: R_PAREN@222..223 ")" [] []
               1: (empty)

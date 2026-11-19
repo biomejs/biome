@@ -33,6 +33,10 @@ import V6, { type T13 } from "mod";
 export type { T13 };
 export { V6 };
 
+import V7, { type T14, type T15 } from "mod";
+export type { T14, T15 };
+export { V7 };
+
 ```
 
 # Diagnostics
@@ -218,6 +222,60 @@ invalid-separated-type.ts:23:8 lint/style/useImportType  FIXABLE  ━━━━�
        24 │ + import·type·{·T12·}·from·"mod";
     24 25 │   export type { T11, T12 };
     25 26 │   
+  
+
+```
+
+```
+invalid-separated-type.ts:26:12 lint/style/useImportType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These named imports are only used as types.
+  
+    24 │ export type { T11, T12 };
+    25 │ 
+  > 26 │ import V6, { type T13 } from "mod";
+       │            ^^^^^^^^^^^^
+    27 │ export type { T13 };
+    28 │ export { V6 };
+  
+  i Importing the types with import type ensures that they are removed by the compilers and avoids loading unnecessary modules.
+  
+  i Safe fix: Use import type.
+  
+    24 24 │   export type { T11, T12 };
+    25 25 │   
+    26    │ - import·V6,·{·type·T13·}·from·"mod";
+       26 │ + import·V6·from·"mod";
+       27 │ + import·type·{·T13·}·from·"mod";
+    27 28 │   export type { T13 };
+    28 29 │   export { V6 };
+  
+
+```
+
+```
+invalid-separated-type.ts:30:12 lint/style/useImportType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These named imports are only used as types.
+  
+    28 │ export { V6 };
+    29 │ 
+  > 30 │ import V7, { type T14, type T15 } from "mod";
+       │            ^^^^^^^^^^^^^^^^^^^^^^
+    31 │ export type { T14, T15 };
+    32 │ export { V7 };
+  
+  i Importing the types with import type ensures that they are removed by the compilers and avoids loading unnecessary modules.
+  
+  i Safe fix: Use import type.
+  
+    28 28 │   export { V6 };
+    29 29 │   
+    30    │ - import·V7,·{·type·T14,·type·T15·}·from·"mod";
+       30 │ + import·V7·from·"mod";
+       31 │ + import·type·{·T14,·T15·}·from·"mod";
+    31 32 │   export type { T14, T15 };
+    32 33 │   export { V7 };
   
 
 ```

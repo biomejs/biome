@@ -3,8 +3,11 @@
 ///
 /// ALso, the module includes implementation to convert rule options to Biome's rule options.
 use biome_deserialize_macros::Deserializable;
+use biome_rule_options::use_consistent_json_file_read;
 use biome_rule_options::use_filenaming_convention;
+use biome_rule_options::use_numeric_separators;
 use smallvec::SmallVec;
+use std::num::NonZeroU8;
 
 #[derive(Clone, Debug, Default, Deserializable)]
 pub(crate) struct FilenameCaseOptions {
@@ -74,6 +77,82 @@ impl From<FilenameCases> for Option<use_filenaming_convention::FilenameCases> {
             None
         } else {
             Some(use_filenaming_convention::FilenameCases::from_iter(cases))
+        }
+    }
+}
+
+/// ESLint options for `unicorn/numeric-separators-style`.
+///
+/// Note: ESLint uses `number` for decimal literals, while Biome uses `decimal`.
+/// The `onlyIfContainsSeparator` option is not supported and is ignored.
+#[derive(Clone, Debug, Default, Deserializable)]
+pub(crate) struct NumericSeparatorsStyleOptions {
+    number: EslintNumericSeparatorTypeOptions,
+    binary: EslintNumericSeparatorTypeOptions,
+    octal: EslintNumericSeparatorTypeOptions,
+    hexadecimal: EslintNumericSeparatorTypeOptions,
+}
+
+#[derive(Clone, Debug, Default, Deserializable)]
+pub(crate) struct EslintNumericSeparatorTypeOptions {
+    minimum_digits: Option<u8>,
+    group_length: Option<NonZeroU8>,
+}
+
+impl From<EslintNumericSeparatorTypeOptions>
+    for use_numeric_separators::NumericLiteralSeparatorOptions
+{
+    fn from(val: EslintNumericSeparatorTypeOptions) -> Self {
+        Self {
+            minimum_digits: val.minimum_digits,
+            group_length: val.group_length,
+        }
+    }
+}
+
+impl From<NumericSeparatorsStyleOptions> for use_numeric_separators::UseNumericSeparatorsOptions {
+    fn from(val: NumericSeparatorsStyleOptions) -> Self {
+        Self {
+            binary: some_if_set(val.binary),
+            octal: some_if_set(val.octal),
+            decimal: some_if_set(val.number),
+            hexadecimal: some_if_set(val.hexadecimal),
+        }
+    }
+}
+
+fn some_if_set(
+    opts: EslintNumericSeparatorTypeOptions,
+) -> Option<use_numeric_separators::NumericLiteralSeparatorOptions> {
+    if opts.minimum_digits.is_some() || opts.group_length.is_some() {
+        Some(opts.into())
+    } else {
+        None
+    }
+}
+
+/// ESLint option for `unicorn/consistent-json-file-read`, written as a string after the severity:
+/// `["error", "buffer"]`.
+#[derive(Clone, Copy, Debug, Deserializable)]
+pub(crate) enum ConsistentJsonFileReadOption {
+    #[deserializable(rename = "string")]
+    String,
+    #[deserializable(rename = "buffer")]
+    Buffer,
+}
+impl From<ConsistentJsonFileReadOption>
+    for use_consistent_json_file_read::UseConsistentJsonFileReadOptions
+{
+    fn from(val: ConsistentJsonFileReadOption) -> Self {
+        Self {
+            read_as: Some(match val {
+                ConsistentJsonFileReadOption::String => {
+                    use_consistent_json_file_read::JsonFileReadAs::String
+                }
+                ConsistentJsonFileReadOption::Buffer => {
+                    use_consistent_json_file_read::JsonFileReadAs::Buffer
+                }
+            }),
         }
     }
 }

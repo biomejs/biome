@@ -1,0 +1,6 @@
+/* should generate diagnostics */
+@property --angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 10px;
+}

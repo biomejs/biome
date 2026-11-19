@@ -5,9 +5,11 @@ use crate::syntax::parse_error::expected_attribute;
 use crate::syntax::parse_error::expected_vue_directive_argument;
 use crate::syntax::parse_error::expected_vue_v_for_binding;
 use crate::syntax::parse_error::expected_vue_v_for_binding_separator;
+use crate::syntax::parse_error::expected_vue_v_for_default;
 use crate::syntax::parse_error::expected_vue_v_for_expression;
 use crate::syntax::parse_error::expected_vue_v_for_operator;
 use crate::syntax::parse_error::expected_vue_v_for_tuple_binding_end;
+use crate::syntax::parse_error::unexpected_vue_v_for_rest_default;
 use crate::token_source::HtmlLexContext;
 use biome_html_syntax::HtmlSyntaxKind;
 use biome_html_syntax::HtmlSyntaxKind::*;
@@ -17,6 +19,7 @@ use biome_parser::parse_lists::{ParseNodeList, ParseSeparatedList};
 use biome_parser::parse_recovery::{ParseRecoveryTokenSet, RecoveryResult};
 use biome_parser::parsed_syntax::ParsedSyntax::{Absent, Present};
 use biome_parser::prelude::*;
+use biome_rowan::TextRange;
 
 pub const VUE_KEYWORDS: TokenSet<HtmlSyntaxKind> = token_set!(T![of], T![in]);
 
@@ -31,10 +34,7 @@ pub(crate) fn parse_vue_directive(p: &mut HtmlParser) -> ParsedSyntax {
     // Check if this is v-for BEFORE bumping the token
     let is_v_for = p.cur_text() == "v-for";
     // FIXME: Ideally, the lexer would just lex IDENT directly
-    p.bump_remap_with_context(
-        IDENT,
-        HtmlLexContext::InsideTagWithDirectives { svelte: false },
-    );
+    p.bump_remap_with_context(IDENT, super::inside_tag_context(p));
     if p.at(T![:]) {
         // is there any trivia after the directive name and before the colon?
         if let Some(last_trivia) = p.source().trivia_list.last()
@@ -92,10 +92,7 @@ pub(crate) fn parse_vue_v_on_shorthand_directive(p: &mut HtmlParser) -> ParsedSy
     let m = p.start();
 
     let pos = p.source().position();
-    p.bump_with_context(
-        T![@],
-        HtmlLexContext::InsideTagWithDirectives { svelte: false },
-    );
+    p.bump_with_context(T![@], super::inside_tag_context(p));
     // is there any trivia after the @ and before argument?
     if let Some(last_trivia) = p.source().trivia_list.last()
         && pos < last_trivia.text_range().start()
@@ -124,10 +121,7 @@ pub(crate) fn parse_vue_v_slot_shorthand_directive(p: &mut HtmlParser) -> Parsed
     let m = p.start();
 
     let pos = p.source().position();
-    p.bump_with_context(
-        T![#],
-        HtmlLexContext::InsideTagWithDirectives { svelte: false },
-    );
+    p.bump_with_context(T![#], super::inside_tag_context(p));
     // is there any trivia after the hash and before argument?
     if let Some(last_trivia) = p.source().trivia_list.last()
         && pos < last_trivia.text_range().start()
@@ -156,10 +150,7 @@ fn parse_vue_directive_argument(p: &mut HtmlParser) -> ParsedSyntax {
     let m = p.start();
 
     let pos = p.source().position();
-    p.bump_with_context(
-        T![:],
-        HtmlLexContext::InsideTagWithDirectives { svelte: false },
-    );
+    p.bump_with_context(T![:], super::inside_tag_context(p));
     // is there any trivia after the colon and before argument?
     if let Some(last_trivia) = p.source().trivia_list.last()
         && pos < last_trivia.text_range().start()
@@ -169,9 +160,13 @@ fn parse_vue_directive_argument(p: &mut HtmlParser) -> ParsedSyntax {
         p.error(expected_vue_directive_argument(p, last_trivia.text_range()));
         return Present(m.complete(p, VUE_BOGUS_DIRECTIVE));
     }
-    parse_vue_dynamic_argument(p)
-        .or_else(|| parse_vue_static_argument(p))
-        .ok();
+    // `:="props"` (argument-less v-bind shorthand) is valid Vue syntax, identical
+    // to `v-bind="props"` -- the argument is optional here, unlike in v-on/v-slot.
+    if p.at_ts(token_set![T!['['], HTML_LITERAL]) {
+        parse_vue_dynamic_argument(p)
+            .or_else(|| parse_vue_static_argument(p))
+            .ok();
+    }
 
     Present(m.complete(p, VUE_DIRECTIVE_ARGUMENT))
 }
@@ -179,10 +174,7 @@ fn parse_vue_directive_argument(p: &mut HtmlParser) -> ParsedSyntax {
 fn parse_vue_static_argument(p: &mut HtmlParser) -> ParsedSyntax {
     let m = p.start();
 
-    p.expect_with_context(
-        HTML_LITERAL,
-        HtmlLexContext::InsideTagWithDirectives { svelte: false },
-    );
+    p.expect_with_context(HTML_LITERAL, super::inside_tag_context(p));
 
     Present(m.complete(p, VUE_STATIC_ARGUMENT))
 }
@@ -195,14 +187,8 @@ fn parse_vue_dynamic_argument(p: &mut HtmlParser) -> ParsedSyntax {
     let m = p.start();
 
     p.bump_with_context(T!['['], HtmlLexContext::VueDirectiveArgument);
-    p.expect_with_context(
-        HTML_LITERAL,
-        HtmlLexContext::InsideTagWithDirectives { svelte: false },
-    );
-    p.expect_with_context(
-        T![']'],
-        HtmlLexContext::InsideTagWithDirectives { svelte: false },
-    );
+    p.expect_with_context(HTML_LITERAL, super::inside_tag_context(p));
+    p.expect_with_context(T![']'], super::inside_tag_context(p));
 
     Present(m.complete(p, VUE_DYNAMIC_ARGUMENT))
 }
@@ -245,21 +231,12 @@ fn parse_vue_modifier(p: &mut HtmlParser) -> ParsedSyntax {
 
     let m = p.start();
 
-    p.bump_with_context(
-        T![.],
-        HtmlLexContext::InsideTagWithDirectives { svelte: false },
-    );
+    p.bump_with_context(T![.], super::inside_tag_context(p));
     if p.at(T![:]) {
         // `:` is actually a valid modifier, for example `@keydown.:`
-        p.bump_remap_with_context(
-            HTML_LITERAL,
-            HtmlLexContext::InsideTagWithDirectives { svelte: false },
-        );
+        p.bump_remap_with_context(HTML_LITERAL, super::inside_tag_context(p));
     } else {
-        p.expect_with_context(
-            HTML_LITERAL,
-            HtmlLexContext::InsideTagWithDirectives { svelte: false },
-        );
+        p.expect_with_context(HTML_LITERAL, super::inside_tag_context(p));
     }
 
     Present(m.complete(p, VUE_MODIFIER))
@@ -276,6 +253,7 @@ const RECOVER_V_FOR: TokenSet<HtmlSyntaxKind> =
 /// - `"(item, index) in items"`
 /// - `"(value, key, index) in obj"`
 /// - `"{ message } in items"`
+/// - `"{ message = fallback } in items"`
 pub fn parse_vue_v_for_value(p: &mut HtmlParser) -> ParsedSyntax {
     if !p.at_ts(token_set![T!["'"], T!['"']]) {
         return Absent;
@@ -288,7 +266,7 @@ pub fn parse_vue_v_for_value(p: &mut HtmlParser) -> ParsedSyntax {
     p.bump_v_for(start_quote_kind);
 
     // binding: AnyVueVForBinding
-    parse_vue_v_for_binding(p)
+    parse_vue_v_for_binding(p, start_quote_kind)
         .or_recover_with_token_set(
             p,
             &ParseRecoveryTokenSet::new(HTML_BOGUS, RECOVER_V_FOR),
@@ -302,38 +280,42 @@ pub fn parse_vue_v_for_value(p: &mut HtmlParser) -> ParsedSyntax {
         .or_add_diagnostic(p, expected_vue_v_for_expression);
 
     // r_quote: ending quote must match starting quote
-    p.expect_with_context(
-        start_quote_kind,
-        HtmlLexContext::InsideTagWithDirectives { svelte: false },
-    );
+    p.expect_with_context(start_quote_kind, super::inside_tag_context(p));
 
     Present(m.complete(p, VUE_V_FOR_VALUE))
 }
 
-fn parse_vue_v_for_binding(p: &mut HtmlParser) -> ParsedSyntax {
-    match p.cur() {
-        T!['('] => parse_vue_v_for_tuple_binding(p),
-        T!['{'] => parse_vue_v_for_object_binding(p),
-        T!['['] => parse_vue_v_for_array_binding(p),
+/// `quote` is the quote that terminates the attribute value.
+fn parse_vue_v_for_binding(p: &mut HtmlParser, quote: HtmlSyntaxKind) -> ParsedSyntax {
+    let binding = match p.cur() {
+        T!['('] => return parse_vue_v_for_tuple_binding(p, quote),
+        T!['{'] => parse_vue_v_for_object_binding(p, quote),
+        T!['['] => parse_vue_v_for_array_binding(p, quote),
         HTML_LITERAL => parse_vue_v_for_identifier_binding(p),
         _ => Absent,
-    }
+    };
+    parse_vue_v_for_default_binding(p, binding, quote)
 }
 
-fn parse_vue_v_for_binding_list_element(p: &mut HtmlParser) -> ParsedSyntax {
+fn parse_vue_v_for_binding_list_element(p: &mut HtmlParser, quote: HtmlSyntaxKind) -> ParsedSyntax {
     if p.at(T![...]) {
-        parse_vue_v_for_rest_binding(p)
-    } else {
-        match p.cur() {
-            T!['{'] => parse_vue_v_for_object_binding(p),
-            T!['['] => parse_vue_v_for_array_binding(p),
-            HTML_LITERAL => parse_vue_v_for_object_property_or_identifier_binding(p),
-            _ => Absent,
-        }
+        return parse_vue_v_for_rest_binding(p, quote);
     }
+    let binding = match p.cur() {
+        T!['{'] => parse_vue_v_for_object_binding(p, quote),
+        T!['['] => parse_vue_v_for_array_binding(p, quote),
+        HTML_LITERAL => {
+            return parse_vue_v_for_object_property_or_identifier_binding(p, quote);
+        }
+        _ => Absent,
+    };
+    parse_vue_v_for_default_binding(p, binding, quote)
 }
 
-fn parse_vue_v_for_object_property_or_identifier_binding(p: &mut HtmlParser) -> ParsedSyntax {
+fn parse_vue_v_for_object_property_or_identifier_binding(
+    p: &mut HtmlParser,
+    quote: HtmlSyntaxKind,
+) -> ParsedSyntax {
     if !p.at(HTML_LITERAL) {
         return Absent;
     }
@@ -343,13 +325,44 @@ fn parse_vue_v_for_object_property_or_identifier_binding(p: &mut HtmlParser) -> 
     };
 
     if !p.at(T![:]) {
-        return Present(property);
+        return parse_vue_v_for_default_binding(p, Present(property), quote);
     }
 
     let m = property.precede(p);
     p.bump_v_for(T![:]);
-    parse_vue_v_for_binding(p).or_add_diagnostic(p, expected_vue_v_for_binding);
+    parse_vue_v_for_binding(p, quote).or_add_diagnostic(p, expected_vue_v_for_binding);
     Present(m.complete(p, VUE_V_FOR_OBJECT_PROPERTY_BINDING))
+}
+
+/// Parses the default value that follows `binding`, as in `item = fallback`.
+/// Returns `binding` unchanged when no `=` follows it.
+fn parse_vue_v_for_default_binding(
+    p: &mut HtmlParser,
+    binding: ParsedSyntax,
+    quote: HtmlSyntaxKind,
+) -> ParsedSyntax {
+    let Present(binding) = binding else {
+        return Absent;
+    };
+    if !p.at(T![=]) {
+        return Present(binding);
+    }
+
+    let m = binding.precede(p);
+    parse_vue_v_for_default(p, quote);
+    Present(m.complete(p, VUE_V_FOR_DEFAULT_BINDING))
+}
+
+/// Parses the `=` and the value of a default, as in `= fallback`.
+fn parse_vue_v_for_default(p: &mut HtmlParser, quote: HtmlSyntaxKind) {
+    p.bump_with_context(T![=], HtmlLexContext::VueVForDefault(quote));
+    if p.at(HTML_LITERAL) {
+        let expression = p.start();
+        p.bump_v_for(HTML_LITERAL);
+        expression.complete(p, HTML_TEXT_EXPRESSION);
+    } else {
+        p.error(expected_vue_v_for_default(p, p.cur_range()));
+    }
 }
 
 fn parse_vue_v_for_identifier_binding(p: &mut HtmlParser) -> ParsedSyntax {
@@ -362,7 +375,7 @@ fn parse_vue_v_for_identifier_binding(p: &mut HtmlParser) -> ParsedSyntax {
     Present(m.complete(p, VUE_V_FOR_IDENTIFIER_BINDING))
 }
 
-fn parse_vue_v_for_rest_binding(p: &mut HtmlParser) -> ParsedSyntax {
+fn parse_vue_v_for_rest_binding(p: &mut HtmlParser, quote: HtmlSyntaxKind) -> ParsedSyntax {
     if !p.at(T![...]) {
         return Absent;
     }
@@ -370,29 +383,40 @@ fn parse_vue_v_for_rest_binding(p: &mut HtmlParser) -> ParsedSyntax {
     let m = p.start();
     p.bump_v_for(T![...]);
     parse_vue_v_for_identifier_binding(p).or_add_diagnostic(p, expected_vue_v_for_binding);
-    Present(m.complete(p, VUE_V_FOR_REST_BINDING))
+    let rest = m.complete(p, VUE_V_FOR_REST_BINDING);
+    if !p.at(T![=]) {
+        return Present(rest);
+    }
+
+    // The default is parsed so that the list resumes after its value.
+    let m = rest.precede(p);
+    let start = p.cur_range().start();
+    parse_vue_v_for_default(p, quote);
+    let range = TextRange::new(start, p.last_end().unwrap_or(start));
+    p.error(unexpected_vue_v_for_rest_default(p, range));
+    Present(m.complete(p, HTML_BOGUS))
 }
 
-fn parse_vue_v_for_object_binding(p: &mut HtmlParser) -> ParsedSyntax {
+fn parse_vue_v_for_object_binding(p: &mut HtmlParser, quote: HtmlSyntaxKind) -> ParsedSyntax {
     if !p.at(T!['{']) {
         return Absent;
     }
 
     let m = p.start();
     p.bump_v_for(T!['{']);
-    VueVForBindingList::new(T!['}']).parse_list(p);
+    VueVForBindingList::new(T!['}'], quote).parse_list(p);
     p.expect_v_for(T!['}']);
     Present(m.complete(p, VUE_V_FOR_OBJECT_BINDING))
 }
 
-fn parse_vue_v_for_array_binding(p: &mut HtmlParser) -> ParsedSyntax {
+fn parse_vue_v_for_array_binding(p: &mut HtmlParser, quote: HtmlSyntaxKind) -> ParsedSyntax {
     if !p.at(T!['[']) {
         return Absent;
     }
 
     let m = p.start();
     p.bump_v_for(T!['[']);
-    VueVForBindingList::new(T![']']).parse_list(p);
+    VueVForBindingList::new(T![']'], quote).parse_list(p);
     p.expect_v_for(T![']']);
     Present(m.complete(p, VUE_V_FOR_ARRAY_BINDING))
 }
@@ -400,7 +424,7 @@ fn parse_vue_v_for_array_binding(p: &mut HtmlParser) -> ParsedSyntax {
 /// Parses a tuple v-for binding (with parentheses).
 ///
 /// Examples: `(item)`, `(item, index)`, `(value, key, index)`, `({ msg }, index)`
-fn parse_vue_v_for_tuple_binding(p: &mut HtmlParser) -> ParsedSyntax {
+fn parse_vue_v_for_tuple_binding(p: &mut HtmlParser, quote: HtmlSyntaxKind) -> ParsedSyntax {
     if !p.at(T!['(']) {
         return Absent;
     }
@@ -409,15 +433,15 @@ fn parse_vue_v_for_tuple_binding(p: &mut HtmlParser) -> ParsedSyntax {
 
     p.bump_v_for(T!['(']);
 
-    parse_vue_v_for_binding(p).or_add_diagnostic(p, expected_vue_v_for_binding);
+    parse_vue_v_for_binding(p, quote).or_add_diagnostic(p, expected_vue_v_for_binding);
 
     // second: VueVForTupleElement? (optional ", identifier")
     if p.at(T![,]) {
-        parse_vue_v_for_tuple_element(p).ok();
+        parse_vue_v_for_tuple_element(p, quote).ok();
 
         // third: VueVForTupleElement? (optional ", identifier")
         if p.at(T![,]) {
-            parse_vue_v_for_tuple_element(p).ok();
+            parse_vue_v_for_tuple_element(p, quote).ok();
         }
     }
 
@@ -429,7 +453,7 @@ fn parse_vue_v_for_tuple_binding(p: &mut HtmlParser) -> ParsedSyntax {
 }
 
 /// Parses a tuple element (comma followed by binding).
-fn parse_vue_v_for_tuple_element(p: &mut HtmlParser) -> ParsedSyntax {
+fn parse_vue_v_for_tuple_element(p: &mut HtmlParser, quote: HtmlSyntaxKind) -> ParsedSyntax {
     if !p.at(T![,]) {
         return Absent;
     }
@@ -438,7 +462,7 @@ fn parse_vue_v_for_tuple_element(p: &mut HtmlParser) -> ParsedSyntax {
 
     p.bump_v_for(T![,]);
 
-    parse_vue_v_for_binding(p).or_add_diagnostic(p, expected_vue_v_for_binding);
+    parse_vue_v_for_binding(p, quote).or_add_diagnostic(p, expected_vue_v_for_binding);
 
     Present(m.complete(p, VUE_V_FOR_TUPLE_ELEMENT))
 }
@@ -469,11 +493,13 @@ fn parse_vue_v_for_expression(p: &mut HtmlParser, quote: HtmlSyntaxKind) -> Pars
 
 struct VueVForBindingList {
     end: HtmlSyntaxKind,
+    /// The quote that terminates the attribute value.
+    quote: HtmlSyntaxKind,
 }
 
 impl VueVForBindingList {
-    fn new(end: HtmlSyntaxKind) -> Self {
-        Self { end }
+    fn new(end: HtmlSyntaxKind, quote: HtmlSyntaxKind) -> Self {
+        Self { end, quote }
     }
 }
 
@@ -494,7 +520,7 @@ impl ParseSeparatedList for VueVForBindingList {
     const LIST_KIND: Self::Kind = VUE_V_FOR_BINDING_LIST;
 
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
-        parse_vue_v_for_binding_list_element(p)
+        parse_vue_v_for_binding_list_element(p, self.quote)
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {

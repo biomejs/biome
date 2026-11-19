@@ -21,6 +21,8 @@ invalid.jsx:1:8 lint/style/noImplicitBoolean  FIXABLE  ━━━━━━━━�
     2 │ <input accept /** some comment */ />;
     3 │ <input /** some comment */ accept />;
   
+  i Writing the value explicitly makes it clear that the prop is set to true, which is easy to miss when the prop is written without a value.
+  
   i Safe fix: Add explicit `true` literal for this attribute
   
     1 │ <input·disabled={true}·/>;
@@ -39,6 +41,8 @@ invalid.jsx:2:8 lint/style/noImplicitBoolean  FIXABLE  ━━━━━━━━�
     3 │ <input /** some comment */ accept />;
     4 │ 
   
+  i Writing the value explicitly makes it clear that the prop is set to true, which is easy to miss when the prop is written without a value.
+  
   i Safe fix: Add explicit `true` literal for this attribute
   
     2 │ <input·accept={true}·/**·some·comment·*/·/>;
@@ -56,6 +60,8 @@ invalid.jsx:3:28 lint/style/noImplicitBoolean  FIXABLE  ━━━━━━━━
   > 3 │ <input /** some comment */ accept />;
       │                            ^^^^^^
     4 │ 
+  
+  i Writing the value explicitly makes it clear that the prop is set to true, which is easy to miss when the prop is written without a value.
   
   i Safe fix: Add explicit `true` literal for this attribute
   

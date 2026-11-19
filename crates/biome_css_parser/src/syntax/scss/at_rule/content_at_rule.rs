@@ -1,4 +1,4 @@
-use super::{expect_scss_statement_at_rule_end, include_at_rule::parse_scss_include_argument_list};
+use super::{expect_scss_semicolon_at_rule, include_at_rule::parse_scss_include_argument_list};
 use crate::parser::CssParser;
 use biome_css_syntax::CssSyntaxKind::SCSS_CONTENT_AT_RULE;
 use biome_css_syntax::T;
@@ -25,7 +25,7 @@ pub(crate) fn parse_scss_content_at_rule(p: &mut CssParser) -> ParsedSyntax {
     p.bump(T![content]);
     // The argument list is optional in the grammar, so a missing `(` is valid.
     parse_scss_include_argument_list(p).ok();
-    expect_scss_statement_at_rule_end(p);
+    expect_scss_semicolon_at_rule(p);
 
     Present(m.complete(p, SCSS_CONTENT_AT_RULE))
 }

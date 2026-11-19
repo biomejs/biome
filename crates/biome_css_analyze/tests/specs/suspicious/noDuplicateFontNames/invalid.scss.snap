@@ -1,0 +1,66 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalid.scss
+---
+# Input
+```css
+/* should generate diagnostics */
+.typography {
+  font-family: Arial, Arial, sans-serif;
+  font: normal 14px/32px Arial, Arial, serif;
+}
+
+```
+
+# Diagnostics
+```
+invalid.scss:3:23 lint/suspicious/noDuplicateFontNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate font names are redundant and unnecessary: Arial
+  
+    1 │ /* should generate diagnostics */
+    2 │ .typography {
+  > 3 │   font-family: Arial, Arial, sans-serif;
+      │                       ^^^^^
+    4 │   font: normal 14px/32px Arial, Arial, serif;
+    5 │ }
+  
+  i This is where the duplicate font name is found:
+  
+    1 │ /* should generate diagnostics */
+    2 │ .typography {
+  > 3 │   font-family: Arial, Arial, sans-serif;
+      │                ^^^^^
+    4 │   font: normal 14px/32px Arial, Arial, serif;
+    5 │ }
+  
+  i Remove duplicate font names within the property.
+  
+
+```
+
+```
+invalid.scss:4:33 lint/suspicious/noDuplicateFontNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate font names are redundant and unnecessary: Arial
+  
+    2 │ .typography {
+    3 │   font-family: Arial, Arial, sans-serif;
+  > 4 │   font: normal 14px/32px Arial, Arial, serif;
+      │                                 ^^^^^
+    5 │ }
+    6 │ 
+  
+  i This is where the duplicate font name is found:
+  
+    2 │ .typography {
+    3 │   font-family: Arial, Arial, sans-serif;
+  > 4 │   font: normal 14px/32px Arial, Arial, serif;
+      │                          ^^^^^
+    5 │ }
+    6 │ 
+  
+  i Remove duplicate font names within the property.
+  
+
+```

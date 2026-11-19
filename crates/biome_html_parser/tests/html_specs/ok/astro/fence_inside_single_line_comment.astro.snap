@@ -28,13 +28,14 @@ HtmlRoot {
         },
         r_fence_token: FENCE@24..27 "---" [] [],
     },
+    processing_instruction: missing (optional),
     directive: missing (optional),
     html: HtmlElementList [
         HtmlElement {
             opening_element: HtmlOpeningElement {
                 l_angle_token: L_ANGLE@27..30 "<" [Newline("\n"), Newline("\n")] [],
                 name: HtmlTagName {
-                    value_token: HTML_LITERAL@30..32 "h1" [] [],
+                    value_token: H1_KW@30..32 "h1" [] [],
                 },
                 attributes: HtmlAttributeList [],
                 r_angle_token: R_ANGLE@32..33 ">" [] [],
@@ -48,7 +49,7 @@ HtmlRoot {
                 l_angle_token: L_ANGLE@35..36 "<" [] [],
                 slash_token: SLASH@36..37 "/" [] [],
                 name: HtmlTagName {
-                    value_token: HTML_LITERAL@37..39 "h1" [] [],
+                    value_token: H1_KW@37..39 "h1" [] [],
                 },
                 r_angle_token: R_ANGLE@39..40 ">" [] [],
             },
@@ -69,12 +70,13 @@ HtmlRoot {
       0: HTML_LITERAL@3..24 "// ---\nconst x = 1;\n" [Newline("\n")] []
     2: FENCE@24..27 "---" [] []
   2: (empty)
-  3: HTML_ELEMENT_LIST@27..40
+  3: (empty)
+  4: HTML_ELEMENT_LIST@27..40
     0: HTML_ELEMENT@27..40
       0: HTML_OPENING_ELEMENT@27..33
         0: L_ANGLE@27..30 "<" [Newline("\n"), Newline("\n")] []
         1: HTML_TAG_NAME@30..32
-          0: HTML_LITERAL@30..32 "h1" [] []
+          0: H1_KW@30..32 "h1" [] []
         2: HTML_ATTRIBUTE_LIST@32..32
         3: R_ANGLE@32..33 ">" [] []
       1: HTML_ELEMENT_LIST@33..35
@@ -84,8 +86,8 @@ HtmlRoot {
         0: L_ANGLE@35..36 "<" [] []
         1: SLASH@36..37 "/" [] []
         2: HTML_TAG_NAME@37..39
-          0: HTML_LITERAL@37..39 "h1" [] []
+          0: H1_KW@37..39 "h1" [] []
         3: R_ANGLE@39..40 ">" [] []
-  4: EOF@40..41 "" [Newline("\n")] []
+  5: EOF@40..41 "" [Newline("\n")] []
 
 ```

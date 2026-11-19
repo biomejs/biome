@@ -1,0 +1,100 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidProperties.ts
+---
+# Input
+```ts
+// should generate diagnostics
+function check(value: { count?: number, label?: string, enabled?: boolean }, array: unknown[] | undefined) {
+    if (value.count) {}
+    if (value.label) {}
+    if (value.enabled) {}
+    if (array?.length) {}
+}
+
+```
+
+# Diagnostics
+```
+invalidProperties.ts:3:9 lint/nursery/useStrictBooleanExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This condition uses a nullable number.
+  
+    1 │ // should generate diagnostics
+    2 │ function check(value: { count?: number, label?: string, enabled?: boolean }, array: unknown[] | undefined) {
+  > 3 │     if (value.count) {}
+      │         ^^^^^^^^^^^
+    4 │     if (value.label) {}
+    5 │     if (value.enabled) {}
+  
+  i This check treats zero, NaN, and nullish values alike.
+  
+  i Check for nullish values and falsy numbers explicitly, or use Boolean() to test truthiness.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidProperties.ts:4:9 lint/nursery/useStrictBooleanExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This condition uses a nullable string.
+  
+    2 │ function check(value: { count?: number, label?: string, enabled?: boolean }, array: unknown[] | undefined) {
+    3 │     if (value.count) {}
+  > 4 │     if (value.label) {}
+      │         ^^^^^^^^^^^
+    5 │     if (value.enabled) {}
+    6 │     if (array?.length) {}
+  
+  i This check treats empty strings and nullish values alike.
+  
+  i Check for nullish values and empty strings explicitly, or use Boolean() to test truthiness.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidProperties.ts:5:9 lint/nursery/useStrictBooleanExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This condition uses a nullable boolean.
+  
+    3 │     if (value.count) {}
+    4 │     if (value.label) {}
+  > 5 │     if (value.enabled) {}
+      │         ^^^^^^^^^^^^^
+    6 │     if (array?.length) {}
+    7 │ }
+  
+  i This check treats false and nullish values alike.
+  
+  i Compare with true or provide an explicit default with ?? false.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidProperties.ts:6:9 lint/nursery/useStrictBooleanExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This condition uses a nullable number.
+  
+    4 │     if (value.label) {}
+    5 │     if (value.enabled) {}
+  > 6 │     if (array?.length) {}
+      │         ^^^^^^^^^^^^^
+    7 │ }
+    8 │ 
+  
+  i This check treats zero, NaN, and nullish values alike.
+  
+  i Check for nullish values and falsy numbers explicitly, or use Boolean() to test truthiness.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

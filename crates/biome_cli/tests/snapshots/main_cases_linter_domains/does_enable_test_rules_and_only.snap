@@ -2,6 +2,12 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
+## Command
+
+```shell
+biome lint test1.js test2.js --only=suspicious/noDebugger
+```
+
 ## `biome.json`
 
 ```json
@@ -59,6 +65,8 @@ test1.js:2:9 lint/suspicious/noDebugger  FIXABLE  ━━━━━━━━━━
       │         ^^^^^^^^^
     3 │         describe.only("bar", () => {});
     4 │ 
+  
+  i A debugger statement pauses the program when a debugger is open. It is meant for debugging only, and it should not be left in code that is shipped.
   
   i Unsafe fix: Remove debugger statement
   

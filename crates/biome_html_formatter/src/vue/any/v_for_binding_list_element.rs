@@ -11,6 +11,7 @@ impl FormatRule<AnyVueVForBindingListElement> for FormatAnyVueVForBindingListEle
             AnyVueVForBindingListElement::AnyVueVForDestructuredBinding(node) => {
                 node.format().fmt(f)
             }
+            AnyVueVForBindingListElement::VueVForDefaultBinding(node) => node.format().fmt(f),
             AnyVueVForBindingListElement::VueVForIdentifierBinding(node) => node.format().fmt(f),
             AnyVueVForBindingListElement::VueVForObjectPropertyBinding(node) => {
                 node.format().fmt(f)

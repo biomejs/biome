@@ -1,0 +1,162 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid_mixed_usage.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+class MixedUsage {
+	#writtenThenRead = 0;
+	#onlyWritten = 0;
+	private readLater = 0;
+	private onlyUpdated = 0;
+	#unused = 0;
+	private destructured = 0;
+	private alsoUnused = 0;
+
+	method() {
+		this.#writtenThenRead = 1;
+		this.#onlyWritten = 1;
+		this.onlyUpdated++;
+		const { destructured } = this;
+		return [this.#writtenThenRead, this.readLater, destructured];
+	}
+}
+
+class ComputedAfterUse {
+	private used = 0;
+	private viaComputed = 0;
+	#sharpUnused = 0;
+
+	method(key: string) {
+		return [this.used, this[key]];
+	}
+}
+
+```
+
+# Diagnostics
+```
+invalid_mixed_usage.ts:4:2 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━━━━━━━━━
+
+  ! This private class member is defined but never used.
+  
+    2 │ class MixedUsage {
+    3 │ 	#writtenThenRead = 0;
+  > 4 │ 	#onlyWritten = 0;
+      │ 	^^^^^^^^^^^^
+    5 │ 	private readLater = 0;
+    6 │ 	private onlyUpdated = 0;
+  
+  i A private class member that nothing uses is dead code. It adds noise and can mislead readers into thinking it is used.
+  
+  i Unsafe fix: Remove unused declaration.
+  
+     2  2 │   class MixedUsage {
+     3  3 │     #writtenThenRead = 0;
+     4    │ - → #onlyWritten·=·0;
+     5  4 │     private readLater = 0;
+     6  5 │     private onlyUpdated = 0;
+  
+
+```
+
+```
+invalid_mixed_usage.ts:6:10 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━━━━━━━━
+
+  ! This private class member is defined but never used.
+  
+    4 │ 	#onlyWritten = 0;
+    5 │ 	private readLater = 0;
+  > 6 │ 	private onlyUpdated = 0;
+      │ 	        ^^^^^^^^^^^
+    7 │ 	#unused = 0;
+    8 │ 	private destructured = 0;
+  
+  i A private class member that nothing uses is dead code. It adds noise and can mislead readers into thinking it is used.
+  
+  i Unsafe fix: Remove unused declaration.
+  
+     4  4 │     #onlyWritten = 0;
+     5  5 │     private readLater = 0;
+     6    │ - → private·onlyUpdated·=·0;
+     7  6 │     #unused = 0;
+     8  7 │     private destructured = 0;
+  
+
+```
+
+```
+invalid_mixed_usage.ts:7:2 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━━━━━━━━━
+
+  ! This private class member is defined but never used.
+  
+    5 │ 	private readLater = 0;
+    6 │ 	private onlyUpdated = 0;
+  > 7 │ 	#unused = 0;
+      │ 	^^^^^^^
+    8 │ 	private destructured = 0;
+    9 │ 	private alsoUnused = 0;
+  
+  i A private class member that nothing uses is dead code. It adds noise and can mislead readers into thinking it is used.
+  
+  i Unsafe fix: Remove unused declaration.
+  
+     5  5 │     private readLater = 0;
+     6  6 │     private onlyUpdated = 0;
+     7    │ - → #unused·=·0;
+     8  7 │     private destructured = 0;
+     9  8 │     private alsoUnused = 0;
+  
+
+```
+
+```
+invalid_mixed_usage.ts:9:10 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━━━━━━━━
+
+  ! This private class member is defined but never used.
+  
+     7 │ 	#unused = 0;
+     8 │ 	private destructured = 0;
+   > 9 │ 	private alsoUnused = 0;
+       │ 	        ^^^^^^^^^^
+    10 │ 
+    11 │ 	method() {
+  
+  i A private class member that nothing uses is dead code. It adds noise and can mislead readers into thinking it is used.
+  
+  i Unsafe fix: Remove unused declaration.
+  
+     7  7 │     #unused = 0;
+     8  8 │     private destructured = 0;
+     9    │ - → private·alsoUnused·=·0;
+    10  9 │   
+    11 10 │     method() {
+  
+
+```
+
+```
+invalid_mixed_usage.ts:23:2 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━━━━━━━━
+
+  ! This private class member is defined but never used.
+  
+    21 │ 	private used = 0;
+    22 │ 	private viaComputed = 0;
+  > 23 │ 	#sharpUnused = 0;
+       │ 	^^^^^^^^^^^^
+    24 │ 
+    25 │ 	method(key: string) {
+  
+  i A private class member that nothing uses is dead code. It adds noise and can mislead readers into thinking it is used.
+  
+  i Unsafe fix: Remove unused declaration.
+  
+    21 21 │     private used = 0;
+    22 22 │     private viaComputed = 0;
+    23    │ - → #sharpUnused·=·0;
+    24 23 │   
+    25 24 │     method(key: string) {
+  
+
+```

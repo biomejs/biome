@@ -1,0 +1,188 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/selectors/selector-boundary-layout-stability.css
+---
+
+# Input
+
+```css
+.long-selector-name-one .long-selector-name-two .long-selector-name-three/* boundary */>.long-selector-name-four .long-selector-name-five{color:red}
+
+.multiline-block/* multiline
+comment */{color:blue}
+
+.parent{.nested/* nested multiline
+comment */{color:green}}
+
+.descendant-comment/* comment */
+.target{color:black}
+
+.descendant-comment-blank/* comment */
+
+.target{color:white}
+
+.block-comment-gap
+
+/* comment */{color:purple}
+
+.parent{.nested-block-comment-gap
+
+/* comment */{color:orange}}
+
+.functional-pseudo:is(.other,
+/* leading */
+.a
+/* boundary */
+>
+.b){color:pink}
+
+.parent{.functional-pseudo:is(.other,
+/* leading */
+.a
+/* boundary */
+>
+.b){color:teal}}
+
+.base   .target,
+/* id */
+#target    .child,
+/* attribute */
+[data-target]   .child,
+/* pseudo */
+:hover  .child,
+/* universal */
+*    .child{color:navy}
+
+/* long id */
+#target   .selector-with-a-very-long-name-one    .selector-with-a-very-long-name-two   .selector-with-a-very-long-name-three{color:maroon}
+
+/* long attribute */
+[data-target]    .selector-with-a-very-long-name-one   .selector-with-a-very-long-name-two    .selector-with-a-very-long-name-three{color:maroon}
+
+/* long pseudo */
+:hover   .selector-with-a-very-long-name-one    .selector-with-a-very-long-name-two   .selector-with-a-very-long-name-three{color:maroon}
+
+/* long universal */
+*   .selector-with-a-very-long-name-one    .selector-with-a-very-long-name-two   .selector-with-a-very-long-name-three{color:maroon}
+
+```
+
+
+# Formatted
+
+```css
+.long-selector-name-one .long-selector-name-two .long-selector-name-three /* boundary */ > .long-selector-name-four .long-selector-name-five {
+	color: red;
+}
+
+.multiline-block /* multiline
+comment */ {
+	color: blue;
+}
+
+.parent {
+	.nested /* nested multiline
+comment */ {
+		color: green;
+	}
+}
+
+.descendant-comment /* comment */
+.target {
+	color: black;
+}
+
+.descendant-comment-blank /* comment */
+
+.target {
+	color: white;
+}
+
+.block-comment-gap
+
+/* comment */ {
+	color: purple;
+}
+
+.parent {
+	.nested-block-comment-gap
+
+	/* comment */ {
+		color: orange;
+	}
+}
+
+.functional-pseudo:is(
+	.other,
+	/* leading */
+	.a
+	/* boundary */
+	>
+	.b
+) {
+	color: pink;
+}
+
+.parent {
+	.functional-pseudo:is(
+			.other,
+			/* leading */
+			.a
+			/* boundary */
+			>
+			.b
+		) {
+		color: teal;
+	}
+}
+
+.base .target,
+/* id */
+#target .child,
+/* attribute */
+[data-target] .child,
+/* pseudo */
+:hover .child,
+/* universal */
+* .child {
+	color: navy;
+}
+
+/* long id */
+#target
+	.selector-with-a-very-long-name-one
+	.selector-with-a-very-long-name-two
+	.selector-with-a-very-long-name-three {
+	color: maroon;
+}
+
+/* long attribute */
+[data-target]
+	.selector-with-a-very-long-name-one
+	.selector-with-a-very-long-name-two
+	.selector-with-a-very-long-name-three {
+	color: maroon;
+}
+
+/* long pseudo */
+:hover
+	.selector-with-a-very-long-name-one
+	.selector-with-a-very-long-name-two
+	.selector-with-a-very-long-name-three {
+	color: maroon;
+}
+
+/* long universal */
+*
+	.selector-with-a-very-long-name-one
+	.selector-with-a-very-long-name-two
+	.selector-with-a-very-long-name-three {
+	color: maroon;
+}
+
+```
+
+# Lines exceeding max width of 80 characters
+```
+    1: .long-selector-name-one .long-selector-name-two .long-selector-name-three /* boundary */ > .long-selector-name-four .long-selector-name-five {
+```

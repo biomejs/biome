@@ -1,0 +1,209 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+
+try {
+  throw new Error("Original error");
+} catch (err) {
+  throw new Error("Wrapper error");
+}
+
+
+try {
+  throw new Error("Original error");
+} catch (err) {
+  throw new Error(`Failed: ${err.message}`);
+}
+
+try {
+  throw new Error("Original error");
+} catch (err) {
+  if (true) {
+    throw err;
+  }
+}
+
+try {
+	doSomething();
+} catch {
+	throw new TypeError("Something went wrong");
+}
+
+
+try {
+  throw new Error("Original error");
+} catch ({ message }) {
+  throw new Error(message);
+}
+
+
+try {
+  throw new Error("Original error");
+} catch (err) {
+  throw new Error(`Failed to process: ${err.message}`, { cause: err.message });
+}
+
+try {
+    doSomething();
+} catch (error) {
+    if (whatever) {
+        const error = anotherError; // This declaration is the problem.
+        throw new Error("Something went wrong", { cause: error });
+    }
+}
+
+try {
+    doSomething();
+} catch (err) {
+	throw new Error("", { cause: otherVar });
+}
+
+
+```
+
+# Diagnostics
+```
+invalid.js:6:3 lint/style/useErrorCause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The original error is not passed to the new `Error` object.
+  
+    4 │   throw new Error("Original error");
+    5 │ } catch (err) {
+  > 6 │   throw new Error("Wrapper error");
+      │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ }
+    8 │ 
+  
+  i Without the original error as its `cause`, the stack trace and context of the first failure are lost. This makes the failure harder to trace.
+  
+  i Pass the original error in the `cause` option, for example `new Error("message", { cause: error })`.
+  
+
+```
+
+```
+invalid.js:13:3 lint/style/useErrorCause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The original error is not passed to the new `Error` object.
+  
+    11 │   throw new Error("Original error");
+    12 │ } catch (err) {
+  > 13 │   throw new Error(`Failed: ${err.message}`);
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    14 │ }
+    15 │ 
+  
+  i Without the original error as its `cause`, the stack trace and context of the first failure are lost. This makes the failure harder to trace.
+  
+  i Pass the original error in the `cause` option, for example `new Error("message", { cause: error })`.
+  
+
+```
+
+```
+invalid.js:27:2 lint/style/useErrorCause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The original error is discarded because the `catch` clause has no parameter.
+  
+    25 │ 	doSomething();
+    26 │ } catch {
+  > 27 │ 	throw new TypeError("Something went wrong");
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    28 │ }
+    29 │ 
+  
+  i Without a parameter, the code cannot access the original error, so its details are lost.
+  
+  i Add a parameter to the `catch` clause and pass it as the `cause` of the new error.
+  
+
+```
+
+```
+invalid.js:33:10 lint/style/useErrorCause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The error is destructured in the `catch` clause.
+  
+    31 │ try {
+    32 │   throw new Error("Original error");
+  > 33 │ } catch ({ message }) {
+       │          ^^^^^^^^^^^
+    34 │   throw new Error(message);
+    35 │ }
+  
+  i Destructuring can lose information from the error object, such as the stack trace. The original error also cannot be passed as the `cause`.
+  
+  i Catch the error in a single variable, read its properties from that variable, and pass the variable as the `cause`.
+  
+
+```
+
+```
+invalid.js:41:3 lint/style/useErrorCause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The original error is not passed to the new `Error` object.
+  
+    39 │   throw new Error("Original error");
+    40 │ } catch (err) {
+  > 41 │   throw new Error(`Failed to process: ${err.message}`, { cause: err.message });
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    42 │ }
+    43 │ 
+  
+  i Without the original error as its `cause`, the stack trace and context of the first failure are lost. This makes the failure harder to trace.
+  
+  i Pass the original error in the `cause` option, for example `new Error("message", { cause: error })`.
+  
+
+```
+
+```
+invalid.js:49:58 lint/style/useErrorCause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The `cause` property is shadowing the original error from the `catch` clause.
+  
+    47 │     if (whatever) {
+    48 │         const error = anotherError; // This declaration is the problem.
+  > 49 │         throw new Error("Something went wrong", { cause: error });
+       │                                                          ^^^^^
+    50 │     }
+    51 │ }
+  
+  i The original error is declared here.
+  
+    44 │ try {
+    45 │     doSomething();
+  > 46 │ } catch (error) {
+       │          ^^^^^
+    47 │     if (whatever) {
+    48 │         const error = anotherError; // This declaration is the problem.
+  
+  i The `cause` refers to a different value than the caught error, so the original error is still lost.
+  
+  i Rename the variable that shadows the caught error, or pass the caught error as the `cause`.
+  
+
+```
+
+```
+invalid.js:56:2 lint/style/useErrorCause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The original error is not passed to the new `Error` object.
+  
+    54 │     doSomething();
+    55 │ } catch (err) {
+  > 56 │ 	throw new Error("", { cause: otherVar });
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    57 │ }
+    58 │ 
+  
+  i Without the original error as its `cause`, the stack trace and context of the first failure are lost. This makes the failure harder to trace.
+  
+  i Pass the original error in the `cause` option, for example `new Error("message", { cause: error })`.
+  
+
+```

@@ -1,0 +1,36 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-switch-statement.vue
+---
+# Input
+```vue
+/* should generate diagnostics */
+
+<script>
+import { ref } from 'vue'
+const foo = ref(true)
+switch (foo) {
+}
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-switch-statement.vue:6:9 lint/correctness/noVueRefAsOperand ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Ref value is accessed without `.value`.
+  
+    4 │ import { ref } from 'vue'
+    5 │ const foo = ref(true)
+  > 6 │ switch (foo) {
+      │         ^^^
+    7 │ }
+    8 │ </script>
+  
+  i Without `.value`, Vue cannot track changes to the ref, which may break reactivity.
+  
+  i Use `.value` to access ref value.
+  
+
+```

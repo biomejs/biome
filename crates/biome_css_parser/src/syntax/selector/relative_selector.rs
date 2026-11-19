@@ -1,13 +1,17 @@
 use crate::parser::CssParser;
-use crate::syntax::parse_error::expected_relative_selector;
-use crate::syntax::selector::{is_nth_at_compound_selector, parse_selector};
+use crate::syntax::CssSyntaxFeatures;
+use crate::syntax::parse_error::{expected_relative_selector, scss_only_syntax_error};
+use crate::syntax::selector::{
+    is_at_scss_partial_combinator_selector, is_nth_at_compound_selector, parse_selector,
+    parse_style_rule_selector,
+};
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::parse_lists::ParseSeparatedList;
 use biome_parser::parse_recovery::{ParseRecovery, RecoveryError, RecoveryResult};
 use biome_parser::parsed_syntax::ParsedSyntax;
 use biome_parser::parsed_syntax::ParsedSyntax::{Absent, Present};
-use biome_parser::{Parser, TokenSet, token_set};
+use biome_parser::{Parser, SyntaxFeature, TokenSet, token_set};
 
 /// Represents a list of relative CSS selectors with support for error recovery.
 ///
@@ -26,6 +30,7 @@ pub(crate) struct RelativeSelectorList {
     end_kind: CssSyntaxKind,
     /// Flag indicating whether error recovery is disabled.
     is_recovery_disabled: bool,
+    is_partial_combinator_nesting_allowed: bool,
 }
 
 impl RelativeSelectorList {
@@ -40,7 +45,22 @@ impl RelativeSelectorList {
         Self {
             end_kind,
             is_recovery_disabled: false,
+            is_partial_combinator_nesting_allowed: false,
         }
+    }
+
+    /// Allows a combinator-only selector immediately before an SCSS style-rule block.
+    ///
+    /// ```scss
+    /// .card {
+    ///   + {
+    ///     .media {}
+    ///   }
+    /// }
+    /// ```
+    pub(crate) fn allow_partial_combinator_nesting(mut self) -> Self {
+        self.is_partial_combinator_nesting_allowed = true;
+        self
     }
 
     /// Disables error recovery for this selector list.
@@ -119,7 +139,7 @@ impl ParseSeparatedList for RelativeSelectorList {
     const LIST_KIND: CssSyntaxKind = CSS_RELATIVE_SELECTOR_LIST;
 
     fn parse_element(&mut self, p: &mut CssParser) -> ParsedSyntax {
-        parse_relative_selector(p)
+        parse_relative_selector(p, self.is_partial_combinator_nesting_allowed)
     }
 
     fn is_at_list_end(&self, p: &mut CssParser) -> bool {
@@ -170,24 +190,46 @@ pub(crate) fn is_at_relative_selector(p: &mut CssParser) -> bool {
     is_at_relative_selector_combinator(p) || is_nth_at_compound_selector(p, 0)
 }
 
-/// Parses a relative selector from the current position in the CSS parser.
+/// Parses a relative selector, including SCSS combinator-only style-rule nesting.
 ///
-/// This function attempts to parse a relative selector starting from the current position. If the position
-/// does not indicate a relative selector, it returns `Absent`. Otherwise, it parses the selector, adding
-/// diagnostics if necessary, and returns `Present` with the parsed syntax.
+/// ```scss
+/// .card {
+///   + {
+///     .media {}
+///   }
+///
+///   > .existing-leading-form {}
+/// }
+/// ```
 #[inline]
-fn parse_relative_selector(p: &mut CssParser) -> ParsedSyntax {
+fn parse_relative_selector(
+    p: &mut CssParser,
+    is_partial_combinator_nesting_allowed: bool,
+) -> ParsedSyntax {
     if !is_at_relative_selector(p) {
         return Absent;
     }
 
-    let m = p.start();
-
-    // Consume the combinator from the set of relative selector combinators.
-    p.eat_ts(RELATIVE_SELECTOR_COMBINATOR_SET);
-    // Attempt to parse the selector, adding a diagnostic if it fails.
-    parse_selector(p).or_add_diagnostic(p, expected_relative_selector);
-
-    // Mark the end of the parsing operation and return the result.
-    Present(m.complete(p, CSS_RELATIVE_SELECTOR))
+    let selector = p.start();
+    if is_partial_combinator_nesting_allowed && is_at_scss_partial_combinator_selector(p) {
+        CssSyntaxFeatures::Scss.parse_exclusive_syntax(
+            p,
+            |p| {
+                p.bump_ts(RELATIVE_SELECTOR_COMBINATOR_SET);
+                Present(selector.complete(p, SCSS_PARTIAL_COMBINATOR_SELECTOR))
+            },
+            |p, marker| {
+                scss_only_syntax_error(p, "SCSS partial combinator selectors", marker.range(p))
+            },
+        )
+    } else {
+        p.eat_ts(RELATIVE_SELECTOR_COMBINATOR_SET);
+        if is_partial_combinator_nesting_allowed {
+            parse_style_rule_selector(p)
+        } else {
+            parse_selector(p)
+        }
+        .or_add_diagnostic(p, expected_relative_selector);
+        Present(selector.complete(p, CSS_RELATIVE_SELECTOR))
+    }
 }

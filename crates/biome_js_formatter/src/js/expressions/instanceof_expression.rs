@@ -24,7 +24,8 @@ impl FormatNodeRule<JsInstanceofExpression> for FormatJsInstanceofExpression {
 #[cfg(test)]
 mod tests {
     use crate::{assert_needs_parentheses, assert_not_needs_parentheses};
-    use biome_js_syntax::{JsFileSource, JsInstanceofExpression};
+    use biome_js_syntax::JsInstanceofExpression;
+    use biome_languages::JsFileSource;
 
     #[test]
     fn needs_parentheses() {

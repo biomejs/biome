@@ -1,0 +1,420 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+
+Math.max(Math.max(a, b), c);
+Math.min(a, Math.min(b, c));
+Math.max(Math.max(a, b), Math.max(c, d), e);
+Math.min(Math.min(Math.min(a, b), c), d);
+Math.max(Math.max(a, b));
+Math.min(Math.min());
+Math.max(Math.max(...values), fallback);
+const value = Math.max(foo, Math.max(bar, baz)).toString();
+const parenthesized = Math.min((Math.min(a, b)), c);
+Math.max(foo(), Math.max(bar(), baz()), qux());
+Math.min(Math.min(foo(a), bar(b)), baz(Math.min(c, d)));
+
+const multiline = Math.max(
+    Math.max(
+        a,
+        b,
+    ),
+    c,
+);
+
+Math.max(/* keep */ Math.max(a, b), c);
+Math.max(Math.max(a, b) /* keep */, c);
+Math.max(Math.max(/* keep */ a, b), c);
+Math.max(Math.max(a, b), /* keep */ c);
+Math./* keep */max(Math.max(a, b), c);
+
+```
+
+# Diagnostics
+```
+invalid.js:3:1 lint/nursery/useFlatMathMinMax  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Math.max() call contains another call to the same method.
+  
+    1 │ /* should generate diagnostics */
+    2 │ 
+  > 3 │ Math.max(Math.max(a, b), c);
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ Math.min(a, Math.min(b, c));
+    5 │ Math.max(Math.max(a, b), Math.max(c, d), e);
+  
+  i Math.max() accepts any number of arguments, so the nested call is unnecessary.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Flatten the nested Math.max() calls.
+  
+    3 │ Math.max(Math.max(a,·b),·c);
+      │          ---------    -     
+
+```
+
+```
+invalid.js:4:1 lint/nursery/useFlatMathMinMax  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Math.min() call contains another call to the same method.
+  
+    3 │ Math.max(Math.max(a, b), c);
+  > 4 │ Math.min(a, Math.min(b, c));
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ Math.max(Math.max(a, b), Math.max(c, d), e);
+    6 │ Math.min(Math.min(Math.min(a, b), c), d);
+  
+  i Math.min() accepts any number of arguments, so the nested call is unnecessary.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Flatten the nested Math.min() calls.
+  
+    4 │ Math.min(a,·Math.min(b,·c));
+      │             ---------    -  
+
+```
+
+```
+invalid.js:5:1 lint/nursery/useFlatMathMinMax  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Math.max() call contains another call to the same method.
+  
+    3 │ Math.max(Math.max(a, b), c);
+    4 │ Math.min(a, Math.min(b, c));
+  > 5 │ Math.max(Math.max(a, b), Math.max(c, d), e);
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ Math.min(Math.min(Math.min(a, b), c), d);
+    7 │ Math.max(Math.max(a, b));
+  
+  i Math.max() accepts any number of arguments, so the nested call is unnecessary.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Flatten the nested Math.max() calls.
+  
+    5 │ Math.max(Math.max(a,·b),·Math.max(c,·d),·e);
+      │          ---------    -  ---------    -     
+
+```
+
+```
+invalid.js:6:1 lint/nursery/useFlatMathMinMax  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Math.min() call contains another call to the same method.
+  
+    4 │ Math.min(a, Math.min(b, c));
+    5 │ Math.max(Math.max(a, b), Math.max(c, d), e);
+  > 6 │ Math.min(Math.min(Math.min(a, b), c), d);
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ Math.max(Math.max(a, b));
+    8 │ Math.min(Math.min());
+  
+  i Math.min() accepts any number of arguments, so the nested call is unnecessary.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Flatten the nested Math.min() calls.
+  
+    6 │ Math.min(Math.min(Math.min(a,·b),·c),·d);
+      │          ------------------    -   -     
+
+```
+
+```
+invalid.js:7:1 lint/nursery/useFlatMathMinMax  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Math.max() call contains another call to the same method.
+  
+    5 │ Math.max(Math.max(a, b), Math.max(c, d), e);
+    6 │ Math.min(Math.min(Math.min(a, b), c), d);
+  > 7 │ Math.max(Math.max(a, b));
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ Math.min(Math.min());
+    9 │ Math.max(Math.max(...values), fallback);
+  
+  i Math.max() accepts any number of arguments, so the nested call is unnecessary.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Flatten the nested Math.max() calls.
+  
+    7 │ Math.max(Math.max(a,·b));
+      │          ---------    -  
+
+```
+
+```
+invalid.js:8:1 lint/nursery/useFlatMathMinMax  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Math.min() call contains another call to the same method.
+  
+     6 │ Math.min(Math.min(Math.min(a, b), c), d);
+     7 │ Math.max(Math.max(a, b));
+   > 8 │ Math.min(Math.min());
+       │ ^^^^^^^^^^^^^^^^^^^^
+     9 │ Math.max(Math.max(...values), fallback);
+    10 │ const value = Math.max(foo, Math.max(bar, baz)).toString();
+  
+  i Math.min() accepts any number of arguments, so the nested call is unnecessary.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Flatten the nested Math.min() calls.
+  
+    8 │ Math.min(Math.min());
+      │          ----------  
+
+```
+
+```
+invalid.js:9:1 lint/nursery/useFlatMathMinMax  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Math.max() call contains another call to the same method.
+  
+     7 │ Math.max(Math.max(a, b));
+     8 │ Math.min(Math.min());
+   > 9 │ Math.max(Math.max(...values), fallback);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ const value = Math.max(foo, Math.max(bar, baz)).toString();
+    11 │ const parenthesized = Math.min((Math.min(a, b)), c);
+  
+  i Math.max() accepts any number of arguments, so the nested call is unnecessary.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Flatten the nested Math.max() calls.
+  
+    9 │ Math.max(Math.max(...values),·fallback);
+      │          ---------         -            
+
+```
+
+```
+invalid.js:10:15 lint/nursery/useFlatMathMinMax  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Math.max() call contains another call to the same method.
+  
+     8 │ Math.min(Math.min());
+     9 │ Math.max(Math.max(...values), fallback);
+  > 10 │ const value = Math.max(foo, Math.max(bar, baz)).toString();
+       │               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    11 │ const parenthesized = Math.min((Math.min(a, b)), c);
+    12 │ Math.max(foo(), Math.max(bar(), baz()), qux());
+  
+  i Math.max() accepts any number of arguments, so the nested call is unnecessary.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Flatten the nested Math.max() calls.
+  
+    10 │ const·value·=·Math.max(foo,·Math.max(bar,·baz)).toString();
+       │                             ---------        -             
+
+```
+
+```
+invalid.js:11:23 lint/nursery/useFlatMathMinMax  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Math.min() call contains another call to the same method.
+  
+     9 │ Math.max(Math.max(...values), fallback);
+    10 │ const value = Math.max(foo, Math.max(bar, baz)).toString();
+  > 11 │ const parenthesized = Math.min((Math.min(a, b)), c);
+       │                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ Math.max(foo(), Math.max(bar(), baz()), qux());
+    13 │ Math.min(Math.min(foo(a), bar(b)), baz(Math.min(c, d)));
+  
+  i Math.min() accepts any number of arguments, so the nested call is unnecessary.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Flatten the nested Math.min() calls.
+  
+    11 │ const·parenthesized·=·Math.min((Math.min(a,·b)),·c);
+       │                                ----------    --     
+
+```
+
+```
+invalid.js:12:1 lint/nursery/useFlatMathMinMax  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Math.max() call contains another call to the same method.
+  
+    10 │ const value = Math.max(foo, Math.max(bar, baz)).toString();
+    11 │ const parenthesized = Math.min((Math.min(a, b)), c);
+  > 12 │ Math.max(foo(), Math.max(bar(), baz()), qux());
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │ Math.min(Math.min(foo(a), bar(b)), baz(Math.min(c, d)));
+    14 │ 
+  
+  i Math.max() accepts any number of arguments, so the nested call is unnecessary.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Flatten the nested Math.max() calls.
+  
+    12 │ Math.max(foo(),·Math.max(bar(),·baz()),·qux());
+       │                 ---------           -          
+
+```
+
+```
+invalid.js:13:1 lint/nursery/useFlatMathMinMax  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Math.min() call contains another call to the same method.
+  
+    11 │ const parenthesized = Math.min((Math.min(a, b)), c);
+    12 │ Math.max(foo(), Math.max(bar(), baz()), qux());
+  > 13 │ Math.min(Math.min(foo(a), bar(b)), baz(Math.min(c, d)));
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    14 │ 
+    15 │ const multiline = Math.max(
+  
+  i Math.min() accepts any number of arguments, so the nested call is unnecessary.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Flatten the nested Math.min() calls.
+  
+    13 │ Math.min(Math.min(foo(a),·bar(b)),·baz(Math.min(c,·d)));
+       │          ---------             -                        
+
+```
+
+```
+invalid.js:15:19 lint/nursery/useFlatMathMinMax  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Math.max() call contains another call to the same method.
+  
+    13 │ Math.min(Math.min(foo(a), bar(b)), baz(Math.min(c, d)));
+    14 │ 
+  > 15 │ const multiline = Math.max(
+       │                   ^^^^^^^^^
+  > 16 │     Math.max(
+        ...
+  > 20 │     c,
+  > 21 │ );
+       │ ^
+    22 │ 
+    23 │ Math.max(/* keep */ Math.max(a, b), c);
+  
+  i Math.max() accepts any number of arguments, so the nested call is unnecessary.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Flatten the nested Math.max() calls.
+  
+    13 13 │   Math.min(Math.min(foo(a), bar(b)), baz(Math.min(c, d)));
+    14 14 │   
+    15    │ - const·multiline·=·Math.max(
+    16    │ - ····Math.max(
+    17    │ - ········a,
+    18    │ - ········b,
+    19    │ - ····),
+    20    │ - ····c,
+    21    │ - );
+       15 │ + const·multiline·=·Math.max(a,·b,·c);
+    22 16 │   
+    23 17 │   Math.max(/* keep */ Math.max(a, b), c);
+  
+
+```
+
+```
+invalid.js:23:1 lint/nursery/useFlatMathMinMax ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Math.max() call contains another call to the same method.
+  
+    21 │ );
+    22 │ 
+  > 23 │ Math.max(/* keep */ Math.max(a, b), c);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    24 │ Math.max(Math.max(a, b) /* keep */, c);
+    25 │ Math.max(Math.max(/* keep */ a, b), c);
+  
+  i Math.max() accepts any number of arguments, so the nested call is unnecessary.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:24:1 lint/nursery/useFlatMathMinMax ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Math.max() call contains another call to the same method.
+  
+    23 │ Math.max(/* keep */ Math.max(a, b), c);
+  > 24 │ Math.max(Math.max(a, b) /* keep */, c);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    25 │ Math.max(Math.max(/* keep */ a, b), c);
+    26 │ Math.max(Math.max(a, b), /* keep */ c);
+  
+  i Math.max() accepts any number of arguments, so the nested call is unnecessary.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:25:1 lint/nursery/useFlatMathMinMax ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Math.max() call contains another call to the same method.
+  
+    23 │ Math.max(/* keep */ Math.max(a, b), c);
+    24 │ Math.max(Math.max(a, b) /* keep */, c);
+  > 25 │ Math.max(Math.max(/* keep */ a, b), c);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    26 │ Math.max(Math.max(a, b), /* keep */ c);
+    27 │ Math./* keep */max(Math.max(a, b), c);
+  
+  i Math.max() accepts any number of arguments, so the nested call is unnecessary.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:26:1 lint/nursery/useFlatMathMinMax ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Math.max() call contains another call to the same method.
+  
+    24 │ Math.max(Math.max(a, b) /* keep */, c);
+    25 │ Math.max(Math.max(/* keep */ a, b), c);
+  > 26 │ Math.max(Math.max(a, b), /* keep */ c);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    27 │ Math./* keep */max(Math.max(a, b), c);
+    28 │ 
+  
+  i Math.max() accepts any number of arguments, so the nested call is unnecessary.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:27:1 lint/nursery/useFlatMathMinMax ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Math.max() call contains another call to the same method.
+  
+    25 │ Math.max(Math.max(/* keep */ a, b), c);
+    26 │ Math.max(Math.max(a, b), /* keep */ c);
+  > 27 │ Math./* keep */max(Math.max(a, b), c);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    28 │ 
+  
+  i Math.max() accepts any number of arguments, so the nested call is unnecessary.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

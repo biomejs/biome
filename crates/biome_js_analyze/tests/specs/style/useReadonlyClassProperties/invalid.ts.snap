@@ -357,6 +357,90 @@ export class Test {
 
 # Diagnostics
 ```
+invalid.ts:3:17 lint/style/useReadonlyClassProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Member 'incorrectlyModifiableStatic' is never reassigned.
+  
+    1 │ // Static properties
+    2 │ class TestIncorrectlyModifiableStatic {
+  > 3 │ 	private static incorrectlyModifiableStatic = 7;
+      │ 	               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ }
+    5 │ 
+  
+  i Using readonly improves code safety, clarity, and helps prevent unintended mutations.
+  
+  i Unsafe fix: Add readonly decorator.
+  
+    3 │ → private·static·readonly·incorrectlyModifiableStatic·=·7;
+      │                  +++++++++                                
+
+```
+
+```
+invalid.ts:8:9 lint/style/useReadonlyClassProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Member '#incorrectlyModifiableStatic' is never reassigned.
+  
+     6 │ // Private static fields
+     7 │ class TestIncorrectlyModifiableStaticPrivate {
+   > 8 │ 	static #incorrectlyModifiableStatic = 7;
+       │ 	       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ }
+    10 │ 
+  
+  i Using readonly improves code safety, clarity, and helps prevent unintended mutations.
+  
+  i Unsafe fix: Add readonly decorator.
+  
+    8 │ → static·readonly·#incorrectlyModifiableStatic·=·7;
+      │          +++++++++                                 
+
+```
+
+```
+invalid.ts:13:17 lint/style/useReadonlyClassProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Member 'incorrectlyModifiableStaticArrow' is never reassigned.
+  
+    11 │ // Static arrow functions
+    12 │ class TestIncorrectlyModifiableStaticArrow {
+  > 13 │ 	private static incorrectlyModifiableStaticArrow = () => 7;
+       │ 	               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    14 │ }
+    15 │ 
+  
+  i Using readonly improves code safety, clarity, and helps prevent unintended mutations.
+  
+  i Unsafe fix: Add readonly decorator.
+  
+    13 │ → private·static·readonly·incorrectlyModifiableStaticArrow·=·()·=>·7;
+       │                  +++++++++                                           
+
+```
+
+```
+invalid.ts:18:9 lint/style/useReadonlyClassProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Member '#incorrectlyModifiableStaticArrow' is never reassigned.
+  
+    16 │ //  Private static arrow functions
+    17 │ class TestIncorrectlyModifiableStaticArrowPrivate {
+  > 18 │ 	static #incorrectlyModifiableStaticArrow = () => 7;
+       │ 	       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    19 │ }
+    20 │ 
+  
+  i Using readonly improves code safety, clarity, and helps prevent unintended mutations.
+  
+  i Unsafe fix: Add readonly decorator.
+  
+    18 │ → static·readonly·#incorrectlyModifiableStaticArrow·=·()·=>·7;
+       │          +++++++++                                            
+
+```
+
+```
 invalid.ts:23:10 lint/style/useReadonlyClassProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Member 'incorrectlyModifiableInline' is never reassigned.

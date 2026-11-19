@@ -3,8 +3,6 @@ use crate::reporter::{
     ReporterWriter, TraversalSummary,
 };
 use crate::runner::execution::Execution;
-use biome_analyze::profiling;
-use biome_analyze::profiling::DisplayProfiles;
 use biome_console::fmt::Formatter;
 use biome_console::{fmt, markup};
 use biome_diagnostics::PrintDiagnostic;
@@ -48,7 +46,9 @@ impl<'a> Reporter for ConsoleReporter<'a> {
     }
 }
 
-pub(crate) struct ConsoleReporterVisitor;
+pub(crate) struct ConsoleReporterVisitor {
+    pub(crate) concise: bool,
+}
 
 impl ReporterVisitor for ConsoleReporterVisitor {
     fn report_summary(
@@ -59,27 +59,22 @@ impl ReporterVisitor for ConsoleReporterVisitor {
         verbose: bool,
     ) -> io::Result<()> {
         if execution.is_check() && summary.suggested_fixes_skipped > 0 {
-            writer.log(markup! {
+            writer.error(markup! {
                 <Warn>"Skipped "{summary.suggested_fixes_skipped}" suggested fixes.\n"</Warn>
                 <Info>"If you wish to apply the suggested (unsafe) fixes, use the command "<Emphasis>"biome check --write --unsafe\n"</Emphasis></Info>
             })
         }
 
         if !execution.is_ci() && summary.diagnostics_not_printed > 0 {
-            writer.log(markup! {
+            writer.error(markup! {
                 <Warn>"The number of diagnostics exceeds the limit allowed. Use "<Emphasis>"--max-diagnostics"</Emphasis>" to increase it.\n"</Warn>
                 <Info>"Diagnostics not shown: "</Info><Emphasis>{summary.diagnostics_not_printed}</Emphasis><Info>"."</Info>
             })
         }
 
-        writer.log(markup! {
+        writer.error(markup! {
             {ConsoleTraversalSummary(execution, &summary, verbose)}
         });
-        let profiles = profiling::drain_sorted_by_total(false);
-        if !profiles.is_empty() {
-            writer.log(markup! {{ DisplayProfiles(profiles, None) }});
-        }
-
         Ok(())
     }
 
@@ -153,6 +148,8 @@ impl ReporterVisitor for ConsoleReporterVisitor {
             if diagnostic.severity() >= diagnostics_payload.diagnostic_level {
                 if diagnostic.tags().is_verbose() && verbose {
                     writer.error(markup! {{PrintDiagnostic::verbose(diagnostic)}});
+                } else if self.concise {
+                    writer.error(markup! {{PrintDiagnostic::concise(diagnostic)}});
                 } else {
                     writer.error(markup! {{PrintDiagnostic::simple(diagnostic)}});
                 }

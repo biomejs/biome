@@ -1,0 +1,66 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidAstro.astro
+---
+# Input
+```astro
+---
+// should generate diagnostics
+import { foo } from "./foo";
+import type { Bar } from "./bar";
+---
+
+<div>{foo}</div>
+
+```
+
+# Diagnostics
+```
+invalidAstro.astro:3:21 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Add a file extension for relative imports.
+  
+    1 │ ---
+    2 │ // should generate diagnostics
+  > 3 │ import { foo } from "./foo";
+      │                     ^^^^^^^
+    4 │ import type { Bar } from "./bar";
+    5 │ ---
+  
+  i Explicit import improves compatibility with browsers and makes file resolution in tooling faster.
+  
+  i Safe fix: Add import extension .ts.
+  
+    1 1 │   // should generate diagnostics
+    2   │ - import·{·foo·}·from·"./foo";
+      2 │ + import·{·foo·}·from·"./foo.ts";
+    3 3 │   import type { Bar } from "./bar";
+    4 4 │   
+  
+
+```
+
+```
+invalidAstro.astro:4:26 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Add a file extension for relative imports.
+  
+    2 │ // should generate diagnostics
+    3 │ import { foo } from "./foo";
+  > 4 │ import type { Bar } from "./bar";
+      │                          ^^^^^^^
+    5 │ ---
+    6 │ 
+  
+  i Explicit import improves compatibility with browsers and makes file resolution in tooling faster.
+  
+  i Safe fix: Add import extension .ts.
+  
+    1 1 │   // should generate diagnostics
+    2 2 │   import { foo } from "./foo";
+    3   │ - import·type·{·Bar·}·from·"./bar";
+      3 │ + import·type·{·Bar·}·from·"./bar.ts";
+    4 4 │   
+  
+
+```

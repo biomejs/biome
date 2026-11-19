@@ -1,4 +1,6 @@
 use crate::prelude::*;
+use crate::utils::case::unknown_at_rule_name_case;
+use crate::utils::statement_at_rule_ending::FormatStatementAtRuleEnding;
 use biome_css_syntax::{CssUnknownValueAtRule, CssUnknownValueAtRuleFields};
 use biome_formatter::write;
 
@@ -12,7 +14,10 @@ impl FormatNodeRule<CssUnknownValueAtRule> for FormatCssUnknownValueAtRule {
             semicolon_token,
         } = node.as_fields();
 
-        write!(f, [name.format()])?;
+        let name = name?;
+        let name_case = unknown_at_rule_name_case(&name, components.as_ref().ok());
+
+        write!(f, [name.format().with_text_case(name_case)])?;
 
         if let Ok(components) = components {
             if components.items().next().is_some() {
@@ -21,6 +26,20 @@ impl FormatNodeRule<CssUnknownValueAtRule> for FormatCssUnknownValueAtRule {
             write!(f, [components.format()])?;
         }
 
-        write!(f, [semicolon_token.format()])
+        write!(
+            f,
+            [FormatStatementAtRuleEnding::new(
+                node.syntax(),
+                semicolon_token
+            )]
+        )
+    }
+
+    fn fmt_dangling_comments(
+        &self,
+        _node: &CssUnknownValueAtRule,
+        _f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        Ok(())
     }
 }

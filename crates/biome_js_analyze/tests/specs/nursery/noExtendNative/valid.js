@@ -1,0 +1,24 @@
+/* should not generate diagnostics */
+
+// Subclassing a built-in is the approved pattern.
+class CustomArray extends Array {}
+
+// Extending your own objects is fine.
+const obj = {};
+obj.extra = "a";
+MyClass.prototype.method = function () {};
+
+// Adding static properties to a built-in is out of scope.
+Array.from2 = function () {};
+
+// defineProperty on a non-prototype target.
+Object.defineProperty(obj, "x", { value: 1 });
+
+// Non-constructor built-in (lowercase first character).
+parseFloat.prototype.x = 1;
+
+// Shadowed builtins must not be flagged.
+function f(Array) { Array.prototype.x = 1; }
+function g(Object) { Object.defineProperty(String.prototype, "x", { value: 1 }); }
+const Object = {};
+Object.defineProperty(Array.prototype, "x", { value: 1 });

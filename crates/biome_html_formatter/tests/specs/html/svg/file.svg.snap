@@ -1,0 +1,25 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: svg/file.svg
+---
+
+# Input
+
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+	<circle cx="50" cy="50" r="40" fill="red"/>
+	<text x="50" y="55" text-anchor="middle" fill="white">SVG</text>
+</svg>
+
+```
+
+
+# Formatted
+
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+	<circle cx="50" cy="50" r="40" fill="red" />
+	<text x="50" y="55" text-anchor="middle" fill="white">SVG</text>
+</svg>
+
+```

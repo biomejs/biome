@@ -1,0 +1,151 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: issue7747Invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+
+const LetterValues = ["A", "B", "C"] as const;
+type Letter = (typeof LetterValues)[number];
+
+function test(letter: Letter): number {
+	switch (letter) {
+		case "A":
+			return 1;
+		case "B":
+			return 1;
+	}
+}
+
+const Bar = { "A": 1, "B": 2, "C": 3 } as const;
+type Letter2 = keyof (typeof Bar);
+
+function test2(letter: Letter2): number {
+	switch (letter) {
+		case "A":
+			return 1;
+		case "B":
+			return 1;
+	}
+}
+
+function numericMissing(value: [-1, 0x2][number]) {
+	switch (value) {
+		case 2: break;
+	}
+}
+
+```
+
+# Diagnostics
+```
+issue7747Invalid.ts:7:2 lint/nursery/useExhaustiveSwitchCases  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The switch statement is not exhaustive.
+  
+     6 │ function test(letter: Letter): number {
+   > 7 │ 	switch (letter) {
+       │ 	^^^^^^^^^^^^^^^^^
+   > 8 │ 		case "A":
+   > 9 │ 			return 1;
+  > 10 │ 		case "B":
+  > 11 │ 			return 1;
+  > 12 │ 	}
+       │ 	^
+    13 │ }
+    14 │ 
+  
+  i Some variants of the union type are not handled here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i These cases are missing:
+  
+  - "C"
+  
+  i Unsafe fix: Add the missing cases to the switch statement.
+  
+     9  9 │         return 1;
+    10 10 │       case "B":
+    11    │ - → → → return·1;
+       11 │ + → → → return·1;
+       12 │ + → → case·"C":·throw·new·Error("TODO:·Not·implemented·yet");
+    12 13 │     }
+    13 14 │   }
+  
+
+```
+
+```
+issue7747Invalid.ts:19:2 lint/nursery/useExhaustiveSwitchCases  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The switch statement is not exhaustive.
+  
+    18 │ function test2(letter: Letter2): number {
+  > 19 │ 	switch (letter) {
+       │ 	^^^^^^^^^^^^^^^^^
+  > 20 │ 		case "A":
+  > 21 │ 			return 1;
+  > 22 │ 		case "B":
+  > 23 │ 			return 1;
+  > 24 │ 	}
+       │ 	^
+    25 │ }
+    26 │ 
+  
+  i Some variants of the union type are not handled here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i These cases are missing:
+  
+  - "C"
+  
+  i Unsafe fix: Add the missing cases to the switch statement.
+  
+    21 21 │         return 1;
+    22 22 │       case "B":
+    23    │ - → → → return·1;
+       23 │ + → → → return·1;
+       24 │ + → → case·"C":·throw·new·Error("TODO:·Not·implemented·yet");
+    24 25 │     }
+    25 26 │   }
+  
+
+```
+
+```
+issue7747Invalid.ts:28:2 lint/nursery/useExhaustiveSwitchCases  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The switch statement is not exhaustive.
+  
+    27 │ function numericMissing(value: [-1, 0x2][number]) {
+  > 28 │ 	switch (value) {
+       │ 	^^^^^^^^^^^^^^^^
+  > 29 │ 		case 2: break;
+  > 30 │ 	}
+       │ 	^
+    31 │ }
+    32 │ 
+  
+  i Some variants of the union type are not handled here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i These cases are missing:
+  
+  - -1
+  
+  i Unsafe fix: Add the missing cases to the switch statement.
+  
+    27 27 │   function numericMissing(value: [-1, 0x2][number]) {
+    28 28 │     switch (value) {
+    29    │ - → → case·2:·break;
+       29 │ + → → case·2:·break;
+       30 │ + → → case·-1:·throw·new·Error("TODO:·Not·implemented·yet");
+    30 31 │     }
+    31 32 │   }
+  
+
+```

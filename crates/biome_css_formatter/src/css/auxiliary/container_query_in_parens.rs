@@ -16,11 +16,13 @@ impl FormatNodeRule<CssContainerQueryInParens> for FormatCssContainerQueryInPare
             r_paren_token,
         } = node.as_fields();
 
+        let should_insert_space = f.options().delimiter_spacing().value();
+
         write!(
             f,
             [group(&format_args![
                 l_paren_token.format(),
-                soft_block_indent(&query.format()),
+                soft_block_indent_with_maybe_space(&query.format(), should_insert_space),
                 r_paren_token.format()
             ])]
         )

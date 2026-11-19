@@ -987,14 +987,16 @@ CssRoot {
                                     value_token: IDENT@337..340 "--x" [] [],
                                 },
                                 colon_token: COLON@340..342 ":" [] [Whitespace(" ")],
-                                value: ScssExpression {
-                                    items: ScssExpressionItemList [
+                                value: CssCustomPropertyValue {
+                                    components: CssCustomPropertyComponentList [
                                         CssNumber {
                                             value_token: CSS_NUMBER_LITERAL@342..344 "10" [] [],
                                         },
-                                        CssColor {
-                                            hash_token: HASH@344..345 "#" [] [],
-                                            value_token: CSS_COLOR_LITERAL@345..348 "fff" [] [],
+                                        CssCustomPropertyDelimiter {
+                                            value: HASH@344..345 "#" [] [],
+                                        },
+                                        CssCustomIdentifier {
+                                            value_token: IDENT@345..348 "fff" [] [],
                                         },
                                     ],
                                 },
@@ -1030,17 +1032,19 @@ CssRoot {
                                     value_token: IDENT@356..359 "--x" [] [],
                                 },
                                 colon_token: COLON@359..361 ":" [] [Whitespace(" ")],
-                                value: ScssExpression {
-                                    items: ScssExpressionItemList [
-                                        ScssVariable {
-                                            dollar_token: DOLLAR@361..362 "$" [] [],
-                                            name: CssIdentifier {
-                                                value_token: IDENT@362..363 "v" [] [],
-                                            },
+                                value: CssCustomPropertyValue {
+                                    components: CssCustomPropertyComponentList [
+                                        CssCustomPropertyDelimiter {
+                                            value: DOLLAR@361..362 "$" [] [],
                                         },
-                                        CssColor {
-                                            hash_token: HASH@363..364 "#" [] [],
-                                            value_token: CSS_COLOR_LITERAL@364..367 "fff" [] [],
+                                        CssCustomIdentifier {
+                                            value_token: IDENT@362..363 "v" [] [],
+                                        },
+                                        CssCustomPropertyDelimiter {
+                                            value: HASH@363..364 "#" [] [],
+                                        },
+                                        CssCustomIdentifier {
+                                            value_token: IDENT@364..367 "fff" [] [],
                                         },
                                     ],
                                 },
@@ -1076,26 +1080,22 @@ CssRoot {
                                     value_token: IDENT@375..378 "--x" [] [],
                                 },
                                 colon_token: COLON@378..380 ":" [] [Whitespace(" ")],
-                                value: ScssExpression {
-                                    items: ScssExpressionItemList [
-                                        ScssInterpolatedValue {
-                                            items: ScssInterpolatedValuePartList [
-                                                CssNumber {
-                                                    value_token: CSS_NUMBER_LITERAL@380..382 "10" [] [],
-                                                },
-                                                ScssInterpolation {
-                                                    hash_token: HASH@382..383 "#" [] [],
-                                                    l_curly_token: L_CURLY@383..384 "{" [] [],
-                                                    value: ScssExpression {
-                                                        items: ScssExpressionItemList [
-                                                            CssIdentifier {
-                                                                value_token: IDENT@384..387 "foo" [] [],
-                                                            },
-                                                        ],
+                                value: CssCustomPropertyValue {
+                                    components: CssCustomPropertyComponentList [
+                                        CssNumber {
+                                            value_token: CSS_NUMBER_LITERAL@380..382 "10" [] [],
+                                        },
+                                        ScssInterpolation {
+                                            hash_token: HASH@382..383 "#" [] [],
+                                            l_curly_token: L_CURLY@383..384 "{" [] [],
+                                            value: ScssExpression {
+                                                items: ScssExpressionItemList [
+                                                    CssIdentifier {
+                                                        value_token: IDENT@384..387 "foo" [] [],
                                                     },
-                                                    r_curly_token: R_CURLY@387..388 "}" [] [],
-                                                },
-                                            ],
+                                                ],
+                                            },
+                                            r_curly_token: R_CURLY@387..388 "}" [] [],
                                         },
                                     ],
                                 },
@@ -1804,13 +1804,14 @@ CssRoot {
                 0: CSS_DASHED_IDENTIFIER@337..340
                   0: IDENT@337..340 "--x" [] []
                 1: COLON@340..342 ":" [] [Whitespace(" ")]
-                2: SCSS_EXPRESSION@342..348
-                  0: SCSS_EXPRESSION_ITEM_LIST@342..348
+                2: CSS_CUSTOM_PROPERTY_VALUE@342..348
+                  0: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@342..348
                     0: CSS_NUMBER@342..344
                       0: CSS_NUMBER_LITERAL@342..344 "10" [] []
-                    1: CSS_COLOR@344..348
+                    1: CSS_CUSTOM_PROPERTY_DELIMITER@344..345
                       0: HASH@344..345 "#" [] []
-                      1: CSS_COLOR_LITERAL@345..348 "fff" [] []
+                    2: CSS_CUSTOM_IDENTIFIER@345..348
+                      0: IDENT@345..348 "fff" [] []
               1: (empty)
             1: SEMICOLON@348..350 ";" [] [Whitespace(" ")]
         2: R_CURLY@350..351 "}" [] []
@@ -1832,15 +1833,16 @@ CssRoot {
                 0: CSS_DASHED_IDENTIFIER@356..359
                   0: IDENT@356..359 "--x" [] []
                 1: COLON@359..361 ":" [] [Whitespace(" ")]
-                2: SCSS_EXPRESSION@361..367
-                  0: SCSS_EXPRESSION_ITEM_LIST@361..367
-                    0: SCSS_VARIABLE@361..363
+                2: CSS_CUSTOM_PROPERTY_VALUE@361..367
+                  0: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@361..367
+                    0: CSS_CUSTOM_PROPERTY_DELIMITER@361..362
                       0: DOLLAR@361..362 "$" [] []
-                      1: CSS_IDENTIFIER@362..363
-                        0: IDENT@362..363 "v" [] []
-                    1: CSS_COLOR@363..367
+                    1: CSS_CUSTOM_IDENTIFIER@362..363
+                      0: IDENT@362..363 "v" [] []
+                    2: CSS_CUSTOM_PROPERTY_DELIMITER@363..364
                       0: HASH@363..364 "#" [] []
-                      1: CSS_COLOR_LITERAL@364..367 "fff" [] []
+                    3: CSS_CUSTOM_IDENTIFIER@364..367
+                      0: IDENT@364..367 "fff" [] []
               1: (empty)
             1: SEMICOLON@367..369 ";" [] [Whitespace(" ")]
         2: R_CURLY@369..370 "}" [] []
@@ -1862,20 +1864,18 @@ CssRoot {
                 0: CSS_DASHED_IDENTIFIER@375..378
                   0: IDENT@375..378 "--x" [] []
                 1: COLON@378..380 ":" [] [Whitespace(" ")]
-                2: SCSS_EXPRESSION@380..388
-                  0: SCSS_EXPRESSION_ITEM_LIST@380..388
-                    0: SCSS_INTERPOLATED_VALUE@380..388
-                      0: SCSS_INTERPOLATED_VALUE_PART_LIST@380..388
-                        0: CSS_NUMBER@380..382
-                          0: CSS_NUMBER_LITERAL@380..382 "10" [] []
-                        1: SCSS_INTERPOLATION@382..388
-                          0: HASH@382..383 "#" [] []
-                          1: L_CURLY@383..384 "{" [] []
-                          2: SCSS_EXPRESSION@384..387
-                            0: SCSS_EXPRESSION_ITEM_LIST@384..387
-                              0: CSS_IDENTIFIER@384..387
-                                0: IDENT@384..387 "foo" [] []
-                          3: R_CURLY@387..388 "}" [] []
+                2: CSS_CUSTOM_PROPERTY_VALUE@380..388
+                  0: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@380..388
+                    0: CSS_NUMBER@380..382
+                      0: CSS_NUMBER_LITERAL@380..382 "10" [] []
+                    1: SCSS_INTERPOLATION@382..388
+                      0: HASH@382..383 "#" [] []
+                      1: L_CURLY@383..384 "{" [] []
+                      2: SCSS_EXPRESSION@384..387
+                        0: SCSS_EXPRESSION_ITEM_LIST@384..387
+                          0: CSS_IDENTIFIER@384..387
+                            0: IDENT@384..387 "foo" [] []
+                      3: R_CURLY@387..388 "}" [] []
               1: (empty)
             1: SEMICOLON@388..390 ";" [] [Whitespace(" ")]
         2: R_CURLY@390..391 "}" [] []

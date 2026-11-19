@@ -1,0 +1,14 @@
+/* should generate diagnostics */
+@import "theme.css" supports("unknown-property": blue);
+
+@supports (unknown-property + "-name": blue) {
+  .valid {
+    color: blue;
+  }
+}
+
+@supports ("display": grid) {
+  .invalid {
+    colr: blue;
+  }
+}

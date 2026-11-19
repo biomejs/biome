@@ -1,0 +1,321 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: unsorted.svelte
+---
+# Input
+```svelte
+<input type="checkbox" spellcheck="true" tabindex="-1" dir="auto" bind:checked={accepted} />
+<input type="checkbox" spellcheck="true" tabindex="-1" dir="auto" bind:checked defaultChecked={true}>
+<div style:color="red" spellcheck="true" tabindex="-1" dir="auto" class="mydiv">some text</div>
+
+<img use:myaction={data} spellcheck="true" tabindex="-1" dir="auto" {src} alt="some alt text" />
+
+<div
+    bind:value2={a}
+    bind:value1={a}
+    use:myAction
+	use:gestures
+    out:fade
+    transition:fade
+    style:width="12rem"
+	onswipeleft={next}
+	onswiperight={prev}
+    {@attach myAttachment}
+    spellcheck="true"
+    in:fly={{ y: 200 }}
+    tabindex="-1"
+    dir="auto"
+    class:cool={cool}
+    {foo}
+    class:myClass={foo}
+    animate:whizz
+    bind:this={canvas}
+    transition:fly={{ y: 200, duration: 2000 }}
+    animate:flip
+    style:color="red"
+>...</div>
+
+<div
+    bind:value2={a}
+    bind:value1={a}
+    use:myAction
+	use:gestures
+    out:fade
+    transition:fade
+    style:width="12rem"
+	onswipeleft={next}
+	onswiperight={prev}
+    {@attach myAttachment}
+    {...props}
+    spellcheck="true"
+    in:fly={{ y: 200 }}
+    tabindex="-1"
+    dir="auto"
+    class:cool={cool}
+    {foo}
+    class:myClass={foo}
+    animate:whizz
+    bind:this={canvas}
+    transition:fly={{ y: 200, duration: 2000 }}
+    animate:flip
+    style:color="red"
+>...</div>
+
+```
+
+# Diagnostics
+```
+unsorted.svelte:1:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attributes are not sorted.
+  
+  > 1 │ <input type="checkbox" spellcheck="true" tabindex="-1" dir="auto" bind:checked={accepted} />
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ <input type="checkbox" spellcheck="true" tabindex="-1" dir="auto" bind:checked defaultChecked={true}>
+    3 │ <div style:color="red" spellcheck="true" tabindex="-1" dir="auto" class="mydiv">some text</div>
+  
+  i Safe fix: Sort the HTML attributes.
+  
+     1    │ - <input·type="checkbox"·spellcheck="true"·tabindex="-1"·dir="auto"·bind:checked={accepted}·/>
+        1 │ + <input·dir="auto"·spellcheck="true"·tabindex="-1"·type="checkbox"·bind:checked={accepted}·/>
+     2  2 │   <input type="checkbox" spellcheck="true" tabindex="-1" dir="auto" bind:checked defaultChecked={true}>
+     3  3 │   <div style:color="red" spellcheck="true" tabindex="-1" dir="auto" class="mydiv">some text</div>
+  
+
+```
+
+```
+unsorted.svelte:2:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attributes are not sorted.
+  
+    1 │ <input type="checkbox" spellcheck="true" tabindex="-1" dir="auto" bind:checked={accepted} />
+  > 2 │ <input type="checkbox" spellcheck="true" tabindex="-1" dir="auto" bind:checked defaultChecked={true}>
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ <div style:color="red" spellcheck="true" tabindex="-1" dir="auto" class="mydiv">some text</div>
+    4 │ 
+  
+  i Safe fix: Sort the HTML attributes.
+  
+     1  1 │   <input type="checkbox" spellcheck="true" tabindex="-1" dir="auto" bind:checked={accepted} />
+     2    │ - <input·type="checkbox"·spellcheck="true"·tabindex="-1"·dir="auto"·bind:checked·defaultChecked={true}>
+        2 │ + <input·defaultChecked={true}·dir="auto"·spellcheck="true"·tabindex="-1"·type="checkbox"·bind:checked·>
+     3  3 │   <div style:color="red" spellcheck="true" tabindex="-1" dir="auto" class="mydiv">some text</div>
+     4  4 │   
+  
+
+```
+
+```
+unsorted.svelte:3:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attributes are not sorted.
+  
+    1 │ <input type="checkbox" spellcheck="true" tabindex="-1" dir="auto" bind:checked={accepted} />
+    2 │ <input type="checkbox" spellcheck="true" tabindex="-1" dir="auto" bind:checked defaultChecked={true}>
+  > 3 │ <div style:color="red" spellcheck="true" tabindex="-1" dir="auto" class="mydiv">some text</div>
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ 
+    5 │ <img use:myaction={data} spellcheck="true" tabindex="-1" dir="auto" {src} alt="some alt text" />
+  
+  i Safe fix: Sort the HTML attributes.
+  
+     1  1 │   <input type="checkbox" spellcheck="true" tabindex="-1" dir="auto" bind:checked={accepted} />
+     2  2 │   <input type="checkbox" spellcheck="true" tabindex="-1" dir="auto" bind:checked defaultChecked={true}>
+     3    │ - <div·style:color="red"·spellcheck="true"·tabindex="-1"·dir="auto"·class="mydiv">some·text</div>
+        3 │ + <div·class="mydiv"·dir="auto"·spellcheck="true"·tabindex="-1"·style:color="red"·>some·text</div>
+     4  4 │   
+     5  5 │   <img use:myaction={data} spellcheck="true" tabindex="-1" dir="auto" {src} alt="some alt text" />
+  
+
+```
+
+```
+unsorted.svelte:5:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attributes are not sorted.
+  
+    3 │ <div style:color="red" spellcheck="true" tabindex="-1" dir="auto" class="mydiv">some text</div>
+    4 │ 
+  > 5 │ <img use:myaction={data} spellcheck="true" tabindex="-1" dir="auto" {src} alt="some alt text" />
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ 
+    7 │ <div
+  
+  i Safe fix: Sort the HTML attributes.
+  
+     3  3 │   <div style:color="red" spellcheck="true" tabindex="-1" dir="auto" class="mydiv">some text</div>
+     4  4 │   
+     5    │ - <img·use:myaction={data}·spellcheck="true"·tabindex="-1"·dir="auto"·{src}·alt="some·alt·text"·/>
+        5 │ + <img·alt="some·alt·text"·dir="auto"·spellcheck="true"·{src}·tabindex="-1"·use:myaction={data}·/>
+     6  6 │   
+     7  7 │   <div
+  
+
+```
+
+```
+unsorted.svelte:7:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attributes are not sorted.
+  
+     5 │ <img use:myaction={data} spellcheck="true" tabindex="-1" dir="auto" {src} alt="some alt text" />
+     6 │ 
+   > 7 │ <div
+       │ ^^^^
+   > 8 │     bind:value2={a}
+        ...
+  > 29 │     style:color="red"
+  > 30 │ >...</div>
+       │ ^
+    31 │ 
+    32 │ <div
+  
+  i Safe fix: Sort the HTML attributes.
+  
+     6  6 │   
+     7  7 │   <div
+     8    │ - ····bind:value2={a}
+     9    │ - ····bind:value1={a}
+    10    │ - ····use:myAction
+    11    │ - → use:gestures
+    12    │ - ····out:fade
+    13    │ - ····transition:fade
+    14    │ - ····style:width="12rem"
+    15    │ - → onswipeleft={next}
+    16    │ - → onswiperight={prev}
+    17    │ - ····{@attach·myAttachment}
+    18    │ - ····spellcheck="true"
+    19    │ - ····in:fly={{·y:·200·}}
+    20    │ - ····tabindex="-1"
+    21    │ - ····dir="auto"
+    22    │ - ····class:cool={cool}
+    23    │ - ····{foo}
+    24    │ - ····class:myClass={foo}
+    25    │ - ····animate:whizz
+    26    │ - ····bind:this={canvas}
+    27    │ - ····transition:fly={{·y:·200,·duration:·2000·}}
+    28    │ - ····animate:flip
+    29    │ - ····style:color="red"
+        8 │ + ····dir="auto"
+        9 │ + ····{foo}
+       10 │ + → onswipeleft={next}
+       11 │ + → onswiperight={prev}
+       12 │ + ····spellcheck="true"
+       13 │ + ····tabindex="-1"
+       14 │ + ····bind:this={canvas}
+       15 │ + ····style:color="red"
+       16 │ + ····style:width="12rem"
+       17 │ + ····class:cool={cool}
+       18 │ + ····class:myClass={foo}
+       19 │ + ····bind:value1={a}
+       20 │ + ····bind:value2={a}
+       21 │ + → use:gestures
+       22 │ + ····use:myAction
+       23 │ + ····transition:fade
+       24 │ + ····transition:fly={{·y:·200,·duration:·2000·}}
+       25 │ + ····in:fly={{·y:·200·}}
+       26 │ + ····out:fade
+       27 │ + ····animate:flip
+       28 │ + ····animate:whizz
+       29 │ + ····{@attach·myAttachment}
+    30 30 │   >...</div>
+    31 31 │   
+  
+
+```
+
+```
+unsorted.svelte:32:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attributes are not sorted.
+  
+    30 │ >...</div>
+    31 │ 
+  > 32 │ <div
+       │ ^^^^
+  > 33 │     bind:value2={a}
+        ...
+  > 54 │     animate:flip
+  > 55 │     style:color="red"
+  > 56 │ >...</div>
+       │ ^
+    57 │ 
+  
+  i Safe fix: Sort the HTML attributes.
+  
+    42 42 │       {@attach myAttachment}
+    43 43 │       {...props}
+    44    │ - ····spellcheck="true"
+    45    │ - ····in:fly={{·y:·200·}}
+    46    │ - ····tabindex="-1"
+    47    │ - ····dir="auto"
+    48    │ - ····class:cool={cool}
+    49    │ - ····{foo}
+    50    │ - ····class:myClass={foo}
+    51    │ - ····animate:whizz
+    52    │ - ····bind:this={canvas}
+    53    │ - ····transition:fly={{·y:·200,·duration:·2000·}}
+       44 │ + ····dir="auto"
+       45 │ + ····{foo}
+       46 │ + ····spellcheck="true"
+       47 │ + ····tabindex="-1"
+       48 │ + ····bind:this={canvas}
+       49 │ + ····style:color="red"
+       50 │ + ····class:cool={cool}
+       51 │ + ····class:myClass={foo}
+       52 │ + ····transition:fly={{·y:·200,·duration:·2000·}}
+       53 │ + ····in:fly={{·y:·200·}}
+    54 54 │       animate:flip
+    55    │ - ····style:color="red"
+       55 │ + ····animate:whizz
+    56 56 │   >...</div>
+    57 57 │   
+  
+
+```
+
+```
+unsorted.svelte:32:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attributes are not sorted.
+  
+    30 │ >...</div>
+    31 │ 
+  > 32 │ <div
+       │ ^^^^
+  > 33 │     bind:value2={a}
+        ...
+  > 54 │     animate:flip
+  > 55 │     style:color="red"
+  > 56 │ >...</div>
+       │ ^
+    57 │ 
+  
+  i Safe fix: Sort the HTML attributes.
+  
+    31 31 │   
+    32 32 │   <div
+    33    │ - ····bind:value2={a}
+    34    │ - ····bind:value1={a}
+    35    │ - ····use:myAction
+    36    │ - → use:gestures
+    37    │ - ····out:fade
+    38    │ - ····transition:fade
+    39    │ - ····style:width="12rem"
+    40    │ - → onswipeleft={next}
+    41    │ - → onswiperight={prev}
+       33 │ + → onswipeleft={next}
+       34 │ + → onswiperight={prev}
+       35 │ + ····style:width="12rem"
+       36 │ + ····bind:value1={a}
+       37 │ + ····bind:value2={a}
+       38 │ + → use:gestures
+       39 │ + ····use:myAction
+       40 │ + ····transition:fade
+       41 │ + ····out:fade
+    42 42 │       {@attach myAttachment}
+    43 43 │       {...props}
+  
+
+```

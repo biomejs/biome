@@ -1,0 +1,12 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-vue-object-v-on.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<template>
+  <button v-on="{ click: () => console.log('clicked') }"></button>
+</template>
+
+```

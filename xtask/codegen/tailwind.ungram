@@ -39,6 +39,7 @@ SyntaxElement = SyntaxElement
 TwBogus = SyntaxElement*
 TwBogusCandidate = SyntaxElement*
 TwBogusVariant = SyntaxElement*
+TwBogusVariantSegment = SyntaxElement*
 TwBogusModifier = SyntaxElement*
 TwBogusValue = SyntaxElement*
 CssBogusPropertyValue = SyntaxElement*
@@ -50,16 +51,21 @@ CssBogusPropertyValue = SyntaxElement*
 
 TwRoot =
 	bom: 'UNICODE_BOM'?
+	leading_whitespace: ' '?
 	candidates: TwCandidateList
 	eof: 'EOF'
 
-TwCandidateList = AnyTwFullCandidate*
+TwCandidateList = (AnyTwFullCandidate (' ' AnyTwFullCandidate)* ' '?)
 
 AnyTwFullCandidate = TwFullCandidate | TwBogusCandidate
 
 // A Candidate is essentially a CSS class from an end user perspective. It's what the end user puts inside the `class` attribute in their HTML, separated by spaces.
+// The important flag is written as a trailing `!` (`flex!`); the leading
+// form (`!flex`) is Tailwind's legacy spelling and is still accepted, but a
+// candidate can't carry both.
 TwFullCandidate =
 	variants: TwVariantList
+	legacy_important: '!'?
 	negative: '-'?
 	candidate: AnyTwCandidate
 	'!'?
@@ -79,12 +85,17 @@ TwArbitraryCandidate =
 	']'
 	modifier: AnyTwModifier?
 
-// Static candidates are candidates that don't take any arguments.
+// Static candidates are candidates that don't take any arguments. A
+// modifier can still follow the bare name: `@container/sidebar` names
+// the container, and invalid forms like `flex/50` must stay one
+// candidate so the class survives as a unit.
 //
 // underline
 // box-border
+// @container/sidebar
 TwStaticCandidate =
 	base: 'tw_base'
+	modifier: AnyTwModifier?
 
 // Functional candidates are candidates that can take an argument.
 //
@@ -102,9 +113,7 @@ TwVariantList = (AnyTwVariant (':' AnyTwVariant)* ':'?)
 
 // A Variant is a selector that modifies what the Candidate applies to.
 AnyTwVariant = TwArbitraryVariant
-	| TwStaticVariant
-	| TwFunctionalVariant
-	| TwDataAttribute
+	| TwVariantExpression
 	| TwBogusVariant
 
 // Arbitrary variants are variants that take a selector and generate a variant on the fly.
@@ -115,21 +124,46 @@ TwArbitraryVariant =
 	selector: 'tw_selector'
 	']'
 
-// Static variants are variants that don't take any arguments.
+// Non-arbitrary variants are represented as syntax-level segment lists.
+// A bracketed value can glue directly to the last segment with no `-`
+// separator (`@[400px]:` is the container root plus an arbitrary size),
+// and a variant can carry a modifier: named group/peer scopes
+// (`group-hover/menu:`) and named container queries (`@sm/main:`).
 //
 // hover:text-red-500
 // ^^^^^
-TwStaticVariant =
-	base: 'tw_base'
+// group-data-[state=open]:block
+// ^^^^^^^^^^^^^^^^^^^^^^^
+TwVariantExpression =
+	segments: TwVariantSegmentList
+	glued_value: TwArbitraryVariantSegment?
+	modifier: AnyTwModifier?
 
-// aria-disabled:text-red-500
-// ^^^^^^^^^^^^^
-// aria-[disabled]:text-red-500
-// ^^^^^^^^^^^^^^^
-TwFunctionalVariant =
-	base: 'tw_base'
-	'-'
-	value: AnyTwValue
+TwVariantSegmentList =
+	AnyTwVariantSegment ('-' AnyTwVariantSegment)*
+
+AnyTwVariantSegment =
+	TwNamedVariantSegment
+	| TwArbitraryVariantSegment
+	| TwCssVariableVariantSegment
+	| TwBogusVariantSegment
+
+TwNamedVariantSegment =
+	value: 'tw_variant_segment'
+
+TwArbitraryVariantSegment =
+	'['
+	value: 'tw_selector'
+	']'
+
+// The parentheses hold the arguments of a CSS `var()` call.
+//
+// min-(--breakpoint-tablet):flex
+//     ^^^^^^^^^^^^^^^^^^^^^
+TwCssVariableVariantSegment =
+	'('
+	value: CssParameterList
+	')'
 
 
 AnyTwValue = TwNamedValue
@@ -137,7 +171,6 @@ AnyTwValue = TwNamedValue
 	| TwPercentageValue
 	| TwArbitraryValue
 	| TwCssVariableValue
-	| TwDataAttribute
 	| TwBogusValue
 
 // bg-red-500
@@ -163,12 +196,29 @@ TwArbitraryValue =
 	value: CssGenericComponentValueList
 	']'
 
+// The parentheses hold the arguments of a CSS `var()` call, optionally
+// preceded by a type hint.
+//
 // bg-(--brand-primary)
 //    ^^^^^^^^^^^^^^^^^
+// bg-(--brand,var(--fallback))
+//    ^^^^^^^^^^^^^^^^^^^^^^^^^
+// bg-(color:--brand)
+//    ^^^^^^^^^^^^^^^
 TwCssVariableValue =
 	'('
-	value: 'tw_value'
+	type_hint: TwTypeHint?
+	value: CssParameterList
 	')'
+
+// The data type a CSS variable value resolves to. Tailwind uses it to
+// pick a utility when the base accepts more than one type.
+//
+// bg-(color:--brand)
+//     ^^^^^^
+TwTypeHint =
+	name: 'tw_value'
+	':'
 
 AnyTwModifier = TwModifier | TwBogusModifier
 
@@ -179,29 +229,6 @@ AnyTwModifier = TwModifier | TwBogusModifier
 TwModifier =
 	'/'
 	value: AnyTwValue
-
-// data-[state=open]:hidden
-// ^^^^^^^^^^^^^^^^^
-// group-data-active:hidden
-//       ^^^^^^^^^^^
-TwDataAttribute =
-	'data'
-	'-'
-	value: AnyTwDataAttributeValue
-
-AnyTwDataAttributeValue =
-	TwNamedValue |
-	TwNumberValue |
-	TwArbitraryValue |
-	TwBogusValue
-
-// TODO: replace TwArbitraryValue in AnyTwDataAttributeValue with this
-// TwDataAttributeArbitraryValue =
-//	'['
-//	key: 'tw_value'
-//	'='
-//	value: 'tw_value'
-//	']'
 
 CssGenericComponentValueList = AnyCssGenericComponentValue*
 
@@ -280,7 +307,6 @@ CssParameterList = AnyCssExpression (',' AnyCssExpression)* ','?
 
 AnyCssExpression =
 	CssListOfComponentValuesExpression
-	| CssComponentValueList
 	| CssBinaryExpression
 	| CssUnaryExpression
 	| CssParenthesizedExpression
@@ -294,11 +320,11 @@ CssBinaryExpression =
 
 CssUnaryExpression =
 	operator: ('+' | '-' | '*')
-	argument: AnyCssValue
+	argument: AnyCssExpression
 
 CssParenthesizedExpression =
 	'('
-	expression: CssComponentValueList
+	expression: AnyCssExpression?
 	')'
 
 CssColor = value: 'CSS_COLOR_LITERAL'

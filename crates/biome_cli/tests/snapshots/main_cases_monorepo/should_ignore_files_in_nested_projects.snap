@@ -2,10 +2,10 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
-## `packages/lib/biome.json`
+## Command
 
-```json
-{ "extends": "//" }
+```shell
+biome check '<TEMP_DIR>/should_ignore_files_in_nested_projects'
 ```
 
 ## `biome.json`
@@ -19,6 +19,12 @@ expression: redactor(content)
     "useIgnoreFile": true
   }
 }
+```
+
+## `packages/lib/biome.json`
+
+```json
+{ "extends": "//" }
 ```
 
 ## `.gitignore`

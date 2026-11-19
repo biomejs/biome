@@ -1,0 +1,125 @@
+---
+source: crates/biome_tailwind_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```text
+bg-[foo[bar baz]] flex
+
+```
+
+
+## AST
+
+```
+TwRoot {
+    bom_token: missing (optional),
+    leading_whitespace_token: missing (optional),
+    candidates: TwCandidateList [
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwFunctionalCandidate {
+                base_token: TW_BASE@0..2 "bg" [] [],
+                minus_token: DASH@2..3 "-" [] [],
+                value: TwBogusValue {
+                    items: [
+                        L_BRACKET@3..4 "[" [] [],
+                        TW_SELECTOR@4..11 "foo[bar" [] [],
+                    ],
+                },
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        WHITESPACE@11..12 " " [] [],
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwStaticCandidate {
+                base_token: TW_BASE@12..17 "baz]]" [] [],
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        WHITESPACE@17..18 " " [] [],
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwStaticCandidate {
+                base_token: TW_BASE@18..22 "flex" [] [],
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        WHITESPACE@22..23 "\n" [] [],
+    ],
+    eof_token: EOF@23..23 "" [] [],
+}
+```
+
+## CST
+
+```
+0: TW_ROOT@0..23
+  0: (empty)
+  1: (empty)
+  2: TW_CANDIDATE_LIST@0..23
+    0: TW_FULL_CANDIDATE@0..11
+      0: TW_VARIANT_LIST@0..0
+      1: (empty)
+      2: (empty)
+      3: TW_FUNCTIONAL_CANDIDATE@0..11
+        0: TW_BASE@0..2 "bg" [] []
+        1: DASH@2..3 "-" [] []
+        2: TW_BOGUS_VALUE@3..11
+          0: L_BRACKET@3..4 "[" [] []
+          1: TW_SELECTOR@4..11 "foo[bar" [] []
+        3: (empty)
+      4: (empty)
+    1: WHITESPACE@11..12 " " [] []
+    2: TW_FULL_CANDIDATE@12..17
+      0: TW_VARIANT_LIST@12..12
+      1: (empty)
+      2: (empty)
+      3: TW_STATIC_CANDIDATE@12..17
+        0: TW_BASE@12..17 "baz]]" [] []
+        1: (empty)
+      4: (empty)
+    3: WHITESPACE@17..18 " " [] []
+    4: TW_FULL_CANDIDATE@18..22
+      0: TW_VARIANT_LIST@18..18
+      1: (empty)
+      2: (empty)
+      3: TW_STATIC_CANDIDATE@18..22
+        0: TW_BASE@18..22 "flex" [] []
+        1: (empty)
+      4: (empty)
+    5: WHITESPACE@22..23 "\n" [] []
+  3: EOF@23..23 "" [] []
+
+```
+
+## Diagnostics
+
+```
+nested-bracket-whitespace.txt:1:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a value but instead found '[foo[bar'.
+  
+  > 1 │ bg-[foo[bar baz]] flex
+      │    ^^^^^^^^
+    2 │ 
+  
+  i Expected a value here.
+  
+  > 1 │ bg-[foo[bar baz]] flex
+      │    ^^^^^^^^
+    2 │ 
+  
+```

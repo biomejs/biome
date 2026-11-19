@@ -1,0 +1,46 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.ts
+---
+# Input
+```ts
+// should not generate diagnostics
+function allowed(number: number, string: string, boolean: boolean, bigint: bigint) {
+    if (number) {}
+    if (string) {}
+    if (boolean) {}
+    if (bigint) {}
+    if (number && string && boolean) {}
+}
+function nullableObjects(object: object | null, callback: (() => void) | undefined, symbol: symbol | null) {
+    if (object) {}
+    if (callback) {}
+    if (symbol) {}
+}
+function truthyLiterals(boolean: true | undefined, string: "yes" | "no" | null, number: 1 | 2 | undefined) {
+    if (boolean) {}
+    if (string) {}
+    if (number) {}
+}
+function explicit(number: number | null, string: string | undefined, boolean?: boolean) {
+    if (number !== null) {}
+    if (string !== undefined) {}
+    if (boolean === true) {}
+    if (boolean ?? false) {}
+    if (Boolean(number)) {}
+    const first = true && number;
+    const second = false || string;
+    const third = number ?? 0;
+    for (number; true; number) {}
+}
+function generic<T extends boolean>(value: T) {
+    if (value) {}
+}
+function impossible(value: never) {
+    if (value) {}
+}
+function branded(value: boolean & { readonly brand: unique symbol }) {
+    if (value) {}
+}
+
+```

@@ -13,6 +13,7 @@ use biome_diagnostics::{
 use biome_line_index::LineIndex;
 use biome_lsp_converters::{PositionEncoding, from_proto, to_proto};
 use biome_rowan::{TextRange, TextSize};
+use biome_service::WorkspaceError;
 use biome_service::workspace::CodeAction;
 use biome_text_edit::{CompressedOp, DiffOp, TextEdit};
 use std::any::Any;
@@ -22,7 +23,7 @@ use std::fmt::{Debug, Display};
 use std::ops::{Add, Range};
 use std::str::FromStr;
 use std::{io, mem};
-use tower_lsp_server::jsonrpc::Error as LspError;
+use tower_lsp_server::jsonrpc::{Error as LspError, ErrorCode};
 use tower_lsp_server::ls_types::{self as lsp, CodeDescription, Uri};
 use tracing::error;
 
@@ -106,7 +107,7 @@ pub(crate) fn code_fix_to_lsp(
         .rule_name
         .as_ref()
         .filter(|_| action.category.matches("quickfix"))
-        .map(|(group_name, rule_name)| {
+        .map_or_default(|(group_name, rule_name)| {
             diagnostics
                 .iter()
                 .filter_map(|d| {
@@ -127,8 +128,7 @@ pub(crate) fn code_fix_to_lsp(
                     }
                 })
                 .collect()
-        })
-        .unwrap_or_default();
+        });
 
     let kind = action.category.to_str().into_owned();
 
@@ -396,6 +396,12 @@ pub(crate) fn into_lsp_error(msg: impl Display + Debug) -> LspError {
     error
 }
 
+pub(crate) fn workspace_error_to_lsp(error: WorkspaceError) -> LspError {
+    let mut lsp_error = into_lsp_error(&error);
+    lsp_error.data = serde_json::to_value(biome_diagnostics::serde::Diagnostic::from(error)).ok();
+    lsp_error
+}
+
 pub(crate) fn panic_to_lsp_error(err: Box<dyn Any + Send>) -> LspError {
     let mut error = LspError::internal_error();
 
@@ -413,6 +419,35 @@ pub(crate) fn panic_to_lsp_error(err: Box<dyn Any + Send>) -> LspError {
         },
     }
 
+    error
+}
+
+pub(crate) fn cancelled_to_lsp_error(cancelled: salsa::Cancelled) -> LspError {
+    let mut error = match cancelled {
+        salsa::Cancelled::PendingWrite => LspError::content_modified(),
+        salsa::Cancelled::PropagatedPanic => LspError::internal_error(),
+        _ => LspError::request_cancelled(),
+    };
+    error.message = Cow::Owned(cancelled.to_string());
+    error.data = Some(format!("{cancelled:?}").into());
+    error
+}
+
+/// Converts the cancellation of a workspace method called through a `biome/*`
+/// request, such as the requests of `biome check --use-server`, into an LSP
+/// error.
+///
+/// Unlike [cancelled_to_lsp_error], [salsa::Cancelled::PropagatedPanic] is
+/// reported as content modified, so that the client sends the request again.
+/// The request only waited for a query that another request gave up on. That
+/// request was either cancelled by a pending write, or it panicked and reports
+/// the panic in its own response.
+pub(crate) fn workspace_cancelled_to_lsp_error(cancelled: salsa::Cancelled) -> LspError {
+    let is_propagated_panic = matches!(cancelled, salsa::Cancelled::PropagatedPanic);
+    let mut error = cancelled_to_lsp_error(cancelled);
+    if is_propagated_panic {
+        error.code = ErrorCode::ContentModified;
+    }
     error
 }
 
@@ -471,7 +506,7 @@ pub(crate) fn apply_document_changes(
 
 #[cfg(test)]
 mod tests {
-    use super::apply_document_changes;
+    use super::{apply_document_changes, workspace_cancelled_to_lsp_error};
     use biome_line_index::{LineIndex, WideEncoding};
     use biome_lsp_converters::PositionEncoding;
     use biome_text_edit::TextEdit;
@@ -670,5 +705,18 @@ line 7 new";
         // Must not panic — the invalid change is skipped, text is unchanged
         let output = apply_document_changes(encoding, input, changes);
         assert_eq!(output, "abc\ndef\nghi");
+    }
+
+    #[test]
+    fn workspace_cancellations_ask_the_client_to_resend() {
+        for cancelled in [
+            salsa::Cancelled::PendingWrite,
+            salsa::Cancelled::PropagatedPanic,
+        ] {
+            assert_eq!(
+                workspace_cancelled_to_lsp_error(cancelled).code,
+                tower_lsp_server::jsonrpc::ErrorCode::ContentModified,
+            );
+        }
     }
 }

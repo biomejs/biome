@@ -52,6 +52,10 @@ Object.fromEntries([["then"]])
 Object.fromEntries([[`then`, 1]])
 Object.fromEntries([foo, ["then", 1]])
 
+/* before Object */ Object /* before . */ . /* before fromEntries */ fromEntries /* before ( */ ( /* before outer [ */ [ /* before inner [ */ [ /* before key */ "then" /* before , */ , /* before value */ 1 /* before inner ] */ ] /* before outer ] */ ] /* before ) */ )
+/* before Object */ Object /* before . */ . /* before defineProperty */ defineProperty /* before ( */ ( /* before first argument */ foo /* before first , */ , /* before second argument */ "then" /* before second , */ , /* before third argument */ 1 /* before ) */ )
+/* before Reflect */ Reflect /* before . */ . /* before defineProperty */ defineProperty /* before ( */ ( /* before first argument */ foo /* before first , */ , /* before second argument */ "then" /* before second , */ , /* before third argument */ 1 /* before ) */ )
+
 // `export`
 const then = 1; export {then}
 const notThen = 1; export {notThen as then}

@@ -1,22 +1,33 @@
 use crate::JsRuleAction;
-use crate::services::embedded_bindings::EmbeddedBindings;
-use crate::services::embedded_value_references::EmbeddedValueReferences;
+use crate::services::embedded::EmbeddedService;
 use crate::{services::semantic::Semantic, utils::rename::RenameSymbolExtensions};
 use biome_analyze::RuleSource;
 use biome_analyze::{FixKind, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_js_semantic::{ReferencesExtensions, SemanticModel};
+use biome_js_semantic::{Binding, Reference, SemanticModel};
 use biome_js_syntax::binding_ext::{AnyJsBindingDeclaration, AnyJsIdentifierBinding};
 use biome_js_syntax::declaration_ext::is_in_ambient_context;
 use biome_js_syntax::{
-    AnyJsExpression, EmbeddingKind, JsClassExpression, JsFileSource, JsForStatement,
-    JsFunctionExpression, JsIdentifierExpression, JsModuleItemList, JsSequenceExpression,
-    JsSyntaxKind, JsSyntaxNode, TsConditionalType, TsDeclarationModule, TsInferType,
-    TsInterfaceDeclaration, TsTypeAliasDeclaration,
+    AnyJsExpression, JsArrayBindingPattern, JsArrayBindingPatternElement,
+    JsArrayBindingPatternElementList, JsArrayBindingPatternRestElement, JsArrowFunctionExpression,
+    JsBogusNamedImportSpecifier, JsCallExpression, JsClassExpression, JsDefaultImportSpecifier,
+    JsForStatement, JsFormalParameter, JsFunctionExpression, JsIdentifierExpression, JsLanguage,
+    JsModuleItemList, JsNamedImportSpecifier, JsNamespaceImportSpecifier, JsObjectBindingPattern,
+    JsObjectBindingPatternProperty, JsObjectBindingPatternPropertyList, JsObjectBindingPatternRest,
+    JsObjectBindingPatternShorthandProperty, JsRestParameter, JsSequenceExpression,
+    JsShorthandNamedImportSpecifier, JsSyntaxKind, JsSyntaxNode, JsVariableDeclarator,
+    TsConditionalType, TsDeclarationModule, TsDeclareFunctionDeclaration, TsEnumMember,
+    TsImportEqualsDeclaration, TsIndexSignatureParameter, TsInferType, TsInterfaceDeclaration,
+    TsMappedType, TsPropertyParameter, TsTypeAliasDeclaration, TsTypeParameterList,
+    TsTypeParameters,
 };
-use biome_rowan::{AstNode, BatchMutationExt, Direction, SyntaxResult};
-use biome_rule_options::no_unused_variables::NoUnusedVariablesOptions;
+use biome_languages::JsFileSource;
+use biome_languages::javascript::JsEmbeddingKind;
+use biome_rowan::{AstNode, BatchMutationExt, Direction, SyntaxKindSet, SyntaxResult};
+use biome_rule_options::no_unused_variables::{
+    NoUnusedVariablesOptions, NoUnusedVariablesOptionsIgnore,
+};
 
 declare_lint_rule! {
     /// Disallow unused variables.
@@ -107,14 +118,12 @@ declare_lint_rule! {
     ///
     /// In Astro files, a top-level interface or a type alias named `Props` is always ignored
     /// as it's implicitly read by the framework.
-    /// ```astro,ignore
+    /// ```astro
     /// ---
     /// interface Props {
     ///   name: string;
     ///   greeting?: string;
     /// }
-    ///
-    /// const { name, greeting } = Astro.props;
     /// ---
     /// ```
     ///
@@ -127,7 +136,7 @@ declare_lint_rule! {
     ///
     /// Default: `true`
     ///
-    /// #### Example
+    /// If this option is set to `false`, unused rest siblings either have to be renamed or removed.
     ///
     /// ```json,options
     /// {
@@ -148,6 +157,85 @@ declare_lint_rule! {
     /// const { brand: _, ...other } = car;
     /// console.log(other);
     /// ```
+    ///
+    /// ### `ignoreUsingDeclarations`
+    ///
+    /// Default: `false`
+    ///
+    /// Whether to ignore unused variables declared with `using` or `await using`. Variables declared
+    /// with `const`, `let`, or `var` are still reported.
+    ///
+    /// A `using` declaration cleans up its value automatically when the enclosing block ends,
+    /// so the variable can be useful even if the code never reads it.
+    ///
+    /// ```json,options
+    /// {
+    ///   "options": {
+    ///     "ignoreUsingDeclarations": true
+    ///   }
+    /// }
+    /// ```
+    ///
+    /// #### Valid
+    ///
+    /// ```js,use_options
+    /// async function main() {
+    ///     using resource = createResource();
+    ///     await using connection = await openConnection();
+    /// }
+    /// main();
+    /// ```
+    ///
+    /// ### `ignore`
+    ///
+    /// An object that allows excluding matching identifiers from this rule.
+    ///
+    /// Each key may specify an array of identifiers to ignore which are case-sensitive matches.
+    ///
+    /// The special string `"*"` can serve two purposes:
+    /// - As a **key** it refers to every kind of identifier.
+    /// - As a **value** it may be used to match all identifiers in the respective group, effectively disabling this rule for that group.
+    ///
+    /// Allowed keys:
+    ///
+    /// - `"*"`: Applies to all identifiers
+    /// - `"class"`: Applies to class names
+    /// - `"function"`: Applies to function names
+    /// - `"interface"`: Applies to interface names
+    /// - `"typeAlias"`: Applies to type aliases
+    /// - `"typeParameter"`: Applies to type parameters
+    /// - `"variable"`: Applies to variable names
+    ///
+    /// Default: `{}` (no variables are excluded)
+    ///
+    /// For example, you can exclude all unused identifiers named `ignored` regardless of their kind,
+    /// all unused classes named `IgnoredClass`, and all unused functions with the following
+    /// configuration.
+    ///
+    /// A variable named `unusedVariable` is still flagged as unused, and so is a class named
+    /// `UnusedClass` since they don't fall under the exceptions.
+    ///
+    /// ```json,options
+    /// {
+    ///   "options": {
+    ///     "ignore": {
+    ///       "*": ["ignored"],
+    ///       "class": ["IgnoredClass"],
+    ///       "function": ["*"]
+    ///     }
+    ///   }
+    /// }
+    /// ```
+    ///
+    /// ```js,expect_diagnostic,ignore,use_options
+    /// const ignored = 0;
+    /// class IgnoredClass {}
+    /// function ignoredFunction() {}
+    ///
+    /// const unusedVariable = 0;
+    /// class UnusedClass {}
+    /// ```
+    ///
     pub NoUnusedVariables {
         version: "1.0.0",
         name: "noUnusedVariables",
@@ -156,6 +244,8 @@ declare_lint_rule! {
             RuleSource::Eslint("no-unused-vars").same(),
             RuleSource::EslintTypeScript("no-unused-vars").same(),
             RuleSource::EslintUnusedImports("no-unused-vars").same(),
+            RuleSource::EslintVueJs("no-unused-vars").same(),
+            RuleSource::DenoLint("no-unused-vars").same(),
         ],
         recommended: true,
         severity: Severity::Warning,
@@ -170,6 +260,208 @@ pub enum SuggestedFix {
     NoSuggestion,
     /// Suggest to prefix the name of the binding with underscore
     PrefixUnderscore,
+}
+
+impl Rule for NoUnusedVariables {
+    type Query = Semantic<AnyJsIdentifierBinding>;
+    type State = SuggestedFix;
+    type Signals = Option<Self::State>;
+    type Options = NoUnusedVariablesOptions;
+
+    fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
+        let binding = ctx.query();
+        let model = ctx.model();
+
+        // Every check below can only turn a report into no report, so the
+        // cheapest ones run first.
+        let declaration = binding.syntax().parent()?;
+        if !AnyJsBindingDeclaration::can_cast(declaration.kind()) {
+            return None;
+        }
+        if is_never_reported(&declaration) {
+            debug_assert!(suggested_fix_if_unused(model, binding, ctx.options()).is_none());
+            return None;
+        }
+
+        let embedded = ctx
+            .get_service::<EmbeddedService>()
+            .expect("embedded service");
+
+        let file_source = ctx.source_type::<JsFileSource>();
+
+        let is_declaration_file = file_source.language().is_definition_file();
+        if is_declaration_file
+            && let Some(items) = binding
+                .syntax()
+                .ancestors()
+                .skip(1)
+                .find_map(JsModuleItemList::cast)
+        {
+            // A declaration file without top-level exports and imports is a global declaration file.
+            // All top-level types and variables are available in every file of the project.
+            // Thus, it is ok if top-level types are not used locally.
+            let is_top_level = items.parent::<TsDeclarationModule>().is_some();
+            if is_top_level && items.into_iter().all(|x| x.as_any_js_statement().is_some()) {
+                return None;
+            }
+        }
+
+        if is_ignored(binding, ctx.options()).unwrap_or_default() {
+            return None;
+        }
+
+        let binding_name_token = binding.name_token().ok()?;
+        let binding_name = binding_name_token.text_trimmed();
+        let binding_token_text = binding_name_token.token_text_trimmed();
+
+        // Ignore name prefixed with `_`
+        let is_underscore_prefixed = binding_name.starts_with('_');
+        // Source and declaration snippets contribute their own declarations to
+        // the embedded-binding set. Checking that set would make every local
+        // binding appear used. Template usage is handled by the reference check.
+        let is_defined_in_embedded_binding = !file_source.is_embedded_source()
+            && !file_source.is_svelte_declaration()
+            && embedded.contains_binding(binding_token_text.clone())
+            && binding
+                .declaration()
+                .map(|d| d.parent_binding_pattern_declaration().unwrap_or(d))
+                .is_some_and(|d| {
+                    matches!(
+                        d,
+                        AnyJsBindingDeclaration::JsShorthandNamedImportSpecifier(_)
+                            | AnyJsBindingDeclaration::JsNamedImportSpecifier(_)
+                            | AnyJsBindingDeclaration::JsDefaultImportSpecifier(_)
+                            | AnyJsBindingDeclaration::JsNamespaceImportSpecifier(_)
+                            | AnyJsBindingDeclaration::JsVariableDeclarator(_)
+                    )
+                });
+        let is_used_as_reference = embedded.is_used(binding_token_text.clone())
+            || matches!(
+                file_source.as_embedding_kind(),
+                JsEmbeddingKind::Svelte { .. }
+            ) && embedded.is_svelte_store_used(binding_token_text.clone())
+            || matches!(file_source.as_embedding_kind(), JsEmbeddingKind::Vue { .. })
+                && embedded.is_vue_directive_used(binding_token_text);
+
+        if is_underscore_prefixed || is_defined_in_embedded_binding || is_used_as_reference {
+            return None;
+        }
+
+        // In Astro files, a top-level type/interface `Props` is always ignored as it's implicitly
+        // read by the framework.
+        if binding_name == "Props"
+            && let JsEmbeddingKind::Astro { .. } = file_source.as_embedding_kind()
+            && let AnyJsIdentifierBinding::TsIdentifierBinding(binding) = binding
+            && (TsInterfaceDeclaration::can_cast(binding.syntax().parent()?.kind())
+                || TsTypeAliasDeclaration::can_cast(binding.syntax().parent()?.kind()))
+            && JsModuleItemList::can_cast(binding.syntax().grand_parent()?.kind())
+        {
+            return None;
+        }
+
+        if is_unused(model, binding) {
+            // In Svelte 5, assigning to a `$bindable()` prop reflects the value back to the
+            // parent component. Such a variable may be write-only in the script block but is
+            // still meaningful — suppress the diagnostic to avoid a false positive.
+            if matches!(
+                file_source.as_embedding_kind(),
+                JsEmbeddingKind::Svelte { .. }
+            ) && is_svelte_bindable_prop(binding)
+            {
+                return None;
+            }
+            suggested_fix_if_unused(model, binding, ctx.options())
+        } else {
+            None
+        }
+    }
+
+    fn diagnostic(ctx: &RuleContext<Self>, _: &Self::State) -> Option<RuleDiagnostic> {
+        let binding = ctx.query();
+
+        let symbol_type = match binding.syntax().parent()?.kind() {
+            JsSyntaxKind::JS_FORMAL_PARAMETER => "parameter",
+            JsSyntaxKind::JS_FUNCTION_DECLARATION => "function",
+            JsSyntaxKind::JS_CLASS_DECLARATION => "class",
+            JsSyntaxKind::TS_INTERFACE_DECLARATION => "interface",
+            JsSyntaxKind::TS_TYPE_ALIAS_DECLARATION => "type alias",
+            JsSyntaxKind::TS_TYPE_PARAMETER => "type parameter",
+            _ => "variable",
+        };
+
+        let binding_name = match binding {
+            AnyJsIdentifierBinding::JsIdentifierBinding(node) => node.name_token().ok()?,
+            AnyJsIdentifierBinding::TsIdentifierBinding(node) => node.name_token().ok()?,
+            AnyJsIdentifierBinding::TsTypeParameterName(node) => node.ident_token().ok()?,
+            AnyJsIdentifierBinding::TsLiteralEnumMemberName(node) => node.value().ok()?,
+        };
+
+        let mut diag = RuleDiagnostic::new(
+            rule_category!(),
+            binding.syntax().text_trimmed_range(),
+            markup! {
+                "This "{symbol_type}" "<Emphasis>{binding_name.text_trimmed()}</Emphasis>" is unused."
+            },
+        ).note(
+            markup! {
+                "Unused variables are often the result of typos, incomplete refactors, or other sources of bugs."
+            },
+        );
+
+        // Check if this binding is part of an object destructuring pattern with a rest property
+        if let Some(decl) = binding.declaration()
+            && is_rest_spread_sibling(&decl)
+        {
+            diag = diag.note(
+                markup! {
+                        "You can enable the "<Emphasis>"ignoreRestSiblings"</Emphasis>" option to ignore unused variables "
+                        "inside destructured objects with rest properties."
+                    },
+            );
+        }
+
+        Some(diag)
+    }
+
+    fn action(ctx: &RuleContext<Self>, suggestion: &Self::State) -> Option<JsRuleAction> {
+        match suggestion {
+            SuggestedFix::NoSuggestion => None,
+            SuggestedFix::PrefixUnderscore => {
+                let binding = ctx.query();
+                let mut mutation = ctx.root().begin();
+
+                let name = match binding {
+                    AnyJsIdentifierBinding::JsIdentifierBinding(binding) => {
+                        binding.name_token().ok()?
+                    }
+                    AnyJsIdentifierBinding::TsIdentifierBinding(binding) => {
+                        binding.name_token().ok()?
+                    }
+                    AnyJsIdentifierBinding::TsTypeParameterName(binding) => {
+                        binding.ident_token().ok()?
+                    }
+                    AnyJsIdentifierBinding::TsLiteralEnumMemberName(_) => {
+                        return None;
+                    }
+                };
+                let name_trimmed = name.text_trimmed();
+                let new_name = format!("_{name_trimmed}");
+
+                let model = ctx.model();
+                if !mutation.rename_node_declaration(model, binding, &new_name) {
+                    return None;
+                }
+
+                Some(JsRuleAction::new(
+                    ctx.metadata().action_category(ctx.category(), ctx.group()),
+                    ctx.metadata().applicability(),
+                    markup! { "If this is intentional, prepend "<Emphasis>{name_trimmed}</Emphasis>" with an underscore." }
+                        .to_owned(),
+                    mutation,
+                ))
+            }
+        }
+    }
 }
 
 /// Returns `true` if the binding is part of an object pattern with a rest element as a sibling
@@ -191,6 +483,52 @@ fn is_rest_spread_sibling(decl: &AnyJsBindingDeclaration) -> bool {
     }
 }
 
+fn is_implemented_overload_type_parameter(
+    model: &SemanticModel,
+    type_parameter: &JsSyntaxNode,
+) -> bool {
+    let Some(signature) = type_parameter
+        .parent()
+        .and_then(TsTypeParameterList::cast)
+        .and_then(|list| list.parent::<TsTypeParameters>())
+        .and_then(|parameters| parameters.parent::<TsDeclareFunctionDeclaration>())
+    else {
+        return false;
+    };
+    let Some(id) = signature
+        .id()
+        .ok()
+        .and_then(|id| id.as_js_identifier_binding().cloned())
+    else {
+        return false;
+    };
+    let Some(scope) = model.scope_hoisted_to(id.syntax()) else {
+        return false;
+    };
+    let signature_range = id.syntax().text_trimmed_range();
+
+    scope.overload_sets().into_iter().any(|set| {
+        let Some((implementation, signatures)) = set.split_last() else {
+            return false;
+        };
+        let Some(implementation) = model.binding_by_id(*implementation) else {
+            return false;
+        };
+        if !matches!(
+            implementation.tree().declaration(),
+            Some(AnyJsBindingDeclaration::JsFunctionDeclaration(_))
+        ) {
+            return false;
+        }
+
+        signatures.iter().any(|id| {
+            model
+                .binding_by_id(*id)
+                .is_some_and(|binding| binding.range() == signature_range)
+        })
+    })
+}
+
 fn suggestion_for_binding(binding: &AnyJsIdentifierBinding) -> Option<SuggestedFix> {
     if binding.is_under_object_pattern_binding()? {
         Some(SuggestedFix::NoSuggestion)
@@ -202,6 +540,7 @@ fn suggestion_for_binding(binding: &AnyJsIdentifierBinding) -> Option<SuggestedF
 // It is ok in some Typescripts constructs for a parameter to be unused.
 // Returning None means is ok to be unused
 fn suggested_fix_if_unused(
+    model: &SemanticModel,
     binding: &AnyJsIdentifierBinding,
     options: &NoUnusedVariablesOptions,
 ) -> Option<SuggestedFix> {
@@ -235,8 +574,13 @@ fn suggested_fix_if_unused(
         | AnyJsBindingDeclaration::JsObjectBindingPatternShorthandProperty(_) => {
             None
         }
-        node @ AnyJsBindingDeclaration::JsVariableDeclarator(_) => {
-            if is_in_ambient_context(node.syntax()) {
+        AnyJsBindingDeclaration::JsVariableDeclarator(declarator) => {
+            if is_in_ambient_context(declarator.syntax())
+                || (options.ignore_using_declarations()
+                    && declarator
+                        .declaration()
+                        .is_some_and(|declaration| declaration.is_using()))
+            {
                 None
             } else {
                 suggestion_for_binding(binding)
@@ -258,9 +602,12 @@ fn suggested_fix_if_unused(
         // Bindings under catch are never ok to be unused
         AnyJsBindingDeclaration::JsCatchDeclaration(_) => Some(SuggestedFix::PrefixUnderscore),
 
-        // Type parameters are never ok to be unused unless they are declared in an ambient context
+        // Type parameters are only ok to be unused in ambient contexts or implemented overload
+        // signatures.
         node @ AnyJsBindingDeclaration::TsTypeParameter(_) => {
-            if is_in_ambient_context(node.syntax()) {
+            if is_in_ambient_context(node.syntax())
+                || is_implemented_overload_type_parameter(model, node.syntax())
+            {
                 None
             } else {
                 Some(SuggestedFix::PrefixUnderscore)
@@ -309,176 +656,97 @@ fn suggested_fix_if_unused(
     }
 }
 
-impl Rule for NoUnusedVariables {
-    type Query = Semantic<AnyJsIdentifierBinding>;
-    type State = SuggestedFix;
-    type Signals = Option<Self::State>;
-    type Options = NoUnusedVariablesOptions;
+/// Declaration kinds for which [suggested_fix_if_unused] returns `None`, so a
+/// binding they declare is never reported, used or not.
+const NEVER_REPORTED_DECLARATION_KINDS: SyntaxKindSet<JsLanguage> =
+    TsDeclareFunctionDeclaration::KIND_SET
+        .union(JsClassExpression::KIND_SET)
+        .union(JsFunctionExpression::KIND_SET)
+        .union(TsIndexSignatureParameter::KIND_SET)
+        .union(TsMappedType::KIND_SET)
+        .union(TsEnumMember::KIND_SET)
+        .union(TsPropertyParameter::KIND_SET)
+        .union(BINDING_PATTERN_DECLARATION_KINDS)
+        .union(JsShorthandNamedImportSpecifier::KIND_SET)
+        .union(JsNamedImportSpecifier::KIND_SET)
+        .union(JsBogusNamedImportSpecifier::KIND_SET)
+        .union(JsDefaultImportSpecifier::KIND_SET)
+        .union(JsNamespaceImportSpecifier::KIND_SET)
+        .union(JsFormalParameter::KIND_SET)
+        .union(JsRestParameter::KIND_SET)
+        .union(TsImportEqualsDeclaration::KIND_SET);
 
-    fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
-        let binding = ctx.query();
-        let model = ctx.model();
-        let embedded_bindings = ctx
-            .get_service::<EmbeddedBindings>()
-            .expect("embedded bindings service");
-        let embedded_references = ctx
-            .get_service::<EmbeddedValueReferences>()
-            .expect("embedded references service");
+/// Binding pattern declarations, which
+/// [AnyJsBindingDeclaration::parent_binding_pattern_declaration] resolves to
+/// the declaration that contains the pattern.
+const BINDING_PATTERN_DECLARATION_KINDS: SyntaxKindSet<JsLanguage> =
+    JsArrayBindingPatternElement::KIND_SET
+        .union(JsArrayBindingPatternRestElement::KIND_SET)
+        .union(JsObjectBindingPatternProperty::KIND_SET)
+        .union(JsObjectBindingPatternRest::KIND_SET)
+        .union(JsObjectBindingPatternShorthandProperty::KIND_SET);
 
-        let file_source = ctx.source_type::<JsFileSource>();
+/// Pattern nodes that [AnyJsBindingDeclaration::parent_binding_pattern_declaration]
+/// skips on its way up to the declaration that contains a pattern.
+const BINDING_PATTERN_KINDS: SyntaxKindSet<JsLanguage> = JsArrayBindingPatternElement::KIND_SET
+    .union(JsArrayBindingPatternElementList::KIND_SET)
+    .union(JsArrayBindingPattern::KIND_SET)
+    .union(JsObjectBindingPattern::KIND_SET)
+    .union(JsObjectBindingPatternProperty::KIND_SET)
+    .union(JsObjectBindingPatternPropertyList::KIND_SET);
 
-        let is_declaration_file = file_source.language().is_definition_file();
-        if is_declaration_file
-            && let Some(items) = binding
-                .syntax()
-                .ancestors()
-                .skip(1)
-                .find_map(JsModuleItemList::cast)
-        {
-            // A declaration file without top-level exports and imports is a global declaration file.
-            // All top-level types and variables are available in every files of the project.
-            // Thus, it is ok if top-level types are not used locally.
-            let is_top_level = items.parent::<TsDeclarationModule>().is_some();
-            if is_top_level && items.into_iter().all(|x| x.as_any_js_statement().is_some()) {
-                return None;
-            }
-        }
+/// Returns `true` if [suggested_fix_if_unused] returns `None` for every
+/// binding declared by `declaration`, a node that casts to
+/// [AnyJsBindingDeclaration], so such a binding is never reported, used or not.
+///
+/// Reads only syntax kinds, mirroring the declaration that
+/// [suggested_fix_if_unused] matches on.
+fn is_never_reported(declaration: &JsSyntaxNode) -> bool {
+    let mut kind = declaration.kind();
+    if BINDING_PATTERN_DECLARATION_KINDS.matches(kind)
+        && let Some(parent_kind) = declaration
+            .ancestors()
+            .skip(1)
+            .map(|ancestor| ancestor.kind())
+            .find(|kind| !BINDING_PATTERN_KINDS.matches(*kind))
+        && AnyJsBindingDeclaration::can_cast(parent_kind)
+    {
+        kind = parent_kind;
+    }
+    NEVER_REPORTED_DECLARATION_KINDS.matches(kind)
+}
 
-        let binding_name = binding.name_token().ok()?;
-        let binding_name = binding_name.text_trimmed();
+/// Returns `true` if `binding` is considered as ignored by the user.
+pub fn is_ignored(
+    binding: &AnyJsIdentifierBinding,
+    options: &NoUnusedVariablesOptions,
+) -> Option<bool> {
+    let binding_name = binding.name_token().ok()?;
+    let binding_name = binding_name.text_trimmed();
 
-        // Ignore name prefixed with `_`
-        let is_underscore_prefixed = binding_name.starts_with('_');
-        // Only suppress noUnusedVariables for imports and variable declarations in
-        // embedded script blocks. Function/class/type declarations should still be
-        // flagged unless they are actually referenced in the template
-        // (handled by is_used_as_reference below).
-        // Eventually, we should probably not ignore bindings in embedded blocks, because they might be genuinely unused.
-        let is_defined_in_embedded_binding = embedded_bindings.contains_binding(binding_name)
-            && binding
-                .declaration()
-                .map(|d| d.parent_binding_pattern_declaration().unwrap_or(d))
-                .is_some_and(|d| {
-                    matches!(
-                        d,
-                        AnyJsBindingDeclaration::JsShorthandNamedImportSpecifier(_)
-                            | AnyJsBindingDeclaration::JsNamedImportSpecifier(_)
-                            | AnyJsBindingDeclaration::JsDefaultImportSpecifier(_)
-                            | AnyJsBindingDeclaration::JsNamespaceImportSpecifier(_)
-                            | AnyJsBindingDeclaration::JsVariableDeclarator(_)
-                    )
-                });
-        let is_used_as_reference = embedded_references.is_used_as_value(binding_name);
+    let ignore_options = options.ignore();
+    let is_all_ignored = ignore_options.all.unwrap_or_default().iter().any(|ignore| {
+        &**ignore == NoUnusedVariablesOptionsIgnore::IGNORE_ALL || &**ignore == binding_name
+    });
 
-        if is_underscore_prefixed || is_defined_in_embedded_binding || is_used_as_reference {
-            return None;
-        }
-
-        // In Astro files, a top-level type/interface `Props` is always ignored as it's implicitly
-        // read by the framework.
-        if binding_name == "Props"
-            && let EmbeddingKind::Astro { .. } = file_source.as_embedding_kind()
-            && let AnyJsIdentifierBinding::TsIdentifierBinding(binding) = binding
-            && (TsInterfaceDeclaration::can_cast(binding.syntax().parent()?.kind())
-                || TsTypeAliasDeclaration::can_cast(binding.syntax().parent()?.kind()))
-            && JsModuleItemList::can_cast(binding.syntax().grand_parent()?.kind())
-        {
-            return None;
-        }
-
-        if is_unused(model, binding) {
-            suggested_fix_if_unused(binding, ctx.options())
-        } else {
-            None
-        }
+    if is_all_ignored {
+        return Some(true);
     }
 
-    fn diagnostic(ctx: &RuleContext<Self>, _: &Self::State) -> Option<RuleDiagnostic> {
-        let binding = ctx.query();
+    let specific_ignores = match binding.syntax().parent()?.kind() {
+        JsSyntaxKind::JS_FUNCTION_DECLARATION => ignore_options.function,
+        JsSyntaxKind::JS_CLASS_DECLARATION => ignore_options.class,
+        JsSyntaxKind::TS_INTERFACE_DECLARATION => ignore_options.interface,
+        JsSyntaxKind::TS_TYPE_ALIAS_DECLARATION => ignore_options.type_alias,
+        JsSyntaxKind::TS_TYPE_PARAMETER => ignore_options.type_parameter,
+        _ => ignore_options.variable,
+    };
 
-        let symbol_type = match binding.syntax().parent()?.kind() {
-            JsSyntaxKind::JS_FORMAL_PARAMETER => "parameter",
-            JsSyntaxKind::JS_FUNCTION_DECLARATION => "function",
-            JsSyntaxKind::JS_CLASS_DECLARATION => "class",
-            JsSyntaxKind::TS_INTERFACE_DECLARATION => "interface",
-            JsSyntaxKind::TS_TYPE_ALIAS_DECLARATION => "type alias",
-            JsSyntaxKind::TS_TYPE_PARAMETER => "type parameter",
-            _ => "variable",
-        };
+    let is_specific_ignored = specific_ignores.unwrap_or_default().iter().any(|ignore| {
+        &**ignore == NoUnusedVariablesOptionsIgnore::IGNORE_ALL || &**ignore == binding_name
+    });
 
-        let binding_name = match binding {
-            AnyJsIdentifierBinding::JsIdentifierBinding(node) => node.name_token().ok()?,
-            AnyJsIdentifierBinding::TsIdentifierBinding(node) => node.name_token().ok()?,
-            AnyJsIdentifierBinding::TsTypeParameterName(node) => node.ident_token().ok()?,
-            AnyJsIdentifierBinding::TsLiteralEnumMemberName(node) => node.value().ok()?,
-        };
-
-        let mut diag = RuleDiagnostic::new(
-            rule_category!(),
-            binding.syntax().text_trimmed_range(),
-            markup! {
-                "This "{symbol_type}" "<Emphasis>{binding_name.text_trimmed()}</Emphasis>" is unused."
-            },
-        ).note(
-            markup! {
-                "Unused variables are often the result of typos, incomplete refactors, or other sources of bugs."
-            },
-        );
-
-        // Check if this binding is part of an object destructuring pattern with a rest property
-        if let Some(decl) = binding.declaration()
-            && is_rest_spread_sibling(&decl)
-        {
-            diag = diag.note(
-                    markup! {
-                        "You can enable the "<Emphasis>"ignoreRestSiblings"</Emphasis>" option to ignore unused variables "
-                        "inside destructured objects with rest properties."
-                    },
-                );
-        }
-
-        Some(diag)
-    }
-
-    fn action(ctx: &RuleContext<Self>, suggestion: &Self::State) -> Option<JsRuleAction> {
-        match suggestion {
-            SuggestedFix::NoSuggestion => None,
-            SuggestedFix::PrefixUnderscore => {
-                let binding = ctx.query();
-                let mut mutation = ctx.root().begin();
-
-                let name = match binding {
-                    AnyJsIdentifierBinding::JsIdentifierBinding(binding) => {
-                        binding.name_token().ok()?
-                    }
-                    AnyJsIdentifierBinding::TsIdentifierBinding(binding) => {
-                        binding.name_token().ok()?
-                    }
-                    AnyJsIdentifierBinding::TsTypeParameterName(binding) => {
-                        binding.ident_token().ok()?
-                    }
-                    AnyJsIdentifierBinding::TsLiteralEnumMemberName(_) => {
-                        return None;
-                    }
-                };
-                let name_trimmed = name.text_trimmed();
-                let new_name = format!("_{name_trimmed}");
-
-                let model = ctx.model();
-                if !mutation.rename_node_declaration(model, binding, &new_name) {
-                    return None;
-                }
-
-                Some(JsRuleAction::new(
-                    ctx.metadata().action_category(ctx.category(), ctx.group()),
-                    ctx.metadata().applicability(),
-                    markup! { "If this is intentional, prepend "<Emphasis>{name_trimmed}</Emphasis>" with an underscore." }
-                        .to_owned(),
-                    mutation,
-                ))
-            }
-        }
-    }
+    Some(is_specific_ignored)
 }
 
 fn containing_statement_list(decl: &AnyJsBindingDeclaration) -> Option<JsSyntaxNode> {
@@ -542,7 +810,7 @@ fn is_namespace_merged_with_used_value(
     Some(false)
 }
 
-fn is_value_merged_with_exported_namespace(
+fn is_value_merged_with_used_namespace(
     model: &SemanticModel,
     binding: &AnyJsIdentifierBinding,
 ) -> Option<bool> {
@@ -554,7 +822,8 @@ fn is_value_merged_with_exported_namespace(
 
     // Namespace declarations must follow the value they merge with, so the
     // scope name lookup points directly at the merged namespace when it exists.
-    let namespace = scope.get_binding(name)?.tree();
+    let namespace_binding = scope.get_binding(name)?;
+    let namespace = namespace_binding.tree();
     if namespace.syntax().text_trimmed_range() == binding.syntax().text_trimmed_range() {
         return Some(false);
     }
@@ -567,7 +836,10 @@ fn is_value_merged_with_exported_namespace(
         return Some(false);
     }
 
-    Some(model.is_exported(&namespace))
+    Some(
+        model.is_exported(&namespace)
+            || !is_unused_by_references(&namespace_binding, namespace_decl.syntax()),
+    )
 }
 
 fn is_declaration_merged_with_used(
@@ -576,14 +848,192 @@ fn is_declaration_merged_with_used(
 ) -> Option<bool> {
     let decl = binding.declaration()?;
     match decl {
+        AnyJsBindingDeclaration::TsInterfaceDeclaration(_) => {
+            is_interface_merged_with_used(model, binding)
+        }
         AnyJsBindingDeclaration::TsModuleDeclaration(_) => {
             is_namespace_merged_with_used_value(model, binding)
         }
         _ if is_namespace_merge_value_declaration(&decl) => {
-            is_value_merged_with_exported_namespace(model, binding)
+            is_value_merged_with_used_namespace(model, binding)
         }
         _ => None,
     }
+}
+
+fn is_interface_merged_with_used(
+    model: &SemanticModel,
+    binding: &AnyJsIdentifierBinding,
+) -> Option<bool> {
+    let name_token = binding.name_token().ok()?;
+    let name = name_token.text_trimmed();
+    let scope = model.scope_hoisted_to(binding.syntax())?;
+
+    Some(scope.bindings().any(|scope_binding| {
+        let other = scope_binding.tree();
+        let Some(other_declaration) = other.declaration() else {
+            return false;
+        };
+        matches!(
+            other_declaration,
+            AnyJsBindingDeclaration::TsInterfaceDeclaration(_)
+        ) && other
+            .name_token()
+            .is_ok_and(|other_name| other_name.text_trimmed() == name)
+            && (model.is_exported(&other)
+                || !is_unused_by_references(&scope_binding, other_declaration.syntax()))
+    }))
+}
+
+/// Returns `true` if `call` is a call to a simple identifier named `name`.
+fn is_call_to(call: &JsCallExpression, name: &str) -> bool {
+    let Ok(AnyJsExpression::JsIdentifierExpression(ident)) = call.callee() else {
+        return false;
+    };
+    ident.name().is_ok_and(|n| n.has_name(name))
+}
+
+/// Returns `true` if the binding is a `$bindable()` shorthand property in a `$props()`
+/// destructuring in a Svelte 5 component.
+///
+/// In Svelte 5, assigning to a `$bindable()` prop reflects the new value back to the parent
+/// component. A variable that appears write-only in the script is therefore intentional and
+/// should not be flagged as unused.
+fn is_svelte_bindable_prop(binding: &AnyJsIdentifierBinding) -> bool {
+    // The binding must be declared as a shorthand property in an object destructuring pattern.
+    let Some(decl) = binding.declaration() else {
+        return false;
+    };
+    let AnyJsBindingDeclaration::JsObjectBindingPatternShorthandProperty(shorthand) = decl else {
+        return false;
+    };
+
+    // The shorthand property must have a default initializer `= $bindable(...)`.
+    let Some(init) = shorthand.init() else {
+        return false;
+    };
+    let Ok(AnyJsExpression::JsCallExpression(call)) = init.expression() else {
+        return false;
+    };
+    if !is_call_to(&call, "$bindable") {
+        return false;
+    }
+
+    // Walk up to find the enclosing `JsVariableDeclarator` whose rhs must be `$props()`.
+    let Some(declarator) = shorthand
+        .syntax()
+        .ancestors()
+        .find_map(JsVariableDeclarator::cast)
+    else {
+        return false;
+    };
+    let Some(declarator_init) = declarator.initializer() else {
+        return false;
+    };
+    let Ok(AnyJsExpression::JsCallExpression(props_call)) = declarator_init.expression() else {
+        return false;
+    };
+    is_call_to(&props_call, "$props")
+}
+
+fn is_unused_by_references(binding: &Binding, declaration: &JsSyntaxNode) -> bool {
+    // Expressions in a return position inside an arrow function expression are used.
+    // Type parameters declared in mapped types are only used in the mapped type.
+    let any_use_counts = matches!(
+        declaration.kind(),
+        JsSyntaxKind::JS_ARROW_FUNCTION_EXPRESSION | JsSyntaxKind::TS_MAPPED_TYPE
+    );
+    // A reference starts inside this range exactly when it lies inside the
+    // declaration, so the stored start tells where it is without building its node.
+    let declaration_range = declaration.text_range_with_trivia();
+
+    // Any use outside the declaration means the binding is used.
+    if binding
+        .all_references()
+        .filter(|reference| {
+            any_use_counts || !declaration_range.contains(reference.range_start())
+        })
+        .any(|reference| use_parent(&reference, declaration).is_some())
+    {
+        return false;
+    }
+    if any_use_counts {
+        return true;
+    }
+    binding
+        .all_references()
+        .filter(|reference| declaration_range.contains(reference.range_start()))
+        .filter_map(|reference| use_parent(&reference, declaration))
+        .all(|ref_parent| {
+            let mut is_unused = true;
+            for ancestor in ref_parent.ancestors() {
+                if &ancestor == declaration {
+                    return is_unused;
+                }
+                match ancestor.kind() {
+                    JsSyntaxKind::JS_FUNCTION_BODY => {
+                        // reset because we are inside a function
+                        is_unused = true;
+                    }
+                    JsSyntaxKind::JS_ARROW_FUNCTION_EXPRESSION => {
+                        if let Some(arrow) = JsArrowFunctionExpression::cast(ancestor)
+                            && let Ok(body) = arrow.body()
+                            && body
+                                .syntax()
+                                .text_trimmed_range()
+                                .contains_range(ref_parent.text_trimmed_range())
+                        {
+                            is_unused = true;
+                        }
+                    }
+                    JsSyntaxKind::JS_ASSIGNMENT_EXPRESSION
+                    | JsSyntaxKind::JS_CALL_EXPRESSION
+                    | JsSyntaxKind::JS_NEW_EXPRESSION
+                    // These can call a getter
+                    | JsSyntaxKind::JS_STATIC_MEMBER_EXPRESSION
+                    | JsSyntaxKind::JS_COMPUTED_MEMBER_EXPRESSION => {
+                        // The ref can be leaked or code can be executed
+                        is_unused = false;
+                    }
+                    _ => {}
+                }
+            }
+            // Only reached if the declaration is not an ancestor of the reference.
+            false
+        })
+}
+
+/// Returns the parent of the reference's node, or `None` if the reference does
+/// not use the binding: a write that only updates it in statement position, such
+/// as `a += 1` or `a++`, or a read whose value is discarded, such as `a;`.
+///
+/// The reference's node is built from the closest ancestor of `declaration`
+/// that contains it.
+fn use_parent(reference: &Reference, declaration: &JsSyntaxNode) -> Option<JsSyntaxNode> {
+    let ref_parent = reference.syntax_near(declaration).parent()?;
+    if reference.is_write() {
+        // Ensure that the assignment is not used in an used expression.
+        let is_statement_like = ref_parent
+            .ancestors()
+            .find(|x| {
+                matches!(
+                    x.kind(),
+                    JsSyntaxKind::JS_ASSIGNMENT_EXPRESSION
+                        | JsSyntaxKind::JS_POST_UPDATE_EXPRESSION
+                        | JsSyntaxKind::JS_PRE_UPDATE_EXPRESSION
+                )
+            })
+            .and_then(|x| is_unused_expression(&x).ok())
+            .unwrap_or(false);
+        if is_statement_like {
+            return None;
+        }
+    } else if JsIdentifierExpression::can_cast(ref_parent.kind())
+        && is_unused_expression(&ref_parent).ok()?
+    {
+        return None;
+    }
+    Some(ref_parent)
 }
 
 /// Returns `true` if `binding` is considered as unused.
@@ -600,80 +1050,14 @@ pub fn is_unused(model: &SemanticModel, binding: &AnyJsIdentifierBinding) -> boo
         return false;
     }
 
-    if model.is_exported(binding) {
-        return false;
-    }
-
     let Some(declaration) = binding.declaration() else {
         return false;
     };
-    let declaration = declaration.syntax();
-    let unused_by_refs = binding
-        .all_references(model)
-        .filter_map(|reference| {
-            let ref_parent = reference.syntax().parent()?;
-            if reference.is_write() {
-                // Skip self assignment such as `a += 1` and `a++`.
-                // Ensure that the assignment is not used in an used expression.
-                let is_statement_like = ref_parent
-                    .ancestors()
-                    .find(|x| {
-                        matches!(
-                            x.kind(),
-                            JsSyntaxKind::JS_ASSIGNMENT_EXPRESSION
-                                | JsSyntaxKind::JS_POST_UPDATE_EXPRESSION
-                                | JsSyntaxKind::JS_PRE_UPDATE_EXPRESSION
-                        )
-                    })
-                    .and_then(|x| is_unused_expression(&x).ok())
-                    .unwrap_or(false);
-                if is_statement_like {
-                    return None;
-                }
-            } else if JsIdentifierExpression::can_cast(ref_parent.kind())
-                && is_unused_expression(&ref_parent).ok()?
-            {
-                // The reference is in an unused expression
-                return None;
-            }
-            Some(ref_parent)
-        })
-        .all(|ref_parent| {
-            if matches!(
-                declaration.kind(),
-                JsSyntaxKind::JS_ARROW_FUNCTION_EXPRESSION | JsSyntaxKind::TS_MAPPED_TYPE
-            ) {
-                // Expression in an return position inside an arrow function expression are used.
-                // Type parameters declared in mapped types are only used in the mapped type.
-                return false;
-            }
-            let mut is_unused = true;
-            for ancestor in ref_parent.ancestors() {
-                if &ancestor == declaration {
-                    // inside the declaration
-                    return is_unused;
-                }
-                match ancestor.kind() {
-                    JsSyntaxKind::JS_FUNCTION_BODY => {
-                        // reset because we are inside a function
-                        is_unused = true;
-                    }
-                    JsSyntaxKind::JS_ASSIGNMENT_EXPRESSION
-                    | JsSyntaxKind::JS_CALL_EXPRESSION
-                    | JsSyntaxKind::JS_NEW_EXPRESSION
-                    // These can call a getter
-                    | JsSyntaxKind::JS_STATIC_MEMBER_EXPRESSION
-                    | JsSyntaxKind::JS_COMPUTED_MEMBER_EXPRESSION => {
-                        // The ref can be leaked or code can be executed
-                        is_unused = false;
-                    }
-                    _ => {}
-                }
-            }
-            // Always false when the ref is outside the declaration
-            false
-        });
-    if !unused_by_refs {
+    let model_binding = model.as_binding(binding);
+    if model_binding.is_exported() {
+        return false;
+    }
+    if !is_unused_by_references(&model_binding, declaration.syntax()) {
         return false;
     }
     !is_declaration_merged_with_used(model, binding).unwrap_or(false)
@@ -682,26 +1066,27 @@ pub fn is_unused(model: &SemanticModel, binding: &AnyJsIdentifierBinding) -> boo
 /// Returns `true` if `expr` is unused.
 fn is_unused_expression(expr: &JsSyntaxNode) -> SyntaxResult<bool> {
     debug_assert!(AnyJsExpression::can_cast(expr.kind()));
-    // We use range as a way to identify nodes without owning them.
-    let mut previous = expr.text_trimmed_range();
+    // The child of `parent` that contains `expr`. Its range identifies it
+    // among the children of `parent`, and is only computed when needed.
+    let mut previous = expr.clone();
     for parent in expr.ancestors().skip(1) {
         match parent.kind() {
             JsSyntaxKind::JS_EXPRESSION_STATEMENT => return Ok(true),
             JsSyntaxKind::JS_PARENTHESIZED_EXPRESSION => {
-                previous = parent.text_trimmed_range();
+                previous = parent;
             }
             JsSyntaxKind::JS_SEQUENCE_EXPRESSION => {
                 let seq_expr = JsSequenceExpression::unwrap_cast(parent);
                 // If the expression is not the rightmost node in a comma sequence
-                if seq_expr.left()?.range() == previous {
+                if seq_expr.left()?.range() == previous.text_trimmed_range() {
                     return Ok(true);
                 }
-                previous = seq_expr.range();
+                previous = seq_expr.into_syntax();
             }
             JsSyntaxKind::JS_FOR_STATEMENT => {
                 let for_stmt = JsForStatement::unwrap_cast(parent);
                 if let Some(for_test) = for_stmt.test() {
-                    return Ok(for_test.range() != previous);
+                    return Ok(for_test.range() != previous.text_trimmed_range());
                 }
                 return Ok(true);
             }

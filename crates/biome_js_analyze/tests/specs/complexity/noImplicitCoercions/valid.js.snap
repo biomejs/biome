@@ -59,4 +59,7 @@ foo + 'bar';
 1 / (foo + bar);
 1 / 2;
 
+`${baz}1`;
+`1${qux}`;
+String.raw`${qux}`;
 ```

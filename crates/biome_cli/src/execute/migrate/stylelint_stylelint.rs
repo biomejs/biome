@@ -1,0 +1,386 @@
+//! This module includes implementations for deserializing a Stylelint configuration.
+//!
+//! The defined types follow the Stylelint configuration schema described at
+//! <https://stylelint.io/user-guide/configure>.
+//!
+//! See [super::stylelint_to_biome] for converting a Stylelint config to a Biome config.
+
+use biome_deserialize::{
+    Deserializable, DeserializableType, DeserializableTypes, DeserializableValue,
+    DeserializationContext, DeserializationVisitor, MapMembers, Merge,
+};
+use biome_deserialize_macros::Deserializable;
+use std::ops::Deref;
+
+use super::eslint_eslint::{IgnorePattern, ShorthandVec};
+
+/// A Stylelint configuration object.
+///
+/// See <https://stylelint.io/user-guide/configure>
+#[derive(Debug, Default, Deserializable)]
+#[deserializable(unknown_fields = "allow")]
+pub(crate) struct StylelintConfigData {
+    /// Configurations to extend, resolved recursively.
+    pub(crate) extends: ShorthandVec<String>,
+    /// The severity applied to rules that don't specify one.
+    pub(crate) default_severity: Option<Severity>,
+    /// The enabled rules.
+    pub(crate) rules: Rules,
+    /// Per-glob configuration overrides.
+    pub(crate) overrides: Vec<OverrideConfigData>,
+    /// The glob patterns that are ignored.
+    pub(crate) ignore_files: ShorthandVec<IgnorePattern>,
+}
+impl Merge for StylelintConfigData {
+    fn merge_with(&mut self, mut other: Self) {
+        self.extends.merge_with(other.extends);
+        if other.default_severity.is_some() {
+            self.default_severity = other.default_severity;
+        }
+        self.rules.merge_with(other.rules);
+        self.overrides.append(&mut other.overrides);
+        self.ignore_files.merge_with(other.ignore_files);
+    }
+}
+
+/// A Stylelint config can be embedded in `package.json`.
+#[derive(Debug, Default, Deserializable)]
+#[deserializable(unknown_fields = "allow")]
+pub(crate) struct StylelintPackageJson {
+    pub(crate) stylelint: Option<StylelintConfigData>,
+}
+
+/// A Stylelint `overrides` entry.
+///
+/// See <https://stylelint.io/user-guide/configure#overrides>
+#[derive(Debug, Default, Deserializable)]
+#[deserializable(unknown_fields = "allow")]
+pub(crate) struct OverrideConfigData {
+    /// The glob patterns for target files.
+    pub(crate) files: ShorthandVec<Box<str>>,
+    /// The severity applied to rules that don't specify one.
+    pub(crate) default_severity: Option<Severity>,
+    /// The enabled rules.
+    pub(crate) rules: Rules,
+}
+
+/// The severity of a Stylelint rule.
+///
+/// See <https://stylelint.io/user-guide/configure#severity>
+#[derive(Clone, Copy, Debug, Default)]
+pub(crate) enum Severity {
+    Warning,
+    #[default]
+    Error,
+}
+impl Deserializable for Severity {
+    fn deserialize<V: DeserializableValue>(
+        ctx: &mut dyn DeserializationContext<State = V::State>,
+        value: &V,
+        name: &str,
+    ) -> Option<Self> {
+        let s = biome_deserialize::Text::deserialize(ctx, value, name)?;
+        match s.text() {
+            "warning" => Some(Self::Warning),
+            "error" => Some(Self::Error),
+            _ => None,
+        }
+    }
+}
+impl From<Severity> for biome_configuration::RulePlainConfiguration {
+    fn from(value: Severity) -> Self {
+        match value {
+            Severity::Warning => Self::Warn,
+            Severity::Error => Self::Error,
+        }
+    }
+}
+
+/// The set of rules configured in a Stylelint configuration.
+///
+/// Rules are keyed by name because Stylelint configurations, including those
+/// pulled in through `extends`, override rules by name.
+#[derive(Debug, Default)]
+pub(crate) struct Rules(pub(crate) rustc_hash::FxHashMap<Box<str>, RuleData>);
+impl Merge for Rules {
+    fn merge_with(&mut self, other: Self) {
+        // Incoming entries replace existing ones so that a configuration merged
+        // on top takes precedence, matching Stylelint's rule resolution order.
+        for (name, data) in other.0 {
+            self.0.insert(name, data);
+        }
+    }
+}
+impl Deref for Rules {
+    type Target = rustc_hash::FxHashMap<Box<str>, RuleData>;
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+impl Deserializable for Rules {
+    fn deserialize<V: DeserializableValue>(
+        ctx: &mut dyn DeserializationContext<State = V::State>,
+        value: &V,
+        name: &str,
+    ) -> Option<Self> {
+        struct Visitor;
+        impl<S> DeserializationVisitor<S> for Visitor {
+            type Output = Rules;
+            const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::MAP;
+            fn visit_map(
+                self,
+                ctx: &mut dyn DeserializationContext<State = S>,
+                members: &mut MapMembers<'_, S>,
+                _range: biome_rowan::TextRange,
+                _name: &str,
+            ) -> Option<Self::Output> {
+                use biome_deserialize::Text;
+                let mut result = rustc_hash::FxHashMap::default();
+                for (key, value) in members.flatten() {
+                    let Some(rule_name) = Text::deserialize(ctx, &key, "") else {
+                        continue;
+                    };
+                    let Some(data) = RuleData::deserialize(ctx, &value, rule_name.text()) else {
+                        continue;
+                    };
+                    result.insert(rule_name.text().into(), data);
+                }
+                Some(Rules(result))
+            }
+        }
+        value.deserialize(ctx, Visitor, name)
+    }
+}
+
+/// The configuration of a single Stylelint rule.
+#[derive(Debug)]
+pub(crate) struct RuleData {
+    /// Whether the rule is enabled.
+    ///
+    /// Stylelint disables a rule when its value is `null` or when its primary
+    /// option is `false`.
+    pub(crate) enabled: bool,
+    /// The severity set in the secondary options, if any.
+    pub(crate) severity: Option<Severity>,
+    /// The primary option, for rules whose Biome equivalent has a matching option.
+    pub(crate) primary_option: Option<PrimaryOption>,
+    /// The at-rule names of the `ignoreAtRules` secondary option.
+    ///
+    /// Regular expressions are left out because Biome only matches plain names.
+    pub(crate) ignore_at_rules: Box<[Box<str>]>,
+}
+impl Deserializable for RuleData {
+    fn deserialize<V: DeserializableValue>(
+        ctx: &mut dyn DeserializationContext<State = V::State>,
+        value: &V,
+        name: &str,
+    ) -> Option<Self> {
+        match value.visitable_type(ctx)? {
+            DeserializableType::Null => Some(Self {
+                enabled: false,
+                severity: None,
+                primary_option: None,
+                ignore_at_rules: Box::default(),
+            }),
+            DeserializableType::Bool => {
+                let enabled = bool::deserialize(ctx, value, name)?;
+                Some(Self {
+                    enabled,
+                    severity: None,
+                    primary_option: None,
+                    ignore_at_rules: Box::default(),
+                })
+            }
+            DeserializableType::Array => {
+                struct Visitor;
+                impl<S> DeserializationVisitor<S> for Visitor {
+                    type Output = RuleData;
+                    const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::ARRAY;
+                    fn visit_array(
+                        self,
+                        ctx: &mut dyn DeserializationContext<State = S>,
+                        items: &mut dyn ExactSizeIterator<
+                            Item = Option<Box<dyn DeserializableValue<State = S>>>,
+                        >,
+                        _range: biome_rowan::TextRange,
+                        name: &str,
+                    ) -> Option<Self::Output> {
+                        let mut items = items.flatten();
+                        let mut primary_option = None;
+                        let enabled = match items.next() {
+                            Some(primary) => match primary.visitable_type(ctx) {
+                                Some(DeserializableType::Null) => false,
+                                Some(DeserializableType::Bool) => {
+                                    bool::deserialize(ctx, &primary, name).unwrap_or(true)
+                                }
+                                _ => {
+                                    primary_option =
+                                        PrimaryOption::from_rule_value(ctx, &primary, name);
+                                    true
+                                }
+                            },
+                            None => true,
+                        };
+                        let secondary_options = items
+                            .next()
+                            .and_then(|secondary| {
+                                SecondaryOptions::deserialize(ctx, &secondary, name)
+                            })
+                            .unwrap_or_default();
+                        Some(RuleData {
+                            enabled,
+                            severity: secondary_options.severity,
+                            primary_option,
+                            ignore_at_rules: secondary_options
+                                .ignore_at_rules
+                                .into_iter()
+                                .filter(|name| !is_regex(name))
+                                .collect(),
+                        })
+                    }
+                }
+                value.deserialize(ctx, Visitor, name)
+            }
+            // Any other primary option (string, number, object) enables the rule.
+            _ => Some(Self {
+                enabled: true,
+                severity: None,
+                primary_option: PrimaryOption::from_rule_value(ctx, value, name),
+                ignore_at_rules: Box::default(),
+            }),
+        }
+    }
+}
+
+/// The primary option of a Stylelint rule whose Biome equivalent has a matching option.
+#[derive(Debug)]
+pub(crate) enum PrimaryOption {
+    LightnessNotation(LightnessNotation),
+    MaxNestingDepth(u8),
+    /// A primary option that Biome can't represent.
+    ///
+    /// Deserialization reports a diagnostic for the invalid value, and the rule isn't migrated
+    /// because migrating it with Biome's default would change its behavior.
+    Unsupported,
+}
+impl PrimaryOption {
+    /// Deserializes the primary option of the Stylelint rule named `rule_name`.
+    ///
+    /// Returns `None` for rules whose primary option isn't migrated.
+    fn from_rule_value<V: DeserializableValue>(
+        ctx: &mut dyn DeserializationContext<State = V::State>,
+        value: &V,
+        rule_name: &str,
+    ) -> Option<Self> {
+        match rule_name {
+            "lightness-notation" => {
+                LightnessNotation::deserialize(ctx, value, rule_name).map(Self::LightnessNotation)
+            }
+            "max-nesting-depth" => Some(
+                u8::deserialize(ctx, value, rule_name)
+                    .map_or(Self::Unsupported, Self::MaxNestingDepth),
+            ),
+            _ => None,
+        }
+    }
+}
+
+/// The primary option of the `lightness-notation` rule.
+///
+/// See <https://stylelint.io/user-guide/rules/lightness-notation>
+#[derive(Clone, Copy, Debug, Deserializable)]
+pub(crate) enum LightnessNotation {
+    Percentage,
+    Number,
+}
+impl From<LightnessNotation>
+    for biome_rule_options::use_consistent_lightness_notation::LightnessNotation
+{
+    fn from(value: LightnessNotation) -> Self {
+        match value {
+            LightnessNotation::Percentage => Self::Percentage,
+            LightnessNotation::Number => Self::Number,
+        }
+    }
+}
+
+/// The secondary options object of a Stylelint rule.
+///
+/// Only the fields that have a Biome equivalent are deserialized.
+#[derive(Debug, Default, Deserializable)]
+#[deserializable(unknown_fields = "allow")]
+struct SecondaryOptions {
+    severity: Option<Severity>,
+    ignore_at_rules: ShorthandVec<Box<str>>,
+}
+
+/// Returns `true` if Stylelint interprets the option value as a regular expression,
+/// such as `/^my-/` or `/^my-/i`.
+///
+/// See <https://github.com/stylelint/stylelint/blob/main/lib/utils/matchesStringOrRegExp.mjs>
+fn is_regex(value: &str) -> bool {
+    value.starts_with('/') && (value.ends_with('/') || value.ends_with("/i"))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn rule(enabled: bool) -> RuleData {
+        RuleData {
+            enabled,
+            severity: None,
+            primary_option: None,
+            ignore_at_rules: Box::default(),
+        }
+    }
+
+    #[test]
+    fn rules_merge_replaces_existing_entry_with_incoming() {
+        let mut base = Rules(rustc_hash::FxHashMap::from_iter([("a".into(), rule(true))]));
+        base.merge_with(Rules(rustc_hash::FxHashMap::from_iter([(
+            "a".into(),
+            rule(false),
+        )])));
+
+        assert!(!base.0["a"].enabled);
+    }
+
+    #[test]
+    fn config_merge_lets_incoming_configuration_take_precedence() {
+        let mut base = StylelintConfigData {
+            default_severity: Some(Severity::Error),
+            rules: Rules(rustc_hash::FxHashMap::from_iter([("a".into(), rule(true))])),
+            overrides: vec![OverrideConfigData {
+                files: ShorthandVec::from(Box::<str>::from("base")),
+                ..Default::default()
+            }],
+            ..Default::default()
+        };
+        base.merge_with(StylelintConfigData {
+            default_severity: Some(Severity::Warning),
+            rules: Rules(rustc_hash::FxHashMap::from_iter([(
+                "a".into(),
+                rule(false),
+            )])),
+            overrides: vec![OverrideConfigData {
+                files: ShorthandVec::from(Box::<str>::from("incoming")),
+                ..Default::default()
+            }],
+            ..Default::default()
+        });
+
+        assert!(matches!(base.default_severity, Some(Severity::Warning)));
+        assert!(!base.rules.0["a"].enabled);
+        // Incoming overrides are appended last so they win in Stylelint's order.
+        assert_eq!(base.overrides.len(), 2);
+        assert_eq!(
+            base.overrides[0].files.first().map(Deref::deref),
+            Some("base")
+        );
+        assert_eq!(
+            base.overrides[1].files.first().map(Deref::deref),
+            Some("incoming")
+        );
+    }
+}

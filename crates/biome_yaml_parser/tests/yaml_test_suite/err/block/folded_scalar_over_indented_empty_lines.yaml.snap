@@ -1,0 +1,106 @@
+---
+source: crates/biome_yaml_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+```yaml
+block scalar: >
+ 
+  
+   
+ invalid
+
+```
+
+## AST
+
+```
+YamlRoot {
+    documents: YamlDocumentList [
+        YamlDocument {
+            bom_token: missing (optional),
+            directives: YamlDirectiveList [],
+            dashdashdash_token: missing (optional),
+            node: YamlBlockInBlockNode {
+                properties: YamlPropertyList [],
+                content: YamlBlockMapping {
+                    mapping_start_token: MAPPING_START@0..0 "" [] [],
+                    entries: YamlBlockMapEntryList [
+                        YamlBlockMapImplicitEntry {
+                            key: YamlFlowYamlNode {
+                                properties: YamlPropertyList [],
+                                content: YamlPlainScalar {
+                                    value_token: PLAIN_LITERAL@0..12 "block scalar" [] [],
+                                },
+                            },
+                            colon_token: COLON@12..14 ":" [] [Whitespace(" ")],
+                            value: YamlBlockInBlockNode {
+                                properties: YamlPropertyList [],
+                                content: YamlFoldedScalar {
+                                    r_angle_token: R_ANGLE@14..15 ">" [] [],
+                                    headers: YamlBlockHeaderList [],
+                                    content: YamlBlockContent {
+                                        value_token: BLOCK_CONTENT_LITERAL@15..33 "\n \n  \n   \n invalid" [] [],
+                                    },
+                                },
+                            },
+                        },
+                    ],
+                    mapping_end_token: MAPPING_END@33..34 "" [Newline("\n")] [],
+                },
+            },
+            dotdotdot_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@34..34 "" [] [],
+}
+```
+
+## CST
+
+```
+0: YAML_ROOT@0..34
+  0: YAML_DOCUMENT_LIST@0..34
+    0: YAML_DOCUMENT@0..34
+      0: (empty)
+      1: YAML_DIRECTIVE_LIST@0..0
+      2: (empty)
+      3: YAML_BLOCK_IN_BLOCK_NODE@0..34
+        0: YAML_PROPERTY_LIST@0..0
+        1: YAML_BLOCK_MAPPING@0..34
+          0: MAPPING_START@0..0 "" [] []
+          1: YAML_BLOCK_MAP_ENTRY_LIST@0..33
+            0: YAML_BLOCK_MAP_IMPLICIT_ENTRY@0..33
+              0: YAML_FLOW_YAML_NODE@0..12
+                0: YAML_PROPERTY_LIST@0..0
+                1: YAML_PLAIN_SCALAR@0..12
+                  0: PLAIN_LITERAL@0..12 "block scalar" [] []
+              1: COLON@12..14 ":" [] [Whitespace(" ")]
+              2: YAML_BLOCK_IN_BLOCK_NODE@14..33
+                0: YAML_PROPERTY_LIST@14..14
+                1: YAML_FOLDED_SCALAR@14..33
+                  0: R_ANGLE@14..15 ">" [] []
+                  1: YAML_BLOCK_HEADER_LIST@15..15
+                  2: YAML_BLOCK_CONTENT@15..33
+                    0: BLOCK_CONTENT_LITERAL@15..33 "\n \n  \n   \n invalid" [] []
+          2: MAPPING_END@33..34 "" [Newline("\n")] []
+      4: (empty)
+  1: EOF@34..34 "" [] []
+
+```
+
+## Diagnostics
+
+```
+folded_scalar_over_indented_empty_lines.yaml:4:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This empty line is more indented than the first non-empty line.
+  
+  > 4 │    
+      │ ^^^
+    5 │  invalid
+    6 │ 
+  
+  i Reduce this line's indentation to match the first non-empty line.
+  
+```

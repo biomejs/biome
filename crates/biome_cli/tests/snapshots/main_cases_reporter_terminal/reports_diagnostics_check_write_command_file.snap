@@ -2,6 +2,12 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
+## Command
+
+```shell
+biome check --max-diagnostics=5 --reporter=default --reporter-file=file.txt main.ts index.ts index.css
+```
+
 ## `file.txt`
 
 ```txt
@@ -30,6 +36,8 @@ index.css:3:23 lint/correctness/noUnknownFunction ━━━━━━━━━━
     4 │ 
     5 │ .style {
   
+  ℹ Browsers ignore a declaration that contains an unknown function, so the style is not applied.
+  
   ℹ Use a known function instead.
   
   ℹ See MDN web docs for more details.
@@ -44,6 +52,8 @@ index.css:7:17 lint/correctness/noUnknownFunction ━━━━━━━━━━
       │                 ^^^^^^^^^^^^
     8 │ }
     9 │ 
+  
+  ℹ Browsers ignore a declaration that contains an unknown function, so the style is not applied.
   
   ℹ Use a known function instead.
   
@@ -82,15 +92,13 @@ Found 16 warnings.
 ## `index.css`
 
 ```css
-
-
-.brokenStyle { color: f( }
-
-.style {
-                color:
-                fakeFunction()
+.brokenStyle {
+  color: f(
 }
 
+.style {
+  color: fakeFunction();
+}
 ```
 
 ## `index.ts`

@@ -16,8 +16,9 @@ expression: snapshot
 ## AST
 
 ```
-MdDocument {
+MdRoot {
     bom_token: missing (optional),
+    frontmatter: missing (optional),
     value: MdBlockList [
         MdQuote {
             prefix: MdQuotePrefix {
@@ -46,7 +47,6 @@ MdDocument {
                             value_token: MD_HARD_LINE_LITERAL@13..16 "  \n" [] [],
                         },
                     ],
-                    hard_line: missing (optional),
                 },
                 MdQuotePrefix {
                     pre_marker_indent: MdQuoteIndentList [],
@@ -67,7 +67,6 @@ MdDocument {
                             value_token: MD_TEXTUAL_LITERAL@20..23 "baz" [] [],
                         },
                     ],
-                    hard_line: missing (optional),
                 },
             ],
         },
@@ -79,9 +78,10 @@ MdDocument {
 ## CST
 
 ```
-0: MD_DOCUMENT@0..23
+0: MD_ROOT@0..23
   0: (empty)
-  1: MD_BLOCK_LIST@0..23
+  1: (empty)
+  2: MD_BLOCK_LIST@0..23
     0: MD_QUOTE@0..23
       0: MD_QUOTE_PREFIX@0..2
         0: MD_QUOTE_INDENT_LIST@0..0
@@ -102,7 +102,6 @@ MdDocument {
               0: MD_TEXTUAL_LITERAL@10..13 "bar" [] []
             4: MD_HARD_LINE@13..16
               0: MD_HARD_LINE_LITERAL@13..16 "  \n" [] []
-          1: (empty)
         1: MD_QUOTE_PREFIX@16..17
           0: MD_QUOTE_INDENT_LIST@16..16
           1: R_ANGLE@16..17 ">" [] []
@@ -117,7 +116,6 @@ MdDocument {
           0: MD_INLINE_ITEM_LIST@20..23
             0: MD_TEXTUAL@20..23
               0: MD_TEXTUAL_LITERAL@20..23 "baz" [] []
-          1: (empty)
-  2: EOF@23..23 "" [] []
+  3: EOF@23..23 "" [] []
 
 ```

@@ -1,0 +1,35 @@
+@theme   {
+  --color-brand: red;
+}
+
+@theme   inline{
+  --color-brand: red;
+}
+
+@theme default   inline {
+  --color-brand: red;
+}
+
+@theme default inline    reference {
+  --color-brand: red;
+}
+
+@theme
+  reference
+  inline
+  default
+  static {
+  --color-brand: red;
+}
+
+@theme prefix(tw){
+  --color-brand: red;
+}
+
+@theme static prefix(tw) {
+  --color-brand: red;
+}
+
+@theme Inline UNKNOWN {
+  --color-brand: red;
+}

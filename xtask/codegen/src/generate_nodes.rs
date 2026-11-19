@@ -1017,6 +1017,8 @@ pub(crate) fn token_kind_to_code(name: &str, language_kind: LanguageKind) -> Tok
         quote! { T![#token] }
     } else if name == " " {
         quote! { T![' '] }
+    } else if name == "~~" {
+        quote! { DOUBLE_TILDE }
     }
     // Special handling for quote characters
     // Double quote needs to be wrapped in single quotes: T!['"']
@@ -1209,5 +1211,7 @@ pub fn should_token_be_quoted(token: &str) -> bool {
             | "{#"
             | "{/"
             | "{:" // Note: "'" and "\"" are handled separately in token_kind_to_code
+            | "[("
+            | ")]"
     )
 }

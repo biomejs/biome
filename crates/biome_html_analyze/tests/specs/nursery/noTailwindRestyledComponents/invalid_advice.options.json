@@ -1,0 +1,33 @@
+{
+  "linter": {
+    "rules": {
+      "nursery": {
+        "noTailwindRestyledComponents": {
+          "level": "error",
+          "options": {
+            "allow": [
+              {
+                "components": "my-button",
+                "advice": "Use the variant prop of my-button."
+              },
+              {
+                "components": "my-card",
+                "categories": [
+                  "shape"
+                ]
+              },
+              {
+                "components": "my-card",
+                "advice": "Use the size prop of my-card."
+              },
+              {
+                "components": "my-card",
+                "advice": "This advice is not shown."
+              }
+            ]
+          }
+        }
+      }
+    }
+  }
+}

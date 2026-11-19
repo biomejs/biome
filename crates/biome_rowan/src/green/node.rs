@@ -15,16 +15,22 @@ use crate::utility_types::static_assert;
 use crate::{
     GreenToken, NodeOrToken, TextRange, TextSize,
     arc::{Arc, HeaderSlice, ThinArc},
-    green::{GreenElement, GreenElementRef, RawSyntaxKind},
+    green::{GreenElement, GreenElementFlags, GreenElementRef, RawSyntaxKind},
 };
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub(super) struct GreenNodeHead {
     kind: RawSyntaxKind,
+    flags: GreenElementFlags,
     text_len: TextSize,
     #[cfg(feature = "countme")]
     _c: countme::Count<GreenNode>,
 }
+
+#[cfg(target_pointer_width = "64")]
+static_assert!(mem::size_of::<GreenElementFlags>() == 1);
+#[cfg(target_pointer_width = "64")]
+static_assert!(mem::size_of::<GreenNodeHead>() == 8);
 
 #[cfg(feature = "countme")]
 pub(crate) fn has_live() -> bool {
@@ -149,6 +155,16 @@ impl fmt::Display for GreenNodeData {
 }
 
 impl GreenNodeData {
+    pub(crate) fn write_source_text(&self, output: &mut String) {
+        for slot in self.slots() {
+            match slot {
+                Slot::Node { node, .. } => node.write_source_text(output),
+                Slot::Token { token, .. } => output.push_str(token.text()),
+                Slot::Empty { .. } => {}
+            }
+        }
+    }
+
     #[inline]
     fn header(&self) -> &GreenNodeHead {
         &self.data.header
@@ -171,6 +187,21 @@ impl GreenNodeData {
         self.header().text_len
     }
 
+    #[inline]
+    pub(crate) fn has_comments(&self) -> bool {
+        self.flags().contains(GreenElementFlags::HAS_COMMENTS)
+    }
+
+    #[inline]
+    pub(crate) fn has_skipped(&self) -> bool {
+        self.flags().contains(GreenElementFlags::HAS_SKIPPED)
+    }
+
+    #[inline]
+    pub(crate) fn flags(&self) -> GreenElementFlags {
+        self.header().flags
+    }
+
     /// Children of this node.
     #[inline]
     pub fn children(&self) -> Children<'_> {
@@ -186,7 +217,37 @@ impl GreenNodeData {
         }
     }
 
+    /// Returns the slot whose range contains `rel_range`, with its index and
+    /// offset relative to this node.
+    ///
+    /// For a non-empty range at most one slot contains it. An empty range can
+    /// sit on the boundary of several slots. Then a slot that strictly
+    /// contains it wins, otherwise the last slot that ends at it, otherwise
+    /// the first slot when the range is at the start of this node.
     pub(crate) fn slot_at_range(
+        &self,
+        rel_range: TextRange,
+    ) -> Option<(usize, TextSize, &'_ Slot)> {
+        if rel_range.is_empty() {
+            return self.slot_at_range_by_lengths(rel_range);
+        }
+
+        // Slots are contiguous: each one ends where the next one starts, and
+        // the last one ends where this node ends. Reading the ends from the
+        // offsets avoids loading every probed child to read its length.
+        let slots = self.slice();
+        let idx = slots
+            .partition_point(|slot| slot.rel_offset() <= rel_range.start())
+            .checked_sub(1)?;
+        let slot = &slots[idx];
+        let end = slots.get(idx + 1).map_or(self.text_len(), Slot::rel_offset);
+        (rel_range.end() <= end).then_some((idx, slot.rel_offset(), slot))
+    }
+
+    /// Returns the same slot as [Self::slot_at_range], for empty and non-empty
+    /// ranges, but loads each child the binary search probes to read its
+    /// length.
+    fn slot_at_range_by_lengths(
         &self,
         rel_range: TextRange,
     ) -> Option<(usize, TextSize, &'_ Slot)> {
@@ -205,6 +266,51 @@ impl GreenNodeData {
         Some((idx, slot.rel_offset(), slot))
     }
 
+    /// Returns a pair of optional children around `offset`:
+    ///
+    /// - Left: starts before `offset` and ends at or after it.
+    /// - Right: starts exactly at `offset`.
+    ///
+    /// Missing slots and children with zero-length text ranges are skipped,
+    /// including zero-length tokens and nodes with no source text.
+    ///
+    /// For the JavaScript call `foo(1)`, the two children cover `foo` (`0..3`)
+    /// and `(1)` (`3..6`). The pairs below show each child's source text:
+    ///
+    /// ```text
+    /// offset 0 → (None, Some("foo"))
+    /// offset 2 → (Some("foo"), None)
+    /// offset 3 → (Some("foo"), Some("(1)"))
+    /// offset 4 → (Some("(1)"), None)
+    /// offset 6 → (Some("(1)"), None)
+    /// ```
+    pub(crate) fn children_at_offset(
+        &self,
+        offset: TextSize,
+    ) -> (Option<Child<'_>>, Option<Child<'_>>) {
+        let slots = self.slice();
+        let offset_index = slots.partition_point(|slot| slot.rel_offset() < offset);
+        let is_at_offset = |slot: &Slot| {
+            let range = slot.rel_range();
+            !range.is_empty() && range.contains_inclusive(offset)
+        };
+
+        let left = slots[..offset_index]
+            .iter()
+            .enumerate()
+            .rev()
+            .find(|(_, slot)| is_at_offset(slot))
+            .and_then(|(index, slot)| Child::try_from((index, slot)).ok());
+        let right = slots[offset_index..]
+            .iter()
+            .enumerate()
+            .take_while(|(_, slot)| slot.rel_offset() == offset)
+            .find(|(_, slot)| is_at_offset(slot))
+            .and_then(|(index, slot)| Child::try_from((offset_index + index, slot)).ok());
+
+        (left, right)
+    }
+
     #[must_use = "syntax elements are immutable, the result of update methods must be propagated to have any effect"]
     pub(crate) fn splice_slots<R, I>(&self, range: R, replace_with: I) -> GreenNode
     where
@@ -221,6 +327,45 @@ impl GreenNodeData {
             .collect();
 
         slots.splice(range, replace_with);
+        GreenNode::new(self.kind(), slots)
+    }
+
+    /// Returns a copy of this node in which each slot named in `edits` is
+    /// replaced with the elements of its replacement, which may be empty to
+    /// remove the slot.
+    ///
+    /// `edits` is expected in ascending slot order. An edit is ignored if its
+    /// index is not greater than the index of an earlier edit, or if it is past
+    /// the last slot. For edits in ascending order without duplicates that
+    /// only name existing slots, the result is the same as calling
+    /// [Self::splice_slots] once per edit in descending order, but the slots
+    /// are copied only once.
+    #[must_use = "syntax elements are immutable, the result of update methods must be propagated to have any effect"]
+    pub(crate) fn splice_many_slots<E, R>(&self, edits: E) -> GreenNode
+    where
+        E: IntoIterator<Item = (usize, R)>,
+        R: IntoIterator<Item = Option<GreenElement>>,
+    {
+        let mut edits = edits.into_iter().peekable();
+        let mut slots = Vec::with_capacity(self.slice().len());
+
+        for (index, slot) in self.slots().enumerate() {
+            // Skip the edits of slots that were already passed
+            while edits
+                .next_if(|(edit_index, _)| *edit_index < index)
+                .is_some()
+            {}
+            if let Some((_, replacement)) = edits.next_if(|(edit_index, _)| *edit_index == index) {
+                slots.extend(replacement);
+            } else {
+                slots.push(match slot {
+                    Slot::Empty { .. } => None,
+                    Slot::Node { node, .. } => Some(NodeOrToken::Node(node.clone())),
+                    Slot::Token { token, .. } => Some(NodeOrToken::Token(token.clone())),
+                });
+            }
+        }
+
         GreenNode::new(self.kind(), slots)
     }
 }
@@ -246,38 +391,32 @@ impl GreenNode {
         I: IntoIterator<Item = Option<GreenElement>>,
         I::IntoIter: ExactSizeIterator,
     {
-        let mut text_len: TextSize = 0.into();
-        let slots = slots.into_iter().map(|el| {
-            let rel_offset = text_len;
-            match el {
-                Some(el) => {
-                    text_len += el.text_len();
-                    match el {
-                        NodeOrToken::Node(node) => Slot::Node { rel_offset, node },
-                        NodeOrToken::Token(token) => Slot::Token { rel_offset, token },
-                    }
-                }
-                None => Slot::Empty { rel_offset },
-            }
-        });
-
-        let data = ThinArc::from_header_and_iter(
+        let data = ThinArc::from_header_and_iter_with(
             GreenNodeHead {
                 kind,
+                flags: GreenElementFlags::default(),
                 text_len: 0.into(),
                 #[cfg(feature = "countme")]
                 _c: countme::Count::new(),
             },
-            slots,
+            slots.into_iter(),
+            |head, el| {
+                let rel_offset = head.text_len;
+                match el {
+                    Some(NodeOrToken::Node(node)) => {
+                        head.text_len += node.text_len();
+                        head.flags.insert(node.flags());
+                        Slot::Node { rel_offset, node }
+                    }
+                    Some(NodeOrToken::Token(token)) => {
+                        head.text_len += token.text_len();
+                        head.flags.insert(token.flags());
+                        Slot::Token { rel_offset, token }
+                    }
+                    None => Slot::Empty { rel_offset },
+                }
+            },
         );
-
-        // XXX: fixup `text_len` after construction, because we can't iterate
-        // `slots` twice.
-        let data = {
-            let mut data = Arc::from_thin(data);
-            Arc::get_mut(&mut data).unwrap().header.text_len = text_len;
-            Arc::into_thin(data)
-        };
 
         Self { ptr: data }
     }
@@ -317,7 +456,7 @@ impl Slot {
         }
     }
     #[inline]
-    fn rel_range(&self) -> TextRange {
+    pub(crate) fn rel_range(&self) -> TextRange {
         let text_len = match self.as_ref() {
             None => TextSize::from(0),
             Some(element) => element.text_len(),
@@ -327,7 +466,7 @@ impl Slot {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 pub(crate) struct Slots<'a> {
     pub(crate) raw: slice::Iter<'a, Slot>,
 }
@@ -452,7 +591,7 @@ impl<'a> TryFrom<(usize, &'a Slot)> for Child<'a> {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 pub(crate) struct Children<'a> {
     slots: Enumerate<Slots<'a>>,
 }
@@ -491,8 +630,11 @@ impl FusedIterator for Children<'_> {}
 
 #[cfg(test)]
 mod tests {
-    use crate::GreenNode;
+    use crate::TextSize;
+    use crate::green::node::Slot;
+    use crate::green::{GreenElement, GreenTrivia};
     use crate::raw_language::{RawLanguageKind, RawSyntaxTreeBuilder};
+    use crate::{GreenNode, GreenToken, RawSyntaxKind, TextRange, TriviaPiece, TriviaPieceKind};
 
     fn build_test_list() -> GreenNode {
         let mut builder: RawSyntaxTreeBuilder = RawSyntaxTreeBuilder::new();
@@ -552,5 +694,153 @@ mod tests {
 
         // Has 3 slots, one is missing
         assert_eq!(root.slots().len(), 3);
+    }
+
+    /// Compares the offset-based search with the length-based one on every
+    /// sequence of up to five slots drawn from missing slots, empty and
+    /// non-empty tokens, and empty and non-empty nodes, for every range that
+    /// starts and ends within one character past the node.
+    #[test]
+    fn slot_at_range_matches_search_by_lengths() {
+        let token = |text: &str| {
+            Some(GreenElement::Token(GreenToken::new_raw(
+                RawSyntaxKind(1),
+                text,
+            )))
+        };
+        let node = |text: &str| {
+            Some(GreenElement::Node(GreenNode::new(
+                RawSyntaxKind(2),
+                [token(text)],
+            )))
+        };
+        let alphabet = [
+            None,
+            token(""),
+            token("a"),
+            token("abc"),
+            node(""),
+            node("ab"),
+        ];
+
+        let mut sequences = vec![vec![]];
+        let mut longest = vec![vec![]];
+        for _ in 0..5 {
+            longest = longest
+                .iter()
+                .flat_map(|sequence: &Vec<_>| {
+                    alphabet.iter().map(move |slot| {
+                        let mut sequence = sequence.clone();
+                        sequence.push(slot.clone());
+                        sequence
+                    })
+                })
+                .collect();
+            sequences.extend(longest.iter().cloned());
+        }
+
+        for sequence in sequences {
+            let green = GreenNode::new(RawSyntaxKind(0), sequence);
+            let len = u32::from(green.text_len()) + 1;
+            for start in 0..=len {
+                for end in start..=len {
+                    let range = TextRange::new(start.into(), end.into());
+                    let actual = green
+                        .slot_at_range(range)
+                        .map(|(index, offset, _)| (index, offset));
+                    let expected = green
+                        .slot_at_range_by_lengths(range)
+                        .map(|(index, offset, _)| (index, offset));
+                    assert_eq!(actual, expected, "{range:?} in {green:?}");
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn slot_offsets_and_text_len() {
+        let token = |text: &str| GreenElement::Token(GreenToken::new_raw(RawSyntaxKind(1), text));
+        let node = GreenNode::new(
+            RawSyntaxKind(0),
+            [
+                Some(token("ab")),
+                None,
+                Some(GreenElement::Node(GreenNode::new(
+                    RawSyntaxKind(2),
+                    [Some(token("c"))],
+                ))),
+                Some(token("")),
+                Some(token("def")),
+            ],
+        );
+
+        assert_eq!(node.kind(), RawSyntaxKind(0));
+        assert_eq!(node.text_len(), TextSize::from(6));
+        assert_eq!(
+            node.slots().map(Slot::rel_offset).collect::<Vec<_>>(),
+            [0, 2, 2, 3, 3].map(TextSize::from)
+        );
+        assert!(matches!(node.slice()[1], Slot::Empty { .. }));
+        assert!(matches!(node.slice()[2], Slot::Node { .. }));
+        let mut text = String::new();
+        node.write_source_text(&mut text);
+        assert_eq!(text, "abcdef");
+    }
+
+    #[test]
+    fn propagates_trivia_flags() {
+        let comment_token = GreenToken::with_trivia(
+            RawSyntaxKind(0),
+            "//value",
+            GreenTrivia::new([TriviaPiece::single_line_comment(2)]),
+            GreenTrivia::empty(),
+        );
+        let comment_node =
+            GreenNode::new(RawSyntaxKind(0), [Some(GreenElement::Token(comment_token))]);
+        assert!(comment_node.has_comments());
+        assert!(!comment_node.has_skipped());
+
+        let skipped_token = GreenToken::with_trivia(
+            RawSyntaxKind(0),
+            "?value",
+            GreenTrivia::new([TriviaPiece::new(TriviaPieceKind::Skipped, 1)]),
+            GreenTrivia::empty(),
+        );
+        let skipped_node =
+            GreenNode::new(RawSyntaxKind(0), [Some(GreenElement::Token(skipped_token))]);
+        assert!(!skipped_node.has_comments());
+        assert!(skipped_node.has_skipped());
+
+        let root = GreenNode::new(
+            RawSyntaxKind(0),
+            [
+                Some(GreenElement::Node(comment_node)),
+                Some(GreenElement::Node(skipped_node)),
+            ],
+        );
+        assert!(root.has_comments());
+        assert!(root.has_skipped());
+    }
+
+    #[test]
+    fn splice_many_slots_ignores_out_of_order_and_out_of_range_edits() {
+        let root = build_test_list();
+        let token = |text| {
+            Some(GreenElement::Token(GreenToken::new_raw(
+                RawSyntaxKind(0),
+                text,
+            )))
+        };
+
+        let spliced = root.splice_many_slots([
+            (0, vec![token("x")]),
+            (0, vec![token("y")]),
+            (2, vec![]),
+            (1, vec![token("z")]),
+            (3, vec![token("w")]),
+        ]);
+
+        assert_eq!(spliced.slots().len(), 2);
+        assert_eq!(spliced.to_string(), "x∅");
     }
 }

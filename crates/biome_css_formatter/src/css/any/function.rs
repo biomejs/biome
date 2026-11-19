@@ -12,6 +12,7 @@ impl FormatRule<AnyCssFunction> for FormatAnyCssFunction {
             AnyCssFunction::CssFunction(node) => node.format().fmt(f),
             AnyCssFunction::CssIfFunction(node) => node.format().fmt(f),
             AnyCssFunction::CssUrlFunction(node) => node.format().fmt(f),
+            AnyCssFunction::ScssLegacyIfFunction(node) => node.format().fmt(f),
         }
     }
 }

@@ -1,0 +1,121 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidSvelte.svelte
+---
+# Input
+```svelte
+<!-- should generate diagnostics -->
+<script lang="ts">
+	import { foo } from "./foo";
+	import type { Bar } from "./bar";
+	import ValidSvelte from "./validSvelte";
+
+	const lazy = import("./foo");
+</script>
+
+<ValidSvelte />
+
+```
+
+# Diagnostics
+```
+invalidSvelte.svelte:3:22 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Add a file extension for relative imports.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <script lang="ts">
+  > 3 │ 	import { foo } from "./foo";
+      │ 	                    ^^^^^^^
+    4 │ 	import type { Bar } from "./bar";
+    5 │ 	import ValidSvelte from "./validSvelte";
+  
+  i Explicit import improves compatibility with browsers and makes file resolution in tooling faster.
+  
+  i Safe fix: Add import extension .ts.
+  
+    1 1 │   
+    2   │ - → import·{·foo·}·from·"./foo";
+      2 │ + → import·{·foo·}·from·"./foo.ts";
+    3 3 │     import type { Bar } from "./bar";
+    4 4 │     import ValidSvelte from "./validSvelte";
+  
+
+```
+
+```
+invalidSvelte.svelte:4:27 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Add a file extension for relative imports.
+  
+    2 │ <script lang="ts">
+    3 │ 	import { foo } from "./foo";
+  > 4 │ 	import type { Bar } from "./bar";
+      │ 	                         ^^^^^^^
+    5 │ 	import ValidSvelte from "./validSvelte";
+    6 │ 
+  
+  i Explicit import improves compatibility with browsers and makes file resolution in tooling faster.
+  
+  i Safe fix: Add import extension .ts.
+  
+    1 1 │   
+    2 2 │     import { foo } from "./foo";
+    3   │ - → import·type·{·Bar·}·from·"./bar";
+      3 │ + → import·type·{·Bar·}·from·"./bar.ts";
+    4 4 │     import ValidSvelte from "./validSvelte";
+    5 5 │   
+  
+
+```
+
+```
+invalidSvelte.svelte:5:26 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Add a file extension for relative imports.
+  
+    3 │ 	import { foo } from "./foo";
+    4 │ 	import type { Bar } from "./bar";
+  > 5 │ 	import ValidSvelte from "./validSvelte";
+      │ 	                        ^^^^^^^^^^^^^^^
+    6 │ 
+    7 │ 	const lazy = import("./foo");
+  
+  i Explicit import improves compatibility with browsers and makes file resolution in tooling faster.
+  
+  i Safe fix: Add import extension .svelte.
+  
+    2 2 │     import { foo } from "./foo";
+    3 3 │     import type { Bar } from "./bar";
+    4   │ - → import·ValidSvelte·from·"./validSvelte";
+      4 │ + → import·ValidSvelte·from·"./validSvelte.svelte";
+    5 5 │   
+    6 6 │     const lazy = import("./foo");
+  
+
+```
+
+```
+invalidSvelte.svelte:7:22 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Add a file extension for relative imports.
+  
+    5 │ 	import ValidSvelte from "./validSvelte";
+    6 │ 
+  > 7 │ 	const lazy = import("./foo");
+      │ 	                    ^^^^^^^
+    8 │ </script>
+    9 │ 
+  
+  i Explicit import improves compatibility with browsers and makes file resolution in tooling faster.
+  
+  i Safe fix: Add import extension .ts.
+  
+    4 4 │     import ValidSvelte from "./validSvelte";
+    5 5 │   
+    6   │ - → const·lazy·=·import("./foo");
+      6 │ + → const·lazy·=·import("./foo.ts");
+    7 7 │   
+  
+
+```

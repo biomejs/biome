@@ -1,0 +1,748 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidDoubleBitwiseNot.js
+---
+# Input
+```js
+/* should generate diagnostics */
+const a = ~~3.9;
+const b = ~~(1 + 2 / 3.4);
+const c = ~~1 + 2 / 3.4;
+const d = ~~(0, 1.4);
+const e = ~~~10.01;
+const f = ~~(~10.01);
+const g = ~(~~10.01);
+const h = ~~-10.01;
+const i = ~~~~10.01;
+function j() {return~~3.9;}
+function k() {return ~~3.9;}
+const l = ~~(a ? b : c);
+const m = ~~a.b?.c;
+const n = /* first comment */ ~~3.4; // A B C
+const o = typeof~~x;
+const p = ~~bar | 0;
+const q = ~~(bar | 0);
+function r() {return~~x + 1;}
+function s() {throw~~x + 1;}
+const t = a in~~b + 1;
+switch (value) {case~~x ? a : b: break;}
+const u = `${~~x}`;
+
+```
+
+# Diagnostics
+```
+invalidDoubleBitwiseNot.js:2:11 lint/nursery/useMathTrunc  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use Math.trunc() instead of ~~.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const a = ~~3.9;
+      │           ^^^^^
+    3 │ const b = ~~(1 + 2 / 3.4);
+    4 │ const c = ~~1 + 2 / 3.4;
+  
+  i Bitwise operations turn the number into a 32-bit integer first, so numbers above 2147483647 or below -2147483648 give wrong results.
+  
+  i Math.trunc() removes the decimal part of any number and states the intent clearly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.trunc() instead.
+  
+     1  1 │   /* should generate diagnostics */
+     2    │ - const·a·=·~~3.9;
+        2 │ + const·a·=·Math.trunc(3.9);
+     3  3 │   const b = ~~(1 + 2 / 3.4);
+     4  4 │   const c = ~~1 + 2 / 3.4;
+  
+
+```
+
+```
+invalidDoubleBitwiseNot.js:3:11 lint/nursery/useMathTrunc  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use Math.trunc() instead of ~~.
+  
+    1 │ /* should generate diagnostics */
+    2 │ const a = ~~3.9;
+  > 3 │ const b = ~~(1 + 2 / 3.4);
+      │           ^^^^^^^^^^^^^^^
+    4 │ const c = ~~1 + 2 / 3.4;
+    5 │ const d = ~~(0, 1.4);
+  
+  i Bitwise operations turn the number into a 32-bit integer first, so numbers above 2147483647 or below -2147483648 give wrong results.
+  
+  i Math.trunc() removes the decimal part of any number and states the intent clearly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.trunc() instead.
+  
+     1  1 │   /* should generate diagnostics */
+     2  2 │   const a = ~~3.9;
+     3    │ - const·b·=·~~(1·+·2·/·3.4);
+        3 │ + const·b·=·Math.trunc(1·+·2·/·3.4);
+     4  4 │   const c = ~~1 + 2 / 3.4;
+     5  5 │   const d = ~~(0, 1.4);
+  
+
+```
+
+```
+invalidDoubleBitwiseNot.js:4:11 lint/nursery/useMathTrunc  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use Math.trunc() instead of ~~.
+  
+    2 │ const a = ~~3.9;
+    3 │ const b = ~~(1 + 2 / 3.4);
+  > 4 │ const c = ~~1 + 2 / 3.4;
+      │           ^^^
+    5 │ const d = ~~(0, 1.4);
+    6 │ const e = ~~~10.01;
+  
+  i Bitwise operations turn the number into a 32-bit integer first, so numbers above 2147483647 or below -2147483648 give wrong results.
+  
+  i Math.trunc() removes the decimal part of any number and states the intent clearly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.trunc() instead.
+  
+     2  2 │   const a = ~~3.9;
+     3  3 │   const b = ~~(1 + 2 / 3.4);
+     4    │ - const·c·=·~~1·+·2·/·3.4;
+        4 │ + const·c·=·Math.trunc(1)·+·2·/·3.4;
+     5  5 │   const d = ~~(0, 1.4);
+     6  6 │   const e = ~~~10.01;
+  
+
+```
+
+```
+invalidDoubleBitwiseNot.js:5:11 lint/nursery/useMathTrunc  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use Math.trunc() instead of ~~.
+  
+    3 │ const b = ~~(1 + 2 / 3.4);
+    4 │ const c = ~~1 + 2 / 3.4;
+  > 5 │ const d = ~~(0, 1.4);
+      │           ^^^^^^^^^^
+    6 │ const e = ~~~10.01;
+    7 │ const f = ~~(~10.01);
+  
+  i Bitwise operations turn the number into a 32-bit integer first, so numbers above 2147483647 or below -2147483648 give wrong results.
+  
+  i Math.trunc() removes the decimal part of any number and states the intent clearly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.trunc() instead.
+  
+     3  3 │   const b = ~~(1 + 2 / 3.4);
+     4  4 │   const c = ~~1 + 2 / 3.4;
+     5    │ - const·d·=·~~(0,·1.4);
+        5 │ + const·d·=·Math.trunc((0,·1.4));
+     6  6 │   const e = ~~~10.01;
+     7  7 │   const f = ~~(~10.01);
+  
+
+```
+
+```
+invalidDoubleBitwiseNot.js:6:12 lint/nursery/useMathTrunc  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use Math.trunc() instead of ~~.
+  
+    4 │ const c = ~~1 + 2 / 3.4;
+    5 │ const d = ~~(0, 1.4);
+  > 6 │ const e = ~~~10.01;
+      │            ^^^^^^^
+    7 │ const f = ~~(~10.01);
+    8 │ const g = ~(~~10.01);
+  
+  i Bitwise operations turn the number into a 32-bit integer first, so numbers above 2147483647 or below -2147483648 give wrong results.
+  
+  i Math.trunc() removes the decimal part of any number and states the intent clearly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.trunc() instead.
+  
+     4  4 │   const c = ~~1 + 2 / 3.4;
+     5  5 │   const d = ~~(0, 1.4);
+     6    │ - const·e·=·~~~10.01;
+        6 │ + const·e·=·~Math.trunc(10.01);
+     7  7 │   const f = ~~(~10.01);
+     8  8 │   const g = ~(~~10.01);
+  
+
+```
+
+```
+invalidDoubleBitwiseNot.js:7:12 lint/nursery/useMathTrunc  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use Math.trunc() instead of ~~.
+  
+    5 │ const d = ~~(0, 1.4);
+    6 │ const e = ~~~10.01;
+  > 7 │ const f = ~~(~10.01);
+      │            ^^^^^^^^^
+    8 │ const g = ~(~~10.01);
+    9 │ const h = ~~-10.01;
+  
+  i Bitwise operations turn the number into a 32-bit integer first, so numbers above 2147483647 or below -2147483648 give wrong results.
+  
+  i Math.trunc() removes the decimal part of any number and states the intent clearly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.trunc() instead.
+  
+     5  5 │   const d = ~~(0, 1.4);
+     6  6 │   const e = ~~~10.01;
+     7    │ - const·f·=·~~(~10.01);
+        7 │ + const·f·=·~Math.trunc(10.01);
+     8  8 │   const g = ~(~~10.01);
+     9  9 │   const h = ~~-10.01;
+  
+
+```
+
+```
+invalidDoubleBitwiseNot.js:8:13 lint/nursery/useMathTrunc  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use Math.trunc() instead of ~~.
+  
+     6 │ const e = ~~~10.01;
+     7 │ const f = ~~(~10.01);
+   > 8 │ const g = ~(~~10.01);
+       │             ^^^^^^^
+     9 │ const h = ~~-10.01;
+    10 │ const i = ~~~~10.01;
+  
+  i Bitwise operations turn the number into a 32-bit integer first, so numbers above 2147483647 or below -2147483648 give wrong results.
+  
+  i Math.trunc() removes the decimal part of any number and states the intent clearly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.trunc() instead.
+  
+     6  6 │   const e = ~~~10.01;
+     7  7 │   const f = ~~(~10.01);
+     8    │ - const·g·=·~(~~10.01);
+        8 │ + const·g·=·~(Math.trunc(10.01));
+     9  9 │   const h = ~~-10.01;
+    10 10 │   const i = ~~~~10.01;
+  
+
+```
+
+```
+invalidDoubleBitwiseNot.js:9:11 lint/nursery/useMathTrunc  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use Math.trunc() instead of ~~.
+  
+     7 │ const f = ~~(~10.01);
+     8 │ const g = ~(~~10.01);
+   > 9 │ const h = ~~-10.01;
+       │           ^^^^^^^^
+    10 │ const i = ~~~~10.01;
+    11 │ function j() {return~~3.9;}
+  
+  i Bitwise operations turn the number into a 32-bit integer first, so numbers above 2147483647 or below -2147483648 give wrong results.
+  
+  i Math.trunc() removes the decimal part of any number and states the intent clearly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.trunc() instead.
+  
+     7  7 │   const f = ~~(~10.01);
+     8  8 │   const g = ~(~~10.01);
+     9    │ - const·h·=·~~-10.01;
+        9 │ + const·h·=·Math.trunc(-10.01);
+    10 10 │   const i = ~~~~10.01;
+    11 11 │   function j() {return~~3.9;}
+  
+
+```
+
+```
+invalidDoubleBitwiseNot.js:10:13 lint/nursery/useMathTrunc  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use Math.trunc() instead of ~~.
+  
+     8 │ const g = ~(~~10.01);
+     9 │ const h = ~~-10.01;
+  > 10 │ const i = ~~~~10.01;
+       │             ^^^^^^^
+    11 │ function j() {return~~3.9;}
+    12 │ function k() {return ~~3.9;}
+  
+  i Bitwise operations turn the number into a 32-bit integer first, so numbers above 2147483647 or below -2147483648 give wrong results.
+  
+  i Math.trunc() removes the decimal part of any number and states the intent clearly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.trunc() instead.
+  
+     8  8 │   const g = ~(~~10.01);
+     9  9 │   const h = ~~-10.01;
+    10    │ - const·i·=·~~~~10.01;
+       10 │ + const·i·=·~~Math.trunc(10.01);
+    11 11 │   function j() {return~~3.9;}
+    12 12 │   function k() {return ~~3.9;}
+  
+
+```
+
+```
+invalidDoubleBitwiseNot.js:11:21 lint/nursery/useMathTrunc  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use Math.trunc() instead of ~~.
+  
+     9 │ const h = ~~-10.01;
+    10 │ const i = ~~~~10.01;
+  > 11 │ function j() {return~~3.9;}
+       │                     ^^^^^
+    12 │ function k() {return ~~3.9;}
+    13 │ const l = ~~(a ? b : c);
+  
+  i Bitwise operations turn the number into a 32-bit integer first, so numbers above 2147483647 or below -2147483648 give wrong results.
+  
+  i Math.trunc() removes the decimal part of any number and states the intent clearly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.trunc() instead.
+  
+     9  9 │   const h = ~~-10.01;
+    10 10 │   const i = ~~~~10.01;
+    11    │ - function·j()·{return~~3.9;}
+       11 │ + function·j()·{return·Math.trunc(3.9);}
+    12 12 │   function k() {return ~~3.9;}
+    13 13 │   const l = ~~(a ? b : c);
+  
+
+```
+
+```
+invalidDoubleBitwiseNot.js:12:22 lint/nursery/useMathTrunc  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use Math.trunc() instead of ~~.
+  
+    10 │ const i = ~~~~10.01;
+    11 │ function j() {return~~3.9;}
+  > 12 │ function k() {return ~~3.9;}
+       │                      ^^^^^
+    13 │ const l = ~~(a ? b : c);
+    14 │ const m = ~~a.b?.c;
+  
+  i Bitwise operations turn the number into a 32-bit integer first, so numbers above 2147483647 or below -2147483648 give wrong results.
+  
+  i Math.trunc() removes the decimal part of any number and states the intent clearly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.trunc() instead.
+  
+    10 10 │   const i = ~~~~10.01;
+    11 11 │   function j() {return~~3.9;}
+    12    │ - function·k()·{return·~~3.9;}
+       12 │ + function·k()·{return·Math.trunc(3.9);}
+    13 13 │   const l = ~~(a ? b : c);
+    14 14 │   const m = ~~a.b?.c;
+  
+
+```
+
+```
+invalidDoubleBitwiseNot.js:13:11 lint/nursery/useMathTrunc  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use Math.trunc() instead of ~~.
+  
+    11 │ function j() {return~~3.9;}
+    12 │ function k() {return ~~3.9;}
+  > 13 │ const l = ~~(a ? b : c);
+       │           ^^^^^^^^^^^^^
+    14 │ const m = ~~a.b?.c;
+    15 │ const n = /* first comment */ ~~3.4; // A B C
+  
+  i Bitwise operations turn the number into a 32-bit integer first, so numbers above 2147483647 or below -2147483648 give wrong results.
+  
+  i Math.trunc() removes the decimal part of any number and states the intent clearly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.trunc() instead.
+  
+    11 11 │   function j() {return~~3.9;}
+    12 12 │   function k() {return ~~3.9;}
+    13    │ - const·l·=·~~(a·?·b·:·c);
+       13 │ + const·l·=·Math.trunc(a·?·b·:·c);
+    14 14 │   const m = ~~a.b?.c;
+    15 15 │   const n = /* first comment */ ~~3.4; // A B C
+  
+
+```
+
+```
+invalidDoubleBitwiseNot.js:14:11 lint/nursery/useMathTrunc  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use Math.trunc() instead of ~~.
+  
+    12 │ function k() {return ~~3.9;}
+    13 │ const l = ~~(a ? b : c);
+  > 14 │ const m = ~~a.b?.c;
+       │           ^^^^^^^^
+    15 │ const n = /* first comment */ ~~3.4; // A B C
+    16 │ const o = typeof~~x;
+  
+  i Bitwise operations turn the number into a 32-bit integer first, so numbers above 2147483647 or below -2147483648 give wrong results.
+  
+  i Math.trunc() removes the decimal part of any number and states the intent clearly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.trunc() instead.
+  
+    12 12 │   function k() {return ~~3.9;}
+    13 13 │   const l = ~~(a ? b : c);
+    14    │ - const·m·=·~~a.b?.c;
+       14 │ + const·m·=·Math.trunc(a.b?.c);
+    15 15 │   const n = /* first comment */ ~~3.4; // A B C
+    16 16 │   const o = typeof~~x;
+  
+
+```
+
+```
+invalidDoubleBitwiseNot.js:15:31 lint/nursery/useMathTrunc  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use Math.trunc() instead of ~~.
+  
+    13 │ const l = ~~(a ? b : c);
+    14 │ const m = ~~a.b?.c;
+  > 15 │ const n = /* first comment */ ~~3.4; // A B C
+       │                               ^^^^^
+    16 │ const o = typeof~~x;
+    17 │ const p = ~~bar | 0;
+  
+  i Bitwise operations turn the number into a 32-bit integer first, so numbers above 2147483647 or below -2147483648 give wrong results.
+  
+  i Math.trunc() removes the decimal part of any number and states the intent clearly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.trunc() instead.
+  
+    13 13 │   const l = ~~(a ? b : c);
+    14 14 │   const m = ~~a.b?.c;
+    15    │ - const·n·=·/*·first·comment·*/·~~3.4;·//·A·B·C
+       15 │ + const·n·=·/*·first·comment·*/·Math.trunc(3.4);·//·A·B·C
+    16 16 │   const o = typeof~~x;
+    17 17 │   const p = ~~bar | 0;
+  
+
+```
+
+```
+invalidDoubleBitwiseNot.js:16:17 lint/nursery/useMathTrunc  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use Math.trunc() instead of ~~.
+  
+    14 │ const m = ~~a.b?.c;
+    15 │ const n = /* first comment */ ~~3.4; // A B C
+  > 16 │ const o = typeof~~x;
+       │                 ^^^
+    17 │ const p = ~~bar | 0;
+    18 │ const q = ~~(bar | 0);
+  
+  i Bitwise operations turn the number into a 32-bit integer first, so numbers above 2147483647 or below -2147483648 give wrong results.
+  
+  i Math.trunc() removes the decimal part of any number and states the intent clearly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.trunc() instead.
+  
+    14 14 │   const m = ~~a.b?.c;
+    15 15 │   const n = /* first comment */ ~~3.4; // A B C
+    16    │ - const·o·=·typeof~~x;
+       16 │ + const·o·=·typeof·Math.trunc(x);
+    17 17 │   const p = ~~bar | 0;
+    18 18 │   const q = ~~(bar | 0);
+  
+
+```
+
+```
+invalidDoubleBitwiseNot.js:17:11 lint/nursery/useMathTrunc  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use Math.trunc() instead of | 0.
+  
+    15 │ const n = /* first comment */ ~~3.4; // A B C
+    16 │ const o = typeof~~x;
+  > 17 │ const p = ~~bar | 0;
+       │           ^^^^^^^^^
+    18 │ const q = ~~(bar | 0);
+    19 │ function r() {return~~x + 1;}
+  
+  i Bitwise operations turn the number into a 32-bit integer first, so numbers above 2147483647 or below -2147483648 give wrong results.
+  
+  i Math.trunc() removes the decimal part of any number and states the intent clearly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.trunc() instead.
+  
+    15 15 │   const n = /* first comment */ ~~3.4; // A B C
+    16 16 │   const o = typeof~~x;
+    17    │ - const·p·=·~~bar·|·0;
+       17 │ + const·p·=·Math.trunc(~~bar);
+    18 18 │   const q = ~~(bar | 0);
+    19 19 │   function r() {return~~x + 1;}
+  
+
+```
+
+```
+invalidDoubleBitwiseNot.js:17:11 lint/nursery/useMathTrunc  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use Math.trunc() instead of ~~.
+  
+    15 │ const n = /* first comment */ ~~3.4; // A B C
+    16 │ const o = typeof~~x;
+  > 17 │ const p = ~~bar | 0;
+       │           ^^^^^
+    18 │ const q = ~~(bar | 0);
+    19 │ function r() {return~~x + 1;}
+  
+  i Bitwise operations turn the number into a 32-bit integer first, so numbers above 2147483647 or below -2147483648 give wrong results.
+  
+  i Math.trunc() removes the decimal part of any number and states the intent clearly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.trunc() instead.
+  
+    15 15 │   const n = /* first comment */ ~~3.4; // A B C
+    16 16 │   const o = typeof~~x;
+    17    │ - const·p·=·~~bar·|·0;
+       17 │ + const·p·=·Math.trunc(bar)·|·0;
+    18 18 │   const q = ~~(bar | 0);
+    19 19 │   function r() {return~~x + 1;}
+  
+
+```
+
+```
+invalidDoubleBitwiseNot.js:18:11 lint/nursery/useMathTrunc  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use Math.trunc() instead of ~~.
+  
+    16 │ const o = typeof~~x;
+    17 │ const p = ~~bar | 0;
+  > 18 │ const q = ~~(bar | 0);
+       │           ^^^^^^^^^^^
+    19 │ function r() {return~~x + 1;}
+    20 │ function s() {throw~~x + 1;}
+  
+  i Bitwise operations turn the number into a 32-bit integer first, so numbers above 2147483647 or below -2147483648 give wrong results.
+  
+  i Math.trunc() removes the decimal part of any number and states the intent clearly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.trunc() instead.
+  
+    16 16 │   const o = typeof~~x;
+    17 17 │   const p = ~~bar | 0;
+    18    │ - const·q·=·~~(bar·|·0);
+       18 │ + const·q·=·Math.trunc(bar·|·0);
+    19 19 │   function r() {return~~x + 1;}
+    20 20 │   function s() {throw~~x + 1;}
+  
+
+```
+
+```
+invalidDoubleBitwiseNot.js:18:14 lint/nursery/useMathTrunc  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use Math.trunc() instead of | 0.
+  
+    16 │ const o = typeof~~x;
+    17 │ const p = ~~bar | 0;
+  > 18 │ const q = ~~(bar | 0);
+       │              ^^^^^^^
+    19 │ function r() {return~~x + 1;}
+    20 │ function s() {throw~~x + 1;}
+  
+  i Bitwise operations turn the number into a 32-bit integer first, so numbers above 2147483647 or below -2147483648 give wrong results.
+  
+  i Math.trunc() removes the decimal part of any number and states the intent clearly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.trunc() instead.
+  
+    16 16 │   const o = typeof~~x;
+    17 17 │   const p = ~~bar | 0;
+    18    │ - const·q·=·~~(bar·|·0);
+       18 │ + const·q·=·~~(Math.trunc(bar));
+    19 19 │   function r() {return~~x + 1;}
+    20 20 │   function s() {throw~~x + 1;}
+  
+
+```
+
+```
+invalidDoubleBitwiseNot.js:19:21 lint/nursery/useMathTrunc  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use Math.trunc() instead of ~~.
+  
+    17 │ const p = ~~bar | 0;
+    18 │ const q = ~~(bar | 0);
+  > 19 │ function r() {return~~x + 1;}
+       │                     ^^^
+    20 │ function s() {throw~~x + 1;}
+    21 │ const t = a in~~b + 1;
+  
+  i Bitwise operations turn the number into a 32-bit integer first, so numbers above 2147483647 or below -2147483648 give wrong results.
+  
+  i Math.trunc() removes the decimal part of any number and states the intent clearly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.trunc() instead.
+  
+    17 17 │   const p = ~~bar | 0;
+    18 18 │   const q = ~~(bar | 0);
+    19    │ - function·r()·{return~~x·+·1;}
+       19 │ + function·r()·{return·Math.trunc(x)·+·1;}
+    20 20 │   function s() {throw~~x + 1;}
+    21 21 │   const t = a in~~b + 1;
+  
+
+```
+
+```
+invalidDoubleBitwiseNot.js:20:20 lint/nursery/useMathTrunc  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use Math.trunc() instead of ~~.
+  
+    18 │ const q = ~~(bar | 0);
+    19 │ function r() {return~~x + 1;}
+  > 20 │ function s() {throw~~x + 1;}
+       │                    ^^^
+    21 │ const t = a in~~b + 1;
+    22 │ switch (value) {case~~x ? a : b: break;}
+  
+  i Bitwise operations turn the number into a 32-bit integer first, so numbers above 2147483647 or below -2147483648 give wrong results.
+  
+  i Math.trunc() removes the decimal part of any number and states the intent clearly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.trunc() instead.
+  
+    18 18 │   const q = ~~(bar | 0);
+    19 19 │   function r() {return~~x + 1;}
+    20    │ - function·s()·{throw~~x·+·1;}
+       20 │ + function·s()·{throw·Math.trunc(x)·+·1;}
+    21 21 │   const t = a in~~b + 1;
+    22 22 │   switch (value) {case~~x ? a : b: break;}
+  
+
+```
+
+```
+invalidDoubleBitwiseNot.js:21:15 lint/nursery/useMathTrunc  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use Math.trunc() instead of ~~.
+  
+    19 │ function r() {return~~x + 1;}
+    20 │ function s() {throw~~x + 1;}
+  > 21 │ const t = a in~~b + 1;
+       │               ^^^
+    22 │ switch (value) {case~~x ? a : b: break;}
+    23 │ const u = `${~~x}`;
+  
+  i Bitwise operations turn the number into a 32-bit integer first, so numbers above 2147483647 or below -2147483648 give wrong results.
+  
+  i Math.trunc() removes the decimal part of any number and states the intent clearly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.trunc() instead.
+  
+    19 19 │   function r() {return~~x + 1;}
+    20 20 │   function s() {throw~~x + 1;}
+    21    │ - const·t·=·a·in~~b·+·1;
+       21 │ + const·t·=·a·in·Math.trunc(b)·+·1;
+    22 22 │   switch (value) {case~~x ? a : b: break;}
+    23 23 │   const u = `${~~x}`;
+  
+
+```
+
+```
+invalidDoubleBitwiseNot.js:22:21 lint/nursery/useMathTrunc  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use Math.trunc() instead of ~~.
+  
+    20 │ function s() {throw~~x + 1;}
+    21 │ const t = a in~~b + 1;
+  > 22 │ switch (value) {case~~x ? a : b: break;}
+       │                     ^^^
+    23 │ const u = `${~~x}`;
+    24 │ 
+  
+  i Bitwise operations turn the number into a 32-bit integer first, so numbers above 2147483647 or below -2147483648 give wrong results.
+  
+  i Math.trunc() removes the decimal part of any number and states the intent clearly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.trunc() instead.
+  
+    20 20 │   function s() {throw~~x + 1;}
+    21 21 │   const t = a in~~b + 1;
+    22    │ - switch·(value)·{case~~x·?·a·:·b:·break;}
+       22 │ + switch·(value)·{case·Math.trunc(x)·?·a·:·b:·break;}
+    23 23 │   const u = `${~~x}`;
+    24 24 │   
+  
+
+```
+
+```
+invalidDoubleBitwiseNot.js:23:14 lint/nursery/useMathTrunc  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use Math.trunc() instead of ~~.
+  
+    21 │ const t = a in~~b + 1;
+    22 │ switch (value) {case~~x ? a : b: break;}
+  > 23 │ const u = `${~~x}`;
+       │              ^^^
+    24 │ 
+  
+  i Bitwise operations turn the number into a 32-bit integer first, so numbers above 2147483647 or below -2147483648 give wrong results.
+  
+  i Math.trunc() removes the decimal part of any number and states the intent clearly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.trunc() instead.
+  
+    21 21 │   const t = a in~~b + 1;
+    22 22 │   switch (value) {case~~x ? a : b: break;}
+    23    │ - const·u·=·`${~~x}`;
+       23 │ + const·u·=·`${Math.trunc(x)}`;
+    24 24 │   
+  
+
+```

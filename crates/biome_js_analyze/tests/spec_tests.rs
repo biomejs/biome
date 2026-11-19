@@ -2,13 +2,16 @@ use biome_analyze::{
     ActionFilter, AnalysisFilter, AnalyzerAction, AnalyzerPluginSlice, ControlFlow, Never,
     Queryable, RegistryVisitor, Rule, RuleDomain, RuleFilter, RuleGroup,
 };
+use biome_db::Source;
 use biome_diagnostics::advice::CodeSuggestionAdvice;
 use biome_fs::OsFileSystem;
 use biome_js_analyze::JsAnalyzerServices;
 use biome_js_parser::{JsParserOptions, parse};
-use biome_js_semantic::{SemanticModelOptions, semantic_model};
-use biome_js_syntax::{AnyJsRoot, JsFileSource, JsLanguage, ModuleKind};
+use biome_js_syntax::{AnyJsRoot, JsLanguage};
+use biome_languages::{DocumentFileSource, JsFileSource, LanguageDb, javascript::ModuleKind};
 use biome_package::PackageType;
+use biome_parser::AnyParse;
+use biome_parser::db::{ParseDb, ParseHandle, SourceOutput};
 use biome_plugin_loader::AnalyzerGritPlugin;
 use biome_rowan::{AstNode, FileSourceError};
 use biome_test_utils::{
@@ -18,15 +21,74 @@ use biome_test_utils::{
     project_layout_for_test_file, register_leak_checker, scripts_from_json,
     write_analyzer_snapshot,
 };
-use camino::Utf8Path;
+use camino::{Utf8Path, Utf8PathBuf};
+use salsa::Storage;
 use std::ops::Deref;
+use std::rc::Rc;
 use std::sync::Arc;
 use std::{fs::read_to_string, slice};
 
-tests_macros::gen_tests! {"tests/specs/**/*.{cjs,cts,js,mjs,jsx,tsx,ts,json,jsonc,svelte,vue,html,astro}", crate::run_test, "module"}
-tests_macros::gen_tests! {"tests/suppression/**/*.{cjs,cts,js,jsx,tsx,ts,json,jsonc,svelte,vue}", crate::run_suppression_test, "module"}
+// Spec cases are discovered from the filesystem during macro expansion.
+tests_macros::gen_tests! {"tests/specs/**/*.{cjs,cts,js,mjs,jsx,tsx,ts,json,jsonc,svelte,vue,html,astro,gs}", crate::run_test, "module"}
+tests_macros::gen_tests! {"tests/suppression/**/*.{cjs,cts,js,jsx,tsx,ts,json,jsonc,svelte,vue,astro}", crate::run_suppression_test, "module"}
 tests_macros::gen_tests! {"tests/multiple_rules/**/*.{cjs,cts,js,jsx,tsx,ts,json,jsonc,svelte,vue}", crate::run_multi_rule_test, "module"}
 tests_macros::gen_tests! {"tests/plugin/*.grit", crate::run_plugin_test, "module"}
+
+#[salsa::db]
+struct TestDb {
+    parsed: Option<Source>,
+    parse: ParseHandle,
+    source_type: Option<DocumentFileSource>,
+    storage: Storage<Self>,
+}
+
+/// Returns the parse that the test made of the text, which is the tree the
+/// analyzer analyzes.
+#[salsa::db]
+impl ParseDb for TestDb {
+    fn parse_source(&self, _source: Source) -> SourceOutput {
+        SourceOutput {
+            parse: self.parse.clone(),
+            document_source_index: 0,
+            snippets: Vec::new(),
+        }
+    }
+}
+
+#[salsa::db]
+impl LanguageDb for TestDb {
+    fn source_from_index(&self, _index: usize) -> Option<DocumentFileSource> {
+        Some(DocumentFileSource::Js(JsFileSource::tsx()))
+    }
+}
+
+#[salsa::db]
+impl biome_db::Db for TestDb {
+    fn parsed_source_for_path(&self, _path: &Utf8Path) -> Option<Source> {
+        self.parsed
+    }
+}
+
+#[salsa::db]
+impl salsa::Database for TestDb {}
+
+fn embedded_db(
+    parsed: &AnyJsRoot,
+    path: impl Into<Utf8PathBuf>,
+    source_type: &JsFileSource,
+) -> (Rc<dyn LanguageDb>, Source) {
+    let mut db = TestDb {
+        parsed: None,
+        parse: AnyParse::from(parsed.syntax().as_send().unwrap()).into(),
+        source_type: None,
+        storage: Storage::default(),
+    };
+    let text = parsed.syntax().text_with_trivia().to_string();
+    let parsed = Source::new(&db, path.into(), text.into(), 0);
+    db.parsed = Some(parsed);
+    db.source_type = Some(DocumentFileSource::from(*source_type));
+    (Rc::new(db), parsed)
+}
 
 /// Checks if any of the enabled rules is in the project domain and requires the module graph.
 struct NeedsModuleGraph<'a> {
@@ -177,7 +239,10 @@ pub(crate) fn analyze_and_snap(
     let parsed = parse(input_code, source_type, parser_options);
     let root = parsed.tree();
 
-    let mut options = create_analyzer_options::<JsLanguage>(input_file, &mut diagnostics);
+    // Use the parent directory as working directory for relative paths in diagnostics
+    let working_directory = input_file.parent().unwrap_or(Utf8Path::new("."));
+    let mut options =
+        create_analyzer_options::<JsLanguage>(input_file, working_directory, &mut diagnostics);
 
     // Query tsconfig.json for JSX factory settings if jsx_runtime is ReactClassic
     // and the factory settings are not already set
@@ -204,19 +269,17 @@ pub(crate) fn analyze_and_snap(
     }
 
     let needs_module_graph = NeedsModuleGraph::new(filter.enabled_rules).compute();
-    let module_graph = if needs_module_graph {
-        module_graph_for_test_file(input_file, &project_layout)
-    } else {
-        Default::default()
-    };
-    let semantic_model = semantic_model(&root, SemanticModelOptions::from(&source_type));
 
-    let services = JsAnalyzerServices::from((
-        module_graph,
-        project_layout,
-        source_type,
-        Some(semantic_model),
-    ));
+    let (language_db, parsed_source) = embedded_db(&root, input_file, &source_type);
+    let mut services = JsAnalyzerServices::default()
+        .with_source_type(source_type)
+        .with_project_layout(project_layout.clone())
+        .with_language_db(language_db)
+        .with_parsed_source(parsed_source.into());
+    if needs_module_graph {
+        let module_db = module_graph_for_test_file(input_file, &project_layout);
+        services = services.with_module_db(module_db.rc_module_db());
+    }
 
     let (_, errors) =
         biome_js_analyze::analyze(&root, filter, &options, plugins, services, |event| {
@@ -357,6 +420,21 @@ pub(crate) fn run_suppression_test(input: &'static str, _: &str, _: &str, _: &st
 
     let input_file = Utf8Path::new(input);
     let file_name = input_file.file_name().unwrap();
+
+    if matches!(input_file.extension(), Some("vue" | "svelte" | "astro")) {
+        let input_code = read_to_string(input_file)
+            .unwrap_or_else(|err| panic!("failed to read {input_file:?}: {err:?}"));
+        let (group, rule) = parse_test_path(input_file);
+        let snapshot = analyze_with_workspace(input_file, input_code, group, rule);
+        insta::with_settings!({
+            prepend_module_to_snapshot => false,
+            snapshot_path => input_file.parent().unwrap(),
+        }, {
+            insta::assert_snapshot!(file_name, snapshot, file_name);
+        });
+        return;
+    }
+
     let source_type = match input_file.extension() {
         Some("js" | "mjs" | "jsx") => JsFileSource::jsx(),
         Some("cjs") => JsFileSource::js_script(),
@@ -484,6 +562,7 @@ fn run_plugin_test(input: &'static str, _: &str, _: &str, _: &str) {
     let plugin = match AnalyzerGritPlugin::load(
         &OsFileSystem::new(plugin_path.to_owned()),
         Utf8Path::new(plugin_path),
+        None,
     ) {
         Ok(plugin) => plugin,
         Err(err) => panic!("Cannot load plugin: {err:?}"),

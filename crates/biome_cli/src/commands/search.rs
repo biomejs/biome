@@ -15,9 +15,10 @@ use biome_deserialize::Merge;
 use biome_diagnostics::Severity;
 use biome_diagnostics::{Category, DiagnosticExt, category};
 use biome_fs::FileSystem;
+use biome_languages::DocumentFileSource;
 use biome_service::workspace::{
-    DocumentFileSource, DropPatternParams, FeatureKind, FeatureName, FeaturesBuilder,
-    FeaturesSupported, ParsePatternParams, PatternId, ScanKind, SearchLanguage, SupportKind,
+    DropPatternParams, FeatureKind, FeatureName, FeaturesBuilder, FeaturesSupported,
+    ParsePatternParams, PatternId, ScanKind, SearchLanguage, SupportKind,
 };
 use biome_service::{Workspace, WorkspaceError};
 use camino::Utf8PathBuf;
@@ -34,23 +35,18 @@ pub(crate) struct SearchCommandPayload {
 }
 
 struct SearchExecution {
-    /// The GritQL pattern to search for.
-    ///
-    /// Note that the search command does not support rewrites.
+    /// The required `PATTERN` argument is the GritQL pattern to find. It must be a search pattern
+    /// because rewrites are not supported.
     pattern: PatternId,
 
-    /// The language to query for.
+    /// Selects the language grammar used for the pattern and searched code: CSS, JavaScript, or JSON.
     ///
-    /// Grit queries are specific to the grammar of the language they
-    /// target, so we currently do not support writing queries that apply
-    /// to multiple languages at once.
+    /// GritQL patterns are specific to their target grammar, so a search cannot target multiple
+    /// languages at once.
     ///
-    /// If none given, the default language is JavaScript.
+    /// Defaults to `javascript`.
     language: Option<SearchLanguage>,
 
-    /// An optional tuple.
-    /// 1. The virtual path to the file
-    /// 2. The content of the file
     stdin_file_path: Option<String>,
 }
 

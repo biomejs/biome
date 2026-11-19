@@ -11,12 +11,12 @@ pub mod assign_ext;
 pub mod binary_like_expression;
 pub mod binding_ext;
 pub mod cast_ext;
+pub mod class_ext;
 pub mod declaration_ext;
 pub mod directive_ext;
 pub mod export_ext;
 pub mod expr_ext;
 pub mod expression_left_side;
-pub mod file_source;
 pub mod function_ext;
 pub mod identifier_ext;
 pub mod import_ext;
@@ -41,7 +41,6 @@ pub use biome_rowan::{
 };
 pub use cast_ext::*;
 pub use expr_ext::*;
-pub use file_source::*;
 pub use function_ext::*;
 pub use identifier_ext::*;
 pub use import_ext::*;
@@ -51,7 +50,7 @@ pub use syntax_node::*;
 pub use unescape::*;
 
 use crate::JsSyntaxKind::*;
-use biome_rowan::{AstNode, RawSyntaxKind, SyntaxKind, SyntaxResult};
+use biome_rowan::{AstNode, RawSyntaxKind, SyntaxKind, SyntaxKindSet, SyntaxResult};
 
 impl From<u16> for JsSyntaxKind {
     fn from(d: u16) -> Self {
@@ -113,12 +112,14 @@ impl biome_rowan::SyntaxKind for JsSyntaxKind {
                 | JS_BOGUS_IMPORT_ASSERTION_ENTRY
                 | JS_BOGUS_NAMED_IMPORT_SPECIFIER
                 | JS_BOGUS_ASSIGNMENT
+                | JS_BOGUS_VARIABLE_DECLARATION
                 | TS_BOGUS_TYPE
         )
     }
 
     fn to_bogus(&self) -> Self {
         match self {
+            kind if JsVariableDeclaration::can_cast(*kind) => JS_BOGUS_VARIABLE_DECLARATION,
             kind if AnyJsModuleItem::can_cast(*kind) => JS_BOGUS_STATEMENT,
             kind if AnyJsExpression::can_cast(*kind) => JS_BOGUS_EXPRESSION,
             kind if AnyJsBinding::can_cast(*kind) => JS_BOGUS_BINDING,
@@ -165,7 +166,11 @@ impl biome_rowan::SyntaxKind for JsSyntaxKind {
     }
 
     fn is_allowed_before_suppressions(&self) -> bool {
-        matches!(self, Self::JS_SHEBANG)
+        const ALLOWED: SyntaxKindSet<JsLanguage> =
+            SyntaxKindSet::from_raw(RawSyntaxKind(JsSyntaxKind::JS_SHEBANG as u16)).union(
+                SyntaxKindSet::from_raw(RawSyntaxKind(JsSyntaxKind::UNICODE_BOM as u16)),
+            );
+        ALLOWED.matches(*self)
     }
 }
 
@@ -305,9 +310,9 @@ pub fn inner_string_text(token: &JsSyntaxToken) -> TokenText {
     if matches!(
         token.kind(),
         JsSyntaxKind::JS_STRING_LITERAL | JsSyntaxKind::JSX_STRING_LITERAL
-    ) {
-        // remove string delimiters
-        // SAFETY: string literal token have a delimiters at the start and the end of the string
+    ) && text.starts_with(['"', '\''])
+    {
+        // SAFETY: a string literal that starts with a quote is terminated by its matching quote
         let range = TextRange::new(1.into(), text.len() - TextSize::from(1));
         text = text.slice(range);
     }

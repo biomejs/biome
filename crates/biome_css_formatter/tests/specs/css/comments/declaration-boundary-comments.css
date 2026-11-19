@@ -1,0 +1,6 @@
+a{padding /* name */ :1px;color:red!important /* important */ ;--token:/* empty */ ;}
+a{height/* tight */:2px;width: /* value */3px;border:red /* plain */ ;--custom /* custom */ :1px;}
+a{margin/* name */
+:1px;padding:
+/* value */2px;}
+@supports( display /* supports */ :flex){}

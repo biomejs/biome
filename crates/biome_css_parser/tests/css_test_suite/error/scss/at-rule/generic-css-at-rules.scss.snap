@@ -1,6 +1,5 @@
 ---
 source: crates/biome_css_parser/tests/spec_test.rs
-assertion_line: 206
 expression: snapshot
 ---
 
@@ -59,7 +58,7 @@ CssRoot {
                         },
                     ],
                 },
-                semicolon_token: missing (required),
+                semicolon_token: missing (optional),
             },
         },
         CssAtRule {
@@ -98,7 +97,7 @@ CssRoot {
                                         },
                                     ],
                                 },
-                                semicolon_token: missing (required),
+                                semicolon_token: missing (optional),
                             },
                         },
                     ],
@@ -189,17 +188,5 @@ generic-css-at-rules.scss:3:1 parse ━━━━━━━━━━━━━━�
     5 │ }
   
   i Remove @
-  
-generic-css-at-rules.scss:5:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `;` but instead found `}`
-  
-    3 │ @mixin boundary {
-    4 │   @unknown #{$value}
-  > 5 │ }
-      │ ^
-    6 │ 
-  
-  i Remove }
   
 ```

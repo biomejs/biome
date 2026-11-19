@@ -20,6 +20,8 @@ pub use marker::{CompletedMarker, Marker};
 use std::{any::type_name, ops::Range};
 pub use token_set::TokenSet;
 
+#[cfg(feature = "db")]
+pub mod db;
 pub mod diagnostic;
 pub mod event;
 pub mod lexer;
@@ -667,6 +669,29 @@ pub trait SyntaxFeature: Sized {
         P: FnOnce(&mut Self::Parser<'source>) -> ParsedSyntax,
         E: FnOnce(&Self::Parser<'source>, &CompletedMarker) -> ParseDiagnostic,
     {
+        self.parse_exclusive_syntax_with_kind(p, parse, error_builder, None)
+    }
+
+    /// Parses syntax with an optional recovery kind for unsupported features.
+    ///
+    /// When unsupported, replaces diagnostics from the parse attempt with one
+    /// feature diagnostic and changes the node to `bogus_kind`, or to
+    /// [`SyntaxKind::to_bogus`] when `None`. The supplied kind should be an error
+    /// node accepted by the enclosing grammar.
+    ///
+    /// Supported syntax and its diagnostics are unchanged. An absent result
+    /// stays absent and does not invoke `error_builder`.
+    fn parse_exclusive_syntax_with_kind<'source, P, E>(
+        &self,
+        p: &mut Self::Parser<'source>,
+        parse: P,
+        error_builder: E,
+        bogus_kind: Option<<Self::Parser<'source> as Parser>::Kind>,
+    ) -> ParsedSyntax
+    where
+        P: FnOnce(&mut Self::Parser<'source>) -> ParsedSyntax,
+        E: FnOnce(&Self::Parser<'source>, &CompletedMarker) -> ParseDiagnostic,
+    {
         if self.is_supported(p) {
             parse(p)
         } else {
@@ -678,7 +703,8 @@ pub trait SyntaxFeature: Sized {
                 Present(mut syntax) => {
                     let diagnostic = error_builder(p, &syntax);
                     p.error(diagnostic);
-                    syntax.change_to_bogus(p);
+                    let kind = bogus_kind.unwrap_or_else(|| syntax.kind(p).to_bogus());
+                    syntax.change_kind(p, kind);
                     Present(syntax)
                 }
                 _ => Absent,
@@ -780,10 +806,24 @@ impl AnyParse {
         }
     }
 
-    pub fn into_serde_diagnostics(self, offset: Option<TextSize>) -> Vec<SerdeDiagnostic> {
+    /// Retrieves the root node of the parsed syntax tree.
+    ///
+    /// Returns `None` for [AnyParse::EmbeddedNode]
+    pub fn into_language_root<N>(self) -> Option<N>
+    where
+        N: AstNode,
+        N::Language: 'static,
+    {
         match self {
-            Self::Node(node) => node.into_serde_diagnostics(offset),
-            Self::EmbeddedNode(node) => node.into_serde_diagnostics(offset),
+            Self::Node(node) => node.root.clone().into_language_root::<N>(),
+            Self::EmbeddedNode(_) => None,
+        }
+    }
+
+    pub fn into_serde_diagnostics(self) -> Vec<SerdeDiagnostic> {
+        match self {
+            Self::Node(node) => node.into_serde_diagnostics(),
+            Self::EmbeddedNode(node) => node.into_serde_diagnostics(),
         }
     }
 
@@ -830,24 +870,20 @@ impl AnyParse {
     /// ## Panic
     ///
     /// It panics if this node is a [EmbeddedSendNode]
-    pub fn unwrap_into_send_node(self) -> SendNode {
-        if let Self::Node(node) = self {
-            node.into_root()
-        } else {
-            panic!("Calling unwrap_into_send_node on an embedded node isn't a valid operation")
-        }
-    }
-
-    /// Returns a [SendNode] that can be sent across threads
-    ///
-    /// ## Panic
-    ///
-    /// It panics if this node is a [EmbeddedSendNode]
     pub fn unwrap_as_send_node(&self) -> SendNode {
         if let Self::Node(node) = self {
             node.clone().into_root()
         } else {
             panic!("Calling unwrap_as_send_node on an embedded node isn't a valid operation")
+        }
+    }
+
+    /// Returns a [SendNode] that can be sent across threads
+    pub fn as_send_node(&self) -> Option<SendNode> {
+        if let Self::Node(node) = self {
+            Some(node.clone().into_root())
+        } else {
+            None
         }
     }
 
@@ -955,15 +991,9 @@ impl NodeParse {
     }
 
     /// This function transforms diagnostics coming from the parser into serializable diagnostics
-    pub fn into_serde_diagnostics(self, offset: Option<TextSize>) -> Vec<SerdeDiagnostic> {
+    pub fn into_serde_diagnostics(self) -> Vec<SerdeDiagnostic> {
         self.diagnostics
             .into_iter()
-            .map(|mut diag| {
-                if let Some(offset) = offset {
-                    diag.set_location_offset(offset)
-                }
-                diag
-            })
             .map(SerdeDiagnostic::new)
             .collect()
     }
@@ -1000,13 +1030,11 @@ impl EmbeddedNodeParse {
         &self.diagnostics
     }
 
-    pub fn into_serde_diagnostics(self, offset: Option<TextSize>) -> Vec<SerdeDiagnostic> {
+    pub fn into_serde_diagnostics(self) -> Vec<SerdeDiagnostic> {
         self.diagnostics
             .into_iter()
             .map(|mut diag| {
-                if let Some(offset) = offset {
-                    diag.set_location_offset(offset)
-                }
+                diag.set_location_offset(self.root.offset());
                 diag
             })
             .map(SerdeDiagnostic::new)

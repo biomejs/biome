@@ -1,6 +1,6 @@
 [package]
 name                 = "biome_aria_metadata"
-version              = "0.5.7"
+version.workspace    = true
 authors.workspace    = true
 edition.workspace    = true
 description          = "Metadata about ARIA properties and ARIA roles"
@@ -9,6 +9,7 @@ repository.workspace = true
 license.workspace    = true
 keywords.workspace   = true
 categories.workspace = true
+include              = ["aria-data/*.json", "build.rs", "src/lib.rs"]
 publish              = true
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
@@ -19,12 +20,12 @@ publish              = true
 biome_deserialize        = { workspace = true }
 biome_deserialize_macros = { workspace = true }
 biome_string_case        = { workspace = true }
-prettyplease             = "0.2.37"
+prettyplease             = { workspace = true }
 proc-macro2              = { workspace = true, features = ["span-locations"] }
 quote                    = { workspace = true }
 serde                    = { workspace = true }
 serde_json               = { workspace = true }
-syn                      = "2.0.76"
+syn                      = { workspace = true }
 
 [lints]
 workspace = true

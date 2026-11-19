@@ -1,0 +1,23 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome format --delimiter-spacing true --write file.js
+```
+
+## `file.js`
+
+```js
+const arr = [ 1, 2, 3 ];
+function foo( a, b ) {}
+
+```
+
+# Emitted Messages
+
+```block
+Formatted 1 file in <TIME>. Fixed 1 file.
+```

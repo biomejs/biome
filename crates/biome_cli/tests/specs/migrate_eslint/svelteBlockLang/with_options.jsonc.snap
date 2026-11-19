@@ -1,0 +1,53 @@
+---
+source: crates/biome_cli/src/execute/migrate/eslint_to_biome.rs
+expression: with_options.jsonc
+---
+## ESLint Config
+
+```json
+{
+	"rules": {
+		"svelte/block-lang": [
+			"error",
+			{
+				"enforceScriptPresent": true,
+				"enforceStylePresent": false,
+				"script": "ts",
+				"style": ["scss", null]
+			}
+		]
+	}
+}
+
+```
+
+## Biome Config Before Migration
+
+```json
+{}
+
+```
+
+## Biome Config After Migration
+
+```json
+{
+	"linter": {
+		"rules": {
+			"preset": "none",
+			"nursery": {
+				"useConsistentBlockLang": {
+					"level": "error",
+					"options": {
+						"blocks": {
+							"script": { "lang": ["ts"], "required": true },
+							"style": { "lang": ["scss"], "allowNoLang": true }
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+```

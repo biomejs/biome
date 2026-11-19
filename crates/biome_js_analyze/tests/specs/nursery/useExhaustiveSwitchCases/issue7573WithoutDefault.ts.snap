@@ -1,0 +1,60 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: issue7573WithoutDefault.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+
+type Letter = "A" | "B" | "C";
+const getLetter = (): Letter => Math.random() > 0.5 ? "A" : "B";
+
+function incomplete(): number {
+	switch (getLetter()) {
+		case "A":
+			return 1;
+		case "B":
+			return 1;
+	}
+}
+
+```
+
+# Diagnostics
+```
+issue7573WithoutDefault.ts:7:2 lint/nursery/useExhaustiveSwitchCases  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
+
+  i The switch statement is not exhaustive.
+  
+     6 │ function incomplete(): number {
+   > 7 │ 	switch (getLetter()) {
+       │ 	^^^^^^^^^^^^^^^^^^^^^^
+   > 8 │ 		case "A":
+   > 9 │ 			return 1;
+  > 10 │ 		case "B":
+  > 11 │ 			return 1;
+  > 12 │ 	}
+       │ 	^
+    13 │ }
+    14 │ 
+  
+  i Some variants of the union type are not handled here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i These cases are missing:
+  
+  - "C"
+  
+  i Unsafe fix: Add the missing cases to the switch statement.
+  
+     9  9 │         return 1;
+    10 10 │       case "B":
+    11    │ - → → → return·1;
+       11 │ + → → → return·1;
+       12 │ + → → case·"C":·throw·new·Error("TODO:·Not·implemented·yet");
+    12 13 │     }
+    13 14 │   }
+  
+
+```

@@ -1,0 +1,29 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-svelte-store-subscription.svelte
+---
+# Input
+```svelte
+<!-- should not generate diagnostics -->
+<script module>
+import { moduleStore } from "./stores.js";
+</script>
+
+<script>
+import { toasts, theme } from "./stores.js";
+import defaultStore, { store as aliasStore } from "./stores.js";
+
+console.log($moduleStore);
+</script>
+
+{#each $toasts as toast (toast.id)}
+  <p>{toast.title}</p>
+{/each}
+
+<select bind:value={$theme}>
+  <option value="white">White</option>
+</select>
+
+<p>{$defaultStore} {$aliasStore}</p>
+
+```

@@ -1,0 +1,138 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```html
+<div a ?></div>
+<div a?></div>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    processing_instruction: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@0..1 "<" [] [],
+                name: HtmlTagName {
+                    value_token: DIV_KW@1..5 "div" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    HtmlAttribute {
+                        name: HtmlAttributeName {
+                            value_token: HTML_LITERAL@5..7 "a" [] [Whitespace(" ")],
+                        },
+                        initializer: missing (optional),
+                    },
+                    HtmlAttribute {
+                        name: HtmlAttributeName {
+                            value_token: HTML_LITERAL@7..8 "?" [] [],
+                        },
+                        initializer: missing (optional),
+                    },
+                ],
+                r_angle_token: R_ANGLE@8..9 ">" [] [],
+            },
+            children: HtmlElementList [],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@9..10 "<" [] [],
+                slash_token: SLASH@10..11 "/" [] [],
+                name: HtmlTagName {
+                    value_token: DIV_KW@11..14 "div" [] [],
+                },
+                r_angle_token: R_ANGLE@14..15 ">" [] [],
+            },
+        },
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@15..17 "<" [Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: DIV_KW@17..21 "div" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    HtmlAttribute {
+                        name: HtmlAttributeName {
+                            value_token: HTML_LITERAL@21..23 "a?" [] [],
+                        },
+                        initializer: missing (optional),
+                    },
+                ],
+                r_angle_token: R_ANGLE@23..24 ">" [] [],
+            },
+            children: HtmlElementList [],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@24..25 "<" [] [],
+                slash_token: SLASH@25..26 "/" [] [],
+                name: HtmlTagName {
+                    value_token: DIV_KW@26..29 "div" [] [],
+                },
+                r_angle_token: R_ANGLE@29..30 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@30..31 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..31
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: (empty)
+  4: HTML_ELEMENT_LIST@0..30
+    0: HTML_ELEMENT@0..15
+      0: HTML_OPENING_ELEMENT@0..9
+        0: L_ANGLE@0..1 "<" [] []
+        1: HTML_TAG_NAME@1..5
+          0: DIV_KW@1..5 "div" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@5..8
+          0: HTML_ATTRIBUTE@5..7
+            0: HTML_ATTRIBUTE_NAME@5..7
+              0: HTML_LITERAL@5..7 "a" [] [Whitespace(" ")]
+            1: (empty)
+          1: HTML_ATTRIBUTE@7..8
+            0: HTML_ATTRIBUTE_NAME@7..8
+              0: HTML_LITERAL@7..8 "?" [] []
+            1: (empty)
+        3: R_ANGLE@8..9 ">" [] []
+      1: HTML_ELEMENT_LIST@9..9
+      2: HTML_CLOSING_ELEMENT@9..15
+        0: L_ANGLE@9..10 "<" [] []
+        1: SLASH@10..11 "/" [] []
+        2: HTML_TAG_NAME@11..14
+          0: DIV_KW@11..14 "div" [] []
+        3: R_ANGLE@14..15 ">" [] []
+    1: HTML_ELEMENT@15..30
+      0: HTML_OPENING_ELEMENT@15..24
+        0: L_ANGLE@15..17 "<" [Newline("\n")] []
+        1: HTML_TAG_NAME@17..21
+          0: DIV_KW@17..21 "div" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@21..23
+          0: HTML_ATTRIBUTE@21..23
+            0: HTML_ATTRIBUTE_NAME@21..23
+              0: HTML_LITERAL@21..23 "a?" [] []
+            1: (empty)
+        3: R_ANGLE@23..24 ">" [] []
+      1: HTML_ELEMENT_LIST@24..24
+      2: HTML_CLOSING_ELEMENT@24..30
+        0: L_ANGLE@24..25 "<" [] []
+        1: SLASH@25..26 "/" [] []
+        2: HTML_TAG_NAME@26..29
+          0: DIV_KW@26..29 "div" [] []
+        3: R_ANGLE@29..30 ">" [] []
+  5: EOF@30..31 "" [Newline("\n")] []
+
+```

@@ -112,6 +112,11 @@ impl Rule for NoCommonJs {
             )
             .note(markup! {
                 "ESM-style "<Emphasis>{es_name}</Emphasis>" statements are more easily statically analyzable and tree-shakable compared to CommonJs "<Emphasis>{common_js_name}</Emphasis>"."
+            })
+            .note(if *state {
+                markup! { "Replace it with an "<Emphasis>"export"</Emphasis>" declaration, such as "<Emphasis>"export default value"</Emphasis>" or "<Emphasis>"export const name = value"</Emphasis>"." }.to_owned()
+            } else {
+                markup! { "Replace it with an "<Emphasis>"import"</Emphasis>" declaration, such as "<Emphasis>"import name from \"module\""</Emphasis>"." }.to_owned()
             }),
         )
     }

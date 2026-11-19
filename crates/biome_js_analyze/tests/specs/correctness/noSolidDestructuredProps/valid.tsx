@@ -45,3 +45,7 @@ let Component = (props) => {
 let element = <div />;
 
 let Component = (props: Props) => <div />;
+
+function helper({ a }) {
+	return <div>{a}</div>;
+}

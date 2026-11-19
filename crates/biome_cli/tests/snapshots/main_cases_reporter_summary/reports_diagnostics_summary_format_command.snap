@@ -2,18 +2,22 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
+## Command
+
+```shell
+biome format --reporter=summary main.ts index.ts index.css
+```
+
 ## `index.css`
 
 ```css
-
-
-.brokenStyle { color: f( }
-
-.style {
-                color:
-                fakeFunction()
+.brokenStyle {
+  color: f(
 }
 
+.style {
+  color: fakeFunction();
+}
 ```
 
 ## `index.ts`

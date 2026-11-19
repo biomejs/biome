@@ -1,0 +1,90 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<template>
+<marquee />
+<blink />
+<blink></blink>
+</template>
+
+```
+
+# Diagnostics
+```
+invalid.vue:3:1 lint/a11y/noDistractingElements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Don't use the 'marquee' element.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <template>
+  > 3 │ <marquee />
+      │ ^^^^^^^^^^^
+    4 │ <blink />
+    5 │ <blink></blink>
+  
+  i Visually distracting elements can cause accessibility issues and should be avoided.
+  
+  i Unsafe fix: Remove the 'marquee' element.
+  
+    1 1 │   <!-- should generate diagnostics -->
+    2 2 │   <template>
+    3   │ - <marquee·/>
+    4 3 │   <blink />
+    5 4 │   <blink></blink>
+  
+
+```
+
+```
+invalid.vue:4:1 lint/a11y/noDistractingElements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Don't use the 'blink' element.
+  
+    2 │ <template>
+    3 │ <marquee />
+  > 4 │ <blink />
+      │ ^^^^^^^^^
+    5 │ <blink></blink>
+    6 │ </template>
+  
+  i Visually distracting elements can cause accessibility issues and should be avoided.
+  
+  i Unsafe fix: Remove the 'blink' element.
+  
+    2 2 │   <template>
+    3 3 │   <marquee />
+    4   │ - <blink·/>
+    5 4 │   <blink></blink>
+    6 5 │   </template>
+  
+
+```
+
+```
+invalid.vue:5:1 lint/a11y/noDistractingElements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Don't use the 'blink' element.
+  
+    3 │ <marquee />
+    4 │ <blink />
+  > 5 │ <blink></blink>
+      │ ^^^^^^^^^^^^^^^
+    6 │ </template>
+    7 │ 
+  
+  i Visually distracting elements can cause accessibility issues and should be avoided.
+  
+  i Unsafe fix: Remove the 'blink' element.
+  
+    3 3 │   <marquee />
+    4 4 │   <blink />
+    5   │ - <blink></blink>
+    6 5 │   </template>
+    7 6 │   
+  
+
+```

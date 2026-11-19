@@ -8,7 +8,6 @@ expression: snapshot
 ```ts
 const a8 = f<number><number>;  // Relational operator error
 const b1 = f?.<number>;  // Error, `(` expected
-f<T> << f<T>;
 f<T> = g<K>;
 f<T> >> f<T>;
 f<T> >= f<T>;
@@ -121,117 +120,88 @@ JsModule {
             semicolon_token: SEMICOLON@82..107 ";" [] [Whitespace("  "), Comments("// Error, `(` expected")],
         },
         JsExpressionStatement {
-            expression: TsInstantiationExpression {
-                expression: TsInstantiationExpression {
-                    expression: JsIdentifierExpression {
-                        name: JsReferenceIdentifier {
-                            value_token: IDENT@107..109 "f" [Newline("\n")] [],
-                        },
-                    },
-                    arguments: TsTypeArguments {
-                        l_angle_token: L_ANGLE@109..110 "<" [] [],
-                        ts_type_argument_list: TsTypeArgumentList [
-                            TsReferenceType {
-                                name: JsReferenceIdentifier {
-                                    value_token: IDENT@110..111 "T" [] [],
-                                },
-                                type_arguments: missing (optional),
-                            },
-                        ],
-                        r_angle_token: R_ANGLE@111..113 ">" [] [Whitespace(" ")],
-                    },
-                },
-                arguments: TsTypeArguments {
-                    l_angle_token: L_ANGLE@113..114 "<" [] [],
-                    ts_type_argument_list: TsTypeArgumentList [
-                        TsBogusType {
-                            items: [
-                                JsBogus {
-                                    items: [
-                                        L_ANGLE@114..116 "<" [] [Whitespace(" ")],
-                                        JsBogus {
-                                            items: [
-                                                TsTypeParameter {
-                                                    modifiers: TsTypeParameterModifierList [],
-                                                    name: TsTypeParameterName {
-                                                        ident_token: IDENT@116..117 "f" [] [],
-                                                    },
-                                                    constraint: missing (optional),
-                                                    default: missing (optional),
-                                                },
-                                                TsTypeParameterModifierList [],
-                                            ],
-                                        },
-                                    ],
-                                },
-                                TsFunctionType {
-                                    type_parameters: TsTypeParameters {
-                                        l_angle_token: L_ANGLE@117..118 "<" [] [],
-                                        items: TsTypeParameterList [
-                                            TsTypeParameter {
-                                                modifiers: TsTypeParameterModifierList [],
-                                                name: TsTypeParameterName {
-                                                    ident_token: IDENT@118..119 "T" [] [],
-                                                },
-                                                constraint: missing (optional),
-                                                default: missing (optional),
-                                            },
-                                        ],
-                                        r_angle_token: R_ANGLE@119..120 ">" [] [],
-                                    },
-                                    parameters: missing (required),
-                                    fat_arrow_token: missing (required),
-                                    return_type: missing (required),
-                                },
-                            ],
-                        },
-                    ],
-                    r_angle_token: missing (required),
-                },
-            },
-            semicolon_token: SEMICOLON@120..121 ";" [] [],
-        },
-        JsExpressionStatement {
             expression: JsAssignmentExpression {
                 left: JsBogusAssignment {
                     items: [
                         JsIdentifierExpression {
                             name: JsReferenceIdentifier {
-                                value_token: IDENT@121..123 "f" [Newline("\n")] [],
+                                value_token: IDENT@107..109 "f" [Newline("\n")] [],
                             },
                         },
                         TsTypeArguments {
-                            l_angle_token: L_ANGLE@123..124 "<" [] [],
+                            l_angle_token: L_ANGLE@109..110 "<" [] [],
                             ts_type_argument_list: TsTypeArgumentList [
                                 TsReferenceType {
                                     name: JsReferenceIdentifier {
-                                        value_token: IDENT@124..125 "T" [] [],
+                                        value_token: IDENT@110..111 "T" [] [],
                                     },
                                     type_arguments: missing (optional),
                                 },
                             ],
-                            r_angle_token: R_ANGLE@125..127 ">" [] [Whitespace(" ")],
+                            r_angle_token: R_ANGLE@111..113 ">" [] [Whitespace(" ")],
                         },
                     ],
                 },
-                operator_token: EQ@127..129 "=" [] [Whitespace(" ")],
+                operator_token: EQ@113..115 "=" [] [Whitespace(" ")],
                 right: TsInstantiationExpression {
                     expression: JsIdentifierExpression {
                         name: JsReferenceIdentifier {
-                            value_token: IDENT@129..130 "g" [] [],
+                            value_token: IDENT@115..116 "g" [] [],
                         },
                     },
                     arguments: TsTypeArguments {
-                        l_angle_token: L_ANGLE@130..131 "<" [] [],
+                        l_angle_token: L_ANGLE@116..117 "<" [] [],
                         ts_type_argument_list: TsTypeArgumentList [
                             TsReferenceType {
                                 name: JsReferenceIdentifier {
-                                    value_token: IDENT@131..132 "K" [] [],
+                                    value_token: IDENT@117..118 "K" [] [],
                                 },
                                 type_arguments: missing (optional),
                             },
                         ],
-                        r_angle_token: R_ANGLE@132..133 ">" [] [],
+                        r_angle_token: R_ANGLE@118..119 ">" [] [],
+                    },
+                },
+            },
+            semicolon_token: SEMICOLON@119..120 ";" [] [],
+        },
+        JsExpressionStatement {
+            expression: JsBinaryExpression {
+                left: JsBinaryExpression {
+                    left: JsIdentifierExpression {
+                        name: JsReferenceIdentifier {
+                            value_token: IDENT@120..122 "f" [Newline("\n")] [],
+                        },
+                    },
+                    operator_token: L_ANGLE@122..123 "<" [] [],
+                    right: JsIdentifierExpression {
+                        name: JsReferenceIdentifier {
+                            value_token: IDENT@123..124 "T" [] [],
+                        },
+                    },
+                },
+                operator_token: R_ANGLE@124..126 ">" [] [Whitespace(" ")],
+                right: JsBinaryExpression {
+                    left: missing (required),
+                    operator_token: SHR@126..129 ">>" [] [Whitespace(" ")],
+                    right: TsInstantiationExpression {
+                        expression: JsIdentifierExpression {
+                            name: JsReferenceIdentifier {
+                                value_token: IDENT@129..130 "f" [] [],
+                            },
+                        },
+                        arguments: TsTypeArguments {
+                            l_angle_token: L_ANGLE@130..131 "<" [] [],
+                            ts_type_argument_list: TsTypeArgumentList [
+                                TsReferenceType {
+                                    name: JsReferenceIdentifier {
+                                        value_token: IDENT@131..132 "T" [] [],
+                                    },
+                                    type_arguments: missing (optional),
+                                },
+                            ],
+                            r_angle_token: R_ANGLE@132..133 ">" [] [],
+                        },
                     },
                 },
             },
@@ -240,40 +210,40 @@ JsModule {
         JsExpressionStatement {
             expression: JsBinaryExpression {
                 left: JsBinaryExpression {
-                    left: JsIdentifierExpression {
-                        name: JsReferenceIdentifier {
-                            value_token: IDENT@134..136 "f" [Newline("\n")] [],
-                        },
-                    },
-                    operator_token: L_ANGLE@136..137 "<" [] [],
-                    right: JsIdentifierExpression {
-                        name: JsReferenceIdentifier {
-                            value_token: IDENT@137..138 "T" [] [],
-                        },
-                    },
-                },
-                operator_token: R_ANGLE@138..140 ">" [] [Whitespace(" ")],
-                right: JsBinaryExpression {
-                    left: missing (required),
-                    operator_token: SHR@140..143 ">>" [] [Whitespace(" ")],
-                    right: TsInstantiationExpression {
-                        expression: JsIdentifierExpression {
+                    left: JsBinaryExpression {
+                        left: JsIdentifierExpression {
                             name: JsReferenceIdentifier {
-                                value_token: IDENT@143..144 "f" [] [],
+                                value_token: IDENT@134..136 "f" [Newline("\n")] [],
                             },
                         },
-                        arguments: TsTypeArguments {
-                            l_angle_token: L_ANGLE@144..145 "<" [] [],
-                            ts_type_argument_list: TsTypeArgumentList [
-                                TsReferenceType {
-                                    name: JsReferenceIdentifier {
-                                        value_token: IDENT@145..146 "T" [] [],
-                                    },
-                                    type_arguments: missing (optional),
-                                },
-                            ],
-                            r_angle_token: R_ANGLE@146..147 ">" [] [],
+                        operator_token: L_ANGLE@136..137 "<" [] [],
+                        right: JsIdentifierExpression {
+                            name: JsReferenceIdentifier {
+                                value_token: IDENT@137..138 "T" [] [],
+                            },
                         },
+                    },
+                    operator_token: R_ANGLE@138..140 ">" [] [Whitespace(" ")],
+                    right: missing (required),
+                },
+                operator_token: GTEQ@140..143 ">=" [] [Whitespace(" ")],
+                right: TsInstantiationExpression {
+                    expression: JsIdentifierExpression {
+                        name: JsReferenceIdentifier {
+                            value_token: IDENT@143..144 "f" [] [],
+                        },
+                    },
+                    arguments: TsTypeArguments {
+                        l_angle_token: L_ANGLE@144..145 "<" [] [],
+                        ts_type_argument_list: TsTypeArgumentList [
+                            TsReferenceType {
+                                name: JsReferenceIdentifier {
+                                    value_token: IDENT@145..146 "T" [] [],
+                                },
+                                type_arguments: missing (optional),
+                            },
+                        ],
+                        r_angle_token: R_ANGLE@146..147 ">" [] [],
                     },
                 },
             },
@@ -282,85 +252,43 @@ JsModule {
         JsExpressionStatement {
             expression: JsBinaryExpression {
                 left: JsBinaryExpression {
-                    left: JsBinaryExpression {
-                        left: JsIdentifierExpression {
-                            name: JsReferenceIdentifier {
-                                value_token: IDENT@148..150 "f" [Newline("\n")] [],
-                            },
-                        },
-                        operator_token: L_ANGLE@150..151 "<" [] [],
-                        right: JsIdentifierExpression {
-                            name: JsReferenceIdentifier {
-                                value_token: IDENT@151..152 "T" [] [],
-                            },
-                        },
-                    },
-                    operator_token: R_ANGLE@152..154 ">" [] [Whitespace(" ")],
-                    right: missing (required),
-                },
-                operator_token: GTEQ@154..157 ">=" [] [Whitespace(" ")],
-                right: TsInstantiationExpression {
-                    expression: JsIdentifierExpression {
-                        name: JsReferenceIdentifier {
-                            value_token: IDENT@157..158 "f" [] [],
-                        },
-                    },
-                    arguments: TsTypeArguments {
-                        l_angle_token: L_ANGLE@158..159 "<" [] [],
-                        ts_type_argument_list: TsTypeArgumentList [
-                            TsReferenceType {
-                                name: JsReferenceIdentifier {
-                                    value_token: IDENT@159..160 "T" [] [],
-                                },
-                                type_arguments: missing (optional),
-                            },
-                        ],
-                        r_angle_token: R_ANGLE@160..161 ">" [] [],
-                    },
-                },
-            },
-            semicolon_token: SEMICOLON@161..162 ";" [] [],
-        },
-        JsExpressionStatement {
-            expression: JsBinaryExpression {
-                left: JsBinaryExpression {
                     left: JsIdentifierExpression {
                         name: JsReferenceIdentifier {
-                            value_token: IDENT@162..164 "f" [Newline("\n")] [],
+                            value_token: IDENT@148..150 "f" [Newline("\n")] [],
                         },
                     },
-                    operator_token: L_ANGLE@164..165 "<" [] [],
+                    operator_token: L_ANGLE@150..151 "<" [] [],
                     right: JsIdentifierExpression {
                         name: JsReferenceIdentifier {
-                            value_token: IDENT@165..166 "T" [] [],
+                            value_token: IDENT@151..152 "T" [] [],
                         },
                     },
                 },
-                operator_token: R_ANGLE@166..168 ">" [] [Whitespace(" ")],
+                operator_token: R_ANGLE@152..154 ">" [] [Whitespace(" ")],
                 right: TsTypeAssertionExpression {
-                    l_angle_token: L_ANGLE@168..170 "<" [] [Whitespace(" ")],
+                    l_angle_token: L_ANGLE@154..156 "<" [] [Whitespace(" ")],
                     ty: TsReferenceType {
                         name: JsReferenceIdentifier {
-                            value_token: IDENT@170..171 "f" [] [],
+                            value_token: IDENT@156..157 "f" [] [],
                         },
                         type_arguments: TsTypeArguments {
-                            l_angle_token: L_ANGLE@171..172 "<" [] [],
+                            l_angle_token: L_ANGLE@157..158 "<" [] [],
                             ts_type_argument_list: TsTypeArgumentList [
                                 TsReferenceType {
                                     name: JsReferenceIdentifier {
-                                        value_token: IDENT@172..173 "T" [] [],
+                                        value_token: IDENT@158..159 "T" [] [],
                                     },
                                     type_arguments: missing (optional),
                                 },
                             ],
-                            r_angle_token: R_ANGLE@173..174 ">" [] [],
+                            r_angle_token: R_ANGLE@159..160 ">" [] [],
                         },
                     },
                     r_angle_token: missing (required),
                     expression: missing (required),
                 },
             },
-            semicolon_token: SEMICOLON@174..175 ";" [] [],
+            semicolon_token: SEMICOLON@160..161 ";" [] [],
         },
         JsExpressionStatement {
             expression: JsBinaryExpression {
@@ -368,171 +296,171 @@ JsModule {
                     left: JsBinaryExpression {
                         left: JsIdentifierExpression {
                             name: JsReferenceIdentifier {
-                                value_token: IDENT@175..177 "f" [Newline("\n")] [],
+                                value_token: IDENT@161..163 "f" [Newline("\n")] [],
                             },
                         },
-                        operator_token: L_ANGLE@177..178 "<" [] [],
+                        operator_token: L_ANGLE@163..164 "<" [] [],
                         right: JsIdentifierExpression {
                             name: JsReferenceIdentifier {
-                                value_token: IDENT@178..179 "T" [] [],
+                                value_token: IDENT@164..165 "T" [] [],
                             },
                         },
                     },
-                    operator_token: R_ANGLE@179..181 ">" [] [Whitespace(" ")],
+                    operator_token: R_ANGLE@165..167 ">" [] [Whitespace(" ")],
                     right: missing (required),
                 },
-                operator_token: R_ANGLE@181..183 ">" [] [Whitespace(" ")],
+                operator_token: R_ANGLE@167..169 ">" [] [Whitespace(" ")],
                 right: TsInstantiationExpression {
                     expression: JsIdentifierExpression {
                         name: JsReferenceIdentifier {
-                            value_token: IDENT@183..184 "f" [] [],
+                            value_token: IDENT@169..170 "f" [] [],
                         },
                     },
                     arguments: TsTypeArguments {
-                        l_angle_token: L_ANGLE@184..185 "<" [] [],
+                        l_angle_token: L_ANGLE@170..171 "<" [] [],
                         ts_type_argument_list: TsTypeArgumentList [
                             TsReferenceType {
                                 name: JsReferenceIdentifier {
-                                    value_token: IDENT@185..186 "T" [] [],
+                                    value_token: IDENT@171..172 "T" [] [],
                                 },
                                 type_arguments: missing (optional),
                             },
                         ],
-                        r_angle_token: R_ANGLE@186..187 ">" [] [],
+                        r_angle_token: R_ANGLE@172..173 ">" [] [],
                     },
                 },
             },
-            semicolon_token: SEMICOLON@187..188 ";" [] [],
+            semicolon_token: SEMICOLON@173..174 ";" [] [],
         },
         JsExpressionStatement {
             expression: JsBinaryExpression {
                 left: JsBinaryExpression {
                     left: JsIdentifierExpression {
                         name: JsReferenceIdentifier {
-                            value_token: IDENT@188..190 "f" [Newline("\n")] [],
+                            value_token: IDENT@174..176 "f" [Newline("\n")] [],
                         },
                     },
-                    operator_token: L_ANGLE@190..191 "<" [] [],
+                    operator_token: L_ANGLE@176..177 "<" [] [],
                     right: JsIdentifierExpression {
                         name: JsReferenceIdentifier {
-                            value_token: IDENT@191..192 "T" [] [],
+                            value_token: IDENT@177..178 "T" [] [],
                         },
                     },
                 },
-                operator_token: R_ANGLE@192..194 ">" [] [Whitespace(" ")],
+                operator_token: R_ANGLE@178..180 ">" [] [Whitespace(" ")],
                 right: missing (required),
             },
             semicolon_token: missing (optional),
         },
         JsImport {
-            import_token: IMPORT_KW@194..200 "import" [] [],
+            import_token: IMPORT_KW@180..186 "import" [] [],
             import_clause: missing (required),
             semicolon_token: missing (optional),
         },
         JsExpressionStatement {
             expression: TsTypeAssertionExpression {
-                l_angle_token: L_ANGLE@200..201 "<" [] [],
+                l_angle_token: L_ANGLE@186..187 "<" [] [],
                 ty: TsNumberLiteralType {
                     minus_token: missing (optional),
-                    literal_token: JS_NUMBER_LITERAL@201..202 "1" [] [],
+                    literal_token: JS_NUMBER_LITERAL@187..188 "1" [] [],
                 },
-                r_angle_token: R_ANGLE@202..203 ">" [] [],
+                r_angle_token: R_ANGLE@188..189 ">" [] [],
                 expression: missing (required),
             },
-            semicolon_token: SEMICOLON@203..204 ";" [] [],
+            semicolon_token: SEMICOLON@189..190 ";" [] [],
         },
         JsExpressionStatement {
             expression: JsBinaryExpression {
                 left: JsBinaryExpression {
                     left: JsIdentifierExpression {
                         name: JsReferenceIdentifier {
-                            value_token: IDENT@204..206 "f" [Newline("\n")] [],
+                            value_token: IDENT@190..192 "f" [Newline("\n")] [],
                         },
                     },
-                    operator_token: L_ANGLE@206..207 "<" [] [],
+                    operator_token: L_ANGLE@192..193 "<" [] [],
                     right: JsIdentifierExpression {
                         name: JsReferenceIdentifier {
-                            value_token: IDENT@207..208 "T" [] [],
+                            value_token: IDENT@193..194 "T" [] [],
                         },
                     },
                 },
-                operator_token: R_ANGLE@208..210 ">" [] [Whitespace(" ")],
+                operator_token: R_ANGLE@194..196 ">" [] [Whitespace(" ")],
                 right: JsBogusExpression {
                     items: [
                         JsBogus {
                             items: [
-                                IDENT@210..215 "yield" [] [],
+                                IDENT@196..201 "yield" [] [],
                             ],
                         },
                     ],
                 },
             },
-            semicolon_token: SEMICOLON@215..216 ";" [] [],
+            semicolon_token: SEMICOLON@201..202 ";" [] [],
         },
         JsExpressionStatement {
             expression: JsBinaryExpression {
                 left: JsBinaryExpression {
                     left: JsIdentifierExpression {
                         name: JsReferenceIdentifier {
-                            value_token: IDENT@216..218 "f" [Newline("\n")] [],
+                            value_token: IDENT@202..204 "f" [Newline("\n")] [],
                         },
                     },
-                    operator_token: L_ANGLE@218..219 "<" [] [],
+                    operator_token: L_ANGLE@204..205 "<" [] [],
                     right: JsIdentifierExpression {
                         name: JsReferenceIdentifier {
-                            value_token: IDENT@219..220 "T" [] [],
+                            value_token: IDENT@205..206 "T" [] [],
                         },
                     },
                 },
-                operator_token: R_ANGLE@220..222 ">" [] [Whitespace(" ")],
+                operator_token: R_ANGLE@206..208 ">" [] [Whitespace(" ")],
                 right: JsPreUpdateExpression {
-                    operator_token: PLUS2@222..224 "++" [] [],
+                    operator_token: PLUS2@208..210 "++" [] [],
                     operand: missing (required),
                 },
             },
-            semicolon_token: SEMICOLON@224..225 ";" [] [],
+            semicolon_token: SEMICOLON@210..211 ";" [] [],
         },
         JsExpressionStatement {
             expression: JsBinaryExpression {
                 left: JsBinaryExpression {
                     left: JsIdentifierExpression {
                         name: JsReferenceIdentifier {
-                            value_token: IDENT@225..227 "f" [Newline("\n")] [],
+                            value_token: IDENT@211..213 "f" [Newline("\n")] [],
                         },
                     },
-                    operator_token: L_ANGLE@227..228 "<" [] [],
+                    operator_token: L_ANGLE@213..214 "<" [] [],
                     right: JsIdentifierExpression {
                         name: JsReferenceIdentifier {
-                            value_token: IDENT@228..229 "T" [] [],
+                            value_token: IDENT@214..215 "T" [] [],
                         },
                     },
                 },
-                operator_token: R_ANGLE@229..231 ">" [] [Whitespace(" ")],
+                operator_token: R_ANGLE@215..217 ">" [] [Whitespace(" ")],
                 right: JsPreUpdateExpression {
-                    operator_token: MINUS2@231..233 "--" [] [],
+                    operator_token: MINUS2@217..219 "--" [] [],
                     operand: missing (required),
                 },
             },
-            semicolon_token: SEMICOLON@233..234 ";" [] [],
+            semicolon_token: SEMICOLON@219..220 ";" [] [],
         },
         JsExpressionStatement {
             expression: JsBinaryExpression {
                 left: JsBinaryExpression {
                     left: JsIdentifierExpression {
                         name: JsReferenceIdentifier {
-                            value_token: IDENT@234..236 "f" [Newline("\n")] [],
+                            value_token: IDENT@220..222 "f" [Newline("\n")] [],
                         },
                     },
-                    operator_token: L_ANGLE@236..237 "<" [] [],
+                    operator_token: L_ANGLE@222..223 "<" [] [],
                     right: JsIdentifierExpression {
                         name: JsReferenceIdentifier {
-                            value_token: IDENT@237..238 "T" [] [],
+                            value_token: IDENT@223..224 "T" [] [],
                         },
                     },
                 },
-                operator_token: R_ANGLE@238..240 ">" [] [Whitespace(" ")],
+                operator_token: R_ANGLE@224..226 ">" [] [Whitespace(" ")],
                 right: JsRegexLiteralExpression {
-                    value_token: JS_REGEX_LITERAL@240..245 "/= 1;" [] [],
+                    value_token: JS_REGEX_LITERAL@226..231 "/= 1;" [] [],
                 },
             },
             semicolon_token: missing (optional),
@@ -542,91 +470,91 @@ JsModule {
                 left: TsInstantiationExpression {
                     expression: JsIdentifierExpression {
                         name: JsReferenceIdentifier {
-                            value_token: IDENT@245..247 "f" [Newline("\n")] [],
+                            value_token: IDENT@231..233 "f" [Newline("\n")] [],
                         },
                     },
                     arguments: TsTypeArguments {
-                        l_angle_token: L_ANGLE@247..248 "<" [] [],
+                        l_angle_token: L_ANGLE@233..234 "<" [] [],
                         ts_type_argument_list: TsTypeArgumentList [
                             TsReferenceType {
                                 name: JsReferenceIdentifier {
-                                    value_token: IDENT@248..249 "T" [] [],
+                                    value_token: IDENT@234..235 "T" [] [],
                                 },
                                 type_arguments: missing (optional),
                             },
                         ],
-                        r_angle_token: R_ANGLE@249..251 ">" [] [Whitespace(" ")],
+                        r_angle_token: R_ANGLE@235..237 ">" [] [Whitespace(" ")],
                     },
                 },
-                operator_token: LTEQ@251..254 "<=" [] [Whitespace(" ")],
+                operator_token: LTEQ@237..240 "<=" [] [Whitespace(" ")],
                 right: TsInstantiationExpression {
                     expression: JsIdentifierExpression {
                         name: JsReferenceIdentifier {
-                            value_token: IDENT@254..255 "f" [] [],
+                            value_token: IDENT@240..241 "f" [] [],
                         },
                     },
                     arguments: TsTypeArguments {
-                        l_angle_token: L_ANGLE@255..256 "<" [] [],
+                        l_angle_token: L_ANGLE@241..242 "<" [] [],
                         ts_type_argument_list: TsTypeArgumentList [
                             TsReferenceType {
                                 name: JsReferenceIdentifier {
-                                    value_token: IDENT@256..257 "T" [] [],
+                                    value_token: IDENT@242..243 "T" [] [],
                                 },
                                 type_arguments: missing (optional),
                             },
                         ],
-                        r_angle_token: R_ANGLE@257..258 ">" [] [],
+                        r_angle_token: R_ANGLE@243..244 ">" [] [],
                     },
                 },
             },
-            semicolon_token: SEMICOLON@258..259 ";" [] [],
+            semicolon_token: SEMICOLON@244..245 ";" [] [],
         },
         JsExpressionStatement {
             expression: JsComputedMemberExpression {
                 object: TsInstantiationExpression {
                     expression: JsIdentifierExpression {
                         name: JsReferenceIdentifier {
-                            value_token: IDENT@259..262 "f" [Newline("\n")] [Whitespace(" ")],
+                            value_token: IDENT@245..248 "f" [Newline("\n")] [Whitespace(" ")],
                         },
                     },
                     arguments: TsTypeArguments {
-                        l_angle_token: L_ANGLE@262..263 "<" [] [],
+                        l_angle_token: L_ANGLE@248..249 "<" [] [],
                         ts_type_argument_list: TsTypeArgumentList [
                             TsReferenceType {
                                 name: JsReferenceIdentifier {
-                                    value_token: IDENT@263..264 "T" [] [],
+                                    value_token: IDENT@249..250 "T" [] [],
                                 },
                                 type_arguments: missing (optional),
                             },
                         ],
-                        r_angle_token: R_ANGLE@264..265 ">" [] [],
+                        r_angle_token: R_ANGLE@250..251 ">" [] [],
                     },
                 },
                 optional_chain_token: missing (optional),
-                l_brack_token: L_BRACK@265..267 "[" [Newline("\n")] [],
+                l_brack_token: L_BRACK@251..253 "[" [Newline("\n")] [],
                 member: missing (required),
-                r_brack_token: R_BRACK@267..268 "]" [] [],
+                r_brack_token: R_BRACK@253..254 "]" [] [],
             },
-            semicolon_token: SEMICOLON@268..269 ";" [] [],
+            semicolon_token: SEMICOLON@254..255 ";" [] [],
         },
         JsExpressionStatement {
             expression: TsInstantiationExpression {
                 expression: JsIdentifierExpression {
                     name: JsReferenceIdentifier {
-                        value_token: IDENT@269..271 "f" [Newline("\n")] [],
+                        value_token: IDENT@255..257 "f" [Newline("\n")] [],
                     },
                 },
                 arguments: TsTypeArguments {
-                    l_angle_token: L_ANGLE@271..272 "<" [] [],
+                    l_angle_token: L_ANGLE@257..258 "<" [] [],
                     ts_type_argument_list: TsTypeArgumentList [
                         TsReferenceType {
                             name: JsReferenceIdentifier {
-                                value_token: IDENT@272..273 "T" [] [],
+                                value_token: IDENT@258..259 "T" [] [],
                             },
                             type_arguments: missing (optional),
                         },
                     ],
-                    r_angle_token: R_ANGLE@273..274 ">" [] [],
+                    r_angle_token: R_ANGLE@259..260 ">" [] [],
                 },
             },
             semicolon_token: missing (optional),
@@ -634,37 +562,37 @@ JsModule {
         JsExpressionStatement {
             expression: JsIdentifierExpression {
                 name: JsReferenceIdentifier {
-                    value_token: IDENT@274..278 "as" [Newline("\n")] [Whitespace(" ")],
+                    value_token: IDENT@260..264 "as" [Newline("\n")] [Whitespace(" ")],
                 },
             },
             semicolon_token: missing (optional),
         },
         JsBlockStatement {
-            l_curly_token: L_CURLY@278..279 "{" [] [],
+            l_curly_token: L_CURLY@264..265 "{" [] [],
             statements: JsStatementList [],
-            r_curly_token: R_CURLY@279..280 "}" [] [],
+            r_curly_token: R_CURLY@265..266 "}" [] [],
         },
         JsEmptyStatement {
-            semicolon_token: SEMICOLON@280..281 ";" [] [],
+            semicolon_token: SEMICOLON@266..267 ";" [] [],
         },
         JsExpressionStatement {
             expression: TsInstantiationExpression {
                 expression: JsIdentifierExpression {
                     name: JsReferenceIdentifier {
-                        value_token: IDENT@281..283 "f" [Newline("\n")] [],
+                        value_token: IDENT@267..269 "f" [Newline("\n")] [],
                     },
                 },
                 arguments: TsTypeArguments {
-                    l_angle_token: L_ANGLE@283..284 "<" [] [],
+                    l_angle_token: L_ANGLE@269..270 "<" [] [],
                     ts_type_argument_list: TsTypeArgumentList [
                         TsReferenceType {
                             name: JsReferenceIdentifier {
-                                value_token: IDENT@284..285 "T" [] [],
+                                value_token: IDENT@270..271 "T" [] [],
                             },
                             type_arguments: missing (optional),
                         },
                     ],
-                    r_angle_token: R_ANGLE@285..286 ">" [] [],
+                    r_angle_token: R_ANGLE@271..272 ">" [] [],
                 },
             },
             semicolon_token: missing (optional),
@@ -672,143 +600,143 @@ JsModule {
         JsExpressionStatement {
             expression: JsIdentifierExpression {
                 name: JsReferenceIdentifier {
-                    value_token: IDENT@286..297 "satisfies" [Newline("\n")] [Whitespace(" ")],
+                    value_token: IDENT@272..283 "satisfies" [Newline("\n")] [Whitespace(" ")],
                 },
             },
             semicolon_token: missing (optional),
         },
         JsBlockStatement {
-            l_curly_token: L_CURLY@297..298 "{" [] [],
+            l_curly_token: L_CURLY@283..284 "{" [] [],
             statements: JsStatementList [],
-            r_curly_token: R_CURLY@298..299 "}" [] [],
+            r_curly_token: R_CURLY@284..285 "}" [] [],
         },
         JsEmptyStatement {
-            semicolon_token: SEMICOLON@299..300 ";" [] [],
+            semicolon_token: SEMICOLON@285..286 ";" [] [],
         },
         JsClassDeclaration {
             decorators: JsDecoratorList [],
             abstract_token: missing (optional),
-            class_token: CLASS_KW@300..307 "class" [Newline("\n")] [Whitespace(" ")],
+            class_token: CLASS_KW@286..293 "class" [Newline("\n")] [Whitespace(" ")],
             id: JsIdentifierBinding {
-                name_token: IDENT@307..310 "C5" [] [Whitespace(" ")],
+                name_token: IDENT@293..296 "C5" [] [Whitespace(" ")],
             },
             type_parameters: missing (optional),
             extends_clause: missing (optional),
             implements_clause: missing (optional),
-            l_curly_token: L_CURLY@310..311 "{" [] [],
+            l_curly_token: L_CURLY@296..297 "{" [] [],
             members: JsClassMemberList [
                 JsPropertyClassMember {
                     modifiers: JsPropertyModifierList [
                         TsAccessibilityModifier {
-                            modifier_token: PROTECTED_KW@311..326 "protected" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")],
+                            modifier_token: PROTECTED_KW@297..312 "protected" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")],
                         },
                     ],
                     name: JsLiteralMemberName {
-                        value: IDENT@326..337 "specialFoo" [] [Whitespace(" ")],
+                        value: IDENT@312..323 "specialFoo" [] [Whitespace(" ")],
                     },
                     property_annotation: missing (optional),
                     value: JsInitializerClause {
-                        eq_token: EQ@337..339 "=" [] [Whitespace(" ")],
+                        eq_token: EQ@323..325 "=" [] [Whitespace(" ")],
                         expression: JsAssignmentExpression {
                             left: JsBogusAssignment {
                                 items: [
                                     JsBinaryExpression {
                                         left: JsIdentifierExpression {
                                             name: JsReferenceIdentifier {
-                                                value_token: IDENT@339..340 "f" [] [],
+                                                value_token: IDENT@325..326 "f" [] [],
                                             },
                                         },
-                                        operator_token: L_ANGLE@340..341 "<" [] [],
+                                        operator_token: L_ANGLE@326..327 "<" [] [],
                                         right: JsIdentifierExpression {
                                             name: JsReferenceIdentifier {
-                                                value_token: IDENT@341..347 "string" [] [],
+                                                value_token: IDENT@327..333 "string" [] [],
                                             },
                                         },
                                     },
-                                    R_ANGLE@347..349 ">" [] [Whitespace(" ")],
+                                    R_ANGLE@333..335 ">" [] [Whitespace(" ")],
                                     JsBogusExpression {
                                         items: [
-                                            HASH@349..350 "#" [] [],
-                                            IDENT@350..354 "bar" [] [Whitespace(" ")],
+                                            HASH@335..336 "#" [] [],
+                                            IDENT@336..340 "bar" [] [Whitespace(" ")],
                                         ],
                                     },
                                 ],
                             },
-                            operator_token: EQ@354..356 "=" [] [Whitespace(" ")],
+                            operator_token: EQ@340..342 "=" [] [Whitespace(" ")],
                             right: JsNumberLiteralExpression {
-                                value_token: JS_NUMBER_LITERAL@356..359 "123" [] [],
+                                value_token: JS_NUMBER_LITERAL@342..345 "123" [] [],
                             },
                         },
                     },
                     semicolon_token: missing (optional),
                 },
             ],
-            r_curly_token: R_CURLY@359..361 "}" [Newline("\n")] [],
+            r_curly_token: R_CURLY@345..347 "}" [Newline("\n")] [],
         },
         JsForInStatement {
-            for_token: FOR_KW@361..366 "for" [Newline("\n")] [Whitespace(" ")],
-            l_paren_token: L_PAREN@366..367 "(" [] [],
+            for_token: FOR_KW@347..352 "for" [Newline("\n")] [Whitespace(" ")],
+            l_paren_token: L_PAREN@352..353 "(" [] [],
             initializer: JsForVariableDeclaration {
                 await_token: missing (optional),
-                kind_token: CONST_KW@367..373 "const" [] [Whitespace(" ")],
+                kind_token: CONST_KW@353..359 "const" [] [Whitespace(" ")],
                 declarator: JsVariableDeclarator {
                     id: JsIdentifierBinding {
-                        name_token: IDENT@373..375 "a" [] [Whitespace(" ")],
+                        name_token: IDENT@359..361 "a" [] [Whitespace(" ")],
                     },
                     variable_annotation: missing (optional),
                     initializer: JsInitializerClause {
-                        eq_token: EQ@375..377 "=" [] [Whitespace(" ")],
+                        eq_token: EQ@361..363 "=" [] [Whitespace(" ")],
                         expression: TsInstantiationExpression {
                             expression: JsStaticMemberExpression {
                                 object: JsIdentifierExpression {
                                     name: JsReferenceIdentifier {
-                                        value_token: IDENT@377..378 "b" [] [],
+                                        value_token: IDENT@363..364 "b" [] [],
                                     },
                                 },
-                                operator_token: DOT@378..379 "." [] [],
+                                operator_token: DOT@364..365 "." [] [],
                                 member: JsName {
-                                    value_token: IDENT@379..383 "test" [] [],
+                                    value_token: IDENT@365..369 "test" [] [],
                                 },
                             },
                             arguments: TsTypeArguments {
-                                l_angle_token: L_ANGLE@383..384 "<" [] [],
+                                l_angle_token: L_ANGLE@369..370 "<" [] [],
                                 ts_type_argument_list: TsTypeArgumentList [
                                     TsStringType {
-                                        string_token: STRING_KW@384..390 "string" [] [],
+                                        string_token: STRING_KW@370..376 "string" [] [],
                                     },
                                 ],
-                                r_angle_token: R_ANGLE@390..392 ">" [] [Whitespace(" ")],
+                                r_angle_token: R_ANGLE@376..378 ">" [] [Whitespace(" ")],
                             },
                         },
                     },
                 },
             },
-            in_token: IN_KW@392..395 "in" [] [Whitespace(" ")],
+            in_token: IN_KW@378..381 "in" [] [Whitespace(" ")],
             expression: JsArrayExpression {
-                l_brack_token: L_BRACK@395..396 "[" [] [],
+                l_brack_token: L_BRACK@381..382 "[" [] [],
                 elements: JsArrayElementList [],
-                r_brack_token: R_BRACK@396..397 "]" [] [],
+                r_brack_token: R_BRACK@382..383 "]" [] [],
             },
-            r_paren_token: R_PAREN@397..399 ")" [] [Whitespace(" ")],
+            r_paren_token: R_PAREN@383..385 ")" [] [Whitespace(" ")],
             body: JsBlockStatement {
-                l_curly_token: L_CURLY@399..400 "{" [] [],
+                l_curly_token: L_CURLY@385..386 "{" [] [],
                 statements: JsStatementList [],
-                r_curly_token: R_CURLY@400..401 "}" [] [],
+                r_curly_token: R_CURLY@386..387 "}" [] [],
             },
         },
     ],
-    eof_token: EOF@401..402 "" [Newline("\n")] [],
+    eof_token: EOF@387..388 "" [Newline("\n")] [],
 }
 ```
 
 ## CST
 
 ```
-0: JS_MODULE@0..402
+0: JS_MODULE@0..388
   0: (empty)
   1: (empty)
   2: JS_DIRECTIVE_LIST@0..0
-  3: JS_MODULE_ITEM_LIST@0..401
+  3: JS_MODULE_ITEM_LIST@0..387
     0: JS_VARIABLE_STATEMENT@0..59
       0: JS_VARIABLE_DECLARATION@0..28
         0: (empty)
@@ -861,9 +789,9 @@ JsModule {
                   2: R_ANGLE@81..82 ">" [] []
                 3: (empty)
       1: SEMICOLON@82..107 ";" [] [Whitespace("  "), Comments("// Error, `(` expected")]
-    2: JS_EXPRESSION_STATEMENT@107..121
-      0: TS_INSTANTIATION_EXPRESSION@107..120
-        0: TS_INSTANTIATION_EXPRESSION@107..113
+    2: JS_EXPRESSION_STATEMENT@107..120
+      0: JS_ASSIGNMENT_EXPRESSION@107..119
+        0: JS_BOGUS_ASSIGNMENT@107..113
           0: JS_IDENTIFIER_EXPRESSION@107..109
             0: JS_REFERENCE_IDENTIFIER@107..109
               0: IDENT@107..109 "f" [Newline("\n")] []
@@ -875,430 +803,386 @@ JsModule {
                   0: IDENT@110..111 "T" [] []
                 1: (empty)
             2: R_ANGLE@111..113 ">" [] [Whitespace(" ")]
-        1: TS_TYPE_ARGUMENTS@113..120
-          0: L_ANGLE@113..114 "<" [] []
-          1: TS_TYPE_ARGUMENT_LIST@114..120
-            0: TS_BOGUS_TYPE@114..120
-              0: JS_BOGUS@114..117
-                0: L_ANGLE@114..116 "<" [] [Whitespace(" ")]
-                1: JS_BOGUS@116..117
-                  0: TS_TYPE_PARAMETER@116..117
-                    0: TS_TYPE_PARAMETER_MODIFIER_LIST@116..116
-                    1: TS_TYPE_PARAMETER_NAME@116..117
-                      0: IDENT@116..117 "f" [] []
-                    2: (empty)
-                    3: (empty)
-                  1: TS_TYPE_PARAMETER_MODIFIER_LIST@117..117
-              1: TS_FUNCTION_TYPE@117..120
-                0: TS_TYPE_PARAMETERS@117..120
-                  0: L_ANGLE@117..118 "<" [] []
-                  1: TS_TYPE_PARAMETER_LIST@118..119
-                    0: TS_TYPE_PARAMETER@118..119
-                      0: TS_TYPE_PARAMETER_MODIFIER_LIST@118..118
-                      1: TS_TYPE_PARAMETER_NAME@118..119
-                        0: IDENT@118..119 "T" [] []
-                      2: (empty)
-                      3: (empty)
-                  2: R_ANGLE@119..120 ">" [] []
+        1: EQ@113..115 "=" [] [Whitespace(" ")]
+        2: TS_INSTANTIATION_EXPRESSION@115..119
+          0: JS_IDENTIFIER_EXPRESSION@115..116
+            0: JS_REFERENCE_IDENTIFIER@115..116
+              0: IDENT@115..116 "g" [] []
+          1: TS_TYPE_ARGUMENTS@116..119
+            0: L_ANGLE@116..117 "<" [] []
+            1: TS_TYPE_ARGUMENT_LIST@117..118
+              0: TS_REFERENCE_TYPE@117..118
+                0: JS_REFERENCE_IDENTIFIER@117..118
+                  0: IDENT@117..118 "K" [] []
                 1: (empty)
-                2: (empty)
-                3: (empty)
-          2: (empty)
-      1: SEMICOLON@120..121 ";" [] []
-    3: JS_EXPRESSION_STATEMENT@121..134
-      0: JS_ASSIGNMENT_EXPRESSION@121..133
-        0: JS_BOGUS_ASSIGNMENT@121..127
-          0: JS_IDENTIFIER_EXPRESSION@121..123
-            0: JS_REFERENCE_IDENTIFIER@121..123
-              0: IDENT@121..123 "f" [Newline("\n")] []
-          1: TS_TYPE_ARGUMENTS@123..127
-            0: L_ANGLE@123..124 "<" [] []
-            1: TS_TYPE_ARGUMENT_LIST@124..125
-              0: TS_REFERENCE_TYPE@124..125
-                0: JS_REFERENCE_IDENTIFIER@124..125
-                  0: IDENT@124..125 "T" [] []
-                1: (empty)
-            2: R_ANGLE@125..127 ">" [] [Whitespace(" ")]
-        1: EQ@127..129 "=" [] [Whitespace(" ")]
-        2: TS_INSTANTIATION_EXPRESSION@129..133
-          0: JS_IDENTIFIER_EXPRESSION@129..130
-            0: JS_REFERENCE_IDENTIFIER@129..130
-              0: IDENT@129..130 "g" [] []
-          1: TS_TYPE_ARGUMENTS@130..133
-            0: L_ANGLE@130..131 "<" [] []
-            1: TS_TYPE_ARGUMENT_LIST@131..132
-              0: TS_REFERENCE_TYPE@131..132
-                0: JS_REFERENCE_IDENTIFIER@131..132
-                  0: IDENT@131..132 "K" [] []
-                1: (empty)
-            2: R_ANGLE@132..133 ">" [] []
+            2: R_ANGLE@118..119 ">" [] []
+      1: SEMICOLON@119..120 ";" [] []
+    3: JS_EXPRESSION_STATEMENT@120..134
+      0: JS_BINARY_EXPRESSION@120..133
+        0: JS_BINARY_EXPRESSION@120..124
+          0: JS_IDENTIFIER_EXPRESSION@120..122
+            0: JS_REFERENCE_IDENTIFIER@120..122
+              0: IDENT@120..122 "f" [Newline("\n")] []
+          1: L_ANGLE@122..123 "<" [] []
+          2: JS_IDENTIFIER_EXPRESSION@123..124
+            0: JS_REFERENCE_IDENTIFIER@123..124
+              0: IDENT@123..124 "T" [] []
+        1: R_ANGLE@124..126 ">" [] [Whitespace(" ")]
+        2: JS_BINARY_EXPRESSION@126..133
+          0: (empty)
+          1: SHR@126..129 ">>" [] [Whitespace(" ")]
+          2: TS_INSTANTIATION_EXPRESSION@129..133
+            0: JS_IDENTIFIER_EXPRESSION@129..130
+              0: JS_REFERENCE_IDENTIFIER@129..130
+                0: IDENT@129..130 "f" [] []
+            1: TS_TYPE_ARGUMENTS@130..133
+              0: L_ANGLE@130..131 "<" [] []
+              1: TS_TYPE_ARGUMENT_LIST@131..132
+                0: TS_REFERENCE_TYPE@131..132
+                  0: JS_REFERENCE_IDENTIFIER@131..132
+                    0: IDENT@131..132 "T" [] []
+                  1: (empty)
+              2: R_ANGLE@132..133 ">" [] []
       1: SEMICOLON@133..134 ";" [] []
     4: JS_EXPRESSION_STATEMENT@134..148
       0: JS_BINARY_EXPRESSION@134..147
-        0: JS_BINARY_EXPRESSION@134..138
-          0: JS_IDENTIFIER_EXPRESSION@134..136
-            0: JS_REFERENCE_IDENTIFIER@134..136
-              0: IDENT@134..136 "f" [Newline("\n")] []
-          1: L_ANGLE@136..137 "<" [] []
-          2: JS_IDENTIFIER_EXPRESSION@137..138
-            0: JS_REFERENCE_IDENTIFIER@137..138
-              0: IDENT@137..138 "T" [] []
-        1: R_ANGLE@138..140 ">" [] [Whitespace(" ")]
-        2: JS_BINARY_EXPRESSION@140..147
-          0: (empty)
-          1: SHR@140..143 ">>" [] [Whitespace(" ")]
-          2: TS_INSTANTIATION_EXPRESSION@143..147
-            0: JS_IDENTIFIER_EXPRESSION@143..144
-              0: JS_REFERENCE_IDENTIFIER@143..144
-                0: IDENT@143..144 "f" [] []
-            1: TS_TYPE_ARGUMENTS@144..147
-              0: L_ANGLE@144..145 "<" [] []
-              1: TS_TYPE_ARGUMENT_LIST@145..146
-                0: TS_REFERENCE_TYPE@145..146
-                  0: JS_REFERENCE_IDENTIFIER@145..146
-                    0: IDENT@145..146 "T" [] []
-                  1: (empty)
-              2: R_ANGLE@146..147 ">" [] []
-      1: SEMICOLON@147..148 ";" [] []
-    5: JS_EXPRESSION_STATEMENT@148..162
-      0: JS_BINARY_EXPRESSION@148..161
-        0: JS_BINARY_EXPRESSION@148..154
-          0: JS_BINARY_EXPRESSION@148..152
-            0: JS_IDENTIFIER_EXPRESSION@148..150
-              0: JS_REFERENCE_IDENTIFIER@148..150
-                0: IDENT@148..150 "f" [Newline("\n")] []
-            1: L_ANGLE@150..151 "<" [] []
-            2: JS_IDENTIFIER_EXPRESSION@151..152
-              0: JS_REFERENCE_IDENTIFIER@151..152
-                0: IDENT@151..152 "T" [] []
-          1: R_ANGLE@152..154 ">" [] [Whitespace(" ")]
+        0: JS_BINARY_EXPRESSION@134..140
+          0: JS_BINARY_EXPRESSION@134..138
+            0: JS_IDENTIFIER_EXPRESSION@134..136
+              0: JS_REFERENCE_IDENTIFIER@134..136
+                0: IDENT@134..136 "f" [Newline("\n")] []
+            1: L_ANGLE@136..137 "<" [] []
+            2: JS_IDENTIFIER_EXPRESSION@137..138
+              0: JS_REFERENCE_IDENTIFIER@137..138
+                0: IDENT@137..138 "T" [] []
+          1: R_ANGLE@138..140 ">" [] [Whitespace(" ")]
           2: (empty)
-        1: GTEQ@154..157 ">=" [] [Whitespace(" ")]
-        2: TS_INSTANTIATION_EXPRESSION@157..161
-          0: JS_IDENTIFIER_EXPRESSION@157..158
-            0: JS_REFERENCE_IDENTIFIER@157..158
-              0: IDENT@157..158 "f" [] []
-          1: TS_TYPE_ARGUMENTS@158..161
-            0: L_ANGLE@158..159 "<" [] []
-            1: TS_TYPE_ARGUMENT_LIST@159..160
-              0: TS_REFERENCE_TYPE@159..160
-                0: JS_REFERENCE_IDENTIFIER@159..160
-                  0: IDENT@159..160 "T" [] []
+        1: GTEQ@140..143 ">=" [] [Whitespace(" ")]
+        2: TS_INSTANTIATION_EXPRESSION@143..147
+          0: JS_IDENTIFIER_EXPRESSION@143..144
+            0: JS_REFERENCE_IDENTIFIER@143..144
+              0: IDENT@143..144 "f" [] []
+          1: TS_TYPE_ARGUMENTS@144..147
+            0: L_ANGLE@144..145 "<" [] []
+            1: TS_TYPE_ARGUMENT_LIST@145..146
+              0: TS_REFERENCE_TYPE@145..146
+                0: JS_REFERENCE_IDENTIFIER@145..146
+                  0: IDENT@145..146 "T" [] []
                 1: (empty)
-            2: R_ANGLE@160..161 ">" [] []
-      1: SEMICOLON@161..162 ";" [] []
-    6: JS_EXPRESSION_STATEMENT@162..175
-      0: JS_BINARY_EXPRESSION@162..174
-        0: JS_BINARY_EXPRESSION@162..166
-          0: JS_IDENTIFIER_EXPRESSION@162..164
-            0: JS_REFERENCE_IDENTIFIER@162..164
-              0: IDENT@162..164 "f" [Newline("\n")] []
-          1: L_ANGLE@164..165 "<" [] []
-          2: JS_IDENTIFIER_EXPRESSION@165..166
-            0: JS_REFERENCE_IDENTIFIER@165..166
-              0: IDENT@165..166 "T" [] []
-        1: R_ANGLE@166..168 ">" [] [Whitespace(" ")]
-        2: TS_TYPE_ASSERTION_EXPRESSION@168..174
-          0: L_ANGLE@168..170 "<" [] [Whitespace(" ")]
-          1: TS_REFERENCE_TYPE@170..174
-            0: JS_REFERENCE_IDENTIFIER@170..171
-              0: IDENT@170..171 "f" [] []
-            1: TS_TYPE_ARGUMENTS@171..174
-              0: L_ANGLE@171..172 "<" [] []
-              1: TS_TYPE_ARGUMENT_LIST@172..173
-                0: TS_REFERENCE_TYPE@172..173
-                  0: JS_REFERENCE_IDENTIFIER@172..173
-                    0: IDENT@172..173 "T" [] []
+            2: R_ANGLE@146..147 ">" [] []
+      1: SEMICOLON@147..148 ";" [] []
+    5: JS_EXPRESSION_STATEMENT@148..161
+      0: JS_BINARY_EXPRESSION@148..160
+        0: JS_BINARY_EXPRESSION@148..152
+          0: JS_IDENTIFIER_EXPRESSION@148..150
+            0: JS_REFERENCE_IDENTIFIER@148..150
+              0: IDENT@148..150 "f" [Newline("\n")] []
+          1: L_ANGLE@150..151 "<" [] []
+          2: JS_IDENTIFIER_EXPRESSION@151..152
+            0: JS_REFERENCE_IDENTIFIER@151..152
+              0: IDENT@151..152 "T" [] []
+        1: R_ANGLE@152..154 ">" [] [Whitespace(" ")]
+        2: TS_TYPE_ASSERTION_EXPRESSION@154..160
+          0: L_ANGLE@154..156 "<" [] [Whitespace(" ")]
+          1: TS_REFERENCE_TYPE@156..160
+            0: JS_REFERENCE_IDENTIFIER@156..157
+              0: IDENT@156..157 "f" [] []
+            1: TS_TYPE_ARGUMENTS@157..160
+              0: L_ANGLE@157..158 "<" [] []
+              1: TS_TYPE_ARGUMENT_LIST@158..159
+                0: TS_REFERENCE_TYPE@158..159
+                  0: JS_REFERENCE_IDENTIFIER@158..159
+                    0: IDENT@158..159 "T" [] []
                   1: (empty)
-              2: R_ANGLE@173..174 ">" [] []
+              2: R_ANGLE@159..160 ">" [] []
           2: (empty)
           3: (empty)
-      1: SEMICOLON@174..175 ";" [] []
-    7: JS_EXPRESSION_STATEMENT@175..188
-      0: JS_BINARY_EXPRESSION@175..187
-        0: JS_BINARY_EXPRESSION@175..181
-          0: JS_BINARY_EXPRESSION@175..179
-            0: JS_IDENTIFIER_EXPRESSION@175..177
-              0: JS_REFERENCE_IDENTIFIER@175..177
-                0: IDENT@175..177 "f" [Newline("\n")] []
-            1: L_ANGLE@177..178 "<" [] []
-            2: JS_IDENTIFIER_EXPRESSION@178..179
-              0: JS_REFERENCE_IDENTIFIER@178..179
-                0: IDENT@178..179 "T" [] []
-          1: R_ANGLE@179..181 ">" [] [Whitespace(" ")]
+      1: SEMICOLON@160..161 ";" [] []
+    6: JS_EXPRESSION_STATEMENT@161..174
+      0: JS_BINARY_EXPRESSION@161..173
+        0: JS_BINARY_EXPRESSION@161..167
+          0: JS_BINARY_EXPRESSION@161..165
+            0: JS_IDENTIFIER_EXPRESSION@161..163
+              0: JS_REFERENCE_IDENTIFIER@161..163
+                0: IDENT@161..163 "f" [Newline("\n")] []
+            1: L_ANGLE@163..164 "<" [] []
+            2: JS_IDENTIFIER_EXPRESSION@164..165
+              0: JS_REFERENCE_IDENTIFIER@164..165
+                0: IDENT@164..165 "T" [] []
+          1: R_ANGLE@165..167 ">" [] [Whitespace(" ")]
           2: (empty)
-        1: R_ANGLE@181..183 ">" [] [Whitespace(" ")]
-        2: TS_INSTANTIATION_EXPRESSION@183..187
-          0: JS_IDENTIFIER_EXPRESSION@183..184
-            0: JS_REFERENCE_IDENTIFIER@183..184
-              0: IDENT@183..184 "f" [] []
-          1: TS_TYPE_ARGUMENTS@184..187
-            0: L_ANGLE@184..185 "<" [] []
-            1: TS_TYPE_ARGUMENT_LIST@185..186
-              0: TS_REFERENCE_TYPE@185..186
-                0: JS_REFERENCE_IDENTIFIER@185..186
-                  0: IDENT@185..186 "T" [] []
+        1: R_ANGLE@167..169 ">" [] [Whitespace(" ")]
+        2: TS_INSTANTIATION_EXPRESSION@169..173
+          0: JS_IDENTIFIER_EXPRESSION@169..170
+            0: JS_REFERENCE_IDENTIFIER@169..170
+              0: IDENT@169..170 "f" [] []
+          1: TS_TYPE_ARGUMENTS@170..173
+            0: L_ANGLE@170..171 "<" [] []
+            1: TS_TYPE_ARGUMENT_LIST@171..172
+              0: TS_REFERENCE_TYPE@171..172
+                0: JS_REFERENCE_IDENTIFIER@171..172
+                  0: IDENT@171..172 "T" [] []
                 1: (empty)
-            2: R_ANGLE@186..187 ">" [] []
-      1: SEMICOLON@187..188 ";" [] []
-    8: JS_EXPRESSION_STATEMENT@188..194
-      0: JS_BINARY_EXPRESSION@188..194
-        0: JS_BINARY_EXPRESSION@188..192
-          0: JS_IDENTIFIER_EXPRESSION@188..190
-            0: JS_REFERENCE_IDENTIFIER@188..190
-              0: IDENT@188..190 "f" [Newline("\n")] []
-          1: L_ANGLE@190..191 "<" [] []
-          2: JS_IDENTIFIER_EXPRESSION@191..192
-            0: JS_REFERENCE_IDENTIFIER@191..192
-              0: IDENT@191..192 "T" [] []
-        1: R_ANGLE@192..194 ">" [] [Whitespace(" ")]
+            2: R_ANGLE@172..173 ">" [] []
+      1: SEMICOLON@173..174 ";" [] []
+    7: JS_EXPRESSION_STATEMENT@174..180
+      0: JS_BINARY_EXPRESSION@174..180
+        0: JS_BINARY_EXPRESSION@174..178
+          0: JS_IDENTIFIER_EXPRESSION@174..176
+            0: JS_REFERENCE_IDENTIFIER@174..176
+              0: IDENT@174..176 "f" [Newline("\n")] []
+          1: L_ANGLE@176..177 "<" [] []
+          2: JS_IDENTIFIER_EXPRESSION@177..178
+            0: JS_REFERENCE_IDENTIFIER@177..178
+              0: IDENT@177..178 "T" [] []
+        1: R_ANGLE@178..180 ">" [] [Whitespace(" ")]
         2: (empty)
       1: (empty)
-    9: JS_IMPORT@194..200
-      0: IMPORT_KW@194..200 "import" [] []
+    8: JS_IMPORT@180..186
+      0: IMPORT_KW@180..186 "import" [] []
       1: (empty)
       2: (empty)
-    10: JS_EXPRESSION_STATEMENT@200..204
-      0: TS_TYPE_ASSERTION_EXPRESSION@200..203
-        0: L_ANGLE@200..201 "<" [] []
-        1: TS_NUMBER_LITERAL_TYPE@201..202
+    9: JS_EXPRESSION_STATEMENT@186..190
+      0: TS_TYPE_ASSERTION_EXPRESSION@186..189
+        0: L_ANGLE@186..187 "<" [] []
+        1: TS_NUMBER_LITERAL_TYPE@187..188
           0: (empty)
-          1: JS_NUMBER_LITERAL@201..202 "1" [] []
-        2: R_ANGLE@202..203 ">" [] []
+          1: JS_NUMBER_LITERAL@187..188 "1" [] []
+        2: R_ANGLE@188..189 ">" [] []
         3: (empty)
-      1: SEMICOLON@203..204 ";" [] []
-    11: JS_EXPRESSION_STATEMENT@204..216
-      0: JS_BINARY_EXPRESSION@204..215
-        0: JS_BINARY_EXPRESSION@204..208
-          0: JS_IDENTIFIER_EXPRESSION@204..206
-            0: JS_REFERENCE_IDENTIFIER@204..206
-              0: IDENT@204..206 "f" [Newline("\n")] []
-          1: L_ANGLE@206..207 "<" [] []
-          2: JS_IDENTIFIER_EXPRESSION@207..208
-            0: JS_REFERENCE_IDENTIFIER@207..208
-              0: IDENT@207..208 "T" [] []
-        1: R_ANGLE@208..210 ">" [] [Whitespace(" ")]
-        2: JS_BOGUS_EXPRESSION@210..215
-          0: JS_BOGUS@210..215
-            0: IDENT@210..215 "yield" [] []
-      1: SEMICOLON@215..216 ";" [] []
-    12: JS_EXPRESSION_STATEMENT@216..225
-      0: JS_BINARY_EXPRESSION@216..224
-        0: JS_BINARY_EXPRESSION@216..220
-          0: JS_IDENTIFIER_EXPRESSION@216..218
-            0: JS_REFERENCE_IDENTIFIER@216..218
-              0: IDENT@216..218 "f" [Newline("\n")] []
-          1: L_ANGLE@218..219 "<" [] []
-          2: JS_IDENTIFIER_EXPRESSION@219..220
-            0: JS_REFERENCE_IDENTIFIER@219..220
-              0: IDENT@219..220 "T" [] []
-        1: R_ANGLE@220..222 ">" [] [Whitespace(" ")]
-        2: JS_PRE_UPDATE_EXPRESSION@222..224
-          0: PLUS2@222..224 "++" [] []
+      1: SEMICOLON@189..190 ";" [] []
+    10: JS_EXPRESSION_STATEMENT@190..202
+      0: JS_BINARY_EXPRESSION@190..201
+        0: JS_BINARY_EXPRESSION@190..194
+          0: JS_IDENTIFIER_EXPRESSION@190..192
+            0: JS_REFERENCE_IDENTIFIER@190..192
+              0: IDENT@190..192 "f" [Newline("\n")] []
+          1: L_ANGLE@192..193 "<" [] []
+          2: JS_IDENTIFIER_EXPRESSION@193..194
+            0: JS_REFERENCE_IDENTIFIER@193..194
+              0: IDENT@193..194 "T" [] []
+        1: R_ANGLE@194..196 ">" [] [Whitespace(" ")]
+        2: JS_BOGUS_EXPRESSION@196..201
+          0: JS_BOGUS@196..201
+            0: IDENT@196..201 "yield" [] []
+      1: SEMICOLON@201..202 ";" [] []
+    11: JS_EXPRESSION_STATEMENT@202..211
+      0: JS_BINARY_EXPRESSION@202..210
+        0: JS_BINARY_EXPRESSION@202..206
+          0: JS_IDENTIFIER_EXPRESSION@202..204
+            0: JS_REFERENCE_IDENTIFIER@202..204
+              0: IDENT@202..204 "f" [Newline("\n")] []
+          1: L_ANGLE@204..205 "<" [] []
+          2: JS_IDENTIFIER_EXPRESSION@205..206
+            0: JS_REFERENCE_IDENTIFIER@205..206
+              0: IDENT@205..206 "T" [] []
+        1: R_ANGLE@206..208 ">" [] [Whitespace(" ")]
+        2: JS_PRE_UPDATE_EXPRESSION@208..210
+          0: PLUS2@208..210 "++" [] []
           1: (empty)
-      1: SEMICOLON@224..225 ";" [] []
-    13: JS_EXPRESSION_STATEMENT@225..234
-      0: JS_BINARY_EXPRESSION@225..233
-        0: JS_BINARY_EXPRESSION@225..229
-          0: JS_IDENTIFIER_EXPRESSION@225..227
-            0: JS_REFERENCE_IDENTIFIER@225..227
-              0: IDENT@225..227 "f" [Newline("\n")] []
-          1: L_ANGLE@227..228 "<" [] []
-          2: JS_IDENTIFIER_EXPRESSION@228..229
-            0: JS_REFERENCE_IDENTIFIER@228..229
-              0: IDENT@228..229 "T" [] []
-        1: R_ANGLE@229..231 ">" [] [Whitespace(" ")]
-        2: JS_PRE_UPDATE_EXPRESSION@231..233
-          0: MINUS2@231..233 "--" [] []
+      1: SEMICOLON@210..211 ";" [] []
+    12: JS_EXPRESSION_STATEMENT@211..220
+      0: JS_BINARY_EXPRESSION@211..219
+        0: JS_BINARY_EXPRESSION@211..215
+          0: JS_IDENTIFIER_EXPRESSION@211..213
+            0: JS_REFERENCE_IDENTIFIER@211..213
+              0: IDENT@211..213 "f" [Newline("\n")] []
+          1: L_ANGLE@213..214 "<" [] []
+          2: JS_IDENTIFIER_EXPRESSION@214..215
+            0: JS_REFERENCE_IDENTIFIER@214..215
+              0: IDENT@214..215 "T" [] []
+        1: R_ANGLE@215..217 ">" [] [Whitespace(" ")]
+        2: JS_PRE_UPDATE_EXPRESSION@217..219
+          0: MINUS2@217..219 "--" [] []
           1: (empty)
-      1: SEMICOLON@233..234 ";" [] []
-    14: JS_EXPRESSION_STATEMENT@234..245
-      0: JS_BINARY_EXPRESSION@234..245
-        0: JS_BINARY_EXPRESSION@234..238
-          0: JS_IDENTIFIER_EXPRESSION@234..236
-            0: JS_REFERENCE_IDENTIFIER@234..236
-              0: IDENT@234..236 "f" [Newline("\n")] []
-          1: L_ANGLE@236..237 "<" [] []
-          2: JS_IDENTIFIER_EXPRESSION@237..238
-            0: JS_REFERENCE_IDENTIFIER@237..238
-              0: IDENT@237..238 "T" [] []
-        1: R_ANGLE@238..240 ">" [] [Whitespace(" ")]
-        2: JS_REGEX_LITERAL_EXPRESSION@240..245
-          0: JS_REGEX_LITERAL@240..245 "/= 1;" [] []
+      1: SEMICOLON@219..220 ";" [] []
+    13: JS_EXPRESSION_STATEMENT@220..231
+      0: JS_BINARY_EXPRESSION@220..231
+        0: JS_BINARY_EXPRESSION@220..224
+          0: JS_IDENTIFIER_EXPRESSION@220..222
+            0: JS_REFERENCE_IDENTIFIER@220..222
+              0: IDENT@220..222 "f" [Newline("\n")] []
+          1: L_ANGLE@222..223 "<" [] []
+          2: JS_IDENTIFIER_EXPRESSION@223..224
+            0: JS_REFERENCE_IDENTIFIER@223..224
+              0: IDENT@223..224 "T" [] []
+        1: R_ANGLE@224..226 ">" [] [Whitespace(" ")]
+        2: JS_REGEX_LITERAL_EXPRESSION@226..231
+          0: JS_REGEX_LITERAL@226..231 "/= 1;" [] []
       1: (empty)
-    15: JS_EXPRESSION_STATEMENT@245..259
-      0: JS_BINARY_EXPRESSION@245..258
+    14: JS_EXPRESSION_STATEMENT@231..245
+      0: JS_BINARY_EXPRESSION@231..244
+        0: TS_INSTANTIATION_EXPRESSION@231..237
+          0: JS_IDENTIFIER_EXPRESSION@231..233
+            0: JS_REFERENCE_IDENTIFIER@231..233
+              0: IDENT@231..233 "f" [Newline("\n")] []
+          1: TS_TYPE_ARGUMENTS@233..237
+            0: L_ANGLE@233..234 "<" [] []
+            1: TS_TYPE_ARGUMENT_LIST@234..235
+              0: TS_REFERENCE_TYPE@234..235
+                0: JS_REFERENCE_IDENTIFIER@234..235
+                  0: IDENT@234..235 "T" [] []
+                1: (empty)
+            2: R_ANGLE@235..237 ">" [] [Whitespace(" ")]
+        1: LTEQ@237..240 "<=" [] [Whitespace(" ")]
+        2: TS_INSTANTIATION_EXPRESSION@240..244
+          0: JS_IDENTIFIER_EXPRESSION@240..241
+            0: JS_REFERENCE_IDENTIFIER@240..241
+              0: IDENT@240..241 "f" [] []
+          1: TS_TYPE_ARGUMENTS@241..244
+            0: L_ANGLE@241..242 "<" [] []
+            1: TS_TYPE_ARGUMENT_LIST@242..243
+              0: TS_REFERENCE_TYPE@242..243
+                0: JS_REFERENCE_IDENTIFIER@242..243
+                  0: IDENT@242..243 "T" [] []
+                1: (empty)
+            2: R_ANGLE@243..244 ">" [] []
+      1: SEMICOLON@244..245 ";" [] []
+    15: JS_EXPRESSION_STATEMENT@245..255
+      0: JS_COMPUTED_MEMBER_EXPRESSION@245..254
         0: TS_INSTANTIATION_EXPRESSION@245..251
-          0: JS_IDENTIFIER_EXPRESSION@245..247
-            0: JS_REFERENCE_IDENTIFIER@245..247
-              0: IDENT@245..247 "f" [Newline("\n")] []
-          1: TS_TYPE_ARGUMENTS@247..251
-            0: L_ANGLE@247..248 "<" [] []
-            1: TS_TYPE_ARGUMENT_LIST@248..249
-              0: TS_REFERENCE_TYPE@248..249
-                0: JS_REFERENCE_IDENTIFIER@248..249
-                  0: IDENT@248..249 "T" [] []
+          0: JS_IDENTIFIER_EXPRESSION@245..248
+            0: JS_REFERENCE_IDENTIFIER@245..248
+              0: IDENT@245..248 "f" [Newline("\n")] [Whitespace(" ")]
+          1: TS_TYPE_ARGUMENTS@248..251
+            0: L_ANGLE@248..249 "<" [] []
+            1: TS_TYPE_ARGUMENT_LIST@249..250
+              0: TS_REFERENCE_TYPE@249..250
+                0: JS_REFERENCE_IDENTIFIER@249..250
+                  0: IDENT@249..250 "T" [] []
                 1: (empty)
-            2: R_ANGLE@249..251 ">" [] [Whitespace(" ")]
-        1: LTEQ@251..254 "<=" [] [Whitespace(" ")]
-        2: TS_INSTANTIATION_EXPRESSION@254..258
-          0: JS_IDENTIFIER_EXPRESSION@254..255
-            0: JS_REFERENCE_IDENTIFIER@254..255
-              0: IDENT@254..255 "f" [] []
-          1: TS_TYPE_ARGUMENTS@255..258
-            0: L_ANGLE@255..256 "<" [] []
-            1: TS_TYPE_ARGUMENT_LIST@256..257
-              0: TS_REFERENCE_TYPE@256..257
-                0: JS_REFERENCE_IDENTIFIER@256..257
-                  0: IDENT@256..257 "T" [] []
-                1: (empty)
-            2: R_ANGLE@257..258 ">" [] []
-      1: SEMICOLON@258..259 ";" [] []
-    16: JS_EXPRESSION_STATEMENT@259..269
-      0: JS_COMPUTED_MEMBER_EXPRESSION@259..268
-        0: TS_INSTANTIATION_EXPRESSION@259..265
-          0: JS_IDENTIFIER_EXPRESSION@259..262
-            0: JS_REFERENCE_IDENTIFIER@259..262
-              0: IDENT@259..262 "f" [Newline("\n")] [Whitespace(" ")]
-          1: TS_TYPE_ARGUMENTS@262..265
-            0: L_ANGLE@262..263 "<" [] []
-            1: TS_TYPE_ARGUMENT_LIST@263..264
-              0: TS_REFERENCE_TYPE@263..264
-                0: JS_REFERENCE_IDENTIFIER@263..264
-                  0: IDENT@263..264 "T" [] []
-                1: (empty)
-            2: R_ANGLE@264..265 ">" [] []
+            2: R_ANGLE@250..251 ">" [] []
         1: (empty)
-        2: L_BRACK@265..267 "[" [Newline("\n")] []
+        2: L_BRACK@251..253 "[" [Newline("\n")] []
         3: (empty)
-        4: R_BRACK@267..268 "]" [] []
-      1: SEMICOLON@268..269 ";" [] []
-    17: JS_EXPRESSION_STATEMENT@269..274
-      0: TS_INSTANTIATION_EXPRESSION@269..274
-        0: JS_IDENTIFIER_EXPRESSION@269..271
-          0: JS_REFERENCE_IDENTIFIER@269..271
-            0: IDENT@269..271 "f" [Newline("\n")] []
-        1: TS_TYPE_ARGUMENTS@271..274
-          0: L_ANGLE@271..272 "<" [] []
-          1: TS_TYPE_ARGUMENT_LIST@272..273
-            0: TS_REFERENCE_TYPE@272..273
-              0: JS_REFERENCE_IDENTIFIER@272..273
-                0: IDENT@272..273 "T" [] []
+        4: R_BRACK@253..254 "]" [] []
+      1: SEMICOLON@254..255 ";" [] []
+    16: JS_EXPRESSION_STATEMENT@255..260
+      0: TS_INSTANTIATION_EXPRESSION@255..260
+        0: JS_IDENTIFIER_EXPRESSION@255..257
+          0: JS_REFERENCE_IDENTIFIER@255..257
+            0: IDENT@255..257 "f" [Newline("\n")] []
+        1: TS_TYPE_ARGUMENTS@257..260
+          0: L_ANGLE@257..258 "<" [] []
+          1: TS_TYPE_ARGUMENT_LIST@258..259
+            0: TS_REFERENCE_TYPE@258..259
+              0: JS_REFERENCE_IDENTIFIER@258..259
+                0: IDENT@258..259 "T" [] []
               1: (empty)
-          2: R_ANGLE@273..274 ">" [] []
+          2: R_ANGLE@259..260 ">" [] []
       1: (empty)
-    18: JS_EXPRESSION_STATEMENT@274..278
-      0: JS_IDENTIFIER_EXPRESSION@274..278
-        0: JS_REFERENCE_IDENTIFIER@274..278
-          0: IDENT@274..278 "as" [Newline("\n")] [Whitespace(" ")]
+    17: JS_EXPRESSION_STATEMENT@260..264
+      0: JS_IDENTIFIER_EXPRESSION@260..264
+        0: JS_REFERENCE_IDENTIFIER@260..264
+          0: IDENT@260..264 "as" [Newline("\n")] [Whitespace(" ")]
       1: (empty)
-    19: JS_BLOCK_STATEMENT@278..280
-      0: L_CURLY@278..279 "{" [] []
-      1: JS_STATEMENT_LIST@279..279
-      2: R_CURLY@279..280 "}" [] []
-    20: JS_EMPTY_STATEMENT@280..281
-      0: SEMICOLON@280..281 ";" [] []
-    21: JS_EXPRESSION_STATEMENT@281..286
-      0: TS_INSTANTIATION_EXPRESSION@281..286
-        0: JS_IDENTIFIER_EXPRESSION@281..283
-          0: JS_REFERENCE_IDENTIFIER@281..283
-            0: IDENT@281..283 "f" [Newline("\n")] []
-        1: TS_TYPE_ARGUMENTS@283..286
-          0: L_ANGLE@283..284 "<" [] []
-          1: TS_TYPE_ARGUMENT_LIST@284..285
-            0: TS_REFERENCE_TYPE@284..285
-              0: JS_REFERENCE_IDENTIFIER@284..285
-                0: IDENT@284..285 "T" [] []
+    18: JS_BLOCK_STATEMENT@264..266
+      0: L_CURLY@264..265 "{" [] []
+      1: JS_STATEMENT_LIST@265..265
+      2: R_CURLY@265..266 "}" [] []
+    19: JS_EMPTY_STATEMENT@266..267
+      0: SEMICOLON@266..267 ";" [] []
+    20: JS_EXPRESSION_STATEMENT@267..272
+      0: TS_INSTANTIATION_EXPRESSION@267..272
+        0: JS_IDENTIFIER_EXPRESSION@267..269
+          0: JS_REFERENCE_IDENTIFIER@267..269
+            0: IDENT@267..269 "f" [Newline("\n")] []
+        1: TS_TYPE_ARGUMENTS@269..272
+          0: L_ANGLE@269..270 "<" [] []
+          1: TS_TYPE_ARGUMENT_LIST@270..271
+            0: TS_REFERENCE_TYPE@270..271
+              0: JS_REFERENCE_IDENTIFIER@270..271
+                0: IDENT@270..271 "T" [] []
               1: (empty)
-          2: R_ANGLE@285..286 ">" [] []
+          2: R_ANGLE@271..272 ">" [] []
       1: (empty)
-    22: JS_EXPRESSION_STATEMENT@286..297
-      0: JS_IDENTIFIER_EXPRESSION@286..297
-        0: JS_REFERENCE_IDENTIFIER@286..297
-          0: IDENT@286..297 "satisfies" [Newline("\n")] [Whitespace(" ")]
+    21: JS_EXPRESSION_STATEMENT@272..283
+      0: JS_IDENTIFIER_EXPRESSION@272..283
+        0: JS_REFERENCE_IDENTIFIER@272..283
+          0: IDENT@272..283 "satisfies" [Newline("\n")] [Whitespace(" ")]
       1: (empty)
-    23: JS_BLOCK_STATEMENT@297..299
-      0: L_CURLY@297..298 "{" [] []
-      1: JS_STATEMENT_LIST@298..298
-      2: R_CURLY@298..299 "}" [] []
-    24: JS_EMPTY_STATEMENT@299..300
-      0: SEMICOLON@299..300 ";" [] []
-    25: JS_CLASS_DECLARATION@300..361
-      0: JS_DECORATOR_LIST@300..300
+    22: JS_BLOCK_STATEMENT@283..285
+      0: L_CURLY@283..284 "{" [] []
+      1: JS_STATEMENT_LIST@284..284
+      2: R_CURLY@284..285 "}" [] []
+    23: JS_EMPTY_STATEMENT@285..286
+      0: SEMICOLON@285..286 ";" [] []
+    24: JS_CLASS_DECLARATION@286..347
+      0: JS_DECORATOR_LIST@286..286
       1: (empty)
-      2: CLASS_KW@300..307 "class" [Newline("\n")] [Whitespace(" ")]
-      3: JS_IDENTIFIER_BINDING@307..310
-        0: IDENT@307..310 "C5" [] [Whitespace(" ")]
+      2: CLASS_KW@286..293 "class" [Newline("\n")] [Whitespace(" ")]
+      3: JS_IDENTIFIER_BINDING@293..296
+        0: IDENT@293..296 "C5" [] [Whitespace(" ")]
       4: (empty)
       5: (empty)
       6: (empty)
-      7: L_CURLY@310..311 "{" [] []
-      8: JS_CLASS_MEMBER_LIST@311..359
-        0: JS_PROPERTY_CLASS_MEMBER@311..359
-          0: JS_PROPERTY_MODIFIER_LIST@311..326
-            0: TS_ACCESSIBILITY_MODIFIER@311..326
-              0: PROTECTED_KW@311..326 "protected" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")]
-          1: JS_LITERAL_MEMBER_NAME@326..337
-            0: IDENT@326..337 "specialFoo" [] [Whitespace(" ")]
+      7: L_CURLY@296..297 "{" [] []
+      8: JS_CLASS_MEMBER_LIST@297..345
+        0: JS_PROPERTY_CLASS_MEMBER@297..345
+          0: JS_PROPERTY_MODIFIER_LIST@297..312
+            0: TS_ACCESSIBILITY_MODIFIER@297..312
+              0: PROTECTED_KW@297..312 "protected" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")]
+          1: JS_LITERAL_MEMBER_NAME@312..323
+            0: IDENT@312..323 "specialFoo" [] [Whitespace(" ")]
           2: (empty)
-          3: JS_INITIALIZER_CLAUSE@337..359
-            0: EQ@337..339 "=" [] [Whitespace(" ")]
-            1: JS_ASSIGNMENT_EXPRESSION@339..359
-              0: JS_BOGUS_ASSIGNMENT@339..354
-                0: JS_BINARY_EXPRESSION@339..347
-                  0: JS_IDENTIFIER_EXPRESSION@339..340
-                    0: JS_REFERENCE_IDENTIFIER@339..340
-                      0: IDENT@339..340 "f" [] []
-                  1: L_ANGLE@340..341 "<" [] []
-                  2: JS_IDENTIFIER_EXPRESSION@341..347
-                    0: JS_REFERENCE_IDENTIFIER@341..347
-                      0: IDENT@341..347 "string" [] []
-                1: R_ANGLE@347..349 ">" [] [Whitespace(" ")]
-                2: JS_BOGUS_EXPRESSION@349..354
-                  0: HASH@349..350 "#" [] []
-                  1: IDENT@350..354 "bar" [] [Whitespace(" ")]
-              1: EQ@354..356 "=" [] [Whitespace(" ")]
-              2: JS_NUMBER_LITERAL_EXPRESSION@356..359
-                0: JS_NUMBER_LITERAL@356..359 "123" [] []
+          3: JS_INITIALIZER_CLAUSE@323..345
+            0: EQ@323..325 "=" [] [Whitespace(" ")]
+            1: JS_ASSIGNMENT_EXPRESSION@325..345
+              0: JS_BOGUS_ASSIGNMENT@325..340
+                0: JS_BINARY_EXPRESSION@325..333
+                  0: JS_IDENTIFIER_EXPRESSION@325..326
+                    0: JS_REFERENCE_IDENTIFIER@325..326
+                      0: IDENT@325..326 "f" [] []
+                  1: L_ANGLE@326..327 "<" [] []
+                  2: JS_IDENTIFIER_EXPRESSION@327..333
+                    0: JS_REFERENCE_IDENTIFIER@327..333
+                      0: IDENT@327..333 "string" [] []
+                1: R_ANGLE@333..335 ">" [] [Whitespace(" ")]
+                2: JS_BOGUS_EXPRESSION@335..340
+                  0: HASH@335..336 "#" [] []
+                  1: IDENT@336..340 "bar" [] [Whitespace(" ")]
+              1: EQ@340..342 "=" [] [Whitespace(" ")]
+              2: JS_NUMBER_LITERAL_EXPRESSION@342..345
+                0: JS_NUMBER_LITERAL@342..345 "123" [] []
           4: (empty)
-      9: R_CURLY@359..361 "}" [Newline("\n")] []
-    26: JS_FOR_IN_STATEMENT@361..401
-      0: FOR_KW@361..366 "for" [Newline("\n")] [Whitespace(" ")]
-      1: L_PAREN@366..367 "(" [] []
-      2: JS_FOR_VARIABLE_DECLARATION@367..392
+      9: R_CURLY@345..347 "}" [Newline("\n")] []
+    25: JS_FOR_IN_STATEMENT@347..387
+      0: FOR_KW@347..352 "for" [Newline("\n")] [Whitespace(" ")]
+      1: L_PAREN@352..353 "(" [] []
+      2: JS_FOR_VARIABLE_DECLARATION@353..378
         0: (empty)
-        1: CONST_KW@367..373 "const" [] [Whitespace(" ")]
-        2: JS_VARIABLE_DECLARATOR@373..392
-          0: JS_IDENTIFIER_BINDING@373..375
-            0: IDENT@373..375 "a" [] [Whitespace(" ")]
+        1: CONST_KW@353..359 "const" [] [Whitespace(" ")]
+        2: JS_VARIABLE_DECLARATOR@359..378
+          0: JS_IDENTIFIER_BINDING@359..361
+            0: IDENT@359..361 "a" [] [Whitespace(" ")]
           1: (empty)
-          2: JS_INITIALIZER_CLAUSE@375..392
-            0: EQ@375..377 "=" [] [Whitespace(" ")]
-            1: TS_INSTANTIATION_EXPRESSION@377..392
-              0: JS_STATIC_MEMBER_EXPRESSION@377..383
-                0: JS_IDENTIFIER_EXPRESSION@377..378
-                  0: JS_REFERENCE_IDENTIFIER@377..378
-                    0: IDENT@377..378 "b" [] []
-                1: DOT@378..379 "." [] []
-                2: JS_NAME@379..383
-                  0: IDENT@379..383 "test" [] []
-              1: TS_TYPE_ARGUMENTS@383..392
-                0: L_ANGLE@383..384 "<" [] []
-                1: TS_TYPE_ARGUMENT_LIST@384..390
-                  0: TS_STRING_TYPE@384..390
-                    0: STRING_KW@384..390 "string" [] []
-                2: R_ANGLE@390..392 ">" [] [Whitespace(" ")]
-      3: IN_KW@392..395 "in" [] [Whitespace(" ")]
-      4: JS_ARRAY_EXPRESSION@395..397
-        0: L_BRACK@395..396 "[" [] []
-        1: JS_ARRAY_ELEMENT_LIST@396..396
-        2: R_BRACK@396..397 "]" [] []
-      5: R_PAREN@397..399 ")" [] [Whitespace(" ")]
-      6: JS_BLOCK_STATEMENT@399..401
-        0: L_CURLY@399..400 "{" [] []
-        1: JS_STATEMENT_LIST@400..400
-        2: R_CURLY@400..401 "}" [] []
-  4: EOF@401..402 "" [Newline("\n")] []
+          2: JS_INITIALIZER_CLAUSE@361..378
+            0: EQ@361..363 "=" [] [Whitespace(" ")]
+            1: TS_INSTANTIATION_EXPRESSION@363..378
+              0: JS_STATIC_MEMBER_EXPRESSION@363..369
+                0: JS_IDENTIFIER_EXPRESSION@363..364
+                  0: JS_REFERENCE_IDENTIFIER@363..364
+                    0: IDENT@363..364 "b" [] []
+                1: DOT@364..365 "." [] []
+                2: JS_NAME@365..369
+                  0: IDENT@365..369 "test" [] []
+              1: TS_TYPE_ARGUMENTS@369..378
+                0: L_ANGLE@369..370 "<" [] []
+                1: TS_TYPE_ARGUMENT_LIST@370..376
+                  0: TS_STRING_TYPE@370..376
+                    0: STRING_KW@370..376 "string" [] []
+                2: R_ANGLE@376..378 ">" [] [Whitespace(" ")]
+      3: IN_KW@378..381 "in" [] [Whitespace(" ")]
+      4: JS_ARRAY_EXPRESSION@381..383
+        0: L_BRACK@381..382 "[" [] []
+        1: JS_ARRAY_ELEMENT_LIST@382..382
+        2: R_BRACK@382..383 "]" [] []
+      5: R_PAREN@383..385 ")" [] [Whitespace(" ")]
+      6: JS_BLOCK_STATEMENT@385..387
+        0: L_CURLY@385..386 "{" [] []
+        1: JS_STATEMENT_LIST@386..386
+        2: R_CURLY@386..387 "}" [] []
+  4: EOF@387..388 "" [Newline("\n")] []
 
 ```
 
@@ -1312,14 +1196,14 @@ ts_instantiation_expressions_1.ts:1:29 parse ━━━━━━━━━━━�
   > 1 │ const a8 = f<number><number>;  // Relational operator error
       │                             ^
     2 │ const b1 = f?.<number>;  // Error, `(` expected
-    3 │ f<T> << f<T>;
+    3 │ f<T> = g<K>;
   
   i Expected an expression here.
   
   > 1 │ const a8 = f<number><number>;  // Relational operator error
       │                             ^
     2 │ const b1 = f?.<number>;  // Error, `(` expected
-    3 │ f<T> << f<T>;
+    3 │ f<T> = g<K>;
   
 ts_instantiation_expressions_1.ts:2:23 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -1328,373 +1212,340 @@ ts_instantiation_expressions_1.ts:2:23 parse ━━━━━━━━━━━�
     1 │ const a8 = f<number><number>;  // Relational operator error
   > 2 │ const b1 = f?.<number>;  // Error, `(` expected
       │                       ^
-    3 │ f<T> << f<T>;
-    4 │ f<T> = g<K>;
+    3 │ f<T> = g<K>;
+    4 │ f<T> >> f<T>;
   
   i Remove ;
   
-ts_instantiation_expressions_1.ts:3:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `<`
-  
-    1 │ const a8 = f<number><number>;  // Relational operator error
-    2 │ const b1 = f?.<number>;  // Error, `(` expected
-  > 3 │ f<T> << f<T>;
-      │          ^
-    4 │ f<T> = g<K>;
-    5 │ f<T> >> f<T>;
-  
-  i Remove <
-  
-ts_instantiation_expressions_1.ts:3:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a parenthesis '(' but instead found ';'.
-  
-    1 │ const a8 = f<number><number>;  // Relational operator error
-    2 │ const b1 = f?.<number>;  // Error, `(` expected
-  > 3 │ f<T> << f<T>;
-      │             ^
-    4 │ f<T> = g<K>;
-    5 │ f<T> >> f<T>;
-  
-  i Expected a parenthesis '(' here.
-  
-    1 │ const a8 = f<number><number>;  // Relational operator error
-    2 │ const b1 = f?.<number>;  // Error, `(` expected
-  > 3 │ f<T> << f<T>;
-      │             ^
-    4 │ f<T> = g<K>;
-    5 │ f<T> >> f<T>;
-  
-ts_instantiation_expressions_1.ts:4:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ts_instantiation_expressions_1.ts:3:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Invalid assignment to `f<T>`
   
+    1 │ const a8 = f<number><number>;  // Relational operator error
     2 │ const b1 = f?.<number>;  // Error, `(` expected
-    3 │ f<T> << f<T>;
-  > 4 │ f<T> = g<K>;
+  > 3 │ f<T> = g<K>;
       │ ^^^^
-    5 │ f<T> >> f<T>;
-    6 │ f<T> >= f<T>;
+    4 │ f<T> >> f<T>;
+    5 │ f<T> >= f<T>;
   
   i This expression cannot be assigned to
   
-ts_instantiation_expressions_1.ts:5:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ts_instantiation_expressions_1.ts:4:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected an expression for the left hand side of the `>>` operator.
   
-    3 │ f<T> << f<T>;
-    4 │ f<T> = g<K>;
-  > 5 │ f<T> >> f<T>;
+    2 │ const b1 = f?.<number>;  // Error, `(` expected
+    3 │ f<T> = g<K>;
+  > 4 │ f<T> >> f<T>;
       │      ^^
-    6 │ f<T> >= f<T>;
-    7 │ f<T> < f<T>;
+    5 │ f<T> >= f<T>;
+    6 │ f<T> < f<T>;
   
   i This operator requires a left hand side value
   
-ts_instantiation_expressions_1.ts:6:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ts_instantiation_expressions_1.ts:5:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected an expression but instead found '>='.
   
-    4 │ f<T> = g<K>;
-    5 │ f<T> >> f<T>;
-  > 6 │ f<T> >= f<T>;
+    3 │ f<T> = g<K>;
+    4 │ f<T> >> f<T>;
+  > 5 │ f<T> >= f<T>;
       │      ^^
-    7 │ f<T> < f<T>;
-    8 │ f<T> > f<T>;
+    6 │ f<T> < f<T>;
+    7 │ f<T> > f<T>;
   
   i Expected an expression here.
   
-    4 │ f<T> = g<K>;
-    5 │ f<T> >> f<T>;
-  > 6 │ f<T> >= f<T>;
+    3 │ f<T> = g<K>;
+    4 │ f<T> >> f<T>;
+  > 5 │ f<T> >= f<T>;
       │      ^^
-    7 │ f<T> < f<T>;
-    8 │ f<T> > f<T>;
+    6 │ f<T> < f<T>;
+    7 │ f<T> > f<T>;
   
-ts_instantiation_expressions_1.ts:7:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ts_instantiation_expressions_1.ts:6:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `>` but instead found `;`
   
-    5 │ f<T> >> f<T>;
-    6 │ f<T> >= f<T>;
-  > 7 │ f<T> < f<T>;
+    4 │ f<T> >> f<T>;
+    5 │ f<T> >= f<T>;
+  > 6 │ f<T> < f<T>;
       │            ^
-    8 │ f<T> > f<T>;
-    9 │ f<T> import<1>;
+    7 │ f<T> > f<T>;
+    8 │ f<T> import<1>;
   
   i Remove ;
   
-ts_instantiation_expressions_1.ts:8:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ts_instantiation_expressions_1.ts:7:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected an expression but instead found '>'.
   
-     6 │ f<T> >= f<T>;
-     7 │ f<T> < f<T>;
-   > 8 │ f<T> > f<T>;
-       │      ^
-     9 │ f<T> import<1>;
-    10 │ f<T> yield;
+    5 │ f<T> >= f<T>;
+    6 │ f<T> < f<T>;
+  > 7 │ f<T> > f<T>;
+      │      ^
+    8 │ f<T> import<1>;
+    9 │ f<T> yield;
   
   i Expected an expression here.
   
-     6 │ f<T> >= f<T>;
-     7 │ f<T> < f<T>;
-   > 8 │ f<T> > f<T>;
-       │      ^
-     9 │ f<T> import<1>;
-    10 │ f<T> yield;
+    5 │ f<T> >= f<T>;
+    6 │ f<T> < f<T>;
+  > 7 │ f<T> > f<T>;
+      │      ^
+    8 │ f<T> import<1>;
+    9 │ f<T> yield;
   
-ts_instantiation_expressions_1.ts:9:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ts_instantiation_expressions_1.ts:8:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected an expression but instead found 'import'.
   
-     7 │ f<T> < f<T>;
-     8 │ f<T> > f<T>;
-   > 9 │ f<T> import<1>;
+     6 │ f<T> < f<T>;
+     7 │ f<T> > f<T>;
+   > 8 │ f<T> import<1>;
        │      ^^^^^^
-    10 │ f<T> yield;
-    11 │ f<T> ++;
+     9 │ f<T> yield;
+    10 │ f<T> ++;
   
   i Expected an expression here.
   
-     7 │ f<T> < f<T>;
-     8 │ f<T> > f<T>;
-   > 9 │ f<T> import<1>;
+     6 │ f<T> < f<T>;
+     7 │ f<T> > f<T>;
+   > 8 │ f<T> import<1>;
        │      ^^^^^^
-    10 │ f<T> yield;
-    11 │ f<T> ++;
+     9 │ f<T> yield;
+    10 │ f<T> ++;
   
-ts_instantiation_expressions_1.ts:9:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ts_instantiation_expressions_1.ts:8:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a default import, a namespace import, or a named import but instead found '<'.
   
-     7 │ f<T> < f<T>;
-     8 │ f<T> > f<T>;
-   > 9 │ f<T> import<1>;
+     6 │ f<T> < f<T>;
+     7 │ f<T> > f<T>;
+   > 8 │ f<T> import<1>;
        │            ^
-    10 │ f<T> yield;
-    11 │ f<T> ++;
+     9 │ f<T> yield;
+    10 │ f<T> ++;
   
   i Expected a default import, a namespace import, or a named import here.
   
-     7 │ f<T> < f<T>;
-     8 │ f<T> > f<T>;
-   > 9 │ f<T> import<1>;
+     6 │ f<T> < f<T>;
+     7 │ f<T> > f<T>;
+   > 8 │ f<T> import<1>;
        │            ^
-    10 │ f<T> yield;
-    11 │ f<T> ++;
+     9 │ f<T> yield;
+    10 │ f<T> ++;
   
-ts_instantiation_expressions_1.ts:9:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ts_instantiation_expressions_1.ts:8:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected an expression but instead found ';'.
   
-     7 │ f<T> < f<T>;
-     8 │ f<T> > f<T>;
-   > 9 │ f<T> import<1>;
+     6 │ f<T> < f<T>;
+     7 │ f<T> > f<T>;
+   > 8 │ f<T> import<1>;
        │               ^
-    10 │ f<T> yield;
-    11 │ f<T> ++;
+     9 │ f<T> yield;
+    10 │ f<T> ++;
   
   i Expected an expression here.
   
-     7 │ f<T> < f<T>;
-     8 │ f<T> > f<T>;
-   > 9 │ f<T> import<1>;
+     6 │ f<T> < f<T>;
+     7 │ f<T> > f<T>;
+   > 8 │ f<T> import<1>;
        │               ^
-    10 │ f<T> yield;
-    11 │ f<T> ++;
+     9 │ f<T> yield;
+    10 │ f<T> ++;
   
-ts_instantiation_expressions_1.ts:10:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ts_instantiation_expressions_1.ts:9:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Illegal use of reserved keyword `yield` as an identifier in strict mode
   
-     8 │ f<T> > f<T>;
-     9 │ f<T> import<1>;
-  > 10 │ f<T> yield;
+     7 │ f<T> > f<T>;
+     8 │ f<T> import<1>;
+   > 9 │ f<T> yield;
        │      ^^^^^
-    11 │ f<T> ++;
-    12 │ f<T> --;
+    10 │ f<T> ++;
+    11 │ f<T> --;
+  
+ts_instantiation_expressions_1.ts:10:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an identifier, or a member expression but instead found ';'.
+  
+     8 │ f<T> import<1>;
+     9 │ f<T> yield;
+  > 10 │ f<T> ++;
+       │        ^
+    11 │ f<T> --;
+    12 │ f<T> /= 1;
+  
+  i Expected an identifier, or a member expression here.
+  
+     8 │ f<T> import<1>;
+     9 │ f<T> yield;
+  > 10 │ f<T> ++;
+       │        ^
+    11 │ f<T> --;
+    12 │ f<T> /= 1;
   
 ts_instantiation_expressions_1.ts:11:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected an identifier, or a member expression but instead found ';'.
   
-     9 │ f<T> import<1>;
-    10 │ f<T> yield;
-  > 11 │ f<T> ++;
+     9 │ f<T> yield;
+    10 │ f<T> ++;
+  > 11 │ f<T> --;
        │        ^
-    12 │ f<T> --;
-    13 │ f<T> /= 1;
+    12 │ f<T> /= 1;
+    13 │ f<T> <= f<T>;
   
   i Expected an identifier, or a member expression here.
   
-     9 │ f<T> import<1>;
-    10 │ f<T> yield;
-  > 11 │ f<T> ++;
+     9 │ f<T> yield;
+    10 │ f<T> ++;
+  > 11 │ f<T> --;
        │        ^
-    12 │ f<T> --;
-    13 │ f<T> /= 1;
+    12 │ f<T> /= 1;
+    13 │ f<T> <= f<T>;
   
-ts_instantiation_expressions_1.ts:12:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected an identifier, or a member expression but instead found ';'.
-  
-    10 │ f<T> yield;
-    11 │ f<T> ++;
-  > 12 │ f<T> --;
-       │        ^
-    13 │ f<T> /= 1;
-    14 │ f<T> <= f<T>;
-  
-  i Expected an identifier, or a member expression here.
-  
-    10 │ f<T> yield;
-    11 │ f<T> ++;
-  > 12 │ f<T> --;
-       │        ^
-    13 │ f<T> /= 1;
-    14 │ f<T> <= f<T>;
-  
-ts_instantiation_expressions_1.ts:13:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ts_instantiation_expressions_1.ts:12:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × unterminated regex literal
   
-    11 │ f<T> ++;
-    12 │ f<T> --;
-  > 13 │ f<T> /= 1;
+    10 │ f<T> ++;
+    11 │ f<T> --;
+  > 12 │ f<T> /= 1;
        │           
-    14 │ f<T> <= f<T>;
-    15 │ f <T>
+    13 │ f<T> <= f<T>;
+    14 │ f <T>
   
   i ...but the line ends here
   
-    11 │ f<T> ++;
-    12 │ f<T> --;
-  > 13 │ f<T> /= 1;
+    10 │ f<T> ++;
+    11 │ f<T> --;
+  > 12 │ f<T> /= 1;
        │           
-    14 │ f<T> <= f<T>;
-    15 │ f <T>
+    13 │ f<T> <= f<T>;
+    14 │ f <T>
   
   i a regex literal starts there...
   
-    11 │ f<T> ++;
-    12 │ f<T> --;
-  > 13 │ f<T> /= 1;
+    10 │ f<T> ++;
+    11 │ f<T> --;
+  > 12 │ f<T> /= 1;
        │      ^
-    14 │ f<T> <= f<T>;
-    15 │ f <T>
+    13 │ f<T> <= f<T>;
+    14 │ f <T>
   
-ts_instantiation_expressions_1.ts:16:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ts_instantiation_expressions_1.ts:15:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected an expression but instead found ']'.
   
-    14 │ f<T> <= f<T>;
-    15 │ f <T>
-  > 16 │ [];
+    13 │ f<T> <= f<T>;
+    14 │ f <T>
+  > 15 │ [];
        │  ^
-    17 │ f<T>
-    18 │ as {};
+    16 │ f<T>
+    17 │ as {};
   
   i Expected an expression here.
   
-    14 │ f<T> <= f<T>;
-    15 │ f <T>
-  > 16 │ [];
+    13 │ f<T> <= f<T>;
+    14 │ f <T>
+  > 15 │ [];
        │  ^
-    17 │ f<T>
-    18 │ as {};
+    16 │ f<T>
+    17 │ as {};
   
-ts_instantiation_expressions_1.ts:18:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ts_instantiation_expressions_1.ts:17:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a semicolon or an implicit semicolon after a statement, but found none
   
-    16 │ [];
-    17 │ f<T>
-  > 18 │ as {};
+    15 │ [];
+    16 │ f<T>
+  > 17 │ as {};
        │    ^
-    19 │ f<T>
-    20 │ satisfies {};
+    18 │ f<T>
+    19 │ satisfies {};
   
   i An explicit or implicit semicolon is expected here...
   
-    16 │ [];
-    17 │ f<T>
-  > 18 │ as {};
+    15 │ [];
+    16 │ f<T>
+  > 17 │ as {};
        │    ^
-    19 │ f<T>
-    20 │ satisfies {};
+    18 │ f<T>
+    19 │ satisfies {};
   
   i ...Which is required to end this statement
   
-    16 │ [];
-    17 │ f<T>
-  > 18 │ as {};
+    15 │ [];
+    16 │ f<T>
+  > 17 │ as {};
        │ ^^^^
-    19 │ f<T>
-    20 │ satisfies {};
+    18 │ f<T>
+    19 │ satisfies {};
   
-ts_instantiation_expressions_1.ts:20:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ts_instantiation_expressions_1.ts:19:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a semicolon or an implicit semicolon after a statement, but found none
   
-    18 │ as {};
-    19 │ f<T>
-  > 20 │ satisfies {};
+    17 │ as {};
+    18 │ f<T>
+  > 19 │ satisfies {};
        │           ^
-    21 │ class C5 {
-    22 │     protected specialFoo = f<string> #bar = 123
+    20 │ class C5 {
+    21 │     protected specialFoo = f<string> #bar = 123
   
   i An explicit or implicit semicolon is expected here...
   
-    18 │ as {};
-    19 │ f<T>
-  > 20 │ satisfies {};
+    17 │ as {};
+    18 │ f<T>
+  > 19 │ satisfies {};
        │           ^
-    21 │ class C5 {
-    22 │     protected specialFoo = f<string> #bar = 123
+    20 │ class C5 {
+    21 │     protected specialFoo = f<string> #bar = 123
   
   i ...Which is required to end this statement
   
-    18 │ as {};
-    19 │ f<T>
-  > 20 │ satisfies {};
+    17 │ as {};
+    18 │ f<T>
+  > 19 │ satisfies {};
        │ ^^^^^^^^^^^
-    21 │ class C5 {
-    22 │     protected specialFoo = f<string> #bar = 123
+    20 │ class C5 {
+    21 │     protected specialFoo = f<string> #bar = 123
   
-ts_instantiation_expressions_1.ts:22:38 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ts_instantiation_expressions_1.ts:21:38 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Private names are only allowed on the left side of a 'in' expression
   
-    20 │ satisfies {};
-    21 │ class C5 {
-  > 22 │     protected specialFoo = f<string> #bar = 123
+    19 │ satisfies {};
+    20 │ class C5 {
+  > 21 │     protected specialFoo = f<string> #bar = 123
        │                                      ^^^^
-    23 │ }
-    24 │ for (const a = b.test<string> in []) {}
+    22 │ }
+    23 │ for (const a = b.test<string> in []) {}
   
-ts_instantiation_expressions_1.ts:22:28 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ts_instantiation_expressions_1.ts:21:28 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Invalid assignment to `f<string> #bar`
   
-    20 │ satisfies {};
-    21 │ class C5 {
-  > 22 │     protected specialFoo = f<string> #bar = 123
+    19 │ satisfies {};
+    20 │ class C5 {
+  > 21 │     protected specialFoo = f<string> #bar = 123
        │                            ^^^^^^^^^^^^^^
-    23 │ }
-    24 │ for (const a = b.test<string> in []) {}
+    22 │ }
+    23 │ for (const a = b.test<string> in []) {}
   
   i This expression cannot be assigned to
   
-ts_instantiation_expressions_1.ts:24:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ts_instantiation_expressions_1.ts:23:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × `for..in` statement declarators cannot have an initializer expression
   
-    22 │     protected specialFoo = f<string> #bar = 123
-    23 │ }
-  > 24 │ for (const a = b.test<string> in []) {}
+    21 │     protected specialFoo = f<string> #bar = 123
+    22 │ }
+  > 23 │ for (const a = b.test<string> in []) {}
        │              ^^^^^^^^^^^^^^^^
-    25 │ 
+    24 │ 
   
 ```

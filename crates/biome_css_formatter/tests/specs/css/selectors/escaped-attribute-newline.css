@@ -1,0 +1,11 @@
+div   span[foo='bar short\
+short']{color:red}
+
+div   span[foo='bar long long long\
+ long long long long long long long long long long long long']{color:red}
+
+div{&   span[foo='bar short\
+short']{color:red}}
+
+div{&   span[foo='bar long long long\
+ long long long long long long long long long long long long']{color:red}}

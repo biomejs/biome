@@ -1,0 +1,6 @@
+/* should generate diagnostics */
+.host {
+    color: red;
+    display: block;
+    @keyframes inner { from { opacity: 0; } to { opacity: 1; } }
+}

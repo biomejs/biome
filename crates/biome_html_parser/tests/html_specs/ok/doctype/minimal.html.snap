@@ -17,10 +17,12 @@ expression: snapshot
 HtmlRoot {
     bom_token: missing (optional),
     frontmatter: missing (optional),
+    processing_instruction: missing (optional),
     directive: HtmlDirective {
         l_angle_token: L_ANGLE@0..1 "<" [] [],
         excl_token: BANG@1..2 "!" [] [],
         doctype_token: DOCTYPE_KW@2..9 "DOCTYPE" [] [],
+        name_token: missing (optional),
         html_token: missing (optional),
         quirk_token: missing (optional),
         public_id_token: missing (optional),
@@ -38,7 +40,8 @@ HtmlRoot {
 0: HTML_ROOT@0..11
   0: (empty)
   1: (empty)
-  2: HTML_DIRECTIVE@0..10
+  2: (empty)
+  3: HTML_DIRECTIVE@0..10
     0: L_ANGLE@0..1 "<" [] []
     1: BANG@1..2 "!" [] []
     2: DOCTYPE_KW@2..9 "DOCTYPE" [] []
@@ -46,8 +49,9 @@ HtmlRoot {
     4: (empty)
     5: (empty)
     6: (empty)
-    7: R_ANGLE@9..10 ">" [] []
-  3: HTML_ELEMENT_LIST@10..10
-  4: EOF@10..11 "" [Newline("\n")] []
+    7: (empty)
+    8: R_ANGLE@9..10 ">" [] []
+  4: HTML_ELEMENT_LIST@10..10
+  5: EOF@10..11 "" [Newline("\n")] []
 
 ```

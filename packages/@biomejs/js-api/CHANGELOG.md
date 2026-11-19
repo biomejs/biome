@@ -1,5 +1,69 @@
 # @biomejs/js-api
 
+## 6.1.0
+
+### Minor Changes
+
+- [#9940](https://github.com/biomejs/biome/pull/9940) [`1aefcb1`](https://github.com/biomejs/biome/commit/1aefcb186f47df33685aeb2fdd249cd90bdf1892) Thanks [@regseb](https://github.com/regseb)! - Added `spanInBytesToSpanInCodeUnits` helper function in subpath exports of `@biomejs/js-api`.
+  
+  ```js
+  import { spanInBytesToSpanInCodeUnits } from "@biomejs/js-api/nodejs";
+  // Or:
+  // import { spanInBytesToSpanInCodeUnits } from "@biomejs/js-api/bundler";
+  // import { spanInBytesToSpanInCodeUnits } from "@biomejs/js-api/web";
+  
+  const [start, end] = spanInBytesToSpanInCodeUnits(
+      diagnostic.location.span,
+      content
+  );
+  const text = content.slice(start, end); // Correctly extracts the text
+  ```
+
+- [#8912](https://github.com/biomejs/biome/pull/8912) [`e9785d8`](https://github.com/biomejs/biome/commit/e9785d8ce949cd7ba3f9d64f4cb4a7f7f9034e60) Thanks [@dyc3](https://github.com/dyc3)! - Added GritQL search to `@biomejs/js-api`. Parse a pattern with `parsePattern()`, search content with `searchContent()`, and release the pattern with `dropPattern()`. Matches are returned as UTF-8 byte offsets; use `spanInBytesToSpanInCodeUnits()` to convert them before slicing the content.
+  
+  ```js
+  const patternId = biome.parsePattern("`console.log($message)`", {
+    defaultLanguage: "js",
+  });
+  const { matches } = biome.searchContent(projectKey, content, {
+    filePath: "example.js",
+    patternId,
+  });
+  biome.dropPattern(patternId);
+  ```
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @biomejs/wasm-bundler@2.6.0
+  - @biomejs/wasm-nodejs@2.6.0
+  - @biomejs/wasm-web@2.6.0
+
+## 6.0.0
+
+### Minor Changes
+
+- [#8944](https://github.com/biomejs/biome/pull/8944) [`8cd3da1`](https://github.com/biomejs/biome/commit/8cd3da1c9008109a17264ea60d1022a8373d3265) Thanks [@ash1day](https://github.com/ash1day)! - Added a new `spanInBytesToSpanInCodeUnits` helper function to convert byte-based spans from Biome diagnostics to UTF-16 code unit spans.
+
+  Biome internally uses UTF-8 byte offsets for spans, but JavaScript strings use UTF-16 code units. This causes incorrect text extraction when using `string.slice()` with non-ASCII content. The new helper function correctly handles this conversion, including surrogate pairs and unpaired surrogates.
+
+  ```js
+  import { spanInBytesToSpanInCodeUnits } from "@biomejs/js-api";
+
+  const [start, end] = spanInBytesToSpanInCodeUnits(
+    diagnostic.location.span,
+    content,
+  );
+  const text = content.slice(start, end); // Correctly extracts the text
+  ```
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @biomejs/wasm-web@2.5.0
+  - @biomejs/wasm-bundler@2.5.0
+  - @biomejs/wasm-nodejs@2.5.0
+
 ## 5.0.0
 
 ### Patch Changes

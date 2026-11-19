@@ -1,0 +1,128 @@
+---
+source: crates/biome_markdown_analyze/tests/spec_tests.rs
+expression: allowedLanguages.md
+---
+# Input
+```md
+<!-- should generate diagnostics -->
+
+```
+no language
+```
+
+```js
+console.log(1)
+```
+
+```python
+print(1)
+```
+
+```JS
+console.log(1)
+```
+
+```js title="example.js"
+console.log(1)
+```
+
+``` js
+console.log(1)
+```
+
+```   
+console.log(1)
+```
+
+```
+
+# Diagnostics
+```
+allowedLanguages.md:3:1 lint/nursery/useFencedCodeLanguage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This fenced code block is missing a language tag.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ 
+  > 3 │ ```
+      │ ^^^
+    4 │ no language
+    5 │ ```
+  
+  i Renderers use language tags to select syntax highlighting for supported languages.
+  
+  i Add one of the languages configured in allowedLanguages after the opening fence.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+allowedLanguages.md:11:4 lint/nursery/useFencedCodeLanguage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This language tag isn't in the list of allowed languages.
+  
+     9 │ ```
+    10 │ 
+  > 11 │ ```python
+       │    ^^^^^^
+    12 │ print(1)
+    13 │ ```
+  
+  i The allowedLanguages option restricts fenced code blocks to a specific set of language tags.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Use one of the allowed languages:
+  
+  - js
+  - ts
+  
+
+```
+
+```
+allowedLanguages.md:15:4 lint/nursery/useFencedCodeLanguage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This language tag isn't in the list of allowed languages.
+  
+    13 │ ```
+    14 │ 
+  > 15 │ ```JS
+       │    ^^
+    16 │ console.log(1)
+    17 │ ```
+  
+  i The allowedLanguages option restricts fenced code blocks to a specific set of language tags.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Use one of the allowed languages:
+  
+  - js
+  - ts
+  
+
+```
+
+```
+allowedLanguages.md:27:1 lint/nursery/useFencedCodeLanguage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This fenced code block is missing a language tag.
+  
+    25 │ ```
+    26 │ 
+  > 27 │ ```···
+       │ ^^^
+    28 │ console.log(1)
+    29 │ ```
+  
+  i Renderers use language tags to select syntax highlighting for supported languages.
+  
+  i Add one of the languages configured in allowedLanguages after the opening fence.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

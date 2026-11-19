@@ -1,0 +1,486 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+a { color: fn(!); width: 1px; }
+b { color: fn(!important); width: 1px; }
+c { color: fn(!notimportant); width: 1px; }
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: CssTypeSelector {
+                        namespace: missing (optional),
+                        ident: CssIdentifier {
+                            value_token: IDENT@0..2 "a" [] [Whitespace(" ")],
+                        },
+                    },
+                    sub_selectors: CssSubSelectorList [],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@2..4 "{" [] [Whitespace(" ")],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssBogusProperty {
+                                items: [
+                                    CssIdentifier {
+                                        value_token: IDENT@4..9 "color" [] [],
+                                    },
+                                    COLON@9..11 ":" [] [Whitespace(" ")],
+                                    CssBogus {
+                                        items: [
+                                            CssBogusSupportsCondition {
+                                                items: [
+                                                    CssIdentifier {
+                                                        value_token: IDENT@11..13 "fn" [] [],
+                                                    },
+                                                    L_PAREN@13..14 "(" [] [],
+                                                    CssBogus {
+                                                        items: [
+                                                            CssBogusParameter {
+                                                                items: [
+                                                                    BANG@14..15 "!" [] [],
+                                                                ],
+                                                            },
+                                                        ],
+                                                    },
+                                                    R_PAREN@15..16 ")" [] [],
+                                                ],
+                                            },
+                                        ],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@16..18 ";" [] [Whitespace(" ")],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@18..23 "width" [] [],
+                                },
+                                colon_token: COLON@23..25 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssRegularDimension {
+                                        value_token: CSS_NUMBER_LITERAL@25..26 "1" [] [],
+                                        unit_token: IDENT@26..28 "px" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@28..30 ";" [] [Whitespace(" ")],
+                    },
+                ],
+                r_curly_token: R_CURLY@30..31 "}" [] [],
+            },
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: CssTypeSelector {
+                        namespace: missing (optional),
+                        ident: CssIdentifier {
+                            value_token: IDENT@31..34 "b" [Newline("\n")] [Whitespace(" ")],
+                        },
+                    },
+                    sub_selectors: CssSubSelectorList [],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@34..36 "{" [] [Whitespace(" ")],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssBogusProperty {
+                                items: [
+                                    CssIdentifier {
+                                        value_token: IDENT@36..41 "color" [] [],
+                                    },
+                                    COLON@41..43 ":" [] [Whitespace(" ")],
+                                    CssBogus {
+                                        items: [
+                                            CssBogusSupportsCondition {
+                                                items: [
+                                                    CssIdentifier {
+                                                        value_token: IDENT@43..45 "fn" [] [],
+                                                    },
+                                                    L_PAREN@45..46 "(" [] [],
+                                                    CssBogus {
+                                                        items: [
+                                                            CssBogusParameter {
+                                                                items: [
+                                                                    BANG@46..47 "!" [] [],
+                                                                ],
+                                                            },
+                                                            CssListOfComponentValuesExpression {
+                                                                css_component_value_list: CssComponentValueList [
+                                                                    CssIdentifier {
+                                                                        value_token: IDENT@47..56 "important" [] [],
+                                                                    },
+                                                                ],
+                                                            },
+                                                        ],
+                                                    },
+                                                    R_PAREN@56..57 ")" [] [],
+                                                ],
+                                            },
+                                        ],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@57..59 ";" [] [Whitespace(" ")],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@59..64 "width" [] [],
+                                },
+                                colon_token: COLON@64..66 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssRegularDimension {
+                                        value_token: CSS_NUMBER_LITERAL@66..67 "1" [] [],
+                                        unit_token: IDENT@67..69 "px" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@69..71 ";" [] [Whitespace(" ")],
+                    },
+                ],
+                r_curly_token: R_CURLY@71..72 "}" [] [],
+            },
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: CssTypeSelector {
+                        namespace: missing (optional),
+                        ident: CssIdentifier {
+                            value_token: IDENT@72..75 "c" [Newline("\n")] [Whitespace(" ")],
+                        },
+                    },
+                    sub_selectors: CssSubSelectorList [],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@75..77 "{" [] [Whitespace(" ")],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssBogusProperty {
+                                items: [
+                                    CssIdentifier {
+                                        value_token: IDENT@77..82 "color" [] [],
+                                    },
+                                    COLON@82..84 ":" [] [Whitespace(" ")],
+                                    CssBogus {
+                                        items: [
+                                            CssBogusSupportsCondition {
+                                                items: [
+                                                    CssIdentifier {
+                                                        value_token: IDENT@84..86 "fn" [] [],
+                                                    },
+                                                    L_PAREN@86..87 "(" [] [],
+                                                    CssBogus {
+                                                        items: [
+                                                            CssBogusParameter {
+                                                                items: [
+                                                                    BANG@87..88 "!" [] [],
+                                                                ],
+                                                            },
+                                                            CssListOfComponentValuesExpression {
+                                                                css_component_value_list: CssComponentValueList [
+                                                                    CssIdentifier {
+                                                                        value_token: IDENT@88..100 "notimportant" [] [],
+                                                                    },
+                                                                ],
+                                                            },
+                                                        ],
+                                                    },
+                                                    R_PAREN@100..101 ")" [] [],
+                                                ],
+                                            },
+                                        ],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@101..103 ";" [] [Whitespace(" ")],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@103..108 "width" [] [],
+                                },
+                                colon_token: COLON@108..110 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssRegularDimension {
+                                        value_token: CSS_NUMBER_LITERAL@110..111 "1" [] [],
+                                        unit_token: IDENT@111..113 "px" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@113..115 ";" [] [Whitespace(" ")],
+                    },
+                ],
+                r_curly_token: R_CURLY@115..116 "}" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@116..117 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..117
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..116
+    0: CSS_QUALIFIED_RULE@0..31
+      0: CSS_SELECTOR_LIST@0..2
+        0: CSS_COMPOUND_SELECTOR@0..2
+          0: CSS_NESTED_SELECTOR_LIST@0..0
+          1: CSS_TYPE_SELECTOR@0..2
+            0: (empty)
+            1: CSS_IDENTIFIER@0..2
+              0: IDENT@0..2 "a" [] [Whitespace(" ")]
+          2: CSS_SUB_SELECTOR_LIST@2..2
+      1: CSS_DECLARATION_OR_RULE_BLOCK@2..31
+        0: L_CURLY@2..4 "{" [] [Whitespace(" ")]
+        1: CSS_DECLARATION_OR_RULE_LIST@4..30
+          0: CSS_DECLARATION_WITH_SEMICOLON@4..18
+            0: CSS_DECLARATION@4..16
+              0: CSS_BOGUS_PROPERTY@4..16
+                0: CSS_IDENTIFIER@4..9
+                  0: IDENT@4..9 "color" [] []
+                1: COLON@9..11 ":" [] [Whitespace(" ")]
+                2: CSS_BOGUS@11..16
+                  0: CSS_BOGUS_SUPPORTS_CONDITION@11..16
+                    0: CSS_IDENTIFIER@11..13
+                      0: IDENT@11..13 "fn" [] []
+                    1: L_PAREN@13..14 "(" [] []
+                    2: CSS_BOGUS@14..15
+                      0: CSS_BOGUS_PARAMETER@14..15
+                        0: BANG@14..15 "!" [] []
+                    3: R_PAREN@15..16 ")" [] []
+              1: (empty)
+            1: SEMICOLON@16..18 ";" [] [Whitespace(" ")]
+          1: CSS_DECLARATION_WITH_SEMICOLON@18..30
+            0: CSS_DECLARATION@18..28
+              0: CSS_GENERIC_PROPERTY@18..28
+                0: CSS_IDENTIFIER@18..23
+                  0: IDENT@18..23 "width" [] []
+                1: COLON@23..25 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@25..28
+                  0: CSS_REGULAR_DIMENSION@25..28
+                    0: CSS_NUMBER_LITERAL@25..26 "1" [] []
+                    1: IDENT@26..28 "px" [] []
+              1: (empty)
+            1: SEMICOLON@28..30 ";" [] [Whitespace(" ")]
+        2: R_CURLY@30..31 "}" [] []
+    1: CSS_QUALIFIED_RULE@31..72
+      0: CSS_SELECTOR_LIST@31..34
+        0: CSS_COMPOUND_SELECTOR@31..34
+          0: CSS_NESTED_SELECTOR_LIST@31..31
+          1: CSS_TYPE_SELECTOR@31..34
+            0: (empty)
+            1: CSS_IDENTIFIER@31..34
+              0: IDENT@31..34 "b" [Newline("\n")] [Whitespace(" ")]
+          2: CSS_SUB_SELECTOR_LIST@34..34
+      1: CSS_DECLARATION_OR_RULE_BLOCK@34..72
+        0: L_CURLY@34..36 "{" [] [Whitespace(" ")]
+        1: CSS_DECLARATION_OR_RULE_LIST@36..71
+          0: CSS_DECLARATION_WITH_SEMICOLON@36..59
+            0: CSS_DECLARATION@36..57
+              0: CSS_BOGUS_PROPERTY@36..57
+                0: CSS_IDENTIFIER@36..41
+                  0: IDENT@36..41 "color" [] []
+                1: COLON@41..43 ":" [] [Whitespace(" ")]
+                2: CSS_BOGUS@43..57
+                  0: CSS_BOGUS_SUPPORTS_CONDITION@43..57
+                    0: CSS_IDENTIFIER@43..45
+                      0: IDENT@43..45 "fn" [] []
+                    1: L_PAREN@45..46 "(" [] []
+                    2: CSS_BOGUS@46..56
+                      0: CSS_BOGUS_PARAMETER@46..47
+                        0: BANG@46..47 "!" [] []
+                      1: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@47..56
+                        0: CSS_COMPONENT_VALUE_LIST@47..56
+                          0: CSS_IDENTIFIER@47..56
+                            0: IDENT@47..56 "important" [] []
+                    3: R_PAREN@56..57 ")" [] []
+              1: (empty)
+            1: SEMICOLON@57..59 ";" [] [Whitespace(" ")]
+          1: CSS_DECLARATION_WITH_SEMICOLON@59..71
+            0: CSS_DECLARATION@59..69
+              0: CSS_GENERIC_PROPERTY@59..69
+                0: CSS_IDENTIFIER@59..64
+                  0: IDENT@59..64 "width" [] []
+                1: COLON@64..66 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@66..69
+                  0: CSS_REGULAR_DIMENSION@66..69
+                    0: CSS_NUMBER_LITERAL@66..67 "1" [] []
+                    1: IDENT@67..69 "px" [] []
+              1: (empty)
+            1: SEMICOLON@69..71 ";" [] [Whitespace(" ")]
+        2: R_CURLY@71..72 "}" [] []
+    2: CSS_QUALIFIED_RULE@72..116
+      0: CSS_SELECTOR_LIST@72..75
+        0: CSS_COMPOUND_SELECTOR@72..75
+          0: CSS_NESTED_SELECTOR_LIST@72..72
+          1: CSS_TYPE_SELECTOR@72..75
+            0: (empty)
+            1: CSS_IDENTIFIER@72..75
+              0: IDENT@72..75 "c" [Newline("\n")] [Whitespace(" ")]
+          2: CSS_SUB_SELECTOR_LIST@75..75
+      1: CSS_DECLARATION_OR_RULE_BLOCK@75..116
+        0: L_CURLY@75..77 "{" [] [Whitespace(" ")]
+        1: CSS_DECLARATION_OR_RULE_LIST@77..115
+          0: CSS_DECLARATION_WITH_SEMICOLON@77..103
+            0: CSS_DECLARATION@77..101
+              0: CSS_BOGUS_PROPERTY@77..101
+                0: CSS_IDENTIFIER@77..82
+                  0: IDENT@77..82 "color" [] []
+                1: COLON@82..84 ":" [] [Whitespace(" ")]
+                2: CSS_BOGUS@84..101
+                  0: CSS_BOGUS_SUPPORTS_CONDITION@84..101
+                    0: CSS_IDENTIFIER@84..86
+                      0: IDENT@84..86 "fn" [] []
+                    1: L_PAREN@86..87 "(" [] []
+                    2: CSS_BOGUS@87..100
+                      0: CSS_BOGUS_PARAMETER@87..88
+                        0: BANG@87..88 "!" [] []
+                      1: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@88..100
+                        0: CSS_COMPONENT_VALUE_LIST@88..100
+                          0: CSS_IDENTIFIER@88..100
+                            0: IDENT@88..100 "notimportant" [] []
+                    3: R_PAREN@100..101 ")" [] []
+              1: (empty)
+            1: SEMICOLON@101..103 ";" [] [Whitespace(" ")]
+          1: CSS_DECLARATION_WITH_SEMICOLON@103..115
+            0: CSS_DECLARATION@103..113
+              0: CSS_GENERIC_PROPERTY@103..113
+                0: CSS_IDENTIFIER@103..108
+                  0: IDENT@103..108 "width" [] []
+                1: COLON@108..110 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@110..113
+                  0: CSS_REGULAR_DIMENSION@110..113
+                    0: CSS_NUMBER_LITERAL@110..111 "1" [] []
+                    1: IDENT@111..113 "px" [] []
+              1: (empty)
+            1: SEMICOLON@113..115 ";" [] [Whitespace(" ")]
+        2: R_CURLY@115..116 "}" [] []
+  2: EOF@116..117 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+release-important-arguments.css:1:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a declaration item but instead found '!'.
+  
+  > 1 │ a { color: fn(!); width: 1px; }
+      │               ^
+    2 │ b { color: fn(!important); width: 1px; }
+    3 │ c { color: fn(!notimportant); width: 1px; }
+  
+  i Expected a declaration item here.
+  
+  > 1 │ a { color: fn(!); width: 1px; }
+      │               ^
+    2 │ b { color: fn(!important); width: 1px; }
+    3 │ c { color: fn(!notimportant); width: 1px; }
+  
+release-important-arguments.css:2:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a declaration item but instead found '!'.
+  
+    1 │ a { color: fn(!); width: 1px; }
+  > 2 │ b { color: fn(!important); width: 1px; }
+      │               ^
+    3 │ c { color: fn(!notimportant); width: 1px; }
+    4 │ 
+  
+  i Expected a declaration item here.
+  
+    1 │ a { color: fn(!); width: 1px; }
+  > 2 │ b { color: fn(!important); width: 1px; }
+      │               ^
+    3 │ c { color: fn(!notimportant); width: 1px; }
+    4 │ 
+  
+release-important-arguments.css:2:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `important`
+  
+    1 │ a { color: fn(!); width: 1px; }
+  > 2 │ b { color: fn(!important); width: 1px; }
+      │                ^^^^^^^^^
+    3 │ c { color: fn(!notimportant); width: 1px; }
+    4 │ 
+  
+  i Remove important
+  
+release-important-arguments.css:3:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a declaration item but instead found '!'.
+  
+    1 │ a { color: fn(!); width: 1px; }
+    2 │ b { color: fn(!important); width: 1px; }
+  > 3 │ c { color: fn(!notimportant); width: 1px; }
+      │               ^
+    4 │ 
+  
+  i Expected a declaration item here.
+  
+    1 │ a { color: fn(!); width: 1px; }
+    2 │ b { color: fn(!important); width: 1px; }
+  > 3 │ c { color: fn(!notimportant); width: 1px; }
+      │               ^
+    4 │ 
+  
+release-important-arguments.css:3:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `notimportant`
+  
+    1 │ a { color: fn(!); width: 1px; }
+    2 │ b { color: fn(!important); width: 1px; }
+  > 3 │ c { color: fn(!notimportant); width: 1px; }
+      │                ^^^^^^^^^^^^
+    4 │ 
+  
+  i Remove notimportant
+  
+```

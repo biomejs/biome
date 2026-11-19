@@ -1,8 +1,8 @@
+use crate::TestArgs as Args;
 use crate::run_cli;
 use crate::snap_test::{SnapshotPayload, assert_cli_snapshot, assert_file_contents};
 use biome_console::BufferConsole;
 use biome_fs::MemoryFileSystem;
-use bpaf::Args;
 use camino::Utf8Path;
 
 const SVELTE_FILE_IMPORTS_BEFORE: &str = r#"<script lang="ts">
@@ -330,6 +330,203 @@ const props: Props = { title: "Hello" };
 }
 
 #[test]
+fn svelte_generics_are_parsed_and_formatted() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        r#"{ "html": { "formatter": { "enabled": true }, "linter": { "enabled": true }, "experimentalFullSupportEnabled": true } }"#
+            .as_bytes(),
+    );
+
+    let path = Utf8Path::new("file.svelte");
+    fs.insert(
+        path.into(),
+        r#"<script lang="ts" generics="TData   extends   { selected?: boolean; name?: string },TRow">
+let { items, selected }: { items: TData[]; selected: TRow } = $props();
+</script>
+
+<p>{items.length}{selected}</p>
+"#
+        .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["check", "--write", path.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "svelte_generics_are_parsed_and_formatted",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn full_support_preserves_const_tag_assignments() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+    fs.insert(
+        "biome.json".into(),
+        br#"{
+            "html": {
+                "experimentalFullSupportEnabled": true,
+                "formatter": { "enabled": true }
+            },
+            "linter": { "rules": { "recommended": false } },
+            "assist": { "enabled": false }
+        }"#,
+    );
+    let path = Utf8Path::new("file.svelte");
+    fs.insert(
+        path.into(),
+        br#"{#if true}
+    {@const value=source}
+    {@const {property}=source}
+    {@const [item]=source}
+    {@const nested=(source=1)+2}
+    {@const callback=()=>source=1}
+{/if}
+"#,
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["check", "--write", path.as_str()].as_slice()),
+    );
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "full_support_preserves_const_tag_assignments",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn formats_typed_const_tags() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+    fs.insert(
+        "biome.json".into(),
+        br#"{ "html": { "experimentalFullSupportEnabled": true, "formatter": { "enabled": true } } }"#,
+    );
+    let path = Utf8Path::new("file.svelte");
+    fs.insert(
+        path.into(),
+        br#"<script lang="ts">
+const items = [1, 2, 3];
+</script>
+
+{#each items as item}
+    {@const doubled  :  number=item*2}
+    {@const cells:Record<string,typeof item>={value:item}}
+    {@const {value}: {value:number}=cells}
+    {@const [first]:number[]=[item]}
+    <span>{doubled}{cells.value}{value}{first}</span>
+{/each}
+"#,
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["format", "--write", path.as_str()].as_slice()),
+    );
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+    let (fs, lint_result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "lint",
+                "--only=correctness/noUndeclaredVariables",
+                path.as_str(),
+            ]
+            .as_slice(),
+        ),
+    );
+    assert!(lint_result.is_ok(), "run_cli returned {lint_result:?}");
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "formats_typed_const_tags",
+        fs,
+        console,
+        result.followed_by(lint_result),
+    ));
+}
+
+#[test]
+fn formats_declaration_tags() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        r#"{
+            "html": {
+                "formatter": { "enabled": true },
+                "experimentalFullSupportEnabled": true
+            }
+        }"#
+        .as_bytes(),
+    );
+
+    let svelte_file_path = Utf8Path::new("file.svelte");
+    fs.insert(
+        svelte_file_path.into(),
+        r#"<script>
+const source={value:1};
+</script>
+
+{let    value=source.value;}
+{const first=1,second={value:"}"};}
+{const regex=/[}]/;}
+"#
+        .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["format", "--write", svelte_file_path.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert_file_contents(
+        &fs,
+        svelte_file_path,
+        r#"<script>
+const source = { value: 1 };
+</script>
+
+{let value = source.value}
+{const first = 1,
+	second = { value: "}" }}
+{const regex = /[}]/}
+"#,
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "formats_declaration_tags",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn format_stdin_successfully() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
@@ -609,6 +806,94 @@ fn format_svelte_ts_generics_files_write() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "format_svelte_ts_generics_files_write",
+        fs,
+        console,
+        result,
+    ));
+}
+
+// Regression test for https://github.com/biomejs/biome/issues/10247
+#[test]
+fn full_support_writes_attribute_expression_fix() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        r#"{
+            "html": { "experimentalFullSupportEnabled": true },
+            "linter": {
+                "rules": { "recommended": false, "style": { "useBlockStatements": "warn" } }
+            }
+        }"#
+        .as_bytes(),
+    );
+
+    let svelte_file_path = Utf8Path::new("file.svelte");
+    fs.insert(
+        svelte_file_path.into(),
+        r#"<script lang="ts">
+	let open = true;
+
+	function close() {
+		open = false;
+	}
+</script>
+
+<button
+	type="button"
+	onclick={() => {
+		if (open) close();
+	}}
+>
+	Close
+</button>
+"#
+        .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "lint",
+                "--write",
+                "--unsafe",
+                "--only=style/useBlockStatements",
+                svelte_file_path.as_str(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_file_contents(
+        &fs,
+        svelte_file_path,
+        r#"<script lang="ts">
+	let open = true;
+
+	function close() {
+		open = false;
+	}
+</script>
+
+<button
+	type="button"
+	onclick={() => {
+		if (open) { close(); }
+	}}
+>
+	Close
+</button>
+"#,
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "full_support_writes_attribute_expression_fix",
         fs,
         console,
         result,

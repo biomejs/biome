@@ -1,0 +1,24 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validOtherModule.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+import path, { sep } from "./my-path";
+import { delimiter as separator } from "node:path";
+const other = require("other-path");
+const { sep: otherSeparator } = require("other-path");
+const { delimiter: sepAlias } = require("node:path");
+const { delimiter: { sep: nestedSeparator } } = require("node:path");
+
+var fullPath = __dirname + path.sep + "foo.js";
+var fullPath = __dirname + sep + "foo.js";
+var fullPath = __dirname + separator + "foo.js";
+var fullPath = __dirname + other.sep + "foo.js";
+var fullPath = __dirname + otherSeparator + "foo.js";
+var fullPath = __dirname + sepAlias + "foo.js";
+var fullPath = __dirname + nestedSeparator + "foo.js";
+var fullPath = __dirname + require("other-path").sep + "foo.js";
+
+```

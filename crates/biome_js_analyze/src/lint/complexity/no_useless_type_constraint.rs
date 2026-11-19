@@ -5,9 +5,9 @@ use biome_diagnostics::Severity;
 
 use biome_js_factory::make;
 use biome_js_syntax::{
-    AnyTsType, JsFileSource, JsSyntaxKind, T, TsTypeConstraintClause, TsTypeParameter,
-    TsTypeParameterList,
+    AnyTsType, JsSyntaxKind, T, TsTypeConstraintClause, TsTypeParameter, TsTypeParameterList,
 };
+use biome_languages::JsFileSource;
 use biome_rowan::{
     AstNode, AstSeparatedList, BatchMutationExt, SyntaxNodeOptionExt, trim_leading_trivia_pieces,
 };

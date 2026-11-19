@@ -2,6 +2,12 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
+## Command
+
+```shell
+biome migrate prettier
+```
+
 ## `biome.json`
 
 ```json
@@ -64,14 +70,15 @@ biome.json migrate ━━━━━━━━━━━━━━━━━━━━�
       27 │ + → → → "bracketSpacing":·true
       28 │ + → → }
       29 │ + → },
-      30 │ + → "html":·{
-      31 │ + → → "formatter":·{
-      32 │ + → → → "indentScriptAndStyle":·false,
-      33 │ + → → → "selfCloseVoidElements":·"always"
-      34 │ + → → }
-      35 │ + → }
-      36 │ + }
-      37 │ + 
+      30 │ + → "markdown":·{·"parser":·{·"frontmatter":·true·}·},
+      31 │ + → "html":·{
+      32 │ + → → "formatter":·{
+      33 │ + → → → "indentScriptAndStyle":·false,
+      34 │ + → → → "selfCloseVoidElements":·"always"
+      35 │ + → → }
+      36 │ + → }
+      37 │ + }
+      38 │ + 
   
 
 ```

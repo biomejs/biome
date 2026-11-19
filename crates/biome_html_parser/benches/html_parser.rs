@@ -2,7 +2,7 @@ use std::{collections::HashMap, fs, path::Path};
 
 use biome_diagnostics::{DiagnosticExt, print_diagnostic_to_string};
 use biome_html_parser::{HtmlParserOptions, parse_html, parse_html_with_cache};
-use biome_html_syntax::HtmlFileSource;
+use biome_languages::HtmlFileSource;
 use biome_rowan::NodeCache;
 use biome_string_case::StrLikeExtension;
 use biome_test_utils::BenchCase;
@@ -16,7 +16,7 @@ static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
 
 #[cfg(all(
     any(target_os = "macos", target_os = "linux"),
-    not(target_env = "musl"),
+    not(all(target_env = "musl", target_arch = "aarch64")),
 ))]
 #[global_allocator]
 static GLOBAL: tikv_jemallocator::Jemalloc = tikv_jemallocator::Jemalloc;

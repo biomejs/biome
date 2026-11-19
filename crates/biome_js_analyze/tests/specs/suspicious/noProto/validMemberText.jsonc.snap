@@ -1,0 +1,158 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validMemberText.jsonc
+---
+# Input
+```cjs
+obj.prototype;
+```
+
+# Input
+```cjs
+obj.prototype = value;
+```
+
+# Input
+```cjs
+obj[property];
+```
+
+# Input
+```cjs
+obj[property] = value;
+```
+
+# Input
+```cjs
+obj[tag`__proto__`];
+```
+
+# Input
+```cjs
+obj[tag`__proto__`] = value;
+```
+
+# Input
+```cjs
+obj[`__proto__${suffix}`];
+```
+
+# Input
+```cjs
+obj[`${prefix}__proto__`] = value;
+```
+
+# Input
+```cjs
+obj['__proto__' + suffix];
+```
+
+# Input
+```cjs
+obj['__proto__' + suffix] = value;
+```
+
+# Input
+```cjs
+obj[``];
+```
+
+# Input
+```cjs
+obj[``] = value;
+```
+
+# Input
+```cjs
+obj[0];
+```
+
+# Input
+```cjs
+obj[null] = value;
+```
+
+# Input
+```cjs
+class Example { #__proto__; method() { return this.#__proto__; } }
+```
+
+# Input
+```cjs
+obj['é__proto__'];
+```
+
+# Input
+```cjs
+obj['__proto__é'] = value;
+```
+
+# Input
+```cjs
+obj[__proto__];
+```
+
+# Input
+```cjs
+obj[__proto__] = value;
+```
+
+# Input
+```cjs
+obj["'__proto__'"];
+```
+
+# Input
+```cjs
+obj["'__proto__'"] = value;
+```
+
+# Input
+```cjs
+obj[`"__proto__"`];
+```
+
+# Input
+```cjs
+obj[`"__proto__"`] = value;
+```
+
+# Input
+```cjs
+obj["__proto__"``];
+```
+
+# Input
+```cjs
+obj["__proto__"``] = value;
+```
+
+# Input
+```cjs
+obj[((property))];
+```
+
+# Input
+```cjs
+obj[('__proto__', property)] = value;
+```
+
+# Input
+```cjs
+obj[(tag`__proto__`)];
+```
+
+# Input
+```cjs
+obj[((tag`__proto__`))] = value;
+```
+
+# Input
+```cjs
+obj[("'__proto__'")];
+```
+
+# Input
+```cjs
+obj[(`"__proto__"`)] = value;
+```

@@ -1,0 +1,14 @@
+@property #{} { syntax: "*"; inherits: false; }
+.after-property { color: red; }
+@font-palette-values #{} { font-family: "Bixa"; }
+.after-palette { color: red; }
+@position-try #{} { top: 0; }
+.after-position { color: red; }
+
+@property #{$name;
+.after-unclosed-name { color: blue; }
+
+@property brand { syntax: "*"; inherits: false; }
+@font-palette-values theme { font-family: "Bixa"; }
+@position-try corner { top: 0; }
+.following { color: green; }

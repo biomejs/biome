@@ -1,0 +1,16 @@
+$gap: 16px;
+
+@media (min-width: -$) {
+  .missing-name { color: red; }
+}
+.after-name { color: blue; }
+
+@media (min-width: -$gap +) {
+  .missing-operand { color: red; }
+}
+.after-operand { color: blue; }
+
+@media (min-width: +$gap *) {
+  .missing-product { color: red; }
+}
+.after-product { color: blue; }

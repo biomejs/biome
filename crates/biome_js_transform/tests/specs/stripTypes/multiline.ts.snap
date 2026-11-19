@@ -1,0 +1,252 @@
+---
+source: crates/biome_js_transform/tests/spec_tests.rs
+expression: multiline.ts
+---
+# Input
+```ts
+function foo<
+	Lorem,
+	Ipsum,
+>(
+	a: Lorem,
+	b?: Ipsum,
+): Bar<
+	Lorem
+> {
+	return a as unknown as Bar<
+		// comment inside an erased range
+		Lorem
+	>;
+}
+
+interface Multi {
+	a: string;
+	b: number;
+}
+
+class Klass<
+	T,
+>
+	implements
+		Iface,
+		Other
+{
+	value: Map<
+		string,
+		T
+	> = new Map();
+}
+
+```
+
+# Transformations
+```diff
+@@ -1,7 +1,7 @@
+-function foo<
+-	Lorem,
+-	Ipsum,
+->(
++function foo 
++       
++       
++ (
+ 	a: Lorem,
+ 	b?: Ipsum,
+ ): Bar<
+
+```
+
+```diff
+@@ -2,7 +2,7 @@
+ 	Lorem,
+ 	Ipsum,
+ >(
+-	a: Lorem,
++	a       ,
+ 	b?: Ipsum,
+ ): Bar<
+ 	Lorem
+
+```
+
+```diff
+@@ -3,7 +3,7 @@
+ 	Ipsum,
+ >(
+ 	a: Lorem,
+-	b?: Ipsum,
++	b : Ipsum,
+ ): Bar<
+ 	Lorem
+ > {
+
+```
+
+```diff
+@@ -3,7 +3,7 @@
+ 	Ipsum,
+ >(
+ 	a: Lorem,
+-	b?: Ipsum,
++	b?       ,
+ ): Bar<
+ 	Lorem
+ > {
+
+```
+
+```diff
+@@ -4,9 +4,9 @@
+ >(
+ 	a: Lorem,
+ 	b?: Ipsum,
+-): Bar<
+-	Lorem
+-> {
++)      
++      
++  {
+ 	return a as unknown as Bar<
+ 		// comment inside an erased range
+ 		Lorem
+
+```
+
+```diff
+@@ -7,7 +7,7 @@
+ ): Bar<
+ 	Lorem
+ > {
+-	return a as unknown as Bar<
++	return a            as Bar<
+ 		// comment inside an erased range
+ 		Lorem
+ 	>;
+
+```
+
+```diff
+@@ -7,10 +7,10 @@
+ ): Bar<
+ 	Lorem
+ > {
+-	return a as unknown as Bar<
+-		// comment inside an erased range
+-		Lorem
+-	>;
++	return a as unknown        
++                                   
++       
++  ;
+ }
+ 
+ interface Multi {
+
+```
+
+```diff
+@@ -13,10 +13,10 @@
+ 	>;
+ }
+ 
+-interface Multi {
+-	a: string;
+-	b: number;
+-}
++                 
++           
++           
++ 
+ 
+ class Klass<
+ 	T,
+
+```
+
+```diff
+@@ -18,9 +18,9 @@
+ 	b: number;
+ }
+ 
+-class Klass<
+-	T,
+->
++class Klass 
++   
++ 
+ 	implements
+ 		Iface,
+ 		Other
+
+```
+
+```diff
+@@ -21,9 +21,9 @@
+ class Klass<
+ 	T,
+ >
+-	implements
+-		Iface,
+-		Other
++	          
++        
++       
+ {
+ 	value: Map<
+ 		string,
+
+```
+
+```diff
+@@ -25,8 +25,8 @@
+ 		Iface,
+ 		Other
+ {
+-	value: Map<
+-		string,
+-		T
+-	> = new Map();
++	value      
++         
++   
++   = new Map();
+ }
+
+```
+
+# Final output
+```ts
+function foo 
+       
+       
+ (
+	a       ,
+	b        ,
+)      
+      
+  {
+	return a                   
+                                   
+       
+  ;
+}
+
+                 
+           
+           
+ 
+
+class Klass 
+   
+ 
+	          
+        
+       
+{
+	value      
+         
+   
+   = new Map();
+}
+
+```

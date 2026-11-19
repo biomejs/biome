@@ -1,0 +1,92 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome lint test.js
+```
+
+## `biome.json`
+
+```json
+{
+  "linter": {
+    "rules": {
+      "recommended": false,
+      "suspicious": {
+        "preset": "none",
+        "noDebugger": "error"
+      }
+    }
+  }
+}
+```
+
+## `test.js`
+
+```js
+debugger;
+
+```
+
+# Termination Message
+
+```block
+lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+biome.json:2:15 deserialize  DEPRECATED  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The use of the recommended field has been deprecated, and will removed in the next major version of Biome. Use preset instead.
+  
+     1 │ {
+   > 2 │     "linter": {
+       │               ^
+   > 3 │         "rules": {
+   > 4 │             "recommended": false,
+        ...
+   > 8 │             }
+   > 9 │         }
+  > 10 │     }
+       │     ^
+    11 │ }
+  
+  i Migrate the configuration with the proper command
+  
+  $ biome migrate
+  
+
+```
+
+```block
+test.js:1:1 lint/suspicious/noDebugger  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This is an unexpected use of the debugger statement.
+  
+  > 1 │ debugger;
+      │ ^^^^^^^^^
+    2 │ 
+  
+  i A debugger statement pauses the program when a debugger is open. It is meant for debugging only, and it should not be left in code that is shipped.
+  
+  i Unsafe fix: Remove debugger statement
+  
+    1 │ debugger;
+      │ ---------
+
+```
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+Found 1 error.
+```

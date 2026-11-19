@@ -1,0 +1,53 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: whitespace/css-display-classifications/classifications.html
+---
+
+# Input
+
+```html
+<marquee behavior="alternate">This text will bounce</marquee>
+before<noscript>fallback text</noscript>after
+before<video>fallback video text</video>after
+before<audio>fallback audio text</audio>after
+before<object>fallback object text</object>after
+
+<marquee behavior="alternate"> This text will bounce </marquee>
+before<noscript>fallback text</noscript>after
+before<video>fallback video text</video>after
+before<audio>fallback audio text</audio>after
+before<object>fallback object text</object>after
+
+```
+
+
+# Options
+
+```json
+{
+	"formatter": {
+		"lineWidth": 50
+	}
+}
+```
+
+# Formatted
+
+```html
+<marquee behavior="alternate">
+	This text will bounce
+</marquee>
+before<noscript>fallback text</noscript>after
+before<video>fallback video text</video>after
+before<audio>fallback audio text</audio>after
+before<object>fallback object text</object>after
+
+<marquee behavior="alternate">
+	This text will bounce
+</marquee>
+before<noscript>fallback text</noscript>after
+before<video>fallback video text</video>after
+before<audio>fallback audio text</audio>after
+before<object>fallback object text</object>after
+
+```

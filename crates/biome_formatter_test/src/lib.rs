@@ -1,9 +1,13 @@
 #![deny(clippy::use_self)]
 
-use biome_formatter::{CstFormatContext, FormatLanguage, FormatResult, Formatted, Printed};
+use biome_configuration::Configuration;
+use biome_formatter::rowan::Printed;
+use biome_formatter::{
+    CstFormatContext, FormatLanguage, FormatResult, Formatted, SourceMapGeneration,
+};
+use biome_languages::DocumentFileSource;
 use biome_parser::AnyParse;
 use biome_rowan::{SyntaxNode, TextRange};
-use biome_service::file_handlers::DocumentFileSource;
 use biome_service::settings::{ServiceLanguage, Settings};
 
 pub mod check_reformat;
@@ -31,7 +35,12 @@ pub trait TestFormatLanguage {
         language: Self::FormatLanguage,
         node: &SyntaxNode<Self::ServiceLanguage>,
     ) -> FormatResult<Formatted<Self::Context>> {
-        biome_formatter::format_node(node, language, false)
+        biome_formatter::format_node_with_source_map_generation(
+            node,
+            language,
+            false,
+            SourceMapGeneration::Enabled,
+        )
     }
 
     fn format_range(
@@ -48,4 +57,11 @@ pub trait TestFormatLanguage {
         settings: &Settings,
         file_source: &DocumentFileSource,
     ) -> Self::FormatLanguage;
+
+    fn configure_formatter(
+        &self,
+        _configuration: &mut Configuration,
+        _format_language: &Self::FormatLanguage,
+    ) {
+    }
 }

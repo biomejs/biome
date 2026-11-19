@@ -1,0 +1,20 @@
+<button
+    class="bg-green-500 text-gray-100 hover:bg-green-400 flex items-center px-4 py-2 border border-l-0 rounded-r"
+>
+    Copy
+</button>
+<div
+    class="bg-green-500 text-gray-100 hover:bg-green-400 flex items-center px-4 py-2 border border-l-0 rounded-r"
+>
+    Copy
+</div>
+<span
+    class="bg-green-500 text-gray-100 hover:bg-green-400 flex items-center px-4 py-2 border border-l-0 rounded-r"
+>
+    Copy
+</span>
+<p
+    class="bg-green-500 text-gray-100 hover:bg-green-400 flex items-center px-4 py-2 border border-l-0 rounded-r"
+>
+    Copy
+</p>

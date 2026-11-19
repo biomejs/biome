@@ -1,0 +1,174 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidAssertions.ts
+---
+# Input
+```ts
+// should generate diagnostics
+declare function assert(value: unknown): asserts value;
+declare function assertSecond(message: string, value: unknown): asserts value;
+function checks(number: number | null, string: string | undefined, boolean?: boolean) {
+    assert(number);
+    assertSecond("present", string);
+    assert(boolean);
+}
+// Each check below runs before any assertion narrows its operands.
+function logicalAnd(number: number | null) {
+    assert(true && number);
+}
+function logicalOr(number: number | null, string: string | undefined) {
+    assert(number || string);
+}
+function parenthesized(boolean?: boolean) {
+    assert((boolean));
+}
+
+```
+
+# Diagnostics
+```
+invalidAssertions.ts:5:12 lint/nursery/useStrictBooleanExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This condition uses a nullable number.
+  
+    3 │ declare function assertSecond(message: string, value: unknown): asserts value;
+    4 │ function checks(number: number | null, string: string | undefined, boolean?: boolean) {
+  > 5 │     assert(number);
+      │            ^^^^^^
+    6 │     assertSecond("present", string);
+    7 │     assert(boolean);
+  
+  i This check treats zero, NaN, and nullish values alike.
+  
+  i Check for nullish values and falsy numbers explicitly, or use Boolean() to test truthiness.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidAssertions.ts:6:29 lint/nursery/useStrictBooleanExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This condition uses a nullable string.
+  
+    4 │ function checks(number: number | null, string: string | undefined, boolean?: boolean) {
+    5 │     assert(number);
+  > 6 │     assertSecond("present", string);
+      │                             ^^^^^^
+    7 │     assert(boolean);
+    8 │ }
+  
+  i This check treats empty strings and nullish values alike.
+  
+  i Check for nullish values and empty strings explicitly, or use Boolean() to test truthiness.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidAssertions.ts:7:12 lint/nursery/useStrictBooleanExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This condition uses a nullable boolean.
+  
+    5 │     assert(number);
+    6 │     assertSecond("present", string);
+  > 7 │     assert(boolean);
+      │            ^^^^^^^
+    8 │ }
+    9 │ // Each check below runs before any assertion narrows its operands.
+  
+  i This check treats false and nullish values alike.
+  
+  i Compare with true or provide an explicit default with ?? false.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidAssertions.ts:11:20 lint/nursery/useStrictBooleanExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This condition uses a nullable number.
+  
+     9 │ // Each check below runs before any assertion narrows its operands.
+    10 │ function logicalAnd(number: number | null) {
+  > 11 │     assert(true && number);
+       │                    ^^^^^^
+    12 │ }
+    13 │ function logicalOr(number: number | null, string: string | undefined) {
+  
+  i This check treats zero, NaN, and nullish values alike.
+  
+  i Check for nullish values and falsy numbers explicitly, or use Boolean() to test truthiness.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidAssertions.ts:14:22 lint/nursery/useStrictBooleanExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This condition uses a nullable string.
+  
+    12 │ }
+    13 │ function logicalOr(number: number | null, string: string | undefined) {
+  > 14 │     assert(number || string);
+       │                      ^^^^^^
+    15 │ }
+    16 │ function parenthesized(boolean?: boolean) {
+  
+  i This check treats empty strings and nullish values alike.
+  
+  i Check for nullish values and empty strings explicitly, or use Boolean() to test truthiness.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidAssertions.ts:14:12 lint/nursery/useStrictBooleanExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This condition uses a nullable number.
+  
+    12 │ }
+    13 │ function logicalOr(number: number | null, string: string | undefined) {
+  > 14 │     assert(number || string);
+       │            ^^^^^^
+    15 │ }
+    16 │ function parenthesized(boolean?: boolean) {
+  
+  i This check treats zero, NaN, and nullish values alike.
+  
+  i Check for nullish values and falsy numbers explicitly, or use Boolean() to test truthiness.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidAssertions.ts:17:13 lint/nursery/useStrictBooleanExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This condition uses a nullable boolean.
+  
+    15 │ }
+    16 │ function parenthesized(boolean?: boolean) {
+  > 17 │     assert((boolean));
+       │             ^^^^^^^
+    18 │ }
+    19 │ 
+  
+  i This check treats false and nullish values alike.
+  
+  i Compare with true or provide an explicit default with ?? false.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

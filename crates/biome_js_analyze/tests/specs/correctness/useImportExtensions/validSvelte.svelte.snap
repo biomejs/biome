@@ -1,0 +1,17 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validSvelte.svelte
+---
+# Input
+```svelte
+<!-- should not generate diagnostics -->
+<script lang="ts">
+	import { foo } from "./foo.ts";
+	import type { Bar } from "./bar.ts";
+	import InvalidVue from "./invalidVue.vue";
+	import "biome";
+</script>
+
+{foo}
+
+```

@@ -1,0 +1,33 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidImport.js
+---
+# Input
+```js
+/* should generate diagnostics */
+import process from "node:process";
+
+process.exit(1);
+
+```
+
+# Diagnostics
+```
+invalidImport.js:4:1 lint/nursery/noProcessExit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use process.exit().
+  
+    2 │ import process from "node:process";
+    3 │ 
+  > 4 │ process.exit(1);
+      │ ^^^^^^^^^^^^^^^
+    5 │ 
+  
+  i It stops the program right away, before work in progress finishes and without saying why it stopped.
+  
+  i Throw an error instead, or set process.exitCode to choose the exit code.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

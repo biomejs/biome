@@ -1,0 +1,16 @@
+// should not generate diagnostics
+[
+  "/* should not generate diagnostics */\nvar a = 'hello world';",
+  "/* should not generate diagnostics */\n0x1234;",
+  "/* should not generate diagnostics */\n0X5;",
+  "/* should not generate diagnostics */\na = 0;",
+  "/* should not generate diagnostics */\n0.1;",
+  "/* should not generate diagnostics */\n0.5e1;",
+  "/* should not generate diagnostics */\nconst numbers = [0o71, 0O71, 0b101, 0B101, 0xFF, 0XFF, 57, 0e1, 0E1, .5];",
+  "/* should not generate diagnostics */\nconst numbers = [0n, 10n, 0o71n, 0O71n, 0b101n, 0xFFn, 1_000, 0o7_1];",
+  "/* should not generate diagnostics */\nconst text = '071'; const template = `071`; const pattern = /071/;",
+  "/* should not generate diagnostics */\nconst text = '\\071';",
+  "/* should not generate diagnostics */\nconst object = { '071': true, '08': false, 0: true, 0o71: false, 57() {}, 0n: true };",
+  "/* should not generate diagnostics */\nconst { '071': value } = object;",
+  "/* should not generate diagnostics */\nconst object = { get '071'() {}, set '007'(value) {} };"
+]

@@ -7,12 +7,12 @@ mod token_source;
 
 pub use parser::HtmlParserOptions;
 
-use crate::parser::{HtmlLosslessTreeSink, HtmlParser};
+use crate::parser::{HtmlLosslessTreeSink, HtmlOffsetLosslessTreeSink, HtmlParser};
 use crate::syntax::parse_root;
-use biome_html_syntax::{HtmlRoot, HtmlSyntaxNode};
+use biome_html_syntax::{HtmlLanguage, HtmlRoot, HtmlSyntaxNode};
 use biome_parser::diagnostic::ParseDiagnostic;
-use biome_parser::{AnyParse, NodeParse};
-use biome_rowan::{AstNode, NodeCache};
+use biome_parser::{AnyParse, EmbeddedNodeParse, NodeParse};
+use biome_rowan::{AstNode, NodeCache, SyntaxNodeWithOffset, TextSize};
 
 /// Parses the provided string as HTML program using the provided node cache.
 pub fn parse_html_with_cache(
@@ -111,5 +111,119 @@ impl From<HtmlParse> for AnyParse {
             diagnostics,
         )
         .into()
+    }
+}
+
+/// Parses HTML `source` with a `base_offset` for embedded content.
+pub fn parse_html_with_offset(
+    source: &str,
+    base_offset: TextSize,
+    options: HtmlParserOptions,
+) -> HtmlOffsetParse {
+    parse_html_with_offset_and_cache(source, base_offset, &mut NodeCache::default(), options)
+}
+
+/// Parses HTML `source` with a `base_offset` and `cache` for embedded content.
+pub fn parse_html_with_offset_and_cache(
+    source: &str,
+    base_offset: TextSize,
+    cache: &mut NodeCache,
+    options: HtmlParserOptions,
+) -> HtmlOffsetParse {
+    let mut parser = HtmlParser::new(source, options);
+
+    parse_root(&mut parser);
+
+    let (events, diagnostics, trivia) = parser.finish();
+
+    let mut tree_sink = HtmlOffsetLosslessTreeSink::with_cache(source, &trivia, cache, base_offset);
+    biome_parser::event::process(&mut tree_sink, events, diagnostics);
+    let (root, diagnostics) = tree_sink.finish();
+
+    HtmlOffsetParse::new(root, diagnostics)
+}
+
+/// A utility struct for managing the result of an offset-aware HTML parser job.
+#[derive(Clone, Debug)]
+pub struct HtmlOffsetParse {
+    root: SyntaxNodeWithOffset<HtmlLanguage>,
+    diagnostics: Vec<ParseDiagnostic>,
+}
+
+impl HtmlOffsetParse {
+    pub fn new(
+        root: SyntaxNodeWithOffset<HtmlLanguage>,
+        diagnostics: Vec<ParseDiagnostic>,
+    ) -> Self {
+        Self { root, diagnostics }
+    }
+
+    /// Returns the offset-aware syntax node represented by this parse result.
+    pub fn syntax(&self) -> SyntaxNodeWithOffset<HtmlLanguage> {
+        self.root.clone()
+    }
+
+    /// Returns the diagnostics which occurred when parsing.
+    pub fn diagnostics(&self) -> &[ParseDiagnostic] {
+        &self.diagnostics
+    }
+
+    /// Retrieves the diagnostics which occurred when parsing.
+    pub fn into_diagnostics(self) -> Vec<ParseDiagnostic> {
+        self.diagnostics
+    }
+
+    /// Returns `true` if the parser encountered errors.
+    pub fn has_errors(&self) -> bool {
+        self.diagnostics
+            .iter()
+            .any(|diagnostic| diagnostic.is_error())
+    }
+
+    /// Converts this parse into a typed AST node.
+    ///
+    /// # Panics
+    /// Panics if the node represented by this parse result mismatches.
+    pub fn tree(&self) -> HtmlRoot {
+        HtmlRoot::unwrap_cast(self.root.inner().clone())
+    }
+
+    /// Returns the base offset applied to this parse result.
+    pub fn base_offset(&self) -> TextSize {
+        self.root.base_offset()
+    }
+
+    /// Converts back to the underlying parse result, discarding offset information.
+    pub fn into_inner(self) -> HtmlParse {
+        HtmlParse::new(self.root.into_inner(), self.diagnostics)
+    }
+}
+
+impl From<HtmlOffsetParse> for AnyParse {
+    fn from(parse: HtmlOffsetParse) -> Self {
+        let root = parse.syntax();
+        let diagnostics = parse.into_diagnostics();
+        EmbeddedNodeParse::new(root.as_embedded_send(), diagnostics).into()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::{HtmlParserOptions, parse_html_with_offset};
+    use biome_rowan::TextSize;
+
+    #[test]
+    fn offset_parse_ranges_start_at_base_offset() {
+        let source = "<div>content</div>";
+        let base_offset = TextSize::from(42);
+        let parse = parse_html_with_offset(source, base_offset, HtmlParserOptions::default());
+
+        assert!(!parse.has_errors());
+        assert_eq!(parse.base_offset(), base_offset);
+        assert_eq!(parse.syntax().text_range_with_trivia().start(), base_offset);
+        assert_eq!(
+            parse.syntax().text_range_with_trivia().end(),
+            base_offset + TextSize::from(source.len() as u32)
+        );
     }
 }

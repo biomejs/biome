@@ -1,0 +1,125 @@
+---
+source: crates/biome_cli/src/execute/migrate/eslint_to_biome.rs
+expression: with_options.jsonc
+---
+## ESLint Config
+
+```json
+{
+	"overrides": [
+		{
+			"files": ["strict.ts"],
+			"rules": {
+				"@typescript-eslint/switch-exhaustiveness-check": [
+					2,
+					{ "considerDefaultExhaustiveForUnions": false }
+				]
+			}
+		},
+		{
+			"files": ["empty.ts"],
+			"rules": {
+				"@typescript-eslint/switch-exhaustiveness-check": ["error", {}]
+			}
+		},
+		{
+			"files": ["unsupported.ts"],
+			"rules": {
+				"@typescript-eslint/switch-exhaustiveness-check": [
+					"error",
+					{
+						"allowDefaultCaseForExhaustiveSwitch": false,
+						"defaultCaseCommentPattern": "^skip default$",
+						"requireDefaultForNonUnion": true
+					}
+				]
+			}
+		}
+	],
+	"rules": {
+		"@typescript-eslint/switch-exhaustiveness-check": [
+			"warn",
+			{ "considerDefaultExhaustiveForUnions": true }
+		]
+	}
+}
+
+```
+
+## Biome Config Before Migration
+
+```json
+{
+	"linter": {
+		"rules": {
+			"nursery": {
+				"useExhaustiveSwitchCases": {
+					"level": "error",
+					"options": { "requireExplicitCase": true }
+				}
+			}
+		}
+	}
+}
+
+```
+
+## Biome Config After Migration
+
+```json
+{
+	"linter": {
+		"rules": {
+			"preset": "none",
+			"nursery": {
+				"useExhaustiveSwitchCases": {
+					"level": "warn",
+					"options": { "requireExplicitCase": false }
+				}
+			}
+		}
+	},
+	"overrides": [
+		{
+			"includes": ["strict.ts"],
+			"linter": {
+				"rules": {
+					"nursery": {
+						"useExhaustiveSwitchCases": {
+							"level": "error",
+							"options": { "requireExplicitCase": true }
+						}
+					}
+				}
+			}
+		},
+		{
+			"includes": ["empty.ts"],
+			"linter": {
+				"rules": {
+					"nursery": {
+						"useExhaustiveSwitchCases": {
+							"level": "error",
+							"options": { "requireExplicitCase": true }
+						}
+					}
+				}
+			}
+		},
+		{
+			"includes": ["unsupported.ts"],
+			"linter": {
+				"rules": {
+					"nursery": {
+						"useExhaustiveSwitchCases": {
+							"level": "error",
+							"options": { "requireExplicitCase": true }
+						}
+					}
+				}
+			}
+		}
+	]
+}
+
+```

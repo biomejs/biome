@@ -4,3 +4,10 @@ toml-version = "v1.0.0"  # optional
 [format.rules]
 key-value-equals-sign-alignment = true
 line-width                      = 120
+
+# The built-in Cargo.toml schema enables TOML 1.1, which lets tombi emit multi-line inline tables.
+# Cargo accepts them, but tools that parse manifests with a TOML 1.0 parser (e.g. cargo-codspeed) don't.
+[[schemas]]
+toml-version = "v1.0.0"
+path         = "tombi://www.schemastore.org/cargo.json"
+include      = ["**/Cargo.toml", "Cargo.toml"]

@@ -7,6 +7,7 @@ use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_semantic::{ReferencesExtensions, Scope, SemanticModel, SemanticScopeExtensions};
 use biome_js_syntax::*;
+use biome_languages::JsFileSource;
 use biome_rowan::{AstNode, BatchMutationExt, declare_node_union};
 use biome_rule_options::use_const::UseConstOptions;
 
@@ -87,7 +88,11 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "useConst",
         language: "js",
-        sources: &[RuleSource::Eslint("prefer-const").same()],
+        sources: &[
+            RuleSource::Eslint("prefer-const").same(),
+            RuleSource::EslintSvelte("prefer-const").same(),
+            RuleSource::DenoLint("prefer-const").same(),
+        ],
         recommended: true,
         severity: Severity::Warning,
         fix_kind: FixKind::Safe,
@@ -153,7 +158,9 @@ impl Rule for UseConst {
             }
         }
 
-        Some(diag)
+        Some(diag.note(markup! {
+            "A variable that is never reassigned is clearer as "<Emphasis>"const"</Emphasis>", because it prevents the binding from being reassigned."
+        }))
     }
 
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
@@ -441,18 +448,11 @@ fn has_member_expr_in_array_pat(pat: &JsArrayAssignmentPattern) -> bool {
         .any(|it| it.pattern().is_some_and(has_member_expr_in_assign_pat))
 }
 
-fn is_member_expr_assignment(mut assignment: AnyJsAssignment) -> bool {
-    use AnyJsAssignment::*;
-    while let JsParenthesizedAssignment(p) = assignment {
-        if let Ok(p) = p.assignment() {
-            assignment = p
-        } else {
-            return false;
-        }
-    }
+fn is_member_expr_assignment(assignment: AnyJsAssignment) -> bool {
     matches!(
-        assignment,
-        JsComputedMemberAssignment(_) | JsStaticMemberAssignment(_)
+        assignment.omit_target_parentheses(),
+        AnyJsAssignment::JsComputedMemberAssignment(_)
+            | AnyJsAssignment::JsStaticMemberAssignment(_)
     )
 }
 

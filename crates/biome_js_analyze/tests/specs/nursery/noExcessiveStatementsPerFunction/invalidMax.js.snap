@@ -1,0 +1,514 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidMax.js
+---
+# Input
+```js
+/* should generate diagnostics */
+function foo() { var bar = 1; var baz = 2; var qux = 3; }
+var foo = () => { var bar = 1; var baz = 2; var qux = 3; };
+var foo = function() { var bar = 1; var baz = 2; var qux = 3; };
+function foo() { var bar = 1; if (true) { while (false) { var qux = null; } } }
+function foo() { var bar = 1; try { a; } catch (e) { b; } finally { c; } }
+function foo() { "use strict"; a; b; }
+function foo() { ;;; }
+function foo() { a; { b; } }
+function foo() { label: { a; b; } }
+function foo() { var bar = 1; return function () { var z; var y; var x; }; }
+function foo() { foo_1; /* foo_ 2 */ class C { static { one; two; three; four; { five; six; seven; eight; } } } foo_3 }
+class C { static { one; two; three; four; function not_top_level() { 1; 2; 3; } five; six; seven; eight; } }
+var foo = { thing() { a; b; c; } };
+var foo = { get thing() { a; b; return c; } };
+var foo = { set thing(v) { a; b; c; } };
+class C { method() { a; b; c; } }
+class C { get x() { a; b; return c; } }
+class C { set x(v) { a; b; c; } }
+class C { constructor() { a; b; c; } }
+class C { field = () => { a; b; c; }; }
+export default function () { a; b; c; }
+function foo(cb = () => { a; b; c; }) {}
+async function* foo() { a; b; yield c; }
+
+```
+
+# Diagnostics
+```
+invalidMax.js:2:1 lint/nursery/noExcessiveStatementsPerFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function has too many statements (3). Maximum allowed is 2.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ function foo() { var bar = 1; var baz = 2; var qux = 3; }
+      │ ^^^^^^^^^^^^^^
+    3 │ var foo = () => { var bar = 1; var baz = 2; var qux = 3; };
+    4 │ var foo = function() { var bar = 1; var baz = 2; var qux = 3; };
+  
+  i Functions with many statements are harder to read, test, and maintain.
+  
+  i Consider splitting this function into smaller functions.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidMax.js:3:11 lint/nursery/noExcessiveStatementsPerFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function has too many statements (3). Maximum allowed is 2.
+  
+    1 │ /* should generate diagnostics */
+    2 │ function foo() { var bar = 1; var baz = 2; var qux = 3; }
+  > 3 │ var foo = () => { var bar = 1; var baz = 2; var qux = 3; };
+      │           ^^^^^
+    4 │ var foo = function() { var bar = 1; var baz = 2; var qux = 3; };
+    5 │ function foo() { var bar = 1; if (true) { while (false) { var qux = null; } } }
+  
+  i Functions with many statements are harder to read, test, and maintain.
+  
+  i Consider splitting this function into smaller functions.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidMax.js:4:11 lint/nursery/noExcessiveStatementsPerFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function has too many statements (3). Maximum allowed is 2.
+  
+    2 │ function foo() { var bar = 1; var baz = 2; var qux = 3; }
+    3 │ var foo = () => { var bar = 1; var baz = 2; var qux = 3; };
+  > 4 │ var foo = function() { var bar = 1; var baz = 2; var qux = 3; };
+      │           ^^^^^^^^^^
+    5 │ function foo() { var bar = 1; if (true) { while (false) { var qux = null; } } }
+    6 │ function foo() { var bar = 1; try { a; } catch (e) { b; } finally { c; } }
+  
+  i Functions with many statements are harder to read, test, and maintain.
+  
+  i Consider splitting this function into smaller functions.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidMax.js:5:1 lint/nursery/noExcessiveStatementsPerFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function has too many statements (4). Maximum allowed is 2.
+  
+    3 │ var foo = () => { var bar = 1; var baz = 2; var qux = 3; };
+    4 │ var foo = function() { var bar = 1; var baz = 2; var qux = 3; };
+  > 5 │ function foo() { var bar = 1; if (true) { while (false) { var qux = null; } } }
+      │ ^^^^^^^^^^^^^^
+    6 │ function foo() { var bar = 1; try { a; } catch (e) { b; } finally { c; } }
+    7 │ function foo() { "use strict"; a; b; }
+  
+  i Functions with many statements are harder to read, test, and maintain.
+  
+  i Consider splitting this function into smaller functions.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidMax.js:6:1 lint/nursery/noExcessiveStatementsPerFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function has too many statements (5). Maximum allowed is 2.
+  
+    4 │ var foo = function() { var bar = 1; var baz = 2; var qux = 3; };
+    5 │ function foo() { var bar = 1; if (true) { while (false) { var qux = null; } } }
+  > 6 │ function foo() { var bar = 1; try { a; } catch (e) { b; } finally { c; } }
+      │ ^^^^^^^^^^^^^^
+    7 │ function foo() { "use strict"; a; b; }
+    8 │ function foo() { ;;; }
+  
+  i Functions with many statements are harder to read, test, and maintain.
+  
+  i Consider splitting this function into smaller functions.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidMax.js:7:1 lint/nursery/noExcessiveStatementsPerFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function has too many statements (3). Maximum allowed is 2.
+  
+    5 │ function foo() { var bar = 1; if (true) { while (false) { var qux = null; } } }
+    6 │ function foo() { var bar = 1; try { a; } catch (e) { b; } finally { c; } }
+  > 7 │ function foo() { "use strict"; a; b; }
+      │ ^^^^^^^^^^^^^^
+    8 │ function foo() { ;;; }
+    9 │ function foo() { a; { b; } }
+  
+  i Functions with many statements are harder to read, test, and maintain.
+  
+  i Consider splitting this function into smaller functions.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidMax.js:8:1 lint/nursery/noExcessiveStatementsPerFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function has too many statements (3). Maximum allowed is 2.
+  
+     6 │ function foo() { var bar = 1; try { a; } catch (e) { b; } finally { c; } }
+     7 │ function foo() { "use strict"; a; b; }
+   > 8 │ function foo() { ;;; }
+       │ ^^^^^^^^^^^^^^
+     9 │ function foo() { a; { b; } }
+    10 │ function foo() { label: { a; b; } }
+  
+  i Functions with many statements are harder to read, test, and maintain.
+  
+  i Consider splitting this function into smaller functions.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidMax.js:9:1 lint/nursery/noExcessiveStatementsPerFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function has too many statements (3). Maximum allowed is 2.
+  
+     7 │ function foo() { "use strict"; a; b; }
+     8 │ function foo() { ;;; }
+   > 9 │ function foo() { a; { b; } }
+       │ ^^^^^^^^^^^^^^
+    10 │ function foo() { label: { a; b; } }
+    11 │ function foo() { var bar = 1; return function () { var z; var y; var x; }; }
+  
+  i Functions with many statements are harder to read, test, and maintain.
+  
+  i Consider splitting this function into smaller functions.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidMax.js:10:1 lint/nursery/noExcessiveStatementsPerFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function has too many statements (3). Maximum allowed is 2.
+  
+     8 │ function foo() { ;;; }
+     9 │ function foo() { a; { b; } }
+  > 10 │ function foo() { label: { a; b; } }
+       │ ^^^^^^^^^^^^^^
+    11 │ function foo() { var bar = 1; return function () { var z; var y; var x; }; }
+    12 │ function foo() { foo_1; /* foo_ 2 */ class C { static { one; two; three; four; { five; six; seven; eight; } } } foo_3 }
+  
+  i Functions with many statements are harder to read, test, and maintain.
+  
+  i Consider splitting this function into smaller functions.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidMax.js:11:38 lint/nursery/noExcessiveStatementsPerFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function has too many statements (3). Maximum allowed is 2.
+  
+     9 │ function foo() { a; { b; } }
+    10 │ function foo() { label: { a; b; } }
+  > 11 │ function foo() { var bar = 1; return function () { var z; var y; var x; }; }
+       │                                      ^^^^^^^^^^^
+    12 │ function foo() { foo_1; /* foo_ 2 */ class C { static { one; two; three; four; { five; six; seven; eight; } } } foo_3 }
+    13 │ class C { static { one; two; three; four; function not_top_level() { 1; 2; 3; } five; six; seven; eight; } }
+  
+  i Functions with many statements are harder to read, test, and maintain.
+  
+  i Consider splitting this function into smaller functions.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidMax.js:12:1 lint/nursery/noExcessiveStatementsPerFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function has too many statements (3). Maximum allowed is 2.
+  
+    10 │ function foo() { label: { a; b; } }
+    11 │ function foo() { var bar = 1; return function () { var z; var y; var x; }; }
+  > 12 │ function foo() { foo_1; /* foo_ 2 */ class C { static { one; two; three; four; { five; six; seven; eight; } } } foo_3 }
+       │ ^^^^^^^^^^^^^^
+    13 │ class C { static { one; two; three; four; function not_top_level() { 1; 2; 3; } five; six; seven; eight; } }
+    14 │ var foo = { thing() { a; b; c; } };
+  
+  i Functions with many statements are harder to read, test, and maintain.
+  
+  i Consider splitting this function into smaller functions.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidMax.js:13:43 lint/nursery/noExcessiveStatementsPerFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function has too many statements (3). Maximum allowed is 2.
+  
+    11 │ function foo() { var bar = 1; return function () { var z; var y; var x; }; }
+    12 │ function foo() { foo_1; /* foo_ 2 */ class C { static { one; two; three; four; { five; six; seven; eight; } } } foo_3 }
+  > 13 │ class C { static { one; two; three; four; function not_top_level() { 1; 2; 3; } five; six; seven; eight; } }
+       │                                           ^^^^^^^^^^^^^^^^^^^^^^^^
+    14 │ var foo = { thing() { a; b; c; } };
+    15 │ var foo = { get thing() { a; b; return c; } };
+  
+  i Functions with many statements are harder to read, test, and maintain.
+  
+  i Consider splitting this function into smaller functions.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidMax.js:14:13 lint/nursery/noExcessiveStatementsPerFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function has too many statements (3). Maximum allowed is 2.
+  
+    12 │ function foo() { foo_1; /* foo_ 2 */ class C { static { one; two; three; four; { five; six; seven; eight; } } } foo_3 }
+    13 │ class C { static { one; two; three; four; function not_top_level() { 1; 2; 3; } five; six; seven; eight; } }
+  > 14 │ var foo = { thing() { a; b; c; } };
+       │             ^^^^^^^
+    15 │ var foo = { get thing() { a; b; return c; } };
+    16 │ var foo = { set thing(v) { a; b; c; } };
+  
+  i Functions with many statements are harder to read, test, and maintain.
+  
+  i Consider splitting this function into smaller functions.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidMax.js:15:13 lint/nursery/noExcessiveStatementsPerFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function has too many statements (3). Maximum allowed is 2.
+  
+    13 │ class C { static { one; two; three; four; function not_top_level() { 1; 2; 3; } five; six; seven; eight; } }
+    14 │ var foo = { thing() { a; b; c; } };
+  > 15 │ var foo = { get thing() { a; b; return c; } };
+       │             ^^^^^^^^^^^
+    16 │ var foo = { set thing(v) { a; b; c; } };
+    17 │ class C { method() { a; b; c; } }
+  
+  i Functions with many statements are harder to read, test, and maintain.
+  
+  i Consider splitting this function into smaller functions.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidMax.js:16:13 lint/nursery/noExcessiveStatementsPerFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function has too many statements (3). Maximum allowed is 2.
+  
+    14 │ var foo = { thing() { a; b; c; } };
+    15 │ var foo = { get thing() { a; b; return c; } };
+  > 16 │ var foo = { set thing(v) { a; b; c; } };
+       │             ^^^^^^^^^^^^
+    17 │ class C { method() { a; b; c; } }
+    18 │ class C { get x() { a; b; return c; } }
+  
+  i Functions with many statements are harder to read, test, and maintain.
+  
+  i Consider splitting this function into smaller functions.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidMax.js:17:11 lint/nursery/noExcessiveStatementsPerFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function has too many statements (3). Maximum allowed is 2.
+  
+    15 │ var foo = { get thing() { a; b; return c; } };
+    16 │ var foo = { set thing(v) { a; b; c; } };
+  > 17 │ class C { method() { a; b; c; } }
+       │           ^^^^^^^^
+    18 │ class C { get x() { a; b; return c; } }
+    19 │ class C { set x(v) { a; b; c; } }
+  
+  i Functions with many statements are harder to read, test, and maintain.
+  
+  i Consider splitting this function into smaller functions.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidMax.js:18:11 lint/nursery/noExcessiveStatementsPerFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function has too many statements (3). Maximum allowed is 2.
+  
+    16 │ var foo = { set thing(v) { a; b; c; } };
+    17 │ class C { method() { a; b; c; } }
+  > 18 │ class C { get x() { a; b; return c; } }
+       │           ^^^^^^^
+    19 │ class C { set x(v) { a; b; c; } }
+    20 │ class C { constructor() { a; b; c; } }
+  
+  i Functions with many statements are harder to read, test, and maintain.
+  
+  i Consider splitting this function into smaller functions.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidMax.js:19:11 lint/nursery/noExcessiveStatementsPerFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function has too many statements (3). Maximum allowed is 2.
+  
+    17 │ class C { method() { a; b; c; } }
+    18 │ class C { get x() { a; b; return c; } }
+  > 19 │ class C { set x(v) { a; b; c; } }
+       │           ^^^^^^^^
+    20 │ class C { constructor() { a; b; c; } }
+    21 │ class C { field = () => { a; b; c; }; }
+  
+  i Functions with many statements are harder to read, test, and maintain.
+  
+  i Consider splitting this function into smaller functions.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidMax.js:20:11 lint/nursery/noExcessiveStatementsPerFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function has too many statements (3). Maximum allowed is 2.
+  
+    18 │ class C { get x() { a; b; return c; } }
+    19 │ class C { set x(v) { a; b; c; } }
+  > 20 │ class C { constructor() { a; b; c; } }
+       │           ^^^^^^^^^^^^^
+    21 │ class C { field = () => { a; b; c; }; }
+    22 │ export default function () { a; b; c; }
+  
+  i Functions with many statements are harder to read, test, and maintain.
+  
+  i Consider splitting this function into smaller functions.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidMax.js:21:19 lint/nursery/noExcessiveStatementsPerFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function has too many statements (3). Maximum allowed is 2.
+  
+    19 │ class C { set x(v) { a; b; c; } }
+    20 │ class C { constructor() { a; b; c; } }
+  > 21 │ class C { field = () => { a; b; c; }; }
+       │                   ^^^^^
+    22 │ export default function () { a; b; c; }
+    23 │ function foo(cb = () => { a; b; c; }) {}
+  
+  i Functions with many statements are harder to read, test, and maintain.
+  
+  i Consider splitting this function into smaller functions.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidMax.js:22:16 lint/nursery/noExcessiveStatementsPerFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function has too many statements (3). Maximum allowed is 2.
+  
+    20 │ class C { constructor() { a; b; c; } }
+    21 │ class C { field = () => { a; b; c; }; }
+  > 22 │ export default function () { a; b; c; }
+       │                ^^^^^^^^^^^
+    23 │ function foo(cb = () => { a; b; c; }) {}
+    24 │ async function* foo() { a; b; yield c; }
+  
+  i Functions with many statements are harder to read, test, and maintain.
+  
+  i Consider splitting this function into smaller functions.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidMax.js:23:19 lint/nursery/noExcessiveStatementsPerFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function has too many statements (3). Maximum allowed is 2.
+  
+    21 │ class C { field = () => { a; b; c; }; }
+    22 │ export default function () { a; b; c; }
+  > 23 │ function foo(cb = () => { a; b; c; }) {}
+       │                   ^^^^^
+    24 │ async function* foo() { a; b; yield c; }
+    25 │ 
+  
+  i Functions with many statements are harder to read, test, and maintain.
+  
+  i Consider splitting this function into smaller functions.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidMax.js:24:1 lint/nursery/noExcessiveStatementsPerFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function has too many statements (3). Maximum allowed is 2.
+  
+    22 │ export default function () { a; b; c; }
+    23 │ function foo(cb = () => { a; b; c; }) {}
+  > 24 │ async function* foo() { a; b; yield c; }
+       │ ^^^^^^^^^^^^^^^^^^^^^
+    25 │ 
+  
+  i Functions with many statements are harder to read, test, and maintain.
+  
+  i Consider splitting this function into smaller functions.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

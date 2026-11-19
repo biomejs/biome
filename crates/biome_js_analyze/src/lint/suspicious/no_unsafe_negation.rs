@@ -37,7 +37,10 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noUnsafeNegation",
         language: "js",
-        sources: &[RuleSource::Eslint("no-unsafe-negation").same()],
+        sources: &[
+            RuleSource::Eslint("no-unsafe-negation").same(),
+            RuleSource::Eslint("no-negated-in-lhs").inspired(),
+        ],
         recommended: true,
         severity: Severity::Error,
         fix_kind: FixKind::Unsafe,
@@ -74,7 +77,10 @@ impl Rule for NoUnsafeNegation {
             markup! {
                 "The negation operator is used unsafely on the left side of this binary expression."
             },
-        ))
+        )
+        .note(markup! {
+            "The negation applies only to the left operand, not to the whole expression, so the result is probably not what was intended."
+        }))
     }
 
     fn action(ctx: &RuleContext<Self>, _: &Self::State) -> Option<JsRuleAction> {

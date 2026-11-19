@@ -21,3 +21,13 @@ switch (a) { case 1: { function f() {} break; } default: { function f() {} break
 ```cjs
 switch (a) { case 1: { class C {} break; } default: { class C {} break; } }
 ```
+
+# Input
+```cjs
+switch (a) { case 1: var x = 1; break; default: var y = 2; break; }
+```
+
+# Input
+```cjs
+switch (a) { case 1: var x = 1, y = 2; break; case 2: x; break; }
+```

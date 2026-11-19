@@ -1,0 +1,13 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validSuppressed.jsx
+---
+# Input
+```jsx
+/* should not generate diagnostics */
+<div>
+    {/* biome-ignore lint/nursery/noMisplacedListElements: The container is replaced before rendering. */}
+    <li>Item</li>
+</div>;
+
+```

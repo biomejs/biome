@@ -1,0 +1,58 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/list/task-list/in-html.md
+---
+
+# Input
+
+```md
+<details>
+  <summary><h2>Checklist</h2></summary>
+
+- [ ] I checked for duplicate issues.
+</details>
+<details>
+  <summary><h2>Checklist</h2></summary>
+
+- [ ] I checked for duplicate issues.
+- [ ] I checked for duplicate issues.
+</details>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -2,12 +2,10 @@
+   <summary><h2>Checklist</h2></summary>
+ 
+ - [ ] I checked for duplicate issues.
+-
+ </details>
+ <details>
+   <summary><h2>Checklist</h2></summary>
+ 
+ - [ ] I checked for duplicate issues.
+ - [ ] I checked for duplicate issues.
+-
+ </details>
+```
+
+# Output
+
+```md
+<details>
+  <summary><h2>Checklist</h2></summary>
+
+- [ ] I checked for duplicate issues.
+</details>
+<details>
+  <summary><h2>Checklist</h2></summary>
+
+- [ ] I checked for duplicate issues.
+- [ ] I checked for duplicate issues.
+</details>
+```

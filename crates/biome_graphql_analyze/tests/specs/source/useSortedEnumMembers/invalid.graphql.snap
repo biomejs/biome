@@ -1,0 +1,101 @@
+---
+source: crates/biome_graphql_analyze/tests/spec_tests.rs
+expression: invalid.graphql
+---
+# Input
+```graphql
+# should generate diagnostics
+enum Role {
+  SUPER_ADMIN
+  ADMIN
+  USER
+  GOD
+}
+
+enum Test {
+	qux # Some comment
+	foo
+	"Bar"
+	Bar
+	"""
+	bar
+	"""
+	bar
+}
+
+```
+
+# Diagnostics
+```
+invalid.graphql:2:1 assist/source/useSortedEnumMembers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The members of the enum Role are not sorted.
+  
+    1 │ # should generate diagnostics
+  > 2 │ enum Role {
+      │ ^^^^^^^^^^^
+  > 3 │   SUPER_ADMIN
+  > 4 │   ADMIN
+  > 5 │   USER
+  > 6 │   GOD
+  > 7 │ }
+      │ ^
+    8 │ 
+    9 │ enum Test {
+  
+  i Safe fix: Sort the enum members.
+  
+     1  1 │   # should generate diagnostics
+     2  2 │   enum Role {
+     3    │ - ··SUPER_ADMIN
+     4    │ - ··ADMIN
+     5    │ - ··USER
+     6    │ - ··GOD
+        3 │ + ··ADMIN
+        4 │ + ··GOD
+        5 │ + ··SUPER_ADMIN
+        6 │ + ··USER
+     7  7 │   }
+     8  8 │   
+  
+
+```
+
+```
+invalid.graphql:9:1 assist/source/useSortedEnumMembers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The members of the enum Test are not sorted.
+  
+     7 │ }
+     8 │ 
+   > 9 │ enum Test {
+       │ ^^^^^^^^^^^
+  > 10 │ 	qux # Some comment
+        ...
+  > 16 │ 	"""
+  > 17 │ 	bar
+  > 18 │ }
+       │ ^
+    19 │ 
+  
+  i Safe fix: Sort the enum members.
+  
+     8  8 │   
+     9  9 │   enum Test {
+    10    │ - → qux·#·Some·comment
+    11    │ - → foo
+    12    │ - → "Bar"
+       10 │ + → "Bar"
+    13 11 │     Bar
+    14 12 │     """
+    15 13 │     bar
+    16 14 │     """
+    17    │ - → bar
+       15 │ + → bar
+       16 │ + → foo
+       17 │ + → qux
+    18 18 │   }
+    19 19 │   
+  
+
+```

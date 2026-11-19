@@ -16,8 +16,9 @@ world
 ## AST
 
 ```
-MdDocument {
+MdRoot {
     bom_token: UNICODE_BOM@0..3 "\u{feff}" [] [],
+    frontmatter: missing (optional),
     value: MdBlockList [
         MdHeader {
             indent: MdIndentTokenList [],
@@ -32,7 +33,6 @@ MdDocument {
                         value_token: MD_TEXTUAL_LITERAL@4..10 " Hello" [] [],
                     },
                 ],
-                hard_line: missing (optional),
             },
             after: MdHashList [],
         },
@@ -51,7 +51,6 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@17..18 "\n" [] [],
                 },
             ],
-            hard_line: missing (optional),
         },
     ],
     eof_token: EOF@18..18 "" [] [],
@@ -61,9 +60,10 @@ MdDocument {
 ## CST
 
 ```
-0: MD_DOCUMENT@0..18
+0: MD_ROOT@0..18
   0: UNICODE_BOM@0..3 "\u{feff}" [] []
-  1: MD_BLOCK_LIST@3..18
+  1: (empty)
+  2: MD_BLOCK_LIST@3..18
     0: MD_HEADER@3..10
       0: MD_INDENT_TOKEN_LIST@3..3
       1: MD_HASH_LIST@3..4
@@ -73,7 +73,6 @@ MdDocument {
         0: MD_INLINE_ITEM_LIST@4..10
           0: MD_TEXTUAL@4..10
             0: MD_TEXTUAL_LITERAL@4..10 " Hello" [] []
-        1: (empty)
       3: MD_HASH_LIST@10..10
     1: MD_NEWLINE@10..11
       0: NEWLINE@10..11 "\n" [] []
@@ -85,7 +84,6 @@ MdDocument {
           0: MD_TEXTUAL_LITERAL@12..17 "world" [] []
         1: MD_TEXTUAL@17..18
           0: MD_TEXTUAL_LITERAL@17..18 "\n" [] []
-      1: (empty)
-  2: EOF@18..18 "" [] []
+  3: EOF@18..18 "" [] []
 
 ```

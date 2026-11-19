@@ -7,9 +7,9 @@ mod utils;
 
 pub use fs::{
     AutoSearchResult, ConfigName, ErrorEntry, File, FileSystem, FileSystemDiagnostic,
-    FileSystemExt, FsErrorKind, MemoryFileSystem, OpenOptions, OsFileSystem, PathKind, TemporaryFs,
-    TraversalContext, TraversalScope,
+    FileSystemExt, FsErrorKind, ManifestName, MemoryFileSystem, OpenOptions, OsFileSystem,
+    PathKind, TemporaryFs, TraversalContext, TraversalScope,
 };
 pub use interner::{PathInterner, PathInternerSet};
-pub use path::BiomePath;
+pub use path::{BiomePath, is_node_modules_path};
 pub use utils::*;

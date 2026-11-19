@@ -13,9 +13,24 @@ use biome_js_factory::{
     syntax::{AnyJsObjectMemberName, AnyTsName, AnyTsType, AnyTsTypeMember, T},
 };
 use biome_rowan::{AstSeparatedList, TriviaPieceKind};
+use biome_unicode_table::is_js_ident;
 
 fn escape_jsdoc_comment_text(text: &str) -> String {
     text.replace("*/", "*\\/")
+}
+
+fn format_jsdoc_comment(text: &str) -> String {
+    let text = escape_jsdoc_comment_text(text);
+    let mut comment = String::from("/**");
+    for line in text.lines() {
+        comment.push_str("\n\t *");
+        if !line.is_empty() {
+            comment.push(' ');
+            comment.push_str(line);
+        }
+    }
+    comment.push_str("\n\t */");
+    comment
 }
 
 /// Manages a queue of type definitions that need to be generated
@@ -90,12 +105,11 @@ fn instance_type<'a>(
             let required_properties = schema
                 .get("required")
                 .and_then(|v| v.as_array())
-                .map(|arr| {
+                .map_or_default(|arr| {
                     arr.iter()
                         .filter_map(|v| v.as_str())
                         .collect::<std::collections::HashSet<_>>()
-                })
-                .unwrap_or_default();
+                });
 
             let properties_obj =
                 schema
@@ -122,10 +136,15 @@ fn instance_type<'a>(
                                     ts_type
                                 };
 
-                                let mut property_ident = make::ident(property);
+                                // Use string literal for non-identifier property names
+                                let mut property_ident = if is_js_ident(property) {
+                                    make::ident(property)
+                                } else {
+                                    make::js_string_literal(property)
+                                };
+
                                 if let Some(description) = description {
-                                    let description = escape_jsdoc_comment_text(&description);
-                                    let comment = format!("/**\n\t* {description} \n\t */");
+                                    let comment = format_jsdoc_comment(&description);
                                     let trivia = vec![
                                         (TriviaPieceKind::Newline, "\n"),
                                         (TriviaPieceKind::MultiLineComment, comment.as_str()),
@@ -165,13 +184,9 @@ fn instance_type<'a>(
             });
 
             // Don't use `additionalProperties: false` here.
-            let additional_properties = schema.get("additionalProperties").and_then(|v| {
-                if v.as_bool() == Some(false) {
-                    None
-                } else {
-                    Some(v)
-                }
-            });
+            let additional_properties = schema
+                .get("additionalProperties")
+                .filter(|&v| v.as_bool() != Some(false));
 
             // If `additionalProperties` is not empty, add a mapped or record type.
             let additional_properties_type = additional_properties.map(|add_props| {
@@ -439,7 +454,8 @@ fn schema_object_type<'a>(
             } else if let Some(key) = reference.strip_prefix("#/definitions/") {
                 let def = root_schema.get("definitions")?.as_object()?.get(key)?;
                 (key, def)
-            } else if let Some(key) = reference.strip_prefix("#/components/schemas/") {
+            } else {
+                let key = reference.strip_prefix("#/components/schemas/")?;
                 let def = root_schema
                     .get("components")?
                     .as_object()?
@@ -447,8 +463,6 @@ fn schema_object_type<'a>(
                     .as_object()?
                     .get(key)?;
                 (key, def)
-            } else {
-                return None;
             };
 
             queue.push_back((key, def_schema));
@@ -618,12 +632,11 @@ pub fn generate_type<'a>(
             let required_properties = schema
                 .get("required")
                 .and_then(|v| v.as_array())
-                .map(|arr| {
+                .map_or_default(|arr| {
                     arr.iter()
                         .filter_map(|v| v.as_str())
                         .collect::<std::collections::HashSet<_>>()
-                })
-                .unwrap_or_default();
+                });
 
             // Create a property signature member in the interface for each
             // property of the corresponding schema object
@@ -645,10 +658,15 @@ pub fn generate_type<'a>(
                         ts_type
                     };
 
-                    let mut property = make::ident(property_str);
+                    // Use string literal for non-identifier property names
+                    let mut property = if is_js_ident(property_str) {
+                        make::ident(property_str)
+                    } else {
+                        make::js_string_literal(property_str)
+                    };
+
                     if let Some(ref description) = description {
-                        let description = escape_jsdoc_comment_text(description);
-                        let comment = format!("/**\n\t* {description} \n\t */");
+                        let comment = format_jsdoc_comment(description);
                         let trivia = vec![
                             (TriviaPieceKind::Newline, "\n"),
                             (TriviaPieceKind::MultiLineComment, comment.as_str()),
@@ -763,7 +781,7 @@ macro_rules! workspace_method {
 }
 
 /// Returns a list of signature for all the methods in the [Workspace] trait
-pub fn methods() -> [WorkspaceMethod; 30] {
+pub fn methods() -> [WorkspaceMethod; 31] {
     [
         workspace_method!(file_features),
         workspace_method!(update_settings),
@@ -785,6 +803,7 @@ pub fn methods() -> [WorkspaceMethod; 30] {
         workspace_method!(get_semantic_model),
         workspace_method!(get_module_graph),
         workspace_method!(pull_diagnostics),
+        workspace_method!(process_file),
         workspace_method!(pull_actions),
         workspace_method!(pull_diagnostics_and_actions),
         workspace_method!(format_file),

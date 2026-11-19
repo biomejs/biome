@@ -644,6 +644,22 @@ pub const fn ascii_collation_weight_from(collation_table: &[u8; 128]) -> [u8; 25
 }
 
 pub trait StrLikeExtension: ToOwned {
+    /// Compares lexicographically after folding ASCII uppercase letters to lowercase,
+    /// without allocating. Non-ASCII bytes are compared unchanged.
+    ///
+    /// Binary search requires the slice to be sorted using this comparison function, which
+    /// can differ from ordinary byte comparisons when entries contain uppercase letters.
+    /// Duplicate matches follow the standard slice binary search behavior.
+    ///
+    /// ```
+    /// use biome_string_case::StrLikeExtension;
+    ///
+    /// let names = ["Alpha", "beta", "GAMMA"];
+    /// assert_eq!(names.binary_search_by(|name| name.cmp_ignore_ascii_case("BETA")), Ok(1));
+    /// assert_eq!(names.binary_search_by(|name| name.cmp_ignore_ascii_case("delta")), Err(2));
+    /// ```
+    fn cmp_ignore_ascii_case(&self, other: &Self) -> Ordering;
+
     /// Returns the same value as String::to_lowercase. The only difference
     /// is that this functions returns ```Cow``` and does not allocate
     /// if the string is already in lowercase.
@@ -679,6 +695,11 @@ pub trait StrOnlyExtension: ToOwned {
 }
 
 impl StrLikeExtension for str {
+    #[inline]
+    fn cmp_ignore_ascii_case(&self, other: &Self) -> Ordering {
+        self.as_bytes().cmp_ignore_ascii_case(other.as_bytes())
+    }
+
     fn to_ascii_lowercase_cow(&self) -> Cow<'_, Self> {
         let has_ascii_uppercase = self.bytes().any(|b| b.is_ascii_uppercase());
         if has_ascii_uppercase {
@@ -745,6 +766,12 @@ impl StrOnlyExtension for str {
 }
 
 impl StrLikeExtension for std::ffi::OsStr {
+    #[inline]
+    fn cmp_ignore_ascii_case(&self, other: &Self) -> Ordering {
+        self.as_encoded_bytes()
+            .cmp_ignore_ascii_case(other.as_encoded_bytes())
+    }
+
     fn to_ascii_lowercase_cow(&self) -> Cow<'_, Self> {
         let has_ascii_uppercase = self
             .as_encoded_bytes()
@@ -774,6 +801,27 @@ impl StrLikeExtension for std::ffi::OsStr {
 }
 
 impl StrLikeExtension for [u8] {
+    #[inline]
+    fn cmp_ignore_ascii_case(&self, other: &Self) -> Ordering {
+        let mut left = self;
+        let mut right = other;
+        while let (Some((a, a_rest)), Some((b, b_rest))) = (
+            left.split_first_chunk::<8>(),
+            right.split_first_chunk::<8>(),
+        ) {
+            let a = lowercase_ascii_word(u64::from_be_bytes(*a));
+            let b = lowercase_ascii_word(u64::from_be_bytes(*b));
+            if a != b {
+                return a.cmp(&b);
+            }
+            left = a_rest;
+            right = b_rest;
+        }
+        left.iter()
+            .map(u8::to_ascii_lowercase)
+            .cmp(right.iter().map(u8::to_ascii_lowercase))
+    }
+
     fn to_ascii_lowercase_cow(&self) -> Cow<'_, Self> {
         let has_ascii_uppercase = self.iter().any(|b| b.is_ascii_uppercase());
         if has_ascii_uppercase {
@@ -801,6 +849,18 @@ impl StrLikeExtension for [u8] {
         self.windows(needle.len())
             .any(|window| window.eq_ignore_ascii_case(needle))
     }
+}
+
+#[inline]
+fn lowercase_ascii_word(word: u64) -> u64 {
+    // Clear each high bit so additions cannot carry between byte lanes.
+    // Adding 63 and 37 sets different high bits exactly for bytes in A..=Z.
+    // Exclude non-ASCII bytes, then shift each matching high bit to the case bit.
+    let low = word & 0x7f7f_7f7f_7f7f_7f7f;
+    let uppercase = ((low + 0x3f3f_3f3f_3f3f_3f3f) ^ (low + 0x2525_2525_2525_2525))
+        & !word
+        & 0x8080_8080_8080_8080;
+    word | (uppercase >> 2)
 }
 
 // TODO: Once trait-alias are stabilized it would be enough to `use` this trait instead of individual ones.
@@ -1428,5 +1488,132 @@ mod contains_ignore_ascii_case_osstr {
     fn punctuation_and_digits_must_match_exactly() {
         assert!(OsStr::new("color-2").contains_ignore_ascii_case(OsStr::new("COLOR-2")));
         assert!(!OsStr::new("color-2").contains_ignore_ascii_case(OsStr::new("color_2")));
+    }
+}
+
+#[cfg(test)]
+mod cmp_ignore_ascii_case_tests {
+    use super::StrLikeExtension;
+    use std::{cmp::Ordering, ffi::OsStr};
+
+    #[test]
+    fn all_byte_pairs() {
+        for a in 0..=u8::MAX {
+            for b in 0..=u8::MAX {
+                let expected = a.to_ascii_lowercase().cmp(&b.to_ascii_lowercase());
+                assert_eq!([a].cmp_ignore_ascii_case(&[b]), expected);
+                for offset in 0..16 {
+                    let mut left = [b'A'; 24];
+                    let mut right = [b'a'; 24];
+                    left[offset] = a;
+                    right[offset] = b;
+                    assert_eq!(left.cmp_ignore_ascii_case(&right), expected);
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn mixed_byte_lanes() {
+        let mut state = 0x1234_5678_u32;
+        for len in 0..128 {
+            let mut left = [0_u8; 128];
+            for byte in &mut left {
+                state = state.wrapping_mul(1_664_525).wrapping_add(1_013_904_223);
+                *byte = (state >> 24) as u8;
+            }
+            let mut right = left.map(|byte| byte.to_ascii_uppercase());
+            for offset in 0..128 {
+                right[offset] = right[offset].wrapping_add(1);
+                let a = &left[..len];
+                let b = &right[..len];
+                let expected = a
+                    .iter()
+                    .map(u8::to_ascii_lowercase)
+                    .cmp(b.iter().map(u8::to_ascii_lowercase));
+                assert_eq!(a.cmp_ignore_ascii_case(b), expected);
+                assert_eq!(b.cmp_ignore_ascii_case(a), expected.reverse());
+                right[offset] = left[offset].to_ascii_uppercase();
+            }
+        }
+    }
+
+    #[test]
+    fn prefixes_and_lengths() {
+        let upper = [b'A'; 257];
+        let lower = [b'a'; 257];
+        for left_len in 0..=upper.len() {
+            for right_len in 0..=lower.len() {
+                assert_eq!(
+                    upper[..left_len].cmp_ignore_ascii_case(&lower[..right_len]),
+                    left_len.cmp(&right_len)
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn strings_and_os_strings() {
+        for (left, right, expected) in [
+            ("", "", Ordering::Equal),
+            ("a", "B", Ordering::Less),
+            ("Z", "[", Ordering::Greater),
+            ("@", "a", Ordering::Less),
+            ("Straße", "STRASSE", Ordering::Greater),
+            ("É", "é", Ordering::Less),
+            ("éAb", "éaB", Ordering::Equal),
+            ("a\0B", "A\0b", Ordering::Equal),
+            ("item10", "ITEM9", Ordering::Less),
+        ] {
+            assert_eq!(left.cmp_ignore_ascii_case(right), expected);
+            assert_eq!(
+                OsStr::new(left).cmp_ignore_ascii_case(OsStr::new(right)),
+                expected
+            );
+            assert_eq!(
+                left.as_bytes().cmp_ignore_ascii_case(right.as_bytes()),
+                expected
+            );
+        }
+    }
+
+    #[test]
+    fn binary_search_results() {
+        let mut entries = ["z", "B", "a", "[", "", "é", "É", "abc", "AB"];
+        entries.sort_by(|a, b| a.cmp_ignore_ascii_case(b));
+        for (index, entry) in entries.iter().enumerate() {
+            assert_eq!(
+                entries.binary_search_by(|value| value.cmp_ignore_ascii_case(entry)),
+                Ok(index)
+            );
+        }
+        assert_eq!(
+            entries.binary_search_by(|value| value.cmp_ignore_ascii_case("ABC")),
+            Ok(4)
+        );
+        for query in ["!", "aa", "abcd", "c", "zz", "ê"] {
+            let expected = entries
+                .iter()
+                .position(|entry| entry.cmp_ignore_ascii_case(query).is_gt())
+                .unwrap_or(entries.len());
+            assert_eq!(
+                entries.binary_search_by(|value| value.cmp_ignore_ascii_case(query)),
+                Err(expected)
+            );
+        }
+        let empty: [&str; 0] = [];
+        assert_eq!(
+            empty.binary_search_by(|value| value.cmp_ignore_ascii_case("a")),
+            Err(0)
+        );
+        let duplicates = ["a", "A", "a"];
+        let index = duplicates
+            .binary_search_by(|value| value.cmp_ignore_ascii_case("A"))
+            .unwrap();
+        assert!(duplicates[index].eq_ignore_ascii_case("A"));
+        assert_eq!(
+            ["A"].binary_search_by(|value| value.cmp_ignore_ascii_case("a")),
+            Ok(0)
+        );
     }
 }

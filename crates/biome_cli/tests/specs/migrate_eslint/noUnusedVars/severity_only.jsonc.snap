@@ -1,0 +1,39 @@
+---
+source: crates/biome_cli/src/execute/migrate/eslint_to_biome.rs
+expression: severity_only.jsonc
+---
+## ESLint Config
+
+```json
+{ "rules": { "no-unused-vars": "error" } }
+
+```
+
+## Biome Config Before Migration
+
+```json
+{}
+
+```
+
+## Biome Config After Migration
+
+```json
+{
+	"linter": {
+		"rules": {
+			"preset": "none",
+			"correctness": {
+				"noUnusedVariables": {
+					"level": "error",
+					"options": {
+						"ignoreRestSiblings": false,
+						"ignoreUsingDeclarations": false
+					}
+				}
+			}
+		}
+	}
+}
+
+```

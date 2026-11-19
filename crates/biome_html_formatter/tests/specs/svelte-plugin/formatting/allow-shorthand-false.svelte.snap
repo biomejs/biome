@@ -1,0 +1,42 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: formatting/allow-shorthand-false.svelte
+---
+
+# Input
+
+```svelte
+<input value />
+<input value="string" />
+<input {value} />
+<input value="{value}" />
+<input value={value} />
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,5 +1,5 @@
+ <input value />
+ <input value="string" />
+-<input value={value} />
+-<input value={value} />
+-<input value={value} />
++<input {value} />
++<input value="{value}" />
++<input {value} />
+```
+
+# Output
+
+```svelte
+<input value />
+<input value="string" />
+<input {value} />
+<input value="{value}" />
+<input {value} />
+```

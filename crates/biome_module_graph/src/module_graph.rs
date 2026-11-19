@@ -4,286 +4,113 @@
 //! This can be used by lint rules for things such as cycle detection, and
 //! detecting broken imports.
 //!
-//! The module graph is instantiated and updated inside the Workspace Server.
-
-mod fs_proxy;
-
-use std::{collections::BTreeSet, ops::Deref};
-
+//! Module info is stored as Salsa inputs in a `WorkspaceDb`. Query and
+//! traversal functions in this module accept `&dyn ModuleDb` to look up data.
 use crate::css_module_info::{CssModuleInfo, CssModuleVisitor, SerializedCssModuleInfo};
+use crate::db::queries::{css_dependencies, html_dependencies, js_dependencies};
+use crate::html_module_info::{
+    HtmlModuleInfo, HtmlModuleVisitor, PreparedHtmlModule, SerializedHtmlModuleInfo,
+    prepare_html_module,
+};
 use crate::{
-    JsExport, JsModuleInfo, JsOwnExport, ModuleDiagnostic, SerializedJsModuleInfo,
+    JsModuleInfo, ModuleDb, ModuleDiagnostic, SerializedJsModuleInfo, TypeInferenceMode,
     js_module_info::JsModuleVisitor,
 };
 use biome_css_syntax::AnyCssRoot;
 use biome_fs::BiomePath;
 use biome_js_syntax::AnyJsRoot;
-use biome_js_type_info::ImportSymbol;
-use biome_jsdoc_comment::JsdocComment;
-use biome_project_layout::ProjectLayout;
-use biome_resolver::{FsWithResolverProxy, PathInfo};
-use camino::{Utf8Path, Utf8PathBuf};
-pub(crate) use fs_proxy::ModuleGraphFsProxy;
-use papaya::{HashMap, HashMapRef, LocalGuard};
-use rustc_hash::{FxBuildHasher, FxHashSet};
+use biome_resolver::ResolverDb;
+use camino::Utf8PathBuf;
+use rustc_hash::FxHashSet;
+use std::ops::Deref;
 
 pub const SUPPORTED_EXTENSIONS: &[&str] = &[
     "ts", "tsx", "mts", "cts", "js", "jsx", "mjs", "cjs", "json", "node",
 ];
 
-/// Data structure for tracking imports and exports across files.
-///
-/// The module graph is also augmented with type information, allowing types
-/// to be looked up from imports as well.
-///
-/// The module graph is simply a flat mapping from paths to module info
-/// structures. This approach makes both lookups easy and makes it very easy for
-/// us to invalidate part of the graph when there are file system changes.
-#[derive(Debug, Default)]
-pub struct ModuleGraph {
-    /// Cached module info per file.
-    data: HashMap<Utf8PathBuf, ModuleInfo, FxBuildHasher>,
+// #region Resolve functions (pure — produce module info without storing it)
 
-    /// Cache that tracks the presence of files, directories, and symlinks
-    /// across the project.
-    path_info: HashMap<Utf8PathBuf, Option<PathInfo>>,
+/// Resolves a JS/TS file into its module info.
+///
+/// Collects the module info from the AST and resolves its imports through the
+/// database, which records the path info observed by the resolver.
+/// The caller is responsible for storing the module info in the database.
+pub fn resolve_js_module(
+    db: &dyn ResolverDb,
+    root: AnyJsRoot,
+    path: &BiomePath,
+    semantic_model: std::sync::Arc<biome_js_semantic::SemanticModel>,
+    enable_type_inference: bool,
+) -> (JsModuleInfo, ModuleDependencies, Vec<ModuleDiagnostic>) {
+    let inference_mode = if enable_type_inference {
+        TypeInferenceMode::RawTypesOnly
+    } else {
+        TypeInferenceMode::Disabled
+    };
+
+    resolve_js_module_with_inference_mode(db, root, path, semantic_model, inference_mode)
 }
 
-impl ModuleGraph {
-    /// Returns whether the given `path` is indexed in the module graph.
-    pub fn contains(&self, path: &Utf8Path) -> bool {
-        self.data.pin().contains_key(path)
-    }
-
-    /// Returns the module info, such as imports and exports and their types,
-    /// for the given `path`.
-    pub fn js_module_info_for_path(&self, path: &Utf8Path) -> Option<JsModuleInfo> {
-        self.data.pin().get(path).and_then(|info| match info {
-            ModuleInfo::Js(module_info) => Some(module_info.clone()),
-            _ => None,
-        })
-    }
-
-    /// Returns the data of the module graph in test
-    pub fn data(&self) -> HashMapRef<'_, Utf8PathBuf, ModuleInfo, FxBuildHasher, LocalGuard<'_>> {
-        self.data.pin()
-    }
-
-    /// Updates the module graph to add, update, or remove files.
-    ///
-    /// Only JavaScript/TypeScript files need to be provided as part of
-    /// `added_or_updated_paths` and `removed_paths`. Manifests are expected to
-    /// be resolved through the `project_layout`. As such, the `project_layout`
-    /// must have been updated before calling this method.
-    ///
-    /// Returns the dependencies of all the paths that were added or updated.
-    pub fn update_graph_for_js_paths(
-        &self,
-        fs: &dyn FsWithResolverProxy,
-        project_layout: &ProjectLayout,
-        added_or_updated_paths: &[(
-            &BiomePath,
-            AnyJsRoot,
-            std::sync::Arc<biome_js_semantic::SemanticModel>,
-        )],
-        enable_type_inference: bool,
-    ) -> (ModuleDependencies, Vec<ModuleDiagnostic>) {
-        // Make sure all directories are registered for the added/updated paths.
-        let path_info = self.path_info.pin();
-        for (path, _, _) in added_or_updated_paths {
-            let mut parent = path.parent();
-            while let Some(path) = parent {
-                let mut inserted = false;
-                path_info.get_or_insert_with(path.to_path_buf(), || {
-                    inserted = true;
-                    fs.path_info(path).ok()
-                });
-                if !inserted {
-                    break;
-                }
-                parent = path.parent();
-            }
-        }
-
-        let fs_proxy = ModuleGraphFsProxy::new(fs, self, project_layout);
-        let mut dependencies = ModuleDependencies::default();
-        let mut diagnostics = Vec::new();
-
-        // Traverse all the added and updated paths and insert their module
-        // info.
-        let modules = self.data.pin();
-        for (path, root, semantic_model) in added_or_updated_paths {
-            let directory = path.parent().unwrap_or(path);
-            let visitor = JsModuleVisitor::new(
-                root.clone(),
-                directory,
-                &fs_proxy,
-                semantic_model.clone(),
-                enable_type_inference,
-            );
-
-            let module_info = visitor.collect_info();
-            for import_path in module_info.all_import_paths() {
-                if let Some(path) = import_path.as_path() {
-                    dependencies.insert(path.to_path_buf());
-                }
-            }
-
-            for diagnostic in module_info.diagnostics() {
-                diagnostics.push(diagnostic.clone());
-            }
-
-            modules.insert(path.to_path_buf(), module_info.into());
-        }
-
-        (dependencies, diagnostics)
-    }
-
-    pub fn update_graph_for_css_paths(
-        &self,
-        fs: &dyn FsWithResolverProxy,
-        project_layout: &ProjectLayout,
-        added_or_updated_paths: &[(&BiomePath, AnyCssRoot)],
-        _semantic_model: Option<&biome_css_semantic::model::SemanticModel>,
-    ) -> (ModuleDependencies, Vec<ModuleDiagnostic>) {
-        // Make sure all directories are registered for the added/updated paths.
-        let path_info = self.path_info.pin();
-        for (path, _) in added_or_updated_paths {
-            let mut parent = path.parent();
-            while let Some(path) = parent {
-                let mut inserted = false;
-                path_info.get_or_insert_with(path.to_path_buf(), || {
-                    inserted = true;
-                    fs.path_info(path).ok()
-                });
-                if !inserted {
-                    break;
-                }
-                parent = path.parent();
-            }
-        }
-
-        let fs_proxy = ModuleGraphFsProxy::new(fs, self, project_layout);
-        let mut dependencies = ModuleDependencies::default();
-        let diagnostics = Vec::new();
-
-        // Traverse all the added and updated paths and insert their module
-        // info.
-        let modules = self.data.pin();
-
-        for (path, root) in added_or_updated_paths {
-            let directory = path.parent().unwrap_or(path);
-            let visitor = CssModuleVisitor::new(root.clone(), directory, &fs_proxy);
-
-            let module = visitor.visit();
-
-            for (_, path) in module.0.imports.deref() {
-                if let Some(path) = path.resolved_path.as_path() {
-                    dependencies.insert(path.to_path_buf());
-                }
-            }
-
-            modules.insert(path.to_path_buf(), module.into());
-        }
-
-        (dependencies, diagnostics)
-    }
-
-    pub fn update_graph_for_removed_paths(&self, removed_paths: &[&BiomePath]) {
-        let modules = self.data.pin();
-        // Clean up removed paths from the module graph and path info cache.
-        let path_info = self.path_info.pin();
-        // Clean up removed paths.
-        for removed_path in removed_paths {
-            modules.remove(removed_path.as_path());
-            path_info.remove(removed_path.as_path());
-        }
-    }
-
-    pub fn get_or_insert_path_info(
-        &self,
-        path: &Utf8Path,
-        fs: &dyn FsWithResolverProxy,
-    ) -> Option<PathInfo> {
-        self.path_info
-            .pin()
-            .get_or_insert_with(path.to_path_buf(), || fs.path_info(path).ok())
-            .clone()
-    }
-
-    /// Unloads all paths from the graph within the given `path`.
-    ///
-    /// This method works both for unloading folders as well as individual
-    /// files.
-    pub fn unload_path(&self, path: &Utf8Path) {
-        let data = self.data.pin();
-        for indexed_path in data.keys() {
-            if indexed_path.starts_with(path) {
-                data.remove(indexed_path);
-            }
-        }
-    }
-
-    /// Finds an exported symbol by `symbol_name` as exported by `module`.
-    ///
-    /// Follows re-exports if necessary.
-    pub(crate) fn find_exported_symbol(
-        &self,
-        module: &JsModuleInfo,
-        symbol_name: &str,
-    ) -> Option<JsOwnExport> {
-        let data = self.data.pin();
-        let mut seen_paths = BTreeSet::new();
-
-        find_exported_symbol_with_seen_paths(&data, module, symbol_name, &mut seen_paths)
-            .map(|(_, export)| export.clone())
-    }
-
-    /// Finds an exported symbol by `symbol_name` as exported by `module`.
-    ///
-    /// Follows re-exports if necessary.
-    pub(crate) fn find_jsdoc_for_exported_symbol(
-        &self,
-        module: &JsModuleInfo,
-        symbol_name: &str,
-    ) -> Option<JsdocComment> {
-        let data = self.data.pin();
-        let mut seen_paths = BTreeSet::new();
-
-        find_exported_symbol_with_seen_paths(&data, module, symbol_name, &mut seen_paths).and_then(
-            |(module, export)| match export {
-                JsOwnExport::Binding(binding_range) => {
-                    // Find the binding at this range via the semantic model
-                    module
-                        .semantic_model
-                        .as_binding_by_range(*binding_range)
-                        .and_then(|binding| binding.jsdoc().cloned())
-                }
-                JsOwnExport::Type(_) => None,
-                JsOwnExport::Namespace(reexport) => reexport
-                    .export_range
-                    .and_then(|range| module.semantic_model.export_jsdoc(range).cloned()),
-            },
-        )
-    }
+pub fn resolve_js_module_with_inference_mode(
+    db: &dyn ResolverDb,
+    root: AnyJsRoot,
+    path: &BiomePath,
+    semantic_model: std::sync::Arc<biome_js_semantic::SemanticModel>,
+    inference_mode: TypeInferenceMode,
+) -> (JsModuleInfo, ModuleDependencies, Vec<ModuleDiagnostic>) {
+    let visitor = JsModuleVisitor::new(root, path.to_path_buf(), semantic_model, inference_mode);
+    let module_info = visitor.collect_info();
+    let dependencies = js_dependencies(db, path, &module_info);
+    let diagnostics = module_info.diagnostics().to_vec();
+    (module_info, dependencies, diagnostics)
 }
 
+pub fn resolve_css_module(
+    db: &dyn ResolverDb,
+    root: AnyCssRoot,
+    path: &BiomePath,
+) -> (CssModuleInfo, ModuleDependencies, Vec<ModuleDiagnostic>) {
+    let module = CssModuleVisitor::new(root).visit();
+    let dependencies = css_dependencies(db, path, &module);
+    (module, dependencies, Vec::new())
+}
+
+pub fn resolve_html_module(
+    db: &dyn ModuleDb,
+    path: &BiomePath,
+) -> Option<(HtmlModuleInfo, ModuleDependencies, Vec<ModuleDiagnostic>)> {
+    let parsed_source = db.parsed_source_for_path(path)?;
+    let prepared = prepare_html_module(db, parsed_source);
+    Some(resolve_prepared_html_module(db, prepared, path))
+}
+
+pub fn resolve_prepared_html_module(
+    db: &dyn ResolverDb,
+    prepared: PreparedHtmlModule,
+    path: &BiomePath,
+) -> (HtmlModuleInfo, ModuleDependencies, Vec<ModuleDiagnostic>) {
+    let module = HtmlModuleVisitor::new(prepared, path.to_path_buf()).visit();
+    let dependencies = html_dependencies(db, path, &module);
+    (module, dependencies, Vec::new())
+}
+
+// #endregion
+
+// #region: Types (Salsa input, enums, serialization, dependencies)
+#[salsa::input]
 #[derive(Debug)]
-pub enum ModuleInfo {
+pub struct ModuleInfo {
+    pub path: Utf8PathBuf,
+
+    #[no_eq]
+    pub kind: ModuleInfoKind,
+}
+
+#[derive(Debug, Clone)]
+pub enum ModuleInfoKind {
     Js(JsModuleInfo),
     Css(CssModuleInfo),
-}
-
-impl From<JsModuleInfo> for ModuleInfo {
-    fn from(value: JsModuleInfo) -> Self {
-        Self::Js(value)
-    }
-}
-
-impl From<CssModuleInfo> for ModuleInfo {
-    fn from(value: CssModuleInfo) -> Self {
-        Self::Css(value)
-    }
+    Html(HtmlModuleInfo),
 }
 
 #[derive(Debug)]
@@ -293,6 +120,7 @@ impl From<CssModuleInfo> for ModuleInfo {
 pub enum SerializedModuleInfo {
     Js(SerializedJsModuleInfo),
     Css(SerializedCssModuleInfo),
+    Html(SerializedHtmlModuleInfo),
 }
 
 impl SerializedModuleInfo {
@@ -309,16 +137,44 @@ impl SerializedModuleInfo {
             _ => None,
         }
     }
+
+    pub fn as_html_module_info(&self) -> Option<&SerializedHtmlModuleInfo> {
+        match self {
+            Self::Html(module) => Some(module),
+            _ => None,
+        }
+    }
+}
+
+impl From<JsModuleInfo> for ModuleInfoKind {
+    fn from(info: JsModuleInfo) -> Self {
+        Self::Js(info)
+    }
+}
+
+impl From<CssModuleInfo> for ModuleInfoKind {
+    fn from(info: CssModuleInfo) -> Self {
+        Self::Css(info)
+    }
+}
+
+impl From<HtmlModuleInfo> for ModuleInfoKind {
+    fn from(info: HtmlModuleInfo) -> Self {
+        Self::Html(info)
+    }
 }
 
 impl ModuleInfo {
-    pub fn dump(&self) -> SerializedModuleInfo {
-        match self {
-            Self::Js(module) => SerializedModuleInfo::Js(module.dump()),
-            Self::Css(module) => SerializedModuleInfo::Css(module.dump()),
+    pub fn dump(self, db: &dyn ModuleDb) -> SerializedModuleInfo {
+        match self.kind(db) {
+            ModuleInfoKind::Js(module) => SerializedModuleInfo::Js(module.dump(db, self)),
+            ModuleInfoKind::Css(module) => SerializedModuleInfo::Css(module.dump()),
+            ModuleInfoKind::Html(module) => SerializedModuleInfo::Html(module.dump()),
         }
     }
+}
 
+impl ModuleInfoKind {
     pub fn as_js_module_info(&self) -> Option<&JsModuleInfo> {
         match self {
             Self::Js(module) => Some(module),
@@ -332,81 +188,20 @@ impl ModuleInfo {
             _ => None,
         }
     }
-}
 
-fn find_exported_symbol_with_seen_paths<'a>(
-    data: &'a HashMapRef<Utf8PathBuf, ModuleInfo, FxBuildHasher, LocalGuard>,
-    module: &'a JsModuleInfo,
-    symbol_name: &str,
-    seen_paths: &mut BTreeSet<&'a Utf8Path>,
-) -> Option<(&'a JsModuleInfo, &'a JsOwnExport)> {
-    match module.exports.get(symbol_name) {
-        Some(JsExport::Own(own_export) | JsExport::OwnType(own_export)) => {
-            Some((module, own_export))
+    pub fn as_html_module_info(&self) -> Option<&HtmlModuleInfo> {
+        match self {
+            Self::Html(module) => Some(module),
+            _ => None,
         }
-        Some(JsExport::Reexport(reexport) | JsExport::ReexportType(reexport)) => {
-            match &reexport.import.symbol {
-                ImportSymbol::All => {
-                    // TODO: Follow namespace exports.
-                    None
-                }
-                // The source-side name may differ from the export name when the
-                // reexport uses an alias, e.g. `export { l as beforeEach } from
-                // './tasks'`. In that case we must look up the source-side name
-                // (`l`) in the target module, not the alias (`beforeEach`).
-                ImportSymbol::Named(source_name) => {
-                    let lookup = source_name.text();
-                    match reexport.import.resolved_path.as_deref() {
-                        Ok(path) if seen_paths.insert(path) => data.get(path).and_then(|module| {
-                            if let ModuleInfo::Js(module) = module {
-                                find_exported_symbol_with_seen_paths(
-                                    data, module, lookup, seen_paths,
-                                )
-                            } else {
-                                None
-                            }
-                        }),
-                        _ => None,
-                    }
-                }
-                ImportSymbol::Default => match reexport.import.resolved_path.as_deref() {
-                    Ok(path) if seen_paths.insert(path) => data.get(path).and_then(|module| {
-                        if let ModuleInfo::Js(module) = module {
-                            find_exported_symbol_with_seen_paths(
-                                data,
-                                module,
-                                symbol_name,
-                                seen_paths,
-                            )
-                        } else {
-                            None
-                        }
-                    }),
-                    _ => None,
-                },
-            }
-        }
-        None => module.blanket_reexports.iter().find_map(|reexport| {
-            match reexport.import.resolved_path.as_deref() {
-                Ok(path) if seen_paths.insert(path) => data.get(path).and_then(|module| {
-                    if let ModuleInfo::Js(module) = module {
-                        find_exported_symbol_with_seen_paths(data, module, symbol_name, seen_paths)
-                    } else {
-                        None
-                    }
-                }),
-                _ => None,
-            }
-        }),
     }
 }
 
 /// Represents all the files that are imported/depended on by a module.
-#[derive(Debug, Default)]
+#[derive(Clone, Debug, Default, Eq, PartialEq)]
 pub struct ModuleDependencies(FxHashSet<Utf8PathBuf>);
 
 impl ModuleDependencies {
-    /// Adds a dependency to the module dependencies, if it wasn't added yet.
     pub fn insert(&mut self, dependency_path: Utf8PathBuf) {
         self.0.insert(dependency_path);
     }
@@ -432,6 +227,12 @@ impl From<FxHashSet<Utf8PathBuf>> for ModuleDependencies {
     }
 }
 
+impl Extend<Utf8PathBuf> for ModuleDependencies {
+    fn extend<T: IntoIterator<Item = Utf8PathBuf>>(&mut self, iter: T) {
+        self.0.extend(iter);
+    }
+}
+
 impl FromIterator<Utf8PathBuf> for ModuleDependencies {
     fn from_iter<T: IntoIterator<Item = Utf8PathBuf>>(iter: T) -> Self {
         Self(iter.into_iter().collect())
@@ -447,3 +248,5 @@ impl IntoIterator for ModuleDependencies {
         self.0.into_iter()
     }
 }
+
+//#endregion

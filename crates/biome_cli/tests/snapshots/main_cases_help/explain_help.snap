@@ -2,10 +2,16 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
+## Command
+
+```shell
+biome explain --help
+```
+
 # Emitted Messages
 
 ```block
-Shows documentation of various aspects of the CLI.
+Prints documentation for a lint rule or the path to the daemon server log directory.
 ### Examples
 ```shell
 biome explain noDebugger
@@ -17,7 +23,7 @@ biome explain daemon-logs
 Usage: explain NAME
 
 Available positional items:
-    NAME        Single name to display documentation for.
+    NAME        `NAME` is a lint rule name or `daemon-logs`.
 
 Available options:
     -h, --help  Prints help information

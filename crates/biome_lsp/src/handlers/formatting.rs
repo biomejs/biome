@@ -5,6 +5,7 @@ use anyhow::Context;
 use biome_fs::BiomePath;
 use biome_lsp_converters::from_proto;
 use biome_rowan::{TextLen, TextRange, TextSize};
+use biome_service::Workspace;
 use biome_service::file_handlers::astro::AstroFileHandler;
 use biome_service::file_handlers::svelte::SvelteFileHandler;
 use biome_service::file_handlers::vue::VueFileHandler;
@@ -27,7 +28,10 @@ pub(crate) fn format(
     let Some(doc) = session.document(&url) else {
         return Ok(None);
     };
-    if !session.workspace.file_exists(path.clone().into())? {
+    if !session
+        .workspace_for_request()
+        .file_exists(path.clone().into())?
+    {
         return Ok(None);
     }
 
@@ -35,37 +39,46 @@ pub(crate) fn format(
 
     let FileFeaturesResult {
         features_supported: file_features,
-    } = session.workspace.file_features(SupportsFeatureParams {
-        project_key: doc.project_key,
-        path: path.clone(),
-        features,
-        inline_config: session.inline_config(),
-        skip_ignore_check: false,
-        not_requested_features: FeaturesBuilder::new().with_search().build(),
-    })?;
+    } = session
+        .workspace_for_request()
+        .file_features(SupportsFeatureParams {
+            project_key: doc.project_key,
+            path: path.clone(),
+            features,
+            inline_config: session.inline_config(),
+            skip_ignore_check: false,
+            not_requested_features: FeaturesBuilder::new().with_search().build(),
+        })?;
     if !file_features.supports_format() {
         return notify_user(file_features, path);
     }
 
-    let size_limit_result = session.workspace.check_file_size(CheckFileSizeParams {
-        project_key: doc.project_key,
-        path: path.clone(),
-    })?;
+    let size_limit_result =
+        session
+            .workspace_for_request()
+            .check_file_size(CheckFileSizeParams {
+                project_key: doc.project_key,
+                path: path.clone(),
+            })?;
     if size_limit_result.is_too_large() {
         return Ok(None);
     }
 
-    let printed = session.workspace.format_file(FormatFileParams {
-        project_key: doc.project_key,
-        path: path.clone(),
-        inline_config: session.inline_config(),
-    })?;
+    let printed = session
+        .workspace_for_request()
+        .format_file(FormatFileParams {
+            project_key: doc.project_key,
+            path: path.clone(),
+            inline_config: session.inline_config(),
+        })?;
 
     let mut output = printed.into_code();
-    let input = session.workspace.get_file_content(GetFileContentParams {
-        project_key: doc.project_key,
-        path: path.clone(),
-    })?;
+    let input = session
+        .workspace_for_request()
+        .get_file_content(GetFileContentParams {
+            project_key: doc.project_key,
+            path: path.clone(),
+        })?;
     if output.is_empty() {
         return Ok(None);
     }
@@ -101,29 +114,37 @@ pub(crate) fn format_range(
     let Some(doc) = session.document(&url) else {
         return Err(extension_error(&path).into());
     };
-    if !session.workspace.file_exists(path.clone().into())? {
+    if !session
+        .workspace_for_request()
+        .file_exists(path.clone().into())?
+    {
         return Ok(None);
     }
 
     let features = FeaturesBuilder::new().with_formatter().build();
     let FileFeaturesResult {
         features_supported: file_features,
-    } = session.workspace.file_features(SupportsFeatureParams {
-        project_key: doc.project_key,
-        path: path.clone(),
-        features,
-        inline_config: session.inline_config(),
-        skip_ignore_check: false,
-        not_requested_features: FeaturesBuilder::new().with_search().build(),
-    })?;
+    } = session
+        .workspace_for_request()
+        .file_features(SupportsFeatureParams {
+            project_key: doc.project_key,
+            path: path.clone(),
+            features,
+            inline_config: session.inline_config(),
+            skip_ignore_check: false,
+            not_requested_features: FeaturesBuilder::new().with_search().build(),
+        })?;
     if !file_features.supports_format() {
         return notify_user(file_features, path);
     }
 
-    let size_limit_result = session.workspace.check_file_size(CheckFileSizeParams {
-        project_key: doc.project_key,
-        path: path.clone(),
-    })?;
+    let size_limit_result =
+        session
+            .workspace_for_request()
+            .check_file_size(CheckFileSizeParams {
+                project_key: doc.project_key,
+                path: path.clone(),
+            })?;
     if size_limit_result.is_too_large() {
         return Ok(None);
     }
@@ -137,10 +158,12 @@ pub(crate) fn format_range(
                 url.as_str()
             )
         })?;
-    let content = session.workspace.get_file_content(GetFileContentParams {
-        project_key: doc.project_key,
-        path: path.clone(),
-    })?;
+    let content = session
+        .workspace_for_request()
+        .get_file_content(GetFileContentParams {
+            project_key: doc.project_key,
+            path: path.clone(),
+        })?;
 
     let offset = match path.extension() {
         Some("vue") => VueFileHandler::start(content.as_str()),
@@ -161,12 +184,14 @@ pub(crate) fn format_range(
         format_range
     };
 
-    let formatted = session.workspace.format_range(FormatRangeParams {
-        project_key: doc.project_key,
-        path: path.clone(),
-        range: format_range,
-        inline_config: session.inline_config(),
-    })?;
+    let formatted = session
+        .workspace_for_request()
+        .format_range(FormatRangeParams {
+            project_key: doc.project_key,
+            path: path.clone(),
+            range: format_range,
+            inline_config: session.inline_config(),
+        })?;
 
     let formatted_range = formatted
         .range()
@@ -197,29 +222,37 @@ pub(crate) fn format_on_type(
     let Some(doc) = session.document(&url) else {
         return Err(extension_error(&path).into());
     };
-    if !session.workspace.file_exists(path.clone().into())? {
+    if !session
+        .workspace_for_request()
+        .file_exists(path.clone().into())?
+    {
         return Ok(None);
     }
 
     let features = FeaturesBuilder::new().with_formatter().build();
     let FileFeaturesResult {
         features_supported: file_features,
-    } = session.workspace.file_features(SupportsFeatureParams {
-        project_key: doc.project_key,
-        path: path.clone(),
-        features,
-        inline_config: session.inline_config(),
-        skip_ignore_check: false,
-        not_requested_features: FeaturesBuilder::new().with_search().build(),
-    })?;
+    } = session
+        .workspace_for_request()
+        .file_features(SupportsFeatureParams {
+            project_key: doc.project_key,
+            path: path.clone(),
+            features,
+            inline_config: session.inline_config(),
+            skip_ignore_check: false,
+            not_requested_features: FeaturesBuilder::new().with_search().build(),
+        })?;
     if !file_features.supports_format() {
         return notify_user(file_features, path);
     }
 
-    let size_limit_result = session.workspace.check_file_size(CheckFileSizeParams {
-        project_key: doc.project_key,
-        path: path.clone(),
-    })?;
+    let size_limit_result =
+        session
+            .workspace_for_request()
+            .check_file_size(CheckFileSizeParams {
+                project_key: doc.project_key,
+                path: path.clone(),
+            })?;
     if size_limit_result.is_too_large() {
         return Ok(None);
     }
@@ -233,17 +266,21 @@ pub(crate) fn format_on_type(
             )
         })?;
 
-    let formatted = session.workspace.format_on_type(FormatOnTypeParams {
-        project_key: doc.project_key,
-        path: path.clone(),
-        offset,
-        inline_config: session.inline_config(),
-    })?;
+    let formatted = session
+        .workspace_for_request()
+        .format_on_type(FormatOnTypeParams {
+            project_key: doc.project_key,
+            path: path.clone(),
+            offset,
+            inline_config: session.inline_config(),
+        })?;
 
-    let content = session.workspace.get_file_content(GetFileContentParams {
-        project_key: doc.project_key,
-        path: path.clone(),
-    })?;
+    let content = session
+        .workspace_for_request()
+        .get_file_content(GetFileContentParams {
+            project_key: doc.project_key,
+            path: path.clone(),
+        })?;
 
     let formatted_range = formatted
         .range()

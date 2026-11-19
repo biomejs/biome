@@ -8,6 +8,7 @@ use std::{
 
 use biome_console::{fmt, markup};
 use biome_text_size::{TextLen, TextRange, TextSize};
+use terminal_size::terminal_size;
 use unicode_width::UnicodeWidthChar;
 
 use crate::{
@@ -29,6 +30,7 @@ pub(super) const CODE_FRAME_CONTEXT_LINES: NonZeroUsize = unwrap(NonZeroUsize::n
 
 const MAX_CODE_FRAME_LINES: usize = 8;
 const HALF_MAX_CODE_FRAME_LINES: usize = MAX_CODE_FRAME_LINES / 2;
+const DEFAULT_TERMINAL_WIDTH: usize = 100;
 
 /// Prints a code frame advice
 pub(super) fn print_frame(fmt: &mut fmt::Formatter<'_>, location: Location<'_>) -> io::Result<()> {
@@ -142,42 +144,7 @@ pub(super) fn print_frame(fmt: &mut fmt::Formatter<'_>, location: Location<'_>) 
         let should_highlight =
             line_index >= start_location.line_number && line_index <= end_location.line_number;
 
-        let padding_width = max_gutter_len
-            .get()
-            .saturating_sub(calculate_print_width(line_index).get());
-
-        for _ in 0..padding_width {
-            fmt.write_str(" ")?;
-        }
-
-        if should_highlight {
-            fmt.write_markup(markup! {
-                <Emphasis><Error>'>'</Error></Emphasis>' '
-            })?;
-        } else {
-            fmt.write_str("  ")?;
-        }
-
-        fmt.write_markup(markup! {
-            <Emphasis>{format_args!("{line_index} \u{2502} ")}</Emphasis>
-        })?;
-
-        // Show invisible characters
-        print_invisibles(
-            fmt,
-            line_text,
-            PrintInvisiblesOptions {
-                ignore_trailing_carriage_return: true,
-                ignore_leading_tabs: true,
-                ignore_lone_spaces: true,
-                at_line_start: true,
-                at_line_end: true,
-            },
-        )?;
-
-        fmt.write_str("\n")?;
-
-        if should_highlight {
+        let marker = if should_highlight {
             let is_first_line = line_index == start_location.line_number;
             let is_last_line = line_index == end_location.line_number;
 
@@ -185,7 +152,7 @@ pub(super) fn print_frame(fmt: &mut fmt::Formatter<'_>, location: Location<'_>) 
                 start_index.max(line_range.start()) - line_range.start();
             let end_index_relative_to_line = end_index.min(line_range.end()) - line_range.start();
 
-            let marker = if is_first_line && is_last_line {
+            if is_first_line && is_last_line {
                 // Only line in the selection
                 Some(TextRange::new(
                     start_index_relative_to_line,
@@ -208,44 +175,104 @@ pub(super) fn print_frame(fmt: &mut fmt::Formatter<'_>, location: Location<'_>) 
                 Some(TextRange::new(start_index, end_index_relative_to_line))
             } else {
                 None
+            }
+        } else {
+            None
+        };
+
+        let padding_width = max_gutter_len
+            .get()
+            .saturating_sub(calculate_print_width(line_index).get());
+
+        for _ in 0..padding_width {
+            fmt.write_str(" ")?;
+        }
+
+        if should_highlight {
+            fmt.write_markup(markup! {
+                <Emphasis><Error>'>'</Error></Emphasis>' '
+            })?;
+        } else {
+            fmt.write_str("  ")?;
+        }
+
+        fmt.write_markup(markup! {
+            <Emphasis>{format_args!("{line_index} \u{2502} ")}</Emphasis>
+        })?;
+
+        let displayed_line = DisplayedLine::new(line_text, marker);
+
+        if displayed_line.has_leading_ellipsis {
+            fmt.write_markup(markup! { <Dim>"..."</Dim> })?;
+        }
+
+        // Show invisible characters
+        print_invisibles(
+            fmt,
+            displayed_line.text,
+            PrintInvisiblesOptions {
+                ignore_trailing_carriage_return: true,
+                ignore_leading_tabs: true,
+                ignore_lone_spaces: true,
+                at_line_start: true,
+                at_line_end: true,
+            },
+        )?;
+
+        if displayed_line.has_trailing_ellipsis {
+            fmt.write_markup(markup! { <Dim>"..."</Dim> })?;
+        }
+
+        fmt.write_str("\n")?;
+
+        if should_highlight && let Some(marker) = marker {
+            let Some(marker) = displayed_line.marker(marker) else {
+                continue;
             };
 
-            if let Some(marker) = marker {
-                for _ in 0..max_gutter_len.get() {
-                    fmt.write_str(" ")?;
-                }
+            for _ in 0..max_gutter_len.get() {
+                fmt.write_str(" ")?;
+            }
 
-                fmt.write_markup(markup! {
-                    <Emphasis>"   \u{2502} "</Emphasis>
-                })?;
+            fmt.write_markup(markup! {
+                <Emphasis>"   \u{2502} "</Emphasis>
+            })?;
 
-                // Align the start of the marker with the line above by a
-                // number of space characters equal to the unicode print width
-                // of the leading part of the line (before the start of the
-                // marker), with a special exception for tab characters that
-                // still get printed as tabs to respect the user-defined tab
-                // display width
-                let leading_range = TextRange::new(TextSize::from(0), marker.start());
-                for c in line_text[leading_range].chars() {
-                    match c {
-                        '\t' => fmt.write_str("\t")?,
-                        _ => {
-                            for _ in 0..char_width(c) {
-                                fmt.write_str(" ")?;
-                            }
+            // Align the start of the marker with the line above by a
+            // number of space characters equal to the unicode print width
+            // of the leading part of the line (before the start of the
+            // marker), with a special exception for tab characters that
+            // still get printed as tabs to respect the user-defined tab
+            // display width
+            let ellipsis_width = if displayed_line.has_leading_ellipsis {
+                text_width("...")
+            } else {
+                0
+            };
+            for _ in 0..ellipsis_width {
+                fmt.write_str(" ")?;
+            }
+
+            let leading_range = TextRange::new(TextSize::from(0), marker.start());
+            for c in displayed_line.text[leading_range].chars() {
+                match c {
+                    '\t' => fmt.write_str("\t")?,
+                    _ => {
+                        for _ in 0..char_width(c) {
+                            fmt.write_str(" ")?;
                         }
                     }
                 }
-
-                let marker_width = text_width(&line_text[marker]);
-                for _ in 0..marker_width {
-                    fmt.write_markup(markup! {
-                        <Emphasis><Error>'^'</Error></Emphasis>
-                    })?;
-                }
-
-                fmt.write_str("\n")?;
             }
+
+            let marker_width = text_width(&displayed_line.text[marker]);
+            for _ in 0..marker_width {
+                fmt.write_markup(markup! {
+                    <Emphasis><Error>'^'</Error></Emphasis>
+                })?;
+            }
+
+            fmt.write_str("\n")?;
         }
     }
 
@@ -340,6 +367,81 @@ pub(super) fn calculate_print_width(mut value: OneIndexed) -> NonZeroUsize {
 /// characters set to [TAB_WIDTH] and the width of control characters set to 0
 pub(super) fn text_width(text: &str) -> usize {
     text.chars().map(char_width).sum()
+}
+
+pub(super) fn terminal_width() -> usize {
+    if cfg!(debug_assertions) {
+        // for testing consistency
+        DEFAULT_TERMINAL_WIDTH
+    } else {
+        terminal_size().map_or(DEFAULT_TERMINAL_WIDTH, |(width, _)| width.0 as usize)
+    }
+}
+
+struct DisplayedLine<'a> {
+    text: &'a str,
+    offset: TextSize,
+    has_leading_ellipsis: bool,
+    has_trailing_ellipsis: bool,
+}
+
+impl<'a> DisplayedLine<'a> {
+    fn new(text: &'a str, marker: Option<TextRange>) -> Self {
+        let terminal_width = terminal_width();
+        let max_line_width = terminal_width.saturating_mul(4);
+
+        if text_width(text) <= max_line_width {
+            return Self {
+                text,
+                offset: TextSize::from(0),
+                has_leading_ellipsis: false,
+                has_trailing_ellipsis: false,
+            };
+        }
+
+        let marker = marker.unwrap_or_else(|| TextRange::new(TextSize::from(0), text.text_len()));
+        let marker_start_width =
+            text_width(&text[TextRange::new(TextSize::from(0), marker.start())]);
+        let marker_width = text_width(&text[marker]);
+        let marker_center_width = marker_start_width.saturating_add(marker_width / 2);
+        let window_start_width = if marker_width > terminal_width {
+            marker_start_width.saturating_sub(terminal_width / 4)
+        } else {
+            marker_center_width.saturating_sub(terminal_width / 2)
+        };
+        let window_end_width = window_start_width.saturating_add(terminal_width);
+
+        let start = byte_index_at_width(text, window_start_width);
+        let end = byte_index_at_width(text, window_end_width).max(start);
+
+        Self {
+            text: &text[usize::from(start)..usize::from(end)],
+            offset: start,
+            has_leading_ellipsis: start > TextSize::from(0),
+            has_trailing_ellipsis: end < text.text_len(),
+        }
+    }
+
+    fn marker(&self, marker: TextRange) -> Option<TextRange> {
+        let start = marker.start().max(self.offset) - self.offset;
+        let end = marker.end().min(self.offset + self.text.text_len()) - self.offset;
+
+        (start <= end).then(|| TextRange::new(start, end))
+    }
+}
+
+fn byte_index_at_width(text: &str, width: usize) -> TextSize {
+    let mut current_width = 0;
+
+    for (byte_index, char) in text.char_indices() {
+        let next_width = current_width + char_width(char);
+        if next_width > width {
+            return TextSize::from(byte_index as u32);
+        }
+        current_width = next_width;
+    }
+
+    text.text_len()
 }
 
 /// We need to set a value here since we have no way of knowing what the user's

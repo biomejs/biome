@@ -19,7 +19,8 @@ impl SyntaxFactory for TailwindSyntaxFactory {
             | TW_BOGUS_CANDIDATE
             | TW_BOGUS_MODIFIER
             | TW_BOGUS_VALUE
-            | TW_BOGUS_VARIANT => RawSyntaxNode::new(kind, children.into_iter().map(Some)),
+            | TW_BOGUS_VARIANT
+            | TW_BOGUS_VARIANT_SEGMENT => RawSyntaxNode::new(kind, children.into_iter().map(Some)),
             CSS_BINARY_EXPRESSION => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
@@ -222,7 +223,7 @@ impl SyntaxFactory for TailwindSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element
-                    && CssComponentValueList::can_cast(element.kind())
+                    && AnyCssExpression::can_cast(element.kind())
                 {
                     slots.mark_present();
                     current_element = elements.next();
@@ -359,7 +360,7 @@ impl SyntaxFactory for TailwindSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element
-                    && AnyCssValue::can_cast(element.kind())
+                    && AnyCssExpression::can_cast(element.kind())
                 {
                     slots.mark_present();
                     current_element = elements.next();
@@ -578,9 +579,42 @@ impl SyntaxFactory for TailwindSyntaxFactory {
                 }
                 slots.into_node(TW_ARBITRARY_VARIANT, children)
             }
-            TW_CSS_VARIABLE_VALUE => {
+            TW_ARBITRARY_VARIANT_SEGMENT => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && element.kind() == T!['[']
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && element.kind() == TW_SELECTOR
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && element.kind() == T![']']
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        TW_ARBITRARY_VARIANT_SEGMENT.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(TW_ARBITRARY_VARIANT_SEGMENT, children)
+            }
+            TW_CSS_VARIABLE_VALUE => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<4usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element
                     && element.kind() == T!['(']
@@ -590,7 +624,14 @@ impl SyntaxFactory for TailwindSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element
-                    && element.kind() == TW_VALUE
+                    && TwTypeHint::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && CssParameterList::can_cast(element.kind())
                 {
                     slots.mark_present();
                     current_element = elements.next();
@@ -611,26 +652,26 @@ impl SyntaxFactory for TailwindSyntaxFactory {
                 }
                 slots.into_node(TW_CSS_VARIABLE_VALUE, children)
             }
-            TW_DATA_ATTRIBUTE => {
+            TW_CSS_VARIABLE_VARIANT_SEGMENT => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element
-                    && element.kind() == T![data]
+                    && element.kind() == T!['(']
                 {
                     slots.mark_present();
                     current_element = elements.next();
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element
-                    && element.kind() == T ! [-]
+                    && CssParameterList::can_cast(element.kind())
                 {
                     slots.mark_present();
                     current_element = elements.next();
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element
-                    && AnyTwDataAttributeValue::can_cast(element.kind())
+                    && element.kind() == T![')']
                 {
                     slots.mark_present();
                     current_element = elements.next();
@@ -638,18 +679,25 @@ impl SyntaxFactory for TailwindSyntaxFactory {
                 slots.next_slot();
                 if current_element.is_some() {
                     return RawSyntaxNode::new(
-                        TW_DATA_ATTRIBUTE.to_bogus(),
+                        TW_CSS_VARIABLE_VARIANT_SEGMENT.to_bogus(),
                         children.into_iter().map(Some),
                     );
                 }
-                slots.into_node(TW_DATA_ATTRIBUTE, children)
+                slots.into_node(TW_CSS_VARIABLE_VARIANT_SEGMENT, children)
             }
             TW_FULL_CANDIDATE => {
                 let mut elements = (&children).into_iter();
-                let mut slots: RawNodeSlots<4usize> = RawNodeSlots::default();
+                let mut slots: RawNodeSlots<5usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element
                     && TwVariantList::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && element.kind() == T![!]
                 {
                     slots.mark_present();
                     current_element = elements.next();
@@ -724,39 +772,6 @@ impl SyntaxFactory for TailwindSyntaxFactory {
                 }
                 slots.into_node(TW_FUNCTIONAL_CANDIDATE, children)
             }
-            TW_FUNCTIONAL_VARIANT => {
-                let mut elements = (&children).into_iter();
-                let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
-                let mut current_element = elements.next();
-                if let Some(element) = &current_element
-                    && element.kind() == TW_BASE
-                {
-                    slots.mark_present();
-                    current_element = elements.next();
-                }
-                slots.next_slot();
-                if let Some(element) = &current_element
-                    && element.kind() == T ! [-]
-                {
-                    slots.mark_present();
-                    current_element = elements.next();
-                }
-                slots.next_slot();
-                if let Some(element) = &current_element
-                    && AnyTwValue::can_cast(element.kind())
-                {
-                    slots.mark_present();
-                    current_element = elements.next();
-                }
-                slots.next_slot();
-                if current_element.is_some() {
-                    return RawSyntaxNode::new(
-                        TW_FUNCTIONAL_VARIANT.to_bogus(),
-                        children.into_iter().map(Some),
-                    );
-                }
-                slots.into_node(TW_FUNCTIONAL_VARIANT, children)
-            }
             TW_MODIFIER => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
@@ -801,6 +816,25 @@ impl SyntaxFactory for TailwindSyntaxFactory {
                     );
                 }
                 slots.into_node(TW_NAMED_VALUE, children)
+            }
+            TW_NAMED_VARIANT_SEGMENT => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && element.kind() == TW_VARIANT_SEGMENT
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        TW_NAMED_VARIANT_SEGMENT.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(TW_NAMED_VARIANT_SEGMENT, children)
             }
             TW_NUMBER_VALUE => {
                 let mut elements = (&children).into_iter();
@@ -849,10 +883,17 @@ impl SyntaxFactory for TailwindSyntaxFactory {
             }
             TW_ROOT => {
                 let mut elements = (&children).into_iter();
-                let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
+                let mut slots: RawNodeSlots<4usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element
                     && element.kind() == T![UNICODE_BOM]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && element.kind() == T![' ']
                 {
                     slots.mark_present();
                     current_element = elements.next();
@@ -879,10 +920,17 @@ impl SyntaxFactory for TailwindSyntaxFactory {
             }
             TW_STATIC_CANDIDATE => {
                 let mut elements = (&children).into_iter();
-                let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
+                let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element
                     && element.kind() == TW_BASE
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && AnyTwModifier::can_cast(element.kind())
                 {
                     slots.mark_present();
                     current_element = elements.next();
@@ -896,12 +944,19 @@ impl SyntaxFactory for TailwindSyntaxFactory {
                 }
                 slots.into_node(TW_STATIC_CANDIDATE, children)
             }
-            TW_STATIC_VARIANT => {
+            TW_TYPE_HINT => {
                 let mut elements = (&children).into_iter();
-                let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
+                let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element
-                    && element.kind() == TW_BASE
+                    && element.kind() == TW_VALUE
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && element.kind() == T ! [:]
                 {
                     slots.mark_present();
                     current_element = elements.next();
@@ -909,11 +964,44 @@ impl SyntaxFactory for TailwindSyntaxFactory {
                 slots.next_slot();
                 if current_element.is_some() {
                     return RawSyntaxNode::new(
-                        TW_STATIC_VARIANT.to_bogus(),
+                        TW_TYPE_HINT.to_bogus(),
                         children.into_iter().map(Some),
                     );
                 }
-                slots.into_node(TW_STATIC_VARIANT, children)
+                slots.into_node(TW_TYPE_HINT, children)
+            }
+            TW_VARIANT_EXPRESSION => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && TwVariantSegmentList::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && TwArbitraryVariantSegment::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && AnyTwModifier::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        TW_VARIANT_EXPRESSION.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(TW_VARIANT_EXPRESSION, children)
             }
             CSS_COMPONENT_VALUE_LIST => {
                 Self::make_node_list_syntax(kind, children, AnyCssValue::can_cast)
@@ -928,15 +1016,26 @@ impl SyntaxFactory for TailwindSyntaxFactory {
                 T ! [,],
                 true,
             ),
-            TW_CANDIDATE_LIST => {
-                Self::make_node_list_syntax(kind, children, AnyTwFullCandidate::can_cast)
-            }
+            TW_CANDIDATE_LIST => Self::make_separated_list_syntax(
+                kind,
+                children,
+                AnyTwFullCandidate::can_cast,
+                T![' '],
+                true,
+            ),
             TW_VARIANT_LIST => Self::make_separated_list_syntax(
                 kind,
                 children,
                 AnyTwVariant::can_cast,
                 T ! [:],
                 true,
+            ),
+            TW_VARIANT_SEGMENT_LIST => Self::make_separated_list_syntax(
+                kind,
+                children,
+                AnyTwVariantSegment::can_cast,
+                T ! [-],
+                false,
             ),
             _ => unreachable!("Is {:?} a token?", kind),
         }

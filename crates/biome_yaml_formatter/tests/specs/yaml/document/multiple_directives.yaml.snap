@@ -1,0 +1,25 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/document/multiple_directives.yaml
+---
+
+# Input
+
+```yaml
+%YAML   1.2
+%TAG ! tag:example.com,2000:
+---
+a: 1
+
+```
+
+
+# Formatted
+
+```yaml
+%YAML 1.2
+%TAG ! tag:example.com,2000:
+---
+a: 1
+
+```

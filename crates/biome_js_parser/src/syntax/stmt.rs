@@ -32,6 +32,7 @@ use crate::ParsedSyntax::{Absent, Present};
 use crate::span::Span;
 use crate::{JsParser, JsSyntaxFeature, ParseRecoveryTokenSet, parser};
 use biome_js_syntax::{JsSyntaxKind::*, *};
+use biome_languages::javascript::ModuleKind;
 use biome_parser::ParserProgress;
 use biome_parser::diagnostic::expected_token;
 use biome_parser::parse_lists::{ParseNodeList, ParseSeparatedList};
@@ -1236,6 +1237,16 @@ fn eat_variable_declaration(
 
     p.state_mut().name_map.clear();
     Some((list, variable_declarator_list.remaining_declarator_range))
+}
+
+pub(super) fn parse_svelte_legacy_const_declarator(p: &mut JsParser) -> ParsedSyntax {
+    let context = VariableDeclaratorContext {
+        kind_name: Some("const"),
+        ..VariableDeclaratorContext::new(VariableDeclarationParent::VariableStatement)
+    };
+    let declarator = parse_variable_declarator(p, &context);
+    p.state_mut().name_map.clear();
+    declarator
 }
 
 struct VariableDeclaratorList {

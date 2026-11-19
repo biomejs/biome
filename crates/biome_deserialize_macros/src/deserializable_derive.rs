@@ -7,10 +7,10 @@ use self::struct_field_attrs::DeprecatedField;
 use crate::deserializable_derive::enum_variant_attrs::EnumVariantAttrs;
 use crate::deserializable_derive::struct_field_attrs::StructFieldAttrs;
 use biome_string_case::Case;
-use proc_macro_error2::*;
+use proc_macro_error3::*;
 use proc_macro2::{Ident, TokenStream};
-use quote::quote;
-use syn::{Data, GenericParam, Generics, Path, Type};
+use quote::{format_ident, quote};
+use syn::{Data, GenericParam, Generics, Path};
 
 pub(crate) struct DeriveInput {
     pub ident: Ident,
@@ -75,10 +75,8 @@ impl DeriveInput {
                         let fields = data
                             .fields
                             .into_iter()
-                            .filter_map(|field| {
-                                field.ident.map(|ident| (ident, field.attrs, field.ty))
-                            })
-                            .filter_map(|(ident, attrs, ty)| {
+                            .filter_map(|field| field.ident.map(|ident| (ident, field.attrs)))
+                            .filter_map(|(ident, attrs)| {
                                 let attrs = StructFieldAttrs::try_from(&attrs)
                                     .expect("Could not parse field attributes");
                                 if attrs.skip {
@@ -108,7 +106,6 @@ impl DeriveInput {
                                     ident,
                                     key,
                                     required: attrs.required,
-                                    ty,
                                     validate: attrs.validate,
                                 })
                             })
@@ -202,7 +199,6 @@ pub struct DeserializableFieldData {
     ident: Ident,
     key: String,
     required: bool,
-    ty: Type,
     validate: Option<Path>,
 }
 
@@ -270,9 +266,9 @@ fn generate_deserializable_enum(
 
     quote! {
         impl #generics biome_deserialize::Deserializable for #ident #generics #trait_bounds{
-            fn deserialize(
-                ctx: &mut impl biome_deserialize::DeserializationContext,
-                value: &impl biome_deserialize::DeserializableValue,
+            fn deserialize<__V: biome_deserialize::DeserializableValue>(
+                ctx: &mut dyn biome_deserialize::DeserializationContext<State = __V::State>,
+                value: &__V,
                 name: &str,
             ) -> Option<Self> {
                 let mut result = match biome_deserialize::Text::deserialize(ctx, value, name)?.text() {
@@ -314,9 +310,9 @@ fn generate_deserializable_newtype(
 
     quote! {
         impl #generics biome_deserialize::Deserializable for #ident #generics #trait_bounds {
-            fn deserialize(
-                ctx: &mut impl biome_deserialize::DeserializationContext,
-                value: &impl biome_deserialize::DeserializableValue,
+            fn deserialize<__V: biome_deserialize::DeserializableValue>(
+                ctx: &mut dyn biome_deserialize::DeserializationContext<State = __V::State>,
+                value: &__V,
                 name: &str,
             ) -> Option<Self> {
                 let result = biome_deserialize::Deserializable::deserialize(ctx, value, name).map(Self)?;
@@ -351,11 +347,18 @@ fn generate_deserializable_struct(
         .fields
         .into_iter()
         .map(|field_data| {
+            let is_required = field_data.required;
             let DeserializableFieldData {
                 ident: field_ident,
                 key,
                 ..
             } = field_data;
+            let mark_seen = if is_required {
+                let seen_ident = format_ident!("seen_{}", field_ident);
+                quote! { #seen_ident = true; }
+            } else {
+                quote! {}
+            };
             let deprecation_notice = field_data.deprecated.map(|deprecated| match deprecated {
                 DeprecatedField::Message(message) => quote! {
                     ctx.report(DeserializationDiagnostic::new_deprecated(
@@ -386,7 +389,11 @@ fn generate_deserializable_struct(
 
             quote! {
                 #key => {
-                    match Deserializable::deserialize(ctx, &value, &key_text)#validate {
+                    #mark_seen
+                    ctx.enter_property(key_text.text(), key.range(), value.range());
+                    let deserialized = Deserializable::deserialize(ctx, &value, &key_text)#validate;
+                    ctx.exit_property();
+                    match deserialized {
                         Some(value) => {
                             #deprecation_notice
                             result.#field_ident = value;
@@ -398,6 +405,13 @@ fn generate_deserializable_struct(
         })
         .collect();
 
+    let seen_declarations: Vec<_> = required_fields
+        .iter()
+        .map(|field_data| {
+            let seen_ident = format_ident!("seen_{}", field_data.ident);
+            quote! { let mut #seen_ident = false; }
+        })
+        .collect();
     let validator = if required_fields.is_empty() {
         quote! {}
     } else {
@@ -406,14 +420,10 @@ fn generate_deserializable_struct(
             .map(|field_data| &field_data.key)
             .collect();
         let required_fields = required_fields.iter().map(|field_data| {
-            let DeserializableFieldData {
-                ident: field_ident,
-                key,
-                ty,
-                ..
-            } = field_data;
+            let DeserializableFieldData { ident, key, .. } = field_data;
+            let seen_ident = format_ident!("seen_{}", ident);
             quote! {
-                if result.#field_ident == #ty::default() {
+                if !#seen_ident {
                     ctx.report(DeserializationDiagnostic::new_missing_key(
                         #key,
                         range,
@@ -441,7 +451,10 @@ fn generate_deserializable_struct(
         quote! {
             unknown_key => {
                 let key_text = Text::deserialize(ctx, &key, "")?;
-                if let Some(value) = Deserializable::deserialize(ctx, &value, key_text.text()) {
+                ctx.enter_property(key_text.text(), key.range(), value.range());
+                let deserialized = Deserializable::deserialize(ctx, &value, key_text.text());
+                ctx.exit_property();
+                if let Some(value) = deserialized {
                     std::iter::Extend::extend(&mut result.#rest_field, [(key_text, value)]);
                 }
             }
@@ -471,31 +484,33 @@ fn generate_deserializable_struct(
 
     let tuple_type = generate_generics_tuple(&generics);
     let trait_bounds = generate_trait_bounds(&generics);
+    let visitor_generics = generate_visitor_generics(&generics);
     let generics = generate_generics_without_trait_bounds(&generics);
 
     quote! {
         impl #generics biome_deserialize::Deserializable for #ident #generics #trait_bounds {
-            fn deserialize(
-                ctx: &mut impl biome_deserialize::DeserializationContext,
-                value: &impl biome_deserialize::DeserializableValue,
+            fn deserialize<__V: biome_deserialize::DeserializableValue>(
+                ctx: &mut dyn biome_deserialize::DeserializationContext<State = __V::State>,
+                value: &__V,
                 name: &str,
             ) -> Option<Self> {
                 use std::marker::PhantomData;
                 struct Visitor #generics (PhantomData< #tuple_type >);
-                impl #generics biome_deserialize::DeserializationVisitor for Visitor #generics #trait_bounds {
+                impl #visitor_generics biome_deserialize::DeserializationVisitor<__S> for Visitor #generics #trait_bounds {
                     type Output = #ident #generics;
 
                     const EXPECTED_TYPE: biome_deserialize::DeserializableTypes = biome_deserialize::DeserializableTypes::MAP;
 
                     fn visit_map(
                         self,
-                        ctx: &mut impl biome_deserialize::DeserializationContext,
-                        members: impl Iterator<Item = Option<(impl biome_deserialize::DeserializableValue, impl biome_deserialize::DeserializableValue)>>,
+                        ctx: &mut dyn biome_deserialize::DeserializationContext<State = __S>,
+                        members: &mut biome_deserialize::MapMembers<'_, __S>,
                         range: biome_deserialize::TextRange,
                         name: &str,
                     ) -> Option<Self::Output> {
                         use biome_deserialize::{Deserializable, DeserializationDiagnostic, Text};
                         let mut result: Self::Output = Self::Output::default();
+                        #(#seen_declarations)*
                         for (key, value) in members.flatten() {
                             let Some(key_text) = Text::deserialize(ctx, &key, "") else {
                                 continue;
@@ -535,9 +550,9 @@ fn generate_deserializable_from(
     };
     quote! {
         impl #generics biome_deserialize::Deserializable for #ident #generics #trait_bounds {
-            fn deserialize(
-                ctx: &mut impl biome_deserialize::DeserializationContext,
-                value: &impl biome_deserialize::DeserializableValue,
+            fn deserialize<__V: biome_deserialize::DeserializableValue>(
+                ctx: &mut dyn biome_deserialize::DeserializationContext<State = __V::State>,
+                value: &__V,
                 name: &str,
             ) -> Option<Self> {
                 let result: #from = biome_deserialize::Deserializable::deserialize(ctx, value, name)?;
@@ -568,9 +583,9 @@ fn generate_deserializable_try_from(
     };
     quote! {
         impl #generics biome_deserialize::Deserializable for #ident #generics #trait_bounds {
-            fn deserialize(
-                ctx: &mut impl biome_deserialize::DeserializationContext,
-                value: &impl biome_deserialize::DeserializableValue,
+            fn deserialize<__V: biome_deserialize::DeserializableValue>(
+                ctx: &mut dyn biome_deserialize::DeserializationContext<State = __V::State>,
+                value: &__V,
                 name: &str,
             ) -> Option<Self> {
                 let mut result: #try_from = biome_deserialize::Deserializable::deserialize(ctx, value, name)?;
@@ -609,6 +624,21 @@ fn generate_generics_without_trait_bounds(generics: &Generics) -> TokenStream {
         quote! {
             < #(#params),* >
         }
+    }
+}
+
+/// Returns the generics of the visitor's implementation: the state of the deserialization
+/// context, followed by `generics` without their trait bounds.
+fn generate_visitor_generics(generics: &Generics) -> TokenStream {
+    let params = generics.params.iter().map(|param| match param {
+        GenericParam::Type(ty) => {
+            let ident = &ty.ident;
+            quote! { #ident }
+        }
+        _ => abort!(generics, "Unsupported generic parameter"),
+    });
+    quote! {
+        < __S, #(#params),* >
     }
 }
 

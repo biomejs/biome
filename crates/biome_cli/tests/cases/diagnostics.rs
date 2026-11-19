@@ -1,8 +1,8 @@
+use crate::TestArgs as Args;
 use crate::snap_test::{SnapshotPayload, assert_cli_snapshot};
 use crate::{UNFORMATTED, run_cli};
 use biome_console::{BufferConsole, LogLevel};
 use biome_fs::MemoryFileSystem;
-use bpaf::Args;
 use camino::{Utf8Path, Utf8PathBuf};
 
 const TEST_CONTENTS: &str = "debugger;";
@@ -47,7 +47,7 @@ fn logs_the_appropriate_messages_according_to_set_diagnostics_level() {
     assert!(
         messages
             .iter()
-            .filter(|m| m.level == LogLevel::Log)
+            .filter(|m| m.level == LogLevel::Error)
             .any(|m| {
                 let content = format!("{:?}", m.content);
 
@@ -92,6 +92,86 @@ fn max_diagnostics_no_verbose() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "max_diagnostics_no_verbose",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn reads_pnpm_workspace_catalog() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        Utf8Path::new("pnpm-workspace.yaml").into(),
+        r#"
+packages:
+  - "src"
+catalogs:
+  react19:
+    react: 19.0.0
+"#
+        .as_bytes(),
+    );
+
+    fs.insert(
+        Utf8Path::new("package.json").into(),
+        r#"
+{
+  "name": "app",
+  "dependencies": {
+    "react": "catalog:react19"
+  }
+}
+"#
+        .as_bytes(),
+    );
+
+    fs.insert(
+        Utf8Path::new("biome.json").into(),
+        r#"
+{
+  "javascript": {
+    "resolver": {
+      "experimentalPnpmCatalogs": true
+    }
+  },
+    "linter": {
+    "rules": {
+      "suspicious": {
+        "noReactForwardRef": "error"
+      }
+    }
+  }
+}
+"#
+        .as_bytes(),
+    );
+
+    fs.insert(
+        Utf8Path::new("src/input.jsx").into(),
+        r#"
+import { forwardRef } from "react";
+
+export const Component = forwardRef((props, ref) => {
+  return <div ref={ref} {...props} />;
+});
+"#
+        .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["check", "src/input.jsx"].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "reads_pnpm_workspace_catalog",
         fs,
         console,
         result,
@@ -261,7 +341,7 @@ fn max_diagnostics_are_lifted() {
     assert!(
         messages
             .iter()
-            .filter(|m| m.level == LogLevel::Log)
+            .filter(|m| m.level == LogLevel::Error)
             .any(|m| {
                 let content = format!("{:?}", m.content);
 

@@ -1,0 +1,57 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: indexedAccessInvalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+
+const letters = ["A", "B"] as const;
+declare const letter: (typeof letters)[number];
+await letter;
+
+declare const count: number[][number];
+await count;
+
+```
+
+# Diagnostics
+```
+indexedAccessInvalid.ts:5:1 lint/nursery/useAwaitThenable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i `await` used on a non-Promise value.
+  
+    3 │ const letters = ["A", "B"] as const;
+    4 │ declare const letter: (typeof letters)[number];
+  > 5 │ await letter;
+      │ ^^^^^^^^^^^^
+    6 │ 
+    7 │ declare const count: number[][number];
+  
+  i This may happen if you accidentally used `await` on a synchronous value.
+  
+  i Please ensure the value is not a custom "thenable" implementation before removing the `await`: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise#thenables
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+indexedAccessInvalid.ts:8:1 lint/nursery/useAwaitThenable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i `await` used on a non-Promise value.
+  
+    7 │ declare const count: number[][number];
+  > 8 │ await count;
+      │ ^^^^^^^^^^^
+    9 │ 
+  
+  i This may happen if you accidentally used `await` on a synchronous value.
+  
+  i Please ensure the value is not a custom "thenable" implementation before removing the `await`: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise#thenables
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

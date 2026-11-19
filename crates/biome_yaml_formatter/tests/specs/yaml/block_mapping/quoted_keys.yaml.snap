@@ -17,13 +17,7 @@ a: 10
 
 ```yaml
 a: 10
-'b': 20
+"b": 20
 "c": 30
 
 ```
-
-
-
-## Unimplemented nodes/tokens
-
-"a: 10\n'b': 20\n\"c\": 30\n" => 0..22

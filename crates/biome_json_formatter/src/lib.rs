@@ -16,14 +16,15 @@ use crate::context::JsonFormatOptions;
 use crate::cst::FormatJsonSyntaxNode;
 pub(crate) use crate::trivia::*;
 use crate::verbatim::{format_bogus_node, format_suppressed_node};
+use biome_formatter::Formatted;
 use biome_formatter::comments::Comments;
-use biome_formatter::prelude::*;
+use biome_formatter::rowan::Printed;
+use biome_formatter::rowan::prelude::*;
 use biome_formatter::trivia::{FormatToken, format_skipped_token_trivia};
 use biome_formatter::{
     CstFormatContext, FormatContext, FormatLanguage, FormatOwnedWithRule, FormatRefWithRule,
     TransformSourceMap, write,
 };
-use biome_formatter::{Formatted, Printed};
 use biome_json_syntax::{
     AnyJsonValue, JsonLanguage, JsonSyntaxNode, JsonSyntaxNodeWithOffset, JsonSyntaxToken,
 };
@@ -76,7 +77,7 @@ where
 
 /// Implement [AsFormat] for [Option] when `T` implements [AsFormat]
 ///
-/// Allows to call format on optional AST fields without having to unwrap the field first.
+/// Allows calling format on optional AST fields without having to unwrap the field first.
 impl<T, C> AsFormat<C> for Option<T>
 where
     T: AsFormat<C>,
@@ -113,7 +114,7 @@ where
 
 /// Implement [IntoFormat] for [Option] when `T` implements [IntoFormat]
 ///
-/// Allows to call format on optional AST fields without having to unwrap the field first.
+/// Allows calling format on optional AST fields without having to unwrap the field first.
 impl<T, Context> IntoFormat<Context> for Option<T>
 where
     T: IntoFormat<Context>,

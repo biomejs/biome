@@ -1,0 +1,17 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: valid.zero.scss
+---
+# Input
+```css
+/* should not generate diagnostics */
+.foo #{$test} {}
+.foo.bar #{$test} {}
+.foo[hidden]#{$test}.bar {}
+.foo:not(.bar)#{$test} {}
+.foo *#{$test}.bar {}
+#root {
+  &[hidden]#{$test}.bar {}
+}
+
+```

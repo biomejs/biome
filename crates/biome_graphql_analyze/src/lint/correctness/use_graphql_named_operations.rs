@@ -12,9 +12,13 @@ use biome_string_case::Case;
 use crate::GraphqlRuleAction;
 
 declare_lint_rule! {
-    /// Enforce specifying the name of GraphQL operations.
+    /// Require a name for every explicit GraphQL operation definition.
     ///
-    /// This is useful because most GraphQL client libraries use the operation name for caching purposes.
+    /// Operation names help clients identify requests in logs, debugging tools, and caches. A name
+    /// also distinguishes the operation from others in the same document.
+    ///
+    /// The shorthand query form `{ field }` has no operation-definition node and is not checked by
+    /// this rule.
     ///
     /// ## Examples
     ///

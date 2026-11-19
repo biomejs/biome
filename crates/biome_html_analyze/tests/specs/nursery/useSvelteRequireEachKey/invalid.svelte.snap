@@ -1,0 +1,85 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.svelte
+---
+# Input
+```svelte
+<!-- should generate diagnostics -->
+
+{#each items as item}
+  <div>{item}</div>
+{/each}
+
+{#each items as item, i}
+  <div>{i}: {item}</div>
+{/each}
+
+{#each users as { id, name }}
+  <div>{id}: {name}</div>
+{/each}
+
+```
+
+# Diagnostics
+```
+invalid.svelte:3:1 lint/nursery/useSvelteRequireEachKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This {#each} block is missing a key.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ 
+  > 3 │ {#each items as item}
+      │ ^^^^^^^^^^^^^^^^^^^^^
+    4 │   <div>{item}</div>
+    5 │ {/each}
+  
+  i Providing a key helps Svelte track each item when the list changes.
+  
+  i Add a unique key using the (key) syntax, for example: {#each items as item (item.id)}.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:7:1 lint/nursery/useSvelteRequireEachKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This {#each} block is missing a key.
+  
+    5 │ {/each}
+    6 │ 
+  > 7 │ {#each items as item, i}
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │   <div>{i}: {item}</div>
+    9 │ {/each}
+  
+  i Providing a key helps Svelte track each item when the list changes.
+  
+  i Add a unique key using the (key) syntax, for example: {#each items as item (item.id)}.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:11:1 lint/nursery/useSvelteRequireEachKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This {#each} block is missing a key.
+  
+     9 │ {/each}
+    10 │ 
+  > 11 │ {#each users as { id, name }}
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │   <div>{id}: {name}</div>
+    13 │ {/each}
+  
+  i Providing a key helps Svelte track each item when the list changes.
+  
+  i Add a unique key using the (key) syntax, for example: {#each items as item (item.id)}.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

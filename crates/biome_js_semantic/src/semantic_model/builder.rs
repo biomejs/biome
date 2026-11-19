@@ -1,11 +1,13 @@
 use super::*;
 use biome_js_syntax::{
-    AnyJsDeclaration, AnyJsRoot, JsExport, JsIdentifierAssignment, JsSyntaxNode, TextRange,
-    TsConditionalType, TsTypeParameterName,
+    AnyJsDeclaration, AnyJsIdentifierReference, AnyJsRoot, JsExport, JsIdentifierAssignment,
+    JsLanguage, JsSyntaxNode, TextRange, TsConditionalType, TsDeclareStatement,
+    TsTypeParameterName, unescape_js_identifier,
 };
 use biome_jsdoc_comment::JsdocComment;
-use biome_rowan::SyntaxNodePtr;
+use biome_rowan::{SyntaxKindSet, SyntaxNodePtr};
 use rustc_hash::{FxHashMap, FxHashSet};
+use std::collections::hash_map::Entry;
 
 /// Builds the [SemanticModel] consuming [SemanticEvent] and [JsSyntaxNode].
 /// For a good example on how to use it see [semantic_model].
@@ -21,15 +23,16 @@ pub struct SemanticModelBuilder {
     globals: Vec<SemanticModelGlobalBindingData>,
     globals_by_name: FxHashMap<String, Option<u32>>,
     scopes: Vec<SemanticModelScopeData>,
-    scope_range_by_start: FxHashMap<TextSize, BTreeSet<Interval<u32, ScopeId>>>,
     scope_hoisted_to_by_range: FxHashMap<TextSize, ScopeId>,
     bindings: Vec<SemanticModelBindingData>,
     /// maps a binding range start to its index inside [SemanticModelBuilder::bindings] vec
     bindings_by_start: FxHashMap<TextSize, BindingId>,
     /// maps a reference range start to its binding index inside [SemanticModelBuilder::bindings] vec
     declared_at_by_start: FxHashMap<TextSize, BindingId>,
-    exported: FxHashSet<TextSize>,
+    exported: FxHashSet<BindingId>,
     unresolved_references: Vec<SemanticModelUnresolvedReference>,
+    unresolved_references_by_start: FxHashSet<TextSize>,
+    global_references_by_start: FxHashSet<TextSize>,
     flavor: SemanticFlavor,
     pub(crate) export_jsdoc_by_range: FxHashMap<TextRange, JsdocComment>,
 }
@@ -43,13 +46,14 @@ impl SemanticModelBuilder {
             globals: vec![],
             globals_by_name: FxHashMap::default(),
             scopes: vec![],
-            scope_range_by_start: FxHashMap::default(),
             scope_hoisted_to_by_range: FxHashMap::default(),
             bindings: vec![],
             bindings_by_start: FxHashMap::default(),
             declared_at_by_start: FxHashMap::default(),
             exported: FxHashSet::default(),
             unresolved_references: Vec::new(),
+            unresolved_references_by_start: FxHashSet::default(),
+            global_references_by_start: FxHashSet::default(),
             flavor: SemanticFlavor::default(),
             export_jsdoc_by_range: FxHashMap::default(),
         }
@@ -60,9 +64,16 @@ impl SemanticModelBuilder {
         self.flavor = flavor;
     }
 
+    /// The kinds of the nodes that [Self::push_node] reads: the ones that
+    /// [SemanticEventExtractor] reads, and [JsExport].
+    pub const VISITED_KINDS: SyntaxKindSet<JsLanguage> =
+        SemanticEventExtractor::VISITED_KINDS.union(JsExport::KIND_SET);
+
     #[inline]
     pub fn push_node(&mut self, node: &JsSyntaxNode) {
         use JsSyntaxKind::*;
+        // If you read a node kind that `SemanticEventExtractor::VISITED_KINDS`
+        // doesn't contain, add it to [Self::VISITED_KINDS].
         match node.kind() {
             // Accessible from bindings and references
             JS_IDENTIFIER_BINDING
@@ -80,7 +91,11 @@ impl SemanticModelBuilder {
             JS_MODULE
             | JS_SCRIPT
             | JS_EXPRESSION_TEMPLATE_ROOT
+            | JS_SVELTE_DECLARATION_ROOT
+            | JS_SVELTE_LEGACY_CONST_ROOT
             | JS_SVELTE_SNIPPET_ROOT
+            | JS_VUE_SLOT_PROPS_ROOT
+            | JS_VUE_GENERIC_ROOT
             | TS_DECLARATION_MODULE
             | JS_FUNCTION_DECLARATION
             | JS_FUNCTION_EXPRESSION
@@ -146,7 +161,12 @@ impl SemanticModelBuilder {
 
     #[inline]
     pub fn push_global(&mut self, name: impl Into<String>) {
-        self.globals_by_name.insert(name.into(), None);
+        let name = name.into();
+        let decoded = match unescape_js_identifier(&name) {
+            std::borrow::Cow::Borrowed(_) => None,
+            std::borrow::Cow::Owned(decoded) => Some(decoded),
+        };
+        self.globals_by_name.insert(decoded.unwrap_or(name), None);
     }
 
     #[inline]
@@ -167,6 +187,7 @@ impl SemanticModelBuilder {
                     children: vec![],
                     bindings: vec![],
                     bindings_by_name: FxHashMap::default(),
+                    overloads_by_name: FxHashMap::default(),
                     read_references: vec![],
                     write_references: vec![],
                     is_closure,
@@ -175,16 +196,6 @@ impl SemanticModelBuilder {
                 if let Some(parent_scope_id) = parent_scope_id {
                     self.scopes[parent_scope_id.index()].children.push(scope_id);
                 }
-
-                let start = range.start();
-                self.scope_range_by_start
-                    .entry(start)
-                    .or_default()
-                    .insert(Interval {
-                        start: start.into(),
-                        stop: range.end().into(),
-                        val: scope_id,
-                    });
             }
             ScopeEnded { .. } => {}
             DeclarationFound {
@@ -219,11 +230,17 @@ impl SemanticModelBuilder {
                 // Handle bindings with a bogus name
                 if let Some(node) = self.binding_node_by_start.get(&range.start()) {
                     let name = if let Some(node) = JsIdentifierBinding::cast_ref(node) {
-                        node.name_token().ok().map(|t| t.token_text_trimmed())
+                        node.name_token()
+                            .ok()
+                            .map(|t| crate::identifier_name(t.token_text_trimmed()))
                     } else if let Some(node) = TsIdentifierBinding::cast_ref(node) {
-                        node.name_token().ok().map(|t| t.token_text_trimmed())
+                        node.name_token()
+                            .ok()
+                            .map(|t| crate::identifier_name(t.token_text_trimmed()))
                     } else if let Some(node) = TsTypeParameterName::cast_ref(node) {
-                        node.ident_token().ok().map(|t| t.token_text_trimmed())
+                        node.ident_token()
+                            .ok()
+                            .map(|t| crate::identifier_name(t.token_text_trimmed()))
                     } else {
                         None
                     };
@@ -235,13 +252,39 @@ impl SemanticModelBuilder {
                                 declaration_kind,
                             );
 
-                        scope
-                            .bindings_by_name
-                            .entry(name)
-                            .and_modify(|existing| {
-                                *existing = existing.union_with(binding_reference);
-                            })
-                            .or_insert(binding_reference);
+                        // Update `bindings_by_name` (declaration merging), keeping
+                        // the previous reference so we can detect same-name
+                        // function overloads on collision.
+                        let previous = match scope.bindings_by_name.entry(name.clone()) {
+                            Entry::Occupied(mut existing) => {
+                                let previous = *existing.get();
+                                *existing.get_mut() = previous.union_with(binding_reference);
+                                Some(previous)
+                            }
+                            Entry::Vacant(slot) => {
+                                slot.insert(binding_reference);
+                                None
+                            }
+                        };
+
+                        // Record an overload set only when a function follows a
+                        // same-name function (rare). The common case of a unique
+                        // name adds nothing beyond the check above, keeping the
+                        // hot build path allocation- and rehash-free.
+                        if matches!(declaration_kind, JsDeclarationKind::Function)
+                            && let Some(previous) = previous
+                        {
+                            let previous_id = previous.value_ty_or_ty();
+                            if self.bindings[previous_id.index()].declaration_kind
+                                == JsDeclarationKind::Function
+                            {
+                                scope
+                                    .overloads_by_name
+                                    .entry(name)
+                                    .or_insert_with(|| smallvec::smallvec![previous_id])
+                                    .push(binding_id);
+                            }
+                        }
                     }
                 }
 
@@ -336,9 +379,15 @@ impl SemanticModelBuilder {
                 };
 
                 let node = &self.binding_node_by_start[&range.start()];
-                let unresolved_name = node.text_trimmed().to_string();
+                let unresolved_name = AnyJsIdentifierReference::cast_ref(node)
+                    .and_then(|reference| reference.value_token().ok())
+                    .map_or_else(
+                        || node.text_trimmed().to_string().into(),
+                        |token| crate::identifier_name(token.token_text_trimmed()),
+                    );
 
-                if let Some(global_name) = self.resolve_global_name(&unresolved_name) {
+                if let Some(global_name) = self.resolve_global_name(unresolved_name.text()) {
+                    self.global_references_by_start.insert(range.start());
                     if let Some(index) = self.globals_by_name[global_name] {
                         self.globals[index as usize].references.push(
                             SemanticModelGlobalReferenceData {
@@ -361,6 +410,7 @@ impl SemanticModelBuilder {
                             Some(id);
                     }
                 } else {
+                    self.unresolved_references_by_start.insert(range.start());
                     self.unresolved_references
                         .push(SemanticModelUnresolvedReference { range });
                 }
@@ -369,10 +419,9 @@ impl SemanticModelBuilder {
                 declaration_at,
                 range,
             } => {
-                self.exported.insert(declaration_at);
-
                 let binding_id = self.bindings_by_start[&declaration_at];
                 let binding = &mut self.bindings[binding_id.index()];
+                self.exported.insert(binding_id);
                 binding.export_ranges.push(range);
             }
         }
@@ -382,15 +431,9 @@ impl SemanticModelBuilder {
     pub fn build(self) -> SemanticModel {
         let data = SemanticModelData {
             root: self.root.syntax().as_send().expect("To be a root node"),
+            scope_by_range: ScopeRangeIndex::from_scopes(&self.scopes),
             flavor: self.flavor,
             scopes: self.scopes,
-            scope_by_range: Lapper::new(
-                self.scope_range_by_start
-                    .values()
-                    .flat_map(|scopes| scopes.iter())
-                    .cloned()
-                    .collect(),
-            ),
             scope_hoisted_to_by_range: self.scope_hoisted_to_by_range,
             binding_node_by_start: self
                 .binding_node_by_start
@@ -407,6 +450,8 @@ impl SemanticModelBuilder {
             declared_at_by_start: self.declared_at_by_start,
             exported: self.exported,
             unresolved_references: self.unresolved_references,
+            unresolved_references_by_start: self.unresolved_references_by_start,
+            global_references_by_start: self.global_references_by_start,
             globals: self.globals,
             export_jsdoc_by_range: self.export_jsdoc_by_range,
         };
@@ -447,8 +492,9 @@ impl SemanticModelBuilder {
         let Ok(reference_name) = identifier_assignment.name_token() else {
             return false;
         };
+        let reference_name = crate::identifier_name(reference_name.token_text_trimmed());
         self.flavor
-            .store_reference_name(reference_name.text_trimmed())
+            .store_reference_name(reference_name.text())
             .is_some()
     }
 }
@@ -457,6 +503,8 @@ fn find_jsdoc(node: &JsSyntaxNode) -> Option<JsdocComment> {
     node.ancestors().find_map(|ancestor| {
         if let Some(export) = JsExport::cast_ref(&ancestor) {
             JsdocComment::try_from(export.syntax()).ok()
+        } else if let Some(decl) = TsDeclareStatement::cast_ref(&ancestor) {
+            JsdocComment::try_from(decl.syntax()).ok()
         } else if let Some(decl) = AnyJsDeclaration::cast(ancestor) {
             JsdocComment::try_from(decl.syntax()).ok()
         } else {

@@ -23,9 +23,11 @@ CssRoot {
             at_token: AT@0..1 "@" [] [],
             rule: TwThemeAtRule {
                 theme_token: THEME_KW@1..7 "theme" [] [Whitespace(" ")],
-                name: CssIdentifier {
-                    value_token: IDENT@7..11 "foo" [] [Whitespace(" ")],
-                },
+                options: TwThemeOptionList [
+                    CssIdentifier {
+                        value_token: IDENT@7..11 "foo" [] [Whitespace(" ")],
+                    },
+                ],
                 block: CssDeclarationOrRuleBlock {
                     l_curly_token: L_CURLY@11..12 "{" [] [],
                     items: CssDeclarationOrRuleList [
@@ -67,8 +69,9 @@ CssRoot {
       0: AT@0..1 "@" [] []
       1: TW_THEME_AT_RULE@1..28
         0: THEME_KW@1..7 "theme" [] [Whitespace(" ")]
-        1: CSS_IDENTIFIER@7..11
-          0: IDENT@7..11 "foo" [] [Whitespace(" ")]
+        1: TW_THEME_OPTION_LIST@7..11
+          0: CSS_IDENTIFIER@7..11
+            0: IDENT@7..11 "foo" [] [Whitespace(" ")]
         2: CSS_DECLARATION_OR_RULE_BLOCK@11..28
           0: L_CURLY@11..12 "{" [] []
           1: CSS_DECLARATION_OR_RULE_LIST@12..26

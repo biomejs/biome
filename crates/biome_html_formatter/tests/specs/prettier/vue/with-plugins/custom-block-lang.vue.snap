@@ -1,0 +1,38 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: vue/with-plugins/custom-block-lang.vue
+---
+
+# Input
+
+```vue
+<custom lang="uppercase-rocks">
+hello,
+world!
+</custom>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,4 +1,4 @@
+ <custom lang="uppercase-rocks">
+-HELLO,
+-WORLD!
++hello,
++world!
+ </custom>
+```
+
+# Output
+
+```vue
+<custom lang="uppercase-rocks">
+hello,
+world!
+</custom>
+```

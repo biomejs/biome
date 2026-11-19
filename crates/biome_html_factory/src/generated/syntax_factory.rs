@@ -24,6 +24,211 @@ impl SyntaxFactory for HtmlSyntaxFactory {
             | VUE_BOGUS_DIRECTIVE_ARGUMENT => {
                 RawSyntaxNode::new(kind, children.into_iter().map(Some))
             }
+            ANGULAR_BINDING_NAME => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && element.kind() == HTML_LITERAL
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        ANGULAR_BINDING_NAME.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(ANGULAR_BINDING_NAME, children)
+            }
+            ANGULAR_EVENT_BINDING => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<4usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && element.kind() == T!['(']
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && AngularBindingName::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && element.kind() == T![')']
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && HtmlAttributeInitializerClause::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        ANGULAR_EVENT_BINDING.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(ANGULAR_EVENT_BINDING, children)
+            }
+            ANGULAR_PROPERTY_BINDING => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<4usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && element.kind() == T!['[']
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && AngularBindingName::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && element.kind() == T![']']
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && HtmlAttributeInitializerClause::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        ANGULAR_PROPERTY_BINDING.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(ANGULAR_PROPERTY_BINDING, children)
+            }
+            ANGULAR_STRUCTURAL_DIRECTIVE => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && element.kind() == T ! [*]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && AngularBindingName::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && HtmlAttributeInitializerClause::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        ANGULAR_STRUCTURAL_DIRECTIVE.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(ANGULAR_STRUCTURAL_DIRECTIVE, children)
+            }
+            ANGULAR_TEMPLATE_REF_VARIABLE => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && element.kind() == T ! [#]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && AngularBindingName::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && HtmlAttributeInitializerClause::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        ANGULAR_TEMPLATE_REF_VARIABLE.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(ANGULAR_TEMPLATE_REF_VARIABLE, children)
+            }
+            ANGULAR_TWO_WAY_BINDING => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<4usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && element.kind() == T!["[("]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && AngularBindingName::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && element.kind() == T![")]"]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && HtmlAttributeInitializerClause::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        ANGULAR_TWO_WAY_BINDING.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(ANGULAR_TWO_WAY_BINDING, children)
+            }
             ASTRO_CLASS_DIRECTIVE => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
@@ -75,6 +280,39 @@ impl SyntaxFactory for HtmlSyntaxFactory {
                     );
                 }
                 slots.into_node(ASTRO_CLIENT_DIRECTIVE, children)
+            }
+            ASTRO_CLOSING_FRAGMENT => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && element.kind() == T ! [<]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && element.kind() == T ! [/]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && element.kind() == T ! [>]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        ASTRO_CLOSING_FRAGMENT.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(ASTRO_CLOSING_FRAGMENT, children)
             }
             ASTRO_DEFINE_DIRECTIVE => {
                 let mut elements = (&children).into_iter();
@@ -154,6 +392,39 @@ impl SyntaxFactory for HtmlSyntaxFactory {
                 }
                 slots.into_node(ASTRO_EMBEDDED_CONTENT, children)
             }
+            ASTRO_FRAGMENT => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && AstroOpeningFragment::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && HtmlElementList::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && AstroClosingFragment::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        ASTRO_FRAGMENT.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(ASTRO_FRAGMENT, children)
+            }
             ASTRO_FRONTMATTER_ELEMENT => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
@@ -212,6 +483,32 @@ impl SyntaxFactory for HtmlSyntaxFactory {
                     );
                 }
                 slots.into_node(ASTRO_IS_DIRECTIVE, children)
+            }
+            ASTRO_OPENING_FRAGMENT => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && element.kind() == T ! [<]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && element.kind() == T ! [>]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        ASTRO_OPENING_FRAGMENT.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(ASTRO_OPENING_FRAGMENT, children)
             }
             ASTRO_SERVER_DIRECTIVE => {
                 let mut elements = (&children).into_iter();
@@ -480,7 +777,7 @@ impl SyntaxFactory for HtmlSyntaxFactory {
                 let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element
-                    && element.kind() == HTML_LITERAL
+                    && element.kind() == HTML_COMPONENT_LITERAL
                 {
                     slots.mark_present();
                     current_element = elements.next();
@@ -515,7 +812,7 @@ impl SyntaxFactory for HtmlSyntaxFactory {
             }
             HTML_DIRECTIVE => {
                 let mut elements = (&children).into_iter();
-                let mut slots: RawNodeSlots<8usize> = RawNodeSlots::default();
+                let mut slots: RawNodeSlots<9usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element
                     && element.kind() == T ! [<]
@@ -533,6 +830,13 @@ impl SyntaxFactory for HtmlSyntaxFactory {
                 slots.next_slot();
                 if let Some(element) = &current_element
                     && element.kind() == T![doctype]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && element.kind() == HTML_LITERAL
                 {
                     slots.mark_present();
                     current_element = elements.next();
@@ -685,7 +989,7 @@ impl SyntaxFactory for HtmlSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element
-                    && HtmlTagName::can_cast(element.kind())
+                    && HtmlComponentName::can_cast(element.kind())
                 {
                     slots.mark_present();
                     current_element = elements.next();
@@ -739,9 +1043,49 @@ impl SyntaxFactory for HtmlSyntaxFactory {
                 }
                 slots.into_node(HTML_OPENING_ELEMENT, children)
             }
+            HTML_PROCESSING_INSTRUCTION => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<4usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && element.kind() == T ! [<?]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && AnyHtmlTagName::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && HtmlAttributeList::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && element.kind() == T ! [?>]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        HTML_PROCESSING_INSTRUCTION.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(HTML_PROCESSING_INSTRUCTION, children)
+            }
             HTML_ROOT => {
                 let mut elements = (&children).into_iter();
-                let mut slots: RawNodeSlots<5usize> = RawNodeSlots::default();
+                let mut slots: RawNodeSlots<6usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element
                     && element.kind() == T![UNICODE_BOM]
@@ -752,6 +1096,13 @@ impl SyntaxFactory for HtmlSyntaxFactory {
                 slots.next_slot();
                 if let Some(element) = &current_element
                     && AnyAstroFrontmatterElement::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && HtmlProcessingInstruction::can_cast(element.kind())
                 {
                     slots.mark_present();
                     current_element = elements.next();
@@ -930,7 +1281,261 @@ impl SyntaxFactory for HtmlSyntaxFactory {
                 let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element
-                    && element.kind() == HTML_LITERAL
+                    && matches!(
+                        element.kind(),
+                        T![html]
+                            | T![style]
+                            | T![use]
+                            | T![set]
+                            | T![animate]
+                            | T![a]
+                            | T![abbr]
+                            | T![acronym]
+                            | T![address]
+                            | T![area]
+                            | T![article]
+                            | T![aside]
+                            | T![audio]
+                            | T![b]
+                            | T![base]
+                            | T![basefont]
+                            | T![bdi]
+                            | T![bdo]
+                            | T![bgsound]
+                            | T![big]
+                            | T![blink]
+                            | T![blockquote]
+                            | T![body]
+                            | T![br]
+                            | T![button]
+                            | T![canvas]
+                            | T![caption]
+                            | T![center]
+                            | T![cite]
+                            | T![code]
+                            | T![col]
+                            | T![colgroup]
+                            | T![data]
+                            | T![datalist]
+                            | T![dd]
+                            | T![del]
+                            | T![details]
+                            | T![dfn]
+                            | T![dialog]
+                            | T![dir]
+                            | T![div]
+                            | T![dl]
+                            | T![dt]
+                            | T![em]
+                            | T![embed]
+                            | T![fieldset]
+                            | T![figcaption]
+                            | T![figure]
+                            | T![font]
+                            | T![footer]
+                            | T![form]
+                            | T![frame]
+                            | T![frameset]
+                            | T![h1]
+                            | T![h2]
+                            | T![h3]
+                            | T![h4]
+                            | T![h5]
+                            | T![h6]
+                            | T![head]
+                            | T![header]
+                            | T![hgroup]
+                            | T![hr]
+                            | T![i]
+                            | T![iframe]
+                            | T![image]
+                            | T![img]
+                            | T![input]
+                            | T![ins]
+                            | T![kbd]
+                            | T![keygen]
+                            | T![label]
+                            | T![legend]
+                            | T![li]
+                            | T![link]
+                            | T![main]
+                            | T![map]
+                            | T![mark]
+                            | T![marquee]
+                            | T![menu]
+                            | T![menuitem]
+                            | T![meta]
+                            | T![meter]
+                            | T![nav]
+                            | T![nobr]
+                            | T![noembed]
+                            | T![noframes]
+                            | T![noscript]
+                            | T![object]
+                            | T![ol]
+                            | T![optgroup]
+                            | T![option]
+                            | T![output]
+                            | T![p]
+                            | T![param]
+                            | T![picture]
+                            | T![plaintext]
+                            | T![pre]
+                            | T![progress]
+                            | T![q]
+                            | T![rb]
+                            | T![rp]
+                            | T![rt]
+                            | T![rtc]
+                            | T![ruby]
+                            | T![s]
+                            | T![samp]
+                            | T![script]
+                            | T![search]
+                            | T![section]
+                            | T![select]
+                            | T![slot]
+                            | T![small]
+                            | T![source]
+                            | T![span]
+                            | T![strike]
+                            | T![strong]
+                            | T![sub]
+                            | T![summary]
+                            | T![sup]
+                            | T![svg]
+                            | T![table]
+                            | T![tbody]
+                            | T![td]
+                            | T![template]
+                            | T![textarea]
+                            | T![tfoot]
+                            | T![th]
+                            | T![thead]
+                            | T![time]
+                            | T![title]
+                            | T![tr]
+                            | T![track]
+                            | T![tt]
+                            | T![u]
+                            | T![ul]
+                            | T![var]
+                            | T![video]
+                            | T![wbr]
+                            | T![xmp]
+                            | T![altGlyph]
+                            | T![altGlyphDef]
+                            | T![altGlyphItem]
+                            | T![animateColor]
+                            | T![animateMotion]
+                            | T![animateTransform]
+                            | T![circle]
+                            | T![clipPath]
+                            | T![color_profile]
+                            | T![cursor]
+                            | T![defs]
+                            | T![desc]
+                            | T![discard]
+                            | T![ellipse]
+                            | T![feBlend]
+                            | T![feColorMatrix]
+                            | T![feComponentTransfer]
+                            | T![feComposite]
+                            | T![feConvolveMatrix]
+                            | T![feDiffuseLighting]
+                            | T![feDisplacementMap]
+                            | T![feDistantLight]
+                            | T![feDropShadow]
+                            | T![feFlood]
+                            | T![feFuncA]
+                            | T![feFuncB]
+                            | T![feFuncG]
+                            | T![feFuncR]
+                            | T![feGaussianBlur]
+                            | T![feImage]
+                            | T![feMerge]
+                            | T![feMergeNode]
+                            | T![feMorphology]
+                            | T![feOffset]
+                            | T![fePointLight]
+                            | T![feSpecularLighting]
+                            | T![feSpotLight]
+                            | T![feTile]
+                            | T![feTurbulence]
+                            | T![filter]
+                            | T![font_face]
+                            | T![font_face_format]
+                            | T![font_face_name]
+                            | T![font_face_src]
+                            | T![font_face_uri]
+                            | T![foreignObject]
+                            | T![g]
+                            | T![glyph]
+                            | T![glyphRef]
+                            | T![hatch]
+                            | T![hatchpath]
+                            | T![hkern]
+                            | T![line]
+                            | T![linearGradient]
+                            | T![marker]
+                            | T![mask]
+                            | T![mesh]
+                            | T![meshgradient]
+                            | T![meshpatch]
+                            | T![meshrow]
+                            | T![metadata]
+                            | T![missing_glyph]
+                            | T![mpath]
+                            | T![path]
+                            | T![pattern]
+                            | T![polygon]
+                            | T![polyline]
+                            | T![radialGradient]
+                            | T![rect]
+                            | T![solidcolor]
+                            | T![stop]
+                            | T![switch]
+                            | T![symbol]
+                            | T![text]
+                            | T![textPath]
+                            | T![tref]
+                            | T![tspan]
+                            | T![view]
+                            | T![vkern]
+                            | T![annotation]
+                            | T![annotation_xml]
+                            | T![maction]
+                            | T![math]
+                            | T![merror]
+                            | T![mfrac]
+                            | T![mi]
+                            | T![mmultiscripts]
+                            | T![mn]
+                            | T![mo]
+                            | T![mover]
+                            | T![mpadded]
+                            | T![mphantom]
+                            | T![mprescripts]
+                            | T![mroot]
+                            | T![mrow]
+                            | T![ms]
+                            | T![mspace]
+                            | T![msqrt]
+                            | T![mstyle]
+                            | T![msub]
+                            | T![msubsup]
+                            | T![msup]
+                            | T![mtable]
+                            | T![mtd]
+                            | T![mtext]
+                            | T![mtr]
+                            | T![munder]
+                            | T![munderover]
+                            | T![semantics]
+                            | T![component]
+                            | HTML_UNKNOWN_TAG
+                            | HTML_LITERAL
+                    )
                 {
                     slots.mark_present();
                     current_element = elements.next();
@@ -1539,6 +2144,39 @@ impl SyntaxFactory for HtmlSyntaxFactory {
                     );
                 }
                 slots.into_node(SVELTE_DEBUG_BLOCK, children)
+            }
+            SVELTE_DECLARATION_BLOCK => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && element.kind() == T!['{']
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && HtmlTextExpression::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && element.kind() == T!['}']
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        SVELTE_DECLARATION_BLOCK.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(SVELTE_DECLARATION_BLOCK, children)
             }
             SVELTE_DIRECTIVE_MODIFIER => {
                 let mut elements = (&children).into_iter();
@@ -2327,6 +2965,39 @@ impl SyntaxFactory for HtmlSyntaxFactory {
                 }
                 slots.into_node(SVELTE_OUT_DIRECTIVE, children)
             }
+            SVELTE_RENAME_BINDING => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && SvelteName::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && element.kind() == T ! [:]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && AnySvelteBindingAssignmentBinding::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        SVELTE_RENAME_BINDING.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(SVELTE_RENAME_BINDING, children)
+            }
             SVELTE_RENDER_BLOCK => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<4usize> = RawNodeSlots::default();
@@ -2557,6 +3228,58 @@ impl SyntaxFactory for HtmlSyntaxFactory {
                     );
                 }
                 slots.into_node(SVELTE_STYLE_DIRECTIVE, children)
+            }
+            SVELTE_TEMPLATE_ATTRIBUTE_VALUE => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && matches!(element.kind(), T!['"'] | T!["'"])
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && SvelteTemplateElementList::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && matches!(element.kind(), T!['"'] | T!["'"])
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        SVELTE_TEMPLATE_ATTRIBUTE_VALUE.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(SVELTE_TEMPLATE_ATTRIBUTE_VALUE, children)
+            }
+            SVELTE_TEMPLATE_CHUNK_ELEMENT => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && element.kind() == HTML_TEMPLATE_CHUNK
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        SVELTE_TEMPLATE_CHUNK_ELEMENT.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(SVELTE_TEMPLATE_CHUNK_ELEMENT, children)
             }
             SVELTE_TRANSITION_DIRECTIVE => {
                 let mut elements = (&children).into_iter();
@@ -2819,6 +3542,39 @@ impl SyntaxFactory for HtmlSyntaxFactory {
                     );
                 }
                 slots.into_node(VUE_V_FOR_ARRAY_BINDING, children)
+            }
+            VUE_V_FOR_DEFAULT_BINDING => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && AnyVueVForBinding::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && element.kind() == T ! [=]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && HtmlTextExpression::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        VUE_V_FOR_DEFAULT_BINDING.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(VUE_V_FOR_DEFAULT_BINDING, children)
             }
             VUE_V_FOR_IDENTIFIER_BINDING => {
                 let mut elements = (&children).into_iter();
@@ -3197,6 +3953,9 @@ impl SyntaxFactory for HtmlSyntaxFactory {
             }
             SVELTE_ELSE_IF_CLAUSE_LIST => {
                 Self::make_node_list_syntax(kind, children, SvelteElseIfClause::can_cast)
+            }
+            SVELTE_TEMPLATE_ELEMENT_LIST => {
+                Self::make_node_list_syntax(kind, children, AnySvelteTemplateElement::can_cast)
             }
             VUE_MODIFIER_LIST => Self::make_node_list_syntax(kind, children, VueModifier::can_cast),
             VUE_V_FOR_BINDING_LIST => Self::make_separated_list_syntax(

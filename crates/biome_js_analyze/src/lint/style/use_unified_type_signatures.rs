@@ -20,7 +20,7 @@ use biome_js_syntax::{
 use biome_jsdoc_comment::JsdocComment;
 use biome_rowan::{
     AstNode, AstSeparatedList, BatchMutation, BatchMutationExt, SyntaxResult, TextRange,
-    TriviaPieceKind, chain_trivia_pieces, declare_node_union,
+    chain_trivia_pieces, declare_node_union,
 };
 use biome_rule_options::use_unified_type_signatures::UseUnifiedTypeSignaturesOptions;
 
@@ -197,13 +197,18 @@ impl Rule for UseUnifiedTypeSignatures {
     }
 
     fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
-        Some(RuleDiagnostic::new(
-            rule_category!(),
-            state.signature_to_remove.overload_range(),
-            markup! {
+        Some(
+            RuleDiagnostic::new(
+                rule_category!(),
+                state.signature_to_remove.overload_range(),
+                markup! {
+                    "This overload signature can be combined with a similar one."
+                },
+            )
+            .note(markup! {
                 "Multiple similar overload signatures are hard to read and maintain."
-            },
-        ))
+            }),
+        )
     }
 
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleAction<JsLanguage>> {
@@ -217,7 +222,9 @@ impl Rule for UseUnifiedTypeSignatures {
         // Check if the signature to remove has comments, which we would like to preserve.
         if signature_to_remove_wrapper
             .syntax()
-            .first_leading_trivia().as_ref().is_some_and(|trivia| trivia.pieces().any(|piece| piece.is_comments()))
+            .first_leading_trivia()
+            .as_ref()
+            .is_some_and(|trivia| trivia.pieces().any(|piece| piece.is_comments()))
         {
             // Transfer comments and whitespace before removing the signature.
             mutation.remove_node_and_transfer_trivia(
@@ -245,9 +252,7 @@ impl Rule for UseUnifiedTypeSignatures {
                         AnyTsType::TsUnionType(
                             make::ts_union_type(make::ts_union_type_variant_list(
                                 [parameter_type, combine_with_type],
-                                [make::token(T![|])
-                                    .with_leading_trivia([(TriviaPieceKind::Whitespace, " ")])
-                                    .with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")])],
+                                [make::token(T![|]).with_surrounding_spaces()],
                             ))
                             .build(),
                         ),

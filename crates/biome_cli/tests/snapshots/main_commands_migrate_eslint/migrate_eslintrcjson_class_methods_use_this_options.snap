@@ -1,8 +1,13 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
-assertion_line: 520
 expression: redactor(content)
 ---
+## Command
+
+```shell
+biome migrate eslint --include-nursery
+```
+
 ## `biome.json`
 
 ```json
@@ -44,8 +49,8 @@ biome.json migrate ━━━━━━━━━━━━━━━━━━━━�
        2 │ + → "linter":·{
        3 │ + → → "enabled":·true,
        4 │ + → → "rules":·{
-       5 │ + → → → "recommended":·false,
-       6 │ + → → → "nursery":·{
+       5 │ + → → → "preset":·"none",
+       6 │ + → → → "style":·{
        7 │ + → → → → "useThisInClassMethods":·{
        8 │ + → → → → → "level":·"error",
        9 │ + → → → → → "options":·{
@@ -60,7 +65,7 @@ biome.json migrate ━━━━━━━━━━━━━━━━━━━━�
       18 │ + → "overrides":·[
       19 │ + → → {
       20 │ + → → → "includes":·["severity-only.js"],
-      21 │ + → → → "linter":·{·"rules":·{·"nursery":·{·"useThisInClassMethods":·"warn"·}·}·}
+      21 │ + → → → "linter":·{·"rules":·{·"style":·{·"useThisInClassMethods":·"warn"·}·}·}
       22 │ + → → }
       23 │ + → ]
       24 │ + }

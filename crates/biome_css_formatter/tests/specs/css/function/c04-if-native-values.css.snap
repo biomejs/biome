@@ -1,0 +1,29 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/function/c04-if-native-values.css
+---
+
+# Input
+
+```css
+.native{width:if(media(width>400px):calc(1px + 2px);else:0);height:if(supports(display:grid):1px;else:2px);color:if(style(--enabled:true):red;else:blue)}
+.empty{color:if(style(--enabled:true):;else:blue);width:if(media(width>400px):/* empty */;else:);height:if(supports(display:grid):;)}
+
+```
+
+
+# Formatted
+
+```css
+.native {
+	width: if(media(width > 400px): calc(1px + 2px); else: 0);
+	height: if(supports(display: grid): 1px; else: 2px);
+	color: if(style(--enabled: true): red; else: blue);
+}
+.empty {
+	color: if(style(--enabled: true): ; else: blue);
+	width: if(media(width > 400px): /* empty */; else: );
+	height: if(supports(display: grid): );
+}
+
+```

@@ -1,0 +1,11 @@
+---
+source: crates/biome_grit_patterns/tests/spec_tests.rs
+expression: rangeOverflowStartColumn
+---
+ErrorSnapshotResult {
+    diagnostics: [
+        InvalidRange(
+            "start_column must be an integer between 0 and 4294967295",
+        ),
+    ],
+}

@@ -1,13 +1,20 @@
+use std::rc::Rc;
+
 use crate::prelude::*;
+use crate::utils::case::{is_css_modules_import_export_declaration, is_supports_test_declaration};
+use crate::utils::comment_trivia::has_source_gap_before_token;
 use crate::utils::component_value_list::{ValueListLayout, get_value_list_layout};
 use biome_css_syntax::{
-    AnyCssGenericPropertyValueOrExpression, CssGenericProperty, CssGenericPropertyFields,
-    CssLanguage,
+    AnyCssDeclarationName, AnyCssGenericPropertyValueOrExpression, CssContainerStyleInParens,
+    CssContainerStyleQueryInParens, CssDeclaration, CssFontFeatureValuesItem, CssGenericProperty,
+    CssGenericPropertyFields, CssIdentifier, CssIfStyleTest, CssLanguage,
+    CssSupportsFeatureDeclaration, TwPluginAtRule, is_css_horizontal_whitespace_byte,
+    is_css_newline_byte,
 };
 use biome_formatter::comments::SourceComment;
 use biome_formatter::trivia::format_dangling_comment;
 use biome_formatter::{format_args, write};
-use biome_rowan::SyntaxResult;
+use biome_rowan::{AstNodeList, SyntaxResult};
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatCssGenericProperty;
@@ -15,8 +22,9 @@ impl FormatNodeRule<CssGenericProperty> for FormatCssGenericProperty {
     fn fmt_fields(&self, node: &CssGenericProperty, f: &mut CssFormatter) -> FormatResult<()> {
         let CssGenericPropertyFields { name, .. } = node.as_fields();
         let colon_comments = CssPropertyColonComments::new(node);
+        let name = name?;
 
-        write!(f, [name.format()])?;
+        write_property_name(node, &name, f)?;
         colon_comments.fmt_colon_boundary(f)?;
         colon_comments.fmt_value_boundary(f)
     }
@@ -26,7 +34,7 @@ impl FormatNodeRule<CssGenericProperty> for FormatCssGenericProperty {
         _node: &CssGenericProperty,
         _f: &mut CssFormatter,
     ) -> FormatResult<()> {
-        // Printed by `CssPropertyColonComments` as `color/* a */: red`.
+        // No-op: `fmt_colon_boundary` prints `a { color/* a */: red; }`.
         Ok(())
     }
 
@@ -35,14 +43,62 @@ impl FormatNodeRule<CssGenericProperty> for FormatCssGenericProperty {
         _node: &CssGenericProperty,
         _f: &mut CssFormatter,
     ) -> FormatResult<()> {
-        // Printed by `CssPropertyColonComments` as `color:/* a */ red`.
+        // No-op: `fmt_value_boundary` prints `a { color:/* a */ red; }`.
         Ok(())
     }
 }
 
-/// Formats comments around a declaration colon.
-///
-/// Prettier preserves this boundary closely: `color/* a */:/* b */ red`.
+fn write_property_name(
+    property: &CssGenericProperty,
+    name: &AnyCssDeclarationName,
+    f: &mut CssFormatter,
+) -> FormatResult<()> {
+    let Some(identifier) = name.as_css_identifier() else {
+        return write!(f, [name.format()]);
+    };
+
+    let case = if is_already_lowercase(identifier) || should_preserve_property_name(property) {
+        CssCase::Preserve
+    } else {
+        CssCase::Lowercase
+    };
+
+    write!(f, [identifier.format().with_text_case(case)])
+}
+
+fn is_already_lowercase(name: &CssIdentifier) -> bool {
+    name.value_token().is_ok_and(|token| {
+        token
+            .token_text_trimmed()
+            .bytes()
+            .all(|byte| !byte.is_ascii_uppercase())
+    })
+}
+
+fn should_preserve_property_name(property: &CssGenericProperty) -> bool {
+    is_preserved_declaration_context(property) || is_css_modules_import_export_declaration(property)
+}
+
+/// Preserves query-test names and author-owned declaration keys.
+fn is_preserved_declaration_context(property: &CssGenericProperty) -> bool {
+    let Some(declaration) = property.parent::<CssDeclaration>() else {
+        return false;
+    };
+
+    if is_supports_test_declaration(&declaration) {
+        return true;
+    }
+
+    declaration.syntax().ancestors().any(|ancestor| {
+        CssContainerStyleQueryInParens::can_cast(ancestor.kind())
+            || CssContainerStyleInParens::can_cast(ancestor.kind())
+            || CssIfStyleTest::can_cast(ancestor.kind())
+            || CssFontFeatureValuesItem::can_cast(ancestor.kind())
+            || TwPluginAtRule::can_cast(ancestor.kind())
+    })
+}
+
+/// Formats declaration-colon comments like `a { color/* a */:/* b */ red; }`.
 struct CssPropertyColonComments<'a> {
     node: &'a CssGenericProperty,
 }
@@ -52,9 +108,7 @@ impl<'a> CssPropertyColonComments<'a> {
         Self { node }
     }
 
-    /// Writes name/colon-boundary comments and the colon.
-    ///
-    /// Example: `color/* before */: red`.
+    /// Writes name/colon comments and the colon, as in `a { color/* c */: red; }`.
     fn fmt_colon_boundary(&self, f: &mut CssFormatter) -> FormatResult<()> {
         let colon = self.node.colon_token();
         // Clone the Rc-backed store so comment slices don't borrow `f` during writes.
@@ -65,19 +119,10 @@ impl<'a> CssPropertyColonComments<'a> {
             return write!(f, [colon.format()]);
         }
 
-        // This comment belongs between the property name and `:`, e.g.
-        // `color/* c */: red`.
         for comment in colon_boundary_comments {
-            let formatted = format_dangling_comment(comment);
-
-            if comment.kind().is_line() {
-                write!(f, [space(), formatted])?;
-            } else {
-                write!(f, [formatted])?;
-            }
+            self.fmt_name_boundary_comment(comment, f)?;
         }
 
-        // Prettier keeps `color // note\n: red` as a raw name/colon boundary.
         let should_break_before_colon = colon_boundary_comments
             .iter()
             .any(|comment| comment.kind().is_line() || comment.lines_after() > 0);
@@ -91,13 +136,66 @@ impl<'a> CssPropertyColonComments<'a> {
                 ])]
             )
         } else {
-            write!(f, [colon.format()])
+            write!(
+                f,
+                [
+                    maybe_space(
+                        self.should_preserve_source_gap_before_colon()
+                            && has_source_gap_before_token(colon_boundary_comments, &colon)
+                    ),
+                    colon.format()
+                ]
+            )
         }
     }
 
-    /// Writes colon/value-boundary comments and the value.
+    /// Writes one name/colon comment, as in `a { color/* c */ : red; }`.
     ///
-    /// Example: `color:/* after */ red`.
+    /// `@supports (display /* c */: flex) {}` keeps a space before the comment.
+    fn fmt_name_boundary_comment(
+        &self,
+        comment: &SourceComment<CssLanguage>,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        let formatted = format_dangling_comment(comment);
+
+        if comment.kind().is_line() || self.is_supports_feature_declaration() {
+            write!(f, [space(), formatted])
+        } else {
+            write!(f, [formatted])
+        }
+    }
+
+    /// Returns `true` when `a { color/* c */ : red; }` preserves the gap.
+    ///
+    /// Custom properties and `@supports` normalize the gap.
+    fn should_preserve_source_gap_before_colon(&self) -> bool {
+        if self
+            .node
+            .name()
+            .is_ok_and(|name| name.syntax().text_trimmed().starts_with("--"))
+        {
+            return false;
+        }
+
+        if self.node.parent::<CssDeclaration>().is_none() {
+            return false;
+        }
+
+        !self.is_supports_feature_declaration()
+    }
+
+    fn is_supports_feature_declaration(&self) -> bool {
+        let Some(declaration) = self.node.parent::<CssDeclaration>() else {
+            return false;
+        };
+
+        declaration
+            .parent::<CssSupportsFeatureDeclaration>()
+            .is_some()
+    }
+
+    /// Writes colon/value comments and the value, as in `a { color:/* c */ red; }`.
     fn fmt_value_boundary(&self, f: &mut CssFormatter) -> FormatResult<()> {
         let value = self.node.value();
         // Clone the Rc-backed store so comment slices don't borrow `f` during writes.
@@ -105,11 +203,19 @@ impl<'a> CssPropertyColonComments<'a> {
         let value_boundary_comments = comments.trailing_comments(self.node.syntax());
 
         if value_boundary_comments.is_empty() {
-            return write!(f, [space(), value.format()]);
+            return if is_empty_custom_property_value(&value) {
+                write!(
+                    f,
+                    [
+                        maybe_space(self.has_source_gap_after_colon_token()),
+                        value.format()
+                    ]
+                )
+            } else {
+                write!(f, [space(), value.format()])
+            };
         }
 
-        // This comment belongs between `:` and the value, e.g.
-        // `color:/* c */ red`.
         for (index, comment) in value_boundary_comments.iter().enumerate() {
             self.fmt_value_boundary_comment(index, comment, f)?;
         }
@@ -120,10 +226,14 @@ impl<'a> CssPropertyColonComments<'a> {
             || value_list_needs_multiline_layout(&value, f);
 
         if should_break_before_value {
-            write!(
-                f,
-                [indent(&format_args![hard_line_break(), &value.format()])]
-            )
+            if should_indent_value_after_colon_comments(&value, f) {
+                write!(
+                    f,
+                    [indent(&format_args![hard_line_break(), &value.format()])]
+                )
+            } else {
+                write!(f, [hard_line_break(), value.format()])
+            }
         } else {
             write!(f, [space(), value.format()])
         }
@@ -138,11 +248,20 @@ impl<'a> CssPropertyColonComments<'a> {
         let formatted = format_dangling_comment(comment);
 
         if comment.lines_before() > 0 {
+            if let Some(source_indent) = source_indent_before_comment(comment) {
+                return write!(
+                    f,
+                    [dedent_to_root(&align(
+                        source_indent,
+                        &format_args![hard_line_break(), formatted]
+                    ))]
+                );
+            }
+
             if comment.kind().is_line() {
                 return write!(f, [hard_line_break(), formatted]);
             }
 
-            // `color:\n/* note */ red` keeps the block comment at the raw column.
             return write!(
                 f,
                 [dedent_to_root(&format_args![hard_line_break(), formatted])]
@@ -158,7 +277,7 @@ impl<'a> CssPropertyColonComments<'a> {
         write!(f, [formatted])
     }
 
-    /// Returns `true` for a source gap in `color: /* note */ red`.
+    /// Returns `true` for the gap in `a { color: /* note */ red; }`.
     fn has_source_gap_after_colon(&self, comment: &SourceComment<CssLanguage>) -> bool {
         let Ok(colon_token) = self.node.colon_token() else {
             return false;
@@ -172,11 +291,53 @@ impl<'a> CssPropertyColonComments<'a> {
             .take_while(|piece| piece.text_range().end() <= comment_start)
             .any(|piece| piece.is_whitespace() || piece.is_newline())
     }
+
+    /// Returns whether an empty custom-property value contains whitespace.
+    fn has_source_gap_after_colon_token(&self) -> bool {
+        self.node.colon_token().is_ok_and(|colon| {
+            colon
+                .trailing_trivia()
+                .pieces()
+                .any(|piece| piece.is_whitespace() || piece.is_newline())
+        })
+    }
 }
 
-/// Returns `true` when the value list needs multiline layout.
+/// Recovers the horizontal source indentation of an own-line comment.
 ///
-/// Example: `font-family: /* note */ Hiragino Sans, sans-serif`.
+/// [`SourceComment`] records vertical spacing but not the exact spaces or tabs
+/// before a comment. For `color:\n        // comment`, this returns eight
+/// spaces. The caller resets structural indentation and aligns the comment
+/// with this prefix.
+fn source_indent_before_comment(comment: &SourceComment<CssLanguage>) -> Option<AlignedStr> {
+    let comment_piece = comment.piece().as_piece();
+    let token = comment_piece.token();
+    let comment_start =
+        usize::from(comment_piece.text_range().start() - token.text_range().start());
+    let source_before_comment = token.text().get(..comment_start)?;
+    let newline = source_before_comment
+        .bytes()
+        .rposition(is_css_newline_byte)?;
+    let source_indent = &source_before_comment[newline + 1..];
+
+    if !source_indent.bytes().all(is_css_horizontal_whitespace_byte) {
+        return None;
+    }
+
+    Some(AlignedStr::Owned(Rc::<str>::from(source_indent)))
+}
+
+fn is_empty_custom_property_value(
+    value: &SyntaxResult<AnyCssGenericPropertyValueOrExpression>,
+) -> bool {
+    value
+        .as_ref()
+        .ok()
+        .and_then(|value| value.as_css_custom_property_value())
+        .is_some_and(|value| value.components().is_empty())
+}
+
+/// Returns `true` when `a { font-family: /* note */ Hiragino Sans, sans-serif; }` breaks.
 fn value_list_needs_multiline_layout(
     value: &SyntaxResult<AnyCssGenericPropertyValueOrExpression>,
     f: &CssFormatter,
@@ -194,5 +355,37 @@ fn value_list_needs_multiline_layout(
         ValueListLayout::OnePerLine
             | ValueListLayout::OneGroupPerLine
             | ValueListLayout::OneGroupPerLineWithDanglingComments
+    )
+}
+
+/// Returns `true` when the boundary formatter should indent the value.
+///
+/// For:
+///
+/// ```scss
+/// a {
+///   grid-template-areas: // c
+///     "header";
+/// }
+/// ```
+///
+/// `PreserveInline` indents `"header"`, so the property boundary only writes
+/// the line break after `// c`.
+fn should_indent_value_after_colon_comments(
+    value: &SyntaxResult<AnyCssGenericPropertyValueOrExpression>,
+    f: &CssFormatter,
+) -> bool {
+    !matches!(
+        value.as_ref().ok().and_then(|value| {
+            value
+                .as_css_generic_component_value_list()
+                .map(|list| get_value_list_layout(list, f.comments(), f))
+                .or_else(|| {
+                    value.as_scss_expression().map(|expression| {
+                        get_value_list_layout(&expression.items(), f.comments(), f)
+                    })
+                })
+        }),
+        Some(ValueListLayout::PreserveInline)
     )
 }

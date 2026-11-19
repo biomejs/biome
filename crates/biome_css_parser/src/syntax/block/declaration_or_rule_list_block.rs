@@ -1,11 +1,13 @@
 use crate::parser::CssParser;
+use crate::syntax::at_rule::keyframes::parse_scss_template_keyframes_item;
 use crate::syntax::at_rule::{is_at_at_rule, parse_at_rule};
 use crate::syntax::block::ParseBlockBody;
 use crate::syntax::declaration::parse_declaration_with_semicolon;
 use crate::syntax::parse_error::{expected_any_declaration_or_at_rule, scss_only_syntax_error};
 use crate::syntax::scss::{
-    is_at_scss_interpolated_property, is_at_scss_nesting_declaration,
-    is_at_scss_variable_declaration, parse_scss_nesting_declaration,
+    is_at_scss_interpolated_property_name, is_at_scss_nesting_declaration,
+    is_at_scss_variable_declaration, parse_exclusive_scss_nested_property_declaration,
+    parse_scss_interpolated_property_declaration, parse_scss_nesting_declaration,
     parse_scss_variable_declaration, try_parse_scss_nesting_declaration,
 };
 use crate::syntax::{
@@ -15,8 +17,8 @@ use crate::syntax::{
     try_parse_nested_qualified_rule_without_selector_recovery,
 };
 use biome_css_syntax::CssSyntaxKind::*;
-use biome_css_syntax::EmbeddingKind;
 use biome_css_syntax::{CssSyntaxKind, T};
+use biome_languages::css::CssEmbeddingKind;
 use biome_parser::parse_lists::ParseNodeList;
 use biome_parser::parse_recovery::{ParseRecovery, RecoveryResult};
 use biome_parser::prelude::ParsedSyntax;
@@ -43,13 +45,14 @@ impl ParseBlockBody for DeclarationOrRuleListBlock {
 }
 
 #[inline]
-fn is_at_declaration_or_rule_item(p: &mut CssParser) -> bool {
-    is_at_at_rule(p)
+pub(crate) fn is_at_declaration_or_rule_item(p: &mut CssParser) -> bool {
+    p.at(CSS_PERCENTAGE_VALUE)
+        || is_at_at_rule(p)
         || is_at_top_level_qualified_rule(p)
         || is_at_nested_qualified_rule(p)
         || is_at_scss_nesting_declaration(p)
         || is_at_scss_variable_declaration(p)
-        || is_at_scss_interpolated_property(p)
+        || is_at_scss_interpolated_property_name(p)
         || is_at_any_declaration_with_semicolon(p)
         || is_at_metavariable(p)
 }
@@ -57,8 +60,99 @@ fn is_at_declaration_or_rule_item(p: &mut CssParser) -> bool {
 #[inline]
 fn is_at_top_level_qualified_rule(p: &mut CssParser) -> bool {
     !p.state().is_nesting_block
-        && matches!(p.source_type.as_embedding_kind(), EmbeddingKind::Styled)
+        && matches!(p.source_type.as_embedding_kind(), CssEmbeddingKind::Styled)
         && is_at_qualified_rule(p)
+}
+
+/// Parses SCSS interpolation-led block items.
+///
+/// Examples: `#{$selector} {}` and `--#{$prop}: red;`.
+#[inline]
+fn parse_scss_interpolated_block_item(p: &mut CssParser, end_kind: CssSyntaxKind) -> ParsedSyntax {
+    // `#{$selector} {}` and `--#{$prop}: red;` share an interpolation start.
+    if is_at_nested_qualified_rule(p)
+        && let Ok(rule) = try_parse_nested_qualified_rule_without_selector_recovery(p, end_kind)
+    {
+        return rule;
+    }
+
+    parse_declaration_with_semicolon(p)
+}
+
+/// Parses SCSS interpolation-led block items in CSS recovery mode.
+///
+/// Examples: `#{$selector} {}` and `--#{$prop}: red;`.
+#[inline]
+fn parse_exclusive_scss_interpolated_block_item(
+    p: &mut CssParser,
+    end_kind: CssSyntaxKind,
+) -> ParsedSyntax {
+    if is_at_nested_qualified_rule(p)
+        && let Ok(rule) = try_parse_nested_qualified_rule_without_selector_recovery(p, end_kind)
+    {
+        return rule;
+    }
+
+    CssSyntaxFeatures::Scss.parse_exclusive_syntax(
+        p,
+        parse_scss_interpolated_property_declaration,
+        |p, marker| {
+            scss_only_syntax_error(
+                p,
+                "SCSS interpolated property declarations",
+                marker.range(p),
+            )
+        },
+    )
+}
+
+/// Parses a block item that starts with a Grit metavariable.
+///
+/// The metavariable starts a nested qualified rule if its selector stays on
+/// the same line, and is a standalone item otherwise:
+///
+/// ```css
+/// .parent {
+///     ${selector} {}
+///     ${mixin}
+///     .child {}
+/// }
+/// ```
+#[inline]
+fn parse_metavariable_block_item(p: &mut CssParser) -> ParsedSyntax {
+    // The rule must reach its own closing brace, also at the root of a styled
+    // snippet, whose list ends at the end of the file.
+    if is_at_single_line_selector(p)
+        && let Ok(rule) = try_parse_nested_qualified_rule_without_selector_recovery(p, T!['}'])
+    {
+        return rule;
+    }
+
+    parse_metavariable(p)
+}
+
+/// The number of tokens [is_at_single_line_selector] looks ahead for the `{`.
+const MAX_SELECTOR_LOOKAHEAD: usize = 64;
+
+/// Returns `true` if the tokens up to the next `{` stay on the same line,
+/// except after the commas between the selectors of a list:
+///
+/// ```css
+/// ${first},
+/// ${second} {}
+/// ```
+fn is_at_single_line_selector(p: &mut CssParser) -> bool {
+    for n in 1..=MAX_SELECTOR_LOOKAHEAD {
+        match p.nth(n) {
+            T!['{'] => return true,
+            T![;] | T!['}'] | EOF => return false,
+            _ if p.has_nth_preceding_line_break(n) && !p.nth_at(n - 1, T![,]) => return false,
+            _ => {}
+        }
+    }
+
+    // Leave the decision to the speculative parse for longer selectors.
+    true
 }
 
 struct DeclarationOrRuleListParseRecovery {
@@ -97,9 +191,21 @@ impl ParseNodeList for DeclarationOrRuleList {
     const LIST_KIND: Self::Kind = CSS_DECLARATION_OR_RULE_LIST;
 
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
+        if let ParsedSyntax::Present(item) = CssSyntaxFeatures::Scss
+            .parse_exclusive_syntax_with_kind(
+                p,
+                parse_scss_template_keyframes_item,
+                |p, marker| scss_only_syntax_error(p, "SCSS keyframe blocks", marker.range(p)),
+                // The default CSS_BOGUS_KEYFRAMES_ITEM is not allowed in this list.
+                Some(CSS_BOGUS),
+            )
+        {
+            return ParsedSyntax::Present(item);
+        }
+
         if is_at_at_rule(p) {
             parse_at_rule(p)
-        } else if is_at_scss_nesting_declaration(p) {
+        } else if CssSyntaxFeatures::Scss.is_supported(p) && is_at_scss_nesting_declaration(p) {
             // Match Sass's declaration-first strategy for ambiguous `name:ident` and
             // `name::...` forms, but do the ambiguity check inside the same speculative
             // declaration parse so we don't pay a separate probe pass first.
@@ -122,17 +228,12 @@ impl ParseNodeList for DeclarationOrRuleList {
                     scss_only_syntax_error(p, "SCSS variable declarations", marker.range(p))
                 },
             )
-        } else if is_at_scss_interpolated_property(p) {
-            // The remaining interpolation-bearing property names here are the
-            // dashed/custom-property forms that `is_at_scss_nesting_declaration`
-            // intentionally excludes, such as `--theme-#{$slot}: red;`.
-            if let Ok(rule) =
-                try_parse_nested_qualified_rule_without_selector_recovery(p, self.end_kind)
-            {
-                return rule;
+        } else if is_at_scss_interpolated_property_name(p) {
+            if CssSyntaxFeatures::Scss.is_supported(p) {
+                parse_scss_interpolated_block_item(p, self.end_kind)
+            } else {
+                parse_exclusive_scss_interpolated_block_item(p, self.end_kind)
             }
-
-            parse_declaration_with_semicolon(p)
         } else if is_at_any_declaration_with_semicolon(p) {
             // if we are at a declaration,
             // we still can have a nested qualified rule or a declaration
@@ -183,6 +284,12 @@ impl ParseNodeList for DeclarationOrRuleList {
             // If parsing as a declaration was successful, return the parsed declaration.
             if let Ok(declaration) = declaration {
                 return declaration;
+            }
+
+            if let ParsedSyntax::Present(declaration) =
+                parse_exclusive_scss_nested_property_declaration(p, CSS_BOGUS)
+            {
+                return ParsedSyntax::Present(declaration);
             }
 
             // If the speculative parse failed and we encountered an if() function,
@@ -237,10 +344,10 @@ impl ParseNodeList for DeclarationOrRuleList {
             // fall back to parsing the block as a declaration,
             // because declaration error is more relevant.
             parse_any_declaration_with_semicolon(p)
+        } else if is_at_metavariable(p) {
+            parse_metavariable_block_item(p)
         } else if is_at_nested_qualified_rule(p) {
             parse_nested_qualified_rule(p)
-        } else if is_at_metavariable(p) {
-            parse_metavariable(p)
         } else {
             Absent
         }

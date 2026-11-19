@@ -1,0 +1,11 @@
+@forward './button' as components_*;
+@forward './button' as components-*;
+@forward './button' as components_* show $components_gap, components_reset;
+@forward './button' as components_* hide components_internal;
+@forward './button' as components_* with ($gap: 4px);
+@forward './button' as components_* show $components_gap, components_reset with ($components_gap: 4px !default);
+@forward './button' as Components_*;
+@forward './button' as components*;
+@forward './button' as components1*;
+@forward './button' as show*;
+@forward './button' as components\5f *;

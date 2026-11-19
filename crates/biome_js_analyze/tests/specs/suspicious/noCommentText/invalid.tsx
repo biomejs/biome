@@ -21,4 +21,9 @@
         comment */
     </div>
     <div>😀//😀 comment </div>
+    <div>before /* comment */ after</div>
+    <div>
+        // first
+        // second
+    </div>
 </>

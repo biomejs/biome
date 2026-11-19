@@ -2,11 +2,17 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
+## Command
+
+```shell
+biome format --write --css-formatter-trailing-newline=false test.css
+```
+
 ## `test.css`
 
 ```css
 .test {
-	color: red;
+  color: red;
 }
 ```
 

@@ -1,0 +1,133 @@
+$gap: 8px;
+$name: theme;
+
+:root {
+  --empty:;
+  --literal-variable: $gap;
+  --literal-expression: 1 + 1;
+  --literal-call: math.div(8px, 2);
+  --identifier-case: InHeRiT;
+  --number-spelling: .50;
+  --known-dimension: 1PX;
+  --unknown-dimension: 2FoO;
+  --percentage: 50%;
+  --numeric-comments: 1/* first */ + /* second */2PX;
+  --plain-string: "$gap";
+  --interpolated-string: "size-#{$gap}";
+  --computed: #{$gap / 2};
+  --spaced-interpolation-start: # {foo};
+  --commented-interpolation-start: #/* gap */{foo};
+  --#{$name}: #{$gap};
+  --theme: {color:red;padding:calc(2px + #{$gap});};
+  --json: {"enabled":true,"sizes":[1,2]};
+  --script: function(rule){console.log(rule)};
+  --nested: (foo; [bar,baz] {a:b;});
+  --empty-function-comment: fn(/* function */);
+  --commented-function-gap: fn/* gap */(raw);
+  --empty-paren-comment: (/* paren */);
+  --empty-bracket-comment: [/* bracket */];
+  --empty-brace-comment: {/* brace */};
+  --comments: before/* middle */after;
+  --boundary-comments: /* leading */ value /* trailing */;
+  --other-word: !something;
+  --just-exclamation: !;
+  --in-identifier: foo!bar;
+  --just-exclamations: !!!!!!!;
+  --mid-important: value !important fallback;
+  --important: value !important;
+  --important-before-line-comment: value !important// keep raw
+    ;
+  --repeated-important: value !important !important;
+  --after-repeated-important: stable;
+  --nested-important: (value !important);
+  --multiline: first
+    second;
+  --single-line-comment: // (
+    );
+  --image: url(https://example.com/image.svg?size=large&theme=dark);
+  --data: url(data:image/svg+xml,%3Csvg%3E);
+  --spaced-url: url (foo);
+  --sass-looking-url: url($path + ".css");
+  --interpolated-url: url(images/#{$name}.png);
+  --quoted-url-content: url("image.svg"?fallback);
+  --url-delimiter-suffix: url(image.svg)?;
+  --url-line-content: url(image.svg)// raw
+    ;
+  --fallback-delimiters: ? `;
+}
+
+@supports (--raw: $gap + 1px, fallback) {
+  .supported {
+    color: green;
+  }
+}
+
+@supports (--comment-only: /* loud */) {
+  .supported {
+    color: green;
+  }
+}
+
+@supports (--absolute-url: url(https://example.com/image.svg)) {
+  .supported {
+    color: green;
+  }
+}
+
+@supports (--protocol-relative-url: url(//cdn.example.com/image.svg)) {
+  .supported {
+    color: green;
+  }
+}
+
+@supports (--quoted-url-content: url("image.svg"?fallback)) {
+  .supported {
+    color: green;
+  }
+}
+
+@supports (--line-comment: // silent )
+  value) {
+  .supported {
+    color: green;
+  }
+}
+
+@supports (--block-before-line-comment: /* value */ // silent
+) {
+  .supported {
+    color: green;
+  }
+}
+
+@keyframes raw-custom-property {
+  from {
+    --frame-value: $gap;
+  }
+
+  to {
+    --frame-value: {step: #{$gap}};
+  }
+}
+
+@media print {
+  :root {
+    --media-value: $gap + 1px;
+  }
+}
+
+@container style(--container-value: $gap + 1px) {
+  .container-context {
+    color: green;
+  }
+}
+
+.semicolonless { --value: token }
+.braced { --value: { a: b } }
+
+@supports (--url-line-comment: url(// silent
+  image.svg)) {
+  .supported {
+    color: green;
+  }
+}

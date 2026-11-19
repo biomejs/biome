@@ -1,0 +1,48 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: parenthesized.js
+---
+# Input
+```js
+/* should generate diagnostics */
+await page.click("button", ({ force: true }));
+await page.locator('x').fill("text", (({ force: true })));
+
+```
+
+# Diagnostics
+```
+parenthesized.js:2:7 lint/suspicious/noPlaywrightForceOption ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected use of { force: true } option.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ await page.click("button", ({ force: true }));
+      │       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ await page.locator('x').fill("text", (({ force: true })));
+    4 │ 
+  
+  i The force option bypasses actionability checks and can lead to unreliable tests.
+  
+  i Fix the underlying issue instead of forcing the action.
+  
+
+```
+
+```
+parenthesized.js:3:7 lint/suspicious/noPlaywrightForceOption ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected use of { force: true } option.
+  
+    1 │ /* should generate diagnostics */
+    2 │ await page.click("button", ({ force: true }));
+  > 3 │ await page.locator('x').fill("text", (({ force: true })));
+      │       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ 
+  
+  i The force option bypasses actionability checks and can lead to unreliable tests.
+  
+  i Fix the underlying issue instead of forcing the action.
+  
+
+```

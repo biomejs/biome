@@ -3,11 +3,19 @@ use biome_analyze::{
     ActionFilter, AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never,
     RuleCategoriesBuilder,
 };
+use biome_db::Source;
+use biome_js_analyze::JsAnalyzerServices;
 use biome_js_parser::JsParserOptions;
-use biome_js_syntax::JsFileSource;
+use biome_languages::{DocumentFileSource, JsFileSource, LanguageDb};
+use biome_parser::db::{ParseDb, ParseHandle, SourceOutput};
+use biome_rowan::AstNode;
 use biome_test_utils::BenchCase;
+use camino::Utf8Path;
 use criterion::{BenchmarkId, Criterion, black_box, criterion_group, criterion_main};
+use salsa::Storage;
 use std::collections::HashMap;
+use std::rc::Rc;
+use std::sync::Arc;
 
 #[cfg(target_os = "windows")]
 #[global_allocator]
@@ -15,7 +23,7 @@ static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
 
 #[cfg(all(
     any(target_os = "macos", target_os = "linux"),
-    not(target_env = "musl"),
+    not(all(target_env = "musl", target_arch = "aarch64")),
 ))]
 #[global_allocator]
 static GLOBAL: tikv_jemallocator::Jemalloc = tikv_jemallocator::Jemalloc;
@@ -44,10 +52,65 @@ fn bench_analyzer(criterion: &mut Criterion) {
                     BenchmarkId::from_parameter(test_case.filename()),
                     code,
                     |b, _| {
+                        #[salsa::db]
+                        #[derive(Default)]
+                        struct TestDb {
+                            parsed: Option<Source>,
+                            /// The parse of the text of `parsed`. The
+                            /// benchmark makes it once, so that it measures
+                            /// the analyzer rather than the parser.
+                            parse: Option<ParseHandle>,
+                            js_source: Option<JsFileSource>,
+                            storage: Storage<Self>,
+                        }
+
+                        #[salsa::db]
+                        impl ParseDb for TestDb {
+                            fn parse_source(&self, source: Source) -> SourceOutput {
+                                let parse = self.parse.clone().unwrap_or_else(|| {
+                                    biome_parser::AnyParse::from(biome_js_parser::parse(
+                                        source.text(self),
+                                        self.js_source.unwrap_or_default(),
+                                        JsParserOptions::default(),
+                                    ))
+                                    .into()
+                                });
+                                SourceOutput {
+                                    parse,
+                                    document_source_index: 0,
+                                    snippets: Vec::new(),
+                                }
+                            }
+                        }
+
+                        #[salsa::db]
+                        impl LanguageDb for TestDb {
+                            fn source_from_index(
+                                &self,
+                                _index: usize,
+                            ) -> Option<DocumentFileSource> {
+                                Some(DocumentFileSource::Js(JsFileSource::tsx()))
+                            }
+                        }
+
+                        #[salsa::db]
+                        impl biome_db::Db for TestDb {
+                            fn parsed_source_for_path(&self, _path: &Utf8Path) -> Option<Source> {
+                                self.parsed
+                            }
+                        }
+
+                        #[salsa::db]
+                        impl salsa::Database for TestDb {}
+
                         let file_source =
                             JsFileSource::try_from(test_case.path()).unwrap_or_default();
                         let parse =
                             biome_js_parser::parse(code, file_source, JsParserOptions::default());
+                        let shared_parse = ParseHandle::from(biome_parser::AnyParse::from(
+                            parse.tree().syntax().as_send().unwrap(),
+                        ));
+                        let text = Arc::<str>::from(code);
 
                         let filter = AnalysisFilter {
                             categories: RuleCategoriesBuilder::default()
@@ -61,13 +124,25 @@ fn bench_analyzer(criterion: &mut Criterion) {
                             AnalyzerConfiguration::default()
                                 .with_jsx_runtime(JsxRuntime::default()),
                         );
+
                         b.iter(|| {
+                            let mut db = TestDb {
+                                parse: Some(shared_parse.clone()),
+                                ..TestDb::default()
+                            };
+                            let parsed_source =
+                                Source::new(&db, test_case.path().to_path_buf(), text.clone(), 0);
+                            db.parsed = Some(parsed_source);
+                            db.js_source = Some(file_source);
+                            let services = JsAnalyzerServices::default()
+                                .with_language_db(Rc::new(db))
+                                .with_parsed_source(parsed_source.into());
                             biome_js_analyze::analyze(
                                 &parse.tree(),
                                 filter,
                                 &options,
                                 &[],
-                                Default::default(),
+                                services,
                                 |event| {
                                     black_box(event.diagnostic());
                                     black_box(event.actions(ActionFilter::all()));

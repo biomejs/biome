@@ -1,0 +1,399 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidMemberText.jsonc
+---
+# Input
+```cjs
+obj['__proto__'];
+```
+
+# Diagnostics
+```
+invalidMemberText.jsonc:1:1 lint/suspicious/noProto ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid use of the deprecated __proto__ accessor.
+  
+  > 1 │ obj['__proto__'];
+      │ ^^^^^^^^^^^^^^^^
+  
+  i Object.prototype.__proto__ is an outdated way to get or set an object's prototype,
+    having been deprecated in 2009 for being inefficient and unreliable.
+  
+  i Object.getPrototypeOf() and Object.setPrototypeOf() are modern alternatives that work on all objects and are more performant.
+  
+
+```
+
+# Input
+```cjs
+obj['__proto__'] = value;
+```
+
+# Diagnostics
+```
+invalidMemberText.jsonc:1:1 lint/suspicious/noProto ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid use of the deprecated __proto__ accessor.
+  
+  > 1 │ obj['__proto__'] = value;
+      │ ^^^^^^^^^^^^^^^^
+  
+  i Object.prototype.__proto__ is an outdated way to get or set an object's prototype,
+    having been deprecated in 2009 for being inefficient and unreliable.
+  
+  i Object.getPrototypeOf() and Object.setPrototypeOf() are modern alternatives that work on all objects and are more performant.
+  
+
+```
+
+# Input
+```cjs
+obj[`__proto__`];
+```
+
+# Diagnostics
+```
+invalidMemberText.jsonc:1:1 lint/suspicious/noProto ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid use of the deprecated __proto__ accessor.
+  
+  > 1 │ obj[`__proto__`];
+      │ ^^^^^^^^^^^^^^^^
+  
+  i Object.prototype.__proto__ is an outdated way to get or set an object's prototype,
+    having been deprecated in 2009 for being inefficient and unreliable.
+  
+  i Object.getPrototypeOf() and Object.setPrototypeOf() are modern alternatives that work on all objects and are more performant.
+  
+
+```
+
+# Input
+```cjs
+obj[`__proto__`] = value;
+```
+
+# Diagnostics
+```
+invalidMemberText.jsonc:1:1 lint/suspicious/noProto ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid use of the deprecated __proto__ accessor.
+  
+  > 1 │ obj[`__proto__`] = value;
+      │ ^^^^^^^^^^^^^^^^
+  
+  i Object.prototype.__proto__ is an outdated way to get or set an object's prototype,
+    having been deprecated in 2009 for being inefficient and unreliable.
+  
+  i Object.getPrototypeOf() and Object.setPrototypeOf() are modern alternatives that work on all objects and are more performant.
+  
+
+```
+
+# Input
+```cjs
+obj?.__proto__;
+```
+
+# Diagnostics
+```
+invalidMemberText.jsonc:1:1 lint/suspicious/noProto ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid use of the deprecated __proto__ accessor.
+  
+  > 1 │ obj?.__proto__;
+      │ ^^^^^^^^^^^^^^
+  
+  i Object.prototype.__proto__ is an outdated way to get or set an object's prototype,
+    having been deprecated in 2009 for being inefficient and unreliable.
+  
+  i Object.getPrototypeOf() and Object.setPrototypeOf() are modern alternatives that work on all objects and are more performant.
+  
+
+```
+
+# Input
+```cjs
+obj?.['__proto__'];
+```
+
+# Diagnostics
+```
+invalidMemberText.jsonc:1:1 lint/suspicious/noProto ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid use of the deprecated __proto__ accessor.
+  
+  > 1 │ obj?.['__proto__'];
+      │ ^^^^^^^^^^^^^^^^^^
+  
+  i Object.prototype.__proto__ is an outdated way to get or set an object's prototype,
+    having been deprecated in 2009 for being inefficient and unreliable.
+  
+  i Object.getPrototypeOf() and Object.setPrototypeOf() are modern alternatives that work on all objects and are more performant.
+  
+
+```
+
+# Input
+```cjs
+obj?.[`__proto__`];
+```
+
+# Diagnostics
+```
+invalidMemberText.jsonc:1:1 lint/suspicious/noProto ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid use of the deprecated __proto__ accessor.
+  
+  > 1 │ obj?.[`__proto__`];
+      │ ^^^^^^^^^^^^^^^^^^
+  
+  i Object.prototype.__proto__ is an outdated way to get or set an object's prototype,
+    having been deprecated in 2009 for being inefficient and unreliable.
+  
+  i Object.getPrototypeOf() and Object.setPrototypeOf() are modern alternatives that work on all objects and are more performant.
+  
+
+```
+
+# Input
+```cjs
+obj. /* member */ __proto__;
+```
+
+# Diagnostics
+```
+invalidMemberText.jsonc:1:1 lint/suspicious/noProto ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid use of the deprecated __proto__ accessor.
+  
+  > 1 │ obj. /* member */ __proto__;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Object.prototype.__proto__ is an outdated way to get or set an object's prototype,
+    having been deprecated in 2009 for being inefficient and unreliable.
+  
+  i Object.getPrototypeOf() and Object.setPrototypeOf() are modern alternatives that work on all objects and are more performant.
+  
+
+```
+
+# Input
+```cjs
+obj. /* member */ __proto__ = value;
+```
+
+# Diagnostics
+```
+invalidMemberText.jsonc:1:1 lint/suspicious/noProto ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid use of the deprecated __proto__ accessor.
+  
+  > 1 │ obj. /* member */ __proto__ = value;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Object.prototype.__proto__ is an outdated way to get or set an object's prototype,
+    having been deprecated in 2009 for being inefficient and unreliable.
+  
+  i Object.getPrototypeOf() and Object.setPrototypeOf() are modern alternatives that work on all objects and are more performant.
+  
+
+```
+
+# Input
+```cjs
+obj[ /* member */ '__proto__' /* member */ ];
+```
+
+# Diagnostics
+```
+invalidMemberText.jsonc:1:1 lint/suspicious/noProto ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid use of the deprecated __proto__ accessor.
+  
+  > 1 │ obj[ /* member */ '__proto__' /* member */ ];
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Object.prototype.__proto__ is an outdated way to get or set an object's prototype,
+    having been deprecated in 2009 for being inefficient and unreliable.
+  
+  i Object.getPrototypeOf() and Object.setPrototypeOf() are modern alternatives that work on all objects and are more performant.
+  
+
+```
+
+# Input
+```cjs
+obj[ /* member */ '__proto__' /* member */ ] = value;
+```
+
+# Diagnostics
+```
+invalidMemberText.jsonc:1:1 lint/suspicious/noProto ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid use of the deprecated __proto__ accessor.
+  
+  > 1 │ obj[ /* member */ '__proto__' /* member */ ] = value;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Object.prototype.__proto__ is an outdated way to get or set an object's prototype,
+    having been deprecated in 2009 for being inefficient and unreliable.
+  
+  i Object.getPrototypeOf() and Object.setPrototypeOf() are modern alternatives that work on all objects and are more performant.
+  
+
+```
+
+# Input
+```cjs
+obj[('__proto__')];
+```
+
+# Diagnostics
+```
+invalidMemberText.jsonc:1:1 lint/suspicious/noProto ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid use of the deprecated __proto__ accessor.
+  
+  > 1 │ obj[('__proto__')];
+      │ ^^^^^^^^^^^^^^^^^^
+  
+  i Object.prototype.__proto__ is an outdated way to get or set an object's prototype,
+    having been deprecated in 2009 for being inefficient and unreliable.
+  
+  i Object.getPrototypeOf() and Object.setPrototypeOf() are modern alternatives that work on all objects and are more performant.
+  
+
+```
+
+# Input
+```cjs
+obj[('__proto__')] = value;
+```
+
+# Diagnostics
+```
+invalidMemberText.jsonc:1:1 lint/suspicious/noProto ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid use of the deprecated __proto__ accessor.
+  
+  > 1 │ obj[('__proto__')] = value;
+      │ ^^^^^^^^^^^^^^^^^^
+  
+  i Object.prototype.__proto__ is an outdated way to get or set an object's prototype,
+    having been deprecated in 2009 for being inefficient and unreliable.
+  
+  i Object.getPrototypeOf() and Object.setPrototypeOf() are modern alternatives that work on all objects and are more performant.
+  
+
+```
+
+# Input
+```cjs
+obj[((('__proto__')))];
+```
+
+# Diagnostics
+```
+invalidMemberText.jsonc:1:1 lint/suspicious/noProto ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid use of the deprecated __proto__ accessor.
+  
+  > 1 │ obj[((('__proto__')))];
+      │ ^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Object.prototype.__proto__ is an outdated way to get or set an object's prototype,
+    having been deprecated in 2009 for being inefficient and unreliable.
+  
+  i Object.getPrototypeOf() and Object.setPrototypeOf() are modern alternatives that work on all objects and are more performant.
+  
+
+```
+
+# Input
+```cjs
+obj[(((`__proto__`)))] = value;
+```
+
+# Diagnostics
+```
+invalidMemberText.jsonc:1:1 lint/suspicious/noProto ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid use of the deprecated __proto__ accessor.
+  
+  > 1 │ obj[(((`__proto__`)))] = value;
+      │ ^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Object.prototype.__proto__ is an outdated way to get or set an object's prototype,
+    having been deprecated in 2009 for being inefficient and unreliable.
+  
+  i Object.getPrototypeOf() and Object.setPrototypeOf() are modern alternatives that work on all objects and are more performant.
+  
+
+```
+
+# Input
+```cjs
+obj[( /* member */ '__proto__' /* member */ )];
+```
+
+# Diagnostics
+```
+invalidMemberText.jsonc:1:1 lint/suspicious/noProto ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid use of the deprecated __proto__ accessor.
+  
+  > 1 │ obj[( /* member */ '__proto__' /* member */ )];
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Object.prototype.__proto__ is an outdated way to get or set an object's prototype,
+    having been deprecated in 2009 for being inefficient and unreliable.
+  
+  i Object.getPrototypeOf() and Object.setPrototypeOf() are modern alternatives that work on all objects and are more performant.
+  
+
+```
+
+# Input
+```cjs
+obj[(property, '__proto__')];
+```
+
+# Diagnostics
+```
+invalidMemberText.jsonc:1:1 lint/suspicious/noProto ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid use of the deprecated __proto__ accessor.
+  
+  > 1 │ obj[(property, '__proto__')];
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Object.prototype.__proto__ is an outdated way to get or set an object's prototype,
+    having been deprecated in 2009 for being inefficient and unreliable.
+  
+  i Object.getPrototypeOf() and Object.setPrototypeOf() are modern alternatives that work on all objects and are more performant.
+  
+
+```
+
+# Input
+```cjs
+obj[(property, `__proto__`)] = value;
+```
+
+# Diagnostics
+```
+invalidMemberText.jsonc:1:1 lint/suspicious/noProto ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid use of the deprecated __proto__ accessor.
+  
+  > 1 │ obj[(property, `__proto__`)] = value;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Object.prototype.__proto__ is an outdated way to get or set an object's prototype,
+    having been deprecated in 2009 for being inefficient and unreliable.
+  
+  i Object.getPrototypeOf() and Object.setPrototypeOf() are modern alternatives that work on all objects and are more performant.
+  
+
+```

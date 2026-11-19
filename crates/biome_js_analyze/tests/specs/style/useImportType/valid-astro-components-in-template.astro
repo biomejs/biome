@@ -1,4 +1,3 @@
-<!-- should not generate diagnostics -->
 ---
 import type { ComponentProps } from "astro/types";
 
@@ -10,5 +9,6 @@ interface Props {
 
 const { badge } = Astro.props;
 ---
+<!-- should not generate diagnostics -->
 
 {badge && <Badge text={badge.text} variant={badge.variant} />}

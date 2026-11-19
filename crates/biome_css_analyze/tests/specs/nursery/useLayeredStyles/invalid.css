@@ -1,0 +1,58 @@
+/* should generate diagnostics */
+@import "foo.css";
+
+p {
+	color: red;
+}
+
+@media (min-width: 600px) {
+	a {
+		color: bar
+	}
+}
+
+.parent {
+	color: red;
+
+	& .child {
+		color: blue;
+	}
+}
+
+a:hover {
+	color: red;
+}
+
+::selection {
+	color: red;
+}
+
+:root {
+	--color: red;
+}
+
+@supports (display: grid) {
+	.box {
+		display: grid;
+	}
+}
+
+@container (min-width: 200px) {
+	.card {
+		color: red;
+	}
+}
+
+@scope (.foo) {
+	p {
+		color: red;
+	}
+}
+
+@media (min-width: 600px) {
+	@supports (display: grid) {
+		a {
+			color: red;
+		}
+	}
+}

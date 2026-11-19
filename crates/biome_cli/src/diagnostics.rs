@@ -1,3 +1,4 @@
+use crate::commands::inspect::InspectionAdvice;
 use biome_console::fmt::Formatter;
 use biome_console::markup;
 use biome_diagnostics::advice::ListAdvice;
@@ -56,10 +57,24 @@ pub enum CliDiagnostic {
     NoFilesWereProcessed(NoFilesWereProcessed),
     /// Errors thrown when running the `biome migrate` command
     MigrateError(MigrationDiagnostic),
+    /// Errors thrown when running the `biome upgrade` command
+    UpgradeError(UpgradeDiagnostic),
     /// Emitted during the reporting phase
     Report(ReportDiagnostic),
     /// Emitted when there's an error emitted when using stdin mode
     Stdin(StdinDiagnostic),
+    /// Plugin inspection results containing resolution errors.
+    InspectionError(InspectionError),
+}
+
+#[derive(Debug, Diagnostic)]
+#[diagnostic(category = "configuration", severity = Error)]
+pub struct InspectionError {
+    #[message]
+    #[description]
+    message: MessageAndDescription,
+    #[advice]
+    advice: InspectionAdvice,
 }
 
 #[derive(Debug, Diagnostic)]
@@ -163,6 +178,7 @@ pub struct CheckError {
     category: &'static Category,
 
     #[message]
+    #[description]
     message: MessageAndDescription,
 }
 
@@ -258,6 +274,19 @@ pub struct MigrationDiagnostic {
 }
 
 #[derive(Debug, Diagnostic)]
+#[diagnostic(
+	category = "upgrade",
+	severity = Error,
+)]
+pub struct UpgradeDiagnostic {
+    #[message]
+    #[description]
+    pub message: MessageAndDescription,
+    #[source]
+    pub source: Option<Error>,
+}
+
+#[derive(Debug, Diagnostic)]
 pub enum ReportDiagnostic {
     /// Emitted when trying to serialise the report
     Serialization(SerdeJsonError),
@@ -281,7 +310,7 @@ impl CliAdvice {
 impl Advices for CliAdvice {
     fn record(&self, visitor: &mut dyn Visit) -> std::io::Result<()> {
         let command_name = command_name();
-        let help_sub_command = format!("{} {} --help", command_name, &self.sub_command);
+        let help_sub_command = format!("{} {} --help", command_name, self.sub_command);
         visitor.record_log(
             LogCategory::Info,
             &markup! { "Type the following command for more information" },
@@ -293,6 +322,24 @@ impl Advices for CliAdvice {
 }
 
 impl CliDiagnostic {
+    pub(crate) fn inspection_error(
+        message: biome_console::MarkupBuf,
+        advice: InspectionAdvice,
+    ) -> Self {
+        Self::InspectionError(InspectionError {
+            message: message.into(),
+            advice,
+        })
+    }
+
+    /// Returned when a command-line argument cannot be parsed.
+    pub fn parse_error(message: impl Into<String>) -> Self {
+        Self::ParseError(ParseDiagnostic {
+            source: None,
+            message: MessageAndDescription::from(message.into()),
+        })
+    }
+
     /// Returned when a subcommand is called with an unsupported combination of arguments
     pub fn incompatible_arguments(
         first_argument: impl Into<String>,
@@ -449,6 +496,14 @@ impl CliDiagnostic {
         })
     }
 
+    /// Errors thrown when running the `biome upgrade` command
+    pub fn upgrade_error(message: impl Into<String>, source: Option<Error>) -> Self {
+        Self::UpgradeError(UpgradeDiagnostic {
+            message: MessageAndDescription::from(message.into()),
+            source,
+        })
+    }
+
     /// Return by the help command when it is called with a subcommand it doesn't know
     pub fn new_unknown_help(command: impl Into<String>) -> Self {
         Self::UnknownCommandHelp(UnknownCommandHelp {
@@ -511,6 +566,17 @@ impl Diagnostic for StdinDiagnostic {
         match self {
             Self::NotFormatted => Severity::Error,
             Self::NoExtension => Severity::Warning,
+        }
+    }
+
+    fn description(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::NotFormatted => {
+                fmt.write_str("The contents aren't fixed. Use the `--write` flag to fix them.")
+            }
+            Self::NoExtension => fmt.write_str(
+                "The file passed via --stdin-file-path doesn't have an extension. Biome needs a file extension to know how to handle the file.",
+            ),
         }
     }
 

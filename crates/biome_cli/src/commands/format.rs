@@ -10,7 +10,9 @@ use biome_configuration::graphql::GraphqlFormatterConfiguration;
 use biome_configuration::html::HtmlFormatterConfiguration;
 use biome_configuration::javascript::JsFormatterConfiguration;
 use biome_configuration::json::{JsonFormatterConfiguration, JsonParserConfiguration};
+use biome_configuration::markdown::MarkdownFormatterConfiguration;
 use biome_configuration::vcs::VcsConfiguration;
+use biome_configuration::yaml::YamlFormatterConfiguration;
 use biome_configuration::{Configuration, FilesConfiguration, FormatterConfiguration};
 use biome_console::{Console, MarkupBuf};
 use biome_deserialize::Merge;
@@ -30,6 +32,8 @@ pub(crate) struct FormatCommandPayload {
     pub(crate) css_formatter: Option<CssFormatterConfiguration>,
     pub(crate) graphql_formatter: Option<GraphqlFormatterConfiguration>,
     pub(crate) html_formatter: Option<HtmlFormatterConfiguration>,
+    pub(crate) markdown_formatter: Option<MarkdownFormatterConfiguration>,
+    pub(crate) yaml_formatter: Option<YamlFormatterConfiguration>,
     pub(crate) formatter_configuration: Option<FormatterConfiguration>,
     pub(crate) vcs_configuration: Option<VcsConfiguration>,
     pub(crate) files_configuration: Option<FilesConfiguration>,
@@ -42,6 +46,7 @@ pub(crate) struct FormatCommandPayload {
     pub(crate) since: Option<String>,
     pub(crate) json_parser: Option<JsonParserConfiguration>,
     pub(crate) css_parser: Option<CssParserConfiguration>,
+    pub(crate) watch: bool,
 }
 
 struct FormatExecution {
@@ -127,6 +132,10 @@ impl TraversalCommand for FormatCommandPayload {
         "format"
     }
 
+    fn is_watch_mode(&self) -> bool {
+        self.watch
+    }
+
     fn minimal_scan_kind(&self) -> Option<ScanKind> {
         Some(ScanKind::KnownFiles)
     }
@@ -191,6 +200,18 @@ impl TraversalCommand for FormatCommandPayload {
             html.formatter.merge_with(self.html_formatter.clone());
         }
 
+        if self.markdown_formatter.is_some() {
+            let markdown = configuration.markdown.get_or_insert_with(Default::default);
+            markdown
+                .formatter
+                .merge_with(self.markdown_formatter.clone());
+        }
+
+        if self.yaml_formatter.is_some() {
+            let yaml = configuration.yaml.get_or_insert_with(Default::default);
+            yaml.formatter.merge_with(self.yaml_formatter.clone());
+        }
+
         if self.javascript_formatter.is_some() {
             let javascript = configuration
                 .javascript
@@ -230,5 +251,27 @@ impl TraversalCommand for FormatCommandPayload {
         )?
         .unwrap_or(self.paths.clone());
         Ok(paths)
+    }
+
+    fn check_incompatible_arguments(&self) -> Result<(), CliDiagnostic> {
+        if self.is_watch_mode() {
+            if self.fix {
+                return Err(CliDiagnostic::incompatible_arguments(
+                    "--watch",
+                    "--fix",
+                    "Applying code fixes is not available in watch mode.",
+                ));
+            }
+
+            if self.write {
+                return Err(CliDiagnostic::incompatible_arguments(
+                    "--watch",
+                    "--write",
+                    "Applying code fixes is not available in watch mode.",
+                ));
+            }
+        }
+
+        Ok(())
     }
 }

@@ -1,0 +1,371 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+.card:not(.disabled)#id { color: red; }
+.card[data-state]#id { color: blue; }
+.card:not(.disabled) #id { color: red; }
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@0..1 "." [] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@1..5 "card" [] [],
+                            },
+                        },
+                        CssPseudoClassSelector {
+                            colon_token: COLON@5..6 ":" [] [],
+                            class: CssPseudoClassFunctionSelectorList {
+                                name: CssIdentifier {
+                                    value_token: IDENT@6..9 "not" [] [],
+                                },
+                                l_paren_token: L_PAREN@9..10 "(" [] [],
+                                selectors: CssSelectorList [
+                                    CssCompoundSelector {
+                                        nesting_selectors: CssNestedSelectorList [],
+                                        simple_selector: missing (optional),
+                                        sub_selectors: CssSubSelectorList [
+                                            CssClassSelector {
+                                                dot_token: DOT@10..11 "." [] [],
+                                                name: CssCustomIdentifier {
+                                                    value_token: IDENT@11..19 "disabled" [] [],
+                                                },
+                                            },
+                                        ],
+                                    },
+                                ],
+                                r_paren_token: R_PAREN@19..20 ")" [] [],
+                            },
+                        },
+                        CssIdSelector {
+                            hash_token: HASH@20..21 "#" [] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@21..24 "id" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@24..26 "{" [] [Whitespace(" ")],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@26..31 "color" [] [],
+                                },
+                                colon_token: COLON@31..33 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@33..36 "red" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@36..38 ";" [] [Whitespace(" ")],
+                    },
+                ],
+                r_curly_token: R_CURLY@38..39 "}" [] [],
+            },
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@39..41 "." [Newline("\n")] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@41..45 "card" [] [],
+                            },
+                        },
+                        CssAttributeSelector {
+                            l_brack_token: L_BRACK@45..46 "[" [] [],
+                            name: CssAttributeName {
+                                namespace: missing (optional),
+                                name: CssIdentifier {
+                                    value_token: IDENT@46..56 "data-state" [] [],
+                                },
+                            },
+                            matcher: missing (optional),
+                            r_brack_token: R_BRACK@56..57 "]" [] [],
+                        },
+                        CssIdSelector {
+                            hash_token: HASH@57..58 "#" [] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@58..61 "id" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@61..63 "{" [] [Whitespace(" ")],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@63..68 "color" [] [],
+                                },
+                                colon_token: COLON@68..70 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@70..74 "blue" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@74..76 ";" [] [Whitespace(" ")],
+                    },
+                ],
+                r_curly_token: R_CURLY@76..77 "}" [] [],
+            },
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssComplexSelector {
+                    left: CssCompoundSelector {
+                        nesting_selectors: CssNestedSelectorList [],
+                        simple_selector: missing (optional),
+                        sub_selectors: CssSubSelectorList [
+                            CssClassSelector {
+                                dot_token: DOT@77..79 "." [Newline("\n")] [],
+                                name: CssCustomIdentifier {
+                                    value_token: IDENT@79..83 "card" [] [],
+                                },
+                            },
+                            CssPseudoClassSelector {
+                                colon_token: COLON@83..84 ":" [] [],
+                                class: CssPseudoClassFunctionSelectorList {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@84..87 "not" [] [],
+                                    },
+                                    l_paren_token: L_PAREN@87..88 "(" [] [],
+                                    selectors: CssSelectorList [
+                                        CssCompoundSelector {
+                                            nesting_selectors: CssNestedSelectorList [],
+                                            simple_selector: missing (optional),
+                                            sub_selectors: CssSubSelectorList [
+                                                CssClassSelector {
+                                                    dot_token: DOT@88..89 "." [] [],
+                                                    name: CssCustomIdentifier {
+                                                        value_token: IDENT@89..97 "disabled" [] [],
+                                                    },
+                                                },
+                                            ],
+                                        },
+                                    ],
+                                    r_paren_token: R_PAREN@97..98 ")" [] [],
+                                },
+                            },
+                        ],
+                    },
+                    combinator: CSS_SPACE_LITERAL@98..99 " " [] [],
+                    right: CssCompoundSelector {
+                        nesting_selectors: CssNestedSelectorList [],
+                        simple_selector: missing (optional),
+                        sub_selectors: CssSubSelectorList [
+                            CssIdSelector {
+                                hash_token: HASH@99..100 "#" [] [],
+                                name: CssCustomIdentifier {
+                                    value_token: IDENT@100..103 "id" [] [Whitespace(" ")],
+                                },
+                            },
+                        ],
+                    },
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@103..105 "{" [] [Whitespace(" ")],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@105..110 "color" [] [],
+                                },
+                                colon_token: COLON@110..112 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@112..115 "red" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@115..117 ";" [] [Whitespace(" ")],
+                    },
+                ],
+                r_curly_token: R_CURLY@117..118 "}" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@118..119 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..119
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..118
+    0: CSS_QUALIFIED_RULE@0..39
+      0: CSS_SELECTOR_LIST@0..24
+        0: CSS_COMPOUND_SELECTOR@0..24
+          0: CSS_NESTED_SELECTOR_LIST@0..0
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@0..24
+            0: CSS_CLASS_SELECTOR@0..5
+              0: DOT@0..1 "." [] []
+              1: CSS_CUSTOM_IDENTIFIER@1..5
+                0: IDENT@1..5 "card" [] []
+            1: CSS_PSEUDO_CLASS_SELECTOR@5..20
+              0: COLON@5..6 ":" [] []
+              1: CSS_PSEUDO_CLASS_FUNCTION_SELECTOR_LIST@6..20
+                0: CSS_IDENTIFIER@6..9
+                  0: IDENT@6..9 "not" [] []
+                1: L_PAREN@9..10 "(" [] []
+                2: CSS_SELECTOR_LIST@10..19
+                  0: CSS_COMPOUND_SELECTOR@10..19
+                    0: CSS_NESTED_SELECTOR_LIST@10..10
+                    1: (empty)
+                    2: CSS_SUB_SELECTOR_LIST@10..19
+                      0: CSS_CLASS_SELECTOR@10..19
+                        0: DOT@10..11 "." [] []
+                        1: CSS_CUSTOM_IDENTIFIER@11..19
+                          0: IDENT@11..19 "disabled" [] []
+                3: R_PAREN@19..20 ")" [] []
+            2: CSS_ID_SELECTOR@20..24
+              0: HASH@20..21 "#" [] []
+              1: CSS_CUSTOM_IDENTIFIER@21..24
+                0: IDENT@21..24 "id" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@24..39
+        0: L_CURLY@24..26 "{" [] [Whitespace(" ")]
+        1: CSS_DECLARATION_OR_RULE_LIST@26..38
+          0: CSS_DECLARATION_WITH_SEMICOLON@26..38
+            0: CSS_DECLARATION@26..36
+              0: CSS_GENERIC_PROPERTY@26..36
+                0: CSS_IDENTIFIER@26..31
+                  0: IDENT@26..31 "color" [] []
+                1: COLON@31..33 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@33..36
+                  0: CSS_IDENTIFIER@33..36
+                    0: IDENT@33..36 "red" [] []
+              1: (empty)
+            1: SEMICOLON@36..38 ";" [] [Whitespace(" ")]
+        2: R_CURLY@38..39 "}" [] []
+    1: CSS_QUALIFIED_RULE@39..77
+      0: CSS_SELECTOR_LIST@39..61
+        0: CSS_COMPOUND_SELECTOR@39..61
+          0: CSS_NESTED_SELECTOR_LIST@39..39
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@39..61
+            0: CSS_CLASS_SELECTOR@39..45
+              0: DOT@39..41 "." [Newline("\n")] []
+              1: CSS_CUSTOM_IDENTIFIER@41..45
+                0: IDENT@41..45 "card" [] []
+            1: CSS_ATTRIBUTE_SELECTOR@45..57
+              0: L_BRACK@45..46 "[" [] []
+              1: CSS_ATTRIBUTE_NAME@46..56
+                0: (empty)
+                1: CSS_IDENTIFIER@46..56
+                  0: IDENT@46..56 "data-state" [] []
+              2: (empty)
+              3: R_BRACK@56..57 "]" [] []
+            2: CSS_ID_SELECTOR@57..61
+              0: HASH@57..58 "#" [] []
+              1: CSS_CUSTOM_IDENTIFIER@58..61
+                0: IDENT@58..61 "id" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@61..77
+        0: L_CURLY@61..63 "{" [] [Whitespace(" ")]
+        1: CSS_DECLARATION_OR_RULE_LIST@63..76
+          0: CSS_DECLARATION_WITH_SEMICOLON@63..76
+            0: CSS_DECLARATION@63..74
+              0: CSS_GENERIC_PROPERTY@63..74
+                0: CSS_IDENTIFIER@63..68
+                  0: IDENT@63..68 "color" [] []
+                1: COLON@68..70 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@70..74
+                  0: CSS_IDENTIFIER@70..74
+                    0: IDENT@70..74 "blue" [] []
+              1: (empty)
+            1: SEMICOLON@74..76 ";" [] [Whitespace(" ")]
+        2: R_CURLY@76..77 "}" [] []
+    2: CSS_QUALIFIED_RULE@77..118
+      0: CSS_SELECTOR_LIST@77..103
+        0: CSS_COMPLEX_SELECTOR@77..103
+          0: CSS_COMPOUND_SELECTOR@77..98
+            0: CSS_NESTED_SELECTOR_LIST@77..77
+            1: (empty)
+            2: CSS_SUB_SELECTOR_LIST@77..98
+              0: CSS_CLASS_SELECTOR@77..83
+                0: DOT@77..79 "." [Newline("\n")] []
+                1: CSS_CUSTOM_IDENTIFIER@79..83
+                  0: IDENT@79..83 "card" [] []
+              1: CSS_PSEUDO_CLASS_SELECTOR@83..98
+                0: COLON@83..84 ":" [] []
+                1: CSS_PSEUDO_CLASS_FUNCTION_SELECTOR_LIST@84..98
+                  0: CSS_IDENTIFIER@84..87
+                    0: IDENT@84..87 "not" [] []
+                  1: L_PAREN@87..88 "(" [] []
+                  2: CSS_SELECTOR_LIST@88..97
+                    0: CSS_COMPOUND_SELECTOR@88..97
+                      0: CSS_NESTED_SELECTOR_LIST@88..88
+                      1: (empty)
+                      2: CSS_SUB_SELECTOR_LIST@88..97
+                        0: CSS_CLASS_SELECTOR@88..97
+                          0: DOT@88..89 "." [] []
+                          1: CSS_CUSTOM_IDENTIFIER@89..97
+                            0: IDENT@89..97 "disabled" [] []
+                  3: R_PAREN@97..98 ")" [] []
+          1: CSS_SPACE_LITERAL@98..99 " " [] []
+          2: CSS_COMPOUND_SELECTOR@99..103
+            0: CSS_NESTED_SELECTOR_LIST@99..99
+            1: (empty)
+            2: CSS_SUB_SELECTOR_LIST@99..103
+              0: CSS_ID_SELECTOR@99..103
+                0: HASH@99..100 "#" [] []
+                1: CSS_CUSTOM_IDENTIFIER@100..103
+                  0: IDENT@100..103 "id" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@103..118
+        0: L_CURLY@103..105 "{" [] [Whitespace(" ")]
+        1: CSS_DECLARATION_OR_RULE_LIST@105..117
+          0: CSS_DECLARATION_WITH_SEMICOLON@105..117
+            0: CSS_DECLARATION@105..115
+              0: CSS_GENERIC_PROPERTY@105..115
+                0: CSS_IDENTIFIER@105..110
+                  0: IDENT@105..110 "color" [] []
+                1: COLON@110..112 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@112..115
+                  0: CSS_IDENTIFIER@112..115
+                    0: IDENT@112..115 "red" [] []
+              1: (empty)
+            1: SEMICOLON@115..117 ";" [] [Whitespace(" ")]
+        2: R_CURLY@117..118 "}" [] []
+  2: EOF@118..119 "" [Newline("\n")] []
+
+```

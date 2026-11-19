@@ -15,6 +15,13 @@ impl FormatNodeRule<CssPseudoClassOfNthSelector> for FormatCssPseudoClassOfNthSe
             selectors,
         } = node.as_fields();
 
-        write!(f, [of_token.format(), space(), selectors.format()])
+        write!(
+            f,
+            [
+                of_token.format()?.with_text_case(CssCase::Preserve),
+                space(),
+                selectors.format()
+            ]
+        )
     }
 }

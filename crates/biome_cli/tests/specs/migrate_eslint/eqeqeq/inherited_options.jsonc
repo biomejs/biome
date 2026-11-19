@@ -1,0 +1,11 @@
+{
+  "biome": {},
+  "eslint": {
+    "rules": { "eqeqeq": ["off", "always", { "null": "ignore" }] },
+    "overrides": [
+      { "files": ["severity.js"], "rules": { "eqeqeq": "error" } },
+      { "files": ["array-severity.js"], "rules": { "eqeqeq": ["warn"] } },
+      { "files": ["replace.js"], "rules": { "eqeqeq": ["error", "always", {}] } }
+    ]
+  }
+}

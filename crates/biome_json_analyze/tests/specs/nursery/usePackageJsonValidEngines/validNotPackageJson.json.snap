@@ -1,0 +1,14 @@
+---
+source: crates/biome_json_analyze/tests/spec_tests.rs
+expression: validNotPackageJson.json
+---
+# Input
+```json
+{
+	"engines": {
+		"node": 24,
+		"npm": ""
+	}
+}
+
+```

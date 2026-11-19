@@ -150,7 +150,6 @@ YamlRoot {
                                 },
                             },
                             COMMA@59..60 "," [] [],
-                            missing element,
                         ],
                         r_curly_token: R_CURLY@60..62 "}" [Newline("\n")] [],
                     },
@@ -264,7 +263,6 @@ YamlRoot {
                         3: (empty)
                     2: R_CURLY@58..59 "}" [] []
               5: COMMA@59..60 "," [] []
-              6: (empty)
             2: R_CURLY@60..62 "}" [Newline("\n")] []
         2: FLOW_END@62..62 "" [] []
       4: (empty)

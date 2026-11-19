@@ -1,12 +1,65 @@
 use super::*;
 use biome_analyze::{ActionFilter, AnalyzerOptions, Never, RuleCategoriesBuilder, RuleFilter};
+use biome_db::Source;
 use biome_diagnostics::category;
 use biome_diagnostics::{Diagnostic, DiagnosticExt, Severity, print_diagnostic_to_string};
-use biome_js_parser::{JsParserOptions, parse};
-use biome_js_semantic::{SemanticModelOptions, semantic_model};
-use biome_js_syntax::{JsFileSource, TextRange, TextSize};
+use biome_js_parser::{JsParserOptions, Parse, parse};
+use biome_js_syntax::{TextRange, TextSize};
+use biome_languages::{DocumentFileSource, JsFileSource, LanguageDb};
 use biome_package::{Dependencies, PackageJson};
+use biome_parser::AnyParse;
+use biome_parser::db::{ParseDb, ParseHandle, SourceOutput};
+use camino::{Utf8Path, Utf8PathBuf};
+use salsa::Storage;
 use std::slice;
+
+#[salsa::db]
+struct TestDb {
+    parsed: Option<Source>,
+    parse: ParseHandle,
+    storage: Storage<Self>,
+}
+
+/// Returns the parse that the test made of the text, which is the tree the
+/// analyzer analyzes.
+#[salsa::db]
+impl ParseDb for TestDb {
+    fn parse_source(&self, _source: Source) -> SourceOutput {
+        SourceOutput {
+            parse: self.parse.clone(),
+            document_source_index: 0,
+            snippets: Vec::new(),
+        }
+    }
+}
+
+#[salsa::db]
+impl LanguageDb for TestDb {
+    fn source_from_index(&self, _index: usize) -> Option<DocumentFileSource> {
+        Some(DocumentFileSource::Js(JsFileSource::tsx()))
+    }
+}
+
+#[salsa::db]
+impl biome_db::Db for TestDb {
+    fn parsed_source_for_path(&self, _path: &Utf8Path) -> Option<Source> {
+        self.parsed
+    }
+}
+
+#[salsa::db]
+impl salsa::Database for TestDb {}
+
+fn embedded_db(parsed: &Parse<AnyJsRoot>) -> Rc<dyn LanguageDb> {
+    let mut db = TestDb {
+        parsed: None,
+        parse: AnyParse::from(parsed.syntax().as_send().unwrap()).into(),
+        storage: Storage::default(),
+    };
+    let text = parsed.syntax().text_with_trivia().to_string();
+    db.parsed = Some(Source::new(&db, Utf8PathBuf::new(), text.into(), 0));
+    Rc::new(db)
+}
 
 #[ignore]
 #[test]
@@ -20,14 +73,10 @@ fn quick_test() {
     let rule_filter = RuleFilter::Rule("nursery", "useExplicitType");
 
     let dependencies = Dependencies(Box::new([("buffer".into(), "latest".into())]));
-    let semantic_model = semantic_model(&parsed.tree(), SemanticModelOptions::default());
 
-    let services = crate::JsAnalyzerServices::from((
-        Default::default(),
-        project_layout_with_top_level_dependencies(dependencies),
-        JsFileSource::tsx(),
-        Some(semantic_model),
-    ));
+    let services = crate::JsAnalyzerServices::default()
+        .with_source_type(JsFileSource::tsx())
+        .with_project_layout(project_layout_with_top_level_dependencies(dependencies));
 
     crate::analyze(
         &parsed.tree(),
@@ -78,7 +127,8 @@ fn quick_test_suppression() {
         JsFileSource::js_module(),
         JsParserOptions::default(),
     );
-    let services = JsAnalyzerServices::from(&parsed.tree());
+
+    let services = JsAnalyzerServices::from(&parsed.tree()).with_language_db(embedded_db(&parsed));
     let options = AnalyzerOptions::default();
     crate::analyze(
         &parsed.tree(),
@@ -163,7 +213,7 @@ fn suppression() {
 
     let mut lint_ranges: Vec<TextRange> = Vec::new();
     let mut parse_ranges: Vec<TextRange> = Vec::new();
-    let services = JsAnalyzerServices::from(&parsed.tree());
+    let services = JsAnalyzerServices::from(&parsed.tree()).with_language_db(embedded_db(&parsed));
     let options = AnalyzerOptions::default();
     crate::analyze(
         &parsed.tree(),
@@ -241,7 +291,7 @@ fn suppression_syntax() {
         filter,
         &options,
         &[],
-        Default::default(),
+        JsAnalyzerServices::default(),
         |signal| {
             if let Some(diag) = signal.diagnostic() {
                 let code = diag.category().unwrap();
@@ -285,7 +335,7 @@ let bar = 33;
         filter,
         &options,
         &[],
-        Default::default(),
+        JsAnalyzerServices::default(),
         |signal| {
             if let Some(diag) = signal.diagnostic() {
                 let error = diag
@@ -336,7 +386,7 @@ debugger;
         filter,
         &options,
         &[],
-        Default::default(),
+        JsAnalyzerServices::default(),
         |signal| {
             if let Some(diag) = signal.diagnostic() {
                 let error = diag
@@ -382,7 +432,7 @@ debugger;
         filter,
         &options,
         &[],
-        Default::default(),
+        JsAnalyzerServices::default(),
         |signal| {
             if let Some(diag) = signal.diagnostic() {
                 let error = diag
@@ -430,7 +480,7 @@ debugger;
         filter,
         &options,
         &[],
-        Default::default(),
+        JsAnalyzerServices::default(),
         |signal| {
             if let Some(diag) = signal.diagnostic() {
                 let error = diag
@@ -479,7 +529,7 @@ let bar = 33;
         filter,
         &options,
         &[],
-        Default::default(),
+        JsAnalyzerServices::default(),
         |signal| {
             if let Some(diag) = signal.diagnostic() {
                 let code = diag.category().unwrap();
@@ -526,7 +576,7 @@ let bar = 33;
         filter,
         &options,
         &[],
-        Default::default(),
+        JsAnalyzerServices::default(),
         |signal| {
             if let Some(diag) = signal.diagnostic() {
                 let error = diag
@@ -571,7 +621,7 @@ let bar = 33;
         filter,
         &options,
         &[],
-        Default::default(),
+        JsAnalyzerServices::default(),
         |signal| {
             if let Some(diag) = signal.diagnostic() {
                 let error = diag
@@ -619,7 +669,7 @@ let bar = 33;
         filter,
         &options,
         &[],
-        Default::default(),
+        JsAnalyzerServices::default(),
         |signal| {
             if let Some(diag) = signal.diagnostic() {
                 let error = diag
@@ -669,7 +719,7 @@ let c;
         filter,
         &options,
         &[],
-        Default::default(),
+        JsAnalyzerServices::default(),
         |signal| {
             if let Some(diag) = signal.diagnostic() {
                 let code = diag.category().unwrap();
@@ -720,7 +770,7 @@ debugger;
         filter,
         &options,
         &[],
-        Default::default(),
+        JsAnalyzerServices::default(),
         |signal| {
             if let Some(diag) = signal.diagnostic() {
                 has_diagnostics = true;
@@ -772,7 +822,7 @@ let d;
         filter,
         &options,
         &[],
-        Default::default(),
+        JsAnalyzerServices::default(),
         |signal| {
             if let Some(diag) = signal.diagnostic() {
                 let error = diag
@@ -810,14 +860,8 @@ const foo0 = function (bar: string) {
     };
     let options = AnalyzerOptions::default();
     let root = parsed.tree();
-    let semantic_model = semantic_model(&parsed.tree(), SemanticModelOptions::default());
 
-    let services = crate::JsAnalyzerServices::from((
-        Default::default(),
-        Default::default(),
-        JsFileSource::ts(),
-        Some(semantic_model),
-    ));
+    let services = crate::JsAnalyzerServices::default().with_source_type(JsFileSource::ts());
 
     crate::analyze(&root, filter, &options, &[], services, |signal| {
         if let Some(diag) = signal.diagnostic() {
@@ -864,7 +908,7 @@ a == b;
         filter,
         &options,
         &[],
-        Default::default(),
+        JsAnalyzerServices::default(),
         |signal| {
             if let Some(diag) = signal.diagnostic() {
                 has_diagnostics = true;
@@ -904,7 +948,7 @@ var foo = {
         ..AnalysisFilter::default()
     };
 
-    let services = JsAnalyzerServices::from(&parsed.tree());
+    let services = JsAnalyzerServices::from(&parsed.tree()).with_language_db(embedded_db(&parsed));
 
     let options = AnalyzerOptions::default();
     crate::analyze(&parsed.tree(), filter, &options, &[], services, |signal| {
@@ -942,7 +986,7 @@ console.log("should be suppressed");"#;
     };
 
     let options = AnalyzerOptions::default();
-    let services = JsAnalyzerServices::from(&parsed.tree());
+    let services = JsAnalyzerServices::from(&parsed.tree()).with_language_db(embedded_db(&parsed));
     let mut diagnostic_found = false;
     analyze(&parsed.tree(), filter, &options, &[], services, |signal| {
         if let Some(diag) = signal.diagnostic() {
@@ -956,6 +1000,60 @@ console.log("should be suppressed");"#;
     });
 
     assert!(diagnostic_found, "must have diagnostics");
+}
+
+#[test]
+fn line_suppression_follows_line_breaks_in_tokens_and_comments() {
+    const SOURCE: &str = "// biome-ignore lint/suspicious/noDoubleEquals: template spans two lines
+a1 == `
+` + (b1 == c1);
+d1 == e1; // biome-ignore lint/suspicious/noDoubleEquals: trailing comment
+f1 == g1;
+h1 == /* biome-ignore lint/suspicious/noDoubleEquals: comment spans two lines
+*/ i1;
+j1 == k1;
+";
+
+    let parsed = parse(
+        SOURCE,
+        JsFileSource::js_module(),
+        JsParserOptions::default(),
+    );
+
+    let filter = AnalysisFilter {
+        categories: RuleCategoriesBuilder::default().with_lint().build(),
+        enabled_rules: Some(&[RuleFilter::Rule("suspicious", "noDoubleEquals")]),
+        ..AnalysisFilter::default()
+    };
+
+    let mut reported = Vec::new();
+    let options = AnalyzerOptions::default();
+    analyze(
+        &parsed.tree(),
+        filter,
+        &options,
+        &[],
+        JsAnalyzerServices::default(),
+        |signal| {
+            if let Some(diag) = signal.diagnostic() {
+                let code = diag.category().unwrap();
+                if code != category!("lint/suspicious/noDoubleEquals") {
+                    panic!("unexpected diagnostic {code:?}");
+                }
+                let range = diag.get_span().unwrap();
+                reported.push(&SOURCE[..usize::from(range.start())]);
+            }
+
+            ControlFlow::<Never>::Continue(())
+        },
+    );
+
+    // Each comment suppresses the line after the one it ends on, and only that line.
+    let reported: Vec<_> = reported
+        .into_iter()
+        .map(|before| before.rsplit(['\n', '(']).next().unwrap().trim_end())
+        .collect();
+    assert_eq!(reported, ["b1", "d1", "h1"]);
 }
 
 fn project_layout_with_top_level_dependencies(dependencies: Dependencies) -> Arc<ProjectLayout> {

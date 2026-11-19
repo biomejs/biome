@@ -1,0 +1,25 @@
+<!-- should generate diagnostics -->
+<!doctype html>
+<html>
+<head>
+<style>.card { border: 1px solid; } .title { font-weight: bold; }</style>
+<style>.container { max-width: 1200px; } .btn { padding: 8px; }</style>
+</head>
+<body>
+	<!-- .header is not declared in any <style> block -->
+	<div class="card header">Single unknown</div>
+
+	<!-- .header and .footer are undeclared -->
+	<div class="card header title footer">Multi unknown</div>
+
+	<!-- .header, .footer, .unknown are all undeclared -->
+	<div class="header footer unknown">Multi-block unknown</div>
+
+	<!-- .main-content and .unknown-btn are undeclared -->
+	<div class="container">
+		<main class="main-content">
+			<button class="btn unknown-btn">Element types</button>
+		</main>
+	</div>
+</body>
+</html>

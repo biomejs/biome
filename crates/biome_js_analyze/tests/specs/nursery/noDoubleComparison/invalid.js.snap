@@ -1,0 +1,1354 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+x === y || x < y;
+x < y || x === y;
+x === y || x > y;
+x > y || x === y;
+x <= y && x >= y;
+x >= y && x <= y;
+x <= y && x !== y;
+x !== y && x <= y;
+x >= y && x !== y;
+x !== y && x >= y;
+x < y || x > y;
+x > y || x < y;
+undefined === undefined || undefined < undefined;
+undefined <= undefined && undefined >= undefined;
+const symbol = Symbol();
+symbol === symbol || symbol < symbol;
+symbol <= symbol && symbol >= symbol;
+null <= 0 && null !== 0;
+null >= 0 && null !== 0;
+x === y || y < x;
+y < x || x === y;
+x <= y && y <= x;
+a.b === c || c > a.b;
+x === 5 || x < 5;
+x === "a" || x < 'a';
+a.b === c || a.b < c;
+this.x === y || this.x > y;
+a[b] === c || a[b] > c;
+a[0] === c || a[0] > c;
+this.#x === y || this.#x < y;
+a.b === c || a["b"] < c;
+a["b"] === c || a[`b`] > c;
+a[0] === c || a["0"] < c;
+a[1.5] === c || a["1.5"] < c;
+a.b.c === d || a["b"][`c`] < d;
+a[i].b === c || a[i]["b"] < c;
+x === y || x < y || z;
+x < y || x === y || x > y;
+(x === y || x < y).foo;
+if (x === y || x < y) {}
+const result = x >= y && x !== y;
+(x === y) || (x < y);
+(a /* kept */) === c || a < c;
+let regex = /foo/;
+regex === b || regex < b;
+// Variables that refer to each other are followed only once.
+const loopA = loopB, loopB = loopA;
+loopA === c || loopA < c;
+// Escaped and non-decimal property names.
+a["\x62"] === c || a.b < c;
+a[0x1000000000000081] === c || a["1152921504606847200"] < c;
+// Escapes that are compared by their source text.
+x === "\01" || x < "\01";
+a["\1"] === c || a["\1"] < c;
+
+```
+
+# Diagnostics
+```
+invalid.js:2:1 lint/nursery/noDoubleComparison  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These two comparisons can be combined into x <= y.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ x === y || x < y;
+      │ ^^^^^^^^^^^^^^^^
+    3 │ x < y || x === y;
+    4 │ x === y || x > y;
+  
+  i Both comparisons check the same two values, so a single comparison usually means the same thing with less code.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Combine them into a single comparison.
+  
+     1  1 │   /* should generate diagnostics */
+     2    │ - x·===·y·||·x·<·y;
+        2 │ + x·<=·y;
+     3  3 │   x < y || x === y;
+     4  4 │   x === y || x > y;
+  
+
+```
+
+```
+invalid.js:3:1 lint/nursery/noDoubleComparison  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These two comparisons can be combined into x <= y.
+  
+    1 │ /* should generate diagnostics */
+    2 │ x === y || x < y;
+  > 3 │ x < y || x === y;
+      │ ^^^^^^^^^^^^^^^^
+    4 │ x === y || x > y;
+    5 │ x > y || x === y;
+  
+  i Both comparisons check the same two values, so a single comparison usually means the same thing with less code.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Combine them into a single comparison.
+  
+    3 │ x·<·y·||·x·===·y;
+      │    ----------    
+
+```
+
+```
+invalid.js:4:1 lint/nursery/noDoubleComparison  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These two comparisons can be combined into x >= y.
+  
+    2 │ x === y || x < y;
+    3 │ x < y || x === y;
+  > 4 │ x === y || x > y;
+      │ ^^^^^^^^^^^^^^^^
+    5 │ x > y || x === y;
+    6 │ x <= y && x >= y;
+  
+  i Both comparisons check the same two values, so a single comparison usually means the same thing with less code.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Combine them into a single comparison.
+  
+     2  2 │   x === y || x < y;
+     3  3 │   x < y || x === y;
+     4    │ - x·===·y·||·x·>·y;
+        4 │ + x·>=·y;
+     5  5 │   x > y || x === y;
+     6  6 │   x <= y && x >= y;
+  
+
+```
+
+```
+invalid.js:5:1 lint/nursery/noDoubleComparison  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These two comparisons can be combined into x >= y.
+  
+    3 │ x < y || x === y;
+    4 │ x === y || x > y;
+  > 5 │ x > y || x === y;
+      │ ^^^^^^^^^^^^^^^^
+    6 │ x <= y && x >= y;
+    7 │ x >= y && x <= y;
+  
+  i Both comparisons check the same two values, so a single comparison usually means the same thing with less code.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Combine them into a single comparison.
+  
+    5 │ x·>·y·||·x·===·y;
+      │    ----------    
+
+```
+
+```
+invalid.js:6:1 lint/nursery/noDoubleComparison  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These two comparisons can be combined into x === y.
+  
+    4 │ x === y || x > y;
+    5 │ x > y || x === y;
+  > 6 │ x <= y && x >= y;
+      │ ^^^^^^^^^^^^^^^^
+    7 │ x >= y && x <= y;
+    8 │ x <= y && x !== y;
+  
+  i Both comparisons check the same two values, so a single comparison usually means the same thing with less code.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Combine them into a single comparison.
+  
+     4  4 │   x === y || x > y;
+     5  5 │   x > y || x === y;
+     6    │ - x·<=·y·&&·x·>=·y;
+        6 │ + x·===·y;
+     7  7 │   x >= y && x <= y;
+     8  8 │   x <= y && x !== y;
+  
+
+```
+
+```
+invalid.js:7:1 lint/nursery/noDoubleComparison  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These two comparisons can be combined into x === y.
+  
+    5 │ x > y || x === y;
+    6 │ x <= y && x >= y;
+  > 7 │ x >= y && x <= y;
+      │ ^^^^^^^^^^^^^^^^
+    8 │ x <= y && x !== y;
+    9 │ x !== y && x <= y;
+  
+  i Both comparisons check the same two values, so a single comparison usually means the same thing with less code.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Combine them into a single comparison.
+  
+     5  5 │   x > y || x === y;
+     6  6 │   x <= y && x >= y;
+     7    │ - x·>=·y·&&·x·<=·y;
+        7 │ + x·===·y;
+     8  8 │   x <= y && x !== y;
+     9  9 │   x !== y && x <= y;
+  
+
+```
+
+```
+invalid.js:8:1 lint/nursery/noDoubleComparison  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These two comparisons can be combined into x < y.
+  
+     6 │ x <= y && x >= y;
+     7 │ x >= y && x <= y;
+   > 8 │ x <= y && x !== y;
+       │ ^^^^^^^^^^^^^^^^^
+     9 │ x !== y && x <= y;
+    10 │ x >= y && x !== y;
+  
+  i Both comparisons check the same two values, so a single comparison usually means the same thing with less code.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Combine them into a single comparison.
+  
+    8 │ x·<=·y·&&·x·!==·y;
+      │    ------------   
+
+```
+
+```
+invalid.js:9:1 lint/nursery/noDoubleComparison  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These two comparisons can be combined into x < y.
+  
+     7 │ x >= y && x <= y;
+     8 │ x <= y && x !== y;
+   > 9 │ x !== y && x <= y;
+       │ ^^^^^^^^^^^^^^^^^
+    10 │ x >= y && x !== y;
+    11 │ x !== y && x >= y;
+  
+  i Both comparisons check the same two values, so a single comparison usually means the same thing with less code.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Combine them into a single comparison.
+  
+    9 │ x·!==·y·&&·x·<=·y;
+      │   ----------- -   
+
+```
+
+```
+invalid.js:10:1 lint/nursery/noDoubleComparison  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These two comparisons can be combined into x > y.
+  
+     8 │ x <= y && x !== y;
+     9 │ x !== y && x <= y;
+  > 10 │ x >= y && x !== y;
+       │ ^^^^^^^^^^^^^^^^^
+    11 │ x !== y && x >= y;
+    12 │ x < y || x > y;
+  
+  i Both comparisons check the same two values, so a single comparison usually means the same thing with less code.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Combine them into a single comparison.
+  
+    10 │ x·>=·y·&&·x·!==·y;
+       │    ------------   
+
+```
+
+```
+invalid.js:11:1 lint/nursery/noDoubleComparison  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These two comparisons can be combined into x > y.
+  
+     9 │ x !== y && x <= y;
+    10 │ x >= y && x !== y;
+  > 11 │ x !== y && x >= y;
+       │ ^^^^^^^^^^^^^^^^^
+    12 │ x < y || x > y;
+    13 │ x > y || x < y;
+  
+  i Both comparisons check the same two values, so a single comparison usually means the same thing with less code.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Combine them into a single comparison.
+  
+    11 │ x·!==·y·&&·x·>=·y;
+       │   ----------- -   
+
+```
+
+```
+invalid.js:12:1 lint/nursery/noDoubleComparison  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These two comparisons can be combined into x !== y.
+  
+    10 │ x >= y && x !== y;
+    11 │ x !== y && x >= y;
+  > 12 │ x < y || x > y;
+       │ ^^^^^^^^^^^^^^
+    13 │ x > y || x < y;
+    14 │ undefined === undefined || undefined < undefined;
+  
+  i Both comparisons check the same two values, so a single comparison usually means the same thing with less code.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Combine them into a single comparison.
+  
+    10 10 │   x >= y && x !== y;
+    11 11 │   x !== y && x >= y;
+    12    │ - x·<·y·||·x·>·y;
+       12 │ + x·!==·y;
+    13 13 │   x > y || x < y;
+    14 14 │   undefined === undefined || undefined < undefined;
+  
+
+```
+
+```
+invalid.js:13:1 lint/nursery/noDoubleComparison  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These two comparisons can be combined into x !== y.
+  
+    11 │ x !== y && x >= y;
+    12 │ x < y || x > y;
+  > 13 │ x > y || x < y;
+       │ ^^^^^^^^^^^^^^
+    14 │ undefined === undefined || undefined < undefined;
+    15 │ undefined <= undefined && undefined >= undefined;
+  
+  i Both comparisons check the same two values, so a single comparison usually means the same thing with less code.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Combine them into a single comparison.
+  
+    11 11 │   x !== y && x >= y;
+    12 12 │   x < y || x > y;
+    13    │ - x·>·y·||·x·<·y;
+       13 │ + x·!==·y;
+    14 14 │   undefined === undefined || undefined < undefined;
+    15 15 │   undefined <= undefined && undefined >= undefined;
+  
+
+```
+
+```
+invalid.js:14:1 lint/nursery/noDoubleComparison  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These two comparisons can be combined into undefined <= undefined.
+  
+    12 │ x < y || x > y;
+    13 │ x > y || x < y;
+  > 14 │ undefined === undefined || undefined < undefined;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    15 │ undefined <= undefined && undefined >= undefined;
+    16 │ const symbol = Symbol();
+  
+  i Both comparisons check the same two values, so a single comparison usually means the same thing with less code.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Combine them into a single comparison.
+  
+    12 12 │   x < y || x > y;
+    13 13 │   x > y || x < y;
+    14    │ - undefined·===·undefined·||·undefined·<·undefined;
+       14 │ + undefined·<=·undefined;
+    15 15 │   undefined <= undefined && undefined >= undefined;
+    16 16 │   const symbol = Symbol();
+  
+
+```
+
+```
+invalid.js:15:1 lint/nursery/noDoubleComparison  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These two comparisons can be combined into undefined === undefined.
+  
+    13 │ x > y || x < y;
+    14 │ undefined === undefined || undefined < undefined;
+  > 15 │ undefined <= undefined && undefined >= undefined;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    16 │ const symbol = Symbol();
+    17 │ symbol === symbol || symbol < symbol;
+  
+  i Both comparisons check the same two values, so a single comparison usually means the same thing with less code.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Combine them into a single comparison.
+  
+    13 13 │   x > y || x < y;
+    14 14 │   undefined === undefined || undefined < undefined;
+    15    │ - undefined·<=·undefined·&&·undefined·>=·undefined;
+       15 │ + undefined·===·undefined;
+    16 16 │   const symbol = Symbol();
+    17 17 │   symbol === symbol || symbol < symbol;
+  
+
+```
+
+```
+invalid.js:17:1 lint/nursery/noDoubleComparison  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These two comparisons can be combined into symbol <= symbol.
+  
+    15 │ undefined <= undefined && undefined >= undefined;
+    16 │ const symbol = Symbol();
+  > 17 │ symbol === symbol || symbol < symbol;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    18 │ symbol <= symbol && symbol >= symbol;
+    19 │ null <= 0 && null !== 0;
+  
+  i Both comparisons check the same two values, so a single comparison usually means the same thing with less code.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Combine them into a single comparison.
+  
+    15 15 │   undefined <= undefined && undefined >= undefined;
+    16 16 │   const symbol = Symbol();
+    17    │ - symbol·===·symbol·||·symbol·<·symbol;
+       17 │ + symbol·<=·symbol;
+    18 18 │   symbol <= symbol && symbol >= symbol;
+    19 19 │   null <= 0 && null !== 0;
+  
+
+```
+
+```
+invalid.js:18:1 lint/nursery/noDoubleComparison  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These two comparisons can be combined into symbol === symbol.
+  
+    16 │ const symbol = Symbol();
+    17 │ symbol === symbol || symbol < symbol;
+  > 18 │ symbol <= symbol && symbol >= symbol;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    19 │ null <= 0 && null !== 0;
+    20 │ null >= 0 && null !== 0;
+  
+  i Both comparisons check the same two values, so a single comparison usually means the same thing with less code.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Combine them into a single comparison.
+  
+    16 16 │   const symbol = Symbol();
+    17 17 │   symbol === symbol || symbol < symbol;
+    18    │ - symbol·<=·symbol·&&·symbol·>=·symbol;
+       18 │ + symbol·===·symbol;
+    19 19 │   null <= 0 && null !== 0;
+    20 20 │   null >= 0 && null !== 0;
+  
+
+```
+
+```
+invalid.js:19:1 lint/nursery/noDoubleComparison  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These two comparisons can be combined into null < 0.
+  
+    17 │ symbol === symbol || symbol < symbol;
+    18 │ symbol <= symbol && symbol >= symbol;
+  > 19 │ null <= 0 && null !== 0;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^
+    20 │ null >= 0 && null !== 0;
+    21 │ x === y || y < x;
+  
+  i Both comparisons check the same two values, so a single comparison usually means the same thing with less code.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Combine them into a single comparison.
+  
+    19 │ null·<=·0·&&·null·!==·0;
+       │       ---------------   
+
+```
+
+```
+invalid.js:20:1 lint/nursery/noDoubleComparison  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These two comparisons can be combined into null > 0.
+  
+    18 │ symbol <= symbol && symbol >= symbol;
+    19 │ null <= 0 && null !== 0;
+  > 20 │ null >= 0 && null !== 0;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^
+    21 │ x === y || y < x;
+    22 │ y < x || x === y;
+  
+  i Both comparisons check the same two values, so a single comparison usually means the same thing with less code.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Combine them into a single comparison.
+  
+    20 │ null·>=·0·&&·null·!==·0;
+       │       ---------------   
+
+```
+
+```
+invalid.js:21:1 lint/nursery/noDoubleComparison  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These two comparisons can be combined into x >= y.
+  
+    19 │ null <= 0 && null !== 0;
+    20 │ null >= 0 && null !== 0;
+  > 21 │ x === y || y < x;
+       │ ^^^^^^^^^^^^^^^^
+    22 │ y < x || x === y;
+    23 │ x <= y && y <= x;
+  
+  i Both comparisons check the same two values, so a single comparison usually means the same thing with less code.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Combine them into a single comparison.
+  
+    19 19 │   null <= 0 && null !== 0;
+    20 20 │   null >= 0 && null !== 0;
+    21    │ - x·===·y·||·y·<·x;
+       21 │ + x·>=·y;
+    22 22 │   y < x || x === y;
+    23 23 │   x <= y && y <= x;
+  
+
+```
+
+```
+invalid.js:22:1 lint/nursery/noDoubleComparison  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These two comparisons can be combined into y <= x.
+  
+    20 │ null >= 0 && null !== 0;
+    21 │ x === y || y < x;
+  > 22 │ y < x || x === y;
+       │ ^^^^^^^^^^^^^^^^
+    23 │ x <= y && y <= x;
+    24 │ a.b === c || c > a.b;
+  
+  i Both comparisons check the same two values, so a single comparison usually means the same thing with less code.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Combine them into a single comparison.
+  
+    20 20 │   null >= 0 && null !== 0;
+    21 21 │   x === y || y < x;
+    22    │ - y·<·x·||·x·===·y;
+       22 │ + y·<=·x;
+    23 23 │   x <= y && y <= x;
+    24 24 │   a.b === c || c > a.b;
+  
+
+```
+
+```
+invalid.js:23:1 lint/nursery/noDoubleComparison  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These two comparisons can be combined into x === y.
+  
+    21 │ x === y || y < x;
+    22 │ y < x || x === y;
+  > 23 │ x <= y && y <= x;
+       │ ^^^^^^^^^^^^^^^^
+    24 │ a.b === c || c > a.b;
+    25 │ x === 5 || x < 5;
+  
+  i Both comparisons check the same two values, so a single comparison usually means the same thing with less code.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Combine them into a single comparison.
+  
+    21 21 │   x === y || y < x;
+    22 22 │   y < x || x === y;
+    23    │ - x·<=·y·&&·y·<=·x;
+       23 │ + x·===·y;
+    24 24 │   a.b === c || c > a.b;
+    25 25 │   x === 5 || x < 5;
+  
+
+```
+
+```
+invalid.js:24:1 lint/nursery/noDoubleComparison  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These two comparisons can be combined into a.b <= c.
+  
+    22 │ y < x || x === y;
+    23 │ x <= y && y <= x;
+  > 24 │ a.b === c || c > a.b;
+       │ ^^^^^^^^^^^^^^^^^^^^
+    25 │ x === 5 || x < 5;
+    26 │ x === "a" || x < 'a';
+  
+  i Both comparisons check the same two values, so a single comparison usually means the same thing with less code.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Combine them into a single comparison.
+  
+    22 22 │   y < x || x === y;
+    23 23 │   x <= y && y <= x;
+    24    │ - a.b·===·c·||·c·>·a.b;
+       24 │ + a.b·<=·c;
+    25 25 │   x === 5 || x < 5;
+    26 26 │   x === "a" || x < 'a';
+  
+
+```
+
+```
+invalid.js:25:1 lint/nursery/noDoubleComparison  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These two comparisons can be combined into x <= 5.
+  
+    23 │ x <= y && y <= x;
+    24 │ a.b === c || c > a.b;
+  > 25 │ x === 5 || x < 5;
+       │ ^^^^^^^^^^^^^^^^
+    26 │ x === "a" || x < 'a';
+    27 │ a.b === c || a.b < c;
+  
+  i Both comparisons check the same two values, so a single comparison usually means the same thing with less code.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Combine them into a single comparison.
+  
+    23 23 │   x <= y && y <= x;
+    24 24 │   a.b === c || c > a.b;
+    25    │ - x·===·5·||·x·<·5;
+       25 │ + x·<=·5;
+    26 26 │   x === "a" || x < 'a';
+    27 27 │   a.b === c || a.b < c;
+  
+
+```
+
+```
+invalid.js:26:1 lint/nursery/noDoubleComparison  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These two comparisons can be combined into x <= "a".
+  
+    24 │ a.b === c || c > a.b;
+    25 │ x === 5 || x < 5;
+  > 26 │ x === "a" || x < 'a';
+       │ ^^^^^^^^^^^^^^^^^^^^
+    27 │ a.b === c || a.b < c;
+    28 │ this.x === y || this.x > y;
+  
+  i Both comparisons check the same two values, so a single comparison usually means the same thing with less code.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Combine them into a single comparison.
+  
+    24 24 │   a.b === c || c > a.b;
+    25 25 │   x === 5 || x < 5;
+    26    │ - x·===·"a"·||·x·<·'a';
+       26 │ + x·<=·"a";
+    27 27 │   a.b === c || a.b < c;
+    28 28 │   this.x === y || this.x > y;
+  
+
+```
+
+```
+invalid.js:27:1 lint/nursery/noDoubleComparison  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These two comparisons can be combined into a.b <= c.
+  
+    25 │ x === 5 || x < 5;
+    26 │ x === "a" || x < 'a';
+  > 27 │ a.b === c || a.b < c;
+       │ ^^^^^^^^^^^^^^^^^^^^
+    28 │ this.x === y || this.x > y;
+    29 │ a[b] === c || a[b] > c;
+  
+  i Both comparisons check the same two values, so a single comparison usually means the same thing with less code.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Combine them into a single comparison.
+  
+    25 25 │   x === 5 || x < 5;
+    26 26 │   x === "a" || x < 'a';
+    27    │ - a.b·===·c·||·a.b·<·c;
+       27 │ + a.b·<=·c;
+    28 28 │   this.x === y || this.x > y;
+    29 29 │   a[b] === c || a[b] > c;
+  
+
+```
+
+```
+invalid.js:28:1 lint/nursery/noDoubleComparison  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These two comparisons can be combined into this.x >= y.
+  
+    26 │ x === "a" || x < 'a';
+    27 │ a.b === c || a.b < c;
+  > 28 │ this.x === y || this.x > y;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    29 │ a[b] === c || a[b] > c;
+    30 │ a[0] === c || a[0] > c;
+  
+  i Both comparisons check the same two values, so a single comparison usually means the same thing with less code.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Combine them into a single comparison.
+  
+    26 26 │   x === "a" || x < 'a';
+    27 27 │   a.b === c || a.b < c;
+    28    │ - this.x·===·y·||·this.x·>·y;
+       28 │ + this.x·>=·y;
+    29 29 │   a[b] === c || a[b] > c;
+    30 30 │   a[0] === c || a[0] > c;
+  
+
+```
+
+```
+invalid.js:29:1 lint/nursery/noDoubleComparison  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These two comparisons can be combined into a[b] >= c.
+  
+    27 │ a.b === c || a.b < c;
+    28 │ this.x === y || this.x > y;
+  > 29 │ a[b] === c || a[b] > c;
+       │ ^^^^^^^^^^^^^^^^^^^^^^
+    30 │ a[0] === c || a[0] > c;
+    31 │ this.#x === y || this.#x < y;
+  
+  i Both comparisons check the same two values, so a single comparison usually means the same thing with less code.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Combine them into a single comparison.
+  
+    27 27 │   a.b === c || a.b < c;
+    28 28 │   this.x === y || this.x > y;
+    29    │ - a[b]·===·c·||·a[b]·>·c;
+       29 │ + a[b]·>=·c;
+    30 30 │   a[0] === c || a[0] > c;
+    31 31 │   this.#x === y || this.#x < y;
+  
+
+```
+
+```
+invalid.js:30:1 lint/nursery/noDoubleComparison  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These two comparisons can be combined into a[0] >= c.
+  
+    28 │ this.x === y || this.x > y;
+    29 │ a[b] === c || a[b] > c;
+  > 30 │ a[0] === c || a[0] > c;
+       │ ^^^^^^^^^^^^^^^^^^^^^^
+    31 │ this.#x === y || this.#x < y;
+    32 │ a.b === c || a["b"] < c;
+  
+  i Both comparisons check the same two values, so a single comparison usually means the same thing with less code.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Combine them into a single comparison.
+  
+    28 28 │   this.x === y || this.x > y;
+    29 29 │   a[b] === c || a[b] > c;
+    30    │ - a[0]·===·c·||·a[0]·>·c;
+       30 │ + a[0]·>=·c;
+    31 31 │   this.#x === y || this.#x < y;
+    32 32 │   a.b === c || a["b"] < c;
+  
+
+```
+
+```
+invalid.js:31:1 lint/nursery/noDoubleComparison  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These two comparisons can be combined into this.#x <= y.
+  
+    29 │ a[b] === c || a[b] > c;
+    30 │ a[0] === c || a[0] > c;
+  > 31 │ this.#x === y || this.#x < y;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    32 │ a.b === c || a["b"] < c;
+    33 │ a["b"] === c || a[`b`] > c;
+  
+  i Both comparisons check the same two values, so a single comparison usually means the same thing with less code.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Combine them into a single comparison.
+  
+    29 29 │   a[b] === c || a[b] > c;
+    30 30 │   a[0] === c || a[0] > c;
+    31    │ - this.#x·===·y·||·this.#x·<·y;
+       31 │ + this.#x·<=·y;
+    32 32 │   a.b === c || a["b"] < c;
+    33 33 │   a["b"] === c || a[`b`] > c;
+  
+
+```
+
+```
+invalid.js:32:1 lint/nursery/noDoubleComparison  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These two comparisons can be combined into a.b <= c.
+  
+    30 │ a[0] === c || a[0] > c;
+    31 │ this.#x === y || this.#x < y;
+  > 32 │ a.b === c || a["b"] < c;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^
+    33 │ a["b"] === c || a[`b`] > c;
+    34 │ a[0] === c || a["0"] < c;
+  
+  i Both comparisons check the same two values, so a single comparison usually means the same thing with less code.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Combine them into a single comparison.
+  
+    30 30 │   a[0] === c || a[0] > c;
+    31 31 │   this.#x === y || this.#x < y;
+    32    │ - a.b·===·c·||·a["b"]·<·c;
+       32 │ + a.b·<=·c;
+    33 33 │   a["b"] === c || a[`b`] > c;
+    34 34 │   a[0] === c || a["0"] < c;
+  
+
+```
+
+```
+invalid.js:33:1 lint/nursery/noDoubleComparison  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These two comparisons can be combined into a["b"] >= c.
+  
+    31 │ this.#x === y || this.#x < y;
+    32 │ a.b === c || a["b"] < c;
+  > 33 │ a["b"] === c || a[`b`] > c;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    34 │ a[0] === c || a["0"] < c;
+    35 │ a[1.5] === c || a["1.5"] < c;
+  
+  i Both comparisons check the same two values, so a single comparison usually means the same thing with less code.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Combine them into a single comparison.
+  
+    31 31 │   this.#x === y || this.#x < y;
+    32 32 │   a.b === c || a["b"] < c;
+    33    │ - a["b"]·===·c·||·a[`b`]·>·c;
+       33 │ + a["b"]·>=·c;
+    34 34 │   a[0] === c || a["0"] < c;
+    35 35 │   a[1.5] === c || a["1.5"] < c;
+  
+
+```
+
+```
+invalid.js:34:1 lint/nursery/noDoubleComparison  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These two comparisons can be combined into a[0] <= c.
+  
+    32 │ a.b === c || a["b"] < c;
+    33 │ a["b"] === c || a[`b`] > c;
+  > 34 │ a[0] === c || a["0"] < c;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^
+    35 │ a[1.5] === c || a["1.5"] < c;
+    36 │ a.b.c === d || a["b"][`c`] < d;
+  
+  i Both comparisons check the same two values, so a single comparison usually means the same thing with less code.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Combine them into a single comparison.
+  
+    32 32 │   a.b === c || a["b"] < c;
+    33 33 │   a["b"] === c || a[`b`] > c;
+    34    │ - a[0]·===·c·||·a["0"]·<·c;
+       34 │ + a[0]·<=·c;
+    35 35 │   a[1.5] === c || a["1.5"] < c;
+    36 36 │   a.b.c === d || a["b"][`c`] < d;
+  
+
+```
+
+```
+invalid.js:35:1 lint/nursery/noDoubleComparison  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These two comparisons can be combined into a[1.5] <= c.
+  
+    33 │ a["b"] === c || a[`b`] > c;
+    34 │ a[0] === c || a["0"] < c;
+  > 35 │ a[1.5] === c || a["1.5"] < c;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    36 │ a.b.c === d || a["b"][`c`] < d;
+    37 │ a[i].b === c || a[i]["b"] < c;
+  
+  i Both comparisons check the same two values, so a single comparison usually means the same thing with less code.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Combine them into a single comparison.
+  
+    33 33 │   a["b"] === c || a[`b`] > c;
+    34 34 │   a[0] === c || a["0"] < c;
+    35    │ - a[1.5]·===·c·||·a["1.5"]·<·c;
+       35 │ + a[1.5]·<=·c;
+    36 36 │   a.b.c === d || a["b"][`c`] < d;
+    37 37 │   a[i].b === c || a[i]["b"] < c;
+  
+
+```
+
+```
+invalid.js:36:1 lint/nursery/noDoubleComparison  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These two comparisons can be combined into a.b.c <= d.
+  
+    34 │ a[0] === c || a["0"] < c;
+    35 │ a[1.5] === c || a["1.5"] < c;
+  > 36 │ a.b.c === d || a["b"][`c`] < d;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    37 │ a[i].b === c || a[i]["b"] < c;
+    38 │ x === y || x < y || z;
+  
+  i Both comparisons check the same two values, so a single comparison usually means the same thing with less code.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Combine them into a single comparison.
+  
+    34 34 │   a[0] === c || a["0"] < c;
+    35 35 │   a[1.5] === c || a["1.5"] < c;
+    36    │ - a.b.c·===·d·||·a["b"][`c`]·<·d;
+       36 │ + a.b.c·<=·d;
+    37 37 │   a[i].b === c || a[i]["b"] < c;
+    38 38 │   x === y || x < y || z;
+  
+
+```
+
+```
+invalid.js:37:1 lint/nursery/noDoubleComparison  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These two comparisons can be combined into a[i].b <= c.
+  
+    35 │ a[1.5] === c || a["1.5"] < c;
+    36 │ a.b.c === d || a["b"][`c`] < d;
+  > 37 │ a[i].b === c || a[i]["b"] < c;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    38 │ x === y || x < y || z;
+    39 │ x < y || x === y || x > y;
+  
+  i Both comparisons check the same two values, so a single comparison usually means the same thing with less code.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Combine them into a single comparison.
+  
+    35 35 │   a[1.5] === c || a["1.5"] < c;
+    36 36 │   a.b.c === d || a["b"][`c`] < d;
+    37    │ - a[i].b·===·c·||·a[i]["b"]·<·c;
+       37 │ + a[i].b·<=·c;
+    38 38 │   x === y || x < y || z;
+    39 39 │   x < y || x === y || x > y;
+  
+
+```
+
+```
+invalid.js:38:1 lint/nursery/noDoubleComparison  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These two comparisons can be combined into x <= y.
+  
+    36 │ a.b.c === d || a["b"][`c`] < d;
+    37 │ a[i].b === c || a[i]["b"] < c;
+  > 38 │ x === y || x < y || z;
+       │ ^^^^^^^^^^^^^^^^
+    39 │ x < y || x === y || x > y;
+    40 │ (x === y || x < y).foo;
+  
+  i Both comparisons check the same two values, so a single comparison usually means the same thing with less code.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Combine them into a single comparison.
+  
+    36 36 │   a.b.c === d || a["b"][`c`] < d;
+    37 37 │   a[i].b === c || a[i]["b"] < c;
+    38    │ - x·===·y·||·x·<·y·||·z;
+       38 │ + x·<=·y·||·z;
+    39 39 │   x < y || x === y || x > y;
+    40 40 │   (x === y || x < y).foo;
+  
+
+```
+
+```
+invalid.js:39:1 lint/nursery/noDoubleComparison  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These two comparisons can be combined into x <= y.
+  
+    37 │ a[i].b === c || a[i]["b"] < c;
+    38 │ x === y || x < y || z;
+  > 39 │ x < y || x === y || x > y;
+       │ ^^^^^^^^^^^^^^^^
+    40 │ (x === y || x < y).foo;
+    41 │ if (x === y || x < y) {}
+  
+  i Both comparisons check the same two values, so a single comparison usually means the same thing with less code.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Combine them into a single comparison.
+  
+    39 │ x·<·y·||·x·===·y·||·x·>·y;
+       │    ----------             
+
+```
+
+```
+invalid.js:40:2 lint/nursery/noDoubleComparison  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These two comparisons can be combined into x <= y.
+  
+    38 │ x === y || x < y || z;
+    39 │ x < y || x === y || x > y;
+  > 40 │ (x === y || x < y).foo;
+       │  ^^^^^^^^^^^^^^^^
+    41 │ if (x === y || x < y) {}
+    42 │ const result = x >= y && x !== y;
+  
+  i Both comparisons check the same two values, so a single comparison usually means the same thing with less code.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Combine them into a single comparison.
+  
+    38 38 │   x === y || x < y || z;
+    39 39 │   x < y || x === y || x > y;
+    40    │ - (x·===·y·||·x·<·y).foo;
+       40 │ + (x·<=·y).foo;
+    41 41 │   if (x === y || x < y) {}
+    42 42 │   const result = x >= y && x !== y;
+  
+
+```
+
+```
+invalid.js:41:5 lint/nursery/noDoubleComparison  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These two comparisons can be combined into x <= y.
+  
+    39 │ x < y || x === y || x > y;
+    40 │ (x === y || x < y).foo;
+  > 41 │ if (x === y || x < y) {}
+       │     ^^^^^^^^^^^^^^^^
+    42 │ const result = x >= y && x !== y;
+    43 │ (x === y) || (x < y);
+  
+  i Both comparisons check the same two values, so a single comparison usually means the same thing with less code.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Combine them into a single comparison.
+  
+    39 39 │   x < y || x === y || x > y;
+    40 40 │   (x === y || x < y).foo;
+    41    │ - if·(x·===·y·||·x·<·y)·{}
+       41 │ + if·(x·<=·y)·{}
+    42 42 │   const result = x >= y && x !== y;
+    43 43 │   (x === y) || (x < y);
+  
+
+```
+
+```
+invalid.js:42:16 lint/nursery/noDoubleComparison  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These two comparisons can be combined into x > y.
+  
+    40 │ (x === y || x < y).foo;
+    41 │ if (x === y || x < y) {}
+  > 42 │ const result = x >= y && x !== y;
+       │                ^^^^^^^^^^^^^^^^^
+    43 │ (x === y) || (x < y);
+    44 │ (a /* kept */) === c || a < c;
+  
+  i Both comparisons check the same two values, so a single comparison usually means the same thing with less code.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Combine them into a single comparison.
+  
+    42 │ const·result·=·x·>=·y·&&·x·!==·y;
+       │                   ------------   
+
+```
+
+```
+invalid.js:43:1 lint/nursery/noDoubleComparison  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These two comparisons can be combined into x <= y.
+  
+    41 │ if (x === y || x < y) {}
+    42 │ const result = x >= y && x !== y;
+  > 43 │ (x === y) || (x < y);
+       │ ^^^^^^^^^^^^^^^^^^^^
+    44 │ (a /* kept */) === c || a < c;
+    45 │ let regex = /foo/;
+  
+  i Both comparisons check the same two values, so a single comparison usually means the same thing with less code.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Combine them into a single comparison.
+  
+    41 41 │   if (x === y || x < y) {}
+    42 42 │   const result = x >= y && x !== y;
+    43    │ - (x·===·y)·||·(x·<·y);
+       43 │ + x·<=·y;
+    44 44 │   (a /* kept */) === c || a < c;
+    45 45 │   let regex = /foo/;
+  
+
+```
+
+```
+invalid.js:44:1 lint/nursery/noDoubleComparison  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These two comparisons can be combined into (a /* kept */) <= c.
+  
+    42 │ const result = x >= y && x !== y;
+    43 │ (x === y) || (x < y);
+  > 44 │ (a /* kept */) === c || a < c;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    45 │ let regex = /foo/;
+    46 │ regex === b || regex < b;
+  
+  i Both comparisons check the same two values, so a single comparison usually means the same thing with less code.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Combine them into a single comparison.
+  
+    42 42 │   const result = x >= y && x !== y;
+    43 43 │   (x === y) || (x < y);
+    44    │ - (a·/*·kept·*/)·===·c·||·a·<·c;
+       44 │ + (a·/*·kept·*/)·<=·c;
+    45 45 │   let regex = /foo/;
+    46 46 │   regex === b || regex < b;
+  
+
+```
+
+```
+invalid.js:46:1 lint/nursery/noDoubleComparison  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These two comparisons can be combined into regex <= b.
+  
+    44 │ (a /* kept */) === c || a < c;
+    45 │ let regex = /foo/;
+  > 46 │ regex === b || regex < b;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^
+    47 │ // Variables that refer to each other are followed only once.
+    48 │ const loopA = loopB, loopB = loopA;
+  
+  i Both comparisons check the same two values, so a single comparison usually means the same thing with less code.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Combine them into a single comparison.
+  
+    44 44 │   (a /* kept */) === c || a < c;
+    45 45 │   let regex = /foo/;
+    46    │ - regex·===·b·||·regex·<·b;
+       46 │ + regex·<=·b;
+    47 47 │   // Variables that refer to each other are followed only once.
+    48 48 │   const loopA = loopB, loopB = loopA;
+  
+
+```
+
+```
+invalid.js:49:1 lint/nursery/noDoubleComparison  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These two comparisons can be combined into loopA <= c.
+  
+    47 │ // Variables that refer to each other are followed only once.
+    48 │ const loopA = loopB, loopB = loopA;
+  > 49 │ loopA === c || loopA < c;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^
+    50 │ // Escaped and non-decimal property names.
+    51 │ a["\x62"] === c || a.b < c;
+  
+  i Both comparisons check the same two values, so a single comparison usually means the same thing with less code.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Combine them into a single comparison.
+  
+    47 47 │   // Variables that refer to each other are followed only once.
+    48 48 │   const loopA = loopB, loopB = loopA;
+    49    │ - loopA·===·c·||·loopA·<·c;
+       49 │ + loopA·<=·c;
+    50 50 │   // Escaped and non-decimal property names.
+    51 51 │   a["\x62"] === c || a.b < c;
+  
+
+```
+
+```
+invalid.js:51:1 lint/nursery/noDoubleComparison  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These two comparisons can be combined into a["\x62"] <= c.
+  
+    49 │ loopA === c || loopA < c;
+    50 │ // Escaped and non-decimal property names.
+  > 51 │ a["\x62"] === c || a.b < c;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    52 │ a[0x1000000000000081] === c || a["1152921504606847200"] < c;
+    53 │ // Escapes that are compared by their source text.
+  
+  i Both comparisons check the same two values, so a single comparison usually means the same thing with less code.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Combine them into a single comparison.
+  
+    49 49 │   loopA === c || loopA < c;
+    50 50 │   // Escaped and non-decimal property names.
+    51    │ - a["\x62"]·===·c·||·a.b·<·c;
+       51 │ + a["\x62"]·<=·c;
+    52 52 │   a[0x1000000000000081] === c || a["1152921504606847200"] < c;
+    53 53 │   // Escapes that are compared by their source text.
+  
+
+```
+
+```
+invalid.js:52:1 lint/nursery/noDoubleComparison  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These two comparisons can be combined into a[0x1000000000000081] <= c.
+  
+    50 │ // Escaped and non-decimal property names.
+    51 │ a["\x62"] === c || a.b < c;
+  > 52 │ a[0x1000000000000081] === c || a["1152921504606847200"] < c;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    53 │ // Escapes that are compared by their source text.
+    54 │ x === "\01" || x < "\01";
+  
+  i Both comparisons check the same two values, so a single comparison usually means the same thing with less code.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Combine them into a single comparison.
+  
+    50 50 │   // Escaped and non-decimal property names.
+    51 51 │   a["\x62"] === c || a.b < c;
+    52    │ - a[0x1000000000000081]·===·c·||·a["1152921504606847200"]·<·c;
+       52 │ + a[0x1000000000000081]·<=·c;
+    53 53 │   // Escapes that are compared by their source text.
+    54 54 │   x === "\01" || x < "\01";
+  
+
+```
+
+```
+invalid.js:54:1 lint/nursery/noDoubleComparison  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These two comparisons can be combined into x <= "\01".
+  
+    52 │ a[0x1000000000000081] === c || a["1152921504606847200"] < c;
+    53 │ // Escapes that are compared by their source text.
+  > 54 │ x === "\01" || x < "\01";
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^
+    55 │ a["\1"] === c || a["\1"] < c;
+    56 │ 
+  
+  i Both comparisons check the same two values, so a single comparison usually means the same thing with less code.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Combine them into a single comparison.
+  
+    52 52 │   a[0x1000000000000081] === c || a["1152921504606847200"] < c;
+    53 53 │   // Escapes that are compared by their source text.
+    54    │ - x·===·"\01"·||·x·<·"\01";
+       54 │ + x·<=·"\01";
+    55 55 │   a["\1"] === c || a["\1"] < c;
+    56 56 │   
+  
+
+```
+
+```
+invalid.js:55:1 lint/nursery/noDoubleComparison  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These two comparisons can be combined into a["\1"] <= c.
+  
+    53 │ // Escapes that are compared by their source text.
+    54 │ x === "\01" || x < "\01";
+  > 55 │ a["\1"] === c || a["\1"] < c;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    56 │ 
+  
+  i Both comparisons check the same two values, so a single comparison usually means the same thing with less code.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Combine them into a single comparison.
+  
+    53 53 │   // Escapes that are compared by their source text.
+    54 54 │   x === "\01" || x < "\01";
+    55    │ - a["\1"]·===·c·||·a["\1"]·<·c;
+       55 │ + a["\1"]·<=·c;
+    56 56 │   
+  
+
+```

@@ -1,13 +1,10 @@
-mod quotes;
-mod raw_interpolation;
-
-use self::raw_interpolation::FormatRawScssStringInterpolation;
 use crate::prelude::*;
+use crate::utils::scss_interpolated_string::{
+    FormatRawScssStringInterpolation, ScssInterpolatedStringQuotes,
+};
 use biome_css_syntax::{
     AnyScssInterpolatedStringPart, ScssInterpolatedString, ScssInterpolatedStringFields,
 };
-
-pub(crate) use self::quotes::ScssInterpolatedStringQuotes;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatScssInterpolatedString;

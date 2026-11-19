@@ -1,0 +1,16 @@
+.selector {
+    composes: classNameA classNameB from "./globals.css",
+              classNameC from "./typography.css";
+}
+
+.selector2 {
+    composes: foo from "./a.css", bar from "./b.css";
+}
+
+.selector3 {
+    composes: classA classB, classC from global;
+}
+
+.selector4 {
+    composes: a, b, c;
+}

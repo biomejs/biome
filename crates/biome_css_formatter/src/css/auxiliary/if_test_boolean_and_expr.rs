@@ -18,7 +18,7 @@ impl FormatNodeRule<CssIfTestBooleanAndExpr> for FormatCssIfTestBooleanAndExpr {
             [
                 left.format(),
                 space(),
-                and_token.format(),
+                and_token.format()?.with_text_case(CssCase::Preserve),
                 space(),
                 right.format()
             ]

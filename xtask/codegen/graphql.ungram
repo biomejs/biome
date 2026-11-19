@@ -85,8 +85,9 @@ AnyGraphqlTypeExtension =
 AnyGraphqlOperationDefinition = GraphqlOperationDefinition | GraphqlSelectionSet
 
 // query/mutation/subscription operation
-// https://spec.graphql.org/October2021/#sec-Language.Operations
+// https://spec.graphql.org/draft/#sec-Language.Operations
 GraphqlOperationDefinition =
+	description: GraphqlDescription?
 	type: GraphqlOperationType
 	name: GraphqlNameBinding?
 	variables: GraphqlVariableDefinitions?
@@ -166,10 +167,13 @@ GraphqlInlineFragment =
 	selection_set: GraphqlSelectionSet
 
 // fragment a on A { b }
-// https://spec.graphql.org/October2021/#sec-Language.Fragments
+// https://spec.graphql.org/draft/#sec-Language.Fragments
+// Fragment variables are supported for compatibility with graphql-js's legacy syntax.
 GraphqlFragmentDefinition =
+	description: GraphqlDescription?
 	'fragment'
 	name: GraphqlNameBinding
+	variables: GraphqlVariableDefinitions?
 	type_condition: GraphqlTypeCondition
 	directives: GraphqlDirectiveList
 	selection_set: GraphqlSelectionSet
@@ -239,8 +243,9 @@ GraphqlVariableDefinitions =
 GraphqlVariableDefinitionList = GraphqlVariableDefinition*
 
 // $episode: Episode = JEDI
-// https://spec.graphql.org/October2021/#VariableDefinition
+// https://spec.graphql.org/draft/#VariableDefinition
 GraphqlVariableDefinition =
+	description: GraphqlDescription?
 	variable: GraphqlVariableBinding
 	':'
 	type: AnyGraphqlType

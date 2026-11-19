@@ -2,6 +2,7 @@ use crate::cli_options::{CliOptions, CliReporter};
 use biome_configuration::analyzer::AnalyzerSelector;
 use biome_console::MarkupBuf;
 use biome_diagnostics::Category;
+use biome_flags::{CiProvider, Environment};
 use biome_fs::BiomePath;
 use biome_service::configuration::ProjectScanComputer;
 use biome_service::workspace::{
@@ -48,7 +49,7 @@ pub(crate) trait Execution: Send + Sync + std::panic::RefUnwindSafe {
     /// Used by [crate::runner::ProcessFile::execute] to determine which kind of support kind the file has
     fn supports_kind(&self, file_features: &FeaturesSupported) -> Option<SupportKind>;
 
-    /// It should returns the value of `--stdin-file-path`
+    /// Returns the value of `--stdin-file-path` for commands that support standard input.
     fn get_stdin_file_path(&self) -> Option<&str>;
 
     /// Derives the [ScanKind] for this execution
@@ -95,16 +96,26 @@ pub(crate) trait Execution: Send + Sync + std::panic::RefUnwindSafe {
         false
     }
 
+    fn is_rule_profiling_enabled(&self) -> bool {
+        false
+    }
+
+    fn is_type_inference_profiling_enabled(&self) -> bool {
+        false
+    }
+
+    /// Drains the type-inference profile owned by this execution.
+    fn take_type_inference_profile(
+        &self,
+    ) -> Option<biome_module_graph::type_inference::profiling::TypeInferenceProfileSnapshot> {
+        None
+    }
+
     /// The [Category] that should be used when running the command.
     fn as_diagnostic_category(&self) -> &'static Category;
 
     /// Whether the execution should apply safe fixes
     fn is_safe_fixes_enabled(&self) -> bool {
-        false
-    }
-
-    /// Whether the execution should apply safe and unsafe fixes
-    fn is_safe_and_unsafe_fixes_enabled(&self) -> bool {
         false
     }
 
@@ -183,12 +194,8 @@ pub struct Stdin(
 );
 
 impl Stdin {
-    pub(crate) fn as_path(&self) -> &Utf8Path {
-        self.0.as_path()
-    }
-
-    pub(crate) fn as_content(&self) -> &str {
-        self.1.as_str()
+    pub(crate) fn into_parts(self) -> (Utf8PathBuf, String) {
+        (self.0, self.1)
     }
 }
 
@@ -213,4 +220,20 @@ impl From<(bool, bool)> for VcsTargeted {
 #[derive(Debug, Clone, Copy)]
 pub enum ExecutionEnvironment {
     GitHub,
+}
+
+impl ExecutionEnvironment {
+    /// Returns the CI environment whose reporter `biome ci` enables
+    /// automatically, or `None` when no such environment is detected.
+    pub(crate) fn from_environment(environment: &dyn Environment) -> Option<Self> {
+        match CiProvider::from_environment(environment)? {
+            CiProvider::GithubActions => Some(Self::GitHub),
+            CiProvider::Gitlab
+            | CiProvider::Circleci
+            | CiProvider::AzurePipelines
+            | CiProvider::Buildkite
+            | CiProvider::Jenkins
+            | CiProvider::Other => None,
+        }
+    }
 }

@@ -2,13 +2,19 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
+## Command
+
+```shell
+biome migrate eslint
+```
+
 ## `biome.json`
 
 ```json
 {
   "linter": {
     "rules": {
-      "recommended": true,
+      "preset": "recommended",
       "suspicious": { "noDoubleEquals": "error" }
     }
   }
@@ -28,13 +34,18 @@ biome.json migrate ━━━━━━━━━━━━━━━━━━━━�
 
   i Configuration file can be updated.
   
-    1   │ - {·"linter":·{·"rules":·{·"recommended":·true,·"suspicious":·{·"noDoubleEquals":·"error"·}·}·}·}
-      1 │ + {
-      2 │ + → "linter":·{
-      3 │ + → → "rules":·{·"recommended":·false,·"suspicious":·{·"noDoubleEquals":·"off"·}·}
-      4 │ + → }
-      5 │ + }
-      6 │ + 
+    1    │ - {·"linter":·{·"rules":·{·"preset":·"recommended",·"suspicious":·{·"noDoubleEquals":·"error"·}·}·}·}
+       1 │ + {
+       2 │ + → "linter":·{
+       3 │ + → → "rules":·{
+       4 │ + → → → "preset":·"none",
+       5 │ + → → → "suspicious":·{
+       6 │ + → → → → "noDoubleEquals":·{·"level":·"off",·"options":·{·"ignoreNull":·false·}·}
+       7 │ + → → → }
+       8 │ + → → }
+       9 │ + → }
+      10 │ + }
+      11 │ + 
   
 
 ```

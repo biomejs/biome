@@ -1,0 +1,36 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.svelte
+---
+# Input
+```svelte
+<!-- should generate diagnostics -->
+<script>
+	import { get_current_component } from "svelte/internal";
+</script>
+
+<p>{get_current_component()}</p>
+
+```
+
+# Diagnostics
+```
+invalid.svelte:3:40 lint/nursery/noSvelteInternal ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Don't import from svelte/internal.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <script>
+  > 3 │ 	import { get_current_component } from "svelte/internal";
+      │ 	                                      ^^^^^^^^^^^^^^^^^
+    4 │ </script>
+    5 │ 
+  
+  i This module is private to Svelte and can change or disappear in any release.
+  
+  i Import from a public module, such as svelte, instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

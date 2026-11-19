@@ -1,0 +1,12 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: chunk-because-of-bare-imports.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+
+import "b";
+import { A } from "a";
+
+```

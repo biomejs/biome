@@ -1,0 +1,38 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/value/parity-unicode-identifiers.css
+---
+
+# Input
+
+```css
+.café, .𐐀, .\ab name, .name\bb {
+  café: café;
+  existing: 𐐀;
+  quoted: "«" '»';
+  escaped: \ab \bb \ab name name\bb;
+  functions: café(𐐀) \ab name(\bb);
+  units: 1café 2𐐀;
+  after: red;
+}
+
+```
+
+
+# Formatted
+
+```css
+.café,
+.𐐀,
+.\ab name,
+.name\bb  {
+	café: café;
+	existing: 𐐀;
+	quoted: "«" "»";
+	escaped: \ab \bb \ab name name\bb;
+	functions: café(𐐀) \ab name(\bb);
+	units: 1café 2𐐀;
+	after: red;
+}
+
+```

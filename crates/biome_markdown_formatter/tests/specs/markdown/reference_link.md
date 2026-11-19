@@ -6,6 +6,10 @@
 
 [  spaced  ][  label  ]
 
+[    ]
+
+- [x] dev done (2026-06-22) / [ ] prod pending
+
 [*foo* bar][]
 
 [foo][BaR]
@@ -13,6 +17,10 @@
 text with [inline][ref] in the middle
 
 [link with **bold**][ref]
+
+# *[heading*][ref]
+
+> - [nested][ref]
 
 [world]: https://example.com "World"
 [  label  ]: https://example.com "Label"

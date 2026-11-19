@@ -1,0 +1,17 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validOptional.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+globalThis.window?.BigInt(1);
+globalThis.window?.["BigInt"](1);
+globalThis?.window.BigInt(1);
+(globalThis.window?.BigInt)(1);
+(globalThis.window?.["BigInt"])(1);
+(globalThis?.window).BigInt(1);
+(globalThis.window?.globalThis).BigInt(1);
+globalThis.window?.BigInt?.(1);
+
+```

@@ -372,12 +372,9 @@ impl Iterator for SameIdentifiers {
                 // resume the previous one
                 AnyAssignmentLike::None => {
                     // we still have assignments-like to complete, so we continue the loop
-                    if let Some(pair) = self.assignment_queue.pop_front() {
+                    {
+                        let pair = self.assignment_queue.pop_front()?;
                         self.current_assignment_like = pair;
-                    }
-                    // the queue is empty
-                    else {
-                        return None;
                     }
                 }
                 AnyAssignmentLike::Identifiers(identifier_like) => {
@@ -626,7 +623,30 @@ impl TryFrom<(AnyJsAssignmentPattern, AnyJsExpression)> for AnyAssignmentLike {
                     &right,
                 )?,
             },
-
+            (
+                AnyJsAssignmentPattern::AnyJsAssignment(AnyJsAssignment::JsStaticMemberAssignment(
+                    left,
+                )),
+                AnyJsExpression::JsComputedMemberExpression(right),
+            ) => Self::StaticExpression {
+                left: AnyJsAssignmentExpressionLikeIterator::from_static_member_assignment(&left)?,
+                right: AnyJsAssignmentExpressionLikeIterator::from_computed_member_expression(
+                    &right,
+                )?,
+            },
+            (
+                AnyJsAssignmentPattern::AnyJsAssignment(
+                    AnyJsAssignment::JsComputedMemberAssignment(left),
+                ),
+                AnyJsExpression::JsStaticMemberExpression(right),
+            ) => Self::StaticExpression {
+                left: AnyJsAssignmentExpressionLikeIterator::from_computed_member_assignment(
+                    &left,
+                )?,
+                right: AnyJsAssignmentExpressionLikeIterator::from_static_member_expression(
+                    &right,
+                )?,
+            },
             (
                 AnyJsAssignmentPattern::AnyJsAssignment(
                     AnyJsAssignment::JsComputedMemberAssignment(left),
@@ -685,6 +705,10 @@ pub enum IdentifiersLike {
     /// a[3].d = a[4].d
     /// ```
     Literal(AnyJsLiteralExpression, AnyJsLiteralExpression),
+    /// To compare a dot-notation member with an equivalent computed literal member.
+    NameAndLiteral(JsName, AnyJsLiteralExpression),
+    /// To compare a computed literal member with an equivalent dot-notation member.
+    LiteralAndName(AnyJsLiteralExpression, JsName),
 }
 
 impl TryFrom<(AnyNameLike, AnyNameLike)> for IdentifiersLike {
@@ -710,6 +734,14 @@ impl TryFrom<(AnyNameLike, AnyNameLike)> for IdentifiersLike {
                 AnyNameLike::AnyJsLiteralExpression(left),
                 AnyNameLike::AnyJsLiteralExpression(right),
             ) => Ok(Self::Literal(left, right)),
+            (
+                AnyNameLike::AnyJsName(AnyJsName::JsName(left)),
+                AnyNameLike::AnyJsLiteralExpression(right),
+            ) => Ok(Self::NameAndLiteral(left, right)),
+            (
+                AnyNameLike::AnyJsLiteralExpression(left),
+                AnyNameLike::AnyJsName(AnyJsName::JsName(right)),
+            ) => Ok(Self::LiteralAndName(left, right)),
 
             _ => Err(()),
         }
@@ -724,6 +756,8 @@ impl IdentifiersLike {
             Self::PrivateName(left, _) => left.range(),
             Self::References(left, _) => left.range(),
             Self::Literal(left, _) => left.range(),
+            Self::NameAndLiteral(left, _) => left.range(),
+            Self::LiteralAndName(left, _) => left.range(),
         }
     }
 
@@ -734,6 +768,8 @@ impl IdentifiersLike {
             Self::PrivateName(_, right) => right.range(),
             Self::References(_, right) => right.range(),
             Self::Literal(_, right) => right.range(),
+            Self::NameAndLiteral(_, right) => right.range(),
+            Self::LiteralAndName(_, right) => right.range(),
         }
     }
 
@@ -744,7 +780,17 @@ impl IdentifiersLike {
             Self::PrivateName(_, right) => right.value_token().ok(),
             Self::References(_, right) => right.value_token().ok(),
             Self::Literal(_, right) => right.value_token().ok(),
+            Self::NameAndLiteral(_, right) => right.value_token().ok(),
+            Self::LiteralAndName(_, right) => right.value_token().ok(),
         }
+    }
+}
+
+fn literal_property_token(literal: &AnyJsLiteralExpression) -> Option<JsSyntaxToken> {
+    match literal {
+        AnyJsLiteralExpression::JsStringLiteralExpression(literal) => literal.value_token().ok(),
+        AnyJsLiteralExpression::JsNumberLiteralExpression(literal) => literal.value_token().ok(),
+        _ => None,
     }
 }
 
@@ -771,27 +817,21 @@ fn with_same_identifiers(identifiers_like: &IdentifiersLike) -> Option<()> {
             let right_value = right.value_token().ok()?;
             (left_value, right_value)
         }
-        IdentifiersLike::Literal(left, right) => match (left, right) {
-            (
-                AnyJsLiteralExpression::JsStringLiteralExpression(left),
-                AnyJsLiteralExpression::JsStringLiteralExpression(right),
-            ) => {
-                let left_value = left.value_token().ok()?;
-                let right_value = right.value_token().ok()?;
-                (left_value, right_value)
-            }
-
-            (
-                AnyJsLiteralExpression::JsNumberLiteralExpression(left),
-                AnyJsLiteralExpression::JsNumberLiteralExpression(right),
-            ) => {
-                let left_value = left.value_token().ok()?;
-                let right_value = right.value_token().ok()?;
-                (left_value, right_value)
-            }
-
-            _ => return None,
-        },
+        IdentifiersLike::Literal(left, right) => {
+            let left_value = literal_property_token(left)?;
+            let right_value = literal_property_token(right)?;
+            (left_value, right_value)
+        }
+        IdentifiersLike::NameAndLiteral(left, right) => {
+            let left_value = left.value_token().ok()?;
+            let right_value = literal_property_token(right)?;
+            (left_value, right_value)
+        }
+        IdentifiersLike::LiteralAndName(left, right) => {
+            let left_value = literal_property_token(left)?;
+            let right_value = right.value_token().ok()?;
+            (left_value, right_value)
+        }
     };
 
     if inner_string_text(&left_value) == inner_string_text(&right_value) {

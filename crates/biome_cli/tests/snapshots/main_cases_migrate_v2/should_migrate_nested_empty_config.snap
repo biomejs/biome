@@ -1,0 +1,88 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome migrate
+biome migrate --write
+biome migrate --write
+```
+
+## `biome.json`
+
+```json
+{}
+```
+
+## `pkg/biome.json`
+
+```json
+{ "root": false }
+```
+
+# Emitted Messages
+
+```block
+Your configuration file is up to date.
+```
+
+```block
+<TEMP_DIR>/should_migrate_nested_empty_config/pkg/biome.json migrate ━━━━━━━━━━━━━━━━━━━━
+
+  i Configuration file can be updated.
+  
+    1 │ {"root":·false}
+      │  +++++++++++++ 
+
+```
+
+```block
+configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Migration results:
+  
+  - <TEMP_DIR>/should_migrate_nested_empty_config/biome.json: no migration needed.
+  - <TEMP_DIR>/should_migrate_nested_empty_config/pkg/biome.json: configuration needs migration.
+  
+  i Use --write to apply the changes.
+  
+  $ biome migrate --write
+  
+
+```
+
+```block
+Your configuration file is up to date.
+```
+
+```block
+configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Migration results:
+  
+  - <TEMP_DIR>/should_migrate_nested_empty_config/biome.json: no migration needed.
+  - <TEMP_DIR>/should_migrate_nested_empty_config/pkg/biome.json: configuration successfully migrated.
+  
+
+```
+
+```block
+Your configuration file is up to date.
+```
+
+```block
+Your configuration file is up to date.
+```
+
+```block
+configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Migration results:
+  
+  - <TEMP_DIR>/should_migrate_nested_empty_config/biome.json: no migration needed.
+  - <TEMP_DIR>/should_migrate_nested_empty_config/pkg/biome.json: no migration needed.
+  
+
+```

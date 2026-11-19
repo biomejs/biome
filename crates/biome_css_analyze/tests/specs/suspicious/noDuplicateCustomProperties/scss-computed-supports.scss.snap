@@ -1,0 +1,49 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: scss-computed-supports.scss
+---
+# Input
+```css
+/* should generate diagnostics */
+.valid {
+  --theme: red;
+  @supports ("--theme": blue) and ("--theme": green) {
+    --theme: blue;
+  }
+}
+
+@supports ("--theme": green) {
+  .invalid {
+    --theme: red;
+    --theme: blue;
+  }
+}
+
+```
+
+# Diagnostics
+```
+scss-computed-supports.scss:12:5 lint/suspicious/noDuplicateCustomProperties ━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate custom properties can lead to unexpected behavior and may override previous declarations unintentionally.
+  
+    10 │   .invalid {
+    11 │     --theme: red;
+  > 12 │     --theme: blue;
+       │     ^^^^^^^
+    13 │   }
+    14 │ }
+  
+  i --theme is already defined here.
+  
+     9 │ @supports ("--theme": green) {
+    10 │   .invalid {
+  > 11 │     --theme: red;
+       │     ^^^^^^^
+    12 │     --theme: blue;
+    13 │   }
+  
+  i Remove or rename the duplicate custom property to ensure consistent styling.
+  
+
+```

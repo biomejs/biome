@@ -3,7 +3,7 @@ use crate::runner::diagnostics::PanicDiagnostic;
 use crate::runner::process_file::{FileStatus, ProcessFile};
 use biome_diagnostics::{DiagnosticExt, DiagnosticTags, Severity, category};
 use biome_fs::{BiomePath, FileSystem, TraversalContext};
-use biome_service::file_handlers::DocumentFileSource;
+use biome_languages::DocumentFileSource;
 use biome_service::workspace::{
     FileFeaturesResult, IgnoreKind, PathIsIgnoredParams, SupportsFeatureParams,
 };
@@ -75,8 +75,6 @@ pub trait Handler: Default + Send + Sync + Debug + std::panic::RefUnwindSafe {
             not_requested_features: execution.not_requested_features(),
         });
 
-        let can_read = DocumentFileSource::can_read(biome_path);
-
         let file_features = match file_features {
             Ok(FileFeaturesResult {
                 features_supported: file_features,
@@ -88,7 +86,10 @@ pub trait Handler: Default + Send + Sync + Debug + std::panic::RefUnwindSafe {
                     return false;
                 }
 
-                if file_features.is_not_supported() && !file_features.is_ignored() && !can_read {
+                if file_features.is_not_supported()
+                    && !file_features.is_ignored()
+                    && !DocumentFileSource::can_read(biome_path)
+                {
                     // we should throw a diagnostic if we can't handle a file that isn't ignored
                     miss_handler_err(ctx, fs, extension_error(biome_path), biome_path);
                     return false;
@@ -101,7 +102,12 @@ pub trait Handler: Default + Send + Sync + Debug + std::panic::RefUnwindSafe {
             }
         };
 
-        execution.can_handle(file_features)
+        let can_handle = execution.can_handle(file_features.clone());
+        if can_handle {
+            ctx.insert_file_features(biome_path.clone(), file_features);
+        }
+
+        can_handle
     }
 
     /// This function wraps the [process_file] function implementing the traversal
@@ -121,8 +127,8 @@ pub trait Handler: Default + Send + Sync + Debug + std::panic::RefUnwindSafe {
         // We pass &Ctx which should also implement TraversalContext
 
         match catch_unwind(move || P::execute(ctx, biome_path, max_diagnostics, diagnostic_level)) {
-            Ok(Ok(FileStatus::Changed)) => {
-                ctx.increment_changed(biome_path);
+            Ok(Ok(FileStatus::Changed(changed_file))) => {
+                ctx.increment_changed(biome_path, changed_file);
             }
             Ok(Ok(FileStatus::Unchanged)) => {
                 ctx.increment_unchanged();
@@ -184,7 +190,7 @@ pub(crate) fn miss_handler_err(
         })
         .unwrap_or(biome_path.to_string());
     ctx.push_diagnostic(
-        err.with_category(category!("files/missingHandler"))
+        err.with_category(category!("fs/missingHandler"))
             .with_file_path(file_path)
             .with_tags(DiagnosticTags::VERBOSE),
     );

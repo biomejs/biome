@@ -1,0 +1,23 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome format --write --yaml-formatter-indent-width 4 file.yaml
+```
+
+## `file.yaml`
+
+```yaml
+root:
+    - item
+
+```
+
+# Emitted Messages
+
+```block
+Formatted 1 file in <TIME>. Fixed 1 file.
+```

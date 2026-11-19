@@ -1,0 +1,23 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: valid.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<template>
+
+<ul v-if="complete">
+  <TodoItem
+    v-for="todo in todos"
+    :todo="todo"
+  />
+</ul>
+
+<TodoItem
+  v-for="todo in shownTodos"
+  :todo="todo"
+/>
+</template>
+
+```

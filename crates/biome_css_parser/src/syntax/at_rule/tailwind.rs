@@ -4,9 +4,15 @@ use crate::syntax::at_rule::parse_at_rule_declarator;
 use crate::syntax::block::{
     parse_declaration_block, parse_declaration_or_rule_list_block, parse_rule_block,
 };
-use crate::syntax::parse_error::{expected_identifier, expected_string, expected_tw_source};
+use crate::syntax::parse_error::{
+    expected_identifier, expected_string, expected_tw_source, expected_tw_theme_option,
+};
+use crate::syntax::scss::expect_scss_semicolon_at_rule;
 use crate::syntax::selector::SelectorList;
-use crate::syntax::{is_at_identifier, parse_identifier, parse_regular_identifier, parse_string};
+use crate::syntax::value::function::is_nth_at_adjacent_l_paren;
+use crate::syntax::{
+    CssSyntaxFeatures, is_at_identifier, parse_identifier, parse_regular_identifier, parse_string,
+};
 use biome_css_syntax::CssSyntaxKind::{self, *};
 use biome_css_syntax::T;
 use biome_parser::parse_lists::{ParseNodeList, ParseSeparatedList};
@@ -16,6 +22,7 @@ use biome_parser::parsed_syntax::ParsedSyntax::{Absent, Present};
 use biome_parser::prelude::*;
 
 // @theme { --color-primary: #3b82f6; }
+// @theme default inline reference { --color-primary: #3b82f6; }
 pub(crate) fn parse_theme_at_rule(p: &mut CssParser) -> ParsedSyntax {
     if !p.at(T![theme]) {
         return Absent;
@@ -24,10 +31,76 @@ pub(crate) fn parse_theme_at_rule(p: &mut CssParser) -> ParsedSyntax {
     let m = p.start();
 
     p.bump(T![theme]);
-    parse_regular_identifier(p).ok();
+    ThemeOptionList.parse_list(p);
     parse_declaration_or_rule_list_block(p);
 
     Present(m.complete(p, TW_THEME_AT_RULE))
+}
+
+/// Space-separated `@theme` options. Tailwind ignores option keywords it does
+/// not recognize, so any identifier is accepted here.
+struct ThemeOptionList;
+
+static TW_THEME_OPTION_LIST_END: TokenSet<CssSyntaxKind> = token_set![T!['{'], T!['}'], T![;]];
+
+impl ParseNodeList for ThemeOptionList {
+    type Kind = CssSyntaxKind;
+    type Parser<'source> = CssParser<'source>;
+    const LIST_KIND: Self::Kind = TW_THEME_OPTION_LIST;
+
+    fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
+        if is_at_theme_prefix_option(p) {
+            parse_theme_prefix_option(p)
+        } else {
+            parse_regular_identifier(p)
+        }
+    }
+
+    fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
+        p.at_ts(TW_THEME_OPTION_LIST_END)
+    }
+
+    fn recover(
+        &mut self,
+        p: &mut Self::Parser<'_>,
+        parsed_element: ParsedSyntax,
+    ) -> RecoveryResult {
+        if let Present(option) = parsed_element {
+            return Ok(option);
+        }
+
+        // Only the invalid tokens become bogus, so options after them still
+        // parse as options.
+        let m = p.start();
+        while !(p.at(EOF) || p.at_ts(TW_THEME_OPTION_LIST_END) || is_at_identifier(p)) {
+            p.bump_any();
+        }
+        let bogus = m.complete(p, CSS_BOGUS);
+        p.error(expected_tw_theme_option(p, bogus.range(p)));
+
+        Ok(bogus)
+    }
+}
+
+/// Tailwind only recognizes the prefix option when it is spelled exactly
+/// `prefix(`, so `prefix (tw)` and `PREFIX(tw)` are parsed as other options.
+fn is_at_theme_prefix_option(p: &mut CssParser) -> bool {
+    p.at(T![prefix]) && p.cur_text() == "prefix" && is_nth_at_adjacent_l_paren(p, 1)
+}
+
+// @theme prefix(tw) { ... }
+fn parse_theme_prefix_option(p: &mut CssParser) -> ParsedSyntax {
+    if !p.at(T![prefix]) {
+        return Absent;
+    }
+
+    let m = p.start();
+    p.bump(T![prefix]);
+    p.expect(T!['(']);
+    parse_regular_identifier(p).or_add_diagnostic(p, expected_identifier);
+    p.expect(T![')']);
+
+    Present(m.complete(p, TW_THEME_PREFIX_OPTION))
 }
 
 // @utility tab-4 { tab-size: 4; }
@@ -103,7 +176,7 @@ pub(crate) fn parse_variant_at_rule(p: &mut CssParser) -> ParsedSyntax {
     }
 
     let m = p.start();
-    p.bump(T![variant]);
+    p.bump_with_context(T![variant], CssLexContext::TailwindUtilityName);
 
     if !is_at_identifier(p) {
         p.error(expected_identifier(p, p.cur_range()));
@@ -124,7 +197,7 @@ pub(crate) fn parse_custom_variant_at_rule(p: &mut CssParser) -> ParsedSyntax {
     }
 
     let m = p.start();
-    p.bump(T![custom_variant]);
+    p.bump_with_context(T![custom_variant], CssLexContext::TailwindUtilityName);
 
     if !is_at_identifier(p) {
         p.error(expected_identifier(p, p.cur_range()));
@@ -181,7 +254,11 @@ pub(crate) fn parse_apply_at_rule(p: &mut CssParser) -> ParsedSyntax {
     let m = p.start();
     p.bump_with_context(T![apply], CssLexContext::TailwindUtility);
     ApplyClassList.parse_list(p);
-    p.expect(T![;]);
+    if CssSyntaxFeatures::Scss.is_supported(p) {
+        expect_scss_semicolon_at_rule(p);
+    } else {
+        p.expect(T![;]);
+    }
 
     Present(m.complete(p, TW_APPLY_AT_RULE))
 }

@@ -1,0 +1,14 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.jsx
+---
+# Input
+```jsx
+/* should not generate diagnostics */
+import * as Names from "./validNamedExports.js";
+
+const element = <Names.a />;
+const nested = <Names.deep.e />;
+const withChildren = <Names.ExportedClass>text</Names.ExportedClass>;
+
+```

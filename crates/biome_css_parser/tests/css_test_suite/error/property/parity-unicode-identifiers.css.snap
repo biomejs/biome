@@ -1,0 +1,783 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+.values {
+  --raw: « » «name name» a«b «» -« --« £;
+  after-raw: red;
+  start: «;
+  after-start: red;
+  continuation: a«b;
+  after-continuation: café;
+  hyphen: -«;
+  after-hyphen: 𐐀;
+  double-hyphen: --«;
+  after-double-hyphen: blue;
+  unit: 1«;
+  after-unit: 1px;
+  other: £;
+  after-other: green;
+}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@0..1 "." [] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@1..8 "values" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@8..9 "{" [] [],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssBogusProperty {
+                                items: [
+                                    CssDashedIdentifier {
+                                        value_token: IDENT@9..17 "--raw" [Newline("\n"), Whitespace("  ")] [],
+                                    },
+                                    COLON@17..19 ":" [] [Whitespace(" ")],
+                                    CssBogus {
+                                        items: [
+                                            CssBogusPropertyValue {
+                                                items: [
+                                                    ERROR_TOKEN@19..22 "«" [] [Whitespace(" ")],
+                                                    ERROR_TOKEN@22..25 "»" [] [Whitespace(" ")],
+                                                    ERROR_TOKEN@25..27 "«" [] [],
+                                                    IDENT@27..32 "name" [] [Whitespace(" ")],
+                                                    IDENT@32..36 "name" [] [],
+                                                    ERROR_TOKEN@36..39 "»" [] [Whitespace(" ")],
+                                                    IDENT@39..40 "a" [] [],
+                                                    ERROR_TOKEN@40..42 "«" [] [],
+                                                    IDENT@42..44 "b" [] [Whitespace(" ")],
+                                                    ERROR_TOKEN@44..46 "«" [] [],
+                                                    ERROR_TOKEN@46..49 "»" [] [Whitespace(" ")],
+                                                    MINUS@49..50 "-" [] [],
+                                                    ERROR_TOKEN@50..53 "«" [] [Whitespace(" ")],
+                                                    MINUS@53..54 "-" [] [],
+                                                    MINUS@54..55 "-" [] [],
+                                                    ERROR_TOKEN@55..58 "«" [] [Whitespace(" ")],
+                                                    ERROR_TOKEN@58..60 "£" [] [],
+                                                ],
+                                            },
+                                        ],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@60..61 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@61..73 "after-raw" [Newline("\n"), Whitespace("  ")] [],
+                                },
+                                colon_token: COLON@73..75 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@75..78 "red" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@78..79 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssBogusProperty {
+                                items: [
+                                    CssIdentifier {
+                                        value_token: IDENT@79..87 "start" [Newline("\n"), Whitespace("  ")] [],
+                                    },
+                                    COLON@87..89 ":" [] [Whitespace(" ")],
+                                    CssBogus {
+                                        items: [
+                                            CssBogusPropertyValue {
+                                                items: [
+                                                    ERROR_TOKEN@89..91 "«" [] [],
+                                                ],
+                                            },
+                                        ],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@91..92 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@92..106 "after-start" [Newline("\n"), Whitespace("  ")] [],
+                                },
+                                colon_token: COLON@106..108 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@108..111 "red" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@111..112 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssBogusProperty {
+                                items: [
+                                    CssIdentifier {
+                                        value_token: IDENT@112..127 "continuation" [Newline("\n"), Whitespace("  ")] [],
+                                    },
+                                    COLON@127..129 ":" [] [Whitespace(" ")],
+                                    CssBogus {
+                                        items: [
+                                            CssIdentifier {
+                                                value_token: IDENT@129..130 "a" [] [],
+                                            },
+                                            CssBogusPropertyValue {
+                                                items: [
+                                                    ERROR_TOKEN@130..132 "«" [] [],
+                                                    IDENT@132..133 "b" [] [],
+                                                ],
+                                            },
+                                        ],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@133..134 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@134..155 "after-continuation" [Newline("\n"), Whitespace("  ")] [],
+                                },
+                                colon_token: COLON@155..157 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@157..162 "café" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@162..163 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssBogusProperty {
+                                items: [
+                                    CssIdentifier {
+                                        value_token: IDENT@163..172 "hyphen" [Newline("\n"), Whitespace("  ")] [],
+                                    },
+                                    COLON@172..174 ":" [] [Whitespace(" ")],
+                                    CssBogus {
+                                        items: [
+                                            CssBogusPropertyValue {
+                                                items: [
+                                                    MINUS@174..175 "-" [] [],
+                                                    ERROR_TOKEN@175..177 "«" [] [],
+                                                ],
+                                            },
+                                        ],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@177..178 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@178..193 "after-hyphen" [Newline("\n"), Whitespace("  ")] [],
+                                },
+                                colon_token: COLON@193..195 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@195..199 "𐐀" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@199..200 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssBogusProperty {
+                                items: [
+                                    CssIdentifier {
+                                        value_token: IDENT@200..216 "double-hyphen" [Newline("\n"), Whitespace("  ")] [],
+                                    },
+                                    COLON@216..218 ":" [] [Whitespace(" ")],
+                                    CssBogus {
+                                        items: [
+                                            CssBogusPropertyValue {
+                                                items: [
+                                                    MINUS@218..219 "-" [] [],
+                                                    MINUS@219..220 "-" [] [],
+                                                    ERROR_TOKEN@220..222 "«" [] [],
+                                                ],
+                                            },
+                                        ],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@222..223 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@223..245 "after-double-hyphen" [Newline("\n"), Whitespace("  ")] [],
+                                },
+                                colon_token: COLON@245..247 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@247..251 "blue" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@251..252 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssBogusProperty {
+                                items: [
+                                    CssIdentifier {
+                                        value_token: IDENT@252..259 "unit" [Newline("\n"), Whitespace("  ")] [],
+                                    },
+                                    COLON@259..261 ":" [] [Whitespace(" ")],
+                                    CssBogus {
+                                        items: [
+                                            CssNumber {
+                                                value_token: CSS_NUMBER_LITERAL@261..262 "1" [] [],
+                                            },
+                                            CssBogusPropertyValue {
+                                                items: [
+                                                    ERROR_TOKEN@262..264 "«" [] [],
+                                                ],
+                                            },
+                                        ],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@264..265 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@265..278 "after-unit" [Newline("\n"), Whitespace("  ")] [],
+                                },
+                                colon_token: COLON@278..280 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssRegularDimension {
+                                        value_token: CSS_NUMBER_LITERAL@280..281 "1" [] [],
+                                        unit_token: IDENT@281..283 "px" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@283..284 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssBogusProperty {
+                                items: [
+                                    CssIdentifier {
+                                        value_token: IDENT@284..292 "other" [Newline("\n"), Whitespace("  ")] [],
+                                    },
+                                    COLON@292..294 ":" [] [Whitespace(" ")],
+                                    CssBogus {
+                                        items: [
+                                            CssBogusPropertyValue {
+                                                items: [
+                                                    ERROR_TOKEN@294..296 "£" [] [],
+                                                ],
+                                            },
+                                        ],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@296..297 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@297..311 "after-other" [Newline("\n"), Whitespace("  ")] [],
+                                },
+                                colon_token: COLON@311..313 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@313..318 "green" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@318..319 ";" [] [],
+                    },
+                ],
+                r_curly_token: R_CURLY@319..321 "}" [Newline("\n")] [],
+            },
+        },
+    ],
+    eof_token: EOF@321..322 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..322
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..321
+    0: CSS_QUALIFIED_RULE@0..321
+      0: CSS_SELECTOR_LIST@0..8
+        0: CSS_COMPOUND_SELECTOR@0..8
+          0: CSS_NESTED_SELECTOR_LIST@0..0
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@0..8
+            0: CSS_CLASS_SELECTOR@0..8
+              0: DOT@0..1 "." [] []
+              1: CSS_CUSTOM_IDENTIFIER@1..8
+                0: IDENT@1..8 "values" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@8..321
+        0: L_CURLY@8..9 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@9..319
+          0: CSS_DECLARATION_WITH_SEMICOLON@9..61
+            0: CSS_DECLARATION@9..60
+              0: CSS_BOGUS_PROPERTY@9..60
+                0: CSS_DASHED_IDENTIFIER@9..17
+                  0: IDENT@9..17 "--raw" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@17..19 ":" [] [Whitespace(" ")]
+                2: CSS_BOGUS@19..60
+                  0: CSS_BOGUS_PROPERTY_VALUE@19..60
+                    0: ERROR_TOKEN@19..22 "«" [] [Whitespace(" ")]
+                    1: ERROR_TOKEN@22..25 "»" [] [Whitespace(" ")]
+                    2: ERROR_TOKEN@25..27 "«" [] []
+                    3: IDENT@27..32 "name" [] [Whitespace(" ")]
+                    4: IDENT@32..36 "name" [] []
+                    5: ERROR_TOKEN@36..39 "»" [] [Whitespace(" ")]
+                    6: IDENT@39..40 "a" [] []
+                    7: ERROR_TOKEN@40..42 "«" [] []
+                    8: IDENT@42..44 "b" [] [Whitespace(" ")]
+                    9: ERROR_TOKEN@44..46 "«" [] []
+                    10: ERROR_TOKEN@46..49 "»" [] [Whitespace(" ")]
+                    11: MINUS@49..50 "-" [] []
+                    12: ERROR_TOKEN@50..53 "«" [] [Whitespace(" ")]
+                    13: MINUS@53..54 "-" [] []
+                    14: MINUS@54..55 "-" [] []
+                    15: ERROR_TOKEN@55..58 "«" [] [Whitespace(" ")]
+                    16: ERROR_TOKEN@58..60 "£" [] []
+              1: (empty)
+            1: SEMICOLON@60..61 ";" [] []
+          1: CSS_DECLARATION_WITH_SEMICOLON@61..79
+            0: CSS_DECLARATION@61..78
+              0: CSS_GENERIC_PROPERTY@61..78
+                0: CSS_IDENTIFIER@61..73
+                  0: IDENT@61..73 "after-raw" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@73..75 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@75..78
+                  0: CSS_IDENTIFIER@75..78
+                    0: IDENT@75..78 "red" [] []
+              1: (empty)
+            1: SEMICOLON@78..79 ";" [] []
+          2: CSS_DECLARATION_WITH_SEMICOLON@79..92
+            0: CSS_DECLARATION@79..91
+              0: CSS_BOGUS_PROPERTY@79..91
+                0: CSS_IDENTIFIER@79..87
+                  0: IDENT@79..87 "start" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@87..89 ":" [] [Whitespace(" ")]
+                2: CSS_BOGUS@89..91
+                  0: CSS_BOGUS_PROPERTY_VALUE@89..91
+                    0: ERROR_TOKEN@89..91 "«" [] []
+              1: (empty)
+            1: SEMICOLON@91..92 ";" [] []
+          3: CSS_DECLARATION_WITH_SEMICOLON@92..112
+            0: CSS_DECLARATION@92..111
+              0: CSS_GENERIC_PROPERTY@92..111
+                0: CSS_IDENTIFIER@92..106
+                  0: IDENT@92..106 "after-start" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@106..108 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@108..111
+                  0: CSS_IDENTIFIER@108..111
+                    0: IDENT@108..111 "red" [] []
+              1: (empty)
+            1: SEMICOLON@111..112 ";" [] []
+          4: CSS_DECLARATION_WITH_SEMICOLON@112..134
+            0: CSS_DECLARATION@112..133
+              0: CSS_BOGUS_PROPERTY@112..133
+                0: CSS_IDENTIFIER@112..127
+                  0: IDENT@112..127 "continuation" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@127..129 ":" [] [Whitespace(" ")]
+                2: CSS_BOGUS@129..133
+                  0: CSS_IDENTIFIER@129..130
+                    0: IDENT@129..130 "a" [] []
+                  1: CSS_BOGUS_PROPERTY_VALUE@130..133
+                    0: ERROR_TOKEN@130..132 "«" [] []
+                    1: IDENT@132..133 "b" [] []
+              1: (empty)
+            1: SEMICOLON@133..134 ";" [] []
+          5: CSS_DECLARATION_WITH_SEMICOLON@134..163
+            0: CSS_DECLARATION@134..162
+              0: CSS_GENERIC_PROPERTY@134..162
+                0: CSS_IDENTIFIER@134..155
+                  0: IDENT@134..155 "after-continuation" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@155..157 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@157..162
+                  0: CSS_IDENTIFIER@157..162
+                    0: IDENT@157..162 "café" [] []
+              1: (empty)
+            1: SEMICOLON@162..163 ";" [] []
+          6: CSS_DECLARATION_WITH_SEMICOLON@163..178
+            0: CSS_DECLARATION@163..177
+              0: CSS_BOGUS_PROPERTY@163..177
+                0: CSS_IDENTIFIER@163..172
+                  0: IDENT@163..172 "hyphen" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@172..174 ":" [] [Whitespace(" ")]
+                2: CSS_BOGUS@174..177
+                  0: CSS_BOGUS_PROPERTY_VALUE@174..177
+                    0: MINUS@174..175 "-" [] []
+                    1: ERROR_TOKEN@175..177 "«" [] []
+              1: (empty)
+            1: SEMICOLON@177..178 ";" [] []
+          7: CSS_DECLARATION_WITH_SEMICOLON@178..200
+            0: CSS_DECLARATION@178..199
+              0: CSS_GENERIC_PROPERTY@178..199
+                0: CSS_IDENTIFIER@178..193
+                  0: IDENT@178..193 "after-hyphen" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@193..195 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@195..199
+                  0: CSS_IDENTIFIER@195..199
+                    0: IDENT@195..199 "𐐀" [] []
+              1: (empty)
+            1: SEMICOLON@199..200 ";" [] []
+          8: CSS_DECLARATION_WITH_SEMICOLON@200..223
+            0: CSS_DECLARATION@200..222
+              0: CSS_BOGUS_PROPERTY@200..222
+                0: CSS_IDENTIFIER@200..216
+                  0: IDENT@200..216 "double-hyphen" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@216..218 ":" [] [Whitespace(" ")]
+                2: CSS_BOGUS@218..222
+                  0: CSS_BOGUS_PROPERTY_VALUE@218..222
+                    0: MINUS@218..219 "-" [] []
+                    1: MINUS@219..220 "-" [] []
+                    2: ERROR_TOKEN@220..222 "«" [] []
+              1: (empty)
+            1: SEMICOLON@222..223 ";" [] []
+          9: CSS_DECLARATION_WITH_SEMICOLON@223..252
+            0: CSS_DECLARATION@223..251
+              0: CSS_GENERIC_PROPERTY@223..251
+                0: CSS_IDENTIFIER@223..245
+                  0: IDENT@223..245 "after-double-hyphen" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@245..247 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@247..251
+                  0: CSS_IDENTIFIER@247..251
+                    0: IDENT@247..251 "blue" [] []
+              1: (empty)
+            1: SEMICOLON@251..252 ";" [] []
+          10: CSS_DECLARATION_WITH_SEMICOLON@252..265
+            0: CSS_DECLARATION@252..264
+              0: CSS_BOGUS_PROPERTY@252..264
+                0: CSS_IDENTIFIER@252..259
+                  0: IDENT@252..259 "unit" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@259..261 ":" [] [Whitespace(" ")]
+                2: CSS_BOGUS@261..264
+                  0: CSS_NUMBER@261..262
+                    0: CSS_NUMBER_LITERAL@261..262 "1" [] []
+                  1: CSS_BOGUS_PROPERTY_VALUE@262..264
+                    0: ERROR_TOKEN@262..264 "«" [] []
+              1: (empty)
+            1: SEMICOLON@264..265 ";" [] []
+          11: CSS_DECLARATION_WITH_SEMICOLON@265..284
+            0: CSS_DECLARATION@265..283
+              0: CSS_GENERIC_PROPERTY@265..283
+                0: CSS_IDENTIFIER@265..278
+                  0: IDENT@265..278 "after-unit" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@278..280 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@280..283
+                  0: CSS_REGULAR_DIMENSION@280..283
+                    0: CSS_NUMBER_LITERAL@280..281 "1" [] []
+                    1: IDENT@281..283 "px" [] []
+              1: (empty)
+            1: SEMICOLON@283..284 ";" [] []
+          12: CSS_DECLARATION_WITH_SEMICOLON@284..297
+            0: CSS_DECLARATION@284..296
+              0: CSS_BOGUS_PROPERTY@284..296
+                0: CSS_IDENTIFIER@284..292
+                  0: IDENT@284..292 "other" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@292..294 ":" [] [Whitespace(" ")]
+                2: CSS_BOGUS@294..296
+                  0: CSS_BOGUS_PROPERTY_VALUE@294..296
+                    0: ERROR_TOKEN@294..296 "£" [] []
+              1: (empty)
+            1: SEMICOLON@296..297 ";" [] []
+          13: CSS_DECLARATION_WITH_SEMICOLON@297..319
+            0: CSS_DECLARATION@297..318
+              0: CSS_GENERIC_PROPERTY@297..318
+                0: CSS_IDENTIFIER@297..311
+                  0: IDENT@297..311 "after-other" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@311..313 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@313..318
+                  0: CSS_IDENTIFIER@313..318
+                    0: IDENT@313..318 "green" [] []
+              1: (empty)
+            1: SEMICOLON@318..319 ";" [] []
+        2: R_CURLY@319..321 "}" [Newline("\n")] []
+  2: EOF@321..322 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+parity-unicode-identifiers.css:2:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × unexpected character `«`
+  
+    1 │ .values {
+  > 2 │   --raw: « » «name name» a«b «» -« --« £;
+      │          ^
+    3 │   after-raw: red;
+    4 │   start: «;
+  
+parity-unicode-identifiers.css:2:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × unexpected character `»`
+  
+    1 │ .values {
+  > 2 │   --raw: « » «name name» a«b «» -« --« £;
+      │            ^
+    3 │   after-raw: red;
+    4 │   start: «;
+  
+parity-unicode-identifiers.css:2:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × unexpected character `«`
+  
+    1 │ .values {
+  > 2 │   --raw: « » «name name» a«b «» -« --« £;
+      │              ^
+    3 │   after-raw: red;
+    4 │   start: «;
+  
+parity-unicode-identifiers.css:2:24 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × unexpected character `»`
+  
+    1 │ .values {
+  > 2 │   --raw: « » «name name» a«b «» -« --« £;
+      │                        ^
+    3 │   after-raw: red;
+    4 │   start: «;
+  
+parity-unicode-identifiers.css:2:27 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × unexpected character `«`
+  
+    1 │ .values {
+  > 2 │   --raw: « » «name name» a«b «» -« --« £;
+      │                           ^
+    3 │   after-raw: red;
+    4 │   start: «;
+  
+parity-unicode-identifiers.css:2:30 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × unexpected character `«`
+  
+    1 │ .values {
+  > 2 │   --raw: « » «name name» a«b «» -« --« £;
+      │                              ^
+    3 │   after-raw: red;
+    4 │   start: «;
+  
+parity-unicode-identifiers.css:2:31 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × unexpected character `»`
+  
+    1 │ .values {
+  > 2 │   --raw: « » «name name» a«b «» -« --« £;
+      │                               ^
+    3 │   after-raw: red;
+    4 │   start: «;
+  
+parity-unicode-identifiers.css:2:34 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × unexpected character `«`
+  
+    1 │ .values {
+  > 2 │   --raw: « » «name name» a«b «» -« --« £;
+      │                                  ^
+    3 │   after-raw: red;
+    4 │   start: «;
+  
+parity-unicode-identifiers.css:2:38 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × unexpected character `«`
+  
+    1 │ .values {
+  > 2 │   --raw: « » «name name» a«b «» -« --« £;
+      │                                      ^
+    3 │   after-raw: red;
+    4 │   start: «;
+  
+parity-unicode-identifiers.css:2:40 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × unexpected character `£`
+  
+    1 │ .values {
+  > 2 │   --raw: « » «name name» a«b «» -« --« £;
+      │                                        ^
+    3 │   after-raw: red;
+    4 │   start: «;
+  
+parity-unicode-identifiers.css:4:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × unexpected character `«`
+  
+    2 │   --raw: « » «name name» a«b «» -« --« £;
+    3 │   after-raw: red;
+  > 4 │   start: «;
+      │          ^
+    5 │   after-start: red;
+    6 │   continuation: a«b;
+  
+parity-unicode-identifiers.css:6:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × unexpected character `«`
+  
+    4 │   start: «;
+    5 │   after-start: red;
+  > 6 │   continuation: a«b;
+      │                  ^
+    7 │   after-continuation: café;
+    8 │   hyphen: -«;
+  
+parity-unicode-identifiers.css:8:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+     6 │   continuation: a«b;
+     7 │   after-continuation: café;
+   > 8 │   hyphen: -«;
+       │           ^^
+     9 │   after-hyphen: 𐐀;
+    10 │   double-hyphen: --«;
+  
+  i Expected one of:
+  
+  - identifier
+  - string
+  - number
+  - dimension
+  - ratio
+  - custom property
+  - function
+  
+parity-unicode-identifiers.css:8:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × unexpected character `«`
+  
+     6 │   continuation: a«b;
+     7 │   after-continuation: café;
+   > 8 │   hyphen: -«;
+       │            ^
+     9 │   after-hyphen: 𐐀;
+    10 │   double-hyphen: --«;
+  
+parity-unicode-identifiers.css:10:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+     8 │   hyphen: -«;
+     9 │   after-hyphen: 𐐀;
+  > 10 │   double-hyphen: --«;
+       │                  ^^^
+    11 │   after-double-hyphen: blue;
+    12 │   unit: 1«;
+  
+  i Expected one of:
+  
+  - identifier
+  - string
+  - number
+  - dimension
+  - ratio
+  - custom property
+  - function
+  
+parity-unicode-identifiers.css:10:20 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × unexpected character `«`
+  
+     8 │   hyphen: -«;
+     9 │   after-hyphen: 𐐀;
+  > 10 │   double-hyphen: --«;
+       │                    ^
+    11 │   after-double-hyphen: blue;
+    12 │   unit: 1«;
+  
+parity-unicode-identifiers.css:12:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × unexpected character `«`
+  
+    10 │   double-hyphen: --«;
+    11 │   after-double-hyphen: blue;
+  > 12 │   unit: 1«;
+       │          ^
+    13 │   after-unit: 1px;
+    14 │   other: £;
+  
+parity-unicode-identifiers.css:14:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × unexpected character `£`
+  
+    12 │   unit: 1«;
+    13 │   after-unit: 1px;
+  > 14 │   other: £;
+       │          ^
+    15 │   after-other: green;
+    16 │ }
+  
+```

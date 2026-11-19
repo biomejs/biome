@@ -1,6 +1,6 @@
 [package]
 name                 = "biome_line_index"
-version              = "0.1.0"
+version.workspace    = true
 authors.workspace    = true
 edition.workspace    = true
 description          = "Biome's tools for converting between byte offsets and line / column positions"

@@ -1,0 +1,52 @@
+/* should not generate diagnostics */
+
+class Foo {
+    constructor() {
+        this.value = 1;
+    }
+
+    method(value = this.value) {
+        const getValue = () => this.value;
+        return getValue() ?? value;
+    }
+
+    static method() {
+        return this.value;
+    }
+
+    get value() {
+        return this._value;
+    }
+
+    set value(value) {
+        this._value = value;
+    }
+
+    #privateMethod() {
+        return this.value;
+    }
+
+    field = this.defaultValue;
+    callback = () => this.defaultValue;
+
+    static {
+        const update = () => (this.value = 1);
+        update();
+    }
+}
+
+const ClassExpression = class {
+    value = this.defaultValue;
+    static value = this.defaultValue;
+};
+
+class Outer {
+    method() {
+        class Inner extends this.Base {
+            [this.methodName]() {}
+            [this.propertyName] = 1;
+        }
+
+        return Inner;
+    }
+}

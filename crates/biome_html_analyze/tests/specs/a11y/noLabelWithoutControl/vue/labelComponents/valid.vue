@@ -1,0 +1,4 @@
+<template>
+	<!-- should not generate diagnostics -->
+	<CustomLabel for="js_id" aria-label="A label" />
+</template>

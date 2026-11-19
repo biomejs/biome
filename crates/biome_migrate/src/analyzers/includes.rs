@@ -7,7 +7,7 @@ use biome_console::markup;
 use biome_diagnostics::{Applicability, category};
 use biome_json_factory::make;
 use biome_json_syntax::{AnyJsonValue, JsonArrayValue, JsonMember, JsonObjectValue, JsonRoot, T};
-use biome_rowan::{AstNode, BatchMutationExt, TextRange, TextSize, TriviaPieceKind};
+use biome_rowan::{AstNode, BatchMutationExt, TextRange, TextSize};
 
 declare_migration! {
     pub(crate) Includes {
@@ -33,7 +33,6 @@ impl Rule for Includes {
                 .name()
                 .ok()
                 .and_then(|name| name.inner_string_text())
-                .and_then(|r| r.ok())
             else {
                 continue;
             };
@@ -71,8 +70,7 @@ impl Rule for Includes {
             .include
             .as_ref()
             .or(state.ignore.as_ref())
-            .map(|node| node.range())
-            .unwrap_or_default();
+            .map_or_default(|node| node.range());
         let mut diagnostic = RuleDiagnostic::new(
             category!("migrate"),
             range,
@@ -103,15 +101,13 @@ impl Rule for Includes {
                 mutation.remove_node(ignore.clone());
                 if let Some(trailing_comma) = ignore
                     .syntax()
-                    .last_token()
-                    .and_then(|ignore_last_token| ignore_last_token.next_token())
+                    .next_token()
                     .filter(|next_token| next_token.kind() == T![,])
                 {
                     mutation.remove_token(trailing_comma);
                 } else if let Some(leading_comma) = ignore
                     .syntax()
-                    .first_token()
-                    .and_then(|ignore_last_token| ignore_last_token.prev_token())
+                    .prev_token()
                     .filter(|prev_token| prev_token.kind() == T![,])
                 {
                     mutation.remove_token(leading_comma);
@@ -195,8 +191,7 @@ impl State {
             }
         }
         let separator_count = globs.len().saturating_sub(1);
-        let separators = (0..separator_count)
-            .map(|_| make::token(T![,]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]));
+        let separators = (0..separator_count).map(|_| make::token(T![,]).with_trailing_space());
         make::json_array_value(
             make::token(T!['[']),
             make::json_array_element_list(globs, separators),
@@ -211,11 +206,7 @@ impl TryFrom<JsonObjectValue> for State {
     fn try_from(value: JsonObjectValue) -> Result<Self, Self::Error> {
         let mut result = Self::default();
         for member in value.json_member_list().into_iter().flatten() {
-            let member_name = member
-                .name()
-                .ok()
-                .and_then(|name| name.inner_string_text())
-                .and_then(|r| r.ok());
+            let member_name = member.name().ok().and_then(|name| name.inner_string_text());
             if member_name.as_ref().is_some_and(|name| name == &"include") {
                 result.include = Some(member);
             } else if member_name.as_ref().is_some_and(|name| name == &"ignore") {

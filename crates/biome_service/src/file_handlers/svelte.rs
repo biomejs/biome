@@ -1,21 +1,25 @@
-use super::{ParsedLangAndSetup, SearchCapabilities, parse_lang_and_setup_from_script_opening_tag};
+use super::{
+    EditorCapabilities, ParsedLangAndSetup, SearchCapabilities,
+    parse_lang_and_setup_from_script_opening_tag,
+};
 use crate::WorkspaceError;
+use crate::db::WorkspaceDb;
 use crate::file_handlers::{
     AnalyzerCapabilities, Capabilities, CodeActionsParams, DebugCapabilities, EnabledForPath,
-    ExtensionHandler, FixAllParams, FormatterCapabilities, LintParams, LintResults, ParseResult,
-    ParserCapabilities, javascript,
+    ExtensionHandler, FixAllParams, FixedFileResult, FormatterCapabilities, LintParams,
+    LintResults, ParseResult, ParserCapabilities, html, javascript,
 };
 use crate::settings::SettingsWithEditor;
-use crate::workspace::{DocumentFileSource, FixFileResult, PullActionsResult};
-use biome_formatter::{Printed, SourceMapGeneration};
+use crate::workspace::PullActionsResult;
+use biome_formatter::SourceMapGeneration;
+use biome_formatter::rowan::Printed;
 use biome_fs::BiomePath;
-use biome_html_syntax::HtmlLanguage;
 use biome_js_formatter::format_node;
 use biome_js_parser::{JsParserOptions, parse_js_with_cache};
-use biome_js_syntax::{
-    EmbeddingKind, JsFileSource, JsLanguage, SvelteFileKind, TextRange, TextSize,
-};
-use biome_parser::AnyParse;
+use biome_js_syntax::{TextRange, TextSize};
+use biome_languages::javascript::{JsEmbeddingKind, SvelteEmbeddingKind, SvelteFileKind};
+use biome_languages::{DocumentFileSource, JsFileSource};
+use biome_parser::db::AnalyzedSource;
 use biome_rowan::NodeCache;
 use regex::{Match, Regex};
 use std::sync::LazyLock;
@@ -71,22 +75,25 @@ impl SvelteFileHandler {
             .captures(text)
             .and_then(|captures| {
                 let ParsedLangAndSetup {
-                    language, variant, ..
+                    language,
+                    variant,
+                    module,
+                    ..
                 } = parse_lang_and_setup_from_script_opening_tag(
                     captures.name("opening")?.as_str(),
                 );
                 Some(
                     JsFileSource::from(language)
                         .with_variant(variant)
-                        .with_embedding_kind(EmbeddingKind::Svelte {
-                            is_source: true,
-                            is_function_signature: false,
-                            kind: SvelteFileKind::Component,
-                            is_const_block: false,
+                        .with_embedding_kind(JsEmbeddingKind::Svelte {
+                            is_module_script: module,
+                            is_class_attribute: false,
+                            file_kind: SvelteFileKind::Component,
+                            embedding_kind: SvelteEmbeddingKind::Source,
                         }),
                 )
             })
-            .map_or(JsFileSource::js_module(), |fs| fs)
+            .unwrap_or(JsFileSource::js_module())
     }
 }
 
@@ -127,12 +134,16 @@ impl ExtensionHandler for SvelteFileHandler {
             },
             // TODO: We should be able to search JS portions already
             search: SearchCapabilities { search: None },
+            editors: EditorCapabilities {
+                resolve_binding: None,
+                resolve_definition: None,
+            },
         }
     }
 }
 
 fn parse(
-    _rome_path: &BiomePath,
+    _biome_path: &BiomePath,
     file_source: DocumentFileSource,
     text: &str,
     _settings: &SettingsWithEditor,
@@ -163,22 +174,29 @@ fn parse(
     }
 }
 
-#[tracing::instrument(level = "debug", skip(parse, settings))]
+#[tracing::instrument(level = "debug", skip(parse, settings, workspace_db))]
 fn format(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
-    parse: AnyParse,
+    parse: super::ParsedOrigin,
     settings: &SettingsWithEditor,
+    workspace_db: WorkspaceDb,
 ) -> Result<Printed, WorkspaceError> {
-    let options = settings.format_options::<JsLanguage>(biome_path, document_file_source);
-    let html_options = settings.format_options::<HtmlLanguage>(biome_path, document_file_source);
+    let options = javascript::resolve_format_options(
+        biome_path,
+        document_file_source,
+        settings,
+        &workspace_db,
+    );
+    let html_options =
+        html::resolve_format_options(biome_path, document_file_source, settings, &workspace_db);
     let indent_amount = if *html_options.indent_script_and_style() {
         1
     } else {
         0
     };
-    let tree = parse.syntax();
-    let formatted = format_node(options, &tree, false)?;
+    let tree = parse.syntax(&workspace_db);
+    let formatted = format_node(options, &tree, Vec::new())?;
     match formatted.print_with_indent(indent_amount, SourceMapGeneration::Disabled) {
         Ok(printed) => Ok(printed),
         Err(error) => {
@@ -190,21 +208,37 @@ fn format(
 pub(crate) fn format_range(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
-    parse: AnyParse,
+    parse: AnalyzedSource,
     settings: &SettingsWithEditor,
     range: TextRange,
+    workspace_db: WorkspaceDb,
 ) -> Result<Printed, WorkspaceError> {
-    javascript::format_range(biome_path, document_file_source, parse, settings, range)
+    javascript::format_range(
+        biome_path,
+        document_file_source,
+        parse,
+        settings,
+        range,
+        workspace_db,
+    )
 }
 
 pub(crate) fn format_on_type(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
-    parse: AnyParse,
+    parse: AnalyzedSource,
     settings: &SettingsWithEditor,
     offset: TextSize,
+    workspace_db: WorkspaceDb,
 ) -> Result<Printed, WorkspaceError> {
-    javascript::format_on_type(biome_path, document_file_source, parse, settings, offset)
+    javascript::format_on_type(
+        biome_path,
+        document_file_source,
+        parse,
+        settings,
+        offset,
+        workspace_db,
+    )
 }
 
 pub(crate) fn lint(params: LintParams) -> LintResults {
@@ -215,13 +249,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
     javascript::code_actions(params)
 }
 
-fn fix_all(mut params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
-    let html_options = params
-        .settings
-        .format_options::<HtmlLanguage>(params.biome_path, &params.document_file_source);
-    if *html_options.indent_script_and_style() {
-        params.embeds_initial_indent = 1;
-    }
+fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, WorkspaceError> {
     javascript::fix_all(params)
 }
 

@@ -1,0 +1,190 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<template>
+  <div v-text="foobar"></div>
+  <span v-text="message" />
+  <p v-text="'literal'">ignored content</p>
+  <MyComponent v-text="label" />
+  <div v-text></div>
+  <div v-text:arg="foobar"></div>
+  <div v-text.modifier="foobar"></div>
+  <ul>
+    <li v-for="item in items" :key="item.id" v-text="item.name"></li>
+  </ul>
+</template>
+
+```
+
+# Diagnostics
+```
+invalid.vue:3:8 lint/nursery/noVueVText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of the v-text directive.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <template>
+  > 3 │   <div v-text="foobar"></div>
+      │        ^^^^^^^^^^^^^^^
+    4 │   <span v-text="message" />
+    5 │   <p v-text="'literal'">ignored content</p>
+  
+  i v-text replaces everything inside the element, so the text it shows is not visible where it appears in the template.
+  
+  i Put the value between double curly braces inside the element instead, like {{ message }}.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:4:9 lint/nursery/noVueVText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of the v-text directive.
+  
+    2 │ <template>
+    3 │   <div v-text="foobar"></div>
+  > 4 │   <span v-text="message" />
+      │         ^^^^^^^^^^^^^^^^
+    5 │   <p v-text="'literal'">ignored content</p>
+    6 │   <MyComponent v-text="label" />
+  
+  i v-text replaces everything inside the element, so the text it shows is not visible where it appears in the template.
+  
+  i Put the value between double curly braces inside the element instead, like {{ message }}.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:5:6 lint/nursery/noVueVText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of the v-text directive.
+  
+    3 │   <div v-text="foobar"></div>
+    4 │   <span v-text="message" />
+  > 5 │   <p v-text="'literal'">ignored content</p>
+      │      ^^^^^^^^^^^^^^^^^^
+    6 │   <MyComponent v-text="label" />
+    7 │   <div v-text></div>
+  
+  i v-text replaces everything inside the element, so the text it shows is not visible where it appears in the template.
+  
+  i Put the value between double curly braces inside the element instead, like {{ message }}.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:6:16 lint/nursery/noVueVText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of the v-text directive.
+  
+    4 │   <span v-text="message" />
+    5 │   <p v-text="'literal'">ignored content</p>
+  > 6 │   <MyComponent v-text="label" />
+      │                ^^^^^^^^^^^^^^
+    7 │   <div v-text></div>
+    8 │   <div v-text:arg="foobar"></div>
+  
+  i v-text replaces everything inside the element, so the text it shows is not visible where it appears in the template.
+  
+  i Put the value between double curly braces inside the element instead, like {{ message }}.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:7:8 lint/nursery/noVueVText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of the v-text directive.
+  
+    5 │   <p v-text="'literal'">ignored content</p>
+    6 │   <MyComponent v-text="label" />
+  > 7 │   <div v-text></div>
+      │        ^^^^^^
+    8 │   <div v-text:arg="foobar"></div>
+    9 │   <div v-text.modifier="foobar"></div>
+  
+  i v-text replaces everything inside the element, so the text it shows is not visible where it appears in the template.
+  
+  i Put the value between double curly braces inside the element instead, like {{ message }}.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:8:8 lint/nursery/noVueVText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of the v-text directive.
+  
+     6 │   <MyComponent v-text="label" />
+     7 │   <div v-text></div>
+   > 8 │   <div v-text:arg="foobar"></div>
+       │        ^^^^^^^^^^^^^^^^^^^
+     9 │   <div v-text.modifier="foobar"></div>
+    10 │   <ul>
+  
+  i v-text replaces everything inside the element, so the text it shows is not visible where it appears in the template.
+  
+  i Put the value between double curly braces inside the element instead, like {{ message }}.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:9:8 lint/nursery/noVueVText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of the v-text directive.
+  
+     7 │   <div v-text></div>
+     8 │   <div v-text:arg="foobar"></div>
+   > 9 │   <div v-text.modifier="foobar"></div>
+       │        ^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │   <ul>
+    11 │     <li v-for="item in items" :key="item.id" v-text="item.name"></li>
+  
+  i v-text replaces everything inside the element, so the text it shows is not visible where it appears in the template.
+  
+  i Put the value between double curly braces inside the element instead, like {{ message }}.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:11:46 lint/nursery/noVueVText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of the v-text directive.
+  
+     9 │   <div v-text.modifier="foobar"></div>
+    10 │   <ul>
+  > 11 │     <li v-for="item in items" :key="item.id" v-text="item.name"></li>
+       │                                              ^^^^^^^^^^^^^^^^^^
+    12 │   </ul>
+    13 │ </template>
+  
+  i v-text replaces everything inside the element, so the text it shows is not visible where it appears in the template.
+  
+  i Put the value between double curly braces inside the element instead, like {{ message }}.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

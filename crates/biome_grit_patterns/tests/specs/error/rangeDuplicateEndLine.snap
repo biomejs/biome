@@ -1,0 +1,13 @@
+---
+source: crates/biome_grit_patterns/tests/spec_tests.rs
+expression: rangeDuplicateEndLine
+---
+ErrorSnapshotResult {
+    diagnostics: [
+        FunctionArgument(
+            DuplicateArguments {
+                name: "end_line",
+            },
+        ),
+    ],
+}

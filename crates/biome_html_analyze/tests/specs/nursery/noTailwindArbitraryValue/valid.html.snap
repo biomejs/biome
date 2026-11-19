@@ -1,0 +1,17 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: valid.html
+---
+# Input
+```html
+<!-- should not generate diagnostics -->
+<div class="w-4 text-red-500 bg-white"></div>
+<div class="hover:px-2"></div>
+<div class="[&:nth-child(3)]:px-2"></div>
+<div class="has-[:checked]:bg-red-500"></div>
+<div classList="p-[10px]"></div>
+<div CLASSLIST="p-[10px]"></div>
+<div class="text-red-500/[0.31] hover:bg-black/[0.5] text-sm/[18px]"></div>
+<div class="bg-(--brand) [&_svg]:size-4 data-[state=open]:flex"></div>
+
+```

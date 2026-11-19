@@ -1,0 +1,30 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/value/parity-function-adjacency.css
+---
+
+# Input
+
+```css
+.native{
+color:rgb(10, 20, 30); width:calc(1px + 2px); background:url(asset.svg); content:attr(data-x); value:columns(1fr, 2fr); spaced:columns (1fr, 2fr); comment:columns/**/(1fr, 2fr); font:italic (16px) sans-serif; conditional:if(style(--ready:true):red; else:blue); }
+
+```
+
+
+# Formatted
+
+```css
+.native {
+	color: rgb(10, 20, 30);
+	width: calc(1px + 2px);
+	background: url(asset.svg);
+	content: attr(data-x);
+	value: columns(1fr, 2fr);
+	spaced: columns(1fr, 2fr);
+	comment: columns(/**/ 1fr, 2fr);
+	font: italic(16px) sans-serif;
+	conditional: if(style(--ready: true): red; else: blue);
+}
+
+```

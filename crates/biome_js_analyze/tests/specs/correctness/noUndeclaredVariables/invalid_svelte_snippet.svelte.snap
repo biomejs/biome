@@ -37,6 +37,10 @@ invalid_svelte_snippet.svelte:17:21 lint/correctness/noUndeclaredVariables ━�
     18 │ {/each}
     19 │ 
   
+  i Using an undeclared variable at runtime can throw a ReferenceError. It often points to a typo or a missing import.
+  
+  i Declare or import the variable, or fix its name.
+  
   i By default, Biome recognizes browser and Node.js globals.
     You can ignore more globals using the javascript.globals configuration.
   
@@ -55,6 +59,10 @@ invalid_svelte_snippet.svelte:8:19 lint/correctness/noUndeclaredVariables ━━
      9 │     </figure>
     10 │ {/snippet}
   
+  i Using an undeclared variable at runtime can throw a ReferenceError. It often points to a typo or a missing import.
+  
+  i Declare or import the variable, or fix its name.
+  
   i By default, Biome recognizes browser and Node.js globals.
     You can ignore more globals using the javascript.globals configuration.
   
@@ -72,6 +80,10 @@ invalid_svelte_snippet.svelte:13:11 lint/correctness/noUndeclaredVariables ━�
     14 │ {/snippet}
     15 │ 
   
+  i Using an undeclared variable at runtime can throw a ReferenceError. It often points to a typo or a missing import.
+  
+  i Declare or import the variable, or fix its name.
+  
   i By default, Biome recognizes browser and Node.js globals.
     You can ignore more globals using the javascript.globals configuration.
   
@@ -88,6 +100,10 @@ invalid_svelte_snippet.svelte:13:21 lint/correctness/noUndeclaredVariables ━�
        │                     ^^^^^^^
     14 │ {/snippet}
     15 │ 
+  
+  i Using an undeclared variable at runtime can throw a ReferenceError. It often points to a typo or a missing import.
+  
+  i Declare or import the variable, or fix its name.
   
   i By default, Biome recognizes browser and Node.js globals.
     You can ignore more globals using the javascript.globals configuration.

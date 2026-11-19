@@ -1,0 +1,41 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-define-component.js
+---
+# Input
+```js
+/* should generate diagnostics */
+import { defineComponent } from "vue";
+
+export default defineComponent({
+  props: {
+    foo: {
+      type: Boolean,
+      default: true,
+    },
+  },
+});
+
+```
+
+# Diagnostics
+```
+invalid-define-component.js:8:16 lint/nursery/noVueBooleanDefault ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Boolean prop has a default value.
+  
+     6 │     foo: {
+     7 │       type: Boolean,
+   > 8 │       default: true,
+       │                ^^^^
+     9 │     },
+    10 │   },
+  
+  i Vue already defaults an absent Boolean prop to false. A default of true means the prop can only be turned off by explicitly passing false.
+  
+  i Remove the default value. If the prop should be enabled by default, invert its name and meaning instead, for example disabled instead of enabled.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

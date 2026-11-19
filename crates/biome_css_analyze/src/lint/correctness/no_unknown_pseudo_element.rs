@@ -1,11 +1,12 @@
+#![expect(clippy::disallowed_methods, reason = "This rule needs the complete pseudo-element syntax.")]
+
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
-use biome_css_syntax::{
-    AnyCssPseudoElement, AnyCssSelectorIdentifier, CssFileSource, CssPseudoElementSelector,
-};
+use biome_css_syntax::{AnyCssPseudoElement, AnyCssSelectorIdentifier, CssPseudoElementSelector};
 use biome_diagnostics::Severity;
+use biome_languages::CssFileSource;
 use biome_rowan::AstNode;
 use biome_rule_options::no_unknown_pseudo_element::NoUnknownPseudoElementOptions;
 use biome_string_case::StrLikeExtension;
@@ -13,11 +14,16 @@ use biome_string_case::StrLikeExtension;
 use crate::utils::{is_pseudo_elements, vender_prefix};
 
 declare_lint_rule! {
-    /// Disallow unknown pseudo-element selectors.
+    /// Disallow unrecognized pseudo-element selectors.
     ///
-    /// For details on known CSS pseudo-elements, see the [MDN web docs](https://developer.mozilla.org/en-US/docs/Web/CSS/Pseudo-elements#list_of_pseudo-elements).
+    /// A pseudo-element selects a specific part of an element, such as `::before` or `::selection`.
+    /// Vendor-prefixed pseudo-elements are allowed. See
+    /// [MDN's pseudo-element reference](https://developer.mozilla.org/en-US/docs/Web/CSS/Pseudo-elements#list_of_pseudo-elements).
     ///
-    /// This rule ignores vendor-prefixed pseudo-element selectors.
+    /// ## SCSS limitations
+    ///
+    /// Pseudo-element names containing SCSS interpolation are ignored because the emitted name
+    /// cannot be determined statically.
     ///
     /// ## Examples
     ///
@@ -57,7 +63,8 @@ declare_lint_rule! {
     ///
     /// ### `ignore`
     ///
-    /// A list of unknown pseudo-element names to ignore (case-insensitive).
+    /// Lists additional pseudo-element names to allow, without regard to letter case. Defaults to
+    /// an empty list.
     ///
     /// ```json,options
     /// {
@@ -119,13 +126,11 @@ impl Rule for NoUnknownPseudoElement {
                     ctx.options(),
                 )
             }
-            AnyCssPseudoElement::CssPseudoElementFunction(ident) => {
-                should_not_trigger(
-                    ident.name().ok()?.to_trimmed_text().text(),
-                    file_source,
-                    ctx.options(),
-                )
-            }
+            AnyCssPseudoElement::CssPseudoElementFunction(ident) => should_not_trigger(
+                ident.name().ok()?.to_trimmed_text().text(),
+                file_source,
+                ctx.options(),
+            ),
             AnyCssPseudoElement::ScssInterpolatedPseudoElementFunction(_) => true,
         };
 
@@ -164,7 +169,7 @@ fn should_not_trigger_pseudo_element_name(
     file_source: &CssFileSource,
     options: &NoUnknownPseudoElementOptions,
 ) -> bool {
-    // `::foo-#{$name}` cannot be validated before Sass interpolation is resolved.
+    // `::foo-#{$name}` cannot be validated before SCSS interpolation is resolved.
     let Some(name) = name.as_css_identifier() else {
         return true;
     };

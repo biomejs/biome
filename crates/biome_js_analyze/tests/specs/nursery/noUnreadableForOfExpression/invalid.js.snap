@@ -1,0 +1,1390 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+
+// Calls with complex arguments
+for (const item of getItems(createArgument(seed))) {}
+for (const item of getItems(argument || fallback)) {}
+for (const item of getItems(...inputs)) {}
+for (const item of getItems(tag`argument`)) {}
+for (const pair of Iterator.zip([names, getScores(seed)])) {}
+for (const pair of Iterator.zip([...inputs])) {}
+for (const pair of Iterator.zip([[first], [second]])) {}
+for (const pair of Iterator.zip([first, , second])) {}
+for (const item of Object.keys({ a: 1 })) {}
+for (const item of Object.keys(Object.fromEntries(entries))) {}
+for (const item of Object.values(items.filter(item => item.isEnabled))) {}
+for (
+	const item of getItems(createArgument(seed))
+) {}
+
+async function asyncLoop() {
+	for await (const item of getItems(createArgument(seed))) {}
+	for (const item of await getItems()) {}
+}
+
+// Expressions that are neither a property access nor a call
+for (const item of condition ? first : second) {}
+for (const item of first || second) {}
+for (const item of new Set(items)) {}
+for (const item of tag`items`) {}
+for (const character of `abc`) {}
+
+// Complex objects and callees
+for (const item of (header || "").split(",")) {}
+for (const item of (condition ? first : second).values()) {}
+for (const item of items.map(callback).values()) {}
+for (const item of items[method]()) {}
+for (const item of items[index]) {}
+for (const item of getItems(seed)()) {}
+
+// Optional chaining
+for (const item of items?.values()) {}
+for (const item of items?.entries) {}
+for (const item of items?.map(item => item.value)) {}
+for (const item of items?.map(callback)) {}
+for (const item of items.filter?.(item => item.isEnabled)) {}
+for (const item of items.filter?.(callback)) {}
+for (const item of getItems?.()) {}
+
+// Methods called on the result of a static `Iterator` method
+for (const item of globalThis.Iterator.from(items).map(callback)) {}
+for (const item of (globalThis).Iterator.from(items).map(callback)) {}
+for (const item of (Iterator).from(items).map(callback)) {}
+for (const item of Iterator.from(items).map(item => item.value)) {}
+for (const item of Iterator.from(items).map(callback)) {}
+for (const item of Iterator.from(items).filter(item => item.isEnabled)) {}
+for (const item of Iterator.from(items).filter(callback)) {}
+for (const item of Iterator.from(items).take(1)) {}
+for (const item of Iterator.from(items).drop(1)) {}
+for (const item of Iterator.from(items).flatMap(callback)) {}
+for (const item of Iterator.concat(first, second).map(callback)) {}
+for (const item of Iterator.zip(iterables).filter(callback)) {}
+for (const item of Iterator.zipKeyed(iterables).take(1)) {}
+for (const item of Iterator.from(items).take(1).map(callback)) {}
+
+// Methods called on the result of a method that returns an iterator
+for (const item of items.values().map(item => item.value)) {}
+for (const item of items.values().map(callback)) {}
+for (const item of items.values().filter(callback)) {}
+for (const item of items.values().take(1)) {}
+for (const item of items.values().take(1).map(callback)) {}
+for (const item of items.keys().map(callback)) {}
+for (const item of items.entries().filter(callback)) {}
+for (const item of items.matchAll(pattern).map(callback)) {}
+for (const item of items?.values().map(callback)) {}
+
+// Methods called on a variable that holds an iterator
+function iteratorVariable() {
+	const iterator = items.values();
+	for (const item of iterator.map(callback)) {}
+}
+function chainedIteratorVariables() {
+	const iterator = items.values();
+	const copy = iterator;
+	for (const item of copy.take(1)) {}
+}
+
+// Methods called on the result of a generator function
+function generatorDeclaration() {
+	function* generate() {
+		yield 1;
+	}
+	for (const item of generate().filter(callback)) {}
+}
+function generatorExpression() {
+	const generate = function* () {
+		yield 1;
+	};
+	for (const item of generate().map(callback)) {}
+}
+function hoistedGenerator() {
+	for (const item of generate().drop(1)) {}
+	function* generate() {
+		yield 1;
+	}
+}
+export default function* exportedGenerator() {
+	yield 1;
+}
+for (const item of exportedGenerator().take(1)) {}
+
+```
+
+# Diagnostics
+```
+invalid.js:4:20 lint/nursery/noUnreadableForOfExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This for...of loop goes through the result of a complex expression.
+  
+    3 │ // Calls with complex arguments
+  > 4 │ for (const item of getItems(createArgument(seed))) {}
+      │                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ for (const item of getItems(argument || fallback)) {}
+    6 │ for (const item of getItems(...inputs)) {}
+  
+  i A complex expression between the parentheses of a loop makes it harder to see what the loop works on.
+  
+  i Store the expression in a variable before the loop, and loop over that variable instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:5:20 lint/nursery/noUnreadableForOfExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This for...of loop goes through the result of a complex expression.
+  
+    3 │ // Calls with complex arguments
+    4 │ for (const item of getItems(createArgument(seed))) {}
+  > 5 │ for (const item of getItems(argument || fallback)) {}
+      │                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ for (const item of getItems(...inputs)) {}
+    7 │ for (const item of getItems(tag`argument`)) {}
+  
+  i A complex expression between the parentheses of a loop makes it harder to see what the loop works on.
+  
+  i Store the expression in a variable before the loop, and loop over that variable instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:6:20 lint/nursery/noUnreadableForOfExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This for...of loop goes through the result of a complex expression.
+  
+    4 │ for (const item of getItems(createArgument(seed))) {}
+    5 │ for (const item of getItems(argument || fallback)) {}
+  > 6 │ for (const item of getItems(...inputs)) {}
+      │                    ^^^^^^^^^^^^^^^^^^^
+    7 │ for (const item of getItems(tag`argument`)) {}
+    8 │ for (const pair of Iterator.zip([names, getScores(seed)])) {}
+  
+  i A complex expression between the parentheses of a loop makes it harder to see what the loop works on.
+  
+  i Store the expression in a variable before the loop, and loop over that variable instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:7:20 lint/nursery/noUnreadableForOfExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This for...of loop goes through the result of a complex expression.
+  
+    5 │ for (const item of getItems(argument || fallback)) {}
+    6 │ for (const item of getItems(...inputs)) {}
+  > 7 │ for (const item of getItems(tag`argument`)) {}
+      │                    ^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ for (const pair of Iterator.zip([names, getScores(seed)])) {}
+    9 │ for (const pair of Iterator.zip([...inputs])) {}
+  
+  i A complex expression between the parentheses of a loop makes it harder to see what the loop works on.
+  
+  i Store the expression in a variable before the loop, and loop over that variable instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:8:20 lint/nursery/noUnreadableForOfExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This for...of loop goes through the result of a complex expression.
+  
+     6 │ for (const item of getItems(...inputs)) {}
+     7 │ for (const item of getItems(tag`argument`)) {}
+   > 8 │ for (const pair of Iterator.zip([names, getScores(seed)])) {}
+       │                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ for (const pair of Iterator.zip([...inputs])) {}
+    10 │ for (const pair of Iterator.zip([[first], [second]])) {}
+  
+  i A complex expression between the parentheses of a loop makes it harder to see what the loop works on.
+  
+  i Store the expression in a variable before the loop, and loop over that variable instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:9:20 lint/nursery/noUnreadableForOfExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This for...of loop goes through the result of a complex expression.
+  
+     7 │ for (const item of getItems(tag`argument`)) {}
+     8 │ for (const pair of Iterator.zip([names, getScores(seed)])) {}
+   > 9 │ for (const pair of Iterator.zip([...inputs])) {}
+       │                    ^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ for (const pair of Iterator.zip([[first], [second]])) {}
+    11 │ for (const pair of Iterator.zip([first, , second])) {}
+  
+  i A complex expression between the parentheses of a loop makes it harder to see what the loop works on.
+  
+  i Store the expression in a variable before the loop, and loop over that variable instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:10:20 lint/nursery/noUnreadableForOfExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This for...of loop goes through the result of a complex expression.
+  
+     8 │ for (const pair of Iterator.zip([names, getScores(seed)])) {}
+     9 │ for (const pair of Iterator.zip([...inputs])) {}
+  > 10 │ for (const pair of Iterator.zip([[first], [second]])) {}
+       │                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    11 │ for (const pair of Iterator.zip([first, , second])) {}
+    12 │ for (const item of Object.keys({ a: 1 })) {}
+  
+  i A complex expression between the parentheses of a loop makes it harder to see what the loop works on.
+  
+  i Store the expression in a variable before the loop, and loop over that variable instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:11:20 lint/nursery/noUnreadableForOfExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This for...of loop goes through the result of a complex expression.
+  
+     9 │ for (const pair of Iterator.zip([...inputs])) {}
+    10 │ for (const pair of Iterator.zip([[first], [second]])) {}
+  > 11 │ for (const pair of Iterator.zip([first, , second])) {}
+       │                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ for (const item of Object.keys({ a: 1 })) {}
+    13 │ for (const item of Object.keys(Object.fromEntries(entries))) {}
+  
+  i A complex expression between the parentheses of a loop makes it harder to see what the loop works on.
+  
+  i Store the expression in a variable before the loop, and loop over that variable instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:12:20 lint/nursery/noUnreadableForOfExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This for...of loop goes through the result of a complex expression.
+  
+    10 │ for (const pair of Iterator.zip([[first], [second]])) {}
+    11 │ for (const pair of Iterator.zip([first, , second])) {}
+  > 12 │ for (const item of Object.keys({ a: 1 })) {}
+       │                    ^^^^^^^^^^^^^^^^^^^^^
+    13 │ for (const item of Object.keys(Object.fromEntries(entries))) {}
+    14 │ for (const item of Object.values(items.filter(item => item.isEnabled))) {}
+  
+  i A complex expression between the parentheses of a loop makes it harder to see what the loop works on.
+  
+  i Store the expression in a variable before the loop, and loop over that variable instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:13:20 lint/nursery/noUnreadableForOfExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This for...of loop goes through the result of a complex expression.
+  
+    11 │ for (const pair of Iterator.zip([first, , second])) {}
+    12 │ for (const item of Object.keys({ a: 1 })) {}
+  > 13 │ for (const item of Object.keys(Object.fromEntries(entries))) {}
+       │                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    14 │ for (const item of Object.values(items.filter(item => item.isEnabled))) {}
+    15 │ for (
+  
+  i A complex expression between the parentheses of a loop makes it harder to see what the loop works on.
+  
+  i Store the expression in a variable before the loop, and loop over that variable instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:14:20 lint/nursery/noUnreadableForOfExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This for...of loop goes through the result of a complex expression.
+  
+    12 │ for (const item of Object.keys({ a: 1 })) {}
+    13 │ for (const item of Object.keys(Object.fromEntries(entries))) {}
+  > 14 │ for (const item of Object.values(items.filter(item => item.isEnabled))) {}
+       │                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    15 │ for (
+    16 │ 	const item of getItems(createArgument(seed))
+  
+  i A complex expression between the parentheses of a loop makes it harder to see what the loop works on.
+  
+  i Store the expression in a variable before the loop, and loop over that variable instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:16:16 lint/nursery/noUnreadableForOfExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This for...of loop goes through the result of a complex expression.
+  
+    14 │ for (const item of Object.values(items.filter(item => item.isEnabled))) {}
+    15 │ for (
+  > 16 │ 	const item of getItems(createArgument(seed))
+       │ 	              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    17 │ ) {}
+    18 │ 
+  
+  i A complex expression between the parentheses of a loop makes it harder to see what the loop works on.
+  
+  i Store the expression in a variable before the loop, and loop over that variable instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:20:27 lint/nursery/noUnreadableForOfExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This for await...of loop goes through the result of a complex expression.
+  
+    19 │ async function asyncLoop() {
+  > 20 │ 	for await (const item of getItems(createArgument(seed))) {}
+       │ 	                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    21 │ 	for (const item of await getItems()) {}
+    22 │ }
+  
+  i A complex expression between the parentheses of a loop makes it harder to see what the loop works on.
+  
+  i Store the expression in a variable before the loop, and loop over that variable instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:21:21 lint/nursery/noUnreadableForOfExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This for...of loop goes through the result of a complex expression.
+  
+    19 │ async function asyncLoop() {
+    20 │ 	for await (const item of getItems(createArgument(seed))) {}
+  > 21 │ 	for (const item of await getItems()) {}
+       │ 	                   ^^^^^^^^^^^^^^^^
+    22 │ }
+    23 │ 
+  
+  i A complex expression between the parentheses of a loop makes it harder to see what the loop works on.
+  
+  i Store the expression in a variable before the loop, and loop over that variable instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:25:20 lint/nursery/noUnreadableForOfExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This for...of loop goes through the result of a complex expression.
+  
+    24 │ // Expressions that are neither a property access nor a call
+  > 25 │ for (const item of condition ? first : second) {}
+       │                    ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    26 │ for (const item of first || second) {}
+    27 │ for (const item of new Set(items)) {}
+  
+  i A complex expression between the parentheses of a loop makes it harder to see what the loop works on.
+  
+  i Store the expression in a variable before the loop, and loop over that variable instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:26:20 lint/nursery/noUnreadableForOfExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This for...of loop goes through the result of a complex expression.
+  
+    24 │ // Expressions that are neither a property access nor a call
+    25 │ for (const item of condition ? first : second) {}
+  > 26 │ for (const item of first || second) {}
+       │                    ^^^^^^^^^^^^^^^
+    27 │ for (const item of new Set(items)) {}
+    28 │ for (const item of tag`items`) {}
+  
+  i A complex expression between the parentheses of a loop makes it harder to see what the loop works on.
+  
+  i Store the expression in a variable before the loop, and loop over that variable instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:27:20 lint/nursery/noUnreadableForOfExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This for...of loop goes through the result of a complex expression.
+  
+    25 │ for (const item of condition ? first : second) {}
+    26 │ for (const item of first || second) {}
+  > 27 │ for (const item of new Set(items)) {}
+       │                    ^^^^^^^^^^^^^^
+    28 │ for (const item of tag`items`) {}
+    29 │ for (const character of `abc`) {}
+  
+  i A complex expression between the parentheses of a loop makes it harder to see what the loop works on.
+  
+  i Store the expression in a variable before the loop, and loop over that variable instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:28:20 lint/nursery/noUnreadableForOfExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This for...of loop goes through the result of a complex expression.
+  
+    26 │ for (const item of first || second) {}
+    27 │ for (const item of new Set(items)) {}
+  > 28 │ for (const item of tag`items`) {}
+       │                    ^^^^^^^^^^
+    29 │ for (const character of `abc`) {}
+    30 │ 
+  
+  i A complex expression between the parentheses of a loop makes it harder to see what the loop works on.
+  
+  i Store the expression in a variable before the loop, and loop over that variable instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:29:25 lint/nursery/noUnreadableForOfExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This for...of loop goes through the result of a complex expression.
+  
+    27 │ for (const item of new Set(items)) {}
+    28 │ for (const item of tag`items`) {}
+  > 29 │ for (const character of `abc`) {}
+       │                         ^^^^^
+    30 │ 
+    31 │ // Complex objects and callees
+  
+  i A complex expression between the parentheses of a loop makes it harder to see what the loop works on.
+  
+  i Store the expression in a variable before the loop, and loop over that variable instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:32:20 lint/nursery/noUnreadableForOfExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This for...of loop goes through the result of a complex expression.
+  
+    31 │ // Complex objects and callees
+  > 32 │ for (const item of (header || "").split(",")) {}
+       │                    ^^^^^^^^^^^^^^^^^^^^^^^^^
+    33 │ for (const item of (condition ? first : second).values()) {}
+    34 │ for (const item of items.map(callback).values()) {}
+  
+  i A complex expression between the parentheses of a loop makes it harder to see what the loop works on.
+  
+  i Store the expression in a variable before the loop, and loop over that variable instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:33:20 lint/nursery/noUnreadableForOfExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This for...of loop goes through the result of a complex expression.
+  
+    31 │ // Complex objects and callees
+    32 │ for (const item of (header || "").split(",")) {}
+  > 33 │ for (const item of (condition ? first : second).values()) {}
+       │                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    34 │ for (const item of items.map(callback).values()) {}
+    35 │ for (const item of items[method]()) {}
+  
+  i A complex expression between the parentheses of a loop makes it harder to see what the loop works on.
+  
+  i Store the expression in a variable before the loop, and loop over that variable instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:34:20 lint/nursery/noUnreadableForOfExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This for...of loop goes through the result of a complex expression.
+  
+    32 │ for (const item of (header || "").split(",")) {}
+    33 │ for (const item of (condition ? first : second).values()) {}
+  > 34 │ for (const item of items.map(callback).values()) {}
+       │                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    35 │ for (const item of items[method]()) {}
+    36 │ for (const item of items[index]) {}
+  
+  i A complex expression between the parentheses of a loop makes it harder to see what the loop works on.
+  
+  i Store the expression in a variable before the loop, and loop over that variable instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:35:20 lint/nursery/noUnreadableForOfExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This for...of loop goes through the result of a complex expression.
+  
+    33 │ for (const item of (condition ? first : second).values()) {}
+    34 │ for (const item of items.map(callback).values()) {}
+  > 35 │ for (const item of items[method]()) {}
+       │                    ^^^^^^^^^^^^^^^
+    36 │ for (const item of items[index]) {}
+    37 │ for (const item of getItems(seed)()) {}
+  
+  i A complex expression between the parentheses of a loop makes it harder to see what the loop works on.
+  
+  i Store the expression in a variable before the loop, and loop over that variable instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:36:20 lint/nursery/noUnreadableForOfExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This for...of loop goes through the result of a complex expression.
+  
+    34 │ for (const item of items.map(callback).values()) {}
+    35 │ for (const item of items[method]()) {}
+  > 36 │ for (const item of items[index]) {}
+       │                    ^^^^^^^^^^^^
+    37 │ for (const item of getItems(seed)()) {}
+    38 │ 
+  
+  i A complex expression between the parentheses of a loop makes it harder to see what the loop works on.
+  
+  i Store the expression in a variable before the loop, and loop over that variable instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:37:20 lint/nursery/noUnreadableForOfExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This for...of loop goes through the result of a complex expression.
+  
+    35 │ for (const item of items[method]()) {}
+    36 │ for (const item of items[index]) {}
+  > 37 │ for (const item of getItems(seed)()) {}
+       │                    ^^^^^^^^^^^^^^^^
+    38 │ 
+    39 │ // Optional chaining
+  
+  i A complex expression between the parentheses of a loop makes it harder to see what the loop works on.
+  
+  i Store the expression in a variable before the loop, and loop over that variable instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:40:20 lint/nursery/noUnreadableForOfExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This for...of loop goes through the result of a complex expression.
+  
+    39 │ // Optional chaining
+  > 40 │ for (const item of items?.values()) {}
+       │                    ^^^^^^^^^^^^^^^
+    41 │ for (const item of items?.entries) {}
+    42 │ for (const item of items?.map(item => item.value)) {}
+  
+  i A complex expression between the parentheses of a loop makes it harder to see what the loop works on.
+  
+  i Store the expression in a variable before the loop, and loop over that variable instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:41:20 lint/nursery/noUnreadableForOfExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This for...of loop goes through the result of a complex expression.
+  
+    39 │ // Optional chaining
+    40 │ for (const item of items?.values()) {}
+  > 41 │ for (const item of items?.entries) {}
+       │                    ^^^^^^^^^^^^^^
+    42 │ for (const item of items?.map(item => item.value)) {}
+    43 │ for (const item of items?.map(callback)) {}
+  
+  i A complex expression between the parentheses of a loop makes it harder to see what the loop works on.
+  
+  i Store the expression in a variable before the loop, and loop over that variable instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:42:20 lint/nursery/noUnreadableForOfExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This for...of loop goes through the result of a complex expression.
+  
+    40 │ for (const item of items?.values()) {}
+    41 │ for (const item of items?.entries) {}
+  > 42 │ for (const item of items?.map(item => item.value)) {}
+       │                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    43 │ for (const item of items?.map(callback)) {}
+    44 │ for (const item of items.filter?.(item => item.isEnabled)) {}
+  
+  i A complex expression between the parentheses of a loop makes it harder to see what the loop works on.
+  
+  i Store the expression in a variable before the loop, and loop over that variable instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:43:20 lint/nursery/noUnreadableForOfExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This for...of loop goes through the result of a complex expression.
+  
+    41 │ for (const item of items?.entries) {}
+    42 │ for (const item of items?.map(item => item.value)) {}
+  > 43 │ for (const item of items?.map(callback)) {}
+       │                    ^^^^^^^^^^^^^^^^^^^^
+    44 │ for (const item of items.filter?.(item => item.isEnabled)) {}
+    45 │ for (const item of items.filter?.(callback)) {}
+  
+  i A complex expression between the parentheses of a loop makes it harder to see what the loop works on.
+  
+  i Store the expression in a variable before the loop, and loop over that variable instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:44:20 lint/nursery/noUnreadableForOfExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This for...of loop goes through the result of a complex expression.
+  
+    42 │ for (const item of items?.map(item => item.value)) {}
+    43 │ for (const item of items?.map(callback)) {}
+  > 44 │ for (const item of items.filter?.(item => item.isEnabled)) {}
+       │                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    45 │ for (const item of items.filter?.(callback)) {}
+    46 │ for (const item of getItems?.()) {}
+  
+  i A complex expression between the parentheses of a loop makes it harder to see what the loop works on.
+  
+  i Store the expression in a variable before the loop, and loop over that variable instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:45:20 lint/nursery/noUnreadableForOfExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This for...of loop goes through the result of a complex expression.
+  
+    43 │ for (const item of items?.map(callback)) {}
+    44 │ for (const item of items.filter?.(item => item.isEnabled)) {}
+  > 45 │ for (const item of items.filter?.(callback)) {}
+       │                    ^^^^^^^^^^^^^^^^^^^^^^^^
+    46 │ for (const item of getItems?.()) {}
+    47 │ 
+  
+  i A complex expression between the parentheses of a loop makes it harder to see what the loop works on.
+  
+  i Store the expression in a variable before the loop, and loop over that variable instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:46:20 lint/nursery/noUnreadableForOfExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This for...of loop goes through the result of a complex expression.
+  
+    44 │ for (const item of items.filter?.(item => item.isEnabled)) {}
+    45 │ for (const item of items.filter?.(callback)) {}
+  > 46 │ for (const item of getItems?.()) {}
+       │                    ^^^^^^^^^^^^
+    47 │ 
+    48 │ // Methods called on the result of a static `Iterator` method
+  
+  i A complex expression between the parentheses of a loop makes it harder to see what the loop works on.
+  
+  i Store the expression in a variable before the loop, and loop over that variable instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:49:20 lint/nursery/noUnreadableForOfExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This for...of loop goes through the result of a complex expression.
+  
+    48 │ // Methods called on the result of a static `Iterator` method
+  > 49 │ for (const item of globalThis.Iterator.from(items).map(callback)) {}
+       │                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    50 │ for (const item of (globalThis).Iterator.from(items).map(callback)) {}
+    51 │ for (const item of (Iterator).from(items).map(callback)) {}
+  
+  i A complex expression between the parentheses of a loop makes it harder to see what the loop works on.
+  
+  i Store the expression in a variable before the loop, and loop over that variable instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:50:20 lint/nursery/noUnreadableForOfExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This for...of loop goes through the result of a complex expression.
+  
+    48 │ // Methods called on the result of a static `Iterator` method
+    49 │ for (const item of globalThis.Iterator.from(items).map(callback)) {}
+  > 50 │ for (const item of (globalThis).Iterator.from(items).map(callback)) {}
+       │                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    51 │ for (const item of (Iterator).from(items).map(callback)) {}
+    52 │ for (const item of Iterator.from(items).map(item => item.value)) {}
+  
+  i A complex expression between the parentheses of a loop makes it harder to see what the loop works on.
+  
+  i Store the expression in a variable before the loop, and loop over that variable instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:51:20 lint/nursery/noUnreadableForOfExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This for...of loop goes through the result of a complex expression.
+  
+    49 │ for (const item of globalThis.Iterator.from(items).map(callback)) {}
+    50 │ for (const item of (globalThis).Iterator.from(items).map(callback)) {}
+  > 51 │ for (const item of (Iterator).from(items).map(callback)) {}
+       │                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    52 │ for (const item of Iterator.from(items).map(item => item.value)) {}
+    53 │ for (const item of Iterator.from(items).map(callback)) {}
+  
+  i A complex expression between the parentheses of a loop makes it harder to see what the loop works on.
+  
+  i Store the expression in a variable before the loop, and loop over that variable instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:52:20 lint/nursery/noUnreadableForOfExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This for...of loop goes through the result of a complex expression.
+  
+    50 │ for (const item of (globalThis).Iterator.from(items).map(callback)) {}
+    51 │ for (const item of (Iterator).from(items).map(callback)) {}
+  > 52 │ for (const item of Iterator.from(items).map(item => item.value)) {}
+       │                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    53 │ for (const item of Iterator.from(items).map(callback)) {}
+    54 │ for (const item of Iterator.from(items).filter(item => item.isEnabled)) {}
+  
+  i A complex expression between the parentheses of a loop makes it harder to see what the loop works on.
+  
+  i Store the expression in a variable before the loop, and loop over that variable instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:53:20 lint/nursery/noUnreadableForOfExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This for...of loop goes through the result of a complex expression.
+  
+    51 │ for (const item of (Iterator).from(items).map(callback)) {}
+    52 │ for (const item of Iterator.from(items).map(item => item.value)) {}
+  > 53 │ for (const item of Iterator.from(items).map(callback)) {}
+       │                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    54 │ for (const item of Iterator.from(items).filter(item => item.isEnabled)) {}
+    55 │ for (const item of Iterator.from(items).filter(callback)) {}
+  
+  i A complex expression between the parentheses of a loop makes it harder to see what the loop works on.
+  
+  i Store the expression in a variable before the loop, and loop over that variable instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:54:20 lint/nursery/noUnreadableForOfExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This for...of loop goes through the result of a complex expression.
+  
+    52 │ for (const item of Iterator.from(items).map(item => item.value)) {}
+    53 │ for (const item of Iterator.from(items).map(callback)) {}
+  > 54 │ for (const item of Iterator.from(items).filter(item => item.isEnabled)) {}
+       │                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    55 │ for (const item of Iterator.from(items).filter(callback)) {}
+    56 │ for (const item of Iterator.from(items).take(1)) {}
+  
+  i A complex expression between the parentheses of a loop makes it harder to see what the loop works on.
+  
+  i Store the expression in a variable before the loop, and loop over that variable instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:55:20 lint/nursery/noUnreadableForOfExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This for...of loop goes through the result of a complex expression.
+  
+    53 │ for (const item of Iterator.from(items).map(callback)) {}
+    54 │ for (const item of Iterator.from(items).filter(item => item.isEnabled)) {}
+  > 55 │ for (const item of Iterator.from(items).filter(callback)) {}
+       │                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    56 │ for (const item of Iterator.from(items).take(1)) {}
+    57 │ for (const item of Iterator.from(items).drop(1)) {}
+  
+  i A complex expression between the parentheses of a loop makes it harder to see what the loop works on.
+  
+  i Store the expression in a variable before the loop, and loop over that variable instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:56:20 lint/nursery/noUnreadableForOfExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This for...of loop goes through the result of a complex expression.
+  
+    54 │ for (const item of Iterator.from(items).filter(item => item.isEnabled)) {}
+    55 │ for (const item of Iterator.from(items).filter(callback)) {}
+  > 56 │ for (const item of Iterator.from(items).take(1)) {}
+       │                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    57 │ for (const item of Iterator.from(items).drop(1)) {}
+    58 │ for (const item of Iterator.from(items).flatMap(callback)) {}
+  
+  i A complex expression between the parentheses of a loop makes it harder to see what the loop works on.
+  
+  i Store the expression in a variable before the loop, and loop over that variable instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:57:20 lint/nursery/noUnreadableForOfExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This for...of loop goes through the result of a complex expression.
+  
+    55 │ for (const item of Iterator.from(items).filter(callback)) {}
+    56 │ for (const item of Iterator.from(items).take(1)) {}
+  > 57 │ for (const item of Iterator.from(items).drop(1)) {}
+       │                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    58 │ for (const item of Iterator.from(items).flatMap(callback)) {}
+    59 │ for (const item of Iterator.concat(first, second).map(callback)) {}
+  
+  i A complex expression between the parentheses of a loop makes it harder to see what the loop works on.
+  
+  i Store the expression in a variable before the loop, and loop over that variable instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:58:20 lint/nursery/noUnreadableForOfExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This for...of loop goes through the result of a complex expression.
+  
+    56 │ for (const item of Iterator.from(items).take(1)) {}
+    57 │ for (const item of Iterator.from(items).drop(1)) {}
+  > 58 │ for (const item of Iterator.from(items).flatMap(callback)) {}
+       │                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    59 │ for (const item of Iterator.concat(first, second).map(callback)) {}
+    60 │ for (const item of Iterator.zip(iterables).filter(callback)) {}
+  
+  i A complex expression between the parentheses of a loop makes it harder to see what the loop works on.
+  
+  i Store the expression in a variable before the loop, and loop over that variable instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:59:20 lint/nursery/noUnreadableForOfExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This for...of loop goes through the result of a complex expression.
+  
+    57 │ for (const item of Iterator.from(items).drop(1)) {}
+    58 │ for (const item of Iterator.from(items).flatMap(callback)) {}
+  > 59 │ for (const item of Iterator.concat(first, second).map(callback)) {}
+       │                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    60 │ for (const item of Iterator.zip(iterables).filter(callback)) {}
+    61 │ for (const item of Iterator.zipKeyed(iterables).take(1)) {}
+  
+  i A complex expression between the parentheses of a loop makes it harder to see what the loop works on.
+  
+  i Store the expression in a variable before the loop, and loop over that variable instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:60:20 lint/nursery/noUnreadableForOfExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This for...of loop goes through the result of a complex expression.
+  
+    58 │ for (const item of Iterator.from(items).flatMap(callback)) {}
+    59 │ for (const item of Iterator.concat(first, second).map(callback)) {}
+  > 60 │ for (const item of Iterator.zip(iterables).filter(callback)) {}
+       │                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    61 │ for (const item of Iterator.zipKeyed(iterables).take(1)) {}
+    62 │ for (const item of Iterator.from(items).take(1).map(callback)) {}
+  
+  i A complex expression between the parentheses of a loop makes it harder to see what the loop works on.
+  
+  i Store the expression in a variable before the loop, and loop over that variable instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:61:20 lint/nursery/noUnreadableForOfExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This for...of loop goes through the result of a complex expression.
+  
+    59 │ for (const item of Iterator.concat(first, second).map(callback)) {}
+    60 │ for (const item of Iterator.zip(iterables).filter(callback)) {}
+  > 61 │ for (const item of Iterator.zipKeyed(iterables).take(1)) {}
+       │                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    62 │ for (const item of Iterator.from(items).take(1).map(callback)) {}
+    63 │ 
+  
+  i A complex expression between the parentheses of a loop makes it harder to see what the loop works on.
+  
+  i Store the expression in a variable before the loop, and loop over that variable instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:62:20 lint/nursery/noUnreadableForOfExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This for...of loop goes through the result of a complex expression.
+  
+    60 │ for (const item of Iterator.zip(iterables).filter(callback)) {}
+    61 │ for (const item of Iterator.zipKeyed(iterables).take(1)) {}
+  > 62 │ for (const item of Iterator.from(items).take(1).map(callback)) {}
+       │                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    63 │ 
+    64 │ // Methods called on the result of a method that returns an iterator
+  
+  i A complex expression between the parentheses of a loop makes it harder to see what the loop works on.
+  
+  i Store the expression in a variable before the loop, and loop over that variable instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:65:20 lint/nursery/noUnreadableForOfExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This for...of loop goes through the result of a complex expression.
+  
+    64 │ // Methods called on the result of a method that returns an iterator
+  > 65 │ for (const item of items.values().map(item => item.value)) {}
+       │                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    66 │ for (const item of items.values().map(callback)) {}
+    67 │ for (const item of items.values().filter(callback)) {}
+  
+  i A complex expression between the parentheses of a loop makes it harder to see what the loop works on.
+  
+  i Store the expression in a variable before the loop, and loop over that variable instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:66:20 lint/nursery/noUnreadableForOfExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This for...of loop goes through the result of a complex expression.
+  
+    64 │ // Methods called on the result of a method that returns an iterator
+    65 │ for (const item of items.values().map(item => item.value)) {}
+  > 66 │ for (const item of items.values().map(callback)) {}
+       │                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    67 │ for (const item of items.values().filter(callback)) {}
+    68 │ for (const item of items.values().take(1)) {}
+  
+  i A complex expression between the parentheses of a loop makes it harder to see what the loop works on.
+  
+  i Store the expression in a variable before the loop, and loop over that variable instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:67:20 lint/nursery/noUnreadableForOfExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This for...of loop goes through the result of a complex expression.
+  
+    65 │ for (const item of items.values().map(item => item.value)) {}
+    66 │ for (const item of items.values().map(callback)) {}
+  > 67 │ for (const item of items.values().filter(callback)) {}
+       │                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    68 │ for (const item of items.values().take(1)) {}
+    69 │ for (const item of items.values().take(1).map(callback)) {}
+  
+  i A complex expression between the parentheses of a loop makes it harder to see what the loop works on.
+  
+  i Store the expression in a variable before the loop, and loop over that variable instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:68:20 lint/nursery/noUnreadableForOfExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This for...of loop goes through the result of a complex expression.
+  
+    66 │ for (const item of items.values().map(callback)) {}
+    67 │ for (const item of items.values().filter(callback)) {}
+  > 68 │ for (const item of items.values().take(1)) {}
+       │                    ^^^^^^^^^^^^^^^^^^^^^^
+    69 │ for (const item of items.values().take(1).map(callback)) {}
+    70 │ for (const item of items.keys().map(callback)) {}
+  
+  i A complex expression between the parentheses of a loop makes it harder to see what the loop works on.
+  
+  i Store the expression in a variable before the loop, and loop over that variable instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:69:20 lint/nursery/noUnreadableForOfExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This for...of loop goes through the result of a complex expression.
+  
+    67 │ for (const item of items.values().filter(callback)) {}
+    68 │ for (const item of items.values().take(1)) {}
+  > 69 │ for (const item of items.values().take(1).map(callback)) {}
+       │                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    70 │ for (const item of items.keys().map(callback)) {}
+    71 │ for (const item of items.entries().filter(callback)) {}
+  
+  i A complex expression between the parentheses of a loop makes it harder to see what the loop works on.
+  
+  i Store the expression in a variable before the loop, and loop over that variable instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:70:20 lint/nursery/noUnreadableForOfExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This for...of loop goes through the result of a complex expression.
+  
+    68 │ for (const item of items.values().take(1)) {}
+    69 │ for (const item of items.values().take(1).map(callback)) {}
+  > 70 │ for (const item of items.keys().map(callback)) {}
+       │                    ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    71 │ for (const item of items.entries().filter(callback)) {}
+    72 │ for (const item of items.matchAll(pattern).map(callback)) {}
+  
+  i A complex expression between the parentheses of a loop makes it harder to see what the loop works on.
+  
+  i Store the expression in a variable before the loop, and loop over that variable instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:71:20 lint/nursery/noUnreadableForOfExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This for...of loop goes through the result of a complex expression.
+  
+    69 │ for (const item of items.values().take(1).map(callback)) {}
+    70 │ for (const item of items.keys().map(callback)) {}
+  > 71 │ for (const item of items.entries().filter(callback)) {}
+       │                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    72 │ for (const item of items.matchAll(pattern).map(callback)) {}
+    73 │ for (const item of items?.values().map(callback)) {}
+  
+  i A complex expression between the parentheses of a loop makes it harder to see what the loop works on.
+  
+  i Store the expression in a variable before the loop, and loop over that variable instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:72:20 lint/nursery/noUnreadableForOfExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This for...of loop goes through the result of a complex expression.
+  
+    70 │ for (const item of items.keys().map(callback)) {}
+    71 │ for (const item of items.entries().filter(callback)) {}
+  > 72 │ for (const item of items.matchAll(pattern).map(callback)) {}
+       │                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    73 │ for (const item of items?.values().map(callback)) {}
+    74 │ 
+  
+  i A complex expression between the parentheses of a loop makes it harder to see what the loop works on.
+  
+  i Store the expression in a variable before the loop, and loop over that variable instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:73:20 lint/nursery/noUnreadableForOfExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This for...of loop goes through the result of a complex expression.
+  
+    71 │ for (const item of items.entries().filter(callback)) {}
+    72 │ for (const item of items.matchAll(pattern).map(callback)) {}
+  > 73 │ for (const item of items?.values().map(callback)) {}
+       │                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    74 │ 
+    75 │ // Methods called on a variable that holds an iterator
+  
+  i A complex expression between the parentheses of a loop makes it harder to see what the loop works on.
+  
+  i Store the expression in a variable before the loop, and loop over that variable instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:78:21 lint/nursery/noUnreadableForOfExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This for...of loop goes through the result of a complex expression.
+  
+    76 │ function iteratorVariable() {
+    77 │ 	const iterator = items.values();
+  > 78 │ 	for (const item of iterator.map(callback)) {}
+       │ 	                   ^^^^^^^^^^^^^^^^^^^^^^
+    79 │ }
+    80 │ function chainedIteratorVariables() {
+  
+  i A complex expression between the parentheses of a loop makes it harder to see what the loop works on.
+  
+  i Store the expression in a variable before the loop, and loop over that variable instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:83:21 lint/nursery/noUnreadableForOfExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This for...of loop goes through the result of a complex expression.
+  
+    81 │ 	const iterator = items.values();
+    82 │ 	const copy = iterator;
+  > 83 │ 	for (const item of copy.take(1)) {}
+       │ 	                   ^^^^^^^^^^^^
+    84 │ }
+    85 │ 
+  
+  i A complex expression between the parentheses of a loop makes it harder to see what the loop works on.
+  
+  i Store the expression in a variable before the loop, and loop over that variable instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:91:21 lint/nursery/noUnreadableForOfExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This for...of loop goes through the result of a complex expression.
+  
+    89 │ 		yield 1;
+    90 │ 	}
+  > 91 │ 	for (const item of generate().filter(callback)) {}
+       │ 	                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    92 │ }
+    93 │ function generatorExpression() {
+  
+  i A complex expression between the parentheses of a loop makes it harder to see what the loop works on.
+  
+  i Store the expression in a variable before the loop, and loop over that variable instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:97:21 lint/nursery/noUnreadableForOfExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This for...of loop goes through the result of a complex expression.
+  
+    95 │ 		yield 1;
+    96 │ 	};
+  > 97 │ 	for (const item of generate().map(callback)) {}
+       │ 	                   ^^^^^^^^^^^^^^^^^^^^^^^^
+    98 │ }
+    99 │ function hoistedGenerator() {
+  
+  i A complex expression between the parentheses of a loop makes it harder to see what the loop works on.
+  
+  i Store the expression in a variable before the loop, and loop over that variable instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:100:21 lint/nursery/noUnreadableForOfExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This for...of loop goes through the result of a complex expression.
+  
+     98 │ }
+     99 │ function hoistedGenerator() {
+  > 100 │ 	for (const item of generate().drop(1)) {}
+        │ 	                   ^^^^^^^^^^^^^^^^^^
+    101 │ 	function* generate() {
+    102 │ 		yield 1;
+  
+  i A complex expression between the parentheses of a loop makes it harder to see what the loop works on.
+  
+  i Store the expression in a variable before the loop, and loop over that variable instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:108:20 lint/nursery/noUnreadableForOfExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This for...of loop goes through the result of a complex expression.
+  
+    106 │ 	yield 1;
+    107 │ }
+  > 108 │ for (const item of exportedGenerator().take(1)) {}
+        │                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    109 │ 
+  
+  i A complex expression between the parentheses of a loop makes it harder to see what the loop works on.
+  
+  i Store the expression in a variable before the loop, and loop over that variable instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

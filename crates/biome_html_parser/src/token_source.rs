@@ -1,4 +1,4 @@
-use crate::lexer::HtmlLexer;
+use crate::lexer::{HtmlLexer, HtmlLexerOptions};
 use biome_html_syntax::HtmlSyntaxKind::{AS_KW, CATCH_KW, EOF, THEN_KW};
 use biome_html_syntax::{HtmlSyntaxKind, TextRange};
 use biome_parser::diagnostic::ParseDiagnostic;
@@ -16,27 +16,29 @@ pub(crate) struct HtmlTokenSource<'source> {
     pub(super) trivia_list: Vec<Trivia>,
 }
 
-#[derive(Default, Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(crate) enum HtmlLexContext {
     /// The default state. This state is used for lexing outside of tags.
     ///
     /// When the lexer is outside of a tag, special characters are lexed as text.
     ///
     /// The exceptions being `<` which indicates the start of a tag, and `>` which is invalid syntax if not preceded with a `<`.
-    #[default]
-    Regular,
+    Regular { framework: HtmlFramework },
     /// When the lexer is inside a tag, special characters are lexed as tag tokens.
-    InsideTag,
-    /// Like [InsideTag], but with Vue-style directive tokens enabled (`.`, `:`, `@`, `#`, etc.).
-    /// When `svelte` is `true`, also recognizes `//` and `/* */` as JS-style comments (for Svelte
-    /// component names which need both member-expression `.` support and comment support).
+    ///
+    /// This single context covers plain HTML as well as the Vue/Svelte/Astro
+    /// variants, parameterized by `framework`, which selects the directive lexing
+    /// and whether PascalCase tag names are treated as component names.
+    InsideTag { framework: HtmlFramework },
+    /// Like [InsideTag], but used **only** when lexing a component name or member
+    /// expression (e.g. `Foo` / `Foo.Bar`), after the parser has already decided
+    /// the name is a component. The tag-name token is always emitted as
+    /// `HTML_COMPONENT_LITERAL`, and `.` is lexed as a token for member access.
+    ///
+    /// `svelte` controls brace handling only. Whether `//` and `/* */` comments
+    /// are recognized follows [`HtmlLexerOptions::framework`], since Astro
+    /// accepts them too.
     InsideTagWithDirectives { svelte: bool },
-    /// Like [InsideTag], but with Svelte-specific tokens enabled.
-    /// This enables parsing of JS-style `//` and `/* */` comments as trivia.
-    InsideTagSvelte,
-    /// Like [InsideTag], but with Astro-specific tokens enabled.
-    /// This enables parsing of Astro directives (client:, set:, class:, is:, server:)
-    InsideTagAstro,
     /// Lexes Vue directive arguments inside `[]`.
     VueDirectiveArgument,
     /// Lexes the binding and operator portions of a Vue `v-for` value.
@@ -44,10 +46,22 @@ pub(crate) enum HtmlLexContext {
     /// Lexes the iterable expression after a Vue `v-for` `in` or `of` operator.
     /// The stored syntax kind is the quote that terminates the attribute value.
     VueVForExpression(HtmlSyntaxKind),
+    /// Lexes the default value of a Vue `v-for` binding, after its `=`.
+    /// The stored syntax kind is the quote that terminates the attribute value.
+    VueVForDefault(HtmlSyntaxKind),
     /// When the parser encounters a `=` token (the beginning of the attribute initializer clause), it switches to this context.
     ///
     /// This is because attribute values can start and end with a `"` or `'` character, or be unquoted, and the lexer needs to know to start lexing a string literal.
     AttributeValue,
+
+    /// Like [AttributeValue] but for quoted values stops at `{` instead of consuming
+    /// the whole string, so the parser can detect interpolations without a pre-scan.
+    SvelteAttributeValue,
+
+    /// Lexes literal chunks of a Svelte template attribute value (e.g. `top: ` and
+    /// `px` in `style="top: {top}px"`). Emits `{` as its own token; everything else
+    /// runs until the next `{` or the closing quote.
+    SvelteTemplateChunk { quote: u8 },
 
     /// Context to be used when parsing the contents of Svelte blocks. Svelte blocks usually start with `{@`, `{:`, `{/` or `{#`.
     /// When lexing using this context, specific tokens are emitted such as `if`, `else`, `debug`, etc.
@@ -55,7 +69,7 @@ pub(crate) enum HtmlLexContext {
     /// Outside of this context, the lexer doesn't yield any particular keywords.
     Svelte,
 
-    /// The binding properties in Svelte are special and require a special lexing. They accept everything until `=` is found.
+    /// The binding properties in Svelte are special and require a special lexing. They accept everything until whitespace, `=`, `>`, `/`, or `|` is found.
     SvelteBindingLiteral,
 
     /// Lex tokens inside text expressions. In the following examples, `foo` is the text expression:
@@ -68,6 +82,13 @@ pub(crate) enum HtmlLexContext {
     ///
     /// When the parser has encounters the sequence `<!DOCTYPE`, it switches to this context. It will remain in this context until the next `>` token is encountered.
     Doctype,
+    /// Lexes the target and attributes of a processing instruction, between
+    /// `<?` and `?>`.
+    ///
+    /// A name ends before `?>`, so the `?` of `<?xml?>` or `<?foo bar?>` starts
+    /// the closing `?>` rather than joining the name. Framework syntax, such as
+    /// Vue directives or Astro expressions, is not recognized.
+    ProcessingInstruction,
     /// Treat everything as text until the closing tag is encountered.
     EmbeddedLanguage(HtmlEmbeddedLanguage),
     /// CDATA Sections are treated as text until the closing CDATA token is encountered.
@@ -75,6 +96,31 @@ pub(crate) enum HtmlLexContext {
     /// Lexing the Astro frontmatter. When in this context, the lexer will treat `---`
     /// as a boundary for `HTML_LITERAL`
     AstroFencedCodeBlock,
+}
+
+/// The framework flavor of an HTML file, used to parameterize the [HtmlLexContext::InsideTag]
+/// context so the lexer knows which directive tokens to recognize and whether
+/// PascalCase tag names should be treated as component names.
+#[derive(Default, Clone, Copy, Debug, PartialEq, Eq)]
+pub(crate) enum HtmlFramework {
+    /// Plain HTML. PascalCase names are still HTML tags (case-insensitive).
+    #[default]
+    Plain,
+    /// Vue single-file component. Enables Vue directive tokens (`.`, `:`, `@`, `[`, `]`, `#`).
+    Vue,
+    /// Svelte component. Enables `.` and JS-style comments.
+    Svelte,
+    /// Astro component. Enables Astro directive tokens (`:`, `.`).
+    Astro,
+    /// Angular component. Enables Astro directive tokens (`:`, `.`).
+    Angular,
+}
+
+impl HtmlFramework {
+    /// Whether PascalCase tag names should be treated as component names.
+    pub(crate) const fn supports_components(self) -> bool {
+        !matches!(self, Self::Plain)
+    }
 }
 
 impl HtmlLexContext {
@@ -110,12 +156,17 @@ pub(crate) enum RestrictedExpressionStopAt {
     ClosingParen,
     /// Stops at `then` or `catch` keywords
     ThenOrCatch,
+    /// Like `AsOrComma`, but skips the first occurrence of `as` and stops at
+    /// the second. Used when the parser has determined via lookahead that the
+    /// expression contains a TypeScript `as const` assertion before the Svelte
+    /// binding `as`.
+    AsOrCommaSkipFirstAs,
 }
 
 impl RestrictedExpressionStopAt {
     pub(crate) fn matches_punct(&self, byte: u8) -> bool {
         match self {
-            Self::AsOrComma | Self::Comma => byte == b',',
+            Self::AsOrComma | Self::Comma | Self::AsOrCommaSkipFirstAs => byte == b',',
             Self::ClosingParen => byte == b')',
             Self::ThenOrCatch => false,
         }
@@ -123,7 +174,7 @@ impl RestrictedExpressionStopAt {
 
     pub(crate) fn matches_keyword(&self, keyword: HtmlSyntaxKind) -> bool {
         match self {
-            Self::AsOrComma => keyword == AS_KW,
+            Self::AsOrComma | Self::AsOrCommaSkipFirstAs => keyword == AS_KW,
             Self::Comma => false,
             Self::ClosingParen => false,
             Self::ThenOrCatch => keyword == THEN_KW || keyword == CATCH_KW,
@@ -135,22 +186,64 @@ impl RestrictedExpressionStopAt {
 pub(crate) enum HtmlEmbeddedLanguage {
     Script,
     Style,
-    Preformatted,
+    /// An element whose text the user-agent stylesheet renders with a
+    /// `white-space` value that keeps newlines and consecutive spaces.
+    /// Lexing the text as a single literal is what lets the formatter
+    /// reproduce it byte for byte; splitting it into markup would lose the
+    /// whitespace to trivia.
+    Preformatted(PreformattedElement),
+    /// An element whose content is raw text because of how it was written
+    /// rather than because of its name: a custom block or non-HTML `<template>`
+    /// of a Vue single-file component, or an Astro element carrying `is:raw`.
+    /// The tag name is arbitrary, so it is carried as a range into the source
+    /// rather than as a `&'static str`.
+    RawTextBlock {
+        name: TextRange,
+    },
+}
+
+/// The preformatted elements, each identified by the closing tag that ends its
+/// text. `pre` renders as `white-space: pre` and `textarea` as `pre-wrap`;
+/// `xmp` and `plaintext` are obsolete but browsers still read them as raw text.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub(crate) enum PreformattedElement {
+    Pre,
+    Textarea,
+    Xmp,
+    Plaintext,
 }
 
 impl HtmlEmbeddedLanguage {
-    pub fn end_tag(&self) -> &'static str {
+    /// The name of the tag that ends this content, e.g. `script` for a
+    /// `<script>` element. A raw-text block can be named anything, so its name
+    /// is read back out of `source`, which is the same text its range was taken
+    /// from.
+    pub fn closing_tag_name<'a>(&self, source: &'a str) -> &'a str {
         match self {
-            Self::Script => "</script>",
-            Self::Style => "</style>",
-            Self::Preformatted => "</pre>",
+            Self::Script => "script",
+            Self::Style => "style",
+            Self::Preformatted(element) => match element {
+                PreformattedElement::Pre => "pre",
+                PreformattedElement::Textarea => "textarea",
+                PreformattedElement::Xmp => "xmp",
+                PreformattedElement::Plaintext => "plaintext",
+            },
+            Self::RawTextBlock { name } => &source[*name],
         }
     }
 }
 
 impl LexContext for HtmlLexContext {
     fn is_regular(&self) -> bool {
-        matches!(self, Self::Regular)
+        matches!(self, Self::Regular { .. })
+    }
+}
+
+impl Default for HtmlLexContext {
+    fn default() -> Self {
+        Self::Regular {
+            framework: HtmlFramework::Plain,
+        }
     }
 }
 
@@ -158,27 +251,39 @@ impl LexContext for HtmlLexContext {
 pub(crate) enum HtmlReLexContext {
     /// Specialised relex that manages certain characters such as commas, etc.
     Svelte,
-    /// Relex tokens using `HtmlLexer::consume_html_text`
-    HtmlText,
+    /// Relex tokens using `HtmlLexer::consume_html_text`.
+    HtmlText { framework: HtmlFramework },
     /// Relex tokens as if the parser was inside a tag.
     InsideTag,
     /// Relex tokens as if the parser was inside a tag in an Astro file.
     InsideTagAstro,
     /// Relex tokens as if the parser was inside a tag in a Svelte file.
     InsideTagSvelte,
+    /// Re-tokenize the current `{{` as a single `{`. Used where the file has
+    /// single text expressions, so `{{` opens an object literal rather than an
+    /// interpolation.
+    SingleCurly,
+    /// Re-tokenize the current quote token (`DOUBLE_QUOTE` or `SINGLE_QUOTE`)
+    /// as a full `HTML_STRING_LITERAL`. Used when a Svelte attribute value was
+    /// speculatively parsed as a template but turned out to have no
+    /// interpolations, so it can be parsed as a plain string instead.
+    SvelteAttributeString,
 }
 
 pub(crate) type HtmlTokenSourceCheckpoint = TokenSourceCheckpoint<HtmlSyntaxKind>;
 
 impl<'source> HtmlTokenSource<'source> {
     /// Creates a new token source for the given string
-    pub fn from_str(source: &'source str) -> Self {
-        let lexer = HtmlLexer::from_str(source);
-
+    pub fn from_str(
+        source: &'source str,
+        initial_context: HtmlLexContext,
+        options: HtmlLexerOptions,
+    ) -> Self {
+        let lexer = HtmlLexer::from_str(source).with_options(options);
         let buffered = BufferedLexer::new(lexer);
         let mut source = Self::new(buffered);
 
-        source.next_non_trivia_token(HtmlLexContext::Regular, true);
+        source.next_non_trivia_token(initial_context, true);
         source
     }
 
@@ -262,11 +367,11 @@ impl TokenSource for HtmlTokenSource<'_> {
     }
 
     fn bump(&mut self) {
-        self.bump_with_context(HtmlLexContext::Regular)
+        self.bump_with_context(HtmlLexContext::default())
     }
 
     fn skip_as_trivia(&mut self) {
-        self.skip_as_trivia_with_context(HtmlLexContext::Regular)
+        self.skip_as_trivia_with_context(HtmlLexContext::default())
     }
 
     fn finish(self) -> (Vec<Trivia>, Vec<ParseDiagnostic>) {

@@ -1,0 +1,28 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: importGlobal.ts
+---
+# Input
+```ts
+import { test } from "custom-runner";
+test("first", () => {});
+it("global", () => {});
+
+```
+
+# Diagnostics
+```
+importGlobal.ts:2:1 lint/style/useConsistentTestIt ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The test function test is inconsistent with the configured preferred function it.
+  
+    1 │ import { test } from "custom-runner";
+  > 2 │ test("first", () => {});
+      │ ^^^^
+    3 │ it("global", () => {});
+    4 │ 
+  
+  i Using a consistent function for tests improves readability and makes it easier to search for tests in the codebase.
+  
+
+```

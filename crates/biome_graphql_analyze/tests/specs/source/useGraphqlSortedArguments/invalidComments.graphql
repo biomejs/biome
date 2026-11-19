@@ -1,0 +1,58 @@
+# should generate diagnostics
+query FieldCommaThenComment {
+  users(
+    first: 10, # first
+    after: "x" # after
+  ) { id }
+}
+
+query FieldCommentAbove {
+  users(
+    # about first
+    first: 10
+    # about after
+    after: "x"
+  ) { id }
+}
+
+type DefinitionMixed {
+  users(
+    # header for c
+    c: Int, # same c
+    b: Int # same b
+    # header for a
+    "Description of a"
+    a: Int, # same a
+  ): [User]
+}
+
+type DefinitionPlainIntoCommentSlot {
+  users(
+    c: Int, # c
+    a: Int,
+  ): [User]
+}
+
+# The comment of `a` would be followed by `b` on the same line, so no fix is offered.
+query CommentWouldSwallowArgument {
+  users(c: 1, b: 2, a: 3 # a
+  ) { id }
+}
+
+# The comment of `b` would be followed by `)` on the same line, so no fix is offered.
+type CommentWouldSwallowParen {
+  users(b: Int # b
+    a: Int): [User]
+}
+
+# The comment above `b` would follow `a` on the same line, so no fix is offered.
+type CommentAboveIntoInlineSlot {
+  users(a: Int, c: Int,
+    # about b
+    b: Int): [User]
+}
+
+# The comment above `a` would follow `(` on the same line, so no fix is offered.
+directive @commentAboveIntoFirstSlot(b: Int,
+  # about a
+  a: Int) on FIELD

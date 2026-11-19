@@ -1,0 +1,9 @@
+@media (min-width: -$gap + 800px) {
+  .negative { display: block; }
+}
+
+@media (min-width: +$gap + 800px) {
+  .positive { display: block; }
+}
+
+.after { color: blue; }

@@ -20,6 +20,13 @@ impl FormatNodeRule<ScssInterpolatedPseudoElementFunction>
             arguments,
             r_paren_token,
         } = node.as_fields();
+        let content = format_with(|f| {
+            if arguments.is_some() {
+                arguments.format().fmt(f)
+            } else {
+                format_dangling_comments(node.syntax()).fmt(f)
+            }
+        });
 
         write!(
             f,
@@ -27,10 +34,24 @@ impl FormatNodeRule<ScssInterpolatedPseudoElementFunction>
                 name.format(),
                 group(&format_args![
                     l_paren_token.format(),
-                    soft_block_indent(&arguments.format()),
+                    soft_block_indent(&content),
                     r_paren_token.format()
                 ])
             ]
         )
+    }
+
+    fn fmt_dangling_comments(
+        &self,
+        node: &ScssInterpolatedPseudoElementFunction,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        if node.arguments().is_none() {
+            Ok(())
+        } else {
+            format_dangling_comments(node.syntax())
+                .with_soft_block_indent()
+                .fmt(f)
+        }
     }
 }

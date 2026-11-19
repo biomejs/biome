@@ -1,0 +1,15 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: entity.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+
+import type { Repository } from "./repository";
+
+export interface Entity<R extends Repository<any> = Repository<any>> {
+	repository: R;
+}
+
+```

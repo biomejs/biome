@@ -1,0 +1,152 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome lint '<TEMP_DIR>/root_plugin_includes_are_relative_to_child_config_that_extends_root'
+```
+
+## `biome.json`
+
+```json
+{
+  "root": true,
+  "plugins": [
+    {
+      "path": "./biome/root-relative.grit",
+      "includes": ["packages/mobile/src/**"]
+    },
+    { "path": "./biome/child-relative.grit", "includes": ["src/**"] },
+    {
+      "path": "./biome/root-relative-config.grit",
+      "resolutionKind": "config",
+      "includes": ["packages/mobile/src/**"]
+    },
+    {
+      "path": "./biome/child-relative-config.grit",
+      "resolutionKind": "config",
+      "includes": ["src/**"]
+    }
+  ]
+}
+```
+
+## `packages/mobile/biome.json`
+
+```json
+{ "extends": "//" }
+```
+
+## `biome/child-relative-config.grit`
+
+```grit
+`Object.assign($args)` where {
+    register_diagnostic(span = $args, message = "Pattern relative to the child directory, resolutionKind config")
+}
+```
+
+## `biome/child-relative.grit`
+
+```grit
+`Object.assign($args)` where {
+    register_diagnostic(span = $args, message = "Pattern relative to the child directory")
+}
+```
+
+## `biome/root-relative-config.grit`
+
+```grit
+`Object.assign($args)` where {
+    register_diagnostic(span = $args, message = "Pattern relative to the root directory, resolutionKind config")
+}
+```
+
+## `biome/root-relative.grit`
+
+```grit
+`Object.assign($args)` where {
+    register_diagnostic(span = $args, message = "Pattern relative to the root directory")
+}
+```
+
+## `packages/mobile/src/file.js`
+
+```js
+Object.assign({}, value);
+
+```
+
+## `src/file.js`
+
+```js
+Object.assign({}, value);
+
+```
+
+# Termination Message
+
+```block
+lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+packages/mobile/src/file.js:1:15 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Pattern relative to the child directory
+  
+  > 1 │ Object.assign({}, value);
+      │               ^^^^^^^^^
+    2 │ 
+  
+
+```
+
+```block
+packages/mobile/src/file.js:1:15 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Pattern relative to the child directory, resolutionKind config
+  
+  > 1 │ Object.assign({}, value);
+      │               ^^^^^^^^^
+    2 │ 
+  
+
+```
+
+```block
+src/file.js:1:15 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Pattern relative to the child directory
+  
+  > 1 │ Object.assign({}, value);
+      │               ^^^^^^^^^
+    2 │ 
+  
+
+```
+
+```block
+src/file.js:1:15 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Pattern relative to the child directory, resolutionKind config
+  
+  > 1 │ Object.assign({}, value);
+      │               ^^^^^^^^^
+    2 │ 
+  
+
+```
+
+```block
+Checked 8 files in <TIME>. No fixes applied.
+Found 4 errors.
+```

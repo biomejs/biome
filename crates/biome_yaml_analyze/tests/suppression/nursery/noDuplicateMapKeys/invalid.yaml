@@ -1,0 +1,31 @@
+# should generate diagnostics
+person:
+  name: John Doe
+  age: 50
+  name: Jane Doe
+
+person2: { name: John, age: 50, name: Jane }
+
+person3:
+  name: John Doe
+  "name": Jane Doe
+  'name': Baby Doe
+
+# nested block mappings, duplicates at both levels
+parent:
+  child:
+    name: John Doe
+    name: Jane Doe
+  child: second
+
+# sequence of mappings, each with duplicates
+people:
+  - id: 1
+    id: 2
+  - name: a
+    role: admin
+    role: guest
+
+# nested flow mappings, duplicates at both levels
+config: { a: { x: 1, x: 2 }, a: 3 }
+

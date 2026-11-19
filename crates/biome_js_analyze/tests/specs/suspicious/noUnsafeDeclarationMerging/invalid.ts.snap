@@ -45,6 +45,8 @@ invalid.ts:2:7 lint/suspicious/noUnsafeDeclarationMerging ━━━━━━━�
   
   i The TypeScript compiler doesn't check whether properties defined in the interface are initialized in the class.
   
+  i Rename the class or the interface so that they do not merge, or declare the properties directly in the class and remove the interface.
+  
 
 ```
 
@@ -69,6 +71,8 @@ invalid.ts:4:7 lint/suspicious/noUnsafeDeclarationMerging ━━━━━━━�
     7 │ function f(){
   
   i The TypeScript compiler doesn't check whether properties defined in the interface are initialized in the class.
+  
+  i Rename the class or the interface so that they do not merge, or declare the properties directly in the class and remove the interface.
   
 
 ```
@@ -95,6 +99,8 @@ invalid.ts:9:11 lint/suspicious/noUnsafeDeclarationMerging ━━━━━━━
   
   i The TypeScript compiler doesn't check whether properties defined in the interface are initialized in the class.
   
+  i Rename the class or the interface so that they do not merge, or declare the properties directly in the class and remove the interface.
+  
 
 ```
 
@@ -119,6 +125,8 @@ invalid.ts:14:11 lint/suspicious/noUnsafeDeclarationMerging ━━━━━━�
     15 │ }
   
   i The TypeScript compiler doesn't check whether properties defined in the interface are initialized in the class.
+  
+  i Rename the class or the interface so that they do not merge, or declare the properties directly in the class and remove the interface.
   
 
 ```

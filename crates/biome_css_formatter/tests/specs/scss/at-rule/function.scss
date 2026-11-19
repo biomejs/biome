@@ -11,3 +11,10 @@ $value * $ratio;
 @function --highlight  ( ) {
 result:var(--highlight,#{$highlight});
 }
+
+$function-name: highlight;
+
+@function
+--#{$function-name}  ( ) {
+result: red;
+}

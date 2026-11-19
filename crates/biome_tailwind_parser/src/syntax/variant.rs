@@ -1,6 +1,7 @@
 use crate::parser::TailwindParser;
+use crate::syntax::css_value::parse_css_parameter_list;
 use crate::syntax::parse_error::*;
-use crate::syntax::value::parse_value;
+use crate::syntax::parse_modifier;
 use crate::token_source::TailwindLexContext;
 use biome_parser::parse_lists::ParseSeparatedList;
 use biome_parser::parsed_syntax::ParsedSyntax::{Absent, Present};
@@ -83,14 +84,11 @@ pub(crate) fn parse_variant(p: &mut TailwindParser) -> ParsedSyntax {
         // variants can't start with a negative sign
         return Absent;
     }
-    if p.at(T![data]) {
-        return parse_data_attribute(p);
-    }
     if p.at(T!['[']) {
         return parse_arbitrary_variant(p);
     }
 
-    parse_static_or_functional_variant(p)
+    parse_variant_expression(p)
 }
 
 fn parse_arbitrary_variant(p: &mut TailwindParser) -> ParsedSyntax {
@@ -110,24 +108,37 @@ fn parse_arbitrary_variant(p: &mut TailwindParser) -> ParsedSyntax {
     Present(m.complete(p, TW_ARBITRARY_VARIANT))
 }
 
-fn parse_static_or_functional_variant(p: &mut TailwindParser) -> ParsedSyntax {
+fn parse_variant_expression(p: &mut TailwindParser) -> ParsedSyntax {
     let checkpoint = p.checkpoint();
     let m = p.start();
-    p.bump(TW_BASE);
 
-    if !p.at(T![-]) {
-        if !p.at(COLON) {
-            // if we don't reach a colon, we haven't actually parsed a variant.
-            m.abandon(p);
-            p.rewind(checkpoint);
-            return Absent;
-        }
-        return Present(m.complete(p, TW_STATIC_VARIANT));
+    p.source_mut()
+        .re_lex_current_in_context(TailwindLexContext::VariantSegment);
+
+    let segments = p.start();
+    parse_any_variant_segment(p).or_add_diagnostic(p, expected_value);
+
+    while p.at(T![-]) {
+        p.bump_with_context(T![-], TailwindLexContext::VariantSegment);
+        parse_any_variant_segment(p).or_add_diagnostic(p, expected_value);
     }
 
-    p.expect(T![-]);
+    segments.complete(p, TW_VARIANT_SEGMENT_LIST);
 
-    parse_value(p).or_add_diagnostic(p, expected_value);
+    if p.at(T!['[']) {
+        // A bracketed value can glue directly to the last segment with no
+        // `-` separator: `@[400px]:` is the container root plus an
+        // arbitrary size. Whitespace before the `[` means it starts the
+        // next class instead.
+        parse_arbitrary_variant_segment(p).or_add_diagnostic(p, expected_value);
+    }
+
+    // A variant can carry a modifier (`group-hover/menu:`, `@sm/main:`).
+    // When the `:` check below fails, the rewind hands the `/` back to the
+    // candidate's own modifier parsing (`bg-red-500/50`).
+    if p.at(T![/]) {
+        parse_modifier(p).or_add_diagnostic(p, expected_value);
+    }
 
     if !p.at(COLON) {
         // if we don't reach a colon, we haven't actually parsed a variant.
@@ -136,18 +147,51 @@ fn parse_static_or_functional_variant(p: &mut TailwindParser) -> ParsedSyntax {
         return Absent;
     }
 
-    Present(m.complete(p, TW_FUNCTIONAL_VARIANT))
+    Present(m.complete(p, TW_VARIANT_EXPRESSION))
 }
 
-pub(crate) fn parse_data_attribute(p: &mut TailwindParser) -> ParsedSyntax {
-    if !p.at(T![data]) {
+fn parse_any_variant_segment(p: &mut TailwindParser) -> ParsedSyntax {
+    if p.at(T!['[']) {
+        return parse_arbitrary_variant_segment(p);
+    }
+
+    if p.at(T!['(']) {
+        return parse_css_variable_variant_segment(p);
+    }
+
+    parse_named_variant_segment(p)
+}
+
+fn parse_named_variant_segment(p: &mut TailwindParser) -> ParsedSyntax {
+    if !p.at(TW_VARIANT_SEGMENT) {
         return Absent;
     }
 
     let m = p.start();
-    p.bump(T![data]);
-    p.expect(T![-]);
-    parse_value(p).or_add_diagnostic(p, expected_value);
+    p.bump_with_context(TW_VARIANT_SEGMENT, TailwindLexContext::VariantSegment);
 
-    Present(m.complete(p, TW_DATA_ATTRIBUTE))
+    Present(m.complete(p, TW_NAMED_VARIANT_SEGMENT))
+}
+
+fn parse_arbitrary_variant_segment(p: &mut TailwindParser) -> ParsedSyntax {
+    // The bracket body is a raw selector, not a CSS value list, so it is read
+    // as one opaque `tw_selector` token like the top-level `TwArbitraryVariant`
+    // — this keeps combinators (`has-[>svg]`, `[+p]`, `[~span]`) inside the
+    // selector instead of erroring on them in the CSS-value grammar.
+    let m = p.start();
+    p.expect_with_context(T!['['], TailwindLexContext::ArbitraryVariant);
+    p.expect_with_context(TW_SELECTOR, TailwindLexContext::ArbitraryVariant);
+    p.expect(T![']']);
+    Present(m.complete(p, TW_ARBITRARY_VARIANT_SEGMENT))
+}
+
+fn parse_css_variable_variant_segment(p: &mut TailwindParser) -> ParsedSyntax {
+    let m = p.start();
+    p.expect_with_context(T!['('], TailwindLexContext::CssValue);
+    let parameters = parse_css_parameter_list(p);
+    if parameters.range(p).is_empty() {
+        p.error(expected_value(p, p.cur_range()));
+    }
+    p.expect(T![')']);
+    Present(m.complete(p, TW_CSS_VARIABLE_VARIANT_SEGMENT))
 }

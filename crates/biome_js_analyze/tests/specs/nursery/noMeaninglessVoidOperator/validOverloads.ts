@@ -1,0 +1,10 @@
+/* should not generate diagnostics */
+declare class Overloaded {
+    run(value: string): void;
+    run(value: number): number;
+}
+declare const instance: Overloaded;
+void instance.run(1);
+declare function overloaded(value: string): void;
+declare function overloaded(value: number): number;
+void overloaded(1);

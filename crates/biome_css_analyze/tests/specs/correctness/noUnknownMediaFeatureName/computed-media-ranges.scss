@@ -1,0 +1,7 @@
+/* should generate diagnostics */
+@media ($feature + "" >= 40rem) {}
+@media (40rem <= $feature + "") {}
+@media (20rem < range-name() <= 80rem) {}
+@import "wide-layout.css" screen and (range-name() >= 40rem);
+@media ($min + 1rem < unknown) {}
+@media ($min + 1rem < unknown <= $max - 1rem) {}

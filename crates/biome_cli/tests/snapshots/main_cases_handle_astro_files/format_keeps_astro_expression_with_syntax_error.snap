@@ -1,0 +1,70 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome format --write file.astro
+```
+
+## `biome.json`
+
+```json
+{
+  "formatter": { "formatWithErrors": true },
+  "html": {
+    "experimentalFullSupportEnabled": true,
+    "formatter": { "enabled": true }
+  }
+}
+```
+
+## `file.astro`
+
+```astro
+<div>
+	<p>{items.map((item) => )}</p>
+</div>
+
+```
+
+# Termination Message
+
+```block
+format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+file.astro:2:23 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a function body, or an expression but instead found ')'.
+  
+    1 │ <div   >
+  > 2 │ 	<p>{items.map((item) => )}</p>
+      │ 	                     ^
+    3 │ </div>
+    4 │ 
+  
+  i Expected a function body, or an expression here.
+  
+    1 │ <div   >
+  > 2 │ 	<p>{items.map((item) => )}</p>
+      │ 	                     ^
+    3 │ </div>
+    4 │ 
+  
+
+```
+
+```block
+Formatted 1 file in <TIME>. Fixed 1 file.
+Found 1 error.
+```

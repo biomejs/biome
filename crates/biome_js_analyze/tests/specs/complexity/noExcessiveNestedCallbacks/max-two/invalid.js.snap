@@ -1,0 +1,69 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+foo1(function () {
+    foo2(function () {
+        foo3(function () {
+            // Too deeply nested with max: 2.
+        });
+    });
+});
+
+foo1(() => {
+    foo2(() => {
+        foo3(() => {
+            // Too deeply nested with max: 2.
+        });
+    });
+});
+
+```
+
+# Diagnostics
+```
+invalid.js:4:14 lint/complexity/noExcessiveNestedCallbacks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This callback is nested too deeply.
+  
+    2 │ foo1(function () {
+    3 │     foo2(function () {
+  > 4 │         foo3(function () {
+      │              ^^^^^^^^^^^^^
+  > 5 │             // Too deeply nested with max: 2.
+  > 6 │         });
+      │         ^
+    7 │     });
+    8 │ });
+  
+  i Callbacks nested 3 levels deep are harder to read and maintain. The configured maximum is 2.
+  
+  i Extract some callbacks into named functions to reduce nesting.
+  
+
+```
+
+```
+invalid.js:12:14 lint/complexity/noExcessiveNestedCallbacks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This callback is nested too deeply.
+  
+    10 │ foo1(() => {
+    11 │     foo2(() => {
+  > 12 │         foo3(() => {
+       │              ^^^^^^^
+  > 13 │             // Too deeply nested with max: 2.
+  > 14 │         });
+       │         ^
+    15 │     });
+    16 │ });
+  
+  i Callbacks nested 3 levels deep are harder to read and maintain. The configured maximum is 2.
+  
+  i Extract some callbacks into named functions to reduce nesting.
+  
+
+```

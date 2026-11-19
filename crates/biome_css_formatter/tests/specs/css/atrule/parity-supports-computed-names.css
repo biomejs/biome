@@ -1,0 +1,14 @@
+@supports( overflow-x:clip ){.native{overflow-x:clip}}
+@supports((overflow-x:clip) and (display:grid)){.grouped{display:grid}}
+@supports not (overflow-x:clip){.negated{overflow-x:hidden}}
+@supports(overflow-x:clip) or (display:flex){.or{display:flex}}
+@supports selector(:is(.scroller-x,.scroller-y)){.selector{display:grid}}
+@supports ( overflow- ){.general-enclosed{overflow-x:clip}}
+@supports ( calc(0) ){.function-general-enclosed{color:red}}
+@supports( --literal:var(--axis) ){.custom-property{color:red}}
+
+@import "a.css" supports( overflow-x:clip );
+@import "b.css" supports( (overflow-x:clip) );
+@import "custom.css" supports(--literal:var(--axis));
+
+.ordinary-if{color:if(supports(display:grid):green;else:red)}

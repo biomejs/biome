@@ -1,0 +1,14 @@
+/* should generate diagnostics */
+.valid {
+  --theme: red;
+  @supports ("--theme": blue) and ("--theme": green) {
+    --theme: blue;
+  }
+}
+
+@supports ("--theme": green) {
+  .invalid {
+    --theme: red;
+    --theme: blue;
+  }
+}

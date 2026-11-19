@@ -2,15 +2,10 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
-## `package/biome.jsonc`
+## Command
 
-```json
-{
-  "extends": "//",
-  "linter": {
-    "includes": ["**", "!**/*.test.js"]
-  }
-}
+```shell
+biome lint
 ```
 
 ## `biome.jsonc`
@@ -19,6 +14,17 @@ expression: redactor(content)
 {
   "files": {
     "includes": ["**"]
+  }
+}
+```
+
+## `package/biome.jsonc`
+
+```json
+{
+  "extends": "//",
+  "linter": {
+    "includes": ["**", "!**/*.test.js"]
   }
 }
 ```
@@ -73,6 +79,8 @@ file.js:1:8 lint/suspicious/noDebugger  FIXABLE  ━━━━━━━━━━�
   
   > 1 │ let a; debugger
       │        ^^^^^^^^
+  
+  i A debugger statement pauses the program when a debugger is open. It is meant for debugging only, and it should not be left in code that is shipped.
   
   i Unsafe fix: Remove debugger statement
   

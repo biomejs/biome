@@ -5,10 +5,11 @@
 use crate::parser::CssParser;
 use crate::syntax::parse_root;
 use biome_css_factory::CssSyntaxFactory;
-use biome_css_syntax::{AnyCssRoot, CssFileSource, CssLanguage, CssSyntaxNode};
+use biome_css_syntax::{AnyCssRoot, CssLanguage, CssSyntaxNode};
+use biome_languages::CssFileSource;
 pub use biome_parser::prelude::*;
 use biome_parser::{AnyParse, EmbeddedNodeParse, NodeParse};
-use biome_rowan::{AstNode, NodeCache, SyntaxNodeWithOffset, TextSize};
+use biome_rowan::{AstNode, NodeCache, SyntaxNodeWithOffset, TextRange, TextSize};
 pub use parser::{CssModulesKind, CssParserOptions};
 
 mod lexer;
@@ -36,7 +37,29 @@ pub fn parse_css_with_cache(
     cache: &mut NodeCache,
     options: CssParserOptions,
 ) -> CssParse {
-    let mut parser = CssParser::new(source, source_type, options);
+    parse_css_with_metavariables_and_cache(source, source_type, cache, options, &[])
+}
+
+/// Parses the provided string as CSS program, lexing the given source ranges
+/// as Grit metavariables.
+pub fn parse_css_with_metavariables(
+    source: &str,
+    source_type: CssFileSource,
+    options: CssParserOptions,
+    metavariables: &[TextRange],
+) -> CssParse {
+    let mut cache = NodeCache::default();
+    parse_css_with_metavariables_and_cache(source, source_type, &mut cache, options, metavariables)
+}
+
+fn parse_css_with_metavariables_and_cache(
+    source: &str,
+    source_type: CssFileSource,
+    cache: &mut NodeCache,
+    options: CssParserOptions,
+    metavariables: &[TextRange],
+) -> CssParse {
+    let mut parser = CssParser::new_with_metavariables(source, source_type, options, metavariables);
 
     parse_root(&mut parser);
 
@@ -69,7 +92,8 @@ impl CssParse {
     /// # use biome_rowan::{AstNode, AstNodeList, SyntaxError};
     ///
     /// # fn main() -> Result<(), SyntaxError> {
-    /// use biome_css_syntax::{CssFileSource, CssSyntaxKind};
+    /// use biome_css_syntax::CssSyntaxKind;
+    /// use biome_languages::CssFileSource;
     /// use biome_css_parser::CssParserOptions;
     /// let parse = parse_css(r#""#, CssFileSource::css(), CssParserOptions::default());
     ///
@@ -202,7 +226,7 @@ impl From<CssOffsetParse> for AnyParse {
 /// # Examples
 /// ```
 /// use biome_css_parser::{CssParserOptions, parse_css_with_offset};
-/// use biome_css_syntax::CssFileSource;
+/// use biome_languages::CssFileSource;
 /// use biome_rowan::TextSize;
 ///
 /// // Parsing embedded CSS starting at position 50 in an HTML document
@@ -221,21 +245,25 @@ pub fn parse_css_with_offset(
     options: CssParserOptions,
 ) -> CssOffsetParse {
     let mut cache = NodeCache::default();
-    parse_css_with_offset_and_cache(source, source_type, base_offset, &mut cache, options)
+    parse_css_with_offset_and_cache(source, source_type, base_offset, &mut cache, options, &[])
 }
 
 /// Parses CSS code with an offset and cache for embedded content.
 ///
 /// This is the cache-enabled version of [`parse_css_with_offset`] for improved performance
 /// when parsing multiple embedded CSS blocks.
+///
+/// The `metavariables` ranges, relative to `source`, are lexed as Grit
+/// metavariables, such as the interpolations of a styled-components template.
 pub fn parse_css_with_offset_and_cache(
     source: &str,
     source_type: CssFileSource,
     base_offset: biome_rowan::TextSize,
     cache: &mut NodeCache,
     options: CssParserOptions,
+    metavariables: &[TextRange],
 ) -> CssOffsetParse {
-    let mut parser = CssParser::new(source, source_type, options);
+    let mut parser = CssParser::new_with_metavariables(source, source_type, options, metavariables);
 
     parse_root(&mut parser);
 
@@ -252,7 +280,7 @@ pub fn parse_css_with_offset_and_cache(
 mod tests {
     use crate::{CssParserOptions, parse_css};
     use crate::{parse_css_with_cache, parse_css_with_offset};
-    use biome_css_syntax::{CssFileSource, EmbeddingKind};
+    use biome_languages::{CssFileSource, css::CssEmbeddingKind};
     use biome_rowan::TextSize;
 
     #[test]
@@ -341,7 +369,7 @@ mod tests {
         ] {
             let parse = parse_css(
                 css,
-                CssFileSource::css().with_embedding_kind(EmbeddingKind::Styled),
+                CssFileSource::css().with_embedding_kind(CssEmbeddingKind::Styled),
                 CssParserOptions::default(),
             );
 
@@ -364,7 +392,7 @@ background: black;
 
         let parse = parse_css(
             css_code,
-            CssFileSource::css().with_embedding_kind(EmbeddingKind::Styled),
+            CssFileSource::css().with_embedding_kind(CssEmbeddingKind::Styled),
             CssParserOptions::default(),
         );
 

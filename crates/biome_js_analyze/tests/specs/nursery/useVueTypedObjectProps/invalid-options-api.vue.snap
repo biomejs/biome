@@ -1,0 +1,82 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-options-api.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<script lang="ts">
+export default {
+  props: {
+    user: Object,
+    settings: { type: Object, default: () => ({}) },
+    items: [Array, String],
+  },
+};
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-options-api.vue:5:11 lint/nursery/useVueTypedObjectProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This prop is declared with Object but has no TypeScript type.
+  
+    3 │ export default {
+    4 │   props: {
+  > 5 │     user: Object,
+      │           ^^^^^^
+    6 │     settings: { type: Object, default: () => ({}) },
+    7 │     items: [Array, String],
+  
+  i TypeScript only knows that the prop is an object, not which properties it has, so it can't catch mistakes when the prop is passed or used.
+  
+  i Add the type with PropType from vue, for example Object as PropType<User>.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:6:23 lint/nursery/useVueTypedObjectProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This prop is declared with Object but has no TypeScript type.
+  
+    4 │   props: {
+    5 │     user: Object,
+  > 6 │     settings: { type: Object, default: () => ({}) },
+      │                       ^^^^^^
+    7 │     items: [Array, String],
+    8 │   },
+  
+  i TypeScript only knows that the prop is an object, not which properties it has, so it can't catch mistakes when the prop is passed or used.
+  
+  i Add the type with PropType from vue, for example Object as PropType<User>.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:7:13 lint/nursery/useVueTypedObjectProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This prop is declared with Array but has no TypeScript type.
+  
+    5 │     user: Object,
+    6 │     settings: { type: Object, default: () => ({}) },
+  > 7 │     items: [Array, String],
+      │             ^^^^^
+    8 │   },
+    9 │ };
+  
+  i TypeScript only knows that the prop is an array, not what it holds, so it can't catch mistakes when the prop is passed or used.
+  
+  i Add the type with PropType from vue, for example Array as PropType<string[]>.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

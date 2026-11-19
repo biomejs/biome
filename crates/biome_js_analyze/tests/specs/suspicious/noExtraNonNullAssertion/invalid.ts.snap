@@ -78,6 +78,8 @@ invalid.ts:2:13 lint/suspicious/noExtraNonNullAssertion  FIXABLE  ━━━━�
     3 │ 
     4 │ function case2(bar: number | undefined) {
   
+  i Repeating the assertion has no effect beyond the first one, and it can point to a mistake.
+  
   i Safe fix: Remove extra non-null assertion.
   
     2 │ const·bar·=·case1!!.bar;
@@ -95,6 +97,8 @@ invalid.ts:5:24 lint/suspicious/noExtraNonNullAssertion  FIXABLE  ━━━━�
       │                        ^^^^
     6 │ }
     7 │ 
+  
+  i Repeating the assertion has no effect beyond the first one, and it can point to a mistake.
   
   i Safe fix: Remove extra non-null assertion.
   
@@ -114,6 +118,8 @@ invalid.ts:5:24 lint/suspicious/noExtraNonNullAssertion  FIXABLE  ━━━━�
     6 │ }
     7 │ 
   
+  i Repeating the assertion has no effect beyond the first one, and it can point to a mistake.
+  
   i Safe fix: Remove extra non-null assertion.
   
     5 │ ··const·bar1:·number·=·bar!!!;
@@ -132,6 +138,8 @@ invalid.ts:9:10 lint/suspicious/noExtraNonNullAssertion  FIXABLE  ━━━━�
     10 │ }
     11 │ 
   
+  i Repeating the assertion has no effect beyond the first one, and it can point to a mistake.
+  
   i Safe fix: Remove extra non-null assertion.
   
     9 │ ··return·bar!?.n;
@@ -149,6 +157,8 @@ invalid.ts:13:10 lint/suspicious/noExtraNonNullAssertion  FIXABLE  ━━━━�
        │          ^^^^
     14 │ }
     15 │ 
+  
+  i Repeating the assertion has no effect beyond the first one, and it can point to a mistake.
   
   i Safe fix: Remove extra non-null assertion.
   
@@ -169,6 +179,8 @@ invalid.ts:16:15 lint/suspicious/noExtraNonNullAssertion  FIXABLE  ━━━━�
     17 │ 
     18 │ function case6(bar?: { n: number }) {
   
+  i Repeating the assertion has no effect beyond the first one, and it can point to a mistake.
+  
   i Safe fix: Remove extra non-null assertion.
   
     16 │ const·bar2·=·(case5!)!.bar;
@@ -186,6 +198,8 @@ invalid.ts:19:11 lint/suspicious/noExtraNonNullAssertion  FIXABLE  ━━━━�
        │           ^^^^
     20 │ }
     21 │ 
+  
+  i Repeating the assertion has no effect beyond the first one, and it can point to a mistake.
   
   i Safe fix: Remove extra non-null assertion.
   
@@ -205,6 +219,8 @@ invalid.ts:23:10 lint/suspicious/noExtraNonNullAssertion  FIXABLE  ━━━━�
     24 │ }
     25 │ 
   
+  i Repeating the assertion has no effect beyond the first one, and it can point to a mistake.
+  
   i Safe fix: Remove extra non-null assertion.
   
     23 │ ··return·(bar)!?.n;
@@ -222,6 +238,8 @@ invalid.ts:27:12 lint/suspicious/noExtraNonNullAssertion  FIXABLE  ━━━━�
        │            ^^^^
     28 │ }
     29 │ 
+  
+  i Repeating the assertion has no effect beyond the first one, and it can point to a mistake.
   
   i Safe fix: Remove extra non-null assertion.
   
@@ -242,6 +260,8 @@ invalid.ts:32:5 lint/suspicious/noExtraNonNullAssertion  FIXABLE  ━━━━�
     33 │   }
     34 │ }
   
+  i Repeating the assertion has no effect beyond the first one, and it can point to a mistake.
+  
   i Safe fix: Remove extra non-null assertion.
   
     32 │ ····this.property!!;
@@ -260,6 +280,8 @@ invalid.ts:36:1 lint/suspicious/noExtraNonNullAssertion  FIXABLE  ━━━━�
        │ ^^^^^^^
     37 │ 
     38 │ case11!?.[computedField];
+  
+  i Repeating the assertion has no effect beyond the first one, and it can point to a mistake.
   
   i Safe fix: Remove extra non-null assertion.
   
@@ -280,6 +302,8 @@ invalid.ts:40:11 lint/suspicious/noExtraNonNullAssertion  FIXABLE  ━━━━�
     41 │ 
     42 │ case13!!! = null
   
+  i Repeating the assertion has no effect beyond the first one, and it can point to a mistake.
+  
   i Safe fix: Remove extra non-null assertion.
   
     40 │ case12!?.[a.b!!];
@@ -298,6 +322,8 @@ invalid.ts:42:1 lint/suspicious/noExtraNonNullAssertion  FIXABLE  ━━━━�
        │ ^^^^^^^
     43 │ 
     44 │ case14!! = null
+  
+  i Repeating the assertion has no effect beyond the first one, and it can point to a mistake.
   
   i Safe fix: Remove extra non-null assertion.
   
@@ -318,6 +344,8 @@ invalid.ts:42:1 lint/suspicious/noExtraNonNullAssertion  FIXABLE  ━━━━�
     43 │ 
     44 │ case14!! = null
   
+  i Repeating the assertion has no effect beyond the first one, and it can point to a mistake.
+  
   i Safe fix: Remove extra non-null assertion.
   
     42 │ case13!!!·=·null
@@ -336,6 +364,8 @@ invalid.ts:44:1 lint/suspicious/noExtraNonNullAssertion  FIXABLE  ━━━━�
        │ ^^^^^^^
     45 │ 
     46 │ if (case15!!) {}
+  
+  i Repeating the assertion has no effect beyond the first one, and it can point to a mistake.
   
   i Safe fix: Remove extra non-null assertion.
   
@@ -356,6 +386,8 @@ invalid.ts:46:5 lint/suspicious/noExtraNonNullAssertion  FIXABLE  ━━━━�
     47 │ 
     48 │ if (!case16!!) {}
   
+  i Repeating the assertion has no effect beyond the first one, and it can point to a mistake.
+  
   i Safe fix: Remove extra non-null assertion.
   
     46 │ if·(case15!!)·{}
@@ -374,6 +406,8 @@ invalid.ts:48:6 lint/suspicious/noExtraNonNullAssertion  FIXABLE  ━━━━�
        │      ^^^^^^^
     49 │ 
     50 │ // Test cases for issue #7927: nested assertions in compound assignments should be flagged
+  
+  i Repeating the assertion has no effect beyond the first one, and it can point to a mistake.
   
   i Safe fix: Remove extra non-null assertion.
   
@@ -394,6 +428,8 @@ invalid.ts:52:1 lint/suspicious/noExtraNonNullAssertion  FIXABLE  ━━━━�
     53 │ 
     54 │ const arr2: number[] = [1, 2, 3];
   
+  i Repeating the assertion has no effect beyond the first one, and it can point to a mistake.
+  
   i Safe fix: Remove extra non-null assertion.
   
     52 │ arr1[0]!!·^=·arr1[1];
@@ -411,6 +447,8 @@ invalid.ts:55:12 lint/suspicious/noExtraNonNullAssertion  FIXABLE  ━━━━�
        │            ^^^^^^^^
     56 │ 
     57 │ // Test case for issue #8475
+  
+  i Repeating the assertion has no effect beyond the first one, and it can point to a mistake.
   
   i Safe fix: Remove extra non-null assertion.
   
@@ -430,6 +468,8 @@ invalid.ts:58:14 lint/suspicious/noExtraNonNullAssertion  FIXABLE  ━━━━�
     59 │ const _d2 = ((blob.b!))!.d!.length;
     60 │ 
   
+  i Repeating the assertion has no effect beyond the first one, and it can point to a mistake.
+  
   i Safe fix: Remove extra non-null assertion.
   
     58 │ const·_d2·=·(blob.b!)!.d!.length;
@@ -447,6 +487,8 @@ invalid.ts:59:15 lint/suspicious/noExtraNonNullAssertion  FIXABLE  ━━━━�
   > 59 │ const _d2 = ((blob.b!))!.d!.length;
        │               ^^^^^^^
     60 │ 
+  
+  i Repeating the assertion has no effect beyond the first one, and it can point to a mistake.
   
   i Safe fix: Remove extra non-null assertion.
   

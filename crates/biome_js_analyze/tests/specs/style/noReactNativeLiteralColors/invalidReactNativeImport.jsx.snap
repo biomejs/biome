@@ -1,0 +1,34 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidReactNativeImport.jsx
+---
+# Input
+```jsx
+/* should generate diagnostics */
+
+import { StyleSheet } from 'react-native';
+
+const styles = StyleSheet.create({
+	text: { color: 'red' },
+});
+
+```
+
+# Diagnostics
+```
+invalidReactNativeImport.jsx:6:10 lint/style/noReactNativeLiteralColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Color literals are not allowed inside styles.
+  
+    5 │ const styles = StyleSheet.create({
+  > 6 │ 	text: { color: 'red' },
+      │ 	        ^^^^^^^^^^^^
+    7 │ });
+    8 │ 
+  
+  i Inline colors are hard to keep consistent across screens and to adapt when the design palette changes.
+  
+  i Extract the color into a named constant or a shared theme module, and reference it from the style.
+  
+
+```

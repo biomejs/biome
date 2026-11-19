@@ -410,11 +410,16 @@ fn split_minus_binary_expressions(
 /// Combine the expressions in the list with the addition operator.
 fn make_plus_binary_expression(list: Vec<AnyJsExpression>) -> Option<AnyJsExpression> {
     list.into_iter().rev().reduce(|left, right| {
-        AnyJsExpression::JsBinaryExpression(make::js_binary_expression(
-            left,
-            make::token(T![+]),
-            right,
-        ))
+        let has_space_before_operator = left
+            .syntax()
+            .last_trailing_trivia()
+            .and_then(|trivia| trivia.last())
+            .is_some_and(|piece| piece.is_whitespace() || piece.is_newline());
+        let mut operator = make::token(T![+]).with_trailing_space();
+        if !has_space_before_operator {
+            operator = operator.with_leading_space();
+        }
+        AnyJsExpression::JsBinaryExpression(make::js_binary_expression(left, operator, right))
     })
 }
 
@@ -461,7 +466,14 @@ fn extract_negative_index_expression(
             ))
         }
     } else {
-        make_plus_binary_expression(right_list)
+        Some(AnyJsExpression::JsUnaryExpression(
+            make::js_unary_expression(
+                make::token(T![-]),
+                overwrap_parentheses_expression(
+                    &make_plus_binary_expression(right_list)?.trim_trivia()?,
+                )?,
+            ),
+        ))
     }
 }
 

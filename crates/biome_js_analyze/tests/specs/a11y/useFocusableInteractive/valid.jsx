@@ -15,4 +15,6 @@
 	</div>
 	<button />
 	<div role="h1" />
+	<div role="separator" />
+	<div role="separator" tabIndex={0} />
 </div>;

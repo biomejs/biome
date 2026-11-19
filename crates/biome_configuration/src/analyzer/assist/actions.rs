@@ -1,6 +1,8 @@
 //! Generated file, do not edit by hand, see `xtask/codegen`
 
+use crate::analyzer::presets::PresetConfig;
 use crate::analyzer::{RuleAssistConfiguration, RuleAssistPlainConfiguration};
+use biome_analyze::RulePreset;
 use biome_analyze::{RuleFilter, options::RuleOptions};
 use biome_deserialize_macros::{Deserializable, Merge};
 use biome_diagnostics::{Category, Severity};
@@ -67,30 +69,51 @@ impl std::fmt::Display for RuleGroup {
 pub enum ActionName {
     NoDuplicateClasses,
     OrganizeImports,
+    UseGraphqlSortedArguments,
+    UseGraphqlSortedDefinitions,
+    UseGraphqlSortedVariables,
     UseSortedAttributes,
+    UseSortedEnumMembers,
     UseSortedInterfaceMembers,
     UseSortedKeys,
+    UseSortedPackageJson,
     UseSortedProperties,
+    UseSortedSelectionSet,
+    UseSortedTypeFields,
 }
 impl ActionName {
     pub const fn as_str(self) -> &'static str {
         match self {
             Self::NoDuplicateClasses => "noDuplicateClasses",
             Self::OrganizeImports => "organizeImports",
+            Self::UseGraphqlSortedArguments => "useGraphqlSortedArguments",
+            Self::UseGraphqlSortedDefinitions => "useGraphqlSortedDefinitions",
+            Self::UseGraphqlSortedVariables => "useGraphqlSortedVariables",
             Self::UseSortedAttributes => "useSortedAttributes",
+            Self::UseSortedEnumMembers => "useSortedEnumMembers",
             Self::UseSortedInterfaceMembers => "useSortedInterfaceMembers",
             Self::UseSortedKeys => "useSortedKeys",
+            Self::UseSortedPackageJson => "useSortedPackageJson",
             Self::UseSortedProperties => "useSortedProperties",
+            Self::UseSortedSelectionSet => "useSortedSelectionSet",
+            Self::UseSortedTypeFields => "useSortedTypeFields",
         }
     }
     pub const fn group(self) -> RuleGroup {
         match self {
             Self::NoDuplicateClasses => RuleGroup::Source,
             Self::OrganizeImports => RuleGroup::Source,
+            Self::UseGraphqlSortedArguments => RuleGroup::Source,
+            Self::UseGraphqlSortedDefinitions => RuleGroup::Source,
+            Self::UseGraphqlSortedVariables => RuleGroup::Source,
             Self::UseSortedAttributes => RuleGroup::Source,
+            Self::UseSortedEnumMembers => RuleGroup::Source,
             Self::UseSortedInterfaceMembers => RuleGroup::Source,
             Self::UseSortedKeys => RuleGroup::Source,
+            Self::UseSortedPackageJson => RuleGroup::Source,
             Self::UseSortedProperties => RuleGroup::Source,
+            Self::UseSortedSelectionSet => RuleGroup::Source,
+            Self::UseSortedTypeFields => RuleGroup::Source,
         }
     }
 }
@@ -100,10 +123,17 @@ impl std::str::FromStr for ActionName {
         match s {
             "noDuplicateClasses" => Ok(Self::NoDuplicateClasses),
             "organizeImports" => Ok(Self::OrganizeImports),
+            "useGraphqlSortedArguments" => Ok(Self::UseGraphqlSortedArguments),
+            "useGraphqlSortedDefinitions" => Ok(Self::UseGraphqlSortedDefinitions),
+            "useGraphqlSortedVariables" => Ok(Self::UseGraphqlSortedVariables),
             "useSortedAttributes" => Ok(Self::UseSortedAttributes),
+            "useSortedEnumMembers" => Ok(Self::UseSortedEnumMembers),
             "useSortedInterfaceMembers" => Ok(Self::UseSortedInterfaceMembers),
             "useSortedKeys" => Ok(Self::UseSortedKeys),
+            "useSortedPackageJson" => Ok(Self::UseSortedPackageJson),
             "useSortedProperties" => Ok(Self::UseSortedProperties),
+            "useSortedSelectionSet" => Ok(Self::UseSortedSelectionSet),
+            "useSortedTypeFields" => Ok(Self::UseSortedTypeFields),
             _ => Err("This rule name doesn't exist."),
         }
     }
@@ -117,9 +147,17 @@ impl std::fmt::Display for ActionName {
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct Actions {
-    #[doc = r" It enables the assist actions recommended by Biome. `true` by default."]
+    #[doc = r" Enables or disables Biome's recommended assist actions across all action groups."]
+    #[doc = r" Defaults to `true`."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub recommended: Option<bool>,
+    #[doc = r" Selects the baseline set of assist actions. `recommended` enables Biome's"]
+    #[doc = r" recommended actions, `all` enables all actions, and `none` starts with no actions"]
+    #[doc = r" enabled. Group presets and explicit action settings override this preset."]
+    #[doc = r" Defaults to `recommended`."]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub preset: Option<PresetConfig>,
+    #[doc = "Configures source-level actions such as organizing imports and sorting declarations. These actions are exposed through editor source actions and through CLI checking and application."]
     #[deserializable(rename = "source")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub source: Option<Source>,
@@ -154,8 +192,15 @@ impl Actions {
                 .map(|(level, _)| level.into()),
         }
     }
-    pub(crate) const fn is_recommended_false(&self) -> bool {
-        matches!(self.recommended, Some(false))
+    #[doc = r" Returns the current preset. Defaults to the recommended set"]
+    pub(crate) fn preset(&self) -> PresetConfig {
+        if matches!(self.recommended, Some(false)) {
+            PresetConfig::None
+        } else if let Some(preset) = &self.preset {
+            preset.clone()
+        } else {
+            PresetConfig::default()
+        }
     }
     #[doc = r" It returns the enabled rules by default."]
     #[doc = r""]
@@ -164,11 +209,11 @@ impl Actions {
         let mut enabled_rules = FxHashSet::default();
         let mut disabled_rules = FxHashSet::default();
         if let Some(group) = self.source.as_ref() {
-            group.collect_preset_rules(!self.is_recommended_false(), &mut enabled_rules);
+            group.collect_preset_rules(self.preset(), &mut enabled_rules);
             enabled_rules.extend(&group.get_enabled_rules());
             disabled_rules.extend(&group.get_disabled_rules());
-        } else if !self.is_recommended_false() {
-            enabled_rules.extend(Source::recommended_rules_as_filters());
+        } else if !self.preset().is_none() {
+            enabled_rules.extend(Source::preset_as_filters(self.preset()));
         }
         enabled_rules.difference(&disabled_rules).copied().collect()
     }

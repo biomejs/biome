@@ -1,8 +1,8 @@
+use crate::TestArgs as Args;
 use crate::snap_test::{SnapshotPayload, assert_cli_snapshot};
 use crate::{run_cli, run_cli_with_server_workspace};
 use biome_console::BufferConsole;
 use biome_fs::MemoryFileSystem;
-use bpaf::Args;
 use camino::Utf8Path;
 
 const PLUGIN: &str = r#"

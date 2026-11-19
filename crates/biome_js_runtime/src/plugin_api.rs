@@ -1,36 +1,85 @@
+use crate::ast::JsAstNode;
+use crate::kind_set::{JsNodeKindSet, JsTokenKindSet};
+use crate::mutation::{JsMutation, create_mutation};
+use crate::token::{JsAstToken, factory_token};
+use crate::trivia::JsTriviaPiece;
+use biome_analyze::{PluginActionData, PluginDiagnosticEntry, RuleDiagnostic};
+use biome_diagnostics::{Applicability, Severity, category};
+use biome_js_syntax::{JsLanguage, JsSyntaxNode};
+use biome_text_size::TextRange;
+use boa_engine::module::SyntheticModuleInitializer;
+use boa_engine::object::builtins::JsArray;
+use boa_engine::object::{FunctionObjectBuilder, JsObject, ObjectInitializer};
+use boa_engine::property::Attribute;
+use boa_engine::{
+    Context, JsNativeError, JsResult, JsString, JsValue, Module, NativeFunction, js_string,
+};
 use std::cell::RefCell;
 use std::rc::Rc;
 
-use boa_engine::module::SyntheticModuleInitializer;
-use boa_engine::object::FunctionObjectBuilder;
-use boa_engine::{Context, JsNativeError, JsValue, Module, NativeFunction, js_string};
-
-use biome_analyze::RuleDiagnostic;
-use biome_diagnostics::{Severity, category};
-use biome_text_size::TextRange;
+fn boolean_option(object: &JsObject, name: &str, context: &mut Context) -> JsResult<bool> {
+    let value = object.get(JsString::from(name), context)?;
+    if value.is_undefined() {
+        Ok(false)
+    } else {
+        value.as_boolean().ok_or_else(|| {
+            JsNativeError::typ()
+                .with_message(format!("The `{name}` query option must be a boolean."))
+                .into()
+        })
+    }
+}
 
 pub(crate) struct JsPluginApi {
-    diagnostics: Rc<RefCell<Vec<RuleDiagnostic>>>,
+    diagnostics: Rc<RefCell<Vec<PluginDiagnosticEntry>>>,
+    source: Rc<RefCell<Option<JsSyntaxNode>>>,
 }
 
 impl JsPluginApi {
     pub(crate) fn new() -> Self {
         Self {
             diagnostics: Rc::new(RefCell::new(Vec::new())),
+            source: Rc::new(RefCell::new(None)),
         }
     }
 
     pub(crate) fn create_module(&self, context: &mut Context) -> Module {
         let diagnostics = self.diagnostics.clone();
+        let source = self.source.clone();
 
         // SAFETY: The closure doesn't capture any GC-managed values.
         let register_diagnostic = FunctionObjectBuilder::new(context.realm(), unsafe {
             NativeFunction::from_closure(move |_this, args, context| {
-                let [severity, message] = args else {
+                let (target, severity, message, fix) = match args {
+                    [target, severity, message] => (target, severity, message, None),
+                    [target, severity, message, fix] => (target, severity, message, Some(fix)),
+                    _ => return Err(JsNativeError::typ()
+                        .with_message(
+                            "registerDiagnostic() requires a node, token, or trivia piece, a severity, and a message, with an optional fourth fix argument. Call registerDiagnostic(element, severity, message, fix).",
+                        )
+                        .into()),
+                };
+
+                let Some((range, root)) = Self::diagnostic_target(target) else {
                     return Err(JsNativeError::typ()
-                        .with_message("registerDiagnostic() expects two string arguments")
+                        .with_message(
+                            "The first argument to registerDiagnostic() is not a Biome node, token, or trivia piece. Pass the node supplied to run(), or a node, token, or trivia piece reached from it.",
+                        )
                         .into());
                 };
+                // A token or trivia piece outside the analyzed source, such as one
+                // created with factory.token(), has no range in that source.
+                let is_node = target
+                    .as_object()
+                    .is_some_and(|object| object.downcast_ref::<JsAstNode>().is_some());
+                if !is_node
+                    && let Some(source) = source.borrow().as_ref()
+                    && root.as_ref() != Some(source)
+                {
+                    return Err(JsNativeError::typ()
+                        .with_message("The diagnostic's token or trivia piece does not belong to the source being analyzed. Pass a token or trivia piece read from that source, not one created with factory.token() or read from an updated node.")
+                        .into());
+                }
 
                 let severity =
                     match severity.to_string(context)?.to_std_string_lossy().as_str() {
@@ -41,37 +90,139 @@ impl JsPluginApi {
                         "hint" => Severity::Hint,
                         _ => return Err(JsNativeError::typ()
                             .with_message(
-                                "Unexpected severity, expected one of: fatal, error, warning, information, hint",
+                                "The diagnostic severity is not supported. Use \"fatal\", \"error\", \"warning\", \"information\", or \"hint\" as the second argument to registerDiagnostic().",
                             )
                             .into()),
                     };
 
                 let diagnostic = RuleDiagnostic::new(
                     category!("plugin"),
-                    None::<TextRange>, // TODO: retrieve a span from the AST
+                    range,
                     message.to_string(context)?.to_std_string_lossy(),
                 )
                 .with_severity(severity);
 
-                diagnostics.borrow_mut().push(diagnostic);
+                let action = match fix.filter(|fix| !fix.is_undefined()) {
+                    Some(fix) => {
+                        let source = source.borrow().clone().ok_or_else(|| JsNativeError::typ()
+                            .with_message("A code fix can only be reported while Biome is analyzing source code. Call registerDiagnostic() with the fix from run()."))?;
+                        Self::code_fix(root, fix, &source, context)?
+                    }
+                    None => None,
+                };
+                diagnostics.borrow_mut().push(PluginDiagnosticEntry { diagnostic, action });
 
                 Ok(JsValue::undefined())
             })
         })
-        .length(2)
+        .length(3)
         .name("registerDiagnostic")
         .build();
 
-        // TODO: auto-generate AST classes and insert into the runtime
-        // TODO: more runtime APIs?
+        let ast = FunctionObjectBuilder::new(
+            context.realm(),
+            NativeFunction::from_fn_ptr(Self::ast_query),
+        )
+        .length(1)
+        .name("ast")
+        .build();
+
+        let grit = FunctionObjectBuilder::new(
+            context.realm(),
+            NativeFunction::from_fn_ptr(Self::grit_query),
+        )
+        .length(1)
+        .name("grit")
+        .build();
+
+        let define_rule = FunctionObjectBuilder::new(
+            context.realm(),
+            NativeFunction::from_fn_ptr(Self::define_rule),
+        )
+        .length(1)
+        .name("defineRule")
+        .build();
+
+        let create_mutation = FunctionObjectBuilder::new(
+            context.realm(),
+            NativeFunction::from_fn_ptr(create_mutation),
+        )
+        .length(1)
+        .name("createMutation")
+        .build();
+        let node_kinds = FunctionObjectBuilder::new(
+            context.realm(),
+            NativeFunction::from_fn_ptr(JsNodeKindSet::<JsLanguage>::create),
+        )
+        .length(0)
+        .name("nodeKinds")
+        .build();
+
+        let token_kinds = FunctionObjectBuilder::new(
+            context.realm(),
+            NativeFunction::from_fn_ptr(JsTokenKindSet::<JsLanguage>::create),
+        )
+        .length(0)
+        .name("tokenKinds")
+        .build();
+
+        let factory = ObjectInitializer::new(context)
+            .function(
+                NativeFunction::from_fn_ptr(factory_token),
+                js_string!("token"),
+                1,
+            )
+            .build();
 
         Module::synthetic(
-            &[js_string!("registerDiagnostic")],
+            &[
+                js_string!("registerDiagnostic"),
+                js_string!("ast"),
+                js_string!("grit"),
+                js_string!("defineRule"),
+                js_string!("createMutation"),
+                js_string!("factory"),
+                js_string!("nodeKinds"),
+                js_string!("tokenKinds"),
+            ],
             SyntheticModuleInitializer::from_copy_closure_with_captures(
-                |module, fns, _| {
-                    module.set_export(&js_string!("registerDiagnostic"), fns.0.clone().into())
+                |module,
+                 (
+                    register_diagnostic,
+                    ast,
+                    grit,
+                    define_rule,
+                    create_mutation,
+                    factory,
+                    node_kinds,
+                    token_kinds,
+                ),
+                 _| {
+                    module.set_export(
+                        &js_string!("registerDiagnostic"),
+                        register_diagnostic.clone().into(),
+                    )?;
+                    module.set_export(&js_string!("ast"), ast.clone().into())?;
+                    module.set_export(&js_string!("grit"), grit.clone().into())?;
+                    module.set_export(&js_string!("defineRule"), define_rule.clone().into())?;
+                    module.set_export(
+                        &js_string!("createMutation"),
+                        create_mutation.clone().into(),
+                    )?;
+                    module.set_export(&js_string!("factory"), factory.clone().into())?;
+                    module.set_export(&js_string!("nodeKinds"), node_kinds.clone().into())?;
+                    module.set_export(&js_string!("tokenKinds"), token_kinds.clone().into())
                 },
-                (register_diagnostic,),
+                (
+                    register_diagnostic,
+                    ast,
+                    grit,
+                    define_rule,
+                    create_mutation,
+                    factory,
+                    node_kinds,
+                    token_kinds,
+                ),
             ),
             None,
             None,
@@ -79,7 +230,236 @@ impl JsPluginApi {
         )
     }
 
-    pub(crate) fn pull_diagnostics(&self) -> Vec<RuleDiagnostic> {
+    /// Implements `ast(...kinds, options)`: builds an AST query object from syntax kind names.
+    fn ast_query(_this: &JsValue, args: &[JsValue], context: &mut Context) -> JsResult<JsValue> {
+        Self::node_query("ast", args, context)
+    }
+
+    /// Implements `grit(pattern, options)`: builds a Grit query object from a pattern string.
+    fn grit_query(_this: &JsValue, args: &[JsValue], context: &mut Context) -> JsResult<JsValue> {
+        let (pattern, options) = match args {
+            [pattern] => (pattern, None),
+            [pattern, options] if options.is_undefined() => (pattern, None),
+            [pattern, options] => {
+                let Some(options) = options.as_object() else {
+                    return Err(JsNativeError::typ()
+                        .with_message("grit() options must be an object. Pass { semantic: true } as the second argument.")
+                        .into());
+                };
+                (pattern, Some(options))
+            }
+            _ => {
+                return Err(JsNativeError::typ()
+                    .with_message("grit() requires one Grit pattern string and an optional options object. Pass grit(\"`console.log($args)`\", { semantic: true }).")
+                    .into());
+            }
+        };
+        let Some(pattern) = pattern.as_string() else {
+            return Err(JsNativeError::typ()
+                .with_message("grit() requires a Grit pattern string. Pass a string such as \"`console.log($args)`\", not a node or other value.")
+                .into());
+        };
+        let requires_semantic = match options.as_ref() {
+            Some(options) => boolean_option(options, "semantic", context)?,
+            None => false,
+        };
+
+        let query = ObjectInitializer::new(context)
+            .property(
+                js_string!("type"),
+                JsString::from("grit"),
+                Attribute::ENUMERABLE,
+            )
+            .property(
+                js_string!("pattern"),
+                JsValue::from(pattern.clone()),
+                Attribute::ENUMERABLE,
+            )
+            .property(
+                js_string!("requiresSemantic"),
+                JsValue::from(requires_semantic),
+                Attribute::ENUMERABLE,
+            )
+            .build();
+
+        Ok(query.into())
+    }
+
+    fn node_query(query_type: &str, args: &[JsValue], context: &mut Context) -> JsResult<JsValue> {
+        let (kinds_args, options) = match args.split_last() {
+            Some((last, rest)) if last.is_undefined() => (rest, None),
+            Some((last, rest)) if last.as_object().is_some() => (rest, last.as_object()),
+            _ => (args, None),
+        };
+        let requires_semantic = match options.as_ref() {
+            Some(options) => boolean_option(options, "semantic", context)?,
+            None => false,
+        };
+
+        if kinds_args.is_empty() {
+            return Err(JsNativeError::typ()
+                .with_message(format!("{query_type}() requires at least one node kind. Pass a kind from JsNodeByKind, such as {query_type}(\"JS_CALL_EXPRESSION\")."))
+                .into());
+        }
+
+        let mut kinds = Vec::with_capacity(kinds_args.len());
+        for arg in kinds_args {
+            let Some(kind) = arg.as_string() else {
+                return Err(JsNativeError::typ()
+                    .with_message(format!("{query_type}() requires node kind names as strings. Pass names such as \"JS_CALL_EXPRESSION\", not node objects."))
+                    .into());
+            };
+            if JsAstNode::syntax_kind_from_ast_name(&kind.to_std_string_lossy()).is_none() {
+                return Err(JsNativeError::typ()
+                    .with_message(format!(
+                        "Unknown syntax kind {:?}. Pass a node kind listed in JsNodeByKind, such as \"JS_CALL_EXPRESSION\".",
+                        kind.to_std_string_lossy(),
+                    ))
+                    .into());
+            }
+            kinds.push(JsValue::from(kind));
+        }
+
+        let kinds = JsArray::from_iter(kinds, context);
+        let query = ObjectInitializer::new(context)
+            .property(
+                js_string!("type"),
+                JsString::from(query_type),
+                Attribute::ENUMERABLE,
+            )
+            .property(js_string!("kinds"), kinds, Attribute::ENUMERABLE)
+            .property(
+                js_string!("requiresSemantic"),
+                JsValue::from(requires_semantic),
+                Attribute::ENUMERABLE,
+            )
+            .build();
+
+        Ok(query.into())
+    }
+
+    /// Implements `defineRule(rule)`: validates the shape of the rule and returns it as-is.
+    /// Rules are collected from the module exports after the plugin is evaluated.
+    fn define_rule(_this: &JsValue, args: &[JsValue], context: &mut Context) -> JsResult<JsValue> {
+        let [rule] = args else {
+            return Err(JsNativeError::typ()
+                .with_message("defineRule() requires exactly one rule object. Pass an object with query and run properties.")
+                .into());
+        };
+
+        let Some(object) = rule.as_object() else {
+            return Err(JsNativeError::typ()
+                .with_message("The argument to defineRule() is not an object. Pass an object with query and run properties.")
+                .into());
+        };
+
+        if object
+            .get(js_string!("query"), context)?
+            .as_object()
+            .is_none()
+        {
+            return Err(JsNativeError::typ()
+                .with_message(
+                    "The rule's query property must be a query object. Set it to ast(...) or grit(...) with the nodes the rule should inspect.",
+                )
+                .into());
+        }
+
+        if object
+            .get(js_string!("run"), context)?
+            .as_function()
+            .is_none()
+        {
+            return Err(JsNativeError::typ()
+                .with_message("The rule's run property must be a function. Add run(node) to inspect matching nodes and report diagnostics.")
+                .into());
+        }
+
+        Ok(rule.clone())
+    }
+
+    /// Returns the range a diagnostic on `value` highlights, and the root of
+    /// the tree containing it. Detached tokens and trivia have no root.
+    fn diagnostic_target(value: &JsValue) -> Option<(TextRange, Option<JsSyntaxNode>)> {
+        if let Some(JsAstNode { node }) = JsAstNode::from_value(value) {
+            return Some((node.text_trimmed_range(), Some(node.tree_top())));
+        }
+        let (range, token) = if let Some(JsAstToken { token }) = JsAstToken::from_value(value) {
+            (token.text_trimmed_range(), token)
+        } else {
+            let JsTriviaPiece { piece, .. } = JsTriviaPiece::from_value(value)?;
+            (piece.text_range(), piece.token())
+        };
+        let root = token.parent().map(|parent| parent.tree_top());
+        Some((range, root))
+    }
+
+    fn code_fix(
+        root: Option<JsSyntaxNode>,
+        fix: &JsValue,
+        source: &JsSyntaxNode,
+        context: &mut Context,
+    ) -> JsResult<Option<PluginActionData>> {
+        let fix = fix
+            .as_object()
+            .ok_or_else(|| JsNativeError::typ().with_message("The fix argument to registerDiagnostic() is not an object. Pass an object with mutation, message, and kind properties, or omit the fix argument."))?;
+        let mutation = fix.get(js_string!("mutation"), context)?;
+        let message = fix.get(js_string!("message"), context)?;
+        let kind = fix.get(js_string!("kind"), context)?;
+        let message = message
+            .as_string()
+            .ok_or_else(|| {
+                JsNativeError::typ().with_message("The fix.message property must be a string. Set it to a description of the change, such as \"Replace var with let.\".")
+            })?
+            .to_std_string()
+            .map_err(|_| {
+                JsNativeError::typ().with_message("The fix.message property contains an incomplete Unicode character. Check its \\u escapes and supply complete characters.")
+            })?;
+        let kind = kind.as_string().ok_or_else(|| {
+            JsNativeError::typ().with_message(
+                "The fix.kind property must be a string. Set it to \"safe\" or \"unsafe\".",
+            )
+        })?;
+        let applicability = if kind == "safe" {
+            Applicability::Always
+        } else if kind == "unsafe" {
+            Applicability::MaybeIncorrect
+        } else {
+            return Err(JsNativeError::typ()
+                .with_message(format!(
+                    "Unknown fix kind {:?}. Set fix.kind to \"safe\" or \"unsafe\".",
+                    kind.to_std_string_lossy()
+                ))
+                .into());
+        };
+        if root.as_ref() != Some(source) {
+            return Err(JsNativeError::typ()
+                .with_message("The diagnostic's target does not belong to the source being analyzed. Pass a node, token, or trivia piece from that source to registerDiagnostic().")
+                .into());
+        }
+
+        // Property getters may execute JavaScript. Consume the batch only after validation.
+        let batch = JsMutation::take(&mutation, source)?;
+        let Some((source_range, text_edit)) = batch.to_text_range_and_edit() else {
+            return Ok(None);
+        };
+        let source = source.text_with_trivia().to_string();
+        if text_edit.new_string(&source) == source {
+            return Ok(None);
+        }
+        Ok(Some(PluginActionData {
+            source_range,
+            text_edit,
+            message,
+            applicability,
+        }))
+    }
+
+    pub(crate) fn pull_diagnostics(&self) -> Vec<PluginDiagnosticEntry> {
         std::mem::take(&mut self.diagnostics.borrow_mut())
+    }
+
+    pub(crate) fn set_source(&self, source: Option<JsSyntaxNode>) {
+        *self.source.borrow_mut() = source;
     }
 }

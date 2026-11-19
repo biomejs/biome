@@ -1,0 +1,13 @@
+<script>
+    const name = "world";
+</script>
+
+<style>
+    div {
+        color: red;
+    }
+</style>
+
+
+
+<div />

@@ -1,0 +1,16 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+
+import type { Entity } from "./entity";
+
+declare function load(): Entity<string>;
+
+if (load()) {
+}
+
+```

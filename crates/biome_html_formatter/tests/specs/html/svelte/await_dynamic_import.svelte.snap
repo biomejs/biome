@@ -16,7 +16,7 @@ info: svelte/await_dynamic_import.svelte
 # Formatted
 
 ```svelte
-{#await import('./Component.svelte') then { default: Component }}
+{#await import("./Component.svelte") then { default: Component }}
 	<Component />
 {/await}
 

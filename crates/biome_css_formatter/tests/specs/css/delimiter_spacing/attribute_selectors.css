@@ -1,0 +1,70 @@
+/* Simple attribute presence */
+[lang] {
+    font-family: serif;
+}
+
+/* Attribute with value */
+[type="text"] {
+    border: 1px solid gray;
+}
+
+[type='password'] {
+    border: 1px solid red;
+}
+
+/* Attribute operators */
+[class~="warning"] {
+    color: orange;
+}
+
+[lang|="en"] {
+    font-style: italic;
+}
+
+[href^="https"] {
+    color: green;
+}
+
+[href$=".pdf"] {
+    background: url(pdf-icon.png) no-repeat;
+}
+
+[title*="hello"] {
+    text-decoration: underline;
+}
+
+/* Case sensitivity modifiers */
+[class~="warning" i] {
+    font-weight: bold;
+}
+
+[type="TEXT" s] {
+    text-transform: uppercase;
+}
+
+/* Namespaced attributes */
+[foo|bar=baz] {
+    display: block;
+}
+
+[*|attr] {
+    visibility: visible;
+}
+
+/* Multiple attributes */
+[data-active][data-visible] {
+    opacity: 1;
+}
+
+[data-theme="dark"][data-mode="compact"] {
+    padding: 0;
+}
+
+/* Complex combinations */
+div[class="container"][id^="main"] {
+    margin: 0 auto;
+}
+
+a[href][target="_blank"] {
+    color: blue;
+}

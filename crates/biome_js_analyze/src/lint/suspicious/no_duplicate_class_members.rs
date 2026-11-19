@@ -1,5 +1,6 @@
 use biome_analyze::RuleSource;
 use biome_analyze::{Ast, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
+use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{
     AnyJsClassMemberName, JsClassMemberList, JsGetterClassMember, JsMethodClassMember,
@@ -99,6 +100,71 @@ declare_lint_rule! {
     }
 }
 
+declare_node_union! {
+    pub AnyClassMemberDefinition = JsGetterClassMember | JsMethodClassMember | JsPropertyClassMember | JsSetterClassMember
+}
+
+impl Rule for NoDuplicateClassMembers {
+    type Query = Ast<JsClassMemberList>;
+    type State = AnyClassMemberDefinition;
+    type Signals = Box<[Self::State]>;
+    type Options = NoDuplicateClassMembersOptions;
+
+    fn run(ctx: &RuleContext<Self>) -> Self::Signals {
+        let mut defined_members: FxHashMap<MemberState, FxHashSet<MemberType>> =
+            FxHashMap::default();
+
+        let node = ctx.query();
+        node.into_iter()
+            .filter_map(|member| {
+                let member = AnyClassMemberDefinition::cast(member.into_syntax())?;
+                let member_name_node = member.name()?;
+                let member_state = MemberState {
+                    name: get_member_name(&member_name_node)?.text().into(),
+                    is_static: is_static_member(member.modifiers_list()),
+                };
+
+                let member_type = member.member_type();
+                if let Some(stored_members) = defined_members.get_mut(&member_state) {
+                    if stored_members.contains(&MemberType::Normal)
+                        || stored_members.contains(&member_type)
+                        || member_type == MemberType::Normal
+                    {
+                        return Some(member);
+                    } else {
+                        stored_members.insert(member_type);
+                    }
+                } else {
+                    defined_members
+                        .entry(member_state)
+                        .or_default()
+                        .insert(member_type);
+                }
+
+                None
+            })
+            .collect::<Vec<_>>()
+            .into_boxed_slice()
+    }
+
+    fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
+        let diagnostic = RuleDiagnostic::new(
+            rule_category!(),
+            state.range(),
+            markup! {
+                "Duplicate class member name "<Emphasis>{get_member_name(&state.name()?)?.text()}</Emphasis>"."
+            },
+        )
+        .note(markup! {
+            "The last declaration silently overwrites the earlier ones, which can cause unexpected behavior."
+        })
+        .note(markup! {
+            "Remove the duplicate member, or rename it if you meant a different member."
+        });
+
+        Some(diagnostic)
+    }
+}
 fn get_member_name(node: &AnyJsClassMemberName) -> Option<TokenText> {
     match node {
         AnyJsClassMemberName::JsLiteralMemberName(node) => node.name().ok(),
@@ -114,10 +180,6 @@ fn is_static_member(node: JsSyntaxList) -> bool {
             false
         }
     })
-}
-
-declare_node_union! {
-    pub AnyClassMemberDefinition = JsGetterClassMember | JsMethodClassMember | JsPropertyClassMember | JsSetterClassMember
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -169,61 +231,4 @@ impl AnyClassMemberDefinition {
 struct MemberState {
     name: Box<str>,
     is_static: bool,
-}
-
-impl Rule for NoDuplicateClassMembers {
-    type Query = Ast<JsClassMemberList>;
-    type State = AnyClassMemberDefinition;
-    type Signals = Box<[Self::State]>;
-    type Options = NoDuplicateClassMembersOptions;
-
-    fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let mut defined_members: FxHashMap<MemberState, FxHashSet<MemberType>> =
-            FxHashMap::default();
-
-        let node = ctx.query();
-        node.into_iter()
-            .filter_map(|member| {
-                let member = AnyClassMemberDefinition::cast(member.into_syntax())?;
-                let member_name_node = member.name()?;
-                let member_state = MemberState {
-                    name: get_member_name(&member_name_node)?.text().into(),
-                    is_static: is_static_member(member.modifiers_list()),
-                };
-
-                let member_type = member.member_type();
-                if let Some(stored_members) = defined_members.get_mut(&member_state) {
-                    if stored_members.contains(&MemberType::Normal)
-                        || stored_members.contains(&member_type)
-                        || member_type == MemberType::Normal
-                    {
-                        return Some(member);
-                    } else {
-                        stored_members.insert(member_type);
-                    }
-                } else {
-                    defined_members
-                        .entry(member_state)
-                        .or_default()
-                        .insert(member_type);
-                }
-
-                None
-            })
-            .collect::<Vec<_>>()
-            .into_boxed_slice()
-    }
-
-    fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
-        let diagnostic = RuleDiagnostic::new(
-            rule_category!(),
-            state.range(),
-            format!(
-                "Duplicate class member name {:?}",
-                get_member_name(&state.name()?)?.text()
-            ),
-        );
-
-        Some(diagnostic)
-    }
 }

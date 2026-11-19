@@ -1,0 +1,155 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/blockquote_list_item_after_nested_item.md
+---
+
+# Input
+
+```md
+> - one
+>   - nested
+> - two
+
+> 1. one
+>    1. nested
+> 2. two
+
+> - a
+>   - b
+>     - c
+> - d
+
+> - a
+>   - b
+>     - c
+>   - d
+
+> - 1. a
+> - b
+
+> > - one
+> >   - nested
+> > - two
+
+> * one
+>   + nested
+> * two
+
+> - one
+>   - nested
+> > quoted
+
+> - one
+>   - nested
+>   > quoted
+
+> - 1. a
+> > quoted
+
+> - one
+> > quoted
+
+> 1. one
+> - other list
+
+> - one
+> # heading
+
+> paragraph
+> continuation
+>
+> - one
+>   - nested
+> > quoted
+
+> - one
+>   <!-- biome-ignore format: keep -->
+>   - nested
+> - two
+
+> - one
+>   <!-- biome-ignore format: keep -->
+>   - nested
+>   > quoted
+
+- > - one
+  >   - nested
+  > - two
+
+```
+
+
+# Formatted
+
+```md
+> - one
+>   - nested
+> - two
+
+> 1. one
+>    1. nested
+> 2. two
+
+> - a
+>   - b
+>     - c
+> - d
+
+> - a
+>   - b
+>     - c
+>   - d
+
+> - 1. a
+> - b
+
+> > - one
+> >   - nested
+> > - two
+
+> - one
+>   - nested
+> - two
+
+> - one
+>   - nested
+> > quoted
+
+> - one
+>   - nested
+>   > quoted
+
+> - 1. a
+> > quoted
+
+> - one
+> > quoted
+
+> 1. one
+> - other list
+
+> - one
+> # heading
+
+> paragraph
+> continuation
+>
+> - one
+>   - nested
+> > quoted
+
+> - one
+>   <!-- biome-ignore format: keep -->
+>   - nested
+> - two
+
+> - one
+>   <!-- biome-ignore format: keep -->
+>   - nested
+>   > quoted
+
+- > - one
+  >   - nested
+  > - two
+
+```

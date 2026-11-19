@@ -1,0 +1,84 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: vue/multiparser/vue-component.vue
+---
+
+# Input
+
+```vue
+<template >
+  <h1 >{{greeting}}     world</h1 >
+  <script>kikoo ( ) </script>
+</template >
+
+<script>
+module  .  exports  =
+{data : function () {return {
+	greeting: "Hello"
+}}
+}
+</script>
+
+<style   scoped >
+p { font-size : 2em ; text-align : center ; }
+
+  </style >
+
+<style   lang="postcss" >
+p { font-size : 2em ; text-align : center ; }
+
+  </style >
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,7 +1,7 @@
+ <template>
+   <h1>{{ greeting }} world</h1>
+   <script>
+-    kikoo();
++  kikoo();
+   </script>
+ </template>
+ 
+```
+
+# Output
+
+```vue
+<template>
+  <h1>{{ greeting }} world</h1>
+  <script>
+  kikoo();
+  </script>
+</template>
+
+<script>
+module.exports = {
+  data: function () {
+    return {
+      greeting: "Hello",
+    };
+  },
+};
+</script>
+
+<style scoped>
+p {
+  font-size: 2em;
+  text-align: center;
+}
+</style>
+
+<style lang="postcss">
+p {
+  font-size: 2em;
+  text-align: center;
+}
+</style>
+```

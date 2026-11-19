@@ -1,0 +1,13 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: validSuppressed.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<template>
+  <!-- biome-ignore lint/nursery/useVueConsistentEventHyphenation: This third-party component emits camelCase events. -->
+  <VueComponent @customEvent="onEvent" />
+</template>
+
+```

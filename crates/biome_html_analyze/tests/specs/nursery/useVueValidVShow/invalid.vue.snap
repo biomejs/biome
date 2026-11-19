@@ -1,0 +1,362 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+assertion_line: 121
+expression: invalid.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+
+<template>
+  <!-- Missing value -->
+  <div v-show></div>
+
+  <!-- Empty value -->
+  <div v-show=""></div>
+
+  <!-- Blank value -->
+  <div v-show="   "></div>
+
+  <!-- Unexpected argument -->
+  <div v-show:aaa="foo"></div>
+
+  <!-- Unexpected dynamic argument -->
+  <div v-show:[name]="foo"></div>
+
+  <!-- Unexpected modifier -->
+  <div v-show.aaa="foo"></div>
+
+  <!-- Multiple modifiers -->
+  <div v-show.aaa.bbb="foo"></div>
+
+  <!-- Argument and modifier -->
+  <div v-show:aaa.bbb="foo"></div>
+
+  <!-- On a template element -->
+  <template v-show="condition"><div></div></template>
+
+  <!-- On a self-closing template element -->
+  <template v-show="condition" />
+
+  <!-- On a template element without a value -->
+  <template v-show></template>
+
+  <!-- On a component -->
+  <MyComponent v-show:aaa="foo" />
+</template>
+
+```
+
+# Diagnostics
+```
+invalid.vue:5:8 lint/nursery/useVueValidVShow ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The v-show directive is missing a value.
+  
+    3 │ <template>
+    4 │   <!-- Missing value -->
+  > 5 │   <div v-show></div>
+      │        ^^^^^^
+    6 │ 
+    7 │   <!-- Empty value -->
+  
+  i v-show needs a value to decide whether to show or hide the element.
+  
+  i Add a condition, like v-show="isVisible".
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:8:8 lint/nursery/useVueValidVShow ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The v-show directive is missing a value.
+  
+     7 │   <!-- Empty value -->
+   > 8 │   <div v-show=""></div>
+       │        ^^^^^^^^^
+     9 │ 
+    10 │   <!-- Blank value -->
+  
+  i v-show needs a value to decide whether to show or hide the element.
+  
+  i Add a condition, like v-show="isVisible".
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:11:8 lint/nursery/useVueValidVShow ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The v-show directive is missing a value.
+  
+    10 │   <!-- Blank value -->
+  > 11 │   <div v-show="   "></div>
+       │        ^^^^^^^^^^^^
+    12 │ 
+    13 │   <!-- Unexpected argument -->
+  
+  i v-show needs a value to decide whether to show or hide the element.
+  
+  i Add a condition, like v-show="isVisible".
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:14:14 lint/nursery/useVueValidVShow ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The v-show directive doesn't accept an argument.
+  
+    13 │   <!-- Unexpected argument -->
+  > 14 │   <div v-show:aaa="foo"></div>
+       │              ^^^^
+    15 │ 
+    16 │   <!-- Unexpected dynamic argument -->
+  
+  i v-show only uses its value to decide whether to show the element, so the argument does nothing.
+  
+  i Remove the argument, like v-show="isVisible".
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:17:14 lint/nursery/useVueValidVShow ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The v-show directive doesn't accept an argument.
+  
+    16 │   <!-- Unexpected dynamic argument -->
+  > 17 │   <div v-show:[name]="foo"></div>
+       │              ^^^^^^^
+    18 │ 
+    19 │   <!-- Unexpected modifier -->
+  
+  i v-show only uses its value to decide whether to show the element, so the argument does nothing.
+  
+  i Remove the argument, like v-show="isVisible".
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:20:14 lint/nursery/useVueValidVShow ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The v-show directive doesn't accept modifiers.
+  
+    19 │   <!-- Unexpected modifier -->
+  > 20 │   <div v-show.aaa="foo"></div>
+       │              ^^^^
+    21 │ 
+    22 │   <!-- Multiple modifiers -->
+  
+  i v-show has no modifiers, so this modifier does nothing.
+  
+  i Remove the modifier, like v-show="isVisible".
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:23:14 lint/nursery/useVueValidVShow ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The v-show directive doesn't accept modifiers.
+  
+    22 │   <!-- Multiple modifiers -->
+  > 23 │   <div v-show.aaa.bbb="foo"></div>
+       │              ^^^^^^^^
+    24 │ 
+    25 │   <!-- Argument and modifier -->
+  
+  i v-show has no modifiers, so this modifier does nothing.
+  
+  i Remove the modifier, like v-show="isVisible".
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:26:14 lint/nursery/useVueValidVShow ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The v-show directive doesn't accept an argument.
+  
+    25 │   <!-- Argument and modifier -->
+  > 26 │   <div v-show:aaa.bbb="foo"></div>
+       │              ^^^^
+    27 │ 
+    28 │   <!-- On a template element -->
+  
+  i v-show only uses its value to decide whether to show the element, so the argument does nothing.
+  
+  i Remove the argument, like v-show="isVisible".
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:26:18 lint/nursery/useVueValidVShow ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The v-show directive doesn't accept modifiers.
+  
+    25 │   <!-- Argument and modifier -->
+  > 26 │   <div v-show:aaa.bbb="foo"></div>
+       │                  ^^^^
+    27 │ 
+    28 │   <!-- On a template element -->
+  
+  i v-show has no modifiers, so this modifier does nothing.
+  
+  i Remove the modifier, like v-show="isVisible".
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:29:13 lint/nursery/useVueValidVShow ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The v-show directive can't be used on a <template> element.
+  
+    28 │   <!-- On a template element -->
+  > 29 │   <template v-show="condition"><div></div></template>
+       │             ^^^^^^^^^^^^^^^^^^
+    30 │ 
+    31 │   <!-- On a self-closing template element -->
+  
+  i v-show hides an element by changing its CSS display style. A <template> element doesn't appear on the page, so there is nothing for v-show to hide.
+  
+  i Use v-if on the <template> instead, or move v-show to an element inside it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:32:13 lint/nursery/useVueValidVShow ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The v-show directive can't be used on a <template> element.
+  
+    31 │   <!-- On a self-closing template element -->
+  > 32 │   <template v-show="condition" />
+       │             ^^^^^^^^^^^^^^^^^^
+    33 │ 
+    34 │   <!-- On a template element without a value -->
+  
+  i v-show hides an element by changing its CSS display style. A <template> element doesn't appear on the page, so there is nothing for v-show to hide.
+  
+  i Use v-if on the <template> instead, or move v-show to an element inside it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:35:13 lint/nursery/useVueValidVShow ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The v-show directive is missing a value.
+  
+    34 │   <!-- On a template element without a value -->
+  > 35 │   <template v-show></template>
+       │             ^^^^^^
+    36 │ 
+    37 │   <!-- On a component -->
+  
+  i v-show needs a value to decide whether to show or hide the element.
+  
+  i Add a condition, like v-show="isVisible".
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:35:13 lint/nursery/useVueValidVShow ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The v-show directive can't be used on a <template> element.
+  
+    34 │   <!-- On a template element without a value -->
+  > 35 │   <template v-show></template>
+       │             ^^^^^^
+    36 │ 
+    37 │   <!-- On a component -->
+  
+  i v-show hides an element by changing its CSS display style. A <template> element doesn't appear on the page, so there is nothing for v-show to hide.
+  
+  i Use v-if on the <template> instead, or move v-show to an element inside it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:38:22 lint/nursery/useVueValidVShow ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The v-show directive doesn't accept an argument.
+  
+    37 │   <!-- On a component -->
+  > 38 │   <MyComponent v-show:aaa="foo" />
+       │                      ^^^^
+    39 │ </template>
+    40 │ 
+  
+  i v-show only uses its value to decide whether to show the element, so the argument does nothing.
+  
+  i Remove the argument, like v-show="isVisible".
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:8:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a valid expression in template syntax
+  
+     7 │   <!-- Empty value -->
+   > 8 │   <div v-show=""></div>
+       │                
+     9 │ 
+    10 │   <!-- Blank value -->
+  
+  i Template expressions can only contain JavaScript expressions, not statements like 'let', 'if', or 'function'.
+  
+
+```
+
+```
+invalid.vue:11:19 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a valid expression in template syntax
+  
+    10 │   <!-- Blank value -->
+  > 11 │   <div v-show="   "></div>
+       │                   
+    12 │ 
+    13 │   <!-- Unexpected argument -->
+  
+  i Template expressions can only contain JavaScript expressions, not statements like 'let', 'if', or 'function'.
+  
+
+```

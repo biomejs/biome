@@ -1,0 +1,16 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+function nonNullIdentifier() {
+	if (a) {
+		return t!;
+	}
+
+	return false;
+}
+
+```

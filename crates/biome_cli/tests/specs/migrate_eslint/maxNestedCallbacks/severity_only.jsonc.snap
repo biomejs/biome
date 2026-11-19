@@ -22,8 +22,8 @@ expression: severity_only.jsonc
 {
 	"linter": {
 		"rules": {
-			"recommended": false,
-			"nursery": {
+			"preset": "none",
+			"complexity": {
 				"noExcessiveNestedCallbacks": {
 					"level": "error",
 					"options": { "max": 10 }

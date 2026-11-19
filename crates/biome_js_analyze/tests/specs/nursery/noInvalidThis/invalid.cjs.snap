@@ -1,0 +1,62 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 196
+expression: invalid.cjs
+---
+# Input
+```cjs
+/* should generate diagnostics */
+"use strict";
+function foo() {
+	this.a = 0;
+}
+function bar() {
+	return function () {
+		this.a = 0;
+	};
+}
+
+```
+
+# Diagnostics
+```
+invalid.cjs:4:2 lint/nursery/noInvalidThis ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected this in a function that isn't a method or a constructor.
+  
+    2 │ "use strict";
+    3 │ function foo() {
+  > 4 │ 	this.a = 0;
+      │ 	^^^^
+    5 │ }
+    6 │ function bar() {
+  
+  i When a function is called on its own instead of as a method, this is undefined, and reading its properties throws an error.
+  
+  i Pass the value as a parameter instead, or turn the function into a method. In TypeScript, if callers provide this, declare its type with a this parameter.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.cjs:8:3 lint/nursery/noInvalidThis ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected this in a function that isn't a method or a constructor.
+  
+     6 │ function bar() {
+     7 │ 	return function () {
+   > 8 │ 		this.a = 0;
+       │ 		^^^^
+     9 │ 	};
+    10 │ }
+  
+  i When a function is called on its own instead of as a method, this is undefined, and reading its properties throws an error.
+  
+  i Pass the value as a parameter instead, or turn the function into a method. In TypeScript, if callers provide this, declare its type with a this parameter.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

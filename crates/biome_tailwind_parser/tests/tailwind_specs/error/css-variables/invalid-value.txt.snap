@@ -1,0 +1,177 @@
+---
+source: crates/biome_tailwind_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```text
+bg-() bg-(color:) bg-(--a:b)
+```
+
+
+## AST
+
+```
+TwRoot {
+    bom_token: missing (optional),
+    leading_whitespace_token: missing (optional),
+    candidates: TwCandidateList [
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwFunctionalCandidate {
+                base_token: TW_BASE@0..2 "bg" [] [],
+                minus_token: DASH@2..3 "-" [] [],
+                value: TwCssVariableValue {
+                    l_paren_token: L_PAREN@3..4 "(" [] [],
+                    type_hint: missing (optional),
+                    value: CssParameterList [],
+                    r_paren_token: R_PAREN@4..5 ")" [] [],
+                },
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        WHITESPACE@5..6 " " [] [],
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwFunctionalCandidate {
+                base_token: TW_BASE@6..8 "bg" [] [],
+                minus_token: DASH@8..9 "-" [] [],
+                value: TwCssVariableValue {
+                    l_paren_token: L_PAREN@9..10 "(" [] [],
+                    type_hint: TwTypeHint {
+                        name_token: TW_VALUE@10..15 "color" [] [],
+                        colon_token: COLON@15..16 ":" [] [],
+                    },
+                    value: CssParameterList [],
+                    r_paren_token: R_PAREN@16..17 ")" [] [],
+                },
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        WHITESPACE@17..18 " " [] [],
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwFunctionalCandidate {
+                base_token: TW_BASE@18..20 "bg" [] [],
+                minus_token: DASH@20..21 "-" [] [],
+                value: TwBogusValue {
+                    items: [
+                        L_PAREN@21..22 "(" [] [],
+                        TW_VALUE@22..27 "--a:b" [] [],
+                        R_PAREN@27..28 ")" [] [],
+                    ],
+                },
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@28..28 "" [] [],
+}
+```
+
+## CST
+
+```
+0: TW_ROOT@0..28
+  0: (empty)
+  1: (empty)
+  2: TW_CANDIDATE_LIST@0..28
+    0: TW_FULL_CANDIDATE@0..5
+      0: TW_VARIANT_LIST@0..0
+      1: (empty)
+      2: (empty)
+      3: TW_FUNCTIONAL_CANDIDATE@0..5
+        0: TW_BASE@0..2 "bg" [] []
+        1: DASH@2..3 "-" [] []
+        2: TW_CSS_VARIABLE_VALUE@3..5
+          0: L_PAREN@3..4 "(" [] []
+          1: (empty)
+          2: CSS_PARAMETER_LIST@4..4
+          3: R_PAREN@4..5 ")" [] []
+        3: (empty)
+      4: (empty)
+    1: WHITESPACE@5..6 " " [] []
+    2: TW_FULL_CANDIDATE@6..17
+      0: TW_VARIANT_LIST@6..6
+      1: (empty)
+      2: (empty)
+      3: TW_FUNCTIONAL_CANDIDATE@6..17
+        0: TW_BASE@6..8 "bg" [] []
+        1: DASH@8..9 "-" [] []
+        2: TW_CSS_VARIABLE_VALUE@9..17
+          0: L_PAREN@9..10 "(" [] []
+          1: TW_TYPE_HINT@10..16
+            0: TW_VALUE@10..15 "color" [] []
+            1: COLON@15..16 ":" [] []
+          2: CSS_PARAMETER_LIST@16..16
+          3: R_PAREN@16..17 ")" [] []
+        3: (empty)
+      4: (empty)
+    3: WHITESPACE@17..18 " " [] []
+    4: TW_FULL_CANDIDATE@18..28
+      0: TW_VARIANT_LIST@18..18
+      1: (empty)
+      2: (empty)
+      3: TW_FUNCTIONAL_CANDIDATE@18..28
+        0: TW_BASE@18..20 "bg" [] []
+        1: DASH@20..21 "-" [] []
+        2: TW_BOGUS_VALUE@21..28
+          0: L_PAREN@21..22 "(" [] []
+          1: TW_VALUE@22..27 "--a:b" [] []
+          2: R_PAREN@27..28 ")" [] []
+        3: (empty)
+      4: (empty)
+  3: EOF@28..28 "" [] []
+
+```
+
+## Diagnostics
+
+```
+invalid-value.txt:1:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a value but instead found ')'.
+  
+  > 1 │ bg-() bg-(color:) bg-(--a:b)
+      │     ^
+  
+  i Expected a value here.
+  
+  > 1 │ bg-() bg-(color:) bg-(--a:b)
+      │     ^
+  
+invalid-value.txt:1:17 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a value but instead found ')'.
+  
+  > 1 │ bg-() bg-(color:) bg-(--a:b)
+      │                 ^
+  
+  i Expected a value here.
+  
+  > 1 │ bg-() bg-(color:) bg-(--a:b)
+      │                 ^
+  
+invalid-value.txt:1:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a value but instead found '(--a:b)'.
+  
+  > 1 │ bg-() bg-(color:) bg-(--a:b)
+      │                      ^^^^^^^
+  
+  i Expected a value here.
+  
+  > 1 │ bg-() bg-(color:) bg-(--a:b)
+      │                      ^^^^^^^
+  
+```

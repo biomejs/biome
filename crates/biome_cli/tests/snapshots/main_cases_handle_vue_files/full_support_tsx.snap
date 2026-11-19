@@ -2,6 +2,12 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
+## Command
+
+```shell
+biome check --write --unsafe file.vue
+```
+
 ## `biome.json`
 
 ```json
@@ -18,7 +24,6 @@ expression: redactor(content)
 
 ```vue
 <script lang="tsx">
-import s from "src/utils";
 import { sure } from "sure.js";
 import z from "zod";
 
@@ -28,7 +33,7 @@ interface Props {
 
 let schema = z.object().optional();
 schema + sure();
-const props: Props = { title: "Hello" };
+const _props: Props = { title: "Hello" };
 
 function _FunctionalComponent() {
 	return <div></div>;

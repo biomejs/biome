@@ -73,7 +73,7 @@ impl Rule for UseFragmentSyntax {
     fn action(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<JsRuleAction> {
         let node = ctx.query();
         let mut mutation = ctx.root().begin();
-        let list = jsx_child_list(node.children());
+        let list = jsx_child_list(node.elements());
         let opening_element = node.opening_element().ok()?;
         let closing_element = node.closing_element().ok()?;
         let fragment = jsx_fragment(

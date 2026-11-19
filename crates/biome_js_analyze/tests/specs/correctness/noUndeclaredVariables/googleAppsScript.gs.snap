@@ -1,0 +1,36 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: googleAppsScript.gs
+---
+# Input
+```cjs
+// Google Apps Script service globals must be recognized (no diagnostics).
+SpreadsheetApp.getActiveSpreadsheet();
+Logger.log("hello");
+DriveApp.getFiles();
+
+// A genuinely undeclared variable must still be reported.
+notAGlobal();
+
+```
+
+# Diagnostics
+```
+googleAppsScript.gs:7:1 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The notAGlobal variable is undeclared.
+  
+    6 │ // A genuinely undeclared variable must still be reported.
+  > 7 │ notAGlobal();
+      │ ^^^^^^^^^^
+    8 │ 
+  
+  i Using an undeclared variable at runtime can throw a ReferenceError. It often points to a typo or a missing import.
+  
+  i Declare or import the variable, or fix its name.
+  
+  i By default, Biome recognizes browser and Node.js globals.
+    You can ignore more globals using the javascript.globals configuration.
+  
+
+```

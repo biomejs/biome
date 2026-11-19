@@ -1,12 +1,15 @@
 use crate::GraphqlCommentStyle;
-use biome_formatter::{AttributePosition, BracketSpacing, IndentWidth, QuoteStyle, prelude::*};
+use biome_formatter::rowan::RowanSource;
+use biome_formatter::{
+    AttributePosition, BracketSpacing, IndentWidth, QuoteStyle, rowan::prelude::*,
+};
 use biome_formatter::{
     CstFormatContext, FormatContext, FormatOptions, IndentStyle, LineEnding, LineWidth,
     TrailingNewline, TransformSourceMap,
 };
 
 use crate::comments::{FormatGraphqlLeadingComment, GraphqlComments};
-use biome_graphql_syntax::{GraphqlFileSource, GraphqlLanguage};
+use biome_graphql_syntax::GraphqlLanguage;
 use std::fmt;
 use std::rc::Rc;
 
@@ -35,6 +38,7 @@ impl GraphqlFormatContext {
 
 impl FormatContext for GraphqlFormatContext {
     type Options = GraphqlFormatOptions;
+    type Source = RowanSource;
 
     fn options(&self) -> &Self::Options {
         &self.options
@@ -66,13 +70,11 @@ pub struct GraphqlFormatOptions {
     bracket_spacing: BracketSpacing,
     /// Whether to add a trailing newline at the end of the file. Defaults to true.
     trailing_newline: TrailingNewline,
-    _file_source: GraphqlFileSource,
 }
 
 impl GraphqlFormatOptions {
-    pub fn new(file_source: GraphqlFileSource) -> Self {
+    pub fn new() -> Self {
         Self {
-            _file_source: file_source,
             indent_style: IndentStyle::default(),
             indent_width: IndentWidth::default(),
             line_ending: LineEnding::default(),

@@ -1,0 +1,100 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome inspect plugins
+```
+
+## `biome.json`
+
+```json
+{
+  "plugins": [
+    { "path": "./unfiltered.grit", "includes": ["src/**/*.ts"] },
+    "./unfiltered.grit",
+    { "path": "./filtered.grit", "includes": ["src/**/*.ts", "!**/*.test.ts"] },
+    { "path": "./throw.ts", "includes": ["src/**/*.ts"] },
+    "./broken"
+  ],
+  "overrides": [
+    {
+      "includes": ["tests/**"],
+      "plugins": [
+        { "path": "./filtered.grit", "includes": ["**/*.test.ts"] },
+        { "path": "./throw.ts", "includes": ["**/*.test.ts"] },
+        { "path": "./unfiltered.grit", "includes": ["**/*.test.ts"] }
+      ]
+    },
+    { "includes": ["scripts/**"], "plugins": ["./filtered.grit"] }
+  ]
+}
+```
+
+## `broken/biome-manifest.json`
+
+```json
+{ "version": 2 }
+```
+
+## `filtered.grit`
+
+```grit
+`console.log($message)`
+```
+
+## `throw.ts`
+
+```ts
+throw new Error('must not execute');
+```
+
+## `unfiltered.grit`
+
+```grit
+`console.log($message)`
+```
+
+# Termination Message
+
+```block
+configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × 1 plugin in the configuration has an error.
+  
+  The configuration enables 2 plugin rules and 1 JavaScript plugin.
+  
+  Local plugins
+  
+  - unfiltered.grit (rule name: unfiltered)
+  
+  Rules that apply only to matching files
+  
+  - filtered.grit (rule name: filtered), for files matching any of:
+    - includes: [src/**/*.ts, !**/*.test.ts]
+    - override includes: [tests/**] and includes: [**/*.test.ts]
+    - override includes: [scripts/**]
+  
+  JavaScript plugins
+  
+  - throw.ts, for files matching any of:
+    - includes: [src/**/*.ts]
+    - override includes: [tests/**] and includes: [**/*.test.ts]
+  
+  i Biome doesn't run JavaScript plugins during inspection, so their rule names aren't listed.
+  
+  Plugins with errors
+  
+  broken
+  
+  × The Biome manifest broken/biome-manifest.json is invalid.
+  
+  × Unsupported version 2.
+  
+  i Biome manifests must use version 1.
+  
+
+
+```

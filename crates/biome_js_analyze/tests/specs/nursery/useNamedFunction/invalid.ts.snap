@@ -1,0 +1,52 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+const typed = function<T>(this: Window, value: T): T { return value; };
+const asserted = function() {} as () => void;
+
+```
+
+# Diagnostics
+```
+invalid.ts:2:15 lint/nursery/useNamedFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function has no name.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const typed = function<T>(this: Window, value: T): T { return value; };
+      │               ^^^^^^^^
+    3 │ const asserted = function() {} as () => void;
+    4 │ 
+  
+  i Error messages and debugging tools can show a function without a name as <anonymous>, which makes it harder to find where an error came from.
+  
+  i Give this function a name.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:3:18 lint/nursery/useNamedFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function has no name.
+  
+    1 │ /* should generate diagnostics */
+    2 │ const typed = function<T>(this: Window, value: T): T { return value; };
+  > 3 │ const asserted = function() {} as () => void;
+      │                  ^^^^^^^^
+    4 │ 
+  
+  i Error messages and debugging tools can show a function without a name as <anonymous>, which makes it harder to find where an error came from.
+  
+  i Give this function a name.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

@@ -1,0 +1,51 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/at_rule/parity-query-unary-values.css
+---
+
+# Input
+
+```css
+@media(min-width:16px),(min-width:-16px),(min-width:+16px){.lengths{display:block}}
+@media(aspect-ratio:16 /9){.ratio{display:block}}
+@media(-16px<width<=+800px),(width>=400px),(800px>width){.ranges{display:block}}
+@media(min-width:calc(800px - 16px)){.calculation{display:block}}
+@container(min-width: -16px){.container{display:block}}
+.after{color:blue}
+
+```
+
+
+# Formatted
+
+```css
+@media (min-width: 16px), (min-width: -16px), (min-width: +16px) {
+	.lengths {
+		display: block;
+	}
+}
+@media (aspect-ratio: 16 / 9) {
+	.ratio {
+		display: block;
+	}
+}
+@media (-16px < width <= +800px), (width >= 400px), (800px > width) {
+	.ranges {
+		display: block;
+	}
+}
+@media (min-width: calc(800px - 16px)) {
+	.calculation {
+		display: block;
+	}
+}
+@container (min-width: -16px) {
+	.container {
+		display: block;
+	}
+}
+.after {
+	color: blue;
+}
+
+```

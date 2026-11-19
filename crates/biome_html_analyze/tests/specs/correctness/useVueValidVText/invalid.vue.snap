@@ -1,0 +1,269 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<template>
+
+<div v-text></div>
+<div v-text=""></div>
+<div v-text="    "></div>
+<div v-text:aaa="foo"></div>
+<div v-text.bbb="foo"></div>
+<div v-text:aaa></div>
+<div v-text.bbb></div>
+
+<div v-text />
+<div v-text="" />
+<div v-text:aaa="foo" />
+<div v-text.bbb="foo" />
+</template>
+
+```
+
+# Diagnostics
+```
+invalid.vue:4:6 lint/correctness/useVueValidVText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The v-text directive is missing a value.
+  
+    2 │ <template>
+    3 │ 
+  > 4 │ <div v-text></div>
+      │      ^^^^^^
+    5 │ <div v-text=""></div>
+    6 │ <div v-text="    "></div>
+  
+  i v-text directives require a value containing the text content to render.
+  
+  i For example, use v-text="foo" to render the content of the foo variable.
+  
+
+```
+
+```
+invalid.vue:5:6 lint/correctness/useVueValidVText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The v-text directive is missing a value.
+  
+    4 │ <div v-text></div>
+  > 5 │ <div v-text=""></div>
+      │      ^^^^^^^^^
+    6 │ <div v-text="    "></div>
+    7 │ <div v-text:aaa="foo"></div>
+  
+  i v-text directives require a value containing the text content to render.
+  
+  i For example, use v-text="foo" to render the content of the foo variable.
+  
+
+```
+
+```
+invalid.vue:6:6 lint/correctness/useVueValidVText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The v-text directive is missing a value.
+  
+    4 │ <div v-text></div>
+    5 │ <div v-text=""></div>
+  > 6 │ <div v-text="    "></div>
+      │      ^^^^^^^^^^^^^
+    7 │ <div v-text:aaa="foo"></div>
+    8 │ <div v-text.bbb="foo"></div>
+  
+  i v-text directives require a value containing the text content to render.
+  
+  i For example, use v-text="foo" to render the content of the foo variable.
+  
+
+```
+
+```
+invalid.vue:7:12 lint/correctness/useVueValidVText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The v-text directive does not accept an argument.
+  
+    5 │ <div v-text=""></div>
+    6 │ <div v-text="    "></div>
+  > 7 │ <div v-text:aaa="foo"></div>
+      │            ^^^^
+    8 │ <div v-text.bbb="foo"></div>
+    9 │ <div v-text:aaa></div>
+  
+  i v-text directives should be used without arguments, like v-text="content".
+  
+
+```
+
+```
+invalid.vue:8:12 lint/correctness/useVueValidVText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The v-text directive does not support modifiers.
+  
+     6 │ <div v-text="    "></div>
+     7 │ <div v-text:aaa="foo"></div>
+   > 8 │ <div v-text.bbb="foo"></div>
+       │            ^^^^
+     9 │ <div v-text:aaa></div>
+    10 │ <div v-text.bbb></div>
+  
+  i v-text directives do not support any modifiers. Remove the modifier.
+  
+
+```
+
+```
+invalid.vue:9:12 lint/correctness/useVueValidVText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The v-text directive does not accept an argument.
+  
+     7 │ <div v-text:aaa="foo"></div>
+     8 │ <div v-text.bbb="foo"></div>
+   > 9 │ <div v-text:aaa></div>
+       │            ^^^^
+    10 │ <div v-text.bbb></div>
+    11 │ 
+  
+  i v-text directives should be used without arguments, like v-text="content".
+  
+
+```
+
+```
+invalid.vue:10:12 lint/correctness/useVueValidVText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The v-text directive does not support modifiers.
+  
+     8 │ <div v-text.bbb="foo"></div>
+     9 │ <div v-text:aaa></div>
+  > 10 │ <div v-text.bbb></div>
+       │            ^^^^
+    11 │ 
+    12 │ <div v-text />
+  
+  i v-text directives do not support any modifiers. Remove the modifier.
+  
+
+```
+
+```
+invalid.vue:12:6 lint/correctness/useVueValidVText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The v-text directive is missing a value.
+  
+    10 │ <div v-text.bbb></div>
+    11 │ 
+  > 12 │ <div v-text />
+       │      ^^^^^^
+    13 │ <div v-text="" />
+    14 │ <div v-text:aaa="foo" />
+  
+  i v-text directives require a value containing the text content to render.
+  
+  i For example, use v-text="foo" to render the content of the foo variable.
+  
+
+```
+
+```
+invalid.vue:13:6 lint/correctness/useVueValidVText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The v-text directive is missing a value.
+  
+    12 │ <div v-text />
+  > 13 │ <div v-text="" />
+       │      ^^^^^^^^^
+    14 │ <div v-text:aaa="foo" />
+    15 │ <div v-text.bbb="foo" />
+  
+  i v-text directives require a value containing the text content to render.
+  
+  i For example, use v-text="foo" to render the content of the foo variable.
+  
+
+```
+
+```
+invalid.vue:14:12 lint/correctness/useVueValidVText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The v-text directive does not accept an argument.
+  
+    12 │ <div v-text />
+    13 │ <div v-text="" />
+  > 14 │ <div v-text:aaa="foo" />
+       │            ^^^^
+    15 │ <div v-text.bbb="foo" />
+    16 │ </template>
+  
+  i v-text directives should be used without arguments, like v-text="content".
+  
+
+```
+
+```
+invalid.vue:15:12 lint/correctness/useVueValidVText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The v-text directive does not support modifiers.
+  
+    13 │ <div v-text="" />
+    14 │ <div v-text:aaa="foo" />
+  > 15 │ <div v-text.bbb="foo" />
+       │            ^^^^
+    16 │ </template>
+    17 │ 
+  
+  i v-text directives do not support any modifiers. Remove the modifier.
+  
+
+```
+
+```
+invalid.vue:5:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a valid expression in template syntax
+  
+    4 │ <div v-text></div>
+  > 5 │ <div v-text=""></div>
+      │              
+    6 │ <div v-text="    "></div>
+    7 │ <div v-text:aaa="foo"></div>
+  
+  i Template expressions can only contain JavaScript expressions, not statements like 'let', 'if', or 'function'.
+  
+
+```
+
+```
+invalid.vue:6:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a valid expression in template syntax
+  
+    4 │ <div v-text></div>
+    5 │ <div v-text=""></div>
+  > 6 │ <div v-text="    "></div>
+      │                  
+    7 │ <div v-text:aaa="foo"></div>
+    8 │ <div v-text.bbb="foo"></div>
+  
+  i Template expressions can only contain JavaScript expressions, not statements like 'let', 'if', or 'function'.
+  
+
+```
+
+```
+invalid.vue:13:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a valid expression in template syntax
+  
+    12 │ <div v-text />
+  > 13 │ <div v-text="" />
+       │              
+    14 │ <div v-text:aaa="foo" />
+    15 │ <div v-text.bbb="foo" />
+  
+  i Template expressions can only contain JavaScript expressions, not statements like 'let', 'if', or 'function'.
+  
+
+```

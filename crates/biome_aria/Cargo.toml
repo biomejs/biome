@@ -1,6 +1,6 @@
 [package]
 name                 = "biome_aria"
-version              = "0.5.7"
+version.workspace    = true
 authors.workspace    = true
 edition.workspace    = true
 description          = "Utilities to create ARIA query for biome_js_analyze"
@@ -15,6 +15,7 @@ publish              = true
 
 [dependencies]
 biome_aria_metadata = { workspace = true }
+biome_string_case   = { workspace = true }
 
 [lints]
 workspace = true

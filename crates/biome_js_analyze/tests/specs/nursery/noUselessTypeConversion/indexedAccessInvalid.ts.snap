@@ -1,0 +1,121 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: indexedAccessInvalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+
+const letters = ["A", "B", "C"] as const;
+declare const letter: (typeof letters)[number];
+String(letter);
+
+declare const count: [1, 2, 3][number];
+Number(count);
+
+declare const flag: boolean[][number];
+Boolean(flag);
+
+const values = { A: 1, B: 2 } as const;
+declare const key: keyof typeof values;
+String(key);
+
+```
+
+# Diagnostics
+```
+indexedAccessInvalid.ts:5:1 lint/nursery/noUselessTypeConversion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid calling `String()` on a string value.
+  
+    3 │ const letters = ["A", "B", "C"] as const;
+    4 │ declare const letter: (typeof letters)[number];
+  > 5 │ String(letter);
+      │ ^^^^^^
+    6 │ 
+    7 │ declare const count: [1, 2, 3][number];
+  
+  i This expression already evaluates to a string.
+  
+  i Remove the conversion and use the value directly.
+  
+  i Redundant conversions make it harder to see that the value already has the expected string type.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9752 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+indexedAccessInvalid.ts:8:1 lint/nursery/noUselessTypeConversion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid calling `Number()` on a number value.
+  
+     7 │ declare const count: [1, 2, 3][number];
+   > 8 │ Number(count);
+       │ ^^^^^^
+     9 │ 
+    10 │ declare const flag: boolean[][number];
+  
+  i This expression already evaluates to a number.
+  
+  i Remove the conversion and use the value directly.
+  
+  i Redundant conversions make it harder to see that the value already has the expected number type.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9752 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+indexedAccessInvalid.ts:11:1 lint/nursery/noUselessTypeConversion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid calling `Boolean()` on a boolean value.
+  
+    10 │ declare const flag: boolean[][number];
+  > 11 │ Boolean(flag);
+       │ ^^^^^^^
+    12 │ 
+    13 │ const values = { A: 1, B: 2 } as const;
+  
+  i This expression already evaluates to a boolean.
+  
+  i Remove the conversion and use the value directly.
+  
+  i Redundant conversions make it harder to see that the value already has the expected boolean type.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9752 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+indexedAccessInvalid.ts:15:1 lint/nursery/noUselessTypeConversion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid calling `String()` on a string value.
+  
+    13 │ const values = { A: 1, B: 2 } as const;
+    14 │ declare const key: keyof typeof values;
+  > 15 │ String(key);
+       │ ^^^^^^
+    16 │ 
+  
+  i This expression already evaluates to a string.
+  
+  i Remove the conversion and use the value directly.
+  
+  i Redundant conversions make it harder to see that the value already has the expected string type.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9752 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

@@ -1,0 +1,89 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome migrate stylelint
+```
+
+## `biome.json`
+
+```json
+{ "linter": { "enabled": true } }
+```
+
+## `.stylelintrc.json`
+
+```json
+{
+        "rules": {
+            "block-no-empty": true,
+            "color-hex-case": "lower",
+            "indentation": 2,
+            "string-quotes": "double",
+            "unicode-bom": "never"
+        }
+    }
+```
+
+# Emitted Messages
+
+```block
+biome.json migrate ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Configuration file can be updated.
+  
+    1   │ - {·"linter":·{·"enabled":·true·}·}
+      1 │ + {
+      2 │ + → "linter":·{
+      3 │ + → → "enabled":·true,
+      4 │ + → → "rules":·{·"preset":·"none",·"suspicious":·{·"noEmptyBlock":·"error"·}·}
+      5 │ + → }
+      6 │ + }
+      7 │ + 
+  
+
+```
+
+```block
+migrate ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i 5 Stylelint rules found
+    - 3 are obsolete because of Biome's formatter
+    - 1 can be migrated to Biome's rules (run with --write to migrate)
+    - 80% (4) of your Stylelint rules are fully covered by Biome
+      - 20% (1) via direct migration to Biome rules
+  
+  
+  i Rules that can be migrated:
+  
+  - block-no-empty
+  
+  i These rules enforce styles handled by Biome's formatter (so you don't lose the functionality):
+  
+  - color-hex-case
+  - indentation
+  - string-quotes
+  
+  i These rules don't have an equivalent Biome rule yet:
+  
+  - unicode-bom
+  
+
+```
+
+```block
+configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Migration results:
+  
+  - biome.json: configuration needs migration.
+  
+  i Use --write to apply the changes.
+  
+  $ biome migrate --write
+  
+
+```

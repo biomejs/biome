@@ -1,0 +1,37 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: bare-grouping-only.js
+---
+# Input
+```js
+import "zzz-polyfill";
+import "aaa-polyfill";
+import "mmm-polyfill";
+
+```
+
+# Diagnostics
+```
+bare-grouping-only.js:1:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Sort these imports.
+  
+  > 1 │ import "zzz-polyfill";
+      │ ^^^^^^^^^^^^^^^^^^^^^^
+  > 2 │ import "aaa-polyfill";
+  > 3 │ import "mmm-polyfill";
+      │ ^^^^^^^^^^^^^^^^^^^^^^
+    4 │ 
+  
+  i Safe fix: Organize imports and exports (Biome)
+  
+    1   │ - import·"zzz-polyfill";
+    2   │ - import·"aaa-polyfill";
+    3   │ - import·"mmm-polyfill";
+      1 │ + import·"aaa-polyfill";
+      2 │ + import·"mmm-polyfill";
+      3 │ + import·"zzz-polyfill";
+    4 4 │   
+  
+
+```

@@ -1,0 +1,44 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.jsx
+---
+# Input
+```jsx
+// should generate diagnostics
+
+import "./a.css";
+import "./b.css";
+
+function Component() {
+	return <button className="class-a class-b">Test</button>;
+}
+
+```
+
+# Diagnostics
+```
+invalid.jsx:7:36 lint/nursery/noUndeclaredClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The CSS class class-b is not defined in any imported stylesheet.
+  
+    6 │ function Component() {
+  > 7 │ 	return <button className="class-a class-b">Test</button>;
+      │ 	                                  ^^^^^^^
+    8 │ }
+    9 │ 
+  
+  i Referencing undefined classes often indicates a typo or a missing stylesheet, and will result in elements not being styled as intended.
+  
+  i Checked import tree:
+    
+    invalid.jsx (this file) -> which imports a.css, b.css
+  
+  
+  i Either import a CSS file that defines this class or remove this class name.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9156 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

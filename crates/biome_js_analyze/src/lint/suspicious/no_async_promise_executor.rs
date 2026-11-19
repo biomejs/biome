@@ -83,13 +83,21 @@ impl Rule for NoAsyncPromiseExecutor {
     }
 
     fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
-        Some(RuleDiagnostic::new(
-            rule_category!(),
-            state.range(),
-            markup! {
-                "Promise executor functions should not be `async`."
-            },
-        ))
+        Some(
+            RuleDiagnostic::new(
+                rule_category!(),
+                state.range(),
+                markup! {
+                    "Promise executor functions should not be `async`."
+                },
+            )
+            .note(markup! {
+                "If an "<Emphasis>"async"</Emphasis>" executor throws or awaits a rejected promise, the error is not caught by the "<Emphasis>"Promise"</Emphasis>" constructor. The promise can stay pending forever."
+            })
+            .note(markup! {
+                "Remove the "<Emphasis>"async"</Emphasis>" keyword and call "<Emphasis>"resolve"</Emphasis>" or "<Emphasis>"reject"</Emphasis>" instead. If you need "<Emphasis>"await"</Emphasis>", run it outside the "<Emphasis>"Promise"</Emphasis>" constructor."
+            }),
+        )
     }
 }
 

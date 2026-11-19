@@ -1,0 +1,36 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<script setup>
+import { ref } from "@vue/reactivity";
+</script>
+
+```
+
+# Diagnostics
+```
+invalid.vue:3:21 lint/nursery/useVueBaseImport  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Don't import the internal Vue package '@vue/reactivity'.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <script setup>
+  > 3 │ import { ref } from "@vue/reactivity";
+      │                     ^^^^^^^^^^^^^^^^^
+    4 │ </script>
+    5 │ 
+  
+  i The public 'vue' entry point re-exports Vue's supported runtime APIs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Import 'vue' instead.
+  
+    2 │ import·{·ref·}·from·"@vue/reactivity";
+      │                      -   -----------  
+
+```

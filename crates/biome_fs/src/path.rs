@@ -13,6 +13,13 @@ use std::hash::Hash;
 use std::path::{Path, PathBuf};
 use std::{fs::File, io, io::Write, ops::Deref};
 
+/// Returns whether `path` contains a directory component named `node_modules`.
+#[inline]
+pub fn is_node_modules_path(path: &Utf8Path) -> bool {
+    path.components()
+        .any(|component| component.as_str().as_bytes() == b"node_modules")
+}
+
 /// The priority of the file
 // NOTE: The order of the variants is important, the one on the top has the highest priority
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Ord, PartialOrd, Hash)]
@@ -67,7 +74,7 @@ impl std::hash::Hash for BiomePath {
 impl BiomePath {
     pub fn new(path_to_file: impl Into<Utf8PathBuf>) -> Self {
         let path = path_to_file.into();
-        let kind = path.file_name().map(Self::priority).unwrap_or_default();
+        let kind = path.file_name().map_or_default(Self::priority);
         Self {
             path,
             kind,
@@ -78,7 +85,7 @@ impl BiomePath {
 
     pub fn new_with_kind(path_to_file: impl Into<Utf8PathBuf>, path_kind: PathKind) -> Self {
         let path = path_to_file.into();
-        let kind = path.file_name().map(Self::priority).unwrap_or_default();
+        let kind = path.file_name().map_or_default(Self::priority);
         Self {
             path,
             kind,
@@ -89,7 +96,7 @@ impl BiomePath {
 
     pub fn new_written(path_to_file: impl Into<Utf8PathBuf>) -> Self {
         let path = path_to_file.into();
-        let kind = path.file_name().map(Self::priority).unwrap_or_default();
+        let kind = path.file_name().map_or_default(Self::priority);
         Self {
             path,
             kind,
@@ -136,14 +143,19 @@ impl BiomePath {
 
     /// The priority of the file.
     /// - `biome.json` and `biome.jsonc` have the highest priority
-    /// - `package.json`, `tsconfig.json`/`jsconfig.json`, and `turbo.json` have the second-highest priority, and they are considered as manifest files
+    /// - `package.json`, `tsconfig.json`/`jsconfig.json`, `turbo.json`, and `pnpm-workspace.yaml` have the second-highest priority, and they are considered as manifest files
     /// - Other files are considered as files to handle
     fn priority(file_name: &str) -> FileKinds {
         if file_name == ConfigName::biome_json() || file_name == ConfigName::biome_jsonc() {
             FileKinds::Config
         } else if matches!(
             file_name,
-            "package.json" | "tsconfig.json" | "jsconfig.json" | "turbo.json" | "turbo.jsonc"
+            "package.json"
+                | "tsconfig.json"
+                | "jsconfig.json"
+                | "turbo.json"
+                | "turbo.jsonc"
+                | "pnpm-workspace.yaml"
         ) {
             FileKinds::Manifest
         } else if matches!(file_name, ".gitignore" | ".ignore") {
@@ -191,9 +203,7 @@ impl BiomePath {
     /// Returns `true` if the path is inside `node_modules`
     #[inline(always)]
     pub fn is_dependency(&self) -> bool {
-        self.path
-            .components()
-            .any(|component| component.as_str().as_bytes() == b"node_modules")
+        is_node_modules_path(&self.path)
     }
 
     /// Whether this is a file named `package.json`
@@ -322,6 +332,22 @@ impl Ord for BiomePath {
 #[cfg(test)]
 mod test {
     use crate::path::FileKinds;
+    use camino::Utf8Path;
+
+    use super::is_node_modules_path;
+
+    #[test]
+    fn detects_node_modules_paths() {
+        assert!(is_node_modules_path(Utf8Path::new(
+            "/project/node_modules/package/index.js"
+        )));
+        assert!(is_node_modules_path(Utf8Path::new(
+            "project/packages/app/node_modules/package/index.js"
+        )));
+        assert!(!is_node_modules_path(Utf8Path::new(
+            "/project/node_modules_backup/package/index.js"
+        )));
+    }
 
     #[test]
     fn test_biome_paths() {
@@ -334,6 +360,10 @@ mod test {
         assert_eq!(BiomePath::priority("package.json"), FileKinds::Manifest);
         assert_eq!(BiomePath::priority("turbo.json"), FileKinds::Manifest);
         assert_eq!(BiomePath::priority("turbo.jsonc"), FileKinds::Manifest);
+        assert_eq!(
+            BiomePath::priority("pnpm-workspace.yaml"),
+            FileKinds::Manifest
+        );
         assert_eq!(BiomePath::priority("biome.json"), FileKinds::Config);
         assert_eq!(BiomePath::priority("biome.jsonc"), FileKinds::Config);
         assert_eq!(BiomePath::priority(".gitignore"), FileKinds::Ignore);

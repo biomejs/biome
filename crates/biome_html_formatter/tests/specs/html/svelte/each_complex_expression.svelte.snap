@@ -32,7 +32,7 @@ info: svelte/each_complex_expression.svelte
 	<div>{item}</div>
 {/each}
 
-{#each items.filter(x => x.active) as item}
+{#each items.filter((x) => x.active) as item}
 	<div>{item}</div>
 {/each}
 

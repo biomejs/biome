@@ -1,54 +1,74 @@
 use crate::parser::CssParser;
+use crate::syntax::is_nth_at_identifier;
 use crate::syntax::scss::expression::parse_scss_selector_interpolation;
+use crate::syntax::scss::identifiers::{
+    is_at_identifier_number_part, is_nth_at_identifier_number_part, parse_identifier_number_part,
+};
 use crate::syntax::scss::{is_at_scss_interpolation, is_nth_at_scss_interpolation};
 use crate::syntax::selector::{parse_selector_identifier_fragment, selector_lex_context};
-use crate::syntax::{CssSyntaxFeatures, is_nth_at_identifier};
 use biome_css_syntax::CssSyntaxKind::{
-    CSS_DIMENSION_VALUE, CSS_NUMBER, CSS_NUMBER_LITERAL, SCSS_PARENT_SELECTOR_SUFFIX,
-    SCSS_PARENT_SELECTOR_SUFFIX_HYPHEN, SCSS_PARENT_SELECTOR_SUFFIX_PART_LIST,
+    SCSS_PARENT_SELECTOR, SCSS_PARENT_SELECTOR_SUFFIX, SCSS_PARENT_SELECTOR_SUFFIX_HYPHEN,
+    SCSS_PARENT_SELECTOR_SUFFIX_PART_LIST,
 };
 use biome_css_syntax::{CssSyntaxKind, T};
+use biome_parser::Parser;
 use biome_parser::parse_lists::ParseNodeList;
 use biome_parser::parse_recovery::{RecoveryError, RecoveryResult};
 use biome_parser::prelude::ParsedSyntax;
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
-use biome_parser::{Parser, SyntaxFeature};
 
-/// Parses the suffix in an SCSS parent selector after `&` has been consumed.
+/// Parses an SCSS parent selector with a source-tight suffix.
 ///
-/// Examples:
+/// Example:
 /// ```scss
 /// .button {
-///   &--active {}
-///    ^^^^^^^^
-///   &-100\.200 {}
-///    ^^^^^^^^^
-///   &#{$state} {}
-///    ^^^^^^^^^
+///   &--#{$state} {}
 /// }
 /// ```
 ///
 /// Docs: https://sass-lang.com/documentation/style-rules/parent-selector/
 #[inline]
-pub(crate) fn parse_scss_parent_selector_suffix(p: &mut CssParser) -> ParsedSyntax {
-    if !is_at_scss_parent_selector_suffix(p) {
+pub(crate) fn parse_scss_parent_selector(p: &mut CssParser) -> ParsedSyntax {
+    if !is_at_scss_parent_selector(p) {
         return Absent;
     }
 
-    let m = p.start();
+    let parent = p.start();
+    let context = selector_lex_context(p);
+    p.bump_with_context(T![&], context);
+
+    let suffix = p.start();
     ScssParentSelectorSuffixPartList.parse_list(p);
-    Present(m.complete(p, SCSS_PARENT_SELECTOR_SUFFIX))
+    suffix.complete(p, SCSS_PARENT_SELECTOR_SUFFIX);
+
+    Present(parent.complete(p, SCSS_PARENT_SELECTOR))
 }
 
+/// Returns whether the current token starts an SCSS parent selector with a
+/// source-tight suffix.
+///
+/// Example:
+/// ```scss
+/// .button {
+///   &--#{$state} {}
+/// }
+/// ```
 #[inline]
-pub(crate) fn is_at_scss_parent_selector_suffix(p: &mut CssParser) -> bool {
-    CssSyntaxFeatures::Scss.is_supported(p)
-        && !p.has_preceding_whitespace()
-        && is_at_scss_parent_selector_suffix_part(p)
+pub(crate) fn is_at_scss_parent_selector(p: &mut CssParser) -> bool {
+    p.at(T![&])
+        && !p.has_nth_preceding_whitespace(1)
+        && is_nth_at_scss_parent_selector_suffix_part(p, 1)
 }
 
-/// Parses adjacent suffix parts in `&-#{$state}` until whitespace or selector
-/// syntax ends the parent suffix.
+/// Parses adjacent suffix parts until whitespace or selector syntax ends the
+/// parent suffix.
+///
+/// Example:
+/// ```scss
+/// .button {
+///   &-#{$state} {}
+/// }
+/// ```
 struct ScssParentSelectorSuffixPartList;
 impl ParseNodeList for ScssParentSelectorSuffixPartList {
     type Kind = CssSyntaxKind;
@@ -73,7 +93,15 @@ impl ParseNodeList for ScssParentSelectorSuffixPartList {
 
 /// Parses one suffix part in an SCSS parent selector.
 ///
-/// Examples: `--active`, `-100`, `\.200`, `#{$state}`, `-#{$state}`.
+/// Examples:
+/// ```scss
+/// .button {
+///   &--active {}
+///   &-100\.200 {}
+///   &#{$state} {}
+///   &-#{$state} {}
+/// }
+/// ```
 #[inline]
 fn parse_scss_parent_selector_suffix_part(p: &mut CssParser) -> ParsedSyntax {
     if !is_at_scss_parent_selector_suffix_part(p) {
@@ -82,64 +110,81 @@ fn parse_scss_parent_selector_suffix_part(p: &mut CssParser) -> ParsedSyntax {
 
     if is_at_scss_interpolation(p) {
         parse_scss_selector_interpolation(p)
-    } else if is_nth_at_scss_parent_selector_suffix_hyphen(p, 0) {
+    } else if is_at_scss_parent_selector_suffix_hyphen(p) {
         parse_scss_parent_selector_suffix_hyphen(p)
-    } else if is_at_scss_parent_selector_suffix_number(p) {
-        parse_scss_parent_selector_suffix_number(p)
+    } else if is_at_identifier_number_part(p) {
+        let context = selector_lex_context(p);
+        parse_identifier_number_part(p, context)
     } else {
         parse_selector_identifier_fragment(p)
     }
 }
 
+/// Returns whether the current token is an identifier, interpolation, number,
+/// dimension, or raw hyphen accepted by a parent-selector suffix.
+///
+/// Example:
+/// ```scss
+/// .button {
+///   &--#{$state} {}
+/// }
+/// ```
 #[inline]
 fn is_at_scss_parent_selector_suffix_part(p: &mut CssParser) -> bool {
-    is_nth_at_scss_parent_selector_suffix_value(p, 0)
-        || is_nth_at_scss_parent_selector_suffix_hyphen(p, 0)
+    is_nth_at_scss_parent_selector_suffix_part(p, 0)
+}
+
+/// Returns whether the token at `n` is an identifier, interpolation, number,
+/// dimension, or raw hyphen accepted by a parent-selector suffix.
+///
+/// Example:
+/// ```scss
+/// .button {
+///   &--#{$state} {}
+/// }
+/// ```
+#[inline]
+fn is_nth_at_scss_parent_selector_suffix_part(p: &mut CssParser, n: usize) -> bool {
+    is_nth_at_scss_parent_selector_suffix_value(p, n) || p.nth_at(n, T![-])
 }
 
 #[inline]
 fn is_nth_at_scss_parent_selector_suffix_value(p: &mut CssParser, n: usize) -> bool {
     is_nth_at_identifier(p, n)
         || is_nth_at_scss_interpolation(p, n)
-        || p.nth_at(n, CSS_DIMENSION_VALUE)
-        || p.nth_at(n, CSS_NUMBER_LITERAL)
+        || is_nth_at_identifier_number_part(p, n)
 }
 
+/// Returns whether the current token is a raw hyphen in a parent-selector
+/// suffix.
+///
+/// Example:
+/// ```scss
+/// .button {
+///   &--#{$state} {}
+/// }
+/// ```
 #[inline]
-fn is_nth_at_scss_parent_selector_suffix_hyphen(p: &mut CssParser, n: usize) -> bool {
-    p.nth_at(n, T![-])
-        && !p.has_nth_preceding_whitespace(n)
-        && is_nth_at_scss_parent_selector_suffix_value(p, n + 1)
-        && !p.has_nth_preceding_whitespace(n + 1)
+fn is_at_scss_parent_selector_suffix_hyphen(p: &mut CssParser) -> bool {
+    p.at(T![-])
 }
 
+/// Parses one raw hyphen in a parent-selector suffix.
+///
+/// Example:
+/// ```scss
+/// .button {
+///   &--#{$state} {}
+/// }
+/// ```
 #[inline]
 fn parse_scss_parent_selector_suffix_hyphen(p: &mut CssParser) -> ParsedSyntax {
-    if !is_nth_at_scss_parent_selector_suffix_hyphen(p, 0) {
-        return Absent;
-    }
-
-    let m = p.start();
-    p.bump(T![-]);
-    Present(m.complete(p, SCSS_PARENT_SELECTOR_SUFFIX_HYPHEN))
-}
-
-/// Parses the numeric suffix part in `&-100\.200`.
-#[inline]
-fn parse_scss_parent_selector_suffix_number(p: &mut CssParser) -> ParsedSyntax {
-    if !is_at_scss_parent_selector_suffix_number(p) {
+    if !is_at_scss_parent_selector_suffix_hyphen(p) {
         return Absent;
     }
 
     let m = p.start();
     let context = selector_lex_context(p);
-    // `&-100\.200`: `-100` can lex as a dimension head, but the suffix
-    // owns it as a number and leaves `\.200` as the next suffix part.
-    p.bump_remap_with_context(CSS_NUMBER_LITERAL, context);
-    Present(m.complete(p, CSS_NUMBER))
-}
-
-#[inline]
-fn is_at_scss_parent_selector_suffix_number(p: &mut CssParser) -> bool {
-    p.at(CSS_DIMENSION_VALUE) || p.at(CSS_NUMBER_LITERAL)
+    p.bump_with_context(T![-], context);
+    Present(m.complete(p, SCSS_PARENT_SELECTOR_SUFFIX_HYPHEN))
 }

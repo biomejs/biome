@@ -2,14 +2,14 @@ use crate::parser::{
     GraphqlParser,
     argument::parse_arguments,
     directive::{DirectiveList, is_at_directive},
-    is_nth_at_name, parse_binding,
+    is_nth_at_name, parse_binding, parse_description,
     parse_error::{
         expected_any_selection, expected_name, expected_type, expected_variable,
         expected_variable_definition,
     },
     parse_literal_name, parse_reference,
     r#type::parse_type,
-    value::parse_default_value,
+    value::{is_at_string, parse_default_value},
     variable::{is_at_variable, parse_variable_binding},
 };
 use biome_graphql_syntax::{
@@ -110,6 +110,7 @@ impl ParseRecovery for VariableDefinitionListParseRecovery {
 #[inline]
 pub(crate) fn parse_operation_definition(p: &mut GraphqlParser) -> ParsedSyntax {
     let m = p.start();
+    parse_description(p).ok();
     {
         let m = p.start();
         p.bump_ts(OPERATION_TYPE);
@@ -209,7 +210,7 @@ fn parse_fragment(p: &mut GraphqlParser) -> ParsedSyntax {
 }
 
 #[inline]
-fn parse_variable_definitions(p: &mut GraphqlParser) -> ParsedSyntax {
+pub(crate) fn parse_variable_definitions(p: &mut GraphqlParser) -> ParsedSyntax {
     if !is_at_variable_definitions(p) {
         return Absent;
     }
@@ -230,6 +231,7 @@ fn parse_variable_definition(p: &mut GraphqlParser) -> ParsedSyntax {
     }
 
     let m = p.start();
+    parse_description(p).ok();
 
     // Malformed variable
     if !is_at_variable(p) && p.nth_at(1, T![:]) {
@@ -265,13 +267,14 @@ fn is_at_variable_definitions_end(p: &GraphqlParser) -> bool {
 
 #[inline]
 fn is_at_variable_definition(p: &mut GraphqlParser) -> bool {
-    is_at_variable(p)
+    let offset = if is_at_string(p) { 1 } else { 0 };
+    p.nth_at(offset, T![$])
     // malformed variable
-    || (is_nth_at_name(p, 0) && p.nth_at(1, T![:]))
-    // malformed variable,but not inside selection set
-    || (p.nth_at(1, T![:]) && !p.at(T!['{']))
+    || (is_nth_at_name(p, offset) && p.nth_at(offset + 1, T![:]))
+    // malformed variable, but not inside a selection set
+    || (p.nth_at(offset + 1, T![:]) && !p.nth_at(offset, T!['{']))
     // missing entire variable
-    || p.at(T![:])
+    || p.nth_at(offset, T![:])
 }
 
 // Since keywords are valid names, we could only be sure that we are at the end

@@ -79,6 +79,7 @@ declare_lint_rule! {
         sources: &[
             RuleSource::EslintUnicorn("new-for-builtins").same(),
             RuleSource::Eslint("no-new-native-nonconstructor").same(),
+            RuleSource::Eslint("no-new-symbol").inspired(),
         ],
         recommended: true,
         severity: Severity::Error,
@@ -129,7 +130,10 @@ impl Rule for NoInvalidBuiltinInstantiation {
             markup! {
                 "Use "<Emphasis>{use_this}{name}"()"</Emphasis>" instead of "<Emphasis>{instead_of}{name}"()"</Emphasis>"."
             },
-        ))
+        )
+        .note(markup! {
+            "Calling this builtin the wrong way throws a "<Emphasis>"TypeError"</Emphasis>" at runtime."
+        }))
     }
 
     fn action(ctx: &RuleContext<Self>, _: &Self::State) -> Option<JsRuleAction> {

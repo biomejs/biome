@@ -1,6 +1,6 @@
 [package]
 name                 = "biome_js_parser"
-version              = "0.5.7"
+version.workspace    = true
 authors.workspace    = true
 edition.workspace    = true
 description          = "Biome's JavaScript parser"
@@ -9,6 +9,7 @@ repository.workspace = true
 license.workspace    = true
 keywords.workspace   = true
 categories.workspace = true
+include              = ["LICENSE", "README.md", "src/**/*"]
 publish              = true
 
 # cargo-workspaces metadata
@@ -24,10 +25,11 @@ biome_console       = { workspace = true }
 biome_diagnostics   = { workspace = true }
 biome_js_factory    = { workspace = true }
 biome_js_syntax     = { workspace = true }
+biome_languages     = { workspace = true, features = ["lang_js"] }
 biome_parser        = { workspace = true }
 biome_rowan         = { workspace = true }
 biome_unicode_table = { workspace = true }
-drop_bomb           = "0.1.5"
+drop_bomb           = { workspace = true }
 enumflags2          = { workspace = true }
 indexmap            = { workspace = true }
 rustc-hash          = { workspace = true }
@@ -38,13 +40,13 @@ smallvec            = { workspace = true }
 tracing             = { workspace = true }
 
 [dev-dependencies]
-biome_configuration = { path = "../biome_configuration" }
+biome_configuration = { path = "../biome_configuration", features = ["lang_js"] }
 biome_deserialize   = { path = "../biome_deserialize" }
 biome_fs            = { path = "../biome_fs" }
 biome_service       = { path = "../biome_service" }
-biome_test_utils    = { path = "../biome_test_utils" }
+biome_test_utils    = { path = "../biome_test_utils", features = ["lang_js"] }
 camino              = { workspace = true }
-criterion           = { package = "codspeed-criterion-compat", version = "=3.0.5" }
+criterion           = { workspace = true }
 insta               = { workspace = true }
 quickcheck          = { workspace = true }
 quickcheck_macros   = { workspace = true }

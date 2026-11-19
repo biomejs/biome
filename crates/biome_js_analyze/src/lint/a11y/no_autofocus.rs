@@ -5,8 +5,11 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_js_syntax::{JsLanguage, JsSyntaxKind, JsxAttribute, jsx_ext::AnyJsxElement};
-use biome_rowan::{AstNode, BatchMutationExt, WalkEvent};
+use biome_js_syntax::{
+    JsLanguage, JsSyntaxKind, JsxAttribute, JsxClosingElement, JsxOpeningElement,
+    JsxSelfClosingElement, jsx_ext::AnyJsxElement,
+};
+use biome_rowan::{AstNode, BatchMutationExt, SyntaxKindSet, WalkEvent};
 use biome_rule_options::no_autofocus::NoAutofocusOptions;
 use biome_string_case::StrOnlyExtension;
 
@@ -76,10 +79,60 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noAutofocus",
         language: "jsx",
-        sources: &[RuleSource::EslintJsxA11y("no-autofocus").same()],
+        sources: &[
+            RuleSource::EslintJsxA11y("no-autofocus").same(),
+            RuleSource::EslintAstro("jsx-a11y/no-autofocus").same(),
+        ],
         recommended: true,
         severity: Severity::Error,
         fix_kind: FixKind::Unsafe,
+    }
+}
+
+pub struct ValidAutofocus(AnyJsxElement);
+
+impl Rule for NoAutofocus {
+    type Query = ValidAutofocus;
+    type State = JsxAttribute;
+    type Signals = Option<Self::State>;
+    type Options = NoAutofocusOptions;
+
+    fn run(ctx: &RuleContext<Self>) -> Self::Signals {
+        let node = ctx.query();
+        if node.is_custom_component() {
+            return None;
+        }
+        node.find_attribute_by_name("autoFocus")
+    }
+
+    fn diagnostic(_ctx: &RuleContext<Self>, attr: &Self::State) -> Option<RuleDiagnostic> {
+        Some(RuleDiagnostic::new(
+            rule_category!(),
+            attr.syntax().text_trimmed_range(),
+            markup! {
+                "Avoid the "<Emphasis>"autoFocus"</Emphasis>" attribute."
+            },
+        )
+        .note(markup! {
+            "Autofocus moves keyboard focus without the user asking for it. This can disorient screen reader users and people who navigate with a keyboard."
+        }))
+    }
+
+    fn action(ctx: &RuleContext<Self>, attr: &Self::State) -> Option<JsRuleAction> {
+        let mut mutation = ctx.root().begin();
+        if attr.syntax().has_trailing_comments() {
+            let prev_token = attr.syntax().first_token()?.prev_token()?;
+            let new_token =
+                prev_token.append_trivia_pieces(attr.syntax().last_trailing_trivia()?.pieces());
+            mutation.replace_token_discard_trivia(prev_token, new_token);
+        }
+        mutation.remove_node(attr.clone());
+        Some(JsRuleAction::new(
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
+            ctx.metadata().applicability(),
+            markup! { "Remove the "<Emphasis>"autoFocus"</Emphasis>" attribute." }.to_owned(),
+            mutation,
+        ))
     }
 }
 
@@ -108,6 +161,17 @@ struct ValidAutofocusVisitor {
 
 impl Visitor for ValidAutofocusVisitor {
     type Language = JsLanguage;
+
+    fn visited_kinds(
+        &self,
+        _: Option<SyntaxKindSet<JsLanguage>>,
+    ) -> Option<SyntaxKindSet<JsLanguage>> {
+        Some(
+            JsxOpeningElement::KIND_SET
+                .union(JsxSelfClosingElement::KIND_SET)
+                .union(JsxClosingElement::KIND_SET),
+        )
+    }
 
     fn visit(
         &mut self,
@@ -159,7 +223,7 @@ impl Visitor for ValidAutofocusVisitor {
     }
 }
 
-pub struct ValidAutofocus(AnyJsxElement);
+
 
 impl QueryMatch for ValidAutofocus {
     fn text_range(&self) -> biome_rowan::TextRange {
@@ -185,47 +249,5 @@ impl Queryable for ValidAutofocus {
 
     fn unwrap_match(_: &biome_analyze::ServiceBag, query: &Self::Input) -> Self::Output {
         query.0.clone()
-    }
-}
-
-impl Rule for NoAutofocus {
-    type Query = ValidAutofocus;
-    type State = JsxAttribute;
-    type Signals = Option<Self::State>;
-    type Options = NoAutofocusOptions;
-
-    fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let node = ctx.query();
-        if node.is_custom_component() {
-            return None;
-        }
-        node.find_attribute_by_name("autoFocus")
-    }
-
-    fn diagnostic(_ctx: &RuleContext<Self>, attr: &Self::State) -> Option<RuleDiagnostic> {
-        Some(RuleDiagnostic::new(
-            rule_category!(),
-            attr.syntax().text_trimmed_range(),
-            markup! {
-                "Avoid the "<Emphasis>"autoFocus"</Emphasis>" attribute."
-            },
-        ))
-    }
-
-    fn action(ctx: &RuleContext<Self>, attr: &Self::State) -> Option<JsRuleAction> {
-        let mut mutation = ctx.root().begin();
-        if attr.syntax().has_trailing_comments() {
-            let prev_token = attr.syntax().first_token()?.prev_token()?;
-            let new_token =
-                prev_token.append_trivia_pieces(attr.syntax().last_trailing_trivia()?.pieces());
-            mutation.replace_token_discard_trivia(prev_token, new_token);
-        }
-        mutation.remove_node(attr.clone());
-        Some(JsRuleAction::new(
-            ctx.metadata().action_category(ctx.category(), ctx.group()),
-            ctx.metadata().applicability(),
-            markup! { "Remove the "<Emphasis>"autoFocus"</Emphasis>" attribute." }.to_owned(),
-            mutation,
-        ))
     }
 }

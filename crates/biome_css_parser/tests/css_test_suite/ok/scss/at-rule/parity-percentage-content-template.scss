@@ -1,0 +1,4 @@
+@mixin relay { @content; }
+@mixin frames {@include relay {0%{/* start */opacity:0}100%{opacity:1}}}
+@include unknown { 0%,50% {opacity:0.5} 100% {opacity:1} }
+.after {color:red}

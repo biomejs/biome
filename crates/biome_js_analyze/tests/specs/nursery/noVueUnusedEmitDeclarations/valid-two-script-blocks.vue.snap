@@ -1,0 +1,24 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-two-script-blocks.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<script>
+export default {
+  emits: ["foo", "bar"],
+};
+</script>
+
+<script setup>
+const emit = defineEmits(["baz"]);
+emit("foo");
+emit("baz");
+</script>
+
+<template>
+  <button @click="$emit('bar')">Bar</button>
+</template>
+
+```

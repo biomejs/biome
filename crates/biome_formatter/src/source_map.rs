@@ -1,4 +1,5 @@
-use crate::{Printed, SourceMarker, TextRange};
+use crate::rowan::RowanSource;
+use crate::{Printed, SourceMap, SourceMarker, TextRange};
 use biome_rowan::TextLen;
 use biome_rowan::{Language, SyntaxNode, TextSize};
 use rustc_hash::FxHashMap;
@@ -77,11 +78,12 @@ impl TransformSourceMap {
             self.source_offset(transformed_range.end(), RangePosition::End),
         );
 
+        let source_text_end = self.source_text.offset + self.source_text.text.text_len();
         debug_assert!(
-            range.end() <= self.source_text.text.text_len() - self.source_text.offset,
+            range.end() <= source_text_end,
             "Mapped range {:?} exceeds the length of the source document {:?}. Please check if the passed `transformed_range` is a range of the transformed tree and not of the source tree, and that it belongs to the tree for which the source map was created for.",
             range,
-            self.source_text.text.text_len() - self.source_text.offset
+            source_text_end
         );
         range
     }
@@ -211,25 +213,25 @@ impl TransformSourceMap {
     /// in the original, untransformed source code.
     ///
     /// The printer creates a source map that allows mapping positions from the newly formatted document
-    /// back to the locations of the tree. However, the source positions stored in [crate::FormatElement::Text]
-    /// and [crate::FormatElement::LocatedTokenText] are relative to the transformed tree
+    /// back to the locations of the tree. However, the source positions stored in [crate::FormatElement::MappedText]
+    /// and [crate::FormatElement::MappedLocatedTokenText] are relative to the transformed tree
     /// and not the original tree passed to [crate::format_node].
     ///
     /// This function re-maps the positions from the positions in the transformed tree back to the positions
     /// in the original, untransformed tree.
-    pub fn map_printed(&self, mut printed: Printed) -> Printed {
+    pub fn map_printed(&self, mut printed: Printed<RowanSource>) -> Printed<RowanSource> {
         self.map_markers(&mut printed.sourcemap);
 
         printed
     }
 
     /// Maps the printers source map marker to the source positions.
-    fn map_markers(&self, markers: &mut [SourceMarker]) {
+    fn map_markers(&self, markers: &mut [SourceMarker<TextSize>]) {
         if self.deleted_ranges.is_empty() {
             return;
         }
 
-        let mut previous_marker: Option<SourceMarker> = None;
+        let mut previous_marker: Option<SourceMarker<TextSize>> = None;
         let mut next_range_index = 0;
 
         for marker in markers {
@@ -278,6 +280,12 @@ impl TransformSourceMap {
 
             marker.source = source;
         }
+    }
+}
+
+impl SourceMap<RowanSource> for TransformSourceMap {
+    fn map_printed(&self, printed: Printed<RowanSource>) -> Printed<RowanSource> {
+        Self::map_printed(self, printed)
     }
 }
 

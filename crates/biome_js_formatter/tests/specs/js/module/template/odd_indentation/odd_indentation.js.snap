@@ -1,0 +1,59 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: js/module/template/odd_indentation/odd_indentation.js
+---
+
+# Input
+
+```js
+const fiveSpaceIndent = (data) => `
+     ${
+       data
+       ?`<bar>${data.aBitLongerNameHelpingReproduceThisProblem}</bar>`
+       :''
+     }
+`
+
+const sixSpaceIndent = (data) => `
+      ${
+       data
+       ?`<bar>${data.aBitLongerNameHelpingReproduceThisProblem}</bar>`
+       :''
+     }
+`
+
+```
+
+
+# Options
+
+```json
+{
+  "$schema": "../../../../../../../../packages/@biomejs/biome/configuration_schema.json",
+  "formatter": {
+    "indentStyle": "space",
+    "indentWidth": 2
+  }
+}
+```
+
+# Formatted
+
+```js
+const fiveSpaceIndent = (data) => `
+     ${
+       data
+         ? `<bar>${data.aBitLongerNameHelpingReproduceThisProblem}</bar>`
+         : ""
+     }
+`;
+
+const sixSpaceIndent = (data) => `
+      ${
+        data
+          ? `<bar>${data.aBitLongerNameHelpingReproduceThisProblem}</bar>`
+          : ""
+      }
+`;
+
+```

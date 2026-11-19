@@ -1,0 +1,53 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: parity-unknown-prelude-strings.scss
+---
+# Input
+```css
+/* should generate diagnostics */
+@foo "raw \z #{'inner \z'}";
+@foo 'raw \z #{"escaped \"quote\""}';
+@custom-#{"theme"} "before #{'inner \z'} after";
+
+```
+
+# Diagnostics
+```
+parity-unknown-prelude-strings.scss:2:24 lint/suspicious/noUselessEscapeInString  FIXABLE  ━━━━━━━━━━
+
+  ! The character doesn't need to be escaped.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ @foo "raw \z #{'inner \z'}";
+      │                        ^
+    3 │ @foo 'raw \z #{"escaped \"quote\""}';
+    4 │ @custom-#{"theme"} "before #{'inner \z'} after";
+  
+  i Only quotes that enclose the string and special characters need to be escaped.
+  
+  i Safe fix: Unescape the character.
+  
+    2 │ @foo·"raw·\z·#{'inner·\z'}";
+      │                       -     
+
+```
+
+```
+parity-unknown-prelude-strings.scss:4:38 lint/suspicious/noUselessEscapeInString  FIXABLE  ━━━━━━━━━━
+
+  ! The character doesn't need to be escaped.
+  
+    2 │ @foo "raw \z #{'inner \z'}";
+    3 │ @foo 'raw \z #{"escaped \"quote\""}';
+  > 4 │ @custom-#{"theme"} "before #{'inner \z'} after";
+      │                                      ^
+    5 │ 
+  
+  i Only quotes that enclose the string and special characters need to be escaped.
+  
+  i Safe fix: Unescape the character.
+  
+    4 │ @custom-#{"theme"}·"before·#{'inner·\z'}·after";
+      │                                     -           
+
+```

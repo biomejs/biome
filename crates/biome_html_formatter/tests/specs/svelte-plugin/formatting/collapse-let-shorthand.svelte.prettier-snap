@@ -1,0 +1,3 @@
+<Widget let:foo>
+    <p>{foo}</p>
+</Widget>

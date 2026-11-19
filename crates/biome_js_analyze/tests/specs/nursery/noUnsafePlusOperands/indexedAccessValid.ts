@@ -1,0 +1,11 @@
+/* should not generate diagnostics */
+
+declare const count: [1, 2, 3][number];
+count + 1;
+
+declare const bigint: bigint[][number];
+bigint + 1n;
+
+const letters = ["A", "B"] as const;
+declare const letter: (typeof letters)[number];
+letter + "C";

@@ -22,8 +22,9 @@ expression: snapshot
 ## AST
 
 ```
-MdDocument {
+MdRoot {
     bom_token: missing (optional),
+    frontmatter: missing (optional),
     value: MdBlockList [
         MdBulletListItem {
             md_bullet_list: MdBulletList [
@@ -44,7 +45,6 @@ MdDocument {
                                     value_token: MD_TEXTUAL_LITERAL@10..11 "\n" [] [],
                                 },
                             ],
-                            hard_line: missing (optional),
                         },
                     ],
                 },
@@ -65,7 +65,6 @@ MdDocument {
                                     value_token: MD_TEXTUAL_LITERAL@21..22 "\n" [] [],
                                 },
                             ],
-                            hard_line: missing (optional),
                         },
                     ],
                 },
@@ -86,7 +85,6 @@ MdDocument {
                                     value_token: MD_TEXTUAL_LITERAL@34..35 "\n" [] [],
                                 },
                             ],
-                            hard_line: missing (optional),
                         },
                     ],
                 },
@@ -114,7 +112,6 @@ MdDocument {
                                     value_token: MD_TEXTUAL_LITERAL@56..57 "\n" [] [],
                                 },
                             ],
-                            hard_line: missing (optional),
                         },
                     ],
                 },
@@ -135,7 +132,6 @@ MdDocument {
                                     value_token: MD_TEXTUAL_LITERAL@71..72 "\n" [] [],
                                 },
                             ],
-                            hard_line: missing (optional),
                         },
                     ],
                 },
@@ -163,7 +159,6 @@ MdDocument {
                                     value_token: MD_TEXTUAL_LITERAL@86..87 "\n" [] [],
                                 },
                             ],
-                            hard_line: missing (optional),
                         },
                     ],
                 },
@@ -184,7 +179,6 @@ MdDocument {
                                     value_token: MD_TEXTUAL_LITERAL@106..107 "\n" [] [],
                                 },
                             ],
-                            hard_line: missing (optional),
                         },
                     ],
                 },
@@ -198,9 +192,10 @@ MdDocument {
 ## CST
 
 ```
-0: MD_DOCUMENT@0..107
+0: MD_ROOT@0..107
   0: (empty)
-  1: MD_BLOCK_LIST@0..107
+  1: (empty)
+  2: MD_BLOCK_LIST@0..107
     0: MD_BULLET_LIST_ITEM@0..35
       0: MD_BULLET_LIST@0..35
         0: MD_BULLET@0..11
@@ -216,7 +211,6 @@ MdDocument {
                   0: MD_TEXTUAL_LITERAL@2..10 "Item one" [] []
                 1: MD_TEXTUAL@10..11
                   0: MD_TEXTUAL_LITERAL@10..11 "\n" [] []
-              1: (empty)
         1: MD_BULLET@11..22
           0: MD_LIST_MARKER_PREFIX@11..13
             0: MD_INDENT_TOKEN_LIST@11..11
@@ -230,7 +224,6 @@ MdDocument {
                   0: MD_TEXTUAL_LITERAL@13..21 "Item two" [] []
                 1: MD_TEXTUAL@21..22
                   0: MD_TEXTUAL_LITERAL@21..22 "\n" [] []
-              1: (empty)
         2: MD_BULLET@22..35
           0: MD_LIST_MARKER_PREFIX@22..24
             0: MD_INDENT_TOKEN_LIST@22..22
@@ -244,7 +237,6 @@ MdDocument {
                   0: MD_TEXTUAL_LITERAL@24..34 "Item three" [] []
                 1: MD_TEXTUAL@34..35
                   0: MD_TEXTUAL_LITERAL@34..35 "\n" [] []
-              1: (empty)
     1: MD_NEWLINE@35..36
       0: NEWLINE@35..36 "\n" [] []
     2: MD_BULLET_LIST_ITEM@36..72
@@ -262,7 +254,6 @@ MdDocument {
                   0: MD_TEXTUAL_LITERAL@38..56 "Alternative marker" [] []
                 1: MD_TEXTUAL@56..57
                   0: MD_TEXTUAL_LITERAL@56..57 "\n" [] []
-              1: (empty)
         1: MD_BULLET@57..72
           0: MD_LIST_MARKER_PREFIX@57..59
             0: MD_INDENT_TOKEN_LIST@57..57
@@ -276,7 +267,6 @@ MdDocument {
                   0: MD_TEXTUAL_LITERAL@59..71 "Another item" [] []
                 1: MD_TEXTUAL@71..72
                   0: MD_TEXTUAL_LITERAL@71..72 "\n" [] []
-              1: (empty)
     3: MD_NEWLINE@72..73
       0: NEWLINE@72..73 "\n" [] []
     4: MD_BULLET_LIST_ITEM@73..107
@@ -294,7 +284,6 @@ MdDocument {
                   0: MD_TEXTUAL_LITERAL@75..86 "Plus marker" [] []
                 1: MD_TEXTUAL@86..87
                   0: MD_TEXTUAL_LITERAL@86..87 "\n" [] []
-              1: (empty)
         1: MD_BULLET@87..107
           0: MD_LIST_MARKER_PREFIX@87..89
             0: MD_INDENT_TOKEN_LIST@87..87
@@ -308,7 +297,6 @@ MdDocument {
                   0: MD_TEXTUAL_LITERAL@89..106 "Another plus item" [] []
                 1: MD_TEXTUAL@106..107
                   0: MD_TEXTUAL_LITERAL@106..107 "\n" [] []
-              1: (empty)
-  2: EOF@107..107 "" [] []
+  3: EOF@107..107 "" [] []
 
 ```

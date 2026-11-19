@@ -1,0 +1,26 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: unknown-reexport-barrel.js
+---
+# Input
+```js
+/* should generate diagnostics */
+export { fromMissingPackage } from "missing-package";
+
+```
+
+# Diagnostics
+```
+unknown-reexport-barrel.js:2:36 lint/correctness/noUnresolvedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The import specifier missing-package cannot be resolved: module not found
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ export { fromMissingPackage } from "missing-package";
+      │                                    ^^^^^^^^^^^^^^^^^
+    3 │ 
+  
+  i Make sure the specifier is correct and your project is set up correctly.
+  
+
+```

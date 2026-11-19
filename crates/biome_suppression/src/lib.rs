@@ -66,6 +66,14 @@ pub enum SuppressionKind {
 }
 
 impl SuppressionKind {
+    pub const fn is_classic(&self) -> bool {
+        matches!(self, Self::Classic)
+    }
+
+    pub const fn is_global(&self) -> bool {
+        matches!(self, Self::All)
+    }
+
     pub fn as_str(&self) -> &str {
         match self {
             Self::Classic => "biome-ignore",
@@ -86,6 +94,18 @@ const RANGE_END_PATTERNS: [&str; 2] = ["-END", "-end"];
 
 pub fn parse_suppression_comment(
     base: &str,
+) -> impl Iterator<Item = Result<Suppression<'_>, SuppressionDiagnostic>> {
+    parse_suppression_comment_with_line_prefix(base, |line| line)
+}
+
+/// Parses a suppression comment after applying `strip_line_prefix` to each
+/// comment-content line.
+///
+/// The callback must return a suffix borrowed from the supplied line so parsed
+/// ranges continue to refer to the original comment text.
+pub fn parse_suppression_comment_with_line_prefix(
+    base: &str,
+    strip_line_prefix: fn(&str) -> &str,
 ) -> impl Iterator<Item = Result<Suppression<'_>, SuppressionDiagnostic>> {
     let (head, mut comment) = if base.starts_with('#') {
         base.split_at(1)
@@ -122,7 +142,7 @@ pub fn parse_suppression_comment(
             line = line.trim_start_matches('*').trim_start()
         }
 
-        line = line.trim_start();
+        line = strip_line_prefix(line).trim_start();
 
         const PATTERN: [[char; 2]; 12] = [
             ['b', 'B'],

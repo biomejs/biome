@@ -1,0 +1,27 @@
+@at-root () { .empty-query-body { color: red; } }
+.after-empty { color: blue; }
+
+@at-root (: media) { .missing-modifier-body { color: red; } }
+.after-modifier { color: blue; }
+
+@at-root (without:) { .missing-rules-body { color: red; } }
+.after-rules { color: blue; }
+
+@at-root (without: media { .missing-close-body { color: red; } }
+.after-close { color: blue; }
+
+@at-root (without: 1 +) { .bad-expression-body { color: red; } }
+.after-expression { color: blue; }
+
+@at-root (without: root-query(1 +)) { .bad-nested-body { color: red; } }
+.after-nested { color: blue; }
+
+.outer {
+  @at-root ($query
+}
+.after-outer { color: blue; }
+
+.outer-closed-query {
+  @at-root ($query)
+}
+.after-closed-query { color: blue; }

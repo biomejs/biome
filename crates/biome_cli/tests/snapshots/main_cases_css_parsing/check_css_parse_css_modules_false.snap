@@ -2,10 +2,18 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
+## Command
+
+```shell
+biome check --css-parse-css-modules=false file.module.css
+```
+
 ## `file.module.css`
 
 ```css
-.className { composes: other from './other.module.css'; }
+.className {
+  composes: other from "./other.module.css";
+}
 ```
 
 # Termination Message

@@ -1,0 +1,205 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<template>
+<div tabindex="1"></div>
+<div tabindex="5"></div>
+<button tabindex="2"></button>
+<a href="#" tabindex="10"></a>
+<input tabindex="99" />
+<!-- static Vue bindings with positive tabindex should also be flagged -->
+<div :tabindex="'1'"></div>
+<div v-bind:tabindex="'5'"></div>
+<button :tabindex="'2'"></button>
+</template>
+
+```
+
+# Diagnostics
+```
+invalid.vue:3:15 lint/a11y/noPositiveTabindex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid positive values for the tabindex attribute.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <template>
+  > 3 │ <div tabindex="1"></div>
+      │               ^^^
+    4 │ <div tabindex="5"></div>
+    5 │ <button tabindex="2"></button>
+  
+  i Elements with a positive tabindex override natural page content order. This causes elements without a positive tab index to come last when navigating using a keyboard.
+  
+  i Use only 0 and -1 as tabindex values. Avoid using tabindex values greater than 0 and CSS properties that can change the order of focusable HTML elements.
+  
+  i Unsafe fix: Remove the tabindex attribute.
+  
+    3 │ <div·tabindex="1"></div>
+      │      ------------       
+
+```
+
+```
+invalid.vue:4:15 lint/a11y/noPositiveTabindex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid positive values for the tabindex attribute.
+  
+    2 │ <template>
+    3 │ <div tabindex="1"></div>
+  > 4 │ <div tabindex="5"></div>
+      │               ^^^
+    5 │ <button tabindex="2"></button>
+    6 │ <a href="#" tabindex="10"></a>
+  
+  i Elements with a positive tabindex override natural page content order. This causes elements without a positive tab index to come last when navigating using a keyboard.
+  
+  i Use only 0 and -1 as tabindex values. Avoid using tabindex values greater than 0 and CSS properties that can change the order of focusable HTML elements.
+  
+  i Unsafe fix: Remove the tabindex attribute.
+  
+    4 │ <div·tabindex="5"></div>
+      │      ------------       
+
+```
+
+```
+invalid.vue:5:18 lint/a11y/noPositiveTabindex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid positive values for the tabindex attribute.
+  
+    3 │ <div tabindex="1"></div>
+    4 │ <div tabindex="5"></div>
+  > 5 │ <button tabindex="2"></button>
+      │                  ^^^
+    6 │ <a href="#" tabindex="10"></a>
+    7 │ <input tabindex="99" />
+  
+  i Elements with a positive tabindex override natural page content order. This causes elements without a positive tab index to come last when navigating using a keyboard.
+  
+  i Use only 0 and -1 as tabindex values. Avoid using tabindex values greater than 0 and CSS properties that can change the order of focusable HTML elements.
+  
+  i Unsafe fix: Remove the tabindex attribute.
+  
+    5 │ <button·tabindex="2"></button>
+      │         ------------          
+
+```
+
+```
+invalid.vue:6:22 lint/a11y/noPositiveTabindex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid positive values for the tabindex attribute.
+  
+    4 │ <div tabindex="5"></div>
+    5 │ <button tabindex="2"></button>
+  > 6 │ <a href="#" tabindex="10"></a>
+      │                      ^^^^
+    7 │ <input tabindex="99" />
+    8 │ <!-- static Vue bindings with positive tabindex should also be flagged -->
+  
+  i Elements with a positive tabindex override natural page content order. This causes elements without a positive tab index to come last when navigating using a keyboard.
+  
+  i Use only 0 and -1 as tabindex values. Avoid using tabindex values greater than 0 and CSS properties that can change the order of focusable HTML elements.
+  
+  i Unsafe fix: Remove the tabindex attribute.
+  
+    6 │ <a·href="#"·tabindex="10"></a>
+      │             -------------     
+
+```
+
+```
+invalid.vue:7:17 lint/a11y/noPositiveTabindex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid positive values for the tabindex attribute.
+  
+    5 │ <button tabindex="2"></button>
+    6 │ <a href="#" tabindex="10"></a>
+  > 7 │ <input tabindex="99" />
+      │                 ^^^^
+    8 │ <!-- static Vue bindings with positive tabindex should also be flagged -->
+    9 │ <div :tabindex="'1'"></div>
+  
+  i Elements with a positive tabindex override natural page content order. This causes elements without a positive tab index to come last when navigating using a keyboard.
+  
+  i Use only 0 and -1 as tabindex values. Avoid using tabindex values greater than 0 and CSS properties that can change the order of focusable HTML elements.
+  
+  i Unsafe fix: Remove the tabindex attribute.
+  
+    7 │ <input·tabindex="99"·/>
+      │        --------------  
+
+```
+
+```
+invalid.vue:9:16 lint/a11y/noPositiveTabindex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid positive values for the tabindex attribute.
+  
+     7 │ <input tabindex="99" />
+     8 │ <!-- static Vue bindings with positive tabindex should also be flagged -->
+   > 9 │ <div :tabindex="'1'"></div>
+       │                ^^^^^
+    10 │ <div v-bind:tabindex="'5'"></div>
+    11 │ <button :tabindex="'2'"></button>
+  
+  i Elements with a positive tabindex override natural page content order. This causes elements without a positive tab index to come last when navigating using a keyboard.
+  
+  i Use only 0 and -1 as tabindex values. Avoid using tabindex values greater than 0 and CSS properties that can change the order of focusable HTML elements.
+  
+  i Unsafe fix: Remove the tabindex attribute.
+  
+    9 │ <div·:tabindex="'1'"></div>
+      │      ---------------       
+
+```
+
+```
+invalid.vue:10:22 lint/a11y/noPositiveTabindex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid positive values for the tabindex attribute.
+  
+     8 │ <!-- static Vue bindings with positive tabindex should also be flagged -->
+     9 │ <div :tabindex="'1'"></div>
+  > 10 │ <div v-bind:tabindex="'5'"></div>
+       │                      ^^^^^
+    11 │ <button :tabindex="'2'"></button>
+    12 │ </template>
+  
+  i Elements with a positive tabindex override natural page content order. This causes elements without a positive tab index to come last when navigating using a keyboard.
+  
+  i Use only 0 and -1 as tabindex values. Avoid using tabindex values greater than 0 and CSS properties that can change the order of focusable HTML elements.
+  
+  i Unsafe fix: Remove the tabindex attribute.
+  
+    10 │ <div·v-bind:tabindex="'5'"></div>
+       │      ---------------------       
+
+```
+
+```
+invalid.vue:11:19 lint/a11y/noPositiveTabindex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid positive values for the tabindex attribute.
+  
+     9 │ <div :tabindex="'1'"></div>
+    10 │ <div v-bind:tabindex="'5'"></div>
+  > 11 │ <button :tabindex="'2'"></button>
+       │                   ^^^^^
+    12 │ </template>
+    13 │ 
+  
+  i Elements with a positive tabindex override natural page content order. This causes elements without a positive tab index to come last when navigating using a keyboard.
+  
+  i Use only 0 and -1 as tabindex values. Avoid using tabindex values greater than 0 and CSS properties that can change the order of focusable HTML elements.
+  
+  i Unsafe fix: Remove the tabindex attribute.
+  
+    11 │ <button·:tabindex="'2'"></button>
+       │         ---------------          
+
+```

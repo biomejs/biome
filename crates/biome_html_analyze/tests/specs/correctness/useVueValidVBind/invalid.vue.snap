@@ -1,0 +1,242 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+
+<template>
+  <!-- Missing value with no argument -->
+  <Foo v-bind />
+  <div v-bind></div>
+
+  <!-- Missing value with a dynamic argument: no static name to derive a binding from -->
+  <Foo v-bind:[dynamic] />
+  <Foo :[dynamic] />
+
+  <!-- Missing value with modifier -->
+  <div v-bind.prop></div>
+
+  <!-- Invalid single modifier on long-form -->
+  <div v-bind:foo.invalid="bar"></div>
+
+  <!-- Invalid modifier on shorthand -->
+  <span :bar.badModifier="baz"></span>
+
+  <!-- Mixed valid and invalid modifiers: 'prop' is valid, 'wrong' is not -->
+  <p :baz.prop.wrong="value"></p>
+
+  <!-- Dynamic argument is present but modifier is invalid -->
+  <p v-bind:[dynamic].notAValidModifier="value"></p>
+
+  <!-- Multiple invalid modifiers -->
+  <button :disabled.once="true"></button>
+
+  <!-- Component binding with unknown modifier -->
+  <MyComponent v-bind:propName.weird="someValue"></MyComponent>
+</template>
+
+```
+
+# Diagnostics
+```
+invalid.vue:5:8 lint/correctness/useVueValidVBind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This v-bind directive is missing a value.
+  
+    3 │ <template>
+    4 │   <!-- Missing value with no argument -->
+  > 5 │   <Foo v-bind />
+      │        ^^^^^^
+    6 │   <div v-bind></div>
+    7 │ 
+  
+  i v-bind directives require a value.
+  
+  i Add a value to the directive, e.g. v-bind:foo="bar".
+  
+
+```
+
+```
+invalid.vue:6:8 lint/correctness/useVueValidVBind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This v-bind directive is missing a value.
+  
+    4 │   <!-- Missing value with no argument -->
+    5 │   <Foo v-bind />
+  > 6 │   <div v-bind></div>
+      │        ^^^^^^
+    7 │ 
+    8 │   <!-- Missing value with a dynamic argument: no static name to derive a binding from -->
+  
+  i v-bind directives require a value.
+  
+  i Add a value to the directive, e.g. v-bind:foo="bar".
+  
+
+```
+
+```
+invalid.vue:9:8 lint/correctness/useVueValidVBind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This v-bind directive is missing a value.
+  
+     8 │   <!-- Missing value with a dynamic argument: no static name to derive a binding from -->
+   > 9 │   <Foo v-bind:[dynamic] />
+       │        ^^^^^^^^^^^^^^^^
+    10 │   <Foo :[dynamic] />
+    11 │ 
+  
+  i v-bind directives require a value.
+  
+  i Add a value to the directive, e.g. v-bind:foo="bar".
+  
+
+```
+
+```
+invalid.vue:10:8 lint/correctness/useVueValidVBind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This v-bind directive is missing a value.
+  
+     8 │   <!-- Missing value with a dynamic argument: no static name to derive a binding from -->
+     9 │   <Foo v-bind:[dynamic] />
+  > 10 │   <Foo :[dynamic] />
+       │        ^^^^^^^^^^
+    11 │ 
+    12 │   <!-- Missing value with modifier -->
+  
+  i v-bind directives require a value.
+  
+  i Add a value to the directive, e.g. v-bind:foo="bar".
+  
+
+```
+
+```
+invalid.vue:13:8 lint/correctness/useVueValidVBind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This v-bind directive is missing a value.
+  
+    12 │   <!-- Missing value with modifier -->
+  > 13 │   <div v-bind.prop></div>
+       │        ^^^^^^^^^^^
+    14 │ 
+    15 │   <!-- Invalid single modifier on long-form -->
+  
+  i v-bind directives require a value.
+  
+  i Add a value to the directive, e.g. v-bind:foo="bar".
+  
+
+```
+
+```
+invalid.vue:16:18 lint/correctness/useVueValidVBind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This v-bind directive has an invalid modifier.
+  
+    15 │   <!-- Invalid single modifier on long-form -->
+  > 16 │   <div v-bind:foo.invalid="bar"></div>
+       │                  ^^^^^^^^
+    17 │ 
+    18 │   <!-- Invalid modifier on shorthand -->
+  
+  i Only the following modifiers are allowed on v-bind directives: prop, camel, sync, and attr.
+  
+  i Remove or correct the invalid modifier.
+  
+
+```
+
+```
+invalid.vue:19:13 lint/correctness/useVueValidVBind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This v-bind directive has an invalid modifier.
+  
+    18 │   <!-- Invalid modifier on shorthand -->
+  > 19 │   <span :bar.badModifier="baz"></span>
+       │             ^^^^^^^^^^^^
+    20 │ 
+    21 │   <!-- Mixed valid and invalid modifiers: 'prop' is valid, 'wrong' is not -->
+  
+  i Only the following modifiers are allowed on v-bind directives: prop, camel, sync, and attr.
+  
+  i Remove or correct the invalid modifier.
+  
+
+```
+
+```
+invalid.vue:22:15 lint/correctness/useVueValidVBind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This v-bind directive has an invalid modifier.
+  
+    21 │   <!-- Mixed valid and invalid modifiers: 'prop' is valid, 'wrong' is not -->
+  > 22 │   <p :baz.prop.wrong="value"></p>
+       │               ^^^^^^
+    23 │ 
+    24 │   <!-- Dynamic argument is present but modifier is invalid -->
+  
+  i Only the following modifiers are allowed on v-bind directives: prop, camel, sync, and attr.
+  
+  i Remove or correct the invalid modifier.
+  
+
+```
+
+```
+invalid.vue:25:22 lint/correctness/useVueValidVBind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This v-bind directive has an invalid modifier.
+  
+    24 │   <!-- Dynamic argument is present but modifier is invalid -->
+  > 25 │   <p v-bind:[dynamic].notAValidModifier="value"></p>
+       │                      ^^^^^^^^^^^^^^^^^^
+    26 │ 
+    27 │   <!-- Multiple invalid modifiers -->
+  
+  i Only the following modifiers are allowed on v-bind directives: prop, camel, sync, and attr.
+  
+  i Remove or correct the invalid modifier.
+  
+
+```
+
+```
+invalid.vue:28:20 lint/correctness/useVueValidVBind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This v-bind directive has an invalid modifier.
+  
+    27 │   <!-- Multiple invalid modifiers -->
+  > 28 │   <button :disabled.once="true"></button>
+       │                    ^^^^^
+    29 │ 
+    30 │   <!-- Component binding with unknown modifier -->
+  
+  i Only the following modifiers are allowed on v-bind directives: prop, camel, sync, and attr.
+  
+  i Remove or correct the invalid modifier.
+  
+
+```
+
+```
+invalid.vue:31:31 lint/correctness/useVueValidVBind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This v-bind directive has an invalid modifier.
+  
+    30 │   <!-- Component binding with unknown modifier -->
+  > 31 │   <MyComponent v-bind:propName.weird="someValue"></MyComponent>
+       │                               ^^^^^^
+    32 │ </template>
+    33 │ 
+  
+  i Only the following modifiers are allowed on v-bind directives: prop, camel, sync, and attr.
+  
+  i Remove or correct the invalid modifier.
+  
+
+```

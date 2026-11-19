@@ -1,9 +1,8 @@
-use crate::run_cli;
+use crate::TestArgs as Args;
 use crate::snap_test::{CliSnapshot, SnapshotPayload};
-use biome_cli::CliDiagnostic;
+use crate::{CliRunResult, run_cli};
 use biome_console::{BufferConsole, Console};
 use biome_fs::MemoryFileSystem;
-use bpaf::Args;
 use camino::{Utf8Path, Utf8PathBuf};
 use serial_test::serial;
 use std::{env, fs};
@@ -48,6 +47,64 @@ fn with_configuration() {
     assert_rage_snapshot(SnapshotPayload::new(
         module_path!(),
         "with_configuration",
+        fs,
+        console,
+        result,
+    ));
+}
+
+// The configuration lives at a non-default path and is selected via `--config-path`.
+// Because bpaf populates the same `config_path` field from either the flag or the
+// `BIOME_CONFIG_PATH` env var, exercising the flag also covers the env var, without
+// mutating the process environment. See https://github.com/biomejs/biome/issues/6686
+#[test]
+#[serial]
+fn with_custom_config_path() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+    fs.insert(
+        Utf8Path::new("custom/biome.json").to_path_buf(),
+        r#"{
+  "formatter": {
+    "enabled": false
+  }
+}"#,
+    );
+
+    let (fs, result) = run_rage(
+        fs,
+        &mut console,
+        Args::from(["rage", "--config-path=custom/biome.json"].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_rage_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "with_custom_config_path",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+#[serial]
+fn with_missing_custom_config_path() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let (fs, result) = run_rage(
+        fs,
+        &mut console,
+        Args::from(["rage", "--config-path=missing/biome.json"].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_rage_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "with_missing_custom_config_path",
         fs,
         console,
         result,
@@ -122,6 +179,38 @@ fn with_malformed_configuration() {
     assert_rage_snapshot(SnapshotPayload::new(
         module_path!(),
         "with_malformed_configuration",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+#[serial]
+fn with_files_configuration() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+    fs.insert(
+        Utf8Path::new("biome.json").to_path_buf(),
+        r#"{
+  "files": {
+    "ignoreUnknown": true,
+    "includes": [
+      "**/*.js",
+      "**/*.ts",
+      "!**/generated/**"
+    ]
+  }
+}"#,
+    );
+
+    let (fs, result) = run_rage(fs, &mut console, Args::from(["rage"].as_slice()));
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_rage_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "with_files_configuration",
         fs,
         console,
         result,
@@ -213,7 +302,7 @@ fn with_linter_configuration() {
         "noAutofocus": "off"
       },
       "complexity": {
-        "recommended": true
+        "preset": "recommended"
       },
       "suspicious": {
         "noCommentText": {
@@ -287,7 +376,7 @@ fn run_rage(
     fs: MemoryFileSystem,
     console: &mut dyn Console,
     args: Args,
-) -> (MemoryFileSystem, Result<(), CliDiagnostic>) {
+) -> (MemoryFileSystem, CliRunResult) {
     let _test_dir = TestLogDir::new("biome-rage-test");
     run_cli(fs, console, args)
 }
@@ -305,7 +394,7 @@ fn assert_rage_snapshot(payload: SnapshotPayload<'_>) {
             .map(|line| match line.trim_start().split_once(':') {
                 Some((
                     "CPU Architecture" | "OS" | "NO_COLOR" | "TERM" | "BIOME_LOG_PATH"
-                    | "Color support",
+                    | "RUST_BACKTRACE" | "Color support",
                     value,
                 )) => line.replace(value.trim_start(), "**PLACEHOLDER**"),
                 _ => line.to_string(),

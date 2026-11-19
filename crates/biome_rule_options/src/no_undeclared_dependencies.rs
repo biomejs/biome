@@ -20,6 +20,10 @@ pub struct NoUndeclaredDependenciesOptions {
     /// If set to `false`, then the rule will show an error when `optionalDependencies` are imported. Defaults to `true`.
     #[serde(skip_serializing_if = "Option::<_>::is_none")]
     pub optional_dependencies: Option<DependencyAvailability>,
+
+    /// If set to `false`, then the rule will show an error when `bundleDependencies` are imported. Defaults to `true`.
+    #[serde(skip_serializing_if = "Option::<_>::is_none")]
+    pub bundle_dependencies: Option<DependencyAvailability>,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, serde::Deserialize, serde::Serialize)]
@@ -45,12 +49,12 @@ impl Default for DependencyAvailability {
 }
 
 impl Deserializable for DependencyAvailability {
-    fn deserialize(
-        ctx: &mut impl DeserializationContext,
-        value: &impl DeserializableValue,
+    fn deserialize<V: DeserializableValue>(
+        ctx: &mut dyn DeserializationContext<State = V::State>,
+        value: &V,
         name: &str,
     ) -> Option<Self> {
-        Some(if value.visitable_type()? == DeserializableType::Bool {
+        Some(if value.visitable_type(ctx)? == DeserializableType::Bool {
             Self::Bool(<bool as Deserializable>::deserialize(ctx, value, name)?)
         } else {
             Self::Patterns(Deserializable::deserialize(ctx, value, name)?)

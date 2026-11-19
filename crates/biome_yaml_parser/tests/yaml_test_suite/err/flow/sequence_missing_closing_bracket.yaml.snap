@@ -27,14 +27,14 @@ YamlRoot {
                             YamlFlowYamlNode {
                                 properties: YamlPropertyList [],
                                 content: YamlPlainScalar {
-                                    value_token: PLAIN_LITERAL@2..4 "a\n" [] [],
+                                    value_token: PLAIN_LITERAL@2..3 "a" [] [],
                                 },
                             },
                         ],
                         r_brack_token: missing (required),
                     },
                 },
-                flow_end_token: FLOW_END@4..4 "" [] [],
+                flow_end_token: FLOW_END@3..4 "" [Newline("\n")] [],
             },
             dotdotdot_token: missing (optional),
         },
@@ -54,17 +54,17 @@ YamlRoot {
       2: (empty)
       3: YAML_FLOW_IN_BLOCK_NODE@0..4
         0: FLOW_START@0..0 "" [] []
-        1: YAML_FLOW_JSON_NODE@0..4
+        1: YAML_FLOW_JSON_NODE@0..3
           0: YAML_PROPERTY_LIST@0..0
-          1: YAML_FLOW_SEQUENCE@0..4
+          1: YAML_FLOW_SEQUENCE@0..3
             0: L_BRACK@0..2 "[" [] [Whitespace(" ")]
-            1: YAML_FLOW_SEQUENCE_ENTRY_LIST@2..4
-              0: YAML_FLOW_YAML_NODE@2..4
+            1: YAML_FLOW_SEQUENCE_ENTRY_LIST@2..3
+              0: YAML_FLOW_YAML_NODE@2..3
                 0: YAML_PROPERTY_LIST@2..2
-                1: YAML_PLAIN_SCALAR@2..4
-                  0: PLAIN_LITERAL@2..4 "a\n" [] []
+                1: YAML_PLAIN_SCALAR@2..3
+                  0: PLAIN_LITERAL@2..3 "a" [] []
             2: (empty)
-        2: FLOW_END@4..4 "" [] []
+        2: FLOW_END@3..4 "" [Newline("\n")] []
       4: (empty)
   1: EOF@4..4 "" [] []
 

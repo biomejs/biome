@@ -1,0 +1,858 @@
+use crate::class_context::{
+    TailwindClassContextNode, get_root_name, is_class_configuration_key,
+    is_compound_configuration_key, is_merge_function, is_variant_function,
+};
+use std::cell::RefCell;
+use std::marker::PhantomData;
+use std::panic::AssertUnwindSafe;
+use std::rc::Rc;
+use std::sync::Arc;
+
+use biome_analyze::{
+    AddVisitor, DiagnosticSignal, FromServices, Phase, Phases, QueryMatch, Queryable, RuleCategory,
+    RuleKey, RuleMetadata, ServiceBag, ServicesDiagnostic, SignalEntry, SignalRuleKey, Visitor,
+    VisitorContext, options::TailwindOptions,
+};
+use biome_console::markup;
+use biome_diagnostics::{Diagnostic, MessageAndDescription, panic::catch_unwind};
+use biome_html_syntax::HtmlAttribute;
+use biome_js_syntax::{
+    AnyJsExpression, AnyJsLiteralExpression, JsArrayElementList, JsAssignmentExpression,
+    JsAssignmentOperator, JsAwaitExpression, JsBinaryExpression, JsBinaryOperator,
+    JsCallArgumentList, JsCallArguments, JsCallExpression, JsConditionalExpression, JsLanguage,
+    JsLiteralMemberName, JsLogicalExpression, JsLogicalOperator, JsObjectMemberList,
+    JsParenthesizedExpression, JsPropertyObjectMember, JsSequenceExpression,
+    JsStringLiteralExpression, JsSyntaxKind, JsTemplateChunkElement, JsTemplateElement,
+    JsTemplateElementList, JsTemplateExpression, JsxAttribute, JsxAttributeInitializerClause,
+    JsxExpressionAttributeValue, JsxString, TsAsExpression, TsNonNullAssertionExpression,
+    TsSatisfiesExpression, TsTypeAssertionExpression,
+};
+use biome_languages::JsFileSource;
+use biome_parser::diagnostic::ParseDiagnostic;
+use biome_rowan::{
+    AstNode, Language, NodeCache, SyntaxKindSet, SyntaxNode, TextLen, TextRange, TextSize,
+    TokenText, WalkEvent,
+};
+use biome_tailwind_parser::{TailwindParse, TailwindParserOptions, parse_tailwind_with_options};
+use biome_tailwind_syntax::{TailwindLanguage, TwRoot};
+use rustc_hash::FxHashMap;
+
+use crate::tailwind_v4::TailwindDesignSystem;
+
+#[derive(Clone, Debug)]
+pub struct SyntaxService<L> {
+    inner: Rc<RefCell<SyntaxServiceInner<L>>>,
+}
+
+impl<L: Language> Default for SyntaxService<L> {
+    fn default() -> Self {
+        Self {
+            inner: Rc::default(),
+        }
+    }
+}
+
+#[derive(Debug)]
+struct SyntaxServiceInner<L> {
+    node_cache: NodeCache,
+    parsed: FxHashMap<TailwindSyntaxCacheKey, Rc<TailwindParse>>,
+    _language: PhantomData<L>,
+}
+
+impl<L: Language> Default for SyntaxServiceInner<L> {
+    fn default() -> Self {
+        Self {
+            node_cache: NodeCache::default(),
+            parsed: FxHashMap::default(),
+            _language: PhantomData,
+        }
+    }
+}
+
+pub type TwSyntaxService = SyntaxService<TailwindLanguage>;
+
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+pub struct TailwindSyntaxCacheKey {
+    range: TextRange,
+    kind: ClassStringHostKind,
+}
+
+impl TailwindSyntaxCacheKey {
+    pub fn new(range: TextRange, kind: ClassStringHostKind) -> Self {
+        Self { range, kind }
+    }
+}
+
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+#[repr(u8)]
+pub enum ClassStringHostKind {
+    JsStringLiteralExpression,
+    JsLiteralMemberName,
+    JsxString,
+    JsTemplateChunkElement,
+    HtmlString,
+}
+
+pub struct TailwindClassString {
+    pub key: TailwindSyntaxCacheKey,
+    pub text: TokenText,
+    /// The range of `text` in the host source file.
+    pub inner_range: TextRange,
+    /// The ranges of `text`, relative to its start, that hold only part of a
+    /// class, such as `bar-` in `` `bar-${color}` ``. Parse errors are
+    /// expected there, so they aren't reported.
+    pub partial_classes: [Option<TextRange>; 2],
+}
+
+impl TailwindClassString {
+    /// Whether `range`, relative to the start of `text`, touches part of a
+    /// class.
+    fn touches_partial_class(&self, range: TextRange) -> bool {
+        touches_any(&self.partial_classes, range)
+    }
+}
+
+fn touches_any(ranges: &[Option<TextRange>; 2], range: TextRange) -> bool {
+    ranges
+        .iter()
+        .flatten()
+        .any(|other| other.intersect(range).is_some())
+}
+
+pub struct ParsedTailwindSyntax {
+    pub parse: Rc<TailwindParse>,
+    pub should_emit_diagnostics: bool,
+    panic_diagnostic: Option<TailwindParserPanicDiagnostic>,
+}
+
+#[derive(Clone, Debug, Diagnostic)]
+#[diagnostic(category = "internalError/panic", severity = Fatal, tags(INTERNAL))]
+struct TailwindParserPanicDiagnostic {
+    #[location(span)]
+    span: TextRange,
+    #[message]
+    #[description]
+    message: MessageAndDescription,
+}
+
+impl TailwindParserPanicDiagnostic {
+    fn new(span: TextRange, message: String) -> Self {
+        Self {
+            span,
+            message: MessageAndDescription::from(
+                markup! {
+                    "The Tailwind parser panicked while parsing this class string: "{message}
+                }
+                .to_owned(),
+            ),
+        }
+    }
+}
+
+impl TwSyntaxService {
+    pub fn parse_for_query(&self, class_string: &TailwindClassString) -> Rc<TailwindParse> {
+        self.inner
+            .borrow()
+            .parsed
+            .get(&class_string.key)
+            // SAFETY: The visitor caches every class string before emitting its query match.
+            .expect("TailwindSyntaxVisitor must parse Tailwind class strings before rule queries")
+            .clone()
+    }
+
+    pub fn parse_for_visitor(
+        &self,
+        class_string: &TailwindClassString,
+        options: TailwindParserOptions,
+    ) -> ParsedTailwindSyntax {
+        let mut inner = self.inner.borrow_mut();
+        parse_with_inner(&mut inner, class_string, options)
+    }
+}
+
+fn parse_with_inner(
+    inner: &mut SyntaxServiceInner<TailwindLanguage>,
+    class_string: &TailwindClassString,
+    options: TailwindParserOptions,
+) -> ParsedTailwindSyntax {
+    if let Some(parse) = inner.parsed.get(&class_string.key) {
+        return ParsedTailwindSyntax {
+            parse: parse.clone(),
+            should_emit_diagnostics: false,
+            panic_diagnostic: None,
+        };
+    }
+
+    let mut panic_diagnostic = None;
+    // Convert parser panics into diagnostics tied to the host class string.
+    let parse = match catch_unwind(AssertUnwindSafe(|| {
+        parse_tailwind_with_options(class_string.text.text(), &mut inner.node_cache, options)
+    })) {
+        Ok(parse) => Rc::new(parse),
+        Err(error) => {
+            let message = error.info;
+            panic_diagnostic = Some(TailwindParserPanicDiagnostic::new(
+                class_string.inner_range,
+                message,
+            ));
+            Rc::new(parse_tailwind_with_options(
+                "",
+                &mut inner.node_cache,
+                options,
+            ))
+        }
+    };
+    inner.parsed.insert(class_string.key, parse.clone());
+    ParsedTailwindSyntax {
+        parse,
+        should_emit_diagnostics: true,
+        panic_diagnostic,
+    }
+}
+
+pub trait TailwindClassStringHost: AstNode {
+    fn tailwind_class_string(
+        &self,
+        options: &TailwindOptions,
+        is_class_attribute: bool,
+    ) -> Option<TailwindClassString>;
+}
+
+#[derive(Clone)]
+pub struct TailwindSyntax<N> {
+    node: N,
+    parse: Rc<TailwindParse>,
+    /// See [TailwindClassString::partial_classes].
+    partial_classes: [Option<TextRange>; 2],
+}
+
+pub struct TailwindSyntaxMatch<L: Language> {
+    node: SyntaxNode<L>,
+    class_string: TailwindClassString,
+}
+
+impl<L: Language + 'static> QueryMatch for TailwindSyntaxMatch<L> {
+    fn text_range(&self) -> TextRange {
+        self.node.text_trimmed_range()
+    }
+}
+
+impl<N> TailwindSyntax<N> {
+    pub fn node(&self) -> &N {
+        &self.node
+    }
+
+    pub fn tailwind_root(&self) -> TwRoot {
+        self.parse.tree()
+    }
+
+    pub fn tailwind_diagnostics(&self) -> &[ParseDiagnostic] {
+        self.parse.diagnostics()
+    }
+
+    pub fn tailwind_has_errors(&self) -> bool {
+        self.parse.has_errors()
+    }
+
+    /// Whether `range`, relative to the start of the class string, touches a
+    /// class that continues outside the string, such as `bar` in
+    /// `` `foo bar${suffix}` ``.
+    pub fn touches_partial_class(&self, range: TextRange) -> bool {
+        touches_any(&self.partial_classes, range)
+    }
+}
+
+impl<N> QueryMatch for TailwindSyntax<N>
+where
+    N: AstNode + 'static,
+{
+    fn text_range(&self) -> TextRange {
+        self.node.syntax().text_trimmed_range()
+    }
+}
+
+pub struct TailwindSyntaxServices {
+    _service: TwSyntaxService,
+}
+
+impl FromServices for TailwindSyntaxServices {
+    fn from_services(
+        rule_key: &RuleKey,
+        _rule_metadata: &RuleMetadata,
+        services: &ServiceBag,
+    ) -> Result<Self, ServicesDiagnostic> {
+        Ok(Self {
+            _service: services
+                .get_service::<TwSyntaxService>()
+                .ok_or_else(|| ServicesDiagnostic::new(rule_key.rule_name(), &["TwSyntaxService"]))?
+                .clone(),
+        })
+    }
+}
+
+impl Phase for TailwindSyntaxServices {
+    fn phase() -> Phases {
+        Phases::Syntax
+    }
+}
+
+impl<N> Queryable for TailwindSyntax<N>
+where
+    N: AstNode + TailwindClassStringHost + 'static,
+{
+    type Input = TailwindSyntaxMatch<N::Language>;
+    type Output = Self;
+    type Language = N::Language;
+    type Services = TailwindSyntaxServices;
+
+    fn build_visitor(
+        analyzer: &mut impl AddVisitor<Self::Language>,
+        _: &<Self::Language as Language>::Root,
+    ) {
+        analyzer.add_visitor(Phases::Syntax, TailwindSyntaxVisitor::<N>::default);
+    }
+
+    fn unwrap_match(services: &ServiceBag, node: &Self::Input) -> Self::Output {
+        let ast_node = N::unwrap_cast(node.node.clone());
+        let parse = services
+            .get_service::<TwSyntaxService>()
+            // SAFETY: TailwindSyntaxServices requires this service before the rule can run.
+            .expect("TwSyntaxService service is not registered")
+            .parse_for_query(&node.class_string);
+
+        Self {
+            node: ast_node,
+            parse,
+            partial_classes: node.class_string.partial_classes,
+        }
+    }
+}
+
+pub struct TailwindSyntaxVisitor<N>(PhantomData<N>);
+
+impl<N> Default for TailwindSyntaxVisitor<N> {
+    fn default() -> Self {
+        Self(PhantomData)
+    }
+}
+
+impl<N> Visitor for TailwindSyntaxVisitor<N>
+where
+    N: AstNode + TailwindClassStringHost + 'static,
+{
+    type Language = N::Language;
+
+    fn visit(
+        &mut self,
+        event: &WalkEvent<SyntaxNode<Self::Language>>,
+        mut ctx: VisitorContext<Self::Language>,
+    ) {
+        let WalkEvent::Enter(node) = event else {
+            return;
+        };
+
+        // A node overlaps the range only if all its ancestors do, so checking
+        // the node alone skips the same nodes as skipping whole subtrees.
+        if let Some(range) = ctx.range
+            && node.text_range_with_trivia().ordering(range).is_ne()
+        {
+            return;
+        }
+
+        let Some(ast_node) = N::cast_ref(node) else {
+            return;
+        };
+        let Some(class_string) = ast_node.tailwind_class_string(
+            ctx.options.tailwind(),
+            ctx.services
+                .get_service::<JsFileSource>()
+                .is_some_and(|source| source.as_embedding_kind().is_class_attribute()),
+        ) else {
+            return;
+        };
+        let Some(service) = ctx.services.get_service::<TwSyntaxService>() else {
+            return;
+        };
+        let design = ctx.services.get_service::<Arc<TailwindDesignSystem>>();
+        let options = design.map_or_else(
+            || TailwindDesignSystem::default_ref().parser_options(),
+            |design| design.parser_options(),
+        );
+        let parsed = service.parse_for_visitor(&class_string, options);
+        if let Some(diagnostic) = parsed.panic_diagnostic {
+            let text_range = diagnostic.span;
+            ctx.push_signal(SignalEntry {
+                signal: Box::new(DiagnosticSignal::new(move || diagnostic.clone())),
+                rule: SignalRuleKey::Rule(RuleKey::new("tailwind", "parse")),
+                instances: Box::new([]),
+                text_range,
+                category: RuleCategory::Syntax,
+            });
+        }
+        if parsed.should_emit_diagnostics {
+            emit_parse_diagnostics(&mut ctx, &class_string, parsed.parse.diagnostics());
+        }
+        ctx.match_query(TailwindSyntaxMatch {
+            node: node.clone(),
+            class_string,
+        });
+    }
+
+    fn visited_kinds(
+        &self,
+        _: Option<SyntaxKindSet<Self::Language>>,
+    ) -> Option<SyntaxKindSet<Self::Language>> {
+        Some(N::KIND_SET)
+    }
+}
+
+fn emit_parse_diagnostics<L: Language>(
+    ctx: &mut VisitorContext<L>,
+    class_string: &TailwindClassString,
+    diagnostics: &[ParseDiagnostic],
+) {
+    for diagnostic in diagnostics {
+        let span = diagnostic.location().span;
+        let touches_partial_class = span.map_or_else(
+            || class_string.partial_classes.iter().any(Option::is_some),
+            |span| class_string.touches_partial_class(span),
+        );
+        if touches_partial_class {
+            continue;
+        }
+        let text_range = span.map_or(class_string.inner_range, |span| {
+            span + class_string.inner_range.start()
+        });
+        let mut diagnostic = diagnostic.clone();
+        diagnostic.set_location_offset(class_string.inner_range.start());
+        ctx.push_signal(SignalEntry {
+            signal: Box::new(DiagnosticSignal::new(move || diagnostic.clone())),
+            rule: SignalRuleKey::Rule(RuleKey::new("tailwind", "parse")),
+            instances: Box::new([]),
+            text_range,
+            category: RuleCategory::Syntax,
+        });
+    }
+}
+
+const CLASS_CONFIGURATION_WRAPPER_KINDS: SyntaxKindSet<JsLanguage> = JsObjectMemberList::KIND_SET
+    .union(JsArrayElementList::KIND_SET)
+    .union(JsCallArguments::KIND_SET)
+    .union(JsCallArgumentList::KIND_SET)
+    .union(JsParenthesizedExpression::KIND_SET)
+    .union(JsAwaitExpression::KIND_SET)
+    .union(TsAsExpression::KIND_SET)
+    .union(TsSatisfiesExpression::KIND_SET)
+    .union(TsNonNullAssertionExpression::KIND_SET)
+    .union(TsTypeAssertionExpression::KIND_SET);
+
+const CLASS_STRING_WRAPPER_KINDS: SyntaxKindSet<JsLanguage> = CLASS_CONFIGURATION_WRAPPER_KINDS
+    .union(JsTemplateElementList::KIND_SET)
+    .union(JsTemplateElement::KIND_SET)
+    .union(JsxExpressionAttributeValue::KIND_SET)
+    .union(JsxAttributeInitializerClause::KIND_SET);
+
+fn is_class_preserving_spread(
+    collection_kind: Option<JsSyntaxKind>,
+    parent_kind: JsSyntaxKind,
+) -> bool {
+    match collection_kind {
+        Some(JsSyntaxKind::JS_ARRAY_EXPRESSION) => matches!(
+            parent_kind,
+            JsSyntaxKind::JS_ARRAY_ELEMENT_LIST | JsSyntaxKind::JS_CALL_ARGUMENT_LIST
+        ),
+        Some(JsSyntaxKind::JS_OBJECT_EXPRESSION) => {
+            parent_kind == JsSyntaxKind::JS_OBJECT_MEMBER_LIST
+        }
+        _ => false,
+    }
+}
+
+/// Returns whether the value of `member` is in a position that holds classes in
+/// the configuration object of a variant function such as `cva` or `tv`.
+fn is_class_configuration_value(
+    member: &JsPropertyObjectMember,
+    options: &TailwindOptions,
+) -> Option<bool> {
+    let mut path = Vec::new();
+    let mut collection_kind = None;
+    let mut child = member.syntax().clone();
+    for ancestor in member.syntax().ancestors() {
+        match ancestor.kind() {
+            JsSyntaxKind::JS_PROPERTY_OBJECT_MEMBER => {
+                let member = JsPropertyObjectMember::cast_ref(&ancestor)?;
+                path.push(member.name().ok()?.name()?);
+            }
+            JsSyntaxKind::JS_CONDITIONAL_EXPRESSION => {
+                let conditional = JsConditionalExpression::cast_ref(&ancestor)?;
+                if conditional.test().ok()?.syntax() == &child {
+                    return None;
+                }
+            }
+            JsSyntaxKind::JS_LOGICAL_EXPRESSION => {
+                let logical = JsLogicalExpression::cast_ref(&ancestor)?;
+                if logical.operator().ok()? == JsLogicalOperator::LogicalAnd
+                    && logical.left().ok()?.syntax() == &child
+                {
+                    return None;
+                }
+            }
+            JsSyntaxKind::JS_SEQUENCE_EXPRESSION => {
+                let sequence = JsSequenceExpression::cast_ref(&ancestor)?;
+                if sequence.right().ok()?.syntax() != &child {
+                    return None;
+                }
+            }
+            JsSyntaxKind::JS_ASSIGNMENT_EXPRESSION => {
+                let assignment = JsAssignmentExpression::cast_ref(&ancestor)?;
+                if assignment.right().ok()?.syntax() != &child
+                    || !matches!(
+                        assignment.operator().ok()?,
+                        JsAssignmentOperator::Assign
+                            | JsAssignmentOperator::LogicalAndAssign
+                            | JsAssignmentOperator::LogicalOrAssign
+                            | JsAssignmentOperator::NullishCoalescingAssign
+                    )
+                {
+                    return None;
+                }
+            }
+            JsSyntaxKind::JS_CALL_EXPRESSION => {
+                let call = JsCallExpression::cast_ref(&ancestor)?;
+                if !JsCallArguments::can_cast(child.kind()) {
+                    return None;
+                }
+                let name = get_root_name(call.callee().ok()?)?;
+                if !is_variant_function(options, name.text()) {
+                    return None;
+                }
+                // `path` lists keys from `member` outwards, so the first key of the
+                // configuration object comes last.
+                let mut keys = path.iter().rev();
+                let key = keys.next()?;
+                return Some(if is_class_configuration_key(key.text()) {
+                    true
+                } else if is_compound_configuration_key(key.text()) {
+                    keys.next()
+                        .is_some_and(|key| matches!(key.text(), "class" | "className"))
+                } else {
+                    false
+                });
+            }
+            JsSyntaxKind::JS_ARRAY_EXPRESSION | JsSyntaxKind::JS_OBJECT_EXPRESSION => {
+                collection_kind = Some(ancestor.kind());
+            }
+            JsSyntaxKind::JS_SPREAD => {
+                if !is_class_preserving_spread(collection_kind, ancestor.parent()?.kind()) {
+                    return None;
+                }
+            }
+            kind if CLASS_CONFIGURATION_WRAPPER_KINDS.matches(kind) => {}
+            _ => return None,
+        }
+        child = ancestor;
+    }
+    None
+}
+
+/// Returns whether the value of `member` is written as classes rather than as a
+/// condition.
+fn member_value_holds_classes(member: &JsPropertyObjectMember) -> bool {
+    member.value().is_ok_and(|value| {
+        matches!(
+            value.omit_parentheses(),
+            AnyJsExpression::AnyJsLiteralExpression(
+                AnyJsLiteralExpression::JsStringLiteralExpression(_)
+            ) | AnyJsExpression::JsTemplateExpression(_)
+                | AnyJsExpression::JsArrayExpression(_)
+                | AnyJsExpression::JsObjectExpression(_)
+                | AnyJsExpression::JsConditionalExpression(_)
+        )
+    })
+}
+
+fn inspect_string_literal(
+    node: &SyntaxNode<JsLanguage>,
+    options: &TailwindOptions,
+    is_class_attribute: bool,
+) -> Option<bool> {
+    let mut child = node.clone();
+    let mut collection_kind = None;
+    let mut is_object_key = false;
+    for ancestor in node.ancestors().skip(1) {
+        match ancestor.kind() {
+            JsSyntaxKind::JS_CONDITIONAL_EXPRESSION => {
+                let conditional = JsConditionalExpression::cast_ref(&ancestor)?;
+                if conditional.test().ok()?.syntax() == &child {
+                    return None;
+                }
+            }
+            JsSyntaxKind::JS_BINARY_EXPRESSION => {
+                let binary = JsBinaryExpression::cast_ref(&ancestor)?;
+                if collection_kind.is_some() || binary.operator().ok()? != JsBinaryOperator::Plus {
+                    return None;
+                }
+                collection_kind = None;
+            }
+            JsSyntaxKind::JS_ASSIGNMENT_EXPRESSION => {
+                let assignment = JsAssignmentExpression::cast_ref(&ancestor)?;
+                if assignment.right().ok()?.syntax() != &child {
+                    return None;
+                }
+                match assignment.operator().ok()? {
+                    JsAssignmentOperator::Assign
+                    | JsAssignmentOperator::LogicalAndAssign
+                    | JsAssignmentOperator::LogicalOrAssign
+                    | JsAssignmentOperator::NullishCoalescingAssign => {}
+                    JsAssignmentOperator::AddAssign if collection_kind.is_none() => {}
+                    _ => return None,
+                }
+            }
+            JsSyntaxKind::JS_LOGICAL_EXPRESSION => {
+                let logical = JsLogicalExpression::cast_ref(&ancestor)?;
+                if logical.operator().ok()? == JsLogicalOperator::LogicalAnd
+                    && logical.left().ok()?.syntax() == &child
+                {
+                    return None;
+                }
+            }
+            JsSyntaxKind::JS_PROPERTY_OBJECT_MEMBER => {
+                let member = JsPropertyObjectMember::cast_ref(&ancestor)?;
+                if member.name().ok()?.syntax() != &child {
+                    return is_class_configuration_value(&member, options);
+                }
+                // A key whose value holds classes, like `sm` in `{ sm: "px-2" }`, is a
+                // name. Otherwise the object maps classes to conditions, as in
+                // `{ "px-2": isActive }`, and the key is a class.
+                if is_class_configuration_value(&member, options).unwrap_or(false)
+                    && member_value_holds_classes(&member)
+                {
+                    return None;
+                }
+                is_object_key = true;
+            }
+            JsSyntaxKind::JS_SEQUENCE_EXPRESSION => {
+                let sequence = JsSequenceExpression::cast_ref(&ancestor)?;
+                if sequence.right().ok()?.syntax() != &child {
+                    return None;
+                }
+            }
+            JsSyntaxKind::JSX_ATTRIBUTE => {
+                let attribute = JsxAttribute::cast_ref(&ancestor)?;
+                return Some(attribute.is_tailwind_class_context(options));
+            }
+            JsSyntaxKind::JS_CALL_EXPRESSION => {
+                let call = JsCallExpression::cast_ref(&ancestor)?;
+                if !JsCallArguments::can_cast(child.kind()) {
+                    return Some(false);
+                }
+                let name = get_root_name(call.callee().ok()?)?;
+                // Keys of a variant function's configuration object are names, not classes.
+                return Some(
+                    is_merge_function(options, name.text())
+                        || !is_object_key && is_variant_function(options, name.text()),
+                );
+            }
+            JsSyntaxKind::JS_TEMPLATE_EXPRESSION => {
+                if collection_kind.is_some() {
+                    return None;
+                }
+                collection_kind = None;
+                let template = JsTemplateExpression::cast_ref(&ancestor)?;
+                if let Some(tag) = template.tag() {
+                    let name = get_root_name(tag)?;
+                    return Some(
+                        is_merge_function(options, name.text())
+                            || is_variant_function(options, name.text()),
+                    );
+                }
+            }
+            JsSyntaxKind::JS_EXPRESSION_TEMPLATE_ROOT => return Some(is_class_attribute),
+            JsSyntaxKind::JS_ARRAY_EXPRESSION | JsSyntaxKind::JS_OBJECT_EXPRESSION => {
+                collection_kind = Some(ancestor.kind());
+            }
+            JsSyntaxKind::JS_SPREAD => {
+                if !is_class_preserving_spread(collection_kind, ancestor.parent()?.kind()) {
+                    return None;
+                }
+            }
+            JsSyntaxKind::JS_COMPUTED_MEMBER_NAME => {
+                if collection_kind.is_some() {
+                    return None;
+                }
+            }
+            kind if CLASS_STRING_WRAPPER_KINDS.matches(kind) => {}
+            _ => return None,
+        }
+        child = ancestor;
+    }
+    None
+}
+
+fn tailwind_class_string(
+    text: TokenText,
+    value_start: TextSize,
+    kind: ClassStringHostKind,
+) -> TailwindClassString {
+    let inner_range = TextRange::at(value_start, text.text_len());
+    TailwindClassString {
+        key: TailwindSyntaxCacheKey::new(inner_range, kind),
+        text,
+        inner_range,
+        partial_classes: [None, None],
+    }
+}
+
+impl TailwindClassStringHost for JsStringLiteralExpression {
+    fn tailwind_class_string(
+        &self,
+        options: &TailwindOptions,
+        is_class_attribute: bool,
+    ) -> Option<TailwindClassString> {
+        if !inspect_string_literal(self.syntax(), options, is_class_attribute).unwrap_or(false) {
+            return None;
+        }
+        tailwind_class_string(
+            self.inner_string_text().ok()?,
+            self.value_token().ok()?.text_trimmed_range().start() + TextSize::from(1),
+            ClassStringHostKind::JsStringLiteralExpression,
+        )
+        .into()
+    }
+}
+
+impl TailwindClassStringHost for JsLiteralMemberName {
+    fn tailwind_class_string(
+        &self,
+        options: &TailwindOptions,
+        is_class_attribute: bool,
+    ) -> Option<TailwindClassString> {
+        if !inspect_string_literal(self.syntax(), options, is_class_attribute).unwrap_or(false) {
+            return None;
+        }
+        let value = self.value().ok()?;
+        // Only string literal keys have an opening quote to skip.
+        let quote_len = if value.kind() == JsSyntaxKind::JS_STRING_LITERAL {
+            TextSize::from(1)
+        } else {
+            TextSize::from(0)
+        };
+        tailwind_class_string(
+            self.name().ok()?,
+            value.text_trimmed_range().start() + quote_len,
+            ClassStringHostKind::JsLiteralMemberName,
+        )
+        .into()
+    }
+}
+
+impl TailwindClassStringHost for JsxString {
+    fn tailwind_class_string(
+        &self,
+        options: &TailwindOptions,
+        _is_class_attribute: bool,
+    ) -> Option<TailwindClassString> {
+        let jsx_attribute = self
+            .syntax()
+            .ancestors()
+            .skip(1)
+            .find_map(JsxAttribute::cast)?;
+        if !jsx_attribute.is_tailwind_class_context(options) {
+            return None;
+        }
+        tailwind_class_string(
+            self.inner_string_text().ok()?,
+            self.value_token().ok()?.text_trimmed_range().start() + TextSize::from(1),
+            ClassStringHostKind::JsxString,
+        )
+        .into()
+    }
+}
+
+impl TailwindClassStringHost for JsTemplateChunkElement {
+    fn tailwind_class_string(
+        &self,
+        options: &TailwindOptions,
+        is_class_attribute: bool,
+    ) -> Option<TailwindClassString> {
+        if !inspect_string_literal(self.syntax(), options, is_class_attribute).unwrap_or(false) {
+            return None;
+        }
+        let token = self.template_chunk_token().ok()?;
+        let text = token.text_trimmed();
+        // A class touching an interpolation, as in `` `bar-${color}` ``, continues
+        // past this chunk.
+        let syntax = self.syntax();
+        let is_whitespace = |c: char| c.is_ascii_whitespace();
+        let leading = syntax
+            .prev_sibling()
+            .is_some_and(|sibling| JsTemplateElement::can_cast(sibling.kind()))
+            .then(|| {
+                let end = text.find(is_whitespace).unwrap_or(text.len());
+                TextRange::up_to(TextSize::of(&text[..end]))
+            })
+            .filter(|range| !range.is_empty());
+        let trailing = syntax
+            .next_sibling()
+            .is_some_and(|sibling| JsTemplateElement::can_cast(sibling.kind()))
+            .then(|| {
+                let start = text.rfind(is_whitespace).map_or(0, |index| index + 1);
+                TextRange::new(TextSize::of(&text[..start]), TextSize::of(text))
+            })
+            .filter(|range| !range.is_empty());
+        Some(TailwindClassString {
+            partial_classes: [leading, trailing],
+            ..tailwind_class_string(
+                token.token_text(),
+                token.text_trimmed_range().start(),
+                ClassStringHostKind::JsTemplateChunkElement,
+            )
+        })
+    }
+}
+
+impl TailwindClassStringHost for HtmlAttribute {
+    fn tailwind_class_string(
+        &self,
+        options: &TailwindOptions,
+        _is_class_attribute: bool,
+    ) -> Option<TailwindClassString> {
+        if !self.is_tailwind_class_context(options) {
+            return None;
+        }
+        let html_string = self.html_string()?;
+        tailwind_class_string(
+            html_string.inner_string_text().ok()?,
+            html_string.inner_string_range().ok()?.start(),
+            ClassStringHostKind::HtmlString,
+        )
+        .into()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use biome_js_parser::{JsParserOptions, parse};
+
+    /// Returns the source text at the `inner_range` of each object key that
+    /// holds a class string in `source`.
+    fn object_key_class_texts(source: &str) -> Vec<String> {
+        let parse = parse(source, JsFileSource::jsx(), JsParserOptions::default());
+        parse
+            .syntax()
+            .descendants()
+            .filter_map(JsLiteralMemberName::cast)
+            .filter_map(|name| name.tailwind_class_string(&TailwindOptions::default(), false))
+            .map(|class_string| source[class_string.inner_range].to_string())
+            .collect()
+    }
+
+    #[test]
+    fn object_key_inner_range() {
+        assert_eq!(
+            object_key_class_texts(r#"clsx({ flex: active, "p-2": active, 'm-2': active });"#),
+            ["flex", "p-2", "m-2"]
+        );
+    }
+}

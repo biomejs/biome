@@ -1,7 +1,8 @@
 use biome_analyze::{Ast, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_js_syntax::{AnyJsExpression, JsFileSource, JsVariableDeclaration, JsVariableDeclarator};
+use biome_js_syntax::{AnyJsExpression, JsVariableDeclaration, JsVariableDeclarator};
+use biome_languages::JsFileSource;
 use biome_rule_options::no_evolving_types::NoEvolvingTypesOptions;
 
 declare_lint_rule! {
@@ -87,15 +88,16 @@ impl Rule for NoEvolvingTypes {
                 match expression {
                     AnyJsExpression::AnyJsLiteralExpression(literal_expr)
                         if literal_expr.as_js_null_literal_expression().is_some()
-                            && !is_type_annotated
-                        => {
-                            return Some(variable);
-                        }
+                            && !is_type_annotated =>
+                    {
+                        return Some(variable);
+                    }
                     AnyJsExpression::JsArrayExpression(array_expr)
-                        if array_expr.elements().into_iter().next().is_none() && !is_type_annotated
-                        => {
-                            return Some(variable);
-                        }
+                        if array_expr.elements().into_iter().next().is_none()
+                            && !is_type_annotated =>
+                    {
+                        return Some(variable);
+                    }
                     _ => {}
                 };
             }

@@ -1,0 +1,116 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: keyframes.scss
+---
+# Input
+```css
+/* should generate diagnostics */
+@keyframes fade {
+  from {
+    opacity: 0;
+    display: block;
+  }
+  to {
+    color: red;
+    display: block;
+  }
+}
+
+@keyframes no-semicolon {
+  to {
+    color: red;
+    display: block // display comment
+  }
+}
+
+```
+
+# Diagnostics
+```
+keyframes.scss:3:8 assist/source/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+    1 │ /* should generate diagnostics */
+    2 │ @keyframes fade {
+  > 3 │   from {
+      │        ^
+  > 4 │     opacity: 0;
+  > 5 │     display: block;
+  > 6 │   }
+      │   ^
+    7 │   to {
+    8 │     color: red;
+  
+  i Safe fix: Sort these properties
+  
+     2  2 │   @keyframes fade {
+     3  3 │     from {
+     4    │ - ····opacity:·0;
+     5    │ - ····display:·block;
+        4 │ + ····display:·block;
+        5 │ + ····opacity:·0;
+     6  6 │     }
+     7  7 │     to {
+  
+
+```
+
+```
+keyframes.scss:7:6 assist/source/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+     5 │     display: block;
+     6 │   }
+   > 7 │   to {
+       │      ^
+   > 8 │     color: red;
+   > 9 │     display: block;
+  > 10 │   }
+       │   ^
+    11 │ }
+    12 │ 
+  
+  i Safe fix: Sort these properties
+  
+     6  6 │     }
+     7  7 │     to {
+     8    │ - ····color:·red;
+     9    │ - ····display:·block;
+        8 │ + ····display:·block;
+        9 │ + ····color:·red;
+    10 10 │     }
+    11 11 │   }
+  
+
+```
+
+```
+keyframes.scss:14:6 assist/source/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+    13 │ @keyframes no-semicolon {
+  > 14 │   to {
+       │      ^
+  > 15 │     color: red;
+  > 16 │     display: block // display comment
+  > 17 │   }
+       │   ^
+    18 │ }
+    19 │ 
+  
+  i Safe fix: Sort these properties
+  
+    13 13 │   @keyframes no-semicolon {
+    14 14 │     to {
+    15    │ - ····color:·red;
+    16    │ - ····display:·block·//·display·comment
+       15 │ + ····display:·block;·//·display·comment
+       16 │ + ····color:·red;
+    17 17 │     }
+    18 18 │   }
+  
+
+```

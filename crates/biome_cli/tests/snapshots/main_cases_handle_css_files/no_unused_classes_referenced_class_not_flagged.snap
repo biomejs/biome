@@ -1,0 +1,55 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome lint --only=nursery/noUnusedClasses '<TEMP_DIR>/no_unused_classes_referenced_class_not_flagged'
+```
+
+## `App.jsx`
+
+```jsx
+import "./styles.css";
+export default () => <div className="button" />;
+
+```
+
+## `Card.tsx`
+
+```tsx
+import "./styles.css";
+export default function Card() {
+    return <div className="card">content</div>;
+}
+
+```
+
+## `Solid.jsx`
+
+```jsx
+import "./styles.css";
+export default () => <div class="solid" />;
+
+```
+
+## `styles.css`
+
+```css
+.button {
+  color: blue;
+}
+.card {
+  border-radius: 8px;
+}
+.solid {
+  margin: 0;
+}
+```
+
+# Emitted Messages
+
+```block
+Checked 4 files in <TIME>. No fixes applied.
+```

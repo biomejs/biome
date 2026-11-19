@@ -4,16 +4,15 @@ mod tests;
 mod scan_cursor;
 mod source_cursor;
 
-use self::scan_cursor::CssScanCursor;
-use self::scan_cursor::{
-    PendingUrlRawValueScan, StringBodyScan, StringBodyScanStop, UrlBodyStartScan,
-};
+use self::scan_cursor::{CssScanCursor, StringBodyScan, StringBodyScanStop};
 use self::source_cursor::SourceCursor;
 use crate::CssParserOptions;
 use biome_css_syntax::{
-    CssFileSource, CssNumberScanOptions, CssSyntaxKind, CssSyntaxKind::*, T, TextLen, TextRange,
-    TextSize, scan_css_number,
+    CssNumberScanOptions, CssSyntaxKind, CssSyntaxKind::*, T, TextLen, TextRange, TextSize,
+    scan_css_number,
 };
+use biome_languages::CssFileSource;
+use biome_languages::css::CssEmbeddingKind;
 use biome_parser::diagnostic::ParseDiagnostic;
 use biome_parser::lexer::{
     LexContext, Lexer, LexerCheckpoint, LexerWithCheckpoint, ReLexer, TokenFlags,
@@ -23,6 +22,41 @@ use biome_unicode_table::{
     Dispatch::{self, *},
     lookup_byte,
 };
+
+/// Controls how `//` is classified in an SCSS custom-property value.
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+pub enum CssCustomPropertyCommentMode {
+    /// Preserves `//` as raw content, as in `--value: // literal;`.
+    PreserveDoubleSlash,
+    /// Treats `//` as a comment, as in `@supports (--value: // comment\n token) {}`.
+    ScssLineComments,
+}
+
+#[derive(Debug, Copy, Clone)]
+enum TokenFallback {
+    Error,
+    Delimiter,
+}
+
+/// Byte range for a raw URL literal discovered by URL-body classification.
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+pub(crate) struct UrlRawValueScan {
+    /// Absolute byte position where the raw value starts.
+    pub(crate) start: usize,
+    /// Absolute byte position immediately before the closing `)` or EOF.
+    pub(crate) end: usize,
+    /// Whether the scan stopped on a closing `)` instead of EOF.
+    pub(crate) terminated: bool,
+}
+
+/// Source range of the identifier body in an SCSS hash string.
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+pub(crate) struct ScssHashValueScan {
+    /// Absolute byte position immediately after the leading `#`.
+    pub(crate) start: usize,
+    /// Absolute byte position immediately after the identifier body.
+    pub(crate) end: usize,
+}
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Default)]
 pub enum CssLexContext {
@@ -37,19 +71,36 @@ pub enum CssLexContext {
     /// Distinct '-' from identifiers and '+' from numbers.
     PseudoNthSelector,
 
-    /// Applied when lexing CSS url function.
-    /// Chooses whether the first body token should stay on regular tokenization
-    /// or become a raw URL literal.
-    UrlBody { scss_exclusive_syntax_allowed: bool },
-    /// Applied when lexing CSS url function raw bodies after classification.
-    /// Greedily consume tokens in the URL function until encountering `)`.
-    UrlRawValue,
+    /// Emits regular trivia until the precomputed raw URL body starts, then
+    /// commits the body without rescanning it.
+    ///
+    /// ```css
+    /// url(images/logo.png)
+    /// ```
+    UrlRawValue(UrlRawValueScan),
+    /// Emits regular trivia until the segmented SCSS URL body starts, then
+    /// lexes its text and interpolation boundaries.
+    ///
+    /// ```scss
+    /// url(images/#{$name}.png)
+    /// ```
+    ScssUrlValue {
+        /// Absolute byte position where segmented URL content starts.
+        start: usize,
+    },
 
     /// Applied when lexing CSS color literals.
     /// Starting from #
     /// support #000 #000f #ffffff #ffffffff
     /// https://drafts.csswg.org/css-color/#typedef-hex-color
     Color,
+
+    /// Commits a classified SCSS hash-string body without rescanning it.
+    ///
+    /// ```scss
+    /// $selector: #ABCG;
+    /// ```
+    ScssHashValue(ScssHashValueScan),
 
     /// Applied when lexing CSS unicode range.
     /// Starting from U+ or u+
@@ -65,10 +116,14 @@ pub enum CssLexContext {
     /// quote for malformed recovery.
     ScssStringInterpolation(CssStringQuote),
 
+    /// Applied to the raw body of an SCSS custom property.
+    CustomPropertyValue(CssCustomPropertyCommentMode),
+
     /// Applied when lexing Tailwind CSS utility classes.
     /// Currently, only applicable to when we encounter a `@apply` rule.
     TailwindUtility,
-    /// Applied when lexing Tailwind CSS utility names in `@utility`.
+    /// Applied when lexing Tailwind CSS utility and variant names in
+    /// `@utility`, `@variant`, and `@custom-variant`.
     TailwindUtilityName,
 }
 
@@ -116,6 +171,10 @@ pub enum CssReLexContext {
     UnicodeRange,
     /// Re-lexes `+` and `-` as standalone tokens for SCSS expression parsing.
     ScssExpression,
+    /// Re-lexes a name suffix without requiring an identifier-start character.
+    ///
+    /// `@custom-#{$name}01 token;` keeps `01` without number normalization.
+    ScssIdentifierContinuation,
 }
 
 /// An extremely fast, lookup table based, lossless CSS lexer
@@ -148,7 +207,9 @@ pub(crate) struct CssLexer<'src> {
     options: CssParserOptions,
     source_type: CssFileSource,
     pending_scss_string_start: Option<PendingScssInterpolatedStringStart>,
-    pending_url_raw_value_scan: Option<PendingUrlRawValueScan>,
+
+    /// Ranges of the Grit metavariables in the source.
+    metavariables: &'src [TextRange],
 }
 
 impl<'src> Lexer<'src> for CssLexer<'src> {
@@ -161,6 +222,10 @@ impl<'src> Lexer<'src> for CssLexer<'src> {
 
     fn source(&self) -> &'src str {
         self.cursor.source()
+    }
+
+    fn metavariable_ranges(&self) -> &[TextRange] {
+        self.metavariables
     }
 
     fn current(&self) -> Self::Kind {
@@ -191,13 +256,19 @@ impl<'src> Lexer<'src> for CssLexer<'src> {
                 }
                 CssLexContext::Selector => self.consume_selector_token(current),
                 CssLexContext::PseudoNthSelector => self.consume_pseudo_nth_selector_token(current),
-                CssLexContext::UrlBody {
-                    scss_exclusive_syntax_allowed,
-                } => self.consume_url_body_token(current, scss_exclusive_syntax_allowed),
-                CssLexContext::UrlRawValue => self.consume_url_raw_value_token(current),
+                CssLexContext::UrlRawValue(scan) => self.consume_url_raw_value_token(current, scan),
+                CssLexContext::ScssUrlValue { start } => {
+                    self.consume_scss_url_value_token(current, start)
+                }
                 CssLexContext::Color => self.consume_color_token(current),
+                CssLexContext::ScssHashValue(scan) => {
+                    self.consume_scss_hash_value_token(current, scan)
+                }
                 CssLexContext::UnicodeRange => self.consume_unicode_range_token(current),
                 CssLexContext::ScssString(quote) => self.lex_scss_string_chunk_token(quote),
+                CssLexContext::CustomPropertyValue(comment_mode) => {
+                    self.consume_custom_property_value_token(current, comment_mode)
+                }
                 CssLexContext::TailwindUtility => self.consume_token_tailwind_utility(current),
                 CssLexContext::TailwindUtilityName => {
                     self.consume_token_tailwind_utility_name(current)
@@ -255,7 +326,6 @@ impl<'src> Lexer<'src> for CssLexer<'src> {
         self.unicode_bom_length = unicode_bom_length;
         self.diagnostics.truncate(diagnostics_pos as usize);
         self.pending_scss_string_start = None;
-        self.pending_url_raw_value_scan = None;
     }
 
     fn finish(self) -> Vec<ParseDiagnostic> {
@@ -321,12 +391,104 @@ impl<'src> CssLexer<'src> {
             options: CssParserOptions::default(),
             source_type: CssFileSource::default(),
             pending_scss_string_start: None,
-            pending_url_raw_value_scan: None,
+            metavariables: &[],
         }
     }
 
     pub(crate) fn with_options(self, options: CssParserOptions) -> Self {
         Self { options, ..self }
+    }
+
+    /// Lexes the given source ranges as Grit metavariables.
+    pub(crate) fn with_metavariables(self, metavariables: &'src [TextRange]) -> Self {
+        Self {
+            metavariables,
+            ..self
+        }
+    }
+
+    /// Returns `true` if the word that starts at the current position contains
+    /// a Grit metavariable. See [Self::metavariable_word_end].
+    #[inline]
+    fn is_at_metavariable_word(&self) -> bool {
+        !self.metavariables.is_empty() && self.metavariable_word_end().is_some()
+    }
+
+    /// Consumes the word that starts at the current position as a single Grit
+    /// metavariable. See [Self::metavariable_word_end].
+    fn consume_metavariable_word(&mut self) -> CssSyntaxKind {
+        if let Some(end) = self.metavariable_word_end() {
+            self.advance(end - self.position());
+        }
+
+        GRIT_METAVARIABLE
+    }
+
+    /// Returns the end of the word that starts at the current position, if the
+    /// word contains a Grit metavariable.
+    ///
+    /// In a styled template, the whole word is a single metavariable, because
+    /// the interpolations are substituted as text glued to the text around them:
+    ///
+    /// ```css
+    /// width: ${width}px;
+    /// border-${side}: none;
+    /// ```
+    ///
+    /// Elsewhere, such as in Grit snippets, a metavariable is a token on its own.
+    fn metavariable_word_end(&self) -> Option<usize> {
+        if !matches!(
+            self.source_type.as_embedding_kind(),
+            CssEmbeddingKind::Styled
+        ) {
+            return self.metavariable_end_at(self.position());
+        }
+
+        let source = self.source();
+        let mut position = self.position();
+        let mut has_metavariable = false;
+        loop {
+            if let Some(end) = self.metavariable_end_at(position) {
+                position = end;
+                has_metavariable = true;
+                continue;
+            }
+
+            let Some(&byte) = source.as_bytes().get(position) else {
+                break;
+            };
+
+            match lookup_byte(byte) {
+                IDT | DIG | ZER | MIN | PRC | HAS => position += 1,
+                // A decimal point belongs to the number, such as in
+                // `1.5${unit}` or `1.${fraction}`, while a selector dot like in
+                // `${Item}.active` is a boundary.
+                PRD if source
+                    .as_bytes()
+                    .get(position + 1)
+                    .is_some_and(|&next| matches!(lookup_byte(next), DIG | ZER))
+                    || (is_number_prefix(&source[self.position()..position])
+                        && self.metavariable_end_at(position + 1).is_some()) =>
+                {
+                    position += 1;
+                }
+                UNI => {
+                    position += source[position..].chars().next().map_or(1, char::len_utf8);
+                }
+                _ => break,
+            }
+        }
+
+        has_metavariable.then_some(position)
+    }
+
+    /// Returns the end of the Grit metavariable that starts at `position`.
+    fn metavariable_end_at(&self, position: usize) -> Option<usize> {
+        let position = TextSize::from(position as u32);
+        self.metavariables
+            .binary_search_by_key(&position, |range| range.start())
+            .ok()
+            .map(|index| self.metavariables[index].end().into())
     }
 
     pub(crate) fn with_source_type(self, source_type: CssFileSource) -> Self {
@@ -382,6 +544,7 @@ impl<'src> CssLexer<'src> {
             self.is_scss(),
             self.is_line_comment_enabled(),
         )
+        .with_metavariables(self.metavariables)
     }
 
     fn byte_before(&self, position: usize, offset: usize) -> Option<u8> {
@@ -419,12 +582,27 @@ impl<'src> CssLexer<'src> {
     /// Guaranteed to not be at the end of the file
     // A lookup table of `byte -> fn(l: &mut Lexer) -> Token` is exponentially slower than this approach
     fn consume_token(&mut self, current: u8) -> CssSyntaxKind {
+        self.consume_token_with_fallback(current, TokenFallback::Error)
+    }
+
+    fn consume_token_with_fallback(
+        &mut self,
+        current: u8,
+        fallback: TokenFallback,
+    ) -> CssSyntaxKind {
         // The speed difference comes from the difference in table size, a 2kb table is easily fit into cpu cache
         // While a 16kb table will be ejected from cache very often leading to slowdowns, this also allows LLVM
         // to do more aggressive optimizations on the match regarding how to map it to instructions
         let dispatched = lookup_byte(current);
 
         match dispatched {
+            // Only these bytes can start a word with a metavariable, such as
+            // `${width}px` or `border-${side}`.
+            DOL | IDT | UNI | BSL | DIG | ZER | MIN | PRD | HAS
+                if self.is_at_metavariable_word() =>
+            {
+                self.consume_metavariable_word()
+            }
             WHS => {
                 let kind = self.consume_newline_or_whitespaces();
                 if kind == Self::NEWLINE {
@@ -462,16 +640,11 @@ impl<'src> CssLexer<'src> {
                     return bom;
                 }
                 // Not a BOM, check other UNI cases below
-                if self.options.is_metavariable_enabled() && self.is_metavariable_start() {
-                    self.consume_metavariable(GRIT_METAVARIABLE)
-                } else if self.is_ident_start() {
+                if self.is_ident_start() {
                     self.consume_identifier()
                 } else {
-                    self.consume_unexpected_character()
+                    self.consume_fallback(fallback)
                 }
-            }
-            UNI if self.options.is_metavariable_enabled() && self.is_metavariable_start() => {
-                self.consume_metavariable(GRIT_METAVARIABLE)
             }
             IDT | UNI | BSL if self.is_ident_start() => self.consume_identifier(),
 
@@ -496,10 +669,40 @@ impl<'src> CssLexer<'src> {
             PRC => self.consume_byte(T![%]),
             Dispatch::AMP => self.consume_byte(T![&]),
 
-            UNI => self.consume_unexpected_character(),
-
-            _ => self.consume_unexpected_character(),
+            _ => self.consume_fallback(fallback),
         }
+    }
+
+    fn consume_fallback(&mut self, fallback: TokenFallback) -> CssSyntaxKind {
+        match fallback {
+            TokenFallback::Error => self.consume_unexpected_character(),
+            TokenFallback::Delimiter => self.consume_custom_property_delimiter(),
+        }
+    }
+
+    /// Lexes one token from an SCSS custom-property value.
+    #[inline]
+    fn consume_custom_property_value_token(
+        &mut self,
+        current: u8,
+        comment_mode: CssCustomPropertyCommentMode,
+    ) -> CssSyntaxKind {
+        if comment_mode == CssCustomPropertyCommentMode::PreserveDoubleSlash
+            && current == b'/'
+            && self.peek_byte() == Some(b'/')
+        {
+            return self.consume_byte(T![/]);
+        }
+
+        self.consume_token_with_fallback(current, TokenFallback::Delimiter)
+    }
+
+    #[inline]
+    fn consume_custom_property_delimiter(&mut self) -> CssSyntaxKind {
+        self.assert_current_char_boundary();
+        let current = self.current_char_unchecked();
+        self.advance(current.len_utf8());
+        CSS_DELIM_LITERAL
     }
 
     fn consume_color_token(&mut self, current: u8) -> CssSyntaxKind {
@@ -507,6 +710,19 @@ impl<'src> CssLexer<'src> {
             b'0'..=b'9' | b'a'..=b'f' | b'A'..=b'F' => self.consume_color(),
             _ => self.consume_token(current),
         }
+    }
+
+    fn consume_scss_hash_value_token(
+        &mut self,
+        current: u8,
+        scan: ScssHashValueScan,
+    ) -> CssSyntaxKind {
+        if self.position() != scan.start {
+            return self.consume_token(current);
+        }
+
+        self.set_position(scan.end);
+        IDENT
     }
 
     fn consume_color(&mut self) -> CssSyntaxKind {
@@ -592,49 +808,9 @@ impl<'src> CssLexer<'src> {
         }
     }
 
-    fn consume_url_raw_value_token(&mut self, current: u8) -> CssSyntaxKind {
-        self.scan_cursor()
-            .scan_url_raw_value()
-            .and_then(|scan| self.consume_pending_url_raw_value(scan))
-            .unwrap_or_else(|| self.consume_token(current))
-    }
-
-    fn consume_url_body_token(
-        &mut self,
-        current: u8,
-        scss_exclusive_syntax_allowed: bool,
-    ) -> CssSyntaxKind {
-        if let Some(scan) = self.take_pending_url_raw_value_scan_at_current_position() {
-            return self
-                .consume_pending_url_raw_value(scan)
-                .unwrap_or_else(|| self.consume_token(current));
-        }
-
-        match self.scan_url_body_start(self.position(), scss_exclusive_syntax_allowed) {
-            UrlBodyStartScan::InterpolatedFunction | UrlBodyStartScan::Other => {
-                self.consume_token(current)
-            }
-            UrlBodyStartScan::RawValue(scan) => {
-                if scan.start == self.position() {
-                    self.consume_pending_url_raw_value(scan)
-                        .unwrap_or_else(|| self.consume_token(current))
-                } else {
-                    // Leading trivia is still emitted as normal trivia tokens.
-                    // Cache the raw-value scan so the next non-trivia token can
-                    // commit the already-classified URL body in one step.
-                    self.pending_url_raw_value_scan = Some(scan);
-                    self.consume_token(current)
-                }
-            }
-        }
-    }
-
-    fn consume_pending_url_raw_value(
-        &mut self,
-        scan: PendingUrlRawValueScan,
-    ) -> Option<CssSyntaxKind> {
+    fn consume_url_raw_value_token(&mut self, current: u8, scan: UrlRawValueScan) -> CssSyntaxKind {
         if scan.start != self.position() {
-            return None;
+            return self.consume_token(current);
         }
 
         self.set_position(scan.end);
@@ -647,7 +823,28 @@ impl<'src> CssLexer<'src> {
             self.diagnostics.push(diagnostic);
         }
 
-        Some(CSS_URL_VALUE_RAW_LITERAL)
+        CSS_URL_VALUE_RAW_LITERAL
+    }
+
+    /// Emits `images/`, `#`, or `.png` from `url(images/#{$name}.png)`.
+    ///
+    /// Text stops before `#{` or `)`, and `#` leaves the cursor at `{`.
+    fn consume_scss_url_value_token(&mut self, current: u8, start: usize) -> CssSyntaxKind {
+        if self.position() < start {
+            return self.consume_token(current);
+        }
+
+        if self.is_at_scss_interpolation() {
+            return self.consume_byte(T![#]);
+        }
+
+        let end = self.scan_cursor().scan_scss_url_value_chunk();
+        if end > self.position() {
+            self.set_position(end);
+            SCSS_URL_CONTENT_LITERAL
+        } else {
+            self.consume_token(current)
+        }
     }
 
     fn consume_pseudo_nth_selector_token(&mut self, current: u8) -> CssSyntaxKind {
@@ -1188,6 +1385,9 @@ impl<'src> CssLexer<'src> {
             b"returns" => RETURNS_KW,
             b"use" => USE_KW,
             b"with" => WITH_KW,
+            b"custom-media" => CUSTOM_MEDIA_KW,
+            b"true" => TRUE_KW,
+            b"false" => FALSE_KW,
             // Tailwind CSS 4.0 keywords
             b"theme" => THEME_KW,
             b"utility" => UTILITY_KW,
@@ -1200,6 +1400,7 @@ impl<'src> CssLexer<'src> {
             b"plugin" => PLUGIN_KW,
             b"slot" => SLOT_KW,
             b"inline" => INLINE_KW,
+            b"prefix" => PREFIX_KW,
             _ => IDENT,
         }
     }
@@ -1299,6 +1500,12 @@ impl<'src> CssLexer<'src> {
                             has_newline = true;
                             self.advance(1)
                         }
+                        b'$' if self.is_metavariable_start() => {
+                            let start = self.position();
+                            self.consume_metavariable(());
+                            has_newline |=
+                                self.source()[start..self.position()].contains(['\n', '\r']);
+                        }
                         chr => self.advance_byte_or_char(chr),
                     }
                 }
@@ -1324,6 +1531,7 @@ impl<'src> CssLexer<'src> {
                 while let Some(chr) = self.current_byte() {
                     match chr {
                         b'\n' | b'\r' => return COMMENT,
+                        b'$' if self.is_metavariable_start() => self.consume_metavariable(()),
                         chr => self.advance_byte_or_char(chr),
                     }
                 }
@@ -1529,6 +1737,9 @@ impl<'src> CssLexer<'src> {
         let dispatched = lookup_byte(current);
 
         match dispatched {
+            SLH if self.is_scss() && matches!(self.peek_byte(), Some(b'/' | b'*')) => {
+                self.consume_slash()
+            }
             WHS => {
                 let kind = self.consume_newline_or_whitespaces();
                 if kind == Self::NEWLINE {
@@ -1546,6 +1757,40 @@ impl<'src> CssLexer<'src> {
     fn consume_token_tailwind_utility_name(&mut self, current: u8) -> CssSyntaxKind {
         if self.is_ident_start() {
             return self.consume_identifier_with_slash(true);
+        }
+
+        // Tailwind utility and variant names may start with a digit, such as
+        // the `2xl` breakpoint in `@utility 2xl` or `@variant 2xl`. The default
+        // CSS lexer would split that into a number and an identifier, so consume
+        // the whole run as a single identifier here.
+        let dispatched = lookup_byte(current);
+        if matches!(dispatched, DIG | ZER) {
+            while let Some(byte) = self.current_byte() {
+                match lookup_byte(byte) {
+                    DIG | ZER | IDT | UNI | MIN => self.advance_byte_or_char(byte),
+                    _ => break,
+                }
+            }
+            return T![ident];
+        }
+
+        // Tailwind variant names may be container-query variants, such as
+        // `@xl` in `@variant @xl`. The default CSS lexer would lex the
+        // leading `@` as its own token, so consume the `@`-prefixed run as
+        // a single identifier here.
+        if matches!(dispatched, AT_)
+            && self
+                .peek_byte()
+                .is_some_and(|byte| matches!(lookup_byte(byte), DIG | ZER | IDT | UNI | MIN))
+        {
+            self.advance(1);
+            while let Some(byte) = self.current_byte() {
+                match lookup_byte(byte) {
+                    DIG | ZER | IDT | UNI | MIN => self.advance_byte_or_char(byte),
+                    _ => break,
+                }
+            }
+            return T![ident];
         }
 
         self.consume_token(current)
@@ -1578,6 +1823,17 @@ impl<'src> ReLexer<'src> for CssLexer<'src> {
                 CssReLexContext::Regular => self.consume_token(current),
                 CssReLexContext::UnicodeRange => self.consume_unicode_range_token(current),
                 CssReLexContext::ScssExpression => self.consume_scss_expression_token(current),
+                CssReLexContext::ScssIdentifierContinuation => {
+                    let mut cursor = self.scan_cursor();
+                    cursor.advance_ident_sequence();
+                    let end = cursor.position();
+                    if end > self.position() {
+                        self.set_position(end);
+                        IDENT
+                    } else {
+                        self.consume_token(current)
+                    }
+                }
             },
             None => EOF,
         };
@@ -1594,6 +1850,52 @@ impl<'src> ReLexer<'src> for CssLexer<'src> {
 }
 
 impl<'src> CssLexer<'src> {
+    /// Classifies the complete identifier after `#` before color lexing begins.
+    ///
+    /// Returns its source range when the body is a Sass string, including a
+    /// hexadecimal-looking head immediately followed by interpolation. Returns
+    /// `None` for numeric starts, missing identifiers, and decoded identifiers
+    /// that select Sass's raw hexadecimal-color parsing. Escape spellings are
+    /// retained in the returned range, including an escape's terminating space.
+    /// This structural scan does not enable SCSS syntax for its caller.
+    ///
+    /// ```scss
+    /// $selector: #ABCG;
+    /// $interpolated: #ABC#{G};
+    /// $escaped: #\61 pp;
+    /// $color: #ABC;
+    /// ```
+    ///
+    /// See [Sass unquoted strings](https://sass-lang.com/documentation/values/strings/#other-unquoted-strings)
+    /// and [interpolation](https://sass-lang.com/documentation/interpolation/).
+    pub(crate) fn scss_hash_value_scan(&self, start: usize) -> Option<ScssHashValueScan> {
+        let mut cursor = self.scan_cursor_at(start);
+        let bytes = self.source().as_bytes();
+        let has_hyphen_prefix = bytes.get(start) == Some(&b'-')
+            && (bytes.get(start + 1) == Some(&b'-')
+                || (bytes.get(start + 1) == Some(&b'#') && bytes.get(start + 2) == Some(&b'{')));
+        if !cursor.is_ident_start() && !has_hyphen_prefix {
+            return None;
+        }
+
+        let mut decoded = [0; 9];
+        let scan = cursor.consume_ident_sequence(&mut decoded);
+        // Sass retains a digit escape at identifier start, so its normalized
+        // spelling cannot select hexadecimal-color parsing.
+        let escaped_digit_start = bytes.get(start) == Some(&b'\\') && decoded[0].is_ascii_digit();
+        let is_color = scan.only_ascii_used
+            && matches!(scan.count, 3 | 4 | 6 | 8)
+            && decoded[..scan.count].iter().all(u8::is_ascii_hexdigit);
+        if is_color && !escaped_digit_start && !cursor.is_at_scss_interpolation() {
+            return None;
+        }
+
+        Some(ScssHashValueScan {
+            start,
+            end: scan.position,
+        })
+    }
+
     pub(crate) fn has_pending_scss_string_start(&self) -> bool {
         self.pending_scss_string_start.is_some()
     }
@@ -1621,24 +1923,20 @@ impl<'src> CssLexer<'src> {
         self.scan_cursor_at(start).is_at_scss_concatenation_plus()
     }
 
-    fn take_pending_url_raw_value_scan_at_current_position(
-        &mut self,
-    ) -> Option<PendingUrlRawValueScan> {
-        let scan = self.pending_url_raw_value_scan?;
-
-        if scan.start == self.position() {
-            self.pending_url_raw_value_scan = None;
-            Some(scan)
-        } else {
-            if self.position() > scan.start {
-                // A fallback tokenization path already moved past the cached
-                // raw-literal start, so the speculative range is no longer
-                // aligned with the real lexer position.
-                self.pending_url_raw_value_scan = None;
-            }
-
-            None
-        }
+    /// Returns whether `start` begins a final custom-property `!important`.
+    ///
+    /// This uses the source scanner because buffered token lookahead always
+    /// uses regular lexing, which would drop declaration content such as
+    /// `// raw` before deciding whether `!important` is final.
+    pub(crate) fn is_at_final_custom_property_important(
+        &self,
+        start: usize,
+        comment_mode: CssCustomPropertyCommentMode,
+    ) -> bool {
+        self.scan_cursor_at(start)
+            .scan_final_custom_property_important(
+                comment_mode == CssCustomPropertyCommentMode::ScssLineComments,
+            )
     }
 
     fn consume_scss_expression_token(&mut self, current: u8) -> CssSyntaxKind {
@@ -1649,13 +1947,17 @@ impl<'src> CssLexer<'src> {
         }
     }
 
-    fn scan_url_body_start(
+    pub(crate) fn url_body_lex_context(
         &self,
         start: usize,
         scss_exclusive_syntax_allowed: bool,
-    ) -> UrlBodyStartScan {
+    ) -> CssLexContext {
         self.scan_cursor_at(start)
-            .scan_url_body_start(scss_exclusive_syntax_allowed)
+            .url_body_lex_context(scss_exclusive_syntax_allowed)
+    }
+
+    pub(crate) fn custom_property_url_lex_context(&self, start: usize) -> Option<CssLexContext> {
+        self.scan_cursor_at(start).custom_property_url_lex_context()
     }
 }
 
@@ -1729,4 +2031,11 @@ enum SameQuoteInInterpolation {
     NestedString(StringBodyScan),
     /// The quote should be treated as the outer string closing early.
     OuterQuote,
+}
+
+/// Returns `true` if `text` is an optionally signed run of digits, such as the
+/// `-1` before the decimal point in `-1.${fraction}`.
+fn is_number_prefix(text: &str) -> bool {
+    let digits = text.strip_prefix(['-', '+']).unwrap_or(text);
+    !digits.is_empty() && digits.bytes().all(|byte| byte.is_ascii_digit())
 }

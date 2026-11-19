@@ -23,6 +23,8 @@ invalidComments.js:1:1 lint/suspicious/noCompareNegZero  FIXABLE  ━━━━�
     2 │ -0
     3 │ // comment
   
+  i The comparison treats -0 and 0 as equal, so comparing against -0 gives the same result as comparing against 0.
+  
   i Safe fix: Replace -0 with 0
   
     1 │ -0·/**·comment·**/·===·4;
@@ -44,6 +46,8 @@ invalidComments.js:2:1 lint/suspicious/noCompareNegZero  FIXABLE  ━━━━�
     5 │ 4 === // comment
     6 │ -0
   
+  i The comparison treats -0 and 0 as equal, so comparing against -0 gives the same result as comparing against 0.
+  
   i Safe fix: Replace -0 with 0
   
     2 │ -0
@@ -62,6 +66,8 @@ invalidComments.js:5:1 lint/suspicious/noCompareNegZero  FIXABLE  ━━━━�
       │ ^^^^^^^^^^^^^^^^
   > 6 │ -0
       │ ^^
+  
+  i The comparison treats -0 and 0 as equal, so comparing against -0 gives the same result as comparing against 0.
   
   i Safe fix: Replace -0 with 0
   

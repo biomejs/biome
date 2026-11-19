@@ -1,0 +1,8 @@
+$dark: true;
+
+.a {
+  background: url(if(sass($dark): "dark.png"; else: "light.png"));
+  background: url(if(sass($dark): "dark.png"));
+  background: url(if(not sass($dark): "light.png"; else: "dark.png";));
+  background: url(if($dark, "dark.png", "light.png"));
+}

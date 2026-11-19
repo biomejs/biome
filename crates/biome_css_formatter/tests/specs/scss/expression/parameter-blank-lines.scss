@@ -1,0 +1,14 @@
+a{
+keyword-to-keyword:fn( $a:1,
+
+  $b:2
+);
+keyword-to-positional:fn( $a:1,
+
+  2
+);
+positional-to-keyword:fn( 1,
+
+  $b:2
+);
+}

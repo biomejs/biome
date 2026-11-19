@@ -1,0 +1,5 @@
+.grid{grid-template-areas:/* row */"header header" "footer footer";}
+.grid{grid-template-areas:
+/* row */
+"header header"
+"footer footer";}

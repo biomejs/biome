@@ -1,0 +1,730 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+array.sort((a: number, b: number): boolean => a > b);
+array.sort((a: number, b: number): boolean => compare(a, b));
+array.sort(function (a: number, b: number): boolean {
+	return compare(a, b);
+});
+array.sort((a: number, b: number): boolean => {
+	if (a > b) {
+		return true;
+	}
+
+	return false;
+});
+array.sort((a: number, b: number): a is number => compare(a, b));
+array.sort((a: number, b: number): true | false => compare(a, b));
+array.sort((a: number, b: number): Flag => compare(a, b));
+array.sort((a: number, b: number) => (a > b) as boolean);
+array.sort((a: number, b: number) => <boolean>compare(a, b));
+array.sort((a: number, b: number) => compare(a, b) satisfies boolean);
+array.sort((a: number, b: number) => (a > b)!);
+array.sort((a: unknown, b: unknown) => (a as number) > (b as number));
+array.sort((a, b) => (a as number) > b);
+array.sort(<T extends { score: number }>(a: T, b: T) => a.score > b.score);
+array.sort((a?, b?) => a > b);
+array.sort((Boolean as (value: unknown) => boolean));
+array.sort(((a, b) => a > b) as Comparator);
+array.sort(compare as Comparator);
+array.sort(compare as (a: number, b: number) => boolean);
+array.sort(compare as CallableComparator);
+array.sort(compare as { (a: number, b: number): boolean });
+array.sort((compare as (a: number, b: number) => boolean)!);
+array.sort(Boolean!);
+array.sort(annotatedComparator);
+array.sort(declaredComparator);
+array.sort((a, b) => flag);
+array.sort(<T,>(a: T, b: T) => a > b);
+array.sort((a: number, b: number) => annotatedFlag);
+
+function withParameters(parameterComparator: (a: number, b: number) => boolean, typedFlag: boolean) {
+	array.sort(parameterComparator);
+	array.sort((a, b) => typedFlag);
+}
+
+function typed(array: Int8Array) {
+	array.sort((a, b) => a > b);
+}
+
+type Flag = boolean;
+type Comparator = (a: number, b: number) => boolean;
+interface CallableComparator {
+	(a: number, b: number): boolean;
+}
+const annotatedComparator: (a: number, b: number) => boolean = (a, b) => compareUnknown(a, b);
+declare function declaredComparator(a: number, b: number): boolean;
+const flag = true;
+let annotatedFlag: boolean = getFlag();
+
+```
+
+# Diagnostics
+```
+invalid.ts:2:12 lint/nursery/noBooleanSortComparator ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This sort comparator returns a boolean instead of a number.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ array.sort((a: number, b: number): boolean => a > b);
+      │            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ array.sort((a: number, b: number): boolean => compare(a, b));
+    4 │ array.sort(function (a: number, b: number): boolean {
+  
+  i The sort method treats true as 1 and false as 0, so the comparator can never put the first item before the second. The items aren't sorted correctly, and the result can differ between JavaScript engines.
+  
+  i Return a negative number, zero, or a positive number instead, such as a - b for numbers or a.localeCompare(b) for strings.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:3:12 lint/nursery/noBooleanSortComparator ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This sort comparator returns a boolean instead of a number.
+  
+    1 │ /* should generate diagnostics */
+    2 │ array.sort((a: number, b: number): boolean => a > b);
+  > 3 │ array.sort((a: number, b: number): boolean => compare(a, b));
+      │            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ array.sort(function (a: number, b: number): boolean {
+    5 │ 	return compare(a, b);
+  
+  i The sort method treats true as 1 and false as 0, so the comparator can never put the first item before the second. The items aren't sorted correctly, and the result can differ between JavaScript engines.
+  
+  i Return a negative number, zero, or a positive number instead, such as a - b for numbers or a.localeCompare(b) for strings.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:4:12 lint/nursery/noBooleanSortComparator ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This sort comparator returns a boolean instead of a number.
+  
+    2 │ array.sort((a: number, b: number): boolean => a > b);
+    3 │ array.sort((a: number, b: number): boolean => compare(a, b));
+  > 4 │ array.sort(function (a: number, b: number): boolean {
+      │            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 5 │ 	return compare(a, b);
+  > 6 │ });
+      │ ^
+    7 │ array.sort((a: number, b: number): boolean => {
+    8 │ 	if (a > b) {
+  
+  i The sort method treats true as 1 and false as 0, so the comparator can never put the first item before the second. The items aren't sorted correctly, and the result can differ between JavaScript engines.
+  
+  i Return a negative number, zero, or a positive number instead, such as a - b for numbers or a.localeCompare(b) for strings.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:7:12 lint/nursery/noBooleanSortComparator ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This sort comparator returns a boolean instead of a number.
+  
+     5 │ 	return compare(a, b);
+     6 │ });
+   > 7 │ array.sort((a: number, b: number): boolean => {
+       │            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   > 8 │ 	if (a > b) {
+        ...
+  > 12 │ 	return false;
+  > 13 │ });
+       │ ^
+    14 │ array.sort((a: number, b: number): a is number => compare(a, b));
+    15 │ array.sort((a: number, b: number): true | false => compare(a, b));
+  
+  i The sort method treats true as 1 and false as 0, so the comparator can never put the first item before the second. The items aren't sorted correctly, and the result can differ between JavaScript engines.
+  
+  i Return a negative number, zero, or a positive number instead, such as a - b for numbers or a.localeCompare(b) for strings.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:14:12 lint/nursery/noBooleanSortComparator ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This sort comparator returns a boolean instead of a number.
+  
+    12 │ 	return false;
+    13 │ });
+  > 14 │ array.sort((a: number, b: number): a is number => compare(a, b));
+       │            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    15 │ array.sort((a: number, b: number): true | false => compare(a, b));
+    16 │ array.sort((a: number, b: number): Flag => compare(a, b));
+  
+  i The sort method treats true as 1 and false as 0, so the comparator can never put the first item before the second. The items aren't sorted correctly, and the result can differ between JavaScript engines.
+  
+  i Return a negative number, zero, or a positive number instead, such as a - b for numbers or a.localeCompare(b) for strings.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:15:12 lint/nursery/noBooleanSortComparator ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This sort comparator returns a boolean instead of a number.
+  
+    13 │ });
+    14 │ array.sort((a: number, b: number): a is number => compare(a, b));
+  > 15 │ array.sort((a: number, b: number): true | false => compare(a, b));
+       │            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    16 │ array.sort((a: number, b: number): Flag => compare(a, b));
+    17 │ array.sort((a: number, b: number) => (a > b) as boolean);
+  
+  i The sort method treats true as 1 and false as 0, so the comparator can never put the first item before the second. The items aren't sorted correctly, and the result can differ between JavaScript engines.
+  
+  i Return a negative number, zero, or a positive number instead, such as a - b for numbers or a.localeCompare(b) for strings.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:16:12 lint/nursery/noBooleanSortComparator ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This sort comparator returns a boolean instead of a number.
+  
+    14 │ array.sort((a: number, b: number): a is number => compare(a, b));
+    15 │ array.sort((a: number, b: number): true | false => compare(a, b));
+  > 16 │ array.sort((a: number, b: number): Flag => compare(a, b));
+       │            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    17 │ array.sort((a: number, b: number) => (a > b) as boolean);
+    18 │ array.sort((a: number, b: number) => <boolean>compare(a, b));
+  
+  i The sort method treats true as 1 and false as 0, so the comparator can never put the first item before the second. The items aren't sorted correctly, and the result can differ between JavaScript engines.
+  
+  i Return a negative number, zero, or a positive number instead, such as a - b for numbers or a.localeCompare(b) for strings.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:17:12 lint/nursery/noBooleanSortComparator ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This sort comparator returns a boolean instead of a number.
+  
+    15 │ array.sort((a: number, b: number): true | false => compare(a, b));
+    16 │ array.sort((a: number, b: number): Flag => compare(a, b));
+  > 17 │ array.sort((a: number, b: number) => (a > b) as boolean);
+       │            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    18 │ array.sort((a: number, b: number) => <boolean>compare(a, b));
+    19 │ array.sort((a: number, b: number) => compare(a, b) satisfies boolean);
+  
+  i The sort method treats true as 1 and false as 0, so the comparator can never put the first item before the second. The items aren't sorted correctly, and the result can differ between JavaScript engines.
+  
+  i Return a negative number, zero, or a positive number instead, such as a - b for numbers or a.localeCompare(b) for strings.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:18:12 lint/nursery/noBooleanSortComparator ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This sort comparator returns a boolean instead of a number.
+  
+    16 │ array.sort((a: number, b: number): Flag => compare(a, b));
+    17 │ array.sort((a: number, b: number) => (a > b) as boolean);
+  > 18 │ array.sort((a: number, b: number) => <boolean>compare(a, b));
+       │            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    19 │ array.sort((a: number, b: number) => compare(a, b) satisfies boolean);
+    20 │ array.sort((a: number, b: number) => (a > b)!);
+  
+  i The sort method treats true as 1 and false as 0, so the comparator can never put the first item before the second. The items aren't sorted correctly, and the result can differ between JavaScript engines.
+  
+  i Return a negative number, zero, or a positive number instead, such as a - b for numbers or a.localeCompare(b) for strings.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:19:12 lint/nursery/noBooleanSortComparator ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This sort comparator returns a boolean instead of a number.
+  
+    17 │ array.sort((a: number, b: number) => (a > b) as boolean);
+    18 │ array.sort((a: number, b: number) => <boolean>compare(a, b));
+  > 19 │ array.sort((a: number, b: number) => compare(a, b) satisfies boolean);
+       │            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    20 │ array.sort((a: number, b: number) => (a > b)!);
+    21 │ array.sort((a: unknown, b: unknown) => (a as number) > (b as number));
+  
+  i The sort method treats true as 1 and false as 0, so the comparator can never put the first item before the second. The items aren't sorted correctly, and the result can differ between JavaScript engines.
+  
+  i Return a negative number, zero, or a positive number instead, such as a - b for numbers or a.localeCompare(b) for strings.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:20:12 lint/nursery/noBooleanSortComparator ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This sort comparator returns a boolean instead of a number.
+  
+    18 │ array.sort((a: number, b: number) => <boolean>compare(a, b));
+    19 │ array.sort((a: number, b: number) => compare(a, b) satisfies boolean);
+  > 20 │ array.sort((a: number, b: number) => (a > b)!);
+       │            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    21 │ array.sort((a: unknown, b: unknown) => (a as number) > (b as number));
+    22 │ array.sort((a, b) => (a as number) > b);
+  
+  i The sort method treats true as 1 and false as 0, so the comparator can never put the first item before the second. The items aren't sorted correctly, and the result can differ between JavaScript engines.
+  
+  i Return a negative number, zero, or a positive number instead, such as a - b for numbers or a.localeCompare(b) for strings.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:21:12 lint/nursery/noBooleanSortComparator ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This sort comparator returns a boolean instead of a number.
+  
+    19 │ array.sort((a: number, b: number) => compare(a, b) satisfies boolean);
+    20 │ array.sort((a: number, b: number) => (a > b)!);
+  > 21 │ array.sort((a: unknown, b: unknown) => (a as number) > (b as number));
+       │            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    22 │ array.sort((a, b) => (a as number) > b);
+    23 │ array.sort(<T extends { score: number }>(a: T, b: T) => a.score > b.score);
+  
+  i The sort method treats true as 1 and false as 0, so the comparator can never put the first item before the second. The items aren't sorted correctly, and the result can differ between JavaScript engines.
+  
+  i Return a negative number, zero, or a positive number instead, such as a - b for numbers or a.localeCompare(b) for strings.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:22:12 lint/nursery/noBooleanSortComparator ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This sort comparator returns a boolean instead of a number.
+  
+    20 │ array.sort((a: number, b: number) => (a > b)!);
+    21 │ array.sort((a: unknown, b: unknown) => (a as number) > (b as number));
+  > 22 │ array.sort((a, b) => (a as number) > b);
+       │            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    23 │ array.sort(<T extends { score: number }>(a: T, b: T) => a.score > b.score);
+    24 │ array.sort((a?, b?) => a > b);
+  
+  i The sort method treats true as 1 and false as 0, so the comparator can never put the first item before the second. The items aren't sorted correctly, and the result can differ between JavaScript engines.
+  
+  i Return a negative number, zero, or a positive number instead, such as a - b for numbers or a.localeCompare(b) for strings.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:23:12 lint/nursery/noBooleanSortComparator ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This sort comparator returns a boolean instead of a number.
+  
+    21 │ array.sort((a: unknown, b: unknown) => (a as number) > (b as number));
+    22 │ array.sort((a, b) => (a as number) > b);
+  > 23 │ array.sort(<T extends { score: number }>(a: T, b: T) => a.score > b.score);
+       │            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    24 │ array.sort((a?, b?) => a > b);
+    25 │ array.sort((Boolean as (value: unknown) => boolean));
+  
+  i The sort method treats true as 1 and false as 0, so the comparator can never put the first item before the second. The items aren't sorted correctly, and the result can differ between JavaScript engines.
+  
+  i Return a negative number, zero, or a positive number instead, such as a - b for numbers or a.localeCompare(b) for strings.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:24:12 lint/nursery/noBooleanSortComparator ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This sort comparator returns a boolean instead of a number.
+  
+    22 │ array.sort((a, b) => (a as number) > b);
+    23 │ array.sort(<T extends { score: number }>(a: T, b: T) => a.score > b.score);
+  > 24 │ array.sort((a?, b?) => a > b);
+       │            ^^^^^^^^^^^^^^^^^
+    25 │ array.sort((Boolean as (value: unknown) => boolean));
+    26 │ array.sort(((a, b) => a > b) as Comparator);
+  
+  i The sort method treats true as 1 and false as 0, so the comparator can never put the first item before the second. The items aren't sorted correctly, and the result can differ between JavaScript engines.
+  
+  i Return a negative number, zero, or a positive number instead, such as a - b for numbers or a.localeCompare(b) for strings.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:25:12 lint/nursery/noBooleanSortComparator ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This sort comparator returns a boolean instead of a number.
+  
+    23 │ array.sort(<T extends { score: number }>(a: T, b: T) => a.score > b.score);
+    24 │ array.sort((a?, b?) => a > b);
+  > 25 │ array.sort((Boolean as (value: unknown) => boolean));
+       │            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    26 │ array.sort(((a, b) => a > b) as Comparator);
+    27 │ array.sort(compare as Comparator);
+  
+  i The sort method treats true as 1 and false as 0, so the comparator can never put the first item before the second. The items aren't sorted correctly, and the result can differ between JavaScript engines.
+  
+  i Return a negative number, zero, or a positive number instead, such as a - b for numbers or a.localeCompare(b) for strings.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:26:12 lint/nursery/noBooleanSortComparator ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This sort comparator returns a boolean instead of a number.
+  
+    24 │ array.sort((a?, b?) => a > b);
+    25 │ array.sort((Boolean as (value: unknown) => boolean));
+  > 26 │ array.sort(((a, b) => a > b) as Comparator);
+       │            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    27 │ array.sort(compare as Comparator);
+    28 │ array.sort(compare as (a: number, b: number) => boolean);
+  
+  i The sort method treats true as 1 and false as 0, so the comparator can never put the first item before the second. The items aren't sorted correctly, and the result can differ between JavaScript engines.
+  
+  i Return a negative number, zero, or a positive number instead, such as a - b for numbers or a.localeCompare(b) for strings.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:27:12 lint/nursery/noBooleanSortComparator ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This sort comparator returns a boolean instead of a number.
+  
+    25 │ array.sort((Boolean as (value: unknown) => boolean));
+    26 │ array.sort(((a, b) => a > b) as Comparator);
+  > 27 │ array.sort(compare as Comparator);
+       │            ^^^^^^^^^^^^^^^^^^^^^
+    28 │ array.sort(compare as (a: number, b: number) => boolean);
+    29 │ array.sort(compare as CallableComparator);
+  
+  i The sort method treats true as 1 and false as 0, so the comparator can never put the first item before the second. The items aren't sorted correctly, and the result can differ between JavaScript engines.
+  
+  i Return a negative number, zero, or a positive number instead, such as a - b for numbers or a.localeCompare(b) for strings.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:28:12 lint/nursery/noBooleanSortComparator ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This sort comparator returns a boolean instead of a number.
+  
+    26 │ array.sort(((a, b) => a > b) as Comparator);
+    27 │ array.sort(compare as Comparator);
+  > 28 │ array.sort(compare as (a: number, b: number) => boolean);
+       │            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    29 │ array.sort(compare as CallableComparator);
+    30 │ array.sort(compare as { (a: number, b: number): boolean });
+  
+  i The sort method treats true as 1 and false as 0, so the comparator can never put the first item before the second. The items aren't sorted correctly, and the result can differ between JavaScript engines.
+  
+  i Return a negative number, zero, or a positive number instead, such as a - b for numbers or a.localeCompare(b) for strings.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:29:12 lint/nursery/noBooleanSortComparator ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This sort comparator returns a boolean instead of a number.
+  
+    27 │ array.sort(compare as Comparator);
+    28 │ array.sort(compare as (a: number, b: number) => boolean);
+  > 29 │ array.sort(compare as CallableComparator);
+       │            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    30 │ array.sort(compare as { (a: number, b: number): boolean });
+    31 │ array.sort((compare as (a: number, b: number) => boolean)!);
+  
+  i The sort method treats true as 1 and false as 0, so the comparator can never put the first item before the second. The items aren't sorted correctly, and the result can differ between JavaScript engines.
+  
+  i Return a negative number, zero, or a positive number instead, such as a - b for numbers or a.localeCompare(b) for strings.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:30:12 lint/nursery/noBooleanSortComparator ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This sort comparator returns a boolean instead of a number.
+  
+    28 │ array.sort(compare as (a: number, b: number) => boolean);
+    29 │ array.sort(compare as CallableComparator);
+  > 30 │ array.sort(compare as { (a: number, b: number): boolean });
+       │            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    31 │ array.sort((compare as (a: number, b: number) => boolean)!);
+    32 │ array.sort(Boolean!);
+  
+  i The sort method treats true as 1 and false as 0, so the comparator can never put the first item before the second. The items aren't sorted correctly, and the result can differ between JavaScript engines.
+  
+  i Return a negative number, zero, or a positive number instead, such as a - b for numbers or a.localeCompare(b) for strings.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:31:12 lint/nursery/noBooleanSortComparator ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This sort comparator returns a boolean instead of a number.
+  
+    29 │ array.sort(compare as CallableComparator);
+    30 │ array.sort(compare as { (a: number, b: number): boolean });
+  > 31 │ array.sort((compare as (a: number, b: number) => boolean)!);
+       │            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    32 │ array.sort(Boolean!);
+    33 │ array.sort(annotatedComparator);
+  
+  i The sort method treats true as 1 and false as 0, so the comparator can never put the first item before the second. The items aren't sorted correctly, and the result can differ between JavaScript engines.
+  
+  i Return a negative number, zero, or a positive number instead, such as a - b for numbers or a.localeCompare(b) for strings.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:32:12 lint/nursery/noBooleanSortComparator ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This sort comparator returns a boolean instead of a number.
+  
+    30 │ array.sort(compare as { (a: number, b: number): boolean });
+    31 │ array.sort((compare as (a: number, b: number) => boolean)!);
+  > 32 │ array.sort(Boolean!);
+       │            ^^^^^^^^
+    33 │ array.sort(annotatedComparator);
+    34 │ array.sort(declaredComparator);
+  
+  i The sort method treats true as 1 and false as 0, so the comparator can never put the first item before the second. The items aren't sorted correctly, and the result can differ between JavaScript engines.
+  
+  i Return a negative number, zero, or a positive number instead, such as a - b for numbers or a.localeCompare(b) for strings.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:33:12 lint/nursery/noBooleanSortComparator ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This sort comparator returns a boolean instead of a number.
+  
+    31 │ array.sort((compare as (a: number, b: number) => boolean)!);
+    32 │ array.sort(Boolean!);
+  > 33 │ array.sort(annotatedComparator);
+       │            ^^^^^^^^^^^^^^^^^^^
+    34 │ array.sort(declaredComparator);
+    35 │ array.sort((a, b) => flag);
+  
+  i The sort method treats true as 1 and false as 0, so the comparator can never put the first item before the second. The items aren't sorted correctly, and the result can differ between JavaScript engines.
+  
+  i Return a negative number, zero, or a positive number instead, such as a - b for numbers or a.localeCompare(b) for strings.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:34:12 lint/nursery/noBooleanSortComparator ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This sort comparator returns a boolean instead of a number.
+  
+    32 │ array.sort(Boolean!);
+    33 │ array.sort(annotatedComparator);
+  > 34 │ array.sort(declaredComparator);
+       │            ^^^^^^^^^^^^^^^^^^
+    35 │ array.sort((a, b) => flag);
+    36 │ array.sort(<T,>(a: T, b: T) => a > b);
+  
+  i The sort method treats true as 1 and false as 0, so the comparator can never put the first item before the second. The items aren't sorted correctly, and the result can differ between JavaScript engines.
+  
+  i Return a negative number, zero, or a positive number instead, such as a - b for numbers or a.localeCompare(b) for strings.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:35:12 lint/nursery/noBooleanSortComparator ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This sort comparator returns a boolean instead of a number.
+  
+    33 │ array.sort(annotatedComparator);
+    34 │ array.sort(declaredComparator);
+  > 35 │ array.sort((a, b) => flag);
+       │            ^^^^^^^^^^^^^^
+    36 │ array.sort(<T,>(a: T, b: T) => a > b);
+    37 │ array.sort((a: number, b: number) => annotatedFlag);
+  
+  i The sort method treats true as 1 and false as 0, so the comparator can never put the first item before the second. The items aren't sorted correctly, and the result can differ between JavaScript engines.
+  
+  i Return a negative number, zero, or a positive number instead, such as a - b for numbers or a.localeCompare(b) for strings.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:36:12 lint/nursery/noBooleanSortComparator ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This sort comparator returns a boolean instead of a number.
+  
+    34 │ array.sort(declaredComparator);
+    35 │ array.sort((a, b) => flag);
+  > 36 │ array.sort(<T,>(a: T, b: T) => a > b);
+       │            ^^^^^^^^^^^^^^^^^^^^^^^^^
+    37 │ array.sort((a: number, b: number) => annotatedFlag);
+    38 │ 
+  
+  i The sort method treats true as 1 and false as 0, so the comparator can never put the first item before the second. The items aren't sorted correctly, and the result can differ between JavaScript engines.
+  
+  i Return a negative number, zero, or a positive number instead, such as a - b for numbers or a.localeCompare(b) for strings.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:37:12 lint/nursery/noBooleanSortComparator ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This sort comparator returns a boolean instead of a number.
+  
+    35 │ array.sort((a, b) => flag);
+    36 │ array.sort(<T,>(a: T, b: T) => a > b);
+  > 37 │ array.sort((a: number, b: number) => annotatedFlag);
+       │            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    38 │ 
+    39 │ function withParameters(parameterComparator: (a: number, b: number) => boolean, typedFlag: boolean) {
+  
+  i The sort method treats true as 1 and false as 0, so the comparator can never put the first item before the second. The items aren't sorted correctly, and the result can differ between JavaScript engines.
+  
+  i Return a negative number, zero, or a positive number instead, such as a - b for numbers or a.localeCompare(b) for strings.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:40:13 lint/nursery/noBooleanSortComparator ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This sort comparator returns a boolean instead of a number.
+  
+    39 │ function withParameters(parameterComparator: (a: number, b: number) => boolean, typedFlag: boolean) {
+  > 40 │ 	array.sort(parameterComparator);
+       │ 	           ^^^^^^^^^^^^^^^^^^^
+    41 │ 	array.sort((a, b) => typedFlag);
+    42 │ }
+  
+  i The sort method treats true as 1 and false as 0, so the comparator can never put the first item before the second. The items aren't sorted correctly, and the result can differ between JavaScript engines.
+  
+  i Return a negative number, zero, or a positive number instead, such as a - b for numbers or a.localeCompare(b) for strings.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:41:13 lint/nursery/noBooleanSortComparator ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This sort comparator returns a boolean instead of a number.
+  
+    39 │ function withParameters(parameterComparator: (a: number, b: number) => boolean, typedFlag: boolean) {
+    40 │ 	array.sort(parameterComparator);
+  > 41 │ 	array.sort((a, b) => typedFlag);
+       │ 	           ^^^^^^^^^^^^^^^^^^^
+    42 │ }
+    43 │ 
+  
+  i The sort method treats true as 1 and false as 0, so the comparator can never put the first item before the second. The items aren't sorted correctly, and the result can differ between JavaScript engines.
+  
+  i Return a negative number, zero, or a positive number instead, such as a - b for numbers or a.localeCompare(b) for strings.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:45:13 lint/nursery/noBooleanSortComparator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This sort comparator returns a boolean instead of a number.
+  
+    44 │ function typed(array: Int8Array) {
+  > 45 │ 	array.sort((a, b) => a > b);
+       │ 	           ^^^^^^^^^^^^^^^
+    46 │ }
+    47 │ 
+  
+  i The sort method treats true as 1 and false as 0, so the comparator can never put the first item before the second. The items aren't sorted correctly, and the result can differ between JavaScript engines.
+  
+  i Return a negative number, zero, or a positive number instead, such as a - b for numbers or a.localeCompare(b) for strings.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Subtract the compared values instead.
+  
+    43 43 │   
+    44 44 │   function typed(array: Int8Array) {
+    45    │ - → array.sort((a,·b)·=>·a·>·b);
+       45 │ + → array.sort((a,·b)·=>·a·-·b);
+    46 46 │   }
+    47 47 │   
+  
+
+```

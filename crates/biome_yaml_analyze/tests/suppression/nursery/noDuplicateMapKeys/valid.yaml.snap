@@ -1,0 +1,47 @@
+---
+source: crates/biome_yaml_analyze/tests/spec_tests.rs
+expression: valid.yaml
+---
+# Input
+```yaml
+# should not generate diagnostics
+person:
+  # biome-ignore lint/nursery/noDuplicateMapKeys: test
+  name: John Doe
+  age: 50
+  name: Jane Doe
+
+# biome-ignore lint/nursery/noDuplicateMapKeys: test
+person2: { name: John, age: 50, name: Jane }
+
+person3:
+  # biome-ignore lint/nursery/noDuplicateMapKeys: test
+  name: John Doe
+  "name": Jane Doe
+  'name': Baby Doe
+
+# nested block mappings, duplicates at both levels
+parent:
+  # biome-ignore lint/nursery/noDuplicateMapKeys: test
+  child:
+    # biome-ignore lint/nursery/noDuplicateMapKeys: test
+    name: John Doe
+    name: Jane Doe
+  child: second
+
+# sequence of mappings, each with duplicates
+people:
+  - # biome-ignore lint/nursery/noDuplicateMapKeys: test
+    id: 1
+    id: 2
+  - name: a
+    # biome-ignore lint/nursery/noDuplicateMapKeys: test
+    role: admin
+    role: guest
+
+# nested flow mappings, duplicates at both levels
+# biome-ignore lint/nursery/noDuplicateMapKeys: test
+config: { a: { x: 1, x: 2 }, a: 3 }
+
+
+```

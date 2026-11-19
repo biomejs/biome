@@ -16,6 +16,15 @@ impl FormatNodeRule<CssPositionTryAtRuleDeclarator> for FormatCssPositionTryAtRu
             name,
         } = node.as_fields();
 
-        write!(f, [position_try_token.format(), space(), name.format()])
+        write!(
+            f,
+            [
+                position_try_token
+                    .format()?
+                    .with_text_case(CssCase::Lowercase),
+                space(),
+                name.format()
+            ]
+        )
     }
 }

@@ -1,12 +1,12 @@
+use crate::TestArgs as Args;
 use crate::run_cli;
-use crate::snap_test::{SnapshotPayload, assert_cli_snapshot};
+use crate::snap_test::{SnapshotPayload, assert_cli_snapshot, assert_file_contents};
 use biome_console::BufferConsole;
 use biome_fs::MemoryFileSystem;
-use bpaf::Args;
 use camino::Utf8Path;
 
 #[test]
-fn should_error_when_interpolation_is_disabled() {
+fn should_not_error_when_interpolation_is_disabled() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
@@ -35,11 +35,11 @@ fn should_error_when_interpolation_is_disabled() {
         Args::from(["format", html_file.as_str()].as_slice()),
     );
 
-    assert!(result.is_err(), "run_cli returned {result:?}");
+    assert!(result.is_ok(), "run_cli returned {result:?}");
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
-        "should_error_when_interpolation_is_disabled",
+        "should_not_error_when_interpolation_is_disabled",
         fs,
         console,
         result,
@@ -85,6 +85,40 @@ fn should_not_error_when_interpolation_is_enabled() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "should_not_error_when_interpolation_is_enabled",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn should_apply_html_parser_override() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let html_file = Utf8Path::new("special/file.html");
+    fs.insert(html_file.into(), "<div>{{ $interpolation }}</div>\n");
+    fs.insert(
+        Utf8Path::new("biome.json").into(),
+        r#"{
+  "html": { "formatter": { "enabled": true } },
+  "overrides": [{
+    "includes": ["special/**"],
+    "html": { "parser": { "interpolation": true } }
+  }]
+}"#,
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["format", html_file.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "should_apply_html_parser_override",
         fs,
         console,
         result,
@@ -277,6 +311,51 @@ fn should_pull_diagnostics_from_embedded_languages_when_linting() {
 }
 
 #[test]
+fn html_comments_suppress_embedded_css_and_json_rules() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+    let file = Utf8Path::new("file.html");
+    fs.insert(
+        file.into(),
+        r#"<!-- biome-ignore lint/correctness/noUnknownProperty: expected typo -->
+<style>.ignored { colr: red; }</style>
+<style>.reported { colr: red; }</style>
+<!-- biome-ignore lint/suspicious/noDuplicateObjectKeys: expected duplicate -->
+<script type="application/json">{"key":1,"key":2}</script>
+<script type="application/json">{"key":1,"key":2}</script>"#
+            .as_bytes(),
+    );
+    fs.insert(
+        "biome.json".into(),
+        r#"{
+  "linter": {
+    "rules": {
+      "recommended": false,
+      "correctness": { "noUnknownProperty": "error" },
+      "suspicious": { "noDuplicateObjectKeys": "error" }
+    }
+  }
+}"#
+        .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", file.as_str()].as_slice()),
+    );
+    assert!(result.is_err(), "{result:?}\n{console:#?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "html_comments_suppress_embedded_css_and_json_rules",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn should_apply_fixes_to_embedded_languages() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
@@ -442,6 +521,91 @@ fn lint_write_html_with_embedded_script_is_idempotent() {
 }
 
 #[test]
+fn should_error_when_vue_is_disabled() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let html_file = Utf8Path::new("file.html");
+    fs.insert(
+        html_file.into(),
+        r#"<div v-if="show">{{ message }}</div>
+"#
+        .as_bytes(),
+    );
+    fs.insert(
+        Utf8Path::new("biome.json").into(),
+        r#"{
+    "html": {
+        "linter": {
+            "enabled": true
+        }
+    }
+}"#
+        .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", html_file.as_str()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "should_error_when_vue_is_disabled",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn should_not_error_when_vue_is_enabled() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let html_file = Utf8Path::new("file.html");
+    fs.insert(
+        html_file.into(),
+        r#"<div v-if="show">{{ message }}</div>
+"#
+        .as_bytes(),
+    );
+    fs.insert(
+        Utf8Path::new("biome.json").into(),
+        r#"{
+    "html": {
+        "parser": {
+            "vue": true
+        },
+        "linter": {
+            "enabled": true
+        }
+    }
+}"#
+        .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", html_file.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "should_not_error_when_vue_is_enabled",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn should_lint_a_html_file() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
@@ -477,6 +641,188 @@ fn should_lint_a_html_file() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "should_lint_a_html_file",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn should_apply_html_linter_override() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+    let source = "<div scope=\"col\"></div>\n";
+
+    let html_file = Utf8Path::new("test.html");
+    fs.insert(html_file.into(), source);
+    let overridden_html_file = Utf8Path::new("special/test.html");
+    fs.insert(overridden_html_file.into(), source);
+    fs.insert(
+        Utf8Path::new("biome.json").into(),
+        r#"{
+  "files": { "includes": ["test.html", "special/**"] },
+  "html": { "linter": { "enabled": true } },
+  "overrides": [{
+    "includes": ["special/**"],
+    "html": { "linter": { "enabled": false } }
+  }]
+}"#,
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", html_file.as_str(), overridden_html_file.as_str()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "should_apply_html_linter_override",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn should_apply_html_assist_override() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+    let source = "<input type=\"text\" id=\"name\" name=\"name\" />\n";
+
+    let html_file = Utf8Path::new("test.html");
+    fs.insert(html_file.into(), source);
+    let overridden_html_file = Utf8Path::new("special/test.html");
+    fs.insert(overridden_html_file.into(), source);
+    fs.insert(
+        Utf8Path::new("biome.json").into(),
+        r#"{
+  "files": { "includes": ["test.html", "special/**"] },
+  "formatter": { "enabled": false },
+  "linter": { "enabled": false },
+  "assist": {
+    "enabled": true,
+    "actions": { "source": { "useSortedAttributes": "on" } }
+  },
+  "overrides": [{
+    "includes": ["special/**"],
+    "html": { "assist": { "enabled": false } }
+  }]
+}"#,
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "check",
+                "--write",
+                html_file.as_str(),
+                overridden_html_file.as_str(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert_file_contents(
+        &fs,
+        html_file,
+        "<input id=\"name\" name=\"name\" type=\"text\" />\n",
+    );
+    assert_file_contents(&fs, overridden_html_file, source);
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "should_apply_html_assist_override",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn should_handle_htm_file() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let htm_file = Utf8Path::new("index.htm");
+    fs.insert(
+        htm_file.into(),
+        r#"<div scope = "col"></div>
+"#
+        .as_bytes(),
+    );
+
+    fs.insert(
+        Utf8Path::new("biome.json").into(),
+        r#"{
+    "html": {
+        "formatter": {
+            "enabled": true
+        },
+        "linter": {
+            "enabled": true
+        }
+    }
+}"#
+        .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["check", htm_file.as_str()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "should_handle_htm_file",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn should_handle_svg_file() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let svg_file = Utf8Path::new("image.svg");
+    fs.insert(
+        svg_file.into(),
+        r#"<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="red" /></svg>
+"#
+            .as_bytes(),
+    );
+
+    fs.insert(
+        Utf8Path::new("biome.json").into(),
+        r#"{
+    "html": {
+        "formatter": {
+            "enabled": true
+        }
+    }
+}"#
+        .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["check", svg_file.as_str()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "should_handle_svg_file",
         fs,
         console,
         result,

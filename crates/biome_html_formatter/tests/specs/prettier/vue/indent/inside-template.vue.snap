@@ -1,0 +1,93 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: vue/indent/inside-template.vue
+---
+
+# Input
+
+```vue
+<template>
+    <style>
+        br {
+            background: #00abc9;
+        }
+
+    div {
+        background: #00abc9;
+    }
+    </style>
+
+    <script>
+        console.log('hello');
+    console.log('hello');
+    </script>
+
+    <br />
+    <footer>
+        foo
+        <br/>
+    </footer>
+</template>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,17 +1,17 @@
+ <template>
+   <style>
+-        br {
+-            background: #00abc9;
+-        }
++  br {
++    background: #00abc9;
++  }
+ 
+-    div {
+-        background: #00abc9;
+-    }
++  div {
++    background: #00abc9;
++  }
+   </style>
+ 
+   <script>
+-        console.log('hello');
+-    console.log('hello');
++  console.log("hello");
++  console.log("hello");
+   </script>
+ 
+   <br />
+```
+
+# Output
+
+```vue
+<template>
+  <style>
+  br {
+    background: #00abc9;
+  }
+
+  div {
+    background: #00abc9;
+  }
+  </style>
+
+  <script>
+  console.log("hello");
+  console.log("hello");
+  </script>
+
+  <br />
+  <footer>
+    foo
+    <br />
+  </footer>
+</template>
+```

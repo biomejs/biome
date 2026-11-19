@@ -1,0 +1,29 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/value/attr-interpolated-name.scss
+---
+
+# Input
+
+```scss
+.a::after {
+  content:attr( #{$name} );
+  content: attr(data-#{$name});
+  content: attr(#{$name}-Label   raw-string);
+  content: attr(#{$name} type(<number>),0);
+}
+
+```
+
+
+# Formatted
+
+```scss
+.a::after {
+	content: attr(#{$name});
+	content: attr(data-#{$name});
+	content: attr(#{$name}-Label raw-string);
+	content: attr(#{$name} type(<number>), 0);
+}
+
+```

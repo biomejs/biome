@@ -1,0 +1,239 @@
+use biome_graphql_syntax::{GraphqlLanguage, GraphqlSyntaxToken};
+use biome_rowan::{
+    AstNode, AstNodeList, SyntaxTriviaPiece, TextRange, TokenText, chain_trivia_pieces,
+};
+use biome_string_case::comparable_token::ComparableToken;
+use rustc_hash::FxHashMap;
+use std::cmp::Ordering;
+use std::hash::Hash;
+
+/// A name that is defined more than once in the same list.
+#[derive(Debug)]
+pub struct DuplicateName {
+    /// The name as written at its first occurrence.
+    pub(crate) name: TokenText,
+    /// The first occurrence of the name.
+    pub(crate) first: TextRange,
+    /// Every later occurrence of the name, in source order. Never empty.
+    pub(crate) duplicates: Vec<TextRange>,
+}
+
+/// Groups `items` by key and returns one [DuplicateName] per key that appears more than once.
+///
+/// Each item is a `(key, name, range)` tuple. The result is ordered by the first occurrence of each key.
+pub(crate) fn collect_duplicate_names<K: Hash + Eq>(
+    items: impl IntoIterator<Item = (K, TokenText, TextRange)>,
+) -> Box<[DuplicateName]> {
+    let mut indexes: FxHashMap<K, usize> = FxHashMap::default();
+    let mut groups: Vec<DuplicateName> = Vec::new();
+
+    for (key, name, range) in items {
+        match indexes.get(&key) {
+            Some(&index) => groups[index].duplicates.push(range),
+            None => {
+                indexes.insert(key, groups.len());
+                groups.push(DuplicateName {
+                    name,
+                    first: range,
+                    duplicates: Vec::new(),
+                });
+            }
+        }
+    }
+
+    groups
+        .into_iter()
+        .filter(|group| !group.duplicates.is_empty())
+        .collect()
+}
+
+/// Compares two names in natural order. A missing name sorts after every present name.
+fn compare_names(a: Option<TokenText>, b: Option<TokenText>) -> Ordering {
+    match (a, b) {
+        (Some(a), Some(b)) => ComparableToken::new(a).ascii_nat_cmp(&ComparableToken::new(b)),
+        (None, Some(_)) => Ordering::Greater,
+        (Some(_), None) => Ordering::Less,
+        (None, None) => Ordering::Equal,
+    }
+}
+
+/// Returns whether `list` is already in the order that [`sort_list`] produces.
+pub(crate) fn is_list_sorted<L>(list: &L, name: impl Fn(&L::Node) -> Option<TokenText>) -> bool
+where
+    L: AstNodeList<Language = GraphqlLanguage>,
+{
+    let mut previous = None;
+    for item in list.iter() {
+        if previous
+            .as_ref()
+            .is_some_and(|previous| compare_names(name(previous), name(&item)) == Ordering::Greater)
+        {
+            return false;
+        }
+        previous = Some(item);
+    }
+    true
+}
+
+/// The trivia around an item of a list, split between the trivia that moves with the item
+/// and the trivia that stays at its position in the list.
+struct ItemTrivia<N> {
+    node: N,
+    name: Option<TokenText>,
+    first_token: GraphqlSyntaxToken,
+    /// The number of leading trivia pieces of `first_token` before the first comment.
+    position_leading_len: usize,
+    last_token: GraphqlSyntaxToken,
+    /// Whether the trailing trivia of `last_token` contains an end-of-line comment, in which
+    /// case the whole trailing trivia moves with the item instead of staying in place.
+    trailing_is_attached: bool,
+}
+
+impl<N: AstNode<Language = GraphqlLanguage>> ItemTrivia<N> {
+    fn new(node: N, name: Option<TokenText>) -> Option<Self> {
+        let syntax = node.syntax();
+        let first_token = syntax.first_token()?;
+        let last_token = syntax.last_token()?;
+        let leading = first_token.leading_trivia();
+        let position_leading_len = leading
+            .pieces()
+            .position(|piece| piece.is_comments())
+            .unwrap_or(leading.pieces().len());
+        let trailing_is_attached = last_token
+            .trailing_trivia()
+            .pieces()
+            .any(|piece| piece.is_comments());
+
+        Some(Self {
+            node,
+            name,
+            first_token,
+            position_leading_len,
+            last_token,
+            trailing_is_attached,
+        })
+    }
+
+    /// The leading trivia before its first comment. It stays at the position of the item.
+    fn position_leading(
+        &self,
+    ) -> impl ExactSizeIterator<Item = SyntaxTriviaPiece<GraphqlLanguage>> {
+        self.first_token
+            .leading_trivia()
+            .pieces()
+            .take(self.position_leading_len)
+    }
+
+    /// The leading trivia from its first comment onward. It moves with the item.
+    fn attached_leading(
+        &self,
+    ) -> impl ExactSizeIterator<Item = SyntaxTriviaPiece<GraphqlLanguage>> {
+        self.first_token
+            .leading_trivia()
+            .pieces()
+            .skip(self.position_leading_len)
+    }
+
+    fn has_attached_leading(&self) -> bool {
+        self.position_leading_len < self.first_token.leading_trivia().pieces().len()
+    }
+
+    /// Whether this position in the list starts on a new line.
+    ///
+    /// Leading trivia is either empty or starts with a newline, because the trivia up to the
+    /// end of a line belongs to the trailing trivia of the previous token.
+    fn position_on_new_line(&self) -> bool {
+        self.position_leading()
+            .next()
+            .is_some_and(|piece| piece.is_newline())
+    }
+}
+
+/// Returns the items of `list` sorted by the name returned by `name`, or `None` when they can't
+/// be sorted without placing a moved comment on the same line as other code.
+///
+/// `r_paren` is the token that closes the list. The end-of-line comment of the item that ends up
+/// last must not be followed by `r_paren` on the same line.
+///
+/// Comments above an item and comments at the end of its line move with the item.
+/// The other trivia, such as commas and the whitespace between items, stays in place.
+pub(crate) fn sort_list<L, N>(
+    list: &L,
+    r_paren: &GraphqlSyntaxToken,
+    name: impl Fn(&N) -> Option<TokenText>,
+) -> Option<Vec<N>>
+where
+    L: AstNodeList<Language = GraphqlLanguage, Node = N>,
+    N: AstNode<Language = GraphqlLanguage>,
+{
+    let r_paren_on_new_line = r_paren
+        .leading_trivia()
+        .pieces()
+        .next()
+        .is_some_and(|piece| piece.is_newline());
+    let items = list
+        .iter()
+        .map(|node| {
+            let name = name(&node);
+            ItemTrivia::new(node, name)
+        })
+        .collect::<Option<Vec<_>>>()?;
+
+    let mut order: Vec<usize> = (0..items.len()).collect();
+    order.sort_by(|&a, &b| compare_names(items[a].name.clone(), items[b].name.clone()));
+
+    let mut nodes = Vec::with_capacity(items.len());
+    for (position, &index) in order.iter().enumerate() {
+        let slot = &items[position];
+        let item = &items[index];
+
+        // A comment above the item must stay on its own line. Otherwise it would follow
+        // the previous token and describe a different item.
+        if item.has_attached_leading() && !slot.position_on_new_line() {
+            return None;
+        }
+
+        let node = item
+            .node
+            .clone()
+            .with_leading_trivia_pieces(chain_trivia_pieces(
+                slot.position_leading(),
+                item.attached_leading(),
+            ))?;
+        let node = if item.trailing_is_attached {
+            // A line comment runs until the end of the line, so the code after it must start
+            // on a new line. Otherwise the comment would swallow that code.
+            let next_on_new_line = items
+                .get(position + 1)
+                .map_or(r_paren_on_new_line, ItemTrivia::position_on_new_line);
+            if !next_on_new_line {
+                return None;
+            }
+            node.with_trailing_trivia_pieces(item.last_token.trailing_trivia().pieces())?
+        } else if slot.trailing_is_attached {
+            node.with_trailing_trivia_pieces([])?
+        } else {
+            node.with_trailing_trivia_pieces(slot.last_token.trailing_trivia().pieces())?
+        };
+
+        // Items can be written without trivia between them, as in `f(b: "x"a: ENUM)`. After
+        // sorting, such a pair can become `ENUM` followed by `b`, which would merge into a single
+        // name, so a space keeps them apart.
+        let next_is_separated = items
+            .get(position + 1)
+            .is_none_or(|next| next.position_leading_len > 0);
+        let last_token = node.syntax().last_token()?;
+        let node = if !next_is_separated && last_token.trailing_trivia().pieces().len() == 0 {
+            let spaced = last_token.with_trailing_space();
+            N::cast(
+                node.into_syntax()
+                    .replace_child(last_token.into(), spaced.into())?,
+            )?
+        } else {
+            node
+        };
+        nodes.push(node);
+    }
+
+    Some(nodes)
+}

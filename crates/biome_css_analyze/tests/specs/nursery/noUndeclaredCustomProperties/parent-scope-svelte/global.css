@@ -1,0 +1,2 @@
+/* should not generate diagnostics */
+:root { --global-color: green; }

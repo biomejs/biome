@@ -7,13 +7,13 @@ on:
       - main
       - next
     paths: # Only run when changes are made to rust code or root Cargo
-      - "crates/**"
-      - "fuzz/**"
-      - "xtask/**"
-      - "Cargo.toml"
-      - "Cargo.lock"
-      - "rust-toolchain.toml"
-      - "rustfmt.toml"
+      - 'crates/**'
+      - 'fuzz/**'
+      - 'xtask/**'
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      - 'rust-toolchain.toml'
+      - 'rustfmt.toml'
 permissions:
   contents: read
 
@@ -23,7 +23,7 @@ jobs:
     if: ${{ github.actor != 'autofix-ci[bot]' }}
     steps:
       - name: Checkout branch
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Install toolchain
         uses: moonrepo/setup-rust@abb2d32350334249b178c401e5ec5836e0cd88d3 # v1.3.0
@@ -44,19 +44,19 @@ jobs:
         run: cargo codegen-schema
       - name: Run the bindings codegen
         run: cargo codegen-bindings
-      - name: Run the migrate codegen
+      - name: Run the ESLint migrate codegen
         run: cargo codegen-migrate
+      - name: Run the Stylelint migrate codegen
+        run: cargo run -p xtask_codegen --features configuration -- migrate-stylelint
 
       # Format Rust and TOML files
       - name: Run format
         run: |
           cargo fmt --all
 
-      - uses: tombi-toml/setup-tombi@9880d1d3ba5e745d410c697366c513b337704388 # v1.0.11
+      - uses: tombi-toml/setup-tombi@d8f3250344c4e9107b91c02bc11efcf72baf5793 # v1.7.3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          version: '0.7.32'
 
       - name: Format TOML files
         run: tombi format

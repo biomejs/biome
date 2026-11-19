@@ -10,17 +10,17 @@ use crate::{
     JsConditionalExpression, JsDoWhileStatement, JsForStatement, JsIdentifierExpression,
     JsIfStatement, JsLiteralMemberName, JsLogicalExpression, JsNewExpression,
     JsNumberLiteralExpression, JsObjectExpression, JsPostUpdateExpression, JsPreUpdateExpression,
-    JsReferenceIdentifier, JsRegexLiteralExpression, JsStaticMemberExpression,
-    JsStringLiteralExpression, JsSyntaxKind, JsSyntaxNode, JsSyntaxToken, JsTemplateChunkElement,
-    JsTemplateExpression, JsUnaryExpression, JsWhileStatement, OperatorPrecedence,
-    TsStringLiteralType, inner_string_text,
+    JsReferenceIdentifier, JsRegexLiteralExpression, JsSequenceExpression,
+    JsStaticMemberExpression, JsStringLiteralExpression, JsSyntaxKind, JsSyntaxNode, JsSyntaxToken,
+    JsTemplateChunkElement, JsTemplateExpression, JsUnaryExpression, JsWhileStatement,
+    OperatorPrecedence, TsStringLiteralType, inner_string_text,
 };
 use biome_rowan::{
     AstNode, AstNodeList, AstSeparatedList, NodeOrToken, SyntaxNodeCast, SyntaxResult, TextRange,
     TextSize, TokenText, declare_node_union,
 };
 use core::iter;
-use std::collections::HashSet;
+use smallvec::SmallVec;
 
 const GLOBAL_THIS: &str = "globalThis";
 const UNDEFINED: &str = "undefined";
@@ -544,6 +544,18 @@ impl JsObjectExpression {
     pub fn is_empty(&self) -> bool {
         self.members().is_empty()
     }
+
+    /// Returns the first member with the given name.
+    ///
+    /// Names are resolved by [`AnyJsObjectMember::name`], so computed members only match when
+    /// their name is a literal.
+    pub fn find_member(&self, name: &str) -> Option<AnyJsObjectMember> {
+        self.members().iter().flatten().find(|member| {
+            member
+                .name()
+                .is_some_and(|member_name| member_name.text() == name)
+        })
+    }
 }
 
 impl JsNumberLiteralExpression {
@@ -551,10 +563,9 @@ impl JsNumberLiteralExpression {
     ///
     /// ```
     /// use biome_js_factory::make;
-    /// use biome_rowan::TriviaPieceKind;
     ///
     /// let number = make::js_number_literal_expression(make::js_number_literal("1.23")
-    ///     .with_trailing_trivia(vec![(TriviaPieceKind::Whitespace, " ")]));
+    ///     .with_trailing_space());
     /// assert_eq!(number.as_number().unwrap(), 1.23);
     /// ```
     pub fn as_number(&self) -> Option<f64> {
@@ -569,10 +580,9 @@ impl JsStringLiteralExpression {
     ///
     /// ```
     /// use biome_js_factory::make;
-    /// use biome_rowan::TriviaPieceKind;
     ///
     ///let string = make::js_string_literal_expression(make::js_string_literal("foo")
-    ///     .with_leading_trivia(vec![(TriviaPieceKind::Whitespace, " ")]));
+    ///     .with_leading_space());
     /// assert_eq!(string.inner_string_text().unwrap().text(), "foo");
     /// ```
     pub fn inner_string_text(&self) -> SyntaxResult<TokenText> {
@@ -935,19 +945,27 @@ impl AnyJsExpression {
     /// - `test.(only|skip|fixme|todo|fails|failing|concurrent|sequential).(only|skip|fixme|todo|fails|failing|concurrent|sequential)`
     /// - `describe.(only|skip|fixme|todo|shuffle|concurrent|sequential)`
     /// - `describe.(only|skip|fixme|todo|shuffle|concurrent|sequential).(only|skip|fixme|todo|shuffle|concurrent|sequential)`
+    /// - `suite.(only|skip|fixme|todo|shuffle|concurrent|sequential)`
+    /// - `suite.(only|skip|fixme|todo|shuffle|concurrent|sequential).(only|skip|fixme|todo|shuffle|concurrent|sequential)`
     /// - `test.step`
     /// - `test.step.(skip|fixme)`
     /// - `test.describe`
     /// - `test.describe.(only|skip|fixme)`
     /// - `test.describe.(parallel|serial)`
     /// - `test.describe.(parallel|serial).(only|skip|fixme)`
+    /// - `test.suite`
+    /// - `test.suite.(only|skip|fixme)`
+    /// - `test.suite.(parallel|serial)`
+    /// - `test.suite.(parallel|serial).(only|skip|fixme)`
     /// - `skip`
     /// - `xit`
     /// - `xdescribe`
     /// - `xtest`
+    /// - `xsuite`
     /// - `fit`
     /// - `fdescribe`
     /// - `ftest`
+    /// - `fsuite`
     /// - `Deno.test`
     ///
     /// Elements within parentheses `()` can be any of the listed options separated by `|`.
@@ -957,25 +975,26 @@ impl AnyJsExpression {
     ///
     /// [article]: https://craftinginterpreters.com/scanning-on-demand.html#tries-and-state-machines
     pub fn contains_a_test_pattern(&self) -> bool {
-        let members = CalleeNamesIterator::new(self.clone()).collect::<Vec<_>>();
-
-        let mut set = HashSet::new();
-        let has_duplicates = members.iter().any(|x| !set.insert(x));
-
-        if has_duplicates {
+        let Some(members) = callee_names(self.clone()) else {
+            return false;
+        };
+        if members
+            .iter()
+            .enumerate()
+            .any(|(index, current)| members.iter().skip(index + 1).any(|other| current == other))
+        {
             return false;
         }
 
-        let mut rev = members.iter().rev();
-
-        let first = rev.next().map(|t| t.text());
-        let second = rev.next().map(|t| t.text());
-        let third = rev.next().map(|t| t.text());
-        let fourth = rev.next().map(|t| t.text());
-        let fifth = rev.next().map(|t| t.text());
+        let mut members = members.iter().rev();
+        let first = members.next().map(TokenText::text);
+        let second = members.next().map(TokenText::text);
+        let third = members.next().map(TokenText::text);
+        let fourth = members.next().map(TokenText::text);
+        let fifth = members.next().map(TokenText::text);
 
         match first {
-            Some("describe") => match second {
+            Some("describe" | "suite") => match second {
                 None => true,
                 Some(
                     "concurrent" | "sequential" | "only" | "skip" | "fixme" | "todo" | "shuffle",
@@ -1018,7 +1037,7 @@ impl AnyJsExpression {
                             | "failing",
                     )
                 ),
-                Some("describe") => match third {
+                Some("describe" | "suite") => match third {
                     None => true,
                     Some("only" | "skip" | "fixme") => fourth.is_none(),
                     Some("parallel" | "serial") => match fourth {
@@ -1034,7 +1053,10 @@ impl AnyJsExpression {
                 Some("test") => third.is_none(),
                 _ => false,
             },
-            Some("skip" | "xit" | "xdescribe" | "xtest" | "fit" | "fdescribe" | "ftest") => true,
+            Some(
+                "skip" | "xit" | "xdescribe" | "xtest" | "fit" | "fdescribe" | "ftest" | "fsuite"
+                | "xsuite",
+            ) => true,
             _ => false,
         }
     }
@@ -1043,16 +1065,23 @@ impl AnyJsExpression {
     ///
     /// A valid test.each pattern must:
     /// - Start with a valid test pattern (see [`contains_a_test_pattern`])
-    /// - End with `.each` or `.for`
+    /// - End with `.each`, `.for`, or `.prop`
+    ///
+    /// `.prop` is [`@fast-check/vitest`](https://github.com/dubzzz/fast-check/tree/main/packages/vitest)'s
+    /// property-based-testing counterpart to `.each`: it also takes a table
+    /// (of arbitraries) and is itself called with the test name and callback.
     ///
     /// ## Examples
     ///
     /// - `test.each`
     /// - `describe.each`
+    /// - `suite.each`
     /// - `it.each`
     /// - `test.only.each`
     /// - `describe.skip.each`
+    /// - `suite.skip.each`
     /// - `it.concurrent.each`
+    /// - `test.prop`
     ///
     /// [`contains_a_test_pattern`]:  crate::AnyJsExpression::contains_a_test_pattern
     ///
@@ -1072,7 +1101,7 @@ impl AnyJsExpression {
                     .ok()
                     .map(|token| token.token_text_trimmed())
                 {
-                    return matches!(token.text(), "each" | "for");
+                    return matches!(token.text(), "each" | "for" | "prop");
                 }
 
                 false
@@ -1082,33 +1111,38 @@ impl AnyJsExpression {
     }
 
     /// Checks whether the current function call is:
-    /// - `describe`
+    /// - `describe` or `suite`
     pub fn contains_describe_call(&self) -> bool {
-        let mut members = CalleeNamesIterator::new(self.clone());
-
-        if let Some(member) = members.next() {
-            return member.text() == "describe";
-        }
-        false
+        callee_names(self.clone()).is_some_and(|members| {
+            members
+                .first()
+                .is_some_and(|member| matches!(member.text(), "describe" | "suite"))
+        })
     }
 
-    /// Checks whether the current function call is:
-    /// - `it`: many libraries such as Node.js, Mocha, Jest, etc.
-    /// - `test`: many libraries such as Node.js, bun, etc.
+    /// Checks whether the current function call is a test body context:
+    /// - `it` and `test` calls accepted by [`contains_a_test_pattern`], such as
+    ///   `it.only` or `test.concurrent`
+    /// - `it.each` and `test.each` table test calls accepted by
+    ///   [`contains_a_test_each_pattern`], such as `test.concurrent.each`
     /// - [`Deno.test`](https://docs.deno.com/runtime/manual/basics/testing/)
     /// - [`waitFor`](https://testing-library.com/docs/dom-testing-library/api-async/#waitfor)
+    ///
+    /// [`contains_a_test_pattern`]: crate::AnyJsExpression::contains_a_test_pattern
+    /// [`contains_a_test_each_pattern`]: crate::AnyJsExpression::contains_a_test_each_pattern
     pub fn contains_it_call(&self) -> bool {
-        let mut members = CalleeNamesIterator::new(self.clone());
-
-        let texts: [Option<TokenText>; 2] = [members.next(), members.next()];
-
-        let mut rev = texts.iter().rev().flatten();
-
-        let first = rev.next().map(|t| t.text());
-        let second = rev.next().map(|t| t.text());
+        let Some(members) = callee_names(self.clone()) else {
+            return false;
+        };
+        let mut members = members.iter().rev();
+        let first = members.next().map(TokenText::text);
+        let second = members.next().map(TokenText::text);
 
         match first {
-            Some("test" | "it" | "waitFor") => true,
+            Some("test" | "it") => {
+                self.contains_a_test_pattern() || self.contains_a_test_each_pattern()
+            }
+            Some("waitFor") => true,
             Some("Deno") => matches!(second, Some("test")),
             _ => false,
         }
@@ -1117,8 +1151,8 @@ impl AnyJsExpression {
     /// Checks whether the current expression contains a focused test pattern.
     ///
     /// This method detects any of the following focused test patterns:
-    /// - `describe.only`, `it.only`, `test.only`
-    /// - `fdescribe`, `fit`, `ftest`
+    /// - `describe.only`, `it.only`, `test.only`, `suite.only`
+    /// - `fdescribe`, `fit`, `ftest`, `fsuite`
     /// - `test.concurrent.only`
     /// - `it.concurrent.only`
     ///
@@ -1133,24 +1167,35 @@ impl AnyJsExpression {
     /// test() // returns false
     /// ```
     pub fn contains_focused_test(&self) -> SyntaxResult<bool> {
-        let mut members = CalleeNamesIterator::new(self.clone());
+        let Some(members) = callee_names(self.clone()) else {
+            return Ok(false);
+        };
+        let mut members = members.iter();
 
         let first = members.next();
         let second = members.next();
 
         // Jasmine / Angular focused test patterns (f prepended)
+        let is_direct_call = self
+            .clone()
+            .omit_parentheses()
+            .as_js_identifier_expression()
+            .is_some();
         if let Some(token) = &first {
             let name = token.text();
-            if matches!(name, "fdescribe" | "fit" | "ftest") && second.is_none() {
+            if matches!(name, "fdescribe" | "fit" | "ftest" | "fsuite")
+                && second.is_none()
+                && is_direct_call
+            {
                 return Ok(true);
             }
         }
 
         // Handle cases with .only
         if let (Some(first_token), Some(second_token)) = (&first, &second) {
-            // Check for direct .only pattern: test.only, it.only, describe.only
+            // Check for direct .only pattern: test.only, it.only, describe.only, suite.only
             if first_token.text() == "only"
-                && matches!(second_token.text(), "test" | "it" | "describe")
+                && matches!(second_token.text(), "test" | "it" | "describe" | "suite")
             {
                 return Ok(true);
             }
@@ -1173,6 +1218,7 @@ impl AnyJsExpression {
     /// This method detects patterns like:
     /// - `test.only.each`
     /// - `describe.only.each`
+    /// - `suite.only.each`
     /// - `it.only.each`
     ///
     /// ## Examples
@@ -1183,7 +1229,10 @@ impl AnyJsExpression {
     /// test.each // returns false
     /// ```
     pub fn contains_only_each_pattern(&self) -> SyntaxResult<bool> {
-        let mut members = CalleeNamesIterator::new(self.clone());
+        let Some(members) = callee_names(self.clone()) else {
+            return Ok(false);
+        };
+        let mut members = members.iter();
 
         let first = members.next();
         let second = members.next();
@@ -1208,12 +1257,15 @@ impl AnyJsExpression {
                 "test"
                     | "it"
                     | "describe"
+                    | "suite"
                     | "xtest"
                     | "xit"
                     | "xdescribe"
+                    | "xsuite"
                     | "ftest"
                     | "fit"
                     | "fdescribe"
+                    | "fsuite"
             ) {
                 return Ok(true);
             }
@@ -1238,30 +1290,24 @@ impl AnyJsExpression {
     /// - `assert`
     /// - `assertEquals`
     pub fn to_assertion_call(&self) -> Option<TokenText> {
-        let mut members = CalleeNamesIterator::new(self.clone());
+        let members = callee_names(self.clone())?;
 
-        let texts: [Option<TokenText>; 2] = [members.next(), members.next()];
+        let (first, second) = match members.as_slice() {
+            [first] => (first, None),
+            [second, first, ..] => (first, Some(second)),
+            [] => return None,
+        };
 
-        let mut rev = texts.iter().rev().flatten();
-
-        let first = rev.next();
-        let second = rev.next();
-
-        match first {
-            Some(first) => {
-                if first.text() == "assert" {
-                    if second.is_some() {
-                        Some(first.clone())
-                    } else {
-                        None
-                    }
-                } else if matches!(first.text(), "expect" | "assertEquals") {
-                    Some(first.clone())
-                } else {
-                    None
-                }
+        if first.text() == "assert" {
+            if second.is_some() {
+                Some(first.clone())
+            } else {
+                None
             }
-            None => None,
+        } else if matches!(first.text(), "expect" | "assertEquals") {
+            Some(first.clone())
+        } else {
+            None
         }
     }
 
@@ -1366,20 +1412,66 @@ impl AnyJsExpression {
         }
     }
 
-    /// Returns the innermost expression, ignoring any parenthesized expressions or type assertions.
+    /// Removes parentheses and the TypeScript syntax that only affects types: `as`,
+    /// `satisfies`, `<T>value`, `value!`, and `value<T>`.
+    ///
+    /// The returned expression evaluates to the same value as `self`, with the same side
+    /// effects. Use [`Self::inner_expression`] to also look through sequence expressions.
+    ///
+    /// Returns `None` if the syntax tree is incomplete.
+    pub fn omit_type_wrappers(mut self) -> Option<Self> {
+        loop {
+            self = match self {
+                Self::JsParenthesizedExpression(expression) => expression.expression().ok()?,
+                Self::TsAsExpression(expression) => expression.expression().ok()?,
+                Self::TsSatisfiesExpression(expression) => expression.expression().ok()?,
+                Self::TsNonNullAssertionExpression(expression) => expression.expression().ok()?,
+                Self::TsTypeAssertionExpression(expression) => expression.expression().ok()?,
+                Self::TsInstantiationExpression(expression) => expression.expression().ok()?,
+                expression => return Some(expression),
+            };
+        }
+    }
+
+    /// Returns the expression that produces the value of `self`, looking through everything
+    /// that [`Self::omit_type_wrappers`] removes and through sequence expressions.
+    ///
+    /// A sequence expression evaluates to its last expression, so `(a, b)` returns `b`. The
+    /// expressions before the last one still run and can have side effects, so the result
+    /// isn't a safe replacement for `self` in a code fix.
+    ///
+    /// Returns `None` if the syntax tree is incomplete.
     pub fn inner_expression(&self) -> Option<Self> {
-        (match self {
-            Self::JsParenthesizedExpression(expression) => expression.expression().ok(),
-            Self::TsAsExpression(expression) => expression.expression().ok(),
-            Self::TsSatisfiesExpression(expression) => expression.expression().ok(),
-            Self::TsNonNullAssertionExpression(expression) => expression.expression().ok(),
-            Self::TsTypeAssertionExpression(expression) => expression.expression().ok(),
-            Self::TsInstantiationExpression(expression) => expression.expression().ok(),
-            Self::JsSequenceExpression(expression) => expression.right().ok(),
-            _ => return Some(self.clone()),
+        let mut expression = self.clone();
+        loop {
+            expression = match expression.omit_type_wrappers()? {
+                Self::JsSequenceExpression(sequence) => sequence.right().ok()?,
+                expression => return Some(expression),
+            };
+        }
+    }
+
+    /// Returns the outermost expression, ignoring any parenthesized expressions or type assertions.
+    pub fn outer_expression(&self) -> Option<Self> {
+        iter::successors(Some(self.clone()), |expression| {
+            let parent = expression.syntax().parent()?;
+
+            if !is_transparent_expression_wrapper(&parent) {
+                return None;
+            }
+
+            // Only the right-hand side determines the value of a sequence expression.
+            if parent.kind() == JsSyntaxKind::JS_SEQUENCE_EXPRESSION
+                && !JsSequenceExpression::cast(parent.clone())
+                    .and_then(|sequence| sequence.right().ok())
+                    .is_some_and(|right| right.syntax() == expression.syntax())
+            {
+                return None;
+            }
+
+            Self::cast(parent)
         })
-        .as_ref()
-        .and_then(Self::inner_expression)
+        .last()
     }
 
     pub fn is_string_literal(&self) -> bool {
@@ -1387,6 +1479,14 @@ impl AnyJsExpression {
             self,
             Self::AnyJsLiteralExpression(AnyJsLiteralExpression::JsStringLiteralExpression(_),)
         )
+    }
+
+    /// Returns `true` if this expression is, or sits on, an optional chain (`?.`).
+    ///
+    /// Non-member, non-call expressions return `false`.
+    pub fn is_optional_chain(&self) -> bool {
+        AnyJsOptionalChainExpression::cast_ref(self.syntax())
+            .is_some_and(|expr| expr.is_optional_chain())
     }
 }
 
@@ -1407,57 +1507,45 @@ pub fn is_transparent_expression_wrapper(node: &JsSyntaxNode) -> bool {
     )
 }
 
-/// Iterator that returns the callee names in "top down order".
+/// Returns the callee names in "top down order".
+///
+/// Returns `None` unless the callee is a chain of names rooted in an identifier,
+/// so a callee like `/re/.test` isn't mistaken for `test`.
 ///
 /// # Examples
 ///
 /// ```javascript
-/// it.only() -> [`only`, `it`]
+/// it.only() -> Some([`only`, `it`])
+/// /re/.test() -> None
 /// ```
-struct CalleeNamesIterator {
-    next: Option<AnyJsExpression>,
-}
+fn callee_names(callee: AnyJsExpression) -> Option<SmallVec<[TokenText; 5]>> {
+    use AnyJsExpression::*;
 
-impl CalleeNamesIterator {
-    fn new(callee: AnyJsExpression) -> Self {
-        Self { next: Some(callee) }
-    }
-}
-
-impl Iterator for CalleeNamesIterator {
-    type Item = TokenText;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        use AnyJsExpression::*;
-
-        let current = self.next.take()?;
-
+    let mut names = SmallVec::new();
+    let mut current = callee;
+    loop {
         match current {
-            JsIdentifierExpression(identifier) => identifier
-                .name()
-                .and_then(|reference| reference.value_token())
-                .ok()
-                .map(|value| value.token_text_trimmed()),
-            JsStaticMemberExpression(member_expression) => match member_expression.member() {
-                Ok(AnyJsName::JsName(name)) => {
-                    self.next = member_expression.object().ok();
-                    name.value_token()
-                        .ok()
-                        .map(|name| name.token_text_trimmed())
-                }
-                _ => None,
-            },
+            JsIdentifierExpression(identifier) => {
+                let name = identifier.name().ok()?.value_token().ok()?;
+                names.push(name.token_text_trimmed());
+                return Some(names);
+            }
+            JsStaticMemberExpression(member_expression) => {
+                let AnyJsName::JsName(name) = member_expression.member().ok()? else {
+                    return None;
+                };
+                names.push(name.value_token().ok()?.token_text_trimmed());
+                current = member_expression.object().ok()?;
+            }
             JsComputedMemberExpression(member_expression) => {
                 let member = member_expression.member().ok()?;
-                if let AnyJsExpression::AnyJsLiteralExpression(lit) = &member
-                    && let Some(string_lit) = lit.as_js_string_literal_expression()
-                {
-                    self.next = member_expression.object().ok();
-                    return string_lit.inner_string_text().ok();
-                }
-                None
+                let string_lit = member
+                    .as_any_js_literal_expression()?
+                    .as_js_string_literal_expression()?;
+                names.push(string_lit.inner_string_text().ok()?);
+                current = member_expression.object().ok()?;
             }
-            _ => None,
+            _ => return None,
         }
     }
 }
@@ -1804,6 +1892,13 @@ impl AnyJsObjectMemberName {
     /// assert_eq!(computed.name().unwrap().text(), "a");
     /// ```
     pub fn name(&self) -> Option<TokenText> {
+        Some(inner_string_text(&self.name_token()?))
+    }
+
+    /// Returns the token that holds the text of [Self::name].
+    ///
+    /// The token text can include the quotes around the name.
+    pub fn name_token(&self) -> Option<JsSyntaxToken> {
         let token = match self {
             Self::JsComputedMemberName(expr) => {
                 let expr = expr.expression().ok()?;
@@ -1823,7 +1918,7 @@ impl AnyJsObjectMemberName {
             Self::JsLiteralMemberName(expr) => expr.value().ok()?,
             Self::JsMetavariable(_) => return None,
         };
-        Some(inner_string_text(&token))
+        Some(token)
     }
 }
 
@@ -2257,10 +2352,9 @@ impl TsStringLiteralType {
     ///
     /// ```
     /// use biome_js_factory::make;
-    /// use biome_rowan::TriviaPieceKind;
     ///
     /// let string = make::ts_string_literal_type(make::js_string_literal("foo")
-    ///     .with_leading_trivia(vec![(TriviaPieceKind::Whitespace, " ")]));
+    ///     .with_leading_space());
     /// assert_eq!(string.inner_string_text().unwrap().text(), "foo");
     /// ```
     pub fn inner_string_text(&self) -> SyntaxResult<TokenText> {
@@ -2343,10 +2437,11 @@ pub fn is_in_boolean_context(node: &JsSyntaxNode) -> Option<bool> {
 
 #[cfg(test)]
 mod test {
-    use biome_js_factory::syntax::{JsCallExpression, JsTemplateExpression};
+    use biome_js_factory::syntax::{AnyJsExpression, JsCallExpression, JsTemplateExpression};
     use biome_js_parser::JsParserOptions;
-    use biome_js_parser::parse_module;
-    use biome_rowan::AstNodeList;
+    use biome_js_parser::{parse, parse_module};
+    use biome_languages::JsFileSource;
+    use biome_rowan::{AstNode, AstNodeList};
 
     fn extract_call_expression(src: &str) -> JsCallExpression {
         let result = parse_module(src, JsParserOptions::default());
@@ -2380,6 +2475,25 @@ mod test {
             .clone()
     }
 
+    fn extract_ts_expression(src: &str) -> AnyJsExpression {
+        let result = parse(src, JsFileSource::ts(), JsParserOptions::default());
+        let module = result
+            .tree()
+            .as_js_module()
+            .unwrap()
+            .items()
+            .first()
+            .unwrap();
+
+        module
+            .as_any_js_statement()
+            .unwrap()
+            .as_js_expression_statement()
+            .unwrap()
+            .expression()
+            .unwrap()
+    }
+
     #[test]
     fn matches_simple_call() {
         let call_expression = extract_call_expression("test();");
@@ -2410,6 +2524,10 @@ mod test {
     #[test]
     fn doesnt_test_call_expression_with_duplicates() {
         let call_expression = extract_call_expression("test.only.only.only();");
+        assert!(!call_expression.callee().unwrap().contains_a_test_pattern());
+
+        let call_expression =
+            extract_call_expression("test.only.skip.fixme.concurrent.sequential.only();");
         assert!(!call_expression.callee().unwrap().contains_a_test_pattern());
     }
 
@@ -2661,6 +2779,8 @@ mod test {
             "describe('name', () => {});",
             "it('name', () => {});",
             "foo.fit()",
+            "builder.image('url').fit('max');",
+            "builder.image('url').auto('format').quality(90).fit('max');",
         ];
         for valid_case in VALID {
             let call_expression = extract_call_expression(valid_case);
@@ -2719,6 +2839,52 @@ mod test {
                     .contains_only_each_pattern(),
                 Ok(false),
                 "Expected this case to be invalid: {invalid_case}"
+            );
+        }
+    }
+
+    #[test]
+    fn omit_type_wrappers() {
+        const CASES: &[(&str, &str)] = &[
+            ("a;", "a"),
+            ("((a));", "a"),
+            ("(a as T);", "a"),
+            ("(a satisfies T);", "a"),
+            ("(<T>a);", "a"),
+            ("a!;", "a"),
+            ("(f<string>);", "f"),
+            ("((<T>(a as U)!) satisfies V);", "a"),
+            ("(a as T).b;", "(a as T).b"),
+            ("(a, b);", "a, b"),
+            ("((a, b) as T);", "a, b"),
+        ];
+        for (source, expected) in CASES {
+            let expression = extract_ts_expression(source).omit_type_wrappers().unwrap();
+            assert_eq!(
+                expression.syntax().text_trimmed(),
+                *expected,
+                "Unexpected result for: {source}"
+            );
+        }
+    }
+
+    #[test]
+    fn inner_expression() {
+        const CASES: &[(&str, &str)] = &[
+            ("a;", "a"),
+            ("((a as T)!);", "a"),
+            ("(f<string>);", "f"),
+            ("(a, b);", "b"),
+            ("((a, (b as T)) satisfies U);", "b"),
+            ("(a, (b, c!));", "c"),
+            ("((a, b), c).d;", "((a, b), c).d"),
+        ];
+        for (source, expected) in CASES {
+            let expression = extract_ts_expression(source).inner_expression().unwrap();
+            assert_eq!(
+                expression.syntax().text_trimmed(),
+                *expected,
+                "Unexpected result for: {source}"
             );
         }
     }

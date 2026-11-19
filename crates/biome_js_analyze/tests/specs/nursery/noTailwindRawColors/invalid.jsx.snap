@@ -1,0 +1,201 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.jsx
+---
+# Input
+```jsx
+// should generate diagnostics
+<div className="bg-pink-500" />;
+<div class="hover:text-white/80 dark:border-slate-950" />;
+<div className={'ring-offset-black'} />;
+<div className={active ? "bg-red-500" : "bg-blue-500"} />;
+<div className={active && "bg-pink-500"} />;
+<div className={(sideEffect(), "bg-pink-500")} />;
+<div className={`bg-pink-500 ${extra} text-white`} />;
+<div title="é" className="
+  [&:nth-child(2)]:border-t-red-500/50!" />;
+
+```
+
+# Diagnostics
+```
+invalid.jsx:2:17 lint/nursery/noTailwindRawColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind CSS class uses a raw palette color.
+  
+    1 │ // should generate diagnostics
+  > 2 │ <div className="bg-pink-500" />;
+      │                 ^^^^^^^^^^^
+    3 │ <div class="hover:text-white/80 dark:border-slate-950" />;
+    4 │ <div className={'ring-offset-black'} />;
+  
+  i Raw palette colors couple components to specific colors, making design-system changes harder.
+  
+  i Use a color from your design system. Check your Tailwind config for the available colors.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:3:38 lint/nursery/noTailwindRawColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind CSS class uses a raw palette color.
+  
+    1 │ // should generate diagnostics
+    2 │ <div className="bg-pink-500" />;
+  > 3 │ <div class="hover:text-white/80 dark:border-slate-950" />;
+      │                                      ^^^^^^^^^^^^^^^^
+    4 │ <div className={'ring-offset-black'} />;
+    5 │ <div className={active ? "bg-red-500" : "bg-blue-500"} />;
+  
+  i Raw palette colors couple components to specific colors, making design-system changes harder.
+  
+  i Use a color from your design system. Check your Tailwind config for the available colors.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:5:27 lint/nursery/noTailwindRawColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind CSS class uses a raw palette color.
+  
+    3 │ <div class="hover:text-white/80 dark:border-slate-950" />;
+    4 │ <div className={'ring-offset-black'} />;
+  > 5 │ <div className={active ? "bg-red-500" : "bg-blue-500"} />;
+      │                           ^^^^^^^^^^
+    6 │ <div className={active && "bg-pink-500"} />;
+    7 │ <div className={(sideEffect(), "bg-pink-500")} />;
+  
+  i Raw palette colors couple components to specific colors, making design-system changes harder.
+  
+  i Use a color from your design system. Check your Tailwind config for the available colors.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:5:42 lint/nursery/noTailwindRawColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind CSS class uses a raw palette color.
+  
+    3 │ <div class="hover:text-white/80 dark:border-slate-950" />;
+    4 │ <div className={'ring-offset-black'} />;
+  > 5 │ <div className={active ? "bg-red-500" : "bg-blue-500"} />;
+      │                                          ^^^^^^^^^^^
+    6 │ <div className={active && "bg-pink-500"} />;
+    7 │ <div className={(sideEffect(), "bg-pink-500")} />;
+  
+  i Raw palette colors couple components to specific colors, making design-system changes harder.
+  
+  i Use a color from your design system. Check your Tailwind config for the available colors.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:6:28 lint/nursery/noTailwindRawColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind CSS class uses a raw palette color.
+  
+    4 │ <div className={'ring-offset-black'} />;
+    5 │ <div className={active ? "bg-red-500" : "bg-blue-500"} />;
+  > 6 │ <div className={active && "bg-pink-500"} />;
+      │                            ^^^^^^^^^^^
+    7 │ <div className={(sideEffect(), "bg-pink-500")} />;
+    8 │ <div className={`bg-pink-500 ${extra} text-white`} />;
+  
+  i Raw palette colors couple components to specific colors, making design-system changes harder.
+  
+  i Use a color from your design system. Check your Tailwind config for the available colors.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:7:33 lint/nursery/noTailwindRawColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind CSS class uses a raw palette color.
+  
+    5 │ <div className={active ? "bg-red-500" : "bg-blue-500"} />;
+    6 │ <div className={active && "bg-pink-500"} />;
+  > 7 │ <div className={(sideEffect(), "bg-pink-500")} />;
+      │                                 ^^^^^^^^^^^
+    8 │ <div className={`bg-pink-500 ${extra} text-white`} />;
+    9 │ <div title="é" className="
+  
+  i Raw palette colors couple components to specific colors, making design-system changes harder.
+  
+  i Use a color from your design system. Check your Tailwind config for the available colors.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:8:18 lint/nursery/noTailwindRawColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind CSS class uses a raw palette color.
+  
+     6 │ <div className={active && "bg-pink-500"} />;
+     7 │ <div className={(sideEffect(), "bg-pink-500")} />;
+   > 8 │ <div className={`bg-pink-500 ${extra} text-white`} />;
+       │                  ^^^^^^^^^^^
+     9 │ <div title="é" className="
+    10 │   [&:nth-child(2)]:border-t-red-500/50!" />;
+  
+  i Raw palette colors couple components to specific colors, making design-system changes harder.
+  
+  i Use a color from your design system. Check your Tailwind config for the available colors.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:10:20 lint/nursery/noTailwindRawColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind CSS class uses a raw palette color.
+  
+     8 │ <div className={`bg-pink-500 ${extra} text-white`} />;
+     9 │ <div title="é" className="
+  > 10 │   [&:nth-child(2)]:border-t-red-500/50!" />;
+       │                    ^^^^^^^^^^^^^^^^^^^
+    11 │ 
+  
+  i Raw palette colors couple components to specific colors, making design-system changes harder.
+  
+  i Use a color from your design system. Check your Tailwind config for the available colors.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

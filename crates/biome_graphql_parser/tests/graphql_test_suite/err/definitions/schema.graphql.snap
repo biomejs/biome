@@ -168,6 +168,7 @@ GraphqlRoot {
             },
         },
         GraphqlOperationDefinition {
+            description: missing (optional),
             ty: GraphqlOperationType {
                 value_token: QUERY_KW@269..277 "query" [Newline("\n"), Newline("\n")] [Whitespace(" ")],
             },
@@ -284,13 +285,14 @@ GraphqlRoot {
               0: IDENT@254..269 "MyQueryRootType" [] []
         2: (empty)
     5: GRAPHQL_OPERATION_DEFINITION@269..311
-      0: GRAPHQL_OPERATION_TYPE@269..277
+      0: (empty)
+      1: GRAPHQL_OPERATION_TYPE@269..277
         0: QUERY_KW@269..277 "query" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
-      1: GRAPHQL_NAME_BINDING@277..293
+      2: GRAPHQL_NAME_BINDING@277..293
         0: IDENT@277..293 "MyQueryRootType" [] [Whitespace(" ")]
-      2: (empty)
-      3: GRAPHQL_DIRECTIVE_LIST@293..293
-      4: GRAPHQL_SELECTION_SET@293..311
+      3: (empty)
+      4: GRAPHQL_DIRECTIVE_LIST@293..293
+      5: GRAPHQL_SELECTION_SET@293..311
         0: L_CURLY@293..294 "{" [] []
         1: GRAPHQL_SELECTION_LIST@294..309
           0: GRAPHQL_FIELD@294..309

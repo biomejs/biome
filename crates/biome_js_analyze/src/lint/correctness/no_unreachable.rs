@@ -8,10 +8,11 @@ use biome_control_flow::{
 };
 use biome_diagnostics::Severity;
 use biome_js_syntax::{
-    JsBlockStatement, JsCaseClause, JsDefaultClause, JsDoWhileStatement, JsForInStatement,
-    JsForOfStatement, JsForStatement, JsFunctionBody, JsIfStatement, JsLabeledStatement,
-    JsLanguage, JsReturnStatement, JsSwitchStatement, JsSyntaxElement, JsSyntaxKind, JsSyntaxNode,
-    JsTryFinallyStatement, JsTryStatement, JsVariableStatement, JsWhileStatement, TextRange,
+    AnyJsBindingPattern, JsBlockStatement, JsCaseClause, JsDefaultClause, JsDoWhileStatement,
+    JsForInStatement, JsForOfStatement, JsForStatement, JsFunctionBody, JsIfStatement,
+    JsLabeledStatement, JsLanguage, JsReturnStatement, JsSwitchStatement, JsSyntaxElement,
+    JsSyntaxKind, JsSyntaxNode, JsTryFinallyStatement, JsTryStatement, JsVariableStatement,
+    JsWhileStatement, TextRange,
 };
 use biome_rowan::{AstNode, NodeOrToken, declare_node_union};
 use biome_rule_options::no_unreachable::NoUnreachableOptions;
@@ -19,7 +20,10 @@ use roaring::bitmap::RoaringBitmap;
 use rustc_hash::FxHashMap;
 
 declare_lint_rule! {
-    /// Disallow unreachable code
+    /// Disallow code that can never run.
+    ///
+    /// Statements after `return`, `throw`, `break`, or `continue` cannot execute. Unreachable code
+    /// is often left by mistake after a refactor and can hide intended behavior.
     ///
     /// ## Examples
     ///
@@ -33,19 +37,31 @@ declare_lint_rule! {
     /// ```
     ///
     /// ```js,expect_diagnostic
-    /// function example() {
-    ///     for(let i = 0; i < 10; ++i) {
+    /// function example(condition) {
+    ///     while (condition) {
     ///         break;
+    ///         neverCalled();
     ///     }
     /// }
     /// ```
     ///
     /// ```js,expect_diagnostic
     /// function example() {
-    ///     for(const key in value) {
+    ///     for (const key in value) {
     ///         continue;
     ///         neverCalled();
     ///     }
+    /// }
+    /// ```
+    ///
+    /// ### Valid
+    ///
+    /// ```js
+    /// function example(condition) {
+    ///     if (condition) {
+    ///         return;
+    ///     }
+    ///     alwaysCalled();
     /// }
     /// ```
     pub NoUnreachable {
@@ -792,21 +808,27 @@ impl UnreachableRanges {
                 }
 
                 JsControlFlowNode::JsVariableStatement(stmt) => {
-                    let declaration = stmt.declaration().ok()?;
-                    declaration
-                        .declarators()
-                        .into_iter()
-                        .filter_map(|declarator| match declarator {
-                            Ok(declarator) => match declarator.initializer()?.expression() {
-                                Ok(expression) => {
-                                    Some(Ok(expression.syntax().text_range_with_trivia()))
-                                }
-                                Err(err) => Some(Err(err)),
-                            },
-                            Err(err) => Some(Err(err)),
-                        })
-                        .collect::<Result<Vec<_>, _>>()
-                        .ok()?
+                    let mut res = Vec::new();
+                    for declarator in stmt.declaration().ok()?.declarators() {
+                        let declarator = declarator.ok()?;
+                        let Some(initializer) = declarator.initializer() else {
+                            continue;
+                        };
+                        // The graph evaluates the default values of a
+                        // destructuring pattern after the initializer.
+                        let id = declarator.id().ok()?;
+                        if !matches!(id, AnyJsBindingPattern::AnyJsBinding(_)) {
+                            res.push(id.syntax().text_range_with_trivia());
+                        }
+                        res.push(
+                            initializer
+                                .expression()
+                                .ok()?
+                                .syntax()
+                                .text_range_with_trivia(),
+                        );
+                    }
+                    res
                 }
                 JsControlFlowNode::JsLabeledStatement(stmt) => {
                     vec![stmt.body().ok()?.syntax().text_range_with_trivia()]
@@ -817,10 +839,12 @@ impl UnreachableRanges {
                 ],
                 JsControlFlowNode::JsForInStatement(stmt) => vec![
                     stmt.initializer().ok()?.syntax().text_range_with_trivia(),
+                    stmt.expression().ok()?.syntax().text_range_with_trivia(),
                     stmt.body().ok()?.syntax().text_range_with_trivia(),
                 ],
                 JsControlFlowNode::JsForOfStatement(stmt) => vec![
                     stmt.initializer().ok()?.syntax().text_range_with_trivia(),
+                    stmt.expression().ok()?.syntax().text_range_with_trivia(),
                     stmt.body().ok()?.syntax().text_range_with_trivia(),
                 ],
                 JsControlFlowNode::JsForStatement(stmt) => {

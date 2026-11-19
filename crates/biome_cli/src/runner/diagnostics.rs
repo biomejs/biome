@@ -1,5 +1,5 @@
 use biome_diagnostics::{
-    Advices, Category, Diagnostic, DiagnosticExt, DiagnosticTags, Error, Visit,
+    Advices, Category, Diagnostic, DiagnosticExt, DiagnosticTags, Error, Visit, category,
 };
 use biome_diagnostics::{IoError, StdError};
 use biome_text_edit::TextEdit;
@@ -48,7 +48,7 @@ pub(crate) struct ContentDiffAdvice {
 
 impl Advices for ContentDiffAdvice {
     fn record(&self, visitor: &mut dyn Visit) -> io::Result<()> {
-        let diff = TextEdit::from_unicode_words(&self.old, &self.new);
+        let diff = TextEdit::from_unicode_words(self.old.as_str(), self.new.as_str());
         visitor.record_diff(&diff)
     }
 }
@@ -63,7 +63,7 @@ pub(crate) struct PanicDiagnostic {
 
 #[derive(Debug, Diagnostic)]
 #[diagnostic(
-    category = "files/missingHandler",
+    category = "fs/missingHandler",
     message = "Biome doesn't know how to process this file",
 	severity = Warning,
     tags(VERBOSE)
@@ -79,7 +79,11 @@ pub(crate) struct UnhandledDiagnostic;
 pub(crate) struct SkippedDiagnostic;
 
 #[derive(Debug, Diagnostic)]
-#[diagnostic(category = "search", severity = Information)]
+#[diagnostic(
+    category = "search",
+    severity = Information,
+    message = "Found a match of the search pattern."
+)]
 pub(crate) struct SearchDiagnostic;
 
 /// Extension trait for turning [Display]-able error types into [TraversalError]
@@ -139,6 +143,22 @@ pub(crate) trait ResultIoExt: ResultExt {
 
 impl<T> ResultIoExt for io::Result<T> {
     fn with_file_path(self, file_path: String) -> Result<Self::Result, Error> {
-        self.map_err(|error| IoError::from(error).with_file_path(file_path))
+        self.map_err(|error| {
+            IoError::from(error)
+                .with_category(category!("fs/io"))
+                .with_file_path(file_path)
+                .with_tags(DiagnosticTags::INTERNAL)
+        })
     }
+}
+
+#[derive(Debug, Diagnostic)]
+#[diagnostic(
+    category = "internalError/fs",
+    severity = Warning,
+    message = "Failed to watch file or folder for changes."
+)]
+pub struct WatcherDiagnostic {
+    #[source]
+    pub(crate) source: Option<Error>,
 }

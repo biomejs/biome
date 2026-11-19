@@ -1,12 +1,12 @@
 use crate::model::{Selector, SemanticModel, Specificity};
-use biome_css_syntax::AnyCssRoot;
-use biome_formatter::prelude::*;
+use biome_formatter::rowan::RowanSource;
+use biome_formatter::rowan::prelude::*;
 use biome_formatter::write;
 use biome_formatter::{
     FormatContext, FormatOptions, IndentStyle, IndentWidth, LineEnding, LineWidth,
     SourceMapGeneration, TrailingNewline, TransformSourceMap,
 };
-use biome_rowan::{AstNode, TextSize};
+use biome_rowan::AstNode;
 
 #[derive(Debug, Default)]
 struct FormatSemanticModelOptions;
@@ -50,6 +50,7 @@ struct FormatSemanticModelContext {
 
 impl FormatContext for FormatSemanticModelContext {
     type Options = FormatSemanticModelOptions;
+    type Source = RowanSource;
 
     fn options(&self) -> &Self::Options {
         &self.options
@@ -75,43 +76,38 @@ impl std::fmt::Display for SemanticModel {
 
 impl Format<FormatSemanticModelContext> for SemanticModel {
     fn fmt(&self, f: &mut Formatter<FormatSemanticModelContext>) -> FormatResult<()> {
-        let mut selectors: Vec<&Selector> = self
-            .data
-            .all_rules
-            .iter()
-            .flat_map(|rule| rule.selectors())
+        let mut selectors: Vec<Selector> = self
+            .all_rules()
+            .into_iter()
+            .flat_map(|rule| rule.selectors().to_vec())
             .collect();
-        selectors.sort_by_key(|sel| sel.range(&self.root()).start());
+        selectors.sort_by_key(|sel| sel.range().start());
 
         let mut builder = f.join_nodes_with_hardline();
-        for selector in selectors {
-            builder.entry(
-                selector.node(&self.root()).syntax(),
-                &SelectorWithRoot(selector, &self.root()),
-            );
+        for selector in &selectors {
+            builder.entry(selector.node().syntax(), &SelectorWithRoot(selector));
         }
         builder.finish()
     }
 }
 
-struct SelectorWithRoot<'a>(&'a Selector, &'a AnyCssRoot);
+struct SelectorWithRoot<'a>(&'a Selector);
 
 impl<'a> Format<FormatSemanticModelContext> for SelectorWithRoot<'a> {
     fn fmt(&self, f: &mut Formatter<FormatSemanticModelContext>) -> FormatResult<()> {
         let selector = self.0;
-        let root = self.1;
-        let range = std::format!("{:?}", selector.range(root));
+        let range = std::format!("{:?}", selector.range());
         let resolved = selector.resolved().to_string();
         write!(
             f,
             [
-                text(resolved.as_str(), selector.range(root).start()),
+                text(resolved.as_str(), Some(selector.range().start())),
                 token(":"),
                 space(),
                 &selector.specificity(),
                 space(),
                 token(" @ "),
-                text(range.as_str(), TextSize::default()),
+                text(range.as_str(), None),
             ]
         )
     }
@@ -123,13 +119,13 @@ impl Format<FormatSemanticModelContext> for Specificity {
             f,
             [
                 token("("),
-                text(self.0.to_string().as_str(), TextSize::default()),
+                text(self.0.to_string().as_str(), None),
                 token(","),
                 space(),
-                text(self.1.to_string().as_str(), TextSize::default()),
+                text(self.1.to_string().as_str(), None),
                 token(","),
                 space(),
-                text(self.2.to_string().as_str(), TextSize::default()),
+                text(self.2.to_string().as_str(), None),
                 token(")")
             ]
         )
@@ -140,7 +136,7 @@ impl Format<FormatSemanticModelContext> for Specificity {
 mod tests {
     use crate::semantic_model;
     use biome_css_parser::{CssParserOptions, parse_css};
-    use biome_css_syntax::CssFileSource;
+    use biome_languages::CssFileSource;
 
     #[ignore]
     #[test]
@@ -162,5 +158,35 @@ mod tests {
         let parsed = parse_css(source, CssFileSource::css(), CssParserOptions::default());
         let model = semantic_model(&parsed.tree());
         eprintln!("{}", model);
+    }
+
+    #[test]
+    fn prints_nested_selectors() {
+        let source = r#".card {
+  :root[data-theme="dark"] & {}
+  code {
+    html body & {}
+    & & > span {}
+  }
+  @media (prefers-color-scheme: dark) {
+    :root[data-theme="auto"] & {}
+  }
+  @container (min-width: 1px) {
+    & > p {}
+  }
+  @starting-style {
+    &:hover {}
+  }
+}"#;
+
+        let parsed = parse_css(source, CssFileSource::css(), CssParserOptions::default());
+        let model = semantic_model(&parsed.tree());
+        let formatted = model.to_string();
+        let snapshot = format!(
+            "## Input\n\n```css\n{source}\n```\n\n## Formatted\n\n```text\n{}\n```",
+            formatted.trim_end()
+        );
+
+        insta::assert_snapshot!(snapshot);
     }
 }

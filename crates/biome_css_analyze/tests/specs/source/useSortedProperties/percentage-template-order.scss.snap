@@ -1,0 +1,45 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: percentage-template-order.scss
+---
+# Input
+```css
+/* should not generate diagnostics */
+@mixin frames {
+    0% { opacity: 0; }
+    from { opacity: 1; }
+}
+
+@mixin statement-frames {
+    0% { opacity: 0; }
+    @include intermediate;
+    from { opacity: 0.5; }
+    @if true { 100% { opacity: 1; } }
+    to { opacity: 0.75; }
+    100% { opacity: 1; }
+}
+
+@include animation {
+    0% { opacity: 0; }
+    from { opacity: 1; }
+    @include intermediate;
+    100% { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@mixin nested-control-frames {
+    $alpha: 0;
+    @if true { 0% { opacity: $alpha; } }
+}
+
+@mixin nested-content-frames {
+    $alpha: 0;
+    @include relay { @if true { 0% { opacity: $alpha; } } }
+}
+
+@include animation {
+    $alpha: 0;
+    @for $i from 1 through 2 { #{$i}% { opacity: $alpha; } }
+}
+
+```

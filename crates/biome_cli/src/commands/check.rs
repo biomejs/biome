@@ -11,11 +11,13 @@ use biome_configuration::analyzer::assist::{AssistConfiguration, AssistEnabled};
 use biome_configuration::css::CssParserConfiguration;
 use biome_configuration::formatter::{FormatWithErrorsEnabled, FormatterEnabled};
 use biome_configuration::json::JsonParserConfiguration;
+use biome_configuration::markdown::MarkdownParserConfiguration;
 use biome_configuration::{Configuration, FormatterConfiguration, LinterConfiguration};
 use biome_console::{Console, MarkupBuf};
 use biome_deserialize::Merge;
 use biome_diagnostics::{Category, category};
 use biome_fs::FileSystem;
+use biome_module_graph::type_inference::profiling::TypeInferenceProfilerGuard;
 use biome_service::workspace::{
     FeatureKind, FeatureName, FeaturesBuilder, FeaturesSupported, FixFileMode, ScanKind,
     SupportKind,
@@ -42,16 +44,19 @@ pub(crate) struct CheckCommandPayload {
     pub(crate) format_with_errors: Option<FormatWithErrorsEnabled>,
     pub(crate) json_parser: Option<JsonParserConfiguration>,
     pub(crate) css_parser: Option<CssParserConfiguration>,
+    pub(crate) markdown_parser: Option<MarkdownParserConfiguration>,
     pub(crate) only: Vec<AnalyzerSelector>,
     pub(crate) skip: Vec<AnalyzerSelector>,
+    pub(crate) watch: bool,
     pub(crate) profile_rules: bool,
+    pub(crate) profile_type_inference: bool,
 }
 
 struct CheckExecution {
     /// The type of fixes that should be applied when analyzing a file.
     ///
-    /// It's [None] if the `check` command is called without `--apply` or `--apply-suggested`
-    /// arguments.
+    /// It's [None] if the `check` command is called without `--write` or `--fix`.
+    /// `--unsafe` upgrades the mode when combined with `--write` or `--fix`.
     fix_file_mode: Option<FixFileMode>,
     /// An optional tuple.
     /// 1. The virtual path to the file
@@ -70,6 +75,11 @@ struct CheckExecution {
     only: Vec<AnalyzerSelector>,
     /// Skip the given lint rule, assist action, group of rules and actions, or domain
     skip: Vec<AnalyzerSelector>,
+
+    profile_rules: bool,
+
+    /// Profiler for type inference
+    type_inference_profile: Option<TypeInferenceProfilerGuard>,
 }
 
 impl Execution for CheckExecution {
@@ -104,6 +114,22 @@ impl Execution for CheckExecution {
         true
     }
 
+    fn is_rule_profiling_enabled(&self) -> bool {
+        self.profile_rules
+    }
+
+    fn is_type_inference_profiling_enabled(&self) -> bool {
+        self.type_inference_profile.is_some()
+    }
+
+    fn take_type_inference_profile(
+        &self,
+    ) -> Option<biome_module_graph::type_inference::profiling::TypeInferenceProfileSnapshot> {
+        self.type_inference_profile
+            .as_ref()
+            .map(TypeInferenceProfilerGuard::drain)
+    }
+
     fn as_diagnostic_category(&self) -> &'static Category {
         category!("check")
     }
@@ -111,11 +137,6 @@ impl Execution for CheckExecution {
     fn is_safe_fixes_enabled(&self) -> bool {
         self.fix_file_mode
             .is_some_and(|fix_mode| fix_mode == FixFileMode::SafeFixes)
-    }
-
-    fn is_safe_and_unsafe_fixes_enabled(&self) -> bool {
-        self.fix_file_mode
-            .is_some_and(|fix_mode| fix_mode == FixFileMode::SafeAndUnsafeFixes)
     }
 
     fn as_fix_file_mode(&self) -> Option<FixFileMode> {
@@ -162,6 +183,10 @@ impl TraversalCommand for CheckCommandPayload {
         "check"
     }
 
+    fn is_watch_mode(&self) -> bool {
+        self.watch
+    }
+
     fn minimal_scan_kind(&self) -> Option<ScanKind> {
         None
     }
@@ -180,6 +205,25 @@ impl TraversalCommand for CheckCommandPayload {
             unsafe_: self.unsafe_,
         })?;
 
+        let type_inference_profile = if self.profile_type_inference {
+            if cli_options.use_server {
+                return Err(CliDiagnostic::incompatible_arguments(
+                    "--profile-type-inference",
+                    "--use-server",
+                    "Type-inference profiling is available only for in-process CLI analysis.",
+                ));
+            }
+            if self.stdin_file_path.is_some() {
+                return Err(CliDiagnostic::incompatible_arguments(
+                    "--profile-type-inference",
+                    "--stdin-file-path",
+                    "Type-inference profiles require files processed by the CLI traversal.",
+                ));
+            }
+            Some(TypeInferenceProfilerGuard::start())
+        } else {
+            None
+        };
         if self.profile_rules {
             biome_analyze::profiling::enable();
         }
@@ -192,6 +236,8 @@ impl TraversalCommand for CheckCommandPayload {
             skip_parse_errors: cli_options.skip_parse_errors,
             only: self.only.clone(),
             skip: self.skip.clone(),
+            profile_rules: self.profile_rules,
+            type_inference_profile,
         }))
     }
 
@@ -243,6 +289,10 @@ impl TraversalCommand for CheckCommandPayload {
         if self.json_parser.is_some() {
             json.parser.merge_with(self.json_parser.clone())
         }
+        let markdown = configuration.markdown.get_or_insert_with(Default::default);
+        if self.markdown_parser.is_some() {
+            markdown.parser.merge_with(self.markdown_parser.clone())
+        }
 
         if let Some(mut conf) = self.configuration.clone() {
             if let Some(linter) = conf.linter.as_mut() {
@@ -280,5 +330,27 @@ impl TraversalCommand for CheckCommandPayload {
         .unwrap_or(self.paths.clone());
 
         Ok(paths)
+    }
+
+    fn check_incompatible_arguments(&self) -> Result<(), CliDiagnostic> {
+        if self.is_watch_mode() {
+            if self.fix {
+                return Err(CliDiagnostic::incompatible_arguments(
+                    "--watch",
+                    "--fix",
+                    "Applying code fixes is not available in watch mode.",
+                ));
+            }
+
+            if self.write {
+                return Err(CliDiagnostic::incompatible_arguments(
+                    "--watch",
+                    "--write",
+                    "Applying code fixes is not available in watch mode.",
+                ));
+            }
+        }
+
+        Ok(())
     }
 }

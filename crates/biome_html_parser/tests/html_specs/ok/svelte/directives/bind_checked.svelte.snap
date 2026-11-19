@@ -18,12 +18,13 @@ expression: snapshot
 HtmlRoot {
     bom_token: missing (optional),
     frontmatter: missing (optional),
+    processing_instruction: missing (optional),
     directive: missing (optional),
     html: HtmlElementList [
         HtmlSelfClosingElement {
             l_angle_token: L_ANGLE@0..1 "<" [] [],
             name: HtmlTagName {
-                value_token: HTML_LITERAL@1..7 "input" [] [Whitespace(" ")],
+                value_token: INPUT_KW@1..7 "input" [] [Whitespace(" ")],
             },
             attributes: HtmlAttributeList [
                 HtmlAttribute {
@@ -64,7 +65,7 @@ HtmlRoot {
         HtmlSelfClosingElement {
             l_angle_token: L_ANGLE@50..52 "<" [Newline("\n")] [],
             name: HtmlTagName {
-                value_token: HTML_LITERAL@52..58 "input" [] [Whitespace(" ")],
+                value_token: INPUT_KW@52..58 "input" [] [Whitespace(" ")],
             },
             attributes: HtmlAttributeList [
                 HtmlAttribute {
@@ -114,11 +115,12 @@ HtmlRoot {
   0: (empty)
   1: (empty)
   2: (empty)
-  3: HTML_ELEMENT_LIST@0..113
+  3: (empty)
+  4: HTML_ELEMENT_LIST@0..113
     0: HTML_SELF_CLOSING_ELEMENT@0..50
       0: L_ANGLE@0..1 "<" [] []
       1: HTML_TAG_NAME@1..7
-        0: HTML_LITERAL@1..7 "input" [] [Whitespace(" ")]
+        0: INPUT_KW@1..7 "input" [] [Whitespace(" ")]
       2: HTML_ATTRIBUTE_LIST@7..48
         0: HTML_ATTRIBUTE@7..23
           0: HTML_ATTRIBUTE_NAME@7..11
@@ -146,7 +148,7 @@ HtmlRoot {
     1: HTML_SELF_CLOSING_ELEMENT@50..113
       0: L_ANGLE@50..52 "<" [Newline("\n")] []
       1: HTML_TAG_NAME@52..58
-        0: HTML_LITERAL@52..58 "input" [] [Whitespace(" ")]
+        0: INPUT_KW@52..58 "input" [] [Whitespace(" ")]
       2: HTML_ATTRIBUTE_LIST@58..111
         0: HTML_ATTRIBUTE@58..74
           0: HTML_ATTRIBUTE_NAME@58..62
@@ -171,6 +173,6 @@ HtmlRoot {
                 2: R_CURLY@109..111 "}" [] [Whitespace(" ")]
       3: SLASH@111..112 "/" [] []
       4: R_ANGLE@112..113 ">" [] []
-  4: EOF@113..114 "" [Newline("\n")] []
+  5: EOF@113..114 "" [Newline("\n")] []
 
 ```

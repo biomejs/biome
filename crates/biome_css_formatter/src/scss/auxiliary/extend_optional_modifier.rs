@@ -15,6 +15,12 @@ impl FormatNodeRule<ScssExtendOptionalModifier> for FormatScssExtendOptionalModi
             optional_token,
         } = node.as_fields();
 
-        write!(f, [excl_token.format(), optional_token.format()])
+        write!(
+            f,
+            [
+                excl_token.format(),
+                optional_token.format()?.with_text_case(CssCase::Preserve)
+            ]
+        )
     }
 }

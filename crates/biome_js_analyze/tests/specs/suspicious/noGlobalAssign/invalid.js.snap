@@ -27,6 +27,8 @@ invalid.js:1:1 lint/suspicious/noGlobalAssign ━━━━━━━━━━━�
   
   i Assigning to a global variable can override essential functionality.
   
+  i Remove the assignment, or declare a local variable with a different name and assign to that instead.
+  
 
 ```
 
@@ -42,6 +44,8 @@ invalid.js:2:1 lint/suspicious/noGlobalAssign ━━━━━━━━━━━�
     4 │ length = 1;
   
   i Assigning to a global variable can override essential functionality.
+  
+  i Remove the assignment, or declare a local variable with a different name and assign to that instead.
   
 
 ```
@@ -60,6 +64,8 @@ invalid.js:3:1 lint/suspicious/noGlobalAssign ━━━━━━━━━━━�
   
   i Assigning to a global variable can override essential functionality.
   
+  i Remove the assignment, or declare a local variable with a different name and assign to that instead.
+  
 
 ```
 
@@ -76,6 +82,8 @@ invalid.js:4:1 lint/suspicious/noGlobalAssign ━━━━━━━━━━━�
     6 │ String++;
   
   i Assigning to a global variable can override essential functionality.
+  
+  i Remove the assignment, or declare a local variable with a different name and assign to that instead.
   
 
 ```
@@ -94,6 +102,8 @@ invalid.js:5:1 lint/suspicious/noGlobalAssign ━━━━━━━━━━━�
   
   i Assigning to a global variable can override essential functionality.
   
+  i Remove the assignment, or declare a local variable with a different name and assign to that instead.
+  
 
 ```
 
@@ -111,6 +121,8 @@ invalid.js:6:1 lint/suspicious/noGlobalAssign ━━━━━━━━━━━�
   
   i Assigning to a global variable can override essential functionality.
   
+  i Remove the assignment, or declare a local variable with a different name and assign to that instead.
+  
 
 ```
 
@@ -126,6 +138,8 @@ invalid.js:7:3 lint/suspicious/noGlobalAssign ━━━━━━━━━━━�
     8 │ require = 0;
   
   i Assigning to a global variable can override essential functionality.
+  
+  i Remove the assignment, or declare a local variable with a different name and assign to that instead.
   
 
 ```
@@ -143,6 +157,8 @@ invalid.js:7:15 lint/suspicious/noGlobalAssign ━━━━━━━━━━━
   
   i Assigning to a global variable can override essential functionality.
   
+  i Remove the assignment, or declare a local variable with a different name and assign to that instead.
+  
 
 ```
 
@@ -157,6 +173,8 @@ invalid.js:8:1 lint/suspicious/noGlobalAssign ━━━━━━━━━━━�
       │ ^^^^^^^
   
   i Assigning to a global variable can override essential functionality.
+  
+  i Remove the assignment, or declare a local variable with a different name and assign to that instead.
   
 
 ```

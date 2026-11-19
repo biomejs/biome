@@ -22,6 +22,12 @@ for (const platform of PLATFORMS) {
 	}
 }
 
+// The Android (Termux) packages have no dedicated build; they reuse the
+// static musl binaries, which run unmodified on Android.
+for (const arch of ARCHITECTURES) {
+	updateOptionalDependencies("android-%s", arch, "linux-%s-musl");
+}
+
 for (const target of WASM_TARGETS) {
 	updateWasmPackage(target);
 }
@@ -30,7 +36,7 @@ function getName(platform, arch, prefix = "cli") {
 	return format(`${prefix}-${platform}`, arch);
 }
 
-function updateOptionalDependencies(platform, arch) {
+function updateOptionalDependencies(platform, arch, binaryPlatform = platform) {
 	const os = platform.split("-")[0];
 	const buildName = getName(platform, arch);
 	const packageRoot = resolve(PACKAGES_ROOT, buildName);
@@ -71,7 +77,7 @@ function updateOptionalDependencies(platform, arch) {
 	const ext = os === "win32" ? ".exe" : "";
 	const binarySource = resolve(
 		REPO_ROOT,
-		`${getName(platform, arch, "biome")}${ext}`,
+		`${getName(binaryPlatform, arch, "biome")}${ext}`,
 	);
 	const binaryTarget = resolve(packageRoot, `biome${ext}`);
 

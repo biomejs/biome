@@ -1,6 +1,6 @@
 [package]
 name                 = "biome_jsdoc_comment"
-version              = "0.0.1"
+version.workspace    = true
 authors.workspace    = true
 edition.workspace    = true
 description          = "JSDoc comment handling helpers"
@@ -16,6 +16,9 @@ biome_formatter = { workspace = true }
 biome_js_parser = { workspace = true }
 biome_js_syntax = { workspace = true }
 biome_rowan     = { workspace = true }
+
+[dev-dependencies]
+biome_languages = { workspace = true, features = ["lang_js"] }
 
 [lints]
 workspace = true

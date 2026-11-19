@@ -1,0 +1,7 @@
+pattern second_line() {
+    range(start_line=2, end_line=2)
+}
+
+call_expression() as $call where {
+    $call <: second_line()
+}

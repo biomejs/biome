@@ -1,6 +1,7 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
-info: css/scss/expression/edge-cases.scss
+assertion_line: 249
+info: scss/expression/edge-cases.scss
 ---
 
 # Input
@@ -66,7 +67,10 @@ $paren-map: (
 	b: 2,
 );
 $paren-expr: (1 + 2 * 3);
-$nested-list: 1 2, 3 4, 5;
+$nested-list:
+	1 2,
+	3 4,
+	5;
 $kw-args: foo($a: 1, $b: 2, $c...);
 .b {
 	padding: (1 2, 3 4);

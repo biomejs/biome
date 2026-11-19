@@ -1,0 +1,44 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/at-rule/closing-comment-ownership.scss
+---
+
+# Input
+
+```scss
+.ownership{
+value:fn(1px,2px);
+after-ordinary:1;
+value:fn(1px,2px,/* ordinary close */);
+after-ordinary-comment:2;
+@include mix(1px,2px);
+after-include:3;
+@include mix(1px,2px,/* include close */);
+after-include-comment:4;
+@include mix($args... // spread close
+);
+after-spread:5;
+}
+
+```
+
+
+# Formatted
+
+```scss
+.ownership {
+	value: fn(1px, 2px);
+	after-ordinary: 1;
+	value: fn(1px, 2px /* ordinary close */);
+	after-ordinary-comment: 2;
+	@include mix(1px, 2px);
+	after-include: 3;
+	@include mix(1px, 2px /* include close */);
+	after-include-comment: 4;
+	@include mix(
+		$args... // spread close
+	);
+	after-spread: 5;
+}
+
+```

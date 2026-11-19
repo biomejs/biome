@@ -1,0 +1,209 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome lint '<TEMP_DIR>/package_preset_includes_in_local_extended_config_are_relative_to_consuming_config'
+```
+
+## `biome.json`
+
+```json
+{ "extends": ["./shared/base.json"] }
+```
+
+## `node_modules/@shared/plugin/biome-manifest.json`
+
+```json
+{
+    "version": 1,
+    "plugins": {
+        "rules": [{
+            "noAssign": "rules/noAssign.grit",
+            "noKeys": "rules/noKeys.grit"
+        }],
+        "presets": { "recommended": ["noAssign", "noKeys"] }
+    }
+}
+```
+
+## `node_modules/@shared/plugin/package.json`
+
+```json
+{ "name": "@shared/plugin" }
+```
+
+## `node_modules/@shared/plugin/rules/noAssign.grit`
+
+```grit
+`Object.assign($args)` where {
+    register_diagnostic(span = $args, message = "Package of the consuming project: do not use Object.assign")
+}
+```
+
+## `node_modules/@shared/plugin/rules/noKeys.grit`
+
+```grit
+`Object.keys($args)` where {
+    register_diagnostic(span = $args, message = "Package of the consuming project: do not use Object.keys")
+}
+```
+
+## `packages/app/src/index.js`
+
+```js
+Object.assign({}, value);
+Object.keys(value);
+
+```
+
+## `shared/base.json`
+
+```json
+{
+    "plugins": [
+        {
+            "path": "@shared/plugin/presets/recommended",
+            "resolutionKind": "config",
+            "includes": ["src/**", "!src/generated/**"]
+        },
+        {
+            "path": "@shared/plugin/presets/recommended",
+            "includes": ["src/**", "!src/generated/**"]
+        }
+    ]
+}
+```
+
+## `shared/node_modules/@shared/plugin/biome-manifest.json`
+
+```json
+{
+    "version": 1,
+    "plugins": {
+        "rules": [{
+            "noAssign": "rules/noAssign.grit",
+            "noKeys": "rules/noKeys.grit"
+        }],
+        "presets": { "recommended": ["noAssign", "noKeys"] }
+    }
+}
+```
+
+## `shared/node_modules/@shared/plugin/package.json`
+
+```json
+{ "name": "@shared/plugin" }
+```
+
+## `shared/node_modules/@shared/plugin/rules/noAssign.grit`
+
+```grit
+`Object.assign($args)` where {
+    register_diagnostic(span = $args, message = "Package of the extended configuration: do not use Object.assign")
+}
+```
+
+## `shared/node_modules/@shared/plugin/rules/noKeys.grit`
+
+```grit
+`Object.keys($args)` where {
+    register_diagnostic(span = $args, message = "Package of the extended configuration: do not use Object.keys")
+}
+```
+
+## `shared/src/index.js`
+
+```js
+Object.assign({}, value);
+Object.keys(value);
+
+```
+
+## `src/generated/index.js`
+
+```js
+Object.assign({}, value);
+Object.keys(value);
+
+```
+
+## `src/index.js`
+
+```js
+Object.assign({}, value);
+Object.keys(value);
+
+```
+
+# Termination Message
+
+```block
+lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+src/index.js:1:15 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Package of the extended configuration: do not use Object.assign
+  
+  > 1 │ Object.assign({}, value);
+      │               ^^^^^^^^^
+    2 │ Object.keys(value);
+    3 │ 
+  
+
+```
+
+```block
+src/index.js:1:15 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Package of the consuming project: do not use Object.assign
+  
+  > 1 │ Object.assign({}, value);
+      │               ^^^^^^^^^
+    2 │ Object.keys(value);
+    3 │ 
+  
+
+```
+
+```block
+src/index.js:2:13 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Package of the extended configuration: do not use Object.keys
+  
+    1 │ Object.assign({}, value);
+  > 2 │ Object.keys(value);
+      │             ^^^^^
+    3 │ 
+  
+
+```
+
+```block
+src/index.js:2:13 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Package of the consuming project: do not use Object.keys
+  
+    1 │ Object.assign({}, value);
+  > 2 │ Object.keys(value);
+      │             ^^^^^
+    3 │ 
+  
+
+```
+
+```block
+Checked 6 files in <TIME>. No fixes applied.
+Found 4 errors.
+```

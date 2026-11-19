@@ -1,0 +1,46 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-emit-multiple-args.vue
+---
+# Input
+```vue
+/* should generate diagnostics */
+
+<script>
+import { ref, defineComponent } from 'vue'
+
+export default defineComponent({
+  emits: ['incremented'],
+  setup(_, { emit }) {
+    const counter = ref(0)
+
+    emit('incremented', 'xxx', counter)
+
+    return {
+      counter
+    }
+  }
+})
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-emit-multiple-args.vue:11:32 lint/correctness/noVueRefAsOperand ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Ref value is accessed without `.value`.
+  
+     9 │     const counter = ref(0)
+    10 │ 
+  > 11 │     emit('incremented', 'xxx', counter)
+       │                                ^^^^^^^
+    12 │ 
+    13 │     return {
+  
+  i Without `.value`, Vue cannot track changes to the ref, which may break reactivity.
+  
+  i Use `.value` to access ref value.
+  
+
+```

@@ -166,17 +166,7 @@ a.important
 ```diff
 --- Prettier
 +++ Biome
-@@ -27,7 +27,8 @@
- 
-   font-weight: bold;
- }
--%message-shared {
-+%
-+message-shared {
-   border: 1px solid #ccc;
-   padding: 10px;
-   color: #333;
-@@ -60,36 +61,46 @@
+@@ -60,36 +60,46 @@
    @extend .notice !optional;
  }
  a.important {
@@ -268,8 +258,7 @@ a.important
 
   font-weight: bold;
 }
-%
-message-shared {
+%message-shared {
   border: 1px solid #ccc;
   padding: 10px;
   color: #333;
@@ -351,19 +340,11 @@ a.important {
 ```
 extend.css:50:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected a qualified rule, or an at rule but instead found '%'.
+  × SCSS placeholder selectors are an SCSS only feature. Convert your file to an SCSS file or remove the syntax.
   
     49 │ }
   > 50 │ %message-shared {
-       │ ^
-    51 │     border: 1px solid #ccc;
-    52 │     padding: 10px;
-  
-  i Expected a qualified rule, or an at rule here.
-  
-    49 │ }
-  > 50 │ %message-shared {
-       │ ^
+       │ ^^^^^^^^^^^^^^^
     51 │     border: 1px solid #ccc;
     52 │     padding: 10px;
   
@@ -372,5 +353,5 @@ extend.css:50:1 parse ━━━━━━━━━━━━━━━━━━━�
 
 # Lines exceeding max width of 80 characters
 ```
-  105:   @extend .very-very-very-very-very-very-very-very-very-very-very-very-very-long-selector, .very-very-very-very-very-very-very-very-very-very-very-very-very-long-selector;
+  104:   @extend .very-very-very-very-very-very-very-very-very-very-very-very-very-long-selector, .very-very-very-very-very-very-very-very-very-very-very-very-very-long-selector;
 ```

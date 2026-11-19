@@ -11,16 +11,17 @@ use biome_js_semantic::ReferencesExtensions;
 use biome_js_syntax::{
     AnyJsBinding, AnyJsBindingPattern, AnyJsExpression, JsArrowFunctionExpression,
     JsAssignmentExpression, JsExpressionStatement, JsIdentifierBinding, JsIdentifierExpression,
-    JsThisExpression, JsVariableDeclaration, JsVariableDeclarator, JsVariableStatement, T,
+    JsInitializerClause, JsPropertyClassMember, JsThisExpression, JsVariableDeclaration,
+    JsVariableDeclarator, JsVariableStatement, T,
 };
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt};
 use biome_rule_options::no_useless_this_alias::NoUselessThisAliasOptions;
 
 declare_lint_rule! {
-    /// Disallow useless `this` aliasing.
+    /// Disallow aliases for `this` when `this` can be used directly.
     ///
-    /// Arrow functions inherits `this` from their enclosing scope;
-    /// this makes `this` aliasing useless in this situation.
+    /// Arrow functions use `this` from their surrounding scope. In that situation, assigning
+    /// `this` to another variable adds an unnecessary name without changing which value is used.
     ///
     /// ## Examples
     ///
@@ -108,6 +109,13 @@ impl Rule for NoUselessThisAlias {
                 .syntax()
                 .ancestors()
                 .skip(1)
+                // Field initializers have their own `this`, unlike computed property names.
+                .take_while(|node| {
+                    !(JsInitializerClause::can_cast(node.kind())
+                        && node.parent().is_some_and(|parent| {
+                            JsPropertyClassMember::can_cast(parent.kind())
+                        }))
+                })
                 .filter(|x| !JsArrowFunctionExpression::can_cast(x.kind()))
                 .find_map(AnyJsControlFlowRoot::cast)?;
             if this_scope != current_this_scope {

@@ -45,7 +45,7 @@ JsModule {
                         ],
                         r_angle_token: R_ANGLE@5..6 ">" [] [],
                     },
-                    children: JsxChildList [],
+                    elements: JsxChildList [],
                     closing_element: JsxClosingElement {
                         l_angle_token: L_ANGLE@6..7 "<" [] [],
                         slash_token: SLASH@7..8 "/" [] [],
@@ -77,7 +77,7 @@ JsModule {
                         ],
                         r_angle_token: R_ANGLE@19..20 ">" [] [],
                     },
-                    children: JsxChildList [],
+                    elements: JsxChildList [],
                     closing_element: JsxClosingElement {
                         l_angle_token: L_ANGLE@20..21 "<" [] [],
                         slash_token: SLASH@21..22 "/" [] [],
@@ -109,7 +109,7 @@ JsModule {
                         ],
                         r_angle_token: R_ANGLE@36..37 ">" [] [],
                     },
-                    children: JsxChildList [],
+                    elements: JsxChildList [],
                     closing_element: JsxClosingElement {
                         l_angle_token: L_ANGLE@37..38 "<" [] [],
                         slash_token: SLASH@38..39 "/" [] [],
@@ -147,7 +147,7 @@ JsModule {
                         ],
                         r_angle_token: R_ANGLE@56..57 ">" [] [],
                     },
-                    children: JsxChildList [],
+                    elements: JsxChildList [],
                     closing_element: JsxClosingElement {
                         l_angle_token: L_ANGLE@57..58 "<" [] [],
                         slash_token: SLASH@58..59 "/" [] [],
@@ -185,7 +185,7 @@ JsModule {
                         ],
                         r_angle_token: R_ANGLE@73..74 ">" [] [],
                     },
-                    children: JsxChildList [],
+                    elements: JsxChildList [],
                     closing_element: JsxClosingElement {
                         l_angle_token: L_ANGLE@74..75 "<" [] [],
                         slash_token: SLASH@75..76 "/" [] [],
@@ -232,7 +232,7 @@ JsModule {
                         ],
                         r_angle_token: R_ANGLE@102..103 ">" [] [],
                     },
-                    children: JsxChildList [],
+                    elements: JsxChildList [],
                     closing_element: JsxClosingElement {
                         l_angle_token: L_ANGLE@103..104 "<" [] [],
                         slash_token: SLASH@104..105 "/" [] [],
@@ -279,7 +279,7 @@ JsModule {
                         ],
                         r_angle_token: R_ANGLE@131..132 ">" [] [],
                     },
-                    children: JsxChildList [],
+                    elements: JsxChildList [],
                     closing_element: JsxClosingElement {
                         l_angle_token: L_ANGLE@132..133 "<" [] [],
                         slash_token: SLASH@133..134 "/" [] [],
@@ -332,7 +332,7 @@ JsModule {
                         ],
                         r_angle_token: R_ANGLE@164..165 ">" [] [],
                     },
-                    children: JsxChildList [],
+                    elements: JsxChildList [],
                     closing_element: JsxClosingElement {
                         l_angle_token: L_ANGLE@165..166 "<" [] [],
                         slash_token: SLASH@166..167 "/" [] [],

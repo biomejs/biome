@@ -1,0 +1,101 @@
+---
+source: crates/biome_graphql_analyze/tests/spec_tests.rs
+expression: invalid.graphql
+---
+# Input
+```graphql
+query user {
+  user {
+    id
+  }
+}
+
+query user {
+  me {
+    id
+  }
+}
+
+mutation updateUser {
+  updateUser {
+    id
+  }
+}
+
+mutation updateUser {
+  updateProfile {
+    name
+  }
+}
+
+mutation updateUser {
+  updateSettings {
+    theme
+  }
+}
+
+```
+
+# Diagnostics
+```
+invalid.graphql:1:7 lint/suspicious/noDuplicateGraphqlOperationName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The operation name "user" is used more than once.
+  
+  > 1 │ query user {
+      │       ^^^^
+    2 │   user {
+    3 │     id
+  
+  i The operation "user" is repeated here.
+  
+    5 │ }
+    6 │ 
+  > 7 │ query user {
+      │       ^^^^
+    8 │   me {
+    9 │     id
+  
+  i GraphQL operation names must be unique to ensure proper identification.
+  
+  i Rename the operation to have a unique name.
+  
+
+```
+
+```
+invalid.graphql:13:10 lint/suspicious/noDuplicateGraphqlOperationName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The operation name "updateUser" is used more than once.
+  
+    11 │ }
+    12 │ 
+  > 13 │ mutation updateUser {
+       │          ^^^^^^^^^^
+    14 │   updateUser {
+    15 │     id
+  
+  i The operation "updateUser" is repeated here.
+  
+    17 │ }
+    18 │ 
+  > 19 │ mutation updateUser {
+       │          ^^^^^^^^^^
+    20 │   updateProfile {
+    21 │     name
+  
+  i The operation "updateUser" is repeated here.
+  
+    23 │ }
+    24 │ 
+  > 25 │ mutation updateUser {
+       │          ^^^^^^^^^^
+    26 │   updateSettings {
+    27 │     theme
+  
+  i GraphQL operation names must be unique to ensure proper identification.
+  
+  i Rename the operation to have a unique name.
+  
+
+```

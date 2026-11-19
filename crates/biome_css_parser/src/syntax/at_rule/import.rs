@@ -2,9 +2,7 @@ use crate::parser::CssParser;
 use crate::syntax::at_rule::layer::LayerNameList;
 use crate::syntax::at_rule::media::MediaQueryList;
 use crate::syntax::at_rule::supports::error::expected_any_supports_condition;
-use crate::syntax::at_rule::supports::{
-    is_at_supports_property, parse_any_supports_condition, parse_supports_declaration,
-};
+use crate::syntax::at_rule::supports::parse_import_supports_condition;
 use crate::syntax::util::skip_possible_tailwind_syntax;
 use crate::syntax::value::url::{is_at_url_function, is_nth_at_url_function, parse_url_function};
 use crate::syntax::{is_at_string, parse_string};
@@ -205,17 +203,13 @@ pub(crate) fn parse_import_supports(p: &mut CssParser) -> ParsedSyntax {
     p.bump(T![supports]);
     p.expect(T!['(']);
 
-    if is_at_supports_property(p) {
-        parse_supports_declaration(p).ok();
-    } else {
-        parse_any_supports_condition(p)
-            .or_recover(
-                p,
-                &ImportSupportsConditionParseRecovery,
-                expected_any_supports_condition,
-            )
-            .ok();
-    }
+    parse_import_supports_condition(p)
+        .or_recover(
+            p,
+            &ImportSupportsConditionParseRecovery,
+            expected_any_supports_condition,
+        )
+        .ok();
 
     p.expect(T![')']);
     Present(m.complete(p, CSS_IMPORT_SUPPORTS))

@@ -22,8 +22,9 @@ expression: snapshot
 ## AST
 
 ```
-MdDocument {
+MdRoot {
     bom_token: missing (optional),
+    frontmatter: missing (optional),
     value: MdBlockList [
         MdQuote {
             prefix: MdQuotePrefix {
@@ -51,7 +52,6 @@ MdDocument {
                                             value_token: MD_TEXTUAL_LITERAL@8..9 "\n" [] [],
                                         },
                                     ],
-                                    hard_line: missing (optional),
                                 },
                                 MdQuotePrefix {
                                     pre_marker_indent: MdQuoteIndentList [],
@@ -120,7 +120,6 @@ MdDocument {
                                             value_token: MD_TEXTUAL_LITERAL@30..31 "\n" [] [],
                                         },
                                     ],
-                                    hard_line: missing (optional),
                                 },
                                 MdQuotePrefix {
                                     pre_marker_indent: MdQuoteIndentList [],
@@ -188,9 +187,10 @@ MdDocument {
 ## CST
 
 ```
-0: MD_DOCUMENT@0..50
+0: MD_ROOT@0..50
   0: (empty)
-  1: MD_BLOCK_LIST@0..50
+  1: (empty)
+  2: MD_BLOCK_LIST@0..50
     0: MD_QUOTE@0..15
       0: MD_QUOTE_PREFIX@0..2
         0: MD_QUOTE_INDENT_LIST@0..0
@@ -212,7 +212,6 @@ MdDocument {
                       0: MD_TEXTUAL_LITERAL@5..8 "foo" [] []
                     1: MD_TEXTUAL@8..9
                       0: MD_TEXTUAL_LITERAL@8..9 "\n" [] []
-                  1: (empty)
                 1: MD_QUOTE_PREFIX@9..11
                   0: MD_QUOTE_INDENT_LIST@9..9
                   1: R_ANGLE@9..10 ">" [] []
@@ -258,7 +257,6 @@ MdDocument {
                       0: MD_TEXTUAL_LITERAL@27..30 "Bar" [] []
                     4: MD_TEXTUAL@30..31
                       0: MD_TEXTUAL_LITERAL@30..31 "\n" [] []
-                  1: (empty)
                 1: MD_QUOTE_PREFIX@31..33
                   0: MD_QUOTE_INDENT_LIST@31..31
                   1: R_ANGLE@31..32 ">" [] []
@@ -294,6 +292,6 @@ MdDocument {
           1: MD_SETEXT_UNDERLINE_LITERAL@46..49 "---" [] []
         1: MD_NEWLINE@49..50
           0: NEWLINE@49..50 "\n" [] []
-  2: EOF@50..50 "" [] []
+  3: EOF@50..50 "" [] []
 
 ```

@@ -1,6 +1,7 @@
 use crate::prelude::*;
-use crate::utils::import::write_import_payload;
+use crate::utils::import::FormatImportClause;
 use biome_css_syntax::{ScssPlainImport, ScssPlainImportFields};
+use biome_formatter::write;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatScssPlainImport;
@@ -13,6 +14,8 @@ impl FormatNodeRule<ScssPlainImport> for FormatScssPlainImport {
             media,
         } = node.as_fields();
 
-        write_import_payload(f, &url, layer.as_ref(), supports.as_ref(), &media)
+        let import_clause = FormatImportClause::new(url, layer, supports, media);
+
+        write!(f, [group(&import_clause)])
     }
 }

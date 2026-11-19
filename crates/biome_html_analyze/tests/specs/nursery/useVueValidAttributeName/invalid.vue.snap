@@ -1,0 +1,320 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<template>
+  <p 0abc></p>
+  <p -def></p>
+  <p 0abc="value"></p>
+  <p a$b></p>
+  <p a#b="value"></p>
+  <p a&b></p>
+  <p v-bind:0abc="value"></p>
+  <p v-bind:-def.prop="value"></p>
+  <p :0abc="value"></p>
+  <p :-def="value"></p>
+  <p :0abc.camel="value"></p>
+  <svg 0abc></svg>
+  <div is="my-button" 0abc></div>
+  <div><span foo 0abc bar></span></div>
+</template>
+
+```
+
+# Diagnostics
+```
+invalid.vue:3:6 lint/nursery/useVueValidAttributeName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The attribute name 0abc isn't valid.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <template>
+  > 3 │   <p 0abc></p>
+      │      ^^^^
+    4 │   <p -def></p>
+    5 │   <p 0abc="value"></p>
+  
+  i Browsers can throw an error when Vue sets an attribute with an invalid name.
+  
+  i Start the name with a letter, an underscore, or a colon, and use only letters, digits, hyphens, underscores, periods, and colons after it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:4:6 lint/nursery/useVueValidAttributeName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The attribute name -def isn't valid.
+  
+    2 │ <template>
+    3 │   <p 0abc></p>
+  > 4 │   <p -def></p>
+      │      ^^^^
+    5 │   <p 0abc="value"></p>
+    6 │   <p a$b></p>
+  
+  i Browsers can throw an error when Vue sets an attribute with an invalid name.
+  
+  i Start the name with a letter, an underscore, or a colon, and use only letters, digits, hyphens, underscores, periods, and colons after it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:5:6 lint/nursery/useVueValidAttributeName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The attribute name 0abc isn't valid.
+  
+    3 │   <p 0abc></p>
+    4 │   <p -def></p>
+  > 5 │   <p 0abc="value"></p>
+      │      ^^^^
+    6 │   <p a$b></p>
+    7 │   <p a#b="value"></p>
+  
+  i Browsers can throw an error when Vue sets an attribute with an invalid name.
+  
+  i Start the name with a letter, an underscore, or a colon, and use only letters, digits, hyphens, underscores, periods, and colons after it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:6:6 lint/nursery/useVueValidAttributeName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The attribute name a$b isn't valid.
+  
+    4 │   <p -def></p>
+    5 │   <p 0abc="value"></p>
+  > 6 │   <p a$b></p>
+      │      ^^^
+    7 │   <p a#b="value"></p>
+    8 │   <p a&b></p>
+  
+  i Browsers can throw an error when Vue sets an attribute with an invalid name.
+  
+  i Start the name with a letter, an underscore, or a colon, and use only letters, digits, hyphens, underscores, periods, and colons after it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:7:6 lint/nursery/useVueValidAttributeName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The attribute name a#b isn't valid.
+  
+    5 │   <p 0abc="value"></p>
+    6 │   <p a$b></p>
+  > 7 │   <p a#b="value"></p>
+      │      ^^^
+    8 │   <p a&b></p>
+    9 │   <p v-bind:0abc="value"></p>
+  
+  i Browsers can throw an error when Vue sets an attribute with an invalid name.
+  
+  i Start the name with a letter, an underscore, or a colon, and use only letters, digits, hyphens, underscores, periods, and colons after it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:8:6 lint/nursery/useVueValidAttributeName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The attribute name a&b isn't valid.
+  
+     6 │   <p a$b></p>
+     7 │   <p a#b="value"></p>
+   > 8 │   <p a&b></p>
+       │      ^^^
+     9 │   <p v-bind:0abc="value"></p>
+    10 │   <p v-bind:-def.prop="value"></p>
+  
+  i Browsers can throw an error when Vue sets an attribute with an invalid name.
+  
+  i Start the name with a letter, an underscore, or a colon, and use only letters, digits, hyphens, underscores, periods, and colons after it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:9:13 lint/nursery/useVueValidAttributeName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The attribute name 0abc isn't valid.
+  
+     7 │   <p a#b="value"></p>
+     8 │   <p a&b></p>
+   > 9 │   <p v-bind:0abc="value"></p>
+       │             ^^^^
+    10 │   <p v-bind:-def.prop="value"></p>
+    11 │   <p :0abc="value"></p>
+  
+  i Browsers can throw an error when Vue sets an attribute with an invalid name.
+  
+  i Start the name with a letter, an underscore, or a colon, and use only letters, digits, hyphens, underscores, periods, and colons after it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:10:13 lint/nursery/useVueValidAttributeName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The attribute name -def isn't valid.
+  
+     8 │   <p a&b></p>
+     9 │   <p v-bind:0abc="value"></p>
+  > 10 │   <p v-bind:-def.prop="value"></p>
+       │             ^^^^
+    11 │   <p :0abc="value"></p>
+    12 │   <p :-def="value"></p>
+  
+  i Browsers can throw an error when Vue sets an attribute with an invalid name.
+  
+  i Start the name with a letter, an underscore, or a colon, and use only letters, digits, hyphens, underscores, periods, and colons after it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:11:7 lint/nursery/useVueValidAttributeName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The attribute name 0abc isn't valid.
+  
+     9 │   <p v-bind:0abc="value"></p>
+    10 │   <p v-bind:-def.prop="value"></p>
+  > 11 │   <p :0abc="value"></p>
+       │       ^^^^
+    12 │   <p :-def="value"></p>
+    13 │   <p :0abc.camel="value"></p>
+  
+  i Browsers can throw an error when Vue sets an attribute with an invalid name.
+  
+  i Start the name with a letter, an underscore, or a colon, and use only letters, digits, hyphens, underscores, periods, and colons after it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:12:7 lint/nursery/useVueValidAttributeName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The attribute name -def isn't valid.
+  
+    10 │   <p v-bind:-def.prop="value"></p>
+    11 │   <p :0abc="value"></p>
+  > 12 │   <p :-def="value"></p>
+       │       ^^^^
+    13 │   <p :0abc.camel="value"></p>
+    14 │   <svg 0abc></svg>
+  
+  i Browsers can throw an error when Vue sets an attribute with an invalid name.
+  
+  i Start the name with a letter, an underscore, or a colon, and use only letters, digits, hyphens, underscores, periods, and colons after it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:13:7 lint/nursery/useVueValidAttributeName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The attribute name 0abc isn't valid.
+  
+    11 │   <p :0abc="value"></p>
+    12 │   <p :-def="value"></p>
+  > 13 │   <p :0abc.camel="value"></p>
+       │       ^^^^
+    14 │   <svg 0abc></svg>
+    15 │   <div is="my-button" 0abc></div>
+  
+  i Browsers can throw an error when Vue sets an attribute with an invalid name.
+  
+  i Start the name with a letter, an underscore, or a colon, and use only letters, digits, hyphens, underscores, periods, and colons after it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:14:8 lint/nursery/useVueValidAttributeName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The attribute name 0abc isn't valid.
+  
+    12 │   <p :-def="value"></p>
+    13 │   <p :0abc.camel="value"></p>
+  > 14 │   <svg 0abc></svg>
+       │        ^^^^
+    15 │   <div is="my-button" 0abc></div>
+    16 │   <div><span foo 0abc bar></span></div>
+  
+  i Browsers can throw an error when Vue sets an attribute with an invalid name.
+  
+  i Start the name with a letter, an underscore, or a colon, and use only letters, digits, hyphens, underscores, periods, and colons after it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:15:23 lint/nursery/useVueValidAttributeName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The attribute name 0abc isn't valid.
+  
+    13 │   <p :0abc.camel="value"></p>
+    14 │   <svg 0abc></svg>
+  > 15 │   <div is="my-button" 0abc></div>
+       │                       ^^^^
+    16 │   <div><span foo 0abc bar></span></div>
+    17 │ </template>
+  
+  i Browsers can throw an error when Vue sets an attribute with an invalid name.
+  
+  i Start the name with a letter, an underscore, or a colon, and use only letters, digits, hyphens, underscores, periods, and colons after it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:16:18 lint/nursery/useVueValidAttributeName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The attribute name 0abc isn't valid.
+  
+    14 │   <svg 0abc></svg>
+    15 │   <div is="my-button" 0abc></div>
+  > 16 │   <div><span foo 0abc bar></span></div>
+       │                  ^^^^
+    17 │ </template>
+    18 │ 
+  
+  i Browsers can throw an error when Vue sets an attribute with an invalid name.
+  
+  i Start the name with a letter, an underscore, or a colon, and use only letters, digits, hyphens, underscores, periods, and colons after it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

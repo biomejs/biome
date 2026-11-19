@@ -1,11 +1,13 @@
-use crate::lexer::{MarkdownLexContext, MarkdownLexer, MarkdownReLexContext};
+use crate::MarkdownParserOptions;
+use crate::lexer::{MarkdownLexContext, MarkdownLexer, MarkdownReLexContext, html_comment_len};
+use crate::syntax::TAB_STOP_SPACES;
 use biome_markdown_syntax::MarkdownSyntaxKind;
-use biome_markdown_syntax::MarkdownSyntaxKind::EOF;
+use biome_markdown_syntax::MarkdownSyntaxKind::{EOF, PIPE, WHITESPACE};
 use biome_parser::lexer::BufferedLexer;
 use biome_parser::prelude::{BumpWithContext, TokenSource};
 use biome_parser::token_source::{TokenSourceWithBufferedLexer, Trivia};
 use biome_parser::{diagnostic::ParseDiagnostic, token_source::TokenSourceCheckpoint};
-use biome_rowan::{TextRange, TriviaPieceKind};
+use biome_rowan::{TextRange, TextSize, TriviaPieceKind};
 
 /// Find the start position of the current line in source text.
 ///
@@ -45,9 +47,23 @@ impl<'source> MarkdownTokenSource<'source> {
         }
     }
     /// Creates a new token source for the given string
-    pub fn from_str(source: &'source str) -> Self {
-        let lexer = MarkdownLexer::from_str(source);
+    pub fn from_str(source: &'source str, options: &MarkdownParserOptions) -> Self {
+        let lexer = MarkdownLexer::from_str(source).with_options(options);
 
+        Self::from_lexer(lexer)
+    }
+
+    pub fn from_range(
+        source: &'source str,
+        range: TextRange,
+        options: &MarkdownParserOptions,
+    ) -> Option<Self> {
+        let lexer = MarkdownLexer::from_range(source, range)?.with_options(options);
+
+        Some(Self::from_lexer(lexer))
+    }
+
+    fn from_lexer(lexer: MarkdownLexer<'source>) -> Self {
         let buffered = BufferedLexer::new(lexer);
         let mut source = MarkdownTokenSource::new(buffered);
 
@@ -56,12 +72,30 @@ impl<'source> MarkdownTokenSource<'source> {
     }
 
     fn next_non_trivia_token(&mut self, context: MarkdownLexContext, first_token: bool) {
-        let mut trailing = !first_token;
+        match context {
+            MarkdownLexContext::Table => {
+                self.next_non_trivia_token_impl::<true>(context, first_token)
+            }
+            _ => self.next_non_trivia_token_impl::<false>(context, first_token),
+        }
+    }
+
+    fn next_non_trivia_token_impl<const TABLE: bool>(
+        &mut self,
+        context: MarkdownLexContext,
+        first_token: bool,
+    ) {
+        // GFM trims the spaces between pipes and cell content, so in a table row the
+        // whitespace on either side of a pipe is the pipe's trivia.
+        let mut trailing = !first_token && (!TABLE || self.current() == PIPE);
 
         loop {
             let kind = self.lexer.next_token(context);
-
-            let trivia_kind = TriviaPieceKind::try_from(kind);
+            let trivia_kind = if TABLE && kind == WHITESPACE {
+                Ok(TriviaPieceKind::Whitespace)
+            } else {
+                TriviaPieceKind::try_from(kind)
+            };
 
             match trivia_kind {
                 Err(_) => {
@@ -77,6 +111,40 @@ impl<'source> MarkdownTokenSource<'source> {
                         .push(Trivia::new(trivia_kind, self.current_range(), trailing));
                 }
             }
+        }
+    }
+
+    /// Records leading comments after the parser has identified an HTML span.
+    /// Keeping them visible until then preserves HTML block and container boundaries.
+    /// A comment-only literal retains an empty token to anchor its trivia and syntax node.
+    pub(crate) fn record_html_comment_trivia(&mut self) {
+        let range = self.current_range();
+        let mut text = &self.lexer.source()[range];
+        let mut offset = range.start();
+        while let Some(length) = html_comment_len(text) {
+            let end = offset + TextSize::from(length as u32);
+            self.trivia_list.push(Trivia::new(
+                TriviaPieceKind::MultiLineComment,
+                TextRange::new(offset, end),
+                false,
+            ));
+            text = &text[length..];
+            offset = end;
+
+            let next = text.trim_start_matches([' ', '\t']);
+            if !next.is_empty() && !next.starts_with("<!--") {
+                break;
+            }
+            let whitespace = TextSize::from((text.len() - next.len()) as u32);
+            if whitespace > TextSize::from(0) {
+                self.trivia_list.push(Trivia::new(
+                    TriviaPieceKind::Whitespace,
+                    TextRange::at(offset, whitespace),
+                    false,
+                ));
+                offset += whitespace;
+            }
+            text = next;
         }
     }
 
@@ -96,8 +164,9 @@ impl<'source> MarkdownTokenSource<'source> {
     pub fn source_after_current(&self) -> &str {
         let range = self.lexer.current_range();
         let start: usize = range.start().into();
+        let end = self.lexer.lexer().range_end();
         let source = self.lexer.source();
-        &source[start..]
+        &source[start..end]
     }
 
     /// Returns the full source text.
@@ -105,10 +174,16 @@ impl<'source> MarkdownTokenSource<'source> {
         self.lexer.source()
     }
 
-    /// Count leading indentation on the current line, including whitespace inside the current token.
+    pub fn has_frontmatter_closing_fence(&self) -> bool {
+        self.lexer.lexer().has_frontmatter_closing_fence()
+    }
+
+    /// Count leading indentation on the current line, including whitespace
+    /// inside the current token.
     ///
-    /// This scans from the start of the current line to the first non-whitespace character.
-    /// Tab characters are counted as 4 spaces per CommonMark spec.
+    /// Scans from the start of the current line to the first non-whitespace
+    /// character. Tabs expand to the next multiple of `TAB_STOP_SPACES`,
+    /// per CommonMark §2.2.
     pub fn line_start_leading_indent(&self) -> usize {
         let range = self.lexer.current_range();
         let start: usize = range.start().into();
@@ -117,15 +192,15 @@ impl<'source> MarkdownTokenSource<'source> {
         let line_start = find_line_start(&source[..start]);
 
         let line = &source[line_start..];
-        let mut count = 0usize;
+        let mut column = 0usize;
         for c in line.chars() {
             match c {
-                ' ' => count += 1,
-                '\t' => count += 4,
+                ' ' => column += 1,
+                '\t' => column += TAB_STOP_SPACES - (column % TAB_STOP_SPACES),
                 _ => break,
             }
         }
-        count
+        column
     }
 
     /// Returns true if the current token starts on a line with only whitespace before it.
@@ -170,6 +245,13 @@ impl<'source> MarkdownTokenSource<'source> {
 
     pub fn set_force_ordered_list_marker(&mut self, value: bool) {
         self.lexer.lexer_mut().set_force_ordered_list_marker(value);
+    }
+
+    /// Re-lex from the current token start up to `end` as a single token of
+    /// the given kind.
+    pub fn re_lex_span(&mut self, end: TextSize, kind: MarkdownSyntaxKind) -> MarkdownSyntaxKind {
+        self.lexer.lexer_mut().set_relex_span(end.into(), kind);
+        self.lexer.re_lex(MarkdownReLexContext::Span)
     }
 
     /// Bump the current token using the LinkDefinition context.

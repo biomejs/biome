@@ -20,11 +20,13 @@ impl FormatRule<AnyCssValue> for FormatAnyCssValue {
             AnyCssValue::CssRatio(node) => node.format().fmt(f),
             AnyCssValue::CssString(node) => node.format().fmt(f),
             AnyCssValue::CssUnicodeRange(node) => node.format().fmt(f),
+            AnyCssValue::ScssHashValue(node) => node.format().fmt(f),
             AnyCssValue::ScssInterpolatedIdentifier(node) => node.format().fmt(f),
             AnyCssValue::ScssInterpolatedString(node) => node.format().fmt(f),
             AnyCssValue::ScssInterpolatedValue(node) => node.format().fmt(f),
             AnyCssValue::ScssModuleMemberAccess(node) => node.format().fmt(f),
             AnyCssValue::ScssParentSelectorValue(node) => node.format().fmt(f),
+            AnyCssValue::ScssPercentValue(node) => node.format().fmt(f),
             AnyCssValue::ScssVariable(node) => node.format().fmt(f),
             AnyCssValue::TwValueThemeReference(node) => node.format().fmt(f),
         }

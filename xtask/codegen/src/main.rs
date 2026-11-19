@@ -5,10 +5,17 @@ mod generate_configuration;
 #[cfg(feature = "external_data")]
 mod generate_css_baseline;
 #[cfg(feature = "external_data")]
+mod generate_css_keywords;
+#[cfg(feature = "external_data")]
 mod generate_license;
 #[cfg(feature = "configuration")]
 mod generate_migrate_eslint;
-mod move_rule;
+#[cfg(feature = "configuration")]
+mod generate_migrate_stylelint;
+#[cfg(feature = "external_data")]
+mod generate_module_replacements;
+#[cfg(feature = "rules_metadata")]
+mod generate_rules_metadata;
 use xtask_glue::{Result, project_root, pushd};
 
 #[cfg(feature = "schema")]
@@ -20,14 +27,24 @@ use crate::generate_configuration::generate_rules_configuration;
 #[cfg(feature = "external_data")]
 use crate::generate_css_baseline::generate_css_baseline;
 #[cfg(feature = "external_data")]
+use crate::generate_css_keywords::generate_css_keywords;
+#[cfg(feature = "external_data")]
 use crate::generate_license::generate_license;
 #[cfg(feature = "configuration")]
 use crate::generate_migrate_eslint::generate_migrate_eslint;
-use crate::move_rule::move_rule;
+#[cfg(feature = "configuration")]
+use crate::generate_migrate_stylelint::generate_migrate_stylelint;
+#[cfg(feature = "external_data")]
+use crate::generate_module_replacements::generate_module_replacements;
+#[cfg(feature = "rules_metadata")]
+use crate::generate_rules_metadata::generate_rules_metadata;
 
+#[cfg(feature = "global_types")]
+use xtask_codegen::generate_global_types;
 use xtask_codegen::{
     TaskCommand, generate_analyzer, generate_analyzer_rule_options, generate_ast,
-    generate_formatters, generate_new_analyzer_rule, generate_tables, task_command,
+    generate_formatters, generate_new_analyzer_rule, generate_tables, move_rule::move_rule,
+    promote_rules::promote_rules, task_command,
 };
 use xtask_glue::Mode::Overwrite;
 
@@ -55,6 +72,16 @@ fn main() -> Result<()> {
             #[cfg(feature = "configuration")]
             generate_migrate_eslint(Overwrite)?;
         }
+        TaskCommand::MigrateStylelint => {
+            #[cfg(feature = "configuration")]
+            generate_migrate_stylelint(Overwrite)?;
+        }
+        TaskCommand::RulesMetadata { out } => {
+            #[cfg(feature = "rules_metadata")]
+            generate_rules_metadata(out)?;
+            #[cfg(not(feature = "rules_metadata"))]
+            let _ = out;
+        }
         TaskCommand::Schema => {
             #[cfg(feature = "schema")]
             xtask_codegen::generate_schema::generate_configuration_schema(Overwrite)?;
@@ -62,6 +89,10 @@ fn main() -> Result<()> {
         TaskCommand::Bindings => {
             #[cfg(feature = "schema")]
             generate_workspace_bindings(Overwrite)?;
+        }
+        #[cfg(feature = "global_types")]
+        TaskCommand::GlobalTypes => {
+            generate_global_types::run()?;
         }
         TaskCommand::License => {
             #[cfg(feature = "external_data")]
@@ -77,6 +108,14 @@ fn main() -> Result<()> {
             #[cfg(feature = "external_data")]
             generate_css_baseline(Overwrite)?;
         }
+        TaskCommand::CssKeywords => {
+            #[cfg(feature = "external_data")]
+            generate_css_keywords(Overwrite)?;
+        }
+        TaskCommand::ModuleReplacements => {
+            #[cfg(feature = "external_data")]
+            generate_module_replacements(Overwrite)?;
+        }
         TaskCommand::NewRule {
             category,
             name,
@@ -86,7 +125,10 @@ fn main() -> Result<()> {
             generate_analyzer_rule_options(&name, Overwrite, true)?;
         }
         TaskCommand::MoveRule { name, group } => {
-            move_rule(&name, &group);
+            move_rule(&name, &group)?;
+        }
+        TaskCommand::PromoteRules { manifest } => {
+            promote_rules(&manifest)?;
         }
         TaskCommand::All => {
             generate_tables()?;

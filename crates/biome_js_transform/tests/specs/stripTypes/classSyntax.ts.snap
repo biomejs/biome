@@ -1,0 +1,337 @@
+---
+source: crates/biome_js_transform/tests/spec_tests.rs
+expression: classSyntax.ts
+---
+# Input
+```ts
+abstract class Foo<T> extends Base<T> implements Iface {
+	private readonly a: string = 'a';
+	b?: number;
+	c!: string;
+	declare d: number;
+	abstract e(): void;
+	[key: string]: unknown;
+	override f?(this: Foo<T>, a?: T): void {}
+	constructor() {
+		super();
+		this.c = 'c';
+	}
+}
+
+abstract class Nesting {
+	abstract g(): void;
+	h() {
+		abstract class Inner {
+			abstract i: number;
+		}
+		return Inner;
+	}
+}
+
+```
+
+# Transformations
+```diff
+@@ -1,9 +1,9 @@
+-abstract class Foo<T> extends Base<T> implements Iface {
++         class Foo<T> extends Base<T> implements Iface {
+ 	private readonly a: string = 'a';
+ 	b?: number;
+ 	c!: string;
+ 	declare d: number;
+-	abstract e(): void;
++	                   
+ 	[key: string]: unknown;
+ 	override f?(this: Foo<T>, a?: T): void {}
+ 	constructor() {
+
+```
+
+```diff
+@@ -1,4 +1,4 @@
+-abstract class Foo<T> extends Base<T> implements Iface {
++abstract class Foo    extends Base<T> implements Iface {
+ 	private readonly a: string = 'a';
+ 	b?: number;
+ 	c!: string;
+
+```
+
+```diff
+@@ -1,4 +1,4 @@
+-abstract class Foo<T> extends Base<T> implements Iface {
++abstract class Foo<T> extends Base    implements Iface {
+ 	private readonly a: string = 'a';
+ 	b?: number;
+ 	c!: string;
+
+```
+
+```diff
+@@ -1,4 +1,4 @@
+-abstract class Foo<T> extends Base<T> implements Iface {
++abstract class Foo<T> extends Base<T>                  {
+ 	private readonly a: string = 'a';
+ 	b?: number;
+ 	c!: string;
+
+```
+
+```diff
+@@ -1,5 +1,5 @@
+ abstract class Foo<T> extends Base<T> implements Iface {
+-	private readonly a: string = 'a';
++	        readonly a: string = 'a';
+ 	b?: number;
+ 	c!: string;
+ 	declare d: number;
+
+```
+
+```diff
+@@ -1,5 +1,5 @@
+ abstract class Foo<T> extends Base<T> implements Iface {
+-	private readonly a: string = 'a';
++	private          a: string = 'a';
+ 	b?: number;
+ 	c!: string;
+ 	declare d: number;
+
+```
+
+```diff
+@@ -1,5 +1,5 @@
+ abstract class Foo<T> extends Base<T> implements Iface {
+-	private readonly a: string = 'a';
++	private readonly a         = 'a';
+ 	b?: number;
+ 	c!: string;
+ 	declare d: number;
+
+```
+
+```diff
+@@ -1,6 +1,6 @@
+ abstract class Foo<T> extends Base<T> implements Iface {
+ 	private readonly a: string = 'a';
+-	b?: number;
++	b         ;
+ 	c!: string;
+ 	declare d: number;
+ 	abstract e(): void;
+
+```
+
+```diff
+@@ -1,7 +1,7 @@
+ abstract class Foo<T> extends Base<T> implements Iface {
+ 	private readonly a: string = 'a';
+ 	b?: number;
+-	c!: string;
++	c         ;
+ 	declare d: number;
+ 	abstract e(): void;
+ 	[key: string]: unknown;
+
+```
+
+```diff
+@@ -2,7 +2,7 @@
+ 	private readonly a: string = 'a';
+ 	b?: number;
+ 	c!: string;
+-	declare d: number;
++	                  
+ 	abstract e(): void;
+ 	[key: string]: unknown;
+ 	override f?(this: Foo<T>, a?: T): void {}
+
+```
+
+```diff
+@@ -3,7 +3,7 @@
+ 	b?: number;
+ 	c!: string;
+ 	declare d: number;
+-	abstract e(): void;
++	                   
+ 	[key: string]: unknown;
+ 	override f?(this: Foo<T>, a?: T): void {}
+ 	constructor() {
+
+```
+
+```diff
+@@ -4,7 +4,7 @@
+ 	c!: string;
+ 	declare d: number;
+ 	abstract e(): void;
+-	[key: string]: unknown;
++	                       
+ 	override f?(this: Foo<T>, a?: T): void {}
+ 	constructor() {
+ 		super();
+
+```
+
+```diff
+@@ -5,7 +5,7 @@
+ 	declare d: number;
+ 	abstract e(): void;
+ 	[key: string]: unknown;
+-	override f?(this: Foo<T>, a?: T): void {}
++	         f?(this: Foo<T>, a?: T): void {}
+ 	constructor() {
+ 		super();
+ 		this.c = 'c';
+
+```
+
+```diff
+@@ -5,7 +5,7 @@
+ 	declare d: number;
+ 	abstract e(): void;
+ 	[key: string]: unknown;
+-	override f?(this: Foo<T>, a?: T): void {}
++	override f (this: Foo<T>, a?: T): void {}
+ 	constructor() {
+ 		super();
+ 		this.c = 'c';
+
+```
+
+```diff
+@@ -5,7 +5,7 @@
+ 	declare d: number;
+ 	abstract e(): void;
+ 	[key: string]: unknown;
+-	override f?(this: Foo<T>, a?: T): void {}
++	override f?(              a?: T): void {}
+ 	constructor() {
+ 		super();
+ 		this.c = 'c';
+
+```
+
+```diff
+@@ -5,7 +5,7 @@
+ 	declare d: number;
+ 	abstract e(): void;
+ 	[key: string]: unknown;
+-	override f?(this: Foo<T>, a?: T): void {}
++	override f?(this: Foo<T>, a : T): void {}
+ 	constructor() {
+ 		super();
+ 		this.c = 'c';
+
+```
+
+```diff
+@@ -5,7 +5,7 @@
+ 	declare d: number;
+ 	abstract e(): void;
+ 	[key: string]: unknown;
+-	override f?(this: Foo<T>, a?: T): void {}
++	override f?(this: Foo<T>, a?   ): void {}
+ 	constructor() {
+ 		super();
+ 		this.c = 'c';
+
+```
+
+```diff
+@@ -5,7 +5,7 @@
+ 	declare d: number;
+ 	abstract e(): void;
+ 	[key: string]: unknown;
+-	override f?(this: Foo<T>, a?: T): void {}
++	override f?(this: Foo<T>, a?: T)       {}
+ 	constructor() {
+ 		super();
+ 		this.c = 'c';
+
+```
+
+```diff
+@@ -12,8 +12,8 @@
+ 	}
+ }
+ 
+-abstract class Nesting {
+-	abstract g(): void;
++         class Nesting {
++	                   
+ 	h() {
+ 		abstract class Inner {
+ 			abstract i: number;
+
+```
+
+```diff
+@@ -13,7 +13,7 @@
+ }
+ 
+ abstract class Nesting {
+-	abstract g(): void;
++	                   
+ 	h() {
+ 		abstract class Inner {
+ 			abstract i: number;
+
+```
+
+```diff
+@@ -15,8 +15,8 @@
+ abstract class Nesting {
+ 	abstract g(): void;
+ 	h() {
+-		abstract class Inner {
+-			abstract i: number;
++		         class Inner {
++			                   
+ 		}
+ 		return Inner;
+ 	}
+
+```
+
+```diff
+@@ -16,7 +16,7 @@
+ 	abstract g(): void;
+ 	h() {
+ 		abstract class Inner {
+-			abstract i: number;
++			                   
+ 		}
+ 		return Inner;
+ 	}
+
+```
+
+# Final output
+```ts
+         class Foo    extends Base                     {
+	                 a         = 'a';
+	b         ;
+	c         ;
+	                  
+	                   
+	                       
+	         f (              a    )       {}
+	constructor() {
+		super();
+		this.c = 'c';
+	}
+}
+
+         class Nesting {
+	                   
+	h() {
+		         class Inner {
+			                   
+		}
+		return Inner;
+	}
+}
+
+```

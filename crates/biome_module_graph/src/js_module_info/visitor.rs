@@ -1,117 +1,158 @@
+use crate::css_module_info::CssClassReference;
 use biome_js_semantic::ScopeId;
 use biome_js_syntax::{
     AnyJsArrayBindingPatternElement, AnyJsBinding, AnyJsBindingPattern, AnyJsDeclarationClause,
-    AnyJsExportClause, AnyJsExportDefaultDeclaration, AnyJsExpression, AnyJsImportClause,
-    AnyJsImportLike, AnyJsObjectBindingPatternMember, AnyJsRoot, AnyTsIdentifierBinding,
-    AnyTsModuleName, JsExportFromClause, JsExportNamedFromClause, JsExportNamedSpecifierList,
-    JsIdentifierBinding, JsVariableDeclaratorList, TsExportAssignmentClause, unescape_js_string,
+    AnyJsExportClause, AnyJsExportDefaultDeclaration, AnyJsExpression, AnyJsImportLike,
+    AnyJsObjectBindingPatternMember, AnyJsRoot, AnyJsxAttributeName, AnyJsxAttributeValue,
+    AnyTsIdentifierBinding, AnyTsModuleName, JsExport, JsExportFromClause, JsExportNamedFromClause,
+    JsExportNamedSpecifierList, JsIdentifierBinding, JsVariableDeclaratorList, JsxAttribute,
+    TsExportAssignmentClause, unescape_js_string,
 };
-use biome_js_type_info::{ImportSymbol, TypeData, TypeReference, TypeResolver};
-use biome_resolver::{ResolveOptions, resolve};
+use biome_js_type_info::{ImportSymbol, RawTypeCollector, TypeData, TypeReference};
+use biome_languages::JsFileSource;
 use biome_rowan::{AstNode, TokenText, WalkEvent};
-use camino::Utf8Path;
+use camino::Utf8PathBuf;
+use either::Either;
 
 use crate::{
-    JsImport, JsImportPhase, JsModuleInfo, JsReexport, SUPPORTED_EXTENSIONS,
-    js_module_info::collector::JsCollectedExport, module_graph::ModuleGraphFsProxy,
+    JsImport, JsImportPhase, JsModuleInfo, JsReexport,
+    js_module_info::collector::{JsCollectedExport, TypeInferenceMode},
+    js_module_info::flow::FlowRootScanner,
 };
 
-use super::{ResolvedPath, collector::JsModuleInfoCollector};
+use super::collector::JsModuleInfoCollector;
 
-/// Extensions to try to resolve based on the extension in the import specifier.
-/// ref: https://www.typescriptlang.org/docs/handbook/modules/reference.html#the-moduleresolution-compiler-option
-const EXTENSION_ALIASES: &[(&str, &[&str])] = &[
-    ("js", &["ts", "tsx", "d.ts", "js", "jsx"]),
-    ("mjs", &["mts", "d.mts", "mjs"]),
-    ("cjs", &["cts", "d.cts", "cjs"]),
-];
-
-pub(crate) struct JsModuleVisitor<'a> {
+pub(crate) struct JsModuleVisitor {
     root: AnyJsRoot,
-    directory: &'a Utf8Path,
-    fs_proxy: &'a ModuleGraphFsProxy<'a>,
+    file_path: Utf8PathBuf,
     semantic_model: std::sync::Arc<biome_js_semantic::SemanticModel>,
-    infer_types: bool,
+    inference_mode: TypeInferenceMode,
 }
 
-impl<'a> JsModuleVisitor<'a> {
+impl JsModuleVisitor {
     pub fn new(
         root: AnyJsRoot,
-        directory: &'a Utf8Path,
-        fs_proxy: &'a ModuleGraphFsProxy,
+        file_path: Utf8PathBuf,
         semantic_model: std::sync::Arc<biome_js_semantic::SemanticModel>,
-        infer_types: bool,
+        inference_mode: TypeInferenceMode,
     ) -> Self {
         Self {
             root,
-            directory,
-            fs_proxy,
+            file_path,
             semantic_model,
-            infer_types,
+            inference_mode,
         }
     }
 
-    pub fn collect_info(self) -> JsModuleInfo {
+    pub fn collect_info(mut self) -> JsModuleInfo {
         let mut collector = JsModuleInfoCollector::new(self.semantic_model.clone());
+        let mut flow_roots = FlowRootScanner::default();
+        // Declaration files contain no code that runs, so no root can need flow.
+        let scan_flow_roots = self.inference_mode != TypeInferenceMode::Disabled
+            && !JsFileSource::try_from(self.file_path.as_path())
+                .is_ok_and(|source| source.language().is_definition_file());
 
-        let iter = self.root.syntax().preorder();
-        for event in iter {
+        let kinds = AnyJsImportLike::KIND_SET
+            .union(JsExport::KIND_SET)
+            .union(JsxAttribute::KIND_SET)
+            .union(JsModuleInfoCollector::LEAVE_NODE_KINDS);
+        let root = self.root.syntax().clone();
+        // The flow root scanner must see every node, not only the kinds that
+        // the collector visits.
+        let events = if scan_flow_roots {
+            Either::Left(root.preorder())
+        } else {
+            Either::Right(root.preorder_of_kinds(kinds))
+        };
+        for event in events {
             match event {
                 WalkEvent::Enter(node) => {
+                    if scan_flow_roots {
+                        flow_roots.enter(&node);
+                    }
                     if let Some(import) = AnyJsImportLike::cast_ref(&node) {
                         self.visit_import(import, &mut collector);
-                    } else if let Some(export) = biome_js_syntax::JsExport::cast_ref(&node) {
+                    } else if let Some(export) = JsExport::cast_ref(&node) {
                         self.visit_export(export, &mut collector);
+                    } else if let Some(attr) = JsxAttribute::cast_ref(&node) {
+                        self.visit_jsx_attribute(attr, &mut collector);
                     }
                 }
                 WalkEvent::Leave(node) => {
+                    if scan_flow_roots {
+                        flow_roots.leave(&node);
+                    }
                     collector.leave_node(&node);
                 }
             }
         }
 
-        JsModuleInfo::new(collector, self.semantic_model, self.infer_types)
+        JsModuleInfo::new(
+            collector,
+            self.semantic_model,
+            self.inference_mode,
+            flow_roots,
+        )
     }
 
-    fn visit_import(&self, node: AnyJsImportLike, collector: &mut JsModuleInfoCollector) {
+    /// Collects static CSS class references from JSX `class` and `className`
+    /// attributes.
+    ///
+    /// Only static string literals are collected; dynamic expressions are
+    /// skipped to avoid false positives in `noUnusedClasses`.
+    fn visit_jsx_attribute(&self, attr: JsxAttribute, collector: &mut JsModuleInfoCollector) {
+        if let Some(inner) = self.extract_jsx_class_attribute_inner(&attr) {
+            collector
+                .referenced_classes
+                .push(CssClassReference::new(inner, self.file_path.clone()));
+        }
+    }
+
+    /// Extracts the inner (quote-stripped) text from a JSX `class` or
+    /// `className` attribute, if it is a static string literal.
+    ///
+    /// Returns `None` if the attribute is not a class attribute, is not a
+    /// static string, or has malformed structure.
+    fn extract_jsx_class_attribute_inner(&self, attr: &JsxAttribute) -> Option<TokenText> {
+        let name_node = attr.name().ok()?;
+        let name_text = match name_node {
+            AnyJsxAttributeName::JsxName(n) => n.value_token().ok()?.token_text_trimmed(),
+            AnyJsxAttributeName::JsxNamespaceName(_) => return None,
+        };
+        if name_text != "class" && name_text != "className" {
+            return None;
+        }
+
+        let jsx_string = attr
+            .initializer()
+            .and_then(|init| init.value().ok())
+            .and_then(|val| match val {
+                AnyJsxAttributeValue::JsxString(s) => Some(s),
+                _ => None,
+            })?;
+
+        jsx_string.inner_string_text().ok()
+    }
+
+    fn visit_import(&mut self, node: AnyJsImportLike, collector: &mut JsModuleInfoCollector) {
         let Some(specifier) = node.inner_string_text() else {
             return;
         };
 
-        let resolved_path = self.resolved_path_from_specifier(specifier.text());
-
         match node {
             AnyJsImportLike::JsModuleSource(source) => {
                 // TODO: support defer or source imports
-                let phase = if let Some(clause) = source.parent::<AnyJsImportClause>() {
-                    match clause {
-                        AnyJsImportClause::JsImportDefaultClause(clause)
-                            if clause.type_token().is_some() =>
-                        {
-                            JsImportPhase::Type
-                        }
-                        AnyJsImportClause::JsImportNamedClause(clause)
-                            if clause.type_token().is_some() =>
-                        {
-                            JsImportPhase::Type
-                        }
-                        AnyJsImportClause::JsImportNamespaceClause(clause)
-                            if clause.type_token().is_some() =>
-                        {
-                            JsImportPhase::Type
-                        }
-                        _ => JsImportPhase::Default,
-                    }
+                let phase = if source.imports_only_types() {
+                    JsImportPhase::Type
                 } else {
                     JsImportPhase::Default
                 };
 
-                collector.register_static_import_path(specifier, resolved_path, phase);
+                collector.register_static_import_path(specifier, phase);
             }
             AnyJsImportLike::JsCallExpression(_) | AnyJsImportLike::JsImportCallExpression(_) => {
                 collector.register_dynamic_import_path(
                     specifier,
-                    resolved_path,
                     JsImportPhase::Default, // TODO: support defer or source imports
                 );
             }
@@ -119,8 +160,8 @@ impl<'a> JsModuleVisitor<'a> {
     }
 
     fn visit_export(
-        &self,
-        node: biome_js_syntax::JsExport,
+        &mut self,
+        node: JsExport,
         collector: &mut JsModuleInfoCollector,
     ) -> Option<()> {
         match node.export_clause().ok()? {
@@ -219,22 +260,34 @@ impl<'a> JsModuleVisitor<'a> {
         node: &AnyJsExportDefaultDeclaration,
         collector: &mut JsModuleInfoCollector,
     ) -> Option<()> {
-        let name = match &node {
+        let name = match node {
             AnyJsExportDefaultDeclaration::JsClassExportDefaultDeclaration(node) => {
-                node.id().and_then(get_name)?
+                node.id().and_then(get_name)
             }
             AnyJsExportDefaultDeclaration::JsFunctionExportDefaultDeclaration(node) => {
-                node.id().and_then(get_name)?
+                node.id().and_then(get_name)
             }
             AnyJsExportDefaultDeclaration::TsDeclareFunctionExportDefaultDeclaration(node) => {
-                node.id().and_then(get_name)?
+                node.id().and_then(get_name)
             }
             AnyJsExportDefaultDeclaration::TsInterfaceDeclaration(node) => {
-                node.id().ok().and_then(get_ts_name)?
+                node.id().ok().and_then(get_ts_name)
             }
         };
 
-        collector.register_export_with_name("default", name);
+        if let Some(name) = name {
+            collector.register_export_with_name("default", name);
+        } else if matches!(
+            node,
+            AnyJsExportDefaultDeclaration::JsClassExportDefaultDeclaration(_)
+                | AnyJsExportDefaultDeclaration::JsFunctionExportDefaultDeclaration(_)
+                | AnyJsExportDefaultDeclaration::TsDeclareFunctionExportDefaultDeclaration(_)
+        ) {
+            collector.register_default_export_declaration(node);
+        } else {
+            return None;
+        }
+
         Some(())
     }
 
@@ -259,7 +312,7 @@ impl<'a> JsModuleVisitor<'a> {
     }
 
     fn visit_export_from_clause(
-        &self,
+        &mut self,
         node: JsExportFromClause,
         collector: &mut JsModuleInfoCollector,
     ) -> Option<()> {
@@ -269,7 +322,6 @@ impl<'a> JsModuleVisitor<'a> {
             .inner_string_text()
             .ok()?;
         let import = JsImport {
-            resolved_path: self.resolved_path_from_specifier(&specifier),
             specifier: specifier.into(),
             symbol: ImportSymbol::All,
         };
@@ -299,7 +351,7 @@ impl<'a> JsModuleVisitor<'a> {
     }
 
     fn visit_export_named_from_clause(
-        &self,
+        &mut self,
         node: JsExportNamedFromClause,
         collector: &mut JsModuleInfoCollector,
     ) -> Option<()> {
@@ -308,8 +360,6 @@ impl<'a> JsModuleVisitor<'a> {
             .as_js_module_source()?
             .inner_string_text()
             .ok()?;
-        let resolved_path = self.resolved_path_from_specifier(&import_specifier);
-
         for specifier in node.specifiers() {
             let Ok(specifier) = specifier else {
                 continue;
@@ -330,7 +380,6 @@ impl<'a> JsModuleVisitor<'a> {
                 reexport: JsReexport {
                     import: JsImport {
                         specifier: import_specifier.clone().into(),
-                        resolved_path: resolved_path.clone(),
                         symbol: ImportSymbol::Named(imported_name),
                     },
                     export_range: None,
@@ -456,20 +505,6 @@ impl<'a> JsModuleVisitor<'a> {
         let name = binding.name_token().ok()?.token_text_trimmed();
         collector.register_export_with_name(name.clone(), name);
         Some(())
-    }
-
-    fn resolved_path_from_specifier(&self, specifier: &str) -> ResolvedPath {
-        let options = ResolveOptions {
-            condition_names: &["types", "import", "default"],
-            default_files: &["index"],
-            extensions: SUPPORTED_EXTENSIONS,
-            extension_aliases: EXTENSION_ALIASES,
-            resolve_node_builtins: true,
-            resolve_types: true,
-            ..Default::default()
-        };
-        let resolved_path = resolve(specifier, self.directory, self.fs_proxy, &options);
-        ResolvedPath::new(resolved_path)
     }
 }
 

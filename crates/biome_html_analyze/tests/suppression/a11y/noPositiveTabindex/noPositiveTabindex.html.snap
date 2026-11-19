@@ -1,0 +1,18 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: noPositiveTabindex.html
+---
+# Input
+```html
+<!-- biome-ignore lint/a11y/noPositiveTabindex: intentional tab order -->
+<slot
+  name="icon"
+  tabindex="2"
+></slot>
+<!-- biome-ignore lint/a11y/noPositiveTabindex: intentional tab order -->
+<input
+  type="text"
+  tabindex="3"
+/>
+
+```

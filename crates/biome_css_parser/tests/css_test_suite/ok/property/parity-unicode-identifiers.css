@@ -1,0 +1,9 @@
+.café, .𐐀, .\ab name, .name\bb {
+  café: café;
+  existing: 𐐀;
+  quoted: "«" '»';
+  escaped: \ab \bb \ab name name\bb;
+  functions: café(𐐀) \ab name(\bb);
+  units: 1café 2𐐀;
+  after: red;
+}

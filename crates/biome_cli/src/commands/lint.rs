@@ -11,12 +11,18 @@ use biome_configuration::css::{CssLinterConfiguration, CssParserConfiguration};
 use biome_configuration::graphql::GraphqlLinterConfiguration;
 use biome_configuration::javascript::JsLinterConfiguration;
 use biome_configuration::json::{JsonLinterConfiguration, JsonParserConfiguration};
+use biome_configuration::markdown::{
+    MarkdownAnalyzeEmbeds, MarkdownLinterConfiguration, MarkdownParserConfiguration,
+};
 use biome_configuration::vcs::VcsConfiguration;
 use biome_configuration::{Configuration, FilesConfiguration, LinterConfiguration};
 use biome_console::{Console, MarkupBuf};
 use biome_deserialize::Merge;
 use biome_diagnostics::{Category, category};
 use biome_fs::FileSystem;
+use biome_module_graph::type_inference::profiling::{
+    TypeInferenceProfileSnapshot, TypeInferenceProfilerGuard,
+};
 use biome_service::configuration::ProjectScanComputer;
 use biome_service::workspace::{
     FeatureKind, FeatureName, FeaturesBuilder, FeaturesSupported, FixFileMode, ScanKind,
@@ -49,14 +55,19 @@ pub(crate) struct LintCommandPayload {
     pub(crate) graphql_linter: Option<GraphqlLinterConfiguration>,
     pub(crate) json_parser: Option<JsonParserConfiguration>,
     pub(crate) css_parser: Option<CssParserConfiguration>,
+    pub(crate) markdown_linter: Option<MarkdownLinterConfiguration>,
+    pub(crate) markdown_analyze_embeds: Option<MarkdownAnalyzeEmbeds>,
+    pub(crate) markdown_parser: Option<MarkdownParserConfiguration>,
     pub(crate) profile_rules: bool,
+    pub(crate) profile_type_inference: bool,
+    pub(crate) watch: bool,
 }
 
 struct LintExecution {
     /// The type of fixes that should be applied when analyzing a file.
     ///
-    /// It's [None] if the `lint` command is called without `--apply` or `--apply-suggested`
-    /// arguments.
+    /// It's [None] if the `lint` command is called without `--write`, `--fix`, or `--suppress`.
+    /// `--unsafe` upgrades the mode when combined with `--write` or `--fix`.
     fix_file_mode: Option<FixFileMode>,
     /// An optional tuple.
     /// 1. The virtual path to the file
@@ -77,6 +88,11 @@ struct LintExecution {
     suppression_reason: Option<String>,
     /// It skips parse errors
     skip_parse_errors: bool,
+
+    profile_rules: bool,
+
+    /// The type inference profiler
+    type_inference_profile: Option<TypeInferenceProfilerGuard>,
 }
 
 impl Execution for LintExecution {
@@ -152,6 +168,20 @@ impl Execution for LintExecution {
     fn is_lint(&self) -> bool {
         true
     }
+
+    fn is_rule_profiling_enabled(&self) -> bool {
+        self.profile_rules
+    }
+
+    fn is_type_inference_profiling_enabled(&self) -> bool {
+        self.type_inference_profile.is_some()
+    }
+
+    fn take_type_inference_profile(&self) -> Option<TypeInferenceProfileSnapshot> {
+        self.type_inference_profile
+            .as_ref()
+            .map(TypeInferenceProfilerGuard::drain)
+    }
 }
 
 impl TraversalCommand for LintCommandPayload {
@@ -159,6 +189,10 @@ impl TraversalCommand for LintCommandPayload {
 
     fn command_name(&self) -> &'static str {
         "lint"
+    }
+
+    fn is_watch_mode(&self) -> bool {
+        self.watch
     }
 
     fn minimal_scan_kind(&self) -> Option<ScanKind> {
@@ -179,6 +213,26 @@ impl TraversalCommand for LintCommandPayload {
             suppression_reason: self.suppression_reason.clone(),
         })?;
 
+        let type_inference_profile = if self.profile_type_inference {
+            if cli_options.use_server {
+                return Err(CliDiagnostic::incompatible_arguments(
+                    "--profile-type-inference",
+                    "--use-server",
+                    "Type-inference profiling is available only for in-process CLI analysis.",
+                ));
+            }
+            if self.stdin_file_path.is_some() {
+                return Err(CliDiagnostic::incompatible_arguments(
+                    "--profile-type-inference",
+                    "--stdin-file-path",
+                    "Type-inference profiling requires files processed by the CLI traversal.",
+                ));
+            }
+
+            Some(TypeInferenceProfilerGuard::start())
+        } else {
+            None
+        };
         if self.profile_rules {
             biome_analyze::profiling::enable();
         }
@@ -192,6 +246,8 @@ impl TraversalCommand for LintCommandPayload {
             suppress: self.suppress,
             suppression_reason: self.suppression_reason.clone(),
             skip_parse_errors: cli_options.skip_parse_errors,
+            profile_rules: self.profile_rules,
+            type_inference_profile,
         }))
     }
 
@@ -254,6 +310,19 @@ impl TraversalCommand for LintCommandPayload {
             json.parser.merge_with(self.json_parser.clone());
         }
 
+        let markdown = loaded_configuration
+            .markdown
+            .get_or_insert_with(Default::default);
+        if self.markdown_linter.is_some() {
+            markdown.linter.merge_with(self.markdown_linter.clone());
+        }
+        if self.markdown_analyze_embeds.is_some() {
+            markdown.analyze_embeds = self.markdown_analyze_embeds;
+        }
+        if self.markdown_parser.is_some() {
+            markdown.parser.merge_with(self.markdown_parser.clone());
+        }
+
         Ok(loaded_configuration)
     }
 
@@ -272,5 +341,35 @@ impl TraversalCommand for LintCommandPayload {
         .unwrap_or(self.paths.clone());
 
         Ok(paths)
+    }
+
+    fn check_incompatible_arguments(&self) -> Result<(), CliDiagnostic> {
+        if self.is_watch_mode() {
+            if self.fix {
+                return Err(CliDiagnostic::incompatible_arguments(
+                    "--watch",
+                    "--fix",
+                    "Applying code fixes is not available in watch mode.",
+                ));
+            }
+
+            if self.write {
+                return Err(CliDiagnostic::incompatible_arguments(
+                    "--watch",
+                    "--write",
+                    "Applying code fixes is not available in watch mode.",
+                ));
+            }
+
+            if self.suppress {
+                return Err(CliDiagnostic::incompatible_arguments(
+                    "--watch",
+                    "--suppress",
+                    "Applying suppressions is not available in watch mode.",
+                ));
+            }
+        }
+
+        Ok(())
     }
 }

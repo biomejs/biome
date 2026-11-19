@@ -1,0 +1,56 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: formatting/attribute-with-linebreaks.svelte
+---
+
+# Input
+
+```svelte
+<div
+    class=" {longExpressionThatForcesLinebreaks} longExpressionThatForcesLinebreaks longExpressionThatForcesLinebreaks  "
+    alt="When reformatting class attributes it is fine to trim and add new line breaks. 
+That's not the case with other attributes. "
+    data-value={array.map((item) => {
+        return item + 1
+    })}
+></div>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,8 +1,8 @@
+ <div
+-    class=" {longExpressionThatForcesLinebreaks} longExpressionThatForcesLinebreaks longExpressionThatForcesLinebreaks"
++    class=" {longExpressionThatForcesLinebreaks} longExpressionThatForcesLinebreaks longExpressionThatForcesLinebreaks  "
+     alt="When reformatting class attributes it is fine to trim and add new line breaks. 
+ That's not the case with other attributes. "
+     data-value={array.map((item) => {
+-        return item + 1;
++        return item + 1
+     })}
+ ></div>
+```
+
+# Output
+
+```svelte
+<div
+    class=" {longExpressionThatForcesLinebreaks} longExpressionThatForcesLinebreaks longExpressionThatForcesLinebreaks  "
+    alt="When reformatting class attributes it is fine to trim and add new line breaks. 
+That's not the case with other attributes. "
+    data-value={array.map((item) => {
+        return item + 1
+    })}
+></div>
+```
+
+# Lines exceeding max width of 80 characters
+```
+    2:     class=" {longExpressionThatForcesLinebreaks} longExpressionThatForcesLinebreaks longExpressionThatForcesLinebreaks  "
+    3:     alt="When reformatting class attributes it is fine to trim and add new line breaks. 
+```

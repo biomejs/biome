@@ -1,0 +1,11 @@
+/* should not generate diagnostics */
+const foo1 = (bar => bar)();
+const foo2 = (() => {
+	return a ? b : c
+})();
+const foo3 = (function () { return (a); })();
+const getBaz = bar => (bar ? bar.baz : baz);
+const foo4 = getBaz(getBar());
+const foo5 = new (() => (a))();
+const foo6 = (() => (a))`template`;
+foo(() => (a));

@@ -6,13 +6,17 @@ use crate::syntax::scss::{
     is_at_scss_function, is_at_scss_interpolated_function_or_value, is_at_scss_interpolated_string,
     is_at_scss_variable, is_nth_at_scss_function, parse_scss_expression_until, parse_scss_function,
     parse_scss_interpolated_function_or_value, parse_scss_interpolated_string,
+    parse_scss_interpolated_url_value,
 };
 use crate::syntax::value::function::{
-    is_nth_at_css_function, is_nth_at_function, parse_css_function, parse_function,
+    is_at_css_if_function_in_context, is_nth_at_css_function, is_nth_at_function,
+    parse_css_function, parse_function,
 };
 use crate::syntax::value::parse_error::expected_url_modifier;
-use crate::syntax::{CssSyntaxFeatures, ValueParsingContext, ValueParsingMode};
-use crate::syntax::{is_at_identifier, is_at_string, parse_regular_identifier, parse_string};
+use crate::syntax::{
+    CssSyntaxFeatures, ValueParsingContext, ValueParsingMode, is_at_identifier, is_at_string,
+    parse_regular_identifier, parse_string,
+};
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::parse_lists::ParseNodeList;
@@ -86,32 +90,61 @@ pub(crate) fn parse_url_function_with_context(
 
     p.bump_ts(URL_SET);
 
-    if is_at_nth_url_modifier_function(p, 1, context) {
+    let lex_context = if is_at_nth_url_modifier_function(p, 1, context) {
         // Keep plain function heads on regular tokenization so `src(var(--foo))`
         // and similar cases do not get folded into a raw URL literal.
-        p.bump(T!['(']);
-    } else if context.is_full_scss_parsing_allowed() {
-        // Full SCSS mode needs URL-body classification so interpolation-based
-        // function names such as `url(#{name}(bar))` survive lexing.
-        p.bump_with_context(
-            T!['('],
-            CssLexContext::UrlBody {
-                scss_exclusive_syntax_allowed: true,
-            },
-        );
+        CssLexContext::Regular
     } else {
-        // Plain CSS keeps the cheaper raw-URL path. CSS-only SCSS diagnostics
-        // for interpolation-shaped bodies are not worth paying this cost on
-        // every `url(...)`.
-        p.bump_with_context(T!['('], CssLexContext::UrlRawValue);
-    }
+        p.source()
+            .url_body_lex_context(context.is_full_scss_parsing_allowed())
+    };
 
-    parse_url_value_with_context(p, context).ok();
-
-    UrlModifierList::new(context).parse_list(p);
-    p.expect(T![')']);
+    parse_url_function_body(p, context, lex_context, CssLexContext::Regular);
 
     Present(m.complete(p, CSS_URL_FUNCTION))
+}
+
+/// Parses a raw URL without promoting `$name` to a Sass expression.
+/// Returns `Absent` for bodies that need generic custom-property parsing.
+///
+/// ```scss
+/// .icon { --image: url($directory/#{$name}.svg); }
+/// ```
+pub(crate) fn parse_custom_property_url_function(
+    p: &mut CssParser,
+    following_context: CssLexContext,
+) -> ParsedSyntax {
+    if !is_at_url_function(p) || !p.at(T![url]) {
+        return Absent;
+    }
+    let Some(lex_context) = p.source_mut().custom_property_url_lex_context() else {
+        return Absent;
+    };
+
+    let function = p.start();
+    p.bump(T![url]);
+    parse_url_function_body(
+        p,
+        ValueParsingContext::new(p, ValueParsingMode::CssOnly),
+        lex_context,
+        following_context,
+    );
+    Present(function.complete(p, CSS_URL_FUNCTION))
+}
+
+/// Parses the body of `url(icon.svg)` and restores the caller's lexer context.
+fn parse_url_function_body(
+    p: &mut CssParser,
+    context: ValueParsingContext,
+    lex_context: CssLexContext,
+    following_context: CssLexContext,
+) {
+    let scss_url_lex_context =
+        matches!(lex_context, CssLexContext::ScssUrlValue { .. }).then_some(lex_context);
+    p.bump_with_context(T!['('], lex_context);
+    parse_url_value_with_context(p, context, scss_url_lex_context).ok();
+    UrlModifierList::new(context).parse_list(p);
+    p.expect_with_context(T![')'], following_context);
 }
 
 /// Detects a function-shaped URL modifier at lookahead `n`.
@@ -193,9 +226,10 @@ fn parse_url_modifier_function_with_context(
 
 /// Determines if the parser is at a CSS URL value.
 ///
-/// This covers raw values, quoted strings, and SCSS interpolated strings such
-/// as `url(fudge#{$x}.css)` or `url("#{$bg}")`. SassScript bodies such as
-/// `url($path + ".css")` are context-dependent.
+/// This covers raw values, quoted strings, and interpolated strings. Structured
+/// unquoted SCSS URL values are selected from the precomputed URL-body mode.
+///
+/// SassScript bodies such as `url($path + ".css")` are context-dependent.
 #[inline]
 pub(crate) fn is_at_url_value(p: &mut CssParser) -> bool {
     is_at_url_value_raw(p) || is_at_string(p) || is_at_scss_interpolated_string(p)
@@ -211,7 +245,11 @@ pub(crate) fn is_at_url_value(p: &mut CssParser) -> bool {
 /// ```
 #[inline]
 pub(crate) fn parse_url_value(p: &mut CssParser) -> ParsedSyntax {
-    parse_url_value_with_context(p, ValueParsingContext::new(p, ValueParsingMode::ScssAware))
+    parse_url_value_with_context(
+        p,
+        ValueParsingContext::new(p, ValueParsingMode::ScssAware),
+        None,
+    )
 }
 
 /// Parses a URL value while preserving the caller's SCSS parsing mode.
@@ -220,15 +258,25 @@ pub(crate) fn parse_url_value(p: &mut CssParser) -> ParsedSyntax {
 /// `url("#{$bg}" + ".png")` to SassScript expressions before falling back to
 /// quoted-string or raw-URL parsing.
 #[inline]
-fn parse_url_value_with_context(p: &mut CssParser, context: ValueParsingContext) -> ParsedSyntax {
+fn parse_url_value_with_context(
+    p: &mut CssParser,
+    context: ValueParsingContext,
+    scss_url_lex_context: Option<CssLexContext>,
+) -> ParsedSyntax {
     if is_at_scss_url_expression(p, context) {
         parse_scss_url_expression(p)
+    } else if let Some(lex_context) = scss_url_lex_context {
+        parse_scss_interpolated_url_value(p, lex_context)
     } else if !is_at_url_value(p) {
         Absent
     } else if is_at_string(p) {
         parse_string(p)
     } else if is_at_scss_interpolated_string(p) {
-        parse_scss_interpolated_string(p)
+        CssSyntaxFeatures::Scss.parse_exclusive_syntax(
+            p,
+            |p| parse_scss_interpolated_string(p, CssLexContext::Regular),
+            |p, m| scss_only_syntax_error(p, "SCSS interpolated strings", m.range(p)),
+        )
     } else {
         parse_url_value_raw(p)
     }
@@ -240,11 +288,14 @@ fn parse_url_value_with_context(p: &mut CssParser, context: ValueParsingContext)
 /// ```scss
 /// url($path + ".css")
 /// url("#{$bg}" + ".png")
+/// url(if(sass($dark): "dark.png"; else: "light.png"))
 /// ```
 #[inline]
 fn is_at_scss_url_expression(p: &mut CssParser, context: ValueParsingContext) -> bool {
     context.is_full_scss_parsing_allowed()
-        && (is_at_scss_variable(p) || is_at_scss_string_concatenation(p))
+        && (is_at_scss_variable(p)
+            || is_at_scss_string_concatenation(p)
+            || is_at_css_if_function_in_context(p, context))
 }
 
 /// Detects quoted-string concatenation in a URL body.
@@ -272,6 +323,7 @@ fn is_at_scss_string_concatenation(p: &mut CssParser) -> bool {
 /// url($path + ".css")
 /// url("../" + $path)
 /// url("#{$bg}" + ".png")
+/// url(if(sass($dark): "dark.png"; else: "light.png"))
 /// ```
 ///
 /// Docs: https://sass-lang.com/documentation/syntax/structure

@@ -23,9 +23,3 @@ outer:
     deep: leaf
 
 ```
-
-
-
-## Unimplemented nodes/tokens
-
-"outer:\n  inner: value\n  nested:\n    deep: leaf\n" => 0..47

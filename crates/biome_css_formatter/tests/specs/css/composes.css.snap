@@ -38,6 +38,21 @@ info: css/composes.css
  from './namespace.css';
 }
 
+.d {
+	composes:
+		classNameA
+	from
+		'./a.css',
+		classNameB
+		classNameC
+	from
+		"./b.css";
+}
+
+.e {
+	composes: classNameA classNameB,classNameC from global;
+}
+
 ```
 
 
@@ -62,6 +77,18 @@ info: css/composes.css
 
 .c {
 	composes: classNameA classNameB from "./namespace.css";
+}
+
+.d {
+	composes:
+		classNameA from "./a.css",
+		classNameB classNameC from "./b.css";
+}
+
+.e {
+	composes:
+		classNameA classNameB,
+		classNameC from global;
 }
 
 ```

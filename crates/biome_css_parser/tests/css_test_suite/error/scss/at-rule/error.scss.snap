@@ -23,10 +23,8 @@ CssRoot {
                 error_token: ERROR_KW@1..7 "error" [] [Whitespace(" ")],
                 value: ScssExpression {
                     items: ScssExpressionItemList [
-                        CssFunction {
-                            name: CssIdentifier {
-                                value_token: IDENT@7..9 "if" [] [],
-                            },
+                        ScssLegacyIfFunction {
+                            if_token: IF_KW@7..9 "if" [] [],
                             l_paren_token: L_PAREN@9..10 "(" [] [],
                             items: CssParameterList [
                                 ScssExpression {
@@ -74,9 +72,8 @@ CssRoot {
         0: ERROR_KW@1..7 "error" [] [Whitespace(" ")]
         1: SCSS_EXPRESSION@7..23
           0: SCSS_EXPRESSION_ITEM_LIST@7..23
-            0: CSS_FUNCTION@7..23
-              0: CSS_IDENTIFIER@7..9
-                0: IDENT@7..9 "if" [] []
+            0: SCSS_LEGACY_IF_FUNCTION@7..23
+              0: IF_KW@7..9 "if" [] []
               1: L_PAREN@9..10 "(" [] []
               2: CSS_PARAMETER_LIST@10..23
                 0: SCSS_EXPRESSION@10..15

@@ -3,7 +3,8 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_js_syntax::{AnyJsDeclaration, JsFileSource, JsStatementList, JsSyntaxKind};
+use biome_js_syntax::{AnyJsDeclaration, JsStatementList, JsSyntaxKind};
+use biome_languages::JsFileSource;
 use biome_rowan::AstNode;
 use biome_rule_options::no_inner_declarations::NoInnerDeclarationsOptions;
 
@@ -93,7 +94,10 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noInnerDeclarations",
         language: "js",
-        sources: &[RuleSource::Eslint("no-inner-declarations").same()],
+        sources: &[
+            RuleSource::Eslint("no-inner-declarations").same(),
+            RuleSource::EslintSvelte("no-inner-declarations").same(),
+        ],
         recommended: true,
         severity: Severity::Error,
     }

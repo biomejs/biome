@@ -1,0 +1,8 @@
+.missing-colon{width:if(sass(false):0;sass(true) 1px + 2px;else:0);height:1px}
+.missing-operand{width:if(sass(true):1px + ;else:2px);height:1px}
+.missing-operand-separator{width:if(sass(true):1px + else:2px);height:1px}
+.missing-separator{width:if(sass(true):1px + 2px else:0);height:1px}
+.missing-close{width:if(sass(true):1px + 2px;else:0}
+$missing-map-close:if(sass(true):(a:1;else:2);
+$missing-list-close:if(sass(true):(1,2;else:0);
+.after{display:block}

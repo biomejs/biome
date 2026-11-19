@@ -1,0 +1,3 @@
+// should not generate diagnostics
+// biome-ignore-all lint/nursery/useConsistentUnicodeBom: encoding required
+{"value": 1}

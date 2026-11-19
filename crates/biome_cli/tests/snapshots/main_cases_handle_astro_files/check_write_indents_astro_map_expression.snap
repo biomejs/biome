@@ -1,0 +1,57 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome check --write file.astro
+```
+
+## `biome.json`
+
+```json
+{
+  "assist": { "enabled": false },
+  "html": {
+    "experimentalFullSupportEnabled": true,
+    "formatter": { "enabled": true }
+  },
+  "linter": { "enabled": false }
+}
+```
+
+## `file.astro`
+
+```astro
+<section>
+	<div class="featured-users-grid">
+		{featuredUsers.map((user) => (
+			<div class="featured-user-card">
+				<Image
+					src={user.data.logo}
+					alt={`${user.data.id} logo`}
+					width={64}
+					height={64}
+					loading="lazy"
+				/>
+				<span class="user-name">{user.data.id}</span>
+			</div>
+		))}
+	</div>
+	<div>
+		{items.map((item) => (
+			<span class="long-class-name-that-forces-the-map-expression-to-break">
+				{item}
+			</span>
+		))}
+	</div>
+</section>
+
+```
+
+# Emitted Messages
+
+```block
+Checked 1 file in <TIME>. Fixed 1 file.
+```

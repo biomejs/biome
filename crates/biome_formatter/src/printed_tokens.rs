@@ -79,7 +79,7 @@ impl PrintedTokens {
                 continue;
             }
 
-            if !offsets.shift_remove(&range.start()) {
+            if !offsets.swap_remove(&range.start()) {
                 panic!(
                     "token has not been seen by the formatter: {token:#?}.\
                         \nUse `format_replaced` if you want to replace a token from the formatted output.\
@@ -95,5 +95,74 @@ impl PrintedTokens {
                 "tracked offset {offset:?} doesn't match any token of {root:#?}. Have you passed a token from another tree?"
             );
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use biome_js_parser::{JsParserOptions, parse_module};
+
+    #[test]
+    fn assertion_preserves_tracking_order_and_snapshots() {
+        let root = parse_module("first; second; third;", JsParserOptions::default()).syntax();
+        let tokens: Vec<_> = root.descendants_tokens(Direction::Prev).collect();
+        let mut tracked = PrintedTokens::default();
+
+        for token in &tokens[..3] {
+            tracked.track_token(token);
+        }
+        let snapshot = tracked.snapshot();
+        let saved_offsets: Vec<_> = tracked.offsets.iter().copied().collect();
+
+        for token in &tokens[3..] {
+            tracked.track_token(token);
+        }
+        let all_offsets: Vec<_> = tracked.offsets.iter().copied().collect();
+
+        tracked.assert_all_tracked(&root);
+        tracked.assert_all_tracked(&root);
+        assert_eq!(
+            tracked.offsets.iter().copied().collect::<Vec<_>>(),
+            all_offsets
+        );
+
+        tracked.set_disabled(true);
+        tracked.restore(snapshot);
+        assert!(!tracked.is_disabled());
+        assert_eq!(
+            tracked.offsets.iter().copied().collect::<Vec<_>>(),
+            saved_offsets
+        );
+
+        for token in &tokens[3..] {
+            tracked.track_token(token);
+        }
+        tracked.assert_all_tracked(&root);
+    }
+
+    #[test]
+    #[should_panic(expected = "token has not been seen by the formatter")]
+    fn assertion_rejects_missing_token() {
+        let root = parse_module("first; second;", JsParserOptions::default()).syntax();
+        let mut tracked = PrintedTokens::default();
+        for token in root.descendants_tokens(Direction::Next).skip(1) {
+            tracked.track_token(&token);
+        }
+        tracked.assert_all_tracked(&root);
+    }
+
+    #[test]
+    #[should_panic(expected = "doesn't match any token")]
+    fn assertion_rejects_extra_offset() {
+        let root = parse_module("first;", JsParserOptions::default()).syntax();
+        let mut tracked = PrintedTokens::default();
+        for token in root.descendants_tokens(Direction::Next) {
+            tracked.track_token(&token);
+        }
+        tracked
+            .offsets
+            .insert(root.text_trimmed_range().end() + TextSize::from(1));
+        tracked.assert_all_tracked(&root);
     }
 }

@@ -1,7 +1,6 @@
 // should generate diagnostics
 <>
 	<div>allowed</div>
-	<div>allowed   </div>
 	<>test</>
 </>
 

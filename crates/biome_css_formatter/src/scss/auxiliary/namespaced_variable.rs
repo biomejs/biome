@@ -13,6 +13,13 @@ impl FormatNodeRule<ScssNamespacedVariable> for FormatScssNamespacedVariable {
             name,
         } = node.as_fields();
 
-        write!(f, [namespace.format(), dot_token.format(), name.format()])
+        write!(
+            f,
+            [
+                namespace?.format().with_text_case(CssCase::Preserve),
+                dot_token.format(),
+                name.format()
+            ]
+        )
     }
 }

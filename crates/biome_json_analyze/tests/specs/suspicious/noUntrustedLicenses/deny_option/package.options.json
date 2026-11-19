@@ -1,0 +1,14 @@
+{
+    "linter": {
+        "rules": {
+            "suspicious": {
+                "noUntrustedLicenses": {
+                    "level": "error",
+                    "options": {
+                        "deny": ["ISC"]
+                    }
+                }
+            }
+        }
+    }
+}

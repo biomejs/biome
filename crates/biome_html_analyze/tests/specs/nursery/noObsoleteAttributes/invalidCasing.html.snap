@@ -1,0 +1,75 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+assertion_line: 121
+expression: invalidCasing.html
+---
+# Input
+```html
+<!-- should generate diagnostics -->
+<TABLE BGCOLOR="#ffffff"></TABLE>
+<Img src="/photo.jpg" alt="" Border="0">
+<div ALIGN="center">Content</div>
+
+```
+
+# Diagnostics
+```
+invalidCasing.html:2:8 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The BGCOLOR attribute on <TABLE> is obsolete.
+  
+    1 │ <!-- should generate diagnostics -->
+  > 2 │ <TABLE BGCOLOR="#ffffff"></TABLE>
+      │        ^^^^^^^^^^^^^^^^^
+    3 │ <Img src="/photo.jpg" alt="" Border="0">
+    4 │ <div ALIGN="center">Content</div>
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Use CSS instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidCasing.html:3:30 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Border attribute on <Img> is obsolete.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <TABLE BGCOLOR="#ffffff"></TABLE>
+  > 3 │ <Img src="/photo.jpg" alt="" Border="0">
+      │                              ^^^^^^^^^^
+    4 │ <div ALIGN="center">Content</div>
+    5 │ 
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Use CSS instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidCasing.html:4:6 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The ALIGN attribute on <div> is obsolete.
+  
+    2 │ <TABLE BGCOLOR="#ffffff"></TABLE>
+    3 │ <Img src="/photo.jpg" alt="" Border="0">
+  > 4 │ <div ALIGN="center">Content</div>
+      │      ^^^^^^^^^^^^^^
+    5 │ 
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Use CSS instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

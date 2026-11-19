@@ -1,0 +1,26 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: jsx/unary_trailing_comments.jsx
+---
+
+# Input
+
+```jsx
+!(a ||
+  <Component /> // trailing
+);
+
+```
+
+
+# Formatted
+
+```jsx
+!(
+	a ||
+	(
+		<Component /> // trailing
+	)
+);
+
+```

@@ -1,0 +1,29 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: simple.js
+---
+# Input
+```js
+/* should generate diagnostics */
+await page.waitForNavigation();
+
+
+```
+
+# Diagnostics
+```
+simple.js:2:7 lint/suspicious/noPlaywrightWaitForNavigation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected use of page.waitForNavigation().
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ await page.waitForNavigation();
+      │       ^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ 
+  
+  i waitForNavigation() is deprecated because it can be unreliable.
+  
+  i Use page.waitForURL() or page.waitForLoadState() instead.
+  
+
+```

@@ -1,0 +1,225 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```html
+<?xml?>
+<svg>
+	<?foo bar?>
+	<?foo a?b?>
+	<?foo a=b?>
+	<?xml-stylesheet href="style.css" type="text/css"?>
+</svg>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    processing_instruction: HtmlProcessingInstruction {
+        start_token: PI_START@0..2 "<?" [] [],
+        target: HtmlTagName {
+            value_token: HTML_LITERAL@2..5 "xml" [] [],
+        },
+        attributes: HtmlAttributeList [],
+        end_token: PI_END@5..7 "?>" [] [],
+    },
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@7..9 "<" [Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: SVG_KW@9..12 "svg" [] [],
+                },
+                attributes: HtmlAttributeList [],
+                r_angle_token: R_ANGLE@12..13 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlProcessingInstruction {
+                    start_token: PI_START@13..17 "<?" [Newline("\n"), Whitespace("\t")] [],
+                    target: HtmlTagName {
+                        value_token: HTML_LITERAL@17..21 "foo" [] [Whitespace(" ")],
+                    },
+                    attributes: HtmlAttributeList [
+                        HtmlAttribute {
+                            name: HtmlAttributeName {
+                                value_token: HTML_LITERAL@21..24 "bar" [] [],
+                            },
+                            initializer: missing (optional),
+                        },
+                    ],
+                    end_token: PI_END@24..26 "?>" [] [],
+                },
+                HtmlProcessingInstruction {
+                    start_token: PI_START@26..30 "<?" [Newline("\n"), Whitespace("\t")] [],
+                    target: HtmlTagName {
+                        value_token: HTML_LITERAL@30..34 "foo" [] [Whitespace(" ")],
+                    },
+                    attributes: HtmlAttributeList [
+                        HtmlAttribute {
+                            name: HtmlAttributeName {
+                                value_token: HTML_LITERAL@34..37 "a?b" [] [],
+                            },
+                            initializer: missing (optional),
+                        },
+                    ],
+                    end_token: PI_END@37..39 "?>" [] [],
+                },
+                HtmlProcessingInstruction {
+                    start_token: PI_START@39..43 "<?" [Newline("\n"), Whitespace("\t")] [],
+                    target: HtmlTagName {
+                        value_token: HTML_LITERAL@43..47 "foo" [] [Whitespace(" ")],
+                    },
+                    attributes: HtmlAttributeList [
+                        HtmlAttribute {
+                            name: HtmlAttributeName {
+                                value_token: HTML_LITERAL@47..48 "a" [] [],
+                            },
+                            initializer: HtmlAttributeInitializerClause {
+                                eq_token: EQ@48..49 "=" [] [],
+                                value: HtmlString {
+                                    value_token: HTML_STRING_LITERAL@49..50 "b" [] [],
+                                },
+                            },
+                        },
+                    ],
+                    end_token: PI_END@50..52 "?>" [] [],
+                },
+                HtmlProcessingInstruction {
+                    start_token: PI_START@52..56 "<?" [Newline("\n"), Whitespace("\t")] [],
+                    target: HtmlTagName {
+                        value_token: HTML_LITERAL@56..71 "xml-stylesheet" [] [Whitespace(" ")],
+                    },
+                    attributes: HtmlAttributeList [
+                        HtmlAttribute {
+                            name: HtmlAttributeName {
+                                value_token: HTML_LITERAL@71..75 "href" [] [],
+                            },
+                            initializer: HtmlAttributeInitializerClause {
+                                eq_token: EQ@75..76 "=" [] [],
+                                value: HtmlString {
+                                    value_token: HTML_STRING_LITERAL@76..88 "\"style.css\"" [] [Whitespace(" ")],
+                                },
+                            },
+                        },
+                        HtmlAttribute {
+                            name: HtmlAttributeName {
+                                value_token: HTML_LITERAL@88..92 "type" [] [],
+                            },
+                            initializer: HtmlAttributeInitializerClause {
+                                eq_token: EQ@92..93 "=" [] [],
+                                value: HtmlString {
+                                    value_token: HTML_STRING_LITERAL@93..103 "\"text/css\"" [] [],
+                                },
+                            },
+                        },
+                    ],
+                    end_token: PI_END@103..105 "?>" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@105..107 "<" [Newline("\n")] [],
+                slash_token: SLASH@107..108 "/" [] [],
+                name: HtmlTagName {
+                    value_token: SVG_KW@108..111 "svg" [] [],
+                },
+                r_angle_token: R_ANGLE@111..112 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@112..113 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..113
+  0: (empty)
+  1: (empty)
+  2: HTML_PROCESSING_INSTRUCTION@0..7
+    0: PI_START@0..2 "<?" [] []
+    1: HTML_TAG_NAME@2..5
+      0: HTML_LITERAL@2..5 "xml" [] []
+    2: HTML_ATTRIBUTE_LIST@5..5
+    3: PI_END@5..7 "?>" [] []
+  3: (empty)
+  4: HTML_ELEMENT_LIST@7..112
+    0: HTML_ELEMENT@7..112
+      0: HTML_OPENING_ELEMENT@7..13
+        0: L_ANGLE@7..9 "<" [Newline("\n")] []
+        1: HTML_TAG_NAME@9..12
+          0: SVG_KW@9..12 "svg" [] []
+        2: HTML_ATTRIBUTE_LIST@12..12
+        3: R_ANGLE@12..13 ">" [] []
+      1: HTML_ELEMENT_LIST@13..105
+        0: HTML_PROCESSING_INSTRUCTION@13..26
+          0: PI_START@13..17 "<?" [Newline("\n"), Whitespace("\t")] []
+          1: HTML_TAG_NAME@17..21
+            0: HTML_LITERAL@17..21 "foo" [] [Whitespace(" ")]
+          2: HTML_ATTRIBUTE_LIST@21..24
+            0: HTML_ATTRIBUTE@21..24
+              0: HTML_ATTRIBUTE_NAME@21..24
+                0: HTML_LITERAL@21..24 "bar" [] []
+              1: (empty)
+          3: PI_END@24..26 "?>" [] []
+        1: HTML_PROCESSING_INSTRUCTION@26..39
+          0: PI_START@26..30 "<?" [Newline("\n"), Whitespace("\t")] []
+          1: HTML_TAG_NAME@30..34
+            0: HTML_LITERAL@30..34 "foo" [] [Whitespace(" ")]
+          2: HTML_ATTRIBUTE_LIST@34..37
+            0: HTML_ATTRIBUTE@34..37
+              0: HTML_ATTRIBUTE_NAME@34..37
+                0: HTML_LITERAL@34..37 "a?b" [] []
+              1: (empty)
+          3: PI_END@37..39 "?>" [] []
+        2: HTML_PROCESSING_INSTRUCTION@39..52
+          0: PI_START@39..43 "<?" [Newline("\n"), Whitespace("\t")] []
+          1: HTML_TAG_NAME@43..47
+            0: HTML_LITERAL@43..47 "foo" [] [Whitespace(" ")]
+          2: HTML_ATTRIBUTE_LIST@47..50
+            0: HTML_ATTRIBUTE@47..50
+              0: HTML_ATTRIBUTE_NAME@47..48
+                0: HTML_LITERAL@47..48 "a" [] []
+              1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@48..50
+                0: EQ@48..49 "=" [] []
+                1: HTML_STRING@49..50
+                  0: HTML_STRING_LITERAL@49..50 "b" [] []
+          3: PI_END@50..52 "?>" [] []
+        3: HTML_PROCESSING_INSTRUCTION@52..105
+          0: PI_START@52..56 "<?" [Newline("\n"), Whitespace("\t")] []
+          1: HTML_TAG_NAME@56..71
+            0: HTML_LITERAL@56..71 "xml-stylesheet" [] [Whitespace(" ")]
+          2: HTML_ATTRIBUTE_LIST@71..103
+            0: HTML_ATTRIBUTE@71..88
+              0: HTML_ATTRIBUTE_NAME@71..75
+                0: HTML_LITERAL@71..75 "href" [] []
+              1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@75..88
+                0: EQ@75..76 "=" [] []
+                1: HTML_STRING@76..88
+                  0: HTML_STRING_LITERAL@76..88 "\"style.css\"" [] [Whitespace(" ")]
+            1: HTML_ATTRIBUTE@88..103
+              0: HTML_ATTRIBUTE_NAME@88..92
+                0: HTML_LITERAL@88..92 "type" [] []
+              1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@92..103
+                0: EQ@92..93 "=" [] []
+                1: HTML_STRING@93..103
+                  0: HTML_STRING_LITERAL@93..103 "\"text/css\"" [] []
+          3: PI_END@103..105 "?>" [] []
+      2: HTML_CLOSING_ELEMENT@105..112
+        0: L_ANGLE@105..107 "<" [Newline("\n")] []
+        1: SLASH@107..108 "/" [] []
+        2: HTML_TAG_NAME@108..111
+          0: SVG_KW@108..111 "svg" [] []
+        3: R_ANGLE@111..112 ">" [] []
+  5: EOF@112..113 "" [Newline("\n")] []
+
+```

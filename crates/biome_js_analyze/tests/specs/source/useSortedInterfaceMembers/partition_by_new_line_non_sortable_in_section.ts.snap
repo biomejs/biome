@@ -1,0 +1,47 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 149
+expression: partition_by_new_line_non_sortable_in_section.ts
+---
+# Input
+```ts
+interface Example {
+	z: string;
+	(): void;
+
+	b: string;
+	a: string;
+}
+
+```
+
+# Diagnostics
+```
+partition_by_new_line_non_sortable_in_section.ts:1:1 assist/source/useSortedInterfaceMembers  FIXABLE  ━━━━━━━━━━
+
+  i The interface members are not sorted by key.
+  
+  > 1 │ interface Example {
+      │ ^^^^^^^^^^^^^^^^^^^
+  > 2 │ 	z: string;
+  > 3 │ 	(): void;
+  > 4 │ 
+  > 5 │ 	b: string;
+  > 6 │ 	a: string;
+  > 7 │ }
+      │ ^
+    8 │ 
+  
+  i Safe fix: Sort the interface members by key.
+  
+    3 3 │     (): void;
+    4 4 │   
+    5   │ - → b:·string;
+    6   │ - → a:·string;
+      5 │ + → a:·string;
+      6 │ + → b:·string;
+    7 7 │   }
+    8 8 │   
+  
+
+```

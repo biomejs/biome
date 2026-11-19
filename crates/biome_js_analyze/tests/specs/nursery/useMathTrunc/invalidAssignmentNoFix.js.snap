@@ -1,0 +1,228 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidAssignmentNoFix.js
+---
+# Input
+```js
+/* should generate diagnostics */
+foo[i++] |= 0;
+getObject().value |= 0;
+foo[bar()] |= 0;
+foo[delete a.b] |= 0;
+foo[a = 1] |= 0;
+[...foo][0] |= 0;
+foo /* comment */ |= 0;
+foo |= /* comment */ 0;
+foo[tag`key`] |= 0;
+foo[`${bar()}`] |= 0;
+
+```
+
+# Diagnostics
+```
+invalidAssignmentNoFix.js:2:1 lint/nursery/useMathTrunc ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use Math.trunc() instead of |= 0.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ foo[i++] |= 0;
+      │ ^^^^^^^^^^^^^
+    3 │ getObject().value |= 0;
+    4 │ foo[bar()] |= 0;
+  
+  i Bitwise operations turn the number into a 32-bit integer first, so numbers above 2147483647 or below -2147483648 give wrong results.
+  
+  i Math.trunc() removes the decimal part of any number and states the intent clearly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidAssignmentNoFix.js:3:1 lint/nursery/useMathTrunc ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use Math.trunc() instead of |= 0.
+  
+    1 │ /* should generate diagnostics */
+    2 │ foo[i++] |= 0;
+  > 3 │ getObject().value |= 0;
+      │ ^^^^^^^^^^^^^^^^^^^^^^
+    4 │ foo[bar()] |= 0;
+    5 │ foo[delete a.b] |= 0;
+  
+  i Bitwise operations turn the number into a 32-bit integer first, so numbers above 2147483647 or below -2147483648 give wrong results.
+  
+  i Math.trunc() removes the decimal part of any number and states the intent clearly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidAssignmentNoFix.js:4:1 lint/nursery/useMathTrunc ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use Math.trunc() instead of |= 0.
+  
+    2 │ foo[i++] |= 0;
+    3 │ getObject().value |= 0;
+  > 4 │ foo[bar()] |= 0;
+      │ ^^^^^^^^^^^^^^^
+    5 │ foo[delete a.b] |= 0;
+    6 │ foo[a = 1] |= 0;
+  
+  i Bitwise operations turn the number into a 32-bit integer first, so numbers above 2147483647 or below -2147483648 give wrong results.
+  
+  i Math.trunc() removes the decimal part of any number and states the intent clearly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidAssignmentNoFix.js:5:1 lint/nursery/useMathTrunc ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use Math.trunc() instead of |= 0.
+  
+    3 │ getObject().value |= 0;
+    4 │ foo[bar()] |= 0;
+  > 5 │ foo[delete a.b] |= 0;
+      │ ^^^^^^^^^^^^^^^^^^^^
+    6 │ foo[a = 1] |= 0;
+    7 │ [...foo][0] |= 0;
+  
+  i Bitwise operations turn the number into a 32-bit integer first, so numbers above 2147483647 or below -2147483648 give wrong results.
+  
+  i Math.trunc() removes the decimal part of any number and states the intent clearly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidAssignmentNoFix.js:6:1 lint/nursery/useMathTrunc ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use Math.trunc() instead of |= 0.
+  
+    4 │ foo[bar()] |= 0;
+    5 │ foo[delete a.b] |= 0;
+  > 6 │ foo[a = 1] |= 0;
+      │ ^^^^^^^^^^^^^^^
+    7 │ [...foo][0] |= 0;
+    8 │ foo /* comment */ |= 0;
+  
+  i Bitwise operations turn the number into a 32-bit integer first, so numbers above 2147483647 or below -2147483648 give wrong results.
+  
+  i Math.trunc() removes the decimal part of any number and states the intent clearly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidAssignmentNoFix.js:7:1 lint/nursery/useMathTrunc ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use Math.trunc() instead of |= 0.
+  
+    5 │ foo[delete a.b] |= 0;
+    6 │ foo[a = 1] |= 0;
+  > 7 │ [...foo][0] |= 0;
+      │ ^^^^^^^^^^^^^^^^
+    8 │ foo /* comment */ |= 0;
+    9 │ foo |= /* comment */ 0;
+  
+  i Bitwise operations turn the number into a 32-bit integer first, so numbers above 2147483647 or below -2147483648 give wrong results.
+  
+  i Math.trunc() removes the decimal part of any number and states the intent clearly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidAssignmentNoFix.js:8:1 lint/nursery/useMathTrunc ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use Math.trunc() instead of |= 0.
+  
+     6 │ foo[a = 1] |= 0;
+     7 │ [...foo][0] |= 0;
+   > 8 │ foo /* comment */ |= 0;
+       │ ^^^^^^^^^^^^^^^^^^^^^^
+     9 │ foo |= /* comment */ 0;
+    10 │ foo[tag`key`] |= 0;
+  
+  i Bitwise operations turn the number into a 32-bit integer first, so numbers above 2147483647 or below -2147483648 give wrong results.
+  
+  i Math.trunc() removes the decimal part of any number and states the intent clearly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidAssignmentNoFix.js:9:1 lint/nursery/useMathTrunc ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use Math.trunc() instead of |= 0.
+  
+     7 │ [...foo][0] |= 0;
+     8 │ foo /* comment */ |= 0;
+   > 9 │ foo |= /* comment */ 0;
+       │ ^^^^^^^^^^^^^^^^^^^^^^
+    10 │ foo[tag`key`] |= 0;
+    11 │ foo[`${bar()}`] |= 0;
+  
+  i Bitwise operations turn the number into a 32-bit integer first, so numbers above 2147483647 or below -2147483648 give wrong results.
+  
+  i Math.trunc() removes the decimal part of any number and states the intent clearly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidAssignmentNoFix.js:10:1 lint/nursery/useMathTrunc ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use Math.trunc() instead of |= 0.
+  
+     8 │ foo /* comment */ |= 0;
+     9 │ foo |= /* comment */ 0;
+  > 10 │ foo[tag`key`] |= 0;
+       │ ^^^^^^^^^^^^^^^^^^
+    11 │ foo[`${bar()}`] |= 0;
+    12 │ 
+  
+  i Bitwise operations turn the number into a 32-bit integer first, so numbers above 2147483647 or below -2147483648 give wrong results.
+  
+  i Math.trunc() removes the decimal part of any number and states the intent clearly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidAssignmentNoFix.js:11:1 lint/nursery/useMathTrunc ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use Math.trunc() instead of |= 0.
+  
+     9 │ foo |= /* comment */ 0;
+    10 │ foo[tag`key`] |= 0;
+  > 11 │ foo[`${bar()}`] |= 0;
+       │ ^^^^^^^^^^^^^^^^^^^^
+    12 │ 
+  
+  i Bitwise operations turn the number into a 32-bit integer first, so numbers above 2147483647 or below -2147483648 give wrong results.
+  
+  i Math.trunc() removes the decimal part of any number and states the intent clearly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

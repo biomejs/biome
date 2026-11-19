@@ -1,6 +1,5 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
-assertion_line: 249
 info: css/stylefmt-repo/media-queries-ranges/media-queries-ranges.css
 ---
 
@@ -27,7 +26,7 @@ info: css/stylefmt-repo/media-queries-ranges/media-queries-ranges.css
    }
  }
 -@custom-media --only-medium-screen (width >=500px) and (width<= 1200px);
-+@custom-media --only-medium-screen (    width    >=500px     ) and (width<=    1200px    );
++@custom-media --only-medium-screen (width >= 500px) and (width <= 1200px);
  @media (--only-medium-screen) {
    .rule {
      color: blue;
@@ -41,15 +40,10 @@ info: css/stylefmt-repo/media-queries-ranges/media-queries-ranges.css
     color: red;
   }
 }
-@custom-media --only-medium-screen (    width    >=500px     ) and (width<=    1200px    );
+@custom-media --only-medium-screen (width >= 500px) and (width <= 1200px);
 @media (--only-medium-screen) {
   .rule {
     color: blue;
   }
 }
-```
-
-# Lines exceeding max width of 80 characters
-```
-    6: @custom-media --only-medium-screen (    width    >=500px     ) and (width<=    1200px    );
 ```

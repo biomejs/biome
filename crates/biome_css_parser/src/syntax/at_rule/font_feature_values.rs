@@ -1,15 +1,18 @@
+use super::name::{is_at_scss_at_rule_prelude_name, parse_custom_at_rule_name};
 use super::parse_error::{
     expected_any_font_family_name, expected_any_font_feature_value_item,
     expected_font_feature_values_item,
 };
 use crate::syntax::block::{ParseBlockBody, parse_declaration_block};
-use crate::syntax::is_at_string;
+use crate::syntax::declaration::parse_empty_declaration;
+use crate::syntax::parse_error::scss_only_syntax_error;
+use crate::syntax::scss::{is_at_scss_interpolated_string, parse_scss_interpolated_string};
+use crate::syntax::{CssSyntaxFeatures, is_at_string};
 use crate::{
     lexer::CssLexContext,
     parser::CssParser,
     syntax::{
-        is_at_identifier, parse_custom_identifier,
-        parse_error::expected_non_css_wide_keyword_identifier, parse_string,
+        is_at_identifier, parse_error::expected_non_css_wide_keyword_identifier, parse_string,
     },
 };
 use biome_css_syntax::{
@@ -19,7 +22,7 @@ use biome_css_syntax::{
 use biome_parser::parse_lists::ParseSeparatedList;
 use biome_parser::parse_recovery::ParseRecovery;
 use biome_parser::{
-    Parser, TokenSet,
+    Parser, SyntaxFeature, TokenSet,
     parse_lists::ParseNodeList,
     parse_recovery::{ParseRecoveryTokenSet, RecoveryResult},
     parsed_syntax::ParsedSyntax::{self, Absent, Present},
@@ -134,33 +137,40 @@ impl ParseRecovery for CssFontFamilyNameListParseRecovery {
     }
 }
 
-/// Determines whether the current token in the parser is a font family name.
+/// Recognizes a quoted name or the first part of an unquoted font family.
 ///
-/// This function checks if the current position in the CSS parser is pointing to a valid
-/// font family name by looking for either an identifier or a string token. Font family names
-/// can be specified either as named fonts, like `Arial`, or as strings, like `"Times New Roman"`.
-///
-/// Font family names are used within various CSS properties, such as `font-family`, to specify
-/// which font should be applied to text.
+/// ```scss
+/// @font-feature-values Font #{$name}, "Font #{$name}" {}
+/// ```
 #[inline]
 pub(crate) fn is_at_font_family_name(p: &mut CssParser) -> bool {
-    is_at_identifier(p) || is_at_string(p)
+    is_at_identifier(p)
+        || is_at_string(p)
+        || is_at_scss_at_rule_prelude_name(p)
+        || is_at_scss_interpolated_string(p)
 }
 
-/// Parses a font family name from the CSS content being analyzed.
+/// Keeps whitespace-separated parts in one family, allowing SCSS interpolation.
 ///
-/// This function attempts to parse a font family name at the current position of the CSS parser.
-/// Font family names can be provided either as strings (e.g., "Times New Roman") or as identifiers
-/// (e.g., Arial). The function first checks if the current position indeed represents a font family
-/// name by calling `is_at_font_family_name`. If a font family name is present, it then determines
-/// whether the name is provided as a string or an identifier and parses it accordingly.
+/// ```scss
+/// @font-feature-values Font #{$name}, #{$name}-Sans {}
+/// ```
 #[inline]
 pub(crate) fn parse_font_family_name(p: &mut CssParser) -> ParsedSyntax {
     if !is_at_font_family_name(p) {
         return Absent;
     }
 
-    if is_at_string(p) {
+    if is_at_scss_interpolated_string(p) {
+        CssSyntaxFeatures::Scss.parse_exclusive_syntax_with_kind(
+            p,
+            |p| parse_scss_interpolated_string(p, CssLexContext::Regular),
+            |p, marker| {
+                scss_only_syntax_error(p, "SCSS interpolated font family names", marker.range(p))
+            },
+            Some(CSS_BOGUS_FONT_FAMILY_NAME),
+        )
+    } else if is_at_string(p) {
         parse_string(p)
     } else {
         let m = p.start();
@@ -177,7 +187,7 @@ impl ParseNodeList for CssCustomIdentifierSpaceSeparatedList {
     const LIST_KIND: Self::Kind = CSS_CUSTOM_IDENTIFIER_SPACE_SEPARATED_LIST;
 
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
-        parse_custom_identifier(p, CssLexContext::Regular)
+        parse_custom_at_rule_name(p)
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
@@ -222,7 +232,7 @@ impl ParseRecovery for CssCustomIdentifierSpaceSeparatedListParseRecovery {
     /// }
     /// ```
     fn is_at_recovered(&self, p: &mut Self::Parser<'_>) -> bool {
-        p.at(T!['{']) || p.at(T![,]) || is_at_identifier(p)
+        p.at(T!['{']) || p.at(T![,]) || is_at_identifier(p) || is_at_scss_at_rule_prelude_name(p)
     }
 }
 
@@ -248,7 +258,9 @@ impl ParseNodeList for FontFeatureValuesItemList {
     const LIST_KIND: Self::Kind = CSS_FONT_FEATURE_VALUES_ITEM_LIST;
 
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
-        parse_font_feature_values_item(p)
+        CssSyntaxFeatures::Scss
+            .parse_supported_syntax(p, parse_empty_declaration)
+            .or_else(|| parse_font_feature_values_item(p))
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
@@ -260,12 +272,14 @@ impl ParseNodeList for FontFeatureValuesItemList {
         p: &mut Self::Parser<'_>,
         parsed_element: ParsedSyntax,
     ) -> RecoveryResult {
+        let recovery_set = if CssSyntaxFeatures::Scss.is_supported(p) {
+            FONT_FEATURE_VALUES_ITEM_LIST_RECOVERY_SET.union(token_set![T![;]])
+        } else {
+            FONT_FEATURE_VALUES_ITEM_LIST_RECOVERY_SET
+        };
         parsed_element.or_recover_with_token_set(
             p,
-            &ParseRecoveryTokenSet::new(
-                CSS_BOGUS_FONT_FEATURE_VALUES_ITEM,
-                FONT_FEATURE_VALUES_ITEM_LIST_RECOVERY_SET,
-            ),
+            &ParseRecoveryTokenSet::new(CSS_BOGUS_FONT_FEATURE_VALUES_ITEM, recovery_set),
             expected_font_feature_values_item,
         )
     }

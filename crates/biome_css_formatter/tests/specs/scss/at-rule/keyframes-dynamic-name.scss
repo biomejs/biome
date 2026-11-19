@@ -1,0 +1,10 @@
+$name: fade;
+$suffix: loader;
+
+@keyframes  #{$name}{to{opacity:1}}
+
+@keyframes $name{to{opacity:1}}
+
+@keyframes #{$name}-out{to{opacity:1}}
+
+@keyframes fade-#{$suffix}{to{opacity:1}}

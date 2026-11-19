@@ -1,8 +1,8 @@
+use crate::TestArgs as Args;
 use crate::run_cli;
 use crate::snap_test::{SnapshotPayload, assert_cli_snapshot};
 use biome_console::BufferConsole;
 use biome_fs::MemoryFileSystem;
-use bpaf::Args;
 use camino::Utf8Path;
 
 #[test]
@@ -219,7 +219,7 @@ fn migrate_eslintrcjson_fix() {
 
 #[test]
 fn migrate_eslintrcjson_override_existing_config() {
-    let biomejson = r#"{ "linter": { "rules": { "recommended": true, "suspicious": { "noDoubleEquals": "error" } } } }"#;
+    let biomejson = r#"{ "linter": { "rules": { "preset": "recommended", "suspicious": { "noDoubleEquals": "error" } } } }"#;
     let eslintrc = r#"{ "rules": { "eqeqeq": "off" } }"#;
 
     let fs = MemoryFileSystem::default();
@@ -478,6 +478,59 @@ fn migrate_eslintrcjson_class_methods_use_this_options() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "migrate_eslintrcjson_class_methods_use_this_options",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn migrate_no_restricted_properties_with_options() {
+    let biomejson = r#"{}"#;
+    let eslintrc = r#"{
+        "rules": {
+            "no-restricted-properties": ["error",
+                {
+                    "object": "require",
+                    "property": "ensure",
+                    "message": "Use dynamic import() instead."
+                },
+                {
+                    "object": "arguments",
+                    "allowProperties": ["length"]
+                },
+                {
+                    "property": "__defineGetter__",
+                    "allowObjects": ["Object"]
+                }
+            ]
+        }
+    }"#;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8Path::new("biome.json").into(), biomejson.as_bytes());
+    fs.insert(Utf8Path::new(".eslintrc.json").into(), eslintrc.as_bytes());
+
+    let mut console = BufferConsole::default();
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "migrate",
+                "eslint",
+                "--include-inspired",
+                "--include-nursery",
+                "--write",
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "migrate_no_restricted_properties_with_options",
         fs,
         console,
         result,
@@ -833,6 +886,32 @@ fn migrate_rules_covered_by_formatter() {
 }
 
 #[test]
+fn migrate_one_var_is_inspired() {
+    let biomejson = r#"{}"#;
+    let eslintrc = r#"{ "rules": { "one-var": "error" } }"#;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8Path::new("biome.json").into(), biomejson.as_bytes());
+    fs.insert(Utf8Path::new(".eslintrc.json").into(), eslintrc.as_bytes());
+
+    let mut console = BufferConsole::default();
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["migrate", "eslint"].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "migrate_one_var_is_inspired",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn migrate_jest_consistent_test_it_no_options() {
     // With both flags and --write, biome.json should get the rule at its default options.
     let biomejson = r#"{}"#;
@@ -843,7 +922,7 @@ fn migrate_jest_consistent_test_it_no_options() {
     fs.insert(Utf8Path::new(".eslintrc.json").into(), eslintrc.as_bytes());
 
     let mut console = BufferConsole::default();
-    let (fs, result) = run_cli(
+    let (fs, migrate_result) = run_cli(
         fs,
         &mut console,
         Args::from(
@@ -858,13 +937,17 @@ fn migrate_jest_consistent_test_it_no_options() {
         ),
     );
 
-    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert!(
+        migrate_result.is_ok(),
+        "run_cli returned {migrate_result:?}"
+    );
 
     // rerun with linting to verify the configuration is valid
 
     let (fs, result) = run_cli(fs, &mut console, Args::from(["lint"].as_slice()));
 
     assert!(result.is_ok(), "run_cli rerun returned {result:?}");
+    let result = migrate_result.followed_by(result);
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),

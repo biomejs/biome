@@ -17,6 +17,13 @@ impl FormatNodeRule<CssIfSupportsIdentifierTest> for FormatCssIfSupportsIdentifi
             value,
         } = node.as_fields();
 
-        write!(f, [ident.format(), colon_token.format(), value.format()])
+        write!(
+            f,
+            [
+                ident?.format().with_text_case(CssCase::Preserve),
+                colon_token.format(),
+                value.format()
+            ]
+        )
     }
 }

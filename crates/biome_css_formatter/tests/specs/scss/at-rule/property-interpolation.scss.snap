@@ -1,0 +1,40 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/at-rule/property-interpolation.scss
+---
+
+# Input
+
+```scss
+@PROPERTY   --#{ $name }{
+  syntax:"<color>";
+  inherits:false;
+  initial-value:red;
+}
+
+@property --theme-#{$name} {syntax: "<length>"; inherits: true; initial-value: 0px;}
+
+@property --#{$prefix}-#{$name}-Color {}
+
+```
+
+
+# Formatted
+
+```scss
+@property --#{$name} {
+	syntax: "<color>";
+	inherits: false;
+	initial-value: red;
+}
+
+@property --theme-#{$name} {
+	syntax: "<length>";
+	inherits: true;
+	initial-value: 0px;
+}
+
+@property --#{$prefix}-#{$name}-Color {
+}
+
+```

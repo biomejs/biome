@@ -1,13 +1,14 @@
 use std::fmt::{Debug, Formatter};
+use std::io;
 
-use camino::Utf8PathBuf;
+use camino::{Utf8Path, Utf8PathBuf};
 use serde::{Deserialize, Serialize};
 
 use biome_console::fmt::Display;
 use biome_console::markup;
 use biome_deserialize::DeserializationDiagnostic;
-use biome_diagnostics::{Diagnostic, Error, MessageAndDescription};
-use biome_fs::FileSystemDiagnostic;
+use biome_diagnostics::{Advices, Diagnostic, Error, LogCategory, MessageAndDescription, Visit};
+use biome_fs::{FileSystemDiagnostic, ManifestName};
 use biome_grit_patterns::CompileError;
 use biome_resolver::{ResolveError, ResolveErrorDiagnostic};
 use biome_rowan::SyntaxError;
@@ -21,7 +22,7 @@ pub enum PluginDiagnostic {
     /// Error compiling the plugin
     Compile(CompileDiagnostic),
 
-    /// Error thrown when deserializing a plugin manifest, such as:
+    /// Error thrown when deserializing a Biome manifest, such as:
     /// - syntax error
     /// - incorrect fields
     /// - incorrect values
@@ -82,16 +83,95 @@ impl From<SyntaxError> for PluginDiagnostic {
 }
 
 impl PluginDiagnostic {
-    pub fn cant_resolve(path: Utf8PathBuf, kind: Option<ResolveError>) -> Self {
-        Self::CantResolve(CantResolve {
+    pub fn cant_read_plugin_file(path: Utf8PathBuf, source: FileSystemDiagnostic) -> Self {
+        Self::InvalidManifest(InvalidManifest {
             message: MessageAndDescription::from(
                 markup! {
-                   "Failed to resolve the plugin manifest from "
-                   <Emphasis>{path.to_string()}</Emphasis>
+                    "Biome couldn't read the plugin file "
+                    <Emphasis>{path.to_string()}</Emphasis>"."
                 }
                 .to_owned(),
             ),
-            source: kind.map(|kind| ResolveErrorDiagnostic::new(kind, path).into()),
+            source: Some(Error::from(source)),
+        })
+    }
+
+    /// Reports a single-file plugin whose file name can't be used as a plugin
+    /// name in suppression comments.
+    pub fn invalid_plugin_file_name(path: &Utf8Path) -> Self {
+        Self::InvalidManifest(InvalidManifest {
+            message: MessageAndDescription::from(
+                markup! {
+                    "The plugin file name "<Emphasis>{path.file_name().unwrap_or(path.as_str())}</Emphasis>
+                    " must not contain whitespace, "<Emphasis>":"</Emphasis>", or "<Emphasis>"("</Emphasis>
+                    ", because the file name is the plugin name used in suppression comments."
+                }
+                .to_owned(),
+            ),
+            source: None,
+        })
+    }
+
+    /// Reports a plugin or manifest rule path that doesn't point to a file.
+    pub fn plugin_file_not_found(path: &Utf8Path) -> Self {
+        Self::CantResolve(CantResolve {
+            message: MessageAndDescription::from(
+                markup! {
+                    "Biome couldn't find the plugin file "<Emphasis>{path.as_str()}</Emphasis>"."
+                }
+                .to_owned(),
+            ),
+            advice: PackageLookupAdvice::default(),
+            source: None,
+        })
+    }
+
+    /// Reports a plugin path that doesn't contain a Biome manifest.
+    pub fn missing_manifest(path: &Utf8Path) -> Self {
+        Self::CantResolve(CantResolve {
+            message: MessageAndDescription::from(
+                markup! {
+                    "Biome couldn't find a "<Emphasis>{ManifestName::biome_manifest_json()}</Emphasis>
+                    " or "<Emphasis>{ManifestName::biome_manifest_jsonc()}</Emphasis>
+                    " file in "<Emphasis>{path.as_str()}</Emphasis>"."
+                }
+                .to_owned(),
+            ),
+            advice: PackageLookupAdvice::default(),
+            source: None,
+        })
+    }
+
+    /// Reports a plugin package that can't be resolved from `base_path`.
+    ///
+    /// When the package isn't installed, the diagnostic names the directory where the
+    /// `node_modules` lookup starts. Other resolution failures keep the resolver error as
+    /// their source.
+    pub fn cant_resolve_package(package: &str, base_path: &Utf8Path, kind: ResolveError) -> Self {
+        if kind == ResolveError::NotFound {
+            return Self::CantResolve(CantResolve {
+                message: MessageAndDescription::from(
+                    markup! {
+                        "Biome couldn't find the plugin package "<Emphasis>{package}</Emphasis>"."
+                    }
+                    .to_owned(),
+                ),
+                advice: PackageLookupAdvice {
+                    base_path: Some(base_path.to_string()),
+                },
+                source: None,
+            });
+        }
+
+        Self::CantResolve(CantResolve {
+            message: MessageAndDescription::from(
+                markup! {
+                    "Biome couldn't resolve the plugin package "<Emphasis>{package}</Emphasis>"."
+                }
+                .to_owned(),
+            ),
+            advice: PackageLookupAdvice::default(),
+            source: Some(ResolveErrorDiagnostic::new(kind, Utf8PathBuf::from(package)).into()),
         })
     }
 
@@ -179,9 +259,41 @@ pub struct CantResolve {
     #[description]
     message: MessageAndDescription,
 
+    #[advice]
+    advice: PackageLookupAdvice,
+
     #[serde(skip)]
     #[source]
     source: Option<Error>,
+}
+
+/// Tells the user where Biome looked for a plugin package that isn't installed.
+#[derive(Debug, Default, Serialize, Deserialize)]
+pub struct PackageLookupAdvice {
+    /// The directory where the `node_modules` lookup starts. `None` records no advice.
+    base_path: Option<String>,
+}
+
+impl Advices for PackageLookupAdvice {
+    fn record(&self, visitor: &mut dyn Visit) -> io::Result<()> {
+        let Some(base_path) = &self.base_path else {
+            return Ok(());
+        };
+        // An empty base path is relative, so the lookup starts in the working directory.
+        let directory = if base_path.is_empty() {
+            markup! { "the working directory" }
+        } else {
+            markup! { <Emphasis>{base_path}</Emphasis> }
+        };
+        visitor.record_log(
+            LogCategory::Info,
+            &markup! {
+                "Make sure the package is installed. Biome looks for it in the "
+                <Emphasis>"node_modules"</Emphasis>" directory of "{directory}
+                " and of each parent directory."
+            },
+        )
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize, Diagnostic)]
@@ -208,14 +320,16 @@ pub struct NotLoaded {
 
 #[cfg(test)]
 mod test {
-    use crate::plugin_manifest::PluginManifest;
+    use crate::test_utils::snapshot_content;
 
     use biome_deserialize::json::deserialize_from_json_str;
     use biome_diagnostics::{Error, print_diagnostic_to_string};
     use biome_json_parser::JsonParserOptions;
+    use biome_manifest::BiomeManifest;
 
-    fn snap_diagnostic(test_name: &str, diagnostic: Error) {
+    fn snap_diagnostic(test_name: &str, plugin_sources: &[(&str, &str)], diagnostic: Error) {
         let content = print_diagnostic_to_string(&diagnostic);
+        let content = snapshot_content(plugin_sources, &[], &content);
 
         insta::with_settings!({
             prepend_module_to_snapshot => false,
@@ -226,13 +340,22 @@ mod test {
 
     #[test]
     fn deserialization_error() {
-        let content = "{}";
+        let content = r#"{
+            "plugins": {
+                "rules": [{ "one": "rules/1.grit" }],
+                "presets": { "recommended": ["one"] }
+            }
+        }"#;
         let result =
-            deserialize_from_json_str::<PluginManifest>(content, JsonParserOptions::default(), "");
+            deserialize_from_json_str::<BiomeManifest>(content, JsonParserOptions::default(), "");
 
         assert!(result.has_errors());
         for diagnostic in result.into_diagnostics() {
-            snap_diagnostic("deserialization_error", diagnostic)
+            snap_diagnostic(
+                "deserialization_error",
+                &[("biome-manifest.jsonc", content)],
+                diagnostic,
+            )
         }
     }
 
@@ -240,12 +363,13 @@ mod test {
     fn deserialization_quick_check() {
         let content = r#"{
     "version": 1,
-    "rules": [
-        "./rules/my-rule.grit"
-    ]
+    "plugins": {
+        "rules": [{ "myRule": "./rules/my-rule.grit" }],
+        "presets": { "recommended": ["myRule"] }
+    }
 }"#;
         let _result =
-            deserialize_from_json_str::<PluginManifest>(content, JsonParserOptions::default(), "")
+            deserialize_from_json_str::<BiomeManifest>(content, JsonParserOptions::default(), "")
                 .into_deserialized()
                 .unwrap_or_default();
     }

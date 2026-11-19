@@ -1,0 +1,17 @@
+/* should not generate diagnostics */
+import { createApp, defineComponent } from "vue";
+import App from "./App.vue";
+import Other from "./Other.vue";
+
+const app = createApp(App);
+app.mixin({ created() {} });
+defineComponent(Other);
+createApp(App).mount("#app");
+
+export default defineComponent({
+  components: {
+    Inner: { name: "Inner" },
+  },
+});
+
+createApp(App, { msg: "hi" });

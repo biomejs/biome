@@ -1,0 +1,395 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+switch (x) {
+	case 1:
+		a;
+		break;
+	case 2:
+		switch (y) {
+			case 3:
+				c;
+				break;
+			default:
+				d;
+		}
+		break;
+	default:
+		b;
+}
+
+switch (x) {
+	case 1: {
+		switch (y) {
+			case 3:
+				c;
+		}
+		switch (z) {
+			case 3:
+				c;
+		}
+		break;
+	}
+}
+
+switch (x) {
+	case 1:
+		switch (y) {
+			case 3:
+				c;
+			default:
+				switch (z) {
+					case 4:
+						d;
+				}
+		}
+		break;
+}
+
+switch (x) {
+	default:
+		switch (y) {
+			case 3:
+				c;
+		}
+}
+
+switch (x) {
+	case 1: {
+		const insideFunction = () => {
+			switch (y) {}
+		};
+		break;
+	}
+}
+
+switch (x) {
+	case 1: {
+		class Foo {
+			method() {
+				switch (y) {}
+			}
+		}
+		break;
+	}
+}
+
+switch (
+	(() => {
+		switch (y) {}
+	})()
+) {
+}
+
+switch (x) {
+	case (() => {
+		switch (y) {}
+	})():
+		break;
+}
+
+```
+
+# Diagnostics
+```
+invalid.js:7:3 lint/nursery/noNestedSwitch ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This switch statement is inside another switch statement.
+  
+    5 │ 		break;
+    6 │ 	case 2:
+  > 7 │ 		switch (y) {
+      │ 		^^^^^^
+    8 │ 			case 3:
+    9 │ 				c;
+  
+  i The outer switch statement starts here.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ switch (x) {
+      │ ^^^^^^
+    3 │ 	case 1:
+    4 │ 		a;
+  
+  i Nested switch statements are hard to read, because it is easy to mix up which case belongs to which switch.
+  
+  i Move the inner switch statement into a separate function written outside the outer switch statement.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:21:3 lint/nursery/noNestedSwitch ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This switch statement is inside another switch statement.
+  
+    19 │ switch (x) {
+    20 │ 	case 1: {
+  > 21 │ 		switch (y) {
+       │ 		^^^^^^
+    22 │ 			case 3:
+    23 │ 				c;
+  
+  i The outer switch statement starts here.
+  
+    17 │ }
+    18 │ 
+  > 19 │ switch (x) {
+       │ ^^^^^^
+    20 │ 	case 1: {
+    21 │ 		switch (y) {
+  
+  i Nested switch statements are hard to read, because it is easy to mix up which case belongs to which switch.
+  
+  i Move the inner switch statement into a separate function written outside the outer switch statement.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:25:3 lint/nursery/noNestedSwitch ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This switch statement is inside another switch statement.
+  
+    23 │ 				c;
+    24 │ 		}
+  > 25 │ 		switch (z) {
+       │ 		^^^^^^
+    26 │ 			case 3:
+    27 │ 				c;
+  
+  i The outer switch statement starts here.
+  
+    17 │ }
+    18 │ 
+  > 19 │ switch (x) {
+       │ ^^^^^^
+    20 │ 	case 1: {
+    21 │ 		switch (y) {
+  
+  i Nested switch statements are hard to read, because it is easy to mix up which case belongs to which switch.
+  
+  i Move the inner switch statement into a separate function written outside the outer switch statement.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:35:3 lint/nursery/noNestedSwitch ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This switch statement is inside another switch statement.
+  
+    33 │ switch (x) {
+    34 │ 	case 1:
+  > 35 │ 		switch (y) {
+       │ 		^^^^^^
+    36 │ 			case 3:
+    37 │ 				c;
+  
+  i The outer switch statement starts here.
+  
+    31 │ }
+    32 │ 
+  > 33 │ switch (x) {
+       │ ^^^^^^
+    34 │ 	case 1:
+    35 │ 		switch (y) {
+  
+  i Nested switch statements are hard to read, because it is easy to mix up which case belongs to which switch.
+  
+  i Move the inner switch statement into a separate function written outside the outer switch statement.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:39:5 lint/nursery/noNestedSwitch ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This switch statement is inside another switch statement.
+  
+    37 │ 				c;
+    38 │ 			default:
+  > 39 │ 				switch (z) {
+       │ 				^^^^^^
+    40 │ 					case 4:
+    41 │ 						d;
+  
+  i The outer switch statement starts here.
+  
+    33 │ switch (x) {
+    34 │ 	case 1:
+  > 35 │ 		switch (y) {
+       │ 		^^^^^^
+    36 │ 			case 3:
+    37 │ 				c;
+  
+  i Nested switch statements are hard to read, because it is easy to mix up which case belongs to which switch.
+  
+  i Move the inner switch statement into a separate function written outside the outer switch statement.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:49:3 lint/nursery/noNestedSwitch ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This switch statement is inside another switch statement.
+  
+    47 │ switch (x) {
+    48 │ 	default:
+  > 49 │ 		switch (y) {
+       │ 		^^^^^^
+    50 │ 			case 3:
+    51 │ 				c;
+  
+  i The outer switch statement starts here.
+  
+    45 │ }
+    46 │ 
+  > 47 │ switch (x) {
+       │ ^^^^^^
+    48 │ 	default:
+    49 │ 		switch (y) {
+  
+  i Nested switch statements are hard to read, because it is easy to mix up which case belongs to which switch.
+  
+  i Move the inner switch statement into a separate function written outside the outer switch statement.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:58:4 lint/nursery/noNestedSwitch ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This switch statement is inside another switch statement.
+  
+    56 │ 	case 1: {
+    57 │ 		const insideFunction = () => {
+  > 58 │ 			switch (y) {}
+       │ 			^^^^^^
+    59 │ 		};
+    60 │ 		break;
+  
+  i The outer switch statement starts here.
+  
+    53 │ }
+    54 │ 
+  > 55 │ switch (x) {
+       │ ^^^^^^
+    56 │ 	case 1: {
+    57 │ 		const insideFunction = () => {
+  
+  i Nested switch statements are hard to read, because it is easy to mix up which case belongs to which switch.
+  
+  i Move the inner switch statement into a separate function written outside the outer switch statement.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:68:5 lint/nursery/noNestedSwitch ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This switch statement is inside another switch statement.
+  
+    66 │ 		class Foo {
+    67 │ 			method() {
+  > 68 │ 				switch (y) {}
+       │ 				^^^^^^
+    69 │ 			}
+    70 │ 		}
+  
+  i The outer switch statement starts here.
+  
+    62 │ }
+    63 │ 
+  > 64 │ switch (x) {
+       │ ^^^^^^
+    65 │ 	case 1: {
+    66 │ 		class Foo {
+  
+  i Nested switch statements are hard to read, because it is easy to mix up which case belongs to which switch.
+  
+  i Move the inner switch statement into a separate function written outside the outer switch statement.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:77:3 lint/nursery/noNestedSwitch ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This switch statement is inside another switch statement.
+  
+    75 │ switch (
+    76 │ 	(() => {
+  > 77 │ 		switch (y) {}
+       │ 		^^^^^^
+    78 │ 	})()
+    79 │ ) {
+  
+  i The outer switch statement starts here.
+  
+    73 │ }
+    74 │ 
+  > 75 │ switch (
+       │ ^^^^^^
+    76 │ 	(() => {
+    77 │ 		switch (y) {}
+  
+  i Nested switch statements are hard to read, because it is easy to mix up which case belongs to which switch.
+  
+  i Move the inner switch statement into a separate function written outside the outer switch statement.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:84:3 lint/nursery/noNestedSwitch ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This switch statement is inside another switch statement.
+  
+    82 │ switch (x) {
+    83 │ 	case (() => {
+  > 84 │ 		switch (y) {}
+       │ 		^^^^^^
+    85 │ 	})():
+    86 │ 		break;
+  
+  i The outer switch statement starts here.
+  
+    80 │ }
+    81 │ 
+  > 82 │ switch (x) {
+       │ ^^^^^^
+    83 │ 	case (() => {
+    84 │ 		switch (y) {}
+  
+  i Nested switch statements are hard to read, because it is easy to mix up which case belongs to which switch.
+  
+  i Move the inner switch statement into a separate function written outside the outer switch statement.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

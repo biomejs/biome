@@ -1,0 +1,19 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: valid.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+
+<template>
+  <div class="size-4"></div>
+  <div class="truncate"></div>
+  <BaseIcon class="inline-block sm:hover:size-6 text-blue-500" />
+  <button class="rounded-md px-4 py-2 disabled:opacity-50">
+    Save
+  </button>
+  <div class="mx-3 [&_svg]:size-[1.25rem]"></div>
+</template>
+
+```

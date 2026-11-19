@@ -156,13 +156,21 @@ impl Rule for UseValidForDirection {
         let node = ctx.query();
         let l_paren_range = node.l_paren_token().ok()?.text_trimmed_range();
         let r_paren_range = node.r_paren_token().ok()?.text_trimmed_range();
-        Some(RuleDiagnostic::new(
-            rule_category!(),
-            l_paren_range.cover(r_paren_range),
-            markup! {
-                "The update clause in this loop moves the variable in the wrong direction."
-            },
-        ))
+        Some(
+            RuleDiagnostic::new(
+                rule_category!(),
+                l_paren_range.cover(r_paren_range),
+                markup! {
+                    "The update clause in this loop moves the variable in the wrong direction."
+                },
+            )
+            .note(markup! {
+                "The variable moves away from the value that ends the loop, so the loop condition may never become false. This can cause an infinite loop."
+            })
+            .note(markup! {
+                "Change the update clause so that it moves the variable toward the loop condition, or change the condition."
+            }),
+        )
     }
 }
 

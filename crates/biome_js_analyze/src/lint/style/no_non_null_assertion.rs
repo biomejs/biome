@@ -78,13 +78,21 @@ impl Rule for NoNonNullAssertion {
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _: &Self::State) -> Option<RuleDiagnostic> {
-        Some(RuleDiagnostic::new(
-            rule_category!(),
-            ctx.query().range(),
-            markup! {
-                "Forbidden non-null assertion."
-            },
-        ))
+        Some(
+            RuleDiagnostic::new(
+                rule_category!(),
+                ctx.query().range(),
+                markup! {
+                    "Forbidden non-null assertion."
+                },
+            )
+            .note(markup! {
+                "A non-null assertion tells TypeScript to ignore a possible "<Emphasis>"null"</Emphasis>" or "<Emphasis>"undefined"</Emphasis>" value. If the value is missing at runtime, the code fails with an error that the compiler could not catch."
+            })
+            .note(markup! {
+                "Check that the value is defined before using it, for example with an "<Emphasis>"if"</Emphasis>" statement or optional chaining, instead of asserting it."
+            }),
+        )
     }
 
     fn action(ctx: &RuleContext<Self>, _: &Self::State) -> Option<JsRuleAction> {

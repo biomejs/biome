@@ -1,0 +1,30 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalid.scss
+---
+# Input
+```css
+/* should generate diagnostics */
+.foo {}
+@import "theme.css";
+
+```
+
+# Diagnostics
+```
+invalid.scss:3:9 lint/correctness/noInvalidPositionAtImportRule ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This @import is in the wrong position.
+  
+    1 │ /* should generate diagnostics */
+    2 │ .foo {}
+  > 3 │ @import "theme.css";
+      │         ^^^^^^^^^^^
+    4 │ 
+  
+  i Any @import rules must precede all other valid at-rules and style rules in a stylesheet (ignoring @charset and @layer), or else the @import rule is invalid.
+  
+  i Consider moving import position.
+  
+
+```

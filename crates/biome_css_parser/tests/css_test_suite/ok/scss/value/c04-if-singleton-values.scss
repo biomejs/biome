@@ -1,0 +1,4 @@
+@use "sass:meta";
+$bare:if(sass(true):1,;else:2,);
+$grouped:if(sass(false):(3,);else:(4,));
+.singleton{bare:meta.inspect($bare);grouped:meta.inspect($grouped)}

@@ -1,0 +1,50 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/at-rule/layer-interpolation.scss
+---
+
+# Input
+
+```scss
+@layer   #{$layers} ;
+
+@LAYER #{ $layer }{
+  .a { color: red; }
+}
+
+@layer reset,#{$name},   components;
+
+@layer theme-#{$name}.Base {}
+
+@layer framework.#{$sub};
+
+@layer #{$a}.#{$b},#{$c}-suffix;
+
+@import url("theme.css") layer(#{$layer});
+
+```
+
+
+# Formatted
+
+```scss
+@layer #{$layers};
+
+@layer #{$layer} {
+	.a {
+		color: red;
+	}
+}
+
+@layer reset, #{$name}, components;
+
+@layer theme-#{$name}.Base {
+}
+
+@layer framework.#{$sub};
+
+@layer #{$a}.#{$b}, #{$c}-suffix;
+
+@import url("theme.css") layer(#{$layer});
+
+```

@@ -1,5 +1,5 @@
+<!-- should generate diagnostics -->
 <template>
-  <!-- Native anchors without accessible content should trigger -->
   <a></a>
   <a>    </a>
   <a aria-hidden="true">content</a>
@@ -19,4 +19,11 @@
 
   <!-- Hidden input is not accessible -->
   <a><input type="hidden" /></a>
+
+  <!-- Labels alone do not provide anchor content -->
+  <a aria-label="Navigate to dashboard"></a>
+  <a title="Go to settings page"></a>
+  <a aria-labelledby="dashboard-label"></a>
+  <a :aria-label="label" />
+  <a :title="label">    </a>
 </template>

@@ -2,6 +2,12 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
+## Command
+
+```shell
+biome format --write test.css
+```
+
 ## `biome.json`
 
 ```json
@@ -21,7 +27,7 @@ expression: redactor(content)
 
 ```css
 .test {
-	color: red;
+  color: red;
 }
 ```
 

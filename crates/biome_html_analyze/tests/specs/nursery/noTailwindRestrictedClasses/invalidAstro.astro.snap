@@ -1,0 +1,127 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalidAstro.astro
+---
+# Input
+```astro
+<!-- should generate diagnostics -->
+<div class="bg-green-500"></div>
+<div class='hover:bg-green-500/50 float-left'></div>
+<div title="é" class="
+  dark:-mt-4"></div>
+
+```
+
+# Diagnostics
+```
+invalidAstro.astro:2:13 lint/nursery/noTailwindRestrictedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The Tailwind CSS class bg-green-500 isn't allowed in this project.
+  
+    1 │ <!-- should generate diagnostics -->
+  > 2 │ <div class="bg-green-500"></div>
+      │             ^^^^^^^^^^^^
+    3 │ <div class='hover:bg-green-500/50 float-left'></div>
+    4 │ <div title="é" class="
+  
+  i Use the success color.
+  
+  i Use bg-success instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use bg-success instead.
+  
+    1 1 │   <!-- should generate diagnostics -->
+    2   │ - <div·class="bg-green-500"></div>
+      2 │ + <div·class="bg-success"></div>
+    3 3 │   <div class='hover:bg-green-500/50 float-left'></div>
+    4 4 │   <div title="é" class="
+  
+
+```
+
+```
+invalidAstro.astro:3:19 lint/nursery/noTailwindRestrictedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The Tailwind CSS class bg-green-500 isn't allowed in this project.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <div class="bg-green-500"></div>
+  > 3 │ <div class='hover:bg-green-500/50 float-left'></div>
+      │                   ^^^^^^^^^^^^
+    4 │ <div title="é" class="
+    5 │   dark:-mt-4"></div>
+  
+  i Use the success color.
+  
+  i Use bg-success instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use bg-success instead.
+  
+    1 1 │   <!-- should generate diagnostics -->
+    2 2 │   <div class="bg-green-500"></div>
+    3   │ - <div·class='hover:bg-green-500/50·float-left'></div>
+      3 │ + <div·class='hover:bg-success/50·float-left'></div>
+    4 4 │   <div title="é" class="
+    5 5 │     dark:-mt-4"></div>
+  
+
+```
+
+```
+invalidAstro.astro:3:35 lint/nursery/noTailwindRestrictedClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The Tailwind CSS class float-left isn't allowed in this project.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <div class="bg-green-500"></div>
+  > 3 │ <div class='hover:bg-green-500/50 float-left'></div>
+      │                                   ^^^^^^^^^^
+    4 │ <div title="é" class="
+    5 │   dark:-mt-4"></div>
+  
+  i Use flexbox or grid for layout.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidAstro.astro:5:3 lint/nursery/noTailwindRestrictedClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The Tailwind CSS variant dark isn't allowed in this project.
+  
+    3 │ <div class='hover:bg-green-500/50 float-left'></div>
+    4 │ <div title="é" class="
+  > 5 │   dark:-mt-4"></div>
+      │   ^^^^
+    6 │ 
+  
+  i This project does not support dark mode.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidAstro.astro:5:8 lint/nursery/noTailwindRestrictedClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The Tailwind CSS class -mt-4 isn't allowed in this project.
+  
+    3 │ <div class='hover:bg-green-500/50 float-left'></div>
+    4 │ <div title="é" class="
+  > 5 │   dark:-mt-4"></div>
+      │        ^^^^^
+    6 │ 
+  
+  i Avoid negative margins.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

@@ -1,0 +1,7 @@
+@supports (!important: a) { .name {} }
+@import "bare.css" supports(!important: a);
+@import "grouped.css" supports((!important: a));
+@supports (!important + "-name": a) { .expression {} }
+@supports (foo !important: a) { .list {} }
+@import "list.css" supports(foo !important: a);
+@supports (color: red !important) { .value {} }

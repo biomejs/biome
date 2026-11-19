@@ -13,25 +13,25 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_semantic::{CanBeImportedExported, SemanticModel};
 use biome_js_syntax::{
-    AnyJsClassMember, AnyJsObjectMember, AnyJsVariableDeclaration, AnyTsTypeMember, JsFileSource,
+    AnyJsClassMember, AnyJsObjectMember, AnyJsVariableDeclaration, AnyTsTypeMember,
     JsIdentifierBinding, JsLiteralExportName, JsLiteralMemberName, JsModuleItemList,
     JsPrivateClassMemberName, JsShorthandPropertyObjectMember, JsSyntaxKind, JsSyntaxToken,
     JsVariableDeclarator, JsVariableKind, Modifier, TsDeclarationModule, TsIdentifierBinding,
     TsLiteralEnumMemberName, TsTypeParameterName,
     binding_ext::{AnyJsBindingDeclaration, AnyJsIdentifierBinding},
 };
+use biome_languages::JsFileSource;
 use biome_rowan::{
     AstNode, BatchMutationExt, SyntaxResult, TextRange, TextSize, declare_node_union,
+};
+pub use biome_rule_options::use_naming_convention::{
+    Convention, Formats, Kind, RestrictedModifier, RestrictedModifiers, Scope, Selector,
+    UseNamingConventionOptions,
 };
 use biome_string_case::{Case, Cases};
 use biome_unicode_table::is_js_ident;
 use enumflags2::BitFlags;
 use smallvec::SmallVec;
-
-pub use biome_rule_options::use_naming_convention::{
-    Convention, Formats, Kind, RestrictedModifier, RestrictedModifiers, Scope, Selector,
-    UseNamingConventionOptions,
-};
 
 declare_lint_rule! {
     /// Enforce naming conventions for everything across a codebase.
@@ -278,19 +278,25 @@ declare_lint_rule! {
     ///   }
     ///   ```
     ///
-    /// - Declarations inside an external TypeScript module
+    /// - Declarations inside an external TypeScript module, including inside its nested namespaces
     ///
     ///   ```ts
     ///   declare module "myExternalModule" {
     ///     export interface my_INTERFACE {}
+    ///     namespace Inner {
+    ///       interface my_OTHER_INTERFACE {}
+    ///     }
     ///   }
     ///   ```
     ///
-    /// - Declarations inside a global declaration
+    /// - Declarations inside a global declaration, including inside its nested namespaces
     ///
     ///   ```ts
     ///   declare global {
     ///     interface HTMLElement {}
+    ///     namespace NodeJS {
+    ///       interface process_ENV {}
+    ///     }
     ///   }
     ///   ```
     ///
@@ -736,7 +742,11 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "useNamingConvention",
         language: "ts",
-        sources: &[RuleSource::EslintTypeScript("naming-convention").inspired()],
+        sources: &[
+            RuleSource::EslintTypeScript("naming-convention").inspired(),
+            RuleSource::Eslint("camelcase").inspired(),
+            RuleSource::EslintVueJs("camelcase").inspired(),
+        ],
         recommended: false,
         severity: Severity::Information,
         fix_kind: FixKind::Safe,
@@ -800,7 +810,8 @@ impl Rule for UseNamingConvention {
                         suggestion: Suggestion::Match(matching.to_string().into_boxed_str()),
                     });
                 };
-                if let Some(first_capture) = capture.iter().skip(1).find_map(|x| x) {
+                {
+                    let first_capture = capture.iter().skip(1).find_map(|x| x)?;
                     name_range_start += first_capture.start();
                     let captured = first_capture.as_str();
                     is_not_trimmed = name.len() == captured.len();
@@ -809,9 +820,6 @@ impl Rule for UseNamingConvention {
                         // Empty string are always valid.
                         return None;
                     }
-                } else {
-                    // Match without any capture implies a valid case
-                    return None;
                 }
             }
             if !convention.formats.is_empty() {
@@ -1251,7 +1259,7 @@ fn selector_from_binding_declaration(decl: &AnyJsBindingDeclaration) -> Option<S
             | AnyJsBindingDeclaration::JsNamedImportSpecifier(_) =>
                 Some(Selector::with_scope(Kind::ImportAlias, Scope::Global)),
             AnyJsBindingDeclaration::TsModuleDeclaration(_) =>
-                Some(Selector::with_scope(Kind::Namespace, Scope::Global)),
+                Some(Selector::with_scope(Kind::Namespace, scope_from_declaration(decl)?)),
             AnyJsBindingDeclaration::TsTypeAliasDeclaration(_) =>
                 Some(Selector::with_scope(Kind::TypeAlias, scope_from_declaration(decl)?)),
             AnyJsBindingDeclaration::JsClassDeclaration(class) => {
@@ -1341,6 +1349,7 @@ fn selector_from_object_member(member: &AnyJsObjectMember) -> Option<Selector> {
 fn selector_from_type_member(member: &AnyTsTypeMember) -> Option<Selector> {
     match member {
         AnyTsTypeMember::JsBogusMember(_)
+        | AnyTsTypeMember::JsMetavariable(_)
         | AnyTsTypeMember::TsCallSignatureTypeMember(_)
         | AnyTsTypeMember::TsConstructSignatureTypeMember(_) => None,
         AnyTsTypeMember::TsIndexSignatureTypeMember(property) => {
@@ -1472,8 +1481,17 @@ fn scope_from_declaration(node: &AnyJsBindingDeclaration) -> Option<Scope> {
     match control_flow_root.kind() {
         JsSyntaxKind::JS_MODULE
         | JsSyntaxKind::JS_SCRIPT
-        | JsSyntaxKind::TS_DECLARATION_MODULE
-        | JsSyntaxKind::TS_MODULE_DECLARATION => Some(Scope::Global),
+        | JsSyntaxKind::TS_DECLARATION_MODULE => Some(Scope::Global),
+        JsSyntaxKind::TS_MODULE_DECLARATION => {
+            // A module declaration is itself a control flow root, so the search above
+            // stops at the innermost enclosing one and never sees the ambient
+            // declaration that may wrap it.
+            let is_ambient = control_flow_root.ancestors().skip(1).any(|x| {
+                x.kind() == JsSyntaxKind::TS_EXTERNAL_MODULE_DECLARATION
+                    || x.kind() == JsSyntaxKind::TS_GLOBAL_DECLARATION
+            });
+            (!is_ambient).then_some(Scope::Global)
+        }
         // Ignore declarations in external module declaration and global declarations.
         JsSyntaxKind::TS_EXTERNAL_MODULE_DECLARATION | JsSyntaxKind::TS_GLOBAL_DECLARATION => None,
         _ => Some(Scope::Any),

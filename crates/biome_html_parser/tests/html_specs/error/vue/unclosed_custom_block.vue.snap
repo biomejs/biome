@@ -1,0 +1,184 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```vue
+<docs>
+This block is never closed, so the blocks after it are still parsed.
+
+<template>
+	<div class="markup">still markup</div>
+</template>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    processing_instruction: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@0..1 "<" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_UNKNOWN_TAG@1..5 "docs" [] [],
+                },
+                attributes: HtmlAttributeList [],
+                r_angle_token: R_ANGLE@5..6 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlContent {
+                    value_token: HTML_LITERAL@6..75 "This block is never closed, so the blocks after it are still parsed." [Newline("\n")] [],
+                },
+                HtmlElement {
+                    opening_element: HtmlOpeningElement {
+                        l_angle_token: L_ANGLE@75..78 "<" [Newline("\n"), Newline("\n")] [],
+                        name: HtmlTagName {
+                            value_token: TEMPLATE_KW@78..86 "template" [] [],
+                        },
+                        attributes: HtmlAttributeList [],
+                        r_angle_token: R_ANGLE@86..87 ">" [] [],
+                    },
+                    children: HtmlElementList [
+                        HtmlElement {
+                            opening_element: HtmlOpeningElement {
+                                l_angle_token: L_ANGLE@87..90 "<" [Newline("\n"), Whitespace("\t")] [],
+                                name: HtmlTagName {
+                                    value_token: DIV_KW@90..94 "div" [] [Whitespace(" ")],
+                                },
+                                attributes: HtmlAttributeList [
+                                    HtmlAttribute {
+                                        name: HtmlAttributeName {
+                                            value_token: HTML_LITERAL@94..99 "class" [] [],
+                                        },
+                                        initializer: HtmlAttributeInitializerClause {
+                                            eq_token: EQ@99..100 "=" [] [],
+                                            value: HtmlString {
+                                                value_token: HTML_STRING_LITERAL@100..108 "\"markup\"" [] [],
+                                            },
+                                        },
+                                    },
+                                ],
+                                r_angle_token: R_ANGLE@108..109 ">" [] [],
+                            },
+                            children: HtmlElementList [
+                                HtmlContent {
+                                    value_token: HTML_LITERAL@109..121 "still markup" [] [],
+                                },
+                            ],
+                            closing_element: HtmlClosingElement {
+                                l_angle_token: L_ANGLE@121..122 "<" [] [],
+                                slash_token: SLASH@122..123 "/" [] [],
+                                name: HtmlTagName {
+                                    value_token: DIV_KW@123..126 "div" [] [],
+                                },
+                                r_angle_token: R_ANGLE@126..127 ">" [] [],
+                            },
+                        },
+                    ],
+                    closing_element: HtmlClosingElement {
+                        l_angle_token: L_ANGLE@127..129 "<" [Newline("\n")] [],
+                        slash_token: SLASH@129..130 "/" [] [],
+                        name: HtmlTagName {
+                            value_token: TEMPLATE_KW@130..138 "template" [] [],
+                        },
+                        r_angle_token: R_ANGLE@138..139 ">" [] [],
+                    },
+                },
+            ],
+            closing_element: missing (required),
+        },
+    ],
+    eof_token: EOF@139..140 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..140
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: (empty)
+  4: HTML_ELEMENT_LIST@0..139
+    0: HTML_ELEMENT@0..139
+      0: HTML_OPENING_ELEMENT@0..6
+        0: L_ANGLE@0..1 "<" [] []
+        1: HTML_TAG_NAME@1..5
+          0: HTML_UNKNOWN_TAG@1..5 "docs" [] []
+        2: HTML_ATTRIBUTE_LIST@5..5
+        3: R_ANGLE@5..6 ">" [] []
+      1: HTML_ELEMENT_LIST@6..139
+        0: HTML_CONTENT@6..75
+          0: HTML_LITERAL@6..75 "This block is never closed, so the blocks after it are still parsed." [Newline("\n")] []
+        1: HTML_ELEMENT@75..139
+          0: HTML_OPENING_ELEMENT@75..87
+            0: L_ANGLE@75..78 "<" [Newline("\n"), Newline("\n")] []
+            1: HTML_TAG_NAME@78..86
+              0: TEMPLATE_KW@78..86 "template" [] []
+            2: HTML_ATTRIBUTE_LIST@86..86
+            3: R_ANGLE@86..87 ">" [] []
+          1: HTML_ELEMENT_LIST@87..127
+            0: HTML_ELEMENT@87..127
+              0: HTML_OPENING_ELEMENT@87..109
+                0: L_ANGLE@87..90 "<" [Newline("\n"), Whitespace("\t")] []
+                1: HTML_TAG_NAME@90..94
+                  0: DIV_KW@90..94 "div" [] [Whitespace(" ")]
+                2: HTML_ATTRIBUTE_LIST@94..108
+                  0: HTML_ATTRIBUTE@94..108
+                    0: HTML_ATTRIBUTE_NAME@94..99
+                      0: HTML_LITERAL@94..99 "class" [] []
+                    1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@99..108
+                      0: EQ@99..100 "=" [] []
+                      1: HTML_STRING@100..108
+                        0: HTML_STRING_LITERAL@100..108 "\"markup\"" [] []
+                3: R_ANGLE@108..109 ">" [] []
+              1: HTML_ELEMENT_LIST@109..121
+                0: HTML_CONTENT@109..121
+                  0: HTML_LITERAL@109..121 "still markup" [] []
+              2: HTML_CLOSING_ELEMENT@121..127
+                0: L_ANGLE@121..122 "<" [] []
+                1: SLASH@122..123 "/" [] []
+                2: HTML_TAG_NAME@123..126
+                  0: DIV_KW@123..126 "div" [] []
+                3: R_ANGLE@126..127 ">" [] []
+          2: HTML_CLOSING_ELEMENT@127..139
+            0: L_ANGLE@127..129 "<" [Newline("\n")] []
+            1: SLASH@129..130 "/" [] []
+            2: HTML_TAG_NAME@130..138
+              0: TEMPLATE_KW@130..138 "template" [] []
+            3: R_ANGLE@138..139 ">" [] []
+      2: (empty)
+  5: EOF@139..140 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+unclosed_custom_block.vue:7:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a closing tag but instead found the end of the file.
+  
+    5 │ 	<div class="markup">still markup</div>
+    6 │ </template>
+  > 7 │ 
+      │ 
+  
+  i Expected a closing tag here.
+  
+    5 │ 	<div class="markup">still markup</div>
+    6 │ </template>
+  > 7 │ 
+      │ 
+  
+```

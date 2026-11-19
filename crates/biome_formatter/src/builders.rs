@@ -1,14 +1,22 @@
 use crate::format_element::tag::{Condition, Tag};
 use crate::prelude::tag::{DedentMode, GroupMode, LabelId};
 use crate::prelude::*;
-use crate::{Argument, Arguments, GroupId, TextRange, TextSize, write};
+#[cfg(feature = "rowan")]
+use crate::rowan::RowanSource;
+use crate::{Argument, Arguments, FormatContext, FormatOptions, GroupId, Source, write};
 use crate::{Buffer, VecBuffer};
+#[cfg(feature = "rowan")]
+use crate::{TextRange, TextSize};
 use Tag::*;
-use biome_rowan::{Language, SyntaxNode, SyntaxToken, TextLen, TokenText};
+#[cfg(feature = "rowan")]
+use biome_rowan::{Language, SyntaxNode, SyntaxToken, TokenText};
+#[cfg(feature = "rowan")]
+use biome_text_size::TextLen;
+#[cfg(feature = "rowan")]
 use std::borrow::Cow;
 use std::cell::Cell;
+use std::convert::Infallible;
 use std::marker::PhantomData;
-use std::num::NonZeroU8;
 
 /// A line break that only gets printed if the enclosing `Group` doesn't fit on a single line.
 /// It's omitted if the enclosing `Group` fits on a single line.
@@ -98,6 +106,45 @@ pub const fn soft_line_break() -> Line {
 #[inline]
 pub const fn hard_line_break() -> Line {
     Line::new(LineMode::Hard)
+}
+
+/// A forced line break that doesn't expand enclosing groups.
+///
+/// The printer always emits the configured line ending and resets indentation
+/// to the document root. Compose it with [`expand_parent`] when the enclosing
+/// group must also expand.
+#[inline]
+pub const fn literal_line_break_without_parent() -> Line {
+    Line::new(LineMode::Literal {
+        source_position: None,
+    })
+}
+
+#[cfg(feature = "rowan")]
+#[inline]
+pub(crate) const fn source_mapped_literal_line_break_without_parent<P>(
+    source_position: P,
+) -> SourceMappedLiteralLine<P> {
+    SourceMappedLiteralLine(source_position)
+}
+
+#[cfg(feature = "rowan")]
+/// A [literal_line_break_without_parent] that records its position `P` in
+/// the source code, so that the printer adds it to the source map.
+pub(crate) struct SourceMappedLiteralLine<P>(P);
+
+#[cfg(feature = "rowan")]
+impl<P, Context> Format<Context> for SourceMappedLiteralLine<P>
+where
+    P: Copy,
+    Context: FormatContext,
+    Context::Source: Source<Position = P>,
+{
+    fn fmt(&self, f: &mut Formatter<Context>) -> FormatResult<()> {
+        f.write_element(FormatElement::Line(LineMode::Literal {
+            source_position: Some(self.0),
+        }))
+    }
 }
 
 /// A forced empty line. An empty line inserts enough line breaks in the output for
@@ -191,18 +238,18 @@ pub const fn soft_line_break_or_space() -> Line {
 
 #[derive(Copy, Clone, Eq, PartialEq)]
 pub struct Line {
-    mode: LineMode,
+    mode: LineMode<Infallible>,
 }
 
 impl Line {
-    const fn new(mode: LineMode) -> Self {
+    const fn new(mode: LineMode<Infallible>) -> Self {
         Self { mode }
     }
 }
 
-impl<Context> Format<Context> for Line {
+impl<Context: FormatContext> Format<Context> for Line {
     fn fmt(&self, f: &mut Formatter<Context>) -> FormatResult<()> {
-        f.write_element(FormatElement::Line(self.mode))
+        f.write_element(FormatElement::Line(self.mode.with_position()))
     }
 }
 
@@ -263,7 +310,7 @@ pub struct Token {
     text: &'static str,
 }
 
-impl<Context> Format<Context> for Token {
+impl<Context: FormatContext> Format<Context> for Token {
     fn fmt(&self, f: &mut Formatter<Context>) -> FormatResult<()> {
         f.write_element(FormatElement::Token { text: self.text })
     }
@@ -275,34 +322,111 @@ impl std::fmt::Debug for Token {
     }
 }
 
+/// Creates a source map entry from the passed source `position`
+/// to the position in the formatted output.
+///
+/// ## Examples
+///
+/// ```
+/// use biome_formatter::format;
+/// use biome_formatter::prelude::*;
+///
+/// # fn main() -> FormatResult<()> {
+/// use biome_formatter::{SourceMapGeneration, SourceMarker};
+///
+/// let elements = format!(SimpleFormatContext::default(), [
+///     source_position(0),
+///     token("Hello "),
+///     source_position(7),
+///     token("'Biome'"),
+/// ])?;
+///
+/// let printed = elements.print_with_indent(0, SourceMapGeneration::Enabled)?;
+///
+/// assert_eq!(printed.as_code(), r#"Hello 'Biome'"#);
+/// assert_eq!(printed.sourcemap(), [
+///     SourceMarker { source: 0, dest: 0 },
+///     SourceMarker { source: 6, dest: 6 },
+///     SourceMarker { source: 7, dest: 6 },
+///     SourceMarker { source: 14, dest: 13 },
+/// ]);
+///
+/// # Ok(())
+/// # }
+/// ```
+pub const fn source_position<P>(position: P) -> SourcePosition<P> {
+    SourcePosition(position)
+}
+
+#[derive(Eq, PartialEq, Copy, Clone, Debug)]
+pub struct SourcePosition<P>(P);
+
+impl<P, Context> Format<Context> for SourcePosition<P>
+where
+    P: Copy + Eq,
+    Context: FormatContext,
+    Context::Source: Source<Position = P>,
+{
+    fn fmt(&self, f: &mut Formatter<Context>) -> FormatResult<()> {
+        if f.source_map_generation().is_disabled() {
+            return Ok(());
+        }
+
+        if let Some(FormatElement::SourcePosition(last_position)) = f.buffer.elements().last()
+            && *last_position == self.0
+        {
+            return Ok(());
+        }
+
+        f.write_element(FormatElement::SourcePosition(self.0))?;
+
+        Ok(())
+    }
+}
+
 /// Creates a text from a dynamic string and a range of the input source
-pub fn text(text: &str, position: TextSize) -> Text<'_> {
-    debug_assert_no_newlines(text);
+pub fn text<P>(text: &str, position: Option<P>) -> Text<'_, P> {
+    debug_assert_normalized_newlines(text);
 
     Text { text, position }
 }
 
 #[derive(Eq, PartialEq)]
-pub struct Text<'a> {
+pub struct Text<'a, P> {
     text: &'a str,
-    position: TextSize,
+    position: Option<P>,
 }
 
-impl<Context> Format<Context> for Text<'_> {
+impl<P, Context> Format<Context> for Text<'_, P>
+where
+    P: Copy,
+    Context: FormatContext,
+    Context::Source: Source<Position = P>,
+{
     fn fmt(&self, f: &mut Formatter<Context>) -> FormatResult<()> {
+        if let Some(position) = self.position
+            && f.source_map_generation().is_enabled()
+        {
+            return f.write_element(FormatElement::MappedText {
+                text: self.text.to_string().into_boxed_str(),
+                source_position: position,
+            });
+        }
+
         f.write_element(FormatElement::Text {
             text: self.text.to_string().into_boxed_str(),
-            source_position: self.position,
+            text_width: TextWidth::from_text(self.text, f.options().indent_width()),
         })
     }
 }
 
-impl std::fmt::Debug for Text<'_> {
+impl<P> std::fmt::Debug for Text<'_, P> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::write!(f, "Text({})", self.text)
     }
 }
 
+#[cfg(feature = "rowan")]
 /// String that is the same as in the input source text if `text` is [`Cow::Borrowed`] or
 /// some replaced content if `text` is [`Cow::Owned`].
 pub fn syntax_token_cow_slice<'a, L: Language>(
@@ -310,24 +434,55 @@ pub fn syntax_token_cow_slice<'a, L: Language>(
     token: &'a SyntaxToken<L>,
     start: TextSize,
 ) -> SyntaxTokenCowSlice<'a, L> {
-    debug_assert_no_newlines(&text);
+    debug_assert_normalized_newlines(&text);
 
     SyntaxTokenCowSlice { text, token, start }
 }
 
+#[cfg(feature = "rowan")]
 pub struct SyntaxTokenCowSlice<'a, L: Language> {
     text: Cow<'a, str>,
     token: &'a SyntaxToken<L>,
     start: TextSize,
 }
 
-impl<L: Language, Context> Format<Context> for SyntaxTokenCowSlice<'_, L> {
-    fn fmt(&self, f: &mut Formatter<Context>) -> FormatResult<()> {
+#[cfg(feature = "rowan")]
+impl<'a, L: Language> SyntaxTokenCowSlice<'a, L> {
+    /// Splits embedded LF characters into non-propagating literal lines.
+    ///
+    /// The slice must use LF as its only line terminator. Callers normalize
+    /// source line endings before constructing it, for example with
+    /// [`crate::normalize_newlines`]. The printer converts each logical LF to
+    /// the configured output line ending.
+    ///
+    /// For `before\nafter`, this emits text for `before`, one literal line, and
+    /// text for `after`. Printing at zero indentation produces:
+    ///
+    /// ```text
+    /// before
+    /// after
+    /// ```
+    ///
+    /// Every literal line resets indentation to the document root.
+    /// Text without newlines keeps the existing single-element representation.
+    pub fn with_literal_line_breaks(self) -> SyntaxTokenCowSliceWithLiteralLineBreaks<'a, L> {
+        SyntaxTokenCowSliceWithLiteralLineBreaks { slice: self }
+    }
+
+    fn fmt_segment<Context>(
+        &self,
+        text: &str,
+        start: TextSize,
+        f: &mut Formatter<Context>,
+    ) -> FormatResult<()>
+    where
+        Context: FormatContext<Source = RowanSource>,
+    {
         match &self.text {
-            Cow::Borrowed(text) => {
-                let range = TextRange::at(self.start, text.text_len());
+            Cow::Borrowed(_) => {
+                let range = TextRange::at(start, text.text_len());
                 debug_assert_eq!(
-                    *text,
+                    text,
                     &self.token.text()[range - self.token.text_range().start()],
                     "The borrowed string doesn't match the specified token substring. Does the borrowed string belong to this token and range?"
                 );
@@ -335,25 +490,122 @@ impl<L: Language, Context> Format<Context> for SyntaxTokenCowSlice<'_, L> {
                 let relative_range = range - self.token.text_range().start();
                 let slice = self.token.token_text().slice(relative_range);
 
-                f.write_element(FormatElement::LocatedTokenText {
-                    slice,
-                    source_position: self.start,
-                })
+                if f.source_map_generation().is_enabled() {
+                    f.write_element(FormatElement::MappedLocatedTokenText {
+                        slice,
+                        source_position: start,
+                    })
+                } else {
+                    f.write_element(FormatElement::LocatedTokenText {
+                        slice,
+                        text_width: TextWidth::from_text(text, f.options().indent_width()),
+                    })
+                }
             }
-            Cow::Owned(text) => f.write_element(FormatElement::Text {
-                text: text.clone().into_boxed_str(),
-                source_position: self.start,
-            }),
+            Cow::Owned(_) => {
+                if f.source_map_generation().is_enabled() {
+                    f.write_element(FormatElement::MappedText {
+                        text: text.to_string().into_boxed_str(),
+                        source_position: start,
+                    })
+                } else {
+                    f.write_element(FormatElement::Text {
+                        text: text.to_string().into_boxed_str(),
+                        text_width: TextWidth::from_text(text, f.options().indent_width()),
+                    })
+                }
+            }
         }
     }
 }
 
+#[cfg(feature = "rowan")]
+impl<L: Language, Context> Format<Context> for SyntaxTokenCowSlice<'_, L>
+where
+    Context: FormatContext<Source = RowanSource>,
+{
+    fn fmt(&self, f: &mut Formatter<Context>) -> FormatResult<()> {
+        self.fmt_segment(self.text.as_ref(), self.start, f)
+    }
+}
+
+#[cfg(feature = "rowan")]
 impl<L: Language> std::fmt::Debug for SyntaxTokenCowSlice<'_, L> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::write!(f, "SyntaxTokenCowSlice({})", self.text)
     }
 }
 
+#[cfg(feature = "rowan")]
+/// Formatter returned by [`SyntaxTokenCowSlice::with_literal_line_breaks`].
+pub struct SyntaxTokenCowSliceWithLiteralLineBreaks<'a, L: Language> {
+    slice: SyntaxTokenCowSlice<'a, L>,
+}
+
+#[cfg(feature = "rowan")]
+impl<L: Language> std::fmt::Debug for SyntaxTokenCowSliceWithLiteralLineBreaks<'_, L> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_tuple("SyntaxTokenCowSliceWithLiteralLineBreaks")
+            .field(&self.slice)
+            .finish()
+    }
+}
+
+#[cfg(feature = "rowan")]
+impl<L: Language, Context> Format<Context> for SyntaxTokenCowSliceWithLiteralLineBreaks<'_, L>
+where
+    Context: FormatContext<Source = RowanSource>,
+{
+    fn fmt(&self, f: &mut Formatter<Context>) -> FormatResult<()> {
+        let text = self.slice.text.as_ref();
+        let Some((first, rest)) = text.split_once('\n') else {
+            return self.slice.fmt(f);
+        };
+
+        let mut source_position = self.slice.start;
+        if !first.is_empty() {
+            self.slice.fmt_segment(first, source_position, f)?;
+        }
+        source_position += first.text_len();
+        self.fmt_literal_line_break(source_position, f)?;
+        source_position += "\n".text_len();
+
+        let mut segments = rest.split('\n').peekable();
+        while let Some(segment) = segments.next() {
+            if !segment.is_empty() {
+                self.slice.fmt_segment(segment, source_position, f)?;
+            }
+            source_position += segment.text_len();
+
+            if segments.peek().is_some() {
+                self.fmt_literal_line_break(source_position, f)?;
+                source_position += "\n".text_len();
+            }
+        }
+
+        Ok(())
+    }
+}
+
+#[cfg(feature = "rowan")]
+impl<L: Language> SyntaxTokenCowSliceWithLiteralLineBreaks<'_, L> {
+    fn fmt_literal_line_break<Context>(
+        &self,
+        source_position: TextSize,
+        f: &mut Formatter<Context>,
+    ) -> FormatResult<()>
+    where
+        Context: FormatContext<Source = RowanSource>,
+    {
+        if f.source_map_generation().is_enabled() {
+            source_mapped_literal_line_break_without_parent(source_position).fmt(f)
+        } else {
+            literal_line_break_without_parent().fmt(f)
+        }
+    }
+}
+
+#[cfg(feature = "rowan")]
 /// Copies a source text 1:1 into the output text.
 pub fn located_token_text<L: Language>(
     token: &SyntaxToken<L>,
@@ -362,7 +614,7 @@ pub fn located_token_text<L: Language>(
     let relative_range = range - token.text_range().start();
     let slice = token.token_text().slice(relative_range);
 
-    debug_assert_no_newlines(&slice);
+    debug_assert_normalized_newlines(&slice);
 
     LocatedTokenText {
         text: slice,
@@ -370,30 +622,43 @@ pub fn located_token_text<L: Language>(
     }
 }
 
+#[cfg(feature = "rowan")]
 pub struct LocatedTokenText {
     text: TokenText,
     source_position: TextSize,
 }
 
-impl<Context> Format<Context> for LocatedTokenText {
+#[cfg(feature = "rowan")]
+impl<Context> Format<Context> for LocatedTokenText
+where
+    Context: FormatContext<Source = RowanSource>,
+{
     fn fmt(&self, f: &mut Formatter<Context>) -> FormatResult<()> {
-        f.write_element(FormatElement::LocatedTokenText {
-            slice: self.text.clone(),
-            source_position: self.source_position,
-        })
+        if f.source_map_generation().is_enabled() {
+            f.write_element(FormatElement::MappedLocatedTokenText {
+                slice: self.text.clone(),
+                source_position: self.source_position,
+            })
+        } else {
+            f.write_element(FormatElement::LocatedTokenText {
+                slice: self.text.clone(),
+                text_width: TextWidth::from_text(&self.text, f.options().indent_width()),
+            })
+        }
     }
 }
 
+#[cfg(feature = "rowan")]
 impl std::fmt::Debug for LocatedTokenText {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::write!(f, "LocatedTokenText({})", self.text)
     }
 }
 
-fn debug_assert_no_newlines(text: &str) {
+fn debug_assert_normalized_newlines(text: &str) {
     debug_assert!(
         !text.contains('\r'),
-        "The content '{text}' contains an unsupported '\\r' line terminator character but text must only use line feeds '\\n' as line separator. Use '\\n' instead of '\\r' and '\\r\\n' to insert a line break in strings."
+        "The content '{text}' contains a carriage return, but formatter text must use LF line endings. Normalize source text with `normalize_newlines` before constructing formatter text."
     );
 }
 
@@ -434,7 +699,7 @@ pub struct LineSuffix<'a, Context> {
     content: Argument<'a, Context>,
 }
 
-impl<Context> Format<Context> for LineSuffix<'_, Context> {
+impl<Context: FormatContext> Format<Context> for LineSuffix<'_, Context> {
     fn fmt(&self, f: &mut Formatter<Context>) -> FormatResult<()> {
         f.write_element(FormatElement::Tag(StartLineSuffix))?;
         Arguments::from(&self.content).fmt(f)?;
@@ -481,7 +746,7 @@ pub const fn line_suffix_boundary() -> LineSuffixBoundary {
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub struct LineSuffixBoundary;
 
-impl<Context> Format<Context> for LineSuffixBoundary {
+impl<Context: FormatContext> Format<Context> for LineSuffixBoundary {
     fn fmt(&self, f: &mut Formatter<Context>) -> FormatResult<()> {
         f.write_element(FormatElement::LineSuffixBoundary)
     }
@@ -569,7 +834,7 @@ pub struct FormatLabelled<'a, Context> {
     content: Argument<'a, Context>,
 }
 
-impl<Context> Format<Context> for FormatLabelled<'_, Context> {
+impl<Context: FormatContext> Format<Context> for FormatLabelled<'_, Context> {
     fn fmt(&self, f: &mut Formatter<Context>) -> FormatResult<()> {
         f.write_element(FormatElement::Tag(StartLabelled(self.label_id)))?;
         Arguments::from(&self.content).fmt(f)?;
@@ -583,6 +848,84 @@ impl<Context> std::fmt::Debug for FormatLabelled<'_, Context> {
             .field(&self.label_id)
             .field(&"{{content}}")
             .finish()
+    }
+}
+
+/// Code written in another language, such as the JavaScript inside an HTML
+/// `<script>` tag, that the formatter of that language can format.
+///
+/// The host formatter formats the code first, and the element prints that
+/// output unless the caller of the formatter replaces it with
+/// [crate::Formatted::format_embedded]. The replacement is printed where the
+/// element is and doesn't necessarily end with a line break, so the node that
+/// writes the element is responsible for the line breaks around the code.
+///
+/// # Examples
+///
+/// ```
+/// use biome_formatter::prelude::*;
+/// use biome_formatter::{format, write};
+///
+/// # fn main() -> FormatResult<()> {
+/// let key = 1;
+/// let paragraph = format_with(|f| {
+///     let embedded = FormatEmbedded::new(key, &token("a  +  b"), f)?;
+///     write!(f, [token("<p>"), embedded, token("</p>")])
+/// });
+///
+/// // Without a replacement, the host formatter's output is printed.
+/// let formatted = format!(SimpleFormatContext::default(), [paragraph])?;
+/// assert_eq!("<p>a  +  b</p>", formatted.print()?.as_code());
+///
+/// let replacement = format!(SimpleFormatContext::default(), [token("a + b")])?.into_document();
+/// let mut formatted = format!(SimpleFormatContext::default(), [paragraph])?;
+/// formatted.format_embedded(|embedded_key| (embedded_key == key).then(|| replacement.clone()));
+/// assert_eq!("<p>a + b</p>", formatted.print()?.as_code());
+/// # Ok(())
+/// # }
+/// ```
+pub struct FormatEmbedded<S: Source> {
+    key: S::EmbeddedKey,
+    content: Interned<S>,
+}
+
+impl<S: Source> FormatEmbedded<S> {
+    /// Formats `content`, the host formatter's output for the embedded code
+    /// identified by `key`.
+    ///
+    /// The caller of the formatter identifies the code by `key` in
+    /// [crate::Formatted::format_embedded]. If the caller doesn't replace the
+    /// element, the element prints `content`.
+    pub fn new<Context>(
+        key: S::EmbeddedKey,
+        content: &impl Format<Context>,
+        f: &mut Formatter<Context>,
+    ) -> FormatResult<Self>
+    where
+        Context: FormatContext<Source = S>,
+    {
+        let mut buffer = VecBuffer::new(f.state_mut());
+        write!(buffer, [content])?;
+        Ok(Self {
+            key,
+            content: Interned::new(buffer.into_vec()),
+        })
+    }
+}
+
+impl<S, Context> Format<Context> for FormatEmbedded<S>
+where
+    S: Source,
+    Context: FormatContext<Source = S>,
+{
+    fn fmt(&self, f: &mut Formatter<Context>) -> FormatResult<()> {
+        // `Document::replace_embedded` replaces the element that follows the
+        // start tag, so the content must stay a single interned element.
+        f.write_elements([
+            FormatElement::Tag(StartEmbedded(self.key.clone())),
+            FormatElement::Interned(self.content.clone()),
+            FormatElement::Tag(EndEmbedded),
+        ])
     }
 }
 
@@ -697,7 +1040,7 @@ pub fn maybe_space(should_insert: bool) -> Option<Space> {
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub struct Space;
 
-impl<Context> Format<Context> for Space {
+impl<Context: FormatContext> Format<Context> for Space {
     fn fmt(&self, f: &mut Formatter<Context>) -> FormatResult<()> {
         f.write_element(FormatElement::Space)
     }
@@ -706,7 +1049,7 @@ impl<Context> Format<Context> for Space {
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub struct HardSpace;
 
-impl<Context> Format<Context> for HardSpace {
+impl<Context: FormatContext> Format<Context> for HardSpace {
     fn fmt(&self, f: &mut Formatter<Context>) -> FormatResult<()> {
         f.write_element(FormatElement::HardSpace)
     }
@@ -758,7 +1101,7 @@ impl<Context> Format<Context> for HardSpace {
 ///     [
 ///         token("root"),
 ///         indent(&format_args![align(
-///             2,
+///             "  ",
 ///             &format_args![indent(&format_args![
 ///                 hard_line_break(),
 ///                 token("should be 3 tabs"),
@@ -789,7 +1132,7 @@ pub struct Indent<'a, Context> {
     content: Argument<'a, Context>,
 }
 
-impl<Context> Format<Context> for Indent<'_, Context> {
+impl<Context: FormatContext> Format<Context> for Indent<'_, Context> {
     fn fmt(&self, f: &mut Formatter<Context>) -> FormatResult<()> {
         f.write_element(FormatElement::Tag(StartIndent))?;
         Arguments::from(&self.content).fmt(f)?;
@@ -818,7 +1161,7 @@ impl<Context> std::fmt::Debug for Indent<'_, Context> {
 /// # fn main() -> FormatResult<()> {
 /// let block = format!(SimpleFormatContext::default(), [
 ///     token("root"),
-///     align(2, &format_args![
+///     align("  ", &format_args![
 ///         hard_line_break(),
 ///         token("aligned"),
 ///         dedent(&format_args![
@@ -862,7 +1205,7 @@ impl<Context> std::fmt::Debug for Indent<'_, Context> {
 ///                 hard_line_break(),
 ///                 token("Indented"),
 ///                 align(
-///                     2,
+///                     "  ",
 ///                     &format_args![
 ///                         hard_line_break(),
 ///                         token("Indented and aligned"),
@@ -874,7 +1217,7 @@ impl<Context> std::fmt::Debug for Indent<'_, Context> {
 ///                 ),
 ///             ]),
 ///             align(
-///                 2,
+///                 "  ",
 ///                 &format_args![
 ///                     hard_line_break(),
 ///                     token("Aligned"),
@@ -909,9 +1252,9 @@ impl<Context> std::fmt::Debug for Indent<'_, Context> {
 ///     [
 ///         token("root"),
 ///         indent(&format_args![align(
-///             2,
+///             "  ",
 ///             &format_args![align(
-///                 2,
+///                 "  ",
 ///                 &format_args![indent(&format_args![
 ///                     hard_line_break(),
 ///                     token("should be 4 tabs"),
@@ -948,7 +1291,7 @@ pub struct Dedent<'a, Context> {
     mode: DedentMode,
 }
 
-impl<Context> Format<Context> for Dedent<'_, Context> {
+impl<Context: FormatContext> Format<Context> for Dedent<'_, Context> {
     fn fmt(&self, f: &mut Formatter<Context>) -> FormatResult<()> {
         f.write_element(FormatElement::Tag(StartDedent(self.mode)))?;
         Arguments::from(&self.content).fmt(f)?;
@@ -979,7 +1322,7 @@ impl<Context> std::fmt::Debug for Dedent<'_, Context> {
 ///         indent(&format_args![
 ///             hard_line_break(),
 ///             token("indent level 2"),
-///             align(2, &format_args![
+///             align("  ", &format_args![
 ///                 hard_line_break(),
 ///                 token("two space align"),
 ///                 dedent_to_root(&format_args![
@@ -1028,7 +1371,6 @@ where
 /// ## Tab indention
 ///
 /// ```
-/// use std::num::NonZeroU8;
 /// use biome_formatter::{format, format_args};
 /// use biome_formatter::prelude::*;
 ///
@@ -1038,7 +1380,7 @@ where
 ///     hard_line_break(),
 ///     token("?"),
 ///     space(),
-///     align(2, &format_args![
+///     align("  ", &format_args![
 ///         token("function () {"),
 ///         hard_line_break(),
 ///         token("}"),
@@ -1046,7 +1388,7 @@ where
 ///     hard_line_break(),
 ///     token(":"),
 ///     space(),
-///     align(2, &format_args![
+///     align("  ", &format_args![
 ///         token("function () {"),
 ///         block_indent(&token("console.log('test');")),
 ///         token("}"),
@@ -1073,7 +1415,6 @@ where
 /// ## Spaces indention
 ///
 /// ```
-/// use std::num::NonZeroU8;
 /// use biome_formatter::{format, format_args, IndentStyle, SimpleFormatOptions};
 /// use biome_formatter::prelude::*;
 ///
@@ -1089,7 +1430,7 @@ where
 ///     hard_line_break(),
 ///     token("?"),
 ///     space(),
-///     align(2, &format_args![
+///     align("  ", &format_args![
 ///         token("function () {"),
 ///         hard_line_break(),
 ///         token("}"),
@@ -1097,7 +1438,7 @@ where
 ///     hard_line_break(),
 ///     token(":"),
 ///     space(),
-///     align(2, &format_args![
+///     align("  ", &format_args![
 ///         token("function () {"),
 ///         block_indent(&token("console.log('test');")),
 ///         token("}"),
@@ -1118,25 +1459,79 @@ where
 ///
 /// * tab indention: Printer indents the expression with two tabs because the `align` increases the indention level.
 /// * space indention: Printer indents the expression by 4 spaces (one indention level) **and** 2 spaces for the align.
-pub fn align<Content, Context>(count: u8, content: &Content) -> Align<'_, Context>
+pub fn align<'a, Content, Context>(
+    placeholder: impl Into<AlignedStr>,
+    content: &'a Content,
+) -> Align<'a, Context>
 where
     Content: Format<Context>,
 {
     Align {
-        count: NonZeroU8::new(count).expect("Alignment count must be a non-zero number."),
+        placeholder: placeholder.into(),
         content: Argument::new(content),
     }
 }
 
-#[derive(Copy, Clone)]
+#[derive(Clone)]
 pub struct Align<'a, Context> {
-    count: NonZeroU8,
+    placeholder: AlignedStr,
     content: Argument<'a, Context>,
 }
 
-impl<Context> Format<Context> for Align<'_, Context> {
+/// Placeholder text printed as alignment on continuation lines.
+///
+/// The printer clones this value on every line break inside an aligned
+/// region (see `pending_indent`), so the owned variant is reference-counted
+/// to keep those clones allocation-free.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub enum AlignedStr {
+    Borrowed(&'static str),
+    Owned(std::rc::Rc<str>),
+}
+
+impl AlignedStr {
+    pub fn len(&self) -> usize {
+        self.as_str().len()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.as_str().is_empty()
+    }
+
+    pub fn as_str(&self) -> &str {
+        match self {
+            Self::Borrowed(s) => s,
+            Self::Owned(s) => s,
+        }
+    }
+
+    pub fn push_str(&mut self, text: &str) {
+        let mut owned = String::with_capacity(self.len() + text.len());
+        owned.push_str(self.as_str());
+        owned.push_str(text);
+        *self = Self::Owned(owned.into());
+    }
+}
+
+impl From<&'static str> for AlignedStr {
+    fn from(s: &'static str) -> Self {
+        Self::Borrowed(s)
+    }
+}
+
+impl From<String> for AlignedStr {
+    fn from(s: String) -> Self {
+        Self::Owned(s.into())
+    }
+}
+
+impl<Context: FormatContext> Format<Context> for Align<'_, Context> {
     fn fmt(&self, f: &mut Formatter<Context>) -> FormatResult<()> {
-        f.write_element(FormatElement::Tag(StartAlign(tag::Align(self.count))))?;
+        // The placeholder is boxed so the `Align` tag payload stays one
+        // pointer wide and `FormatElement` keeps its asserted size.
+        f.write_element(FormatElement::Tag(StartAlign(tag::Align(Box::new(
+            self.placeholder.clone(),
+        )))))?;
         Arguments::from(&self.content).fmt(f)?;
         f.write_element(FormatElement::Tag(EndAlign))
     }
@@ -1145,7 +1540,8 @@ impl<Context> Format<Context> for Align<'_, Context> {
 impl<Context> std::fmt::Debug for Align<'_, Context> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("Align")
-            .field("count", &self.count)
+            .field("placeholder", &self.placeholder.as_str())
+            .field("count", &self.placeholder.len())
             .field("content", &"{{content}}")
             .finish()
     }
@@ -1561,7 +1957,7 @@ enum IndentMode {
     SoftLineOrSpace,
 }
 
-impl<Context> Format<Context> for BlockIndent<'_, Context> {
+impl<Context: FormatContext> Format<Context> for BlockIndent<'_, Context> {
     fn fmt(&self, f: &mut Formatter<Context>) -> FormatResult<()> {
         let snapshot = f.snapshot();
 
@@ -1762,6 +2158,75 @@ pub fn group<Context>(content: &impl Format<Context>) -> Group<'_, Context> {
         content: Argument::new(content),
         group_id: None,
         should_expand: false,
+        boundary: false,
+    }
+}
+
+/// Creates a boundary group, Biome's equivalent of Prettier's
+/// `conditionalGroup` called with a single state: `conditionalGroup([content])`.
+/// Wherever a Prettier printer calls `conditionalGroup` with one state, port
+/// it to `boundary_group`.
+///
+/// A boundary group is a group that the expansion of its content doesn't
+/// pass through. Before printing, a group that holds a hard line break, an
+/// [`expand_parent`], or an expanded group is marked as expanded. That group
+/// then expands its parent, and so on up to the root, so a single line break
+/// can expand every group around it. The expansion stops at a boundary group:
+/// neither the boundary group nor the groups around it are marked. The groups
+/// inside it are marked as usual.
+///
+/// When printing, a boundary group is like any other group. The printer
+/// prints it on one line if its content fits, and breaks it otherwise.
+///
+/// This is exactly what Prettier's `conditionalGroup` does with one state.
+/// Prettier doesn't propagate a break into a group with `expandedStates`, and
+/// prints a single-state `conditionalGroup` flat if it fits and broken
+/// otherwise. The "conditional" in Prettier's name refers to picking the
+/// first of several states that fits, which a single state never does. For
+/// several states, the closest Biome element is [`best_fitting!`].
+///
+/// ```
+/// use biome_formatter::{format, format_args, write};
+/// use biome_formatter::prelude::*;
+///
+/// # fn main() -> FormatResult<()> {
+/// let content = format_with(|f| {
+///     write!(f, [token("a"), hard_line_break(), token("b")])
+/// });
+///
+/// // The hard line break expands the enclosing group
+/// let elements = format!(SimpleFormatContext::default(), [
+///     group(&format_args![
+///         token("["),
+///         soft_line_break(),
+///         group(&content),
+///         soft_line_break(),
+///         token("]"),
+///     ])
+/// ])?;
+/// assert_eq!("[\na\nb\n]", elements.print()?.as_code());
+///
+/// // The boundary group stops the expansion
+/// let elements = format!(SimpleFormatContext::default(), [
+///     group(&format_args![
+///         token("["),
+///         soft_line_break(),
+///         boundary_group(&content),
+///         soft_line_break(),
+///         token("]"),
+///     ])
+/// ])?;
+/// assert_eq!("[a\nb]", elements.print()?.as_code());
+/// # Ok(())
+/// # }
+/// ```
+#[inline]
+pub fn boundary_group<Context>(content: &impl Format<Context>) -> Group<'_, Context> {
+    Group {
+        content: Argument::new(content),
+        group_id: None,
+        should_expand: false,
+        boundary: true,
     }
 }
 
@@ -1770,6 +2235,7 @@ pub struct Group<'a, Context> {
     content: Argument<'a, Context>,
     group_id: Option<GroupId>,
     should_expand: bool,
+    boundary: bool,
 }
 
 impl<Context> Group<'_, Context> {
@@ -1790,7 +2256,7 @@ impl<Context> Group<'_, Context> {
     }
 }
 
-impl<Context> Format<Context> for Group<'_, Context> {
+impl<Context: FormatContext> Format<Context> for Group<'_, Context> {
     fn fmt(&self, f: &mut Formatter<Context>) -> FormatResult<()> {
         let mode = match self.should_expand {
             true => GroupMode::Expand,
@@ -1798,7 +2264,10 @@ impl<Context> Format<Context> for Group<'_, Context> {
         };
 
         f.write_element(FormatElement::Tag(StartGroup(
-            tag::Group::new().with_id(self.group_id).with_mode(mode),
+            tag::Group::new()
+                .with_id(self.group_id)
+                .with_mode(mode)
+                .with_boundary(self.boundary),
         )))?;
 
         Arguments::from(&self.content).fmt(f)?;
@@ -1812,6 +2281,7 @@ impl<Context> std::fmt::Debug for Group<'_, Context> {
         f.debug_struct("GroupElements")
             .field("group_id", &self.group_id)
             .field("should_expand", &self.should_expand)
+            .field("boundary", &self.boundary)
             .field("content", &"{{content}}")
             .finish()
     }
@@ -1860,7 +2330,7 @@ pub const fn expand_parent() -> ExpandParent {
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub struct ExpandParent;
 
-impl<Context> Format<Context> for ExpandParent {
+impl<Context: FormatContext> Format<Context> for ExpandParent {
     fn fmt(&self, f: &mut Formatter<Context>) -> FormatResult<()> {
         f.write_element(FormatElement::ExpandParent)
     }
@@ -2099,7 +2569,7 @@ impl<Context> IfGroupBreaks<'_, Context> {
     }
 }
 
-impl<Context> Format<Context> for IfGroupBreaks<'_, Context> {
+impl<Context: FormatContext> Format<Context> for IfGroupBreaks<'_, Context> {
     fn fmt(&self, f: &mut Formatter<Context>) -> FormatResult<()> {
         f.write_element(FormatElement::Tag(StartConditionalContent(
             Condition::new(self.mode).with_group_id(self.group_id),
@@ -2223,7 +2693,7 @@ pub struct IndentIfGroupBreaks<'a, Context> {
     group_id: GroupId,
 }
 
-impl<Context> Format<Context> for IndentIfGroupBreaks<'_, Context> {
+impl<Context: FormatContext> Format<Context> for IndentIfGroupBreaks<'_, Context> {
     fn fmt(&self, f: &mut Formatter<Context>) -> FormatResult<()> {
         f.write_element(FormatElement::Tag(StartIndentIfGroupBreaks(self.group_id)))?;
         Arguments::from(&self.content).fmt(f)?;
@@ -2285,7 +2755,7 @@ impl<Context, T> std::fmt::Debug for FormatWith<Context, T> {
 ///                 let mut join = f.join_with(&separator);
 ///
 ///                 for item in &self.items {
-///                     join.entry(&format_with(|f| write!(f, [text(item, TextSize::default())])));
+///                     join.entry(&format_with(|f| write!(f, [text(item, None)])));
 ///                 }
 ///                 join.finish()
 ///             })),
@@ -2424,6 +2894,7 @@ pub struct JoinBuilder<'fmt, 'buf, Separator, Context> {
 impl<'fmt, 'buf, Separator, Context> JoinBuilder<'fmt, 'buf, Separator, Context>
 where
     Separator: Format<Context>,
+    Context: FormatContext,
 {
     /// Creates a new instance that joins the elements without a separator
     pub(super) fn new(fmt: &'fmt mut Formatter<'buf, Context>) -> Self {
@@ -2480,6 +2951,22 @@ where
     }
 }
 
+/// Counts the line breaks before an item in the source code.
+///
+/// [JoinNodesBuilder] uses this count to keep an empty line between two items
+/// when the source code has one.
+pub trait LinesBefore {
+    /// Returns how many line breaks come before this item in the source code.
+    fn lines_before(&self) -> usize;
+}
+
+#[cfg(feature = "rowan")]
+impl<L: Language> LinesBefore for SyntaxNode<L> {
+    fn lines_before(&self) -> usize {
+        get_lines_before(self)
+    }
+}
+
 /// Builder to join together nodes that ensures that nodes separated by empty lines continue
 /// to be separated by empty lines in the formatted output.
 #[must_use = "must eventually call `finish()` on Format builders"]
@@ -2494,6 +2981,7 @@ pub struct JoinNodesBuilder<'fmt, 'buf, Separator, Context> {
 impl<'fmt, 'buf, Separator, Context> JoinNodesBuilder<'fmt, 'buf, Separator, Context>
 where
     Separator: Format<Context>,
+    Context: FormatContext,
 {
     pub(super) fn new(separator: Separator, fmt: &'fmt mut Formatter<'buf, Context>) -> Self {
         Self {
@@ -2506,10 +2994,10 @@ where
 
     /// Adds a new node with the specified formatted content to the output, respecting any new lines
     /// that appear before the node in the input source.
-    pub fn entry<L: Language>(&mut self, node: &SyntaxNode<L>, content: &dyn Format<Context>) {
+    pub fn entry(&mut self, node: &impl LinesBefore, content: &dyn Format<Context>) {
         self.result = self.result.and_then(|_| {
             if self.has_elements {
-                if get_lines_before(node) > 1 {
+                if node.lines_before() > 1 {
                     write!(self.fmt, [empty_line()])?;
                 } else {
                     self.separator.fmt(self.fmt)?;
@@ -2532,11 +3020,11 @@ where
     }
 
     /// Adds an iterator of entries to the output. Each entry is a `(node, content)` tuple.
-    pub fn entries<L, F, I>(&mut self, entries: I) -> &mut Self
+    pub fn entries<N, F, I>(&mut self, entries: I) -> &mut Self
     where
-        L: Language,
+        N: LinesBefore,
         F: Format<Context>,
-        I: IntoIterator<Item = (SyntaxNode<L>, F)>,
+        I: IntoIterator<Item = (N, F)>,
     {
         for (node, content) in entries {
             self.entry(&node, &content)
@@ -2550,6 +3038,7 @@ where
     }
 }
 
+#[cfg(feature = "rowan")]
 /// Get the number of line breaks between two consecutive SyntaxNodes in the tree
 pub fn get_lines_before<L: Language>(next_node: &SyntaxNode<L>) -> usize {
     // Count the newlines in the leading trivia of the next node
@@ -2560,6 +3049,7 @@ pub fn get_lines_before<L: Language>(next_node: &SyntaxNode<L>) -> usize {
     }
 }
 
+#[cfg(feature = "rowan")]
 pub fn get_lines_before_token<L: Language>(token: &SyntaxToken<L>) -> usize {
     token
         .leading_trivia()
@@ -2581,7 +3071,7 @@ pub struct FillBuilder<'fmt, 'buf, Context> {
     empty: bool,
 }
 
-impl<'a, 'buf, Context> FillBuilder<'a, 'buf, Context> {
+impl<'a, 'buf, Context: FormatContext> FillBuilder<'a, 'buf, Context> {
     pub(crate) fn new(fmt: &'a mut Formatter<'buf, Context>) -> Self {
         let result = fmt.write_element(FormatElement::Tag(StartFill));
 
@@ -2667,7 +3157,7 @@ impl<'a, Context> BestFitting<'a, Context> {
     }
 }
 
-impl<Context> Format<Context> for BestFitting<'_, Context> {
+impl<Context: FormatContext> Format<Context> for BestFitting<'_, Context> {
     fn fmt(&self, f: &mut Formatter<Context>) -> FormatResult<()> {
         let variants = self.variants.items();
         // Each variant is wrapped in Start/End tags

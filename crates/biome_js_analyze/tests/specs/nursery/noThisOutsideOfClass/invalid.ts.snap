@@ -1,0 +1,137 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+
+class Foo {
+    accessor [this.key] = 1;
+}
+
+const object = {
+    validator(this: TrackedModel) {
+        function getValue() {
+            return this.value;
+        }
+
+        return getValue();
+    },
+
+    method() {
+        return this.value;
+    },
+};
+
+function validator(value: TrackedModel) {
+    return this.value;
+}
+
+const arrow = (this: TrackedModel) => this.value;
+
+```
+
+_Note: The parser emitted 1 diagnostics which are not shown here._
+
+# Diagnostics
+```
+invalid.ts:4:15 lint/nursery/noThisOutsideOfClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Do not use this outside of a class.
+  
+    3 │ class Foo {
+  > 4 │     accessor [this.key] = 1;
+      │               ^^^^
+    5 │ }
+    6 │ 
+  
+  i this depends on how a function is called and may refer to an unexpected object.
+  
+  i Use a class member, or declare an explicit this parameter in a TypeScript function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:10:20 lint/nursery/noThisOutsideOfClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Do not use this outside of a class.
+  
+     8 │     validator(this: TrackedModel) {
+     9 │         function getValue() {
+  > 10 │             return this.value;
+       │                    ^^^^
+    11 │         }
+    12 │ 
+  
+  i this depends on how a function is called and may refer to an unexpected object.
+  
+  i Use a class member, or declare an explicit this parameter in a TypeScript function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:17:16 lint/nursery/noThisOutsideOfClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Do not use this outside of a class.
+  
+    16 │     method() {
+  > 17 │         return this.value;
+       │                ^^^^
+    18 │     },
+    19 │ };
+  
+  i this depends on how a function is called and may refer to an unexpected object.
+  
+  i Use a class member, or declare an explicit this parameter in a TypeScript function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:22:12 lint/nursery/noThisOutsideOfClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Do not use this outside of a class.
+  
+    21 │ function validator(value: TrackedModel) {
+  > 22 │     return this.value;
+       │            ^^^^
+    23 │ }
+    24 │ 
+  
+  i this depends on how a function is called and may refer to an unexpected object.
+  
+  i Use a class member, or declare an explicit this parameter in a TypeScript function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:25:39 lint/nursery/noThisOutsideOfClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Do not use this outside of a class.
+  
+    23 │ }
+    24 │ 
+  > 25 │ const arrow = (this: TrackedModel) => this.value;
+       │                                       ^^^^
+    26 │ 
+  
+  i this depends on how a function is called and may refer to an unexpected object.
+  
+  i Use a class member, or declare an explicit this parameter in a TypeScript function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

@@ -1,14 +1,17 @@
 use crate::diagnostics::CompilerDiagnostic;
 use crate::grit_built_in_functions::BuiltIns;
-use crate::grit_context::{GritExecContext, GritQueryContext, GritTargetFile};
+use crate::grit_context::{GritExecContext, GritQueryContext, GritTargetFile, new_file_owner};
 use crate::grit_definitions::{
     Definitions, ScannedDefinitionInfo, compile_definitions, scan_definitions,
 };
 use crate::grit_file::GritFile;
 use crate::grit_resolved_pattern::GritResolvedPattern;
 use crate::grit_target_language::GritTargetLanguage;
-use crate::grit_target_node::GritTargetSyntaxKind;
+use crate::grit_target_node::{
+    GritSyntaxSlot, GritTargetLanguageNode, GritTargetNode, GritTargetSyntaxKind,
+};
 use crate::grit_tree::GritTargetTree;
+use crate::linearization::apply_effects;
 use crate::pattern_compiler::{PatternCompiler, auto_wrap_pattern};
 use crate::pattern_compiler::{
     compilation_context::CompilationContext, compilation_context::NodeCompilationContext,
@@ -16,7 +19,10 @@ use crate::pattern_compiler::{
 use crate::variables::{VarRegistry, VariableLocations};
 use crate::{BuiltInFunction, CompileError};
 use biome_analyze::RuleDiagnostic;
-use biome_grit_syntax::{GritRoot, GritRootExt};
+use biome_diagnostics::Applicability;
+use biome_grit_syntax::{GritRoot, GritRootExt, GritSyntaxKind};
+use biome_rowan::AstNode;
+use biome_rowan::syntax::SyntaxElementKey;
 use camino::Utf8Path;
 use grit_pattern_matcher::constants::{
     ABSOLUTE_PATH_INDEX, FILENAME_INDEX, GLOBAL_VARS_SCOPE_INDEX, NEW_FILES_INDEX, PROGRAM_INDEX,
@@ -24,11 +30,12 @@ use grit_pattern_matcher::constants::{
 use grit_pattern_matcher::context::ExecContext;
 use grit_pattern_matcher::file_owners::{FileOwner, FileOwners};
 use grit_pattern_matcher::pattern::{
-    File as GritFileTrait, FilePtr, FileRegistry, Matcher, Pattern, Predicate, ResolvedPattern,
-    State, VariableSource,
+    Container, File as GritFileTrait, FilePtr, FileRegistry, Matcher, Pattern, Predicate,
+    ResolvedPattern, State, Variable, VariableSource,
 };
 use grit_util::error::{GritPatternError, GritResult};
 use grit_util::{AnalysisLogs, Ast, ByteRange, InputRanges, Range, VariableMatch};
+use rustc_hash::FxHashSet;
 use std::collections::{BTreeMap, BTreeSet};
 use std::path::{Path, PathBuf};
 use std::sync::Mutex;
@@ -47,6 +54,11 @@ const GLOBAL_VARS: [(&str, usize); 4] = [
 #[derive(Debug)]
 pub struct GritQuery {
     pub pattern: Pattern<GritQueryContext>,
+
+    /// The pattern as compiled, before its automatic `contains` wrapping.
+    ///
+    /// Only present when the query was compiled as a node selector.
+    selector_pattern: Option<Pattern<GritQueryContext>>,
 
     /// Cached syntax kinds targeted by the compiled pattern.
     anchor_kinds: Vec<GritTargetSyntaxKind>,
@@ -86,6 +98,7 @@ impl GritQuery {
             patterns: &self.definitions.patterns,
             predicates: &self.definitions.predicates,
             diagnostics: Mutex::new(Vec::new()),
+            node_selector: self.selector_pattern.is_some(),
         }
     }
 
@@ -94,6 +107,86 @@ impl GritQuery {
         let paths: Vec<_> = files.iter().map(|file| file.path.as_std_path()).collect();
         let file_registry = FileRegistry::new_from_paths(paths);
         State::new(var_registry.into(), file_registry)
+    }
+
+    fn bind_global_variables<'a>(
+        grit_file: &GritFile<'a>,
+        state: &mut State<'a, GritQueryContext>,
+        language: &GritTargetLanguage,
+    ) -> GritResult<()> {
+        let name_val = grit_file.name(&state.files);
+        let program_val = grit_file.binding(&state.files);
+        let abs_path_val = grit_file.absolute_path(&state.files, language)?;
+
+        let globals = state.bindings[GLOBAL_VARS_SCOPE_INDEX as usize]
+            .last_mut()
+            .expect("the global variable scope must be initialized");
+        globals[FILENAME_INDEX].value = Some(name_val);
+        globals[PROGRAM_INDEX].value = Some(program_val);
+        globals[ABSOLUTE_PATH_INDEX].value = Some(abs_path_val);
+        globals[NEW_FILES_INDEX].value = Some(GritResolvedPattern::from_list_parts([].into_iter()));
+
+        Ok(())
+    }
+
+    /// Returns the nodes selected by a selector query.
+    ///
+    /// The pattern is executed against every node and token in `file`, as
+    /// written by the user. A pattern that matches a list selects each of the
+    /// list's named children. Neither rewrites nor diagnostics are applied.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the query was not compiled with
+    /// [`CompilePatternOptions::as_node_selector()`](crate::CompilePatternOptions::as_node_selector).
+    pub fn find_matches(&self, file: GritTargetFile) -> GritResult<Vec<GritTargetLanguageNode>> {
+        let Some(selector_pattern) = &self.selector_pattern else {
+            return Err(GritPatternError::new(
+                "This Grit query was not compiled as a node selector.",
+            ));
+        };
+
+        let file_owners = FileOwners::new();
+        let files = vec![file];
+        let file_ptr = FilePtr::new(0, 0);
+        let context = self.make_exec_context(&files, &file_owners);
+        let mut state = self.make_initial_state(&files);
+
+        let mut logs: AnalysisLogs = Vec::new().into();
+        let grit_file = GritFile::Ptr(file_ptr);
+        context.load_file(&grit_file, &mut state, &mut logs)?;
+        Self::bind_global_variables(&grit_file, &mut state, &self.language)?;
+
+        let file_owner = state.files.get_file_owner(file_ptr);
+        let candidates = selection_candidates(&file_owner.tree.root_node());
+        let patterns = selector_patterns(selector_pattern);
+
+        let mut matches = Vec::new();
+        let mut match_keys = FxHashSet::default();
+        for candidate in candidates {
+            if !self.anchor_kinds.is_empty() && !self.anchor_kinds.contains(&candidate.kind()) {
+                continue;
+            }
+
+            for pattern in &patterns {
+                // Each attempt starts from the same state, so variables bound by
+                // a failed attempt cannot affect later candidates.
+                let mut candidate_state = state.clone();
+                let binding = GritResolvedPattern::from_node_binding(candidate.clone());
+                if pattern.execute(&binding, &mut candidate_state, &context, &mut logs)? {
+                    if candidate.is_list() {
+                        for child in candidate.named_children() {
+                            push_unique(&mut matches, &mut match_keys, child.language_node());
+                        }
+                    } else {
+                        push_unique(&mut matches, &mut match_keys, candidate.language_node());
+                    }
+                    break;
+                }
+            }
+        }
+
+        Ok(matches)
     }
 
     pub fn execute(&self, file: GritTargetFile) -> GritResult<GritQueryResult> {
@@ -151,25 +244,8 @@ impl GritQuery {
         if anchor_kinds.is_empty() {
             return self.execute(file);
         }
-        // Create tree independently of state to avoid borrow conflicts.
-        // from_cached_parse_result wraps the existing parsed tree — O(1).
-        let mut logs: AnalysisLogs = Vec::new().into();
-        let tree = self.language.get_parser().from_cached_parse_result(
-            &file.parse,
-            Some(file.path.as_std_path()),
-            &mut logs,
-        );
-        let Some(tree) = tree else {
-            return self.execute(file);
-        };
 
-        // Collect anchor-kind nodes from the independent tree.
-        // Use slice::contains — anchor_kinds is tiny (1-3 items), faster than hashing.
-        let root = tree.root_node();
-        let anchor_nodes: Vec<_> = root
-            .descendants()
-            .filter(|node| anchor_kinds.contains(&node.kind()))
-            .collect();
+        let mut logs: AnalysisLogs = Vec::new().into();
 
         // Set up context and state (same as execute).
         let file_owners = FileOwners::new();
@@ -182,29 +258,21 @@ impl GritQuery {
         let grit_file = GritFile::Ptr(file_ptr);
         context.load_file(&grit_file, &mut state, &mut logs)?;
 
+        // Collect anchor-kind nodes from the LOADED tree so that effect
+        // bindings reference the same source allocation as the file owner.
+        // `get_file_owner` returns `&'a FileOwner` (lifetime from file_owners,
+        // not from &self on state), so anchor_nodes don't borrow state.
+        let file_owner = state.files.get_file_owner(file_ptr);
+        let root = file_owner.tree.root_node();
+        let anchor_nodes: Vec<_> = root
+            .descendants()
+            .filter(|node| anchor_kinds.contains(&node.kind()))
+            .collect();
+
         // Replicate the global-variable binding from `FilePattern::execute` in
         // `grit-pattern-matcher` (crate `grit-pattern-matcher`, module `pattern/file_pattern.rs`).
         // If the upstream binding logic changes, this block must be updated to match.
-        let name_val = grit_file.name(&state.files);
-        let program_val = grit_file.binding(&state.files);
-        let abs_path_val = grit_file.absolute_path(&state.files, &context.lang)?;
-
-        state.bindings[GLOBAL_VARS_SCOPE_INDEX as usize]
-            .last_mut()
-            .unwrap()[FILENAME_INDEX]
-            .value = Some(name_val);
-        state.bindings[GLOBAL_VARS_SCOPE_INDEX as usize]
-            .last_mut()
-            .unwrap()[PROGRAM_INDEX]
-            .value = Some(program_val);
-        state.bindings[GLOBAL_VARS_SCOPE_INDEX as usize]
-            .last_mut()
-            .unwrap()[ABSOLUTE_PATH_INDEX]
-            .value = Some(abs_path_val);
-        state.bindings[GLOBAL_VARS_SCOPE_INDEX as usize]
-            .last_mut()
-            .unwrap()[NEW_FILES_INDEX]
-            .value = Some(GritResolvedPattern::from_list_parts([].into_iter()));
+        Self::bind_global_variables(&grit_file, &mut state, &self.language)?;
 
         // Execute inner pattern (Bubble) at each anchor-kind node.
         let mut matched = false;
@@ -233,7 +301,39 @@ impl GritQuery {
                 suppressed,
             };
             let file_owner = state.files.get_file_owner(file_ptr);
-            file_owner.matches.borrow_mut().input_matches = Some(input_ranges);
+            let mut match_log = file_owner.matches.borrow_mut();
+            if match_log.input_matches.is_none() {
+                match_log.input_matches = Some(input_ranges);
+            }
+        }
+
+        // Apply effects: if there are accumulated effects, linearize
+        // them to produce rewritten source and push a new file version.
+        // This replicates the logic from exec_step in grit_context.rs.
+        if !state.effects.is_empty() {
+            let file_owner = state.files.get_file_owner(file_ptr);
+            let source = file_owner.tree.text();
+
+            let new_src = apply_effects(
+                source,
+                &state.effects,
+                &state.files,
+                &context.lang,
+                &mut logs,
+            )?;
+
+            if new_src != source {
+                let file_name = file_owner.name.clone();
+                if let Some(new_owner) =
+                    new_file_owner(file_name, &new_src, &self.language, &mut logs)?
+                {
+                    file_owners.push(new_owner);
+                    state
+                        .files
+                        .push_revision(&file_ptr, file_owners.last().unwrap());
+                }
+            }
+            state.effects = vec![];
         }
 
         // Collect effects.
@@ -256,6 +356,31 @@ impl GritQuery {
         source_path: Option<&Utf8Path>,
         lang: GritTargetLanguage,
         extra_built_ins: Vec<BuiltInFunction>,
+    ) -> Result<Self, CompileError> {
+        Self::from_node_impl(root, source_path, lang, extra_built_ins, false)
+    }
+
+    /// Compiles a node selector query.
+    ///
+    /// Unlike [`Self::from_node()`], the query keeps the pattern before its
+    /// automatic `contains` wrapping, so [`Self::find_matches()`] can execute it
+    /// against individual nodes. Rewrites are rejected because a selector does
+    /// not edit source text.
+    pub fn from_node_selector(
+        root: GritRoot,
+        source_path: Option<&Utf8Path>,
+        lang: GritTargetLanguage,
+        extra_built_ins: Vec<BuiltInFunction>,
+    ) -> Result<Self, CompileError> {
+        Self::from_node_impl(root, source_path, lang, extra_built_ins, true)
+    }
+
+    fn from_node_impl(
+        root: GritRoot,
+        source_path: Option<&Utf8Path>,
+        lang: GritTargetLanguage,
+        extra_built_ins: Vec<BuiltInFunction>,
+        node_selector: bool,
     ) -> Result<Self, CompileError> {
         let ScannedDefinitionInfo {
             pattern_definition_info,
@@ -312,6 +437,12 @@ impl GritQuery {
             &mut node_context,
         )?;
 
+        if node_selector && has_rewrite(&root) {
+            return Err(CompileError::RewritesNotAllowed);
+        }
+
+        let selector_pattern = node_selector.then(|| pattern.clone());
+
         let pattern = auto_wrap_pattern(
             pattern,
             &mut definitions.patterns,
@@ -331,6 +462,7 @@ impl GritQuery {
 
         Ok(Self {
             pattern,
+            selector_pattern,
             anchor_kinds,
             definitions,
             name,
@@ -345,7 +477,7 @@ impl GritQuery {
 #[derive(Debug)]
 pub struct GritQueryResult {
     pub effects: Vec<GritQueryEffect>,
-    pub diagnostics: Vec<RuleDiagnostic>,
+    pub diagnostics: Vec<(RuleDiagnostic, Applicability)>,
     pub logs: AnalysisLogs,
 }
 
@@ -526,6 +658,58 @@ pub struct Message {
     pub variable_runtime_id: String,
 }
 
+/// Returns whether the Grit source contains a rewrite.
+fn has_rewrite(root: &GritRoot) -> bool {
+    root.syntax().descendants().any(|node| {
+        matches!(
+            node.kind(),
+            GritSyntaxKind::GRIT_REWRITE | GritSyntaxKind::GRIT_PREDICATE_REWRITE
+        )
+    })
+}
+
+/// Returns the patterns that a selector executes at each candidate.
+///
+/// An explicit `sequential { ... }` holds several independent patterns, so each
+/// step becomes a selector. Other patterns are executed as written.
+fn selector_patterns(pattern: &Pattern<GritQueryContext>) -> Vec<&Pattern<GritQueryContext>> {
+    match pattern {
+        Pattern::Sequential(steps) => steps.iter().map(|step| &step.pattern).collect(),
+        _ => vec![pattern],
+    }
+}
+
+/// Collects a node and all of its descendants, including tokens.
+///
+/// Grit matches can be anchored on leaf tokens such as operators, so selectors
+/// must visit tokens as well as nodes.
+fn selection_candidates<'a>(node: &GritTargetNode<'a>) -> Vec<GritTargetNode<'a>> {
+    fn collect<'a>(node: &GritTargetNode<'a>, candidates: &mut Vec<GritTargetNode<'a>>) {
+        candidates.push(node.clone());
+        if let Some(slots) = node.slots() {
+            for slot in slots {
+                if let GritSyntaxSlot::Node(child) = slot {
+                    collect(&child, candidates);
+                }
+            }
+        }
+    }
+
+    let mut candidates = Vec::new();
+    collect(node, &mut candidates);
+    candidates
+}
+
+fn push_unique(
+    matches: &mut Vec<GritTargetLanguageNode>,
+    keys: &mut FxHashSet<SyntaxElementKey>,
+    node: &GritTargetLanguageNode,
+) {
+    if keys.insert(node.key()) {
+        matches.push(node.clone());
+    }
+}
+
 /// Extracts the syntax kinds that a pattern targets by navigating
 /// the auto-wrapped pattern tree.
 ///
@@ -550,8 +734,10 @@ fn extract_anchor_kinds(pattern: &Pattern<GritQueryContext>) -> Vec<GritTargetSy
         Pattern::Bubble(bubble) => extract_anchor_kinds(bubble.pattern_def.pattern()),
         Pattern::Where(where_pat) => {
             let mut kinds = extract_anchor_kinds(&where_pat.pattern);
-            if kinds.is_empty() {
-                kinds = extract_anchor_kinds_from_predicate(&where_pat.side_condition);
+            if kinds.is_empty()
+                && let Pattern::Variable(variable) = &where_pat.pattern
+            {
+                kinds = extract_anchor_kinds_from_predicate(&where_pat.side_condition, variable);
             }
             kinds
         }
@@ -582,7 +768,8 @@ fn extract_anchor_kinds(pattern: &Pattern<GritQueryContext>) -> Vec<GritTargetSy
         // restricting to X's kinds would miss valid matches.
         Pattern::Not(_) => vec![],
         Pattern::Rewrite(rw) => extract_anchor_kinds(&rw.left),
-        Pattern::Maybe(maybe) => extract_anchor_kinds(&maybe.pattern),
+        // Maybe matches every node because its inner pattern is optional.
+        Pattern::Maybe(_) => vec![],
         Pattern::Limit(limit) => extract_anchor_kinds(&limit.pattern),
         Pattern::CodeSnippet(snippet) => snippet.patterns.iter().map(|(kind, _)| *kind).collect(),
         Pattern::AstNode(node) => vec![node.kind],
@@ -590,28 +777,46 @@ fn extract_anchor_kinds(pattern: &Pattern<GritQueryContext>) -> Vec<GritTargetSy
     }
 }
 
-/// Extracts anchor kinds from a predicate expression.
+/// Extracts anchor kinds for `variable` from a predicate.
+///
+/// Only constraints on the same variable determine the kind of the node that
+/// matched. Predicates on other variables, such as `$program`, cannot narrow
+/// the candidate kinds.
 fn extract_anchor_kinds_from_predicate(
     predicate: &Predicate<GritQueryContext>,
+    variable: &Variable,
 ) -> Vec<GritTargetSyntaxKind> {
     match predicate {
         Predicate::Match(m) => {
-            if let Some(pattern) = &m.pattern {
-                extract_anchor_kinds(pattern)
-            } else {
-                vec![]
+            let Container::Variable(predicate_variable) = &m.val else {
+                return vec![];
+            };
+            let (Ok(predicate_scope), Ok(predicate_index)) = (
+                predicate_variable.try_scope(),
+                predicate_variable.try_index(),
+            ) else {
+                return vec![];
+            };
+            let (Ok(variable_scope), Ok(variable_index)) =
+                (variable.try_scope(), variable.try_index())
+            else {
+                return vec![];
+            };
+            if predicate_scope != variable_scope || predicate_index != variable_index {
+                return vec![];
             }
+            m.pattern.as_ref().map_or_default(extract_anchor_kinds)
         }
-        Predicate::And(a) => a
+        Predicate::And(and) => and
             .predicates
             .iter()
-            .flat_map(extract_anchor_kinds_from_predicate)
+            .flat_map(|predicate| extract_anchor_kinds_from_predicate(predicate, variable))
             .collect(),
-        Predicate::Or(o) => {
-            let all: Vec<_> = o
+        Predicate::Or(or) => {
+            let all: Vec<_> = or
                 .predicates
                 .iter()
-                .map(extract_anchor_kinds_from_predicate)
+                .map(|predicate| extract_anchor_kinds_from_predicate(predicate, variable))
                 .collect();
             if all.iter().any(|kinds| kinds.is_empty()) {
                 return vec![];
@@ -628,13 +833,13 @@ fn extract_anchor_kinds_from_predicate(
 /// Returns None if the pattern structure doesn't match the expected
 /// auto-wrap chain.
 ///
-/// Note: only inspects the first step of Sequential, matching the
-/// auto-wrap structure where Contains is always in the first step.
+/// Note: only extracts from single-step Sequential patterns, matching
+/// the auto-wrap structure. Multi-step Sequential falls back to `execute()`.
 fn extract_contains_inner(
     pattern: &Pattern<GritQueryContext>,
 ) -> Option<&Pattern<GritQueryContext>> {
     match pattern {
-        Pattern::Sequential(seq) => seq
+        Pattern::Sequential(seq) if seq.len() == 1 => seq
             .first()
             .and_then(|step| extract_contains_inner(&step.pattern)),
         Pattern::File(file) => extract_contains_inner(&file.body),
@@ -648,7 +853,6 @@ fn extract_contains_inner(
         // collects from ALL And branches, so there may be an asymmetry when
         // multiple Contains exist. See the matching NOTE there.
         Pattern::And(and) => and.patterns.iter().find_map(extract_contains_inner),
-        Pattern::Limit(limit) => extract_contains_inner(&limit.pattern),
         _ => None,
     }
 }
@@ -656,7 +860,10 @@ fn extract_contains_inner(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::testing::{compile_js_query, make_js_file};
+    use crate::testing::{compile_js_query, compile_js_selector, make_js_file};
+    use biome_grit_parser::parse_grit;
+    use biome_js_syntax::JsSyntaxKind;
+    use biome_rowan::NodeOrToken;
 
     // -- extract_anchor_kinds tests --
 
@@ -683,12 +890,31 @@ mod tests {
 
     #[test]
     fn anchor_kinds_returns_empty_for_not() {
-        // `not` negation: can't restrict to specific kinds.
         let query = compile_js_query("not `console.log($msg)`");
         let kinds = query.anchor_kinds();
         assert!(
             kinds.is_empty(),
             "Not patterns should return empty anchor kinds"
+        );
+    }
+
+    #[test]
+    fn anchor_kinds_returns_empty_for_maybe() {
+        let query = compile_js_query("maybe `console.log($msg)`");
+        let kinds = query.anchor_kinds();
+        assert!(
+            kinds.is_empty(),
+            "Maybe patterns match every node and cannot be narrowed by kind"
+        );
+    }
+
+    #[test]
+    fn anchor_kinds_ignores_predicates_on_other_variables() {
+        let query = compile_js_query("$x where { $program <: contains `console.log($msg)` }");
+        let kinds = query.anchor_kinds();
+        assert!(
+            kinds.is_empty(),
+            "predicates on another variable cannot narrow the matched kind"
         );
     }
 
@@ -804,6 +1030,54 @@ mod tests {
     }
 
     #[test]
+    fn execute_optimized_matches_execute_for_rewrite() {
+        let query = compile_js_query("`console.log($msg)` => `console.info($msg)`");
+        let code = r#"console.log("hello");"#;
+
+        let opt_result = query
+            .execute_optimized(make_js_file(code))
+            .expect("optimized failed");
+        let full_result = query.execute(make_js_file(code)).expect("execute failed");
+
+        assert!(
+            !full_result.effects.is_empty(),
+            "full execute should produce rewrite effects"
+        );
+        assert_eq!(
+            opt_result.effects.len(),
+            full_result.effects.len(),
+            "rewrite: optimized and full should produce same number of effects"
+        );
+    }
+
+    #[test]
+    fn rewrites_metavariables_inside_quoted_strings() {
+        let query = compile_js_query(
+            r#"`"$value"` where {
+                $token = "my-old-css-variable",
+                $replacement = "my-new-css-variable",
+                $value <: r`(.*)(.*)-\\[--$token\\](.*)`($prefix, $class, $suffix) => `$prefix$class-[--$replacement]$suffix`
+            }"#,
+        );
+        let code = r#"const value = "bg-[--my-old-css-variable] text-sm";"#;
+        let expected = r#"const value = "bg-[--my-new-css-variable] text-sm";"#;
+
+        let results = [
+            query.execute(make_js_file(code)).expect("execute failed"),
+            query
+                .execute_optimized(make_js_file(code))
+                .expect("optimized failed"),
+        ];
+
+        for result in results {
+            let [GritQueryEffect::Rewrite(rewrite)] = result.effects.as_slice() else {
+                panic!("expected one rewrite effect, got {:?}", result.effects);
+            };
+            assert_eq!(rewrite.rewritten.content, expected);
+        }
+    }
+
+    #[test]
     fn execute_optimized_no_matches_when_pattern_absent() {
         let query = compile_js_query("`console.log($msg)`");
         let code = "const x = 42;";
@@ -817,5 +1091,151 @@ mod tests {
             opt_result.effects, full_result.effects,
             "no-match: optimized and full should produce identical effects"
         );
+    }
+
+    // -- find_matches tests --
+
+    #[test]
+    fn find_matches_returns_each_node_of_a_sequence() {
+        let query = compile_js_selector("`foo(); bar()`");
+        let matches = query
+            .find_matches(make_js_file("foo(); bar();"))
+            .expect("selector failed");
+
+        assert_eq!(
+            matches
+                .iter()
+                .map(|node| node.kind().as_js_kind().expect("JS node"))
+                .collect::<Vec<_>>(),
+            [
+                JsSyntaxKind::JS_EXPRESSION_STATEMENT,
+                JsSyntaxKind::JS_EXPRESSION_STATEMENT
+            ]
+        );
+    }
+
+    #[test]
+    fn find_matches_does_not_duplicate_wrapper_and_child_matches() {
+        let query = compile_js_selector("`undefined`");
+        let matches = query
+            .find_matches(make_js_file("undefined; undefined;"))
+            .expect("selector failed");
+
+        assert_eq!(matches.len(), 2, "got {matches:?}");
+    }
+
+    #[test]
+    fn find_matches_allows_trailing_list_separators() {
+        let query = compile_js_selector("`a, b`");
+        let without_trailing_comma = query
+            .find_matches(make_js_file("function f(a, b) {}"))
+            .expect("selector failed");
+        let with_trailing_comma = query
+            .find_matches(make_js_file("function f(a, b,) {}"))
+            .expect("selector failed");
+
+        assert_eq!(with_trailing_comma.len(), 2);
+        assert_eq!(
+            with_trailing_comma
+                .iter()
+                .map(|node| node.text_trimmed_range())
+                .collect::<Vec<_>>(),
+            without_trailing_comma
+                .iter()
+                .map(|node| node.text_trimmed_range())
+                .collect::<Vec<_>>()
+        );
+    }
+
+    #[test]
+    fn find_matches_requires_the_whole_sequence() {
+        let query = compile_js_selector("`foo(); bar()`");
+        let matches = query
+            .find_matches(make_js_file("foo(); bar(); baz();"))
+            .expect("selector failed");
+
+        assert!(
+            matches.is_empty(),
+            "expected no match when the list has extra children, got {matches:?}"
+        );
+    }
+
+    #[test]
+    fn regular_queries_do_not_match_multi_child_lists() {
+        let query = compile_js_query("`foo(); bar()`");
+        let result = query
+            .execute(make_js_file("foo(); bar();"))
+            .expect("execute failed");
+
+        assert!(
+            result.effects.is_empty(),
+            "regular Grit queries should keep their list-matching behavior, got {:?}",
+            result.effects
+        );
+    }
+
+    #[test]
+    fn find_matches_does_not_prefilter_candidates_by_kind() {
+        let query = compile_js_selector("maybe `foo()`");
+        let matches = query
+            .find_matches(make_js_file("const value = 1;"))
+            .expect("selector failed");
+
+        assert!(
+            !matches.is_empty(),
+            "kind-independent patterns must see every candidate"
+        );
+    }
+
+    #[test]
+    fn find_matches_supports_sequential_steps() {
+        let query = compile_js_selector("sequential { `foo()`, `bar()` }");
+        let matches = query
+            .find_matches(make_js_file("foo(); bar(); baz();"))
+            .expect("selector failed");
+
+        assert_eq!(
+            matches
+                .iter()
+                .map(|node| node.kind().as_js_kind().expect("JS node"))
+                .collect::<Vec<_>>(),
+            [
+                JsSyntaxKind::JS_CALL_EXPRESSION,
+                JsSyntaxKind::JS_CALL_EXPRESSION
+            ]
+        );
+    }
+
+    #[test]
+    fn find_matches_returns_leaf_tokens() {
+        let query = compile_js_selector("`+`");
+        let matches = query
+            .find_matches(make_js_file("const value = 1 + 2;"))
+            .expect("selector failed");
+
+        let [matched] = matches.as_slice() else {
+            panic!("expected the plus token, got {matches:?}");
+        };
+        assert_eq!(matched.kind().as_js_kind(), Some(JsSyntaxKind::PLUS));
+        assert!(matches!(
+            matched,
+            GritTargetLanguageNode::JsLanguage(NodeOrToken::Token(_))
+        ));
+    }
+
+    #[test]
+    fn selector_rejects_rewrites() {
+        let parsed = parse_grit("`foo()` => `bar()`");
+        assert!(parsed.diagnostics().is_empty());
+
+        let error = GritQuery::from_node_selector(
+            parsed.tree(),
+            None,
+            GritTargetLanguage::JsTargetLanguage(crate::JsTargetLanguage),
+            Vec::new(),
+        )
+        .expect_err("rewrites are not selectors");
+
+        assert!(matches!(error, CompileError::RewritesNotAllowed));
     }
 }

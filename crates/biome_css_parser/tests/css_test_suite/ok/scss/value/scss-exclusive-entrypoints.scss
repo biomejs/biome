@@ -1,0 +1,33 @@
+$query: "(hover)";
+$value: 2px;
+
+@media (#{$query} and (color)) {
+  .and-query { color: red; }
+}
+
+@media (#{$query} or (color)) {
+  .or-query { color: red; }
+}
+
+@media (#{$query} and not (color)) {
+  .not-query { color: red; }
+}
+
+@font-face {
+  font: { family: serif; }
+  src: url(font.woff2);
+}
+
+@media (min-width: 10px + 1px) {
+  .arithmetic-query { color: red; }
+}
+
+.bracketed {
+  number: [1];
+  group: [(1 + 2)];
+  variable: [$value];
+  function: [fn(1)];
+  color: red;
+}
+
+.after { color: blue; }

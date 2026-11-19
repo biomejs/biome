@@ -71,6 +71,7 @@ declare_lint_rule! {
         sources: &[
             RuleSource::EslintTypeScript("prefer-for-of").same(),
             RuleSource::EslintUnicorn("no-for-loop").same(),
+            RuleSource::EslintMysticatea("prefer-for-of").same(),
         ],
         recommended: false,
         severity: Severity::Information,
@@ -122,6 +123,13 @@ impl Rule for UseForOf {
             AnyJsStatement::JsExpressionStatement(statement) => Some(statement.range()),
             _ => None,
         }?;
+
+        if binding
+            .all_writes(model)
+            .any(|reference| body_range.contains(reference.range_start()))
+        {
+            return None;
+        }
 
         let references = list_initializer_references(model, binding, &body_range);
         let array_right = test.as_js_binary_expression()?.right().ok()?;

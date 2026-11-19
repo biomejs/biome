@@ -2,6 +2,12 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
+## Command
+
+```shell
+biome format '<TEMP_DIR>/should_fail_for_nested_roots'
+```
+
 ## `biome.json`
 
 ```json

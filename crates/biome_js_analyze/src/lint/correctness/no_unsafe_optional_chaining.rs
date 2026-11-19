@@ -10,17 +10,21 @@ use biome_js_syntax::{
     JsInExpression, JsInitializerClause, JsInstanceofExpression, JsLogicalExpression,
     JsLogicalOperator, JsNewExpression, JsObjectAssignmentPatternProperty, JsObjectMemberList,
     JsParenthesizedExpression, JsSequenceExpression, JsSpread, JsStaticMemberExpression,
-    JsTemplateExpression, JsVariableDeclarator, JsWithStatement,
+    JsTemplateExpression, JsVariableDeclarator, JsWithStatement, TsAsExpression,
+    TsInstantiationExpression, TsSatisfiesExpression, TsTypeAssertionExpression,
 };
 use biome_rowan::{AstNode, TextRange, declare_node_union};
 use biome_rule_options::no_unsafe_optional_chaining::NoUnsafeOptionalChainingOptions;
 
 declare_lint_rule! {
-    /// Disallow the use of optional chaining in contexts where the undefined value is not allowed.
+    /// Disallow optional chaining where `undefined` is not a valid result.
     ///
-    /// The optional chaining (?.) expression can short-circuit with a return value of undefined.
-    /// Therefore, treating an evaluated optional chaining expression as a function, object, number, etc., can cause TypeError or unexpected results.
-    /// Also, parentheses limit the scope of short-circuiting in chains.
+    /// When the value before `?.` is `null` or `undefined`, JavaScript stops evaluating that chain
+    /// and returns `undefined`. Calling that result, reading another property from it, or using it
+    /// where an object is required can then throw a `TypeError`.
+    ///
+    /// Parentheses end the protection of an optional chain. For example, `(object?.property).name`
+    /// still tries to read `name` when `object?.property` produces `undefined`.
     ///
     /// ## Examples
     ///
@@ -103,6 +107,12 @@ impl Rule for NoUnsafeOptionalChaining {
                     parent = expression.parent::<RuleNode>()
                 }
                 RuleNode::JsAwaitExpression(expression) => parent = expression.parent::<RuleNode>(),
+                RuleNode::TsAsExpression(_)
+                | RuleNode::TsSatisfiesExpression(_)
+                | RuleNode::TsTypeAssertionExpression(_)
+                | RuleNode::TsInstantiationExpression(_) => {
+                    parent = current_parent.parent::<RuleNode>()
+                }
                 RuleNode::JsExtendsClause(extends) => {
                     // class A extends obj?.foo {}
                     return Some(extends.syntax().text_trimmed_range());
@@ -307,7 +317,13 @@ impl Rule for NoUnsafeOptionalChaining {
             .detail(
                 range,
                 "If it short-circuits with 'undefined' the evaluation will throw TypeError here:",
-            ),
+            )
+            .note(markup! {
+                "Optional chaining produces "<Emphasis>"undefined"</Emphasis>" when the value before "<Emphasis>"?."</Emphasis>" is "<Emphasis>"null"</Emphasis>" or "<Emphasis>"undefined"</Emphasis>", and this operation does not accept "<Emphasis>"undefined"</Emphasis>"."
+            })
+            .note(markup! {
+                "Provide a fallback value, for example "<Emphasis>"(a?.b ?? {})"</Emphasis>", or check that the value is defined before using it."
+            }),
         )
     }
 }
@@ -333,6 +349,10 @@ declare_node_union! {
     | JsExtendsClause
     | JsInExpression
     | JsInstanceofExpression
+    | TsAsExpression
+    | TsSatisfiesExpression
+    | TsTypeAssertionExpression
+    | TsInstantiationExpression
 }
 
 impl From<AnyJsOptionalChainExpression> for RuleNode {

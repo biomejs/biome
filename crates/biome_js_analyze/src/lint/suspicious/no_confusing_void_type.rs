@@ -93,12 +93,17 @@ impl Rule for NoConfusingVoidType {
             VoidTypeContext::Union => "inside a union type.",
             VoidTypeContext::Unknown => "outside a return type or a type parameter.",
         };
-        Some(RuleDiagnostic::new(
-            rule_category!(),
-            node.range(),
-            markup! {
-            <Emphasis>"void"</Emphasis>" is confusing "{message}},
-        ))
+        Some(
+            RuleDiagnostic::new(
+                rule_category!(),
+                node.range(),
+                markup! {
+                <Emphasis>"void"</Emphasis>" is confusing "{message}},
+            )
+            .note(markup! {
+                <Emphasis>"void"</Emphasis>" is meant for the return type of a function. In other positions it is easy to mix up with "<Emphasis>"undefined"</Emphasis>", which makes the type harder to understand."
+            }),
+        )
     }
 
     fn action(ctx: &RuleContext<Self>, _: &Self::State) -> Option<JsRuleAction> {
@@ -121,6 +126,18 @@ fn decide_void_type_context(node: &JsSyntaxNode) -> Option<VoidTypeContext> {
     for parent in node.parent()?.ancestors() {
         match parent.kind() {
             JsSyntaxKind::TS_UNION_TYPE_VARIANT_LIST => {
+                // void | never
+                // `never` is the only type that can be mixed with `void` without changing its meaning
+                if parent.children().all(|child| {
+                    AnyTsType::cast(child).is_some_and(|ty| {
+                        matches!(
+                            ty.omit_parentheses(),
+                            AnyTsType::TsVoidType(_) | AnyTsType::TsNeverType(_)
+                        )
+                    })
+                }) {
+                    return None;
+                }
                 // checks if the union type contains a generic type has a void type as argument
                 for child in parent.descendants() {
                     if child.kind() == JsSyntaxKind::TS_TYPE_ARGUMENT_LIST {

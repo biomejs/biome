@@ -3,7 +3,7 @@
 #[path = "rome_common.rs"]
 mod rome_common;
 
-use biome_js_syntax::JsFileSource;
+use biome_languages::JsFileSource;
 use libfuzzer_sys::Corpus;
 
 pub fn do_fuzz(case: &[u8]) -> Corpus {

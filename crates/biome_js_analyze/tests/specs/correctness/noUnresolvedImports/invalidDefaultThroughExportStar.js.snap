@@ -1,0 +1,28 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidDefaultThroughExportStar.js
+---
+# Input
+```js
+/* should generate diagnostics */
+// `export * from` does not forward the default export.
+import value from "./validDefaultExportStarBarrel.js";
+
+```
+
+# Diagnostics
+```
+invalidDefaultThroughExportStar.js:3:8 lint/correctness/noUnresolvedImports ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The path ./validDefaultExportStarBarrel.js has no default export.
+  
+    1 │ /* should generate diagnostics */
+    2 │ // `export * from` does not forward the default export.
+  > 3 │ import value from "./validDefaultExportStarBarrel.js";
+      │        ^^^^^
+    4 │ 
+  
+  i Make sure that the path is correct and that you're importing the right symbol.
+  
+
+```

@@ -6,7 +6,8 @@ use crate::syntax::parse_error::{
 };
 use crate::syntax::{
     AttrInitializerContext, TextExpression, parse_attribute_initializer, parse_html_element,
-    parse_single_text_expression, parse_single_text_expression_content,
+    parse_single_text_expression, parse_single_text_expression_after_opening,
+    parse_single_text_expression_content,
 };
 use crate::token_source::{HtmlLexContext, HtmlReLexContext, RestrictedExpressionStopAt};
 use biome_html_syntax::HtmlSyntaxKind::*;
@@ -17,6 +18,10 @@ use biome_parser::prelude::ParsedSyntax;
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
 use biome_parser::{Marker, Parser, SyntaxFeature, TokenSet, token_set};
 use biome_rowan::TextRange;
+use biome_unicode_table::{
+    Dispatch::{DIG, DOL, IDT, UNI, ZER},
+    is_js_id_continue, lookup_byte,
+};
 use std::ops::Sub;
 
 pub(crate) fn parse_svelte_hash_block(p: &mut HtmlParser) -> ParsedSyntax {
@@ -41,7 +46,7 @@ pub(crate) fn parse_svelte_hash_block(p: &mut HtmlParser) -> ParsedSyntax {
                 let _ = ParseRecoveryTokenSet::new(HTML_BOGUS, token_set![T!['}']]).recover(p);
             }
 
-            p.expect(T!['}']);
+            p.expect_with_context(T!['}'], super::regular_context(p));
             Present(m.complete(p, SVELTE_BOGUS_BLOCK))
         }
     }
@@ -97,7 +102,7 @@ fn parse_if_opening_block(p: &mut HtmlParser, parent_marker: Marker) -> ParsedSy
         expected_expression(p, range.sub_start(parent_marker.start()))
     });
 
-    p.expect(T!['}']);
+    p.expect_with_context(T!['}'], super::regular_context(p));
 
     SvelteElementList::new()
         .with_stop_at_curly_colon()
@@ -130,7 +135,7 @@ pub(crate) fn parse_else_if_clause(p: &mut HtmlParser) -> ParsedSyntax {
         expected_expression(p, range.sub_start(m.start()))
     });
 
-    p.expect(T!['}']);
+    p.expect_with_context(T!['}'], super::regular_context(p));
 
     SvelteElementList::new()
         .with_stop_at_curly_colon()
@@ -146,8 +151,8 @@ pub(crate) fn parse_else_clause(p: &mut HtmlParser) -> ParsedSyntax {
     }
     let m = p.start();
     p.bump_with_context(T!["{:"], HtmlLexContext::Svelte);
-    p.expect(T![else]);
-    p.expect(T!['}']);
+    p.expect_with_context(T![else], HtmlLexContext::Svelte);
+    p.expect_with_context(T!['}'], super::regular_context(p));
     SvelteElementList::new().parse_list(p);
     Present(m.complete(p, SVELTE_ELSE_CLAUSE))
 }
@@ -248,7 +253,7 @@ fn parse_each_key(p: &mut HtmlParser) -> ParsedSyntax {
     // Re-lex to Svelte context to recognize ',) and other tokens
     p.re_lex(HtmlReLexContext::Svelte);
 
-    p.expect(T![')']);
+    p.expect_with_context(T![')'], HtmlLexContext::Svelte);
 
     Present(m.complete(p, SVELTE_EACH_KEY))
 }
@@ -300,10 +305,32 @@ fn parse_each_opening_block(p: &mut HtmlParser, parent_marker: Marker) -> (Parse
         return (Absent, false);
     }
 
-    p.bump_with_context(
-        T![each],
-        HtmlLexContext::restricted_expression(RestrictedExpressionStopAt::AsOrComma),
-    );
+    // check whether the collection expression
+    // contains a TypeScript `as const` assertion before the Svelte binding `as`.
+    // If so, we use `AsOrCommaSkipFirstAs` so the lexer includes the TypeScript
+    // `as const` in the expression token and stops only at the binding `as`.
+    let stop_at = if p.lookahead(|p| {
+        p.bump_with_context(
+            T![each],
+            HtmlLexContext::restricted_expression(RestrictedExpressionStopAt::AsOrComma),
+        );
+        if p.at(HTML_LITERAL) {
+            p.bump_any();
+            p.re_lex(HtmlReLexContext::Svelte);
+            p.at(T![as]) && {
+                p.bump_with_context(T![as], HtmlLexContext::Svelte);
+                p.at(T![const])
+            }
+        } else {
+            false
+        }
+    }) {
+        RestrictedExpressionStopAt::AsOrCommaSkipFirstAs
+    } else {
+        RestrictedExpressionStopAt::AsOrComma
+    };
+
+    p.bump_with_context(T![each], HtmlLexContext::restricted_expression(stop_at));
     // Flags used to track possible errors so that the final block can be emitted as a bogus node
     let mut has_errors = false;
 
@@ -339,7 +366,7 @@ fn parse_each_opening_block(p: &mut HtmlParser, parent_marker: Marker) -> (Parse
         parse_svelte_block_item(p).ok();
     }
 
-    p.expect(T!['}']);
+    p.expect_with_context(T!['}'], super::regular_context(p));
 
     (
         Present(parent_marker.complete(p, SVELTE_EACH_OPENING_BLOCK)),
@@ -372,12 +399,56 @@ pub(crate) fn parse_svelte_spread_or_expression(p: &mut HtmlParser) -> ParsedSyn
             .parse_element(p)
             .or_add_diagnostic(p, expected_expression);
 
-        p.expect_with_context(T!['}'], HtmlLexContext::InsideTagSvelte);
+        p.expect_with_context(T!['}'], super::inside_tag_context(p));
         Present(m.complete(p, HTML_SPREAD_ATTRIBUTE))
     } else {
         p.rewind(checkpoint);
         m.abandon(p);
-        parse_single_text_expression(p, HtmlLexContext::InsideTagSvelte)
+        let context = super::inside_tag_context(p);
+        parse_single_text_expression(p, context)
+    }
+}
+
+pub(crate) fn parse_svelte_declaration_or_expression(p: &mut HtmlParser) -> ParsedSyntax {
+    if !Svelte.is_supported(p) || !p.at(T!['{']) {
+        return parse_single_text_expression(p, super::regular_context(p));
+    }
+
+    let checkpoint = p.checkpoint();
+    let m = p.start();
+    let opening_range = p.cur_range();
+    p.bump_with_context(T!['{'], HtmlLexContext::single_expression());
+
+    let text = p.cur_text();
+    let declaration_rest = match text.as_bytes().first() {
+        Some(b'l') => text.strip_prefix("let"),
+        Some(b'c') => text.strip_prefix("const"),
+        _ => None,
+    };
+    let is_declaration = declaration_rest.is_some_and(|rest| match rest.as_bytes().first() {
+        None => true,
+        Some(byte) => match lookup_byte(*byte) {
+            IDT | DOL | DIG | ZER => false,
+            UNI => rest
+                .chars()
+                .next()
+                .is_none_or(|character| !is_js_id_continue(character)),
+            _ => true,
+        },
+    });
+
+    if is_declaration {
+        parse_single_text_expression_content(p).or_add_diagnostic(p, expected_text_expression);
+        p.expect_with_context(T!['}'], super::regular_context(p));
+        Present(m.complete(p, SVELTE_DECLARATION_BLOCK))
+    } else {
+        parse_single_text_expression_after_opening(
+            p,
+            super::regular_context(p),
+            checkpoint,
+            m,
+            opening_range,
+        )
     }
 }
 
@@ -460,7 +531,7 @@ fn parse_await_opening_block(p: &mut HtmlParser, parent_marker: Marker) -> Parse
         has_catch_clause = Some(m.range(p));
     }
 
-    p.expect(T!['}']);
+    p.expect_with_context(T!['}'], super::regular_context(p));
 
     SvelteElementList::new()
         .with_stop_at_curly_colon()
@@ -597,7 +668,7 @@ fn parse_await_then_or_catch_block(
         return (Absent, BlockParsed::None);
     }
     let m = p.start();
-    p.bump(T!["{:"]);
+    p.bump_with_context(T!["{:"], HtmlLexContext::Svelte);
 
     if p.at(T![then]) {
         (
@@ -628,7 +699,7 @@ fn parse_await_then_block(
 
     parse_single_text_expression_content(p).ok();
 
-    p.expect(T!['}']);
+    p.expect_with_context(T!['}'], super::regular_context(p));
 
     SvelteElementList::new()
         .with_stop_at_curly_colon()
@@ -660,7 +731,7 @@ fn parse_await_catch_block(
 
     parse_single_text_expression_content(p).ok();
 
-    p.expect(T!['}']);
+    p.expect_with_context(T!['}'], super::regular_context(p));
 
     SvelteElementList::new()
         .with_stop_at_curly_colon()
@@ -717,7 +788,7 @@ fn parse_snippet_opening_block(p: &mut HtmlParser, parent_marker: Marker) -> Par
         p.error(p.err_builder("Expected an expression after 'snippet'", p.cur_range()));
     }
 
-    p.expect(T!['}']);
+    p.expect_with_context(T!['}'], super::regular_context(p));
 
     SvelteElementList::new()
         .with_stop_at_curly_colon()
@@ -736,7 +807,7 @@ fn parse_curly_destructured_name(p: &mut HtmlParser) -> ParsedSyntax {
 
     SvelteBindingAssignmentBindingList.parse_list(p);
 
-    p.expect(T!['}']);
+    p.expect_with_context(T!['}'], HtmlLexContext::Svelte);
 
     Present(m.complete(p, SVELTE_CURLY_DESTRUCTURED_NAME))
 }
@@ -776,7 +847,7 @@ pub(crate) fn parse_opening_block(
         expected_expression(p, range.sub_start(m.start()))
     });
 
-    p.expect(T!['}']);
+    p.expect_with_context(T!['}'], super::regular_context(p));
 
     Present(m.complete(p, node))
 }
@@ -797,7 +868,7 @@ pub(crate) fn parse_closing_block(
 
     p.expect_with_context(keyword, HtmlLexContext::Svelte);
 
-    p.expect(T!['}']);
+    p.expect_with_context(T!['}'], super::regular_context(p));
 
     Present(m.complete(p, node))
 }
@@ -824,7 +895,7 @@ pub(crate) fn parse_svelte_at_block(p: &mut HtmlParser) -> ParsedSyntax {
                 let _ = ParseRecoveryTokenSet::new(HTML_BOGUS, token_set![T!['}']]).recover(p);
             }
 
-            p.expect(T!['}']);
+            p.expect_with_context(T!['}'], super::regular_context(p));
             Present(m.complete(p, SVELTE_BOGUS_BLOCK))
         }
     }
@@ -837,7 +908,7 @@ pub(crate) fn parse_debug_block(p: &mut HtmlParser, marker: Marker) -> ParsedSyn
 
     BindingList.parse_list(p);
 
-    p.expect(T!['}']);
+    p.expect_with_context(T!['}'], super::regular_context(p));
 
     Present(marker.complete(p, SVELTE_DEBUG_BLOCK))
 }
@@ -850,7 +921,7 @@ pub(crate) fn parse_html_block(p: &mut HtmlParser, marker: Marker) -> ParsedSynt
 
     parse_single_text_expression_content(p).or_add_diagnostic(p, expected_text_expression);
 
-    p.expect(T!['}']);
+    p.expect_with_context(T!['}'], super::regular_context(p));
 
     Present(marker.complete(p, SVELTE_HTML_BLOCK))
 }
@@ -863,7 +934,7 @@ pub(crate) fn parse_render_block(p: &mut HtmlParser, marker: Marker) -> ParsedSy
 
     parse_single_text_expression_content(p).or_add_diagnostic(p, expected_text_expression);
 
-    p.expect(T!['}']);
+    p.expect_with_context(T!['}'], super::regular_context(p));
 
     Present(marker.complete(p, SVELTE_RENDER_BLOCK))
 }
@@ -878,7 +949,7 @@ pub(crate) fn parse_attach_attribute(p: &mut HtmlParser) -> ParsedSyntax {
 
     parse_single_text_expression_content(p).or_add_diagnostic(p, expected_text_expression);
 
-    p.expect_with_context(T!['}'], HtmlLexContext::InsideTagSvelte);
+    p.expect_with_context(T!['}'], super::inside_tag_context(p));
 
     Present(m.complete(p, SVELTE_ATTACH_ATTRIBUTE))
 }
@@ -891,7 +962,7 @@ pub(crate) fn parse_const_block(p: &mut HtmlParser, marker: Marker) -> ParsedSyn
 
     parse_single_text_expression_content(p).or_add_diagnostic(p, expected_text_expression);
 
-    p.expect(T!['}']);
+    p.expect_with_context(T!['}'], super::regular_context(p));
 
     Present(marker.complete(p, SVELTE_CONST_BLOCK))
 }
@@ -968,8 +1039,11 @@ fn parse_svelte_binding_property(p: &mut HtmlParser) -> ParsedSyntax {
 }
 
 fn parse_binding_literal(p: &mut HtmlParser) -> ParsedSyntax {
+    if !p.at(HTML_LITERAL) {
+        return Absent;
+    }
     let m = p.start();
-    p.bump_with_context(HTML_LITERAL, HtmlLexContext::InsideTagSvelte);
+    p.bump_with_context(HTML_LITERAL, HtmlLexContext::SvelteBindingLiteral);
     Present(m.complete(p, SVELTE_LITERAL))
 }
 
@@ -985,6 +1059,48 @@ fn parse_rest_name(p: &mut HtmlParser) -> ParsedSyntax {
     });
 
     Present(m.complete(p, SVELTE_REST_BINDING))
+}
+
+/// Parses either a rename binding `key: alias` or a plain name.
+///
+/// In object destructuring patterns like `{ component: Filter }`, the `:` separates
+/// a property name (key) from a local binding name (alias). This function handles both
+/// cases: if a `:` follows the identifier, it emits a `SvelteRenameBinding` node;
+/// otherwise the wrapping marker is abandoned and the plain `SvelteName` is returned.
+fn parse_binding_assignment_element(p: &mut HtmlParser) -> ParsedSyntax {
+    if p.at(T![...]) {
+        parse_rest_name(p)
+    } else if p.at(T!['{']) {
+        let result = parse_curly_destructured_name(p);
+        p.re_lex(HtmlReLexContext::Svelte);
+        result
+    } else if p.at(T!['[']) {
+        let result = parse_square_destructured_name(p);
+        p.re_lex(HtmlReLexContext::Svelte);
+        result
+    } else {
+        parse_rename_or_plain_name(p)
+    }
+}
+
+fn parse_rename_or_plain_name(p: &mut HtmlParser) -> ParsedSyntax {
+    let m = p.start();
+    let result = parse_svelte_name(p);
+    if result.is_absent() {
+        m.abandon(p);
+        return Absent;
+    }
+    p.re_lex(HtmlReLexContext::Svelte);
+    if p.at(T![:]) {
+        p.bump_with_context(T![:], HtmlLexContext::Svelte);
+        parse_binding_assignment_element(p).or_add_diagnostic(p, |p, range| {
+            p.err_builder("Expected a binding name after ':'", range)
+        });
+        Present(m.complete(p, SVELTE_RENAME_BINDING))
+    } else {
+        m.abandon(p);
+        result
+    }
 }
 
 #[derive(Default)]
@@ -1009,15 +1125,12 @@ impl ParseNodeList for SvelteElementList {
     const LIST_KIND: Self::Kind = HTML_ELEMENT_LIST;
 
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
-        parse_html_element(p)
+        parse_html_element(p, false, false)
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
-        let at_l_angle0 = p.at(T![<]);
-        let at_slash1 = p.nth_at(1, T![/]);
-        let at_eof = p.at(EOF);
-        at_l_angle0 && at_slash1
-            || at_eof
+        p.at(EOF)
+            || p.at(T![<]) && p.nth_at(1, T![/])
             || p.at(T!["{/"])
             || (self.stop_at_curly_colon && p.at(T!["{:"]))
     }
@@ -1081,19 +1194,7 @@ impl ParseSeparatedList for SvelteBindingAssignmentBindingList {
     const LIST_KIND: Self::Kind = SVELTE_BINDING_ASSIGNMENT_BINDING_LIST;
 
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
-        if p.at(T![...]) {
-            parse_rest_name(p)
-        } else if p.at(T!['{']) {
-            let result = parse_curly_destructured_name(p);
-            p.re_lex(HtmlReLexContext::Svelte);
-            result
-        } else if p.at(T!['[']) {
-            let result = parse_square_destructured_name(p);
-            p.re_lex(HtmlReLexContext::Svelte);
-            result
-        } else {
-            parse_svelte_name(p)
-        }
+        parse_binding_assignment_element(p)
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
@@ -1253,7 +1354,7 @@ fn parse_bind_initializer(p: &mut HtmlParser) -> ParsedSyntax {
             parse_bind_function_text_expression(p, HtmlLexContext::Svelte).ok();
 
             if p.at(T!['}']) {
-                p.bump_remap_with_context(T!['}'], HtmlLexContext::InsideTagSvelte);
+                p.bump_remap_with_context(T!['}'], super::inside_tag_context(p));
                 expression.complete(p, SVELTE_BIND_FUNCTION_BINDING_EXPRESSION);
                 return Present(m.complete(p, SVELTE_BIND_FUNCTION_BINDING_INITIALIZER_CLAUSE));
             }

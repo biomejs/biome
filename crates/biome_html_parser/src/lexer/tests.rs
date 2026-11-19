@@ -1,7 +1,7 @@
 #![cfg(test)]
 
-use super::{HtmlLexer, TextSize};
-use crate::token_source::HtmlLexContext;
+use super::{HtmlLexer, HtmlLexerOptions, TextSize};
+use crate::token_source::{HtmlFramework, HtmlLexContext, TextExpressionKind};
 use biome_html_syntax::HtmlSyntaxKind::{self, *};
 use biome_parser::lexer::Lexer;
 use quickcheck_macros::quickcheck;
@@ -48,7 +48,23 @@ fn losslessness(string: String) -> bool {
 // and make sure the tokens yielded are fully lossless and the source can be reconstructed from only the tokens
 macro_rules! assert_lex {
     ($context:expr, $src:expr, $($kind:ident:$len:expr $(,)?)*) => {{
-        let mut lexer = HtmlLexer::from_str($src);
+        let framework = match $context {
+            HtmlLexContext::Regular { framework } | HtmlLexContext::InsideTag { framework } => {
+                framework
+            }
+            // The context carries no framework, so infer the one that produces it.
+            HtmlLexContext::InsideTagWithDirectives { svelte: true } => HtmlFramework::Svelte,
+            _ => HtmlFramework::Plain,
+        };
+        let text_expression = match framework {
+            HtmlFramework::Plain => None,
+            HtmlFramework::Vue | HtmlFramework::Angular => Some(TextExpressionKind::Double),
+            HtmlFramework::Svelte | HtmlFramework::Astro => Some(TextExpressionKind::Single),
+        };
+        let mut lexer = HtmlLexer::from_str($src).with_options(HtmlLexerOptions {
+            framework,
+            text_expression,
+        });
         let mut idx = 0;
         let mut tok_idx = TextSize::default();
 
@@ -122,7 +138,7 @@ fn doctype_upper_key() {
 #[test]
 fn string_literal() {
     assert_lex! {
-        HtmlLexContext::InsideTag,
+        HtmlLexContext::InsideTag { framework: HtmlFramework::Plain },
         "\"data-attribute\"",
         HTML_STRING_LITERAL: 16,
     }
@@ -131,10 +147,10 @@ fn string_literal() {
 #[test]
 fn self_closing() {
     assert_lex! {
-        HtmlLexContext::InsideTag,
+        HtmlLexContext::InsideTag { framework: HtmlFramework::Plain },
         "<div />",
         L_ANGLE: 1,
-        HTML_LITERAL: 3,
+        DIV_KW: 3,
         WHITESPACE: 1,
         SLASH: 1
         R_ANGLE: 1
@@ -144,14 +160,14 @@ fn self_closing() {
 #[test]
 fn element() {
     assert_lex! {
-        HtmlLexContext::InsideTag,
+        HtmlLexContext::InsideTag { framework: HtmlFramework::Plain },
         "<div></div>",
         L_ANGLE: 1,
-        HTML_LITERAL: 3,
+        DIV_KW: 3,
         R_ANGLE: 1,
         L_ANGLE: 1,
         SLASH: 1,
-        HTML_LITERAL: 3,
+        DIV_KW: 3,
         R_ANGLE: 1,
     }
 }
@@ -195,12 +211,33 @@ fn doctype_with_quirk_and_system() {
 }
 
 #[test]
+fn processing_instruction_names_end_before_closing_delimiter() {
+    assert_lex! {
+        HtmlLexContext::ProcessingInstruction,
+        "<?foo a?b c=d e=\"f\"?>",
+        PI_START: 2,
+        HTML_LITERAL: 3,
+        WHITESPACE: 1,
+        HTML_LITERAL: 3,
+        WHITESPACE: 1,
+        HTML_LITERAL: 1,
+        EQ: 1,
+        HTML_LITERAL: 1,
+        WHITESPACE: 1,
+        HTML_LITERAL: 1,
+        EQ: 1,
+        HTML_STRING_LITERAL: 3,
+        PI_END: 2,
+    }
+}
+
+#[test]
 fn element_with_attributes() {
     assert_lex! {
-        HtmlLexContext::InsideTag,
+        HtmlLexContext::InsideTag { framework: HtmlFramework::Plain },
         "<div class='joy and happiness'>",
         L_ANGLE: 1,
-        HTML_LITERAL: 3,
+        DIV_KW: 3,
         WHITESPACE: 1,
         HTML_LITERAL: 5,
         EQ:1,
@@ -212,10 +249,10 @@ fn element_with_attributes() {
 #[test]
 fn element_with_dashed_attributes() {
     assert_lex! {
-        HtmlLexContext::InsideTag,
+        HtmlLexContext::InsideTag { framework: HtmlFramework::Plain },
         "<div aria-hidden>",
         L_ANGLE: 1,
-        HTML_LITERAL: 3,
+        DIV_KW: 3,
         WHITESPACE: 1,
         HTML_LITERAL: 11,
         R_ANGLE: 1,
@@ -223,16 +260,53 @@ fn element_with_dashed_attributes() {
 }
 
 #[test]
+fn element_with_angular_attributes() {
+    assert_lex! {
+        HtmlLexContext::InsideTag { framework: HtmlFramework::Angular },
+        "<input (keyup)=\"x\" [disabled]=\"y\" [(ngModel)]=\"z\" *ngIf=\"c\" #tpl>",
+        L_ANGLE: 1,
+        INPUT_KW: 5,
+        WHITESPACE: 1,
+        L_PAREN: 1,
+        HTML_LITERAL: 5,
+        R_PAREN: 1,
+        EQ: 1,
+        HTML_STRING_LITERAL: 3,
+        WHITESPACE: 1,
+        L_BRACKET: 1,
+        HTML_LITERAL: 8,
+        R_BRACKET: 1,
+        EQ: 1,
+        HTML_STRING_LITERAL: 3,
+        WHITESPACE: 1,
+        L_BRACKET_PAREN: 2,
+        HTML_LITERAL: 7,
+        R_BRACKET_PAREN: 2,
+        EQ: 1,
+        HTML_STRING_LITERAL: 3,
+        WHITESPACE: 1,
+        STAR: 1,
+        HTML_LITERAL: 4,
+        EQ: 1,
+        HTML_STRING_LITERAL: 3,
+        WHITESPACE: 1,
+        HASH: 1,
+        HTML_LITERAL: 3,
+        R_ANGLE: 1,
+    }
+}
+
+#[test]
 fn html_element() {
     assert_lex! {
-        HtmlLexContext::InsideTag,
+        HtmlLexContext::InsideTag { framework: HtmlFramework::Plain },
         "<html></html>",
         L_ANGLE: 1,
-        HTML_LITERAL: 4,
+        HTML_KW: 4,
         R_ANGLE: 1,
         L_ANGLE: 1,
         SLASH: 1,
-        HTML_LITERAL: 4,
+        HTML_KW: 4,
         R_ANGLE: 1,
     }
 }
@@ -265,7 +339,7 @@ fn long_text() {
 #[test]
 fn text_trailing_whitespace() {
     assert_lex! {
-        HtmlLexContext::Regular,
+        HtmlLexContext::default(),
         "Lorem ipsum dolor <a",
         HTML_LITERAL: 17,
         WHITESPACE: 1,
@@ -277,7 +351,7 @@ fn text_trailing_whitespace() {
 #[test]
 fn text_trailing_whitespace_multiple() {
     assert_lex! {
-        HtmlLexContext::Regular,
+        HtmlLexContext::default(),
         "Lorem ipsum dolor  <a",
         HTML_LITERAL: 17,
         WHITESPACE: 2,
@@ -322,12 +396,32 @@ fn unquoted_attribute_value_invalid_chars() {
 }
 
 #[test]
-fn cdata_full() {
+fn cdata_start_in_regular_context() {
+    assert_lex! {
+        HtmlLexContext::Regular {
+            framework: HtmlFramework::Plain,
+        },
+        "<![CDATA[",
+        CDATA_START: 9,
+    }
+}
+
+#[test]
+fn cdata_content() {
     assert_lex! {
         HtmlLexContext::CdataSection,
-        "<![CDATA[1]]>",
-        CDATA_START: 9,
+        "1]]>",
         HTML_LITERAL: 1,
+        CDATA_END: 3,
+    }
+}
+
+#[test]
+fn cdata_start_in_content_is_literal() {
+    assert_lex! {
+        HtmlLexContext::CdataSection,
+        "<![CDATA[x]]>",
+        HTML_LITERAL: 10,
         CDATA_END: 3,
     }
 }
@@ -335,7 +429,7 @@ fn cdata_full() {
 #[test]
 fn svelte_openings() {
     assert_lex! {
-        HtmlLexContext::Regular,
+        HtmlLexContext::Regular { framework: HtmlFramework::Svelte },
         "{@debug}",
         SV_CURLY_AT: 2,
         DEBUG_KW: 5,
@@ -343,7 +437,7 @@ fn svelte_openings() {
     }
 
     assert_lex! {
-        HtmlLexContext::Regular,
+        HtmlLexContext::Regular { framework: HtmlFramework::Svelte },
         "{/debug}",
         SV_CURLY_SLASH: 2,
         DEBUG_KW: 5,
@@ -351,7 +445,7 @@ fn svelte_openings() {
     }
 
     assert_lex! {
-        HtmlLexContext::Regular,
+        HtmlLexContext::Regular { framework: HtmlFramework::Svelte },
         "{:debug}",
         SV_CURLY_COLON: 2,
         DEBUG_KW: 5,
@@ -359,11 +453,43 @@ fn svelte_openings() {
     }
 
     assert_lex! {
-        HtmlLexContext::Regular,
+        HtmlLexContext::Regular { framework: HtmlFramework::Svelte },
         "{#debug}",
         SV_CURLY_HASH: 2,
         DEBUG_KW: 5,
         R_CURLY: 1
+    }
+}
+
+#[test]
+fn svelte_openings_are_not_lexed_outside_svelte() {
+    assert_lex! {
+        HtmlLexContext::Regular { framework: HtmlFramework::Astro },
+        "{/debug}",
+        L_CURLY: 1,
+        HTML_LITERAL: 7,
+    }
+}
+
+#[test]
+fn curly_braces_depend_on_text_expression_options() {
+    assert_lex! {
+        HtmlLexContext::Regular { framework: HtmlFramework::Plain },
+        "{{",
+        HTML_LITERAL: 2,
+    }
+
+    assert_lex! {
+        HtmlLexContext::Regular { framework: HtmlFramework::Vue },
+        "{{",
+        L_DOUBLE_CURLY: 2,
+    }
+
+    assert_lex! {
+        HtmlLexContext::Regular { framework: HtmlFramework::Svelte },
+        "{{",
+        L_CURLY: 1,
+        L_CURLY: 1,
     }
 }
 
@@ -413,7 +539,7 @@ fn svelte_keywords() {
 #[test]
 fn svelte_line_comment_inside_tag() {
     assert_lex! {
-        HtmlLexContext::InsideTagSvelte,
+        HtmlLexContext::InsideTag { framework: HtmlFramework::Svelte },
         "// comment\n",
         COMMENT: 10,
         NEWLINE: 1,
@@ -423,7 +549,7 @@ fn svelte_line_comment_inside_tag() {
 #[test]
 fn svelte_line_comment_without_newline() {
     assert_lex! {
-        HtmlLexContext::InsideTagSvelte,
+        HtmlLexContext::InsideTag { framework: HtmlFramework::Svelte },
         "// comment",
         COMMENT: 10,
     }
@@ -432,7 +558,7 @@ fn svelte_line_comment_without_newline() {
 #[test]
 fn svelte_block_comment_single_line() {
     assert_lex! {
-        HtmlLexContext::InsideTagSvelte,
+        HtmlLexContext::InsideTag { framework: HtmlFramework::Svelte },
         "/* comment */",
         COMMENT: 13,
     }
@@ -441,7 +567,7 @@ fn svelte_block_comment_single_line() {
 #[test]
 fn svelte_block_comment_multiline() {
     assert_lex! {
-        HtmlLexContext::InsideTagSvelte,
+        HtmlLexContext::InsideTag { framework: HtmlFramework::Svelte },
         "/* line1\nline2 */",
         COMMENT: 17,
     }
@@ -450,7 +576,7 @@ fn svelte_block_comment_multiline() {
 #[test]
 fn plain_slash_inside_tag_not_a_comment() {
     assert_lex! {
-        HtmlLexContext::InsideTag,
+        HtmlLexContext::InsideTag { framework: HtmlFramework::Plain },
         "/",
         SLASH: 1,
     }
@@ -459,7 +585,7 @@ fn plain_slash_inside_tag_not_a_comment() {
 #[test]
 fn plain_double_slash_inside_tag_not_a_comment() {
     assert_lex! {
-        HtmlLexContext::InsideTag,
+        HtmlLexContext::InsideTag { framework: HtmlFramework::Plain },
         "//",
         SLASH: 1,
         SLASH: 1,
@@ -469,7 +595,7 @@ fn plain_double_slash_inside_tag_not_a_comment() {
 #[test]
 fn plain_slash_asterisk_inside_tag_not_a_comment() {
     assert_lex! {
-        HtmlLexContext::InsideTag,
+        HtmlLexContext::InsideTag { framework: HtmlFramework::Plain },
         "/*",
         SLASH: 1,
         HTML_LITERAL: 1,
@@ -479,7 +605,7 @@ fn plain_slash_asterisk_inside_tag_not_a_comment() {
 #[test]
 fn svelte_slash_remains_slash_in_svelte_context() {
     assert_lex! {
-        HtmlLexContext::InsideTagSvelte,
+        HtmlLexContext::InsideTag { framework: HtmlFramework::Svelte },
         "/",
         SLASH: 1,
     }
@@ -488,10 +614,151 @@ fn svelte_slash_remains_slash_in_svelte_context() {
 #[test]
 fn svelte_slash_after_comment() {
     assert_lex! {
-        HtmlLexContext::InsideTagSvelte,
+        HtmlLexContext::InsideTag { framework: HtmlFramework::Svelte },
         "// comment\n/",
         COMMENT: 10,
         NEWLINE: 1,
         SLASH: 1,
     }
+}
+
+#[test]
+fn known_html_tag_name_is_case_insensitive() {
+    assert_lex! {
+        HtmlLexContext::InsideTag { framework: HtmlFramework::Plain },
+        "<DIV>",
+        L_ANGLE: 1,
+        DIV_KW: 3,
+        R_ANGLE: 1,
+    }
+}
+
+#[test]
+fn tag_name_with_dash_is_a_component() {
+    assert_lex! {
+        HtmlLexContext::InsideTag { framework: HtmlFramework::Vue },
+        "<my-element>",
+        L_ANGLE: 1,
+        HTML_COMPONENT_LITERAL: 10,
+        R_ANGLE: 1,
+    }
+}
+
+#[test]
+fn known_svg_tag_name_is_case_sensitive() {
+    // SVG camelCase names are recognized by their exact spelling...
+    assert_lex! {
+        HtmlLexContext::InsideTag { framework: HtmlFramework::Plain },
+        "<feGaussianBlur>",
+        L_ANGLE: 1,
+        FE_GAUSSIAN_BLUR_KW: 14,
+        R_ANGLE: 1,
+    }
+
+    // ...but the all-lowercase spelling is not a known tag.
+    assert_lex! {
+        HtmlLexContext::InsideTag { framework: HtmlFramework::Plain },
+        "<fegaussianblur>",
+        L_ANGLE: 1,
+        HTML_UNKNOWN_TAG: 14,
+        R_ANGLE: 1,
+    }
+}
+
+#[test]
+fn known_mathml_tag_name_is_case_insensitive() {
+    assert_lex! {
+        HtmlLexContext::InsideTag { framework: HtmlFramework::Plain },
+        "<mfrac>",
+        L_ANGLE: 1,
+        MFRAC_KW: 5,
+        R_ANGLE: 1,
+    }
+
+    assert_lex! {
+        HtmlLexContext::InsideTag { framework: HtmlFramework::Plain },
+        "<MATH>",
+        L_ANGLE: 1,
+        MATH_KW: 4,
+        R_ANGLE: 1,
+    }
+
+    assert_lex! {
+        HtmlLexContext::InsideTag { framework: HtmlFramework::Vue },
+        "<mI>",
+        L_ANGLE: 1,
+        MI_KW: 2,
+        R_ANGLE: 1,
+    }
+}
+
+#[test]
+fn known_tag_name_with_dash_is_a_keyword() {
+    assert_lex! {
+        HtmlLexContext::InsideTag { framework: HtmlFramework::Plain },
+        "<ANNOTATION-XML>",
+        L_ANGLE: 1,
+        ANNOTATION_XML_KW: 14,
+        R_ANGLE: 1,
+    }
+
+    assert_lex! {
+        HtmlLexContext::InsideTag { framework: HtmlFramework::Vue },
+        "<annotation-xml>",
+        L_ANGLE: 1,
+        ANNOTATION_XML_KW: 14,
+        R_ANGLE: 1,
+    }
+
+    assert_lex! {
+        HtmlLexContext::InsideTag { framework: HtmlFramework::Svelte },
+        "<font-face>",
+        L_ANGLE: 1,
+        FONT_FACE_KW: 9,
+        R_ANGLE: 1,
+    }
+}
+
+#[test]
+fn pascal_case_mathml_tag_is_a_component_in_frameworks() {
+    assert_lex! {
+        HtmlLexContext::InsideTag { framework: HtmlFramework::Astro },
+        "<Math>",
+        L_ANGLE: 1,
+        HTML_COMPONENT_LITERAL: 4,
+        R_ANGLE: 1,
+    }
+
+    assert_lex! {
+        HtmlLexContext::InsideTag { framework: HtmlFramework::Vue },
+        "<Annotation-xml>",
+        L_ANGLE: 1,
+        HTML_COMPONENT_LITERAL: 14,
+        R_ANGLE: 1,
+    }
+}
+
+#[test]
+fn pascal_case_tag_is_a_component_in_frameworks() {
+    assert_lex! {
+        HtmlLexContext::InsideTag { framework: HtmlFramework::Vue },
+        "<Foo>",
+        L_ANGLE: 1,
+        HTML_COMPONENT_LITERAL: 3,
+        R_ANGLE: 1,
+    }
+}
+
+#[test]
+fn is_at_closing_tag_matches_only_the_whole_name() {
+    let is_at = |source, name| HtmlLexer::from_str(source).is_at_closing_tag(name);
+
+    assert!(is_at("</docs>", "docs"));
+    assert!(is_at("</DOCS>", "docs"));
+    assert!(is_at("</docs   >", "docs"));
+    // A longer name that merely starts with `docs` is a different tag.
+    assert!(!is_at("</docsy>", "docs"));
+    assert!(!is_at("</doc>", "docs"));
+    assert!(!is_at("<docs>", "docs"));
+    assert!(!is_at("nothing here", "docs"));
 }

@@ -25,48 +25,74 @@
 mod arguments;
 mod buffer;
 mod builders;
+#[cfg(feature = "rowan")]
 pub mod comments;
 pub mod diagnostics;
+#[cfg(debug_assertions)]
+mod format_audit;
 pub mod format_element;
 mod format_extensions;
 pub mod formatter;
 pub mod group_id;
 pub mod macros;
 pub mod prelude;
-#[cfg(debug_assertions)]
+#[cfg(all(debug_assertions, feature = "rowan"))]
 pub mod printed_tokens;
 pub mod printer;
+#[cfg(feature = "rowan")]
+pub mod rowan;
+#[cfg(feature = "rowan")]
 pub mod separated;
+mod source;
+#[cfg(feature = "rowan")]
 mod source_map;
 pub mod token;
+mod token_case;
+#[cfg(feature = "rowan")]
 pub mod trivia;
 
 use crate::formatter::Formatter;
 use crate::group_id::UniqueGroupIdBuilder;
-use crate::prelude::{Tag, TagKind};
+use crate::prelude::TagKind;
 use std::fmt;
 use std::fmt::{Debug, Display};
 
+#[cfg(feature = "rowan")]
 use crate::builders::syntax_token_cow_slice;
+#[cfg(feature = "rowan")]
 use crate::comments::{CommentStyle, Comments, SourceComment};
 pub use crate::diagnostics::{ActualStart, FormatError, InvalidDocumentError, PrintError};
-use crate::format_element::document::Document;
-use crate::format_element::{Interned, LineMode};
 #[cfg(debug_assertions)]
+use crate::format_audit::FormatAudit;
+use crate::format_element::document::Document;
+pub use crate::format_extensions::{
+    FormatScopedOptions, FormatScopedOptionsExt, FormatWithScopedOptions,
+};
+#[cfg(all(debug_assertions, feature = "rowan"))]
 use crate::printed_tokens::PrintedTokens;
 use crate::printer::{Printer, PrinterOptions};
+#[cfg(feature = "rowan")]
+use crate::rowan::RowanSource;
 pub use arguments::{Argument, Arguments};
+#[cfg(feature = "diagnostics")]
 use biome_console::markup;
+#[cfg(feature = "deserialize")]
 use biome_deserialize::{
     Deserializable, DeserializableValue, DeserializationContext, DeserializationDiagnostic,
     TextNumber,
 };
+#[cfg(feature = "deserialize")]
 use biome_deserialize_macros::Deserializable;
+#[cfg(feature = "deserialize")]
 use biome_deserialize_macros::Merge;
+#[cfg(feature = "rowan")]
 use biome_rowan::{
     Language, NodeOrToken, SyntaxElement, SyntaxNode, SyntaxNodeWithOffset, SyntaxResult,
-    SyntaxToken, SyntaxTriviaPiece, TextLen, TextRange, TextSize, TokenAtOffset,
+    SyntaxToken, SyntaxTriviaPiece, TokenAtOffset,
 };
+#[cfg(feature = "rowan")]
+use biome_text_size::TextLen;
+use biome_text_size::{TextRange, TextSize};
 pub use buffer::{
     Buffer, BufferExtensions, BufferSnapshot, Inspect, PreambleBuffer, RemoveSoftLinesBuffer,
     VecBuffer,
@@ -75,12 +101,19 @@ pub use builders::BestFitting;
 pub use format_element::{FormatElement, LINE_TERMINATORS, normalize_newlines};
 pub use group_id::GroupId;
 pub use printer::SourceMapGeneration;
+pub use source::{NoSourceMap, PlainSource, Source, SourceMap};
+#[cfg(feature = "rowan")]
 pub use source_map::{TransformSourceMap, TransformSourceMapBuilder};
+use std::marker::PhantomData;
 use std::num::ParseIntError;
 use std::str::FromStr;
 use token::string::Quote;
+#[cfg(feature = "rowan")]
+pub use token_case::FormatRuleWithTextCase;
+pub use token_case::{FormatTextCaseExt, TextCase};
 
-#[derive(Debug, Default, Clone, Copy, Deserializable, Eq, Hash, Merge, PartialEq)]
+#[derive(Debug, Default, Clone, Copy, Eq, Hash, PartialEq)]
+#[cfg_attr(feature = "deserialize", derive(Deserializable, Merge))]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Serialize, serde::Deserialize),
@@ -88,10 +121,10 @@ use token::string::Quote;
 )]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub enum IndentStyle {
-    /// Indent with Tab
+    /// Uses tabs for indentation.
     #[default]
     Tab,
-    /// Indent with Space
+    /// Uses spaces for indentation.
     Space,
 }
 
@@ -131,7 +164,8 @@ impl Display for IndentStyle {
     }
 }
 
-#[derive(Clone, Copy, Debug, Deserializable, Eq, Hash, Merge, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+#[cfg_attr(feature = "deserialize", derive(Deserializable, Merge))]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Serialize, serde::Deserialize),
@@ -283,14 +317,36 @@ impl std::fmt::Display for LineEnding {
     }
 }
 
-#[derive(Clone, Copy, Eq, Merge, Hash, PartialEq)]
+/// Sets the indentation width. With space indentation, this is the number of spaces emitted per
+/// indentation level. With tab indentation, Biome emits one tab per level and uses this value as the
+/// tab's display width when calculating line length.
+///
+/// Accepted values range from 0 through 24.
+#[derive(Clone, Copy, Eq, Hash, PartialEq)]
+#[cfg_attr(feature = "deserialize", derive(Merge))]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Serialize),
     serde(rename_all = "camelCase")
 )]
-#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct IndentWidth(u8);
+
+#[cfg(feature = "schema")]
+impl schemars::JsonSchema for IndentWidth {
+    fn schema_name() -> std::borrow::Cow<'static, str> {
+        std::borrow::Cow::Borrowed("IndentWidth")
+    }
+
+    fn json_schema(_generator: &mut schemars::SchemaGenerator) -> schemars::Schema {
+        schemars::json_schema!({
+            "description": "Sets the indentation width. With space indentation, this is the number of spaces emitted per\nindentation level. With tab indentation, Biome emits one tab per level and uses this value as the\ntab's display width when calculating line length.\n\nAccepted values range from 0 through 24.",
+            "type": "integer",
+            "format": "uint8",
+            "minimum": Self::MIN,
+            "maximum": Self::MAX
+        })
+    }
+}
 
 impl IndentWidth {
     pub const MIN: u8 = 0;
@@ -309,10 +365,11 @@ impl Default for IndentWidth {
     }
 }
 
+#[cfg(feature = "deserialize")]
 impl Deserializable for IndentWidth {
-    fn deserialize(
-        ctx: &mut impl DeserializationContext,
-        value: &impl DeserializableValue,
+    fn deserialize<V: DeserializableValue>(
+        ctx: &mut dyn DeserializationContext<State = V::State>,
+        value: &V,
         name: &str,
     ) -> Option<Self> {
         let value_text = TextNumber::deserialize(ctx, value, name)?;
@@ -362,6 +419,7 @@ impl TryFrom<u8> for IndentWidth {
     }
 }
 
+#[cfg(feature = "diagnostics")]
 impl biome_console::fmt::Display for IndentWidth {
     fn fmt(&self, fmt: &mut biome_console::fmt::Formatter) -> std::io::Result<()> {
         fmt.write_markup(markup! {{self.value()}})
@@ -381,17 +439,35 @@ impl Debug for IndentWidth {
     }
 }
 
-/// Validated value for the `line_width` formatter options
+/// Sets the preferred maximum line width used when deciding where to wrap code. Some content, such
+/// as long unbreakable strings, may still exceed this width.
 ///
-/// The allowed range of values is 1..=320
-#[derive(Clone, Copy, Eq, Merge, PartialEq)]
+/// Accepted values range from 1 through 320.
+#[derive(Clone, Copy, Eq, PartialEq)]
+#[cfg_attr(feature = "deserialize", derive(Merge))]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Serialize),
     serde(rename_all = "camelCase")
 )]
-#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct LineWidth(u16);
+
+#[cfg(feature = "schema")]
+impl schemars::JsonSchema for LineWidth {
+    fn schema_name() -> std::borrow::Cow<'static, str> {
+        std::borrow::Cow::Borrowed("LineWidth")
+    }
+
+    fn json_schema(_generator: &mut schemars::SchemaGenerator) -> schemars::Schema {
+        schemars::json_schema!({
+            "description": "Sets the preferred maximum line width used when deciding where to wrap code. Some content, such\nas long unbreakable strings, may still exceed this width.\n\nAccepted values range from 1 through 320.",
+            "type": "integer",
+            "format": "uint16",
+            "minimum": Self::MIN,
+            "maximum": Self::MAX
+        })
+    }
+}
 
 impl LineWidth {
     /// Minimum allowed value for a valid [LineWidth]
@@ -411,10 +487,11 @@ impl Default for LineWidth {
     }
 }
 
+#[cfg(feature = "deserialize")]
 impl Deserializable for LineWidth {
-    fn deserialize(
-        ctx: &mut impl DeserializationContext,
-        value: &impl DeserializableValue,
+    fn deserialize<V: DeserializableValue>(
+        ctx: &mut dyn DeserializationContext<State = V::State>,
+        value: &V,
         name: &str,
     ) -> Option<Self> {
         let value_text = TextNumber::deserialize(ctx, value, name)?;
@@ -442,6 +519,7 @@ impl<'de> serde::Deserialize<'de> for LineWidth {
     }
 }
 
+#[cfg(feature = "diagnostics")]
 impl biome_console::fmt::Display for LineWidth {
     fn fmt(&self, fmt: &mut biome_console::fmt::Formatter) -> std::io::Result<()> {
         fmt.write_markup(markup! {{self.0}})
@@ -571,7 +649,8 @@ impl From<LineWidth> for u16 {
     }
 }
 
-#[derive(Clone, Copy, Debug, Default, Deserializable, Eq, Hash, Merge, PartialEq)]
+#[derive(Clone, Copy, Debug, Default, Eq, Hash, PartialEq)]
+#[cfg_attr(feature = "deserialize", derive(Deserializable, Merge))]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Serialize, serde::Deserialize),
@@ -656,7 +735,8 @@ impl From<QuoteStyle> for Quote {
     }
 }
 
-#[derive(Clone, Copy, Debug, Deserializable, Eq, Hash, Merge, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+#[cfg_attr(feature = "deserialize", derive(Deserializable, Merge))]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Serialize, serde::Deserialize),
@@ -690,6 +770,7 @@ impl std::fmt::Display for BracketSpacing {
     }
 }
 
+#[cfg(feature = "diagnostics")]
 impl biome_console::fmt::Display for BracketSpacing {
     fn fmt(&self, fmt: &mut biome_console::fmt::Formatter) -> std::io::Result<()> {
         fmt.write_str(&self.0.to_string())
@@ -711,7 +792,65 @@ impl FromStr for BracketSpacing {
     }
 }
 
-#[derive(Clone, Copy, Debug, Default, Deserializable, Eq, Hash, Merge, PartialEq)]
+/// Whether to insert spaces inside delimiters (after the opening delimiter and before the closing
+/// delimiter), such as parentheses, brackets, angle brackets, and template literal interpolations.
+/// Spaces are not added before the opening delimiter, and empty delimiters are not affected.
+/// Only applies when the content fits on a single line; when content breaks across multiple lines,
+/// no extra spaces are added. The specific delimiters affected depend on the language.
+#[derive(Clone, Copy, Debug, Default, Eq, Hash, PartialEq)]
+#[cfg_attr(feature = "deserialize", derive(Deserializable, Merge))]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Serialize, serde::Deserialize),
+    serde(rename_all = "camelCase")
+)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+pub struct DelimiterSpacing(bool);
+
+impl DelimiterSpacing {
+    /// Return the boolean value for this [DelimiterSpacing]
+    pub fn value(&self) -> bool {
+        self.0
+    }
+}
+
+impl From<bool> for DelimiterSpacing {
+    fn from(value: bool) -> Self {
+        Self(value)
+    }
+}
+
+impl std::fmt::Display for DelimiterSpacing {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::write!(f, "{:?}", self.value())
+    }
+}
+
+#[cfg(feature = "diagnostics")]
+impl biome_console::fmt::Display for DelimiterSpacing {
+    fn fmt(&self, fmt: &mut biome_console::fmt::Formatter) -> std::io::Result<()> {
+        fmt.write_str(&self.0.to_string())
+    }
+}
+
+impl FromStr for DelimiterSpacing {
+    type Err = &'static str;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let value = bool::from_str(s);
+
+        match value {
+            Ok(value) => Ok(Self(value)),
+            Err(_) => Err(
+                "Value not supported for DelimiterSpacing. Supported values are 'true' and 'false'.",
+            ),
+        }
+    }
+}
+
+/// Controls attribute placement in HTML-like languages.
+#[derive(Clone, Copy, Debug, Default, Eq, Hash, PartialEq)]
+#[cfg_attr(feature = "deserialize", derive(Deserializable, Merge))]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Serialize, serde::Deserialize),
@@ -719,8 +858,10 @@ impl FromStr for BracketSpacing {
 )]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub enum AttributePosition {
+    /// Places attributes automatically and wraps them when needed.
     #[default]
     Auto,
+    /// Places each attribute on its own line when an element has multiple attributes.
     Multiline,
 }
 
@@ -747,8 +888,12 @@ impl FromStr for AttributePosition {
     }
 }
 
-/// Put the `>` of a multi-line HTML or JSX element at the end of the last line instead of being alone on the next line (does not apply to self closing elements).
-#[derive(Clone, Copy, Debug, Default, Deserializable, Eq, Hash, Merge, PartialEq)]
+/// Controls the placement of the closing bracket for multiline HTML and JSX opening tags. Biome
+/// places the bracket at the end of the last attribute line when enabled and on its own line after
+/// the last attribute when disabled. This option also affects self-closing HTML elements, but
+/// self-closing JSX elements are unaffected.
+#[derive(Clone, Copy, Debug, Default, Eq, Hash, PartialEq)]
+#[cfg_attr(feature = "deserialize", derive(Deserializable, Merge))]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Serialize, serde::Deserialize),
@@ -789,7 +934,8 @@ impl FromStr for BracketSameLine {
     }
 }
 
-#[derive(Clone, Copy, Debug, Eq, Hash, Deserializable, Merge, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+#[cfg_attr(feature = "deserialize", derive(Deserializable, Merge))]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Serialize, serde::Deserialize),
@@ -836,7 +982,8 @@ impl FromStr for TrailingNewline {
     }
 }
 
-#[derive(Clone, Copy, Debug, Default, Eq, Hash, Deserializable, Merge, PartialEq)]
+#[derive(Clone, Copy, Debug, Default, Eq, Hash, PartialEq)]
+#[cfg_attr(feature = "deserialize", derive(Deserializable, Merge))]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Serialize, serde::Deserialize),
@@ -844,13 +991,13 @@ impl FromStr for TrailingNewline {
 )]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub enum Expand {
-    /// Objects are expanded when the first property has a leading newline. Arrays are always
-    /// expanded if they are shorter than the line width.
+    /// Objects are expanded when the first property has a leading newline. Arrays remain on one
+    /// line if they fit.
     #[default]
     Auto,
     /// Objects and arrays are always expanded.
     Always,
-    /// Objects and arrays are never expanded, if they are shorter than the line width.
+    /// Objects and arrays remain on one line if they fit.
     Never,
 }
 
@@ -880,15 +1027,19 @@ impl fmt::Display for Expand {
 pub trait FormatContext {
     type Options: FormatOptions;
 
+    /// The source code that this context formats. It sets the types that the
+    /// document uses to point back to the source code.
+    type Source: Source;
+
     /// Returns the formatting options
     fn options(&self) -> &Self::Options;
 
-    /// Returns [None] if the CST has not been pre-processed.
+    /// Returns [None] if the source has not been pre-processed.
     ///
-    /// Returns [Some] if the CST has been pre-processed to simplify formatting.
+    /// Returns [Some] if the source has been pre-processed to simplify formatting.
     /// The source map can be used to map positions of the formatted nodes back to their original
     /// source locations or to resolve the source text.
-    fn source_map(&self) -> Option<&TransformSourceMap>;
+    fn source_map(&self) -> Option<&<Self::Source as Source>::SourceMap>;
 }
 
 /// Options customizing how the source code should be formatted.
@@ -917,11 +1068,12 @@ pub trait FormatOptions {
     fn as_print_options(&self) -> PrinterOptions;
 }
 
+#[cfg(feature = "rowan")]
 /// The [CstFormatContext] is an extension of the CST unaware [FormatContext] and must be implemented
 /// by every language.
 ///
 /// The context customizes the comments formatting and stores the comments of the CST.
-pub trait CstFormatContext: FormatContext {
+pub trait CstFormatContext: FormatContext<Source = RowanSource> {
     type Language: Language;
     type Style: CommentStyle<Language = Self::Language>;
 
@@ -932,25 +1084,46 @@ pub trait CstFormatContext: FormatContext {
     fn comments(&self) -> &Comments<Self::Language>;
 }
 
-#[derive(Debug, Default, Eq, PartialEq)]
-pub struct SimpleFormatContext {
+/// A context that only holds the options needed to print a document.
+///
+/// `S` is the source of the document. [Default] and [Self::new] create a
+/// context for [PlainSource]; use [Self::from_options] for any other source.
+#[derive(Debug, Eq, PartialEq)]
+pub struct SimpleFormatContext<S = PlainSource> {
     options: SimpleFormatOptions,
+    source: PhantomData<S>,
 }
 
 impl SimpleFormatContext {
     pub fn new(options: SimpleFormatOptions) -> Self {
-        Self { options }
+        Self::from_options(options)
     }
 }
 
-impl FormatContext for SimpleFormatContext {
+impl<S> SimpleFormatContext<S> {
+    pub fn from_options(options: SimpleFormatOptions) -> Self {
+        Self {
+            options,
+            source: PhantomData,
+        }
+    }
+}
+
+impl Default for SimpleFormatContext {
+    fn default() -> Self {
+        Self::new(SimpleFormatOptions::default())
+    }
+}
+
+impl<S: Source> FormatContext for SimpleFormatContext<S> {
     type Options = SimpleFormatOptions;
+    type Source = S;
 
     fn options(&self) -> &Self::Options {
         &self.options
     }
 
-    fn source_map(&self) -> Option<&TransformSourceMap> {
+    fn source_map(&self) -> Option<&S::SourceMap> {
         None
     }
 }
@@ -1004,21 +1177,21 @@ impl Display for SimpleFormatOptions {
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
-pub struct SourceMarker {
+pub struct SourceMarker<P> {
     /// Position of the marker in the original source
-    pub source: TextSize,
+    pub source: P,
     /// Position of the marker in the output code
-    pub dest: TextSize,
+    pub dest: P,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
-pub struct Formatted<Context> {
-    document: Document,
+pub struct Formatted<Context: FormatContext> {
+    document: Document<Context::Source>,
     context: Context,
 }
 
-impl<Context> Formatted<Context> {
-    pub fn new(document: Document, context: Context) -> Self {
+impl<Context: FormatContext> Formatted<Context> {
+    pub fn new(document: Document<Context::Source>, context: Context) -> Self {
         Self { document, context }
     }
 
@@ -1027,37 +1200,16 @@ impl<Context> Formatted<Context> {
         &self.context
     }
 
-    /// Visits each embedded element and replaces it with elements contained inside the [Document]
-    /// emitted by `fn_format_embedded`
+    /// Replaces the content of each embedded element with the [Document] returned by
+    /// `fn_format_embedded` for the element's key.
+    ///
+    /// When `fn_format_embedded` returns `None`, the element keeps the content the host
+    /// formatter wrote for it.
     pub fn format_embedded<F>(&mut self, mut fn_format_embedded: F)
     where
-        F: FnMut(TextRange) -> Option<Document>,
+        F: FnMut(<Context::Source as Source>::EmbeddedKey) -> Option<Document<Context::Source>>,
     {
-        let mut last_start_resolved = false;
-        self.document.transform(move |element| match element {
-            FormatElement::Tag(Tag::StartEmbedded(range)) => match fn_format_embedded(*range) {
-                Some(document) => {
-                    last_start_resolved = true;
-                    Some(FormatElement::Interned(Interned::new(
-                        document.into_elements(),
-                    )))
-                }
-                None => {
-                    // Keep the StartEmbedded tag so it stays paired with EndEmbedded.
-                    last_start_resolved = false;
-                    None
-                }
-            },
-            FormatElement::Tag(Tag::EndEmbedded) => {
-                if last_start_resolved {
-                    Some(FormatElement::Line(LineMode::Hard))
-                } else {
-                    // Keep EndEmbedded paired with the unresolved StartEmbedded.
-                    None
-                }
-            }
-            _ => None,
-        });
+        self.document.replace_embedded(&mut fn_format_embedded);
     }
 
     /// Propagates the expand flags through the document.
@@ -1069,25 +1221,20 @@ impl<Context> Formatted<Context> {
     }
 
     /// Returns the formatted document.
-    pub fn document(&self) -> &Document {
+    pub fn document(&self) -> &Document<Context::Source> {
         &self.document
     }
 
     /// Consumes `self` and returns the formatted document.
-    pub fn into_document(self) -> Document {
+    pub fn into_document(self) -> Document<Context::Source> {
         self.document
     }
 
-    pub fn swap_document(&mut self, document: Document) {
+    pub fn swap_document(&mut self, document: Document<Context::Source>) {
         self.document = document;
     }
-}
 
-impl<Context> Formatted<Context>
-where
-    Context: FormatContext,
-{
-    pub fn print(&self) -> PrintResult<Printed> {
+    pub fn print(&self) -> PrintResult<Printed<Context::Source>> {
         let print_options = self.context.options().as_print_options();
 
         let printed = Printer::new(print_options).print(&self.document)?;
@@ -1111,7 +1258,7 @@ where
         &self,
         indent: u16,
         source_map: SourceMapGeneration,
-    ) -> PrintResult<Printed> {
+    ) -> PrintResult<Printed<Context::Source>> {
         let print_options = self
             .context
             .options()
@@ -1136,26 +1283,40 @@ where
 }
 pub type PrintResult<T> = Result<T, PrintError>;
 
+/// The code printed for a document of source `S`.
+///
+/// Positions and ranges use the types of `S`, including the positions in the
+/// printed code.
 #[derive(Debug, Clone, Eq, PartialEq)]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Serialize, serde::Deserialize),
-    serde(rename_all = "camelCase")
+    serde(
+        rename_all = "camelCase",
+        bound(
+            serialize = "S::Position: serde::Serialize, S::Span: serde::Serialize",
+            deserialize = "S::Position: serde::Deserialize<'de>, S::Span: serde::Deserialize<'de>"
+        )
+    )
 )]
-#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
-pub struct Printed {
+#[cfg_attr(
+    feature = "schema",
+    derive(schemars::JsonSchema),
+    schemars(bound = "S::Position: schemars::JsonSchema, S::Span: schemars::JsonSchema")
+)]
+pub struct Printed<S: Source> {
     code: String,
-    range: Option<TextRange>,
-    sourcemap: Vec<SourceMarker>,
-    verbatim_ranges: Vec<TextRange>,
+    range: Option<S::Span>,
+    sourcemap: Vec<SourceMarker<S::Position>>,
+    verbatim_ranges: Vec<S::Span>,
 }
 
-impl Printed {
+impl<S: Source> Printed<S> {
     pub fn new(
         code: String,
-        range: Option<TextRange>,
-        sourcemap: Vec<SourceMarker>,
-        verbatim_source: Vec<TextRange>,
+        range: Option<S::Span>,
+        sourcemap: Vec<SourceMarker<S::Position>>,
+        verbatim_source: Vec<S::Span>,
     ) -> Self {
         Self {
             code,
@@ -1175,28 +1336,28 @@ impl Printed {
         }
     }
 
-    /// [TextRange] of the input source file covered by this formatted code,
+    /// Range of the input source file covered by this formatted code,
     /// or [None] if the entire file is covered in this instance
-    pub fn range(&self) -> Option<TextRange> {
-        self.range
+    pub fn range(&self) -> Option<S::Span> {
+        self.range.clone()
     }
 
-    /// Returns a list of [SourceMarker] mapping byte positions
+    /// Returns a list of [SourceMarker] mapping positions
     /// in the output string to the input source code.
     /// It's not guaranteed that the markers are sorted by source position.
-    pub fn sourcemap(&self) -> &[SourceMarker] {
+    pub fn sourcemap(&self) -> &[SourceMarker<S::Position>] {
         &self.sourcemap
     }
 
-    /// Returns a list of [SourceMarker] mapping byte positions
+    /// Returns a list of [SourceMarker] mapping positions
     /// in the output string to the input source code, consuming the result
-    pub fn into_sourcemap(self) -> Vec<SourceMarker> {
+    pub fn into_sourcemap(self) -> Vec<SourceMarker<S::Position>> {
         self.sourcemap
     }
 
-    /// Takes the list of [SourceMarker] mapping byte positions in the output string
+    /// Takes the list of [SourceMarker] mapping positions in the output string
     /// to the input source code.
-    pub fn take_sourcemap(&mut self) -> Vec<SourceMarker> {
+    pub fn take_sourcemap(&mut self) -> Vec<SourceMarker<S::Position>> {
         std::mem::take(&mut self.sourcemap)
     }
 
@@ -1210,20 +1371,13 @@ impl Printed {
         self.code
     }
 
-    /// The text in the formatted code that has been formatted as verbatim.
-    pub fn verbatim(&self) -> impl Iterator<Item = (TextRange, &str)> {
-        self.verbatim_ranges
-            .iter()
-            .map(|range| (*range, &self.code[*range]))
-    }
-
     /// Ranges of the formatted code that have been formatted as verbatim.
-    pub fn verbatim_ranges(&self) -> &[TextRange] {
+    pub fn verbatim_ranges(&self) -> &[S::Span] {
         &self.verbatim_ranges
     }
 
     /// Takes the ranges of nodes that have been formatted as verbatim, replacing them with an empty list.
-    pub fn take_verbatim_ranges(&mut self) -> Vec<TextRange> {
+    pub fn take_verbatim_ranges(&mut self) -> Vec<S::Span> {
         std::mem::take(&mut self.verbatim_ranges)
     }
 
@@ -1258,7 +1412,7 @@ pub type FormatResult<F> = Result<F, FormatError>;
 ///     fn fmt(&self, f: &mut Formatter<SimpleFormatContext>) -> FormatResult<()> {
 ///         write!(f, [
 ///             hard_line_break(),
-///             text(&self.0, TextSize::from(0)),
+///             text(&self.0, None),
 ///             hard_line_break(),
 ///         ])
 ///     }
@@ -1309,6 +1463,7 @@ where
     }
 }
 
+#[cfg(feature = "rowan")]
 impl<T, Context> Format<Context> for SyntaxResult<T>
 where
     T: Format<Context>,
@@ -1536,7 +1691,7 @@ where
 /// ```
 ///
 #[inline(always)]
-pub fn write<Context>(
+pub fn write<Context: FormatContext>(
     output: &mut dyn Buffer<Context = Context>,
     args: Arguments<Context>,
 ) -> FormatResult<()> {
@@ -1590,10 +1745,12 @@ where
 
     let mut document = Document::from(buffer.into_vec());
     document.propagate_expand();
+    state.assert_no_audit_events();
 
     Ok(Formatted::new(document, state.into_context()))
 }
 
+#[cfg(feature = "rowan")]
 /// Entry point for formatting a [SyntaxNode] for a specific language.
 pub trait FormatLanguage {
     type SyntaxLanguage: Language;
@@ -1636,16 +1793,34 @@ pub trait FormatLanguage {
     ) -> Self::Context;
 }
 
+#[cfg(feature = "rowan")]
 /// Formats a syntax node file based on its features.
 ///
 /// It returns a [Formatted] result, which the user can use to override a file.
 ///
-/// When `skip_embedded_nodes` is `true`, the content of `<script>` and `<style` is formatted
-/// verbatim.
+/// `delegate_fmt_embedded_nodes` is forwarded to [FormatLanguage::create_context]. Languages that
+/// support embedded code can use it to write that code as [crate::builders::FormatEmbedded]
+/// elements, whose content the caller can replace with [Formatted::format_embedded].
 pub fn format_node<L: FormatLanguage>(
     root: &SyntaxNode<L::SyntaxLanguage>,
     language: L,
     delegate_fmt_embedded_nodes: bool,
+) -> FormatResult<Formatted<L::Context>> {
+    format_node_with_source_map_generation(
+        root,
+        language,
+        delegate_fmt_embedded_nodes,
+        SourceMapGeneration::Disabled,
+    )
+}
+
+#[cfg(feature = "rowan")]
+/// Formats a syntax node while configuring whether source positions are stored in the IR.
+pub fn format_node_with_source_map_generation<L: FormatLanguage>(
+    root: &SyntaxNode<L::SyntaxLanguage>,
+    language: L,
+    delegate_fmt_embedded_nodes: bool,
+    source_map_generation: SourceMapGeneration,
 ) -> FormatResult<Formatted<L::Context>> {
     let (root, source_map) = match language.transform(root) {
         Some((transformed, source_map)) => {
@@ -1694,7 +1869,7 @@ pub fn format_node<L: FormatLanguage>(
     let context = language.create_context(&root, source_map, delegate_fmt_embedded_nodes);
     let format_node = FormatRefWithRule::new(&root, L::FormatRule::default());
 
-    let mut state = FormatState::new(context);
+    let mut state = FormatState::new_with_source_map_generation(context, source_map_generation);
     let mut buffer = VecBuffer::new(&mut state);
 
     write!(buffer, [format_node])?;
@@ -1703,6 +1878,7 @@ pub fn format_node<L: FormatLanguage>(
     document.propagate_expand();
 
     state.assert_formatted_all_tokens(&root);
+    state.assert_no_audit_events();
 
     let context = state.into_context();
     let comments = context.comments();
@@ -1713,6 +1889,7 @@ pub fn format_node<L: FormatLanguage>(
     Ok(Formatted::new(document, context))
 }
 
+#[cfg(feature = "rowan")]
 /// Formats a syntax node file based on its features.
 ///
 /// It returns a [Formatted] result, which the user can use to override a file.
@@ -1769,7 +1946,8 @@ pub fn format_node_with_offset<L: FormatLanguage>(
     let context = language.create_context(&root, source_map, delegate_fmt_embedded_nodes);
     let format_node = FormatRefWithRule::new(&root, L::FormatRule::default());
 
-    let mut state = FormatState::new(context);
+    let mut state =
+        FormatState::new_with_source_map_generation(context, SourceMapGeneration::Disabled);
     let mut buffer = VecBuffer::new(&mut state);
 
     write!(buffer, [format_node])?;
@@ -1778,6 +1956,7 @@ pub fn format_node_with_offset<L: FormatLanguage>(
     document.propagate_expand();
 
     state.assert_formatted_all_tokens(&root);
+    state.assert_no_audit_events();
 
     let context = state.into_context();
     let comments = context.comments();
@@ -1788,6 +1967,7 @@ pub fn format_node_with_offset<L: FormatLanguage>(
     Ok(Formatted::new(document, context))
 }
 
+#[cfg(feature = "rowan")]
 /// Returns the [TextRange] for this [SyntaxElement] with the leading and
 /// trailing whitespace trimmed (but keeping comments or skipped trivias)
 fn text_non_whitespace_range<E, L>(elem: &E) -> TextRange
@@ -1826,6 +2006,7 @@ where
     TextRange::new(start, end)
 }
 
+#[cfg(feature = "rowan")]
 /// Formats a range within a file, supported by Biome
 ///
 /// This runs a simple heuristic to determine the initial indentation
@@ -1841,7 +2022,7 @@ pub fn format_range<Language: FormatLanguage>(
     root: &SyntaxNode<Language::SyntaxLanguage>,
     mut range: TextRange,
     language: Language,
-) -> FormatResult<Printed> {
+) -> FormatResult<Printed<RowanSource>> {
     if range.is_empty() {
         return Ok(Printed::new(
             String::new(),
@@ -1997,8 +2178,8 @@ pub fn format_range<Language: FormatLanguage>(
     // starting before or at said starting point, and the closest
     // marker to the end of the source range starting after or at
     // said ending point respectively
-    let mut range_start: Option<&SourceMarker> = None;
-    let mut range_end: Option<&SourceMarker> = None;
+    let mut range_start: Option<&SourceMarker<TextSize>> = None;
+    let mut range_end: Option<&SourceMarker<TextSize>> = None;
 
     let sourcemap = printed.sourcemap();
     for marker in sourcemap {
@@ -2092,6 +2273,7 @@ pub fn format_range<Language: FormatLanguage>(
     ))
 }
 
+#[cfg(feature = "rowan")]
 /// Formats a single node within a file, supported by Biome.
 ///
 /// This runs a simple heuristic to determine the initial indentation
@@ -2105,7 +2287,7 @@ pub fn format_range<Language: FormatLanguage>(
 pub fn format_sub_tree<L: FormatLanguage>(
     root: &SyntaxNode<L::SyntaxLanguage>,
     language: L,
-) -> FormatResult<Printed> {
+) -> FormatResult<Printed<RowanSource>> {
     // Determine the initial indentation level for the printer by inspecting the trivia pieces
     // of each token from the first token of the common root towards the start of the file
     let mut tokens = std::iter::successors(root.first_token(), |token| token.prev_token());
@@ -2155,7 +2337,12 @@ pub fn format_sub_tree<L: FormatLanguage>(
         None => 0,
     };
 
-    let formatted = format_node(root, language, false)?;
+    let formatted = format_node_with_source_map_generation(
+        root,
+        language,
+        false,
+        SourceMapGeneration::Enabled,
+    )?;
     let mut printed = formatted.print_with_indent(initial_indent, SourceMapGeneration::Enabled)?;
     let sourcemap = printed.take_sourcemap();
     let verbatim_ranges = printed.take_verbatim_ranges();
@@ -2168,7 +2355,12 @@ pub fn format_sub_tree<L: FormatLanguage>(
     ))
 }
 
-impl<L: Language, Context> Format<Context> for SyntaxTriviaPiece<L> {
+#[cfg(feature = "rowan")]
+impl<L, Context> Format<Context> for SyntaxTriviaPiece<L>
+where
+    L: Language,
+    Context: FormatContext<Source = RowanSource>,
+{
     fn fmt(&self, f: &mut Formatter<Context>) -> FormatResult<()> {
         let range = self.text_range();
 
@@ -2197,11 +2389,14 @@ pub struct FormatState<Context> {
     context: Context,
 
     group_id_builder: UniqueGroupIdBuilder,
+    source_map_generation: SourceMapGeneration,
 
     // This is using a RefCell as it only exists in debug mode,
     // the Formatter is still completely immutable in release builds
-    #[cfg(debug_assertions)]
+    #[cfg(all(debug_assertions, feature = "rowan"))]
     pub printed_tokens: PrintedTokens,
+    #[cfg(debug_assertions)]
+    format_audit: FormatAudit,
 }
 
 impl<Context> std::fmt::Debug for FormatState<Context>
@@ -2218,12 +2413,22 @@ where
 impl<Context> FormatState<Context> {
     /// Creates a new state with the given language specific context
     pub fn new(context: Context) -> Self {
+        Self::new_with_source_map_generation(context, SourceMapGeneration::Enabled)
+    }
+
+    pub fn new_with_source_map_generation(
+        context: Context,
+        source_map_generation: SourceMapGeneration,
+    ) -> Self {
         Self {
             context,
             group_id_builder: Default::default(),
+            source_map_generation,
 
-            #[cfg(debug_assertions)]
+            #[cfg(all(debug_assertions, feature = "rowan"))]
             printed_tokens: Default::default(),
+            #[cfg(debug_assertions)]
+            format_audit: Default::default(),
         }
     }
 
@@ -2234,6 +2439,10 @@ impl<Context> FormatState<Context> {
     /// Returns the context specifying how to format the current CST
     pub fn context(&self) -> &Context {
         &self.context
+    }
+
+    pub const fn source_map_generation(&self) -> SourceMapGeneration {
+        self.source_map_generation
     }
 
     /// Returns a mutable reference to the context
@@ -2248,12 +2457,12 @@ impl<Context> FormatState<Context> {
         self.group_id_builder.group_id(debug_name)
     }
 
-    #[cfg(not(debug_assertions))]
+    #[cfg(all(not(debug_assertions), feature = "rowan"))]
     #[inline]
     pub fn track_token<L: Language>(&mut self, _token: &SyntaxToken<L>) {}
 
     /// Tracks the given token as formatted
-    #[cfg(debug_assertions)]
+    #[cfg(all(debug_assertions, feature = "rowan"))]
     #[inline]
     pub fn track_token<L: Language>(&mut self, token: &SyntaxToken<L>) {
         self.printed_tokens.track_token(token);
@@ -2261,37 +2470,59 @@ impl<Context> FormatState<Context> {
 
     #[cfg(not(debug_assertions))]
     #[inline]
+    pub fn record_audit_event(&mut self, _event: impl Into<String>) {}
+
+    /// Records a formatter audit event that must be resolved before formatting completes.
+    #[cfg(debug_assertions)]
+    #[inline]
+    pub fn record_audit_event(&mut self, event: impl Into<String>) {
+        self.format_audit.record_event(event);
+    }
+
+    #[cfg(not(all(debug_assertions, feature = "rowan")))]
+    #[inline]
     pub fn set_token_tracking_disabled(&mut self, _: bool) {}
 
     /// Disables or enables token tracking for a portion of the code.
     ///
     /// It can be useful to disable the token tracking when it is necessary to re-format a node with different parameters.
-    #[cfg(debug_assertions)]
+    #[cfg(all(debug_assertions, feature = "rowan"))]
     pub fn set_token_tracking_disabled(&mut self, enabled: bool) {
         self.printed_tokens.set_disabled(enabled)
     }
 
-    #[cfg(not(debug_assertions))]
+    #[cfg(not(all(debug_assertions, feature = "rowan")))]
     #[inline]
     pub fn is_token_tracking_disabled(&self) -> bool {
         false
     }
 
     /// Returns `true` if token tracking is currently disabled.
-    #[cfg(debug_assertions)]
+    #[cfg(all(debug_assertions, feature = "rowan"))]
     pub fn is_token_tracking_disabled(&self) -> bool {
         self.printed_tokens.is_disabled()
     }
 
-    #[cfg(not(debug_assertions))]
+    #[cfg(all(not(debug_assertions), feature = "rowan"))]
     #[inline]
     pub fn assert_formatted_all_tokens<L: Language>(&self, _root: &SyntaxNode<L>) {}
 
     /// Asserts in debug builds that all tokens have been printed.
-    #[cfg(debug_assertions)]
+    #[cfg(all(debug_assertions, feature = "rowan"))]
     #[inline]
     pub fn assert_formatted_all_tokens<L: Language>(&self, root: &SyntaxNode<L>) {
         self.printed_tokens.assert_all_tracked(root);
+    }
+
+    #[cfg(not(debug_assertions))]
+    #[inline]
+    pub fn assert_no_audit_events(&self) {}
+
+    /// Asserts in debug builds that no formatter audit events were recorded.
+    #[cfg(debug_assertions)]
+    #[inline]
+    pub fn assert_no_audit_events(&self) {
+        self.format_audit.assert_no_events();
     }
 }
 
@@ -2301,37 +2532,496 @@ where
 {
     pub fn snapshot(&self) -> FormatStateSnapshot {
         FormatStateSnapshot {
-            #[cfg(debug_assertions)]
+            #[cfg(all(debug_assertions, feature = "rowan"))]
             printed_tokens: self.printed_tokens.snapshot(),
+            #[cfg(debug_assertions)]
+            format_audit: self.format_audit.snapshot(),
         }
     }
 
     pub fn restore_snapshot(&mut self, snapshot: FormatStateSnapshot) {
         let FormatStateSnapshot {
-            #[cfg(debug_assertions)]
+            #[cfg(all(debug_assertions, feature = "rowan"))]
             printed_tokens,
+            #[cfg(debug_assertions)]
+            format_audit,
         } = snapshot;
 
-        cfg_if::cfg_if! {
-            if #[cfg(debug_assertions)] {
-                self.printed_tokens.restore(printed_tokens);
-            }
-        }
+        #[cfg(all(debug_assertions, feature = "rowan"))]
+        self.printed_tokens.restore(printed_tokens);
+        #[cfg(debug_assertions)]
+        self.format_audit.restore(format_audit);
     }
 }
 
 pub struct FormatStateSnapshot {
-    #[cfg(debug_assertions)]
+    #[cfg(all(debug_assertions, feature = "rowan"))]
     printed_tokens: printed_tokens::PrintedTokensSnapshot,
+    #[cfg(debug_assertions)]
+    format_audit: format_audit::FormatAuditSnapshot,
 }
 
-#[cfg(test)]
+#[cfg(all(test, feature = "rowan"))]
 mod tests {
-    use super::LineWidth;
+    use std::borrow::Cow;
+
+    use super::{
+        Document, FormatElement, FormatState, Formatted, LineEnding, LineWidth, Printed,
+        SimpleFormatContext, SimpleFormatOptions, SourceMapGeneration, SourceMarker, VecBuffer,
+    };
+    use crate::prelude::*;
+    use crate::rowan::RowanSource;
     use biome_deserialize::json::deserialize_from_json_str;
     use biome_deserialize_macros::Deserializable;
     use biome_diagnostics::Error;
+    use biome_js_parser::{JsParserOptions, parse_module};
+    use biome_js_syntax::{JsSyntaxKind, JsSyntaxToken};
+    use biome_rowan::TextSize;
 
+    /// Returns a context for documents built from `biome_rowan` tokens.
+    fn rowan_context(options: SimpleFormatOptions) -> SimpleFormatContext<RowanSource> {
+        SimpleFormatContext::from_options(options)
+    }
+
+    fn print_literal_token_slice<'a>(
+        syntax_token: &'a JsSyntaxToken,
+        text: Cow<'a, str>,
+        start: TextSize,
+    ) -> Printed<RowanSource> {
+        let formatted = crate::format!(
+            rowan_context(SimpleFormatOptions::default()),
+            [syntax_token_cow_slice(text, syntax_token, start).with_literal_line_breaks()]
+        )
+        .unwrap();
+
+        formatted
+            .print_with_indent(0, SourceMapGeneration::Enabled)
+            .unwrap()
+    }
+
+    fn print_literal_token_slice_followed_by_generated<'a>(
+        syntax_token: &'a JsSyntaxToken,
+        text: Cow<'a, str>,
+        start: TextSize,
+        context: SimpleFormatContext<RowanSource>,
+        source_map_generation: SourceMapGeneration,
+    ) -> Printed<RowanSource> {
+        let formatted = crate::format!(
+            context,
+            [
+                syntax_token_cow_slice(text, syntax_token, start).with_literal_line_breaks(),
+                token(";")
+            ]
+        )
+        .unwrap();
+
+        formatted
+            .print_with_indent(0, source_map_generation)
+            .unwrap()
+    }
+
+    #[test]
+    fn borrowed_syntax_token_slice_preserves_literal_lines_and_source_markers() {
+        let token = JsSyntaxToken::new_detached(JsSyntaxKind::JS_STRING_LITERAL, "ab\ncd", [], []);
+        let printed =
+            print_literal_token_slice(&token, Cow::Borrowed(token.text()), TextSize::from(0));
+
+        assert_eq!(printed.as_code(), "ab\ncd");
+        assert_eq!(
+            printed.sourcemap(),
+            [
+                SourceMarker {
+                    source: TextSize::from(0),
+                    dest: TextSize::from(0)
+                },
+                SourceMarker {
+                    source: TextSize::from(2),
+                    dest: TextSize::from(2)
+                },
+                SourceMarker {
+                    source: TextSize::from(3),
+                    dest: TextSize::from(3)
+                },
+                SourceMarker {
+                    source: TextSize::from(5),
+                    dest: TextSize::from(5)
+                },
+            ]
+        );
+    }
+
+    #[test]
+    fn syntax_token_slice_preserves_boundary_literal_lines() {
+        let token =
+            JsSyntaxToken::new_detached(JsSyntaxKind::JS_STRING_LITERAL, "\nab\n\n", [], []);
+        let printed =
+            print_literal_token_slice(&token, Cow::Borrowed(token.text()), TextSize::from(0));
+
+        assert_eq!(printed.as_code(), "\nab\n\n");
+    }
+
+    #[test]
+    fn owned_syntax_token_slice_preserves_literal_line_source_markers() {
+        let token = JsSyntaxToken::new_detached(JsSyntaxKind::JS_STRING_LITERAL, "xxxxxxx", [], []);
+        let printed =
+            print_literal_token_slice(&token, Cow::Owned("AB\nCD".to_string()), TextSize::from(1));
+
+        assert_eq!(printed.as_code(), "AB\nCD");
+        assert_eq!(
+            printed.sourcemap(),
+            [
+                SourceMarker {
+                    source: TextSize::from(1),
+                    dest: TextSize::from(0)
+                },
+                SourceMarker {
+                    source: TextSize::from(3),
+                    dest: TextSize::from(2)
+                },
+                SourceMarker {
+                    source: TextSize::from(4),
+                    dest: TextSize::from(3)
+                },
+                SourceMarker {
+                    source: TextSize::from(6),
+                    dest: TextSize::from(5)
+                },
+            ]
+        );
+    }
+
+    #[test]
+    fn syntax_token_slice_without_newlines_keeps_one_text_element() {
+        let token = JsSyntaxToken::new_detached(JsSyntaxKind::JS_STRING_LITERAL, "plain", [], []);
+        let formatted = crate::format!(
+            rowan_context(SimpleFormatOptions::default()),
+            [
+                syntax_token_cow_slice(Cow::Borrowed(token.text()), &token, TextSize::from(0),)
+                    .with_literal_line_breaks()
+            ]
+        )
+        .unwrap();
+
+        assert_eq!(formatted.document().as_ref().len(), 1);
+        assert!(matches!(
+            formatted.document().as_ref()[0],
+            FormatElement::MappedLocatedTokenText { .. }
+        ));
+    }
+
+    #[test]
+    fn syntax_token_slice_trailing_literal_lines_advance_source_for_generated_text() {
+        let cases: &[(&str, u32, &[SourceMarker<TextSize>])] = &[
+            (
+                "a\n",
+                0,
+                &[
+                    SourceMarker {
+                        source: TextSize::from(0),
+                        dest: TextSize::from(0),
+                    },
+                    SourceMarker {
+                        source: TextSize::from(1),
+                        dest: TextSize::from(1),
+                    },
+                    SourceMarker {
+                        source: TextSize::from(2),
+                        dest: TextSize::from(2),
+                    },
+                    SourceMarker {
+                        source: TextSize::from(2),
+                        dest: TextSize::from(3),
+                    },
+                ],
+            ),
+            (
+                "\n",
+                10,
+                &[
+                    SourceMarker {
+                        source: TextSize::from(10),
+                        dest: TextSize::from(0),
+                    },
+                    SourceMarker {
+                        source: TextSize::from(11),
+                        dest: TextSize::from(1),
+                    },
+                    SourceMarker {
+                        source: TextSize::from(11),
+                        dest: TextSize::from(2),
+                    },
+                ],
+            ),
+            (
+                "a\n\n",
+                0,
+                &[
+                    SourceMarker {
+                        source: TextSize::from(0),
+                        dest: TextSize::from(0),
+                    },
+                    SourceMarker {
+                        source: TextSize::from(1),
+                        dest: TextSize::from(1),
+                    },
+                    SourceMarker {
+                        source: TextSize::from(2),
+                        dest: TextSize::from(2),
+                    },
+                    SourceMarker {
+                        source: TextSize::from(3),
+                        dest: TextSize::from(3),
+                    },
+                    SourceMarker {
+                        source: TextSize::from(3),
+                        dest: TextSize::from(4),
+                    },
+                ],
+            ),
+        ];
+
+        for &(text, start, expected_markers) in cases {
+            let syntax_token =
+                JsSyntaxToken::new_detached(JsSyntaxKind::JS_STRING_LITERAL, text, [], []);
+            let printed = print_literal_token_slice_followed_by_generated(
+                &syntax_token,
+                Cow::Borrowed(syntax_token.text()),
+                TextSize::from(start),
+                rowan_context(SimpleFormatOptions::default()),
+                SourceMapGeneration::Enabled,
+            );
+
+            assert_eq!(printed.as_code(), std::format!("{text};"));
+            assert_eq!(printed.sourcemap(), expected_markers);
+        }
+    }
+
+    #[test]
+    fn syntax_token_slice_literal_line_mapping_uses_configured_line_ending() {
+        let syntax_token =
+            JsSyntaxToken::new_detached(JsSyntaxKind::JS_STRING_LITERAL, "a\n", [], []);
+        let printed = print_literal_token_slice_followed_by_generated(
+            &syntax_token,
+            Cow::Borrowed(syntax_token.text()),
+            TextSize::from(0),
+            rowan_context(SimpleFormatOptions {
+                line_ending: LineEnding::Crlf,
+                ..SimpleFormatOptions::default()
+            }),
+            SourceMapGeneration::Enabled,
+        );
+
+        assert_eq!(printed.as_code(), "a\r\n;");
+        assert_eq!(
+            printed.sourcemap(),
+            [
+                SourceMarker {
+                    source: TextSize::from(0),
+                    dest: TextSize::from(0),
+                },
+                SourceMarker {
+                    source: TextSize::from(1),
+                    dest: TextSize::from(1),
+                },
+                SourceMarker {
+                    source: TextSize::from(2),
+                    dest: TextSize::from(3),
+                },
+                SourceMarker {
+                    source: TextSize::from(2),
+                    dest: TextSize::from(4),
+                },
+            ]
+        );
+    }
+
+    #[test]
+    fn syntax_token_slice_literal_lines_without_source_map_keep_output() {
+        let syntax_token =
+            JsSyntaxToken::new_detached(JsSyntaxKind::JS_STRING_LITERAL, "a\n\n", [], []);
+        let mut state = FormatState::new_with_source_map_generation(
+            rowan_context(SimpleFormatOptions::default()),
+            SourceMapGeneration::Disabled,
+        );
+        let mut buffer = VecBuffer::new(&mut state);
+        crate::write!(
+            buffer,
+            [
+                syntax_token_cow_slice(
+                    Cow::Borrowed(syntax_token.text()),
+                    &syntax_token,
+                    TextSize::from(0),
+                )
+                .with_literal_line_breaks(),
+                token(";")
+            ]
+        )
+        .unwrap();
+        let elements = buffer.into_vec();
+        assert_eq!(
+            elements
+                .iter()
+                .filter(|element| {
+                    matches!(
+                        element,
+                        FormatElement::Line(LineMode::Literal {
+                            source_position: None,
+                            ..
+                        })
+                    )
+                })
+                .count(),
+            2
+        );
+        assert!(elements.iter().all(|element| !matches!(
+            element,
+            FormatElement::Line(LineMode::Literal {
+                source_position: Some(_),
+                ..
+            })
+        )));
+
+        let formatted = Formatted::new(Document::from(elements), state.into_context());
+        let printed = formatted
+            .print_with_indent(0, SourceMapGeneration::Disabled)
+            .unwrap();
+
+        assert_eq!(printed.as_code(), "a\n\n;");
+        assert!(printed.sourcemap().is_empty());
+    }
+
+    #[test]
+    fn syntax_token_slice_literal_line_supersedes_pending_source_position() {
+        let syntax_token =
+            JsSyntaxToken::new_detached(JsSyntaxKind::JS_STRING_LITERAL, "\n", [], []);
+        let formatted = crate::format!(
+            rowan_context(SimpleFormatOptions::default()),
+            [
+                source_position(TextSize::from(0)),
+                syntax_token_cow_slice(
+                    Cow::Borrowed(syntax_token.text()),
+                    &syntax_token,
+                    TextSize::from(0),
+                )
+                .with_literal_line_breaks(),
+                token(";")
+            ]
+        )
+        .unwrap();
+        let printed = formatted
+            .print_with_indent(0, SourceMapGeneration::Enabled)
+            .unwrap();
+
+        assert_eq!(printed.as_code(), "\n;");
+        assert_eq!(
+            printed.sourcemap(),
+            [
+                SourceMarker {
+                    source: TextSize::from(0),
+                    dest: TextSize::from(0),
+                },
+                SourceMarker {
+                    source: TextSize::from(1),
+                    dest: TextSize::from(1),
+                },
+                SourceMarker {
+                    source: TextSize::from(1),
+                    dest: TextSize::from(2),
+                },
+            ]
+        );
+    }
+
+    #[test]
+    fn source_mapped_literal_line_break_survives_line_suffix_flush() {
+        let syntax_token =
+            JsSyntaxToken::new_detached(JsSyntaxKind::JS_STRING_LITERAL, "a", [], []);
+        let formatted = crate::format!(
+            rowan_context(SimpleFormatOptions::default()),
+            [
+                syntax_token_cow_slice(
+                    Cow::Borrowed(syntax_token.text()),
+                    &syntax_token,
+                    TextSize::from(0),
+                ),
+                line_suffix(&crate::format_args![token("!")]),
+                crate::builders::source_mapped_literal_line_break_without_parent(TextSize::from(1)),
+                token(";")
+            ]
+        )
+        .unwrap();
+        let printed = formatted
+            .print_with_indent(0, SourceMapGeneration::Enabled)
+            .unwrap();
+
+        assert_eq!(printed.as_code(), "a!\n;");
+        assert_eq!(
+            printed.sourcemap(),
+            [
+                SourceMarker {
+                    source: TextSize::from(0),
+                    dest: TextSize::from(0),
+                },
+                SourceMarker {
+                    source: TextSize::from(1),
+                    dest: TextSize::from(1),
+                },
+                SourceMarker {
+                    source: TextSize::from(1),
+                    dest: TextSize::from(2),
+                },
+                SourceMarker {
+                    source: TextSize::from(2),
+                    dest: TextSize::from(3),
+                },
+                SourceMarker {
+                    source: TextSize::from(2),
+                    dest: TextSize::from(4),
+                },
+            ]
+        );
+    }
+
+    #[test]
+    fn borrowed_utf8_syntax_token_slice_uses_absolute_source_positions() {
+        let parse = parse_module("`aé\nbc`", JsParserOptions::default());
+        assert!(parse.diagnostics().is_empty());
+        let root = parse.syntax();
+        let syntax_token = std::iter::successors(root.first_token(), JsSyntaxToken::next_token)
+            .find(|token| token.kind() == JsSyntaxKind::TEMPLATE_CHUNK)
+            .unwrap();
+        assert_eq!(syntax_token.text_range().start(), TextSize::from(1));
+
+        let text = &syntax_token.text()[1..];
+        assert_eq!(text, "é\nbc");
+        let printed =
+            print_literal_token_slice(&syntax_token, Cow::Borrowed(text), TextSize::from(2));
+
+        assert_eq!(printed.as_code(), "é\nbc");
+        assert_eq!(
+            printed.sourcemap(),
+            [
+                SourceMarker {
+                    source: TextSize::from(2),
+                    dest: TextSize::from(0),
+                },
+                SourceMarker {
+                    source: TextSize::from(4),
+                    dest: TextSize::from(2),
+                },
+                SourceMarker {
+                    source: TextSize::from(5),
+                    dest: TextSize::from(3),
+                },
+                SourceMarker {
+                    source: TextSize::from(7),
+                    dest: TextSize::from(5),
+                },
+            ]
+        );
+    }
+
+    #[cfg(all(feature = "deserialize", feature = "diagnostics"))]
     #[test]
     fn test_out_of_range_line_width() {
         #[derive(Debug, Default, Deserializable, Eq, PartialEq)]
@@ -2361,7 +3051,7 @@ mod tests {
         let source = r#"{ "lineWidth": 500 }"#;
         let deserialized = deserialize_from_json_str::<TestConfig>(source, Default::default(), "");
         assert_eq!(
-            format!("{}", DiagnosticPrinter::new(deserialized.diagnostics())),
+            std::format!("{}", DiagnosticPrinter::new(deserialized.diagnostics())),
             "The number should be an integer between 1 and 320."
         );
         assert_eq!(
@@ -2377,33 +3067,250 @@ mod tests {
         use super::Printed;
 
         // Test stripping LF
-        let printed = Printed::new("test\n".to_string(), None, vec![], vec![]);
+        let printed = Printed::<RowanSource>::new("test\n".to_string(), None, vec![], vec![]);
         let stripped = printed.strip_trailing_newlines();
         assert_eq!(stripped.as_code(), "test");
 
         // Test stripping CRLF
-        let printed = Printed::new("test\r\n".to_string(), None, vec![], vec![]);
+        let printed = Printed::<RowanSource>::new("test\r\n".to_string(), None, vec![], vec![]);
         let stripped = printed.strip_trailing_newlines();
         assert_eq!(stripped.as_code(), "test");
 
         // Test stripping CR
-        let printed = Printed::new("test\r".to_string(), None, vec![], vec![]);
+        let printed = Printed::<RowanSource>::new("test\r".to_string(), None, vec![], vec![]);
         let stripped = printed.strip_trailing_newlines();
         assert_eq!(stripped.as_code(), "test");
 
         // Test stripping multiple newlines
-        let printed = Printed::new("test\n\n\n".to_string(), None, vec![], vec![]);
+        let printed = Printed::<RowanSource>::new("test\n\n\n".to_string(), None, vec![], vec![]);
         let stripped = printed.strip_trailing_newlines();
         assert_eq!(stripped.as_code(), "test");
 
         // Test not stripping newlines in the middle
-        let printed = Printed::new("test\ncode".to_string(), None, vec![], vec![]);
+        let printed = Printed::<RowanSource>::new("test\ncode".to_string(), None, vec![], vec![]);
         let stripped = printed.strip_trailing_newlines();
         assert_eq!(stripped.as_code(), "test\ncode");
 
         // Test empty string
-        let printed = Printed::new(String::new(), None, vec![], vec![]);
+        let printed = Printed::<RowanSource>::new(String::new(), None, vec![], vec![]);
         let stripped = printed.strip_trailing_newlines();
         assert_eq!(stripped.as_code(), "");
+    }
+
+    #[test]
+    fn disabled_source_map_generation_omits_source_position_elements() {
+        let mut state = FormatState::new_with_source_map_generation(
+            rowan_context(SimpleFormatOptions::default()),
+            SourceMapGeneration::Disabled,
+        );
+        let mut buffer = VecBuffer::new(&mut state);
+
+        crate::write!(buffer, [text("alpha", Some(TextSize::from(7))), token(";")]).unwrap();
+
+        let elements = buffer.into_vec();
+        assert_eq!(elements.len(), 2);
+        assert!(matches!(elements[0], FormatElement::Text { .. }));
+        assert!(matches!(elements[1], FormatElement::Token { text: ";" }));
+    }
+
+    #[test]
+    fn enabled_source_map_generation_inlines_source_position_on_text() {
+        let mut state = FormatState::new_with_source_map_generation(
+            rowan_context(SimpleFormatOptions::default()),
+            SourceMapGeneration::Enabled,
+        );
+        let mut buffer = VecBuffer::new(&mut state);
+
+        crate::write!(buffer, [text("alpha", Some(TextSize::from(7))), token(";")]).unwrap();
+
+        let elements = buffer.into_vec();
+        assert_eq!(elements.len(), 2);
+        assert!(matches!(
+            elements[0],
+            FormatElement::MappedText {
+                source_position,
+                ..
+            } if source_position == TextSize::from(7)
+        ));
+        assert!(matches!(elements[1], FormatElement::Token { text: ";" }));
+    }
+
+    #[cfg(debug_assertions)]
+    #[test]
+    #[should_panic(expected = "formatter audit failed")]
+    fn format_state_reports_audit_events() {
+        let mut state = FormatState::new(SimpleFormatContext::default());
+
+        state.record_audit_event("missing explicit formatter decision");
+
+        state.assert_no_audit_events();
+    }
+
+    #[cfg(debug_assertions)]
+    #[test]
+    #[should_panic(expected = "formatter audit failed")]
+    fn format_reports_audit_events() {
+        let content = format_with(|f| {
+            f.state_mut()
+                .record_audit_event("missing explicit formatter decision");
+            Ok(())
+        });
+
+        crate::format!(SimpleFormatContext::default(), [content]).unwrap();
+    }
+
+    #[cfg(debug_assertions)]
+    #[test]
+    fn format_state_restores_audit_events_with_snapshot() {
+        let mut state = FormatState::new(SimpleFormatContext::default());
+        let snapshot = state.snapshot();
+
+        state.record_audit_event("speculative formatter decision");
+        state.restore_snapshot(snapshot);
+
+        state.assert_no_audit_events();
+    }
+
+    #[cfg(debug_assertions)]
+    #[test]
+    #[should_panic(expected = "persistent formatter decision")]
+    fn format_state_restore_preserves_earlier_audit_events() {
+        let mut state = FormatState::new(SimpleFormatContext::default());
+        state.record_audit_event("persistent formatter decision");
+        let snapshot = state.snapshot();
+
+        state.record_audit_event("speculative formatter decision");
+        state.restore_snapshot(snapshot);
+
+        state.assert_no_audit_events();
+    }
+
+    #[cfg(debug_assertions)]
+    mod audit_entrypoint_tests {
+        use super::*;
+        use crate::comments::{CommentKind, CommentStyle, Comments, SourceComment};
+        use crate::{
+            CstFormatContext, FormatContext, FormatLanguage, SimpleFormatOptions,
+            TransformSourceMap,
+        };
+        use biome_rowan::raw_language::{RawLanguage, RawLanguageKind, RawSyntaxTreeBuilder};
+        use biome_rowan::{SyntaxNode, SyntaxNodeWithOffset, SyntaxTriviaPieceComments};
+
+        #[derive(Debug, Default)]
+        struct AuditContext {
+            options: SimpleFormatOptions,
+            comments: Comments<RawLanguage>,
+        }
+
+        impl FormatContext for AuditContext {
+            type Options = SimpleFormatOptions;
+            type Source = RowanSource;
+
+            fn options(&self) -> &Self::Options {
+                &self.options
+            }
+
+            fn source_map(&self) -> Option<&TransformSourceMap> {
+                None
+            }
+        }
+
+        impl CstFormatContext for AuditContext {
+            type Language = RawLanguage;
+            type Style = AuditCommentStyle;
+            type CommentRule = AuditCommentRule;
+
+            fn comments(&self) -> &Comments<Self::Language> {
+                &self.comments
+            }
+        }
+
+        #[derive(Debug, Default)]
+        struct AuditCommentStyle;
+
+        impl CommentStyle for AuditCommentStyle {
+            type Language = RawLanguage;
+
+            fn get_comment_kind(
+                _comment: &SyntaxTriviaPieceComments<Self::Language>,
+            ) -> CommentKind {
+                CommentKind::InlineBlock
+            }
+        }
+
+        #[derive(Debug, Default)]
+        struct AuditCommentRule;
+
+        impl FormatRule<SourceComment<RawLanguage>> for AuditCommentRule {
+            type Context = AuditContext;
+
+            fn fmt(
+                &self,
+                _item: &SourceComment<RawLanguage>,
+                _f: &mut Formatter<Self::Context>,
+            ) -> FormatResult<()> {
+                Ok(())
+            }
+        }
+
+        #[derive(Debug, Default)]
+        struct AuditRootRule;
+
+        impl FormatRule<SyntaxNode<RawLanguage>> for AuditRootRule {
+            type Context = AuditContext;
+
+            fn fmt(
+                &self,
+                _item: &SyntaxNode<RawLanguage>,
+                f: &mut Formatter<Self::Context>,
+            ) -> FormatResult<()> {
+                f.state_mut().record_audit_event("entrypoint audit event");
+                Ok(())
+            }
+        }
+
+        #[derive(Debug, Default)]
+        struct AuditLanguage {
+            options: SimpleFormatOptions,
+        }
+
+        impl FormatLanguage for AuditLanguage {
+            type SyntaxLanguage = RawLanguage;
+            type Context = AuditContext;
+            type FormatRule = AuditRootRule;
+
+            fn options(&self) -> &SimpleFormatOptions {
+                &self.options
+            }
+
+            fn create_context(
+                self,
+                root: &SyntaxNode<RawLanguage>,
+                _source_map: Option<TransformSourceMap>,
+                _delegate_fmt_embedded_nodes: bool,
+            ) -> AuditContext {
+                AuditContext {
+                    options: self.options,
+                    comments: Comments::from_node(root, &AuditCommentStyle, None),
+                }
+            }
+        }
+
+        fn root() -> SyntaxNode<RawLanguage> {
+            RawSyntaxTreeBuilder::wrap_with_node(RawLanguageKind::ROOT, |_| {})
+        }
+
+        #[test]
+        #[should_panic(expected = "entrypoint audit event")]
+        fn format_node_reports_audit_events() {
+            crate::format_node(&root(), AuditLanguage::default(), false).unwrap();
+        }
+
+        #[test]
+        #[should_panic(expected = "entrypoint audit event")]
+        fn format_node_with_offset_reports_audit_events() {
+            let root = SyntaxNodeWithOffset::new(root(), TextSize::from(10));
+            crate::format_node_with_offset(&root, AuditLanguage::default(), false).unwrap();
+        }
     }
 }

@@ -1,0 +1,13 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+new Date(date.getTime()!);
+new Date(date.getTime() as number);
+class Date {}
+new Date(date.getTime());
+
+```

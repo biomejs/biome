@@ -1,0 +1,41 @@
+@use   "sass:list";
+@use   "sass:map";
+
+$delta:   2px;
+$items:   columns (1fr, 2fr);
+$config:   (layout:   columns (1fr, 2fr));
+$interpolated:   col#{"umns"} (1fr, 2fr);
+$interpolated-config:   (layout:   #{"columns"} (1fr, 2fr));
+
+@function echo($value){ @return $value; }
+@function ordinary-default($value:   columns (1fr, 2fr)){ @return $value; }
+@function interpolated-default($value:   #{"columns"} (1fr, 2fr)){ @return $value; }
+@function ordinary-return(){ @return columns (1fr, 2fr); }
+@function interpolated-return(){ @return col#{"umns"} (1fr, 2fr); }
+
+.a{
+   font:   italic (16px + $delta) sans-serif;
+   count:   list.length($items);
+   map-count:   list.length(map.get($config, layout));
+   interpolated-count:   list.length(#{"columns"} (1fr, 2fr));
+   interpolated-font:   #{"italic"} (16px + $delta) sans-serif;
+   interpolated-variable:   list.length($interpolated);
+   interpolated-map:   list.length(map.get($interpolated-config, layout));
+}
+
+.contexts{
+   argument:   list.length(echo(columns (1fr, 2fr)));
+   keyword:   list.length(echo($value:   columns (1fr, 2fr)));
+   interpolated-argument:   list.length(echo(#{"columns"} (1fr, 2fr)));
+   default:   list.length(ordinary-default());
+   interpolated-default:   list.length(interpolated-default());
+   returned:   list.length(ordinary-return());
+   interpolated-returned:   list.length(interpolated-return());
+   adjacent:   list.length(columns(1fr, 2fr));
+   interpolated-adjacent:   list.length(#{"columns"}(1fr, 2fr));
+   partial-adjacent:   list.length(col#{"umns"}(1fr, 2fr));
+   suffix-adjacent:   list.length(#{"col"}umns(1fr, 2fr));
+   nested-group:   list.length(columns ((1fr, 2fr)));
+   empty-group:   list.length(columns ());
+   empty-call:   list.length(columns());
+}

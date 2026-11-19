@@ -1,25 +1,92 @@
 #![deny(clippy::use_self)]
+#![expect(clippy::too_many_arguments)]
 
 mod a11y;
 mod assist;
 mod lint;
 mod registry;
+mod services;
+mod suppression;
 mod suppression_action;
-mod utils;
+mod tailwind;
+mod vue;
 
 pub use crate::registry::visit_registry;
+pub use crate::services::aria::{Aria, AriaServices};
+pub use crate::services::module_graph::{HtmlDbService, HtmlModuleGraph};
+pub use crate::services::vue::{VueSemantic, VueSemanticServices};
+pub use crate::suppression::HtmlSuppression;
 use crate::suppression_action::HtmlSuppressionAction;
 use biome_analyze::{
-    AnalysisFilter, AnalyzerOptions, AnalyzerSignal, AnalyzerSuppression, ControlFlow,
-    LanguageRoot, MatchQueryParams, MetadataRegistry, RuleAction, RuleRegistry,
-    to_analyzer_suppressions,
+    AnalysisFilter, AnalyzerOptions, AnalyzerSignal, ControlFlow, EmbeddedSignalInspector,
+    LanguageRoot, MatchQueryParams, MetadataRegistry, RuleAction, RuleRegistry, SnippetAnalyzer,
+    Suppression,
 };
-use biome_deserialize::TextRange;
+use biome_aria::AriaRoles;
+use biome_db::Source;
 use biome_diagnostics::Error;
-use biome_html_syntax::{HtmlFileSource, HtmlLanguage};
-use biome_suppression::{SuppressionDiagnostic, parse_suppression_comment};
+use biome_embeds::EmbeddedData;
+use biome_html_syntax::HtmlLanguage;
+use biome_languages::{HtmlFileSource, LanguageDb};
+use biome_module_graph::ModuleDb;
+use biome_project_layout::ProjectLayout;
+use biome_suppression::SuppressionDiagnostic;
+use biome_tailwind_logic::syntax_service::TwSyntaxService;
+use biome_tailwind_logic::tailwind_v4::TailwindDesignSystem;
 use std::ops::Deref;
-use std::sync::LazyLock;
+use std::rc::Rc;
+use std::sync::{Arc, LazyLock};
+
+/// Services available to HTML lint rules.
+#[derive(Default)]
+pub struct HtmlAnalyzerServices {
+    pub module_db: Option<Rc<dyn ModuleDb>>,
+    pub language_db: Option<Rc<dyn LanguageDb>>,
+    pub embedded_data: Option<Arc<EmbeddedData>>,
+    pub project_layout: Option<Arc<ProjectLayout>>,
+    /// The analyzed document, which the embedded queries of `language_db`
+    /// read.
+    pub document: Option<Source>,
+}
+
+impl HtmlAnalyzerServices {
+    pub fn with_document(mut self, document: Source) -> Self {
+        self.document = Some(document);
+        self
+    }
+
+    pub fn with_module_db(mut self, module_db: Rc<dyn ModuleDb>) -> Self {
+        self.module_db = Some(module_db);
+        self
+    }
+
+    pub fn with_project_layout(mut self, project_layout: Arc<ProjectLayout>) -> Self {
+        self.project_layout = Some(project_layout);
+        self
+    }
+
+    pub fn with_language_db(mut self, language_db: Rc<dyn LanguageDb>) -> Self {
+        self.language_db = Some(language_db);
+        self
+    }
+
+    pub fn with_embedded_data(mut self, embedded_data: Option<Arc<EmbeddedData>>) -> Self {
+        self.embedded_data = embedded_data;
+        self
+    }
+}
+
+impl std::fmt::Debug for HtmlAnalyzerServices {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("HtmlAnalyzerServices")
+            .field("module_db", &self.module_db.as_ref().map(|_| "..."))
+            .field("language_db", &self.language_db.as_ref().map(|_| "..."))
+            .field("embedded_data", &self.embedded_data.as_ref().map(|_| "..."))
+            .field("project_layout", &self.project_layout)
+            .field("document", &self.document)
+            .finish()
+    }
+}
 
 pub(crate) type HtmlRuleAction = RuleAction<HtmlLanguage>;
 
@@ -37,13 +104,116 @@ pub fn analyze<'a, F, B>(
     filter: AnalysisFilter,
     options: &'a AnalyzerOptions,
     source_type: HtmlFileSource,
+    html_services: HtmlAnalyzerServices,
+    suppression: Option<Box<dyn Suppression<Diagnostic = SuppressionDiagnostic> + 'a>>,
     emit_signal: F,
 ) -> (Option<B>, Vec<Error>)
 where
     F: FnMut(&dyn AnalyzerSignal<HtmlLanguage>) -> ControlFlow<B> + 'a,
     B: 'a,
 {
-    analyze_with_inspect_matcher(root, filter, |_| {}, options, source_type, emit_signal)
+    analyze_with_optional_snippets::<F, B, ()>(
+        root,
+        filter,
+        options,
+        source_type,
+        html_services,
+        suppression,
+        None,
+        None,
+        emit_signal,
+    )
+}
+
+/// Analyzes HTML embedded in another file, honoring ignore comments in both.
+pub fn analyze_snippet<'a, F, B>(
+    root: &LanguageRoot<HtmlLanguage>,
+    filter: AnalysisFilter,
+    options: &'a AnalyzerOptions,
+    source_type: HtmlFileSource,
+    html_services: HtmlAnalyzerServices,
+    suppression: Option<Box<dyn Suppression<Diagnostic = SuppressionDiagnostic> + 'a>>,
+    inspector: EmbeddedSignalInspector<'_, '_>,
+    emit_signal: F,
+) -> (Option<B>, Vec<Error>)
+where
+    F: FnMut(&dyn AnalyzerSignal<HtmlLanguage>) -> ControlFlow<B> + 'a,
+    B: 'a,
+{
+    analyze_with_optional_snippets::<F, B, ()>(
+        root,
+        filter,
+        options,
+        source_type,
+        html_services,
+        suppression,
+        Some(inspector),
+        None,
+        emit_signal,
+    )
+}
+
+/// Analyzes HTML and embedded snippets together. Ignore comments in HTML can
+/// also apply to findings in the snippets.
+pub fn analyze_with_snippets<'a, F, B, Output>(
+    root: &LanguageRoot<HtmlLanguage>,
+    filter: AnalysisFilter,
+    options: &'a AnalyzerOptions,
+    source_type: HtmlFileSource,
+    html_services: HtmlAnalyzerServices,
+    suppression: Option<Box<dyn Suppression<Diagnostic = SuppressionDiagnostic> + 'a>>,
+    snippets: &mut [Box<dyn SnippetAnalyzer<B, Output = Output> + '_>],
+    emit_signal: F,
+) -> (Option<B>, Vec<Error>)
+where
+    F: FnMut(&dyn AnalyzerSignal<HtmlLanguage>) -> ControlFlow<B> + 'a,
+    B: 'a,
+{
+    analyze_with_optional_snippets(
+        root,
+        filter,
+        options,
+        source_type,
+        html_services,
+        suppression,
+        None,
+        Some(snippets),
+        emit_signal,
+    )
+}
+
+fn analyze_with_optional_snippets<'a, F, B, Output>(
+    root: &LanguageRoot<HtmlLanguage>,
+    filter: AnalysisFilter,
+    options: &'a AnalyzerOptions,
+    source_type: HtmlFileSource,
+    html_services: HtmlAnalyzerServices,
+    suppression: Option<Box<dyn Suppression<Diagnostic = SuppressionDiagnostic> + 'a>>,
+    snippet_inspector: Option<EmbeddedSignalInspector<'_, '_>>,
+    snippets: Option<&mut [Box<dyn SnippetAnalyzer<B, Output = Output> + '_>]>,
+    emit_signal: F,
+) -> (Option<B>, Vec<Error>)
+where
+    F: FnMut(&dyn AnalyzerSignal<HtmlLanguage>) -> ControlFlow<B> + 'a,
+    B: 'a,
+{
+    let module_db = html_services.module_db.clone();
+    analyze_with_inspect_matcher_and_snippets(
+        root,
+        filter,
+        move |_| {
+            if let Some(db) = module_db.as_ref() {
+                db.unwind_if_revision_cancelled();
+            }
+        },
+        options,
+        source_type,
+        html_services,
+        suppression,
+        snippet_inspector,
+        snippets,
+        emit_signal,
+    )
 }
 
 /// Run the analyzer on the provided `root`: this process will use the given `filter`
@@ -58,6 +228,39 @@ pub fn analyze_with_inspect_matcher<'a, V, F, B>(
     inspect_matcher: V,
     options: &'a AnalyzerOptions,
     source_type: HtmlFileSource,
+    html_services: HtmlAnalyzerServices,
+    suppression: Option<Box<dyn Suppression<Diagnostic = SuppressionDiagnostic> + 'a>>,
+    emit_signal: F,
+) -> (Option<B>, Vec<Error>)
+where
+    V: FnMut(&MatchQueryParams<HtmlLanguage>) + 'a,
+    F: FnMut(&dyn AnalyzerSignal<HtmlLanguage>) -> ControlFlow<B> + 'a,
+    B: 'a,
+{
+    analyze_with_inspect_matcher_and_snippets::<V, F, B, ()>(
+        root,
+        filter,
+        inspect_matcher,
+        options,
+        source_type,
+        html_services,
+        suppression,
+        None,
+        None,
+        emit_signal,
+    )
+}
+
+fn analyze_with_inspect_matcher_and_snippets<'a, V, F, B, Output>(
+    root: &LanguageRoot<HtmlLanguage>,
+    filter: AnalysisFilter,
+    inspect_matcher: V,
+    options: &'a AnalyzerOptions,
+    source_type: HtmlFileSource,
+    html_services: HtmlAnalyzerServices,
+    suppression: Option<Box<dyn Suppression<Diagnostic = SuppressionDiagnostic> + 'a>>,
+    snippet_inspector: Option<EmbeddedSignalInspector<'_, '_>>,
+    snippets: Option<&mut [Box<dyn SnippetAnalyzer<B, Output = Output> + '_>]>,
     mut emit_signal: F,
 ) -> (Option<B>, Vec<Error>)
 where
@@ -65,32 +268,6 @@ where
     F: FnMut(&dyn AnalyzerSignal<HtmlLanguage>) -> ControlFlow<B> + 'a,
     B: 'a,
 {
-    fn parse_linter_suppression_comment(
-        text: &str,
-        piece_range: TextRange,
-    ) -> Vec<Result<AnalyzerSuppression<'_>, SuppressionDiagnostic>> {
-        let mut result = Vec::new();
-
-        for suppression in parse_suppression_comment(text) {
-            let suppression = match suppression {
-                Ok(suppression) => suppression,
-                Err(err) => {
-                    result.push(Err(err));
-                    continue;
-                }
-            };
-
-            let analyzer_suppressions: Vec<_> = to_analyzer_suppressions(suppression, piece_range)
-                .into_iter()
-                .map(Ok)
-                .collect();
-
-            result.extend(analyzer_suppressions)
-        }
-
-        result
-    }
-
     let mut registry = RuleRegistry::builder(&filter, root);
     visit_registry(&mut registry);
 
@@ -102,11 +279,30 @@ where
     }
 
     services.insert_service(source_type);
+    services.insert_service(TwSyntaxService::default());
+    services.insert_service(Arc::new(AriaRoles));
+    services.insert_service(html_services.module_db.as_deref().map_or_else(
+        || Arc::new(TailwindDesignSystem::default()),
+        |module_db| TailwindDesignSystem::from_module_graph(module_db, options.tailwind()),
+    ));
+    if let Some(module_db) = html_services.module_db {
+        services.insert_service(module_db);
+    }
+    if let Some(language_db) = html_services.language_db {
+        services.insert_service(language_db);
+        services.insert_service(options.file_path.clone());
+    }
+    if let Some(document) = html_services.document {
+        services.insert_service(document);
+    }
+    if let Some(project_layout) = html_services.project_layout {
+        services.insert_service(project_layout);
+    }
 
     let mut analyzer = biome_analyze::Analyzer::new(
         METADATA.deref(),
         biome_analyze::InspectMatcher::new(registry, inspect_matcher),
-        parse_linter_suppression_comment,
+        suppression.unwrap_or_else(|| Box::new(HtmlSuppression)),
         Box::new(HtmlSuppressionAction),
         &mut emit_signal,
     );
@@ -115,15 +311,19 @@ where
         analyzer.add_visitor(phase, visitor);
     }
 
-    (
-        analyzer.run(biome_analyze::AnalyzerContext {
-            root: root.clone(),
-            range: filter.range,
-            services,
-            options,
-        }),
-        diagnostics,
-    )
+    let ctx = biome_analyze::AnalyzerContext {
+        root: root.clone(),
+        range: filter.range,
+        services,
+        options,
+    };
+    let result = match (snippet_inspector, snippets) {
+        (Some(inspector), _) => analyzer.run_snippet(ctx, inspector),
+        (None, Some(snippets)) => analyzer.run_with_snippets(ctx, snippets),
+        (None, None) => analyzer.run(ctx),
+    };
+
+    (result, diagnostics)
 }
 
 #[cfg(test)]
@@ -137,7 +337,7 @@ mod tests {
     use biome_diagnostics::termcolor::NoColor;
     use biome_diagnostics::{Diagnostic, DiagnosticExt, PrintDiagnostic, Severity};
     use biome_html_parser::parse_html;
-    use biome_html_syntax::HtmlFileSource;
+    use biome_languages::HtmlFileSource;
     use biome_rowan::TextRange;
     use std::slice;
 
@@ -168,6 +368,8 @@ mod tests {
             },
             &options,
             HtmlFileSource::html(),
+            crate::HtmlAnalyzerServices::default(),
+            None,
             |signal| {
                 if let Some(diag) = signal.diagnostic() {
                     error_ranges.push(diag.location().span.unwrap());

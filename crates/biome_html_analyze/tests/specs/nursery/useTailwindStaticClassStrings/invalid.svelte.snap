@@ -1,0 +1,96 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.svelte
+---
+# Input
+```svelte
+<!-- should generate diagnostics -->
+<div class="bg-{color}"></div>
+<div class="{size}-4"></div>
+<div class="hover:bg-{color}-500"></div>
+<div class="é-{color}"></div>
+
+```
+
+# Diagnostics
+```
+invalid.svelte:2:12 lint/nursery/useTailwindStaticClassStrings ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This class string is constructed dynamically.
+  
+    1 │ <!-- should generate diagnostics -->
+  > 2 │ <div class="bg-{color}"></div>
+      │            ^^^^^^^^^^^^
+    3 │ <div class="{size}-4"></div>
+    4 │ <div class="hover:bg-{color}-500"></div>
+  
+  i Tailwind scans source text for complete class names.
+  
+  i Use complete class names, choosing between them with a conditional expression or a lookup.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:3:12 lint/nursery/useTailwindStaticClassStrings ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This class string is constructed dynamically.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <div class="bg-{color}"></div>
+  > 3 │ <div class="{size}-4"></div>
+      │            ^^^^^^^^^^
+    4 │ <div class="hover:bg-{color}-500"></div>
+    5 │ <div class="é-{color}"></div>
+  
+  i Tailwind scans source text for complete class names.
+  
+  i Use complete class names, choosing between them with a conditional expression or a lookup.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:4:12 lint/nursery/useTailwindStaticClassStrings ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This class string is constructed dynamically.
+  
+    2 │ <div class="bg-{color}"></div>
+    3 │ <div class="{size}-4"></div>
+  > 4 │ <div class="hover:bg-{color}-500"></div>
+      │            ^^^^^^^^^^^^^^^^^^^^^^
+    5 │ <div class="é-{color}"></div>
+    6 │ 
+  
+  i Tailwind scans source text for complete class names.
+  
+  i Use complete class names, choosing between them with a conditional expression or a lookup.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:5:12 lint/nursery/useTailwindStaticClassStrings ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This class string is constructed dynamically.
+  
+    3 │ <div class="{size}-4"></div>
+    4 │ <div class="hover:bg-{color}-500"></div>
+  > 5 │ <div class="é-{color}"></div>
+      │            ^^^^^^^^^^^
+    6 │ 
+  
+  i Tailwind scans source text for complete class names.
+  
+  i Use complete class names, choosing between them with a conditional expression or a lookup.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

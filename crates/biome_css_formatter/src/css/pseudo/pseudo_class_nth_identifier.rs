@@ -12,6 +12,6 @@ impl FormatNodeRule<CssPseudoClassNthIdentifier> for FormatCssPseudoClassNthIden
     ) -> FormatResult<()> {
         let CssPseudoClassNthIdentifierFields { value } = node.as_fields();
 
-        write!(f, [value.format()])
+        write!(f, [value.format()?.with_text_case(CssCase::Preserve)])
     }
 }

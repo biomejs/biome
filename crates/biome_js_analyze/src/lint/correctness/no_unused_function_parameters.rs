@@ -1,3 +1,4 @@
+use crate::services::embedded::EmbeddedService;
 use crate::{JsRuleAction, services::semantic::Semantic, utils::rename::RenameSymbolExtensions};
 use biome_analyze::{FixKind, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
@@ -13,8 +14,8 @@ use biome_rule_options::no_unused_function_parameters::NoUnusedFunctionParameter
 declare_lint_rule! {
     /// Disallow unused function parameters.
     ///
-    /// There is an exception to this rule:
-    /// parameters that starts with underscore, e.g. `function foo(_a, _b) {}`.
+    /// Parameters whose names start with an underscore are ignored. The underscore communicates
+    /// that the parameter is intentionally unused, for example `function foo(_a, _b) {}`.
     ///
     /// ## Examples
     ///
@@ -46,6 +47,10 @@ declare_lint_rule! {
     /// ```
     ///
     /// ```js
+    /// function foo(_myVar) {}
+    /// ```
+    ///
+    /// ```js
     /// function withObjectSpread({ a, ...rest }) {
     ///	    return rest;
     /// }
@@ -53,15 +58,16 @@ declare_lint_rule! {
     ///
     /// ## Options
     ///
-    /// The rule has the following options
+    /// The rule has the following option.
     ///
     /// ### `ignoreRestSiblings`
     /// **Since `v2.1.0`**
     ///
-    /// Whether to ignore unused variables from an object destructuring with a spread.
-    /// Example: `a` and `b` in `function({ a, b, ...rest }) { return rest;}` should be ignored by this rule when set to false.
-    ///
+    /// Ignores unused names taken from an object parameter when the same parameter also collects
+    /// the remaining properties, as in `function({ a, ...rest }) { return rest; }`.
     /// Defaults to `true`.
+    ///
+    /// Set this option to `false` to report those unused properties.
     ///
     /// ```json,options
     /// {
@@ -135,9 +141,20 @@ impl Rule for NoUnusedFunctionParameters {
         let ignore_rest_siblings = ctx.options().ignore_rest_siblings();
 
         let name = binding.name_token().ok()?;
-        let name = name.text_trimmed();
+        let name_text = name.text_trimmed();
 
-        if name.starts_with('_') {
+        if name_text.starts_with('_') {
+            return None;
+        }
+
+        // A snippet parameter can be used in the snippet body, which the
+        // semantic model of the script doesn't see. Matching is by name: the
+        // template is a separate parse with no shared symbols, so a name clash
+        // can hide a real unused parameter — a false negative, never a false
+        // positive on a used one.
+        if let Some(embedded) = ctx.get_service::<EmbeddedService>()
+            && embedded.is_used(name.token_text_trimmed())
+        {
             return None;
         }
 

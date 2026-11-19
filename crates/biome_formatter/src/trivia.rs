@@ -4,7 +4,8 @@ use crate::comments::is_doc_comment;
 use crate::format_element::tag::VerbatimKind;
 use crate::prelude::*;
 use crate::{
-    Argument, Arguments, CstFormatContext, FormatRefWithRule, GroupId, SourceComment, TextRange,
+    Argument, Arguments, CstFormatContext, FormatContext, FormatRefWithRule, GroupId,
+    SourceComment, TextRange,
     comments::{CommentKind, CommentStyle},
     write,
 };
@@ -649,6 +650,7 @@ impl DanglingIndentMode {
         f: &mut Formatter<Context>,
     ) -> FormatResult<()>
     where
+        Context: FormatContext,
         Content: Format<Context>,
     {
         match self {

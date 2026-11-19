@@ -142,7 +142,7 @@ impl TryFrom<JsSyntaxToken> for JsdocComment {
 mod tests {
     use super::*;
     use biome_js_parser::{JsParserOptions, parse};
-    use biome_js_syntax::JsFileSource;
+    use biome_languages::JsFileSource;
 
     #[test]
     fn test_text_is_jsdoc_comment() {

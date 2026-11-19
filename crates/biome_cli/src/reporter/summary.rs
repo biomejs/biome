@@ -5,13 +5,12 @@ use crate::reporter::{
 use crate::runner::execution::Execution;
 use crate::{DiagnosticsPayload, TraversalSummary};
 
-use biome_analyze::profiling::DisplayProfiles;
 use biome_console::fmt::{Display, Formatter};
 use biome_console::{MarkupBuf, markup};
 use biome_diagnostics::advice::ListAdvice;
 use biome_diagnostics::{
-    Advices, Category, Diagnostic, LogCategory, PrintDiagnostic, Resource, Severity, Visit,
-    category,
+    Advices, Category, Diagnostic, LogCategory, MessageAndDescription, PrintDiagnostic, Resource,
+    Severity, Visit, category,
 };
 use biome_fs::BiomePath;
 use camino::{Utf8Path, Utf8PathBuf};
@@ -81,11 +80,6 @@ impl ReporterVisitor for SummaryReporterVisitor {
         writer.log(markup! {
             {ConsoleTraversalSummary(execution, &summary, verbose)}
         });
-
-        let profiles = biome_analyze::profiling::drain_sorted_by_total(false);
-        if !profiles.is_empty() {
-            writer.log(markup! {{ DisplayProfiles(profiles, None) }});
-        }
 
         Ok(())
     }
@@ -265,7 +259,8 @@ struct SummaryListDiagnostic<'a> {
     category: &'static Category,
 
     #[message]
-    message: MarkupBuf,
+    #[description]
+    message: MessageAndDescription,
 
     #[advice]
     list: SummaryListAdvice<'a>,
@@ -359,10 +354,12 @@ impl<'a> Display for FileToDiagnostics<'a> {
                 .collect();
 
             let diagnostic = SummaryListDiagnostic {
-                message: markup! {
-                    <Info>"The following files have parsing errors:"</Info>
-                }
-                .to_owned(),
+                message: MessageAndDescription::from(
+                    markup! {
+                        <Info>"The following files have parsing errors:"</Info>
+                    }
+                    .to_owned(),
+                ),
 
                 list: SummaryListAdvice(&parse_files_with_counts),
                 category: category!("reporter/parse"),
@@ -391,10 +388,12 @@ impl<'a> Display for FileToDiagnostics<'a> {
                 .collect();
 
             let diagnostic = SummaryListDiagnostic {
-                message: markup! {
-                    <Info>"The following files need to be formatted:"</Info>
-                }
-                .to_owned(),
+                message: MessageAndDescription::from(
+                    markup! {
+                        <Info>"The following files need to be formatted:"</Info>
+                    }
+                    .to_owned(),
+                ),
 
                 list: SummaryListAdvice(&format_files_with_counts),
                 category: category!("reporter/format"),

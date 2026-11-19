@@ -1,0 +1,21 @@
+# should generate diagnostics
+plain: &plain true
+tagged: &tagged !!bool "true"
+tagged_mapping: &mapping !!bool
+  key: value
+first_key:
+  &first false: 1
+
+? *plain
+: 2
+? *tagged
+: 3
+? *mapping
+: 4
+flow: { *plain : 5, *first : 6 }
+
+# the alias refers to the closest anchor before it
+again: &again text
+other: &again True
+? *again
+: 7

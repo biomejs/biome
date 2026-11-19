@@ -71,11 +71,15 @@ CssRoot {
                                             },
                                             CssBogusCustomIdentifier {
                                                 items: [
-                                                    CSS_NUMBER_LITERAL@55..59 "123" [] [Whitespace(" ")],
+                                                    ScssExpressionItemList [
+                                                        CssNumber {
+                                                            value_token: CSS_NUMBER_LITERAL@55..59 "123" [] [Whitespace(" ")],
+                                                        },
+                                                        CssIdentifier {
+                                                            value_token: IDENT@59..68 "nav-start" [] [],
+                                                        },
+                                                    ],
                                                 ],
-                                            },
-                                            CssCustomIdentifier {
-                                                value_token: IDENT@59..68 "nav-start" [] [],
                                             },
                                         ],
                                         r_brack_token: R_BRACK@68..70 "]" [] [Whitespace(" ")],
@@ -92,22 +96,25 @@ CssRoot {
                                             },
                                             CssBogusCustomIdentifier {
                                                 items: [
-                                                    CSS_DIMENSION_VALUE@88..89 "1" [] [],
+                                                    ScssExpressionItemList [
+                                                        CssRegularDimension {
+                                                            value_token: CSS_NUMBER_LITERAL@88..89 "1" [] [],
+                                                            unit_token: IDENT@89..92 "fr" [] [Whitespace(" ")],
+                                                        },
+                                                        CssBracketedValue {
+                                                            l_brack_token: L_BRACK@92..93 "[" [] [],
+                                                            items: CssBracketedValueList [
+                                                                CssCustomIdentifier {
+                                                                    value_token: IDENT@93..97 "last" [] [],
+                                                                },
+                                                            ],
+                                                            r_brack_token: R_BRACK@97..98 "]" [] [],
+                                                        },
+                                                    ],
                                                 ],
-                                            },
-                                            CssCustomIdentifier {
-                                                value_token: IDENT@89..92 "fr" [] [Whitespace(" ")],
-                                            },
-                                            CssBogusCustomIdentifier {
-                                                items: [
-                                                    L_BRACK@92..93 "[" [] [],
-                                                ],
-                                            },
-                                            CssCustomIdentifier {
-                                                value_token: IDENT@93..97 "last" [] [],
                                             },
                                         ],
-                                        r_brack_token: R_BRACK@97..98 "]" [] [],
+                                        r_brack_token: missing (required),
                                     },
                                 ],
                             },
@@ -166,28 +173,33 @@ CssRoot {
                     1: CSS_BRACKETED_VALUE_LIST@49..68
                       0: CSS_CUSTOM_IDENTIFIER@49..55
                         0: IDENT@49..55 "first" [] [Whitespace(" ")]
-                      1: CSS_BOGUS_CUSTOM_IDENTIFIER@55..59
-                        0: CSS_NUMBER_LITERAL@55..59 "123" [] [Whitespace(" ")]
-                      2: CSS_CUSTOM_IDENTIFIER@59..68
-                        0: IDENT@59..68 "nav-start" [] []
+                      1: CSS_BOGUS_CUSTOM_IDENTIFIER@55..68
+                        0: SCSS_EXPRESSION_ITEM_LIST@55..68
+                          0: CSS_NUMBER@55..59
+                            0: CSS_NUMBER_LITERAL@55..59 "123" [] [Whitespace(" ")]
+                          1: CSS_IDENTIFIER@59..68
+                            0: IDENT@59..68 "nav-start" [] []
                     2: R_BRACK@68..70 "]" [] [Whitespace(" ")]
                   1: CSS_REGULAR_DIMENSION@70..76
                     0: CSS_NUMBER_LITERAL@70..73 "150" [] []
                     1: IDENT@73..76 "px" [] [Whitespace(" ")]
                   2: CSS_BRACKETED_VALUE@76..98
                     0: L_BRACK@76..77 "[" [] []
-                    1: CSS_BRACKETED_VALUE_LIST@77..97
+                    1: CSS_BRACKETED_VALUE_LIST@77..98
                       0: CSS_CUSTOM_IDENTIFIER@77..88
                         0: IDENT@77..88 "main-start" [] [Whitespace(" ")]
-                      1: CSS_BOGUS_CUSTOM_IDENTIFIER@88..89
-                        0: CSS_DIMENSION_VALUE@88..89 "1" [] []
-                      2: CSS_CUSTOM_IDENTIFIER@89..92
-                        0: IDENT@89..92 "fr" [] [Whitespace(" ")]
-                      3: CSS_BOGUS_CUSTOM_IDENTIFIER@92..93
-                        0: L_BRACK@92..93 "[" [] []
-                      4: CSS_CUSTOM_IDENTIFIER@93..97
-                        0: IDENT@93..97 "last" [] []
-                    2: R_BRACK@97..98 "]" [] []
+                      1: CSS_BOGUS_CUSTOM_IDENTIFIER@88..98
+                        0: SCSS_EXPRESSION_ITEM_LIST@88..98
+                          0: CSS_REGULAR_DIMENSION@88..92
+                            0: CSS_NUMBER_LITERAL@88..89 "1" [] []
+                            1: IDENT@89..92 "fr" [] [Whitespace(" ")]
+                          1: CSS_BRACKETED_VALUE@92..98
+                            0: L_BRACK@92..93 "[" [] []
+                            1: CSS_BRACKETED_VALUE_LIST@93..97
+                              0: CSS_CUSTOM_IDENTIFIER@93..97
+                                0: IDENT@93..97 "last" [] []
+                            2: R_BRACK@97..98 "]" [] []
+                    2: (empty)
               1: (empty)
             1: SEMICOLON@98..99 ";" [] []
         2: R_CURLY@99..101 "}" [Newline("\n")] []
@@ -200,52 +212,34 @@ CssRoot {
 ```
 grid_error.css:3:32 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected an identifier but instead found '123'.
+  × SCSS bracketed expressions are an SCSS only feature. Convert your file to an SCSS file or remove the syntax.
   
     1 │ #grid {
     2 │ 	display: grid;
   > 3 │ 	grid-template-columns: [first 123 nav-start] 150px [main-start 1fr [last];
-      │ 	                              ^^^
-    4 │ }
-    5 │ 
-  
-  i Expected an identifier here.
-  
-    1 │ #grid {
-    2 │ 	display: grid;
-  > 3 │ 	grid-template-columns: [first 123 nav-start] 150px [main-start 1fr [last];
-      │ 	                              ^^^
+      │ 	                              ^^^^^^^^^^^^^
     4 │ }
     5 │ 
   
 grid_error.css:3:65 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected an identifier but instead found '1'.
+  × SCSS bracketed expressions are an SCSS only feature. Convert your file to an SCSS file or remove the syntax.
   
     1 │ #grid {
     2 │ 	display: grid;
   > 3 │ 	grid-template-columns: [first 123 nav-start] 150px [main-start 1fr [last];
-      │ 	                                                               ^
+      │ 	                                                               ^^^^^^^^^^
     4 │ }
     5 │ 
   
-  i Expected an identifier here.
-  
-    1 │ #grid {
-    2 │ 	display: grid;
-  > 3 │ 	grid-template-columns: [first 123 nav-start] 150px [main-start 1fr [last];
-      │ 	                                                               ^
-    4 │ }
-    5 │ 
-  
-grid_error.css:3:69 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+grid_error.css:3:75 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected an identifier but instead found '['.
+  × Expected an identifier but instead found ';'.
   
     1 │ #grid {
     2 │ 	display: grid;
   > 3 │ 	grid-template-columns: [first 123 nav-start] 150px [main-start 1fr [last];
-      │ 	                                                                   ^
+      │ 	                                                                         ^
     4 │ }
     5 │ 
   
@@ -254,7 +248,7 @@ grid_error.css:3:69 parse ━━━━━━━━━━━━━━━━━━
     1 │ #grid {
     2 │ 	display: grid;
   > 3 │ 	grid-template-columns: [first 123 nav-start] 150px [main-start 1fr [last];
-      │ 	                                                                   ^
+      │ 	                                                                         ^
     4 │ }
     5 │ 
   

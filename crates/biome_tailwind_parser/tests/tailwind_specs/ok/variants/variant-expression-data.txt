@@ -1,0 +1,1 @@
+data-active:flex data-[state=open]:block group-data-[state=open]:block group-has-[a]:block aria-[checked]:text-red-500 max-md:flex min-lg:grid

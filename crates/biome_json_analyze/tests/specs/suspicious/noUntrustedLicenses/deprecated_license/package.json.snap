@@ -1,0 +1,32 @@
+---
+source: crates/biome_json_analyze/tests/spec_tests.rs
+expression: package.json
+---
+# Input
+```json
+{
+    "dependencies": {
+        "valid-pkg": "^1.0.0",
+        "deprecated-pkg": "^1.0.0"
+    }
+}
+
+```
+
+# Diagnostics
+```
+package.json:4:9 lint/suspicious/noUntrustedLicenses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The dependency deprecated-pkg in dependencies has a deprecated SPDX license: AGPL-1.0.
+  
+    2 │     "dependencies": {
+    3 │         "valid-pkg": "^1.0.0",
+  > 4 │         "deprecated-pkg": "^1.0.0"
+      │         ^^^^^^^^^^^^^^^^
+    5 │     }
+    6 │ }
+  
+  i This license identifier is deprecated by the SPDX standard. Set ignoreDeprecated to true to accept deprecated licenses, or remove it from the project. Alternatively, contact the author(s) to update the license.
+  
+
+```

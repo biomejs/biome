@@ -4,13 +4,55 @@
 //! various AST nodes that can contain CSS class strings (string literals,
 //! JSX strings, template chunks, etc.).
 
+use biome_analyze::options::TailwindOptions;
 use biome_js_syntax::{
     AnyJsExpression, JsCallArguments, JsCallExpression, JsLiteralMemberName,
     JsStringLiteralExpression, JsSyntaxNode, JsTemplateChunkElement, JsTemplateExpression,
     JsxAttribute, JsxString,
 };
 use biome_rowan::{AstNode, TokenText, declare_node_union};
-use biome_rule_options::use_sorted_classes::UseSortedClassesOptions;
+use biome_rule_options::no_duplicate_classes::NoDuplicateClassesOptions;
+use biome_tailwind_logic::syntax_service::{TailwindClassString, TailwindClassStringHost};
+
+/// Trait for option types that specify which class attributes and functions to check.
+pub trait ClassStringOptions {
+    fn has_attribute(&self, name: &str) -> bool;
+    fn has_function(&self, name: &str) -> bool;
+    fn match_function(&self, name: &str) -> bool;
+}
+
+impl ClassStringOptions for NoDuplicateClassesOptions {
+    fn has_attribute(&self, name: &str) -> bool {
+        self.has_attribute(name)
+    }
+    fn has_function(&self, name: &str) -> bool {
+        self.has_function(name)
+    }
+    fn match_function(&self, name: &str) -> bool {
+        self.match_function(name)
+    }
+}
+
+impl TailwindClassStringHost for AnyClassStringLike {
+    fn tailwind_class_string(
+        &self,
+        options: &TailwindOptions,
+        is_class_attribute: bool,
+    ) -> Option<TailwindClassString> {
+        match self {
+            Self::JsStringLiteralExpression(node) => {
+                node.tailwind_class_string(options, is_class_attribute)
+            }
+            Self::JsxString(node) => node.tailwind_class_string(options, is_class_attribute),
+            Self::JsTemplateChunkElement(node) => {
+                node.tailwind_class_string(options, is_class_attribute)
+            }
+            Self::JsLiteralMemberName(node) => {
+                node.tailwind_class_string(options, is_class_attribute)
+            }
+        }
+    }
+}
 
 fn get_callee_name(call_expression: &JsCallExpression) -> Option<TokenText> {
     call_expression
@@ -25,7 +67,7 @@ fn get_callee_name(call_expression: &JsCallExpression) -> Option<TokenText> {
 
 fn is_call_expression_of_target_function(
     call_expression: &JsCallExpression,
-    options: &UseSortedClassesOptions,
+    options: &impl ClassStringOptions,
 ) -> bool {
     get_callee_name(call_expression).is_some_and(|name| options.has_function(name.text()))
 }
@@ -47,7 +89,7 @@ declare_node_union! {
     pub AnyClassStringLike = JsStringLiteralExpression | JsxString | JsTemplateChunkElement | JsLiteralMemberName
 }
 
-fn inspect_string_literal(node: &JsSyntaxNode, options: &UseSortedClassesOptions) -> Option<bool> {
+fn inspect_string_literal(node: &JsSyntaxNode, options: &impl ClassStringOptions) -> Option<bool> {
     let mut in_arguments = false;
     let mut in_function = false;
     for ancestor in node.ancestors().skip(1) {
@@ -80,7 +122,7 @@ impl AnyClassStringLike {
     /// Returns `Some(true)` if the node is in a context that should be checked
     /// (e.g., a `class` or `className` attribute, or inside a utility function call).
     /// Returns `None` if the node should be skipped.
-    pub fn should_visit(&self, options: &UseSortedClassesOptions) -> Option<bool> {
+    pub fn should_visit(&self, options: &impl ClassStringOptions) -> Option<bool> {
         match self {
             Self::JsStringLiteralExpression(string_literal) => {
                 inspect_string_literal(string_literal.syntax(), options)
@@ -114,7 +156,7 @@ impl AnyClassStringLike {
                         }
                         if let Some(AnyJsExpression::JsStaticMemberExpression(tag)) =
                             template_expression.tag()
-                            && options.match_function(tag.to_string().as_ref())
+                            && options.match_function(&tag.syntax().text_trimmed().to_string())
                         {
                             return Some(true);
                         }

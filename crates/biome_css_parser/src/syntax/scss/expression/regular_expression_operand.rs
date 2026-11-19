@@ -25,9 +25,8 @@ pub(super) fn parse_scss_regular_expression_operand(
     p: &mut CssParser,
     options: ScssExpressionOptions,
 ) -> ParsedSyntax {
-    // Shared CSS value parsing owns function heads. Pass the SCSS expression
-    // context through so `@include foo(a (...))` and `color: rgba (...)` split
-    // differently without adding formatter-side repair logic.
+    // Sass expressions require adjacent function heads even when shared CSS
+    // value recovery accepts separated identifiers and parentheses as calls.
     let context = ValueParsingContext::new(p, ValueParsingMode::ScssAware)
         .with_function_call_context(options.function_call_context());
 

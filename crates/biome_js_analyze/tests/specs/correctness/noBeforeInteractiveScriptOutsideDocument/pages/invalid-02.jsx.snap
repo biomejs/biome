@@ -1,0 +1,47 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-02.jsx
+---
+# Input
+```jsx
+/* should generate diagnostics */
+import MyScript from 'next/script'
+
+export default function Index() {
+  return (
+    <div>
+      <MyScript
+        src="https://example.com/script.js"
+        strategy="beforeInteractive"
+      ></MyScript>
+    </div>
+  )
+}
+
+```
+
+# Diagnostics
+```
+invalid-02.jsx:7:7 lint/correctness/noBeforeInteractiveScriptOutsideDocument ━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Don't use next/script component with the `beforeInteractive` strategy outside of pages/_document.js.
+  
+     5 │   return (
+     6 │     <div>
+   > 7 │       <MyScript
+       │       ^^^^^^^^^
+   > 8 │         src="https://example.com/script.js"
+   > 9 │         strategy="beforeInteractive"
+  > 10 │       ></MyScript>
+       │       ^
+    11 │     </div>
+    12 │   )
+  
+  i The beforeInteractive strategy only works when the script is loaded from the custom document. Anywhere else, the script does not load before the page becomes interactive.
+  
+  i Move this script to pages/_document.js, or use a different strategy such as afterInteractive.
+  
+  i See the Next.js docs for more details.
+  
+
+```

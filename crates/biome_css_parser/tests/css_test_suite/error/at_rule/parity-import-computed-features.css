@@ -1,0 +1,5 @@
+@media ($bound + "-width": 30rem) {}
+@container ($bound + "-width": 30rem) {}
+.control { width: if(media($bound + "-width": 30rem): 1px; else: 2px); }
+.following { color: green; }
+@import "wide-layout.css" screen and ($bound + "-width": 30rem);

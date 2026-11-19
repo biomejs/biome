@@ -475,6 +475,10 @@ mod internal {
         fn tags(&self) -> DiagnosticTags {
             self.source.as_diagnostic().tags()
         }
+
+        fn source(&self) -> Option<&dyn Diagnostic> {
+            self.source.as_diagnostic().source()
+        }
     }
 
     /// Diagnostic type returned by [super::DiagnosticExt::with_file_span],
@@ -632,6 +636,20 @@ mod internal {
 
         fn record_diff(&mut self, diff: &TextEdit) -> io::Result<()> {
             self.visitor.record_diff(diff)
+        }
+
+        fn record_code_suggestion(
+            &mut self,
+            location: Location<'_>,
+            diff: &TextEdit,
+        ) -> io::Result<()> {
+            self.visitor.record_code_suggestion(
+                Location {
+                    source_code: Some(location.source_code.unwrap_or(self.source_code)),
+                    ..location
+                },
+                diff,
+            )
         }
 
         fn record_backtrace(

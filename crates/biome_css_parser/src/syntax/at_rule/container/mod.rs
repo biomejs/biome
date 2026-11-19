@@ -11,13 +11,19 @@ use crate::syntax::at_rule::error::{
 };
 use crate::syntax::at_rule::feature::{expected_any_query_feature, parse_any_query_feature};
 use crate::syntax::block::parse_conditional_block;
-use crate::syntax::parse_error::expected_non_css_wide_keyword_identifier;
+use crate::syntax::parse_error::{
+    expected_non_css_wide_keyword_identifier, scss_only_syntax_error,
+};
 use crate::syntax::property::{
     END_OF_PROPERTY_VALUE_COMPONENT_LIST_TOKEN_SET, END_OF_PROPERTY_VALUE_TOKEN_SET,
 };
+use crate::syntax::scss::{
+    is_at_scss_container_interpolated_query, is_at_scss_container_name_or_query,
+    parse_scss_container_interpolated_query, parse_scss_container_name_or_query,
+};
 use crate::syntax::value::function::{is_at_any_css_function, is_nth_at_css_function};
 use crate::syntax::{
-    is_at_declaration, parse_any_css_value, parse_custom_identifier,
+    CssSyntaxFeatures, is_at_declaration, parse_any_css_value, parse_custom_identifier,
     parse_declaration_with_value_end_set, parse_regular_identifier,
 };
 use biome_css_syntax::CssSyntaxKind::*;
@@ -101,7 +107,27 @@ pub(crate) fn parse_container_at_rule_declarator(p: &mut CssParser) -> ParsedSyn
     let m = p.start();
     p.bump(T![container]);
 
-    if !is_at_container_style_query_in_parens(p) && !is_at_container_scroll_state_query(p) {
+    if is_at_scss_container_name_or_query(p) {
+        // Sass interpolation can stand in for either the name or the query.
+        // Only an interpolated name still needs the query that follows it.
+        let is_name = parse_scss_container_name_or_query(p)
+            .kind(p)
+            .is_some_and(|kind| kind == SCSS_INTERPOLATED_IDENTIFIER);
+
+        if is_name {
+            parse_any_container_query(p)
+                .or_recover(p, &AnyQueryParseRecovery, expected_any_container_query)
+                .ok();
+        }
+
+        return Present(m.complete(p, CSS_CONTAINER_AT_RULE_DECLARATOR));
+    }
+
+    // `not` can't be a container name, so it always starts the query.
+    if !is_at_container_not_query(p)
+        && !is_at_container_style_query_in_parens(p)
+        && !is_at_container_scroll_state_query(p)
+    {
         let name = parse_custom_identifier(p, CssLexContext::Regular);
         // Because the name is optional, we have to indirectly check if it's
         // a CSS-wide keyword that can't be used. If it was required, we could
@@ -126,11 +152,48 @@ pub(crate) fn parse_any_container_query(p: &mut CssParser) -> ParsedSyntax {
     if is_at_container_not_query(p) {
         parse_container_not_query(p)
     } else {
-        parse_any_container_query_in_parens(p, None).map(|lhs| match p.cur() {
-            T![and] => parse_container_and_query(p, lhs),
-            T![or] => parse_container_or_query(p, lhs),
-            _ => lhs,
-        })
+        parse_any_container_query_in_parens(p, None).map(|lhs| complete_any_container_query(p, lhs))
+    }
+}
+
+/// Returns whether the current token can start a container query.
+///
+/// A container name is only valid when a query follows it.
+///
+/// ```css
+/// @container sidebar (width > 400px) { }
+/// @container sidebar not (width > 400px) { }
+/// ```
+#[inline]
+pub(crate) fn is_at_any_container_query(p: &mut CssParser) -> bool {
+    // `and (...)` and `or (...)` would otherwise be accepted as a
+    // general-enclosed function, but they can only continue a query.
+    if p.at(T![and]) || p.at(T![or]) {
+        return false;
+    }
+
+    is_at_container_not_query(p)
+        || p.at(T!['('])
+        || is_at_container_style_query_in_parens(p)
+        || is_at_any_css_function(p)
+        || is_at_scss_container_interpolated_query(p)
+}
+
+/// Completes a container query whose first operand was already parsed,
+/// chaining any following `and` or `or` operands.
+///
+/// ```scss
+/// @container #{$query} and (width > 400px) { }
+/// ```
+#[inline]
+pub(crate) fn complete_any_container_query(
+    p: &mut CssParser,
+    lhs: CompletedMarker,
+) -> CompletedMarker {
+    match p.cur() {
+        T![and] => parse_container_and_query(p, lhs),
+        T![or] => parse_container_or_query(p, lhs),
+        _ => lhs,
     }
 }
 
@@ -438,6 +501,14 @@ pub(crate) fn parse_any_container_query_in_parens(
         parse_container_size_feature_in_parens(p)
     } else if is_at_container_scroll_state_query(p) {
         parse_container_scroll_state_query(p)
+    } else if is_at_scss_container_interpolated_query(p) {
+        CssSyntaxFeatures::Scss.parse_exclusive_syntax(
+            p,
+            parse_scss_container_interpolated_query,
+            |p, marker| {
+                scss_only_syntax_error(p, "SCSS interpolated container queries", marker.range(p))
+            },
+        )
     } else if is_at_any_css_function(p) {
         // Here we're inside a <general-enclosed> branch,
         // which means that the parser is at unknown syntax.

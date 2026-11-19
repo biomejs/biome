@@ -77,7 +77,7 @@ class Test {
 
 	constructor(a: string) {}
 
-	private declare readonly test?: string;
+	declare private readonly test?: string;
 	readonly test2!: string;
 
 	display2(): void {

@@ -1,39 +1,80 @@
+use crate::bullet_list::{FmtAnyList, list_ends_with_quote_prefix};
+use crate::context::ProseWrap;
 use crate::markdown::auxiliary::newline::FormatMdNewlineOptions;
 use crate::markdown::auxiliary::paragraph::FormatMdParagraphOptions;
+use crate::markdown::auxiliary::quote_prefix::FormatMdQuotePrefixOptions;
 use crate::prelude::*;
-use crate::shared::TextPrintMode;
+use crate::quote::quote_line_prefix;
+use crate::shared::{TextContext, TextPrintMode, format_removed_quote_boundary};
 use biome_formatter::FormatRuleWithOptions;
-use biome_formatter::write;
-use biome_markdown_syntax::{AnyMdBlock, AnyMdLeafBlock, MdBlockList, MdBullet};
+use biome_formatter::{format_args, write};
+use biome_markdown_syntax::list_ext::AnyListItem;
+use biome_markdown_syntax::{
+    AnyMdBlock, AnyMdCodeBlock, AnyMdContainerBlock, AnyMdInline, AnyMdLeafBlock, GfmTable,
+    MdBlockList, MdBullet, MdQuote,
+};
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatMdBlockList {
-    /// When true, it removes all leading newlines and trailing newlines
-    paragraph_print_mode: TextPrintMode,
-
-    trim: bool,
+    quote_boundary_trim: QuoteBoundaryTrim,
 }
 impl FormatRule<MdBlockList> for FormatMdBlockList {
     type Context = MarkdownFormatContext;
     fn fmt(&self, node: &MdBlockList, f: &mut MarkdownFormatter) -> FormatResult<()> {
+        let prose_wrap = f.options().prose_wrap();
         let mut joiner = f.join();
 
-        let inside_list = node
+        let text_context = if node
             .syntax()
             .parent()
-            .is_some_and(|n| MdBullet::can_cast(n.kind()));
+            .is_some_and(|n| MdBullet::can_cast(n.kind()))
+        {
+            TextContext::List
+        } else {
+            TextContext::Neutral
+        };
 
-        if !self.trim {
+        let should_not_trim = node
+            .syntax()
+            .parent()
+            .is_some_and(|node| MdQuote::can_cast(node.kind()));
+
+        if should_not_trim {
+            let quote_trim_range = quote_boundary_trim_range(node, self.quote_boundary_trim);
             let mut prev_content = PrevContentBlock::None;
-            let mut iter = node.iter().peekable();
+            let mut prev_list_removed_quote_prefix = false;
+            let mut iter = node.iter().enumerate().peekable();
 
-            while let Some(node) = iter.next() {
+            while let Some((index, node)) = iter.next() {
+                if !quote_trim_range.contains(&index) {
+                    joiner.entry(&format_with(|f| format_removed_quote_boundary(&node, f)));
+                    continue;
+                }
+
+                if prev_list_removed_quote_prefix {
+                    prev_list_removed_quote_prefix = false;
+                    let line_prefix = quote_line_prefix(node.syntax())?;
+                    joiner.entry(&format_with(|f| {
+                        write!(
+                            f,
+                            [dedent_to_root(&format_args![
+                                hard_line_break(),
+                                line_prefix.format(true)
+                            ])]
+                        )
+                    }));
+                }
+
                 match &node {
                     AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::MdParagraph(paragraph)) => {
                         prev_content = PrevContentBlock::Paragraph;
                         joiner.entry(&paragraph.format().with_options(FormatMdParagraphOptions {
-                            trim_mode: self.paragraph_print_mode,
-                            inside_list,
+                            trim_mode: if prose_wrap == ProseWrap::Preserve {
+                                TextPrintMode::Pristine
+                            } else {
+                                TextPrintMode::fill()
+                            },
+                            text_context,
                         }));
                     }
 
@@ -44,7 +85,7 @@ impl FormatRule<MdBlockList> for FormatMdBlockList {
 
                     node if node.is_newline() => {
                         if prev_content == PrevContentBlock::Header
-                            && iter.peek().is_some_and(|next| !next.is_newline())
+                            && iter.peek().is_some_and(|(_, next)| !next.is_newline())
                         {
                             let entry =
                                 format_with(|f| write!(f, [node.format(), hard_line_break()]));
@@ -55,9 +96,39 @@ impl FormatRule<MdBlockList> for FormatMdBlockList {
                         prev_content = PrevContentBlock::Other;
                     }
 
+                    AnyMdBlock::MdQuotePrefix(prefix) if prose_wrap != ProseWrap::Preserve => {
+                        joiner.entry(&prefix.format().with_options(FormatMdQuotePrefixOptions {
+                            should_remove: true,
+                        }));
+
+                        // A newline printed as text skips the `align` markers, so
+                        // print this quote-only line's markers explicitly.
+                        if let Some((_, newline)) = iter.next_if(|(index, next)| {
+                            quote_trim_range.contains(index)
+                                && next.is_newline()
+                                && !newline_block_has_comments(next)
+                        }) {
+                            prev_content = PrevContentBlock::Other;
+                            let line_prefix = quote_line_prefix(newline.syntax())?;
+                            joiner.entry(&format_with(move |f| {
+                                format_removed_quote_boundary(&newline, f)?;
+                                write!(
+                                    f,
+                                    [
+                                        dedent_to_root(&format_args![
+                                            hard_line_break(),
+                                            line_prefix.format(false)
+                                        ]),
+                                        hard_line_break()
+                                    ]
+                                )
+                            }));
+                        }
+                    }
+
                     AnyMdBlock::MdQuotePrefix(prefix)
                         if prev_content == PrevContentBlock::Paragraph
-                            && iter.peek().is_some_and(|next| next.is_fenced_block()) =>
+                            && iter.peek().is_some_and(|(_, next)| next.is_fenced_block()) =>
                     {
                         prev_content = PrevContentBlock::Other;
                         let entry = format_with(|f| {
@@ -74,7 +145,14 @@ impl FormatRule<MdBlockList> for FormatMdBlockList {
 
                     _ => {
                         prev_content = PrevContentBlock::Other;
-                        joiner.entry(&node.format());
+                        if let Some(list_item) = node.as_any_list_item() {
+                            prev_list_removed_quote_prefix =
+                                list_ends_with_quote_prefix(&list_item);
+                            joiner
+                                .entry(&format_with(|f| FmtAnyList::new(list_item.clone()).fmt(f)));
+                        } else {
+                            joiner.entry(&node.format());
+                        }
                     }
                 }
             }
@@ -82,56 +160,11 @@ impl FormatRule<MdBlockList> for FormatMdBlockList {
             return joiner.finish();
         }
 
-        let mut iter = node.iter();
-
-        // Count trailing newlines using next_back
-        let mut trailing_count = 0;
-        while iter.next_back().is_some_and(|block| block.is_newline()) {
-            trailing_count += 1;
+        DefaultBlockListFormatter {
+            node: node.clone(),
+            text_context,
         }
-
-        // we don't need the iter anymore
-        drop(iter);
-
-        // Single forward pass in document order
-        let mut still_leading = true;
-        let mut prev_was_header = false;
-        let content_count = node.len() - trailing_count;
-        let mut iter = node.iter().enumerate().peekable();
-        while let Some((index, node)) = iter.next() {
-            if let AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::MdNewline(newline)) = &node {
-                let is_leading = still_leading;
-                let is_trailing = index >= content_count;
-                if prev_was_header && !is_leading && !is_trailing {
-                    joiner.entry(&newline.format().with_options(FormatMdNewlineOptions {
-                        should_remove: true,
-                    }));
-                    while iter.peek().is_some_and(|(_, next)| next.is_newline()) {
-                        if let Some((
-                            _,
-                            AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::MdNewline(extra)),
-                        )) = iter.next()
-                        {
-                            joiner.entry(&extra.format().with_options(FormatMdNewlineOptions {
-                                should_remove: true,
-                            }));
-                        }
-                    }
-                    joiner.entry(&empty_line());
-                } else {
-                    joiner.entry(&newline.format().with_options(FormatMdNewlineOptions {
-                        should_remove: is_leading || is_trailing,
-                    }));
-                }
-                prev_was_header = false;
-            } else {
-                still_leading = false;
-                prev_was_header = node.is_any_header();
-                joiner.entry(&node.format());
-            }
-        }
-
-        joiner.finish()
+        .fmt(f)
     }
 }
 
@@ -143,20 +176,674 @@ enum PrevContentBlock {
     Other,
 }
 
-pub(crate) struct FormatMdBlockListOptions {
-    /// Signals how [MdParagraph] should be formatted
-    pub(crate) paragraph_print_mode: TextPrintMode,
+#[derive(Debug, Clone, Copy, Default)]
+pub(crate) enum QuoteBoundaryTrim {
+    /// Preserve quote-only boundary lines.
+    #[default]
+    None,
+    /// Remove quote-only lines before blockquote content.
+    Leading,
+    /// Remove quote-only lines before and after blockquote content.
+    LeadingAndTrailing,
+}
 
-    /// When true, leading and trailing newlines are removed
-    pub(crate) trim: bool,
+pub(crate) struct FormatMdBlockListOptions {
+    /// Controls removal of quote-only boundary lines.
+    pub(crate) quote_boundary_trim: QuoteBoundaryTrim,
 }
 
 impl FormatRuleWithOptions<MdBlockList> for FormatMdBlockList {
     type Options = FormatMdBlockListOptions;
 
     fn with_options(mut self, options: Self::Options) -> Self {
-        self.paragraph_print_mode = options.paragraph_print_mode;
-        self.trim = options.trim;
+        self.quote_boundary_trim = options.quote_boundary_trim;
         self
     }
+}
+
+pub(crate) fn quote_boundary_trim_range(
+    node: &MdBlockList,
+    quote_boundary_trim: QuoteBoundaryTrim,
+) -> std::ops::Range<usize> {
+    let start = match quote_boundary_trim {
+        QuoteBoundaryTrim::None => 0,
+        QuoteBoundaryTrim::Leading | QuoteBoundaryTrim::LeadingAndTrailing => {
+            quote_boundary_trim_start(node)
+        }
+    };
+    let end = match quote_boundary_trim {
+        QuoteBoundaryTrim::LeadingAndTrailing => quote_boundary_trim_end(node, start),
+        QuoteBoundaryTrim::None | QuoteBoundaryTrim::Leading => node.len(),
+    };
+
+    start..end
+}
+
+/// Finds the first blocklist entry that belongs to blockquote content.
+///
+/// Quote-only lines at the start of a blockquote do not all have the same CST
+/// shape. The first quote-only line uses the `MdQuote` node's own prefix, so
+/// the content list starts with `MdNewline`. Later quote-only lines are stored
+/// as `MdQuotePrefix` followed by `MdNewline`. The scan trims only those exact
+/// boundary shapes and stops when a quote prefix is followed by real content.
+fn quote_boundary_trim_start(node: &MdBlockList) -> usize {
+    let mut iter = node.iter().enumerate().peekable();
+    let mut start = 0;
+
+    // The first empty line of a blockquote is represented by the quote node's
+    // own prefix plus a leading newline in the content list.
+    if iter
+        .peek()
+        .is_some_and(|(_, block)| block.is_newline() && !newline_block_has_comments(block))
+    {
+        iter.next();
+        start = 1;
+    }
+
+    // Additional quote-only leading lines are represented as
+    // MdQuotePrefix + MdNewline pairs. Stop as soon as a quote prefix is
+    // followed by real content; that prefix belongs to the content line.
+    while let Some((prefix_index, AnyMdBlock::MdQuotePrefix(_))) = iter.next() {
+        if iter
+            .peek()
+            .is_some_and(|(_, block)| block.is_newline() && !newline_block_has_comments(block))
+        {
+            iter.next();
+            start = prefix_index + 2;
+        } else {
+            break;
+        }
+    }
+
+    start
+}
+
+/// Finds the exclusive end of blockquote content after trailing boundary trim.
+///
+/// Trailing quote-only lines can be represented as a final `MdQuotePrefix`, or
+/// as `MdQuotePrefix` followed by `MdNewline`. The backward scan trims only
+/// those shapes. A newline is not enough by itself: it belongs to a quote-only
+/// boundary only when the previous block-list entry is an `MdQuotePrefix`.
+fn quote_boundary_trim_end(node: &MdBlockList, start: usize) -> usize {
+    let mut iter = node.iter().enumerate();
+    let mut end = node.len();
+
+    loop {
+        match iter.next_back() {
+            // A final MdQuotePrefix is a quote-only trailing line without its
+            // own newline token.
+            Some((index, AnyMdBlock::MdQuotePrefix(_))) if index >= start => {
+                end = index;
+            }
+            // A final newline can belong to a quote-only trailing line only
+            // when it is immediately preceded by an MdQuotePrefix.
+            Some((_, block)) if block.is_newline() && !newline_block_has_comments(&block) => {
+                match iter.next_back() {
+                    Some((prefix_index, AnyMdBlock::MdQuotePrefix(_))) if prefix_index >= start => {
+                        end = prefix_index;
+                    }
+                    _ => break,
+                }
+            }
+            _ => break,
+        }
+    }
+
+    end
+}
+
+pub(crate) struct DefaultBlockListFormatter {
+    node: MdBlockList,
+    text_context: TextContext,
+}
+
+#[derive(Default)]
+struct PreviousBlock(Option<AnyMdBlock>);
+
+impl PreviousBlock {
+    fn set(&mut self, block: AnyMdBlock) {
+        self.0 = Some(block);
+    }
+
+    fn is_header(&self) -> bool {
+        self.0.as_ref().is_some_and(AnyMdBlock::is_any_header)
+    }
+
+    fn is_list(&self) -> bool {
+        self.0.as_ref().is_some_and(AnyMdBlock::is_list)
+    }
+
+    fn is_paragraph(&self) -> bool {
+        self.0.as_ref().is_some_and(AnyMdBlock::is_paragraph)
+    }
+
+    fn is_link_reference_definition(&self) -> bool {
+        self.0
+            .as_ref()
+            .is_some_and(AnyMdBlock::is_link_reference_definition)
+    }
+
+    fn is_thematic_break(&self) -> bool {
+        self.0.as_ref().is_some_and(AnyMdBlock::is_thematic_break)
+    }
+
+    fn is_fenced_code_block(&self) -> bool {
+        self.0.as_ref().is_some_and(AnyMdBlock::is_fenced_block)
+    }
+
+    fn is_quote_ending_with_fenced_code_block(&self) -> bool {
+        self.0
+            .as_ref()
+            .is_some_and(quote_ends_with_fenced_code_block)
+    }
+
+    fn ends_with_line_break(&self) -> bool {
+        self.0
+            .as_ref()
+            .and_then(AnyMdBlock::as_any_list_item)
+            .is_some_and(|item| list_ends_with_line_break(&item))
+    }
+
+    /// Whether the block terminates its own last line. Otherwise the first
+    /// [MdNewline] that follows the block is its line terminator.
+    ///
+    /// [MdNewline]: biome_markdown_syntax::MdNewline
+    fn terminates_last_line(&self) -> bool {
+        self.0.as_ref().is_some_and(block_ends_with_line_break)
+    }
+
+    fn needs_empty_line_before_list(&self) -> bool {
+        self.0.as_ref().is_some_and(|block| {
+            matches!(
+                block,
+                AnyMdBlock::AnyMdLeafBlock(
+                    AnyMdLeafBlock::AnyMdCodeBlock(AnyMdCodeBlock::MdIndentCodeBlock(_))
+                )
+            ) || matches!(
+                block,
+                AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::MdHtmlBlock(html)) if !html.is_html_comment()
+            ) || matches!(
+                block,
+                AnyMdBlock::AnyMdLeafBlock(
+                    AnyMdLeafBlock::MdParagraph(_) | AnyMdLeafBlock::GfmTable(_)
+                )
+            ) || block
+                .as_any_md_container_block()
+                .is_some_and(|container| container.as_md_quote().is_some())
+        })
+    }
+}
+
+impl Format<MarkdownFormatContext> for DefaultBlockListFormatter {
+    fn fmt(&self, f: &mut Formatter<MarkdownFormatContext>) -> FormatResult<()> {
+        f.context().comments().is_suppressed(self.node.syntax());
+
+        let mut joiner = f.join();
+
+        let mut iter = self.node.iter();
+
+        // Count trailing newlines using next_back
+        let mut trailing_count = 0;
+        while iter
+            .next_back()
+            .is_some_and(|block| block.is_newline() && !newline_block_has_comments(&block))
+        {
+            trailing_count += 1;
+        }
+
+        // we don't need the iter anymore
+        drop(iter);
+
+        // Single forward pass in document order
+        let mut still_leading = true;
+        let mut previous_block = PreviousBlock::default();
+        let mut after_newline = false;
+        let content_count = self.node.len() - trailing_count;
+        let mut iter = self.node.iter().enumerate().peekable();
+        while let Some((index, node)) = iter.next() {
+            if let AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::MdNewline(newline)) = &node {
+                let is_leading = still_leading;
+                let is_trailing = index >= content_count;
+                let has_comments = newline.value_token().is_ok_and(|token| {
+                    token
+                        .leading_trivia()
+                        .pieces()
+                        .any(|piece| piece.is_comments())
+                        || token
+                            .trailing_trivia()
+                            .pieces()
+                            .any(|piece| piece.is_comments())
+                });
+                let next_is_bull_item = iter.peek().is_some_and(|(_, next)| next.is_list());
+                let next_content_is_thematic_break =
+                    next_content_block_is_thematic_break(&self.node, index + 1, content_count);
+
+                if has_comments {
+                    joiner.entry(&newline.format());
+                    previous_block.set(node.clone());
+                    still_leading = false;
+                } else if previous_block.0.as_ref().is_some_and(|block| {
+                    newline_block_has_comments(block) || block.is_html_comment()
+                }) {
+                    joiner.entry(&newline.format());
+                } else if previous_block.is_link_reference_definition()
+                    && !is_leading
+                    && !is_trailing
+                    && next_content_block_is_link_reference_definition(
+                        &self.node,
+                        index + 1,
+                        content_count,
+                    )
+                {
+                    joiner.entry(&newline.format().with_options(FormatMdNewlineOptions {
+                        print_mode: TextPrintMode::Remove,
+                    }));
+                    while iter.peek().is_some_and(|(i, next)| {
+                        next.is_newline() && !newline_block_has_comments(next) && *i < content_count
+                    }) {
+                        if let Some((
+                            _,
+                            AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::MdNewline(extra)),
+                        )) = iter.next()
+                        {
+                            joiner.entry(&extra.format().with_options(FormatMdNewlineOptions {
+                                print_mode: TextPrintMode::Remove,
+                            }));
+                        }
+                    }
+                    joiner.entry(&hard_line_break());
+                } else if ((previous_block.is_thematic_break() && !after_newline)
+                    || next_content_is_thematic_break)
+                    && !is_leading
+                    && !is_trailing
+                {
+                    joiner.entry(&newline.format().with_options(FormatMdNewlineOptions {
+                        print_mode: TextPrintMode::Remove,
+                    }));
+                    while iter.peek().is_some_and(|(i, next)| {
+                        next.is_newline() && !newline_block_has_comments(next) && *i < content_count
+                    }) {
+                        if let Some((
+                            _,
+                            AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::MdNewline(extra)),
+                        )) = iter.next()
+                        {
+                            joiner.entry(&extra.format().with_options(FormatMdNewlineOptions {
+                                print_mode: TextPrintMode::Remove,
+                            }));
+                        }
+                    }
+                    joiner.entry(&empty_line());
+                } else if previous_block.is_header()
+                    && !after_newline
+                    && !is_leading
+                    && !is_trailing
+                {
+                    joiner.entry(&newline.format().with_options(FormatMdNewlineOptions {
+                        print_mode: TextPrintMode::Remove,
+                    }));
+                    while iter.peek().is_some_and(|(_, next)| {
+                        next.is_newline() && !newline_block_has_comments(next)
+                    }) {
+                        if let Some((
+                            _,
+                            AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::MdNewline(extra)),
+                        )) = iter.next()
+                        {
+                            joiner.entry(&extra.format().with_options(FormatMdNewlineOptions {
+                                print_mode: TextPrintMode::Remove,
+                            }));
+                        }
+                    }
+                    joiner.entry(&empty_line());
+                } else if previous_block.is_list() && !is_leading && !is_trailing {
+                    // A list always flushes its own trailing line break, so
+                    // the newlines that follow it at this level must be
+                    // re-evaluated as a whole run: printing them one by one
+                    // double-counts the line ending when the last block of
+                    // the list (e.g. a thematic break) doesn't swallow it.
+                    let mut run = vec![newline.clone()];
+                    while iter.peek().is_some_and(|(i, next)| {
+                        next.is_newline() && !newline_block_has_comments(next) && *i < content_count
+                    }) {
+                        if let Some((
+                            _,
+                            AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::MdNewline(nl)),
+                        )) = iter.next()
+                        {
+                            run.push(nl);
+                        }
+                    }
+                    let next_is_list = iter.peek().is_some_and(|(_, next)| next.is_list());
+                    if next_is_list {
+                        // Sibling lists always need exactly one blank line to
+                        // stay separate lists.
+                        for nl in &run {
+                            joiner.entry(&nl.format().with_options(FormatMdNewlineOptions {
+                                print_mode: TextPrintMode::Remove,
+                            }));
+                        }
+                        joiner.entry(&empty_line());
+                    } else {
+                        let mut blank_lines = run.iter();
+                        if !previous_block.ends_with_line_break() {
+                            // The first newline is the line terminator of the
+                            // list itself: the list has already flushed its own
+                            // line break, so printing it would create a
+                            // spurious blank line.
+                            if let Some(line_terminator) = blank_lines.next() {
+                                joiner.entry(&line_terminator.format().with_options(
+                                    FormatMdNewlineOptions {
+                                        print_mode: TextPrintMode::Remove,
+                                    },
+                                ));
+                            }
+                        }
+                        // The remaining newlines are real blank lines. They
+                        // collapse into one, or into two before an indented
+                        // code block so that it can't be read as part of the
+                        // list.
+                        let kept = if iter.peek().is_some_and(|(_, next)| next.is_indent_block()) {
+                            2
+                        } else {
+                            1
+                        };
+                        for (position, blank_line) in blank_lines.enumerate() {
+                            joiner.entry(&blank_line.format().with_options(
+                                FormatMdNewlineOptions {
+                                    print_mode: if position < kept {
+                                        TextPrintMode::Pristine
+                                    } else {
+                                        TextPrintMode::Remove
+                                    },
+                                },
+                            ));
+                        }
+                    }
+                } else if previous_block.is_fenced_code_block()
+                    && !is_leading
+                    && !is_trailing
+                    && next_content_block_is_list(&self.node, index + 1, content_count)
+                {
+                    // A fenced code block doesn't print its own line
+                    // terminator, so the first newline of this run is the
+                    // terminator and the rest are blank lines. Removing the
+                    // whole run and printing one empty line keeps the output
+                    // stable across passes: replacing only the last newline
+                    // with a hard line break shrinks the run by one newline
+                    // on every pass.
+                    joiner.entry(&newline.format().with_options(FormatMdNewlineOptions {
+                        print_mode: TextPrintMode::Remove,
+                    }));
+                    while iter.peek().is_some_and(|(i, next)| {
+                        next.is_newline() && !newline_block_has_comments(next) && *i < content_count
+                    }) {
+                        if let Some((
+                            _,
+                            AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::MdNewline(extra)),
+                        )) = iter.next()
+                        {
+                            joiner.entry(&extra.format().with_options(FormatMdNewlineOptions {
+                                print_mode: TextPrintMode::Remove,
+                            }));
+                        }
+                    }
+                    joiner.entry(&empty_line());
+                } else if next_is_bull_item {
+                    joiner.entry(&newline.format().with_options(FormatMdNewlineOptions {
+                        print_mode: TextPrintMode::Remove,
+                    }));
+                    if !is_leading && !is_trailing {
+                        if previous_block.needs_empty_line_before_list() {
+                            joiner.entry(&empty_line());
+                        } else {
+                            joiner.entry(&hard_line_break());
+                        }
+                    }
+                } else if is_leading || is_trailing {
+                    joiner.entry(&newline.format().with_options(FormatMdNewlineOptions {
+                        print_mode: TextPrintMode::Remove,
+                    }));
+                } else {
+                    let mut newlines = vec![newline.clone()];
+                    while iter
+                        .peek()
+                        .is_some_and(|(i, next)| next.is_newline() && *i < content_count)
+                    {
+                        if let Some((
+                            _,
+                            AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::MdNewline(next_newline)),
+                        )) = iter.next()
+                        {
+                            newlines.push(next_newline);
+                        }
+                    }
+                    if iter.peek().is_some_and(|(_, next)| next.is_list()) {
+                        // Same separator as a single newline before a list.
+                        for newline in &newlines {
+                            joiner.entry(&newline.format().with_options(FormatMdNewlineOptions {
+                                print_mode: TextPrintMode::Remove,
+                            }));
+                        }
+                        if previous_block.needs_empty_line_before_list() {
+                            joiner.entry(&empty_line());
+                        } else {
+                            joiner.entry(&hard_line_break());
+                        }
+                    } else {
+                        // Consecutive blank lines collapse into one. When the
+                        // previous block doesn't terminate its last line, the
+                        // first newline is that terminator.
+                        let kept = if previous_block.terminates_last_line() {
+                            1
+                        } else {
+                            2
+                        };
+                        for (position, newline) in newlines.iter().enumerate() {
+                            joiner.entry(&newline.format().with_options(FormatMdNewlineOptions {
+                                print_mode: if position < kept {
+                                    TextPrintMode::Pristine
+                                } else {
+                                    TextPrintMode::Remove
+                                },
+                            }));
+                        }
+                    }
+                }
+                after_newline = true;
+            } else {
+                let was_leading = still_leading;
+                let node_is_thematic_break = node.is_thematic_break();
+                let node_is_list = node.is_list();
+                if ((previous_block.is_list() && node_is_list)
+                    || previous_block.is_thematic_break()
+                    || node_is_thematic_break)
+                    && !was_leading
+                    && !after_newline
+                {
+                    joiner.entry(&empty_line());
+                } else if previous_block.is_quote_ending_with_fenced_code_block()
+                    && !was_leading
+                    && !after_newline
+                {
+                    joiner.entry(&hard_line_break());
+                } else if previous_block.is_paragraph()
+                    && !node.is_html_block()
+                    && !after_newline
+                    && !self.text_context.is_list()
+                {
+                    // A block that interrupts a paragraph (a header, a fenced
+                    // code block, a list, ...) gets a blank line before it.
+                    // Inside a list item the two stay tight, so a nested list
+                    // doesn't turn the item into a loose one. HTML blocks stay
+                    // attached to the paragraph, as Prettier does.
+                    joiner.entry(&empty_line());
+                }
+
+                still_leading = false;
+                previous_block.set(node.clone());
+                after_newline = false;
+                if let Some(list_item) = node.as_any_list_item() {
+                    joiner.entry(&format_with(|f| FmtAnyList::new(list_item.clone()).fmt(f)));
+                } else {
+                    joiner.entry(&node.format());
+                }
+            }
+        }
+
+        joiner.finish()
+    }
+}
+
+fn quote_ends_with_fenced_code_block(block: &AnyMdBlock) -> bool {
+    let AnyMdBlock::AnyMdContainerBlock(quote) = block else {
+        return false;
+    };
+    let Some(quote) = quote.as_md_quote() else {
+        return false;
+    };
+    quote
+        .content()
+        .iter()
+        .rev()
+        .find(|block| !block.is_newline())
+        .is_some_and(|block| block.is_fenced_block())
+}
+
+fn next_content_block_is_list(
+    block_list: &MdBlockList,
+    start: usize,
+    content_count: usize,
+) -> bool {
+    block_list
+        .iter()
+        .enumerate()
+        .skip(start)
+        .take_while(|(index, _)| *index < content_count)
+        .find(|(_, block)| !block.is_newline())
+        .is_some_and(|(_, block)| block.is_list())
+}
+
+fn newline_block_has_comments(block: &AnyMdBlock) -> bool {
+    block
+        .as_any_md_leaf_block()
+        .and_then(AnyMdLeafBlock::as_md_newline)
+        .and_then(|newline| newline.value_token().ok())
+        .is_some_and(|token| {
+            token
+                .leading_trivia()
+                .pieces()
+                .any(|piece| piece.is_comments())
+                || token
+                    .trailing_trivia()
+                    .pieces()
+                    .any(|piece| piece.is_comments())
+        })
+}
+
+fn next_content_block_is_thematic_break(
+    block_list: &MdBlockList,
+    start: usize,
+    content_count: usize,
+) -> bool {
+    block_list
+        .iter()
+        .enumerate()
+        .skip(start)
+        .take_while(|(index, _)| *index < content_count)
+        .find(|(_, block)| !block.is_newline())
+        .is_some_and(|(_, block)| block.is_thematic_break())
+}
+
+fn next_content_block_is_link_reference_definition(
+    block_list: &MdBlockList,
+    start: usize,
+    content_count: usize,
+) -> bool {
+    block_list
+        .iter()
+        .enumerate()
+        .skip(start)
+        .take_while(|(index, _)| *index < content_count)
+        .find(|(_, block)| !block.is_newline())
+        .is_some_and(|(_, block)| block.is_link_reference_definition())
+}
+
+/// Whether the list terminates its own line.
+///
+/// This is the case when the last block of its last bullet carries the line
+/// ending: a paragraph ending with a newline or a hard line break, a table
+/// ending with a newline, a quote whose last block carries it, or a blank line
+/// swallowed by the bullet as [MdNewline]. Blocks that end with their last
+/// visible character, like a thematic break, leave the line terminator to the
+/// enclosing block list.
+///
+/// [MdNewline]: biome_markdown_syntax::MdNewline
+pub(crate) fn list_ends_with_line_break(item: &AnyListItem) -> bool {
+    let Some(last_bullet) = item.list().iter().last() else {
+        return false;
+    };
+    let mut content = last_bullet.content();
+    loop {
+        match content.iter().last() {
+            Some(
+                block @ (AnyMdBlock::AnyMdLeafBlock(
+                    AnyMdLeafBlock::MdNewline(_)
+                    | AnyMdLeafBlock::MdParagraph(_)
+                    | AnyMdLeafBlock::GfmTable(_),
+                )
+                | AnyMdBlock::AnyMdContainerBlock(AnyMdContainerBlock::MdQuote(_))),
+            ) => return block_ends_with_line_break(&block),
+            Some(block) => match block
+                .as_any_list_item()
+                .and_then(|nested| nested.list().iter().last())
+            {
+                // Nested list: the line ending is carried by its last bullet.
+                Some(bullet) => content = bullet.content(),
+                None => return false,
+            },
+            None => return false,
+        }
+    }
+}
+
+/// Whether the block carries the line ending of its last line.
+///
+/// Paragraphs and indented code blocks end with a newline or a hard line
+/// break in their inline content, and table rows own their newline. A quote or
+/// list delegates to its last block. Other blocks, like headers and fenced code
+/// blocks, end with their last visible character.
+fn block_ends_with_line_break(block: &AnyMdBlock) -> bool {
+    match block {
+        AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::MdNewline(_)) => true,
+        AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::MdParagraph(paragraph)) => {
+            paragraph.ends_with_newline()
+                || matches!(paragraph.list().last(), Some(AnyMdInline::MdHardLine(_)))
+        }
+        AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::AnyMdCodeBlock(
+            AnyMdCodeBlock::MdIndentCodeBlock(code),
+        )) => code.content().ends_with_newline(),
+        AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::GfmTable(table)) => {
+            table_ends_with_line_break(table)
+        }
+        AnyMdBlock::AnyMdContainerBlock(AnyMdContainerBlock::MdQuote(quote)) => quote
+            .content()
+            .iter()
+            .last()
+            .is_some_and(|last| block_ends_with_line_break(&last)),
+        _ => block
+            .as_any_list_item()
+            .is_some_and(|item| list_ends_with_line_break(&item)),
+    }
+}
+
+fn table_ends_with_line_break(table: &GfmTable) -> bool {
+    table.body().iter().last().map_or_else(
+        || {
+            table
+                .delimiter()
+                .is_ok_and(|row| row.newline_token().is_some())
+        },
+        |row| row.newline_token().is_some(),
+    )
 }

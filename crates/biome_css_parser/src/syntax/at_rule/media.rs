@@ -1,16 +1,20 @@
 use super::parse_error::expected_media_query;
 use crate::parser::CssParser;
 use crate::syntax::at_rule::error::{AnyInParensChainParseRecovery, AnyInParensParseRecovery};
-use crate::syntax::at_rule::feature::{expected_any_query_feature, parse_any_query_feature};
+use crate::syntax::at_rule::feature::{expected_any_query_feature, parse_media_query_feature};
 use crate::syntax::block::parse_conditional_block;
-use crate::syntax::scss::{is_at_scss_interpolation, parse_scss_regular_interpolation};
-use crate::syntax::util::skip_possible_tailwind_syntax;
-use crate::syntax::{
-    is_at_identifier, is_at_metavariable, is_nth_at_identifier, parse_metavariable,
-    parse_regular_identifier,
+use crate::syntax::parse_error::scss_only_syntax_error;
+use crate::syntax::scss::{
+    is_at_scss_interpolated_media_in_parens, is_at_scss_media_condition, is_at_scss_media_query,
+    is_nth_at_scss_interpolated_identifier, is_nth_at_scss_interpolation, is_nth_source_tight,
+    parse_scss_interpolated_media_in_parens, parse_scss_interpolated_name,
+    parse_scss_media_condition, parse_scss_media_condition_from_query, parse_scss_media_query,
 };
+use crate::syntax::util::skip_possible_tailwind_syntax;
+use crate::syntax::{CssSyntaxFeatures, is_at_metavariable, parse_metavariable};
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
+use biome_parser::SyntaxFeature;
 use biome_parser::diagnostic::expected_any;
 use biome_parser::parse_lists::ParseSeparatedList;
 use biome_parser::parse_recovery::{ParseRecoveryTokenSet, RecoveryResult};
@@ -101,10 +105,7 @@ impl ParseSeparatedList for MediaQueryList {
 
 #[inline]
 pub(crate) fn is_at_any_media_query(p: &mut CssParser) -> bool {
-    is_at_media_type_query(p)
-        || is_at_scss_media_query(p)
-        || is_at_metavariable(p)
-        || is_at_any_media_condition(p)
+    is_at_media_type_query(p) || is_at_metavariable(p) || is_at_any_media_condition(p)
 }
 
 /// Parses one media query list item.
@@ -120,8 +121,6 @@ pub(crate) fn is_at_any_media_query(p: &mut CssParser) -> bool {
 pub(crate) fn parse_any_media_query(p: &mut CssParser) -> ParsedSyntax {
     if is_at_media_type_query(p) {
         parse_any_media_type_query(p)
-    } else if is_at_scss_media_query(p) {
-        parse_scss_media_query(p)
     } else if is_at_metavariable(p) {
         parse_metavariable(p)
     } else if is_at_any_media_condition(p) {
@@ -144,34 +143,8 @@ fn parse_any_media_condition_query(p: &mut CssParser) -> ParsedSyntax {
 }
 
 #[inline]
-fn is_at_scss_media_query(p: &mut CssParser) -> bool {
-    is_at_scss_interpolation(p)
-}
-
-/// Parses a Sass interpolation as a complete media query.
-///
-/// Example:
-/// ```scss
-/// @media #{$query} {}
-/// ```
-///
-/// Docs: https://sass-lang.com/documentation/at-rules/css/#media
-#[inline]
-fn parse_scss_media_query(p: &mut CssParser) -> ParsedSyntax {
-    if !is_at_scss_media_query(p) {
-        return Absent;
-    }
-
-    let m = p.start();
-    // Guarded by `is_at_scss_media_query` above.
-    parse_scss_regular_interpolation(p).ok();
-
-    Present(m.complete(p, SCSS_MEDIA_QUERY))
-}
-
-#[inline]
 pub(crate) fn is_at_any_media_condition(p: &mut CssParser) -> bool {
-    is_at_media_not_condition(p) || is_at_any_media_in_parens(p)
+    is_at_media_not_condition(p) || is_at_any_media_condition_operand(p)
 }
 
 /// Parses a media condition, including chained `and` / `or` forms.
@@ -185,8 +158,16 @@ pub(crate) fn parse_any_media_condition(p: &mut CssParser) -> ParsedSyntax {
 
     if is_at_media_not_condition(p) {
         parse_media_not_condition(p)
+    } else if is_at_scss_media_condition(p) {
+        CssSyntaxFeatures::Scss.parse_exclusive_syntax(
+            p,
+            parse_scss_media_condition,
+            |p, marker| {
+                scss_only_syntax_error(p, "SCSS interpolated media conditions", marker.range(p))
+            },
+        )
     } else {
-        parse_any_media_in_parens(p).map(|lhs| match p.cur() {
+        parse_any_media_condition_operand(p).map(|lhs| match p.cur() {
             T![and] => parse_media_and_condition(p, lhs),
             T![or] => parse_media_or_condition(p, lhs),
             _ => lhs,
@@ -196,60 +177,171 @@ pub(crate) fn parse_any_media_condition(p: &mut CssParser) -> ParsedSyntax {
 
 const MODIFIER_TYPE_QUERY_SET: TokenSet<CssSyntaxKind> = token_set!(T![only], T![not]);
 
+/// Returns whether the current token starts a plain or interpolated media type name.
+///
+/// ```scss
+/// @media screen {}
+/// @media print-#{$suffix} {}
+/// ```
+#[inline]
+fn is_at_media_type_name(p: &mut CssParser) -> bool {
+    is_nth_at_scss_interpolated_identifier(p, 0)
+}
+
+/// Returns whether the current token has a source-tight SCSS interpolation
+/// suffix.
+///
+/// ```scss
+/// @media only#{$type} {}
+/// ```
+#[inline]
+fn is_at_source_tight_scss_interpolation_suffix(p: &mut CssParser) -> bool {
+    is_nth_at_scss_interpolation(p, 1) && is_nth_source_tight(p, 1)
+}
+
+/// Returns whether the current token is a standalone media-type modifier.
+///
+/// ```scss
+/// @media only #{$type} {}
+/// ```
+#[inline]
+fn is_at_media_type_modifier(p: &mut CssParser) -> bool {
+    p.at_ts(MODIFIER_TYPE_QUERY_SET)
+        && is_nth_at_scss_interpolated_identifier(p, 1)
+        && !is_at_source_tight_scss_interpolation_suffix(p)
+}
+
+/// Returns whether the current token is a standalone media condition operator.
+///
+/// A source-tight `and#{$suffix}` remains an interpolated media type name.
+///
+/// ```scss
+/// @media screen and (color) {}
+/// @media screen and#{$suffix} {}
+/// ```
+#[inline]
+pub(crate) fn is_at_media_condition_operator(p: &mut CssParser) -> bool {
+    (p.at(T![and]) || p.at(T![or])) && !is_at_source_tight_scss_interpolation_suffix(p)
+}
+
+/// Returns whether a second media-type-shaped fragment can follow the parsed
+/// head.
+///
+/// ```scss
+/// $query: "and (width >= 40rem)";
+/// @media all #{$query} {}
+/// ```
+#[inline]
+fn is_at_media_query_tail_candidate(p: &mut CssParser) -> bool {
+    !is_nth_source_tight(p, 0) && !is_at_media_condition_operator(p) && is_at_media_type_name(p)
+}
+
 #[inline]
 fn parse_any_media_type_query(p: &mut CssParser) -> ParsedSyntax {
     if !is_at_media_type_query(p) {
         return Absent;
     }
 
-    let media_type_query = parse_media_type_query(p);
+    let has_modifier = is_at_media_type_modifier(p);
+    let head = p.start();
+    if has_modifier {
+        p.bump_ts(MODIFIER_TYPE_QUERY_SET);
+    }
+    let head_has_interpolation = parse_media_type(p);
+    let head = head.complete(p, CSS_MEDIA_TYPE_QUERY);
+
+    // The list-level Tailwind skip runs after this parser returns, but the
+    // optional SCSS tail must not consume a Tailwind import clause as a name.
+    skip_possible_tailwind_syntax(p);
+
+    let has_tail = !has_modifier && is_at_media_query_tail_candidate(p);
+    let tail_has_interpolation = if has_tail { parse_media_type(p) } else { false };
+
+    if head_has_interpolation || tail_has_interpolation {
+        return CssSyntaxFeatures::Scss.parse_exclusive_syntax(
+            p,
+            |p| parse_scss_media_query_from_head(p, head),
+            |p, marker| {
+                scss_only_syntax_error(p, "SCSS interpolated media queries", marker.range(p))
+            },
+        );
+    }
+
+    if has_tail {
+        // `$query: "and (width >= 40rem)"; @media all #{$query} {}` may form
+        // a query after evaluation. `@media screen print {}` cannot.
+        let bogus = head.precede(p).complete(p, CSS_BOGUS_MEDIA_QUERY);
+        p.error(expected_media_query(p, bogus.range(p)));
+        return Present(bogus);
+    }
 
     if p.at(T![and]) {
-        let m = media_type_query.precede(p);
+        let m = head.precede(p);
         p.bump(T![and]);
         parse_any_media_type_condition(p).or_add_diagnostic(p, expected_any_media_condition);
         Present(m.complete(p, CSS_MEDIA_AND_TYPE_QUERY))
     } else {
-        media_type_query
+        Present(head)
     }
 }
+
+/// Parses a plain or interpolated media type and reports whether it contains
+/// interpolation.
+///
+/// ```scss
+/// @media print-#{$suffix} {}
+/// ```
+#[inline]
+fn parse_media_type(p: &mut CssParser) -> bool {
+    if !is_at_media_type_name(p) {
+        return false;
+    }
+
+    let media_type = p.start();
+    let has_interpolation = parse_scss_interpolated_name(p)
+        .ok()
+        .is_some_and(|name| name.kind(p) == SCSS_INTERPOLATED_IDENTIFIER);
+    media_type.complete(p, CSS_MEDIA_TYPE);
+
+    has_interpolation
+}
+
+/// Completes an interpolated media-type query and parses its condition chain.
+///
+/// ```scss
+/// $query: "and (width >= 40rem)";
+/// @media all #{$query} and (color) {}
+/// ```
+#[inline]
+fn parse_scss_media_query_from_head(p: &mut CssParser, head: CompletedMarker) -> ParsedSyntax {
+    let query = head.precede(p).complete(p, SCSS_MEDIA_QUERY);
+    let query = if is_at_media_condition_operator(p) {
+        parse_scss_media_condition_from_query(p, query)
+            .precede(p)
+            .complete(p, CSS_MEDIA_CONDITION_QUERY)
+    } else {
+        query
+    };
+
+    Present(query)
+}
+
+/// Returns whether a media-type query starts at the current token.
+///
+/// ```scss
+/// @media only #{$type} {}
+/// @media not #{$type} {}
+/// ```
 #[inline]
 fn is_at_media_type_query(p: &mut CssParser) -> bool {
-    (p.at_ts(MODIFIER_TYPE_QUERY_SET) && is_nth_at_identifier(p, 1))
-        || (is_at_identifier(p) && !p.at(T![not]))
-}
-#[inline]
-fn parse_media_type_query(p: &mut CssParser) -> ParsedSyntax {
-    if !is_at_media_type_query(p) {
-        return Absent;
-    }
-
-    let m = p.start();
-
-    p.eat_ts(MODIFIER_TYPE_QUERY_SET);
-    // Guarded by `is_at_media_type_query` above.
-    parse_media_type(p).ok();
-
-    Present(m.complete(p, CSS_MEDIA_TYPE_QUERY))
-}
-
-#[inline]
-fn parse_media_type(p: &mut CssParser) -> ParsedSyntax {
-    if !is_at_identifier(p) {
-        return Absent;
-    }
-
-    let m = p.start();
-
-    // Guarded by `is_at_identifier` above.
-    parse_regular_identifier(p).ok();
-
-    Present(m.complete(p, CSS_MEDIA_TYPE))
+    is_at_media_type_modifier(p)
+        || (is_at_media_type_name(p)
+            && (!p.at(T![not]) || is_at_source_tight_scss_interpolation_suffix(p)))
 }
 
 #[inline]
 fn is_at_any_media_type_condition(p: &mut CssParser) -> bool {
-    is_at_media_not_condition(p) || is_at_any_media_in_parens(p)
+    is_at_media_not_condition(p) || is_at_any_media_condition_operand(p)
 }
 #[inline]
 fn parse_any_media_type_condition(p: &mut CssParser) -> ParsedSyntax {
@@ -260,7 +352,7 @@ fn parse_any_media_type_condition(p: &mut CssParser) -> ParsedSyntax {
     if is_at_media_not_condition(p) {
         parse_media_not_condition(p)
     } else {
-        parse_any_media_in_parens(p).map(|lhs| parse_media_and_condition(p, lhs))
+        parse_any_media_condition_operand(p).map(|lhs| parse_media_and_condition(p, lhs))
     }
 }
 
@@ -268,8 +360,13 @@ fn parse_any_media_type_condition(p: &mut CssParser) -> ParsedSyntax {
 fn is_at_media_not_condition(p: &mut CssParser) -> bool {
     p.at(T![not])
 }
+
+/// Parses a media `not` condition starting at the `not` keyword.
+///
+/// In plain CSS media conditions this is only a leading condition. SCSS can
+/// also reuse it after an interpolation-led `and` chain.
 #[inline]
-fn parse_media_not_condition(p: &mut CssParser) -> ParsedSyntax {
+pub fn parse_media_not_condition(p: &mut CssParser) -> ParsedSyntax {
     if !is_at_media_not_condition(p) {
         return Absent;
     }
@@ -277,7 +374,7 @@ fn parse_media_not_condition(p: &mut CssParser) -> ParsedSyntax {
     let m = p.start();
 
     p.bump(T![not]);
-    parse_any_media_in_parens(p)
+    parse_any_media_condition_operand(p)
         .or_recover(p, &AnyInParensParseRecovery, expected_any_media_in_parens)
         .ok();
 
@@ -285,9 +382,9 @@ fn parse_media_not_condition(p: &mut CssParser) -> ParsedSyntax {
 }
 
 /// Parses a left-associated media `and` condition chain after the first
-/// parenthesized operand has already been parsed.
+/// media condition operand has already been parsed.
 #[inline]
-fn parse_media_and_condition(p: &mut CssParser, lhs: CompletedMarker) -> CompletedMarker {
+pub fn parse_media_and_condition(p: &mut CssParser, lhs: CompletedMarker) -> CompletedMarker {
     if !p.at(T![and]) {
         return lhs;
     }
@@ -295,7 +392,7 @@ fn parse_media_and_condition(p: &mut CssParser, lhs: CompletedMarker) -> Complet
     let m = lhs.precede(p);
     p.bump(T![and]);
 
-    let recovery_result = parse_any_media_in_parens(p)
+    let recovery_result = parse_any_media_condition_operand(p)
         .or_recover(
             p,
             &AnyInParensChainParseRecovery::new(T![and]).with_stop_kind(T![')']),
@@ -303,19 +400,15 @@ fn parse_media_and_condition(p: &mut CssParser, lhs: CompletedMarker) -> Complet
         )
         .map(|rhs| parse_media_and_condition(p, rhs));
 
-    if recovery_result.is_err() && p.at(T![and]) {
-        let m = p.start();
-        let rhs = m.complete(p, CSS_BOGUS);
-        parse_media_and_condition(p, rhs);
-    }
+    recover_missing_and_rhs(p, recovery_result);
 
     m.complete(p, CSS_MEDIA_AND_CONDITION)
 }
 
 /// Parses a left-associated media `or` condition chain after the first
-/// parenthesized operand has already been parsed.
+/// media condition operand has already been parsed.
 #[inline]
-fn parse_media_or_condition(p: &mut CssParser, lhs: CompletedMarker) -> CompletedMarker {
+pub fn parse_media_or_condition(p: &mut CssParser, lhs: CompletedMarker) -> CompletedMarker {
     if !p.at(T![or]) {
         return lhs;
     }
@@ -323,7 +416,7 @@ fn parse_media_or_condition(p: &mut CssParser, lhs: CompletedMarker) -> Complete
     let m = lhs.precede(p);
     p.bump(T![or]);
 
-    let recovery_result = parse_any_media_in_parens(p)
+    let recovery_result = parse_any_media_condition_operand(p)
         .or_recover(
             p,
             &AnyInParensChainParseRecovery::new(T![or]).with_stop_kind(T![')']),
@@ -340,6 +433,33 @@ fn parse_media_or_condition(p: &mut CssParser, lhs: CompletedMarker) -> Complete
     m.complete(p, CSS_MEDIA_OR_CONDITION)
 }
 
+/// Continues `and` chain recovery after a missing or invalid RHS.
+#[inline]
+pub fn recover_missing_and_rhs(p: &mut CssParser, recovery_result: RecoveryResult) {
+    if recovery_result.is_err() && p.at(T![and]) {
+        let m = p.start();
+        let rhs = m.complete(p, CSS_BOGUS);
+        parse_media_and_condition(p, rhs);
+    }
+}
+
+#[inline]
+fn is_at_any_media_condition_operand(p: &mut CssParser) -> bool {
+    is_at_scss_media_query(p) || is_at_any_media_in_parens(p)
+}
+
+/// Parses a media condition operand, including Sass interpolation in SCSS files.
+#[inline]
+pub fn parse_any_media_condition_operand(p: &mut CssParser) -> ParsedSyntax {
+    if is_at_scss_media_query(p) {
+        CssSyntaxFeatures::Scss.parse_exclusive_syntax(p, parse_scss_media_query, |p, marker| {
+            scss_only_syntax_error(p, "SCSS interpolated media queries", marker.range(p))
+        })
+    } else {
+        parse_any_media_in_parens(p)
+    }
+}
+
 #[inline]
 fn is_at_any_media_in_parens(p: &mut CssParser) -> bool {
     p.at(T!['('])
@@ -351,6 +471,16 @@ fn is_at_any_media_in_parens(p: &mut CssParser) -> bool {
 /// `(not (color))` and media features such as `(width <= 500px)`.
 #[inline]
 pub(crate) fn parse_any_media_in_parens(p: &mut CssParser) -> ParsedSyntax {
+    if is_at_scss_interpolated_media_in_parens(p) {
+        return CssSyntaxFeatures::Scss.parse_exclusive_syntax(
+            p,
+            parse_scss_interpolated_media_in_parens,
+            |p, marker| {
+                scss_only_syntax_error(p, "SCSS interpolated media conditions", marker.range(p))
+            },
+        );
+    }
+
     if !is_at_any_media_in_parens(p) {
         return Absent;
     }
@@ -364,9 +494,7 @@ pub(crate) fn parse_any_media_in_parens(p: &mut CssParser) -> ParsedSyntax {
             .ok();
         CSS_MEDIA_CONDITION_IN_PARENS
     } else {
-        parse_any_query_feature(p)
-            .or_recover(p, &AnyInParensParseRecovery, expected_any_query_feature)
-            .ok();
+        recover_media_feature_in_parens_body(p);
         CSS_MEDIA_FEATURE_IN_PARENS
     };
 
@@ -375,10 +503,17 @@ pub(crate) fn parse_any_media_in_parens(p: &mut CssParser) -> ParsedSyntax {
     Present(m.complete(p, kind))
 }
 
+#[inline]
+fn recover_media_feature_in_parens_body(p: &mut CssParser) {
+    parse_media_query_feature(p)
+        .or_recover(p, &AnyInParensParseRecovery, expected_any_query_feature)
+        .ok();
+}
+
 fn expected_any_media_condition(p: &CssParser, range: TextRange) -> ParseDiagnostic {
     expected_any(&["media condition", "parenthesized media query"], range, p)
 }
 
-fn expected_any_media_in_parens(p: &CssParser, range: TextRange) -> ParseDiagnostic {
+pub fn expected_any_media_in_parens(p: &CssParser, range: TextRange) -> ParseDiagnostic {
     expected_any(&["media condition", "query feature"], range, p)
 }

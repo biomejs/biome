@@ -1,0 +1,86 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidTailwindCaret41.jsx
+---
+# Input
+```jsx
+// should generate diagnostics
+<div className="flex-grow bg-left-top break-words" />;
+
+```
+
+# Diagnostics
+```
+invalidTailwindCaret41.jsx:2:17 lint/nursery/noTailwindLegacyUtilities  FIXABLE  ━━━━━━━━━━━━━━━━━━━
+
+  ! The Tailwind CSS class flex-grow is a legacy name.
+  
+    1 │ // should generate diagnostics
+  > 2 │ <div className="flex-grow bg-left-top break-words" />;
+      │                 ^^^^^^^^^
+    3 │ 
+  
+  i Tailwind CSS renamed this utility and only keeps the old name for backward compatibility.
+  
+  i Use grow instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use the current class name.
+  
+    2 │ <div·className="flex-grow·bg-left-top·break-words"·/>;
+      │                 -----                                 
+
+```
+
+```
+invalidTailwindCaret41.jsx:2:27 lint/nursery/noTailwindLegacyUtilities  FIXABLE  ━━━━━━━━━━━━━━━━━━━
+
+  ! The Tailwind CSS class bg-left-top is a legacy name.
+  
+    1 │ // should generate diagnostics
+  > 2 │ <div className="flex-grow bg-left-top break-words" />;
+      │                           ^^^^^^^^^^^
+    3 │ 
+  
+  i Tailwind CSS renamed this utility and only keeps the old name for backward compatibility.
+  
+  i Use bg-top-left instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use the current class name.
+  
+    1 1 │   // should generate diagnostics
+    2   │ - <div·className="flex-grow·bg-left-top·break-words"·/>;
+      2 │ + <div·className="flex-grow·bg-top-left·break-words"·/>;
+    3 3 │   
+  
+
+```
+
+```
+invalidTailwindCaret41.jsx:2:39 lint/nursery/noTailwindLegacyUtilities  FIXABLE  ━━━━━━━━━━━━━━━━━━━
+
+  ! The Tailwind CSS class break-words is a legacy name.
+  
+    1 │ // should generate diagnostics
+  > 2 │ <div className="flex-grow bg-left-top break-words" />;
+      │                                       ^^^^^^^^^^^
+    3 │ 
+  
+  i Tailwind CSS renamed this utility and only keeps the old name for backward compatibility.
+  
+  i Use wrap-break-word instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use the current class name.
+  
+    1 1 │   // should generate diagnostics
+    2   │ - <div·className="flex-grow·bg-left-top·break-words"·/>;
+      2 │ + <div·className="flex-grow·bg-left-top·wrap-break-word"·/>;
+    3 3 │   
+  
+
+```

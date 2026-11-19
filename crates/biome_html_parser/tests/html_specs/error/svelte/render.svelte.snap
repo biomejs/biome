@@ -17,6 +17,7 @@ expression: snapshot
 HtmlRoot {
     bom_token: missing (optional),
     frontmatter: missing (optional),
+    processing_instruction: missing (optional),
     directive: missing (optional),
     html: HtmlElementList [
         SvelteRenderBlock {
@@ -39,14 +40,15 @@ HtmlRoot {
   0: (empty)
   1: (empty)
   2: (empty)
-  3: HTML_ELEMENT_LIST@0..19
+  3: (empty)
+  4: HTML_ELEMENT_LIST@0..19
     0: SVELTE_RENDER_BLOCK@0..19
       0: SV_CURLY_AT@0..2 "{@" [] []
       1: RENDER_KW@2..9 "render" [] [Whitespace(" ")]
       2: HTML_TEXT_EXPRESSION@9..19
         0: HTML_LITERAL@9..19 "sum(1, 2)\n" [] []
       3: (empty)
-  4: EOF@19..19 "" [] []
+  5: EOF@19..19 "" [] []
 
 ```
 

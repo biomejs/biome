@@ -2,6 +2,12 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
+## Command
+
+```shell
+biome lint --reporter=summary main.ts index.ts index.css
+```
+
 ## `biome.json`
 
 ```json
@@ -13,15 +19,13 @@ expression: redactor(content)
 ## `index.css`
 
 ```css
-
-
-.brokenStyle { color: f( }
-
-.style {
-                color:
-                fakeFunction()
+.brokenStyle {
+  color: f(
 }
 
+.style {
+  color: fakeFunction();
+}
 ```
 
 ## `index.ts`

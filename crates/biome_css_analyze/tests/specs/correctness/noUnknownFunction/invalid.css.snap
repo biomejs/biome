@@ -20,6 +20,8 @@ invalid.css:1:16 lint/correctness/noUnknownFunction ━━━━━━━━━�
     2 │ a { transform: UNKNOWN(4); }
     3 │ a { width: calc(10% * unknown(1)); }
   
+  i Browsers ignore a declaration that contains an unknown function, so the style is not applied.
+  
   i Use a known function instead.
   
   i See MDN web docs for more details.
@@ -37,6 +39,8 @@ invalid.css:2:16 lint/correctness/noUnknownFunction ━━━━━━━━━�
       │                ^^^^^^^
     3 │ a { width: calc(10% * unknown(1)); }
   
+  i Browsers ignore a declaration that contains an unknown function, so the style is not applied.
+  
   i Use a known function instead.
   
   i See MDN web docs for more details.
@@ -53,6 +57,8 @@ invalid.css:3:23 lint/correctness/noUnknownFunction ━━━━━━━━━�
     2 │ a { transform: UNKNOWN(4); }
   > 3 │ a { width: calc(10% * unknown(1)); }
       │                       ^^^^^^^
+  
+  i Browsers ignore a declaration that contains an unknown function, so the style is not applied.
   
   i Use a known function instead.
   

@@ -1,0 +1,7 @@
+@theme static prefix(tw) {
+	--color-brand: red;
+}
+
+@theme prefix(tw) default inline {
+	--color-brand: red;
+}

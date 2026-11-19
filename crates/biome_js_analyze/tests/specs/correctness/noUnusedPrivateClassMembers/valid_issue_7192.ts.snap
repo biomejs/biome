@@ -1,0 +1,19 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid_issue_7192.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+
+class App {
+	#persistenceRequest: Promise<boolean> | undefined;
+
+	saveData() {
+		this.#persistenceRequest ??= navigator.storage.persist();
+	}
+}
+
+new App();
+
+```

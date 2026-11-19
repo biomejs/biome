@@ -2,15 +2,18 @@ use crate::context::CssFormatContext;
 use biome_css_syntax::{CssLanguage, CssSyntaxNode, CssSyntaxToken};
 use biome_formatter::format_element::tag::VerbatimKind;
 use biome_formatter::formatter::Formatter;
-use biome_formatter::prelude::{Tag, located_token_text, text};
+use biome_formatter::rowan::FormatElement;
+use biome_formatter::rowan::prelude::{Tag, located_token_text, text};
 use biome_formatter::trivia::{
     format_leading_comments_from_slice, format_trailing_comments_from_slice,
 };
 use biome_formatter::{
-    Buffer, CstFormatContext, Format, FormatContext, FormatElement, FormatError, FormatResult,
-    FormatWithRule, LINE_TERMINATORS, normalize_newlines,
+    Buffer, CstFormatContext, Format, FormatContext, FormatError, FormatResult, FormatWithRule,
+    LINE_TERMINATORS, normalize_newlines,
 };
-use biome_rowan::{AstNode, Direction, SyntaxElement, TextRange, TextSize};
+#[cfg(debug_assertions)]
+use biome_rowan::SyntaxElement;
+use biome_rowan::{AstNode, Direction, TextRange, TextSize};
 
 /// "Formats" a node according to its original formatting in the source text. Being able to format
 /// a node "as is" is useful if a node contains syntax errors. Formatting a node with syntax errors
@@ -82,6 +85,7 @@ where
 {
     fn fmt(&self, f: &mut Formatter<CssFormatContext>) -> FormatResult<()> {
         debug_assert!(self.node.text_trimmed_range().contains_range(self.range));
+        #[cfg(debug_assertions)]
         mark_css_verbatim_subtree(self.node, f);
 
         let mut last_end = self.range.start();
@@ -102,6 +106,10 @@ where
             f.state_mut().track_token(&token);
 
             match (self.format_token)(&token, range, f)? {
+                CssVerbatimTokenFormat::Source if token.text_trimmed().contains('\r') => {
+                    let source = token.token_text().slice(range - token.text_range().start());
+                    text(&normalize_newlines(&source, ['\r']), Some(range.start())).fmt(f)?;
+                }
                 CssVerbatimTokenFormat::Source => located_token_text(&token, range).fmt(f)?,
                 CssVerbatimTokenFormat::Replacement => {}
             }
@@ -137,6 +145,7 @@ impl Format<CssFormatContext> for FormatCssVerbatimNode<'_> {
 
         let preserve_outer_trivia = self.node.parent().is_none();
 
+        #[cfg(debug_assertions)]
         for element in self.node.descendants_with_tokens(Direction::Next) {
             match element {
                 SyntaxElement::Token(token) => f.state_mut().track_token(&token),
@@ -217,7 +226,7 @@ impl Format<CssFormatContext> for FormatCssVerbatimNode<'_> {
 
         text(
             &normalize_newlines(&original_source, LINE_TERMINATORS),
-            verbatim_text_start,
+            Some(verbatim_text_start),
         )
         .fmt(f)?;
 
@@ -256,6 +265,7 @@ impl Format<CssFormatContext> for FormatCssVerbatimNode<'_> {
 ///
 /// Use this when a formatter writes verbatim source for a node and its child
 /// formatters do not run, such as string interpolation `#{ get($map) }`.
+#[cfg(debug_assertions)]
 fn mark_css_verbatim_subtree(node: &CssSyntaxNode, f: &Formatter<CssFormatContext>) {
     mark_css_verbatim_node(node, f);
 
@@ -268,6 +278,7 @@ fn mark_css_verbatim_subtree(node: &CssSyntaxNode, f: &Formatter<CssFormatContex
     }
 }
 
+#[cfg(debug_assertions)]
 fn mark_css_verbatim_node(node: &CssSyntaxNode, f: &Formatter<CssFormatContext>) {
     let comments = f.context().comments();
     comments.mark_suppression_checked(node);
@@ -288,7 +299,7 @@ fn write_verbatim_range_source(
     let mut source = range.start();
 
     raw.slice(relative_range).try_for_each_chunk(|chunk| {
-        text(chunk, source).fmt(f)?;
+        text(&normalize_newlines(chunk, ['\r']), Some(source)).fmt(f)?;
         source += TextSize::from(chunk.len() as u32);
         Ok(())
     })

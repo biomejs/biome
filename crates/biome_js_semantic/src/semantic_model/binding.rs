@@ -25,6 +25,11 @@ pub enum JsDeclarationKind {
     /// Declares both a type and a value.
     Enum,
 
+    /// A `function` declaration or a `declare function` overload signature.
+    ///
+    /// Declares only a value, and is hoisted to the function scope.
+    Function,
+
     /// A generic type parameter, declared in angle brackets.
     ///
     /// For example: `<T>`.
@@ -32,7 +37,7 @@ pub enum JsDeclarationKind {
     /// Declares only a type.
     Generic,
 
-    /// A `function` or `var` declaration.
+    /// A `var` declaration.
     ///
     /// Declares only a value, and is hoisted to the function scope.
     HoistedValue,
@@ -110,6 +115,7 @@ impl JsDeclarationKind {
             self,
             Self::Class
                 | Self::Enum
+                | Self::Function
                 | Self::HoistedValue
                 | Self::Import
                 | Self::Namespace
@@ -129,14 +135,14 @@ impl JsDeclarationKind {
             if let Some(declaration) = AnyJsDeclaration::cast_ref(&ancestor) {
                 return match declaration {
                     AnyJsDeclaration::JsClassDeclaration(_) => Self::Class,
-                    AnyJsDeclaration::JsFunctionDeclaration(_) => Self::HoistedValue,
+                    AnyJsDeclaration::JsFunctionDeclaration(_) => Self::Function,
                     AnyJsDeclaration::JsVariableDeclaration(decl) => match decl.variable_kind() {
                         Ok(JsVariableKind::Const | JsVariableKind::Let) => Self::Value,
                         Ok(JsVariableKind::Using) => Self::Using,
                         Ok(JsVariableKind::Var) => Self::HoistedValue,
                         Err(_) => Self::Unknown,
                     },
-                    AnyJsDeclaration::TsDeclareFunctionDeclaration(_) => Self::HoistedValue,
+                    AnyJsDeclaration::TsDeclareFunctionDeclaration(_) => Self::Function,
                     AnyJsDeclaration::TsEnumDeclaration(_) => Self::Enum,
                     AnyJsDeclaration::TsExternalModuleDeclaration(_) => Self::Module,
                     AnyJsDeclaration::TsInterfaceDeclaration(_) => Self::Interface,
@@ -246,7 +252,8 @@ impl TsBindingReference {
         match self {
             Self::ValueType(binding_id)
             | Self::TypeAndValueType(binding_id)
-            | Self::NamespaceAndValueType(binding_id) => binding_id,
+            | Self::NamespaceAndValueType(binding_id)
+            | Self::Type(binding_id) => binding_id,
             Self::Merged {
                 ty,
                 value_ty,
@@ -255,14 +262,15 @@ impl TsBindingReference {
                 .or(namespace_ty)
                 .or(ty)
                 .expect("a merged reference must have at least two fields set to `Some`"),
-            Self::Type(binding_id) => binding_id,
         }
     }
 
     /// Creates a union from this binding reference with another.
     ///
     /// If both bindings refer to the same kind of type, the binding ID(s) from
-    /// `other` takes precedence.
+    /// `other` take precedence. Same-name function overloads are tracked
+    /// separately in the scope's overload map, so here two functions simply
+    /// merge last-wins like any other pair of values.
     pub fn union_with(self, other: Self) -> Self {
         match (self, other) {
             (Self::Type(own_binding_id), Self::ValueType(other_binding_id)) => {
@@ -453,7 +461,7 @@ impl TsBindingReference {
 }
 
 /// Internal type with all the semantic data of a specific binding
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub(crate) struct SemanticModelBindingData {
     pub(crate) range: TextRange,
     pub(crate) references: Vec<SemanticModelReference>,
@@ -465,14 +473,14 @@ pub(crate) struct SemanticModelBindingData {
     pub(crate) jsdoc: Option<JsdocComment>,
 }
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(crate) enum SemanticModelReferenceType {
     Read { hoisted: bool },
     Write { hoisted: bool },
 }
 
 /// Internal type with all the semantic data of a specific reference
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub(crate) struct SemanticModelReference {
     pub(crate) range_start: TextSize,
     pub(crate) ty: SemanticModelReferenceType,
@@ -537,6 +545,14 @@ impl Binding {
         self.data.binding(self.id).declaration_kind
     }
 
+    /// Returns the trimmed text range of the binding's identifier.
+    ///
+    /// This equals `self.syntax().text_trimmed_range()`, but reads the stored
+    /// range instead of locating the syntax node in the tree.
+    pub fn range(&self) -> TextRange {
+        self.data.binding(self.id).range
+    }
+
     /// Returns the syntax node associated with this binding.
     pub fn syntax(&self) -> JsSyntaxNode {
         let binding = self.data.binding(self.id);
@@ -544,9 +560,34 @@ impl Binding {
             .to_node(self.data.to_root().syntax())
     }
 
+    /// Returns the node of this binding, like [Self::syntax], but resolves
+    /// it near `node` with [biome_rowan::SyntaxNodePtr::as_node_near]
+    /// instead of from the root.
+    ///
+    /// This is cheaper than [Self::syntax] when `node` is close to the
+    /// binding. `node` must belong to the tree the model was built from.
+    ///
+    /// ## Panics
+    ///
+    /// Panics if the binding's node can't be found in the tree of `node`.
+    pub fn syntax_near(&self, node: &JsSyntaxNode) -> JsSyntaxNode {
+        let binding = self.data.binding(self.id);
+        self.data.binding_node_by_start[&binding.range.start()].unwrap_node_near(node)
+    }
+
     /// Returns the typed AST node associated with this binding.
     pub fn tree(&self) -> AnyJsIdentifierBinding {
         AnyJsIdentifierBinding::unwrap_cast(self.syntax().clone())
+    }
+
+    /// Returns the typed AST node of this binding, like [Self::tree], but
+    /// resolves it near `node`.
+    ///
+    /// ## Panics
+    ///
+    /// Panics in the same cases as [Self::syntax_near].
+    pub fn tree_near(&self, node: &JsSyntaxNode) -> AnyJsIdentifierBinding {
+        AnyJsIdentifierBinding::unwrap_cast(self.syntax_near(node))
     }
 
     /// Returns an iterator to all references of this binding.
@@ -596,7 +637,7 @@ impl Binding {
     /// Returns all exports of the binding.
     ///
     /// The node kind is either an identifier binding (if the declaration is
-    /// itself an `export` statement) or an identifier usage.
+    /// itself an `export` statement) or an identifier reference.
     pub fn exports(&self) -> impl Iterator<Item = JsSyntaxNode> + '_ {
         let binding = self.data.binding(self.id);
         binding.export_ranges.iter().filter_map(|export_start| {
@@ -607,12 +648,13 @@ impl Binding {
         })
     }
 
+    /// Includes regular imports, type-only imports, and TypeScript `import =` declarations.
     pub fn is_imported(&self) -> bool {
-        super::is_imported(&self.syntax())
+        self.declaration_kind().is_import_declaration()
     }
 
     pub fn is_exported(&self) -> bool {
-        self.data.is_exported(self.syntax().text_trimmed_range())
+        self.data.is_exported(self.range())
     }
 
     /// Returns the JSDoc comment associated with this binding, if any.

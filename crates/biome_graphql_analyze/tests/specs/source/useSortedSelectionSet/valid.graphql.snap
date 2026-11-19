@@ -1,0 +1,44 @@
+---
+source: crates/biome_graphql_analyze/tests/spec_tests.rs
+expression: valid.graphql
+---
+# Input
+```graphql
+# should not generate diagnostics
+query Member {
+  member {
+    email
+    firstName
+    lastName
+    ...accountFields
+    ...profileFields
+    ... on Address {
+      city
+      street
+      zipCode
+    }
+    ... on User {
+      createdAt
+      updatedAt
+    }
+  }
+}
+
+query AliasMember {
+  member {
+    accountId: id
+    email
+    firstName
+  }
+}
+
+fragment memberFragment on Member {
+  email
+  firstName
+  lastName
+  ...contactFields
+  ... on User {
+    createdAt
+  }
+}
+```

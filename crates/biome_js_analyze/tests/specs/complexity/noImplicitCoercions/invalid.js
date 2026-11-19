@@ -30,3 +30,6 @@ let x ='' + 1n;
 a * 1 / (b * 1);
 /* test */ a * 1 + 2;
 /* test */ x /*comment*/ * 1 + 2;
+
+// TODO: Make this a linting error?
+// `${bar}`;

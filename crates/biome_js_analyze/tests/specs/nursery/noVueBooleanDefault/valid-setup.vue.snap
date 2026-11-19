@@ -1,0 +1,20 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-setup.vue
+---
+# Input
+```vue
+<script setup lang="ts">
+/* should not generate diagnostics */
+interface Props {
+  foo?: boolean;
+  bar?: boolean | string;
+  baz?: string;
+}
+
+const { baz = "baz" } = withDefaults(defineProps<Props>(), {
+  bar: "bar",
+});
+</script>
+
+```

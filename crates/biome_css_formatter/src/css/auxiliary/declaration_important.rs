@@ -11,6 +11,12 @@ impl FormatNodeRule<CssDeclarationImportant> for FormatCssDeclarationImportant {
             important_token,
         } = node.as_fields();
 
-        write!(f, [excl_token.format(), important_token.format()])
+        write!(
+            f,
+            [
+                excl_token.format(),
+                important_token.format()?.with_text_case(CssCase::Lowercase)
+            ]
+        )
     }
 }

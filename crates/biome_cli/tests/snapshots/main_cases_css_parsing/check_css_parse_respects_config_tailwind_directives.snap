@@ -2,6 +2,12 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
+## Command
+
+```shell
+biome check file.css
+```
+
 ## `biome.json`
 
 ```json
@@ -17,8 +23,10 @@ expression: redactor(content)
 ## `file.css`
 
 ```css
-@import 'tailwindcss';
-.foo { color: red; }
+@import "tailwindcss";
+.foo {
+  color: red;
+}
 ```
 
 # Termination Message

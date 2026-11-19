@@ -11,9 +11,9 @@ use biome_js_syntax::{
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt};
 use biome_rule_options::use_date_now::UseDateNowOptions;
 
-use crate::JsRuleAction;
-
-use crate::lint::style::use_explicit_length_check::does_node_needs_space_before_child;
+use crate::{
+    JsRuleAction, ast_utils::needs_space_before_identifier_expression_replacement,
+};
 
 declare_lint_rule! {
     /// Use `Date.now()` to get the number of milliseconds since the Unix Epoch.
@@ -121,7 +121,7 @@ impl Rule for UseDateNow {
             make::js_name(make::ident("now")).into(),
         );
 
-        if does_node_needs_space_before_child(&node.syntax().parent()?) {
+        if needs_space_before_identifier_expression_replacement(node) {
             // Make fake token to get leading trivia
             let leading_trivia = make::token_decorated_with_space(T![=])
                 .leading_trivia()

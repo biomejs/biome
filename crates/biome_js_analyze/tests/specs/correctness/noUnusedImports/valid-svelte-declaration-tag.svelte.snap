@@ -1,0 +1,15 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-svelte-declaration-tag.svelte
+---
+# Input
+```svelte
+<!-- should not generate diagnostics -->
+<script>
+import { source } from "./source.js";
+</script>
+
+{const value = source}
+{value}
+
+```

@@ -6,7 +6,7 @@
 
 use std::sync::Arc;
 
-use crate::services::semantic::SemanticModelBuilderVisitor;
+use super::semantic::SemanticModelBuilderVisitor;
 use biome_analyze::{
     AddVisitor, FromServices, Phase, Phases, QueryKey, Queryable, RuleKey, RuleMetadata,
     ServiceBag, ServicesDiagnostic, SyntaxVisitor,
@@ -102,8 +102,8 @@ where
     type Language = JsLanguage;
     type Services = TurborepoServices;
 
-    fn build_visitor(analyzer: &mut impl AddVisitor<JsLanguage>, root: &AnyJsRoot) {
-        analyzer.add_visitor(Phases::Syntax, || SemanticModelBuilderVisitor::new(root));
+    fn build_visitor(analyzer: &mut impl AddVisitor<JsLanguage>, _: &AnyJsRoot) {
+        analyzer.add_visitor(Phases::Syntax, || SemanticModelBuilderVisitor);
         analyzer.add_visitor(Phases::Semantic, SyntaxVisitor::default);
     }
 
@@ -121,7 +121,7 @@ mod tests {
     use super::*;
     use biome_deserialize::json::deserialize_from_json_str;
     use biome_js_semantic::{SemanticModelOptions, semantic_model};
-    use biome_js_syntax::JsFileSource;
+    use biome_languages::JsFileSource;
 
     fn create_turbo_json(json: &str) -> TurboJson {
         let (turbo_json, _diagnostics) =

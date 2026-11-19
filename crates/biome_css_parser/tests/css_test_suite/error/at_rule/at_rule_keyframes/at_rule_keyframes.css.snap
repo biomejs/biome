@@ -388,60 +388,58 @@ CssRoot {
                                     selector: FROM_KW@310..317 "from" [Newline("\n"), Whitespace("\t")] [Whitespace(" ")],
                                 },
                             ],
-                            block: CssBogusBlock {
-                                items: [
-                                    L_CURLY@317..318 "{" [] [],
-                                    CssBogus {
-                                        items: [
-                                            CssDeclarationWithSemicolon {
-                                                declaration: CssDeclaration {
-                                                    property: CssGenericProperty {
+                            block: CssDeclarationBlock {
+                                l_curly_token: L_CURLY@317..318 "{" [] [],
+                                declarations: CssDeclarationList [
+                                    CssDeclarationWithSemicolon {
+                                        declaration: CssDeclaration {
+                                            property: CssGenericProperty {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@318..330 "transform" [Newline("\n"), Whitespace("\t\t")] [],
+                                                },
+                                                colon_token: COLON@330..332 ":" [] [Whitespace(" ")],
+                                                value: CssGenericComponentValueList [
+                                                    CssFunction {
                                                         name: CssIdentifier {
-                                                            value_token: IDENT@318..330 "transform" [Newline("\n"), Whitespace("\t\t")] [],
+                                                            value_token: IDENT@332..342 "translateX" [] [],
                                                         },
-                                                        colon_token: COLON@330..332 ":" [] [Whitespace(" ")],
-                                                        value: CssGenericComponentValueList [
-                                                            CssFunction {
-                                                                name: CssIdentifier {
-                                                                    value_token: IDENT@332..342 "translateX" [] [],
-                                                                },
-                                                                l_paren_token: L_PAREN@342..343 "(" [] [],
-                                                                items: CssParameterList [
-                                                                    CssListOfComponentValuesExpression {
-                                                                        css_component_value_list: CssComponentValueList [
-                                                                            CssPercentage {
-                                                                                value_token: CSS_NUMBER_LITERAL@343..344 "0" [] [],
-                                                                                percent_token: PERCENT@344..345 "%" [] [],
-                                                                            },
-                                                                        ],
+                                                        l_paren_token: L_PAREN@342..343 "(" [] [],
+                                                        items: CssParameterList [
+                                                            CssListOfComponentValuesExpression {
+                                                                css_component_value_list: CssComponentValueList [
+                                                                    CssPercentage {
+                                                                        value_token: CSS_NUMBER_LITERAL@343..344 "0" [] [],
+                                                                        percent_token: PERCENT@344..345 "%" [] [],
                                                                     },
                                                                 ],
-                                                                r_paren_token: R_PAREN@345..346 ")" [] [],
                                                             },
                                                         ],
+                                                        r_paren_token: R_PAREN@345..346 ")" [] [],
                                                     },
-                                                    important: missing (optional),
-                                                },
-                                                semicolon_token: SEMICOLON@346..347 ";" [] [],
-                                            },
-                                            CssBogus {
-                                                items: [
-                                                    TO_KW@347..354 "to" [Newline("\n"), Newline("\n"), Newline("\n"), Whitespace("\t")] [Whitespace(" ")],
-                                                    L_CURLY@354..355 "{" [] [],
-                                                    IDENT@355..367 "transform" [Newline("\n"), Whitespace("\t\t")] [],
-                                                    COLON@367..369 ":" [] [Whitespace(" ")],
-                                                    IDENT@369..379 "translateX" [] [],
-                                                    L_PAREN@379..380 "(" [] [],
-                                                    CSS_PERCENTAGE_VALUE@380..383 "100" [] [],
-                                                    PERCENT@383..384 "%" [] [],
-                                                    R_PAREN@384..385 ")" [] [],
-                                                    SEMICOLON@385..386 ";" [] [],
                                                 ],
                                             },
+                                            important: missing (optional),
+                                        },
+                                        semicolon_token: SEMICOLON@346..347 ";" [] [],
+                                    },
+                                    CssBogusDeclaration {
+                                        items: [
+                                            TO_KW@347..354 "to" [Newline("\n"), Newline("\n"), Newline("\n"), Whitespace("\t")] [Whitespace(" ")],
+                                            L_CURLY@354..355 "{" [] [],
+                                            IDENT@355..367 "transform" [Newline("\n"), Whitespace("\t\t")] [],
+                                            COLON@367..369 ":" [] [Whitespace(" ")],
+                                            IDENT@369..379 "translateX" [] [],
+                                            L_PAREN@379..380 "(" [] [],
+                                            CSS_PERCENTAGE_VALUE@380..383 "100" [] [],
+                                            PERCENT@383..384 "%" [] [],
+                                            R_PAREN@384..385 ")" [] [],
                                         ],
                                     },
-                                    R_CURLY@386..389 "}" [Newline("\n"), Whitespace("\t")] [],
+                                    CssEmptyDeclaration {
+                                        semicolon_token: SEMICOLON@385..386 ";" [] [],
+                                    },
                                 ],
+                                r_curly_token: R_CURLY@386..389 "}" [Newline("\n"), Whitespace("\t")] [],
                             },
                         },
                     ],
@@ -1060,9 +1058,9 @@ CssRoot {
               0: CSS_KEYFRAMES_SELECTOR_LIST@310..317
                 0: CSS_KEYFRAMES_IDENT_SELECTOR@310..317
                   0: FROM_KW@310..317 "from" [Newline("\n"), Whitespace("\t")] [Whitespace(" ")]
-              1: CSS_BOGUS_BLOCK@317..389
+              1: CSS_DECLARATION_BLOCK@317..389
                 0: L_CURLY@317..318 "{" [] []
-                1: CSS_BOGUS@318..386
+                1: CSS_DECLARATION_LIST@318..386
                   0: CSS_DECLARATION_WITH_SEMICOLON@318..347
                     0: CSS_DECLARATION@318..346
                       0: CSS_GENERIC_PROPERTY@318..346
@@ -1083,7 +1081,7 @@ CssRoot {
                             3: R_PAREN@345..346 ")" [] []
                       1: (empty)
                     1: SEMICOLON@346..347 ";" [] []
-                  1: CSS_BOGUS@347..386
+                  1: CSS_BOGUS_DECLARATION@347..385
                     0: TO_KW@347..354 "to" [Newline("\n"), Newline("\n"), Newline("\n"), Whitespace("\t")] [Whitespace(" ")]
                     1: L_CURLY@354..355 "{" [] []
                     2: IDENT@355..367 "transform" [Newline("\n"), Whitespace("\t\t")] []
@@ -1093,7 +1091,8 @@ CssRoot {
                     6: CSS_PERCENTAGE_VALUE@380..383 "100" [] []
                     7: PERCENT@383..384 "%" [] []
                     8: R_PAREN@384..385 ")" [] []
-                    9: SEMICOLON@385..386 ";" [] []
+                  2: CSS_EMPTY_DECLARATION@385..386
+                    0: SEMICOLON@385..386 ";" [] []
                 2: R_CURLY@386..389 "}" [Newline("\n"), Whitespace("\t")] []
           2: R_CURLY@389..391 "}" [Newline("\n")] []
     5: CSS_AT_RULE@391..494
@@ -1420,12 +1419,12 @@ at_rule_keyframes.css:24:2 parse ━━━━━━━━━━━━━━━�
 at_rule_keyframes.css:34:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a declaration item but instead found 'to {
-    		transform: translateX(100%);'.
+    		transform: translateX(100%)'.
   
   > 34 │ 	to {
        │ 	^^^^
   > 35 │ 		transform: translateX(100%);
-       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^
     36 │ 	}
     37 │ }
   
@@ -1434,7 +1433,7 @@ at_rule_keyframes.css:34:2 parse ━━━━━━━━━━━━━━━�
   > 34 │ 	to {
        │ 	^^^^
   > 35 │ 		transform: translateX(100%);
-       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^
     36 │ 	}
     37 │ }
   

@@ -31,13 +31,13 @@ JsModule {
                         attributes: JsxAttributeList [],
                         r_angle_token: R_ANGLE@4..5 ">" [] [],
                     },
-                    children: JsxChildList [
+                    elements: JsxChildList [
                         JsxFragment {
                             opening_fragment: JsxOpeningFragment {
                                 l_angle_token: L_ANGLE@5..6 "<" [] [],
                                 r_angle_token: R_ANGLE@6..7 ">" [] [],
                             },
-                            children: JsxChildList [
+                            elements: JsxChildList [
                                 JsxText {
                                     value_token: JSX_TEXT_LITERAL@7..11 "test" [] [],
                                 },

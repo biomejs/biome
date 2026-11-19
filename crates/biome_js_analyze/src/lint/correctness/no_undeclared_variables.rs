@@ -1,13 +1,15 @@
-use crate::globals::{is_js_global, is_ts_global};
-use crate::services::embedded_bindings::EmbeddedBindings;
-use crate::services::semantic::SemanticServices;
+use crate::globals::{is_google_apps_script_global, is_js_global, is_ts_global};
+use crate::services::embedded::EmbeddedService;
+use crate::services::semantic::Semantic;
 use biome_analyze::context::RuleContext;
 use biome_analyze::{Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{
-    AnyJsFunction, JsFileSource, JsSyntaxToken, Language, TsAsExpression, TsReferenceType,
+    AnyJsFunction, AnyJsIdentifierReference, JsSyntaxToken, TsAsExpression, TsReferenceType,
 };
+use biome_languages::JsFileSource;
+use biome_languages::javascript::Language;
 use biome_rowan::AstNode;
 use biome_rule_options::no_undeclared_variables::NoUndeclaredVariablesOptions;
 
@@ -63,77 +65,73 @@ declare_lint_rule! {
 }
 
 impl Rule for NoUndeclaredVariables {
-    type Query = SemanticServices;
+    type Query = Semantic<AnyJsIdentifierReference>;
     type State = JsSyntaxToken;
-    type Signals = Box<[Self::State]>;
+    type Signals = Option<Self::State>;
     type Options = NoUndeclaredVariablesOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let model = ctx.query();
+        let model = ctx.model();
+        let identifier = ctx.query();
+        if !model.is_unresolved_reference(identifier) {
+            return None;
+        }
         let source_type = ctx.source_type::<JsFileSource>();
-        let embedded_bindings = ctx
-            .get_service::<EmbeddedBindings>()
-            .expect("embedded bindings service");
+        let embedded = ctx
+            .get_service::<EmbeddedService>()
+            .expect("embedded service");
         let flavor = model.flavor();
 
-        model
-            .all_unresolved_references()
-            .filter_map(|reference| {
-                let identifier = reference.tree();
-                let under_as_expression = identifier
-                    .parent::<TsReferenceType>()
-                    .and_then(|ty| ty.parent::<TsAsExpression>())
-                    .is_some();
+        let under_as_expression = identifier
+            .parent::<TsReferenceType>()
+            .and_then(|ty| ty.parent::<TsAsExpression>())
+            .is_some();
 
-                let token = identifier.value_token().ok()?;
-                let text = token.text_trimmed();
-                // Semantic resolution handles declared `$store` bindings; this fallback keeps
-                // configured globals and embedded bindings aligned on `store`.
-                let store_name = flavor.store_reference_name(text);
+        let token = identifier.value_token().ok()?;
+        let text = token.text_trimmed();
+        let token_text = token.token_text_trimmed();
+        // Semantic resolution handles declared `$store` bindings; this fallback keeps
+        // configured globals and embedded bindings aligned on `store`.
+        let store_name = flavor.store_reference_name(text);
 
-                if ctx.is_global(text) || store_name.is_some_and(|store_name| ctx.is_global(store_name))
-                {
-                    return None;
-                }
+        if ctx.is_global(text) || store_name.is_some_and(|store_name| ctx.is_global(store_name)) {
+            return None;
+        }
 
-                if embedded_bindings.contains_binding(text)
-                    || store_name
-                        .is_some_and(|store_name| embedded_bindings.contains_binding(store_name))
-                {
-                    return None;
-                }
+        if embedded.contains_binding(token_text)
+            || store_name.is_some_and(|store_name| embedded.contains_binding_text(store_name))
+        {
+            return None;
+        }
 
-                // Typescript Const Assertion
-                if text == "const" && under_as_expression {
-                    return None;
-                }
+        // Typescript Const Assertion
+        if text == "const" && under_as_expression {
+            return None;
+        }
 
-                // arguments object within non-arrow functions
-                if text == "arguments" {
-                    let is_in_non_arrow_function =
-                        identifier.syntax().ancestors().skip(1).any(|ancestor| {
-                            !matches!(
-                                AnyJsFunction::cast(ancestor),
-                                None | Some(AnyJsFunction::JsArrowFunctionExpression(_))
-                            )
-                        });
-                    if is_in_non_arrow_function {
-                        return None;
-                    }
-                }
+        // arguments object within non-arrow functions
+        if text == "arguments" {
+            let is_in_non_arrow_function =
+                identifier.syntax().ancestors().skip(1).any(|ancestor| {
+                    !matches!(
+                        AnyJsFunction::cast(ancestor),
+                        None | Some(AnyJsFunction::JsArrowFunctionExpression(_))
+                    )
+                });
+            if is_in_non_arrow_function {
+                return None;
+            }
+        }
 
-                if is_global(text, source_type) {
-                    return None;
-                }
+        if is_global(text, source_type) {
+            return None;
+        }
 
-                if !ctx.options().check_types() && identifier.is_only_type() {
-                    return None;
-                }
+        if !ctx.options().check_types() && identifier.is_only_type() {
+            return None;
+        }
 
-                Some(token)
-            })
-            .collect::<Vec<_>>()
-            .into_boxed_slice()
+        Some(token)
     }
 
     fn diagnostic(_ctx: &RuleContext<Self>, token: &Self::State) -> Option<RuleDiagnostic> {
@@ -143,15 +141,28 @@ impl Rule for NoUndeclaredVariables {
             markup! {
                 "The "<Emphasis>{token.text_trimmed()}</Emphasis>" variable is undeclared."
             },
-        ).note(markup! {
+        )
+        .note(markup! {
+            "Using an undeclared variable at runtime can throw a "<Emphasis>"ReferenceError"</Emphasis>". It often points to a typo or a missing import."
+        })
+        .note(markup! {
+            "Declare or import the variable, or fix its name."
+        })
+        .note(markup! {
             "By default, Biome recognizes browser and Node.js globals.\nYou can ignore more globals using the "<Hyperlink href="https://biomejs.dev/reference/configuration/#javascriptglobals">"javascript.globals"</Hyperlink>" configuration."
         }))
     }
 }
 
 fn is_global(reference_name: &str, source_type: &JsFileSource) -> bool {
+    // Google Apps Script runs plain JavaScript in Google's runtime, which exposes
+    // extra service globals (e.g. `SpreadsheetApp`) on top of the language ones.
+    let is_gas_global =
+        source_type.is_google_apps_script() && is_google_apps_script_global(reference_name);
     match source_type.language() {
-        Language::JavaScript => is_js_global(reference_name),
-        Language::TypeScript { .. } => is_js_global(reference_name) || is_ts_global(reference_name),
+        Language::JavaScript => is_js_global(reference_name) || is_gas_global,
+        Language::TypeScript { .. } => {
+            is_js_global(reference_name) || is_ts_global(reference_name) || is_gas_global
+        }
     }
 }

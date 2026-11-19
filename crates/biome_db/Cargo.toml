@@ -1,0 +1,21 @@
+[package]
+name                 = "biome_db"
+version.workspace    = true
+authors.workspace    = true
+edition.workspace    = true
+description          = "Biome internal database"
+homepage.workspace   = true
+repository.workspace = true
+license.workspace    = true
+keywords.workspace   = true
+categories.workspace = true
+publish              = true
+
+[dependencies]
+camino = { workspace = true }
+salsa  = { workspace = true }
+
+[features]
+
+[lints]
+workspace = true

@@ -1,0 +1,156 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidUnterminated.js
+---
+# Input
+```js
+/* The fix isn't offered when the negative literal would continue the previous statement. */
+foo
+BigInt("-1")
+foo
+BigInt(-1).toString()
+foo()
+BigInt(-1).toString()
+x = {}
+BigInt(-1).toString()
+x = function () {}
+BigInt(-1).toString()
+x = () => {}
+BigInt(-1).toString()
+"use strict"
+BigInt(-1).toString()
+
+```
+
+# Diagnostics
+```
+invalidUnterminated.js:3:1 lint/nursery/useBigintLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This BigInt() call can be replaced with a bigint literal.
+  
+    1 │ /* The fix isn't offered when the negative literal would continue the previous statement. */
+    2 │ foo
+  > 3 │ BigInt("-1")
+      │ ^^^^^^^^^^^^
+    4 │ foo
+    5 │ BigInt(-1).toString()
+  
+  i A bigint literal with the n suffix is more concise, and it is evaluated at parse time instead of being converted at runtime.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidUnterminated.js:5:1 lint/nursery/useBigintLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This BigInt() call can be replaced with a bigint literal.
+  
+    3 │ BigInt("-1")
+    4 │ foo
+  > 5 │ BigInt(-1).toString()
+      │ ^^^^^^^^^^
+    6 │ foo()
+    7 │ BigInt(-1).toString()
+  
+  i A bigint literal with the n suffix is more concise, and it is evaluated at parse time instead of being converted at runtime.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidUnterminated.js:7:1 lint/nursery/useBigintLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This BigInt() call can be replaced with a bigint literal.
+  
+    5 │ BigInt(-1).toString()
+    6 │ foo()
+  > 7 │ BigInt(-1).toString()
+      │ ^^^^^^^^^^
+    8 │ x = {}
+    9 │ BigInt(-1).toString()
+  
+  i A bigint literal with the n suffix is more concise, and it is evaluated at parse time instead of being converted at runtime.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidUnterminated.js:9:1 lint/nursery/useBigintLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This BigInt() call can be replaced with a bigint literal.
+  
+     7 │ BigInt(-1).toString()
+     8 │ x = {}
+   > 9 │ BigInt(-1).toString()
+       │ ^^^^^^^^^^
+    10 │ x = function () {}
+    11 │ BigInt(-1).toString()
+  
+  i A bigint literal with the n suffix is more concise, and it is evaluated at parse time instead of being converted at runtime.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidUnterminated.js:11:1 lint/nursery/useBigintLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This BigInt() call can be replaced with a bigint literal.
+  
+     9 │ BigInt(-1).toString()
+    10 │ x = function () {}
+  > 11 │ BigInt(-1).toString()
+       │ ^^^^^^^^^^
+    12 │ x = () => {}
+    13 │ BigInt(-1).toString()
+  
+  i A bigint literal with the n suffix is more concise, and it is evaluated at parse time instead of being converted at runtime.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidUnterminated.js:13:1 lint/nursery/useBigintLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This BigInt() call can be replaced with a bigint literal.
+  
+    11 │ BigInt(-1).toString()
+    12 │ x = () => {}
+  > 13 │ BigInt(-1).toString()
+       │ ^^^^^^^^^^
+    14 │ "use strict"
+    15 │ BigInt(-1).toString()
+  
+  i A bigint literal with the n suffix is more concise, and it is evaluated at parse time instead of being converted at runtime.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidUnterminated.js:15:1 lint/nursery/useBigintLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This BigInt() call can be replaced with a bigint literal.
+  
+    13 │ BigInt(-1).toString()
+    14 │ "use strict"
+  > 15 │ BigInt(-1).toString()
+       │ ^^^^^^^^^^
+    16 │ 
+  
+  i A bigint literal with the n suffix is more concise, and it is evaluated at parse time instead of being converted at runtime.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

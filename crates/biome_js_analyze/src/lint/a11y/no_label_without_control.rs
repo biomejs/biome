@@ -4,8 +4,8 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{
-    AnyJsxAttribute, AnyJsxAttributeName, AnyJsxAttributeValue, AnyJsxElementName, AnyJsxTag,
-    JsSyntaxKind, JsxAttribute,
+    AnyJsExpression, AnyJsxAttribute, AnyJsxAttributeName, AnyJsxAttributeValue,
+    AnyJsxElementName, AnyJsxTag, JsSyntaxKind, JsxAttribute,
 };
 use biome_rowan::{AstNode, WalkEvent};
 use biome_rule_options::no_label_without_control::NoLabelWithoutControlOptions;
@@ -87,7 +87,11 @@ declare_lint_rule! {
         version: "1.8.0",
         name: "noLabelWithoutControl",
         language: "jsx",
-        sources: &[RuleSource::EslintJsxA11y("label-has-associated-control").same()],
+        sources: &[
+            RuleSource::EslintJsxA11y("label-has-associated-control").same(),
+            RuleSource::EslintAstro("jsx-a11y/label-has-associated-control").same(),
+            RuleSource::EslintJsxA11y("label-has-for").inspired(),
+        ],
         recommended: true,
         severity: Severity::Error,
     }
@@ -102,10 +106,10 @@ impl Rule for NoLabelWithoutControl {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
         let options = ctx.options();
+
         let element_name = node.name()?.name_value_token().ok()?;
         let element_name = element_name.text_trimmed();
-        let is_allowed_element = has_element_name(options, element_name)
-            || DEFAULT_LABEL_COMPONENTS.contains(&element_name);
+        let is_allowed_element = has_element_name(options, element_name);
 
         if !is_allowed_element {
             return None;
@@ -132,7 +136,9 @@ impl Rule for NoLabelWithoutControl {
             markup! {
                 "A form label must be associated with an input."
             },
-        );
+        ).note(markup! {
+            "Assistive technologies rely on a label being associated with a control to announce it. Without the association, screen reader users cannot tell what the control is for."
+        });
 
         if !state.has_text_content {
             diagnostic = diagnostic.note(
@@ -142,7 +148,7 @@ impl Rule for NoLabelWithoutControl {
 
         if !state.has_control_association {
             diagnostic = diagnostic.note(
-                markup! { "Consider adding a `for` or `htmlFor` attribute to the label element or moving the input element to inside the label element." },
+                markup! { "Consider adding a \""<Emphasis>"for"</Emphasis>"\" or \""<Emphasis>"htmlFor"</Emphasis>"\" attribute to the label element or moving the input element to inside the label element." },
             );
         }
 
@@ -158,13 +164,7 @@ fn has_label_attribute(options: &NoLabelWithoutControlOptions, attribute: &JsxAt
         return false;
     };
     let attribute_name = attribute_name.text_trimmed();
-    if !DEFAULT_LABEL_ATTRIBUTES.contains(&attribute_name)
-        && !options
-            .label_attributes
-            .iter()
-            .flatten()
-            .any(|name| name.as_ref() == attribute_name)
-    {
+    if !options.label_attributes().contains(&attribute_name) {
         return false;
     }
     attribute
@@ -229,13 +229,7 @@ fn has_nested_control(options: &NoLabelWithoutControlOptions, jsx_tag: &AnyJsxTa
                         continue;
                     };
                     let element_name = element_name.text_trimmed();
-                    if DEFAULT_INPUT_COMPONENTS.contains(&element_name)
-                        || options
-                            .input_components
-                            .iter()
-                            .flatten()
-                            .any(|name| name.as_ref() == element_name)
-                    {
+                    if options.input_components().contains(&element_name) {
                         return true;
                     }
                 }
@@ -247,11 +241,7 @@ fn has_nested_control(options: &NoLabelWithoutControlOptions, jsx_tag: &AnyJsxTa
 }
 
 fn has_element_name(options: &NoLabelWithoutControlOptions, element_name: &str) -> bool {
-    options
-        .label_components
-        .iter()
-        .flatten()
-        .any(|label_component_name| label_component_name.as_ref() == element_name)
+    options.label_components().contains(&element_name)
 }
 
 pub struct NoLabelWithoutControlState {
@@ -259,15 +249,10 @@ pub struct NoLabelWithoutControlState {
     pub has_control_association: bool,
 }
 
-const DEFAULT_LABEL_ATTRIBUTES: [&str; 3] = ["aria-label", "aria-labelledby", "alt"];
-const DEFAULT_LABEL_COMPONENTS: [&str; 1] = ["label"];
-const DEFAULT_INPUT_COMPONENTS: [&str; 7] = [
-    "input", "meter", "output", "progress", "select", "textarea", "button",
-];
+const FOR_ATTRIBUTES: [&str; 2] = ["for", "htmlFor"];
 
 /// Returns whether the passed `AnyJsxTag` have a `for` or `htmlFor` attribute
 fn has_for_attribute(jsx_tag: &AnyJsxTag) -> bool {
-    let for_attributes = ["for", "htmlFor"];
     let Some(attributes) = jsx_tag.attributes() else {
         return false;
     };
@@ -282,12 +267,17 @@ fn has_for_attribute(jsx_tag: &AnyJsxTag) -> bool {
                     None
                 }
             })
-            .is_some_and(|jsx_name| for_attributes.contains(&jsx_name.text_trimmed())),
+            .is_some_and(|jsx_name| FOR_ATTRIBUTES.contains(&jsx_name.text_trimmed())),
         AnyJsxAttribute::JsxShorthandAttribute(attribute) => attribute
-            .name()
+            .expression()
             .ok()
-            .and_then(|name| name.value_token().ok())
-            .is_some_and(|name| for_attributes.contains(&name.text_trimmed())),
+            .and_then(|expression| match expression {
+                AnyJsExpression::JsIdentifierExpression(expression) => {
+                    expression.name().ok()?.value_token().ok()
+                }
+                _ => None,
+            })
+            .is_some_and(|name| FOR_ATTRIBUTES.contains(&name.text_trimmed())),
         AnyJsxAttribute::JsxSpreadAttribute(_) | AnyJsxAttribute::JsMetavariable(_) => false,
     })
 }
@@ -296,7 +286,8 @@ fn has_for_attribute(jsx_tag: &AnyJsxTag) -> bool {
 fn has_label_attribute_value(jsx_attribute_value: &AnyJsxAttributeValue) -> bool {
     match jsx_attribute_value {
         AnyJsxAttributeValue::AnyJsxTag(_) => false,
-        AnyJsxAttributeValue::JsxExpressionAttributeValue(_) => true,
+        AnyJsxAttributeValue::JsxExpressionAttributeValue(_)
+        | AnyJsxAttributeValue::JsTemplateExpression(_) => true,
         AnyJsxAttributeValue::JsxString(jsx_string) => !jsx_string
             .inner_string_text()
             .is_ok_and(|text| text.text().trim().is_empty()),

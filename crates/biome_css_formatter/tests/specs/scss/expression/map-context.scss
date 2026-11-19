@@ -4,3 +4,7 @@ $nestedValueMultiArg:(key:foo((a,b),(c,d)),);
 $doubleParenListValue:(key:((a,b)),);
 $doubleParenMapValue:(key:((a:b)),);
 $doubleParenMapValueBroken:(key:((very-very-very-very-very-very-very-very-long-map-key:very-very-very-very-very-very-very-very-long-map-value,other-key:other-other-value)),);
+$ordinaryList:(a,b);
+$emptyMapValue:(plain:(),wrapped:(()));
+$directMapKey:((a:b):value);
+$nestedMapKey:(fn((a:b)):value);

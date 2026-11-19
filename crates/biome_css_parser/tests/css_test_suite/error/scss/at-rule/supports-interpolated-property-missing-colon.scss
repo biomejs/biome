@@ -9,3 +9,8 @@
     color: blue;
   }
 }
+@supports (margin-#{}: blue) {
+  .malformed {
+    color: blue;
+  }
+}

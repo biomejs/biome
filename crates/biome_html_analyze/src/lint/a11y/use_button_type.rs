@@ -2,15 +2,36 @@ use biome_analyze::RuleSource;
 use biome_analyze::{Ast, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_html_syntax::HtmlFileSource;
+
+use biome_html_syntax::T;
 use biome_html_syntax::element_ext::AnyHtmlTagElement;
-use biome_rowan::{AstNode, AstNodeList};
+use biome_rowan::AstNode;
 use biome_rule_options::use_button_type::UseButtonTypeOptions;
 
-use crate::utils::is_html_tag;
-
 declare_lint_rule! {
-    /// Enforces the usage and validity of the attribute `type` for the element `button`
+    /// Require an explicit, valid `type` on every `<button>`.
+    ///
+    /// A button without a type defaults to `submit`, which can submit a surrounding form
+    /// unexpectedly. Use `button`, `submit`, or `reset` to state the intended behavior.
+    ///
+    /// A `button` element without a [`type` attribute](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/button#type)
+    /// behaves as `type="submit"`.
+    /// Inside a `form`, clicking it submits the form, which often reloads the page.
+    /// That is rarely the intent of a button that opens a menu, toggles a panel, or runs a click handler.
+    ///
+    /// This is easy to miss in Vue, Svelte, and Astro components, because a `button` rendered by one component
+    /// can end up inside a `form` rendered by another.
+    /// An explicit `type` makes the button behave the same wherever it's rendered.
+    ///
+    /// The HTML specification defines three values for `type`:
+    /// - `button`: the button has no default behavior. Use it for buttons handled by JavaScript.
+    /// - `submit`: the button submits its form.
+    /// - `reset`: the button resets the controls of its form to their initial values.
+    ///
+    /// Browsers treat any other value the same as a missing `type`, so the rule reports invalid values too.
+    ///
+    /// In Vue, Svelte, and Astro files, the rule ignores `type` values bound to an expression,
+    /// such as `:type="buttonType"` or `type={buttonType}`, because their value can't be known statically.
     ///
     /// ## Examples
     ///
@@ -24,17 +45,39 @@ declare_lint_rule! {
     /// <button type="incorrectType">Do something</button>
     /// ```
     ///
+    /// Clicking this button submits the form instead of clearing it:
+    ///
+    /// ```html,expect_diagnostic
+    /// <form action="/search">
+    ///     <input name="query" />
+    ///     <button>Clear</button>
+    /// </form>
+    /// ```
+    ///
     /// ### Valid
     ///
     /// ```html
     /// <button type="button">Do something</button>
+    ///
+    /// <form action="/search">
+    ///     <input name="query" />
+    ///     <button type="reset">Clear</button>
+    ///     <button type="submit">Search</button>
+    /// </form>
     /// ```
     ///
     pub UseButtonType {
         version: "2.4.0",
         name: "useButtonType",
         language: "html",
-        sources: &[RuleSource::EslintReact("button-has-type").same(), RuleSource::HtmlEslint("require-button-type").same()],
+        sources: &[
+            RuleSource::EslintReact("button-has-type").inspired(),
+            RuleSource::EslintReactDom("no-missing-button-type").inspired(),
+            RuleSource::EslintReactXyz("dom-no-missing-button-type").inspired(),
+            RuleSource::EslintSvelte("button-has-type").same(),
+            RuleSource::EslintVueJs("html-button-has-type").same(),
+            RuleSource::HtmlEslint("require-button-type").same(),
+        ],
         recommended: true,
         severity: Severity::Error,
     }
@@ -54,47 +97,34 @@ impl Rule for UseButtonType {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let element = ctx.query();
-        let source_type = ctx.source_type::<HtmlFileSource>();
 
-        if !is_html_tag(element, source_type, "button") {
+        if element.tag_name_kind() != Some(T![button]) {
             return None;
         }
 
-        let type_attribute = element.find_attribute_by_name("type");
+        let type_attribute = element.find_attribute_or_vue_binding("type");
 
         // If no regular attribute found, check for Svelte shorthand syntax
-        if type_attribute.is_none() {
-            // Check if there's a shorthand attribute like {type}
-            if has_dynamic_attribute(element, "type") {
-                // We can't validate the runtime value, but the attribute will be provided
-                // Assume it's valid since we can't determine the value
-                return None;
-            }
+        let Some(attribute) = type_attribute else {
             // No regular attribute and no shorthand - missing type attribute
             return Some(UseButtonTypeState { missing_prop: true });
-        }
-
-        let attribute = type_attribute?;
-
-        let Some(initializer) = attribute.initializer() else {
-            return Some(UseButtonTypeState {
-                missing_prop: false,
-            });
         };
 
-        let value = initializer.value().ok()?;
+        // Check static value first (works for both HTML and Vue static bindings)
+        if let Some(string_value) = attribute.as_static_value() {
+            return if ALLOWED_BUTTON_TYPES.contains(&string_value.text()) {
+                None
+            } else {
+                Some(UseButtonTypeState {
+                    missing_prop: false,
+                })
+            };
+        }
 
-        // If the value is a dynamic expression (e.g., {foo} in Svelte), we can't validate it,
-        // so we assume it's valid to avoid false positives.
-        // We only validate static string values.
-        if value.as_html_string().is_some() {
-            // Static string value - validate it
-            if let Some(string_value) = value.string_value()
-                && ALLOWED_BUTTON_TYPES.contains(&&*string_value)
-            {
-                return None;
-            }
-            // Invalid static value
+        // For HTML attributes with no initializer (bare `type` with no value is invalid)
+        if let Some(html_attr) = attribute.as_html_attribute()
+            && html_attr.initializer().is_none()
+        {
             return Some(UseButtonTypeState {
                 missing_prop: false,
             });
@@ -127,47 +157,4 @@ impl Rule for UseButtonType {
             }
         ))
     }
-}
-
-/// Checks if a dynamic attribute (shorthand or directive) exists for the given name.
-/// For example, `<button {type}>` (Svelte), `<button :type="foo">` (Vue), or `<button v-bind:type="foo">` (Vue).
-fn has_dynamic_attribute(element: &AnyHtmlTagElement, name: &str) -> bool {
-    element
-        .attributes()
-        .iter()
-        .find_map(|attr| {
-            // Check if this is a HtmlSingleTextExpression (Svelte shorthand syntax)
-            if let Some(single_expr) = attr.as_html_attribute_single_text_expression() {
-                // Check if the expression text matches the attribute name we're looking for
-                let expression = single_expr.expression().ok()?.html_literal_token().ok()?;
-                return if expression.text() == name {
-                    Some(())
-                } else {
-                    None
-                };
-            } else if let Some(vue_directive) = attr.as_any_vue_directive() {
-                // Check for v-bind:type="foo" (longhand)
-                let directive_arg = if let Some(dir) = vue_directive.as_vue_directive()
-                    && dir.name_token().ok()?.text_trimmed() == "v-bind"
-                {
-                    dir.arg()
-                } else if let Some(dir) = vue_directive.as_vue_v_bind_shorthand_directive() {
-                    dir.arg().ok()
-                } else {
-                    None
-                }?;
-
-                let name_token = directive_arg
-                    .arg()
-                    .ok()?
-                    .as_vue_static_argument()?
-                    .name_token()
-                    .ok()?;
-                if name_token.text_trimmed() == name {
-                    return Some(());
-                }
-            }
-            None
-        })
-        .is_some()
 }

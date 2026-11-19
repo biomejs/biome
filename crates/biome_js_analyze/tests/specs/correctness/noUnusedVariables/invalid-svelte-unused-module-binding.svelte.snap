@@ -1,0 +1,48 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-svelte-unused-module-binding.svelte
+---
+# Input
+```svelte
+<script module lang="ts">
+// Declared in the module script and referenced in neither block nor the
+// template: still reported as unused.
+function unusedHelper(): string {
+  return "unused";
+}
+</script>
+
+<script lang="ts">
+const value = 1;
+</script>
+
+<p>{value}</p>
+
+```
+
+# Diagnostics
+```
+invalid-svelte-unused-module-binding.svelte:4:10 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━
+
+  ! This function unusedHelper is unused.
+  
+    2 │ // Declared in the module script and referenced in neither block nor the
+    3 │ // template: still reported as unused.
+  > 4 │ function unusedHelper(): string {
+      │          ^^^^^^^^^^^^
+    5 │   return "unused";
+    6 │ }
+  
+  i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend unusedHelper with an underscore.
+  
+    2 2 │   // Declared in the module script and referenced in neither block nor the
+    3 3 │   // template: still reported as unused.
+    4   │ - function·unusedHelper():·string·{
+      4 │ + function·_unusedHelper():·string·{
+    5 5 │     return "unused";
+    6 6 │   }
+  
+
+```

@@ -1,0 +1,14 @@
+/* should generate diagnostics */
+@mixin size {
+  width: 100%;
+}
+
+.card {
+  margin: 1px 2px 3px 4px;
+  inset-block-start: 1px;
+  inset-block-end: 2px;
+  padding: #{$space} 2px;
+  margin: $space 2px;
+  padding-block-start: #{$space};
+  padding-block-end: 2px;
+}

@@ -1,8 +1,8 @@
+use crate::TestArgs as Args;
 use crate::run_cli;
 use crate::snap_test::{SnapshotPayload, assert_cli_snapshot, assert_file_contents};
 use biome_console::BufferConsole;
 use biome_fs::MemoryFileSystem;
-use bpaf::Args;
 use camino::Utf8Path;
 
 const UNFORMATTED: &str = "  statement(  )  ";
@@ -1095,6 +1095,9 @@ fn overrides_json_formatting_options() {
                         "overrides.json"
                     ],
                     "json": {
+                        "parser": {
+                            "allowTrailingCommas": true
+                        },
                         "formatter": {
                             "enabled": true,
                             "bracketSpacing": false,

@@ -1,0 +1,375 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```html
+<DIV>a</SPAN></div>
+<P>b</PRE></p>
+<Custom-Tag>c</Custom-Tags></custom-tag>
+</DIV>
+</BR>
+<after>d</after>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    processing_instruction: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlBogusElement {
+            items: [
+                HtmlOpeningElement {
+                    l_angle_token: L_ANGLE@0..1 "<" [] [],
+                    name: HtmlTagName {
+                        value_token: DIV_KW@1..4 "DIV" [] [],
+                    },
+                    attributes: HtmlAttributeList [],
+                    r_angle_token: R_ANGLE@4..5 ">" [] [],
+                },
+                HtmlElementList [
+                    HtmlContent {
+                        value_token: HTML_LITERAL@5..6 "a" [] [],
+                    },
+                ],
+                HtmlBogusElement {
+                    items: [
+                        L_ANGLE@6..7 "<" [] [],
+                        SLASH@7..8 "/" [] [],
+                        HtmlTagName {
+                            value_token: SPAN_KW@8..12 "SPAN" [] [],
+                        },
+                        R_ANGLE@12..13 ">" [] [],
+                    ],
+                },
+                HtmlElementList [],
+                HtmlClosingElement {
+                    l_angle_token: L_ANGLE@13..14 "<" [] [],
+                    slash_token: SLASH@14..15 "/" [] [],
+                    name: HtmlTagName {
+                        value_token: DIV_KW@15..18 "div" [] [],
+                    },
+                    r_angle_token: R_ANGLE@18..19 ">" [] [],
+                },
+            ],
+        },
+        HtmlBogusElement {
+            items: [
+                HtmlOpeningElement {
+                    l_angle_token: L_ANGLE@19..21 "<" [Newline("\n")] [],
+                    name: HtmlTagName {
+                        value_token: P_KW@21..22 "P" [] [],
+                    },
+                    attributes: HtmlAttributeList [],
+                    r_angle_token: R_ANGLE@22..23 ">" [] [],
+                },
+                HtmlElementList [
+                    HtmlContent {
+                        value_token: HTML_LITERAL@23..24 "b" [] [],
+                    },
+                ],
+                HtmlBogusElement {
+                    items: [
+                        L_ANGLE@24..25 "<" [] [],
+                        SLASH@25..26 "/" [] [],
+                        HtmlTagName {
+                            value_token: PRE_KW@26..29 "PRE" [] [],
+                        },
+                        R_ANGLE@29..30 ">" [] [],
+                    ],
+                },
+                HtmlElementList [],
+                HtmlClosingElement {
+                    l_angle_token: L_ANGLE@30..31 "<" [] [],
+                    slash_token: SLASH@31..32 "/" [] [],
+                    name: HtmlTagName {
+                        value_token: P_KW@32..33 "p" [] [],
+                    },
+                    r_angle_token: R_ANGLE@33..34 ">" [] [],
+                },
+            ],
+        },
+        HtmlBogusElement {
+            items: [
+                HtmlOpeningElement {
+                    l_angle_token: L_ANGLE@34..36 "<" [Newline("\n")] [],
+                    name: HtmlTagName {
+                        value_token: HTML_UNKNOWN_TAG@36..46 "Custom-Tag" [] [],
+                    },
+                    attributes: HtmlAttributeList [],
+                    r_angle_token: R_ANGLE@46..47 ">" [] [],
+                },
+                HtmlElementList [
+                    HtmlContent {
+                        value_token: HTML_LITERAL@47..48 "c" [] [],
+                    },
+                ],
+                HtmlBogusElement {
+                    items: [
+                        L_ANGLE@48..49 "<" [] [],
+                        SLASH@49..50 "/" [] [],
+                        HtmlTagName {
+                            value_token: HTML_UNKNOWN_TAG@50..61 "Custom-Tags" [] [],
+                        },
+                        R_ANGLE@61..62 ">" [] [],
+                    ],
+                },
+                HtmlElementList [],
+                HtmlClosingElement {
+                    l_angle_token: L_ANGLE@62..63 "<" [] [],
+                    slash_token: SLASH@63..64 "/" [] [],
+                    name: HtmlTagName {
+                        value_token: HTML_UNKNOWN_TAG@64..74 "custom-tag" [] [],
+                    },
+                    r_angle_token: R_ANGLE@74..75 ">" [] [],
+                },
+            ],
+        },
+        HtmlBogusElement {
+            items: [
+                L_ANGLE@75..77 "<" [Newline("\n")] [],
+                SLASH@77..78 "/" [] [],
+                HtmlTagName {
+                    value_token: DIV_KW@78..81 "DIV" [] [],
+                },
+                R_ANGLE@81..82 ">" [] [],
+            ],
+        },
+        HtmlBogusElement {
+            items: [
+                L_ANGLE@82..84 "<" [Newline("\n")] [],
+                SLASH@84..85 "/" [] [],
+                HtmlTagName {
+                    value_token: BR_KW@85..87 "BR" [] [],
+                },
+                R_ANGLE@87..88 ">" [] [],
+            ],
+        },
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@88..90 "<" [Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: HTML_UNKNOWN_TAG@90..95 "after" [] [],
+                },
+                attributes: HtmlAttributeList [],
+                r_angle_token: R_ANGLE@95..96 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlContent {
+                    value_token: HTML_LITERAL@96..97 "d" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@97..98 "<" [] [],
+                slash_token: SLASH@98..99 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_UNKNOWN_TAG@99..104 "after" [] [],
+                },
+                r_angle_token: R_ANGLE@104..105 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@105..106 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..106
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: (empty)
+  4: HTML_ELEMENT_LIST@0..105
+    0: HTML_BOGUS_ELEMENT@0..19
+      0: HTML_OPENING_ELEMENT@0..5
+        0: L_ANGLE@0..1 "<" [] []
+        1: HTML_TAG_NAME@1..4
+          0: DIV_KW@1..4 "DIV" [] []
+        2: HTML_ATTRIBUTE_LIST@4..4
+        3: R_ANGLE@4..5 ">" [] []
+      1: HTML_ELEMENT_LIST@5..6
+        0: HTML_CONTENT@5..6
+          0: HTML_LITERAL@5..6 "a" [] []
+      2: HTML_BOGUS_ELEMENT@6..13
+        0: L_ANGLE@6..7 "<" [] []
+        1: SLASH@7..8 "/" [] []
+        2: HTML_TAG_NAME@8..12
+          0: SPAN_KW@8..12 "SPAN" [] []
+        3: R_ANGLE@12..13 ">" [] []
+      3: HTML_ELEMENT_LIST@13..13
+      4: HTML_CLOSING_ELEMENT@13..19
+        0: L_ANGLE@13..14 "<" [] []
+        1: SLASH@14..15 "/" [] []
+        2: HTML_TAG_NAME@15..18
+          0: DIV_KW@15..18 "div" [] []
+        3: R_ANGLE@18..19 ">" [] []
+    1: HTML_BOGUS_ELEMENT@19..34
+      0: HTML_OPENING_ELEMENT@19..23
+        0: L_ANGLE@19..21 "<" [Newline("\n")] []
+        1: HTML_TAG_NAME@21..22
+          0: P_KW@21..22 "P" [] []
+        2: HTML_ATTRIBUTE_LIST@22..22
+        3: R_ANGLE@22..23 ">" [] []
+      1: HTML_ELEMENT_LIST@23..24
+        0: HTML_CONTENT@23..24
+          0: HTML_LITERAL@23..24 "b" [] []
+      2: HTML_BOGUS_ELEMENT@24..30
+        0: L_ANGLE@24..25 "<" [] []
+        1: SLASH@25..26 "/" [] []
+        2: HTML_TAG_NAME@26..29
+          0: PRE_KW@26..29 "PRE" [] []
+        3: R_ANGLE@29..30 ">" [] []
+      3: HTML_ELEMENT_LIST@30..30
+      4: HTML_CLOSING_ELEMENT@30..34
+        0: L_ANGLE@30..31 "<" [] []
+        1: SLASH@31..32 "/" [] []
+        2: HTML_TAG_NAME@32..33
+          0: P_KW@32..33 "p" [] []
+        3: R_ANGLE@33..34 ">" [] []
+    2: HTML_BOGUS_ELEMENT@34..75
+      0: HTML_OPENING_ELEMENT@34..47
+        0: L_ANGLE@34..36 "<" [Newline("\n")] []
+        1: HTML_TAG_NAME@36..46
+          0: HTML_UNKNOWN_TAG@36..46 "Custom-Tag" [] []
+        2: HTML_ATTRIBUTE_LIST@46..46
+        3: R_ANGLE@46..47 ">" [] []
+      1: HTML_ELEMENT_LIST@47..48
+        0: HTML_CONTENT@47..48
+          0: HTML_LITERAL@47..48 "c" [] []
+      2: HTML_BOGUS_ELEMENT@48..62
+        0: L_ANGLE@48..49 "<" [] []
+        1: SLASH@49..50 "/" [] []
+        2: HTML_TAG_NAME@50..61
+          0: HTML_UNKNOWN_TAG@50..61 "Custom-Tags" [] []
+        3: R_ANGLE@61..62 ">" [] []
+      3: HTML_ELEMENT_LIST@62..62
+      4: HTML_CLOSING_ELEMENT@62..75
+        0: L_ANGLE@62..63 "<" [] []
+        1: SLASH@63..64 "/" [] []
+        2: HTML_TAG_NAME@64..74
+          0: HTML_UNKNOWN_TAG@64..74 "custom-tag" [] []
+        3: R_ANGLE@74..75 ">" [] []
+    3: HTML_BOGUS_ELEMENT@75..82
+      0: L_ANGLE@75..77 "<" [Newline("\n")] []
+      1: SLASH@77..78 "/" [] []
+      2: HTML_TAG_NAME@78..81
+        0: DIV_KW@78..81 "DIV" [] []
+      3: R_ANGLE@81..82 ">" [] []
+    4: HTML_BOGUS_ELEMENT@82..88
+      0: L_ANGLE@82..84 "<" [Newline("\n")] []
+      1: SLASH@84..85 "/" [] []
+      2: HTML_TAG_NAME@85..87
+        0: BR_KW@85..87 "BR" [] []
+      3: R_ANGLE@87..88 ">" [] []
+    5: HTML_ELEMENT@88..105
+      0: HTML_OPENING_ELEMENT@88..96
+        0: L_ANGLE@88..90 "<" [Newline("\n")] []
+        1: HTML_TAG_NAME@90..95
+          0: HTML_UNKNOWN_TAG@90..95 "after" [] []
+        2: HTML_ATTRIBUTE_LIST@95..95
+        3: R_ANGLE@95..96 ">" [] []
+      1: HTML_ELEMENT_LIST@96..97
+        0: HTML_CONTENT@96..97
+          0: HTML_LITERAL@96..97 "d" [] []
+      2: HTML_CLOSING_ELEMENT@97..105
+        0: L_ANGLE@97..98 "<" [] []
+        1: SLASH@98..99 "/" [] []
+        2: HTML_TAG_NAME@99..104
+          0: HTML_UNKNOWN_TAG@99..104 "after" [] []
+        3: R_ANGLE@104..105 ">" [] []
+  5: EOF@105..106 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+closing-tag-name-case-mismatch.html:1:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a matching closing tag but instead found '</SPAN>'.
+  
+  > 1 │ <DIV>a</SPAN></div>
+      │       ^^^^^^^
+    2 │ <P>b</PRE></p>
+    3 │ <Custom-Tag>c</Custom-Tags></custom-tag>
+  
+  i Expected a matching closing tag here.
+  
+  > 1 │ <DIV>a</SPAN></div>
+      │       ^^^^^^^
+    2 │ <P>b</PRE></p>
+    3 │ <Custom-Tag>c</Custom-Tags></custom-tag>
+  
+closing-tag-name-case-mismatch.html:2:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a matching closing tag but instead found '</PRE>'.
+  
+    1 │ <DIV>a</SPAN></div>
+  > 2 │ <P>b</PRE></p>
+      │     ^^^^^^
+    3 │ <Custom-Tag>c</Custom-Tags></custom-tag>
+    4 │ </DIV>
+  
+  i Expected a matching closing tag here.
+  
+    1 │ <DIV>a</SPAN></div>
+  > 2 │ <P>b</PRE></p>
+      │     ^^^^^^
+    3 │ <Custom-Tag>c</Custom-Tags></custom-tag>
+    4 │ </DIV>
+  
+closing-tag-name-case-mismatch.html:3:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a matching closing tag but instead found '</Custom-Tags>'.
+  
+    1 │ <DIV>a</SPAN></div>
+    2 │ <P>b</PRE></p>
+  > 3 │ <Custom-Tag>c</Custom-Tags></custom-tag>
+      │              ^^^^^^^^^^^^^^
+    4 │ </DIV>
+    5 │ </BR>
+  
+  i Expected a matching closing tag here.
+  
+    1 │ <DIV>a</SPAN></div>
+    2 │ <P>b</PRE></p>
+  > 3 │ <Custom-Tag>c</Custom-Tags></custom-tag>
+      │              ^^^^^^^^^^^^^^
+    4 │ </DIV>
+    5 │ </BR>
+  
+closing-tag-name-case-mismatch.html:4:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This closing tag has no matching opening tag.
+  
+    2 │ <P>b</PRE></p>
+    3 │ <Custom-Tag>c</Custom-Tags></custom-tag>
+  > 4 │ </DIV>
+      │ ^^^^^^
+    5 │ </BR>
+    6 │ <after>d</after>
+  
+  i Remove the closing tag, or add the opening tag it belongs to.
+  
+closing-tag-name-case-mismatch.html:5:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Void elements should not have a closing tag. Remove the closing tag.
+  
+    3 │ <Custom-Tag>c</Custom-Tags></custom-tag>
+    4 │ </DIV>
+  > 5 │ </BR>
+      │ ^^^^^
+    6 │ <after>d</after>
+    7 │ 
+  
+```

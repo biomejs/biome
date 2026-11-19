@@ -1,0 +1,20 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: valid-hash-id-values.scss
+---
+# Input
+```css
+/* should not generate diagnostics */
+$targets: (app: #app, brand: #Brand);
+$id: #ABCG;
+.strings {
+  values: #BAR #ABCG #a #ab #abcde #abcdefg #-app #_app #and;
+  escaped: #\61 pp;
+  adjacent: #ABC#{G};
+  quoted: "#ABC";
+  --raw: #ABC;
+  fragment: url(#app);
+}
+#ABCG { color: red; }
+
+```

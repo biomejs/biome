@@ -27,12 +27,16 @@
 //!   `lib.rs` and `src/lib.rs` match `**` and `**/*.rs`
 //!   Conversely, `README.txt` doesn't match `**/*.rs` because the pat ends with `.txt`.
 //!
-//! - Use `\*` to escape `*`
+//! - brace alternatives `{a,b}` match either alternative. For example, `*.{js,ts}` matches files
+//!   ending in `.js` or `.ts`. Only one level of alternatives is supported. Nested alternatives
+//!   such as `{{a,b},c}` are not supported.
 //!
-//!   the path `*` matches `\*`.
+//! - character classes such as `[abc]`, `[0-9]`, and `[!abc]` are not supported.
 //!
-//! - `?`, `[`, `]`, `{`, and `}` must be escaped using `\`.
-//!   These characters are reserved for possible future use.
+//! - `?` is not a supported wildcard.
+//!
+//! - a backslash escapes `!`, `*`, `?`, `{`, `}`, `[`, `]`, or another backslash. For example, the
+//!   path `*` matches `\*`.
 //!
 //! - Use `!` as first character to negate a glob
 //!
@@ -145,8 +149,11 @@
 
 pub mod editorconfig;
 
-/// Normalized Biome glob pattern that strips `./` from the pattern.
-#[derive(Debug, Clone, Eq, PartialEq)]
+/// Matches case-sensitive paths with `/` separators. Supports `*` within a path segment,
+/// segment-only `**`, brace alternatives such as `{js,ts}`, backslash escaping, and leading `!` or
+/// `!!` negation. Does not support `?`, character classes, nested brace alternatives, partial
+/// globstars, or consecutive globstars. Leading `./` sequences are removed before parsing.
+#[derive(Debug, Clone, Eq, Hash, PartialEq)]
 #[cfg_attr(
     feature = "biome_deserialize",
     derive(biome_deserialize_macros::Deserializable)
@@ -199,7 +206,10 @@ impl AsRef<Glob> for NormalizedGlob {
     }
 }
 
-/// A Biome glob pattern.
+/// Matches case-sensitive paths with `/` separators. Supports `*` within a path segment,
+/// segment-only `**`, brace alternatives such as `{js,ts}`, backslash escaping, and leading `!` or
+/// `!!` negation. Does not support `?`, character classes, nested brace alternatives, partial
+/// globstars, or consecutive globstars.
 #[derive(Clone)]
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 #[cfg_attr(feature = "serde", serde(try_from = "String", into = "String"))]
@@ -357,9 +367,9 @@ impl TryFrom<String> for Glob {
 // We use a custom impl to precisely report the location of the error.
 #[cfg(feature = "biome_deserialize")]
 impl biome_deserialize::Deserializable for Glob {
-    fn deserialize(
-        ctx: &mut impl biome_deserialize::DeserializationContext,
-        value: &impl biome_deserialize::DeserializableValue,
+    fn deserialize<V: biome_deserialize::DeserializableValue>(
+        ctx: &mut dyn biome_deserialize::DeserializationContext<State = V::State>,
+        value: &V,
         name: &str,
     ) -> Option<Self> {
         let glob = String::deserialize(ctx, value, name)?;
@@ -388,8 +398,11 @@ impl schemars::JsonSchema for Glob {
         std::borrow::Cow::Borrowed("Glob")
     }
 
-    fn json_schema(generator: &mut schemars::SchemaGenerator) -> schemars::Schema {
-        String::json_schema(generator)
+    fn json_schema(_generator: &mut schemars::SchemaGenerator) -> schemars::Schema {
+        schemars::json_schema!({
+            "description": "Matches case-sensitive paths with `/` separators. Supports `*` within a path segment,\nsegment-only `**`, brace alternatives such as `{js,ts}`, backslash escaping, and leading `!` or\n`!!` negation. Does not support `?`, character classes, nested brace alternatives, partial\nglobstars, or consecutive globstars.",
+            "type": "string"
+        })
     }
 }
 

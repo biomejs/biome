@@ -1,0 +1,79 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome lint test.js
+```
+
+## `biome.json`
+
+```json
+{
+  "linter": {
+    "rules": {
+      "recommended": false,
+      "suspicious": {
+        "preset": "all",
+        "noDebugger": "off"
+      }
+    }
+  }
+}
+```
+
+## `test.js`
+
+```js
+debugger;
+function foo() {}
+
+```
+
+# Emitted Messages
+
+```block
+biome.json:2:15 deserialize  DEPRECATED  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The use of the recommended field has been deprecated, and will removed in the next major version of Biome. Use preset instead.
+  
+     1 │ {
+   > 2 │     "linter": {
+       │               ^
+   > 3 │         "rules": {
+   > 4 │             "recommended": false,
+        ...
+   > 8 │             }
+   > 9 │         }
+  > 10 │     }
+       │     ^
+    11 │ }
+  
+  i Migrate the configuration with the proper command
+  
+  $ biome migrate
+  
+
+```
+
+```block
+test.js:2:16 lint/suspicious/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected empty block.
+  
+    1 │ debugger;
+  > 2 │ function foo() {}
+      │                ^^
+    3 │ 
+  
+  i Empty blocks are usually the result of an incomplete refactoring. Remove the empty block or add a comment inside it if it is intentional.
+  
+
+```
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+Found 1 warning.
+```

@@ -1,0 +1,13 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: valid.html
+---
+# Input
+```html
+<!-- should not generate diagnostics -->
+<div class="bg-linear-to-r bg-top-left object-bottom-right max-w-(--breakpoint-lg)"></div>
+<div class="text-ellipsis box-decoration-clone grow shrink-0 order-0 wrap-break-word inset-s-4"></div>
+<div title="flex-grow order-none start-4"></div>
+<div class="start-date end-of-list -start-auto flex-grow-wrapper max-w-screen-wrapper"></div>
+
+```

@@ -1,0 +1,118 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidMappedJsxExtensions.ts
+---
+# Input
+```ts
+// should generate diagnostics
+import "./foo.js";
+import "./sub/foo.js";
+import "./foo.jsx";
+import "./foo.tsx";
+import "./foo.ts";
+import "./missing.jsx";
+
+```
+
+# Diagnostics
+```
+invalidMappedJsxExtensions.ts:2:8 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━
+
+  ! Add a file extension for relative imports.
+  
+    1 │ // should generate diagnostics
+  > 2 │ import "./foo.js";
+      │        ^^^^^^^^^^
+    3 │ import "./sub/foo.js";
+    4 │ import "./foo.jsx";
+  
+  i Explicit import improves compatibility with browsers and makes file resolution in tooling faster.
+  
+  i Safe fix: Add import extension .ts.
+  
+    1 1 │   // should generate diagnostics
+    2   │ - import·"./foo.js";
+      2 │ + import·"./foo.ts";
+    3 3 │   import "./sub/foo.js";
+    4 4 │   import "./foo.jsx";
+  
+
+```
+
+```
+invalidMappedJsxExtensions.ts:3:8 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━
+
+  ! Add a file extension for relative imports.
+  
+    1 │ // should generate diagnostics
+    2 │ import "./foo.js";
+  > 3 │ import "./sub/foo.js";
+      │        ^^^^^^^^^^^^^^
+    4 │ import "./foo.jsx";
+    5 │ import "./foo.tsx";
+  
+  i Explicit import improves compatibility with browsers and makes file resolution in tooling faster.
+  
+  i Safe fix: Add import extension .ts.
+  
+    1 1 │   // should generate diagnostics
+    2 2 │   import "./foo.js";
+    3   │ - import·"./sub/foo.js";
+      3 │ + import·"./sub/foo.ts";
+    4 4 │   import "./foo.jsx";
+    5 5 │   import "./foo.tsx";
+  
+
+```
+
+```
+invalidMappedJsxExtensions.ts:4:8 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━
+
+  ! Add a file extension for relative imports.
+  
+    2 │ import "./foo.js";
+    3 │ import "./sub/foo.js";
+  > 4 │ import "./foo.jsx";
+      │        ^^^^^^^^^^^
+    5 │ import "./foo.tsx";
+    6 │ import "./foo.ts";
+  
+  i Explicit import improves compatibility with browsers and makes file resolution in tooling faster.
+  
+  i Safe fix: Add import extension .ts.
+  
+    2 2 │   import "./foo.js";
+    3 3 │   import "./sub/foo.js";
+    4   │ - import·"./foo.jsx";
+      4 │ + import·"./foo.ts";
+    5 5 │   import "./foo.tsx";
+    6 6 │   import "./foo.ts";
+  
+
+```
+
+```
+invalidMappedJsxExtensions.ts:5:8 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━
+
+  ! Add a file extension for relative imports.
+  
+    3 │ import "./sub/foo.js";
+    4 │ import "./foo.jsx";
+  > 5 │ import "./foo.tsx";
+      │        ^^^^^^^^^^^
+    6 │ import "./foo.ts";
+    7 │ import "./missing.jsx";
+  
+  i Explicit import improves compatibility with browsers and makes file resolution in tooling faster.
+  
+  i Safe fix: Add import extension .ts.
+  
+    3 3 │   import "./sub/foo.js";
+    4 4 │   import "./foo.jsx";
+    5   │ - import·"./foo.tsx";
+      5 │ + import·"./foo.ts";
+    6 6 │   import "./foo.ts";
+    7 7 │   import "./missing.jsx";
+  
+
+```

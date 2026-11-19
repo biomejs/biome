@@ -5,6 +5,12 @@ pub(crate) struct FormatYamlDirectiveList;
 impl FormatRule<YamlDirectiveList> for FormatYamlDirectiveList {
     type Context = YamlFormatContext;
     fn fmt(&self, node: &YamlDirectiveList, f: &mut YamlFormatter) -> FormatResult<()> {
-        f.join().entries(node.iter().formatted()).finish()
+        let mut join = f.join_nodes_with_hardline();
+
+        for directive in node {
+            join.entry(directive.syntax(), &directive.format());
+        }
+
+        join.finish()
     }
 }

@@ -3,6 +3,7 @@ pub(crate) mod github;
 pub(crate) mod gitlab;
 pub(crate) mod json;
 pub(crate) mod junit;
+pub(crate) mod profilers;
 pub(crate) mod rdjson;
 pub(crate) mod sarif;
 pub(crate) mod summary;

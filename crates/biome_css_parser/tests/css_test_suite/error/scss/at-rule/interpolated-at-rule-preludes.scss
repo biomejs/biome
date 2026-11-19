@@ -1,0 +1,14 @@
+@position-try --try-#{} { top: 0; }
+.after-position { color: red; }
+@color-profile --profile-#{} { src: url("a.icc"); }
+.after-profile { color: red; }
+@custom-media --media-#{} (min-width: 1px);
+.after-media { color: red; }
+@counter-style counter-#{} { symbols: "*"; }
+.after-counter { color: red; }
+@font-feature-values Font #{} { @swash { fancy: 1; } }
+.after-font { color: red; }
+@page page-#{}:#{} { margin: 1in; }
+.after-page { color: red; }
+@namespace ns-#{} url("http://example.com");
+.after-namespace { color: red; }

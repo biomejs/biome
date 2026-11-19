@@ -1,0 +1,16 @@
+@media (aspect-ratio: 16 / 9) and (min-width: calc(800px - 16px)) {
+  .query { color: red; }
+}
+
+@font-face {
+  font-family: serif;
+  src: url(font.woff2);
+}
+
+.grid {
+  grid-template-columns: [first start] 1fr [end];
+  --tokens: [first end];
+  &__bar { color: blue; }
+}
+
+@unknown fn(#{$value});

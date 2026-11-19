@@ -6,6 +6,182 @@ use biome_markdown_syntax::{
     MarkdownSyntaxToken as SyntaxToken, *,
 };
 use biome_rowan::AstNode;
+pub fn gfm_strikethrough(
+    l_fence_token: SyntaxToken,
+    content: MdInlineItemList,
+    r_fence_token: SyntaxToken,
+) -> GfmStrikethrough {
+    GfmStrikethrough::unwrap_cast(SyntaxNode::new_detached(
+        MarkdownSyntaxKind::GFM_STRIKETHROUGH,
+        [
+            Some(SyntaxElement::Token(l_fence_token)),
+            Some(SyntaxElement::Node(content.into_syntax())),
+            Some(SyntaxElement::Token(r_fence_token)),
+        ],
+    ))
+}
+pub fn gfm_table(
+    header: GfmTableRow,
+    delimiter: GfmTableDelimiterRow,
+    body: GfmTableRowList,
+) -> GfmTable {
+    GfmTable::unwrap_cast(SyntaxNode::new_detached(
+        MarkdownSyntaxKind::GFM_TABLE,
+        [
+            Some(SyntaxElement::Node(header.into_syntax())),
+            Some(SyntaxElement::Node(delimiter.into_syntax())),
+            Some(SyntaxElement::Node(body.into_syntax())),
+        ],
+    ))
+}
+pub fn gfm_table_cell(content: MdInlineItemList) -> GfmTableCell {
+    GfmTableCell::unwrap_cast(SyntaxNode::new_detached(
+        MarkdownSyntaxKind::GFM_TABLE_CELL,
+        [Some(SyntaxElement::Node(content.into_syntax()))],
+    ))
+}
+pub fn gfm_table_delimiter_cell(dashes: GfmTableDelimiterDashList) -> GfmTableDelimiterCellBuilder {
+    GfmTableDelimiterCellBuilder {
+        dashes,
+        l_colon_token: None,
+        r_colon_token: None,
+    }
+}
+pub struct GfmTableDelimiterCellBuilder {
+    dashes: GfmTableDelimiterDashList,
+    l_colon_token: Option<SyntaxToken>,
+    r_colon_token: Option<SyntaxToken>,
+}
+impl GfmTableDelimiterCellBuilder {
+    pub fn with_l_colon_token(mut self, l_colon_token: SyntaxToken) -> Self {
+        self.l_colon_token = Some(l_colon_token);
+        self
+    }
+    pub fn with_r_colon_token(mut self, r_colon_token: SyntaxToken) -> Self {
+        self.r_colon_token = Some(r_colon_token);
+        self
+    }
+    pub fn build(self) -> GfmTableDelimiterCell {
+        GfmTableDelimiterCell::unwrap_cast(SyntaxNode::new_detached(
+            MarkdownSyntaxKind::GFM_TABLE_DELIMITER_CELL,
+            [
+                self.l_colon_token.map(|token| SyntaxElement::Token(token)),
+                Some(SyntaxElement::Node(self.dashes.into_syntax())),
+                self.r_colon_token.map(|token| SyntaxElement::Token(token)),
+            ],
+        ))
+    }
+}
+pub fn gfm_table_delimiter_dash(minus_token: SyntaxToken) -> GfmTableDelimiterDash {
+    GfmTableDelimiterDash::unwrap_cast(SyntaxNode::new_detached(
+        MarkdownSyntaxKind::GFM_TABLE_DELIMITER_DASH,
+        [Some(SyntaxElement::Token(minus_token))],
+    ))
+}
+pub fn gfm_table_delimiter_row(
+    quote_prefixes: MdQuotePrefixList,
+    cells: GfmTableDelimiterCellList,
+) -> GfmTableDelimiterRowBuilder {
+    GfmTableDelimiterRowBuilder {
+        quote_prefixes,
+        cells,
+        l_pipe_token: None,
+        r_pipe_token: None,
+        newline_token: None,
+    }
+}
+pub struct GfmTableDelimiterRowBuilder {
+    quote_prefixes: MdQuotePrefixList,
+    cells: GfmTableDelimiterCellList,
+    l_pipe_token: Option<SyntaxToken>,
+    r_pipe_token: Option<SyntaxToken>,
+    newline_token: Option<SyntaxToken>,
+}
+impl GfmTableDelimiterRowBuilder {
+    pub fn with_l_pipe_token(mut self, l_pipe_token: SyntaxToken) -> Self {
+        self.l_pipe_token = Some(l_pipe_token);
+        self
+    }
+    pub fn with_r_pipe_token(mut self, r_pipe_token: SyntaxToken) -> Self {
+        self.r_pipe_token = Some(r_pipe_token);
+        self
+    }
+    pub fn with_newline_token(mut self, newline_token: SyntaxToken) -> Self {
+        self.newline_token = Some(newline_token);
+        self
+    }
+    pub fn build(self) -> GfmTableDelimiterRow {
+        GfmTableDelimiterRow::unwrap_cast(SyntaxNode::new_detached(
+            MarkdownSyntaxKind::GFM_TABLE_DELIMITER_ROW,
+            [
+                Some(SyntaxElement::Node(self.quote_prefixes.into_syntax())),
+                self.l_pipe_token.map(|token| SyntaxElement::Token(token)),
+                Some(SyntaxElement::Node(self.cells.into_syntax())),
+                self.r_pipe_token.map(|token| SyntaxElement::Token(token)),
+                self.newline_token.map(|token| SyntaxElement::Token(token)),
+            ],
+        ))
+    }
+}
+pub fn gfm_table_row(
+    quote_prefixes: MdQuotePrefixList,
+    cells: GfmTableCellList,
+) -> GfmTableRowBuilder {
+    GfmTableRowBuilder {
+        quote_prefixes,
+        cells,
+        l_pipe_token: None,
+        r_pipe_token: None,
+        newline_token: None,
+    }
+}
+pub struct GfmTableRowBuilder {
+    quote_prefixes: MdQuotePrefixList,
+    cells: GfmTableCellList,
+    l_pipe_token: Option<SyntaxToken>,
+    r_pipe_token: Option<SyntaxToken>,
+    newline_token: Option<SyntaxToken>,
+}
+impl GfmTableRowBuilder {
+    pub fn with_l_pipe_token(mut self, l_pipe_token: SyntaxToken) -> Self {
+        self.l_pipe_token = Some(l_pipe_token);
+        self
+    }
+    pub fn with_r_pipe_token(mut self, r_pipe_token: SyntaxToken) -> Self {
+        self.r_pipe_token = Some(r_pipe_token);
+        self
+    }
+    pub fn with_newline_token(mut self, newline_token: SyntaxToken) -> Self {
+        self.newline_token = Some(newline_token);
+        self
+    }
+    pub fn build(self) -> GfmTableRow {
+        GfmTableRow::unwrap_cast(SyntaxNode::new_detached(
+            MarkdownSyntaxKind::GFM_TABLE_ROW,
+            [
+                Some(SyntaxElement::Node(self.quote_prefixes.into_syntax())),
+                self.l_pipe_token.map(|token| SyntaxElement::Token(token)),
+                Some(SyntaxElement::Node(self.cells.into_syntax())),
+                self.r_pipe_token.map(|token| SyntaxElement::Token(token)),
+                self.newline_token.map(|token| SyntaxElement::Token(token)),
+            ],
+        ))
+    }
+}
+pub fn gfm_task_list_item(
+    l_bracket_token: SyntaxToken,
+    state: MdTextual,
+    r_bracket_token: SyntaxToken,
+) -> GfmTaskListItem {
+    GfmTaskListItem::unwrap_cast(SyntaxNode::new_detached(
+        MarkdownSyntaxKind::GFM_TASK_LIST_ITEM,
+        [
+            Some(SyntaxElement::Token(l_bracket_token)),
+            Some(SyntaxElement::Node(state.into_syntax())),
+            Some(SyntaxElement::Token(r_bracket_token)),
+        ],
+    ))
+}
 pub fn md_autolink(
     l_angle_token: SyntaxToken,
     value: MdInlineItemList,
@@ -35,39 +211,17 @@ pub fn md_bullet_list_item(md_bullet_list: MdBulletList) -> MdBulletListItem {
         [Some(SyntaxElement::Node(md_bullet_list.into_syntax()))],
     ))
 }
+pub fn md_code_content(value_token: SyntaxToken) -> MdCodeContent {
+    MdCodeContent::unwrap_cast(SyntaxNode::new_detached(
+        MarkdownSyntaxKind::MD_CODE_CONTENT,
+        [Some(SyntaxElement::Token(value_token))],
+    ))
+}
 pub fn md_continuation_indent(indent: MdIndentTokenList) -> MdContinuationIndent {
     MdContinuationIndent::unwrap_cast(SyntaxNode::new_detached(
         MarkdownSyntaxKind::MD_CONTINUATION_INDENT,
         [Some(SyntaxElement::Node(indent.into_syntax()))],
     ))
-}
-pub fn md_document(value: MdBlockList, eof_token: SyntaxToken) -> MdDocumentBuilder {
-    MdDocumentBuilder {
-        value,
-        eof_token,
-        bom_token: None,
-    }
-}
-pub struct MdDocumentBuilder {
-    value: MdBlockList,
-    eof_token: SyntaxToken,
-    bom_token: Option<SyntaxToken>,
-}
-impl MdDocumentBuilder {
-    pub fn with_bom_token(mut self, bom_token: SyntaxToken) -> Self {
-        self.bom_token = Some(bom_token);
-        self
-    }
-    pub fn build(self) -> MdDocument {
-        MdDocument::unwrap_cast(SyntaxNode::new_detached(
-            MarkdownSyntaxKind::MD_DOCUMENT,
-            [
-                self.bom_token.map(|token| SyntaxElement::Token(token)),
-                Some(SyntaxElement::Node(self.value.into_syntax())),
-                Some(SyntaxElement::Token(self.eof_token)),
-            ],
-        ))
-    }
 }
 pub fn md_entity_reference(value_token: SyntaxToken) -> MdEntityReference {
     MdEntityReference::unwrap_cast(SyntaxNode::new_detached(
@@ -118,6 +272,26 @@ impl MdFencedCodeBlockBuilder {
         ))
     }
 }
+pub fn md_frontmatter(
+    l_fence_token: SyntaxToken,
+    content: MdFrontmatterContent,
+    r_fence_token: SyntaxToken,
+) -> MdFrontmatter {
+    MdFrontmatter::unwrap_cast(SyntaxNode::new_detached(
+        MarkdownSyntaxKind::MD_FRONTMATTER,
+        [
+            Some(SyntaxElement::Token(l_fence_token)),
+            Some(SyntaxElement::Node(content.into_syntax())),
+            Some(SyntaxElement::Token(r_fence_token)),
+        ],
+    ))
+}
+pub fn md_frontmatter_content(value_token: SyntaxToken) -> MdFrontmatterContent {
+    MdFrontmatterContent::unwrap_cast(SyntaxNode::new_detached(
+        MarkdownSyntaxKind::MD_FRONTMATTER_CONTENT,
+        [Some(SyntaxElement::Token(value_token))],
+    ))
+}
 pub fn md_hard_line(value_token: SyntaxToken) -> MdHardLine {
     MdHardLine::unwrap_cast(SyntaxNode::new_detached(
         MarkdownSyntaxKind::MD_HARD_LINE,
@@ -166,7 +340,7 @@ impl MdHeaderBuilder {
         ))
     }
 }
-pub fn md_html_block(indent: MdIndentTokenList, content: MdInlineItemList) -> MdHtmlBlock {
+pub fn md_html_block(indent: MdIndentTokenList, content: MdHtmlContent) -> MdHtmlBlock {
     MdHtmlBlock::unwrap_cast(SyntaxNode::new_detached(
         MarkdownSyntaxKind::MD_HTML_BLOCK,
         [
@@ -175,9 +349,9 @@ pub fn md_html_block(indent: MdIndentTokenList, content: MdInlineItemList) -> Md
         ],
     ))
 }
-pub fn md_indent(value_token: SyntaxToken) -> MdIndent {
-    MdIndent::unwrap_cast(SyntaxNode::new_detached(
-        MarkdownSyntaxKind::MD_INDENT,
+pub fn md_html_content(value_token: SyntaxToken) -> MdHtmlContent {
+    MdHtmlContent::unwrap_cast(SyntaxNode::new_detached(
+        MarkdownSyntaxKind::MD_HTML_CONTENT,
         [Some(SyntaxElement::Token(value_token))],
     ))
 }
@@ -221,10 +395,10 @@ pub fn md_inline_emphasis(
         ],
     ))
 }
-pub fn md_inline_html(value: MdInlineItemList) -> MdInlineHtml {
+pub fn md_inline_html(value_token: SyntaxToken) -> MdInlineHtml {
     MdInlineHtml::unwrap_cast(SyntaxNode::new_detached(
         MarkdownSyntaxKind::MD_INLINE_HTML,
-        [Some(SyntaxElement::Node(value.into_syntax()))],
+        [Some(SyntaxElement::Token(value_token))],
     ))
 }
 pub fn md_inline_image(
@@ -455,31 +629,11 @@ pub fn md_ordered_list_item(md_bullet_list: MdBulletList) -> MdOrderedListItem {
         [Some(SyntaxElement::Node(md_bullet_list.into_syntax()))],
     ))
 }
-pub fn md_paragraph(list: MdInlineItemList) -> MdParagraphBuilder {
-    MdParagraphBuilder {
-        list,
-        hard_line: None,
-    }
-}
-pub struct MdParagraphBuilder {
-    list: MdInlineItemList,
-    hard_line: Option<MdHardLine>,
-}
-impl MdParagraphBuilder {
-    pub fn with_hard_line(mut self, hard_line: MdHardLine) -> Self {
-        self.hard_line = Some(hard_line);
-        self
-    }
-    pub fn build(self) -> MdParagraph {
-        MdParagraph::unwrap_cast(SyntaxNode::new_detached(
-            MarkdownSyntaxKind::MD_PARAGRAPH,
-            [
-                Some(SyntaxElement::Node(self.list.into_syntax())),
-                self.hard_line
-                    .map(|token| SyntaxElement::Node(token.into_syntax())),
-            ],
-        ))
-    }
+pub fn md_paragraph(list: MdInlineItemList) -> MdParagraph {
+    MdParagraph::unwrap_cast(SyntaxNode::new_detached(
+        MarkdownSyntaxKind::MD_PARAGRAPH,
+        [Some(SyntaxElement::Node(list.into_syntax()))],
+    ))
 }
 pub fn md_quote(prefix: MdQuotePrefix, content: MdBlockList) -> MdQuote {
     MdQuote::unwrap_cast(SyntaxNode::new_detached(
@@ -618,6 +772,42 @@ pub fn md_reference_link_label(
         ],
     ))
 }
+pub fn md_root(value: MdBlockList, eof_token: SyntaxToken) -> MdRootBuilder {
+    MdRootBuilder {
+        value,
+        eof_token,
+        bom_token: None,
+        frontmatter: None,
+    }
+}
+pub struct MdRootBuilder {
+    value: MdBlockList,
+    eof_token: SyntaxToken,
+    bom_token: Option<SyntaxToken>,
+    frontmatter: Option<MdFrontmatter>,
+}
+impl MdRootBuilder {
+    pub fn with_bom_token(mut self, bom_token: SyntaxToken) -> Self {
+        self.bom_token = Some(bom_token);
+        self
+    }
+    pub fn with_frontmatter(mut self, frontmatter: MdFrontmatter) -> Self {
+        self.frontmatter = Some(frontmatter);
+        self
+    }
+    pub fn build(self) -> MdRoot {
+        MdRoot::unwrap_cast(SyntaxNode::new_detached(
+            MarkdownSyntaxKind::MD_ROOT,
+            [
+                self.bom_token.map(|token| SyntaxElement::Token(token)),
+                self.frontmatter
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                Some(SyntaxElement::Node(self.value.into_syntax())),
+                Some(SyntaxElement::Token(self.eof_token)),
+            ],
+        ))
+    }
+}
 pub fn md_setext_header(content: MdInlineItemList, underline_token: SyntaxToken) -> MdSetextHeader {
     MdSetextHeader::unwrap_cast(SyntaxNode::new_detached(
         MarkdownSyntaxKind::MD_SETEXT_HEADER,
@@ -625,12 +815,6 @@ pub fn md_setext_header(content: MdInlineItemList, underline_token: SyntaxToken)
             Some(SyntaxElement::Node(content.into_syntax())),
             Some(SyntaxElement::Token(underline_token)),
         ],
-    ))
-}
-pub fn md_soft_break(value_token: SyntaxToken) -> MdSoftBreak {
-    MdSoftBreak::unwrap_cast(SyntaxNode::new_detached(
-        MarkdownSyntaxKind::MD_SOFT_BREAK,
-        [Some(SyntaxElement::Token(value_token))],
     ))
 }
 pub fn md_textual(value_token: SyntaxToken) -> MdTextual {
@@ -649,6 +833,160 @@ pub fn md_thematic_break_char(value_token: SyntaxToken) -> MdThematicBreakChar {
     MdThematicBreakChar::unwrap_cast(SyntaxNode::new_detached(
         MarkdownSyntaxKind::MD_THEMATIC_BREAK_CHAR,
         [Some(SyntaxElement::Token(value_token))],
+    ))
+}
+pub fn mdx_block_expression(
+    l_curly_token: SyntaxToken,
+    r_curly_token: SyntaxToken,
+) -> MdxBlockExpressionBuilder {
+    MdxBlockExpressionBuilder {
+        l_curly_token,
+        r_curly_token,
+        content: None,
+    }
+}
+pub struct MdxBlockExpressionBuilder {
+    l_curly_token: SyntaxToken,
+    r_curly_token: SyntaxToken,
+    content: Option<MdxExpressionContent>,
+}
+impl MdxBlockExpressionBuilder {
+    pub fn with_content(mut self, content: MdxExpressionContent) -> Self {
+        self.content = Some(content);
+        self
+    }
+    pub fn build(self) -> MdxBlockExpression {
+        MdxBlockExpression::unwrap_cast(SyntaxNode::new_detached(
+            MarkdownSyntaxKind::MDX_BLOCK_EXPRESSION,
+            [
+                Some(SyntaxElement::Token(self.l_curly_token)),
+                self.content
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                Some(SyntaxElement::Token(self.r_curly_token)),
+            ],
+        ))
+    }
+}
+pub fn mdx_esm_block(content_token: SyntaxToken) -> MdxEsmBlock {
+    MdxEsmBlock::unwrap_cast(SyntaxNode::new_detached(
+        MarkdownSyntaxKind::MDX_ESM_BLOCK,
+        [Some(SyntaxElement::Token(content_token))],
+    ))
+}
+pub fn mdx_expression_content(value_token: SyntaxToken) -> MdxExpressionContent {
+    MdxExpressionContent::unwrap_cast(SyntaxNode::new_detached(
+        MarkdownSyntaxKind::MDX_EXPRESSION_CONTENT,
+        [Some(SyntaxElement::Token(value_token))],
+    ))
+}
+pub fn mdx_inline_expression(
+    l_curly_token: SyntaxToken,
+    r_curly_token: SyntaxToken,
+) -> MdxInlineExpressionBuilder {
+    MdxInlineExpressionBuilder {
+        l_curly_token,
+        r_curly_token,
+        content: None,
+    }
+}
+pub struct MdxInlineExpressionBuilder {
+    l_curly_token: SyntaxToken,
+    r_curly_token: SyntaxToken,
+    content: Option<MdxExpressionContent>,
+}
+impl MdxInlineExpressionBuilder {
+    pub fn with_content(mut self, content: MdxExpressionContent) -> Self {
+        self.content = Some(content);
+        self
+    }
+    pub fn build(self) -> MdxInlineExpression {
+        MdxInlineExpression::unwrap_cast(SyntaxNode::new_detached(
+            MarkdownSyntaxKind::MDX_INLINE_EXPRESSION,
+            [
+                Some(SyntaxElement::Token(self.l_curly_token)),
+                self.content
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                Some(SyntaxElement::Token(self.r_curly_token)),
+            ],
+        ))
+    }
+}
+pub fn mdx_jsx_block_tag(value_token: SyntaxToken) -> MdxJsxBlockTag {
+    MdxJsxBlockTag::unwrap_cast(SyntaxNode::new_detached(
+        MarkdownSyntaxKind::MDX_JSX_BLOCK_TAG,
+        [Some(SyntaxElement::Token(value_token))],
+    ))
+}
+pub fn mdx_jsx_inline_tag(value_token: SyntaxToken) -> MdxJsxInlineTag {
+    MdxJsxInlineTag::unwrap_cast(SyntaxNode::new_detached(
+        MarkdownSyntaxKind::MDX_JSX_INLINE_TAG,
+        [Some(SyntaxElement::Token(value_token))],
+    ))
+}
+pub fn gfm_table_cell_list<I, S>(items: I, separators: S) -> GfmTableCellList
+where
+    I: IntoIterator<Item = GfmTableCell>,
+    I::IntoIter: ExactSizeIterator,
+    S: IntoIterator<Item = MarkdownSyntaxToken>,
+    S::IntoIter: ExactSizeIterator,
+{
+    let mut items = items.into_iter();
+    let mut separators = separators.into_iter();
+    let length = items.len() + separators.len();
+    GfmTableCellList::unwrap_cast(SyntaxNode::new_detached(
+        MarkdownSyntaxKind::GFM_TABLE_CELL_LIST,
+        (0..length).map(|index| {
+            if index % 2 == 0 {
+                Some(items.next()?.into_syntax().into())
+            } else {
+                Some(separators.next()?.into())
+            }
+        }),
+    ))
+}
+pub fn gfm_table_delimiter_cell_list<I, S>(items: I, separators: S) -> GfmTableDelimiterCellList
+where
+    I: IntoIterator<Item = GfmTableDelimiterCell>,
+    I::IntoIter: ExactSizeIterator,
+    S: IntoIterator<Item = MarkdownSyntaxToken>,
+    S::IntoIter: ExactSizeIterator,
+{
+    let mut items = items.into_iter();
+    let mut separators = separators.into_iter();
+    let length = items.len() + separators.len();
+    GfmTableDelimiterCellList::unwrap_cast(SyntaxNode::new_detached(
+        MarkdownSyntaxKind::GFM_TABLE_DELIMITER_CELL_LIST,
+        (0..length).map(|index| {
+            if index % 2 == 0 {
+                Some(items.next()?.into_syntax().into())
+            } else {
+                Some(separators.next()?.into())
+            }
+        }),
+    ))
+}
+pub fn gfm_table_delimiter_dash_list<I>(items: I) -> GfmTableDelimiterDashList
+where
+    I: IntoIterator<Item = GfmTableDelimiterDash>,
+    I::IntoIter: ExactSizeIterator,
+{
+    GfmTableDelimiterDashList::unwrap_cast(SyntaxNode::new_detached(
+        MarkdownSyntaxKind::GFM_TABLE_DELIMITER_DASH_LIST,
+        items
+            .into_iter()
+            .map(|item| Some(item.into_syntax().into())),
+    ))
+}
+pub fn gfm_table_row_list<I>(items: I) -> GfmTableRowList
+where
+    I: IntoIterator<Item = GfmTableRow>,
+    I::IntoIter: ExactSizeIterator,
+{
+    GfmTableRowList::unwrap_cast(SyntaxNode::new_detached(
+        MarkdownSyntaxKind::GFM_TABLE_ROW_LIST,
+        items
+            .into_iter()
+            .map(|item| Some(item.into_syntax().into())),
     ))
 }
 pub fn md_block_list<I>(items: I) -> MdBlockList
@@ -735,6 +1073,18 @@ where
             .map(|item| Some(item.into_syntax().into())),
     ))
 }
+pub fn md_quote_prefix_list<I>(items: I) -> MdQuotePrefixList
+where
+    I: IntoIterator<Item = MdQuotePrefix>,
+    I::IntoIter: ExactSizeIterator,
+{
+    MdQuotePrefixList::unwrap_cast(SyntaxNode::new_detached(
+        MarkdownSyntaxKind::MD_QUOTE_PREFIX_LIST,
+        items
+            .into_iter()
+            .map(|item| Some(item.into_syntax().into())),
+    ))
+}
 pub fn md_thematic_break_part_list<I>(items: I) -> MdThematicBreakPartList
 where
     I: IntoIterator<Item = AnyMdThematicBreakPart>,
@@ -764,6 +1114,16 @@ where
 {
     MdBogusBlock::unwrap_cast(SyntaxNode::new_detached(
         MarkdownSyntaxKind::MD_BOGUS_BLOCK,
+        slots,
+    ))
+}
+pub fn md_bogus_bullet<I>(slots: I) -> MdBogusBullet
+where
+    I: IntoIterator<Item = Option<SyntaxElement>>,
+    I::IntoIter: ExactSizeIterator,
+{
+    MdBogusBullet::unwrap_cast(SyntaxNode::new_detached(
+        MarkdownSyntaxKind::MD_BOGUS_BULLET,
         slots,
     ))
 }

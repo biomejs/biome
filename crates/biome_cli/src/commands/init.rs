@@ -4,16 +4,23 @@ use biome_configuration::{Configuration, FilesConfiguration};
 use biome_console::fmt::{Display, Formatter};
 use biome_console::{ConsoleExt, markup};
 use biome_diagnostics::{Category, Diagnostic, PrintDiagnostic, Severity, category};
-use biome_fs::ConfigName;
+use biome_fs::{ConfigName, FileSystem};
 use biome_service::configuration::create_config;
+use camino::Utf8Path;
 
-pub(crate) fn init(session: CliSession, emit_jsonc: bool) -> Result<(), CliDiagnostic> {
+pub(crate) fn init(
+    session: CliSession,
+    emit_jsonc: bool,
+    should_enable_git_integration: bool,
+) -> Result<(), CliDiagnostic> {
     let fs = session.app.workspace.fs();
     let working_directory = fs.working_directory().unwrap_or_default();
     let mut config = Configuration::init();
     let mut vcs_enabled = false;
     let mut dist_enabled = false;
-    if fs.path_exists(&working_directory.join(IGNORE_FILE_NAME))
+    if should_enable_git_integration
+        || is_inside_git_repository(fs, &working_directory)
+        || fs.path_exists(&working_directory.join(IGNORE_FILE_NAME))
         || fs.path_exists(&working_directory.join(GIT_IGNORE_FILE_NAME))
     {
         vcs_enabled = true;
@@ -42,8 +49,10 @@ pub(crate) fn init(session: CliSession, emit_jsonc: bool) -> Result<(), CliDiagn
     let diagnostic = InitDiagnostic {
         dist_enabled,
         vcs_enabled,
+        git_integration_requested: should_enable_git_integration,
         file_created,
     };
+    session.app.console.log(markup! {{BiomeLogo}"\n"});
     session
         .app
         .console
@@ -52,10 +61,58 @@ pub(crate) fn init(session: CliSession, emit_jsonc: bool) -> Result<(), CliDiagn
     Ok(())
 }
 
+fn is_inside_git_repository(fs: &dyn FileSystem, working_directory: &Utf8Path) -> bool {
+    working_directory.ancestors().any(|directory| {
+        let dot_git = directory.join(".git");
+        fs.path_is_dir(&dot_git) || fs.path_is_file(&dot_git)
+    })
+}
+
+/// ANSI colour representation of the Biome logo with the wordmark and slogan.
+///
+/// Renders the Biome geometric emblem (a triangle with a curved inner cutout)
+/// in blue, alongside the "Biome" wordmark in bold and the "TOOLCHAIN OF THE
+/// WEB" slogan in dim text. The emblem is rasterised from the official SVG
+/// path data using even-odd fill with half-block characters for double
+/// vertical resolution.
+struct BiomeLogo;
+
+impl Display for BiomeLogo {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::io::Result<()> {
+        f.write_markup(markup! {
+            <Info>"                       ▄"</Info>"
+"<Info>"                      ▄██"</Info>"
+"<Info>"                     ▄████"</Info>"
+"<Info>"                    ▄██████"</Info>"
+"<Info>"                   ▄████████"</Info>"
+"<Info>"                  ▄██████████"</Info>"
+"<Info>"                 ▄████████████"</Info>"
+"<Info>"                ▄██████████████"</Info>"
+"<Info>"               ▄████████████████                "</Info><Emphasis>"  ██████▄"</Emphasis>"
+"<Info>"              ▄██████████████████               "</Info><Emphasis>"  ██   ██  ▄▄"</Emphasis>"
+"<Info>"              ▀▀▀       ▀▀▀▀██████              "</Info><Emphasis>"  ██   ██      ▄██████▄  ██▄    ▄██   ▄██████▄"</Emphasis>"
+"<Info>"                             ██████             "</Info><Emphasis>"  ██████▀  ██  ██    ██  ██ █  █ ██  ██      ██"</Emphasis>"
+"<Info>"              ▄▄▄▄████▄▄▄    ███████            "</Info><Emphasis>"  ██   ██  ██  ██    ██  ██  ██  ██  ██▀▀▀▀▀▀▀▀"</Emphasis>"
+"<Info>"          ▄▄█████████████   █████████           "</Info><Emphasis>"  ██   ██  ██  ██    ██  ██      ██  ██"</Emphasis>"
+"<Info>"        ▄███████████████    ██████████          "</Info><Emphasis>"  ██████▀  ██  ▀██████▀  ██      ██   ▀██████▀"</Emphasis>"
+"<Info>"      ▄█████████████████   ▄███████████"</Info>"
+"<Info>"     ███████████▀▀▀▀▀▀▀▀   █████████████        "</Info><Dim>"    T O O L C H A I N   O F   T H E   W E B"</Dim>"
+"<Info>"   ▄█████████▀             ██████████████"</Info>"
+"<Info>"  ▄████████▀     ▄▄▄▄▄▄▄  ████████████████"</Info>"
+"<Info>"  ████████    ▄▄███████████████████████████"</Info>"
+"<Info>" ████████▄   ▄██████████████████████████████"</Info>"
+"<Info>" ████████████████████████████████████████████"</Info>"
+"<Info>" █████████████████████████████████████████████"</Info>"
+"<Info>" ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀"</Info>
+        })
+    }
+}
+
 #[derive(Debug)]
 struct InitDiagnostic {
     dist_enabled: bool,
     vcs_enabled: bool,
+    git_integration_requested: bool,
     file_created: &'static str,
 }
 
@@ -85,9 +142,15 @@ impl Display for InitDiagnostic {
     Your project configuration. See "<Hyperlink href="https://biomejs.dev/reference/configuration">"https://biomejs.dev/reference/configuration"</Hyperlink>})?;
 
         if self.vcs_enabled {
-            f.write_markup(markup!{
-                "\n\nFound an ignore file. Biome enabled "<Hyperlink href="https://biomejs.dev/guides/integrate-in-vcs">"VCS integration."</Hyperlink>
-            })?;
+            if self.git_integration_requested {
+                f.write_markup(markup!{
+                    "\n\nBiome enabled "<Hyperlink href="https://biomejs.dev/guides/integrate-in-vcs">"Git VCS integration."</Hyperlink>
+                })?;
+            } else {
+                f.write_markup(markup!{
+                    "\n\nFound a Git repository or ignore file. Biome enabled "<Hyperlink href="https://biomejs.dev/guides/integrate-in-vcs">"VCS integration."</Hyperlink>
+                })?;
+            }
         }
 
         if self.dist_enabled {
@@ -100,15 +163,16 @@ impl Display for InitDiagnostic {
 
   "<Dim>"1."</Dim>" "<Emphasis>"Setup an editor extension"</Emphasis>"
      Get live errors as you type and format when you save.
-     Learn more at "<Hyperlink href="https://biomejs.dev/guides/editors/first-party-extensions/">"https://biomejs.dev/guides/editors/first-party-extensions/"</Hyperlink>"
+     Learn more at "<Hyperlink href="https://biomejs.dev/editors/first-party-extensions/">"https://biomejs.dev/editors/first-party-extensions/"</Hyperlink>"
 
   "<Dim>"2."</Dim>" "<Emphasis>"Try a command"</Emphasis>"
      "<Italic>"biome check"</Italic>"  checks formatting, import sorting, and lint rules.
      "<Italic>"biome --help"</Italic>" displays the available commands.
 
-  "<Dim>"3."</Dim>" "<Emphasis>"Migrate from ESLint and Prettier"</Emphasis>"
-     "<Italic>"biome migrate eslint"</Italic>"   migrates your ESLint configuration to Biome.
-     "<Italic>"biome migrate prettier"</Italic>" migrates your Prettier configuration to Biome.
+  "<Dim>"3."</Dim>" "<Emphasis>"Migrate from ESLint, Stylelint and Prettier"</Emphasis>"
+     "<Italic>"biome migrate eslint"</Italic>"    migrates your ESLint configuration to Biome.
+     "<Italic>"biome migrate stylelint"</Italic>" migrates your Stylelint configuration to Biome.
+     "<Italic>"biome migrate prettier"</Italic>"  migrates your Prettier configuration to Biome.
 
   "<Dim>"4."</Dim>" "<Emphasis>"Read the documentation"</Emphasis>"
      Find guides and documentation at "<Hyperlink href="https://biomejs.dev/guides/getting-started/">"https://biomejs.dev/guides/getting-started/"</Hyperlink>"

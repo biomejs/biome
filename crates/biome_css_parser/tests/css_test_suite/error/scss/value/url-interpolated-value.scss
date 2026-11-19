@@ -1,0 +1,6 @@
+.errors {
+  invalid-expression: url(images/#{1 +}.png);
+  missing-interpolation-close: url(images/#{$name.png);
+  later-malformed-interpolation: url(images/#{$name}/#{$theme.png);
+  missing-url-close: url(images/#{$name}.png;
+}

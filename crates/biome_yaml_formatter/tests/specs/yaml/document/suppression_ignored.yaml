@@ -1,0 +1,22 @@
+%YAML 1.2
+---
+# biome-ignore-all format: after the document header
+...
+# biome-ignore-all format: after an empty document
+---
+first:    [1,2]
+# biome-ignore-all format: after content
+late:    [3,4]
+# biome-ignore lint: not a formatter suppression
+lint_only:    [5,6]
+# biome-ignore format:
+missing_reason:    [7,8]
+literal: |
+  # biome-ignore-all format: scalar content
+quoted: "# biome-ignore format: scalar content"
+formatted:    [9,10]
+---
+# biome-ignore-all format: in a later document
+last:
+     - [11,12]
+     - {a:  1,b:  2}

@@ -24,7 +24,7 @@ impl FormatNodeRule<CssFunctionAtRuleDeclarator> for FormatCssFunctionAtRuleDecl
         write!(
             f,
             [
-                function_token.format(),
+                function_token.format()?.with_text_case(CssCase::Lowercase),
                 space(),
                 name.format(),
                 group(&format_args![

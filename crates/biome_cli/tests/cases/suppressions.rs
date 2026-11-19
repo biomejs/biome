@@ -1,8 +1,8 @@
+use crate::TestArgs as Args;
 use crate::snap_test::SnapshotPayload;
-use crate::{FORMATTED, assert_cli_snapshot, run_cli};
+use crate::{FORMATTED, assert_cli_snapshot, run_cli, run_cli_with_server_workspace};
 use biome_console::BufferConsole;
 use biome_fs::{FileSystemExt, MemoryFileSystem};
-use bpaf::Args;
 use camino::Utf8Path;
 
 const SUPPRESS_BEFORE: &str = "(1 >= -0)";
@@ -120,6 +120,65 @@ fn suppress_multiple_ok() {
         console,
         result,
     ));
+}
+
+#[test]
+fn suppress_multiple_rules_after_jsdoc() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let file_path = Utf8Path::new("fix.js");
+    fs.insert(
+        file_path.into(),
+        br#"import { error } from "module";
+
+/**
+ * Handles errors.
+ */
+function handler(error, unused) {
+	error();
+}
+"#,
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "lint",
+                "--suppress",
+                "--reason=test",
+                "--only=lint/suspicious/noShadow",
+                "--only=lint/correctness/noUnusedFunctionParameters",
+                file_path.as_str(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    let mut buffer = String::new();
+    fs.open(file_path)
+        .unwrap()
+        .read_to_string(&mut buffer)
+        .unwrap();
+
+    assert_eq!(
+        buffer,
+        r#"import { error } from "module";
+
+/**
+ * Handles errors.
+ */
+// biome-ignore lint/suspicious/noShadow: test
+// biome-ignore lint/correctness/noUnusedFunctionParameters: test
+function handler(error, unused) {
+	error();
+}
+"#
+    );
 }
 
 #[test]
@@ -316,6 +375,36 @@ let bar = 33;",
 }
 
 #[test]
+fn check_respects_top_level_assist_suppression() {
+    let source = r#"// biome-ignore-all lint: unused imports are intentional
+// biome-ignore-all assist: preserve import order
+
+import b from "b";
+import a from "a";
+"#;
+    for args in [
+        vec!["check", "file.js"],
+        vec!["check", "--write", "file.js"],
+    ] {
+        let fs = MemoryFileSystem::default();
+        let mut console = BufferConsole::default();
+        let file_path = Utf8Path::new("file.js");
+        fs.insert(file_path.into(), source.as_bytes());
+
+        let (fs, result) = run_cli(fs, &mut console, Args::from(args.as_slice()));
+
+        assert!(result.is_ok(), "{args:?} returned {result:?}");
+
+        let mut buffer = String::new();
+        fs.open(file_path)
+            .unwrap()
+            .read_to_string(&mut buffer)
+            .unwrap();
+        assert_eq!(buffer, source, "{args:?} changed the file");
+    }
+}
+
+#[test]
 fn misplaced_top_level_suppression() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
@@ -407,8 +496,8 @@ function sommething(chalk: ChalkInstance) {
         Args::from(["lint", file_path.as_str()].as_slice()),
     );
 
-    if let Result::Err(e) = &result {
-        println!("{e:#?}");
+    if result.is_err() {
+        println!("{result:#?}");
     }
 
     assert!(result.is_ok(), "run_cli returned {result:#?}");
@@ -584,6 +673,172 @@ var bar = 33;",
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "should_emit_diagnostics_for_incorrect_reason",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn suppress_plugin_diagnostics() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        br#"{
+    "plugins": ["noFoo.grit"]
+}
+"#,
+    );
+    fs.insert(
+        "noFoo.grit".into(),
+        br#"language js
+
+`foo($args)` where {
+    register_diagnostic(span=$args, message="Do not call foo", severity="error")
+}
+"#,
+    );
+
+    let file_path = Utf8Path::new("file.js");
+    fs.insert(file_path.into(), *b"debugger;\nfoo(1);\n");
+
+    let (fs, result) = run_cli_with_server_workspace(
+        fs,
+        &mut console,
+        Args::from(["lint", "--suppress", file_path.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    let mut buffer = String::new();
+    fs.open(file_path)
+        .unwrap()
+        .read_to_string(&mut buffer)
+        .unwrap();
+
+    assert_eq!(
+        buffer,
+        "// biome-ignore lint/suspicious/noDebugger: ignored using `--suppress`\ndebugger;\n// biome-ignore lint/plugin/noFoo: ignored using `--suppress`\nfoo(1);\n"
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "suppress_plugin_diagnostics",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn suppress_plugin_diagnostics_with_reason() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        br#"{
+    "plugins": ["noFoo.grit", "logBar.grit"]
+}
+"#,
+    );
+    fs.insert(
+        "noFoo.grit".into(),
+        br#"language js
+
+`foo($args)` where {
+    register_diagnostic(span=$args, message="Do not call foo", severity="error")
+}
+"#,
+    );
+    fs.insert(
+        "logBar.grit".into(),
+        br#"language js
+
+`bar($args)` where {
+    log(message="Found bar", variable=$args)
+}
+"#,
+    );
+
+    let file_path = Utf8Path::new("file.js");
+    fs.insert(file_path.into(), *b"foo(1);\nbar(2);\n");
+
+    let (fs, result) = run_cli_with_server_workspace(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "lint",
+                "--suppress",
+                "--reason=We love Biome",
+                file_path.as_str(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    let mut buffer = String::new();
+    fs.open(file_path)
+        .unwrap()
+        .read_to_string(&mut buffer)
+        .unwrap();
+
+    // `logBar` only logs, so it doesn't get a suppression comment.
+    assert_eq!(
+        buffer,
+        "// biome-ignore lint/plugin/noFoo: We love Biome\nfoo(1);\nbar(2);\n"
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "suppress_plugin_diagnostics_with_reason",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn suppress_rejects_plugin_name_unusable_in_suppressions() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        br#"{
+    "plugins": ["no foo.grit"]
+}
+"#,
+    );
+    fs.insert(
+        "no foo.grit".into(),
+        br#"language js
+
+`foo($args)` where {
+    register_diagnostic(span=$args, message="Do not call foo", severity="error")
+}
+"#,
+    );
+
+    let file_path = Utf8Path::new("file.js");
+    fs.insert(file_path.into(), *b"foo(1);\n");
+
+    let (fs, result) = run_cli_with_server_workspace(
+        fs,
+        &mut console,
+        Args::from(["lint", "--suppress", file_path.as_str()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "suppress_rejects_plugin_name_unusable_in_suppressions",
         fs,
         console,
         result,

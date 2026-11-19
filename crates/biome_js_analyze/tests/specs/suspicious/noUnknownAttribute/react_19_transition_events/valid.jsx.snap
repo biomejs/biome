@@ -1,0 +1,17 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.jsx
+---
+# Input
+```jsx
+/* should not generate diagnostics */
+<div
+	onTransitionCancel={handleTransition}
+	onTransitionCancelCapture={handleTransition}
+	onTransitionRun={handleTransition}
+	onTransitionRunCapture={handleTransition}
+	onTransitionStart={handleTransition}
+	onTransitionStartCapture={handleTransition}
+/>;
+
+```

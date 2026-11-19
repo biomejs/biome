@@ -3,19 +3,72 @@ use biome_analyze::{
     ActionFilter, AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never,
     RuleFilter,
 };
+use biome_db::Source;
 use biome_deserialize::TextRange;
 use biome_diagnostics::{Diagnostic, DiagnosticExt, Severity, print_diagnostic_to_string};
 use biome_fs::TemporaryFs;
 use biome_js_analyze::{JsAnalyzerServices, analyze};
-use biome_js_parser::{JsParserOptions, parse};
-use biome_js_semantic::{SemanticModelOptions, semantic_model};
-use biome_js_syntax::JsFileSource;
+use biome_js_parser::{JsParserOptions, Parse, parse};
+use biome_js_syntax::AnyJsRoot;
+use biome_languages::{DocumentFileSource, JsFileSource, LanguageDb};
 use biome_package::{Dependencies, PackageJson};
+use biome_parser::AnyParse;
+use biome_parser::db::{ParseDb, ParseHandle, SourceOutput};
 use biome_project_layout::ProjectLayout;
 use biome_test_utils::module_graph_for_test_file;
-use camino::Utf8PathBuf;
+use camino::{Utf8Path, Utf8PathBuf};
+use salsa::Storage;
+use std::rc::Rc;
 use std::slice;
 use std::sync::Arc;
+
+#[salsa::db]
+struct TestDb {
+    parsed: Option<Source>,
+    parse: ParseHandle,
+    storage: Storage<Self>,
+}
+
+/// Returns the parse that the test made of the text, which is the tree the
+/// analyzer analyzes.
+#[salsa::db]
+impl ParseDb for TestDb {
+    fn parse_source(&self, _source: Source) -> SourceOutput {
+        SourceOutput {
+            parse: self.parse.clone(),
+            document_source_index: 0,
+            snippets: Vec::new(),
+        }
+    }
+}
+
+#[salsa::db]
+impl LanguageDb for TestDb {
+    fn source_from_index(&self, _index: usize) -> Option<DocumentFileSource> {
+        Some(DocumentFileSource::Js(JsFileSource::tsx()))
+    }
+}
+
+#[salsa::db]
+impl biome_db::Db for TestDb {
+    fn parsed_source_for_path(&self, _path: &Utf8Path) -> Option<Source> {
+        self.parsed
+    }
+}
+
+#[salsa::db]
+impl salsa::Database for TestDb {}
+
+fn embedded_db(parsed: &Parse<AnyJsRoot>) -> Rc<dyn LanguageDb> {
+    let mut db = TestDb {
+        parsed: None,
+        parse: AnyParse::from(parsed.syntax().as_send().unwrap()).into(),
+        storage: Storage::default(),
+    };
+    let text = parsed.syntax().text_with_trivia().to_string();
+    db.parsed = Some(Source::new(&db, Utf8PathBuf::new(), text.into(), 0));
+    Rc::new(db)
+}
 
 fn project_layout_with_top_level_dependencies(dependencies: Dependencies) -> Arc<ProjectLayout> {
     let manifest = PackageJson::default().with_dependencies(dependencies);
@@ -55,19 +108,17 @@ fn quick_test() {
         .with_file_path(file_path.clone())
         .with_configuration(
             AnalyzerConfiguration::default().with_jsx_runtime(JsxRuntime::ReactClassic),
-        );
+        )
+        .with_working_directory(fs.working_directory.clone());
     let rule_filter = RuleFilter::Rule("correctness", "noUnusedImports");
 
     let dependencies = Dependencies(Box::new([("buffer".into(), "latest".into())]));
 
     let project_layout = project_layout_with_top_level_dependencies(dependencies);
-    let semantic_model = semantic_model(&parsed.tree(), SemanticModelOptions::default());
-    let services = crate::JsAnalyzerServices::from((
-        module_graph_for_test_file(file_path.as_path(), project_layout.as_ref()),
-        project_layout,
-        JsFileSource::tsx(),
-        Some(semantic_model),
-    ));
+    let db = module_graph_for_test_file(file_path.as_path(), project_layout.as_ref());
+    let services =
+        crate::JsAnalyzerServices::from((db.rc_module_db(), project_layout, JsFileSource::tsx()))
+            .with_language_db(embedded_db(&parsed));
 
     analyze(
         &parsed.tree(),
@@ -131,7 +182,7 @@ function App() {
         );
     let rule_filter = RuleFilter::Rule("correctness", "noUnusedImports");
 
-    let services = JsAnalyzerServices::default();
+    let services = JsAnalyzerServices::default().with_language_db(embedded_db(&parsed));
 
     analyze(
         &parsed.tree(),

@@ -1,0 +1,36 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: valid.scss
+---
+# Input
+```css
+/* should not generate diagnostics */
+:root {
+  --theme-color: red;
+}
+
+$syntax: "<color>";
+@property --registered-color {
+  syntax: $syntax;
+  inherits: false;
+  initial-value: red;
+}
+
+$inherits: false;
+@function initial-color() {
+  @return red;
+}
+
+@property --dynamic-registration {
+  syntax: "<color>";
+  inherits: $inherits;
+  initial-value: initial-color();
+}
+
+.themed {
+  color: var(--theme-color);
+  border-color: var(--registered-color);
+  background-color: var(--dynamic-registration);
+}
+
+```

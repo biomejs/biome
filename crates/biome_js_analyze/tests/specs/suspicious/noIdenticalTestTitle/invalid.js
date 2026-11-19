@@ -1,0 +1,81 @@
+/* should generate diagnostics */
+
+// Duplicate test titles inside a describe
+describe('foo', () => {
+  it('should do bar', () => {});
+  it('should do bar', () => {});
+});
+
+// Duplicate describe titles inside a describe
+describe('suite', () => {
+  describe('baz', () => {});
+  describe('baz', () => {});
+});
+
+// Top-level duplicate tests (no describe wrapper)
+it('is awesome', () => {});
+it('is awesome', () => {});
+
+// Duplicate no-substitution template literal test titles
+describe('template titles', () => {
+  it(`same title`, () => {});
+  it(`same title`, () => {});
+});
+
+// Duplicate describe titles using no-substitution templates
+describe(`suite alpha`, () => {});
+describe(`suite alpha`, () => {});
+
+// Duplicate test titles inside a suite
+suite('my suite', () => {
+  it('should do bar', () => {});
+  it('should do bar', () => {});
+});
+
+// Duplicate suite titles inside a suite
+suite('outer suite', () => {
+  suite('nested', () => {});
+  suite('nested', () => {});
+});
+
+// Three occurrences of the same test title
+describe('triple', () => {
+  it('repeated', () => {});
+  it('repeated', () => {});
+  it('repeated', () => {});
+});
+
+// Interleaved duplicates produce one diagnostic per title
+describe('interleaved', () => {
+  it('a', () => {});
+  it('b', () => {});
+  it('a', () => {});
+  it('b', () => {});
+  it('a', () => {});
+});
+
+// Duplicate describe and duplicate test sharing a title in the same scope
+describe('shared title', () => {
+  describe('same', () => {});
+  describe('same', () => {});
+  it('same', () => {});
+  it('same', () => {});
+});
+
+// Mixed quote styles are the same title
+describe('quotes', () => {
+  it('quoted', () => {});
+  it("quoted", () => {});
+  it(`quoted`, () => {});
+});
+
+// Describe blocks with a mode or another modifier
+test.describe.serial('serial', () => {
+  test('same', () => {});
+  test('same', () => {});
+});
+
+describe.shuffle('shuffle', () => {
+  it('same', () => {});
+  it('same', () => {});
+});

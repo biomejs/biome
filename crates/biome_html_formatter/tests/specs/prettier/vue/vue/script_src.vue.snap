@@ -1,0 +1,35 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: vue/vue/script_src.vue
+---
+
+# Input
+
+```vue
+<script src="https://www.gstatic.com/firebasejs/4.10.1/firebase.js"></script>
+<script src="https://www.gstatic.com/firebasejs/4.10.1/firebase-firestore.js"></script>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,2 +1,4 @@
+ <script src="https://www.gstatic.com/firebasejs/4.10.1/firebase.js"></script>
+-<script src="https://www.gstatic.com/firebasejs/4.10.1/firebase-firestore.js"></script>
++<script
++  src="https://www.gstatic.com/firebasejs/4.10.1/firebase-firestore.js"
++></script>
+```
+
+# Output
+
+```vue
+<script src="https://www.gstatic.com/firebasejs/4.10.1/firebase.js"></script>
+<script
+  src="https://www.gstatic.com/firebasejs/4.10.1/firebase-firestore.js"
+></script>
+```

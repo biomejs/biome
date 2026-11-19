@@ -1,0 +1,9 @@
+{
+  "biome": {},
+  "eslint": {
+    "rules": {
+      "react/forbid-elements": ["off", { "forbid": ["button"] }],
+      "vue/no-restricted-html-elements": ["warn", "marquee"]
+    }
+  }
+}

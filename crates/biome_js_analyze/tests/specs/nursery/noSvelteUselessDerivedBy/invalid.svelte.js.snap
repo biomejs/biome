@@ -1,0 +1,81 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 196
+expression: invalid.svelte.js
+---
+# Input
+```js
+/* should generate diagnostics */
+export function createCounter() {
+	let count = $state(0);
+	const doubled = $derived.by(() => count * 2);
+	return {
+		get doubled() {
+			return doubled;
+		},
+	};
+}
+
+export class Counter {
+	count = $state(0);
+	doubled = $derived.by(() => this.count * 2);
+}
+
+```
+
+# Diagnostics
+```
+invalid.svelte.js:4:18 lint/nursery/noSvelteUselessDerivedBy  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This $derived.by() function only returns a single expression.
+  
+    2 │ export function createCounter() {
+    3 │ 	let count = $state(0);
+  > 4 │ 	const doubled = $derived.by(() => count * 2);
+      │ 	                ^^^^^^^^^^^
+    5 │ 	return {
+    6 │ 		get doubled() {
+  
+  i $derived.by() is only needed when the derivation requires statements, such as loops or intermediate variables. Passing the expression to $derived() directly is shorter and behaves the same way.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Pass the expression to $derived() directly.
+  
+     2  2 │   export function createCounter() {
+     3  3 │     let count = $state(0);
+     4    │ - → const·doubled·=·$derived.by(()·=>·count·*·2);
+        4 │ + → const·doubled·=·$derived(count·*·2);
+     5  5 │     return {
+     6  6 │       get doubled() {
+  
+
+```
+
+```
+invalid.svelte.js:14:12 lint/nursery/noSvelteUselessDerivedBy  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This $derived.by() function only returns a single expression.
+  
+    12 │ export class Counter {
+    13 │ 	count = $state(0);
+  > 14 │ 	doubled = $derived.by(() => this.count * 2);
+       │ 	          ^^^^^^^^^^^
+    15 │ }
+    16 │ 
+  
+  i $derived.by() is only needed when the derivation requires statements, such as loops or intermediate variables. Passing the expression to $derived() directly is shorter and behaves the same way.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Pass the expression to $derived() directly.
+  
+    12 12 │   export class Counter {
+    13 13 │     count = $state(0);
+    14    │ - → doubled·=·$derived.by(()·=>·this.count·*·2);
+       14 │ + → doubled·=·$derived(this.count·*·2);
+    15 15 │   }
+    16 16 │   
+  
+
+```

@@ -1,0 +1,9 @@
+/* should generate diagnostics */
+a { font-family: monospace, monospace, monospace; }
+b { font-family: serif, monospace, monospace; }
+c { font-family: monospace, monospace, sans-serif; }
+d { font-family: "monospace", "monospace"; }
+e { font-family: Monospace Mono, Monospace Mono; }
+f { font-family: monospace, "Arial", "Arial"; }
+g { font-family: ui-monospace, ui-monospace; }
+h { font-family: monospace, monospace, var(--fallback); }

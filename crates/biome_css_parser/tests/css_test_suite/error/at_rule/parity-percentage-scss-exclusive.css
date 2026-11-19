@@ -1,0 +1,5 @@
+.literal { 0% { opacity: 0; } color: red; }
+.mixed { from, 75% { opacity: 0.75; } color: green; }
+.interpolated { #{$step}% { opacity: 1; } color: blue; }
+.malformed { 0% color: red; .child { color: blue; } }
+.after { from: red; from, to { opacity: 0; } entry:hover { color: blue; } }

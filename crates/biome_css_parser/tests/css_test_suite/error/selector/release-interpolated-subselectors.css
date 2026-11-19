@@ -1,0 +1,3 @@
+.card:not(.disabled)#{$suffix} { color: red; }
+.card[data-state]#{$suffix} { color: blue; }
+.after { width: 1px; }

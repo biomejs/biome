@@ -1,9 +1,10 @@
 use biome_analyze::{ActionFilter, AnalysisFilter, AnalyzerAction, ControlFlow, Never, RuleFilter};
-use biome_configuration::{ConfigurationSource, ExtendedConfigurations};
+use biome_configuration::ExtendedConfigurations;
 use biome_diagnostics::advice::CodeSuggestionAdvice;
 use biome_json_analyze::{ExtendedConfigurationProvider, JsonAnalyzeServices};
 use biome_json_parser::{JsonParserOptions, parse_json};
-use biome_json_syntax::{JsonFileSource, JsonLanguage};
+use biome_json_syntax::JsonLanguage;
+use biome_languages::JsonFileSource;
 use biome_package::PackageJson;
 use biome_project_layout::ProjectLayout;
 use biome_rowan::AstNode;
@@ -105,6 +106,10 @@ fn run_suppression_test(input: &'static str, _: &str, _: &str, _: &str) {
 
     let input_file = Utf8Path::new(input);
     let file_name = input_file.file_name().unwrap();
+    if file_name.ends_with(".options.json") || file_name.ends_with(".options.jsonc") {
+        return;
+    }
+
     let (source_type, parser_options) = match input_file.extension() {
         Some("json") => (JsonFileSource::json(), JsonParserOptions::default()),
         Some("jsonc") => (
@@ -202,15 +207,15 @@ pub(crate) fn analyze_and_snap(
 
     let mut code_fixes = Vec::new();
     let configuration_source = load_configuration_source(input_file);
-    let options = create_analyzer_options::<JsonLanguage>(input_file, &mut diagnostics);
+    // Use the parent directory as a working directory for relative paths in diagnostics
+    let working_directory = input_file.parent().unwrap_or(Utf8Path::new("."));
+    let options =
+        create_analyzer_options::<JsonLanguage>(input_file, working_directory, &mut diagnostics);
     let project_layout = project_layout_for_json_test(input_file);
     let services = JsonAnalyzeServices {
         file_source,
-        configuration_provider: configuration_source.map(|(config, list)| {
-            Arc::new(ConfigurationSource {
-                source: Some((config, Some(input_file.to_path_buf()))),
-                extended_configurations: ExtendedConfigurations::from(list),
-            }) as Arc<dyn ExtendedConfigurationProvider>
+        configuration_provider: configuration_source.map(|(_, list)| {
+            Arc::new(ExtendedConfigurations::from(list)) as Arc<dyn ExtendedConfigurationProvider>
         }),
         project_layout,
     };

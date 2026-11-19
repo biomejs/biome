@@ -1,0 +1,40 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-setup-patterns.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+import { defineComponent } from "vue";
+
+export const RestContext = defineComponent({
+  setup(props, ...context) {
+    context.emit("click");
+  },
+});
+
+export const ArrayContext = defineComponent({
+  setup(props, [emit]) {
+    emit("click");
+  },
+});
+
+export const DollarEmit = defineComponent({
+  setup(props, { $emit }) {
+    $emit("click");
+  },
+});
+
+export const OnlyProps = defineComponent({
+  setup(context) {
+    context.emit("click");
+  },
+});
+
+export const ImmediatelyInvoked = defineComponent({
+  setup: ((props, context) => {
+    context.emit("click");
+  })(),
+});
+
+```

@@ -1,0 +1,14 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: validVElseIf.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<template>
+  <c1 v-if="1" />
+  <c2 v-else-if="1" />
+  <c3 v-else />
+</template>
+
+```

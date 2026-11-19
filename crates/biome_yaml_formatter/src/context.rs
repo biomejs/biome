@@ -1,16 +1,15 @@
+use crate::YamlCommentStyle;
+use crate::comments::{FormatYamlLeadingComment, YamlComments};
+use biome_formatter::rowan::RowanSource;
+use biome_formatter::{
+    BracketSpacing, CstFormatContext, FormatContext, FormatOptions, IndentStyle, LineEnding,
+    LineWidth, QuoteStyle, TrailingNewline, TransformSourceMap,
+};
+use biome_formatter::{IndentWidth, rowan::prelude::*};
+use biome_yaml_syntax::YamlLanguage;
 use std::default::Default;
 use std::fmt;
 use std::rc::Rc;
-
-use biome_formatter::{
-    CstFormatContext, FormatContext, FormatOptions, IndentStyle, LineEnding, LineWidth,
-    TrailingNewline, TransformSourceMap,
-};
-use biome_formatter::{IndentWidth, prelude::*};
-use biome_yaml_syntax::YamlLanguage;
-
-use crate::YamlCommentStyle;
-use crate::comments::{FormatYamlLeadingComment, YamlComments};
 
 #[derive(Debug)]
 pub struct YamlFormatContext {
@@ -37,6 +36,7 @@ impl YamlFormatContext {
 
 impl FormatContext for YamlFormatContext {
     type Options = YamlFormatOptions;
+    type Source = RowanSource;
 
     fn options(&self) -> &Self::Options {
         &self.options
@@ -57,27 +57,24 @@ impl CstFormatContext for YamlFormatContext {
     }
 }
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Default, Clone, PartialEq)]
 pub struct YamlFormatOptions {
-    indent_style: IndentStyle,
     indent_width: IndentWidth,
     line_ending: LineEnding,
     line_width: LineWidth,
     /// Whether to add a trailing newline at the end of the file. Defaults to true.
     trailing_newline: TrailingNewline,
+    /// The preferred quote style for quoted scalars that work with either
+    /// kind of quote. Defaults to double quotes.
+    quote_style: QuoteStyle,
+    /// Whether to insert spaces inside non-empty flow mappings and sequences
+    /// that fit on one line. When unset, mappings have spaces and sequences do not.
+    bracket_spacing: Option<BracketSpacing>,
 }
 
 impl YamlFormatOptions {
     pub fn new() -> Self {
-        Self {
-            trailing_newline: TrailingNewline::default(),
-            ..Default::default()
-        }
-    }
-
-    pub fn with_indent_style(mut self, indent_style: IndentStyle) -> Self {
-        self.indent_style = indent_style;
-        self
+        Self::default()
     }
 
     pub fn with_indent_width(mut self, indent_width: IndentWidth) -> Self {
@@ -100,10 +97,6 @@ impl YamlFormatOptions {
         self
     }
 
-    pub fn set_indent_style(&mut self, indent_style: IndentStyle) {
-        self.indent_style = indent_style;
-    }
-
     pub fn set_indent_width(&mut self, indent_width: IndentWidth) {
         self.indent_width = indent_width;
     }
@@ -119,11 +112,37 @@ impl YamlFormatOptions {
     pub fn set_trailing_newline(&mut self, trailing_newline: TrailingNewline) {
         self.trailing_newline = trailing_newline;
     }
+
+    pub fn with_quote_style(mut self, quote_style: QuoteStyle) -> Self {
+        self.quote_style = quote_style;
+        self
+    }
+
+    pub fn set_quote_style(&mut self, quote_style: QuoteStyle) {
+        self.quote_style = quote_style;
+    }
+
+    pub fn quote_style(&self) -> QuoteStyle {
+        self.quote_style
+    }
+
+    pub fn with_bracket_spacing(mut self, bracket_spacing: BracketSpacing) -> Self {
+        self.bracket_spacing = Some(bracket_spacing);
+        self
+    }
+
+    pub fn set_bracket_spacing(&mut self, bracket_spacing: BracketSpacing) {
+        self.bracket_spacing = Some(bracket_spacing);
+    }
+
+    pub fn bracket_spacing(&self) -> Option<BracketSpacing> {
+        self.bracket_spacing
+    }
 }
 
 impl FormatOptions for YamlFormatOptions {
     fn indent_style(&self) -> IndentStyle {
-        self.indent_style
+        IndentStyle::Space
     }
 
     fn indent_width(&self) -> IndentWidth {
@@ -149,11 +168,16 @@ impl FormatOptions for YamlFormatOptions {
 
 impl fmt::Display for YamlFormatOptions {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        writeln!(f, "Indent style: {}", self.indent_style)?;
         writeln!(f, "Indent width: {}", self.indent_width.value())?;
         writeln!(f, "Line ending: {}", self.line_ending)?;
         writeln!(f, "Line width: {}", self.line_width.value())?;
         writeln!(f, "Trailing newline: {}", self.trailing_newline.value())?;
+        writeln!(f, "Quote style: {}", self.quote_style)?;
+        if let Some(bracket_spacing) = self.bracket_spacing {
+            writeln!(f, "Bracket spacing: {}", bracket_spacing.value())?;
+        } else {
+            writeln!(f, "Bracket spacing: unset")?;
+        }
 
         Ok(())
     }

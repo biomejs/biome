@@ -1,0 +1,88 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome inspect plugins --path=file.js
+```
+
+## `biome.json`
+
+```json
+{
+  "plugins": ["./before.grit"],
+  "overrides": [
+    {
+      "includes": ["**/*.test.js"],
+      "plugins": [
+        "./missing.grit",
+        "./broken",
+        {
+          "path": "missing-package/presets/recommended",
+          "resolutionKind": "project"
+        },
+        "./after.grit"
+      ]
+    }
+  ]
+}
+```
+
+## `after.grit`
+
+```grit
+`unterminated
+```
+
+## `before.grit`
+
+```grit
+`unterminated
+```
+
+## `broken/biome-manifest.json`
+
+```json
+{ "version": 2 }
+```
+
+# Termination Message
+
+```block
+configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × 3 plugins in the configuration have errors.
+  
+  The configuration enables 1 plugin rule for file.js.
+  
+  Local plugins
+  
+  - before.grit (rule name: before)
+  
+  Plugins with errors
+  
+  missing.grit (override includes: [**/*.test.js])
+  
+  × Biome couldn't find the plugin file missing.grit.
+  
+  broken (override includes: [**/*.test.js])
+  
+  × The Biome manifest broken/biome-manifest.json is invalid.
+  
+  × Unsupported version 2.
+  
+  i Biome manifests must use version 1.
+  
+  missing-package/presets/recommended (override includes: [**/*.test.js])
+  
+  × Biome couldn't find the plugin package missing-package.
+  
+  i Make sure the package is installed. Biome looks for it in the node_modules directory of the working directory and of each parent directory.
+  
+  i Plugins that don't apply to file.js are also reported, because Biome loads every plugin in the configuration.
+  
+
+
+```

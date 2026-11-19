@@ -1,0 +1,11 @@
+---
+source: crates/biome_grit_patterns/tests/spec_tests.rs
+expression: rangeVariable
+---
+ErrorSnapshotResult {
+    diagnostics: [
+        InvalidRange(
+            "end_line must be an unsigned integer literal",
+        ),
+    ],
+}

@@ -1,0 +1,81 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome lint '<TEMP_DIR>/plugin_includes_are_relative_to_configuration_directory'
+```
+
+## `biome.json`
+
+```json
+{
+  "plugins": [
+    {
+      "path": "./no-assign.grit",
+      "includes": ["packages/**/src/**", "!packages/**/src/generated/**"]
+    }
+  ]
+}
+```
+
+## `no-assign.grit`
+
+```grit
+`Object.assign($args)` where {
+    register_diagnostic(span = $args, message = "Prefer object spread")
+}
+```
+
+## `packages/example/scripts/index.js`
+
+```js
+Object.assign({}, value);
+
+```
+
+## `packages/example/src/generated/index.js`
+
+```js
+Object.assign({}, value);
+
+```
+
+## `packages/example/src/index.js`
+
+```js
+Object.assign({}, value);
+
+```
+
+# Termination Message
+
+```block
+lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+packages/example/src/index.js:1:15 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Prefer object spread
+  
+  > 1 │ Object.assign({}, value);
+      │               ^^^^^^^^^
+    2 │ 
+  
+
+```
+
+```block
+Checked 5 files in <TIME>. No fixes applied.
+Found 1 error.
+```

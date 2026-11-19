@@ -1,0 +1,15 @@
+@custom-#{} token;
+.after-empty { color: red; }
+
+@custom-#{$name;
+@next token;
+.after-semicolon { color: red; }
+
+@custom-#{$name} token
+@next token;
+.after-missing-semicolon { color: red; }
+
+@custom-#{$name { color: red; }
+.after-block { color: red; }
+
+@custom-#{

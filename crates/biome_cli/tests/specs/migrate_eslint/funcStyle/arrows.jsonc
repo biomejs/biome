@@ -1,0 +1,14 @@
+{
+  "biome": {},
+  "eslint": {
+    "rules": {
+      "func-style": [
+        "error",
+        "declaration",
+        {
+          "allowArrowFunctions": true
+        }
+      ]
+    }
+  }
+}

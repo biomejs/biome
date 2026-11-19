@@ -5,8 +5,9 @@ use biome_js_syntax::{
     AnyJsExportClause, AnyJsExpression, AnyJsFormalParameter, AnyJsImportClause,
     AnyJsLiteralExpression, AnyJsModuleItem, AnyJsName, AnyJsNamedImportSpecifier,
     AnyJsObjectMember, AnyJsObjectMemberName, AnyJsParameter, AnyJsStatement, AnyTsName,
-    AnyTsReturnType, AnyTsType, AnyTsTypeMember, JsFileSource, T, TriviaPieceKind,
+    AnyTsReturnType, AnyTsType, AnyTsTypeMember, T, TriviaPieceKind,
 };
+use biome_languages::JsFileSource;
 use biome_rowan::AstNode;
 use biome_service::workspace_types::{ModuleQueue, generate_type, methods};
 use biome_string_case::Case;
@@ -15,6 +16,20 @@ use xtask_glue::{Mode, Result, project_root};
 
 fn escape_jsdoc_comment_text(text: &str) -> String {
     text.replace("*/", "*\\/")
+}
+
+fn format_jsdoc_comment(text: &str) -> String {
+    let text = escape_jsdoc_comment_text(text);
+    let mut comment = String::from("/**");
+    for line in text.lines() {
+        comment.push_str("\n\t *");
+        if !line.is_empty() {
+            comment.push(' ');
+            comment.push_str(line);
+        }
+    }
+    comment.push_str("\n\t */");
+    comment
 }
 
 pub(crate) fn generate_workspace_bindings(mode: Mode) -> Result<()> {
@@ -199,8 +214,7 @@ pub(crate) fn generate_workspace_bindings(mode: Mode) -> Result<()> {
     items.extend(declarations.into_iter().map(|(decl, description)| {
         let mut export = make::token(T![export]);
         if let Some(description) = description {
-            let description = escape_jsdoc_comment_text(&description);
-            let comment = format!("/**\n\t* {description} \n\t */\n");
+            let comment = format_jsdoc_comment(&description);
             let trivia = vec![
                 (TriviaPieceKind::Newline, "\n"),
                 (TriviaPieceKind::MultiLineComment, comment.as_str()),
@@ -412,7 +426,7 @@ pub(crate) fn generate_workspace_bindings(mode: Mode) -> Result<()> {
     let formatted = format_node(
         JsFormatOptions::new(JsFileSource::ts()),
         module.syntax(),
-        false,
+        vec![],
     )
     .unwrap();
     let printed = formatted.print().unwrap();

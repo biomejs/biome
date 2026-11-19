@@ -1,0 +1,20 @@
+// should not generate diagnostics
+declare function ambient(): void;
+function overloaded(value: string): string;
+function overloaded(value: number): number;
+function overloaded(value: string | number) { return value; }
+export function exported(value: string): string;
+export function exported(value: number): number;
+export function exported(value: string | number) { return value; }
+namespace Nested {
+    function local(value: string): string;
+    function local(value: string) { return value; }
+}
+switch (value) {
+    case 0:
+        function inSwitch(value: string): string;
+    case 1:
+        function inSwitch(value: string) { return value; }
+}
+export default function() {}
+

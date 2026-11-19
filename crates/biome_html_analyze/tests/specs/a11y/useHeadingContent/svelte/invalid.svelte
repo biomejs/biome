@@ -1,0 +1,6 @@
+<!-- should generate diagnostics -->
+<h1></h1>
+<h2>   </h2>
+<h1 aria-hidden="true">invisible content</h1>
+<h1><span aria-hidden="true">hidden</span></h1>
+<h3></h3>

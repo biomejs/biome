@@ -1,0 +1,55 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidGlobalType.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+export {};
+
+// A declaration in `declare global` describes the built-in `Set` and `Map`
+declare global {
+	var Set: SetConstructor;
+	interface Set<T> {
+		extra: T;
+	}
+	interface ReadonlyMap<K, V> {
+		extra: [K, V];
+	}
+}
+
+function globalTypes(selected: Set<number>, records: ReadonlyMap<number, string>) {
+	return selected.union(new Set(records.keys()));
+}
+
+```
+
+# Diagnostics
+```
+invalidGlobalType.ts:16:24 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use union().
+  
+    15 │ function globalTypes(selected: Set<number>, records: ReadonlyMap<number, string>) {
+  > 16 │ 	return selected.union(new Set(records.keys()));
+       │ 	                      ^^^^^^^^^^^^^^^^^^^^^^^
+    17 │ }
+    18 │ 
+  
+  i The method reads a Set, or the keys of a Map, directly and doesn't change them. Creating another Set only takes extra time and memory.
+  
+  i Pass the original Set or Map to the method instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    14 14 │   
+    15 15 │   function globalTypes(selected: Set<number>, records: ReadonlyMap<number, string>) {
+    16    │ - → return·selected.union(new·Set(records.keys()));
+       16 │ + → return·selected.union(records);
+    17 17 │   }
+    18 18 │   
+  
+
+```

@@ -2,6 +2,7 @@ mod charset;
 mod color_profile;
 pub(crate) mod container;
 mod counter_style;
+mod custom_media;
 mod document;
 pub(crate) mod error;
 pub(crate) mod feature;
@@ -10,9 +11,10 @@ mod font_feature_values;
 mod font_palette_values;
 mod function;
 mod import;
-mod keyframes;
+pub(crate) mod keyframes;
 mod layer;
 pub(crate) mod media;
+mod name;
 mod namespace;
 mod page;
 mod parse_error;
@@ -37,6 +39,7 @@ use crate::syntax::at_rule::container::{
 use crate::syntax::at_rule::counter_style::{
     parse_counter_style_at_rule, parse_counter_style_at_rule_declarator,
 };
+use crate::syntax::at_rule::custom_media::parse_custom_media_at_rule;
 use crate::syntax::at_rule::document::parse_document_at_rule;
 use crate::syntax::at_rule::font_face::{
     parse_font_face_at_rule, parse_font_face_at_rule_declarator,
@@ -66,14 +69,18 @@ use crate::syntax::at_rule::tailwind::{
     parse_reference_at_rule, parse_slot_at_rule, parse_source_at_rule, parse_theme_at_rule,
     parse_utility_at_rule, parse_variant_at_rule,
 };
-use crate::syntax::at_rule::unknown::{is_at_unknown_at_rule, parse_unknown_at_rule};
+use crate::syntax::at_rule::unknown::{
+    is_at_scss_interpolated_unknown_at_rule, is_at_unknown_at_rule,
+    parse_scss_interpolated_unknown_at_rule, parse_unknown_at_rule,
+};
 use crate::syntax::at_rule::value::parse_value_at_rule;
 use crate::syntax::at_rule::view_transition::{
     parse_view_transition_at_rule, parse_view_transition_at_rule_declarator,
 };
 
-use crate::syntax::parse_error::{expected_any_at_rule, tailwind_disabled};
+use crate::syntax::parse_error::{expected_any_at_rule, scss_only_syntax_error, tailwind_disabled};
 use crate::syntax::scss::{
+    is_at_scss_interpolation, is_nth_at_scss_interpolated_dashed_identifier,
     parse_bogus_scss_else_at_rule, parse_scss_at_root_at_rule, parse_scss_content_at_rule,
     parse_scss_debug_at_rule, parse_scss_each_at_rule, parse_scss_error_at_rule,
     parse_scss_extend_at_rule, parse_scss_for_at_rule, parse_scss_forward_at_rule,
@@ -125,6 +132,18 @@ pub(crate) fn parse_at_rule(p: &mut CssParser) -> ParsedSyntax {
 #[inline]
 pub(crate) fn parse_any_at_rule(p: &mut CssParser) -> ParsedSyntax {
     match p.cur() {
+        _ if is_at_scss_interpolation(p)
+            || (CssSyntaxFeatures::Scss.is_supported(p)
+                && is_at_scss_interpolated_unknown_at_rule(p)) =>
+        {
+            CssSyntaxFeatures::Scss.parse_exclusive_syntax(
+                p,
+                parse_scss_interpolated_unknown_at_rule,
+                |p, marker| {
+                    scss_only_syntax_error(p, "SCSS interpolated at-rule names", marker.range(p))
+                },
+            )
+        }
         T![charset] => parse_charset_at_rule(p),
         T![color_profile] => parse_color_profile_at_rule(p),
         T![counter_style] => parse_counter_style_at_rule(p),
@@ -132,19 +151,15 @@ pub(crate) fn parse_any_at_rule(p: &mut CssParser) -> ParsedSyntax {
         T![font_face] => parse_font_face_at_rule(p),
         T![font_feature_values] => parse_font_feature_values_at_rule(p),
         T![font_palette_values] => parse_font_palette_values_at_rule(p),
-        T![function]
-            if CssSyntaxFeatures::Scss.is_supported(p) && is_nth_at_dashed_identifier(p, 1) =>
-        {
-            // `@function --highlight()` is plain CSS in SCSS; `double()` stays Sass.
-            parse_function_at_rule(p)
-        }
         T![function] => {
-            if CssSyntaxFeatures::Scss.is_supported(p) {
+            // `@function --highlight()` is plain CSS in SCSS; `double()` stays Sass.
+            if CssSyntaxFeatures::Scss.is_supported(p) && !is_at_css_function_at_rule_name(p) {
                 parse_scss_function_at_rule(p)
             } else {
                 parse_function_at_rule(p)
             }
         }
+        T![custom_media] => parse_custom_media_at_rule(p),
         T![media] => parse_media_at_rule(p),
         T![keyframes] => parse_keyframes_at_rule(p),
         T![page] => parse_page_at_rule(p),
@@ -265,6 +280,11 @@ pub(crate) fn parse_any_at_rule(p: &mut CssParser) -> ParsedSyntax {
         _ if is_at_unknown_at_rule(p) => parse_unknown_at_rule(p),
         _ => Absent,
     }
+}
+
+#[inline]
+fn is_at_css_function_at_rule_name(p: &mut CssParser) -> bool {
+    is_nth_at_dashed_identifier(p, 1) || is_nth_at_scss_interpolated_dashed_identifier(p, 1)
 }
 
 #[inline]

@@ -1,6 +1,8 @@
 use crate::{BiomePath, PathInterner};
-use biome_diagnostics::{Advices, Diagnostic, IoError, LogCategory, Visit, console};
-use biome_diagnostics::{Error, Severity};
+use biome_diagnostics::{
+    Advices, Category, Diagnostic, Error, IoError, Location, LogCategory, Severity, Visit,
+    category, console,
+};
 use camino::{Utf8Path, Utf8PathBuf};
 use directories::ProjectDirs;
 pub use memory::{ErrorEntry, MemoryFileSystem};
@@ -34,6 +36,41 @@ impl ConfigName {
 
     pub const fn file_names() -> [&'static str; 4] {
         Self::BIOME_JSON
+    }
+
+    pub fn matches_file_name(file_name: &str) -> bool {
+        Self::BIOME_JSON.contains(&file_name)
+    }
+
+    pub fn is_manifest_file(path: &Utf8Path) -> bool {
+        path.file_name().is_some_and(Self::matches_file_name)
+    }
+}
+
+/// File names recognized as Biome manifests.
+pub struct ManifestName;
+
+impl ManifestName {
+    const BIOME_MANIFEST_JSON: [&'static str; 2] = ["biome-manifest.json", "biome-manifest.jsonc"];
+
+    /// Returns the strict JSON manifest name.
+    pub const fn biome_manifest_json() -> &'static str {
+        Self::BIOME_MANIFEST_JSON[0]
+    }
+
+    /// Returns the JSON-with-comments manifest name.
+    pub const fn biome_manifest_jsonc() -> &'static str {
+        Self::BIOME_MANIFEST_JSON[1]
+    }
+
+    /// Returns manifest names in lookup priority order.
+    pub const fn file_names() -> [&'static str; 2] {
+        Self::BIOME_MANIFEST_JSON
+    }
+
+    pub fn is_manifest_file(path: &Utf8Path) -> bool {
+        path.file_name()
+            .is_some_and(|file_name| Self::file_names().contains(&file_name))
     }
 }
 
@@ -262,7 +299,9 @@ pub trait FileSystem: Send + Sync + RefUnwindSafe {
                         path: file_path.to_string(),
                         severity: Severity::Error,
                         error_kind: FsErrorKind::CantReadFile,
-                        source: Some(Error::from(IoError::from(err))),
+                        source: Some(Error::from(
+                            IoError::from(err).with_category(category!("fs/io")),
+                        )),
                     }),
                 }
             }
@@ -270,7 +309,9 @@ pub trait FileSystem: Send + Sync + RefUnwindSafe {
                 path: file_path.to_string(),
                 severity: Severity::Error,
                 error_kind: FsErrorKind::CantReadFile,
-                source: Some(Error::from(IoError::from(err))),
+                source: Some(Error::from(
+                    IoError::from(err).with_category(category!("fs/io")),
+                )),
             }),
         }
     }
@@ -497,21 +538,44 @@ where
     }
 }
 
-#[derive(Debug, Diagnostic, Deserialize, Serialize)]
-#[diagnostic(category = "internalError/fs")]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct FileSystemDiagnostic {
-    #[severity]
     pub severity: Severity,
-    #[location(resource)]
     pub path: String,
-    #[message]
-    #[description]
-    #[advice]
     pub error_kind: FsErrorKind,
 
-    #[source]
     #[serde(skip)]
     pub source: Option<Error>,
+}
+
+impl Diagnostic for FileSystemDiagnostic {
+    fn category(&self) -> Option<&'static Category> {
+        Some(self.error_kind.category())
+    }
+
+    fn severity(&self) -> Severity {
+        self.severity
+    }
+
+    fn description(&self, fmt: &mut Formatter<'_>) -> fmt::Result {
+        Display::fmt(&self.error_kind, fmt)
+    }
+
+    fn message(&self, fmt: &mut console::fmt::Formatter<'_>) -> io::Result<()> {
+        console::fmt::Display::fmt(&self.error_kind, fmt)
+    }
+
+    fn advices(&self, visitor: &mut dyn Visit) -> io::Result<()> {
+        self.error_kind.record(visitor)
+    }
+
+    fn location(&self) -> Location<'_> {
+        Location::builder().resource(&self.path).build()
+    }
+
+    fn source(&self) -> Option<&dyn Diagnostic> {
+        self.source.as_deref()
+    }
 }
 
 impl Display for FileSystemDiagnostic {
@@ -533,7 +597,7 @@ impl FileSystemDiagnostic {
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub enum FsErrorKind {
-    /// File not found
+    /// File cannot be read.
     CantReadFile,
     /// Unknown file type
     UnknownFileType,
@@ -543,6 +607,20 @@ pub enum FsErrorKind {
     DeeplyNestedSymlinkExpansion,
     /// Invalid UTF-8 characters in path.
     NonUtf8Path,
+}
+
+impl FsErrorKind {
+    fn category(&self) -> &'static Category {
+        match self {
+            Self::CantReadFile => category!("fs/cantRead"),
+            Self::UnknownFileType => category!("fs/unknownFileType"),
+            Self::DereferencedSymlink => category!("fs/dereferencedSymlink"),
+            Self::DeeplyNestedSymlinkExpansion => {
+                category!("fs/deeplyNestedSymlinkExpansion")
+            }
+            Self::NonUtf8Path => category!("fs/nonUtf8Path"),
+        }
+    }
 }
 
 impl console::fmt::Display for FsErrorKind {
@@ -595,5 +673,34 @@ impl Advices for FsErrorKind {
                 &"Biome encountered a path with invalid UTF-8 characters."
             )
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn fs_error_kind_categories() {
+        assert_eq!(
+            FsErrorKind::CantReadFile.category(),
+            category!("fs/cantRead")
+        );
+        assert_eq!(
+            FsErrorKind::UnknownFileType.category(),
+            category!("fs/unknownFileType")
+        );
+        assert_eq!(
+            FsErrorKind::DereferencedSymlink.category(),
+            category!("fs/dereferencedSymlink")
+        );
+        assert_eq!(
+            FsErrorKind::DeeplyNestedSymlinkExpansion.category(),
+            category!("fs/deeplyNestedSymlinkExpansion")
+        );
+        assert_eq!(
+            FsErrorKind::NonUtf8Path.category(),
+            category!("fs/nonUtf8Path")
+        );
     }
 }

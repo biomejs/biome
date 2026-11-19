@@ -1,0 +1,8 @@
+<!-- should not generate diagnostics -->
+<input type="text" aria-label="Name" />
+<div aria-hidden="true"></div>
+<div aria-live="polite"></div>
+<button aria-pressed="false"></button>
+<input aria-required="true" />
+<div role="alert" aria-atomic="true"></div>
+<div ARIA-HIDDEN="true"></div>

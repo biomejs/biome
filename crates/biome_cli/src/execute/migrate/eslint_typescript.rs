@@ -9,7 +9,7 @@ use biome_deserialize_macros::Deserializable;
 use biome_rule_options::restricted_regex::RestrictedRegex;
 use biome_rule_options::{
     no_base_to_string, no_shadow, use_consistent_array_type, use_consistent_member_accessibility,
-    use_import_type, use_naming_convention,
+    use_exhaustive_switch_cases, use_import_type, use_naming_convention,
 };
 
 #[derive(Debug, Default, Deserializable)]
@@ -19,6 +19,26 @@ pub(crate) struct NoBaseToStringOptions {
     ignored_type_names: Option<Box<[Box<str>]>>,
     #[deserializable(rename = "checkUnknown")]
     check_unknown: Option<bool>,
+}
+
+#[derive(Debug, Default, Deserializable)]
+#[deserializable(unknown_fields = "allow")]
+pub(crate) struct SwitchExhaustivenessCheckOptions {
+    consider_default_exhaustive_for_unions: Option<bool>,
+}
+
+impl From<SwitchExhaustivenessCheckOptions>
+    for use_exhaustive_switch_cases::UseExhaustiveSwitchCasesOptions
+{
+    fn from(value: SwitchExhaustivenessCheckOptions) -> Self {
+        Self {
+            require_explicit_case: Some(
+                !value
+                    .consider_default_exhaustive_for_unions
+                    .unwrap_or(false),
+            ),
+        }
+    }
 }
 
 impl From<NoBaseToStringOptions> for no_base_to_string::NoBaseToStringOptions {
@@ -259,7 +279,6 @@ impl NamingConventionSelection {
             || modifiers.contains(use_naming_convention::RestrictedModifier::Protected);
         let has_property_modifier =
             modifiers.contains(use_naming_convention::RestrictedModifier::Readonly);
-        modifiers.contains(use_naming_convention::RestrictedModifier::Private);
         let scope = self
             .modifiers
             .iter()
@@ -538,9 +557,9 @@ impl NamingConventionSelection {
 #[derive(Debug)]
 pub(crate) struct Anything;
 impl Deserializable for Anything {
-    fn deserialize(
-        _ctx: &mut impl biome_deserialize::DeserializationContext,
-        _value: &impl biome_deserialize::DeserializableValue,
+    fn deserialize<V: biome_deserialize::DeserializableValue>(
+        _ctx: &mut dyn biome_deserialize::DeserializationContext<State = V::State>,
+        _value: &V,
         _name: &str,
     ) -> Option<Self> {
         Some(Self)

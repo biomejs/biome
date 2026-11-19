@@ -1,18 +1,24 @@
 use crate::fonts::is_function_keyword;
-use crate::utils::is_custom_function;
-use biome_analyze::{
-    Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
-};
+use crate::services::semantic::Semantic;
+use crate::utils::{is_custom_function, is_scss_built_in_function};
+use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_css_syntax::CssFunction;
 use biome_diagnostics::Severity;
+use biome_languages::CssFileSource;
 use biome_rowan::{AstNode, TextRange};
 use biome_rule_options::no_unknown_function::NoUnknownFunctionOptions;
 
 declare_lint_rule! {
-    /// Disallow unknown CSS value functions.
+    /// Disallow unrecognized CSS value functions.
     ///
     /// This rule ignores double-dashed custom functions, e.g. `--custom-function()`.
+    /// In SCSS files, it also ignores SCSS built-in functions and functions declared in the same file.
+    ///
+    /// ## SCSS limitations
+    ///
+    /// The rule does not resolve functions made globally available by legacy SCSS `@import`.
+    /// Configure the `ignore` option for imported functions that cannot be resolved locally.
     ///
     /// Data sources of known CSS value functions are:
     /// - MDN reference on [CSS value functions](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Functions)
@@ -37,7 +43,8 @@ declare_lint_rule! {
     ///
     /// ### `ignore`
     ///
-    /// A list of unknown function names to ignore (case-insensitive).
+    /// Lists additional function names to allow, without regard to letter case. Defaults to an
+    /// empty list.
     ///
     /// ```json,options
     /// {
@@ -71,7 +78,7 @@ pub struct NoUnknownFunctionState {
 }
 
 impl Rule for NoUnknownFunction {
-    type Query = Ast<CssFunction>;
+    type Query = Semantic<CssFunction>;
     type State = NoUnknownFunctionState;
     type Signals = Option<Self::State>;
     type Options = NoUnknownFunctionOptions;
@@ -84,13 +91,20 @@ impl Rule for NoUnknownFunction {
         })?;
         let function_name = binding.text_trimmed();
 
-        // We don't have a semantic model yet, so we can't determine if functions are defined elsewhere.
-        // Therefore, we ignore these custom functions to prevent false detections.
+        // The semantic model doesn't track custom function definitions, which may also come
+        // from other files, so we ignore custom functions to prevent false detections.
         if is_custom_function(function_name) {
             return None;
         }
 
         if is_function_keyword(function_name) {
+            return None;
+        }
+
+        if ctx.source_type::<CssFileSource>().is_scss()
+            && (is_scss_built_in_function(function_name)
+                || ctx.model().has_scss_function(function_name))
+        {
             return None;
         }
 
@@ -113,6 +127,9 @@ impl Rule for NoUnknownFunction {
                     "Unexpected unknown function: "<Emphasis>{state.function_name}</Emphasis>
                 },
             )
+            .note(markup! {
+                "Browsers ignore a declaration that contains an unknown function, so the style is not applied."
+            })
             .note(markup! {
                 "Use a known function instead."
             })

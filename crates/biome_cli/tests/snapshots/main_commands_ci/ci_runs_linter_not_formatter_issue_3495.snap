@@ -2,6 +2,12 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
+## Command
+
+```shell
+biome ci file.js
+```
+
 ## `biome.json`
 
 ```json
@@ -32,6 +38,8 @@ file.js:1:1 lint/style/useConst  FIXABLE  ━━━━━━━━━━━━�
   
   > 1 │ let a = !b || !c
       │     ^
+  
+  i A variable that is never reassigned is clearer as const, because it prevents the binding from being reassigned.
   
   i Safe fix: Use const instead.
   

@@ -1,0 +1,69 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome inspect plugins
+```
+
+## `biome.json`
+
+```json
+{
+  "plugins": [
+    { "path": "@acme/testing/noFocusedTests", "includes": ["src/**/*.test.ts"] }
+  ],
+  "overrides": [
+    {
+      "includes": ["**/*.test.ts"],
+      "plugins": [
+        "@acme/testing/presets/recommended",
+        "@acme/testing/noFakeTimers"
+      ]
+    }
+  ]
+}
+```
+
+## `node_modules/@acme/testing/biome-manifest.json`
+
+```json
+{"plugins":{"presets":{"recommended":["noFocusedTests"]},"rules":[{"noFakeTimers":"rules/noFakeTimers.grit","noFocusedTests":"rules/noFocusedTests.grit"}]},"version":1}
+```
+
+## `node_modules/@acme/testing/package.json`
+
+```json
+{"exports":{"biome":"./biome-manifest.json","default":"./index.js"},"name":"@acme/testing"}
+```
+
+## `node_modules/@acme/testing/rules/noFakeTimers.grit`
+
+```grit
+`console.log($message)`
+```
+
+## `node_modules/@acme/testing/rules/noFocusedTests.grit`
+
+```grit
+`console.log($message)`
+```
+
+# Emitted Messages
+
+```block
+configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The configuration enables 2 plugin rules.
+  
+  Rules that apply only to matching files
+  
+  - @acme/testing/noFakeTimers, for files matching override includes: [**/*.test.ts] (listed directly)
+  - @acme/testing/noFocusedTests, for files matching any of:
+    - includes: [src/**/*.test.ts] (listed directly)
+    - override includes: [**/*.test.ts] (presets/recommended)
+  
+
+```

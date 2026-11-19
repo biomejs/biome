@@ -1,0 +1,11 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: validNotFirstTemplate.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<template><div></div></template>
+<template><div v-if="foo"></div></template>
+
+```

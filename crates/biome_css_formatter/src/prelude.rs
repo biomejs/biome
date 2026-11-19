@@ -3,11 +3,12 @@
 #![allow(unused_imports)]
 
 pub(crate) use crate::separated::FormatAstSeparatedListExtension;
+pub(crate) use crate::utils::case::CssCase;
 pub(crate) use crate::{
     AsFormat, CssFormatContext, CssFormatter, FormatNodeRule, FormattedIterExt as _, IntoFormat,
     format_number_token, format_removed, format_replaced, on_removed, on_skipped, verbatim::*,
 };
-pub(crate) use biome_formatter::prelude::*;
+pub(crate) use biome_formatter::rowan::prelude::*;
 pub(crate) use biome_rowan::{
     AstNode as _, AstNodeList as _, AstNodeSlotMap as _, AstSeparatedList as _,
 };

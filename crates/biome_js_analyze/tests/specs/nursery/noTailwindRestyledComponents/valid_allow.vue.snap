@@ -1,0 +1,13 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid_allow.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<template>
+	<Card.Root :class="'shadow-lg'" />
+	<UI.Button :class="'hover:rounded-none'" />
+</template>
+
+```

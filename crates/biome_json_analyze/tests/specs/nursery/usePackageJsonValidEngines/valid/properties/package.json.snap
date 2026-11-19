@@ -1,0 +1,26 @@
+---
+source: crates/biome_json_analyze/tests/spec_tests.rs
+expression: package.json
+---
+# Input
+```json
+{
+	"name": "example",
+	"engines": {
+		"node": "^24.11.0",
+		"npm": ">=11",
+		"pnpm": " 10.x ",
+		"vscode": "*",
+		"": ">=1"
+	},
+	"devEngines": {
+		"runtime": { "name": "node", "version": 24 }
+	},
+	"config": {
+		"engines": 24,
+		"nested": { "engines": { "node": 24 } }
+	},
+	"workspaces": [{ "engines": null }]
+}
+
+```

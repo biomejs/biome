@@ -1,0 +1,156 @@
+/* should generate diagnostics */
+
+// return at end of function body
+function a() {
+    return;
+}
+
+// return after statements at end
+function b() {
+    doSomething();
+    return;
+}
+
+// return at end of if-block (no code after if)
+function c() {
+    if (condition) {
+        bar();
+        return;
+    }
+}
+
+// return at end of else-block (no code after if/else)
+function d() {
+    if (condition) {
+        foo();
+    } else {
+        bar();
+        return;
+    }
+}
+
+// both branches with return, tail-positioned
+function e() {
+    if (condition) {
+        return;
+    } else {
+        return;
+    }
+}
+
+// return in nested if chains, all tail-positioned
+function f() {
+    if (a) {
+        if (b) {
+            return;
+        }
+    }
+}
+
+// return at end of try block (tail-positioned, no finally)
+function g() {
+    try {
+        doSomething();
+        return;
+    } catch (e) {
+        handleError();
+    }
+}
+
+// return at end of catch block (tail-positioned, no finally)
+function h() {
+    try {
+        doSomething();
+    } catch (e) {
+        handleError();
+        return;
+    }
+}
+
+// arrow function
+const i = () => {
+    return;
+}
+
+// return in labeled statement (tail-positioned)
+function j() {
+    label: {
+        return;
+    }
+}
+
+// return in try body of try-finally (tail-positioned)
+function k() {
+    try {
+        return;
+    } finally {
+        cleanup();
+    }
+}
+
+// single-statement if with return (tail-positioned)
+function l() {
+    if (foo) { return; }
+}
+
+// unbraced if consequent: reported, but removing the return would leave `if (a)` without a body
+function m() {
+    if (a) return;
+}
+
+// unbraced if and else branches: both reported, neither can be removed
+function n() {
+    if (a) return; else return;
+}
+
+// unbraced else branch
+function o() {
+    if (a) foo(); else return;
+}
+
+// labeled statement body
+function p() {
+    label: return;
+}
+
+// nested unbraced ifs
+function q() {
+    if (a) if (b) return;
+}
+
+// braced consequent is fixed, unbraced alternate is only reported
+function r() {
+    if (a) { return; } else return;
+}
+
+// leading line comment is preserved
+function s() {
+    doSomething();
+    // best effort
+    return;
+}
+
+// trailing comment
+function t() {
+    doSomething();
+    return; // done
+}
+
+// comment before the first statement of a block
+function u() {
+    if (a) { // reason
+        return;
+    }
+}
+
+// comment inside the return statement: no fix
+function v() {
+    doSomething();
+    return/**/;
+}
+
+// trailing comments on both this statement and the previous one
+function w() {
+    doSomething(); // a
+    return; // done
+}

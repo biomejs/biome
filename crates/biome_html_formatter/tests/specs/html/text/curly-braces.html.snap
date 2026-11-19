@@ -1,0 +1,21 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: text/curly-braces.html
+---
+
+# Input
+
+```html
+<span>{test} {{test}}</span>
+<div>before{{test}}after</div>
+
+```
+
+
+# Formatted
+
+```html
+<span>{test} {{test}}</span>
+<div>before{{test}}after</div>
+
+```

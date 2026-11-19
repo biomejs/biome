@@ -18,3 +18,4 @@ var a = x instanceof foo ? true : false;
 
 var a = 'make' in car ? true : false;
 var a = 'make' in car ? false : true;
+const pauseEventLane = document.cookie.indexOf('cid_debug=false') > -1 ? true : false;

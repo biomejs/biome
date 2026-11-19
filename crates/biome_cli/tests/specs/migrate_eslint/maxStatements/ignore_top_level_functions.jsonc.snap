@@ -1,0 +1,40 @@
+---
+source: crates/biome_cli/src/execute/migrate/eslint_to_biome.rs
+expression: ignore_top_level_functions.jsonc
+---
+## ESLint Config
+
+```json
+{
+	"rules": {
+		"max-statements": ["error", 15, { "ignoreTopLevelFunctions": true }]
+	}
+}
+
+```
+
+## Biome Config Before Migration
+
+```json
+{}
+
+```
+
+## Biome Config After Migration
+
+```json
+{
+	"linter": {
+		"rules": {
+			"preset": "none",
+			"nursery": {
+				"noExcessiveStatementsPerFunction": {
+					"level": "error",
+					"options": { "max": 15, "ignoreTopLevelFunctions": true }
+				}
+			}
+		}
+	}
+}
+
+```

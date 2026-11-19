@@ -2,6 +2,12 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
+## Command
+
+```shell
+biome format '<TEMP_DIR>/errors_on_ignored_nested_biome_json'
+```
+
 ## `biome.json`
 
 ```json

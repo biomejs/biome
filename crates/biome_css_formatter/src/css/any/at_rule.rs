@@ -13,6 +13,7 @@ impl FormatRule<AnyCssAtRule> for FormatAnyCssAtRule {
             AnyCssAtRule::CssColorProfileAtRule(node) => node.format().fmt(f),
             AnyCssAtRule::CssContainerAtRule(node) => node.format().fmt(f),
             AnyCssAtRule::CssCounterStyleAtRule(node) => node.format().fmt(f),
+            AnyCssAtRule::CssCustomMediaAtRule(node) => node.format().fmt(f),
             AnyCssAtRule::CssDocumentAtRule(node) => node.format().fmt(f),
             AnyCssAtRule::CssFontFaceAtRule(node) => node.format().fmt(f),
             AnyCssAtRule::CssFontFeatureValuesAtRule(node) => node.format().fmt(f),

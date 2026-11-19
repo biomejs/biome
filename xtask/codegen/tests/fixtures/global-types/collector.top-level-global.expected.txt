@@ -1,0 +1,6 @@
+records
+DeclarationRecord { file_repo_relative: "collector.top-level-global.d.ts", scope: Global, declared_name: "GlobalAlias", kind: TypeAlias, text_range: 0..26, syntax_kind: TS_TYPE_ALIAS_DECLARATION }
+DeclarationRecord { file_repo_relative: "collector.top-level-global.d.ts", scope: Global, declared_name: "globalFunction", kind: DeclareFunction, text_range: 35..67, syntax_kind: TS_DECLARE_FUNCTION_DECLARATION }
+coverage
+Collected(0)
+Collected(1)

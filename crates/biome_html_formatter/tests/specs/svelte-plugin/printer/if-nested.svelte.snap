@@ -1,0 +1,67 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: printer/if-nested.svelte
+---
+
+# Input
+
+```svelte
+{#if foo}
+    {#if bar}
+        x
+    {/if}
+{:else}
+    {#if bar}
+        x
+    {/if}
+{/if}
+
+{#if foo}{#if bar}x{/if}{:else}{#if bar}x{/if}{/if}
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -8,4 +8,12 @@
+     {/if}
+ {/if}
+ 
+-{#if foo}{#if bar}x{/if}{:else}{#if bar}x{/if}{/if}
++{#if foo}
++    {#if bar}
++        x
++    {/if}
++{:else}
++    {#if bar}
++        x
++    {/if}
++{/if}
+```
+
+# Output
+
+```svelte
+{#if foo}
+    {#if bar}
+        x
+    {/if}
+{:else}
+    {#if bar}
+        x
+    {/if}
+{/if}
+
+{#if foo}
+    {#if bar}
+        x
+    {/if}
+{:else}
+    {#if bar}
+        x
+    {/if}
+{/if}
+```

@@ -1,6 +1,6 @@
 use crate::{SemanticModelOptions, semantic_model};
 use biome_js_parser::JsParserOptions;
-use biome_js_syntax::JsFileSource;
+use biome_languages::JsFileSource;
 
 fn assert_format_snapshot(test_name: &str, source: &str, source_type: JsFileSource) {
     let parsed = biome_js_parser::parse(source, source_type, JsParserOptions::default());

@@ -43,6 +43,14 @@ const validShorthand = {
     arrowWithBlock: () => { return "arrow block"; },
     asyncArrow: async () => "async arrow",
 
+    // Named function expressions
+    sameName: function sameName() { return "same name"; },
+    otherName: function differentName() { return "different name"; },
+    recursive: function recursive(n) { return n > 0 ? recursive(n - 1) : n; },
+    asyncNamed: async function asyncNamed() { return "async named"; },
+    generatorNamed: function* generatorNamed() { yield "named gen"; },
+    [computedNamed]: function computedNamed() { return "computed named"; },
+
     // Accessors
     get getter() { return "getter"; },
     set setter(value) { this._setter = value; },

@@ -5,9 +5,11 @@ pub mod markdown;
 mod reporters;
 pub mod results;
 mod runner;
+pub mod scss;
 pub mod symbols;
 pub mod ts;
 mod util;
+pub mod yaml;
 
 pub use crate::reporters::SummaryDetailLevel;
 
@@ -21,12 +23,14 @@ use biome_parser::diagnostic::ParseDiagnostic;
 use biome_string_case::StrOnlyExtension;
 use jsx::jsx_babel::BabelJsxTestSuite;
 use markdown::commonmark::CommonMarkTestSuite;
+use scss::sass_spec::SassSpecTestSuite;
 use serde::{Deserialize, Serialize};
 use std::any::Any;
 use symbols::msts::SymbolsMicrosoftTestSuite;
 use ts::ts_babel::BabelTypescriptTestSuite;
 use ts::ts_microsoft::MicrosoftTypescriptTestSuite;
 use util::decode_maybe_utf16_string;
+use yaml::yaml_test_suite::YamlTestSuite;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct TestResult {
@@ -89,7 +93,11 @@ impl TestResults {
         self.details = results;
         let passed = self.passed_tests() as u32;
         let tests_ran = self.details.len();
-        let coverage = (f64::from(passed) / tests_ran as f64) * 100.0;
+        let coverage = if tests_ran == 0 {
+            0.0
+        } else {
+            (f64::from(passed) / tests_ran as f64) * 100.0
+        };
         self.summary = Summary {
             tests_ran: self.details.len() as u32,
             passed,
@@ -167,6 +175,8 @@ const ALL_TS_SUITES: &str = "ts";
 const ALL_JSX_SUITES: &str = "jsx";
 const ALL_SYMBOLS_SUITES: &str = "symbols";
 const ALL_MARKDOWN_SUITES: &str = "markdown";
+const ALL_SCSS_SUITES: &str = "scss";
+const ALL_YAML_SUITES: &str = "yaml";
 
 fn get_test_suites(suites: Option<&str>) -> Vec<Box<dyn TestSuite>> {
     let suites = suites.unwrap_or("*").to_lowercase_cow();
@@ -181,7 +191,9 @@ fn get_test_suites(suites: Option<&str>) -> Vec<Box<dyn TestSuite>> {
             ALL_JSX_SUITES => ids.extend(["jsx/babel"]),
             ALL_SYMBOLS_SUITES => ids.extend(["symbols/microsoft"]),
             ALL_MARKDOWN_SUITES => ids.extend(["markdown/commonmark"]),
-            ALL_SUITES => ids.extend(["js", "ts", "jsx", "symbols", "markdown"]),
+            ALL_SCSS_SUITES => ids.extend(["scss/sass-spec"]),
+            ALL_YAML_SUITES => ids.extend(["yaml/yaml-test-suite"]),
+            ALL_SUITES => ids.extend(["js", "ts", "jsx", "symbols", "markdown", "scss", "yaml"]),
 
             "js/262" => suites.push(Box::new(Test262TestSuite)),
             "ts/microsoft" => suites.push(Box::new(MicrosoftTypescriptTestSuite)),
@@ -189,6 +201,8 @@ fn get_test_suites(suites: Option<&str>) -> Vec<Box<dyn TestSuite>> {
             "jsx/babel" => suites.push(Box::new(BabelJsxTestSuite)),
             "symbols/microsoft" => suites.push(Box::new(SymbolsMicrosoftTestSuite)),
             "markdown/commonmark" => suites.push(Box::new(CommonMarkTestSuite)),
+            "scss/sass-spec" => suites.push(Box::new(SassSpecTestSuite)),
+            "yaml/yaml-test-suite" => suites.push(Box::new(YamlTestSuite)),
 
             _ => {}
         }

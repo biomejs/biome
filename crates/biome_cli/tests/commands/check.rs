@@ -1,3 +1,4 @@
+use crate::TestArgs as Args;
 use crate::configs::{
     CONFIG_FILE_SIZE_LIMIT, CONFIG_LINTER_DISABLED, CONFIG_LINTER_DISABLED_JSONC,
     CONFIG_LINTER_DOWNGRADE_DIAGNOSTIC, CONFIG_LINTER_SUPPRESSED_GROUP,
@@ -10,7 +11,6 @@ use crate::{
 };
 use biome_console::{BufferConsole, LogLevel, MarkupBuf, markup};
 use biome_fs::{ErrorEntry, FileSystemExt, MemoryFileSystem, OsFileSystem};
-use bpaf::Args;
 use camino::{Utf8Path, Utf8PathBuf};
 use std::env::temp_dir;
 use std::fs::{File, create_dir, create_dir_all, remove_dir_all};
@@ -48,6 +48,24 @@ console.log(a);
 ";
 
 const APPLY_SUGGESTED_AFTER: &str = "const a = 4;\nconsole.log(a);\n";
+
+const JSX_FRAGMENT_ATTRIBUTE_BEFORE: &str = r#"const cases = (
+  <>
+    <Component selfClosing={<><div /></>} />
+    <Component nested={<><><span /></></>} />
+    <Component expression={<>{value}</>} />
+  </>
+);
+"#;
+
+const JSX_FRAGMENT_ATTRIBUTE_AFTER: &str = r#"const cases = (
+	<>
+		<Component selfClosing={<div />} />
+		<Component nested={<span />} />
+		<Component expression={value} />
+	</>
+);
+"#;
 
 const NO_DEBUGGER_BEFORE: &str = "debugger;\n";
 const NO_DEBUGGER_AFTER: &str = "debugger;\n";
@@ -115,6 +133,26 @@ fn parse_error() {
 }
 
 #[test]
+fn utf16_file_returns_error() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let file_path = Utf8Path::new("check.js");
+    fs.insert(
+        file_path.into(),
+        b"\xff\xfec\0o\0n\0s\0t\0 \0a\0 \0=\0 \x001\0;\0",
+    );
+
+    let (_, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["check", "--write", file_path.as_str()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+}
+
+#[test]
 fn lint_error() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
@@ -161,18 +199,19 @@ fn maximum_diagnostics() {
             .iter()
             .filter(|m| m.level == LogLevel::Error)
             .count(),
-        20_usize
+        // 20 diagnostics, the max-diagnostics warning, and the summary
+        22_usize
     );
 
     assert!(
         messages
             .iter()
-            .filter(|m| m.level == LogLevel::Log)
+            .filter(|m| m.level == LogLevel::Error)
             .any(|m| {
                 let content = format!("{:?}", m.content);
                 content.contains("The number of diagnostics exceeds the limit allowed")
                     && content.contains("Diagnostics not shown")
-                    && content.contains("29")
+                    && content.contains("30")
             })
     );
 
@@ -183,6 +222,46 @@ fn maximum_diagnostics() {
         console,
         result,
     ));
+}
+
+#[test]
+fn summary_is_printed_to_stderr() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+    let file_path = Utf8Path::new("check.js");
+    fs.insert(file_path.into(), NO_DEBUGGER.as_bytes());
+
+    let (_, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["check", "--write", file_path.as_str()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    let messages = &console.out_buffer;
+
+    assert!(
+        messages.iter().all(|m| m.level == LogLevel::Error),
+        "expected every message to be printed to stderr: {messages:?}"
+    );
+
+    let error_contents: Vec<_> = messages
+        .iter()
+        .map(|m| markup_to_string(markup! {{m.content}}))
+        .collect();
+
+    assert!(
+        error_contents
+            .iter()
+            .any(|content| content.contains("Skipped") && content.contains("suggested fixes")),
+        "{error_contents:#?}"
+    );
+    assert!(
+        error_contents
+            .iter()
+            .any(|content| content.contains("Checked"))
+    );
 }
 
 #[test]
@@ -295,6 +374,48 @@ fn apply_suggested() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "apply_suggested",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn check_write_unsafe_preserves_jsx_attribute_value_shape() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let file_path = Utf8Path::new("fragment-attribute.tsx");
+    fs.insert(file_path.into(), JSX_FRAGMENT_ATTRIBUTE_BEFORE.as_bytes());
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "check",
+                "--write",
+                "--unsafe",
+                "--only=complexity/noUselessFragments",
+                file_path.as_str(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    let mut buffer = String::new();
+    fs.open(file_path)
+        .unwrap()
+        .read_to_string(&mut buffer)
+        .unwrap();
+
+    assert_eq!(buffer, JSX_FRAGMENT_ATTRIBUTE_AFTER);
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "check_write_unsafe_preserves_jsx_attribute_value_shape",
         fs,
         console,
         result,
@@ -910,7 +1031,7 @@ fn no_lint_if_files_are_listed_in_ignore_option() {
 /// Creating a symbolic link will fail on Windows if the current process is
 /// unprivileged. Since running tests as administrator is uncommon and
 /// constraining, this error gets silently ignored if we're not running on CI
-/// (the workflows are being being run with the correct permissions on CI)
+/// (the workflows are being run with the correct permissions on CI)
 #[cfg(target_os = "windows")]
 macro_rules! check_windows_symlink {
     ($result:expr) => {
@@ -920,6 +1041,38 @@ macro_rules! check_windows_symlink {
             Err(_) => return,
         }
     };
+}
+
+#[test]
+fn missing_path() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let root_path = Utf8PathBuf::from_path_buf(temp_dir())
+        .unwrap()
+        .join("check_missing_path");
+    let missing_path = root_path.join("missing.js");
+
+    let _ = remove_dir_all(&root_path);
+    create_dir(&root_path).unwrap();
+
+    let result = run_cli_with_dyn_fs(
+        Box::new(OsFileSystem::new(root_path.clone())),
+        &mut console,
+        Args::from(["check", missing_path.as_str()].as_slice()),
+    );
+
+    remove_dir_all(root_path).unwrap();
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "missing_path",
+        fs,
+        console,
+        result,
+    ));
 }
 
 #[test]
@@ -1702,7 +1855,7 @@ fn applies_organize_imports_bug_4552() {
         "linter": {
             "enabled": true,
             "rules": {
-                "recommended": true,
+                "preset": "recommended",
                 "correctness": { "noUnusedImports": "off" }
             }
         }
@@ -1966,7 +2119,7 @@ fn check_stdin_applies_the_config_based_on_path() {
   "linter": {
     "enabled": true,
     "rules": {
-      "recommended": true
+      "preset": "recommended"
     }
   },
   "formatter": {
@@ -2288,7 +2441,7 @@ fn should_apply_correct_file_source() {
         r#"{
     	"linter": {
     		"rules": {
-    			"recommended": true,
+    			"preset": "recommended",
     			"correctness": {
     				"noUndeclaredVariables": "error"
     			}
@@ -2390,7 +2543,7 @@ fn should_not_disable_recommended_rules_for_a_group() {
   "linter": {
     "enabled": true,
     "rules": {
-      "recommended": true,
+      "preset": "recommended",
       "complexity": {
         "noUselessSwitchCase": "off"
       }
@@ -2566,7 +2719,7 @@ fn should_pass_if_there_are_only_warnings() {
 {
   "linter": {
     "rules": {
-        "recommended": true,
+        "preset": "recommended",
         "suspicious": {
             "noClassAssign": "warn"
         }
@@ -2615,7 +2768,7 @@ fn does_error_with_only_warnings() {
 {
   "linter": {
     "rules": {
-        "recommended": true,
+        "preset": "recommended",
         "suspicious": {
             "noClassAssign": "warn"
         }
@@ -2716,7 +2869,7 @@ fn should_show_formatter_diagnostics_for_files_ignored_by_linter() {
                 "enabled": true,
                 "includes": ["**", "!build/**"],
                 "rules": {
-                    "recommended": true
+                    "preset": "recommended"
                 }
             }
         }"#,
@@ -3200,7 +3353,7 @@ fn html_enabled_by_arg_check() {
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
-    assert_file_contents(&fs, file_path, "<!DOCTYPE html>\n");
+    assert_file_contents(&fs, file_path, "<!doctype html>\n");
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
@@ -3354,6 +3507,62 @@ fn check_json_plugin() {
 }
 
 #[test]
+fn check_plugin_from_package_manifest() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        Utf8PathBuf::from("biome.json"),
+        br#"{
+    "plugins": ["@scope/biome-plugin/noAssign"],
+    "formatter": { "enabled": false }
+}"#,
+    );
+    fs.insert(
+        Utf8PathBuf::from("node_modules/@scope/biome-plugin/package.json"),
+        br#"{
+    "name": "@scope/biome-plugin",
+    "exports": "./index.js"
+}"#,
+    );
+    fs.insert(
+        Utf8PathBuf::from("node_modules/@scope/biome-plugin/biome-manifest.json"),
+        br#"{
+    "version": 1,
+    "plugins": {
+        "rules": [{ "noAssign": "rules/noAssign.grit" }],
+        "presets": { "recommended": ["noAssign"] }
+    }
+}"#,
+    );
+    fs.insert(
+        Utf8PathBuf::from("node_modules/@scope/biome-plugin/rules/noAssign.grit"),
+        br#"`Object.assign($args)` where {
+    register_diagnostic(
+        span = $args,
+        message = "Prefer object spread instead of `Object.assign()`"
+    )
+}"#,
+    );
+    let file_path = "file.js";
+    fs.insert(file_path.into(), b"Object.assign({});");
+
+    let (fs, result) = run_cli_with_server_workspace(
+        fs,
+        &mut console,
+        Args::from(["check", file_path].as_slice()),
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "check_plugin_from_package_manifest",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn check_js_plugin_with_native_field_names() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
@@ -3460,6 +3669,194 @@ const foo = 'bad'
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "check_plugin_diagnostic_offset_in_vue_file",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn check_plugin_apply_rewrite() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        Utf8PathBuf::from("biome.json"),
+        br#"{
+    "plugins": ["useConsoleInfo.grit"],
+    "formatter": { "enabled": false }
+}
+"#,
+    );
+
+    fs.insert(
+        Utf8PathBuf::from("useConsoleInfo.grit"),
+        br#"language js
+
+`console.log($msg)` as $call where {
+    register_diagnostic(span = $call, message = "Use console.info instead of console.log.", severity = "warn"),
+    $call => `console.info($msg)`
+}
+"#,
+    );
+
+    let file_path = Utf8Path::new("input.js");
+    fs.insert(file_path.into(), b"console.log(\"hello\");\n");
+
+    let (fs, result) = run_cli_with_server_workspace(
+        fs,
+        &mut console,
+        Args::from(["check", "--write", "--unsafe", file_path.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert_file_contents(&fs, file_path, "console.info(\"hello\");\n");
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "check_plugin_apply_rewrite",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn check_plugin_rewrite_no_write() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        Utf8PathBuf::from("biome.json"),
+        br#"{
+    "plugins": ["useConsoleInfo.grit"],
+    "formatter": { "enabled": false }
+}
+"#,
+    );
+
+    fs.insert(
+        Utf8PathBuf::from("useConsoleInfo.grit"),
+        br#"language js
+
+`console.log($msg)` as $call where {
+    register_diagnostic(span = $call, message = "Use console.info instead of console.log.", severity = "warn"),
+    $call => `console.info($msg)`
+}
+"#,
+    );
+
+    let file_path = Utf8Path::new("input.js");
+    fs.insert(file_path.into(), b"console.log(\"hello\");\n");
+
+    let (fs, result) = run_cli_with_server_workspace(
+        fs,
+        &mut console,
+        Args::from(["check", file_path.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert_file_contents(&fs, file_path, "console.log(\"hello\");\n");
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "check_plugin_rewrite_no_write",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn check_plugin_rewrite_write_without_unsafe() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        Utf8PathBuf::from("biome.json"),
+        br#"{
+    "plugins": ["useConsoleInfo.grit"],
+    "formatter": { "enabled": false }
+}
+"#,
+    );
+
+    fs.insert(
+        Utf8PathBuf::from("useConsoleInfo.grit"),
+        br#"language js
+
+`console.log($msg)` as $call where {
+    register_diagnostic(span = $call, message = "Use console.info instead of console.log.", severity = "warn"),
+    $call => `console.info($msg)`
+}
+"#,
+    );
+
+    let file_path = Utf8Path::new("file.js");
+    fs.insert(file_path.into(), b"console.log(\"hello\");\n");
+
+    let (fs, result) = run_cli_with_server_workspace(
+        fs,
+        &mut console,
+        Args::from(["check", "--write", file_path.as_str()].as_slice()),
+    );
+
+    // --write without --unsafe should NOT apply unsafe fixes
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert_file_contents(&fs, file_path, "console.log(\"hello\");\n");
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "check_plugin_rewrite_write_without_unsafe",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn check_plugin_multiple_rewrites() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        Utf8PathBuf::from("biome.json"),
+        br#"{
+    "plugins": ["useLoggerInfo.grit"],
+    "formatter": { "enabled": false }
+}
+"#,
+    );
+
+    fs.insert(
+        Utf8PathBuf::from("useLoggerInfo.grit"),
+        br#"language js
+
+`console.log($msg)` as $call where {
+    register_diagnostic(span = $call, message = "Use logger.info instead of console.log.", severity = "warn"),
+    $call => `logger.info($msg)`
+}
+"#,
+    );
+
+    let file_path = Utf8Path::new("input.js");
+    fs.insert(
+        file_path.into(),
+        b"console.log(\"hello\");\nconsole.log(\"world\");\nconsole.log(\"!\");\n",
+    );
+
+    let (fs, result) = run_cli_with_server_workspace(
+        fs,
+        &mut console,
+        Args::from(["check", "--write", "--unsafe", file_path.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert_file_contents(
+        &fs,
+        file_path,
+        "logger.info(\"hello\");\nlogger.info(\"world\");\nlogger.info(\"!\");\n",
+    );
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "check_plugin_multiple_rewrites",
         fs,
         console,
         result,
@@ -3694,6 +4091,289 @@ fn file_too_large_error_on_warnings() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "file_too_large_error_on_warnings",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn check_plugin_apply_rewrite_css() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        Utf8PathBuf::from("biome.json"),
+        br#"{
+    "plugins": ["banRed.grit"],
+    "css": { "linter": { "enabled": true } },
+    "linter": {
+        "rules": { "recommended": false }
+    },
+    "formatter": { "enabled": false }
+}
+"#,
+    );
+
+    fs.insert(
+        Utf8PathBuf::from("banRed.grit"),
+        br#"language css
+
+`red` as $color where {
+    register_diagnostic(
+        span = $color,
+        message = "Avoid using red.",
+        severity = "warn"
+    ),
+    $color => `blue`
+}
+"#,
+    );
+
+    let file_path = Utf8Path::new("file.css");
+    fs.insert(file_path.into(), b"a { color: red; }\n");
+
+    let (fs, result) = run_cli_with_server_workspace(
+        fs,
+        &mut console,
+        Args::from(["check", "--write", "--unsafe", file_path.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert_file_contents(&fs, file_path, "a { color: blue; }\n");
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "check_plugin_apply_rewrite_css",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn check_plugin_safe_fix_write() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        Utf8PathBuf::from("biome.json"),
+        br#"{
+    "plugins": ["useConsoleInfo.grit"],
+    "formatter": { "enabled": false }
+}
+"#,
+    );
+
+    fs.insert(
+        Utf8PathBuf::from("useConsoleInfo.grit"),
+        br#"language js
+
+`console.log($msg)` as $call where {
+    register_diagnostic(span = $call, message = "Use console.info instead of console.log.", severity = "warn", fix_kind = "safe"),
+    $call => `console.info($msg)`
+}
+"#,
+    );
+
+    let file_path = Utf8Path::new("input.js");
+    fs.insert(file_path.into(), b"console.log(\"hello\");\n");
+
+    let (fs, result) = run_cli_with_server_workspace(
+        fs,
+        &mut console,
+        Args::from(["check", "--write", file_path.as_str()].as_slice()),
+    );
+
+    // --write without --unsafe should apply safe fixes
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert_file_contents(&fs, file_path, "console.info(\"hello\");\n");
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "check_plugin_safe_fix_write",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn check_plugin_safe_fix_no_write() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        Utf8PathBuf::from("biome.json"),
+        br#"{
+    "plugins": ["useConsoleInfo.grit"],
+    "formatter": { "enabled": false }
+}
+"#,
+    );
+
+    fs.insert(
+        Utf8PathBuf::from("useConsoleInfo.grit"),
+        br#"language js
+
+`console.log($msg)` as $call where {
+    register_diagnostic(span = $call, message = "Use console.info instead of console.log.", severity = "warn", fix_kind = "safe"),
+    $call => `console.info($msg)`
+}
+"#,
+    );
+
+    let file_path = Utf8Path::new("input.js");
+    fs.insert(file_path.into(), b"console.log(\"hello\");\n");
+
+    let (fs, result) = run_cli_with_server_workspace(
+        fs,
+        &mut console,
+        Args::from(["check", file_path.as_str()].as_slice()),
+    );
+
+    // Without --write, safe fixes should not be applied but shown as "Safe fix"
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert_file_contents(&fs, file_path, "console.log(\"hello\");\n");
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "check_plugin_safe_fix_no_write",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn check_plugin_invalid_fix_kind() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        Utf8PathBuf::from("biome.json"),
+        br#"{
+    "plugins": ["badFixKind.grit"],
+    "formatter": { "enabled": false }
+}
+"#,
+    );
+
+    fs.insert(
+        Utf8PathBuf::from("badFixKind.grit"),
+        br#"language js
+
+`console.log($msg)` as $call where {
+    register_diagnostic(span = $call, message = "Use console.info instead.", fix_kind = "invalid"),
+    $call => `console.info($msg)`
+}
+"#,
+    );
+
+    let file_path = Utf8Path::new("input.js");
+    fs.insert(file_path.into(), b"console.log(\"hello\");\n");
+
+    let (fs, result) = run_cli_with_server_workspace(
+        fs,
+        &mut console,
+        Args::from(["check", file_path.as_str()].as_slice()),
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "check_plugin_invalid_fix_kind",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn check_plugin_invalid_severity() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        Utf8PathBuf::from("biome.json"),
+        br#"{
+    "plugins": ["badSeverity.grit"],
+    "formatter": { "enabled": false }
+}
+"#,
+    );
+
+    fs.insert(
+        Utf8PathBuf::from("badSeverity.grit"),
+        br#"language js
+
+`console.log($msg)` as $call where {
+    register_diagnostic(span = $call, message = "Use console.info instead.", severity = "invalid")
+}
+"#,
+    );
+
+    let file_path = Utf8Path::new("input.js");
+    fs.insert(file_path.into(), b"console.log(\"hello\");\n");
+
+    let (fs, result) = run_cli_with_server_workspace(
+        fs,
+        &mut console,
+        Args::from(["check", file_path.as_str()].as_slice()),
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "check_plugin_invalid_severity",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn check_plugin_apply_rewrite_json() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        Utf8PathBuf::from("biome.json"),
+        br#"{
+    "plugins": ["fixVersion.grit"],
+    "json": { "linter": { "enabled": true } },
+    "linter": {
+        "rules": { "recommended": false }
+    },
+    "formatter": { "enabled": false }
+}
+"#,
+    );
+
+    fs.insert(
+        Utf8PathBuf::from("fixVersion.grit"),
+        br#"language json
+
+`"1.0.0"` as $version where {
+    register_diagnostic(
+        span = $version,
+        message = "Update version.",
+        severity = "warn"
+    ),
+    $version => `"2.0.0"`
+}
+"#,
+    );
+
+    let file_path = Utf8Path::new("package.json");
+    fs.insert(file_path.into(), b"{\"version\": \"1.0.0\"}\n");
+
+    let (fs, result) = run_cli_with_server_workspace(
+        fs,
+        &mut console,
+        Args::from(["check", "--write", "--unsafe", file_path.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert_file_contents(&fs, file_path, "{\"version\": \"2.0.0\"}\n");
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "check_plugin_apply_rewrite_json",
         fs,
         console,
         result,

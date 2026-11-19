@@ -1,0 +1,9 @@
+[
+	"/* should generate diagnostics */ ;(function() { var bar = 1; return function () { var z; return 42; }; })()",
+	"/* should generate diagnostics */ ;(function() { var bar = 1; var baz = 2; })(); (function() { var bar = 1; var baz = 2; })()",
+	"/* should generate diagnostics */ define(['foo', 'qux'], function(foo, qux) { var bar = 1; var baz = 2; return function () { var z; return 42; }; })",
+	"/* should generate diagnostics */ function foo() { 1; 2; } const bar = () => 1;",
+	"/* should generate diagnostics */ function foo(cb = () => { a; b; }) { 1; 2; }",
+	"/* should generate diagnostics */ const foo = () => () => { a; b; };",
+	"/* should generate diagnostics */ class C { static { one; two; function not_top_level() { 1; 2; } } }"
+]

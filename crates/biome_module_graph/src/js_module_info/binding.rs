@@ -62,8 +62,7 @@ impl JsBinding {
             .tree()
             .name_token()
             .ok()
-            .map(|t| t.token_text_trimmed().into())
-            .unwrap_or_default()
+            .map_or_default(|t| t.token_text_trimmed().into())
     }
 
     /// Returns the scope of this binding.
@@ -80,10 +79,11 @@ impl JsBinding {
     /// a default unknown type when no augmentation data exists.
     pub fn ty(&self) -> TypeReference {
         // Look up type augmentation data by binding range
-        let binding_range = self.semantic_binding.syntax().text_trimmed_range();
+        let binding_range = self.semantic_binding.range();
         self.data
-            .binding_type_data
+            .raw_binding_types
             .get(&binding_range)
-            .map_or_else(TypeReference::unknown, |data| data.ty.clone())
+            .cloned()
+            .unwrap_or_else(TypeReference::unknown)
     }
 }

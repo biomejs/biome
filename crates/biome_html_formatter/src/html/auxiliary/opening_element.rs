@@ -3,7 +3,7 @@ use crate::{
     prelude::*,
     utils::{css_display::get_css_display_from_tag, metadata::should_lowercase_html_tag},
 };
-use biome_formatter::{FormatRuleWithOptions, GroupId, trivia::format_dangling_comments, write};
+use biome_formatter::{CstFormatContext, FormatRefWithRule, FormatRuleWithOptions, GroupId, write};
 use biome_html_syntax::{
     HtmlElement, HtmlOpeningElement, HtmlOpeningElementFields, HtmlSyntaxToken,
 };
@@ -26,6 +26,12 @@ pub(crate) struct FormatHtmlOpeningElement {
     /// Prettier borrows the `>` from the first element's closing tag and prints it
     /// at the start of the next element's opening tag group to keep them "touching".
     borrowed_sibling_r_angle: Option<HtmlSyntaxToken>,
+
+    /// Whether the tag is printed on a single line, whatever its width.
+    is_single_line: bool,
+    /// Whether verbatim content owns the dangling and trailing comments after this tag.
+    /// When true, this rule skips those comments and does not insert a separating space.
+    verbatim_children: bool,
 }
 
 pub(crate) struct FormatHtmlOpeningElementOptions {
@@ -36,6 +42,12 @@ pub(crate) struct FormatHtmlOpeningElementOptions {
 
     /// A `>` token borrowed from the previous sibling element's closing tag.
     pub borrowed_sibling_r_angle: Option<HtmlSyntaxToken>,
+
+    /// Whether the tag is printed on a single line, whatever its width.
+    pub is_single_line: bool,
+    /// Whether verbatim content owns the dangling and trailing comments after this tag.
+    /// When true, this rule skips those comments and does not insert a separating space.
+    pub verbatim_children: bool,
 }
 
 impl FormatRuleWithOptions<HtmlOpeningElement> for FormatHtmlOpeningElement {
@@ -45,6 +57,8 @@ impl FormatRuleWithOptions<HtmlOpeningElement> for FormatHtmlOpeningElement {
         self.r_angle_is_borrowed = options.r_angle_is_borrowed;
         self.attr_group_id = Some(options.attr_group_id);
         self.borrowed_sibling_r_angle = options.borrowed_sibling_r_angle;
+        self.is_single_line = options.is_single_line;
+        self.verbatim_children = options.verbatim_children;
         self
     }
 }
@@ -55,7 +69,7 @@ impl FormatNodeRule<HtmlOpeningElement> for FormatHtmlOpeningElement {
         node: &HtmlOpeningElement,
         f: &mut HtmlFormatter,
     ) -> FormatResult<()> {
-        if !f.comments().has_dangling_comments(node.syntax()) {
+        if self.verbatim_children || !f.comments().has_dangling_comments(node.syntax()) {
             return Ok(());
         }
 
@@ -68,15 +82,52 @@ impl FormatNodeRule<HtmlOpeningElement> for FormatHtmlOpeningElement {
             .and_then(|c| c.l_angle_token().ok())
             .is_some_and(|tok| tok.has_leading_whitespace_or_newline());
 
+        let comments = f.context().comments().clone();
+        let dangling_comments = comments.dangling_comments(node.syntax());
+        let format_comments = format_with(|f| {
+            for (index, comment) in dangling_comments.iter().enumerate() {
+                let format_comment = FormatRefWithRule::new(
+                    comment,
+                    <HtmlFormatContext as CstFormatContext>::CommentRule::default(),
+                );
+                if index == 0 && comment.lines_before() == 0 && comment.kind().is_line() {
+                    write!(f, [space()])?;
+                } else if index > 0 && comment.lines_before() > 0 {
+                    if comment.lines_before() > 1 {
+                        write!(f, [empty_line()])?;
+                    } else {
+                        write!(f, [hard_line_break()])?;
+                    }
+                }
+                write!(f, [format_comment])?;
+                comment.mark_formatted();
+            }
+            if !has_source_newline
+                && dangling_comments
+                    .last()
+                    .is_some_and(|comment| comment.kind().is_line())
+            {
+                write!(f, [hard_line_break()])?;
+            }
+            Ok(())
+        });
+
         if has_source_newline {
-            format_dangling_comments(node.syntax())
-                .with_block_indent()
-                .fmt(f)
+            write!(f, [block_indent(&format_comments)])
         } else {
-            format_dangling_comments(node.syntax())
-                .with_soft_block_indent()
-                .fmt(f)
+            write!(f, [soft_block_indent(&format_comments)])
         }
+    }
+
+    fn fmt_trailing_comments(
+        &self,
+        node: &HtmlOpeningElement,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        if self.verbatim_children {
+            return Ok(());
+        }
+        format_html_trailing_comments(node.syntax()).fmt(f)
     }
 
     fn fmt_fields(&self, node: &HtmlOpeningElement, f: &mut HtmlFormatter) -> FormatResult<()> {
@@ -115,6 +166,7 @@ impl FormatNodeRule<HtmlOpeningElement> for FormatHtmlOpeningElement {
                     .with_options(FormatHtmlAttributeListOptions {
                         is_canonical_html_element,
                         tag_name: Some(name.clone()),
+                        is_single_line: self.is_single_line,
                     })
                     .fmt(f)?;
 
@@ -123,7 +175,7 @@ impl FormatNodeRule<HtmlOpeningElement> for FormatHtmlOpeningElement {
                 // The r_angle is placed inside this group because prettier always includes this token
                 // in the same group as the attributes, unless the token is being borrowed.
                 // When these tokens are borrowed, they are managed by the sibling `HtmlElementList` formatter.
-                if !bracket_same_line {
+                if !bracket_same_line && !self.is_single_line {
                     write!(f, [soft_line_break()])?;
                 }
                 if !self.r_angle_is_borrowed {
@@ -137,6 +189,7 @@ impl FormatNodeRule<HtmlOpeningElement> for FormatHtmlOpeningElement {
         // Handle whitespace sensitivity in cases where the HtmlElementList formatter is not invoked because the element has no children.
         if let Ok(r_angle_token) = &r_angle_token
             && is_whitespace_sensitive
+            && !self.verbatim_children
             && r_angle_token.has_trailing_whitespace()
         {
             // we can't get rid of the whitespace if the element is whitespace sensitive

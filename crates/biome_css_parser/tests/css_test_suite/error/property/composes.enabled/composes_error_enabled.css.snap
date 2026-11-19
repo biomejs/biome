@@ -60,10 +60,12 @@ CssRoot {
                                     value_token: IDENT@4..14 "composes" [Newline("\n"), Whitespace("\t")] [],
                                 },
                                 colon_token: COLON@14..16 ":" [] [Whitespace(" ")],
-                                value: CssComposesPropertyValue {
-                                    classes: CssComposesClassList [],
-                                    specifier: missing (optional),
-                                },
+                                values: CssComposesPropertyValueList [
+                                    CssComposesPropertyValue {
+                                        classes: CssComposesClassList [],
+                                        specifier: missing (optional),
+                                    },
+                                ],
                             },
                             important: missing (optional),
                         },
@@ -98,17 +100,19 @@ CssRoot {
                                     value_token: IDENT@38..48 "composes" [Newline("\n"), Whitespace("\t")] [],
                                 },
                                 colon_token: COLON@48..50 ":" [] [Whitespace(" ")],
-                                value: CssComposesPropertyValue {
-                                    classes: CssComposesClassList [
-                                        CssCustomIdentifier {
-                                            value_token: IDENT@50..60 "className" [] [Whitespace(" ")],
+                                values: CssComposesPropertyValueList [
+                                    CssComposesPropertyValue {
+                                        classes: CssComposesClassList [
+                                            CssCustomIdentifier {
+                                                value_token: IDENT@50..60 "className" [] [Whitespace(" ")],
+                                            },
+                                        ],
+                                        specifier: CssComposesImportSpecifier {
+                                            from_token: FROM_KW@60..65 "from" [] [Whitespace(" ")],
+                                            source: missing (required),
                                         },
-                                    ],
-                                    specifier: CssComposesImportSpecifier {
-                                        from_token: FROM_KW@60..65 "from" [] [Whitespace(" ")],
-                                        source: missing (required),
                                     },
-                                },
+                                ],
                             },
                             important: missing (optional),
                         },
@@ -143,17 +147,19 @@ CssRoot {
                                     value_token: IDENT@87..97 "composes" [Newline("\n"), Whitespace("\t")] [],
                                 },
                                 colon_token: COLON@97..99 ":" [] [Whitespace(" ")],
-                                value: CssComposesPropertyValue {
-                                    classes: CssComposesClassList [
-                                        CssCustomIdentifier {
-                                            value_token: IDENT@99..115 "globalClassName" [] [Whitespace(" ")],
+                                values: CssComposesPropertyValueList [
+                                    CssComposesPropertyValue {
+                                        classes: CssComposesClassList [
+                                            CssCustomIdentifier {
+                                                value_token: IDENT@99..115 "globalClassName" [] [Whitespace(" ")],
+                                            },
+                                        ],
+                                        specifier: CssComposesImportSpecifier {
+                                            from_token: FROM_KW@115..120 "from" [] [Whitespace(" ")],
+                                            source: missing (required),
                                         },
-                                    ],
-                                    specifier: CssComposesImportSpecifier {
-                                        from_token: FROM_KW@115..120 "from" [] [Whitespace(" ")],
-                                        source: missing (required),
                                     },
-                                },
+                                ],
                             },
                             important: missing (optional),
                         },
@@ -188,13 +194,15 @@ CssRoot {
                                     value_token: IDENT@142..152 "composes" [Newline("\n"), Whitespace("\t")] [],
                                 },
                                 colon_token: COLON@152..155 ":" [] [Whitespace("  ")],
-                                value: CssComposesPropertyValue {
-                                    classes: CssComposesClassList [],
-                                    specifier: CssComposesImportSpecifier {
-                                        from_token: FROM_KW@155..160 "from" [] [Whitespace(" ")],
-                                        source: missing (required),
+                                values: CssComposesPropertyValueList [
+                                    CssComposesPropertyValue {
+                                        classes: CssComposesClassList [],
+                                        specifier: CssComposesImportSpecifier {
+                                            from_token: FROM_KW@155..160 "from" [] [Whitespace(" ")],
+                                            source: missing (required),
+                                        },
                                     },
-                                },
+                                ],
                             },
                             important: missing (optional),
                         },
@@ -229,15 +237,17 @@ CssRoot {
                                     value_token: IDENT@182..192 "composes" [Newline("\n"), Whitespace("\t")] [],
                                 },
                                 colon_token: COLON@192..195 ":" [] [Whitespace("  ")],
-                                value: CssComposesPropertyValue {
-                                    classes: CssComposesClassList [],
-                                    specifier: CssComposesImportSpecifier {
-                                        from_token: FROM_KW@195..200 "from" [] [Whitespace(" ")],
-                                        source: CssIdentifier {
-                                            value_token: IDENT@200..206 "global" [] [],
+                                values: CssComposesPropertyValueList [
+                                    CssComposesPropertyValue {
+                                        classes: CssComposesClassList [],
+                                        specifier: CssComposesImportSpecifier {
+                                            from_token: FROM_KW@195..200 "from" [] [Whitespace(" ")],
+                                            source: CssIdentifier {
+                                                value_token: IDENT@200..206 "global" [] [],
+                                            },
                                         },
                                     },
-                                },
+                                ],
                             },
                             important: missing (optional),
                         },
@@ -277,9 +287,10 @@ CssRoot {
                 0: CSS_IDENTIFIER@4..14
                   0: IDENT@4..14 "composes" [Newline("\n"), Whitespace("\t")] []
                 1: COLON@14..16 ":" [] [Whitespace(" ")]
-                2: CSS_COMPOSES_PROPERTY_VALUE@16..16
-                  0: CSS_COMPOSES_CLASS_LIST@16..16
-                  1: (empty)
+                2: CSS_COMPOSES_PROPERTY_VALUE_LIST@16..16
+                  0: CSS_COMPOSES_PROPERTY_VALUE@16..16
+                    0: CSS_COMPOSES_CLASS_LIST@16..16
+                    1: (empty)
               1: (empty)
             1: SEMICOLON@16..17 ";" [] []
         2: R_CURLY@17..19 "}" [Newline("\n")] []
@@ -302,13 +313,14 @@ CssRoot {
                 0: CSS_IDENTIFIER@38..48
                   0: IDENT@38..48 "composes" [Newline("\n"), Whitespace("\t")] []
                 1: COLON@48..50 ":" [] [Whitespace(" ")]
-                2: CSS_COMPOSES_PROPERTY_VALUE@50..65
-                  0: CSS_COMPOSES_CLASS_LIST@50..60
-                    0: CSS_CUSTOM_IDENTIFIER@50..60
-                      0: IDENT@50..60 "className" [] [Whitespace(" ")]
-                  1: CSS_COMPOSES_IMPORT_SPECIFIER@60..65
-                    0: FROM_KW@60..65 "from" [] [Whitespace(" ")]
-                    1: (empty)
+                2: CSS_COMPOSES_PROPERTY_VALUE_LIST@50..65
+                  0: CSS_COMPOSES_PROPERTY_VALUE@50..65
+                    0: CSS_COMPOSES_CLASS_LIST@50..60
+                      0: CSS_CUSTOM_IDENTIFIER@50..60
+                        0: IDENT@50..60 "className" [] [Whitespace(" ")]
+                    1: CSS_COMPOSES_IMPORT_SPECIFIER@60..65
+                      0: FROM_KW@60..65 "from" [] [Whitespace(" ")]
+                      1: (empty)
               1: (empty)
             1: SEMICOLON@65..66 ";" [] []
         2: R_CURLY@66..68 "}" [Newline("\n")] []
@@ -331,13 +343,14 @@ CssRoot {
                 0: CSS_IDENTIFIER@87..97
                   0: IDENT@87..97 "composes" [Newline("\n"), Whitespace("\t")] []
                 1: COLON@97..99 ":" [] [Whitespace(" ")]
-                2: CSS_COMPOSES_PROPERTY_VALUE@99..120
-                  0: CSS_COMPOSES_CLASS_LIST@99..115
-                    0: CSS_CUSTOM_IDENTIFIER@99..115
-                      0: IDENT@99..115 "globalClassName" [] [Whitespace(" ")]
-                  1: CSS_COMPOSES_IMPORT_SPECIFIER@115..120
-                    0: FROM_KW@115..120 "from" [] [Whitespace(" ")]
-                    1: (empty)
+                2: CSS_COMPOSES_PROPERTY_VALUE_LIST@99..120
+                  0: CSS_COMPOSES_PROPERTY_VALUE@99..120
+                    0: CSS_COMPOSES_CLASS_LIST@99..115
+                      0: CSS_CUSTOM_IDENTIFIER@99..115
+                        0: IDENT@99..115 "globalClassName" [] [Whitespace(" ")]
+                    1: CSS_COMPOSES_IMPORT_SPECIFIER@115..120
+                      0: FROM_KW@115..120 "from" [] [Whitespace(" ")]
+                      1: (empty)
               1: (empty)
             1: SEMICOLON@120..121 ";" [] []
         2: R_CURLY@121..123 "}" [Newline("\n")] []
@@ -360,11 +373,12 @@ CssRoot {
                 0: CSS_IDENTIFIER@142..152
                   0: IDENT@142..152 "composes" [Newline("\n"), Whitespace("\t")] []
                 1: COLON@152..155 ":" [] [Whitespace("  ")]
-                2: CSS_COMPOSES_PROPERTY_VALUE@155..160
-                  0: CSS_COMPOSES_CLASS_LIST@155..155
-                  1: CSS_COMPOSES_IMPORT_SPECIFIER@155..160
-                    0: FROM_KW@155..160 "from" [] [Whitespace(" ")]
-                    1: (empty)
+                2: CSS_COMPOSES_PROPERTY_VALUE_LIST@155..160
+                  0: CSS_COMPOSES_PROPERTY_VALUE@155..160
+                    0: CSS_COMPOSES_CLASS_LIST@155..155
+                    1: CSS_COMPOSES_IMPORT_SPECIFIER@155..160
+                      0: FROM_KW@155..160 "from" [] [Whitespace(" ")]
+                      1: (empty)
               1: (empty)
             1: SEMICOLON@160..161 ";" [] []
         2: R_CURLY@161..163 "}" [Newline("\n")] []
@@ -387,12 +401,13 @@ CssRoot {
                 0: CSS_IDENTIFIER@182..192
                   0: IDENT@182..192 "composes" [Newline("\n"), Whitespace("\t")] []
                 1: COLON@192..195 ":" [] [Whitespace("  ")]
-                2: CSS_COMPOSES_PROPERTY_VALUE@195..206
-                  0: CSS_COMPOSES_CLASS_LIST@195..195
-                  1: CSS_COMPOSES_IMPORT_SPECIFIER@195..206
-                    0: FROM_KW@195..200 "from" [] [Whitespace(" ")]
-                    1: CSS_IDENTIFIER@200..206
-                      0: IDENT@200..206 "global" [] []
+                2: CSS_COMPOSES_PROPERTY_VALUE_LIST@195..206
+                  0: CSS_COMPOSES_PROPERTY_VALUE@195..206
+                    0: CSS_COMPOSES_CLASS_LIST@195..195
+                    1: CSS_COMPOSES_IMPORT_SPECIFIER@195..206
+                      0: FROM_KW@195..200 "from" [] [Whitespace(" ")]
+                      1: CSS_IDENTIFIER@200..206
+                        0: IDENT@200..206 "global" [] []
               1: (empty)
             1: SEMICOLON@206..207 ";" [] []
         2: R_CURLY@207..209 "}" [Newline("\n")] []

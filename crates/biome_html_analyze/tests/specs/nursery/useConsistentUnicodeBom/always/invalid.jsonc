@@ -1,0 +1,8 @@
+// should generate diagnostics
+[
+  "",
+  "<div>text</div>",
+  "  <div>text</div>",
+  "\n<div>text</div>",
+  "<!-- header -->\n<div>text</div>"
+]

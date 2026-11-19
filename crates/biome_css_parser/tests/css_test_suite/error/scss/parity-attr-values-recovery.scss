@@ -1,0 +1,3 @@
+.a{content:attr($);color:red;}
+$gap:2px;.b{width:attr(data-size px,$gap *);height:1px;}
+.c{content:attr(#{});color:red;}

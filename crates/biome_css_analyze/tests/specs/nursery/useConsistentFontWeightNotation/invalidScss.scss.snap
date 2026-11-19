@@ -1,0 +1,64 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalidScss.scss
+---
+# Input
+```css
+/* should generate diagnostics */
+a { font-weight: bold; }
+a { .b { font: bold 16px serif; } }
+
+```
+
+# Diagnostics
+```
+invalidScss.scss:2:18 lint/nursery/useConsistentFontWeightNotation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This font weight is written as the keyword bold instead of a number.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ a { font-weight: bold; }
+      │                  ^^^^
+    3 │ a { .b { font: bold 16px serif; } }
+    4 │ 
+  
+  i Writing font weights the same way everywhere makes styles easier to read and compare.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use 700 instead.
+  
+    1 1 │   /* should generate diagnostics */
+    2   │ - a·{·font-weight:·bold;·}
+      2 │ + a·{·font-weight:·700;·}
+    3 3 │   a { .b { font: bold 16px serif; } }
+    4 4 │   
+  
+
+```
+
+```
+invalidScss.scss:3:16 lint/nursery/useConsistentFontWeightNotation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This font weight is written as the keyword bold instead of a number.
+  
+    1 │ /* should generate diagnostics */
+    2 │ a { font-weight: bold; }
+  > 3 │ a { .b { font: bold 16px serif; } }
+      │                ^^^^
+    4 │ 
+  
+  i Writing font weights the same way everywhere makes styles easier to read and compare.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use 700 instead.
+  
+    1 1 │   /* should generate diagnostics */
+    2 2 │   a { font-weight: bold; }
+    3   │ - a·{·.b·{·font:·bold·16px·serif;·}·}
+      3 │ + a·{·.b·{·font:·700·16px·serif;·}·}
+    4 4 │   
+  
+
+```

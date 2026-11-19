@@ -7,7 +7,9 @@ use crate::grit_resolved_pattern::GritResolvedPattern;
 use crate::grit_target_language::GritTargetLanguage;
 use crate::grit_target_node::GritTargetNode;
 use crate::grit_tree::GritTargetTree;
+use crate::linearization::apply_effects;
 use biome_analyze::RuleDiagnostic;
+use biome_diagnostics::Applicability;
 use biome_parser::AnyParse;
 use camino::Utf8PathBuf;
 use grit_pattern_matcher::constants::{GLOBAL_VARS_SCOPE_INDEX, NEW_FILES_INDEX};
@@ -22,7 +24,7 @@ use grit_util::{AnalysisLogs, FileOrigin, InputRanges, MatchRanges, error::GritR
 use path_absolutize::Absolutize;
 use std::collections::BTreeSet;
 use std::path::PathBuf;
-use std::sync::{Arc, Mutex};
+use std::sync::Mutex;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct GritQueryContext;
@@ -54,11 +56,17 @@ pub struct GritExecContext<'a> {
     pub patterns: &'a [PatternDefinition<GritQueryContext>],
     pub predicates: &'a [PredicateDefinition<GritQueryContext>],
 
-    pub diagnostics: Mutex<Vec<RuleDiagnostic>>,
+    pub diagnostics: Mutex<Vec<(RuleDiagnostic, Applicability)>>,
+
+    /// Whether the query was compiled as a node selector.
+    ///
+    /// Selector queries allow snippets to match multi-child lists. Regular
+    /// Grit queries keep their existing list-matching behavior.
+    pub node_selector: bool,
 }
 
 impl GritExecContext<'_> {
-    pub fn add_diagnostic(&self, diagnostic: RuleDiagnostic) {
+    pub fn add_diagnostic(&self, diagnostic: RuleDiagnostic, applicability: Applicability) {
         let mut diagnostics = self.diagnostics.lock().unwrap();
         // Make sure we don't add multiple messages for the same span.
         // I think this happens when a node and its child(ren) both match the
@@ -67,13 +75,13 @@ impl GritExecContext<'_> {
         // Grit pattern matcher.
         if diagnostics
             .last()
-            .is_none_or(|last| last.span() != diagnostic.span())
+            .is_none_or(|(last, _)| last.span() != diagnostic.span())
         {
-            diagnostics.push(diagnostic);
+            diagnostics.push((diagnostic, applicability));
         }
     }
 
-    pub fn into_diagnostics(self) -> Vec<RuleDiagnostic> {
+    pub fn into_diagnostics(self) -> Vec<(RuleDiagnostic, Applicability)> {
         self.diagnostics.into_inner().unwrap()
     }
 }
@@ -145,7 +153,13 @@ impl<'a> ExecContext<'a, GritQueryContext> for GritExecContext<'a> {
         };
 
         let binding = if files.len() == 1 {
-            ResolvedPattern::from_file_pointer(*files.last().unwrap())
+            let Some(&file_ptr) = files.first() else {
+                return Ok(false);
+            };
+            if !self.load_file(&GritFile::Ptr(file_ptr), state, logs)? {
+                return Ok(false);
+            }
+            ResolvedPattern::from_file_pointer(file_ptr)
         } else {
             // Load all files into memory and collect successful file pointers
             files.retain(|file_ptr| {
@@ -176,15 +190,36 @@ impl<'a> ExecContext<'a, GritQueryContext> for GritExecContext<'a> {
             variables,
             suppressed,
         };
-        for file_ptr in files {
-            let file = state.files.get_file_owner(file_ptr);
+        for file_ptr in &files {
+            let file = state.files.get_file_owner(*file_ptr);
             let mut match_log = file.matches.borrow_mut();
 
             if match_log.input_matches.is_none() {
                 match_log.input_matches = Some(input_ranges.clone());
             }
+        }
 
-            // TODO: Implement effect application
+        // Apply effects: if there are accumulated effects, linearize
+        // them to produce rewritten source and push a new file version.
+        if !state.effects.is_empty() {
+            for file_ptr in &files {
+                let file_owner = state.files.get_file_owner(*file_ptr);
+                let source = file_owner.tree.text();
+
+                let new_src =
+                    apply_effects(source, &state.effects, &state.files, &self.lang, logs)?;
+
+                if new_src != source {
+                    let file_name = file_owner.name.clone();
+                    if let Some(new_owner) = new_file_owner(file_name, &new_src, &self.lang, logs)?
+                    {
+                        self.files().push(new_owner);
+                        state
+                            .files
+                            .push_revision(file_ptr, self.files().last().unwrap());
+                    }
+                }
+            }
         }
 
         let new_files_binding = &mut state.bindings[GLOBAL_VARS_SCOPE_INDEX as usize]
@@ -254,18 +289,22 @@ impl<'a> ExecContext<'a, GritQueryContext> for GritExecContext<'a> {
 
                 // TODO: Verify the workspace's maximum file size.
 
-                let file = file_owner_from_matches(
-                    file.path.as_ref(),
+                let Some(file) = file_owner_from_matches(
+                    file.path.as_path(),
                     &file.parse,
                     None,
                     FileOrigin::Fresh,
                     &self.lang,
                     logs,
-                )?;
-                if let Some(file) = file {
-                    self.files.push(file);
-                    state.files.load_file(ptr, self.files.last().unwrap());
-                }
+                )?
+                else {
+                    return Ok(false);
+                };
+                self.files.push(file);
+                let Some(file) = self.files.last() else {
+                    return Ok(false);
+                };
+                state.files.load_file(ptr, file);
             }
         }
         Ok(true)
@@ -307,7 +346,7 @@ fn file_owner_from_matches(
     }))
 }
 
-fn new_file_owner(
+pub(crate) fn new_file_owner(
     name: impl Into<PathBuf>,
     source: &str,
     language: &GritTargetLanguage,
@@ -347,14 +386,14 @@ fn new_file_owner(
 /// that can use the Biome workspace.
 #[derive(Clone, Debug)]
 pub struct GritTargetFile {
-    pub path: Arc<Utf8PathBuf>,
+    pub path: Utf8PathBuf,
     pub parse: AnyParse,
 }
 
 impl GritTargetFile {
     pub fn new(path: impl Into<Utf8PathBuf>, parse: AnyParse) -> Self {
         Self {
-            path: Arc::new(path.into()),
+            path: path.into(),
             parse,
         }
     }

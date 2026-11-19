@@ -1,0 +1,80 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-destructure.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<script setup lang="ts">
+const { name = "World", label: renamed = "Label" } = defineProps<{
+  name: string;
+  label: string;
+}>();
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-destructure.vue:4:3 lint/nursery/noVueRequiredPropWithDefault  FIXABLE  ━━━━━━━━━━━━━━━━━━━━
+
+  ! The prop name is required, but it also has a default value.
+  
+    2 │ <script setup lang="ts">
+    3 │ const { name = "World", label: renamed = "Label" } = defineProps<{
+  > 4 │   name: string;
+      │   ^^^^^^^^^^^^^
+    5 │   label: string;
+    6 │ }>();
+  
+  i The default value is declared here.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <script setup lang="ts">
+  > 3 │ const { name = "World", label: renamed = "Label" } = defineProps<{
+      │         ^^^^^^^^^^^^^^
+    4 │   name: string;
+    5 │   label: string;
+  
+  i Parent components are expected to always pass a required prop, so its default value should never be needed.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Make the prop optional.
+  
+    3 │ ··name?:·string;
+      │       +         
+
+```
+
+```
+invalid-destructure.vue:5:3 lint/nursery/noVueRequiredPropWithDefault  FIXABLE  ━━━━━━━━━━━━━━━━━━━━
+
+  ! The prop label is required, but it also has a default value.
+  
+    3 │ const { name = "World", label: renamed = "Label" } = defineProps<{
+    4 │   name: string;
+  > 5 │   label: string;
+      │   ^^^^^^^^^^^^^^
+    6 │ }>();
+    7 │ </script>
+  
+  i The default value is declared here.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <script setup lang="ts">
+  > 3 │ const { name = "World", label: renamed = "Label" } = defineProps<{
+      │                         ^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │   name: string;
+    5 │   label: string;
+  
+  i Parent components are expected to always pass a required prop, so its default value should never be needed.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Make the prop optional.
+  
+    4 │ ··label?:·string;
+      │        +         
+
+```

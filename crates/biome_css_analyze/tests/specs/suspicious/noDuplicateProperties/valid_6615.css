@@ -1,0 +1,8 @@
+/* should not generate diagnostics */
+.class {
+    color: red;
+
+    @mixin hover {
+        color: blue;
+    }
+}

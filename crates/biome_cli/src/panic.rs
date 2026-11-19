@@ -1,21 +1,23 @@
 use std::{
     backtrace::{Backtrace, BacktraceStatus},
     fmt::Write,
-    panic::{PanicHookInfo, set_hook},
+    io::{self, Write as _},
+    panic::PanicHookInfo,
     thread,
 };
 
 /// Installs a global panic handler to show a user-friendly error message
 /// in case the CLI panics
 pub fn setup_panic_handler() {
-    set_hook(Box::new(panic_handler))
+    biome_diagnostics::panic::set_hook(Box::new(panic_handler))
 }
 
 fn panic_handler(info: &PanicHookInfo) {
     let error = write_error(info).expect("To write into buffer");
 
-    // Write the panic to stderr
-    eprintln!("{error}");
+    // Write the panic to stderr. Unlike `eprintln!`, this doesn't panic if
+    // stderr is closed, which would abort the process with a double panic
+    let _ = writeln!(io::stderr().lock(), "{error}");
 
     // Write the panic to the log file, this is done last since the `tracing`
     // infrastructure could panic a second time and abort the process, so we

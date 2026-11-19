@@ -1,0 +1,13 @@
+<!-- should not generate diagnostics -->
+<template>
+  <div>
+    <template #default="{ value }: { value: string }">{{ value }}</template>
+    <template v-slot:header="{ title: heading, ...rest }: HeaderProps">
+      {{ heading }} {{ rest }}
+    </template>
+    <template #items="[first, ...tail]: string[]">{{ first }} {{ tail }}</template>
+  </div>
+</template>
+<script lang="ts" setup>
+type HeaderProps = { title: string; subtitle: string };
+</script>

@@ -1,0 +1,78 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: whitespace/closing-tag-fill-width/narrow/wrapping.vue
+---
+
+# Input
+
+```vue
+<template>
+  <long-custom-element>word</long-custom-element>
+  <span>one two three four five six seven eight nine</span>
+  <a-long-long-long-element>foo bar foo bar foo bar foo bar foo bar foo bar foo bar</a-long-long-long-element>
+  <div>one two three four five six seven eight nine ten</div>
+</template>
+
+<template><long-custom-element
+>word</long-custom-element
+><span
+>one two three four five six seven eight nine</span
+><a-long-long-long-element
+>foo bar foo bar foo bar foo bar foo bar foo bar foo bar</a-long-long-long-element
+><div
+>one two three four five six seven eight nine ten</div
+></template>
+
+```
+
+
+# Options
+
+```json
+{
+	"formatter": {
+		"lineWidth": 40
+	}
+}
+```
+
+# Formatted
+
+```vue
+<template>
+	<long-custom-element
+		>word</long-custom-element
+	>
+	<span
+		>one two three four five six seven
+		eight nine</span
+	>
+	<a-long-long-long-element
+		>foo bar foo bar foo bar foo bar foo
+		bar foo bar foo
+		bar</a-long-long-long-element
+	>
+	<div>
+		one two three four five six seven
+		eight nine ten
+	</div>
+</template>
+
+<template
+	><long-custom-element
+		>word</long-custom-element
+	><span
+		>one two three four five six seven
+		eight nine</span
+	><a-long-long-long-element
+		>foo bar foo bar foo bar foo bar foo
+		bar foo bar foo
+		bar</a-long-long-long-element
+	>
+	<div>
+		one two three four five six seven
+		eight nine ten
+	</div>
+</template>
+
+```

@@ -1,3 +1,4 @@
+use crate::TestArgs as Args;
 use crate::configs::{
     CONFIG_DISABLED_FORMATTER, CONFIG_FILE_SIZE_LIMIT, CONFIG_FILES_INCLUDES_EXCLUDES_STDIN_PATH,
     CONFIG_FORMAT, CONFIG_FORMAT_JSONC, CONFIG_ISSUE_3175_1, CONFIG_ISSUE_3175_2,
@@ -8,7 +9,6 @@ use crate::{
 };
 use biome_console::{BufferConsole, MarkupBuf, markup};
 use biome_fs::{FileSystemExt, MemoryFileSystem};
-use bpaf::Args;
 use camino::{Utf8Path, Utf8PathBuf};
 
 // six spaces
@@ -110,6 +110,14 @@ const APPLY_BRACKET_SPACING_BEFORE_GRAPHQL: &str = r#"{
 const APPLY_BRACKET_SPACING_AFTER_GRAPHQL: &str = r#"{
 	field_value(object_value: {key: "value"})
 }
+"#;
+
+const APPLY_DELIMITER_SPACING_BEFORE: &str = r#"const arr = [1, 2, 3];
+function foo(a, b) {}
+"#;
+
+const APPLY_DELIMITER_SPACING_AFTER: &str = r#"const arr = [ 1, 2, 3 ];
+function foo( a, b ) {}
 "#;
 
 const APPLY_BRACKET_SAME_LINE_BEFORE: &str = r#"<Foo
@@ -285,10 +293,7 @@ fn write_only_files_in_correct_base() {
     let mut console = BufferConsole::default();
 
     let file_to_format = Utf8Path::new("src/format.js");
-    fs.insert(
-        file_to_format.into(),
-        <&str>::clone(&UNFORMATTED).as_bytes(),
-    );
+    fs.insert(file_to_format.into(), UNFORMATTED.as_bytes());
 
     let file_to_not_format = Utf8Path::new("scripts/format.js");
     fs.insert(file_to_not_format.into(), UNFORMATTED.as_bytes());
@@ -841,6 +846,87 @@ fn applies_custom_bracket_spacing() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "applies_custom_bracket_spacing",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn applies_global_delimiter_spacing() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let file_path = Utf8Path::new("file.js");
+    fs.insert(file_path.into(), APPLY_DELIMITER_SPACING_BEFORE.as_bytes());
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "format",
+                "--delimiter-spacing",
+                "true",
+                "--write",
+                file_path.as_str(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_file_contents(&fs, file_path, APPLY_DELIMITER_SPACING_AFTER);
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "applies_global_delimiter_spacing",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn language_overrides_global_delimiter_spacing() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let config_path = Utf8Path::new("biome.json");
+    fs.insert(
+        config_path.into(),
+        r#"{
+  "formatter": {
+    "delimiterSpacing": true
+  },
+  "javascript": {
+    "formatter": {
+      "delimiterSpacing": false
+    }
+  }
+}
+"#
+        .as_bytes(),
+    );
+
+    let file_path = Utf8Path::new("file.js");
+    fs.insert(file_path.into(), APPLY_DELIMITER_SPACING_AFTER.as_bytes());
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["format", "--write", file_path.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    // JS overrides global, so no spaces should be present (delimiterSpacing: false)
+    assert_file_contents(&fs, file_path, APPLY_DELIMITER_SPACING_BEFORE);
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "language_overrides_global_delimiter_spacing",
         fs,
         console,
         result,
@@ -3199,7 +3285,7 @@ fn should_format_files_in_folders_ignored_by_linter() {
                 "includes": ["**", "!**/build"],
                 "enabled": true,
                 "rules": {
-                    "recommended": true
+                    "preset": "recommended"
                 }
             }
         }"#,
@@ -3485,7 +3571,7 @@ fn html_enabled_by_arg_format() {
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
-    assert_file_contents(&fs, file_path, "<!DOCTYPE html>\n");
+    assert_file_contents(&fs, file_path, "<!doctype html>\n");
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
@@ -4014,61 +4100,60 @@ fn trailing_newline_html_via_cli() {
 }
 
 #[test]
-fn harness_scss() {
+fn harness_scss_format() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_path = Utf8Path::new("format.scss");
-    fs.insert(file_path.into(), "$fff".as_bytes());
+    fs.insert(
+        file_path.into(),
+        "$color:red;.element{color:$color}".as_bytes(),
+    );
 
-    let (_, result) = run_cli(
+    let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", file_path.as_str()].as_slice()),
+        Args::from(["format", "--write", file_path.as_str()].as_slice()),
     );
 
-    assert!(
-        result.is_err(),
-        "This test will fail once SCSS support is officially added"
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert_file_contents(
+        &fs,
+        file_path,
+        "$color: red;\n.element {\n\tcolor: $color;\n}\n",
     );
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "scss_format",
+        fs,
+        console,
+        result,
+    ));
 }
 
 #[test]
-fn harness_markdown() {
+fn harness_scss_lint() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Utf8Path::new("format.md");
-    fs.insert(file_path.into(), "## ff  \n\n\n\n\n bar".as_bytes());
+    let file_path = Utf8Path::new("lint.scss");
+    fs.insert(
+        file_path.into(),
+        "$color: red;\n.element { transform: unknown(1); color: $color; }".as_bytes(),
+    );
 
-    let (_, result) = run_cli(
+    let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", file_path.as_str()].as_slice()),
+        Args::from(["lint", file_path.as_str()].as_slice()),
     );
 
-    assert!(
-        result.is_err(),
-        "This test will fail once markdown support is officially added"
-    );
-}
-
-#[test]
-fn harness_yaml() {
-    let fs = MemoryFileSystem::default();
-    let mut console = BufferConsole::default();
-
-    let file_path = Utf8Path::new("format.yml");
-    fs.insert(file_path.into(), "- foo\n - bar".as_bytes());
-
-    let (_, result) = run_cli(
+    assert!(result.is_err(), "run_cli returned {result:?}");
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "scss_lint",
         fs,
-        &mut console,
-        Args::from(["format", file_path.as_str()].as_slice()),
-    );
-
-    assert!(
-        result.is_err(),
-        "This test will fail once yaml support is officially added"
-    );
+        console,
+        result,
+    ));
 }

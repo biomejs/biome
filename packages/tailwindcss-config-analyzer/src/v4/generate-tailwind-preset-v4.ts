@@ -4,7 +4,7 @@
 //   pnpm --filter tailwindcss-config-analyzer execute:v4
 //
 // Output:
-//   crates/biome_js_analyze/src/lint/nursery/use_sorted_classes/tailwind_preset_v4.rs
+//   crates/biome_tailwind_logic/src/tailwind_v4/tailwind_preset_v4.rs
 
 import { spawn } from "node:child_process";
 import fs from "node:fs/promises";
@@ -18,12 +18,13 @@ import {
 	type ThemeKeysByPrefix,
 } from "./extract-theme-keys.js";
 import { extractUtilities } from "./extract-utilities.js";
+import { extractVariants } from "./extract-variants.js";
 import { renderRust } from "./render-rust.js";
 import { THEME_NAMESPACES } from "./theme-namespaces.js";
 
 const ROOT_PACKAGE_NAME = "@biomejs/monorepo";
 const OUTPUT_PATH =
-	"crates/biome_js_analyze/src/lint/nursery/use_sorted_classes/tailwind_preset_v4.rs";
+	"crates/biome_tailwind_logic/src/tailwind_v4/tailwind_preset_v4.rs";
 
 async function findRepoRoot(): Promise<string> {
 	let cwd = path.dirname(fileURLToPath(import.meta.url));
@@ -87,17 +88,23 @@ function runRustfmt(filePath: string): Promise<void> {
 }
 
 async function main() {
-	const [propertyOrder, themeKeys, utilities] = await Promise.all([
+	const [propertyOrder, themeKeys, utilities, variants] = await Promise.all([
 		extractPropertyOrder(),
 		extractThemeKeys(),
 		extractUtilities(),
+		extractVariants(),
 	]);
 
 	verifyNamespaces(themeKeys);
 
-	const rust = renderRust({ propertyOrder, themeKeys, utilities });
-
 	const repoRoot = await findRepoRoot();
+	const rust = renderRust({
+		propertyOrder,
+		themeKeys,
+		utilities,
+		variants,
+	});
+
 	const outPath = path.join(repoRoot, OUTPUT_PATH);
 	await fs.writeFile(outPath, rust);
 
@@ -106,7 +113,7 @@ async function main() {
 	console.log(`wrote ${OUTPUT_PATH}`);
 	console.log(
 		`  property-order: ${propertyOrder.length}, namespaces with keys: ${themeKeys.size}, ` +
-			`static: ${utilities.static.length}, functional: ${utilities.functional.length}`,
+			`static: ${utilities.static.length}, functional: ${utilities.functional.length}, variants: ${variants.variants.length}`,
 	);
 }
 

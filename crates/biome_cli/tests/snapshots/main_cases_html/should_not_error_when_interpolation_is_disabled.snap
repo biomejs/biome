@@ -1,0 +1,34 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome format file.html
+```
+
+## `biome.json`
+
+```json
+{
+  "html": {
+    "formatter": {
+      "enabled": true
+    }
+  }
+}
+```
+
+## `file.html`
+
+```html
+<div>{{ $interpolation }}</div>
+
+```
+
+# Emitted Messages
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+```

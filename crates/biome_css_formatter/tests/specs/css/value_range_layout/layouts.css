@@ -1,0 +1,18 @@
+.single{color:  /* theme */INITIAL ;background-image:linear-gradient(180deg,transparent,rgba(30,  40,50,0.75));}
+
+.grid{grid-template-areas:  "header header"   "main sidebar";
+grid-template-columns: [full-start] minmax(1em,1fr)
+ [main-start] minmax(20ch, 75ch) [main-end]  ;}
+
+.groups{background:url("first-background-image.png") center/cover no-repeat,url("second-background-image.png") right/contain repeat-x;
+box-shadow: /* shadows */ 1px  2px 3px darkslategray,4px 5px 6px lightslategray;}
+
+.comments{box-shadow:1px/* horizontal */2px 3px gray,/* layer */4px 5px 6px black;
+margin:1px /* top */ 2px   3px/* bottom */4px;}
+
+.fill{font:italic small-caps 700 condensed 16px/1.5 "A Very Long Font Family Name",sans-serif;
+border-radius:12.3456789% 23.4567891% 34.5678912% 45.6789123%/56.7891234% 67.8912345% 78.9123456% 89.1234567%;
+animation: exceptionally-long-animation-name 1200ms cubic-bezier(0.125,0.875,0.625,1) 250ms infinite alternate both running;}
+
+.arguments{color:rgba(var(--exceptionally-long-red-channel),var(--exceptionally-long-green-channel),var(--exceptionally-long-blue-channel),0.75);
+transform:matrix3d(1.000001,0.000002,0.000003,0.000004,0.000005,1.000006,0.000007,0.000008,0.000009,0.000010,1.000011,0.000012,0.000013,0.000014,0.000015,1.000016);}

@@ -1,0 +1,21 @@
+/* should generate diagnostics */
+
+/* Nested and explicit selectors with the same resolved target are compared. */
+a b:hover {}
+b {
+  &:hover {}
+}
+
+/* A nested selector expanded through a parent selector list is reported once. */
+.high .target {
+  #theme &:hover {}
+}
+.low-a.one .target,
+.low-b.two .target,
+.low-c.three .target {
+  &:hover {}
+}
+
+/* Combinators inside functional pseudo-classes do not split the target compound. */
+.parent .target:has(.x > .y) {}
+.target:has(.x > .y) {}

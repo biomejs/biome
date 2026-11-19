@@ -31,46 +31,32 @@ info: html/js/template-literal.html
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,15 +1,15 @@
--<!doctype html>
-+<!DOCTYPE html>
+@@ -1,6 +1,6 @@
+ <!doctype html>
  <html lang="en">
 -  <head> </head>
 +  <head></head>
    <body>
      <script>
--      function foo() {
--        return `
-+            function foo() {
-+                return `
-                     <div>
-                         <p>Text</p>
-                     </div>
-                 `;
--      }
--    </script>
-+            }
-+        </script>
-   </body>
- </html>
+       function foo() {
 ```
 
 # Output
 
 ```html
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head></head>
   <body>
     <script>
-            function foo() {
-                return `
+      function foo() {
+        return `
                     <div>
                         <p>Text</p>
                     </div>
                 `;
-            }
-        </script>
+      }
+    </script>
   </body>
 </html>
 ```

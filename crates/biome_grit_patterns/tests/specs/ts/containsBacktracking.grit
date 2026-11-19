@@ -1,0 +1,5 @@
+JsConditionalExpression() as $conditionalExp where {
+  $conditionalExp <: contains JsStringLiteralExpression() as $stringExp,
+  $stringExp = trim($stringExp, trim_chars=`'"`),
+  $stringExp <: `orange`
+}

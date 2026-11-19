@@ -1,0 +1,70 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome lint test.js
+```
+
+## `biome.json`
+
+```json
+{
+  "linter": {
+    "rules": {
+      "nursery": {
+        "noThisOutsideOfClass": "error"
+      }
+    }
+  }
+}
+```
+
+## `test.js`
+
+```js
+export function getContext() {
+    return this;
+}
+
+```
+
+# Termination Message
+
+```block
+lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+test.js:2:12 lint/nursery/noThisOutsideOfClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Do not use this outside of a class.
+  
+    1 │ export function getContext() {
+  > 2 │     return this;
+      │            ^^^^
+    3 │ }
+    4 │ 
+  
+  i this depends on how a function is called and may refer to an unexpected object.
+  
+  i Use a class member, or declare an explicit this parameter in a TypeScript function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+Found 1 error.
+```

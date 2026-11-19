@@ -1,0 +1,209 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: vue/vue/v-if.vue
+---
+
+# Input
+
+```vue
+<template>
+<root>
+  <and v-if="
+long_long_long_long_long_long_long_condition_1 && long_long_long_long_long_long_long_condition_2 && short_1 && short_2 &&
+long_long_long_long_long_long_long_condition_3 &&
+long_long_long_long_long_long_long_condition_4
+"></and>
+  <and v-if="
+(long_long_long_long_long_long_long_condition_1 && long_long_long_long_long_long_long_condition_2 && (short_1 && short_2) ) &&
+long_long_long_long_long_long_long_condition_3 &&
+long_long_long_long_long_long_long_condition_4
+"></and>
+  <or v-if="
+long_long_long_long_long_long_long_condition_1 || long_long_long_long_long_long_long_condition_2 ||short_1 || short_2 ||
+long_long_long_long_long_long_long_condition_3 ||
+long_long_long_long_long_long_long_condition_4
+"></or>
+  <or v-if="
+(long_long_long_long_long_long_long_condition_1 || long_long_long_long_long_long_long_condition_2 || (short_1 || short_2) ||
+long_long_long_long_long_long_long_condition_3) ||
+long_long_long_long_long_long_long_condition_4
+"></or>
+  <mixed v-if="
+long_long_long_long_long_long_long_condition_1 && long_long_long_long_long_long_long_condition_2 ||  ((short_1 && short_2) &&
+long_long_long_long_long_long_long_condition_3 &&
+long_long_long_long_long_long_long_condition_4)
+"></mixed>
+  <mixed v-if="
+long_long_long_long_long_long_long_condition_1 && long_long_long_long_long_long_long_condition_2 || short_1 && short_2 &&
+long_long_long_long_long_long_long_condition_3 ||
+long_long_long_long_long_long_long_condition_4
+"></mixed>
+</root>
+</template>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -2,45 +2,63 @@
+   <root>
+     <and
+       v-if="
+-long_long_long_long_long_long_long_condition_1 && long_long_long_long_long_long_long_condition_2 && short_1 && short_2 &&
+-long_long_long_long_long_long_long_condition_3 &&
+-long_long_long_long_long_long_long_condition_4
+-"
++        long_long_long_long_long_long_long_condition_1 &&
++        long_long_long_long_long_long_long_condition_2 &&
++        short_1 &&
++        short_2 &&
++        long_long_long_long_long_long_long_condition_3 &&
++        long_long_long_long_long_long_long_condition_4
++      "
+     ></and>
+     <and
+       v-if="
+-(long_long_long_long_long_long_long_condition_1 && long_long_long_long_long_long_long_condition_2 && (short_1 && short_2) ) &&
+-long_long_long_long_long_long_long_condition_3 &&
+-long_long_long_long_long_long_long_condition_4
+-"
++        long_long_long_long_long_long_long_condition_1 &&
++        long_long_long_long_long_long_long_condition_2 &&
++        short_1 &&
++        short_2 &&
++        long_long_long_long_long_long_long_condition_3 &&
++        long_long_long_long_long_long_long_condition_4
++      "
+     ></and>
+     <or
+       v-if="
+-long_long_long_long_long_long_long_condition_1 || long_long_long_long_long_long_long_condition_2 ||short_1 || short_2 ||
+-long_long_long_long_long_long_long_condition_3 ||
+-long_long_long_long_long_long_long_condition_4
+-"
++        long_long_long_long_long_long_long_condition_1 ||
++        long_long_long_long_long_long_long_condition_2 ||
++        short_1 ||
++        short_2 ||
++        long_long_long_long_long_long_long_condition_3 ||
++        long_long_long_long_long_long_long_condition_4
++      "
+     ></or>
+     <or
+       v-if="
+-(long_long_long_long_long_long_long_condition_1 || long_long_long_long_long_long_long_condition_2 || (short_1 || short_2) ||
+-long_long_long_long_long_long_long_condition_3) ||
+-long_long_long_long_long_long_long_condition_4
+-"
++        long_long_long_long_long_long_long_condition_1 ||
++        long_long_long_long_long_long_long_condition_2 ||
++        short_1 ||
++        short_2 ||
++        long_long_long_long_long_long_long_condition_3 ||
++        long_long_long_long_long_long_long_condition_4
++      "
+     ></or>
+     <mixed
+       v-if="
+-long_long_long_long_long_long_long_condition_1 && long_long_long_long_long_long_long_condition_2 ||  ((short_1 && short_2) &&
+-long_long_long_long_long_long_long_condition_3 &&
+-long_long_long_long_long_long_long_condition_4)
+-"
++        (long_long_long_long_long_long_long_condition_1 &&
++          long_long_long_long_long_long_long_condition_2) ||
++        (short_1 &&
++          short_2 &&
++          long_long_long_long_long_long_long_condition_3 &&
++          long_long_long_long_long_long_long_condition_4)
++      "
+     ></mixed>
+     <mixed
+       v-if="
+-long_long_long_long_long_long_long_condition_1 && long_long_long_long_long_long_long_condition_2 || short_1 && short_2 &&
+-long_long_long_long_long_long_long_condition_3 ||
+-long_long_long_long_long_long_long_condition_4
+-"
++        (long_long_long_long_long_long_long_condition_1 &&
++          long_long_long_long_long_long_long_condition_2) ||
++        (short_1 &&
++          short_2 &&
++          long_long_long_long_long_long_long_condition_3) ||
++        long_long_long_long_long_long_long_condition_4
++      "
+     ></mixed>
+   </root>
+ </template>
+```
+
+# Output
+
+```vue
+<template>
+  <root>
+    <and
+      v-if="
+        long_long_long_long_long_long_long_condition_1 &&
+        long_long_long_long_long_long_long_condition_2 &&
+        short_1 &&
+        short_2 &&
+        long_long_long_long_long_long_long_condition_3 &&
+        long_long_long_long_long_long_long_condition_4
+      "
+    ></and>
+    <and
+      v-if="
+        long_long_long_long_long_long_long_condition_1 &&
+        long_long_long_long_long_long_long_condition_2 &&
+        short_1 &&
+        short_2 &&
+        long_long_long_long_long_long_long_condition_3 &&
+        long_long_long_long_long_long_long_condition_4
+      "
+    ></and>
+    <or
+      v-if="
+        long_long_long_long_long_long_long_condition_1 ||
+        long_long_long_long_long_long_long_condition_2 ||
+        short_1 ||
+        short_2 ||
+        long_long_long_long_long_long_long_condition_3 ||
+        long_long_long_long_long_long_long_condition_4
+      "
+    ></or>
+    <or
+      v-if="
+        long_long_long_long_long_long_long_condition_1 ||
+        long_long_long_long_long_long_long_condition_2 ||
+        short_1 ||
+        short_2 ||
+        long_long_long_long_long_long_long_condition_3 ||
+        long_long_long_long_long_long_long_condition_4
+      "
+    ></or>
+    <mixed
+      v-if="
+        (long_long_long_long_long_long_long_condition_1 &&
+          long_long_long_long_long_long_long_condition_2) ||
+        (short_1 &&
+          short_2 &&
+          long_long_long_long_long_long_long_condition_3 &&
+          long_long_long_long_long_long_long_condition_4)
+      "
+    ></mixed>
+    <mixed
+      v-if="
+        (long_long_long_long_long_long_long_condition_1 &&
+          long_long_long_long_long_long_long_condition_2) ||
+        (short_1 &&
+          short_2 &&
+          long_long_long_long_long_long_long_condition_3) ||
+        long_long_long_long_long_long_long_condition_4
+      "
+    ></mixed>
+  </root>
+</template>
+```

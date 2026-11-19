@@ -1,0 +1,504 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: unsorted.vue
+---
+# Input
+```vue
+<template>
+<p v-text="msg" v-show="ok" dir="auto" v-foo:bar.baz id="hello" class="flex"></p>
+
+<div 
+  v-slot:default
+  v-on:click="doThis"
+  v-once
+  ref="my-ref"
+  :key="item.id"
+  v-bind:src="'/path/to/images/' + fileName"
+  spellcheck="true"
+  v-for="item in items"
+  tabindex="-1"
+  @scroll.passive="onScroll"
+  :is="tabs[currentTab]"
+  v-text="msg"
+  dir="auto"
+  v-model="countModel"
+  v-if="awesome"
+  :class="{ red: isRed }"
+></div>
+
+<!-- with v-bind="object" -->
+<div 
+  v-slot:default
+  v-on:click="doThis"
+  v-once
+  ref="my-ref"
+  v-bind="{ id: someProp, 'other-attr': otherProp }"
+  :key="item.id"
+  v-bind:src="'/path/to/images/' + fileName"
+  spellcheck="true"
+  v-for="item in items"
+  tabindex="-1"
+  @scroll.passive="onScroll"
+  :is="tabs[currentTab]"
+  v-text="msg"
+  dir="auto"
+  v-model="countModel"
+  v-if="awesome"
+  :class="{ red: isRed }"
+></div>
+
+<!-- attributes within the same category  -->
+<div v-if="awesome" v-else v-else-if="type === 'B'" v-show="ok">
+</div>
+
+<div v-pre v-once></div>
+
+<div ref="my-ref" :key="item.id"></div>
+
+<div v-slot="{ x, y }" v-slot:default v-slot:footer #header #[dynamicSlotName]></div>
+
+<div v-slot:footer v-slot="{ x, y }" v-slot:default #header #[dynamicSlotName]></div>
+
+<div v-slot:default #[dynamicSlotName] v-slot:footer v-slot="{ x, y }" #header></div>
+
+<div v-mycustomdirectiveb v-mycustomdirectivea></div>
+
+<div v-bind:propc="foo" v-bind:propb="foo" :propa="foo"></div>
+
+<div @scroll.passive="onScroll" @click.stop="doThis" v-on:click="doThis" @click.prevent="doThis"></div>
+
+<div v-text="msg" v-html="html"></div>
+
+<!-- argument-less v-bind shorthand sorts like v-bind (VueOtherAttribute), not like a custom directive -->
+<div v-mycustomdirective v-if="awesome" :="props" ref="my-ref"></div>
+</template>
+
+```
+
+# Diagnostics
+```
+unsorted.vue:2:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attributes are not sorted.
+  
+    1 │ <template>
+  > 2 │ <p v-text="msg" v-show="ok" dir="auto" v-foo:bar.baz id="hello" class="flex"></p>
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ 
+    4 │ <div·
+  
+  i Safe fix: Sort the HTML attributes.
+  
+     1  1 │   <template>
+     2    │ - <p·v-text="msg"·v-show="ok"·dir="auto"·v-foo:bar.baz·id="hello"·class="flex"></p>
+        2 │ + <p·class="flex"·dir="auto"·id="hello"·v-show="ok"·v-foo:bar.baz·v-text="msg"·></p>
+     3  3 │   
+     4  4 │   <div·
+  
+
+```
+
+```
+unsorted.vue:4:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attributes are not sorted.
+  
+     2 │ <p v-text="msg" v-show="ok" dir="auto" v-foo:bar.baz id="hello" class="flex"></p>
+     3 │ 
+   > 4 │ <div·
+       │ ^^^^^
+   > 5 │   v-slot:default
+        ...
+  > 20 │   :class="{ red: isRed }"
+  > 21 │ ></div>
+       │ ^
+    22 │ 
+    23 │ <!-- with v-bind="object" -->
+  
+  i Safe fix: Sort the HTML attributes.
+  
+     3  3 │   
+     4  4 │   <div·
+     5    │ - ··v-slot:default
+     6    │ - ··v-on:click="doThis"
+     7    │ - ··v-once
+     8    │ - ··ref="my-ref"
+     9    │ - ··:key="item.id"
+    10    │ - ··v-bind:src="'/path/to/images/'·+·fileName"
+    11    │ - ··spellcheck="true"
+    12    │ - ··v-for="item·in·items"
+    13    │ - ··tabindex="-1"
+    14    │ - ··@scroll.passive="onScroll"
+    15    │ - ··:is="tabs[currentTab]"
+    16    │ - ··v-text="msg"
+    17    │ - ··dir="auto"
+    18    │ - ··v-model="countModel"
+    19    │ - ··v-if="awesome"
+    20    │ - ··:class="{·red:·isRed·}"
+        5 │ + ··dir="auto"
+        6 │ + ··spellcheck="true"
+        7 │ + ··tabindex="-1"
+        8 │ + ··:is="tabs[currentTab]"
+        9 │ + ··v-for="item·in·items"
+       10 │ + ··v-if="awesome"
+       11 │ + ··v-once
+       12 │ + ··:key="item.id"
+       13 │ + ··ref="my-ref"
+       14 │ + ··v-slot:default
+       15 │ + ··v-model="countModel"
+       16 │ + ··:class="{·red:·isRed·}"
+       17 │ + ··v-bind:src="'/path/to/images/'·+·fileName"
+       18 │ + ··v-on:click="doThis"
+       19 │ + ··@scroll.passive="onScroll"
+       20 │ + ··v-text="msg"
+    21 21 │   ></div>
+    22 22 │   
+  
+
+```
+
+```
+unsorted.vue:24:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attributes are not sorted.
+  
+    23 │ <!-- with v-bind="object" -->
+  > 24 │ <div·
+       │ ^^^^^
+  > 25 │   v-slot:default
+        ...
+  > 41 │   :class="{ red: isRed }"
+  > 42 │ ></div>
+       │ ^
+    43 │ 
+    44 │ <!-- attributes within the same category  -->
+  
+  i Safe fix: Sort the HTML attributes.
+  
+    23 23 │   <!-- with v-bind="object" -->
+    24 24 │   <div·
+    25    │ - ··v-slot:default
+    26    │ - ··v-on:click="doThis"
+    27    │ - ··v-once
+    28    │ - ··ref="my-ref"
+       25 │ + ··v-once
+       26 │ + ··ref="my-ref"
+       27 │ + ··v-slot:default
+       28 │ + ··v-on:click="doThis"
+    29 29 │     v-bind="{ id: someProp, 'other-attr': otherProp }"
+    30 30 │     :key="item.id"
+  
+
+```
+
+```
+unsorted.vue:24:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attributes are not sorted.
+  
+    23 │ <!-- with v-bind="object" -->
+  > 24 │ <div·
+       │ ^^^^^
+  > 25 │   v-slot:default
+        ...
+  > 41 │   :class="{ red: isRed }"
+  > 42 │ ></div>
+       │ ^
+    43 │ 
+    44 │ <!-- attributes within the same category  -->
+  
+  i Safe fix: Sort the HTML attributes.
+  
+    28 28 │     ref="my-ref"
+    29 29 │     v-bind="{ id: someProp, 'other-attr': otherProp }"
+    30    │ - ··:key="item.id"
+    31    │ - ··v-bind:src="'/path/to/images/'·+·fileName"
+    32    │ - ··spellcheck="true"
+    33    │ - ··v-for="item·in·items"
+    34    │ - ··tabindex="-1"
+    35    │ - ··@scroll.passive="onScroll"
+    36    │ - ··:is="tabs[currentTab]"
+    37    │ - ··v-text="msg"
+    38    │ - ··dir="auto"
+    39    │ - ··v-model="countModel"
+    40    │ - ··v-if="awesome"
+    41    │ - ··:class="{·red:·isRed·}"
+       30 │ + ··dir="auto"
+       31 │ + ··spellcheck="true"
+       32 │ + ··tabindex="-1"
+       33 │ + ··:is="tabs[currentTab]"
+       34 │ + ··v-for="item·in·items"
+       35 │ + ··v-if="awesome"
+       36 │ + ··:key="item.id"
+       37 │ + ··v-model="countModel"
+       38 │ + ··:class="{·red:·isRed·}"
+       39 │ + ··v-bind:src="'/path/to/images/'·+·fileName"
+       40 │ + ··@scroll.passive="onScroll"
+       41 │ + ··v-text="msg"
+    42 42 │   ></div>
+    43 43 │   
+  
+
+```
+
+```
+unsorted.vue:45:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attributes are not sorted.
+  
+    44 │ <!-- attributes within the same category  -->
+  > 45 │ <div v-if="awesome" v-else v-else-if="type === 'B'" v-show="ok">
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    46 │ </div>
+    47 │ 
+  
+  i Safe fix: Sort the HTML attributes.
+  
+    43 43 │   
+    44 44 │   <!-- attributes within the same category  -->
+    45    │ - <div·v-if="awesome"·v-else·v-else-if="type·===·'B'"·v-show="ok">
+       45 │ + <div·v-else·v-else-if="type·===·'B'"·v-if="awesome"·v-show="ok">
+    46 46 │   </div>
+    47 47 │   
+  
+
+```
+
+```
+unsorted.vue:48:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attributes are not sorted.
+  
+    46 │ </div>
+    47 │ 
+  > 48 │ <div v-pre v-once></div>
+       │ ^^^^^^^^^^^^^^^^^^
+    49 │ 
+    50 │ <div ref="my-ref" :key="item.id"></div>
+  
+  i Safe fix: Sort the HTML attributes.
+  
+    46 46 │   </div>
+    47 47 │   
+    48    │ - <div·v-pre·v-once></div>
+       48 │ + <div·v-once·v-pre·></div>
+    49 49 │   
+    50 50 │   <div ref="my-ref" :key="item.id"></div>
+  
+
+```
+
+```
+unsorted.vue:50:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attributes are not sorted.
+  
+    48 │ <div v-pre v-once></div>
+    49 │ 
+  > 50 │ <div ref="my-ref" :key="item.id"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    51 │ 
+    52 │ <div v-slot="{ x, y }" v-slot:default v-slot:footer #header #[dynamicSlotName]></div>
+  
+  i Safe fix: Sort the HTML attributes.
+  
+    48 48 │   <div v-pre v-once></div>
+    49 49 │   
+    50    │ - <div·ref="my-ref"·:key="item.id"></div>
+       50 │ + <div·:key="item.id"·ref="my-ref"·></div>
+    51 51 │   
+    52 52 │   <div v-slot="{ x, y }" v-slot:default v-slot:footer #header #[dynamicSlotName]></div>
+  
+
+```
+
+```
+unsorted.vue:52:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attributes are not sorted.
+  
+    50 │ <div ref="my-ref" :key="item.id"></div>
+    51 │ 
+  > 52 │ <div v-slot="{ x, y }" v-slot:default v-slot:footer #header #[dynamicSlotName]></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    53 │ 
+    54 │ <div v-slot:footer v-slot="{ x, y }" v-slot:default #header #[dynamicSlotName]></div>
+  
+  i Safe fix: Sort the HTML attributes.
+  
+    50 50 │   <div ref="my-ref" :key="item.id"></div>
+    51 51 │   
+    52    │ - <div·v-slot="{·x,·y·}"·v-slot:default·v-slot:footer·#header·#[dynamicSlotName]></div>
+       52 │ + <div·v-slot:default·v-slot:footer·#header·v-slot="{·x,·y·}"·#[dynamicSlotName]></div>
+    53 53 │   
+    54 54 │   <div v-slot:footer v-slot="{ x, y }" v-slot:default #header #[dynamicSlotName]></div>
+  
+
+```
+
+```
+unsorted.vue:54:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attributes are not sorted.
+  
+    52 │ <div v-slot="{ x, y }" v-slot:default v-slot:footer #header #[dynamicSlotName]></div>
+    53 │ 
+  > 54 │ <div v-slot:footer v-slot="{ x, y }" v-slot:default #header #[dynamicSlotName]></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    55 │ 
+    56 │ <div v-slot:default #[dynamicSlotName] v-slot:footer v-slot="{ x, y }" #header></div>
+  
+  i Safe fix: Sort the HTML attributes.
+  
+    52 52 │   <div v-slot="{ x, y }" v-slot:default v-slot:footer #header #[dynamicSlotName]></div>
+    53 53 │   
+    54    │ - <div·v-slot:footer·v-slot="{·x,·y·}"·v-slot:default·#header·#[dynamicSlotName]></div>
+       54 │ + <div·v-slot:default·v-slot:footer·#header·v-slot="{·x,·y·}"·#[dynamicSlotName]></div>
+    55 55 │   
+    56 56 │   <div v-slot:default #[dynamicSlotName] v-slot:footer v-slot="{ x, y }" #header></div>
+  
+
+```
+
+```
+unsorted.vue:56:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attributes are not sorted.
+  
+    54 │ <div v-slot:footer v-slot="{ x, y }" v-slot:default #header #[dynamicSlotName]></div>
+    55 │ 
+  > 56 │ <div v-slot:default #[dynamicSlotName] v-slot:footer v-slot="{ x, y }" #header></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    57 │ 
+    58 │ <div v-mycustomdirectiveb v-mycustomdirectivea></div>
+  
+  i Safe fix: Sort the HTML attributes.
+  
+    54 54 │   <div v-slot:footer v-slot="{ x, y }" v-slot:default #header #[dynamicSlotName]></div>
+    55 55 │   
+    56    │ - <div·v-slot:default·#[dynamicSlotName]·v-slot:footer·v-slot="{·x,·y·}"·#header></div>
+       56 │ + <div·v-slot:default·v-slot:footer·#header·#[dynamicSlotName]·v-slot="{·x,·y·}"·></div>
+    57 57 │   
+    58 58 │   <div v-mycustomdirectiveb v-mycustomdirectivea></div>
+  
+
+```
+
+```
+unsorted.vue:58:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attributes are not sorted.
+  
+    56 │ <div v-slot:default #[dynamicSlotName] v-slot:footer v-slot="{ x, y }" #header></div>
+    57 │ 
+  > 58 │ <div v-mycustomdirectiveb v-mycustomdirectivea></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    59 │ 
+    60 │ <div v-bind:propc="foo" v-bind:propb="foo" :propa="foo"></div>
+  
+  i Safe fix: Sort the HTML attributes.
+  
+    56 56 │   <div v-slot:default #[dynamicSlotName] v-slot:footer v-slot="{ x, y }" #header></div>
+    57 57 │   
+    58    │ - <div·v-mycustomdirectiveb·v-mycustomdirectivea></div>
+       58 │ + <div·v-mycustomdirectivea·v-mycustomdirectiveb·></div>
+    59 59 │   
+    60 60 │   <div v-bind:propc="foo" v-bind:propb="foo" :propa="foo"></div>
+  
+
+```
+
+```
+unsorted.vue:60:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attributes are not sorted.
+  
+    58 │ <div v-mycustomdirectiveb v-mycustomdirectivea></div>
+    59 │ 
+  > 60 │ <div v-bind:propc="foo" v-bind:propb="foo" :propa="foo"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    61 │ 
+    62 │ <div @scroll.passive="onScroll" @click.stop="doThis" v-on:click="doThis" @click.prevent="doThis"></div>
+  
+  i Safe fix: Sort the HTML attributes.
+  
+    58 58 │   <div v-mycustomdirectiveb v-mycustomdirectivea></div>
+    59 59 │   
+    60    │ - <div·v-bind:propc="foo"·v-bind:propb="foo"·:propa="foo"></div>
+       60 │ + <div·:propa="foo"·v-bind:propb="foo"·v-bind:propc="foo"·></div>
+    61 61 │   
+    62 62 │   <div @scroll.passive="onScroll" @click.stop="doThis" v-on:click="doThis" @click.prevent="doThis"></div>
+  
+
+```
+
+```
+unsorted.vue:62:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attributes are not sorted.
+  
+    60 │ <div v-bind:propc="foo" v-bind:propb="foo" :propa="foo"></div>
+    61 │ 
+  > 62 │ <div @scroll.passive="onScroll" @click.stop="doThis" v-on:click="doThis" @click.prevent="doThis"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    63 │ 
+    64 │ <div v-text="msg" v-html="html"></div>
+  
+  i Safe fix: Sort the HTML attributes.
+  
+    60 60 │   <div v-bind:propc="foo" v-bind:propb="foo" :propa="foo"></div>
+    61 61 │   
+    62    │ - <div·@scroll.passive="onScroll"·@click.stop="doThis"·v-on:click="doThis"·@click.prevent="doThis"></div>
+       62 │ + <div·@click.stop="doThis"·v-on:click="doThis"·@click.prevent="doThis"·@scroll.passive="onScroll"·></div>
+    63 63 │   
+    64 64 │   <div v-text="msg" v-html="html"></div>
+  
+
+```
+
+```
+unsorted.vue:64:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attributes are not sorted.
+  
+    62 │ <div @scroll.passive="onScroll" @click.stop="doThis" v-on:click="doThis" @click.prevent="doThis"></div>
+    63 │ 
+  > 64 │ <div v-text="msg" v-html="html"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    65 │ 
+    66 │ <!-- argument-less v-bind shorthand sorts like v-bind (VueOtherAttribute), not like a custom directive -->
+  
+  i Safe fix: Sort the HTML attributes.
+  
+    62 62 │   <div @scroll.passive="onScroll" @click.stop="doThis" v-on:click="doThis" @click.prevent="doThis"></div>
+    63 63 │   
+    64    │ - <div·v-text="msg"·v-html="html"></div>
+       64 │ + <div·v-html="html"·v-text="msg"·></div>
+    65 65 │   
+    66 66 │   <!-- argument-less v-bind shorthand sorts like v-bind (VueOtherAttribute), not like a custom directive -->
+  
+
+```
+
+```
+unsorted.vue:67:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attributes are not sorted.
+  
+    66 │ <!-- argument-less v-bind shorthand sorts like v-bind (VueOtherAttribute), not like a custom directive -->
+  > 67 │ <div v-mycustomdirective v-if="awesome" :="props" ref="my-ref"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    68 │ </template>
+    69 │ 
+  
+  i Safe fix: Sort the HTML attributes.
+  
+    65 65 │   
+    66 66 │   <!-- argument-less v-bind shorthand sorts like v-bind (VueOtherAttribute), not like a custom directive -->
+    67    │ - <div·v-mycustomdirective·v-if="awesome"·:="props"·ref="my-ref"></div>
+       67 │ + <div·v-if="awesome"·ref="my-ref"·v-mycustomdirective·:="props"·></div>
+    68 68 │   </template>
+    69 69 │   
+  
+
+```

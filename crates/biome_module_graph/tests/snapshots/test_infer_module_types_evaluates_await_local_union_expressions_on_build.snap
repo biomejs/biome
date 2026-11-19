@@ -1,0 +1,71 @@
+---
+source: crates/biome_module_graph/tests/spec_tests.rs
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+let promise: Promise<void> | undefined;
+
+async function sleep(): Promise<void> {
+	return;
+}
+
+export async function consume() {
+	if (!promise) {
+		promise = sleep();
+	}
+
+	const awaited = await promise;
+	return awaited;
+}
+```
+
+## Inferred types
+
+```
+Binding promise "promise" => instanceof Promise<void> | undefined
+
+Binding sleep "sleep" => async Function "sleep" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: instanceof Promise<void>
+}
+
+Binding consume "consume" => async Function "consume" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: instanceof Promise<void | undefined>
+}
+
+Expression "!promise" => boolean
+
+Expression "promise" => instanceof Promise<void> | undefined
+
+Expression "promise = sleep()" => unknown
+
+Expression "sleep" => async Function "sleep" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: instanceof Promise<void>
+}
+
+Expression "sleep()" => instanceof Promise<void>
+
+Binding awaited "awaited" => void | undefined
+
+Expression "await promise" => void | undefined
+
+Expression "promise" => instanceof Promise<void> | undefined
+
+Expression "awaited" => void | undefined
+```

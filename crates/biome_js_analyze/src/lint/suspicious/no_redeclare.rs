@@ -1,11 +1,11 @@
-use crate::services::semantic::SemanticServices;
+use crate::services::semantic::Semantic;
 use biome_analyze::{Rule, RuleDiagnostic, context::RuleContext};
 use biome_analyze::{RuleSource, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_semantic::Scope;
-use biome_js_syntax::binding_ext::AnyJsBindingDeclaration;
-use biome_js_syntax::{JsSyntaxKind, TextRange};
+use biome_js_syntax::binding_ext::{AnyJsBindingDeclaration, AnyJsIdentifierBinding};
+use biome_js_syntax::{JsSyntaxKind, JsSyntaxNode, TextRange};
 use biome_rowan::{AstNode, TokenText};
 use biome_rule_options::no_redeclare::NoRedeclareOptions;
 use rustc_hash::FxHashMap;
@@ -81,16 +81,29 @@ pub struct Redeclaration {
 }
 
 impl Rule for NoRedeclare {
-    type Query = SemanticServices;
+    type Query = Semantic<AnyJsIdentifierBinding>;
     type State = Redeclaration;
     type Signals = Box<[Redeclaration]>;
     type Options = NoRedeclareOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let mut redeclarations = Vec::default();
-        for scope in ctx.query().scopes() {
-            check_redeclarations_in_single_scope(&scope, &mut redeclarations);
+        let model = ctx.model();
+        let node = ctx.query().syntax();
+        let binding = model.as_binding(ctx.query());
+        let scope = model
+            .scope_hoisted_to(node)
+            .unwrap_or_else(|| binding.scope());
+        // Two bindings have the same node exactly when their ranges start at
+        // the same offset.
+        if scope
+            .bindings()
+            .next()
+            .is_none_or(|first| first.range().start() != binding.range().start())
+        {
+            return Box::default();
         }
+        let mut redeclarations = Vec::default();
+        check_redeclarations_in_single_scope(&scope, node, &mut redeclarations);
         redeclarations.into_boxed_slice()
     }
 
@@ -123,9 +136,17 @@ impl Rule for NoRedeclare {
     }
 }
 
-fn check_redeclarations_in_single_scope(scope: &Scope, redeclarations: &mut Vec<Redeclaration>) {
+/// `first_binding` is the node of the first binding of `scope`.
+fn check_redeclarations_in_single_scope(
+    scope: &Scope,
+    first_binding: &JsSyntaxNode,
+    redeclarations: &mut Vec<Redeclaration>,
+) {
     let mut declarations = FxHashMap::<TokenText, (TextRange, AnyJsBindingDeclaration)>::default();
-    if scope.syntax().kind() == JsSyntaxKind::JS_FUNCTION_BODY {
+    // The bindings of a scope and of its parent scope sit close together in
+    // the tree, so each node is located starting from the previous one.
+    let mut previous_node = first_binding.clone();
+    if scope.syntax_kind() == JsSyntaxKind::JS_FUNCTION_BODY {
         // Handle cases where a variable/type redeclares a parameter or type parameter.
         // For example:
         //
@@ -148,7 +169,8 @@ fn check_redeclarations_in_single_scope(scope: &Scope, redeclarations: &mut Vec<
         // ```
         if let Some(function_scope) = scope.parent() {
             for binding in function_scope.bindings() {
-                let id_binding = binding.tree();
+                let id_binding = binding.tree_near(&previous_node);
+                previous_node = id_binding.syntax().clone();
                 if let Some(decl) = id_binding.declaration() {
                     // Ignore the function itself.
                     if !matches!(decl, AnyJsBindingDeclaration::JsFunctionExpression(_)) {
@@ -157,7 +179,7 @@ fn check_redeclarations_in_single_scope(scope: &Scope, redeclarations: &mut Vec<
                         };
                         declarations.insert(
                             name.token_text_trimmed(),
-                            (id_binding.syntax().text_trimmed_range(), decl),
+                            (binding.range(), decl),
                         );
                     }
                 }
@@ -165,7 +187,8 @@ fn check_redeclarations_in_single_scope(scope: &Scope, redeclarations: &mut Vec<
         }
     }
     for binding in scope.bindings() {
-        let id_binding = binding.tree();
+        let id_binding = binding.tree_near(&previous_node);
+        previous_node = id_binding.syntax().clone();
 
         // We consider only binding of a declaration
         // This allows to skip function parameters, methods, ...
@@ -194,11 +217,11 @@ fn check_redeclarations_in_single_scope(scope: &Scope, redeclarations: &mut Vec<
                     redeclarations.push(Redeclaration {
                         name,
                         declaration: *first_text_range,
-                        redeclaration: id_binding.syntax().text_trimmed_range(),
+                        redeclaration: binding.range(),
                     })
                 }
             } else {
-                declarations.insert(name, (id_binding.syntax().text_trimmed_range(), decl));
+                declarations.insert(name, (binding.range(), decl));
             }
         }
     }

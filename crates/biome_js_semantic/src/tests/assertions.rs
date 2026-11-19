@@ -5,7 +5,8 @@ use biome_diagnostics::{
     Advices, Diagnostic, DiagnosticExt, Location, LogCategory, PrintDiagnostic, Visit,
 };
 use biome_js_parser::JsParserOptions;
-use biome_js_syntax::{AnyJsRoot, JsFileSource, JsSyntaxToken, TextRange, TextSize, WalkEvent};
+use biome_js_syntax::{AnyJsRoot, JsSyntaxToken, TextRange, TextSize, WalkEvent};
+use biome_languages::JsFileSource;
 use biome_rowan::{AstNode, NodeOrToken};
 use rustc_hash::FxHashMap;
 use std::collections::BTreeMap;
@@ -465,7 +466,7 @@ impl SemanticAssertions {
     ) {
         // Check every declaration assertion is ok
 
-        for (_, assertion) in self.declarations_assertions.iter() {
+        for assertion in self.declarations_assertions.values() {
             if let Some(events) = events_by_pos.get(&assertion.range.start()) {
                 match &events[0] {
                     SemanticEvent::DeclarationFound { .. } => {

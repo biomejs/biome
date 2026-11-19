@@ -1,0 +1,573 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 196
+expression: invalid.svelte
+---
+# Input
+```svelte
+<!-- should generate diagnostics -->
+<script>
+	const date = new Date(8.64e15);
+	date.setMonth(3);
+
+	const map = new Map([[1, "one"]]);
+	map.clear();
+
+	const set = new Set([1, 2]);
+	function remove(value) {
+		set.delete(value);
+	}
+
+	const url = new URL("https://svelte.dev/");
+	url.port = 80;
+
+	const params = new URLSearchParams("foo=1&bar=2");
+	params.sort();
+
+	const computed = new Map();
+	computed["set"](1, "one");
+
+	const computedUrl = new URL("https://svelte.dev/");
+	computedUrl["hash"] = "#top";
+
+	const compoundUrl = new URL("https://svelte.dev/");
+	compoundUrl.pathname += "/docs";
+
+	const optional = new Set();
+	optional?.add(1);
+
+	const state = $state(new Map());
+	state.set(1, "one");
+
+	const raw = $state.raw(new Set());
+	raw.add(1);
+
+	const alias = new Map();
+	const other = alias;
+	other.set(1, "one");
+
+	let assigned;
+	assigned = new Set();
+	assigned.add(1);
+
+	const fallback = cond ? new Map() : null;
+	fallback?.set(1, "one");
+
+	const logical = existing ?? new Set();
+	logical.add(1);
+
+	let created;
+	function create() {
+		created = new Map();
+	}
+	function update() {
+		created.set(1, "one");
+	}
+
+	function local() {
+		const temporary = new Set();
+		globalSet = temporary;
+	}
+	let globalSet;
+	globalSet.add(1);
+</script>
+
+```
+
+# Diagnostics
+```
+invalid.svelte:3:15 lint/nursery/useSvelteReactiveClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Date is modified, but Svelte doesn't detect changes to it.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <script>
+  > 3 │ 	const date = new Date(8.64e15);
+      │ 	             ^^^^^^^^^^^^^^^^^
+    4 │ 	date.setMonth(3);
+    5 │ 
+  
+  i It's modified here.
+  
+    2 │ <script>
+    3 │ 	const date = new Date(8.64e15);
+  > 4 │ 	date.setMonth(3);
+      │ 	^^^^^^^^^^^^^^^^
+    5 │ 
+    6 │ 	const map = new Map([[1, "one"]]);
+  
+  i Svelte doesn't detect changes made inside a built-in Date, so the parts of the page that use it don't update.
+  
+  i Use SvelteDate from svelte/reactivity instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:6:14 lint/nursery/useSvelteReactiveClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Map is modified, but Svelte doesn't detect changes to it.
+  
+    4 │ 	date.setMonth(3);
+    5 │ 
+  > 6 │ 	const map = new Map([[1, "one"]]);
+      │ 	            ^^^^^^^^^^^^^^^^^^^^^
+    7 │ 	map.clear();
+    8 │ 
+  
+  i It's modified here.
+  
+    6 │ 	const map = new Map([[1, "one"]]);
+  > 7 │ 	map.clear();
+      │ 	^^^^^^^^^^^
+    8 │ 
+    9 │ 	const set = new Set([1, 2]);
+  
+  i Svelte doesn't detect changes made inside a built-in Map, so the parts of the page that use it don't update.
+  
+  i Use SvelteMap from svelte/reactivity instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:9:14 lint/nursery/useSvelteReactiveClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set is modified, but Svelte doesn't detect changes to it.
+  
+     7 │ 	map.clear();
+     8 │ 
+   > 9 │ 	const set = new Set([1, 2]);
+       │ 	            ^^^^^^^^^^^^^^^
+    10 │ 	function remove(value) {
+    11 │ 		set.delete(value);
+  
+  i It's modified here.
+  
+     9 │ 	const set = new Set([1, 2]);
+    10 │ 	function remove(value) {
+  > 11 │ 		set.delete(value);
+       │ 		^^^^^^^^^^^^^^^^^
+    12 │ 	}
+    13 │ 
+  
+  i Svelte doesn't detect changes made inside a built-in Set, so the parts of the page that use it don't update.
+  
+  i Use SvelteSet from svelte/reactivity instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:14:14 lint/nursery/useSvelteReactiveClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This URL is modified, but Svelte doesn't detect changes to it.
+  
+    12 │ 	}
+    13 │ 
+  > 14 │ 	const url = new URL("https://svelte.dev/");
+       │ 	            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    15 │ 	url.port = 80;
+    16 │ 
+  
+  i It's modified here.
+  
+    14 │ 	const url = new URL("https://svelte.dev/");
+  > 15 │ 	url.port = 80;
+       │ 	^^^^^^^^
+    16 │ 
+    17 │ 	const params = new URLSearchParams("foo=1&bar=2");
+  
+  i Svelte doesn't detect changes made inside a built-in URL, so the parts of the page that use it don't update.
+  
+  i Use SvelteURL from svelte/reactivity instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:17:17 lint/nursery/useSvelteReactiveClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This URLSearchParams is modified, but Svelte doesn't detect changes to it.
+  
+    15 │ 	url.port = 80;
+    16 │ 
+  > 17 │ 	const params = new URLSearchParams("foo=1&bar=2");
+       │ 	               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    18 │ 	params.sort();
+    19 │ 
+  
+  i It's modified here.
+  
+    17 │ 	const params = new URLSearchParams("foo=1&bar=2");
+  > 18 │ 	params.sort();
+       │ 	^^^^^^^^^^^^^
+    19 │ 
+    20 │ 	const computed = new Map();
+  
+  i Svelte doesn't detect changes made inside a built-in URLSearchParams, so the parts of the page that use it don't update.
+  
+  i Use SvelteURLSearchParams from svelte/reactivity instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:20:19 lint/nursery/useSvelteReactiveClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Map is modified, but Svelte doesn't detect changes to it.
+  
+    18 │ 	params.sort();
+    19 │ 
+  > 20 │ 	const computed = new Map();
+       │ 	                 ^^^^^^^^^
+    21 │ 	computed["set"](1, "one");
+    22 │ 
+  
+  i It's modified here.
+  
+    20 │ 	const computed = new Map();
+  > 21 │ 	computed["set"](1, "one");
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^
+    22 │ 
+    23 │ 	const computedUrl = new URL("https://svelte.dev/");
+  
+  i Svelte doesn't detect changes made inside a built-in Map, so the parts of the page that use it don't update.
+  
+  i Use SvelteMap from svelte/reactivity instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:23:22 lint/nursery/useSvelteReactiveClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This URL is modified, but Svelte doesn't detect changes to it.
+  
+    21 │ 	computed["set"](1, "one");
+    22 │ 
+  > 23 │ 	const computedUrl = new URL("https://svelte.dev/");
+       │ 	                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    24 │ 	computedUrl["hash"] = "#top";
+    25 │ 
+  
+  i It's modified here.
+  
+    23 │ 	const computedUrl = new URL("https://svelte.dev/");
+  > 24 │ 	computedUrl["hash"] = "#top";
+       │ 	^^^^^^^^^^^^^^^^^^^
+    25 │ 
+    26 │ 	const compoundUrl = new URL("https://svelte.dev/");
+  
+  i Svelte doesn't detect changes made inside a built-in URL, so the parts of the page that use it don't update.
+  
+  i Use SvelteURL from svelte/reactivity instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:26:22 lint/nursery/useSvelteReactiveClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This URL is modified, but Svelte doesn't detect changes to it.
+  
+    24 │ 	computedUrl["hash"] = "#top";
+    25 │ 
+  > 26 │ 	const compoundUrl = new URL("https://svelte.dev/");
+       │ 	                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    27 │ 	compoundUrl.pathname += "/docs";
+    28 │ 
+  
+  i It's modified here.
+  
+    26 │ 	const compoundUrl = new URL("https://svelte.dev/");
+  > 27 │ 	compoundUrl.pathname += "/docs";
+       │ 	^^^^^^^^^^^^^^^^^^^^
+    28 │ 
+    29 │ 	const optional = new Set();
+  
+  i Svelte doesn't detect changes made inside a built-in URL, so the parts of the page that use it don't update.
+  
+  i Use SvelteURL from svelte/reactivity instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:29:19 lint/nursery/useSvelteReactiveClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set is modified, but Svelte doesn't detect changes to it.
+  
+    27 │ 	compoundUrl.pathname += "/docs";
+    28 │ 
+  > 29 │ 	const optional = new Set();
+       │ 	                 ^^^^^^^^^
+    30 │ 	optional?.add(1);
+    31 │ 
+  
+  i It's modified here.
+  
+    29 │ 	const optional = new Set();
+  > 30 │ 	optional?.add(1);
+       │ 	^^^^^^^^^^^^^^^^
+    31 │ 
+    32 │ 	const state = $state(new Map());
+  
+  i Svelte doesn't detect changes made inside a built-in Set, so the parts of the page that use it don't update.
+  
+  i Use SvelteSet from svelte/reactivity instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:32:23 lint/nursery/useSvelteReactiveClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Map is modified, but Svelte doesn't detect changes to it.
+  
+    30 │ 	optional?.add(1);
+    31 │ 
+  > 32 │ 	const state = $state(new Map());
+       │ 	                     ^^^^^^^^^
+    33 │ 	state.set(1, "one");
+    34 │ 
+  
+  i It's modified here.
+  
+    32 │ 	const state = $state(new Map());
+  > 33 │ 	state.set(1, "one");
+       │ 	^^^^^^^^^^^^^^^^^^^
+    34 │ 
+    35 │ 	const raw = $state.raw(new Set());
+  
+  i Svelte doesn't detect changes made inside a built-in Map, so the parts of the page that use it don't update.
+  
+  i Use SvelteMap from svelte/reactivity instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:35:25 lint/nursery/useSvelteReactiveClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set is modified, but Svelte doesn't detect changes to it.
+  
+    33 │ 	state.set(1, "one");
+    34 │ 
+  > 35 │ 	const raw = $state.raw(new Set());
+       │ 	                       ^^^^^^^^^
+    36 │ 	raw.add(1);
+    37 │ 
+  
+  i It's modified here.
+  
+    35 │ 	const raw = $state.raw(new Set());
+  > 36 │ 	raw.add(1);
+       │ 	^^^^^^^^^^
+    37 │ 
+    38 │ 	const alias = new Map();
+  
+  i Svelte doesn't detect changes made inside a built-in Set, so the parts of the page that use it don't update.
+  
+  i Use SvelteSet from svelte/reactivity instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:38:16 lint/nursery/useSvelteReactiveClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Map is modified, but Svelte doesn't detect changes to it.
+  
+    36 │ 	raw.add(1);
+    37 │ 
+  > 38 │ 	const alias = new Map();
+       │ 	              ^^^^^^^^^
+    39 │ 	const other = alias;
+    40 │ 	other.set(1, "one");
+  
+  i It's modified here.
+  
+    38 │ 	const alias = new Map();
+    39 │ 	const other = alias;
+  > 40 │ 	other.set(1, "one");
+       │ 	^^^^^^^^^^^^^^^^^^^
+    41 │ 
+    42 │ 	let assigned;
+  
+  i Svelte doesn't detect changes made inside a built-in Map, so the parts of the page that use it don't update.
+  
+  i Use SvelteMap from svelte/reactivity instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:43:13 lint/nursery/useSvelteReactiveClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set is modified, but Svelte doesn't detect changes to it.
+  
+    42 │ 	let assigned;
+  > 43 │ 	assigned = new Set();
+       │ 	           ^^^^^^^^^
+    44 │ 	assigned.add(1);
+    45 │ 
+  
+  i It's modified here.
+  
+    42 │ 	let assigned;
+    43 │ 	assigned = new Set();
+  > 44 │ 	assigned.add(1);
+       │ 	^^^^^^^^^^^^^^^
+    45 │ 
+    46 │ 	const fallback = cond ? new Map() : null;
+  
+  i Svelte doesn't detect changes made inside a built-in Set, so the parts of the page that use it don't update.
+  
+  i Use SvelteSet from svelte/reactivity instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:46:26 lint/nursery/useSvelteReactiveClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Map is modified, but Svelte doesn't detect changes to it.
+  
+    44 │ 	assigned.add(1);
+    45 │ 
+  > 46 │ 	const fallback = cond ? new Map() : null;
+       │ 	                        ^^^^^^^^^
+    47 │ 	fallback?.set(1, "one");
+    48 │ 
+  
+  i It's modified here.
+  
+    46 │ 	const fallback = cond ? new Map() : null;
+  > 47 │ 	fallback?.set(1, "one");
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^
+    48 │ 
+    49 │ 	const logical = existing ?? new Set();
+  
+  i Svelte doesn't detect changes made inside a built-in Map, so the parts of the page that use it don't update.
+  
+  i Use SvelteMap from svelte/reactivity instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:49:30 lint/nursery/useSvelteReactiveClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set is modified, but Svelte doesn't detect changes to it.
+  
+    47 │ 	fallback?.set(1, "one");
+    48 │ 
+  > 49 │ 	const logical = existing ?? new Set();
+       │ 	                            ^^^^^^^^^
+    50 │ 	logical.add(1);
+    51 │ 
+  
+  i It's modified here.
+  
+    49 │ 	const logical = existing ?? new Set();
+  > 50 │ 	logical.add(1);
+       │ 	^^^^^^^^^^^^^^
+    51 │ 
+    52 │ 	let created;
+  
+  i Svelte doesn't detect changes made inside a built-in Set, so the parts of the page that use it don't update.
+  
+  i Use SvelteSet from svelte/reactivity instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:54:13 lint/nursery/useSvelteReactiveClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Map is modified, but Svelte doesn't detect changes to it.
+  
+    52 │ 	let created;
+    53 │ 	function create() {
+  > 54 │ 		created = new Map();
+       │ 		          ^^^^^^^^^
+    55 │ 	}
+    56 │ 	function update() {
+  
+  i It's modified here.
+  
+    55 │ 	}
+    56 │ 	function update() {
+  > 57 │ 		created.set(1, "one");
+       │ 		^^^^^^^^^^^^^^^^^^^^^
+    58 │ 	}
+    59 │ 
+  
+  i Svelte doesn't detect changes made inside a built-in Map, so the parts of the page that use it don't update.
+  
+  i Use SvelteMap from svelte/reactivity instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:61:21 lint/nursery/useSvelteReactiveClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set is modified, but Svelte doesn't detect changes to it.
+  
+    60 │ 	function local() {
+  > 61 │ 		const temporary = new Set();
+       │ 		                  ^^^^^^^^^
+    62 │ 		globalSet = temporary;
+    63 │ 	}
+  
+  i It's modified here.
+  
+    63 │ 	}
+    64 │ 	let globalSet;
+  > 65 │ 	globalSet.add(1);
+       │ 	^^^^^^^^^^^^^^^^
+    66 │ </script>
+    67 │ 
+  
+  i Svelte doesn't detect changes made inside a built-in Set, so the parts of the page that use it don't update.
+  
+  i Use SvelteSet from svelte/reactivity instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

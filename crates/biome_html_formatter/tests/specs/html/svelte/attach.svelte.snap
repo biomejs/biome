@@ -35,7 +35,7 @@ info: svelte/attach.svelte
 	width={32}
 	height={32}
 	{@attach (canvas) => {
-		const context = canvas.getContext('2d');
+		const context = canvas.getContext("2d");
 
 		$effect(() => {
 			context.fillStyle = color;

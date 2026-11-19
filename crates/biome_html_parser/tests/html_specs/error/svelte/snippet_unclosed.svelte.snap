@@ -21,6 +21,7 @@ expression: snapshot
 HtmlRoot {
     bom_token: missing (optional),
     frontmatter: missing (optional),
+    processing_instruction: missing (optional),
     directive: missing (optional),
     html: HtmlElementList [
         SvelteSnippetBlock {
@@ -36,7 +37,7 @@ HtmlRoot {
                         opening_element: HtmlOpeningElement {
                             l_angle_token: L_ANGLE@21..25 "<" [Newline("\n"), Whitespace("  ")] [],
                             name: HtmlTagName {
-                                value_token: HTML_LITERAL@25..26 "p" [] [],
+                                value_token: P_KW@25..26 "p" [] [],
                             },
                             attributes: HtmlAttributeList [],
                             r_angle_token: R_ANGLE@26..27 ">" [] [],
@@ -50,7 +51,7 @@ HtmlRoot {
                             l_angle_token: L_ANGLE@33..34 "<" [] [],
                             slash_token: SLASH@34..35 "/" [] [],
                             name: HtmlTagName {
-                                value_token: HTML_LITERAL@35..36 "p" [] [],
+                                value_token: P_KW@35..36 "p" [] [],
                             },
                             r_angle_token: R_ANGLE@36..37 ">" [] [],
                         },
@@ -83,7 +84,8 @@ HtmlRoot {
   0: (empty)
   1: (empty)
   2: (empty)
-  3: HTML_ELEMENT_LIST@0..69
+  3: (empty)
+  4: HTML_ELEMENT_LIST@0..69
     0: SVELTE_SNIPPET_BLOCK@0..47
       0: SVELTE_SNIPPET_OPENING_BLOCK@0..37
         0: SV_CURLY_HASH@0..2 "{#" [] []
@@ -96,7 +98,7 @@ HtmlRoot {
             0: HTML_OPENING_ELEMENT@21..27
               0: L_ANGLE@21..25 "<" [Newline("\n"), Whitespace("  ")] []
               1: HTML_TAG_NAME@25..26
-                0: HTML_LITERAL@25..26 "p" [] []
+                0: P_KW@25..26 "p" [] []
               2: HTML_ATTRIBUTE_LIST@26..26
               3: R_ANGLE@26..27 ">" [] []
             1: HTML_ELEMENT_LIST@27..33
@@ -106,7 +108,7 @@ HtmlRoot {
               0: L_ANGLE@33..34 "<" [] []
               1: SLASH@34..35 "/" [] []
               2: HTML_TAG_NAME@35..36
-                0: HTML_LITERAL@35..36 "p" [] []
+                0: P_KW@35..36 "p" [] []
               3: R_ANGLE@36..37 ">" [] []
       1: SVELTE_SNIPPET_CLOSING_BLOCK@37..47
         0: SV_CURLY_SLASH@37..40 "{/" [Newline("\n")] []
@@ -118,7 +120,7 @@ HtmlRoot {
       2: HTML_TEXT_EXPRESSION@58..68
         0: HTML_LITERAL@58..68 "greeting()" [] []
       3: R_CURLY@68..69 "}" [] []
-  4: EOF@69..70 "" [Newline("\n")] []
+  5: EOF@69..70 "" [Newline("\n")] []
 
 ```
 

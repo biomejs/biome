@@ -10,12 +10,17 @@ impl FormatNodeRule<GraphqlOperationDefinition> for FormatGraphqlOperationDefini
         f: &mut GraphqlFormatter,
     ) -> FormatResult<()> {
         let GraphqlOperationDefinitionFields {
+            description,
             ty,
             name,
             variables,
             directives,
             selection_set,
         } = node.as_fields();
+
+        if let Some(description) = description {
+            write!(f, [description.format(), hard_line_break()])?;
+        }
 
         write!(f, [ty.format()])?;
 

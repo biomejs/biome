@@ -1,0 +1,12 @@
+---
+source: crates/biome_grit_patterns/tests/spec_tests.rs
+expression: rangeTrivia
+---
+SnapshotResult {
+    messages: [],
+    matched_ranges: [
+        "3:3-3:10",
+    ],
+    rewritten_files: [],
+    created_files: [],
+}

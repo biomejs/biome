@@ -27,6 +27,11 @@ expression: invalid.tsx
         comment */
     </div>
     <div>😀//😀 comment </div>
+    <div>before /* comment */ after</div>
+    <div>
+        // first
+        // second
+    </div>
 </>
 
 ```
@@ -42,6 +47,8 @@ invalid.tsx:2:10 lint/suspicious/noCommentText  FIXABLE  ━━━━━━━�
       │          ^^^^^^^^^^
     3 │     <div>/* comment */</div>
     4 │     <div>/** comment */</div>
+  
+  i In JSX children, text that starts with // or /* is rendered as text. It is not treated as a comment.
   
   i Unsafe fix: Wrap the comments with braces
   
@@ -66,6 +73,8 @@ invalid.tsx:3:10 lint/suspicious/noCommentText  FIXABLE  ━━━━━━━�
     4 │     <div>/** comment */</div>
     5 │     <div>text /* comment */</div>
   
+  i In JSX children, text that starts with // or /* is rendered as text. It is not treated as a comment.
+  
   i Unsafe fix: Wrap the comments with braces
   
     3 │ ····<div>{/*·comment·*/}</div>
@@ -84,6 +93,8 @@ invalid.tsx:4:10 lint/suspicious/noCommentText  FIXABLE  ━━━━━━━�
       │          ^^^^^^^^^^^^^^
     5 │     <div>text /* comment */</div>
     6 │     <div>/* comment */ text</div>
+  
+  i In JSX children, text that starts with // or /* is rendered as text. It is not treated as a comment.
   
   i Unsafe fix: Wrap the comments with braces
   
@@ -104,6 +115,8 @@ invalid.tsx:5:15 lint/suspicious/noCommentText  FIXABLE  ━━━━━━━�
     6 │     <div>/* comment */ text</div>
     7 │     <div>
   
+  i In JSX children, text that starts with // or /* is rendered as text. It is not treated as a comment.
+  
   i Unsafe fix: Wrap the comments with braces
   
     5 │ ····<div>text·{/*·comment·*/}</div>
@@ -123,6 +136,8 @@ invalid.tsx:6:10 lint/suspicious/noCommentText  FIXABLE  ━━━━━━━�
     7 │     <div>
     8 │         text
   
+  i In JSX children, text that starts with // or /* is rendered as text. It is not treated as a comment.
+  
   i Unsafe fix: Wrap the comments with braces
   
     6 │ ····<div>{/*·comment·*/}·text</div>
@@ -141,6 +156,8 @@ invalid.tsx:9:9 lint/suspicious/noCommentText  FIXABLE  ━━━━━━━━
        │         ^^^^^^^^^^
     10 │     </div>
     11 │     <div>
+  
+  i In JSX children, text that starts with // or /* is rendered as text. It is not treated as a comment.
   
   i Unsafe fix: Wrap the comments with braces
   
@@ -166,6 +183,8 @@ invalid.tsx:12:9 lint/suspicious/noCommentText  FIXABLE  ━━━━━━━�
     13 │         text
     14 │     </div>
   
+  i In JSX children, text that starts with // or /* is rendered as text. It is not treated as a comment.
+  
   i Unsafe fix: Wrap the comments with braces
   
     12 │ ········{/*·comment·*/}
@@ -184,6 +203,8 @@ invalid.tsx:16:9 lint/suspicious/noCommentText  FIXABLE  ━━━━━━━�
        │         ^^^^^^^^^^
     17 │         text
     18 │     </div>
+  
+  i In JSX children, text that starts with // or /* is rendered as text. It is not treated as a comment.
   
   i Unsafe fix: Wrap the comments with braces
   
@@ -211,6 +232,8 @@ invalid.tsx:20:9 lint/suspicious/noCommentText  FIXABLE  ━━━━━━━�
     22 │     </div>
     23 │     <div>😀//😀 comment </div>
   
+  i In JSX children, text that starts with // or /* is rendered as text. It is not treated as a comment.
+  
   i Unsafe fix: Wrap the comments with braces
   
     18 18 │       </div>
@@ -234,8 +257,10 @@ invalid.tsx:23:11 lint/suspicious/noCommentText  FIXABLE  ━━━━━━━�
     22 │     </div>
   > 23 │     <div>😀//😀 comment </div>
        │            ^^^^^^^^^^^^^
-    24 │ </>
-    25 │ 
+    24 │     <div>before /* comment */ after</div>
+    25 │     <div>
+  
+  i In JSX children, text that starts with // or /* is rendered as text. It is not treated as a comment.
   
   i Unsafe fix: Wrap the comments with braces
   
@@ -243,8 +268,81 @@ invalid.tsx:23:11 lint/suspicious/noCommentText  FIXABLE  ━━━━━━━�
     22 22 │       </div>
     23    │ - ····<div>😀//😀·comment·</div>
        23 │ + ····<div>😀{/*·😀·comment·*/}</div>
-    24 24 │   </>
-    25 25 │   
+    24 24 │       <div>before /* comment */ after</div>
+    25 25 │       <div>
+  
+
+```
+
+```
+invalid.tsx:24:17 lint/suspicious/noCommentText  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Wrap comments inside children within braces.
+  
+    22 │     </div>
+    23 │     <div>😀//😀 comment </div>
+  > 24 │     <div>before /* comment */ after</div>
+       │                 ^^^^^^^^^^^^^
+    25 │     <div>
+    26 │         // first
+  
+  i In JSX children, text that starts with // or /* is rendered as text. It is not treated as a comment.
+  
+  i Unsafe fix: Wrap the comments with braces
+  
+    24 │ ····<div>before·{/*·comment·*/}·after</div>
+       │                 +             +            
+
+```
+
+```
+invalid.tsx:26:9 lint/suspicious/noCommentText  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Wrap comments inside children within braces.
+  
+    24 │     <div>before /* comment */ after</div>
+    25 │     <div>
+  > 26 │         // first
+       │         ^^^^^^^^
+    27 │         // second
+    28 │     </div>
+  
+  i In JSX children, text that starts with // or /* is rendered as text. It is not treated as a comment.
+  
+  i Unsafe fix: Wrap the comments with braces
+  
+    24 24 │       <div>before /* comment */ after</div>
+    25 25 │       <div>
+    26    │ - ········//·first
+       26 │ + ········{/*·first·*/}
+    27 27 │           // second
+    28 28 │       </div>
+  
+
+```
+
+```
+invalid.tsx:27:9 lint/suspicious/noCommentText  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Wrap comments inside children within braces.
+  
+    25 │     <div>
+    26 │         // first
+  > 27 │         // second
+       │         ^^^^^^^^^
+    28 │     </div>
+    29 │ </>
+  
+  i In JSX children, text that starts with // or /* is rendered as text. It is not treated as a comment.
+  
+  i Unsafe fix: Wrap the comments with braces
+  
+    25 25 │       <div>
+    26 26 │           // first
+    27    │ - ········//·second
+       27 │ + ········{/*·second·*/}
+    28 28 │       </div>
+    29 29 │   </>
   
 
 ```

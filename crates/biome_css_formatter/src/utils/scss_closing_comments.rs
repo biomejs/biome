@@ -16,7 +16,7 @@ pub(crate) enum ClosingCommentSpacing {
 
 /// Returns `true` when an include argument node owns comments before `)`.
 pub(crate) fn owns_include_closing_comments(node: &CssSyntaxNode, f: &CssFormatter) -> bool {
-    is_in_scss_include_arguments(node) && f.comments().has_dangling_comments(node)
+    f.comments().has_dangling_comments(node) && is_in_scss_include_arguments(node)
 }
 
 /// Returns `true` when an include-owned map prints comments before `)`.
@@ -59,7 +59,10 @@ pub(crate) fn write_include_closing_comments(
 
 /// Returns `true` for `//` comments before the include-owned closing `)`.
 ///
-/// Example: `@include mix((a, // end\n))` needs a hard break before `)`.
+/// ```scss
+/// @include mix((a, // end
+/// ));
+/// ```
 fn has_line_closing_comment(node: &CssSyntaxNode, f: &CssFormatter) -> bool {
     f.comments()
         .dangling_comments(node)

@@ -86,3 +86,16 @@ function f (x) {
         // do nothing
     }
 }
+
+// https://github.com/biomejs/biome/issues/12529
+function f (x, y) {
+    if (x) {
+        switch (y) {
+            case 0:
+                return false;
+        }
+    } else {
+        return false;
+    }
+    return true;
+}

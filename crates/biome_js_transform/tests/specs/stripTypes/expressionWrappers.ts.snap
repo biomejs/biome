@@ -1,0 +1,102 @@
+---
+source: crates/biome_js_transform/tests/spec_tests.rs
+expression: expressionWrappers.ts
+---
+# Input
+```ts
+const a = b as unknown as string;
+const c = d satisfies number;
+const e = f!;
+const g = <string>h;
+(i as string) = 'i';
+j! = 'j';
+
+```
+
+# Transformations
+```diff
+@@ -1,4 +1,4 @@
+-const a = b as unknown as string;
++const a = b as unknown          ;
+ const c = d satisfies number;
+ const e = f!;
+ const g = <string>h;
+
+```
+
+```diff
+@@ -1,4 +1,4 @@
+-const a = b as unknown as string;
++const a = b            as string;
+ const c = d satisfies number;
+ const e = f!;
+ const g = <string>h;
+
+```
+
+```diff
+@@ -1,5 +1,5 @@
+ const a = b as unknown as string;
+-const c = d satisfies number;
++const c = d                 ;
+ const e = f!;
+ const g = <string>h;
+ (i as string) = 'i';
+
+```
+
+```diff
+@@ -1,6 +1,6 @@
+ const a = b as unknown as string;
+ const c = d satisfies number;
+-const e = f!;
++const e = f ;
+ const g = <string>h;
+ (i as string) = 'i';
+ j! = 'j';
+
+```
+
+```diff
+@@ -1,6 +1,6 @@
+ const a = b as unknown as string;
+ const c = d satisfies number;
+ const e = f!;
+-const g = <string>h;
++const g =         h;
+ (i as string) = 'i';
+ j! = 'j';
+
+```
+
+```diff
+@@ -2,5 +2,5 @@
+ const c = d satisfies number;
+ const e = f!;
+ const g = <string>h;
+-(i as string) = 'i';
++(i          ) = 'i';
+ j! = 'j';
+
+```
+
+```diff
+@@ -3,4 +3,4 @@
+ const e = f!;
+ const g = <string>h;
+ (i as string) = 'i';
+-j! = 'j';
++j  = 'j';
+
+```
+
+# Final output
+```ts
+const a = b                     ;
+const c = d                 ;
+const e = f ;
+const g =         h;
+(i          ) = 'i';
+j  = 'j';
+
+```

@@ -1,0 +1,33 @@
+---
+source: crates/biome_graphql_analyze/tests/spec_tests.rs
+expression: valid.graphql
+---
+# Input
+```graphql
+# should not generate diagnostics
+query Sorted($a: Int, $b: Int, $c: Int) { x }
+
+query SortedMultiline(
+  # about a
+  $a: Int # a
+  $b: Int = 1 @dir
+  $c: [String!]!
+) { x }
+
+query Single($a: Int) { x }
+
+query NaturalOrder($_z: Int, $A: Int, $a9: Int, $a10: Int, $B: Int, $b: Int) { x }
+
+query Duplicates($a: Int, $b: Int, $b: String) { x }
+
+query NoVariables { x }
+
+query ($a: Int, $b: Int) { x }
+
+mutation Mutation($a: Int, $b: Int) { x }
+
+subscription Subscription($a: Int, $b: Int) { x }
+
+fragment Fragment on User { x }
+
+```

@@ -4,12 +4,14 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{AnyJsImportClause, AnyJsImportLike, JsModuleSource};
-use biome_module_graph::{JsImportPath, JsModuleInfo, ModuleGraph};
-use biome_rowan::{AstNode, TextRange};
+use biome_module_graph::{
+    ModuleDb, ModuleInfo, ModuleInfoKind, SymbolFromModuleInfo, find_jsdoc_for_exported_symbol,
+};
+use biome_rowan::{AstNode, Text, TextRange};
 use biome_rule_options::no_deprecated_imports::NoDeprecatedImportsOptions;
 use camino::Utf8Path;
 
-use crate::services::module_graph::ResolvedImports;
+use crate::services::database::ResolvedImports;
 
 declare_lint_rule! {
     /// Restrict imports of deprecated exports.
@@ -76,21 +78,25 @@ impl Rule for NoDeprecatedImports {
     type Options = NoDeprecatedImportsOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let Some(module_info) = ctx.module_info_for_path(ctx.file_path()) else {
+        let Some(owner) = ctx.module_info_for_path(ctx.file_path()) else {
+            return Vec::new();
+        };
+        let ModuleInfoKind::Js(module_info) = owner.kind(ctx.db()) else {
             return Vec::new();
         };
 
         let node = ctx.query();
-        let Some(target_path) = module_info
-            .get_import_path_by_js_node(node)
-            .and_then(JsImportPath::as_path)
-        else {
+        let Some(import_path) = module_info.get_import_path_by_js_node(node) else {
+            return Vec::new();
+        };
+        let resolved = import_path.resolve_js(ctx.db(), owner);
+        let Some(target_path) = resolved.path().as_path() else {
             return Vec::new();
         };
 
         match node {
             AnyJsImportLike::JsModuleSource(node) => {
-                get_deprecated_imports_from_module_source(node, target_path, ctx.module_graph())
+                get_deprecated_imports_from_module_source(node, target_path, ctx.db())
             }
 
             // TODO: require() and import() calls should also be handled here, but tracking the
@@ -123,9 +129,9 @@ impl Rule for NoDeprecatedImports {
 fn get_deprecated_imports_from_module_source(
     node: &JsModuleSource,
     target_path: &Utf8Path,
-    module_graph: &ModuleGraph,
+    module_db: &dyn ModuleDb,
 ) -> Vec<NoDeprecatedImportsState> {
-    let Some(module_info) = module_graph.js_module_info_for_path(target_path) else {
+    let Some(module_info) = module_db.module_for_path(target_path) else {
         return Vec::new();
     };
 
@@ -134,7 +140,7 @@ fn get_deprecated_imports_from_module_source(
     };
 
     import_clause.filter_map_all_imported_symbols(|name, range| {
-        find_deprecation(&module_info, module_graph, &name)
+        find_deprecation(module_info, module_db, &name)
             .map(|message| NoDeprecatedImportsState { range, message })
     })
 }
@@ -147,12 +153,13 @@ fn get_deprecated_imports_from_module_source(
 /// - Returns `Some(None)` if the symbol is deprecated but has no message.
 /// - Returns `None` if the symbol is not deprecated or cannot be found.
 fn find_deprecation(
-    module_info: &JsModuleInfo,
-    module_graph: &ModuleGraph,
-    name: &str,
+    module_info: ModuleInfo,
+    module_db: &dyn ModuleDb,
+    name: &Text,
 ) -> Option<Option<String>> {
-    module_info
-        .find_jsdoc_for_exported_symbol(module_graph, name)
+    let symbol = SymbolFromModuleInfo::new(module_db, name.text(), module_info);
+    find_jsdoc_for_exported_symbol(module_db, symbol)
+        .as_ref()
         .and_then(|jsdoc| {
             let mut is_deprecated = false;
             let mut message = String::new();

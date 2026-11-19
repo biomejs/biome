@@ -12,7 +12,13 @@ use crate::syntax::CssSyntaxFeatures;
 /// See: https://github.com/biomejs/biome/issues/7920
 pub(crate) fn skip_possible_tailwind_syntax(p: &mut CssParser) {
     if CssSyntaxFeatures::Tailwind.is_supported(p)
-        && p.at_ts(token_set![IDENT, T![source], T![theme], T![important]])
+        && p.at_ts(token_set![
+            IDENT,
+            T![prefix],
+            T![source],
+            T![theme],
+            T![important]
+        ])
     {
         if p.cur_text() == "prefix" || p.cur_text() == "source" || p.cur_text() == "theme" {
             p.parse_as_skipped_trivia_tokens(skip_tailwind_function_clause)

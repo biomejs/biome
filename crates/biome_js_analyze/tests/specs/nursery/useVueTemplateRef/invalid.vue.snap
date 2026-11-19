@@ -1,0 +1,87 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<template>
+  <div ref="root" />
+  <h1 ref="heading">Heading</h1>
+  <a href="" ref="link">Link</a>
+  <button ref="button">Content</button>
+</template>
+
+<script setup>
+import { ref, shallowRef } from "vue";
+
+const root = ref();
+const heading = ref(null);
+const link = shallowRef();
+const buttonRef = ref();
+</script>
+
+```
+
+# Diagnostics
+```
+invalid.vue:12:7 lint/nursery/useVueTemplateRef ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The template ref root is created with ref().
+  
+    10 │ import { ref, shallowRef } from "vue";
+    11 │ 
+  > 12 │ const root = ref();
+       │       ^^^^
+    13 │ const heading = ref(null);
+    14 │ const link = shallowRef();
+  
+  i Vue links this variable to the element only by its name, so renaming the variable breaks the link without warning.
+  
+  i Use useTemplateRef("root") instead, which names the element explicitly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:13:7 lint/nursery/useVueTemplateRef ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The template ref heading is created with ref().
+  
+    12 │ const root = ref();
+  > 13 │ const heading = ref(null);
+       │       ^^^^^^^
+    14 │ const link = shallowRef();
+    15 │ const buttonRef = ref();
+  
+  i Vue links this variable to the element only by its name, so renaming the variable breaks the link without warning.
+  
+  i Use useTemplateRef("heading") instead, which names the element explicitly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:14:7 lint/nursery/useVueTemplateRef ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The template ref link is created with shallowRef().
+  
+    12 │ const root = ref();
+    13 │ const heading = ref(null);
+  > 14 │ const link = shallowRef();
+       │       ^^^^
+    15 │ const buttonRef = ref();
+    16 │ </script>
+  
+  i Vue links this variable to the element only by its name, so renaming the variable breaks the link without warning.
+  
+  i Use useTemplateRef("link") instead, which names the element explicitly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

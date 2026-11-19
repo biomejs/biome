@@ -1,0 +1,10 @@
+// should not generate diagnostics
+const typed: () => void = function() {};
+const arrow: () => void = () => {};
+export const exported: () => void = () => {};
+const parenthesized: () => void = (function() {});
+
+type Handler = (value: string) => number;
+const handler: Handler = value => value.length;
+export const exportedHandler: Handler = function(value) { return value.length; };
+const typedFirst: Handler = value => value.length, typedSecond: Handler = function(value) { return value.length; };

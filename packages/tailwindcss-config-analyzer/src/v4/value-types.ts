@@ -9,7 +9,10 @@
 // When Tailwind adds or removes an arbitrary-value predicate, edit
 // `CSS_DATA_TYPES` and rerun codegen + the corresponding Rust predicate body
 // in `value_match.rs`. Named-path typed values are limited to parser-level
-// Number / Percentage / Ratio categories.
+// number / Percentage / Ratio categories. A bare number is further split by
+// which numbers Tailwind accepts: `Integer` (`isPositiveInteger`),
+// `Multiplier` (`isValidSpacingMultiplier`, a multiple of 0.25), or any
+// `Number`.
 
 // `FamilyName` and `GenericName` are part of Tailwind v4's `inferDataType`
 // catalog, but they are intentionally omitted here. Their only consumer is the
@@ -19,9 +22,25 @@
 // carrying the variants would only produce dead enum members and never-fired
 // predicates. Add them back if a future utility is found that disambiguates
 // property by these data types.
-export const NAMED_VALUE_TYPES = ["Number", "Percentage", "Ratio"] as const;
+export const NAMED_VALUE_TYPES = [
+	"Integer",
+	"Multiplier",
+	"Number",
+	"Percentage",
+	"Ratio",
+] as const;
 
 export type NamedValueType = (typeof NAMED_VALUE_TYPES)[number];
+
+// The `/modifier` a named branch accepts. Color utilities take an opacity
+// modifier (`bg-red-500/50`); font-size utilities take a line-height
+// modifier (`text-lg/8`, `text-lg/loose`); every other branch takes none,
+// so a modifier makes the candidate invalid (`w-1/foo`, `p-4/2`). Probed
+// per branch — the same value that detects a branch is re-probed with a
+// numeric and a leading-keyword modifier.
+export const MODIFIER_KINDS = ["None", "Opacity", "LineHeight"] as const;
+
+export type ModifierKind = (typeof MODIFIER_KINDS)[number];
 
 export const CSS_DATA_TYPES = [
 	"Color",

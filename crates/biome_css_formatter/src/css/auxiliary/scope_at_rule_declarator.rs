@@ -13,7 +13,10 @@ impl FormatNodeRule<CssScopeAtRuleDeclarator> for FormatCssScopeAtRuleDeclarator
     ) -> FormatResult<()> {
         let CssScopeAtRuleDeclaratorFields { scope_token, range } = node.as_fields();
 
-        write!(f, [scope_token.format()])?;
+        write!(
+            f,
+            [scope_token.format()?.with_text_case(CssCase::Lowercase)]
+        )?;
 
         if range.is_some() {
             write!(f, [space(), range.format()])?;

@@ -1,0 +1,47 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/embeds/containers.md
+---
+
+# Input
+
+```md
+- item
+
+  ```js
+  const   listed = 1
+  ```
+
+> ```js
+> const   quoted = 2
+> ```
+
+```
+
+
+# Options
+
+```json
+{
+  "markdown": {
+    "parser": {
+      "frontmatter": true
+    }
+  }
+}
+```
+
+# Formatted
+
+```md
+- item
+
+  ```js
+  const   listed = 1
+  ```
+
+> ```js
+> const   quoted = 2
+> ```
+
+```

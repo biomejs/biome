@@ -1,0 +1,8 @@
+[
+	"!foo === bar",
+	"!foo !== bar",
+	"if (!a === b) {}",
+	"if (!a !== b) {}",
+	"!a === b ? c : d",
+	"!result !== expected"
+]

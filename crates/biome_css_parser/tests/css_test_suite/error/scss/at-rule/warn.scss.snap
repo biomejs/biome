@@ -19,61 +19,40 @@ CssRoot {
     items: CssRootItemList [
         CssAtRule {
             at_token: AT@0..1 "@" [] [],
-            rule: CssBogusAtRule {
-                items: [
-                    WARN_KW@1..6 "warn" [] [Whitespace(" ")],
-                    CssBogus {
-                        items: [
-                            CssBogus {
-                                items: [
-                                    CssBogus {
-                                        items: [
-                                            L_PAREN@6..7 "(" [] [],
-                                            CssBogus {
-                                                items: [
-                                                    CssBogus {
-                                                        items: [
-                                                            ScssListExpressionElement {
-                                                                value: ScssExpression {
-                                                                    items: ScssExpressionItemList [
-                                                                        CssNumber {
-                                                                            value_token: CSS_NUMBER_LITERAL@7..8 "1" [] [],
-                                                                        },
-                                                                    ],
-                                                                },
-                                                            },
-                                                            COMMA@8..10 "," [] [Whitespace(" ")],
-                                                            CssBogus {
-                                                                items: [
-                                                                    CssBogus {
-                                                                        items: [
-                                                                            CssBogus {
-                                                                                items: [
-                                                                                    CssNumber {
-                                                                                        value_token: CSS_NUMBER_LITERAL@10..11 "2" [] [],
-                                                                                    },
-                                                                                    CssBogusPropertyValue {
-                                                                                        items: [
-                                                                                            SEMICOLON@11..12 ";" [] [],
-                                                                                        ],
-                                                                                    },
-                                                                                ],
-                                                                            },
-                                                                        ],
-                                                                    },
-                                                                ],
-                                                            },
-                                                        ],
-                                                    },
-                                                ],
-                                            },
-                                        ],
+            rule: ScssWarnAtRule {
+                warn_token: WARN_KW@1..6 "warn" [] [Whitespace(" ")],
+                value: ScssExpression {
+                    items: ScssExpressionItemList [
+                        ScssParenthesizedExpression {
+                            l_paren_token: L_PAREN@6..7 "(" [] [],
+                            expression: ScssListExpression {
+                                elements: ScssListExpressionElementList [
+                                    ScssListExpressionElement {
+                                        value: ScssExpression {
+                                            items: ScssExpressionItemList [
+                                                CssNumber {
+                                                    value_token: CSS_NUMBER_LITERAL@7..8 "1" [] [],
+                                                },
+                                            ],
+                                        },
+                                    },
+                                    COMMA@8..10 "," [] [Whitespace(" ")],
+                                    ScssListExpressionElement {
+                                        value: ScssExpression {
+                                            items: ScssExpressionItemList [
+                                                CssNumber {
+                                                    value_token: CSS_NUMBER_LITERAL@10..11 "2" [] [],
+                                                },
+                                            ],
+                                        },
                                     },
                                 ],
                             },
-                        ],
-                    },
-                ],
+                            r_paren_token: missing (required),
+                        },
+                    ],
+                },
+                semicolon_token: SEMICOLON@11..12 ";" [] [],
             },
         },
     ],
@@ -89,27 +68,27 @@ CssRoot {
   1: CSS_ROOT_ITEM_LIST@0..12
     0: CSS_AT_RULE@0..12
       0: AT@0..1 "@" [] []
-      1: CSS_BOGUS_AT_RULE@1..12
+      1: SCSS_WARN_AT_RULE@1..12
         0: WARN_KW@1..6 "warn" [] [Whitespace(" ")]
-        1: CSS_BOGUS@6..12
-          0: CSS_BOGUS@6..12
-            0: CSS_BOGUS@6..12
+        1: SCSS_EXPRESSION@6..11
+          0: SCSS_EXPRESSION_ITEM_LIST@6..11
+            0: SCSS_PARENTHESIZED_EXPRESSION@6..11
               0: L_PAREN@6..7 "(" [] []
-              1: CSS_BOGUS@7..12
-                0: CSS_BOGUS@7..12
+              1: SCSS_LIST_EXPRESSION@7..11
+                0: SCSS_LIST_EXPRESSION_ELEMENT_LIST@7..11
                   0: SCSS_LIST_EXPRESSION_ELEMENT@7..8
                     0: SCSS_EXPRESSION@7..8
                       0: SCSS_EXPRESSION_ITEM_LIST@7..8
                         0: CSS_NUMBER@7..8
                           0: CSS_NUMBER_LITERAL@7..8 "1" [] []
                   1: COMMA@8..10 "," [] [Whitespace(" ")]
-                  2: CSS_BOGUS@10..12
-                    0: CSS_BOGUS@10..12
-                      0: CSS_BOGUS@10..12
+                  2: SCSS_LIST_EXPRESSION_ELEMENT@10..11
+                    0: SCSS_EXPRESSION@10..11
+                      0: SCSS_EXPRESSION_ITEM_LIST@10..11
                         0: CSS_NUMBER@10..11
                           0: CSS_NUMBER_LITERAL@10..11 "2" [] []
-                        1: CSS_BOGUS_PROPERTY_VALUE@11..12
-                          0: SEMICOLON@11..12 ";" [] []
+              2: (empty)
+        2: SEMICOLON@11..12 ";" [] []
   2: EOF@12..13 "" [Newline("\n")] []
 
 ```
@@ -119,30 +98,12 @@ CssRoot {
 ```
 warn.scss:1:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected a SCSS expression but instead found ';'.
+  × expected `)` but instead found `;`
   
   > 1 │ @warn (1, 2;
       │            ^
     2 │ 
   
-  i Expected a SCSS expression here.
-  
-  > 1 │ @warn (1, 2;
-      │            ^
-    2 │ 
-  
-warn.scss:2:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `)` but instead the file ends
-  
-    1 │ @warn (1, 2;
-  > 2 │ 
-      │ 
-  
-  i the file ends here
-  
-    1 │ @warn (1, 2;
-  > 2 │ 
-      │ 
+  i Remove ;
   
 ```

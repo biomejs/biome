@@ -1506,22 +1506,23 @@ CssRoot {
                         at_token: AT@2291..2292 "@" [] [],
                         declarator: CssContainerAtRuleDeclarator {
                             container_token: CONTAINER_KW@2292..2302 "container" [] [Whitespace(" ")],
-                            name: CssCustomIdentifier {
-                                value_token: IDENT@2302..2306 "not" [] [Whitespace(" ")],
-                            },
-                            query: CssContainerSizeFeatureInParens {
-                                l_paren_token: L_PAREN@2306..2307 "(" [] [],
-                                feature: CssQueryFeaturePlain {
-                                    name: CssIdentifier {
-                                        value_token: IDENT@2307..2316 "min-width" [] [],
+                            name: missing (optional),
+                            query: CssContainerNotQuery {
+                                not_token: NOT_KW@2302..2306 "not" [] [Whitespace(" ")],
+                                query: CssContainerSizeFeatureInParens {
+                                    l_paren_token: L_PAREN@2306..2307 "(" [] [],
+                                    feature: CssQueryFeaturePlain {
+                                        name: CssIdentifier {
+                                            value_token: IDENT@2307..2316 "min-width" [] [],
+                                        },
+                                        colon_token: COLON@2316..2318 ":" [] [Whitespace(" ")],
+                                        value: CssRegularDimension {
+                                            value_token: CSS_NUMBER_LITERAL@2318..2321 "900" [] [],
+                                            unit_token: IDENT@2321..2323 "px" [] [],
+                                        },
                                     },
-                                    colon_token: COLON@2316..2318 ":" [] [Whitespace(" ")],
-                                    value: CssRegularDimension {
-                                        value_token: CSS_NUMBER_LITERAL@2318..2321 "900" [] [],
-                                        unit_token: IDENT@2321..2323 "px" [] [],
-                                    },
+                                    r_paren_token: R_PAREN@2323..2324 ")" [] [],
                                 },
-                                r_paren_token: R_PAREN@2323..2324 ")" [] [],
                             },
                         },
                     },
@@ -3179,18 +3180,19 @@ CssRoot {
             0: AT@2291..2292 "@" [] []
             1: CSS_CONTAINER_AT_RULE_DECLARATOR@2292..2324
               0: CONTAINER_KW@2292..2302 "container" [] [Whitespace(" ")]
-              1: CSS_CUSTOM_IDENTIFIER@2302..2306
-                0: IDENT@2302..2306 "not" [] [Whitespace(" ")]
-              2: CSS_CONTAINER_SIZE_FEATURE_IN_PARENS@2306..2324
-                0: L_PAREN@2306..2307 "(" [] []
-                1: CSS_QUERY_FEATURE_PLAIN@2307..2323
-                  0: CSS_IDENTIFIER@2307..2316
-                    0: IDENT@2307..2316 "min-width" [] []
-                  1: COLON@2316..2318 ":" [] [Whitespace(" ")]
-                  2: CSS_REGULAR_DIMENSION@2318..2323
-                    0: CSS_NUMBER_LITERAL@2318..2321 "900" [] []
-                    1: IDENT@2321..2323 "px" [] []
-                2: R_PAREN@2323..2324 ")" [] []
+              1: (empty)
+              2: CSS_CONTAINER_NOT_QUERY@2302..2324
+                0: NOT_KW@2302..2306 "not" [] [Whitespace(" ")]
+                1: CSS_CONTAINER_SIZE_FEATURE_IN_PARENS@2306..2324
+                  0: L_PAREN@2306..2307 "(" [] []
+                  1: CSS_QUERY_FEATURE_PLAIN@2307..2323
+                    0: CSS_IDENTIFIER@2307..2316
+                      0: IDENT@2307..2316 "min-width" [] []
+                    1: COLON@2316..2318 ":" [] [Whitespace(" ")]
+                    2: CSS_REGULAR_DIMENSION@2318..2323
+                      0: CSS_NUMBER_LITERAL@2318..2321 "900" [] []
+                      1: IDENT@2321..2323 "px" [] []
+                  2: R_PAREN@2323..2324 ")" [] []
           2: R_PAREN@2324..2325 ")" [] []
           3: SEMICOLON@2325..2326 ";" [] []
     31: CSS_AT_RULE@2326..2373

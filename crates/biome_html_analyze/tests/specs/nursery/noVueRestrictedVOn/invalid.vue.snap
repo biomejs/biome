@@ -1,0 +1,294 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<template>
+  <input @focusin="onFocus" />
+  <input v-on:focusin="onFocus" />
+  <input @focusin.once="onFocus" />
+  <form @submit="save"></form>
+  <div v-on="handlers"></div>
+  <a @click.prevent="onClick"></a>
+  <a v-on:click.stop.prevent="onClick"></a>
+  <MyButton @click="onClick" />
+  <MyButton v-on:click="onClick"></MyButton>
+  <input @keyup.ctrl.enter="onKeyup" />
+  <Foo.Bar @select="onSelect" />
+  <MyInput @update:modelValue="onUpdate" />
+  <input @focusin />
+  <input @focusin = "onFocus" />
+</template>
+
+```
+
+# Diagnostics
+```
+invalid.vue:3:10 lint/nursery/noVueRestrictedVOn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The event listener @focusin is restricted in this project.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <template>
+  > 3 │   <input @focusin="onFocus" />
+      │          ^^^^^^^^
+    4 │   <input v-on:focusin="onFocus" />
+    5 │   <input @focusin.once="onFocus" />
+  
+  i Remove the event listener or use an allowed alternative. If this event listener should be allowed, update the listeners option.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:4:10 lint/nursery/noVueRestrictedVOn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The event listener v-on:focusin is restricted in this project.
+  
+    2 │ <template>
+    3 │   <input @focusin="onFocus" />
+  > 4 │   <input v-on:focusin="onFocus" />
+      │          ^^^^^^^^^^^^
+    5 │   <input @focusin.once="onFocus" />
+    6 │   <form @submit="save"></form>
+  
+  i Remove the event listener or use an allowed alternative. If this event listener should be allowed, update the listeners option.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:5:10 lint/nursery/noVueRestrictedVOn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The event listener @focusin.once is restricted in this project.
+  
+    3 │   <input @focusin="onFocus" />
+    4 │   <input v-on:focusin="onFocus" />
+  > 5 │   <input @focusin.once="onFocus" />
+      │          ^^^^^^^^^^^^^
+    6 │   <form @submit="save"></form>
+    7 │   <div v-on="handlers"></div>
+  
+  i Remove the event listener or use an allowed alternative. If this event listener should be allowed, update the listeners option.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:6:9 lint/nursery/noVueRestrictedVOn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The event listener @submit is restricted in this project.
+  
+    4 │   <input v-on:focusin="onFocus" />
+    5 │   <input @focusin.once="onFocus" />
+  > 6 │   <form @submit="save"></form>
+      │         ^^^^^^^
+    7 │   <div v-on="handlers"></div>
+    8 │   <a @click.prevent="onClick"></a>
+  
+  i Use the onSave prop instead.
+  
+  i Remove the event listener or use an allowed alternative. If this event listener should be allowed, update the listeners option.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:7:8 lint/nursery/noVueRestrictedVOn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The event listener v-on is restricted in this project.
+  
+    5 │   <input @focusin.once="onFocus" />
+    6 │   <form @submit="save"></form>
+  > 7 │   <div v-on="handlers"></div>
+      │        ^^^^
+    8 │   <a @click.prevent="onClick"></a>
+    9 │   <a v-on:click.stop.prevent="onClick"></a>
+  
+  i Remove the event listener or use an allowed alternative. If this event listener should be allowed, update the listeners option.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:8:6 lint/nursery/noVueRestrictedVOn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The event listener @click.prevent is restricted in this project.
+  
+     6 │   <form @submit="save"></form>
+     7 │   <div v-on="handlers"></div>
+   > 8 │   <a @click.prevent="onClick"></a>
+       │      ^^^^^^^^^^^^^^
+     9 │   <a v-on:click.stop.prevent="onClick"></a>
+    10 │   <MyButton @click="onClick" />
+  
+  i Remove the event listener or use an allowed alternative. If this event listener should be allowed, update the listeners option.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:9:6 lint/nursery/noVueRestrictedVOn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The event listener v-on:click.stop.prevent is restricted in this project.
+  
+     7 │   <div v-on="handlers"></div>
+     8 │   <a @click.prevent="onClick"></a>
+   > 9 │   <a v-on:click.stop.prevent="onClick"></a>
+       │      ^^^^^^^^^^^^^^^^^^^^^^^
+    10 │   <MyButton @click="onClick" />
+    11 │   <MyButton v-on:click="onClick"></MyButton>
+  
+  i Remove the event listener or use an allowed alternative. If this event listener should be allowed, update the listeners option.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:10:13 lint/nursery/noVueRestrictedVOn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The event listener @click is restricted in this project.
+  
+     8 │   <a @click.prevent="onClick"></a>
+     9 │   <a v-on:click.stop.prevent="onClick"></a>
+  > 10 │   <MyButton @click="onClick" />
+       │             ^^^^^^
+    11 │   <MyButton v-on:click="onClick"></MyButton>
+    12 │   <input @keyup.ctrl.enter="onKeyup" />
+  
+  i Remove the event listener or use an allowed alternative. If this event listener should be allowed, update the listeners option.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:11:13 lint/nursery/noVueRestrictedVOn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The event listener v-on:click is restricted in this project.
+  
+     9 │   <a v-on:click.stop.prevent="onClick"></a>
+    10 │   <MyButton @click="onClick" />
+  > 11 │   <MyButton v-on:click="onClick"></MyButton>
+       │             ^^^^^^^^^^
+    12 │   <input @keyup.ctrl.enter="onKeyup" />
+    13 │   <Foo.Bar @select="onSelect" />
+  
+  i Remove the event listener or use an allowed alternative. If this event listener should be allowed, update the listeners option.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:12:10 lint/nursery/noVueRestrictedVOn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The event listener @keyup.ctrl.enter is restricted in this project.
+  
+    10 │   <MyButton @click="onClick" />
+    11 │   <MyButton v-on:click="onClick"></MyButton>
+  > 12 │   <input @keyup.ctrl.enter="onKeyup" />
+       │          ^^^^^^^^^^^^^^^^^
+    13 │   <Foo.Bar @select="onSelect" />
+    14 │   <MyInput @update:modelValue="onUpdate" />
+  
+  i Remove the event listener or use an allowed alternative. If this event listener should be allowed, update the listeners option.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:13:12 lint/nursery/noVueRestrictedVOn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The event listener @select is restricted in this project.
+  
+    11 │   <MyButton v-on:click="onClick"></MyButton>
+    12 │   <input @keyup.ctrl.enter="onKeyup" />
+  > 13 │   <Foo.Bar @select="onSelect" />
+       │            ^^^^^^^
+    14 │   <MyInput @update:modelValue="onUpdate" />
+    15 │   <input @focusin />
+  
+  i Remove the event listener or use an allowed alternative. If this event listener should be allowed, update the listeners option.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:14:12 lint/nursery/noVueRestrictedVOn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The event listener @update:modelValue is restricted in this project.
+  
+    12 │   <input @keyup.ctrl.enter="onKeyup" />
+    13 │   <Foo.Bar @select="onSelect" />
+  > 14 │   <MyInput @update:modelValue="onUpdate" />
+       │            ^^^^^^^^^^^^^^^^^^
+    15 │   <input @focusin />
+    16 │   <input @focusin = "onFocus" />
+  
+  i Remove the event listener or use an allowed alternative. If this event listener should be allowed, update the listeners option.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:15:10 lint/nursery/noVueRestrictedVOn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The event listener @focusin is restricted in this project.
+  
+    13 │   <Foo.Bar @select="onSelect" />
+    14 │   <MyInput @update:modelValue="onUpdate" />
+  > 15 │   <input @focusin />
+       │          ^^^^^^^^
+    16 │   <input @focusin = "onFocus" />
+    17 │ </template>
+  
+  i Remove the event listener or use an allowed alternative. If this event listener should be allowed, update the listeners option.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:16:10 lint/nursery/noVueRestrictedVOn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The event listener @focusin is restricted in this project.
+  
+    14 │   <MyInput @update:modelValue="onUpdate" />
+    15 │   <input @focusin />
+  > 16 │   <input @focusin = "onFocus" />
+       │          ^^^^^^^^
+    17 │ </template>
+    18 │ 
+  
+  i Remove the event listener or use an allowed alternative. If this event listener should be allowed, update the listeners option.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

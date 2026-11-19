@@ -1,7 +1,9 @@
 use crate::prelude::*;
 use biome_formatter::write;
 
-use crate::utils::format_node_without_comments::FormatAnyJsExpressionWithoutComments;
+use crate::utils::format_node_without_comments::{
+    FormatAnyJsExpressionWithoutComments, formats_own_dangling_comments,
+};
 use biome_js_syntax::{JsxSpreadChild, JsxSpreadChildFields};
 
 #[derive(Debug, Clone, Default)]
@@ -17,6 +19,7 @@ impl FormatNodeRule<JsxSpreadChild> for FormatJsxSpreadChild {
         } = node.as_fields();
 
         let expression = expression?;
+        let delimiter_spacing = f.options().delimiter_spacing().value();
 
         let format_inner = format_with(|f| {
             if f.comments().is_suppressed(expression.syntax()) {
@@ -37,10 +40,15 @@ impl FormatNodeRule<JsxSpreadChild> for FormatJsxSpreadChild {
                     ]
                 )?;
                 FormatAnyJsExpressionWithoutComments.fmt(&expression, f)?;
+                if !formats_own_dangling_comments(&expression) {
+                    write!(
+                        f,
+                        [format_dangling_comments(expression.syntax()).with_soft_block_indent()]
+                    )?;
+                }
                 write!(
                     f,
                     [
-                        format_dangling_comments(expression.syntax()).with_soft_block_indent(),
                         format_trailing_comments(expression.syntax()),
                         line_suffix_boundary()
                     ]
@@ -51,7 +59,21 @@ impl FormatNodeRule<JsxSpreadChild> for FormatJsxSpreadChild {
         write!(f, [l_curly_token.format()])?;
 
         if f.comments().has_comments(expression.syntax()) {
-            write!(f, [soft_block_indent(&format_inner)])?;
+            if delimiter_spacing {
+                // With delimiter spacing, try to fit on one line with spaces
+                write!(
+                    f,
+                    [group(&soft_block_indent_with_maybe_space(
+                        &format_inner,
+                        true
+                    ))]
+                )?;
+            } else {
+                // Without delimiter spacing, always break to multiple lines
+                write!(f, [soft_block_indent(&format_inner)])?;
+            }
+        } else if delimiter_spacing {
+            write!(f, [space(), format_inner, space()])?;
         } else {
             write!(f, [format_inner])?;
         }

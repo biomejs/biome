@@ -1,12 +1,12 @@
 //! Utilities for high-level parsing of js code.
 
 use crate::*;
-pub use biome_js_syntax::{
-    AnyJsRoot, JsFileSource, JsLanguage, JsModule, JsScript, JsSyntaxNode, ModuleKind,
-};
+pub use biome_js_syntax::{AnyJsRoot, JsLanguage, JsModule, JsScript, JsSyntaxNode};
+use biome_languages::JsFileSource;
+use biome_languages::javascript::ModuleKind;
 use biome_parser::token_source::Trivia;
 use biome_parser::{AnyParse, EmbeddedNodeParse, NodeParse, event::Event};
-use biome_rowan::{AstNode, NodeCache, SyntaxNodeWithOffset};
+use biome_rowan::{AstNode, NodeCache, SyntaxNodeWithOffset, TextRange};
 use std::marker::PhantomData;
 
 /// A utility struct for managing the result of a parser job
@@ -143,8 +143,9 @@ fn parse_common(
     text: &str,
     source_type: JsFileSource,
     options: JsParserOptions,
+    metavariables: &[TextRange],
 ) -> (Vec<Event<JsSyntaxKind>>, Vec<ParseDiagnostic>, Vec<Trivia>) {
-    let mut parser = JsParser::new(text, source_type, options);
+    let mut parser = JsParser::new_with_metavariables(text, source_type, options, metavariables);
     syntax::program::parse(&mut parser);
 
     let (events, trivia, errors) = parser.finish();
@@ -157,7 +158,8 @@ fn parse_common(
 ///
 /// ```
 /// use biome_js_parser::{JsParserOptions, parse_script};
-/// use biome_js_syntax::{JsSyntaxToken, JsFileSource, JsSyntaxList, JsComputedMemberExpression};
+/// use biome_js_syntax::{JsSyntaxToken, JsSyntaxList, JsComputedMemberExpression};
+/// use biome_languages::JsFileSource;
 /// use biome_rowan::{AstNode, Direction};
 ///
 /// let parse = parse_script("foo.bar[2]", JsParserOptions::default());
@@ -241,7 +243,7 @@ pub fn parse_module(text: &str, options: JsParserOptions) -> Parse<JsModule> {
 ///
 /// ```
 /// use biome_js_parser::{JsParserOptions, parse};
-/// use biome_js_syntax::{LanguageVariant, LanguageVersion, ModuleKind, JsFileSource};
+/// use biome_languages::{javascript::{LanguageVariant, LanguageVersion, ModuleKind}, JsFileSource};
 /// // parse source text as TypeScript
 /// let mut module = JsFileSource::ts();
 /// let mut parsed = parse("type F = {}", module, JsParserOptions::default());
@@ -269,7 +271,7 @@ pub fn parse(text: &str, source_type: JsFileSource, options: JsParserOptions) ->
 ///
 /// ```
 /// use biome_js_parser::{JsParserOptions, parse_js_with_cache};
-/// use biome_js_syntax::JsFileSource;
+/// use biome_languages::JsFileSource;
 /// use biome_rowan::NodeCache;
 ///
 /// let source_type = JsFileSource::js_module();
@@ -289,7 +291,29 @@ pub fn parse_js_with_cache(
     options: JsParserOptions,
     cache: &mut NodeCache,
 ) -> Parse<AnyJsRoot> {
-    let (events, errors, tokens) = parse_common(text, source_type, options);
+    parse_js_with_metavariables_and_cache(text, source_type, options, &[], cache)
+}
+
+/// Parses the provided string as an EcmaScript program, lexing the given source
+/// ranges as Grit metavariables.
+pub fn parse_with_metavariables(
+    text: &str,
+    source_type: JsFileSource,
+    options: JsParserOptions,
+    metavariables: &[TextRange],
+) -> Parse<AnyJsRoot> {
+    let mut cache = NodeCache::default();
+    parse_js_with_metavariables_and_cache(text, source_type, options, metavariables, &mut cache)
+}
+
+fn parse_js_with_metavariables_and_cache(
+    text: &str,
+    source_type: JsFileSource,
+    options: JsParserOptions,
+    metavariables: &[TextRange],
+    cache: &mut NodeCache,
+) -> Parse<AnyJsRoot> {
+    let (events, errors, tokens) = parse_common(text, source_type, options, metavariables);
     let mut tree_sink = JsLosslessTreeSink::with_cache(text, &tokens, cache);
     biome_parser::event::process(&mut tree_sink, events, errors);
     let (green, parse_errors) = tree_sink.finish();
@@ -363,7 +387,7 @@ impl JsOffsetParse {
 /// # Examples
 /// ```
 /// use biome_js_parser::{JsParserOptions, parse_js_with_offset};
-/// use biome_js_syntax::JsFileSource;
+/// use biome_languages::JsFileSource;
 /// use biome_rowan::TextSize;
 ///
 /// // Parsing embedded JavaScript starting at position 100 in an HTML document
@@ -400,7 +424,7 @@ pub fn parse_js_with_offset_and_cache(
     options: JsParserOptions,
     cache: &mut NodeCache,
 ) -> JsOffsetParse {
-    let (events, errors, tokens) = parse_common(text, source_type, options);
+    let (events, errors, tokens) = parse_common(text, source_type, options, &[]);
     let mut tree_sink =
         crate::JsOffsetLosslessTreeSink::with_cache(text, &tokens, cache, base_offset);
     biome_parser::event::process(&mut tree_sink, events, errors);
@@ -439,8 +463,32 @@ pub fn parse_module_with_offset(
 
 #[cfg(test)]
 mod tests {
-    use crate::{JsFileSource, JsParserOptions, parse_js_with_cache, parse_js_with_offset};
+    use crate::{JsParserOptions, parse, parse_js_with_cache, parse_js_with_offset, parse_script};
+    use biome_languages::JsFileSource;
+    use biome_languages::javascript::JsEmbeddingKind;
+
     use biome_rowan::TextSize;
+
+    #[test]
+    fn deeply_nested_expression_reports_error() {
+        let source = format!("{}a;", "a+".repeat(50_000));
+
+        std::thread::Builder::new()
+            .stack_size(2 * 1024 * 1024)
+            .spawn(move || {
+                let parse = parse_script(&source, JsParserOptions::default());
+                let parsed_source = parse.syntax().text_with_trivia().to_string();
+                let diagnostics_len = parse.diagnostics().len();
+
+                drop(parse);
+
+                assert_eq!(parsed_source, source);
+                assert_eq!(diagnostics_len, 1);
+            })
+            .expect("must create constrained-stack thread")
+            .join()
+            .expect("constrained-stack parse must complete");
+    }
 
     #[test]
     fn test_offset_parsing_basic() {
@@ -508,5 +556,21 @@ mod tests {
             offset_parse.syntax().inner().text_with_trivia().to_string(),
             normal_parse.syntax().text_with_trivia().to_string()
         );
+    }
+
+    #[test]
+    fn comment_only_template_expression_is_an_error_outside_astro() {
+        let vue = JsFileSource::js_module().with_embedding_kind(JsEmbeddingKind::Vue {
+            is_class_attribute: false,
+            setup: false,
+            is_source: false,
+            event_handler: false,
+            allow_statements: false,
+            slot_props: false,
+            generics_list: false,
+        });
+        let parse = parse("/* only a comment */", vue, JsParserOptions::default());
+
+        assert!(parse.has_errors(), "only Astro allows a comment-only body");
     }
 }

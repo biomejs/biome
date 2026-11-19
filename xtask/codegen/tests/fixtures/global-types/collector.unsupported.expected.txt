@@ -1,0 +1,8 @@
+records
+coverage
+OutOfScope { reason: "unsupported_import", file: "collector.unsupported.d.ts", scope: Global, range: 0..22, syntax_kind: JS_IMPORT }
+Diagnostic(CoverageDiagnostic { category: "missing_variable_annotation", file: "collector.unsupported.d.ts", scope: Global, range: 35..41, syntax_kind: JS_VARIABLE_DECLARATOR, detail: None })
+OutOfScope { reason: "unsupported_export_clause", file: "collector.unsupported.d.ts", scope: Global, range: 50..64, syntax_kind: JS_EXPORT_NAMED_CLAUSE }
+Diagnostic(CoverageDiagnostic { category: "unsupported_declaration", file: "collector.unsupported.d.ts", scope: Global, range: 73..97, syntax_kind: JS_CLASS_DECLARATION, detail: None })
+Diagnostic(CoverageDiagnostic { category: "unsupported_declaration", file: "collector.unsupported.d.ts", scope: Global, range: 106..121, syntax_kind: TS_ENUM_DECLARATION, detail: None })
+Diagnostic(CoverageDiagnostic { category: "unsupported_declaration", file: "collector.unsupported.d.ts", scope: Global, range: 122..132, syntax_kind: JS_CLASS_DECLARATION, detail: None })

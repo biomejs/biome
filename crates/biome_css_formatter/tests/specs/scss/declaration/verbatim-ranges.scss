@@ -1,0 +1,4 @@
+.ranges{
+background:/* before url */url( images/#{ /* first */ $name   /* last */ }.png )/* after url */;
+content:/* before string */"#{ /* first */ mix(  ".5" , $amount ) /* last */ }"/* after string */;
+}

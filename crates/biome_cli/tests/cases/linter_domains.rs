@@ -1,8 +1,8 @@
-use crate::run_cli;
+use crate::TestArgs as Args;
 use crate::snap_test::{SnapshotPayload, assert_cli_snapshot};
+use crate::{run_cli, run_cli_with_server_workspace};
 use biome_console::BufferConsole;
 use biome_fs::MemoryFileSystem;
-use bpaf::Args;
 use camino::Utf8Path;
 
 #[test]
@@ -551,6 +551,270 @@ export function Component() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "group_enable_and_domain_enable_are_additive",
+        fs,
+        console,
+        result,
+    ));
+}
+
+/// A rule that belongs to several domains stays enabled when one of its domains
+/// is disabled but another one is enabled.
+#[test]
+fn disabled_domain_does_not_disable_rules_of_enabled_domain() {
+    let mut console = BufferConsole::default();
+    let fs = MemoryFileSystem::default();
+    let config = Utf8Path::new("biome.json");
+    fs.insert(
+        config.into(),
+        br#"{
+    "linter": {
+        "domains": {
+            "react": "all",
+            "next": "none"
+        }
+    }
+}
+"#,
+    );
+    let test1 = Utf8Path::new("test1.jsx");
+    fs.insert(
+        test1.into(),
+        br#"import { useEffect } from "react";
+
+export function Clock({ tick, onTick }) {
+    useEffect(() => {
+        onTick(tick);
+    }, []);
+    return null;
+}
+"#,
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", test1.as_str()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "disabled_domain_does_not_disable_rules_of_enabled_domain",
+        fs,
+        console,
+        result,
+    ));
+}
+
+/// A rule enabled explicitly stays enabled when its domain is disabled.
+#[test]
+fn explicitly_enabled_rule_is_not_disabled_by_domain() {
+    let mut console = BufferConsole::default();
+    let fs = MemoryFileSystem::default();
+    let config = Utf8Path::new("biome.json");
+    fs.insert(
+        config.into(),
+        br#"{
+    "linter": {
+        "rules": {
+            "correctness": {
+                "useExhaustiveDependencies": "error"
+            }
+        },
+        "domains": {
+            "react": "none"
+        }
+    }
+}
+"#,
+    );
+    let test1 = Utf8Path::new("test1.jsx");
+    fs.insert(
+        test1.into(),
+        br#"import { useEffect } from "react";
+
+export function Clock({ tick, onTick }) {
+    useEffect(() => {
+        onTick(tick);
+    }, []);
+    return null;
+}
+"#,
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", test1.as_str()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "explicitly_enabled_rule_is_not_disabled_by_domain",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn explicitly_enabled_override_rule_is_not_disabled_by_domain() {
+    let mut console = BufferConsole::default();
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        Utf8Path::new("biome.json").into(),
+        br#"{
+    "linter": {
+        "domains": {
+            "react": "none"
+        }
+    },
+    "overrides": [{
+        "includes": ["test.jsx"],
+        "linter": {
+            "rules": {
+                "correctness": {
+                    "useExhaustiveDependencies": "error"
+                }
+            }
+        }
+    }]
+}
+"#,
+    );
+    let test = Utf8Path::new("test.jsx");
+    fs.insert(
+        test.into(),
+        br#"import { useEffect } from "react";
+
+export function Clock({ tick, onTick }) {
+    useEffect(() => {
+        onTick(tick);
+    }, []);
+    return null;
+}
+"#,
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", test.as_str()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "explicitly_enabled_override_rule_is_not_disabled_by_domain",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn rules_enabled_in_overrides_enable_project_and_types_domains() {
+    let mut console = BufferConsole::default();
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        Utf8Path::new("biome.json").into(),
+        br#"{
+    "overrides": [{
+        "includes": ["src/**"],
+        "linter": {
+            "rules": {
+                "correctness": { "noUnresolvedImports": "error" },
+                "nursery": { "noFloatingPromises": "error" },
+                "suspicious": { "noConsole": "error" }
+            }
+        }
+    }]
+}
+"#,
+    );
+    let index = Utf8Path::new("src/index.ts");
+    fs.insert(
+        index.into(),
+        br#"import { missing } from "./other.ts";
+
+async function load(): Promise<string> {
+	return "data";
+}
+
+export function main(): void {
+	console.log(missing);
+	load();
+}
+"#,
+    );
+    fs.insert(
+        Utf8Path::new("src/other.ts").into(),
+        b"export const other = 1;\n",
+    );
+
+    let (fs, result) = run_cli_with_server_workspace(
+        fs,
+        &mut console,
+        Args::from(["check", index.as_str()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "rules_enabled_in_overrides_enable_project_and_types_domains",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn unrelated_override_rule_does_not_enable_rules_from_disabled_domain() {
+    let mut console = BufferConsole::default();
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        Utf8Path::new("biome.json").into(),
+        br#"{
+    "linter": {
+        "rules": { "correctness": "error" },
+        "domains": { "solid": "none" }
+    },
+    "overrides": [{
+        "includes": ["**"],
+        "linter": {
+            "rules": {
+                "correctness": { "noUnusedVariables": "off" }
+            }
+        }
+    }]
+}
+"#,
+    );
+    let card = Utf8Path::new("card.tsx");
+    fs.insert(
+        card.into(),
+        br#"export function Card({ title }: { title: string }) {
+    return <div>{title}</div>;
+}
+"#,
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", card.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "unrelated_override_rule_does_not_enable_rules_from_disabled_domain",
         fs,
         console,
         result,

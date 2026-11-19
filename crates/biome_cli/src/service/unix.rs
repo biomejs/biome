@@ -1,11 +1,13 @@
 use crate::logging::LogOptions;
 use biome_lsp::{ServerConnection, ServerFactory};
+use biome_package::node_semver::Version;
 use biome_service::WatcherOptions;
-use camino::Utf8PathBuf;
+use camino::{Utf8Path, Utf8PathBuf};
 use std::{
     convert::Infallible,
     env, fs,
     io::{self, ErrorKind},
+    os::unix::fs::{DirBuilderExt, FileTypeExt, MetadataExt, PermissionsExt},
     time::Duration,
 };
 use tokio::{
@@ -17,16 +19,68 @@ use tokio::{
     process::{Child, Command},
     time,
 };
-use tracing::{Instrument, debug, info};
+use tracing::{Instrument, debug, info, warn};
+
+/// Returns the directory containing the daemon sockets
+fn get_socket_dir() -> Utf8PathBuf {
+    biome_fs::ensure_cache_dir().join("biome-daemon")
+}
 
 /// Returns the filesystem path of the global socket used to communicate with
 /// the server daemon
 fn get_socket_name() -> Utf8PathBuf {
-    biome_fs::ensure_cache_dir().join(format!("biome-socket-{}", biome_configuration::VERSION))
+    get_socket_dir().join(format!("biome-socket-{}", biome_configuration::VERSION))
+}
+
+fn current_uid() -> u32 {
+    // SAFETY: `geteuid` is always successful and has no side effects
+    unsafe { libc::geteuid() }
+}
+
+/// Creates the socket directory at `path` if it doesn't exist, and ensures
+/// that only the current user can access it
+fn create_socket_dir(path: &Utf8Path) -> io::Result<()> {
+    if let Err(err) = fs::DirBuilder::new().mode(0o700).create(path)
+        && err.kind() != ErrorKind::AlreadyExists
+    {
+        return Err(err);
+    }
+
+    verify_socket_dir(path)
+}
+
+/// Ensures that `path` is a directory that only the current user can access.
+fn verify_socket_dir(path: &Utf8Path) -> io::Result<()> {
+    let metadata = fs::symlink_metadata(path)?;
+    if !metadata.is_dir() || metadata.uid() != current_uid() || metadata.mode() & 0o077 != 0 {
+        return Err(io::Error::new(
+            ErrorKind::PermissionDenied,
+            format!(
+                "The socket directory {path} must be a directory owned by the current user and inaccessible to other users."
+            ),
+        ));
+    }
+
+    Ok(())
 }
 
 pub(crate) fn enumerate_pipes() -> io::Result<impl Iterator<Item = (String, Utf8PathBuf)>> {
-    fs::read_dir(biome_fs::ensure_cache_dir()).map(|iter| {
+    let sockets = match enumerate_pipes_in(get_socket_dir()) {
+        Ok(sockets) => Some(sockets),
+        Err(err) if err.kind() == ErrorKind::NotFound => None,
+        Err(err) => return Err(err),
+    };
+
+    // Older versions created their sockets directly in the cache directory
+    let legacy_sockets = enumerate_pipes_in(biome_fs::ensure_cache_dir())?;
+
+    Ok(legacy_sockets.chain(sockets.into_iter().flatten()))
+}
+
+fn enumerate_pipes_in(
+    path: Utf8PathBuf,
+) -> io::Result<impl Iterator<Item = (String, Utf8PathBuf)>> {
+    fs::read_dir(&path).map(|iter| {
         iter.filter_map(|entry| {
             let entry = Utf8PathBuf::from_path_buf(entry.ok()?.path()).ok()?;
             let file_name = entry.file_name()?;
@@ -41,8 +95,69 @@ pub(crate) fn enumerate_pipes() -> io::Result<impl Iterator<Item = (String, Utf8
     })
 }
 
+async fn purge_old_sockets_in(cache_dir: &Utf8Path, current_version: &str) {
+    let Ok(current_version) = current_version.parse::<Version>() else {
+        warn!("Skipping stale socket cleanup because the current version is invalid");
+        return;
+    };
+
+    let sockets = match enumerate_pipes_in(cache_dir.to_path_buf()) {
+        Ok(sockets) => sockets.collect::<Vec<_>>(),
+        Err(err) => {
+            warn!("Could not enumerate stale daemon sockets: {err}");
+            return;
+        }
+    };
+
+    for (version, path) in sockets {
+        let Ok(version) = version.parse::<Version>() else {
+            continue;
+        };
+
+        if version >= current_version {
+            continue;
+        }
+
+        let file_type = match fs::symlink_metadata(&path) {
+            Ok(metadata) => metadata.file_type(),
+            Err(err) if err.kind() == ErrorKind::NotFound => continue,
+            Err(err) => {
+                warn!("Could not inspect stale daemon socket {path}: {err}");
+                continue;
+            }
+        };
+
+        if !file_type.is_socket() {
+            continue;
+        }
+
+        match time::timeout(Duration::from_millis(100), UnixStream::connect(&path)).await {
+            Ok(Ok(_)) => {}
+            Ok(Err(err)) if err.kind() == ErrorKind::ConnectionRefused => {
+                if let Err(err) = fs::remove_file(&path)
+                    && err.kind() != ErrorKind::NotFound
+                {
+                    warn!("Could not remove stale daemon socket {path}: {err}");
+                } else {
+                    info!("Removed stale socket at {path}");
+                }
+            }
+            Ok(Err(err)) if err.kind() == ErrorKind::NotFound => {}
+            Ok(Err(err)) => warn!("Could not connect to stale daemon socket {path}: {err}"),
+            Err(_) => warn!("Timed out connecting to stale daemon socket {path}"),
+        }
+    }
+}
+
+async fn purge_old_sockets() {
+    // Older versions created their sockets directly in the cache directory
+    purge_old_sockets_in(&biome_fs::ensure_cache_dir(), biome_configuration::VERSION).await;
+    purge_old_sockets_in(&get_socket_dir(), biome_configuration::VERSION).await;
+}
+
 /// Try to connect to the global socket and wait for the connection to become ready
 async fn try_connect() -> io::Result<UnixStream> {
+    verify_socket_dir(&get_socket_dir())?;
     let socket_name = get_socket_name();
     info!("Trying to connect to socket {}", socket_name.as_str());
     let stream = UnixStream::connect(socket_name).await?;
@@ -82,6 +197,10 @@ fn spawn_daemon(
         "--log-prefix-name={}",
         log_options.log_prefix_name.as_str()
     ));
+
+    cmd.arg(format!("--log-kind={}", log_options.log_kind));
+
+    cmd.arg(format!("--log-level={}", log_options.log_level));
 
     // Create a new session for the process and make it the leader, this will
     // ensures that the child process is fully detached from its parent and will
@@ -199,9 +318,12 @@ pub(crate) async fn print_socket() -> io::Result<()> {
 /// Start listening on the global socket and accepting connections with the
 /// provided [ServerFactory]
 pub(crate) async fn run_daemon(factory: ServerFactory) -> io::Result<Infallible> {
+    create_socket_dir(&get_socket_dir())?;
     let path = get_socket_name();
 
     info!("Trying to connect to socket {path}");
+
+    purge_old_sockets().await;
 
     // Try to remove the socket file if it already exists
     if path.exists() {
@@ -209,7 +331,7 @@ pub(crate) async fn run_daemon(factory: ServerFactory) -> io::Result<Infallible>
         fs::remove_file(&path)?;
     }
 
-    let listener = UnixListener::bind(path)?;
+    let listener = bind_socket(&path)?;
 
     loop {
         let (stream, _) = listener.accept().await?;
@@ -219,8 +341,175 @@ pub(crate) async fn run_daemon(factory: ServerFactory) -> io::Result<Infallible>
     }
 }
 
+/// Bind a listener on `path` that is only accessible by the current user
+fn bind_socket(path: &Utf8Path) -> io::Result<UnixListener> {
+    let listener = UnixListener::bind(path)?;
+    fs::set_permissions(path, fs::Permissions::from_mode(0o600))?;
+    Ok(listener)
+}
+
 /// Async task driving a single client connection
 async fn run_server(connection: ServerConnection, stream: UnixStream) {
     let (read, write) = stream.into_split();
     connection.accept(read, write).await;
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::{
+        os::unix::fs::symlink,
+        sync::atomic::{AtomicUsize, Ordering},
+    };
+
+    static NEXT_TEST_DIRECTORY: AtomicUsize = AtomicUsize::new(0);
+
+    struct TestDirectory(Utf8PathBuf);
+
+    impl TestDirectory {
+        fn new() -> Self {
+            let path = env::temp_dir().join(format!(
+                "biome-socket-test-{}-{}",
+                std::process::id(),
+                NEXT_TEST_DIRECTORY.fetch_add(1, Ordering::Relaxed)
+            ));
+            fs::create_dir(&path).unwrap();
+            Self(Utf8PathBuf::from_path_buf(path).unwrap())
+        }
+
+        fn socket(&self, version: &str) -> Utf8PathBuf {
+            self.0.join(format!("biome-socket-{version}"))
+        }
+    }
+
+    impl Drop for TestDirectory {
+        fn drop(&mut self) {
+            fs::remove_dir_all(&self.0).ok();
+        }
+    }
+
+    fn create_stale_socket(path: &Utf8Path) {
+        drop(UnixListener::bind(path).unwrap());
+    }
+
+    #[tokio::test]
+    async fn binds_socket_accessible_only_by_owner() {
+        let directory = TestDirectory::new();
+        let socket = directory.socket("2.0.0");
+        let _listener = bind_socket(&socket).unwrap();
+
+        let mode = fs::metadata(&socket).unwrap().permissions().mode();
+        assert_eq!(mode & 0o777, 0o600);
+    }
+
+    #[test]
+    fn creates_socket_dir_accessible_only_by_owner() {
+        let directory = TestDirectory::new();
+        let socket_dir = directory.0.join("sockets");
+        create_socket_dir(&socket_dir).unwrap();
+
+        let mode = fs::metadata(&socket_dir).unwrap().permissions().mode();
+        assert_eq!(mode & 0o777, 0o700);
+
+        // An existing private directory is reused
+        create_socket_dir(&socket_dir).unwrap();
+    }
+
+    #[test]
+    fn rejects_socket_dir_accessible_by_others() {
+        let directory = TestDirectory::new();
+        let socket_dir = directory.0.join("sockets");
+        fs::create_dir(&socket_dir).unwrap();
+        fs::set_permissions(&socket_dir, fs::Permissions::from_mode(0o755)).unwrap();
+
+        let err = create_socket_dir(&socket_dir).unwrap_err();
+        assert_eq!(err.kind(), ErrorKind::PermissionDenied);
+    }
+
+    #[test]
+    fn rejects_symlinked_socket_dir() {
+        let directory = TestDirectory::new();
+        let target = directory.0.join("target");
+        let socket_dir = directory.0.join("sockets");
+        fs::DirBuilder::new().mode(0o700).create(&target).unwrap();
+        symlink(&target, &socket_dir).unwrap();
+
+        let err = create_socket_dir(&socket_dir).unwrap_err();
+        assert_eq!(err.kind(), ErrorKind::PermissionDenied);
+    }
+
+    #[tokio::test]
+    async fn removes_stale_older_sockets() {
+        let directory = TestDirectory::new();
+        let stable = directory.socket("1.9.0");
+        let prerelease = directory.socket("2.0.0-beta.1");
+        create_stale_socket(&stable);
+        create_stale_socket(&prerelease);
+
+        purge_old_sockets_in(&directory.0, "2.0.0").await;
+
+        assert!(!stable.exists());
+        assert!(!prerelease.exists());
+    }
+
+    #[tokio::test]
+    async fn preserves_active_older_sockets() {
+        let directory = TestDirectory::new();
+        let socket = directory.socket("1.9.0");
+        let _listener = UnixListener::bind(&socket).unwrap();
+
+        purge_old_sockets_in(&directory.0, "2.0.0").await;
+
+        assert!(socket.exists());
+    }
+
+    #[tokio::test]
+    async fn preserves_equal_and_newer_sockets() {
+        let directory = TestDirectory::new();
+        let equal = directory.socket("2.0.0");
+        let newer = directory.socket("2.0.1");
+        let same_precedence = directory.socket("2.0.0+build.1");
+        create_stale_socket(&equal);
+        create_stale_socket(&newer);
+        create_stale_socket(&same_precedence);
+
+        purge_old_sockets_in(&directory.0, "2.0.0").await;
+
+        assert!(equal.exists());
+        assert!(newer.exists());
+        assert!(same_precedence.exists());
+    }
+
+    #[tokio::test]
+    async fn preserves_unparseable_and_non_socket_entries() {
+        let directory = TestDirectory::new();
+        let invalid = directory.socket("not-a-version");
+        let legacy = directory.0.join("biome-socket");
+        let regular_file = directory.socket("1.9.0");
+        let target = directory.0.join("target");
+        let symlink_path = directory.socket("1.8.0");
+        create_stale_socket(&invalid);
+        create_stale_socket(&legacy);
+        fs::write(&regular_file, "not a socket").unwrap();
+        fs::write(&target, "not a socket").unwrap();
+        symlink(&target, &symlink_path).unwrap();
+
+        purge_old_sockets_in(&directory.0, "2.0.0").await;
+
+        assert!(invalid.exists());
+        assert!(legacy.exists());
+        assert!(regular_file.exists());
+        assert!(symlink_path.exists());
+    }
+
+    #[tokio::test]
+    async fn skips_cleanup_for_an_unparseable_current_version() {
+        let directory = TestDirectory::new();
+        let socket = directory.socket("1.9.0");
+        create_stale_socket(&socket);
+
+        purge_old_sockets_in(&directory.0, "not-a-version").await;
+
+        assert!(socket.exists());
+    }
 }

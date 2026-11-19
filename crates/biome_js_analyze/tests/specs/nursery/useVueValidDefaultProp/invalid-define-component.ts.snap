@@ -1,0 +1,102 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-define-component.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+import { defineComponent, type PropType } from "vue";
+
+export default defineComponent({
+  props: {
+    a: { type: Array as PropType<string[]>, default: [] },
+    b: { type: Object as PropType<{ [key: number]: number }>, default: {} },
+    c: { type: Function as PropType<() => number>, default: 10 },
+    d: { type: [Object, Number], default: {} } as PropOptions<object>,
+  },
+});
+
+```
+
+# Diagnostics
+```
+invalid-define-component.ts:6:54 lint/nursery/useVueValidDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The default value of the prop a isn't returned from a function.
+  
+    4 │ export default defineComponent({
+    5 │   props: {
+  > 6 │     a: { type: Array as PropType<string[]>, default: [] },
+      │                                                      ^^
+    7 │     b: { type: Object as PropType<{ [key: number]: number }>, default: {} },
+    8 │     c: { type: Function as PropType<() => number>, default: 10 },
+  
+  i An object or array written directly as a default value is shared by every instance of the component. Changing it in one instance changes it in all of them.
+  
+  i Return the value from a function instead, such as () => [] or () => ({}).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-define-component.ts:7:72 lint/nursery/useVueValidDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The default value of the prop b isn't returned from a function.
+  
+    5 │   props: {
+    6 │     a: { type: Array as PropType<string[]>, default: [] },
+  > 7 │     b: { type: Object as PropType<{ [key: number]: number }>, default: {} },
+      │                                                                        ^^
+    8 │     c: { type: Function as PropType<() => number>, default: 10 },
+    9 │     d: { type: [Object, Number], default: {} } as PropOptions<object>,
+  
+  i An object or array written directly as a default value is shared by every instance of the component. Changing it in one instance changes it in all of them.
+  
+  i Return the value from a function instead, such as () => [] or () => ({}).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-define-component.ts:8:61 lint/nursery/useVueValidDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The default value of the prop c doesn't match the type of the prop.
+  
+     6 │     a: { type: Array as PropType<string[]>, default: [] },
+     7 │     b: { type: Object as PropType<{ [key: number]: number }>, default: {} },
+   > 8 │     c: { type: Function as PropType<() => number>, default: 10 },
+       │                                                             ^^
+     9 │     d: { type: [Object, Number], default: {} } as PropOptions<object>,
+    10 │   },
+  
+  i The prop accepts Function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-define-component.ts:9:43 lint/nursery/useVueValidDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The default value of the prop d isn't returned from a function.
+  
+     7 │     b: { type: Object as PropType<{ [key: number]: number }>, default: {} },
+     8 │     c: { type: Function as PropType<() => number>, default: 10 },
+   > 9 │     d: { type: [Object, Number], default: {} } as PropOptions<object>,
+       │                                           ^^
+    10 │   },
+    11 │ });
+  
+  i An object or array written directly as a default value is shared by every instance of the component. Changing it in one instance changes it in all of them.
+  
+  i Return the value from a function instead, such as () => [] or () => ({}).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

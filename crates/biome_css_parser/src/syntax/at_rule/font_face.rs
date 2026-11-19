@@ -1,5 +1,5 @@
 use crate::parser::CssParser;
-use crate::syntax::block::parse_declaration_block;
+use crate::syntax::block::parse_declaration_or_statement_block;
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::T;
 use biome_parser::parsed_syntax::ParsedSyntax::Present;
@@ -20,7 +20,7 @@ pub(crate) fn parse_font_face_at_rule(p: &mut CssParser) -> ParsedSyntax {
     let m = p.start();
 
     parse_font_face_at_rule_declarator(p).ok();
-    parse_declaration_block(p);
+    parse_declaration_or_statement_block(p);
 
     Present(m.complete(p, CSS_FONT_FACE_AT_RULE))
 }

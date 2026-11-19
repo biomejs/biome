@@ -1,0 +1,60 @@
+---
+source: crates/biome_js_transform/tests/spec_tests.rs
+expression: parameterProperties.ts
+---
+# Input
+```ts
+// should generate diagnostics
+class Foo {
+	constructor(private a: string) {}
+}
+
+```
+
+# Transformations
+```diff
+@@ -1,4 +1,4 @@
+ // should generate diagnostics
+ class Foo {
+-	constructor(private a: string) {}
++	constructor(        a: string) {}
+ }
+
+```
+
+```diff
+@@ -1,4 +1,4 @@
+ // should generate diagnostics
+ class Foo {
+-	constructor(private a: string) {}
++	constructor(private a        ) {}
+ }
+
+```
+
+# Final output
+```ts
+// should generate diagnostics
+class Foo {
+	constructor(        a        ) {}
+}
+
+```
+
+# Diagnostics
+```
+parameterProperties.ts:3:14 transformations/stripTypes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i parameter properties cannot be stripped because they generate runtime code.
+  
+    1 │ // should generate diagnostics
+    2 │ class Foo {
+  > 3 │ 	constructor(private a: string) {}
+      │ 	            ^^^^^^^^^^^^^^^^^
+    4 │ }
+    5 │ 
+  
+  i Only type syntax that can be erased is supported. Rewrite this using JavaScript syntax.
+  
+
+```

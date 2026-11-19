@@ -1,0 +1,7 @@
+.native {
+  color: if(style(--status: complete): seagreen; else: gray);
+  background: if(not (media(print)): white; else: black);
+  border-color: if(style(--status: complete) and supports(display: grid): red; else: blue);
+  outline-color: if(media(width > 1px) or style(--enabled: true): red; else: blue);
+}
+.after { display: block; }

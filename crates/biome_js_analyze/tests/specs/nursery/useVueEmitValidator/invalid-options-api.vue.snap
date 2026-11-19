@@ -1,0 +1,57 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-options-api.vue
+---
+# Input
+```vue
+<script>
+/* should generate diagnostics */
+export default {
+  emits: ["foo", "update:modelValue"],
+};
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-options-api.vue:4:11 lint/nursery/useVueEmitValidator ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The event foo is declared without a validator function.
+  
+    2 │ /* should generate diagnostics */
+    3 │ export default {
+  > 4 │   emits: ["foo", "update:modelValue"],
+      │           ^^^^^
+    5 │ };
+    6 │ </script>
+  
+  i A validator function checks the values passed with the event, and documents what the event sends. In TypeScript, its parameter types also become the types the emit function accepts for this event.
+  
+  i Declare the events in an object instead of an array, and give this event a function that receives its values and returns true when they are valid. If the event sends no values, use () => true.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:4:18 lint/nursery/useVueEmitValidator ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The event update:modelValue is declared without a validator function.
+  
+    2 │ /* should generate diagnostics */
+    3 │ export default {
+  > 4 │   emits: ["foo", "update:modelValue"],
+      │                  ^^^^^^^^^^^^^^^^^^^
+    5 │ };
+    6 │ </script>
+  
+  i A validator function checks the values passed with the event, and documents what the event sends. In TypeScript, its parameter types also become the types the emit function accepts for this event.
+  
+  i Declare the events in an object instead of an array, and give this event a function that receives its values and returns true when they are valid. If the event sends no values, use () => true.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

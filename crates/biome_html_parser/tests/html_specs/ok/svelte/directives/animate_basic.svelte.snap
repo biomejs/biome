@@ -19,6 +19,7 @@ expression: snapshot
 HtmlRoot {
     bom_token: missing (optional),
     frontmatter: missing (optional),
+    processing_instruction: missing (optional),
     directive: missing (optional),
     html: HtmlElementList [
         SvelteEachBlock {
@@ -49,7 +50,7 @@ HtmlRoot {
                     opening_element: HtmlOpeningElement {
                         l_angle_token: L_ANGLE@27..31 "<" [Newline("\n"), Whitespace("  ")] [],
                         name: HtmlTagName {
-                            value_token: HTML_LITERAL@31..34 "li" [] [Whitespace(" ")],
+                            value_token: LI_KW@31..34 "li" [] [Whitespace(" ")],
                         },
                         attributes: HtmlAttributeList [
                             SvelteAnimateDirective {
@@ -79,7 +80,7 @@ HtmlRoot {
                         l_angle_token: L_ANGLE@53..54 "<" [] [],
                         slash_token: SLASH@54..55 "/" [] [],
                         name: HtmlTagName {
-                            value_token: HTML_LITERAL@55..57 "li" [] [],
+                            value_token: LI_KW@55..57 "li" [] [],
                         },
                         r_angle_token: R_ANGLE@57..58 ">" [] [],
                     },
@@ -104,7 +105,8 @@ HtmlRoot {
   0: (empty)
   1: (empty)
   2: (empty)
-  3: HTML_ELEMENT_LIST@0..66
+  3: (empty)
+  4: HTML_ELEMENT_LIST@0..66
     0: SVELTE_EACH_BLOCK@0..66
       0: SVELTE_EACH_OPENING_BLOCK@0..27
         0: SV_CURLY_HASH@0..2 "{#" [] []
@@ -127,7 +129,7 @@ HtmlRoot {
           0: HTML_OPENING_ELEMENT@27..47
             0: L_ANGLE@27..31 "<" [Newline("\n"), Whitespace("  ")] []
             1: HTML_TAG_NAME@31..34
-              0: HTML_LITERAL@31..34 "li" [] [Whitespace(" ")]
+              0: LI_KW@31..34 "li" [] [Whitespace(" ")]
             2: HTML_ATTRIBUTE_LIST@34..46
               0: SVELTE_ANIMATE_DIRECTIVE@34..46
                 0: ANIMATE_KW@34..41 "animate" [] []
@@ -148,13 +150,13 @@ HtmlRoot {
             0: L_ANGLE@53..54 "<" [] []
             1: SLASH@54..55 "/" [] []
             2: HTML_TAG_NAME@55..57
-              0: HTML_LITERAL@55..57 "li" [] []
+              0: LI_KW@55..57 "li" [] []
             3: R_ANGLE@57..58 ">" [] []
       2: (empty)
       3: SVELTE_EACH_CLOSING_BLOCK@58..66
         0: SV_CURLY_SLASH@58..61 "{/" [Newline("\n")] []
         1: EACH_KW@61..65 "each" [] []
         2: R_CURLY@65..66 "}" [] []
-  4: EOF@66..67 "" [Newline("\n")] []
+  5: EOF@66..67 "" [Newline("\n")] []
 
 ```

@@ -1,0 +1,14 @@
+/* should generate diagnostics */
+.valid {
+  color: red;
+  @supports ("color": blue) and ("color": green) {
+    color: blue;
+  }
+}
+
+@supports ("color": green) {
+  .invalid {
+    color: red;
+    color: blue;
+  }
+}

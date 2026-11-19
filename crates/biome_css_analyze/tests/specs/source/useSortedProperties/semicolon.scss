@@ -1,0 +1,9 @@
+/* should generate diagnostics */
+div {
+  color: red;
+  display: block // Display comment.
+}
+
+.compact {color: red;
+  display: block // Display comment.
+}

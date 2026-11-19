@@ -1,0 +1,14 @@
+---
+source: crates/biome_grit_patterns/tests/spec_tests.rs
+expression: rangePositionalArgument
+---
+ErrorSnapshotResult {
+    diagnostics: [
+        FunctionArgument(
+            MissingArgumentName {
+                name: "range",
+                variable: "",
+            },
+        ),
+    ],
+}

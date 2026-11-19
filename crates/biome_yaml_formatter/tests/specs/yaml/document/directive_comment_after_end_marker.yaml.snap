@@ -1,0 +1,31 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/document/directive_comment_after_end_marker.yaml
+---
+
+# Input
+
+```yaml
+%YAML 1.2
+
+# after a blank line
+---
+a
+...
+# after the end marker
+
+```
+
+
+# Formatted
+
+```yaml
+%YAML 1.2
+
+# after a blank line
+---
+a
+...
+# after the end marker
+
+```

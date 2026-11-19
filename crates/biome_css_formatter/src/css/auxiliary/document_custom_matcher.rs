@@ -17,12 +17,21 @@ impl FormatNodeRule<CssDocumentCustomMatcher> for FormatCssDocumentCustomMatcher
             r_paren_token,
         } = node.as_fields();
 
+        let maybe_space = format_with(|f: &mut CssFormatter| {
+            if f.options().delimiter_spacing().value() {
+                write!(f, [space()])?;
+            }
+            Ok(())
+        });
+
         write!(
             f,
             [
-                name.format(),
+                name.format()?.with_text_case(CssCase::Preserve),
                 l_paren_token.format(),
+                maybe_space,
                 value.format(),
+                maybe_space,
                 r_paren_token.format()
             ]
         )

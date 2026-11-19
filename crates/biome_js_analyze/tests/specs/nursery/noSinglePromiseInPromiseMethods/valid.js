@@ -1,0 +1,26 @@
+/* should not generate diagnostics */
+Promise.race([promise, anotherPromise]);
+Promise.race(notArrayLiteral);
+Promise.race([...promises]);
+Promise.any([promise, anotherPromise]);
+Promise.all([promise, anotherPromise]);
+Promise.notListedMethod([promise]);
+Promise[race]([promise]);
+Promise.race([,]);
+Promise.race([]);
+NotPromise.race([promise]);
+Promise?.race([promise]);
+Promise.race?.([promise]);
+globalThis?.Promise.race([promise]);
+Promise.race(...[promise]);
+Promise.race([promise], extraArguments);
+Promise.race();
+new Promise.race([promise]);
+Promise.allSettled([promise]);
+foo.Promise.race([promise]);
+const foo = await Promise.all(promises);
+const [{ value, reason }] = await Promise.allSettled([promise]);
+
+function shadowed(Promise) {
+	return Promise.all([promise]);
+}

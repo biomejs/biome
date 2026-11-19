@@ -1,0 +1,577 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidUnion.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+
+type A1 = number | any;
+type A2 = any | number;
+type U1 = number | unknown;
+type U2 = unknown | "foo";
+type N1 = number | never;
+type N2 = never | number;
+
+type L1 = number | 0;
+type L2 = number | (0 | 1);
+type L3 = (2 | "other" | 3) | number;
+type L4 = "" | string;
+type L5 = `a${number}c` | string;
+type L6 = 0n | bigint;
+type L7 = -1n | bigint;
+type L8 = -1 | number;
+type L9 = false | boolean;
+type L10 = true | boolean;
+type L11 = | "a" | string;
+
+// Only the outermost union reports nested members.
+type Nested = string | ("a" | (unknown | number));
+
+// `never` outside of the return type position.
+type F1 = () => Promise<never | string>;
+function f1(param: string | never): void {}
+
+// A leading `|` with a single parenthesized union.
+type S1 = | (string | "a");
+
+// `unknown` has no effect next to `any`.
+type K1 = unknown | any;
+
+```
+
+# Diagnostics
+```
+invalidUnion.ts:3:20 lint/nursery/noRedundantTypeConstituents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The any type makes every other member of this union redundant.
+  
+    1 │ /* should generate diagnostics */
+    2 │ 
+  > 3 │ type A1 = number | any;
+      │                    ^^^
+    4 │ type A2 = any | number;
+    5 │ type U1 = number | unknown;
+  
+  i This union is always any, whatever its other members are.
+  
+  i If the type should be any, replace the whole union with any. Otherwise, remove any.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidUnion.ts:4:11 lint/nursery/noRedundantTypeConstituents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The any type makes every other member of this union redundant.
+  
+    3 │ type A1 = number | any;
+  > 4 │ type A2 = any | number;
+      │           ^^^
+    5 │ type U1 = number | unknown;
+    6 │ type U2 = unknown | "foo";
+  
+  i This union is always any, whatever its other members are.
+  
+  i If the type should be any, replace the whole union with any. Otherwise, remove any.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidUnion.ts:5:20 lint/nursery/noRedundantTypeConstituents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The unknown type makes every other member of this union redundant.
+  
+    3 │ type A1 = number | any;
+    4 │ type A2 = any | number;
+  > 5 │ type U1 = number | unknown;
+      │                    ^^^^^^^
+    6 │ type U2 = unknown | "foo";
+    7 │ type N1 = number | never;
+  
+  i This union is always unknown, whatever its other members are.
+  
+  i If the type should be unknown, replace the whole union with unknown. Otherwise, remove unknown.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidUnion.ts:6:11 lint/nursery/noRedundantTypeConstituents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The unknown type makes every other member of this union redundant.
+  
+    4 │ type A2 = any | number;
+    5 │ type U1 = number | unknown;
+  > 6 │ type U2 = unknown | "foo";
+      │           ^^^^^^^
+    7 │ type N1 = number | never;
+    8 │ type N2 = never | number;
+  
+  i This union is always unknown, whatever its other members are.
+  
+  i If the type should be unknown, replace the whole union with unknown. Otherwise, remove unknown.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidUnion.ts:7:20 lint/nursery/noRedundantTypeConstituents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The never type has no effect in this union.
+  
+    5 │ type U1 = number | unknown;
+    6 │ type U2 = unknown | "foo";
+  > 7 │ type N1 = number | never;
+      │                    ^^^^^
+    8 │ type N2 = never | number;
+    9 │ 
+  
+  i This union accepts the same values with or without never.
+  
+  i Remove never.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidUnion.ts:8:11 lint/nursery/noRedundantTypeConstituents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The never type has no effect in this union.
+  
+     6 │ type U2 = unknown | "foo";
+     7 │ type N1 = number | never;
+   > 8 │ type N2 = never | number;
+       │           ^^^^^
+     9 │ 
+    10 │ type L1 = number | 0;
+  
+  i This union accepts the same values with or without never.
+  
+  i Remove never.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidUnion.ts:10:20 lint/nursery/noRedundantTypeConstituents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This literal type is redundant because the union also includes number.
+  
+     8 │ type N2 = never | number;
+     9 │ 
+  > 10 │ type L1 = number | 0;
+       │                    ^
+    11 │ type L2 = number | (0 | 1);
+    12 │ type L3 = (2 | "other" | 3) | number;
+  
+  i Every value of this literal type is already a number, so the union accepts the same values without it.
+  
+  i Remove the literal type, or remove number if only specific values should be accepted.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidUnion.ts:11:21 lint/nursery/noRedundantTypeConstituents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This literal type is redundant because the union also includes number.
+  
+    10 │ type L1 = number | 0;
+  > 11 │ type L2 = number | (0 | 1);
+       │                     ^
+    12 │ type L3 = (2 | "other" | 3) | number;
+    13 │ type L4 = "" | string;
+  
+  i Every value of this literal type is already a number, so the union accepts the same values without it.
+  
+  i Remove the literal type, or remove number if only specific values should be accepted.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidUnion.ts:11:25 lint/nursery/noRedundantTypeConstituents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This literal type is redundant because the union also includes number.
+  
+    10 │ type L1 = number | 0;
+  > 11 │ type L2 = number | (0 | 1);
+       │                         ^
+    12 │ type L3 = (2 | "other" | 3) | number;
+    13 │ type L4 = "" | string;
+  
+  i Every value of this literal type is already a number, so the union accepts the same values without it.
+  
+  i Remove the literal type, or remove number if only specific values should be accepted.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidUnion.ts:12:12 lint/nursery/noRedundantTypeConstituents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This literal type is redundant because the union also includes number.
+  
+    10 │ type L1 = number | 0;
+    11 │ type L2 = number | (0 | 1);
+  > 12 │ type L3 = (2 | "other" | 3) | number;
+       │            ^
+    13 │ type L4 = "" | string;
+    14 │ type L5 = `a${number}c` | string;
+  
+  i Every value of this literal type is already a number, so the union accepts the same values without it.
+  
+  i Remove the literal type, or remove number if only specific values should be accepted.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidUnion.ts:12:26 lint/nursery/noRedundantTypeConstituents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This literal type is redundant because the union also includes number.
+  
+    10 │ type L1 = number | 0;
+    11 │ type L2 = number | (0 | 1);
+  > 12 │ type L3 = (2 | "other" | 3) | number;
+       │                          ^
+    13 │ type L4 = "" | string;
+    14 │ type L5 = `a${number}c` | string;
+  
+  i Every value of this literal type is already a number, so the union accepts the same values without it.
+  
+  i Remove the literal type, or remove number if only specific values should be accepted.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidUnion.ts:13:11 lint/nursery/noRedundantTypeConstituents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This literal type is redundant because the union also includes string.
+  
+    11 │ type L2 = number | (0 | 1);
+    12 │ type L3 = (2 | "other" | 3) | number;
+  > 13 │ type L4 = "" | string;
+       │           ^^
+    14 │ type L5 = `a${number}c` | string;
+    15 │ type L6 = 0n | bigint;
+  
+  i Every value of this literal type is already a string, so the union accepts the same values without it.
+  
+  i Remove the literal type, or remove string if only specific values should be accepted.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidUnion.ts:14:11 lint/nursery/noRedundantTypeConstituents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This literal type is redundant because the union also includes string.
+  
+    12 │ type L3 = (2 | "other" | 3) | number;
+    13 │ type L4 = "" | string;
+  > 14 │ type L5 = `a${number}c` | string;
+       │           ^^^^^^^^^^^^^
+    15 │ type L6 = 0n | bigint;
+    16 │ type L7 = -1n | bigint;
+  
+  i Every value of this literal type is already a string, so the union accepts the same values without it.
+  
+  i Remove the literal type, or remove string if only specific values should be accepted.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidUnion.ts:15:11 lint/nursery/noRedundantTypeConstituents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This literal type is redundant because the union also includes bigint.
+  
+    13 │ type L4 = "" | string;
+    14 │ type L5 = `a${number}c` | string;
+  > 15 │ type L6 = 0n | bigint;
+       │           ^^
+    16 │ type L7 = -1n | bigint;
+    17 │ type L8 = -1 | number;
+  
+  i Every value of this literal type is already a bigint, so the union accepts the same values without it.
+  
+  i Remove the literal type, or remove bigint if only specific values should be accepted.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidUnion.ts:16:11 lint/nursery/noRedundantTypeConstituents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This literal type is redundant because the union also includes bigint.
+  
+    14 │ type L5 = `a${number}c` | string;
+    15 │ type L6 = 0n | bigint;
+  > 16 │ type L7 = -1n | bigint;
+       │           ^^^
+    17 │ type L8 = -1 | number;
+    18 │ type L9 = false | boolean;
+  
+  i Every value of this literal type is already a bigint, so the union accepts the same values without it.
+  
+  i Remove the literal type, or remove bigint if only specific values should be accepted.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidUnion.ts:17:11 lint/nursery/noRedundantTypeConstituents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This literal type is redundant because the union also includes number.
+  
+    15 │ type L6 = 0n | bigint;
+    16 │ type L7 = -1n | bigint;
+  > 17 │ type L8 = -1 | number;
+       │           ^^
+    18 │ type L9 = false | boolean;
+    19 │ type L10 = true | boolean;
+  
+  i Every value of this literal type is already a number, so the union accepts the same values without it.
+  
+  i Remove the literal type, or remove number if only specific values should be accepted.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidUnion.ts:18:11 lint/nursery/noRedundantTypeConstituents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This literal type is redundant because the union also includes boolean.
+  
+    16 │ type L7 = -1n | bigint;
+    17 │ type L8 = -1 | number;
+  > 18 │ type L9 = false | boolean;
+       │           ^^^^^
+    19 │ type L10 = true | boolean;
+    20 │ type L11 = | "a" | string;
+  
+  i Every value of this literal type is already a boolean, so the union accepts the same values without it.
+  
+  i Remove the literal type, or remove boolean if only specific values should be accepted.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidUnion.ts:19:12 lint/nursery/noRedundantTypeConstituents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This literal type is redundant because the union also includes boolean.
+  
+    17 │ type L8 = -1 | number;
+    18 │ type L9 = false | boolean;
+  > 19 │ type L10 = true | boolean;
+       │            ^^^^
+    20 │ type L11 = | "a" | string;
+    21 │ 
+  
+  i Every value of this literal type is already a boolean, so the union accepts the same values without it.
+  
+  i Remove the literal type, or remove boolean if only specific values should be accepted.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidUnion.ts:20:14 lint/nursery/noRedundantTypeConstituents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This literal type is redundant because the union also includes string.
+  
+    18 │ type L9 = false | boolean;
+    19 │ type L10 = true | boolean;
+  > 20 │ type L11 = | "a" | string;
+       │              ^^^
+    21 │ 
+    22 │ // Only the outermost union reports nested members.
+  
+  i Every value of this literal type is already a string, so the union accepts the same values without it.
+  
+  i Remove the literal type, or remove string if only specific values should be accepted.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidUnion.ts:23:25 lint/nursery/noRedundantTypeConstituents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This literal type is redundant because the union also includes string.
+  
+    22 │ // Only the outermost union reports nested members.
+  > 23 │ type Nested = string | ("a" | (unknown | number));
+       │                         ^^^
+    24 │ 
+    25 │ // `never` outside of the return type position.
+  
+  i Every value of this literal type is already a string, so the union accepts the same values without it.
+  
+  i Remove the literal type, or remove string if only specific values should be accepted.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidUnion.ts:23:32 lint/nursery/noRedundantTypeConstituents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The unknown type makes every other member of this union redundant.
+  
+    22 │ // Only the outermost union reports nested members.
+  > 23 │ type Nested = string | ("a" | (unknown | number));
+       │                                ^^^^^^^
+    24 │ 
+    25 │ // `never` outside of the return type position.
+  
+  i This union is always unknown, whatever its other members are.
+  
+  i If the type should be unknown, replace the whole union with unknown. Otherwise, remove unknown.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidUnion.ts:26:25 lint/nursery/noRedundantTypeConstituents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The never type has no effect in this union.
+  
+    25 │ // `never` outside of the return type position.
+  > 26 │ type F1 = () => Promise<never | string>;
+       │                         ^^^^^
+    27 │ function f1(param: string | never): void {}
+    28 │ 
+  
+  i This union accepts the same values with or without never.
+  
+  i Remove never.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidUnion.ts:27:29 lint/nursery/noRedundantTypeConstituents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The never type has no effect in this union.
+  
+    25 │ // `never` outside of the return type position.
+    26 │ type F1 = () => Promise<never | string>;
+  > 27 │ function f1(param: string | never): void {}
+       │                             ^^^^^
+    28 │ 
+    29 │ // A leading `|` with a single parenthesized union.
+  
+  i This union accepts the same values with or without never.
+  
+  i Remove never.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidUnion.ts:30:23 lint/nursery/noRedundantTypeConstituents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This literal type is redundant because the union also includes string.
+  
+    29 │ // A leading `|` with a single parenthesized union.
+  > 30 │ type S1 = | (string | "a");
+       │                       ^^^
+    31 │ 
+    32 │ // `unknown` has no effect next to `any`.
+  
+  i Every value of this literal type is already a string, so the union accepts the same values without it.
+  
+  i Remove the literal type, or remove string if only specific values should be accepted.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidUnion.ts:33:11 lint/nursery/noRedundantTypeConstituents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The unknown type has no effect in this union.
+  
+    32 │ // `unknown` has no effect next to `any`.
+  > 33 │ type K1 = unknown | any;
+       │           ^^^^^^^
+    34 │ 
+  
+  i This union accepts the same values with or without unknown.
+  
+  i Remove unknown.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidUnion.ts:33:21 lint/nursery/noRedundantTypeConstituents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The any type makes every other member of this union redundant.
+  
+    32 │ // `unknown` has no effect next to `any`.
+  > 33 │ type K1 = unknown | any;
+       │                     ^^^
+    34 │ 
+  
+  i This union is always any, whatever its other members are.
+  
+  i If the type should be any, replace the whole union with any. Otherwise, remove any.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

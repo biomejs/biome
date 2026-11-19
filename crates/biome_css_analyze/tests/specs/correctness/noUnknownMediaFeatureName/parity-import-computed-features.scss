@@ -1,0 +1,15 @@
+/* should generate diagnostics */
+$bound: min;
+$width: 30rem;
+@media ($bound + "-width": $width) {}
+@import "wide-layout.css" screen and ($bound + "-width": $width);
+@media ("min" + "-width": $width) {}
+@media (#{$bound}-width: $width) {}
+@media ($width + 1rem < width) {}
+@media (feature-name(): $width) {}
+@import "wide-layout.css" screen and (feature-name(): $width);
+@media ($bound + "") {}
+@import "wide-layout.css" screen and ($bound + "");
+@media ($bound + "-width": $width) and (unknown: 1px) {}
+@media ($width + 1rem < unknown <= 90rem) {}
+@import "wide-layout.css" screen and (unknown: $width);

@@ -1,0 +1,77 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/at-rule/supports-interpolation.scss
+---
+
+# Input
+
+```scss
+@supports #{"(display: grid)"} {
+  a {
+    display: grid;
+  }
+}
+
+@supports   #{   "(display: flex)"   }   {
+  a{display:flex}
+}
+
+@supports   #{   "(display: grid)"   }   and   (   gap   :   1rem   )   {
+  a{gap:1rem}
+}
+
+@supports   not   #{   "(display: flex)"   }   {
+  a{display:block}
+}
+
+@supports   (   gap   :   1rem   )   and   #{   "(display: grid)"   }   {
+  a{gap:1rem}
+}
+
+@supports   (   gap   :   1rem   )   or   #{   "(display: flex)"   }   {
+  a{display:flex}
+}
+
+```
+
+
+# Formatted
+
+```scss
+@supports #{"(display: grid)"} {
+	a {
+		display: grid;
+	}
+}
+
+@supports #{"(display: flex)"} {
+	a {
+		display: flex;
+	}
+}
+
+@supports #{"(display: grid)"} and (gap: 1rem) {
+	a {
+		gap: 1rem;
+	}
+}
+
+@supports not #{"(display: flex)"} {
+	a {
+		display: block;
+	}
+}
+
+@supports (gap: 1rem) and #{"(display: grid)"} {
+	a {
+		gap: 1rem;
+	}
+}
+
+@supports (gap: 1rem) or #{"(display: flex)"} {
+	a {
+		display: flex;
+	}
+}
+
+```

@@ -3,7 +3,6 @@
 :global(.class div) .div {}
 :global( {}
 :global() {}
-:global(.div, .class) {}
 :global(.div, .class {}
 :global(.div .class {}
 :global(.div .class

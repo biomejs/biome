@@ -1,0 +1,100 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```
+<!-- foo -->*bar*
+*baz*
+
+<!--
+--># text
+
+```
+
+
+## AST
+
+```
+MdRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    value: MdBlockList [
+        MdHtmlBlock {
+            indent: MdIndentTokenList [],
+            content: MdHtmlContent {
+                value_token: MD_HTML_LITERAL@0..17 "*bar*" [Comments("<!-- foo -->")] [],
+            },
+        },
+        MdNewline {
+            value_token: NEWLINE@17..18 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdInlineItalic {
+                    l_fence: STAR@18..19 "*" [] [],
+                    content: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@19..22 "baz" [] [],
+                        },
+                    ],
+                    r_fence: STAR@22..23 "*" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@23..24 "\n" [] [],
+                },
+            ],
+        },
+        MdNewline {
+            value_token: NEWLINE@24..25 "\n" [] [],
+        },
+        MdHtmlBlock {
+            indent: MdIndentTokenList [],
+            content: MdHtmlContent {
+                value_token: MD_HTML_LITERAL@25..39 "# text" [Comments("<!--\n-->")] [],
+            },
+        },
+        MdNewline {
+            value_token: NEWLINE@39..40 "\n" [] [],
+        },
+    ],
+    eof_token: EOF@40..40 "" [] [],
+}
+```
+
+## CST
+
+```
+0: MD_ROOT@0..40
+  0: (empty)
+  1: (empty)
+  2: MD_BLOCK_LIST@0..40
+    0: MD_HTML_BLOCK@0..17
+      0: MD_INDENT_TOKEN_LIST@0..0
+      1: MD_HTML_CONTENT@0..17
+        0: MD_HTML_LITERAL@0..17 "*bar*" [Comments("<!-- foo -->")] []
+    1: MD_NEWLINE@17..18
+      0: NEWLINE@17..18 "\n" [] []
+    2: MD_PARAGRAPH@18..24
+      0: MD_INLINE_ITEM_LIST@18..24
+        0: MD_INLINE_ITALIC@18..23
+          0: STAR@18..19 "*" [] []
+          1: MD_INLINE_ITEM_LIST@19..22
+            0: MD_TEXTUAL@19..22
+              0: MD_TEXTUAL_LITERAL@19..22 "baz" [] []
+          2: STAR@22..23 "*" [] []
+        1: MD_TEXTUAL@23..24
+          0: MD_TEXTUAL_LITERAL@23..24 "\n" [] []
+    3: MD_NEWLINE@24..25
+      0: NEWLINE@24..25 "\n" [] []
+    4: MD_HTML_BLOCK@25..39
+      0: MD_INDENT_TOKEN_LIST@25..25
+      1: MD_HTML_CONTENT@25..39
+        0: MD_HTML_LITERAL@25..39 "# text" [Comments("<!--\n-->")] []
+    5: MD_NEWLINE@39..40
+      0: NEWLINE@39..40 "\n" [] []
+  3: EOF@40..40 "" [] []
+
+```

@@ -2,14 +2,21 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
+## Command
+
+```shell
+biome migrate eslint --include-inspired --include-nursery --write
+biome lint
+```
+
 ## `biome.json`
 
 ```json
 {
   "linter": {
     "rules": {
-      "recommended": false,
-      "nursery": {
+      "preset": "none",
+      "style": {
         "useConsistentTestIt": {
           "level": "error",
           "options": { "function": "test", "withinDescribe": "it" }

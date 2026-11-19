@@ -67,12 +67,15 @@ info: markdown/blockquote/ignore-code.md
 ```diff
 --- Prettier
 +++ Biome
-@@ -38,10 +38,12 @@
- > > ```
- > ````
+@@ -13,6 +13,7 @@
+ > ```
  
-+> 
- > <!-- prettier-ignore -->
+ > - test
++>
+ >   ```md
+ >   <!-- prettier-ignore -->
+ >   - This is a long long
+@@ -42,6 +43,7 @@
  > - This is a long long
  >   long long long long
  >   long long paragraph.
@@ -100,6 +103,7 @@ info: markdown/blockquote/ignore-code.md
 > ```
 
 > - test
+>
 >   ```md
 >   <!-- prettier-ignore -->
 >   - This is a long long
@@ -125,7 +129,6 @@ info: markdown/blockquote/ignore-code.md
 > > ```
 > ````
 
-> 
 > <!-- prettier-ignore -->
 > - This is a long long
 >   long long long long

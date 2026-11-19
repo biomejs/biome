@@ -52,9 +52,7 @@ $map: (
 		"list",
 		"list",
 		"list",
-	): (
-			"list",
-		),
+	): ("list"),
 	(
 		"list",
 		"long long long long long long long long long long long long long list",
@@ -85,9 +83,9 @@ $icons: (
 	/* keep blank */
 
 	cal-week-group: (
-			left: 1,
-			top: 169,
-		),
+		left: 1,
+		top: 169,
+	),
 );
 
 @if true {
@@ -95,7 +93,7 @@ $icons: (
 		$key: (
 				$theme-name: $value,
 			),
-	)
+	);
 }
 
 @for $i from 1 through 2 {

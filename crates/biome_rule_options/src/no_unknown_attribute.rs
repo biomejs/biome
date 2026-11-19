@@ -8,6 +8,14 @@ pub struct NoUnknownAttributeOptions {
     pub ignore: Option<Box<[Box<str>]>>,
 }
 
+impl NoUnknownAttributeOptions {
+    /// Returns [`Self::ignore`] if it is set.
+    /// Otherwise, returns an empty slice.
+    pub fn ignore(&self) -> &[Box<str>] {
+        self.ignore.as_deref().unwrap_or_default()
+    }
+}
+
 impl biome_deserialize::Merge for NoUnknownAttributeOptions {
     fn merge_with(&mut self, other: Self) {
         if let Some(ignore) = other.ignore {

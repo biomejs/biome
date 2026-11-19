@@ -10,6 +10,7 @@ impl FormatRule<AnyCssImportSupportsCondition> for FormatAnyCssImportSupportsCon
         match node {
             AnyCssImportSupportsCondition::AnyCssSupportsCondition(node) => node.format().fmt(f),
             AnyCssImportSupportsCondition::CssDeclaration(node) => node.format().fmt(f),
+            AnyCssImportSupportsCondition::ScssSupportsDeclaration(node) => node.format().fmt(f),
         }
     }
 }

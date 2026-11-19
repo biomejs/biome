@@ -2,13 +2,19 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
+## Command
+
+```shell
+biome lint --write --unsafe file.js
+```
+
 ## `biome.json`
 
 ```json
 {
   "linter": {
     "rules": {
-      "recommended": true,
+      "preset": "recommended",
       "suspicious": {
         "noClassAssign": "warn"
       }
@@ -30,7 +36,7 @@ A = 0;
 ```block
 file.js:2:1 lint/suspicious/noClassAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! 'A' is a class.
+  ! The class 'A' is reassigned.
   
     1 │ class A {};
   > 2 │ A = 0;
@@ -43,6 +49,10 @@ file.js:2:1 lint/suspicious/noClassAssign ━━━━━━━━━━━━�
       │       ^
     2 │ A = 0;
     3 │ 
+  
+  i Reassigning a class replaces it. Code that expects the original class, such as new calls and instanceof checks, can then break.
+  
+  i Store the new value in a separate variable, or give the new class a different name.
   
 
 ```

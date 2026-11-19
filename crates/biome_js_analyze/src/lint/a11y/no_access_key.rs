@@ -41,7 +41,11 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noAccessKey",
         language: "jsx",
-        sources: &[RuleSource::EslintJsxA11y("no-access-key").same(), RuleSource::HtmlEslint("no-accesskey-attrs").inspired()],
+        sources: &[
+            RuleSource::EslintJsxA11y("no-access-key").same(),
+            RuleSource::HtmlEslint("no-accesskey-attrs").inspired(),
+            RuleSource::EslintAstro("jsx-a11y/no-access-key").same(),
+        ],
         recommended: true,
         severity: Severity::Error,
         fix_kind: FixKind::Unsafe,
@@ -85,13 +89,12 @@ impl Rule for NoAccessKey {
                 rule_category!(),
                 node.syntax().text_trimmed_range(),
                 markup! {
-                    "Avoid the "<Emphasis>"accessKey"</Emphasis>" attribute to reduce inconsistencies between \
-                    keyboard shortcuts and screen reader keyboard commands."
+                    "Avoid the "<Emphasis>"accessKey"</Emphasis>" attribute."
                 },
             ).note(
                 markup! {
                     "Assigning keyboard shortcuts using the "<Emphasis>"accessKey"</Emphasis>" attribute leads to \
-                    inconsistent keyboard actions across applications."
+                    inconsistent keyboard actions across applications, and the shortcuts can conflict with screen reader keyboard commands."
                 },
             )
         )

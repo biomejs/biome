@@ -8,7 +8,7 @@ use biome_js_syntax::{
 /// `Ord` impl can be used directly to check whether hooks appear in the
 /// correct sequence.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
-pub(crate) enum LifecycleHook {
+pub enum LifecycleHook {
     BeforeAll,
     /// from `node:test`, runs before all tests in a suite.
     Before,
@@ -36,8 +36,8 @@ impl LifecycleHook {
     /// `None` if the call is not a recognised hook (bare or member form).
     ///
     /// Bare form: `beforeEach(...)`, `afterAll(...)`, etc.
-    /// Member form: `test.beforeEach(...)`, `describe.afterAll(...)`, etc.,
-    /// where the object must be a known test root (`test`, `it`, `describe`).
+    /// Member form: `test.beforeEach(...)`, `describe.afterAll(...)`, `suite.beforeEach(...)`, etc.,
+    /// where the object must be a known test root (`test`, `it`, `describe`, `suite`).
     pub(crate) fn from_call_expression(call: &JsCallExpression) -> Option<Self> {
         let callee = call.callee().ok()?.omit_parentheses();
 
@@ -73,7 +73,9 @@ impl LifecycleHook {
                         }
                     })
                     .and_then(|i| i.name().and_then(|r| r.value_token()).ok())
-                    .is_some_and(|tok| matches!(tok.text_trimmed(), "test" | "it" | "describe"));
+                    .is_some_and(|tok| {
+                        matches!(tok.text_trimmed(), "test" | "it" | "describe" | "suite")
+                    });
 
                 object_is_test_root.then_some(hook)
             }
@@ -82,7 +84,7 @@ impl LifecycleHook {
         }
     }
 
-    fn from_name(s: &str) -> Option<Self> {
+    pub(crate) fn from_name(s: &str) -> Option<Self> {
         match s {
             "beforeAll" => Some(Self::BeforeAll),
             "beforeEach" => Some(Self::BeforeEach),
@@ -92,6 +94,12 @@ impl LifecycleHook {
             "after" => Some(Self::After),
             _ => None,
         }
+    }
+}
+
+impl biome_console::fmt::Display for LifecycleHook {
+    fn fmt(&self, fmt: &mut biome_console::fmt::Formatter<'_>) -> std::io::Result<()> {
+        fmt.write_str(self.as_str())
     }
 }
 
@@ -112,9 +120,104 @@ pub(crate) fn is_unit_test(call: &JsCallExpression) -> bool {
     !is_describe_call(call)
 }
 
+/// Modifiers that can follow a `describe` callee without changing what it
+/// declares, such as `describe.only` or `test.describe.serial`.
+///
+/// Sorted for binary search.
+const DESCRIBE_MODIFIERS: &[&str] = &[
+    "concurrent",
+    "fixme",
+    "only",
+    "parallel",
+    "sequential",
+    "serial",
+    "shuffle",
+    "skip",
+    "todo",
+];
+
+/// Returns `true` if the call expression is a describe block:
+/// - Bare call: `describe(...)`, `fdescribe(...)`, `xdescribe(...)`, `suite(...)`, `fsuite(...)`, `xsuite(...)`
+/// - Member call: `test.describe(...)`, `it.describe(...)`, `test.suite(...)`, `describe.each(...)`, `suite.each(...)`
+///   where the object is a known test root (`test`, `it`, `describe`, or `suite`), or a modifier chain (`suite.only(...)`, `suite.skip(...)`, etc.).
+/// - Conditional call: `describe.skipIf(condition)(...)`, `describe.runIf(condition).only(...)`
+///
+/// Only `JsStaticMemberExpression` callees are considered — computed member
+/// expressions like `obj["describe"]()` are not matched.
+fn is_describe_callee(callee: &AnyJsExpression) -> bool {
+    let mut callee = callee.clone();
+    loop {
+        callee = match callee {
+            // describe(...) / fdescribe(...) / xdescribe(...) / suite(...) / fsuite(...) / xsuite(...)
+            AnyJsExpression::JsIdentifierExpression(ident) => {
+                return ident.name().and_then(|r| r.value_token()).is_ok_and(|tok| {
+                    matches!(
+                        tok.text_trimmed(),
+                        "describe" | "fdescribe" | "xdescribe" | "suite" | "fsuite" | "xsuite"
+                    )
+                });
+            }
+
+            // test.describe(...) / it.describe(...) / test.suite(...) / describe.skip(...) / suite.only(...) etc.
+            AnyJsExpression::JsStaticMemberExpression(member) => {
+                let Some(member_name) = member
+                    .member()
+                    .ok()
+                    .and_then(|name| name.as_js_name()?.value_token().ok())
+                else {
+                    return false;
+                };
+                let Ok(object) = member.object() else {
+                    return false;
+                };
+                let object = object.omit_parentheses();
+
+                if matches!(member_name.text_trimmed(), "describe" | "suite") {
+                    let AnyJsExpression::JsIdentifierExpression(i) = object else {
+                        return false;
+                    };
+                    return i.name().and_then(|r| r.value_token()).is_ok_and(|tok| {
+                        matches!(tok.text_trimmed(), "test" | "it" | "describe" | "suite")
+                    });
+                }
+                if DESCRIBE_MODIFIERS
+                    .binary_search(&member_name.text_trimmed())
+                    .is_err()
+                {
+                    return false;
+                }
+                object
+            }
+
+            // describe.skipIf(condition)(...) / describe.runIf(condition).only(...)
+            AnyJsExpression::JsCallExpression(call) => {
+                let Ok(AnyJsExpression::JsStaticMemberExpression(member)) =
+                    call.callee().map(|callee| callee.omit_parentheses())
+                else {
+                    return false;
+                };
+                let is_condition = member
+                    .member()
+                    .ok()
+                    .and_then(|name| name.as_js_name()?.value_token().ok())
+                    .is_some_and(|name| matches!(name.text_trimmed(), "skipIf" | "runIf"));
+                let Ok(object) = member.object() else {
+                    return false;
+                };
+                if !is_condition {
+                    return false;
+                }
+                object.omit_parentheses()
+            }
+
+            _ => return false,
+        };
+    }
+}
+
 /// Returns `true` if the call expression is a describe block:
 /// - Bare call: `describe(...)`, `fdescribe(...)`, `xdescribe(...)`
-/// - Member call: `test.describe(...)`, `it.describe(...)`, `describe.each(...)`
+/// - Member call: `test.describe(...)`, `it.describe(...)`
 ///   where the object is a known test root (`test`, `it`, or `describe`).
 ///
 /// Only `JsStaticMemberExpression` callees are considered — computed member
@@ -123,53 +226,7 @@ pub(crate) fn is_describe_call(call: &JsCallExpression) -> bool {
     let Ok(callee) = call.callee() else {
         return false;
     };
-    let callee = callee.omit_parentheses();
-
-    match callee {
-        // describe(...) / fdescribe(...) / xdescribe(...)
-        AnyJsExpression::JsIdentifierExpression(ident) => ident
-            .name()
-            .and_then(|r| r.value_token())
-            .is_ok_and(|tok| matches!(tok.text_trimmed(), "describe" | "fdescribe" | "xdescribe")),
-
-        // test.describe(...) / it.describe(...) / describe.each(...) etc.
-        AnyJsExpression::JsStaticMemberExpression(member) => {
-            // The right-hand member must be "describe".
-            let member_is_describe = member
-                .member()
-                .ok()
-                .and_then(|m| {
-                    if let AnyJsName::JsName(n) = m {
-                        Some(n)
-                    } else {
-                        None
-                    }
-                })
-                .and_then(|n| n.value_token().ok())
-                .is_some_and(|tok| tok.text_trimmed() == "describe");
-
-            if !member_is_describe {
-                return false;
-            }
-
-            // The left-hand object must be a known test root identifier.
-            member
-                .object()
-                .ok()
-                .map(|o| o.omit_parentheses())
-                .and_then(|o| {
-                    if let AnyJsExpression::JsIdentifierExpression(i) = o {
-                        Some(i)
-                    } else {
-                        None
-                    }
-                })
-                .and_then(|i| i.name().and_then(|r| r.value_token()).ok())
-                .is_some_and(|tok| matches!(tok.text_trimmed(), "test" | "it" | "describe"))
-        }
-
-        _ => false,
-    }
+    is_describe_callee(&callee.omit_parentheses())
 }
 
 /// Returns the statement list of a `describe` callback when the call has a
@@ -198,14 +255,104 @@ pub(crate) fn describe_body(call: &JsCallExpression) -> Option<JsStatementList> 
 
     Some(block.statements())
 }
+/// The kind of test block.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum TestBlockKind {
+    Test,
+    Describe,
+}
+
+impl TestBlockKind {
+    pub(crate) fn as_str(self) -> &'static str {
+        match self {
+            Self::Test => "test",
+            Self::Describe => "describe",
+        }
+    }
+
+    /// Identifies the `TestBlockKind` of a call expression (`test`, `describe`, or `.each` variants).
+    pub(crate) fn from_call_expression(call: &JsCallExpression) -> Option<Self> {
+        if is_describe_call(call) {
+            Some(Self::Describe)
+        } else if is_unit_test(call) {
+            Some(Self::Test)
+        } else {
+            is_each_call(call)
+        }
+    }
+
+    /// Identifies the kind of test block that `callee` declares once it is
+    /// given its table of cases, as in `test.each(table)` or
+    /// `` describe.only.each`table` ``.
+    ///
+    /// Returns `None` if `callee` isn't a table callee such as `test.each`.
+    pub(crate) fn from_each_callee(callee: &AnyJsExpression) -> Option<Self> {
+        if !callee.contains_a_test_each_pattern() {
+            return None;
+        }
+
+        let AnyJsExpression::JsStaticMemberExpression(member) = callee else {
+            return None;
+        };
+        let object = member.object().ok()?.omit_parentheses();
+
+        if is_describe_callee(&object) {
+            Some(Self::Describe)
+        } else {
+            Some(Self::Test)
+        }
+    }
+}
+
+/// Returns the test block kind of a call whose callee is the result of a
+/// table-driven or conditional test function:
+///
+/// - `test.each(table)(...)`, `describe.for(table)(...)`
+/// - `` test.each`table`(...) ``
+/// - `test.skipIf(condition)(...)`, `describe.runIf(condition)(...)`
+/// - `describe.skipIf(condition).each(table)(...)`
+pub(crate) fn is_each_call(call: &JsCallExpression) -> Option<TestBlockKind> {
+    let inner_callee = match call.callee().ok()?.omit_parentheses() {
+        AnyJsExpression::JsCallExpression(inner_call) => inner_call.callee().ok()?,
+        AnyJsExpression::JsTemplateExpression(template) => template.tag()?,
+        _ => return None,
+    }
+    .omit_parentheses();
+
+    let AnyJsExpression::JsStaticMemberExpression(member) = inner_callee else {
+        return None;
+    };
+    // The table functions that `contains_a_test_each_pattern` accepts, and
+    // Vitest's conditions.
+    let name = member.member().ok()?.as_js_name()?.value_token().ok()?;
+    if !matches!(
+        name.text_trimmed(),
+        "each" | "for" | "prop" | "skipIf" | "runIf"
+    ) {
+        return None;
+    }
+    let object = member.object().ok()?.omit_parentheses();
+
+    if is_describe_callee(&object) {
+        Some(TestBlockKind::Describe)
+    } else if object.contains_a_test_pattern() {
+        Some(TestBlockKind::Test)
+    } else {
+        None
+    }
+}
 
 #[cfg(test)]
 mod tests {
     use biome_js_parser::JsParserOptions;
-    use biome_js_syntax::{JsCallExpression, JsFileSource};
+    use biome_js_syntax::JsCallExpression;
+    use biome_languages::JsFileSource;
     use biome_rowan::{AstNode, AstNodeList};
 
-    use super::{LifecycleHook, describe_body, is_describe_call, is_unit_test};
+    use super::{
+        DESCRIBE_MODIFIERS, LifecycleHook, TestBlockKind, describe_body, is_describe_call,
+        is_unit_test,
+    };
 
     fn first_call(src: &str) -> JsCallExpression {
         let parse =
@@ -254,6 +401,42 @@ mod tests {
     fn describe_describe_member() {
         assert!(is_describe_call(&first_call(
             "describe.describe('suite', () => {})"
+        )));
+    }
+
+    #[test]
+    fn describe_modifiers_are_sorted() {
+        for pair in DESCRIBE_MODIFIERS.windows(2) {
+            assert!(
+                pair[0] < pair[1],
+                "`{}` must come before `{}`",
+                pair[1],
+                pair[0]
+            );
+        }
+    }
+
+    #[test]
+    fn describe_with_modifiers() {
+        for source in [
+            "describe.only('suite', () => {})",
+            "describe.todo('suite')",
+            "describe.shuffle('suite', () => {})",
+            "describe.skip.shuffle('suite', () => {})",
+            "test.describe.parallel('suite', () => {})",
+            "test.describe.serial('suite', () => {})",
+            "test.describe.serial.only('suite', () => {})",
+        ] {
+            let call = first_call(source);
+            assert!(is_describe_call(&call), "{source}");
+            assert!(!is_unit_test(&call), "{source}");
+        }
+    }
+
+    #[test]
+    fn describe_configuration_is_not_describe() {
+        assert!(!is_describe_call(&first_call(
+            "test.describe.configure({ mode: 'serial' })"
         )));
     }
 
@@ -341,6 +524,37 @@ mod tests {
     #[test]
     fn unrelated_call_is_not_unit_test() {
         assert!(!is_unit_test(&first_call("console.log('hello')")));
+    }
+
+    #[test]
+    fn member_call_on_non_identifier_is_not_unit_test() {
+        assert!(!is_unit_test(&first_call("/a/.test(x)")));
+        assert!(!is_unit_test(&first_call("new RegExp(s).test(x)")));
+        assert!(!is_unit_test(&first_call("this.it('test', () => {})")));
+        assert!(!is_unit_test(&first_call(
+            "foo().test.only('test', () => {})"
+        )));
+    }
+
+    #[test]
+    fn member_call_on_non_identifier_is_not_test_block() {
+        assert_eq!(
+            TestBlockKind::from_call_expression(&first_call("foo().describe('suite', () => {})")),
+            None
+        );
+        assert_eq!(
+            TestBlockKind::from_call_expression(&first_call(
+                "foo().test.each([1, 2])('test', () => {})"
+            )),
+            None
+        );
+    }
+
+    #[test]
+    fn computed_string_member_is_unit_test() {
+        assert!(is_unit_test(&first_call(
+            r#"test["only"]('test', () => {})"#
+        )));
     }
 
     #[test]
@@ -568,6 +782,139 @@ mod tests {
         assert_eq!(
             LifecycleHook::from_call_expression(&first_call("before(() => {})")),
             Some(LifecycleHook::Before)
+        );
+    }
+
+    #[test]
+    fn from_call_expression_describe_and_test() {
+        assert_eq!(
+            TestBlockKind::from_call_expression(&first_call("describe('test', () => {})")),
+            Some(TestBlockKind::Describe)
+        );
+        assert_eq!(
+            TestBlockKind::from_call_expression(&first_call("suite('test', () => {})")),
+            Some(TestBlockKind::Describe)
+        );
+        assert_eq!(
+            TestBlockKind::from_call_expression(&first_call("fsuite('test', () => {})")),
+            Some(TestBlockKind::Describe)
+        );
+        assert_eq!(
+            TestBlockKind::from_call_expression(&first_call("xsuite('test', () => {})")),
+            Some(TestBlockKind::Describe)
+        );
+        assert_eq!(
+            TestBlockKind::from_call_expression(&first_call("test.suite('test', () => {})")),
+            Some(TestBlockKind::Describe)
+        );
+        assert_eq!(
+            TestBlockKind::from_call_expression(&first_call(
+                "describe.each([1, 2])('test', () => {})"
+            )),
+            Some(TestBlockKind::Describe)
+        );
+        assert_eq!(
+            TestBlockKind::from_call_expression(&first_call(
+                "suite.each([1, 2])('test', () => {})"
+            )),
+            Some(TestBlockKind::Describe)
+        );
+        assert_eq!(
+            TestBlockKind::from_call_expression(&first_call(
+                "suite.skip.each([1, 2])('test', () => {})"
+            )),
+            Some(TestBlockKind::Describe)
+        );
+        assert_eq!(
+            TestBlockKind::from_call_expression(&first_call("it('test', () => {})")),
+            Some(TestBlockKind::Test)
+        );
+        assert_eq!(
+            TestBlockKind::from_call_expression(&first_call("test.each([1, 2])('test', () => {})")),
+            Some(TestBlockKind::Test)
+        );
+    }
+
+    #[test]
+    fn from_call_expression_tagged_template_table() {
+        assert_eq!(
+            TestBlockKind::from_call_expression(&first_call(
+                "describe.each`a | b`('suite', () => {})"
+            )),
+            Some(TestBlockKind::Describe)
+        );
+        assert_eq!(
+            TestBlockKind::from_call_expression(&first_call(
+                "it.skip.each`a | b`('test', () => {})"
+            )),
+            Some(TestBlockKind::Test)
+        );
+        assert_eq!(
+            TestBlockKind::from_call_expression(&first_call("foo.each`a | b`('test', () => {})")),
+            None
+        );
+    }
+
+    #[test]
+    fn from_call_expression_conditional() {
+        assert_eq!(
+            TestBlockKind::from_call_expression(&first_call(
+                "describe.skipIf(condition)('suite', () => {})"
+            )),
+            Some(TestBlockKind::Describe)
+        );
+        assert_eq!(
+            TestBlockKind::from_call_expression(&first_call(
+                "test.runIf(condition)('test', () => {})"
+            )),
+            Some(TestBlockKind::Test)
+        );
+        assert_eq!(
+            TestBlockKind::from_call_expression(&first_call(
+                "foo.skipIf(condition)('test', () => {})"
+            )),
+            None
+        );
+    }
+
+    #[test]
+    fn from_call_expression_chained_after_condition() {
+        for source in [
+            "describe.skipIf(condition).each([1, 2])('suite', () => {})",
+            "describe.runIf(condition).concurrent('suite', () => {})",
+            "describe.only.skipIf(condition)('suite', () => {})",
+        ] {
+            assert_eq!(
+                TestBlockKind::from_call_expression(&first_call(source)),
+                Some(TestBlockKind::Describe),
+                "{source}"
+            );
+        }
+    }
+
+    #[test]
+    fn condition_without_test_call_is_not_test_block() {
+        // The condition is given, but the function it returns is never called.
+        assert_eq!(
+            TestBlockKind::from_call_expression(&first_call("describe.skipIf(condition)")),
+            None
+        );
+    }
+
+    #[test]
+    fn table_without_test_call_is_not_test_block() {
+        // The table is given, but the function it returns is never called.
+        assert_eq!(
+            TestBlockKind::from_call_expression(&first_call("it.each([1, 2])")),
+            None
+        );
+    }
+
+    #[test]
+    fn suite_before_each_member() {
+        assert_eq!(
+            LifecycleHook::from_call_expression(&first_call("suite.beforeEach(() => {})")),
+            Some(LifecycleHook::BeforeEach)
         );
     }
 }

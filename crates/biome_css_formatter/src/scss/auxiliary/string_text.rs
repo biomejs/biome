@@ -1,5 +1,5 @@
-use super::interpolated_string::ScssInterpolatedStringQuotes;
 use crate::prelude::*;
+use crate::utils::scss_interpolated_string::ScssInterpolatedStringQuotes;
 use biome_css_syntax::{ScssStringText, ScssStringTextFields};
 use biome_formatter::{FormatRuleWithOptions, prelude::text, token::string::normalize_string};
 
@@ -34,7 +34,10 @@ impl FormatNodeRule<ScssStringText> for FormatScssStringText {
 
         format_replaced(
             &token,
-            &text(normalized.as_ref(), token.text_trimmed_range().start()),
+            &text(
+                normalized.as_ref(),
+                Some(token.text_trimmed_range().start()),
+            ),
         )
         .fmt(f)
     }

@@ -1,6 +1,16 @@
+mod ast;
 mod context;
+mod generated;
+mod kind_set;
 mod module_loader;
+mod mutation;
 mod plugin_api;
+mod rule_context;
+mod semantic;
+mod source;
+mod token;
+mod traversal;
+mod trivia;
 
-pub use context::JsExecContext;
+pub use context::{JsExecContext, JsPluginRule};
 pub use module_loader::JsModuleLoader;

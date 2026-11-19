@@ -1,0 +1,42 @@
+---
+source: crates/biome_yaml_analyze/tests/spec_tests.rs
+expression: valid.yaml
+---
+# Input
+```yaml
+# should not generate diagnostics
+# biome-ignore lint/nursery/noYamlBooleanKeys: test
+true: 1
+
+nested:
+  # biome-ignore lint/nursery/noYamlBooleanKeys: test
+  false: 2
+
+# biome-ignore lint/nursery/noYamlBooleanKeys: test
+flow: { True: 3 }
+
+sequence:
+  - # biome-ignore lint/nursery/noYamlBooleanKeys: test
+    FALSE: 4
+
+explicit:
+  # biome-ignore lint/nursery/noYamlBooleanKeys: test
+  ? TRUE
+  : 5
+
+tagged:
+  # biome-ignore lint/nursery/noYamlBooleanKeys: test
+  !!bool "text": 6
+
+anchored: &flag False
+aliased:
+  # biome-ignore lint/nursery/noYamlBooleanKeys: test
+  ? *flag
+  : 7
+
+items:
+  - &item
+    # biome-ignore lint/nursery/noYamlBooleanKeys: test
+    True: 8
+
+```

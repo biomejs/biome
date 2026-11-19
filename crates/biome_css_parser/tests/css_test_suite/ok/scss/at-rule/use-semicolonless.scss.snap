@@ -1,0 +1,55 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+@use
+  "theme"
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        CssAtRule {
+            at_token: AT@0..1 "@" [] [],
+            rule: ScssUseAtRule {
+                use_token: USE_KW@1..4 "use" [] [],
+                url: CssString {
+                    value_token: CSS_STRING_LITERAL@4..14 "\"theme\"" [Newline("\n"), Whitespace("  ")] [],
+                },
+                as_clause: missing (optional),
+                with_clause: missing (optional),
+                semicolon_token: missing (optional),
+            },
+        },
+    ],
+    eof_token: EOF@14..15 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..15
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..14
+    0: CSS_AT_RULE@0..14
+      0: AT@0..1 "@" [] []
+      1: SCSS_USE_AT_RULE@1..14
+        0: USE_KW@1..4 "use" [] []
+        1: CSS_STRING@4..14
+          0: CSS_STRING_LITERAL@4..14 "\"theme\"" [Newline("\n"), Whitespace("  ")] []
+        2: (empty)
+        3: (empty)
+        4: (empty)
+  2: EOF@14..15 "" [Newline("\n")] []
+
+```

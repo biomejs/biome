@@ -1,4 +1,4 @@
-use biome_css_syntax::EmbeddingKind;
+use biome_languages::css::CssEmbeddingKind;
 use biome_parser::CompletedMarker;
 
 use crate::parser::CssParser;
@@ -14,13 +14,24 @@ use crate::syntax::block::{parse_declaration_or_rule_list_block, parse_rule_bloc
 /// In addition to nested style rules, this specification allows nested group rules inside of style rules:
 /// any at-rule whose body contains style rules can be nested inside of a style rule as well.
 ///
+/// Top-level SCSS conditional blocks also accept variable declarations:
+///
+/// ```scss
+/// @supports (display: grid) {
+///   $display: grid;
+///   .grid {
+///     display: $display;
+///   }
+/// }
+/// ```
+///
 /// For more detailed information refer to the
 /// [CSS Nesting Module](https://drafts.csswg.org/css-nesting-1/#conditionals)
 ///
 #[inline]
 pub(crate) fn parse_conditional_block(p: &mut CssParser) -> CompletedMarker {
     if p.state().is_nesting_block
-        || matches!(p.source_type.as_embedding_kind(), EmbeddingKind::Styled)
+        || matches!(p.source_type.as_embedding_kind(), CssEmbeddingKind::Styled)
     {
         parse_declaration_or_rule_list_block(p)
     } else {

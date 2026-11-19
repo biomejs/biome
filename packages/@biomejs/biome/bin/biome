@@ -43,6 +43,10 @@ const PLATFORMS = {
 		x64: "@biomejs/cli-linux-x64-musl/biome",
 		arm64: "@biomejs/cli-linux-arm64-musl/biome",
 	},
+	android: {
+		x64: "@biomejs/cli-android-x64/biome",
+		arm64: "@biomejs/cli-android-arm64/biome",
+	},
 };
 
 const binPath = env.BIOME_BINARY ||
@@ -61,6 +65,7 @@ if (binPath) {
 			stdio: "inherit",
 			env: {
 				...env,
+				BIOME_DISTRIBUTION: "npm",
 				JS_RUNTIME_VERSION: version,
 				JS_RUNTIME_NAME: release.name,
 				...(packageManager != null
@@ -74,7 +79,15 @@ if (binPath) {
 		throw result.error;
 	}
 
-	process.exitCode = result.status;
+	// We check `signal` instead of `status` because a child killed by a signal
+	// has a null `status`, which Node turns into exit code 0. The shell
+	// convention for that case is 128 + signal number.
+	if (result.signal) {
+		const signalNumber = require("os").constants.signals[result.signal];
+		process.exitCode = signalNumber ? 128 + signalNumber : 1;
+	} else {
+		process.exitCode = result.status;
+	}
 } else {
 	console.error(
 		"The Biome CLI package doesn't ship with prebuilt binaries for your platform yet. " +

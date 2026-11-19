@@ -1,0 +1,38 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-type-literal.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<script setup lang="ts">
+const emit = defineEmits<{
+  foo: [string, number];
+  bar: [];
+}>();
+const change = () => emit("foo");
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-type-literal.vue:5:3 lint/nursery/noVueUnusedEmitDeclarations ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The event bar is declared but never emitted.
+  
+    3 │ const emit = defineEmits<{
+    4 │   foo: [string, number];
+  > 5 │   bar: [];
+      │   ^^^
+    6 │ }>();
+    7 │ const change = () => emit("foo");
+  
+  i Other components can listen for this event, but their listeners are never called.
+  
+  i Remove the declaration, or emit the event.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

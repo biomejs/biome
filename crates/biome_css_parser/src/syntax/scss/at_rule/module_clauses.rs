@@ -283,6 +283,6 @@ impl ParseSeparatedList for ScssModuleConfigurationItemList {
     }
 
     fn allow_trailing_separating_element(&self) -> bool {
-        false
+        true
     }
 }

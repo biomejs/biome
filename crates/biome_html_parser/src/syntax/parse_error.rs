@@ -67,8 +67,28 @@ pub(crate) fn expected_closing_tag(p: &HtmlParser, range: TextRange) -> ParseDia
     expected_node("closing tag", range, p).into_diagnostic(p)
 }
 
+/// The parser encountered a closing tag at the top level of the document, where
+/// there is no element for it to close.
+///
+/// ```html
+/// <div></div></span>
+///            ^^^^^^^ no element to close
+/// ```
+pub(crate) fn unexpected_closing_tag(p: &HtmlParser, range: TextRange) -> ParseDiagnostic {
+    p.err_builder("This closing tag has no matching opening tag.", range)
+        .with_hint("Remove the closing tag, or add the opening tag it belongs to.")
+}
+
 pub(crate) fn expected_matching_closing_tag(p: &HtmlParser, range: TextRange) -> ParseDiagnostic {
     expected_node("matching closing tag", range, p).into_diagnostic(p)
+}
+
+pub(crate) fn expected_no_spaces(p: &HtmlParser, range: TextRange) -> ParseDiagnostic {
+    p.err_builder(
+        "Processing instruction name can't have a leading space.",
+        range,
+    )
+    .with_hint("Remove the leading space.")
 }
 
 /// The parser was encountered a tag that does not have a name.
@@ -113,13 +133,19 @@ pub(crate) fn expected_name(p: &HtmlParser, range: TextRange) -> ParseDiagnostic
 }
 
 pub(crate) fn disabled_vue(p: &HtmlParser, range: TextRange) -> ParseDiagnostic {
-    // TODO: uncomment when the parser option is implemented
-    // p.err_builder("Vue syntax isn't enabled. Is this supposed to be a .vue file?", range).with_hint(markup!("Remove it or enable the parsing using the "<Emphasis>"html.parser.vue"</Emphasis>" option."))
-    p.err_builder("Vue syntax isn't enabled. Is this supposed to be a .vue file? HTML-as-Vue is not yet supported.", range).with_hint(markup!("Remove it or rename this file to have the "<Emphasis>".vue"</Emphasis>" file extension."))
+    p.err_builder("Vue syntax isn't enabled. Is this supposed to be a .vue file?", range).with_hint(markup!("Remove it, change the extension to "<Emphasis>".vue"</Emphasis>", or enable the parsing using the "<Emphasis>"html.parser.vue"</Emphasis>" option."))
 }
 
 pub(crate) fn expected_vue_directive_argument(p: &HtmlParser, range: TextRange) -> ParseDiagnostic {
     expected_node("vue directive argument", range, p).into_diagnostic(p)
+}
+
+pub(crate) fn disabled_angular(p: &HtmlParser, range: TextRange) -> ParseDiagnostic {
+    p.err_builder("This looks like Angular syntax, but this is not an Angular file.", range).with_hint(markup!("Remove it or rename this file to have the "<Emphasis>".component.html"</Emphasis>" file extension."))
+}
+
+pub(crate) fn expected_angular_name(p: &HtmlParser, range: TextRange) -> ParseDiagnostic {
+    p.err_builder("Expected an Angular binding name.", range)
 }
 
 pub(crate) fn expected_expression(p: &HtmlParser, range: TextRange) -> ParseDiagnostic {
@@ -156,6 +182,18 @@ pub(crate) fn expected_vue_v_for_expression(p: &HtmlParser, range: TextRange) ->
         range,
     )
     .with_hint(markup!("Add the collection or expression to iterate over."))
+}
+
+pub(crate) fn expected_vue_v_for_default(p: &HtmlParser, range: TextRange) -> ParseDiagnostic {
+    expected_node("default value", range, p).into_diagnostic(p)
+}
+
+pub(crate) fn unexpected_vue_v_for_rest_default(
+    p: &HtmlParser,
+    range: TextRange,
+) -> ParseDiagnostic {
+    p.err_builder("A rest binding can't have a default value.", range)
+        .with_hint(markup!("Remove the default value."))
 }
 
 pub(crate) fn expected_vue_v_for_binding(p: &HtmlParser, range: TextRange) -> ParseDiagnostic {

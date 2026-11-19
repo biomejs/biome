@@ -1,0 +1,13 @@
+# should generate diagnostics
+query A {
+	field(arg: { f1: "value", f1: "value" })
+}
+query B {
+	field(arg: { f1: "value", f1: "value", f1: "value" })
+}
+query C {
+	field(arg: { f1: {f2: "value", f2: "value" }})
+}
+query D {
+	field(arg: { a: 1, b: 2, a: 3, b: 4 })
+}

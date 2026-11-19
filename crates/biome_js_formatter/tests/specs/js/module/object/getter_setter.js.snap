@@ -13,6 +13,9 @@ let b = {
 	set foo(a) {}
 	set bar(a, ) {}
 }
+let c = {
+	set veryLongPropertyNameHere(veryLongParameterNameThatExceedsTheLineWidthLimit) {}
+}
 
 ```
 
@@ -27,5 +30,13 @@ let b = {
 	set foo(a) {}
 	set bar(a, ) {}
 }
+let c = {
+	set veryLongPropertyNameHere(veryLongParameterNameThatExceedsTheLineWidthLimit) {},
+};
 
+```
+
+# Lines exceeding max width of 80 characters
+```
+    9: 	set veryLongPropertyNameHere(veryLongParameterNameThatExceedsTheLineWidthLimit) {},
 ```

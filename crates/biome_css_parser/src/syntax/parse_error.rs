@@ -63,6 +63,18 @@ pub(crate) fn expected_any_rule(p: &CssParser, range: TextRange) -> ParseDiagnos
     expected_any(&["qualified rule", "at rule"], range, p)
 }
 
+pub(crate) fn expected_any_rule_list_item(p: &CssParser, range: TextRange) -> ParseDiagnostic {
+    if p.source_type.is_scss() {
+        expected_any(
+            &["qualified rule", "at rule", "SCSS variable declaration"],
+            range,
+            p,
+        )
+    } else {
+        expected_any_rule(p, range)
+    }
+}
+
 pub(crate) fn expected_any_declaration_or_at_rule(
     p: &CssParser,
     range: TextRange,
@@ -245,6 +257,10 @@ pub(crate) fn tailwind_disabled(p: &CssParser, range: TextRange) -> ParseDiagnos
 
 pub(crate) fn expected_tw_source(p: &CssParser, range: TextRange) -> ParseDiagnostic {
     expected_any(&["string literal", "inline(\"...\")"], range, p)
+}
+
+pub(crate) fn expected_tw_theme_option(p: &CssParser, range: TextRange) -> ParseDiagnostic {
+    expected_any(&["identifier", "prefix(...)"], range, p)
 }
 
 pub(crate) fn scss_only_syntax_error(

@@ -1,8 +1,9 @@
 use biome_css_formatter::context::CssFormatOptions;
 use biome_css_formatter::format_node;
 use biome_css_parser::{CssParserOptions, parse_css};
-use biome_css_syntax::{AnyCssRoot, CssFileSource};
-use biome_formatter::Printed;
+use biome_css_syntax::AnyCssRoot;
+use biome_formatter::rowan::Printed;
+use biome_languages::CssFileSource;
 use biome_rowan::AstNode;
 use biome_test_utils::BenchCase;
 use criterion::{BenchmarkId, Criterion, Throughput, black_box, criterion_group, criterion_main};
@@ -14,7 +15,7 @@ static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
 
 #[cfg(all(
     any(target_os = "macos", target_os = "linux"),
-    not(target_env = "musl"),
+    not(all(target_env = "musl", target_arch = "aarch64")),
 ))]
 #[global_allocator]
 static GLOBAL: tikv_jemallocator::Jemalloc = tikv_jemallocator::Jemalloc;
@@ -26,6 +27,7 @@ static GLOBAL: std::alloc::System = std::alloc::System;
 fn bench_css_formatter(criterion: &mut Criterion) {
     let mut all_suites = HashMap::new();
     all_suites.insert("css", include_str!("libs-css.txt"));
+    all_suites.insert("scss", include_str!("libs-scss.txt"));
     let mut libs = vec![];
     libs.extend(all_suites.values().flat_map(|suite| suite.lines()));
 
@@ -37,7 +39,12 @@ fn bench_css_formatter(criterion: &mut Criterion) {
         match test_case {
             Ok(test_case) => {
                 let code = test_case.code();
-                let parsed = parse_css(code, CssFileSource::css(), CssParserOptions::default());
+                let file_source = if test_case.extension() == "scss" {
+                    CssFileSource::scss()
+                } else {
+                    CssFileSource::css()
+                };
+                let parsed = parse_css(code, file_source, CssParserOptions::default());
                 group.throughput(Throughput::Bytes(code.len() as u64));
                 group.bench_with_input(
                     BenchmarkId::from_parameter(test_case.filename()),

@@ -7,11 +7,12 @@ use crate::{
     grit_target_node::{GritSyntaxSlot, GritTargetNode, GritTargetSyntaxKind},
     grit_tree::GritTargetTree,
 };
+use biome_js_syntax::JsSyntaxKind;
 use grit_pattern_matcher::{
     constants::GLOBAL_VARS_SCOPE_INDEX,
     pattern::{
-        DynamicPattern, DynamicSnippet, DynamicSnippetPart, List, Pattern, RegexLike, RegexPattern,
-        Variable, VariableSource, is_reserved_metavariable,
+        DynamicPattern, DynamicSnippet, DynamicSnippetPart, List, Or, Pattern, RegexLike,
+        RegexPattern, Variable, VariableSource, is_reserved_metavariable,
     },
 };
 use grit_util::{Ast, AstNode, ByteRange, GritMetaValue, Language, Order, SnippetTree, traverse};
@@ -219,7 +220,7 @@ fn pattern_from_node(
         let content = node.text();
         let lang = &context.compilation.lang;
         let pattern = if let Some(regex_pattern) = lang
-            .matches_replaced_metavariable(content)
+            .matches_metavariable(content)
             .then(|| implicit_metavariable_regex(node, context_range, range_map, context))
             .flatten()
         {
@@ -242,6 +243,42 @@ fn pattern_from_node(
         })
         .map(|slot| pattern_arg_from_slot(slot, context_range, range_map, context, is_rhs))
         .collect::<Result<Vec<GritNodePatternArg>, CompileError>>()?;
+
+    if kind.as_js_kind() == Some(JsSyntaxKind::JS_IMPORT_DEFAULT_CLAUSE)
+        && node.child_by_slot_index(1).is_none()
+        && args.iter().any(|arg| {
+            arg.slot_index == 2 && matches!(arg.pattern, Pattern::Variable(_) | Pattern::Underscore)
+        })
+    {
+        // A whole import metavariable can capture default, named, or namespace
+        // specifiers. `Or` requires an explicit pattern for each node kind.
+        let has_type = node.child_by_slot_index(0).is_some();
+        let args: Vec<_> = args
+            .into_iter()
+            .filter(|arg| arg.slot_index != 0 || has_type)
+            .collect();
+        let named_args = args
+            .iter()
+            .filter(|arg| arg.slot_index != 1)
+            .map(|arg| {
+                GritNodePatternArg::new(arg.slot_index.saturating_sub(1), arg.pattern.clone())
+            })
+            .collect();
+        return Ok(Pattern::Or(Box::new(Or::new(vec![
+            Pattern::AstNode(Box::new(GritNodePattern {
+                kind,
+                args: args.clone(),
+            })),
+            Pattern::AstNode(Box::new(GritNodePattern {
+                kind: JsSyntaxKind::JS_IMPORT_NAMED_CLAUSE.into(),
+                args: named_args,
+            })),
+            Pattern::AstNode(Box::new(GritNodePattern {
+                kind: JsSyntaxKind::JS_IMPORT_NAMESPACE_CLAUSE.into(),
+                args,
+            })),
+        ]))));
+    }
 
     Ok(Pattern::AstNode(Box::new(GritNodePattern { kind, args })))
 }
@@ -294,15 +331,16 @@ fn implicit_metavariable_regex(
     let source = node.text();
     let capture_string = "(.*)";
     let uncapture_string = ".*";
-    let variable_regex = context.compilation.lang.replaced_metavariable_regex();
+    let variable_regex = context.compilation.lang.metavariable_regex();
     let mut last = 0;
     let mut regex_string = String::new();
     let mut variables: Vec<Variable> = vec![];
+    let node_start = node.start_byte() as usize;
     for m in variable_regex.find_iter(source) {
         regex_string.push_str(&regex::escape(&source[last..m.start()]));
-        let range = ByteRange::new(m.start(), m.end());
-        last = range.end;
+        last = m.end();
         let name = m.as_str();
+        let range = ByteRange::new(node_start + m.start(), node_start + m.end());
         let variable = text_to_var(name, range, context_range, range_map, context).ok()?;
         match variable {
             SnippetValue::Dots => return None,
@@ -385,14 +423,10 @@ fn node_sub_variables(node: &GritTargetNode, lang: &GritTargetLanguage) -> Vec<B
     }
 
     let source = node.text();
-    let variable_regex = lang.replaced_metavariable_regex();
+    let variable_regex = lang.metavariable_regex();
+    let start_byte = node.start_byte() as usize;
     for m in variable_regex.find_iter(source) {
-        let var_range = ByteRange::new(m.start(), m.end());
-        let start_byte = node.start_byte() as usize;
-        let end_byte = node.end_byte() as usize;
-        if var_range.start >= start_byte && var_range.end <= end_byte {
-            ranges.push(var_range);
-        }
+        ranges.push(ByteRange::new(start_byte + m.start(), start_byte + m.end()));
     }
 
     ranges
@@ -806,7 +840,7 @@ mod tests {
             &mut diagnostics,
         );
 
-        let snippet_source = "µfn && µfn()";
+        let snippet_source = "$fn && $fn()";
         let range = ByteRange::new(0, snippet_source.len());
         let pattern = parse_snippet_content(snippet_source, range, &mut context, false)
             .expect("cannot parse snippet");
@@ -956,13 +990,39 @@ mod tests {
                         ),
                     ),
                 ],
-                source: "µfn && µfn()",
+                source: "$fn && $fn()",
                 dynamic_snippet: Some(
                     Snippet(
                         DynamicSnippet {
                             parts: [
                                 String(
-                                    "µfn && µfn()",
+                                    "",
+                                ),
+                                Variable(
+                                    Variable {
+                                        internal: Static(
+                                            VariableScope {
+                                                scope: 1,
+                                                index: 0,
+                                            },
+                                        ),
+                                    },
+                                ),
+                                String(
+                                    " && ",
+                                ),
+                                Variable(
+                                    Variable {
+                                        internal: Static(
+                                            VariableScope {
+                                                scope: 1,
+                                                index: 0,
+                                            },
+                                        ),
+                                    },
+                                ),
+                                String(
+                                    "()",
                                 ),
                             ],
                         },
@@ -975,7 +1035,7 @@ mod tests {
 
     #[test]
     fn test_export_named_from_snippet_node() {
-        let snippet = GritJsParser.parse_snippet("", "export { µfoo } from \"source\"", "");
+        let snippet = GritJsParser.parse_snippet("", "export { $foo } from \"source\"", "");
         let node = node_from_tree(&snippet).expect("no node found");
         let formatted = format!("{node:#?}");
 
@@ -983,22 +1043,22 @@ mod tests {
         GritTargetNode {
             node: JsLanguage(
                 Node(
-                    0: JS_EXPORT@0..30
+                    0: JS_EXPORT@0..29
                       0: JS_DECORATOR_LIST@0..0
                       1: EXPORT_KW@0..7 "export" [] [Whitespace(" ")]
-                      2: JS_EXPORT_NAMED_FROM_CLAUSE@7..30
+                      2: JS_EXPORT_NAMED_FROM_CLAUSE@7..29
                         0: (empty)
                         1: L_CURLY@7..9 "{" [] [Whitespace(" ")]
-                        2: JS_EXPORT_NAMED_FROM_SPECIFIER_LIST@9..15
-                          0: JS_EXPORT_NAMED_FROM_SPECIFIER@9..15
+                        2: JS_EXPORT_NAMED_FROM_SPECIFIER_LIST@9..14
+                          0: JS_EXPORT_NAMED_FROM_SPECIFIER@9..14
                             0: (empty)
-                            1: JS_METAVARIABLE@9..15
-                              0: GRIT_METAVARIABLE@9..15 "µfoo" [] [Whitespace(" ")]
+                            1: JS_METAVARIABLE@9..14
+                              0: GRIT_METAVARIABLE@9..14 "$foo" [] [Whitespace(" ")]
                             2: (empty)
-                        3: R_CURLY@15..17 "}" [] [Whitespace(" ")]
-                        4: FROM_KW@17..22 "from" [] [Whitespace(" ")]
-                        5: JS_MODULE_SOURCE@22..30
-                          0: JS_STRING_LITERAL@22..30 "\"source\"" [] []
+                        3: R_CURLY@14..16 "}" [] [Whitespace(" ")]
+                        4: FROM_KW@16..21 "from" [] [Whitespace(" ")]
+                        5: JS_MODULE_SOURCE@21..29
+                          0: JS_STRING_LITERAL@21..29 "\"source\"" [] []
                         6: (empty)
                         7: (empty)
                     ,

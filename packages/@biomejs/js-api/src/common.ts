@@ -3,10 +3,138 @@ import type {
 	FixFileMode,
 	Module,
 	OpenProjectResult,
+	PatternId,
 	ProjectKey,
+	SearchLanguage,
 	Workspace,
 } from "./wasm";
 import { tryCatchWrapper } from "./wasm";
+
+export type { PatternId, SearchLanguage };
+
+/**
+ * Check if a code point is a UTF-16 high surrogate (U+D800-U+DBFF).
+ */
+function isHighSurrogate(code: number): boolean {
+	return code >= 0xd800 && code <= 0xdbff;
+}
+
+/**
+ * Check if a code point is a UTF-16 low surrogate (U+DC00-U+DFFF).
+ */
+function isLowSurrogate(code: number): boolean {
+	return code >= 0xdc00 && code <= 0xdfff;
+}
+
+/**
+ * Get the UTF-8 byte length for a code unit at a given index, with lookahead
+ * for proper surrogate pair handling.
+ *
+ * When TextEncoder (used by wasm-bindgen) encounters an unpaired surrogate,
+ * it replaces it with U+FFFD (3 bytes). This function handles that case.
+ *
+ * @param str The string containing the code unit
+ * @param index The index of the code unit
+ * @returns A tuple of [byteLength, codeUnitsConsumed]
+ */
+function getUtf8ByteLengthAt(str: string, index: number): [number, number] {
+	const code = str.charCodeAt(index);
+
+	// ASCII: 1 byte, 1 code unit
+	if (code < 0x80) {
+		return [1, 1];
+	}
+
+	// 2-byte UTF-8 (U+0080-U+07FF): 2 bytes, 1 code unit
+	if (code < 0x800) {
+		return [2, 1];
+	}
+
+	// High surrogate: check if followed by low surrogate
+	if (isHighSurrogate(code)) {
+		const nextCode = str.charCodeAt(index + 1);
+		if (isLowSurrogate(nextCode)) {
+			// Valid surrogate pair: 4 bytes, 2 code units
+			return [4, 2];
+		}
+		// Unpaired high surrogate: replaced with U+FFFD (3 bytes), 1 code unit
+		return [3, 1];
+	}
+
+	// Unpaired low surrogate: replaced with U+FFFD (3 bytes), 1 code unit
+	if (isLowSurrogate(code)) {
+		return [3, 1];
+	}
+
+	// BMP character (U+0800-U+FFFF, excluding surrogates): 3 bytes, 1 code unit
+	return [3, 1];
+}
+
+/**
+ * Convert a byte-based span to a UTF-16 code unit span.
+ *
+ * Biome internally uses UTF-8 byte offsets for spans, but JavaScript strings
+ * use UTF-16 code units. This function converts a span from byte offsets to
+ * code unit offsets, allowing you to use `string.slice(start, end)` correctly
+ * with non-ASCII content.
+ *
+ * @param span A tuple of [startInBytes, endInBytes] from Biome diagnostics
+ * @param str The original string that the span refers to
+ * @returns A tuple of [startInCodeUnits, endInCodeUnits] for use with string.slice()
+ *
+ * @example
+ * ```ts
+ * const content = "/** Franççççais *\/ let a = 123";
+ * const result = biome.lintContent(projectKey, content, { filePath: "example.js" });
+ *
+ * for (const diagnostic of result.diagnostics) {
+ *     const [start, end] = spanInBytesToSpanInCodeUnits(
+ *         diagnostic.location.span,
+ *         content
+ *     );
+ *     const text = content.slice(start, end);
+ *     console.log(text); // Correctly extracts the text
+ * }
+ * ```
+ */
+export function spanInBytesToSpanInCodeUnits(
+	span: [number, number],
+	str: string,
+): [number, number] {
+	const [startInBytes, endInBytes] = span;
+	const spanInCodeUnits: [number, number] = [startInBytes, endInBytes];
+
+	let currCodeUnitIndex = 0;
+	let bytePos = 0;
+
+	// Scan through the string, looking for the start of the substring
+	while (bytePos < startInBytes && currCodeUnitIndex < str.length) {
+		const [byteLength, codeUnitsConsumed] = getUtf8ByteLengthAt(
+			str,
+			currCodeUnitIndex,
+		);
+		bytePos += byteLength;
+		currCodeUnitIndex += codeUnitsConsumed;
+	}
+
+	// We've found the start, we update the start of spanInCodeUnits
+	spanInCodeUnits[0] = currCodeUnitIndex;
+
+	// Now scan through the following string to find the end
+	while (bytePos < endInBytes && currCodeUnitIndex < str.length) {
+		const [byteLength, codeUnitsConsumed] = getUtf8ByteLengthAt(
+			str,
+			currCodeUnitIndex,
+		);
+		bytePos += byteLength;
+		currCodeUnitIndex += codeUnitsConsumed;
+	}
+
+	// We've found the end, we update the end of spanInCodeUnits
+	spanInCodeUnits[1] = currCodeUnitIndex;
+
+	return spanInCodeUnits;
+}
 
 export interface FormatContentDebugOptions extends FormatContentOptions {
 	/**
@@ -60,6 +188,35 @@ export interface LintResult<Diagnostic> {
 	diagnostics: Diagnostic[];
 }
 
+export interface ParsePatternOptions {
+	/**
+	 * The language of the pattern's code snippets, unless the pattern declares
+	 * its own language
+	 */
+	defaultLanguage: SearchLanguage;
+}
+
+export interface SearchContentOptions {
+	/**
+	 * A virtual path of the file. You should add the extension, so Biome knows
+	 * how to parse the content
+	 */
+	filePath: string;
+	/**
+	 * The identifier returned by `parsePattern`
+	 */
+	patternId: PatternId;
+}
+
+export interface SearchResult {
+	/**
+	 * The `[start, end]` range of each match, as UTF-8 byte offsets into the
+	 * content. Convert a range with {@link spanInBytesToSpanInCodeUnits} before
+	 * using it with `String.prototype.slice`.
+	 */
+	matches: [number, number][];
+}
+
 function isFormatContentDebug(
 	options: FormatContentOptions | FormatContentDebugOptions,
 ): options is FormatContentDebugOptions {
@@ -111,7 +268,7 @@ export class BiomeCommon<Configuration, Diagnostic> {
 	/**
 	 * Allows to apply a custom configuration.
 	 *
-	 * If fails when the configuration is incorrect.
+	 * It fails when the configuration is incorrect.
 	 *
 	 * @param projectKey The identifier of the project
 	 * @param configuration
@@ -177,7 +334,7 @@ export class BiomeCommon<Configuration, Diagnostic> {
 	): FormatDebugResult<Diagnostic>;
 
 	/**
-	 * If formats some content.
+	 * It formats some content.
 	 *
 	 * @param projectKey The identifier of the project
 	 * @param content The content to format
@@ -306,6 +463,62 @@ export class BiomeCommon<Configuration, Diagnostic> {
 				printer.free();
 				throw err;
 			}
+		});
+	}
+
+	/**
+	 * Parse a GritQL pattern for searching code.
+	 *
+	 * It fails when the pattern is invalid.
+	 *
+	 * @param pattern The GritQL pattern to parse
+	 * @param options Options needed when parsing a pattern
+	 * @returns The identifier of the parsed pattern. Pass it to `searchContent`,
+	 * and to `dropPattern` once the pattern is no longer needed.
+	 */
+	parsePattern(
+		pattern: string,
+		{ defaultLanguage }: ParsePatternOptions,
+	): PatternId {
+		return tryCatchWrapper(() => {
+			const { patternId } = this.workspace.parsePattern({
+				pattern,
+				defaultLanguage,
+			});
+			return patternId;
+		});
+	}
+
+	/**
+	 * Search the content of a file for matches of a parsed GritQL pattern.
+	 *
+	 * @param projectKey The identifier of the project
+	 * @param content The content to search
+	 * @param options Options needed when searching some content
+	 */
+	searchContent(
+		projectKey: ProjectKey,
+		content: string,
+		{ filePath, patternId }: SearchContentOptions,
+	): SearchResult {
+		return this.withFile(projectKey, filePath, content, (path) => {
+			const { matches } = this.workspace.searchPattern({
+				projectKey,
+				path,
+				pattern: patternId,
+			});
+			return { matches };
+		});
+	}
+
+	/**
+	 * Release a pattern parsed by `parsePattern`.
+	 *
+	 * @param patternId The identifier of the pattern to release
+	 */
+	dropPattern(patternId: PatternId): void {
+		tryCatchWrapper(() => {
+			this.workspace.dropPattern({ pattern: patternId });
 		});
 	}
 }

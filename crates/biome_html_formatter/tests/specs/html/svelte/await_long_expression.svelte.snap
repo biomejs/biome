@@ -18,15 +18,13 @@ info: svelte/await_long_expression.svelte
 # Formatted
 
 ```svelte
-{#await fetch('/api/users/' + userId).then(res => res.json()).then(data => data.profile).catch(err => handleError(err))}
+{#await fetch("/api/users/" + userId)
+	.then((res) => res.json())
+	.then((data) => data.profile)
+	.catch((err) => handleError(err))}
 	<p>Loading...</p>
 {:then profile}
 	<div>{profile.name}</div>
 {/await}
 
-```
-
-# Lines exceeding max width of 80 characters
-```
-    1: {#await fetch('/api/users/' + userId).then(res => res.json()).then(data => data.profile).catch(err => handleError(err))}
 ```

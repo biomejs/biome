@@ -1,9 +1,19 @@
-use biome_js_syntax::{AnyJsExpression, JsBinaryExpression, JsSyntaxNode, inner_string_text};
+use biome_js_syntax::{
+    AnyJsExpression, JsBinaryExpression, JsSyntaxKind, JsSyntaxNode, JsUnaryOperator,
+    inner_string_text,
+};
 use biome_rowan::{AstNode, Direction, WalkEvent};
+use biome_unicode_table::is_js_ident;
+use rustc_hash::FxHasher;
+use std::hash::{Hash, Hasher};
 use std::iter;
 
 pub mod batch;
+pub mod condition;
+pub mod function_return;
+pub mod indexed_collection;
 pub mod rename;
+pub mod same_reference;
 #[cfg(test)]
 pub mod tests;
 
@@ -37,6 +47,21 @@ pub(crate) fn is_node_equal(a_node: &JsSyntaxNode, b_node: &JsSyntaxNode) -> boo
         }
     }
     true
+}
+
+/// Hashes the kinds and inner token texts that [is_node_equal] compares, so nodes that
+/// [is_node_equal] considers equal have the same hash.
+pub(crate) fn node_hash(node: &JsSyntaxNode) -> u64 {
+    let mut hasher = FxHasher::default();
+    for event in node.preorder_with_tokens(Direction::Next) {
+        if let WalkEvent::Enter(element) = event {
+            element.kind().hash(&mut hasher);
+            if let Some(token) = element.as_token() {
+                inner_string_text(token).text().hash(&mut hasher);
+            }
+        }
+    }
+    hasher.finish()
 }
 
 #[derive(Debug, PartialEq)]
@@ -80,11 +105,88 @@ pub(crate) fn find_variable_position(
         .next()
 }
 
+/// Returns `true` if `name` can be declared as a variable in a module, where
+/// strict mode reserves words such as `let` and `static`.
+pub(crate) fn can_be_variable_name(name: &str) -> bool {
+    is_js_ident(name)
+        && !JsSyntaxKind::from_keyword(name)
+            .is_some_and(|keyword| keyword.is_non_contextual_keyword())
+}
+
+// Parse the package name from an import value
+pub(crate) fn parse_package_name(path: &str) -> Option<&str> {
+    if path.is_empty() {
+        return None;
+    }
+
+    let mut in_scope = false;
+    for (i, c) in path.bytes().enumerate() {
+        match c {
+            b'@' if i == 0 => {
+                in_scope = true;
+            }
+            // uppercase characters are not allowed in package name
+            // Here we are more tolerant and accept them.
+            b'A'..=b'Z' | b'a'..=b'z' | b'0'..=b'9' | b'-' | b'_' => {}
+            b'.' if i != 0 => {}
+            b'/' => {
+                if in_scope {
+                    if i == 1 {
+                        // Invalid empty scope
+                        // `@/`
+                        return None;
+                    } else {
+                        // We consumed the scope.
+                        // `@scope/`
+                        in_scope = false;
+                    }
+                } else if i == 0 {
+                    // absolute path
+                    return None;
+                } else {
+                    // We consumed the package name
+                    return Some(&path[..i]);
+                }
+            }
+            _ => {
+                return None;
+            }
+        }
+    }
+
+    // Reject scope-only names (`@scope`) and trailing slash (`@scope/` or `pkg/`).
+    if in_scope || path.ends_with('/') {
+        None
+    } else {
+        Some(path)
+    }
+}
+
+/// Returns the value of a number literal, looking through parentheses, TypeScript type
+/// wrappers, and unary `+` and `-`.
+pub(crate) fn static_number_value(expression: &AnyJsExpression) -> Option<f64> {
+    match expression.clone().omit_type_wrappers()? {
+        AnyJsExpression::AnyJsLiteralExpression(literal) => {
+            literal.as_js_number_literal_expression()?.as_number()
+        }
+        AnyJsExpression::JsUnaryExpression(unary) => {
+            let value = static_number_value(&unary.argument().ok()?)?;
+            match unary.operator().ok()? {
+                JsUnaryOperator::Minus => Some(-value),
+                JsUnaryOperator::Plus => Some(value),
+                _ => None,
+            }
+        }
+        _ => None,
+    }
+}
+
 #[cfg(test)]
 mod test {
-    use crate::utils::{VariablePosition, find_variable_position};
+    use crate::utils::{VariablePosition, find_variable_position, parse_package_name};
     use biome_js_parser::{JsParserOptions, parse};
-    use biome_js_syntax::{JsBinaryExpression, JsFileSource};
+    use biome_js_syntax::JsBinaryExpression;
+    use biome_languages::JsFileSource;
     use biome_rowan::AstNode;
 
     #[test]
@@ -177,5 +279,39 @@ mod test {
         );
 
         assert_eq!(position, Some(VariablePosition::Left));
+    }
+
+    #[test]
+    fn parse_package_name_tests() {
+        assert_eq!(
+            parse_package_name("@scope/package-name"),
+            Some("@scope/package-name")
+        );
+        assert_eq!(
+            parse_package_name("@scope/package-name/path"),
+            Some("@scope/package-name")
+        );
+        assert_eq!(parse_package_name("package_"), Some("package_"));
+        assert_eq!(parse_package_name("package/path"), Some("package"));
+        assert_eq!(parse_package_name("0"), Some("0"));
+        assert_eq!(parse_package_name("0/path"), Some("0"));
+        assert_eq!(parse_package_name("-"), Some("-"));
+        assert_eq!(parse_package_name("-/path"), Some("-"));
+        assert_eq!(parse_package_name("a.js"), Some("a.js"));
+        assert_eq!(parse_package_name("@././file"), Some("@./."));
+
+        // Invalid package names that we accept
+        assert_eq!(parse_package_name("PACKAGE"), Some("PACKAGE"));
+        assert_eq!(parse_package_name("_"), Some("_"));
+
+        // Invalid package names that we reject
+        assert_eq!(parse_package_name(""), None);
+        assert_eq!(parse_package_name("@scope"), None);
+        assert_eq!(parse_package_name("@/path"), None);
+        assert_eq!(parse_package_name("."), None);
+        assert_eq!(parse_package_name("./path"), None);
+        assert_eq!(parse_package_name("#path"), None);
+        assert_eq!(parse_package_name("/path"), None);
+        assert_eq!(parse_package_name("p@ckage/name"), None);
     }
 }

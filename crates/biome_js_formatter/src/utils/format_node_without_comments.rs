@@ -43,6 +43,20 @@ use crate::ts::expressions::type_assertion_expression::FormatTsTypeAssertionExpr
 use crate::{js::expressions::identifier_expression::FormatJsIdentifierExpression, prelude::*};
 use biome_js_syntax::{AnyJsExpression, AnyJsLiteralExpression};
 
+/// Returns `true` if the expression's formatter prints the expression's dangling comments as
+/// part of its fields, e.g. inside the braces of an empty object. Callers that format such an
+/// expression with [FormatAnyJsExpressionWithoutComments] must not format its dangling comments
+/// again.
+pub(crate) fn formats_own_dangling_comments(node: &AnyJsExpression) -> bool {
+    matches!(
+        node,
+        AnyJsExpression::JsArrayExpression(_)
+            | AnyJsExpression::JsArrowFunctionExpression(_)
+            | AnyJsExpression::JsClassExpression(_)
+            | AnyJsExpression::JsObjectExpression(_)
+    )
+}
+
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatAnyJsExpressionWithoutComments;
 
@@ -137,7 +151,9 @@ impl FormatRule<AnyJsExpression> for FormatAnyJsExpressionWithoutComments {
             AnyJsExpression::JsThisExpression(node) => FormatJsThisExpression.fmt_node(node, f),
             AnyJsExpression::JsUnaryExpression(node) => FormatJsUnaryExpression.fmt_node(node, f),
             AnyJsExpression::JsYieldExpression(node) => FormatJsYieldExpression.fmt_node(node, f),
-            AnyJsExpression::JsxTagExpression(node) => FormatJsxTagExpression.fmt_node(node, f),
+            AnyJsExpression::JsxTagExpression(node) => {
+                FormatJsxTagExpression::default().fmt_node(node, f)
+            }
             AnyJsExpression::TsAsExpression(node) => FormatTsAsExpression.fmt_node(node, f),
             AnyJsExpression::TsInstantiationExpression(node) => {
                 FormatTsInstantiationExpression.fmt_node(node, f)

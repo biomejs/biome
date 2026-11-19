@@ -5,7 +5,9 @@ use biome_diagnostics::display::PrintDiagnostic;
 use biome_diagnostics::termcolor;
 use biome_json_parser::{JsonParserOptions, parse_json};
 use biome_rowan::SyntaxKind;
-use biome_test_utils::validate_eof_token;
+use biome_test_utils::{
+    validate_borrowed_tokens_with_comments, validate_eof_token, validate_text_trimmed_ranges,
+};
 use std::fmt::Write;
 use std::fs;
 use std::path::Path;
@@ -39,11 +41,12 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
     let parse_config = JsonParserOptions {
         allow_comments: test_directory.contains("allow_comments"),
         allow_trailing_commas: test_directory.contains("allow_trailing_commas"),
-        allow_metavariables: false,
     };
 
     let parsed = parse_json(&content, parse_config);
     validate_eof_token(parsed.syntax());
+    validate_text_trimmed_ranges(&parsed.syntax());
+    validate_borrowed_tokens_with_comments(&parsed.syntax());
 
     let formatted_ast = format!("{:#?}", parsed.tree());
 

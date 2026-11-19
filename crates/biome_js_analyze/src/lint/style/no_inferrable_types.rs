@@ -178,11 +178,14 @@ impl Rule for NoInferrableTypes {
     fn diagnostic(_: &RuleContext<Self>, annotation: &Self::State) -> Option<RuleDiagnostic> {
         Some(RuleDiagnostic::new(
             rule_category!(),
-            annotation.range(),
+            annotation.ty().ok()?.range(),
             markup! {
                 "This type annotation is trivially inferred from its initialization."
             },
-        ))
+        )
+        .note(markup! {
+            "TypeScript already infers this type from the initial value, so the annotation repeats information and adds noise."
+        }))
     }
 
     fn action(ctx: &RuleContext<Self>, annotation: &Self::State) -> Option<JsRuleAction> {

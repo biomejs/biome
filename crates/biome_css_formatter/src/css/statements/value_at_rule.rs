@@ -15,7 +15,7 @@ impl FormatNodeRule<CssValueAtRule> for FormatCssValueAtRule {
         write!(
             f,
             [
-                value_token.format(),
+                value_token.format()?.with_text_case(CssCase::Lowercase),
                 space(),
                 clause.format(),
                 semicolon_token.format(),

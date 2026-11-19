@@ -1,0 +1,38 @@
+---
+source: crates/biome_service/src/workspace.tests.rs
+expression: sorted
+---
+{
+    "/project/App.jsx": Js(
+        SerializedJsModuleInfo {
+            static_imports: {},
+            static_import_paths: {
+                "./styles.css": "/project/styles.css",
+            },
+            dynamic_imports: {},
+            exports: {
+                "default",
+            },
+            referenced_classes: {
+                "button",
+            },
+        },
+    ),
+    "/project/page.html": Html(
+        SerializedHtmlModuleInfo {
+            style_classes: {},
+            referenced_classes: {
+                "container",
+            },
+        },
+    ),
+    "/project/styles.css": Css(
+        SerializedCssModuleInfo {
+            imports: {},
+            classes: {
+                "button",
+                "container",
+            },
+        },
+    ),
+}

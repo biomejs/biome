@@ -1,0 +1,34 @@
+/* should not generate diagnostics */
+.a {
+    @media (width >= 600px) {
+        .b {
+            color: red;
+        }
+    }
+}
+
+.a {
+    @MEDIA print {
+        .b {
+            color: red;
+        }
+    }
+}
+
+.a {
+    @media print {
+        @supports (display: grid) {
+            .b {
+                color: red;
+            }
+        }
+    }
+}
+
+.a {
+    .b {
+        @media print {
+            color: red;
+        }
+    }
+}

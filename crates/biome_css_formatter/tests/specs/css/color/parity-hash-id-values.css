@@ -1,0 +1,10 @@
+#app, #Brand, #ABCG { color: #ABC; }
+.colors {
+  three: #ABC;
+  four: #ABCD;
+  six: #ABCDEF;
+  eight: #ABCDEF12;
+  quoted: "#app" "#ABCG";
+  --raw: #ABC;
+  fragment: url(#app);
+}

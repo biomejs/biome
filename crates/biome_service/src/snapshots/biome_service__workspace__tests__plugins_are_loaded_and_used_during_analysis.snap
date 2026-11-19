@@ -59,7 +59,12 @@ expression: result.diagnostics
                     Info,
                     "Unsafe fix: If this is intentional, prepend "<Emphasis>"a"</Emphasis>" with an underscore.",
                 ),
-                Diff(
+                CodeSuggestion(
+                    Location {
+                        path: None,
+                        span: None,
+                        source_code: None,
+                    },
                     TextEdit {
                         dictionary: "const a_a = Object.assign({ foo: 'bar' });",
                         ops: [

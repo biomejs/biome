@@ -52,7 +52,10 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noNoninteractiveTabindex",
         language: "jsx",
-        sources: &[RuleSource::EslintJsxA11y("no-noninteractive-tabindex").same()],
+        sources: &[
+            RuleSource::EslintJsxA11y("no-noninteractive-tabindex").same(),
+            RuleSource::EslintAstro("jsx-a11y/no-noninteractive-tabindex").same(),
+        ],
         recommended: true,
         severity: Severity::Error,
         fix_kind: FixKind::Unsafe,

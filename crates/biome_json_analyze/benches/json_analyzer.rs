@@ -5,7 +5,7 @@ use biome_analyze::{
 };
 use biome_json_analyze::JsonAnalyzeServices;
 use biome_json_parser::{JsonParserOptions, parse_json};
-use biome_json_syntax::JsonFileSource;
+use biome_languages::JsonFileSource;
 use biome_test_utils::BenchCase;
 use criterion::{BenchmarkId, Criterion, black_box, criterion_group, criterion_main};
 use std::collections::HashMap;
@@ -16,7 +16,7 @@ static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
 
 #[cfg(all(
     any(target_os = "macos", target_os = "linux"),
-    not(target_env = "musl"),
+    not(all(target_env = "musl", target_arch = "aarch64")),
 ))]
 #[global_allocator]
 static GLOBAL: tikv_jemallocator::Jemalloc = tikv_jemallocator::Jemalloc;

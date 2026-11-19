@@ -64,3 +64,34 @@ ${11111111111} | ${2} | ${2}
 ${1} | ${2} | ${3}
 ${2} | ${1} | ${3}`
 
+test.each([[1, 2]])(
+	"a description that is long enough to push the hugged opening line beyond the print width",
+	(a, b) => {
+		expect(a).toBe(b);
+	},
+);
+
+test.each([[1,2]])("a description that is long enough to push the hugged opening line beyond the print width",(a,b)=>{expect(a).toBe(b);});
+
+it.each([[1, 2]])(
+	"a description that is long enough to push the hugged opening line beyond the print width",
+	(a, b) => {
+		expect(a).toBe(b);
+	},
+);
+
+describe.each([[1, 2]])(
+	"a description that is long enough to push the hugged opening line beyond the print width",
+	(a, b) => {
+		test("adds", () => {
+			expect(a).toBe(b);
+		});
+	},
+);
+
+test.for([[1, 2]])(
+	"a description that is long enough to push the hugged opening line beyond the print width",
+	(a, b) => {
+		expect(a).toBe(b);
+	},
+);

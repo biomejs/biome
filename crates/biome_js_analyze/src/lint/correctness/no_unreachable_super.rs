@@ -6,8 +6,8 @@ use biome_control_flow::{
 };
 use biome_diagnostics::Severity;
 use biome_js_syntax::{
-    AnyJsClass, AnyJsExpression, JsCallExpression, JsConstructorClassMember, JsSyntaxKind,
-    JsThrowStatement, TextRange, WalkEvent,
+    AnyJsClass, AnyJsExpression, JsCallExpression, JsConstructorClassMember, JsSuperExpression,
+    JsSyntaxKind, JsThisExpression, JsThrowStatement, TextRange, WalkEvent,
 };
 use biome_rowan::{AstNode, NodeOrToken};
 use biome_rule_options::no_unreachable_super::NoUnreachableSuperOptions;
@@ -141,7 +141,11 @@ impl Rule for NoUnreachableSuper {
             let block = cfg.get(block_id);
             for instruction in block.instructions.iter() {
                 if let Some(NodeOrToken::Node(ref block_node)) = instruction.node {
-                    let mut iter = block_node.preorder();
+                    let mut iter = block_node.preorder_of_kinds(
+                        JsSuperExpression::KIND_SET
+                            .union(JsThisExpression::KIND_SET)
+                            .union(AnyJsControlFlowRoot::KIND_SET),
+                    );
                     while let Some(event) = iter.next() {
                         let WalkEvent::Enter(node) = event else {
                             continue;

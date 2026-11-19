@@ -11,6 +11,7 @@ impl FormatRule<AnyCssUrlModifier> for FormatAnyCssUrlModifier {
             AnyCssUrlModifier::CssBogusUrlModifier(node) => node.format().fmt(f),
             AnyCssUrlModifier::CssFunction(node) => node.format().fmt(f),
             AnyCssUrlModifier::CssIdentifier(node) => node.format().fmt(f),
+            AnyCssUrlModifier::ScssLegacyIfFunction(node) => node.format().fmt(f),
         }
     }
 }

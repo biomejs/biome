@@ -1,0 +1,5 @@
+{
+	"name": "my-package",
+	"cpu": "x64",
+	"cpu": ["x86_64"]
+}

@@ -1,0 +1,5 @@
+@layer #{$layers};
+
+@layer reset, theme-#{$name};
+
+@layer components {}

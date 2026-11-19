@@ -1,0 +1,118 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.jsx
+---
+# Input
+```jsx
+/* should generate diagnostics */
+function ComponentTag() {
+	let A = "unused";
+	A = "used";
+	return <A />;
+}
+
+function MemberTag() {
+	let A = "unused";
+	A = "used";
+	return <A.B />;
+}
+
+function ReadInOneBranch() {
+	let x = "used";
+	if (cond) {
+		return <A prop={x} />;
+	} else {
+		x = "unused";
+	}
+}
+
+function ChildExpression() {
+	let x = 1;
+	x = 2;
+	return <A>{x}</A>;
+}
+
+```
+
+# Diagnostics
+```
+invalid.jsx:3:6 lint/nursery/noUselessAssignment ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The value assigned to A is never read.
+  
+    1 │ /* should generate diagnostics */
+    2 │ function ComponentTag() {
+  > 3 │ 	let A = "unused";
+      │ 	    ^
+    4 │ 	A = "used";
+    5 │ 	return <A />;
+  
+  i After this assignment, the variable is either assigned again or not read anymore, so this value is thrown away.
+  
+  i Remove the assignment if it's unnecessary. Otherwise, check whether the value should be used, or assigned to a different variable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:9:6 lint/nursery/noUselessAssignment ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The value assigned to A is never read.
+  
+     8 │ function MemberTag() {
+   > 9 │ 	let A = "unused";
+       │ 	    ^
+    10 │ 	A = "used";
+    11 │ 	return <A.B />;
+  
+  i After this assignment, the variable is either assigned again or not read anymore, so this value is thrown away.
+  
+  i Remove the assignment if it's unnecessary. Otherwise, check whether the value should be used, or assigned to a different variable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:19:3 lint/nursery/noUselessAssignment ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The value assigned to x is never read.
+  
+    17 │ 		return <A prop={x} />;
+    18 │ 	} else {
+  > 19 │ 		x = "unused";
+       │ 		^
+    20 │ 	}
+    21 │ }
+  
+  i After this assignment, the variable is either assigned again or not read anymore, so this value is thrown away.
+  
+  i Remove the assignment if it's unnecessary. Otherwise, check whether the value should be used, or assigned to a different variable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:24:6 lint/nursery/noUselessAssignment ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The value assigned to x is never read.
+  
+    23 │ function ChildExpression() {
+  > 24 │ 	let x = 1;
+       │ 	    ^
+    25 │ 	x = 2;
+    26 │ 	return <A>{x}</A>;
+  
+  i After this assignment, the variable is either assigned again or not read anymore, so this value is thrown away.
+  
+  i Remove the assignment if it's unnecessary. Otherwise, check whether the value should be used, or assigned to a different variable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

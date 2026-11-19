@@ -1,0 +1,10 @@
+/* should not generate diagnostics */
+<div className="w-4 text-red-500 bg-white" />;
+<div className="hover:px-2" />;
+<div className="[&:nth-child(3)]:px-2" />;
+<div className="has-[:checked]:bg-red-500" />;
+<div class="p-4 text-lg font-bold" />;
+<div className={`p-4 ${condition ? "text-lg" : "text-sm"}`} />;
+<div className={`${prefix} text-lg`} />;
+<div className="text-red-500/[0.31] hover:bg-black/[0.5] text-sm/[18px]" />;
+<div className="bg-(--brand) [&_svg]:size-4 data-[state=open]:flex" />;

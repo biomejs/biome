@@ -1,0 +1,45 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome lint card.tsx
+```
+
+## `biome.json`
+
+```json
+{
+  "linter": {
+    "rules": { "correctness": "error" },
+    "domains": { "solid": "none" }
+  },
+  "overrides": [
+    {
+      "includes": ["**"],
+      "linter": {
+        "rules": {
+          "correctness": { "noUnusedVariables": "off" }
+        }
+      }
+    }
+  ]
+}
+```
+
+## `card.tsx`
+
+```tsx
+export function Card({ title }: { title: string }) {
+    return <div>{title}</div>;
+}
+
+```
+
+# Emitted Messages
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+```

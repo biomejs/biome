@@ -1,0 +1,7 @@
+@media (width >= 40rem) {
+  $gap: 2rem;
+
+  .card {
+    gap: $gap;
+  }
+}

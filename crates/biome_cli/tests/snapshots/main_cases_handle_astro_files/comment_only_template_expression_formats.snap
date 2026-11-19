@@ -1,0 +1,38 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome format --write file.astro
+```
+
+## `biome.json`
+
+```json
+{
+  "html": {
+    "formatter": { "enabled": true },
+    "experimentalFullSupportEnabled": true
+  }
+}
+```
+
+## `file.astro`
+
+```astro
+---
+const x = 5;
+---
+
+<div>{/* a note */}</div>
+<div class={/* a note */}>{x}</div>
+
+```
+
+# Emitted Messages
+
+```block
+Formatted 1 file in <TIME>. Fixed 1 file.
+```

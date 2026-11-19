@@ -1,0 +1,40 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: issue11605Invalid.ts
+---
+# Input
+```ts
+declare function consume<T>(callback: (value: T) => void): void;
+
+consume<bigint>((value) => {
+	value + 1;
+});
+
+```
+
+# Diagnostics
+```
+issue11605Invalid.ts:4:2 lint/nursery/noUnsafePlusOperands ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Numeric + operations must use either two bigint values or two number values.
+  
+    3 │ consume<bigint>((value) => {
+  > 4 │ 	value + 1;
+      │ 	^^^^^^^^^
+    5 │ });
+    6 │ 
+  
+  i This operation mixes number with bigint.
+  
+    3 │ consume<bigint>((value) => {
+  > 4 │ 	value + 1;
+      │ 	^^^^^^^^^
+    5 │ });
+    6 │ 
+  
+  i Convert one side so both operands use the same numeric type before applying + or +=.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

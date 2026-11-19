@@ -40,7 +40,10 @@ declare_lint_rule! {
         version: "1.9.0",
         name: "useAriaPropsSupportedByRole",
         language: "js",
-        sources: &[RuleSource::EslintJsxA11y("role-supports-aria-props").same()],
+        sources: &[
+            RuleSource::EslintJsxA11y("role-supports-aria-props").same(),
+            RuleSource::EslintAstro("jsx-a11y/role-supports-aria-props").same(),
+        ],
         recommended: true,
         severity: Severity::Error,
     }
@@ -105,7 +108,10 @@ impl Rule for UseAriaPropsSupportedByRole {
                 },
             )
             .note(markup! {
-                "Ensure that ARIA attributes are valid for the role of the element."
+                "Assistive technologies may ignore an ARIA attribute that the role of the element does not support, or report incorrect information to the user."
+            })
+            .note(markup! {
+                "Remove the attribute, or use a role that supports it."
             }),
         )
     }

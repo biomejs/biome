@@ -1,0 +1,80 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: jsx/spread_comments.jsx
+---
+
+# Input
+
+```jsx
+a = <div {...{/* comment */}} />;
+b = <div {...{/* a */ /* b */}} />;
+c = <div {...[/* comment */]} />;
+d = <div {...(class {/* comment */})} />;
+e = <div>{...{/* comment */}}</div>;
+f = <div>{...[/* comment */]}</div>;
+g = <div {...{}} />;
+
+```
+
+
+# Formatted
+
+```jsx
+a = (
+	<div
+		{
+			...{
+				/* comment */
+			}
+		}
+	/>
+);
+b = (
+	<div
+		{
+			...{
+				/* a */
+				/* b */
+			}
+		}
+	/>
+);
+c = (
+	<div
+		{
+			...[
+				/* comment */
+			]
+		}
+	/>
+);
+d = (
+	<div
+		{
+			...class {
+				/* comment */
+			}
+		}
+	/>
+);
+e = (
+	<div>
+		{
+			...{
+				/* comment */
+			}
+		}
+	</div>
+);
+f = (
+	<div>
+		{
+			...[
+				/* comment */
+			]
+		}
+	</div>
+);
+g = <div {...{}} />;
+
+```

@@ -2,6 +2,12 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
+## Command
+
+```shell
+biome check --reporter=rdjson --reporter-file=file.json --reporter=summary --reporter-file=file.txt main.ts
+```
+
 ## `file.json`
 
 ```json
@@ -29,13 +35,30 @@ expression: redactor(content)
           }
         }
       },
-      "message": "This is an unexpected use of the debugger statement."
+      "message": "This is an unexpected use of the debugger statement.",
+      "severity": "ERROR",
+      "suggestions": [
+        {
+          "range": {
+            "end": {
+              "column": 9,
+              "line": 1
+            },
+            "start": {
+              "column": 1,
+              "line": 1
+            }
+          },
+          "text": ""
+        }
+      ]
     },
     {
       "code": {
         "value": "format"
       },
-      "message": "Formatter would have printed the following content:"
+      "message": "Formatter would have printed the following content:",
+      "severity": "ERROR"
     }
   ]
 }

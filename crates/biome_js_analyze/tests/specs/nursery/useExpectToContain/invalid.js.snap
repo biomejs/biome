@@ -1,0 +1,981 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+expect(a.includes(b)).toEqual(true);
+expect(a.includes(b,),).toEqual(true,);
+expect(a['includes'](b)).toEqual(true);
+expect(a['includes'](b))['toEqual'](true);
+expect(a['includes'](b)).toEqual(false);
+expect(a['includes'](b)).not.toEqual(false);
+expect(a['includes'](b))['not'].toEqual(false);
+expect(a['includes'](b))['not']['toEqual'](false);
+expect(a.includes(b)).toEqual(false);
+expect(a.includes(b)).not.toEqual(false);
+expect(a.includes(b)).not.toEqual(true);
+expect(a.includes(b)).toBe(true);
+expect(a.includes(b)).toBe(false);
+expect(a.includes(b)).not.toBe(false);
+expect(a.includes(b)).not.toBe(true);
+expect(a.includes(b)).toStrictEqual(true);
+expect(a.includes(b)).toStrictEqual(false);
+expect(a.includes(b)).not.toStrictEqual(false);
+expect(a.includes(b)).not.toStrictEqual(true);
+expect(a.test(t).includes(b.test(p))).toEqual(true);
+expect(a.test(t).includes(b.test(p))).toEqual(false);
+expect(a.test(t).includes(b.test(p))).not.toEqual(true);
+expect(a.test(t).includes(b.test(p))).not.toEqual(false);
+expect([{ a: 1 }].includes({ a: 1 })).toBe(true);
+expect([{ a: 1 }].includes({ a: 1 })).not.toBe(true);
+expect(a.includes(b), "custom message").toBe(true);
+
+expect((a.includes(b))).toBe(true);
+expect(a.includes(b)).toBe((false));
+
+test("comments around the assertion are kept", () => {
+	// leading comment
+	expect(a.includes(b)).toBe(true); // trailing comment
+});
+
+test("no fix when comments would be removed", () => {
+	expect(a.includes(/* item */ b)).toBe(true);
+	expect(a.includes(b)).not /* negated */.toBe(false);
+	expect(a.includes(b))
+		// why this is checked
+		.toBe(true);
+});
+
+```
+
+# Diagnostics
+```
+invalid.js:2:23 lint/nursery/useExpectToContain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The result of includes() is compared to a boolean.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ expect(a.includes(b)).toEqual(true);
+      │                       ^^^^^^^
+    3 │ expect(a.includes(b,),).toEqual(true,);
+    4 │ expect(a['includes'](b)).toEqual(true);
+  
+  i When this check fails, the error message only shows that a boolean didn't match, not which value was missing.
+  
+  i Use toContain() to check whether a value is present.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toContain() instead.
+  
+     1  1 │   /* should generate diagnostics */
+     2    │ - expect(a.includes(b)).toEqual(true);
+        2 │ + expect(a).toContain(b);
+     3  3 │   expect(a.includes(b,),).toEqual(true,);
+     4  4 │   expect(a['includes'](b)).toEqual(true);
+  
+
+```
+
+```
+invalid.js:3:25 lint/nursery/useExpectToContain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The result of includes() is compared to a boolean.
+  
+    1 │ /* should generate diagnostics */
+    2 │ expect(a.includes(b)).toEqual(true);
+  > 3 │ expect(a.includes(b,),).toEqual(true,);
+      │                         ^^^^^^^
+    4 │ expect(a['includes'](b)).toEqual(true);
+    5 │ expect(a['includes'](b))['toEqual'](true);
+  
+  i When this check fails, the error message only shows that a boolean didn't match, not which value was missing.
+  
+  i Use toContain() to check whether a value is present.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toContain() instead.
+  
+     1  1 │   /* should generate diagnostics */
+     2  2 │   expect(a.includes(b)).toEqual(true);
+     3    │ - expect(a.includes(b,),).toEqual(true,);
+        3 │ + expect(a,).toContain(b,);
+     4  4 │   expect(a['includes'](b)).toEqual(true);
+     5  5 │   expect(a['includes'](b))['toEqual'](true);
+  
+
+```
+
+```
+invalid.js:4:26 lint/nursery/useExpectToContain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The result of includes() is compared to a boolean.
+  
+    2 │ expect(a.includes(b)).toEqual(true);
+    3 │ expect(a.includes(b,),).toEqual(true,);
+  > 4 │ expect(a['includes'](b)).toEqual(true);
+      │                          ^^^^^^^
+    5 │ expect(a['includes'](b))['toEqual'](true);
+    6 │ expect(a['includes'](b)).toEqual(false);
+  
+  i When this check fails, the error message only shows that a boolean didn't match, not which value was missing.
+  
+  i Use toContain() to check whether a value is present.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toContain() instead.
+  
+     2  2 │   expect(a.includes(b)).toEqual(true);
+     3  3 │   expect(a.includes(b,),).toEqual(true,);
+     4    │ - expect(a['includes'](b)).toEqual(true);
+        4 │ + expect(a).toContain(b);
+     5  5 │   expect(a['includes'](b))['toEqual'](true);
+     6  6 │   expect(a['includes'](b)).toEqual(false);
+  
+
+```
+
+```
+invalid.js:5:26 lint/nursery/useExpectToContain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The result of includes() is compared to a boolean.
+  
+    3 │ expect(a.includes(b,),).toEqual(true,);
+    4 │ expect(a['includes'](b)).toEqual(true);
+  > 5 │ expect(a['includes'](b))['toEqual'](true);
+      │                          ^^^^^^^^^
+    6 │ expect(a['includes'](b)).toEqual(false);
+    7 │ expect(a['includes'](b)).not.toEqual(false);
+  
+  i When this check fails, the error message only shows that a boolean didn't match, not which value was missing.
+  
+  i Use toContain() to check whether a value is present.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toContain() instead.
+  
+     3  3 │   expect(a.includes(b,),).toEqual(true,);
+     4  4 │   expect(a['includes'](b)).toEqual(true);
+     5    │ - expect(a['includes'](b))['toEqual'](true);
+        5 │ + expect(a).toContain(b);
+     6  6 │   expect(a['includes'](b)).toEqual(false);
+     7  7 │   expect(a['includes'](b)).not.toEqual(false);
+  
+
+```
+
+```
+invalid.js:6:26 lint/nursery/useExpectToContain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The result of includes() is compared to a boolean.
+  
+    4 │ expect(a['includes'](b)).toEqual(true);
+    5 │ expect(a['includes'](b))['toEqual'](true);
+  > 6 │ expect(a['includes'](b)).toEqual(false);
+      │                          ^^^^^^^
+    7 │ expect(a['includes'](b)).not.toEqual(false);
+    8 │ expect(a['includes'](b))['not'].toEqual(false);
+  
+  i When this check fails, the error message only shows that a boolean didn't match, not which value was missing.
+  
+  i Use toContain() to check whether a value is present.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toContain() instead.
+  
+     4  4 │   expect(a['includes'](b)).toEqual(true);
+     5  5 │   expect(a['includes'](b))['toEqual'](true);
+     6    │ - expect(a['includes'](b)).toEqual(false);
+        6 │ + expect(a).not.toContain(b);
+     7  7 │   expect(a['includes'](b)).not.toEqual(false);
+     8  8 │   expect(a['includes'](b))['not'].toEqual(false);
+  
+
+```
+
+```
+invalid.js:7:30 lint/nursery/useExpectToContain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The result of includes() is compared to a boolean.
+  
+    5 │ expect(a['includes'](b))['toEqual'](true);
+    6 │ expect(a['includes'](b)).toEqual(false);
+  > 7 │ expect(a['includes'](b)).not.toEqual(false);
+      │                              ^^^^^^^
+    8 │ expect(a['includes'](b))['not'].toEqual(false);
+    9 │ expect(a['includes'](b))['not']['toEqual'](false);
+  
+  i When this check fails, the error message only shows that a boolean didn't match, not which value was missing.
+  
+  i Use toContain() to check whether a value is present.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toContain() instead.
+  
+     5  5 │   expect(a['includes'](b))['toEqual'](true);
+     6  6 │   expect(a['includes'](b)).toEqual(false);
+     7    │ - expect(a['includes'](b)).not.toEqual(false);
+        7 │ + expect(a).toContain(b);
+     8  8 │   expect(a['includes'](b))['not'].toEqual(false);
+     9  9 │   expect(a['includes'](b))['not']['toEqual'](false);
+  
+
+```
+
+```
+invalid.js:8:33 lint/nursery/useExpectToContain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The result of includes() is compared to a boolean.
+  
+     6 │ expect(a['includes'](b)).toEqual(false);
+     7 │ expect(a['includes'](b)).not.toEqual(false);
+   > 8 │ expect(a['includes'](b))['not'].toEqual(false);
+       │                                 ^^^^^^^
+     9 │ expect(a['includes'](b))['not']['toEqual'](false);
+    10 │ expect(a.includes(b)).toEqual(false);
+  
+  i When this check fails, the error message only shows that a boolean didn't match, not which value was missing.
+  
+  i Use toContain() to check whether a value is present.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toContain() instead.
+  
+     6  6 │   expect(a['includes'](b)).toEqual(false);
+     7  7 │   expect(a['includes'](b)).not.toEqual(false);
+     8    │ - expect(a['includes'](b))['not'].toEqual(false);
+        8 │ + expect(a).toContain(b);
+     9  9 │   expect(a['includes'](b))['not']['toEqual'](false);
+    10 10 │   expect(a.includes(b)).toEqual(false);
+  
+
+```
+
+```
+invalid.js:9:33 lint/nursery/useExpectToContain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The result of includes() is compared to a boolean.
+  
+     7 │ expect(a['includes'](b)).not.toEqual(false);
+     8 │ expect(a['includes'](b))['not'].toEqual(false);
+   > 9 │ expect(a['includes'](b))['not']['toEqual'](false);
+       │                                 ^^^^^^^^^
+    10 │ expect(a.includes(b)).toEqual(false);
+    11 │ expect(a.includes(b)).not.toEqual(false);
+  
+  i When this check fails, the error message only shows that a boolean didn't match, not which value was missing.
+  
+  i Use toContain() to check whether a value is present.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toContain() instead.
+  
+     7  7 │   expect(a['includes'](b)).not.toEqual(false);
+     8  8 │   expect(a['includes'](b))['not'].toEqual(false);
+     9    │ - expect(a['includes'](b))['not']['toEqual'](false);
+        9 │ + expect(a).toContain(b);
+    10 10 │   expect(a.includes(b)).toEqual(false);
+    11 11 │   expect(a.includes(b)).not.toEqual(false);
+  
+
+```
+
+```
+invalid.js:10:23 lint/nursery/useExpectToContain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The result of includes() is compared to a boolean.
+  
+     8 │ expect(a['includes'](b))['not'].toEqual(false);
+     9 │ expect(a['includes'](b))['not']['toEqual'](false);
+  > 10 │ expect(a.includes(b)).toEqual(false);
+       │                       ^^^^^^^
+    11 │ expect(a.includes(b)).not.toEqual(false);
+    12 │ expect(a.includes(b)).not.toEqual(true);
+  
+  i When this check fails, the error message only shows that a boolean didn't match, not which value was missing.
+  
+  i Use toContain() to check whether a value is present.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toContain() instead.
+  
+     8  8 │   expect(a['includes'](b))['not'].toEqual(false);
+     9  9 │   expect(a['includes'](b))['not']['toEqual'](false);
+    10    │ - expect(a.includes(b)).toEqual(false);
+       10 │ + expect(a).not.toContain(b);
+    11 11 │   expect(a.includes(b)).not.toEqual(false);
+    12 12 │   expect(a.includes(b)).not.toEqual(true);
+  
+
+```
+
+```
+invalid.js:11:27 lint/nursery/useExpectToContain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The result of includes() is compared to a boolean.
+  
+     9 │ expect(a['includes'](b))['not']['toEqual'](false);
+    10 │ expect(a.includes(b)).toEqual(false);
+  > 11 │ expect(a.includes(b)).not.toEqual(false);
+       │                           ^^^^^^^
+    12 │ expect(a.includes(b)).not.toEqual(true);
+    13 │ expect(a.includes(b)).toBe(true);
+  
+  i When this check fails, the error message only shows that a boolean didn't match, not which value was missing.
+  
+  i Use toContain() to check whether a value is present.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toContain() instead.
+  
+     9  9 │   expect(a['includes'](b))['not']['toEqual'](false);
+    10 10 │   expect(a.includes(b)).toEqual(false);
+    11    │ - expect(a.includes(b)).not.toEqual(false);
+       11 │ + expect(a).toContain(b);
+    12 12 │   expect(a.includes(b)).not.toEqual(true);
+    13 13 │   expect(a.includes(b)).toBe(true);
+  
+
+```
+
+```
+invalid.js:12:27 lint/nursery/useExpectToContain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The result of includes() is compared to a boolean.
+  
+    10 │ expect(a.includes(b)).toEqual(false);
+    11 │ expect(a.includes(b)).not.toEqual(false);
+  > 12 │ expect(a.includes(b)).not.toEqual(true);
+       │                           ^^^^^^^
+    13 │ expect(a.includes(b)).toBe(true);
+    14 │ expect(a.includes(b)).toBe(false);
+  
+  i When this check fails, the error message only shows that a boolean didn't match, not which value was missing.
+  
+  i Use toContain() to check whether a value is present.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toContain() instead.
+  
+    10 10 │   expect(a.includes(b)).toEqual(false);
+    11 11 │   expect(a.includes(b)).not.toEqual(false);
+    12    │ - expect(a.includes(b)).not.toEqual(true);
+       12 │ + expect(a).not.toContain(b);
+    13 13 │   expect(a.includes(b)).toBe(true);
+    14 14 │   expect(a.includes(b)).toBe(false);
+  
+
+```
+
+```
+invalid.js:13:23 lint/nursery/useExpectToContain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The result of includes() is compared to a boolean.
+  
+    11 │ expect(a.includes(b)).not.toEqual(false);
+    12 │ expect(a.includes(b)).not.toEqual(true);
+  > 13 │ expect(a.includes(b)).toBe(true);
+       │                       ^^^^
+    14 │ expect(a.includes(b)).toBe(false);
+    15 │ expect(a.includes(b)).not.toBe(false);
+  
+  i When this check fails, the error message only shows that a boolean didn't match, not which value was missing.
+  
+  i Use toContain() to check whether a value is present.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toContain() instead.
+  
+    11 11 │   expect(a.includes(b)).not.toEqual(false);
+    12 12 │   expect(a.includes(b)).not.toEqual(true);
+    13    │ - expect(a.includes(b)).toBe(true);
+       13 │ + expect(a).toContain(b);
+    14 14 │   expect(a.includes(b)).toBe(false);
+    15 15 │   expect(a.includes(b)).not.toBe(false);
+  
+
+```
+
+```
+invalid.js:14:23 lint/nursery/useExpectToContain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The result of includes() is compared to a boolean.
+  
+    12 │ expect(a.includes(b)).not.toEqual(true);
+    13 │ expect(a.includes(b)).toBe(true);
+  > 14 │ expect(a.includes(b)).toBe(false);
+       │                       ^^^^
+    15 │ expect(a.includes(b)).not.toBe(false);
+    16 │ expect(a.includes(b)).not.toBe(true);
+  
+  i When this check fails, the error message only shows that a boolean didn't match, not which value was missing.
+  
+  i Use toContain() to check whether a value is present.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toContain() instead.
+  
+    12 12 │   expect(a.includes(b)).not.toEqual(true);
+    13 13 │   expect(a.includes(b)).toBe(true);
+    14    │ - expect(a.includes(b)).toBe(false);
+       14 │ + expect(a).not.toContain(b);
+    15 15 │   expect(a.includes(b)).not.toBe(false);
+    16 16 │   expect(a.includes(b)).not.toBe(true);
+  
+
+```
+
+```
+invalid.js:15:27 lint/nursery/useExpectToContain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The result of includes() is compared to a boolean.
+  
+    13 │ expect(a.includes(b)).toBe(true);
+    14 │ expect(a.includes(b)).toBe(false);
+  > 15 │ expect(a.includes(b)).not.toBe(false);
+       │                           ^^^^
+    16 │ expect(a.includes(b)).not.toBe(true);
+    17 │ expect(a.includes(b)).toStrictEqual(true);
+  
+  i When this check fails, the error message only shows that a boolean didn't match, not which value was missing.
+  
+  i Use toContain() to check whether a value is present.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toContain() instead.
+  
+    13 13 │   expect(a.includes(b)).toBe(true);
+    14 14 │   expect(a.includes(b)).toBe(false);
+    15    │ - expect(a.includes(b)).not.toBe(false);
+       15 │ + expect(a).toContain(b);
+    16 16 │   expect(a.includes(b)).not.toBe(true);
+    17 17 │   expect(a.includes(b)).toStrictEqual(true);
+  
+
+```
+
+```
+invalid.js:16:27 lint/nursery/useExpectToContain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The result of includes() is compared to a boolean.
+  
+    14 │ expect(a.includes(b)).toBe(false);
+    15 │ expect(a.includes(b)).not.toBe(false);
+  > 16 │ expect(a.includes(b)).not.toBe(true);
+       │                           ^^^^
+    17 │ expect(a.includes(b)).toStrictEqual(true);
+    18 │ expect(a.includes(b)).toStrictEqual(false);
+  
+  i When this check fails, the error message only shows that a boolean didn't match, not which value was missing.
+  
+  i Use toContain() to check whether a value is present.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toContain() instead.
+  
+    14 14 │   expect(a.includes(b)).toBe(false);
+    15 15 │   expect(a.includes(b)).not.toBe(false);
+    16    │ - expect(a.includes(b)).not.toBe(true);
+       16 │ + expect(a).not.toContain(b);
+    17 17 │   expect(a.includes(b)).toStrictEqual(true);
+    18 18 │   expect(a.includes(b)).toStrictEqual(false);
+  
+
+```
+
+```
+invalid.js:17:23 lint/nursery/useExpectToContain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The result of includes() is compared to a boolean.
+  
+    15 │ expect(a.includes(b)).not.toBe(false);
+    16 │ expect(a.includes(b)).not.toBe(true);
+  > 17 │ expect(a.includes(b)).toStrictEqual(true);
+       │                       ^^^^^^^^^^^^^
+    18 │ expect(a.includes(b)).toStrictEqual(false);
+    19 │ expect(a.includes(b)).not.toStrictEqual(false);
+  
+  i When this check fails, the error message only shows that a boolean didn't match, not which value was missing.
+  
+  i Use toContain() to check whether a value is present.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toContain() instead.
+  
+    15 15 │   expect(a.includes(b)).not.toBe(false);
+    16 16 │   expect(a.includes(b)).not.toBe(true);
+    17    │ - expect(a.includes(b)).toStrictEqual(true);
+       17 │ + expect(a).toContain(b);
+    18 18 │   expect(a.includes(b)).toStrictEqual(false);
+    19 19 │   expect(a.includes(b)).not.toStrictEqual(false);
+  
+
+```
+
+```
+invalid.js:18:23 lint/nursery/useExpectToContain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The result of includes() is compared to a boolean.
+  
+    16 │ expect(a.includes(b)).not.toBe(true);
+    17 │ expect(a.includes(b)).toStrictEqual(true);
+  > 18 │ expect(a.includes(b)).toStrictEqual(false);
+       │                       ^^^^^^^^^^^^^
+    19 │ expect(a.includes(b)).not.toStrictEqual(false);
+    20 │ expect(a.includes(b)).not.toStrictEqual(true);
+  
+  i When this check fails, the error message only shows that a boolean didn't match, not which value was missing.
+  
+  i Use toContain() to check whether a value is present.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toContain() instead.
+  
+    16 16 │   expect(a.includes(b)).not.toBe(true);
+    17 17 │   expect(a.includes(b)).toStrictEqual(true);
+    18    │ - expect(a.includes(b)).toStrictEqual(false);
+       18 │ + expect(a).not.toContain(b);
+    19 19 │   expect(a.includes(b)).not.toStrictEqual(false);
+    20 20 │   expect(a.includes(b)).not.toStrictEqual(true);
+  
+
+```
+
+```
+invalid.js:19:27 lint/nursery/useExpectToContain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The result of includes() is compared to a boolean.
+  
+    17 │ expect(a.includes(b)).toStrictEqual(true);
+    18 │ expect(a.includes(b)).toStrictEqual(false);
+  > 19 │ expect(a.includes(b)).not.toStrictEqual(false);
+       │                           ^^^^^^^^^^^^^
+    20 │ expect(a.includes(b)).not.toStrictEqual(true);
+    21 │ expect(a.test(t).includes(b.test(p))).toEqual(true);
+  
+  i When this check fails, the error message only shows that a boolean didn't match, not which value was missing.
+  
+  i Use toContain() to check whether a value is present.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toContain() instead.
+  
+    17 17 │   expect(a.includes(b)).toStrictEqual(true);
+    18 18 │   expect(a.includes(b)).toStrictEqual(false);
+    19    │ - expect(a.includes(b)).not.toStrictEqual(false);
+       19 │ + expect(a).toContain(b);
+    20 20 │   expect(a.includes(b)).not.toStrictEqual(true);
+    21 21 │   expect(a.test(t).includes(b.test(p))).toEqual(true);
+  
+
+```
+
+```
+invalid.js:20:27 lint/nursery/useExpectToContain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The result of includes() is compared to a boolean.
+  
+    18 │ expect(a.includes(b)).toStrictEqual(false);
+    19 │ expect(a.includes(b)).not.toStrictEqual(false);
+  > 20 │ expect(a.includes(b)).not.toStrictEqual(true);
+       │                           ^^^^^^^^^^^^^
+    21 │ expect(a.test(t).includes(b.test(p))).toEqual(true);
+    22 │ expect(a.test(t).includes(b.test(p))).toEqual(false);
+  
+  i When this check fails, the error message only shows that a boolean didn't match, not which value was missing.
+  
+  i Use toContain() to check whether a value is present.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toContain() instead.
+  
+    18 18 │   expect(a.includes(b)).toStrictEqual(false);
+    19 19 │   expect(a.includes(b)).not.toStrictEqual(false);
+    20    │ - expect(a.includes(b)).not.toStrictEqual(true);
+       20 │ + expect(a).not.toContain(b);
+    21 21 │   expect(a.test(t).includes(b.test(p))).toEqual(true);
+    22 22 │   expect(a.test(t).includes(b.test(p))).toEqual(false);
+  
+
+```
+
+```
+invalid.js:21:39 lint/nursery/useExpectToContain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The result of includes() is compared to a boolean.
+  
+    19 │ expect(a.includes(b)).not.toStrictEqual(false);
+    20 │ expect(a.includes(b)).not.toStrictEqual(true);
+  > 21 │ expect(a.test(t).includes(b.test(p))).toEqual(true);
+       │                                       ^^^^^^^
+    22 │ expect(a.test(t).includes(b.test(p))).toEqual(false);
+    23 │ expect(a.test(t).includes(b.test(p))).not.toEqual(true);
+  
+  i When this check fails, the error message only shows that a boolean didn't match, not which value was missing.
+  
+  i Use toContain() to check whether a value is present.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toContain() instead.
+  
+    19 19 │   expect(a.includes(b)).not.toStrictEqual(false);
+    20 20 │   expect(a.includes(b)).not.toStrictEqual(true);
+    21    │ - expect(a.test(t).includes(b.test(p))).toEqual(true);
+       21 │ + expect(a.test(t)).toContain(b.test(p));
+    22 22 │   expect(a.test(t).includes(b.test(p))).toEqual(false);
+    23 23 │   expect(a.test(t).includes(b.test(p))).not.toEqual(true);
+  
+
+```
+
+```
+invalid.js:22:39 lint/nursery/useExpectToContain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The result of includes() is compared to a boolean.
+  
+    20 │ expect(a.includes(b)).not.toStrictEqual(true);
+    21 │ expect(a.test(t).includes(b.test(p))).toEqual(true);
+  > 22 │ expect(a.test(t).includes(b.test(p))).toEqual(false);
+       │                                       ^^^^^^^
+    23 │ expect(a.test(t).includes(b.test(p))).not.toEqual(true);
+    24 │ expect(a.test(t).includes(b.test(p))).not.toEqual(false);
+  
+  i When this check fails, the error message only shows that a boolean didn't match, not which value was missing.
+  
+  i Use toContain() to check whether a value is present.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toContain() instead.
+  
+    20 20 │   expect(a.includes(b)).not.toStrictEqual(true);
+    21 21 │   expect(a.test(t).includes(b.test(p))).toEqual(true);
+    22    │ - expect(a.test(t).includes(b.test(p))).toEqual(false);
+       22 │ + expect(a.test(t)).not.toContain(b.test(p));
+    23 23 │   expect(a.test(t).includes(b.test(p))).not.toEqual(true);
+    24 24 │   expect(a.test(t).includes(b.test(p))).not.toEqual(false);
+  
+
+```
+
+```
+invalid.js:23:43 lint/nursery/useExpectToContain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The result of includes() is compared to a boolean.
+  
+    21 │ expect(a.test(t).includes(b.test(p))).toEqual(true);
+    22 │ expect(a.test(t).includes(b.test(p))).toEqual(false);
+  > 23 │ expect(a.test(t).includes(b.test(p))).not.toEqual(true);
+       │                                           ^^^^^^^
+    24 │ expect(a.test(t).includes(b.test(p))).not.toEqual(false);
+    25 │ expect([{ a: 1 }].includes({ a: 1 })).toBe(true);
+  
+  i When this check fails, the error message only shows that a boolean didn't match, not which value was missing.
+  
+  i Use toContain() to check whether a value is present.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toContain() instead.
+  
+    21 21 │   expect(a.test(t).includes(b.test(p))).toEqual(true);
+    22 22 │   expect(a.test(t).includes(b.test(p))).toEqual(false);
+    23    │ - expect(a.test(t).includes(b.test(p))).not.toEqual(true);
+       23 │ + expect(a.test(t)).not.toContain(b.test(p));
+    24 24 │   expect(a.test(t).includes(b.test(p))).not.toEqual(false);
+    25 25 │   expect([{ a: 1 }].includes({ a: 1 })).toBe(true);
+  
+
+```
+
+```
+invalid.js:24:43 lint/nursery/useExpectToContain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The result of includes() is compared to a boolean.
+  
+    22 │ expect(a.test(t).includes(b.test(p))).toEqual(false);
+    23 │ expect(a.test(t).includes(b.test(p))).not.toEqual(true);
+  > 24 │ expect(a.test(t).includes(b.test(p))).not.toEqual(false);
+       │                                           ^^^^^^^
+    25 │ expect([{ a: 1 }].includes({ a: 1 })).toBe(true);
+    26 │ expect([{ a: 1 }].includes({ a: 1 })).not.toBe(true);
+  
+  i When this check fails, the error message only shows that a boolean didn't match, not which value was missing.
+  
+  i Use toContain() to check whether a value is present.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toContain() instead.
+  
+    22 22 │   expect(a.test(t).includes(b.test(p))).toEqual(false);
+    23 23 │   expect(a.test(t).includes(b.test(p))).not.toEqual(true);
+    24    │ - expect(a.test(t).includes(b.test(p))).not.toEqual(false);
+       24 │ + expect(a.test(t)).toContain(b.test(p));
+    25 25 │   expect([{ a: 1 }].includes({ a: 1 })).toBe(true);
+    26 26 │   expect([{ a: 1 }].includes({ a: 1 })).not.toBe(true);
+  
+
+```
+
+```
+invalid.js:25:39 lint/nursery/useExpectToContain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The result of includes() is compared to a boolean.
+  
+    23 │ expect(a.test(t).includes(b.test(p))).not.toEqual(true);
+    24 │ expect(a.test(t).includes(b.test(p))).not.toEqual(false);
+  > 25 │ expect([{ a: 1 }].includes({ a: 1 })).toBe(true);
+       │                                       ^^^^
+    26 │ expect([{ a: 1 }].includes({ a: 1 })).not.toBe(true);
+    27 │ expect(a.includes(b), "custom message").toBe(true);
+  
+  i When this check fails, the error message only shows that a boolean didn't match, not which value was missing.
+  
+  i Use toContain() to check whether a value is present.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toContain() instead.
+  
+    23 23 │   expect(a.test(t).includes(b.test(p))).not.toEqual(true);
+    24 24 │   expect(a.test(t).includes(b.test(p))).not.toEqual(false);
+    25    │ - expect([{·a:·1·}].includes({·a:·1·})).toBe(true);
+       25 │ + expect([{·a:·1·}]).toContain({·a:·1·});
+    26 26 │   expect([{ a: 1 }].includes({ a: 1 })).not.toBe(true);
+    27 27 │   expect(a.includes(b), "custom message").toBe(true);
+  
+
+```
+
+```
+invalid.js:26:43 lint/nursery/useExpectToContain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The result of includes() is compared to a boolean.
+  
+    24 │ expect(a.test(t).includes(b.test(p))).not.toEqual(false);
+    25 │ expect([{ a: 1 }].includes({ a: 1 })).toBe(true);
+  > 26 │ expect([{ a: 1 }].includes({ a: 1 })).not.toBe(true);
+       │                                           ^^^^
+    27 │ expect(a.includes(b), "custom message").toBe(true);
+    28 │ 
+  
+  i When this check fails, the error message only shows that a boolean didn't match, not which value was missing.
+  
+  i Use toContain() to check whether a value is present.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toContain() instead.
+  
+    24 24 │   expect(a.test(t).includes(b.test(p))).not.toEqual(false);
+    25 25 │   expect([{ a: 1 }].includes({ a: 1 })).toBe(true);
+    26    │ - expect([{·a:·1·}].includes({·a:·1·})).not.toBe(true);
+       26 │ + expect([{·a:·1·}]).not.toContain({·a:·1·});
+    27 27 │   expect(a.includes(b), "custom message").toBe(true);
+    28 28 │   
+  
+
+```
+
+```
+invalid.js:27:41 lint/nursery/useExpectToContain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The result of includes() is compared to a boolean.
+  
+    25 │ expect([{ a: 1 }].includes({ a: 1 })).toBe(true);
+    26 │ expect([{ a: 1 }].includes({ a: 1 })).not.toBe(true);
+  > 27 │ expect(a.includes(b), "custom message").toBe(true);
+       │                                         ^^^^
+    28 │ 
+    29 │ expect((a.includes(b))).toBe(true);
+  
+  i When this check fails, the error message only shows that a boolean didn't match, not which value was missing.
+  
+  i Use toContain() to check whether a value is present.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toContain() instead.
+  
+    25 25 │   expect([{ a: 1 }].includes({ a: 1 })).toBe(true);
+    26 26 │   expect([{ a: 1 }].includes({ a: 1 })).not.toBe(true);
+    27    │ - expect(a.includes(b),·"custom·message").toBe(true);
+       27 │ + expect(a,·"custom·message").toContain(b);
+    28 28 │   
+    29 29 │   expect((a.includes(b))).toBe(true);
+  
+
+```
+
+```
+invalid.js:29:25 lint/nursery/useExpectToContain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The result of includes() is compared to a boolean.
+  
+    27 │ expect(a.includes(b), "custom message").toBe(true);
+    28 │ 
+  > 29 │ expect((a.includes(b))).toBe(true);
+       │                         ^^^^
+    30 │ expect(a.includes(b)).toBe((false));
+    31 │ 
+  
+  i When this check fails, the error message only shows that a boolean didn't match, not which value was missing.
+  
+  i Use toContain() to check whether a value is present.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toContain() instead.
+  
+    27 27 │   expect(a.includes(b), "custom message").toBe(true);
+    28 28 │   
+    29    │ - expect((a.includes(b))).toBe(true);
+       29 │ + expect(a).toContain(b);
+    30 30 │   expect(a.includes(b)).toBe((false));
+    31 31 │   
+  
+
+```
+
+```
+invalid.js:30:23 lint/nursery/useExpectToContain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The result of includes() is compared to a boolean.
+  
+    29 │ expect((a.includes(b))).toBe(true);
+  > 30 │ expect(a.includes(b)).toBe((false));
+       │                       ^^^^
+    31 │ 
+    32 │ test("comments around the assertion are kept", () => {
+  
+  i When this check fails, the error message only shows that a boolean didn't match, not which value was missing.
+  
+  i Use toContain() to check whether a value is present.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toContain() instead.
+  
+    28 28 │   
+    29 29 │   expect((a.includes(b))).toBe(true);
+    30    │ - expect(a.includes(b)).toBe((false));
+       30 │ + expect(a).not.toContain(b);
+    31 31 │   
+    32 32 │   test("comments around the assertion are kept", () => {
+  
+
+```
+
+```
+invalid.js:34:24 lint/nursery/useExpectToContain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The result of includes() is compared to a boolean.
+  
+    32 │ test("comments around the assertion are kept", () => {
+    33 │ 	// leading comment
+  > 34 │ 	expect(a.includes(b)).toBe(true); // trailing comment
+       │ 	                      ^^^^
+    35 │ });
+    36 │ 
+  
+  i When this check fails, the error message only shows that a boolean didn't match, not which value was missing.
+  
+  i Use toContain() to check whether a value is present.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toContain() instead.
+  
+    32 32 │   test("comments around the assertion are kept", () => {
+    33 33 │     // leading comment
+    34    │ - → expect(a.includes(b)).toBe(true);·//·trailing·comment
+       34 │ + → expect(a).toContain(b);·//·trailing·comment
+    35 35 │   });
+    36 36 │   
+  
+
+```
+
+```
+invalid.js:38:35 lint/nursery/useExpectToContain ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The result of includes() is compared to a boolean.
+  
+    37 │ test("no fix when comments would be removed", () => {
+  > 38 │ 	expect(a.includes(/* item */ b)).toBe(true);
+       │ 	                                 ^^^^
+    39 │ 	expect(a.includes(b)).not /* negated */.toBe(false);
+    40 │ 	expect(a.includes(b))
+  
+  i When this check fails, the error message only shows that a boolean didn't match, not which value was missing.
+  
+  i Use toContain() to check whether a value is present.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:39:42 lint/nursery/useExpectToContain ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The result of includes() is compared to a boolean.
+  
+    37 │ test("no fix when comments would be removed", () => {
+    38 │ 	expect(a.includes(/* item */ b)).toBe(true);
+  > 39 │ 	expect(a.includes(b)).not /* negated */.toBe(false);
+       │ 	                                        ^^^^
+    40 │ 	expect(a.includes(b))
+    41 │ 		// why this is checked
+  
+  i When this check fails, the error message only shows that a boolean didn't match, not which value was missing.
+  
+  i Use toContain() to check whether a value is present.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:42:4 lint/nursery/useExpectToContain ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The result of includes() is compared to a boolean.
+  
+    40 │ 	expect(a.includes(b))
+    41 │ 		// why this is checked
+  > 42 │ 		.toBe(true);
+       │ 		 ^^^^
+    43 │ });
+    44 │ 
+  
+  i When this check fails, the error message only shows that a boolean didn't match, not which value was missing.
+  
+  i Use toContain() to check whether a value is present.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

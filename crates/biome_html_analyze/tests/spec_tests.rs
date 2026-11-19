@@ -1,20 +1,64 @@
-use biome_analyze::{ActionFilter, AnalysisFilter, AnalyzerAction, ControlFlow, Never, RuleFilter};
+use biome_analyze::{
+    ActionFilter, AnalysisFilter, AnalyzerAction, ControlFlow, Never, Queryable, RegistryVisitor,
+    Rule, RuleDomain, RuleFilter, RuleGroup,
+};
 use biome_diagnostics::advice::CodeSuggestionAdvice;
+use biome_html_analyze::HtmlAnalyzerServices;
 use biome_html_parser::parse_html;
-use biome_html_syntax::{HtmlFileSource, HtmlLanguage};
+use biome_html_syntax::HtmlLanguage;
+use biome_languages::HtmlFileSource;
 use biome_rowan::AstNode;
 use biome_test_utils::{
     CheckActionType, analyze_with_workspace, assert_diagnostics_expectation_comment,
     assert_errors_are_absent, code_fix_to_string, create_analyzer_options, diagnostic_to_string,
-    has_bogus_nodes_or_empty_slots, parse_test_path, register_leak_checker, scripts_from_json,
+    has_bogus_nodes_or_empty_slots, module_graph_for_html_test_file, parse_test_path,
+    project_layout_for_test_file, register_leak_checker, scripts_from_json,
     write_analyzer_snapshot,
 };
 use camino::Utf8Path;
 use std::ops::Deref;
 use std::{fs::read_to_string, slice};
 
-tests_macros::gen_tests! {"tests/specs/**/*.{html,vue,svelte,astro,json,jsonc}", crate::run_test, "module"}
-tests_macros::gen_tests! {"tests/suppression/**/*.{html,vue,svelte,astro,json,jsonc}", crate::run_suppression_test, "module"}
+tests_macros::gen_tests! {"tests/specs/**/*.{html,vue,svg,svelte,astro,json,jsonc}", crate::run_test, "module"}
+tests_macros::gen_tests! {"tests/suppression/**/*.{html,vue,svg,svelte,astro,json,jsonc}", crate::run_suppression_test, "module"}
+
+/// Checks if any of the enabled rules is in the project domain and requires the module graph.
+struct NeedsModuleGraph<'a> {
+    enabled_rules: Option<&'a [RuleFilter<'a>]>,
+    needs_module_graph: bool,
+}
+
+impl<'a> NeedsModuleGraph<'a> {
+    fn new(enabled_rules: Option<&'a [RuleFilter<'a>]>) -> Self {
+        Self {
+            enabled_rules,
+            needs_module_graph: false,
+        }
+    }
+
+    fn compute(mut self) -> bool {
+        biome_html_analyze::visit_registry(&mut self);
+        self.needs_module_graph
+    }
+}
+
+impl RegistryVisitor<HtmlLanguage> for NeedsModuleGraph<'_> {
+    fn record_rule<R>(&mut self)
+    where
+        R: Rule<Options: Default, Query: Queryable<Language = HtmlLanguage, Output: Clone>>
+            + 'static,
+    {
+        let filter = RuleFilter::Rule(<R::Group as RuleGroup>::NAME, R::METADATA.name);
+
+        if self
+            .enabled_rules
+            .is_some_and(|enabled_rules| enabled_rules.contains(&filter))
+            && R::METADATA.domains.contains(&RuleDomain::Project)
+        {
+            self.needs_module_graph = true;
+        }
+    }
+}
 
 fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
     register_leak_checker();
@@ -22,8 +66,8 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
     let input_file = Utf8Path::new(input);
     let file_name = input_file.file_name().unwrap();
 
-    // Skip options files — they are configuration, not test inputs
-    if file_name.ends_with(".options.json") {
+    // Skip options and manifest files — they are configuration, not test inputs
+    if file_name.ends_with(".options.json") || file_name.ends_with(".package.json") {
         return;
     }
 
@@ -34,14 +78,6 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
     if group == "specs" {
         panic!("the test file must be placed in the {group}/{rule}/<rule-name>/ directory");
     }
-    if biome_html_analyze::METADATA
-        .deref()
-        .find_rule(group, rule)
-        .is_none()
-    {
-        panic!("could not find rule {group}/{rule}");
-    }
-
     let rule_filter = RuleFilter::Rule(group, rule);
     let filter = AnalysisFilter {
         enabled_rules: Some(slice::from_ref(&rule_filter)),
@@ -55,6 +91,14 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
         .unwrap_or_else(|err| panic!("failed to read {input_file:?}: {err:?}"));
 
     if let Some(scripts) = scripts_from_json(extension, &input_code) {
+        if biome_html_analyze::METADATA
+            .deref()
+            .find_rule(group, rule)
+            .is_none()
+        {
+            panic!("could not find rule {group}/{rule}");
+        }
+
         for script in scripts {
             analyze_and_snap(
                 &mut snapshot,
@@ -92,40 +136,66 @@ pub(crate) fn analyze_and_snap(
     let root = parsed.tree();
 
     let mut code_fixes = Vec::new();
-    let options = create_analyzer_options::<HtmlLanguage>(input_file, &mut diagnostics);
+    // Use the parent directory as a working directory for relative paths in diagnostics
+    let working_directory = input_file.parent().unwrap_or(Utf8Path::new("."));
+    let options =
+        create_analyzer_options::<HtmlLanguage>(input_file, working_directory, &mut diagnostics);
 
-    let (_, errors) = biome_html_analyze::analyze(&root, filter, &options, source_type, |event| {
-        if let Some(mut diag) = event.diagnostic() {
-            for action in event.actions(ActionFilter::all()) {
-                if check_action_type.is_suppression() {
-                    if action.is_suppression() {
+    let needs_module_graph = NeedsModuleGraph::new(filter.enabled_rules).compute();
+    let html_services = if needs_module_graph {
+        let mut project_diagnostics = Vec::new();
+        let project_layout = project_layout_for_test_file(input_file, &mut project_diagnostics);
+        diagnostics.extend(project_diagnostics);
+        let module_db = module_graph_for_html_test_file(input_file, &project_layout);
+        HtmlAnalyzerServices {
+            module_db: Some(module_db.rc_module_db()),
+            project_layout: Some(project_layout),
+            ..HtmlAnalyzerServices::default()
+        }
+    } else {
+        HtmlAnalyzerServices::default()
+    };
+
+    let (_, errors) = biome_html_analyze::analyze(
+        &root,
+        filter,
+        &options,
+        source_type,
+        html_services,
+        None,
+        |event| {
+            if let Some(mut diag) = event.diagnostic() {
+                for action in event.actions(ActionFilter::all()) {
+                    if check_action_type.is_suppression() {
+                        if action.is_suppression() {
+                            check_code_action(input_file, input_code, source_type, &action);
+                            diag = diag.add_code_suggestion(CodeSuggestionAdvice::from(action));
+                        }
+                    } else if !action.is_suppression() {
                         check_code_action(input_file, input_code, source_type, &action);
                         diag = diag.add_code_suggestion(CodeSuggestionAdvice::from(action));
                     }
-                } else if !action.is_suppression() {
-                    check_code_action(input_file, input_code, source_type, &action);
-                    diag = diag.add_code_suggestion(CodeSuggestionAdvice::from(action));
                 }
+
+                diagnostics.push(diagnostic_to_string(file_name, input_code, diag.into()));
+                return ControlFlow::Continue(());
             }
 
-            diagnostics.push(diagnostic_to_string(file_name, input_code, diag.into()));
-            return ControlFlow::Continue(());
-        }
-
-        for action in event.actions(ActionFilter::all()) {
-            if check_action_type.is_suppression() {
-                if action.category.matches("quickfix.suppressRule") {
+            for action in event.actions(ActionFilter::all()) {
+                if check_action_type.is_suppression() {
+                    if action.category.matches("quickfix.suppressRule") {
+                        check_code_action(input_file, input_code, source_type, &action);
+                        code_fixes.push(code_fix_to_string(input_code, action));
+                    }
+                } else if !action.category.matches("quickfix.suppressRule") {
                     check_code_action(input_file, input_code, source_type, &action);
                     code_fixes.push(code_fix_to_string(input_code, action));
                 }
-            } else if !action.category.matches("quickfix.suppressRule") {
-                check_code_action(input_file, input_code, source_type, &action);
-                code_fixes.push(code_fix_to_string(input_code, action));
             }
-        }
 
-        ControlFlow::<Never>::Continue(())
-    });
+            ControlFlow::<Never>::Continue(())
+        },
+    );
 
     for error in errors {
         diagnostics.push(diagnostic_to_string(file_name, input_code, error));
@@ -139,6 +209,11 @@ pub(crate) fn analyze_and_snap(
         "html",
         parsed.diagnostics().len(),
     );
+
+    if needs_module_graph {
+        // Normalize Windows paths in the snapshot output.
+        *snapshot = snapshot.replace('\\', "/");
+    }
 
     assert_diagnostics_expectation_comment(input_file, root.syntax(), diagnostics);
 }
@@ -188,22 +263,27 @@ pub(crate) fn run_suppression_test(input: &'static str, _: &str, _: &str, _: &st
 
     let (group, rule) = parse_test_path(input_file);
 
-    let rule_filter = RuleFilter::Rule(group, rule);
-    let filter = AnalysisFilter {
-        enabled_rules: Some(slice::from_ref(&rule_filter)),
-        ..AnalysisFilter::default()
-    };
+    let snapshot = if matches!(input_file.extension(), Some("astro" | "vue" | "svelte")) {
+        analyze_with_workspace(input_file, input_code, group, rule)
+    } else {
+        let rule_filter = RuleFilter::Rule(group, rule);
+        let filter = AnalysisFilter {
+            enabled_rules: Some(slice::from_ref(&rule_filter)),
+            ..AnalysisFilter::default()
+        };
 
-    let mut snapshot = String::new();
-    analyze_and_snap(
-        &mut snapshot,
-        &input_code,
-        HtmlFileSource::html(),
-        filter,
-        file_name,
-        input_file,
-        CheckActionType::Suppression,
-    );
+        let mut snapshot = String::new();
+        analyze_and_snap(
+            &mut snapshot,
+            &input_code,
+            HtmlFileSource::html(),
+            filter,
+            file_name,
+            input_file,
+            CheckActionType::Suppression,
+        );
+        snapshot
+    };
 
     insta::with_settings!({
         prepend_module_to_snapshot => false,

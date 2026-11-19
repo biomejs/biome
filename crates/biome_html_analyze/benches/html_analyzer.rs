@@ -5,8 +5,9 @@ use biome_analyze::{
     ActionFilter, AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never,
     RuleCategoriesBuilder,
 };
+use biome_html_analyze::HtmlAnalyzerServices;
 use biome_html_parser::{HtmlParserOptions, parse_html};
-use biome_html_syntax::HtmlFileSource;
+use biome_languages::HtmlFileSource;
 use biome_test_utils::BenchCase;
 use criterion::{BenchmarkId, Criterion, Throughput, black_box, criterion_group, criterion_main};
 
@@ -16,7 +17,7 @@ static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
 
 #[cfg(all(
     any(target_os = "macos", target_os = "linux"),
-    not(target_env = "musl"),
+    not(all(target_env = "musl", target_arch = "aarch64")),
 ))]
 #[global_allocator]
 static GLOBAL: tikv_jemallocator::Jemalloc = tikv_jemallocator::Jemalloc;
@@ -113,6 +114,8 @@ fn bench_analyzer(criterion: &mut Criterion) {
                                 filter,
                                 &options,
                                 file_source,
+                                biome_html_analyze::HtmlAnalyzerServices::default(),
+                                None,
                                 |event| {
                                     black_box(event.diagnostic());
                                     black_box(event.actions(ActionFilter::all()));
@@ -156,6 +159,8 @@ fn bench_analyzer(criterion: &mut Criterion) {
                     filter,
                     &options,
                     file_source,
+                    HtmlAnalyzerServices::default(),
+                    None,
                     |event| {
                         black_box(event.diagnostic());
                         black_box(event.actions(ActionFilter::all()));

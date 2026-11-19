@@ -1,0 +1,15 @@
+$asset: mark;
+
+.icon {
+  --raw: url(data:image/svg+xml,%3Csvg/%3E);
+  --literal: url($asset);
+  --literal-path: url(/icons/$asset.svg);
+  --interpolated: url(/icons/#{$asset}.svg);
+  --mixed: url($literal-#{$asset}.svg);
+  --payload-comment: url(/*payload*/#{$asset}.svg);
+  --quoted: url("#{$asset}.svg");
+  --nested: var(--fallback, url(/icons/#{$asset}.svg));
+  --function: url(var(--image));
+  --literal-expression: url($asset + ".svg");
+  color: red;
+}

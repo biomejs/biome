@@ -1,0 +1,176 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: with-functions.jsx
+---
+# Input
+```jsx
+/* should generate diagnostics */
+const button = cx("px-2 py-2");
+
+const card = tw.div`overflow-hidden text-ellipsis whitespace-nowrap`;
+
+const spaced = tw /* comment */ .div`px-2 py-2`;
+
+const chained = tw.div.span("px-2 py-2");
+
+```
+
+# Diagnostics
+```
+with-functions.jsx:2:20 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These Tailwind classes can be replaced with a shorthand class.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const button = cx("px-2 py-2");
+      │                    ^^^^
+    3 │ 
+    4 │ const card = tw.div`overflow-hidden text-ellipsis whitespace-nowrap`;
+  
+  i Compressible utility used here.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const button = cx("px-2 py-2");
+      │                         ^^^^
+    3 │ 
+    4 │ const card = tw.div`overflow-hidden text-ellipsis whitespace-nowrap`;
+  
+  i Using fewer classes reduces duplication and improves readability.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the Tailwind shorthand classes.
+  
+    1 1 │   /* should generate diagnostics */
+    2   │ - const·button·=·cx("px-2·py-2");
+      2 │ + const·button·=·cx("p-2");
+    3 3 │   
+    4 4 │   const card = tw.div`overflow-hidden text-ellipsis whitespace-nowrap`;
+  
+
+```
+
+```
+with-functions.jsx:4:21 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These Tailwind classes can be replaced with a shorthand class.
+  
+    2 │ const button = cx("px-2 py-2");
+    3 │ 
+  > 4 │ const card = tw.div`overflow-hidden text-ellipsis whitespace-nowrap`;
+      │                     ^^^^^^^^^^^^^^^
+    5 │ 
+    6 │ const spaced = tw /* comment */ .div`px-2 py-2`;
+  
+  i Compressible utility used here.
+  
+    2 │ const button = cx("px-2 py-2");
+    3 │ 
+  > 4 │ const card = tw.div`overflow-hidden text-ellipsis whitespace-nowrap`;
+      │                                     ^^^^^^^^^^^^^
+    5 │ 
+    6 │ const spaced = tw /* comment */ .div`px-2 py-2`;
+  
+  i Compressible utility used here.
+  
+    2 │ const button = cx("px-2 py-2");
+    3 │ 
+  > 4 │ const card = tw.div`overflow-hidden text-ellipsis whitespace-nowrap`;
+      │                                                   ^^^^^^^^^^^^^^^^^
+    5 │ 
+    6 │ const spaced = tw /* comment */ .div`px-2 py-2`;
+  
+  i Using fewer classes reduces duplication and improves readability.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the Tailwind shorthand classes.
+  
+    2 2 │   const button = cx("px-2 py-2");
+    3 3 │   
+    4   │ - const·card·=·tw.div`overflow-hidden·text-ellipsis·whitespace-nowrap`;
+      4 │ + const·card·=·tw.div`truncate`;
+    5 5 │   
+    6 6 │   const spaced = tw /* comment */ .div`px-2 py-2`;
+  
+
+```
+
+```
+with-functions.jsx:6:38 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These Tailwind classes can be replaced with a shorthand class.
+  
+    4 │ const card = tw.div`overflow-hidden text-ellipsis whitespace-nowrap`;
+    5 │ 
+  > 6 │ const spaced = tw /* comment */ .div`px-2 py-2`;
+      │                                      ^^^^
+    7 │ 
+    8 │ const chained = tw.div.span("px-2 py-2");
+  
+  i Compressible utility used here.
+  
+    4 │ const card = tw.div`overflow-hidden text-ellipsis whitespace-nowrap`;
+    5 │ 
+  > 6 │ const spaced = tw /* comment */ .div`px-2 py-2`;
+      │                                           ^^^^
+    7 │ 
+    8 │ const chained = tw.div.span("px-2 py-2");
+  
+  i Using fewer classes reduces duplication and improves readability.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the Tailwind shorthand classes.
+  
+    4 4 │   const card = tw.div`overflow-hidden text-ellipsis whitespace-nowrap`;
+    5 5 │   
+    6   │ - const·spaced·=·tw·/*·comment·*/·.div`px-2·py-2`;
+      6 │ + const·spaced·=·tw·/*·comment·*/·.div`p-2`;
+    7 7 │   
+    8 8 │   const chained = tw.div.span("px-2 py-2");
+  
+
+```
+
+```
+with-functions.jsx:8:30 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These Tailwind classes can be replaced with a shorthand class.
+  
+    6 │ const spaced = tw /* comment */ .div`px-2 py-2`;
+    7 │ 
+  > 8 │ const chained = tw.div.span("px-2 py-2");
+      │                              ^^^^
+    9 │ 
+  
+  i Compressible utility used here.
+  
+    6 │ const spaced = tw /* comment */ .div`px-2 py-2`;
+    7 │ 
+  > 8 │ const chained = tw.div.span("px-2 py-2");
+      │                                   ^^^^
+    9 │ 
+  
+  i Using fewer classes reduces duplication and improves readability.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the Tailwind shorthand classes.
+  
+    6 6 │   const spaced = tw /* comment */ .div`px-2 py-2`;
+    7 7 │   
+    8   │ - const·chained·=·tw.div.span("px-2·py-2");
+      8 │ + const·chained·=·tw.div.span("p-2");
+    9 9 │   
+  
+
+```

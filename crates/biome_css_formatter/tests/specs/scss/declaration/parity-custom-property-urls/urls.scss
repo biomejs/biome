@@ -1,0 +1,30 @@
+$color:red;
+$asset:mark;
+
+.icon{
+--icon:url(data:image/svg+xml,%3Csvg%20xmlns=%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width=%2210%22%20height=%2210%22%3E%3Crect%20width=%2210%22%20height=%2210%22%20fill=%22red%22/%3E%3C/svg%3E);
+  --literal-http :url(data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20width=%2210%22%20height=%2210%22%3E%3Crect%20width=%2210%22%20height=%2210%22%20fill=%22red%22/%3E%3C/svg%3E);
+--quoted-double:url("data:image/svg+xml,%3Csvg%20xmlns=%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width=%2210%22%20height=%2210%22%3E%3Crect%20width=%2210%22%20height=%2210%22%20fill=%22red%22/%3E%3C/svg%3E");
+--quoted-single:url('data:image/svg+xml,%3Csvg%20xmlns=%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width=%2210%22%20height=%2210%22%3E%3Crect%20width=%2210%22%20height=%2210%22%20fill=%22red%22/%3E%3C/svg%3E');
+--quoted-interpolation:url("data:image/svg+xml,%3Csvg%20xmlns=%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width=%2210%22%20height=%2210%22%3E%3Crect%20width=%2210%22%20height=%2210%22%20fill=%22#{ $color   }%22/%3E%3C/svg%3E");
+--interpolation:url(/icons/#{ $asset   +   "-dark" }.svg?palette=red,blue);
+--fallback:var(--missing,/* before fallback URL */url(data:image/svg+xml,%3Csvg%20xmlns=%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width=%2210%22%20height=%2210%22%3E%3Crect%20width=%2210%22%20height=%2210%22%20fill=%22red%22/%3E%3C/svg%3E)/* after fallback URL */);
+--mixed-case:UrL(data:image/svg+xml,%3Csvg/%3E);
+--escaped-name:u\72l(data:image/svg+xml,%3Csvg/%3E);
+--comment-middle:url(/icons/*v1*/mark.svg);
+--comment-adjacent:url(/icons/*v1*//*dark*/mark.svg);
+--comment-only:url(/*v1*/);
+--comment-start:url(/*v1*/mark.svg);
+--comment-end:url(/icons/mark.svg/*v1*/);
+--comment-interpolation:url(/icons/*v1*/#{ $asset   }.svg);
+/* before declaration */
+--comments:/* before URL */url(/icons/*v1*/mark.svg)/* after URL */;/* after declaration */
+/* biome-ignore format: preserve the authored declaration spacing */
+--suppressed :   url(data:image/svg+xml,%3Csvg%20xmlns=%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width=%2210%22%20height=%2210%22%3E%3Crect%20width=%2210%22%20height=%2210%22%20fill=%22red%22/%3E%3C/svg%3E) ;
+--gradient:linear-gradient(90deg,red,blue);
+background-image:var(--icon);
+  color : red ;
+}
+
+.ordinary{background-image:url(data:image/svg+xml,%3Csvg%20xmlns=%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width=%2210%22%20height=%2210%22%3E%3Crect%20width=%2210%22%20height=%2210%22%20fill=%22red%22/%3E%3C/svg%3E);padding:  1px  2px}
+.following{margin:0;color:blue}

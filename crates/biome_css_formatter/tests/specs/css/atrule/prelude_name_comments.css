@@ -1,0 +1,11 @@
+@page report
+/* own line */ :first {margin:1in}
+@namespace ns
+/* own line */ url("http://example.com");
+@page report /* first */ /* last */ :first {margin:1in}
+@namespace ns /* first */ /* last */ url("http://example.com");
+@page report /* multi
+line */ :first {margin:1in}
+@namespace ns /* multi
+line */ url("http://example.com");
+@namespace ns /* first */ /* biome-ignore format: preserve URL */ /* last */ url( "http://example.com" );

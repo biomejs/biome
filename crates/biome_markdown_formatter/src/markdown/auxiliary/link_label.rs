@@ -1,6 +1,6 @@
 use crate::markdown::lists::inline_item_list::FormatMdFormatInlineItemListOptions;
 use crate::prelude::*;
-use crate::shared::{TextPrintMode, TrimMode};
+use crate::shared::{TextContext, TextPrintMode, TrimMode};
 use biome_markdown_syntax::MdLinkLabel;
 
 #[derive(Debug, Clone, Default)]
@@ -12,7 +12,7 @@ impl FormatNodeRule<MdLinkLabel> for FormatMdLinkLabel {
             .with_options(FormatMdFormatInlineItemListOptions {
                 print_mode: TextPrintMode::Trim(TrimMode::NormalizeWords),
                 keep_fences_in_italics: false,
-                inside_list: false,
+                text_context: TextContext::Neutral,
             })
             .fmt(f)
     }

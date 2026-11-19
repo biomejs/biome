@@ -1,0 +1,72 @@
+---
+source: crates/biome_graphql_analyze/tests/spec_tests.rs
+expression: invalidComments.graphql
+---
+# Input
+```graphql
+# should generate diagnostics
+type c {
+  id: ID!
+} # same c
+
+type a {
+  id: ID!
+}
+
+# header for b
+"Description of b"
+type b {
+  id: ID!
+} # same b
+
+```
+
+# Diagnostics
+```
+invalidComments.graphql:2:1 assist/source/useGraphqlSortedDefinitions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━
+
+  i The definitions of this document are not sorted.
+  
+     1 │ # should generate diagnostics
+   > 2 │ type c {
+       │ ^^^^^^^^
+   > 3 │   id: ID!
+   > 4 │ } # same c
+        ...
+  > 12 │ type b {
+  > 13 │   id: ID!
+  > 14 │ } # same b
+       │ ^
+    15 │ 
+  
+  i Safe fix: Sort the definitions.
+  
+     1    │ - #·should·generate·diagnostics
+     2    │ - type·c·{
+        1 │ + type·a·{
+     3  2 │     id: ID!
+     4    │ - }·#·same·c
+     5    │ - 
+     6    │ - type·a·{
+        3 │ + }
+        4 │ + 
+        5 │ + #·header·for·b
+        6 │ + "Description·of·b"
+        7 │ + type·b·{
+     7  8 │     id: ID!
+     8    │ - }
+     9    │ - 
+    10    │ - #·header·for·b
+    11    │ - "Description·of·b"
+    12    │ - type·b·{
+        9 │ + }·#·same·b
+       10 │ + 
+       11 │ + #·should·generate·diagnostics
+       12 │ + type·c·{
+    13 13 │     id: ID!
+    14    │ - }·#·same·b
+       14 │ + }·#·same·c
+    15 15 │   
+  
+
+```

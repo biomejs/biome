@@ -3,8 +3,9 @@ use biome_analyze::{Ast, FixKind, Rule, RuleDiagnostic, context::RuleContext, de
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{
-    AnyJsClass, JsDirective, JsDirectiveList, JsFileSource, JsFunctionBody, JsModule, JsScript,
+    AnyJsClass, JsDirective, JsDirectiveList, JsFunctionBody, JsModule, JsScript,
 };
+use biome_languages::JsFileSource;
 use biome_rule_options::no_redundant_use_strict::NoRedundantUseStrictOptions;
 
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, declare_node_union};
@@ -12,8 +13,8 @@ use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, declare_node_union};
 declare_lint_rule! {
  /// Prevents from having redundant `"use strict"`.
  ///
- /// The directive `"use strict"` **isn't** needed in `.mjs` files, or in `.js` files inside projects where the `package.json` defines library as module:
- ///
+ /// The directive `"use strict"` <a href="https://262.ecma-international.org/6.0/#sec-strict-mode-code">**isn't** needed</a> in an ESM module.
+ /// This includes `.mjs` files, or `.js` files inside projects where the `package.json` defines the library as a module:
  ///
  /// ```json,ignore
  /// {
@@ -21,7 +22,9 @@ declare_lint_rule! {
  /// }
  /// ```
  ///
- /// Instead, `.cjs` files are considered "scripts" and the directive `"use strict"` is accepted and advised.
+ /// If the type is undefined, ESM module is assumed.
+ /// CommonJS files (`.cjs`, or `.js` files inside a project with `"type": "commonjs"`) are in non-strict mode. 
+ /// For them, the directive `"use strict"` is accepted and advised.
  ///
  /// ## Examples
  ///

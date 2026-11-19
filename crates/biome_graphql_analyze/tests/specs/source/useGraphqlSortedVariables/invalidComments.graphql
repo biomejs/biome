@@ -1,0 +1,54 @@
+# should generate diagnostics
+query CommaThenComment(
+  $c: Int, # c
+  $a: Int # a
+) { x }
+
+query CommentAbove(
+  # about c
+  $c: Int
+  # about a
+  $a: Int
+) { x }
+
+query Mixed(
+  # header for c
+  $c: Int, # same c
+  $b: Int # same b
+  # header for a
+  $a: Int, # same a
+) { x }
+
+query PlainIntoCommentSlot(
+  $c: Int, # c
+  $a: Int,
+) { x }
+
+query CommentIntoPlainSlot(
+  $c: Int,
+  $b: Int, # b
+  $a: Int
+) { x }
+
+# The comment of `$a` would be followed by `$b` on the same line, so no fix is offered.
+query CommentWouldSwallowVariable($c: Int, $b: Int, $a: Int # a
+) { x }
+
+# The comment of `$b` would be followed by `)` on the same line, so no fix is offered.
+query CommentWouldSwallowParen($b: Int # b
+  $a: Int) { x }
+
+# The comment above `$b` would follow `$a` on the same line, so no fix is offered.
+query CommentAboveIntoInlineSlot($a: Int, $c: Int,
+  # about b
+  $b: Int) { x }
+
+# The comment above `$a` would follow `(` on the same line, so no fix is offered.
+query CommentAboveIntoFirstSlot($b: Int,
+  # about a
+  $a: Int) { x }
+
+query CommentAfterParen( # variables
+  $b: Int
+  $a: Int
+) { x }

@@ -1,0 +1,2 @@
+.a{content:attr($name);color:red;}
+.b{width:attr(data-size px,$gap * 2);height:1px;}

@@ -1,0 +1,3 @@
+https://cdn.jsdelivr.net/gh/prometheus-community/helm-charts@kube-prometheus-stack-75.15.1/charts/kube-prometheus-stack/values.yaml
+https://cdn.jsdelivr.net/gh/argoproj/argo-cd@v3.0.12/manifests/install.yaml
+https://raw.githubusercontent.com/cloudflare/api-schemas/a811d14a5914b351b6237b96c71b4b743796daf3/openapi.yaml

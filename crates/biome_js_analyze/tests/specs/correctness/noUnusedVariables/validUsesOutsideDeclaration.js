@@ -1,0 +1,42 @@
+/* should not generate diagnostics */
+
+// A discarded read or an update comes before a use outside the declaration.
+let discardedThenUsed = 0;
+discardedThenUsed;
+(discardedThenUsed, 1);
+console.log(discardedThenUsed);
+
+let updatedThenUsed = 0;
+updatedThenUsed++;
+updatedThenUsed += 1;
+console.log((0, updatedThenUsed));
+
+let assignedInUsedExpression;
+console.log((assignedInUsedExpression = 1));
+
+let updatedInUsedExpression = 0;
+console.log(updatedInUsedExpression++);
+
+let testedInFor = 0;
+for (; testedInFor; ) {}
+
+// A reference inside the declaration comes before a use outside it.
+function recursiveAndCalled() {
+    return recursiveAndCalled();
+}
+recursiveAndCalled();
+
+const selfSchedulingAndCalled = () => {
+    setTimeout(selfSchedulingAndCalled);
+};
+selfSchedulingAndCalled();
+
+class SelfReferencingAndUsed {
+    clone() {
+        return new SelfReferencingAndUsed();
+    }
+}
+new SelfReferencingAndUsed();
+
+// An arrow function parameter without parentheses is used by any use.
+[1].map(bareUsed => bareUsed);

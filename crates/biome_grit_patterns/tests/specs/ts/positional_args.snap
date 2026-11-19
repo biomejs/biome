@@ -1,0 +1,20 @@
+---
+source: crates/biome_grit_patterns/tests/spec_tests.rs
+expression: positional_args
+---
+SnapshotResult {
+    messages: [],
+    matched_ranges: [
+        "1:1-1:29",
+    ],
+    rewritten_files: [
+        OutputFile {
+            messages: [],
+            variables: [],
+            source_file: "tests/specs/ts/positional_args.ts",
+            content: "console.info(\"hello, world!\");\nconsole.warn(\"should not match\");\n",
+            byte_ranges: None,
+        },
+    ],
+    created_files: [],
+}

@@ -1,0 +1,26 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome lint --only=nursery/noUnusedClasses '<TEMP_DIR>/no_unused_classes_global_pseudo_class_is_exempt'
+```
+
+## `styles.css`
+
+```css
+:global(.reset) {
+  margin: 0;
+}
+:global(.base) {
+  padding: 0;
+}
+```
+
+# Emitted Messages
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+```

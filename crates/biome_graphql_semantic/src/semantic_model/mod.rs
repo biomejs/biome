@@ -20,7 +20,7 @@ pub fn semantic_model(root: &GraphqlRoot) -> SemanticModel {
     let mut builder = SemanticModelBuilder::new(root.clone());
 
     let root = root.syntax();
-    for node in root.preorder() {
+    for node in root.preorder_of_kinds(SemanticEventExtractor::VISITED_KINDS) {
         match node {
             biome_graphql_syntax::WalkEvent::Enter(node) => {
                 builder.push_node(&node);

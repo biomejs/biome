@@ -1,7 +1,8 @@
-use biome_formatter::Printed;
+use biome_formatter::rowan::Printed;
 use biome_html_formatter::{HtmlFormatOptions, format_node};
 use biome_html_parser::{HtmlParserOptions, parse_html};
-use biome_html_syntax::{HtmlFileSource, HtmlRoot};
+use biome_html_syntax::HtmlRoot;
+use biome_languages::HtmlFileSource;
 use biome_rowan::AstNode;
 use biome_string_case::StrLikeExtension;
 use biome_test_utils::BenchCase;
@@ -14,7 +15,7 @@ static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
 
 #[cfg(all(
     any(target_os = "macos", target_os = "linux"),
-    not(target_env = "musl"),
+    not(all(target_env = "musl", target_arch = "aarch64")),
 ))]
 #[global_allocator]
 static GLOBAL: tikv_jemallocator::Jemalloc = tikv_jemallocator::Jemalloc;
@@ -85,9 +86,12 @@ fn bench_formatter(criterion: &mut Criterion) {
                     &code,
                     |b, _| {
                         fn format(root: HtmlRoot) -> Printed {
-                            let formatted =
-                                format_node(HtmlFormatOptions::default(), root.syntax(), false)
-                                    .unwrap();
+                            let formatted = format_node(
+                                HtmlFormatOptions::default(),
+                                root.syntax(),
+                                Vec::new(),
+                            )
+                            .unwrap();
                             let printed = formatted.print();
                             drop(formatted);
                             printed.expect("Document to be valid")
@@ -116,7 +120,7 @@ fn bench_formatter(criterion: &mut Criterion) {
         group.bench_with_input(BenchmarkId::new(&id, "format"), code, |b, _| {
             fn format(root: HtmlRoot) -> Printed {
                 let formatted =
-                    format_node(HtmlFormatOptions::default(), root.syntax(), false).unwrap();
+                    format_node(HtmlFormatOptions::default(), root.syntax(), Vec::new()).unwrap();
                 let printed = formatted.print();
                 drop(formatted);
                 printed.expect("Document to be valid")

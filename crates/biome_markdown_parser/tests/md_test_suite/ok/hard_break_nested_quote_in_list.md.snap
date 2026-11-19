@@ -19,8 +19,9 @@ expression: snapshot
 ## AST
 
 ```
-MdDocument {
+MdRoot {
     bom_token: missing (optional),
+    frontmatter: missing (optional),
     value: MdBlockList [
         MdBulletListItem {
             md_bullet_list: MdBulletList [
@@ -36,13 +37,13 @@ MdDocument {
                             prefix: MdQuotePrefix {
                                 pre_marker_indent: MdQuoteIndentList [],
                                 marker_token: R_ANGLE@2..3 ">" [] [],
-                                post_marker_space_token: missing (optional),
+                                post_marker_space_token: MD_QUOTE_POST_MARKER_SPACE@3..4 " " [] [],
                             },
                             content: MdBlockList [
                                 MdParagraph {
                                     list: MdInlineItemList [
                                         MdTextual {
-                                            value_token: MD_TEXTUAL_LITERAL@3..10 " quoted" [] [],
+                                            value_token: MD_TEXTUAL_LITERAL@4..10 "quoted" [] [],
                                         },
                                         MdHardLine {
                                             value_token: MD_HARD_LINE_LITERAL@10..13 "  \n" [] [],
@@ -50,10 +51,7 @@ MdDocument {
                                         MdQuotePrefix {
                                             pre_marker_indent: MdQuoteIndentList [
                                                 MdQuoteIndent {
-                                                    md_quote_pre_marker_indent_token: MD_QUOTE_PRE_MARKER_INDENT@13..14 " " [] [],
-                                                },
-                                                MdQuoteIndent {
-                                                    md_quote_pre_marker_indent_token: MD_QUOTE_PRE_MARKER_INDENT@14..15 " " [] [],
+                                                    md_quote_pre_marker_indent_token: MD_QUOTE_PRE_MARKER_INDENT@13..15 "  " [] [],
                                                 },
                                             ],
                                             marker_token: R_ANGLE@15..16 ">" [] [],
@@ -66,15 +64,11 @@ MdDocument {
                                             value_token: MD_HARD_LINE_LITERAL@21..24 "  \n" [] [],
                                         },
                                     ],
-                                    hard_line: missing (optional),
                                 },
                                 MdQuotePrefix {
                                     pre_marker_indent: MdQuoteIndentList [
                                         MdQuoteIndent {
-                                            md_quote_pre_marker_indent_token: MD_QUOTE_PRE_MARKER_INDENT@24..25 " " [] [],
-                                        },
-                                        MdQuoteIndent {
-                                            md_quote_pre_marker_indent_token: MD_QUOTE_PRE_MARKER_INDENT@25..26 " " [] [],
+                                            md_quote_pre_marker_indent_token: MD_QUOTE_PRE_MARKER_INDENT@24..26 "  " [] [],
                                         },
                                     ],
                                     marker_token: R_ANGLE@26..27 ">" [] [],
@@ -86,10 +80,7 @@ MdDocument {
                                 MdQuotePrefix {
                                     pre_marker_indent: MdQuoteIndentList [
                                         MdQuoteIndent {
-                                            md_quote_pre_marker_indent_token: MD_QUOTE_PRE_MARKER_INDENT@28..29 " " [] [],
-                                        },
-                                        MdQuoteIndent {
-                                            md_quote_pre_marker_indent_token: MD_QUOTE_PRE_MARKER_INDENT@29..30 " " [] [],
+                                            md_quote_pre_marker_indent_token: MD_QUOTE_PRE_MARKER_INDENT@28..30 "  " [] [],
                                         },
                                     ],
                                     marker_token: R_ANGLE@30..31 ">" [] [],
@@ -104,7 +95,6 @@ MdDocument {
                                             value_token: MD_TEXTUAL_LITERAL@41..42 "\n" [] [],
                                         },
                                     ],
-                                    hard_line: missing (optional),
                                 },
                             ],
                         },
@@ -130,7 +120,6 @@ MdDocument {
                                     value_token: MD_TEXTUAL_LITERAL@50..51 "\n" [] [],
                                 },
                             ],
-                            hard_line: missing (optional),
                         },
                     ],
                 },
@@ -144,9 +133,10 @@ MdDocument {
 ## CST
 
 ```
-0: MD_DOCUMENT@0..51
+0: MD_ROOT@0..51
   0: (empty)
-  1: MD_BLOCK_LIST@0..51
+  1: (empty)
+  2: MD_BLOCK_LIST@0..51
     0: MD_BULLET_LIST_ITEM@0..51
       0: MD_BULLET_LIST@0..51
         0: MD_BULLET@0..43
@@ -157,46 +147,39 @@ MdDocument {
             3: MD_INDENT_TOKEN_LIST@2..2
           1: MD_BLOCK_LIST@2..43
             0: MD_QUOTE@2..42
-              0: MD_QUOTE_PREFIX@2..3
+              0: MD_QUOTE_PREFIX@2..4
                 0: MD_QUOTE_INDENT_LIST@2..2
                 1: R_ANGLE@2..3 ">" [] []
-                2: (empty)
-              1: MD_BLOCK_LIST@3..42
-                0: MD_PARAGRAPH@3..24
-                  0: MD_INLINE_ITEM_LIST@3..24
-                    0: MD_TEXTUAL@3..10
-                      0: MD_TEXTUAL_LITERAL@3..10 " quoted" [] []
+                2: MD_QUOTE_POST_MARKER_SPACE@3..4 " " [] []
+              1: MD_BLOCK_LIST@4..42
+                0: MD_PARAGRAPH@4..24
+                  0: MD_INLINE_ITEM_LIST@4..24
+                    0: MD_TEXTUAL@4..10
+                      0: MD_TEXTUAL_LITERAL@4..10 "quoted" [] []
                     1: MD_HARD_LINE@10..13
                       0: MD_HARD_LINE_LITERAL@10..13 "  \n" [] []
                     2: MD_QUOTE_PREFIX@13..17
                       0: MD_QUOTE_INDENT_LIST@13..15
-                        0: MD_QUOTE_INDENT@13..14
-                          0: MD_QUOTE_PRE_MARKER_INDENT@13..14 " " [] []
-                        1: MD_QUOTE_INDENT@14..15
-                          0: MD_QUOTE_PRE_MARKER_INDENT@14..15 " " [] []
+                        0: MD_QUOTE_INDENT@13..15
+                          0: MD_QUOTE_PRE_MARKER_INDENT@13..15 "  " [] []
                       1: R_ANGLE@15..16 ">" [] []
                       2: MD_QUOTE_POST_MARKER_SPACE@16..17 " " [] []
                     3: MD_TEXTUAL@17..21
                       0: MD_TEXTUAL_LITERAL@17..21 "line" [] []
                     4: MD_HARD_LINE@21..24
                       0: MD_HARD_LINE_LITERAL@21..24 "  \n" [] []
-                  1: (empty)
                 1: MD_QUOTE_PREFIX@24..27
                   0: MD_QUOTE_INDENT_LIST@24..26
-                    0: MD_QUOTE_INDENT@24..25
-                      0: MD_QUOTE_PRE_MARKER_INDENT@24..25 " " [] []
-                    1: MD_QUOTE_INDENT@25..26
-                      0: MD_QUOTE_PRE_MARKER_INDENT@25..26 " " [] []
+                    0: MD_QUOTE_INDENT@24..26
+                      0: MD_QUOTE_PRE_MARKER_INDENT@24..26 "  " [] []
                   1: R_ANGLE@26..27 ">" [] []
                   2: (empty)
                 2: MD_NEWLINE@27..28
                   0: NEWLINE@27..28 "\n" [] []
                 3: MD_QUOTE_PREFIX@28..32
                   0: MD_QUOTE_INDENT_LIST@28..30
-                    0: MD_QUOTE_INDENT@28..29
-                      0: MD_QUOTE_PRE_MARKER_INDENT@28..29 " " [] []
-                    1: MD_QUOTE_INDENT@29..30
-                      0: MD_QUOTE_PRE_MARKER_INDENT@29..30 " " [] []
+                    0: MD_QUOTE_INDENT@28..30
+                      0: MD_QUOTE_PRE_MARKER_INDENT@28..30 "  " [] []
                   1: R_ANGLE@30..31 ">" [] []
                   2: MD_QUOTE_POST_MARKER_SPACE@31..32 " " [] []
                 4: MD_PARAGRAPH@32..42
@@ -205,7 +188,6 @@ MdDocument {
                       0: MD_TEXTUAL_LITERAL@32..41 "next para" [] []
                     1: MD_TEXTUAL@41..42
                       0: MD_TEXTUAL_LITERAL@41..42 "\n" [] []
-                  1: (empty)
             1: MD_NEWLINE@42..43
               0: NEWLINE@42..43 "\n" [] []
         1: MD_BULLET@43..51
@@ -221,7 +203,6 @@ MdDocument {
                   0: MD_TEXTUAL_LITERAL@45..50 "after" [] []
                 1: MD_TEXTUAL@50..51
                   0: MD_TEXTUAL_LITERAL@50..51 "\n" [] []
-              1: (empty)
-  2: EOF@51..51 "" [] []
+  3: EOF@51..51 "" [] []
 
 ```

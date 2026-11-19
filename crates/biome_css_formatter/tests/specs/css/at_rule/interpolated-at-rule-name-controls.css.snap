@@ -1,0 +1,39 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/at_rule/interpolated-at-rule-name-controls.css
+---
+
+# Input
+
+```css
+@custom-theme   token;
+@unknown#token{color:red;}
+@unknown#{color:red;}
+@unknown   token{.item{color:red;}}
+@media(color){.item{color:red;}}
+
+```
+
+
+# Formatted
+
+```css
+@custom-theme token;
+@unknown #token {
+	color: red;
+}
+@unknown # {
+	color: red;
+}
+@unknown token {
+	.item {
+		color: red;
+	}
+}
+@media (color) {
+	.item {
+		color: red;
+	}
+}
+
+```

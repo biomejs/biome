@@ -119,7 +119,10 @@ impl Rule for NoUselessRename {
             markup! {
                 "Useless rename."
             },
-        ))
+        )
+        .note(markup! {
+            "Renaming a name to the same name has no effect."
+        }))
     }
 
     fn action(ctx: &RuleContext<Self>, _: &Self::State) -> Option<JsRuleAction> {

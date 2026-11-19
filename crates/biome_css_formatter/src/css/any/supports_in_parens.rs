@@ -12,6 +12,8 @@ impl FormatRule<AnyCssSupportsInParens> for FormatAnyCssSupportsInParens {
             AnyCssSupportsInParens::CssSupportsConditionInParens(node) => node.format().fmt(f),
             AnyCssSupportsInParens::CssSupportsFeatureDeclaration(node) => node.format().fmt(f),
             AnyCssSupportsInParens::CssSupportsFeatureSelector(node) => node.format().fmt(f),
+            AnyCssSupportsInParens::ScssSupportsFeatureDeclaration(node) => node.format().fmt(f),
+            AnyCssSupportsInParens::ScssSupportsInterpolatedCondition(node) => node.format().fmt(f),
         }
     }
 }

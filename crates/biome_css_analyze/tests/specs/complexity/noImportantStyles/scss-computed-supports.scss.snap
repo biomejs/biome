@@ -1,0 +1,14 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: scss-computed-supports.scss
+---
+# Input
+```css
+/* should not generate diagnostics */
+@supports (!important: a) { .name { color: red; } }
+@supports (!important + "-name": a) { .expression { color: red; } }
+@supports (foo !important: a) { .list { color: red; } }
+@import "bare.css" supports(!important: a);
+@import "grouped.css" supports((!important: a));
+
+```

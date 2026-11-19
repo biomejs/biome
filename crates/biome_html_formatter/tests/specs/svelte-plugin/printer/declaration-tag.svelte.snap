@@ -1,0 +1,61 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: printer/declaration-tag.svelte
+---
+
+# Input
+
+```svelte
+{#each boxes as box}
+    {const area = box.width * box.height}
+    {const label = (value) => `${value} square pixels`}
+    <p>{label(area)}</p>
+{/each}
+
+{#if user}
+    {let name = $state(user.name)}
+    {let greeting = $derived(`Hello ${name}`)}
+    <input bind:value={name} />
+    <p>{greeting}</p>
+{/if}
+
+<Component>
+    {let value = getValue()}
+</Component>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -11,6 +11,4 @@
+     <p>{greeting}</p>
+ {/if}
+ 
+-<Component>
+-    {let value = getValue()}
+-</Component>
++<Component> {let value = getValue()} </Component>
+```
+
+# Output
+
+```svelte
+{#each boxes as box}
+    {const area = box.width * box.height}
+    {const label = (value) => `${value} square pixels`}
+    <p>{label(area)}</p>
+{/each}
+
+{#if user}
+    {let name = $state(user.name)}
+    {let greeting = $derived(`Hello ${name}`)}
+    <input bind:value={name} />
+    <p>{greeting}</p>
+{/if}
+
+<Component> {let value = getValue()} </Component>
+```

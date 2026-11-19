@@ -1,0 +1,61 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/flow/bracket_spacing/disabled/comments.yaml
+---
+
+# Input
+
+```yaml
+mapping: {
+  # before
+  first: 1, # between
+  second: 2
+  # after
+}
+sequence: [
+  # before
+  first, # between
+  second
+  # after
+]
+empty_mapping: { } # empty
+empty_sequence: [ ] # empty
+
+```
+
+
+# Options
+
+```json
+{
+  "formatter": {
+    "lineWidth": 40,
+    "bracketSpacing": true
+  },
+  "yaml": {
+    "formatter": {
+      "bracketSpacing": false
+    }
+  }
+}
+```
+
+# Formatted
+
+```yaml
+mapping: {
+    # before
+    first: 1, # between
+    second: 2,
+    # after
+  }
+sequence: [
+    # before
+    first, # between
+    second,
+    # after
+  ]
+empty_mapping: {} # empty
+empty_sequence: [] # empty
+
+```

@@ -37,6 +37,10 @@ invalid.jsx:2:8 lint/suspicious/noDuplicateJsxProps ━━━━━━━━━�
     3 │ 
     4 │ //Case where property is repeated more than twice
   
+  i Only the last assignment takes effect. The earlier values are silently ignored.
+  
+  i Remove the duplicated property, or rename it if you meant a different property.
+  
 
 ```
 
@@ -67,6 +71,10 @@ invalid.jsx:5:8 lint/suspicious/noDuplicateJsxProps ━━━━━━━━━�
     6 │ 
     7 │ //Case with two duplicates
   
+  i Only the last assignment takes effect. The earlier values are silently ignored.
+  
+  i Remove the duplicated property, or rename it if you meant a different property.
+  
 
 ```
 
@@ -88,6 +96,10 @@ invalid.jsx:8:8 lint/suspicious/noDuplicateJsxProps ━━━━━━━━━�
        │                    ^^^^^^^^^^^
      9 │ 
     10 │ <label xml:lang="en-US" xml:lang="en-US"></label>
+  
+  i Only the last assignment takes effect. The earlier values are silently ignored.
+  
+  i Remove the duplicated property, or rename it if you meant a different property.
   
 
 ```
@@ -111,6 +123,10 @@ invalid.jsx:8:32 lint/suspicious/noDuplicateJsxProps ━━━━━━━━━
      9 │ 
     10 │ <label xml:lang="en-US" xml:lang="en-US"></label>
   
+  i Only the last assignment takes effect. The earlier values are silently ignored.
+  
+  i Remove the duplicated property, or rename it if you meant a different property.
+  
 
 ```
 
@@ -132,6 +148,10 @@ invalid.jsx:10:8 lint/suspicious/noDuplicateJsxProps ━━━━━━━━━
   > 10 │ <label xml:lang="en-US" xml:lang="en-US"></label>
        │                         ^^^^^^^^^^^^^^^^
     11 │ 
+  
+  i Only the last assignment takes effect. The earlier values are silently ignored.
+  
+  i Remove the duplicated property, or rename it if you meant a different property.
   
 
 ```

@@ -1,0 +1,81 @@
+/* should not generate diagnostics */
+function plainLoop(items: string[]) {
+	for (const item of items) {}
+}
+
+for (const item of (Iterator as typeof Iterator).from(items).map(callback)) {}
+for (const item of (Iterator.from(items) as Iterator<string>).map(callback)) {}
+for (const item of (items as Iterator<string>).map(callback)) {}
+for (const item of (<Generator<string>>items).filter(callback)) {}
+for (const item of (items satisfies IteratorObject<string>).map(callback)) {}
+for (const item of items.values()!.map(callback)) {}
+
+function iteratorParameter(iterator: Iterator<string>) {
+	for (const item of iterator.map(callback)) {}
+}
+
+function nullableParameter(iterator: IteratorObject<string> | undefined) {
+	for (const item of iterator!.map(callback)) {}
+}
+
+function parenthesizedNullableParameter(iterator: (ArrayIterator<string> | null)) {
+	for (const item of iterator!.filter(callback)) {}
+}
+
+function optionalParameter(iterator?: MapIterator<string>) {
+	for (const item of iterator!.filter(callback)) {}
+}
+
+function iteratorUnion(iterator: SetIterator<string> | StringIterator<string>) {
+	for (const item of iterator.map(callback)) {}
+}
+
+function annotatedVariable(set: Set<string>) {
+	let iterator: SetIterator<string> = set.values();
+	for (const item of iterator.map(callback)) {}
+}
+
+function constantAssertion(source: unknown) {
+	const iterator = source as RegExpStringIterator<RegExpExecArray>;
+	for (const item of iterator.map(callback)) {}
+}
+
+function iteratorReturnType() {
+	function create(): IterableIterator<string> {
+		return items.values();
+	}
+	for (const item of create().map(callback)) {}
+}
+
+function iteratorArrowReturnType() {
+	const create = (): ArrayIterator<string> => items.values();
+	for (const item of create().filter(callback)) {}
+}
+
+function genericIteratorReturnType() {
+	function create<T>(source: T[]): Generator<T> {
+		return source.values() as Generator<T>;
+	}
+	for (const item of create(items).map(callback)) {}
+}
+
+type Rows = IterableIterator<string>;
+type NullableRows = Rows | null;
+
+function typeAlias(rows: Rows) {
+	for (const row of rows.map(callback)) {}
+}
+
+function nullableTypeAlias(rows: NullableRows) {
+	for (const row of rows!.filter(callback)) {}
+}
+
+function constrainedTypeParameter<T extends Iterator<string>>(iterator: T) {
+	for (const item of iterator.map(callback)) {}
+}
+
+class PropertyParameter {
+	constructor(private iterator: Iterator<string>) {
+		for (const item of iterator.filter(callback)) {}
+	}
+}

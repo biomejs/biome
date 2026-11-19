@@ -21,6 +21,13 @@ $value * $ratio;
 result:var(--highlight,#{$highlight});
 }
 
+$function-name: highlight;
+
+@function
+--#{$function-name}  ( ) {
+result: red;
+}
+
 ```
 
 
@@ -33,6 +40,12 @@ result:var(--highlight,#{$highlight});
 
 @function --highlight() {
 	result: var(--highlight, #{$highlight});
+}
+
+$function-name: highlight;
+
+@function --#{$function-name}() {
+	result: red;
 }
 
 ```

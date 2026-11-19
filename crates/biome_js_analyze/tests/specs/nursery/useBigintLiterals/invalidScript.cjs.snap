@@ -1,0 +1,65 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidScript.cjs
+---
+# Input
+```cjs
+BigInt(0777);
+BigInt(0888);
+BigInt(00);
+
+```
+
+# Diagnostics
+```
+invalidScript.cjs:1:1 lint/nursery/useBigintLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This BigInt() call can be replaced with a bigint literal.
+  
+  > 1 │ BigInt(0777);
+      │ ^^^^^^^^^^^^
+    2 │ BigInt(0888);
+    3 │ BigInt(00);
+  
+  i A bigint literal with the n suffix is more concise, and it is evaluated at parse time instead of being converted at runtime.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidScript.cjs:2:1 lint/nursery/useBigintLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This BigInt() call can be replaced with a bigint literal.
+  
+    1 │ BigInt(0777);
+  > 2 │ BigInt(0888);
+      │ ^^^^^^^^^^^^
+    3 │ BigInt(00);
+    4 │ 
+  
+  i A bigint literal with the n suffix is more concise, and it is evaluated at parse time instead of being converted at runtime.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidScript.cjs:3:1 lint/nursery/useBigintLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This BigInt() call can be replaced with a bigint literal.
+  
+    1 │ BigInt(0777);
+    2 │ BigInt(0888);
+  > 3 │ BigInt(00);
+      │ ^^^^^^^^^^
+    4 │ 
+  
+  i A bigint literal with the n suffix is more concise, and it is evaluated at parse time instead of being converted at runtime.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

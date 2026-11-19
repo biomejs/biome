@@ -1,0 +1,7 @@
+/* should generate diagnostics */
+.compact {color: red;
+  display: block; // Display comment.
+}
+
+.trailing {color: red; // Color comment.
+  display: block;}

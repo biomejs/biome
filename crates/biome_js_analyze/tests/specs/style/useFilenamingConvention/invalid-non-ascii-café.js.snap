@@ -13,7 +13,9 @@ invalid-non-ascii-café.js lint/style/useFilenamingConvention ━━━━━━
 
   i The filename should be in ASCII because requireAscii is set to `true`.
   
-  i If you want to use non-ASCII filenames, then set the requireAscii option to `false`.
+  i Non-ASCII characters in filenames can be handled differently by operating systems, file systems, and tools.
+  
+  i Rename the file using only ASCII characters. If you want to use non-ASCII filenames, then set the requireAscii option to `false`.
     See the rule options for more details.
   
 

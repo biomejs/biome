@@ -10,7 +10,7 @@ use grit_pattern_matcher::pattern::{
     ResolvedPattern, State,
 };
 use grit_util::error::GritResult;
-use grit_util::{AnalysisLogs, AstNode, Language};
+use grit_util::{AnalysisLogs, Language};
 
 /// Check if two syntax kinds are compatible for import pattern matching
 fn are_import_kinds_compatible(
@@ -56,6 +56,67 @@ pub struct GritNodePattern {
     pub args: Vec<GritNodePatternArg>,
 }
 
+/// Returns whether a node is a separator token that may trail a list.
+fn is_list_separator(node: &GritTargetNode<'_>) -> bool {
+    node.is_token() && matches!(node.text(), "," | ";")
+}
+
+impl GritNodePattern {
+    /// Matches each argument against the corresponding child slot of a list.
+    fn execute_list<'a>(
+        &'a self,
+        node: &GritTargetNode<'a>,
+        init_state: &mut State<'a, GritQueryContext>,
+        context: &'a GritExecContext,
+        logs: &mut AnalysisLogs,
+    ) -> GritResult<bool> {
+        if node.kind() != self.kind {
+            return Ok(false);
+        }
+
+        // A list pattern describes the listed nodes. Extra trailing separators,
+        // such as the comma in `function f(a, b,)`, are allowed.
+        let Some(slot_count) = node.slots().map(Iterator::count) else {
+            return Ok(false);
+        };
+        let last_matched_slot = self
+            .args
+            .iter()
+            .map(|arg| arg.slot_index)
+            .max()
+            .map_or(0, |index| index as usize + 1);
+        for index in last_matched_slot..slot_count {
+            if node
+                .child_by_slot_index(index as u32)
+                .is_none_or(|child| !is_list_separator(&child))
+            {
+                return Ok(false);
+            }
+        }
+
+        let mut running_state = init_state.clone();
+        for arg in &self.args {
+            let Some(child) = node.child_by_slot_index(arg.slot_index) else {
+                return Ok(false);
+            };
+
+            let mut cur_state = running_state.clone();
+            let child_binding = GritResolvedPattern::from_node_binding(child);
+            if arg
+                .pattern
+                .execute(&child_binding, &mut cur_state, context, logs)?
+            {
+                running_state = cur_state;
+            } else {
+                return Ok(false);
+            }
+        }
+
+        *init_state = running_state;
+        Ok(true)
+    }
+}
+
 impl AstNodePattern<GritQueryContext> for GritNodePattern {
     const INCLUDES_TRIVIA: bool = true;
 
@@ -85,17 +146,16 @@ impl Matcher<GritQueryContext> for GritNodePattern {
         let Some(binding) = binding.get_last_binding() else {
             return Ok(false);
         };
+        // Single-child lists are unwrapped to their child. Multi-child lists
+        // are matched as a sequence by `execute_list`.
         let Some(node) = binding.singleton() else {
-            return Ok(false);
+            return match binding.as_node() {
+                Some(node) if node.is_list() && context.node_selector => {
+                    self.execute_list(&node, init_state, context, logs)
+                }
+                _ => Ok(false),
+            };
         };
-        if binding.is_list() {
-            return self.execute(
-                &ResolvedPattern::from_node_binding(node),
-                init_state,
-                context,
-                logs,
-            );
-        }
 
         // Check if we need to handle import structure transformation
         let needs_import_transformation = self.is_import_transformation_needed(node.kind());
@@ -153,7 +213,7 @@ impl Matcher<GritQueryContext> for GritNodePattern {
                 let source_slot = match (pattern_js_kind, node_js_kind, slot_index) {
                     // type_token, phase_token
                     (JS_IMPORT_DEFAULT_CLAUSE, JS_IMPORT_NAMED_CLAUSE, 0 | 1) => None,
-                    // default_specifier -> first named specifier
+                    // default_specifier -> named_specifiers
                     (JS_IMPORT_DEFAULT_CLAUSE, JS_IMPORT_NAMED_CLAUSE, 2) => Some(1),
                     // from_token, source, assertion
                     (JS_IMPORT_DEFAULT_CLAUSE, JS_IMPORT_NAMED_CLAUSE, 3..=5) => {
@@ -173,18 +233,6 @@ impl Matcher<GritQueryContext> for GritNodePattern {
 
                 match source_slot {
                     None => GritResolvedPattern::from_empty_binding(node.clone(), *slot_index),
-                    Some(1)
-                        if pattern_js_kind == JS_IMPORT_DEFAULT_CLAUSE
-                            && node_js_kind == JS_IMPORT_NAMED_CLAUSE =>
-                    {
-                        // Special case: default_specifier -> first named specifier
-                        node.child_by_slot_index(1)
-                            .and_then(|specifiers| specifiers.children().next())
-                            .map_or(
-                                GritResolvedPattern::from_empty_binding(node.clone(), *slot_index),
-                                GritResolvedPattern::from_node_binding,
-                            )
-                    }
                     Some(source) => get_child(source),
                 }
             } else {

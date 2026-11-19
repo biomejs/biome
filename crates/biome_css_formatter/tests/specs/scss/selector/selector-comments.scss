@@ -1,0 +1,6 @@
+[href]:hover &,// hover
+[href]:focus &,// focus
+[href]:active &{.tooltip{opacity:1;}}
+
+.powerPathNavigator .helm button.pressedButton,// pressed
+.powerPathNavigator .helm button:active:not(.disabledButton){}

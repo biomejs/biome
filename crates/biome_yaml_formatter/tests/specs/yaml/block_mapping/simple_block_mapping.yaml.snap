@@ -21,9 +21,3 @@ b: hello
 c: true
 
 ```
-
-
-
-## Unimplemented nodes/tokens
-
-"a: 10\nb: hello\nc: true\n" => 0..23

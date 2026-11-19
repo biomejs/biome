@@ -4,19 +4,23 @@ mod pseudo_class;
 mod pseudo_element;
 pub(crate) mod relative_selector;
 
-use super::{is_nth_at_metavariable, parse_metavariable};
+use super::is_nth_at_metavariable;
 use crate::lexer::CssLexContext;
 use crate::parser::CssParser;
 use crate::syntax::parse_error::{
     expected_any_sub_selector, expected_compound_selector, expected_identifier, expected_selector,
+    scss_only_syntax_error,
 };
 use crate::syntax::scss::{
-    is_at_scss_interpolated_identifier, is_nth_at_scss_interpolated_identifier,
-    is_nth_at_scss_placeholder_selector, parse_scss_placeholder_selector,
+    is_at_scss_interpolated_selector_identifier, is_at_scss_interpolation,
+    is_nth_at_scss_interpolated_selector_identifier, is_nth_at_scss_placeholder_selector,
+    is_nth_source_tight, parse_scss_interpolated_sub_selector, parse_scss_placeholder_selector,
     parse_scss_selector_custom_identifier, parse_scss_selector_identifier,
 };
 use crate::syntax::selector::attribute::parse_attribute_selector;
-use crate::syntax::selector::nested_selector::NestedSelectorList;
+use crate::syntax::selector::nested_selector::{
+    NestedSelectorList, parse_nested_selector_as_sub_selector,
+};
 use crate::syntax::selector::pseudo_class::parse_pseudo_class_selector;
 pub(crate) use crate::syntax::selector::pseudo_class::{
     PSEUDO_CLASS_NTH_SIGN_SET, PseudoValueList, is_at_pseudo_class_nth_argument,
@@ -46,10 +50,13 @@ use biome_parser::{CompletedMarker, Parser, ParserProgress, SyntaxFeature, Token
 /// around combinators in CSS selectors.
 const SELECTOR_LEX_SET: TokenSet<CssSyntaxKind> =
     COMPLEX_SELECTOR_COMBINATOR_SET.union(token_set![T!['{'], T![,], T![')'], T![!], T![;], EOF]);
-#[inline]
 pub(crate) fn selector_lex_context(p: &mut CssParser) -> CssLexContext {
     // It's an inverted logic for `is_nth_at_selector(p, 1)`.
-    if p.nth_at_ts(1, SELECTOR_LEX_SET) {
+    let next = p.nth(1);
+    // Trailing `@extend` whitespace belongs to the statement boundary.
+    let is_scss_statement_boundary =
+        token_set![T!['}'], T![@]].contains(next) && CssSyntaxFeatures::Scss.is_supported(p);
+    if SELECTOR_LEX_SET.contains(next) || is_scss_statement_boundary {
         CssLexContext::Regular
     } else {
         CssLexContext::Selector
@@ -60,6 +67,7 @@ pub(crate) struct SelectorList {
     end_kind_ts: TokenSet<CssSyntaxKind>,
     recovery_ts: TokenSet<CssSyntaxKind>,
     is_recovery_disabled: bool,
+    is_partial_combinator_nesting_allowed: bool,
 }
 
 impl Default for SelectorList {
@@ -68,11 +76,24 @@ impl Default for SelectorList {
             end_kind_ts: token_set!(T!['{']),
             recovery_ts: token_set![T!['{']],
             is_recovery_disabled: false,
+            is_partial_combinator_nesting_allowed: false,
         }
     }
 }
 
 impl SelectorList {
+    /// Allows partial combinators immediately before an SCSS style-rule block.
+    ///
+    /// ```scss
+    /// .sidebar > {
+    ///   .error {}
+    /// }
+    /// ```
+    pub(crate) fn allow_partial_combinator_nesting(mut self) -> Self {
+        self.is_partial_combinator_nesting_allowed = true;
+        self
+    }
+
     /// Configures the `SelectorList` with a specified token set to indicate the end of the selector list.
     ///
     /// This method allows setting a custom `TokenSet<CssSyntaxKind>` that determines the tokens
@@ -111,7 +132,11 @@ impl ParseSeparatedList for SelectorList {
     const LIST_KIND: Self::Kind = CSS_SELECTOR_LIST;
 
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
-        parse_selector(p)
+        if self.is_partial_combinator_nesting_allowed {
+            parse_style_rule_selector(p)
+        } else {
+            parse_selector(p)
+        }
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
@@ -207,35 +232,83 @@ impl ParseRecovery for SelectorListParseRecovery {
 /// the elements to which a set of CSS rules apply.
 #[inline]
 pub(crate) fn is_nth_at_selector(p: &mut CssParser, n: usize) -> bool {
-    is_nth_at_compound_selector(p, n) || is_nth_at_metavariable(p, n)
+    is_nth_at_compound_selector(p, n)
 }
 
 /// Parses a CSS selector.
 ///
-/// This function attempts to parse a CSS selector, which may be either a compound selector
-/// or a complex selector. Compound selectors are simple, unseparated chains of simple selectors,
-/// whereas complex selectors are compound selectors separated by combinators.
+/// A selector is either a compound selector, which chains simple selectors
+/// without combinators, or a complex selector, which joins compound selectors
+/// with combinators.
 ///
-/// Initially, the function tries to parse a compound selector. If successful, it then checks
-/// if this compound selector forms part of a complex selector and continues parsing accordingly.
+/// This entry point requires every combinator to have a right selector,
+/// including in SCSS selector consumers that do not parse style-rule preludes:
+///
+/// ```scss
+/// .selector:has(> .child) {}
+/// ```
 #[inline]
 pub(crate) fn parse_selector(p: &mut CssParser) -> ParsedSyntax {
+    parse_selector_with_partial_combinator_nesting(p, false)
+}
+
+/// Parses a selector in an SCSS style-rule prelude.
+///
+/// ```scss
+/// .sidebar > {
+///   .error {}
+/// }
+/// ```
+#[inline]
+fn parse_style_rule_selector(p: &mut CssParser) -> ParsedSyntax {
+    parse_selector_with_partial_combinator_nesting(p, true)
+}
+
+/// Parses a selector with the caller's style-rule partial-combinator setting.
+///
+/// ```scss
+/// .selector:has(> .child) {}
+///
+/// .sidebar > {
+///   .error {}
+/// }
+/// ```
+fn parse_selector_with_partial_combinator_nesting(
+    p: &mut CssParser,
+    is_partial_combinator_nesting_allowed: bool,
+) -> ParsedSyntax {
     if !is_nth_at_selector(p, 0) {
         return Absent;
     }
-    if is_nth_at_metavariable(p, 0) {
-        parse_metavariable(p)
-    } else {
-        // In CSS, we have compound selectors and complex selectors.
-        // Compound selectors are simple, unseparated chains of selectors,
-        // while complex selectors are compound selectors separated by combinators.
-        // After parsing the compound selector, it then checks if this compound selector is a part of a complex selector.
-        parse_compound_selector(p).and_then(|selector| parse_complex_selector(p, selector))
-    }
+
+    // Compound selectors are unseparated chains of simple selectors. A
+    // following combinator turns the result into a complex selector.
+    parse_compound_selector_or_metavariable(p).and_then(|selector| {
+        parse_complex_selector(p, selector, is_partial_combinator_nesting_allowed)
+    })
 }
 
 const COMPLEX_SELECTOR_COMBINATOR_SET: TokenSet<CssSyntaxKind> =
     token_set![T![>], T![+], T![~], T![||], CSS_SPACE_LITERAL];
+const SCSS_PARTIAL_COMBINATOR_SET: TokenSet<CssSyntaxKind> = token_set![T![>], T![+], T![~]];
+
+/// Returns whether an SCSS partial-combinator selector starts at the current token.
+///
+/// ```scss
+/// .sidebar > {
+///   .error {}
+/// }
+///
+/// .card {
+///   + {
+///     .media {}
+///   }
+/// }
+/// ```
+#[inline]
+fn is_at_scss_partial_combinator_selector(p: &mut CssParser) -> bool {
+    p.at_ts(SCSS_PARTIAL_COMBINATOR_SET) && p.nth_at(1, T!['{'])
+}
 
 /// Checks if the current or nth token in the parser is a complex selector combinator.
 ///
@@ -251,13 +324,24 @@ fn is_nth_at_complex_selector_combinator(p: &mut CssParser, n: usize) -> bool {
 ///
 /// This function attempts to parse a complex selector, which combines compound selectors
 /// through combinators like '>', '+', ' ', and '~'. These combinators express relationships
-/// between elements in the document tree.
+/// between elements in the document tree. The enabled SCSS style-rule path completes a
+/// trailing combinator as `ScssPartialCombinatorSelector`:
+///
+/// ```scss
+/// .sidebar > {
+///   .error {}
+/// }
+/// ```
 ///
 /// The function iterates over the tokens, parsing each complex selector combinator and
 /// its associated compound selector. Parsing continues until no more complex combinators
 /// are found, at which point it returns the completed complex selector.
 #[inline]
-fn parse_complex_selector(p: &mut CssParser, mut left: CompletedMarker) -> ParsedSyntax {
+fn parse_complex_selector(
+    p: &mut CssParser,
+    mut left: CompletedMarker,
+    is_partial_combinator_nesting_allowed: bool,
+) -> ParsedSyntax {
     let mut progress = ParserProgress::default();
 
     loop {
@@ -266,13 +350,72 @@ fn parse_complex_selector(p: &mut CssParser, mut left: CompletedMarker) -> Parse
         if is_nth_at_complex_selector_combinator(p, 0) {
             let complex_selector = left.precede(p);
 
-            p.bump_ts(COMPLEX_SELECTOR_COMBINATOR_SET);
-            parse_compound_selector(p).or_add_diagnostic(p, expected_compound_selector);
+            if is_partial_combinator_nesting_allowed && is_at_scss_partial_combinator_selector(p) {
+                return CssSyntaxFeatures::Scss.parse_exclusive_syntax(
+                    p,
+                    |p| {
+                        p.bump_ts(SCSS_PARTIAL_COMBINATOR_SET);
+                        Present(complex_selector.complete(p, SCSS_PARTIAL_COMBINATOR_SELECTOR))
+                    },
+                    |p, marker| {
+                        scss_only_syntax_error(
+                            p,
+                            "SCSS partial combinator selectors",
+                            marker.range(p),
+                        )
+                    },
+                );
+            } else {
+                p.bump_ts(COMPLEX_SELECTOR_COMBINATOR_SET);
+                parse_compound_selector_or_metavariable(p)
+                    .or_add_diagnostic(p, expected_compound_selector);
+            }
             left = complex_selector.complete(p, CSS_COMPLEX_SELECTOR)
         } else {
             return Present(left);
         }
     }
+}
+
+/// Parses a compound selector, or a Grit metavariable that stands for a whole
+/// compound selector.
+///
+/// A metavariable directly followed by a sub-selector is the simple selector
+/// of a compound selector instead:
+///
+/// ```css
+/// µselector > .child {}
+/// µtag:hover {}
+/// ```
+#[inline]
+fn parse_compound_selector_or_metavariable(p: &mut CssParser) -> ParsedSyntax {
+    let is_whole_selector = is_nth_at_metavariable(p, 0)
+        && !(p.nth_at_ts(1, SubSelectorList::START_SET) && is_nth_source_tight(p, 1));
+    if is_whole_selector {
+        parse_selector_metavariable(p)
+    } else {
+        parse_compound_selector(p)
+    }
+}
+
+/// Parses a Grit metavariable in a selector.
+///
+/// The selector lexing context keeps the whitespace after the metavariable as
+/// a descendant combinator:
+///
+/// ```css
+/// µparent .child {}
+/// ```
+#[inline]
+fn parse_selector_metavariable(p: &mut CssParser) -> ParsedSyntax {
+    if !is_nth_at_metavariable(p, 0) {
+        return Absent;
+    }
+
+    let m = p.start();
+    let context = selector_lex_context(p);
+    p.bump_with_context(GRIT_METAVARIABLE, context);
+    Present(m.complete(p, CSS_METAVARIABLE))
 }
 
 /// Determines if the current or nth token in the parser is at the start of a compound selector.
@@ -317,8 +460,9 @@ fn is_nth_at_simple_selector(p: &mut CssParser, n: usize) -> bool {
     is_nth_at_namespace(p, n)
         || p.nth_at(n, T![*])
         || is_nth_at_identifier(p, n)
-        || is_nth_at_scss_interpolated_identifier(p, n)
+        || is_nth_at_scss_interpolated_selector_identifier(p, n)
         || is_nth_at_scss_placeholder_selector(p, n)
+        || is_nth_at_metavariable(p, n)
 }
 
 /// Parses a simple selector in CSS.
@@ -332,8 +476,16 @@ fn parse_simple_selector(p: &mut CssParser) -> ParsedSyntax {
         return Absent;
     }
 
+    if is_nth_at_metavariable(p, 0) {
+        return parse_selector_metavariable(p);
+    }
+
     if is_nth_at_scss_placeholder_selector(p, 0) {
-        return parse_scss_placeholder_selector(p);
+        return CssSyntaxFeatures::Scss.parse_exclusive_syntax(
+            p,
+            parse_scss_placeholder_selector,
+            |p, marker| scss_only_syntax_error(p, "SCSS placeholder selectors", marker.range(p)),
+        );
     }
 
     let namespace = parse_namespace(p);
@@ -413,7 +565,7 @@ fn parse_namespace_prefix(p: &mut CssParser) -> ParsedSyntax {
 pub(crate) struct SubSelectorList;
 impl SubSelectorList {
     pub(crate) const START_SET: TokenSet<CssSyntaxKind> =
-        token_set![T![#], T![.], T![:], T![::], T!['[']];
+        token_set![T![#], T![.], T![:], T![::], T!['['], T![&], T![%]];
 }
 impl ParseNodeList for SubSelectorList {
     type Kind = CssSyntaxKind;
@@ -442,15 +594,31 @@ impl ParseNodeList for SubSelectorList {
 ///
 /// This function is responsible for identifying and parsing different types of sub-selectors
 /// based on the current token in the CSS parser. It dispatches to specific parsing functions
-/// for class selectors, ID selectors, attribute selectors, pseudo-classes, and pseudo-elements.
+/// for class selectors, ID selectors, attribute selectors, pseudo-classes, pseudo-elements,
+/// and the nesting selector (`&`), e.g. the trailing `&` in `h1&`.
+/// In SCSS, an interpolation can follow a completed component, as in `.card[data-state]#{$suffix}`.
+/// Placeholders can also follow other components, as in `%a%b` or `.card%a`.
 #[inline]
 fn parse_sub_selector(p: &mut CssParser) -> ParsedSyntax {
     match p.cur() {
         T![.] => parse_class_selector(p),
+        T![#] if is_at_scss_interpolation(p) => CssSyntaxFeatures::Scss.parse_exclusive_syntax(
+            p,
+            parse_scss_interpolated_sub_selector,
+            |p, marker| {
+                scss_only_syntax_error(p, "SCSS interpolated subselectors", marker.range(p))
+            },
+        ),
         T![#] => parse_id_selector(p),
         T!['['] => parse_attribute_selector(p),
         T![:] => parse_pseudo_class_selector(p),
         T![::] => parse_pseudo_element_selector(p),
+        T![&] => parse_nested_selector_as_sub_selector(p),
+        T![%] => CssSyntaxFeatures::Scss.parse_exclusive_syntax(
+            p,
+            parse_scss_placeholder_selector,
+            |p, marker| scss_only_syntax_error(p, "SCSS placeholder selectors", marker.range(p)),
+        ),
         _ => Absent,
     }
 }
@@ -469,7 +637,12 @@ pub(crate) fn parse_class_selector(p: &mut CssParser) -> ParsedSyntax {
     let m = p.start();
 
     p.bump(T![.]);
-    parse_selector_custom_identifier(p).or_add_diagnostic(p, expected_identifier);
+    if is_nth_at_metavariable(p, 0) {
+        parse_selector_metavariable(p)
+    } else {
+        parse_selector_custom_identifier(p)
+    }
+    .or_add_diagnostic(p, expected_identifier);
 
     Present(m.complete(p, CSS_CLASS_SELECTOR))
 }
@@ -533,7 +706,7 @@ fn parse_type_selector(p: &mut CssParser, namespace: ParsedSyntax) -> ParsedSynt
 /// callers still own the surrounding selector node.
 #[inline]
 fn is_at_selector_identifier(p: &mut CssParser) -> bool {
-    is_at_identifier(p) || is_at_scss_interpolated_identifier(p)
+    is_at_identifier(p) || is_at_scss_interpolated_selector_identifier(p)
 }
 
 /// Parses an identifier within a selector context in CSS.
@@ -545,6 +718,14 @@ fn is_at_selector_identifier(p: &mut CssParser) -> bool {
 fn parse_selector_identifier(p: &mut CssParser) -> ParsedSyntax {
     if CssSyntaxFeatures::Scss.is_supported(p) {
         parse_scss_selector_identifier(p)
+    } else if is_at_scss_interpolated_selector_identifier(p) {
+        CssSyntaxFeatures::Scss.parse_exclusive_syntax(
+            p,
+            parse_scss_selector_identifier,
+            |p, marker| {
+                scss_only_syntax_error(p, "SCSS interpolated selector names", marker.range(p))
+            },
+        )
     } else {
         parse_selector_identifier_fragment(p)
     }
@@ -563,6 +744,14 @@ pub(crate) fn parse_selector_identifier_fragment(p: &mut CssParser) -> ParsedSyn
 pub(crate) fn parse_selector_custom_identifier(p: &mut CssParser) -> ParsedSyntax {
     if CssSyntaxFeatures::Scss.is_supported(p) {
         parse_scss_selector_custom_identifier(p)
+    } else if is_at_scss_interpolated_selector_identifier(p) {
+        CssSyntaxFeatures::Scss.parse_exclusive_syntax(
+            p,
+            parse_scss_selector_custom_identifier,
+            |p, marker| {
+                scss_only_syntax_error(p, "SCSS interpolated selector names", marker.range(p))
+            },
+        )
     } else {
         parse_selector_custom_identifier_fragment(p)
     }

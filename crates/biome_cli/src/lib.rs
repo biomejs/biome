@@ -9,15 +9,18 @@
 #![deny(clippy::use_self)]
 
 use biome_console::{ColorMode, Console};
+use biome_flags::{Environment, OsEnvironment};
 use biome_service::{App, Workspace, WorkspaceRef};
 use commands::search::SearchCommandPayload;
 use std::env;
+use std::sync::Arc;
 
 mod changed;
 mod cli_options;
 mod commands;
 mod diagnostics;
 mod execute;
+mod install_source;
 mod logging;
 mod panic;
 pub(crate) mod reporter;
@@ -32,9 +35,12 @@ use crate::commands::lint::LintCommandPayload;
 use crate::commands::migrate::MigrateCommandPayload;
 pub use crate::commands::{BiomeCommand, biome_command};
 pub use crate::logging::{LoggingLevel, setup_cli_subscriber};
+use crate::runner::execution::ExecutionEnvironment;
 use crate::runner::impls::commands::custom_execution::CustomExecutionCmdImpl;
 use crate::runner::impls::commands::traversal::TraversalCommandImpl;
+pub use crate::runner::impls::watchers::mock::MockWatcher;
 use crate::runner::run::run_command;
+pub use crate::runner::watcher::{Watcher, WatcherEvent};
 pub use diagnostics::CliDiagnostic;
 pub use panic::setup_panic_handler;
 pub use reporter::{DiagnosticsPayload, TraversalSummary};
@@ -49,6 +55,11 @@ pub(crate) const VERSION: &str = match option_env!("BIOME_VERSION") {
 pub struct CliSession<'app> {
     /// Instance of [App] used by this run of the CLI
     pub app: App<'app>,
+
+    pub watcher_factory: Option<Box<dyn Fn() -> Box<dyn Watcher> + Send + Sync>>,
+
+    /// The environment variables that commands read through [Environment].
+    pub environment: Arc<dyn Environment>,
 }
 
 impl<'app> CliSession<'app> {
@@ -58,6 +69,8 @@ impl<'app> CliSession<'app> {
     ) -> Result<Self, CliDiagnostic> {
         Ok(Self {
             app: App::new(console, WorkspaceRef::Borrowed(workspace)),
+            watcher_factory: None,
+            environment: Arc::new(OsEnvironment),
         })
     }
 
@@ -65,8 +78,9 @@ impl<'app> CliSession<'app> {
     pub fn run(self, command: BiomeCommand) -> Result<(), CliDiagnostic> {
         match command {
             BiomeCommand::Version(_) => commands::version::full_version(self),
-            BiomeCommand::Rage(_, _, daemon_logs, formatter, linter) => {
-                commands::rage::rage(self, daemon_logs, formatter, linter)
+            BiomeCommand::Upgrade => commands::upgrade::upgrade(self),
+            BiomeCommand::Rage(cli_options, _, daemon_logs, formatter, linter) => {
+                commands::rage::rage(self, &cli_options, daemon_logs, formatter, linter)
             }
             BiomeCommand::Clean => commands::clean::clean(self),
             BiomeCommand::Start {
@@ -92,10 +106,13 @@ impl<'app> CliSession<'app> {
                 format_with_errors,
                 json_parser,
                 css_parser,
+                markdown_parser,
                 log_options,
                 only,
                 skip,
+                watch,
                 profile_rules,
+                profile_type_inference,
             } => run_command(
                 self,
                 &log_options,
@@ -117,9 +134,12 @@ impl<'app> CliSession<'app> {
                     format_with_errors,
                     json_parser,
                     css_parser,
+                    markdown_parser,
                     only,
                     skip,
                     profile_rules,
+                    profile_type_inference,
+                    watch,
                 }),
             ),
             BiomeCommand::Lint {
@@ -145,8 +165,13 @@ impl<'app> CliSession<'app> {
                 graphql_linter,
                 css_parser,
                 json_parser,
+                markdown_linter,
+                markdown_analyze_embeds,
+                markdown_parser,
                 log_options,
                 profile_rules,
+                profile_type_inference,
+                watch,
             } => run_command(
                 self,
                 &log_options,
@@ -171,9 +196,14 @@ impl<'app> CliSession<'app> {
                     javascript_linter,
                     json_linter,
                     graphql_linter,
+                    markdown_linter,
+                    markdown_analyze_embeds,
+                    markdown_parser,
                     css_parser,
                     json_parser,
                     profile_rules,
+                    profile_type_inference,
+                    watch,
                 }),
             ),
             BiomeCommand::Ci {
@@ -193,26 +223,30 @@ impl<'app> CliSession<'app> {
                 only,
                 skip,
                 ..
-            } => run_command(
-                self,
-                &log_options,
-                &cli_options,
-                TraversalCommandImpl(CiCommandPayload {
-                    linter_enabled,
-                    formatter_enabled,
-                    assist_enabled,
-                    enforce_assist,
-                    configuration,
-                    paths,
-                    changed,
-                    since,
-                    format_with_errors,
-                    css_parser,
-                    json_parser,
-                    only,
-                    skip,
-                }),
-            ),
+            } => {
+                let environment = ExecutionEnvironment::from_environment(self.environment.as_ref());
+                run_command(
+                    self,
+                    &log_options,
+                    &cli_options,
+                    TraversalCommandImpl(CiCommandPayload {
+                        linter_enabled,
+                        formatter_enabled,
+                        assist_enabled,
+                        enforce_assist,
+                        configuration,
+                        paths,
+                        changed,
+                        since,
+                        format_with_errors,
+                        css_parser,
+                        json_parser,
+                        only,
+                        skip,
+                        environment,
+                    }),
+                )
+            }
             BiomeCommand::Format {
                 javascript_formatter,
                 formatter_configuration,
@@ -233,6 +267,9 @@ impl<'app> CliSession<'app> {
                 css_parser,
                 json_parser,
                 log_options,
+                watch,
+                markdown_formatter,
+                yaml_formatter,
             } => run_command(
                 self,
                 &log_options,
@@ -246,6 +283,8 @@ impl<'app> CliSession<'app> {
                     paths,
                     vcs_configuration,
                     files_configuration,
+                    markdown_formatter,
+                    yaml_formatter,
                     json_formatter,
                     css_formatter,
                     graphql_formatter,
@@ -255,10 +294,15 @@ impl<'app> CliSession<'app> {
                     since,
                     css_parser,
                     json_parser,
+                    watch,
                 }),
             ),
             BiomeCommand::Explain { doc } => commands::explain::explain(self, doc),
-            BiomeCommand::Init(emit_jsonc) => commands::init::init(self, emit_jsonc),
+            BiomeCommand::Init { jsonc, git } => commands::init::init(self, jsonc, git),
+            BiomeCommand::Inspect {
+                cli_options,
+                sub_command,
+            } => commands::inspect::inspect(self, &cli_options, sub_command),
             BiomeCommand::LspProxy {
                 watcher_options,
                 stdio: _,

@@ -8,7 +8,7 @@ pub struct NoJsxLiteralsOptions {
     #[serde(skip_serializing_if = "Option::<_>::is_none")]
     pub no_strings: Option<bool>,
 
-    /// An array of strings that won't trigger the rule. Whitespaces are taken into consideration
+    /// An array of strings that won't trigger the rule. Surrounding whitespace is ignored.
     #[serde(skip_serializing_if = "Option::<_>::is_none")]
     pub allowed_strings: Option<Box<[Box<str>]>>,
 

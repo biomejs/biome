@@ -1,0 +1,33 @@
+@use "sass:list";
+@use "sass:map";
+@use "sass:string";
+
+$mode: without;
+$rules: media supports;
+$query: "without: rule";
+
+@function root-query($options) {
+  @return map.get($options, query);
+}
+
+.namespace {
+  @at-root (root-query((query: "without: rule", nested: (key: value)))) {
+    .from-map { color: red; }
+  }
+  @at-root (($query)) {
+    .parenthesized { color: blue; }
+  }
+}
+
+@at-root (map.get((mode: without), mode): list.join(media, supports)) {
+  .functions { color: green; }
+}
+@at-root (#{string.unquote("without")}: #{$rules}) {
+  .interpolated { color: purple; }
+}
+@at-root ($mode: (media supports)) {
+  .variable-modifier { color: orange; }
+}
+@at-root ("without": "media") {
+  .quoted { color: black; }
+}

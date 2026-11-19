@@ -1,0 +1,307 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidBuffer.js
+---
+# Input
+```js
+/* should generate diagnostics */
+import { readFile } from "node:fs/promises";
+
+async function direct() {
+	JSON.parse(await fs.readFile("./package.json", "utf8"));
+	JSON.parse(fs.readFileSync("./package.json", "utf-8"));
+	JSON.parse(fs.readFileSync("./package.json", "UTF8"));
+	JSON.parse(await fs.readFile("./package.json", `utf8`));
+	JSON.parse(await fs.readFile("./package.json", { encoding: "utf8" }));
+	JSON.parse(await readFile("./package.json", "utf8"));
+}
+
+async function throughVariables() {
+	const promise = fs.readFile("./package.json", "utf8");
+	JSON.parse(await promise);
+}
+
+async function trailingComma() {
+	JSON.parse(
+		await fs.readFile(
+			"./package.json",
+			"utf8",
+		),
+	);
+}
+
+async function noFix() {
+	// The comments would be lost.
+	JSON.parse(await fs.readFile("./package.json", /* string */ "utf8"));
+	JSON.parse(await fs.readFile("./package.json", { /* string */ encoding: "utf8" }));
+	JSON.parse(await fs.readFile("./package.json", // string
+		"utf8"));
+}
+
+```
+
+# Diagnostics
+```
+invalidBuffer.js:5:49 lint/nursery/useConsistentJsonFileRead  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This JSON file is read as a string, but this project reads JSON files as Buffers.
+  
+    4 │ async function direct() {
+  > 5 │ 	JSON.parse(await fs.readFile("./package.json", "utf8"));
+      │ 	                                               ^^^^^^
+    6 │ 	JSON.parse(fs.readFileSync("./package.json", "utf-8"));
+    7 │ 	JSON.parse(fs.readFileSync("./package.json", "UTF8"));
+  
+  i JSON.parse() turns a Buffer into a string using UTF-8 automatically, so the encoding isn't needed.
+  
+  i Remove the encoding.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the encoding.
+  
+    5 │ → JSON.parse(await·fs.readFile("./package.json",·"utf8"));
+      │                                                --------   
+
+```
+
+```
+invalidBuffer.js:6:47 lint/nursery/useConsistentJsonFileRead  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This JSON file is read as a string, but this project reads JSON files as Buffers.
+  
+    4 │ async function direct() {
+    5 │ 	JSON.parse(await fs.readFile("./package.json", "utf8"));
+  > 6 │ 	JSON.parse(fs.readFileSync("./package.json", "utf-8"));
+      │ 	                                             ^^^^^^^
+    7 │ 	JSON.parse(fs.readFileSync("./package.json", "UTF8"));
+    8 │ 	JSON.parse(await fs.readFile("./package.json", `utf8`));
+  
+  i JSON.parse() turns a Buffer into a string using UTF-8 automatically, so the encoding isn't needed.
+  
+  i Remove the encoding.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the encoding.
+  
+    6 │ → JSON.parse(fs.readFileSync("./package.json",·"utf-8"));
+      │                                              ---------   
+
+```
+
+```
+invalidBuffer.js:7:47 lint/nursery/useConsistentJsonFileRead  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This JSON file is read as a string, but this project reads JSON files as Buffers.
+  
+    5 │ 	JSON.parse(await fs.readFile("./package.json", "utf8"));
+    6 │ 	JSON.parse(fs.readFileSync("./package.json", "utf-8"));
+  > 7 │ 	JSON.parse(fs.readFileSync("./package.json", "UTF8"));
+      │ 	                                             ^^^^^^
+    8 │ 	JSON.parse(await fs.readFile("./package.json", `utf8`));
+    9 │ 	JSON.parse(await fs.readFile("./package.json", { encoding: "utf8" }));
+  
+  i JSON.parse() turns a Buffer into a string using UTF-8 automatically, so the encoding isn't needed.
+  
+  i Remove the encoding.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the encoding.
+  
+    7 │ → JSON.parse(fs.readFileSync("./package.json",·"UTF8"));
+      │                                              --------   
+
+```
+
+```
+invalidBuffer.js:8:49 lint/nursery/useConsistentJsonFileRead  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This JSON file is read as a string, but this project reads JSON files as Buffers.
+  
+     6 │ 	JSON.parse(fs.readFileSync("./package.json", "utf-8"));
+     7 │ 	JSON.parse(fs.readFileSync("./package.json", "UTF8"));
+   > 8 │ 	JSON.parse(await fs.readFile("./package.json", `utf8`));
+       │ 	                                               ^^^^^^
+     9 │ 	JSON.parse(await fs.readFile("./package.json", { encoding: "utf8" }));
+    10 │ 	JSON.parse(await readFile("./package.json", "utf8"));
+  
+  i JSON.parse() turns a Buffer into a string using UTF-8 automatically, so the encoding isn't needed.
+  
+  i Remove the encoding.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the encoding.
+  
+    8 │ → JSON.parse(await·fs.readFile("./package.json",·`utf8`));
+      │                                                --------   
+
+```
+
+```
+invalidBuffer.js:9:49 lint/nursery/useConsistentJsonFileRead  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This JSON file is read as a string, but this project reads JSON files as Buffers.
+  
+     7 │ 	JSON.parse(fs.readFileSync("./package.json", "UTF8"));
+     8 │ 	JSON.parse(await fs.readFile("./package.json", `utf8`));
+   > 9 │ 	JSON.parse(await fs.readFile("./package.json", { encoding: "utf8" }));
+       │ 	                                               ^^^^^^^^^^^^^^^^^^^^
+    10 │ 	JSON.parse(await readFile("./package.json", "utf8"));
+    11 │ }
+  
+  i JSON.parse() turns a Buffer into a string using UTF-8 automatically, so the encoding isn't needed.
+  
+  i Remove the encoding.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the encoding.
+  
+    9 │ → JSON.parse(await·fs.readFile("./package.json",·{·encoding:·"utf8"·}));
+      │                                                ----------------------   
+
+```
+
+```
+invalidBuffer.js:10:46 lint/nursery/useConsistentJsonFileRead  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This JSON file is read as a string, but this project reads JSON files as Buffers.
+  
+     8 │ 	JSON.parse(await fs.readFile("./package.json", `utf8`));
+     9 │ 	JSON.parse(await fs.readFile("./package.json", { encoding: "utf8" }));
+  > 10 │ 	JSON.parse(await readFile("./package.json", "utf8"));
+       │ 	                                            ^^^^^^
+    11 │ }
+    12 │ 
+  
+  i JSON.parse() turns a Buffer into a string using UTF-8 automatically, so the encoding isn't needed.
+  
+  i Remove the encoding.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the encoding.
+  
+    10 │ → JSON.parse(await·readFile("./package.json",·"utf8"));
+       │                                             --------   
+
+```
+
+```
+invalidBuffer.js:14:48 lint/nursery/useConsistentJsonFileRead  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This JSON file is read as a string, but this project reads JSON files as Buffers.
+  
+    13 │ async function throughVariables() {
+  > 14 │ 	const promise = fs.readFile("./package.json", "utf8");
+       │ 	                                              ^^^^^^
+    15 │ 	JSON.parse(await promise);
+    16 │ }
+  
+  i JSON.parse() turns a Buffer into a string using UTF-8 automatically, so the encoding isn't needed.
+  
+  i Remove the encoding.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the encoding.
+  
+    14 │ → const·promise·=·fs.readFile("./package.json",·"utf8");
+       │                                               --------  
+
+```
+
+```
+invalidBuffer.js:22:4 lint/nursery/useConsistentJsonFileRead  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This JSON file is read as a string, but this project reads JSON files as Buffers.
+  
+    20 │ 		await fs.readFile(
+    21 │ 			"./package.json",
+  > 22 │ 			"utf8",
+       │ 			^^^^^^
+    23 │ 		),
+    24 │ 	);
+  
+  i JSON.parse() turns a Buffer into a string using UTF-8 automatically, so the encoding isn't needed.
+  
+  i Remove the encoding.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the encoding.
+  
+    20 20 │       await fs.readFile(
+    21 21 │         "./package.json",
+    22    │ - → → → "utf8",
+    23 22 │       ),
+    24 23 │     );
+  
+
+```
+
+```
+invalidBuffer.js:29:62 lint/nursery/useConsistentJsonFileRead ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This JSON file is read as a string, but this project reads JSON files as Buffers.
+  
+    27 │ async function noFix() {
+    28 │ 	// The comments would be lost.
+  > 29 │ 	JSON.parse(await fs.readFile("./package.json", /* string */ "utf8"));
+       │ 	                                                            ^^^^^^
+    30 │ 	JSON.parse(await fs.readFile("./package.json", { /* string */ encoding: "utf8" }));
+    31 │ 	JSON.parse(await fs.readFile("./package.json", // string
+  
+  i JSON.parse() turns a Buffer into a string using UTF-8 automatically, so the encoding isn't needed.
+  
+  i Remove the encoding.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidBuffer.js:30:49 lint/nursery/useConsistentJsonFileRead ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This JSON file is read as a string, but this project reads JSON files as Buffers.
+  
+    28 │ 	// The comments would be lost.
+    29 │ 	JSON.parse(await fs.readFile("./package.json", /* string */ "utf8"));
+  > 30 │ 	JSON.parse(await fs.readFile("./package.json", { /* string */ encoding: "utf8" }));
+       │ 	                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    31 │ 	JSON.parse(await fs.readFile("./package.json", // string
+    32 │ 		"utf8"));
+  
+  i JSON.parse() turns a Buffer into a string using UTF-8 automatically, so the encoding isn't needed.
+  
+  i Remove the encoding.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidBuffer.js:32:3 lint/nursery/useConsistentJsonFileRead ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This JSON file is read as a string, but this project reads JSON files as Buffers.
+  
+    30 │ 	JSON.parse(await fs.readFile("./package.json", { /* string */ encoding: "utf8" }));
+    31 │ 	JSON.parse(await fs.readFile("./package.json", // string
+  > 32 │ 		"utf8"));
+       │ 		^^^^^^
+    33 │ }
+    34 │ 
+  
+  i JSON.parse() turns a Buffer into a string using UTF-8 automatically, so the encoding isn't needed.
+  
+  i Remove the encoding.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

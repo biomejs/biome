@@ -97,6 +97,7 @@ pub enum TailwindSyntaxKind {
     FR_KW,
     TW_BASE,
     TW_VALUE,
+    TW_VARIANT_SEGMENT,
     TW_NUMBER,
     TW_SELECTOR,
     TW_PROPERTY,
@@ -108,7 +109,7 @@ pub enum TailwindSyntaxKind {
     CSS_URL_VALUE_RAW_LITERAL,
     ERROR_TOKEN,
     IDENT,
-    NEWLINE,
+    CSS_WHITESPACE,
     TW_ROOT,
     TW_CANDIDATE_LIST,
     TW_FULL_CANDIDATE,
@@ -117,18 +118,22 @@ pub enum TailwindSyntaxKind {
     TW_FUNCTIONAL_CANDIDATE,
     TW_VARIANT_LIST,
     TW_ARBITRARY_VARIANT,
-    TW_STATIC_VARIANT,
-    TW_FUNCTIONAL_VARIANT,
+    TW_VARIANT_EXPRESSION,
+    TW_VARIANT_SEGMENT_LIST,
+    TW_NAMED_VARIANT_SEGMENT,
+    TW_ARBITRARY_VARIANT_SEGMENT,
+    TW_CSS_VARIABLE_VARIANT_SEGMENT,
     TW_NAMED_VALUE,
     TW_NUMBER_VALUE,
     TW_PERCENTAGE_VALUE,
     TW_ARBITRARY_VALUE,
     TW_CSS_VARIABLE_VALUE,
+    TW_TYPE_HINT,
     TW_MODIFIER,
-    TW_DATA_ATTRIBUTE,
     TW_BOGUS,
     TW_BOGUS_CANDIDATE,
     TW_BOGUS_VARIANT,
+    TW_BOGUS_VARIANT_SEGMENT,
     TW_BOGUS_MODIFIER,
     TW_BOGUS_VALUE,
     CSS_BOGUS_PROPERTY_VALUE,
@@ -183,6 +188,7 @@ impl TailwindSyntaxKind {
             self,
             TW_BASE
                 | TW_VALUE
+                | TW_VARIANT_SEGMENT
                 | TW_NUMBER
                 | TW_SELECTOR
                 | TW_PROPERTY
@@ -199,6 +205,7 @@ impl TailwindSyntaxKind {
             self,
             TW_CANDIDATE_LIST
                 | TW_VARIANT_LIST
+                | TW_VARIANT_SEGMENT_LIST
                 | CSS_PARAMETER_LIST
                 | CSS_COMPONENT_VALUE_LIST
                 | CSS_GENERIC_COMPONENT_VALUE_LIST

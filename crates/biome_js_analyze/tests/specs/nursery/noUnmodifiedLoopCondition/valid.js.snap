@@ -1,0 +1,170 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.js
+---
+# Input
+```js
+// should not generate diagnostics
+
+let node = getNode();
+while (node) {
+    process(node);
+    node = node.parent;
+}
+
+for (let index = 0; index < items.length; index++) {
+    process(items[index]);
+}
+
+let ready = true;
+do {
+    process();
+    ready = checkReady();
+} while (ready);
+
+let left = 0;
+let right = 1;
+while (left !== right) {
+    left++;
+}
+
+let propertyName = "ready";
+let propertyContainer = {};
+while (propertyName in propertyContainer) {
+    propertyName = nextPropertyName();
+}
+
+let candidate = getCandidate();
+let CandidateType = getCandidateType();
+while (candidate instanceof CandidateType) {
+    candidate = nextCandidate();
+}
+
+let select = true;
+let whenTrue = 1;
+let whenFalse = 2;
+while (select ? whenTrue : whenFalse) {
+    select = false;
+}
+
+while (object.ready) {
+    process(object);
+}
+
+let computedObject = { ready: true };
+let computedKey = "ready";
+while (computedObject[computedKey]) {
+    process(computedObject);
+}
+
+while (check(object)) {
+    process(object);
+}
+
+while (new Check(value)) {
+    process(value);
+}
+
+while (tag`${value}`) {
+    process(value);
+}
+
+function* generator() {
+    while (yield value) {
+        process(value);
+    }
+}
+
+while (value < checkLimit()) {
+    process(value);
+}
+
+let assignedInTest = true;
+while (assignedInTest = check()) {
+    process();
+}
+
+let updatedInTest = 0;
+while (++updatedInTest < limit) {
+    process(updatedInTest);
+}
+
+let updatedInGroup = 0;
+let localLimit = 10;
+while (++updatedInGroup < localLimit) {
+    process(updatedInGroup);
+}
+
+while (hoistedDone) {
+    var hoistedDone = false;
+}
+
+let changedByFunction = true;
+function update() {
+    changedByFunction = false;
+}
+while (changedByFunction) {
+    update();
+}
+
+let changedByDefaultFunction = true;
+export default function updateDefault() {
+    changedByDefaultFunction = false;
+}
+while (changedByDefaultFunction) {
+    updateDefault();
+}
+
+let changedByNestedFunction = true;
+while (changedByNestedFunction) {
+    function updateNested() {
+        changedByNestedFunction = false;
+    }
+    process();
+}
+
+let captured = true;
+while (() => captured) {
+    process();
+}
+
+let functionExpressionCapture = true;
+while (function () {
+    return functionExpressionCapture;
+}) {
+    process();
+}
+
+let classExpressionCapture = true;
+while (class {
+    method() {
+        return classExpressionCapture;
+    }
+}) {
+    process();
+}
+
+let objectMethodBody = true;
+while ({
+    method(value = objectMethodBody) {
+        return objectMethodBody && check();
+    },
+    get value() {
+        return objectMethodBody;
+    },
+    set value(next) {
+        process(objectMethodBody, next);
+    },
+}) {
+    process();
+}
+
+for (;;) {
+    process();
+}
+
+while (true) {
+    break;
+}
+
+```

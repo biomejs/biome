@@ -9,9 +9,11 @@ impl FormatRule<AnyHtmlElement> for FormatAnyHtmlElement {
     fn fmt(&self, node: &AnyHtmlElement, f: &mut HtmlFormatter) -> FormatResult<()> {
         match node {
             AnyHtmlElement::AnyHtmlContent(node) => node.format().fmt(f),
+            AnyHtmlElement::AstroFragment(node) => node.format().fmt(f),
             AnyHtmlElement::HtmlBogusElement(node) => node.format().fmt(f),
             AnyHtmlElement::HtmlCdataSection(node) => node.format().fmt(f),
             AnyHtmlElement::HtmlElement(node) => node.format().fmt(f),
+            AnyHtmlElement::HtmlProcessingInstruction(node) => node.format().fmt(f),
             AnyHtmlElement::HtmlSelfClosingElement(node) => node.format().fmt(f),
         }
     }

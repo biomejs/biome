@@ -1,4 +1,4 @@
-use biome_js_syntax::JsFileSource;
+use biome_languages::JsFileSource;
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
 pub enum SemanticFlavor {

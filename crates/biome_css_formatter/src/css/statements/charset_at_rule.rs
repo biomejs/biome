@@ -15,7 +15,7 @@ impl FormatNodeRule<CssCharsetAtRule> for FormatCssCharsetAtRule {
         write!(
             f,
             [
-                charset_token.format(),
+                charset_token.format()?.with_text_case(CssCase::Lowercase),
                 space(),
                 encoding.format(),
                 semicolon_token.format()

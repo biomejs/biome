@@ -1,3 +1,4 @@
+use crate::TailwindParserOptions;
 use crate::lexer::TailwindLexer;
 use biome_parser::diagnostic::ParseDiagnostic;
 use biome_parser::lexer::{BufferedLexer, LexContext};
@@ -12,11 +13,8 @@ use biome_tailwind_syntax::{TailwindSyntaxKind, TextRange};
 pub(crate) struct TailwindTokenSource<'source> {
     lexer: BufferedLexer<TailwindSyntaxKind, TailwindLexer<'source>>,
 
-    /// List of the skipped trivia. Needed to construct the CST and compute the non-trivia token offsets.
+    /// Trivia emitted by the lexer and tokens skipped during parser recovery.
     pub(super) trivia_list: Vec<Trivia>,
-
-    /// Whether the lexer encountered any trivia between the previous non-trivia token and the current non-trivia token.
-    had_trivia_before: bool,
 }
 pub(crate) type TailwindTokenSourceCheckpoint = TokenSourceCheckpoint<TailwindSyntaxKind>;
 
@@ -31,6 +29,11 @@ pub(crate) enum TailwindLexContext {
     ArbitraryVariant,
     /// Like Arbitrary, but specifically for arbitrary candidates.
     ArbitraryCandidate,
+    /// Lexing one segment inside a Tailwind variant expression.
+    ///
+    /// Named segments stop at `-` and `:` so `group-peer-hover`
+    /// becomes `group` / `peer` / `hover`.
+    VariantSegment,
     /// CSS value lexing inside arbitrary values and arbitrary candidate values.
     CssValue,
     /// Raw URL body lexing inside `url(...)`.
@@ -45,8 +48,8 @@ impl LexContext for TailwindLexContext {
 
 impl<'source> TailwindTokenSource<'source> {
     /// Creates a new token source for the given string
-    pub fn from_str(source: &'source str) -> Self {
-        let lexer = TailwindLexer::from_str(source);
+    pub fn from_str(source: &'source str, options: TailwindParserOptions<'source>) -> Self {
+        let lexer = TailwindLexer::from_str(source).with_base_names(options.base_names);
 
         let buffered = BufferedLexer::new(lexer);
         let mut source = Self::new(buffered);
@@ -60,34 +63,20 @@ impl<'source> TailwindTokenSource<'source> {
         Self {
             lexer,
             trivia_list: vec![],
-            had_trivia_before: false,
         }
     }
 
     fn next_non_trivia_token(&mut self, context: TailwindLexContext, first_token: bool) {
-        let mut trailing = !first_token;
-        self.had_trivia_before = false;
+        let trailing = !first_token;
 
         loop {
             let kind = self.lexer.next_token(context);
+            let Ok(trivia_kind) = TriviaPieceKind::try_from(kind) else {
+                break;
+            };
 
-            let trivia_kind = TriviaPieceKind::try_from(kind);
-
-            match trivia_kind {
-                Err(_) => {
-                    // Not trivia
-                    break;
-                }
-                Ok(trivia_kind) => {
-                    if trivia_kind.is_newline() {
-                        trailing = false;
-                    }
-
-                    self.had_trivia_before = true;
-                    self.trivia_list
-                        .push(Trivia::new(trivia_kind, self.current_range(), trailing));
-                }
-            }
+            self.trivia_list
+                .push(Trivia::new(trivia_kind, self.current_range(), trailing));
         }
     }
 
@@ -104,11 +93,6 @@ impl<'source> TailwindTokenSource<'source> {
         assert!(self.trivia_list.len() >= checkpoint.trivia_len as usize);
         self.trivia_list.truncate(checkpoint.trivia_len as usize);
         self.lexer.rewind(checkpoint.lexer_checkpoint);
-    }
-
-    /// Whether the lexer encountered any trivia between the previous non-trivia token and the current non-trivia token.
-    pub fn had_trivia_before(&self) -> bool {
-        self.had_trivia_before
     }
 
     pub fn re_lex_current_in_context(&mut self, context: TailwindLexContext) -> TailwindSyntaxKind {

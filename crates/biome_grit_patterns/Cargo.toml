@@ -1,6 +1,6 @@
 [package]
 name                 = "biome_grit_patterns"
-version              = "0.0.1"
+version.workspace    = true
 authors.workspace    = true
 edition.workspace    = true
 description          = "Biome implementation for Grit Patterns"
@@ -9,7 +9,7 @@ repository.workspace = true
 license.workspace    = true
 keywords.workspace   = true
 categories.workspace = true
-publish              = false
+publish              = true
 
 [[bench]]
 harness = false
@@ -27,14 +27,15 @@ biome_js_parser      = { workspace = true }
 biome_js_syntax      = { workspace = true }
 biome_json_parser    = { workspace = true }
 biome_json_syntax    = { workspace = true }
+biome_languages      = { workspace = true, features = ["lang_css", "lang_js", "lang_json"] }
 biome_parser         = { workspace = true }
 biome_rowan          = { workspace = true }
 biome_string_case    = { workspace = true }
 camino               = { workspace = true }
 grit-pattern-matcher = { workspace = true }
 grit-util            = { workspace = true }
-path-absolutize      = { version = "3.1.1", features = ["use_unix_paths_on_wasm"], optional = false }
-rand                 = { version = "=0.8.5" }
+path-absolutize      = { workspace = true }
+rand                 = { workspace = true }
 regex                = { workspace = true }
 rustc-hash           = { workspace = true }
 schemars             = { workspace = true, optional = true }
@@ -43,7 +44,7 @@ serde_json           = { workspace = true, optional = true }
 
 [dev-dependencies]
 biome_test_utils = { path = "../biome_test_utils" }
-criterion        = { package = "codspeed-criterion-compat", version = "=3.0.5" }
+criterion        = { workspace = true }
 insta            = { workspace = true }
 tests_macros     = { path = "../tests_macros" }
 

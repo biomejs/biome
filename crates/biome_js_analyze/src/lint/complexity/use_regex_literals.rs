@@ -202,7 +202,10 @@ fn create_regex(pattern: &str, flags: &StaticValue, string_kind: StringKind) -> 
     // Reserve space for the pattern, its delimiters and its flags
     let mut new_pattern = String::with_capacity(pattern.len() + 2 + flags.len());
     new_pattern.push('/');
+    // Whether the regex so far ends with a backslash that escapes the next character.
+    let mut escaped = false;
     while let Some((index, byte)) = pattern_bytes.next() {
+        let was_escaped = std::mem::take(&mut escaped);
         match byte {
             b'\n' => {
                 new_pattern.push_str(&pattern[last_copied_inmdex..index]);
@@ -213,6 +216,12 @@ fn create_regex(pattern: &str, flags: &StaticValue, string_kind: StringKind) -> 
                 match pattern_bytes.next() {
                     Some((_, b'\\')) => {
                         // turn `\\` into `\`
+                        new_pattern.push_str(&pattern[last_copied_inmdex..index]);
+                        last_copied_inmdex = index + 1;
+                        escaped = !was_escaped;
+                    }
+                    Some((_, b'/')) if was_escaped => {
+                        // The slash is already escaped: turn `\/` into `/`
                         new_pattern.push_str(&pattern[last_copied_inmdex..index]);
                         last_copied_inmdex = index + 1;
                     }
@@ -253,8 +262,9 @@ fn create_regex(pattern: &str, flags: &StaticValue, string_kind: StringKind) -> 
                     }
                 }
             }
+            b'\\' => escaped = !was_escaped,
             // Convert slash to "\/" to avoid parsing error in autofix.
-            b'/' => {
+            b'/' if !was_escaped => {
                 new_pattern.push_str(&pattern[last_copied_inmdex..index]);
                 new_pattern.push_str(r"\/");
                 last_copied_inmdex = index + 1;

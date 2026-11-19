@@ -1,0 +1,15 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-vue-aliased-import-in-template.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<script setup lang="ts">
+import { SKIP_CATEGORIES as skipCategories } from "ott-common";
+</script>
+<template>
+  <div :data-categories="skipCategories"></div>
+</template>
+
+```

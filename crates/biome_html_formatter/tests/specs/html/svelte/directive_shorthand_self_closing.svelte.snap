@@ -1,0 +1,21 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: svelte/directive_shorthand_self_closing.svelte
+---
+
+# Input
+
+```svelte
+<input class:invalid/>
+<input style:color|important/>
+
+```
+
+
+# Formatted
+
+```svelte
+<input class:invalid>
+<input style:color|important>
+
+```

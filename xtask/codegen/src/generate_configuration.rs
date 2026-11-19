@@ -6,7 +6,9 @@ use biome_graphql_syntax::GraphqlLanguage;
 use biome_html_syntax::HtmlLanguage;
 use biome_js_syntax::JsLanguage;
 use biome_json_syntax::JsonLanguage;
+use biome_markdown_syntax::MarkdownLanguage;
 use biome_string_case::Case;
+use biome_yaml_syntax::YamlLanguage;
 use proc_macro2::{Ident, Literal, Span};
 use quote::{format_ident, quote};
 use std::collections::{BTreeMap, BTreeSet};
@@ -122,6 +124,51 @@ impl RegistryVisitor<HtmlLanguage> for LintRulesVisitor {
             .entry(<R::Group as RuleGroup>::NAME)
             .or_default()
             .insert(R::METADATA.name, R::METADATA);
+
+        for domain in R::METADATA.domains.iter() {
+            self.domains
+                .entry(domain.as_str())
+                .or_default()
+                .insert((<R::Group as RuleGroup>::NAME, R::METADATA.name));
+        }
+    }
+}
+
+impl RegistryVisitor<MarkdownLanguage> for LintRulesVisitor {
+    fn record_category<C: GroupCategory<Language = MarkdownLanguage>>(&mut self) {
+        if matches!(C::CATEGORY, RuleCategory::Lint) {
+            C::record_groups(self);
+        }
+    }
+
+    fn record_rule<R>(&mut self)
+    where
+        R: Rule<Options: Default, Query: Queryable<Language = MarkdownLanguage, Output: Clone>>
+            + 'static,
+    {
+        self.groups
+            .entry(<R::Group as RuleGroup>::NAME)
+            .or_default()
+            .insert(R::METADATA.name, R::METADATA);
+    }
+}
+
+impl RegistryVisitor<YamlLanguage> for LintRulesVisitor {
+    fn record_category<C: GroupCategory<Language = YamlLanguage>>(&mut self) {
+        if matches!(C::CATEGORY, RuleCategory::Lint) {
+            C::record_groups(self);
+        }
+    }
+
+    fn record_rule<R>(&mut self)
+    where
+        R: Rule<Options: Default, Query: Queryable<Language = YamlLanguage, Output: Clone>>
+            + 'static,
+    {
+        self.groups
+            .entry(<R::Group as RuleGroup>::NAME)
+            .or_default()
+            .insert(R::METADATA.name, R::METADATA);
     }
 }
 
@@ -225,6 +272,53 @@ impl RegistryVisitor<HtmlLanguage> for AssistActionsVisitor {
     }
 }
 
+impl RegistryVisitor<MarkdownLanguage> for AssistActionsVisitor {
+    fn record_category<C: GroupCategory<Language = MarkdownLanguage>>(&mut self) {
+        if matches!(C::CATEGORY, RuleCategory::Action) {
+            C::record_groups(self);
+        }
+    }
+
+    fn record_rule<R>(&mut self)
+    where
+        R: Rule<Options: Default, Query: Queryable<Language = MarkdownLanguage, Output: Clone>>
+            + 'static,
+    {
+        self.groups
+            .entry(<R::Group as RuleGroup>::NAME)
+            .or_default()
+            .insert(R::METADATA.name, R::METADATA);
+    }
+}
+
+impl RegistryVisitor<YamlLanguage> for AssistActionsVisitor {
+    fn record_category<C: GroupCategory<Language = YamlLanguage>>(&mut self) {
+        if matches!(C::CATEGORY, RuleCategory::Action) {
+            C::record_groups(self);
+        }
+    }
+
+    fn record_rule<R>(&mut self)
+    where
+        R: Rule<Options: Default, Query: Queryable<Language = YamlLanguage, Output: Clone>>
+            + 'static,
+    {
+        self.groups
+            .entry(<R::Group as RuleGroup>::NAME)
+            .or_default()
+            .insert(R::METADATA.name, R::METADATA);
+    }
+}
+
+fn assist_group_description(group_name: &str) -> Option<&'static str> {
+    match group_name {
+        "source" => Some(
+            "Configures source-level actions such as organizing imports and sorting declarations. These actions are exposed through editor source actions and through CLI checking and application.",
+        ),
+        _ => None,
+    }
+}
+
 pub(crate) fn generate_rule_options(mode: Mode) -> Result<()> {
     let rule_options_root = get_analyzer_rule_options_path();
     let lib_root = rule_options_root.join("lib.rs");
@@ -240,6 +334,10 @@ pub(crate) fn generate_rule_options(mode: Mode) -> Result<()> {
     biome_graphql_analyze::visit_registry(&mut assist_visitor);
     biome_html_analyze::visit_registry(&mut lint_visitor);
     biome_html_analyze::visit_registry(&mut assist_visitor);
+    biome_markdown_analyze::visit_registry(&mut lint_visitor);
+    biome_markdown_analyze::visit_registry(&mut assist_visitor);
+    biome_yaml_analyze::visit_registry(&mut lint_visitor);
+    biome_yaml_analyze::visit_registry(&mut assist_visitor);
 
     let mut rule_names = BTreeSet::default();
     let mut lib_exports = vec![quote! {
@@ -299,6 +397,10 @@ pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
     biome_graphql_analyze::visit_registry(&mut assist_visitor);
     biome_html_analyze::visit_registry(&mut lint_visitor);
     biome_html_analyze::visit_registry(&mut assist_visitor);
+    biome_markdown_analyze::visit_registry(&mut lint_visitor);
+    biome_markdown_analyze::visit_registry(&mut assist_visitor);
+    biome_yaml_analyze::visit_registry(&mut lint_visitor);
+    biome_yaml_analyze::visit_registry(&mut assist_visitor);
 
     // let LintRulesVisitor { groups } = lint_visitor;
 
@@ -333,8 +435,10 @@ fn generate_for_groups(
     let mut group_pascal_idents = Vec::with_capacity(groups.len());
     let mut group_idents = Vec::with_capacity(groups.len());
     let mut group_strings = Vec::with_capacity(groups.len());
+    let mut group_descriptions = Vec::with_capacity(groups.len());
     let mut group_as_default_rules = Vec::with_capacity(groups.len());
     let mut group_as_disabled_rules = Vec::with_capacity(groups.len());
+    let mut group_as_explicitly_enabled_rules = Vec::with_capacity(groups.len());
     #[derive(Debug)]
     struct RuleGroup {
         group_name: &'static str,
@@ -345,23 +449,28 @@ fn generate_for_groups(
         let group_pascal_ident = quote::format_ident!("{}", &Case::Pascal.convert(group_name));
         let group_ident = quote::format_ident!("{}", group_name);
 
-        let global_recommended = if group_name == "nursery" {
-            quote! { !self.is_recommended_false() && biome_flags::is_unstable() }
+        if group_name == "nursery" {
+            // Nursery rules are never enabled via presets — only individually.
+            group_as_default_rules.push(quote! {
+                if let Some(group) = self.#group_ident.as_ref() {
+                    enabled_rules.extend(&group.get_enabled_rules());
+                    disabled_rules.extend(&group.get_disabled_rules());
+                }
+            });
         } else {
-            quote! { !self.is_recommended_false() }
-        };
-        group_as_default_rules.push(quote! {
-            if let Some(group) = self.#group_ident.as_ref() {
-                group.collect_preset_rules(
-                    #global_recommended,
-                    &mut enabled_rules,
-                );
-                enabled_rules.extend(&group.get_enabled_rules());
-                disabled_rules.extend(&group.get_disabled_rules());
-            } else if #global_recommended {
-                enabled_rules.extend(#group_pascal_ident::recommended_rules_as_filters());
-            }
-        });
+            group_as_default_rules.push(quote! {
+                if let Some(group) = self.#group_ident.as_ref() {
+                    group.collect_preset_rules(
+                        self.preset(),
+                        &mut enabled_rules,
+                    );
+                    enabled_rules.extend(&group.get_enabled_rules());
+                    disabled_rules.extend(&group.get_disabled_rules());
+                } else if !self.preset().is_none() {
+                    enabled_rules.extend(#group_pascal_ident::preset_as_filters(self.preset()));
+                }
+            });
+        }
 
         group_as_disabled_rules.push(quote! {
             if let Some(group) = self.#group_ident.as_ref() {
@@ -369,16 +478,19 @@ fn generate_for_groups(
             }
         });
 
+        group_as_explicitly_enabled_rules.push(quote! {
+            if let Some(group) = self.#group_ident.as_ref() {
+                enabled_rules.extend(&group.get_enabled_rules());
+            }
+        });
+
         group_pascal_idents.push(group_pascal_ident);
         group_idents.push(group_ident.clone());
         group_strings.push(Literal::string(group_name));
-        // if kind == RuleCategory::Action {
-        //     struct_groups.push(generate_group_struct(group_name, &rules, kind));
-        //     // struct_groups.push(quote! {
-        //     //     biome_configuration_macros::assist_group_struct!(#group_name);
-        //     // });
-        // } else {
-        // }
+        group_descriptions.push(
+            assist_group_description(group_name)
+                .map_or_default(|description| quote! { #[doc = #description] }),
+        );
         rule_group_names.extend(rules.keys().map(|rule_name| RuleGroup {
             rule_name,
             group_name,
@@ -493,6 +605,8 @@ fn generate_for_groups(
             use biome_diagnostics::{Category, Severity};
             use rustc_hash::FxHashSet;
             use serde::{Deserialize, Serialize};
+            use crate::analyzer::presets::PresetConfig;
+            use biome_analyze::RulePreset;
             #[cfg(feature = "schema")]
             use schemars::JsonSchema;
 
@@ -561,11 +675,20 @@ fn generate_for_groups(
             #[cfg_attr(feature = "schema", derive(JsonSchema))]
             #[serde(rename_all = "camelCase", deny_unknown_fields)]
             pub struct Actions {
-                /// It enables the assist actions recommended by Biome. `true` by default.
+                /// Enables or disables Biome's recommended assist actions across all action groups.
+                /// Defaults to `true`.
                 #[serde(skip_serializing_if = "Option::is_none")]
                 pub recommended: Option<bool>,
 
+                /// Selects the baseline set of assist actions. `recommended` enables Biome's
+                /// recommended actions, `all` enables all actions, and `none` starts with no actions
+                /// enabled. Group presets and explicit action settings override this preset.
+                /// Defaults to `recommended`.
+                #[serde(skip_serializing_if = "Option::is_none")]
+                pub preset: Option<PresetConfig>,
+
                 #(
+                    #group_descriptions
                     #[deserializable(rename = #group_strings)]
                     #[serde(skip_serializing_if = "Option::is_none")]
                     pub #group_idents: Option<#group_pascal_idents>,
@@ -588,10 +711,16 @@ fn generate_for_groups(
 
                 #severity_fn
 
-                // Note: In top level, it is only considered _not_ recommended
-                // when the recommended option is false
-                pub(crate) const fn is_recommended_false(&self) -> bool {
-                    matches!(self.recommended, Some(false))
+
+                /// Returns the current preset. Defaults to the recommended set
+                pub(crate) fn preset(&self) -> PresetConfig {
+                    if matches!(self.recommended, Some(false)) {
+                        PresetConfig::None
+                    } else if let Some(preset) = &self.preset {
+                        preset.clone()
+                    } else {
+                        PresetConfig::default()
+                    }
                 }
 
 
@@ -632,6 +761,8 @@ fn generate_for_groups(
             use biome_diagnostics::{Category, Severity};
             use rustc_hash::FxHashSet;
             use serde::{Deserialize, Serialize};
+            use crate::analyzer::presets::PresetConfig;
+            use biome_analyze::RulePreset;
             #[cfg(feature = "schema")]
             use schemars::JsonSchema;
 
@@ -700,9 +831,19 @@ fn generate_for_groups(
             #[cfg_attr(feature = "schema", derive(JsonSchema))]
             #[serde(rename_all = "camelCase", deny_unknown_fields)]
             pub struct Rules {
-                /// It enables the lint rules recommended by Biome. `true` by default.
+                /// Enables or disables Biome's recommended non-nursery rules. Defaults to `true`.
+                ///
+                /// **Deprecated:** This option will be removed in the next major version. Use
+                /// `linter.rules.preset` instead, or run `biome migrate` to update the configuration.
                 #[serde(skip_serializing_if = "Option::is_none")]
                 pub recommended: Option<bool>,
+
+                /// Selects the baseline set of lint rules. `recommended` enables Biome's recommended
+                /// non-nursery rules, `all` enables all non-nursery rules, and `none` starts with no
+                /// rules enabled. Group-level settings and explicit rule settings override this
+                /// preset. Defaults to `recommended`.
+                #[serde(skip_serializing_if = "Option::is_none")]
+                pub preset: Option<PresetConfig>,
 
                 #(
                     #[deserializable(rename = #group_strings)]
@@ -739,10 +880,15 @@ fn generate_for_groups(
                     )*
                 }
 
-                // Note: In top level, it is only considered _not_ recommended
-                // when the recommended option is false
-                pub(crate) const fn is_recommended_false(&self) -> bool {
-                    matches!(self.recommended, Some(false))
+                /// Returns the current preset. Defaults to the recommended set
+                pub(crate) fn preset(&self) -> PresetConfig {
+                    if matches!(self.recommended, Some(false)) {
+                        PresetConfig::None
+                    } else if let Some(preset) = &self.preset {
+                        preset.clone()
+                    } else {
+                        PresetConfig::default()
+                    }
                 }
 
 
@@ -762,6 +908,13 @@ fn generate_for_groups(
                     let mut disabled_rules = FxHashSet::default();
                     #( #group_as_disabled_rules )*
                     disabled_rules
+                }
+
+                /// It returns the rules enabled by configuration, excluding the ones enabled by presets
+                pub fn as_explicitly_enabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
+                    let mut enabled_rules = FxHashSet::default();
+                    #( #group_as_explicitly_enabled_rules )*
+                    enabled_rules
                 }
             }
 
@@ -931,14 +1084,14 @@ fn generate_for_domains(
             #domain_as_string => #domain_filters.clone()
         });
         match_rule_arms.push(quote! {
-            #domain_as_string => #domain_filters.iter().any(|filter| filter.match_rule::<R>())
+            #domain_as_string => #domain_filters.iter().any(|filter| filter.match_rule_name(group_name, rule_name))
         });
     }
 
     let stream = quote! {
         use std::sync::LazyLock;
         use crate::analyzer::DomainSelector;
-        use biome_analyze::{Rule, RuleFilter};
+        use biome_analyze::{Rule, RuleFilter, RuleGroup};
 
         #( #lazy_locks )*
 
@@ -957,6 +1110,10 @@ fn generate_for_domains(
                 where
                     R: Rule,
             {
+                self.match_rule_name(<R::Group as RuleGroup>::NAME, R::METADATA.name)
+            }
+
+            pub(crate) fn match_rule_name(&self, group_name: &str, rule_name: &str) -> bool {
                 match self.0 {
                     #( #match_rule_arms ),*,
                     _ => false,

@@ -264,13 +264,8 @@ invalid_without_trivia.js:11:9 lint/complexity/noUselessTernary  FIXABLE  ━━
   
   i Unsafe fix: Remove the conditional expression with
   
-     9  9 │   var a = foo()?true:false;
-    10 10 │   var a = foo?true:false;
-    11    │ - var·a·=·foo===1?true:false;
-       11 │ + var·a·=·foo·===·1;
-    12 12 │   var a = foo+1?true:false;
-    13 13 │   
-  
+    11 │ var·a·=·foo===1?true:false;
+       │                ----------- 
 
 ```
 

@@ -1,0 +1,63 @@
+/* should not generate diagnostics */
+
+// Not a Promise executor
+function foo(resolve, reject) { return 1; }
+(function (resolve, reject) { return 1; });
+(resolve, reject) => 1;
+new foo((resolve, reject) => { return 1; });
+new foo((resolve, reject) => 1);
+new promise(function (resolve, reject) { return 1; });
+new Promise.foo(function (resolve, reject) { return 1; });
+new foo.Promise(function (resolve, reject) { return 1; });
+Promise((resolve, reject) => 1);
+new Promise(foo, (resolve, reject) => 1);
+new Promise(foo, function (resolve, reject) { return 1; });
+
+// Shadowed Promise
+{
+	let Promise;
+	new Promise(function (resolve, reject) { return 1; });
+}
+function shadowedByParameter(Promise) {
+	new Promise((resolve, reject) => 1);
+}
+function shadowedByHoistedVar() {
+	new Promise((resolve, reject) => { return 1; });
+	var Promise;
+}
+
+// `return` without a value
+new Promise(function (resolve, reject) { return; });
+new Promise((resolve, reject) => {
+	if (foo) {
+		resolve(1);
+		return;
+	}
+	reject(new Error());
+});
+
+// `throw` is allowed
+new Promise((resolve, reject) => { throw new Error(); });
+
+// Returns from nested functions and classes
+new Promise(function (resolve, reject) { function foo() { return 1; } });
+new Promise((resolve, reject) => { (function foo() { return 1; })(); });
+new Promise((resolve, reject) => { () => 1 });
+new Promise((resolve, reject) => {
+	bar((err, data) => {
+		if (err) {
+			reject(err);
+			return;
+		}
+		resolve(data);
+	});
+});
+new Promise((resolve) => {
+	const obj = { method() { return 1; }, get value() { return 2; } };
+	class Foo { method() { return 3; } static { () => 4; } }
+	const Bar = class { prop = () => 5; };
+});
+
+// Block bodies
+new Promise(r => { r(1) });
+new Promise(r => { 0 });

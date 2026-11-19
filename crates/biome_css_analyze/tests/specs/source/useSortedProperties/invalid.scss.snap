@@ -1,0 +1,45 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalid.scss
+---
+# Input
+```css
+/* should generate diagnostics */
+$theme: red;
+
+.example {
+  color: $theme;
+  display: block;
+}
+
+```
+
+# Diagnostics
+```
+invalid.scss:4:10 assist/source/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+    2 │ $theme: red;
+    3 │ 
+  > 4 │ .example {
+      │          ^
+  > 5 │   color: $theme;
+  > 6 │   display: block;
+  > 7 │ }
+      │ ^
+    8 │ 
+  
+  i Safe fix: Sort these properties
+  
+    3 3 │   
+    4 4 │   .example {
+    5   │ - ··color:·$theme;
+    6   │ - ··display:·block;
+      5 │ + ··display:·block;
+      6 │ + ··color:·$theme;
+    7 7 │   }
+    8 8 │   
+  
+
+```

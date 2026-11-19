@@ -12,7 +12,12 @@ use crate::services::semantic::Semantic;
 declare_lint_rule! {
     /// Disallow duplicate properties within declaration blocks.
     ///
-    /// This rule checks the declaration blocks for duplicate properties. It ignores custom properties.
+    /// This rule checks the declaration blocks for duplicate properties. It ignores custom properties and declarations inside `@keyframes` blocks.
+    ///
+    /// ## SCSS limitations
+    ///
+    /// Declarations are compared within each authored declaration block. The rule does not expand
+    /// mixins or includes, so duplicates introduced only after SCSS expansion are not reported.
     ///
     /// ## Examples
     ///
@@ -53,14 +58,21 @@ impl Rule for NoDuplicateProperties {
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();
         let model = ctx.model();
-        let root = ctx.root();
 
-        let rule = model.get_rule_by_range(node.range())?;
+        let declarations = model.get_declarations_by_range(node.range());
 
         let mut seen: FxHashMap<TokenText, TextRange> = FxHashMap::default();
 
-        for declaration in rule.declarations() {
-            let prop = declaration.property(&root);
+        for declaration in declarations.iter().filter(|declaration| {
+            declaration
+                .declaration()
+                .syntax()
+                .parent()
+                .and_then(|parent| parent.parent())
+                .as_ref()
+                == Some(node.syntax())
+        }) {
+            let prop = declaration.property();
             let prop_name = prop.value().ok()?;
             let prop_range = prop.range();
 

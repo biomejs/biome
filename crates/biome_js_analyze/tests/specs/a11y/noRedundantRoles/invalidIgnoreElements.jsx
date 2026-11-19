@@ -1,0 +1,5 @@
+/* should generate diagnostics */
+<>
+	<article role="article"></article>
+	<ul role="list"></ul>
+</>;

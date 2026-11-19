@@ -1,0 +1,2272 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+$suffix: frames;
+@key#{$suffix} fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+$name: theme;
+@custom-#{$name} token;
+
+@custom-#{$name}-end token;
+@custom-#{$name}-end token { .item { color: red; } }
+@media#{$name} token;
+@include#{$name} token;
+@-#{$name} token;
+@--#{$name} token;
+@custom-#{$name}2-end token;
+@custom-#{$name}01 token;
+@custom-#{$name}2.5 token;
+@custom-#{$name}+2 token;
+@custom-#{$name}2% token;
+@custom-#{$name}- token;
+@#{$name} token;
+@#{$name} /* fully interpolated */ token;
+@#{$name}-end token { .item { color: red; } }
+@custom-#{$name} /* boundary */ token;
+@custom-#{$name} /* block boundary */ token { .item { color: red; } }
+@custom-#{$name} /* no prelude */ { .item { color: red; } }
+@custom-#{$name}/**/token;
+@custom-/**/#{$name} token;
+@custom- #{$name} token;
+@custom-#{$name} // boundary
+token;
+
+@custom-#{$name}--> token;
+@#{$name}--> token { .item { color: red; } }
+@custom-#{$name} --> token;
+
+.host {
+  @custom-#{$name} final
+}
+@custom-#{$name} final
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        ScssVariableDeclaration {
+            name: ScssVariable {
+                dollar_token: DOLLAR@0..1 "$" [] [],
+                name: CssIdentifier {
+                    value_token: IDENT@1..7 "suffix" [] [],
+                },
+            },
+            colon_token: COLON@7..9 ":" [] [Whitespace(" ")],
+            value: ScssExpression {
+                items: ScssExpressionItemList [
+                    CssIdentifier {
+                        value_token: IDENT@9..15 "frames" [] [],
+                    },
+                ],
+            },
+            modifiers: ScssVariableModifierList [],
+            semicolon_token: SEMICOLON@15..16 ";" [] [],
+        },
+        CssAtRule {
+            at_token: AT@16..18 "@" [Newline("\n")] [],
+            rule: CssUnknownBlockAtRule {
+                name: ScssInterpolatedIdentifier {
+                    items: ScssInterpolatedIdentifierPartList [
+                        CssIdentifier {
+                            value_token: IDENT@18..21 "key" [] [],
+                        },
+                        ScssInterpolation {
+                            hash_token: HASH@21..22 "#" [] [],
+                            l_curly_token: L_CURLY@22..23 "{" [] [],
+                            value: ScssExpression {
+                                items: ScssExpressionItemList [
+                                    ScssVariable {
+                                        dollar_token: DOLLAR@23..24 "$" [] [],
+                                        name: CssIdentifier {
+                                            value_token: IDENT@24..30 "suffix" [] [],
+                                        },
+                                    },
+                                ],
+                            },
+                            r_curly_token: R_CURLY@30..32 "}" [] [Whitespace(" ")],
+                        },
+                    ],
+                },
+                components: CssUnknownAtRuleComponentList {
+                    items: [
+                        IDENT@32..37 "fade" [] [Whitespace(" ")],
+                    ],
+                },
+                block: CssDeclarationOrRuleBlock {
+                    l_curly_token: L_CURLY@37..38 "{" [] [],
+                    items: CssDeclarationOrRuleList [
+                        CssNestedQualifiedRule {
+                            prelude: CssRelativeSelectorList [
+                                CssRelativeSelector {
+                                    combinator: missing (optional),
+                                    selector: CssCompoundSelector {
+                                        nesting_selectors: CssNestedSelectorList [],
+                                        simple_selector: CssTypeSelector {
+                                            namespace: missing (optional),
+                                            ident: CssIdentifier {
+                                                value_token: IDENT@38..46 "from" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")],
+                                            },
+                                        },
+                                        sub_selectors: CssSubSelectorList [],
+                                    },
+                                },
+                            ],
+                            block: CssDeclarationOrRuleBlock {
+                                l_curly_token: L_CURLY@46..48 "{" [] [Whitespace(" ")],
+                                items: CssDeclarationOrRuleList [
+                                    CssDeclarationWithSemicolon {
+                                        declaration: CssDeclaration {
+                                            property: CssGenericProperty {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@48..55 "opacity" [] [],
+                                                },
+                                                colon_token: COLON@55..57 ":" [] [Whitespace(" ")],
+                                                value: ScssExpression {
+                                                    items: ScssExpressionItemList [
+                                                        CssNumber {
+                                                            value_token: CSS_NUMBER_LITERAL@57..58 "0" [] [],
+                                                        },
+                                                    ],
+                                                },
+                                            },
+                                            important: missing (optional),
+                                        },
+                                        semicolon_token: SEMICOLON@58..60 ";" [] [Whitespace(" ")],
+                                    },
+                                ],
+                                r_curly_token: R_CURLY@60..61 "}" [] [],
+                            },
+                        },
+                        CssNestedQualifiedRule {
+                            prelude: CssRelativeSelectorList [
+                                CssRelativeSelector {
+                                    combinator: missing (optional),
+                                    selector: CssCompoundSelector {
+                                        nesting_selectors: CssNestedSelectorList [],
+                                        simple_selector: CssTypeSelector {
+                                            namespace: missing (optional),
+                                            ident: CssIdentifier {
+                                                value_token: IDENT@61..67 "to" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")],
+                                            },
+                                        },
+                                        sub_selectors: CssSubSelectorList [],
+                                    },
+                                },
+                            ],
+                            block: CssDeclarationOrRuleBlock {
+                                l_curly_token: L_CURLY@67..69 "{" [] [Whitespace(" ")],
+                                items: CssDeclarationOrRuleList [
+                                    CssDeclarationWithSemicolon {
+                                        declaration: CssDeclaration {
+                                            property: CssGenericProperty {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@69..76 "opacity" [] [],
+                                                },
+                                                colon_token: COLON@76..78 ":" [] [Whitespace(" ")],
+                                                value: ScssExpression {
+                                                    items: ScssExpressionItemList [
+                                                        CssNumber {
+                                                            value_token: CSS_NUMBER_LITERAL@78..79 "1" [] [],
+                                                        },
+                                                    ],
+                                                },
+                                            },
+                                            important: missing (optional),
+                                        },
+                                        semicolon_token: SEMICOLON@79..81 ";" [] [Whitespace(" ")],
+                                    },
+                                ],
+                                r_curly_token: R_CURLY@81..82 "}" [] [],
+                            },
+                        },
+                    ],
+                    r_curly_token: R_CURLY@82..84 "}" [Newline("\n")] [],
+                },
+            },
+        },
+        ScssVariableDeclaration {
+            name: ScssVariable {
+                dollar_token: DOLLAR@84..87 "$" [Newline("\n"), Newline("\n")] [],
+                name: CssIdentifier {
+                    value_token: IDENT@87..91 "name" [] [],
+                },
+            },
+            colon_token: COLON@91..93 ":" [] [Whitespace(" ")],
+            value: ScssExpression {
+                items: ScssExpressionItemList [
+                    CssIdentifier {
+                        value_token: IDENT@93..98 "theme" [] [],
+                    },
+                ],
+            },
+            modifiers: ScssVariableModifierList [],
+            semicolon_token: SEMICOLON@98..99 ";" [] [],
+        },
+        CssAtRule {
+            at_token: AT@99..101 "@" [Newline("\n")] [],
+            rule: CssUnknownValueAtRule {
+                name: ScssInterpolatedIdentifier {
+                    items: ScssInterpolatedIdentifierPartList [
+                        CssIdentifier {
+                            value_token: IDENT@101..108 "custom-" [] [],
+                        },
+                        ScssInterpolation {
+                            hash_token: HASH@108..109 "#" [] [],
+                            l_curly_token: L_CURLY@109..110 "{" [] [],
+                            value: ScssExpression {
+                                items: ScssExpressionItemList [
+                                    ScssVariable {
+                                        dollar_token: DOLLAR@110..111 "$" [] [],
+                                        name: CssIdentifier {
+                                            value_token: IDENT@111..115 "name" [] [],
+                                        },
+                                    },
+                                ],
+                            },
+                            r_curly_token: R_CURLY@115..117 "}" [] [Whitespace(" ")],
+                        },
+                    ],
+                },
+                components: CssUnknownAtRuleComponentList {
+                    items: [
+                        IDENT@117..122 "token" [] [],
+                    ],
+                },
+                semicolon_token: SEMICOLON@122..123 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@123..126 "@" [Newline("\n"), Newline("\n")] [],
+            rule: CssUnknownValueAtRule {
+                name: ScssInterpolatedIdentifier {
+                    items: ScssInterpolatedIdentifierPartList [
+                        CssIdentifier {
+                            value_token: IDENT@126..133 "custom-" [] [],
+                        },
+                        ScssInterpolation {
+                            hash_token: HASH@133..134 "#" [] [],
+                            l_curly_token: L_CURLY@134..135 "{" [] [],
+                            value: ScssExpression {
+                                items: ScssExpressionItemList [
+                                    ScssVariable {
+                                        dollar_token: DOLLAR@135..136 "$" [] [],
+                                        name: CssIdentifier {
+                                            value_token: IDENT@136..140 "name" [] [],
+                                        },
+                                    },
+                                ],
+                            },
+                            r_curly_token: R_CURLY@140..141 "}" [] [],
+                        },
+                        CssIdentifier {
+                            value_token: IDENT@141..146 "-end" [] [Whitespace(" ")],
+                        },
+                    ],
+                },
+                components: CssUnknownAtRuleComponentList {
+                    items: [
+                        IDENT@146..151 "token" [] [],
+                    ],
+                },
+                semicolon_token: SEMICOLON@151..152 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@152..154 "@" [Newline("\n")] [],
+            rule: CssUnknownBlockAtRule {
+                name: ScssInterpolatedIdentifier {
+                    items: ScssInterpolatedIdentifierPartList [
+                        CssIdentifier {
+                            value_token: IDENT@154..161 "custom-" [] [],
+                        },
+                        ScssInterpolation {
+                            hash_token: HASH@161..162 "#" [] [],
+                            l_curly_token: L_CURLY@162..163 "{" [] [],
+                            value: ScssExpression {
+                                items: ScssExpressionItemList [
+                                    ScssVariable {
+                                        dollar_token: DOLLAR@163..164 "$" [] [],
+                                        name: CssIdentifier {
+                                            value_token: IDENT@164..168 "name" [] [],
+                                        },
+                                    },
+                                ],
+                            },
+                            r_curly_token: R_CURLY@168..169 "}" [] [],
+                        },
+                        CssIdentifier {
+                            value_token: IDENT@169..174 "-end" [] [Whitespace(" ")],
+                        },
+                    ],
+                },
+                components: CssUnknownAtRuleComponentList {
+                    items: [
+                        IDENT@174..180 "token" [] [Whitespace(" ")],
+                    ],
+                },
+                block: CssDeclarationOrRuleBlock {
+                    l_curly_token: L_CURLY@180..182 "{" [] [Whitespace(" ")],
+                    items: CssDeclarationOrRuleList [
+                        CssNestedQualifiedRule {
+                            prelude: CssRelativeSelectorList [
+                                CssRelativeSelector {
+                                    combinator: missing (optional),
+                                    selector: CssCompoundSelector {
+                                        nesting_selectors: CssNestedSelectorList [],
+                                        simple_selector: missing (optional),
+                                        sub_selectors: CssSubSelectorList [
+                                            CssClassSelector {
+                                                dot_token: DOT@182..183 "." [] [],
+                                                name: CssCustomIdentifier {
+                                                    value_token: IDENT@183..188 "item" [] [Whitespace(" ")],
+                                                },
+                                            },
+                                        ],
+                                    },
+                                },
+                            ],
+                            block: CssDeclarationOrRuleBlock {
+                                l_curly_token: L_CURLY@188..190 "{" [] [Whitespace(" ")],
+                                items: CssDeclarationOrRuleList [
+                                    CssDeclarationWithSemicolon {
+                                        declaration: CssDeclaration {
+                                            property: CssGenericProperty {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@190..195 "color" [] [],
+                                                },
+                                                colon_token: COLON@195..197 ":" [] [Whitespace(" ")],
+                                                value: ScssExpression {
+                                                    items: ScssExpressionItemList [
+                                                        CssIdentifier {
+                                                            value_token: IDENT@197..200 "red" [] [],
+                                                        },
+                                                    ],
+                                                },
+                                            },
+                                            important: missing (optional),
+                                        },
+                                        semicolon_token: SEMICOLON@200..202 ";" [] [Whitespace(" ")],
+                                    },
+                                ],
+                                r_curly_token: R_CURLY@202..204 "}" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                    r_curly_token: R_CURLY@204..205 "}" [] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@205..207 "@" [Newline("\n")] [],
+            rule: CssUnknownValueAtRule {
+                name: ScssInterpolatedIdentifier {
+                    items: ScssInterpolatedIdentifierPartList [
+                        CssIdentifier {
+                            value_token: IDENT@207..212 "media" [] [],
+                        },
+                        ScssInterpolation {
+                            hash_token: HASH@212..213 "#" [] [],
+                            l_curly_token: L_CURLY@213..214 "{" [] [],
+                            value: ScssExpression {
+                                items: ScssExpressionItemList [
+                                    ScssVariable {
+                                        dollar_token: DOLLAR@214..215 "$" [] [],
+                                        name: CssIdentifier {
+                                            value_token: IDENT@215..219 "name" [] [],
+                                        },
+                                    },
+                                ],
+                            },
+                            r_curly_token: R_CURLY@219..221 "}" [] [Whitespace(" ")],
+                        },
+                    ],
+                },
+                components: CssUnknownAtRuleComponentList {
+                    items: [
+                        IDENT@221..226 "token" [] [],
+                    ],
+                },
+                semicolon_token: SEMICOLON@226..227 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@227..229 "@" [Newline("\n")] [],
+            rule: CssUnknownValueAtRule {
+                name: ScssInterpolatedIdentifier {
+                    items: ScssInterpolatedIdentifierPartList [
+                        CssIdentifier {
+                            value_token: IDENT@229..236 "include" [] [],
+                        },
+                        ScssInterpolation {
+                            hash_token: HASH@236..237 "#" [] [],
+                            l_curly_token: L_CURLY@237..238 "{" [] [],
+                            value: ScssExpression {
+                                items: ScssExpressionItemList [
+                                    ScssVariable {
+                                        dollar_token: DOLLAR@238..239 "$" [] [],
+                                        name: CssIdentifier {
+                                            value_token: IDENT@239..243 "name" [] [],
+                                        },
+                                    },
+                                ],
+                            },
+                            r_curly_token: R_CURLY@243..245 "}" [] [Whitespace(" ")],
+                        },
+                    ],
+                },
+                components: CssUnknownAtRuleComponentList {
+                    items: [
+                        IDENT@245..250 "token" [] [],
+                    ],
+                },
+                semicolon_token: SEMICOLON@250..251 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@251..253 "@" [Newline("\n")] [],
+            rule: CssUnknownValueAtRule {
+                name: ScssInterpolatedIdentifier {
+                    items: ScssInterpolatedIdentifierPartList [
+                        ScssInterpolatedIdentifierHyphen {
+                            minus_token: MINUS@253..254 "-" [] [],
+                        },
+                        ScssInterpolation {
+                            hash_token: HASH@254..255 "#" [] [],
+                            l_curly_token: L_CURLY@255..256 "{" [] [],
+                            value: ScssExpression {
+                                items: ScssExpressionItemList [
+                                    ScssVariable {
+                                        dollar_token: DOLLAR@256..257 "$" [] [],
+                                        name: CssIdentifier {
+                                            value_token: IDENT@257..261 "name" [] [],
+                                        },
+                                    },
+                                ],
+                            },
+                            r_curly_token: R_CURLY@261..263 "}" [] [Whitespace(" ")],
+                        },
+                    ],
+                },
+                components: CssUnknownAtRuleComponentList {
+                    items: [
+                        IDENT@263..268 "token" [] [],
+                    ],
+                },
+                semicolon_token: SEMICOLON@268..269 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@269..271 "@" [Newline("\n")] [],
+            rule: CssUnknownValueAtRule {
+                name: ScssInterpolatedIdentifier {
+                    items: ScssInterpolatedIdentifierPartList [
+                        ScssInterpolatedIdentifierHyphen {
+                            minus_token: MINUS@271..272 "-" [] [],
+                        },
+                        ScssInterpolatedIdentifierHyphen {
+                            minus_token: MINUS@272..273 "-" [] [],
+                        },
+                        ScssInterpolation {
+                            hash_token: HASH@273..274 "#" [] [],
+                            l_curly_token: L_CURLY@274..275 "{" [] [],
+                            value: ScssExpression {
+                                items: ScssExpressionItemList [
+                                    ScssVariable {
+                                        dollar_token: DOLLAR@275..276 "$" [] [],
+                                        name: CssIdentifier {
+                                            value_token: IDENT@276..280 "name" [] [],
+                                        },
+                                    },
+                                ],
+                            },
+                            r_curly_token: R_CURLY@280..282 "}" [] [Whitespace(" ")],
+                        },
+                    ],
+                },
+                components: CssUnknownAtRuleComponentList {
+                    items: [
+                        IDENT@282..287 "token" [] [],
+                    ],
+                },
+                semicolon_token: SEMICOLON@287..288 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@288..290 "@" [Newline("\n")] [],
+            rule: CssUnknownValueAtRule {
+                name: ScssInterpolatedIdentifier {
+                    items: ScssInterpolatedIdentifierPartList [
+                        CssIdentifier {
+                            value_token: IDENT@290..297 "custom-" [] [],
+                        },
+                        ScssInterpolation {
+                            hash_token: HASH@297..298 "#" [] [],
+                            l_curly_token: L_CURLY@298..299 "{" [] [],
+                            value: ScssExpression {
+                                items: ScssExpressionItemList [
+                                    ScssVariable {
+                                        dollar_token: DOLLAR@299..300 "$" [] [],
+                                        name: CssIdentifier {
+                                            value_token: IDENT@300..304 "name" [] [],
+                                        },
+                                    },
+                                ],
+                            },
+                            r_curly_token: R_CURLY@304..305 "}" [] [],
+                        },
+                        CssIdentifier {
+                            value_token: IDENT@305..311 "2-end" [] [Whitespace(" ")],
+                        },
+                    ],
+                },
+                components: CssUnknownAtRuleComponentList {
+                    items: [
+                        IDENT@311..316 "token" [] [],
+                    ],
+                },
+                semicolon_token: SEMICOLON@316..317 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@317..319 "@" [Newline("\n")] [],
+            rule: CssUnknownValueAtRule {
+                name: ScssInterpolatedIdentifier {
+                    items: ScssInterpolatedIdentifierPartList [
+                        CssIdentifier {
+                            value_token: IDENT@319..326 "custom-" [] [],
+                        },
+                        ScssInterpolation {
+                            hash_token: HASH@326..327 "#" [] [],
+                            l_curly_token: L_CURLY@327..328 "{" [] [],
+                            value: ScssExpression {
+                                items: ScssExpressionItemList [
+                                    ScssVariable {
+                                        dollar_token: DOLLAR@328..329 "$" [] [],
+                                        name: CssIdentifier {
+                                            value_token: IDENT@329..333 "name" [] [],
+                                        },
+                                    },
+                                ],
+                            },
+                            r_curly_token: R_CURLY@333..334 "}" [] [],
+                        },
+                        CssIdentifier {
+                            value_token: IDENT@334..337 "01" [] [Whitespace(" ")],
+                        },
+                    ],
+                },
+                components: CssUnknownAtRuleComponentList {
+                    items: [
+                        IDENT@337..342 "token" [] [],
+                    ],
+                },
+                semicolon_token: SEMICOLON@342..343 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@343..345 "@" [Newline("\n")] [],
+            rule: CssUnknownValueAtRule {
+                name: ScssInterpolatedIdentifier {
+                    items: ScssInterpolatedIdentifierPartList [
+                        CssIdentifier {
+                            value_token: IDENT@345..352 "custom-" [] [],
+                        },
+                        ScssInterpolation {
+                            hash_token: HASH@352..353 "#" [] [],
+                            l_curly_token: L_CURLY@353..354 "{" [] [],
+                            value: ScssExpression {
+                                items: ScssExpressionItemList [
+                                    ScssVariable {
+                                        dollar_token: DOLLAR@354..355 "$" [] [],
+                                        name: CssIdentifier {
+                                            value_token: IDENT@355..359 "name" [] [],
+                                        },
+                                    },
+                                ],
+                            },
+                            r_curly_token: R_CURLY@359..360 "}" [] [],
+                        },
+                        CssIdentifier {
+                            value_token: IDENT@360..361 "2" [] [],
+                        },
+                    ],
+                },
+                components: CssUnknownAtRuleComponentList {
+                    items: [
+                        CSS_NUMBER_LITERAL@361..364 ".5" [] [Whitespace(" ")],
+                        IDENT@364..369 "token" [] [],
+                    ],
+                },
+                semicolon_token: SEMICOLON@369..370 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@370..372 "@" [Newline("\n")] [],
+            rule: CssUnknownValueAtRule {
+                name: ScssInterpolatedIdentifier {
+                    items: ScssInterpolatedIdentifierPartList [
+                        CssIdentifier {
+                            value_token: IDENT@372..379 "custom-" [] [],
+                        },
+                        ScssInterpolation {
+                            hash_token: HASH@379..380 "#" [] [],
+                            l_curly_token: L_CURLY@380..381 "{" [] [],
+                            value: ScssExpression {
+                                items: ScssExpressionItemList [
+                                    ScssVariable {
+                                        dollar_token: DOLLAR@381..382 "$" [] [],
+                                        name: CssIdentifier {
+                                            value_token: IDENT@382..386 "name" [] [],
+                                        },
+                                    },
+                                ],
+                            },
+                            r_curly_token: R_CURLY@386..387 "}" [] [],
+                        },
+                    ],
+                },
+                components: CssUnknownAtRuleComponentList {
+                    items: [
+                        CSS_NUMBER_LITERAL@387..390 "+2" [] [Whitespace(" ")],
+                        IDENT@390..395 "token" [] [],
+                    ],
+                },
+                semicolon_token: SEMICOLON@395..396 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@396..398 "@" [Newline("\n")] [],
+            rule: CssUnknownValueAtRule {
+                name: ScssInterpolatedIdentifier {
+                    items: ScssInterpolatedIdentifierPartList [
+                        CssIdentifier {
+                            value_token: IDENT@398..405 "custom-" [] [],
+                        },
+                        ScssInterpolation {
+                            hash_token: HASH@405..406 "#" [] [],
+                            l_curly_token: L_CURLY@406..407 "{" [] [],
+                            value: ScssExpression {
+                                items: ScssExpressionItemList [
+                                    ScssVariable {
+                                        dollar_token: DOLLAR@407..408 "$" [] [],
+                                        name: CssIdentifier {
+                                            value_token: IDENT@408..412 "name" [] [],
+                                        },
+                                    },
+                                ],
+                            },
+                            r_curly_token: R_CURLY@412..413 "}" [] [],
+                        },
+                        CssIdentifier {
+                            value_token: IDENT@413..414 "2" [] [],
+                        },
+                    ],
+                },
+                components: CssUnknownAtRuleComponentList {
+                    items: [
+                        PERCENT@414..416 "%" [] [Whitespace(" ")],
+                        IDENT@416..421 "token" [] [],
+                    ],
+                },
+                semicolon_token: SEMICOLON@421..422 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@422..424 "@" [Newline("\n")] [],
+            rule: CssUnknownValueAtRule {
+                name: ScssInterpolatedIdentifier {
+                    items: ScssInterpolatedIdentifierPartList [
+                        CssIdentifier {
+                            value_token: IDENT@424..431 "custom-" [] [],
+                        },
+                        ScssInterpolation {
+                            hash_token: HASH@431..432 "#" [] [],
+                            l_curly_token: L_CURLY@432..433 "{" [] [],
+                            value: ScssExpression {
+                                items: ScssExpressionItemList [
+                                    ScssVariable {
+                                        dollar_token: DOLLAR@433..434 "$" [] [],
+                                        name: CssIdentifier {
+                                            value_token: IDENT@434..438 "name" [] [],
+                                        },
+                                    },
+                                ],
+                            },
+                            r_curly_token: R_CURLY@438..439 "}" [] [],
+                        },
+                        ScssInterpolatedIdentifierHyphen {
+                            minus_token: MINUS@439..441 "-" [] [Whitespace(" ")],
+                        },
+                    ],
+                },
+                components: CssUnknownAtRuleComponentList {
+                    items: [
+                        IDENT@441..446 "token" [] [],
+                    ],
+                },
+                semicolon_token: SEMICOLON@446..447 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@447..449 "@" [Newline("\n")] [],
+            rule: CssUnknownValueAtRule {
+                name: ScssInterpolation {
+                    hash_token: HASH@449..450 "#" [] [],
+                    l_curly_token: L_CURLY@450..451 "{" [] [],
+                    value: ScssExpression {
+                        items: ScssExpressionItemList [
+                            ScssVariable {
+                                dollar_token: DOLLAR@451..452 "$" [] [],
+                                name: CssIdentifier {
+                                    value_token: IDENT@452..456 "name" [] [],
+                                },
+                            },
+                        ],
+                    },
+                    r_curly_token: R_CURLY@456..458 "}" [] [Whitespace(" ")],
+                },
+                components: CssUnknownAtRuleComponentList {
+                    items: [
+                        IDENT@458..463 "token" [] [],
+                    ],
+                },
+                semicolon_token: SEMICOLON@463..464 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@464..466 "@" [Newline("\n")] [],
+            rule: CssUnknownValueAtRule {
+                name: ScssInterpolation {
+                    hash_token: HASH@466..467 "#" [] [],
+                    l_curly_token: L_CURLY@467..468 "{" [] [],
+                    value: ScssExpression {
+                        items: ScssExpressionItemList [
+                            ScssVariable {
+                                dollar_token: DOLLAR@468..469 "$" [] [],
+                                name: CssIdentifier {
+                                    value_token: IDENT@469..473 "name" [] [],
+                                },
+                            },
+                        ],
+                    },
+                    r_curly_token: R_CURLY@473..500 "}" [] [Whitespace(" "), Comments("/* fully interpolated */"), Whitespace(" ")],
+                },
+                components: CssUnknownAtRuleComponentList {
+                    items: [
+                        IDENT@500..505 "token" [] [],
+                    ],
+                },
+                semicolon_token: SEMICOLON@505..506 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@506..508 "@" [Newline("\n")] [],
+            rule: CssUnknownBlockAtRule {
+                name: ScssInterpolatedIdentifier {
+                    items: ScssInterpolatedIdentifierPartList [
+                        ScssInterpolation {
+                            hash_token: HASH@508..509 "#" [] [],
+                            l_curly_token: L_CURLY@509..510 "{" [] [],
+                            value: ScssExpression {
+                                items: ScssExpressionItemList [
+                                    ScssVariable {
+                                        dollar_token: DOLLAR@510..511 "$" [] [],
+                                        name: CssIdentifier {
+                                            value_token: IDENT@511..515 "name" [] [],
+                                        },
+                                    },
+                                ],
+                            },
+                            r_curly_token: R_CURLY@515..516 "}" [] [],
+                        },
+                        CssIdentifier {
+                            value_token: IDENT@516..521 "-end" [] [Whitespace(" ")],
+                        },
+                    ],
+                },
+                components: CssUnknownAtRuleComponentList {
+                    items: [
+                        IDENT@521..527 "token" [] [Whitespace(" ")],
+                    ],
+                },
+                block: CssDeclarationOrRuleBlock {
+                    l_curly_token: L_CURLY@527..529 "{" [] [Whitespace(" ")],
+                    items: CssDeclarationOrRuleList [
+                        CssNestedQualifiedRule {
+                            prelude: CssRelativeSelectorList [
+                                CssRelativeSelector {
+                                    combinator: missing (optional),
+                                    selector: CssCompoundSelector {
+                                        nesting_selectors: CssNestedSelectorList [],
+                                        simple_selector: missing (optional),
+                                        sub_selectors: CssSubSelectorList [
+                                            CssClassSelector {
+                                                dot_token: DOT@529..530 "." [] [],
+                                                name: CssCustomIdentifier {
+                                                    value_token: IDENT@530..535 "item" [] [Whitespace(" ")],
+                                                },
+                                            },
+                                        ],
+                                    },
+                                },
+                            ],
+                            block: CssDeclarationOrRuleBlock {
+                                l_curly_token: L_CURLY@535..537 "{" [] [Whitespace(" ")],
+                                items: CssDeclarationOrRuleList [
+                                    CssDeclarationWithSemicolon {
+                                        declaration: CssDeclaration {
+                                            property: CssGenericProperty {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@537..542 "color" [] [],
+                                                },
+                                                colon_token: COLON@542..544 ":" [] [Whitespace(" ")],
+                                                value: ScssExpression {
+                                                    items: ScssExpressionItemList [
+                                                        CssIdentifier {
+                                                            value_token: IDENT@544..547 "red" [] [],
+                                                        },
+                                                    ],
+                                                },
+                                            },
+                                            important: missing (optional),
+                                        },
+                                        semicolon_token: SEMICOLON@547..549 ";" [] [Whitespace(" ")],
+                                    },
+                                ],
+                                r_curly_token: R_CURLY@549..551 "}" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                    r_curly_token: R_CURLY@551..552 "}" [] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@552..554 "@" [Newline("\n")] [],
+            rule: CssUnknownValueAtRule {
+                name: ScssInterpolatedIdentifier {
+                    items: ScssInterpolatedIdentifierPartList [
+                        CssIdentifier {
+                            value_token: IDENT@554..561 "custom-" [] [],
+                        },
+                        ScssInterpolation {
+                            hash_token: HASH@561..562 "#" [] [],
+                            l_curly_token: L_CURLY@562..563 "{" [] [],
+                            value: ScssExpression {
+                                items: ScssExpressionItemList [
+                                    ScssVariable {
+                                        dollar_token: DOLLAR@563..564 "$" [] [],
+                                        name: CssIdentifier {
+                                            value_token: IDENT@564..568 "name" [] [],
+                                        },
+                                    },
+                                ],
+                            },
+                            r_curly_token: R_CURLY@568..585 "}" [] [Whitespace(" "), Comments("/* boundary */"), Whitespace(" ")],
+                        },
+                    ],
+                },
+                components: CssUnknownAtRuleComponentList {
+                    items: [
+                        IDENT@585..590 "token" [] [],
+                    ],
+                },
+                semicolon_token: SEMICOLON@590..591 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@591..593 "@" [Newline("\n")] [],
+            rule: CssUnknownBlockAtRule {
+                name: ScssInterpolatedIdentifier {
+                    items: ScssInterpolatedIdentifierPartList [
+                        CssIdentifier {
+                            value_token: IDENT@593..600 "custom-" [] [],
+                        },
+                        ScssInterpolation {
+                            hash_token: HASH@600..601 "#" [] [],
+                            l_curly_token: L_CURLY@601..602 "{" [] [],
+                            value: ScssExpression {
+                                items: ScssExpressionItemList [
+                                    ScssVariable {
+                                        dollar_token: DOLLAR@602..603 "$" [] [],
+                                        name: CssIdentifier {
+                                            value_token: IDENT@603..607 "name" [] [],
+                                        },
+                                    },
+                                ],
+                            },
+                            r_curly_token: R_CURLY@607..630 "}" [] [Whitespace(" "), Comments("/* block boundary */"), Whitespace(" ")],
+                        },
+                    ],
+                },
+                components: CssUnknownAtRuleComponentList {
+                    items: [
+                        IDENT@630..636 "token" [] [Whitespace(" ")],
+                    ],
+                },
+                block: CssDeclarationOrRuleBlock {
+                    l_curly_token: L_CURLY@636..638 "{" [] [Whitespace(" ")],
+                    items: CssDeclarationOrRuleList [
+                        CssNestedQualifiedRule {
+                            prelude: CssRelativeSelectorList [
+                                CssRelativeSelector {
+                                    combinator: missing (optional),
+                                    selector: CssCompoundSelector {
+                                        nesting_selectors: CssNestedSelectorList [],
+                                        simple_selector: missing (optional),
+                                        sub_selectors: CssSubSelectorList [
+                                            CssClassSelector {
+                                                dot_token: DOT@638..639 "." [] [],
+                                                name: CssCustomIdentifier {
+                                                    value_token: IDENT@639..644 "item" [] [Whitespace(" ")],
+                                                },
+                                            },
+                                        ],
+                                    },
+                                },
+                            ],
+                            block: CssDeclarationOrRuleBlock {
+                                l_curly_token: L_CURLY@644..646 "{" [] [Whitespace(" ")],
+                                items: CssDeclarationOrRuleList [
+                                    CssDeclarationWithSemicolon {
+                                        declaration: CssDeclaration {
+                                            property: CssGenericProperty {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@646..651 "color" [] [],
+                                                },
+                                                colon_token: COLON@651..653 ":" [] [Whitespace(" ")],
+                                                value: ScssExpression {
+                                                    items: ScssExpressionItemList [
+                                                        CssIdentifier {
+                                                            value_token: IDENT@653..656 "red" [] [],
+                                                        },
+                                                    ],
+                                                },
+                                            },
+                                            important: missing (optional),
+                                        },
+                                        semicolon_token: SEMICOLON@656..658 ";" [] [Whitespace(" ")],
+                                    },
+                                ],
+                                r_curly_token: R_CURLY@658..660 "}" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                    r_curly_token: R_CURLY@660..661 "}" [] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@661..663 "@" [Newline("\n")] [],
+            rule: CssUnknownBlockAtRule {
+                name: ScssInterpolatedIdentifier {
+                    items: ScssInterpolatedIdentifierPartList [
+                        CssIdentifier {
+                            value_token: IDENT@663..670 "custom-" [] [],
+                        },
+                        ScssInterpolation {
+                            hash_token: HASH@670..671 "#" [] [],
+                            l_curly_token: L_CURLY@671..672 "{" [] [],
+                            value: ScssExpression {
+                                items: ScssExpressionItemList [
+                                    ScssVariable {
+                                        dollar_token: DOLLAR@672..673 "$" [] [],
+                                        name: CssIdentifier {
+                                            value_token: IDENT@673..677 "name" [] [],
+                                        },
+                                    },
+                                ],
+                            },
+                            r_curly_token: R_CURLY@677..696 "}" [] [Whitespace(" "), Comments("/* no prelude */"), Whitespace(" ")],
+                        },
+                    ],
+                },
+                components: CssUnknownAtRuleComponentList {
+                    items: [],
+                },
+                block: CssDeclarationOrRuleBlock {
+                    l_curly_token: L_CURLY@696..698 "{" [] [Whitespace(" ")],
+                    items: CssDeclarationOrRuleList [
+                        CssNestedQualifiedRule {
+                            prelude: CssRelativeSelectorList [
+                                CssRelativeSelector {
+                                    combinator: missing (optional),
+                                    selector: CssCompoundSelector {
+                                        nesting_selectors: CssNestedSelectorList [],
+                                        simple_selector: missing (optional),
+                                        sub_selectors: CssSubSelectorList [
+                                            CssClassSelector {
+                                                dot_token: DOT@698..699 "." [] [],
+                                                name: CssCustomIdentifier {
+                                                    value_token: IDENT@699..704 "item" [] [Whitespace(" ")],
+                                                },
+                                            },
+                                        ],
+                                    },
+                                },
+                            ],
+                            block: CssDeclarationOrRuleBlock {
+                                l_curly_token: L_CURLY@704..706 "{" [] [Whitespace(" ")],
+                                items: CssDeclarationOrRuleList [
+                                    CssDeclarationWithSemicolon {
+                                        declaration: CssDeclaration {
+                                            property: CssGenericProperty {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@706..711 "color" [] [],
+                                                },
+                                                colon_token: COLON@711..713 ":" [] [Whitespace(" ")],
+                                                value: ScssExpression {
+                                                    items: ScssExpressionItemList [
+                                                        CssIdentifier {
+                                                            value_token: IDENT@713..716 "red" [] [],
+                                                        },
+                                                    ],
+                                                },
+                                            },
+                                            important: missing (optional),
+                                        },
+                                        semicolon_token: SEMICOLON@716..718 ";" [] [Whitespace(" ")],
+                                    },
+                                ],
+                                r_curly_token: R_CURLY@718..720 "}" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                    r_curly_token: R_CURLY@720..721 "}" [] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@721..723 "@" [Newline("\n")] [],
+            rule: CssUnknownValueAtRule {
+                name: ScssInterpolatedIdentifier {
+                    items: ScssInterpolatedIdentifierPartList [
+                        CssIdentifier {
+                            value_token: IDENT@723..730 "custom-" [] [],
+                        },
+                        ScssInterpolation {
+                            hash_token: HASH@730..731 "#" [] [],
+                            l_curly_token: L_CURLY@731..732 "{" [] [],
+                            value: ScssExpression {
+                                items: ScssExpressionItemList [
+                                    ScssVariable {
+                                        dollar_token: DOLLAR@732..733 "$" [] [],
+                                        name: CssIdentifier {
+                                            value_token: IDENT@733..737 "name" [] [],
+                                        },
+                                    },
+                                ],
+                            },
+                            r_curly_token: R_CURLY@737..742 "}" [] [Comments("/**/")],
+                        },
+                    ],
+                },
+                components: CssUnknownAtRuleComponentList {
+                    items: [
+                        IDENT@742..747 "token" [] [],
+                    ],
+                },
+                semicolon_token: SEMICOLON@747..748 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@748..750 "@" [Newline("\n")] [],
+            rule: CssUnknownValueAtRule {
+                name: CssIdentifier {
+                    value_token: IDENT@750..761 "custom-" [] [Comments("/**/")],
+                },
+                components: CssUnknownAtRuleComponentList {
+                    items: [
+                        ScssInterpolation {
+                            hash_token: HASH@761..762 "#" [] [],
+                            l_curly_token: L_CURLY@762..763 "{" [] [],
+                            value: ScssExpression {
+                                items: ScssExpressionItemList [
+                                    ScssVariable {
+                                        dollar_token: DOLLAR@763..764 "$" [] [],
+                                        name: CssIdentifier {
+                                            value_token: IDENT@764..768 "name" [] [],
+                                        },
+                                    },
+                                ],
+                            },
+                            r_curly_token: R_CURLY@768..770 "}" [] [Whitespace(" ")],
+                        },
+                        IDENT@770..775 "token" [] [],
+                    ],
+                },
+                semicolon_token: SEMICOLON@775..776 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@776..778 "@" [Newline("\n")] [],
+            rule: CssUnknownValueAtRule {
+                name: CssIdentifier {
+                    value_token: IDENT@778..786 "custom-" [] [Whitespace(" ")],
+                },
+                components: CssUnknownAtRuleComponentList {
+                    items: [
+                        ScssInterpolation {
+                            hash_token: HASH@786..787 "#" [] [],
+                            l_curly_token: L_CURLY@787..788 "{" [] [],
+                            value: ScssExpression {
+                                items: ScssExpressionItemList [
+                                    ScssVariable {
+                                        dollar_token: DOLLAR@788..789 "$" [] [],
+                                        name: CssIdentifier {
+                                            value_token: IDENT@789..793 "name" [] [],
+                                        },
+                                    },
+                                ],
+                            },
+                            r_curly_token: R_CURLY@793..795 "}" [] [Whitespace(" ")],
+                        },
+                        IDENT@795..800 "token" [] [],
+                    ],
+                },
+                semicolon_token: SEMICOLON@800..801 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@801..803 "@" [Newline("\n")] [],
+            rule: CssUnknownValueAtRule {
+                name: ScssInterpolatedIdentifier {
+                    items: ScssInterpolatedIdentifierPartList [
+                        CssIdentifier {
+                            value_token: IDENT@803..810 "custom-" [] [],
+                        },
+                        ScssInterpolation {
+                            hash_token: HASH@810..811 "#" [] [],
+                            l_curly_token: L_CURLY@811..812 "{" [] [],
+                            value: ScssExpression {
+                                items: ScssExpressionItemList [
+                                    ScssVariable {
+                                        dollar_token: DOLLAR@812..813 "$" [] [],
+                                        name: CssIdentifier {
+                                            value_token: IDENT@813..817 "name" [] [],
+                                        },
+                                    },
+                                ],
+                            },
+                            r_curly_token: R_CURLY@817..830 "}" [] [Whitespace(" "), Comments("// boundary")],
+                        },
+                    ],
+                },
+                components: CssUnknownAtRuleComponentList {
+                    items: [
+                        IDENT@830..836 "token" [Newline("\n")] [],
+                    ],
+                },
+                semicolon_token: SEMICOLON@836..837 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@837..840 "@" [Newline("\n"), Newline("\n")] [],
+            rule: CssUnknownValueAtRule {
+                name: ScssInterpolatedIdentifier {
+                    items: ScssInterpolatedIdentifierPartList [
+                        CssIdentifier {
+                            value_token: IDENT@840..847 "custom-" [] [],
+                        },
+                        ScssInterpolation {
+                            hash_token: HASH@847..848 "#" [] [],
+                            l_curly_token: L_CURLY@848..849 "{" [] [],
+                            value: ScssExpression {
+                                items: ScssExpressionItemList [
+                                    ScssVariable {
+                                        dollar_token: DOLLAR@849..850 "$" [] [],
+                                        name: CssIdentifier {
+                                            value_token: IDENT@850..854 "name" [] [],
+                                        },
+                                    },
+                                ],
+                            },
+                            r_curly_token: R_CURLY@854..855 "}" [] [],
+                        },
+                        CssIdentifier {
+                            value_token: IDENT@855..857 "--" [] [],
+                        },
+                    ],
+                },
+                components: CssUnknownAtRuleComponentList {
+                    items: [
+                        R_ANGLE@857..859 ">" [] [Whitespace(" ")],
+                        IDENT@859..864 "token" [] [],
+                    ],
+                },
+                semicolon_token: SEMICOLON@864..865 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@865..867 "@" [Newline("\n")] [],
+            rule: CssUnknownBlockAtRule {
+                name: ScssInterpolatedIdentifier {
+                    items: ScssInterpolatedIdentifierPartList [
+                        ScssInterpolation {
+                            hash_token: HASH@867..868 "#" [] [],
+                            l_curly_token: L_CURLY@868..869 "{" [] [],
+                            value: ScssExpression {
+                                items: ScssExpressionItemList [
+                                    ScssVariable {
+                                        dollar_token: DOLLAR@869..870 "$" [] [],
+                                        name: CssIdentifier {
+                                            value_token: IDENT@870..874 "name" [] [],
+                                        },
+                                    },
+                                ],
+                            },
+                            r_curly_token: R_CURLY@874..875 "}" [] [],
+                        },
+                        CssIdentifier {
+                            value_token: IDENT@875..877 "--" [] [],
+                        },
+                    ],
+                },
+                components: CssUnknownAtRuleComponentList {
+                    items: [
+                        R_ANGLE@877..879 ">" [] [Whitespace(" ")],
+                        IDENT@879..885 "token" [] [Whitespace(" ")],
+                    ],
+                },
+                block: CssDeclarationOrRuleBlock {
+                    l_curly_token: L_CURLY@885..887 "{" [] [Whitespace(" ")],
+                    items: CssDeclarationOrRuleList [
+                        CssNestedQualifiedRule {
+                            prelude: CssRelativeSelectorList [
+                                CssRelativeSelector {
+                                    combinator: missing (optional),
+                                    selector: CssCompoundSelector {
+                                        nesting_selectors: CssNestedSelectorList [],
+                                        simple_selector: missing (optional),
+                                        sub_selectors: CssSubSelectorList [
+                                            CssClassSelector {
+                                                dot_token: DOT@887..888 "." [] [],
+                                                name: CssCustomIdentifier {
+                                                    value_token: IDENT@888..893 "item" [] [Whitespace(" ")],
+                                                },
+                                            },
+                                        ],
+                                    },
+                                },
+                            ],
+                            block: CssDeclarationOrRuleBlock {
+                                l_curly_token: L_CURLY@893..895 "{" [] [Whitespace(" ")],
+                                items: CssDeclarationOrRuleList [
+                                    CssDeclarationWithSemicolon {
+                                        declaration: CssDeclaration {
+                                            property: CssGenericProperty {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@895..900 "color" [] [],
+                                                },
+                                                colon_token: COLON@900..902 ":" [] [Whitespace(" ")],
+                                                value: ScssExpression {
+                                                    items: ScssExpressionItemList [
+                                                        CssIdentifier {
+                                                            value_token: IDENT@902..905 "red" [] [],
+                                                        },
+                                                    ],
+                                                },
+                                            },
+                                            important: missing (optional),
+                                        },
+                                        semicolon_token: SEMICOLON@905..907 ";" [] [Whitespace(" ")],
+                                    },
+                                ],
+                                r_curly_token: R_CURLY@907..909 "}" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                    r_curly_token: R_CURLY@909..910 "}" [] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@910..912 "@" [Newline("\n")] [],
+            rule: CssUnknownValueAtRule {
+                name: ScssInterpolatedIdentifier {
+                    items: ScssInterpolatedIdentifierPartList [
+                        CssIdentifier {
+                            value_token: IDENT@912..919 "custom-" [] [],
+                        },
+                        ScssInterpolation {
+                            hash_token: HASH@919..920 "#" [] [],
+                            l_curly_token: L_CURLY@920..921 "{" [] [],
+                            value: ScssExpression {
+                                items: ScssExpressionItemList [
+                                    ScssVariable {
+                                        dollar_token: DOLLAR@921..922 "$" [] [],
+                                        name: CssIdentifier {
+                                            value_token: IDENT@922..926 "name" [] [],
+                                        },
+                                    },
+                                ],
+                            },
+                            r_curly_token: R_CURLY@926..928 "}" [] [Whitespace(" ")],
+                        },
+                    ],
+                },
+                components: CssUnknownAtRuleComponentList {
+                    items: [
+                        CDC@928..932 "-->" [] [Whitespace(" ")],
+                        IDENT@932..937 "token" [] [],
+                    ],
+                },
+                semicolon_token: SEMICOLON@937..938 ";" [] [],
+            },
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@938..941 "." [Newline("\n"), Newline("\n")] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@941..946 "host" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@946..947 "{" [] [],
+                items: CssDeclarationOrRuleList [
+                    CssAtRule {
+                        at_token: AT@947..951 "@" [Newline("\n"), Whitespace("  ")] [],
+                        rule: CssUnknownValueAtRule {
+                            name: ScssInterpolatedIdentifier {
+                                items: ScssInterpolatedIdentifierPartList [
+                                    CssIdentifier {
+                                        value_token: IDENT@951..958 "custom-" [] [],
+                                    },
+                                    ScssInterpolation {
+                                        hash_token: HASH@958..959 "#" [] [],
+                                        l_curly_token: L_CURLY@959..960 "{" [] [],
+                                        value: ScssExpression {
+                                            items: ScssExpressionItemList [
+                                                ScssVariable {
+                                                    dollar_token: DOLLAR@960..961 "$" [] [],
+                                                    name: CssIdentifier {
+                                                        value_token: IDENT@961..965 "name" [] [],
+                                                    },
+                                                },
+                                            ],
+                                        },
+                                        r_curly_token: R_CURLY@965..967 "}" [] [Whitespace(" ")],
+                                    },
+                                ],
+                            },
+                            components: CssUnknownAtRuleComponentList {
+                                items: [
+                                    IDENT@967..972 "final" [] [],
+                                ],
+                            },
+                            semicolon_token: missing (optional),
+                        },
+                    },
+                ],
+                r_curly_token: R_CURLY@972..974 "}" [Newline("\n")] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@974..976 "@" [Newline("\n")] [],
+            rule: CssUnknownValueAtRule {
+                name: ScssInterpolatedIdentifier {
+                    items: ScssInterpolatedIdentifierPartList [
+                        CssIdentifier {
+                            value_token: IDENT@976..983 "custom-" [] [],
+                        },
+                        ScssInterpolation {
+                            hash_token: HASH@983..984 "#" [] [],
+                            l_curly_token: L_CURLY@984..985 "{" [] [],
+                            value: ScssExpression {
+                                items: ScssExpressionItemList [
+                                    ScssVariable {
+                                        dollar_token: DOLLAR@985..986 "$" [] [],
+                                        name: CssIdentifier {
+                                            value_token: IDENT@986..990 "name" [] [],
+                                        },
+                                    },
+                                ],
+                            },
+                            r_curly_token: R_CURLY@990..992 "}" [] [Whitespace(" ")],
+                        },
+                    ],
+                },
+                components: CssUnknownAtRuleComponentList {
+                    items: [
+                        IDENT@992..997 "final" [] [],
+                    ],
+                },
+                semicolon_token: missing (optional),
+            },
+        },
+    ],
+    eof_token: EOF@997..998 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..998
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..997
+    0: SCSS_VARIABLE_DECLARATION@0..16
+      0: SCSS_VARIABLE@0..7
+        0: DOLLAR@0..1 "$" [] []
+        1: CSS_IDENTIFIER@1..7
+          0: IDENT@1..7 "suffix" [] []
+      1: COLON@7..9 ":" [] [Whitespace(" ")]
+      2: SCSS_EXPRESSION@9..15
+        0: SCSS_EXPRESSION_ITEM_LIST@9..15
+          0: CSS_IDENTIFIER@9..15
+            0: IDENT@9..15 "frames" [] []
+      3: SCSS_VARIABLE_MODIFIER_LIST@15..15
+      4: SEMICOLON@15..16 ";" [] []
+    1: CSS_AT_RULE@16..84
+      0: AT@16..18 "@" [Newline("\n")] []
+      1: CSS_UNKNOWN_BLOCK_AT_RULE@18..84
+        0: SCSS_INTERPOLATED_IDENTIFIER@18..32
+          0: SCSS_INTERPOLATED_IDENTIFIER_PART_LIST@18..32
+            0: CSS_IDENTIFIER@18..21
+              0: IDENT@18..21 "key" [] []
+            1: SCSS_INTERPOLATION@21..32
+              0: HASH@21..22 "#" [] []
+              1: L_CURLY@22..23 "{" [] []
+              2: SCSS_EXPRESSION@23..30
+                0: SCSS_EXPRESSION_ITEM_LIST@23..30
+                  0: SCSS_VARIABLE@23..30
+                    0: DOLLAR@23..24 "$" [] []
+                    1: CSS_IDENTIFIER@24..30
+                      0: IDENT@24..30 "suffix" [] []
+              3: R_CURLY@30..32 "}" [] [Whitespace(" ")]
+        1: CSS_UNKNOWN_AT_RULE_COMPONENT_LIST@32..37
+          0: IDENT@32..37 "fade" [] [Whitespace(" ")]
+        2: CSS_DECLARATION_OR_RULE_BLOCK@37..84
+          0: L_CURLY@37..38 "{" [] []
+          1: CSS_DECLARATION_OR_RULE_LIST@38..82
+            0: CSS_NESTED_QUALIFIED_RULE@38..61
+              0: CSS_RELATIVE_SELECTOR_LIST@38..46
+                0: CSS_RELATIVE_SELECTOR@38..46
+                  0: (empty)
+                  1: CSS_COMPOUND_SELECTOR@38..46
+                    0: CSS_NESTED_SELECTOR_LIST@38..38
+                    1: CSS_TYPE_SELECTOR@38..46
+                      0: (empty)
+                      1: CSS_IDENTIFIER@38..46
+                        0: IDENT@38..46 "from" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")]
+                    2: CSS_SUB_SELECTOR_LIST@46..46
+              1: CSS_DECLARATION_OR_RULE_BLOCK@46..61
+                0: L_CURLY@46..48 "{" [] [Whitespace(" ")]
+                1: CSS_DECLARATION_OR_RULE_LIST@48..60
+                  0: CSS_DECLARATION_WITH_SEMICOLON@48..60
+                    0: CSS_DECLARATION@48..58
+                      0: CSS_GENERIC_PROPERTY@48..58
+                        0: CSS_IDENTIFIER@48..55
+                          0: IDENT@48..55 "opacity" [] []
+                        1: COLON@55..57 ":" [] [Whitespace(" ")]
+                        2: SCSS_EXPRESSION@57..58
+                          0: SCSS_EXPRESSION_ITEM_LIST@57..58
+                            0: CSS_NUMBER@57..58
+                              0: CSS_NUMBER_LITERAL@57..58 "0" [] []
+                      1: (empty)
+                    1: SEMICOLON@58..60 ";" [] [Whitespace(" ")]
+                2: R_CURLY@60..61 "}" [] []
+            1: CSS_NESTED_QUALIFIED_RULE@61..82
+              0: CSS_RELATIVE_SELECTOR_LIST@61..67
+                0: CSS_RELATIVE_SELECTOR@61..67
+                  0: (empty)
+                  1: CSS_COMPOUND_SELECTOR@61..67
+                    0: CSS_NESTED_SELECTOR_LIST@61..61
+                    1: CSS_TYPE_SELECTOR@61..67
+                      0: (empty)
+                      1: CSS_IDENTIFIER@61..67
+                        0: IDENT@61..67 "to" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")]
+                    2: CSS_SUB_SELECTOR_LIST@67..67
+              1: CSS_DECLARATION_OR_RULE_BLOCK@67..82
+                0: L_CURLY@67..69 "{" [] [Whitespace(" ")]
+                1: CSS_DECLARATION_OR_RULE_LIST@69..81
+                  0: CSS_DECLARATION_WITH_SEMICOLON@69..81
+                    0: CSS_DECLARATION@69..79
+                      0: CSS_GENERIC_PROPERTY@69..79
+                        0: CSS_IDENTIFIER@69..76
+                          0: IDENT@69..76 "opacity" [] []
+                        1: COLON@76..78 ":" [] [Whitespace(" ")]
+                        2: SCSS_EXPRESSION@78..79
+                          0: SCSS_EXPRESSION_ITEM_LIST@78..79
+                            0: CSS_NUMBER@78..79
+                              0: CSS_NUMBER_LITERAL@78..79 "1" [] []
+                      1: (empty)
+                    1: SEMICOLON@79..81 ";" [] [Whitespace(" ")]
+                2: R_CURLY@81..82 "}" [] []
+          2: R_CURLY@82..84 "}" [Newline("\n")] []
+    2: SCSS_VARIABLE_DECLARATION@84..99
+      0: SCSS_VARIABLE@84..91
+        0: DOLLAR@84..87 "$" [Newline("\n"), Newline("\n")] []
+        1: CSS_IDENTIFIER@87..91
+          0: IDENT@87..91 "name" [] []
+      1: COLON@91..93 ":" [] [Whitespace(" ")]
+      2: SCSS_EXPRESSION@93..98
+        0: SCSS_EXPRESSION_ITEM_LIST@93..98
+          0: CSS_IDENTIFIER@93..98
+            0: IDENT@93..98 "theme" [] []
+      3: SCSS_VARIABLE_MODIFIER_LIST@98..98
+      4: SEMICOLON@98..99 ";" [] []
+    3: CSS_AT_RULE@99..123
+      0: AT@99..101 "@" [Newline("\n")] []
+      1: CSS_UNKNOWN_VALUE_AT_RULE@101..123
+        0: SCSS_INTERPOLATED_IDENTIFIER@101..117
+          0: SCSS_INTERPOLATED_IDENTIFIER_PART_LIST@101..117
+            0: CSS_IDENTIFIER@101..108
+              0: IDENT@101..108 "custom-" [] []
+            1: SCSS_INTERPOLATION@108..117
+              0: HASH@108..109 "#" [] []
+              1: L_CURLY@109..110 "{" [] []
+              2: SCSS_EXPRESSION@110..115
+                0: SCSS_EXPRESSION_ITEM_LIST@110..115
+                  0: SCSS_VARIABLE@110..115
+                    0: DOLLAR@110..111 "$" [] []
+                    1: CSS_IDENTIFIER@111..115
+                      0: IDENT@111..115 "name" [] []
+              3: R_CURLY@115..117 "}" [] [Whitespace(" ")]
+        1: CSS_UNKNOWN_AT_RULE_COMPONENT_LIST@117..122
+          0: IDENT@117..122 "token" [] []
+        2: SEMICOLON@122..123 ";" [] []
+    4: CSS_AT_RULE@123..152
+      0: AT@123..126 "@" [Newline("\n"), Newline("\n")] []
+      1: CSS_UNKNOWN_VALUE_AT_RULE@126..152
+        0: SCSS_INTERPOLATED_IDENTIFIER@126..146
+          0: SCSS_INTERPOLATED_IDENTIFIER_PART_LIST@126..146
+            0: CSS_IDENTIFIER@126..133
+              0: IDENT@126..133 "custom-" [] []
+            1: SCSS_INTERPOLATION@133..141
+              0: HASH@133..134 "#" [] []
+              1: L_CURLY@134..135 "{" [] []
+              2: SCSS_EXPRESSION@135..140
+                0: SCSS_EXPRESSION_ITEM_LIST@135..140
+                  0: SCSS_VARIABLE@135..140
+                    0: DOLLAR@135..136 "$" [] []
+                    1: CSS_IDENTIFIER@136..140
+                      0: IDENT@136..140 "name" [] []
+              3: R_CURLY@140..141 "}" [] []
+            2: CSS_IDENTIFIER@141..146
+              0: IDENT@141..146 "-end" [] [Whitespace(" ")]
+        1: CSS_UNKNOWN_AT_RULE_COMPONENT_LIST@146..151
+          0: IDENT@146..151 "token" [] []
+        2: SEMICOLON@151..152 ";" [] []
+    5: CSS_AT_RULE@152..205
+      0: AT@152..154 "@" [Newline("\n")] []
+      1: CSS_UNKNOWN_BLOCK_AT_RULE@154..205
+        0: SCSS_INTERPOLATED_IDENTIFIER@154..174
+          0: SCSS_INTERPOLATED_IDENTIFIER_PART_LIST@154..174
+            0: CSS_IDENTIFIER@154..161
+              0: IDENT@154..161 "custom-" [] []
+            1: SCSS_INTERPOLATION@161..169
+              0: HASH@161..162 "#" [] []
+              1: L_CURLY@162..163 "{" [] []
+              2: SCSS_EXPRESSION@163..168
+                0: SCSS_EXPRESSION_ITEM_LIST@163..168
+                  0: SCSS_VARIABLE@163..168
+                    0: DOLLAR@163..164 "$" [] []
+                    1: CSS_IDENTIFIER@164..168
+                      0: IDENT@164..168 "name" [] []
+              3: R_CURLY@168..169 "}" [] []
+            2: CSS_IDENTIFIER@169..174
+              0: IDENT@169..174 "-end" [] [Whitespace(" ")]
+        1: CSS_UNKNOWN_AT_RULE_COMPONENT_LIST@174..180
+          0: IDENT@174..180 "token" [] [Whitespace(" ")]
+        2: CSS_DECLARATION_OR_RULE_BLOCK@180..205
+          0: L_CURLY@180..182 "{" [] [Whitespace(" ")]
+          1: CSS_DECLARATION_OR_RULE_LIST@182..204
+            0: CSS_NESTED_QUALIFIED_RULE@182..204
+              0: CSS_RELATIVE_SELECTOR_LIST@182..188
+                0: CSS_RELATIVE_SELECTOR@182..188
+                  0: (empty)
+                  1: CSS_COMPOUND_SELECTOR@182..188
+                    0: CSS_NESTED_SELECTOR_LIST@182..182
+                    1: (empty)
+                    2: CSS_SUB_SELECTOR_LIST@182..188
+                      0: CSS_CLASS_SELECTOR@182..188
+                        0: DOT@182..183 "." [] []
+                        1: CSS_CUSTOM_IDENTIFIER@183..188
+                          0: IDENT@183..188 "item" [] [Whitespace(" ")]
+              1: CSS_DECLARATION_OR_RULE_BLOCK@188..204
+                0: L_CURLY@188..190 "{" [] [Whitespace(" ")]
+                1: CSS_DECLARATION_OR_RULE_LIST@190..202
+                  0: CSS_DECLARATION_WITH_SEMICOLON@190..202
+                    0: CSS_DECLARATION@190..200
+                      0: CSS_GENERIC_PROPERTY@190..200
+                        0: CSS_IDENTIFIER@190..195
+                          0: IDENT@190..195 "color" [] []
+                        1: COLON@195..197 ":" [] [Whitespace(" ")]
+                        2: SCSS_EXPRESSION@197..200
+                          0: SCSS_EXPRESSION_ITEM_LIST@197..200
+                            0: CSS_IDENTIFIER@197..200
+                              0: IDENT@197..200 "red" [] []
+                      1: (empty)
+                    1: SEMICOLON@200..202 ";" [] [Whitespace(" ")]
+                2: R_CURLY@202..204 "}" [] [Whitespace(" ")]
+          2: R_CURLY@204..205 "}" [] []
+    6: CSS_AT_RULE@205..227
+      0: AT@205..207 "@" [Newline("\n")] []
+      1: CSS_UNKNOWN_VALUE_AT_RULE@207..227
+        0: SCSS_INTERPOLATED_IDENTIFIER@207..221
+          0: SCSS_INTERPOLATED_IDENTIFIER_PART_LIST@207..221
+            0: CSS_IDENTIFIER@207..212
+              0: IDENT@207..212 "media" [] []
+            1: SCSS_INTERPOLATION@212..221
+              0: HASH@212..213 "#" [] []
+              1: L_CURLY@213..214 "{" [] []
+              2: SCSS_EXPRESSION@214..219
+                0: SCSS_EXPRESSION_ITEM_LIST@214..219
+                  0: SCSS_VARIABLE@214..219
+                    0: DOLLAR@214..215 "$" [] []
+                    1: CSS_IDENTIFIER@215..219
+                      0: IDENT@215..219 "name" [] []
+              3: R_CURLY@219..221 "}" [] [Whitespace(" ")]
+        1: CSS_UNKNOWN_AT_RULE_COMPONENT_LIST@221..226
+          0: IDENT@221..226 "token" [] []
+        2: SEMICOLON@226..227 ";" [] []
+    7: CSS_AT_RULE@227..251
+      0: AT@227..229 "@" [Newline("\n")] []
+      1: CSS_UNKNOWN_VALUE_AT_RULE@229..251
+        0: SCSS_INTERPOLATED_IDENTIFIER@229..245
+          0: SCSS_INTERPOLATED_IDENTIFIER_PART_LIST@229..245
+            0: CSS_IDENTIFIER@229..236
+              0: IDENT@229..236 "include" [] []
+            1: SCSS_INTERPOLATION@236..245
+              0: HASH@236..237 "#" [] []
+              1: L_CURLY@237..238 "{" [] []
+              2: SCSS_EXPRESSION@238..243
+                0: SCSS_EXPRESSION_ITEM_LIST@238..243
+                  0: SCSS_VARIABLE@238..243
+                    0: DOLLAR@238..239 "$" [] []
+                    1: CSS_IDENTIFIER@239..243
+                      0: IDENT@239..243 "name" [] []
+              3: R_CURLY@243..245 "}" [] [Whitespace(" ")]
+        1: CSS_UNKNOWN_AT_RULE_COMPONENT_LIST@245..250
+          0: IDENT@245..250 "token" [] []
+        2: SEMICOLON@250..251 ";" [] []
+    8: CSS_AT_RULE@251..269
+      0: AT@251..253 "@" [Newline("\n")] []
+      1: CSS_UNKNOWN_VALUE_AT_RULE@253..269
+        0: SCSS_INTERPOLATED_IDENTIFIER@253..263
+          0: SCSS_INTERPOLATED_IDENTIFIER_PART_LIST@253..263
+            0: SCSS_INTERPOLATED_IDENTIFIER_HYPHEN@253..254
+              0: MINUS@253..254 "-" [] []
+            1: SCSS_INTERPOLATION@254..263
+              0: HASH@254..255 "#" [] []
+              1: L_CURLY@255..256 "{" [] []
+              2: SCSS_EXPRESSION@256..261
+                0: SCSS_EXPRESSION_ITEM_LIST@256..261
+                  0: SCSS_VARIABLE@256..261
+                    0: DOLLAR@256..257 "$" [] []
+                    1: CSS_IDENTIFIER@257..261
+                      0: IDENT@257..261 "name" [] []
+              3: R_CURLY@261..263 "}" [] [Whitespace(" ")]
+        1: CSS_UNKNOWN_AT_RULE_COMPONENT_LIST@263..268
+          0: IDENT@263..268 "token" [] []
+        2: SEMICOLON@268..269 ";" [] []
+    9: CSS_AT_RULE@269..288
+      0: AT@269..271 "@" [Newline("\n")] []
+      1: CSS_UNKNOWN_VALUE_AT_RULE@271..288
+        0: SCSS_INTERPOLATED_IDENTIFIER@271..282
+          0: SCSS_INTERPOLATED_IDENTIFIER_PART_LIST@271..282
+            0: SCSS_INTERPOLATED_IDENTIFIER_HYPHEN@271..272
+              0: MINUS@271..272 "-" [] []
+            1: SCSS_INTERPOLATED_IDENTIFIER_HYPHEN@272..273
+              0: MINUS@272..273 "-" [] []
+            2: SCSS_INTERPOLATION@273..282
+              0: HASH@273..274 "#" [] []
+              1: L_CURLY@274..275 "{" [] []
+              2: SCSS_EXPRESSION@275..280
+                0: SCSS_EXPRESSION_ITEM_LIST@275..280
+                  0: SCSS_VARIABLE@275..280
+                    0: DOLLAR@275..276 "$" [] []
+                    1: CSS_IDENTIFIER@276..280
+                      0: IDENT@276..280 "name" [] []
+              3: R_CURLY@280..282 "}" [] [Whitespace(" ")]
+        1: CSS_UNKNOWN_AT_RULE_COMPONENT_LIST@282..287
+          0: IDENT@282..287 "token" [] []
+        2: SEMICOLON@287..288 ";" [] []
+    10: CSS_AT_RULE@288..317
+      0: AT@288..290 "@" [Newline("\n")] []
+      1: CSS_UNKNOWN_VALUE_AT_RULE@290..317
+        0: SCSS_INTERPOLATED_IDENTIFIER@290..311
+          0: SCSS_INTERPOLATED_IDENTIFIER_PART_LIST@290..311
+            0: CSS_IDENTIFIER@290..297
+              0: IDENT@290..297 "custom-" [] []
+            1: SCSS_INTERPOLATION@297..305
+              0: HASH@297..298 "#" [] []
+              1: L_CURLY@298..299 "{" [] []
+              2: SCSS_EXPRESSION@299..304
+                0: SCSS_EXPRESSION_ITEM_LIST@299..304
+                  0: SCSS_VARIABLE@299..304
+                    0: DOLLAR@299..300 "$" [] []
+                    1: CSS_IDENTIFIER@300..304
+                      0: IDENT@300..304 "name" [] []
+              3: R_CURLY@304..305 "}" [] []
+            2: CSS_IDENTIFIER@305..311
+              0: IDENT@305..311 "2-end" [] [Whitespace(" ")]
+        1: CSS_UNKNOWN_AT_RULE_COMPONENT_LIST@311..316
+          0: IDENT@311..316 "token" [] []
+        2: SEMICOLON@316..317 ";" [] []
+    11: CSS_AT_RULE@317..343
+      0: AT@317..319 "@" [Newline("\n")] []
+      1: CSS_UNKNOWN_VALUE_AT_RULE@319..343
+        0: SCSS_INTERPOLATED_IDENTIFIER@319..337
+          0: SCSS_INTERPOLATED_IDENTIFIER_PART_LIST@319..337
+            0: CSS_IDENTIFIER@319..326
+              0: IDENT@319..326 "custom-" [] []
+            1: SCSS_INTERPOLATION@326..334
+              0: HASH@326..327 "#" [] []
+              1: L_CURLY@327..328 "{" [] []
+              2: SCSS_EXPRESSION@328..333
+                0: SCSS_EXPRESSION_ITEM_LIST@328..333
+                  0: SCSS_VARIABLE@328..333
+                    0: DOLLAR@328..329 "$" [] []
+                    1: CSS_IDENTIFIER@329..333
+                      0: IDENT@329..333 "name" [] []
+              3: R_CURLY@333..334 "}" [] []
+            2: CSS_IDENTIFIER@334..337
+              0: IDENT@334..337 "01" [] [Whitespace(" ")]
+        1: CSS_UNKNOWN_AT_RULE_COMPONENT_LIST@337..342
+          0: IDENT@337..342 "token" [] []
+        2: SEMICOLON@342..343 ";" [] []
+    12: CSS_AT_RULE@343..370
+      0: AT@343..345 "@" [Newline("\n")] []
+      1: CSS_UNKNOWN_VALUE_AT_RULE@345..370
+        0: SCSS_INTERPOLATED_IDENTIFIER@345..361
+          0: SCSS_INTERPOLATED_IDENTIFIER_PART_LIST@345..361
+            0: CSS_IDENTIFIER@345..352
+              0: IDENT@345..352 "custom-" [] []
+            1: SCSS_INTERPOLATION@352..360
+              0: HASH@352..353 "#" [] []
+              1: L_CURLY@353..354 "{" [] []
+              2: SCSS_EXPRESSION@354..359
+                0: SCSS_EXPRESSION_ITEM_LIST@354..359
+                  0: SCSS_VARIABLE@354..359
+                    0: DOLLAR@354..355 "$" [] []
+                    1: CSS_IDENTIFIER@355..359
+                      0: IDENT@355..359 "name" [] []
+              3: R_CURLY@359..360 "}" [] []
+            2: CSS_IDENTIFIER@360..361
+              0: IDENT@360..361 "2" [] []
+        1: CSS_UNKNOWN_AT_RULE_COMPONENT_LIST@361..369
+          0: CSS_NUMBER_LITERAL@361..364 ".5" [] [Whitespace(" ")]
+          1: IDENT@364..369 "token" [] []
+        2: SEMICOLON@369..370 ";" [] []
+    13: CSS_AT_RULE@370..396
+      0: AT@370..372 "@" [Newline("\n")] []
+      1: CSS_UNKNOWN_VALUE_AT_RULE@372..396
+        0: SCSS_INTERPOLATED_IDENTIFIER@372..387
+          0: SCSS_INTERPOLATED_IDENTIFIER_PART_LIST@372..387
+            0: CSS_IDENTIFIER@372..379
+              0: IDENT@372..379 "custom-" [] []
+            1: SCSS_INTERPOLATION@379..387
+              0: HASH@379..380 "#" [] []
+              1: L_CURLY@380..381 "{" [] []
+              2: SCSS_EXPRESSION@381..386
+                0: SCSS_EXPRESSION_ITEM_LIST@381..386
+                  0: SCSS_VARIABLE@381..386
+                    0: DOLLAR@381..382 "$" [] []
+                    1: CSS_IDENTIFIER@382..386
+                      0: IDENT@382..386 "name" [] []
+              3: R_CURLY@386..387 "}" [] []
+        1: CSS_UNKNOWN_AT_RULE_COMPONENT_LIST@387..395
+          0: CSS_NUMBER_LITERAL@387..390 "+2" [] [Whitespace(" ")]
+          1: IDENT@390..395 "token" [] []
+        2: SEMICOLON@395..396 ";" [] []
+    14: CSS_AT_RULE@396..422
+      0: AT@396..398 "@" [Newline("\n")] []
+      1: CSS_UNKNOWN_VALUE_AT_RULE@398..422
+        0: SCSS_INTERPOLATED_IDENTIFIER@398..414
+          0: SCSS_INTERPOLATED_IDENTIFIER_PART_LIST@398..414
+            0: CSS_IDENTIFIER@398..405
+              0: IDENT@398..405 "custom-" [] []
+            1: SCSS_INTERPOLATION@405..413
+              0: HASH@405..406 "#" [] []
+              1: L_CURLY@406..407 "{" [] []
+              2: SCSS_EXPRESSION@407..412
+                0: SCSS_EXPRESSION_ITEM_LIST@407..412
+                  0: SCSS_VARIABLE@407..412
+                    0: DOLLAR@407..408 "$" [] []
+                    1: CSS_IDENTIFIER@408..412
+                      0: IDENT@408..412 "name" [] []
+              3: R_CURLY@412..413 "}" [] []
+            2: CSS_IDENTIFIER@413..414
+              0: IDENT@413..414 "2" [] []
+        1: CSS_UNKNOWN_AT_RULE_COMPONENT_LIST@414..421
+          0: PERCENT@414..416 "%" [] [Whitespace(" ")]
+          1: IDENT@416..421 "token" [] []
+        2: SEMICOLON@421..422 ";" [] []
+    15: CSS_AT_RULE@422..447
+      0: AT@422..424 "@" [Newline("\n")] []
+      1: CSS_UNKNOWN_VALUE_AT_RULE@424..447
+        0: SCSS_INTERPOLATED_IDENTIFIER@424..441
+          0: SCSS_INTERPOLATED_IDENTIFIER_PART_LIST@424..441
+            0: CSS_IDENTIFIER@424..431
+              0: IDENT@424..431 "custom-" [] []
+            1: SCSS_INTERPOLATION@431..439
+              0: HASH@431..432 "#" [] []
+              1: L_CURLY@432..433 "{" [] []
+              2: SCSS_EXPRESSION@433..438
+                0: SCSS_EXPRESSION_ITEM_LIST@433..438
+                  0: SCSS_VARIABLE@433..438
+                    0: DOLLAR@433..434 "$" [] []
+                    1: CSS_IDENTIFIER@434..438
+                      0: IDENT@434..438 "name" [] []
+              3: R_CURLY@438..439 "}" [] []
+            2: SCSS_INTERPOLATED_IDENTIFIER_HYPHEN@439..441
+              0: MINUS@439..441 "-" [] [Whitespace(" ")]
+        1: CSS_UNKNOWN_AT_RULE_COMPONENT_LIST@441..446
+          0: IDENT@441..446 "token" [] []
+        2: SEMICOLON@446..447 ";" [] []
+    16: CSS_AT_RULE@447..464
+      0: AT@447..449 "@" [Newline("\n")] []
+      1: CSS_UNKNOWN_VALUE_AT_RULE@449..464
+        0: SCSS_INTERPOLATION@449..458
+          0: HASH@449..450 "#" [] []
+          1: L_CURLY@450..451 "{" [] []
+          2: SCSS_EXPRESSION@451..456
+            0: SCSS_EXPRESSION_ITEM_LIST@451..456
+              0: SCSS_VARIABLE@451..456
+                0: DOLLAR@451..452 "$" [] []
+                1: CSS_IDENTIFIER@452..456
+                  0: IDENT@452..456 "name" [] []
+          3: R_CURLY@456..458 "}" [] [Whitespace(" ")]
+        1: CSS_UNKNOWN_AT_RULE_COMPONENT_LIST@458..463
+          0: IDENT@458..463 "token" [] []
+        2: SEMICOLON@463..464 ";" [] []
+    17: CSS_AT_RULE@464..506
+      0: AT@464..466 "@" [Newline("\n")] []
+      1: CSS_UNKNOWN_VALUE_AT_RULE@466..506
+        0: SCSS_INTERPOLATION@466..500
+          0: HASH@466..467 "#" [] []
+          1: L_CURLY@467..468 "{" [] []
+          2: SCSS_EXPRESSION@468..473
+            0: SCSS_EXPRESSION_ITEM_LIST@468..473
+              0: SCSS_VARIABLE@468..473
+                0: DOLLAR@468..469 "$" [] []
+                1: CSS_IDENTIFIER@469..473
+                  0: IDENT@469..473 "name" [] []
+          3: R_CURLY@473..500 "}" [] [Whitespace(" "), Comments("/* fully interpolated */"), Whitespace(" ")]
+        1: CSS_UNKNOWN_AT_RULE_COMPONENT_LIST@500..505
+          0: IDENT@500..505 "token" [] []
+        2: SEMICOLON@505..506 ";" [] []
+    18: CSS_AT_RULE@506..552
+      0: AT@506..508 "@" [Newline("\n")] []
+      1: CSS_UNKNOWN_BLOCK_AT_RULE@508..552
+        0: SCSS_INTERPOLATED_IDENTIFIER@508..521
+          0: SCSS_INTERPOLATED_IDENTIFIER_PART_LIST@508..521
+            0: SCSS_INTERPOLATION@508..516
+              0: HASH@508..509 "#" [] []
+              1: L_CURLY@509..510 "{" [] []
+              2: SCSS_EXPRESSION@510..515
+                0: SCSS_EXPRESSION_ITEM_LIST@510..515
+                  0: SCSS_VARIABLE@510..515
+                    0: DOLLAR@510..511 "$" [] []
+                    1: CSS_IDENTIFIER@511..515
+                      0: IDENT@511..515 "name" [] []
+              3: R_CURLY@515..516 "}" [] []
+            1: CSS_IDENTIFIER@516..521
+              0: IDENT@516..521 "-end" [] [Whitespace(" ")]
+        1: CSS_UNKNOWN_AT_RULE_COMPONENT_LIST@521..527
+          0: IDENT@521..527 "token" [] [Whitespace(" ")]
+        2: CSS_DECLARATION_OR_RULE_BLOCK@527..552
+          0: L_CURLY@527..529 "{" [] [Whitespace(" ")]
+          1: CSS_DECLARATION_OR_RULE_LIST@529..551
+            0: CSS_NESTED_QUALIFIED_RULE@529..551
+              0: CSS_RELATIVE_SELECTOR_LIST@529..535
+                0: CSS_RELATIVE_SELECTOR@529..535
+                  0: (empty)
+                  1: CSS_COMPOUND_SELECTOR@529..535
+                    0: CSS_NESTED_SELECTOR_LIST@529..529
+                    1: (empty)
+                    2: CSS_SUB_SELECTOR_LIST@529..535
+                      0: CSS_CLASS_SELECTOR@529..535
+                        0: DOT@529..530 "." [] []
+                        1: CSS_CUSTOM_IDENTIFIER@530..535
+                          0: IDENT@530..535 "item" [] [Whitespace(" ")]
+              1: CSS_DECLARATION_OR_RULE_BLOCK@535..551
+                0: L_CURLY@535..537 "{" [] [Whitespace(" ")]
+                1: CSS_DECLARATION_OR_RULE_LIST@537..549
+                  0: CSS_DECLARATION_WITH_SEMICOLON@537..549
+                    0: CSS_DECLARATION@537..547
+                      0: CSS_GENERIC_PROPERTY@537..547
+                        0: CSS_IDENTIFIER@537..542
+                          0: IDENT@537..542 "color" [] []
+                        1: COLON@542..544 ":" [] [Whitespace(" ")]
+                        2: SCSS_EXPRESSION@544..547
+                          0: SCSS_EXPRESSION_ITEM_LIST@544..547
+                            0: CSS_IDENTIFIER@544..547
+                              0: IDENT@544..547 "red" [] []
+                      1: (empty)
+                    1: SEMICOLON@547..549 ";" [] [Whitespace(" ")]
+                2: R_CURLY@549..551 "}" [] [Whitespace(" ")]
+          2: R_CURLY@551..552 "}" [] []
+    19: CSS_AT_RULE@552..591
+      0: AT@552..554 "@" [Newline("\n")] []
+      1: CSS_UNKNOWN_VALUE_AT_RULE@554..591
+        0: SCSS_INTERPOLATED_IDENTIFIER@554..585
+          0: SCSS_INTERPOLATED_IDENTIFIER_PART_LIST@554..585
+            0: CSS_IDENTIFIER@554..561
+              0: IDENT@554..561 "custom-" [] []
+            1: SCSS_INTERPOLATION@561..585
+              0: HASH@561..562 "#" [] []
+              1: L_CURLY@562..563 "{" [] []
+              2: SCSS_EXPRESSION@563..568
+                0: SCSS_EXPRESSION_ITEM_LIST@563..568
+                  0: SCSS_VARIABLE@563..568
+                    0: DOLLAR@563..564 "$" [] []
+                    1: CSS_IDENTIFIER@564..568
+                      0: IDENT@564..568 "name" [] []
+              3: R_CURLY@568..585 "}" [] [Whitespace(" "), Comments("/* boundary */"), Whitespace(" ")]
+        1: CSS_UNKNOWN_AT_RULE_COMPONENT_LIST@585..590
+          0: IDENT@585..590 "token" [] []
+        2: SEMICOLON@590..591 ";" [] []
+    20: CSS_AT_RULE@591..661
+      0: AT@591..593 "@" [Newline("\n")] []
+      1: CSS_UNKNOWN_BLOCK_AT_RULE@593..661
+        0: SCSS_INTERPOLATED_IDENTIFIER@593..630
+          0: SCSS_INTERPOLATED_IDENTIFIER_PART_LIST@593..630
+            0: CSS_IDENTIFIER@593..600
+              0: IDENT@593..600 "custom-" [] []
+            1: SCSS_INTERPOLATION@600..630
+              0: HASH@600..601 "#" [] []
+              1: L_CURLY@601..602 "{" [] []
+              2: SCSS_EXPRESSION@602..607
+                0: SCSS_EXPRESSION_ITEM_LIST@602..607
+                  0: SCSS_VARIABLE@602..607
+                    0: DOLLAR@602..603 "$" [] []
+                    1: CSS_IDENTIFIER@603..607
+                      0: IDENT@603..607 "name" [] []
+              3: R_CURLY@607..630 "}" [] [Whitespace(" "), Comments("/* block boundary */"), Whitespace(" ")]
+        1: CSS_UNKNOWN_AT_RULE_COMPONENT_LIST@630..636
+          0: IDENT@630..636 "token" [] [Whitespace(" ")]
+        2: CSS_DECLARATION_OR_RULE_BLOCK@636..661
+          0: L_CURLY@636..638 "{" [] [Whitespace(" ")]
+          1: CSS_DECLARATION_OR_RULE_LIST@638..660
+            0: CSS_NESTED_QUALIFIED_RULE@638..660
+              0: CSS_RELATIVE_SELECTOR_LIST@638..644
+                0: CSS_RELATIVE_SELECTOR@638..644
+                  0: (empty)
+                  1: CSS_COMPOUND_SELECTOR@638..644
+                    0: CSS_NESTED_SELECTOR_LIST@638..638
+                    1: (empty)
+                    2: CSS_SUB_SELECTOR_LIST@638..644
+                      0: CSS_CLASS_SELECTOR@638..644
+                        0: DOT@638..639 "." [] []
+                        1: CSS_CUSTOM_IDENTIFIER@639..644
+                          0: IDENT@639..644 "item" [] [Whitespace(" ")]
+              1: CSS_DECLARATION_OR_RULE_BLOCK@644..660
+                0: L_CURLY@644..646 "{" [] [Whitespace(" ")]
+                1: CSS_DECLARATION_OR_RULE_LIST@646..658
+                  0: CSS_DECLARATION_WITH_SEMICOLON@646..658
+                    0: CSS_DECLARATION@646..656
+                      0: CSS_GENERIC_PROPERTY@646..656
+                        0: CSS_IDENTIFIER@646..651
+                          0: IDENT@646..651 "color" [] []
+                        1: COLON@651..653 ":" [] [Whitespace(" ")]
+                        2: SCSS_EXPRESSION@653..656
+                          0: SCSS_EXPRESSION_ITEM_LIST@653..656
+                            0: CSS_IDENTIFIER@653..656
+                              0: IDENT@653..656 "red" [] []
+                      1: (empty)
+                    1: SEMICOLON@656..658 ";" [] [Whitespace(" ")]
+                2: R_CURLY@658..660 "}" [] [Whitespace(" ")]
+          2: R_CURLY@660..661 "}" [] []
+    21: CSS_AT_RULE@661..721
+      0: AT@661..663 "@" [Newline("\n")] []
+      1: CSS_UNKNOWN_BLOCK_AT_RULE@663..721
+        0: SCSS_INTERPOLATED_IDENTIFIER@663..696
+          0: SCSS_INTERPOLATED_IDENTIFIER_PART_LIST@663..696
+            0: CSS_IDENTIFIER@663..670
+              0: IDENT@663..670 "custom-" [] []
+            1: SCSS_INTERPOLATION@670..696
+              0: HASH@670..671 "#" [] []
+              1: L_CURLY@671..672 "{" [] []
+              2: SCSS_EXPRESSION@672..677
+                0: SCSS_EXPRESSION_ITEM_LIST@672..677
+                  0: SCSS_VARIABLE@672..677
+                    0: DOLLAR@672..673 "$" [] []
+                    1: CSS_IDENTIFIER@673..677
+                      0: IDENT@673..677 "name" [] []
+              3: R_CURLY@677..696 "}" [] [Whitespace(" "), Comments("/* no prelude */"), Whitespace(" ")]
+        1: CSS_UNKNOWN_AT_RULE_COMPONENT_LIST@696..696
+        2: CSS_DECLARATION_OR_RULE_BLOCK@696..721
+          0: L_CURLY@696..698 "{" [] [Whitespace(" ")]
+          1: CSS_DECLARATION_OR_RULE_LIST@698..720
+            0: CSS_NESTED_QUALIFIED_RULE@698..720
+              0: CSS_RELATIVE_SELECTOR_LIST@698..704
+                0: CSS_RELATIVE_SELECTOR@698..704
+                  0: (empty)
+                  1: CSS_COMPOUND_SELECTOR@698..704
+                    0: CSS_NESTED_SELECTOR_LIST@698..698
+                    1: (empty)
+                    2: CSS_SUB_SELECTOR_LIST@698..704
+                      0: CSS_CLASS_SELECTOR@698..704
+                        0: DOT@698..699 "." [] []
+                        1: CSS_CUSTOM_IDENTIFIER@699..704
+                          0: IDENT@699..704 "item" [] [Whitespace(" ")]
+              1: CSS_DECLARATION_OR_RULE_BLOCK@704..720
+                0: L_CURLY@704..706 "{" [] [Whitespace(" ")]
+                1: CSS_DECLARATION_OR_RULE_LIST@706..718
+                  0: CSS_DECLARATION_WITH_SEMICOLON@706..718
+                    0: CSS_DECLARATION@706..716
+                      0: CSS_GENERIC_PROPERTY@706..716
+                        0: CSS_IDENTIFIER@706..711
+                          0: IDENT@706..711 "color" [] []
+                        1: COLON@711..713 ":" [] [Whitespace(" ")]
+                        2: SCSS_EXPRESSION@713..716
+                          0: SCSS_EXPRESSION_ITEM_LIST@713..716
+                            0: CSS_IDENTIFIER@713..716
+                              0: IDENT@713..716 "red" [] []
+                      1: (empty)
+                    1: SEMICOLON@716..718 ";" [] [Whitespace(" ")]
+                2: R_CURLY@718..720 "}" [] [Whitespace(" ")]
+          2: R_CURLY@720..721 "}" [] []
+    22: CSS_AT_RULE@721..748
+      0: AT@721..723 "@" [Newline("\n")] []
+      1: CSS_UNKNOWN_VALUE_AT_RULE@723..748
+        0: SCSS_INTERPOLATED_IDENTIFIER@723..742
+          0: SCSS_INTERPOLATED_IDENTIFIER_PART_LIST@723..742
+            0: CSS_IDENTIFIER@723..730
+              0: IDENT@723..730 "custom-" [] []
+            1: SCSS_INTERPOLATION@730..742
+              0: HASH@730..731 "#" [] []
+              1: L_CURLY@731..732 "{" [] []
+              2: SCSS_EXPRESSION@732..737
+                0: SCSS_EXPRESSION_ITEM_LIST@732..737
+                  0: SCSS_VARIABLE@732..737
+                    0: DOLLAR@732..733 "$" [] []
+                    1: CSS_IDENTIFIER@733..737
+                      0: IDENT@733..737 "name" [] []
+              3: R_CURLY@737..742 "}" [] [Comments("/**/")]
+        1: CSS_UNKNOWN_AT_RULE_COMPONENT_LIST@742..747
+          0: IDENT@742..747 "token" [] []
+        2: SEMICOLON@747..748 ";" [] []
+    23: CSS_AT_RULE@748..776
+      0: AT@748..750 "@" [Newline("\n")] []
+      1: CSS_UNKNOWN_VALUE_AT_RULE@750..776
+        0: CSS_IDENTIFIER@750..761
+          0: IDENT@750..761 "custom-" [] [Comments("/**/")]
+        1: CSS_UNKNOWN_AT_RULE_COMPONENT_LIST@761..775
+          0: SCSS_INTERPOLATION@761..770
+            0: HASH@761..762 "#" [] []
+            1: L_CURLY@762..763 "{" [] []
+            2: SCSS_EXPRESSION@763..768
+              0: SCSS_EXPRESSION_ITEM_LIST@763..768
+                0: SCSS_VARIABLE@763..768
+                  0: DOLLAR@763..764 "$" [] []
+                  1: CSS_IDENTIFIER@764..768
+                    0: IDENT@764..768 "name" [] []
+            3: R_CURLY@768..770 "}" [] [Whitespace(" ")]
+          1: IDENT@770..775 "token" [] []
+        2: SEMICOLON@775..776 ";" [] []
+    24: CSS_AT_RULE@776..801
+      0: AT@776..778 "@" [Newline("\n")] []
+      1: CSS_UNKNOWN_VALUE_AT_RULE@778..801
+        0: CSS_IDENTIFIER@778..786
+          0: IDENT@778..786 "custom-" [] [Whitespace(" ")]
+        1: CSS_UNKNOWN_AT_RULE_COMPONENT_LIST@786..800
+          0: SCSS_INTERPOLATION@786..795
+            0: HASH@786..787 "#" [] []
+            1: L_CURLY@787..788 "{" [] []
+            2: SCSS_EXPRESSION@788..793
+              0: SCSS_EXPRESSION_ITEM_LIST@788..793
+                0: SCSS_VARIABLE@788..793
+                  0: DOLLAR@788..789 "$" [] []
+                  1: CSS_IDENTIFIER@789..793
+                    0: IDENT@789..793 "name" [] []
+            3: R_CURLY@793..795 "}" [] [Whitespace(" ")]
+          1: IDENT@795..800 "token" [] []
+        2: SEMICOLON@800..801 ";" [] []
+    25: CSS_AT_RULE@801..837
+      0: AT@801..803 "@" [Newline("\n")] []
+      1: CSS_UNKNOWN_VALUE_AT_RULE@803..837
+        0: SCSS_INTERPOLATED_IDENTIFIER@803..830
+          0: SCSS_INTERPOLATED_IDENTIFIER_PART_LIST@803..830
+            0: CSS_IDENTIFIER@803..810
+              0: IDENT@803..810 "custom-" [] []
+            1: SCSS_INTERPOLATION@810..830
+              0: HASH@810..811 "#" [] []
+              1: L_CURLY@811..812 "{" [] []
+              2: SCSS_EXPRESSION@812..817
+                0: SCSS_EXPRESSION_ITEM_LIST@812..817
+                  0: SCSS_VARIABLE@812..817
+                    0: DOLLAR@812..813 "$" [] []
+                    1: CSS_IDENTIFIER@813..817
+                      0: IDENT@813..817 "name" [] []
+              3: R_CURLY@817..830 "}" [] [Whitespace(" "), Comments("// boundary")]
+        1: CSS_UNKNOWN_AT_RULE_COMPONENT_LIST@830..836
+          0: IDENT@830..836 "token" [Newline("\n")] []
+        2: SEMICOLON@836..837 ";" [] []
+    26: CSS_AT_RULE@837..865
+      0: AT@837..840 "@" [Newline("\n"), Newline("\n")] []
+      1: CSS_UNKNOWN_VALUE_AT_RULE@840..865
+        0: SCSS_INTERPOLATED_IDENTIFIER@840..857
+          0: SCSS_INTERPOLATED_IDENTIFIER_PART_LIST@840..857
+            0: CSS_IDENTIFIER@840..847
+              0: IDENT@840..847 "custom-" [] []
+            1: SCSS_INTERPOLATION@847..855
+              0: HASH@847..848 "#" [] []
+              1: L_CURLY@848..849 "{" [] []
+              2: SCSS_EXPRESSION@849..854
+                0: SCSS_EXPRESSION_ITEM_LIST@849..854
+                  0: SCSS_VARIABLE@849..854
+                    0: DOLLAR@849..850 "$" [] []
+                    1: CSS_IDENTIFIER@850..854
+                      0: IDENT@850..854 "name" [] []
+              3: R_CURLY@854..855 "}" [] []
+            2: CSS_IDENTIFIER@855..857
+              0: IDENT@855..857 "--" [] []
+        1: CSS_UNKNOWN_AT_RULE_COMPONENT_LIST@857..864
+          0: R_ANGLE@857..859 ">" [] [Whitespace(" ")]
+          1: IDENT@859..864 "token" [] []
+        2: SEMICOLON@864..865 ";" [] []
+    27: CSS_AT_RULE@865..910
+      0: AT@865..867 "@" [Newline("\n")] []
+      1: CSS_UNKNOWN_BLOCK_AT_RULE@867..910
+        0: SCSS_INTERPOLATED_IDENTIFIER@867..877
+          0: SCSS_INTERPOLATED_IDENTIFIER_PART_LIST@867..877
+            0: SCSS_INTERPOLATION@867..875
+              0: HASH@867..868 "#" [] []
+              1: L_CURLY@868..869 "{" [] []
+              2: SCSS_EXPRESSION@869..874
+                0: SCSS_EXPRESSION_ITEM_LIST@869..874
+                  0: SCSS_VARIABLE@869..874
+                    0: DOLLAR@869..870 "$" [] []
+                    1: CSS_IDENTIFIER@870..874
+                      0: IDENT@870..874 "name" [] []
+              3: R_CURLY@874..875 "}" [] []
+            1: CSS_IDENTIFIER@875..877
+              0: IDENT@875..877 "--" [] []
+        1: CSS_UNKNOWN_AT_RULE_COMPONENT_LIST@877..885
+          0: R_ANGLE@877..879 ">" [] [Whitespace(" ")]
+          1: IDENT@879..885 "token" [] [Whitespace(" ")]
+        2: CSS_DECLARATION_OR_RULE_BLOCK@885..910
+          0: L_CURLY@885..887 "{" [] [Whitespace(" ")]
+          1: CSS_DECLARATION_OR_RULE_LIST@887..909
+            0: CSS_NESTED_QUALIFIED_RULE@887..909
+              0: CSS_RELATIVE_SELECTOR_LIST@887..893
+                0: CSS_RELATIVE_SELECTOR@887..893
+                  0: (empty)
+                  1: CSS_COMPOUND_SELECTOR@887..893
+                    0: CSS_NESTED_SELECTOR_LIST@887..887
+                    1: (empty)
+                    2: CSS_SUB_SELECTOR_LIST@887..893
+                      0: CSS_CLASS_SELECTOR@887..893
+                        0: DOT@887..888 "." [] []
+                        1: CSS_CUSTOM_IDENTIFIER@888..893
+                          0: IDENT@888..893 "item" [] [Whitespace(" ")]
+              1: CSS_DECLARATION_OR_RULE_BLOCK@893..909
+                0: L_CURLY@893..895 "{" [] [Whitespace(" ")]
+                1: CSS_DECLARATION_OR_RULE_LIST@895..907
+                  0: CSS_DECLARATION_WITH_SEMICOLON@895..907
+                    0: CSS_DECLARATION@895..905
+                      0: CSS_GENERIC_PROPERTY@895..905
+                        0: CSS_IDENTIFIER@895..900
+                          0: IDENT@895..900 "color" [] []
+                        1: COLON@900..902 ":" [] [Whitespace(" ")]
+                        2: SCSS_EXPRESSION@902..905
+                          0: SCSS_EXPRESSION_ITEM_LIST@902..905
+                            0: CSS_IDENTIFIER@902..905
+                              0: IDENT@902..905 "red" [] []
+                      1: (empty)
+                    1: SEMICOLON@905..907 ";" [] [Whitespace(" ")]
+                2: R_CURLY@907..909 "}" [] [Whitespace(" ")]
+          2: R_CURLY@909..910 "}" [] []
+    28: CSS_AT_RULE@910..938
+      0: AT@910..912 "@" [Newline("\n")] []
+      1: CSS_UNKNOWN_VALUE_AT_RULE@912..938
+        0: SCSS_INTERPOLATED_IDENTIFIER@912..928
+          0: SCSS_INTERPOLATED_IDENTIFIER_PART_LIST@912..928
+            0: CSS_IDENTIFIER@912..919
+              0: IDENT@912..919 "custom-" [] []
+            1: SCSS_INTERPOLATION@919..928
+              0: HASH@919..920 "#" [] []
+              1: L_CURLY@920..921 "{" [] []
+              2: SCSS_EXPRESSION@921..926
+                0: SCSS_EXPRESSION_ITEM_LIST@921..926
+                  0: SCSS_VARIABLE@921..926
+                    0: DOLLAR@921..922 "$" [] []
+                    1: CSS_IDENTIFIER@922..926
+                      0: IDENT@922..926 "name" [] []
+              3: R_CURLY@926..928 "}" [] [Whitespace(" ")]
+        1: CSS_UNKNOWN_AT_RULE_COMPONENT_LIST@928..937
+          0: CDC@928..932 "-->" [] [Whitespace(" ")]
+          1: IDENT@932..937 "token" [] []
+        2: SEMICOLON@937..938 ";" [] []
+    29: CSS_QUALIFIED_RULE@938..974
+      0: CSS_SELECTOR_LIST@938..946
+        0: CSS_COMPOUND_SELECTOR@938..946
+          0: CSS_NESTED_SELECTOR_LIST@938..938
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@938..946
+            0: CSS_CLASS_SELECTOR@938..946
+              0: DOT@938..941 "." [Newline("\n"), Newline("\n")] []
+              1: CSS_CUSTOM_IDENTIFIER@941..946
+                0: IDENT@941..946 "host" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@946..974
+        0: L_CURLY@946..947 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@947..972
+          0: CSS_AT_RULE@947..972
+            0: AT@947..951 "@" [Newline("\n"), Whitespace("  ")] []
+            1: CSS_UNKNOWN_VALUE_AT_RULE@951..972
+              0: SCSS_INTERPOLATED_IDENTIFIER@951..967
+                0: SCSS_INTERPOLATED_IDENTIFIER_PART_LIST@951..967
+                  0: CSS_IDENTIFIER@951..958
+                    0: IDENT@951..958 "custom-" [] []
+                  1: SCSS_INTERPOLATION@958..967
+                    0: HASH@958..959 "#" [] []
+                    1: L_CURLY@959..960 "{" [] []
+                    2: SCSS_EXPRESSION@960..965
+                      0: SCSS_EXPRESSION_ITEM_LIST@960..965
+                        0: SCSS_VARIABLE@960..965
+                          0: DOLLAR@960..961 "$" [] []
+                          1: CSS_IDENTIFIER@961..965
+                            0: IDENT@961..965 "name" [] []
+                    3: R_CURLY@965..967 "}" [] [Whitespace(" ")]
+              1: CSS_UNKNOWN_AT_RULE_COMPONENT_LIST@967..972
+                0: IDENT@967..972 "final" [] []
+              2: (empty)
+        2: R_CURLY@972..974 "}" [Newline("\n")] []
+    30: CSS_AT_RULE@974..997
+      0: AT@974..976 "@" [Newline("\n")] []
+      1: CSS_UNKNOWN_VALUE_AT_RULE@976..997
+        0: SCSS_INTERPOLATED_IDENTIFIER@976..992
+          0: SCSS_INTERPOLATED_IDENTIFIER_PART_LIST@976..992
+            0: CSS_IDENTIFIER@976..983
+              0: IDENT@976..983 "custom-" [] []
+            1: SCSS_INTERPOLATION@983..992
+              0: HASH@983..984 "#" [] []
+              1: L_CURLY@984..985 "{" [] []
+              2: SCSS_EXPRESSION@985..990
+                0: SCSS_EXPRESSION_ITEM_LIST@985..990
+                  0: SCSS_VARIABLE@985..990
+                    0: DOLLAR@985..986 "$" [] []
+                    1: CSS_IDENTIFIER@986..990
+                      0: IDENT@986..990 "name" [] []
+              3: R_CURLY@990..992 "}" [] [Whitespace(" ")]
+        1: CSS_UNKNOWN_AT_RULE_COMPONENT_LIST@992..997
+          0: IDENT@992..997 "final" [] []
+        2: (empty)
+  2: EOF@997..998 "" [Newline("\n")] []
+
+```

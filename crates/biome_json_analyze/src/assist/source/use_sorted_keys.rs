@@ -1,25 +1,33 @@
 use crate::JsonRuleAction;
+use crate::utils::is_package_json;
 use biome_analyze::utils::{is_separated_list_sorted_by, sorted_separated_list_by};
 use biome_analyze::{
-    Ast, FixKind, Rule, RuleAction, RuleDiagnostic, context::RuleContext, declare_source_rule, RuleSource
+    Ast, FixKind, Rule, RuleAction, RuleDiagnostic, RuleSource, RuleSuppressions,
+    context::RuleContext, declare_source_rule,
 };
 use biome_console::markup;
-use biome_diagnostics::category;
 use biome_json_factory::make;
 use biome_json_syntax::{
     AnyJsonValue, JsonLanguage, JsonMemberList, JsonObjectValue, T, TextRange,
 };
-use biome_rowan::{AstNode, BatchMutationExt, SyntaxResult, SyntaxToken};
+use biome_rowan::{AstNode, BatchMutationExt, SyntaxResult, SyntaxToken, WalkEvent};
 use biome_rule_options::use_sorted_keys::{SortOrder, UseSortedKeysOptions};
 use biome_string_case::comparable_token::ComparableToken;
 use std::{cmp::Ordering, ops::Not};
 
 declare_source_rule! {
-    /// Sort the keys of a JSON object in natural order.
+    /// Sort keys in a JSON object.
     ///
-    /// [Natural order](https://en.wikipedia.org/wiki/Natural_sort_order) means
-    /// that uppercase letters come before lowercase letters (e.g. `A` < `a` <
-    /// `B` < `b`) and numbers are compared in a human way (e.g. `9` < `10`).
+    /// :::note
+    /// For `package.json`, use
+    /// [useSortedPackageJson](https://biomejs.dev/assist/actions/use-sorted-package-json), which
+    /// follows package-specific conventions.
+    /// :::
+    ///
+    /// By default, the action uses
+    /// [natural order](https://en.wikipedia.org/wiki/Natural_sort_order): uppercase letters come
+    /// before lowercase letters (`A` before `a`), and numbers are compared by value (`item9`
+    /// before `item10`).
     ///
     /// ## Examples
     ///
@@ -34,12 +42,13 @@ declare_source_rule! {
     /// ```
     ///
     /// ## Options
-    /// This actions accepts following options
     ///
     /// ### `sortOrder`
-    /// This options supports `natural` and `lexicographic` values. Where as `natural` is the default.
     ///
-    /// Following will apply the natural sort order.
+    /// Selects `natural` or `lexicographic` ordering. Natural ordering compares numbers by value
+    /// and is the default. Lexicographic ordering compares keys character by character.
+    ///
+    /// The following configuration uses natural order:
     ///
     /// ```json,options
     /// {
@@ -48,6 +57,7 @@ declare_source_rule! {
     ///     }
     /// }
     /// ```
+    ///
     /// ```json,use_options,expect_diff
     /// {
     ///     "val13": 1,
@@ -58,7 +68,7 @@ declare_source_rule! {
     /// }
     /// ```
     ///
-    /// Following will apply the lexicographic sort order.
+    /// The following configuration uses lexicographic order.
     ///
     /// ```json,options
     /// {
@@ -67,6 +77,7 @@ declare_source_rule! {
     ///     }
     /// }
     /// ```
+    ///
     /// ```json,use_options,expect_diff
     /// {
     ///     "val13": 1,
@@ -78,11 +89,10 @@ declare_source_rule! {
     /// ```
     ///
     /// ### `groupByNesting`
-    /// When enabled, groups object keys by their value's nesting depth before sorting alphabetically.
-    /// Simple values (primitives, single-line arrays, and single-line objects) are sorted first,
-    /// followed by nested values (multi-line arrays and multi-line objects).
     ///
-    /// > Default: `false`
+    /// Groups keys by the shape of their values before sorting by name. Strings, numbers, booleans,
+    /// `null`, and single-line arrays or objects come first. Multi-line arrays and objects come
+    /// afterward. Defaults to `false`.
     ///
     /// ```json,options
     /// {
@@ -91,7 +101,7 @@ declare_source_rule! {
     ///     }
     /// }
     /// ```
-    /// ```json,use_options,expect_diagnostic
+    /// ```json,use_options,expect_diff
     /// {
     ///     "name": "Sample",
     ///     "details": {
@@ -204,8 +214,28 @@ impl Rule for UseSortedKeys {
         }
     }
 
+    fn suppressed_nodes(
+        ctx: &RuleContext<Self>,
+        _state: &Self::State,
+        suppressions: &mut RuleSuppressions<JsonLanguage>,
+    ) {
+        for event in ctx
+            .query()
+            .syntax()
+            .preorder_of_kinds(JsonMemberList::KIND_SET)
+            .skip(1)
+        {
+            if let WalkEvent::Enter(node) = event {
+                suppressions.suppress_node(node);
+            }
+        }
+    }
+
     fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         let options = ctx.options();
+        // package.json files have specialized sorting via useSortedPackageJson; add a note.
+        let path = ctx.file_path();
+
         let message = if options.group_by_nesting.unwrap_or(false) {
             markup! {
                 "The members are not sorted by nesting level and key."
@@ -215,11 +245,16 @@ impl Rule for UseSortedKeys {
                 "The members are not sorted by key."
             }
         };
-        Some(RuleDiagnostic::new(
-            category!("assist/source/useSortedKeys"),
-            Self::text_range(ctx, state),
-            message,
-        ))
+        let mut diagnostic =
+            RuleDiagnostic::new(rule_category!(), Self::text_range(ctx, state), message);
+
+        if is_package_json(path) {
+            diagnostic = diagnostic.note(markup! {
+                "For consistent ordering in `package.json` files, use the action "<Hyperlink href="https://biomejs.dev/assist/actions/use-sorted-package-json">"useSortedPackageJson"</Hyperlink>"."
+            })
+        }
+
+        Some(diagnostic)
     }
 
     fn text_range(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<TextRange> {

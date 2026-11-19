@@ -102,6 +102,7 @@ impl GritTargetLanguageImpl for JsTargetLanguage {
             ("GRIT_OBJ = { ", " }"),
             ("class GRIT_CLASS { ", " }"),
             ("GRIT_VAR = ", ""),
+            ("<", " />"),
             ("<f>", "</f>"),
             ("<f ", " />"),
             ("function GRIT_FN(", ") {}"),
@@ -128,6 +129,9 @@ impl GritTargetLanguageImpl for JsTargetLanguage {
         kind.as_js_kind().is_some_and(|kind| {
             kind == JsSyntaxKind::JS_TEMPLATE_ELEMENT_LIST
                 || kind == JsSyntaxKind::TS_TEMPLATE_ELEMENT_LIST
+                || kind == JsSyntaxKind::JS_DEFAULT_IMPORT_SPECIFIER
+                || kind == JsSyntaxKind::JS_SHORTHAND_NAMED_IMPORT_SPECIFIER
+                || kind == JsSyntaxKind::JS_EXPORT_NAMED_FROM_SPECIFIER
         })
     }
 
@@ -147,9 +151,9 @@ impl GritTargetLanguageImpl for JsTargetLanguage {
 
                 match condition {
                     DisregardedSlotCondition::Always => true,
-                    DisregardedSlotCondition::OnlyIf(node_texts) => node_texts.iter().any(|text| {
-                        *text == node.as_ref().map(|node| node.text()).unwrap_or_default()
-                    }),
+                    DisregardedSlotCondition::OnlyIf(node_texts) => node_texts
+                        .iter()
+                        .any(|text| *text == node.as_ref().map_or_default(|node| node.text())),
                 }
             },
         )

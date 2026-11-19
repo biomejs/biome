@@ -1,3 +1,4 @@
+use crate::TestArgs as Args;
 use crate::configs::{
     CONFIG_FILE_SIZE_LIMIT, CONFIG_LINTER_DISABLED, CONFIG_LINTER_DISABLED_JSONC,
     CONFIG_LINTER_DOWNGRADE_DIAGNOSTIC, CONFIG_LINTER_DOWNGRADE_DIAGNOSTIC_INFO,
@@ -13,7 +14,6 @@ use crate::{
 };
 use biome_console::{BufferConsole, LogLevel, MarkupBuf, markup};
 use biome_fs::{ErrorEntry, FileSystemExt, MemoryFileSystem, OsFileSystem, TemporaryFs};
-use bpaf::Args;
 use camino::{Utf8Path, Utf8PathBuf};
 use std::env::temp_dir;
 use std::fs::{File, create_dir, create_dir_all, remove_dir_all};
@@ -134,18 +134,19 @@ fn maximum_diagnostics() {
             .iter()
             .filter(|m| m.level == LogLevel::Error)
             .count(),
-        20_usize
+        // 20 diagnostics, the max-diagnostics warning, and the summary
+        22_usize
     );
 
     assert!(
         messages
             .iter()
-            .filter(|m| m.level == LogLevel::Log)
+            .filter(|m| m.level == LogLevel::Error)
             .any(|m| {
                 let content = format!("{:?}", m.content);
                 content.contains("The number of diagnostics exceeds the limit allowed")
                     && content.contains("Diagnostics not shown")
-                    && content.contains("28")
+                    && content.contains("29")
             })
     );
 
@@ -750,7 +751,7 @@ fn no_lint_if_files_are_listed_in_ignore_option() {
 /// Creating a symbolic link will fail on Windows if the current process is
 /// unprivileged. Since running tests as administrator is uncommon and
 /// constraining, this error gets silently ignored if we're not running on CI
-/// (the workflows are being being run with the correct permissions on CI)
+/// (the workflows are being run with the correct permissions on CI)
 #[cfg(target_os = "windows")]
 macro_rules! check_windows_symlink {
     ($result:expr) => {
@@ -1264,7 +1265,7 @@ fn ignore_file_in_subdir_in_symlinked_dir() {
     let result = run_cli_with_dyn_fs(
         Box::new(OsFileSystem::new(subroot_path.clone())),
         &mut console,
-        Args::from(["lint", root_path.as_ref()].as_slice()),
+        Args::from(["lint", subroot_path.as_ref()].as_slice()),
     );
 
     remove_dir_all(root_path).unwrap();
@@ -1863,7 +1864,7 @@ fn should_apply_correct_file_source() {
         r#"{
     	"linter": {
     		"rules": {
-    			"recommended": true,
+    			"preset": "recommended",
     			"correctness": {
     				"noUndeclaredVariables": "error"
     			}
@@ -1965,7 +1966,7 @@ fn should_not_disable_recommended_rules_for_a_group() {
   "linter": {
     "enabled": true,
     "rules": {
-      "recommended": true,
+      "preset": "recommended",
       "complexity": {
         "noUselessSwitchCase": "off"
       }
@@ -2139,7 +2140,7 @@ fn should_pass_if_there_are_only_warnings() {
 {
   "linter": {
     "rules": {
-        "recommended": true,
+        "preset": "recommended",
         "suspicious": {
             "noClassAssign": "warn"
         }
@@ -2188,7 +2189,7 @@ fn does_error_with_only_warnings() {
 {
   "linter": {
     "rules": {
-        "recommended": true,
+        "preset": "recommended",
         "suspicious": {
             "noClassAssign": "warn"
         }
@@ -2706,6 +2707,38 @@ fn lint_syntax_rules() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "lint_syntax_rules",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn lint_invalid_property_syntax() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let file_path = Utf8Path::new("check.css");
+    fs.insert(
+        file_path.into(),
+        r#"@property --value {
+    syntax: "<unknown>";
+    inherits: false;
+}"#
+        .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", file_path.as_str()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "lint_invalid_property_syntax",
         fs,
         console,
         result,
@@ -4356,7 +4389,7 @@ fn should_not_choke_on_recursive_function_call() {
         r#"{
     "linter": {
         "rules": {
-            "recommended": true,
+            "preset": "recommended",
         },
         "domains": {
             "next": "all",
@@ -4387,6 +4420,287 @@ fn should_not_choke_on_recursive_function_call() {
         module_path!(),
         "should_not_choke_on_recursive_function_call",
         fs.create_mem(),
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn only_should_skip_plugin() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        Utf8PathBuf::from("biome.json"),
+        br#"{
+    "plugins": ["noManualZIndex.grit"]
+}
+"#,
+    );
+
+    fs.insert(
+        Utf8PathBuf::from("noManualZIndex.grit"),
+        br#"`$fn($args)` where {
+    $fn <: `Object.assign`,
+    register_diagnostic(
+        span = $fn,
+        message = "Prefer object spread instead of Object.assign()",
+        severity = "warn"
+    )
+}"#,
+    );
+
+    let file_path = "file.js";
+    fs.insert(
+        file_path.into(),
+        br#"const merged = Object.assign({}, a, b);
+debugger"#,
+    );
+
+    let (fs, result) = run_cli_with_server_workspace(
+        fs,
+        &mut console,
+        Args::from(["lint", "--only=noDebugger", file_path].as_slice()),
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "only_should_skip_plugin",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn only_plugin_runs_only_plugins() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        Utf8PathBuf::from("biome.json"),
+        br#"{
+    "plugins": ["noManualZIndex.grit"]
+}
+"#,
+    );
+
+    fs.insert(
+        Utf8PathBuf::from("noManualZIndex.grit"),
+        br#"`$fn($args)` where {
+    $fn <: `Object.assign`,
+    register_diagnostic(
+        span = $fn,
+        message = "Prefer object spread instead of Object.assign()",
+        severity = "warn"
+    )
+}"#,
+    );
+
+    let file_path = "file.js";
+    fs.insert(
+        file_path.into(),
+        br#"const merged = Object.assign({}, a, b);
+debugger"#,
+    );
+
+    let (fs, result) = run_cli_with_server_workspace(
+        fs,
+        &mut console,
+        Args::from(["lint", "--only=plugin", file_path].as_slice()),
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "only_plugin_runs_only_plugins",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn skip_plugin_skips_plugins() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        Utf8PathBuf::from("biome.json"),
+        br#"{
+    "plugins": ["noManualZIndex.grit"]
+}
+"#,
+    );
+
+    fs.insert(
+        Utf8PathBuf::from("noManualZIndex.grit"),
+        br#"`$fn($args)` where {
+    $fn <: `Object.assign`,
+    register_diagnostic(
+        span = $fn,
+        message = "Prefer object spread instead of Object.assign()",
+        severity = "warn"
+    )
+}"#,
+    );
+
+    let file_path = "file.js";
+    fs.insert(
+        file_path.into(),
+        br#"const merged = Object.assign({}, a, b);
+debugger"#,
+    );
+
+    let (fs, result) = run_cli_with_server_workspace(
+        fs,
+        &mut console,
+        Args::from(["lint", "--skip=plugin", file_path].as_slice()),
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "skip_plugin_skips_plugins",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn only_per_plugin_selector_is_rejected() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let file_path = "file.js";
+    fs.insert(file_path.into(), b"debugger");
+
+    let (fs, result) = run_cli_with_server_workspace(
+        fs,
+        &mut console,
+        Args::from(["lint", "--only=plugin/foo", file_path].as_slice()),
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "only_per_plugin_selector_is_rejected",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn missing_plugins_report_their_paths() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        Utf8PathBuf::from("biome.json"),
+        br#"{
+    "plugins": ["missingOne.grit", "missingTwo.grit"]
+}
+"#,
+    );
+
+    let file_path = "file.js";
+
+    fs.insert(file_path.into(), b"debugger\n");
+
+    let (fs, result) =
+        run_cli_with_server_workspace(fs, &mut console, Args::from(["lint", file_path].as_slice()));
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "missing_plugins_report_their_paths",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn lint_invalid_plugin_manifest() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+    let file_path = "biome-manifest.json";
+    fs.insert(file_path.into(), b"{}");
+
+    let (fs, result) =
+        run_cli_with_server_workspace(fs, &mut console, Args::from(["lint", file_path].as_slice()));
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "lint_invalid_plugin_manifest",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn lint_plugin_manifest_rejects_empty_rules() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+    let file_path = "biome-manifest.json";
+    fs.insert(
+        file_path.into(),
+        br#"{ "version": 1, "plugins": { "rules": [], "presets": { "recommended": ["one"] } } }"#,
+    );
+
+    let (fs, result) =
+        run_cli_with_server_workspace(fs, &mut console, Args::from(["lint", file_path].as_slice()));
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "lint_plugin_manifest_rejects_empty_rules",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn lint_package_plugin_with_distinct_includes() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        br#"{
+    "plugins": [{ "path": "plugin/noAssign", "includes": ["**/src/**"] }],
+    "overrides": [{
+        "includes": ["tests/**"],
+        "plugins": [{ "path": "plugin/noAssign", "includes": ["**/tests/**"] }]
+    }]
+}"#,
+    );
+    fs.insert(
+        "node_modules/plugin/package.json".into(),
+        br#"{ "name": "plugin" }"#,
+    );
+    fs.insert(
+        "node_modules/plugin/biome-manifest.json".into(),
+        br#"{ "version": 1, "plugins": { "rules": [{ "noAssign": "rules/noAssign.grit" }], "presets": { "recommended": ["noAssign"] } } }"#,
+    );
+    fs.insert(
+        "node_modules/plugin/rules/noAssign.grit".into(),
+        br#"`Object.assign($args)` where {
+    register_diagnostic(span = $args, message = "Do not use Object.assign")
+}"#,
+    );
+    fs.insert("src/a.ts".into(), b"Object.assign({});");
+    fs.insert("tests/a.ts".into(), b"Object.assign({});");
+
+    let (fs, result) = run_cli_with_server_workspace(
+        fs,
+        &mut console,
+        Args::from(["lint", "src/a.ts", "tests/a.ts"].as_slice()),
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "lint_package_plugin_with_distinct_includes",
+        fs,
         console,
         result,
     ));

@@ -6,11 +6,12 @@ use biome_console::markup;
 use biome_js_factory::make;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
-    AnyJsExpression, AnyJsName, AnyJsObjectMember, JsFileSource, JsIdentifierExpression,
-    JsPropertyObjectMember, JsReferenceIdentifier, JsShorthandPropertyObjectMember,
-    JsStaticMemberExpression, JsSyntaxKind, JsSyntaxToken,
+    AnyJsExpression, AnyJsName, AnyJsObjectMember, JsIdentifierExpression, JsPropertyObjectMember,
+    JsReferenceIdentifier, JsShorthandPropertyObjectMember, JsStaticMemberExpression, JsSyntaxKind,
+    JsSyntaxToken,
 };
-use biome_rowan::{AstNode, BatchMutationExt, TriviaPieceKind};
+use biome_languages::JsFileSource;
+use biome_rowan::{AstNode, BatchMutationExt};
 use biome_rule_options::no_global_dirname_filename::NoGlobalDirnameFilenameOptions;
 
 declare_lint_rule! {
@@ -102,13 +103,12 @@ impl Rule for NoGlobalDirnameFilename {
                 expr.into(),
                 make_import_meta(dirname_or_filename).into(),
             );
-        } else if let Some(member) = node.parent::<JsShorthandPropertyObjectMember>() {
+        } else {
+            let member = node.parent::<JsShorthandPropertyObjectMember>()?;
             mutation.replace_node::<AnyJsObjectMember>(
                 member.into(),
                 make_property_object_member(syntax_token, dirname_or_filename).into(),
             )
-        } else {
-            return None;
         }
 
         Some(JsRuleAction::new(
@@ -166,7 +166,7 @@ fn make_property_object_member(
         biome_js_syntax::AnyJsObjectMemberName::JsLiteralMemberName(make::js_literal_member_name(
             make::ident(key.text_trimmed()),
         )),
-        make::token(JsSyntaxKind::COLON).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+        make::token(JsSyntaxKind::COLON).with_trailing_space(),
         AnyJsExpression::JsStaticMemberExpression(make_import_meta(import_meta_property)),
     )
 }

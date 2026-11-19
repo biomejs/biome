@@ -1,0 +1,58 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: vue/directive-values/semicolons-as-needed/event-handlers.vue
+---
+
+# Input
+
+```vue
+<template>
+  <div @click="[a].forEach(f)"></div>
+  <div @loaded="(map = $event) && initMap()"></div>
+  <div @click="count++;"></div>
+  <div @click="handler;"></div>
+  <div @click="a();[b].forEach(f)"></div>
+  <div @click="const x = 1; f(x)"></div>
+  <div @click="if (ok) save()"></div>
+</template>
+
+```
+
+
+# Options
+
+```json
+{
+  "$schema": "../../../../../../../../packages/@biomejs/biome/configuration_schema.json",
+  "javascript": {
+    "formatter": {
+      "semicolons": "asNeeded"
+    }
+  }
+}
+```
+
+# Formatted
+
+```vue
+<template>
+	<div @click="[a].forEach(f)"></div>
+	<div @loaded="(map = $event) && initMap()"></div>
+	<div @click="count++"></div>
+	<div @click="handler;"></div>
+	<div
+		@click="
+			a();
+			[b].forEach(f);
+		"
+	></div>
+	<div
+		@click="
+			const x = 1;
+			f(x);
+		"
+	></div>
+	<div @click="if (ok) save();"></div>
+</template>
+
+```

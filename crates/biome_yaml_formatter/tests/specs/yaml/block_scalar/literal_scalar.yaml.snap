@@ -24,20 +24,13 @@ info: yaml/block_scalar/literal_scalar.yaml
 
 ```yaml
 - |
- hello
- world
+  hello
+  world
 
 - |-
- stripped
+  stripped
 
 - |+
- kept
-
+  kept
 
 ```
-
-
-
-## Unimplemented nodes/tokens
-
-"- |\n hello\n world\n\n- |-\n stripped\n\n- |+\n kept\n\n" => 0..47

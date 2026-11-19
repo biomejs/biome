@@ -1,0 +1,115 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: templateLiteralInvalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+declare const name: string;
+
+String(`hello`);
+`hello`.toString();
+
+const greeting = `hello ${name}`;
+String(greeting);
+greeting.toString();
+
+```
+
+# Diagnostics
+```
+templateLiteralInvalid.ts:4:1 lint/nursery/noUselessTypeConversion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid calling `String()` on a string value.
+  
+    2 │ declare const name: string;
+    3 │ 
+  > 4 │ String(`hello`);
+      │ ^^^^^^
+    5 │ `hello`.toString();
+    6 │ 
+  
+  i This expression already evaluates to a string.
+  
+  i Remove the conversion and use the value directly.
+  
+  i Redundant conversions make it harder to see that the value already has the expected string type.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9752 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+templateLiteralInvalid.ts:5:9 lint/nursery/noUselessTypeConversion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid calling `toString()` on a string value.
+  
+    4 │ String(`hello`);
+  > 5 │ `hello`.toString();
+      │         ^^^^^^^^
+    6 │ 
+    7 │ const greeting = `hello ${name}`;
+  
+  i This expression already evaluates to a string.
+  
+  i Remove the conversion and use the value directly.
+  
+  i Redundant conversions make it harder to see that the value already has the expected string type.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9752 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+templateLiteralInvalid.ts:8:1 lint/nursery/noUselessTypeConversion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid calling `String()` on a string value.
+  
+     7 │ const greeting = `hello ${name}`;
+   > 8 │ String(greeting);
+       │ ^^^^^^
+     9 │ greeting.toString();
+    10 │ 
+  
+  i This expression already evaluates to a string.
+  
+  i Remove the conversion and use the value directly.
+  
+  i Redundant conversions make it harder to see that the value already has the expected string type.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9752 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+templateLiteralInvalid.ts:9:10 lint/nursery/noUselessTypeConversion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid calling `toString()` on a string value.
+  
+     7 │ const greeting = `hello ${name}`;
+     8 │ String(greeting);
+   > 9 │ greeting.toString();
+       │          ^^^^^^^^
+    10 │ 
+  
+  i This expression already evaluates to a string.
+  
+  i Remove the conversion and use the value directly.
+  
+  i Redundant conversions make it harder to see that the value already has the expected string type.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9752 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

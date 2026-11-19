@@ -6,7 +6,6 @@
 
 #[macro_use]
 mod generated;
-mod file_source;
 mod object_ext;
 pub mod string_value_ext;
 mod syntax_node;
@@ -14,7 +13,6 @@ mod syntax_node;
 use biome_rowan::{AstNode, RawSyntaxKind, SyntaxKind, TokenText};
 
 pub use biome_rowan::{TextLen, TextRange, TextSize, TokenAtOffset, TriviaPieceKind, WalkEvent};
-pub use file_source::GraphqlFileSource;
 pub use generated::*;
 pub use syntax_node::*;
 
@@ -92,6 +90,10 @@ impl biome_rowan::SyntaxKind for GraphqlSyntaxKind {
         )
     }
 
+    fn is_allowed_before_suppressions(&self) -> bool {
+        *self == Self::UNICODE_BOM
+    }
+
     fn to_string(&self) -> Option<&'static str> {
         Self::to_string(self)
     }
@@ -106,7 +108,7 @@ impl TryFrom<GraphqlSyntaxKind> for TriviaPieceKind {
                 GraphqlSyntaxKind::NEWLINE => Ok(Self::Newline),
                 GraphqlSyntaxKind::WHITESPACE => Ok(Self::Whitespace),
                 // https://spec.graphql.org/October2021/#sec-Insignificant-Commas
-                GraphqlSyntaxKind::COMMA => Ok(Self::Skipped),
+                GraphqlSyntaxKind::COMMA => Ok(Self::Whitespace),
                 GraphqlSyntaxKind::COMMENT => Ok(Self::SingleLineComment),
                 _ => unreachable!("Not Trivia"),
             }

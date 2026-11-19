@@ -44,7 +44,10 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "useAriaPropsForRole",
         language: "jsx",
-        sources: &[RuleSource::EslintJsxA11y("role-has-required-aria-props").same()],
+        sources: &[
+            RuleSource::EslintJsxA11y("role-has-required-aria-props").same(),
+            RuleSource::EslintAstro("jsx-a11y/role-has-required-aria-props").same(),
+        ],
         recommended: true,
         severity: Severity::Error,
     }
@@ -78,10 +81,15 @@ impl Rule for UseAriaPropsForRole {
                 .as_jsx_string()?
                 .inner_string_text()
                 .ok()?;
-            let role = AriaRole::from_roles(name.text());
+            let role = AriaRole::from_roles(name.text())?;
+            if role == AriaRole::Separator
+                && node.find_attribute_by_name("tabIndex").is_none()
+            {
+                return None;
+            }
             let missing_aria_props: Vec<_> = role
-                .into_iter()
-                .flat_map(|role| role.required_attributes().iter())
+                .required_attributes()
+                .iter()
                 .filter_map(|attribute| {
                     let attribute_name = attribute.as_str();
                     node.find_attribute_by_name(attribute_name)
@@ -112,7 +120,10 @@ impl Rule for UseAriaPropsForRole {
                 "The element with the "<Emphasis>{role_name}</Emphasis>" ARIA role does not have the required ARIA attributes."
                 },
             )
-            .footer_list(markup! { "Missing ARIA prop(s):" }, &state.missing_aria_props)
+            .note(markup! {
+                "Assistive technologies expect an element with this role to provide these attributes. Without them, screen reader users may not understand the element."
+            })
+            .footer_list(markup! { "Add the missing ARIA attribute(s):" }, &state.missing_aria_props)
         })
     }
 }

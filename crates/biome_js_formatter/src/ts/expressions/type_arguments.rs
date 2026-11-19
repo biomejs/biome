@@ -75,21 +75,58 @@ impl FormatNodeRule<TsTypeArguments> for FormatTsTypeArguments {
         let should_inline = !is_arrow_function_variables
             && (ts_type_argument_list.len() == 0 || first_argument_can_be_hugged_or_is_null_type);
 
-        if should_inline {
+        let first_argument_has_leading_line_comment =
+            ts_type_argument_list.first().is_some_and(|first_argument| {
+                first_argument.is_ok_and(|argument| {
+                    f.comments()
+                        .leading_comments(argument.syntax())
+                        .iter()
+                        .any(|comment| comment.kind().is_line() || comment.lines_before() > 0)
+                })
+            });
+
+        let delimiter_spacing = f.options().delimiter_spacing().value();
+
+        if first_argument_has_leading_line_comment {
             write!(
                 f,
-                [
+                [group(&format_args![
                     l_angle_token.format(),
-                    ts_type_argument_list.format(),
+                    block_indent(&ts_type_argument_list.format()),
                     r_angle_token.format()
-                ]
+                ])]
             )
+        } else if should_inline {
+            if delimiter_spacing {
+                write!(
+                    f,
+                    [
+                        l_angle_token.format(),
+                        space(),
+                        ts_type_argument_list.format(),
+                        space(),
+                        r_angle_token.format()
+                    ]
+                )
+            } else {
+                write!(
+                    f,
+                    [
+                        l_angle_token.format(),
+                        ts_type_argument_list.format(),
+                        r_angle_token.format()
+                    ]
+                )
+            }
         } else {
             write!(
                 f,
                 [group(&format_args![
                     l_angle_token.format(),
-                    soft_block_indent(&ts_type_argument_list.format()),
+                    soft_block_indent_with_maybe_space(
+                        &ts_type_argument_list.format(),
+                        delimiter_spacing
+                    ),
                     r_angle_token.format()
                 ])]
             )

@@ -1,0 +1,44 @@
+.a{width:ATTR(data-x TYPE(AUTO))}
+@FONT-FEATURE-VALUES KeepFont{@STYLESET{Fancy:1;fancy:2}}
+@--Foo{COLOR:RED}
+@--Bar KeepValue;
+@FUTURE KeepValue;
+@FUTURE KeepValue{COLOR:INITIAL}
+@KeepLessVar:KeepValue;
+@KeepLessBlock:KeepValue{Nested:INITIAL}
+:\2d\2d Foo{COLOR:RED}
+:\-\-Foo{COLOR:RED}
+@MEDIA(\2d\2d Feature){A{COLOR:RED}}
+@MEDIA(\-\-Feature){A{COLOR:RED}}
+a:EXPORT{COLOR:red}
+---foo,A:HOVER{COLOR:RED}
+---foo:HOVER{COLOR:RED}
+---:FOCUS{COLOR:RED}
+---:HOVER ---{COLOR:RED}
+A{} --- B:HOVER --- C{COLOR:RED}
+.a{\2d\2d Foo:KeepValue}
+.a{\-\-Foo:fn(INITIAL)}
+@--Baz{KeepKey:KeepValue}
+@--Nested{.a{COLOR:RED}}
+:EXPORT{Token:red}
+:export{Keyword:INITIAL}
+:export{.Nested{COLOR:INITIAL}}
+.a{--payload:fn(INITIAL)}
+@future{Payload:fn(INHERIT);.Nested{COLOR:INITIAL}}
+.wide{A:REVERT-LAYER}
+:GLOBAL(.A){Token:red}
+:\67 LOBAL(.A){Token:red}
+:\65 XPORT{Token:red}
+:host ::NG-DEEP .child{COLOR:RED}
+::V-DEEP(.child){COLOR:BLUE}
+::V-SLOTTED(.child){COLOR:RED}
+::V-GLOBAL(.child){COLOR:RED}
+@\-\-Future{COLOR:RED}
+.opaque{COLOR:INITIAL;--keyword:INITIAL;color:fn(INHERIT)}
+@supports(/* keep */COLOR){}
+@supports KeepDirect{}
+@supports KeepLeft and KeepRight{}
+@supports not KeepNot{}
+@supports KeepLeft or KeepRight{}
+@import"x"supports(KeepImport);
+.a{x:if(supports(KeepIfLeft and KeepIfRight):red;else:blue)}

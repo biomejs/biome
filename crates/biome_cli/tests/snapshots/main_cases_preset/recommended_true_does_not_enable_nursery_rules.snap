@@ -1,0 +1,86 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome lint test.js
+```
+
+## `biome.json`
+
+```json
+{
+  "linter": {
+    "rules": {
+      "recommended": true
+    }
+  }
+}
+```
+
+## `test.js`
+
+```js
+for (let i = 0; i < 10; i++) {
+    if (i === 5) {
+        continue;
+    }
+}
+
+```
+
+# Emitted Messages
+
+```block
+biome.json:2:15 deserialize  DEPRECATED  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The use of the recommended field has been deprecated, and will removed in the next major version of Biome. Use preset instead.
+  
+    1 │ {
+  > 2 │     "linter": {
+      │               ^
+  > 3 │         "rules": {
+  > 4 │             "recommended": true
+  > 5 │         }
+  > 6 │     }
+      │     ^
+    7 │ }
+  
+  i Migrate the configuration with the proper command
+  
+  $ biome migrate
+  
+
+```
+
+```block
+test.js:3:9 lint/complexity/noUselessContinue  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unnecessary continue statement
+  
+    1 │ for (let i = 0; i < 10; i++) {
+    2 │     if (i === 5) {
+  > 3 │         continue;
+      │         ^^^^^^^^^
+    4 │     }
+    5 │ }
+  
+  i The loop already moves on to the next iteration at this point, so the statement has no effect.
+  
+  i Safe fix: Delete the unnecessary continue statement
+  
+    1 1 │   for (let i = 0; i < 10; i++) {
+    2 2 │       if (i === 5) {
+    3   │ - ········continue;
+    4 3 │       }
+    5 4 │   }
+  
+
+```
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+Found 1 info.
+```

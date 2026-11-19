@@ -1,0 +1,14 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-script-setup-props-member.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<script setup>
+const props = defineProps(['foo', 'bar'])
+const foo = props.foo
+const { bar } = props
+</script>
+
+```
