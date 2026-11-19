@@ -7,7 +7,7 @@ use hashbrown::{HashTable, hash_table::Entry};
 use rustc_hash::FxHasher;
 
 use biome_js_semantic::ScopeId;
-use biome_js_syntax::{AnyJsExpression, JsSyntaxNode};
+use biome_js_syntax::{AnyJsExpression, JsIdentifierExpression, JsSyntaxNode};
 
 use crate::{
     RawTypeId, TypeData, TypeId, TypeReference, Union, globals::GLOBAL_UNDEFINED_ID,
@@ -112,6 +112,15 @@ pub trait RawTypeCollector {
     /// declares `node`. Returns `None` for collectors without a semantic
     /// model.
     fn enclosing_scope_for_node(&self, _node: &JsSyntaxNode) -> Option<ScopeId> {
+        None
+    }
+
+    /// Returns the initializer of the `const` that `identifier` reads when
+    /// the `const` binds an identifier without a type annotation and its
+    /// declarator ends before `identifier`, as `"k"` for `K` after
+    /// `const K = "k"`. Returns `None` otherwise, and for collectors without
+    /// a semantic model.
+    fn const_initializer(&self, _identifier: &JsIdentifierExpression) -> Option<AnyJsExpression> {
         None
     }
 

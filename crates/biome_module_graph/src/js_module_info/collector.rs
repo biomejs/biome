@@ -7,10 +7,11 @@ use biome_js_syntax::{
     AnyJsArrowFunctionParameters, AnyJsBindingPattern, AnyJsCombinedSpecifier, AnyJsDeclaration,
     AnyJsExportDefaultDeclaration, AnyJsExpression, AnyJsImportClause, AnyTsType,
     JsArrowFunctionExpression, JsAssignmentExpression, JsCatchDeclaration,
-    JsForVariableDeclaration, JsFormalParameter, JsLanguage, JsRestParameter, JsSyntaxNode,
-    JsVariableDeclaration, TsEnumDeclaration, TsEnumMember, TsEnumMemberList, TsGlobalDeclaration,
-    TsInferType, TsInterfaceDeclaration, TsLiteralEnumMemberName, TsMappedType,
-    TsModuleDeclaration, TsTypeParameter, inner_string_text,
+    JsForVariableDeclaration, JsFormalParameter, JsIdentifierExpression, JsLanguage,
+    JsRestParameter, JsSyntaxNode, JsVariableDeclaration, JsVariableKind, TsEnumDeclaration,
+    TsEnumMember, TsEnumMemberList, TsGlobalDeclaration, TsInferType, TsInterfaceDeclaration,
+    TsLiteralEnumMemberName, TsMappedType, TsModuleDeclaration, TsTypeParameter,
+    binding_ext::AnyJsBindingDeclaration, inner_string_text,
 };
 use biome_js_type_info::{
     Class, EnumTypes, Function, FunctionParameter, FunctionParameterBinding, GenericTypeParameter,
@@ -1523,6 +1524,24 @@ impl JsModuleInfoCollector {
 }
 
 impl RawTypeCollector for JsModuleInfoCollector {
+    fn const_initializer(&self, identifier: &JsIdentifierExpression) -> Option<AnyJsExpression> {
+        let binding = self.semantic_model.binding(&identifier.name().ok()?)?;
+        let AnyJsBindingDeclaration::JsVariableDeclarator(declarator) =
+            binding.tree().declaration()?
+        else {
+            return None;
+        };
+        if !matches!(declarator.id(), Ok(AnyJsBindingPattern::AnyJsBinding(_)))
+            || declarator.variable_annotation().is_some()
+            || declarator.declaration()?.variable_kind().ok()? != JsVariableKind::Const
+            || declarator.syntax().text_trimmed_range().end()
+                > identifier.syntax().text_trimmed_range().start()
+        {
+            return None;
+        }
+        declarator.initializer()?.expression().ok()
+    }
+
     fn scope_for_node(&self, node: &JsSyntaxNode) -> Option<ScopeId> {
         Some(self.semantic_model.scope(node).id())
     }
