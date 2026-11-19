@@ -332,13 +332,54 @@ fn in_intersects_the_type_when_no_member_has_the_property() {
     );
 }
 
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type,
+// and `A` at `annotatedKey`. A key that names a `const` narrows as the literal
+// that the `const` holds does, also through another `const` and from the top
+// level of the module. A `const` with a type annotation keeps the declared
+// type, which is wider.
+#[test]
+fn in_narrows_by_constants_that_hold_a_literal_key() {
+    assert_reads(
+        r##"
+        const K = "a";
+        function constKey(x: A | B) { const k = "a"; if (k in x) /*constKey*/x; else /*constKeyElse*/x; }
+        function chained(x: A | B) { const k1 = "a"; const k2 = (k1); if (k2 in x) /*chained*/x; }
+        function moduleKey(x: A | B) { if (K in x) /*moduleKey*/x; }
+        function numberKey(x: Zero | B) { const k = 0; if (k in x) /*numberKey*/x; }
+        function templateKey(x: A | B) { const k = `a`; if (k in x) /*templateKey*/x; }
+        function letKey(x: A | B) { let k = "a"; if (k in x) /*letKey*/x; }
+        function annotatedKey(x: A | B) { const k: "a" = "a"; if (k in x) /*annotatedKey*/x; }
+        function undeclaredKey(x: A | B) { const k = "c"; if (k in x) /*undeclaredKey*/x; else /*undeclaredKeyElse*/x; }
+        "##,
+        &[
+            ("constKey", "x", &["A"]),
+            ("constKeyElse", "x", &["B"]),
+            ("chained", "x", &["A"]),
+            ("moduleKey", "x", &["A"]),
+            ("numberKey", "x", &["Zero"]),
+            ("templateKey", "x", &["A"]),
+            ("letKey", "x", &["A", "B"]),
+            // TypeScript: `A`.
+            ("annotatedKey", "x", &["A", "B"]),
+            (
+                "undeclaredKey",
+                "x",
+                &[
+                    r#"["a": number: 1, "c": unknown]"#,
+                    r#"["b": number: 2, "c": unknown]"#,
+                ],
+            ),
+            ("undeclaredKeyElse", "x", &["A", "B"]),
+        ],
+    );
+}
+
 // Biome keeps the declared type of every read below. A comment gives the type
 // that TypeScript 7.0.2 (`tsc --strict`) gives where it differs.
 #[test]
 fn in_keeps_the_declared_type_where_biome_cannot_tell() {
     assert_reads(
         r##"
-        function constKey(x: A | B) { const k = "a"; if (k in x) /*constKey*/x; }
         function escapedKey(x: A | B) { if ("\u0061" in x) /*escapedKey*/x; }
         function hex(x: A | B) { if (0x0 in x) /*hex*/x; }
         function functionMember(x: A | (() => void)) { if ("call" in x) /*functionMember*/x; else /*functionMemberElse*/x; }
@@ -352,8 +393,6 @@ fn in_keeps_the_declared_type_where_biome_cannot_tell() {
         function discriminant(s: { k: A | B; t: 1 } | { k: B; t: 2 }) { if ("a" in s.k) /*discriminant*/s; }
         "##,
         &[
-            // `A`
-            ("constKey", "x", &["A", "B"]),
             // `A`
             ("escapedKey", "x", &["A", "B"]),
             // `(A | B) & Record<0, unknown>`

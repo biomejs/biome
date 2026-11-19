@@ -30,3 +30,10 @@ function absent(result: Result) {
 function operand(result: Result) {
 	return !("error" in result) && result.data?.size;
 }
+
+function constantKey(result: Result) {
+	const key = "error";
+	if (!(key in result)) {
+		return result.data?.size;
+	}
+}
