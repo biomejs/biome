@@ -1359,12 +1359,11 @@ without such a value gives `Unknown`. A variable whose state is `Unknown` is
 Unknown at the read, while an array whose state is `Unknown`, or to which
 nothing was added, keeps its declared type (`evolving_array_read`). Runtime
 tests narrow a variable from its incoming type and never narrow an array.
-When the values that the root adds to an array that is an array at every
-read are all `null` or all `undefined`, apart from undetermined values, the
-read keeps its declared type without a solve. When every
-write of a variable gives `null`, `undefined`, or `Unknown`, and at least one
-gives `Unknown` (`RootFlow::has_valueless_write`), the read is `Unknown`
-without a solve.
+When the root adds only undetermined values, or nothing, to an array that is
+an array at every read, the read keeps its declared type without a solve.
+When every write of a variable gives `null`, `undefined`, or `Unknown`, and at
+least one gives `Unknown` (`RootFlow::has_valueless_write`), the read is
+`Unknown` without a solve.
 
 **Expressions.** `flow_expressions.rs` uses narrowed operands when inferring
 member accesses, calls, logical and conditional expressions, `await`, the

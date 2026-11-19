@@ -255,6 +255,9 @@ fn evolving_arrays_take_the_types_of_their_elements() {
         function a44() { var a = []; a.push(1); /*a44*/a; }
         function a45() { const a = [], b = []; a.push(1); b.push("s"); /*a45*/a; /*a45b*/b; }
         function u5() { const a = []; a.push(null); a.push(undefined); /*u5*/a; }
+        function a21() { const a = []; a.push(null); /*a21*/a; }
+        function a21b() { const a = []; a.push(undefined); /*a21b*/a; }
+        function a21c() { const a = []; if (c) a.push(null); /*a21c*/a; }
         "#,
         &[
             ("e6", "a", &["instanceof Array<number>"]),
@@ -288,13 +291,15 @@ fn evolving_arrays_take_the_types_of_their_elements() {
             ("a45", "a", &["instanceof Array<number>"]),
             ("a45b", "b", &["instanceof Array<string>"]),
             ("u5", "a", &["instanceof Array<null | undefined>"]),
+            ("a21", "a", &["instanceof Array<null>"]),
+            ("a21b", "a", &["instanceof Array<undefined>"]),
+            ("a21c", "a", &["instanceof Array<null>"]),
         ],
     );
 }
 
 // TypeScript 7.0.2 (`tsc --strict`) gives each read below a narrower type
-// than Biome, in the comment after it. Biome keeps the declared type where
-// nothing but `null`, or nothing but `undefined`, is added to an array, in a
+// than Biome, in the comment after it. Biome keeps the declared type in a
 // closure or a nested function of a variable without an initializer, where
 // TypeScript reports an implicit `any` (TS7005), and for an array to which a
 // write that reaches the read adds a value that Biome may type differently
@@ -309,7 +314,6 @@ fn evolving_declarations_keep_their_declared_type_where_biome_cant_follow_them()
         function v26() { let x; x = 1; const y = x; /*v26*/y; } // number
         function a1() { const a = []; a.push(...[1, 2]); /*a1*/a; } // number[]
         function a3() { const a = []; a[n] = 1; /*a3*/a; } // number[]
-        function a21() { const a = []; a.push(null); /*a21*/a; } // null[]
         function a43() { const a = []; a.push(() => 1); /*a43*/a; } // (() => number)[]
         function a46() { const a = []; a.push(1); (async () => a.push("s"))(); /*a46*/a; } // number[]
         function r1() { let e = null; e = "a"; let y: string | null = f(); y = e; /*r1*/y; } // string
@@ -320,7 +324,6 @@ fn evolving_declarations_keep_their_declared_type_where_biome_cant_follow_them()
             ("v26", "y", &["Unknown"]),
             ("a1", "a", &["instanceof Array<unknown>"]),
             ("a3", "a", &["instanceof Array<unknown>"]),
-            ("a21", "a", &["instanceof Array<unknown>"]),
             ("a43", "a", &["instanceof Array<unknown>"]),
             ("a46", "a", &["instanceof Array<unknown>"]),
             ("r1", "y", &["null", "string"]),

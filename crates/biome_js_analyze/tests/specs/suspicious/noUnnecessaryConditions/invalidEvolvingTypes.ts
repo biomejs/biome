@@ -1,6 +1,7 @@
 // A `let` declared without an initializer, or with `null` or `undefined`,
 // takes its type from the values that the code assigns to it, as in
-// TypeScript, and is `undefined` before any of them, so each condition below
+// TypeScript, and is `undefined` before any of them, and an array that starts
+// empty takes the types of the values added to it, so each condition below
 // can't change.
 
 interface Timer {
@@ -31,5 +32,12 @@ function clearedOnly() {
 function neverAssigned() {
 	let timer;
 	if (timer) {
+	}
+}
+
+function onlyNulls() {
+	const slots = [];
+	slots.push(null);
+	if (slots[0]) {
 	}
 }

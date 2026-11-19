@@ -326,7 +326,6 @@ their writes, as in TypeScript. The code below uses
 | `let x = null; x = store.load(); x` | `number` | Unknown | A rule can miss a report on `x`. |
 | `let x = null; x = 0; x++; x` | `number` | Unknown | A rule can miss a report on `x`. |
 | `let a = []; a.push(1); if (c) a = null; a` | `any[]`, with an error | Unknown | A rule can miss a report on `a`. |
-| `const a = []; a.push(null); a` | `null[]` | `unknown[]` | A rule can miss a report on the elements of `a`. |
 | `let a = []; a.push(1); a.push(store.load()); a` | `number[]` | `unknown[]` | A rule can miss a report on the elements of `a`. |
 | `var v = null; function read() { return v; } v = "a";`, the read in `read` | `any`, with an error | Unknown | A rule can miss a report on `v`. |
 | `let w = null; function read() { w } function write() { w = 1; }`, the read in `read` | `any`, with an error | `null \| 1` | Rules see the values that the writes assign, where TypeScript reports an implicit `any`. |
