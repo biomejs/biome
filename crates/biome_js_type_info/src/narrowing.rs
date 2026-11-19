@@ -1740,15 +1740,19 @@ pub fn narrow_by_type_predicate<'db>(
 ///
 /// `boolean` stays whole, and a boolean value counts as both `true` and
 /// `false`, because Biome types some comparisons, such as `1 === 1`, as
-/// `true` where TypeScript gives `boolean`. So `boolean | undefined` becomes
-/// `boolean` for `true`, where TypeScript gives `true`. A comparison that
-/// Biome can't decide keeps the member. The comparisons visit at most 256
-/// pairs and types, after which the result is `declared`. `resolve` replaces
-/// local and global handles with the types they stand for.
+/// `true` where TypeScript gives `boolean`. So `boolean | undefined` stays
+/// `boolean` for such a `true`. When `is_boolean_literal` is true, the value
+/// is a `true` or `false` literal, whose type is the same in TypeScript, and
+/// `boolean` counts as `true | false`, so `boolean | undefined` becomes `true`
+/// for `true`, as in TypeScript. A comparison that Biome can't decide keeps
+/// the member. The comparisons visit at most 256 pairs and types, after which
+/// the result is `declared`. `resolve` replaces local and global handles with
+/// the types they stand for.
 pub fn narrow_by_assignment<'db>(
     db: &'db dyn TypeDb,
     declared: InferredTypeData<'db>,
     assigned: InferredTypeData<'db>,
+    is_boolean_literal: bool,
     mut resolve: impl FnMut(InferredTypeData<'db>) -> InferredTypeData<'db>,
 ) -> InferredTypeData<'db> {
     if declared == assigned || !matches!(declared, InferredTypeData::Union(_)) {
@@ -1758,7 +1762,7 @@ pub fn narrow_by_assignment<'db>(
         return assigned;
     }
     let mut remaining = MAX_NARROWING_STEPS;
-    let (Some(members), Some(values)) = (
+    let (Some(mut members), Some(values)) = (
         union_members(db, declared, &mut remaining),
         union_members(db, assigned, &mut remaining),
     ) else {
@@ -1768,11 +1772,21 @@ pub fn narrow_by_assignment<'db>(
     for value in values {
         let is_boolean = matches!(value, InferredTypeData::Boolean)
             || matches!(value, InferredTypeData::Literal(literal) if matches!(literal.literal(db), Literal::Boolean(_)));
-        if is_boolean {
+        if is_boolean && !is_boolean_literal {
             expanded.extend([boolean_literal(db, true), boolean_literal(db, false)]);
         } else {
             expanded.push(value);
         }
+    }
+    if is_boolean_literal
+        && let Some(index) = members
+            .iter()
+            .position(|member| *member == InferredTypeData::Boolean)
+    {
+        members.splice(
+            index..=index,
+            [boolean_literal(db, true), boolean_literal(db, false)],
+        );
     }
     let resolve: &mut TypeResolver<'db, '_> = &mut resolve;
     assignment_reduced_members(db, &members, &expanded, assigned, resolve).unwrap_or(declared)
@@ -6629,8 +6643,9 @@ mod tests {
     fn assignments_keep_the_members_of_the_declared_union_that_the_value_may_have() {
         let db = TestDb::default();
         let db = &db;
-        let reduce =
-            |declared, assigned| super::narrow_by_assignment(db, declared, assigned, |ty| ty);
+        let reduce = |declared, assigned| {
+            super::narrow_by_assignment(db, declared, assigned, false, |ty| ty)
+        };
         let a = string(db, "a");
         let b = string(db, "b");
         let one = number(db, "1");
@@ -6686,6 +6701,24 @@ mod tests {
         assert_eq!(
             reduce(literals, boolean_literal(db, true)),
             union(db, &[boolean_literal(db, true), boolean_literal(db, false)])
+        );
+        // A `true` or `false` literal keeps only its own value of `boolean`.
+        let reduce_literal =
+            |declared, assigned| super::narrow_by_assignment(db, declared, assigned, true, |ty| ty);
+        assert_eq!(
+            reduce_literal(optional_boolean, boolean_literal(db, true)),
+            boolean_literal(db, true)
+        );
+        assert_eq!(
+            reduce_literal(literals, boolean_literal(db, false)),
+            boolean_literal(db, false)
+        );
+        assert_eq!(
+            reduce_literal(
+                union(db, &[InferredTypeData::Boolean, InferredTypeData::String]),
+                boolean_literal(db, false)
+            ),
+            boolean_literal(db, false)
         );
     }
 

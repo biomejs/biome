@@ -1497,7 +1497,7 @@ impl<'db> ResolutionCtx<'db, '_> {
             // subtype of TypeScript's type. A subtype is assignable to every
             // member that TypeScript's type is assignable to, so the reduction
             // never gives a narrower type than TypeScript's.
-            FlowAssignedValue::Expression(range) => {
+            FlowAssignedValue::Expression(range) | FlowAssignedValue::BooleanLiteral(range) => {
                 let reference = self.js_info.raw_expressions.get(&range)?.clone();
                 let ty = self.resolve(&reference);
                 // TypeScript widens the literal types of the properties of an
@@ -3214,10 +3214,20 @@ impl<'db> ResolutionCtx<'db, '_> {
                 }),
             None => Some(TypeData::Undefined),
         };
+        let is_boolean_literal = value
+            .and_then(|value| root.assigned.get(value as usize))
+            .is_some_and(|assigned| {
+                matches!(assigned.value, FlowAssignedValue::BooleanLiteral(_))
+                    && assigned.steps.is_empty()
+            });
         let narrowed = match assigned {
-            Some(assigned) => {
-                narrow_by_assignment(self.db, declared, assigned, self.narrowing_resolver())
-            }
+            Some(assigned) => narrow_by_assignment(
+                self.db,
+                declared,
+                assigned,
+                is_boolean_literal,
+                self.narrowing_resolver(),
+            ),
             None => declared,
         };
         solve.writes.insert(index, narrowed);

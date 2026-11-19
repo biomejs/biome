@@ -3825,7 +3825,9 @@ impl RootBuilder<'_, '_> {
         };
         let ranges = match value {
             FlowAssignedValue::Expression(range) => Some(range),
-            FlowAssignedValue::IterableValue(_) | FlowAssignedValue::Key => None,
+            FlowAssignedValue::BooleanLiteral(_)
+            | FlowAssignedValue::IterableValue(_)
+            | FlowAssignedValue::Key => None,
         };
         let callees = ranges
             .into_iter()
@@ -3920,6 +3922,14 @@ impl RootBuilder<'_, '_> {
     /// when Biome can't type it as TypeScript does, as for `typeof` or a call
     /// to a method whose return type Biome infers; see [`value_callees`].
     fn assigned_expression(&mut self, expression: &AnyJsExpression) -> Option<FlowAssignedValue> {
+        if matches!(
+            expression.clone().omit_parentheses(),
+            AnyJsExpression::AnyJsLiteralExpression(
+                AnyJsLiteralExpression::JsBooleanLiteralExpression(_)
+            )
+        ) {
+            return Some(FlowAssignedValue::BooleanLiteral(expression.range()));
+        }
         self.check_value(expression)
             .then(|| FlowAssignedValue::Expression(expression.range()))
     }
@@ -5412,7 +5422,9 @@ mod tests {
             .iter()
             .filter(|assigned| assigned.covered)
             .map(|assigned| match assigned.value {
-                FlowAssignedValue::Expression(range) => &built.source[range],
+                FlowAssignedValue::Expression(range) | FlowAssignedValue::BooleanLiteral(range) => {
+                    &built.source[range]
+                }
                 FlowAssignedValue::IterableValue(_) | FlowAssignedValue::Key => "",
             })
             .collect();

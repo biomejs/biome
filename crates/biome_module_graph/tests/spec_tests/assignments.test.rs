@@ -209,19 +209,48 @@ fn assignments_narrow_to_the_members_of_the_declared_union() {
     );
 }
 
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
+// A `true` or `false` literal keeps only its own value of a `boolean` member
+// of the declared union. A value that is `true` or `false` by another
+// expression, as a comparison, keeps `boolean` whole, because Biome types
+// some comparisons, as `1 === 1`, as `true` where TypeScript gives `boolean`.
+#[test]
+fn boolean_literals_reduce_boolean_members_of_the_declared_union() {
+    assert_reads(
+        r#"
+        function a17() { let b: boolean | undefined = true; /*literal*/b; }
+        function a17b() { let b: boolean | undefined; b = false; /*assigned*/b; }
+        function a17d() { let b: boolean | string = (true); /*parenthesized*/b; }
+        function a17e() { let b: boolean | undefined = 1 === 1; /*comparison*/b; }
+        function a17i() { let b: boolean | null = null; b = true; if (c) b = false; /*both*/b; }
+        function a17k(o: { b: boolean | undefined }) { o.b = true; /*property*/o.b; }
+        "#,
+        &[
+            ("literal", "b", &["bool: true"]),
+            ("assigned", "b", &["bool: false"]),
+            ("parenthesized", "b", &["bool: true"]),
+            ("comparison", "b", &["boolean"]),
+            ("both", "b", &["boolean"]),
+            ("property", "o.b", &["bool: true"]),
+        ],
+    );
+}
+
 // TypeScript 7.0.2 (`tsc --strict`) gives the narrower type in the comment for
-// each read below. Biome is wider: it keeps `boolean` whole, types the value
-// of an assignment expression and an empty array as Unknown, types a right
-// operand without narrowing, gives a target behind `as` its declared type,
-// where TypeScript ignores the write, and doesn't reduce by a call to a
-// method without a return type annotation, even one that always returns, or
-// to an overloaded method whose implementation has none, which TypeScript
-// never calls through.
+// each read below. Biome is wider: it keeps a declared `boolean` that isn't
+// in a union, and `boolean` for a value other than a `true` or `false`
+// literal, types the value of an assignment expression and an empty array as
+// Unknown, types a right operand without narrowing, gives a target behind
+// `as` its declared type, where TypeScript ignores the write, and doesn't
+// reduce by a call to a method without a return type annotation, even one
+// that always returns, or to an overloaded method whose implementation has
+// none, which TypeScript never calls through.
 #[test]
 fn assignments_that_biome_reduces_less_than_typescript() {
     assert_reads(
         r#"
-        function a17() { let b: boolean | undefined = true; /*boolean*/b; }
+        function a17c() { let b: boolean = true; /*boolean*/b; }
+        function a17l() { const t = true; let b: boolean | undefined = t; /*constant*/b; }
         function a20() { let x: string | number, y: string | number; x = y = 1; /*chained*/x; }
         function a30() { let x: string[] | string = []; /*emptyArray*/x; }
         function a40() { let x: string | number = "a"; x = x; /*self*/x; }
@@ -235,6 +264,8 @@ fn assignments_that_biome_reduces_less_than_typescript() {
         &[
             // TypeScript: `true`.
             ("boolean", "b", &["boolean"]),
+            // TypeScript: `true`.
+            ("constant", "b", &["boolean"]),
             // TypeScript: `number`.
             ("chained", "x", &["number", "string"]),
             // TypeScript: `string[]`.
