@@ -1,6 +1,6 @@
 [package]
 name                 = "biome_rule_options"
-version.workspace    = true
+version              = "0.0.0"
 authors.workspace    = true
 edition.workspace    = true
 description          = "This crate is internally used to share lint rule options across analyzers"
@@ -10,7 +10,7 @@ license.workspace    = true
 keywords.workspace   = true
 categories.workspace = true
 include              = ["!**/*_test.*", "!**/*_tests.*", "src/**/*"]
-publish              = true
+publish              = false
 
 [dependencies]
 biome_console            = { workspace = true }

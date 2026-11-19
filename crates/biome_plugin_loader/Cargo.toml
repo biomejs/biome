@@ -1,6 +1,6 @@
 [package]
 name                 = "biome_plugin_loader"
-version.workspace    = true
+version              = "0.0.0"
 authors.workspace    = true
 edition.workspace    = true
 description          = "Functionality for loading plugins and caching them in memory"
@@ -9,7 +9,7 @@ repository.workspace = true
 license.workspace    = true
 keywords.workspace   = true
 categories.workspace = true
-publish              = true
+publish              = false
 
 [[bench]]
 harness           = false

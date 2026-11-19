@@ -1,6 +1,6 @@
 [package]
 name                 = "biome_module_graph"
-version.workspace    = true
+version              = "0.0.0"
 authors.workspace    = true
 edition.workspace    = true
 description          = "Data structure for tracking inferred information across modules"
@@ -10,7 +10,7 @@ license.workspace    = true
 keywords.workspace   = true
 categories.workspace = true
 include              = ["README.md", "src/**/*"]
-publish              = true
+publish              = false
 autotests            = false
 
 [[test]]

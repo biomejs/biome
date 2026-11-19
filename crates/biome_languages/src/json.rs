@@ -1,4 +1,4 @@
-use biome_fs::ConfigName;
+use crate::ConfigName;
 use biome_rowan::FileSourceError;
 use biome_string_case::StrLikeExtension;
 use camino::Utf8Path;
@@ -483,7 +483,7 @@ mod tests {
 
     #[test]
     fn biome_config_sources_preserve_json_variant() {
-        for path in ["biome.json", ".biome.json"] {
+        for path in ["biome.json", ".biome.json", "config/.BIOME.JSON"] {
             let source = JsonFileSource::try_from_well_known(Utf8Path::new(path)).unwrap();
             assert!(source.kind().is_biome_json());
             assert!(!source.allow_comments());
@@ -491,7 +491,7 @@ mod tests {
             assert_eq!(source.variant(), JsonFileVariant::Standard);
         }
 
-        for path in ["biome.jsonc", ".biome.jsonc"] {
+        for path in ["biome.jsonc", ".biome.jsonc", "config/.BIOME.JSONC"] {
             let source = JsonFileSource::try_from_well_known(Utf8Path::new(path)).unwrap();
             assert!(source.kind().is_biome_json());
             assert!(source.allow_comments());

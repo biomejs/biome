@@ -1,6 +1,6 @@
 [package]
 name                 = "biome_project_layout"
-version.workspace    = true
+version              = "0.0.0"
 authors.workspace    = true
 edition.workspace    = true
 description          = "Data structure for tracking projects and their packages"
@@ -9,7 +9,7 @@ repository.workspace = true
 license.workspace    = true
 keywords.workspace   = true
 categories.workspace = true
-publish              = true
+publish              = false
 
 [dependencies]
 biome_package = { workspace = true }

@@ -1,3 +1,4 @@
+mod bundle_plan;
 mod cargo;
 mod plan;
 mod publisher;
@@ -13,6 +14,8 @@ use bpaf::Bpaf;
 #[derive(Clone, Debug, Bpaf)]
 #[bpaf(options, version)]
 pub enum Command {
+    #[bpaf(command)]
+    BundlePlan,
     #[bpaf(command)]
     Verify {
         #[bpaf(switch)]
@@ -30,6 +33,7 @@ pub enum Command {
 pub fn run(command: Command) -> Result<()> {
     let directory = env::current_dir()?;
     match command {
+        Command::BundlePlan => bundle_plan::print(&directory),
         Command::Verify { allow_dirty } => publisher::verify(&directory, allow_dirty),
         Command::Publish {
             execute,
