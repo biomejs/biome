@@ -266,8 +266,6 @@ fn instanceof_narrows_by_declarations() {
 const VOID_FUNCTION: &str = "sync Function { accepts: { params: [] type_args: [] } returns: void }";
 
 // TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
-// An `else` branch that no value reaches is `never` in TypeScript, which Biome
-// reads as Unknown.
 #[test]
 fn instanceof_narrows_through_the_flow() {
     assert_reads(

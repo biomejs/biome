@@ -2826,6 +2826,7 @@ impl TypeMember {
 
         // Extend members with those from constructor definitions:
         let num_members = members.len();
+        let mut readonly_properties = None;
         for i in 0..num_members {
             let member = &members[i];
             if member.is_constructor()
@@ -2842,12 +2843,16 @@ impl TypeMember {
                         } else {
                             TypeMemberKind::Named(named_param.name.clone())
                         };
-                        let kind =
-                            if is_readonly_parameter_property(&member_list, &named_param.name) {
-                                kind.with_readonly()
-                            } else {
-                                kind
-                            };
+                        let readonly_properties = readonly_properties
+                            .get_or_insert_with(|| readonly_parameter_properties(&member_list));
+                        let kind = if readonly_properties
+                            .iter()
+                            .any(|property| property.text() == named_param.name.text())
+                        {
+                            kind.with_readonly()
+                        } else {
+                            kind
+                        };
                         members.push(Self {
                             kind,
                             ty: param.parameter.ty().clone(),
@@ -3408,13 +3413,13 @@ impl TypeMemberAccessibility {
     }
 }
 
-/// Returns whether a constructor implementation in `member_list` declares
-/// the parameter property `name` as `readonly`, as
+/// Returns the names of the parameter properties that a constructor
+/// implementation in `member_list` declares `readonly`, as
 /// `constructor(readonly name: string)` does.
 ///
 /// The constructor's type doesn't record the modifiers of its parameter
 /// properties, so this reads them from the syntax.
-fn is_readonly_parameter_property(member_list: &JsClassMemberList, name: &str) -> bool {
+fn readonly_parameter_properties(member_list: &JsClassMemberList) -> Vec<TokenText> {
     member_list
         .into_iter()
         .filter_map(|member| match member {
@@ -3425,11 +3430,18 @@ fn is_readonly_parameter_property(member_list: &JsClassMemberList, name: &str) -
         })
         .flat_map(|parameters| parameters.parameters())
         .flatten()
-        .any(|parameter| {
+        .filter_map(|parameter| {
             let AnyJsConstructorParameter::TsPropertyParameter(parameter) = parameter else {
-                return false;
+                return None;
             };
-            let has_name = parameter
+            let is_readonly = parameter
+                .modifiers()
+                .into_iter()
+                .any(|modifier| modifier.as_ts_readonly_modifier().is_some());
+            if !is_readonly {
+                return None;
+            }
+            parameter
                 .formal_parameter()
                 .ok()
                 .as_ref()
@@ -3439,13 +3451,9 @@ fn is_readonly_parameter_property(member_list: &JsClassMemberList, name: &str) -
                 .and_then(AnyJsBindingPattern::as_any_js_binding)
                 .and_then(AnyJsBinding::as_js_identifier_binding)
                 .and_then(|identifier| identifier.name_token().ok())
-                .is_some_and(|token| token.text_trimmed() == name);
-            has_name
-                && parameter
-                    .modifiers()
-                    .into_iter()
-                    .any(|modifier| modifier.as_ts_readonly_modifier().is_some())
+                .map(|token| token.token_text_trimmed())
         })
+        .collect()
 }
 
 #[inline]

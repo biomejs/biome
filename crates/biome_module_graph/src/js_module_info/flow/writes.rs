@@ -11,11 +11,41 @@ use super::{FlowSubject, FlowSubjectId, FlowSubjectTable, PropertyKey};
 use biome_js_control_flow::AnyJsControlFlowRoot;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
-    AnyJsExpression, AnyJsName, JsComputedMemberAssignment, JsStaticMemberAssignment, JsSyntaxKind,
-    JsSyntaxNode, JsUnaryExpression, JsUnaryOperator,
+    AnyJsExpression, AnyJsFunction, AnyJsName, AnyTsCastExpression, JsArrowFunctionExpression,
+    JsComputedMemberAssignment, JsFunctionBody, JsFunctionExpression, JsLanguage,
+    JsNewOrCallExpression, JsParenthesizedExpression, JsStaticMemberAssignment,
+    JsTemplateExpression, JsUnaryExpression, JsUnaryOperator, TsInstantiationExpression,
+    TsNonNullAssertionExpression, assign_ext::AnyJsMemberAssignment,
 };
-use biome_rowan::{AstNode, SyntaxResult, WalkEvent};
+use biome_rowan::{AstNode, SyntaxKindSet, SyntaxResult, WalkEvent, declare_node_union};
 use rustc_hash::FxHashSet;
+
+declare_node_union! {
+    /// Code that the write scan skips when it runs only when something calls
+    /// it: a function, or the body of a method, accessor, or constructor.
+    AnyDeferredCode = AnyJsFunction | JsFunctionBody
+}
+
+/// The nodes that the write scan reads: writes, `delete`, and the code it may
+/// skip.
+const WRITE_SCAN_KINDS: SyntaxKindSet<JsLanguage> = AnyDeferredCode::KIND_SET
+    .union(AnyJsMemberAssignment::KIND_SET)
+    .union(JsUnaryExpression::KIND_SET);
+
+/// Function and arrow expressions, whose bodies run when the function does.
+const FUNCTION_EXPRESSION_KINDS: SyntaxKindSet<JsLanguage> =
+    JsFunctionExpression::KIND_SET.union(JsArrowFunctionExpression::KIND_SET);
+
+/// Expressions between a function expression and the call that invokes it,
+/// which keep the value of their operand.
+const TYPE_WRAPPER_KINDS: SyntaxKindSet<JsLanguage> = JsParenthesizedExpression::KIND_SET
+    .union(AnyTsCastExpression::KIND_SET)
+    .union(TsNonNullAssertionExpression::KIND_SET)
+    .union(TsInstantiationExpression::KIND_SET);
+
+/// Expressions that call or construct the expression directly below them.
+const CALL_KINDS: SyntaxKindSet<JsLanguage> =
+    JsNewOrCallExpression::KIND_SET.union(JsTemplateExpression::KIND_SET);
 
 /// The property paths that the code of one execution root may write.
 ///
@@ -67,14 +97,16 @@ impl WrittenPaths {
             written: FxHashSet::default(),
             wildcards: FxHashSet::default(),
         };
-        let root = root.syntax();
-        let mut preorder = root.preorder();
-        while let Some(event) = preorder.next() {
+        let mut events = root.syntax().preorder_of_kinds(WRITE_SCAN_KINDS);
+        while let Some(event) = events.next() {
             let WalkEvent::Enter(node) = event else {
                 continue;
             };
-            if node != *root && runs_later(&node, root) {
-                preorder.skip_subtree();
+            if node != *root.syntax()
+                && let Some(code) = AnyDeferredCode::cast_ref(&node)
+                && runs_later(&code, root)
+            {
+                events.skip_subtree();
                 continue;
             }
             if let Some(assignment) = JsStaticMemberAssignment::cast_ref(&node) {
@@ -253,48 +285,38 @@ impl WrittenPaths {
     }
 }
 
-/// Returns whether `node`, which lies below `root`, runs only when something
+/// Returns whether `code`, which lies below `root`, runs only when something
 /// calls it, after the code around it.
-fn runs_later(node: &JsSyntaxNode, root: &JsSyntaxNode) -> bool {
-    match node.kind() {
-        JsSyntaxKind::JS_FUNCTION_DECLARATION
-        | JsSyntaxKind::JS_FUNCTION_EXPORT_DEFAULT_DECLARATION => true,
-        JsSyntaxKind::JS_FUNCTION_EXPRESSION | JsSyntaxKind::JS_ARROW_FUNCTION_EXPRESSION => {
-            !is_invoked(node)
-        }
+fn runs_later(code: &AnyDeferredCode, root: &AnyJsControlFlowRoot) -> bool {
+    match code {
+        AnyDeferredCode::AnyJsFunction(
+            AnyJsFunction::JsFunctionDeclaration(_)
+            | AnyJsFunction::JsFunctionExportDefaultDeclaration(_),
+        ) => true,
+        AnyDeferredCode::AnyJsFunction(
+            function @ (AnyJsFunction::JsFunctionExpression(_)
+            | AnyJsFunction::JsArrowFunctionExpression(_)),
+        ) => !is_invoked(function),
         // The body of a method, accessor, or constructor. Their decorators,
         // computed keys, and parameter decorators run with the class.
-        JsSyntaxKind::JS_FUNCTION_BODY => node.parent().is_some_and(|parent| {
-            parent != *root
-                && !matches!(
-                    parent.kind(),
-                    JsSyntaxKind::JS_FUNCTION_EXPRESSION
-                        | JsSyntaxKind::JS_ARROW_FUNCTION_EXPRESSION
-                )
+        AnyDeferredCode::JsFunctionBody(body) => body.syntax().parent().is_some_and(|parent| {
+            parent != *root.syntax() && !FUNCTION_EXPRESSION_KINDS.matches(parent.kind())
         }),
-        _ => false,
     }
 }
 
-/// Returns whether the function or arrow expression `node` is called, or
+/// Returns whether `function`, a function or arrow expression, is called, or
 /// constructed, where it is defined, as in `(() => {})()`.
-fn is_invoked(node: &JsSyntaxNode) -> bool {
-    let mut parent = node.parent();
+fn is_invoked(function: &AnyJsFunction) -> bool {
+    let mut parent = function.syntax().parent();
     while let Some(node) = parent {
-        match node.kind() {
-            JsSyntaxKind::JS_PARENTHESIZED_EXPRESSION
-            | JsSyntaxKind::TS_AS_EXPRESSION
-            | JsSyntaxKind::TS_SATISFIES_EXPRESSION
-            | JsSyntaxKind::TS_NON_NULL_ASSERTION_EXPRESSION
-            | JsSyntaxKind::TS_TYPE_ASSERTION_EXPRESSION
-            | JsSyntaxKind::TS_INSTANTIATION_EXPRESSION => parent = node.parent(),
+        let kind = node.kind();
+        if !TYPE_WRAPPER_KINDS.matches(kind) {
             // The only expression directly below these nodes is the one they
             // call; arguments and template elements sit in lists.
-            JsSyntaxKind::JS_CALL_EXPRESSION
-            | JsSyntaxKind::JS_NEW_EXPRESSION
-            | JsSyntaxKind::JS_TEMPLATE_EXPRESSION => return true,
-            _ => return false,
+            return CALL_KINDS.matches(kind);
         }
+        parent = node.parent();
     }
     false
 }
@@ -324,7 +346,7 @@ mod tests {
     use super::*;
     use biome_js_parser::{JsParserOptions, parse};
     use biome_js_semantic::{SemanticModelOptions, semantic_model};
-    use biome_js_syntax::JsExpressionStatement;
+    use biome_js_syntax::{JsExpressionStatement, JsSyntaxKind};
     use biome_languages::JsFileSource;
 
     const PATHS: [&str; 5] = ["o.v", "o.v.w", "o.w", "q.v", "o.v.w.x"];

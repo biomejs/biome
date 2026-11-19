@@ -752,9 +752,9 @@ fn long_signatures_names_and_parenthesized_callees_narrow() {
 }
 
 // TypeScript 7.0.2 (`tsc --strict`) gives every `then` read the target and
-// every `else` read `unknown`, except that in the `else` branch a target of
-// `{}` gives `null | undefined` and `void` gives `{} | null`, where Biome
-// keeps `unknown`.
+// every `else` read `unknown`, except that a target of `{}` gives
+// `null | undefined` and `void` gives `{} | null` in the `else` branch, where
+// Biome keeps `unknown`.
 #[test]
 fn predicate_targets_narrow_unknown_to_the_target() {
     for target in [
@@ -948,10 +948,10 @@ fn assert_reads(source: &str, reads: &[(&str, &str, &[&str])]) {
     assert_no_whole_module_inference(&db, &db.take_salsa_events());
 }
 
-// The `else` branch keeps a member that differs from the target only by
-// `readonly`. Biome records `readonly`, so the two are different types, but
-// its subtype relation ignores `readonly`, so it can't tell which of the two
-// TypeScript's strict subtype relation prefers. A comment gives the type
+// Biome records `readonly`, so two object types that differ only by it are
+// different types. Its subtype relation ignores `readonly`, so it can't tell
+// which of the two TypeScript's strict subtype relation prefers, and the
+// `else` branch keeps both members of each pair. A comment gives the type
 // that TypeScript 7.0.2 (`tsc --strict`) gives where it differs.
 #[test]
 fn object_targets_that_differ_only_by_readonly_keep_both_members_in_the_else_branch() {
@@ -1212,7 +1212,7 @@ fn object_targets_narrow_through_the_flow() {
 }
 
 // TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
-// The `then` branch gets `"a"` and `string`, whose union in TypeScript is
+// Its union of `"a"` and `string`, the types that the `then` branch gets, is
 // `string`, so the `else` branch keeps `"a"`.
 #[test]
 fn primitive_targets_keep_the_literals_that_the_then_branch_absorbs() {
@@ -1397,7 +1397,7 @@ fn typeof_targets_narrow_like_the_values_they_query() {
     }
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) narrows both reads to `string`, although
+// TypeScript 7.0.2 (`tsc --strict`) narrows both reads to `string`, although
 // a direct `eval` can reassign the guard or set `value` to `null`. Biome
 // deliberately copies this unsound narrowing; `NARROWING.md` lists it among
 // the deliberate choices.
