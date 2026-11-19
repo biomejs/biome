@@ -1,0 +1,62 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidHoistedVar.ts
+---
+# Input
+```ts
+// should generate diagnostics
+// A `var` is `undefined` until its declarator runs, so where a path skips the
+// declarator, it can be `undefined` as well as `null`, and the `switch` misses
+// that case.
+
+declare const enabled: boolean;
+
+export function skipped() {
+	if (enabled) {
+		var pending = null;
+	}
+	switch (pending) {
+		case null:
+			return 1;
+	}
+}
+
+```
+
+# Diagnostics
+```
+invalidHoistedVar.ts:12:2 lint/nursery/useExhaustiveSwitchCases  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The switch statement is not exhaustive.
+  
+    10 │ 		var pending = null;
+    11 │ 	}
+  > 12 │ 	switch (pending) {
+       │ 	^^^^^^^^^^^^^^^^^^
+  > 13 │ 		case null:
+  > 14 │ 			return 1;
+  > 15 │ 	}
+       │ 	^
+    16 │ }
+    17 │ 
+  
+  i Some variants of the union type are not handled here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i These cases are missing:
+  
+  - undefined
+  
+  i Unsafe fix: Add the missing cases to the switch statement.
+  
+    12 12 │     switch (pending) {
+    13 13 │       case null:
+    14    │ - → → → return·1;
+       14 │ + → → → return·1;
+       15 │ + → → case·undefined:·throw·new·Error("TODO:·Not·implemented·yet");
+    15 16 │     }
+    16 17 │   }
+  
+
+```

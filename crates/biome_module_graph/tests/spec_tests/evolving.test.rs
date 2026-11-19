@@ -807,22 +807,44 @@ fn other_declarations_dont_evolve() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives `undefined` at `before` and
-// `beforeWritten`, the value of a `var` before its declarator runs, and
-// reports no error. Biome gives `undefined` only when a write after the
-// declarator assigns the variable. Without one, the read keeps the type that
-// the declaration gives, `null`.
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the type in its
+// comment, and reports no error. A `var` is `undefined` before its declarator
+// runs, whether or not a write after the declarator assigns it, so a read
+// that a path around the declarator reaches includes `undefined`. A read
+// that only paths through the declarator reach has the type that the
+// initializer gives. An array whose type evolves is Unknown where it may not
+// be an array.
 #[test]
 fn reads_before_the_declarator_of_a_var_initialized_with_null() {
     assert_reads(
         r#"
-        function f() { /*before*/x; var x = null; }
-        function g() { /*beforeWritten*/y; var y = null; y = 1; }
+        function h1() { /*before*/x; var x = null; } // undefined
+        function h2() { /*beforeWritten*/y; var y = null; y = 1; } // undefined
+        function h3() { var z = null; /*after*/z; } // null
+        function h4() { if (c) { var w = null; } /*joined*/w; } // null | undefined
+        function h5() { /*beforeUndefined*/v; var v = undefined; } // undefined
+        function h6() { for (let i = 0; i < 2; i++) { /*loop*/u; var u = null; } } // null | undefined
+        function h7() { if (c) { var t = null; } /*joinedWritten*/t; t = 1; } // null | undefined
+        function h8() { var s = null; /*afterThen*/s; if (c) { /*nested*/s; } } // null
+        function h9() { if (c) { var b = undefined; } /*joinedUndefined*/b; } // undefined
+        function h10() { /*arrayBefore*/a; var a = []; } // undefined
+        function h11() { if (c) { var d = []; } /*arrayJoined*/d; } // any[] | undefined
         "#,
         &[
-            // TypeScript: `undefined`.
-            ("before", "x", &["null"]),
+            ("before", "x", &["undefined"]),
             ("beforeWritten", "y", &["undefined"]),
+            ("after", "z", &["null"]),
+            ("joined", "w", &["null", "undefined"]),
+            ("beforeUndefined", "v", &["undefined"]),
+            ("loop", "u", &["null", "undefined"]),
+            ("joinedWritten", "t", &["null", "undefined"]),
+            ("afterThen", "s", &["null"]),
+            ("nested", "s", &["null"]),
+            ("joinedUndefined", "b", &["undefined"]),
+            // TypeScript: `undefined`.
+            ("arrayBefore", "a", &["Unknown"]),
+            // TypeScript: `any[] | undefined`.
+            ("arrayJoined", "d", &["Unknown"]),
         ],
     );
 }
