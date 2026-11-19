@@ -1,0 +1,53 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: ignorePrimitivesDisabledObject.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+
+declare const s: string | null;
+declare const anyValue: any;
+
+// String and `any` operands: reported
+const r1 = s || 'x';
+const r2 = anyValue || 'x';
+
+```
+
+# Diagnostics
+```
+ignorePrimitivesDisabledObject.ts:7:14 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+    6 │ // String and `any` operands: reported
+  > 7 │ const r1 = s || 'x';
+      │              ^^
+    8 │ const r2 = anyValue || 'x';
+    9 │ 
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+ignorePrimitivesDisabledObject.ts:8:21 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+    6 │ // String and `any` operands: reported
+    7 │ const r1 = s || 'x';
+  > 8 │ const r2 = anyValue || 'x';
+      │                     ^^
+    9 │ 
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

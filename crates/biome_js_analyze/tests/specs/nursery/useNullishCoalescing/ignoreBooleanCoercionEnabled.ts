@@ -1,52 +1,85 @@
-// Tests for ignoreBooleanCoercion: true
-// `||` and `||=` inside a Boolean() call should NOT generate diagnostics.
+/* should generate diagnostics */
 
 declare const a: string | null;
 declare const b: string;
 declare const c: string;
+declare const d: string;
+declare const n: number | undefined;
 
-// || directly inside Boolean()
+// `||` inside `Boolean()`: not reported
 const r1 = Boolean(a || b);
 
-// chained || inside Boolean()
+// Chained `||` inside `Boolean()`: not reported
 const r2 = Boolean(a || b || c);
 
-// || inside parenthesized argument
+// Parenthesized argument: not reported
 const r3 = Boolean((a || b));
 
-// ||= inside Boolean()
+// `||=` inside `Boolean()`: not reported
 declare let assigned: string | null;
 const r4 = Boolean(assigned ||= b);
 
-// || nested inside Boolean() within another call: still suppressed because the
-// value still flows into the Boolean() coercion.
+// `Boolean()` nested in another call: not reported
 declare function identity<T>(value: T): T;
-const r4b = identity(Boolean(a || 'default'));
+const r5 = identity(Boolean(a || 'default'));
 
-// || mixed with && inside Boolean(): the whole argument is boolean-coerced,
-// so the walk steps through the && parent and suppresses the ||.
-declare const d: string;
-const r4c = Boolean(d && (a || 'default'));
+// `||` under `&&` inside `Boolean()`: not reported
+const r6 = Boolean(d && (a || 'default'));
 
-// These SHOULD still generate diagnostics (not inside Boolean()).
-const r5 = a || 'default';
-
-declare const n: number | undefined;
-const r6 = n || 0;
+// Outside `Boolean()`
+const r7 = a || 'default';
+const r8 = n || 0;
 
 declare let assignPlain: string | null;
 assignPlain ||= 'default';
 
-// Inside a non-Boolean call: SHOULD generate a diagnostic.
-const r7 = identity(a || 'default');
+// Inside another call
+const r9 = identity(a || 'default');
 
-// Boolean shadowed by a parameter: SHOULD generate a diagnostic.
+// `Boolean` shadowed by a parameter
 function shadowedByParameter(Boolean: (value: unknown) => boolean) {
 	return Boolean(a || 'default');
 }
 
-// Boolean shadowed by a local binding: SHOULD generate a diagnostic.
+// `Boolean` shadowed by a local variable
 function shadowedByLocal() {
 	const Boolean = (value: unknown) => !!value;
 	return Boolean(a || 'default');
 }
+
+// `||` in a ternary branch or the last expression of a sequence: not reported
+declare const flag: boolean;
+const r10 = Boolean(flag ? a || b : 'default');
+const r11 = Boolean(flag ? 'default' : a || b);
+const r12 = Boolean((identity(flag), a || b));
+
+// `||` as an operand of `??` inside `Boolean()`: not reported
+const r13 = Boolean(a ?? (b || c));
+const r14 = Boolean((a || b) ?? c);
+
+// Negated inside `Boolean()`
+const r15 = Boolean(!(a || 'default'));
+
+// Earlier expression of a sequence
+const r16 = Boolean((a || 'default', flag));
+
+// Calls other than the global `Boolean()`, or a value that isn't the argument
+const r17 = new Boolean(a || b);
+const r18 = String(a || b);
+const r19 = Boolean(1 + (a || b));
+const r20 = Boolean(() => a || b);
+
+// Comparison ternary inside `Boolean()`
+const r21 = Boolean(a != null ? a : b);
+
+// Truthiness ternary under a logical operator inside `Boolean()`: not reported
+declare const maybeObject: { a: string } | null;
+const r22 = Boolean(flag || (maybeObject ? maybeObject : { a: b }));
+
+// Truthiness ternary passed directly to `Boolean()`: reported
+const r23 = Boolean(maybeObject ? maybeObject : { a: b });
+const r24 = Boolean(!maybeObject ? { a: b } : maybeObject);
+
+// Parentheses and a negation around a truthiness ternary inside `Boolean()`: reported
+const r25 = Boolean((maybeObject ? maybeObject : { a: b }));
+const r26 = Boolean(!(maybeObject ? maybeObject : { a: b }));

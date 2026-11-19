@@ -1,0 +1,326 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: ignoreConditionalTestsDefault.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+
+declare const cond: string | null;
+declare const other: string;
+
+// `if` test: not reported
+if (cond || 'fallback') {
+  console.log('in if');
+}
+
+// `while` test: not reported
+while (cond || 'fallback') {
+  break;
+}
+
+// `for` test: not reported
+for (; cond || 'fallback'; ) {
+  break;
+}
+
+// `do-while` test: not reported
+do {
+  break;
+} while (cond || 'fallback');
+
+// Ternary test: not reported
+const result = (cond || 'fallback') ? 'yes' : 'no';
+
+// Through `!`, a logical operator, a ternary branch, or the last expression of a sequence: not reported
+if (!(cond || 'fallback')) {}
+if (other && (cond || 'fallback')) {}
+if (other ? cond || 'fallback' : other) {}
+if ((other, cond || 'fallback')) {}
+
+// Through `||` or `??`: not reported
+if (cond || other || 'fallback') {}
+if (other || (cond || 'fallback')) {}
+if ((cond || other) ?? 'fallback') {}
+if (cond ?? (other || 'fallback')) {}
+
+// `||=` in a test: not reported
+declare let assigned: string | null;
+if ((assigned ||= 'fallback')) {}
+while ((assigned ||= 'fallback')) {}
+const assignedResult = (assigned ||= 'fallback') ? 'yes' : 'no';
+
+// A truthiness ternary in a test: not reported
+if (cond ? cond : other) {}
+
+// Through a call argument, a unary `+`, or a function body: reported
+declare function check(value: unknown): unknown;
+if (check(cond || 'fallback')) {}
+if (+(cond || 'fallback')) {}
+if (() => cond || 'fallback') {}
+if (
+  function weird() {
+    return cond || 'fallback';
+  }
+) {}
+
+// Earlier expression of a sequence: reported
+if ((cond || 'fallback', other)) {}
+
+// Comparison ternary in a test: reported
+if (cond != null ? cond : other) {}
+
+// `for` initializer and update, and `switch` discriminant: reported
+for (cond || 'fallback'; ; ) {
+  break;
+}
+for (; ; cond || 'fallback') {
+  break;
+}
+switch (cond || 'fallback') {
+  default:
+}
+
+// Operand of a comparison or `typeof`, or the branch of a ternary that is not a test: reported
+if ((cond || 'fallback') === other) {}
+if (typeof (cond || 'fallback')) {}
+const notATest = other ? cond || 'fallback' : other;
+
+// Double negation: not reported
+if (!!(cond || 'fallback')) {}
+
+```
+
+# Diagnostics
+```
+ignoreConditionalTestsDefault.ts:52:16 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+    50 │ // Through a call argument, a unary `+`, or a function body: reported
+    51 │ declare function check(value: unknown): unknown;
+  > 52 │ if (check(cond || 'fallback')) {}
+       │                ^^
+    53 │ if (+(cond || 'fallback')) {}
+    54 │ if (() => cond || 'fallback') {}
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+ignoreConditionalTestsDefault.ts:53:12 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+    51 │ declare function check(value: unknown): unknown;
+    52 │ if (check(cond || 'fallback')) {}
+  > 53 │ if (+(cond || 'fallback')) {}
+       │            ^^
+    54 │ if (() => cond || 'fallback') {}
+    55 │ if (
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+ignoreConditionalTestsDefault.ts:54:16 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+    52 │ if (check(cond || 'fallback')) {}
+    53 │ if (+(cond || 'fallback')) {}
+  > 54 │ if (() => cond || 'fallback') {}
+       │                ^^
+    55 │ if (
+    56 │   function weird() {
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+ignoreConditionalTestsDefault.ts:57:17 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+    55 │ if (
+    56 │   function weird() {
+  > 57 │     return cond || 'fallback';
+       │                 ^^
+    58 │   }
+    59 │ ) {}
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+ignoreConditionalTestsDefault.ts:62:11 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+    61 │ // Earlier expression of a sequence: reported
+  > 62 │ if ((cond || 'fallback', other)) {}
+       │           ^^
+    63 │ 
+    64 │ // Comparison ternary in a test: reported
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+ignoreConditionalTestsDefault.ts:65:5 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━
+
+  i Prefer ?? over a ternary expression checking for nullish.
+  
+    64 │ // Comparison ternary in a test: reported
+  > 65 │ if (cond != null ? cond : other) {}
+       │     ^^^^^^^^^^^^
+    66 │ 
+    67 │ // `for` initializer and update, and `switch` discriminant: reported
+  
+  i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace the ternary with ??.
+  
+    63 63 │   
+    64 64 │   // Comparison ternary in a test: reported
+    65    │ - if·(cond·!=·null·?·cond·:·other)·{}
+       65 │ + if·(cond·??·other)·{}
+    66 66 │   
+    67 67 │   // `for` initializer and update, and `switch` discriminant: reported
+  
+
+```
+
+```
+ignoreConditionalTestsDefault.ts:68:11 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+    67 │ // `for` initializer and update, and `switch` discriminant: reported
+  > 68 │ for (cond || 'fallback'; ; ) {
+       │           ^^
+    69 │   break;
+    70 │ }
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+ignoreConditionalTestsDefault.ts:71:15 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+    69 │   break;
+    70 │ }
+  > 71 │ for (; ; cond || 'fallback') {
+       │               ^^
+    72 │   break;
+    73 │ }
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+ignoreConditionalTestsDefault.ts:74:14 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+    72 │   break;
+    73 │ }
+  > 74 │ switch (cond || 'fallback') {
+       │              ^^
+    75 │   default:
+    76 │ }
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+ignoreConditionalTestsDefault.ts:79:11 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+    78 │ // Operand of a comparison or `typeof`, or the branch of a ternary that is not a test: reported
+  > 79 │ if ((cond || 'fallback') === other) {}
+       │           ^^
+    80 │ if (typeof (cond || 'fallback')) {}
+    81 │ const notATest = other ? cond || 'fallback' : other;
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+ignoreConditionalTestsDefault.ts:80:18 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+    78 │ // Operand of a comparison or `typeof`, or the branch of a ternary that is not a test: reported
+    79 │ if ((cond || 'fallback') === other) {}
+  > 80 │ if (typeof (cond || 'fallback')) {}
+       │                  ^^
+    81 │ const notATest = other ? cond || 'fallback' : other;
+    82 │ 
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+ignoreConditionalTestsDefault.ts:81:31 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+    79 │ if ((cond || 'fallback') === other) {}
+    80 │ if (typeof (cond || 'fallback')) {}
+  > 81 │ const notATest = other ? cond || 'fallback' : other;
+       │                               ^^
+    82 │ 
+    83 │ // Double negation: not reported
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

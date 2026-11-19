@@ -4,69 +4,94 @@ expression: ignoreIfStatementsEnabled.ts
 ---
 # Input
 ```ts
-// Tests for ignoreIfStatements: true.
-// if statements assigning to a nullish variable are ignored, but || and ||= still report.
+/* should generate diagnostics */
 
 declare let a: string | null;
 
-// ignored
+// `if` statements: not reported
 if (!a) {
 	a = 'default';
 }
 
-// ignored
 if (a == null) {
 	a = 'fallback';
 }
 
-// || still reported
+// `||`
 declare const s: string | null;
 const r1 = s || 'x';
 
-// ||= still reported
+// `||=`
 declare let b: string | null;
 b ||= 'y';
+
+// Truthiness ternary: reported
+declare const o: { a: number } | null;
+const r2 = o ? o : { a: 1 };
 
 ```
 
 # Diagnostics
 ```
-ignoreIfStatementsEnabled.ts:18:14 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ignoreIfStatementsEnabled.ts:16:14 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use ?? instead of ||.
   
-    16 │ // || still reported
-    17 │ declare const s: string | null;
-  > 18 │ const r1 = s || 'x';
+    14 │ // `||`
+    15 │ declare const s: string | null;
+  > 16 │ const r1 = s || 'x';
        │              ^^
-    19 │ 
-    20 │ // ||= still reported
+    17 │ 
+    18 │ // `||=`
   
   i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
   
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
-  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
 
 ```
-ignoreIfStatementsEnabled.ts:22:3 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ignoreIfStatementsEnabled.ts:20:3 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use ??= instead of ||=.
   
-    20 │ // ||= still reported
-    21 │ declare let b: string | null;
-  > 22 │ b ||= 'y';
+    18 │ // `||=`
+    19 │ declare let b: string | null;
+  > 20 │ b ||= 'y';
        │   ^^^
-    23 │ 
+    21 │ 
+    22 │ // Truthiness ternary: reported
   
   i The ||= operator assigns when the left side is falsy, while ??= only assigns when it is null or undefined.
   
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+ignoreIfStatementsEnabled.ts:24:12 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer ?? over a ternary expression checking for a falsy value.
+  
+    22 │ // Truthiness ternary: reported
+    23 │ declare const o: { a: number } | null;
+  > 24 │ const r2 = o ? o : { a: 1 };
+       │            ^
+    25 │ 
+  
+  i ?? only uses the fallback when the value is null or undefined.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace the ternary with ??.
+  
+    22 22 │   // Truthiness ternary: reported
+    23 23 │   declare const o: { a: number } | null;
+    24    │ - const·r2·=·o·?·o·:·{·a:·1·};
+       24 │ + const·r2·=·o·??·{·a:·1·};
+    25 25 │   
   
 
 ```

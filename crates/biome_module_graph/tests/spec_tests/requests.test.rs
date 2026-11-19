@@ -71,6 +71,111 @@ fn normalized_expression_request_keeps_lookup_query_boundary() {
 }
 
 #[test]
+fn normalized_expression_request_infers_compound_assignment_targets() {
+    let source = r#"
+        declare const object: { a: string | undefined };
+        declare const numbers: number[];
+        declare const key: "a";
+        declare const counter: { n: number };
+        declare const holder: { item: unknown };
+        object.a ||= "value";
+        object["a"] ||= "value";
+        object[key] ||= "value";
+        numbers[0] ||= 1;
+        counter.n += 1;
+        (holder.item as string | undefined) ||= "value";
+        (<number | null>holder.item) ??= 1;
+    "#;
+    let fs = MemoryFileSystem::default();
+    fs.insert("/src/index.ts".into(), source);
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let infer = |target| {
+        execute_type_inference_request(
+            &db,
+            TypeInferenceCaller::new("test", "compoundAssignment"),
+            NormalizedExpressionTypeRequest::new(
+                module,
+                expression_range_by_source(&db, module, source, target),
+            ),
+        )
+        .unwrap_or_else(|| panic!("{target} type must be inferred"))
+    };
+
+    for target in [
+        "object.a",
+        "object[\"a\"]",
+        "object[key]",
+        "holder.item as string | undefined",
+    ] {
+        let ty = infer(target);
+        assert!(contains_inferred_string(&db, ty), "{target}: {ty:?}");
+        assert!(contains_inferred_undefined(&db, ty), "{target}: {ty:?}");
+    }
+    // An array element read has the element type or `undefined`, never the assigned value.
+    let ty = infer("numbers[0]");
+    assert!(contains_inferred_number(&db, ty), "numbers[0]: {ty:?}");
+    assert!(contains_inferred_undefined(&db, ty), "numbers[0]: {ty:?}");
+    assert!(
+        !contains_inferred_number_literal(&db, ty, "1"),
+        "numbers[0]: {ty:?}"
+    );
+    let ty = infer("counter.n");
+    assert!(is_inferred_number(&db, ty), "counter.n: {ty:?}");
+    let ty = infer("<number | null>holder.item");
+    assert!(contains_inferred_number(&db, ty), "assertion: {ty:?}");
+    assert!(!contains_inferred_string(&db, ty), "assertion: {ty:?}");
+}
+
+#[test]
+fn plain_assignment_and_destructuring_targets_are_not_registered() {
+    let source = r#"
+        declare const object: {
+            a: string | undefined;
+            b: string | undefined;
+            c: string | undefined;
+            d: string | undefined;
+        };
+        declare const list: (string | undefined)[];
+        object.a = "value";
+        (object.b) = "value";
+        [object.c] = ["value"];
+        ({ d: object.d } = { d: "value" });
+        (list[0] as string) = "value";
+    "#;
+    let fs = MemoryFileSystem::default();
+    fs.insert("/src/index.ts".into(), source);
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let ModuleInfoKind::Js(js_info) = module.kind(&db) else {
+        panic!("module must contain JavaScript information");
+    };
+    let is_registered = |target| {
+        js_info
+            .raw_expressions
+            .keys()
+            .any(|range| source_snippet(source, *range) == target)
+    };
+
+    for target in [
+        "object.a",
+        "object.b",
+        "object.c",
+        "object.d",
+        "list[0]",
+        "list[0] as string",
+    ] {
+        assert!(!is_registered(target), "{target} must not be registered");
+    }
+}
+
+#[test]
 fn expected_argument_requests_compose_lookup_queries() {
     let source = "function takes(value: () => void) {} class Job { constructor(value: () => void) {} } takes(() => {}); new Job(() => { let done = true; });";
     let fs = MemoryFileSystem::default();

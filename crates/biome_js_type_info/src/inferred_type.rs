@@ -6,7 +6,13 @@ pub use boolean_coercion::BooleanCoercion;
 pub use spread_misuse::ObjectSpreadMisuse;
 
 use crate::TypeDb;
-use crate::interned_types::{ConditionalType, Literal, ReturnType, TypeData, TypeMember};
+use crate::globals::{
+    BOOLEAN_ID_GLOBAL_TYPE_ID, NUMBER_ID_GLOBAL_TYPE_ID, OBJECT_ID_GLOBAL_TYPE_ID,
+    STRING_ID_GLOBAL_TYPE_ID,
+};
+use crate::interned_types::{
+    ConditionalType, Literal, ReturnType, TypeData, TypeMember, TypeMemberKind,
+};
 use crate::return_type_relation::{
     ReturnTypeRelation, compare_declared_return_type_owned,
     is_escape_hatch as relation_is_escape_hatch, promise_inner as relation_promise_inner,
@@ -1178,49 +1184,149 @@ impl<'db> InferredType<'db> {
         .ok()
     }
 
-    /// Returns whether every variant can be replaced safely in a nullish
-    /// coalescing expression.
+    /// Returns whether every variant is nullish or can't hold a falsy value, so
+    /// `??` picks the same operand as `||`.
+    ///
+    /// An object type can hold `0`, `''`, or `false` when the primitive could
+    /// be assigned to it, as with `{}`, `Number`, or `{ length: number }`. A
+    /// type parameter can hold whatever its constraint allows.
     ///
     /// Returns `None` when variant traversal cannot establish a result because
     /// it encounters an unresolved or recursive type, or exceeds its limit.
     pub fn is_safe_for_nullish_coalescing(self) -> Option<bool> {
         self.try_all_variants_match(|data| {
-            matches!(
-                data.value_conditional_type_shallow(self.db),
-                Some(ConditionalType::Truthy | ConditionalType::Nullish)
-            )
+            if let TypeData::InstanceOf(instance) = data
+                && let TypeData::Generic(generic) = instance.ty(self.db)
+            {
+                // A constraint that is itself a type parameter doesn't match.
+                return generic.constraint(self.db).is_some_and(|constraint| {
+                    Self::new(self.db, constraint)
+                        .try_all_variants_match(|data| self.is_nullish_or_never_falsy(data))
+                        == Ok(true)
+                });
+            }
+            self.is_nullish_or_never_falsy(data)
         })
         .ok()
     }
 
-    /// Returns whether every variant of a nullish union is nullish or an ignored
-    /// primitive. Non-union types return `Some(false)`.
+    /// Whether `data` is nullish, or is a type that no falsy value can have.
     ///
-    /// Returns `None` when variant traversal cannot establish a result because
-    /// it encounters an unresolved or recursive type, or exceeds its limit.
-    pub fn nullish_union_matches_ignored_primitives(
-        self,
-        ignored: IgnoredPrimitiveTypes,
-    ) -> Option<bool> {
-        let TypeData::Union(_) = self.data else {
-            return Some(false);
+    /// An interface that extends another type or a class instance whose class extends
+    /// another class also has the members it inherits, which are not read, so it counts as
+    /// a type that a falsy value can have.
+    fn is_nullish_or_never_falsy(self, data: TypeData<'db>) -> bool {
+        let (data, is_instance) = match data {
+            TypeData::InstanceOf(instance) => {
+                (instance.ty(self.db).expand_canonical_global(self.db), true)
+            }
+            data => (data, false),
         };
+        match data {
+            // A builtin class also lists the call signatures of its constructor.
+            TypeData::Class(class) if is_instance => {
+                class.extends(self.db).is_none()
+                    && !self.fits_falsy_primitive(
+                        class
+                            .members(self.db)
+                            .iter()
+                            .filter(|member| !member.kind.is_call_signature()),
+                    )
+            }
+            TypeData::Interface(interface) => {
+                interface.extends(self.db).is_empty()
+                    && !self.fits_falsy_primitive(interface.members(self.db).iter())
+            }
+            TypeData::Object(object) => !self.fits_falsy_primitive(object.members(self.db).iter()),
+            data => matches!(
+                data.conditional_type_shallow(self.db),
+                Some(ConditionalType::Truthy | ConditionalType::Nullish)
+            ),
+        }
+    }
 
-        self.try_all_variants_match(|data| match data {
-            TypeData::Null | TypeData::Undefined | TypeData::VoidKeyword => true,
-            TypeData::String => ignored.string,
-            TypeData::Number => ignored.number,
-            TypeData::Boolean => ignored.boolean,
-            TypeData::BigInt => ignored.bigint,
-            TypeData::Literal(literal) => match literal.literal(self.db) {
-                Literal::String(_) => ignored.string,
-                Literal::Number(_) => ignored.number,
-                Literal::Boolean(_) => ignored.boolean,
-                Literal::BigInt(_) => ignored.bigint,
+    /// Whether a `string`, `number`, or `boolean` value can be assigned to an
+    /// object type with `members`: its wrapper type or `Object` has every required
+    /// member, and at least one of the members when all of them are optional.
+    ///
+    /// The wrapper types come from the generated global types, which list only the
+    /// members of an older ECMAScript version, so a member added later, such as
+    /// `padStart`, is not found on `String`. A type that needs only such members is
+    /// not recognized as one that a falsy value can have.
+    ///
+    /// `bigint` needs no check of its own, because its wrapper type only has
+    /// members that `Object` has too. Unnamed computed members count as
+    /// present.
+    fn fits_falsy_primitive<'a>(self, members: impl Iterator<Item = &'a TypeMember<'db>>) -> bool
+    where
+        'db: 'a,
+    {
+        let globals = crate::global_types(self.db);
+        let instance_members = |id| match globals.get(id) {
+            TypeData::Class(class) => Some(
+                class
+                    .members(self.db)
+                    .iter()
+                    .filter(|member| !member.kind.is_static()),
+            ),
+            _ => None,
+        };
+        let Some(object_members) = instance_members(OBJECT_ID_GLOBAL_TYPE_ID) else {
+            return true;
+        };
+        let members: Vec<_> = members
+            .map(|member| &member.kind)
+            .filter(|kind| {
+                !kind.is_static() && !kind.is_constructor() && kind.index_signature_type().is_none()
+            })
+            .collect();
+        let is_weak = !members.is_empty() && members.iter().all(|kind| kind.is_optional());
+
+        [
+            STRING_ID_GLOBAL_TYPE_ID,
+            NUMBER_ID_GLOBAL_TYPE_ID,
+            BOOLEAN_ID_GLOBAL_TYPE_ID,
+        ]
+        .into_iter()
+        .any(|id| {
+            let Some(wrapper_members) = instance_members(id) else {
+                return true;
+            };
+            let wrapper_members: Vec<_> = wrapper_members.chain(object_members.clone()).collect();
+            let is_present = |kind: &&TypeMemberKind| {
+                !kind.is_call_signature()
+                    && kind.name().is_none_or(|name| {
+                        wrapper_members
+                            .iter()
+                            .any(|member| member.kind.has_name(name.text()))
+                    })
+            };
+            members
+                .iter()
+                .all(|kind| kind.is_optional() || is_present(kind))
+                && (!is_weak || members.iter().any(is_present))
+        })
+    }
+
+    /// Returns `Some(true)` when any variant is an ignored primitive, a literal
+    /// of one, or a template literal when strings are ignored, and
+    /// `Some(false)` when no variant is.
+    ///
+    /// The primitive members of an intersection are variants, so
+    /// `string & { __brand: "id" }` counts as a string.
+    ///
+    /// Returns `None` when no match is found and variant traversal encounters an
+    /// unresolved or recursive type, or exceeds its limit.
+    pub fn has_ignored_primitive_variant(self, ignored: IgnoredPrimitiveTypes) -> Option<bool> {
+        self.try_any_variant_matches(
+            |data| match data.literal_base_type(self.db).unwrap_or(data) {
+                TypeData::String => ignored.string,
+                TypeData::Number => ignored.number,
+                TypeData::Boolean => ignored.boolean,
+                TypeData::BigInt => ignored.bigint,
                 _ => false,
             },
-            _ => false,
-        })
+        )
         .ok()
     }
 
@@ -1992,7 +2098,7 @@ mod tests {
         InternedInterface, InternedIntersection, InternedLiteral, InternedObject, InternedTuple,
         InternedTypeofType, InternedUnion, TypeMember, TypeMemberKind,
     };
-    use crate::literal::NumberLiteral;
+    use crate::literal::{BooleanLiteral, NumberLiteral, StringLiteral};
 
     #[salsa::db]
     #[derive(Default)]
@@ -2299,6 +2405,303 @@ mod tests {
         assert_eq!(union.has_nullish_variant(), Some(true));
         assert_eq!(union.has_undefined_variant(), None);
         assert_eq!(union.is_safe_for_nullish_coalescing(), None);
+    }
+
+    #[test]
+    fn nullish_coalescing_is_unsafe_when_a_falsy_primitive_fits_the_type() {
+        let db = TestDb::default();
+        let member = |kind| TypeMember {
+            kind,
+            ty: TypeData::String,
+        };
+        let named = |name| member(TypeMemberKind::Named(Text::new_static(name)));
+        let optional = |name| member(TypeMemberKind::NamedOptional(Text::new_static(name)));
+        let object_of_kind = |members: Vec<_>, kind| {
+            TypeData::Object(InternedObject::new(
+                &db,
+                None,
+                members.into_boxed_slice(),
+                false,
+                kind,
+            ))
+        };
+        let object = |members: Vec<_>| object_of_kind(members, ObjectKind::Shape);
+        let object_expression = |members: Vec<_>| object_of_kind(members, ObjectKind::Expression);
+        let instance = |ty| TypeData::instance_of(&db, ty, Box::default());
+        let generic = |constraint| {
+            instance(TypeData::Generic(InternedGenericTypeParameter::new(
+                &db,
+                false,
+                constraint,
+                None,
+                Text::new_static("T"),
+            )))
+        };
+        let global = |id| crate::global_types(&db).get(id);
+        let interface_extending = |extends: Vec<_>, members: Vec<_>| {
+            instance(TypeData::Interface(InternedInterface::new(
+                &db,
+                Box::default(),
+                extends.into_boxed_slice(),
+                members.into_boxed_slice(),
+                Text::new_static("Interface"),
+            )))
+        };
+        let interface = |members: Vec<_>| interface_extending(Vec::new(), members);
+        let class_of = |extends, members: Vec<_>| {
+            TypeData::Class(InternedClass::new(
+                &db,
+                Box::default(),
+                extends,
+                Box::default(),
+                members.into_boxed_slice(),
+                Some(Text::new_static("Box")),
+                false,
+            ))
+        };
+        let class = class_of(None, vec![named("content")]);
+        let empty_or_null =
+            TypeData::union_from_types(&db, vec![object(Vec::new()), TypeData::Null]);
+
+        for (data, expected) in [
+            (instance(global(NUMBER_ID_GLOBAL_TYPE_ID)), false),
+            (instance(global(STRING_ID_GLOBAL_TYPE_ID)), false),
+            (instance(global(BOOLEAN_ID_GLOBAL_TYPE_ID)), false),
+            (instance(global(OBJECT_ID_GLOBAL_TYPE_ID)), false),
+            (object(Vec::new()), false),
+            (object(vec![named("toString")]), false),
+            (object(vec![named("length")]), false),
+            (object(vec![optional("length"), optional("a")]), false),
+            (interface(vec![named("length")]), false),
+            (generic(None), false),
+            (generic(Some(empty_or_null)), false),
+            (instance(class), true),
+            (
+                instance(class_of(Some(TypeData::String), vec![named("content")])),
+                false,
+            ),
+            (class_of(None, vec![named("length")]), true),
+            (
+                interface_extending(vec![TypeData::String], vec![optional("tag")]),
+                false,
+            ),
+            (
+                interface_extending(vec![TypeData::String], vec![named("a")]),
+                false,
+            ),
+            (
+                TypeData::array_instance(&db, Box::new([TypeData::String])),
+                true,
+            ),
+            (object(vec![named("a")]), true),
+            (object_expression(vec![named("length")]), false),
+            (object_expression(vec![named("a")]), true),
+            (interface(vec![named("a")]), true),
+            (object(vec![named("length"), named("push")]), true),
+            (object(vec![optional("a")]), true),
+            (object(vec![member(TypeMemberKind::CallSignature)]), true),
+            (generic(Some(TypeData::ObjectKeyword)), true),
+            (generic(Some(generic(Some(TypeData::ObjectKeyword)))), false),
+        ] {
+            let ty = InferredType::new(
+                &db,
+                TypeData::union_from_types(&db, vec![data, TypeData::Null]),
+            );
+            assert_eq!(
+                ty.is_safe_for_nullish_coalescing(),
+                Some(expected),
+                "{data:?}"
+            );
+        }
+    }
+
+    #[test]
+    fn ignored_primitive_variants_match_any_variant() {
+        let db = TestDb::default();
+        let string_only = IgnoredPrimitiveTypes {
+            string: true,
+            ..IgnoredPrimitiveTypes::default()
+        };
+        let number_only = IgnoredPrimitiveTypes {
+            number: true,
+            ..IgnoredPrimitiveTypes::default()
+        };
+        let boolean_only = IgnoredPrimitiveTypes {
+            boolean: true,
+            ..IgnoredPrimitiveTypes::default()
+        };
+        let bigint_only = IgnoredPrimitiveTypes {
+            bigint: true,
+            ..IgnoredPrimitiveTypes::default()
+        };
+        let all = IgnoredPrimitiveTypes {
+            string: true,
+            number: true,
+            boolean: true,
+            bigint: true,
+        };
+        fn union<'db>(db: &'db TestDb, types: &[TypeData<'db>]) -> TypeData<'db> {
+            TypeData::Union(InternedUnion::new(db, types.to_vec().into_boxed_slice()))
+        }
+        let literal = |literal| TypeData::Literal(InternedLiteral::new(&db, literal));
+        let branded_string = TypeData::Intersection(InternedIntersection::new(
+            &db,
+            Vec::from([
+                TypeData::String,
+                TypeData::Object(InternedObject::new(
+                    &db,
+                    None,
+                    Vec::from([TypeMember {
+                        kind: TypeMemberKind::Named(Text::new_static("__brand")),
+                        ty: TypeData::AnyKeyword,
+                    }])
+                    .into_boxed_slice(),
+                    false,
+                    ObjectKind::Shape,
+                )),
+            ])
+            .into_boxed_slice(),
+        ));
+
+        for (data, ignored, expected) in [
+            (TypeData::String, string_only, Some(true)),
+            (
+                TypeData::String,
+                IgnoredPrimitiveTypes::default(),
+                Some(false),
+            ),
+            (
+                union(
+                    &db,
+                    &[TypeData::String, TypeData::ObjectKeyword, TypeData::Null],
+                ),
+                string_only,
+                Some(true),
+            ),
+            (
+                union(&db, &[TypeData::Number, TypeData::Undefined]),
+                string_only,
+                Some(false),
+            ),
+            (
+                literal(Literal::Template(Text::new_static("prefix"))),
+                string_only,
+                Some(true),
+            ),
+            (
+                union(&db, &[branded_string, TypeData::Undefined]),
+                string_only,
+                Some(true),
+            ),
+            (
+                literal(Literal::Number(NumberLiteral::new(Text::new_static("1")))),
+                all,
+                Some(true),
+            ),
+            (
+                literal(Literal::Number(NumberLiteral::new(Text::new_static("1")))),
+                number_only,
+                Some(true),
+            ),
+            (
+                literal(Literal::Number(NumberLiteral::new(Text::new_static("1")))),
+                string_only,
+                Some(false),
+            ),
+            (
+                literal(Literal::String(StringLiteral::from(Text::new_static("a")))),
+                string_only,
+                Some(true),
+            ),
+            (
+                literal(Literal::String(StringLiteral::from(Text::new_static("a")))),
+                number_only,
+                Some(false),
+            ),
+            (
+                literal(Literal::Boolean(BooleanLiteral::from(true))),
+                boolean_only,
+                Some(true),
+            ),
+            (
+                literal(Literal::Boolean(BooleanLiteral::from(true))),
+                string_only,
+                Some(false),
+            ),
+            (
+                literal(Literal::BigInt(Text::new_static("1n"))),
+                bigint_only,
+                Some(true),
+            ),
+            (
+                literal(Literal::BigInt(Text::new_static("1n"))),
+                number_only,
+                Some(false),
+            ),
+            (
+                literal(Literal::Template(Text::new_static("prefix"))),
+                number_only,
+                Some(false),
+            ),
+            (literal(Literal::Object(Box::default())), all, Some(false)),
+            (TypeData::Boolean, all, Some(true)),
+            (TypeData::BigInt, all, Some(true)),
+            (TypeData::Number, number_only, Some(true)),
+            (TypeData::Number, boolean_only, Some(false)),
+            (TypeData::Boolean, boolean_only, Some(true)),
+            (TypeData::Boolean, number_only, Some(false)),
+            (TypeData::BigInt, bigint_only, Some(true)),
+            (TypeData::BigInt, number_only, Some(false)),
+            (
+                union(&db, &[TypeData::String, TypeData::Boolean]),
+                boolean_only,
+                Some(true),
+            ),
+            (
+                union(&db, &[TypeData::String, TypeData::Unknown]),
+                string_only,
+                Some(true),
+            ),
+            (
+                union(&db, &[TypeData::Unknown, TypeData::Undefined]),
+                string_only,
+                None,
+            ),
+        ] {
+            assert_eq!(
+                InferredType::new(&db, data).has_ignored_primitive_variant(ignored),
+                expected,
+                "{data:?}"
+            );
+        }
+    }
+
+    #[test]
+    fn any_or_unknown_keyword_variant_looks_through_unions() {
+        let db = TestDb::default();
+        fn union<'db>(db: &'db TestDb, types: &[TypeData<'db>]) -> TypeData<'db> {
+            TypeData::Union(InternedUnion::new(db, types.to_vec().into_boxed_slice()))
+        }
+
+        for (data, expected) in [
+            (TypeData::AnyKeyword, true),
+            (TypeData::UnknownKeyword, true),
+            (
+                union(&db, &[TypeData::UnknownKeyword, TypeData::Number]),
+                true,
+            ),
+            (union(&db, &[TypeData::Number, TypeData::AnyKeyword]), true),
+            (union(&db, &[TypeData::Number, TypeData::Undefined]), false),
+            (union(&db, &[TypeData::Unknown, TypeData::Undefined]), false),
+            (TypeData::Unknown, false),
+            (TypeData::Number, false),
+        ] {
+            assert_eq!(
+                InferredType::new(&db, data).includes_any_or_unknown_keyword(),
+                expected,
+                "{data:?}"
+            );
+        }
     }
 
     #[test]

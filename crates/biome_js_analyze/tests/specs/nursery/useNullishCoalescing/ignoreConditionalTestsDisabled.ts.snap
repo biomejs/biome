@@ -4,177 +4,282 @@ expression: ignoreConditionalTestsDisabled.ts
 ---
 # Input
 ```ts
-// should generate diagnostics
+/* should generate diagnostics */
 
 declare const a: string;
 declare const b: number;
 declare const c: boolean;
 
+// `if` test
 if (null || a) {
   console.log(a);
 }
 
+// `while` test
 while (null || b) {
   break;
 }
 
+// `for` test
 for (; null || c; ) {
   break;
 }
 
+// `do-while` test
 do {
   break;
 } while (null || 'fallback');
 
+// Ternary test
 const result = (null || 42) ? 'yes' : 'no';
+
+// `||=` in a test
+declare let assigned: string | null;
+if ((assigned ||= 'fallback')) {}
+
+// Through `!` and a sequence
+if (!(null || a)) {}
+if ((b, null || a)) {}
+
+// A truthiness ternary in a test
+declare const maybe: { a: string } | null;
+if (maybe ? maybe : { a }) {}
 
 ```
 
 # Diagnostics
 ```
-ignoreConditionalTestsDisabled.ts:7:10 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━
+ignoreConditionalTestsDisabled.ts:8:10 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━
 
   i Use ?? instead of ||.
   
-    5 │ declare const c: boolean;
-    6 │ 
-  > 7 │ if (null || a) {
-      │          ^^
-    8 │   console.log(a);
-    9 │ }
+     7 │ // `if` test
+   > 8 │ if (null || a) {
+       │          ^^
+     9 │   console.log(a);
+    10 │ }
   
   i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Safe fix: Replace || with ??.
   
-     5  5 │   declare const c: boolean;
      6  6 │   
-     7    │ - if·(null·||·a)·{
-        7 │ + if·(null·??·a)·{
-     8  8 │     console.log(a);
-     9  9 │   }
+     7  7 │   // `if` test
+     8    │ - if·(null·||·a)·{
+        8 │ + if·(null·??·a)·{
+     9  9 │     console.log(a);
+    10 10 │   }
   
 
 ```
 
 ```
-ignoreConditionalTestsDisabled.ts:11:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━
+ignoreConditionalTestsDisabled.ts:13:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━
 
   i Use ?? instead of ||.
   
-     9 │ }
-    10 │ 
-  > 11 │ while (null || b) {
+    12 │ // `while` test
+  > 13 │ while (null || b) {
        │             ^^
-    12 │   break;
-    13 │ }
+    14 │   break;
+    15 │ }
   
   i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Safe fix: Replace || with ??.
   
-     9  9 │   }
-    10 10 │   
-    11    │ - while·(null·||·b)·{
-       11 │ + while·(null·??·b)·{
-    12 12 │     break;
-    13 13 │   }
+    11 11 │   
+    12 12 │   // `while` test
+    13    │ - while·(null·||·b)·{
+       13 │ + while·(null·??·b)·{
+    14 14 │     break;
+    15 15 │   }
   
 
 ```
 
 ```
-ignoreConditionalTestsDisabled.ts:15:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━
+ignoreConditionalTestsDisabled.ts:18:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━
 
   i Use ?? instead of ||.
   
-    13 │ }
-    14 │ 
-  > 15 │ for (; null || c; ) {
+    17 │ // `for` test
+  > 18 │ for (; null || c; ) {
        │             ^^
-    16 │   break;
-    17 │ }
+    19 │   break;
+    20 │ }
   
   i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Safe fix: Replace || with ??.
   
-    13 13 │   }
-    14 14 │   
-    15    │ - for·(;·null·||·c;·)·{
-       15 │ + for·(;·null·??·c;·)·{
-    16 16 │     break;
-    17 17 │   }
+    16 16 │   
+    17 17 │   // `for` test
+    18    │ - for·(;·null·||·c;·)·{
+       18 │ + for·(;·null·??·c;·)·{
+    19 19 │     break;
+    20 20 │   }
   
 
 ```
 
 ```
-ignoreConditionalTestsDisabled.ts:21:15 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━
+ignoreConditionalTestsDisabled.ts:25:15 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━
 
   i Use ?? instead of ||.
   
-    19 │ do {
-    20 │   break;
-  > 21 │ } while (null || 'fallback');
+    23 │ do {
+    24 │   break;
+  > 25 │ } while (null || 'fallback');
        │               ^^
-    22 │ 
-    23 │ const result = (null || 42) ? 'yes' : 'no';
+    26 │ 
+    27 │ // Ternary test
   
   i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Safe fix: Replace || with ??.
   
-    19 19 │   do {
-    20 20 │     break;
-    21    │ - }·while·(null·||·'fallback');
-       21 │ + }·while·(null·??·'fallback');
-    22 22 │   
-    23 23 │   const result = (null || 42) ? 'yes' : 'no';
+    23 23 │   do {
+    24 24 │     break;
+    25    │ - }·while·(null·||·'fallback');
+       25 │ + }·while·(null·??·'fallback');
+    26 26 │   
+    27 27 │   // Ternary test
   
 
 ```
 
 ```
-ignoreConditionalTestsDisabled.ts:23:22 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━
+ignoreConditionalTestsDisabled.ts:28:22 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━
 
   i Use ?? instead of ||.
   
-    21 │ } while (null || 'fallback');
-    22 │ 
-  > 23 │ const result = (null || 42) ? 'yes' : 'no';
+    27 │ // Ternary test
+  > 28 │ const result = (null || 42) ? 'yes' : 'no';
        │                      ^^
-    24 │ 
+    29 │ 
+    30 │ // `||=` in a test
   
   i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Safe fix: Replace || with ??.
   
-    21 21 │   } while (null || 'fallback');
-    22 22 │   
-    23    │ - const·result·=·(null·||·42)·?·'yes'·:·'no';
-       23 │ + const·result·=·(null·??·42)·?·'yes'·:·'no';
-    24 24 │   
+    26 26 │   
+    27 27 │   // Ternary test
+    28    │ - const·result·=·(null·||·42)·?·'yes'·:·'no';
+       28 │ + const·result·=·(null·??·42)·?·'yes'·:·'no';
+    29 29 │   
+    30 30 │   // `||=` in a test
+  
+
+```
+
+```
+ignoreConditionalTestsDisabled.ts:32:15 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ??= instead of ||=.
+  
+    30 │ // `||=` in a test
+    31 │ declare let assigned: string | null;
+  > 32 │ if ((assigned ||= 'fallback')) {}
+       │               ^^^
+    33 │ 
+    34 │ // Through `!` and a sequence
+  
+  i The ||= operator assigns when the left side is falsy, while ??= only assigns when it is null or undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+ignoreConditionalTestsDisabled.ts:35:12 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+    34 │ // Through `!` and a sequence
+  > 35 │ if (!(null || a)) {}
+       │            ^^
+    36 │ if ((b, null || a)) {}
+    37 │ 
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace || with ??.
+  
+    33 33 │   
+    34 34 │   // Through `!` and a sequence
+    35    │ - if·(!(null·||·a))·{}
+       35 │ + if·(!(null·??·a))·{}
+    36 36 │   if ((b, null || a)) {}
+    37 37 │   
+  
+
+```
+
+```
+ignoreConditionalTestsDisabled.ts:36:14 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+    34 │ // Through `!` and a sequence
+    35 │ if (!(null || a)) {}
+  > 36 │ if ((b, null || a)) {}
+       │              ^^
+    37 │ 
+    38 │ // A truthiness ternary in a test
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace || with ??.
+  
+    34 34 │   // Through `!` and a sequence
+    35 35 │   if (!(null || a)) {}
+    36    │ - if·((b,·null·||·a))·{}
+       36 │ + if·((b,·null·??·a))·{}
+    37 37 │   
+    38 38 │   // A truthiness ternary in a test
+  
+
+```
+
+```
+ignoreConditionalTestsDisabled.ts:40:5 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━
+
+  i Prefer ?? over a ternary expression checking for a falsy value.
+  
+    38 │ // A truthiness ternary in a test
+    39 │ declare const maybe: { a: string } | null;
+  > 40 │ if (maybe ? maybe : { a }) {}
+       │     ^^^^^
+    41 │ 
+  
+  i ?? only uses the fallback when the value is null or undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace the ternary with ??.
+  
+    38 38 │   // A truthiness ternary in a test
+    39 39 │   declare const maybe: { a: string } | null;
+    40    │ - if·(maybe·?·maybe·:·{·a·})·{}
+       40 │ + if·(maybe·??·{·a·})·{}
+    41 41 │   
   
 
 ```

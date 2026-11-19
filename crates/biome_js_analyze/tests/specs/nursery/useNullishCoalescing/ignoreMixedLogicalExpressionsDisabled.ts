@@ -1,40 +1,38 @@
-// Tests for ignoreMixedLogicalExpressions: false
-// Mixed || + && expressions SHOULD generate diagnostics
+/* should generate diagnostics */
 
 declare const a: string | null;
 declare const b: string;
 declare const c: string;
 
-// || as child of &&
+// `||` as an operand of `&&`
 const r1 = (a || 'default') && b;
 
-// || with && child
+// `||` with a `&&` operand
 const r2 = a || (b && c);
 
-// || as left operand of &&
+// `||` as the left operand of `&&`
 const r3 = (a || b) && c;
 
-// Nested: || inside && inside another &&
+// `||` inside nested `&&`
 const r4 = (a || b) && c && b;
 
-// ||= mixed with &&
+// `||=` with a `&&` right-hand side
 declare let assignMixed: string | null;
 assignMixed ||= b && c;
 
-// Chained || with && sibling
+// Chained `||` with a `&&` operand
 declare const x: string | null;
 declare const y: string;
 declare const z: string;
 declare const w: string;
 const r5 = x || y || (z && w);
 
-// Nested ||= where the inner ||= contains && in its RHS.
-// With the option disabled, both ||= operations should be diagnosed.
+// Nested `||=` with a `&&` in the inner right-hand side
 declare let outerAssign: string | null;
 declare let innerAssign: string | null;
 outerAssign ||= innerAssign ||= b && c;
 
-// Same nested ||= shape with explicit parens around the inner assignment.
+// The same with parentheses around the inner `||=`
 declare let parenOuter: string | null;
 declare let parenInner: string | null;
 parenOuter ||= (parenInner ||= b && c);

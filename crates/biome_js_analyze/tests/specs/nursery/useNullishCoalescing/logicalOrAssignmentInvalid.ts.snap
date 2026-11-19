@@ -1,0 +1,521 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: logicalOrAssignmentInvalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+
+// Union with null
+declare let a: string | null;
+a ||= 'default';
+
+// Union with undefined
+declare let b: number | undefined;
+b ||= 0;
+
+// Union with null and undefined
+declare let c: string | null | undefined;
+c ||= 'fallback';
+
+// Nullish literal
+let d: null = null;
+d ||= 'value';
+
+let e: undefined = undefined;
+e ||= 'value';
+
+// Object union with `null`: safe fix
+declare let obj: { a: string } | null;
+obj ||= { a: 'default' };
+
+// Number union with `null`: no fix
+declare let mixed: number | null;
+mixed ||= 100;
+
+// Boolean union with `null`: no fix
+declare let flag: boolean | null;
+flag ||= true;
+
+// Parenthesized identifier target
+declare let wrapped: { a: string } | null;
+(wrapped) ||= { a: 'default' };
+
+// Static member target
+declare const record: { name: string | null };
+record.name ||= 'default';
+
+// Computed member target
+declare const names: (string | null)[];
+names[0] ||= 'default';
+
+// Parenthesized member target
+declare const box: { item: { a: string } | undefined };
+(box.item) ||= { a: 'default' };
+
+// Variable target inside a type assertion
+declare let asserted: { a: string } | null;
+(asserted as { a: string } | null) ||= { a: 'default' };
+
+// `satisfies` keeps the declared type
+declare let satisfiesTarget: { a: string } | null;
+(satisfiesTarget satisfies { a: string } | null) ||= { a: 'default' };
+
+// An angle bracket assertion gives the asserted type
+declare let angleTarget: unknown;
+(<{ a: string } | null>angleTarget) ||= { a: 'default' };
+
+// A member inside a type assertion gives the asserted type
+declare const holder: { item: unknown };
+(holder.item as { a: string } | null) ||= { a: 'default' };
+
+// `any` and `unknown`: no fix
+declare let anyAssigned: any;
+anyAssigned ||= 1;
+
+declare let unknownAssigned: unknown;
+unknownAssigned ||= 1;
+
+declare const unknownMember: { v: unknown };
+unknownMember.v ||= 1;
+
+```
+
+# Diagnostics
+```
+logicalOrAssignmentInvalid.ts:5:3 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ??= instead of ||=.
+  
+    3 │ // Union with null
+    4 │ declare let a: string | null;
+  > 5 │ a ||= 'default';
+      │   ^^^
+    6 │ 
+    7 │ // Union with undefined
+  
+  i The ||= operator assigns when the left side is falsy, while ??= only assigns when it is null or undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+logicalOrAssignmentInvalid.ts:9:3 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ??= instead of ||=.
+  
+     7 │ // Union with undefined
+     8 │ declare let b: number | undefined;
+   > 9 │ b ||= 0;
+       │   ^^^
+    10 │ 
+    11 │ // Union with null and undefined
+  
+  i The ||= operator assigns when the left side is falsy, while ??= only assigns when it is null or undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+logicalOrAssignmentInvalid.ts:13:3 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ??= instead of ||=.
+  
+    11 │ // Union with null and undefined
+    12 │ declare let c: string | null | undefined;
+  > 13 │ c ||= 'fallback';
+       │   ^^^
+    14 │ 
+    15 │ // Nullish literal
+  
+  i The ||= operator assigns when the left side is falsy, while ??= only assigns when it is null or undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+logicalOrAssignmentInvalid.ts:17:3 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ??= instead of ||=.
+  
+    15 │ // Nullish literal
+    16 │ let d: null = null;
+  > 17 │ d ||= 'value';
+       │   ^^^
+    18 │ 
+    19 │ let e: undefined = undefined;
+  
+  i The ||= operator assigns when the left side is falsy, while ??= only assigns when it is null or undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace ||= with ??=.
+  
+    15 15 │   // Nullish literal
+    16 16 │   let d: null = null;
+    17    │ - d·||=·'value';
+       17 │ + d·??=·'value';
+    18 18 │   
+    19 19 │   let e: undefined = undefined;
+  
+
+```
+
+```
+logicalOrAssignmentInvalid.ts:20:3 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ??= instead of ||=.
+  
+    19 │ let e: undefined = undefined;
+  > 20 │ e ||= 'value';
+       │   ^^^
+    21 │ 
+    22 │ // Object union with `null`: safe fix
+  
+  i The ||= operator assigns when the left side is falsy, while ??= only assigns when it is null or undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace ||= with ??=.
+  
+    18 18 │   
+    19 19 │   let e: undefined = undefined;
+    20    │ - e·||=·'value';
+       20 │ + e·??=·'value';
+    21 21 │   
+    22 22 │   // Object union with `null`: safe fix
+  
+
+```
+
+```
+logicalOrAssignmentInvalid.ts:24:5 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ??= instead of ||=.
+  
+    22 │ // Object union with `null`: safe fix
+    23 │ declare let obj: { a: string } | null;
+  > 24 │ obj ||= { a: 'default' };
+       │     ^^^
+    25 │ 
+    26 │ // Number union with `null`: no fix
+  
+  i The ||= operator assigns when the left side is falsy, while ??= only assigns when it is null or undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace ||= with ??=.
+  
+    22 22 │   // Object union with `null`: safe fix
+    23 23 │   declare let obj: { a: string } | null;
+    24    │ - obj·||=·{·a:·'default'·};
+       24 │ + obj·??=·{·a:·'default'·};
+    25 25 │   
+    26 26 │   // Number union with `null`: no fix
+  
+
+```
+
+```
+logicalOrAssignmentInvalid.ts:28:7 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ??= instead of ||=.
+  
+    26 │ // Number union with `null`: no fix
+    27 │ declare let mixed: number | null;
+  > 28 │ mixed ||= 100;
+       │       ^^^
+    29 │ 
+    30 │ // Boolean union with `null`: no fix
+  
+  i The ||= operator assigns when the left side is falsy, while ??= only assigns when it is null or undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+logicalOrAssignmentInvalid.ts:32:6 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ??= instead of ||=.
+  
+    30 │ // Boolean union with `null`: no fix
+    31 │ declare let flag: boolean | null;
+  > 32 │ flag ||= true;
+       │      ^^^
+    33 │ 
+    34 │ // Parenthesized identifier target
+  
+  i The ||= operator assigns when the left side is falsy, while ??= only assigns when it is null or undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+logicalOrAssignmentInvalid.ts:36:11 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━
+
+  i Use ??= instead of ||=.
+  
+    34 │ // Parenthesized identifier target
+    35 │ declare let wrapped: { a: string } | null;
+  > 36 │ (wrapped) ||= { a: 'default' };
+       │           ^^^
+    37 │ 
+    38 │ // Static member target
+  
+  i The ||= operator assigns when the left side is falsy, while ??= only assigns when it is null or undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace ||= with ??=.
+  
+    34 34 │   // Parenthesized identifier target
+    35 35 │   declare let wrapped: { a: string } | null;
+    36    │ - (wrapped)·||=·{·a:·'default'·};
+       36 │ + (wrapped)·??=·{·a:·'default'·};
+    37 37 │   
+    38 38 │   // Static member target
+  
+
+```
+
+```
+logicalOrAssignmentInvalid.ts:40:13 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ??= instead of ||=.
+  
+    38 │ // Static member target
+    39 │ declare const record: { name: string | null };
+  > 40 │ record.name ||= 'default';
+       │             ^^^
+    41 │ 
+    42 │ // Computed member target
+  
+  i The ||= operator assigns when the left side is falsy, while ??= only assigns when it is null or undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+logicalOrAssignmentInvalid.ts:44:10 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ??= instead of ||=.
+  
+    42 │ // Computed member target
+    43 │ declare const names: (string | null)[];
+  > 44 │ names[0] ||= 'default';
+       │          ^^^
+    45 │ 
+    46 │ // Parenthesized member target
+  
+  i The ||= operator assigns when the left side is falsy, while ??= only assigns when it is null or undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+logicalOrAssignmentInvalid.ts:48:12 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━
+
+  i Use ??= instead of ||=.
+  
+    46 │ // Parenthesized member target
+    47 │ declare const box: { item: { a: string } | undefined };
+  > 48 │ (box.item) ||= { a: 'default' };
+       │            ^^^
+    49 │ 
+    50 │ // Variable target inside a type assertion
+  
+  i The ||= operator assigns when the left side is falsy, while ??= only assigns when it is null or undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace ||= with ??=.
+  
+    46 46 │   // Parenthesized member target
+    47 47 │   declare const box: { item: { a: string } | undefined };
+    48    │ - (box.item)·||=·{·a:·'default'·};
+       48 │ + (box.item)·??=·{·a:·'default'·};
+    49 49 │   
+    50 50 │   // Variable target inside a type assertion
+  
+
+```
+
+```
+logicalOrAssignmentInvalid.ts:52:36 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━
+
+  i Use ??= instead of ||=.
+  
+    50 │ // Variable target inside a type assertion
+    51 │ declare let asserted: { a: string } | null;
+  > 52 │ (asserted as { a: string } | null) ||= { a: 'default' };
+       │                                    ^^^
+    53 │ 
+    54 │ // `satisfies` keeps the declared type
+  
+  i The ||= operator assigns when the left side is falsy, while ??= only assigns when it is null or undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace ||= with ??=.
+  
+    50 50 │   // Variable target inside a type assertion
+    51 51 │   declare let asserted: { a: string } | null;
+    52    │ - (asserted·as·{·a:·string·}·|·null)·||=·{·a:·'default'·};
+       52 │ + (asserted·as·{·a:·string·}·|·null)·??=·{·a:·'default'·};
+    53 53 │   
+    54 54 │   // `satisfies` keeps the declared type
+  
+
+```
+
+```
+logicalOrAssignmentInvalid.ts:56:50 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━
+
+  i Use ??= instead of ||=.
+  
+    54 │ // `satisfies` keeps the declared type
+    55 │ declare let satisfiesTarget: { a: string } | null;
+  > 56 │ (satisfiesTarget satisfies { a: string } | null) ||= { a: 'default' };
+       │                                                  ^^^
+    57 │ 
+    58 │ // An angle bracket assertion gives the asserted type
+  
+  i The ||= operator assigns when the left side is falsy, while ??= only assigns when it is null or undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace ||= with ??=.
+  
+    54 54 │   // `satisfies` keeps the declared type
+    55 55 │   declare let satisfiesTarget: { a: string } | null;
+    56    │ - (satisfiesTarget·satisfies·{·a:·string·}·|·null)·||=·{·a:·'default'·};
+       56 │ + (satisfiesTarget·satisfies·{·a:·string·}·|·null)·??=·{·a:·'default'·};
+    57 57 │   
+    58 58 │   // An angle bracket assertion gives the asserted type
+  
+
+```
+
+```
+logicalOrAssignmentInvalid.ts:60:37 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━
+
+  i Use ??= instead of ||=.
+  
+    58 │ // An angle bracket assertion gives the asserted type
+    59 │ declare let angleTarget: unknown;
+  > 60 │ (<{ a: string } | null>angleTarget) ||= { a: 'default' };
+       │                                     ^^^
+    61 │ 
+    62 │ // A member inside a type assertion gives the asserted type
+  
+  i The ||= operator assigns when the left side is falsy, while ??= only assigns when it is null or undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace ||= with ??=.
+  
+    58 58 │   // An angle bracket assertion gives the asserted type
+    59 59 │   declare let angleTarget: unknown;
+    60    │ - (<{·a:·string·}·|·null>angleTarget)·||=·{·a:·'default'·};
+       60 │ + (<{·a:·string·}·|·null>angleTarget)·??=·{·a:·'default'·};
+    61 61 │   
+    62 62 │   // A member inside a type assertion gives the asserted type
+  
+
+```
+
+```
+logicalOrAssignmentInvalid.ts:64:39 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━
+
+  i Use ??= instead of ||=.
+  
+    62 │ // A member inside a type assertion gives the asserted type
+    63 │ declare const holder: { item: unknown };
+  > 64 │ (holder.item as { a: string } | null) ||= { a: 'default' };
+       │                                       ^^^
+    65 │ 
+    66 │ // `any` and `unknown`: no fix
+  
+  i The ||= operator assigns when the left side is falsy, while ??= only assigns when it is null or undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace ||= with ??=.
+  
+    62 62 │   // A member inside a type assertion gives the asserted type
+    63 63 │   declare const holder: { item: unknown };
+    64    │ - (holder.item·as·{·a:·string·}·|·null)·||=·{·a:·'default'·};
+       64 │ + (holder.item·as·{·a:·string·}·|·null)·??=·{·a:·'default'·};
+    65 65 │   
+    66 66 │   // `any` and `unknown`: no fix
+  
+
+```
+
+```
+logicalOrAssignmentInvalid.ts:68:13 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ??= instead of ||=.
+  
+    66 │ // `any` and `unknown`: no fix
+    67 │ declare let anyAssigned: any;
+  > 68 │ anyAssigned ||= 1;
+       │             ^^^
+    69 │ 
+    70 │ declare let unknownAssigned: unknown;
+  
+  i The ||= operator assigns when the left side is falsy, while ??= only assigns when it is null or undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+logicalOrAssignmentInvalid.ts:71:17 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ??= instead of ||=.
+  
+    70 │ declare let unknownAssigned: unknown;
+  > 71 │ unknownAssigned ||= 1;
+       │                 ^^^
+    72 │ 
+    73 │ declare const unknownMember: { v: unknown };
+  
+  i The ||= operator assigns when the left side is falsy, while ??= only assigns when it is null or undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+logicalOrAssignmentInvalid.ts:74:17 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ??= instead of ||=.
+  
+    73 │ declare const unknownMember: { v: unknown };
+  > 74 │ unknownMember.v ||= 1;
+       │                 ^^^
+    75 │ 
+  
+  i The ||= operator assigns when the left side is falsy, while ??= only assigns when it is null or undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
