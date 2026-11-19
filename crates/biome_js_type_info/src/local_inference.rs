@@ -21,24 +21,24 @@ use biome_js_syntax::{
     JsClassExportDefaultDeclaration, JsClassExpression, JsClassMemberList, JsConstructorParameters,
     JsExport, JsExtendsClause, JsForInStatement, JsForOfStatement, JsForVariableDeclaration,
     JsFormalParameter, JsFunctionBody, JsFunctionDeclaration, JsFunctionExpression,
-    JsGetterObjectMember, JsInitializerClause, JsLanguage, JsLogicalExpression, JsLogicalOperator,
-    JsMethodObjectMember, JsModuleItemList, JsNewExpression, JsObjectBindingPattern,
-    JsObjectExpression, JsParameterList, JsParameters, JsParenthesizedExpression,
-    JsPropertyClassMember, JsPropertyObjectMember, JsReferenceIdentifier, JsRestParameter,
-    JsReturnStatement, JsSetterObjectMember, JsSyntaxKind, JsSyntaxNode, JsSyntaxToken,
-    JsTemplateExpression, JsUnaryExpression, JsUnaryOperator, JsVariableDeclaration,
-    JsVariableDeclarator, TsConditionalType, TsDeclarationModule, TsDeclareFunctionDeclaration,
-    TsDeclareStatement, TsEnumDeclaration, TsExportDeclareClause, TsExternalModuleDeclaration,
-    TsGlobalDeclaration, TsInferType, TsInstantiationExpression, TsInterfaceDeclaration,
-    TsMappedType, TsMethodSignatureTypeMember, TsModuleBlock, TsModuleDeclaration,
-    TsPropertyParameterModifierList, TsReferenceType, TsReturnTypeAnnotation,
+    JsGetterObjectMember, JsIdentifierAssignment, JsIdentifierBinding, JsInitializerClause,
+    JsLanguage, JsLogicalExpression, JsLogicalOperator, JsMethodClassMember, JsMethodObjectMember,
+    JsModuleItemList, JsNewExpression, JsObjectBindingPattern, JsObjectExpression, JsParameterList,
+    JsParameters, JsParenthesizedExpression, JsPropertyClassMember, JsPropertyObjectMember,
+    JsReferenceIdentifier, JsRestParameter, JsReturnStatement, JsSetterObjectMember, JsSyntaxKind,
+    JsSyntaxNode, JsSyntaxToken, JsTemplateExpression, JsUnaryExpression, JsUnaryOperator,
+    JsVariableDeclaration, JsVariableDeclarator, TsConditionalType, TsDeclarationModule,
+    TsDeclareFunctionDeclaration, TsDeclareStatement, TsEnumDeclaration, TsExportDeclareClause,
+    TsExternalModuleDeclaration, TsGlobalDeclaration, TsInferType, TsInstantiationExpression,
+    TsInterfaceDeclaration, TsMappedType, TsMethodSignatureTypeMember, TsModuleBlock,
+    TsModuleDeclaration, TsPropertyParameterModifierList, TsReferenceType, TsReturnTypeAnnotation,
     TsSatisfiesExpression, TsTypeAliasDeclaration, TsTypeAnnotation, TsTypeArguments, TsTypeList,
     TsTypeMemberList, TsTypeParameter, TsTypeParameters, TsTypeofType, inner_string_text,
     unescape_js_string,
 };
 use biome_rowan::{
     AstNode, AstNodeList, AstSeparatedList, SyntaxKindSet, SyntaxResult, Text, TextRange,
-    TokenText, WalkEvent,
+    TokenText, WalkEvent, declare_node_union,
 };
 use rustc_hash::FxHashMap;
 
@@ -50,19 +50,20 @@ use crate::literal::{BooleanLiteral, NumberLiteral, RegexpLiteral, StringLiteral
 use crate::{
     AssertsReturnType, CallArgumentType, Class, Constructor, ConstructorParameter,
     DestructureField, ExtendsType, Function, FunctionParameter, FunctionParameterBinding,
-    GenericTypeParameter, IndexedAccessType, Interface, Intersection, Literal, MappedType,
-    MappedTypeKeys, MappedTypeModifier, Module, NamedFunctionParameter, Namespace, Object,
-    ObjectKind, Path, PatternFunctionParameter, PredicateReturnType, RawTypeCollector, RawTypeId,
-    ReturnType, ScopeId, Tuple, TupleElementType, TypeData, TypeInstance, TypeMember,
-    TypeMemberAccessibility, TypeMemberKind, TypeOperator, TypeOperatorType, TypeReference,
-    TypeReferenceQualifier, TypeofAdditionExpression, TypeofAwaitExpression,
-    TypeofBitwiseNotExpression, TypeofCallArgumentExpression, TypeofCallExpression,
-    TypeofComputedMemberExpression, TypeofConditionalExpression, TypeofDestructureExpression,
-    TypeofExpression, TypeofImplicitReturnExpression, TypeofIndexExpression,
-    TypeofIterableValueOfExpression, TypeofLogicalAndExpression, TypeofLogicalOrExpression,
-    TypeofNewExpression, TypeofNullishCoalescingExpression, TypeofParameterExpression,
-    TypeofStaticMemberExpression, TypeofThisOrSuperExpression, TypeofTypeofExpression,
-    TypeofUnaryMinusExpression, TypeofValue, TypeofWidenedLiteralExpression, Union,
+    GenericTypeParameter, IndexedAccessType, InferredPredicateReturnType, Interface, Intersection,
+    Literal, MappedType, MappedTypeKeys, MappedTypeModifier, Module, NamedFunctionParameter,
+    Namespace, Object, ObjectKind, Path, PatternFunctionParameter, PredicateReturnType,
+    RawTypeCollector, RawTypeId, ReturnType, ScopeId, Tuple, TupleElementType, TypeData,
+    TypeInstance, TypeMember, TypeMemberAccessibility, TypeMemberKind, TypeOperator,
+    TypeOperatorType, TypeReference, TypeReferenceQualifier, TypeofAdditionExpression,
+    TypeofAwaitExpression, TypeofBitwiseNotExpression, TypeofCallArgumentExpression,
+    TypeofCallExpression, TypeofComputedMemberExpression, TypeofConditionalExpression,
+    TypeofDestructureExpression, TypeofExpression, TypeofImplicitReturnExpression,
+    TypeofIndexExpression, TypeofInferredPredicateExpression, TypeofIterableValueOfExpression,
+    TypeofLogicalAndExpression, TypeofLogicalOrExpression, TypeofNewExpression,
+    TypeofNullishCoalescingExpression, TypeofParameterExpression, TypeofStaticMemberExpression,
+    TypeofThisOrSuperExpression, TypeofTypeofExpression, TypeofUnaryMinusExpression, TypeofValue,
+    TypeofWidenedLiteralExpression, Union,
 };
 
 const MAX_CONST_ASSERTION_DEPTH: usize = 50;
@@ -424,13 +425,20 @@ impl TypeData {
                         scope_id,
                         decl.parameters(),
                     ),
-                    return_type: function_return_type(
-                        collector,
-                        scope_id,
-                        is_async,
-                        decl.return_type_annotation(),
-                        decl.body().ok().map(AnyJsFunctionBody::JsFunctionBody),
-                    ),
+                    return_type: {
+                        let return_type = function_return_type(
+                            collector,
+                            scope_id,
+                            is_async,
+                            decl.return_type_annotation(),
+                            decl.body().ok().map(AnyJsFunctionBody::JsFunctionBody),
+                        );
+                        with_inferred_predicate(
+                            collector,
+                            &AnyJsFunction::from(decl.clone()).into(),
+                            return_type,
+                        )
+                    },
                 }))
             }
             AnyJsExportDefaultDeclaration::TsDeclareFunctionExportDefaultDeclaration(decl) => {
@@ -957,13 +965,20 @@ impl TypeData {
                 }
                 Err(_) => Box::default(),
             },
-            return_type: function_return_type(
-                collector,
-                scope_id,
-                is_async,
-                expr.return_type_annotation(),
-                expr.body().ok(),
-            ),
+            return_type: {
+                let return_type = function_return_type(
+                    collector,
+                    scope_id,
+                    is_async,
+                    expr.return_type_annotation(),
+                    expr.body().ok(),
+                );
+                with_inferred_predicate(
+                    collector,
+                    &AnyJsFunction::from(expr.clone()).into(),
+                    return_type,
+                )
+            },
         }))
     }
 
@@ -1117,13 +1132,20 @@ impl TypeData {
                 .and_then(|binding| binding.as_js_identifier_binding())
                 .and_then(|binding| text_from_token(binding.name_token())),
             parameters: function_params_from_js_params(collector, scope_id, decl.parameters()),
-            return_type: function_return_type(
-                collector,
-                scope_id,
-                is_async,
-                decl.return_type_annotation(),
-                decl.body().ok().map(AnyJsFunctionBody::JsFunctionBody),
-            ),
+            return_type: {
+                let return_type = function_return_type(
+                    collector,
+                    scope_id,
+                    is_async,
+                    decl.return_type_annotation(),
+                    decl.body().ok().map(AnyJsFunctionBody::JsFunctionBody),
+                );
+                with_inferred_predicate(
+                    collector,
+                    &AnyJsFunction::from(decl.clone()).into(),
+                    return_type,
+                )
+            },
         }))
     }
 
@@ -1146,13 +1168,20 @@ impl TypeData {
                 .and_then(|binding| binding.as_js_identifier_binding())
                 .and_then(|binding| text_from_token(binding.name_token())),
             parameters: function_params_from_js_params(collector, scope_id, expr.parameters()),
-            return_type: function_return_type(
-                collector,
-                scope_id,
-                is_async,
-                expr.return_type_annotation(),
-                expr.body().ok().map(AnyJsFunctionBody::JsFunctionBody),
-            ),
+            return_type: {
+                let return_type = function_return_type(
+                    collector,
+                    scope_id,
+                    is_async,
+                    expr.return_type_annotation(),
+                    expr.body().ok().map(AnyJsFunctionBody::JsFunctionBody),
+                );
+                with_inferred_predicate(
+                    collector,
+                    &AnyJsFunction::from(expr.clone()).into(),
+                    return_type,
+                )
+            },
         }))
     }
 
@@ -2355,13 +2384,16 @@ impl TypeMember {
                         scope_id,
                         member.parameters(),
                     ),
-                    return_type: function_return_type(
-                        collector,
-                        scope_id,
-                        is_async,
-                        member.return_type_annotation(),
-                        member.body().ok().map(AnyJsFunctionBody::JsFunctionBody),
-                    ),
+                    return_type: {
+                        let return_type = function_return_type(
+                            collector,
+                            scope_id,
+                            is_async,
+                            member.return_type_annotation(),
+                            member.body().ok().map(AnyJsFunctionBody::JsFunctionBody),
+                        );
+                        with_inferred_predicate(collector, &member.clone().into(), return_type)
+                    },
                 };
                 let ty = collector.register_and_resolve(function.into());
                 let is_static = member
@@ -2612,13 +2644,16 @@ impl TypeMember {
                             scope_id,
                             member.parameters(),
                         ),
-                        return_type: function_return_type(
-                            collector,
-                            scope_id,
-                            is_async,
-                            member.return_type_annotation(),
-                            member.body().ok().map(AnyJsFunctionBody::JsFunctionBody),
-                        ),
+                        return_type: {
+                            let return_type = function_return_type(
+                                collector,
+                                scope_id,
+                                is_async,
+                                member.return_type_annotation(),
+                                member.body().ok().map(AnyJsFunctionBody::JsFunctionBody),
+                            );
+                            with_inferred_predicate(collector, &member.clone().into(), return_type)
+                        },
                     };
                     Self {
                         kind,
@@ -4449,6 +4484,411 @@ fn ends_by_exit(statement: AnyJsStatement) -> bool {
         }
     }
     true
+}
+
+declare_node_union! {
+    /// A function, method, or arrow function whose body TypeScript can infer
+    /// a type predicate from.
+    pub AnyPredicateFunction = AnyJsFunction | JsMethodClassMember | JsMethodObjectMember
+}
+
+impl AnyPredicateFunction {
+    fn return_type_annotation(&self) -> Option<TsReturnTypeAnnotation> {
+        match self {
+            Self::AnyJsFunction(function) => function.return_type_annotation(),
+            Self::JsMethodClassMember(method) => method.return_type_annotation(),
+            Self::JsMethodObjectMember(method) => method.return_type_annotation(),
+        }
+    }
+
+    fn is_async(&self) -> bool {
+        match self {
+            Self::AnyJsFunction(function) => function.is_async(),
+            Self::JsMethodClassMember(method) => method.async_token().is_some(),
+            Self::JsMethodObjectMember(method) => method.async_token().is_some(),
+        }
+    }
+
+    fn is_generator(&self) -> bool {
+        match self {
+            Self::AnyJsFunction(function) => function.is_generator(),
+            Self::JsMethodClassMember(method) => method.star_token().is_some(),
+            Self::JsMethodObjectMember(method) => method.star_token().is_some(),
+        }
+    }
+
+    fn body(&self) -> Option<AnyJsFunctionBody> {
+        match self {
+            Self::AnyJsFunction(function) => function.body().ok(),
+            Self::JsMethodClassMember(method) => {
+                method.body().ok().map(AnyJsFunctionBody::JsFunctionBody)
+            }
+            Self::JsMethodObjectMember(method) => {
+                method.body().ok().map(AnyJsFunctionBody::JsFunctionBody)
+            }
+        }
+    }
+
+    fn parameters(&self) -> Option<AnyJsArrowFunctionParameters> {
+        match self {
+            Self::AnyJsFunction(function) => function.parameters().ok(),
+            Self::JsMethodClassMember(method) => method
+                .parameters()
+                .ok()
+                .map(AnyJsArrowFunctionParameters::JsParameters),
+            Self::JsMethodObjectMember(method) => method
+                .parameters()
+                .ok()
+                .map(AnyJsArrowFunctionParameters::JsParameters),
+        }
+    }
+
+    /// Returns whether the function is a function or arrow function
+    /// expression passed directly as an argument of a call or `new`
+    /// expression, whose signature gives a type to its parameters without
+    /// a type annotation.
+    fn is_call_argument(&self) -> bool {
+        let Self::AnyJsFunction(
+            AnyJsFunction::JsArrowFunctionExpression(_) | AnyJsFunction::JsFunctionExpression(_),
+        ) = self
+        else {
+            return false;
+        };
+        let mut parent = self.syntax().parent();
+        while let Some(node) = parent.as_ref()
+            && JsParenthesizedExpression::can_cast(node.kind())
+        {
+            parent = node.parent();
+        }
+        parent
+            .and_then(JsCallArgumentList::cast)
+            .and_then(|list| list.parent::<JsCallArguments>())
+            .and_then(|arguments| arguments.syntax().parent())
+            .is_some_and(|call| {
+                JsCallExpression::can_cast(call.kind()) || JsNewExpression::can_cast(call.kind())
+            })
+    }
+}
+
+/// Limits the expressions that [`gives_boolean`] and [`tests_name`] visit.
+const MAX_BOOLEAN_STEPS: usize = 64;
+
+/// Returns `return_type`, the return type collected for `function`, or an
+/// [`InferredPredicateReturnType`] around it when TypeScript may infer a type
+/// predicate from the function's body, as [`inferred_predicate_parameter`]
+/// decides, so that inference decides whether the function has one.
+fn with_inferred_predicate(
+    collector: &mut dyn RawTypeCollector,
+    function: &AnyPredicateFunction,
+    return_type: ReturnType,
+) -> ReturnType {
+    let ReturnType::Type(ty) = return_type else {
+        return return_type;
+    };
+    let Some(parameter_name) = inferred_predicate_parameter(function)
+        .and_then(|(_, binding)| binding.name_token().ok())
+        .map(|name| Text::from(name.token_text_trimmed()))
+    else {
+        return ReturnType::Type(ty);
+    };
+    let target = collector.reference_to_owned_data(TypeData::from(
+        TypeofExpression::InferredPredicate(TypeofInferredPredicateExpression {
+            function: function.syntax().text_trimmed_range(),
+        }),
+    ));
+    ReturnType::InferredPredicate(Box::new(InferredPredicateReturnType {
+        parameter_name,
+        target,
+        ty,
+    }))
+}
+
+/// Returns the value that `function` returns and the parameter that a type
+/// predicate inferred from its body would test, when TypeScript may infer
+/// one for the function, or `None` otherwise.
+///
+/// TypeScript considers a function without a return type annotation that is
+/// neither `async` nor a generator, whose body is an expression or ends with
+/// its only `return` statement, which has a value, and whose returned value
+/// is a boolean. Biome also requires that `return` statement to be the only
+/// statement of the body, because a statement before it can narrow a
+/// parameter where the value is returned, as `if (x === null) throw 0;` does.
+/// The value gives a boolean when it is a comparison, `instanceof`, `in`,
+/// `!`, a call that is not part of an optional chain, or `&&` or `||` of such
+/// values, in parentheses or not.
+///
+/// TypeScript tries the parameters in order and takes the first one that the
+/// returned value narrows. Biome narrows less than TypeScript, so it can't
+/// tell that TypeScript finds no type predicate about a parameter that the
+/// value mentions, and it takes only the first such parameter, skipping
+/// `this`, rest, and destructured parameters and those annotated `boolean`,
+/// which TypeScript skips too. That parameter must be named without escapes,
+/// have no default value, never be assigned anywhere in the function, and
+/// get its type from an annotation or, without one, from the call that the
+/// function is passed to. The value must also test it directly, as
+/// [`tests_name`] describes, because inferring a type predicate costs a
+/// resolution of the parameter's type, which is wasted on a value such as
+/// `query(builder)` or `builder.done()`. Otherwise the function gets no type
+/// predicate.
+pub fn inferred_predicate_parameter(
+    function: &AnyPredicateFunction,
+) -> Option<(AnyJsExpression, JsIdentifierBinding)> {
+    if function.return_type_annotation().is_some() || function.is_async() || function.is_generator()
+    {
+        return None;
+    }
+    let returned = match function.body()? {
+        AnyJsFunctionBody::AnyJsExpression(expression) => expression,
+        AnyJsFunctionBody::JsFunctionBody(body) => {
+            let statements = body.statements();
+            if statements.len() != 1 {
+                return None;
+            }
+            let AnyJsStatement::JsReturnStatement(statement) = statements.first()? else {
+                return None;
+            };
+            statement.argument()?
+        }
+    };
+    let mut remaining = MAX_BOOLEAN_STEPS;
+    if !gives_boolean(&returned, &mut remaining) {
+        return None;
+    }
+    let parameters = match function.parameters()? {
+        AnyJsArrowFunctionParameters::AnyJsBinding(binding) => {
+            let binding = binding.as_js_identifier_binding()?.clone();
+            let name = binding.name_token().ok()?;
+            let text = name.text_trimmed();
+            let mut steps = MAX_BOOLEAN_STEPS;
+            return (mentions_name(&returned, text)
+                && function.is_call_argument()
+                && !text.contains('\\')
+                && tests_name(&returned, text, &mut steps)
+                && !assigns_name(function, text))
+            .then_some((returned, binding));
+        }
+        AnyJsArrowFunctionParameters::JsParameters(parameters) => parameters,
+    };
+    for parameter in parameters.items() {
+        let formal = match parameter.ok()? {
+            AnyJsParameter::TsThisParameter(_) | AnyJsParameter::JsRestParameter(_) => continue,
+            AnyJsParameter::AnyJsFormalParameter(AnyJsFormalParameter::JsFormalParameter(
+                formal,
+            )) => formal,
+            AnyJsParameter::AnyJsFormalParameter(
+                AnyJsFormalParameter::JsBogusParameter(_) | AnyJsFormalParameter::JsMetavariable(_),
+            ) => return None,
+        };
+        let binding = match formal.binding().ok()? {
+            AnyJsBindingPattern::AnyJsBinding(AnyJsBinding::JsIdentifierBinding(binding)) => {
+                binding
+            }
+            AnyJsBindingPattern::AnyJsBinding(_) => return None,
+            AnyJsBindingPattern::JsArrayBindingPattern(_)
+            | AnyJsBindingPattern::JsObjectBindingPattern(_) => continue,
+        };
+        let name = binding.name_token().ok()?;
+        let text = name.text_trimmed();
+        if !mentions_name(&returned, text) {
+            continue;
+        }
+        let annotation = formal.type_annotation();
+        let is_boolean = annotation
+            .as_ref()
+            .and_then(|annotation| annotation.ty().ok())
+            .is_some_and(|ty| matches!(ty, AnyTsType::TsBooleanType(_)));
+        if is_boolean && formal.question_mark_token().is_none() {
+            continue;
+        }
+        let is_typed = annotation.is_some() || function.is_call_argument();
+        let mut steps = MAX_BOOLEAN_STEPS;
+        if !is_typed
+            || formal.initializer().is_some()
+            || text.contains('\\')
+            || !tests_name(&returned, text, &mut steps)
+            || assigns_name(function, text)
+        {
+            return None;
+        }
+        return Some((returned, binding));
+    }
+    None
+}
+
+/// Returns whether `expression` gives only `true` or `false`, as
+/// [`with_inferred_predicate`] lists such expressions. Returns false when the
+/// walk runs out of `remaining` steps.
+fn gives_boolean(expression: &AnyJsExpression, remaining: &mut usize) -> bool {
+    let Some(left) = remaining.checked_sub(1) else {
+        return false;
+    };
+    *remaining = left;
+    match expression {
+        AnyJsExpression::JsParenthesizedExpression(expression) => expression
+            .expression()
+            .is_ok_and(|expression| gives_boolean(&expression, remaining)),
+        AnyJsExpression::JsBinaryExpression(binary) => binary.operator().is_ok_and(|operator| {
+            matches!(
+                operator,
+                JsBinaryOperator::LessThan
+                    | JsBinaryOperator::GreaterThan
+                    | JsBinaryOperator::LessThanOrEqual
+                    | JsBinaryOperator::GreaterThanOrEqual
+                    | JsBinaryOperator::Equality
+                    | JsBinaryOperator::StrictEquality
+                    | JsBinaryOperator::Inequality
+                    | JsBinaryOperator::StrictInequality
+            )
+        }),
+        AnyJsExpression::JsInstanceofExpression(_) | AnyJsExpression::JsInExpression(_) => true,
+        AnyJsExpression::JsUnaryExpression(unary) => {
+            unary.operator().ok() == Some(JsUnaryOperator::LogicalNot)
+        }
+        AnyJsExpression::JsCallExpression(_) => !expression.is_optional_chain(),
+        AnyJsExpression::JsLogicalExpression(logical) => {
+            matches!(
+                logical.operator(),
+                Ok(JsLogicalOperator::LogicalAnd | JsLogicalOperator::LogicalOr)
+            ) && logical
+                .left()
+                .is_ok_and(|left| gives_boolean(&left, remaining))
+                && logical
+                    .right()
+                    .is_ok_and(|right| gives_boolean(&right, remaining))
+        }
+        _ => false,
+    }
+}
+
+/// Returns whether `expression`, a value that gives a boolean (see
+/// [`gives_boolean`]), tests the variable named `name` directly: as the
+/// operand of `typeof` or `!`, an operand of a comparison with `==`, `!=`,
+/// `===`, or `!==`, the left operand of `instanceof`, the right operand of
+/// `in`, or an operand of `&&` or `||`, each also through a property of the
+/// variable, or as an argument of a call. An identifier written with escapes
+/// counts as any name. Returns false when the walk runs out of `remaining`
+/// steps.
+fn tests_name(expression: &AnyJsExpression, name: &str, remaining: &mut usize) -> bool {
+    let Some(left) = remaining.checked_sub(1) else {
+        return false;
+    };
+    *remaining = left;
+    let tests = |operand: SyntaxResult<AnyJsExpression>, remaining: &mut usize| {
+        operand.is_ok_and(|operand| {
+            is_path_of(&operand, name, remaining) || tests_name(&operand, name, remaining)
+        })
+    };
+    match expression {
+        AnyJsExpression::JsParenthesizedExpression(expression) => expression
+            .expression()
+            .is_ok_and(|expression| tests_name(&expression, name, remaining)),
+        AnyJsExpression::JsBinaryExpression(binary) => {
+            matches!(
+                binary.operator(),
+                Ok(JsBinaryOperator::Equality
+                    | JsBinaryOperator::StrictEquality
+                    | JsBinaryOperator::Inequality
+                    | JsBinaryOperator::StrictInequality)
+            ) && (tests(binary.left(), remaining) || tests(binary.right(), remaining))
+        }
+        AnyJsExpression::JsUnaryExpression(unary) => {
+            matches!(
+                unary.operator(),
+                Ok(JsUnaryOperator::LogicalNot | JsUnaryOperator::Typeof)
+            ) && tests(unary.argument(), remaining)
+        }
+        AnyJsExpression::JsInstanceofExpression(instanceof) => tests(instanceof.left(), remaining),
+        AnyJsExpression::JsInExpression(in_expression) => tests(in_expression.object(), remaining),
+        AnyJsExpression::JsLogicalExpression(logical) => {
+            tests(logical.left(), remaining) || tests(logical.right(), remaining)
+        }
+        AnyJsExpression::JsCallExpression(call) => call.arguments().is_ok_and(|arguments| {
+            arguments.args().iter().any(|argument| {
+                matches!(&argument, Ok(AnyJsCallArgument::AnyJsExpression(argument))
+                    if is_path_of(argument, name, &mut 0))
+            })
+        }),
+        _ => false,
+    }
+}
+
+/// Returns whether `expression` reads the variable named `name`, or a
+/// property of it, through property accesses when `remaining` allows them,
+/// counting an identifier written with escapes as any name.
+fn is_path_of(expression: &AnyJsExpression, name: &str, remaining: &mut usize) -> bool {
+    let mut expression = expression.clone();
+    loop {
+        expression = match expression {
+            AnyJsExpression::JsParenthesizedExpression(parenthesized) => {
+                match parenthesized.expression() {
+                    Ok(inner) => inner,
+                    Err(_) => return false,
+                }
+            }
+            AnyJsExpression::JsIdentifierExpression(identifier) => {
+                return identifier
+                    .name()
+                    .and_then(|name| name.value_token())
+                    .is_ok_and(|token| {
+                        let text = token.text_trimmed();
+                        text == name || text.contains('\\')
+                    });
+            }
+            AnyJsExpression::JsStaticMemberExpression(member) if *remaining > 0 => {
+                *remaining -= 1;
+                match member.object() {
+                    Ok(object) => object,
+                    Err(_) => return false,
+                }
+            }
+            AnyJsExpression::JsComputedMemberExpression(member) if *remaining > 0 => {
+                *remaining -= 1;
+                match member.object() {
+                    Ok(object) => object,
+                    Err(_) => return false,
+                }
+            }
+            _ => return false,
+        };
+    }
+}
+
+/// Returns whether `expression` reads a variable named `name`, counting an
+/// identifier written with escapes as a read of any name. A read in a nested
+/// function counts too.
+fn mentions_name(expression: &AnyJsExpression, name: &str) -> bool {
+    expression
+        .syntax()
+        .preorder_of_kinds(JsReferenceIdentifier::KIND_SET)
+        .filter_map(|event| match event {
+            WalkEvent::Enter(node) => JsReferenceIdentifier::cast(node),
+            WalkEvent::Leave(_) => None,
+        })
+        .any(|reference| {
+            reference.value_token().is_ok_and(|token| {
+                let text = token.text_trimmed();
+                text == name || text.contains('\\')
+            })
+        })
+}
+
+/// Returns whether `function` assigns a variable named `name` anywhere,
+/// including in nested functions, counting an assignment target written
+/// with escapes as an assignment of any name.
+fn assigns_name(function: &AnyPredicateFunction, name: &str) -> bool {
+    function
+        .syntax()
+        .preorder_of_kinds(JsIdentifierAssignment::KIND_SET)
+        .filter_map(|event| match event {
+            WalkEvent::Enter(node) => JsIdentifierAssignment::cast(node),
+            WalkEvent::Leave(_) => None,
+        })
+        .any(|assignment| {
+            assignment.name_token().is_ok_and(|token| {
+                let text = token.text_trimmed();
+                text == name || text.contains('\\')
+            })
+        })
 }
 
 /// Checks for TypeScript's special `const` assertion target.

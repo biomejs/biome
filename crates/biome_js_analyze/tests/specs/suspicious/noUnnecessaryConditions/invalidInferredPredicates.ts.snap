@@ -1,0 +1,109 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidInferredPredicates.ts
+---
+# Input
+```ts
+// should generate diagnostics
+// A function without a return type annotation whose body returns a test of
+// a parameter has the type predicate that TypeScript infers from it, so a
+// call narrows its argument, and `filter` with such a callback keeps only the
+// elements that pass, as in TypeScript.
+
+const isPresent = (value: string | null) => value !== null;
+
+function narrowedArgument(value: string | null) {
+	if (isPresent(value)) {
+		return value ?? "";
+	}
+}
+
+function narrowedAfterReturn(value: string | null) {
+	if (!isPresent(value)) {
+		return "";
+	}
+	return value ?? "";
+}
+
+function filteredElements(values: (string | null)[]) {
+	return values.filter((value) => value !== null).map((value) => value ?? "");
+}
+
+```
+
+# Diagnostics
+```
+invalidInferredPredicates.ts:11:10 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary nullish coalescing.
+  
+     9 │ function narrowedArgument(value: string | null) {
+    10 │ 	if (isPresent(value)) {
+  > 11 │ 		return value ?? "";
+       │ 		       ^^^^^
+    12 │ 	}
+    13 │ }
+  
+  i Drop ?? and the fallback expression.
+  
+     9 │ function narrowedArgument(value: string | null) {
+    10 │ 	if (isPresent(value)) {
+  > 11 │ 		return value ?? "";
+       │ 		             ^^
+    12 │ 	}
+    13 │ }
+  
+  i The left-hand side is guaranteed to be non-nullish, so the fallback is unreachable.
+  
+
+```
+
+```
+invalidInferredPredicates.ts:19:9 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary nullish coalescing.
+  
+    17 │ 		return "";
+    18 │ 	}
+  > 19 │ 	return value ?? "";
+       │ 	       ^^^^^
+    20 │ }
+    21 │ 
+  
+  i Drop ?? and the fallback expression.
+  
+    17 │ 		return "";
+    18 │ 	}
+  > 19 │ 	return value ?? "";
+       │ 	             ^^
+    20 │ }
+    21 │ 
+  
+  i The left-hand side is guaranteed to be non-nullish, so the fallback is unreachable.
+  
+
+```
+
+```
+invalidInferredPredicates.ts:23:65 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary nullish coalescing.
+  
+    22 │ function filteredElements(values: (string | null)[]) {
+  > 23 │ 	return values.filter((value) => value !== null).map((value) => value ?? "");
+       │ 	                                                               ^^^^^
+    24 │ }
+    25 │ 
+  
+  i Drop ?? and the fallback expression.
+  
+    22 │ function filteredElements(values: (string | null)[]) {
+  > 23 │ 	return values.filter((value) => value !== null).map((value) => value ?? "");
+       │ 	                                                                     ^^
+    24 │ }
+    25 │ 
+  
+  i The left-hand side is guaranteed to be non-nullish, so the fallback is unreachable.
+  
+
+```

@@ -6,8 +6,8 @@ use biome_js_syntax::{
     TsTypeAliasDeclaration,
 };
 use biome_js_type_info::{
-    EnumTypes, Object, ObjectKind, RawTypeCollector, RawTypeId, ReturnType, TypeData, TypeMember,
-    TypeReference,
+    AnyPredicateFunction, EnumTypes, Object, ObjectKind, RawTypeCollector, RawTypeId, ReturnType,
+    TypeData, TypeMember, TypeReference, inferred_predicate_parameter,
 };
 use biome_rowan::{AstNode, Text};
 
@@ -406,6 +406,152 @@ fn infer_return_type_with_a_reachable_end() {
         &resolver,
         "infer_return_type_with_a_reachable_end",
     );
+}
+
+#[test]
+fn infer_predicate_marker_of_a_boolean_test_of_a_parameter() {
+    // The function returns a test of `v`, so its return type holds the
+    // marker that the module graph resolves to the target of the type
+    // predicate, or to nothing, with `boolean` as the plain return type.
+    const CODE: &str = r#"function f(a: number, v: unknown) {
+	return typeof v === "string";
+}"#;
+
+    let root = parse_ts(CODE);
+    let decl = get_function_declaration(&root);
+    let mut resolver = TestTypeCollector::default();
+    let ty = TypeData::from_js_function_declaration(&mut resolver, ScopeId::GLOBAL, &decl);
+    assert_type_data_snapshot(
+        CODE,
+        &ty,
+        &resolver,
+        "infer_predicate_marker_of_a_boolean_test_of_a_parameter",
+    );
+}
+
+/// Returns the name of the parameter that the first function in `code`
+/// would test with a type predicate inferred from its body.
+fn inferred_predicate_parameter_name(code: &str) -> Option<String> {
+    let root = parse_ts(code);
+    let function = root
+        .syntax()
+        .descendants()
+        .find_map(AnyPredicateFunction::cast)
+        .unwrap();
+    inferred_predicate_parameter(&function)
+        .map(|(_, binding)| binding.syntax().text_trimmed().to_string())
+}
+
+#[test]
+fn infer_predicate_parameters_only_for_functions_of_the_right_shape() {
+    for (code, expected) in [
+        (
+            "function f(v: unknown) { return typeof v === 'string'; }",
+            Some("v"),
+        ),
+        ("const f = (v: unknown) => v instanceof Date;", Some("v")),
+        ("const f = (v: unknown) => { return !v; };", Some("v")),
+        (
+            "const o = { m(v: unknown) { return 'a' in Object(v) || v === 1; } };",
+            Some("v"),
+        ),
+        ("class C { m(v: unknown) { return isFoo(v); } }", Some("v")),
+        ("xs.filter((x) => x !== undefined);", Some("x")),
+        ("xs.filter(x => x !== undefined);", Some("x")),
+        (
+            "xs.filter(function (x) { return x !== undefined; });",
+            Some("x"),
+        ),
+        // The first parameter that the value mentions decides.
+        (
+            "const f = (a: unknown, b: unknown) => typeof b === 'string';",
+            Some("b"),
+        ),
+        ("const f = (a: unknown, b: unknown) => a === b;", Some("a")),
+        // `this`, rest, destructured, and `boolean` parameters are skipped.
+        (
+            "function f(this: unknown, v: unknown) { return v === 1; }",
+            Some("v"),
+        ),
+        (
+            "const f = (...a: unknown[]) => typeof a[0] === 'string';",
+            None,
+        ),
+        (
+            "const f = ({ a }: { a: unknown }, b: unknown) => a === b;",
+            Some("b"),
+        ),
+        (
+            "const f = (a: boolean, b: unknown) => a === true && b === 1;",
+            Some("b"),
+        ),
+        // An operand of `&&` that may not be a boolean.
+        ("const f = (a: boolean, b: unknown) => a && b === 1;", None),
+        ("const f = (a?: boolean) => a === true;", Some("a")),
+        // A return type annotation, `async`, and generators.
+        (
+            "const f = (v: unknown): boolean => typeof v === 'string';",
+            None,
+        ),
+        (
+            "const f = async (v: unknown) => typeof v === 'string';",
+            None,
+        ),
+        (
+            "function* f(v: unknown) { return typeof v === 'string'; }",
+            None,
+        ),
+        // Values that may not be booleans.
+        ("const f = (v: unknown) => v;", None),
+        ("const f = (v: string) => v && v.length > 0;", None),
+        ("const f = (v: unknown) => v ?? false;", None),
+        (
+            "const f = (o: { is?: (v: unknown) => boolean }, v: unknown) => o.is?.(v);",
+            None,
+        ),
+        // Bodies other than a single `return` with a value.
+        (
+            "function f(v: unknown) { if (v) return true; return false; }",
+            None,
+        ),
+        (
+            "function f(v: unknown) { const t = typeof v; return t === 'string'; }",
+            None,
+        ),
+        ("function f(v: unknown) { return; }", None),
+        // Parameters that Biome can't infer a type predicate about.
+        ("const f = (v: string | null = null) => v !== null;", None),
+        ("function f(v) { return typeof v === 'string'; }", None),
+        ("const f = (v) => typeof v === 'string';", None),
+        (
+            "function f(v: string | null) { v = null; return v !== null; }",
+            None,
+        ),
+        (
+            "const f = (v: unknown) => [1].some(() => { v = 1; return true; }) && v === 1;",
+            None,
+        ),
+        ("const f = (v: unknown) => true;", None),
+        // Values that mention the parameter without testing it directly.
+        ("xs.filter((eb) => eb('a', '=', 1));", None),
+        ("const f = (v: { done(): boolean }) => v.done();", None),
+        ("const f = (v: { a: unknown }) => isFoo(v.a);", None),
+        ("const f = (v: number) => v > 0;", None),
+        (
+            "const f = (s: { k: 'a' } | { k: 'b' }) => s.k === 'a';",
+            Some("s"),
+        ),
+        (
+            "const f = (v: unknown) => !(typeof v === 'string');",
+            Some("v"),
+        ),
+    ] {
+        assert_eq!(
+            inferred_predicate_parameter_name(code).as_deref(),
+            expected,
+            "{code}"
+        );
+    }
 }
 
 #[test]

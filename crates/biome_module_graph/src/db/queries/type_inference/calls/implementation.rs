@@ -125,13 +125,17 @@ fn infer_function_call_type<'db>(
             infer_function_call_type(db, target, args, receiver)
         }
         InferredTypeData::Interface(interface) => {
-            select_call_signature(db, interface.members(db), args)
+            select_call_signature(db, interface.members(db), args, receiver)
                 .and_then(|function| infer_function_return_type(db, function, args, receiver))
         }
-        InferredTypeData::Class(class) => select_call_signature(db, class.members(db), args)
-            .and_then(|function| infer_function_return_type(db, function, args, receiver)),
-        InferredTypeData::Object(object) => select_call_signature(db, object.members(db), args)
-            .and_then(|function| infer_function_return_type(db, function, args, receiver)),
+        InferredTypeData::Class(class) => {
+            select_call_signature(db, class.members(db), args, receiver)
+                .and_then(|function| infer_function_return_type(db, function, args, receiver))
+        }
+        InferredTypeData::Object(object) => {
+            select_call_signature(db, object.members(db), args, receiver)
+                .and_then(|function| infer_function_return_type(db, function, args, receiver))
+        }
         InferredTypeData::Union(union) => collected_type_result(
             db,
             union
@@ -156,10 +160,20 @@ fn infer_function_call_type<'db>(
     }
 }
 
+/// Returns the first of the call signatures among `members` that may accept
+/// `args`, or the only one.
+///
+/// A signature doesn't accept the arguments when they provably don't fit its
+/// parameters (see [`signature_may_accept_arguments`]), or when a callback
+/// argument's type predicate binds one of its type parameters to a type that
+/// provably violates the type parameter's constraint, read with the type
+/// arguments of the object that `receiver` gives (see
+/// [`violates_predicate_constraint`]).
 fn select_call_signature<'db>(
     db: &'db dyn ModuleDb,
     members: &[InferredTypeMember<'db>],
     args: &[ResolvedCallArgument<'db>],
+    receiver: &mut CallReceiver<'db, '_>,
 ) -> Option<InferredFunction<'db>> {
     let mut signatures = members
         .iter()
@@ -173,7 +187,40 @@ fn select_call_signature<'db>(
     [first, second]
         .into_iter()
         .chain(signatures)
-        .find(|function| signature_may_accept_arguments(db, *function, args))
+        .find(|function| {
+            signature_may_accept_arguments(db, *function, args)
+                && !violates_predicate_constraint(db, *function, args, receiver)
+        })
+}
+
+/// Returns whether a callback argument of a call to `function` binds a type
+/// parameter of `function` through its type predicate (see
+/// [`callback_predicate_binding`]) to a type that provably violates the type
+/// parameter's constraint, as `string` violates `S extends number` in
+/// `nums.filter(isString)` with `nums: number[]`.
+///
+/// TypeScript then infers the constraint for the type parameter, and the
+/// callback's type predicate doesn't fit the parameter's, so the signature
+/// doesn't accept the call: `nums.filter(isString)` takes the signature of
+/// `filter` that returns `number[]`.
+fn violates_predicate_constraint<'db>(
+    db: &'db dyn ModuleDb,
+    function: InferredFunction<'db>,
+    args: &[ResolvedCallArgument<'db>],
+    receiver: &mut CallReceiver<'db, '_>,
+) -> bool {
+    function
+        .parameters(db)
+        .iter()
+        .filter(|parameter| !parameter.is_this())
+        .zip(args)
+        .any(|(parameter, argument)| {
+            callback_predicate_binding(db, function, parameter.ty(), argument.ty()).is_some_and(
+                |(generic, replacement)| {
+                    satisfies_constraint(db, generic, replacement, receiver, &[]) == Some(false)
+                },
+            )
+        })
 }
 
 /// Expands tuple spreads and maps a source argument index to the expanded list.
@@ -1516,7 +1563,11 @@ impl<'db> ArgumentTypeCompatibility<'db> {
     ///
     /// Unsupported relations and work-budget exhaustion remain viable.
     /// Callable types must also agree on whether they return a Promise, unless
-    /// the parameter discards its return value by declaring `void`.
+    /// the parameter discards its return value by declaring `void`. A
+    /// parameter whose signature returns a type predicate accepts only a
+    /// function that returns one too, as in TypeScript, so a callback that
+    /// returns a `boolean` selects the signature of `filter` that returns
+    /// `T[]`, not the one that returns `S[]`.
     fn is_satisfied(self, db: &'db dyn ModuleDb) -> bool {
         if !self.may_match(db) {
             return false;
@@ -1527,6 +1578,11 @@ impl<'db> ArgumentTypeCompatibility<'db> {
             resolve_callable_function(db, CallableFunctionInput::new(db, self.argument_ty)),
         ) {
             (Some(parameter_function), Some(argument_function)) => {
+                if matches!(parameter_function.return_type(db), ReturnType::Predicate(_))
+                    && !matches!(argument_function.return_type(db), ReturnType::Predicate(_))
+                {
+                    return false;
+                }
                 returns_void(db, parameter_function)
                     || parameter_function.returns_promise(db)
                         == argument_function.returns_promise(db)

@@ -1,0 +1,18 @@
+// should not generate diagnostics
+// TypeScript infers no type predicate when the test can fail for a value of
+// the type where it holds, as a truthiness test fails for `""`, or a length
+// test for any string, so these checks can fail.
+
+const isFilled = (value: string | null) => !!value;
+
+function truthyArgument(value: string | null) {
+	if (!isFilled(value)) {
+		return value ?? "";
+	}
+}
+
+function booleanCallback(values: (string | null)[]) {
+	return values
+		.filter((value) => value !== null && value.length > 0)
+		.map((value) => value ?? "");
+}
