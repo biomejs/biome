@@ -961,3 +961,16 @@ fn lookups_decide_whether_a_switch_is_exhaustive_once() {
     assert_eq!(read("afterZ", "z"), InferredTypeData::String);
     assert_eq!(decisions(&db.take_salsa_events()), 1);
 }
+
+// TypeScript 7.0.2 (`tsc --strict`) gives `string` at `group`: a group with
+// `default` sees the cases outside the group fail, here `x === null`. `x` can
+// still be `null` there, when `case c:` matches and the group runs.
+#[test]
+fn switch_true_groups_with_default_see_the_other_cases_fail() {
+    assert_reads(
+        r#"
+        function f(x: string | null, c: boolean) { switch (true) { case c: default: /*group*/x; break; case x === null: } }
+        "#,
+        &[("group", "x", &["string"])],
+    );
+}

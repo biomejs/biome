@@ -506,8 +506,9 @@ keeps them:
   gets no graph, the test becomes `FlowGuard::Keep`, the write assigns no
   value, or the variable isn't eligible. Inference does the same by keeping
   the declared type. Each known read that is narrower than TypeScript's is a
-  limit in `NARROWING.md` that says so; most are in code that TypeScript
-  types as impossible or finds unreachable.
+  deliberate choice in `NARROWING.md`, listed with the differences from
+  TypeScript; most are in code that TypeScript types as impossible, finds
+  unreachable, or reports as an error.
 - **Collection resolves no type.** It reads the syntax, the semantic model,
   and the module's own raw tables, through the `raw_may_*` functions of
   `biome_js_type_info`. Anything that depends on another module or on a
@@ -1584,8 +1585,9 @@ When a guard needs a type that depends on resolution:
 
 - [ ] `NARROWING.md` describes the change: what narrows, a deliberate choice
       with its reason, or a limit.
-- [ ] No read is narrower than TypeScript's. A known exception is a limit in
-      `NARROWING.md` that says so.
+- [ ] No read is narrower than TypeScript's. A known exception is a
+      deliberate choice in `NARROWING.md`, listed with the differences from
+      TypeScript.
 - [ ] Collection reads only syntax, the semantic model, and the module's own
       raw tables.
 - [ ] Every type that the solve uses is in its key, resolved by the reading

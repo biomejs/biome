@@ -1221,3 +1221,28 @@ fn writes_narrow_receivers() {
         ],
     );
 }
+
+// TypeScript 7.0.2 (`tsc --strict`) gives each read the type in its comment.
+// It narrows `o.v` at a write through `o!.v` and ignores a write through
+// `(o as O).v`. Biome maps neither target to the path `o.v`, so `o.v` keeps
+// its declared type everywhere in the function, also before the write.
+#[test]
+fn writes_through_assertions_stop_narrowing_the_path() {
+    use InferredTypeData::{Null, String};
+    const SOURCE: &str = r#"
+        type O = { v: string | null };
+        function nonNull(o: O) { if (o.v) { o!.v = null; /*nonNull*/o.v; } } // null
+        function asserted(o: O) { if (o.v) { (o as O).v = null; /*asserted*/o.v; } } // string
+        function before(o: O) { if (o.v) { /*before*/o.v; } (o as O).v = "b"; } // string
+        function beforeNonNull(o: O) { if (o.v) { /*beforeNonNull*/o.v; } o!.v = null; } // string
+    "#;
+    assert_reads(
+        SOURCE,
+        &[
+            ("nonNull", "o.v", &[String, Null]),
+            ("asserted", "o.v", &[String, Null]),
+            ("before", "o.v", &[String, Null]),
+            ("beforeNonNull", "o.v", &[String, Null]),
+        ],
+    );
+}

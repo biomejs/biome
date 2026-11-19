@@ -952,3 +952,37 @@ fn inline_functions_that_biome_narrows_less() {
         ],
     );
 }
+
+// TypeScript 7.0.2 (`tsc --strict`) gives `string` at `v`, by the check in
+// `g`. Biome keeps the declared type of a `var` that the top level of a
+// module declares without an initializer, also in a function that checks it.
+#[test]
+fn functions_read_a_top_level_var_without_an_initializer() {
+    assert_reads(
+        r#"
+        var v: string | null;
+        function g() { if (v !== null) /*v*/v; }
+        export {};
+        "#,
+        &[
+            // TypeScript: `string`.
+            ("v", "v", &["null", "string"]),
+        ],
+    );
+}
+
+// TypeScript 7.0.2 (`tsc --strict`) gives `number | null` at `n1` and reports
+// TS2454 there, because nothing but `n++` assigns `n`, which reads `n` before
+// any assignment. Biome gives `number`.
+#[test]
+fn closures_read_a_let_that_only_increments_assign() {
+    assert_reads(
+        r#"
+        function f() { let n: number | null; const g = () => { if (n !== null) /*n1*/n; }; n++; }
+        "#,
+        &[
+            // TypeScript: `number | null`.
+            ("n1", "n", &["number"]),
+        ],
+    );
+}

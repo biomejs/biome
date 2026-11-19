@@ -605,6 +605,43 @@ declare const c: C;
     );
 }
 
+// TypeScript 7.0.2 (`tsc --strict`) gives `string` at `variable` and
+// `property`: the variable and the namespace that `declare global` declares
+// are globals in every module. Biome merges only interfaces from a
+// `declare global` block, so it doesn't see `__DEV__` or `App`.
+#[test]
+fn declare_global_variables_and_namespaces_arent_seen() {
+    assert_file_reads(
+        &[
+            (
+                "/src/globals.ts",
+                r#"
+export {};
+declare global {
+  var __DEV__: string | null;
+  namespace App { interface Config { v: string | null } }
+}
+"#,
+            ),
+            (
+                "/src/use.ts",
+                r#"
+import "./globals";
+function variable() { if (__DEV__) /*variable*/__DEV__; }
+function property(config: App.Config) { if (config.v) /*property*/config.v; }
+"#,
+            ),
+        ],
+        "/src/use.ts",
+        &[
+            // TypeScript: `string`.
+            ("variable", "__DEV__", &["unknown"]),
+            // TypeScript: `string`.
+            ("property", "config.v", &["unknown"]),
+        ],
+    );
+}
+
 // #region SALSA EXECUTION
 
 const SALSA_SHAPES: &str = "export interface X { x: 1 }\n";
