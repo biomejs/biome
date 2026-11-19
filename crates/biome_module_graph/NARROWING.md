@@ -142,6 +142,7 @@ Biome writes `{ b: 1 } & Record<"a", unknown>` as `{ b: 1; a: unknown }`, and
 | An assignment | `x: string \| number; [x] = ["a"]; x` | `string` |
 | A declarator with a type annotation | `const { a }: { a: string \| number } = { a: 1 }; a` | `number` |
 | A `let` without a type annotation | `let x = null; if (c) x = 1; x` | `null \| number` |
+| A `let` without an initializer, before a write | `let x; x` | `undefined` |
 | An array without a type annotation | `let a = []; a.push(1); a` | `number[]` |
 | An assertion function | `assertString(v: unknown): asserts v is string; x: string \| number; (assertString(x), x)` | `string` at the last `x` |
 | A function that returns `never` | `fail(): never; x: string \| null; if (x === null) fail(); x` | `string` |
@@ -324,8 +325,6 @@ their writes, as in TypeScript. The code below uses
 | --- | --- | --- | --- |
 | `let x = null; x = store.load(); x` | `number` | Unknown | A rule can miss a report on `x`. |
 | `let x = null; x = 0; x++; x` | `number` | Unknown | A rule can miss a report on `x`. |
-| `let x; x = null; x` | `null` | Unknown | A rule can miss a report on `x`. |
-| `let x; x` | `undefined` | Unknown | A rule can miss a report on `x`. |
 | `let a = []; a.push(1); if (c) a = null; a` | `any[]`, with an error | Unknown | A rule can miss a report on `a`. |
 | `const a = []; a.push(null); a` | `null[]` | `unknown[]` | A rule can miss a report on the elements of `a`. |
 | `let a = []; a.push(1); a.push(store.load()); a` | `number[]` | `unknown[]` | A rule can miss a report on the elements of `a`. |

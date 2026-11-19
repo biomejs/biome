@@ -1891,19 +1891,18 @@ impl RootCollector<'_> {
         });
         // A variable whose type evolves with its writes can have a type other
         // than its declared type only after a write other than its
-        // initializer, or, for a `var`, on a path that skips its declarator.
-        // Such a variable without either keeps its declared type at every
-        // read, without a solve.
+        // initializer, for a `var`, on a path that skips its declarator, or
+        // without an initializer, where it is `undefined` until a write.
+        // Such a variable without any of these keeps its declared type at
+        // every read, without a solve.
         //
         // A write whose value Biome may type as TypeScript does keeps the
-        // variable evolving. So does any other write of a variable initialized
-        // with `null` or `undefined`, because its declared type can lack the
-        // type of the write, which then gives the reads that it reaches
-        // Unknown, and of an array that a `var` declares, whose declared type
-        // lacks the `undefined` of a path that doesn't pass the declarator.
-        // A variable without an initializer already has the declared type
-        // Unknown, and another array has `unknown[]`, so such writes need no
-        // solve for them.
+        // variable evolving. So does any other write of a variable, because
+        // its declared type can lack the type of the write, which then gives
+        // the reads that it reaches Unknown, and of an array that a `var`
+        // declares, whose declared type lacks the `undefined` of a path that
+        // doesn't pass the declarator. Another array has the declared type
+        // `unknown[]`, so such writes need no solve for it.
         let mut written_after: FxHashSet<FlowSubjectId> = FxHashSet::default();
         let mut typed: FxHashSet<FlowSubjectId> = FxHashSet::default();
         let mut initialized: FxHashSet<FlowSubjectId> = FxHashSet::default();
@@ -1942,7 +1941,8 @@ impl RootCollector<'_> {
             let evolves = subject.is_some_and(|subject| match kind {
                 FlowEvolving::Variable => {
                     typed.contains(&subject)
-                        || (initialized.contains(&subject) && written_after.contains(&subject))
+                        || !initialized.contains(&subject)
+                        || written_after.contains(&subject)
                         || read_before(subject)
                 }
                 FlowEvolving::Array => {
@@ -1984,11 +1984,11 @@ impl RootCollector<'_> {
         // its writes from the flow. Only a read that a write after the
         // initializer reaches has a type other than the one that the
         // declaration gives, as `null` in `let x = null`, so only those writes
-        // mention the variable, and the other reads get no candidates.
-        // TypeScript also gives `undefined` to a read before any write. Biome
-        // keeps the declared type for such a read of a `let x`. The root's
-        // start mentions a `var` declared with an initializer, so a read
-        // before its declarator gets `undefined`.
+        // mention the variable, and the other reads get no candidates. The
+        // root's start mentions a `var` declared with an initializer, so a
+        // read before its declarator gets `undefined`, and a variable
+        // declared without one, so a read that no write reaches gets
+        // `undefined` instead of the declared type, Unknown.
         for (node, write) in (0..).zip(&nodes).filter_map(|(id, node)| match node {
             FlowNode::Write { write, .. } => Some((id, *write)),
             FlowNode::Start | FlowNode::Join(_) | FlowNode::Condition { .. } => None,
@@ -2006,6 +2006,11 @@ impl RootCollector<'_> {
         }
         for subject in &hoisted {
             mentions.push((0, *subject));
+        }
+        for (subject, kind) in &evolving {
+            if *kind == FlowEvolving::Variable && !initialized.contains(subject) {
+                mentions.push((0, *subject));
+            }
         }
         // A subject that may be read before it is assigned, such as a `var`,
         // can be assignment-only too. A read that only writes reach has the
@@ -2822,9 +2827,13 @@ impl RootCollector<'_> {
         if declared.range() != range {
             return None;
         }
+        // A variable that nothing writes keeps the type of its initializer,
+        // but without one, it is `undefined`, which its declared type,
+        // Unknown, doesn't give.
         let evolving = match evolving_declaration(&declared, self.model) {
             FlowEvolving::Variable
                 if declared.all_writes().next().is_none()
+                    && has_initializer(&declared)
                     && !may_read_before_declarator(&declared) =>
             {
                 FlowEvolving::None
@@ -3890,6 +3899,16 @@ fn evolving_declaration(binding: &Binding, model: &SemanticModel) -> FlowEvolvin
     }
 }
 
+/// Returns whether `binding` is declared by a variable declarator with an
+/// initializer.
+fn has_initializer(binding: &Binding) -> bool {
+    matches!(
+        binding.tree().declaration(),
+        Some(AnyJsBindingDeclaration::JsVariableDeclarator(declarator))
+            if declarator.initializer().is_some()
+    )
+}
+
 /// Returns whether a read of the `var` that `binding` declares can come
 /// before its declarator runs, where the variable is still `undefined`: a
 /// read starts before the declarator, or the declarator's statement is nested
@@ -4480,14 +4499,15 @@ mod tests {
         let info = module(SOURCE);
         // Only a read that a write other than the initializer reaches has a
         // type other than the declared type, apart from a `var` read before
-        // its declarator. A write without a value, as `w++`, counts, because
-        // it makes the read Unknown. The declared type stays for a read in a
-        // closure of a variable without an initializer, which is Unknown, for
-        // a variable without such a write, and for an array that an `async`
-        // function called where it is defined adds to. A function that runs
-        // inline adds in the flow.
+        // its declarator and a variable without an initializer, which is
+        // `undefined` before a write. A write without a value, as `w++`,
+        // counts, because it makes the read Unknown. The declared type stays
+        // for a read in a closure of a variable without an initializer, which
+        // is Unknown, for a variable without such a write, and for an array
+        // that an `async` function called where it is defined adds to. A
+        // function that runs inline adds in the flow.
         for (marker, expression, evolving) in [
-            ("before", "x", None),
+            ("before", "x", Some(FlowEvolving::Variable)),
             ("after", "x", Some(FlowEvolving::Variable)),
             ("closure", "x", None),
             ("called", "u", Some(FlowEvolving::Variable)),

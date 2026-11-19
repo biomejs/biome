@@ -119,7 +119,8 @@ fn assert_reads_with(source: &str, modules: &[(&str, &str)], reads: &[(&str, &st
 // A `let` or a `var` without a type annotation, declared without an
 // initializer or with `null` or `undefined`, starts at `undefined` and takes
 // the type of each value assigned to it, its literal types widened, in the
-// function that declares it.
+// function that declares it. A call of a nested function that writes it
+// doesn't change its type.
 #[test]
 fn evolving_variables_take_the_types_of_their_writes() {
     assert_reads(
@@ -160,6 +161,13 @@ fn evolving_variables_take_the_types_of_their_writes() {
         function g3() { let x; x = 1; if (x === 2) /*g3*/x; }
         function u1() { let x = null; x = undefined; /*u1*/x; }
         function u2() { let x = undefined; if (c) x = null; /*u2*/x; }
+        function e3() { let x; /*e3*/x; }
+        function e3b() { let x; /*e3b*/x; x = 1; }
+        function v10() { let x; x = null; /*v10*/x; }
+        function v10b() { let x; x = undefined; /*v10b*/x; }
+        function v10c() { let x = null; x = null; /*v10c*/x; }
+        function v10d() { var x; if (c) x = null; /*v10d*/x; }
+        function v16() { let x; function g() { x = 1; } g(); /*v16*/x; }
         "#,
         &[
             ("e1", "x", &["number"]),
@@ -203,6 +211,13 @@ fn evolving_variables_take_the_types_of_their_writes() {
             ("g3", "x", &["number: 2"]),
             ("u1", "x", &["undefined"]),
             ("u2", "x", &["null", "undefined"]),
+            ("e3", "x", &["undefined"]),
+            ("e3b", "x", &["undefined"]),
+            ("v10", "x", &["null"]),
+            ("v10b", "x", &["undefined"]),
+            ("v10c", "x", &["null"]),
+            ("v10d", "x", &["null", "undefined"]),
+            ("v16", "x", &["undefined"]),
         ],
     );
 }
@@ -279,10 +294,9 @@ fn evolving_arrays_take_the_types_of_their_elements() {
 
 // TypeScript 7.0.2 (`tsc --strict`) gives each read below a narrower type
 // than Biome, in the comment after it. Biome keeps the declared type where
-// only the initializer reaches the read, where nothing but `null`, or nothing
-// but `undefined`, is assigned, in a closure or a nested function of a
-// variable without an initializer, where TypeScript reports an implicit `any`
-// (TS7005), and for an array to which a
+// nothing but `null`, or nothing but `undefined`, is added to an array, in a
+// closure or a nested function of a variable without an initializer, where
+// TypeScript reports an implicit `any` (TS7005), and for an array to which a
 // write that reaches the read adds a value that Biome may type differently
 // from TypeScript, or to which an `async` function called where it is defined
 // adds. A value that reads such a variable has Biome's type for it, which is
@@ -291,10 +305,7 @@ fn evolving_arrays_take_the_types_of_their_elements() {
 fn evolving_declarations_keep_their_declared_type_where_biome_cant_follow_them() {
     assert_reads(
         r#"
-        function e3() { let x; /*e3*/x; } // undefined
         function e17() { let x; const g = () => /*e17*/x; x = 1; } // any
-        function v10() { let x; x = null; /*v10*/x; } // null
-        function v16() { let x; function g() { x = 1; } g(); /*v16*/x; } // undefined
         function v26() { let x; x = 1; const y = x; /*v26*/y; } // number
         function a1() { const a = []; a.push(...[1, 2]); /*a1*/a; } // number[]
         function a3() { const a = []; a[n] = 1; /*a3*/a; } // number[]
@@ -305,10 +316,7 @@ fn evolving_declarations_keep_their_declared_type_where_biome_cant_follow_them()
         function r4() { let e; e = 1; let w: number | string = f(); w = e; /*r4*/w; } // number
         "#,
         &[
-            ("e3", "x", &["Unknown"]),
             ("e17", "x", &["Unknown"]),
-            ("v10", "x", &["Unknown"]),
-            ("v16", "x", &["Unknown"]),
             ("v26", "y", &["Unknown"]),
             ("a1", "a", &["instanceof Array<unknown>"]),
             ("a3", "a", &["instanceof Array<unknown>"]),
