@@ -3287,6 +3287,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     ));
     result.push((
         "nursery",
+        "useSetMethods",
+        TypeId::of::<biome_rule_options::use_set_methods::UseSetMethodsOptions>(),
+    ));
+    result.push((
+        "nursery",
         "useSetSize",
         TypeId::of::<biome_rule_options::use_set_size::UseSetSizeOptions>(),
     ));

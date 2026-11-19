@@ -9,6 +9,7 @@ use std::hash::{Hash, Hasher};
 use std::iter;
 
 pub mod batch;
+pub mod builtin_collection;
 pub mod function_return;
 pub mod indexed_collection;
 pub mod rename;
