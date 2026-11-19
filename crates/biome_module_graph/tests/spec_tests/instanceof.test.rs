@@ -262,6 +262,55 @@ fn instanceof_narrows_by_declarations() {
     );
 }
 
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
+// A type derived from `ReadonlyArray`, such as `ReadonlyArray<string>` or an
+// interface that extends it, counts as derived from `Array`. An `else` branch
+// that no value reaches is `never` in TypeScript, which Biome reads as
+// Unknown.
+#[test]
+fn instanceof_counts_readonly_arrays_as_arrays() {
+    assert_reads(
+        r#"
+        class MyArr<T> extends Array<T> {}
+        interface RO2 extends ReadonlyArray<number> { extra: 1 }
+        declare const RoCtor: new () => RO2;
+        function both(x: ReadonlyArray<string> | string[]) { if (x instanceof Array) /*both*/x; else /*bothElse*/x; }
+        function primitive(x: ReadonlyArray<string> | string) { if (x instanceof Array) /*primitive*/x; else /*primitiveElse*/x; }
+        function subclass(x: ReadonlyArray<string> | MyArr<number>) { if (x instanceof Array) /*subclass*/x; else /*subclassElse*/x; }
+        function extended(x: RO2 | string) { if (x instanceof Array) /*extended*/x; else /*extendedElse*/x; }
+        function instance(x: string[] | string) { if (x instanceof RoCtor) /*instance*/x; else /*instanceElse*/x; }
+        "#,
+        &[
+            (
+                "both",
+                "x",
+                &[
+                    "instanceof Array<string>",
+                    "instanceof ReadonlyArray<string>",
+                ],
+            ),
+            ("bothElse", "x", &["unknown"]),
+            ("primitive", "x", &["instanceof ReadonlyArray<string>"]),
+            ("primitiveElse", "x", &["string"]),
+            (
+                "subclass",
+                "x",
+                &[
+                    "instanceof MyArr<number>",
+                    "instanceof ReadonlyArray<string>",
+                ],
+            ),
+            ("subclassElse", "x", &["unknown"]),
+            ("extended", "x", &["RO2"]),
+            ("extendedElse", "x", &["string"]),
+            // `RO2`, the instance type of `RoCtor`, is derived from the
+            // member `string[]`, so it replaces that member.
+            ("instance", "x", &["RO2"]),
+            ("instanceElse", "x", &["instanceof Array<string>", "string"]),
+        ],
+    );
+}
+
 /// How [`variant_names`] names `() => void`.
 const VOID_FUNCTION: &str = "sync Function { accepts: { params: [] type_args: [] } returns: void }";
 

@@ -5,10 +5,10 @@ use super::{
 };
 use crate::db::queries::{
     BindingTypeInput, BindingTypeWithImportBudgetInput, LocalTypeInput,
-    LocalTypeWithImportBudgetInput, SymbolFromModuleInfo, infer_binding_type,
+    LocalTypeWithImportBudgetInput, SymbolFromModuleInfo, contribution_type, infer_binding_type,
     infer_binding_type_with_import_budget, infer_local_type, infer_local_type_with_import_budget,
-    infer_module_types_bottom_up_for_import_depth, inference_module_sccs, namespace_export_names,
-    resolved_export_origin,
+    infer_module_types_bottom_up_for_import_depth, inference_module_sccs, module_new_exports,
+    namespace_export_names, resolved_export_origin,
 };
 use crate::module_graph::{ModuleInfo, ModuleInfoKind};
 use crate::{
@@ -16,7 +16,7 @@ use crate::{
     resolve_module_import,
 };
 use biome_js_type_info::{
-    GlobalTypeId, ImportSymbol, Path, ResolvedTypeId, TypeImportQualifier, TypeReference,
+    GlobalTypeId, ImportSymbol, Path, ResolvedTypeId, TypeId, TypeImportQualifier, TypeReference,
     TypeResolverLevel,
     interned_types::{
         InternedNamespace as InferredNamespace, LocalTypeHandle, LocalTypeId, ModuleKey,
@@ -716,7 +716,7 @@ impl<'db> ResolutionCtx<'db, '_> {
         let symbol = SymbolFromModuleInfo::new(self.db, name.to_string(), module);
         let (module, name) = match resolved_export_origin(self.db, symbol) {
             ExportOriginResult::Found { module, name } => (module, name),
-            ExportOriginResult::Missing => return ExportResolution::Missing,
+            ExportOriginResult::Missing => return self.resolve_new_export(module, name),
             ExportOriginResult::Ambiguous => return ExportResolution::Ambiguous,
             ExportOriginResult::Indeterminate => return ExportResolution::Indeterminate,
         };
@@ -768,6 +768,28 @@ impl<'db> ResolutionCtx<'db, '_> {
                 own_export: own_export.clone(),
             },
             ty,
+        })
+    }
+
+    /// Resolves an export that only a module augmentation adds to `module`
+    /// to a handle to its declaration in the augmenting module. For example,
+    /// `declare module "./a" { interface Fresh {} }` adds `Fresh` when `./a`
+    /// exports no `Fresh`. Returns [`ExportResolution::Missing`] when no
+    /// augmentation adds the export.
+    fn resolve_new_export(&self, module: ModuleInfo, name: &str) -> ExportResolution<'db> {
+        let new_exports = module_new_exports(self.db, module);
+        let Ok(position) =
+            new_exports.binary_search_by(|(export_name, _)| export_name.text().cmp(name))
+        else {
+            return ExportResolution::Missing;
+        };
+        let declaration = new_exports[position].1;
+        ExportResolution::Resolved(ResolvedExport {
+            identity: ExportIdentity {
+                module: declaration.0,
+                own_export: JsOwnExport::Type(TypeId::new(declaration.1.index())),
+            },
+            ty: contribution_type(self.db, declaration),
         })
     }
 
@@ -955,7 +977,10 @@ impl<'db> ResolutionCtx<'db, '_> {
             }
         }
 
-        resolved.map_or(ExportResolution::Missing, ExportResolution::Resolved)
+        match resolved {
+            Some(resolved) => ExportResolution::Resolved(resolved),
+            None => self.resolve_new_export(module, name),
+        }
     }
 
     fn resolve_export_name_in_module_from_tables(
@@ -1036,7 +1061,7 @@ impl<'db> ResolutionCtx<'db, '_> {
     }
 }
 
-fn module_for_import(
+pub(in crate::db) fn module_for_import(
     db: &dyn ModuleDb,
     owner: ModuleInfo,
     import: &JsImport,

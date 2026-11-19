@@ -67,6 +67,12 @@ impl JsModuleInfo {
                 | JsExport::OwnType(JsOwnExport::Namespace(reexport)) => Some(&reexport.import),
                 JsExport::Own(_) | JsExport::OwnType(_) => None,
             }))
+            .chain(
+                self.contributions
+                    .augmentations
+                    .iter()
+                    .map(|augmentation| &augmentation.import),
+            )
     }
 
     pub fn diagnostics(&self) -> &[ModuleDiagnostic] {
@@ -183,6 +189,40 @@ impl JsModuleInfo {
     }
 }
 
+/// Orders the call signatures of a method that several merged declarations
+/// declare in the order that TypeScript tries them for a call to the method.
+///
+/// `declarations` gives each declaration's signatures in declaration order,
+/// each with whether it is specialized: whether one of its parameters has a
+/// literal type, such as `"a"` or `1`. Each declaration's signatures keep
+/// their order, and go before those of the declarations before it, so a
+/// later declaration's overloads are tried first. Specialized signatures go
+/// before all the others, in declaration order.
+///
+/// For example, with `interface O { f(x: string): 1 }` followed by
+/// `interface O { f(x: "a"): 2; f(x: number): 3 }`, the order is
+/// `f(x: "a")`, `f(x: number)`, `f(x: string)`.
+pub(crate) fn order_merged_overloads<T>(
+    declarations: impl IntoIterator<Item = Vec<(T, bool)>>,
+) -> Vec<T> {
+    let mut ordered = Vec::new();
+    // Specialized signatures occupy the first `cutoff` positions.
+    let mut cutoff = 0;
+    for signatures in declarations {
+        let start = cutoff;
+        for (offset, (signature, is_specialized)) in signatures.into_iter().enumerate() {
+            let position = if is_specialized {
+                cutoff += 1;
+                cutoff - 1
+            } else {
+                start + offset
+            };
+            ordered.insert(position.min(ordered.len()), signature);
+        }
+    }
+    ordered
+}
+
 pub(crate) fn is_named_type_declaration(declaration_kind: JsDeclarationKind) -> bool {
     matches!(
         declaration_kind,
@@ -275,6 +315,60 @@ pub struct JsModuleInfoInner {
     /// which may contain multiple space-separated class names.
     /// Only static string literals are collected; dynamic values are excluded.
     pub referenced_classes: Vec<CssClassReference>,
+
+    /// The interfaces that this module merges into declarations that it
+    /// doesn't own. Empty when type inference is disabled.
+    pub(crate) contributions: ModuleContributions,
+}
+
+/// The interfaces that a module merges, as TypeScript merges them, into
+/// declarations of other modules and into the globals.
+///
+/// In this example, the first interface contributes `extra` to the `X` that
+/// `./shapes` exports, and the second contributes `format` to the global
+/// `String`:
+///
+/// ```ts
+/// declare module "./shapes" {
+///     interface X { extra: 1 }
+/// }
+/// declare global {
+///     interface String { format(): string }
+/// }
+/// ```
+///
+/// TypeScript applies these merges to the whole program, so the queries in
+/// `db/queries/type_inference/augmentations.rs` index them across every
+/// module.
+#[derive(Debug, Default)]
+pub(crate) struct ModuleContributions {
+    /// The interfaces of the module's `declare module "specifier" {}`
+    /// blocks, grouped by specifier in source order.
+    pub(crate) augmentations: Box<[ModuleAugmentation]>,
+    /// The interfaces of the module's `declare global {}` blocks, or the
+    /// top-level interfaces of a declaration file that is a script, in
+    /// source order.
+    pub(crate) globals: Box<[ContributedInterface]>,
+}
+
+/// The interfaces that `declare module "specifier" {}` blocks of a module
+/// add to the module that `specifier` names.
+#[derive(Debug)]
+pub(crate) struct ModuleAugmentation {
+    /// The augmented module, as the specifier of a namespace import.
+    pub(crate) import: JsImport,
+    /// The interfaces of the blocks, in source order.
+    pub(crate) interfaces: Box<[ContributedInterface]>,
+}
+
+/// An interface that one module merges into a declaration that it doesn't
+/// own.
+#[derive(Debug)]
+pub(crate) struct ContributedInterface {
+    pub(crate) name: Text,
+    /// The interface's declaration in the module's raw types. Interfaces of
+    /// one name in one block share one, because the collector merges them.
+    pub(crate) type_id: TypeId,
 }
 
 /// A binding declared directly inside a `namespace` or `module` declaration.
@@ -542,4 +636,30 @@ pub struct SerializedJsModuleInfo {
 
     /// CSS class names referenced in JSX `className` or `class` attributes.
     pub referenced_classes: BTreeSet<String>,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::order_merged_overloads;
+
+    #[test]
+    fn merged_overloads_put_later_declarations_and_specialized_signatures_first() {
+        // `interface O { f(): 1; f(): 2 }`, `interface O { f(): 3 }`.
+        assert_eq!(
+            order_merged_overloads([vec![(1, false), (2, false)], vec![(3, false)]]),
+            [3, 1, 2]
+        );
+        // `interface O { f(x: string): 1; f(x: "a"): 2; f(x: number): 3 }`,
+        // `interface O { f(x: boolean): 4 }`.
+        assert_eq!(
+            order_merged_overloads([vec![(1, false), (2, true), (3, false)], vec![(4, false)]]),
+            [2, 4, 1, 3]
+        );
+        // `interface O { f(x: string): 1 }`,
+        // `interface O { f(x: "a"): 2; f(x: number): 3 }`.
+        assert_eq!(
+            order_merged_overloads([vec![(1, false)], vec![(2, true), (3, false)]]),
+            [2, 3, 1]
+        );
+    }
 }

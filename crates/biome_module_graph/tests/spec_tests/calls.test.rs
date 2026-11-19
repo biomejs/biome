@@ -299,6 +299,7 @@ fn class_call_signatures_select_declared_returns() {
             Some(Text::from("Callable")),
             false,
             None,
+            0,
         ))
     };
     let callable = class(signatures.clone());

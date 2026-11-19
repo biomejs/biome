@@ -236,8 +236,12 @@ impl<'db> InternedExtendsType<'db> {
 ///   have no `BigInt` wrapper.
 /// - `target` has more than 64 members, or members that can't be listed.
 ///
-/// Members that the project adds to a wrapper through `declare global` aren't
-/// seen, so a `target` that requires one gives `NotAssignable`.
+/// The wrapper includes the interfaces that the project merges into it
+/// through `declare global` blocks and through the top-level interfaces of
+/// declaration files without imports or exports. Biome doesn't index the
+/// top-level interfaces of a TypeScript file that isn't a declaration file,
+/// so a `target` that requires a member added only there gives
+/// `NotAssignable`.
 pub(crate) fn primitive_can_satisfy<'db>(
     db: &'db dyn TypeDb,
     kind: TypeofKind,
@@ -559,12 +563,13 @@ pub(crate) fn instance_types<'db>(
 /// A class or an interface is derived from a class or an interface when its
 /// `extends` clauses lead to the same declaration, whatever their type
 /// arguments, so `Box<string>` is derived from `Box`. An instance of a class
-/// is not derived from an interface that the class implements. Arrays and
-/// tuples are derived from `Array`, every object type is derived from `{}`,
-/// and every object type other than `{}` is derived from `Object`. Nothing is
-/// derived from a type literal, a function type, a primitive, `object`, or
-/// another type without a declaration, and none of these is derived from a
-/// class or an interface.
+/// is not derived from an interface that the class implements. Arrays,
+/// tuples, and types derived from `ReadonlyArray`, such as
+/// `ReadonlyArray<string>`, are derived from `Array`. Every object type is
+/// derived from `{}`, and every object type other than `{}` is derived from
+/// `Object`. Nothing is derived from a type literal, a function type, a
+/// primitive, `object`, or another type without a declaration, and none of
+/// these is derived from a class or an interface.
 ///
 /// Biome identifies a declaration by the contents that it collects and by
 /// the handle that names it when Biome reaches it through one, as for a class
@@ -2102,6 +2107,20 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
             }) {
                 return MemberLookup::Unknown;
             }
+            // The interfaces that the project merges into the wrapper with
+            // `declare global`, as in `interface String { format(): string }`.
+            let ClassParents {
+                extends: _,
+                interface_bases,
+            } = class.parents(self.db);
+            let mut visited = FxHashSet::default();
+            for base in interface_bases.iter() {
+                match self.find_member(*base, name, 1, &mut visited) {
+                    found @ MemberLookup::Found { .. } => return found.inherited(),
+                    MemberLookup::Missing => {}
+                    MemberLookup::Unknown => return MemberLookup::Unknown,
+                }
+            }
         }
         let object = TypeData::instance_of(
             self.db,
@@ -3032,18 +3051,22 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
                 interface.extends(self.db).to_vec(),
                 true,
             ),
-            // The parent class comes before the interface bases, so its
-            // members take precedence over theirs, as in TypeScript.
+            // Contributions come first, because TypeScript counts their
+            // members as the class's own. The parent class comes before the
+            // other interface bases, as in TypeScript's base types of a class.
             TypeData::Class(class) if matches!(ty, TypeData::InstanceOf(_)) => {
                 let ClassParents {
                     extends,
                     interface_bases,
                 } = class.parents(self.db);
+                let (contributions, interface_bases) = interface_bases
+                    .split_at(class.contributions(self.db).min(interface_bases.len()));
                 (
                     class.members(self.db).as_ref(),
                     class.type_parameters(self.db).as_ref(),
-                    extends
+                    contributions
                         .iter()
+                        .chain(extends.iter())
                         .chain(interface_bases.iter())
                         .copied()
                         .collect(),
@@ -3615,10 +3638,11 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
     }
 
     /// Returns whether the `extends` clauses of the class or interface
-    /// `source` lead to the declaration `target`, or `None` when Biome can't
-    /// tell, as when a parent doesn't resolve or the walk exceeds its work
-    /// limit. `depth` limits the nesting of the walk, and `visited` holds the
-    /// declarations already walked, which the walk doesn't enter again.
+    /// `source` lead to the declaration `target`, or to `ReadonlyArray` when
+    /// `target` is `Array`. Returns `None` when Biome can't tell, as when a
+    /// parent doesn't resolve or the walk exceeds its work limit. `depth`
+    /// limits the nesting of the walk, and `visited` holds the declarations
+    /// already walked, which the walk doesn't enter again.
     fn declaration_derives(
         &mut self,
         source: Declaration<'db>,
@@ -3631,6 +3655,11 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
         }
         self.remaining_steps = self.remaining_steps.checked_sub(1)?;
         if self.is_same_declaration(source, target)? {
+            return Some(true);
+        }
+        // Neither `Array` nor `ReadonlyArray` extends the other, but every
+        // readonly array is an `Array` at runtime.
+        if target.data.is_array_class(self.db) && source.data.is_readonly_array_interface(self.db) {
             return Some(true);
         }
         if !visited.insert(source.data) {

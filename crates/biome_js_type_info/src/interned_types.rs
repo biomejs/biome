@@ -112,6 +112,19 @@ pub trait TypeDb: biome_db::Db {
         let _ = (module, type_id);
         None
     }
+
+    /// Returns the interface declarations that the project merges into the
+    /// global `id`, as the module and local type of each.
+    ///
+    /// The declarations come from `declare global` blocks and from the
+    /// top-level interfaces of declaration scripts. They are in the order
+    /// that member lookup searches them. The global's data includes them as
+    /// contributions (see [`TypeData::with_contributions`]). The default has
+    /// none, for a database without modules.
+    fn global_contributions(&self, id: GlobalTypeId) -> &[(ModuleKey, LocalTypeId)] {
+        let _ = id;
+        &[]
+    }
 }
 
 #[derive(Clone, Copy, Debug, Default, Eq, Hash, PartialEq, salsa::SalsaValue)]
@@ -1127,6 +1140,87 @@ impl<'db> TypeData<'db> {
         Self::InstanceOf(InternedTypeInstance::new(db, ty, type_parameters))
     }
 
+    /// Returns this interface or class with `contributions` merged into it.
+    ///
+    /// Each contribution is an interface declaration that another module
+    /// merges into this type through a module augmentation, a `declare
+    /// global` block, or a declaration script. It is given as the module and
+    /// local type of that declaration.
+    ///
+    /// The contributions become handles placed before the interface's
+    /// `extends` clauses, or before the class's interface bases, in the
+    /// given order. [`InternedInterface::contributions`] or
+    /// [`InternedClass::contributions`] counts them. Their data stays in the
+    /// module that declares them, so only a reader that resolves a handle
+    /// resolves their members. When this type has type parameters, each
+    /// handle is an instance with those type parameters as type arguments,
+    /// so the contribution's own type parameters stand for this type's.
+    /// Other types, and an empty `contributions`, are returned unchanged.
+    pub fn with_contributions(
+        self,
+        db: &'db dyn TypeDb,
+        contributions: &[(ModuleKey, LocalTypeId)],
+    ) -> Self {
+        if contributions.is_empty() {
+            return self;
+        }
+        let handles = |type_parameters: &[Self]| {
+            contributions
+                .iter()
+                .map(|(module, type_id)| {
+                    let handle = Self::Local(LocalTypeHandle::new(db, *module, *type_id));
+                    if type_parameters.is_empty() {
+                        handle
+                    } else {
+                        Self::instance_of(db, handle, type_parameters.into())
+                    }
+                })
+                .collect::<Vec<_>>()
+        };
+        match self {
+            Self::Interface(interface) => {
+                let type_parameters = interface.type_parameters(db);
+                Self::Interface(InternedInterface::new(
+                    db,
+                    type_parameters.clone(),
+                    handles(type_parameters)
+                        .into_iter()
+                        .chain(interface.extends(db).iter().copied())
+                        .collect::<Box<_>>(),
+                    interface.members(db).clone(),
+                    interface.name(db).clone(),
+                    interface.scope_id(db),
+                    contributions.len() + interface.contributions(db),
+                ))
+            }
+            Self::Class(class) => {
+                let type_parameters = class.type_parameters(db);
+                let ClassParents {
+                    extends,
+                    interface_bases,
+                } = class.parents(db);
+                Self::Class(InternedClass::new(
+                    db,
+                    type_parameters.clone(),
+                    ClassParents {
+                        extends: *extends,
+                        interface_bases: handles(type_parameters)
+                            .into_iter()
+                            .chain(interface_bases.iter().copied())
+                            .collect(),
+                    },
+                    class.implements(db).clone(),
+                    class.members(db).clone(),
+                    class.name(db).clone(),
+                    class.is_builtin(db),
+                    class.scope_id(db),
+                    contributions.len() + class.contributions(db),
+                ))
+            }
+            ty => ty,
+        }
+    }
+
     pub fn array_instance(db: &'db dyn TypeDb, type_parameters: Box<[Self]>) -> Self {
         Self::instance_of(db, Self::array_class(), type_parameters)
     }
@@ -1203,6 +1297,7 @@ impl<'db> TypeData<'db> {
                     name.clone(),
                     is_builtin,
                     *scope_id,
+                    0,
                 ))
             }
             raw::TypeData::Constructor(constructor) => Self::Constructor(InternedConstructor::new(
@@ -1229,6 +1324,7 @@ impl<'db> TypeData<'db> {
                 convert_type_members(db, &interface.members, resolve_reference, resolve_member),
                 interface.name.clone(),
                 interface.scope_id,
+                0,
             )),
             raw::TypeData::Module(module) => Self::Module(InternedModule::new(
                 db,
@@ -1746,6 +1842,7 @@ impl<'db> TypeDataSlotReplacements<'db> {
                 class.name(db).clone(),
                 class.is_builtin(db),
                 class.scope_id(db),
+                class.contributions(db),
             )),
             TypeData::Constructor(constructor) => TypeData::Constructor(InternedConstructor::new(
                 db,
@@ -1781,6 +1878,7 @@ impl<'db> TypeDataSlotReplacements<'db> {
                 self.rebuild_type_members(interface.members(db))?,
                 interface.name(db).clone(),
                 interface.scope_id(db),
+                interface.contributions(db),
             )),
             TypeData::Module(module) => TypeData::Module(InternedModule::new(
                 db,
@@ -2827,6 +2925,15 @@ pub struct InternedClass<'db> {
     /// values. See [`crate::type_data::Class::scope_id`].
     #[returns(copy)]
     pub scope_id: Option<ScopeId>,
+    /// Counts the leading [`ClassParents::interface_bases`] that are
+    /// contributions. A contribution is a handle to an interface that a
+    /// module augmentation, a `declare global` block, or a declaration
+    /// script in another module merges into this class. TypeScript counts
+    /// their members as the class's own, so member lookup searches them
+    /// before the parent class and merges their method overloads with the
+    /// class's. Every other reader treats them as interface bases.
+    #[returns(copy)]
+    pub contributions: usize,
 }
 
 /// The types that a class inherits from: its parent class and the bases of
@@ -2841,10 +2948,12 @@ pub struct ClassParents<'db> {
     /// instances of the class inherit the members of its instances, and the
     /// class inherits its static members.
     pub extends: Option<TypeData<'db>>,
-    /// The types named in the `extends` clauses of the interfaces merged into
-    /// the class, as `A` for `interface N extends A {}` next to `class N {}`.
-    /// They are instance types, so they give members only to the instances of
-    /// the class. See [`crate::type_data::Class::interface_bases`].
+    /// The instance types that the `extends` clauses of the interfaces merged
+    /// into the class name, as `A` for `interface N extends A {}` next to
+    /// `class N {}`, which give only instance-side members. See
+    /// [`crate::type_data::Class::interface_bases`]. The first
+    /// [`InternedClass::contributions`] of them are the interfaces that other
+    /// modules merge into the class.
     pub interface_bases: Box<[TypeData<'db>]>,
 }
 
@@ -2886,6 +2995,15 @@ pub struct InternedInterface<'db> {
     /// different values. See [`crate::type_data::Interface::scope_id`].
     #[returns(copy)]
     pub scope_id: Option<ScopeId>,
+    /// Counts the leading [`Self::extends`] entries that are contributions.
+    /// A contribution is a handle to an interface that a module
+    /// augmentation, a `declare global` block, or a declaration script in
+    /// another module merges into this interface. TypeScript counts their
+    /// members as the interface's own, so member lookup merges their method
+    /// overloads with the interface's. Every other reader treats them as
+    /// `extends` clauses.
+    #[returns(copy)]
+    pub contributions: usize,
 }
 
 #[salsa::interned]
@@ -3963,6 +4081,7 @@ mod tests {
                 Some(text("Class")),
                 false,
                 None,
+                0,
             ))
         });
         assert_identity(&db, |s| {
@@ -4020,6 +4139,7 @@ mod tests {
                 boxed([named_member(s)]),
                 text("Interface"),
                 None,
+                0,
             ))
         });
         assert_identity(&db, |s| {

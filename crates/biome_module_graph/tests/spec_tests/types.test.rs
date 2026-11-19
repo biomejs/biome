@@ -127,9 +127,8 @@ fn test_infer_module_types_merges_interfaces_and_classes_of_one_name() {
         binding("overloadWithoutArguments"),
         InferredTypeData::String
     );
-    // TypeScript: `number`. The first declaration of a method gives all its
-    // overloads, where TypeScript puts those of later declarations first.
-    assert_eq!(binding("overloadWithArgument"), InferredTypeData::String);
+    // The later declaration's overload is tried first, as in TypeScript.
+    assert_eq!(binding("overloadWithArgument"), InferredTypeData::Number);
     // TypeScript: `any`. The declarations name their type parameters
     // differently (TS2428).
     assert_eq!(binding("differentNames"), InferredTypeData::Unknown);

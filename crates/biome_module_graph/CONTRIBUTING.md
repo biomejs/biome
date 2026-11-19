@@ -44,6 +44,24 @@ Named declarations remain symbolic `LocalTypeHandle` values until a consumer
 normalizes or inspects their structure. In this code, "local" means owned by one
 module's type table; it does not mean block- or function-scoped source code.
 
+Some declarations merge interfaces into declarations that their module
+doesn't own: module augmentations (`declare module "./a" { ... }`),
+`declare global` blocks, and the top-level interfaces of declaration files
+without imports or exports. TypeScript applies them to the whole program.
+Collection records them in `JsModuleInfoInner::contributions` and makes their
+names refer to the declaration that they merge into. The tracked queries in
+`src/db/queries/type_inference/augmentations.rs` index them across every
+indexed module: `module_augmentations` per module, `augmentation_index` over
+the graph, and projections for one target module or one global, which
+backdate unless their own entry changes. None of them resolves a type, so
+they never join an inference cycle. `ResolutionCtx::resolve_raw_type_id` adds
+a declaration's contributions to its data as handles, and
+`resolve_global_type` adds a global's through
+`TypeDb::global_contributions`. Nothing else builds a declaration's data, so
+a handle to it has the same data in every context; data built without its
+contributions would make `instanceof` see two declarations. A contribution's
+members are resolved only by whoever resolves its handle, in its own module.
+
 Start at `src/module_graph.rs`, `src/js_module_info/collector.rs`, and
 `src/db/type_inference/resolver.rs`.
 
@@ -451,7 +469,7 @@ boundaries.
 
 The query facade is `src/db/queries/type_inference.rs`. Files under
 `src/db/queries/type_inference/` are organized by subject: `lookups`, `exports`,
-`promises`, `calls`, `normalization`, and `module_types`. Compound Salsa keys
+`augmentations`, `promises`, `calls`, `normalization`, and `module_types`. Compound Salsa keys
 live in the `interned` module. Algorithms used by one family may live in a child module;
 resolution helpers shared by multiple families live under
 `src/db/type_inference/`.

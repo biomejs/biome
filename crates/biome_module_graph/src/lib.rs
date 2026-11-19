@@ -17,7 +17,7 @@ mod traverse;
 pub mod type_inference;
 
 pub use biome_js_type_info::{
-    ImportSymbol,
+    GlobalTypeId, ImportSymbol,
     resolved::{InferredLocalTypeId, InferredModuleKey},
 };
 pub use biome_resolver::{PathInfo, ResolveError, ResolvedPath};
@@ -33,7 +33,7 @@ pub use db::queries::{
     build_import_tree_for_html, build_import_tree_for_js, css_classes_for_module,
     css_property_definitions, find_css_class_definition, find_js_exported_symbol,
     find_jsdoc_for_exported_symbol, find_member_type, find_value_member_type,
-    function_returns_promise, infer_binding_type, infer_call_argument_type,
+    function_returns_promise, global_contributions, infer_binding_type, infer_call_argument_type,
     infer_call_expression_type, infer_constructor_argument_type, infer_export_type,
     infer_expression_function_returns_promise, infer_expression_is_array_of_promises,
     infer_expression_is_promise, infer_expression_type, infer_local_type, infer_module_types,
