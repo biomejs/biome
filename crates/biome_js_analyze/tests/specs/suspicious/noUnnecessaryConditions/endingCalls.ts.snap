@@ -9,9 +9,16 @@ expression: endingCalls.ts
 declare function fail(message: string): never;
 declare function assert(condition: unknown): asserts condition;
 declare const log: { fatal(message: string): never };
+type Never = never;
+declare function failAlias(message: string): Never;
 
 function localNever(value: string | null) {
 	if (value === null) fail("missing");
+	return value?.length;
+}
+
+function aliasNever(value: string | null) {
+	if (value === null) failAlias("missing");
 	return value?.length;
 }
 
@@ -36,25 +43,25 @@ function literalTrue(value: string | null) {
 
 # Diagnostics
 ```
-endingCalls.ts:9:9 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+endingCalls.ts:11:9 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unnecessary optional chaining.
   
-     7 │ function localNever(value: string | null) {
-     8 │ 	if (value === null) fail("missing");
-   > 9 │ 	return value?.length;
+     9 │ function localNever(value: string | null) {
+    10 │ 	if (value === null) fail("missing");
+  > 11 │ 	return value?.length;
        │ 	       ^^^^^
-    10 │ }
-    11 │ 
+    12 │ }
+    13 │ 
   
   i Replace ?. with ..
   
-     7 │ function localNever(value: string | null) {
-     8 │ 	if (value === null) fail("missing");
-   > 9 │ 	return value?.length;
+     9 │ function localNever(value: string | null) {
+    10 │ 	if (value === null) fail("missing");
+  > 11 │ 	return value?.length;
        │ 	            ^^
-    10 │ }
-    11 │ 
+    12 │ }
+    13 │ 
   
   i The receiver is guaranteed to be non-nullish.
   
@@ -62,25 +69,25 @@ endingCalls.ts:9:9 lint/suspicious/noUnnecessaryConditions ━━━━━━━
 ```
 
 ```
-endingCalls.ts:14:9 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+endingCalls.ts:16:9 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unnecessary optional chaining.
   
-    12 │ function methodNever(value: string | null) {
-    13 │ 	if (value === null) log.fatal("missing");
-  > 14 │ 	return value?.length;
+    14 │ function aliasNever(value: string | null) {
+    15 │ 	if (value === null) failAlias("missing");
+  > 16 │ 	return value?.length;
        │ 	       ^^^^^
-    15 │ }
-    16 │ 
+    17 │ }
+    18 │ 
   
   i Replace ?. with ..
   
-    12 │ function methodNever(value: string | null) {
-    13 │ 	if (value === null) log.fatal("missing");
-  > 14 │ 	return value?.length;
+    14 │ function aliasNever(value: string | null) {
+    15 │ 	if (value === null) failAlias("missing");
+  > 16 │ 	return value?.length;
        │ 	            ^^
-    15 │ }
-    16 │ 
+    17 │ }
+    18 │ 
   
   i The receiver is guaranteed to be non-nullish.
   
@@ -88,46 +95,27 @@ endingCalls.ts:14:9 lint/suspicious/noUnnecessaryConditions ━━━━━━�
 ```
 
 ```
-endingCalls.ts:19:9 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+endingCalls.ts:21:9 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unnecessary optional chaining.
   
-    17 │ function assertFalse(value: string | null) {
-    18 │ 	if (value === null) assert(false);
-  > 19 │ 	return value?.length;
+    19 │ function methodNever(value: string | null) {
+    20 │ 	if (value === null) log.fatal("missing");
+  > 21 │ 	return value?.length;
        │ 	       ^^^^^
-    20 │ }
-    21 │ 
+    22 │ }
+    23 │ 
   
   i Replace ?. with ..
   
-    17 │ function assertFalse(value: string | null) {
-    18 │ 	if (value === null) assert(false);
-  > 19 │ 	return value?.length;
+    19 │ function methodNever(value: string | null) {
+    20 │ 	if (value === null) log.fatal("missing");
+  > 21 │ 	return value?.length;
        │ 	            ^^
-    20 │ }
-    21 │ 
+    22 │ }
+    23 │ 
   
   i The receiver is guaranteed to be non-nullish.
-  
-
-```
-
-```
-endingCalls.ts:24:7 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! This condition is always truthy.
-  
-    22 │ function literalTrue(value: string | null) {
-    23 │ 	if (value === null) {
-  > 24 │ 		if (true) return;
-       │ 		    ^^^^
-    25 │ 	}
-    26 │ 	return value?.length;
-  
-  i The value's type can never be falsy, so this check is redundant.
-  
-  i Remove the condition, or check the value you meant to test.
   
 
 ```
@@ -137,8 +125,8 @@ endingCalls.ts:26:9 lint/suspicious/noUnnecessaryConditions ━━━━━━�
 
   ! Unnecessary optional chaining.
   
-    24 │ 		if (true) return;
-    25 │ 	}
+    24 │ function assertFalse(value: string | null) {
+    25 │ 	if (value === null) assert(false);
   > 26 │ 	return value?.length;
        │ 	       ^^^^^
     27 │ }
@@ -146,12 +134,57 @@ endingCalls.ts:26:9 lint/suspicious/noUnnecessaryConditions ━━━━━━�
   
   i Replace ?. with ..
   
-    24 │ 		if (true) return;
-    25 │ 	}
+    24 │ function assertFalse(value: string | null) {
+    25 │ 	if (value === null) assert(false);
   > 26 │ 	return value?.length;
        │ 	            ^^
     27 │ }
     28 │ 
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+endingCalls.ts:31:7 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition is always truthy.
+  
+    29 │ function literalTrue(value: string | null) {
+    30 │ 	if (value === null) {
+  > 31 │ 		if (true) return;
+       │ 		    ^^^^
+    32 │ 	}
+    33 │ 	return value?.length;
+  
+  i The value's type can never be falsy, so this check is redundant.
+  
+  i Remove the condition, or check the value you meant to test.
+  
+
+```
+
+```
+endingCalls.ts:33:9 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    31 │ 		if (true) return;
+    32 │ 	}
+  > 33 │ 	return value?.length;
+       │ 	       ^^^^^
+    34 │ }
+    35 │ 
+  
+  i Replace ?. with ..
+  
+    31 │ 		if (true) return;
+    32 │ 	}
+  > 33 │ 	return value?.length;
+       │ 	            ^^
+    34 │ }
+    35 │ 
   
   i The receiver is guaranteed to be non-nullish.
   

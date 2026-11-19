@@ -145,6 +145,7 @@ Biome writes `{ b: 1 } & Record<"a", unknown>` as `{ b: 1; a: unknown }`, and
 | An array without a type annotation | `let a = []; a.push(1); a` | `number[]` |
 | An assertion function | `assertString(v: unknown): asserts v is string; x: string \| number; (assertString(x), x)` | `string` at the last `x` |
 | A function that returns `never` | `fail(): never; x: string \| null; if (x === null) fail(); x` | `string` |
+| A function that returns `never` through a type alias | `type Never = never; fail(): Never; x: string \| null; if (x === null) fail(); x` | `string` |
 | A closure | `const x: string \| null = f(); if (x) () => x` | `string` |
 | Inline code | `x: string \| null; (() => { while (true) { if (x !== null) break; } })(); x` | `string` |
 | A branch that a check makes impossible | `x: Date; if (x instanceof Date) {} else x` | Unknown |
@@ -219,9 +220,12 @@ TypeScript treats as unreachable, impossible, or erroneous:
   discriminant to `never` through a check that Biome doesn't narrow by, as
   after `if (x === f()) return;`;
 - after a call that never returns that Biome doesn't recognize, as
-  `failAll(xs)` with `failAll<T>(v: T[]): never`, or `fail()` with
-  `fail(): Never` and `type Never = never`, or that comes after the first 64
-  statement calls of a function, and in closures created there;
+  `failAll(xs)` with `failAll<T>(v: T[]): never`, or `fail()` when `never`
+  comes from a generic type alias, as in `fail(): G<string>` with
+  `type G<T> = never`, from a type alias that a declaration file declares
+  globally, or from a type alias in the signature of a generic or overloaded
+  function of the module, or that comes after the first 64 statement calls of
+  a function, and in closures created there;
 - after a call that never returns that Biome drops when a function exceeds its
   work budget, or that is part of a query cycle.
 

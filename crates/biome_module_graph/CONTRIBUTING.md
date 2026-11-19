@@ -625,7 +625,9 @@ value; an optional call of inline code runs the body before its arguments.
 **Paths that no value takes.** A branch that a condition written as the
 literal `true` or `false` never takes has no flow (`never_has_outcome`).
 Neither does the code after a statement call of a local function that never
-returns (`GuardFunctions::local_call_ends`). Reads there are not recorded, so
+returns (`GuardFunctions::local_call_ends`), because its return type
+annotation is `never`, in place or through the module's type aliases
+(`annotated_return`). Reads there are not recorded, so
 they keep their declared types, and such a path adds nothing where it joins
 the others. The syntax that counts is in
 [Statements and calls](./NARROWING.md#statements-and-calls).
@@ -890,19 +892,22 @@ The behavior of each kind of test is in
   whose guard is `FlowGuard::Call`. A local function that is generic or
   overloaded, with an overload that returns a type predicate, an assertion,
   or `never` (`selects_signature_by_arguments`), decides nothing at
-  collection, because the call's arguments select its signature. A call in a
-  condition is a call point only when it passes a subject
-  (`condition_call_point`). A statement call is one whenever its callee
-  follows TypeScript's explicit-type rule as far as the syntax tells
-  (`statement_callee`), even when it passes no subject, because its signature
-  can end the path; the reading context checks each member access along the
-  callee (`FlowCallKind::Statement`). Collection records the subjects that a
-  call point may narrow: its subject arguments, the subject of the callee's
-  object, which `this is T` narrows, and, for a statement call, the subjects
-  of each argument decomposed as a condition that holds, whose guard
-  `FlowCallArgument::condition` keeps for `asserts value`. It also records the
-  range of each argument (`FlowCallArgument::range`), where inference reads
-  its type at the call, whether the argument is always false
+  collection, because the call's arguments select its signature. Nor does a
+  statement call of a local function whose return type annotation names an
+  import, in place or through the module's type aliases
+  (`AnnotatedReturn::Undecided`), because only inference can tell whether
+  that type is `never`. A call in a condition is a call point only when it
+  passes a subject (`condition_call_point`). A statement call is one whenever
+  its callee follows TypeScript's explicit-type rule as far as the syntax
+  tells (`statement_callee`), even when it passes no subject, because its
+  signature can end the path; the reading context checks each member access
+  along the callee (`FlowCallKind::Statement`). Collection records the
+  subjects that a call point may narrow: its subject arguments, the subject of
+  the callee's object, which `this is T` narrows, and, for a statement call,
+  the subjects of each argument decomposed as a condition that holds, whose
+  guard `FlowCallArgument::condition` keeps for `asserts value`. It also
+  records the range of each argument (`FlowCallArgument::range`), where
+  inference reads its type at the call, whether the argument is always false
   (`FlowCallArgument::is_false`), and whether the return type of a callee
   that is a name comes from an annotation (the `annotated` field of
   `FlowCallKind::Statement`).
@@ -1420,7 +1425,8 @@ and keeps it per call.
 reaches decides, after the cheap gates and once its baseline exists, which of
 those calls never return (`ending_calls`). Their effect is
 `FlowCallEffect::Ends` when the return type annotation of the signature's
-declaration is `never` (`has_annotated_callee`), or when an `asserts value`
+declaration is `never`, in place or through type aliases, which
+`flow_baseline` follows (`has_annotated_callee`), or when an `asserts value`
 signature gets an argument that is always false. Such an effect narrows
 nothing, so `FlowSubjectRootInput::calls` leaves it out. A read that no path
 reaches without crossing one of these calls keeps its declared type without a
