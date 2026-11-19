@@ -1,0 +1,115 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+assertion_line: 121
+expression: invalid-comments.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<template>
+  <div>666</div>
+</template>
+
+foo
+<!-- comment -->
+bar
+
+<script>
+export default {}
+</script>
+
+baz <!-- trailing comment -->
+
+```
+
+# Diagnostics
+```
+invalid-comments.vue:6:1 lint/nursery/noVueContentOutsideBlock  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This content is outside of the top-level blocks.
+  
+    4 │ </template>
+    5 │ 
+  > 6 │ foo
+      │ ^^^
+    7 │ <!-- comment -->
+    8 │ bar
+  
+  i Vue only reads the top-level blocks of a component, such as <template>, <script>, and <style>. Anything outside of them is dropped, so it never renders or runs.
+  
+  i Move this content into a block, or remove it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the content outside of the top-level blocks.
+  
+     3  3 │     <div>666</div>
+     4  4 │   </template>
+     5    │ - 
+     6    │ - foo
+     7  5 │   <!-- comment -->
+     8  6 │   bar
+  
+
+```
+
+```
+invalid-comments.vue:8:1 lint/nursery/noVueContentOutsideBlock  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This content is outside of the top-level blocks.
+  
+     6 │ foo
+     7 │ <!-- comment -->
+   > 8 │ bar
+       │ ^^^
+     9 │ 
+    10 │ <script>
+  
+  i Vue only reads the top-level blocks of a component, such as <template>, <script>, and <style>. Anything outside of them is dropped, so it never renders or runs.
+  
+  i Move this content into a block, or remove it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the content outside of the top-level blocks.
+  
+     5  5 │   
+     6  6 │   foo
+     7    │ - <!--·comment·-->
+     8    │ - bar
+        7 │ + <!--·comment·-->
+     9  8 │   
+    10  9 │   <script>
+  
+
+```
+
+```
+invalid-comments.vue:14:1 lint/nursery/noVueContentOutsideBlock  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This content is outside of the top-level blocks.
+  
+    12 │ </script>
+    13 │ 
+  > 14 │ baz <!-- trailing comment -->
+       │ ^^^
+    15 │ 
+  
+  i Vue only reads the top-level blocks of a component, such as <template>, <script>, and <style>. Anything outside of them is dropped, so it never renders or runs.
+  
+  i Move this content into a block, or remove it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the content outside of the top-level blocks.
+  
+    11 11 │   export default {}
+    12 12 │   </script>
+    13    │ - 
+    14    │ - baz·<!--·trailing·comment·-->
+       13 │ + 
+       14 │ + ·<!--·trailing·comment·-->
+    15 15 │   
+  
+
+```
