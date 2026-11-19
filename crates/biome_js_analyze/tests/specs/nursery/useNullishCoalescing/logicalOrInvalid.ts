@@ -1,4 +1,4 @@
-// should generate diagnostics
+/* should generate diagnostics */
 
 // Nullish literals
 const a: null = null;
@@ -27,6 +27,13 @@ function getValue(x: string | null): string {
 // Arrow function
 const getDefault = (x: number | undefined) => x || 42;
 
+// Inferred callback parameter
+declare function consume<T>(callback: (value: T) => void): void;
+
+consume<string | null>((value) => {
+	value || "default";
+});
+
 // Object property
 declare const obj: { prop: string | null };
 const h = obj.prop || 'default';
@@ -44,12 +51,12 @@ let result: string;
 declare const source: string | null;
 result = source || 'fallback';
 
-// Chained ||
+// Chained `||`
 declare const x: string | null;
 declare const y: string | null;
 const k = x || y || 'default';
 
-// Mixed nullish + falsy types (no safe fix)
+// Number union with `null`: no fix
 declare const mixedValue: number | null;
 const unsafeFix = mixedValue || 100;
 
@@ -105,3 +112,53 @@ const vReqNull = reqNull.a || "default";
 // Readonly with optional property
 declare const roOpt: Readonly<{a?: string}>;
 const vRoOpt = roOpt.a || "default";
+
+// `||` on destructured parameters without a default
+type FormValues = {
+	value: string;
+};
+
+type GenericProps<T extends FormValues> = {
+	values: T;
+	inert?: boolean;
+};
+
+type PlainProps = {
+	inert?: boolean;
+};
+
+export function genericWithoutDefault<T extends FormValues>({
+	inert,
+}: GenericProps<T>) {
+	return inert || undefined;
+}
+
+export function plainWithoutDefault({ inert }: PlainProps) {
+	return inert || undefined;
+}
+
+// `||` on a destructured parameter whose default keeps `null` in the type
+export function nullableWithDefault({
+	value = "fallback",
+}: {
+	value?: string | null;
+}) {
+	return value || undefined;
+}
+
+// `||` on an array element without a default
+declare const list: (number | undefined)[];
+const [head] = list;
+export const arrayResult = head || undefined;
+
+// `||` after an assertion function declared without a type annotation, which TypeScript ignores (TS2775)
+const assertDefined = (value: unknown): asserts value => {
+	if (!value) {
+		throw new Error();
+	}
+};
+
+function withDefault(value: string | undefined) {
+	assertDefined(value);
+	return value || "default";
+}

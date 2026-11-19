@@ -1,0 +1,64 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: ifStatementValid.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+
+declare function makeObj(): { x: number };
+declare function sideEffect(): void;
+
+// `=== null` on a union that also has `undefined`
+declare let maybe: string | null | undefined;
+if (maybe === null) {
+	maybe = 'default';
+}
+
+// `=== undefined` on a union that also has `null`
+declare let undefCheck: string | null | undefined;
+if (undefCheck === undefined) {
+	undefCheck = 'default';
+}
+
+// Compound check with the same literal twice
+declare let vacuous: string | null | undefined;
+if (vacuous === null || vacuous === null) {
+	vacuous = 'default';
+}
+
+// Optional property that also accepts `null`
+declare let input: { fruits?: string[] | null };
+if (input.fruits === null) {
+	input.fruits = [];
+}
+
+// `else` branch
+declare let withElse: { x: number } | null;
+if (!withElse) {
+	withElse = makeObj();
+} else {
+	withElse = makeObj();
+}
+
+// `!x` on a non-nullish value
+declare let notNullish: { x: number };
+if (!notNullish) {
+	notNullish = makeObj();
+}
+
+// More than one statement in the body
+declare let multi: { x: number } | null;
+if (!multi) {
+	multi = makeObj();
+	sideEffect();
+}
+
+// Test and body with different references
+declare let mismatchA: { x: number } | null;
+declare let mismatchB: { x: number } | null;
+if (!mismatchA) {
+	mismatchB = makeObj();
+}
+
+```

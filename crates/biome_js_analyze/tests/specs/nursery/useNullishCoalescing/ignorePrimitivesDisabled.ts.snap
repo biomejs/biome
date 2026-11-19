@@ -4,8 +4,7 @@ expression: ignorePrimitivesDisabled.ts
 ---
 # Input
 ```ts
-// Tests for ignorePrimitives: false
-// The option is present but disabled, so primitive operands still report.
+/* should generate diagnostics */
 
 declare const s: string | null;
 declare const n: number | null;
@@ -17,16 +16,16 @@ const r2 = n || 0;
 
 # Diagnostics
 ```
-ignorePrimitivesDisabled.ts:7:14 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ignorePrimitivesDisabled.ts:6:14 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use ?? instead of ||.
   
-    5 │ declare const n: number | null;
-    6 │ 
-  > 7 │ const r1 = s || 'x';
+    4 │ declare const n: number | null;
+    5 │ 
+  > 6 │ const r1 = s || 'x';
       │              ^^
-    8 │ const r2 = n || 0;
-    9 │ 
+    7 │ const r2 = n || 0;
+    8 │ 
   
   i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
   
@@ -38,14 +37,14 @@ ignorePrimitivesDisabled.ts:7:14 lint/nursery/useNullishCoalescing ━━━━�
 ```
 
 ```
-ignorePrimitivesDisabled.ts:8:14 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ignorePrimitivesDisabled.ts:7:14 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use ?? instead of ||.
   
-    7 │ const r1 = s || 'x';
-  > 8 │ const r2 = n || 0;
+    6 │ const r1 = s || 'x';
+  > 7 │ const r2 = n || 0;
       │              ^^
-    9 │ 
+    8 │ 
   
   i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
   

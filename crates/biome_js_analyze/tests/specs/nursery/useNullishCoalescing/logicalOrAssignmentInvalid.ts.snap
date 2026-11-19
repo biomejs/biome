@@ -1,10 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-expression: assignmentInvalid.ts
+expression: logicalOrAssignmentInvalid.ts
 ---
 # Input
 ```ts
-// ||= with nullish types should suggest ??=
+/* should generate diagnostics */
 
 // Union with null
 declare let a: string | null;
@@ -25,15 +25,15 @@ d ||= 'value';
 let e: undefined = undefined;
 e ||= 'value';
 
-// Object-shaped annotation with null: no proven truthiness, so no safe fix.
+// Object union with `null`: no fix
 declare let obj: { a: string } | null;
 obj ||= { a: 'default' };
 
-// Mixed nullish + falsy types (no safe fix)
+// Number union with `null`: no fix
 declare let mixed: number | null;
 mixed ||= 100;
 
-// Boolean union (no safe fix - false is falsy but not nullish)
+// Boolean union with `null`: no fix
 declare let flag: boolean | null;
 flag ||= true;
 
@@ -41,7 +41,7 @@ flag ||= true;
 
 # Diagnostics
 ```
-assignmentInvalid.ts:5:3 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+logicalOrAssignmentInvalid.ts:5:3 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use ??= instead of ||=.
   
@@ -62,7 +62,7 @@ assignmentInvalid.ts:5:3 lint/nursery/useNullishCoalescing ━━━━━━━
 ```
 
 ```
-assignmentInvalid.ts:9:3 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+logicalOrAssignmentInvalid.ts:9:3 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use ??= instead of ||=.
   
@@ -83,7 +83,7 @@ assignmentInvalid.ts:9:3 lint/nursery/useNullishCoalescing ━━━━━━━
 ```
 
 ```
-assignmentInvalid.ts:13:3 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+logicalOrAssignmentInvalid.ts:13:3 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use ??= instead of ||=.
   
@@ -104,7 +104,7 @@ assignmentInvalid.ts:13:3 lint/nursery/useNullishCoalescing ━━━━━━�
 ```
 
 ```
-assignmentInvalid.ts:17:3 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+logicalOrAssignmentInvalid.ts:17:3 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
   i Use ??= instead of ||=.
   
@@ -134,7 +134,7 @@ assignmentInvalid.ts:17:3 lint/nursery/useNullishCoalescing  FIXABLE  ━━━�
 ```
 
 ```
-assignmentInvalid.ts:20:3 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+logicalOrAssignmentInvalid.ts:20:3 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
   i Use ??= instead of ||=.
   
@@ -142,7 +142,7 @@ assignmentInvalid.ts:20:3 lint/nursery/useNullishCoalescing  FIXABLE  ━━━�
   > 20 │ e ||= 'value';
        │   ^^^
     21 │ 
-    22 │ // Object-shaped annotation with null: no proven truthiness, so no safe fix.
+    22 │ // Object union with `null`: no fix
   
   i The ||= operator assigns when the left side is falsy, while ??= only assigns when it is null or undefined.
   
@@ -157,22 +157,22 @@ assignmentInvalid.ts:20:3 lint/nursery/useNullishCoalescing  FIXABLE  ━━━�
     20    │ - e·||=·'value';
        20 │ + e·??=·'value';
     21 21 │   
-    22 22 │   // Object-shaped annotation with null: no proven truthiness, so no safe fix.
+    22 22 │   // Object union with `null`: no fix
   
 
 ```
 
 ```
-assignmentInvalid.ts:24:5 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+logicalOrAssignmentInvalid.ts:24:5 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use ??= instead of ||=.
   
-    22 │ // Object-shaped annotation with null: no proven truthiness, so no safe fix.
+    22 │ // Object union with `null`: no fix
     23 │ declare let obj: { a: string } | null;
   > 24 │ obj ||= { a: 'default' };
        │     ^^^
     25 │ 
-    26 │ // Mixed nullish + falsy types (no safe fix)
+    26 │ // Number union with `null`: no fix
   
   i The ||= operator assigns when the left side is falsy, while ??= only assigns when it is null or undefined.
   
@@ -184,16 +184,16 @@ assignmentInvalid.ts:24:5 lint/nursery/useNullishCoalescing ━━━━━━�
 ```
 
 ```
-assignmentInvalid.ts:28:7 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+logicalOrAssignmentInvalid.ts:28:7 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use ??= instead of ||=.
   
-    26 │ // Mixed nullish + falsy types (no safe fix)
+    26 │ // Number union with `null`: no fix
     27 │ declare let mixed: number | null;
   > 28 │ mixed ||= 100;
        │       ^^^
     29 │ 
-    30 │ // Boolean union (no safe fix - false is falsy but not nullish)
+    30 │ // Boolean union with `null`: no fix
   
   i The ||= operator assigns when the left side is falsy, while ??= only assigns when it is null or undefined.
   
@@ -205,11 +205,11 @@ assignmentInvalid.ts:28:7 lint/nursery/useNullishCoalescing ━━━━━━�
 ```
 
 ```
-assignmentInvalid.ts:32:6 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+logicalOrAssignmentInvalid.ts:32:6 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use ??= instead of ||=.
   
-    30 │ // Boolean union (no safe fix - false is falsy but not nullish)
+    30 │ // Boolean union with `null`: no fix
     31 │ declare let flag: boolean | null;
   > 32 │ flag ||= true;
        │      ^^^
