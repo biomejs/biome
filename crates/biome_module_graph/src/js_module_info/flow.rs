@@ -12,7 +12,10 @@
 //! a property path that starts at a variable or at `this`, such as `o.v`,
 //! `a.b.c`, `t[0]`, or `this.#cache`. Guards and reads refer to a subject by
 //! its id in the root's subject table, so a test and a read of the same subject
-//! match without comparing syntax.
+//! match without comparing syntax. A destructuring pattern such as
+//! `{ kind, v }` is a subject too. Tests of its elements narrow the pattern,
+//! and each element's declared type at a read is its property on the narrowed
+//! pattern.
 //!
 //! An execution root is a body analyzed independently, such as a module,
 //! function, or method. Only `let`, `const`, and parameter bindings that are
@@ -50,7 +53,8 @@ use biome_js_syntax::{
     JsThisExpression,
 };
 use biome_js_type_info::{
-    RawTypeData, TypeReference, is_raw_narrowing_invariant, raw_may_be_object_union,
+    RawTypeData, RawTypeId, TypeReference, TypeofExpression, is_raw_narrowing_invariant,
+    raw_may_be_object_union,
 };
 use biome_rowan::{AstNode, AstPtr, SyntaxKindSet, Text, TextRange};
 use builder::{BuiltRoot, build_root};
@@ -83,6 +87,16 @@ pub(crate) enum FlowSubject {
         object: FlowSubjectId,
         key: PropertyKey,
     },
+    /// The destructuring pattern at this range, such as `{ kind, v }` in
+    /// `const { kind, v } = s`, which stands for the value it destructures.
+    ///
+    /// A runtime test of one of its elements narrows it as a test of the
+    /// element's property narrows an object, and a read of another element
+    /// takes that element's property on the narrowed pattern, as in
+    /// TypeScript. Only [`FlowGuard::Property`] guards narrow it. No
+    /// expression reads it, so [`RootFlow::pattern_elements`] maps the reads
+    /// of its elements to it.
+    Pattern(TextRange),
 }
 
 /// The property that a step of a subject's path reads.
@@ -99,14 +113,17 @@ pub(crate) enum PropertyKey {
 }
 
 /// Returns the subject that the path of `subject` starts at, a
-/// [`FlowSubject::Binding`] or [`FlowSubject::This`], given the `subjects` of
-/// its root, each at the index of its id.
+/// [`FlowSubject::Binding`], [`FlowSubject::This`], or
+/// [`FlowSubject::Pattern`], given the `subjects` of its root, each at the
+/// index of its id.
 ///
 /// Returns `None` when `subjects` has no such subject.
 fn subject_root(subjects: &[FlowSubject], mut subject: FlowSubjectId) -> Option<&FlowSubject> {
     loop {
         match subjects.get(subject as usize)? {
-            root @ (FlowSubject::Binding(_) | FlowSubject::This) => return Some(root),
+            root @ (FlowSubject::Binding(_) | FlowSubject::This | FlowSubject::Pattern(_)) => {
+                return Some(root);
+            }
             FlowSubject::Member { object, .. } => {
                 if *object >= subject {
                     return None;
@@ -129,6 +146,13 @@ struct FlowSubjectTable {
     /// The execution root whose `this` can be a subject, or `None` when paths
     /// on the root's `this` cannot narrow.
     this_root: Option<JsSyntaxNode>,
+    /// Maps the range of each element variable of a [`FlowSubject::Pattern`]
+    /// in the table to the pattern and the key of the property that the
+    /// element reads. It holds only the elements that the narrowing of the
+    /// pattern reaches.
+    pattern_elements: FxHashMap<TextRange, (FlowSubjectId, PropertyKey)>,
+    /// The variables found to be no element of such a pattern.
+    non_elements: FxHashSet<TextRange>,
 }
 
 impl FlowSubjectTable {
@@ -197,6 +221,46 @@ impl FlowSubjectTable {
         self.intern(FlowSubject::This)
     }
 
+    /// Returns the destructuring pattern that a runtime test of the variable
+    /// declared at `range` narrows, with the key of the property that the
+    /// variable reads from it. Adds the pattern to the table on first use.
+    /// See [`subjects::narrowing_pattern`] for the patterns that a test
+    /// narrows.
+    ///
+    /// Returns `None` when no such pattern holds the variable, and when the
+    /// table has used every [`FlowSubjectId`].
+    fn pattern(
+        &mut self,
+        range: TextRange,
+        model: &SemanticModel,
+    ) -> Option<(FlowSubjectId, PropertyKey)> {
+        if let Some(element) = self.pattern_elements.get(&range) {
+            return Some(element.clone());
+        }
+        if self.non_elements.contains(&range) {
+            return None;
+        }
+        let Some((pattern, elements)) = model
+            .as_binding_by_range(range)
+            .and_then(|binding| subjects::narrowing_pattern(&binding, model))
+        else {
+            self.non_elements.insert(range);
+            return None;
+        };
+        let pattern = self.intern(FlowSubject::Pattern(pattern.text_trimmed_range()))?;
+        for (element, key) in elements {
+            self.pattern_elements.insert(element, (pattern, key));
+        }
+        self.pattern_elements.get(&range).cloned()
+    }
+
+    /// Returns the pattern and the key of the property that the variable
+    /// declared at `range` reads, when a pattern already in the table holds
+    /// the variable. Unlike [`Self::pattern`], it never adds a pattern.
+    fn pattern_element(&self, range: TextRange) -> Option<&(FlowSubjectId, PropertyKey)> {
+        self.pattern_elements.get(&range)
+    }
+
     fn intern(&mut self, subject: FlowSubject) -> Option<FlowSubjectId> {
         if let Some(id) = self.ids.get(&subject) {
             return Some(*id);
@@ -247,7 +311,13 @@ pub(crate) struct RootFlow {
     /// [`FlowGuard::Property`], such as `s` when the only condition that
     /// mentions it is `s.kind === "c"`. Such a test narrows only a union, so
     /// these subjects need no solve when their declared type is not one.
+    /// Every [`FlowSubject::Pattern`] with reads is one.
     pub(crate) property_only: FxHashSet<FlowSubjectId>,
+    /// The [`FlowSubject::Pattern`] of each element whose reads a test of the
+    /// pattern can reach, keyed by the element's subject. Each such read is
+    /// also a read point of the pattern, so that the declared type of the
+    /// element at the read is its property on the narrowed pattern.
+    pub(crate) pattern_elements: FxHashMap<FlowSubjectId, FlowSubjectId>,
 }
 
 impl RootFlow {
@@ -257,10 +327,24 @@ impl RootFlow {
         self.read_points.get(&subject).map_or(&[], |points| points)
     }
 
+    /// Returns whether the root reads `subject` at `point` where a test of
+    /// `subject` can reach the read.
+    pub(crate) fn reads_at(&self, subject: FlowSubjectId, point: FlowNodeId) -> bool {
+        self.read_points(subject).binary_search(&point).is_ok()
+    }
+
     /// Returns whether conditions narrow `subject` only through
     /// [`FlowGuard::Property`] guards and the root has reads of `subject`.
     pub(crate) fn is_property_only(&self, subject: FlowSubjectId) -> bool {
         self.property_only.contains(&subject)
+    }
+
+    /// Returns the [`FlowSubject::Pattern`] that holds the element `subject`
+    /// when a test of the pattern can reach a read of the element. At such a
+    /// read, the element's declared type is its property on the narrowed
+    /// pattern.
+    pub(crate) fn element_pattern(&self, subject: FlowSubjectId) -> Option<FlowSubjectId> {
+        self.pattern_elements.get(&subject).copied()
     }
 
     pub(crate) fn subject(&self, subject: FlowSubjectId) -> Option<&FlowSubject> {
@@ -270,12 +354,12 @@ impl RootFlow {
     /// Returns the range of the variable that the path of `subject` starts
     /// at, which is the variable itself for a [`FlowSubject::Binding`].
     ///
-    /// Returns `None` for `this` and a path on it, and when the root has no
-    /// such subject.
+    /// Returns `None` for `this`, a path on `this`, and a pattern, and when
+    /// the root has no such subject.
     pub(crate) fn subject_binding(&self, subject: FlowSubjectId) -> Option<TextRange> {
         match subject_root(&self.subjects, subject)? {
             FlowSubject::Binding(range) => Some(*range),
-            FlowSubject::This | FlowSubject::Member { .. } => None,
+            FlowSubject::This | FlowSubject::Member { .. } | FlowSubject::Pattern(_) => None,
         }
     }
 }
@@ -300,11 +384,18 @@ pub(crate) struct ModuleFlow {
     candidates: FxHashMap<TextRange, AstPtr<AnyFlowExpression>>,
     /// The declarations of the bindings in [`RootFlow::property_only`].
     property_only_bindings: FxHashSet<TextRange>,
-    /// Maps the range of a candidate to the declaration of a binding in
-    /// [`Self::property_only_bindings`] when the candidate is, or contains,
-    /// reads of that binding and of no other subject. Such a candidate keeps
-    /// its type when no test of a property can narrow the binding.
+    /// Maps the range of a candidate to the declaration of the binding, or
+    /// the range of the pattern, whose reads alone make it a candidate. Such
+    /// a candidate is, or contains,
+    /// reads of one binding in [`Self::property_only_bindings`], or reads of
+    /// elements of one pattern in [`Self::pattern_types`] that no test of
+    /// the elements themselves reaches. It keeps its type when no test of a
+    /// property can narrow the binding or the pattern.
     property_only_candidates: FxHashMap<TextRange, TextRange>,
+    /// Maps the range of each [`FlowSubject::Pattern`] with reads to its
+    /// declared type, which is the collected type of the value that the
+    /// pattern destructures.
+    pattern_types: FxHashMap<TextRange, TypeReference>,
 }
 
 impl ModuleFlow {
@@ -373,18 +464,26 @@ impl ModuleFlow {
         self.property_only_bindings.contains(&range)
     }
 
-    /// Returns the declaration of the binding whose reads alone make the
-    /// expression at `range` a candidate. Returns `None` when the expression
-    /// is not a candidate, when it also reads another subject, and when
-    /// conditions can narrow the binding other than through
-    /// [`FlowGuard::Property`] guards.
+    /// Returns the declaration of the binding, or the range of the pattern,
+    /// whose reads alone make the expression at `range` a candidate. The
+    /// binding is one that conditions narrow only through tests of its
+    /// properties, and a pattern counts the reads of its elements that no
+    /// test of the elements themselves reaches.
     pub(crate) fn property_only_candidate(&self, range: TextRange) -> Option<TextRange> {
         self.property_only_candidates.get(&range).copied()
     }
 
+    /// Returns the declared type of the [`FlowSubject::Pattern`] at `range`,
+    /// which is the collected type of the value that the pattern
+    /// destructures, or `None` when `range` is not a pattern with reads.
+    pub(crate) fn pattern_type(&self, range: TextRange) -> Option<&TypeReference> {
+        self.pattern_types.get(&range)
+    }
+
     /// Records `expression` as a candidate. `binding` is the declaration of
-    /// the binding in [`Self::property_only_bindings`] whose read makes it a
-    /// candidate, or `None` for a read of another subject.
+    /// the binding in [`Self::property_only_bindings`], or the range of the
+    /// pattern in [`Self::pattern_types`], whose read alone makes
+    /// `expression` a candidate. It is `None` for a read of another subject.
     fn insert_candidate(&mut self, expression: &AnyFlowExpression, binding: Option<TextRange>) {
         let range = expression.range();
         let is_new = !self.candidates.contains_key(&range);
@@ -452,21 +551,34 @@ impl RootCollector<'_> {
         else {
             return;
         };
+        // A pattern's declared type is the collected type of the value it
+        // destructures. The collected type of each element destructures that
+        // value, so any element gives it.
+        let mut pattern_types: FxHashMap<FlowSubjectId, TypeReference> = FxHashMap::default();
+        for (element, (pattern, _)) in &subjects.pattern_elements {
+            if !pattern_types.contains_key(pattern)
+                && let Some(reference) = self.destructured_type(*element)
+            {
+                pattern_types.insert(*pattern, reference.clone());
+            }
+        }
         // A test of a property narrows its object only when the object's
-        // declared type is a union with at least two object types. A variable
-        // that only such tests mention keeps its declared type when it has no
-        // collected type, or when its collected type shows, without
-        // resolution, that it is not such a union. Dropping the variable here
-        // spares its reads the flow queries.
+        // declared type is a union with at least two object types, so a
+        // variable or a pattern that only such tests mention keeps its
+        // declared type when its collected type shows, without resolving it,
+        // that it is not one. Dropping it here spares its reads the flow
+        // queries.
         let unnarrowable: FxHashSet<FlowSubjectId> = property_only
             .iter()
             .copied()
-            .filter(|subject| match subjects.as_slice().get(*subject as usize) {
-                Some(FlowSubject::Binding(binding)) => self
-                    .raw_binding_types
-                    .get(binding)
-                    .is_none_or(|reference| !raw_may_be_object_union(reference, self.raw_types)),
-                Some(FlowSubject::This | FlowSubject::Member { .. }) | None => false,
+            .filter(|subject| {
+                let reference = match subjects.as_slice().get(*subject as usize) {
+                    Some(FlowSubject::Binding(binding)) => self.raw_binding_types.get(binding),
+                    Some(FlowSubject::Pattern(_)) => pattern_types.get(subject),
+                    Some(FlowSubject::This | FlowSubject::Member { .. }) | None => return false,
+                };
+                reference
+                    .is_none_or(|reference| !raw_may_be_object_union(reference, self.raw_types))
             })
             .collect();
         if !unnarrowable.is_empty() {
@@ -481,11 +593,21 @@ impl RootCollector<'_> {
                 Some(FlowSubject::Member { .. })
             )
         };
+        // A pattern narrows in the root that declares its elements, which all
+        // have the same declaration.
+        let local_patterns: FxHashSet<FlowSubjectId> = subjects
+            .pattern_elements
+            .iter()
+            .filter(|(element, _)| eligible.contains(*element))
+            .map(|(_, (pattern, _))| *pattern)
+            .collect();
         // The table stores `this` only when it can narrow.
         let root_can_narrow = |subject: FlowSubjectId| {
             subject_root(subjects.as_slice(), subject).is_some_and(|root| match root {
                 FlowSubject::Binding(binding) => eligible.contains(binding),
                 FlowSubject::This => true,
+                // A pattern has no paths, so it is `subject` itself.
+                FlowSubject::Pattern(_) => local_patterns.contains(&subject),
                 FlowSubject::Member { .. } => false,
             })
         };
@@ -540,40 +662,82 @@ impl RootCollector<'_> {
                         .is_none_or(|written| !written.cancels(subjects.as_slice(), *subject))
             })
             .collect();
+        // Returns the pattern that can narrow the element that `read` reads.
+        // A read through the pattern needs no test of the element itself.
+        let element_pattern = |read: &builder::BuiltRead| {
+            let Some(FlowSubject::Binding(binding)) =
+                subjects.as_slice().get(read.subject as usize)
+            else {
+                return None;
+            };
+            let (pattern, _) = subjects.pattern_element(*binding)?;
+            (eligible.contains(binding) && narrowable.contains(pattern)).then_some(*pattern)
+        };
         let reads: Vec<_> = reads
             .into_iter()
-            .filter(|read| narrowable.contains(&read.subject))
+            .filter(|read| narrowable.contains(&read.subject) || element_pattern(read).is_some())
             .collect();
         if reads.is_empty() {
             return;
         }
 
+        let walked: Vec<FlowSubjectId> = reads
+            .iter()
+            .flat_map(|read| {
+                [
+                    narrowable.contains(&read.subject).then_some(read.subject),
+                    element_pattern(read),
+                ]
+            })
+            .flatten()
+            .collect();
         let Some(reachable) = self.reachable_from_tests(
             &nodes,
             subjects.as_slice(),
             &mentions,
             &property_only,
-            &reads,
+            walked,
         ) else {
             return;
         };
         let index = flow.roots.len();
         let mut read_points: FxHashMap<_, Vec<_>> = FxHashMap::default();
+        let mut pattern_elements = FxHashMap::default();
         for read in reads {
-            if !reachable.contains(&(read.subject, read.point)) {
+            let own = narrowable.contains(&read.subject)
+                && reachable.contains(&(read.subject, read.point));
+            let pattern = element_pattern(&read)
+                .filter(|pattern| reachable.contains(&(*pattern, read.point)));
+            if !own && pattern.is_none() {
                 continue;
             }
-            read_points
-                .entry(read.subject)
-                .or_default()
-                .push(read.point);
-            let binding = match subjects.as_slice().get(read.subject as usize) {
-                Some(FlowSubject::Binding(binding)) if property_only.contains(&read.subject) => {
-                    flow.property_only_bindings.insert(*binding);
-                    Some(*binding)
+            let mut binding = None;
+            if own {
+                read_points
+                    .entry(read.subject)
+                    .or_default()
+                    .push(read.point);
+                if let Some(FlowSubject::Binding(range)) =
+                    subjects.as_slice().get(read.subject as usize)
+                    && property_only.contains(&read.subject)
+                {
+                    flow.property_only_bindings.insert(*range);
+                    binding = Some(*range);
                 }
-                _ => None,
-            };
+            }
+            if let Some(pattern) = pattern {
+                read_points.entry(pattern).or_default().push(read.point);
+                pattern_elements.insert(read.subject, pattern);
+                if let Some(FlowSubject::Pattern(range)) = subjects.as_slice().get(pattern as usize)
+                {
+                    if let Some(reference) = pattern_types.get(&pattern) {
+                        flow.pattern_types.insert(*range, reference.clone());
+                    }
+                    // A read of an element that is also tested itself is a
+                    // candidate for two reasons, so it is never skipped.
+                    binding = (!own).then_some(*range);
+                }
+            }
             let expression = read.expression;
             flow.insert_candidate(&expression, binding);
             for ancestor in expression.evaluated_ancestors() {
@@ -598,6 +762,7 @@ impl RootCollector<'_> {
                 guards: guards.into_boxed_slice(),
                 subjects: subjects.into_subjects().into_boxed_slice(),
                 property_only,
+                pattern_elements,
                 read_points: read_points
                     .into_iter()
                     .map(|(subject, mut points)| {
@@ -607,6 +772,23 @@ impl RootCollector<'_> {
                     })
                     .collect(),
             });
+        }
+    }
+
+    /// Returns the collected type of the value that the variable declared at
+    /// `element` destructures, as `s` in `const { v } = s`, or `None` when its
+    /// collected type destructures no value.
+    fn destructured_type(&self, element: TextRange) -> Option<&TypeReference> {
+        let TypeReference::Resolved(RawTypeId::Local(id)) = self.raw_binding_types.get(&element)?
+        else {
+            return None;
+        };
+        let RawTypeData::TypeofExpression(expression) = self.raw_types.get(id.index())? else {
+            return None;
+        };
+        match expression.as_ref() {
+            TypeofExpression::Destructure(destructure) => Some(&destructure.ty),
+            _ => None,
         }
     }
 
@@ -642,7 +824,7 @@ impl RootCollector<'_> {
     }
 
     /// Returns the `(subject, point)` pairs that a test of the subject can
-    /// reach, including the test itself.
+    /// reach, including the test itself, for each of the `walked` subjects.
     ///
     /// `property_only` holds the subjects that only tests of their properties
     /// narrow. Other variables are walked first, before property paths and
@@ -656,7 +838,7 @@ impl RootCollector<'_> {
         subjects: &[FlowSubject],
         mentions: &[(FlowNodeId, FlowSubjectId)],
         property_only: &FxHashSet<FlowSubjectId>,
-        reads: &[builder::BuiltRead],
+        mut walked: Vec<FlowSubjectId>,
     ) -> Option<FxHashSet<(FlowSubjectId, FlowNodeId)>> {
         let mut successors = vec![Vec::new(); nodes.len()];
         for (index, node) in (0..).zip(nodes) {
@@ -680,12 +862,11 @@ impl RootCollector<'_> {
                     Some(FlowSubject::Member { .. })
                 )
         };
-        let mut read_subjects: Vec<FlowSubjectId> = reads.iter().map(|read| read.subject).collect();
-        read_subjects.sort_unstable_by_key(|subject| (is_secondary(*subject), *subject));
-        read_subjects.dedup();
+        walked.sort_unstable_by_key(|subject| (is_secondary(*subject), *subject));
+        walked.dedup();
         let mut reachable = FxHashSet::default();
         let mut remaining = self.relevance_budget;
-        'subjects: for subject in read_subjects {
+        'subjects: for subject in walked {
             let mut seen = vec![false; nodes.len()];
             let mut pending: Vec<FlowNodeId> = mentions
                 .iter()
@@ -1023,6 +1204,78 @@ mod tests {
         // The annotation of `o` shows that it is not a union, so its read is
         // dropped without resolving anything.
         assert!(!info.flow.is_candidate(marked(SOURCE, "o", "o")));
+    }
+
+    #[test]
+    fn reads_of_elements_of_tested_patterns_are_candidates_named_by_the_pattern() {
+        const SOURCE: &str = r#"
+            declare function g(...values: unknown[]): void;
+            type S = { kind: "a"; v: 1 } | { kind: "b"; v: 2 };
+            function f({ kind, v }: S, x: string | null) {
+                if (kind === "a" && x) { /*v*/v; /*kind*/kind; /*call*/g(v); /*shared*/g(v, x); }
+            }
+        "#;
+        let info = module(SOURCE);
+        let read = info.flow.read(marked(SOURCE, "v", "v")).unwrap();
+        let root = info.flow.root(read.root).unwrap();
+        let pattern = root.element_pattern(read.subject).unwrap();
+        let Some(&super::FlowSubject::Pattern(range)) = root.subject(pattern) else {
+            panic!("an element must map to its pattern");
+        };
+        assert_eq!(&SOURCE[range], "{ kind, v }");
+        assert!(root.is_property_only(pattern));
+        assert!(info.flow.pattern_type(range).is_some());
+        // The read of `v` is a read point of the pattern, not of `v`, which
+        // no condition tests.
+        assert!(root.reads_at(pattern, read.point));
+        assert!(!root.reads_at(read.subject, read.point));
+        // `kind` is tested itself, so its read is a candidate for two reasons.
+        for (marker, expression, named) in [
+            ("v", "v", true),
+            ("kind", "kind", false),
+            ("call", "g(v)", true),
+            ("shared", "g(v, x)", false),
+        ] {
+            let candidate = marked(SOURCE, marker, expression);
+            assert!(info.flow.is_candidate(candidate), "{marker}");
+            assert_eq!(
+                info.flow.property_only_candidate(candidate),
+                named.then_some(range),
+                "{marker}"
+            );
+        }
+    }
+
+    #[test]
+    fn elements_of_patterns_that_cannot_narrow_are_not_candidates() {
+        const SOURCE: &str = r#"
+            type S = { kind: "a"; v: 1 } | { kind: "b"; v: 2 };
+            function mutable(s: S) { let { kind, v } = s; if (kind === "a") { /*mutable*/v; } }
+            function single(s: S) { const { kind } = s; const { v } = s; if (kind === "a") { /*single*/v; } }
+            function written({ kind, v }: S) { v = 2; if (kind === "a") { /*written*/v; } }
+            function enclosingDefault(w: { a?: S }, d: S) { const { a: { kind, v } = d } = w; if (kind === "a") { /*enclosingDefault*/v; } }
+            function closure({ kind, v }: S) { const h = () => { if (kind === "a") { /*closure*/v; } }; }
+            function notUnion({ a, b }: { a: string | null; b: number }) { if (a) { /*notUnion*/b; } }
+            function named({ kind, v }: S) { if (kind === "a") { /*named*/v; } }
+        "#;
+        let info = module(SOURCE);
+        for (marker, expected) in [
+            ("mutable", false),
+            ("single", false),
+            ("written", false),
+            ("enclosingDefault", false),
+            ("closure", false),
+            // The annotation shows that the value is not a union of objects.
+            ("notUnion", false),
+            ("named", true),
+        ] {
+            let expression = if marker == "notUnion" { "b" } else { "v" };
+            assert_eq!(
+                info.flow.is_candidate(marked(SOURCE, marker, expression)),
+                expected,
+                "{marker}"
+            );
+        }
     }
 
     #[test]
