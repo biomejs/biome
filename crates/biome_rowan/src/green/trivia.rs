@@ -148,8 +148,13 @@ impl GreenTrivia {
     }
 
     /// Converts the trivia into a pointer without decrementing its reference
-    /// count. The pointer is null for an empty trivia. The reference leaks
-    /// unless the pointer is passed to [Self::from_raw].
+    /// count.
+    ///
+    /// Returns a null pointer for [Self::empty], which has no allocation.
+    /// Every other trivia returns a non-null pointer, including one that
+    /// [Self::new] created from no pieces. A non-null pointer carries a
+    /// reference that leaks unless the pointer is passed to [Self::from_raw]
+    /// exactly once.
     pub(crate) fn into_raw(self) -> *mut () {
         self.ptr
             .map_or_else(ptr::null_mut, |ptr| ptr.into_raw().as_ptr())

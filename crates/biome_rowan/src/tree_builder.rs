@@ -362,6 +362,8 @@ mod tests {
         drop(root);
         assert_eq!(detached.to_string(), "a");
         assert_eq!(subtree.to_string(), "b");
+        // Leaves `token_text` as the only owner of its token.
+        drop(detached);
         assert_eq!(token_text.text(), "a");
     }
 

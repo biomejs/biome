@@ -549,8 +549,11 @@ impl<'a, H, T> ThinArcBorrow<'a, H, T> {
     ///
     /// # Safety
     ///
-    /// `ptr` must point to the allocation of a `ThinArc<H, T>` that stays alive
-    /// for `'a`.
+    /// `ptr` must point to the allocation of a `ThinArc<H, T>`. The borrow
+    /// doesn't own a reference, so the caller must keep the allocation alive
+    /// for `'a`. Nothing may access the allocation exclusively during `'a`,
+    /// because the borrow hands out shared references to the header and the
+    /// items for that long.
     #[inline]
     pub(crate) unsafe fn from_ptr(ptr: NonNull<()>) -> Self {
         Self {
