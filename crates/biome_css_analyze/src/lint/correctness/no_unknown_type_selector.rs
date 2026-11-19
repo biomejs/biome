@@ -122,10 +122,6 @@ declare_lint_rule! {
     /// Type selector names containing SCSS interpolation are ignored because the emitted name cannot
     /// be determined statically.
     ///
-    /// `from` and `to` aren't reported as the whole selector of a rule directly inside a `@mixin`
-    /// body or an `@include` block, because Sass can place them inside `@keyframes`, where they are
-    /// keyframe selectors.
-    ///
     /// ## Examples
     ///
     /// ### Invalid
