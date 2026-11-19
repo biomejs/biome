@@ -238,8 +238,8 @@ fn unknown_compares_with_literals_and_keeps_other_comparisons() {
 // TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type,
 // except where a comment gives TypeScript's type. `instanceof` gives an
 // instance of a generic class `any` type arguments, as `Map<any, any>`, and a
-// type-guard function with a `null` or `undefined` target leaves the other
-// two of `{} | null | undefined` in its `else` branch.
+// type-guard function with a `null`, `undefined`, or `{}` target leaves the
+// other two of `{} | null | undefined` in its `else` branch.
 #[test]
 fn unknown_narrows_through_properties_instanceof_and_type_predicates() {
     assert_reads(
@@ -273,8 +273,7 @@ fn unknown_narrows_through_properties_instanceof_and_type_predicates() {
             ("L21_45", "x", &["null"]),
             ("L21_67", "x", &[EMPTY, "undefined"]),
             ("L22_44", "x", &[EMPTY]),
-            // `null | undefined`
-            ("L22_66", "x", &["unknown"]),
+            ("L22_66", "x", &["null", "undefined"]),
             ("L8_54", "x", &[EMPTY]),
         ],
     );
@@ -664,6 +663,52 @@ fn instance_tested_any_narrows_as_annotated_any() {
             ("L30_47", "x.v", &["Unknown"]),
             // `A`
             ("L31_62", "a", &["Unknown"]),
+        ],
+    );
+}
+
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type,
+// except where a comment gives TypeScript's type. The `else` branch of a type
+// predicate tests `unknown` as `{} | null | undefined`, removes each member
+// that the target keeps as it is, and gives `unknown` back when every member
+// stays, as for an `object` or an interface target.
+#[test]
+fn type_predicates_with_an_empty_object_target_narrow_unknown_in_their_else_branch() {
+    assert_reads(
+        r#"
+        export {};
+        interface Foo { a: number }
+        type E = {};
+        declare function isE(v: unknown): v is {};
+        declare function isEA(v: unknown): v is E;
+        declare function isO(v: unknown): v is object;
+        declare function isEN(v: unknown): v is {} | null;
+        declare function isFoo(v: unknown): v is Foo;
+        declare function isSE(v: unknown): v is string | {};
+        interface Empty {}
+        declare function isEmpty(v: unknown): v is Empty;
+        function u2(x: unknown) { if (isEA(x)) {} else /*alias*/x; }
+        function u3(x: unknown) { if (isO(x)) {} else /*object*/x; }
+        function u5(x: unknown) { if (isEN(x)) {} else /*orNull*/x; }
+        function u8(x: unknown) { if (isFoo(x)) {} else /*foo*/x; }
+        function u9(x: unknown) { if (isSE(x)) {} else /*orString*/x; }
+        function u12(x: unknown) { if (!isE(x)) /*negated*/x; }
+        function u13(x: unknown) { if (isE(x)) {} else if (x === null) {} else /*thenNull*/x; }
+        function u15(x: {} | null | undefined) { if (isE(x)) {} else /*union*/x; }
+        function u11(x: unknown) { if (isEmpty(x)) {} else /*interface*/x; }
+        "#,
+        &[
+            ("alias", "x", &["null", "undefined"]),
+            ("object", "x", &["unknown"]),
+            ("orNull", "x", &["undefined"]),
+            ("foo", "x", &["unknown"]),
+            ("orString", "x", &["null", "undefined"]),
+            ("negated", "x", &["null", "undefined"]),
+            ("thenNull", "x", &["undefined"]),
+            ("union", "x", &["null", "undefined"]),
+            // TypeScript: `null | undefined`. `{}` and an empty interface are
+            // subtypes of each other, so Biome keeps `{}`.
+            ("interface", "x", &["unknown"]),
         ],
     );
 }

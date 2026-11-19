@@ -1652,8 +1652,10 @@ pub fn may_narrow_by_instanceof(db: &dyn TypeDb, declared: InferredTypeData) -> 
 /// predicate targeting `Foo` gives `Same` in Biome's true branch and
 /// `Same | Bar` in its false branch. TypeScript gives `Same` and `Bar`,
 /// respectively. The false branch also keeps a member when Biome can tell only
-/// that a member of `target` is a subtype of it. It keeps `unknown`, and it
-/// keeps every member when the true branch is empty.
+/// that a member of `target` is a subtype of it. It keeps every member when
+/// the true branch is empty. It tests `unknown` as `{} | null | undefined`
+/// and gives `unknown` back when every member stays, so a target of `{}`
+/// leaves `null | undefined`, and a target of `Foo` leaves `unknown`.
 ///
 /// `any` becomes `target` when `positive` is true and stays `any` when it is
 /// false, as in TypeScript, whatever the target. TypeScript gives `never` in
@@ -2020,7 +2022,21 @@ fn predicate_branch<'db>(
         return None;
     }
     if ty == InferredTypeData::UnknownKeyword {
-        return positive.then_some(target);
+        if positive {
+            return Some(target);
+        }
+        // The false branch tests `unknown` as `{} | null | undefined`, and
+        // keeps `unknown` when every member stays.
+        let split = InferredTypeData::union_from_types(
+            db,
+            vec![
+                empty_object(db),
+                InferredTypeData::Null,
+                InferredTypeData::Undefined,
+            ],
+        );
+        let narrowed = predicate_branch(db, split, target, false, resolve)?;
+        return Some(if narrowed == split { ty } else { narrowed });
     }
     let members = union_members(db, ty, &mut remaining)?;
     if members.contains(&InferredTypeData::UnknownKeyword) {
@@ -6949,6 +6965,18 @@ mod tests {
                 foo,
                 false,
                 InferredTypeData::UnknownKeyword,
+            ),
+            (
+                InferredTypeData::UnknownKeyword,
+                super::empty_object(db),
+                false,
+                union(db, &[InferredTypeData::Null, InferredTypeData::Undefined]),
+            ),
+            (
+                InferredTypeData::UnknownKeyword,
+                union(db, &[super::empty_object(db), InferredTypeData::Null]),
+                false,
+                InferredTypeData::Undefined,
             ),
             // `optional` replaces `IA`, which lacks its optional property, so
             // the `else` branch keeps `IA`.

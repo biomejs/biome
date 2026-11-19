@@ -117,6 +117,7 @@ These results match TypeScript's and can surprise a reader.
 | `instanceof` on `unknown` | `x: unknown; if (x instanceof Map) x` | `Map<any, any>` |
 | `in` where no member declares the key | `x: { b: 1 }; if ("a" in x) x` | `{ b: 1 } & Record<"a", unknown>` |
 | A type-guard function with an unrelated target | `x: Bar; if (isFoo(x)) x` | `Bar & Foo` |
+| A type-guard function for `{}` on `unknown` | `isObj(v: unknown): v is {}; x: unknown; if (isObj(x)) {} else x` | `null \| undefined` |
 | `typeof` that replaces an object type | `interface Len { length: number }; x: number \| Len; if (typeof x === "string") x` | `string` |
 | `any` with `typeof` | `x: any; if (typeof x === "string") x` | `string` |
 | `any` with other checks | `x: any; if (x === "a") x` | `any` |
@@ -472,7 +473,7 @@ or a computed key.
 | `class P1 { a = 1 }; class P2 { a = 1 }; k(v: unknown, c: P1): v is string; k(v: unknown, c: unknown): v is number; x: string \| number; c: P2; if (k(x, c)) x` | `string` | `string \| number` | `noUnnecessaryConditions` can miss an unnecessary check of `x`. |
 | `x: string \| number; if (isFoo(x)) x` | `(string \| number) & Foo` | `string \| number` | A rule can miss a report on `x`. |
 | `interface Same { a: number }; x: Same \| Bar; if (isFoo(x)) {} else x` | `Bar` | `Same \| Bar` | `noUnnecessaryConditions` can miss an unnecessary check of `x`. |
-| `isObj(v: unknown): v is {}; x: unknown; if (isObj(x)) {} else x` | `null \| undefined` | `unknown` | `noUnnecessaryConditions` can miss an unnecessary check of `x`. |
+| `interface Empty {}; isEmpty(v: unknown): v is Empty; x: unknown; if (isEmpty(x)) {} else x` | `null \| undefined` | `unknown` | `noUnnecessaryConditions` can miss an unnecessary check of `x`. |
 | `x: { y: string \| number } \| undefined; if (isString(x?.y)) x` | `{ y: string \| number }` | `{ y: string \| number } \| undefined` | `noUnnecessaryConditions` can miss an unnecessary `?.` on `x`. |
 
 Biome skips an earlier overload only when no narrowing could make it accept
