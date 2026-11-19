@@ -1022,44 +1022,78 @@ fn assignments_from_array_elements_and_to_string_enums() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives `number | undefined` at every read
-// below, the return type that it infers for `helperImpl`. An export of a
-// declaration file, a member of an interface that a declaration file
-// declares, and a member that a declaration file adds to a global interface
-// count as annotated when typed `typeof helperImpl`, so a call of them
-// assigns the return type that Biome infers for `helperImpl`. Biome doesn't
-// see a variable that `declare global` declares, and doesn't count a member
-// of a type literal, so a call of them keeps the declared type.
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the type in its
+// comment. A value that a declaration file types as `typeof` a function
+// returns what the function returns, so a call of it has a return type from
+// an annotation only when the function has one, or is declared in a
+// declaration file. This holds for an export, a member of an interface or a
+// class, and a member added to a global interface, also through a chain of
+// `typeof`. `helperImpl` and `kindImpl` have no return type annotation, so a
+// call through them keeps the declared type, as a direct call of an imported
+// function without one does. TypeScript gives `kindImpl` every result of
+// `typeof`, where Biome types `typeof v` as `"string"`. Biome doesn't see a
+// variable that `declare global` declares, so a call of it keeps the
+// declared type too.
 #[test]
 fn calls_through_typeof_a_function_in_a_declaration_file() {
     assert_reads_with(
         r#"
-        import { exported, typed, holder } from "./globals";
+        import { exported, typed, holder, kind, annotatedKind, viaLocal, viaChain, klass } from "./globals";
         import "./augment";
-        function a1() { let x: number | string | undefined = helper(c); /*globalVariable*/x; }
-        function a2() { let x: number | string | undefined = [1].helperMember(c); /*globalMember*/x; }
-        function a3() { let x: number | string | undefined = exported(c); /*exported*/x; }
-        function a4() { let x: number | string | undefined = typed.m(c); /*typeLiteral*/x; }
-        function a5() { let x: number | string | undefined = moduleHelper(c); /*moduleGlobal*/x; }
-        function a6() { let x: number | string | undefined = holder.m(c); /*interfaceMember*/x; }
+        declare const s: string;
+        type Kind = "bigint" | "boolean" | "function" | "number" | "object" | "string" | "symbol" | "undefined";
+        function a1() { let x: number | string | undefined = helper(c); /*globalVariable*/x; } // number | undefined
+        function a2() { let x: number | string | undefined = [1].helperMember(c); /*globalMember*/x; } // number | undefined
+        function a3() { let x: number | string | undefined = exported(c); /*exported*/x; } // number | undefined
+        function a4() { let x: number | string | undefined = typed.m(c); /*typeLiteral*/x; } // number | undefined
+        function a5() { let x: number | string | undefined = moduleHelper(c); /*moduleGlobal*/x; } // number | undefined
+        function a6() { let x: number | string | undefined = holder.m(c); /*interfaceMember*/x; } // number | undefined
+        function k1() { let x: Kind; x = kind(s); /*kindExport*/x; } // Kind
+        function k2() { let x: Kind; x = annotatedKind(s); /*annotatedExport*/x; } // "string"
+        function k3() { let x: Kind; x = holder.kind(s); /*kindMember*/x; } // Kind
+        function k4() { let x: Kind; x = holder.annotatedKind(s); /*annotatedMember*/x; } // "string"
+        function k5() { let x: Kind; x = [1].kindMember(s); /*kindGlobalMember*/x; } // Kind
+        function k6() { let x: Kind; x = [1].annotatedKindMember(s); /*annotatedGlobalMember*/x; } // "string"
+        function k7() { let x: Kind; x = viaLocal(s); /*viaLocal*/x; } // "string"
+        function k8() { let x: Kind; x = viaChain(s); /*viaChain*/x; } // Kind
+        function k9() { let x: Kind; x = klass.m(s); /*classProperty*/x; } // Kind
         "#,
         &[
             (
                 "/src/impl.ts",
-                "export function helperImpl(c: boolean) { if (c) return 1; }",
+                r#"
+                export function helperImpl(c: boolean) { if (c) return 1; }
+                export function kindImpl(v: string) { return typeof v; }
+                export function annotatedKindImpl(v: string): "string" { return "string"; }
+                "#,
             ),
             (
                 "/src/globals.d.ts",
                 r#"
-                import { helperImpl } from "./impl";
+                import { helperImpl, kindImpl, annotatedKindImpl } from "./impl";
                 declare global {
                   var helper: typeof helperImpl;
-                  interface Array<T> { helperMember: typeof helperImpl; }
+                  interface Array<T> {
+                    helperMember: typeof helperImpl;
+                    kindMember: typeof kindImpl;
+                    annotatedKindMember: typeof annotatedKindImpl;
+                  }
                 }
                 export declare const exported: typeof helperImpl;
                 export declare const typed: { m: typeof helperImpl };
-                export interface Holder { m: typeof helperImpl }
+                export interface Holder {
+                  m: typeof helperImpl;
+                  kind: typeof kindImpl;
+                  annotatedKind: typeof annotatedKindImpl;
+                }
                 export declare const holder: Holder;
+                export declare const kind: typeof kindImpl;
+                export declare const annotatedKind: typeof annotatedKindImpl;
+                declare function localKind(v: string): "string";
+                export declare const viaLocal: typeof localKind;
+                export declare const viaChain: typeof kind;
+                export declare class Klass { m: typeof kindImpl; }
+                export declare const klass: Klass;
                 "#,
             ),
             (
@@ -1072,15 +1106,34 @@ fn calls_through_typeof_a_function_in_a_declaration_file() {
             ),
         ],
         &[
-            // TypeScript: `number | undefined`.
             ("globalVariable", "x", &["number", "string", "undefined"]),
-            ("globalMember", "x", &["number", "undefined"]),
-            ("exported", "x", &["number", "undefined"]),
-            // TypeScript: `number | undefined`.
+            ("globalMember", "x", &["number", "string", "undefined"]),
+            ("exported", "x", &["number", "string", "undefined"]),
             ("typeLiteral", "x", &["number", "string", "undefined"]),
-            // TypeScript: `number | undefined`.
             ("moduleGlobal", "x", &["number", "string", "undefined"]),
-            ("interfaceMember", "x", &["number", "undefined"]),
+            ("interfaceMember", "x", &["number", "string", "undefined"]),
+            ("kindExport", "x", KIND),
+            ("annotatedExport", "x", &["string: string"]),
+            ("kindMember", "x", KIND),
+            ("annotatedMember", "x", &["string: string"]),
+            ("kindGlobalMember", "x", KIND),
+            ("annotatedGlobalMember", "x", &["string: string"]),
+            ("viaLocal", "x", &["string: string"]),
+            ("viaChain", "x", KIND),
+            ("classProperty", "x", KIND),
         ],
     );
 }
+
+/// The members of `Kind` in [`calls_through_typeof_a_function_in_a_declaration_file`],
+/// every result of `typeof`.
+const KIND: &[&str] = &[
+    "string: bigint",
+    "string: boolean",
+    "string: function",
+    "string: number",
+    "string: object",
+    "string: string",
+    "string: symbol",
+    "string: undefined",
+];
