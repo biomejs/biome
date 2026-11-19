@@ -361,9 +361,6 @@ fn tests_of_properties_that_are_not_discriminants_keep_the_object() {
         function possiblyUndefined(s: Shape | undefined) { if (s.kind === "c") /*possiblyUndefined*/s; }
         function predicate(s: Shape) { if (isC(s.kind)) /*predicate*/s; }
         function single(o: Circle) { if (o.kind === "c") /*single*/o; }
-        // TypeScript gives `Circle`: loose equality with a literal does not
-        // narrow yet.
-        function loose(s: Shape) { if (s.kind == "c") /*loose*/s; }
         "#,
         &[
             (
@@ -416,7 +413,6 @@ fn tests_of_properties_that_are_not_discriminants_keep_the_object() {
             ("possiblyUndefined", "s", &["Circle", "Square", "undefined"]),
             ("predicate", "s", &["Circle", "Square"]),
             ("single", "o", &["Circle"]),
-            ("loose", "s", &["Circle", "Square"]),
         ],
     );
 }
@@ -1144,22 +1140,20 @@ fn discriminants_held_at_the_top_level_follow_exports() {
 // anywhere else, so Biome also gives `Circle` at `inSwitch`, `forOf`,
 // `closure`, and `patternClosure`. Biome keeps the declared type at the
 // other reads, because it doesn't follow `s!` and keys that are spelled
-// differently from the property, loose equality doesn't narrow an object,
-// and a `const` exported by an `export { ... }` list holds nothing.
+// differently from the property, and a `const` exported by an
+// `export { ... }` list holds nothing.
 #[test]
 fn discriminant_constants_that_biome_does_not_follow_keep_the_object() {
     assert_reads(
         r#"
         declare function make(): Shape;
         function nonNull(s: Shape) { const k = s!.kind; if (k === "c") /*nonNull*/s; }
-        function loose(s: Shape) { const k = s.kind; if (k == "c") /*loose*/s; }
         function closure(s: Shape) { const k = s.kind; const g = () => { if (k === "c") /*closure*/s; }; }
         function escapedString(s: Shape) { const k = s["\u006bind"]; if (k === "c") /*escapedString*/s; }
         function hexadecimal(t: ["a", number] | ["b", string]) { const k = t[0x0]; if (k === "a") /*hexadecimal*/t; }
         function template(s: Shape) { const { [`kind`]: k } = s; if (k === "c") /*template*/s; }
         function escapedStringKey(s: Shape) { const { "\u006bind": k } = s; if (k === "c") /*escapedStringKey*/s; }
         function patternClosure(s: Shape) { const { kind } = s; const g = () => { if (kind === "c") /*patternClosure*/s; }; }
-        function looseKey(s: Shape) { const { kind } = s; if (kind == "c") /*looseKey*/s; }
         function hexadecimalKey(t: ["a", number] | ["b", string]) { const { 0x0: k } = t; if (k === "a") /*hexadecimalKey*/t; }
         function forOf(s: Shape) { const k = s.kind; for (const x of [1]) { if (k === "c") /*forOf*/s; } }
         function inSwitch(s: Shape) { const k = s.kind; switch (true) { default: if (k === "c") /*inSwitch*/s; } }
@@ -1170,7 +1164,6 @@ fn discriminant_constants_that_biome_does_not_follow_keep_the_object() {
         "#,
         &[
             ("nonNull", "s", &["Circle", "Square"]),
-            ("loose", "s", &["Circle", "Square"]),
             ("closure", "s", &["Circle"]),
             ("escapedString", "s", &["Circle", "Square"]),
             (
@@ -1181,7 +1174,6 @@ fn discriminant_constants_that_biome_does_not_follow_keep_the_object() {
             ("template", "s", &["Circle", "Square"]),
             ("escapedStringKey", "s", &["Circle", "Square"]),
             ("patternClosure", "s", &["Circle"]),
-            ("looseKey", "s", &["Circle", "Square"]),
             (
                 "hexadecimalKey",
                 "t",
@@ -1535,11 +1527,11 @@ fn destructured_elements_that_do_not_narrow_each_other() {
 
 // TypeScript 7.0.2 (`tsc --strict`) gives `number` at every read below. A
 // test in a closure narrows the pattern of the enclosing function there, as
-// in TypeScript, so `closure` gives `number`. Biome keeps the declared type
-// at `loose` and `enclosingDefault`, because loose `==` with a literal
-// doesn't narrow an object, and an element under a default of an
-// enclosing pattern never narrows because its declared type ignores the
-// default. Biome also gives the declared type `unknown`, which no test
+// in TypeScript, so `closure` gives `number`, and loose `==` with a literal
+// narrows the pattern as `===` does, so `loose` gives `number`. Biome keeps
+// the declared type at `enclosingDefault`, because an element under a
+// default of an enclosing pattern never narrows because its declared type
+// ignores the default. Biome also gives the declared type `unknown`, which no test
 // narrows, to an element destructured from `s!`, a parameter destructured in
 // a function that a variable annotation types, and the parameters of a
 // function typed by a rest parameter whose type is a union of tuples.
@@ -1556,7 +1548,7 @@ fn destructured_elements_that_biome_does_not_narrow_yet() {
         const dependent: (...args: ["a", number] | ["b", string]) => void = (k, x) => { if (k === "a") /*dependent*/x; };
         "#,
         &[
-            ("loose", "v", &["number", "string"]),
+            ("loose", "v", &["number"]),
             ("enclosingDefault", "v", &["number", "string"]),
             ("closure", "v", &["number"]),
             ("nonNull", "v", &["unknown"]),
@@ -1699,4 +1691,51 @@ fn complete_module_inference_narrows_destructured_elements_as_lookups_do() {
             Some(expected)
         );
     }
+}
+
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type,
+// except `d7t`. Loose `==` and `!=` with a literal narrow a discriminated
+// union as `===` and `!==` do, through a property, an optional chain, a
+// `const` that holds the property, and an element of a destructuring
+// pattern, and a literal of another kind is removed when it never loosely
+// equals the compared one, as `"c"` for `== 1`. At `d7t`, TypeScript reports
+// that `"1" | 2` and `1` have no overlap (TS2367) and gives `never`, where
+// Biome keeps the member whose `"1"` converts to `1`, which is wider.
+#[test]
+fn loose_equality_of_a_discriminant_narrows_the_object() {
+    assert_reads(
+        r#"
+        interface Num { kind: 1; n: number }
+        function d1(s: Shape) { if (s.kind == "c") /*d1t*/s; else /*d1f*/s; }
+        function d2(s: Circle | Num) { if (s.kind == 1) /*d2t*/s; else /*d2f*/s; }
+        function d3(s: Shape | undefined) { if (s?.kind == "c") /*d3t*/s; }
+        function d4(s: Shape) { const { kind, ...rest } = s; if (kind == "c") /*d4t*/s; }
+        function d5(s: Shape) { const k = s.kind; if (k == "c") /*d5t*/s; }
+        function d6(s: Circle | Num) { if (s.kind != "c") /*d6t*/s; }
+        function d7(s: { k: "1"; a: 1 } | { k: 2; b: 2 }) { if (s.k == 1) /*d7t*/s; else /*d7f*/s; }
+        function d8(s: Shape) { const { kind, r } = s as Circle; if (kind == "c") /*d8t*/r; }
+        function d9({ kind, w }: Shape) { if (kind != "c") /*d9t*/w; }
+        "#,
+        &[
+            ("d1t", "s", &["Circle"]),
+            ("d1f", "s", &["Square"]),
+            ("d2t", "s", &["Num"]),
+            ("d2f", "s", &["Circle"]),
+            ("d3t", "s", &["Circle"]),
+            ("d4t", "s", &["Circle"]),
+            ("d5t", "s", &["Circle"]),
+            ("d6t", "s", &["Num"]),
+            ("d7t", "s", &[r#"["k": string: 1, "a": number: 1]"#]),
+            (
+                "d7f",
+                "s",
+                &[
+                    r#"["k": number: 2, "b": number: 2]"#,
+                    r#"["k": string: 1, "a": number: 1]"#,
+                ],
+            ),
+            ("d8t", "r", &["number"]),
+            ("d9t", "w", &["number"]),
+        ],
+    );
 }
