@@ -1,4 +1,4 @@
-use super::builder::{AnyInlineCode, MAX_DEPTH, has_operands, is_var, mutated_array};
+use super::builder::{AnyInlineCode, MAX_DEPTH, has_operands, inner_link, is_var, mutated_array};
 use biome_js_control_flow::AnyJsControlFlowRoot;
 use biome_js_syntax::{
     AnyJsBinding, AnyJsBindingPattern, AnyJsExpression, AnyJsForInOrOfInitializer,
@@ -392,21 +392,26 @@ fn is_evaluation_condition(node: &JsSyntaxNode) -> bool {
     if !link.is_optional() {
         return false;
     }
-    // The links that follow `node` in its chain enclose it as their object.
+    // The links that follow `node` in its chain enclose it as their object,
+    // also through non-null assertions.
     loop {
         if has_operands(&link) {
             return true;
         }
         let Some(outer) = link
             .syntax()
-            .parent()
+            .ancestors()
+            .skip(1)
+            .find(|ancestor| ancestor.kind() != JsSyntaxKind::TS_NON_NULL_ASSERTION_EXPRESSION)
             .and_then(AnyJsOptionalChainExpression::cast)
         else {
             return false;
         };
         if !outer
             .object()
-            .is_ok_and(|object| object.syntax() == link.syntax())
+            .ok()
+            .and_then(|object| inner_link(&object))
+            .is_some_and(|inner| inner.syntax() == link.syntax())
         {
             return false;
         }

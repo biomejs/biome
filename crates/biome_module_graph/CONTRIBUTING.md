@@ -685,9 +685,11 @@ the arguments run, and the value of an element assignment with `=`
 assignment of `[]` an `EmptyArray` one. `WrittenTargets::mutations` lists the
 variables that they add to.
 
-**Optional chains.** The code after an optional chain continues from the
-flow after its root, unless a key or an argument has a write node; then each
-`?.`'s short circuit joins the chain's end. A `?.` whose object the raw tables
+**Optional chains.** A chain runs through non-null assertions, as
+`x?.a!.b(x)` does at runtime, but parentheses end it (`inner_link`). The code
+after an optional chain continues from the flow after its root, unless a key
+or an argument has a write node; then each `?.`'s short circuit joins the
+chain's end. A `?.` whose object the raw tables
 show can't be nullish (`raw_may_be_nullish`), such as a variable that holds
 an object literal, adds no condition, so it doesn't make the object a tested
 subject.

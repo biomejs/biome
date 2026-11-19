@@ -750,6 +750,33 @@ fn never_has(expression: &AnyJsExpression, truthy: bool, remaining: &mut usize) 
 /// operand: the key of a computed member access, as `k` in `x?.[k]`, or the
 /// arguments of a call, as `y` in `x?.f(y)`. A `?.` before such a link
 /// evaluates the operand only when its object is not nullish.
+/// Returns the link of a chain that `object`, the object of another link,
+/// is, looking through non-null assertions, as `x?.a` in `x?.a!.b`. A
+/// non-null assertion doesn't end an optional chain, because `x?.a!.b` runs
+/// as `x?.a.b`, while parentheses do.
+pub(super) fn inner_link(object: &AnyJsExpression) -> Option<AnyJsOptionalChainExpression> {
+    let mut object = object.clone();
+    while let AnyJsExpression::TsNonNullAssertionExpression(assertion) = object {
+        object = assertion.expression().ok()?;
+    }
+    AnyJsOptionalChainExpression::cast(object.into_syntax())
+}
+
+/// Returns whether `link` belongs to an optional chain: it or a link inside
+/// it, through non-null assertions as [`inner_link`] finds them, has `?.`.
+fn is_optional_chain(link: &AnyJsOptionalChainExpression) -> bool {
+    let mut link = link.clone();
+    loop {
+        if link.is_optional() {
+            return true;
+        }
+        match link.object().ok().and_then(|object| inner_link(&object)) {
+            Some(inner) => link = inner,
+            None => return false,
+        }
+    }
+}
+
 pub(super) fn has_operands(link: &AnyJsOptionalChainExpression) -> bool {
     match link {
         AnyJsOptionalChainExpression::JsStaticMemberExpression(_) => false,
@@ -2960,7 +2987,7 @@ impl RootBuilder<'_, '_> {
             return Ok(incoming);
         }
         if let Some(chain) = AnyJsOptionalChainExpression::cast_ref(node)
-            && chain.is_optional_chain()
+            && is_optional_chain(&chain)
         {
             return self.optional_chain(&chain, incoming, depth);
         }
@@ -3098,7 +3125,8 @@ impl RootBuilder<'_, '_> {
     /// the key or arguments of each link outward. Parentheses end a chain, as
     /// for [`AnyJsOptionalChainExpression::is_optional_chain`] and the
     /// receivers of a runtime test, so the root of `(x?.a)?.b(y)` is
-    /// `(x?.a)`.
+    /// `(x?.a)`. A non-null assertion doesn't, as in TypeScript, so `x` is not
+    /// nullish in the arguments of `x?.a!.b(x)`.
     ///
     /// When its object is nullish, a `?.` gives `undefined` without evaluating
     /// the rest of the chain. So each `?.` that a key or arguments follow adds
@@ -3129,7 +3157,7 @@ impl RootBuilder<'_, '_> {
         let mut link = chain.clone();
         let root = loop {
             let object = link.object().map_err(|_| Unsupported)?;
-            let inner = AnyJsOptionalChainExpression::cast_ref(object.syntax());
+            let inner = inner_link(&object);
             links.push((link, object));
             match inner {
                 Some(inner) => {
