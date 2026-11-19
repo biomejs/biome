@@ -1099,6 +1099,473 @@ fn test_infer_module_types_removes_undefined_from_destructuring_defaults_on_buil
 }
 
 #[test]
+fn test_infer_module_types_removes_undefined_from_parameter_defaults_on_build() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            export function withDefault(defaulted: string | undefined = "value") {
+                return defaulted;
+            }
+            export function withNullableDefault(nullable: string | null | undefined = "value") {
+                return nullable;
+            }
+            export function withoutDefault(plain: string | undefined) {
+                return plain;
+            }
+            export function pattern({ inner }: { inner: string | undefined } = { inner: "x" }) {
+                return inner;
+            }
+            export function withObjectDefault(objectDefault: { a: string } | undefined = {}) {
+                return objectDefault;
+            }
+            export function withUndefinedDefault(undefinedDefault: string | undefined = undefined) {
+                return undefinedDefault;
+            }
+            declare const other: string | null | undefined;
+            export function withReferenceDefault(referenceDefault: string | null | undefined = other) {
+                return referenceDefault;
+            }
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let index_module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, index_module).expect("types must be inferred");
+    let binding_ty = |name| {
+        let ty = inferred_binding_ty_by_name(&db, index_module, inferred, name)
+            .unwrap_or_else(|| panic!("{name} binding type must be inferred"));
+        inferred.resolve_type(&db, ty)
+    };
+
+    let defaulted = binding_ty("defaulted");
+    assert!(contains_inferred_string(&db, defaulted), "{defaulted:?}");
+    assert!(
+        !contains_inferred_undefined(&db, defaulted),
+        "{defaulted:?}"
+    );
+
+    let nullable = binding_ty("nullable");
+    assert!(contains_inferred_string(&db, nullable), "{nullable:?}");
+    assert!(contains_inferred_null(&db, nullable), "{nullable:?}");
+    assert!(!contains_inferred_undefined(&db, nullable), "{nullable:?}");
+
+    let plain = binding_ty("plain");
+    assert!(contains_inferred_undefined(&db, plain), "{plain:?}");
+
+    let inner = binding_ty("inner");
+    assert!(contains_inferred_string(&db, inner), "{inner:?}");
+    assert!(contains_inferred_undefined(&db, inner), "{inner:?}");
+
+    let object_default = binding_ty("objectDefault");
+    assert!(
+        contains_inferred_object(&db, object_default),
+        "{object_default:?}"
+    );
+    assert!(
+        !contains_inferred_undefined(&db, object_default),
+        "{object_default:?}"
+    );
+
+    let undefined_default = binding_ty("undefinedDefault");
+    assert!(
+        contains_inferred_string(&db, undefined_default),
+        "{undefined_default:?}"
+    );
+    assert!(
+        contains_inferred_undefined(&db, undefined_default),
+        "an `undefined` default must keep undefined: {undefined_default:?}"
+    );
+
+    let reference_default = binding_ty("referenceDefault");
+    assert!(
+        contains_inferred_null(&db, reference_default),
+        "{reference_default:?}"
+    );
+    assert!(
+        contains_inferred_undefined(&db, reference_default),
+        "a possibly undefined default must keep undefined: {reference_default:?}"
+    );
+
+    let function = binding_ty("withDefault")
+        .callable_function(&db)
+        .expect("withDefault must be callable");
+    let parameter = inferred.resolve_type(&db, function.parameters(&db)[0].ty());
+    assert!(
+        contains_inferred_undefined(&db, parameter),
+        "the signature must still accept undefined: {parameter:?}"
+    );
+}
+
+type InferredTypePredicate = for<'db> fn(&'db dyn ModuleDb, InferredTypeData<'db>) -> bool;
+
+fn contains_inferred_where<'db>(
+    db: &'db dyn ModuleDb,
+    ty: InferredTypeData<'db>,
+    predicate: &dyn Fn(InferredTypeData<'db>) -> bool,
+) -> bool {
+    if predicate(ty) {
+        return true;
+    }
+
+    match ty {
+        InferredTypeData::Union(union) => union
+            .types(db)
+            .iter()
+            .any(|ty| contains_inferred_where(db, *ty, predicate)),
+        _ => false,
+    }
+}
+
+fn contains_inferred_function<'db>(db: &'db dyn ModuleDb, ty: InferredTypeData<'db>) -> bool {
+    contains_inferred_where(db, ty, &|ty| matches!(ty, InferredTypeData::Function(_)))
+}
+
+fn contains_inferred_constructor<'db>(db: &'db dyn ModuleDb, ty: InferredTypeData<'db>) -> bool {
+    contains_inferred_where(db, ty, &|ty| matches!(ty, InferredTypeData::Constructor(_)))
+}
+
+fn contains_inferred_object<'db>(db: &'db dyn ModuleDb, ty: InferredTypeData<'db>) -> bool {
+    contains_inferred_where(db, ty, &|ty| matches!(ty, InferredTypeData::Object(_)))
+}
+
+fn contains_inferred_bigint<'db>(db: &'db dyn ModuleDb, ty: InferredTypeData<'db>) -> bool {
+    contains_inferred_where(db, ty, &|ty| {
+        ty == InferredTypeData::BigInt
+            || matches!(
+                ty,
+                InferredTypeData::Literal(literal)
+                    if matches!(literal.literal(db), InferredLiteral::BigInt(_))
+            )
+    })
+}
+
+#[test]
+fn test_infer_module_types_keeps_undefined_on_written_defaulted_parameters_on_build() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            declare const source: { objectTarget: string | undefined };
+            export function reassigned(direct: string | undefined = "x") {
+                direct = undefined;
+                return direct;
+            }
+            export function reassignedInClosure(captured: string | undefined = "x") {
+                const reset = () => {
+                    captured = undefined;
+                };
+                reset();
+                return captured;
+            }
+            export function objectDestructured(objectTarget: string | undefined = "x") {
+                ({ objectTarget } = source);
+                return objectTarget;
+            }
+            export function shadowed(shadowTarget: string | undefined = "x") {
+                {
+                    let shadowTarget: string | undefined = "y";
+                    shadowTarget = undefined;
+                }
+                return shadowTarget;
+            }
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let index_module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, index_module).expect("types must be inferred");
+    let binding_ty = |name| {
+        let ty = inferred_binding_ty_by_name(&db, index_module, inferred, name)
+            .unwrap_or_else(|| panic!("{name} binding type must be inferred"));
+        inferred.resolve_type(&db, ty)
+    };
+
+    for name in ["direct", "captured", "objectTarget"] {
+        let ty = binding_ty(name);
+        assert!(contains_inferred_string(&db, ty), "{name}: {ty:?}");
+        assert!(
+            contains_inferred_undefined(&db, ty),
+            "a written parameter must keep undefined: {name}: {ty:?}"
+        );
+    }
+
+    let shadow_target = binding_ty("shadowTarget");
+    assert!(
+        contains_inferred_string(&db, shadow_target),
+        "{shadow_target:?}"
+    );
+    assert!(
+        !contains_inferred_undefined(&db, shadow_target),
+        "a write to a shadowing variable must not affect the parameter: {shadow_target:?}"
+    );
+}
+
+#[test]
+fn test_infer_module_types_removes_undefined_by_parameter_default_kind_on_build() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            declare function tag(strings: TemplateStringsArray): string | undefined;
+            declare function call(): string[] | undefined;
+            declare const condition: boolean;
+            declare const maybe: string | undefined;
+            declare const count: number;
+            declare const items: (string | undefined)[];
+            declare const anyValue: any;
+            type Options = { a: string };
+            export function array(arrayDefault: string[] | undefined = []) {
+                return arrayDefault;
+            }
+            export function arrow(arrowDefault: (() => void) | undefined = () => {}) {
+                return arrowDefault;
+            }
+            export function functionExpression(functionDefault: (() => void) | undefined = function () {}) {
+                return functionDefault;
+            }
+            export function classExpression(classDefault: (new () => object) | undefined = class {}) {
+                return classDefault;
+            }
+            export function instance(newDefault: Date | undefined = new Date()) {
+                return newDefault;
+            }
+            export function template(templateDefault: string | undefined = `x`) {
+                return templateDefault;
+            }
+            export function substitution(substitutionDefault: string | undefined = `x${count}`) {
+                return substitutionDefault;
+            }
+            export function literal(literalDefault: number | undefined = 1) {
+                return literalDefault;
+            }
+            export function negative(negativeDefault: number | undefined = -1) {
+                return negativeDefault;
+            }
+            export function falsy(falseDefault: boolean | undefined = false) {
+                return falseDefault;
+            }
+            export function big(bigDefault: bigint | undefined = 1n) {
+                return bigDefault;
+            }
+            export function pattern(regexDefault: RegExp | undefined = /x/) {
+                return regexDefault;
+            }
+            export function nullDefault(nullDefaultParam: string | null | undefined = null) {
+                return nullDefaultParam;
+            }
+            export function objectOnly(objectDefault: { a: string } | undefined = { a: "x" }) {
+                return objectDefault;
+            }
+            export function asConst(asConstDefault: string | undefined = "x" as const) {
+                return asConstDefault;
+            }
+            export function satisfying(satisfiesDefault: string | undefined = "x" satisfies string) {
+                return satisfiesDefault;
+            }
+            export function parenthesized(wrapped: string | undefined = ("x")) {
+                return wrapped;
+            }
+            export function nestedParenthesized(nested: string | undefined = (("x")) satisfies string) {
+                return nested;
+            }
+            export const arrowFunction = (arrowParam: string | undefined = "x") => arrowParam;
+            export class Holder {
+                constructor(constructorParam: string | undefined = "x") {
+                    constructorParam;
+                }
+                method(methodParam: string | undefined = "x") {
+                    return methodParam;
+                }
+            }
+
+            export function asserted(assertedDefault: string | undefined = <string>"x") {
+                return assertedDefault;
+            }
+            export function widened(widenedDefault: string | undefined = "x" as string | undefined) {
+                return widenedDefault;
+            }
+            export function castObject(castObjectDefault: Options | undefined = {} as Options | undefined) {
+                return castObjectDefault;
+            }
+            export function castAny(castAnyDefault: string | undefined = anyValue as any) {
+                return castAnyDefault;
+            }
+            // The default's own type is not inspected, so a non-null assertion stays conservative.
+            export function nonNull(nonNullDefault: string | undefined = maybe!) {
+                return nonNullDefault;
+            }
+            export function voidZero(voidDefault: string | undefined = void 0) {
+                return voidDefault;
+            }
+            export function tagged(taggedDefault: string | undefined = tag`x`) {
+                return taggedDefault;
+            }
+            export function called(callDefault: string[] | undefined = call()) {
+                return callDefault;
+            }
+            export function conditional(
+                conditionalDefault: string | undefined = condition ? "x" : undefined,
+            ) {
+                return conditionalDefault;
+            }
+            export function orAssigned(orAssignedParam: string | undefined = "x") {
+                orAssignedParam ||= undefined;
+                return orAssignedParam;
+            }
+            export function destructured(destructuredParam: string | undefined = "x") {
+                [destructuredParam] = [undefined];
+                return destructuredParam;
+            }
+            export function looped(loopedParam: string | undefined = "x") {
+                for (loopedParam of items) {
+                }
+                return loopedParam;
+            }
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let index_module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, index_module).expect("types must be inferred");
+    let binding_ty = |name| {
+        let ty = inferred_binding_ty_by_name(&db, index_module, inferred, name)
+            .unwrap_or_else(|| panic!("{name} binding type must be inferred"));
+        inferred.resolve_type(&db, ty)
+    };
+
+    let removes_undefined: &[(&str, InferredTypePredicate)] = &[
+        ("arrayDefault", contains_inferred_instance),
+        ("arrowDefault", contains_inferred_function),
+        ("functionDefault", contains_inferred_function),
+        ("classDefault", contains_inferred_constructor),
+        ("templateDefault", contains_inferred_string),
+        ("substitutionDefault", contains_inferred_string),
+        ("literalDefault", contains_inferred_number),
+        ("negativeDefault", contains_inferred_number),
+        ("falseDefault", contains_inferred_boolean),
+        ("bigDefault", contains_inferred_bigint),
+        ("regexDefault", contains_inferred_instance),
+        ("nullDefaultParam", contains_inferred_string),
+        ("objectDefault", contains_inferred_object),
+        ("asConstDefault", contains_inferred_string),
+        ("satisfiesDefault", contains_inferred_string),
+        ("wrapped", contains_inferred_string),
+        ("nested", contains_inferred_string),
+        ("arrowParam", contains_inferred_string),
+        ("constructorParam", contains_inferred_string),
+        ("methodParam", contains_inferred_string),
+    ];
+    for (name, contains_expected) in removes_undefined {
+        let ty = binding_ty(name);
+        assert!(
+            contains_expected(&db, ty),
+            "{name} must keep its declared type: {ty:?}"
+        );
+        assert!(
+            !contains_inferred_undefined(&db, ty),
+            "a default that can't be undefined must remove it from {name}: {ty:?}"
+        );
+    }
+
+    let null_default = binding_ty("nullDefaultParam");
+    assert!(
+        contains_inferred_null(&db, null_default),
+        "a `null` default keeps null: {null_default:?}"
+    );
+
+    let keeps_undefined: &[(&str, InferredTypePredicate)] = &[
+        ("assertedDefault", contains_inferred_string),
+        ("widenedDefault", contains_inferred_string),
+        ("castObjectDefault", contains_inferred_instance),
+        ("castAnyDefault", contains_inferred_string),
+        ("newDefault", contains_inferred_instance),
+        ("nonNullDefault", contains_inferred_string),
+        ("voidDefault", contains_inferred_string),
+        ("taggedDefault", contains_inferred_string),
+        ("callDefault", contains_inferred_instance),
+        ("conditionalDefault", contains_inferred_string),
+        ("orAssignedParam", contains_inferred_string),
+        ("destructuredParam", contains_inferred_string),
+        ("loopedParam", contains_inferred_string),
+    ];
+    for (name, contains_expected) in keeps_undefined {
+        let ty = binding_ty(name);
+        assert!(
+            contains_expected(&db, ty),
+            "{name} must keep its declared type: {ty:?}"
+        );
+        assert!(
+            contains_inferred_undefined(&db, ty),
+            "{name} must keep undefined: {ty:?}"
+        );
+    }
+}
+
+#[test]
+fn test_infer_module_types_removes_undefined_from_parameter_property_and_callback_defaults_on_build()
+ {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            export class Holder {
+                constructor(private propertyParam: string | undefined = "x") {}
+                read() {
+                    return this.propertyParam;
+                }
+            }
+            export const readValue = new Holder().read();
+            export const mapped = [1].map((callbackParam: number | undefined = 1) => callbackParam);
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let index_module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, index_module).expect("types must be inferred");
+    let binding_ty = |name| {
+        let ty = inferred_binding_ty_by_name(&db, index_module, inferred, name)
+            .unwrap_or_else(|| panic!("{name} binding type must be inferred"));
+        inferred.resolve_type(&db, ty)
+    };
+
+    let property_param = binding_ty("propertyParam");
+    assert!(
+        contains_inferred_string(&db, property_param),
+        "{property_param:?}"
+    );
+    assert!(
+        !contains_inferred_undefined(&db, property_param),
+        "the constructor parameter is never undefined inside the body: {property_param:?}"
+    );
+
+    let read_value = binding_ty("readValue");
+    assert!(contains_inferred_string(&db, read_value), "{read_value:?}");
+    assert!(
+        contains_inferred_undefined(&db, read_value),
+        "the declared property still accepts undefined: {read_value:?}"
+    );
+
+    let callback_param = binding_ty("callbackParam");
+    assert!(
+        contains_inferred_number(&db, callback_param),
+        "{callback_param:?}"
+    );
+    assert!(
+        !contains_inferred_undefined(&db, callback_param),
+        "{callback_param:?}"
+    );
+}
+
+#[test]
 fn test_infer_module_types_evaluates_this_and_super_edge_expressions_on_build() {
     let fs = MemoryFileSystem::default();
     fs.insert(

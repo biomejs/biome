@@ -646,7 +646,7 @@ impl TypeData {
                 let Ok(inner) = expr.expression() else {
                     return Self::unknown();
                 };
-                if is_const_reference_type(&annotation) {
+                if annotation.is_const_reference_type() {
                     type_data_from_const_assertion_expression(collector, scope_id, &inner)
                 } else {
                     let ty = Self::from_any_ts_type(collector, scope_id, &annotation);
@@ -670,7 +670,7 @@ impl TypeData {
                 let Ok(inner) = expr.expression() else {
                     return Self::unknown();
                 };
-                if is_const_reference_type(&annotation) {
+                if annotation.is_const_reference_type() {
                     type_data_from_const_assertion_expression(collector, scope_id, &inner)
                 } else {
                     let ty = Self::from_any_ts_type(collector, scope_id, &annotation);
@@ -3621,30 +3621,16 @@ fn type_from_function_body(
     }
 }
 
-/// Checks for TypeScript's special `const` assertion target.
-fn is_const_reference_type(type_annotation: &AnyTsType) -> bool {
-    let Some(reference_type) = type_annotation.as_ts_reference_type() else {
-        return false;
-    };
-
-    reference_type.type_arguments().is_none()
-        && reference_type.name().is_ok_and(|name| {
-            name.as_js_reference_identifier()
-                .and_then(|identifier| identifier.value_token().ok())
-                .is_some_and(|token| token.text_trimmed() == "const")
-        })
-}
-
 /// Recognizes direct `as const` and `<const>` assertions, allowing parentheses around them.
 fn expression_is_const_assertion(expression: &AnyJsExpression) -> bool {
     let mut current = expression.clone();
     loop {
         match &current {
             AnyJsExpression::TsAsExpression(expression) => {
-                return expression.ty().is_ok_and(|ty| is_const_reference_type(&ty));
+                return expression.ty().is_ok_and(|ty| ty.is_const_reference_type());
             }
             AnyJsExpression::TsTypeAssertionExpression(expression) => {
-                return expression.ty().is_ok_and(|ty| is_const_reference_type(&ty));
+                return expression.ty().is_ok_and(|ty| ty.is_const_reference_type());
             }
             AnyJsExpression::JsParenthesizedExpression(expression) => match expression.expression()
             {

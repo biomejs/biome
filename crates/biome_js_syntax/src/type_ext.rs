@@ -50,6 +50,22 @@ impl AnyTsType {
         )
     }
 
+    /// Returns `true` if `self` is the `const` of an `as const` or `<const>` assertion.
+    ///
+    /// `const` parses as a reference identifier, so there is no dedicated typed node for it.
+    pub fn is_const_reference_type(&self) -> bool {
+        let Some(reference_type) = self.as_ts_reference_type() else {
+            return false;
+        };
+
+        reference_type.type_arguments().is_none()
+            && reference_type.name().is_ok_and(|name| {
+                name.as_js_reference_identifier()
+                    .and_then(|identifier| identifier.value_token().ok())
+                    .is_some_and(|token| token.text_trimmed() == "const")
+            })
+    }
+
     /// Returns `true` if `self` is a primitive type.
     ///
     /// ### Examples
@@ -155,5 +171,39 @@ impl AnyTsFunctionType {
                 .return_type()
                 .map(AnyTsReturnType::AnyTsType),
         }
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use biome_js_parser::{JsParserOptions, parse};
+    use biome_languages::JsFileSource;
+    use biome_rowan::AstNodeList;
+
+    fn asserted_type_is_const(src: &str) -> bool {
+        let result = parse(src, JsFileSource::ts(), JsParserOptions::default());
+        let module = result.tree();
+        let expression = module
+            .as_js_module()
+            .unwrap()
+            .items()
+            .first()
+            .unwrap()
+            .as_any_js_statement()
+            .unwrap()
+            .as_js_expression_statement()
+            .unwrap()
+            .expression()
+            .unwrap();
+        let ty = expression.as_ts_as_expression().unwrap().ty().unwrap();
+        ty.is_const_reference_type()
+    }
+
+    #[test]
+    fn is_const_reference_type() {
+        assert!(asserted_type_is_const("value as const;"));
+        assert!(!asserted_type_is_const("value as Const;"));
+        assert!(!asserted_type_is_const("value as string;"));
+        assert!(!asserted_type_is_const("value as const<string>;"));
     }
 }

@@ -313,6 +313,16 @@ const qualifiedDefaultImportAlways = parseQualifiedDefaultImportAlways();
 if (!qualifiedDefaultImportAlways.truthy) {
 }
 
+// A parameter default that can't be `undefined` removes it from the parameter's type
+function defaultedString(parameter: string | undefined = "x") {
+  return parameter ?? "y";
+}
+
+type DefaultedObject = { x: number };
+function defaultedObject(parameter: DefaultedObject | undefined = { x: 1 }) {
+  return parameter?.x;
+}
+
 ```
 
 # Diagnostics
@@ -1502,6 +1512,58 @@ invalid.ts:307:5 lint/suspicious/noUnnecessaryConditions ━━━━━━━�
   i The value's type can never be truthy, so this check is redundant.
   
   i Remove the condition and the code it guards, or check the value you meant to test.
+  
+
+```
+
+```
+invalid.ts:312:10 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary nullish coalescing.
+  
+    310 │ // A parameter default that can't be `undefined` removes it from the parameter's type
+    311 │ function defaultedString(parameter: string | undefined = "x") {
+  > 312 │   return parameter ?? "y";
+        │          ^^^^^^^^^
+    313 │ }
+    314 │ 
+  
+  i Drop ?? and the fallback expression.
+  
+    310 │ // A parameter default that can't be `undefined` removes it from the parameter's type
+    311 │ function defaultedString(parameter: string | undefined = "x") {
+  > 312 │   return parameter ?? "y";
+        │                    ^^
+    313 │ }
+    314 │ 
+  
+  i The left-hand side is guaranteed to be non-nullish, so the fallback is unreachable.
+  
+
+```
+
+```
+invalid.ts:317:10 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    315 │ type DefaultedObject = { x: number };
+    316 │ function defaultedObject(parameter: DefaultedObject | undefined = { x: 1 }) {
+  > 317 │   return parameter?.x;
+        │          ^^^^^^^^^
+    318 │ }
+    319 │ 
+  
+  i Replace ?. with ..
+  
+    315 │ type DefaultedObject = { x: number };
+    316 │ function defaultedObject(parameter: DefaultedObject | undefined = { x: 1 }) {
+  > 317 │   return parameter?.x;
+        │                   ^^
+    318 │ }
+    319 │ 
+  
+  i The receiver is guaranteed to be non-nullish.
   
 
 ```

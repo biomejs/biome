@@ -310,3 +310,40 @@ function parseQualifiedDefaultImport(): Types.Result<string> {
 const qualifiedDefaultImportResult = parseQualifiedDefaultImport();
 if (!qualifiedDefaultImportResult.success) {
 }
+
+// Parameter with an `undefined` default
+export function undefinedDefault(param: string | undefined = undefined) {
+  return param?.length;
+}
+
+// Reassigned defaulted parameters
+export function reassignedParameter(param: string | undefined = "x") {
+  param = undefined;
+  return param ?? "y";
+}
+
+export function closureReassignedParameter(
+  param: { a: 1 } | undefined = { a: 1 },
+) {
+  const reset = () => {
+    param = undefined;
+  };
+  reset();
+  return param || { a: 1 };
+}
+
+// A type assertion on the default can hide `undefined`
+type AssertedOptions = { a: number };
+export function assertedDefault(
+  param: AssertedOptions | undefined = {} as AssertedOptions | undefined,
+) {
+  return param ?? { a: 1 };
+}
+
+// A `new` expression takes its type from the constructor, which can be `any`
+declare const AnyConstructor: any;
+export function newAnyDefault(
+  param: AssertedOptions | undefined = new AnyConstructor(),
+) {
+  return param ?? { a: 1 };
+}
