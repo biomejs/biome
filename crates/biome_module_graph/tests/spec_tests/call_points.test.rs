@@ -521,8 +521,7 @@ fn library_type_guard_functions_narrow() {
             ("L11_71", "x", &["instanceof Uint8Array"]),
             ("L11_93", "x", &["instanceof ArrayBuffer"]),
             ("L12_60", "x", &["number", "string"]),
-            // TypeScript gives `any[]`, but Biome narrows no `any`.
-            ("L13_46", "x", &["any"]),
+            ("L13_46", "x", &["instanceof Array<any>"]),
             ("L14_68", "x", &["[number, number]"]),
         ],
     );

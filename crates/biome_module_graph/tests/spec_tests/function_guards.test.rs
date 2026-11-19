@@ -116,6 +116,10 @@ fn direct_guards_refine_only_the_selected_occurrences_not_the_declaration() {
     }
 }
 
+// TypeScript 7.0.2 (`tsc --strict`) gives the expected types. In the false
+// branch, `unknown` stays `unknown`, except that a `null` target leaves
+// `{} | undefined` and an `undefined` target leaves `{} | null`, because
+// TypeScript narrows `unknown` there as `{} | null | undefined`.
 #[test]
 fn primitive_keyword_guards_filter_both_branches_and_refine_explicit_unknown() {
     use InferredTypeData::{BigInt, Boolean, Null, Number, String, Symbol, Undefined};
@@ -132,6 +136,8 @@ fn primitive_keyword_guards_filter_both_branches_and_refine_explicit_unknown() {
         let source = format!(
             r#"
                 declare function guard(input: unknown): input is {target};
+                declare const expectedEmpty: {{}};
+                /*expectedEmpty*/expectedEmpty;
                 function inspect(value: string | number | boolean | bigint | symbol | null | undefined) {{
                     if (guard(value)) {{ /*then*/value; }} else {{ /*else*/value; }}
                 }}
@@ -146,11 +152,17 @@ fn primitive_keyword_guards_filter_both_branches_and_refine_explicit_unknown() {
             .map(|(_, ty)| *ty)
             .filter(|ty| *ty != expected)
             .collect::<Vec<_>>();
+        let empty = normalized_type_at(&db, module, &source, "expectedEmpty", "expectedEmpty");
+        let unknown_else = match expected {
+            Null => vec![empty, Undefined],
+            Undefined => vec![empty, Null],
+            _ => vec![InferredTypeData::UnknownKeyword],
+        };
         for (marker, expected) in [
             ("then", &[expected][..]),
             ("else", complement.as_slice()),
             ("unknownThen", &[expected]),
-            ("unknownElse", &[InferredTypeData::UnknownKeyword]),
+            ("unknownElse", unknown_else.as_slice()),
         ] {
             let ty = normalized_type_at(&db, module, &source, marker, "value");
             assert_variants(&db, ty, expected, &format!("{target}: {marker}"));

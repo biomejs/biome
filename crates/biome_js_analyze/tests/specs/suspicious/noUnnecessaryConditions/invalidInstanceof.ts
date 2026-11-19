@@ -37,3 +37,10 @@ function unknownValue(value: unknown) {
 		return value?.message;
 	}
 }
+
+// An instance of a generic class has `any` type arguments, as `Map<any, any>`.
+function genericClass(value: unknown) {
+	if (value instanceof Map) {
+		return value?.size;
+	}
+}

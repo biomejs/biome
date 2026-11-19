@@ -1,0 +1,17 @@
+// should not generate diagnostics
+// `typeof` with a primitive kind narrows `any` and `unknown` to the primitive,
+// so their truthiness is unambiguous.
+
+function anyString(value: any) {
+	if (typeof value === "string") {
+		if (value) {
+			return 1;
+		}
+	}
+}
+
+function unknownNumber(value: unknown) {
+	if (typeof value === "number" && value) {
+		return 1;
+	}
+}

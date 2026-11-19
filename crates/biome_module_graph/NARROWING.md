@@ -495,8 +495,10 @@ These limits apply to every *Supported* and *Partial* row below:
   primitives and functions their members, such as `String` and `Function`,
   from TypeScript's ES2015 library files and the interfaces that the project
   merges into them.
-- Variables whose declared type is `any`, or includes a part that inference
-  cannot determine, never narrow.
+- A variable whose declared type includes a part that inference cannot
+  determine never narrows. A variable whose declared type is `any`, from its
+  annotation or through an alias, an import, or inference, narrows only by
+  the tests that narrow `any` in TypeScript, as the row on `any` describes.
 - An execution root gets no narrowing at all when its own code, outside nested
   functions, contains a `with` statement, a syntax error, or a `break` to the
   label of a `try` statement, as in `out: try { break out; } finally {}`, or
@@ -592,7 +594,7 @@ code as TS7027, an error with `allowUnreachableCode: false`.
 | Equality with another variable | `x: string \| number; y: "a"; if (x === y) x` | `"a"` | Not yet: Biome compares only with the unit values that the limits above list, which leave out a variable with a type annotation, such as `y`. Where the operands are equal, TypeScript also narrows by a variable whose type is not a unit type, keeping the members that the other operand's type can equal. |
 | Equality with the result of a runtime test | `x: string \| number;`<br>`if ((typeof x === "string") === true) x` | `string` | Not yet |
 | `unknown` compared with a literal | `x: unknown; if (x === "a") x` | `"a"` | Supported |
-| `unknown` compared with `null` loosely | `x: unknown; if (x != null) x` | `{}` | Not yet |
+| `unknown` compared with `null` or `undefined` | `x: unknown; if (x != null) x`<br>`if (x !== null) x` | `{}`; `{} \| undefined` | Supported: as in TypeScript, `unknown` narrows as `{} \| null \| undefined`, and a result that keeps all three is `unknown` again, so `=== null` gives `null` and its `else` branch `{} \| undefined`. |
 | `unknown` compared with an object | `x: unknown; o: { a: number }; if (x === o) x` | `object` | Not yet |
 
 ### `typeof`
@@ -603,8 +605,9 @@ code as TS7027, an error with `allowUnreachableCode: false`.
 | Reversed operands | `x: string \| number; if ("string" === typeof x) x` | `string` | Supported |
 | A primitive kind removes object types | `interface Foo { a: number }`<br>`x: string \| Foo; if (typeof x === "string") x` | `string` | Partial: removes the object types that no value of the kind can have, such as `Foo`, and, as TypeScript does, replaces an object type that every value of the kind has with the primitive, so `x: number \| { length: number }` gives `string`. `"undefined"` removes every object type. An object type stays when Biome cannot compare it with the primitive: a class instance whose members the primitive has, because the class can declare private members; a type with an index signature; a member whose type differs from the primitive's member of the same name; a member that a TypeScript library newer than ES2015 adds to the primitive, such as `padStart` of strings or `description` of symbols; and `toString`, `toLocaleString`, or `valueOf` for `"bigint"`. Generics stay unchanged. |
 | `"object"` keeps object types and `null`; its negation removes them | `x: string \| Foo \| null; if (typeof x !== "object") x` | `string` | Deliberately different: the negative branch removes the object types that no primitive and no function can have, such as `Foo`, but keeps those that one can have, such as `{ length: number }`, where TypeScript removes them; see the deliberate choices above. The positive branch keeps object types with a call signature, such as `interface Callable { (): void }`, which TypeScript removes. |
-| `typeof` of `unknown` | `x: unknown; if (typeof x === "object") x`<br>`if (typeof x === "function") x` | `object \| null`; `Function` | Partial: only `"string"`, `"number"`, `"bigint"`, `"boolean"`, `"symbol"`, and `"undefined"` narrow `unknown`. |
+| `typeof` of `unknown` | `x: unknown; if (typeof x === "object") x`<br>`if (typeof x === "function") x` | `object \| null`; `Function` | Supported: `unknown` narrows as `{} \| null \| undefined`, as for equality with `null`, so `typeof x !== "object"` gives `{} \| undefined`, and a primitive kind gives the primitive and keeps `unknown` in the `else` branch. TypeScript gives `object \| null` for `typeof x === "object" \|\| typeof x === "function"`, where Biome gives `object \| null \| Function`, which has the same values. |
 | `typeof` of `{}` gives the primitive | `x: {}; if (typeof x === "string") x` | `string` | Supported |
+| `typeof` of `{}` with `"object"` gives `object` | `x: {}; if (typeof x === "object") x`<br>`interface E {}; y: E; if (typeof y === "object") y` | `object`; `E` | Supported: as in TypeScript, only a type literal or an object expression without members becomes `object`, also through an alias, while an empty interface or class stays as it is. |
 | `"function"` keeps functions and removes object types that no function can have | `interface Foo { a: number }`<br>`interface Len { length: number }`<br>`x: Foo \| (() => void); if (typeof x === "function") x`<br>`y: Len \| string; if (typeof y === "function") y` | `() => void`; `Function` | Partial: in the positive branch, as in TypeScript, an object type that no function can have is removed, one that every function has becomes `Function`, and one with a call or construct signature stays as it is. Object types that Biome cannot compare stay too, as listed for primitive kinds, and so do instances of classes derived from a built-in class. The negative branch keeps object types with a call or construct signature, which TypeScript removes, so `x: CallFoo \| string`, with `interface CallFoo { (): void; foo: string }`, gives `CallFoo \| string` where TypeScript gives `string`. |
 | `typeof` of a generic gives an intersection | `function f<T>(x: T) { if (typeof x === "string") x }` | `T & string` | Not yet |
 | `typeof` of a property | `o: { v: string \| number }; if (typeof o.v === "string") o.v` | `string` | Supported |
@@ -618,7 +621,7 @@ code as TS7027, an error with `allowUnreachableCode: false`.
 | --- | --- | --- | --- |
 | The true branch | `x: Date \| string; if (x instanceof Date) x` | `Date` | Supported |
 | The false branch removes the class and its derived types | `x: Date \| string; if (!(x instanceof Date)) x` | `string` | Supported |
-| `unknown` and `any` become the instance type | `x: unknown; if (x instanceof Map) x` | `Map<any, any>` | Partial: `unknown` becomes an instance of a class that is not generic, so `x instanceof Date` gives `Date`, but the example keeps `unknown`, as the limits above describe. `any` never narrows. |
+| `unknown` and `any` become the instance type | `x: unknown; if (x instanceof Map) x` | `Map<any, any>` | Supported: as in TypeScript, an instance of a generic class gets an `any` type argument for each type parameter, `Object` and `Function` keep the type, and the `else` branch keeps `unknown` and `any`. |
 | `Symbol.hasInstance` with a type predicate | `class Checker { static [Symbol.hasInstance](v: unknown): v is string }`<br>`x: unknown; if (x instanceof Checker) x` | `string` | Not yet |
 | `x.constructor === C` | `class Foo { a = 1 }; class Bar { b = 2 }`<br>`x: Foo \| Bar; if (x.constructor === Foo) x` | `Foo` | Not yet |
 
@@ -635,7 +638,7 @@ code as TS7027, an error with `allowUnreachableCode: false`.
 
 | Behaviour | Example | TypeScript | Status |
 | --- | --- | --- | --- |
-| `Array.isArray` | `x: string \| string[]; if (Array.isArray(x)) x` | `string[]` | Supported, with the restrictions below the table of type predicates, except for `any`, which the row on `any` describes. Other type-guard functions of the lib, such as `ArrayBuffer.isView`, narrow too. |
+| `Array.isArray` | `x: string \| string[]; if (Array.isArray(x)) x` | `string[]` | Supported, with the restrictions below the table of type predicates. `unknown` and `any` become `any[]`. Other type-guard functions of the lib, such as `ArrayBuffer.isView`, narrow too. |
 | `every` with a type predicate callback | `isString: (v: unknown) => v is string;`<br>`xs: (string \| number)[]; if (xs.every(isString)) xs` | `string[]` | Partial: `every` narrows an array or a `readonly` array, also through `xs?.every`, as TypeScript selects its signature `every<S extends T>(predicate: (value: T) => value is S): this is S[]`: `S` is the target of the callback's type predicate when it satisfies its constraint. So does any method of this shape, as the rows on generic and overloaded type-guard functions describe. A tuple keeps its declared type where TypeScript gives an intersection, such as `[string \| number, string \| number] & string[]`. A callback written in place, as `(v): v is string => typeof v === "string"`, narrows nothing, because Biome doesn't type a parameter without an annotation from the call, and neither does a callback whose type predicate TypeScript infers, which the row on inferred type predicates covers. The result of `filter` and `find` with such a callback has the same type argument, so `xs.filter(isString)` is `string[]` and `xs.find(isString)` is `string \| undefined`, also for a callback written in place. |
 | DOM `matches` | `el: Element; if (el.matches("a")) el` (with the `dom` library) | `HTMLAnchorElement` | Not yet |
 
@@ -659,7 +662,7 @@ The rows use `type Circle = { kind: "c"; r: number }` and
 | --- | --- | --- | --- |
 | Literal cases | `x: "a" \| "b" \| "c"; switch (x) { case "a": x }` | `"a"` | Partial: a case narrows the discriminant as `===` does when it is a unit value, as the limits above list them, such as a literal, `null`, `undefined`, `-1`, `void 0`, a template literal without substitutions, or a `const` of a literal type, local or imported, and the discriminant is a variable or a property path, in parentheses or not. TypeScript also narrows by a case of any other value whose type is a unit type, such as an enum member, and a discriminant such as `x!`, where Biome keeps the declared type. Every case test sees the types from just before the `switch`, as in TypeScript. |
 | Grouped cases and fallthrough | `x: "a" \| "b" \| "c"; switch (x) { case "a": case "b": x }` | `"a" \| "b"` | Supported: the statements of a group start where one of its cases matches and where the statements before them fall through. A `break` leaves the `switch`, and a `continue` reaches the loop around it. |
-| `default` removes the handled values | `x: "a" \| "b" \| "c";`<br>`switch (x) { case "a": break; case "b": break; default: x }` | `"c"` | Partial: `default` narrows in any position, by every case that Biome narrows by, and a group that contains it also starts where one of its cases matches. A member whose discriminant is a union of case values stays: with `s: { kind: "a" \| "b"; x: 1 } \| { kind: "c"; y: 2 }`, `default` after `case "a": case "b":` keeps both members, where TypeScript keeps `{ kind: "c"; y: 2 }`. As in TypeScript, `default` narrows no receiver of an optional chain, so `switch (o?.k) { case undefined: break; default: o }` keeps `undefined` in `o`. |
+| `default` removes the handled values | `x: "a" \| "b" \| "c";`<br>`switch (x) { case "a": break; case "b": break; default: x }` | `"c"` | Partial: `default` narrows in any position, by every case that Biome narrows by, and a group that contains it also starts where one of its cases matches. A member whose discriminant is a union of case values stays: with `s: { kind: "a" \| "b"; x: 1 } \| { kind: "c"; y: 2 }`, `default` after `case "a": case "b":` keeps both members, where TypeScript keeps `{ kind: "c"; y: 2 }`. As in TypeScript, `default` narrows no receiver of an optional chain, so `switch (o?.k) { case undefined: break; default: o }` keeps `undefined` in `o`. Where no case of a `switch` on a value or on `typeof` of one matches, in `default` or after a `switch` without one, `unknown` stays `unknown`, as in TypeScript, which removes the matched values from `unknown` as a whole there, so `switch (x) { case null: break; default: x }` reads `unknown` where `x !== null` gives `{} \| undefined`. |
 | `switch (true)` | `x: string \| number;`<br>`switch (true) { case typeof x === "string": x }` | `string` | Partial: a case narrows as its test does when it is truthy, after every case before its group failed to match, and a group with `default` sees the cases outside the group fail, as in TypeScript. The discriminant must be the literal `true` itself, as in TypeScript, which narrows nothing for `(true)` either. A case that fails to match narrows only when it gives a boolean, as the deliberate choices above describe. |
 | `switch` on a discriminant | `s: Circle \| Square; switch (s.kind) { case "c": s }` | `Circle` | Supported: cases on a property, an element access, a tuple index, an optional chain, a `const` that holds a property, and an element of a destructuring pattern narrow the object or the pattern as `===` does, within the limits above. |
 | An exhaustive `switch` ends the path that matches no case | `x: "a" \| "b";`<br>`switch (x) { case "a": return 1; case "b": return 2; } x` | `never`; the read is unreachable (TS7027) | Supported: the path that matches no case narrows the discriminant by every case, so the read is Unknown, and an exhaustive `switch` leaves that path out for every other variable, as the limits above describe. `UnreachableCodeClassificationRequest` reports the code after such a statement as unreachable when no other path reaches it. |
@@ -875,7 +878,7 @@ also ignores an assertion through an element access (TS2776).
 
 | Behaviour | Example | TypeScript | Status |
 | --- | --- | --- | --- |
-| A truthy `unknown` becomes `{}` | `x: unknown; if (x) x` | `{}` | Not yet |
+| A truthy `unknown` becomes `{}` | `x: unknown; if (x) x` | `{}` | Supported: as in TypeScript, the falsy branch keeps `unknown`, because every value except `null` and `undefined` has `{}`, falsy values too. |
 
 ### Generics
 
@@ -888,7 +891,7 @@ also ignores an assertion through an element access (TS2776).
 
 | Behaviour | Example | TypeScript | Status |
 | --- | --- | --- | --- |
-| Primitive `typeof`, `instanceof`, and type predicates narrow `any`; equality and `typeof` with `"object"` or `"function"` do not | `x: any; if (typeof x === "string") x` | `string` | Not yet |
+| Primitive `typeof`, `instanceof`, and type predicates narrow `any`; equality and `typeof` with `"object"` or `"function"` do not | `x: any; if (typeof x === "string") x`<br>`if (x instanceof Date) x`; `if (x) x` | `string`; `Date`; `any` | Partial: as in TypeScript, `typeof` with a primitive kind or `"undefined"`, `instanceof`, and type-guard and assertion functions, also of the library, such as `Array.isArray`, narrow the true branch, and every `else` branch keeps `any`, as do truthiness, equality, `in`, discriminants, and `instanceof` with `Object` or `Function`. Once a test narrows `any`, later tests narrow the result, so `x === "a"` after `typeof x === "string"` gives `"a"`. A variable whose type is `any` through an alias, an import, or inference, as `const data = JSON.parse(s)`, narrows as one whose annotation is `any`. A property of `any`, as `x.v` or `a` in `const { a } = x`, never narrows, and Biome reads it as unknown where TypeScript gives `any`. The `else` branch of a type-guard function whose target is `any` keeps `any`, where TypeScript gives `never`. |
 
 ### `void`
 
