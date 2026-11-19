@@ -6,8 +6,8 @@ use biome_js_semantic::{Reference, ScopeId, SemanticModel, TsBindingReference};
 use biome_js_syntax::{
     AnyJsArrowFunctionParameters, AnyJsBindingPattern, AnyJsCombinedSpecifier, AnyJsDeclaration,
     AnyJsExportDefaultDeclaration, AnyJsExpression, AnyJsImportClause, JsArrowFunctionExpression,
-    JsAssignmentExpression, JsForVariableDeclaration, JsFormalParameter, JsLanguage,
-    JsRestParameter, JsSyntaxNode, JsVariableDeclaration, TsInferType, TsMappedType,
+    JsAssignmentExpression, JsCatchDeclaration, JsForVariableDeclaration, JsFormalParameter,
+    JsLanguage, JsRestParameter, JsSyntaxNode, JsVariableDeclaration, TsInferType, TsMappedType,
     TsModuleDeclaration, TsTypeParameter, inner_string_text,
 };
 use biome_js_type_info::{
@@ -535,6 +535,8 @@ impl JsModuleInfoCollector {
                     .function_parameters
                     .get(param.syntax())
                     .map_or_default(|param| param.binding_type(binding_name));
+            } else if let Some(catch) = JsCatchDeclaration::cast_ref(&ancestor) {
+                return self.catch_binding_type(scope_id, &catch, binding_name);
             } else if let Some(arrow) = JsArrowFunctionExpression::cast_ref(&ancestor)
                 && let Ok(AnyJsArrowFunctionParameters::AnyJsBinding(param)) = arrow.parameters()
                 && param.syntax().text_trimmed_range() == node.text_trimmed_range()
@@ -561,6 +563,40 @@ impl JsModuleInfoCollector {
         }
 
         TypeReference::unknown()
+    }
+
+    /// Type of the variable `binding_name` that the `catch` clause `catch`
+    /// declares. The type is the clause's annotation, or the `unknown` keyword
+    /// without one, which matches TypeScript with `--strict`
+    /// (`useUnknownInCatchVariables`). TypeScript accepts only `unknown` or
+    /// `any` as the annotation. A variable in a destructuring pattern, such as
+    /// `message` in `catch ({ message })`, has the type of that property. It is
+    /// `Unknown` when the clause's type is `unknown` or `any`.
+    fn catch_binding_type(
+        &mut self,
+        scope_id: ScopeId,
+        catch: &JsCatchDeclaration,
+        binding_name: &Text,
+    ) -> TypeReference {
+        let ty = match catch.type_annotation() {
+            Some(annotation) => match annotation.ty() {
+                Ok(ty) => TypeData::from_any_ts_type(self, scope_id, &ty),
+                Err(_) => return TypeReference::unknown(),
+            },
+            None => TypeData::UnknownKeyword,
+        };
+        let Ok(pattern) = catch.binding() else {
+            return TypeReference::unknown();
+        };
+        FunctionParameterBinding::bindings_from_any_js_binding_pattern_of_type(
+            self, scope_id, &pattern, &ty,
+        )
+        .and_then(|bindings| {
+            bindings
+                .iter()
+                .find_map(|binding| (binding.name == *binding_name).then(|| binding.ty.clone()))
+        })
+        .unwrap_or_default()
     }
 
     /// Binding type of an unannotated callback parameter, or `None` when the

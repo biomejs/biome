@@ -18,10 +18,11 @@ use crate::{
     ObjectKind, ScopeId,
     builders::{IntersectionBuilder, UnionBuilder},
     generated::global_types::ids::{
-        ARRAY_ID_GLOBAL_TYPE_ID, ASYNC_DISPOSABLE_ID_GLOBAL_TYPE_ID, DATE_ID_GLOBAL_TYPE_ID,
-        DISPOSABLE_ID_GLOBAL_TYPE_ID, ERROR_ID_GLOBAL_TYPE_ID, MAP_ID_GLOBAL_TYPE_ID,
-        PROMISE_ID_GLOBAL_TYPE_ID, REG_EXP_ID_GLOBAL_TYPE_ID, SET_ID_GLOBAL_TYPE_ID,
-        SYMBOL_ID_GLOBAL_TYPE_ID, WEAK_MAP_ID_GLOBAL_TYPE_ID,
+        ARRAY_ID_GLOBAL_TYPE_ID, ASYNC_DISPOSABLE_ID_GLOBAL_TYPE_ID, BOOLEAN_ID_GLOBAL_TYPE_ID,
+        DATE_ID_GLOBAL_TYPE_ID, DISPOSABLE_ID_GLOBAL_TYPE_ID, ERROR_ID_GLOBAL_TYPE_ID,
+        MAP_ID_GLOBAL_TYPE_ID, NUMBER_ID_GLOBAL_TYPE_ID, PROMISE_ID_GLOBAL_TYPE_ID,
+        READONLY_ARRAY_ID_GLOBAL_TYPE_ID, REG_EXP_ID_GLOBAL_TYPE_ID, SET_ID_GLOBAL_TYPE_ID,
+        STRING_ID_GLOBAL_TYPE_ID, SYMBOL_ID_GLOBAL_TYPE_ID, WEAK_MAP_ID_GLOBAL_TYPE_ID,
     },
     globals_ids::GlobalTypeId,
     literal::{BooleanLiteral, NumberLiteral, RegexpLiteral, StringLiteral},
@@ -725,6 +726,20 @@ impl<'db> TypeData<'db> {
             || self.is_builtin_class_named(db, "Array")
     }
 
+    /// Returns whether this is the built-in `ReadonlyArray` interface, by its
+    /// handle or by its data. An interface with the same name that a module
+    /// declares doesn't count, because it has a scope and a generated global
+    /// doesn't.
+    pub fn is_readonly_array_interface(self, db: &'db dyn TypeDb) -> bool {
+        self == Self::readonly_array_interface()
+            || matches!(
+                self.expand_canonical_global(db),
+                Self::Interface(interface)
+                    if interface.scope_id(db).is_none()
+                        && interface.name(db).text() == "ReadonlyArray"
+            )
+    }
+
     pub fn is_promise_class(self, db: &'db dyn TypeDb) -> bool {
         self == Self::GlobalType(PROMISE_ID_GLOBAL_TYPE_ID)
             || self.is_builtin_class_named(db, "Promise")
@@ -1044,6 +1059,10 @@ impl<'db> TypeData<'db> {
         Self::GlobalType(ASYNC_DISPOSABLE_ID_GLOBAL_TYPE_ID)
     }
 
+    pub const fn boolean_class() -> Self {
+        Self::GlobalType(BOOLEAN_ID_GLOBAL_TYPE_ID)
+    }
+
     pub const fn date_class() -> Self {
         Self::GlobalType(DATE_ID_GLOBAL_TYPE_ID)
     }
@@ -1060,8 +1079,16 @@ impl<'db> TypeData<'db> {
         Self::GlobalType(MAP_ID_GLOBAL_TYPE_ID)
     }
 
+    pub const fn number_class() -> Self {
+        Self::GlobalType(NUMBER_ID_GLOBAL_TYPE_ID)
+    }
+
     pub const fn promise_class() -> Self {
         Self::GlobalType(PROMISE_ID_GLOBAL_TYPE_ID)
+    }
+
+    pub const fn readonly_array_interface() -> Self {
+        Self::GlobalType(READONLY_ARRAY_ID_GLOBAL_TYPE_ID)
     }
 
     pub const fn regexp_class() -> Self {
@@ -1070,6 +1097,10 @@ impl<'db> TypeData<'db> {
 
     pub const fn set_class() -> Self {
         Self::GlobalType(SET_ID_GLOBAL_TYPE_ID)
+    }
+
+    pub const fn string_class() -> Self {
+        Self::GlobalType(STRING_ID_GLOBAL_TYPE_ID)
     }
 
     pub const fn symbol_class() -> Self {

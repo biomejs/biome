@@ -25,8 +25,8 @@ use biome_js_type_info::{
         InternedFunction as InferredFunction,
         InternedGenericTypeParameter as InferredGenericTypeParameter,
         InternedLiteral as InferredInternedLiteral, InternedMappedType as InferredMappedType,
-        InternedTuple as InferredTuple, Literal as InferredLiteral,
-        LocalTypeHandle as InferredLocalTypeHandle,
+        InternedTuple as InferredTuple, InternedTypeInstance as InferredTypeInstance,
+        Literal as InferredLiteral, LocalTypeHandle as InferredLocalTypeHandle,
         NamedFunctionParameter as InferredNamedFunctionParameter, ReturnType as InferredReturnType,
         TupleElementType as InferredTupleElementType, TypeData as InferredTypeData,
         TypeMember as InferredTypeMember, TypeofExpression as InferredTypeofExpression,
@@ -2341,15 +2341,18 @@ impl<'db> ResolutionCtx<'db, '_> {
                         }
                     }
                 },
-                InferredTypeData::InstanceOf(instance)
-                    if self
-                        .resolve_inferred_type(instance.ty(self.db))
-                        .is_array_class(self.db) =>
-                {
+                InferredTypeData::InstanceOf(instance) if self.is_array_instance(instance) => {
                     if let Some(ty) = instance.type_parameters(self.db).first() {
                         let element_ty = self.optional_element_type(*ty, true);
                         types.push(element_ty);
                     }
+                }
+                // `readonly T[]` and `readonly` tuples hold the elements of
+                // their operand.
+                InferredTypeData::TypeOperator(operator)
+                    if operator.operator(self.db) == biome_js_type_info::TypeOperator::Readonly =>
+                {
+                    pending.push(operator.ty(self.db));
                 }
                 InferredTypeData::Union(union) => {
                     pending.extend(union.types(self.db).iter().copied());
@@ -2738,6 +2741,13 @@ impl<'db> ResolutionCtx<'db, '_> {
         let expanded =
             super::lookup::apply_substitutions(self.db, alias_instance.ty(self.db), &substitutions);
         self.resolve_inferred_type(expanded)
+    }
+
+    /// Returns whether `instance` is an instance of `Array` or of
+    /// `ReadonlyArray`, whose first type argument is the type of its elements.
+    fn is_array_instance(&mut self, instance: InferredTypeInstance<'db>) -> bool {
+        let target = self.resolve_inferred_type(instance.ty(self.db));
+        target.is_array_class(self.db) || target.is_readonly_array_interface(self.db)
     }
 
     fn optional_element_type(
