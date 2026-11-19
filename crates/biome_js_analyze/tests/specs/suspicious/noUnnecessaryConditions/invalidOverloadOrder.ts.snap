@@ -1,0 +1,77 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidOverloadOrder.ts
+---
+# Input
+```ts
+// should generate diagnostics
+// The overloads of one declaration with a parameter of a literal type are
+// tried first for a call, as in TypeScript, so the call has the type that the
+// first matching one of them returns.
+
+interface Store {
+	get(key: string): string | undefined;
+	get(key: "name"): string;
+}
+
+function storedName(store: Store) {
+	return store.get("name") ?? "anonymous";
+}
+
+declare function setting(key: string): string | undefined;
+declare function setting(key: "mode"): "light" | "dark";
+
+function mode() {
+	return setting("mode") ?? "light";
+}
+
+```
+
+# Diagnostics
+```
+invalidOverloadOrder.ts:12:9 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary nullish coalescing.
+  
+    11 │ function storedName(store: Store) {
+  > 12 │ 	return store.get("name") ?? "anonymous";
+       │ 	       ^^^^^^^^^^^^^^^^^
+    13 │ }
+    14 │ 
+  
+  i Drop ?? and the fallback expression.
+  
+    11 │ function storedName(store: Store) {
+  > 12 │ 	return store.get("name") ?? "anonymous";
+       │ 	                         ^^
+    13 │ }
+    14 │ 
+  
+  i The left-hand side is guaranteed to be non-nullish, so the fallback is unreachable.
+  
+
+```
+
+```
+invalidOverloadOrder.ts:19:9 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary nullish coalescing.
+  
+    18 │ function mode() {
+  > 19 │ 	return setting("mode") ?? "light";
+       │ 	       ^^^^^^^^^^^^^^^
+    20 │ }
+    21 │ 
+  
+  i Drop ?? and the fallback expression.
+  
+    18 │ function mode() {
+  > 19 │ 	return setting("mode") ?? "light";
+       │ 	                       ^^
+    20 │ }
+    21 │ 
+  
+  i The left-hand side is guaranteed to be non-nullish, so the fallback is unreachable.
+  
+
+```

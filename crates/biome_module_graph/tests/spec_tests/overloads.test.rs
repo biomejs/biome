@@ -337,10 +337,75 @@ declare const o8: O8;
             ("property", "s1.f(0)", &["number: 1"]),
             ("literalUnion", "o4.f(\"a\")", &["number: 2"]),
             ("numberLiteral", "o5.f(1)", &["number: 1"]),
-            // TypeScript: `1`. Biome keeps the order of the overloads of one
-            // declaration.
-            ("oneDeclaration", "o6.f(\"a\")", &["number: 2"]),
+            ("oneDeclaration", "o6.f(\"a\")", &["number: 1"]),
             ("specializedOfLater", "o8.f(\"b\")", &["number: 2"]),
+        ],
+    );
+}
+
+// TypeScript 7.0.2 (`tsc --strict`) tries the overloads of one declaration with
+// a parameter of a literal type first, for methods, functions, and the call
+// signatures of a type. It gives every read below the expected type, unless a
+// comment gives TypeScript's type. A literal type through an alias doesn't
+// count.
+#[test]
+fn overloads_of_one_declaration_with_a_parameter_of_a_literal_type_come_first() {
+    let source = r#"
+interface N1 { f(x: string | null): 2; f(x: null): 1 }
+declare const n1: N1;
+/*null*/n1.f(null);
+type A = "a";
+interface T1 { f(x: string): 2; f(x: A): 1 }
+declare const t1: T1;
+/*alias*/t1.f("a");
+interface M1 { f(x: number): 2; f(x: -1): 1 }
+declare const m1: M1;
+/*negative*/m1.f(-1);
+interface B1 { f(x: boolean): 2; f(x: true): 1 }
+declare const b1: B1;
+/*boolean*/b1.f(true);
+interface P2 { f(a: number, x: string): 2; f(a: number, x: "a"): 1 }
+declare const p2: P2;
+/*second*/p2.f(0, "a");
+interface S3 { f(x: string): 3; f(x: "a"): 1; f(x: "a" | "b"): 2; f(x: "a"): 4 }
+declare const s3: S3;
+/*firstSpecialized*/s3.f("a");
+declare function g(x: string): 2;
+declare function g(x: "a"): 1;
+/*function*/g("a");
+declare const c1: { (x: string): 2; (x: "a"): 1 };
+/*callSignatures*/c1("a");
+class K { m(x: string): 2; m(x: "a"): 1; m(x: string) { return 1 as any; } }
+declare const k: K;
+/*classMethod*/k.m("a");
+type O7 = { f(x: string): 2; f(x: "a"): 1 };
+declare const o7: O7;
+/*typeLiteral*/o7.f("a");
+interface UN { f(x: unknown): 2; f(x: undefined): 1 }
+declare const un: UN;
+/*undefined*/un.f(undefined);
+interface U1 { f(x: string): 2; f(x: `a`): 1 }
+declare const u1: U1;
+/*template*/u1.f("a");
+"#;
+    assert_file_reads(
+        &[("/src/index.ts", source)],
+        "/src/index.ts",
+        &[
+            ("null", "n1.f(null)", &["number: 1"]),
+            ("alias", "t1.f(\"a\")", &["number: 2"]),
+            ("negative", "m1.f(-1)", &["number: 1"]),
+            ("boolean", "b1.f(true)", &["number: 1"]),
+            ("second", "p2.f(0, \"a\")", &["number: 1"]),
+            ("firstSpecialized", "s3.f(\"a\")", &["number: 1"]),
+            ("function", "g(\"a\")", &["number: 1"]),
+            ("callSignatures", "c1(\"a\")", &["number: 1"]),
+            ("classMethod", "k.m(\"a\")", &["number: 1"]),
+            ("typeLiteral", "o7.f(\"a\")", &["number: 1"]),
+            ("undefined", "un.f(undefined)", &["number: 2"]),
+            // TypeScript: `1`. Biome doesn't select the overload whose
+            // parameter has the template literal type for `"a"`.
+            ("template", "u1.f(\"a\")", &["number: 2"]),
         ],
     );
 }
