@@ -5,11 +5,12 @@ use std::{borrow::Cow, sync::Arc};
 use biome_js_semantic::{BindingId, Reference, ScopeId, SemanticModel, TsBindingReference};
 use biome_js_syntax::{
     AnyJsArrowFunctionParameters, AnyJsBindingPattern, AnyJsCombinedSpecifier, AnyJsDeclaration,
-    AnyJsExportDefaultDeclaration, AnyJsExpression, AnyJsImportClause, JsArrowFunctionExpression,
-    JsAssignmentExpression, JsCatchDeclaration, JsForVariableDeclaration, JsFormalParameter,
-    JsLanguage, JsRestParameter, JsSyntaxNode, JsVariableDeclaration, TsEnumDeclaration,
-    TsEnumMember, TsEnumMemberList, TsGlobalDeclaration, TsInferType, TsInterfaceDeclaration,
-    TsLiteralEnumMemberName, TsMappedType, TsModuleDeclaration, TsTypeParameter, inner_string_text,
+    AnyJsExportDefaultDeclaration, AnyJsExpression, AnyJsImportClause, AnyTsType,
+    JsArrowFunctionExpression, JsAssignmentExpression, JsCatchDeclaration,
+    JsForVariableDeclaration, JsFormalParameter, JsLanguage, JsRestParameter, JsSyntaxNode,
+    JsVariableDeclaration, TsEnumDeclaration, TsEnumMember, TsEnumMemberList, TsGlobalDeclaration,
+    TsInferType, TsInterfaceDeclaration, TsLiteralEnumMemberName, TsMappedType,
+    TsModuleDeclaration, TsTypeParameter, inner_string_text,
 };
 use biome_js_type_info::{
     Class, EnumTypes, Function, FunctionParameter, FunctionParameterBinding, GenericTypeParameter,
@@ -1202,23 +1203,33 @@ impl JsModuleInfoCollector {
     /// without one, which matches TypeScript with `--strict`
     /// (`useUnknownInCatchVariables`). TypeScript accepts only `unknown` or
     /// `any` as the annotation. A variable in a destructuring pattern, such as
-    /// `message` in `catch ({ message })`, has the type of that property. It is
-    /// `Unknown` when the clause's type is `unknown` or `any`.
+    /// `message` in `catch ({ message })`, is `any` when the clause's type is
+    /// `unknown` or `any`, as in TypeScript, which reports an error for each
+    /// property or element that it reads from `unknown`. With another
+    /// annotation, it has the type of that property.
     fn catch_binding_type(
         &mut self,
         scope_id: ScopeId,
         catch: &JsCatchDeclaration,
         binding_name: &Text,
     ) -> TypeReference {
+        let Ok(pattern) = catch.binding() else {
+            return TypeReference::unknown();
+        };
         let ty = match catch.type_annotation() {
             Some(annotation) => match annotation.ty() {
+                Ok(AnyTsType::TsAnyType(_) | AnyTsType::TsUnknownType(_))
+                    if !matches!(pattern, AnyJsBindingPattern::AnyJsBinding(_)) =>
+                {
+                    return self.reference_to_owned_data(TypeData::AnyKeyword);
+                }
                 Ok(ty) => TypeData::from_any_ts_type(self, scope_id, &ty),
                 Err(_) => return TypeReference::unknown(),
             },
+            None if !matches!(pattern, AnyJsBindingPattern::AnyJsBinding(_)) => {
+                return self.reference_to_owned_data(TypeData::AnyKeyword);
+            }
             None => TypeData::UnknownKeyword,
-        };
-        let Ok(pattern) = catch.binding() else {
-            return TypeReference::unknown();
         };
         FunctionParameterBinding::bindings_from_any_js_binding_pattern_of_type(
             self, scope_id, &pattern, &ty,

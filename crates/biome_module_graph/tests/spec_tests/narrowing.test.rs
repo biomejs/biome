@@ -2721,16 +2721,16 @@ fn primitive_and_readonly_array_members_resolve() {
     assert!(mismatches.is_empty(), "{}", mismatches.join("\n"));
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type,
-// except where a comment gives TypeScript's type. A variable that `catch`
-// declares has its annotation, or `unknown` without one, wherever the `catch`
-// clause is, and narrows as a value of type `unknown` does. Biome doesn't
-// model the control flow inside a `try` statement, so a test in an `if`
-// statement inside `catch` narrows nothing, and these reads narrow only within
-// one expression.
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
+// A variable that `catch` declares has its annotation, or `unknown` without
+// one, wherever the `catch` clause is, and narrows as a value of type
+// `unknown` does. A variable that a destructuring pattern of the clause
+// declares is `any`. Biome doesn't model the control flow inside a `try`
+// statement, so a test in an `if` statement inside `catch` narrows nothing,
+// and these reads narrow only within one expression.
 #[test]
 fn catch_variables_have_the_unknown_keyword_type() {
-    use InferredTypeData::{AnyKeyword, Unknown, UnknownKeyword};
+    use InferredTypeData::{AnyKeyword, UnknownKeyword};
     const SOURCE: &str = r#"
         declare function g(): void;
         function plain() { try { g(); } catch (e) { /*plain*/e; } }
@@ -2740,6 +2740,9 @@ fn catch_variables_have_the_unknown_keyword_type() {
         function objectPattern() { try { g(); } catch ({ message }) { /*objectPattern*/message; } }
         function arrayPattern() { try { g(); } catch ([first]) { /*arrayPattern*/first; } }
         function anyPattern() { try { g(); } catch ({ message }: any) { /*anyPattern*/message; } }
+        function unknownPattern() { try { g(); } catch ({ message }: unknown) { /*unknownPattern*/message; } }
+        function nestedPattern() { try { g(); } catch ({ a: { b } }) { /*nestedPattern*/b; } }
+        function defaultPattern() { try { g(); } catch ({ a = 1 }) { /*defaultPattern*/a; } }
         const arrow = () => { try { g(); } catch (e) { /*arrow*/e; } };
         class C { m() { try { g(); } catch (e) { /*method*/e; } } }
         function logical() { try { g(); } catch (e) { e instanceof Error && /*logical*/e; } }
@@ -2751,12 +2754,15 @@ fn catch_variables_have_the_unknown_keyword_type() {
         ("annotatedAny", "e", AnyKeyword),
         ("annotatedUnknown", "e", UnknownKeyword),
         ("shadow", "x", UnknownKeyword),
-        // `any` after error TS2339, because `unknown` has no property `message`.
-        ("objectPattern", "message", Unknown),
-        // `any` after error TS2488, because `unknown` is not iterable.
-        ("arrayPattern", "first", Unknown),
-        // `any`
-        ("anyPattern", "message", Unknown),
+        // TypeScript reports error TS2339, because `unknown` has no property
+        // `message`.
+        ("objectPattern", "message", AnyKeyword),
+        // TypeScript reports error TS2488, because `unknown` is not iterable.
+        ("arrayPattern", "first", AnyKeyword),
+        ("anyPattern", "message", AnyKeyword),
+        ("unknownPattern", "message", AnyKeyword),
+        ("nestedPattern", "b", AnyKeyword),
+        ("defaultPattern", "a", AnyKeyword),
         ("arrow", "e", UnknownKeyword),
         ("method", "e", UnknownKeyword),
         ("conditional", "e", InferredTypeData::String),
