@@ -276,7 +276,6 @@ result is wider unless the effect says otherwise, so a rule can miss a report.
 | --- | --- | --- | --- |
 | `var x: string \| number = 1; var x: string \| number = "a"; x` | `string` | `string \| number` | `noUnnecessaryConditions` can miss an unnecessary check of `x`. |
 | `x: any; if (typeof x.v === "string") x.v` | `any` | Unknown | A rule can miss a report on `x.v`. |
-| `try { g(); } catch ({ message }) { message }` | `any`, with an error | Unknown | A rule can miss a report on `message`. |
 | `xs: AsyncIterable<string \| null>; for await (const v of xs) { if (v) v }` | `string` | Unknown | A rule can miss a report on `v`. |
 | `o: { a?: string \| number }; const { a = 0 } = o; if (typeof a === "string") a` | `string` | `string \| number` | `noUnnecessaryConditions` can miss an unnecessary check of `a`. |
 | `x: string; x !== null ? 1 : x` | `1` | Unknown | A rule can miss a report on the conditional. |

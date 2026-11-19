@@ -181,3 +181,11 @@ const annotatedObjectMethod = {
 };
 
 (() => value)();
+
+function returnsDestructuredCatchVariable() {
+	try {
+		return "";
+	} catch ({ message }) {
+		return message;
+	}
+}
