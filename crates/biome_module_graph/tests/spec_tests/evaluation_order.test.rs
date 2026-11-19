@@ -175,32 +175,40 @@ fn receivers_are_not_nullish_inside_their_chain() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives the narrower type in the comment for
-// each read below. Biome is wider and sound:
-// - A chain whose root is a parenthesized optional chain tests the path of
-//   its root, `o.v`, but not `o`. TypeScript narrows `o` too.
-// - `!` ends a chain, so `x?.a!.b(x)` tests nothing. TypeScript treats
-//   `x?.a!` as part of the chain.
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type,
+// unless a comment gives TypeScript's narrower type. A chain whose root is a
+// parenthesized optional chain tests the path of its root, `o.v`, but not
+// `o`, where TypeScript narrows `o` too, which is wider and sound. `!` doesn't
+// end a chain, so `x` is not nullish in the key or the arguments after
+// `x?.a!`, while parentheses around the chain end it.
 #[test]
-fn chains_end_at_parentheses_and_non_null_assertions() {
+fn chains_end_at_parentheses_but_not_at_non_null_assertions() {
     assert_reads(
         r#"
         interface W { w(v: unknown): void }
         interface V { v?: W }
         interface B { b(v: unknown): void }
         interface Q { a?: B }
+        interface R { a?: Record<string, number>; k: string }
         interface O { f?(v: unknown): void }
         function e1(o: V | undefined) { (o?.v)?.w(/*rootPath*/o?.v, /*rootObject*/o); }
         function e2(x: Q | undefined) { x?.a!.b(/*nonNull*/x); }
         function e3(x: O | undefined) { x?.f?.(/*optionalMethod*/x); }
+        function e4(x: R | undefined) { x?.a![String(/*nonNullKey*/x)]; }
+        function e5(x: Q | undefined) { x?.a!!.b(/*twice*/x); }
+        function e6(x: Q | undefined) { (x?.a)!.b(/*parenthesized*/x); }
+        function e7(x: Q | undefined) { x?.a!.b(0); /*after*/x; }
         "#,
         &[
             ("rootPath", "o?.v", &["W"]),
             // TypeScript: `V`.
             ("rootObject", "o", &["V", "undefined"]),
-            // TypeScript: `Q`.
-            ("nonNull", "x", &["Q", "undefined"]),
+            ("nonNull", "x", &["Q"]),
             ("optionalMethod", "x", &["O"]),
+            ("nonNullKey", "x", &["R"]),
+            ("twice", "x", &["Q"]),
+            ("parenthesized", "x", &["Q", "undefined"]),
+            ("after", "x", &["Q", "undefined"]),
         ],
     );
 }

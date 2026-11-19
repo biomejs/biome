@@ -96,6 +96,7 @@ right operand of a logical assignment. Biome splits a condition through `!`,
 | `every` | `xs: (string \| number)[]; if (xs.every(isString)) xs` | `string[]` |
 | `filter` and `find` | `xs: (string \| undefined)[]; xs.filter((x) => x !== undefined)` | `string[]` |
 | An optional chain | `x: { y: number } \| undefined; if (x?.y === -1) x` | `{ y: number }` |
+| The key and the arguments after `?.`, also after `!` | `x: { a?: { b(v: unknown): void } } \| undefined; x?.a!.b(x)` | `{ a?: { b(v: unknown): void } }` at the argument |
 
 A type-guard function selects its overload by the types of the arguments at
 the call, which a check before the call can narrow. Literal type arguments
@@ -498,7 +499,6 @@ only statement, a `return`.
 | Code | TypeScript | Biome | Effect on rules |
 | --- | --- | --- | --- |
 | `x: T, with T extends null; switch (x) { case null: break; default: x }` | `never` | `T` | A rule can miss that `default` never runs. |
-| `x: { a?: { b(v: unknown): void } } \| undefined; x?.a!.b(x)`, the argument | `{ a?: { b(v: unknown): void } }` | `{ a?: { b(v: unknown): void } } \| undefined` | A rule can miss a report on the argument. |
 | `interface O6 { f(x: string): 2; f(x: "a"): 1 }; o6: O6; o6.f("a")` | `1` | `2` | Disjoint: `noUnnecessaryConditions` can report `case 1:` on the result as never matching. |
 
 Biome tries the overloads of one declaration in their written order, where
