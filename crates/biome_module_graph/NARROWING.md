@@ -375,7 +375,6 @@ These rows use `type S = { kind: "c"; v: number } | { kind: "s"; v: string }`.
 
 | Code | TypeScript | Biome | Effect on rules |
 | --- | --- | --- | --- |
-| `s: S \| undefined; const { kind, v } = s!; if (kind === "c") v` | `number` | Unknown | A rule can miss a report on `v`. |
 | `const f: (s: S) => void = ({ kind, v }) => { if (kind === "c") v }` | `number` | Unknown | A rule can miss a report on `v`. |
 | `const f: (...args: ["a", number] \| ["b", string]) => void = (k, x) => { if (k === "a") x }` | `number` | Unknown | A rule can miss a report on `x`. |
 
