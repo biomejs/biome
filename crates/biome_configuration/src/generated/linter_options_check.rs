@@ -280,6 +280,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         >(),
     ));
     result.push((
+        "nursery",
+        "noConvexQueryFilter",
+        TypeId::of::<biome_rule_options::no_convex_query_filter::NoConvexQueryFilterOptions>(),
+    ));
+    result.push((
         "security",
         "noDangerouslySetInnerHtml",
         TypeId::of::<
