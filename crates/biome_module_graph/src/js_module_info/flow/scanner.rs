@@ -1,13 +1,13 @@
-use super::builder::{AnyInlineCode, MAX_DEPTH, has_operands, mutated_array};
+use super::builder::{AnyInlineCode, MAX_DEPTH, has_operands, is_var, mutated_array};
 use biome_js_control_flow::AnyJsControlFlowRoot;
 use biome_js_syntax::{
     AnyJsBinding, AnyJsBindingPattern, AnyJsExpression, AnyJsForInOrOfInitializer,
-    AnyJsOptionalChainExpression, AnyTsReturnType, AnyTsType, JsAssignmentExpression,
-    JsAssignmentOperator, JsCallExpression, JsConditionalExpression, JsDoWhileStatement,
-    JsForInStatement, JsForOfStatement, JsForStatement, JsIdentifierBinding, JsIfStatement,
-    JsLogicalExpression, JsPostUpdateExpression, JsPreUpdateExpression, JsSwitchStatement,
-    JsSyntaxKind, JsSyntaxNode, JsUnaryExpression, JsUnaryOperator, JsVariableDeclarator,
-    JsWhileStatement, TsDeclareFunctionDeclaration,
+    AnyJsLiteralExpression, AnyJsOptionalChainExpression, AnyTsReturnType, AnyTsType,
+    JsAssignmentExpression, JsAssignmentOperator, JsCallExpression, JsConditionalExpression,
+    JsDoWhileStatement, JsForInStatement, JsForOfStatement, JsForStatement, JsIdentifierBinding,
+    JsIfStatement, JsLogicalExpression, JsPostUpdateExpression, JsPreUpdateExpression,
+    JsSwitchStatement, JsSyntaxKind, JsSyntaxNode, JsUnaryExpression, JsUnaryOperator,
+    JsVariableDeclarator, JsWhileStatement, TsDeclareFunctionDeclaration,
 };
 use biome_rowan::{AstNode, AstSeparatedList, SyntaxKind, TextRange, declare_node_union};
 use std::ops::Range;
@@ -198,6 +198,7 @@ impl FlowRootScanner {
         }
         let (mut has_condition, mut has_this, mut has_write, mut has_empty_array) =
             (false, false, false, false);
+        let mut has_evolving_var = false;
         if AnyTsReturnType::can_cast(kind) {
             self.type_region = Some(self.depth);
         } else if AnyFlowConditionSource::can_cast(kind) {
@@ -218,6 +219,7 @@ impl FlowRootScanner {
                     .is_some_and(|expression| {
                         matches!(expression, AnyJsExpression::JsArrayExpression(array) if array.elements().is_empty())
                     });
+            has_evolving_var = is_evolving_var(&declarator);
         }
         for code in current(&mut self.open, &mut self.inline) {
             code.has_array_mutation |= has_array_mutation;
@@ -225,6 +227,7 @@ impl FlowRootScanner {
             code.has_this |= has_this;
             code.has_write |= has_write;
             code.has_empty_array |= has_empty_array;
+            code.has_evolving_var |= has_evolving_var;
         }
     }
 
@@ -341,6 +344,7 @@ impl FlowRootScanner {
             has_write: false,
             has_array_mutation: false,
             has_empty_array: false,
+            has_evolving_var: false,
             has_this: false,
             is_unsupported: false,
         }
@@ -498,6 +502,33 @@ fn is_write(node: &JsSyntaxNode) -> bool {
     })
 }
 
+/// Returns whether `declarator` declares a `var` without a type annotation
+/// whose initializer is `null`, `undefined`, or an empty array literal, in
+/// parentheses or not. Such a variable's type evolves with its writes, and it
+/// is `undefined` until the declarator runs.
+fn is_evolving_var(declarator: &JsVariableDeclarator) -> bool {
+    if declarator.variable_annotation().is_some() || !is_var(declarator) {
+        return false;
+    }
+    let Some(initializer) = declarator
+        .initializer()
+        .and_then(|initializer| initializer.expression().ok())
+    else {
+        return false;
+    };
+    match initializer.omit_parentheses() {
+        AnyJsExpression::AnyJsLiteralExpression(
+            AnyJsLiteralExpression::JsNullLiteralExpression(_),
+        ) => true,
+        AnyJsExpression::JsIdentifierExpression(identifier) => identifier
+            .name()
+            .and_then(|name| name.value_token())
+            .is_ok_and(|token| token.text_trimmed() == "undefined"),
+        AnyJsExpression::JsArrayExpression(array) => array.elements().is_empty(),
+        _ => false,
+    }
+}
+
 /// Returns the innermost open root and the open inline code inside it, whose
 /// own code holds the node just entered.
 fn current<'a>(
@@ -547,6 +578,11 @@ struct OpenRoot {
     /// annotation that an empty array literal initializes, whose type may
     /// evolve with its writes.
     has_empty_array: bool,
+    /// Whether the root's own code declares a `var` whose type evolves with
+    /// its writes and whose declarator has an initializer, as
+    /// [`is_evolving_var`] decides it. A read before the declarator gives
+    /// such a variable `undefined`.
+    has_evolving_var: bool,
     /// Whether the root's own code reads `this`.
     has_this: bool,
     is_unsupported: bool,
@@ -562,7 +598,10 @@ impl OpenRoot {
         if self.is_unsupported || visited - self.first_node >= MAX_ROOT_NODES {
             return None;
         }
-        if self.has_condition || self.has_write || (self.has_array_mutation && self.has_empty_array)
+        if self.has_condition
+            || self.has_write
+            || self.has_evolving_var
+            || (self.has_array_mutation && self.has_empty_array)
         {
             Some(Selection::Flow)
         } else {
@@ -771,6 +810,29 @@ mod tests {
             "function f(v) { const a = []; a.pop(v); }",
             "function f(v) { const a = []; a[\"push\"](v); }",
             "function f(v) { const a = []; return () => a.push(v); }",
+        ] {
+            assert!(selected(source).is_empty(), "{source}");
+        }
+    }
+
+    #[test]
+    fn vars_whose_type_evolves_select_their_root() {
+        for source in [
+            "function f() { x; var x = null; }",
+            "function f() { x; var x = (undefined); }",
+            "function f() { a; var a = []; }",
+        ] {
+            assert_eq!(selected(source), [source], "{source}");
+        }
+        // Only a `var` without a type annotation whose initializer is `null`,
+        // `undefined`, or an empty array literal is `undefined` before its
+        // declarator and takes the types of its writes after it.
+        for source in [
+            "function f() { x; let x = null; }",
+            "function f() { x; var x; }",
+            "function f() { x; var x: null = null; }",
+            "function f() { x; var x = 0; }",
+            "function f() { x; var x = [0]; }",
         ] {
             assert!(selected(source).is_empty(), "{source}");
         }

@@ -786,7 +786,7 @@ fn is_compound_like(right: &AnyJsExpression) -> bool {
 
 /// Returns whether `declarator` is part of a `var` declaration, whose
 /// variables a read can reach before the declarator.
-fn is_var(declarator: &JsVariableDeclarator) -> bool {
+pub(super) fn is_var(declarator: &JsVariableDeclarator) -> bool {
     match declarator.declaration() {
         Some(AnyJsVariableDeclaration::JsVariableDeclaration(declaration)) => declaration.is_var(),
         Some(AnyJsVariableDeclaration::JsForVariableDeclaration(declaration)) => {

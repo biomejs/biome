@@ -833,6 +833,8 @@ impl<'db> ResolutionCtx<'db, '_> {
     ///   type then already is the value's type, as for
     ///   `let x = null; x = null`, or is wider, as Unknown for
     ///   `let x; x = null` and `unknown[]` for `const a = []; a.push(null)`.
+    ///   A `var` whose values are all `null` is solved, because a path that
+    ///   doesn't pass its declarator gives `undefined`.
     ///   An array ignores the values that Biome can't type, and qualifies
     ///   only when it is an array at every read, as
     ///   [`RootFlow::is_always_array`] describes.
@@ -867,7 +869,18 @@ impl<'db> ResolutionCtx<'db, '_> {
                     {
                         return Some(TypeData::Unknown);
                     }
-                    if types.iter().all(is_unit) {
+                    // A path that doesn't pass the declarator of a `var`
+                    // gives `undefined`, which a declared type of `null`
+                    // lacks.
+                    if types.iter().all(is_unit)
+                        && (unit != Some(TypeData::Null)
+                            || !self
+                                .js_info
+                                .flow
+                                .root(read.root)?
+                                .hoisted
+                                .contains(&read.subject))
+                    {
                         return None;
                     }
                 }

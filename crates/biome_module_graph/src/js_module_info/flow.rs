@@ -87,15 +87,16 @@ use biome_js_syntax::{
     JsExpressionStatement, JsForInStatement, JsForOfStatement, JsForStatement, JsFunctionBody,
     JsFunctionExpression, JsGetterClassMember, JsGetterObjectMember, JsIdentifierAssignment,
     JsIdentifierBinding, JsIdentifierExpression, JsIfStatement, JsLanguage, JsMethodClassMember,
-    JsMethodObjectMember, JsObjectBindingPattern, JsObjectBindingPatternProperty,
+    JsMethodObjectMember, JsModule, JsObjectBindingPattern, JsObjectBindingPatternProperty,
     JsObjectBindingPatternPropertyList, JsObjectBindingPatternRest,
     JsObjectBindingPatternShorthandProperty, JsParenthesizedAssignment, JsPostUpdateExpression,
-    JsPreUpdateExpression, JsReturnStatement, JsSetterClassMember, JsSetterObjectMember,
-    JsSwitchStatement, JsSyntaxKind, JsSyntaxNode, JsThisExpression, JsThrowStatement,
-    JsTryFinallyStatement, JsTryStatement, JsVariableDeclarationClause, JsVariableDeclarator,
-    JsVariableKind, JsVariableStatement, JsWhileStatement, JsWithStatement, TsAsAssignment,
-    TsDeclareStatement, TsNonNullAssertionAssignment, TsSatisfiesAssignment,
-    TsTypeAssertionAssignment, binding_ext::AnyJsBindingDeclaration,
+    JsPreUpdateExpression, JsReturnStatement, JsScript, JsSetterClassMember, JsSetterObjectMember,
+    JsStaticInitializationBlockClassMember, JsSwitchStatement, JsSyntaxKind, JsSyntaxNode,
+    JsThisExpression, JsThrowStatement, JsTryFinallyStatement, JsTryStatement,
+    JsVariableDeclarationClause, JsVariableDeclarator, JsVariableKind, JsVariableStatement,
+    JsWhileStatement, JsWithStatement, TsAsAssignment, TsDeclareStatement, TsModuleBlock,
+    TsNonNullAssertionAssignment, TsSatisfiesAssignment, TsTypeAssertionAssignment,
+    binding_ext::AnyJsBindingDeclaration,
 };
 use biome_js_type_info::{
     AnyPredicateFunction, DestructureField, RawTypeData, RawTypeId, TypeReference,
@@ -1890,8 +1891,9 @@ impl RootCollector<'_> {
         });
         // A variable whose type evolves with its writes can have a type other
         // than its declared type only after a write other than its
-        // initializer. Such a variable without such a write keeps its
-        // declared type at every read, without a solve.
+        // initializer, or, for a `var`, on a path that skips its declarator.
+        // Such a variable without either keeps its declared type at every
+        // read, without a solve.
         //
         // A write whose value Biome may type as TypeScript does keeps the
         // variable evolving. So does any other write of a variable initialized
@@ -1927,14 +1929,26 @@ impl RootCollector<'_> {
         let mut evolving: FxHashMap<FlowSubjectId, FlowEvolving> = FxHashMap::default();
         for (range, kind) in evolving_ranges {
             let subject = subjects.get(&FlowSubject::Binding(range));
+            // A read before the declarator of a `var` is `undefined`, which
+            // its declared type lacks, so such a variable evolves without a
+            // write after the initializer too.
+            let read_before = |subject| {
+                hoisted.contains(&subject)
+                    && self
+                        .model
+                        .as_binding_by_range(range)
+                        .is_some_and(|binding| may_read_before_declarator(&binding))
+            };
             let evolves = subject.is_some_and(|subject| match kind {
                 FlowEvolving::Variable => {
                     typed.contains(&subject)
                         || (initialized.contains(&subject) && written_after.contains(&subject))
+                        || read_before(subject)
                 }
                 FlowEvolving::Array => {
                     typed.contains(&subject)
                         || (hoisted.contains(&subject) && written_after.contains(&subject))
+                        || read_before(subject)
                 }
                 FlowEvolving::None => false,
             });
@@ -2790,7 +2804,9 @@ impl RootCollector<'_> {
     /// [`Self::add_outer_evolving_reads`] types its reads.
     /// A variable that nothing writes, and that no call or element assignment
     /// adds values to, has the type of its initializer everywhere. That type
-    /// is its collected type, so it narrows as any other variable.
+    /// is its collected type, so it narrows as any other variable. A `var`
+    /// that a read can reach before its declarator runs is the exception,
+    /// because it is `undefined` there (see [`may_read_before_declarator`]).
     fn declared_range(
         &mut self,
         binding: &JsIdentifierBinding,
@@ -2807,7 +2823,12 @@ impl RootCollector<'_> {
             return None;
         }
         let evolving = match evolving_declaration(&declared, self.model) {
-            FlowEvolving::Variable if declared.all_writes().next().is_none() => FlowEvolving::None,
+            FlowEvolving::Variable
+                if declared.all_writes().next().is_none()
+                    && !may_read_before_declarator(&declared) =>
+            {
+                FlowEvolving::None
+            }
             FlowEvolving::Array
                 if declared.all_writes().next().is_none()
                     && !declared.all_reads().any(|read| {
@@ -2815,7 +2836,8 @@ impl RootCollector<'_> {
                             .parent()
                             .and_then(JsIdentifierExpression::cast)
                             .is_some_and(|identifier| builder::is_array_mutation(&identifier))
-                    }) =>
+                    })
+                    && !may_read_before_declarator(&declared) =>
             {
                 FlowEvolving::None
             }
@@ -3867,6 +3889,50 @@ fn evolving_declaration(binding: &Binding, model: &SemanticModel) -> FlowEvolvin
         FlowEvolving::None
     }
 }
+
+/// Returns whether a read of the `var` that `binding` declares can come
+/// before its declarator runs, where the variable is still `undefined`: a
+/// read starts before the declarator, or the declarator's statement is nested
+/// in another statement, so a path can skip it, as in
+/// `if (c) { var x = null; } x`. Returns false for any other declaration.
+///
+/// A `var` statement directly in the body of the function, the static block,
+/// the namespace, or the module that holds the variable runs on every path
+/// to a read after it.
+fn may_read_before_declarator(binding: &Binding) -> bool {
+    let Some(AnyJsBindingDeclaration::JsVariableDeclarator(declarator)) =
+        binding.tree().declaration()
+    else {
+        return false;
+    };
+    let Some(AnyJsVariableDeclaration::JsVariableDeclaration(declaration)) =
+        declarator.declaration()
+    else {
+        return false;
+    };
+    if !declaration.is_var() {
+        return false;
+    }
+    let declared_at = declarator.syntax().text_trimmed_range().start();
+    if binding
+        .all_reads()
+        .any(|read| read.range_start() < declared_at)
+    {
+        return true;
+    }
+    !declaration
+        .parent::<JsVariableStatement>()
+        .and_then(|statement| statement.syntax().grand_parent())
+        .is_some_and(|holder| VAR_HOLDER_KINDS.matches(holder.kind()))
+}
+
+/// The bodies whose statement lists hold a `var` directly: functions, static
+/// blocks, namespaces, and modules and scripts.
+const VAR_HOLDER_KINDS: SyntaxKindSet<JsLanguage> = JsFunctionBody::KIND_SET
+    .union(JsStaticInitializationBlockClassMember::KIND_SET)
+    .union(TsModuleBlock::KIND_SET)
+    .union(JsModule::KIND_SET)
+    .union(JsScript::KIND_SET);
 
 /// Returns whether `binding` is declared by a `let` or a `var` that may be
 /// read before it is assigned, in the root that declares it, or in a root

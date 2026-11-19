@@ -322,7 +322,6 @@ their writes, as in TypeScript. The code below uses
 | `let x = null; x = 0; x++; x` | `number` | Unknown | A rule can miss a report on `x`. |
 | `let x; x = null; x` | `null` | Unknown | A rule can miss a report on `x`. |
 | `let x; x` | `undefined` | Unknown | A rule can miss a report on `x`. |
-| `x; var x = null;`, the read before the declarator | `undefined` | `null` | Disjoint: rules see `null` where `x` is `undefined`. |
 | `let a = []; a.push(1); if (c) a = null; a` | `any[]`, with an error | Unknown | A rule can miss a report on `a`. |
 | `const a = []; a.push(null); a` | `null[]` | `unknown[]` | A rule can miss a report on the elements of `a`. |
 | `let a = []; a.push(1); a.push(store.load()); a` | `number[]` | `unknown[]` | A rule can miss a report on the elements of `a`. |
@@ -336,9 +335,9 @@ variable. A write in a nested block, as in
 `let x = null; if (c) { x = store.load(); } x`, gives `null | number`, as in
 TypeScript. A read in another function keeps the declared type only when every
 write is an `=` or a logical assignment outside the scope of the declaration,
-as in the last row. A read before the declarator of such a `var` is
-`undefined`, as in TypeScript, only when a write after the declarator assigns
-the variable.
+as in the last row. A read that a path reaches without passing the
+declarator of such a `var`, as in `x; var x = null;`, is `undefined` there, as
+in TypeScript, and an array is Unknown there.
 
 ### Property paths
 
