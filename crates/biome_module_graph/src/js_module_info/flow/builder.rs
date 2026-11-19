@@ -6,33 +6,36 @@ use super::guards::{
 use super::subjects::{identifier_key, literal_key, member_name_key, property_key, subject_of};
 use super::writes::WrittenTargets;
 use super::{
-    AnyFlowExpression, FlowAssigned, FlowAssignedValue, FlowCallee, FlowDestructureStep, FlowNode,
-    FlowNodeId, FlowSubject, FlowSubjectId, FlowSubjectTable, FlowSwitch, FlowTest, FlowWrite,
-    FlowWriteEffect, MAX_SWITCHES, PropertyKey, typeof_kind_bit,
+    AnyFlowExpression, FlowAssigned, FlowAssignedValue, FlowCallee, FlowDestructureStep,
+    FlowEvolving, FlowNode, FlowNodeId, FlowSubject, FlowSubjectId, FlowSubjectTable, FlowSwitch,
+    FlowTest, FlowWrite, FlowWriteEffect, MAX_SWITCHES, PropertyKey, evolving_declaration,
+    typeof_kind_bit,
 };
 use biome_js_control_flow::{AnyJsControlFlowRoot, is_truthy_literal};
 use biome_js_semantic::{Binding, SemanticModel};
 use biome_js_syntax::{
     AnyJsArrayAssignmentPatternElement, AnyJsArrayBindingPatternElement,
     AnyJsArrowFunctionParameters, AnyJsAssignment, AnyJsAssignmentPattern, AnyJsBinding,
-    AnyJsBindingPattern, AnyJsClass, AnyJsClassMember, AnyJsConstructorParameter, AnyJsExpression,
-    AnyJsForInOrOfInitializer, AnyJsForInitializer, AnyJsFormalParameter, AnyJsFunction,
-    AnyJsFunctionBody, AnyJsObjectAssignmentPatternMember, AnyJsObjectBindingPatternMember,
-    AnyJsObjectMemberName, AnyJsOptionalChainExpression, AnyJsParameter, AnyJsStatement,
-    AnyJsSwitchClause, AnyJsTryStatement, AnyJsVariableDeclaration, AnyTsType, AnyTsTypeMember,
-    ClassMemberName, JsArrowFunctionExpression, JsAssignmentExpression, JsAssignmentOperator,
-    JsBinaryOperator, JsClassExpression, JsClassMemberList, JsDoWhileStatement, JsForInStatement,
-    JsForOfStatement, JsForStatement, JsFunctionExpression, JsGetterClassMember,
-    JsGetterObjectMember, JsIdentifierExpression, JsIfStatement, JsInitializerClause, JsLanguage,
-    JsMethodClassMember, JsMethodObjectMember, JsParameters, JsSetterClassMember,
-    JsSetterObjectMember, JsSwitchStatement, JsSyntaxNode, JsUnaryExpression, JsUnaryOperator,
-    JsVariableDeclarator, JsWhileStatement, T, TsInterfaceDeclaration, TsTypeAnnotation,
+    AnyJsBindingPattern, AnyJsCallArgument, AnyJsClass, AnyJsClassMember,
+    AnyJsConstructorParameter, AnyJsExpression, AnyJsForInOrOfInitializer, AnyJsForInitializer,
+    AnyJsFormalParameter, AnyJsFunction, AnyJsFunctionBody, AnyJsLiteralExpression, AnyJsName,
+    AnyJsObjectAssignmentPatternMember, AnyJsObjectBindingPatternMember, AnyJsObjectMemberName,
+    AnyJsOptionalChainExpression, AnyJsParameter, AnyJsStatement, AnyJsSwitchClause,
+    AnyJsTryStatement, AnyJsVariableDeclaration, AnyTsType, AnyTsTypeMember, ClassMemberName,
+    JsArrowFunctionExpression, JsAssignmentExpression, JsAssignmentOperator, JsBinaryOperator,
+    JsCallExpression, JsClassExpression, JsClassMemberList, JsComputedMemberAssignment,
+    JsDoWhileStatement, JsForInStatement, JsForOfStatement, JsForStatement, JsFunctionExpression,
+    JsGetterClassMember, JsGetterObjectMember, JsIdentifierExpression, JsIfStatement,
+    JsInitializerClause, JsLanguage, JsMethodClassMember, JsMethodObjectMember, JsParameters,
+    JsParenthesizedExpression, JsSetterClassMember, JsSetterObjectMember, JsStaticMemberExpression,
+    JsSwitchStatement, JsSyntaxNode, JsUnaryExpression, JsUnaryOperator, JsVariableDeclarator,
+    JsWhileStatement, T, TsInterfaceDeclaration, TsNonNullAssertionExpression, TsTypeAnnotation,
     binding_ext::AnyJsBindingDeclaration,
 };
 use biome_js_type_info::DestructureField;
 use biome_rowan::{
     AstNode, AstNodeList, AstSeparatedList, SyntaxKindSet, SyntaxResult, TextRange, TokenText,
-    declare_node_union,
+    WalkEvent, declare_node_union,
 };
 use rustc_hash::{FxHashMap, FxHashSet};
 use std::ops::Range;
@@ -90,6 +93,14 @@ pub(super) struct BuiltRoot {
     /// The closures that the root creates in its reachable code, with their
     /// capture points, in the order the builder evaluates them.
     pub(super) captures: Vec<BuiltCapture>,
+    /// The write points of the initializers of variables whose type evolves
+    /// with their writes, as `null` in `let x = null`, which give such a
+    /// variable the type that its declaration already gives it.
+    pub(super) initializers: FxHashSet<FlowNodeId>,
+    /// The variables whose type evolves with their writes and that a `var`
+    /// declares with an initializer. A read before the declarator sees such a
+    /// variable as `undefined` instead of the type that its declaration gives.
+    pub(super) hoisted: FxHashSet<FlowSubjectId>,
 }
 
 declare_node_union! {
@@ -226,6 +237,10 @@ pub(super) fn build_root(
         value_callees: FxHashMap::default(),
         written: WrittenTargets::default(),
         captures: Vec::new(),
+        evolving: FxHashMap::default(),
+        evolving_values: FxHashMap::default(),
+        initializers: FxHashSet::default(),
+        hoisted: FxHashSet::default(),
         write_points: 0,
         jumps: Vec::new(),
         exceptions: Vec::new(),
@@ -259,6 +274,8 @@ pub(super) fn build_root(
         assigned: builder.assigned,
         written: builder.written,
         captures: builder.captures,
+        initializers: builder.initializers,
+        hoisted: builder.hoisted,
     })
 }
 
@@ -513,14 +530,150 @@ fn is_var(declarator: &JsVariableDeclarator) -> bool {
     }
 }
 
+/// Returns the variable that `call` adds values to as an array, matching the
+/// calls that TypeScript treats as array mutations. The callee must be
+/// written as `.push` or `.unshift` on a variable, in parentheses or not, or
+/// with `!`, as `a` in `a.push(v)`, `a?.unshift(v)`, or `(a)!.push(v)`.
+/// TypeScript doesn't look at the type of the object or of the method.
+pub(super) fn mutated_array(call: &JsCallExpression) -> Option<JsIdentifierExpression> {
+    let AnyJsExpression::JsStaticMemberExpression(callee) = call.callee().ok()? else {
+        return None;
+    };
+    let AnyJsName::JsName(name) = callee.member().ok()? else {
+        return None;
+    };
+    let name = name.value_token().ok()?;
+    if !matches!(name.text_trimmed(), "push" | "unshift") {
+        return None;
+    }
+    array_variable(callee.object().ok()?)
+}
+
+/// Returns the variable that `expression` reads, without parentheses and
+/// `!`, which TypeScript skips when it matches the object of an array
+/// mutation with a variable.
+fn array_variable(mut expression: AnyJsExpression) -> Option<JsIdentifierExpression> {
+    loop {
+        expression = match expression {
+            AnyJsExpression::JsParenthesizedExpression(parenthesized) => {
+                parenthesized.expression().ok()?
+            }
+            AnyJsExpression::TsNonNullAssertionExpression(asserted) => {
+                asserted.expression().ok()?
+            }
+            AnyJsExpression::JsIdentifierExpression(identifier) => return Some(identifier),
+            _ => return None,
+        };
+    }
+}
+
+/// Returns whether `identifier` is the object of a `push` or `unshift` call
+/// that [`mutated_array`] matches, or of the target of an element assignment
+/// with `=` and any key, as `a` in `a[i] = v`. Other writes of an element,
+/// as `a[0] += 1` or `[a[0]] = t`, add nothing to an array in TypeScript.
+pub(super) fn is_array_mutation(identifier: &JsIdentifierExpression) -> bool {
+    let mut object = identifier.syntax().clone();
+    let parent = loop {
+        let Some(parent) = object.parent() else {
+            return false;
+        };
+        if JsParenthesizedExpression::can_cast(parent.kind())
+            || TsNonNullAssertionExpression::can_cast(parent.kind())
+        {
+            object = parent;
+        } else {
+            break parent;
+        }
+    };
+    if let Some(member) = JsComputedMemberAssignment::cast_ref(&parent) {
+        return member
+            .object()
+            .is_ok_and(|member_object| *member_object.syntax() == object)
+            && member
+                .parent::<JsAssignmentExpression>()
+                .is_some_and(|assignment| {
+                    assignment.operator() == Ok(JsAssignmentOperator::Assign)
+                        && assignment
+                            .left()
+                            .is_ok_and(|left| left.syntax() == member.syntax())
+                });
+    }
+    JsStaticMemberExpression::cast(parent)
+        .and_then(|member| member.parent::<JsCallExpression>())
+        .and_then(|call| mutated_array(&call))
+        .is_some_and(|mutated| mutated.syntax() == identifier.syntax())
+}
+
+/// Returns whether `expression` is an empty array literal without
+/// parentheses. TypeScript doesn't count an empty array literal in
+/// parentheses either.
+fn is_empty_array_literal(expression: &AnyJsExpression) -> bool {
+    matches!(expression, AnyJsExpression::JsArrayExpression(array) if array.elements().is_empty())
+}
+
+/// What the key of an element assignment target, as `0` in `a[0] = v`, tells
+/// about the write to an array whose type evolves with its writes.
+enum ElementKey {
+    /// A number literal, so the value joins the element type, as TypeScript
+    /// adds it when the key's type is a number.
+    Number,
+    /// A string literal or a template without substitutions, whose type is
+    /// no number, so TypeScript adds nothing.
+    String,
+    /// A key whose type may or may not be a number.
+    Other,
+}
+
+impl ElementKey {
+    fn new(key: &AnyJsExpression) -> Self {
+        match key.clone().omit_parentheses() {
+            AnyJsExpression::AnyJsLiteralExpression(
+                AnyJsLiteralExpression::JsNumberLiteralExpression(_),
+            ) => Self::Number,
+            AnyJsExpression::AnyJsLiteralExpression(
+                AnyJsLiteralExpression::JsStringLiteralExpression(_),
+            ) => Self::String,
+            AnyJsExpression::JsTemplateExpression(template)
+                if template.tag().is_none()
+                    && template
+                        .elements()
+                        .iter()
+                        .all(|element| element.as_js_template_element().is_none()) =>
+            {
+                Self::String
+            }
+            _ => Self::Other,
+        }
+    }
+}
+
+/// The reads that [`RootBuilder::reads_evolving`] looks for, and the nested
+/// roots that it skips.
+const EVOLVING_READ_KINDS: SyntaxKindSet<JsLanguage> =
+    JsIdentifierExpression::KIND_SET.union(AnyJsControlFlowRoot::KIND_SET);
+
 /// Limits the operands that [`value_callees`] visits.
 const MAX_VALUE_STEPS: usize = 32;
 
+/// Why Biome may type a value narrower than TypeScript does, as
+/// [`value_callees`] finds it.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+enum UntypedValue {
+    /// The value can be the result of a call to a function whose return type
+    /// Biome infers. When an assignment in a scope other than the declaration
+    /// of a variable whose type evolves with its writes assigns such a value,
+    /// the variable's declared type includes the type that Biome infers.
+    InferredReturn,
+    /// The value can be the result of `typeof`, or its operands exceed
+    /// [`MAX_VALUE_STEPS`].
+    Other,
+}
+
 /// Returns the callees whose return types must come from annotations before
 /// a write reduces by the value of `expression`. The reading context
-/// confirms them. Returns `None` when Biome may type the value narrower than
-/// TypeScript does, so that a write of it gives the subject its declared
-/// type.
+/// confirms them. Returns an error when Biome may type the value narrower
+/// than TypeScript does, so that a write of it gives the subject its declared
+/// type, or Unknown for a variable whose type evolves with its writes.
 ///
 /// The values that `expression` can give are visited through parentheses,
 /// the branches of a conditional expression, the operands of `&&`, `||`, and
@@ -529,19 +682,26 @@ const MAX_VALUE_STEPS: usize = 32;
 /// only when Biome's type of its object has it. Among them:
 ///
 /// - A call depends on where the return type of its callee comes from; see
-///   [`callee_return`]. An inferred return type gives `None`, because Biome
-///   infers the return type of a function without a return type annotation
-///   without the `undefined` of an end that the function can reach.
-/// - `typeof` gives `None`, because Biome types it as the one kind of value
-///   that the operand's type has, where TypeScript gives every kind.
+///   [`callee_return`]. An inferred return type gives
+///   [`UntypedValue::InferredReturn`], because Biome infers the return type
+///   of a function without a return type annotation without the `undefined`
+///   of an end that the function can reach.
+/// - `typeof` gives [`UntypedValue::Other`], because Biome types it as the
+///   one kind of value that the operand's type has, where TypeScript gives
+///   every kind.
 ///
-/// Also returns `None` when the operands exceed [`MAX_VALUE_STEPS`].
-fn value_callees(expression: &AnyJsExpression, model: &SemanticModel) -> Option<Vec<FlowCallee>> {
+/// Also returns [`UntypedValue::Other`] when the operands exceed
+/// [`MAX_VALUE_STEPS`].
+fn value_callees(
+    expression: &AnyJsExpression,
+    model: &SemanticModel,
+) -> Result<Vec<FlowCallee>, UntypedValue> {
     let mut pending = vec![expression.clone()];
     let mut callees = Vec::new();
     let mut remaining = MAX_VALUE_STEPS;
+    let mut inferred = false;
     while let Some(expression) = pending.pop() {
-        remaining = remaining.checked_sub(1)?;
+        remaining = remaining.checked_sub(1).ok_or(UntypedValue::Other)?;
         match expression {
             AnyJsExpression::JsParenthesizedExpression(parenthesized) => {
                 pending.extend(parenthesized.expression().ok());
@@ -563,13 +723,13 @@ fn value_callees(expression: &AnyJsExpression, model: &SemanticModel) -> Option<
             AnyJsExpression::JsUnaryExpression(unary)
                 if unary.operator() == Ok(JsUnaryOperator::Typeof) =>
             {
-                return None;
+                return Err(UntypedValue::Other);
             }
             AnyJsExpression::JsCallExpression(call) => {
-                let callee = call.callee().ok()?;
+                let callee = call.callee().map_err(|_| UntypedValue::Other)?;
                 match callee_return(&callee, model) {
                     CalleeReturn::Annotated => {}
-                    CalleeReturn::Inferred => return None,
+                    CalleeReturn::Inferred => inferred = true,
                     CalleeReturn::Resolved(callee) => callees.push(callee),
                 }
                 if call.is_optional_chain() {
@@ -585,7 +745,11 @@ fn value_callees(expression: &AnyJsExpression, model: &SemanticModel) -> Option<
             _ => {}
         }
     }
-    Some(callees)
+    if inferred {
+        Err(UntypedValue::InferredReturn)
+    } else {
+        Ok(callees)
+    }
 }
 
 /// Where the return type of the callee of a call comes from, as far as the
@@ -933,6 +1097,14 @@ struct RootBuilder<'a, 'raw> {
     value_callees: FxHashMap<TextRange, Box<[FlowCallee]>>,
     written: WrittenTargets,
     captures: Vec<BuiltCapture>,
+    /// How the type of each variable met so far evolves with its writes, by
+    /// the range of its declaration.
+    evolving: FxHashMap<TextRange, FlowEvolving>,
+    /// Whether each value checked so far reads a variable whose type evolves
+    /// with its writes, by the value's range.
+    evolving_values: FxHashMap<TextRange, bool>,
+    initializers: FxHashSet<FlowNodeId>,
+    hoisted: FxHashSet<FlowSubjectId>,
     /// The number of write points added so far, which tells whether an
     /// expression contains one.
     write_points: usize,
@@ -1459,7 +1631,10 @@ impl RootBuilder<'_, '_> {
             // of the iterable for `for...of`, as in TypeScript.
             AnyJsForInOrOfInitializer::AnyJsAssignmentPattern(pattern) => {
                 let flow = self.assignment_pattern(&pattern, header, 0)?;
-                let value = statement.assigned_value(&expression);
+                let value = match statement.assigned_value(&expression) {
+                    Some(value) if !self.reads_evolving(&expression) => Some(value),
+                    Some(_) | None => None,
+                };
                 self.pattern_writes(&pattern, value, &[], flow, 0)?
             }
         };
@@ -1949,6 +2124,12 @@ impl RootBuilder<'_, '_> {
             Some(AnyJsExpression::JsAssignmentExpression(assignment)) => {
                 self.assignment(&assignment, incoming, depth)
             }
+            // The callee and the arguments run before the call adds them to
+            // an array.
+            Some(AnyJsExpression::JsCallExpression(call)) => {
+                let flow = self.children(node, incoming, depth)?;
+                self.array_mutation(&call, flow)
+            }
             Some(AnyJsExpression::JsPreUpdateExpression(update)) => {
                 let operand = update.operand().map_err(|_| Unsupported)?;
                 self.update(&operand, incoming, depth)
@@ -2128,6 +2309,7 @@ impl RootBuilder<'_, '_> {
                     if let Ok(arguments) = call.arguments() {
                         flow = self.evaluate(arguments.syntax(), flow, link_depth + 1)?;
                     }
+                    flow = self.array_mutation(call, flow)?;
                 }
             }
         }
@@ -2188,14 +2370,28 @@ impl RootBuilder<'_, '_> {
                 let flow = self.evaluate(right.syntax(), flow, depth + 1)?;
                 let value = self.assigned_expression(&right);
                 let compound_like = is_compound_like(&right);
-                return self.write_target(&target, flow, |builder| {
-                    let value = builder.assigned_value(value, &[])?;
+                // An empty array literal starts an array whose type evolves
+                // with its writes again.
+                let restarts = is_empty_array_literal(&right)
+                    && match &target {
+                        AnyJsAssignment::JsIdentifierAssignment(identifier) => {
+                            self.model.binding(identifier).is_some_and(|binding| {
+                                self.evolving(binding.range()) == FlowEvolving::Array
+                            })
+                        }
+                        _ => false,
+                    };
+                let flow = self.write_target(&target, flow, |builder| {
+                    if restarts {
+                        return Ok(FlowWriteEffect::EmptyArray);
+                    }
                     Ok(if compound_like {
-                        FlowWriteEffect::CompoundLike(value)
+                        FlowWriteEffect::CompoundLike(builder.assigned_value(value, &[])?)
                     } else {
-                        FlowWriteEffect::Assign(value)
+                        FlowWriteEffect::Assign(builder.assignment_value(&target, &right, value)?)
                     })
-                });
+                })?;
+                return self.element_write(&target, value, flow);
             }
             JsAssignmentOperator::AddAssign
             | JsAssignmentOperator::SubtractAssign
@@ -2217,7 +2413,9 @@ impl RootBuilder<'_, '_> {
         let right_flow = self.evaluate(right.syntax(), right_flow, depth + 1)?;
         let value = self.assigned_expression(&right);
         let right_flow = self.write_target(&target, right_flow, |builder| {
-            Ok(FlowWriteEffect::Assign(builder.assigned_value(value, &[])?))
+            Ok(FlowWriteEffect::Assign(
+                builder.assignment_value(&target, &right, value)?,
+            ))
         })?;
         let skip_flow = self.target_condition(flow, &target, skip_right)?;
         self.join_two(skip_flow, right_flow)
@@ -2750,18 +2948,91 @@ impl RootBuilder<'_, '_> {
             .flatten()
             .copied()
             .collect();
-        let assigned = FlowAssigned {
+        self.intern_assigned(FlowAssigned {
             value,
             steps: steps.into(),
             callees,
-        };
+            covered: false,
+        })
+        .map(Some)
+    }
+
+    /// Returns the index of `assigned` in [`Self::assigned`], adding it when
+    /// it is new.
+    fn intern_assigned(&mut self, assigned: FlowAssigned) -> Build<u32> {
         if let Some(index) = self.assigned_ids.get(&assigned) {
-            return Ok(Some(*index));
+            return Ok(*index);
         }
         let index = u32::try_from(self.assigned.len()).map_err(|_| Unsupported)?;
         self.assigned.push(assigned.clone());
         self.assigned_ids.insert(assigned, index);
-        Ok(Some(index))
+        Ok(index)
+    }
+
+    /// Returns the index of the value that an assignment with `=`, `??=`,
+    /// `||=`, or `&&=` writes to `target`, as `right` in `x = right`, given
+    /// `value`, the value that [`Self::assigned_expression`] gave for
+    /// `right`. The value is covered, as [`FlowAssigned::covered`] describes,
+    /// when [`Self::is_covered`] holds.
+    fn assignment_value(
+        &mut self,
+        target: &AnyJsAssignment,
+        right: &AnyJsExpression,
+        value: Option<FlowAssignedValue>,
+    ) -> Build<Option<u32>> {
+        if !self.is_covered(target, right) {
+            return self.assigned_value(value, &[]);
+        }
+        self.intern_assigned(FlowAssigned {
+            value: FlowAssignedValue::Expression(right.range()),
+            steps: Box::default(),
+            callees: Box::default(),
+            covered: true,
+        })
+        .map(Some)
+    }
+
+    /// Returns whether the declared type of the variable that an assignment
+    /// with `=`, `??=`, `||=`, or `&&=` writes includes the type that Biome
+    /// gives `right`, the assigned value.
+    ///
+    /// The variable must be `target`, in parentheses or with `!`, and its
+    /// type must evolve with its writes as a variable. The declared type of
+    /// such a variable joins its initializer with the values of these
+    /// assignments when they lie in a scope other than the one that declares
+    /// the variable, as `x = v` in `let x = null; if (c) { x = v; }`, so the
+    /// assignment must lie in such a scope. The value must not read a
+    /// variable whose type evolves with its writes, and Biome must not type
+    /// it narrower than TypeScript for a reason other than a call to a
+    /// function whose return type Biome infers; see [`value_callees`].
+    fn is_covered(&mut self, target: &AnyJsAssignment, right: &AnyJsExpression) -> bool {
+        let mut target = target.clone();
+        let identifier = loop {
+            let inner = match target {
+                AnyJsAssignment::JsIdentifierAssignment(identifier) => break identifier,
+                AnyJsAssignment::JsParenthesizedAssignment(assignment) => assignment.assignment(),
+                AnyJsAssignment::TsNonNullAssertionAssignment(assignment) => {
+                    assignment.assignment()
+                }
+                AnyJsAssignment::JsBogusAssignment(_)
+                | AnyJsAssignment::JsComputedMemberAssignment(_)
+                | AnyJsAssignment::JsStaticMemberAssignment(_)
+                | AnyJsAssignment::TsAsAssignment(_)
+                | AnyJsAssignment::TsSatisfiesAssignment(_)
+                | AnyJsAssignment::TsTypeAssertionAssignment(_) => return false,
+            };
+            let Ok(inner) = inner else {
+                return false;
+            };
+            target = inner;
+        };
+        let Some(binding) = self.model.binding(&identifier) else {
+            return false;
+        };
+        self.evolving(binding.range()) == FlowEvolving::Variable
+            && self.model.scope(identifier.syntax()).id() != binding.scope().id()
+            && !self.reads_evolving(right)
+            && !matches!(value_callees(right, self.model), Err(UntypedValue::Other))
     }
 
     /// Returns the value of `expression` as a write assigns it, or `None`
@@ -2777,7 +3048,10 @@ impl RootBuilder<'_, '_> {
     /// the callees that [`value_callees`] gives. The callees are recorded by
     /// the range of `expression`, where [`Self::assigned_value`] finds them.
     fn check_value(&mut self, expression: &AnyJsExpression) -> bool {
-        let Some(callees) = value_callees(expression, self.model) else {
+        if self.reads_evolving(expression) {
+            return false;
+        }
+        let Ok(callees) = value_callees(expression, self.model) else {
             return false;
         };
         if !callees.is_empty() {
@@ -2785,6 +3059,138 @@ impl RootBuilder<'_, '_> {
                 .insert(expression.range(), callees.into_boxed_slice());
         }
         true
+    }
+
+    /// Returns how the type of the variable declared at `range` evolves with
+    /// its writes, calling [`evolving_declaration`] once per variable.
+    fn evolving(&mut self, range: TextRange) -> FlowEvolving {
+        if let Some(evolving) = self.evolving.get(&range) {
+            return *evolving;
+        }
+        let evolving = self
+            .model
+            .as_binding_by_range(range)
+            .map_or(FlowEvolving::None, |binding| {
+                evolving_declaration(&binding, self.model)
+            });
+        self.evolving.insert(range, evolving);
+        evolving
+    }
+
+    /// Returns the subject of the variable that `identifier` reads when the
+    /// variable's type evolves as an array.
+    fn evolving_array(&mut self, identifier: &JsIdentifierExpression) -> Option<FlowSubjectId> {
+        let binding = self.model.binding(&identifier.name().ok()?)?;
+        if self.evolving(binding.range()) != FlowEvolving::Array {
+            return None;
+        }
+        self.subjects.intern(FlowSubject::Binding(binding.range()))
+    }
+
+    /// Returns whether `expression`, a value that a write assigns or adds to
+    /// an array, reads a variable whose type evolves with its writes outside
+    /// the functions that it creates, once per expression.
+    ///
+    /// Biome types such a read in a value without narrowing, from a declared
+    /// type that doesn't follow the variable's writes, as `null` for `x` in
+    /// `let x = null; x = "a"; y = x`, so the value's type can lack what
+    /// TypeScript gives it.
+    fn reads_evolving(&mut self, expression: &AnyJsExpression) -> bool {
+        let range = expression.range();
+        if let Some(reads) = self.evolving_values.get(&range) {
+            return *reads;
+        }
+        let mut reads = false;
+        let mut events = expression.syntax().preorder_of_kinds(EVOLVING_READ_KINDS);
+        while let Some(event) = events.next() {
+            let WalkEvent::Enter(node) = event else {
+                continue;
+            };
+            if AnyJsControlFlowRoot::can_cast(node.kind()) {
+                events.skip_subtree();
+                continue;
+            }
+            if let Some(binding) = JsIdentifierExpression::cast(node)
+                .and_then(|identifier| identifier.name().ok())
+                .and_then(|name| self.model.binding(&name))
+                && self.evolving(binding.range()) != FlowEvolving::None
+            {
+                reads = true;
+                break;
+            }
+        }
+        self.evolving_values.insert(range, reads);
+        reads
+    }
+
+    /// Adds the write points of `call` after `incoming`, the flow after its
+    /// arguments, when `call` adds values to an array whose type evolves with
+    /// its writes, and returns the flow after them. Each argument gets one
+    /// write point, in order, as TypeScript adds each argument to the element
+    /// type. A spread argument adds a value that Biome can't type as
+    /// TypeScript does. [`mutated_array`] recognizes the calls that add values.
+    fn array_mutation(
+        &mut self,
+        call: &JsCallExpression,
+        incoming: FlowNodeId,
+    ) -> Build<FlowNodeId> {
+        let Some(object) = mutated_array(call) else {
+            return Ok(incoming);
+        };
+        let Some(subject) = self.evolving_array(&object) else {
+            return Ok(incoming);
+        };
+        self.written.mutations.insert(object.range().start());
+        let mut flow = incoming;
+        for argument in call.arguments().map_err(|_| Unsupported)?.args() {
+            let value = match argument.map_err(|_| Unsupported)? {
+                AnyJsCallArgument::AnyJsExpression(argument) => {
+                    let value = self.assigned_expression(&argument);
+                    self.assigned_value(value, &[])?
+                }
+                AnyJsCallArgument::JsSpread(_) => None,
+            };
+            let effect = FlowWriteEffect::Elements(value);
+            flow = self.push_write(flow, FlowWrite { subject, effect })?;
+        }
+        Ok(flow)
+    }
+
+    /// Adds the write point that gives the value of the element assignment
+    /// `target = value` to an array whose type evolves with its writes, as
+    /// `a[0] = v` does, after `incoming`, and returns the flow after it.
+    ///
+    /// The value joins the element type only for a number literal key,
+    /// because TypeScript adds a value only when the key's type is a number.
+    /// A string key adds nothing. Any other key may be a number, so its value
+    /// is one that Biome can't type as TypeScript does. Any other target adds
+    /// no write point.
+    fn element_write(
+        &mut self,
+        target: &AnyJsAssignment,
+        value: Option<FlowAssignedValue>,
+        incoming: FlowNodeId,
+    ) -> Build<FlowNodeId> {
+        let AnyJsAssignment::JsComputedMemberAssignment(member) = target else {
+            return Ok(incoming);
+        };
+        let (Some(object), Ok(key)) = (
+            member.object().ok().and_then(array_variable),
+            member.member(),
+        ) else {
+            return Ok(incoming);
+        };
+        let Some(subject) = self.evolving_array(&object) else {
+            return Ok(incoming);
+        };
+        self.written.mutations.insert(object.range().start());
+        let value = match ElementKey::new(&key) {
+            ElementKey::Number => self.assigned_value(value, &[])?,
+            ElementKey::String => return Ok(incoming),
+            ElementKey::Other => None,
+        };
+        let effect = FlowWriteEffect::Elements(value);
+        self.push_write(incoming, FlowWrite { subject, effect })
     }
 
     /// Returns `value` and `steps` with a step that reads `field`, supplied
@@ -2870,6 +3276,27 @@ impl RootBuilder<'_, '_> {
                 if declarator.variable_annotation().is_some() {
                     let value = self.assigned_expression(&expression);
                     flow = self.binding_writes(pattern, value, &[], flow, depth + 1)?;
+                } else if let AnyJsBindingPattern::AnyJsBinding(AnyJsBinding::JsIdentifierBinding(
+                    binding,
+                )) = pattern
+                    && let evolving @ (FlowEvolving::Variable | FlowEvolving::Array) =
+                        self.evolving(binding.range())
+                {
+                    let subject = self
+                        .subjects
+                        .intern(FlowSubject::Binding(binding.range()))
+                        .ok_or(Unsupported)?;
+                    let effect = if evolving == FlowEvolving::Array {
+                        FlowWriteEffect::EmptyArray
+                    } else {
+                        let value = self.assigned_expression(&expression);
+                        FlowWriteEffect::Assign(self.assigned_value(value, &[])?)
+                    };
+                    flow = self.push_write(flow, FlowWrite { subject, effect })?;
+                    self.initializers.insert(flow);
+                    if is_var(declarator) {
+                        self.hoisted.insert(subject);
+                    }
                 } else if is_var(declarator) {
                     flow = self.binding_writes(pattern, None, &[], flow, depth + 1)?;
                 }
@@ -3370,6 +3797,9 @@ mod tests {
                             FlowWriteEffect::Undefined => "Undefined",
                             FlowWriteEffect::Reset => "Reset",
                             FlowWriteEffect::Wildcard => "Wildcard",
+                            FlowWriteEffect::Elements(Some(_)) => "Elements",
+                            FlowWriteEffect::Elements(None) => "UnknownElements",
+                            FlowWriteEffect::EmptyArray => "EmptyArray",
                         };
                         facts.push(format!("{}:{effect}", self.subject_name(write.subject)));
                         follow(*antecedent, facts);
@@ -3935,6 +4365,69 @@ mod tests {
                 built.paths(path, occurrence)
             );
         }
+    }
+
+    #[test]
+    fn evolving_declarations_write_their_initializers_and_their_elements() {
+        // A variable whose type evolves with its writes is written by its
+        // initializer, and an array by each value that a call or an element
+        // assignment with `=` adds to it.
+        let built = function(
+            "function f(v, i) { let x = null; var y = undefined; read(x, y); let q = []; q.push(v, ...v); q[0] = v; q[i] = v; q['k'] = v; q[0] += v; q = []; read(q); }",
+        );
+        assert_eq!(built.paths("x", 1), [facts(&["y:Assign", "x:Assign"])]);
+        assert_eq!(
+            sorted_paths(&built, "q", 7),
+            [facts(&[
+                "q.0:Assign",
+                "q.0:Compound",
+                "q.k:Assign",
+                "q:Elements",
+                "q:Elements",
+                "q:EmptyArray",
+                "q:EmptyArray",
+                "q:UnknownElements",
+                "q:UnknownElements",
+                "q:Wildcard",
+                "x:Assign",
+                "y:Assign",
+            ])]
+        );
+        // `push` on an array that doesn't evolve is an ordinary call, and
+        // assigning an empty array literal to that array restarts nothing.
+        let built = function("function f(w: number[], v) { w.push(v); w = []; read(w); }");
+        assert_eq!(built.paths("w", 3), [facts(&["w:Assign"])]);
+        // A value that reads a variable whose type evolves with its writes
+        // has Biome's type for that variable, which doesn't follow its
+        // writes, so the write gives the declared type.
+        let built = function(
+            "function f(c) { let e = null; e = c; let y: string | null = c; y = e; read(y); }",
+        );
+        assert!(contains(&built.paths("y", 2), "y:Reset"));
+    }
+
+    #[test]
+    fn assignments_in_other_scopes_have_values_that_declared_types_cover() {
+        // The declared type of a variable whose type evolves with its writes
+        // includes the values of `=` and logical assignments in scopes other
+        // than its declaration. Values that Biome may type narrower than
+        // TypeScript for a reason other than an inferred return type, as
+        // `typeof` and a read of such a variable, are left out, and so are
+        // compound and compound-like assignments.
+        let built = function(
+            "function f(c, o, n) { let x = null; let y = null; x = o.m(); if (c) { x = o.m(); x ??= h(); x = typeof c; x = y; x = n + 1; x += 1; } { let z = null; z = o.m(); read(z); } read(x); }",
+        );
+        let covered: Vec<_> = built
+            .root()
+            .assigned
+            .iter()
+            .filter(|assigned| assigned.covered)
+            .map(|assigned| match assigned.value {
+                FlowAssignedValue::Expression(range) => &built.source[range],
+                FlowAssignedValue::IterableValue(_) | FlowAssignedValue::Key => "",
+            })
+            .collect();
+        assert_eq!(covered, ["o.m()", "h()"]);
     }
 
     #[test]

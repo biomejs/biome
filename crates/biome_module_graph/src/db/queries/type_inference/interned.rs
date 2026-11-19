@@ -5,7 +5,7 @@
 //! cached by interning.
 
 use crate::ModuleInfo;
-use crate::js_module_info::flow::{FlowNodeId, FlowSubjectId};
+use crate::js_module_info::flow::{FlowEvolving, FlowNodeId, FlowSubjectId};
 use biome_js_type_info::GlobalTypeId;
 use biome_js_type_info::interned_types::{
     CallArgumentType as InferredCallArgumentType, LocalTypeId as InferredLocalTypeId,
@@ -81,6 +81,13 @@ pub(crate) struct FlowSubjectRootInput<'db> {
     /// reduces the subject, so that other subjects keep sharing their solves.
     #[returns(copy)]
     pub assigned: Option<FlowAssignedTypes<'db>>,
+    /// How the subject's type evolves with its writes, which selects the
+    /// solve. With [`FlowEvolving::None`], the solve narrows `baseline` by the
+    /// root's guards and writes. With the other kinds, it starts at
+    /// `baseline`, which is `undefined`, and takes the subject's type from the
+    /// values that the writes assign.
+    #[returns(copy)]
+    pub evolving: FlowEvolving,
 }
 
 /// The types of the values that the writes of one subject assign, in the

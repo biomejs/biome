@@ -1,0 +1,17 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: libraryValid.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+
+export function load() {
+	return 1;
+}
+
+export async function fetchUser() {
+	return { id: 1 };
+}
+
+```
