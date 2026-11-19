@@ -82,7 +82,7 @@ Binding x "x" => number
 
 Expression "{ x: 1 }" => Object {
   prototype: No prototype
-  members: ["x": number: 1]
+  members: ["x": number]
 }
 
 Expression "1" => number: 1

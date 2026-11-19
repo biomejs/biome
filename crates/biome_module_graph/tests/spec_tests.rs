@@ -80,6 +80,8 @@ mod instanceof;
 mod intersections;
 #[path = "spec_tests/js_doc.test.rs"]
 mod js_doc;
+#[path = "spec_tests/literal_widening.test.rs"]
+mod literal_widening;
 #[path = "spec_tests/loops.test.rs"]
 mod loops;
 #[path = "spec_tests/module_resolution.test.rs"]

@@ -618,6 +618,11 @@ fn classify_expression(
                         }
                     }
                     RawTypeData::TypeofExpression(expression) => match expression.as_ref() {
+                        // Widening a literal type never makes a value a Promise.
+                        TypeofExpression::WidenedLiteral(expression) => ClassificationState {
+                            target: ClassificationTarget::Reference(expression.value.clone()),
+                            ..state
+                        },
                         TypeofExpression::StaticMember(expression)
                         | TypeofExpression::OptionalChainStaticMember(expression) => {
                             ClassificationState {

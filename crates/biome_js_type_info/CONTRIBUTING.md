@@ -88,6 +88,25 @@ one namespace, still share one type and its members. The inferred
 declarations stay apart after their handles are resolved. Generated globals
 have no scope.
 
+Deduplication also means that a raw literal type doesn't tell where it comes
+from: the `1` of `let n = 1` and the `1` of `let n: 1` are one `TypeId`.
+TypeScript widens the first to `number`, because a literal expression has a
+*fresh* literal type, which widens where the value initializes a location
+that the program can assign later. So the collector marks those locations
+instead of the types: a `let` or `var` variable, a class field that isn't
+`readonly`, a parameter with a default value, an element of an array that a
+destructuring pattern takes apart, and a return type inferred from a
+function's body get a `TypeofExpression::WidenedLiteral` around the value's
+type, when the value may have a fresh literal type and no type annotation
+declares the location. Object literals and other array literals need no
+marker, because their kind already says that they are mutable. Type
+assertions, as `1 as 1` and `1 as const`, stay behind a raw `Reference`, so
+nothing takes their literal types as fresh. Resolution in the module graph
+decides which literal types are fresh from the raw expressions behind the
+value, as
+[`widening.rs`](../biome_module_graph/src/db/type_inference/widening.rs)
+describes, and widens them.
+
 Interfaces of one name in one scope, and a class with the interfaces of its
 name, are one type in TypeScript. The module collector merges each such set
 into one raw `Interface` or `Class`, with the scope of the class or the first

@@ -73,7 +73,7 @@ Expression "Child" => class "Child" {
   type_args: []
 }
 
-Binding then "then" => instanceof Promise<number: 42>
+Binding then "then" => instanceof Promise<number>
 
 Expression "direct" => instanceof Promise<string>
 
@@ -107,14 +107,14 @@ Expression "direct.then" => sync Function "then" {
   returns: instanceof Promise<TFulfillmentHandlerValue = string | TRejectionHandlerValue = never>
 }
 
-Expression "direct.then(() => 42)" => instanceof Promise<number: 42>
+Expression "direct.then(() => 42)" => instanceof Promise<number>
 
 Expression "() => 42" => sync Function {
   accepts: {
     params: []
     type_args: []
   }
-  returns: number: 42
+  returns: number
 }
 
 Expression "42" => number: 42
@@ -183,7 +183,7 @@ Expression "Promise.resolve(42)" => instanceof Promise<number: 42>
 
 Expression "42" => number: 42
 
-Binding flattenedAsync "flattenedAsync" => instanceof Promise<number: 42>
+Binding flattenedAsync "flattenedAsync" => instanceof Promise<number>
 
 Expression "direct" => instanceof Promise<string>
 
@@ -217,14 +217,14 @@ Expression "direct.then" => sync Function "then" {
   returns: instanceof Promise<TFulfillmentHandlerValue = string | TRejectionHandlerValue = never>
 }
 
-Expression "direct.then(async () => 42)" => instanceof Promise<number: 42>
+Expression "direct.then(async () => 42)" => instanceof Promise<number>
 
 Expression "async () => 42" => async Function {
   accepts: {
     params: []
     type_args: []
   }
-  returns: instanceof Promise<number: 42>
+  returns: instanceof Promise<number>
 }
 
 Expression "42" => number: 42
@@ -265,7 +265,7 @@ Expression "direct.then" => sync Function "then" {
 
 Expression "direct.then()" => instanceof Promise<string>
 
-Binding recovered "recovered" => instanceof Promise<string | bool: false>
+Binding recovered "recovered" => instanceof Promise<string | boolean>
 
 Expression "direct" => instanceof Promise<string>
 
@@ -287,14 +287,14 @@ Expression "direct.catch" => sync Function "catch" {
   returns: instanceof Promise<string | TRejectionHandlerValue = never>
 }
 
-Expression "direct.catch(() => false)" => instanceof Promise<string | bool: false>
+Expression "direct.catch(() => false)" => instanceof Promise<string | boolean>
 
 Expression "() => false" => sync Function {
   accepts: {
     params: []
     type_args: []
   }
-  returns: bool: false
+  returns: boolean
 }
 
 Expression "false" => bool: false
@@ -329,11 +329,11 @@ Expression "() => {}" => sync Function {
   returns: void
 }
 
-Binding awaitedThen "awaitedThen" => number: 42
+Binding awaitedThen "awaitedThen" => number
 
-Expression "await then" => number: 42
+Expression "await then" => number
 
-Expression "then" => instanceof Promise<number: 42>
+Expression "then" => instanceof Promise<number>
 
 Binding awaitedResolved "awaitedResolved" => number: 42
 
@@ -341,11 +341,11 @@ Expression "await flattenedResolved" => number: 42
 
 Expression "flattenedResolved" => instanceof Promise<number: 42>
 
-Binding awaitedAsync "awaitedAsync" => number: 42
+Binding awaitedAsync "awaitedAsync" => number
 
-Expression "await flattenedAsync" => number: 42
+Expression "await flattenedAsync" => number
 
-Expression "flattenedAsync" => instanceof Promise<number: 42>
+Expression "flattenedAsync" => instanceof Promise<number>
 
 Binding awaitedFinal "awaitedFinal" => string
 
@@ -353,9 +353,9 @@ Expression "await finalResult" => string
 
 Expression "finalResult" => instanceof Promise<string>
 
-Binding awaitedRecovered "awaitedRecovered" => string | bool: false
+Binding awaitedRecovered "awaitedRecovered" => string | boolean
 
-Expression "await recovered" => string | bool: false
+Expression "await recovered" => string | boolean
 
-Expression "recovered" => instanceof Promise<string | bool: false>
+Expression "recovered" => instanceof Promise<string | boolean>
 ```

@@ -235,8 +235,10 @@ fn test_infer_module_types_widens_array_expressions_on_build() {
         ("declared", "instanceof Array<string: asc | string: desc>"),
         ("conditional", "instanceof Array<number>"),
         ("negativeBigints", "instanceof Array<BigInt>"),
-        ("first", "bigint: 1n"),
-        ("second", "number: 2"),
+        // A destructuring pattern gives the elements no literal type, so
+        // TypeScript 7.0.2 widens them.
+        ("first", "BigInt"),
+        ("second", "number"),
         ("picked", "boolean"),
     ] {
         let ty = inferred_binding_ty_by_name(&db, index_module, inferred, name)

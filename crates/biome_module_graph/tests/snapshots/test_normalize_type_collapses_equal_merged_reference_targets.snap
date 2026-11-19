@@ -34,7 +34,7 @@ Binding Foo "Foo" => Object {
 
 Expression "{ name: \"foo\", }" => Object {
   prototype: No prototype
-  members: ["name": string: foo]
+  members: ["name": string]
 }
 
 Expression "{ name: \"foo\", } as const" => Object {

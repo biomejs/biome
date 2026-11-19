@@ -19,6 +19,10 @@ export function mapped(flag: boolean) {
     return map(() => 42) || flag;
 }
 
+export function mappedConstant(flag: boolean) {
+    return map(() => "a" as const) || flag;
+}
+
 ```
 
 # Diagnostics
@@ -47,15 +51,15 @@ callbackOverloadInvalid.ts:5:12 lint/suspicious/noUnnecessaryConditions ━━�
 ```
 
 ```
-callbackOverloadInvalid.ts:13:12 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+callbackOverloadInvalid.ts:17:12 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This condition is always truthy.
   
-    12 │ export function mapped(flag: boolean) {
-  > 13 │     return map(() => 42) || flag;
-       │            ^^^^^^^^^^^^^
-    14 │ }
-    15 │ 
+    16 │ export function mappedConstant(flag: boolean) {
+  > 17 │     return map(() => "a" as const) || flag;
+       │            ^^^^^^^^^^^^^^^^^^^^^^^
+    18 │ }
+    19 │ 
   
   i The value's type can never be falsy, so this check is redundant.
   

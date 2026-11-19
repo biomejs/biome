@@ -679,6 +679,18 @@ impl Format<FormatTypeContext> for TypeofExpression {
             Self::UnaryMinus(expr) => {
                 write!(f, [&format_args![token("-"), &expr.argument]])
             }
+            Self::WidenedLiteral(expr) => write!(
+                f,
+                [&format_args![
+                    token(if expr.is_return_type {
+                        "widened return"
+                    } else {
+                        "widened"
+                    }),
+                    space(),
+                    &expr.value
+                ]]
+            ),
         }
     }
 }

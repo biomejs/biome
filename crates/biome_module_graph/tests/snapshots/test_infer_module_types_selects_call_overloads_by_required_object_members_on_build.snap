@@ -227,7 +227,7 @@ Expression "select({ kind: \"number\" })" => number
 
 Expression "{ kind: \"number\" }" => Object {
   prototype: No prototype
-  members: ["kind": string: number]
+  members: ["kind": string]
 }
 
 Expression "\"number\"" => string: number

@@ -1,0 +1,85 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidLiteralWidening.ts
+---
+# Input
+```ts
+// A `const`, a `readonly` field, and an `as const` assertion keep the literal
+// types of their values, as in TypeScript, so these tests are always truthy
+// or always falsy.
+const limit = 0;
+export function hasLimit() {
+    return limit ? "limited" : "unlimited";
+}
+
+export class Defaults {
+    readonly empty = "";
+    isEmpty() {
+        return this.empty ? "no" : "yes";
+    }
+}
+
+let enabled = true as const;
+export function isEnabled() {
+    return enabled ? "on" : "off";
+}
+
+```
+
+# Diagnostics
+```
+invalidLiteralWidening.ts:6:12 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition is always falsy.
+  
+    4 │ const limit = 0;
+    5 │ export function hasLimit() {
+  > 6 │     return limit ? "limited" : "unlimited";
+      │            ^^^^^
+    7 │ }
+    8 │ 
+  
+  i The value's type can never be truthy, so this check is redundant.
+  
+  i Remove the condition and the code it guards, or check the value you meant to test.
+  
+
+```
+
+```
+invalidLiteralWidening.ts:12:16 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition is always falsy.
+  
+    10 │     readonly empty = "";
+    11 │     isEmpty() {
+  > 12 │         return this.empty ? "no" : "yes";
+       │                ^^^^^^^^^^
+    13 │     }
+    14 │ }
+  
+  i The value's type can never be truthy, so this check is redundant.
+  
+  i Remove the condition and the code it guards, or check the value you meant to test.
+  
+
+```
+
+```
+invalidLiteralWidening.ts:18:12 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition is always truthy.
+  
+    16 │ let enabled = true as const;
+    17 │ export function isEnabled() {
+  > 18 │     return enabled ? "on" : "off";
+       │            ^^^^^^^
+    19 │ }
+    20 │ 
+  
+  i The value's type can never be falsy, so this check is redundant.
+  
+  i Remove the condition, or check the value you meant to test.
+  
+
+```
