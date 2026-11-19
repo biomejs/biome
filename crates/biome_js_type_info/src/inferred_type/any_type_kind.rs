@@ -1,7 +1,7 @@
 use super::{InferredType, MAX_PROMISE_TYPE_STEPS, MAX_TYPE_RELATION_DEPTH};
 use crate::TypeDb;
 use crate::generated::global_types::ids::READONLY_ARRAY_ID_GLOBAL_TYPE_ID;
-use crate::interned_types::TypeData;
+use crate::interned_types::{ClassParents, TypeData};
 use crate::type_data::TypeOperator;
 
 /// Describes how a type exposes `any` without wrapping it in another generic
@@ -172,9 +172,16 @@ fn promise_argument<'db>(
                 .iter()
                 .find_map(|base| promise_argument(db, *base, depth + 1))
         }
-        TypeData::Class(class) => class
-            .extends(db)
-            .and_then(|base| promise_argument(db, base, depth + 1)),
+        TypeData::Class(class) => {
+            let ClassParents {
+                extends,
+                interface_bases,
+            } = class.parents(db);
+            extends
+                .iter()
+                .chain(interface_bases.iter())
+                .find_map(|base| promise_argument(db, *base, depth + 1))
+        }
         _ => None,
     }
 }

@@ -850,6 +850,22 @@ impl Format<FormatTypeContext> for Class {
                 write!(f, [token("none")])
             }
         });
+        // Printed only for a class that interfaces merge into.
+        let interface_bases = format_with(|f| {
+            if self.interface_bases.is_empty() {
+                Ok(())
+            } else {
+                write!(
+                    f,
+                    [
+                        token("interface_bases:"),
+                        space(),
+                        FmtTypeReferences(self.interface_bases.as_ref()),
+                        hard_line_break()
+                    ]
+                )
+            }
+        });
 
         write!(
             f,
@@ -868,6 +884,7 @@ impl Format<FormatTypeContext> for Class {
                     space(),
                     FmtTypeReferences(self.implements.as_ref()),
                     hard_line_break(),
+                    interface_bases,
                     token("type_args:"),
                     space(),
                     FmtTypeReferences(&self.type_parameters),

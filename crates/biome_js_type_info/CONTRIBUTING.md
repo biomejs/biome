@@ -88,6 +88,19 @@ one namespace, still share one type and its members. The inferred
 declarations stay apart after their handles are resolved. Generated globals
 have no scope.
 
+Interfaces of one name in one scope, and a class with the interfaces of its
+name, are one type in TypeScript. The module collector merges each such set
+into one raw `Interface` or `Class`, with the scope of the class or the first
+interface, and gives it to every binding of the set. A class keeps its own
+`extends`, the parent class, which is a value; the `extends` clauses of the
+interfaces become its `interface_bases`, which are instance types, as an
+interface's `extends` clauses are. The inferred `InternedClass` groups both
+in `ClassParents`, so a reader of a class's parents destructures it and
+decides about each kind: instance-side walks, such as member lookup, which
+`in` and type predicates also use, and the derivation that `instanceof`
+tests, follow both, while static members, constructors, and `super` come
+from the parent class only.
+
 ## Inference Layers
 
 The type system can answer type questions at three levels. These levels are

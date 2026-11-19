@@ -949,7 +949,7 @@ mod tests {
     use super::*;
     use crate::ObjectKind;
     use crate::interned_types::{
-        InternedClass, InternedGenericTypeParameter, InternedLiteral, InternedObject,
+        ClassParents, InternedClass, InternedGenericTypeParameter, InternedLiteral, InternedObject,
         InternedTuple, InternedTypeInstance, InternedUnion, TupleElementType, TypeMember,
     };
     use biome_rowan::Text;
@@ -1073,7 +1073,7 @@ mod tests {
         TypeData::Class(InternedClass::new(
             db,
             Box::default(),
-            None,
+            ClassParents::default(),
             Box::default(),
             Box::default(),
             Some(text(name)),
@@ -1086,7 +1086,7 @@ mod tests {
         let leaf = InternedClass::new(
             db,
             Box::default(),
-            None,
+            ClassParents::default(),
             Box::default(),
             Box::default(),
             Some(text("Leaf")),
@@ -1097,7 +1097,10 @@ mod tests {
             InternedClass::new(
                 db,
                 Box::default(),
-                Some(TypeData::Class(base)),
+                ClassParents {
+                    extends: Some(TypeData::Class(base)),
+                    interface_bases: Box::default(),
+                },
                 Box::default(),
                 Box::default(),
                 None,

@@ -7,7 +7,7 @@
 
 use crate::{
     TypeDb,
-    interned_types::{Literal, TypeData, TypeMember},
+    interned_types::{ClassParents, Literal, TypeData, TypeMember},
 };
 use rustc_hash::FxHashSet;
 
@@ -243,7 +243,13 @@ impl<'db, 'names> StringificationAnalyzer<'db, 'names> {
             }
 
             match data {
-                TypeData::Class(class) => pending.extend(class.extends(self.db)),
+                TypeData::Class(class) => {
+                    let ClassParents {
+                        extends,
+                        interface_bases,
+                    } = class.parents(self.db);
+                    pending.extend(extends.iter().chain(interface_bases.iter()).copied());
+                }
                 TypeData::Generic(generic) => pending.extend(generic.constraint(self.db)),
                 TypeData::InstanceOf(instance) => pending.push(instance.ty(self.db)),
                 TypeData::Interface(interface) => {
@@ -286,10 +292,21 @@ impl<'db, 'names> StringificationAnalyzer<'db, 'names> {
                                 .any(TypeMember::is_custom_stringification_member)
                             {
                                 BaseStringificationStep::Complete(BaseStringification::Suppress)
-                            } else if let Some(base) = class.extends(self.db) {
-                                BaseStringificationStep::Children(vec![base])
                             } else {
-                                BaseStringificationStep::Complete(BaseStringification::Report)
+                                let ClassParents {
+                                    extends,
+                                    interface_bases,
+                                } = class.parents(self.db);
+                                let bases: Vec<_> = extends
+                                    .iter()
+                                    .chain(interface_bases.iter())
+                                    .copied()
+                                    .collect();
+                                if bases.is_empty() {
+                                    BaseStringificationStep::Complete(BaseStringification::Report)
+                                } else {
+                                    BaseStringificationStep::Children(bases)
+                                }
                             }
                         }
                         TypeData::InstanceOf(instance) => {

@@ -602,6 +602,50 @@ fn readonly_paths_never_narrow_where_typescript_sees_a_mutable_property() {
     );
 }
 
+// TypeScript 7.0.2 (`tsc --strict`) merges the interfaces of one name in one
+// scope, and a class with them, and takes `readonly` from the first
+// declaration of a property (TS2687 reports the others). It gives every read
+// below the expected type, unless a comment gives TypeScript's type.
+#[test]
+fn readonly_paths_take_readonly_from_the_first_merged_declaration() {
+    use InferredTypeData::{Null, String};
+    const SOURCE: &str = r#"
+        interface R1 { v: string | null } interface R1 { readonly v: string | null }
+        function mutableFirst(o: R1) { const ok = o.v !== null; if (ok) /*mutableFirst*/o.v; }
+        interface R2 { readonly v: string | null } interface R2 { v: string | null }
+        function readonlyFirst(o: R2) { const ok = o.v !== null; if (ok) /*readonlyFirst*/o.v; }
+        interface R3 { readonly w: string | null } interface R3 { x: 1 }
+        function firstMember(o: R3) { const ok = o.w !== null; if (ok) /*firstMember*/o.w; }
+        interface Base0 { v: string | null }
+        interface Mn { readonly v: string | null } interface Mn extends Base0 {}
+        function ownOverBase(o: Mn) { const ok = o.v !== null; if (ok) /*ownOverBase*/o.v; }
+        class Cm { v: string | null = null } interface Cm { readonly w: string | null }
+        function classInterface(o: Cm) { const ok = o.w !== null; if (ok) /*classInterface*/o.w; }
+        interface Rb { readonly v: string | null }
+        class Ci { k = 1 } interface Ci extends Rb {}
+        function inheritedThroughInterface(o: Ci) { const ok = o.v !== null; if (ok) /*inherited*/o.v; }
+        interface Mp { v: string | null } interface Mp extends Rb {}
+        function ownMutableFirst(o: Mp) { const ok = o.v !== null; if (ok) /*ownMutableFirst*/o.v; }
+        interface Mq extends Rb {} interface Mq { v: string | null }
+        function ownMutableLast(o: Mq) { const ok = o.v !== null; if (ok) /*ownMutableLast*/o.v; }
+    "#;
+    assert_reads(
+        SOURCE,
+        &[
+            ("mutableFirst", "o.v", &[String, Null]),
+            ("readonlyFirst", "o.v", &[String]),
+            ("firstMember", "o.w", &[String]),
+            ("ownOverBase", "o.v", &[String]),
+            ("classInterface", "o.w", &[String]),
+            // TypeScript: `string`. Inherited readonly properties never
+            // narrow, as for an interface's `extends` clause.
+            ("inherited", "o.v", &[String, Null]),
+            ("ownMutableFirst", "o.v", &[String, Null]),
+            ("ownMutableLast", "o.v", &[String, Null]),
+        ],
+    );
+}
+
 // TypeScript 7.0.2 (`tsc --strict`) gives `string | null` at the read, because
 // the augmentation declares `v` on `X` without `readonly`. That declaration
 // hides the readonly `v` that `X` inherits.

@@ -191,3 +191,113 @@ try {} catch (error) {}"#,
     }
     assert!(scope_count >= 10, "{scope_count} scopes");
 }
+
+/// Returns the offsets of the declaration names in each merge set of the
+/// global scope of the TypeScript `source`.
+fn merged_type_declaration_offsets(source: &str) -> Vec<Vec<u32>> {
+    let r = biome_js_parser::parse(source, JsFileSource::ts(), JsParserOptions::default());
+    assert!(r.diagnostics().is_empty(), "at {source:?}");
+    let model = semantic_model(&r.tree(), SemanticModelOptions::default());
+    model
+        .global_scope()
+        .merged_type_declarations()
+        .into_iter()
+        .map(|set| {
+            set.into_iter()
+                .map(|id| {
+                    let binding = model.binding_by_id(id).expect("binding must exist");
+                    binding.range().start().into()
+                })
+                .collect()
+        })
+        .collect()
+}
+
+/// Returns the offsets of the names of the classes and interfaces called
+/// `name` in `source`, in source order.
+fn declaration_offsets(source: &str, name: &str) -> Vec<u32> {
+    let mut offsets: Vec<_> = ["class ", "interface "]
+        .iter()
+        .flat_map(|keyword| {
+            let pattern = format!("{keyword}{name} ");
+            source
+                .match_indices(&pattern)
+                .map(|(offset, _)| u32::try_from(offset + keyword.len()).unwrap())
+                .collect::<Vec<_>>()
+        })
+        .collect();
+    offsets.sort_unstable();
+    offsets
+}
+
+/// Interfaces of one name form one merge set, and a class joins it whether
+/// it comes before or after them. Each set lists its declarations in source
+/// order. Only names with two or more such declarations form a set.
+#[test]
+fn merged_type_declarations_record_interfaces_and_classes_of_one_name() {
+    let source = "interface A { a: 1 }\n\
+        interface A { b: 2 }\n\
+        interface A { c: 3 }\n\
+        class B { b = 1 }\n\
+        interface B { c: 3 }\n\
+        interface C { c: 3 }\n\
+        export class C { c = 3 }\n\
+        interface D { d: 4 }\n\
+        class E { e = 5 }\n";
+    assert_eq!(
+        merged_type_declaration_offsets(source),
+        [
+            declaration_offsets(source, "A"),
+            declaration_offsets(source, "B"),
+            declaration_offsets(source, "C"),
+        ]
+    );
+}
+
+/// A namespace between the declarations of a set is not part of it and
+/// doesn't split it, although it merges into the name's binding reference.
+#[test]
+fn merged_type_declarations_survive_declaration_merging() {
+    let source = "interface A { a: 1 }\n\
+        namespace A { export const v = 1; }\n\
+        class A { b = 2 }\n\
+        interface A { c: 3 }\n";
+    assert_eq!(
+        merged_type_declaration_offsets(source),
+        [declaration_offsets(source, "A")]
+    );
+    let r = biome_js_parser::parse(source, JsFileSource::ts(), JsParserOptions::default());
+    let model = semantic_model(&r.tree(), SemanticModelOptions::default());
+    assert!(matches!(
+        model.global_scope().get_binding_reference("A"),
+        Some(crate::TsBindingReference::Merged {
+            namespace_ty: Some(_),
+            ..
+        })
+    ));
+}
+
+/// Two classes of one name form no merge set, because TypeScript rejects the
+/// pair (TS2300). A class expression joins no set because its name is local
+/// to it, and declarations of one name in two scopes form no set either.
+#[test]
+fn merged_type_declarations_leave_out_what_typescript_does_not_merge() {
+    let r = biome_js_parser::parse(
+        "class A { a = 1 }\n\
+         class A { b = 2 }\n",
+        JsFileSource::ts(),
+        JsParserOptions::default(),
+    );
+    let model = semantic_model(&r.tree(), SemanticModelOptions::default());
+    assert!(model.global_scope().merged_type_declarations().is_empty());
+
+    assert!(
+        merged_type_declaration_offsets(
+            "interface B { b: 1 }\n\
+             const B = class B { c = 3 };\n\
+             interface C { c: 1 }\n\
+             namespace N { export interface C { d: 2 } }\n"
+        )
+        .is_empty()
+    );
+}

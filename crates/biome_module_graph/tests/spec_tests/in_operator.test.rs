@@ -197,6 +197,45 @@ fn in_keeps_the_members_that_declare_the_property() {
     );
 }
 
+// TypeScript 7.0.2 (`tsc --strict`) merges the interfaces of one name in one
+// scope into one type, and a class with them, and gives every read below the
+// expected type. Where every member declares the property as required, the
+// `else` branch is `never` in TypeScript, which Biome reads as Unknown.
+#[test]
+fn in_sees_the_members_of_every_merged_declaration() {
+    assert_reads(
+        r#"
+        interface X2 { x: 1 }
+        interface X2 { z: 2 }
+        interface Xx { x: 3 }
+        function mergedIn(q: X2 | Xx) { if ("x" in q) /*mergedIn*/q; else /*mergedInElse*/q; }
+        interface Y1 { y: 1 } interface Y1 { z: 2 } interface Yy { y: 3 }
+        function last(q: Y1 | Yy) { if ("z" in q) /*last*/q; else /*lastElse*/q; }
+        function first(q: Y1 | Yy) { if ("y" in q) /*first*/q; else /*firstElse*/q; }
+        class Kj { k = 1 } interface Kj { j: 1 }
+        function classMember(q: Kj | A) { if ("j" in q) /*classMember*/q; else /*classMemberElse*/q; }
+        interface Jk { j: 1 } class Jk { k = 1 }
+        function interfaceFirst(q: Jk | A) { if ("j" in q) /*interfaceFirst*/q; else /*interfaceFirstElse*/q; }
+        interface Ext extends A {} interface Ext { e: 1 }
+        function inherited(q: Ext | Xx) { if ("a" in q) /*inherited*/q; else /*inheritedElse*/q; }
+        "#,
+        &[
+            ("mergedIn", "q", &["X2", "Xx"]),
+            ("mergedInElse", "q", &["unknown"]),
+            ("last", "q", &["Y1"]),
+            ("lastElse", "q", &["Yy"]),
+            ("first", "q", &["Y1", "Yy"]),
+            ("firstElse", "q", &["unknown"]),
+            ("classMember", "q", &["instanceof Kj"]),
+            ("classMemberElse", "q", &["A"]),
+            ("interfaceFirst", "q", &["instanceof Jk"]),
+            ("interfaceFirstElse", "q", &["A"]),
+            ("inherited", "q", &["Ext"]),
+            ("inheritedElse", "q", &["Xx"]),
+        ],
+    );
+}
+
 // TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type,
 // except where a comment gives TypeScript's type. Biome keeps a member when it
 // can't tell that the member lacks the property.
