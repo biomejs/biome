@@ -26,6 +26,36 @@ describe("Biome WebAssembly formatContent", () => {
 		expect(result.diagnostics).toEqual([]);
 	});
 
+	it.each([
+		["src/a.js", 8],
+		["src\\a.js", 8],
+		["src\\nested\\b.js", 8],
+		["src\\excluded.js", 2],
+		["other\\a.js", 2],
+	])(
+		"should apply matching formatter overrides to %s",
+		(filePath, indentWidth) => {
+			biome.applyConfiguration(projectKey, {
+				formatter: { indentStyle: "space", indentWidth: 2 },
+				overrides: [
+					{
+						includes: ["src/**", "!src/excluded.js"],
+						formatter: { indentWidth: 8 },
+					},
+				],
+			});
+
+			const result = biome.formatContent(projectKey, "function f(){return 1}", {
+				filePath,
+			});
+
+			expect(result.content).toEqual(
+				"function f() {\n" + " ".repeat(indentWidth) + "return 1;\n}\n",
+			);
+			expect(result.diagnostics).toEqual([]);
+		},
+	);
+
 	it("should format JSON content", () => {
 		const result = biome.formatContent(
 			projectKey,

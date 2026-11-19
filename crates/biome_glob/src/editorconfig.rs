@@ -68,7 +68,7 @@ impl EditorconfigGlob {
 
     /// Tests whether the given path matches this pattern.
     pub fn is_match_candidate(&self, path: &crate::CandidatePath<'_>) -> bool {
-        self.glob.is_match_candidate(&path.candidate())
+        self.glob.is_match_candidate(&path.0)
     }
 }
 impl PartialEq for EditorconfigGlob {

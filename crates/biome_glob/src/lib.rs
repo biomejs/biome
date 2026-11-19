@@ -288,7 +288,7 @@ impl Glob {
 
     /// Tests whether the given path matches this pattern, ignoring the negation.
     fn is_raw_match_candidate(&self, path: &CandidatePath<'_>) -> bool {
-        self.glob.is_match_candidate(&path.candidate())
+        self.glob.is_match_candidate(&path.0)
     }
 
     /// Returns the pattern as a string slice.
@@ -434,33 +434,12 @@ impl std::fmt::Display for GlobKind {
 /// Constructing candidates has a very small cost associated with it, so
 /// callers may find it beneficial to amortize that cost when matching a single
 /// path against multiple globs or sets of globs.
-///
-/// Backslashes in the path act as path separators, just like forward slashes.
-/// Biome globs only recognize `/` as a separator, so a path such as
-/// `src\a.js` never matches `src/**` without this normalization. Paths from
-/// Windows APIs use `\` separators, and the normalization keeps matching
-/// consistent across platforms, including targets where `\` is not a path
-/// separator, such as the WebAssembly build used by the JS API.
 #[derive(Debug, Clone)]
-pub struct CandidatePath<'a> {
-    path: std::borrow::Cow<'a, std::path::Path>,
-}
+pub struct CandidatePath<'a>(globset::Candidate<'a>);
 impl<'a> CandidatePath<'a> {
     /// Create a new candidate for matching from the given path.
     pub fn new<P: AsRef<std::path::Path> + ?Sized>(path: &'a P) -> Self {
-        let path = path.as_ref();
-        let path = match path.to_str() {
-            Some(path) if path.contains('\\') => {
-                std::borrow::Cow::Owned(std::path::PathBuf::from(path.replace('\\', "/")))
-            }
-            _ => std::borrow::Cow::Borrowed(path),
-        };
-        Self { path }
-    }
-
-    /// Builds a [`globset::Candidate`] for the normalized path.
-    fn candidate(&self) -> globset::Candidate<'_> {
-        globset::Candidate::new(&self.path)
+        Self(globset::Candidate::new(path))
     }
 
     /// Tests whether the current path matches `glob`.
@@ -875,28 +854,6 @@ mod tests {
             Glob::from_str("!a*").unwrap(),
             Glob::from_str("a").unwrap(),
         ]));
-    }
-
-    #[test]
-    fn test_backslash_separator_matches() {
-        let glob = Glob::from_str("src/**").unwrap();
-
-        // A path with Windows separators matches the same glob as the
-        // equivalent path with forward slashes.
-        assert!(CandidatePath::new(&"src\\a.js").matches(&glob));
-        assert!(CandidatePath::new(&"src/a.js").matches(&glob));
-        assert!(CandidatePath::new(&"src\\nested\\b.js").matches(&glob));
-        assert!(CandidatePath::new(&"src/nested/b.js").matches(&glob));
-
-        // Negated globs also see the normalized path.
-        assert!(!CandidatePath::new(&"src\\a.js").matches_with_exceptions(&[
-            Glob::from_str("src/**").unwrap(),
-            Glob::from_str("!src/a.js").unwrap(),
-        ]));
-
-        // Other directories still don't match.
-        assert!(!CandidatePath::new(&"other\\a.js").matches(&glob));
-        assert!(!CandidatePath::new(&"other/a.js").matches(&glob));
     }
 
     #[test]
