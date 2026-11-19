@@ -18,9 +18,10 @@ use rustc_hash::FxHashSet;
 pub(crate) const MAX_TYPE_SUBSTITUTION_STEPS: usize = 1024;
 const MAX_TYPE_NORMALIZATION_STEPS: usize = 1024;
 
-/// Maximum number of times one normalization normalizes a conditional type
-/// again after instantiating it. This bounds recursive conditional types.
-const MAX_CONDITIONAL_INSTANTIATIONS: usize = 64;
+/// Maximum number of times one normalization normalizes a type again after
+/// evaluating a conditional type or instantiating an alias. This bounds
+/// recursive conditional types and aliases.
+const MAX_INSTANTIATIONS: usize = 64;
 
 /// Maximum number of union members a distributive conditional is split into.
 const MAX_DISTRIBUTED_MEMBERS: usize = 64;
@@ -540,7 +541,7 @@ impl<'db> TypeTransform<'db> for TypeSubstituter<'_, 'db> {
 /// use the same `TypeNormalizer<R>` type rather than a new instantiation.
 struct TypeNormalizer<'a, R> {
     resolve: &'a mut R,
-    /// Remaining conditional instantiations, shared with nested normalizations.
+    /// Remaining instantiations, shared with nested normalizations.
     remaining_instantiations: &'a mut usize,
 }
 
@@ -548,10 +549,11 @@ impl<'db, R> TypeNormalizer<'_, R>
 where
     R: FnMut(TypeData<'db>) -> TypeData<'db>,
 {
-    /// Normalizes a type produced by evaluating a conditional type.
+    /// Normalizes a type produced by evaluating a conditional type or by
+    /// instantiating an alias.
     ///
     /// Once the instantiation budget is exhausted, `ty` is returned as is. Its
-    /// remaining conditionals stay unevaluated.
+    /// remaining conditionals and alias instances stay unevaluated.
     fn normalize_instantiation(&mut self, db: &'db dyn TypeDb, ty: TypeData<'db>) -> TypeData<'db> {
         if *self.remaining_instantiations == 0 {
             return ty;
@@ -662,7 +664,8 @@ where
         false
     }
 
-    /// Instantiates a generic alias whose body contains a conditional type.
+    /// Instantiates a generic alias whose body is an intersection or contains a
+    /// conditional type.
     ///
     /// Generic aliases are represented as instances of their declarations. For
     /// example, `IsString<"a">` below is an instance of `IsString` with the
@@ -682,9 +685,16 @@ where
     /// type Outer<T> = IsString<T>;
     /// ```
     ///
+    /// An intersection body is rebuilt with the arguments in its operands, so
+    /// it is normalized as any intersection is. `NonNullable<T>` is `T & {}`,
+    /// so `NonNullable<string | null>` produces `string`.
+    ///
     /// Aliases with other bodies are left as instances, so they keep their
-    /// identity.
-    fn instantiate_conditional_alias(
+    /// identity, and so are aliases whose arguments refer to a type parameter.
+    /// Instantiating an alias that refers to itself, such as
+    /// `type List<T> = T & { next: List<T> }`, nests one instantiation in the
+    /// other, which stops when the normalization runs out of instantiations.
+    fn instantiate_alias(
         &mut self,
         db: &'db dyn TypeDb,
         instance: InternedTypeInstance<'db>,
@@ -699,7 +709,7 @@ where
         let body = (self.resolve)(alias.ty(db));
         // A conditional can't be evaluated while its arguments are generic,
         // and instantiating a recursive alias with them would never end.
-        if !self.contains_conditional(db, body)
+        if !(matches!(body, TypeData::Intersection(_)) || self.contains_conditional(db, body))
             || type_arguments
                 .iter()
                 .any(|argument| may_refer_to_free_generic(db, *argument, &[]))
@@ -773,7 +783,7 @@ where
             // arguments are normalized, so `Awaited` is checked here as well.
             TypeData::InstanceOf(instance) => self
                 .instantiate_awaited(db, instance)
-                .or_else(|| self.instantiate_conditional_alias(db, instance))
+                .or_else(|| self.instantiate_alias(db, instance))
                 .unwrap_or(ty),
             TypeData::Extends(extends) => match evaluate_extends(db, extends, self.resolve) {
                 Some(evaluated) if evaluated.needs_normalization => {
@@ -827,7 +837,7 @@ impl<'db> TypeData<'db> {
         db: &'db dyn TypeDb,
         mut resolve: impl FnMut(Self) -> Self,
     ) -> TypeTransformResult<Self> {
-        let mut remaining_instantiations = MAX_CONDITIONAL_INSTANTIATIONS;
+        let mut remaining_instantiations = MAX_INSTANTIATIONS;
         TypeDataTransformer::new(MAX_TYPE_NORMALIZATION_STEPS).transform(
             self,
             db,
@@ -1217,6 +1227,84 @@ mod tests {
             source.substitute_types(&db, &substitutions),
             TypeTransformResult::LimitExceeded
         );
+    }
+
+    fn empty_object(db: &TestDb) -> TypeData<'_> {
+        TypeData::Object(crate::interned_types::InternedObject::new(
+            db,
+            None,
+            Box::default(),
+            false,
+            crate::ObjectKind::Shape,
+        ))
+    }
+
+    #[test]
+    fn normalization_instantiates_intersection_aliases() {
+        let db = TestDb::default();
+        let t = generic(&db, "T");
+        // `type NonNullable<T> = T & {}`, an instance of its body with its
+        // type parameters.
+        let body = TypeData::intersection_from_types(&db, vec![t, empty_object(&db)]);
+        let declaration = TypeData::instance_of(&db, body, vec![t].into_boxed_slice());
+        let instance =
+            |argument| TypeData::instance_of(&db, declaration, vec![argument].into_boxed_slice());
+
+        let nullable = TypeData::union_from_types(&db, vec![TypeData::String, TypeData::Null]);
+        assert_eq!(
+            instance(nullable)
+                .normalize_nested_types(&db, |ty| ty)
+                .unwrap(),
+            TypeData::String,
+        );
+        // An argument that refers to a type parameter leaves the alias as it
+        // is.
+        let u = generic(&db, "U");
+        assert_eq!(
+            instance(u).normalize_nested_types(&db, |ty| ty).unwrap(),
+            instance(u),
+        );
+    }
+
+    #[test]
+    fn self_referencing_intersection_aliases_stop_at_the_instantiation_limit() {
+        let db = TestDb::default();
+        let t = generic(&db, "T");
+        // `type List<T> = T & { next: List<T> }`. The alias refers to itself
+        // through a handle, which `List` stands for here and the resolver
+        // replaces with the declaration.
+        let handle = generic(&db, "List");
+        let next = TypeData::Object(crate::interned_types::InternedObject::new(
+            &db,
+            None,
+            vec![crate::interned_types::TypeMember {
+                kind: crate::interned_types::TypeMemberKind::Named(Text::new_static("next")),
+                ty: TypeData::instance_of(&db, handle, vec![t].into_boxed_slice()),
+            }]
+            .into_boxed_slice(),
+            false,
+            crate::ObjectKind::Shape,
+        ));
+        let body = TypeData::intersection_from_types(&db, vec![t, next]);
+        let declaration = TypeData::instance_of(&db, body, vec![t].into_boxed_slice());
+        let resolve = |ty| if ty == handle { declaration } else { ty };
+
+        let list = TypeData::instance_of(&db, handle, vec![TypeData::String].into_boxed_slice());
+        let mut ty = list.normalize_nested_types(&db, resolve).unwrap();
+        // Each instantiation nests the next one in `next`. The last one isn't
+        // normalized, because the normalization ran out of instantiations, so
+        // its `next` is still an instance.
+        let mut depth = 0;
+        while let TypeData::Intersection(intersection) = ty {
+            let [TypeData::String, TypeData::Object(object)] = intersection.types(&db).as_ref()
+            else {
+                panic!("expected `string & {{ next: ... }}`, got {ty:?}");
+            };
+            ty = object.members(&db)[0].ty;
+            depth += 1;
+        }
+        assert!(matches!(ty, TypeData::InstanceOf(_)), "{ty:?}");
+        assert_eq!(depth, MAX_INSTANTIATIONS + 1);
     }
 
     #[test]

@@ -114,9 +114,39 @@ fn flatten_compound_type<'db>(
     result
 }
 
+/// Maximum number of members that distributing an intersection over its union
+/// operands may produce. An intersection whose product would be larger keeps
+/// its union operands, which is the same type, less simplified.
+pub(crate) const MAX_DISTRIBUTED_MEMBERS: usize = 32;
+
+/// Builds intersections normalized by the rules that TypeScript applies, each
+/// of which gives a type with the same values:
+///
+/// - nested intersections are flattened, duplicates removed, and `never`
+///   absorbs the other operands;
+/// - two primitives become the narrower one, or `never` when they share no
+///   value, so `string & "a"` is `"a"` and `string & number` is `never`;
+/// - `null` or `undefined` next to an object type is `never`;
+/// - `{}` next to another operand that is never `null` or `undefined` is
+///   removed, so `string & {}` is `string`, while `T & {}` stays;
+/// - an intersection with union operands is distributed into a union of
+///   intersections, so `(A | B) & C` is `(A & C) | (B & C)`, as long as the
+///   product has at most [`MAX_DISTRIBUTED_MEMBERS`] members;
+/// - operands that are all objects, interfaces, class instances, functions,
+///   or namespaces merge into one anonymous type. A property that several
+///   operands declare has the intersection of their types, and is optional
+///   only when every operand declares it optional (see [`merge_members`]).
+///
+/// The builder doesn't resolve handles. An operand that is a handle, a type
+/// parameter, or another type whose values the builder can't tell stays as it
+/// is, and the rules that need to know its values don't apply.
 pub(crate) struct IntersectionBuilder<'db> {
     db: &'db dyn TypeDb,
     types: Vec<TypeData<'db>>,
+    /// Whether [`Self::build`] distributes over union operands. The members of
+    /// a distributed intersection are built without distribution, which bounds
+    /// the work to one product.
+    distributes: bool,
 }
 
 impl<'db> IntersectionBuilder<'db> {
@@ -124,6 +154,15 @@ impl<'db> IntersectionBuilder<'db> {
         Self {
             db,
             types: Vec::new(),
+            distributes: true,
+        }
+    }
+
+    fn without_distribution(db: &'db dyn TypeDb) -> Self {
+        Self {
+            db,
+            types: Vec::new(),
+            distributes: false,
         }
     }
 
@@ -202,6 +241,15 @@ impl<'db> IntersectionBuilder<'db> {
     }
 
     pub(crate) fn build(mut self) -> TypeData<'db> {
+        if self.distributes
+            && let Some(distributed) = self.distribute()
+        {
+            return distributed;
+        }
+        if self.has_nullish_and_object_operands() {
+            return TypeData::NeverKeyword;
+        }
+        self.remove_empty_objects();
         if let Some(merged) = MergedType::from_types(self.db, &self.types) {
             return merged.into_type(self.db);
         }
@@ -214,6 +262,113 @@ impl<'db> IntersectionBuilder<'db> {
                 self.types.into_boxed_slice(),
             )),
         }
+    }
+
+    /// Distributes the intersection over its union operands, building each
+    /// member of the product with the other operands.
+    ///
+    /// Returns `None` when no operand is a union, or when the product would
+    /// have more than [`MAX_DISTRIBUTED_MEMBERS`] members.
+    fn distribute(&self) -> Option<TypeData<'db>> {
+        let db = self.db;
+        let mut product = 1usize;
+        let operands: Vec<_> = self
+            .types
+            .iter()
+            .map(|ty| match ty {
+                TypeData::Union(union) => {
+                    let members = union.types(db).as_ref();
+                    product = product.saturating_mul(members.len());
+                    members
+                }
+                ty => std::slice::from_ref(ty),
+            })
+            .collect();
+        if product > MAX_DISTRIBUTED_MEMBERS
+            || !self.types.iter().any(|ty| matches!(ty, TypeData::Union(_)))
+        {
+            return None;
+        }
+
+        // Counts through the product in the order of the operands, the last
+        // operand changing fastest.
+        let mut positions = vec![0; operands.len()];
+        let mut union = UnionBuilder::new(db);
+        loop {
+            let intersection = operands.iter().zip(&positions).fold(
+                Self::without_distribution(db),
+                |builder, (members, position)| builder.add(members[*position]),
+            );
+            union = union.add(intersection.build());
+
+            let Some(operand) = operands
+                .iter()
+                .zip(&positions)
+                .rposition(|(members, position)| position + 1 < members.len())
+            else {
+                return Some(union.build());
+            };
+            positions[operand] += 1;
+            positions[operand + 1..].fill(0);
+        }
+    }
+
+    /// Returns whether an operand is `null` or `undefined` and another one is
+    /// an object type, which no value has together with `null` or `undefined`.
+    ///
+    /// Primitives don't need this check: [`Self::add_primitive`] already gives
+    /// `never` for `null & string`.
+    fn has_nullish_and_object_operands(&self) -> bool {
+        self.types
+            .iter()
+            .any(|ty| matches!(ty, TypeData::Null | TypeData::Undefined))
+            && self
+                .types
+                .iter()
+                .any(|ty| is_structural_object_type(self.db, *ty))
+    }
+
+    /// Removes `{}` when another operand is never `null` or `undefined`, since
+    /// every such value is also in `{}`. A type parameter can be `null` or
+    /// `undefined`, so `T & {}` stays.
+    fn remove_empty_objects(&mut self) {
+        let db = self.db;
+        if self.types.iter().any(|ty| is_empty_object(db, *ty))
+            && self
+                .types
+                .iter()
+                .any(|ty| !is_empty_object(db, *ty) && is_non_nullish(db, *ty))
+        {
+            self.types.retain(|ty| !is_empty_object(db, *ty));
+        }
+    }
+}
+
+/// Returns whether `ty` is `{}`, a type literal without members, which every
+/// value other than `null` and `undefined` has. An interface or a class
+/// without members isn't, because it is never removed from an intersection.
+fn is_empty_object<'db>(db: &'db dyn TypeDb, ty: TypeData<'db>) -> bool {
+    matches!(
+        ty,
+        TypeData::Object(object)
+            if object.prototype(db).is_none()
+                && !object.has_unknown_members(db)
+                && object.members(db).is_empty()
+    )
+}
+
+/// Returns whether no value of `ty` is `null` or `undefined`, as far as the
+/// type tells without resolving handles: a primitive other than `null` and
+/// `undefined`, a literal, or an object type.
+fn is_non_nullish<'db>(db: &'db dyn TypeDb, ty: TypeData<'db>) -> bool {
+    match ty {
+        TypeData::BigInt
+        | TypeData::Boolean
+        | TypeData::Number
+        | TypeData::String
+        | TypeData::Symbol
+        | TypeData::Literal(_) => true,
+        ty => is_structural_object_type(db, ty),
     }
 }
 
@@ -601,6 +756,17 @@ fn class_static_members<'db>(members: &[TypeMember<'db>]) -> Vec<TypeMember<'db>
         .collect()
 }
 
+/// Adds the instance `members` of an intersection operand to the members
+/// `merged` from the operands before it.
+///
+/// A member that both declare is merged as TypeScript merges a property of an
+/// intersection: it is optional only when both declare it optional, and
+/// readonly only when both declare it readonly. A property's type is the
+/// intersection of both types, where an optional property's type includes
+/// `undefined`, so `{ a?: string } & { a: string | null }` has `a: string`.
+/// A method, or a property whose type is a function, gets the union of both
+/// types instead. TypeScript intersects function types into overloads, which
+/// Biome doesn't model, and the union is wider.
 fn merge_members<'db>(
     db: &'db dyn TypeDb,
     merged: &mut Vec<TypeMember<'db>>,
@@ -615,19 +781,66 @@ fn merge_members<'db>(
 
         match existing {
             Some(existing) => {
+                let is_optional = existing.kind.is_optional() && member.kind.is_optional();
                 if existing.ty != member.ty {
-                    existing.ty =
-                        TypeData::union_from_types(db, Vec::from([existing.ty, member.ty]));
+                    existing.ty = if is_property(db, existing) && is_property(db, member) {
+                        let property_type = |member: &TypeMember<'db>| {
+                            if member.kind.is_optional() && !is_optional {
+                                TypeData::union_from_types(
+                                    db,
+                                    Vec::from([member.ty, TypeData::Undefined]),
+                                )
+                            } else {
+                                member.ty
+                            }
+                        };
+                        TypeData::intersection_from_types(
+                            db,
+                            Vec::from([property_type(existing), property_type(member)]),
+                        )
+                    } else {
+                        TypeData::union_from_types(db, Vec::from([existing.ty, member.ty]))
+                    };
                 }
-                // As in TypeScript, a property of an intersection is readonly
-                // only when every operand that declares it declares it
-                // readonly.
+                if !is_optional {
+                    existing.kind = existing.kind.clone().without_optional();
+                }
                 if existing.kind.is_readonly() && !member.kind.is_readonly() {
                     existing.kind = existing.kind.clone().without_readonly();
                 }
             }
             None => merged.push(member.clone()),
         }
+    }
+}
+
+/// Returns whether `member` is a property whose type intersects with the type
+/// of the same property in another operand: a named property that isn't a
+/// getter, whose type isn't a function.
+fn is_property<'db>(db: &'db dyn TypeDb, member: &TypeMember<'db>) -> bool {
+    matches!(
+        member.kind,
+        TypeMemberKind::Named(_)
+            | TypeMemberKind::NamedOptional(_)
+            | TypeMemberKind::ReadonlyNamed(_)
+            | TypeMemberKind::ReadonlyNamedOptional(_)
+            | TypeMemberKind::ConstAssertedNamed(_)
+            | TypeMemberKind::ConstAssertedNamedOptional(_)
+    ) && !is_function_type(db, member.ty)
+}
+
+/// Returns whether `ty` is a function or constructor type, an object with only
+/// call signatures, such as the overloads of a method, or a union with such a
+/// member.
+fn is_function_type<'db>(db: &'db dyn TypeDb, ty: TypeData<'db>) -> bool {
+    match ty {
+        TypeData::Function(_) | TypeData::Constructor(_) => true,
+        TypeData::Object(object) => {
+            let members = object.members(db);
+            !members.is_empty() && members.iter().all(|member| member.kind.is_call_signature())
+        }
+        TypeData::Union(union) => union.types(db).iter().any(|ty| is_function_type(db, *ty)),
+        _ => false,
     }
 }
 
@@ -726,7 +939,282 @@ impl<'db> UnionBuilder<'db> {
 
 #[cfg(test)]
 mod tests {
-    use super::{CycleDetector, CycleEntry};
+    use super::{CycleDetector, CycleEntry, MAX_DISTRIBUTED_MEMBERS};
+    use crate::ObjectKind;
+    use crate::interned_types::{
+        InternedFunction, InternedGenericTypeParameter, InternedLiteral, InternedObject, Literal,
+        ReturnType, TypeData, TypeDb, TypeMember, TypeMemberKind,
+    };
+    use biome_rowan::Text;
+
+    #[salsa::db]
+    #[derive(Default)]
+    struct TestDb {
+        storage: salsa::Storage<Self>,
+    }
+
+    #[salsa::db]
+    impl salsa::Database for TestDb {}
+
+    #[salsa::db]
+    impl biome_db::Db for TestDb {
+        fn parsed_source_for_path(&self, _path: &camino::Utf8Path) -> Option<biome_db::Source> {
+            None
+        }
+    }
+
+    #[salsa::db]
+    impl TypeDb for TestDb {}
+
+    fn intersection<'db>(db: &'db TestDb, types: &[TypeData<'db>]) -> TypeData<'db> {
+        TypeData::intersection_from_types(db, types.to_vec())
+    }
+
+    fn union<'db>(db: &'db TestDb, types: &[TypeData<'db>]) -> TypeData<'db> {
+        TypeData::union_from_types(db, types.to_vec())
+    }
+
+    fn object<'db>(db: &'db TestDb, members: Vec<TypeMember<'db>>) -> TypeData<'db> {
+        TypeData::Object(InternedObject::new(
+            db,
+            None,
+            members.into_boxed_slice(),
+            false,
+            ObjectKind::Shape,
+        ))
+    }
+
+    fn member<'db>(kind: fn(Text) -> TypeMemberKind<'db>, ty: TypeData<'db>) -> TypeMember<'db> {
+        TypeMember {
+            kind: kind(Text::new_static("a")),
+            ty,
+        }
+    }
+
+    /// Returns `{ a: ty }`, or `{ a?: ty }`.
+    fn with_a<'db>(db: &'db TestDb, ty: TypeData<'db>, is_optional: bool) -> TypeData<'db> {
+        let kind = if is_optional {
+            TypeMemberKind::NamedOptional
+        } else {
+            TypeMemberKind::Named
+        };
+        object(db, vec![member(kind, ty)])
+    }
+
+    /// Returns the member `a` of the object `ty`.
+    fn member_a<'db>(db: &'db TestDb, ty: TypeData<'db>) -> TypeMember<'db> {
+        let TypeData::Object(object) = ty else {
+            panic!("expected an object, got {ty:?}");
+        };
+        object
+            .members(db)
+            .iter()
+            .find(|member| member.kind.has_name("a"))
+            .cloned()
+            .expect("the object must have `a`")
+    }
+
+    fn number<'db>(db: &'db TestDb, value: usize) -> TypeData<'db> {
+        TypeData::Literal(InternedLiteral::new(
+            db,
+            Literal::Number(crate::literal::NumberLiteral::new(value.to_string().into())),
+        ))
+    }
+
+    fn generic(db: &TestDb) -> TypeData<'_> {
+        TypeData::Generic(InternedGenericTypeParameter::new(
+            db,
+            false,
+            None,
+            None,
+            Text::new_static("T"),
+        ))
+    }
+
+    fn function<'db>(db: &'db TestDb, return_type: TypeData<'db>) -> TypeData<'db> {
+        TypeData::Function(InternedFunction::new(
+            db,
+            Box::default(),
+            Box::default(),
+            ReturnType::Type(return_type),
+            false,
+            None,
+        ))
+    }
+
+    #[test]
+    fn intersections_distribute_over_union_operands() {
+        let db = TestDb::default();
+        let empty = object(&db, Vec::new());
+        // `(string | null) & {}` is `string`.
+        let nullable = union(&db, &[TypeData::String, TypeData::Null]);
+        assert_eq!(intersection(&db, &[nullable, empty]), TypeData::String);
+        // `(1 | 2) & (2 | 3)` is `2`.
+        let left = union(&db, &[number(&db, 1), number(&db, 2)]);
+        let right = union(&db, &[number(&db, 2), number(&db, 3)]);
+        assert_eq!(intersection(&db, &[left, right]), number(&db, 2));
+        // `(string | number) & { a: 1 }` is
+        // `(string & { a: 1 }) | (number & { a: 1 })`.
+        let primitives = union(&db, &[TypeData::String, TypeData::Number]);
+        let a = with_a(&db, number(&db, 1), false);
+        assert_eq!(
+            intersection(&db, &[primitives, a]),
+            union(
+                &db,
+                &[
+                    intersection(&db, &[TypeData::String, a]),
+                    intersection(&db, &[TypeData::Number, a]),
+                ]
+            )
+        );
+    }
+
+    #[test]
+    fn distribution_keeps_products_over_the_bound() {
+        let db = TestDb::default();
+        let numbers = |range: std::ops::Range<usize>| {
+            union(
+                &db,
+                &range.map(|value| number(&db, value)).collect::<Vec<_>>(),
+            )
+        };
+        let object = with_a(&db, TypeData::String, false);
+        // A product with exactly `MAX_DISTRIBUTED_MEMBERS` members distributes.
+        let distributed = intersection(&db, &[numbers(0..4), numbers(0..8), object]);
+        let TypeData::Union(union) = distributed else {
+            panic!("expected a union, got {distributed:?}");
+        };
+        assert_eq!(union.types(&db).len(), 4);
+        assert_eq!(4 * 8, MAX_DISTRIBUTED_MEMBERS);
+        // One more member keeps the union operands.
+        let kept = intersection(&db, &[numbers(0..4), numbers(0..9), object]);
+        let TypeData::Intersection(operands) = kept else {
+            panic!("expected an intersection, got {kept:?}");
+        };
+        assert_eq!(
+            operands.types(&db).as_ref(),
+            [numbers(0..4), numbers(0..9), object]
+        );
+    }
+
+    #[test]
+    fn nullish_operands_next_to_object_types_give_never() {
+        let db = TestDb::default();
+        let empty = object(&db, Vec::new());
+        let a = with_a(&db, TypeData::String, false);
+        for (nullish, other) in [
+            (TypeData::Null, empty),
+            (TypeData::Undefined, a),
+            (TypeData::Null, TypeData::ObjectKeyword),
+            (TypeData::Undefined, TypeData::String),
+        ] {
+            assert_eq!(intersection(&db, &[nullish, other]), TypeData::NeverKeyword);
+            assert_eq!(intersection(&db, &[other, nullish]), TypeData::NeverKeyword);
+        }
+        // A type parameter can be `null`, so `T & null` stays.
+        let t = generic(&db);
+        assert!(matches!(
+            intersection(&db, &[t, TypeData::Null]),
+            TypeData::Intersection(_)
+        ));
+    }
+
+    #[test]
+    fn empty_objects_are_removed_next_to_operands_that_are_never_nullish() {
+        let db = TestDb::default();
+        let empty = object(&db, Vec::new());
+        let a = with_a(&db, TypeData::String, false);
+        assert_eq!(
+            intersection(&db, &[TypeData::String, empty]),
+            TypeData::String
+        );
+        assert_eq!(intersection(&db, &[empty, a]), a);
+        // `T & {}` excludes `null` and `undefined` from `T`, so it stays.
+        let t = generic(&db);
+        let non_nullable = intersection(&db, &[t, empty]);
+        let TypeData::Intersection(operands) = non_nullable else {
+            panic!("expected an intersection, got {non_nullable:?}");
+        };
+        assert_eq!(operands.types(&db).as_ref(), [t, empty]);
+        // `T & string & {}` is `T & string`.
+        assert_eq!(
+            intersection(&db, &[t, TypeData::String, empty]),
+            intersection(&db, &[t, TypeData::String])
+        );
+    }
+
+    #[test]
+    fn properties_declared_by_two_operands_intersect() {
+        let db = TestDb::default();
+        let nullable = union(&db, &[TypeData::String, TypeData::Null]);
+        // `{ a?: string } & { a: string | null }` has `a: string`.
+        let merged = intersection(
+            &db,
+            &[
+                with_a(&db, TypeData::String, true),
+                with_a(&db, nullable, false),
+            ],
+        );
+        let a = member_a(&db, merged);
+        assert!(matches!(a.kind, TypeMemberKind::Named(_)));
+        assert_eq!(a.ty, TypeData::String);
+        // `{ a?: string } & { a?: string | null }` has `a?: string`, and its
+        // read adds `undefined`.
+        let merged = intersection(
+            &db,
+            &[
+                with_a(&db, TypeData::String, true),
+                with_a(&db, nullable, true),
+            ],
+        );
+        let a = member_a(&db, merged);
+        assert!(matches!(a.kind, TypeMemberKind::NamedOptional(_)));
+        assert_eq!(a.ty, TypeData::String);
+        // `{ a: string } & { a: number }` has `a: never`.
+        let merged = intersection(
+            &db,
+            &[
+                with_a(&db, TypeData::String, false),
+                with_a(&db, TypeData::Number, false),
+            ],
+        );
+        assert_eq!(member_a(&db, merged).ty, TypeData::NeverKeyword);
+        // A readonly property stays readonly only when both declare it so.
+        let merged = intersection(
+            &db,
+            &[
+                object(
+                    &db,
+                    vec![member(TypeMemberKind::ReadonlyNamed, TypeData::String)],
+                ),
+                with_a(&db, nullable, false),
+            ],
+        );
+        let a = member_a(&db, merged);
+        assert!(matches!(a.kind, TypeMemberKind::Named(_)));
+        assert_eq!(a.ty, TypeData::String);
+    }
+
+    #[test]
+    fn methods_keep_the_union_of_their_types() {
+        let db = TestDb::default();
+        let left = function(&db, TypeData::String);
+        let right = function(&db, TypeData::Number);
+        let merged = intersection(&db, &[with_a(&db, left, false), with_a(&db, right, false)]);
+        assert_eq!(member_a(&db, merged).ty, union(&db, &[left, right]));
+        // So does a property whose type is a function in one operand only.
+        let merged = intersection(
+            &db,
+            &[
+                with_a(&db, left, false),
+                with_a(&db, TypeData::String, false),
+            ],
+        );
+        assert_eq!(
+            member_a(&db, merged).ty,
+            union(&db, &[left, TypeData::String])
+        );
+    }
 
     #[test]
     fn cycle_detector_reports_reentry_before_finish() {
