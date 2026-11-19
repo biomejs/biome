@@ -822,12 +822,10 @@ impl<'db> ResolutionCtx<'db, '_> {
     ///
     /// Two cases need no solve:
     ///
-    /// - When the values that the root adds to an array are all `null` or
-    ///   all `undefined`, apart from values that Biome can't type, and the
-    ///   array is an array at every read, as [`RootFlow::is_always_array`]
-    ///   describes, this returns `None`, so that the read keeps its declared
-    ///   type, `unknown[]`, which is wider than `null[]` for
-    ///   `const a = []; a.push(null)`.
+    /// - When the root adds to an array only values that Biome can't type,
+    ///   or nothing, and the array is an array at every read, as
+    ///   [`RootFlow::is_always_array`] describes, this returns `None`, so
+    ///   that the read keeps its declared type, `unknown[]`.
     /// - When every write of a variable gives `null`, `undefined`, or a value
     ///   that Biome can't type, and at least one gives such a value, the read
     ///   is Unknown. A solve could give `null` or `undefined` at a read that
@@ -841,10 +839,6 @@ impl<'db> ResolutionCtx<'db, '_> {
     ) -> Option<TypeData<'db>> {
         let assigned = self.flow_assigned_types(read.root, read.subject);
         let types = assigned.map_or(&[][..], |assigned| assigned.types(self.db).as_ref());
-        let mut unit = None;
-        let mut is_unit = |ty: &TypeData<'db>| {
-            matches!(ty, TypeData::Null | TypeData::Undefined) && *unit.get_or_insert(*ty) == *ty
-        };
         match evolving {
             FlowEvolving::Variable => {
                 if types.iter().all(|ty| {
@@ -860,9 +854,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                 }
             }
             FlowEvolving::Array => {
-                if types
-                    .iter()
-                    .all(|ty| *ty == TypeData::Unknown || is_unit(ty))
+                if types.iter().all(|ty| *ty == TypeData::Unknown)
                     && self
                         .js_info
                         .flow
