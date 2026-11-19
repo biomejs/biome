@@ -1,6 +1,7 @@
 // should generate diagnostics
 // A property of `this` narrows like a property of a variable in a method, in
-// an arrow function in a field initializer, and in an object literal method:
+// an arrow function in a field initializer, in an object literal method, and
+// in a function or method whose `this` parameter gives `this` its type:
 // after the test, `this.timer` and `this.#pending` cannot be nullish at the
 // optional chains, as in TypeScript.
 
@@ -40,3 +41,19 @@ const scheduler = {
 		}
 	},
 };
+
+function stopTimer(this: { timer: Timer | null }) {
+	if (this.timer) {
+		this.timer?.cancel();
+	}
+}
+
+class Poller {
+	timer: Timer | null = null;
+
+	stop(this: Poller) {
+		if (this.timer) {
+			this.timer?.cancel();
+		}
+	}
+}

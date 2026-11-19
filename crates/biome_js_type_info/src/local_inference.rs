@@ -676,9 +676,12 @@ impl TypeData {
                 TypeofThisOrSuperExpression::from_any_js_expression(scope_id, expr),
             )),
             AnyJsExpression::JsTemplateExpression(expr) => Self::from_js_template_expression(expr),
-            AnyJsExpression::JsThisExpression(_) => Self::from(TypeofExpression::This(
-                TypeofThisOrSuperExpression::from_any_js_expression(scope_id, expr),
-            )),
+            AnyJsExpression::JsThisExpression(_) => match this_parameter_type(expr) {
+                Some(annotation) => Self::from_any_ts_type(collector, scope_id, &annotation),
+                None => Self::from(TypeofExpression::This(
+                    TypeofThisOrSuperExpression::from_any_js_expression(scope_id, expr),
+                )),
+            },
             AnyJsExpression::TsAsExpression(expr) => {
                 let Ok(annotation) = expr.ty() else {
                     return Self::unknown();
@@ -3469,6 +3472,57 @@ fn is_direct_class_or_object_member(node: &JsSyntaxNode) -> bool {
             }
         })
         .unwrap_or_default()
+}
+
+/// The nodes that give the code inside them a `this` that no `this`
+/// parameter declares: class members other than methods, the getters and
+/// setters of an object literal, and classes, which a walk reaches from their
+/// decorators or `extends` clause.
+const THIS_WITHOUT_PARAMETER_KINDS: SyntaxKindSet<JsLanguage> = AnyJsClassMember::KIND_SET
+    .union(AnyJsClass::KIND_SET)
+    .union(JsGetterObjectMember::KIND_SET)
+    .union(JsSetterObjectMember::KIND_SET);
+
+/// Returns the type annotation of the `this` parameter that declares the type
+/// of `expr`, a `this` expression, as `T` in `function f(this: T) { this }`.
+///
+/// The parameter belongs to the nearest function or method around `expr`
+/// that isn't an arrow function, because an arrow function has the `this` of
+/// the code around it. Returns `None` when that function or method declares
+/// no `this` parameter with a type annotation, when `expr` is in the
+/// decorators or computed key of a method, which run with the `this` around
+/// the class or object, and when a class member, a getter, or a setter gives
+/// `expr` its `this` first.
+fn this_parameter_type(expr: &AnyJsExpression) -> Option<AnyTsType> {
+    let mut child = expr.syntax().clone();
+    for node in expr.syntax().ancestors().skip(1) {
+        let parameters = if JsArrowFunctionExpression::can_cast(node.kind()) {
+            child = node;
+            continue;
+        } else if let Some(function) = AnyJsFunction::cast_ref(&node) {
+            match function.parameters().ok()? {
+                AnyJsArrowFunctionParameters::JsParameters(parameters) => parameters,
+                AnyJsArrowFunctionParameters::AnyJsBinding(_) => return None,
+            }
+        } else if let Some(method) = JsMethodClassMember::cast_ref(&node) {
+            method.parameters().ok()?
+        } else if let Some(method) = JsMethodObjectMember::cast_ref(&node) {
+            method.parameters().ok()?
+        } else if THIS_WITHOUT_PARAMETER_KINDS.matches(node.kind()) {
+            return None;
+        } else {
+            child = node;
+            continue;
+        };
+        if !JsFunctionBody::can_cast(child.kind()) && !JsParameters::can_cast(child.kind()) {
+            return None;
+        }
+        let AnyJsParameter::TsThisParameter(parameter) = parameters.items().first()?.ok()? else {
+            return None;
+        };
+        return parameter.type_annotation()?.ty().ok();
+    }
+    None
 }
 
 impl TypeofThisOrSuperExpression {

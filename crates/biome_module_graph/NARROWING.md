@@ -365,11 +365,10 @@ literal from 0 to 2^53 - 1 is a key of a path, as `o["v"]`, ``o[`v`]``, or
 | --- | --- | --- | --- |
 | `class S { static s: string \| null; static m() { if (this.s) this.s } }` | `string` | Unknown | A rule can miss a report on `this.s`. |
 | `use({ x: null, n() { if (this.x) this.x } })`, with `use(o: { x: string \| null; n(): void })` | `string` | Unknown | A rule can miss a report on `this.x`. |
-| `class T { x: string \| null = null; m(this: T) { if (this.x) this.x } }` | `string` | `string \| null` | `noUnnecessaryConditions` can miss an unnecessary check of `this.x`. |
 
 A path on `this` narrows in methods, accessors, and constructors of a class or
-of an object literal assigned to a variable, and in arrow functions inside
-them.
+of an object literal assigned to a variable, in a function or method whose
+`this` parameter has a type annotation, and in arrow functions inside them.
 
 ### Destructuring
 

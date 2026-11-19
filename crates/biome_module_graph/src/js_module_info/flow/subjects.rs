@@ -11,17 +11,18 @@ use super::{FlowSubject, FlowSubjectId, FlowSubjectTable, PropertyKey};
 use biome_js_control_flow::AnyJsControlFlowRoot;
 use biome_js_semantic::{Binding, SemanticModel};
 use biome_js_syntax::{
-    AnyJsArrayBindingPatternElement, AnyJsAssignment, AnyJsBindingPattern, AnyJsClass,
-    AnyJsClassMember, AnyJsClassMemberName, AnyJsExpression, AnyJsFunction, AnyJsGetter,
-    AnyJsLiteralExpression, AnyJsName, AnyJsObjectBindingPatternMember, AnyJsObjectMemberName,
-    AnyJsParameter, AnyJsPropertyModifier, AnyJsSetter, AnyJsTemplateElement,
-    AnyTsPropertyAnnotation, AnyTsPropertySignatureModifier, JsArrayBindingPatternElement,
-    JsArrowFunctionExpression, JsConstructorClassMember, JsFormalParameter, JsFunctionBody,
-    JsIdentifierBinding, JsInitializerClause, JsLanguage, JsMethodClassMember,
-    JsMethodObjectMember, JsObjectBindingPatternProperty, JsObjectBindingPatternShorthandProperty,
-    JsObjectExpression, JsParameters, JsPropertyClassMember, JsRestParameter, JsSyntaxKind,
-    JsSyntaxNode, JsSyntaxToken, JsVariableDeclarator, binding_ext::AnyJsBindingDeclaration,
-    inner_string_text, unescape_js_identifier,
+    AnyJsArrayBindingPatternElement, AnyJsArrowFunctionParameters, AnyJsAssignment,
+    AnyJsBindingPattern, AnyJsClass, AnyJsClassMember, AnyJsClassMemberName, AnyJsExpression,
+    AnyJsFunction, AnyJsGetter, AnyJsLiteralExpression, AnyJsName, AnyJsObjectBindingPatternMember,
+    AnyJsObjectMemberName, AnyJsParameter, AnyJsPropertyModifier, AnyJsSetter,
+    AnyJsTemplateElement, AnyTsPropertyAnnotation, AnyTsPropertySignatureModifier,
+    JsArrayBindingPatternElement, JsArrowFunctionExpression, JsConstructorClassMember,
+    JsFormalParameter, JsFunctionBody, JsIdentifierBinding, JsInitializerClause, JsLanguage,
+    JsMethodClassMember, JsMethodObjectMember, JsObjectBindingPatternProperty,
+    JsObjectBindingPatternShorthandProperty, JsObjectExpression, JsParameters,
+    JsPropertyClassMember, JsRestParameter, JsSyntaxKind, JsSyntaxNode, JsSyntaxToken,
+    JsVariableDeclarator, TsThisParameter, binding_ext::AnyJsBindingDeclaration, inner_string_text,
+    unescape_js_identifier,
 };
 use biome_rowan::{
     AstNode, AstNodeList, AstSeparatedList, SyntaxKindSet, Text, TextRange, TokenText,
@@ -562,18 +563,24 @@ fn visit_pattern_bindings(
 /// one, where a field without an initializer may be read before it is
 /// assigned, as [`uninitialized_fields`] describes.
 ///
+/// It is also the case in a method, a function declaration, or a function
+/// expression with a `this` parameter that has a type annotation, which gives
+/// `this` its type, as in `m(this: T) {}`, and in an arrow function created
+/// in one.
+///
 /// It is not the case:
 ///
-/// - In a `static` member or static block, where `this` is the class itself,
-///   which Biome types as an instance of the class.
-/// - In a member with a `this` parameter, whose type Biome ignores.
+/// - In a `static` member or static block without a `this` parameter, where
+///   `this` is the class itself, which Biome types as an instance of the
+///   class.
+/// - In a method with a `this` parameter without a type annotation.
 /// - In a member of a class or object literal without such a name, such as an
 ///   object literal passed to a call. Biome types that `this` from an
 ///   enclosing class or object literal, or not at all.
-/// - In a function declaration or expression, and in a module or namespace.
-///   Biome types the `this` of a function only when the function is the value
-///   of a class field or an object literal property, as in
-///   `{ f: function () {} }`.
+/// - In a function declaration or expression without a `this` parameter, and
+///   in a module or namespace. Biome types the `this` of such a function only
+///   when the function is the value of a class field or an object literal
+///   property, as in `{ f: function () {} }`.
 /// - In an arrow function in the decorators, computed key, or `extends` clause
 ///   of a class or a member. That arrow function sees the `this` of the code
 ///   around the class or object, but Biome types it as an instance of the
@@ -588,9 +595,11 @@ pub(super) fn this_can_narrow(root: &AnyJsControlFlowRoot) -> bool {
             .as_ref()
             .is_none_or(|child| MEMBER_BODY_KINDS.matches(child.kind()));
         if let Some(member) = AnyThisMember::cast_ref(&node) {
+            if let Some(parameter) = member_this_parameter(&member) {
+                return in_body && parameter.type_annotation().is_some();
+            }
             return in_body
                 && !is_static(&member)
-                && !has_this_parameter(&member)
                 // A member's parent is its list, inside the class or object.
                 && node
                     .grand_parent()
@@ -598,9 +607,16 @@ pub(super) fn this_can_narrow(root: &AnyJsControlFlowRoot) -> bool {
                     .is_some_and(|owner| types_this_of_members(&owner));
         }
         // An arrow function has the `this` of the code around it.
-        if !JsArrowFunctionExpression::can_cast(node.kind())
-            && THIS_BOUNDARY_KINDS.matches(node.kind())
-        {
+        if JsArrowFunctionExpression::can_cast(node.kind()) {
+            child = Some(node);
+            continue;
+        }
+        if let Some(function) = AnyJsFunction::cast_ref(&node) {
+            return in_body
+                && function_this_parameter(&function)
+                    .is_some_and(|parameter| parameter.type_annotation().is_some());
+        }
+        if THIS_BOUNDARY_KINDS.matches(node.kind()) {
             return false;
         }
         child = Some(node);
@@ -799,9 +815,9 @@ fn is_static(member: &AnyThisMember) -> bool {
     }
 }
 
-/// Returns whether the class or object `member` is a method that declares a
-/// `this` parameter, as in `m(this: Other) {}`.
-fn has_this_parameter(member: &AnyThisMember) -> bool {
+/// Returns the `this` parameter that the class or object `member` declares
+/// when it is a method, as in `m(this: Other) {}`.
+fn member_this_parameter(member: &AnyThisMember) -> Option<TsThisParameter> {
     let parameters = match member {
         AnyThisMember::JsMethodClassMember(method) => method.parameters(),
         AnyThisMember::JsMethodObjectMember(method) => method.parameters(),
@@ -809,12 +825,26 @@ fn has_this_parameter(member: &AnyThisMember) -> bool {
         AnyThisMember::JsConstructorClassMember(_)
         | AnyThisMember::JsPropertyClassMember(_)
         | AnyThisMember::AnyJsGetter(_)
-        | AnyThisMember::AnyJsSetter(_) => return false,
+        | AnyThisMember::AnyJsSetter(_) => return None,
     };
-    parameters
-        .ok()
-        .and_then(|parameters| parameters.items().iter().next())
-        .is_some_and(|first| matches!(first, Ok(AnyJsParameter::TsThisParameter(_))))
+    this_parameter(&parameters.ok()?)
+}
+
+/// Returns the `this` parameter that `function` declares, as in
+/// `function f(this: Other) {}`. An arrow function declares none.
+fn function_this_parameter(function: &AnyJsFunction) -> Option<TsThisParameter> {
+    match function.parameters().ok()? {
+        AnyJsArrowFunctionParameters::JsParameters(parameters) => this_parameter(&parameters),
+        AnyJsArrowFunctionParameters::AnyJsBinding(_) => None,
+    }
+}
+
+/// Returns the `this` parameter of `parameters`, which can only be the first.
+fn this_parameter(parameters: &JsParameters) -> Option<TsThisParameter> {
+    match parameters.items().first()?.ok()? {
+        AnyJsParameter::TsThisParameter(parameter) => Some(parameter),
+        AnyJsParameter::AnyJsFormalParameter(_) | AnyJsParameter::JsRestParameter(_) => None,
+    }
 }
 
 #[cfg(test)]
@@ -1058,9 +1088,17 @@ mod tests {
             ("class K { static get g() { return this; } }", false),
             ("class K { static { this; } }", false),
             ("class K { static f = () => this; }", false),
-            ("class K { m(this: K) { this; } }", false),
-            ("class K { m(this: K) { const f = () => this; } }", false),
-            ("const o = { m(this: object) { this; } };", false),
+            // A `this` parameter with a type annotation types `this`.
+            ("class K { m(this: K) { this; } }", true),
+            ("class K { m(this: K) { const f = () => this; } }", true),
+            ("const o = { m(this: object) { this; } };", true),
+            ("use({ m(this: object) { this; } });", true),
+            ("class K { static m(this: typeof K) { this; } }", true),
+            ("function f(this: object) { this; }", true),
+            ("const f = function (this: object) { this; };", true),
+            ("class K { m(this: K) { function g() { this; } } }", false),
+            ("function f(this) { this; }", false),
+            ("class K { m(this) { this; } }", false),
             ("class K { m() { function g() { this; } } }", false),
             ("function f() { this; }", false),
             ("const f = function () { this; };", false),
