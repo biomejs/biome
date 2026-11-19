@@ -122,6 +122,18 @@ function libraryGuard(value: string[] | null) {
 	if (Array.isArray(value)) return value?.length;
 }
 
+function elementAccessGuard(value: string | null, guards: Array<(input: unknown) => input is string>) {
+	if (guards[0](value)) {
+		return value?.length;
+	}
+}
+
+function keyedGuard(value: string | null, guards: { isString(input: unknown): input is string }) {
+	if (guards["isString"](value)) {
+		return value?.length;
+	}
+}
+
 ```
 
 # Diagnostics
@@ -575,6 +587,58 @@ functionGuards.ts:116:35 lint/suspicious/noUnnecessaryConditions ━━━━━
         │ 	                                      ^^
     117 │ }
     118 │ 
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+functionGuards.ts:121:10 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    119 │ function elementAccessGuard(value: string | null, guards: Array<(input: unknown) => input is string>) {
+    120 │ 	if (guards[0](value)) {
+  > 121 │ 		return value?.length;
+        │ 		       ^^^^^
+    122 │ 	}
+    123 │ }
+  
+  i Replace ?. with ..
+  
+    119 │ function elementAccessGuard(value: string | null, guards: Array<(input: unknown) => input is string>) {
+    120 │ 	if (guards[0](value)) {
+  > 121 │ 		return value?.length;
+        │ 		            ^^
+    122 │ 	}
+    123 │ }
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+functionGuards.ts:127:10 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    125 │ function keyedGuard(value: string | null, guards: { isString(input: unknown): input is string }) {
+    126 │ 	if (guards["isString"](value)) {
+  > 127 │ 		return value?.length;
+        │ 		       ^^^^^
+    128 │ 	}
+    129 │ }
+  
+  i Replace ?. with ..
+  
+    125 │ function keyedGuard(value: string | null, guards: { isString(input: unknown): input is string }) {
+    126 │ 	if (guards["isString"](value)) {
+  > 127 │ 		return value?.length;
+        │ 		            ^^
+    128 │ 	}
+    129 │ }
   
   i The receiver is guaranteed to be non-nullish.
   

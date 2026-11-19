@@ -418,8 +418,9 @@ pub(crate) fn guard_signature<'a>(
 /// select the tested argument. Collection never infers the guard's body.
 ///
 /// A call of a local function narrows according to its collected signature.
-/// Any other call whose callee is a dotted name is a call point (see
-/// [`FlowCall`]), and inference resolves its callee.
+/// Any other call whose callee is a dotted name, or in a condition a chain of
+/// property and element accesses, is a call point (see [`FlowCall`]), and
+/// inference resolves its callee.
 pub(super) struct GuardFunctions<'a> {
     raw_types: &'a [RawTypeData],
     raw_binding_types: &'a FxHashMap<TextRange, TypeReference>,
@@ -2094,8 +2095,9 @@ impl<'a, 'raw> Decomposer<'a, 'raw> {
     /// Returns the guard of `call`, a call whose result a condition tests,
     /// where the result is truthy when `positive` is true.
     ///
-    /// The guard is [`FlowGuard::Call`] when the callee is a dotted name that
-    /// is no local function, as [`GuardFunctions::calls_local_function`]
+    /// The guard is [`FlowGuard::Call`] when the callee is a chain of
+    /// property and element accesses ([`is_access_chain`]) that calls no
+    /// local function, as [`GuardFunctions::calls_local_function`]
     /// checks, or a local function that may have a type predicate inferred
     /// from its body ([`GuardFunctions::calls_inferred_predicate`]), and the
     /// call passes a subject as an argument or as the object of its callee,
@@ -2122,7 +2124,7 @@ impl<'a, 'raw> Decomposer<'a, 'raw> {
         else {
             return FlowGuard::Keep;
         };
-        if !is_dotted_name(&callee, &mut self.remaining) {
+        if !is_access_chain(&callee, &mut self.remaining) {
             return FlowGuard::Keep;
         }
         let Some((arguments, receiver)) = self.call_operands(call, &callee, false) else {
@@ -3886,10 +3888,9 @@ fn chain_receivers(
     Some(receivers)
 }
 
-/// Returns whether `callee` is a dotted name, which TypeScript requires of the
-/// callee of a call point: an identifier or `this`, followed by property
-/// accesses with `.` or `?.`, in parentheses or not, such as `a.b.c`,
-/// `(a).b`, or `this.m`.
+/// Returns whether `callee` is a dotted name: an identifier or `this`,
+/// followed by property accesses with `.` or `?.`, in parentheses or not,
+/// such as `a.b.c`, `(a).b`, or `this.m`.
 ///
 /// Returns false when the walk runs out of work.
 fn is_dotted_name(callee: &AnyJsExpression, remaining: &mut usize) -> bool {
@@ -3915,6 +3916,38 @@ fn is_dotted_name(callee: &AnyJsExpression, remaining: &mut usize) -> bool {
             },
             _ => return false,
         };
+    }
+}
+
+/// Returns whether `callee`, the callee of a call in a condition, is an
+/// identifier or `this` followed by property accesses with `.`, `?.`, or an
+/// element access, in parentheses or not, such as `a.b`, `guards[0]`, or
+/// `(u)["isS"]`.
+///
+/// TypeScript narrows by the type predicate of any callee in a condition. A
+/// callee that starts at another expression, such as the call result in
+/// `get()(x)`, narrows nothing in Biome, which bounds the callees that
+/// inference resolves. Returns false when the walk runs out of work.
+fn is_access_chain(callee: &AnyJsExpression, remaining: &mut usize) -> bool {
+    let mut expression = callee.clone();
+    loop {
+        let Some(left) = remaining.checked_sub(1) else {
+            return false;
+        };
+        *remaining = left;
+        let object = match expression {
+            AnyJsExpression::JsIdentifierExpression(_) | AnyJsExpression::JsThisExpression(_) => {
+                return true;
+            }
+            AnyJsExpression::JsParenthesizedExpression(parenthesized) => parenthesized.expression(),
+            AnyJsExpression::JsStaticMemberExpression(member) => member.object(),
+            AnyJsExpression::JsComputedMemberExpression(member) => member.object(),
+            _ => return false,
+        };
+        match object {
+            Ok(object) => expression = object,
+            Err(_) => return false,
+        }
     }
 }
 

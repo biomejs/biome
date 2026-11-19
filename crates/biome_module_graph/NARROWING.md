@@ -465,7 +465,7 @@ or a computed key.
 
 | Code | TypeScript | Biome | Effect on rules |
 | --- | --- | --- | --- |
-| `u: { isS(v: unknown): v is string }; x: string \| number; if (u["isS"](x)) x` | `string` | `string \| number` | `noUnnecessaryConditions` can miss an unnecessary check of `x`. |
+| `get: () => (v: unknown) => v is string; x: string \| number; if (get()(x)) x` | `string` | `string \| number` | `noUnnecessaryConditions` can miss an unnecessary check of `x`. |
 | `xs: (string \| number)[]; if (xs.every((x) => typeof x === "string")) xs` | `string[]` | `(string \| number)[]` | A rule can miss a report on the elements of `xs`. |
 | `q(v: "a"): v is "a"; q(v: string): v is "b"; x: string; if (q(x)) x` | `"b"` | `string` | `noUnnecessaryConditions` can miss an unnecessary check of `x`. |
 | `isOf<T>(v: unknown, sample: T): v is T; x: string \| number \| boolean; y: string \| number; if (isString(y) && !isOf(x, y)) x` | `number \| boolean` | `string \| number \| boolean` | `noUnnecessaryConditions` can miss an unnecessary check of `x`. |

@@ -524,11 +524,12 @@ pub(crate) struct FlowDestructureStep {
 /// TypeScript narrows through a call whose callee's signature returns a type
 /// predicate or an assertion. Collection decides a local function from its
 /// collected signature, so such a call is never a call point. Every other
-/// call whose callee is a dotted name, an identifier or `this` followed by
-/// `.name` accesses, is one when it passes a subject. Such a statement call
-/// always is one, because its signature can end the path. Inference resolves
-/// its effect in the context that reads a subject it may narrow, or a subject
-/// on a path that it may end (see [`FlowGuard::Call`]).
+/// call in a condition whose callee is an identifier or `this` followed by
+/// property or element accesses, such as `a.b` or `guards[0]`, is one when it
+/// passes a subject. A statement call whose callee is a dotted name, without
+/// element accesses, always is one, because its signature can end the path.
+/// Inference resolves its effect in the context that reads a subject it may
+/// narrow, or a subject on a path that it may end (see [`FlowGuard::Call`]).
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub(crate) struct FlowCall {
     /// The range of the call expression, which identifies the call to
