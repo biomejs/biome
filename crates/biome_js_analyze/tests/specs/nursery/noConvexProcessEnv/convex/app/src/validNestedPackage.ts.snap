@@ -1,0 +1,10 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validNestedPackage.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+const url = process.env.CONVEX_URL;
+
+```
