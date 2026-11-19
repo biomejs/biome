@@ -971,18 +971,47 @@ fn functions_read_a_top_level_var_without_an_initializer() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives `number | null` at `n1` and reports
-// TS2454 there, because nothing but `n++` assigns `n`, which reads `n` before
-// any assignment. Biome gives `number`.
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the type in its
+// comment. A read in a closure assumes a `let` without an initializer assigned
+// where it is declared only when an `=`, a logical assignment, a
+// destructuring assignment, or the head of a `for...in` or `for...of` loop
+// assigns it somewhere. `++`, `+=`, and an assignment through `as` read the
+// variable first, so they don't count. TypeScript reports TS2454 at the reads
+// that only such writes assign, and gives them the declared type. A `var` is
+// always assumed assigned in a closure, so `incrementVar` narrows.
 #[test]
-fn closures_read_a_let_that_only_increments_assign() {
+fn closures_assume_a_let_assigned_only_after_a_definite_assignment() {
     assert_reads(
         r#"
-        function f() { let n: number | null; const g = () => { if (n !== null) /*n1*/n; }; n++; }
+        declare const xs: number[];
+        function a1() { let n: number | null; const g = () => { if (n !== null) /*incrementAfter*/n; }; n++; } // number | null
+        function a2() { let n: number | null; if (c) n++; const g = () => { if (n !== null) /*increment*/n; }; } // number | null
+        function a3() { let n: number | null; if (c) n += 1; const g = () => { if (n !== null) /*compound*/n; }; } // number | null
+        function a4() { let n: number | null; if (c) (n as any) = 1; const g = () => { if (n !== null) /*asserted*/n; }; } // number | null
+        function a5() { let n: number | null; if (c) n++; const g = () => /*incrementRead*/n; } // number | null
+        function a6() { let n: number | null; if (c) n = 1; const g = () => { if (n !== null) /*assigned*/n; }; } // number
+        function a7() { let n: number | null; if (c) n ??= 1; const g = () => { if (n !== null) /*logical*/n; }; } // number
+        function a8() { let n: number | null; if (c) [n] = [1]; const g = () => { if (n !== null) /*array*/n; }; } // number
+        function a9() { let n: number | null; if (c) ({ n } = { n: 1 }); const g = () => { if (n !== null) /*object*/n; }; } // number
+        function a10() { let n: number | null; for (n of xs); const g = () => { if (n !== null) /*forOf*/n; }; } // number
+        function a11() { let n: number | null; const g = () => { if (n !== null) /*assignedAfter*/n; }; n = 1; } // number
+        function a12() { let n: number | null; if (c) n--; n = 2; const g = () => { if (n !== null) /*decrementThenAssigned*/n; }; } // number
+        function a13() { var v: number | null; v++; const g = () => { if (v !== null) /*incrementVar*/v; }; } // number
         "#,
         &[
-            // TypeScript: `number | null`.
-            ("n1", "n", &["number"]),
+            ("incrementAfter", "n", &["null", "number"]),
+            ("increment", "n", &["null", "number"]),
+            ("compound", "n", &["null", "number"]),
+            ("asserted", "n", &["null", "number"]),
+            ("incrementRead", "n", &["null", "number"]),
+            ("assigned", "n", &["number"]),
+            ("logical", "n", &["number"]),
+            ("array", "n", &["number"]),
+            ("object", "n", &["number"]),
+            ("forOf", "n", &["number"]),
+            ("assignedAfter", "n", &["number"]),
+            ("decrementThenAssigned", "n", &["number"]),
+            ("incrementVar", "v", &["number"]),
         ],
     );
 }
