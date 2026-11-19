@@ -18,6 +18,7 @@ export function Links({ props }) {
 			<a href="/settings">Settings, in a parallel route slot</a>
 			<a href="/contact">Contact, pages router</a>
 			<a href="/_preview">Preview, pages router file starting with an underscore</a>
+			<a href="/_help">Help, app router folder escaped with %5F</a>
 			<a href="/stores">Stores, pages router index</a>
 			<a href="/shop">Shop, optional catch-all without segments</a>
 			<a href="/shop/shoes/red">Shop, optional catch-all</a>
@@ -227,7 +228,7 @@ invalid.jsx:13:7 lint/nursery/noHtmlLinkForPages ━━━━━━━━━━�
   > 13 │ 			<a href="/contact">Contact, pages router</a>
        │ 			   ^^^^^^^^^^^^^^^
     14 │ 			<a href="/_preview">Preview, pages router file starting with an underscore</a>
-    15 │ 			<a href="/stores">Stores, pages router index</a>
+    15 │ 			<a href="/_help">Help, app router folder escaped with %5F</a>
   
   i An <a> element to another page loads a new document, so the client loses its state.
   
@@ -249,8 +250,8 @@ invalid.jsx:14:7 lint/nursery/noHtmlLinkForPages ━━━━━━━━━━�
     13 │ 			<a href="/contact">Contact, pages router</a>
   > 14 │ 			<a href="/_preview">Preview, pages router file starting with an underscore</a>
        │ 			   ^^^^^^^^^^^^^^^^
-    15 │ 			<a href="/stores">Stores, pages router index</a>
-    16 │ 			<a href="/shop">Shop, optional catch-all without segments</a>
+    15 │ 			<a href="/_help">Help, app router folder escaped with %5F</a>
+    16 │ 			<a href="/stores">Stores, pages router index</a>
   
   i An <a> element to another page loads a new document, so the client loses its state.
   
@@ -266,14 +267,14 @@ invalid.jsx:14:7 lint/nursery/noHtmlLinkForPages ━━━━━━━━━━�
 ```
 invalid.jsx:15:7 lint/nursery/noHtmlLinkForPages ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This <a> element navigates to /stores, a page of this Next.js app.
+  ! This <a> element navigates to /_help, a page of this Next.js app.
   
     13 │ 			<a href="/contact">Contact, pages router</a>
     14 │ 			<a href="/_preview">Preview, pages router file starting with an underscore</a>
-  > 15 │ 			<a href="/stores">Stores, pages router index</a>
-       │ 			   ^^^^^^^^^^^^^^
-    16 │ 			<a href="/shop">Shop, optional catch-all without segments</a>
-    17 │ 			<a href="/shop/shoes/red">Shop, optional catch-all</a>
+  > 15 │ 			<a href="/_help">Help, app router folder escaped with %5F</a>
+       │ 			   ^^^^^^^^^^^^^
+    16 │ 			<a href="/stores">Stores, pages router index</a>
+    17 │ 			<a href="/shop">Shop, optional catch-all without segments</a>
   
   i An <a> element to another page loads a new document, so the client loses its state.
   
@@ -289,14 +290,14 @@ invalid.jsx:15:7 lint/nursery/noHtmlLinkForPages ━━━━━━━━━━�
 ```
 invalid.jsx:16:7 lint/nursery/noHtmlLinkForPages ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This <a> element navigates to /shop, a page of this Next.js app.
+  ! This <a> element navigates to /stores, a page of this Next.js app.
   
     14 │ 			<a href="/_preview">Preview, pages router file starting with an underscore</a>
-    15 │ 			<a href="/stores">Stores, pages router index</a>
-  > 16 │ 			<a href="/shop">Shop, optional catch-all without segments</a>
-       │ 			   ^^^^^^^^^^^^
-    17 │ 			<a href="/shop/shoes/red">Shop, optional catch-all</a>
-    18 │ 			<a href={"/about"}>About, in an expression</a>
+    15 │ 			<a href="/_help">Help, app router folder escaped with %5F</a>
+  > 16 │ 			<a href="/stores">Stores, pages router index</a>
+       │ 			   ^^^^^^^^^^^^^^
+    17 │ 			<a href="/shop">Shop, optional catch-all without segments</a>
+    18 │ 			<a href="/shop/shoes/red">Shop, optional catch-all</a>
   
   i An <a> element to another page loads a new document, so the client loses its state.
   
@@ -312,14 +313,14 @@ invalid.jsx:16:7 lint/nursery/noHtmlLinkForPages ━━━━━━━━━━�
 ```
 invalid.jsx:17:7 lint/nursery/noHtmlLinkForPages ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This <a> element navigates to /shop/shoes/red, a page of this Next.js app.
+  ! This <a> element navigates to /shop, a page of this Next.js app.
   
-    15 │ 			<a href="/stores">Stores, pages router index</a>
-    16 │ 			<a href="/shop">Shop, optional catch-all without segments</a>
-  > 17 │ 			<a href="/shop/shoes/red">Shop, optional catch-all</a>
-       │ 			   ^^^^^^^^^^^^^^^^^^^^^^
-    18 │ 			<a href={"/about"}>About, in an expression</a>
-    19 │ 			<a target="_self" href="/about">About, in the same tab</a>
+    15 │ 			<a href="/_help">Help, app router folder escaped with %5F</a>
+    16 │ 			<a href="/stores">Stores, pages router index</a>
+  > 17 │ 			<a href="/shop">Shop, optional catch-all without segments</a>
+       │ 			   ^^^^^^^^^^^^
+    18 │ 			<a href="/shop/shoes/red">Shop, optional catch-all</a>
+    19 │ 			<a href={"/about"}>About, in an expression</a>
   
   i An <a> element to another page loads a new document, so the client loses its state.
   
@@ -335,14 +336,37 @@ invalid.jsx:17:7 lint/nursery/noHtmlLinkForPages ━━━━━━━━━━�
 ```
 invalid.jsx:18:7 lint/nursery/noHtmlLinkForPages ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
+  ! This <a> element navigates to /shop/shoes/red, a page of this Next.js app.
+  
+    16 │ 			<a href="/stores">Stores, pages router index</a>
+    17 │ 			<a href="/shop">Shop, optional catch-all without segments</a>
+  > 18 │ 			<a href="/shop/shoes/red">Shop, optional catch-all</a>
+       │ 			   ^^^^^^^^^^^^^^^^^^^^^^
+    19 │ 			<a href={"/about"}>About, in an expression</a>
+    20 │ 			<a target="_self" href="/about">About, in the same tab</a>
+  
+  i An <a> element to another page loads a new document, so the client loses its state.
+  
+  i Use <Link /> from next/link instead, which navigates on the client and prefetches the page.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/7650 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:19:7 lint/nursery/noHtmlLinkForPages ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
   ! This <a> element navigates to /about, a page of this Next.js app.
   
-    16 │ 			<a href="/shop">Shop, optional catch-all without segments</a>
-    17 │ 			<a href="/shop/shoes/red">Shop, optional catch-all</a>
-  > 18 │ 			<a href={"/about"}>About, in an expression</a>
+    17 │ 			<a href="/shop">Shop, optional catch-all without segments</a>
+    18 │ 			<a href="/shop/shoes/red">Shop, optional catch-all</a>
+  > 19 │ 			<a href={"/about"}>About, in an expression</a>
        │ 			   ^^^^^^^^^^^^^^^
-    19 │ 			<a target="_self" href="/about">About, in the same tab</a>
-    20 │ 			<a {...props} href="/about">About, after a spread</a>
+    20 │ 			<a target="_self" href="/about">About, in the same tab</a>
+    21 │ 			<a {...props} href="/about">About, after a spread</a>
   
   i An <a> element to another page loads a new document, so the client loses its state.
   
@@ -356,16 +380,16 @@ invalid.jsx:18:7 lint/nursery/noHtmlLinkForPages ━━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:19:22 lint/nursery/noHtmlLinkForPages ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:20:22 lint/nursery/noHtmlLinkForPages ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This <a> element navigates to /about, a page of this Next.js app.
   
-    17 │ 			<a href="/shop/shoes/red">Shop, optional catch-all</a>
-    18 │ 			<a href={"/about"}>About, in an expression</a>
-  > 19 │ 			<a target="_self" href="/about">About, in the same tab</a>
+    18 │ 			<a href="/shop/shoes/red">Shop, optional catch-all</a>
+    19 │ 			<a href={"/about"}>About, in an expression</a>
+  > 20 │ 			<a target="_self" href="/about">About, in the same tab</a>
        │ 			                  ^^^^^^^^^^^^^
-    20 │ 			<a {...props} href="/about">About, after a spread</a>
-    21 │ 			<a href="/team">Team, app router in src</a>
+    21 │ 			<a {...props} href="/about">About, after a spread</a>
+    22 │ 			<a href="/team">Team, app router in src</a>
   
   i An <a> element to another page loads a new document, so the client loses its state.
   
@@ -379,39 +403,16 @@ invalid.jsx:19:22 lint/nursery/noHtmlLinkForPages ━━━━━━━━━━
 ```
 
 ```
-invalid.jsx:20:18 lint/nursery/noHtmlLinkForPages ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:21:18 lint/nursery/noHtmlLinkForPages ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This <a> element navigates to /about, a page of this Next.js app.
   
-    18 │ 			<a href={"/about"}>About, in an expression</a>
-    19 │ 			<a target="_self" href="/about">About, in the same tab</a>
-  > 20 │ 			<a {...props} href="/about">About, after a spread</a>
+    19 │ 			<a href={"/about"}>About, in an expression</a>
+    20 │ 			<a target="_self" href="/about">About, in the same tab</a>
+  > 21 │ 			<a {...props} href="/about">About, after a spread</a>
        │ 			              ^^^^^^^^^^^^^
-    21 │ 			<a href="/team">Team, app router in src</a>
-    22 │ 			<a href="/careers">Careers, pages router in src</a>
-  
-  i An <a> element to another page loads a new document, so the client loses its state.
-  
-  i Use <Link /> from next/link instead, which navigates on the client and prefetches the page.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/7650 for more information or to report possible bugs.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-
-```
-
-```
-invalid.jsx:21:7 lint/nursery/noHtmlLinkForPages ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! This <a> element navigates to /team, a page of this Next.js app.
-  
-    19 │ 			<a target="_self" href="/about">About, in the same tab</a>
-    20 │ 			<a {...props} href="/about">About, after a spread</a>
-  > 21 │ 			<a href="/team">Team, app router in src</a>
-       │ 			   ^^^^^^^^^^^^
-    22 │ 			<a href="/careers">Careers, pages router in src</a>
-    23 │ 		</>
+    22 │ 			<a href="/team">Team, app router in src</a>
+    23 │ 			<a href="/careers">Careers, pages router in src</a>
   
   i An <a> element to another page loads a new document, so the client loses its state.
   
@@ -427,14 +428,37 @@ invalid.jsx:21:7 lint/nursery/noHtmlLinkForPages ━━━━━━━━━━�
 ```
 invalid.jsx:22:7 lint/nursery/noHtmlLinkForPages ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
+  ! This <a> element navigates to /team, a page of this Next.js app.
+  
+    20 │ 			<a target="_self" href="/about">About, in the same tab</a>
+    21 │ 			<a {...props} href="/about">About, after a spread</a>
+  > 22 │ 			<a href="/team">Team, app router in src</a>
+       │ 			   ^^^^^^^^^^^^
+    23 │ 			<a href="/careers">Careers, pages router in src</a>
+    24 │ 		</>
+  
+  i An <a> element to another page loads a new document, so the client loses its state.
+  
+  i Use <Link /> from next/link instead, which navigates on the client and prefetches the page.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/7650 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:23:7 lint/nursery/noHtmlLinkForPages ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
   ! This <a> element navigates to /careers, a page of this Next.js app.
   
-    20 │ 			<a {...props} href="/about">About, after a spread</a>
-    21 │ 			<a href="/team">Team, app router in src</a>
-  > 22 │ 			<a href="/careers">Careers, pages router in src</a>
+    21 │ 			<a {...props} href="/about">About, after a spread</a>
+    22 │ 			<a href="/team">Team, app router in src</a>
+  > 23 │ 			<a href="/careers">Careers, pages router in src</a>
        │ 			   ^^^^^^^^^^^^^^^
-    23 │ 		</>
-    24 │ 	);
+    24 │ 		</>
+    25 │ 	);
   
   i An <a> element to another page loads a new document, so the client loses its state.
   

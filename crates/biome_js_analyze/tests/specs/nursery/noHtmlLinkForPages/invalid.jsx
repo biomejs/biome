@@ -12,6 +12,7 @@ export function Links({ props }) {
 			<a href="/settings">Settings, in a parallel route slot</a>
 			<a href="/contact">Contact, pages router</a>
 			<a href="/_preview">Preview, pages router file starting with an underscore</a>
+			<a href="/_help">Help, app router folder escaped with %5F</a>
 			<a href="/stores">Stores, pages router index</a>
 			<a href="/shop">Shop, optional catch-all without segments</a>
 			<a href="/shop/shoes/red">Shop, optional catch-all</a>

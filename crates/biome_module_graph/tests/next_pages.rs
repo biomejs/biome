@@ -50,16 +50,18 @@ fn reads_pages_of_both_routers() {
         "/web/app/about/page.tsx",
         "/web/app/(marketing)/pricing/page.jsx",
         "/web/app/@modal/settings/page.jsx",
+        "/web/app/%5Fhelp/page.jsx",
         "/web/pages/contact.jsx",
         "/web/pages/stores/index.js",
     ]);
 
-    assert_eq!(pages(&db, "/web").len(), 6);
+    assert_eq!(pages(&db, "/web").len(), 7);
     for path in [
         "/",
         "/about",
         "/pricing",
         "/settings",
+        "/_help",
         "/contact",
         "/stores",
     ] {

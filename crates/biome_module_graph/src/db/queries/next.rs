@@ -50,7 +50,13 @@ pub fn next_pages(db: &dyn ModuleDb, project: ResolverPathData) -> Vec<NextPage>
                                         directory.starts_with('(') && directory.ends_with(')');
                                     !is_route_group && !directory.starts_with('@')
                                 })
-                                .map(Box::from)
+                                // `%5F` escapes the underscore of a public
+                                // segment, which would otherwise make the
+                                // folder private.
+                                .map(|directory| match directory.strip_prefix("%5F") {
+                                    Some(name) => format!("_{name}").into(),
+                                    None => directory.into(),
+                                })
                                 .collect()
                         }
                         "pages" => {
