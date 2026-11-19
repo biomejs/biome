@@ -514,8 +514,13 @@ fn classify(
 #[test]
 fn unreachable_code_requests_classify_statements() {
     const SOURCE: &str = r#"
+        import type { Never as ImportedNever } from "./types";
+        type Never = never;
+        type Void = void;
         declare function fail(): never;
-        declare const log: { fatal(): never };
+        declare function failAlias(): Never;
+        declare function failImportedAlias(): ImportedNever;
+        declare const log: { fatal(): never; fatalAlias(): Never; voidAlias(): Void };
         declare const c: boolean;
         function a(x: string | null) { return; /*afterReturn*/x; }
         function b(x: string | null) { log.fatal(); /*afterFatal*/x; }
@@ -526,10 +531,15 @@ fn unreachable_code_requests_classify_statements() {
         function i(x: string) { if (typeof x === "number") { /*impossible*/x; } }
         function j(x: "a" | "b") { switch (x) { case "a": return 1; } /*partial*/x; }
         function k(x: string | null) { while (1) { if (c) break; } /*afterLoop*/x; }
+        function l(x: string | null) { failAlias(); /*afterAlias*/x; }
+        function m(x: string | null) { log.fatalAlias(); /*afterMemberAlias*/x; }
+        function n(x: string | null) { log.voidAlias(); /*afterVoidAlias*/x; }
+        function o(x: string | null) { failImportedAlias(); /*afterImportedAlias*/x; }
         /*top*/x;
         declare const x: string;
     "#;
-    let (db, module) = narrowing_db_with(SOURCE, &[]);
+    let (db, module) =
+        narrowing_db_with(SOURCE, &[("/src/types.ts", "export type Never = never;\n")]);
     for (marker, expected) in [
         ("afterReturn", TypeInferenceClassification::Match),
         ("afterFatal", TypeInferenceClassification::Match),
@@ -540,6 +550,10 @@ fn unreachable_code_requests_classify_statements() {
         ("impossible", TypeInferenceClassification::NoMatch),
         ("partial", TypeInferenceClassification::NoMatch),
         ("afterLoop", TypeInferenceClassification::NoMatch),
+        ("afterAlias", TypeInferenceClassification::Match),
+        ("afterMemberAlias", TypeInferenceClassification::Match),
+        ("afterVoidAlias", TypeInferenceClassification::NoMatch),
+        ("afterImportedAlias", TypeInferenceClassification::Match),
         ("top", TypeInferenceClassification::NoMatch),
     ] {
         assert_eq!(classify(&db, module, SOURCE, marker), expected, "{marker}");
@@ -605,48 +619,144 @@ fn unreachable_code_requests_build_only_the_asked_root() {
     );
 }
 
+// A return type of `never` through a type alias, or a chain of them, ends
+// the path as `never` written in place does, whether the module declares the
+// alias or imports it, and for local, `declare`, imported, and member callees.
+// An alias of another type, such as `void` or `never | string`, which is
+// `string`, ends nothing.
+#[test]
+fn calls_returning_never_through_an_alias_end_the_path() {
+    let source = r#"
+        import { failImported } from "./fail";
+        import type { Never as ImportedNever, Void as ImportedVoid, Chained } from "./types";
+        import * as types from "./types";
+        declare const log: { fatalAlias(): Never; fatalChain(): N2; voidAlias(): R };
+        type Never = never;
+        type N1 = never;
+        type N2 = N1;
+        type Paren = (never);
+        type R = void;
+        type U = never | string;
+        type Local = ImportedNever;
+        function failLocal(): Never { throw 0; }
+        declare function failDeclared(): Never;
+        declare function failChain(): N2;
+        declare function failParen(): Paren;
+        declare function failImportedType(): ImportedNever;
+        function failImportedTypeLocal(): ImportedNever { throw 0; }
+        declare function failImportedChain(): Chained;
+        declare function failLocalOfImported(): Local;
+        declare function failNamespace(): types.Never;
+        declare function voidAlias(): R;
+        declare function unionAlias(): U;
+        declare function voidImported(): ImportedVoid;
+        function alias(x: string | null) { if (x !== null) { failLocal(); /*alias*/x; } }
+        function declaredAlias(x: string | null) { if (x !== null) { failDeclared(); /*declaredAlias*/x; } }
+        function memberAlias(x: string | null) { if (x !== null) { log.fatalAlias(); /*memberAlias*/x; } }
+        function importedAlias(x: string | null) { if (x !== null) { failImported(); /*importedAlias*/x; } }
+        function chain(x: string | null) { if (x !== null) { failChain(); /*chain*/x; } }
+        function memberChain(x: string | null) { if (x !== null) { log.fatalChain(); /*memberChain*/x; } }
+        function paren(x: string | null) { if (x !== null) { failParen(); /*paren*/x; } }
+        function importedType(x: string | null) { if (x !== null) { failImportedType(); /*importedType*/x; } }
+        function importedTypeLocal(x: string | null) { if (x !== null) { failImportedTypeLocal(); /*importedTypeLocal*/x; } }
+        function importedChain(x: string | null) { if (x !== null) { failImportedChain(); /*importedChain*/x; } }
+        function localOfImported(x: string | null) { if (x !== null) { failLocalOfImported(); /*localOfImported*/x; } }
+        function namespace(x: string | null) { if (x !== null) { failNamespace(); /*namespace*/x; } }
+        function reachable(x: string | null) { if (x === null) failImportedType(); /*reachable*/x; }
+        function closure(x: string | null) { if (x !== null) { failChain(); const g = () => /*closure*/x; } }
+        function closureImported(x: string | null) { if (x !== null) { failImportedType(); const g = () => /*closureImported*/x; } }
+        function voidR(x: string | null) { if (x !== null) { voidAlias(); /*voidR*/x; } }
+        function memberVoid(x: string | null) { if (x !== null) { log.voidAlias(); /*memberVoid*/x; } }
+        function unionU(x: string | null) { if (x !== null) { unionAlias(); /*unionU*/x; } }
+        function importedVoid(x: string | null) { if (x !== null) { voidImported(); /*importedVoid*/x; } }
+    "#;
+    let string: &[&str] = &["string"];
+    let declared: &[&str] = &["null", "string"];
+    assert_reads_with(
+        source,
+        &[
+            (
+                "/src/fail.ts",
+                "type Never = never;\nexport declare function failImported(): Never;\n",
+            ),
+            (
+                "/src/types.ts",
+                "export type Never = never;\nexport type Void = void;\nexport type Chained = Never;\n",
+            ),
+        ],
+        &[
+            ("alias", "x", declared),
+            ("declaredAlias", "x", declared),
+            ("memberAlias", "x", declared),
+            ("importedAlias", "x", declared),
+            ("chain", "x", declared),
+            ("memberChain", "x", declared),
+            ("paren", "x", declared),
+            ("importedType", "x", declared),
+            ("importedTypeLocal", "x", declared),
+            ("importedChain", "x", declared),
+            ("localOfImported", "x", declared),
+            ("namespace", "x", declared),
+            ("reachable", "x", string),
+            ("closure", "x", declared),
+            ("closureImported", "x", declared),
+            ("voidR", "x", string),
+            ("memberVoid", "x", string),
+            ("unionU", "x", string),
+            ("importedVoid", "x", string),
+        ],
+    );
+}
+
 // TypeScript 7.0.2 (`tsc --strict`) gives `string | null` at every read
 // below, each after a call that never returns, in code that TypeScript finds
 // unreachable. Biome doesn't end the path at the calls before the reads that
 // expect `string`, so those reads are narrower than in TypeScript:
 //
-// - `alias`, `declaredAlias`, `memberAlias`, and `importedAlias`: the
-//   callee's return type is `never` through an alias;
 // - `limit` and `closure`: `log.fatal()` is the 65th statement call of the
-//   function, and only the first 64 can end a path.
+//   function, and only the first 64 can end a path;
+// - `genericAlias`: the return type is `never` through a generic alias;
+// - `globalAlias`: the return type is `never` through an alias that a
+//   declaration file declares globally;
+// - `genericFunction` and `overloaded`: the callee is a generic or an
+//   overloaded function of the module whose return type is `never` through
+//   an alias.
 #[test]
 fn calls_that_biome_doesnt_end_the_path_at() {
     let source = format!(
         r#"
-        import {{ failImported }} from "./fail";
-        declare const log: {{ warn(): void; fatal(): never; fatalAlias(): Never }};
-        type Never = never;
-        function failLocal(): Never {{ throw 0; }}
-        declare function failDeclared(): Never;
-        function alias(x: string | null) {{ if (x !== null) {{ failLocal(); /*alias*/x; }} }}
-        function declaredAlias(x: string | null) {{ if (x !== null) {{ failDeclared(); /*declaredAlias*/x; }} }}
-        function memberAlias(x: string | null) {{ if (x !== null) {{ log.fatalAlias(); /*memberAlias*/x; }} }}
-        function importedAlias(x: string | null) {{ if (x !== null) {{ failImported(); /*importedAlias*/x; }} }}
+        import type {{ Never }} from "./types";
+        declare const log: {{ warn(): void; fatal(): never }};
+        type G<T> = never;
+        declare function failGeneric(): G<string>;
+        declare function failGlobal(): GlobalNever;
+        declare function failG<T>(v: T): Never;
+        declare function failOver(a: string): Never;
+        declare function failOver(a: number): void;
         function limit(x: string | null) {{ {warn64} if (x !== null) {{ log.fatal(); /*limit*/x; const h = () => /*closure*/x; }} }}
         function withinLimit(x: string | null) {{ {warn63} if (x !== null) {{ log.fatal(); /*withinLimit*/x; }} }}
+        function genericAlias(x: string | null) {{ if (x !== null) {{ failGeneric(); /*genericAlias*/x; }} }}
+        function globalAlias(x: string | null) {{ if (x !== null) {{ failGlobal(); /*globalAlias*/x; }} }}
+        function genericFunction(x: string | null) {{ if (x !== null) {{ failG(x); /*genericFunction*/x; }} }}
+        function overloaded(x: string | null) {{ if (x !== null) {{ failOver("a"); /*overloaded*/x; }} }}
         "#,
         warn64 = "log.warn();".repeat(64),
         warn63 = "log.warn();".repeat(63),
     );
     assert_reads_with(
         &source,
-        &[(
-            "/src/fail.ts",
-            "type Never = never;\nexport declare function failImported(): Never;\n",
-        )],
         &[
-            ("alias", "x", &["string"]),
-            ("declaredAlias", "x", &["string"]),
-            ("memberAlias", "x", &["string"]),
-            ("importedAlias", "x", &["string"]),
+            ("/src/types.ts", "export type Never = never;\n"),
+            ("/src/globals.d.ts", "type GlobalNever = never;\n"),
+        ],
+        &[
             ("limit", "x", &["string"]),
             ("closure", "x", &["string"]),
             ("withinLimit", "x", &["null", "string"]),
+            ("genericAlias", "x", &["string"]),
+            ("globalAlias", "x", &["string"]),
+            ("genericFunction", "x", &["string"]),
+            ("overloaded", "x", &["string"]),
         ],
     );
 }

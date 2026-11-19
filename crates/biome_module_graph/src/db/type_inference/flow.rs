@@ -1811,7 +1811,8 @@ impl<'db> ResolutionCtx<'db, '_> {
     /// declared type is, and a target of `any` or `unknown` narrows nothing.
     ///
     /// The effect of a statement call is [`FlowCallEffect::Ends`] when the
-    /// return type annotation of its signature's declaration is `never` (see
+    /// return type annotation of its signature's declaration is `never`,
+    /// written in place or through type aliases (see
     /// [`Self::has_annotated_callee`]), or when its signature is
     /// `asserts value` and the asserted argument is always false.
     fn resolve_call_effect(&mut self, call: &FlowCall) -> Option<FlowCallEffect<'db>> {
@@ -1888,10 +1889,11 @@ impl<'db> ResolutionCtx<'db, '_> {
             ReturnType::Type(ty) => {
                 // TypeScript ends the path at a statement call only when the
                 // return type annotation of the signature's declaration is
-                // `never`.
+                // `never`, in place or through type aliases. Flattening
+                // follows the aliases and drops `never` from a union, so an
+                // alias of a union, such as `never | string`, isn't `never`.
                 let (root, steps, annotated) = callee_steps?;
-                let returns_never = resolve_local_type_on_demand(self.db, *ty)
-                    == TypeData::NeverKeyword
+                let returns_never = self.flow_baseline(*ty) == Some(TypeData::NeverKeyword)
                     && self.has_annotated_callee(root, steps, annotated);
                 return returns_never.then_some(FlowCallEffect::Ends);
             }
