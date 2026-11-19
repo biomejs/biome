@@ -233,11 +233,10 @@ const IMPORTED: &str = r#"
     export declare function g(): void;
 "#;
 
-// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected
-// type. An import narrows by the tests of the root that reads it, from the
-// declared type of what it imports, even when it imports a `let`. A call
-// never cancels that narrowing. A test outside a closure doesn't reach a
-// read inside it.
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
+// An import narrows by the tests of the root that reads it, from the declared
+// type of what it imports, a live `let` too, and a call never changes it. A
+// test outside a closure doesn't reach a read of an import inside it.
 #[test]
 fn imported_bindings_narrow() {
     assert_reads_with(
@@ -352,13 +351,11 @@ fn variables_of_enclosing_roots_narrow_by_the_reading_root() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives the narrower type in the comment
-// for each read below. Biome keeps the declared type of a variable when a
-// function called where it is defined writes it, because the graph has no
-// write point for that write. Biome also narrows a variable that an
-// enclosing root declares only from its declared type. TypeScript continues
-// the flow of the enclosing root where it creates the closure, where `x` is
-// `null`.
+// TypeScript 7.0.2 (`tsc --strict`) gives the narrower type in the comment for
+// `invoked`, and `never` at `captured`, which Biome reads as Unknown. Biome
+// keeps the declared type of a variable that a function called where it is
+// defined writes, because the graph has no write point there. The closure in
+// `e15` continues the flow where it is created, and `x` is `null` there.
 #[test]
 fn variables_of_enclosing_roots_that_biome_narrows_less() {
     assert_reads(
@@ -369,8 +366,7 @@ fn variables_of_enclosing_roots_that_biome_narrows_less() {
         &[
             // TypeScript: `null`.
             ("invoked", "g4", &["null", "string"]),
-            // TypeScript: `never`.
-            ("captured", "x", &["string"]),
+            ("captured", "x", &["Unknown"]),
         ],
     );
 }

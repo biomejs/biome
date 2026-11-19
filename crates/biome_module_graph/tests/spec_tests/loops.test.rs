@@ -361,10 +361,10 @@ fn switch_statements_in_the_body_narrow() {
 
 // TypeScript 7.0.2 (`tsc --strict`) narrows `o` to `A` at the first two reads
 // below, and gives `string | null`, then `string`, at the last two. Biome
-// keeps the declared type of `o` because `o!` is not a variable or a
-// property path, and a read in a closure never sees the narrowing around it.
-// Biome doesn't infer the type of the elements of an `AsyncIterable`, so `v`
-// is Unknown, which no test narrows.
+// keeps the declared type at the first, because `o!` is not a variable or a
+// property path. A read in a closure created in the body sees the test of
+// the loop, as in TypeScript. Biome doesn't infer the type of the elements
+// of an `AsyncIterable`, so `v` is Unknown, which no test narrows.
 #[test]
 fn loops_that_biome_does_not_narrow_yet() {
     assert_reads(
@@ -375,7 +375,7 @@ fn loops_that_biome_does_not_narrow_yet() {
         "#,
         &[
             ("nonNull", "o", &["A", "undefined"]),
-            ("closure", "o", &["A", "undefined"]),
+            ("closure", "o", &["A"]),
             ("asyncIterableDeclared", "v", &["Unknown"]),
             ("asyncIterable", "v", &["Unknown"]),
         ],

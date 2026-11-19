@@ -463,7 +463,7 @@ fn callee_and_subject_shadowing_use_semantic_binding_identity() {
 }
 
 #[test]
-fn let_const_var_and_written_subjects_narrow_but_captures_do_not() {
+fn let_const_var_written_and_captured_subjects_narrow() {
     use InferredTypeData::{Number, String};
     const SOURCE: &str = r#"
         declare function guard(input: unknown): input is string;
@@ -494,7 +494,9 @@ fn let_const_var_and_written_subjects_narrow_but_captures_do_not() {
         ("var", "hoisted", &[String]),
         // TypeScript 7.0.2 (`tsc --strict`) gives `number` after the write.
         ("written", "value", &[Number]),
-        ("captured", "value", &[String, Number]),
+        // TypeScript 7.0.2 (`tsc --strict`) narrows a read in a closure
+        // created after the test.
+        ("captured", "value", &[String]),
         // TypeScript 7.0.2 (`tsc --strict`) narrows the read inside the try
         // block.
         ("try", "value", &[String]),

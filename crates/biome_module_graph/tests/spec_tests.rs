@@ -48,6 +48,8 @@ mod augmentations;
 mod callback_parameters;
 #[path = "spec_tests/calls.test.rs"]
 mod calls;
+#[path = "spec_tests/closures.test.rs"]
+mod closures;
 #[path = "spec_tests/comparisons.test.rs"]
 mod comparisons;
 #[path = "spec_tests/css_classes.test.rs"]

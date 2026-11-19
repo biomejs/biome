@@ -20,12 +20,15 @@
 //! An execution root is a body analyzed independently, such as a module,
 //! function, or method. A variable narrows in each root that reads it: the
 //! root that declares it, and a root nested in that one, such as a function
-//! that reads a module's variable or one of its imports. Each root starts
-//! from the variable's declared type, so facts never cross closure
-//! boundaries. Each root has its own `this`, and paths on it narrow only
-//! where Biome types `this` as TypeScript does. See
-//! [`subjects::this_can_narrow`] for those roots. A property path narrows
-//! only when its variable or `this` does.
+//! that reads a module's variable or one of its imports. A root starts from
+//! the variable's declared type, except in a closure that continues the flow
+//! where it is created. There, as in TypeScript, the variable starts from its
+//! type at the point where the enclosing root creates the closure, its
+//! capture point, which [`FlowCapture`] records. Property paths and `this`
+//! never continue. Each root has its own `this`, and paths on it narrow only
+//! where Biome types `this` as TypeScript does, as
+//! [`subjects::this_can_narrow`] describes. A property path narrows only when
+//! its variable or `this` does.
 //!
 //! A write to a subject in the root's own flow is a write point of the graph,
 //! where the subject takes the type of the assigned value, reduced against
@@ -49,18 +52,25 @@ pub(crate) use expressions::AnyFlowExpression;
 pub(crate) use guards::{FlowGuard, FlowTest, UnitValue, binding_unit_value, guard_signature};
 pub(crate) use scanner::FlowRootScanner;
 
-use biome_js_control_flow::AnyJsControlFlowRoot;
+use biome_js_control_flow::{AnyJsControlFlowRoot, is_truthy_literal};
 use biome_js_semantic::{
     Binding, HasDeclarationAstNode, JsDeclarationKind, Scope, ScopeId, SemanticModel,
 };
 use biome_js_syntax::{
-    AnyJsClass, AnyJsExpression, AnyJsLiteralExpression, AnyJsVariableDeclaration,
-    AnyTsVariableAnnotation, JsArrayBindingPattern, JsArrayBindingPatternElement,
-    JsArrayBindingPatternElementList, JsArrayBindingPatternRestElement, JsGetterObjectMember,
-    JsIdentifierBinding, JsLanguage, JsMethodObjectMember, JsObjectBindingPattern,
+    AnyJsClass, AnyJsClassMember, AnyJsExpression, AnyJsFunction, AnyJsLiteralExpression,
+    AnyJsVariableDeclaration, AnyTsType, AnyTsVariableAnnotation, JsArrayBindingPattern,
+    JsArrayBindingPatternElement, JsArrayBindingPatternElementList,
+    JsArrayBindingPatternRestElement, JsBreakStatement, JsClassDeclaration,
+    JsClassExportDefaultDeclaration, JsComputedMemberName, JsConstructorClassMember,
+    JsContinueStatement, JsDecorator, JsDoWhileStatement, JsExpressionStatement, JsForInStatement,
+    JsForOfStatement, JsForStatement, JsGetterClassMember, JsGetterObjectMember,
+    JsIdentifierAssignment, JsIdentifierBinding, JsIdentifierExpression, JsIfStatement, JsLanguage,
+    JsMethodClassMember, JsMethodObjectMember, JsObjectBindingPattern,
     JsObjectBindingPatternProperty, JsObjectBindingPatternPropertyList, JsObjectBindingPatternRest,
-    JsObjectBindingPatternShorthandProperty, JsSetterObjectMember, JsSyntaxKind, JsSyntaxNode,
-    JsThisExpression, JsVariableDeclarationClause, JsVariableKind, TsDeclareStatement,
+    JsObjectBindingPatternShorthandProperty, JsReturnStatement, JsSetterClassMember,
+    JsSetterObjectMember, JsSwitchStatement, JsSyntaxKind, JsSyntaxNode, JsThisExpression,
+    JsThrowStatement, JsTryFinallyStatement, JsTryStatement, JsVariableDeclarationClause,
+    JsVariableKind, JsVariableStatement, JsWhileStatement, JsWithStatement, TsDeclareStatement,
     binding_ext::AnyJsBindingDeclaration,
 };
 use biome_js_type_info::{
@@ -68,8 +78,11 @@ use biome_js_type_info::{
     is_raw_narrowing_invariant, raw_may_be_object_union, raw_may_be_union, raw_may_have_literal,
     raw_may_narrow_by_instanceof,
 };
-use biome_rowan::{AstNode, AstPtr, AstSeparatedList, SyntaxKindSet, Text, TextRange, TextSize};
-use builder::{BuiltRoot, BuiltSwitch, build_root};
+use biome_rowan::{
+    AstNode, AstPtr, AstSeparatedList, SyntaxKindSet, Text, TextRange, TextSize, WalkEvent,
+    declare_node_union,
+};
+use builder::{AnyContinuingClosure, BuiltCapture, BuiltRoot, BuiltSwitch, build_root};
 use guards::GuardFunctions;
 use rustc_hash::{FxHashMap, FxHashSet};
 use writes::{WrittenPaths, WrittenTargets};
@@ -482,7 +495,46 @@ pub(crate) struct RootFlow {
     /// them with `undefined` added to their declared type, as TypeScript
     /// does. See [`RootCollector::uninitialized_subjects`] for the exact
     /// conditions.
+    ///
+    /// A subject with a capture is never here, because its type at the
+    /// capture point already comes from a flow that starts where the variable
+    /// is declared, `undefined` included.
     pub(crate) uninitialized: FxHashSet<FlowSubjectId>,
+    /// The capture point of each variable that the root continues from an
+    /// enclosing root, keyed by the variable. When the root runs, such a
+    /// variable starts with its type where the enclosing root creates the
+    /// closure that holds the root.
+    pub(crate) captures: FxHashMap<FlowSubjectId, FlowCapture>,
+}
+
+/// The capture point of a variable that a closure reads, where an enclosing
+/// root creates the closure. A read in the closure continues the enclosing
+/// root's flow from there, as TypeScript continues the flow of a function
+/// expression from the point where the code creates it.
+///
+/// A root that the closure holds, directly or through other closures, starts
+/// the variable with its type at [`Self::point`] instead of its declared
+/// type. That type can itself come from a capture of the enclosing root, so
+/// inference resolves the chain outward.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub(crate) struct FlowCapture {
+    /// Index of the enclosing root in the module flow.
+    pub(crate) root: usize,
+    /// The flow point of the enclosing root where it creates the outermost
+    /// closure that holds the reading root, a read point of
+    /// [`Self::subject`] there.
+    pub(crate) point: FlowNodeId,
+    /// The variable in the enclosing root's subject table.
+    pub(crate) subject: FlowSubjectId,
+    /// Where that closure starts. Narrowing at [`Self::point`] counts a
+    /// `switch` statement as exhaustive only when its cases start before this
+    /// offset.
+    pub(crate) start: TextSize,
+    /// Whether some code assigns the variable. A read in a closure then
+    /// assumes the variable assigned where it is declared, as in TypeScript,
+    /// so a `let` without an initializer starts there without `undefined`. A
+    /// `let` that nothing assigns keeps `undefined`.
+    pub(crate) assumes_initialized: bool,
 }
 
 /// A read point with the `switch` statements whose [`FlowGuard::Bypass`]
@@ -633,6 +685,13 @@ impl RootFlow {
         self.uninitialized.contains(&subject)
     }
 
+    /// Returns the capture point where the variable `subject` continues the
+    /// flow of an enclosing root, or `None` when it starts from its declared
+    /// type.
+    pub(crate) fn capture(&self, subject: FlowSubjectId) -> Option<FlowCapture> {
+        self.captures.get(&subject).copied()
+    }
+
     /// Returns whether the subject `prefix` is a proper prefix of the path
     /// of `subject`, as `o` and `o.v` are of `o.v.w`.
     pub(crate) fn is_proper_prefix(
@@ -663,6 +722,12 @@ pub(crate) struct FlowRead {
     pub(crate) point: FlowNodeId,
     /// The subject the read refers to, in its root's subject table.
     pub(crate) subject: FlowSubjectId,
+    /// Whether the read lies in a closure that the root creates and reads a
+    /// variable that some code assigns. Such a read assumes the variable
+    /// assigned where it is declared, as in TypeScript (see
+    /// [`FlowCapture::assumes_initialized`]). False for a read in the root's
+    /// own code.
+    pub(crate) assumes_initialized: bool,
 }
 
 /// Flow facts for one module.
@@ -738,6 +803,10 @@ impl ModuleFlow {
             enclosing: FxHashMap::default(),
             redeclared: FxHashMap::default(),
             binding_reads: FxHashMap::default(),
+            built: FxHashSet::default(),
+            evaluated: FxHashSet::default(),
+            exits: FxHashMap::default(),
+            capture_rules: FxHashMap::default(),
         };
         for selected in roots.selected() {
             collector.add_root(
@@ -848,6 +917,27 @@ impl ModuleFlow {
     pub(crate) fn root(&self, index: usize) -> Option<&RootFlow> {
         self.roots.get(index)
     }
+
+    /// Returns the outermost root of the capture chain that starts at the
+    /// variable `subject` of the root at index `root`, with the variable's id
+    /// in that root's subject table. Returns the root itself when the
+    /// variable has no capture there.
+    ///
+    /// Each capture points to a root collected later, so the chain ends.
+    fn capture_holder(
+        &self,
+        mut root: usize,
+        mut subject: FlowSubjectId,
+    ) -> (usize, FlowSubjectId) {
+        while let Some(capture) = self.roots.get(root).and_then(|flow| flow.capture(subject)) {
+            if capture.root <= root {
+                break;
+            }
+            root = capture.root;
+            subject = capture.subject;
+        }
+        (root, subject)
+    }
 }
 
 struct RootCollector<'a> {
@@ -867,6 +957,68 @@ struct RootCollector<'a> {
     /// How the kept reads of each variable narrow, merged over the roots
     /// that keep them, keyed by its declaration.
     binding_reads: FxHashMap<TextRange, BindingReads>,
+    /// The ranges of the roots built so far.
+    built: FxHashSet<TextRange>,
+    /// The ranges of the closures that the roots built so far create in
+    /// their reachable code, and of their reachable reads of variables that
+    /// they don't declare. Only such a read can continue the flow of a root
+    /// around it.
+    evaluated: FxHashSet<TextRange>,
+    /// For each closure that no root built, keyed by its range, the end of
+    /// the first statement in its own code that ends every path (see
+    /// [`Self::first_exit`]).
+    exits: FxHashMap<TextRange, TextSize>,
+    /// The [`CaptureRule`] of each variable that a closure reads, keyed by
+    /// its declaration.
+    capture_rules: FxHashMap<TextRange, CaptureRule>,
+}
+
+/// Whether a read of a variable inside a closure continues the flow where the
+/// closure is created. Biome follows TypeScript's rule, which depends on the
+/// kind of variable and on where the code assigns it.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+enum CaptureRule {
+    /// Every read continues the flow. This is the rule of a `const`, and of
+    /// a parameter, a `catch` variable, or a `let` that nothing assigns.
+    Always,
+    /// A read continues the flow when it starts after this offset, the
+    /// position that [`assignment_position`] gives the last assignment of a
+    /// parameter, a `catch` variable, or a `let`.
+    After(TextSize),
+    /// No read continues the flow. This is the rule of a `var`, an import, a
+    /// function, a class, a `let` that is exported or declared at the top
+    /// level of a file, and a variable that another function assigns.
+    Never,
+}
+
+impl CaptureRule {
+    /// Returns whether a read that starts at `read` continues the flow.
+    fn continues_at(self, read: TextSize) -> bool {
+        match self {
+            Self::Always => true,
+            Self::After(position) => position < read,
+            Self::Never => false,
+        }
+    }
+}
+
+/// A capture that the root under collection gives a nested root, recorded
+/// once the collected root has its index. The nested root keeps a read inside
+/// a closure that the collected root creates, or a root that keeps such a
+/// read continues from the nested root.
+struct PendingCapture {
+    /// The root that gets the capture, with the variable's id in its subject
+    /// table.
+    holder: (usize, FlowSubjectId),
+    /// The capture point of the outermost closure that holds the read.
+    point: FlowNodeId,
+    /// The variable in the collected root's subject table.
+    subject: FlowSubjectId,
+    /// Where that closure starts.
+    start: TextSize,
+    /// Whether some code assigns the variable, as
+    /// [`FlowCapture::assumes_initialized`] describes.
+    assumes_initialized: bool,
 }
 
 /// Classifies how the conditions and writes of every root that keeps reads
@@ -921,6 +1073,11 @@ impl RootCollector<'_> {
     /// starts the captured variable from its declared type instead. So `root`
     /// gets a graph even when it declares no variable that can narrow, and
     /// relevance keeps no read when no subject can narrow.
+    ///
+    /// A read inside a closure that `root` creates, directly or through other
+    /// closures, continues the flow of `root` where `root` creates the
+    /// outermost one, so a test in `root` can narrow it (see
+    /// [`Self::closure_reads`]).
     fn add_root(
         &mut self,
         flow: &mut ModuleFlow,
@@ -936,23 +1093,39 @@ impl RootCollector<'_> {
         let Some(BuiltRoot {
             nodes,
             mut guards,
-            subjects,
+            mut subjects,
             mut mentions,
             mut property_only,
             mut instance_tested,
             instance_mentions,
-            reads,
+            mut reads,
             switches,
             writes,
             assigned,
             written,
+            mut captures,
         }) = build_root(root, self.model, &mut self.functions, this_can_narrow)
         else {
             return;
         };
+        let root_range = root.syntax().text_trimmed_range();
+        // The builder evaluates only reachable code, so the closures that it
+        // records and the reads here of variables that the root doesn't
+        // declare are the reachable ones.
+        self.built.insert(root_range);
+        for read in &reads {
+            if let Some(FlowSubject::Binding(range)) =
+                subjects.as_slice().get(read.subject as usize)
+                && !root_range.contains_range(*range)
+            {
+                self.evaluated.insert(read.expression.range());
+            }
+        }
+        self.evaluated
+            .extend(captures.iter().map(|capture| capture.closure.range()));
+        captures.sort_unstable_by_key(|capture| capture.closure.range().start());
         // The variables that the root reads but doesn't declare: those of an
         // enclosing root and the module's imports.
-        let root_range = root.syntax().text_trimmed_range();
         for subject in subjects.as_slice() {
             if let FlowSubject::Binding(range) = subject
                 && !root_range.contains_range(*range)
@@ -1124,11 +1297,23 @@ impl RootCollector<'_> {
                     })
             })
             .collect();
-        // Returns the pattern that can narrow the element that `read` reads.
-        // A read through the pattern needs no test of the element itself.
-        let element_pattern = |read: &builder::BuiltRead| {
-            let Some(FlowSubject::Binding(binding)) =
-                subjects.as_slice().get(read.subject as usize)
+        let (captured, assumed_initialized) = if captures.is_empty() {
+            (Vec::new(), FxHashSet::default())
+        } else {
+            self.closure_reads(
+                flow,
+                root_range,
+                &captures,
+                &mut subjects,
+                &narrowable,
+                &mut eligible,
+                &mut reads,
+            )
+        };
+        // The pattern that narrows the element `subject`, even where no test
+        // mentions the element itself.
+        let element_pattern = |subject: FlowSubjectId| {
+            let Some(FlowSubject::Binding(binding)) = subjects.as_slice().get(subject as usize)
             else {
                 return None;
             };
@@ -1137,18 +1322,22 @@ impl RootCollector<'_> {
         };
         let reads: Vec<_> = reads
             .into_iter()
-            .filter(|read| narrowable.contains(&read.subject) || element_pattern(read).is_some())
+            .filter(|read| {
+                narrowable.contains(&read.subject) || element_pattern(read.subject).is_some()
+            })
             .collect();
-        if reads.is_empty() {
+        if reads.is_empty() && captured.is_empty() {
             return;
         }
 
         let walked: Vec<FlowSubjectId> = reads
             .iter()
-            .flat_map(|read| {
+            .map(|read| read.subject)
+            .chain(captured.iter().map(|capture| capture.subject))
+            .flat_map(|subject| {
                 [
-                    narrowable.contains(&read.subject).then_some(read.subject),
-                    element_pattern(read),
+                    narrowable.contains(&subject).then_some(subject),
+                    element_pattern(subject),
                 ]
             })
             .flatten()
@@ -1205,7 +1394,7 @@ impl RootCollector<'_> {
         for read in reads {
             let own = narrowable.contains(&read.subject)
                 && reachable.contains(&(read.subject, read.point));
-            let pattern = element_pattern(&read)
+            let pattern = element_pattern(read.subject)
                 .filter(|pattern| reachable.contains(&(*pattern, read.point)));
             if !own && pattern.is_none() {
                 continue;
@@ -1268,8 +1457,54 @@ impl RootCollector<'_> {
                     root: index,
                     point: read.point,
                     subject: read.subject,
+                    assumes_initialized: assumed_initialized.contains(&expression.range()),
                 },
             );
+        }
+        // A capture point is a read point of the variable, and of the pattern
+        // that holds it, for the nested root that continues from it.
+        let mut kept_captures = Vec::new();
+        for capture in captured {
+            let own = narrowable.contains(&capture.subject)
+                && reachable.contains(&(capture.subject, capture.point));
+            let pattern = element_pattern(capture.subject)
+                .filter(|pattern| reachable.contains(&(*pattern, capture.point)));
+            if !own && pattern.is_none() {
+                continue;
+            }
+            if own {
+                read_points
+                    .entry(capture.subject)
+                    .or_default()
+                    .push(capture.point);
+                if let Some(FlowSubject::Binding(range)) =
+                    subjects.as_slice().get(capture.subject as usize)
+                {
+                    let reads = if property_only.contains(&capture.subject) {
+                        BindingReads::PropertyOnly {
+                            instance_tested: instance_tested.contains(&capture.subject),
+                        }
+                    } else if assignment_only.contains(&capture.subject) {
+                        BindingReads::AssignmentOnly
+                    } else {
+                        BindingReads::Tested
+                    };
+                    self.binding_reads
+                        .entry(*range)
+                        .and_modify(|merged| *merged = merged.merge(reads))
+                        .or_insert(reads);
+                }
+            }
+            if let Some(pattern) = pattern {
+                read_points.entry(pattern).or_default().push(capture.point);
+                pattern_elements.insert(capture.subject, pattern);
+                if let Some(FlowSubject::Pattern(range)) = subjects.as_slice().get(pattern as usize)
+                    && let Some(reference) = pattern_types.get(&pattern)
+                {
+                    flow.pattern_types.insert(*range, reference.clone());
+                }
+            }
+            kept_captures.push(capture);
         }
         if !read_points.is_empty() {
             let property_only: FxHashSet<_> = property_only
@@ -1329,7 +1564,23 @@ impl RootCollector<'_> {
                 subject_writes,
                 uninitialized,
                 assignment_only,
+                captures: FxHashMap::default(),
             });
+            for capture in kept_captures {
+                let (holder, subject) = capture.holder;
+                if let Some(holder) = flow.roots.get_mut(holder) {
+                    holder.captures.entry(subject).or_insert(FlowCapture {
+                        root: index,
+                        point: capture.point,
+                        subject: capture.subject,
+                        start: capture.start,
+                        assumes_initialized: capture.assumes_initialized,
+                    });
+                    // The type at the capture point starts where the
+                    // variable is declared, `undefined` included.
+                    holder.uninitialized.remove(&subject);
+                }
+            }
         }
     }
 
@@ -1463,6 +1714,320 @@ impl RootCollector<'_> {
             .is_some();
         self.enclosing.insert(range, eligible);
         eligible
+    }
+
+    /// Finds the reads of the variables that the root at `root_range` narrows
+    /// inside the closures that the root creates. Each read that continues
+    /// the root's flow, as TypeScript lets a read in a closure do, gets the
+    /// capture point of the outermost of those closures. `captures` lists the
+    /// closures with their capture points, sorted by start.
+    ///
+    /// The variables are the bindings among `narrowable`, the root's tested
+    /// subjects, and the elements of the patterns among them. `subjects` and
+    /// `eligible` gain those elements. A read continues the flow when the
+    /// [`CaptureRule`] of its variable allows it at the read, and when every
+    /// function between the read and the root is a closure that continues the
+    /// flow where it is created, created in reachable code (see
+    /// [`Self::continues_to`]).
+    ///
+    /// A read that no nested root keeps is added to `reads` at the capture
+    /// point, so the root narrows it there. When some code assigns its
+    /// variable, its range is among the returned ranges, which mark the reads
+    /// that [`FlowRead::assumes_initialized`] describes. For a read that a
+    /// nested root keeps, the returned [`PendingCapture`] names the outermost
+    /// root that keeps the read or continues from it. That root starts the
+    /// variable from its type at the capture point.
+    #[expect(
+        clippy::too_many_arguments,
+        reason = "The root's collection state is split across locals of `add_root`."
+    )]
+    fn closure_reads(
+        &mut self,
+        flow: &ModuleFlow,
+        root_range: TextRange,
+        captures: &[BuiltCapture],
+        subjects: &mut FlowSubjectTable,
+        narrowable: &FxHashSet<FlowSubjectId>,
+        eligible: &mut FxHashSet<TextRange>,
+        reads: &mut Vec<builder::BuiltRead>,
+    ) -> (Vec<PendingCapture>, FxHashSet<TextRange>) {
+        let mut variables: Vec<TextRange> = narrowable
+            .iter()
+            .filter_map(|subject| match subjects.as_slice().get(*subject as usize) {
+                Some(FlowSubject::Binding(range)) => Some(*range),
+                Some(FlowSubject::This | FlowSubject::Member { .. } | FlowSubject::Pattern(_))
+                | None => None,
+            })
+            .chain(
+                subjects
+                    .pattern_elements
+                    .iter()
+                    .filter(|(_, (pattern, _))| narrowable.contains(pattern))
+                    .map(|(element, _)| *element),
+            )
+            .collect();
+        variables.sort_unstable_by_key(|range| (range.start(), range.end()));
+        variables.dedup();
+        let mut pending = Vec::new();
+        let mut assumed_initialized = FxHashSet::default();
+        for range in variables {
+            // An element of a pattern of an enclosing root narrows here only
+            // when it can narrow at all.
+            if !eligible.contains(&range) {
+                if root_range.contains_range(range) || !self.encloses_eligible(range) {
+                    continue;
+                }
+                eligible.insert(range);
+            }
+            let rule = self.capture_rule(range);
+            if rule == CaptureRule::Never {
+                continue;
+            }
+            let assumes_initialized = matches!(rule, CaptureRule::After(_));
+            let Some(binding) = self.model.as_binding_by_range(range) else {
+                continue;
+            };
+            let Some(subject) = subjects.intern(FlowSubject::Binding(range)) else {
+                continue;
+            };
+            for reference in binding.all_reads() {
+                let start = reference.range_start();
+                if !rule.continues_at(start) {
+                    continue;
+                }
+                let index =
+                    captures.partition_point(|capture| capture.closure.range().start() <= start);
+                let Some(capture) = index.checked_sub(1).and_then(|index| captures.get(index))
+                else {
+                    continue;
+                };
+                let closure = capture.closure.range();
+                if !closure.contains(start) {
+                    continue;
+                }
+                let Some(identifier) = reference
+                    .syntax_near(capture.closure.syntax())
+                    .parent()
+                    .and_then(JsIdentifierExpression::cast)
+                else {
+                    continue;
+                };
+                if !self.continues_to(&identifier, &capture.closure) {
+                    continue;
+                }
+                match flow.read(identifier.range()) {
+                    Some(kept) => pending.push(PendingCapture {
+                        holder: flow.capture_holder(kept.root, kept.subject),
+                        point: capture.point,
+                        subject,
+                        start: closure.start(),
+                        assumes_initialized,
+                    }),
+                    None => {
+                        if assumes_initialized {
+                            assumed_initialized.insert(identifier.range());
+                        }
+                        reads.push(builder::BuiltRead {
+                            expression: AnyFlowExpression::JsIdentifierExpression(identifier),
+                            point: capture.point,
+                            subject,
+                        });
+                    }
+                }
+            }
+        }
+        (pending, assumed_initialized)
+    }
+
+    /// Returns the [`CaptureRule`] of the variable declared at `range`, which
+    /// tells whether a read of it inside a closure continues the flow where
+    /// the closure is created. Computes the rule once per variable.
+    ///
+    /// As in TypeScript, a read of a parameter, a `catch` variable, or a
+    /// `let` continues the flow only past the variable's last assignment in
+    /// the function that declares it, and never when another function
+    /// assigns it. [`assignment_position`] gives the position of each
+    /// assignment.
+    #[expect(
+        clippy::wildcard_enum_match_arm,
+        reason = "Only parameters, catch variables, and `const` and `let` declarations continue."
+    )]
+    fn capture_rule(&mut self, range: TextRange) -> CaptureRule {
+        if let Some(rule) = self.capture_rules.get(&range) {
+            return *rule;
+        }
+        let rule = self
+            .model
+            .as_binding_by_range(range)
+            .map_or(CaptureRule::Never, |binding| {
+                if binding.is_imported() {
+                    return CaptureRule::Never;
+                }
+                let Some(declaration) = binding.tree().declaration() else {
+                    return CaptureRule::Never;
+                };
+                match declaration
+                    .parent_binding_pattern_declaration()
+                    .unwrap_or(declaration)
+                {
+                    AnyJsBindingDeclaration::JsFormalParameter(_)
+                    | AnyJsBindingDeclaration::JsRestParameter(_)
+                    | AnyJsBindingDeclaration::JsArrowFunctionExpression(_)
+                    | AnyJsBindingDeclaration::TsPropertyParameter(_)
+                    | AnyJsBindingDeclaration::JsCatchDeclaration(_) => {}
+                    AnyJsBindingDeclaration::JsVariableDeclarator(declarator) => {
+                        let Some(declaration) = declarator.declaration() else {
+                            return CaptureRule::Never;
+                        };
+                        match declaration.variable_kind() {
+                            Ok(JsVariableKind::Const | JsVariableKind::Using) => {
+                                return CaptureRule::Always;
+                            }
+                            // Other modules or scripts can assign a `let`
+                            // that a module exports or a script declares
+                            // at its top level.
+                            Ok(JsVariableKind::Let)
+                                if !binding.is_exported()
+                                    && !guards::is_top_level_statement(&declaration) => {}
+                            Ok(JsVariableKind::Let | JsVariableKind::Var) | Err(_) => {
+                                return CaptureRule::Never;
+                            }
+                        }
+                    }
+                    _ => return CaptureRule::Never,
+                }
+                let declared_at = range.start();
+                let declaration = binding.tree();
+                let declaring = enclosing_function(&declaration);
+                let mut last = None;
+                for write in binding.all_writes() {
+                    let Some(target) =
+                        JsIdentifierAssignment::cast(write.syntax_near(declaration.syntax()))
+                    else {
+                        return CaptureRule::Never;
+                    };
+                    if enclosing_function(&target) != declaring {
+                        return CaptureRule::Never;
+                    }
+                    let position = assignment_position(&target, declared_at);
+                    last = last.max(Some(position));
+                }
+                last.map_or(CaptureRule::Always, CaptureRule::After)
+            });
+        self.capture_rules.insert(range, rule);
+        rule
+    }
+
+    /// Returns whether the read `identifier` continues the flow through every
+    /// closure up to `outermost`, the closure that the root under collection
+    /// creates. Every function between the read and that root must be a
+    /// closure that continues the flow where it is created (see
+    /// [`AnyContinuingClosure::continues_outer_flow`]), created in the
+    /// reachable code of the next closure out. The read must lie in the
+    /// reachable code of its own closure.
+    ///
+    /// Code that the function holding it doesn't run in its own flow stops
+    /// the read: a decorator, a computed key of a member, a field initializer,
+    /// a type, or a `declare` statement. The body of a `with` statement stops
+    /// it too.
+    fn continues_to(
+        &mut self,
+        identifier: &JsIdentifierExpression,
+        outermost: &AnyContinuingClosure,
+    ) -> bool {
+        let mut inner = identifier.range();
+        for ancestor in identifier.syntax().ancestors().skip(1) {
+            let kind = ancestor.kind();
+            if AnyJsControlFlowRoot::can_cast(kind) {
+                let Some(closure) = AnyContinuingClosure::cast(ancestor)
+                    .filter(AnyContinuingClosure::continues_outer_flow)
+                else {
+                    return false;
+                };
+                if !self.reaches(&closure, inner) {
+                    return false;
+                }
+                if closure.syntax() == outermost.syntax() {
+                    return true;
+                }
+                inner = closure.range();
+            } else if CLOSURE_BARRIER_KINDS.matches(kind)
+                || (JsComputedMemberName::can_cast(kind)
+                    && ancestor
+                        .parent()
+                        .is_some_and(|member| MEMBER_KINDS.matches(member.kind())))
+            {
+                return false;
+            }
+        }
+        false
+    }
+
+    /// Returns whether `closure` reaches the read or the nested closure at
+    /// `inner` in its own code. When a root built `closure`, the builder's
+    /// evaluation of reachable code answers. Otherwise, `closure` reaches
+    /// `inner` when no statement that ends every path ends before `inner`
+    /// starts (see [`Self::first_exit`]).
+    fn reaches(&mut self, closure: &AnyContinuingClosure, inner: TextRange) -> bool {
+        if self.built.contains(&closure.range()) {
+            return self.evaluated.contains(&inner);
+        }
+        self.first_exit(closure) > inner.start()
+    }
+
+    /// Returns where the first statement in the own code of `closure` that
+    /// ends every path through it ends, or the largest offset when there is
+    /// none. Such a statement is a `return`, `throw`, `break`, or `continue`,
+    /// or a loop whose test is missing or a truthy literal. Computes the
+    /// offset once per closure.
+    ///
+    /// Code after that statement may be unreachable, and TypeScript gives a
+    /// read in unreachable code its declared type. A statement that ends only
+    /// some paths of the closure, such as the `return` in `if (c) return;`,
+    /// counts too, so more reads keep their declared type than in
+    /// TypeScript.
+    fn first_exit(&mut self, closure: &AnyContinuingClosure) -> TextSize {
+        let range = closure.range();
+        if let Some(exit) = self.exits.get(&range) {
+            return *exit;
+        }
+        let mut first = TextSize::from(u32::MAX);
+        let mut events = closure.syntax().preorder_of_kinds(EXIT_SCAN_KINDS);
+        while let Some(event) = events.next() {
+            let WalkEvent::Enter(node) = event else {
+                continue;
+            };
+            if node == *closure.syntax() {
+                continue;
+            }
+            if AnyJsControlFlowRoot::can_cast(node.kind()) {
+                events.skip_subtree();
+                continue;
+            }
+            let ends_paths = match AnyPathEnd::cast_ref(&node) {
+                Some(
+                    AnyPathEnd::JsReturnStatement(_)
+                    | AnyPathEnd::JsThrowStatement(_)
+                    | AnyPathEnd::JsBreakStatement(_)
+                    | AnyPathEnd::JsContinueStatement(_),
+                ) => true,
+                Some(AnyPathEnd::JsWhileStatement(statement)) => {
+                    statement.test().is_ok_and(|test| is_truthy_literal(&test))
+                }
+                Some(AnyPathEnd::JsDoWhileStatement(statement)) => {
+                    statement.test().is_ok_and(|test| is_truthy_literal(&test))
+                }
+                Some(AnyPathEnd::JsForStatement(statement)) => {
+                    statement.test().is_none_or(|test| is_truthy_literal(&test))
+                }
+                None => false,
+            };
+            if ends_paths {
+                first = first.min(node.text_trimmed_range().end());
+            }
+        }
+        self.exits.insert(range, first);
+        first
     }
 
     /// Returns whether another declaration redeclares the name of the `var`
@@ -1811,6 +2376,108 @@ fn readonly_tested_subjects(
     (readonly_tested, only_readonly_tested)
 }
 
+/// Syntax that stops a read inside it from continuing the flow of an
+/// enclosing root: class members that are not functions, such as fields, and
+/// decorators, types, `declare` statements, and `with` statements. The
+/// function that holds such code doesn't run it in its own flow, and in the
+/// body of a `with` statement, a name may not refer to the variable that the
+/// semantic model resolves.
+const CLOSURE_BARRIER_KINDS: SyntaxKindSet<JsLanguage> = AnyJsClassMember::KIND_SET
+    .union(JsDecorator::KIND_SET)
+    .union(AnyTsType::KIND_SET)
+    .union(TsDeclareStatement::KIND_SET)
+    .union(JsWithStatement::KIND_SET);
+
+/// Class members and object members that are functions, whose computed key
+/// runs where their class or object is created, not in their own flow.
+const MEMBER_KINDS: SyntaxKindSet<JsLanguage> =
+    AnyJsClassMember::KIND_SET.union(AnyJsControlFlowRoot::KIND_SET);
+
+declare_node_union! {
+    /// A jump or a loop. A jump ends every path through it, and so does a
+    /// loop whose test is missing or a truthy literal.
+    AnyPathEnd = JsReturnStatement
+        | JsThrowStatement
+        | JsBreakStatement
+        | JsContinueStatement
+        | JsWhileStatement
+        | JsDoWhileStatement
+        | JsForStatement
+}
+
+/// The statements that [`RootCollector::first_exit`] looks for, and the
+/// nested roots it skips.
+const EXIT_SCAN_KINDS: SyntaxKindSet<JsLanguage> =
+    AnyPathEnd::KIND_SET.union(AnyJsControlFlowRoot::KIND_SET);
+
+/// The roots that count as functions when deciding whether another function
+/// assigns a variable, as in TypeScript. An assignment is in another function
+/// when the nearest of these roots around it differs from the one around the
+/// declaration. Namespaces and class static blocks belong to the function
+/// around them.
+const FUNCTION_KINDS: SyntaxKindSet<JsLanguage> = AnyJsFunction::KIND_SET
+    .union(JsMethodObjectMember::KIND_SET)
+    .union(JsGetterObjectMember::KIND_SET)
+    .union(JsSetterObjectMember::KIND_SET)
+    .union(JsMethodClassMember::KIND_SET)
+    .union(JsGetterClassMember::KIND_SET)
+    .union(JsSetterClassMember::KIND_SET)
+    .union(JsConstructorClassMember::KIND_SET);
+
+/// The statements that extend the position of an assignment inside them to
+/// their end, as in TypeScript: variable and expression statements, `if`,
+/// loops, `with`, `switch`, `try`, and class declarations, including the
+/// exported and default-exported forms.
+const ASSIGNMENT_EXTENDING_KINDS: SyntaxKindSet<JsLanguage> = JsVariableStatement::KIND_SET
+    .union(JsVariableDeclarationClause::KIND_SET)
+    .union(JsExpressionStatement::KIND_SET)
+    .union(JsIfStatement::KIND_SET)
+    .union(JsDoWhileStatement::KIND_SET)
+    .union(JsWhileStatement::KIND_SET)
+    .union(JsForStatement::KIND_SET)
+    .union(JsForInStatement::KIND_SET)
+    .union(JsForOfStatement::KIND_SET)
+    .union(JsWithStatement::KIND_SET)
+    .union(JsSwitchStatement::KIND_SET)
+    .union(JsTryStatement::KIND_SET)
+    .union(JsTryFinallyStatement::KIND_SET)
+    .union(JsClassDeclaration::KIND_SET)
+    .union(JsClassExportDefaultDeclaration::KIND_SET);
+
+/// Returns the function that holds `node`, as [`FUNCTION_KINDS`] lists them,
+/// or `None` for code outside every function.
+fn enclosing_function(node: &impl AstNode<Language = JsLanguage>) -> Option<JsSyntaxNode> {
+    node.syntax()
+        .ancestors()
+        .find(|ancestor| FUNCTION_KINDS.matches(ancestor.kind()))
+}
+
+/// Returns the position of the assignment to the variable `target`, which a
+/// read in a closure must start after to continue the flow, as in
+/// TypeScript. The position is the end of the outermost statement of
+/// [`ASSIGNMENT_EXTENDING_KINDS`] around `target` that starts after
+/// `declared_at`, where the variable is declared. Without such a statement,
+/// it is the start of `target`.
+///
+/// So a read in a closure created inside such a statement, as in
+/// `if (c) { x = "a"; const h = () => x; }`, comes before the position and
+/// starts from the declared type, as in TypeScript. A read in a closure
+/// created after the statement, as in `{ x = "a"; } const h = () => x;`,
+/// comes after the position.
+fn assignment_position(target: &JsIdentifierAssignment, declared_at: TextSize) -> TextSize {
+    let mut position = target.range().start();
+    for ancestor in target.syntax().ancestors().skip(1) {
+        let range = ancestor.text_trimmed_range();
+        if range.start() <= declared_at {
+            break;
+        }
+        if ASSIGNMENT_EXTENDING_KINDS.matches(ancestor.kind()) {
+            position = range.end();
+        }
+    }
+    position
+}
+
 /// Binding patterns, with their elements and lists, which can enclose a binding.
 const BINDING_PATTERN_KINDS: SyntaxKindSet<JsLanguage> = JsArrayBindingPattern::KIND_SET
     .union(JsArrayBindingPatternElement::KIND_SET)
@@ -1984,16 +2651,18 @@ mod tests {
                     own !== null && outer !== null && /*own*/own && /*outer*/outer;
                 if (tested !== null) {
                     const h = () => /*captured*/tested;
+                    function k() { /*declared*/tested; }
                 }
             }
         "#;
         let info = module(SOURCE);
-        // A test in `f` never reaches a read in the function that `f`
-        // creates.
+        // A test in `f` reaches a read in a closure that `f` creates, but
+        // not one in a function declaration, which starts its own flow.
         for (marker, expression, expected) in [
             ("own", "own", true),
             ("outer", "outer", true),
-            ("captured", "tested", false),
+            ("captured", "tested", true),
+            ("declared", "tested", false),
         ] {
             assert_eq!(
                 info.flow.is_candidate(marked(SOURCE, marker, expression)),

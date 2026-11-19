@@ -20,11 +20,14 @@ use biome_js_syntax::{
     AnyJsFunctionBody, AnyJsObjectAssignmentPatternMember, AnyJsObjectBindingPatternMember,
     AnyJsObjectMemberName, AnyJsOptionalChainExpression, AnyJsParameter, AnyJsStatement,
     AnyJsSwitchClause, AnyJsTryStatement, AnyJsVariableDeclaration, AnyTsType, AnyTsTypeMember,
-    ClassMemberName, JsAssignmentExpression, JsAssignmentOperator, JsBinaryOperator,
-    JsDoWhileStatement, JsForInStatement, JsForOfStatement, JsForStatement, JsIdentifierExpression,
-    JsIfStatement, JsInitializerClause, JsLanguage, JsParameters, JsSwitchStatement, JsSyntaxNode,
-    JsUnaryExpression, JsUnaryOperator, JsVariableDeclarator, JsWhileStatement, T,
-    TsInterfaceDeclaration, TsTypeAnnotation, binding_ext::AnyJsBindingDeclaration,
+    ClassMemberName, JsArrowFunctionExpression, JsAssignmentExpression, JsAssignmentOperator,
+    JsBinaryOperator, JsClassExpression, JsClassMemberList, JsDoWhileStatement, JsForInStatement,
+    JsForOfStatement, JsForStatement, JsFunctionExpression, JsGetterClassMember,
+    JsGetterObjectMember, JsIdentifierExpression, JsIfStatement, JsInitializerClause, JsLanguage,
+    JsMethodClassMember, JsMethodObjectMember, JsParameters, JsSetterClassMember,
+    JsSetterObjectMember, JsSwitchStatement, JsSyntaxNode, JsUnaryExpression, JsUnaryOperator,
+    JsVariableDeclarator, JsWhileStatement, T, TsInterfaceDeclaration, TsTypeAnnotation,
+    binding_ext::AnyJsBindingDeclaration,
 };
 use biome_js_type_info::DestructureField;
 use biome_rowan::{
@@ -84,6 +87,58 @@ pub(super) struct BuiltRoot {
     /// The assignment targets and `delete` expressions that have a write
     /// point in the graph.
     pub(super) written: WrittenTargets,
+    /// The closures that the root creates in its reachable code, with their
+    /// capture points, in the order the builder evaluates them.
+    pub(super) captures: Vec<BuiltCapture>,
+}
+
+declare_node_union! {
+    /// A function that can continue the flow of the code that creates it, as
+    /// TypeScript lets a read inside it do: a function or arrow expression,
+    /// and a method or accessor of an object literal or of a class. A method
+    /// or accessor of a class continues the flow only in a class expression
+    /// (see [`Self::continues_outer_flow`]). TypeScript starts the flow of a
+    /// function declaration, a constructor, a static block, and a method or
+    /// accessor of a class declaration at their own start.
+    pub(super) AnyContinuingClosure = JsFunctionExpression
+        | JsArrowFunctionExpression
+        | JsMethodObjectMember
+        | JsGetterObjectMember
+        | JsSetterObjectMember
+        | JsMethodClassMember
+        | JsGetterClassMember
+        | JsSetterClassMember
+}
+
+impl AnyContinuingClosure {
+    /// Returns whether a read inside the closure can see the flow where it
+    /// is created. A read always can in a function or arrow expression and
+    /// in an object literal member, and in a class member only when the
+    /// class is a class expression, as in TypeScript.
+    pub(super) fn continues_outer_flow(&self) -> bool {
+        let member = match self {
+            Self::JsFunctionExpression(_)
+            | Self::JsArrowFunctionExpression(_)
+            | Self::JsMethodObjectMember(_)
+            | Self::JsGetterObjectMember(_)
+            | Self::JsSetterObjectMember(_) => return true,
+            Self::JsMethodClassMember(member) => member.syntax(),
+            Self::JsGetterClassMember(member) => member.syntax(),
+            Self::JsSetterClassMember(member) => member.syntax(),
+        };
+        member
+            .parent()
+            .and_then(|members| JsClassMemberList::cast(members)?.parent::<JsClassExpression>())
+            .is_some()
+    }
+}
+
+/// A closure that a root creates, with its capture point, the flow where the
+/// root creates it. A read inside the closure continues from that point, as
+/// in TypeScript.
+pub(super) struct BuiltCapture {
+    pub(super) closure: AnyContinuingClosure,
+    pub(super) point: FlowNodeId,
 }
 
 /// A `switch` statement whose [`FlowGuard::Bypass`] gives `never` when the
@@ -170,6 +225,7 @@ pub(super) fn build_root(
         assigned_ids: FxHashMap::default(),
         value_callees: FxHashMap::default(),
         written: WrittenTargets::default(),
+        captures: Vec::new(),
         write_points: 0,
         jumps: Vec::new(),
         exceptions: Vec::new(),
@@ -202,6 +258,7 @@ pub(super) fn build_root(
         writes: builder.writes,
         assigned: builder.assigned,
         written: builder.written,
+        captures: builder.captures,
     })
 }
 
@@ -875,6 +932,7 @@ struct RootBuilder<'a, 'raw> {
     /// [`Self::check_value`] records them.
     value_callees: FxHashMap<TextRange, Box<[FlowCallee]>>,
     written: WrittenTargets,
+    captures: Vec<BuiltCapture>,
     /// The number of write points added so far, which tells whether an
     /// expression contains one.
     write_points: usize,
@@ -1847,6 +1905,15 @@ impl RootBuilder<'_, '_> {
         // the code around the class. Only the decorators and computed keys of
         // the other members lose the narrowing that TypeScript gives them.
         if UNEVALUATED_KINDS.matches(kind) {
+            if self.records_reads
+                && let Some(closure) = AnyContinuingClosure::cast_ref(node)
+                && closure.continues_outer_flow()
+            {
+                self.captures.push(BuiltCapture {
+                    closure,
+                    point: incoming,
+                });
+            }
             return Ok(incoming);
         }
         if let Some(identifier) = JsIdentifierExpression::cast_ref(node) {

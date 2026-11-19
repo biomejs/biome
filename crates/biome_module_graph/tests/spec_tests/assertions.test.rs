@@ -457,7 +457,9 @@ fn assertions_respect_binding_identity_writes_and_existing_subject_restrictions(
         // Biome reads as Unknown.
         ("written", "value", &[Number]),
         ("argumentWrite", "value", &[InferredTypeData::Unknown]),
-        ("captured", "value", &[String, Number]),
+        // TypeScript 7.0.2 (`tsc --strict`) narrows a read in a closure
+        // created after the assertion.
+        ("captured", "value", &[String]),
         // TypeScript 7.0.2 (`tsc --strict`) narrows the read inside the try
         // block.
         ("try", "value", &[String]),
