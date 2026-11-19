@@ -1,20 +1,16 @@
 use std::convert::TryFrom;
 use std::fmt::Formatter;
 use std::iter::Enumerate;
-use std::{
-    borrow::{Borrow, Cow},
-    fmt,
-    iter::FusedIterator,
-    mem::{self, ManuallyDrop},
-    ops, ptr, slice,
-};
+use std::{fmt, iter::FusedIterator, ops, ptr, slice};
 
 #[cfg(target_pointer_width = "64")]
 use crate::utility_types::static_assert;
+#[cfg(target_pointer_width = "64")]
+use std::mem;
 
 use crate::{
     GreenToken, NodeOrToken, TextRange, TextSize,
-    arc::{Arc, HeaderSlice, ThinArc},
+    arc::{ThinArc, ThinArcBorrow},
     green::{GreenElement, GreenElementFlags, GreenElementRef, RawSyntaxKind},
 };
 
@@ -66,14 +62,16 @@ impl std::fmt::Display for Slot {
 #[cfg(target_pointer_width = "64")]
 static_assert!(mem::size_of::<Slot>() == mem::size_of::<usize>() * 2);
 
-type Repr = HeaderSlice<GreenNodeHead, [Slot]>;
-type ReprThin = HeaderSlice<GreenNodeHead, [Slot; 0]>;
-#[repr(transparent)]
-pub(crate) struct GreenNodeData {
-    data: ReprThin,
+/// A [GreenNode] borrowed for `'a`.
+///
+/// It is a copy of the pointer of the node that doesn't own a reference, so
+/// copying it doesn't touch the reference count of the node.
+#[derive(Clone, Copy)]
+pub(crate) struct GreenNodeRef<'a> {
+    ptr: ThinArcBorrow<'a, GreenNodeHead, Slot>,
 }
 
-impl PartialEq for GreenNodeData {
+impl PartialEq for GreenNodeRef<'_> {
     fn eq(&self, other: &Self) -> bool {
         self.header() == other.header() && self.slice() == other.slice()
     }
@@ -87,41 +85,14 @@ pub(crate) struct GreenNode {
     ptr: ThinArc<GreenNodeHead, Slot>,
 }
 
-impl ToOwned for GreenNodeData {
-    type Owned = GreenNode;
-
+impl From<GreenNodeRef<'_>> for GreenNode {
     #[inline]
-    fn to_owned(&self) -> GreenNode {
-        unsafe {
-            let green = GreenNode::from_raw(ptr::NonNull::from(self));
-            let green = ManuallyDrop::new(green);
-            GreenNode::clone(&green)
-        }
-    }
-}
-
-impl Borrow<GreenNodeData> for GreenNode {
-    #[inline]
-    fn borrow(&self) -> &GreenNodeData {
-        self
-    }
-}
-
-impl From<Cow<'_, GreenNodeData>> for GreenNode {
-    #[inline]
-    fn from(cow: Cow<'_, GreenNodeData>) -> Self {
-        cow.into_owned()
-    }
-}
-
-impl From<&'_ GreenNodeData> for GreenNode {
-    #[inline]
-    fn from(borrow: &'_ GreenNodeData) -> Self {
+    fn from(borrow: GreenNodeRef<'_>) -> Self {
         borrow.to_owned()
     }
 }
 
-impl fmt::Debug for GreenNodeData {
+impl fmt::Debug for GreenNodeRef<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("GreenNode")
             .field("kind", &self.kind())
@@ -133,19 +104,17 @@ impl fmt::Debug for GreenNodeData {
 
 impl fmt::Debug for GreenNode {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let data: &GreenNodeData = self;
-        fmt::Debug::fmt(data, f)
+        fmt::Debug::fmt(&self.as_ref(), f)
     }
 }
 
 impl fmt::Display for GreenNode {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let data: &GreenNodeData = self;
-        fmt::Display::fmt(data, f)
+        fmt::Display::fmt(&self.as_ref(), f)
     }
 }
 
-impl fmt::Display for GreenNodeData {
+impl fmt::Display for GreenNodeRef<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         for child in self.slots() {
             write!(f, "{child}")?;
@@ -154,64 +123,93 @@ impl fmt::Display for GreenNodeData {
     }
 }
 
-impl GreenNodeData {
-    pub(crate) fn write_source_text(&self, output: &mut String) {
+impl<'a> GreenNodeRef<'a> {
+    /// Returns an owned handle to the node, incrementing its reference count.
+    #[inline]
+    pub(crate) fn to_owned(self) -> GreenNode {
+        GreenNode {
+            ptr: self.ptr.to_owned(),
+        }
+    }
+
+    /// Returns the address of the node, which identifies it for as long as
+    /// it is alive. [GreenNode::into_raw] returns the same pointer.
+    #[inline]
+    pub(crate) fn as_ptr(self) -> ptr::NonNull<()> {
+        self.ptr.as_ptr()
+    }
+
+    /// Creates a borrow from a pointer returned by [Self::as_ptr] or
+    /// [GreenNode::into_raw].
+    ///
+    /// # Safety
+    ///
+    /// `ptr` must point to a green node that stays alive for `'a`.
+    #[inline]
+    pub(crate) unsafe fn from_ptr(ptr: ptr::NonNull<()>) -> Self {
+        Self {
+            // SAFETY: Guaranteed by the caller.
+            ptr: unsafe { ThinArcBorrow::from_ptr(ptr) },
+        }
+    }
+
+    pub(crate) fn write_source_text(self, output: &mut String) {
         for slot in self.slots() {
             match slot {
-                Slot::Node { node, .. } => node.write_source_text(output),
-                Slot::Token { token, .. } => output.push_str(token.text()),
+                Slot::Node { node, .. } => node.as_ref().write_source_text(output),
+                Slot::Token { token, .. } => output.push_str(token.as_ref().text()),
                 Slot::Empty { .. } => {}
             }
         }
     }
 
     #[inline]
-    fn header(&self) -> &GreenNodeHead {
-        &self.data.header
+    fn header(self) -> &'a GreenNodeHead {
+        self.ptr.header()
     }
 
     #[inline]
-    pub(crate) fn slice(&self) -> &[Slot] {
-        self.data.slice()
+    pub(crate) fn slice(self) -> &'a [Slot] {
+        self.ptr.slice()
     }
 
     /// Kind of this node.
     #[inline]
-    pub fn kind(&self) -> RawSyntaxKind {
+    pub fn kind(self) -> RawSyntaxKind {
         self.header().kind
     }
 
     /// Returns the length of the text covered by this node.
     #[inline]
-    pub fn text_len(&self) -> TextSize {
+    pub fn text_len(self) -> TextSize {
         self.header().text_len
     }
 
     #[inline]
-    pub(crate) fn has_comments(&self) -> bool {
+    pub(crate) fn has_comments(self) -> bool {
         self.flags().contains(GreenElementFlags::HAS_COMMENTS)
     }
 
     #[inline]
-    pub(crate) fn has_skipped(&self) -> bool {
+    pub(crate) fn has_skipped(self) -> bool {
         self.flags().contains(GreenElementFlags::HAS_SKIPPED)
     }
 
     #[inline]
-    pub(crate) fn flags(&self) -> GreenElementFlags {
+    pub(crate) fn flags(self) -> GreenElementFlags {
         self.header().flags
     }
 
     /// Children of this node.
     #[inline]
-    pub fn children(&self) -> Children<'_> {
+    pub fn children(self) -> Children<'a> {
         Children::new(self.slots().enumerate())
     }
 
     /// Returns the slots of this node. Every node of a specific kind has the same number of slots
     /// to allow using fixed offsets to retrieve a specific child even if some other child is missing.
     #[inline]
-    pub fn slots(&self) -> Slots<'_> {
+    pub fn slots(self) -> Slots<'a> {
         Slots {
             raw: self.slice().iter(),
         }
@@ -224,10 +222,7 @@ impl GreenNodeData {
     /// sit on the boundary of several slots. Then a slot that strictly
     /// contains it wins, otherwise the last slot that ends at it, otherwise
     /// the first slot when the range is at the start of this node.
-    pub(crate) fn slot_at_range(
-        &self,
-        rel_range: TextRange,
-    ) -> Option<(usize, TextSize, &'_ Slot)> {
+    pub(crate) fn slot_at_range(self, rel_range: TextRange) -> Option<(usize, TextSize, &'a Slot)> {
         if rel_range.is_empty() {
             return self.slot_at_range_by_lengths(rel_range);
         }
@@ -247,10 +242,7 @@ impl GreenNodeData {
     /// Returns the same slot as [Self::slot_at_range], for empty and non-empty
     /// ranges, but loads each child the binary search probes to read its
     /// length.
-    fn slot_at_range_by_lengths(
-        &self,
-        rel_range: TextRange,
-    ) -> Option<(usize, TextSize, &'_ Slot)> {
+    fn slot_at_range_by_lengths(self, rel_range: TextRange) -> Option<(usize, TextSize, &'a Slot)> {
         let idx = self
             .slice()
             .binary_search_by(|it| {
@@ -285,9 +277,9 @@ impl GreenNodeData {
     /// offset 6 → (Some("(1)"), None)
     /// ```
     pub(crate) fn children_at_offset(
-        &self,
+        self,
         offset: TextSize,
-    ) -> (Option<Child<'_>>, Option<Child<'_>>) {
+    ) -> (Option<Child<'a>>, Option<Child<'a>>) {
         let slots = self.slice();
         let offset_index = slots.partition_point(|slot| slot.rel_offset() < offset);
         let is_at_offset = |slot: &Slot| {
@@ -312,7 +304,7 @@ impl GreenNodeData {
     }
 
     #[must_use = "syntax elements are immutable, the result of update methods must be propagated to have any effect"]
-    pub(crate) fn splice_slots<R, I>(&self, range: R, replace_with: I) -> GreenNode
+    pub(crate) fn splice_slots<R, I>(self, range: R, replace_with: I) -> GreenNode
     where
         R: ops::RangeBounds<usize>,
         I: Iterator<Item = Option<GreenElement>>,
@@ -341,7 +333,7 @@ impl GreenNodeData {
     /// [Self::splice_slots] once per edit in descending order, but the slots
     /// are copied only once.
     #[must_use = "syntax elements are immutable, the result of update methods must be propagated to have any effect"]
-    pub(crate) fn splice_many_slots<E, R>(&self, edits: E) -> GreenNode
+    pub(crate) fn splice_many_slots<E, R>(self, edits: E) -> GreenNode
     where
         E: IntoIterator<Item = (usize, R)>,
         R: IntoIterator<Item = Option<GreenElement>>,
@@ -370,19 +362,6 @@ impl GreenNodeData {
     }
 }
 
-impl ops::Deref for GreenNode {
-    type Target = GreenNodeData;
-
-    #[inline]
-    fn deref(&self) -> &GreenNodeData {
-        unsafe {
-            let repr: &Repr = &self.ptr;
-            let repr: &ReprThin = &*(repr as *const Repr as *const ReprThin);
-            mem::transmute::<&ReprThin, &GreenNodeData>(repr)
-        }
-    }
-}
-
 impl GreenNode {
     /// Creates new Node.
     #[inline]
@@ -404,13 +383,15 @@ impl GreenNode {
                 let rel_offset = head.text_len;
                 match el {
                     Some(NodeOrToken::Node(node)) => {
-                        head.text_len += node.text_len();
-                        head.flags.insert(node.flags());
+                        let node_ref = node.as_ref();
+                        head.text_len += node_ref.text_len();
+                        head.flags.insert(node_ref.flags());
                         Slot::Node { rel_offset, node }
                     }
                     Some(NodeOrToken::Token(token)) => {
-                        head.text_len += token.text_len();
-                        head.flags.insert(token.flags());
+                        let token_ref = token.as_ref();
+                        head.text_len += token_ref.text_len();
+                        head.flags.insert(token_ref.flags());
                         Slot::Token { rel_offset, token }
                     }
                     None => Slot::Empty { rel_offset },
@@ -421,20 +402,34 @@ impl GreenNode {
         Self { ptr: data }
     }
 
+    /// Borrows the node without incrementing its reference count.
     #[inline]
-    pub(crate) fn into_raw(self) -> ptr::NonNull<GreenNodeData> {
-        // SAFETY: casting from `HeaderSlice<GreenNodeHead, [green::node::Slot]>` to `GreenNodeData`
-        // if safe since `GreenNodeData` is marked as `repr(transparent)`
-        Arc::from_thin(self.ptr).into_raw().cast()
+    pub(crate) fn as_ref(&self) -> GreenNodeRef<'_> {
+        GreenNodeRef {
+            ptr: self.ptr.borrow_arc(),
+        }
     }
 
+    /// Converts the node into a pointer without decrementing its reference
+    /// count. The reference leaks unless the pointer is passed to
+    /// [Self::from_raw].
     #[inline]
-    pub(crate) unsafe fn from_raw(ptr: ptr::NonNull<GreenNodeData>) -> Self {
-        let arc = unsafe {
-            let arc = Arc::from_raw(&ptr.as_ref().data as *const ReprThin);
-            mem::transmute::<Arc<ReprThin>, ThinArc<GreenNodeHead, Slot>>(arc)
-        };
-        Self { ptr: arc }
+    pub(crate) fn into_raw(self) -> ptr::NonNull<()> {
+        self.ptr.into_raw()
+    }
+
+    /// Reconstructs the node from a pointer returned by [Self::into_raw].
+    ///
+    /// # Safety
+    ///
+    /// `ptr` must come from [Self::into_raw], and each call to
+    /// [Self::into_raw] allows a single call to this function.
+    #[inline]
+    pub(crate) unsafe fn from_raw(ptr: ptr::NonNull<()>) -> Self {
+        Self {
+            // SAFETY: Guaranteed by the caller.
+            ptr: unsafe { ThinArc::from_raw(ptr) },
+        }
     }
 }
 
@@ -442,8 +437,8 @@ impl Slot {
     #[inline]
     pub(crate) fn as_ref(&self) -> Option<GreenElementRef<'_>> {
         match self {
-            Self::Node { node, .. } => Some(NodeOrToken::Node(node)),
-            Self::Token { token, .. } => Some(NodeOrToken::Token(token)),
+            Self::Node { node, .. } => Some(NodeOrToken::Node(node.as_ref())),
+            Self::Token { token, .. } => Some(NodeOrToken::Token(token.as_ref())),
             Self::Empty { .. } => None,
         }
     }
@@ -578,12 +573,12 @@ impl<'a> TryFrom<(usize, &'a Slot)> for Child<'a> {
         match slot {
             Slot::Empty { .. } => Err(()),
             Slot::Node { node, rel_offset } => Ok(Child {
-                element: NodeOrToken::Node(node),
+                element: NodeOrToken::Node(node.as_ref()),
                 slot: index as u32,
                 rel_offset: *rel_offset,
             }),
             Slot::Token { token, rel_offset } => Ok(Child {
-                element: NodeOrToken::Token(token),
+                element: NodeOrToken::Token(token.as_ref()),
                 slot: index as u32,
                 rel_offset: *rel_offset,
             }),
@@ -662,6 +657,7 @@ mod tests {
     #[test]
     fn children() {
         let root = build_test_list();
+        let root = root.as_ref();
 
         // Test that children skips missing
         assert_eq!(root.children().count(), 2);
@@ -691,6 +687,7 @@ mod tests {
     #[test]
     fn slots() {
         let root = build_test_list();
+        let root = root.as_ref();
 
         // Has 3 slots, one is missing
         assert_eq!(root.slots().len(), 3);
@@ -744,6 +741,7 @@ mod tests {
 
         for sequence in sequences {
             let green = GreenNode::new(RawSyntaxKind(0), sequence);
+            let green = green.as_ref();
             let len = u32::from(green.text_len()) + 1;
             for start in 0..=len {
                 for end in start..=len {
@@ -776,6 +774,7 @@ mod tests {
                 Some(token("def")),
             ],
         );
+        let node = node.as_ref();
 
         assert_eq!(node.kind(), RawSyntaxKind(0));
         assert_eq!(node.text_len(), TextSize::from(6));
@@ -800,8 +799,8 @@ mod tests {
         );
         let comment_node =
             GreenNode::new(RawSyntaxKind(0), [Some(GreenElement::Token(comment_token))]);
-        assert!(comment_node.has_comments());
-        assert!(!comment_node.has_skipped());
+        assert!(comment_node.as_ref().has_comments());
+        assert!(!comment_node.as_ref().has_skipped());
 
         let skipped_token = GreenToken::with_trivia(
             RawSyntaxKind(0),
@@ -811,8 +810,8 @@ mod tests {
         );
         let skipped_node =
             GreenNode::new(RawSyntaxKind(0), [Some(GreenElement::Token(skipped_token))]);
-        assert!(!skipped_node.has_comments());
-        assert!(skipped_node.has_skipped());
+        assert!(!skipped_node.as_ref().has_comments());
+        assert!(skipped_node.as_ref().has_skipped());
 
         let root = GreenNode::new(
             RawSyntaxKind(0),
@@ -821,8 +820,8 @@ mod tests {
                 Some(GreenElement::Node(skipped_node)),
             ],
         );
-        assert!(root.has_comments());
-        assert!(root.has_skipped());
+        assert!(root.as_ref().has_comments());
+        assert!(root.as_ref().has_skipped());
     }
 
     #[test]
@@ -835,7 +834,7 @@ mod tests {
             )))
         };
 
-        let spliced = root.splice_many_slots([
+        let spliced = root.as_ref().splice_many_slots([
             (0, vec![token("x")]),
             (0, vec![token("y")]),
             (2, vec![]),
@@ -843,7 +842,7 @@ mod tests {
             (3, vec![token("w")]),
         ]);
 
-        assert_eq!(spliced.slots().len(), 2);
+        assert_eq!(spliced.as_ref().slots().len(), 2);
         assert_eq!(spliced.to_string(), "x∅");
     }
 }

@@ -7,6 +7,7 @@ use std::{
     mem::{self, ManuallyDrop, offset_of},
     ops::Deref,
     ptr::{self, NonNull},
+    slice,
     sync::atomic::{
         self,
         Ordering::{Acquire, Relaxed, Release},
@@ -44,28 +45,6 @@ pub(crate) struct Arc<T: ?Sized> {
 unsafe impl<T: ?Sized + Sync + Send> Send for Arc<T> {}
 unsafe impl<T: ?Sized + Sync + Send> Sync for Arc<T> {}
 
-impl<T> Arc<T> {
-    /// Reconstruct the Arc<T> from a raw pointer obtained from into_raw()
-    ///
-    /// Note: This raw pointer will be offset in the allocation and must be preceded
-    /// by the atomic count.
-    ///
-    /// It is recommended to use OffsetArc for this
-    #[inline]
-    pub(crate) unsafe fn from_raw(ptr: *const T) -> Self {
-        let ptr = unsafe {
-            // To find the corresponding pointer to the `ArcInner` we need
-            // to subtract the offset of the `data` field from the pointer.
-            let ptr = (ptr as *const u8).sub(offset_of!(ArcInner<T>, data));
-            NonNull::new_unchecked(ptr as *mut ArcInner<T>)
-        };
-        Self {
-            p: ptr,
-            phantom: PhantomData,
-        }
-    }
-}
-
 impl<T: ?Sized> Arc<T> {
     #[inline]
     fn inner(&self) -> &ArcInner<T> {
@@ -92,13 +71,6 @@ impl<T: ?Sized> Arc<T> {
 
     pub(crate) fn ptr(&self) -> *mut ArcInner<T> {
         self.p.as_ptr()
-    }
-
-    #[inline]
-    pub(crate) fn into_raw(self) -> NonNull<T> {
-        let ptr = NonNull::from(&self.inner().data);
-        mem::forget(self);
-        ptr
     }
 }
 
@@ -271,19 +243,6 @@ impl<H, T> HeaderSlice<H, [T]> {
     }
 }
 
-impl<H, T> Deref for HeaderSlice<H, [T; 0]> {
-    type Target = HeaderSlice<H, [T]>;
-
-    fn deref(&self) -> &Self::Target {
-        unsafe {
-            let len = self.length;
-            let fake_slice: *const [T] =
-                ptr::slice_from_raw_parts(self as *const _ as *const T, len);
-            &*(fake_slice as *const HeaderSlice<H, [T]>)
-        }
-    }
-}
-
 /// A "thin" `Arc` containing dynamically sized data
 ///
 /// This is functionally equivalent to `Arc<(H, [T])>`
@@ -337,6 +296,39 @@ impl<H, T> ThinArc<H, T> {
         // Expose the transient Arc to the callback, which may clone it if it wants.
         // Forward the result.
         f(&transient)
+    }
+
+    /// Returns a handle to this allocation that doesn't own a reference.
+    #[inline]
+    pub(crate) fn borrow_arc(&self) -> ThinArcBorrow<'_, H, T> {
+        ThinArcBorrow {
+            ptr: self.ptr,
+            phantom: PhantomData,
+        }
+    }
+
+    /// Converts the `ThinArc` into a pointer to its allocation. The reference
+    /// count isn't modified, so the reference leaks unless the pointer is
+    /// passed to [Self::from_raw].
+    #[inline]
+    pub(crate) fn into_raw(self) -> NonNull<()> {
+        let ptr = self.ptr.cast();
+        mem::forget(self);
+        ptr
+    }
+
+    /// Reconstructs the `ThinArc` from a pointer returned by [Self::into_raw].
+    ///
+    /// # Safety
+    ///
+    /// `ptr` must come from [Self::into_raw] of a `ThinArc<H, T>`, and each
+    /// call to [Self::into_raw] allows a single call to this function.
+    #[inline]
+    pub(crate) unsafe fn from_raw(ptr: NonNull<()>) -> Self {
+        Self {
+            ptr: ptr.cast(),
+            phantom: PhantomData,
+        }
     }
 
     /// Allocates a `ThinArc` for `num_items` items and writes its reference
@@ -486,6 +478,88 @@ impl<H, T> Drop for ThinArc<H, T> {
     }
 }
 
+/// A [ThinArc] borrowed for `'a`.
+///
+/// Holds a copy of the pointer of the `ThinArc` without owning a reference, so
+/// copying it doesn't touch the reference count.
+///
+/// A `&HeaderSlice<H, [T; 0]>` can't replace it. A reference only grants
+/// access to the bytes of the type it points to, which leaves out the items
+/// after the header and the reference count before it. Reading the items or
+/// creating a new `ThinArc` through such a reference is undefined behavior.
+pub(crate) struct ThinArcBorrow<'a, H, T> {
+    ptr: ptr::NonNull<ArcInner<HeaderSlice<H, [T; 0]>>>,
+    phantom: PhantomData<&'a ThinArc<H, T>>,
+}
+
+// SAFETY: A `ThinArcBorrow` gives the same access as a `&ThinArc`.
+unsafe impl<H: Sync + Send, T: Sync + Send> Send for ThinArcBorrow<'_, H, T> {}
+// SAFETY: See `Send`.
+unsafe impl<H: Sync + Send, T: Sync + Send> Sync for ThinArcBorrow<'_, H, T> {}
+
+impl<H, T> Clone for ThinArcBorrow<'_, H, T> {
+    #[inline]
+    fn clone(&self) -> Self {
+        *self
+    }
+}
+
+impl<H, T> Copy for ThinArcBorrow<'_, H, T> {}
+
+impl<'a, H, T> ThinArcBorrow<'a, H, T> {
+    #[inline]
+    pub(crate) fn header(self) -> &'a H {
+        // SAFETY: The borrowed `ThinArc` keeps the allocation alive for `'a`.
+        unsafe { &(*self.ptr.as_ptr()).data.header }
+    }
+
+    #[inline]
+    pub(crate) fn slice(self) -> &'a [T] {
+        // SAFETY: The borrowed `ThinArc` keeps the allocation alive for `'a`,
+        // and `length` initialized items follow the header.
+        unsafe {
+            let inner = self.ptr.as_ptr();
+            let items = ptr::addr_of!((*inner).data.slice).cast::<T>();
+            slice::from_raw_parts(items, (*inner).data.length)
+        }
+    }
+
+    /// Returns a new `ThinArc` to the allocation, incrementing its reference
+    /// count.
+    #[inline]
+    pub(crate) fn to_owned(self) -> ThinArc<H, T> {
+        // The transient `ThinArc` is never dropped, so it doesn't release the
+        // reference of the borrowed `ThinArc`.
+        let transient = ManuallyDrop::new(ThinArc {
+            ptr: self.ptr,
+            phantom: PhantomData,
+        });
+        ThinArc::clone(&transient)
+    }
+
+    /// Returns the pointer to the allocation: the same pointer that
+    /// [ThinArc::into_raw] returns for the borrowed `ThinArc`.
+    #[inline]
+    pub(crate) fn as_ptr(self) -> NonNull<()> {
+        self.ptr.cast()
+    }
+
+    /// Creates a borrow from a pointer returned by [Self::as_ptr] or
+    /// [ThinArc::into_raw].
+    ///
+    /// # Safety
+    ///
+    /// `ptr` must point to the allocation of a `ThinArc<H, T>` that stays alive
+    /// for `'a`.
+    #[inline]
+    pub(crate) unsafe fn from_ptr(ptr: NonNull<()>) -> Self {
+        Self {
+            ptr: ptr.cast(),
+            phantom: PhantomData,
+        }
+    }
+}
+
 impl<H, T> Arc<HeaderSlice<H, [T]>> {
     /// Converts an `Arc` into a `ThinArc`. This consumes the `Arc`, so the refcount
     /// is not modified.
@@ -539,7 +613,7 @@ impl<H: Hash, T: Hash> Hash for ThinArc<H, T> {
 
 #[cfg(test)]
 mod tests {
-    use super::ThinArc;
+    use super::{ThinArc, ThinArcBorrow};
 
     #[test]
     fn from_header_and_slice_copies_items() {
@@ -569,6 +643,38 @@ mod tests {
             ThinArc::from_header_and_iter_with(5u32, std::iter::empty::<u32>(), |_, item| item);
         assert_eq!(empty.header, 5);
         assert!(empty.slice().is_empty());
+    }
+
+    #[test]
+    fn thin_arc_from_borrow_outlives_the_borrowed_thin_arc() {
+        let arc = ThinArc::from_header_and_slice(7u16, b"hello");
+        let borrow = arc.borrow_arc();
+        assert_eq!(*borrow.header(), 7);
+        assert_eq!(borrow.slice(), b"hello");
+
+        let owned = borrow.to_owned();
+        drop(arc);
+        assert_eq!(owned.header, 7);
+        assert_eq!(owned.slice(), b"hello");
+    }
+
+    #[test]
+    fn raw_pointer_round_trip_keeps_the_reference() {
+        let arc = ThinArc::from_header_and_slice(7u16, b"hello");
+        let clone = arc.clone();
+        let ptr = arc.into_raw();
+        assert_eq!(clone.borrow_arc().as_ptr(), ptr);
+
+        // SAFETY: `clone` keeps the allocation alive while `borrow` is used.
+        let borrow = unsafe { ThinArcBorrow::<u16, u8>::from_ptr(ptr) };
+        assert_eq!(*borrow.header(), 7);
+        assert_eq!(borrow.slice(), b"hello");
+
+        // SAFETY: `ptr` comes from `into_raw`, and it is reclaimed once.
+        let restored = unsafe { ThinArc::<u16, u8>::from_raw(ptr) };
+        drop(clone);
+        assert_eq!(restored.header, 7);
+        assert_eq!(restored.slice(), b"hello");
     }
 
     /// An iterator whose `len()` claims more items than it yields.

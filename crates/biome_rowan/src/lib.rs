@@ -60,7 +60,7 @@ pub use crate::{
     utility_types::{Direction, NodeOrToken, TokenAtOffset, WalkEvent},
 };
 
-pub(crate) use crate::green::{GreenNode, GreenNodeData, GreenToken, GreenTokenData};
+pub(crate) use crate::green::{GreenNode, GreenNodeRef, GreenToken, GreenTokenRef};
 
 #[cfg(feature = "countme")]
 pub fn check_live() -> Option<String> {

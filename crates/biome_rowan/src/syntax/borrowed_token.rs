@@ -7,7 +7,7 @@
 //! itself: it can't navigate to its parent or to its siblings.
 
 use crate::green::Slot;
-use crate::{GreenNodeData, GreenTokenData, Language, SyntaxKind, TriviaPiece, TriviaPieceKind};
+use crate::{GreenNodeRef, GreenTokenRef, Language, SyntaxKind, TriviaPiece, TriviaPieceKind};
 use biome_text_size::{TextLen, TextRange, TextSize};
 use std::iter::FusedIterator;
 use std::marker::PhantomData;
@@ -28,7 +28,7 @@ pub struct BorrowedTokensIterator<'a, L: Language> {
 
 impl<'a, L: Language> BorrowedTokensIterator<'a, L> {
     /// Creates the iterator for `node`, whose range starts at `offset`.
-    pub(super) fn new(node: &'a GreenNodeData, offset: TextSize) -> Self {
+    pub(super) fn new(node: GreenNodeRef<'a>, offset: TextSize) -> Self {
         Self {
             pending_children: vec![(node.slice().iter(), offset)],
             _p: PhantomData,
@@ -47,14 +47,15 @@ impl<'a, L: Language> Iterator for BorrowedTokensIterator<'a, L> {
             match slots.next() {
                 Some(Slot::Token { rel_offset, token }) => {
                     return Some(BorrowedToken {
-                        green: token,
+                        green: token.as_ref(),
                         offset: *node_offset + *rel_offset,
                         _p: PhantomData,
                     });
                 }
                 Some(Slot::Node { rel_offset, node }) => {
                     let offset = *node_offset + *rel_offset;
-                    self.pending_children.push((node.slice().iter(), offset));
+                    self.pending_children
+                        .push((node.as_ref().slice().iter(), offset));
                 }
                 Some(Slot::Empty { .. }) => {}
                 None => {
@@ -82,7 +83,7 @@ pub struct BorrowedTokensWithCommentsIterator<'a, L: Language> {
 
 impl<'a, L: Language> BorrowedTokensWithCommentsIterator<'a, L> {
     /// Creates the iterator for `node`, whose range starts at `offset`.
-    pub(super) fn new(node: &'a GreenNodeData, offset: TextSize) -> Self {
+    pub(super) fn new(node: GreenNodeRef<'a>, offset: TextSize) -> Self {
         let pending_children = if node.has_comments() {
             vec![(node.slice().iter(), offset)]
         } else {
@@ -102,16 +103,17 @@ impl<'a, L: Language> Iterator for BorrowedTokensWithCommentsIterator<'a, L> {
         loop {
             let (slots, node_offset) = self.pending_children.last_mut()?;
             match slots.next() {
-                Some(Slot::Token { rel_offset, token }) if token.has_comments() => {
+                Some(Slot::Token { rel_offset, token }) if token.as_ref().has_comments() => {
                     return Some(BorrowedToken {
-                        green: token,
+                        green: token.as_ref(),
                         offset: *node_offset + *rel_offset,
                         _p: PhantomData,
                     });
                 }
-                Some(Slot::Node { rel_offset, node }) if node.has_comments() => {
+                Some(Slot::Node { rel_offset, node }) if node.as_ref().has_comments() => {
                     let offset = *node_offset + *rel_offset;
-                    self.pending_children.push((node.slice().iter(), offset));
+                    self.pending_children
+                        .push((node.as_ref().slice().iter(), offset));
                 }
                 Some(_) => {}
                 None => {
@@ -126,7 +128,7 @@ impl<L: Language> FusedIterator for BorrowedTokensWithCommentsIterator<'_, L> {}
 
 /// A token that borrows from the tree of the node it was reached from.
 pub struct BorrowedToken<'a, L: Language> {
-    green: &'a GreenTokenData,
+    green: GreenTokenRef<'a>,
     /// Start of the token's range, which includes its leading trivia.
     offset: TextSize,
     _p: PhantomData<L>,

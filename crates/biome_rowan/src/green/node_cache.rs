@@ -11,53 +11,57 @@ use std::ptr::NonNull;
 use crate::green::Slot;
 use crate::syntax::{TriviaPiece, TriviaPieceKind};
 use crate::{
-    GreenNode, GreenNodeData, GreenToken, GreenTokenData, NodeOrToken, RawSyntaxKind,
+    GreenNode, GreenNodeRef, GreenToken, GreenTokenRef, NodeOrToken, RawSyntaxKind,
     green::{GreenElementFlags, GreenElementRef},
 };
 
 use super::element::GreenElement;
-use super::trivia::{GreenTrivia, GreenTriviaData};
+use super::trivia::{GreenTrivia, GreenTriviaRef};
 
 type HashMap<K, V> = hashbrown::HashMap<K, V, BuildHasherDefault<FxHasher>>;
 
 /// Internal representation for a green pointer and a generation index in the
-/// cache, packed into a single `usize`. This relies on the fact that "green
+/// cache, packed into a single pointer. This relies on the fact that "green
 /// elements" (tokens, nodes and trivia) have memory alignment constraints that
 /// exceed a single byte (and thus the lower bits of the pointer will always be
 /// zero), while the generation index only needs a single bit of storage.
 struct GenerationalPointer<T: IntoRawPointer> {
-    data: usize,
+    data: *mut (),
     _ty: PhantomData<T>,
 }
+
+// SAFETY: A `GenerationalPointer` owns a `T`.
+unsafe impl<T: IntoRawPointer + Send> Send for GenerationalPointer<T> {}
+// SAFETY: See `Send`.
+unsafe impl<T: IntoRawPointer + Sync> Sync for GenerationalPointer<T> {}
 
 impl<T: IntoRawPointer> GenerationalPointer<T> {
     fn new(value: T, generation: Generation) -> Self {
         let ptr = value.into_raw();
-        let mut data = ptr as usize;
-        debug_assert!(data & 1 == 0);
-        data |= generation as usize;
+        debug_assert!(ptr.addr() & 1 == 0);
         Self {
-            data,
+            data: ptr.map_addr(|addr| addr | generation as usize),
             _ty: PhantomData,
         }
     }
 
-    fn value(&self) -> &T::Pointee {
-        // SAFETY: This clears the least significant bit from `data`. This bit
-        // should have been set to zero in the original pointer due to the
-        // alignment requirements of the underlying data (this is checked by an
-        // assertion on debug builds), so this essentially extracts the pointer
-        // value from the bit field. Said point is safe to dereference at this
-        // point since we're holding a valid reference to `self` which
-        // guarantees `Drop` has not been called and the memory associated with
-        // the pointer has not been released yet.
-        let data = self.data & !1;
-        let ptr = data as *const T::Pointee;
-        unsafe { &*ptr }
+    /// Returns the pointer that [IntoRawPointer::into_raw] returned for the
+    /// stored value.
+    fn ptr(&self) -> *mut () {
+        // The least significant bit of `data` holds the generation. It is
+        // zero in the original pointer due to the alignment requirements of
+        // the underlying data, so clearing it restores that pointer.
+        self.data.map_addr(|addr| addr & !1)
+    }
+
+    fn value(&self) -> T::Borrowed<'_> {
+        // SAFETY: `self` owns the value until it is dropped, so the value
+        // stays alive for as long as `self` is borrowed.
+        unsafe { T::borrow_raw(self.ptr()) }
     }
 
     fn generation(&self) -> Generation {
-        match self.data & 1 {
+        match self.data.addr() & 1 {
             0 => Generation::A,
             1 => Generation::B,
             // SAFETY: The `& 1` operation above ensures only the least
@@ -67,18 +71,17 @@ impl<T: IntoRawPointer> GenerationalPointer<T> {
     }
 
     fn set_generation(&mut self, generation: Generation) {
-        let data = self.data & !1;
-        self.data = data | generation as usize;
+        self.data = self.ptr().map_addr(|addr| addr | generation as usize);
     }
 }
 
 impl<T: IntoRawPointer> Debug for GenerationalPointer<T>
 where
-    T::Pointee: Debug,
+    for<'a> T::Borrowed<'a>: Debug,
 {
     fn fmt(&self, fmt: &mut Formatter<'_>) -> fmt::Result {
         fmt.debug_struct("GenerationalPointer")
-            .field("value", self.value())
+            .field("value", &self.value())
             .field("generation", &self.generation())
             .finish()
     }
@@ -86,8 +89,9 @@ where
 
 impl<T: IntoRawPointer> Drop for GenerationalPointer<T> {
     fn drop(&mut self) {
-        let ptr = self.value() as *const _ as *mut _;
-        let value = unsafe { T::from_raw(ptr) };
+        // SAFETY: The pointer comes from `into_raw` in `new`, and the value
+        // it owns is only reclaimed here.
+        let value = unsafe { T::from_raw(self.ptr()) };
         drop(value);
     }
 }
@@ -95,9 +99,24 @@ impl<T: IntoRawPointer> Drop for GenerationalPointer<T> {
 /// Trait implemented for types that can be turned into a raw pointer, and
 /// reconstructed back from it. Used by [GenerationalPointer] internally.
 trait IntoRawPointer {
-    type Pointee;
-    fn into_raw(self) -> *mut Self::Pointee;
-    unsafe fn from_raw(ptr: *mut Self::Pointee) -> Self;
+    /// A handle to the value that doesn't own it.
+    type Borrowed<'a>
+    where
+        Self: 'a;
+
+    fn into_raw(self) -> *mut ();
+
+    /// # Safety
+    ///
+    /// `ptr` must come from [Self::into_raw], and each call to
+    /// [Self::into_raw] allows a single call to this function.
+    unsafe fn from_raw(ptr: *mut ()) -> Self;
+
+    /// # Safety
+    ///
+    /// `ptr` must come from [Self::into_raw] of a value that hasn't been
+    /// reclaimed with [Self::from_raw] and isn't reclaimed during `'a`.
+    unsafe fn borrow_raw<'a>(ptr: *mut ()) -> Self::Borrowed<'a>;
 }
 
 /// A token stored in the `NodeCache`.
@@ -107,14 +126,19 @@ trait IntoRawPointer {
 struct CachedToken(GenerationalPointer<GreenToken>);
 
 impl IntoRawPointer for GreenToken {
-    type Pointee = GreenTokenData;
+    type Borrowed<'a> = GreenTokenRef<'a>;
 
-    fn into_raw(self) -> *mut Self::Pointee {
+    fn into_raw(self) -> *mut () {
         Self::into_raw(self).as_ptr()
     }
 
-    unsafe fn from_raw(ptr: *mut Self::Pointee) -> Self {
+    unsafe fn from_raw(ptr: *mut ()) -> Self {
         unsafe { Self::from_raw(NonNull::new(ptr).unwrap()) }
+    }
+
+    unsafe fn borrow_raw<'a>(ptr: *mut ()) -> Self::Borrowed<'a> {
+        // SAFETY: `into_raw` never returns a null pointer.
+        unsafe { GreenTokenRef::from_ptr(NonNull::new_unchecked(ptr)) }
     }
 }
 
@@ -134,14 +158,19 @@ struct CachedNode {
 }
 
 impl IntoRawPointer for GreenNode {
-    type Pointee = GreenNodeData;
+    type Borrowed<'a> = GreenNodeRef<'a>;
 
-    fn into_raw(self) -> *mut Self::Pointee {
+    fn into_raw(self) -> *mut () {
         Self::into_raw(self).as_ptr()
     }
 
-    unsafe fn from_raw(ptr: *mut Self::Pointee) -> Self {
+    unsafe fn from_raw(ptr: *mut ()) -> Self {
         unsafe { Self::from_raw(NonNull::new(ptr).unwrap()) }
+    }
+
+    unsafe fn borrow_raw<'a>(ptr: *mut ()) -> Self::Borrowed<'a> {
+        // SAFETY: `into_raw` never returns a null pointer.
+        unsafe { GreenNodeRef::from_ptr(NonNull::new_unchecked(ptr)) }
     }
 }
 
@@ -164,7 +193,7 @@ impl IntoRawPointer for GreenNode {
 /// lets functions return it in registers.
 pub(crate) struct CacheChild {
     hash: u64,
-    /// Pointer to the [GreenNodeData] or the [GreenTokenData]. The lowest bit is
+    /// Pointer to the [GreenNode] or the [GreenToken]. The lowest bit is
     /// [CacheChild::TOKEN_TAG] for tokens; it's always free because both types are
     /// at least pointer-aligned.
     element: NonNull<()>,
@@ -177,11 +206,8 @@ impl CacheChild {
     #[inline]
     pub(crate) fn owned(element: GreenElement) -> Self {
         let element = match element {
-            NodeOrToken::Node(node) => node.into_raw().cast(),
-            NodeOrToken::Token(token) => token
-                .into_raw()
-                .cast::<()>()
-                .map_addr(|addr| addr | Self::TOKEN_TAG),
+            NodeOrToken::Node(node) => node.into_raw(),
+            NodeOrToken::Token(token) => token.into_raw().map_addr(|addr| addr | Self::TOKEN_TAG),
         };
 
         Self {
@@ -203,10 +229,8 @@ impl CacheChild {
         }
 
         let element = match element {
-            NodeOrToken::Node(node) => NonNull::from(node).cast(),
-            NodeOrToken::Token(token) => NonNull::from(token)
-                .cast::<()>()
-                .map_addr(|addr| addr | Self::TOKEN_TAG),
+            NodeOrToken::Node(node) => node.as_ptr(),
+            NodeOrToken::Token(token) => token.as_ptr().map_addr(|addr| addr | Self::TOKEN_TAG),
         };
 
         Self { hash, element }
@@ -217,20 +241,27 @@ impl CacheChild {
         self.hash == NodeCache::UNCACHED_NODE_HASH
     }
 
+    /// Returns the untagged pointer to the element and whether it is a token.
+    #[inline]
+    fn untagged(&self) -> (NonNull<()>, bool) {
+        let is_token = self.element.addr().get() & Self::TOKEN_TAG != 0;
+        let ptr = self.element.map_addr(|addr| {
+            // SAFETY: Clearing the tag of a non-null pointer to an aligned value
+            // can't produce zero.
+            unsafe { std::num::NonZeroUsize::new_unchecked(addr.get() & !Self::TOKEN_TAG) }
+        });
+        (ptr, is_token)
+    }
+
     #[inline]
     pub(crate) fn as_element_ref(&self) -> GreenElementRef<'_> {
-        let addr = self.element.addr().get();
-        if addr & Self::TOKEN_TAG == 0 {
-            // SAFETY: The pointer is an untagged pointer to a live `GreenNodeData`.
-            NodeOrToken::Node(unsafe { self.element.cast::<GreenNodeData>().as_ref() })
+        let (ptr, is_token) = self.untagged();
+        if is_token {
+            // SAFETY: The pointer is a pointer to a live `GreenToken` once untagged.
+            NodeOrToken::Token(unsafe { GreenTokenRef::from_ptr(ptr) })
         } else {
-            let token = self.element.map_addr(|addr| {
-                // SAFETY: Clearing the tag of a non-null pointer to an aligned value
-                // can't produce zero.
-                unsafe { std::num::NonZeroUsize::new_unchecked(addr.get() & !Self::TOKEN_TAG) }
-            });
-            // SAFETY: The pointer is a pointer to a live `GreenTokenData` once untagged.
-            NodeOrToken::Token(unsafe { token.cast::<GreenTokenData>().as_ref() })
+            // SAFETY: The pointer is an untagged pointer to a live `GreenNode`.
+            NodeOrToken::Node(unsafe { GreenNodeRef::from_ptr(ptr) })
         }
     }
 
@@ -251,15 +282,13 @@ impl CacheChild {
     /// used afterwards.
     #[inline]
     unsafe fn take_owned(&self) -> GreenElement {
+        let (ptr, is_token) = self.untagged();
         // SAFETY: The handle created here takes over the reference count owned by the child.
         unsafe {
-            match self.as_element_ref() {
-                NodeOrToken::Node(node) => {
-                    NodeOrToken::Node(GreenNode::from_raw(NonNull::from(node)))
-                }
-                NodeOrToken::Token(token) => {
-                    NodeOrToken::Token(GreenToken::from_raw(NonNull::from(token)))
-                }
+            if is_token {
+                NodeOrToken::Token(GreenToken::from_raw(ptr))
+            } else {
+                NodeOrToken::Node(GreenNode::from_raw(ptr))
             }
         }
     }
@@ -346,14 +375,14 @@ fn token_hash_of(kind: RawSyntaxKind, text: &str) -> u64 {
     h.finish()
 }
 
-fn token_hash(token: &GreenTokenData) -> u64 {
+fn token_hash(token: GreenTokenRef<'_>) -> u64 {
     token_hash_of(token.kind(), token.text())
 }
 
-fn element_id(elem: GreenElementRef<'_>) -> *const () {
+fn element_id(elem: GreenElementRef<'_>) -> NonNull<()> {
     match elem {
-        NodeOrToken::Node(it) => it as *const GreenNodeData as *const (),
-        NodeOrToken::Token(it) => it as *const GreenTokenData as *const (),
+        NodeOrToken::Node(it) => it.as_ptr(),
+        NodeOrToken::Token(it) => it.as_ptr(),
     }
 }
 
@@ -400,8 +429,8 @@ impl NodeCache {
                 let lhs = no_hash.node.value().slots().filter_map(|slot| match slot {
                     // Ignore empty slots. The queried node only has the present children
                     Slot::Empty { .. } => None,
-                    Slot::Node { node, .. } => Some(element_id(NodeOrToken::Node(node))),
-                    Slot::Token { token, .. } => Some(element_id(NodeOrToken::Token(token))),
+                    Slot::Node { node, .. } => Some(node.as_ref().as_ptr()),
+                    Slot::Token { token, .. } => Some(token.as_ref().as_ptr()),
                 });
 
                 let rhs = children
@@ -550,7 +579,7 @@ impl VacantNodeEntry<'_> {
     /// cache lookups wouldn't be successful because the hash collision prevention check compares the kinds of the
     /// cached and queried node.
     pub fn cache(self, node: GreenNode) -> CacheChild {
-        if self.original_kind != node.kind() {
+        if self.original_kind != node.as_ref().kind() {
             // The kind has changed since it has been queried. For example, the node has been converted to an
             // unknown node. Never cache these nodes because cache lookups will never match.
             CacheChild::owned(NodeOrToken::Node(node))
@@ -578,14 +607,18 @@ impl VacantNodeEntry<'_> {
 struct CachedTrivia(GenerationalPointer<GreenTrivia>);
 
 impl IntoRawPointer for GreenTrivia {
-    type Pointee = GreenTriviaData;
+    type Borrowed<'a> = GreenTriviaRef<'a>;
 
-    fn into_raw(self) -> *mut Self::Pointee {
+    fn into_raw(self) -> *mut () {
         Self::into_raw(self)
     }
 
-    unsafe fn from_raw(ptr: *mut Self::Pointee) -> Self {
+    unsafe fn from_raw(ptr: *mut ()) -> Self {
         unsafe { Self::from_raw(ptr) }
+    }
+
+    unsafe fn borrow_raw<'a>(ptr: *mut ()) -> Self::Borrowed<'a> {
+        unsafe { GreenTriviaRef::from_ptr(ptr) }
     }
 }
 
@@ -680,7 +713,7 @@ mod tests {
         CacheChild, CachedNode, CachedToken, CachedTrivia, NodeCache, token_hash,
     };
     use crate::green::trivia::GreenTrivia;
-    use crate::{GreenToken, GreenTokenData, RawSyntaxKind, TriviaPiece, TriviaPieceKind};
+    use crate::{GreenToken, RawSyntaxKind, TriviaPiece, TriviaPieceKind};
     use biome_text_size::TextSize;
 
     #[test]
@@ -700,10 +733,10 @@ mod tests {
             GreenTrivia::whitespace(1),
         );
 
-        assert_eq!(token_hash(&t1), token_hash(&t2));
+        assert_eq!(token_hash(t1.as_ref()), token_hash(t2.as_ref()));
 
         let t3 = GreenToken::new_raw(kind, "let");
-        assert_ne!(token_hash(&t1), token_hash(&t3));
+        assert_ne!(token_hash(t1.as_ref()), token_hash(t3.as_ref()));
 
         let t4 = GreenToken::with_trivia(
             kind,
@@ -711,7 +744,7 @@ mod tests {
             GreenTrivia::whitespace(1),
             GreenTrivia::whitespace(1),
         );
-        assert_ne!(token_hash(&t1), token_hash(&t4));
+        assert_ne!(token_hash(t1.as_ref()), token_hash(t4.as_ref()));
     }
 
     #[test]
@@ -732,7 +765,8 @@ mod tests {
             .into_token()
             .unwrap();
 
-        assert!(std::ptr::eq::<GreenTokenData>(&*token, &*cached));
+        let cached = cached.as_ref();
+        assert_eq!(token.as_ref().as_ptr(), cached.as_ptr());
         assert!(cached.flags().contains(GreenElementFlags::HAS_COMMENTS));
         assert!(cached.flags().contains(GreenElementFlags::HAS_SKIPPED));
     }

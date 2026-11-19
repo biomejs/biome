@@ -250,7 +250,7 @@ impl<L: Language> SyntaxToken<L> {
                 self.kind().to_raw(),
                 &token_text,
                 leading,
-                self.green_token().trailing_trivia().clone(),
+                self.raw.green().trailing_trivia().clone(),
             )),
             _p: PhantomData,
         }
@@ -280,7 +280,7 @@ impl<L: Language> SyntaxToken<L> {
                 self.kind().to_raw(),
                 &token_text,
                 leading,
-                self.green_token().trailing_trivia().clone(),
+                self.raw.green().trailing_trivia().clone(),
             )),
             _p: PhantomData,
         }
@@ -296,7 +296,7 @@ impl<L: Language> SyntaxToken<L> {
         let mut token_text = String::new();
 
         // copy over leading trivia and token text
-        let trailing_len = self.green_token().trailing_trivia().text_len();
+        let trailing_len = self.raw.green().trailing_trivia().text_len();
         token_text.push_str(&self.text()[..usize::from(self.text().text_len() - trailing_len)]);
 
         let trivia = trivia.into_iter().map(|(kind, text)| {
@@ -310,7 +310,7 @@ impl<L: Language> SyntaxToken<L> {
             raw: cursor::SyntaxToken::new_detached(GreenToken::with_trivia(
                 self.kind().to_raw(),
                 &token_text,
-                self.green_token().leading_trivia().clone(),
+                self.raw.green().leading_trivia().clone(),
                 trailing,
             )),
             _p: PhantomData,
@@ -327,7 +327,7 @@ impl<L: Language> SyntaxToken<L> {
         let mut token_text = String::new();
 
         // copy over leading trivia and token text
-        let trailing_len = self.green_token().trailing_trivia().text_len();
+        let trailing_len = self.raw.green().trailing_trivia().text_len();
         token_text.push_str(&self.text()[..usize::from(self.text().text_len() - trailing_len)]);
 
         let trivia = trivia.into_iter().map(|piece| {
@@ -341,7 +341,7 @@ impl<L: Language> SyntaxToken<L> {
             raw: cursor::SyntaxToken::new_detached(GreenToken::with_trivia(
                 self.kind().to_raw(),
                 &token_text,
-                self.green_token().leading_trivia().clone(),
+                self.raw.green().leading_trivia().clone(),
                 trailing,
             )),
             _p: PhantomData,
