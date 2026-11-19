@@ -543,6 +543,10 @@ fn infer_predicate_parameters_only_for_functions_of_the_right_shape() {
         ("xs.filter((x) => x !== undefined);", Some("x")),
         ("xs.filter(x => x !== undefined);", Some("x")),
         (
+            "const f = (v: string | null = null) => v !== null;",
+            Some("v"),
+        ),
+        (
             "xs.filter(function (x) { return x !== undefined; });",
             Some("x"),
         ),
@@ -604,7 +608,7 @@ fn infer_predicate_parameters_only_for_functions_of_the_right_shape() {
         ),
         ("function f(v: unknown) { return; }", None),
         // Parameters that Biome can't infer a type predicate about.
-        ("const f = (v: string | null = null) => v !== null;", None),
+        ("xs.filter((x = null) => x !== null);", None),
         ("function f(v) { return typeof v === 'string'; }", None),
         ("const f = (v) => typeof v === 'string';", None),
         (
