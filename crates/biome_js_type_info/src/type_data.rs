@@ -652,6 +652,31 @@ impl Function {
             ..self
         }
     }
+
+    /// Returns whether a parameter of the function has a literal type, such
+    /// as `"a"`, `1`, `true`, `null`, or a template literal type without
+    /// substitutions, which makes TypeScript try the signature before the
+    /// other overloads of a call. `data` returns the data that a reference to
+    /// the module's own table stands for.
+    pub fn is_specialized<'a>(
+        &self,
+        data: impl Fn(&TypeReference) -> Option<&'a TypeData>,
+    ) -> bool {
+        self.parameters
+            .iter()
+            .any(|parameter| match data(parameter.ty()) {
+                Some(TypeData::Null) => true,
+                Some(TypeData::Literal(literal)) => match literal.as_ref() {
+                    Literal::BigInt(_)
+                    | Literal::Boolean(_)
+                    | Literal::Number(_)
+                    | Literal::String(_) => true,
+                    Literal::Template(text) => !text.contains("${"),
+                    Literal::Object(_) | Literal::RegExp(_) => false,
+                },
+                _ => false,
+            })
+    }
 }
 
 /// Definition of a function argument.

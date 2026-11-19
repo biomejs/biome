@@ -1029,20 +1029,21 @@ fn method_signatures<'db>(
 }
 
 /// Returns whether a parameter of `function` has a literal type, such as
-/// `"a"`, `1`, or `true`, which makes TypeScript try the signature before the
-/// others of its method.
+/// `"a"`, `1`, `true`, `null`, or a template literal type without
+/// substitutions, which makes TypeScript try the signature before the others
+/// of its method.
 fn is_specialized<'db>(db: &'db dyn ModuleDb, function: InternedFunction<'db>) -> bool {
     function.parameters(db).iter().any(|parameter| {
-        matches!(
-            parameter.ty(),
-            InferredTypeData::Literal(literal) if matches!(
-                literal.literal(db),
+        let ty = parameter.ty();
+        ty == InferredTypeData::Null
+            || matches!(ty, InferredTypeData::Literal(literal) if match literal.literal(db) {
                 InferredLiteral::BigInt(_)
-                    | InferredLiteral::Boolean(_)
-                    | InferredLiteral::Number(_)
-                    | InferredLiteral::String(_)
-            )
-        )
+                | InferredLiteral::Boolean(_)
+                | InferredLiteral::Number(_)
+                | InferredLiteral::String(_) => true,
+                InferredLiteral::Template(text) => !text.contains("${"),
+                InferredLiteral::Object(_) | InferredLiteral::RegExp(_) => false,
+            })
     })
 }
 

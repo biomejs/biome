@@ -14,9 +14,9 @@ use biome_js_syntax::{
 };
 use biome_js_type_info::{
     Class, EnumTypes, Function, FunctionParameter, FunctionParameterBinding, GenericTypeParameter,
-    Interface, Literal, RawTypeCollector, RawTypeData, RawTypeId, TypeData, TypeId,
-    TypeImportQualifier, TypeMember, TypeMemberKind, TypeReference, TypeStore, UnionCollector,
-    global_type_id_for_type_name, resolved::InferredLocalTypeId,
+    Interface, RawTypeCollector, RawTypeData, RawTypeId, TypeData, TypeId, TypeImportQualifier,
+    TypeMember, TypeMemberKind, TypeReference, TypeStore, UnionCollector,
+    global_type_id_for_type_name, resolved::InferredLocalTypeId, specialized_first,
 };
 use biome_rowan::{AstNode, SyntaxKindSet, Text, TextRange, TokenText};
 use indexmap::IndexMap;
@@ -511,8 +511,9 @@ impl JsModuleInfoCollector {
         }
 
         // A set of same-name function overloads becomes an object with one call
-        // signature per declaration, placed on the binding that name resolution
-        // returns for the set (its last one) so a call site can select among them.
+        // signature per declaration, in the order that TypeScript tries them,
+        // placed on the binding that name resolution returns for the set (its
+        // last one) so a call site can select among them.
         let carriers: Vec<(usize, Vec<TypeMember>)> = semantic_model
             .scopes()
             .flat_map(|scope| scope.overload_sets())
@@ -524,6 +525,7 @@ impl JsModuleInfoCollector {
                         ty: self.bindings[id.index()].ty.clone(),
                     })
                     .collect();
+                let signatures = specialized_first(self, signatures, |member| &member.ty);
                 let representative = set.last().expect("overload set has 2+ entries").index();
                 (representative, signatures)
             })
@@ -859,19 +861,10 @@ impl JsModuleInfoCollector {
         }
     }
 
-    /// Returns whether a parameter of `function` has a literal type, such
-    /// as `"a"`, `1`, or `true`, which makes TypeScript try the signature
-    /// before the others of its method.
+    /// Returns whether TypeScript tries `function` before the other
+    /// overloads of its method, as [`Function::is_specialized`] tells.
     fn is_specialized(&self, function: &Function) -> bool {
-        function.parameters.iter().any(|parameter| {
-            matches!(
-                self.local_data(parameter.ty()),
-                Some(TypeData::Literal(literal)) if matches!(
-                    literal.as_ref(),
-                    Literal::BigInt(_) | Literal::Boolean(_) | Literal::Number(_) | Literal::String(_)
-                )
-            )
-        })
+        function.is_specialized(|ty| self.local_data(ty))
     }
 
     /// Returns the data of a reference to the module's own table.

@@ -499,10 +499,11 @@ a parameter, written as the arrow's body or as the only statement, a
 | Code | TypeScript | Biome | Effect on rules |
 | --- | --- | --- | --- |
 | `x: T, with T extends null; switch (x) { case null: break; default: x }` | `never` | `T` | A rule can miss that `default` never runs. |
-| `interface O6 { f(x: string): 2; f(x: "a"): 1 }; o6: O6; o6.f("a")` | `1` | `2` | Disjoint: `noUnnecessaryConditions` can report `case 1:` on the result as never matching. |
+| ``interface U { f(x: string): 2; f(x: `a`): 1 }; u: U; u.f("a")`` | `1` | `2` | Disjoint: `noUnnecessaryConditions` can report `case 1:` on the result as never matching. |
 
-Biome tries the overloads of one declaration in their written order, where
-TypeScript tries those with a parameter of a literal type first.
+Biome tries the overloads with a parameter of a literal type first, as
+TypeScript does. It doesn't select an overload for a string argument through
+a parameter with a template literal type, as in the second row.
 
 ### Declarations and globals
 

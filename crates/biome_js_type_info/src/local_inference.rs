@@ -3086,9 +3086,10 @@ impl TypeMember {
     ///
     /// Method signatures with the same name form one member, so that a call
     /// selects the overload that accepts its arguments. The type of that
-    /// member has one call signature per overload, in declaration order. An
-    /// optional method is optional as a whole. Members that can't be
-    /// collected are `None`.
+    /// member has one call signature per overload, in the order that
+    /// TypeScript tries them (see [`specialized_first`]). The call signatures
+    /// of the type itself are in that order too. An optional method is
+    /// optional as a whole. Members that can't be collected are `None`.
     ///
     /// In this example, `listen` is one member with two call signatures. A
     /// call with a single argument, such as `listen({})`, selects the second
@@ -3155,7 +3156,7 @@ impl TypeMember {
             }
         }
 
-        collected
+        let mut members: Vec<_> = collected
             .into_iter()
             .map(|collected| match collected {
                 CollectedMember::Direct(member) => member,
@@ -3174,15 +3175,37 @@ impl TypeMember {
                     Some(member)
                 }
             })
-            .collect()
+            .collect();
+        // The call signatures of the type are its overloads, which keep their
+        // positions among the other members.
+        let positions: Vec<_> = (0..members.len())
+            .filter(|index| {
+                members[*index]
+                    .as_ref()
+                    .is_some_and(|member| member.kind == TypeMemberKind::CallSignature)
+            })
+            .collect();
+        if positions.len() > 1 {
+            let signatures: Vec<_> = positions
+                .iter()
+                .filter_map(|index| members[*index].take())
+                .collect();
+            let signatures = specialized_first(collector, signatures, |member| &member.ty);
+            for (index, signature) in positions.into_iter().zip(signatures) {
+                members[index] = Some(signature);
+            }
+        }
+        members
     }
 
-    /// Returns an object type with one call signature per overload, in
-    /// declaration order.
+    /// Returns an object type with one call signature per overload, in the
+    /// order that TypeScript tries them for a call (see
+    /// [`specialized_first`]).
     fn overload_set_type(
         collector: &mut dyn RawTypeCollector,
         signatures: Vec<TypeReference>,
     ) -> TypeReference {
+        let signatures = specialized_first(collector, signatures, |ty| ty);
         collector.reference_to_owned_data(TypeData::object_with_members(
             signatures
                 .into_iter()
@@ -3193,6 +3216,28 @@ impl TypeMember {
                 .collect(),
         ))
     }
+}
+
+/// Returns the overloads of one declaration in the order that TypeScript
+/// tries them for a call: those with a parameter of a literal type first
+/// (see [`Function::is_specialized`]), then the others, each group in
+/// declaration order. `signature` returns the type of an overload.
+///
+/// For example, with `f(x: string): 2; f(x: "a"): 1`, `f("a")` is `1`.
+pub fn specialized_first<T>(
+    collector: &dyn RawTypeCollector,
+    overloads: Vec<T>,
+    signature: impl Fn(&T) -> &TypeReference,
+) -> Vec<T> {
+    let (mut specialized, others): (Vec<_>, Vec<_>) = overloads.into_iter().partition(|overload| {
+        matches!(
+            collector.get_by_reference(signature(overload)),
+            Some(TypeData::Function(function))
+                if function.is_specialized(|ty| collector.get_by_reference(ty))
+        )
+    });
+    specialized.extend(others);
+    specialized
 }
 
 /// Registers the function type of a method signature and returns it with the
