@@ -417,6 +417,12 @@ The intersection builder:
 - merges operands that are all objects, interfaces, class instances,
   functions, or namespaces into one anonymous type, which loses their names.
 
+Narrowing builds its intersections with `intersect_narrowed` in
+[`narrowing.rs`](src/narrowing.rs), which applies every rule above except
+the merging, so each operand keeps the declaration it names. A later
+`instanceof` or type predicate compares the operands of `B & A` with `A` by
+declaration, which it can't do for a merged anonymous type.
+
 A property that several merged operands declare has the intersection of their
 types, where an optional property's type includes `undefined`, and it is
 optional or readonly only when every operand declares it so. Methods, and

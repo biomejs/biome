@@ -1,0 +1,117 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidNarrowedIntersections.ts
+---
+# Input
+```ts
+// should generate diagnostics
+// A type predicate that targets `NonNullable<T>` takes the call's type
+// argument, and `asserts this is T` gives `this` the intersection with `T`,
+// so these values are never nullish.
+
+declare function isNonNull<T>(value: T): value is NonNullable<T>;
+declare function assertNonNull<T>(value: T): asserts value is NonNullable<T>;
+
+function nonNullTarget(value: string | null) {
+	if (isNonNull(value)) {
+		return value ?? "";
+	}
+	return "";
+}
+
+function assertedTarget(value: string | undefined) {
+	assertNonNull(value);
+	return value ?? "";
+}
+
+class Ready {
+	ready?: string;
+
+	assertReady(): asserts this is { ready: string } {}
+
+	label() {
+		this.assertReady();
+		return this.ready ?? "";
+	}
+}
+
+```
+
+# Diagnostics
+```
+invalidNarrowedIntersections.ts:11:10 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary nullish coalescing.
+  
+     9 │ function nonNullTarget(value: string | null) {
+    10 │ 	if (isNonNull(value)) {
+  > 11 │ 		return value ?? "";
+       │ 		       ^^^^^
+    12 │ 	}
+    13 │ 	return "";
+  
+  i Drop ?? and the fallback expression.
+  
+     9 │ function nonNullTarget(value: string | null) {
+    10 │ 	if (isNonNull(value)) {
+  > 11 │ 		return value ?? "";
+       │ 		             ^^
+    12 │ 	}
+    13 │ 	return "";
+  
+  i The left-hand side is guaranteed to be non-nullish, so the fallback is unreachable.
+  
+
+```
+
+```
+invalidNarrowedIntersections.ts:18:9 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary nullish coalescing.
+  
+    16 │ function assertedTarget(value: string | undefined) {
+    17 │ 	assertNonNull(value);
+  > 18 │ 	return value ?? "";
+       │ 	       ^^^^^
+    19 │ }
+    20 │ 
+  
+  i Drop ?? and the fallback expression.
+  
+    16 │ function assertedTarget(value: string | undefined) {
+    17 │ 	assertNonNull(value);
+  > 18 │ 	return value ?? "";
+       │ 	             ^^
+    19 │ }
+    20 │ 
+  
+  i The left-hand side is guaranteed to be non-nullish, so the fallback is unreachable.
+  
+
+```
+
+```
+invalidNarrowedIntersections.ts:28:10 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary nullish coalescing.
+  
+    26 │ 	label() {
+    27 │ 		this.assertReady();
+  > 28 │ 		return this.ready ?? "";
+       │ 		       ^^^^^^^^^^
+    29 │ 	}
+    30 │ }
+  
+  i Drop ?? and the fallback expression.
+  
+    26 │ 	label() {
+    27 │ 		this.assertReady();
+  > 28 │ 		return this.ready ?? "";
+       │ 		                  ^^
+    29 │ 	}
+    30 │ }
+  
+  i The left-hand side is guaranteed to be non-nullish, so the fallback is unreachable.
+  
+
+```

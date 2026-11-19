@@ -8,6 +8,7 @@ use biome_js_syntax::numbers::{
 };
 use biome_rowan::Text;
 
+use crate::builders::IntersectionBuilder;
 use crate::generated::global_types::ids::FUNCTION_ID_GLOBAL_TYPE_ID;
 use crate::globals::{
     GLOBAL_ANY_KEYWORD_ID, GLOBAL_BIGINT_KEYWORD_ID, GLOBAL_BOOLEAN_KEYWORD_ID,
@@ -15,13 +16,16 @@ use crate::globals::{
     GLOBAL_STRING_KEYWORD_ID, GLOBAL_SYMBOL_KEYWORD_ID, GLOBAL_UNDEFINED_ID, GLOBAL_UNKNOWN_ID,
     GLOBAL_UNKNOWN_KEYWORD_ID,
 };
-use crate::interned_types::{InternedLiteral, InternedObject, Literal, TypeMemberKind};
+use crate::interned_types::{
+    InternedGenericTypeParameter, InternedIntersection, InternedLiteral, InternedObject, Literal,
+    TypeMember, TypeMemberKind,
+};
 use crate::resolved::InferredTypeData;
 use crate::type_relation::{
     Assignability, InstanceType, PropertyLookup, PropertyPresence, TypeResolver,
-    assignment_reduced_members, find_property, instance_types, is_derived_from,
-    is_empty_object_type, is_subtype, primitive_can_satisfy, property_presence,
-    resolve_wrapped_type, widened_literal,
+    assignment_reduced_members, find_property, instance_types, is_assignable_in_generic_body,
+    is_derived_from, is_empty_object_type, is_subtype, primitive_can_satisfy, property_presence,
+    referenced_generic, resolve_wrapped_type, widened_literal,
 };
 use crate::{
     ObjectKind, RawTypeData, RawTypeId, TypeDb, TypeReference, TypeReferenceQualifier,
@@ -592,8 +596,8 @@ pub fn raw_predicate_target<'a>(
 /// Pass a normalized `ty`. The result is `NeverKeyword` only when no member of
 /// `ty` can pass, and it is `ty` itself when the test removes nothing. A member
 /// stays unchanged when the test can't tell whether its values pass, which is
-/// the case for `Unknown`, generic types, and unresolved handles. Other
-/// members follow these rules:
+/// the case for `Unknown` and unresolved handles. Other members follow these
+/// rules:
 ///
 /// - A `void` member becomes `Unknown`, because a `void` value can be any value
 ///   at runtime.
@@ -612,6 +616,12 @@ pub fn raw_predicate_target<'a>(
 /// - `{}`, a type literal or an object expression without members, becomes
 ///   `object` in the true branch of `typeof` with `"object"`, as in
 ///   TypeScript. An empty interface or class stays as it is.
+/// - A type parameter `T` becomes its intersection with the type of the
+///   values that pass, as in TypeScript: `T & {}` for truthiness and
+///   `!= null`, `T & ({} | undefined)` for `!== null`, `T & string` for
+///   `typeof` with `"string"`, and so on, unless its constraint decides the
+///   test. An intersection with a type parameter narrows each operand. The
+///   type parameter's constraint is read through `resolve`.
 /// - The false branch of an equality test keeps a primitive type such as
 ///   `string`, because a type can't exclude a single literal from it. The false
 ///   branch of a truthiness test keeps `string`, `number`, and `bigint` for the
@@ -898,9 +908,15 @@ pub fn has_readonly_property<'db>(
 ///   removed. A member stays when it declares the property, even as
 ///   optional, or when one of its index signatures accepts the name. A member
 ///   also stays when Biome can't tell whether it has the property, as for a
-///   primitive, a function, a tuple, or a class instance. When no member
-///   declares the property or has such an index signature, `ty` is returned
-///   unchanged. TypeScript gives `ty & Record<name, unknown>` instead.
+///   primitive, a function, a tuple, or a class instance.
+/// - When `positive` is true and every member lacks the property, the result
+///   is the intersection of `ty` with `{ name: unknown }`, as TypeScript
+///   gives `ty & Record<name, unknown>`. A member lacks the property when it
+///   is an object type that neither declares it nor has an index signature
+///   that accepts the name, `object`, `{}`, or a type parameter whose
+///   constraint lacks it. The members of `Object`, such as `toString`, count
+///   as declared. When no member declares the property but Biome can't tell
+///   whether one lacks it, `ty` is returned unchanged.
 /// - When `positive` is false, the members that declare the property as
 ///   required are removed, which can give `never`.
 ///
@@ -913,11 +929,12 @@ pub fn has_readonly_property<'db>(
 pub fn narrow_by_in_operator<'db>(
     db: &'db dyn TypeDb,
     ty: InferredTypeData<'db>,
-    name: &str,
+    name: &Text,
     positive: bool,
     mut resolve: impl FnMut(InferredTypeData<'db>) -> InferredTypeData<'db>,
 ) -> InferredTypeData<'db> {
-    if is_narrowing_invariant(ty) || ty == InferredTypeData::NeverKeyword || name.starts_with('#') {
+    let text = name.text();
+    if is_narrowing_invariant(ty) || ty == InferredTypeData::NeverKeyword || text.starts_with('#') {
         return ty;
     }
     let resolve: &mut TypeResolver<'db, '_> = &mut resolve;
@@ -944,7 +961,7 @@ pub fn narrow_by_in_operator<'db>(
         presences.push(if is_primitive {
             PropertyPresence::Unknown
         } else {
-            property_presence(db, *member, name, resolve)
+            property_presence(db, *member, text, resolve)
         });
     }
     if positive
@@ -955,7 +972,25 @@ pub fn narrow_by_in_operator<'db>(
             )
         })
     {
-        return ty;
+        let lacks_property = members.iter().zip(&presences).all(|(member, presence)| {
+            *presence == PropertyPresence::Missing || lacks_property(db, *member, text, resolve)
+        });
+        return if lacks_property {
+            let record = TypeMember {
+                kind: TypeMemberKind::Named(name.clone()),
+                ty: InferredTypeData::UnknownKeyword,
+            };
+            let record = InferredTypeData::Object(InternedObject::new(
+                db,
+                None,
+                Box::from([record]),
+                false,
+                ObjectKind::Shape,
+            ));
+            intersect_narrowed(db, ty, record)
+        } else {
+            ty
+        };
     }
     let removed = if positive {
         PropertyPresence::Missing
@@ -977,6 +1012,43 @@ pub fn narrow_by_in_operator<'db>(
     }
 }
 
+/// Returns whether `member` is `object` or a type parameter, and no value of
+/// it has the property `name`. As TypeScript does for `name in value`, the
+/// property is looked up on the type parameter's constraint, and on `Object`
+/// for `object` and for a type parameter without a constraint.
+///
+/// Returns false for any other type, and when Biome can't tell, as for a
+/// constraint whose members Biome can't list.
+fn lacks_property<'db>(
+    db: &'db dyn TypeDb,
+    member: InferredTypeData<'db>,
+    name: &str,
+    resolve: &mut TypeResolver<'db, '_>,
+) -> bool {
+    let constraint = match referenced_generic(db, member) {
+        Some(generic) => generic.constraint(db),
+        None if member == InferredTypeData::ObjectKeyword => None,
+        None => return false,
+    };
+    let Some(constraint) = constraint else {
+        return property_presence(db, empty_object(db), name, resolve) == PropertyPresence::Missing;
+    };
+    let mut remaining = MAX_NARROWING_STEPS;
+    let Some(constraint) = flattened(db, constraint, resolve) else {
+        return false;
+    };
+    let Some(members) = union_members(db, constraint, &mut remaining) else {
+        return false;
+    };
+    members.into_iter().all(|member| {
+        if member == InferredTypeData::ObjectKeyword {
+            property_presence(db, empty_object(db), name, resolve) == PropertyPresence::Missing
+        } else {
+            property_presence(db, member, name, resolve) == PropertyPresence::Missing
+        }
+    })
+}
+
 /// Narrows `ty` by the runtime test `value instanceof C`, where
 /// `constructor` is the type of `C`, matching TypeScript except where noted.
 ///
@@ -988,30 +1060,33 @@ pub fn narrow_by_in_operator<'db>(
 /// - When `positive` is true, a member derived from an instance type stays,
 ///   a member that an instance type is derived from becomes that instance
 ///   type, and the other members are removed. So `A | string` becomes `B`
-///   with `class B extends A`. When no member remains, the result is the
-///   instance type if it is a subtype of `ty`, as `A` is of
-///   `{ a: number } | string` with `class A { a = 1 }`, and `ty` otherwise,
-///   where TypeScript gives the intersection of the two. `unknown` and `any`
-///   become the instance type, which has an `any` type argument for each
-///   type parameter of a generic class, as `Map<any, any>` for `Map`.
+///   with `class B extends A`. A type parameter is derived from what its
+///   constraint is derived from. When no member relates to an instance type,
+///   each type parameter whose constraint the instance type is derived from,
+///   or that has no constraint, gives its intersection with the instance
+///   type, as `T` gives `T & A`. When no member remains, the result follows
+///   TypeScript's choice between the instance type, `ty`, and their
+///   intersection, as for a type predicate (see
+///   [`narrow_by_type_predicate`]), so `Bar` gives `Bar & A`. `unknown` and
+///   `any` become the instance type, which has an `any` type argument for
+///   each type parameter of a generic class, as `Map<any, any>` for `Map`.
 /// - When `positive` is false, the members derived from the instance type
 ///   are removed, which can give `never`. As in TypeScript, nothing is
 ///   removed when `constructor` has several instance types, or when the
 ///   instance type is `{}` or not an object type, and `any` stays `any`.
 ///
 /// A member of a union that an instance of a generic class is derived from
-/// stays as it is, because it has its own type arguments, and the result is
-/// `ty` when no member remains, where TypeScript gives an intersection with
-/// the instance type that has `any` type arguments.
+/// stays as it is, because it has its own type arguments.
 ///
 /// Returns `ty` unchanged when Biome can't tell the result:
 ///
 /// - [`instance_types`] can't tell the instance types, as for `Object`,
 ///   `Function`, a generic construct signature, or a class with a static
 ///   `[Symbol.hasInstance]` method;
-/// - a member of the union is a generic, or `unknown` when `positive` is
-///   true;
+/// - a member of the union is `unknown` when `positive` is true;
 /// - [`is_derived_from`] can't decide for a pair of types;
+/// - a comparison that chooses among the instance type, `ty`, and their
+///   intersection is undetermined;
 /// - the union traversal would visit more than 256 types.
 ///
 /// `resolve` resolves handles as for [`narrow_type`].
@@ -1057,15 +1132,6 @@ fn instances_in<'db>(
             .collect::<Option<Vec<_>>>()
             .map(|types| InferredTypeData::union_from_types(db, types));
     }
-    // Gives the union of the instance types, or `None` when one is a generic
-    // class without type arguments, because a read must never have that type.
-    let instance_type = || {
-        instances
-            .iter()
-            .map(|instance| (!instance.is_generic()).then_some(instance.target))
-            .collect::<Option<Vec<_>>>()
-            .map(|types| InferredTypeData::union_from_types(db, types))
-    };
     let mut remaining = MAX_NARROWING_STEPS;
     let members = union_members(db, ty, &mut remaining)?;
     if members.contains(&InferredTypeData::UnknownKeyword) {
@@ -1073,9 +1139,20 @@ fn instances_in<'db>(
     }
     let mut narrowed = Vec::new();
     for instance in instances {
+        let related = narrowed.len();
         for member in &members {
             remaining = remaining.checked_sub(1)?;
-            if is_derived_from(db, *member, instance.target, resolve)? {
+            // A type parameter is derived from what its constraint is
+            // derived from, and no instance type is derived from it.
+            if let Some(generic) = referenced_generic(db, *member) {
+                let is_derived = match generic.constraint(db) {
+                    Some(constraint) => is_derived_from(db, constraint, instance.target, resolve)?,
+                    None => false,
+                };
+                if is_derived {
+                    narrowed.push(*member);
+                }
+            } else if is_derived_from(db, *member, instance.target, resolve)? {
                 narrowed.push(*member);
             } else if is_derived_from(db, instance.target, *member, resolve)? {
                 // A member keeps its own type arguments, which an instance
@@ -1087,13 +1164,289 @@ fn instances_in<'db>(
                 });
             }
         }
+        // An instance type that no member relates to gives its intersection
+        // with each type parameter whose constraint it is derived from. An
+        // unconstrained type parameter counts as `{}`, from which every
+        // object type is derived.
+        if narrowed.len() == related {
+            for member in &members {
+                let Some(generic) = referenced_generic(db, *member) else {
+                    continue;
+                };
+                let is_related = match generic.constraint(db) {
+                    Some(constraint) => is_derived_from(db, instance.target, constraint, resolve)?,
+                    None => true,
+                };
+                if is_related {
+                    let instance_type = instance.with_any_arguments(db)?;
+                    narrowed.push(intersect_narrowed(db, *member, instance_type));
+                }
+            }
+        }
     }
     if !narrowed.is_empty() {
         return Some(InferredTypeData::union_from_types(db, narrowed));
     }
-    let instance_type = instance_type()?;
-    (is_subtype(db, instance_type, ty, resolve) == Assignability::Assignable)
-        .then_some(instance_type)
+    let instance_types = instances
+        .iter()
+        .map(|instance| instance.with_any_arguments(db))
+        .collect::<Option<Vec<_>>>()?;
+    narrow_unrelated(
+        db,
+        ty,
+        InferredTypeData::union_from_types(db, instance_types),
+        resolve,
+    )
+}
+
+/// Returns the type that TypeScript gives a value of type `ty` that a test
+/// shows to have type `candidate`, when no member of `ty` relates to a member
+/// of `candidate`, or `None` when Biome can't tell.
+///
+/// As in TypeScript, the result is `candidate` when it is a subtype of `ty`,
+/// `ty` when it is assignable to `candidate`, `candidate` when it is
+/// assignable to `ty`, and otherwise the intersection of the two, built by
+/// [`intersect_narrowed`]. So `Bar` becomes `Bar & Foo` for `isFoo(x)` with
+/// `interface Foo { a: number }` and `interface Bar { c: number }`. A type
+/// parameter that the types refer to belongs to the narrowed code, so it
+/// relates to another type only through its constraint (see
+/// [`is_assignable_in_generic_body`]). A comparison that can't tell gives
+/// `None`, so the value keeps its type.
+fn narrow_unrelated<'db>(
+    db: &'db dyn TypeDb,
+    ty: InferredTypeData<'db>,
+    candidate: InferredTypeData<'db>,
+    resolve: &mut TypeResolver<'db, '_>,
+) -> Option<InferredTypeData<'db>> {
+    match is_subtype(db, candidate, ty, resolve) {
+        Assignability::Assignable => return Some(candidate),
+        Assignability::Undetermined => return None,
+        Assignability::NotAssignable => {}
+    }
+    match is_assignable_in_generic_body(db, ty, candidate, resolve) {
+        Assignability::Assignable => return Some(ty),
+        Assignability::Undetermined => return None,
+        Assignability::NotAssignable => {}
+    }
+    match is_assignable_in_generic_body(db, candidate, ty, resolve) {
+        Assignability::Assignable => Some(candidate),
+        Assignability::Undetermined => None,
+        Assignability::NotAssignable => Some(intersect_narrowed(db, ty, candidate)),
+    }
+}
+
+/// Narrows `ty` by the runtime test `#name in value`, where `class` is the
+/// type of the class that declares the private name `#name`, as TypeScript
+/// does. Only an object that the class constructed, or the class itself for a
+/// static name, has the private name.
+///
+/// For a name that instances have, the test narrows as `value instanceof C`
+/// does (see [`narrow_by_instanceof`]), with the instance type of the class.
+/// For a static name, which `is_static` tells, it compares the members of
+/// `ty` with the class itself. In the true branch, a member that is the
+/// class stays and a member that is another class, an instance, or a
+/// primitive is removed. The false branch gives `never` when `ty` is the
+/// class and otherwise keeps `ty`, including a member that is the class, as
+/// TypeScript does: there it removes only the members derived from the
+/// class, and the class itself is not one of them. A member that Biome
+/// can't compare leaves `ty` unchanged in either branch, and so does a class
+/// whose instance type Biome can't tell. `resolve` resolves handles as for
+/// [`narrow_type`].
+pub fn narrow_by_private_name<'db>(
+    db: &'db dyn TypeDb,
+    ty: InferredTypeData<'db>,
+    class: InferredTypeData<'db>,
+    is_static: bool,
+    positive: bool,
+    mut resolve: impl FnMut(InferredTypeData<'db>) -> InferredTypeData<'db>,
+) -> InferredTypeData<'db> {
+    if is_narrowing_invariant(ty) || ty == InferredTypeData::NeverKeyword {
+        return ty;
+    }
+    let resolve: &mut TypeResolver<'db, '_> = &mut resolve;
+    if !is_static {
+        let Some(instances) = instance_types(db, class, resolve) else {
+            return ty;
+        };
+        let narrowed = if positive {
+            instances_in(db, ty, &instances, resolve)
+        } else if ty == InferredTypeData::AnyKeyword {
+            None
+        } else {
+            instances_excluded(db, ty, &instances, resolve)
+        };
+        return narrowed.unwrap_or(ty);
+    }
+    if matches!(
+        ty,
+        InferredTypeData::AnyKeyword | InferredTypeData::UnknownKeyword
+    ) {
+        return if positive { class } else { ty };
+    }
+    let class_instance = InferredTypeData::instance_of(db, class, Box::default());
+    if !positive {
+        return match is_same_class(db, ty, class_instance, resolve) {
+            Some(true) => InferredTypeData::NeverKeyword,
+            Some(false) | None => ty,
+        };
+    }
+    let mut remaining = MAX_NARROWING_STEPS;
+    let Some(members) = union_members(db, ty, &mut remaining) else {
+        return ty;
+    };
+    let mut kept = Vec::with_capacity(members.len());
+    for member in &members {
+        let Some(is_class) = is_same_class(db, *member, class_instance, resolve) else {
+            return ty;
+        };
+        if is_class {
+            kept.push(*member);
+        }
+    }
+    if kept.is_empty() {
+        return narrow_unrelated(db, ty, class, resolve).unwrap_or(ty);
+    }
+    if kept.len() == members.len() {
+        ty
+    } else {
+        InferredTypeData::union_from_types(db, kept)
+    }
+}
+
+/// Returns whether `member` is the class whose instance type is
+/// `class_instance`, compared by declaration, or `None` when Biome can't
+/// tell. A primitive, an instance, an object type, or a function is no
+/// class.
+fn is_same_class<'db>(
+    db: &'db dyn TypeDb,
+    member: InferredTypeData<'db>,
+    class_instance: InferredTypeData<'db>,
+    resolve: &mut TypeResolver<'db, '_>,
+) -> Option<bool> {
+    if member.is_primitive(db) {
+        return Some(false);
+    }
+    match resolve_wrapped_type(db, member, resolve).expand_canonical_global(db) {
+        InferredTypeData::Class(_) => {
+            let member_instance = InferredTypeData::instance_of(db, member, Box::default());
+            Some(
+                is_derived_from(db, member_instance, class_instance, resolve)?
+                    && is_derived_from(db, class_instance, member_instance, resolve)?,
+            )
+        }
+        InferredTypeData::InstanceOf(_)
+        | InferredTypeData::Object(_)
+        | InferredTypeData::Interface(_)
+        | InferredTypeData::Function(_)
+        | InferredTypeData::Tuple(_)
+        | InferredTypeData::ObjectKeyword
+        | InferredTypeData::Null
+        | InferredTypeData::Undefined => Some(false),
+        _ => None,
+    }
+}
+
+/// Narrows `ty` by the runtime test `value.constructor === C`, where
+/// `constructor` is the type of `C`, in the branch where the test holds, as
+/// TypeScript does. The other branch keeps `ty`.
+///
+/// The test narrows only when `C` is a class, or another single constructor
+/// whose `prototype` property gives its instances a type other than `any`,
+/// `Object`, or `Function`. A member of `ty` stays when Biome can't rule out
+/// that `C` constructed it:
+///
+/// - when `C` is a class that the code declares, or the member is an
+///   instance of one, the member must be an instance of `C` itself, not of a
+///   class derived from it, because a derived class has its own
+///   `constructor`;
+/// - otherwise, the member must be assignable to the instance type, so
+///   `string` stays for `String` and `Date` for `Date`, whose instance types
+///   TypeScript's library declares as interfaces.
+///
+/// `any` becomes the instance type, with an `any` type argument for each
+/// type parameter of a generic class, and `unknown` stays. As in TypeScript,
+/// an object that overrides `constructor` can pass the test without being
+/// an instance of `C`. `resolve` resolves handles as for [`narrow_type`].
+pub fn narrow_by_constructor<'db>(
+    db: &'db dyn TypeDb,
+    ty: InferredTypeData<'db>,
+    constructor: InferredTypeData<'db>,
+    mut resolve: impl FnMut(InferredTypeData<'db>) -> InferredTypeData<'db>,
+) -> InferredTypeData<'db> {
+    if is_narrowing_invariant(ty) || ty == InferredTypeData::NeverKeyword {
+        return ty;
+    }
+    let resolve: &mut TypeResolver<'db, '_> = &mut resolve;
+    let resolved = resolve_wrapped_type(db, constructor, resolve);
+    // TypeScript reads the instances' type from the `prototype` property,
+    // which a construct signature without one doesn't give.
+    let is_class = matches!(
+        resolved.expand_canonical_global(db),
+        InferredTypeData::Class(_)
+    );
+    if !is_class
+        && !matches!(
+            find_property(db, resolved, "prototype", resolve),
+            PropertyLookup::Found { ty, .. } if ty != InferredTypeData::AnyKeyword
+        )
+    {
+        return ty;
+    }
+    let Some(instances) = instance_types(db, constructor, resolve) else {
+        return ty;
+    };
+    let [instance] = instances.as_slice() else {
+        return ty;
+    };
+    if ty == InferredTypeData::AnyKeyword {
+        return instance.with_any_arguments(db).unwrap_or(ty);
+    }
+    let mut remaining = MAX_NARROWING_STEPS;
+    let Some(members) = union_members(db, ty, &mut remaining) else {
+        return ty;
+    };
+    let target_is_class = is_declared_class_instance(db, instance.target, resolve);
+    let mut kept = Vec::with_capacity(members.len());
+    for member in &members {
+        let stays = if *member == InferredTypeData::UnknownKeyword {
+            true
+        } else if target_is_class || is_declared_class_instance(db, *member, resolve) {
+            !matches!(
+                (
+                    is_derived_from(db, *member, instance.target, resolve),
+                    is_derived_from(db, instance.target, *member, resolve),
+                ),
+                (Some(false), _) | (_, Some(false))
+            )
+        } else {
+            is_assignable_in_generic_body(db, *member, instance.target, resolve)
+                != Assignability::NotAssignable
+        };
+        if stays {
+            kept.push(*member);
+        }
+    }
+    if kept.len() == members.len() {
+        ty
+    } else {
+        InferredTypeData::union_from_types(db, kept)
+    }
+}
+
+/// Returns whether `ty` is an instance of a class that is not built in.
+fn is_declared_class_instance<'db>(
+    db: &'db dyn TypeDb,
+    ty: InferredTypeData<'db>,
+    resolve: &mut TypeResolver<'db, '_>,
+) -> bool {
+    matches!(
+        ty,
+        InferredTypeData::InstanceOf(instance)
+            if matches!(
+                resolve(instance.ty(db)).expand_canonical_global(db),
+                InferredTypeData::Class(class) if !class.is_builtin(db)
+            )
+    )
 }
 
 /// Returns the false branch of [`narrow_by_instanceof`], or `None` when it
@@ -1117,7 +1470,16 @@ fn instances_excluded<'db>(
     let mut kept = Vec::with_capacity(members.len());
     for member in &members {
         remaining = remaining.checked_sub(1)?;
-        if !is_derived_from(db, *member, instance.target, resolve)? {
+        // A type parameter is derived from what its constraint is derived
+        // from.
+        let is_derived = match referenced_generic(db, *member) {
+            Some(generic) => match generic.constraint(db) {
+                Some(constraint) => is_derived_from(db, constraint, instance.target, resolve)?,
+                None => false,
+            },
+            None => is_derived_from(db, *member, instance.target, resolve)?,
+        };
+        if !is_derived {
             kept.push(*member);
         }
     }
@@ -1185,12 +1547,20 @@ pub fn may_narrow_by_instanceof(db: &dyn TypeDb, declared: InferredTypeData) -> 
 ///   of `target` stays, a member of `target` that is a subtype of a member of
 ///   `ty` replaces it, and the other members are removed. So `Foo2 | Bar`
 ///   becomes `Foo2` with `interface Foo2 extends Foo`, and `unknown` becomes
-///   `target`. When no member remains, the result is `target` if it is a
-///   subtype of `ty`, and `ty` otherwise, where TypeScript gives an
-///   intersection such as `(string | number) & Foo`.
+///   `target`. A type parameter relates to another type only through its
+///   constraint. A member of `target` that no member relates to gives its
+///   intersection with each type parameter whose constraint it is a subtype
+///   of, or that has no constraint, so `T | string` becomes `T & Foo`.
+/// - When no member remains in the true branch, the result is, as in
+///   TypeScript, `target` if it is a subtype of `ty`, `ty` if it is
+///   assignable to `target`, `target` if it is assignable to `ty`, and
+///   otherwise the intersection of the two, so `Bar` becomes `Bar & Foo`
+///   with `interface Bar { c: number }`. The first comparison that Biome
+///   can't tell keeps `ty`.
 /// - When `positive` is false, the result removes each member that the true
 ///   branch keeps as it is rather than replacing it with a member of
-///   `target`. As in TypeScript, this can give `never`.
+///   `target`. A type parameter stays unless it is a subtype of `target`. As
+///   in TypeScript, this can give `never`.
 ///
 /// When a member and a member of `target` are subtypes of each other,
 /// TypeScript's strict subtype relation picks which of the two the true branch
@@ -1213,9 +1583,9 @@ pub fn may_narrow_by_instanceof(db: &dyn TypeDb, declared: InferredTypeData) -> 
 /// `ty` is returned unchanged in these cases:
 ///
 /// - A comparison of two members can't tell whether either is a subtype of
-///   the other, as for generics, classes that can declare private members,
-///   and literal types that TypeScript may widen. [`is_subtype`] describes
-///   these comparisons.
+///   the other, as for classes that can declare private members and literal
+///   types that TypeScript may widen. [`is_subtype`] describes these
+///   comparisons.
 /// - `ty` is a union with `unknown`.
 /// - Biome may reach two classes with the same contents as one.
 /// - `target` has `any` or an undetermined member. When `ty` is `any`, only
@@ -1566,6 +1936,7 @@ fn predicate_branch<'db>(
     let mut narrowed = Vec::new();
     let mut kept_as_is = vec![false; members.len()];
     for candidate in &candidates {
+        let related = narrowed.len();
         for (member, kept) in members.iter().zip(&mut kept_as_is) {
             remaining = remaining.checked_sub(1)?;
             match predicate_match(db, *member, *candidate, resolve)? {
@@ -1578,10 +1949,32 @@ fn predicate_branch<'db>(
                 PredicateMatch::Unrelated => {}
             }
         }
+        // A member of the target that no member relates to gives its
+        // intersection with each type parameter whose constraint it is a
+        // subtype of, or that has no constraint.
+        if narrowed.len() == related {
+            for member in &members {
+                let Some(generic) = referenced_generic(db, *member) else {
+                    continue;
+                };
+                remaining = remaining.checked_sub(1)?;
+                let is_related = match generic.constraint(db) {
+                    Some(constraint) => match is_subtype(db, *candidate, constraint, resolve) {
+                        Assignability::Assignable => true,
+                        Assignability::NotAssignable => false,
+                        Assignability::Undetermined => return None,
+                    },
+                    None => true,
+                };
+                if is_related {
+                    narrowed.push(intersect_narrowed(db, *member, *candidate));
+                }
+            }
+        }
     }
     if positive {
         return if narrowed.is_empty() {
-            (is_subtype(db, target, ty, resolve) == Assignability::Assignable).then_some(target)
+            narrow_unrelated(db, ty, target, resolve)
         } else {
             Some(InferredTypeData::union_from_types(db, narrowed))
         };
@@ -1973,13 +2366,12 @@ fn narrow_prepared<'db>(
     resolve: &mut TypeResolver<'db, '_>,
 ) -> InferredTypeData<'db> {
     if !matches!(ty, InferredTypeData::Union(_)) {
-        return narrow_non_union(db, ty, predicate, positive, resolve);
+        return narrow_non_union(db, ty, predicate, positive, Siblings::default(), resolve);
     }
 
     let mut pending = vec![ty];
     let mut remaining = MAX_NARROWING_STEPS;
-    let mut narrowed = Vec::new();
-    let mut changed = false;
+    let mut members = Vec::new();
     while let Some(current) = pending.pop() {
         if remaining == 0 {
             return ty;
@@ -1993,11 +2385,21 @@ fn narrow_prepared<'db>(
             }
             pending.extend(types.iter().rev().copied());
         } else {
-            let result = narrow_non_union(db, current, predicate, positive, resolve);
-            changed |= result != current;
-            if result != InferredTypeData::NeverKeyword {
-                narrowed.push(result);
-            }
+            members.push(current);
+        }
+    }
+
+    let siblings = Siblings {
+        has_null: members.contains(&InferredTypeData::Null),
+        has_undefined: members.contains(&InferredTypeData::Undefined),
+    };
+    let mut narrowed = Vec::with_capacity(members.len());
+    let mut changed = false;
+    for member in members {
+        let result = narrow_non_union(db, member, predicate, positive, siblings, resolve);
+        changed |= result != member;
+        if result != InferredTypeData::NeverKeyword {
+            narrowed.push(result);
         }
     }
 
@@ -2010,6 +2412,16 @@ fn narrow_prepared<'db>(
         // another union graph outside the traversal budget.
         InferredTypeData::union_from_types(db, narrowed)
     }
+}
+
+/// Records which nullish values the other members of a narrowed union are.
+/// A type parameter that `!== null`, `!== undefined`, or `typeof` with
+/// `"undefined"` narrows intersects with `{}` alone when another member is
+/// already the other nullish value.
+#[derive(Clone, Copy, Default)]
+struct Siblings {
+    has_null: bool,
+    has_undefined: bool,
 }
 
 enum PreparedPredicate<'db> {
@@ -2041,9 +2453,16 @@ fn narrow_non_union<'db>(
     ty: InferredTypeData<'db>,
     predicate: &PreparedPredicate<'db>,
     positive: bool,
+    siblings: Siblings,
     resolve: &mut TypeResolver<'db, '_>,
 ) -> InferredTypeData<'db> {
+    if let Some(generic) = referenced_generic(db, ty) {
+        return narrow_type_parameter(db, ty, generic, predicate, positive, siblings, resolve);
+    }
     match ty {
+        InferredTypeData::Intersection(intersection) => {
+            return narrow_intersection(db, ty, intersection, predicate, positive, resolve);
+        }
         InferredTypeData::VoidKeyword => return InferredTypeData::Unknown,
         InferredTypeData::AnyKeyword => {
             return match (predicate, positive) {
@@ -2077,7 +2496,14 @@ fn narrow_non_union<'db>(
                 db,
                 Literal::BigInt(Text::new_static("0n")),
             )),
-            _ => narrow_non_union(db, ty, &PreparedPredicate::Truthy, false, resolve),
+            _ => narrow_non_union(
+                db,
+                ty,
+                &PreparedPredicate::Truthy,
+                false,
+                Siblings::default(),
+                resolve,
+            ),
         },
         PreparedPredicate::Nullish => {
             let nullish = match ty {
@@ -2151,13 +2577,297 @@ fn narrow_unknown<'db>(
                 member
             };
         }
-        narrow_non_union(db, member, predicate, positive, resolve)
+        narrow_non_union(
+            db,
+            member,
+            predicate,
+            positive,
+            Siblings::default(),
+            resolve,
+        )
     });
     if narrowed == members {
         unknown
     } else {
         InferredTypeData::union_from_types(db, narrowed.to_vec())
     }
+}
+
+/// Narrows `ty`, a reference to the type parameter `generic`, as TypeScript
+/// narrows a value whose type is a type parameter of the code that tests it.
+///
+/// Such a value can have any value of the type parameter's constraint, or
+/// any value at all without one, so a test that keeps some of them gives the
+/// intersection of `ty` with the type of the values that pass:
+///
+/// - truthiness and `!= null` give `T & {}`, TypeScript's `NonNullable<T>`;
+/// - `!== null` gives `T & ({} | undefined)`, and `!== undefined` or
+///   `typeof value !== "undefined"` gives `T & ({} | null)`, or `T & {}` when
+///   another member of the narrowed union is already the other nullish value
+///   or the constraint excludes it;
+/// - `typeof` gives `T & string`, `T & undefined`, `T & Function`, and so on,
+///   and `(T & object) | (T & null)` for `"object"`, keeping only the parts
+///   whose values the constraint can have.
+///
+/// A test that every value of the constraint passes keeps `ty`, as for
+/// `x != null` with `T extends {}`, and so does a test that none passes,
+/// where TypeScript gives `never`. Every other test and branch keeps `ty`,
+/// as equality with another literal and the falsy branch do, and so does a
+/// constraint that refers to another type parameter at its top level, as
+/// `T extends U | null` does, which Biome doesn't narrow. `siblings` tells
+/// which nullish values the other members of the narrowed union are.
+fn narrow_type_parameter<'db>(
+    db: &'db dyn TypeDb,
+    ty: InferredTypeData<'db>,
+    generic: InternedGenericTypeParameter<'db>,
+    predicate: &PreparedPredicate<'db>,
+    positive: bool,
+    siblings: Siblings,
+    resolve: &mut TypeResolver<'db, '_>,
+) -> InferredTypeData<'db> {
+    let constraint = match generic.constraint(db) {
+        Some(constraint) => match flattened(db, constraint, resolve) {
+            // Narrowing such a constraint would narrow its type parameter,
+            // whose constraint can lead back to this one.
+            Some(constraint) if refers_to_type_parameter(db, constraint) => return ty,
+            Some(constraint) => Some(constraint),
+            None => return ty,
+        },
+        None => None,
+    };
+    let null = PreparedPredicate::Literal(InferredTypeData::Null, LiteralValue::Null);
+    let undefined =
+        PreparedPredicate::Literal(InferredTypeData::Undefined, LiteralValue::Undefined);
+    let mut passes = |predicate: &PreparedPredicate<'db>, positive: bool| {
+        constraint.map_or(Some(InferredTypeData::UnknownKeyword), |constraint| {
+            let narrowed = narrow_prepared(db, constraint, predicate, positive, resolve);
+            (narrowed != InferredTypeData::NeverKeyword).then_some(narrowed)
+        })
+    };
+    let removed_nullish = match (predicate, positive) {
+        (PreparedPredicate::Truthy | PreparedPredicate::Nullish, _)
+            if positive == matches!(predicate, PreparedPredicate::Truthy) =>
+        {
+            return if passes(&PreparedPredicate::Nullish, true).is_some() {
+                intersect_narrowed(db, ty, empty_object(db))
+            } else {
+                ty
+            };
+        }
+        (PreparedPredicate::Literal(_, LiteralValue::Null), false) => Some(false),
+        (
+            PreparedPredicate::Literal(_, LiteralValue::Undefined)
+            | PreparedPredicate::Typeof(TypeofKind::Undefined),
+            false,
+        ) => Some(true),
+        _ => None,
+    };
+    if let Some(removes_undefined) = removed_nullish {
+        let (removed, other, other_type, other_is_sibling) = if removes_undefined {
+            (&undefined, &null, InferredTypeData::Null, siblings.has_null)
+        } else {
+            (
+                &null,
+                &undefined,
+                InferredTypeData::Undefined,
+                siblings.has_undefined,
+            )
+        };
+        if passes(removed, true).is_none() {
+            return ty;
+        }
+        let candidate = if !other_is_sibling && passes(other, true).is_some() {
+            InferredTypeData::union_from_types(db, vec![empty_object(db), other_type])
+        } else {
+            empty_object(db)
+        };
+        return intersect_narrowed(db, ty, candidate);
+    }
+    let (PreparedPredicate::Typeof(kind), true) = (predicate, positive) else {
+        return ty;
+    };
+    // A constraint whose every value passes, or whose no value passes,
+    // leaves nothing to intersect with.
+    match passes(predicate, true) {
+        Some(narrowed) if constraint != Some(narrowed) => {}
+        Some(_) | None => return ty,
+    }
+    let Some(kind_type) = typeof_type(db, *kind) else {
+        let null_part = passes(&null, true).is_some();
+        let objects = match (constraint, passes(&null, false)) {
+            (None, _) => true,
+            (Some(_), None) => false,
+            (Some(_), Some(without_null)) => {
+                narrow_prepared(
+                    db,
+                    without_null,
+                    &PreparedPredicate::Typeof(TypeofKind::Object),
+                    true,
+                    resolve,
+                ) != InferredTypeData::NeverKeyword
+            }
+        };
+        let parts: Vec<_> = [
+            objects.then_some(InferredTypeData::ObjectKeyword),
+            null_part.then_some(InferredTypeData::Null),
+        ]
+        .into_iter()
+        .flatten()
+        .map(|part| intersect_narrowed(db, ty, part))
+        .collect();
+        return if parts.is_empty() {
+            ty
+        } else {
+            InferredTypeData::union_from_types(db, parts)
+        };
+    };
+    intersect_narrowed(db, ty, kind_type)
+}
+
+/// Narrows `ty`, the intersection `intersection` with a type parameter as an
+/// operand, such as the `T & {}` or `T & string` that narrowing gives, by
+/// narrowing each operand and intersecting the results. So
+/// `typeof value === "string"` turns `T & {}` into `T & string`, and
+/// truthiness keeps `T & string`, because `string & {}` is `string`.
+///
+/// As TypeScript does, an intersection with a primitive operand keeps its
+/// object operands as they are, because they tag the primitive, as in
+/// `T & string & { __brand: 1 }`. A test that removes every value of an
+/// operand removes the intersection, except for `typeof` with `"function"`
+/// and the false branch of `typeof` with `"object"`, which TypeScript
+/// applies to an intersection when any operand passes them.
+///
+/// Strict equality with a literal, `null`, or `undefined` removes the
+/// intersection when it removes every value of an operand and keeps the
+/// intersection as it is otherwise, as TypeScript keeps `T & string` where
+/// the value equals `"a"`. A `boolean` operand narrows to `true` or `false`
+/// instead, because TypeScript reads `T & boolean` as
+/// `(T & true) | (T & false)` and keeps the members that can be equal. A
+/// type predicate whose target is a literal, `null`, or `undefined` narrows
+/// as strict equality with the target does, so `value is "a"` keeps
+/// `T & string` where TypeScript gives `T & "a"`.
+///
+/// An intersection without a type parameter stays as it is.
+fn narrow_intersection<'db>(
+    db: &'db dyn TypeDb,
+    ty: InferredTypeData<'db>,
+    intersection: InternedIntersection<'db>,
+    predicate: &PreparedPredicate<'db>,
+    positive: bool,
+    resolve: &mut TypeResolver<'db, '_>,
+) -> InferredTypeData<'db> {
+    let operands = intersection.types(db);
+    if !operands
+        .iter()
+        .any(|operand| referenced_generic(db, *operand).is_some())
+    {
+        return ty;
+    }
+    let has_primitive = operands.iter().any(|operand| operand.is_primitive(db));
+    let any_operand_passes = matches!(
+        (predicate, positive),
+        (PreparedPredicate::Typeof(TypeofKind::Function), true)
+            | (PreparedPredicate::Typeof(TypeofKind::Object), false)
+    );
+    let is_equality = matches!(predicate, PreparedPredicate::Literal(..));
+    let mut narrowed = Vec::with_capacity(operands.len());
+    let mut changed = false;
+    for operand in operands {
+        let is_tag = has_primitive
+            && !operand.is_primitive(db)
+            && referenced_generic(db, *operand).is_none();
+        let result = if is_tag {
+            *operand
+        } else {
+            narrow_prepared(db, *operand, predicate, positive, resolve)
+        };
+        if result == InferredTypeData::NeverKeyword {
+            if !any_operand_passes {
+                return result;
+            }
+            narrowed.push(*operand);
+            continue;
+        }
+        if is_equality && *operand != InferredTypeData::Boolean {
+            narrowed.push(*operand);
+            continue;
+        }
+        changed |= result != *operand;
+        narrowed.push(result);
+    }
+    if !changed {
+        return ty;
+    }
+    IntersectionBuilder::without_merging(db)
+        .add_all(narrowed)
+        .build()
+}
+
+/// Returns whether `ty` or a member of it, when it is a union, is a type
+/// parameter or an intersection with one.
+fn refers_to_type_parameter<'db>(db: &'db dyn TypeDb, ty: InferredTypeData<'db>) -> bool {
+    match ty {
+        InferredTypeData::Union(union) => union
+            .types(db)
+            .iter()
+            .any(|member| is_type_parameter_or_intersection(db, *member)),
+        ty => is_type_parameter_or_intersection(db, ty),
+    }
+}
+
+/// Returns whether `ty` is a type parameter, or an intersection with a type
+/// parameter among its operands, such as the `T & {}` that narrowing gives.
+pub fn is_type_parameter_or_intersection<'db>(
+    db: &'db dyn TypeDb,
+    ty: InferredTypeData<'db>,
+) -> bool {
+    referenced_generic(db, ty).is_some()
+        || matches!(ty, InferredTypeData::Intersection(intersection)
+            if intersection
+                .types(db)
+                .iter()
+                .any(|operand| referenced_generic(db, *operand).is_some()))
+}
+
+/// Returns `ty` with its handles resolved, also those of the members of a
+/// union, or `None` when the members exceed the budget of 256 visited types.
+fn flattened<'db>(
+    db: &'db dyn TypeDb,
+    ty: InferredTypeData<'db>,
+    resolve: &mut TypeResolver<'db, '_>,
+) -> Option<InferredTypeData<'db>> {
+    let mut pending = vec![ty];
+    let mut members = Vec::new();
+    let mut remaining = MAX_NARROWING_STEPS;
+    while let Some(current) = pending.pop() {
+        remaining = remaining.checked_sub(1)?;
+        match resolve_wrapped_type(db, current, resolve) {
+            InferredTypeData::Union(union) => pending.extend(union.types(db).iter().rev()),
+            member => members.push(member),
+        }
+    }
+    Some(InferredTypeData::union_from_types(db, members))
+}
+
+/// Returns the intersection of `ty`, the type of a value that a runtime test
+/// narrows, with `candidate`, a type that the test shows the value to have,
+/// as TypeScript gives `T & string` or `Bar & Foo`.
+///
+/// The intersection is normalized as the intersection builder normalizes
+/// one, so it distributes over the members of a union, `string & {}` is
+/// `string`, and `null & {}` is `never`. Its object operands are never merged
+/// into one type, so each keeps the declaration it names, which a later
+/// `instanceof` or type predicate compares, as TypeScript compares the
+/// operands of `B & A` with `A`.
+pub(crate) fn intersect_narrowed<'db>(
+    db: &'db dyn TypeDb,
+    ty: InferredTypeData<'db>,
+    candidate: InferredTypeData<'db>,
+) -> InferredTypeData<'db> {
+    IntersectionBuilder::without_merging(db)
+        .add(ty)
+        .add(candidate)
+        .build()
 }
 
 /// Returns `{}`, the type literal without members, which every value other
@@ -4442,7 +5152,7 @@ mod tests {
         name: &str,
         positive: bool,
     ) -> InferredTypeData<'db> {
-        super::narrow_by_in_operator(db, ty, name, positive, |ty| ty)
+        super::narrow_by_in_operator(db, ty, &Text::from(name.to_owned()), positive, |ty| ty)
     }
 
     /// Returns an index signature member whose key has type `key`.
@@ -4508,21 +5218,69 @@ mod tests {
     }
 
     #[test]
-    fn in_keeps_the_type_when_no_member_declares_the_property() {
+    fn in_intersects_with_the_property_when_every_member_lacks_it() {
         let db = &TestDb::default();
         let a = object(db, vec![member("a", InferredTypeData::Number)]);
         let b = object(db, vec![member("b", InferredTypeData::Number)]);
         let numbers = object(db, vec![index_signature(InferredTypeData::Number)]);
-        let class = class_instance(db, vec![member("p", InferredTypeData::Number)]);
+        let record = object(db, vec![member("c", InferredTypeData::UnknownKeyword)]);
+        let generic = InferredTypeData::Generic(InternedGenericTypeParameter::new(
+            db,
+            false,
+            None,
+            None,
+            Text::new_static("T"),
+        ));
+        let constrained = InferredTypeData::Generic(InternedGenericTypeParameter::new(
+            db,
+            false,
+            Some(b),
+            None,
+            Text::new_static("U"),
+        ));
         for ty in [
             union(db, &[a, b]),
             // A numeric index signature accepts only numeric names.
             union(db, &[numbers, b]),
-            // A class can have a property that Biome doesn't collect.
-            union(db, &[class, b]),
+            InferredTypeData::ObjectKeyword,
+            object(db, Vec::new()),
+            generic,
+            // The constraint of `U` lacks the property too.
+            constrained,
         ] {
-            assert_eq!(narrow_in(db, ty, "c", true), ty);
+            assert_eq!(
+                narrow_in(db, ty, "c", true),
+                super::intersect_narrowed(db, ty, record),
+                "{ty:?}"
+            );
             assert_eq!(narrow_in(db, ty, "c", false), ty);
+        }
+        // `{}` is `Record<"c", unknown>` in the intersection.
+        assert_eq!(narrow_in(db, object(db, Vec::new()), "c", true), record);
+    }
+
+    #[test]
+    fn in_keeps_the_type_when_a_member_may_have_the_property() {
+        let db = &TestDb::default();
+        let b = object(db, vec![member("b", InferredTypeData::Number)]);
+        let class = class_instance(db, vec![member("p", InferredTypeData::Number)]);
+        let constrained = InferredTypeData::Generic(InternedGenericTypeParameter::new(
+            db,
+            false,
+            Some(object(db, vec![member("c", InferredTypeData::Number)])),
+            None,
+            Text::new_static("T"),
+        ));
+        for (ty, name) in [
+            // A class can have a property that Biome doesn't collect.
+            (union(db, &[class, b]), "c"),
+            // The constraint of `T` declares the property.
+            (constrained, "c"),
+            // Every object has the members of `Object`.
+            (InferredTypeData::ObjectKeyword, "toString"),
+        ] {
+            assert_eq!(narrow_in(db, ty, name, true), ty, "{name}");
+            assert_eq!(narrow_in(db, ty, name, false), ty, "{name}");
         }
         // The `#` of a private name is part of the name Biome gives it.
         let private = object(db, vec![member("#a", InferredTypeData::Number)]);
@@ -4770,7 +5528,6 @@ mod tests {
             (value, inherits_has_instance),
             (value, generic_constructor),
             (value, object_class),
-            (union(db, &[generic, ic]), a),
             (union(db, &[instance(db, unresolved_parent), ic]), a),
         ] {
             for positive in [true, false] {
@@ -5624,15 +6381,16 @@ mod tests {
     fn type_predicates_leave_the_type_unchanged_when_biome_cannot_tell() {
         let db = &TestDb::default();
         let foo = named_interface(db, "Foo", &[], vec![member("a", InferredTypeData::Number)]);
-        let generic = InferredTypeData::Generic(InternedGenericTypeParameter::new(
+        // A constraint that inference can't determine can't be compared.
+        let constrained = InferredTypeData::Generic(InternedGenericTypeParameter::new(
             db,
             false,
+            Some(InferredTypeData::Unknown),
             None,
-            None,
-            Text::new_static("T"),
+            Text::new_static("U"),
         ));
         for (ty, target) in [
-            (union(db, &[generic, InferredTypeData::String]), foo),
+            (union(db, &[constrained, InferredTypeData::String]), foo),
             (union(db, &[foo, InferredTypeData::UnknownKeyword]), foo),
             (
                 union(db, &[foo, InferredTypeData::String]),
@@ -5926,5 +6684,503 @@ mod tests {
         // `boolean` without an annotation.
         let boolean = predicate_function(&db, &[("v", UnknownKeyword)], None);
         assert_eq!(assignable(boolean, callback), None);
+    }
+
+    /// Returns a reference to the type parameter `name` with `constraint`, as
+    /// an annotation refers to it.
+    fn type_parameter<'db>(
+        db: &'db TestDb,
+        name: &'static str,
+        constraint: Option<InferredTypeData<'db>>,
+    ) -> InferredTypeData<'db> {
+        instance(
+            db,
+            InferredTypeData::Generic(InternedGenericTypeParameter::new(
+                db,
+                false,
+                constraint,
+                None,
+                Text::new_static(name),
+            )),
+        )
+    }
+
+    fn intersection<'db>(
+        db: &'db TestDb,
+        types: &[InferredTypeData<'db>],
+    ) -> InferredTypeData<'db> {
+        super::intersect_narrowed(db, types[0], types[1])
+    }
+
+    #[test]
+    fn intersections_of_narrowing_keep_their_object_operands() {
+        let db = &TestDb::default();
+        let foo = named_interface(db, "Foo", &[], vec![member("a", InferredTypeData::Number)]);
+        let bar = named_interface(db, "Bar", &[], vec![member("c", InferredTypeData::Number)]);
+        let InferredTypeData::Intersection(narrowed) = super::intersect_narrowed(db, bar, foo)
+        else {
+            panic!("`Bar & Foo` must keep both operands");
+        };
+        assert_eq!(narrowed.types(db).as_ref(), [bar, foo]);
+        // The intersection is still normalized.
+        let t = type_parameter(db, "T", None);
+        let empty = object(db, Vec::new());
+        assert_eq!(
+            super::intersect_narrowed(db, InferredTypeData::String, empty),
+            InferredTypeData::String
+        );
+        assert_eq!(
+            super::intersect_narrowed(db, union(db, &[t, InferredTypeData::Null]), empty),
+            super::intersect_narrowed(db, t, empty)
+        );
+    }
+
+    #[test]
+    fn type_parameters_narrow_to_intersections() {
+        let db = &TestDb::default();
+        let t = type_parameter(db, "T", None);
+        let empty = object(db, Vec::new());
+        let non_nullish = intersection(db, &[t, empty]);
+        let null = NarrowingPredicate::Literal(InferredTypeData::Null);
+        let undefined = NarrowingPredicate::Literal(InferredTypeData::Undefined);
+        let with = |other| union(db, &[non_nullish, intersection(db, &[t, other])]);
+        for (predicate, positive, expected) in [
+            (NarrowingPredicate::Truthy, true, non_nullish),
+            (NarrowingPredicate::Truthy, false, t),
+            (NarrowingPredicate::Nullish, false, non_nullish),
+            (NarrowingPredicate::Nullish, true, t),
+            (null, false, with(InferredTypeData::Undefined)),
+            (null, true, t),
+            (undefined, false, with(InferredTypeData::Null)),
+            (undefined, true, t),
+            (NarrowingPredicate::Literal(string(db, "a")), true, t),
+            (NarrowingPredicate::Literal(string(db, "a")), false, t),
+            (
+                NarrowingPredicate::Typeof(TypeofKind::String),
+                true,
+                intersection(db, &[t, InferredTypeData::String]),
+            ),
+            (NarrowingPredicate::Typeof(TypeofKind::String), false, t),
+            (
+                NarrowingPredicate::Typeof(TypeofKind::Undefined),
+                true,
+                intersection(db, &[t, InferredTypeData::Undefined]),
+            ),
+            (
+                NarrowingPredicate::Typeof(TypeofKind::Undefined),
+                false,
+                with(InferredTypeData::Null),
+            ),
+            (
+                NarrowingPredicate::Typeof(TypeofKind::Object),
+                true,
+                union(
+                    db,
+                    &[
+                        intersection(db, &[t, InferredTypeData::ObjectKeyword]),
+                        intersection(db, &[t, InferredTypeData::Null]),
+                    ],
+                ),
+            ),
+            (NarrowingPredicate::Typeof(TypeofKind::Object), false, t),
+        ] {
+            assert_eq!(
+                narrow_type(db, t, predicate, positive),
+                expected,
+                "{predicate:?} {positive}"
+            );
+        }
+        // A constraint that refers to another type parameter, here one
+        // whose constraint refers back, keeps the type parameter.
+        let u = InternedGenericTypeParameter::new(db, false, None, None, Text::new_static("U"));
+        let v = type_parameter(
+            db,
+            "V",
+            Some(union(
+                db,
+                &[
+                    instance(db, InferredTypeData::Generic(u)),
+                    InferredTypeData::Null,
+                ],
+            )),
+        );
+        assert_eq!(narrow_type(db, v, NarrowingPredicate::Truthy, true), v);
+        // A nullish value that another member already is needs no `{}`
+        // union.
+        assert_eq!(
+            narrow_type(
+                db,
+                union(db, &[t, InferredTypeData::Undefined]),
+                null,
+                false
+            ),
+            union(db, &[non_nullish, InferredTypeData::Undefined])
+        );
+    }
+
+    #[test]
+    fn type_parameters_narrow_by_the_values_of_their_constraint() {
+        let db = &TestDb::default();
+        let empty = object(db, Vec::new());
+        let strings = type_parameter(db, "S", Some(InferredTypeData::String));
+        let objects = type_parameter(db, "O", Some(InferredTypeData::ObjectKeyword));
+        let optional = type_parameter(
+            db,
+            "U",
+            Some(union(
+                db,
+                &[InferredTypeData::String, InferredTypeData::Undefined],
+            )),
+        );
+        let mixed = type_parameter(
+            db,
+            "M",
+            Some(union(
+                db,
+                &[InferredTypeData::String, InferredTypeData::Number],
+            )),
+        );
+        let null = NarrowingPredicate::Literal(InferredTypeData::Null);
+        for (ty, predicate, positive, expected) in [
+            // Every value of the constraint passes.
+            (strings, NarrowingPredicate::Truthy, true, strings),
+            (
+                strings,
+                NarrowingPredicate::Typeof(TypeofKind::String),
+                true,
+                strings,
+            ),
+            (objects, NarrowingPredicate::Nullish, false, objects),
+            // No value of the constraint passes, where TypeScript gives
+            // `never`.
+            (
+                strings,
+                NarrowingPredicate::Typeof(TypeofKind::Number),
+                true,
+                strings,
+            ),
+            (objects, NarrowingPredicate::Truthy, false, objects),
+            // No value of the constraint is `null`.
+            (optional, null, false, optional),
+            (
+                optional,
+                NarrowingPredicate::Truthy,
+                true,
+                intersection(db, &[optional, empty]),
+            ),
+            (
+                mixed,
+                NarrowingPredicate::Typeof(TypeofKind::String),
+                true,
+                intersection(db, &[mixed, InferredTypeData::String]),
+            ),
+            (
+                objects,
+                NarrowingPredicate::Typeof(TypeofKind::Object),
+                true,
+                objects,
+            ),
+        ] {
+            assert_eq!(
+                narrow_type(db, ty, predicate, positive),
+                expected,
+                "{ty:?} {predicate:?} {positive}"
+            );
+        }
+    }
+
+    #[test]
+    fn intersections_with_a_type_parameter_narrow_each_operand() {
+        let db = &TestDb::default();
+        let t = type_parameter(db, "T", None);
+        let empty = object(db, Vec::new());
+        let non_nullish = intersection(db, &[t, empty]);
+        let t_string = intersection(db, &[t, InferredTypeData::String]);
+        assert_eq!(
+            narrow_type(
+                db,
+                non_nullish,
+                NarrowingPredicate::Typeof(TypeofKind::String),
+                true
+            ),
+            t_string
+        );
+        assert_eq!(
+            narrow_type(db, t_string, NarrowingPredicate::Truthy, true),
+            t_string
+        );
+        assert_eq!(
+            narrow_type(db, non_nullish, NarrowingPredicate::Truthy, true),
+            non_nullish
+        );
+        // `undefined` has no value that passes, so the intersection goes.
+        let t_undefined = intersection(db, &[t, InferredTypeData::Undefined]);
+        assert_eq!(
+            narrow_type(
+                db,
+                union(db, &[non_nullish, t_undefined]),
+                NarrowingPredicate::Literal(InferredTypeData::Undefined),
+                false
+            ),
+            non_nullish
+        );
+        // A primitive operand keeps its object tags as they are.
+        let tag = object(db, vec![member("brand", InferredTypeData::Number)]);
+        let branded = IntersectionBuilder::without_merging(db)
+            .add_all([t, InferredTypeData::String, tag])
+            .build();
+        assert_eq!(
+            narrow_type(
+                db,
+                branded,
+                NarrowingPredicate::Typeof(TypeofKind::String),
+                true
+            ),
+            branded
+        );
+        // An object operand that isn't callable doesn't remove the
+        // intersection from the branch of `typeof` with `"function"`.
+        let t_foo = intersection(db, &[t, tag]);
+        let InferredTypeData::Intersection(narrowed) = narrow_type(
+            db,
+            t_foo,
+            NarrowingPredicate::Typeof(TypeofKind::Function),
+            true,
+        ) else {
+            panic!("a value of `T & {{ brand: number }}` can be a function");
+        };
+        assert!(narrowed.types(db).contains(&tag));
+        // Intersections without a type parameter stay as they are.
+        let foo = named_interface(db, "Foo", &[], vec![member("a", InferredTypeData::Number)]);
+        let objects = intersection(db, &[foo, tag]);
+        assert_eq!(
+            narrow_type(
+                db,
+                objects,
+                NarrowingPredicate::Typeof(TypeofKind::String),
+                true
+            ),
+            objects
+        );
+    }
+
+    #[test]
+    fn type_predicates_intersect_type_parameters_and_unrelated_types() {
+        let db = &TestDb::default();
+        let foo = named_interface(db, "Foo", &[], vec![member("a", InferredTypeData::Number)]);
+        let bar = named_interface(db, "Bar", &[], vec![member("c", InferredTypeData::Number)]);
+        let t = type_parameter(db, "T", None);
+        let bars = type_parameter(db, "B", Some(bar));
+        let foos = type_parameter(db, "F", Some(union(db, &[foo, bar])));
+        let t_foo = intersection(db, &[t, foo]);
+        for (ty, positive, expected) in [
+            (t, true, t_foo),
+            (t, false, t),
+            // `T` is related to `Foo` through its constraint.
+            (foos, true, intersection(db, &[foos, foo])),
+            // The other member relates to `Foo`, so `T` goes.
+            (union(db, &[t, foo]), true, foo),
+            (union(db, &[t, foo]), false, t),
+            // `string` relates to nothing, and `T` to `Foo` without a
+            // constraint.
+            (union(db, &[t, InferredTypeData::String]), true, t_foo),
+            // No member remains: `Bar & Foo`.
+            (bar, true, intersection(db, &[bar, foo])),
+            (bar, false, bar),
+            // `Foo` is not a subtype of the constraint of `B`, so the
+            // intersection comes from the type as a whole.
+            (bars, true, intersection(db, &[bars, foo])),
+        ] {
+            assert_eq!(
+                narrow_predicate(db, ty, foo, positive),
+                expected,
+                "{ty:?} {positive}"
+            );
+        }
+        // A type parameter that the target names is kept as it is, and is
+        // not a subtype of `null`.
+        assert_eq!(
+            narrow_predicate(db, union(db, &[t, InferredTypeData::Null]), t, true),
+            t
+        );
+        // An object type with a missing method relates to no class.
+        let ready = object(db, vec![member("ready", InferredTypeData::String)]);
+        let r = class(
+            db,
+            "R",
+            None,
+            vec![
+                optional_member("ready", InferredTypeData::String),
+                TypeMember {
+                    kind: TypeMemberKind::Named(Text::new_static("check")),
+                    ty: method(db, "check", InferredTypeData::Boolean),
+                },
+            ],
+        );
+        assert_eq!(
+            narrow_predicate(db, instance(db, r), ready, true),
+            intersection(db, &[instance(db, r), ready])
+        );
+    }
+
+    #[test]
+    fn instanceof_intersects_type_parameters_and_unrelated_classes() {
+        let db = &TestDb::default();
+        let a = class(db, "A", None, vec![member("a", InferredTypeData::Number)]);
+        let b = class(
+            db,
+            "B",
+            Some(a),
+            vec![member("b", InferredTypeData::Number)],
+        );
+        let c = class(db, "C", None, vec![member("c", InferredTypeData::Number)]);
+        let (ia, ib, ic) = (instance(db, a), instance(db, b), instance(db, c));
+        let t = type_parameter(db, "T", None);
+        let derived = type_parameter(db, "D", Some(ib));
+        let parent = type_parameter(db, "P", Some(ia));
+        for (ty, constructor, positive, expected) in [
+            (t, a, true, intersection(db, &[t, ia])),
+            (t, a, false, t),
+            (union(db, &[t, ic]), a, true, intersection(db, &[t, ia])),
+            (union(db, &[t, ic]), a, false, union(db, &[t, ic])),
+            // The constraint of `D` is derived from `A`.
+            (derived, a, true, derived),
+            (derived, a, false, InferredTypeData::NeverKeyword),
+            // `B` is derived from the constraint of `P`.
+            (parent, b, true, intersection(db, &[parent, ib])),
+            // No member remains: `C & A`.
+            (ic, a, true, intersection(db, &[ic, ia])),
+            (ic, a, false, ic),
+        ] {
+            assert_eq!(
+                narrow_instance(db, ty, constructor, positive),
+                expected,
+                "{ty:?} {positive}"
+            );
+        }
+    }
+
+    #[test]
+    fn constructor_comparisons_keep_instances_of_the_class_itself() {
+        let db = &TestDb::default();
+        let a = class(db, "A", None, vec![member("a", InferredTypeData::Number)]);
+        let b = class(
+            db,
+            "B",
+            Some(a),
+            vec![member("b", InferredTypeData::Number)],
+        );
+        let c = class(db, "C", None, vec![member("a", InferredTypeData::Number)]);
+        let (ia, ib, ic) = (instance(db, a), instance(db, b), instance(db, c));
+        let shape = object(db, vec![member("a", InferredTypeData::Number)]);
+        let narrow = |ty, constructor| super::narrow_by_constructor(db, ty, constructor, |ty| ty);
+        // A derived class and a class with the same members are other
+        // constructors, and so is the constructor of an object type.
+        assert_eq!(
+            narrow(union(db, &[ia, ib, ic, shape, InferredTypeData::Null]), a),
+            ia
+        );
+        assert_eq!(narrow(InferredTypeData::AnyKeyword, a), ia);
+        assert_eq!(
+            narrow(InferredTypeData::UnknownKeyword, a),
+            InferredTypeData::UnknownKeyword
+        );
+        // A construct signature without a `prototype` property narrows
+        // nothing.
+        let constructor = InferredTypeData::Constructor(InternedConstructor::new(
+            db,
+            Box::default(),
+            Box::default(),
+            Some(ia),
+        ));
+        let value = union(db, &[ia, ic]);
+        assert_eq!(narrow(value, constructor), value);
+    }
+
+    #[test]
+    fn private_names_narrow_to_the_class_that_declares_them() {
+        let db = &TestDb::default();
+        let p = class(db, "P", None, vec![member("#p", InferredTypeData::Number)]);
+        let q = class(db, "Q", Some(p), Vec::new());
+        let c = class(db, "C", None, vec![member("c", InferredTypeData::Number)]);
+        let (ip, iq, ic) = (instance(db, p), instance(db, q), instance(db, c));
+        let narrow = |ty, is_static, positive| {
+            super::narrow_by_private_name(db, ty, p, is_static, positive, |ty| ty)
+        };
+        assert_eq!(narrow(union(db, &[iq, ic]), false, true), iq);
+        assert_eq!(narrow(union(db, &[iq, ic]), false, false), ic);
+        assert_eq!(narrow(ic, false, true), intersection(db, &[ic, ip]));
+        assert_eq!(narrow(InferredTypeData::UnknownKeyword, false, true), ip);
+        // A static name is the class's own. Where the test fails, the class
+        // goes only when it is the whole type.
+        assert_eq!(narrow(union(db, &[p, ic]), true, true), p);
+        let class_or_instance = union(db, &[p, ic]);
+        assert_eq!(narrow(class_or_instance, true, false), class_or_instance);
+        assert_eq!(narrow(p, true, false), InferredTypeData::NeverKeyword);
+    }
+
+    #[test]
+    fn type_parameters_relate_only_through_their_constraints() {
+        let db = &TestDb::default();
+        let foo = named_interface(db, "Foo", &[], vec![member("a", InferredTypeData::Number)]);
+        let t = type_parameter(db, "T", None);
+        let strings = type_parameter(db, "S", Some(InferredTypeData::String));
+        let empty = object(db, Vec::new());
+        let resolve = &mut |ty| ty;
+        for (source, target, subtype) in [
+            (InferredTypeData::String, t, Assignability::NotAssignable),
+            (t, InferredTypeData::String, Assignability::NotAssignable),
+            (t, foo, Assignability::NotAssignable),
+            (t, InferredTypeData::Null, Assignability::NotAssignable),
+            (t, t, Assignability::Assignable),
+            (
+                t,
+                union(db, &[t, InferredTypeData::Null]),
+                Assignability::Assignable,
+            ),
+            (
+                strings,
+                union(db, &[InferredTypeData::String, InferredTypeData::Number]),
+                Assignability::Assignable,
+            ),
+            (
+                strings,
+                InferredTypeData::Number,
+                Assignability::NotAssignable,
+            ),
+            (
+                InferredTypeData::Null,
+                intersection(db, &[t, empty]),
+                Assignability::NotAssignable,
+            ),
+            (intersection(db, &[t, empty]), t, Assignability::Assignable),
+            (
+                t,
+                InferredTypeData::UnknownKeyword,
+                Assignability::Assignable,
+            ),
+        ] {
+            assert_eq!(
+                is_subtype(db, source, target, resolve),
+                subtype,
+                "{source:?} {target:?}"
+            );
+            assert_eq!(
+                is_assignable_in_generic_body(db, source, target, resolve),
+                subtype,
+                "{source:?} {target:?}"
+            );
+        }
+        // Elsewhere, a type parameter may still be replaced, so only a match
+        // through the constraint is conclusive.
+        assert_eq!(
+            crate::is_assignable_to(db, InferredTypeData::String, t, |ty| ty),
+            None
+        );
+        assert_eq!(crate::is_assignable_to(db, t, foo, |ty| ty), None);
+        assert_eq!(
+            crate::is_assignable_to(db, strings, InferredTypeData::String, |ty| ty),
+            Some(true)
+        );
     }
 }

@@ -734,6 +734,54 @@ where
     }
 }
 
+/// Returns the type that `ty`, an instance of a generic alias whose body is
+/// an intersection, stands for: the body with the instance's type arguments
+/// in place of the alias's type parameters, normalized as an intersection
+/// is. So `NonNullable<string | null>` gives `string`, and `NonNullable<T>`
+/// gives `T & {}`.
+///
+/// Unlike normalization, this also instantiates an alias whose type
+/// arguments refer to a type parameter, as the target of a type predicate
+/// does in a generic function, because it instantiates only `ty` itself and
+/// not the aliases in its body, so an alias that refers to itself can't make
+/// it loop. Returns `None` when `ty` is not such an instance, when a type
+/// parameter of the alias has neither an argument nor a default, and when
+/// substitution fails. `resolve` replaces a handle with the type it stands
+/// for.
+pub fn instantiate_intersection_alias<'db>(
+    db: &'db dyn TypeDb,
+    ty: TypeData<'db>,
+    mut resolve: impl FnMut(TypeData<'db>) -> TypeData<'db>,
+) -> Option<TypeData<'db>> {
+    let TypeData::InstanceOf(instance) = ty else {
+        return None;
+    };
+    let type_arguments = instance.type_parameters(db);
+    if type_arguments.is_empty() {
+        return None;
+    }
+    let TypeData::InstanceOf(alias) = resolve(instance.ty(db)) else {
+        return None;
+    };
+    if !matches!(resolve(alias.ty(db)), TypeData::Intersection(_)) {
+        return None;
+    }
+    let mut substitutions = Vec::with_capacity(alias.type_parameters(db).len() * 2);
+    for (index, type_parameter) in alias.type_parameters(db).iter().enumerate() {
+        let argument = match type_arguments.get(index) {
+            Some(argument) => *argument,
+            // A default may refer to the preceding parameters.
+            None => {
+                let default = referenced_generic(db, *type_parameter)?.default(db)?;
+                substitute_all(db, default, substitutions.clone())?
+            }
+        };
+        substitutions.extend(type_parameter_substitutions(db, *type_parameter, argument)?.1);
+    }
+    // Substitution rebuilds the intersection, which normalizes it.
+    substitute_all(db, resolve(alias.ty(db)), substitutions)
+}
+
 impl<'db, R> TypeTransform<'db> for TypeNormalizer<'_, R>
 where
     R: FnMut(TypeData<'db>) -> TypeData<'db>,

@@ -11,14 +11,16 @@ use crate::js_module_info::TsBindingReferenceExt;
 use biome_js_control_flow::AnyJsControlFlowRoot;
 use biome_js_semantic::{Binding, JsDeclarationKind, SemanticModel};
 use biome_js_syntax::{
-    AnyJsArrowFunctionParameters, AnyJsAssignment, AnyJsCallArgument, AnyJsClassMember,
-    AnyJsExpression, AnyJsFormalParameter, AnyJsFunction, AnyJsInProperty, AnyJsLiteralExpression,
-    AnyJsMemberExpression, AnyJsObjectMember, AnyJsOptionalChainExpression, AnyJsParameter,
-    AnyJsSwitchClause, AnyJsTemplateElement, AnyJsVariableDeclaration, AnyTsReturnType, AnyTsType,
-    JsBinaryOperator, JsCallExpression, JsComputedMemberName, JsDecorator, JsIdentifierExpression,
-    JsLanguage, JsLogicalOperator, JsModule, JsScript, JsSwitchStatement, JsTemplateExpression,
-    JsThisExpression, JsUnaryOperator, JsVariableDeclarator, JsVariableKind, JsVariableStatement,
-    T, TsDeclareStatement, binding_ext::AnyJsBindingDeclaration, unescape_js_identifier,
+    AnyJsArrowFunctionParameters, AnyJsAssignment, AnyJsCallArgument, AnyJsClass, AnyJsClassMember,
+    AnyJsClassMemberName, AnyJsExpression, AnyJsFormalParameter, AnyJsFunction, AnyJsInProperty,
+    AnyJsLiteralExpression, AnyJsMemberExpression, AnyJsName, AnyJsObjectMember,
+    AnyJsOptionalChainExpression, AnyJsParameter, AnyJsSwitchClause, AnyJsTemplateElement,
+    AnyJsVariableDeclaration, AnyTsReturnType, AnyTsType, JsBinaryOperator, JsCallExpression,
+    JsComputedMemberName, JsDecorator, JsIdentifierExpression, JsLanguage, JsLogicalOperator,
+    JsModule, JsPrivateName, JsScript, JsStaticMemberExpression, JsSwitchStatement,
+    JsTemplateExpression, JsThisExpression, JsUnaryOperator, JsVariableDeclarator, JsVariableKind,
+    JsVariableStatement, T, TsDeclareStatement, binding_ext::AnyJsBindingDeclaration,
+    unescape_js_identifier,
 };
 use biome_js_type_info::{
     Function, FunctionParameter, RawPredicateTarget, RawTypeData, RawTypeId, ReturnType,
@@ -136,16 +138,19 @@ pub(crate) enum FlowGuard {
     /// [`RootFlow::switches`]: super::RootFlow::switches
     Bypass { switch: u32, guard: usize },
     /// The guard at this index, which holds where no case of a `switch` on a
-    /// value or on `typeof` of one matches, applied to every incoming type
-    /// except one with an `unknown` member, which stays as it is.
+    /// value or on `typeof` of one matches. An incoming type with an
+    /// `unknown` member stays as it is. A member that is a type parameter, or
+    /// an intersection with one, stays as it is unless the guard leaves it no
+    /// value, when it is removed. The guard narrows the other members.
     ///
     /// Other tests narrow `unknown` as `{} | null | undefined`, so
-    /// `x !== null` gives `{} | undefined`. Where no case of such a `switch`
-    /// matches, TypeScript removes the matched values from the type as a
-    /// whole instead, and `unknown` keeps every value, so
-    /// `switch (x) { case null: break; default: x }` reads `unknown` there.
-    /// `switch (true)` tests each case as a condition, as an `if` does, so its
-    /// guards need no such wrapper.
+    /// `x !== null` gives `{} | undefined`, and a type parameter `T` to an
+    /// intersection, so `x !== null` gives `T & ({} | undefined)`. Where no
+    /// case of such a `switch` matches, TypeScript instead removes the
+    /// members whose every value a case covers and keeps the others whole, so
+    /// `switch (x) { case null: break; default: x }` reads `unknown` or `T`
+    /// there. `switch (true)` tests each case as a condition, as an `if`
+    /// does, so its guards need no such wrapper.
     Unmatched(usize),
     /// The call point at index `call` in [`RootFlow::calls`], whose result
     /// is truthy when `positive` is true and falsy otherwise. A statement
@@ -210,18 +215,35 @@ pub(crate) enum FlowTest {
     /// The `instanceof` operator, as in `value instanceof Date`, whose right
     /// operand, the constructor, is the expression at this range.
     Instanceof(TextRange),
+    /// The `in` operator with a private name, as in `#brand in value`, which
+    /// holds only for an object that the class declaring the name
+    /// constructed, or for that class itself when the name is static.
+    PrivateName {
+        /// The range at which inference finds the type of the class: the
+        /// name that a class declaration binds, or a class expression.
+        class: TextRange,
+        is_static: bool,
+    },
+    /// The equality of `value.constructor` with the constructor at this
+    /// range, as in `value.constructor === Date`. Its guard is only ever
+    /// positive, because TypeScript narrows only where the two are equal.
+    Constructor(TextRange),
 }
 
 impl FlowTest {
     /// Returns whether the test can narrow a value of type `any`, as in
     /// TypeScript: `typeof` with a primitive kind or `"undefined"`,
-    /// `instanceof`, and a call to a type-guard function. Truthiness,
-    /// equality, `in`, and `typeof` with `"object"` or `"function"` keep
-    /// `any` in both branches.
+    /// `instanceof`, `in` with a private name, a comparison of `constructor`,
+    /// and a call to a type-guard function. Truthiness, equality, `in` with a
+    /// key, and `typeof` with `"object"` or `"function"` keep `any` in both
+    /// branches.
     pub(crate) fn narrows_any(self) -> bool {
         match self {
             Self::Typeof(kind) => !matches!(kind, TypeofKind::Object | TypeofKind::Function),
-            Self::Instanceof(_) | Self::Predicate { .. } => true,
+            Self::Instanceof(_)
+            | Self::PrivateName { .. }
+            | Self::Constructor(_)
+            | Self::Predicate { .. } => true,
             Self::Truthy
             | Self::Nullish
             | Self::Null
@@ -938,20 +960,22 @@ pub(super) struct DecomposedCondition {
     /// unless `mentions` also lists them:
     ///
     /// - [`FlowGuard::Property`], such as `s` in `s.kind === "c"`.
-    /// - [`FlowTest::In`], such as `x` in `"a" in x`.
-    /// - [`FlowTest::Instanceof`], such as `x` in `x instanceof Date`.
+    /// - [`FlowTest::In`], such as `x` in `"a" in x`, and
+    ///   [`FlowTest::PrivateName`], such as `x` in `#p in x`.
+    /// - [`FlowTest::Instanceof`], such as `x` in `x instanceof Date`, and
+    ///   [`FlowTest::Constructor`], such as `x` in `x.constructor === Date`.
     /// - A [`FlowTest::Predicate`] whose target has only object types, such as
     ///   `x` in `isFoo(x)`.
     ///
-    /// The first two narrow only a union with two object types, and the
-    /// others narrow only a type with an object type, `unknown`, or `any`. A
+    /// The first narrows only a union with two object types, and the others
+    /// narrow only a type with an object type, `unknown`, or `any`. A
     /// variable whose annotation is `any` is never listed here (see
     /// [`AnyRoot`]). When decomposition stops early, this also lists the
     /// pattern of every variable in `mentions` that is an element of a
     /// destructuring pattern that a test of the variable narrows.
     pub(super) parents: Vec<FlowSubjectId>,
-    /// The subjects in `parents` that `instanceof` or a type-guard function
-    /// whose target has only object types checks.
+    /// The subjects in `parents` that a test other than one of a property
+    /// checks.
     pub(super) instance_tested: Vec<FlowSubjectId>,
     /// Subjects that call points may narrow. A subject that `mentions` or
     /// `parents` also lists counts as mentioned by them instead. Whether a
@@ -1399,12 +1423,12 @@ struct Decomposer<'a, 'raw> {
     remaining: usize,
     mentions: Vec<FlowSubjectId>,
     /// The objects of the [`FlowGuard::Property`] guards and the subjects of
-    /// the [`FlowTest::In`], [`FlowTest::Instanceof`], and object
-    /// [`FlowTest::Predicate`] tests decomposed so far.
+    /// the tests of the shape of a value decomposed so far: `in`,
+    /// `instanceof`, a comparison of `constructor`, and object
+    /// [`FlowTest::Predicate`] tests.
     parents: Vec<FlowSubjectId>,
-    /// The subjects of the [`FlowTest::Instanceof`] tests and of the
-    /// [`FlowTest::Predicate`] tests whose targets have only object types
-    /// decomposed so far.
+    /// The subjects in `parents` of the tests other than
+    /// [`FlowGuard::Property`] decomposed so far.
     instance_tested: Vec<FlowSubjectId>,
     /// The subjects that the call points decomposed so far may narrow.
     call_mentions: Vec<FlowSubjectId>,
@@ -1646,6 +1670,10 @@ impl<'a, 'raw> Decomposer<'a, 'raw> {
             SyntaxGuard::Predicate(test) => Some(test),
             SyntaxGuard::In(key) => Some(FlowTest::In(key)),
             SyntaxGuard::Instanceof(constructor) => Some(FlowTest::Instanceof(constructor)),
+            SyntaxGuard::PrivateName { class, is_static } => {
+                Some(FlowTest::PrivateName { class, is_static })
+            }
+            SyntaxGuard::Constructor(constructor) => Some(FlowTest::Constructor(constructor)),
         };
         let Some(chain) = chain_receivers(operand, &mut self.remaining) else {
             return FlowGuard::Keep;
@@ -1666,17 +1694,18 @@ impl<'a, 'raw> Decomposer<'a, 'raw> {
             Some((test, subject)) => match self.testable(subject) {
                 Testable::Never => FlowGuard::Keep,
                 testable => {
-                    // Like a test of a property, which narrows its object,
-                    // `in` narrows only a union with two object types.
-                    // `instanceof` and a type-guard function whose target has
-                    // only object types narrow only a type with an object
-                    // type, `unknown`, or `any`. A variable declared `any` is
-                    // an ordinary subject, because its annotation already
-                    // shows that these tests narrow it.
+                    // `in`, `instanceof`, a comparison of `constructor`, and a
+                    // type-guard function whose target has only object types
+                    // narrow only a type with an object type, `unknown`, or
+                    // `any`. A variable declared `any` is an ordinary
+                    // subject, because its annotation already shows that
+                    // these tests narrow it.
                     match test {
                         _ if !narrows => {}
-                        FlowTest::In(_) => self.parents.push(subject),
-                        FlowTest::Instanceof(_)
+                        FlowTest::In(_)
+                        | FlowTest::Instanceof(_)
+                        | FlowTest::PrivateName { .. }
+                        | FlowTest::Constructor(_)
                         | FlowTest::Predicate {
                             object_target: true,
                             ..
@@ -1922,11 +1951,11 @@ impl<'a, 'raw> Decomposer<'a, 'raw> {
     /// through an optional chain. A variable target holds no property, because
     /// only a `const` holds one.
     ///
-    /// Returns `None` for a call to a type-guard function, for `in`, and for
-    /// `instanceof`, because TypeScript never narrows `s` through
-    /// `isC(s.kind)`, `"a" in s.kind`, or `s.kind instanceof C`. Only the
-    /// object that holds the property narrows: `o.a.kind` narrows `o.a`, not
-    /// `o`.
+    /// Returns `None` for a call to a type-guard function, for `in`, for
+    /// `instanceof`, and for a comparison of `constructor`, because
+    /// TypeScript never narrows `s` through `isC(s.kind)`, `"a" in s.kind`,
+    /// `s.kind instanceof C`, or `s.kind.constructor === C`. Only the object
+    /// that holds the property narrows: `o.a.kind` narrows `o.a`, not `o`.
     fn property_guard(
         &mut self,
         operand: Option<&AnyJsExpression>,
@@ -1936,7 +1965,11 @@ impl<'a, 'raw> Decomposer<'a, 'raw> {
     ) -> Option<FlowGuard> {
         if matches!(
             test,
-            FlowTest::Predicate { .. } | FlowTest::In(_) | FlowTest::Instanceof(_)
+            FlowTest::Predicate { .. }
+                | FlowTest::In(_)
+                | FlowTest::Instanceof(_)
+                | FlowTest::PrivateName { .. }
+                | FlowTest::Constructor(_)
         ) {
             return None;
         }
@@ -1987,11 +2020,11 @@ impl<'a, 'raw> Decomposer<'a, 'raw> {
     /// element, as `kind === "c"` applies to `{ kind, v }` in
     /// `const { kind, v } = s`.
     ///
-    /// Returns `None` for a call to a type-guard function, for `in`, and for
-    /// `instanceof`, because TypeScript never narrows a pattern through these
-    /// tests of one of its elements. Inside an inlined aliased condition,
-    /// every such pattern can be tested, because its values don't change
-    /// after the destructuring.
+    /// Returns `None` for a call to a type-guard function, for `in`, for
+    /// `instanceof`, and for a comparison of `constructor`, because TypeScript
+    /// never narrows a pattern through these tests of one of its elements.
+    /// Inside an inlined aliased condition, every such pattern can be tested,
+    /// because its values don't change after the destructuring.
     ///
     /// [`subjects::narrowing_pattern`]: super::subjects::narrowing_pattern
     fn pattern_guard(
@@ -2002,7 +2035,11 @@ impl<'a, 'raw> Decomposer<'a, 'raw> {
     ) -> Option<FlowGuard> {
         if matches!(
             test,
-            FlowTest::Predicate { .. } | FlowTest::In(_) | FlowTest::Instanceof(_)
+            FlowTest::Predicate { .. }
+                | FlowTest::In(_)
+                | FlowTest::Instanceof(_)
+                | FlowTest::PrivateName { .. }
+                | FlowTest::Constructor(_)
         ) {
             return None;
         }
@@ -2449,6 +2486,14 @@ enum SyntaxGuard {
     In(TextRange),
     /// The `instanceof` operator whose right operand is at this range.
     Instanceof(TextRange),
+    /// The `in` operator with a private name, a [`FlowTest::PrivateName`].
+    PrivateName {
+        class: TextRange,
+        is_static: bool,
+    },
+    /// The equality of `constructor` with the value at this range, a
+    /// [`FlowTest::Constructor`].
+    Constructor(TextRange),
 }
 
 /// One syntax step, with child expressions left undecomposed.
@@ -2547,18 +2592,28 @@ fn condition_step(
             })
         }
         AnyJsExpression::JsInExpression(expression) => {
-            // A private name, as in `#p in value`, isn't decomposed.
-            let AnyJsInProperty::AnyJsExpression(key) = expression.property().ok()? else {
-                return Some(ConditionStep::Unsupported);
-            };
-            let key = omit_parentheses(key, remaining)?;
             let object = omit_parentheses(expression.object().ok()?, remaining)?;
-            if literal_key(&key).is_none() || !has_subject_shape(&object)? {
+            let guard = match expression.property().ok()? {
+                AnyJsInProperty::JsPrivateName(name) => {
+                    match private_name_class(&name, remaining) {
+                        Some((class, is_static)) => SyntaxGuard::PrivateName { class, is_static },
+                        None => return Some(ConditionStep::Unsupported),
+                    }
+                }
+                AnyJsInProperty::AnyJsExpression(key) => {
+                    let key = omit_parentheses(key, remaining)?;
+                    if literal_key(&key).is_none() {
+                        return Some(ConditionStep::Unsupported);
+                    }
+                    SyntaxGuard::In(key.range())
+                }
+            };
+            if !has_subject_shape(&object)? {
                 return Some(ConditionStep::Unsupported);
             }
             Some(ConditionStep::Guard {
                 operand: object,
-                guard: SyntaxGuard::In(key.range()),
+                guard,
                 positive,
                 // `in` throws on `null` and `undefined`, but TypeScript
                 // narrows no receiver of an optional chain through it.
@@ -2595,6 +2650,11 @@ fn condition_step(
             );
             let left = omit_parentheses(left, remaining)?;
             let right = omit_parentheses(right, remaining)?;
+            for (subject, value) in [(&left, &right), (&right, &left)] {
+                if let Some(step) = constructor_step(subject, value, equal, remaining) {
+                    return Some(step);
+                }
+            }
             for (subject, value) in [(&left, &right), (&right, &left)] {
                 let step = comparison_step(subject, value, strict, equal, model, remaining)?;
                 if !matches!(step, ConditionStep::Unsupported) {
@@ -2699,7 +2759,9 @@ fn comparison_step(
         | SyntaxGuard::Imported { .. }
         | SyntaxGuard::Predicate(_)
         | SyntaxGuard::In(_)
-        | SyntaxGuard::Instanceof(_) => false,
+        | SyntaxGuard::Instanceof(_)
+        | SyntaxGuard::PrivateName { .. }
+        | SyntaxGuard::Constructor(_) => false,
     };
     Some(ConditionStep::Guard {
         operand,
@@ -2707,6 +2769,93 @@ fn comparison_step(
         positive,
         receivers,
     })
+}
+
+/// Decomposes the comparison of `constructor`, the read of the property
+/// `constructor` of an operand, with `value`, a dotted name such as `Date`
+/// or `ns.Foo`, assuming that they are equal when `positive` is true, as
+/// in `x.constructor === Date` or `Date == x.constructor`.
+///
+/// Returns `None` when `constructor` doesn't read `constructor` or `value`
+/// is not a dotted name, so the comparison is decomposed otherwise. In the
+/// branch where the two are equal, the step tests the operand, and the
+/// receivers of its optional chain as not nullish, as in
+/// `o?.v.constructor === Foo`. In the other branch, which TypeScript doesn't
+/// narrow, the step is [`ConditionStep::Unsupported`].
+fn constructor_step(
+    constructor: &AnyJsExpression,
+    value: &AnyJsExpression,
+    positive: bool,
+    remaining: &mut usize,
+) -> Option<ConditionStep> {
+    let AnyJsExpression::JsStaticMemberExpression(member) = constructor else {
+        return None;
+    };
+    let operand = constructor_operand(member, remaining)?;
+    if !is_dotted_name(value, remaining) {
+        return None;
+    }
+    if !positive {
+        return Some(ConditionStep::Unsupported);
+    }
+    Some(ConditionStep::Guard {
+        operand,
+        guard: SyntaxGuard::Constructor(value.range()),
+        positive,
+        receivers: true,
+    })
+}
+
+/// Returns the object of `member`, without parentheses, when `member` reads
+/// the property `constructor` of an expression with the shape of an
+/// operand, as `x.constructor` and `x?.constructor` do.
+fn constructor_operand(
+    member: &JsStaticMemberExpression,
+    remaining: &mut usize,
+) -> Option<AnyJsExpression> {
+    let AnyJsName::JsName(name) = member.member().ok()? else {
+        return None;
+    };
+    if name.value_token().ok()?.text_trimmed() != "constructor" {
+        return None;
+    }
+    let object = omit_parentheses(member.object().ok()?, remaining)?;
+    has_operand_shape(&object)?.then_some(object)
+}
+
+/// Returns the range at which inference finds the type of the class that
+/// declares the private name `name`, and whether the name is static.
+///
+/// The class is the innermost one around `name` that declares a member with
+/// its name, as JavaScript resolves a private name. Its range is the name
+/// that a class declaration binds, or the class expression itself. Returns
+/// `None` when no class around `name` declares it, when that class is an
+/// anonymous default export, and when the walk runs out of work.
+fn private_name_class(name: &JsPrivateName, remaining: &mut usize) -> Option<(TextRange, bool)> {
+    let token = name.value_token().ok()?;
+    let text = token.text_trimmed();
+    for class in name.syntax().ancestors().filter_map(AnyJsClass::cast) {
+        for member in class.members() {
+            *remaining = remaining.checked_sub(1)?;
+            let Ok(Some(AnyJsClassMemberName::JsPrivateClassMemberName(member_name))) =
+                member.name()
+            else {
+                continue;
+            };
+            if member_name.id_token().ok()?.text_trimmed() != text {
+                continue;
+            }
+            let range = match &class {
+                AnyJsClass::JsClassDeclaration(declaration) => declaration.id().ok()?.range(),
+                AnyJsClass::JsClassExportDefaultDeclaration(declaration) => {
+                    declaration.id()?.range()
+                }
+                AnyJsClass::JsClassExpression(expression) => expression.range(),
+            };
+            return Some((range, is_static_member(&member)));
+        }
+    }
+    None
 }
 
 /// A value of a unit type, a type with a single value such as `"a"` or
@@ -4241,7 +4390,8 @@ mod tests {
             r#"function f(value) { const k = "a"; if (k in value) {} }"#,
             r#"function f(value) { if ("a" in value!) {} }"#,
             r#"function f(value) { if ("a" in value.f()) {} }"#,
-            "class K { #p = 1; m(value) { if (#p in value) {} } }",
+            // No class around the test declares `#q`.
+            "class K { #p = 1; m(value) { if (#q in value) {} } }",
         ] {
             let decomposed = decomposed_last(program, FlowOutcome::Truthy);
             assert!(decomposed.condition.mentions.is_empty(), "{program}");
@@ -4314,6 +4464,101 @@ mod tests {
                 matches!(&program[constructor], "Date" | "other" | "other.C"),
                 "{source}: {}",
                 &program[constructor]
+            );
+        }
+    }
+
+    #[test]
+    fn private_names_in_tests_test_the_class_that_declares_them() {
+        for (program, class, is_static) in [
+            (
+                "class K { #p = 1; m(value) { if (#p in value) {} } }",
+                "K",
+                false,
+            ),
+            (
+                "class K { static #p = 1; m(value) { if (#p in value) {} } }",
+                "K",
+                true,
+            ),
+            // The innermost class that declares the name is the one that the
+            // name refers to.
+            (
+                "class K { #p = 1; m() { class L { #q = 1; n(value) { if (#p in value) {} } } } }",
+                "K",
+                false,
+            ),
+            (
+                "const C = class { #p() {} m(value) { if (#p in value) {} } };",
+                "class { #p() {} m(value) { if (#p in value) {} } }",
+                false,
+            ),
+        ] {
+            let decomposed = decomposed_last(program, FlowOutcome::Truthy);
+            assert!(decomposed.condition.mentions.is_empty(), "{program}");
+            assert_eq!(parent_names(&decomposed), ["value"], "{program}");
+            let FlowGuard::Test {
+                test:
+                    FlowTest::PrivateName {
+                        class: range,
+                        is_static: actual,
+                    },
+                positive: true,
+                ..
+            } = decomposed.guards[decomposed.condition.guard]
+            else {
+                panic!("{program}: {:?}", decomposed.guards);
+            };
+            let source = decomposed.model.root().syntax().text_trimmed().to_string();
+            assert_eq!(&source[range], class, "{program}");
+            assert_eq!(actual, is_static, "{program}");
+        }
+    }
+
+    #[test]
+    fn constructor_comparisons_test_their_object_where_they_hold() {
+        use FlowOutcome::{Falsy, Truthy};
+        for (source, outcome, constructor) in [
+            ("value.constructor === Date", Truthy, Some("Date")),
+            ("value.constructor == other.C", Truthy, Some("other.C")),
+            ("Date === value.constructor", Truthy, Some("Date")),
+            ("value.constructor !== Date", Falsy, Some("Date")),
+            ("value?.constructor === Date", Truthy, Some("Date")),
+            // TypeScript narrows only where the comparison holds.
+            ("value.constructor === Date", Falsy, None),
+            ("value.constructor !== Date", Truthy, None),
+        ] {
+            let decomposed = decomposed(source, outcome);
+            let guard = &decomposed.guards[decomposed.condition.guard];
+            let Some(constructor) = constructor else {
+                assert_eq!(*guard, FlowGuard::Keep, "{source}");
+                continue;
+            };
+            assert_eq!(parent_names(&decomposed), ["value"], "{source}");
+            let FlowGuard::Test {
+                test: FlowTest::Constructor(range),
+                positive: true,
+                ..
+            } = guard
+            else {
+                panic!("{source}: {:?}", decomposed.guards);
+            };
+            let program = decomposed.model.root().syntax().text_trimmed().to_string();
+            assert_eq!(&program[*range], constructor, "{source}");
+        }
+        // A value that is not a dotted name, and a member other than
+        // `constructor`, compare as any other value.
+        for source in ["value.constructor === f()", "value.kind === Date"] {
+            let decomposed = decomposed(source, Truthy);
+            assert!(
+                !decomposed.guards.iter().any(|guard| matches!(
+                    guard,
+                    FlowGuard::Test {
+                        test: FlowTest::Constructor(_),
+                        ..
+                    }
+                )),
+                "{source}"
             );
         }
     }

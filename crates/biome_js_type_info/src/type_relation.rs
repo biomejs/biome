@@ -473,6 +473,11 @@ fn is_decimal_integer_name(name: &str) -> bool {
 ///   `a: number`. Such a property is also compared with its literal types
 ///   widened, and the result is undetermined when the two comparisons
 ///   disagree.
+/// - A type parameter belongs to the code being checked, so it relates to
+///   another type only through its constraint, and no concrete type relates
+///   to it. So `string` is not a subtype of an unconstrained `T`, and `T` is
+///   not a subtype of `string`. [`is_assignable_in_generic_body`] gives the
+///   details.
 pub(crate) fn is_subtype<'db>(
     db: &'db dyn TypeDb,
     source: TypeData<'db>,
@@ -481,6 +486,36 @@ pub(crate) fn is_subtype<'db>(
 ) -> Assignability {
     let mut check = AssignabilityCheck::new(db, resolve, &[]);
     check.is_subtype = true;
+    check.has_rigid_type_parameters = true;
+    check.is_assignable(source, target)
+}
+
+/// Returns whether a value of the normalized type `source` is assignable to
+/// `target` in the body of the generic code that declares the type
+/// parameters they refer to, as TypeScript checks a value inside a generic
+/// function.
+///
+/// There, a type parameter stands for one type that the code doesn't know,
+/// so TypeScript relates it to another type as it relates its constraint,
+/// or `unknown` when it has none, and relates no type to it other than
+/// itself, `never`, `any`, and an intersection with it as an operand. So an
+/// unconstrained `T` is assignable neither to `string` nor from it, and
+/// `T extends string` is assignable to `string | number`. Other types are
+/// compared as for assignability. A type whose relation to a type parameter
+/// depends on how it is instantiated, such as a conditional type or an
+/// indexed access, gives [`Assignability::Undetermined`].
+///
+/// Assignability elsewhere, as when a call infers its type arguments or a
+/// conditional type is evaluated, can't tell such comparisons, because the
+/// type parameter may still be replaced.
+pub(crate) fn is_assignable_in_generic_body<'db>(
+    db: &'db dyn TypeDb,
+    source: TypeData<'db>,
+    target: TypeData<'db>,
+    resolve: &mut TypeResolver<'db, '_>,
+) -> Assignability {
+    let mut check = AssignabilityCheck::new(db, resolve, &[]);
+    check.has_rigid_type_parameters = true;
     check.is_assignable(source, target)
 }
 
@@ -1192,6 +1227,10 @@ struct AssignabilityCheck<'db, 'a> {
     /// Whether the check follows TypeScript's subtype relation instead of
     /// assignability. [`is_subtype`] lists the differences.
     is_subtype: bool,
+    /// Whether the type parameters that the compared types refer to belong
+    /// to the code being checked, so they can't be replaced by another type.
+    /// [`is_assignable_in_generic_body`] describes how they relate.
+    has_rigid_type_parameters: bool,
 }
 
 impl<'db, 'a> AssignabilityCheck<'db, 'a> {
@@ -1211,6 +1250,7 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
             parameter_position: InferencePosition::Contravariant,
             remaining_steps: MAX_RELATION_STEPS,
             is_subtype: false,
+            has_rigid_type_parameters: false,
         }
     }
 
@@ -1450,6 +1490,12 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
         }
 
         if let Some(generic) = referenced_generic(self.db, source) {
+            if self.has_rigid_type_parameters {
+                let constraint = generic
+                    .constraint(self.db)
+                    .unwrap_or(TypeData::UnknownKeyword);
+                return self.is_assignable(constraint, target);
+            }
             let Some(constraint) = generic.constraint(self.db) else {
                 return Assignability::Undetermined;
             };
@@ -1461,7 +1507,11 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
             };
         }
         if referenced_generic(self.db, target).is_some() {
-            return Assignability::Undetermined;
+            return if self.has_rigid_type_parameters && self.is_concrete(source) {
+                Assignability::NotAssignable
+            } else {
+                Assignability::Undetermined
+            };
         }
         if is_unresolved(self.db, source) || is_unresolved(self.db, target) {
             return Assignability::Undetermined;
@@ -1639,16 +1689,73 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
             return Assignability::Assignable;
         }
         let result = self.all_assignable(members.iter().map(|member| (source, *member)));
+        // A type parameter of the code being checked never becomes `any`.
         if result == Assignability::NotAssignable
-            && (may_refer_to_free_generic(
-                self.db,
-                TypeData::Intersection(intersection),
-                &self.infer_types,
-            ) || members.iter().any(|member| self.is_weak(*member)))
+            && ((!self.has_rigid_type_parameters
+                && may_refer_to_free_generic(
+                    self.db,
+                    TypeData::Intersection(intersection),
+                    &self.infer_types,
+                ))
+                || members.iter().any(|member| self.is_weak(*member)))
         {
             return Assignability::Undetermined;
         }
         result
+    }
+
+    /// Returns whether the resolved type `ty` can't turn out to be a type
+    /// parameter, whatever the type arguments are, as for a primitive, a
+    /// literal, an object type, a function, or an instance of a class or an
+    /// interface. A conditional type, an indexed access, an alias with type
+    /// arguments, and an unresolved type may turn out to be one.
+    fn is_concrete(&mut self, ty: TypeData<'db>) -> bool {
+        match ty {
+            TypeData::BigInt
+            | TypeData::Boolean
+            | TypeData::Null
+            | TypeData::Number
+            | TypeData::String
+            | TypeData::Symbol
+            | TypeData::Undefined
+            | TypeData::Class(_)
+            | TypeData::Constructor(_)
+            | TypeData::Function(_)
+            | TypeData::Interface(_)
+            | TypeData::Module(_)
+            | TypeData::Namespace(_)
+            | TypeData::Object(_)
+            | TypeData::Tuple(_)
+            | TypeData::Literal(_)
+            | TypeData::ObjectKeyword
+            | TypeData::UnknownKeyword
+            | TypeData::VoidKeyword => true,
+            TypeData::InstanceOf(instance) => matches!(
+                self.resolve(instance.ty(self.db))
+                    .expand_canonical_global(self.db),
+                TypeData::Class(_) | TypeData::Interface(_)
+            ),
+            TypeData::Unknown
+            | TypeData::Global
+            | TypeData::Conditional
+            | TypeData::Generic(_)
+            | TypeData::Local(_)
+            | TypeData::GlobalType(_)
+            | TypeData::GlobalLocal(_)
+            | TypeData::Intersection(_)
+            | TypeData::Union(_)
+            | TypeData::TypeOperator(_)
+            | TypeData::IndexedAccess(_)
+            | TypeData::MappedType(_)
+            | TypeData::Extends(_)
+            | TypeData::MergedReference(_)
+            | TypeData::TypeofExpression(_)
+            | TypeData::TypeofType(_)
+            | TypeData::TypeofValue(_)
+            | TypeData::AnyKeyword
+            | TypeData::NeverKeyword
+            | TypeData::ThisKeyword => false,
+        }
     }
 
     /// Returns whether `ty` is an object type with only optional properties.

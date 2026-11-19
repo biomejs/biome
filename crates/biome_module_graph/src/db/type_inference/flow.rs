@@ -53,9 +53,11 @@ use biome_js_type_info::interned_types::{
 use biome_js_type_info::{
     ImportSymbol, Literal as RawLiteral, NarrowingPredicate, ObjectKind, PropertyTest, RawTypeData,
     RawTypeId, TypeId, TypeReference, TypeofExpression, base_literal_type, evolving_array_element,
-    evolving_assigned_type, has_readonly_property, is_narrowing_invariant,
-    may_narrow_by_instanceof, may_narrow_by_property, narrow_by_assignment, narrow_by_in_operator,
-    narrow_by_instanceof, narrow_by_property, narrow_by_type_predicate, narrow_type,
+    evolving_assigned_type, has_readonly_property, instantiate_intersection_alias,
+    is_narrowing_invariant, is_type_parameter_or_intersection, may_narrow_by_instanceof,
+    may_narrow_by_property, narrow_by_assignment, narrow_by_constructor, narrow_by_in_operator,
+    narrow_by_instanceof, narrow_by_private_name, narrow_by_property, narrow_by_type_predicate,
+    narrow_type,
 };
 use biome_rowan::{AstNode, NodeOrToken, Text, TextRange, TextSize};
 use rustc_hash::FxHashMap;
@@ -693,6 +695,9 @@ impl<'db> ResolutionCtx<'db, '_> {
             None if calls.is_some() => self.called_binding_baseline(binding)?,
             None => self.flow_binding_baseline(binding)?,
         };
+        if !self.may_change_baseline(read.root, read.subject, baseline) {
+            return declared;
+        }
         let exhaustive = self.exhaustive_switches(read, start);
         let assigned = self.flow_assigned_types(read.root, read.subject);
         let ends = self.ending_calls(read)?;
@@ -943,13 +948,35 @@ impl<'db> ResolutionCtx<'db, '_> {
     /// the root can change `ty`.
     fn subject_baseline(&mut self, read: FlowRead, ty: TypeData<'db>) -> Option<TypeData<'db>> {
         let root = self.js_info.flow.root(read.root)?;
-        if root.is_property_only(read.subject)
+        let baseline = if root.is_property_only(read.subject)
             && self.call_effects(read.root, read.subject).is_none()
         {
             self.property_baseline(ty, root.is_instance_tested(read.subject))
         } else {
             self.narrowing_baseline(ty)
-        }
+        }?;
+        self.may_change_baseline(read.root, read.subject, baseline)
+            .then_some(baseline)
+    }
+
+    /// Returns whether the solve of `subject` in the root at index `root` can
+    /// change `baseline`, the type that its narrowing starts from. It can't
+    /// when `baseline` is `any` and the subject is neither in
+    /// [`RootFlow::any_tested`] nor narrowed by one of its call points,
+    /// because every other runtime test and every write keeps `any`.
+    fn may_change_baseline(
+        &mut self,
+        root: usize,
+        subject: FlowSubjectId,
+        baseline: TypeData<'db>,
+    ) -> bool {
+        baseline != TypeData::AnyKeyword
+            || self
+                .js_info
+                .flow
+                .root(root)
+                .is_some_and(|flow| flow.is_any_tested(subject))
+            || self.call_effects(root, subject).is_some()
     }
 
     /// Returns the type of the variable declared at `binding` at the capture
@@ -1043,7 +1070,11 @@ impl<'db> ResolutionCtx<'db, '_> {
                 } else {
                     self.flow_binding_baseline(binding)?
                 };
-                (baseline, root.is_uninitialized(capture.subject))
+                let uninitialized = root.is_uninitialized(capture.subject);
+                if !self.may_change_baseline(capture.root, capture.subject, baseline) {
+                    return Some((baseline, uninitialized));
+                }
+                (baseline, uninitialized)
             }
         };
         if baseline == TypeData::Unknown {
@@ -1236,6 +1267,9 @@ impl<'db> ResolutionCtx<'db, '_> {
             && root.is_assignment_only(read.subject)
             && !may_narrow_by_assignment(baseline)
         {
+            return None;
+        }
+        if !self.may_change_baseline(read.root, read.subject, baseline) {
             return None;
         }
         let readonly_path =
@@ -1666,6 +1700,12 @@ impl<'db> ResolutionCtx<'db, '_> {
         }
         let target = match target {
             Some(target) => {
+                // A target such as `NonNullable<T>` is an alias whose type
+                // argument the call's type arguments replace.
+                let target = instantiate_intersection_alias(self.db, target, |ty| {
+                    resolve_local_type_on_demand(self.db, ty).expand_structural_global(self.db)
+                })
+                .unwrap_or(target);
                 let target = self.flow_baseline(target)?;
                 if matches!(
                     target,
@@ -2533,7 +2573,11 @@ impl<'db> ResolutionCtx<'db, '_> {
                 } else {
                     solve.declared
                 };
-                if let FlowTest::In(_) | FlowTest::Instanceof(_) | FlowTest::Predicate { .. } = test
+                if let FlowTest::In(_)
+                | FlowTest::Instanceof(_)
+                | FlowTest::PrivateName { .. }
+                | FlowTest::Constructor(_)
+                | FlowTest::Predicate { .. } = test
                 {
                     // Loops revisit conditions, and each application compares
                     // every member of the union.
@@ -2555,6 +2599,13 @@ impl<'db> ResolutionCtx<'db, '_> {
                         test @ FlowTest::Instanceof(_) => {
                             self.narrow_by_instance(ty, declared, test, *positive)
                         }
+                        FlowTest::PrivateName { class, is_static } => {
+                            self.narrow_by_private_name(ty, declared, class, is_static, *positive)
+                        }
+                        FlowTest::Constructor(constructor) if *positive => {
+                            self.narrow_by_constructor(ty, declared, constructor)
+                        }
+                        FlowTest::Constructor(_) => ty,
                         FlowTest::Truthy
                         | FlowTest::Nullish
                         | FlowTest::Typeof(_)
@@ -2625,14 +2676,48 @@ impl<'db> ResolutionCtx<'db, '_> {
                 }
             }
             FlowGuard::Unmatched(guard) => {
-                let has_unknown = ty == TypeData::UnknownKeyword
-                    || matches!(ty, TypeData::Union(union)
-                        if union.types(self.db).contains(&TypeData::UnknownKeyword));
-                if has_unknown {
-                    ty
+                let members = if let TypeData::Union(union) = ty {
+                    union.types(self.db)
                 } else {
+                    std::slice::from_ref(&ty)
+                };
+                if members.contains(&TypeData::UnknownKeyword) {
+                    return Some(ty);
+                }
+                if !members
+                    .iter()
+                    .any(|member| is_type_parameter_or_intersection(self.db, *member))
+                {
                     return self.apply_guard(root, *guard, solve, ty, remaining);
                 }
+                // Where no case matches, TypeScript removes the members whose
+                // every value a case covers and keeps the others whole. So a
+                // type parameter, or an intersection with one, stays as it is
+                // unless the guard leaves it no value, instead of becoming the
+                // intersection that the guard gives.
+                let mut kept = Vec::with_capacity(members.len());
+                let mut others = Vec::new();
+                for &member in members {
+                    if !is_type_parameter_or_intersection(self.db, member) {
+                        others.push(member);
+                    } else if self.apply_guard(root, *guard, solve, member, remaining)?
+                        != TypeData::NeverKeyword
+                    {
+                        kept.push(member);
+                    }
+                }
+                let removed_type_parameter = kept.len() + others.len() < members.len();
+                if !others.is_empty() {
+                    let others = TypeData::union_from_types(self.db, others);
+                    let narrowed = self.apply_guard(root, *guard, solve, others, remaining)?;
+                    if !removed_type_parameter && narrowed == others {
+                        return Some(ty);
+                    }
+                    kept.push(narrowed);
+                } else if !removed_type_parameter {
+                    return Some(ty);
+                }
+                TypeData::union_from_types(self.db, kept)
             }
             FlowGuard::Call { call, positive } => {
                 return self.apply_call(root, index, *call, *positive, solve, ty, remaining);
@@ -2888,13 +2973,15 @@ impl<'db> ResolutionCtx<'db, '_> {
 
     /// Narrows `ty` by `name in value`, where `name` is the string or number
     /// literal at `key`. When `positive` is true, the members of `ty` that
-    /// lack the property are removed. When `positive` is false, the members
-    /// that declare it as required are removed. See [`narrow_by_in_operator`].
+    /// lack the property are removed, or, when every member lacks it, `ty`
+    /// becomes its intersection with `{ name: unknown }`. When `positive` is
+    /// false, the members that declare it as required are removed. See
+    /// [`narrow_by_in_operator`].
     ///
-    /// Returns `ty` unchanged when the subject's `declared` type is not a
-    /// union with two object types, because the test could then only make a
-    /// branch impossible. Also returns `ty` unchanged when the key doesn't
-    /// resolve to a string or number literal.
+    /// Returns `ty` unchanged when the subject's `declared` type has no
+    /// object type and is neither `unknown` nor `any`, because the test could
+    /// then only make a branch impossible. Also returns `ty` unchanged when
+    /// the key doesn't resolve to a string or number literal.
     fn narrow_by_in(
         &mut self,
         ty: TypeData<'db>,
@@ -2902,7 +2989,7 @@ impl<'db> ResolutionCtx<'db, '_> {
         key: TextRange,
         positive: bool,
     ) -> TypeData<'db> {
-        if !may_narrow_by_property(self.db, declared) {
+        if !may_narrow_by_instanceof(self.db, declared) {
             return ty;
         }
         let Some(reference) = self.js_info.raw_expressions.get(&key) else {
@@ -2912,8 +2999,8 @@ impl<'db> ResolutionCtx<'db, '_> {
             return ty;
         };
         let name = match literal.literal(self.db) {
-            Literal::String(string) => string.as_str(),
-            Literal::Number(number) => number.as_str(),
+            Literal::String(string) => string.as_ref(),
+            Literal::Number(number) => number.text(),
             Literal::BigInt(_)
             | Literal::Boolean(_)
             | Literal::Object(_)
@@ -2956,6 +3043,67 @@ impl<'db> ResolutionCtx<'db, '_> {
         )
     }
 
+    /// Returns `ty` narrowed by `#name in value` through
+    /// [`narrow_by_private_name`], where `class` is the range at which the
+    /// class that declares `#name` has its type, and `is_static` tells
+    /// whether the name is static.
+    ///
+    /// Returns `ty` unchanged when the subject's `declared` type has no object
+    /// type and is neither `unknown` nor `any`, and when Biome has no type for
+    /// the class. The class is resolved only after that check.
+    fn narrow_by_private_name(
+        &mut self,
+        ty: TypeData<'db>,
+        declared: TypeData<'db>,
+        class: TextRange,
+        is_static: bool,
+        positive: bool,
+    ) -> TypeData<'db> {
+        if !may_narrow_by_instanceof(self.db, declared) {
+            return ty;
+        }
+        let js_info = self.js_info;
+        let Some(reference) = js_info
+            .raw_binding_types
+            .get(&class)
+            .or_else(|| js_info.raw_expressions.get(&class))
+        else {
+            return ty;
+        };
+        let class = self.resolve(reference);
+        narrow_by_private_name(
+            self.db,
+            ty,
+            class,
+            is_static,
+            positive,
+            self.narrowing_resolver(),
+        )
+    }
+
+    /// Returns `ty` narrowed by `value.constructor === C` through
+    /// [`narrow_by_constructor`], where `constructor` is the range of `C`, in
+    /// the branch where the comparison holds.
+    ///
+    /// Returns `ty` unchanged when the subject's `declared` type has no object
+    /// type and is neither `unknown` nor `any`. `C` is resolved only after
+    /// that check.
+    fn narrow_by_constructor(
+        &mut self,
+        ty: TypeData<'db>,
+        declared: TypeData<'db>,
+        constructor: TextRange,
+    ) -> TypeData<'db> {
+        if !may_narrow_by_instanceof(self.db, declared) {
+            return ty;
+        }
+        let Some(reference) = self.js_info.raw_expressions.get(&constructor) else {
+            return ty;
+        };
+        let constructor = self.resolve(reference);
+        narrow_by_constructor(self.db, ty, constructor, self.narrowing_resolver())
+    }
+
     /// Returns the predicate that `test` applies.
     ///
     /// Returns `None` for a call to a type-guard function, an `in` test, and an
@@ -2990,7 +3138,11 @@ impl<'db> ResolutionCtx<'db, '_> {
                     (_, false) => return None,
                 }
             }
-            FlowTest::Predicate { .. } | FlowTest::In(_) | FlowTest::Instanceof(_) => {
+            FlowTest::Predicate { .. }
+            | FlowTest::In(_)
+            | FlowTest::Instanceof(_)
+            | FlowTest::PrivateName { .. }
+            | FlowTest::Constructor(_) => {
                 return None;
             }
         })
@@ -3890,6 +4042,7 @@ mod tests {
             read_points: Default::default(),
             property_only: Default::default(),
             instance_tested: Default::default(),
+            any_tested: Default::default(),
             pattern_elements: Default::default(),
             readonly_tested: Default::default(),
             only_readonly_tested: Default::default(),

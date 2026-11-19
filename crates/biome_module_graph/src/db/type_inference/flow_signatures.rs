@@ -331,13 +331,15 @@ impl<'db> ResolutionCtx<'db, '_> {
     /// Each inferred type must satisfy its type parameter's constraint (see
     /// [`satisfies_constraint`]), read with the type arguments of the object
     /// that the callee is read from, at the call (see
-    /// [`Self::receiver_at_call`]). A type that may be wider than
-    /// TypeScript's can violate a constraint that TypeScript's satisfies, so
-    /// only a violation by TypeScript's type argument rejects the signature.
-    /// The object's type can be wider than TypeScript's too, where Biome
-    /// lacks a narrowing of the object, and a constraint that it satisfies,
-    /// as `S extends T` in `xs.every(isString)`, can then fail in TypeScript,
-    /// which selects another signature.
+    /// [`Self::receiver_at_call`]), so after `xs.every(isString)`,
+    /// `xs.every(isNumber)` reads `xs` as `string[]`, whose `T` rejects
+    /// `number`. A type that may be wider than TypeScript's can violate a
+    /// constraint that TypeScript's satisfies, so only a violation by
+    /// TypeScript's type argument rejects the signature. The object's type
+    /// can be wider than TypeScript's too, where Biome lacks a narrowing of
+    /// the object, and a constraint that it satisfies, as `S extends T` in
+    /// `xs.every(isString)`, can then fail in TypeScript, which selects
+    /// another signature.
     ///
     /// Returns [`Instantiation::Undetermined`] when a parameter of any other
     /// kind refers to a type parameter, when a type parameter is inferred

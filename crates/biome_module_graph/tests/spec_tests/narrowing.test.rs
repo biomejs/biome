@@ -508,11 +508,12 @@ fn unrefinable_binding_types_skip_flow_queries() {
         let events = db.take_salsa_events();
         // An untyped `value` never narrows, and a test that doesn't narrow
         // `any` makes no read of `value: any` a candidate. Collection can't
-        // tell that `Loose` is `any`, so its read needs the declared type and
-        // a solve, which keeps `any`.
+        // tell that `Loose` is `any`, so its read resolves the declared type,
+        // which shows that no test of the root can narrow it, and runs no
+        // solve.
         for (query, count) in [
             ("infer_flow_binding_baseline", queries),
-            ("infer_flow_subject_type", queries),
+            ("infer_flow_subject_type", 0),
         ] {
             assert_eq!(
                 function_query_will_execute_count_by_name(&db, query, &events),
@@ -520,6 +521,60 @@ fn unrefinable_binding_types_skip_flow_queries() {
                 "{parameter}: {query}"
             );
         }
+    }
+}
+
+// TypeScript 7.0.2 (`tsc --strict`) gives `any` at `after` in each source:
+// truthiness and equality don't narrow `any`, whether a variable, a
+// property, or a variable read in a closure has it through inference, an
+// assertion, or an alias. Only the declared type, resolved, shows that, so
+// the read resolves it but runs no solve.
+#[test]
+fn inferred_any_types_skip_solves_for_tests_that_keep_any() {
+    for source in [
+        "function f(text: string) { const value = JSON.parse(text); if (value !== null) { /*after*/value; } }",
+        "function f(input: unknown) { const value = input as any; if (value) { /*after*/value; } }",
+        "type Loose = any;\n\
+         function f(o: { value: Loose }) { if (o.value !== undefined) { /*after*/o.value; } }",
+        "function f(text: string) { const value = JSON.parse(text); if (value !== null) { const g = () => /*after*/value; } }",
+    ] {
+        let (db, module) = narrowing_db(source);
+        let expression = if source.contains("o.value") {
+            "o.value"
+        } else {
+            "value"
+        };
+        db.clear_salsa_events();
+        assert_eq!(
+            normalized_type_at(&db, module, source, "after", expression),
+            InferredTypeData::AnyKeyword,
+            "{source}"
+        );
+        let events = db.take_salsa_events();
+        for query in ["infer_flow_subject_states", "infer_flow_subject_type"] {
+            assert_eq!(
+                function_query_will_execute_count_by_name(&db, query, &events),
+                0,
+                "{source}: {query}"
+            );
+        }
+    }
+}
+
+// TypeScript 7.0.2 (`tsc --strict`) gives `string` at `after`: `typeof`
+// narrows an inferred `any`, also in a closure.
+#[test]
+fn inferred_any_types_narrow_by_typeof() {
+    for source in [
+        "function f(text: string) { const value = JSON.parse(text); if (typeof value === 'string') { /*after*/value; } }",
+        "function f(text: string) { const value = JSON.parse(text); if (typeof value === 'string') { const g = () => /*after*/value; } }",
+    ] {
+        let (db, module) = narrowing_db(source);
+        assert_eq!(
+            normalized_type_at(&db, module, source, "after", "value"),
+            InferredTypeData::String,
+            "{source}"
+        );
     }
 }
 
