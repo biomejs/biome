@@ -79,6 +79,8 @@ revisiting the row.
 | A write to a property between a `const` that holds it and the test of the `const` | `type Circle = { kind: "c"; r: number };`<br>`type Square = { kind: "s"; w: number };`<br>`s: Circle \| Square;`<br>`const k = s.kind; s.kind = "s"; if (k === "c") s`<br>`const ok = s.kind === "c"; s.kind = "s"; if (ok) s` | `Circle` | `Circle \| Square`: a test of a `const` that holds a property, and an aliased condition that tests a property, narrow the object only when the code of the execution root never writes the property, as a property path narrows only when the root never writes it. A write after the test counts too. A test of the property itself, as in `if (s.kind === "c")`, still narrows `s` after the write. Calls and callbacks that write the property don't count, as for property narrowing. | `k` holds the value of `s.kind` from before the write, so `s.kind` is `"s"` at the read and `s` matches neither member. TypeScript checks a write to a discriminant against the narrowed object, so code rarely writes a discriminant in a function that also tests it, and the sound result loses little. |
 | A rest element in a destructuring `const` holds no property | `r: { ok: true; v: number } \| { ok: false; e: string };`<br>`const { ...ok } = r; if (ok) r` | `{ ok: true; v: number }`: TypeScript takes `ok` as the property `r.ok` | The declared type of `r` | `ok` holds a new object with the other properties of `r`, which is always truthy, so `r` can have `ok: false` at the read. |
 | `in` treats object types as closed | `function f(x: { a: 1 } \| { b: 2 }) { if ("a" in x) x.a }`<br>`const v = { a: "s", b: 2 as const }; f(v)` | `1` | `1`, the same as TypeScript: `"a" in x` keeps `{ a: 1 }` and removes `{ b: 2 }` | `{ b: 2 }` also describes objects with other properties, so `f(v)` passes an object whose property `a` is `"s"`, and `x.a` is `"s"` at the read. Keeping `{ b: 2 }` in the true branch, as `{ b: 2 } & Record<"a", unknown>`, would make `in` useless for telling the members of a union apart, while code rarely passes an object whose type leaves out a property that the code tests with `in`. |
+| The true branch of `instanceof` removes members that are not derived from the class | `class A { a = 1 }; class B extends A { b = 2 }`<br>`x: B \| { c: number }; if (x instanceof A) x`<br>`const v: { c: number } = Object.assign(new A(), { c: 1 })` | `B` | `B`, the same as TypeScript: the true branch keeps the members derived from the class and removes object type literals, functions, and other types that are not | `{ c: number }` also describes an instance of `A` that has a property `c`, such as `v`, so `x` can be an instance of `A` that is not a `B` at the read. Keeping such members would make `instanceof` useless for telling the members of a union apart, while code rarely holds an instance of a class in a variable typed by an unrelated object type. |
+| The false branch of `instanceof` removes the class and its derived types | `class A { a = 1 }`<br>`x: A \| string; if (!(x instanceof A)) x`<br>`const v: A = { a: 1 }` | `string` | `string`, the same as TypeScript | TypeScript accepts a plain object for a class type whose members are all public, as `v` shows, so `x` can hold such an object, which is not an instance of `A`, and still be an `A` in the `else` branch. The sound result would remove nothing in the `else` branch, while code rarely types a plain object by a class. |
 | Code between two elements of a destructuring pattern keeps the narrowing | `s: { kind: "c"; x?: number; v: number } \| { kind: "s"; x?: number; v: string };`<br>`const { kind, x = reset(s), v } = s; if (kind === "c") v` | `number` | `number`, the same as TypeScript. A computed key between the elements, as in `{ kind, [key()]: x, v }`, keeps the narrowing too. | Destructuring reads `kind`, then runs the default of `x` when `s.x` is `undefined`, then reads `v`, so `reset` can change `s` before `v` is read and make `v` a string at the read. A computed key runs code at the same point. Defaults and computed keys rarely write the value being destructured, while stopping the narrowing at every default or computed key that can run code would lose it in patterns such as `{ kind, items = load(), v }`. |
 
 ## Limits
@@ -209,11 +211,67 @@ These limits apply to every *Supported* and *Partial* row below:
   as the row on `in` lists. Only the value that `in` looks into narrows:
   `"a" in s.k` narrows `s.k`, not `s`, as in TypeScript. The deliberate
   choices above describe why object types count as closed.
+- `x instanceof C` narrows `x` when `x` is a variable or a property path that
+  can narrow by the rules above, and its declared type is `unknown` or has a
+  member other than `null`, `undefined`, and primitive types, because no
+  primitive is an instance of a class. Only the tested value narrows:
+  `o.v instanceof C` narrows `o.v`, not `o`, and a test of an element of a
+  destructuring pattern doesn't narrow the other elements. In an optional
+  chain, as in `o?.v instanceof C`, the true branch also removes `null` and
+  `undefined` from `o`, as in TypeScript. The instance type of `C` is an
+  instance of `C` when `C` is a class, and otherwise the type of its
+  `prototype` property or the return types of its construct signatures, as
+  `new () => Foo` gives `Foo`. A union of constructors gives the union of
+  their instance types. As in TypeScript, the members of the type of `x` are
+  compared with the instance type by their declarations: a class or an
+  interface is derived from another when its `extends` clauses lead to that
+  declaration, whatever their type arguments, so `Box<string>` is derived
+  from `Box`, and arrays and tuples are derived from `Array`. An object type
+  literal, a function type, or a primitive is derived from no class. The true
+  branch keeps the members derived from the instance type, replaces a member
+  that the instance type is derived from with the instance type, and removes
+  the others. When no member remains, it gives the instance type if that is a
+  subtype of the type of `x`, as `A` is of `{ a: number } | string` with
+  `class A { a = 1 }`, and keeps the type of `x` otherwise, where TypeScript
+  gives an intersection such as `(string | number) & A`. `unknown` becomes
+  the instance type. The false branch removes the members derived from the
+  instance type when `C` has a single instance type that is an object type
+  other than `{}`. The deliberate choices above describe why each branch
+  removes members that a value reaching it can have.
+- `x instanceof C` keeps the type of `x`, where TypeScript narrows it, when
+  `C` is `Object` or `Function`, when its type is `any` or has a generic
+  construct signature, as in `new <T>() => Box<T>`, when `C` declares or
+  inherits a static `[Symbol.hasInstance]` method, or a static member with a
+  computed key that Biome can't name, and when a member of the type of `x` is
+  a type parameter, as in `x: T | C`. An instance of a generic class has no
+  type arguments in Biome, where TypeScript gives it `any` ones, as in
+  `Map<any, any>`, so `unknown` stays `unknown` for such a class, a member
+  that its instance type is derived from stays as it is, and the true branch
+  keeps the type of `x` when no member remains. Two classes with the same
+  name and members in two modules, such as `class K { k = 1 }` in `./a` and
+  in `./b`, can't be told apart from one class that Biome reaches through two
+  modules, so a test of one of them keeps the type of a value of the other.
 - Members that one module adds to an interface of another module through
   module augmentation are not seen. So with
   `declare module "./shapes" { interface X { extra: 1 } }` in one module,
   `x: X | E`, and `interface E { extra: 2 }`, `"extra" in x` gives `E`, where
   TypeScript gives `X | E`.
+- `extends` clauses that one module adds to an interface of another module
+  through module augmentation are not seen either. So with
+  `declare module "./shapes" { interface X extends Base {} }` in one module,
+  `x: X | Sub`, and `class Sub extends Base {}`, `x instanceof Base` gives
+  `Sub`, where TypeScript gives `X | Sub`.
+- A class and an interface with the same name in one module, which
+  TypeScript merges into one type, have only the type of the last of the two
+  declarations in Biome, so `instanceof` doesn't see the `extends` clause of
+  the other one. So with `class N extends C {}`, then
+  `interface N extends A {}`, `x: N | D`, and `class D extends C { d = 1 }`,
+  `x instanceof C` gives `D`, where TypeScript gives `N | D`.
+- Two classes with the same name and members in two namespaces of one module,
+  as in `namespace P1 { export class K { k = 1 } }` and
+  `namespace P2 { export class K { k = 1 } }`, count as one class for
+  `instanceof`. So `x: P1.K | string` gives `string` in the `else` branch of
+  `x instanceof P2.K`, where TypeScript gives `P1.K | string`.
 - Falsy and `typeof` tests compare an object type with the types that give
   primitives and functions their members, such as `String` and `Function`,
   from TypeScript's ES2015 library files. Members that the project adds to
@@ -303,9 +361,9 @@ code as TS7027, an error with `allowUnreachableCode: false`.
 
 | Behaviour | Example | TypeScript | Status |
 | --- | --- | --- | --- |
-| The true branch | `x: Date \| string; if (x instanceof Date) x` | `Date` | Not yet |
-| The false branch removes the class and its derived types | `x: Date \| string; if (!(x instanceof Date)) x` | `string` | Not yet |
-| `unknown` and `any` become the instance type | `x: unknown; if (x instanceof Map) x` | `Map<any, any>` | Not yet |
+| The true branch | `x: Date \| string; if (x instanceof Date) x` | `Date` | Supported |
+| The false branch removes the class and its derived types | `x: Date \| string; if (!(x instanceof Date)) x` | `string` | Supported |
+| `unknown` and `any` become the instance type | `x: unknown; if (x instanceof Map) x` | `Map<any, any>` | Partial: `unknown` becomes an instance of a class that is not generic, so `x instanceof Date` gives `Date`, but the example keeps `unknown`, as the limits above describe. `any` never narrows. |
 | `Symbol.hasInstance` with a type predicate | `class Checker { static [Symbol.hasInstance](v: unknown): v is string }`<br>`x: unknown; if (x instanceof Checker) x` | `string` | Not yet |
 | `x.constructor === C` | `class Foo { a = 1 }; class Bar { b = 2 }`<br>`x: Foo \| Bar; if (x.constructor === Foo) x` | `Foo` | Not yet |
 
@@ -463,7 +521,7 @@ whose result is not tested, do not narrow.
 | Equality of `x?.y` with a value | `x: { y: number } \| undefined; if (x?.y === 1) x` | `{ y: number }` | Partial: comparisons with a primitive literal, `null`, or `undefined`, with `===`, `!==`, `==`, or `!=`, narrow `x` in the branch where `x?.y` cannot be `undefined`. TypeScript also narrows `x` for any other value whose type excludes `undefined`, such as `-1`, a template literal, or a variable of type `number`. |
 | A chain that starts at a parenthesized optional chain | `x: { z?: { w: string } } \| undefined;`<br>`if ((x?.z)?.w) x` | `{ z?: { w: string } }` | Not yet: Biome narrows neither `x` nor its paths. In a comparison, such as `(x?.z)?.w === "a"`, TypeScript narrows `x.z` but not `x`, so a read of `x?.z` adds `undefined` back, which Biome cannot express yet. |
 | The receiver is not nullish inside the chain | `x: { f(v: unknown): void } \| undefined; x?.f(x)` | `{ f(v: unknown): void }` at the argument | Not yet |
-| `instanceof`, `switch`, or a type-guard function applied to `x?.y` | `x: { y: unknown } \| undefined; if (x?.y instanceof Date) x` | `{ y: unknown }` | Not yet |
+| `instanceof`, `switch`, or a type-guard function applied to `x?.y` | `x: { y: unknown } \| undefined; if (x?.y instanceof Date) x` | `{ y: unknown }` | Partial: `instanceof` removes `null` and `undefined` from the receivers in the true branch, as in TypeScript. `switch` and type-guard functions don't narrow the receivers yet. |
 
 ### Nullish coalescing
 

@@ -1,0 +1,31 @@
+// should not generate diagnostics
+// The `else` branch of `instanceof` keeps the members that aren't derived
+// from the class, and the true branch keeps `unknown` for a generic class,
+// whose instance type Biome can't name.
+
+class Loaded {
+	data = { size: 1 };
+}
+
+function falseBranch(result: Loaded | string | null) {
+	if (!(result instanceof Loaded)) {
+		if (result) {
+			return 1;
+		}
+	}
+}
+
+function genericClass(value: unknown) {
+	if (value instanceof Map) {
+		return value?.size;
+	}
+}
+
+function parentClass(value: Error | string | null) {
+	if (value instanceof TypeError) {
+		return 1;
+	}
+	if (value) {
+		return 2;
+	}
+}
