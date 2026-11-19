@@ -3,15 +3,35 @@ const { platform, arch, env, version, release } = process;
 const { execSync } = require("child_process");
 
 function isMusl() {
-	let nodeReportHeader;
+	let nodeReport;
 	try {
-		nodeReportHeader = process.report?.getReport?.()?.header;
+		const report = process.report;
+		const excludeNetwork = report?.excludeNetwork;
+		try {
+			if (typeof excludeNetwork === "boolean") {
+				report.excludeNetwork = true;
+			}
+			nodeReport = report?.getReport?.();
+		} finally {
+			if (typeof excludeNetwork === "boolean") {
+				report.excludeNetwork = excludeNetwork;
+			}
+		}
 	} catch {
-		nodeReportHeader = undefined;
+		nodeReport = undefined;
 	}
 
-	if (nodeReportHeader != null) {
-		return nodeReportHeader.glibcVersionRuntime == null;
+	if (nodeReport?.header?.glibcVersionRuntime) {
+		return false;
+	}
+
+	if (
+		Array.isArray(nodeReport?.sharedObjects) &&
+		nodeReport.sharedObjects.some(
+			(path) => path.includes("libc.musl-") || path.includes("ld-musl-"),
+		)
+	) {
+		return true;
 	}
 
 	let lddOutput;
@@ -20,7 +40,9 @@ function isMusl() {
 			stdio: ["pipe", "pipe", "pipe"],
 		});
 	} catch (err) {
-		lddOutput = err.stderr;
+		return (
+			err.stdout?.includes("musl") || err.stderr?.includes("musl") || false
+		);
 	}
 
 	return lddOutput?.includes("musl") ?? false;

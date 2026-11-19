@@ -46,6 +46,8 @@ jobs:
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: 24.21.0
+      - name: Test CLI wrapper
+        run: node --test packages/@biomejs/biome/tests/bin.test.mjs
       - name: Cache pnpm modules
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
