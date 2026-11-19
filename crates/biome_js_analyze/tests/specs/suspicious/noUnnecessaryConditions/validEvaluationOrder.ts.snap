@@ -1,0 +1,28 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validEvaluationOrder.ts
+---
+# Input
+```ts
+// should not generate diagnostics
+// The code after an optional chain or a default keeps the narrowing from
+// before it, because the chain's key and arguments and the default don't
+// always run, as in TypeScript.
+
+type Options = { v: string | null; w: number; f(value: unknown): void };
+
+function afterChain(o: Options | undefined) {
+	o?.f(0);
+	return o?.w;
+}
+
+function afterDefault(o: Options | undefined, source: { a?: unknown }) {
+	const { a = o && o.w } = source;
+	return o?.w;
+}
+
+function afterParameterDefault(o: Options | undefined, w = o && o.w) {
+	return o?.w;
+}
+
+```

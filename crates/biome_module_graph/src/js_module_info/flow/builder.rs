@@ -1,7 +1,7 @@
 use super::guards::{
     DecomposedCondition, FlowGuard, FlowOutcome, GuardFunctions, SwitchCase, SwitchKind,
-    decompose_assertion, decompose_condition, decompose_for_in, decompose_switch_case,
-    exhaustive_operand, is_unit_case,
+    decompose_assertion, decompose_assignment_target, decompose_condition, decompose_for_in,
+    decompose_switch_case, exhaustive_operand, is_unit_case,
 };
 use super::subjects::subject_of;
 use super::{
@@ -11,11 +11,16 @@ use super::{
 use biome_js_control_flow::{AnyJsControlFlowRoot, is_truthy_literal};
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
-    AnyJsBindingPattern, AnyJsClassMember, AnyJsExpression, AnyJsForInOrOfInitializer,
-    AnyJsFunction, AnyJsFunctionBody, AnyJsStatement, AnyJsSwitchClause, AnyJsTryStatement,
-    AnyTsType, JsDoWhileStatement, JsForInStatement, JsForOfStatement, JsForStatement,
-    JsIdentifierExpression, JsIfStatement, JsLanguage, JsSwitchStatement, JsSyntaxNode,
-    JsWhileStatement, T,
+    AnyJsArrayAssignmentPatternElement, AnyJsArrayBindingPatternElement,
+    AnyJsArrowFunctionParameters, AnyJsAssignment, AnyJsAssignmentPattern, AnyJsBindingPattern,
+    AnyJsClassMember, AnyJsConstructorParameter, AnyJsExpression, AnyJsForInOrOfInitializer,
+    AnyJsForInitializer, AnyJsFormalParameter, AnyJsFunction, AnyJsFunctionBody,
+    AnyJsObjectAssignmentPatternMember, AnyJsObjectBindingPatternMember, AnyJsObjectMemberName,
+    AnyJsOptionalChainExpression, AnyJsParameter, AnyJsStatement, AnyJsSwitchClause,
+    AnyJsTryStatement, AnyJsVariableDeclaration, AnyTsType, JsAssignmentExpression,
+    JsAssignmentOperator, JsDoWhileStatement, JsForInStatement, JsForOfStatement, JsForStatement,
+    JsIdentifierExpression, JsIfStatement, JsInitializerClause, JsLanguage, JsParameters,
+    JsSwitchStatement, JsSyntaxNode, JsVariableDeclarator, JsWhileStatement, T,
 };
 use biome_rowan::{
     AstNode, AstNodeList, AstSeparatedList, SyntaxKindSet, SyntaxResult, TokenText,
@@ -97,17 +102,18 @@ type Build<T> = Result<T, Unsupported>;
 ///
 /// `root` must be selected by a [`FlowRootScanner`], which rejects the roots
 /// that the builder cannot build, such as a root with a `with` statement.
-/// Expression-bodied arrows are supported. Parameter initializers, class
-/// members, `declare` statements, and the expressions of module export
+/// Expression-bodied arrows are supported. Parameters run before the body.
+/// Class members, `declare` statements, and the expressions of module export
 /// declarations other than classes and enums are not evaluated, and
 /// unreachable code records no reads.
 ///
 /// The builder models the control flow of blocks, `if`, `while`, `do...while`,
 /// `for`, `for...in`, `for...of`, `switch`, `try`, labeled statements,
-/// `break`, `continue`, `return`, and `throw`. Any other statement, such as a
+/// `break`, `continue`, `return`, and `throw`, and evaluates expressions in
+/// the order in which JavaScript runs them. Any other statement, such as a
 /// class or enum declaration, is an opaque region: the builder evaluates its
-/// expressions in source order from the flow before it, and the code after it
-/// continues from that evaluation.
+/// expressions from the flow before it, and the code after it continues from
+/// that evaluation.
 /// A condition inside a region narrows only the rest of the expression that
 /// contains it, as in `x && x.length`. Each `break` or `continue` that leaves
 /// the region joins its target with the flow before the region. Because only
@@ -375,6 +381,20 @@ impl StatementCheck {
     }
 }
 
+/// Returns whether `link`, one link of an optional chain, evaluates an
+/// operand: the key of a computed member access, as `k` in `x?.[k]`, or the
+/// arguments of a call, as `y` in `x?.f(y)`. A `?.` before such a link
+/// evaluates the operand only when its object is not nullish.
+pub(super) fn has_operands(link: &AnyJsOptionalChainExpression) -> bool {
+    match link {
+        AnyJsOptionalChainExpression::JsStaticMemberExpression(_) => false,
+        AnyJsOptionalChainExpression::JsComputedMemberExpression(_) => true,
+        AnyJsOptionalChainExpression::JsCallExpression(call) => call
+            .arguments()
+            .is_ok_and(|arguments| !arguments.args().is_empty()),
+    }
+}
+
 declare_node_union! {
     /// A `for...in` or `for...of` statement, which runs its body once for
     /// each key or element of the value of its expression.
@@ -511,15 +531,131 @@ struct RootBuilder<'a, 'raw> {
 
 impl RootBuilder<'_, '_> {
     fn root(&mut self, root: &AnyJsControlFlowRoot) -> Build<()> {
+        let start = self.parameters(root, 0)?;
         if let AnyJsControlFlowRoot::AnyJsFunction(AnyJsFunction::JsArrowFunctionExpression(arrow)) =
             root
             && let AnyJsFunctionBody::AnyJsExpression(body) =
                 arrow.body().map_err(|_| Unsupported)?
         {
-            self.current = Some(self.evaluate(body.syntax(), 0, 0)?);
+            self.current = Some(self.evaluate(body.syntax(), start, 0)?);
             return Ok(());
         }
+        self.current = Some(start);
         self.statements(root.syntax())
+    }
+
+    /// Evaluates the parameters of `root` in order from `incoming`, because
+    /// they run before its body, and returns the flow after them.
+    ///
+    /// Each parameter evaluates its default, then its destructuring pattern,
+    /// so `x.length` in `(x, y = x && x.length)` sees the test of `x`. A
+    /// default runs only when the argument is `undefined`. The decorators of a
+    /// parameter run where its class is defined, not where the function is
+    /// called, so they are not evaluated.
+    fn parameters(
+        &mut self,
+        root: &AnyJsControlFlowRoot,
+        incoming: FlowNodeId,
+    ) -> Build<FlowNodeId> {
+        let parameters = match root {
+            AnyJsControlFlowRoot::AnyJsFunction(function) => match function.parameters() {
+                Ok(AnyJsArrowFunctionParameters::JsParameters(parameters)) => parameters,
+                Ok(AnyJsArrowFunctionParameters::AnyJsBinding(_)) | Err(_) => return Ok(incoming),
+            },
+            AnyJsControlFlowRoot::JsMethodObjectMember(method) => match method.parameters() {
+                Ok(parameters) => parameters,
+                Err(_) => return Ok(incoming),
+            },
+            AnyJsControlFlowRoot::JsMethodClassMember(method) => match method.parameters() {
+                Ok(parameters) => parameters,
+                Err(_) => return Ok(incoming),
+            },
+            AnyJsControlFlowRoot::JsConstructorClassMember(constructor) => {
+                let Ok(parameters) = constructor.parameters() else {
+                    return Ok(incoming);
+                };
+                let mut flow = incoming;
+                for parameter in parameters.parameters().iter().flatten() {
+                    flow = match parameter {
+                        AnyJsConstructorParameter::AnyJsFormalParameter(parameter) => {
+                            self.formal_parameter(&parameter, flow)?
+                        }
+                        AnyJsConstructorParameter::JsRestParameter(parameter) => {
+                            self.binding_element(parameter.binding().ok(), None, flow, 1)?
+                        }
+                        AnyJsConstructorParameter::TsPropertyParameter(parameter) => {
+                            match parameter.formal_parameter() {
+                                Ok(parameter) => self.formal_parameter(&parameter, flow)?,
+                                Err(_) => flow,
+                            }
+                        }
+                    };
+                }
+                return Ok(flow);
+            }
+            AnyJsControlFlowRoot::JsSetterObjectMember(setter) => {
+                return match setter.parameter() {
+                    Ok(parameter) => self.formal_parameter(&parameter, incoming),
+                    Err(_) => Ok(incoming),
+                };
+            }
+            AnyJsControlFlowRoot::JsSetterClassMember(setter) => {
+                return match setter.parameter() {
+                    Ok(parameter) => self.formal_parameter(&parameter, incoming),
+                    Err(_) => Ok(incoming),
+                };
+            }
+            AnyJsControlFlowRoot::JsModule(_)
+            | AnyJsControlFlowRoot::JsScript(_)
+            | AnyJsControlFlowRoot::JsGetterObjectMember(_)
+            | AnyJsControlFlowRoot::JsGetterClassMember(_)
+            | AnyJsControlFlowRoot::JsStaticInitializationBlockClassMember(_)
+            | AnyJsControlFlowRoot::TsModuleDeclaration(_)
+            | AnyJsControlFlowRoot::TsPropertySignatureTypeMember(_) => return Ok(incoming),
+        };
+        self.parameter_list(&parameters, incoming)
+    }
+
+    /// Evaluates `parameters` in order from `incoming` and returns the flow
+    /// after them.
+    fn parameter_list(
+        &mut self,
+        parameters: &JsParameters,
+        incoming: FlowNodeId,
+    ) -> Build<FlowNodeId> {
+        let mut flow = incoming;
+        for parameter in parameters.items().iter().flatten() {
+            flow = match parameter {
+                AnyJsParameter::AnyJsFormalParameter(parameter) => {
+                    self.formal_parameter(&parameter, flow)?
+                }
+                AnyJsParameter::JsRestParameter(parameter) => {
+                    self.binding_element(parameter.binding().ok(), None, flow, 1)?
+                }
+                AnyJsParameter::TsThisParameter(_) => flow,
+            };
+        }
+        Ok(flow)
+    }
+
+    /// Evaluates the default of `parameter`, then its destructuring pattern,
+    /// from `incoming`, and returns the flow after them.
+    fn formal_parameter(
+        &mut self,
+        parameter: &AnyJsFormalParameter,
+        incoming: FlowNodeId,
+    ) -> Build<FlowNodeId> {
+        match parameter {
+            AnyJsFormalParameter::JsFormalParameter(parameter) => self.binding_element(
+                parameter.binding().ok(),
+                parameter.initializer(),
+                incoming,
+                1,
+            ),
+            AnyJsFormalParameter::JsBogusParameter(_) | AnyJsFormalParameter::JsMetavariable(_) => {
+                Err(Unsupported)
+            }
+        }
     }
 
     /// Builds the statements found below `node`, without entering
@@ -595,15 +731,7 @@ impl RootBuilder<'_, '_> {
             }
             AnyJsStatement::JsVariableStatement(variable) => {
                 let declaration = variable.declaration().map_err(|_| Unsupported)?;
-                let mut flow = current;
-                for declarator in declaration.declarators() {
-                    let declarator = declarator.map_err(|_| Unsupported)?;
-                    if let Some(initializer) = declarator.initializer() {
-                        let expression = initializer.expression().map_err(|_| Unsupported)?;
-                        flow = self.evaluate(expression.syntax(), flow, 0)?;
-                    }
-                }
-                self.current = Some(flow);
+                self.current = Some(self.declaration(&declaration.into(), current, 0)?);
                 Ok(())
             }
             AnyJsStatement::JsReturnStatement(_) => {
@@ -799,10 +927,15 @@ impl RootBuilder<'_, '_> {
         current: FlowNodeId,
         label: Option<TokenText>,
     ) -> Build<()> {
-        let mut flow = current;
-        if let Some(initializer) = statement.initializer() {
-            flow = self.evaluate(initializer.syntax(), flow, 0)?;
-        }
+        let flow = match statement.initializer() {
+            Some(AnyJsForInitializer::JsVariableDeclaration(declaration)) => {
+                self.declaration(&declaration.into(), current, 0)?
+            }
+            Some(AnyJsForInitializer::AnyJsExpression(expression)) => {
+                self.evaluate(expression.syntax(), current, 0)?
+            }
+            None => current,
+        };
         let header = self.push(FlowNode::Join(vec![flow]))?;
         let update_entry = self.push(FlowNode::Join(Vec::new()))?;
         let exit = match statement.test() {
@@ -855,8 +988,14 @@ impl RootBuilder<'_, '_> {
         let expression = statement.expression().map_err(|_| Unsupported)?;
         let flow = self.evaluate(expression.syntax(), current, 0)?;
         let header = self.push(FlowNode::Join(vec![flow]))?;
-        let initializer = statement.initializer().map_err(|_| Unsupported)?;
-        let mut flow = self.evaluate(initializer.syntax(), header, 0)?;
+        let mut flow = match statement.initializer().map_err(|_| Unsupported)? {
+            AnyJsForInOrOfInitializer::JsForVariableDeclaration(declaration) => {
+                self.declaration(&declaration.into(), header, 0)?
+            }
+            AnyJsForInOrOfInitializer::AnyJsAssignmentPattern(pattern) => {
+                self.assignment_pattern(&pattern, header, 0)?
+            }
+        };
         // Each iteration assigns the loop variable here, after the defaults
         // of its pattern, but the graph has no write point for it. None is
         // needed because the header also joins the entry, where the variable
@@ -1226,10 +1365,15 @@ impl RootBuilder<'_, '_> {
             exception = self.push(FlowNode::Join(vec![start]))?;
             self.exceptions.push(exception);
             // The declaration runs the defaults of a destructuring pattern.
-            self.current = Some(match clause.declaration() {
-                Some(declaration) => self.evaluate(declaration.syntax(), start, 0)?,
-                None => start,
-            });
+            self.current = Some(
+                match clause
+                    .declaration()
+                    .and_then(|declaration| declaration.binding().ok())
+                {
+                    Some(pattern) => self.binding_pattern(&pattern, start, 0)?,
+                    None => start,
+                },
+            );
             if let Ok(body) = clause.body() {
                 self.statements(body.syntax())?;
             }
@@ -1276,16 +1420,27 @@ impl RootBuilder<'_, '_> {
 
     /// Records reads and branches while evaluating `node` from `incoming`, and
     /// returns the flow after it.
+    ///
+    /// Expressions are evaluated in the order in which JavaScript runs them. A
+    /// destructuring assignment evaluates its right operand before its
+    /// pattern. Any other node evaluates its children in source order, which
+    /// is the order in which they run.
+    ///
+    /// A part that runs only on some paths starts from the condition under
+    /// which it runs, as in TypeScript. The right operand of `&&`, `||`, and
+    /// `??` starts from a test of the left operand, and each branch of a
+    /// conditional expression from a test of its condition. The key and the
+    /// arguments after a `?.` start from a test that its object is not
+    /// nullish, and the right operand of a logical assignment from a test of
+    /// its target. [`Self::optional_chain`] and [`Self::assignment`] cover
+    /// chains and assignments in detail.
     fn evaluate(
         &mut self,
         node: &JsSyntaxNode,
         incoming: FlowNodeId,
         depth: usize,
     ) -> Build<FlowNodeId> {
-        self.remaining_visits = self.remaining_visits.checked_sub(1).ok_or(Unsupported)?;
-        if depth > MAX_DEPTH {
-            return Err(Unsupported);
-        }
+        self.visit(depth)?;
         let kind = node.kind();
         // Class members are left out of the enclosing flow: methods,
         // accessors, constructors, and static blocks are execution roots of
@@ -1311,6 +1466,11 @@ impl RootBuilder<'_, '_> {
             }
             return Ok(incoming);
         }
+        if let Some(chain) = AnyJsOptionalChainExpression::cast_ref(node)
+            && chain.is_optional_chain()
+        {
+            return self.optional_chain(&chain, incoming, depth);
+        }
         match AnyJsExpression::cast_ref(node) {
             // The object and the key are evaluated before the property is read.
             Some(
@@ -1318,17 +1478,11 @@ impl RootBuilder<'_, '_> {
                 | AnyJsExpression::JsComputedMemberExpression(_)),
             ) => {
                 let flow = self.children(node, incoming, depth)?;
-                if self.records_reads
-                    && let Some(subject) = subject_of(&expression, self.model, &mut self.subjects)
-                    && let Some(expression) = AnyFlowExpression::cast(expression.into_syntax())
-                {
-                    self.reads.push(BuiltRead {
-                        expression,
-                        point: flow,
-                        subject,
-                    });
-                }
+                self.member_read(expression, flow);
                 Ok(flow)
+            }
+            Some(AnyJsExpression::JsAssignmentExpression(assignment)) => {
+                self.assignment(&assignment, incoming, depth)
             }
             Some(AnyJsExpression::JsLogicalExpression(logical)) => {
                 let left = logical.left().map_err(|_| Unsupported)?;
@@ -1376,6 +1530,513 @@ impl RootBuilder<'_, '_> {
         Ok(flow)
     }
 
+    /// Spends one of the remaining visits on a node at `depth`, failing when
+    /// no visit remains or the node lies deeper than [`MAX_DEPTH`].
+    fn visit(&mut self, depth: usize) -> Build<()> {
+        self.remaining_visits = self.remaining_visits.checked_sub(1).ok_or(Unsupported)?;
+        if depth > MAX_DEPTH {
+            return Err(Unsupported);
+        }
+        Ok(())
+    }
+
+    /// Records the read of the subject that `expression`, a member access,
+    /// reads, with the incoming flow `point`.
+    fn member_read(&mut self, expression: AnyJsExpression, point: FlowNodeId) {
+        if self.records_reads
+            && let Some(subject) = subject_of(&expression, self.model, &mut self.subjects)
+            && let Some(expression) = AnyFlowExpression::cast(expression.into_syntax())
+        {
+            self.reads.push(BuiltRead {
+                expression,
+                point,
+                subject,
+            });
+        }
+    }
+
+    /// Evaluates the optional chain whose outermost link is `chain` from
+    /// `incoming`, as TypeScript does, and returns the flow after it. `chain`
+    /// lies at `depth`.
+    ///
+    /// The chain evaluates its root, the object of its innermost link, then
+    /// the key or arguments of each link outward. Parentheses end a chain, as
+    /// for [`AnyJsOptionalChainExpression::is_optional_chain`] and the
+    /// receivers of a runtime test, so the root of `(x?.a)?.b(y)` is
+    /// `(x?.a)`.
+    ///
+    /// When its object is nullish, a `?.` gives `undefined` without evaluating
+    /// the rest of the chain. So each `?.` that a key or arguments follow adds
+    /// a condition that its object is not nullish, and the rest of the chain
+    /// runs from that condition. For example, `x` is not nullish in the
+    /// arguments of `x?.f(x)`, `x?.[x.k]`, and `x?.a.f(x)`. The condition
+    /// tests the object as not nullish rather than truthy, so `n` in
+    /// `n?.toFixed(n)` keeps `0`. A `?.` adds no condition when its object is
+    /// `this` or a variable whose collected type can't be nullish, such as `o`
+    /// after `const o = { a: 1 }`. Each property read is recorded after its
+    /// object and key.
+    ///
+    /// The code after the chain also runs where a `?.` gave `undefined`, so
+    /// its flow joins the flow before each `?.` with the end of the chain. As
+    /// long as no key or argument can change the type of a subject, that join
+    /// gives every subject its type after the root. The code after the chain
+    /// therefore continues from the flow after the root, as TypeScript does
+    /// after a chain that changes no subject, and no test inside the chain
+    /// reaches a read after it.
+    fn optional_chain(
+        &mut self,
+        chain: &AnyJsOptionalChainExpression,
+        incoming: FlowNodeId,
+        depth: usize,
+    ) -> Build<FlowNodeId> {
+        // Each link with its object, from the outermost link inward.
+        let mut links = Vec::new();
+        let mut link = chain.clone();
+        let root = loop {
+            let object = link.object().map_err(|_| Unsupported)?;
+            let inner = AnyJsOptionalChainExpression::cast_ref(object.syntax());
+            links.push((link, object));
+            match inner {
+                Some(inner) => {
+                    self.visit(depth + links.len())?;
+                    link = inner;
+                }
+                None => break links.last().map(|(_, object)| object.clone()),
+            }
+        };
+        let root = root.ok_or(Unsupported)?;
+        let after_root = self.evaluate(root.syntax(), incoming, depth + links.len())?;
+        // Only a `?.` that a key or arguments follow adds a condition, so `x`
+        // in `x?.a.b` isn't tested.
+        let tested = links
+            .iter()
+            .position(|(link, _)| has_operands(link))
+            .map_or(0, |outermost| links.len() - outermost);
+        let mut flow = after_root;
+        for (index, (link, object)) in links.iter().rev().enumerate() {
+            let link_depth = depth + links.len() - 1 - index;
+            if index < tested
+                && link.is_optional()
+                && self.functions.may_be_nullish(object, self.model)
+            {
+                let condition = decompose_condition(
+                    object,
+                    FlowOutcome::NonNullish,
+                    self.model,
+                    self.functions,
+                    &mut self.subjects,
+                    &mut self.guards,
+                );
+                flow = self.push_narrowing_condition(flow, condition)?;
+            }
+            match link {
+                AnyJsOptionalChainExpression::JsStaticMemberExpression(member) => {
+                    self.member_read(member.clone().into(), flow);
+                }
+                AnyJsOptionalChainExpression::JsComputedMemberExpression(member) => {
+                    if let Ok(key) = member.member() {
+                        flow = self.evaluate(key.syntax(), flow, link_depth + 1)?;
+                    }
+                    self.member_read(member.clone().into(), flow);
+                }
+                AnyJsOptionalChainExpression::JsCallExpression(call) => {
+                    if let Ok(arguments) = call.arguments() {
+                        flow = self.evaluate(arguments.syntax(), flow, link_depth + 1)?;
+                    }
+                }
+            }
+        }
+        Ok(after_root)
+    }
+
+    /// Evaluates `assignment`, which lies at `depth`, from `incoming`, and
+    /// returns the flow after it.
+    ///
+    /// An assignment to a variable or a property, including a compound
+    /// assignment such as `o[k] += v`, evaluates the object and the key of its
+    /// target, then the right operand, after which the target is written. A
+    /// destructuring assignment evaluates the right operand first, then its
+    /// pattern.
+    ///
+    /// A logical assignment evaluates its right operand only where its target
+    /// is nullish for `??=`, falsy for `||=`, or truthy for `&&=`, as in
+    /// TypeScript, and writes the target there. The flow after it joins that
+    /// path with the path on which the target's test skipped the right
+    /// operand.
+    fn assignment(
+        &mut self,
+        assignment: &JsAssignmentExpression,
+        incoming: FlowNodeId,
+        depth: usize,
+    ) -> Build<FlowNodeId> {
+        let right = assignment.right().map_err(|_| Unsupported)?;
+        let target = match assignment.left().map_err(|_| Unsupported)? {
+            AnyJsAssignmentPattern::AnyJsAssignment(target) => target,
+            pattern => {
+                let flow = self.evaluate(right.syntax(), incoming, depth + 1)?;
+                return self.assignment_pattern(&pattern, flow, depth + 1);
+            }
+        };
+        let flow = self.assignment_target(&target, incoming, depth + 1)?;
+        let (evaluate_right, skip_right) = match assignment.operator().map_err(|_| Unsupported)? {
+            JsAssignmentOperator::LogicalAndAssign => (FlowOutcome::Truthy, FlowOutcome::Falsy),
+            JsAssignmentOperator::LogicalOrAssign => (FlowOutcome::Falsy, FlowOutcome::Truthy),
+            JsAssignmentOperator::NullishCoalescingAssign => {
+                (FlowOutcome::Nullish, FlowOutcome::NonNullish)
+            }
+            JsAssignmentOperator::Assign
+            | JsAssignmentOperator::AddAssign
+            | JsAssignmentOperator::SubtractAssign
+            | JsAssignmentOperator::TimesAssign
+            | JsAssignmentOperator::SlashAssign
+            | JsAssignmentOperator::RemainderAssign
+            | JsAssignmentOperator::ExponentAssign
+            | JsAssignmentOperator::LeftShiftAssign
+            | JsAssignmentOperator::RightShiftAssign
+            | JsAssignmentOperator::UnsignedRightShiftAssign
+            | JsAssignmentOperator::BitwiseAndAssign
+            | JsAssignmentOperator::BitwiseOrAssign
+            | JsAssignmentOperator::BitwiseXorAssign => {
+                return self.evaluate(right.syntax(), flow, depth + 1);
+            }
+        };
+        let right_flow = self.target_condition(flow, &target, evaluate_right)?;
+        let right_flow = self.evaluate(right.syntax(), right_flow, depth + 1)?;
+        let skip_flow = self.target_condition(flow, &target, skip_right)?;
+        self.join_two(skip_flow, right_flow)
+    }
+
+    /// Adds a node where the target `target` of a logical assignment has
+    /// `outcome` after `antecedent`, and returns the flow after it. Adds no
+    /// node when the test can narrow no subject, as for the target `o[k]`.
+    fn target_condition(
+        &mut self,
+        antecedent: FlowNodeId,
+        target: &AnyJsAssignment,
+        outcome: FlowOutcome,
+    ) -> Build<FlowNodeId> {
+        let condition = decompose_assignment_target(
+            target,
+            outcome,
+            self.model,
+            self.functions,
+            &mut self.subjects,
+            &mut self.guards,
+        );
+        self.push_narrowing_condition(antecedent, condition)
+    }
+
+    /// Evaluates the object and the key of `target`, which lies at `depth`,
+    /// from `incoming`, and returns the flow after them: the object of
+    /// `o.v`, the object and the key of `o[k]`, and nothing for a variable.
+    /// Parentheses, `!`, and type assertions around the target are skipped.
+    fn assignment_target(
+        &mut self,
+        target: &AnyJsAssignment,
+        incoming: FlowNodeId,
+        depth: usize,
+    ) -> Build<FlowNodeId> {
+        self.visit(depth)?;
+        let inner = match target {
+            AnyJsAssignment::JsIdentifierAssignment(_) => return Ok(incoming),
+            AnyJsAssignment::JsStaticMemberAssignment(member) => {
+                let object = member.object().map_err(|_| Unsupported)?;
+                return self.evaluate(object.syntax(), incoming, depth + 1);
+            }
+            AnyJsAssignment::JsComputedMemberAssignment(member) => {
+                let object = member.object().map_err(|_| Unsupported)?;
+                let flow = self.evaluate(object.syntax(), incoming, depth + 1)?;
+                return match member.member() {
+                    Ok(key) => self.evaluate(key.syntax(), flow, depth + 1),
+                    Err(_) => Ok(flow),
+                };
+            }
+            AnyJsAssignment::JsParenthesizedAssignment(assignment) => assignment.assignment(),
+            AnyJsAssignment::TsNonNullAssertionAssignment(assignment) => assignment.assignment(),
+            AnyJsAssignment::TsAsAssignment(assignment) => assignment.assignment(),
+            AnyJsAssignment::TsSatisfiesAssignment(assignment) => assignment.assignment(),
+            AnyJsAssignment::TsTypeAssertionAssignment(assignment) => assignment.assignment(),
+            AnyJsAssignment::JsBogusAssignment(_) => return Err(Unsupported),
+        };
+        match inner {
+            Ok(inner) => self.assignment_target(&inner, incoming, depth + 1),
+            Err(_) => Ok(incoming),
+        }
+    }
+
+    /// Evaluates `pattern`, the target of a destructuring assignment, from
+    /// `incoming` and returns the flow after it. `incoming` is the flow after
+    /// the value that `pattern` destructures, and `pattern` lies at `depth`.
+    ///
+    /// The elements run in source order. Each element evaluates its computed
+    /// key, then the object and the key of its target, then its default, after
+    /// which the target is written. A default runs only when the value is
+    /// `undefined`. An element whose target is a nested pattern evaluates its
+    /// default, then the nested pattern.
+    fn assignment_pattern(
+        &mut self,
+        pattern: &AnyJsAssignmentPattern,
+        incoming: FlowNodeId,
+        depth: usize,
+    ) -> Build<FlowNodeId> {
+        self.visit(depth)?;
+        let mut flow = incoming;
+        match pattern {
+            AnyJsAssignmentPattern::AnyJsAssignment(target) => {
+                flow = self.assignment_target(target, flow, depth + 1)?;
+            }
+            AnyJsAssignmentPattern::JsArrayAssignmentPattern(pattern) => {
+                for element in pattern.elements().iter().flatten() {
+                    flow = match element {
+                        AnyJsArrayAssignmentPatternElement::JsArrayAssignmentPatternElement(
+                            element,
+                        ) => self.assignment_element(
+                            element.pattern().ok(),
+                            element.init(),
+                            flow,
+                            depth + 1,
+                        )?,
+                        AnyJsArrayAssignmentPatternElement::JsArrayAssignmentPatternRestElement(
+                            element,
+                        ) => {
+                            self.assignment_element(element.pattern().ok(), None, flow, depth + 1)?
+                        }
+                        AnyJsArrayAssignmentPatternElement::JsArrayHole(_) => flow,
+                    };
+                }
+            }
+            AnyJsAssignmentPattern::JsObjectAssignmentPattern(pattern) => {
+                for property in pattern.properties().iter().flatten() {
+                    flow = match property {
+                        AnyJsObjectAssignmentPatternMember::JsObjectAssignmentPatternProperty(
+                            property,
+                        ) => {
+                            let flow = self.member_name(property.member().ok(), flow, depth + 1)?;
+                            self.assignment_element(
+                                property.pattern().ok(),
+                                property.init(),
+                                flow,
+                                depth + 1,
+                            )?
+                        }
+                        AnyJsObjectAssignmentPatternMember::JsObjectAssignmentPatternShorthandProperty(
+                            property,
+                        ) => self.default_value(property.init(), flow, depth + 1)?,
+                        AnyJsObjectAssignmentPatternMember::JsObjectAssignmentPatternRest(rest) => {
+                            match rest.target() {
+                                Ok(target) => self.assignment_target(&target, flow, depth + 1)?,
+                                Err(_) => flow,
+                            }
+                        }
+                        AnyJsObjectAssignmentPatternMember::JsBogusAssignment(_) => {
+                            return Err(Unsupported);
+                        }
+                    };
+                }
+            }
+        }
+        Ok(flow)
+    }
+
+    /// Evaluates one element of a destructuring assignment from `incoming` and
+    /// returns the flow after it. `pattern` is the element's target and
+    /// `default` its default. A target that is no pattern evaluates its object
+    /// and key before the default, and a nested pattern runs after the
+    /// default.
+    fn assignment_element(
+        &mut self,
+        pattern: Option<AnyJsAssignmentPattern>,
+        default: Option<JsInitializerClause>,
+        incoming: FlowNodeId,
+        depth: usize,
+    ) -> Build<FlowNodeId> {
+        match pattern {
+            Some(AnyJsAssignmentPattern::AnyJsAssignment(target)) => {
+                let flow = self.assignment_target(&target, incoming, depth)?;
+                self.default_value(default, flow, depth)
+            }
+            Some(pattern) => {
+                let flow = self.default_value(default, incoming, depth)?;
+                self.assignment_pattern(&pattern, flow, depth)
+            }
+            None => self.default_value(default, incoming, depth),
+        }
+    }
+
+    /// Evaluates the declarators of `declaration`, which lies at `depth`, in
+    /// order from `incoming`, and returns the flow after them.
+    ///
+    /// Each declarator evaluates its initializer, then its binding pattern. A
+    /// declarator without an initializer, as in a `for...of` head or
+    /// `let x!: T`, evaluates only its pattern. `using` and `await using`
+    /// declarations evaluate as `const` does.
+    fn declaration(
+        &mut self,
+        declaration: &AnyJsVariableDeclaration,
+        incoming: FlowNodeId,
+        depth: usize,
+    ) -> Build<FlowNodeId> {
+        match declaration {
+            AnyJsVariableDeclaration::JsVariableDeclaration(declaration) => {
+                let mut flow = incoming;
+                for declarator in declaration.declarators() {
+                    let declarator = declarator.map_err(|_| Unsupported)?;
+                    flow = self.declarator(&declarator, flow, depth + 1)?;
+                }
+                Ok(flow)
+            }
+            AnyJsVariableDeclaration::JsForVariableDeclaration(declaration) => {
+                let declarator = declaration.declarator().map_err(|_| Unsupported)?;
+                self.declarator(&declarator, incoming, depth + 1)
+            }
+        }
+    }
+
+    /// Evaluates the initializer of `declarator`, then its binding pattern,
+    /// from `incoming`, and returns the flow after them.
+    fn declarator(
+        &mut self,
+        declarator: &JsVariableDeclarator,
+        incoming: FlowNodeId,
+        depth: usize,
+    ) -> Build<FlowNodeId> {
+        let mut flow = incoming;
+        if let Some(initializer) = declarator.initializer() {
+            let expression = initializer.expression().map_err(|_| Unsupported)?;
+            flow = self.evaluate(expression.syntax(), flow, depth + 1)?;
+        }
+        self.binding_element(declarator.id().ok(), None, flow, depth + 1)
+    }
+
+    /// Evaluates `pattern`, the binding pattern of a declaration, a
+    /// parameter, or a `catch` clause, from `incoming` and returns the flow
+    /// after it. `incoming` is the flow after the value that `pattern`
+    /// destructures, and `pattern` lies at `depth`.
+    ///
+    /// The elements run in source order. Each element evaluates its computed
+    /// key, then its default, then its nested pattern. A default runs only
+    /// when the value is `undefined`.
+    fn binding_pattern(
+        &mut self,
+        pattern: &AnyJsBindingPattern,
+        incoming: FlowNodeId,
+        depth: usize,
+    ) -> Build<FlowNodeId> {
+        self.visit(depth)?;
+        let mut flow = incoming;
+        match pattern {
+            AnyJsBindingPattern::AnyJsBinding(_) => {}
+            AnyJsBindingPattern::JsArrayBindingPattern(pattern) => {
+                for element in pattern.elements().iter().flatten() {
+                    flow = match element {
+                        AnyJsArrayBindingPatternElement::JsArrayBindingPatternElement(element) => {
+                            self.binding_element(
+                                element.pattern().ok(),
+                                element.init(),
+                                flow,
+                                depth + 1,
+                            )?
+                        }
+                        AnyJsArrayBindingPatternElement::JsArrayBindingPatternRestElement(
+                            element,
+                        ) => self.binding_element(element.pattern().ok(), None, flow, depth + 1)?,
+                        AnyJsArrayBindingPatternElement::JsArrayHole(_) => flow,
+                    };
+                }
+            }
+            AnyJsBindingPattern::JsObjectBindingPattern(pattern) => {
+                for property in pattern.properties().iter().flatten() {
+                    flow = match property {
+                        AnyJsObjectBindingPatternMember::JsObjectBindingPatternProperty(
+                            property,
+                        ) => {
+                            let flow = self.member_name(property.member().ok(), flow, depth + 1)?;
+                            self.binding_element(
+                                property.pattern().ok(),
+                                property.init(),
+                                flow,
+                                depth + 1,
+                            )?
+                        }
+                        AnyJsObjectBindingPatternMember::JsObjectBindingPatternShorthandProperty(
+                            property,
+                        ) => self.default_value(property.init(), flow, depth + 1)?,
+                        AnyJsObjectBindingPatternMember::JsObjectBindingPatternRest(_) => flow,
+                        AnyJsObjectBindingPatternMember::JsBogusBinding(_)
+                        | AnyJsObjectBindingPatternMember::JsMetavariable(_) => {
+                            return Err(Unsupported);
+                        }
+                    };
+                }
+            }
+        }
+        Ok(flow)
+    }
+
+    /// Evaluates one element of a binding pattern or one parameter from
+    /// `incoming` and returns the flow after it. The element evaluates its
+    /// default `default`, then its pattern `pattern`.
+    fn binding_element(
+        &mut self,
+        pattern: Option<AnyJsBindingPattern>,
+        default: Option<JsInitializerClause>,
+        incoming: FlowNodeId,
+        depth: usize,
+    ) -> Build<FlowNodeId> {
+        let flow = self.default_value(default, incoming, depth)?;
+        match pattern {
+            Some(pattern) => self.binding_pattern(&pattern, flow, depth),
+            None => Ok(flow),
+        }
+    }
+
+    /// Evaluates the expression of `name` when it is a computed property name,
+    /// as `k` in `{ [k]: v }`, from `incoming`, and returns the flow after it.
+    fn member_name(
+        &mut self,
+        name: Option<AnyJsObjectMemberName>,
+        incoming: FlowNodeId,
+        depth: usize,
+    ) -> Build<FlowNodeId> {
+        match name {
+            Some(AnyJsObjectMemberName::JsComputedMemberName(name)) => match name.expression() {
+                Ok(expression) => self.evaluate(expression.syntax(), incoming, depth + 1),
+                Err(_) => Ok(incoming),
+            },
+            Some(AnyJsObjectMemberName::JsMetavariable(_)) => Err(Unsupported),
+            Some(AnyJsObjectMemberName::JsLiteralMemberName(_)) | None => Ok(incoming),
+        }
+    }
+
+    /// Evaluates `default`, the default of a destructuring element or of a
+    /// parameter, from `incoming`, and returns the flow after it.
+    ///
+    /// A default runs only when the value is `undefined`, so the flow after
+    /// it joins `incoming` with the end of the default, as in TypeScript. In
+    /// `const { a = x && f(x) } = o`, for example, `f(x)` sees `x` as truthy,
+    /// and the code after the declaration doesn't.
+    fn default_value(
+        &mut self,
+        default: Option<JsInitializerClause>,
+        incoming: FlowNodeId,
+        depth: usize,
+    ) -> Build<FlowNodeId> {
+        let Some(expression) = default.and_then(|default| default.expression().ok()) else {
+            return Ok(incoming);
+        };
+        let flow = self.evaluate(expression.syntax(), incoming, depth + 1)?;
+        self.join_two(incoming, flow)
+    }
+
+    /// Returns the flow where `first` and `second` meet.
+    fn join_two(&mut self, first: FlowNodeId, second: FlowNodeId) -> Build<FlowNodeId> {
+        if first == second {
+            Ok(first)
+        } else {
+            self.push(FlowNode::Join(vec![first, second]))
+        }
+    }
+
     fn condition(
         &mut self,
         antecedent: FlowNodeId,
@@ -1390,6 +2051,23 @@ impl RootBuilder<'_, '_> {
             &mut self.subjects,
             &mut self.guards,
         );
+        self.push_condition(antecedent, condition)
+    }
+
+    /// Adds a node where `condition` holds after `antecedent` and returns the
+    /// flow after it. Adds no node when the condition can narrow no subject,
+    /// as for the object `f()` of `f()?.g(x)`.
+    fn push_narrowing_condition(
+        &mut self,
+        antecedent: FlowNodeId,
+        condition: DecomposedCondition,
+    ) -> Build<FlowNodeId> {
+        if condition.mentions.is_empty()
+            && condition.parents.is_empty()
+            && self.guards.get(condition.guard) == Some(&FlowGuard::Keep)
+        {
+            return Ok(antecedent);
+        }
         self.push_condition(antecedent, condition)
     }
 
@@ -1886,9 +2564,159 @@ mod tests {
     }
 
     #[test]
-    fn optional_chains_keep_outer_facts_without_a_receiver_condition() {
+    fn optional_chains_test_their_receivers_before_keys_and_arguments() {
         let built = function("function f(x, y) { if (y) x?.read(x); after(x); }");
-        assert_eq!(built.paths("x", 2), [vec!["y:Truthy".to_owned()]]);
+        assert_eq!(
+            sorted_paths(&built, "x", 2),
+            [facts(&["!x:Nullish", "y:Truthy"])]
+        );
+        // The code after the chain continues from the flow after its root.
+        assert_eq!(
+            sorted_paths(&built, "x", 3),
+            [facts(&["!y:Truthy"]), facts(&["y:Truthy"])]
+        );
+        for source in [
+            "function f(x) { x?.[read(x)]; }",
+            "function f(x) { x?.(x); }",
+            "function f(x) { x?.a.b.read(x); }",
+            "function f(x) { x?.read(0).then(x); }",
+        ] {
+            let built = function(source);
+            assert_eq!(built.paths("x", 1), [Vec::<String>::new()], "{source}");
+            assert_eq!(built.paths("x", 2), [facts(&["!x:Nullish"])], "{source}");
+        }
+        // Each `?.` tests its own object. The test of `x.a` also tests `x`
+        // through its property `a`.
+        let built = function("function f(x) { x?.a?.read(x, x.a); }");
+        let both = [facts(&["!x.a:Nullish", "!x:Nullish", "!x[a]:Nullish"])];
+        assert_eq!(sorted_paths(&built, "x", 2), both);
+        assert_eq!(sorted_paths(&built, "x.a", 0), both);
+        // Only a `?.` that a key or arguments follow tests its object, and an
+        // object that is no subject adds no condition.
+        for source in [
+            "function f(x) { x?.a.b; after(x); }",
+            "function f(x) { x?.read(); after(x); }",
+            "function f(x) { (x?.a).read(x); }",
+            "function f(x) { g()?.read(x); }",
+        ] {
+            assert_eq!(function(source).root().nodes.len(), 1, "{source}");
+        }
+    }
+
+    #[test]
+    fn nested_optional_chains_start_from_the_test_of_their_enclosing_chain() {
+        let built = function("function f(x) { x?.read(x?.read(x)); }");
+        assert_eq!(built.paths("x", 2), [facts(&["!x:Nullish"])]);
+        assert_eq!(built.paths("x", 3), [facts(&["!x:Nullish", "!x:Nullish"])]);
+    }
+
+    #[test]
+    fn defaults_join_the_flow_before_them() {
+        let built = function("function f(x, o) { const { a = x && read(x) } = o; after(x); }");
+        assert_eq!(built.paths("x", 2), [facts(&["x:Truthy"])]);
+        assert_eq!(
+            sorted_paths(&built, "x", 3),
+            [Vec::new(), facts(&["!x:Truthy"]), facts(&["x:Truthy"])]
+        );
+        // A default without a condition adds no node.
+        let built = function("function f(x, o) { const { a = read(x) } = o; }");
+        assert_eq!(built.root().nodes.len(), 1);
+    }
+
+    #[test]
+    fn declarations_evaluate_their_initializer_then_their_pattern() {
+        let built = function(
+            "function f(x, o) { const { [read(x)]: { b = read(x) } = read(x), ...rest } = x && o; }",
+        );
+        for occurrence in 1..=3 {
+            assert_eq!(
+                sorted_paths(&built, "x", occurrence),
+                [facts(&["!x:Truthy"]), facts(&["x:Truthy"])],
+                "{occurrence}"
+            );
+        }
+        let built = function("function f(x, o) { for (let [a = x && read(x)] = o; ;) break; }");
+        assert_eq!(built.paths("x", 2), [facts(&["x:Truthy"])]);
+    }
+
+    #[test]
+    fn parameters_run_before_the_body_in_order() {
+        let built = function(
+            "function f(x, y = x && read(x), { a = x || read(x) } = read(x), ...[b = read(x)]) { after(x); }",
+        );
+        assert_eq!(built.paths("x", 2), [facts(&["x:Truthy"])]);
+        assert!(contains(&built.paths("x", 4), "!x:Truthy"));
+        // The default of a parameter runs before the defaults of its pattern.
+        assert!(built.point("x", 5).unwrap() < built.point("x", 4).unwrap());
+        assert!(built.paths("x", 6).len() > 1);
+        assert!(built.paths("x", 7).iter().any(Vec::is_empty));
+        for (source, kind) in [
+            (
+                "const g = (x, y = x && read(x)) => x;",
+                JsSyntaxKind::JS_ARROW_FUNCTION_EXPRESSION,
+            ),
+            (
+                "class K { m(x, y = x && read(x)) {} }",
+                JsSyntaxKind::JS_METHOD_CLASS_MEMBER,
+            ),
+            (
+                "class K { constructor(x, public y = x && read(x)) {} }",
+                JsSyntaxKind::JS_CONSTRUCTOR_CLASS_MEMBER,
+            ),
+        ] {
+            assert_eq!(
+                build(source, kind).paths("x", 2),
+                [facts(&["x:Truthy"])],
+                "{source}"
+            );
+        }
+    }
+
+    #[test]
+    fn destructuring_assignments_evaluate_their_value_then_their_pattern() {
+        let built = function(
+            "function f(x, o) { ({ [read(x)]: o[read(x)] = read(x), b = x && read(x) } = x && o); }",
+        );
+        for occurrence in 1..=3 {
+            assert_eq!(
+                sorted_paths(&built, "x", occurrence),
+                [facts(&["!x:Truthy"]), facts(&["x:Truthy"])],
+                "{occurrence}"
+            );
+        }
+        assert!(contains(&built.paths("x", 5), "x:Truthy"));
+        let built = function("function f(x, a) { [a = x && read(x)] = read(x); }");
+        assert_eq!(built.paths("x", 2), [facts(&["x:Truthy"])]);
+        assert_eq!(built.paths("x", 3), [Vec::<String>::new()]);
+    }
+
+    #[test]
+    fn logical_assignments_evaluate_their_right_operand_from_a_test_of_their_target() {
+        for (operator, right, skip) in [
+            ("&&=", "x:Truthy", "!x:Truthy"),
+            ("||=", "!x:Truthy", "x:Truthy"),
+            ("??=", "x:Nullish", "!x:Nullish"),
+        ] {
+            // The target is the occurrence of `x` before the operator.
+            let built = function(&format!(
+                "function f(x) {{ x {operator} read(x); after(x); }}"
+            ));
+            assert_eq!(built.paths("x", 2), [facts(&[right])], "{operator}");
+            let mut joined = vec![facts(&[skip]), facts(&[right])];
+            joined.sort();
+            assert_eq!(sorted_paths(&built, "x", 3), joined, "{operator}");
+        }
+        // The object and the key of the target run before the test, and a
+        // test of a property also tests its object.
+        let built = function("function f(s, k) { s[read(k)].v ||= read(s); }");
+        assert_eq!(built.paths("k", 1), [Vec::<String>::new()]);
+        let built = function("function f(s) { s.kind ||= read(s); }");
+        assert_eq!(
+            sorted_paths(&built, "s", 2),
+            [facts(&["!s.kind:Truthy", "!s[kind]:Truthy"])]
+        );
+        // A compound assignment evaluates its target, then its right operand.
+        let built = function("function f(x, o) { o[x && read(x)] += read(x); }");
         assert_eq!(built.paths("x", 3).len(), 2);
     }
 

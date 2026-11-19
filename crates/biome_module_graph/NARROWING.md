@@ -612,7 +612,7 @@ whose result is not tested, do not narrow.
 | An assignment narrows to the matching members of the declared type | `let x: string \| number; x = "a"; x` | `string` | Not yet |
 | An initializer narrows an annotated union | `const x: string \| number = 1; x` | `number` | Not yet |
 | Compound assignments and `++` | `let x: number \| string = 0; x += 1; x` | `number` | Not yet |
-| Logical assignments | `x: string \| undefined; x ??= "d"; x` | `string` | Not yet |
+| Logical assignments | `x: string \| undefined; x ??= "d"; x` | `string` | Partial: the right operand runs only where the target is nullish for `??=`, falsy for `\|\|=`, or truthy for `&&=`, so a test of a discriminant narrows the object that holds it there, as `s` in `s.kind \|\|= f(s)`, as in TypeScript. The target is written, and a variable or a property path that its execution root writes doesn't narrow, so the target keeps its declared type in the right operand and after the assignment, where TypeScript gives `undefined` at `f(x)` in `x ??= f(x)` and `string` after the example. |
 | Destructuring assignments | `let x: string \| number; [x] = ["a"]; x` | `string` | Not yet |
 | An unannotated `let` takes the type of its assignments | `let x; x = 1; x` | `number` | Not yet |
 | `delete` counts as an assignment | `o: { p?: string }; if (o.p) { delete o.p; o.p }` | `undefined` | Not yet |
@@ -668,7 +668,7 @@ whose result is not tested, do not narrow.
 | A truthy `x?.y` removes nullish types from `x` | `x: { y: string } \| undefined; if (x?.y) x` | `{ y: string }` | Supported |
 | Equality of `x?.y` with a value | `x: { y: number } \| undefined; if (x?.y === 1) x` | `{ y: number }` | Partial: comparisons with a primitive literal, `null`, or `undefined`, with `===`, `!==`, `==`, or `!=`, narrow `x` in the branch where `x?.y` cannot be `undefined`. TypeScript also narrows `x` for any other value whose type excludes `undefined`, such as `-1`, a template literal, or a variable of type `number`. |
 | A chain that starts at a parenthesized optional chain | `x: { z?: { w: string } } \| undefined;`<br>`if ((x?.z)?.w) x` | `{ z?: { w: string } }` | Not yet: Biome narrows neither `x` nor its paths. In a comparison, such as `(x?.z)?.w === "a"`, TypeScript narrows `x.z` but not `x`, so a read of `x?.z` adds `undefined` back, which Biome cannot express yet. |
-| The receiver is not nullish inside the chain | `x: { f(v: unknown): void } \| undefined; x?.f(x)` | `{ f(v: unknown): void }` at the argument | Not yet |
+| The receiver is not nullish inside the chain | `x: { f(v: unknown): void } \| undefined; x?.f(x)` | `{ f(v: unknown): void }` at the argument | Partial: the key and the arguments after each `?.`, and the rest of the chain after them, as in `x?.[x.k]` or `x?.a.f(x)`, see the object of the `?.` as not nullish. As in TypeScript, the object is tested as not nullish rather than as truthy, so `n: 0 \| 1 \| undefined` stays `0 \| 1` in `n?.toFixed(n)`, and the code after the chain keeps the types from before it. Parentheses and `!` end a chain: TypeScript also narrows `x` in `x?.a!.b(x)`, and both `o?.v` and `o` in `(o?.v)?.w(o?.v, o)`, where Biome narrows only `o?.v`. |
 | `instanceof`, `switch`, or a type-guard function applied to `x?.y` | `x: { y: unknown } \| undefined; if (x?.y instanceof Date) x` | `{ y: unknown }` | Partial: `instanceof` removes `null` and `undefined` from the receivers in the true branch, and a group of cases of `switch (x?.y)` or `switch (typeof x?.y)` does where every case shows that `x?.y` is not `undefined`, as in TypeScript. Type-guard functions don't narrow the receivers yet. |
 
 ### Nullish coalescing
@@ -731,6 +731,7 @@ whose result is not tested, do not narrow.
 | Behaviour | Example | TypeScript | Status |
 | --- | --- | --- | --- |
 | `x!`, `satisfies`, or the comma operator inside a condition | `x: string \| null; if ((0, x)) x`; `if (x!) x` | `string` | Not yet |
+| Destructuring defaults, computed keys, and parameter defaults see the narrowing before them | `x: string \| null; if (x) { const { a = x } = o }`<br>`function f(x: string \| null, y = x && x.length) {}` | `string` at `a = x` and in `x.length` | Supported: expressions run in the order JavaScript runs them. A declaration runs its initializer, then its pattern, a destructuring assignment its value, then its pattern, and a function its parameters, in order, before its body. A default runs only when the value is `undefined`, so a test inside it narrows only the rest of the default, as in TypeScript: `const { a = x && f(x) } = o; x` keeps `x` as declared after the declaration. |
 | Paths join with a union | `x: string \| number \| null;`<br>`if (typeof x === "string") {} else if (x === null) { return; } x` | `string \| number` | Supported |
 | A namespace narrows its own variables but never sees the narrowing around it | `o: string \| null; if (o === null) throw 0;`<br>`namespace N { const l: string \| null = get(); if (l) l; o }` | `string` at `l`; `string \| null` at `o` | Supported |
 | Reads in unreachable code | `x: string \| null; if (x === null) { return; x }` | `string \| null`; the read is unreachable (TS7027) | Supported |

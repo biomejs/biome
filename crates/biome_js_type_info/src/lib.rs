@@ -42,8 +42,8 @@ pub use narrowing::{
     NarrowingPredicate, PropertyTest, RawPredicateTarget, TypeofKind, falsy_values,
     has_readonly_property, is_narrowing_invariant, is_raw_narrowing_invariant,
     may_narrow_by_instanceof, may_narrow_by_property, narrow_by_in_operator, narrow_by_instanceof,
-    narrow_by_property, narrow_by_type_predicate, narrow_type, raw_may_be_object_union,
-    raw_may_narrow_by_instanceof, raw_predicate_target,
+    narrow_by_property, narrow_by_type_predicate, narrow_type, raw_may_be_nullish,
+    raw_may_be_object_union, raw_may_narrow_by_instanceof, raw_predicate_target,
 };
 pub use return_type_relation::{
     NarrowedTypeCandidates, ReturnTypeRelation, ReturnTypeVerdict, compare_declared_return_type,
