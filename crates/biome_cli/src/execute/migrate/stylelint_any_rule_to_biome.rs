@@ -88,6 +88,21 @@ pub(crate) fn migrate_stylelint_any_rule(
                 .get_or_insert(Default::default());
             rule.set_level(rule.level().max(rule_level));
         }
+        "defensive-css/no-user-select-none" => {
+            if !options.include_nursery {
+                results.add(
+                    stylelint_name,
+                    eslint_to_biome::RuleMigrationResult::Nursery,
+                );
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group
+                .unwrap_group_as_mut()
+                .no_user_select_none
+                .get_or_insert(Default::default());
+            rule.set_level(rule.level().max(rule_level));
+        }
         "font-family-no-duplicate-names" => {
             let group = rules.suspicious.get_or_insert_with(Default::default);
             let rule = group
