@@ -2555,7 +2555,14 @@ pub(crate) struct AnalyzerVisitorBuilder<'a, 'settings> {
     skip: Option<&'a [AnalyzerSelector]>,
     path: Option<&'a Utf8Path>,
     enabled_selectors: Option<&'a [AnalyzerSelector]>,
-    project_layout: Arc<ProjectLayout>,
+    /// The layout used to find the `package.json` and `tsconfig.json` of
+    /// `path`. `None` finds neither, like an empty layout.
+    ///
+    /// The default isn't an empty [ProjectLayout] because this builder runs
+    /// for every analyzed file, and creating a layout is not cheap: its
+    /// concurrent map asks for the number of available CPUs, which on Linux
+    /// reads several cgroup files.
+    project_layout: Option<Arc<ProjectLayout>>,
     analyzer_options: AnalyzerOptions,
 }
 
@@ -2572,7 +2579,7 @@ impl<'a, 'settings> AnalyzerVisitorBuilder<'a, 'settings> {
             skip: None,
             path: None,
             enabled_selectors: None,
-            project_layout: Default::default(),
+            project_layout: None,
             analyzer_options,
         }
     }
@@ -2603,7 +2610,7 @@ impl<'a, 'settings> AnalyzerVisitorBuilder<'a, 'settings> {
 
     #[must_use]
     pub(crate) fn with_project_layout(mut self, project_layout: Arc<ProjectLayout>) -> Self {
-        self.project_layout = project_layout;
+        self.project_layout = Some(project_layout);
         self
     }
 
@@ -2667,7 +2674,8 @@ impl<'a, 'settings> AnalyzerVisitorBuilder<'a, 'settings> {
         if use_configured_rules
             && let Some((_, manifest)) = self
                 .path
-                .and_then(|path| self.project_layout.find_node_manifest_for_path(path))
+                .zip(self.project_layout.as_deref())
+                .and_then(|(path, project_layout)| project_layout.find_node_manifest_for_path(path))
         {
             let manifest = ManifestDependencies(manifest);
             let manifest_result = if let Some(query_db) = &query_db {
@@ -2699,11 +2707,11 @@ impl<'a, 'settings> AnalyzerVisitorBuilder<'a, 'settings> {
         analyzer_options.push_globals(globals);
 
         if let Some(path) = self.path
+            && let Some(project_layout) = self.project_layout.as_deref()
             && analyzer_options.jsx_runtime() == Some(JsxRuntime::ReactClassic)
         {
             if analyzer_options.jsx_factory().is_none() {
-                let factory = self
-                    .project_layout
+                let factory = project_layout
                     .query_tsconfig_for_path(path, |tsconfig| {
                         tsconfig.jsx_factory_identifier().map(|s| s.to_string())
                     })
@@ -2711,8 +2719,7 @@ impl<'a, 'settings> AnalyzerVisitorBuilder<'a, 'settings> {
                 analyzer_options.set_jsx_factory(factory.map(Into::into));
             }
             if analyzer_options.jsx_fragment_factory().is_none() {
-                let fragment_factory = self
-                    .project_layout
+                let fragment_factory = project_layout
                     .query_tsconfig_for_path(path, |tsconfig| {
                         tsconfig
                             .jsx_fragment_factory_identifier()
