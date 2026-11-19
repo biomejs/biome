@@ -44,6 +44,12 @@ class Scheduler {
 	}
 }
 
+function enabled() {
+	let ready: boolean | undefined = true;
+	if (ready) {
+	}
+}
+
 ```
 
 # Diagnostics
@@ -173,6 +179,25 @@ invalidAssignments.ts:37:3 lint/suspicious/noUnnecessaryConditions ━━━━�
     39 │ }
   
   i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+invalidAssignments.ts:43:6 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition is always truthy.
+  
+    41 │ function enabled() {
+    42 │ 	let ready: boolean | undefined = true;
+  > 43 │ 	if (ready) {
+       │ 	    ^^^^^
+    44 │ 	}
+    45 │ }
+  
+  i The value's type can never be falsy, so this check is redundant.
+  
+  i Remove the condition, or check the value you meant to test.
   
 
 ```

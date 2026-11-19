@@ -140,6 +140,7 @@ Biome writes `{ b: 1 } & Record<"a", unknown>` as `{ b: 1; a: unknown }`, and
 | `switch (true)` | `x: string \| number \| null; switch (true) { case typeof x === "string": break; case x === null: break; default: x }` | `number` |
 | An exhaustive `switch` | `x: boolean \| null \| undefined; y: string \| null; switch (x) { case true: case false: case null: case undefined: if (y === null) return; } y` | `string` |
 | An assignment | `x: string \| number; [x] = ["a"]; x` | `string` |
+| A `true` or `false` literal assigned to a union with `boolean` | `let b: boolean \| undefined = true; b` | `true` |
 | A declarator with a type annotation | `const { a }: { a: string \| number } = { a: 1 }; a` | `number` |
 | A `let` without a type annotation | `let x = null; if (c) x = 1; x` | `null \| number` |
 | A `let` without an initializer, before a write | `let x; x` | `undefined` |
@@ -300,14 +301,18 @@ reports in it.
 | --- | --- | --- | --- |
 | `x: string \| null; let y: string \| null = f(); if (x) { y = x; y }` | `string` | `string \| null` | `noUnnecessaryConditions` can miss an unnecessary check of `y`. |
 | `class K { m() { return 1; } }; k: K; let x: number \| undefined = k.m(); x` | `number` | `number \| undefined` | `noUnnecessaryConditions` can miss an unnecessary `?.` on `x`. |
-| `let b: boolean \| undefined = true; b` | `true` | `boolean` | `noUnnecessaryConditions` can miss that `b` is always `true`. |
+| `let b: boolean = true; b` | `true` | `boolean` | `noUnnecessaryConditions` can miss that `b` is always `true`. |
+| `const T = true; let b: boolean \| undefined = T; b` | `true` | `boolean` | `noUnnecessaryConditions` can miss that `b` is always `true`. |
 | `let x: number \| string = 1; x = x + 1; x` | `number` | `number \| string` | A rule can miss that `x` is a number. |
 | `xs: string[]; let x: string \| number = 1; [x] = xs; x` | `string` | `string \| number` | `noUnnecessaryConditions` can miss an unnecessary check of `x`. |
 
-A write assigns the type of its value without narrowing. A destructuring
-target keeps its declared type when it reads an element of an array, as in
-`[x] = xs` and `[[x]] = [["a"]]`, or when its default supplies the value, as
-in `[x = 1] = []`. A call reduces the assigned type only when its callee has a
+A write assigns the type of its value without narrowing. Only a `true` or
+`false` literal, in parentheses or not, narrows a `boolean` member of the
+declared union, because Biome gives some comparisons, as `1 === 1`, the type
+`true`, where TypeScript gives `boolean`. A destructuring target keeps its
+declared type when it reads an element of an array, as in `[x] = xs` and
+`[[x]] = [["a"]]`, or when its default supplies the value, as in
+`[x = 1] = []`. A call reduces the assigned type only when its callee has a
 return type annotation or is a local function whose returned values Biome can
 type. A value that a declaration file types as `typeof` a function, as
 `declare const f: typeof impl`, has a return type annotation only when that

@@ -495,6 +495,11 @@ pub(crate) enum FlowAssignedValue {
     /// The value of the expression at this range, as the right operand of an
     /// assignment or an initializer.
     Expression(TextRange),
+    /// A `true` or `false` literal at this range, in parentheses or not, as
+    /// the right operand of an assignment or an initializer. TypeScript and
+    /// Biome give it the same literal type, so a write of it reduces a
+    /// `boolean` member of the declared type to that literal.
+    BooleanLiteral(TextRange),
     /// An element of the iterable at this range, which the head of a
     /// `for...of` loop assigns.
     IterableValue(TextRange),
