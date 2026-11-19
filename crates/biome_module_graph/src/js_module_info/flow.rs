@@ -40,7 +40,7 @@ mod subjects;
 mod writes;
 
 pub(crate) use expressions::AnyFlowExpression;
-pub(crate) use guards::{FlowGuard, FlowTest, guard_signature};
+pub(crate) use guards::{FlowGuard, FlowTest, UnitValue, binding_unit_value, guard_signature};
 pub(crate) use scanner::FlowRootScanner;
 
 use biome_js_control_flow::AnyJsControlFlowRoot;
@@ -368,8 +368,12 @@ pub(crate) const MAX_SWITCHES: usize = 64;
 ///
 /// Collection records only statements that TypeScript can find exhaustive:
 /// statements without `default`, with a discriminant that is a subject or
-/// `typeof` of one, and with cases that all test a unit value, such as `"a"`,
-/// `1`, `null`, or `undefined`, or a kind of value, such as `"string"`.
+/// `typeof` of one, and with cases that all test a unit value or a kind of
+/// value. A unit value is a value such as `"a"`, `-1`, `null`, `undefined`, or
+/// a `const` that holds one, and a kind of value is a string such as
+/// `"string"`. A case that tests an imported variable is recorded too, because
+/// only inference can read its value. Inference counts the statement as
+/// exhaustive only when that variable holds a unit value.
 #[derive(Debug)]
 pub(crate) struct FlowSwitch {
     /// The range of the expression whose type at the statement decides

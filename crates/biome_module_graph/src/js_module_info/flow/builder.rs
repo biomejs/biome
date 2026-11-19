@@ -526,6 +526,9 @@ struct RootBuilder<'a, 'raw> {
     records_reads: bool,
     /// The incoming flow of the next statement, or `None` when unreachable.
     current: Option<FlowNodeId>,
+    /// The visits left before the build gives up. Every statement and every
+    /// evaluated node spends one each time the builder reaches it, so the
+    /// limit also bounds the builds of finally blocks.
     remaining_visits: usize,
 }
 
@@ -678,6 +681,10 @@ impl RootBuilder<'_, '_> {
         reason = "Every other statement is an opaque region."
     )]
     fn statement(&mut self, statement: AnyJsStatement, label: Option<TokenText>) -> Build<()> {
+        // A statement that evaluates nothing, such as a type alias or
+        // unreachable code, also spends a visit, because a finally block is
+        // built more than once.
+        self.visit(0)?;
         let Some(current) = self.current else {
             return Ok(());
         };
@@ -1347,9 +1354,9 @@ impl RootBuilder<'_, '_> {
     fn try_statement(&mut self, statement: &AnyJsTryStatement, current: FlowNodeId) -> Build<()> {
         let finally = statement.finally_clause();
         // A finally block is built twice, so the work doubles with each
-        // finally block that encloses a `try` statement. Every build pushes
-        // this join, so the node limit bounds that work even when the blocks
-        // evaluate nothing.
+        // finally block that encloses a `try` statement. Every statement
+        // spends a visit each time it is built, so the visit limit bounds
+        // that work even when the blocks evaluate nothing.
         let exception = self.push(FlowNode::Join(vec![current]))?;
         self.exceptions.push(exception);
         if finally.is_some() {
@@ -2856,6 +2863,37 @@ mod tests {
         // Each build of a finally block builds the one nested in it twice, so
         // the innermost one would be built 2^20 times.
         assert!(function(&nested(20)).root.is_none());
+    }
+
+    #[test]
+    fn statements_that_evaluate_nothing_count_against_the_visit_limit() {
+        let declarations: String = (0..100)
+            .map(|index| format!("type T{index} = 0; "))
+            .collect();
+        let unreachable = format!("if (x) {{ return; {} }}", "x; ".repeat(100));
+        for body in [declarations, unreachable] {
+            assert!(
+                function(&nested_finally_blocks(2, &body)).root.is_some(),
+                "{body}"
+            );
+            // The innermost finally block is built 2^8 times, so its 100
+            // statements are built more often than the visit limit allows,
+            // although they evaluate nothing.
+            assert!(
+                function(&nested_finally_blocks(8, &body)).root.is_none(),
+                "{body}"
+            );
+        }
+    }
+
+    /// Returns a function whose body tests `x`, then nests `depth` finally
+    /// blocks around `body`.
+    fn nested_finally_blocks(depth: usize, body: &str) -> String {
+        format!(
+            "function f(x) {{ if (x) read(x); {}{body} {} }}",
+            "try {} finally { ".repeat(depth),
+            "}".repeat(depth)
+        )
     }
 
     #[test]
