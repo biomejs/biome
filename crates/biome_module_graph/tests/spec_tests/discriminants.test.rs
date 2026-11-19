@@ -856,3 +856,468 @@ fn tests_that_biome_cannot_compare_keep_more_members() {
         ],
     );
 }
+
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type,
+// because a test of a `const` that holds a property of an object, as `k` holds
+// `s.kind`, narrows that object, and only that object, as a test of the
+// property does.
+#[test]
+fn discriminants_held_in_constants_narrow_the_object() {
+    assert_reads(
+        r#"
+        function equal(s: Shape) { const k = s.kind; if (k === "c") /*equal*/s; else /*equalElse*/s; }
+        function property(s: Shape) { const k = s.kind; if (k === "c") /*property*/s.r; }
+        function element(s: Shape) { const k = s["kind"]; if (k === "c") /*element*/s; }
+        function parenthesized(s: Shape) { const k = (s.kind); if (k === "c") /*parenthesized*/s; }
+        function object(s: Shape) { const k = (s).kind; if (k === "c") /*object*/s; }
+        function escaped(s: Shape) { const k = s.\u006bind; if (k === "c") /*escaped*/s; }
+        function path(w: { s: Shape }) { const k = w.s.kind; if (k === "c") /*path*/w.s; }
+        function typeOf(o: { k: "a"; a: 1 } | { k: 1; b: 2 }) {
+            const k = o.k; if (typeof k === "string") /*typeof*/o; else /*typeofElse*/o;
+        }
+        function truthy(r: Ok | Err) { const ok = r.ok; if (ok) /*truthy*/r; else /*falsy*/r; }
+        function negated(r: Ok | Err) { const ok = r.ok; if (!ok) /*negated*/r; }
+        function notEqual(s: Shape) { const k = s.kind; if (k !== "c") /*notEqual*/s; }
+        function isNull(o: { k: null; a: 1 } | { k: "x"; b: 2 }) {
+            const k = o.k; if (k === null) /*null*/o; else /*nullElse*/o;
+        }
+        function looseNull(o: { k?: "x"; a: 1 } | { k: "y"; b: 2 }) {
+            const k = o.k; if (k == null) /*looseNull*/o; else /*looseNullElse*/o;
+        }
+        function notUndefined(o: { k?: "x"; a: 1 } | { k: "y"; b: 2 }) {
+            const k = o.k; if (k !== undefined) /*notUndefined*/o; else /*notUndefinedElse*/o;
+        }
+        function tuple(t: ["a", number] | ["b", string]) {
+            const k = t[0]; if (k === "a") /*tuple*/t; else /*tupleElse*/t;
+        }
+        function and(s: Shape, x: string | null) { const k = s.kind; if (k === "c" && x) /*and*/s; }
+        function after(s: Shape) { const k = s.kind; if (k === "c") { s; } /*after*/s; }
+        function loop(s: Shape) { const k = s.kind; while (k === "c") { /*loop*/s; } /*exit*/s; }
+        function operand(s: Shape) { const k = s.kind; k === "c" && /*operand*/s; }
+        function early(s: Shape) { const k = s.kind; if (k === "c") return; /*return*/s; }
+        function kind(s: Shape) { const k = s.kind; if (k === "c") /*kind*/k; }
+        function nested(o: { a: Shape } | { a: Circle; b: 1 }) { const k = o.a.kind; if (k === "s") /*outer*/o; }
+        "#,
+        &[
+            ("equal", "s", &["Circle"]),
+            ("equalElse", "s", &["Square"]),
+            ("property", "s.r", &["number"]),
+            ("element", "s", &["Circle"]),
+            ("parenthesized", "s", &["Circle"]),
+            ("object", "s", &["Circle"]),
+            ("escaped", "s", &["Circle"]),
+            ("path", "w.s", &["Circle"]),
+            ("typeof", "o", &[r#"["k": string: a, "a": number: 1]"#]),
+            ("typeofElse", "o", &[r#"["k": number: 1, "b": number: 2]"#]),
+            ("truthy", "r", &["Ok"]),
+            ("falsy", "r", &["Err"]),
+            ("negated", "r", &["Err"]),
+            ("notEqual", "s", &["Square"]),
+            ("null", "o", &[r#"["k": null, "a": number: 1]"#]),
+            ("nullElse", "o", &[r#"["k": string: x, "b": number: 2]"#]),
+            (
+                "looseNull",
+                "o",
+                &[r#"["k"?: string: x | undefined, "a": number: 1]"#],
+            ),
+            (
+                "looseNullElse",
+                "o",
+                &[
+                    r#"["k": string: y, "b": number: 2]"#,
+                    r#"["k"?: string: x | undefined, "a": number: 1]"#,
+                ],
+            ),
+            (
+                "notUndefined",
+                "o",
+                &[
+                    r#"["k": string: y, "b": number: 2]"#,
+                    r#"["k"?: string: x | undefined, "a": number: 1]"#,
+                ],
+            ),
+            (
+                "notUndefinedElse",
+                "o",
+                &[r#"["k"?: string: x | undefined, "a": number: 1]"#],
+            ),
+            ("tuple", "t", &["[string: a, number]"]),
+            ("tupleElse", "t", &["[string: b, string]"]),
+            ("and", "s", &["Circle"]),
+            ("after", "s", &["Circle", "Square"]),
+            ("loop", "s", &["Circle"]),
+            ("exit", "s", &["Square"]),
+            ("operand", "s", &["Circle"]),
+            ("return", "s", &["Square"]),
+            ("kind", "k", &["string: c"]),
+            (
+                "outer",
+                "o",
+                &[
+                    r#"[ "a": interface "Circle" { extends: [] type_args: [] members: ["kind": string: c, "r": number] } , "b": number: 1 ]"#,
+                    r#"[ "a": interface "Circle" { extends: [] type_args: [] members: ["kind": string: c, "r": number] } | interface "Square" { extends: [] type_args: [] members: ["kind": string: s, "w": number] } ]"#,
+                ],
+            ),
+        ],
+    );
+}
+
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
+// A test of a `const` that holds `s?.kind` tests no receiver, so `s` keeps
+// `undefined` wherever the property can be `undefined`. A truthiness test also
+// inlines `s?.kind` as an aliased condition, which shows that `s` is not
+// nullish.
+#[test]
+fn discriminants_held_through_optional_chains_keep_nullish_objects() {
+    assert_reads(
+        r#"
+        function chain(s: Shape | undefined) { const k = s?.kind; if (k === "c") /*chain*/s; else /*chainElse*/s; }
+        function defined(s: Shape) { const k = s?.kind; if (k === "c") /*defined*/s; }
+        function notEqual(s: Shape | undefined) { const k = s?.kind; if (k !== "c") /*notEqual*/s; }
+        function undefinedKind(s: Shape | undefined) {
+            const k = s?.kind; if (k === undefined) /*undefinedKind*/s; else /*undefinedKindElse*/s;
+        }
+        function truthy(s: Shape | undefined) { const k = s?.kind; if (k) /*truthy*/s; else /*falsy*/s; }
+        function receiver(w: { s: Shape } | undefined) {
+            const k = w?.s.kind; if (k === "c") { /*receiver*/w; /*receiverPath*/w?.s; }
+        }
+        "#,
+        &[
+            ("chain", "s", &["Circle", "undefined"]),
+            ("chainElse", "s", &["Square", "undefined"]),
+            ("defined", "s", &["Circle"]),
+            ("notEqual", "s", &["Square", "undefined"]),
+            ("undefinedKind", "s", &["undefined"]),
+            ("undefinedKindElse", "s", &["Circle", "Square", "undefined"]),
+            ("truthy", "s", &["Circle", "Square"]),
+            ("falsy", "s", &["undefined"]),
+            (
+                "receiver",
+                "w",
+                &[
+                    r#"[ "s": interface "Circle" { extends: [] type_args: [] members: ["kind": string: c, "r": number] } | interface "Square" { extends: [] type_args: [] members: ["kind": string: s, "w": number] } ]"#,
+                    "undefined",
+                ],
+            ),
+            ("receiverPath", "w?.s", &["Circle", "undefined"]),
+        ],
+    );
+}
+
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type,
+// because a test of an element of a destructuring `const` narrows the
+// initializer as a test of the element's property does.
+#[test]
+fn destructured_discriminants_narrow_the_initializer() {
+    assert_reads(
+        r#"
+        type S = { kind: "c"; v: number } | { kind: "s"; v: string };
+        function shorthand(s: Shape) { const { kind } = s; if (kind === "c") /*shorthand*/s; else /*shorthandElse*/s; }
+        function renamed(s: Shape) { const { kind: k } = s; if (k === "c") /*renamed*/s; }
+        function others(s: S) { const { kind, v } = s; if (kind === "c") /*others*/s; }
+        function otherDefault(s: S) { const { kind, v = 0 } = s; if (kind === "c") /*otherDefault*/s; }
+        function parenthesized(s: Shape) { const { kind } = (s); if (kind === "c") /*parenthesized*/s; }
+        function path(w: { s: Shape }) { const { kind } = w.s; if (kind === "c") /*path*/w.s; }
+        function string(s: Shape) { const { "kind": k } = s; if (k === "c") /*string*/s; }
+        function computed(s: Shape) { const { ["kind"]: k } = s; if (k === "c") /*computed*/s; }
+        function escaped(s: Shape) { const { \u006bind } = s; if (kind === "c") /*escaped*/s; }
+        function escapedKey(s: Shape) { const { \u006bind: k } = s; if (k === "c") /*escapedKey*/s; }
+        function array(t: ["a", number] | ["b", string]) { const [k] = t; if (k === "a") /*array*/t; else /*arrayElse*/t; }
+        function hole(t: [number, "a"] | [string, "b"]) { const [, k] = t; if (k === "a") /*hole*/t; }
+        function arrayRest(t: ["a", number] | ["b", string]) { const [k, ...others] = t; if (k === "a") /*arrayRest*/t; }
+        function index(t: ["a", number] | ["b", string]) { const { 0: k } = t; if (k === "a") /*index*/t; }
+        function indexString(t: ["a", number] | ["b", string]) { const { "0": k } = t; if (k === "a") /*indexString*/t; }
+        function truthy(r: Ok | Err) { const { ok } = r; if (ok) /*truthy*/r; else /*falsy*/r; }
+        function typeOf(o: { k: "a"; a: 1 } | { k: 1; b: 2 }) { const { k } = o; if (typeof k === "number") /*typeof*/o; }
+        function objectRest(s: Shape) { const { kind, ...others } = s; if (kind === "c") /*objectRest*/s; }
+        function declarators(s: Shape) { const { kind } = s, k = s.kind; if (k === "s") /*declarators*/s; }
+        function notEqual(s: Shape) { const { kind } = s; if (kind !== "c") /*notEqual*/s; }
+        "#,
+        &[
+            ("shorthand", "s", &["Circle"]),
+            ("shorthandElse", "s", &["Square"]),
+            ("renamed", "s", &["Circle"]),
+            ("others", "s", &[r#"["kind": string: c, "v": number]"#]),
+            (
+                "otherDefault",
+                "s",
+                &[r#"["kind": string: c, "v": number]"#],
+            ),
+            ("parenthesized", "s", &["Circle"]),
+            ("path", "w.s", &["Circle"]),
+            ("string", "s", &["Circle"]),
+            ("computed", "s", &["Circle"]),
+            ("escaped", "s", &["Circle"]),
+            ("escapedKey", "s", &["Circle"]),
+            ("array", "t", &["[string: a, number]"]),
+            ("arrayElse", "t", &["[string: b, string]"]),
+            ("hole", "t", &["[number, string: a]"]),
+            ("arrayRest", "t", &["[string: a, number]"]),
+            ("index", "t", &["[string: a, number]"]),
+            ("indexString", "t", &["[string: a, number]"]),
+            ("truthy", "r", &["Ok"]),
+            ("falsy", "r", &["Err"]),
+            ("typeof", "o", &[r#"["k": number: 1, "b": number: 2]"#]),
+            ("objectRest", "s", &["Circle"]),
+            ("declarators", "s", &["Square"]),
+            ("notEqual", "s", &["Square"]),
+        ],
+    );
+}
+
+// TypeScript 7.0.2 (`tsc --strict`) keeps every read below as declared. Only
+// an unannotated `const` holds a discriminant, and only when its initializer
+// reads the property directly or through a pattern that the declarator binds,
+// without a default.
+#[test]
+fn constants_that_hold_no_discriminant_keep_the_object() {
+    assert_reads(
+        r#"
+        declare function isC(value: string): value is "c";
+        function annotated(s: Shape) { const k: string = s.kind; if (k === "c") /*annotated*/s; }
+        function mutable(s: Shape) { let k = s.kind; if (k === "c") /*mutable*/s; }
+        function asserted(s: Shape) { const k = s.kind as string; if (k === "c") /*asserted*/s; }
+        function predicate(s: Shape) { const k = s.kind; if (isC(k)) /*predicate*/s; }
+        function truthy(s: Shape) { const k = s.kind; if (k) /*truthy*/s; }
+        function other(s: Shape, t: Shape) { const k = s.kind; if (k === "c") /*other*/t; }
+        function ownDefault(s: Shape) { const { kind = "c" } = s; if (kind === "c") /*ownDefault*/s; }
+        function nonNull(s: Shape | undefined) { const { kind } = s!; if (kind === "c") /*nonNull*/s; }
+        function cast(s: Shape) { const { kind } = s as Shape; if (kind === "c") /*cast*/s; }
+        function annotatedPattern(s: Shape) { const { kind }: Shape = s; if (kind === "c") /*annotatedPattern*/s; }
+        function mutablePattern(s: Shape) { let { kind } = s; if (kind === "c") /*mutablePattern*/s; }
+        function nested(w: { a: Shape }) { const { a: { kind } } = w; if (kind === "c") /*nested*/w.a; }
+        function elementDefault(t: ["a", number] | ["b", string]) { const [k = "a"] = t; if (k === "a") /*elementDefault*/t; }
+        function nestedProperty(s: Shape) { const { kind: { length } } = s; if (length === 1) /*nestedProperty*/s; }
+        "#,
+        &[
+            ("annotated", "s", &["Circle", "Square"]),
+            ("mutable", "s", &["Circle", "Square"]),
+            ("asserted", "s", &["Circle", "Square"]),
+            ("predicate", "s", &["Circle", "Square"]),
+            ("truthy", "s", &["Circle", "Square"]),
+            ("other", "t", &["Circle", "Square"]),
+            ("ownDefault", "s", &["Circle", "Square"]),
+            ("nonNull", "s", &["Circle", "Square", "undefined"]),
+            ("cast", "s", &["Circle", "Square"]),
+            ("annotatedPattern", "s", &["Circle", "Square"]),
+            ("mutablePattern", "s", &["Circle", "Square"]),
+            ("nested", "w.a", &["Circle", "Square"]),
+            (
+                "elementDefault",
+                "t",
+                &["[string: a, number]", "[string: b, string]"],
+            ),
+            ("nestedProperty", "s", &["Circle", "Square"]),
+        ],
+    );
+}
+
+// TypeScript 7.0.2 (`tsc --strict`) gives `Shape` at the first two reads and
+// `Circle` at the others. An exported `const` holds no discriminant, but the
+// object it reads can be exported, or a `let` at the top level of a file,
+// because only the `const` must keep its value.
+#[test]
+fn discriminants_held_at_the_top_level_follow_exports() {
+    assert_reads(
+        r#"
+        declare function make(): Shape;
+        const s1: Shape = make();
+        export const k1 = s1.kind;
+        if (k1 === "c") /*exported*/s1;
+        const s4: Shape = make();
+        export const { kind: k4 } = s4;
+        if (k4 === "c") /*exportedPattern*/s4;
+        export const s3: Shape = make();
+        const k3 = s3.kind;
+        if (k3 === "c") /*exportedObject*/s3;
+        let s5: Shape = make();
+        const k5 = s5.kind;
+        if (k5 === "c") /*topLevelLet*/s5;
+        "#,
+        &[
+            ("exported", "s1", &["Circle", "Square"]),
+            ("exportedPattern", "s4", &["Circle", "Square"]),
+            ("exportedObject", "s3", &["Circle"]),
+            ("topLevelLet", "s5", &["Circle"]),
+        ],
+    );
+}
+
+// TypeScript 7.0.2 (`tsc --strict`) narrows every read below, giving `Circle`
+// or the first tuple. Biome keeps the declared type at each of them. It
+// doesn't follow `s!` or keys that are spelled differently from the property,
+// and loose equality doesn't narrow an object. A read in a closure or inside
+// `for...of` or `switch` never sees the test. A `const` exported by an
+// `export { ... }` list holds nothing.
+#[test]
+fn discriminant_constants_that_biome_does_not_follow_keep_the_object() {
+    assert_reads(
+        r#"
+        declare function make(): Shape;
+        function nonNull(s: Shape) { const k = s!.kind; if (k === "c") /*nonNull*/s; }
+        function loose(s: Shape) { const k = s.kind; if (k == "c") /*loose*/s; }
+        function closure(s: Shape) { const k = s.kind; const g = () => { if (k === "c") /*closure*/s; }; }
+        function escapedString(s: Shape) { const k = s["\u006bind"]; if (k === "c") /*escapedString*/s; }
+        function hexadecimal(t: ["a", number] | ["b", string]) { const k = t[0x0]; if (k === "a") /*hexadecimal*/t; }
+        function template(s: Shape) { const { [`kind`]: k } = s; if (k === "c") /*template*/s; }
+        function escapedStringKey(s: Shape) { const { "\u006bind": k } = s; if (k === "c") /*escapedStringKey*/s; }
+        function patternClosure(s: Shape) { const { kind } = s; const g = () => { if (kind === "c") /*patternClosure*/s; }; }
+        function looseKey(s: Shape) { const { kind } = s; if (kind == "c") /*looseKey*/s; }
+        function hexadecimalKey(t: ["a", number] | ["b", string]) { const { 0x0: k } = t; if (k === "a") /*hexadecimalKey*/t; }
+        function forOf(s: Shape) { const k = s.kind; for (const x of [1]) { if (k === "c") /*forOf*/s; } }
+        function inSwitch(s: Shape) { const k = s.kind; switch (true) { default: if (k === "c") /*inSwitch*/s; } }
+        const s2: Shape = make();
+        const k2 = s2.kind;
+        export { k2 };
+        if (k2 === "c") /*exportList*/s2;
+        "#,
+        &[
+            ("nonNull", "s", &["Circle", "Square"]),
+            ("loose", "s", &["Circle", "Square"]),
+            ("closure", "s", &["Circle", "Square"]),
+            ("escapedString", "s", &["Circle", "Square"]),
+            (
+                "hexadecimal",
+                "t",
+                &["[string: a, number]", "[string: b, string]"],
+            ),
+            ("template", "s", &["Circle", "Square"]),
+            ("escapedStringKey", "s", &["Circle", "Square"]),
+            ("patternClosure", "s", &["Circle", "Square"]),
+            ("looseKey", "s", &["Circle", "Square"]),
+            (
+                "hexadecimalKey",
+                "t",
+                &["[string: a, number]", "[string: b, string]"],
+            ),
+            ("forOf", "s", &["Circle", "Square"]),
+            ("inSwitch", "s", &["Circle", "Square"]),
+            ("exportList", "s2", &["Circle", "Square"]),
+        ],
+    );
+}
+
+// TypeScript 7.0.2 (`tsc --strict`) gives `Ok`, because it takes the rest
+// element `ok` as the property `r.ok`. Biome keeps the declared type, because
+// `ok` holds an object, which is always truthy, so `r` can be `Err` there.
+#[test]
+fn rest_elements_hold_no_discriminant() {
+    assert_reads(
+        r#"
+        function objectRest(r: Ok | Err) { const { ...ok } = r; if (ok) /*objectRest*/r; }
+        "#,
+        &[("objectRest", "r", &["Err", "Ok"])],
+    );
+}
+
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
+// Inside an aliased condition, the held discriminant narrows the object only
+// when the object cannot change between the `const` and the test, so never a
+// property path such as `w.s`. Outside one, a `const` in a block or a loop,
+// and one that holds a property of a path on `this`, narrow as elsewhere.
+#[test]
+fn held_discriminants_narrow_through_aliased_conditions() {
+    assert_reads(
+        r#"
+        function access(s: Shape) { const k = s.kind; const ok = k === "c"; if (ok) /*access*/s; }
+        function pattern(s: Shape) { const { kind } = s; const ok = kind === "c"; if (ok) /*pattern*/s; }
+        function path(w: { s: Shape }) { const k = w.s.kind; const ok = k === "c"; if (ok) /*path*/w.s; }
+        function patternPath(w: { s: Shape }) { const { kind } = w.s; const ok = kind === "c"; if (ok) /*patternPath*/w.s; }
+        function block(s: Shape) { { const k = s.kind; if (k === "c") /*block*/s; } }
+        function loop(s: Shape) { if (true) { const k = s.kind; } const k = s.kind; for (;;) { if (k === "c") /*loop*/s; } }
+        class K {
+            s!: Shape;
+            m() { const k = this.s.kind; if (k === "c") /*thisPath*/this.s; }
+            n() { const { kind } = this.s; if (kind === "c") /*thisPattern*/this.s; }
+        }
+        "#,
+        &[
+            ("access", "s", &["Circle"]),
+            ("pattern", "s", &["Circle"]),
+            ("path", "w.s", &["Circle", "Square"]),
+            ("patternPath", "w.s", &["Circle", "Square"]),
+            ("block", "s", &["Circle"]),
+            ("loop", "s", &["Circle"]),
+            ("thisPath", "this.s", &["Circle"]),
+            ("thisPattern", "this.s", &["Circle"]),
+        ],
+    );
+}
+
+// TypeScript 7.0.2 (`tsc --strict`) gives `Circle` at every read below,
+// although in the first six functions the write can make `s.kind` differ from
+// the value the `const` holds, so `s` can be a `Square`, or not match any
+// member, at the read. Biome keeps the declared type there, because a test of
+// a `const` that holds a property, or an aliased condition that tests it,
+// narrows the object only when the root's own code never writes the property.
+// A test of the property itself reads its current value, and a call or a
+// callback that writes the property keeps the narrowing, as in TypeScript.
+#[test]
+fn writes_to_a_held_discriminant_stop_the_narrowing() {
+    assert_reads(
+        r#"
+        declare function reset(s: Shape): void;
+        function access(s: Shape) { const k = s.kind; s.kind = "s"; if (k === "c") /*access*/s; }
+        function pattern(s: Shape) { const { kind } = s; s.kind = "s"; if (kind === "c") /*pattern*/s; }
+        function condition(s: Shape) { const ok = s.kind === "c"; s.kind = "s"; if (ok) /*condition*/s; }
+        function path(w: { s: Shape }) { const k = w.s.kind; w.s.kind = "s"; if (k === "c") /*path*/w.s; }
+        function anyKey(s: Shape, key: "kind") { const k = s.kind; s[key] = "s"; if (k === "c") /*anyKey*/s; }
+        function destructuring(s: Shape) {
+            const k = s.kind; ({ kind: s.kind } = { kind: "s" as const }); if (k === "c") /*destructuring*/s;
+        }
+        // The write follows the test, so the `const` still holds the
+        // property's value at the test. Biome doesn't model writes yet, so
+        // any write in the root stops the narrowing.
+        function later(s: Shape) { const k = s.kind; if (k === "c") { s.kind = "c"; /*later*/s; } }
+        function call(s: Shape) { const k = s.kind; reset(s); if (k === "c") /*call*/s; }
+        function callback(s: Shape) { const k = s.kind; [1].forEach(() => { s.kind = "s"; }); if (k === "c") /*callback*/s; }
+        function direct(s: Shape) { s.kind = "s"; if (s.kind === "c") /*direct*/s; }
+        "#,
+        &[
+            ("access", "s", &["Circle", "Square"]),
+            ("pattern", "s", &["Circle", "Square"]),
+            ("condition", "s", &["Circle", "Square"]),
+            ("path", "w.s", &["Circle", "Square"]),
+            ("anyKey", "s", &["Circle", "Square"]),
+            ("destructuring", "s", &["Circle", "Square"]),
+            ("later", "s", &["Circle", "Square"]),
+            ("call", "s", &["Circle"]),
+            ("callback", "s", &["Circle"]),
+            ("direct", "s", &["Circle"]),
+        ],
+    );
+}
+
+// TypeScript 7.0.2 (`tsc --strict`) keeps `o` as declared when it is not a
+// union, because a test of a property narrows only a union. A held
+// discriminant makes its object a subject that only tests of its properties
+// narrow. Collection drops the read of such an object when its annotation
+// shows that it is not a union, so the read runs no solve, while a read of a
+// union runs one.
+#[test]
+fn held_discriminants_of_objects_that_are_not_unions_skip_the_solve() {
+    for (source, solves) in [
+        (
+            "function f(o: { v: string | null }) { const { v } = o; if (v) { /*read*/o; } }",
+            0,
+        ),
+        (
+            "function f(o: { v: string | null }) { const v = o.v; if (v) { /*read*/o; } }",
+            0,
+        ),
+        (
+            r#"function f(o: { k: "a" } | { k: "b" }) { const { k } = o; if (k === "a") { /*read*/o; } }"#,
+            1,
+        ),
+    ] {
+        let (db, module) = narrowing_db(source);
+        db.clear_salsa_events();
+        normalized_type_at(&db, module, source, "read", "o");
+        let events = db.take_salsa_events();
+        assert_eq!(
+            function_query_will_execute_count_by_name(&db, "infer_flow_subject_states", &events),
+            solves,
+            "{source}"
+        );
+    }
+}

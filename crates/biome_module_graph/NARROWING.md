@@ -76,6 +76,8 @@ revisiting the row.
 | A write through an element access whose key is not a literal | `o: { v: string \| null; w: string \| null };`<br>`k: "v" \| "w";`<br>`if (o.v) { o[k] = null; o.v }` | `string` | `string \| null`: a write through a key that is not a string or integer literal, such as `k` or `-0`, stops the narrowing of every property of the object. A literal key writes only the property it names, so `o["w"] = null` keeps the narrowing of `o.v`. `delete o["v"]` also stops the narrowing of `o.v`, where TypeScript gives `string`. | TypeScript ignores the write unless the key is a literal or a `const` with a literal type, although `k` can be `"v"` here, and it ignores `delete` through an element access. Treating such a write as a write is sound, and such writes are rare next to tests of a property. |
 | A getter narrows like a field | `class G { get v(): string \| null }`<br>`g: G; if (g.v) g.v` | `string` | `string`, the same as TypeScript | A getter can return a different value each time it runs, so `g.v` can be `null` at the second read. Treating getters as fields keeps narrowing for classes that expose their state through getters, while getters that change between two reads close together are rare. |
 | A private name and a string key with the same text | `class K { #x: string \| null = null; "#x": string \| null = null; m() { if (this.#x) this["#x"] } }` | `string`: TypeScript treats `this.#x` and `this["#x"]` as the same reference | `string \| null`: `this.#x` and `this["#x"]` are different paths, so neither narrows the other | A private name is not a property, so `this["#x"]` reads the property named `"#x"`, another value, which can be `null` after the test of `this.#x`. Keeping them apart is sound and loses nothing in code that has no property whose name starts with `#`. |
+| A write to a property between a `const` that holds it and the test of the `const` | `type Circle = { kind: "c"; r: number };`<br>`type Square = { kind: "s"; w: number };`<br>`s: Circle \| Square;`<br>`const k = s.kind; s.kind = "s"; if (k === "c") s`<br>`const ok = s.kind === "c"; s.kind = "s"; if (ok) s` | `Circle` | `Circle \| Square`: a test of a `const` that holds a property, and an aliased condition that tests a property, narrow the object only when the code of the execution root never writes the property, as a property path narrows only when the root never writes it. A write after the test counts too. A test of the property itself, as in `if (s.kind === "c")`, still narrows `s` after the write. Calls and callbacks that write the property don't count, as for property narrowing. | `k` holds the value of `s.kind` from before the write, so `s.kind` is `"s"` at the read and `s` matches neither member. TypeScript checks a write to a discriminant against the narrowed object, so code rarely writes a discriminant in a function that also tests it, and the sound result loses little. |
+| A rest element in a destructuring `const` holds no property | `r: { ok: true; v: number } \| { ok: false; e: string };`<br>`const { ...ok } = r; if (ok) r` | `{ ok: true; v: number }`: TypeScript takes `ok` as the property `r.ok` | The declared type of `r` | `ok` holds a new object with the other properties of `r`, which is always truthy, so `r` can have `ok: false` at the read. |
 
 ## Limits
 
@@ -141,7 +143,9 @@ These limits apply to every *Supported* and *Partial* row below:
   top-level `let` of a script, and Biome cannot tell a script from a module.
   A property path, or `this`, never narrows through an aliased condition,
   but a test of a property in one still narrows the variable that holds the
-  property, as in `const ok = s.kind === "c"; if (ok) s`. As in TypeScript,
+  property, as in `const ok = s.kind === "c"; if (ok) s`, unless the
+  execution root writes the property, as the deliberate choices above
+  describe. As in TypeScript,
   aliased conditions inline into one another at most five
   levels deep, so in `const c2 = c1; ...; const c6 = c5; if (c6)`, only the
   truthiness of `c1` is tested.
@@ -166,7 +170,10 @@ These limits apply to every *Supported* and *Partial* row below:
   function on the property, as in `isC(s.kind)`, does not narrow the object,
   as in TypeScript. A write to the property, as in `s.kind = "b"`, keeps the
   object narrowed, because the written value must fit the property of the
-  narrowed object.
+  narrowed object. A test of a `const` that holds the property, as in
+  `const k = s.kind; if (k === "c")` or `const { kind } = s; if (kind === "c")`,
+  narrows the object in the same way, as the row on discriminants held in a
+  `const` describes.
 - Falsy and `typeof` tests compare an object type with the types that give
   primitives and functions their members, such as `String` and `Function`,
   from TypeScript's ES2015 library files. Members that the project adds to
@@ -288,9 +295,9 @@ The rows use `type Circle = { kind: "c"; r: number }` and
 | --- | --- | --- | --- |
 | Equality of a discriminant | `s: Circle \| Square; if (s.kind === "c") s` | `Circle` | Partial: `===` and `!==` with a string, number, bigint, or boolean literal, `null`, or `undefined`, and `== null` and `!= undefined`, narrow the object, as they narrow a variable. Loose `==` and `!=` with a literal, and comparisons with any other value, such as a `const` of a literal type, a negative number, or an enum member, don't narrow the object yet, so `const k = "c"; if (s.kind === k) s` gives `Circle \| Square`. |
 | Truthiness of a discriminant | `r: { ok: true; v: number } \| { ok: false; e: string };`<br>`if (r.ok) r` | `{ ok: true; v: number }` | Supported |
-| Destructured `const` or parameter | `s: { kind: "c"; v: number } \| { kind: "s"; v: string };`<br>`const { kind, v } = s; if (kind === "c") v` | `number` | Not yet |
+| Destructured `const` or parameter | `s: { kind: "c"; v: number } \| { kind: "s"; v: string };`<br>`const { kind, v } = s; if (kind === "c") v` | `number` | Not yet: the test of `kind` narrows `s` itself, as the row on discriminants held in a `const` describes, but not `v`. |
 | Dependent rest parameters | `(...[k, p]: ["a", number] \| ["b", string]) => { if (k === "a") p }` | `number` | Not yet |
-| Discriminant held in a `const` | `s: Circle \| Square; const k = s.kind; if (k === "c") s` | `Circle` | Not yet |
+| Discriminant held in a `const` | `s: Circle \| Square;`<br>`const k = s.kind; if (k === "c") s`<br>`const { kind } = s; if (kind === "c") s` | `Circle` at both reads | Partial: as in TypeScript, a `const` holds a property when its initializer reads the property, as in `const k = s.kind`, `s?.kind`, `s["kind"]`, or `t[0]`, or when it is an element of a destructuring pattern that the declarator binds directly, as in `const { kind } = s`, `const { kind: k } = s`, `const { "kind": k } = s`, or `const [k] = t`, whose initializer is a variable or a property path, not `s!` or `s as S`. The `const` must have no type annotation and must not be exported, and the element must have no default. Tests of the `const` narrow the object as tests of the property do, also inside an aliased condition, where the object must be a variable that cannot change. Through `s?.kind`, no test of `k` shows that `s` is not nullish, so with `s: Circle \| Square \| undefined`, `k === "c"` gives `Circle \| undefined`, as in TypeScript. TypeScript also accepts `s!.kind`, keys spelled differently from the property, such as `s["\u006bind"]`, `t[0x0]`, `{ "\u006bind": k }`, or ``{ [`kind`]: k }``, and a `const` exported by an `export { ... }` list, which keep the declared type in Biome. A read in a closure, or inside a `switch` or `for...of` statement, doesn't see the test, as the limits above describe, and loose `==` doesn't narrow the object yet, as for a test of the property. The deliberate choices above describe writes to the property and rest elements. |
 | Discriminant read through optional chaining | `s: Circle \| Square \| undefined; if (s?.kind === "c") s` | `Circle` | Supported: as in TypeScript, the `null` and `undefined` members stay in the branch where the property can be `undefined`, so `s?.kind !== "c"` keeps `Square \| undefined`. |
 
 ### `switch`

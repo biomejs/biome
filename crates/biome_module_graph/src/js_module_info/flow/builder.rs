@@ -8,16 +8,28 @@ use biome_js_control_flow::{AnyJsControlFlowRoot, is_truthy_literal};
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
     AnyJsClassMember, AnyJsExpression, AnyJsFunction, AnyJsFunctionBody, AnyJsStatement, AnyTsType,
-    JsDoWhileStatement, JsForStatement, JsIdentifierExpression, JsIfStatement, JsSyntaxNode,
-    JsWhileStatement, T,
+    JsDoWhileStatement, JsForStatement, JsIdentifierExpression, JsIfStatement, JsLanguage,
+    JsSyntaxNode, JsWhileStatement, T,
 };
-use biome_rowan::{AstNode, AstNodeList, AstSeparatedList, TokenText};
+use biome_rowan::{AstNode, AstNodeList, AstSeparatedList, SyntaxKindSet, TokenText};
 use rustc_hash::FxHashSet;
 
 const MAX_SYNTAX_NODES: usize = 16_384;
 /// Limits how deeply syntax can nest below the execution root that gets flow.
 pub(super) const MAX_DEPTH: usize = 128;
 const MAX_FLOW_NODES: usize = 65_536;
+
+/// Nodes below a statement list that contain no statement of the execution
+/// root: expressions, types, and nested execution roots.
+const NON_STATEMENT_KINDS: SyntaxKindSet<JsLanguage> = AnyJsControlFlowRoot::KIND_SET
+    .union(AnyJsExpression::KIND_SET)
+    .union(AnyTsType::KIND_SET);
+
+/// Nodes that evaluation leaves out of the enclosing flow: nested execution
+/// roots, class members, and types.
+const UNEVALUATED_KINDS: SyntaxKindSet<JsLanguage> = AnyJsControlFlowRoot::KIND_SET
+    .union(AnyJsClassMember::KIND_SET)
+    .union(AnyTsType::KIND_SET);
 
 /// The flow of one execution root before relevance filtering.
 pub(super) struct BuiltRoot {
@@ -194,11 +206,7 @@ struct StatementCheck {
 impl StatementCheck {
     fn statements(&mut self, node: &JsSyntaxNode) -> bool {
         node.children().all(|child| {
-            let kind = child.kind();
-            if AnyJsControlFlowRoot::can_cast(kind)
-                || AnyJsExpression::can_cast(kind)
-                || AnyTsType::can_cast(kind)
-            {
+            if NON_STATEMENT_KINDS.matches(child.kind()) {
                 return true;
             }
             match AnyJsStatement::cast_ref(&child) {
@@ -375,11 +383,7 @@ impl RootBuilder<'_, '_> {
     /// expressions, types, or nested execution roots.
     fn statements(&mut self, node: &JsSyntaxNode) -> Build<()> {
         for child in node.children() {
-            let kind = child.kind();
-            if AnyJsControlFlowRoot::can_cast(kind)
-                || AnyJsExpression::can_cast(kind)
-                || AnyTsType::can_cast(kind)
-            {
+            if NON_STATEMENT_KINDS.matches(child.kind()) {
                 continue;
             }
             match AnyJsStatement::cast_ref(&child) {
@@ -692,10 +696,7 @@ impl RootBuilder<'_, '_> {
         // initializer, including its decorators and computed key, apart from
         // the code around the class. Only the decorators and computed keys of
         // the other members lose the narrowing that TypeScript gives them.
-        if AnyJsControlFlowRoot::can_cast(kind)
-            || AnyJsClassMember::can_cast(kind)
-            || AnyTsType::can_cast(kind)
-        {
+        if UNEVALUATED_KINDS.matches(kind) {
             return Ok(incoming);
         }
         if let Some(identifier) = JsIdentifierExpression::cast_ref(node) {
