@@ -251,7 +251,9 @@ pub(crate) enum FlowTest {
     },
     /// The `in` operator, as in `"a" in value`. The range is the key, a string
     /// or number literal that spells the property's name, such as `"a"` or `0`
-    /// but not `"\u0061"` or `0x0`. See [`literal_key`].
+    /// but not `"\u0061"` or `0x0`, or a `const` that holds one, as `k` in
+    /// `const k = "a"`. Inference narrows by the key's literal type. See
+    /// [`literal_key`].
     In(TextRange),
     /// The `instanceof` operator, as in `value instanceof Date`, whose right
     /// operand, the constructor, is the expression at this range.
@@ -2934,7 +2936,8 @@ enum SyntaxGuard {
     /// A call to a type-guard function, with the test it applies, a
     /// [`FlowTest::Predicate`].
     Predicate(FlowTest),
-    /// The `in` operator whose key is the literal at this range.
+    /// The `in` operator whose key, at this range, is a literal or a `const`
+    /// that holds one ([`is_literal_key`]).
     In(TextRange),
     /// The `instanceof` operator whose right operand is at this range.
     Instanceof(TextRange),
@@ -3098,7 +3101,7 @@ fn condition_step(
                 }
                 AnyJsInProperty::AnyJsExpression(key) => {
                     let key = omit_parentheses(key, remaining)?;
-                    if literal_key(&key).is_none() {
+                    if !is_literal_key(key.clone(), model, remaining) {
                         return Some(ConditionStep::Unsupported);
                     }
                     SyntaxGuard::In(key.range())
@@ -3682,6 +3685,32 @@ pub(crate) fn unit_value(
         }
     }
     None
+}
+
+/// Returns whether `key`, without parentheses, is a literal that spells a
+/// property's name ([`literal_key`]), or a `const` that holds one, following
+/// at most [`MAX_HELD_VALUES`] `const` declarations, as in
+/// `const k = "a"; k in x`. Inference narrows by the key's type, which is the
+/// literal's type for such a `const`, as in TypeScript.
+fn is_literal_key(mut key: AnyJsExpression, model: &SemanticModel, remaining: &mut usize) -> bool {
+    for _ in 0..MAX_HELD_VALUES {
+        let AnyJsExpression::JsIdentifierExpression(identifier) = &key else {
+            return literal_key(&key).is_some();
+        };
+        let Some(HeldValue::Initializer(initializer)) = identifier
+            .name()
+            .ok()
+            .and_then(|reference| model.binding(&reference))
+            .and_then(|binding| held_value(&binding))
+        else {
+            return false;
+        };
+        let Some(initializer) = omit_parentheses(initializer, remaining) else {
+            return false;
+        };
+        key = initializer;
+    }
+    false
 }
 
 /// Returns the unit value of `expression` when it reads a member of an enum
@@ -5286,6 +5315,29 @@ mod tests {
     }
 
     #[test]
+    fn in_with_a_const_that_holds_a_literal_name_tests_its_object() {
+        for program in [
+            r#"function f(value) { const k = "a"; if (k in value) {} }"#,
+            "const j = 0; function f(value) { const k = (j); if (k in value) {} }",
+        ] {
+            let decomposed = decomposed_last(program, FlowOutcome::Truthy);
+            assert_eq!(parent_names(&decomposed), ["value"], "{program}");
+            assert!(
+                matches!(
+                    decomposed.guards[decomposed.condition.guard],
+                    FlowGuard::Test {
+                        test: FlowTest::In(_),
+                        positive: true,
+                        ..
+                    }
+                ),
+                "{program}: {:?}",
+                decomposed.guards
+            );
+        }
+    }
+
+    #[test]
     fn in_with_a_key_that_is_not_a_literal_name_tests_nothing() {
         for program in [
             r#"function f(value) { if (`a${b}` in value) {} }"#,
@@ -5293,7 +5345,9 @@ mod tests {
             "function f(value) { if (0x0 in value) {} }",
             "function f(value) { if (1.0 in value) {} }",
             "function f(value) { if (-0 in value) {} }",
-            r#"function f(value) { const k = "a"; if (k in value) {} }"#,
+            r#"function f(value) { let k = "a"; if (k in value) {} }"#,
+            r#"function f(value) { const k: "a" = "a"; if (k in value) {} }"#,
+            r#"function f(value) { const k = f(); if (k in value) {} }"#,
             r#"function f(value) { if ("a" in value!) {} }"#,
             r#"function f(value) { if ("a" in value.f()) {} }"#,
             // No class around the test declares `#q`.

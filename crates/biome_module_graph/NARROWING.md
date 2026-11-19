@@ -86,6 +86,7 @@ right operand of a logical assignment. Biome splits a condition through `!`,
 | `instanceof` | `x: Date \| string; if (x instanceof Date) x` | `Date` |
 | `x.constructor === C` | `class K1 { k1 = 1 }; class K2 { k2 = 2 }; x: K1 \| K2; if (x.constructor === K1) x` | `K1` |
 | `in` | `interface A { a: 1 }; interface B { b: 2 }; x: A \| B; if ("a" in x) x` | `A` |
+| `in` with a `const` key | `interface A { a: 1 }; interface B { b: 2 }; x: A \| B; const k = "a"; if (k in x) x` | `A` |
 | `#p in x` | `class P { #p = 1; m(x: P \| Date) { if (#p in x) x } }` | `P` |
 | A type-guard function | `x: Foo \| string; if (isFoo(x)) {} else x` | `string` |
 | A generic type-guard function | `isNonNull<T>(v: T \| null): v is T; x: string \| null; if (isNonNull(x)) x` | `string` |
@@ -467,16 +468,17 @@ ES2015 library files, which lack members that newer libraries add, such as
 
 | Code | TypeScript | Biome | Effect on rules |
 | --- | --- | --- | --- |
-| `interface A { a: 1 }; interface B { b: 2 }; x: A \| B; const k = "a"; if (k in x) x` | `A` | `A \| B` | A rule can miss a report on `x`. |
 | `class P { p = 1 }; class Q { q = 1 }; x: P \| Q; if ("p" in x) x` | `P` | `P \| Q` | A rule can miss a report on `x`. |
 | `x: { b: 1 } \| string[]; if ("a" in x) x` | `(string[] \| { b: 1 }) & Record<"a", unknown>` | `{ b: 1 } \| string[]` | A rule can miss a report on `x`. |
 | `class Checker { static [Symbol.hasInstance](v: unknown): v is string }; x: string \| Date; if (x instanceof Checker) x` | `string` | `string \| Date` | A rule can miss a report on `x`. |
 | `class Box<T> { v!: T }; class C { c = 3 }; GenCtor: new <T>() => Box<T>; x: Box<number> \| C; if (x instanceof GenCtor) x` | `Box<number>` | `Box<number> \| C` | A rule can miss a report on `x`. |
 
-`in` keeps a member in both branches when Biome can't tell whether it has the
-property: a primitive, a function, a tuple, an array, an instance of a class,
-a built-in type, or an object type with a call signature, a setter, a spread,
-or a computed key.
+`in` narrows by a key that is a literal or a `const` without a type
+annotation that holds one, so a key with a literal type from an annotation,
+as `k: "a"`, narrows nothing. `in` keeps a member in both branches when Biome
+can't tell whether it has the property: a primitive, a function, a tuple, an
+array, an instance of a class, a built-in type, or an object type with a call
+signature, a setter, a spread, or a computed key.
 
 ### Type-guard functions
 
