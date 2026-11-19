@@ -660,7 +660,11 @@ syntax can't show, an import or a method (`FlowCallee`), is kept in
 names, and a method by every type of its object, which must get the method
 from the lib, from a declaration file, or from a class or interface that
 declares it with a return type annotation (`member_return`, which reads the
-declaration that the type's scope records).
+declaration that the type's scope records). A declaration file declares only
+annotated functions, but a variable or a property that it types as `typeof`
+of a variable returns what that variable returns, so the reading context
+follows the variable (`declared_return`, `declared_member_returns`,
+`followed_return_is_annotated`).
 
 **Variables whose type evolves.** A `let` or `var` without a type annotation
 whose initializer is missing, `null`, or `undefined` takes the types of the

@@ -1,0 +1,11 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: declarations.d.ts
+---
+# Input
+```ts
+import { kindOfImpl } from "./implementation";
+
+export declare const kindOf: typeof kindOfImpl;
+
+```

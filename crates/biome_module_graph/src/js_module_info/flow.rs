@@ -62,7 +62,8 @@ mod subjects;
 mod writes;
 
 pub(crate) use builder::{
-    AnyMemberDeclaration, CalleeReturn, declaration_return, member_explicitness, member_return,
+    AnyMemberDeclaration, CalleeReturn, DeclaredReturn, declaration_return,
+    declared_member_returns, declared_return, member_explicitness, member_return,
 };
 pub(crate) use expressions::AnyFlowExpression;
 pub(crate) use guards::{

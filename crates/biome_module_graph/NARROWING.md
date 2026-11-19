@@ -305,11 +305,9 @@ target keeps its declared type when it reads an element of an array, as in
 `[x] = xs` and `[[x]] = [["a"]]`, or when its default supplies the value, as
 in `[x = 1] = []`. A call reduces the assigned type only when its callee has a
 return type annotation or is a local function whose returned values Biome can
-type. An export of a declaration file, or a member of an interface that a
-declaration file declares, typed `typeof` a function without a return type
-annotation counts as annotated, so a call of it assigns the return type that
-Biome infers for that function. A member of a type literal typed that way
-doesn't count.
+type. A value that a declaration file types as `typeof` a function, as
+`declare const f: typeof impl`, has a return type annotation only when that
+function has one.
 
 ### Variables whose type evolves with their writes
 
