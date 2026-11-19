@@ -139,6 +139,7 @@ Biome writes `{ b: 1 } & Record<"a", unknown>` as `{ b: 1; a: unknown }`, and
 | `return`, `throw`, `break`, and `continue` | `x: string \| null; if (x === null) return; x` | `string` |
 | `for...in` | `o: Circle \| undefined; for (const k in o) { o }` | `Circle` |
 | A `switch` case | `switch (s.kind) { case "c": s }` | `Circle` |
+| A `switch` case on `x!` | `x: "a" \| "b" \| "c"; switch (x!) { case "a": x }` | `"a"` |
 | `default` | `switch (s.kind) { case "c": break; default: s }` | `Square` |
 | `switch (true)` | `x: string \| number \| null; switch (true) { case typeof x === "string": break; case x === null: break; default: x }` | `number` |
 | An exhaustive `switch` | `x: boolean \| null \| undefined; y: string \| null; switch (x) { case true: case false: case null: case undefined: if (y === null) return; } y` | `string` |
@@ -408,11 +409,14 @@ declared type of each object along it declares the property `readonly`.
 | `x: "a" \| "b"; let y = "a" as const; if (x === y) x` | `"a"` | `"a" \| "b"` | `noUnnecessaryConditions` can miss an unnecessary check of `x`. |
 | `make(): "a"; x: string \| number; const y = make(); if (x === y) x` | `"a"` | `string \| number` | `noUnnecessaryConditions` can miss an unnecessary check of `x`. |
 | `x: "a" \| "b"; y: "a" \| "b"; if (y === "a") { if (x !== y) x }` | `"b"` | `"a" \| "b"` | `noUnnecessaryConditions` can miss an unnecessary check of `x`. |
-| `x: "a" \| "b" \| "c"; switch (x!) { case "a": x }` | `"a"` | `"a" \| "b" \| "c"` | A rule can miss a report on `x` in the case. |
+| `x: "a" \| "b"; if (x! === "a") x` | `"a"` | `"a" \| "b"` | `noUnnecessaryConditions` can miss an unnecessary check of `x`. |
 
 A comparison narrows by a literal, `null`, `undefined`, `void 0`, `-1`, a
 template literal without substitutions, an enum member, a `const` that holds
-one of these, and the declared type of an annotated variable.
+one of these, and the declared type of an annotated variable. Only the
+discriminant of a `switch` narrows through `!`, and only the operand of `!`
+itself, not the object that holds it, as in TypeScript. Other checks of `x!`,
+such as `if (x!)` and `typeof x! === "string"`, narrow nothing.
 
 ### Enums
 

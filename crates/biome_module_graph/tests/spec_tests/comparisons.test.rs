@@ -959,3 +959,25 @@ fn members_of_string_enums_are_strings() {
         );
     }
 }
+
+// TypeScript 7.0.2 (`tsc --strict`) gives `"a"` at `equal`, and `string` at
+// `truthy` and `typeOf`. Only the discriminant of a `switch` narrows through
+// `!`, so Biome keeps the declared types here, which are wider.
+#[test]
+fn checks_of_non_null_assertions_keep_the_type() {
+    assert_reads(
+        r#"
+        function e40(x: "a" | "b") { if (x! === "a") /*equal*/x; }
+        function e41(x: string | null) { if (x!) /*truthy*/x; }
+        function e42(x: string | number) { if (typeof x! === "string") /*typeOf*/x; }
+        "#,
+        &[
+            // TypeScript: `"a"`.
+            ("equal", "x", &["string: a", "string: b"]),
+            // TypeScript: `string`.
+            ("truthy", "x", &["null", "string"]),
+            // TypeScript: `string`.
+            ("typeOf", "x", &["number", "string"]),
+        ],
+    );
+}

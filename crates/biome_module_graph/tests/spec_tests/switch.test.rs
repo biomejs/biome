@@ -334,19 +334,52 @@ fn cases_narrow_by_unit_values() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) narrows `x` to `"a"` at `nonNull`, and
-// gives `number` at `nan`. A discriminant that isn't a subject, such as `x!`,
-// narrows nothing, so Biome keeps the declared type, which is wider.
+// TypeScript 7.0.2 (`tsc --strict`) gives `number` at `nan`.
 #[test]
 fn cases_that_biome_does_not_compare_keep_the_declared_type() {
     assert_reads(
         r#"
         function f43(x: number) { switch (x) { case NaN: /*nan*/x; } }
-        function f45(x: ABC) { switch (x!) { case "a": /*nonNull*/x; } }
+        "#,
+        &[("nan", "x", &["number"])],
+    );
+}
+
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type,
+// and `string` at `nullableAfter`. A case narrows the operand of non-null
+// assertions in the discriminant, also in parentheses, but not the object
+// that holds the operand, at `heldObject`, or the receivers of its optional
+// chain, at `receiver`. The type of `x` at the statement in `f51` includes
+// `null`, so Biome doesn't find the statement exhaustive there, which is
+// wider.
+#[test]
+fn cases_narrow_through_non_null_assertions() {
+    assert_reads(
+        r#"
+        function f45(x: ABC) { switch (x!) { case "a": /*nonNull*/x; break; default: /*nonNullDefault*/x; } }
+        function f46(x: ABC | null) { switch ((x)!!) { case "a": /*nullable*/x; break; default: /*nullableDefault*/x; } }
+        function f47(o: { v: ABC }) { switch (o.v!) { case "a": /*property*/o.v; } }
+        function f48(s: Shape) { switch (s.kind!) { case "c": /*heldObject*/s; /*held*/s.kind; } }
+        function f49(o: { v: ABC } | undefined) { switch (o?.v!) { case "a": /*receiver*/o; } }
+        function f50(x: ABC, y: string | null) { switch (x!) { case "a": case "b": case "c": if (y === null) return; } /*exhaustive*/y; }
+        function f51(x: ABC | null, y: string | null) { switch (x!) { case "a": case "b": case "c": if (y === null) return; } /*nullableAfter*/y; }
         "#,
         &[
-            ("nan", "x", &["number"]),
-            ("nonNull", "x", &["string: a", "string: b", "string: c"]),
+            ("nonNull", "x", &["string: a"]),
+            ("nonNullDefault", "x", &["string: b", "string: c"]),
+            ("nullable", "x", &["string: a"]),
+            ("nullableDefault", "x", &["null", "string: b", "string: c"]),
+            ("property", "o.v", &["string: a"]),
+            ("heldObject", "s", &["Circle", "Square", "Tri"]),
+            ("held", "s.kind", &["string: c"]),
+            (
+                "receiver",
+                "o",
+                &["[\"v\": string: a | string: b | string: c]", "undefined"],
+            ),
+            ("exhaustive", "y", &["string"]),
+            // TypeScript: `string`.
+            ("nullableAfter", "y", &["null", "string"]),
         ],
     );
 }

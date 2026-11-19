@@ -808,8 +808,8 @@ pub(crate) const MAX_ENDING_CALLS: usize = 64;
 #[derive(Debug)]
 pub(crate) struct FlowSwitch {
     /// The range of the expression whose type at the statement decides
-    /// whether it is exhaustive: the discriminant, or the operand of
-    /// `typeof`, without parentheses.
+    /// whether it is exhaustive: the discriminant without non-null
+    /// assertions, or the operand of `typeof`, without parentheses.
     pub(crate) discriminant: TextRange,
     /// The subject of that expression.
     pub(crate) subject: FlowSubjectId,

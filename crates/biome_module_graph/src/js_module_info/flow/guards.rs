@@ -1334,7 +1334,11 @@ pub(super) fn decompose_assignment_target(
 pub(super) enum SwitchKind {
     /// The discriminant has the shape of a subject, or is a call in an
     /// optional chain, as in `switch (x)`, `switch (s.kind)`, or
-    /// `switch (o?.f())`. A case narrows as `discriminant === test` does.
+    /// `switch (o?.f())`, also behind non-null assertions, as in
+    /// `switch (x!)`. A case narrows as `discriminant === test` does. Behind
+    /// a non-null assertion, it narrows only the operand itself, not the
+    /// object that holds it, the pattern that declares it, or the receivers
+    /// of its optional chain, as in TypeScript.
     Value,
     /// The discriminant is `typeof` of such an operand, and every case test
     /// is a string literal or a template literal without a tag and without
@@ -1348,8 +1352,8 @@ pub(super) enum SwitchKind {
     /// The discriminant is the literal `true` itself, without parentheses. A
     /// case narrows as a condition does when it is truthy.
     True,
-    /// Any other discriminant, such as `x!`, `(true)`, or `f()`, whose cases
-    /// narrow nothing.
+    /// Any other discriminant, such as `(true)`, `f()`, or `typeof x!`, whose
+    /// cases narrow nothing.
     Opaque,
 }
 
@@ -1397,10 +1401,11 @@ impl SwitchKind {
                 Self::Opaque
             };
         }
-        if has_operand_shape(&discriminant) == Some(true) {
-            Self::Value
-        } else {
-            Self::Opaque
+        match omit_non_null_assertions(discriminant, &mut remaining) {
+            Some((discriminant, _)) if has_operand_shape(&discriminant) == Some(true) => {
+                Self::Value
+            }
+            _ => Self::Opaque,
         }
     }
 }
@@ -1419,8 +1424,9 @@ fn typeof_operand(expression: &AnyJsExpression, remaining: &mut usize) -> Option
 
 /// Returns the expression whose type decides whether a `switch` statement
 /// of `kind` with the discriminant `discriminant` is exhaustive, without
-/// parentheses: the discriminant of a [`SwitchKind::Value`] statement, or the
-/// operand of a [`SwitchKind::Typeof`] one.
+/// parentheses: the discriminant of a [`SwitchKind::Value`] statement,
+/// without non-null assertions, or the operand of a [`SwitchKind::Typeof`]
+/// one.
 ///
 /// Returns `None` for other kinds, and for a `typeof` discriminant in
 /// parentheses. TypeScript checks such a discriminant as a string value
@@ -1432,7 +1438,8 @@ pub(super) fn exhaustive_operand(
 ) -> Option<AnyJsExpression> {
     let mut remaining = MAX_CONDITION_STEPS;
     match kind {
-        SwitchKind::Value => omit_parentheses(discriminant.clone(), &mut remaining),
+        SwitchKind::Value => omit_non_null_assertions(discriminant.clone(), &mut remaining)
+            .map(|(operand, _)| operand),
         SwitchKind::Typeof => typeof_operand(discriminant, &mut remaining),
         SwitchKind::True | SwitchKind::Opaque => None,
     }
@@ -1461,8 +1468,8 @@ pub(super) fn is_unit_case(
         return false;
     }
     let mut remaining = MAX_CONDITION_STEPS;
-    let (Some(discriminant), Some(test)) = (
-        omit_parentheses(discriminant.clone(), &mut remaining),
+    let (Some((discriminant, _)), Some(test)) = (
+        omit_non_null_assertions(discriminant.clone(), &mut remaining),
         omit_parentheses(test.clone(), &mut remaining),
     ) else {
         return false;
@@ -1538,19 +1545,24 @@ pub(super) fn decompose_switch_case(
         }
         SwitchKind::Value | SwitchKind::Typeof => {
             let mut decomposer = Decomposer::new(model, functions, subjects, guards);
-            decomposer.shape_guards = kind == SwitchKind::Value;
-            let step = omit_parentheses(discriminant.clone(), &mut decomposer.remaining)
-                .zip(omit_parentheses(test.clone(), &mut decomposer.remaining))
-                .and_then(|(discriminant, test)| {
-                    comparison_step(
-                        &discriminant,
-                        &test,
-                        true,
-                        matched,
-                        model,
-                        &mut decomposer.remaining,
-                    )
-                });
+            let operands =
+                omit_non_null_assertions(discriminant.clone(), &mut decomposer.remaining)
+                    .zip(omit_parentheses(test.clone(), &mut decomposer.remaining));
+            // Behind `!`, a case narrows only the operand itself.
+            let asserted = operands
+                .as_ref()
+                .is_some_and(|((_, asserted), _)| *asserted);
+            decomposer.shape_guards = kind == SwitchKind::Value && !asserted;
+            let step = operands.and_then(|((discriminant, _), test)| {
+                comparison_step(
+                    &discriminant,
+                    &test,
+                    true,
+                    matched,
+                    model,
+                    &mut decomposer.remaining,
+                )
+            });
             let guard = match step {
                 Some(ConditionStep::Unsupported) => return None,
                 Some(ConditionStep::Guard {
@@ -1563,7 +1575,7 @@ pub(super) fn decompose_switch_case(
                         operand,
                         guard,
                         positive,
-                        receivers: receivers && matched,
+                        receivers: receivers && matched && !asserted,
                     },
                     outcome,
                     0,
@@ -4186,6 +4198,23 @@ fn omit_parentheses(
     (!kind.is_bogus() && !kind.is_metavariable()).then_some(expression)
 }
 
+/// Returns `expression` without parentheses and non-null assertions, and
+/// whether it had an assertion, as `x` and true for `(x!)!`.
+fn omit_non_null_assertions(
+    expression: AnyJsExpression,
+    remaining: &mut usize,
+) -> Option<(AnyJsExpression, bool)> {
+    let mut expression = omit_parentheses(expression, remaining)?;
+    let mut asserted = false;
+    while let AnyJsExpression::TsNonNullAssertionExpression(assertion) = expression {
+        *remaining = remaining.checked_sub(1)?;
+        assertion.excl_token().ok()?;
+        expression = omit_parentheses(assertion.expression().ok()?, remaining)?;
+        asserted = true;
+    }
+    Some((expression, asserted))
+}
+
 #[cfg(test)]
 mod tests {
     use super::super::{FlowSubject, PropertyKey};
@@ -4277,7 +4306,10 @@ mod tests {
             ("switch (true) { case x: }", SwitchKind::True),
             ("switch ((true)) { case x: }", SwitchKind::Opaque),
             ("switch (false) { case x: }", SwitchKind::Opaque),
-            ("switch (x!) { case 1: }", SwitchKind::Opaque),
+            ("switch (x!) { case 1: }", SwitchKind::Value),
+            ("switch ((x)!!) { case 1: }", SwitchKind::Value),
+            ("switch (typeof x!) { case \"a\": }", SwitchKind::Opaque),
+            ("switch ((typeof x)!) { case \"a\": }", SwitchKind::Opaque),
             ("switch (f()) { case 1: }", SwitchKind::Opaque),
         ] {
             assert_eq!(switch_kind(source), kind, "{source}");

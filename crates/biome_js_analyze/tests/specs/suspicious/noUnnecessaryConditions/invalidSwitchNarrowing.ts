@@ -18,6 +18,13 @@ function caseOfLiteral(value: string | null) {
 	}
 }
 
+function caseOfNonNullAssertion(value: string | null) {
+	switch (value!) {
+		case "a":
+			return value?.length;
+	}
+}
+
 function caseOfTypeof(value: string | number | null) {
 	switch (typeof value) {
 		case "string":
