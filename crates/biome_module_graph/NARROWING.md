@@ -291,7 +291,7 @@ These limits apply to every *Supported* and *Partial* row below:
   of `x` where TypeScript removes it in these cases:
   - The member and a member of the target are subtypes of each other and not
     the same type. TypeScript's strict subtype relation, which depends on
-    modifiers that Biome doesn't record, such as `readonly`, decides whether
+    modifiers that Biome doesn't compare, such as `readonly`, decides whether
     the true branch keeps the member as it is. So with
     `interface Same { a: number }`, `x: Same | Bar` keeps `Same` in the false
     branch of `isFoo(x)`, where TypeScript gives `Bar`, and so does an

@@ -415,15 +415,39 @@ fn render_member(member: &LoweredTypeMember) -> String {
 /// Builds the `TypeMemberKind` expression for a member.
 fn render_member_kind(member: &LoweredTypeMember) -> String {
     match member.kind() {
-        LoweredMemberKind::Named { optional: false } => {
+        LoweredMemberKind::Named {
+            optional: false,
+            readonly: false,
+        } => {
             format!(
                 "crate::TypeMemberKind::Named(biome_rowan::Text::new_static({}))",
                 rust_string_literal(member.name()),
             )
         }
-        LoweredMemberKind::Named { optional: true } => {
+        LoweredMemberKind::Named {
+            optional: true,
+            readonly: false,
+        } => {
             format!(
                 "crate::TypeMemberKind::NamedOptional(biome_rowan::Text::new_static({}))",
+                rust_string_literal(member.name()),
+            )
+        }
+        LoweredMemberKind::Named {
+            optional: false,
+            readonly: true,
+        } => {
+            format!(
+                "crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static({}))",
+                rust_string_literal(member.name()),
+            )
+        }
+        LoweredMemberKind::Named {
+            optional: true,
+            readonly: true,
+        } => {
+            format!(
+                "crate::TypeMemberKind::ReadonlyNamedOptional(biome_rowan::Text::new_static({}))",
                 rust_string_literal(member.name()),
             )
         }

@@ -2293,7 +2293,15 @@ impl TypeMember {
                     .modifiers()
                     .into_iter()
                     .any(|modifier| modifier.as_js_static_modifier().is_some());
-                Self::from_class_member_info(collector, scope_id, name, ty.into(), is_static, false)
+                Self::from_class_member_info(
+                    collector,
+                    scope_id,
+                    name,
+                    ty.into(),
+                    is_static,
+                    false,
+                    false,
+                )
             }),
             AnyJsClassMember::TsMethodSignatureClassMember(member) => {
                 member.name().ok().and_then(|name| {
@@ -2332,6 +2340,7 @@ impl TypeMember {
                         ty.into(),
                         is_static,
                         is_optional,
+                        false,
                     )
                 })
             }
@@ -2360,6 +2369,10 @@ impl TypeMember {
                         .as_ref()
                         .and_then(|annotation| annotation.as_ts_optional_property_annotation())
                         .is_some();
+                    let is_readonly = member
+                        .modifiers()
+                        .into_iter()
+                        .any(|modifier| modifier.as_ts_readonly_modifier().is_some());
                     Self::from_class_member_info(
                         collector,
                         scope_id,
@@ -2367,6 +2380,7 @@ impl TypeMember {
                         ty,
                         is_static,
                         is_optional,
+                        is_readonly,
                     )
                 })
             }
@@ -2402,6 +2416,10 @@ impl TypeMember {
                         .into_iter()
                         .any(|modifier| modifier.as_js_static_modifier().is_some());
                     let is_optional = member.question_mark_token().is_some();
+                    let is_readonly = member
+                        .modifiers()
+                        .into_iter()
+                        .any(|modifier| modifier.as_ts_readonly_modifier().is_some());
                     Self::from_class_member_info(
                         collector,
                         scope_id,
@@ -2409,6 +2427,7 @@ impl TypeMember {
                         ty,
                         is_static,
                         is_optional,
+                        is_readonly,
                     )
                 })
             }
@@ -2431,6 +2450,10 @@ impl TypeMember {
                         .as_ref()
                         .and_then(|annotation| annotation.as_ts_optional_property_annotation())
                         .is_some();
+                    let is_readonly = member
+                        .modifiers()
+                        .into_iter()
+                        .any(|modifier| modifier.as_ts_readonly_modifier().is_some());
                     Self::from_class_member_info(
                         collector,
                         scope_id,
@@ -2438,6 +2461,7 @@ impl TypeMember {
                         ty,
                         is_static,
                         is_optional,
+                        is_readonly,
                     )
                 })
             }
@@ -2688,7 +2712,16 @@ impl TypeMember {
                     let ty = type_from_annotation(collector, scope_id, member.type_annotation())
                         .unwrap_or_default();
                     let is_optional = member.optional_token().is_some();
-                    Self::from_name_and_optional_type(collector, name, ty, is_optional)
+                    let property =
+                        Self::from_name_and_optional_type(collector, name, ty, is_optional);
+                    if member.readonly_token().is_some() {
+                        Self {
+                            kind: property.kind.with_readonly(),
+                            ..property
+                        }
+                    } else {
+                        property
+                    }
                 })
             }
             AnyTsTypeMember::TsSetterSignatureTypeMember(_member) => {
@@ -2698,6 +2731,10 @@ impl TypeMember {
         }
     }
 
+    /// Builds the member for a class method or field named `name`.
+    ///
+    /// `is_readonly` marks a named instance field as declared `readonly`.
+    /// Static and computed fields ignore it.
     #[inline]
     fn from_class_member_info(
         collector: &mut dyn RawTypeCollector,
@@ -2706,6 +2743,7 @@ impl TypeMember {
         ty: TypeReference,
         is_static: bool,
         is_optional: bool,
+        is_readonly: bool,
     ) -> Option<Self> {
         let kind = match name {
             AnyJsClassMemberName::JsComputedMemberName(name) => TypeMemberKind::ComputedValue(
@@ -2721,6 +2759,11 @@ impl TypeMember {
                     TypeMemberKind::Named(name)
                 }
             }
+        };
+        let kind = if is_readonly {
+            kind.with_readonly()
+        } else {
+            kind
         };
 
         Some(Self {
@@ -2779,7 +2822,7 @@ impl TypeMember {
         scope_id: ScopeId,
         member_list: JsClassMemberList,
     ) -> Box<[Self]> {
-        let mut members = Self::collect_class_members(collector, scope_id, member_list);
+        let mut members = Self::collect_class_members(collector, scope_id, member_list.clone());
 
         // Extend members with those from constructor definitions:
         let num_members = members.len();
@@ -2794,12 +2837,19 @@ impl TypeMember {
                         && let FunctionParameter::Named(named_param) = &param.parameter
                     {
                         // TODO: Assign accessibility to type members.
-                        members.push(Self {
-                            kind: if named_param.is_optional {
-                                TypeMemberKind::NamedOptional(named_param.name.clone())
+                        let kind = if named_param.is_optional {
+                            TypeMemberKind::NamedOptional(named_param.name.clone())
+                        } else {
+                            TypeMemberKind::Named(named_param.name.clone())
+                        };
+                        let kind =
+                            if is_readonly_parameter_property(&member_list, &named_param.name) {
+                                kind.with_readonly()
                             } else {
-                                TypeMemberKind::Named(named_param.name.clone())
-                            },
+                                kind
+                            };
+                        members.push(Self {
+                            kind,
                             ty: param.parameter.ty().clone(),
                         });
                     }
@@ -3356,6 +3406,46 @@ impl TypeMemberAccessibility {
 
         Self::default()
     }
+}
+
+/// Returns whether a constructor implementation in `member_list` declares
+/// the parameter property `name` as `readonly`, as
+/// `constructor(readonly name: string)` does.
+///
+/// The constructor's type doesn't record the modifiers of its parameter
+/// properties, so this reads them from the syntax.
+fn is_readonly_parameter_property(member_list: &JsClassMemberList, name: &str) -> bool {
+    member_list
+        .into_iter()
+        .filter_map(|member| match member {
+            AnyJsClassMember::JsConstructorClassMember(constructor) => {
+                constructor.parameters().ok()
+            }
+            _ => None,
+        })
+        .flat_map(|parameters| parameters.parameters())
+        .flatten()
+        .any(|parameter| {
+            let AnyJsConstructorParameter::TsPropertyParameter(parameter) = parameter else {
+                return false;
+            };
+            let has_name = parameter
+                .formal_parameter()
+                .ok()
+                .as_ref()
+                .and_then(AnyJsFormalParameter::as_js_formal_parameter)
+                .and_then(|formal_parameter| formal_parameter.binding().ok())
+                .as_ref()
+                .and_then(AnyJsBindingPattern::as_any_js_binding)
+                .and_then(AnyJsBinding::as_js_identifier_binding)
+                .and_then(|identifier| identifier.name_token().ok())
+                .is_some_and(|token| token.text_trimmed() == name);
+            has_name
+                && parameter
+                    .modifiers()
+                    .into_iter()
+                    .any(|modifier| modifier.as_ts_readonly_modifier().is_some())
+        })
 }
 
 #[inline]

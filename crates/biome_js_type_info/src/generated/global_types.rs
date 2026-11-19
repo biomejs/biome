@@ -2529,7 +2529,9 @@ fn global_object_constructor() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(3)).into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("prototype")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
+                    "prototype",
+                )),
                 ty: crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
             },
             crate::TypeMember {
@@ -2641,7 +2643,7 @@ fn global_function() -> crate::TypeData {
                 ty: crate::globals::GLOBAL_ANY_KEYWORD_ID.into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("length")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static("length")),
                 ty: crate::globals::GLOBAL_NUMBER_KEYWORD_ID.into(),
             },
             crate::TypeMember {
@@ -2653,7 +2655,7 @@ fn global_function() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(5)).into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("name")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static("name")),
                 ty: crate::globals::GLOBAL_STRING_KEYWORD_ID.into(),
             },
             crate::TypeMember {
@@ -2694,7 +2696,9 @@ fn global_function_constructor() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(3)).into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("prototype")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
+                    "prototype",
+                )),
                 ty: crate::RawTypeId::Local(crate::TypeId::new(1)).into(),
             },
         ]),
@@ -2867,7 +2871,7 @@ fn global_string() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(26)).into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("length")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static("length")),
                 ty: crate::globals::GLOBAL_NUMBER_KEYWORD_ID.into(),
             },
             crate::TypeMember {
@@ -3014,7 +3018,9 @@ fn global_string_constructor() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(2)).into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("prototype")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
+                    "prototype",
+                )),
                 ty: crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
             },
             crate::TypeMember {
@@ -3075,7 +3081,9 @@ fn global_boolean_constructor() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(3)).into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("prototype")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
+                    "prototype",
+                )),
                 ty: crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
             },
         ]),
@@ -3218,35 +3226,43 @@ fn global_number_constructor() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(2)).into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("prototype")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
+                    "prototype",
+                )),
                 ty: crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("MAX_VALUE")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
+                    "MAX_VALUE",
+                )),
                 ty: crate::globals::GLOBAL_NUMBER_KEYWORD_ID.into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("MIN_VALUE")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
+                    "MIN_VALUE",
+                )),
                 ty: crate::globals::GLOBAL_NUMBER_KEYWORD_ID.into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("NaN")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static("NaN")),
                 ty: crate::globals::GLOBAL_NUMBER_KEYWORD_ID.into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static(
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
                     "NEGATIVE_INFINITY",
                 )),
                 ty: crate::globals::GLOBAL_NUMBER_KEYWORD_ID.into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static(
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
                     "POSITIVE_INFINITY",
                 )),
                 ty: crate::globals::GLOBAL_NUMBER_KEYWORD_ID.into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("EPSILON")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
+                    "EPSILON",
+                )),
                 ty: crate::globals::GLOBAL_NUMBER_KEYWORD_ID.into(),
             },
             crate::TypeMember {
@@ -3266,13 +3282,13 @@ fn global_number_constructor() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(6)).into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static(
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
                     "MAX_SAFE_INTEGER",
                 )),
                 ty: crate::globals::GLOBAL_NUMBER_KEYWORD_ID.into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static(
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
                     "MIN_SAFE_INTEGER",
                 )),
                 ty: crate::globals::GLOBAL_NUMBER_KEYWORD_ID.into(),
@@ -3294,7 +3310,7 @@ fn global_template_strings_array() -> crate::TypeData {
         type_parameters: Box::default(),
         extends: Box::new([crate::RawTypeId::Local(crate::TypeId::new(2)).into()]),
         members: Box::new([crate::TypeMember {
-            kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("raw")),
+            kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static("raw")),
             ty: crate::RawTypeId::Local(crate::TypeId::new(1)).into(),
         }]),
     }))
@@ -3357,35 +3373,37 @@ fn global_math() -> crate::TypeData {
         extends: Box::default(),
         members: Box::new([
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("E")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static("E")),
                 ty: crate::globals::GLOBAL_NUMBER_KEYWORD_ID.into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("LN10")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static("LN10")),
                 ty: crate::globals::GLOBAL_NUMBER_KEYWORD_ID.into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("LN2")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static("LN2")),
                 ty: crate::globals::GLOBAL_NUMBER_KEYWORD_ID.into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("LOG2E")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static("LOG2E")),
                 ty: crate::globals::GLOBAL_NUMBER_KEYWORD_ID.into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("LOG10E")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static("LOG10E")),
                 ty: crate::globals::GLOBAL_NUMBER_KEYWORD_ID.into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("PI")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static("PI")),
                 ty: crate::globals::GLOBAL_NUMBER_KEYWORD_ID.into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("SQRT1_2")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
+                    "SQRT1_2",
+                )),
                 ty: crate::globals::GLOBAL_NUMBER_KEYWORD_ID.into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("SQRT2")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static("SQRT2")),
                 ty: crate::globals::GLOBAL_NUMBER_KEYWORD_ID.into(),
             },
             crate::TypeMember {
@@ -3803,7 +3821,9 @@ fn global_date_constructor() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(5)).into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("prototype")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
+                    "prototype",
+                )),
                 ty: crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
             },
             crate::TypeMember {
@@ -3883,19 +3903,23 @@ fn global_reg_exp() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(3)).into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("source")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static("source")),
                 ty: crate::globals::GLOBAL_STRING_KEYWORD_ID.into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("global")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static("global")),
                 ty: crate::globals::GLOBAL_BOOLEAN_KEYWORD_ID.into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("ignoreCase")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
+                    "ignoreCase",
+                )),
                 ty: crate::globals::GLOBAL_BOOLEAN_KEYWORD_ID.into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("multiline")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
+                    "multiline",
+                )),
                 ty: crate::globals::GLOBAL_BOOLEAN_KEYWORD_ID.into(),
             },
             crate::TypeMember {
@@ -3907,15 +3931,17 @@ fn global_reg_exp() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(5)).into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("flags")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static("flags")),
                 ty: crate::globals::GLOBAL_STRING_KEYWORD_ID.into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("sticky")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static("sticky")),
                 ty: crate::globals::GLOBAL_BOOLEAN_KEYWORD_ID.into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("unicode")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
+                    "unicode",
+                )),
                 ty: crate::globals::GLOBAL_BOOLEAN_KEYWORD_ID.into(),
             },
             crate::TypeMember {
@@ -4088,7 +4114,9 @@ fn global_reg_exp_constructor() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(5)).into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("prototype")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
+                    "prototype",
+                )),
                 ty: crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
             },
             crate::TypeMember {
@@ -4235,7 +4263,9 @@ fn global_error_constructor() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(2)).into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("prototype")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
+                    "prototype",
+                )),
                 ty: crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
             },
         ]),
@@ -4280,7 +4310,9 @@ fn global_eval_error_constructor() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(2)).into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("prototype")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
+                    "prototype",
+                )),
                 ty: crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
             },
         ]),
@@ -4325,7 +4357,9 @@ fn global_range_error_constructor() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(2)).into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("prototype")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
+                    "prototype",
+                )),
                 ty: crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
             },
         ]),
@@ -4370,7 +4404,9 @@ fn global_reference_error_constructor() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(2)).into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("prototype")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
+                    "prototype",
+                )),
                 ty: crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
             },
         ]),
@@ -4415,7 +4451,9 @@ fn global_syntax_error_constructor() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(2)).into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("prototype")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
+                    "prototype",
+                )),
                 ty: crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
             },
         ]),
@@ -4460,7 +4498,9 @@ fn global_type_error_constructor() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(2)).into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("prototype")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
+                    "prototype",
+                )),
                 ty: crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
             },
         ]),
@@ -4505,7 +4545,9 @@ fn global_uri_error_constructor() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(2)).into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("prototype")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
+                    "prototype",
+                )),
                 ty: crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
             },
         ]),
@@ -4544,7 +4586,7 @@ fn global_readonly_array() -> crate::TypeData {
         extends: Box::default(),
         members: Box::new([
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("length")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static("length")),
                 ty: crate::globals::GLOBAL_NUMBER_KEYWORD_ID.into(),
             },
             crate::TypeMember {
@@ -4651,7 +4693,7 @@ fn global_concat_array() -> crate::TypeData {
         extends: Box::default(),
         members: Box::new([
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("length")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static("length")),
                 ty: crate::globals::GLOBAL_NUMBER_KEYWORD_ID.into(),
             },
             crate::TypeMember {
@@ -4898,7 +4940,9 @@ fn global_array_constructor() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(9)).into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("prototype")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
+                    "prototype",
+                )),
                 ty: crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
             },
             crate::TypeMember {
@@ -5040,7 +5084,7 @@ fn global_array_like() -> crate::TypeData {
         extends: Box::default(),
         members: Box::new([
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("length")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static("length")),
                 ty: crate::globals::GLOBAL_NUMBER_KEYWORD_ID.into(),
             },
             crate::TypeMember {
@@ -5205,7 +5249,9 @@ fn global_array_buffer() -> crate::TypeData {
         implements: Box::default(),
         members: Box::new([
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("byteLength")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
+                    "byteLength",
+                )),
                 ty: crate::globals::GLOBAL_NUMBER_KEYWORD_ID.into(),
             },
             crate::TypeMember {
@@ -5262,7 +5308,9 @@ fn global_array_buffer_constructor() -> crate::TypeData {
         extends: Box::default(),
         members: Box::new([
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("prototype")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
+                    "prototype",
+                )),
                 ty: crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
             },
             crate::TypeMember {
@@ -5289,15 +5337,19 @@ fn global_array_buffer_view() -> crate::TypeData {
         extends: Box::default(),
         members: Box::new([
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("buffer")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static("buffer")),
                 ty: crate::RawTypeId::Local(crate::TypeId::new(1)).into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("byteLength")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
+                    "byteLength",
+                )),
                 ty: crate::globals::GLOBAL_NUMBER_KEYWORD_ID.into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("byteOffset")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
+                    "byteOffset",
+                )),
                 ty: crate::globals::GLOBAL_NUMBER_KEYWORD_ID.into(),
             },
         ]),
@@ -5311,15 +5363,19 @@ fn global_data_view() -> crate::TypeData {
         implements: Box::default(),
         members: Box::new([
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("buffer")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static("buffer")),
                 ty: crate::RawTypeId::Local(crate::TypeId::new(1)).into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("byteLength")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
+                    "byteLength",
+                )),
                 ty: crate::globals::GLOBAL_NUMBER_KEYWORD_ID.into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("byteOffset")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
+                    "byteOffset",
+                )),
                 ty: crate::globals::GLOBAL_NUMBER_KEYWORD_ID.into(),
             },
             crate::TypeMember {
@@ -5412,7 +5468,9 @@ fn global_data_view_constructor() -> crate::TypeData {
         extends: Box::default(),
         members: Box::new([
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("prototype")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
+                    "prototype",
+                )),
                 ty: crate::RawTypeId::Local(crate::TypeId::new(1)).into(),
             },
             crate::TypeMember {
@@ -5430,21 +5488,25 @@ fn global_int8_array() -> crate::TypeData {
         implements: Box::default(),
         members: Box::new([
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static(
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
                     "BYTES_PER_ELEMENT",
                 )),
                 ty: crate::globals::GLOBAL_NUMBER_KEYWORD_ID.into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("buffer")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static("buffer")),
                 ty: crate::RawTypeId::Local(crate::TypeId::new(1)).into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("byteLength")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
+                    "byteLength",
+                )),
                 ty: crate::globals::GLOBAL_NUMBER_KEYWORD_ID.into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("byteOffset")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
+                    "byteOffset",
+                )),
                 ty: crate::globals::GLOBAL_NUMBER_KEYWORD_ID.into(),
             },
             crate::TypeMember {
@@ -5488,7 +5550,7 @@ fn global_int8_array() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(19)).into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("length")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static("length")),
                 ty: crate::globals::GLOBAL_NUMBER_KEYWORD_ID.into(),
             },
             crate::TypeMember {
@@ -5623,7 +5685,9 @@ fn global_int8_array_constructor() -> crate::TypeData {
         extends: Box::default(),
         members: Box::new([
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("prototype")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
+                    "prototype",
+                )),
                 ty: crate::RawTypeId::Local(crate::TypeId::new(1)).into(),
             },
             crate::TypeMember {
@@ -5647,7 +5711,7 @@ fn global_int8_array_constructor() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(12)).into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static(
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
                     "BYTES_PER_ELEMENT",
                 )),
                 ty: crate::globals::GLOBAL_NUMBER_KEYWORD_ID.into(),
@@ -5675,21 +5739,25 @@ fn global_uint8_array() -> crate::TypeData {
         implements: Box::default(),
         members: Box::new([
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static(
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
                     "BYTES_PER_ELEMENT",
                 )),
                 ty: crate::globals::GLOBAL_NUMBER_KEYWORD_ID.into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("buffer")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static("buffer")),
                 ty: crate::RawTypeId::Local(crate::TypeId::new(1)).into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("byteLength")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
+                    "byteLength",
+                )),
                 ty: crate::globals::GLOBAL_NUMBER_KEYWORD_ID.into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("byteOffset")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
+                    "byteOffset",
+                )),
                 ty: crate::globals::GLOBAL_NUMBER_KEYWORD_ID.into(),
             },
             crate::TypeMember {
@@ -5733,7 +5801,7 @@ fn global_uint8_array() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(19)).into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("length")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static("length")),
                 ty: crate::globals::GLOBAL_NUMBER_KEYWORD_ID.into(),
             },
             crate::TypeMember {
@@ -5868,7 +5936,9 @@ fn global_uint8_array_constructor() -> crate::TypeData {
         extends: Box::default(),
         members: Box::new([
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("prototype")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
+                    "prototype",
+                )),
                 ty: crate::RawTypeId::Local(crate::TypeId::new(1)).into(),
             },
             crate::TypeMember {
@@ -5892,7 +5962,7 @@ fn global_uint8_array_constructor() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(12)).into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static(
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
                     "BYTES_PER_ELEMENT",
                 )),
                 ty: crate::globals::GLOBAL_NUMBER_KEYWORD_ID.into(),
@@ -5920,21 +5990,25 @@ fn global_uint8_clamped_array() -> crate::TypeData {
         implements: Box::default(),
         members: Box::new([
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static(
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
                     "BYTES_PER_ELEMENT",
                 )),
                 ty: crate::globals::GLOBAL_NUMBER_KEYWORD_ID.into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("buffer")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static("buffer")),
                 ty: crate::RawTypeId::Local(crate::TypeId::new(1)).into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("byteLength")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
+                    "byteLength",
+                )),
                 ty: crate::globals::GLOBAL_NUMBER_KEYWORD_ID.into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("byteOffset")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
+                    "byteOffset",
+                )),
                 ty: crate::globals::GLOBAL_NUMBER_KEYWORD_ID.into(),
             },
             crate::TypeMember {
@@ -5978,7 +6052,7 @@ fn global_uint8_clamped_array() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(19)).into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("length")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static("length")),
                 ty: crate::globals::GLOBAL_NUMBER_KEYWORD_ID.into(),
             },
             crate::TypeMember {
@@ -6113,7 +6187,9 @@ fn global_uint8_clamped_array_constructor() -> crate::TypeData {
         extends: Box::default(),
         members: Box::new([
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("prototype")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
+                    "prototype",
+                )),
                 ty: crate::RawTypeId::Local(crate::TypeId::new(1)).into(),
             },
             crate::TypeMember {
@@ -6137,7 +6213,7 @@ fn global_uint8_clamped_array_constructor() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(12)).into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static(
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
                     "BYTES_PER_ELEMENT",
                 )),
                 ty: crate::globals::GLOBAL_NUMBER_KEYWORD_ID.into(),
@@ -6165,21 +6241,25 @@ fn global_int16_array() -> crate::TypeData {
         implements: Box::default(),
         members: Box::new([
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static(
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
                     "BYTES_PER_ELEMENT",
                 )),
                 ty: crate::globals::GLOBAL_NUMBER_KEYWORD_ID.into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("buffer")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static("buffer")),
                 ty: crate::RawTypeId::Local(crate::TypeId::new(1)).into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("byteLength")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
+                    "byteLength",
+                )),
                 ty: crate::globals::GLOBAL_NUMBER_KEYWORD_ID.into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("byteOffset")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
+                    "byteOffset",
+                )),
                 ty: crate::globals::GLOBAL_NUMBER_KEYWORD_ID.into(),
             },
             crate::TypeMember {
@@ -6223,7 +6303,7 @@ fn global_int16_array() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(19)).into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("length")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static("length")),
                 ty: crate::globals::GLOBAL_NUMBER_KEYWORD_ID.into(),
             },
             crate::TypeMember {
@@ -6358,7 +6438,9 @@ fn global_int16_array_constructor() -> crate::TypeData {
         extends: Box::default(),
         members: Box::new([
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("prototype")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
+                    "prototype",
+                )),
                 ty: crate::RawTypeId::Local(crate::TypeId::new(1)).into(),
             },
             crate::TypeMember {
@@ -6382,7 +6464,7 @@ fn global_int16_array_constructor() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(12)).into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static(
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
                     "BYTES_PER_ELEMENT",
                 )),
                 ty: crate::globals::GLOBAL_NUMBER_KEYWORD_ID.into(),
@@ -6410,21 +6492,25 @@ fn global_uint16_array() -> crate::TypeData {
         implements: Box::default(),
         members: Box::new([
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static(
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
                     "BYTES_PER_ELEMENT",
                 )),
                 ty: crate::globals::GLOBAL_NUMBER_KEYWORD_ID.into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("buffer")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static("buffer")),
                 ty: crate::RawTypeId::Local(crate::TypeId::new(1)).into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("byteLength")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
+                    "byteLength",
+                )),
                 ty: crate::globals::GLOBAL_NUMBER_KEYWORD_ID.into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("byteOffset")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
+                    "byteOffset",
+                )),
                 ty: crate::globals::GLOBAL_NUMBER_KEYWORD_ID.into(),
             },
             crate::TypeMember {
@@ -6468,7 +6554,7 @@ fn global_uint16_array() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(19)).into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("length")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static("length")),
                 ty: crate::globals::GLOBAL_NUMBER_KEYWORD_ID.into(),
             },
             crate::TypeMember {
@@ -6603,7 +6689,9 @@ fn global_uint16_array_constructor() -> crate::TypeData {
         extends: Box::default(),
         members: Box::new([
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("prototype")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
+                    "prototype",
+                )),
                 ty: crate::RawTypeId::Local(crate::TypeId::new(1)).into(),
             },
             crate::TypeMember {
@@ -6627,7 +6715,7 @@ fn global_uint16_array_constructor() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(12)).into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static(
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
                     "BYTES_PER_ELEMENT",
                 )),
                 ty: crate::globals::GLOBAL_NUMBER_KEYWORD_ID.into(),
@@ -6655,21 +6743,25 @@ fn global_int32_array() -> crate::TypeData {
         implements: Box::default(),
         members: Box::new([
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static(
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
                     "BYTES_PER_ELEMENT",
                 )),
                 ty: crate::globals::GLOBAL_NUMBER_KEYWORD_ID.into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("buffer")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static("buffer")),
                 ty: crate::RawTypeId::Local(crate::TypeId::new(1)).into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("byteLength")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
+                    "byteLength",
+                )),
                 ty: crate::globals::GLOBAL_NUMBER_KEYWORD_ID.into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("byteOffset")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
+                    "byteOffset",
+                )),
                 ty: crate::globals::GLOBAL_NUMBER_KEYWORD_ID.into(),
             },
             crate::TypeMember {
@@ -6713,7 +6805,7 @@ fn global_int32_array() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(19)).into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("length")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static("length")),
                 ty: crate::globals::GLOBAL_NUMBER_KEYWORD_ID.into(),
             },
             crate::TypeMember {
@@ -6848,7 +6940,9 @@ fn global_int32_array_constructor() -> crate::TypeData {
         extends: Box::default(),
         members: Box::new([
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("prototype")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
+                    "prototype",
+                )),
                 ty: crate::RawTypeId::Local(crate::TypeId::new(1)).into(),
             },
             crate::TypeMember {
@@ -6872,7 +6966,7 @@ fn global_int32_array_constructor() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(12)).into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static(
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
                     "BYTES_PER_ELEMENT",
                 )),
                 ty: crate::globals::GLOBAL_NUMBER_KEYWORD_ID.into(),
@@ -6900,21 +6994,25 @@ fn global_uint32_array() -> crate::TypeData {
         implements: Box::default(),
         members: Box::new([
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static(
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
                     "BYTES_PER_ELEMENT",
                 )),
                 ty: crate::globals::GLOBAL_NUMBER_KEYWORD_ID.into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("buffer")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static("buffer")),
                 ty: crate::RawTypeId::Local(crate::TypeId::new(1)).into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("byteLength")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
+                    "byteLength",
+                )),
                 ty: crate::globals::GLOBAL_NUMBER_KEYWORD_ID.into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("byteOffset")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
+                    "byteOffset",
+                )),
                 ty: crate::globals::GLOBAL_NUMBER_KEYWORD_ID.into(),
             },
             crate::TypeMember {
@@ -6958,7 +7056,7 @@ fn global_uint32_array() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(19)).into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("length")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static("length")),
                 ty: crate::globals::GLOBAL_NUMBER_KEYWORD_ID.into(),
             },
             crate::TypeMember {
@@ -7093,7 +7191,9 @@ fn global_uint32_array_constructor() -> crate::TypeData {
         extends: Box::default(),
         members: Box::new([
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("prototype")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
+                    "prototype",
+                )),
                 ty: crate::RawTypeId::Local(crate::TypeId::new(1)).into(),
             },
             crate::TypeMember {
@@ -7117,7 +7217,7 @@ fn global_uint32_array_constructor() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(12)).into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static(
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
                     "BYTES_PER_ELEMENT",
                 )),
                 ty: crate::globals::GLOBAL_NUMBER_KEYWORD_ID.into(),
@@ -7145,21 +7245,25 @@ fn global_float32_array() -> crate::TypeData {
         implements: Box::default(),
         members: Box::new([
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static(
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
                     "BYTES_PER_ELEMENT",
                 )),
                 ty: crate::globals::GLOBAL_NUMBER_KEYWORD_ID.into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("buffer")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static("buffer")),
                 ty: crate::RawTypeId::Local(crate::TypeId::new(1)).into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("byteLength")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
+                    "byteLength",
+                )),
                 ty: crate::globals::GLOBAL_NUMBER_KEYWORD_ID.into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("byteOffset")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
+                    "byteOffset",
+                )),
                 ty: crate::globals::GLOBAL_NUMBER_KEYWORD_ID.into(),
             },
             crate::TypeMember {
@@ -7203,7 +7307,7 @@ fn global_float32_array() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(19)).into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("length")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static("length")),
                 ty: crate::globals::GLOBAL_NUMBER_KEYWORD_ID.into(),
             },
             crate::TypeMember {
@@ -7338,7 +7442,9 @@ fn global_float32_array_constructor() -> crate::TypeData {
         extends: Box::default(),
         members: Box::new([
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("prototype")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
+                    "prototype",
+                )),
                 ty: crate::RawTypeId::Local(crate::TypeId::new(1)).into(),
             },
             crate::TypeMember {
@@ -7362,7 +7468,7 @@ fn global_float32_array_constructor() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(12)).into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static(
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
                     "BYTES_PER_ELEMENT",
                 )),
                 ty: crate::globals::GLOBAL_NUMBER_KEYWORD_ID.into(),
@@ -7390,21 +7496,25 @@ fn global_float64_array() -> crate::TypeData {
         implements: Box::default(),
         members: Box::new([
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static(
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
                     "BYTES_PER_ELEMENT",
                 )),
                 ty: crate::globals::GLOBAL_NUMBER_KEYWORD_ID.into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("buffer")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static("buffer")),
                 ty: crate::RawTypeId::Local(crate::TypeId::new(1)).into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("byteLength")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
+                    "byteLength",
+                )),
                 ty: crate::globals::GLOBAL_NUMBER_KEYWORD_ID.into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("byteOffset")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
+                    "byteOffset",
+                )),
                 ty: crate::globals::GLOBAL_NUMBER_KEYWORD_ID.into(),
             },
             crate::TypeMember {
@@ -7448,7 +7558,7 @@ fn global_float64_array() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(19)).into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("length")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static("length")),
                 ty: crate::globals::GLOBAL_NUMBER_KEYWORD_ID.into(),
             },
             crate::TypeMember {
@@ -7583,7 +7693,9 @@ fn global_float64_array_constructor() -> crate::TypeData {
         extends: Box::default(),
         members: Box::new([
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("prototype")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
+                    "prototype",
+                )),
                 ty: crate::RawTypeId::Local(crate::TypeId::new(1)).into(),
             },
             crate::TypeMember {
@@ -7607,7 +7719,7 @@ fn global_float64_array_constructor() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(12)).into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static(
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
                     "BYTES_PER_ELEMENT",
                 )),
                 ty: crate::globals::GLOBAL_NUMBER_KEYWORD_ID.into(),
@@ -8031,7 +8143,9 @@ fn global_intl_number_format_constructor() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(6)).into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("prototype")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
+                    "prototype",
+                )),
                 ty: crate::RawTypeId::Local(crate::TypeId::new(3)).into(),
             },
         ]),
@@ -8240,7 +8354,9 @@ fn global_intl_date_time_format_constructor() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(6)).into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("prototype")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
+                    "prototype",
+                )),
                 ty: crate::RawTypeId::Local(crate::TypeId::new(3)).into(),
             },
         ]),
@@ -8281,7 +8397,7 @@ fn global_map() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(11)).into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("size")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static("size")),
                 ty: crate::globals::GLOBAL_NUMBER_KEYWORD_ID.into(),
             },
             crate::TypeMember {
@@ -8354,7 +8470,9 @@ fn global_map_constructor() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(10)).into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("prototype")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
+                    "prototype",
+                )),
                 ty: crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
             },
             crate::TypeMember {
@@ -8396,7 +8514,7 @@ fn global_readonly_map() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(7)).into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("size")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static("size")),
                 ty: crate::globals::GLOBAL_NUMBER_KEYWORD_ID.into(),
             },
             crate::TypeMember {
@@ -8480,7 +8598,9 @@ fn global_weak_map_constructor() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(9)).into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("prototype")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
+                    "prototype",
+                )),
                 ty: crate::RawTypeId::Local(crate::TypeId::new(10)).into(),
             },
             crate::TypeMember {
@@ -8518,7 +8638,7 @@ fn global_set() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(8)).into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("size")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static("size")),
                 ty: crate::globals::GLOBAL_NUMBER_KEYWORD_ID.into(),
             },
             crate::TypeMember {
@@ -8579,7 +8699,9 @@ fn global_set_constructor() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(5)).into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("prototype")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
+                    "prototype",
+                )),
                 ty: crate::RawTypeId::Local(crate::TypeId::new(6)).into(),
             },
             crate::TypeMember {
@@ -8610,7 +8732,7 @@ fn global_readonly_set() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(4)).into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("size")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static("size")),
                 ty: crate::globals::GLOBAL_NUMBER_KEYWORD_ID.into(),
             },
             crate::TypeMember {
@@ -8687,7 +8809,9 @@ fn global_weak_set_constructor() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(6)).into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("prototype")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
+                    "prototype",
+                )),
                 ty: crate::RawTypeId::Local(crate::TypeId::new(7)).into(),
             },
             crate::TypeMember {
@@ -8704,11 +8828,15 @@ fn global_symbol_constructor() -> crate::TypeData {
         extends: Box::default(),
         members: Box::new([
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("iterator")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
+                    "iterator",
+                )),
                 ty: crate::globals::GLOBAL_SYMBOL_ITERATOR_ID.into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("prototype")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
+                    "prototype",
+                )),
                 ty: crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
             },
             crate::TypeMember {
@@ -8724,57 +8852,75 @@ fn global_symbol_constructor() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(5)).into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("hasInstance")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
+                    "hasInstance",
+                )),
                 ty: crate::globals::GLOBAL_SYMBOL_HAS_INSTANCE_ID.into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static(
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
                     "isConcatSpreadable",
                 )),
                 ty: crate::globals::GLOBAL_SYMBOL_IS_CONCAT_SPREADABLE_ID.into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("match")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static("match")),
                 ty: crate::globals::GLOBAL_SYMBOL_MATCH_ID.into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("replace")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
+                    "replace",
+                )),
                 ty: crate::globals::GLOBAL_SYMBOL_REPLACE_ID.into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("search")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static("search")),
                 ty: crate::globals::GLOBAL_SYMBOL_SEARCH_ID.into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("species")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
+                    "species",
+                )),
                 ty: crate::globals::GLOBAL_SYMBOL_SPECIES_ID.into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("split")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static("split")),
                 ty: crate::globals::GLOBAL_SYMBOL_SPLIT_ID.into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("toPrimitive")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
+                    "toPrimitive",
+                )),
                 ty: crate::globals::GLOBAL_SYMBOL_TO_PRIMITIVE_ID.into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("toStringTag")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
+                    "toStringTag",
+                )),
                 ty: crate::globals::GLOBAL_SYMBOL_TO_STRING_TAG_ID.into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("unscopables")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
+                    "unscopables",
+                )),
                 ty: crate::globals::GLOBAL_SYMBOL_UNSCOPABLES_ID.into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("asyncIterator")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
+                    "asyncIterator",
+                )),
                 ty: crate::globals::GLOBAL_SYMBOL_ASYNC_ITERATOR_ID.into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("dispose")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
+                    "dispose",
+                )),
                 ty: crate::globals::GLOBAL_SYMBOL_DISPOSE_ID.into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("asyncDispose")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
+                    "asyncDispose",
+                )),
                 ty: crate::globals::GLOBAL_SYMBOL_ASYNC_DISPOSE_ID.into(),
             },
         ]),
@@ -8959,7 +9105,9 @@ fn global_promise_constructor() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(47)).into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("prototype")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
+                    "prototype",
+                )),
                 ty: crate::RawTypeId::Local(crate::TypeId::new(10)).into(),
             },
             crate::TypeMember {
@@ -9452,7 +9600,9 @@ fn global_aggregate_error_constructor() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(3)).into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("prototype")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
+                    "prototype",
+                )),
                 ty: crate::RawTypeId::Local(crate::TypeId::new(1)).into(),
             },
         ]),
@@ -9552,7 +9702,9 @@ fn global_suppressed_error_constructor() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(2)).into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("prototype")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
+                    "prototype",
+                )),
                 ty: crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
             },
         ]),
@@ -9566,7 +9718,9 @@ fn global_disposable_stack() -> crate::TypeData {
         implements: Box::default(),
         members: Box::new([
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("disposed")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
+                    "disposed",
+                )),
                 ty: crate::globals::GLOBAL_BOOLEAN_KEYWORD_ID.into(),
             },
             crate::TypeMember {
@@ -9625,7 +9779,9 @@ fn global_disposable_stack_constructor() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(1)).into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("prototype")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
+                    "prototype",
+                )),
                 ty: crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
             },
         ]),
@@ -9639,7 +9795,9 @@ fn global_async_disposable_stack() -> crate::TypeData {
         implements: Box::default(),
         members: Box::new([
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("disposed")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
+                    "disposed",
+                )),
                 ty: crate::globals::GLOBAL_BOOLEAN_KEYWORD_ID.into(),
             },
             crate::TypeMember {
@@ -9698,7 +9856,9 @@ fn global_async_disposable_stack_constructor() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(1)).into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("prototype")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
+                    "prototype",
+                )),
                 ty: crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
             },
         ]),
@@ -9723,11 +9883,11 @@ fn global_class_decorator_context() -> crate::TypeData {
         extends: Box::default(),
         members: Box::new([
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("kind")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static("kind")),
                 ty: crate::RawTypeId::Local(crate::TypeId::new(2)).into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("name")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static("name")),
                 ty: crate::RawTypeId::Local(crate::TypeId::new(3)).into(),
             },
             crate::TypeMember {
@@ -9735,7 +9895,9 @@ fn global_class_decorator_context() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(5)).into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("metadata")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
+                    "metadata",
+                )),
                 ty: crate::RawTypeId::Local(crate::TypeId::new(6)).into(),
             },
         ]),
@@ -9751,23 +9913,25 @@ fn global_class_method_decorator_context() -> crate::TypeData {
         extends: Box::default(),
         members: Box::new([
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("kind")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static("kind")),
                 ty: crate::RawTypeId::Local(crate::TypeId::new(3)).into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("name")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static("name")),
                 ty: crate::RawTypeId::Local(crate::TypeId::new(4)).into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("static")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static("static")),
                 ty: crate::globals::GLOBAL_BOOLEAN_KEYWORD_ID.into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("private")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
+                    "private",
+                )),
                 ty: crate::globals::GLOBAL_BOOLEAN_KEYWORD_ID.into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("access")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static("access")),
                 ty: crate::RawTypeId::Local(crate::TypeId::new(7)).into(),
             },
             crate::TypeMember {
@@ -9775,7 +9939,9 @@ fn global_class_method_decorator_context() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(9)).into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("metadata")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
+                    "metadata",
+                )),
                 ty: crate::RawTypeId::Local(crate::TypeId::new(10)).into(),
             },
         ]),
@@ -9791,23 +9957,25 @@ fn global_class_getter_decorator_context() -> crate::TypeData {
         extends: Box::default(),
         members: Box::new([
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("kind")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static("kind")),
                 ty: crate::RawTypeId::Local(crate::TypeId::new(2)).into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("name")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static("name")),
                 ty: crate::RawTypeId::Local(crate::TypeId::new(3)).into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("static")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static("static")),
                 ty: crate::globals::GLOBAL_BOOLEAN_KEYWORD_ID.into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("private")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
+                    "private",
+                )),
                 ty: crate::globals::GLOBAL_BOOLEAN_KEYWORD_ID.into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("access")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static("access")),
                 ty: crate::RawTypeId::Local(crate::TypeId::new(6)).into(),
             },
             crate::TypeMember {
@@ -9815,7 +9983,9 @@ fn global_class_getter_decorator_context() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(8)).into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("metadata")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
+                    "metadata",
+                )),
                 ty: crate::RawTypeId::Local(crate::TypeId::new(9)).into(),
             },
         ]),
@@ -9831,23 +10001,25 @@ fn global_class_setter_decorator_context() -> crate::TypeData {
         extends: Box::default(),
         members: Box::new([
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("kind")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static("kind")),
                 ty: crate::RawTypeId::Local(crate::TypeId::new(2)).into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("name")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static("name")),
                 ty: crate::RawTypeId::Local(crate::TypeId::new(3)).into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("static")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static("static")),
                 ty: crate::globals::GLOBAL_BOOLEAN_KEYWORD_ID.into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("private")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
+                    "private",
+                )),
                 ty: crate::globals::GLOBAL_BOOLEAN_KEYWORD_ID.into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("access")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static("access")),
                 ty: crate::RawTypeId::Local(crate::TypeId::new(6)).into(),
             },
             crate::TypeMember {
@@ -9855,7 +10027,9 @@ fn global_class_setter_decorator_context() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(8)).into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("metadata")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
+                    "metadata",
+                )),
                 ty: crate::RawTypeId::Local(crate::TypeId::new(9)).into(),
             },
         ]),
@@ -9871,23 +10045,25 @@ fn global_class_accessor_decorator_context() -> crate::TypeData {
         extends: Box::default(),
         members: Box::new([
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("kind")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static("kind")),
                 ty: crate::RawTypeId::Local(crate::TypeId::new(2)).into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("name")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static("name")),
                 ty: crate::RawTypeId::Local(crate::TypeId::new(3)).into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("static")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static("static")),
                 ty: crate::globals::GLOBAL_BOOLEAN_KEYWORD_ID.into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("private")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
+                    "private",
+                )),
                 ty: crate::globals::GLOBAL_BOOLEAN_KEYWORD_ID.into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("access")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static("access")),
                 ty: crate::RawTypeId::Local(crate::TypeId::new(7)).into(),
             },
             crate::TypeMember {
@@ -9895,7 +10071,9 @@ fn global_class_accessor_decorator_context() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(9)).into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("metadata")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
+                    "metadata",
+                )),
                 ty: crate::RawTypeId::Local(crate::TypeId::new(10)).into(),
             },
         ]),
@@ -9955,23 +10133,25 @@ fn global_class_field_decorator_context() -> crate::TypeData {
         extends: Box::default(),
         members: Box::new([
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("kind")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static("kind")),
                 ty: crate::RawTypeId::Local(crate::TypeId::new(2)).into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("name")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static("name")),
                 ty: crate::RawTypeId::Local(crate::TypeId::new(3)).into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("static")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static("static")),
                 ty: crate::globals::GLOBAL_BOOLEAN_KEYWORD_ID.into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("private")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
+                    "private",
+                )),
                 ty: crate::globals::GLOBAL_BOOLEAN_KEYWORD_ID.into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("access")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static("access")),
                 ty: crate::RawTypeId::Local(crate::TypeId::new(7)).into(),
             },
             crate::TypeMember {
@@ -9979,7 +10159,9 @@ fn global_class_field_decorator_context() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(9)).into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("metadata")),
+                kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
+                    "metadata",
+                )),
                 ty: crate::RawTypeId::Local(crate::TypeId::new(10)).into(),
             },
         ]),
@@ -40854,7 +41036,9 @@ static DECORATOR_METADATA_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 5]>
             crate::TypeData::from(crate::Object {
                 prototype: None,
                 members: Box::new([crate::TypeMember {
-                    kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("metadata")),
+                    kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
+                        "metadata",
+                    )),
                     ty: crate::globals::GLOBAL_SYMBOL_KEYWORD_ID.into(),
                 }]),
                 has_unknown_members: false,
