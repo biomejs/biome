@@ -484,6 +484,7 @@ mod tests {
             &model,
             &mut GuardFunctions::new(&[], &raw_binding_types),
             true,
+            false,
         )
         .expect("root must have flow");
         let ids: Vec<_> = parsed

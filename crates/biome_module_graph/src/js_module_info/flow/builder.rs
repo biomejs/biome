@@ -11,7 +11,7 @@ use super::{
     FlowTest, FlowWrite, FlowWriteEffect, MAX_SWITCHES, PropertyKey, evolving_declaration,
     typeof_kind_bit,
 };
-use biome_js_control_flow::{AnyJsControlFlowRoot, is_truthy_literal};
+use biome_js_control_flow::AnyJsControlFlowRoot;
 use biome_js_semantic::{Binding, SemanticModel};
 use biome_js_syntax::{
     AnyJsArrayAssignmentPatternElement, AnyJsArrayBindingPatternElement,
@@ -107,6 +107,15 @@ pub(super) struct BuiltRoot {
     /// declares with an initializer. A read before the declarator sees such a
     /// variable as `undefined` instead of the type that its declaration gives.
     pub(super) hoisted: FxHashSet<FlowSubjectId>,
+    /// Each statement of the root's own code that the builder met, in the
+    /// order it met them, with its incoming flow, or `None` where no path
+    /// reaches it. Empty unless the build records statements. A statement
+    /// nested in one that no path reaches is never met. A finally block built
+    /// twice lists its statements twice.
+    pub(super) statements: Vec<(TextRange, Option<FlowNodeId>)>,
+    /// The flow that reaches the end of the root, or `None` when every path
+    /// ends before it, as at `return` or `throw`.
+    pub(super) end: Option<FlowNodeId>,
 }
 
 declare_node_union! {
@@ -208,6 +217,14 @@ type Build<T> = Result<T, Unsupported>;
 /// the region while the region has no write point, so a region with both a
 /// write point and a `break` or `continue` that leaves it is not supported.
 ///
+/// A branch that a condition written as the literal `true` or `false` never
+/// takes has no flow, as in TypeScript's binder, so it records no read and
+/// adds nothing where it joins other paths. The statements after a call of a
+/// local function that never returns have no flow either.
+///
+/// When `records_statements` is true, the build lists the statements that
+/// it meets with their incoming flow in [`BuiltRoot::statements`].
+///
 /// Returns `None` for inputs exceeding construction limits. Like the statement
 /// control-flow graph, it also returns `None` when any statement, including
 /// unreachable code, lacks syntax that graph requires, such as a jump target or
@@ -220,6 +237,7 @@ pub(super) fn build_root(
     model: &SemanticModel,
     functions: &mut GuardFunctions,
     this_can_narrow: bool,
+    records_statements: bool,
 ) -> Option<BuiltRoot> {
     if !has_complete_statements(root) {
         return None;
@@ -256,6 +274,7 @@ pub(super) fn build_root(
         exceptions: Vec::new(),
         returns: Vec::new(),
         records_reads: true,
+        statements: records_statements.then(Vec::new),
         current: Some(0),
         remaining_visits: MAX_SYNTAX_NODES,
     };
@@ -288,6 +307,8 @@ pub(super) fn build_root(
         captures: builder.captures,
         initializers: builder.initializers,
         hoisted: builder.hoisted,
+        statements: builder.statements.unwrap_or_default(),
+        end: builder.current,
     })
 }
 
@@ -489,6 +510,100 @@ impl StatementCheck {
         let complete = check(self);
         self.targets.pop();
         complete
+    }
+}
+
+/// Returns the value of `expression` when it is the literal `true` or
+/// `false` itself, without parentheses, as TypeScript's binder reads a
+/// condition.
+pub(super) fn literal_condition(expression: &AnyJsExpression) -> Option<bool> {
+    let AnyJsExpression::AnyJsLiteralExpression(
+        AnyJsLiteralExpression::JsBooleanLiteralExpression(literal),
+    ) = expression
+    else {
+        return None;
+    };
+    literal
+        .value_token()
+        .ok()
+        .map(|token| token.kind() == T![true])
+}
+
+/// Limits the operators of `&&`, `||`, `!`, and parentheses that
+/// [`never_has_outcome`] visits in one condition.
+const MAX_LITERAL_STEPS: usize = 256;
+
+/// Returns whether the condition `expression` is never truthy, when `truthy`
+/// is true, or never falsy otherwise, as TypeScript's binder finds it. The
+/// branch that needs that outcome has no flow.
+///
+/// The literal `true` is never falsy and `false` never truthy. TypeScript
+/// binds each operand of `&&` or `||` as a condition of its own, so
+/// `c && false` is never truthy and `c || true` never falsy. That also holds
+/// inside parentheses and `!`, which inverts the outcome. Any other
+/// condition can be either, including `(false)`, `!false`, `0`, a `const`
+/// that holds `false`, and the operands of `??`. Returns false when the walk
+/// runs out of work.
+pub(super) fn never_has_outcome(expression: &AnyJsExpression, truthy: bool) -> bool {
+    let mut remaining = MAX_LITERAL_STEPS;
+    never_has(expression, truthy, &mut remaining)
+}
+
+fn never_has(expression: &AnyJsExpression, truthy: bool, remaining: &mut usize) -> bool {
+    if let Some(value) = literal_condition(expression) {
+        return value != truthy;
+    }
+    // TypeScript looks through parentheses and `!` for a logical operator,
+    // which gets the outcome, inverted by each `!`. Any other expression
+    // inside them is one ordinary condition.
+    let mut truthy = truthy;
+    let mut expression = expression.clone();
+    let logical = loop {
+        let Some(left) = remaining.checked_sub(1) else {
+            return false;
+        };
+        *remaining = left;
+        expression = match expression {
+            AnyJsExpression::JsParenthesizedExpression(parenthesized) => {
+                match parenthesized.expression() {
+                    Ok(inner) => inner,
+                    Err(_) => return false,
+                }
+            }
+            AnyJsExpression::JsUnaryExpression(unary)
+                if unary.operator() == Ok(JsUnaryOperator::LogicalNot) =>
+            {
+                truthy = !truthy;
+                match unary.argument() {
+                    Ok(inner) => inner,
+                    Err(_) => return false,
+                }
+            }
+            AnyJsExpression::JsLogicalExpression(logical) => break logical,
+            _ => return false,
+        };
+    };
+    let (Ok(left), Ok(right), Ok(operator)) =
+        (logical.left(), logical.right(), logical.operator_token())
+    else {
+        return false;
+    };
+    match (operator.kind(), truthy) {
+        // Both operands must be truthy.
+        (T![&&], true) => never_has(&left, true, remaining) || never_has(&right, true, remaining),
+        // The left operand is falsy, or truthy with a falsy right one.
+        (T![&&], false) => {
+            never_has(&left, false, remaining)
+                && (never_has(&left, true, remaining) || never_has(&right, false, remaining))
+        }
+        (T![||], true) => {
+            never_has(&left, true, remaining)
+                && (never_has(&left, false, remaining) || never_has(&right, true, remaining))
+        }
+        (T![||], false) => {
+            never_has(&left, false, remaining) || never_has(&right, false, remaining)
+        }
+        _ => false,
     }
 }
 
@@ -1244,6 +1359,10 @@ struct RootBuilder<'a, 'raw> {
     /// Whether evaluation records reads. It is false while the builder builds
     /// a finally block a second time, because the first build recorded them.
     records_reads: bool,
+    /// The statements met so far with their incoming flow, for
+    /// [`BuiltRoot::statements`], or `None` when the build doesn't record
+    /// them.
+    statements: Option<Vec<(TextRange, Option<FlowNodeId>)>>,
     /// The incoming flow of the next statement, or `None` when unreachable.
     current: Option<FlowNodeId>,
     /// The visits left before the build gives up. Every statement and every
@@ -1405,6 +1524,9 @@ impl RootBuilder<'_, '_> {
         // unreachable code, also spends a visit, because a finally block is
         // built more than once.
         self.visit(0)?;
+        if let Some(statements) = &mut self.statements {
+            statements.push((statement.range(), self.current));
+        }
         let Some(current) = self.current else {
             return Ok(());
         };
@@ -1437,7 +1559,7 @@ impl RootBuilder<'_, '_> {
             AnyJsStatement::JsExpressionStatement(statement) => {
                 self.visit(0)?;
                 let expression = statement.expression().map_err(|_| Unsupported)?;
-                self.current = Some(self.statement_calls(&expression, current, 1)?);
+                self.current = self.statement_calls(&expression, current, 1)?;
                 Ok(())
             }
             AnyJsStatement::JsDebuggerStatement(_) | AnyJsStatement::JsEmptyStatement(_) => {
@@ -1526,18 +1648,25 @@ impl RootBuilder<'_, '_> {
     /// parentheses around the comma expression. A call in parentheses, as in
     /// `(assert(x));`, is none. The operands run in order, so a write in an
     /// operand comes before the next operand.
+    ///
+    /// Returns `None` when a call of a local function that never returns ends
+    /// the path, so the operands after it don't run. A call point whose
+    /// signature never returns ends the path only where inference finds that
+    /// signature.
     fn statement_calls(
         &mut self,
         expression: &AnyJsExpression,
         incoming: FlowNodeId,
         depth: usize,
-    ) -> Build<FlowNodeId> {
+    ) -> Build<Option<FlowNodeId>> {
         match expression {
             AnyJsExpression::JsSequenceExpression(sequence) => {
                 self.visit(depth)?;
                 let left = sequence.left().map_err(|_| Unsupported)?;
                 let right = sequence.right().map_err(|_| Unsupported)?;
-                let flow = self.statement_calls(&left, incoming, depth + 1)?;
+                let Some(flow) = self.statement_calls(&left, incoming, depth + 1)? else {
+                    return Ok(None);
+                };
                 self.statement_calls(&right, flow, depth + 1)
             }
             AnyJsExpression::JsParenthesizedExpression(parenthesized)
@@ -1554,6 +1683,9 @@ impl RootBuilder<'_, '_> {
             }
             AnyJsExpression::JsCallExpression(call) => {
                 let flow = self.evaluate(call.syntax(), incoming, depth)?;
+                if self.functions.local_call_ends(call, self.model) {
+                    return Ok(None);
+                }
                 match decompose_statement_call(
                     call,
                     self.model,
@@ -1561,11 +1693,13 @@ impl RootBuilder<'_, '_> {
                     &mut self.subjects,
                     &mut self.guards,
                 ) {
-                    Some(condition) => self.push_condition(flow, condition),
-                    None => Ok(flow),
+                    Some(condition) => self.push_condition(flow, condition).map(Some),
+                    None => Ok(Some(flow)),
                 }
             }
-            _ => self.evaluate(expression.syntax(), incoming, depth),
+            _ => self
+                .evaluate(expression.syntax(), incoming, depth)
+                .map(Some),
         }
     }
 
@@ -1622,14 +1756,14 @@ impl RootBuilder<'_, '_> {
     fn if_statement(&mut self, statement: &JsIfStatement, current: FlowNodeId) -> Build<()> {
         let test = statement.test().map_err(|_| Unsupported)?;
         let flow = self.evaluate(test.syntax(), current, 0)?;
-        let positive = self.condition(flow, &test, FlowOutcome::Truthy)?;
-        let negative = self.condition(flow, &test, FlowOutcome::Falsy)?;
-        self.current = Some(positive);
+        let positive = self.branch(flow, &test, FlowOutcome::Truthy)?;
+        let negative = self.branch(flow, &test, FlowOutcome::Falsy)?;
+        self.current = positive;
         if let Ok(consequent) = statement.consequent() {
             self.statement(consequent, None)?;
         }
         let consequent_end = self.current;
-        self.current = Some(negative);
+        self.current = negative;
         if let Some(alternate) = statement
             .else_clause()
             .and_then(|else_clause| else_clause.alternate().ok())
@@ -1649,13 +1783,8 @@ impl RootBuilder<'_, '_> {
         let test = statement.test().map_err(|_| Unsupported)?;
         let header = self.push(FlowNode::Join(vec![current]))?;
         let flow = self.evaluate(test.syntax(), header, 0)?;
-        let exit = if is_truthy_literal(&test) {
-            self.current = Some(flow);
-            None
-        } else {
-            self.current = Some(self.condition(flow, &test, FlowOutcome::Truthy)?);
-            Some(self.condition(flow, &test, FlowOutcome::Falsy)?)
-        };
+        self.current = self.branch(flow, &test, FlowOutcome::Truthy)?;
+        let exit = self.branch(flow, &test, FlowOutcome::Falsy)?;
         self.loop_body(statement.body().ok(), label, header)?;
         if let Some(end) = self.current {
             self.add_predecessor(header, end)?;
@@ -1683,13 +1812,10 @@ impl RootBuilder<'_, '_> {
         if self.has_predecessors(test_entry) {
             let test = statement.test().map_err(|_| Unsupported)?;
             let flow = self.evaluate(test.syntax(), test_entry, 0)?;
-            if is_truthy_literal(&test) {
-                self.add_predecessor(body_entry, flow)?;
-            } else {
-                let repeat = self.condition(flow, &test, FlowOutcome::Truthy)?;
+            if let Some(repeat) = self.branch(flow, &test, FlowOutcome::Truthy)? {
                 self.add_predecessor(body_entry, repeat)?;
-                exit = Some(self.condition(flow, &test, FlowOutcome::Falsy)?);
             }
+            exit = self.branch(flow, &test, FlowOutcome::Falsy)?;
         }
         self.current = self.join(exit.into_iter().chain(target.breaks))?;
         Ok(())
@@ -1715,8 +1841,8 @@ impl RootBuilder<'_, '_> {
         let exit = match statement.test() {
             Some(test) => {
                 let flow = self.evaluate(test.syntax(), header, 0)?;
-                self.current = Some(self.condition(flow, &test, FlowOutcome::Truthy)?);
-                Some(self.condition(flow, &test, FlowOutcome::Falsy)?)
+                self.current = self.branch(flow, &test, FlowOutcome::Truthy)?;
+                self.branch(flow, &test, FlowOutcome::Falsy)?
             }
             None => {
                 self.current = Some(header);
@@ -2312,21 +2438,27 @@ impl RootBuilder<'_, '_> {
                         _ => return Err(Unsupported),
                     };
                 let left_flow = self.evaluate(left.syntax(), incoming, depth + 1)?;
-                let right_flow = self.condition(left_flow, &left, evaluate_right)?;
-                let right_flow = self.evaluate(right.syntax(), right_flow, depth + 1)?;
-                let skip_flow = self.condition(left_flow, &left, skip_right)?;
-                self.push(FlowNode::Join(vec![skip_flow, right_flow]))
+                let right_flow = match self.branch(left_flow, &left, evaluate_right)? {
+                    Some(flow) => Some(self.evaluate(right.syntax(), flow, depth + 1)?),
+                    None => None,
+                };
+                let skip_flow = self.branch(left_flow, &left, skip_right)?;
+                self.join_branches(left_flow, skip_flow, right_flow)
             }
             Some(AnyJsExpression::JsConditionalExpression(conditional)) => {
                 let test = conditional.test().map_err(|_| Unsupported)?;
                 let consequent = conditional.consequent().map_err(|_| Unsupported)?;
                 let alternate = conditional.alternate().map_err(|_| Unsupported)?;
                 let test_flow = self.evaluate(test.syntax(), incoming, depth + 1)?;
-                let positive = self.condition(test_flow, &test, FlowOutcome::Truthy)?;
-                let positive = self.evaluate(consequent.syntax(), positive, depth + 1)?;
-                let negative = self.condition(test_flow, &test, FlowOutcome::Falsy)?;
-                let negative = self.evaluate(alternate.syntax(), negative, depth + 1)?;
-                self.push(FlowNode::Join(vec![positive, negative]))
+                let positive = match self.branch(test_flow, &test, FlowOutcome::Truthy)? {
+                    Some(flow) => Some(self.evaluate(consequent.syntax(), flow, depth + 1)?),
+                    None => None,
+                };
+                let negative = match self.branch(test_flow, &test, FlowOutcome::Falsy)? {
+                    Some(flow) => Some(self.evaluate(alternate.syntax(), flow, depth + 1)?),
+                    None => None,
+                };
+                self.join_branches(test_flow, positive, negative)
             }
             _ => self.children(node, incoming, depth),
         }
@@ -3741,6 +3873,50 @@ impl RootBuilder<'_, '_> {
         }
     }
 
+    /// Returns the flow where `expression`, a condition, has `outcome` after
+    /// `antecedent`, or `None` when the branch is unreachable because the
+    /// condition never has a truthy or falsy `outcome` (see
+    /// [`never_has_outcome`]). A condition written as the literal `true` or
+    /// `false` narrows nothing, so the branch that it takes continues from
+    /// `antecedent`, as in TypeScript.
+    fn branch(
+        &mut self,
+        antecedent: FlowNodeId,
+        expression: &AnyJsExpression,
+        outcome: FlowOutcome,
+    ) -> Build<Option<FlowNodeId>> {
+        let truthy = match outcome {
+            FlowOutcome::Truthy => true,
+            FlowOutcome::Falsy => false,
+            FlowOutcome::Nullish | FlowOutcome::NonNullish => {
+                return self.condition(antecedent, expression, outcome).map(Some);
+            }
+        };
+        if never_has_outcome(expression, truthy) {
+            return Ok(None);
+        }
+        if literal_condition(expression).is_some() {
+            return Ok(Some(antecedent));
+        }
+        self.condition(antecedent, expression, outcome).map(Some)
+    }
+
+    /// Returns the flow after an expression whose two branches end at
+    /// `first` and `second`, `None` for a branch that no path takes, or
+    /// `fallback` when neither is taken.
+    fn join_branches(
+        &mut self,
+        fallback: FlowNodeId,
+        first: Option<FlowNodeId>,
+        second: Option<FlowNodeId>,
+    ) -> Build<FlowNodeId> {
+        match (first, second) {
+            (Some(first), Some(second)) => self.push(FlowNode::Join(vec![first, second])),
+            (Some(flow), None) | (None, Some(flow)) => Ok(flow),
+            (None, None) => Ok(fallback),
+        }
+    }
+
     fn condition(
         &mut self,
         antecedent: FlowNodeId,
@@ -3890,6 +4066,7 @@ mod tests {
                 &model,
                 &mut GuardFunctions::new(&[], &raw_binding_types),
                 super::super::subjects::this_can_narrow(&root),
+                true,
             ),
         }
     }
@@ -4234,11 +4411,53 @@ mod tests {
     }
 
     #[test]
-    fn for_loops_keep_their_exit_for_truthy_literal_tests() {
-        let built = function("function f(x) { for (; true;) { read(x); } after(x); }");
-        assert!(built.point("x", 2).is_some());
-        let built = function("function f(x) { while (true) { read(x); } after(x); }");
-        assert_eq!(built.point("x", 2), None);
+    fn loops_exit_unless_their_test_is_the_literal_true() {
+        for source in [
+            "function f(x) { while (true) { read(x); } after(x); }",
+            "function f(x) { do { read(x); } while (true); after(x); }",
+            "function f(x) { for (;;) { read(x); } after(x); }",
+            "function f(x) { for (; true;) { read(x); } after(x); }",
+            "function f(x, c) { while (c || true) { read(x); } after(x); }",
+        ] {
+            assert_eq!(function(source).point("x", 2), None, "{source}");
+        }
+        for source in [
+            "function f(x) { while (1) { read(x); } after(x); }",
+            r#"function f(x) { while ("a") { read(x); } after(x); }"#,
+            "function f(x) { while ((true)) { read(x); } after(x); }",
+            "function f(x) { while (!0) { read(x); } after(x); }",
+            "function f(x) { do { read(x); } while (1); after(x); }",
+            "function f(x) { for (; 1;) { read(x); } after(x); }",
+        ] {
+            assert!(function(source).point("x", 2).is_some(), "{source}");
+        }
+    }
+
+    #[test]
+    fn branches_that_a_literal_condition_never_takes_have_no_flow() {
+        for source in [
+            "function f(x) { if (false) { read(x); } after(x); }",
+            "function f(x) { if (true) {} else { read(x); } after(x); }",
+            "function f(x) { while (false) { read(x); } after(x); }",
+            "function f(x) { for (; false;) { read(x); } after(x); }",
+            "function f(x) { false && read(x); after(x); }",
+            "function f(x) { true || read(x); after(x); }",
+            "function f(x) { false ? read(x) : 0; after(x); }",
+            "function f(x, c) { if (c && false) { read(x); } after(x); }",
+            "function f(x, c) { if (!(c && false)) {} else { read(x); } after(x); }",
+        ] {
+            let built = function(source);
+            assert_eq!(built.point("x", 1), None, "{source}");
+            assert!(built.point("x", 2).is_some(), "{source}");
+        }
+        for source in [
+            "function f(x) { if ((false)) { read(x); } after(x); }",
+            "function f(x) { if (!false) {} else { read(x); } after(x); }",
+            "function f(x) { if (0) { read(x); } after(x); }",
+            "function f(x) { false ?? read(x); after(x); }",
+        ] {
+            assert!(function(source).point("x", 1).is_some(), "{source}");
+        }
     }
 
     #[test]

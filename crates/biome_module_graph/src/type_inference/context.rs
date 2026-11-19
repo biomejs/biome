@@ -4,17 +4,21 @@
 //! query inputs themselves. This keeps shared lookup and result-processing
 //! behavior consistent between requests.
 
+use biome_js_control_flow::AnyJsControlFlowRoot;
+use biome_js_syntax::AnyJsStatement;
 use biome_js_type_info::interned_types::{
     CallArgumentType as InferredCallArgumentType, TypeData as InferredTypeData,
 };
-use biome_rowan::TextRange;
+use biome_rowan::{AstNode, NodeOrToken, TextRange};
 
 use crate::db::queries::{
-    BindingTypeInput, ExpressionTypeInput, find_member_type, find_value_member_type,
-    infer_binding_type, infer_export_type, infer_expression_function_returns_promise,
-    infer_expression_is_array_of_promises, infer_expression_is_promise, infer_expression_type,
+    BindingTypeInput, ExpressionTypeInput, FlowReachabilityInput, find_member_type,
+    find_value_member_type, infer_binding_type, infer_export_type,
+    infer_expression_function_returns_promise, infer_expression_is_array_of_promises,
+    infer_expression_is_promise, infer_expression_type, infer_flow_reachability,
     resolve_callable_type,
 };
+use crate::module_graph::ModuleInfoKind;
 use crate::{
     CallArgumentTypeInput, ModuleInfo, NormalizeTypeInput, SymbolFromModuleInfo,
     infer_call_argument_type, infer_constructor_argument_type, normalize_type,
@@ -43,6 +47,49 @@ impl<'db> TypeInferenceRequestContext<'db> {
     ) -> TypeInferenceClassification {
         let db = self.db();
         infer_expression_is_promise(db, ExpressionTypeInput::new(db, module, range))
+    }
+
+    /// Classifies whether no path reaches the innermost statement that
+    /// contains `range`, from the flow of the execution root around it. See
+    /// [`super::UnreachableCodeClassificationRequest`].
+    pub(crate) fn classify_statement_as_unreachable(
+        &self,
+        module: ModuleInfo,
+        range: TextRange,
+    ) -> TypeInferenceClassification {
+        let db = self.db();
+        let ModuleInfoKind::Js(info) = module.kind(db) else {
+            return TypeInferenceClassification::Indeterminate;
+        };
+        let tree = info.semantic_model.root();
+        let start = match tree.syntax().covering_element(range) {
+            NodeOrToken::Node(node) => Some(node),
+            NodeOrToken::Token(token) => token.parent(),
+        };
+        let Some(statement) = start
+            .into_iter()
+            .flat_map(|node| node.ancestors())
+            .find_map(AnyJsStatement::cast)
+        else {
+            return TypeInferenceClassification::Indeterminate;
+        };
+        let Some(root) = statement
+            .syntax()
+            .ancestors()
+            .skip(1)
+            .find_map(AnyJsControlFlowRoot::cast)
+        else {
+            return TypeInferenceClassification::Indeterminate;
+        };
+        let input = FlowReachabilityInput::new(db, module, root.syntax().text_trimmed_range());
+        match infer_flow_reachability(db, input)
+            .as_ref()
+            .and_then(|reachability| reachability.reaches(statement.range()))
+        {
+            Some(false) => TypeInferenceClassification::Match,
+            Some(true) => TypeInferenceClassification::NoMatch,
+            None => TypeInferenceClassification::Indeterminate,
+        }
     }
 
     pub(crate) fn classify_expression_as_array_of_promises(

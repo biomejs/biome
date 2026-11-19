@@ -3,11 +3,11 @@
 //! Collection records the incoming flow of each refinable read, the guards
 //! that the conditions of its execution root apply, and its writes (see
 //! [`crate::js_module_info::flow`]). This module resolves the type that the
-//! read's subject starts from, the types that its writes assign, and the
-//! effects of the call points that may narrow it, and applies the guards and
-//! the writes along every path that reaches the read. The solve's key carries
-//! all of these, so a solve resolves no declared type, assigned value, or
-//! callee.
+//! read's subject starts from, the types that its writes assign, what the
+//! call points that may narrow it do, and which statement calls before it
+//! never return. It applies the guards and the writes along every path that
+//! reaches the read. The solve's key carries all of these, so a solve
+//! resolves no declared type, assigned value, or callee.
 //! A variable starts from its declared type. In a closure that continues the
 //! flow where it is created, the variable starts instead from its type at
 //! that point, its capture point. The solve of the enclosing root gives that
@@ -22,7 +22,7 @@ use super::imports::{ExportOriginResult, find_export_origin};
 use super::{ImportResolution, ResolutionCtx, resolve_local_type_on_demand};
 use crate::db::queries::{
     BindingTypeInput, CallableFunctionInput, FlowAssignedTypes, FlowCallEffect, FlowCallEffects,
-    FlowCallInput, FlowCallParameter, FlowSubjectRootInput, FlowSubjectTypeInput,
+    FlowCallInput, FlowCallParameter, FlowReachability, FlowSubjectRootInput, FlowSubjectTypeInput,
     FlowSubjectWritesInput, FlowSwitchInput, LocalTypeInput, global_contributions,
     infer_flow_assigned_types, infer_flow_binding_baseline, infer_flow_call_effect,
     infer_flow_subject_states, infer_flow_subject_type, infer_flow_switch_exhaustive,
@@ -31,14 +31,16 @@ use crate::db::queries::{
 use crate::js_module_info::flow::{
     AnyMemberDeclaration, CalleeReturn, FlowAssigned, FlowAssignedValue, FlowCall, FlowCallKind,
     FlowCallRoot, FlowCallee, FlowCapture, FlowEvolving, FlowGuard, FlowNode, FlowNodeId, FlowRead,
-    FlowSubject, FlowSubjectId, FlowTest, FlowWriteEffect, PropertyKey, RootFlow, UnitValue,
-    binding_unit_value, declaration_return, guard_signature, member_explicitness, member_return,
+    FlowSubject, FlowSubjectId, FlowSwitch, FlowTest, FlowWriteEffect, PropertyKey,
+    ReachabilityGraph, RootFlow, UnitValue, binding_unit_value, build_reachability,
+    declaration_return, guard_signature, member_explicitness, member_return,
 };
 use crate::module_graph::ModuleInfoKind;
 use crate::{
     JsExport, JsModuleInfo, JsOwnExport, ModuleDb, ModuleInfo, ResolutionMode, module_for_key,
     resolve_module_import,
 };
+use biome_js_control_flow::AnyJsControlFlowRoot;
 use biome_js_semantic::ScopeId;
 use biome_js_syntax::{
     AnyJsExpression, JsIdentifierExpression, TsDeclareStatement,
@@ -54,11 +56,13 @@ use biome_js_type_info::{
     may_narrow_by_instanceof, may_narrow_by_property, narrow_by_assignment, narrow_by_in_operator,
     narrow_by_instanceof, narrow_by_property, narrow_by_type_predicate, narrow_type,
 };
-use biome_rowan::{AstNode, Text, TextRange, TextSize};
+use biome_rowan::{AstNode, NodeOrToken, Text, TextRange, TextSize};
 use rustc_hash::FxHashMap;
 use std::collections::VecDeque;
 
 const MAX_FLOW_STEPS: usize = 16_384;
+/// Limits the nodes that [`ResolutionCtx::reachability`] visits in one root.
+const MAX_REACHABILITY_STEPS: usize = 1_048_576;
 /// Limits the handles to local types of a module that
 /// [`ResolutionCtx::resolve_module_handle`] follows.
 const MAX_MODULE_HANDLE_STEPS: usize = 16;
@@ -243,6 +247,31 @@ pub(in crate::db) fn flow_call_effect<'db>(
     ctx.call_effect(call)
 }
 
+pub(in crate::db) fn flow_reachability(
+    db: &dyn ModuleDb,
+    module: ModuleInfo,
+    info: &JsModuleInfo,
+    root: TextRange,
+) -> Option<FlowReachability> {
+    let tree = info.semantic_model.root();
+    let start = match tree.syntax().covering_element(root) {
+        NodeOrToken::Node(node) => node,
+        NodeOrToken::Token(token) => token.parent()?,
+    };
+    let root = start
+        .ancestors()
+        .filter_map(AnyJsControlFlowRoot::cast)
+        .find(|candidate| candidate.syntax().text_trimmed_range() == root)?;
+    let graph = build_reachability(
+        &root,
+        &info.semantic_model,
+        &info.raw_types,
+        &info.raw_binding_types,
+    )?;
+    let mut ctx = ResolutionCtx::new(db, module, info, ImportResolution::on_demand());
+    ctx.reachability(&graph)
+}
+
 pub(in crate::db) fn flow_switch_exhaustive(
     db: &dyn ModuleDb,
     module: ModuleInfo,
@@ -268,8 +297,9 @@ enum FlatteningError {
 /// readonly path, as [`FlowGuard::ReadonlyPath`] requires, the `switch`
 /// statements found exhaustive, as [`FlowGuard::Bypass`] requires, one bit
 /// each, the types that the subject's writes assign, how its type evolves
-/// with its writes, as [`FlowEvolving`] describes, the effects of the call
-/// points that narrow it, as [`FlowGuard::Call`] requires, the results of the
+/// with its writes ([`FlowEvolving`]), the effects of the call
+/// points that narrow it, as [`FlowGuard::Call`] requires, the statement
+/// calls found to end the path, one bit each, the results of the
 /// property guards, `in` tests, `instanceof` tests, and calls to type-guard
 /// functions applied so far, keyed by guard index and incoming type, the
 /// values of the imported variables that [`FlowTest::Imported`] compares
@@ -290,6 +320,7 @@ struct GuardSolve<'db> {
     assigned: Option<FlowAssignedTypes<'db>>,
     evolving: FlowEvolving,
     calls: Option<FlowCallEffects<'db>>,
+    ends: u64,
     properties: FxHashMap<(usize, TypeData<'db>), TypeData<'db>>,
     /// The values of the imported variables that [`FlowTest::Imported`]
     /// compares with, found so far, keyed by declaration.
@@ -300,6 +331,10 @@ struct GuardSolve<'db> {
 }
 
 impl<'db> GuardSolve<'db> {
+    #[expect(
+        clippy::too_many_arguments,
+        reason = "Each argument is a part of the solve's key that its guards read."
+    )]
     fn new(
         subject: FlowSubjectId,
         declared: TypeData<'db>,
@@ -308,6 +343,7 @@ impl<'db> GuardSolve<'db> {
         assigned: Option<FlowAssignedTypes<'db>>,
         evolving: FlowEvolving,
         calls: Option<FlowCallEffects<'db>>,
+        ends: u64,
     ) -> Self {
         Self {
             subject,
@@ -317,6 +353,7 @@ impl<'db> GuardSolve<'db> {
             assigned,
             evolving,
             calls,
+            ends,
             properties: FxHashMap::default(),
             imported: FxHashMap::default(),
             writes: FxHashMap::default(),
@@ -484,6 +521,11 @@ pub(in crate::db) struct LocalFlow<'db> {
     /// keyed by the index of its root and its subject, as
     /// [`ResolutionCtx::call_effects`] gives them.
     subject_call_effects: FxHashMap<(usize, FlowSubjectId), Option<FlowCallEffects<'db>>>,
+    /// Whether a path reaches each read point asked about so far without
+    /// crossing a call that never returns, keyed by the index of its root, the
+    /// point, and the mask of the calls found to never return. Filled by
+    /// [`ResolutionCtx::ending_calls`].
+    reached: FxHashMap<(usize, FlowNodeId, u64), bool>,
 }
 
 impl<'db> ResolutionCtx<'db, '_> {
@@ -623,6 +665,7 @@ impl<'db> ResolutionCtx<'db, '_> {
         };
         let exhaustive = self.exhaustive_switches(read, start);
         let assigned = self.flow_assigned_types(read.root, read.subject);
+        let ends = self.ending_calls(read)?;
         infer_flow_subject_type(
             self.db,
             FlowSubjectTypeInput::new(
@@ -638,6 +681,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                     assigned,
                     FlowEvolving::None,
                     calls,
+                    ends,
                 ),
                 read.point,
             ),
@@ -720,6 +764,7 @@ impl<'db> ResolutionCtx<'db, '_> {
         } else {
             None
         };
+        let ends = self.ending_calls(read)?;
         infer_flow_subject_type(
             self.db,
             FlowSubjectTypeInput::new(
@@ -735,6 +780,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                     assigned,
                     evolving,
                     calls,
+                    ends,
                 ),
                 read.point,
             ),
@@ -769,7 +815,7 @@ impl<'db> ResolutionCtx<'db, '_> {
             captured = self.assumed_initialized(captured, declared);
             uninitialized = false;
         }
-        let narrowed = self.narrow_from(read, start, captured);
+        let narrowed = self.narrow_from(read, start, captured)?;
         if uninitialized
             && contains_undefined(self.db, narrowed)
             && !contains_undefined(self.db, declared)
@@ -820,14 +866,23 @@ impl<'db> ResolutionCtx<'db, '_> {
     /// the tests and writes of its root from `ty`, its type where the root
     /// starts. `start` is where the read's expression starts. Returns `ty`
     /// itself when no test of the root can change it.
-    fn narrow_from(&mut self, read: FlowRead, start: TextSize, ty: TypeData<'db>) -> TypeData<'db> {
+    ///
+    /// Returns `None` when every path to the read crosses a call that never
+    /// returns, so the read keeps its declared type, as in TypeScript.
+    fn narrow_from(
+        &mut self,
+        read: FlowRead,
+        start: TextSize,
+        ty: TypeData<'db>,
+    ) -> Option<TypeData<'db>> {
         let Some(baseline) = self.subject_baseline(read, ty) else {
-            return ty;
+            return Some(ty);
         };
         let exhaustive = self.exhaustive_switches(read, start);
         let assigned = self.flow_assigned_types(read.root, read.subject);
         let calls = self.call_effects(read.root, read.subject);
-        infer_flow_subject_type(
+        let ends = self.ending_calls(read)?;
+        let narrowed = infer_flow_subject_type(
             self.db,
             FlowSubjectTypeInput::new(
                 self.db,
@@ -842,11 +897,12 @@ impl<'db> ResolutionCtx<'db, '_> {
                     assigned,
                     FlowEvolving::None,
                     calls,
+                    ends,
                 ),
                 read.point,
             ),
-        )
-        .unwrap_or(baseline)
+        );
+        Some(narrowed.unwrap_or(baseline))
     }
 
     /// Returns the type that narrowing of `read.subject` in the root of
@@ -963,6 +1019,10 @@ impl<'db> ResolutionCtx<'db, '_> {
         let exhaustive = self.exhaustive_switches(read, capture.start);
         let assigned = self.flow_assigned_types(capture.root, capture.subject);
         let calls = self.call_effects(capture.root, capture.subject);
+        // TypeScript gives the reads of a closure their declared types when
+        // every path to the point that creates it crosses a call that never
+        // returns.
+        let ends = self.ending_calls(read)?;
         let states = infer_flow_subject_states(
             self.db,
             FlowSubjectRootInput::new(
@@ -976,6 +1036,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                 assigned,
                 FlowEvolving::None,
                 calls,
+                ends,
             ),
         );
         let ty = states
@@ -1015,6 +1076,7 @@ impl<'db> ResolutionCtx<'db, '_> {
         let baseline = self.flow_binding_baseline(range)?;
         let exhaustive = self.exhaustive_switches(read, start);
         let calls = self.call_effects(read.root, pattern);
+        let ends = self.ending_calls(read)?;
         // No write changes the value that a pattern destructures.
         let narrowed = infer_flow_subject_type(
             self.db,
@@ -1031,6 +1093,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                     None,
                     FlowEvolving::None,
                     calls,
+                    ends,
                 ),
                 read.point,
             ),
@@ -1149,6 +1212,7 @@ impl<'db> ResolutionCtx<'db, '_> {
         }
         let exhaustive = self.exhaustive_switches(read, member.range().start());
         let assigned = self.flow_assigned_types(read.root, read.subject);
+        let ends = self.ending_calls(read)?;
         infer_flow_subject_type(
             self.db,
             FlowSubjectTypeInput::new(
@@ -1164,6 +1228,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                     assigned,
                     FlowEvolving::None,
                     calls,
+                    ends,
                 ),
                 read.point,
             ),
@@ -1335,7 +1400,7 @@ impl<'db> ResolutionCtx<'db, '_> {
         let info = self.js_info;
         match callee {
             FlowCallee::Import(binding) => {
-                imported_return_is_annotated(self.db, self.module, info, binding)
+                imported_return_is_annotated(self.db, self.module, info, binding, None)
             }
             FlowCallee::Member(member) => {
                 let Some(TypeReference::Resolved(RawTypeId::Local(id))) =
@@ -1388,7 +1453,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                 continue;
             };
             let effect = self.flow_call_effect(flow_call.range);
-            if effect != FlowCallEffect::None {
+            if effect.narrows() {
                 effects.push((*call, effect));
             }
         }
@@ -1428,7 +1493,10 @@ impl<'db> ResolutionCtx<'db, '_> {
     /// Resolves the effect of the call point at `range` in this context, or
     /// [`FlowCallEffect::None`] when the call narrows nothing.
     pub(super) fn call_effect(&mut self, range: TextRange) -> FlowCallEffect<'db> {
-        self.resolve_call_effect(range).unwrap_or_default()
+        match self.js_info.flow.call(range) {
+            Some(call) => self.resolve_call_effect(call).unwrap_or_default(),
+            None => FlowCallEffect::None,
+        }
     }
 
     /// Resolves the effect that [`Self::call_effect`] returns, or `None` when
@@ -1447,9 +1515,14 @@ impl<'db> ResolutionCtx<'db, '_> {
     /// A call in a condition narrows only through a type predicate, and a
     /// statement call only through an assertion. The target is flattened as a
     /// declared type is, and a target of `any` or `unknown` narrows nothing.
-    fn resolve_call_effect(&mut self, range: TextRange) -> Option<FlowCallEffect<'db>> {
+    ///
+    /// The effect of a statement call is [`FlowCallEffect::Ends`] when the
+    /// return type annotation of its signature's declaration is `never` (see
+    /// [`Self::has_annotated_callee`]), or when its signature is
+    /// `asserts value` and the asserted argument is always false.
+    fn resolve_call_effect(&mut self, call: &FlowCall) -> Option<FlowCallEffect<'db>> {
         let info = self.js_info;
-        let call = info.flow.call(range)?;
+        let range = call.range;
         let TypeReference::Resolved(RawTypeId::Local(id)) = info.raw_expressions.get(&range)?
         else {
             return None;
@@ -1460,15 +1533,20 @@ impl<'db> ResolutionCtx<'db, '_> {
         let TypeofExpression::Call(raw) = raw.as_ref() else {
             return None;
         };
-        let statement = match &call.kind {
-            FlowCallKind::Condition => false,
-            FlowCallKind::Statement { root, steps } => {
+        let callee_steps = match &call.kind {
+            FlowCallKind::Condition => None,
+            FlowCallKind::Statement {
+                root,
+                steps,
+                annotated,
+            } => {
                 if !self.has_explicit_callee(*root, steps) {
                     return None;
                 }
-                true
+                Some((*root, &**steps, *annotated))
             }
         };
+        let statement = callee_steps.is_some();
         let callee = self.resolve(&raw.callee);
         let mut callee = self.flow_baseline(callee)?;
         if let TypeData::Union(union) = callee {
@@ -1504,12 +1582,32 @@ impl<'db> ResolutionCtx<'db, '_> {
                     true,
                 )
             }
-            ReturnType::Type(_) => return None,
+            ReturnType::Type(ty) => {
+                // TypeScript ends the path at a statement call only when the
+                // return type annotation of the signature's declaration is
+                // `never`.
+                let (root, steps, annotated) = callee_steps?;
+                let returns_never = resolve_local_type_on_demand(self.db, *ty)
+                    == TypeData::NeverKeyword
+                    && self.has_annotated_callee(root, steps, annotated);
+                return returns_never.then_some(FlowCallEffect::Ends);
+            }
         };
         if asserts != statement {
             return None;
         }
         let parameter = predicate_parameter(self.db, function, name, call)?;
+        // `asserts value` never returns for an argument that is always false.
+        if asserts
+            && target.is_none()
+            && let FlowCallParameter::Argument(index) = parameter
+            && call
+                .arguments
+                .get(index as usize)
+                .is_some_and(|argument| argument.is_false)
+        {
+            return Some(FlowCallEffect::Ends);
+        }
         let target = match target {
             Some(target) => {
                 let target = self.flow_baseline(target)?;
@@ -1551,11 +1649,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                 steps.next();
             }
             FlowCallRoot::Import(binding) => {
-                let is_namespace = matches!(
-                    info.raw_binding_types.get(&binding),
-                    Some(TypeReference::Import(import)) if import.symbol == ImportSymbol::All
-                );
-                let member = if is_namespace {
+                let member = if is_namespace_import(info, binding) {
                     match steps.next().and_then(|step| raw_member(info, *step)) {
                         Some((_, member)) => Some(member),
                         None => return false,
@@ -1578,6 +1672,184 @@ impl<'db> ResolutionCtx<'db, '_> {
             }
         }
         true
+    }
+
+    /// Returns which statements of the root that `graph` holds some path
+    /// reaches, and whether a path reaches the root's end. See
+    /// [`crate::db::queries::infer_flow_reachability`].
+    ///
+    /// A path ends where the graph has no flow, at a statement call that
+    /// never returns, and on the path that matches no case of an exhaustive
+    /// `switch` statement, as in TypeScript. A call point that collection
+    /// kept shares its effect with narrowing; another one is resolved here.
+    ///
+    /// Returns `None` when the walk exceeds its work limit.
+    fn reachability(&mut self, graph: &ReachabilityGraph) -> Option<FlowReachability> {
+        let flow = &graph.flow;
+        let mut ends = vec![false; flow.calls.len()];
+        for (call, ended) in flow.calls.iter().zip(&mut ends) {
+            if !matches!(call.kind, FlowCallKind::Statement { .. }) {
+                continue;
+            }
+            let effect = if self.js_info.flow.call(call.range).is_some() {
+                self.flow_call_effect(call.range)
+            } else {
+                self.resolve_call_effect(call).unwrap_or_default()
+            };
+            *ended = effect == FlowCallEffect::Ends;
+        }
+        let mut exhaustive = vec![false; flow.switches.len()];
+        for (switch, exhaustive) in flow.switches.iter().zip(&mut exhaustive) {
+            *exhaustive = self.is_exhaustive_in(flow, switch);
+        }
+        let ends_at = |node: &FlowNode| -> bool {
+            let FlowNode::Condition { guard, .. } = node else {
+                return false;
+            };
+            match flow.guards.get(*guard) {
+                Some(FlowGuard::Call { call, .. }) => {
+                    ends.get(*call as usize).copied().unwrap_or(false)
+                }
+                Some(FlowGuard::Bypass { switch, .. }) => {
+                    exhaustive.get(*switch as usize).copied().unwrap_or(false)
+                }
+                _ => false,
+            }
+        };
+        let mut successors: Vec<Vec<FlowNodeId>> = vec![Vec::new(); flow.nodes.len()];
+        for (id, node) in (0..).zip(flow.nodes.iter()) {
+            for predecessor in predecessor_ids(node) {
+                successors.get_mut(*predecessor as usize)?.push(id);
+            }
+        }
+        let mut reached = vec![false; flow.nodes.len()];
+        let mut pending = vec![0];
+        let mut remaining = MAX_REACHABILITY_STEPS;
+        while let Some(node) = pending.pop() {
+            remaining = remaining.checked_sub(1)?;
+            let seen = reached.get_mut(node as usize)?;
+            if *seen || ends_at(&flow.nodes[node as usize]) {
+                continue;
+            }
+            *seen = true;
+            pending.extend(&successors[node as usize]);
+        }
+        let reaches = |point: Option<FlowNodeId>| {
+            point.is_some_and(|point| reached.get(point as usize).copied().unwrap_or(false))
+        };
+        let mut statements: Vec<(TextRange, bool)> = Vec::with_capacity(graph.statements.len());
+        for (range, entry) in &graph.statements {
+            statements.push((*range, reaches(*entry)));
+        }
+        // A finally block built twice lists its statements twice, and a
+        // statement that either build reaches is reachable.
+        statements.sort_unstable_by(|(first, reached_first), (second, reached_second)| {
+            first
+                .start()
+                .cmp(&second.start())
+                .then(second.end().cmp(&first.end()))
+                .then(reached_second.cmp(reached_first))
+        });
+        statements.dedup_by_key(|(range, _)| *range);
+        Some(FlowReachability {
+            statements: statements.into_boxed_slice(),
+            end: reaches(graph.end),
+        })
+    }
+
+    /// Returns whether the return type of the callee of a statement call
+    /// comes from an annotation, given the callee's `root`, `steps`, and
+    /// `annotated`, as [`FlowCallKind::Statement`] records them. TypeScript
+    /// ends the path at a call that returns `never` only when that return
+    /// type comes from an annotation.
+    ///
+    /// A callee without member accesses takes `annotated`, which collection
+    /// read from the syntax, unless it is an import. An imported callee, or
+    /// a member of a namespace import, has one when the declaration of the
+    /// export that it names does. A member of a namespace that `declare`
+    /// declares always has one, because it has no body to infer from. Any
+    /// other callee reads a member, which every type of its object must
+    /// declare with an annotated return type (see
+    /// [`has_annotated_return_member`]).
+    fn has_annotated_callee(
+        &mut self,
+        root: FlowCallRoot,
+        steps: &[TextRange],
+        annotated: bool,
+    ) -> bool {
+        let info = self.js_info;
+        match (root, steps) {
+            (FlowCallRoot::Import(binding), []) => {
+                imported_return_is_annotated(self.db, self.module, info, binding, None)
+            }
+            (FlowCallRoot::Explicit | FlowCallRoot::Namespace, []) => annotated,
+            (FlowCallRoot::Namespace, [_]) => true,
+            (FlowCallRoot::Import(binding), [step]) if is_namespace_import(info, binding) => {
+                raw_member(info, *step).is_some_and(|(_, member)| {
+                    imported_return_is_annotated(self.db, self.module, info, binding, Some(member))
+                })
+            }
+            (_, [.., last]) => match raw_member(info, *last) {
+                Some((object, member)) => {
+                    let object = self.resolve(object);
+                    has_annotated_return_member(self.db, object, member.text())
+                }
+                None => false,
+            },
+        }
+    }
+
+    /// Returns the statement calls of the root of `read` that never return
+    /// and whose node reaches the read, one bit each, in the mask that
+    /// [`FlowSubjectRootInput::ends`] takes. Returns `None` when every path
+    /// to the read crosses one of them.
+    ///
+    /// A call never returns when inference finds its effect to be
+    /// [`FlowCallEffect::Ends`]. TypeScript gives a read that only such paths
+    /// reach its declared type, so the caller then keeps the declared type
+    /// without a solve. Otherwise the paths through such a call add nothing
+    /// to the read's type, as in TypeScript. When the walk that checks for a
+    /// path around those calls exceeds its work limit, the read is solved
+    /// with the mask, which gives `Unknown` where no path remains.
+    fn ending_calls(&mut self, read: FlowRead) -> Option<u64> {
+        let Some(root) = self.js_info.flow.root(read.root) else {
+            return Some(0);
+        };
+        let mut pending = root.called_calls(read.point);
+        let mut ends = 0;
+        while pending != 0 {
+            let bit = pending.trailing_zeros();
+            pending &= pending - 1;
+            let Some(call) = root
+                .ending_calls
+                .get(bit as usize)
+                .and_then(|call| root.calls.get(*call as usize))
+            else {
+                continue;
+            };
+            if self.flow_call_effect(call.range) == FlowCallEffect::Ends {
+                ends |= 1 << bit;
+            }
+        }
+        if ends == 0 {
+            return Some(0);
+        }
+        let key = (read.root, read.point, ends);
+        let reached = match self
+            .local_flow
+            .as_ref()
+            .and_then(|local| local.reached.get(&key))
+        {
+            Some(reached) => *reached,
+            None => {
+                let reached = root.reaches_past(read.point, ends).unwrap_or(true);
+                if let Some(local) = self.local_flow.as_mut() {
+                    local.reached.insert(key, reached);
+                }
+                reached
+            }
+        };
+        reached.then_some(ends)
     }
 
     /// Returns the exhaustive `switch` statements of the root of `read` whose
@@ -1661,6 +1933,13 @@ impl<'db> ResolutionCtx<'db, '_> {
         let Some(switch) = root.switches.get(switch as usize) else {
             return false;
         };
+        self.is_exhaustive_in(root, switch)
+    }
+
+    /// Returns whether every value that the type of the discriminant of
+    /// `switch`, a statement of `root`, allows matches a case. See
+    /// [`Self::switch_is_exhaustive`].
+    fn is_exhaustive_in(&mut self, root: &RootFlow, switch: &FlowSwitch) -> bool {
         let Some(discriminant) = self
             .flow_operand_at(switch.discriminant)
             .or_else(|| self.raw_operand_at(switch.discriminant))
@@ -1678,8 +1957,16 @@ impl<'db> ResolutionCtx<'db, '_> {
         if matches!(ty, TypeData::Unknown | TypeData::NeverKeyword) || is_narrowing_invariant(ty) {
             return false;
         }
-        let mut solve =
-            GuardSolve::new(switch.subject, ty, false, 0, None, FlowEvolving::None, None);
+        let mut solve = GuardSolve::new(
+            switch.subject,
+            ty,
+            false,
+            0,
+            None,
+            FlowEvolving::None,
+            None,
+            0,
+        );
         if !self.compares_with_unit_values(root, switch.guard, &mut solve) {
             return false;
         }
@@ -1946,6 +2233,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                 input.assigned(db),
                 input.evolving(db),
                 input.calls(db),
+                input.ends(db),
             ),
         )?;
         Some(
@@ -2285,6 +2573,14 @@ impl<'db> ResolutionCtx<'db, '_> {
         ty: TypeData<'db>,
         remaining: &mut usize,
     ) -> Option<TypeData<'db>> {
+        // A call that never returns adds nothing to any subject after it.
+        if solve.ends != 0
+            && root
+                .ending_bit(call)
+                .is_some_and(|bit| solve.ends & (1 << bit) != 0)
+        {
+            return Some(TypeData::NeverKeyword);
+        }
         let effect = solve.calls.and_then(|calls| {
             let effects = calls.effects(self.db);
             effects
@@ -2297,7 +2593,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                 (parameter, Some(target), positive)
             }
             Some(FlowCallEffect::Assertion { parameter, target }) => (parameter, target, true),
-            Some(FlowCallEffect::None) | None => return Some(ty),
+            Some(FlowCallEffect::None | FlowCallEffect::Ends) | None => return Some(ty),
         };
         let Some(flow_call) = root.calls.get(call as usize) else {
             return Some(ty);
@@ -2714,6 +3010,7 @@ fn imported_unit_value<'db>(
 
 /// Returns whether the return type of a call to the imported binding at
 /// `binding` in `js_info`, the module `module`, comes from an annotation.
+/// For a namespace import, the callee is the export that `member` names.
 ///
 /// The import is followed through re-exports to the module that declares the
 /// export. A binding that an import declares there is followed in turn, at
@@ -2726,6 +3023,7 @@ fn imported_return_is_annotated(
     mut module: ModuleInfo,
     js_info: &JsModuleInfo,
     mut binding: TextRange,
+    mut member: Option<&Text>,
 ) -> bool {
     let mut info = js_info;
     for _ in 0..MAX_IMPORT_STEPS {
@@ -2735,7 +3033,10 @@ fn imported_return_is_annotated(
         let name = match &import.symbol {
             ImportSymbol::Named(name) => name.clone(),
             ImportSymbol::Default => Text::new_static("default"),
-            ImportSymbol::All => return false,
+            ImportSymbol::All => match member.take() {
+                Some(member) => member.clone(),
+                None => return false,
+            },
         };
         let resolved =
             resolve_module_import(db, module, &import.specifier, ResolutionMode::JavaScript);
@@ -2823,6 +3124,43 @@ fn predicate_parameter<'db>(
         return None;
     }
     Some(FlowCallParameter::Argument(u32::try_from(index).ok()?))
+}
+
+/// Returns whether the binding at `binding` in `js_info` is a namespace
+/// import, as `g` in `import * as g from "./g"`.
+fn is_namespace_import(js_info: &JsModuleInfo, binding: TextRange) -> bool {
+    matches!(
+        js_info.raw_binding_types.get(&binding),
+        Some(TypeReference::Import(import)) if import.symbol == ImportSymbol::All
+    )
+}
+
+/// Returns whether every type that `ty` can be declares its member `name`
+/// with a return type annotation (see [`has_annotated_member`]), or `ty` is a
+/// type literal whose members named `name` are all functions written in
+/// place. A method signature and a property annotated with a function type
+/// are such functions, and their syntax states their return types.
+fn has_annotated_return_member(db: &dyn ModuleDb, ty: TypeData, name: &str) -> bool {
+    if has_annotated_member(db, ty, name) {
+        return true;
+    }
+    let mut ty = resolve_local_type_on_demand(db, ty);
+    // A variable annotated with a type literal holds an instance of it.
+    if let TypeData::InstanceOf(instance) = ty {
+        ty = resolve_local_type_on_demand(db, instance.ty(db));
+    }
+    let TypeData::Object(object) = ty else {
+        return false;
+    };
+    if object.kind(db) != ObjectKind::Shape {
+        return false;
+    }
+    let mut members = object
+        .members(db)
+        .iter()
+        .filter(|member| !member.kind.is_static() && member.kind.has_name(name))
+        .peekable();
+    members.peek().is_some() && members.all(|member| matches!(member.ty, TypeData::Function(_)))
 }
 
 /// Returns the object and the name of the static member access at `range`
@@ -3429,6 +3767,8 @@ mod tests {
             captures: Default::default(),
             calls: Box::default(),
             subject_calls: Default::default(),
+            ending_calls: Box::default(),
+            called: Box::default(),
         };
         let reaching = ReachingFlow::new(&root, &[2]).unwrap();
         assert_eq!(reaching.nodes, [2, 1, 3, 0]);

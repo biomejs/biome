@@ -8,8 +8,10 @@
 //! write can reach. Type inference later applies the guards
 //! to resolved types without inspecting syntax again. A call whose effect
 //! depends on its callee's signature is a call point (see [`FlowCall`]).
-//! Inference resolves its effect in the context that reads a subject that
-//! the call may narrow.
+//! Inference resolves its effect where it reads a subject that the call may
+//! narrow, or a subject on a path that the call may end. Branches that a
+//! literal `true` or `false` condition never takes, and the code after a call
+//! of a local function that never returns, have no flow at all.
 //!
 //! A subject is what a runtime test checks and a read narrows: a variable, or
 //! a property path that starts at a variable or at `this`, such as `o.v`,
@@ -57,7 +59,7 @@ pub(crate) use expressions::AnyFlowExpression;
 pub(crate) use guards::{FlowGuard, FlowTest, UnitValue, binding_unit_value, guard_signature};
 pub(crate) use scanner::FlowRootScanner;
 
-use biome_js_control_flow::{AnyJsControlFlowRoot, is_truthy_literal};
+use biome_js_control_flow::AnyJsControlFlowRoot;
 use biome_js_semantic::{
     Binding, HasDeclarationAstNode, JsDeclarationKind, Scope, ScopeId, SemanticModel,
 };
@@ -87,7 +89,9 @@ use biome_rowan::{
     AstNode, AstPtr, AstSeparatedList, SyntaxKindSet, Text, TextRange, TextSize, WalkEvent,
     declare_node_union,
 };
-use builder::{AnyContinuingClosure, BuiltCapture, BuiltRoot, BuiltSwitch, build_root};
+use builder::{
+    AnyContinuingClosure, BuiltCapture, BuiltRoot, BuiltSwitch, build_root, never_has_outcome,
+};
 use guards::GuardFunctions;
 use rustc_hash::{FxHashMap, FxHashSet};
 use writes::{WrittenPaths, WrittenTargets};
@@ -487,12 +491,13 @@ pub(crate) struct FlowDestructureStep {
 /// type.
 ///
 /// TypeScript narrows through a call whose callee's signature returns a type
-/// predicate or an assertion. Collection reads the signature of a local
-/// function itself, so a call of one is never a call point. Every other call
-/// that passes a subject and whose callee is a dotted name, an identifier or
-/// `this` followed by `.name` accesses, is a call point. Inference resolves
-/// its effect in the context that reads a subject it may narrow, and
-/// [`FlowGuard::Call`] applies that effect.
+/// predicate or an assertion. Collection decides a local function from its
+/// collected signature, so such a call is never a call point. Every other
+/// call whose callee is a dotted name, an identifier or `this` followed by
+/// `.name` accesses, is one when it passes a subject. Such a statement call
+/// always is one, because its signature can end the path. Inference resolves
+/// its effect in the context that reads a subject it may narrow, or a subject
+/// on a path that it may end (see [`FlowGuard::Call`]).
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub(crate) struct FlowCall {
     /// The range of the call expression, which identifies the call to
@@ -529,6 +534,14 @@ pub(crate) enum FlowCallKind {
         /// whose object is the root name outward, as `a.b` and `a.b.c` in
         /// `a.b.c(x)`. Each must read a member with an explicit type.
         steps: Box<[TextRange]>,
+        /// Whether the syntax shows that the callee's return type comes from
+        /// an annotation, when the callee is a name without member accesses,
+        /// as `fail` in `fail()`. That holds for a variable or a parameter
+        /// annotated with a function type, and for a global. TypeScript ends
+        /// a path at a call only when a `never` return type comes from the
+        /// annotation of the signature's declaration. The reading context
+        /// checks an import and a member access itself.
+        annotated: bool,
     },
 }
 
@@ -559,6 +572,11 @@ pub(crate) struct FlowCallArgument {
     /// decomposed as a condition that holds, which an `asserts value`
     /// signature applies.
     pub(crate) condition: Option<usize>,
+    /// Whether the argument is always false, as TypeScript reads it: the
+    /// literal `false`, `a && b` with either operand always false, or
+    /// `a || b` with both, also inside parentheses. An `asserts value`
+    /// signature never returns for such an argument.
+    pub(crate) is_false: bool,
 }
 
 /// The paths through one execution root and the guards its conditions apply.
@@ -650,6 +668,14 @@ pub(crate) struct RootFlow {
     /// argument or a receiver, and the statement calls whose arguments,
     /// decomposed as conditions that hold, test it.
     pub(crate) subject_calls: FxHashMap<FlowSubjectId, Box<[u32]>>,
+    /// The indices in [`Self::calls`] of the first [`MAX_ENDING_CALLS`]
+    /// statement calls, which may end the path, sorted. Bit `i` of a mask in
+    /// [`Self::called`] stands for the call at index `i` here. Empty when no
+    /// such call reaches a read.
+    pub(crate) ending_calls: Box<[u32]>,
+    /// The read points that the node of a call in [`Self::ending_calls`]
+    /// reaches, sorted.
+    pub(crate) called: Box<[CalledPoint]>,
 }
 
 /// The capture point of a variable that a closure reads, where an enclosing
@@ -689,6 +715,15 @@ pub(crate) type BypassedPoint = (FlowNodeId, u64);
 /// Limits how many `switch` statements per execution root can be found
 /// exhaustive, because the solve takes them as the bits of a `u64` mask.
 pub(crate) const MAX_SWITCHES: usize = 64;
+
+/// A read point with the statement calls whose node reaches it: bit `i`
+/// stands for [`RootFlow::ending_calls`]`[i]`.
+pub(crate) type CalledPoint = (FlowNodeId, u64);
+
+/// The number of statement calls per execution root that can end a path for
+/// narrowing, the bits of the mask that the solve takes. Narrowing treats
+/// later calls as calls that return.
+pub(crate) const MAX_ENDING_CALLS: usize = 64;
 
 /// A `switch` statement whose [`FlowGuard::Bypass`] gives `never` when the
 /// statement is exhaustive.
@@ -746,6 +781,60 @@ impl RootFlow {
         self.bypassed
             .binary_search_by_key(&point, |(point, _)| *point)
             .map_or(0, |index| self.bypassed[index].1)
+    }
+
+    /// Returns the statement calls in [`Self::ending_calls`] whose node
+    /// reaches `point`, one bit each, or zero when `point` isn't in
+    /// [`Self::called`].
+    pub(crate) fn called_calls(&self, point: FlowNodeId) -> u64 {
+        self.called
+            .binary_search_by_key(&point, |(point, _)| *point)
+            .map_or(0, |index| self.called[index].1)
+    }
+
+    /// Returns the bit of the call point at index `call` in a mask of
+    /// [`Self::called`], or `None` when that call can't end the path.
+    pub(crate) fn ending_bit(&self, call: u32) -> Option<u32> {
+        let bit = self.ending_calls.binary_search(&call).ok()?;
+        u32::try_from(bit).ok()
+    }
+
+    /// Returns whether a path from the root's start reaches `point` without
+    /// crossing the node of a statement call whose bit `ends` has, the mask
+    /// of the calls that never return. TypeScript gives a read that no such
+    /// path reaches its declared type. Returns `None` when the walk exceeds
+    /// its work limit.
+    pub(crate) fn reaches_past(&self, point: FlowNodeId, ends: u64) -> Option<bool> {
+        if ends == 0 {
+            return Some(true);
+        }
+        let mut visited = vec![false; self.nodes.len()];
+        let mut pending = vec![point];
+        let mut remaining = MAX_RELEVANCE_STEPS;
+        while let Some(node) = pending.pop() {
+            remaining = remaining.checked_sub(1)?;
+            let seen = visited.get_mut(node as usize)?;
+            if *seen {
+                continue;
+            }
+            *seen = true;
+            match &self.nodes[node as usize] {
+                FlowNode::Start => return Some(true),
+                FlowNode::Join(predecessors) => pending.extend(predecessors),
+                FlowNode::Condition { antecedent, guard } => {
+                    let ends_here = matches!(
+                        self.guards.get(*guard),
+                        Some(FlowGuard::Call { call, .. })
+                            if self.ending_bit(*call).is_some_and(|bit| ends & (1 << bit) != 0)
+                    );
+                    if !ends_here {
+                        pending.push(*antecedent);
+                    }
+                }
+                FlowNode::Write { antecedent, .. } => pending.push(*antecedent),
+            }
+        }
+        Some(false)
     }
 
     /// Returns the points where the root reads `subject`, sorted, or an empty
@@ -885,6 +974,81 @@ impl RootFlow {
         }
         false
     }
+}
+
+/// The flow of one execution root, built on demand by [`build_reachability`]
+/// to find which of its statements no path reaches.
+pub(crate) struct ReachabilityGraph {
+    /// The root's graph, guards, call points, and `switch` statements, with
+    /// no reads.
+    pub(crate) flow: RootFlow,
+    /// Each statement of the root's own code that the build met, with its
+    /// incoming flow, or `None` where no path reaches it. A statement nested
+    /// in one that no path reaches is not listed.
+    pub(crate) statements: Box<[(TextRange, Option<FlowNodeId>)]>,
+    /// The flow that reaches the end of the root, or `None` when every path
+    /// ends before it.
+    pub(crate) end: Option<FlowNodeId>,
+}
+
+/// Builds the flow of `root`, an execution root of the module, to find which
+/// of its statements no path reaches. `model` is the module's semantic model,
+/// and `raw_types` and `raw_binding_types` are its collected types.
+///
+/// The build follows the rules of collection (see [`build_root`]) without
+/// selecting the root, keeping reads, or looking for writes that the graph
+/// doesn't model, so a root that collection skipped gets a graph too. The
+/// graph already cuts the paths after a call of a local function that never
+/// returns; the call points and the `switch` statements that inference must
+/// decide keep their nodes. Returns `None` when the root exceeds a
+/// construction limit or lacks syntax that the graph requires.
+pub(crate) fn build_reachability(
+    root: &AnyJsControlFlowRoot,
+    model: &SemanticModel,
+    raw_types: &[RawTypeData],
+    raw_binding_types: &FxHashMap<TextRange, TypeReference>,
+) -> Option<ReachabilityGraph> {
+    let mut functions = GuardFunctions::new(raw_types, raw_binding_types);
+    let BuiltRoot {
+        nodes,
+        guards,
+        subjects,
+        calls,
+        switches,
+        writes,
+        assigned,
+        statements,
+        end,
+        ..
+    } = build_root(root, model, &mut functions, false, true)?;
+    Some(ReachabilityGraph {
+        flow: RootFlow {
+            nodes: nodes.into_boxed_slice(),
+            guards: guards.into_boxed_slice(),
+            subjects: subjects.into_subjects().into_boxed_slice(),
+            read_points: FxHashMap::default(),
+            property_only: FxHashSet::default(),
+            instance_tested: FxHashSet::default(),
+            pattern_elements: FxHashMap::default(),
+            readonly_tested: FxHashSet::default(),
+            only_readonly_tested: FxHashSet::default(),
+            switches: switches.into_iter().map(|switch| switch.switch).collect(),
+            bypassed: Box::default(),
+            writes: writes.into_boxed_slice(),
+            assigned: assigned.into_boxed_slice(),
+            subject_writes: FxHashMap::default(),
+            assignment_only: FxHashSet::default(),
+            uninitialized: FxHashSet::default(),
+            evolving: FxHashMap::default(),
+            captures: FxHashMap::default(),
+            calls: calls.into_iter().map(|(call, _)| call).collect(),
+            subject_calls: FxHashMap::default(),
+            ending_calls: Box::default(),
+            called: Box::default(),
+        },
+        statements: statements.into_boxed_slice(),
+        end,
+    })
 }
 
 /// A read whose type a test in its execution root may refine.
@@ -1338,7 +1502,14 @@ impl RootCollector<'_> {
             mut captures,
             initializers,
             hoisted,
-        }) = build_root(root, self.model, &mut self.functions, this_can_narrow)
+            ..
+        }) = build_root(
+            root,
+            self.model,
+            &mut self.functions,
+            this_can_narrow,
+            false,
+        )
         else {
             return;
         };
@@ -1917,6 +2088,7 @@ impl RootCollector<'_> {
                 })
                 .collect();
             let (switches, bypassed) = self.bypassed_points(&nodes, switches, &read_points);
+            let (ending_calls, called) = self.called_points(&nodes, &guards, &calls, &read_points);
             // The values that the writes of each read subject assign, which
             // inference resolves for its solve.
             let mut subject_writes: FxHashMap<FlowSubjectId, Vec<u32>> = FxHashMap::default();
@@ -1980,6 +2152,8 @@ impl RootCollector<'_> {
                 captures: FxHashMap::default(),
                 calls: calls.into_iter().map(|(call, _)| call).collect(),
                 subject_calls,
+                ending_calls,
+                called,
             });
             for capture in kept_captures {
                 let (holder, subject) = capture.holder;
@@ -2053,6 +2227,80 @@ impl RootCollector<'_> {
         (
             switches.into_iter().map(|switch| switch.switch).collect(),
             bypassed.into_boxed_slice(),
+        )
+    }
+
+    /// Returns the indices of the statement calls in `calls`, and the read
+    /// points of `read_points` that the nodes of those calls reach, each with
+    /// the mask of the calls that reach it, for [`RootFlow::ending_calls`] and
+    /// [`RootFlow::called`].
+    ///
+    /// Only the first [`MAX_ENDING_CALLS`] statement calls of the root count.
+    /// Returns no call when none reaches a read, and when the walk spends the
+    /// relevance work limit, so no call ends a path in the root.
+    fn called_points(
+        &self,
+        nodes: &[FlowNode],
+        guards: &[FlowGuard],
+        calls: &[(FlowCall, Box<[FlowSubjectId]>)],
+        read_points: &FxHashMap<FlowSubjectId, Box<[FlowNodeId]>>,
+    ) -> (Box<[u32]>, Box<[CalledPoint]>) {
+        let statement_calls: Vec<u32> = (0..)
+            .zip(calls)
+            .filter(|(_, (call, _))| matches!(call.kind, FlowCallKind::Statement { .. }))
+            .map(|(index, _)| index)
+            .take(MAX_ENDING_CALLS)
+            .collect();
+        if statement_calls.is_empty() {
+            return (Box::default(), Box::default());
+        }
+        let successors = successors(nodes);
+        let mut reached = vec![0u64; nodes.len()];
+        let mut remaining = self.relevance_budget;
+        // A second build of a finally block gives a call a second node.
+        for (id, node) in (0..).zip(nodes) {
+            let FlowNode::Condition { guard, .. } = node else {
+                continue;
+            };
+            let Some(FlowGuard::Call { call, .. }) = guards.get(*guard) else {
+                continue;
+            };
+            let Ok(bit) = statement_calls.binary_search(call) else {
+                continue;
+            };
+            let mask = 1u64 << bit;
+            let mut pending = vec![id];
+            while let Some(node) = pending.pop() {
+                let Some(left) = remaining.checked_sub(1) else {
+                    return (Box::default(), Box::default());
+                };
+                remaining = left;
+                let Some(bits) = reached.get_mut(node as usize) else {
+                    return (Box::default(), Box::default());
+                };
+                if *bits & mask != 0 {
+                    continue;
+                }
+                *bits |= mask;
+                pending.extend(&successors[node as usize]);
+            }
+        }
+        let mut called: Vec<_> = read_points
+            .values()
+            .flatten()
+            .filter_map(|point| {
+                let bits = reached[*point as usize];
+                (bits != 0).then_some((*point, bits))
+            })
+            .collect();
+        if called.is_empty() {
+            return (Box::default(), Box::default());
+        }
+        called.sort_unstable_by_key(|(point, _)| *point);
+        called.dedup_by_key(|(point, _)| *point);
+        (
+            statement_calls.into_boxed_slice(),
+            called.into_boxed_slice(),
         )
     }
 
@@ -2423,11 +2671,12 @@ impl RootCollector<'_> {
         self.first_exit(closure) > inner.start()
     }
 
-    /// Returns where the first statement in the own code of `closure` that
-    /// ends every path through it ends, or the largest offset when there is
-    /// none. Such a statement is a `return`, `throw`, `break`, or `continue`,
-    /// or a loop whose test is missing or a truthy literal. Computes the
-    /// offset once per closure.
+    /// Returns where the first statement of the own code of `closure` that
+    /// ends every path through it ends, or the largest offset when it has
+    /// none. Such a statement is `return`, `throw`, `break`, `continue`, a
+    /// loop whose test is missing or never falsy by the rules of TypeScript's
+    /// binder, such as the literal `true`, or a call of a local function that
+    /// never returns. Each closure is scanned once.
     ///
     /// Code after that statement may be unreachable, and TypeScript gives a
     /// read in unreachable code its declared type. A statement that ends only
@@ -2459,15 +2708,20 @@ impl RootCollector<'_> {
                     | AnyPathEnd::JsBreakStatement(_)
                     | AnyPathEnd::JsContinueStatement(_),
                 ) => true,
-                Some(AnyPathEnd::JsWhileStatement(statement)) => {
-                    statement.test().is_ok_and(|test| is_truthy_literal(&test))
-                }
-                Some(AnyPathEnd::JsDoWhileStatement(statement)) => {
-                    statement.test().is_ok_and(|test| is_truthy_literal(&test))
-                }
-                Some(AnyPathEnd::JsForStatement(statement)) => {
-                    statement.test().is_none_or(|test| is_truthy_literal(&test))
-                }
+                Some(AnyPathEnd::JsWhileStatement(statement)) => statement
+                    .test()
+                    .is_ok_and(|test| never_has_outcome(&test, false)),
+                Some(AnyPathEnd::JsDoWhileStatement(statement)) => statement
+                    .test()
+                    .is_ok_and(|test| never_has_outcome(&test, false)),
+                Some(AnyPathEnd::JsForStatement(statement)) => statement
+                    .test()
+                    .is_none_or(|test| never_has_outcome(&test, false)),
+                Some(AnyPathEnd::JsExpressionStatement(statement)) => matches!(
+                    statement.expression(),
+                    Ok(AnyJsExpression::JsCallExpression(call))
+                        if self.functions.local_call_ends(&call, self.model)
+                ),
                 None => false,
             };
             if ends_paths {
@@ -2889,8 +3143,9 @@ const MEMBER_KINDS: SyntaxKindSet<JsLanguage> =
     AnyJsClassMember::KIND_SET.union(AnyJsControlFlowRoot::KIND_SET);
 
 declare_node_union! {
-    /// A jump or a loop. A jump ends every path through it, and so does a
-    /// loop whose test is missing or a truthy literal.
+    /// A statement after which every path may end: a jump, a loop that may
+    /// never exit by its test, or a call of a local function that never
+    /// returns. [`RootCollector::first_exit`] checks each one.
     AnyPathEnd = JsReturnStatement
         | JsThrowStatement
         | JsBreakStatement
@@ -2898,6 +3153,7 @@ declare_node_union! {
         | JsWhileStatement
         | JsDoWhileStatement
         | JsForStatement
+        | JsExpressionStatement
 }
 
 /// The statements that [`RootCollector::first_exit`] looks for, and the

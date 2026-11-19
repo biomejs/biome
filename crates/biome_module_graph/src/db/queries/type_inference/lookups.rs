@@ -7,15 +7,16 @@
 
 use super::{
     BindingTypeInput, BindingTypeWithImportBudgetInput, ExpressionTypeInput, FlowAssignedTypes,
-    FlowCallEffect, FlowCallInput, FlowSubjectRootInput, FlowSubjectTypeInput,
-    FlowSubjectWritesInput, FlowSwitchInput, LocalTypeInput, LocalTypeWithImportBudgetInput,
+    FlowCallEffect, FlowCallInput, FlowReachability, FlowReachabilityInput, FlowSubjectRootInput,
+    FlowSubjectTypeInput, FlowSubjectWritesInput, FlowSwitchInput, LocalTypeInput,
+    LocalTypeWithImportBudgetInput,
 };
 use crate::ModuleDb;
 use crate::db::type_inference::{
     ImportResolution, ResolutionCtx, find_member_type_on_demand as find_member_type_impl,
     find_value_member_type_on_demand as find_value_member_type_impl, flow_assigned_types,
-    flow_binding_baseline, flow_call_effect, flow_expression_type, flow_subject_states,
-    flow_subject_type, flow_switch_exhaustive, resolve_local_type_on_demand,
+    flow_binding_baseline, flow_call_effect, flow_expression_type, flow_reachability,
+    flow_subject_states, flow_subject_type, flow_switch_exhaustive, resolve_local_type_on_demand,
 };
 use crate::js_module_info::flow::FlowNodeId;
 use crate::module_graph::ModuleInfoKind;
@@ -231,6 +232,44 @@ pub(crate) fn infer_flow_switch_exhaustive<'db>(
     )
 }
 
+/// Finds which statements of one execution root no path reaches, and whether
+/// a path reaches the root's end, as TypeScript decides reachability.
+///
+/// The root's flow graph is built from the module's syntax when this query
+/// runs, so code that nothing asks about costs nothing. A statement is
+/// unreachable when every path to it ends first: at `return`, `throw`,
+/// `break`, or `continue`, in a branch that a condition written as the
+/// literal `true` or `false` never takes, at a call whose signature's return
+/// type annotation is `never` or that asserts an argument that is always
+/// false (see [`infer_flow_call_effect`]), or on the path that matches no
+/// case of an exhaustive `switch`.
+///
+/// Returns `None` for an unavailable root, when the root exceeds a work
+/// limit of its graph or of the walk, and when a query cycle passes through
+/// this lookup, so the caller can't tell whether code is reachable.
+#[salsa::tracked(returns(ref), cycle_result=infer_flow_reachability_cycle_result)]
+pub(crate) fn infer_flow_reachability<'db>(
+    db: &'db dyn ModuleDb,
+    input: FlowReachabilityInput<'db>,
+) -> Option<FlowReachability> {
+    let module = input.module(db);
+    let root = input.root(db);
+    execute_query(
+        TypeInferenceQueryKind::Lookups,
+        TypeInferenceProfileOrigin::exact(module, root),
+        "infer_flow_reachability",
+        || {
+            let ModuleInfoKind::Js(info) = module.kind(db) else {
+                return None;
+            };
+            if !info.infer_types {
+                return None;
+            }
+            flow_reachability(db, module, info, root)
+        },
+    )
+}
+
 /// Resolves the types of the values that the writes of one subject of an
 /// execution root assign, in the order of the root's collected writes of the
 /// subject. The subject's solve narrows by these types.
@@ -266,9 +305,12 @@ pub(crate) fn infer_flow_assigned_types<'db>(
     )
 }
 
-/// Resolves how one call point narrows, from the signature of its callee: the
-/// type predicate of a call in a condition, or the assertion of a statement
-/// call, with its target.
+/// Resolves what one call point does from the signature of its callee, as
+/// TypeScript finds that signature. A call in a condition can apply a type
+/// predicate, and a statement call an assertion, each with its target. A
+/// statement call can also never return, because the return type annotation
+/// of its signature's declaration is `never` or because it asserts an
+/// argument that is always false.
 ///
 /// The reads of every subject that the call may narrow share the result.
 /// Their solves take it in their keys, so a solve resolves no callee.
@@ -502,6 +544,14 @@ fn infer_flow_call_effect_cycle_result<'db>(
     _input: FlowCallInput<'db>,
 ) -> FlowCallEffect<'db> {
     FlowCallEffect::None
+}
+
+fn infer_flow_reachability_cycle_result<'db>(
+    _db: &'db dyn ModuleDb,
+    _id: salsa::Id,
+    _input: FlowReachabilityInput<'db>,
+) -> Option<FlowReachability> {
+    None
 }
 
 fn infer_flow_switch_exhaustive_cycle_result<'db>(

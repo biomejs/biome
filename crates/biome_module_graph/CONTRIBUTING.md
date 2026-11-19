@@ -144,7 +144,17 @@ a path on its own `this`. Its parts live in `src/js_module_info/flow/`:
   joins the flow before it, as `bindInitializer` does. As in TypeScript's
   binder, a declaration evaluates its pattern before its initializer, and a
   destructuring assignment its pattern, with unconditional defaults, before
-  its value.
+  its value. A branch that a condition written as the literal `true` or
+  `false` never takes has no flow, as TypeScript's `createFlowCondition`
+  decides (`never_has_outcome`): in `if`, loops, conditional expressions,
+  and the operands of `&&` and `||`, through parentheses and `!` around such
+  an operator, but not for `(false)`, `!false`, or the operands of `??`.
+  Neither does the code after a statement call of a local function that
+  never returns (`GuardFunctions::local_call_ends`): a function declaration
+  with one signature whose return type annotation is `never`, or an
+  `asserts value` function whose argument is always false. Reads there are
+  not recorded, so they keep their declared types, and such a path adds
+  nothing where it joins the others.
   Each write of a subject adds a write node (`FlowWriteEffect`, with the
   assigned `FlowAssigned` value) that also joins the innermost exception
   join, as `createFlowMutation` does: assignments of every kind, `++`, `--`,
@@ -323,13 +333,19 @@ a path on its own `this`. Its parts live in `src/js_module_info/flow/`:
   call, the subjects of each argument decomposed as a condition that holds,
   whose guard `FlowCallArgument::condition` keeps for `asserts value`. A call
   in a condition is a call point only when it passes a subject
-  (`condition_call_point`). A statement call is one only when its callee
+  (`condition_call_point`). A statement call is one whenever its callee
   follows TypeScript's explicit-type rule as far as the syntax tells
-  (`statement_callee`): the name that it starts at is a function, a class, a
+  (`statement_callee`), even when it passes no subject, because its
+  signature can end the path: the name that it starts at is a function, a class, a
   namespace that `declare` declares, a variable or a parameter with a type
   annotation, a global, an import, which inference checks, or `this` in a
   class member that is not `static`, and the reading context checks each
-  member access along it (`FlowCallKind::Statement`). The decomposed
+  member access along it (`FlowCallKind::Statement`). Collection also
+  records whether each argument is always false
+  (`FlowCallArgument::is_false`, as TypeScript's `isFalseExpression` reads
+  it) and whether the return type of a callee that is a name itself comes
+  from an annotation (the `annotated` field of `FlowCallKind::Statement`).
+  The decomposed
   condition lists the subjects of call points apart from the others
   (`DecomposedCondition::call_mentions`).
   A runtime test of a property of a subject other than `this`, as in
@@ -475,7 +491,10 @@ variable's declared type starts narrowing. The other reads of a subject that
 call points mention are never skipped by the subject's class, and
 `RootFlow::subject_calls` lists the call points of each read subject. It keeps a recorded `switch`
 only when its bypass reaches a kept read, and lists those reads' points in
-`RootFlow::bypassed` with the statements whose bypass reaches them. A read of an element of a
+`RootFlow::bypassed` with the statements whose bypass reaches them. In the
+same way, `RootFlow::called` lists the read points that the node of a
+statement call reaches, with the calls, among the root's first 64
+statement calls (`RootFlow::ending_calls`), whose node reaches them. A read of an element of a
 pattern is also kept when a test of the pattern reaches it: its point becomes
 a read point of the pattern, and `RootFlow::pattern_elements` maps the
 element to the pattern. A subject that conditions narrow only through
@@ -732,6 +751,22 @@ call. When a call point narrows a subject whose reads elsewhere narrow only
 through tests of its shape or only through writes, the read starts from the
 whole declared type (`called_binding_baseline`).
 
+A read whose point the node of a statement call reaches decides, after the
+cheap gates and once its baseline exists, which of those calls never
+return (`ending_calls`): their effect is `FlowCallEffect::Ends` when the
+return type annotation of the signature's declaration is `never`
+(`has_annotated_callee`), as TypeScript's
+`hasTypePredicateOrNeverReturnType` requires, or when an `asserts value`
+signature gets an argument that is always false. Such an effect narrows
+nothing, so `FlowSubjectRootInput::calls` leaves it out. A read that no path
+reaches without crossing one of these calls keeps its declared type without
+a solve (`RootFlow::reaches_past`), as TypeScript gives a read whose flow
+type is `unreachableNeverType` its declared type, and so do the reads of a
+closure created there. Otherwise the solve's key carries the calls
+(`FlowSubjectRootInput::ends`, one bit per call, zero for reads that no such
+call reaches, so they share their solves), and `FlowGuard::Call` gives
+`never` for each of them, which adds nothing where paths join.
+
 `src/db/type_inference/flow.rs` applies each runtime test with `narrow_type`
 from `biome_js_type_info`. Where branches meet, or a loop returns to an earlier
 point, it keeps every type still possible on a reachable path. A read on a path
@@ -816,6 +851,19 @@ normalized expression type or the expected type of a call argument.
 Requests live under `src/type_inference/requests/`. Every concrete request
 implements `TypeInferenceRequestMetadata` beside its execution implementation,
 which gives the request a stable profile ID and human label.
+
+`UnreachableCodeClassificationRequest` tells whether no path reaches a
+statement, as TypeScript's `isReachableFlowNode` decides. It asks the tracked
+query `infer_flow_reachability` about the execution root around the
+statement, which builds that root's graph from the module's syntax when it
+runs (`build_reachability`), with the builder that collection uses, so
+reachability costs nothing until a rule asks. The query resolves the effect
+of each statement call, through `infer_flow_call_effect` when collection
+kept the call point, decides each `switch` statement as
+`switch_is_exhaustive` does, and walks from the root's start without
+crossing a call that never returns or the bypass of an exhaustive `switch`.
+A narrowed type, even `never`, never makes code unreachable. A work limit or
+a query cycle makes the answer `Indeterminate`.
 
 ### Tracked queries
 

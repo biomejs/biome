@@ -93,6 +93,13 @@ pub(crate) struct FlowSubjectRootInput<'db> {
     /// them narrows, so that other subjects keep sharing their solves.
     #[returns(copy)]
     pub calls: Option<FlowCallEffects<'db>>,
+    /// The statement calls of the root found to never return, after which
+    /// the path adds nothing to the subject: bit `i` stands for the call at
+    /// index `i` of the root's collected ending calls. Only calls whose node
+    /// reaches the read count, so the reads that none reaches keep a mask of
+    /// zero and share one solve.
+    #[returns(copy)]
+    pub ends: u64,
 }
 
 /// The effects of the call points of one root that narrow a subject, each
@@ -136,6 +143,20 @@ pub(crate) enum FlowCallEffect<'db> {
         parameter: FlowCallParameter,
         target: Option<InferredTypeData<'db>>,
     },
+    /// A statement call that never returns, because its signature's return
+    /// type annotation is `never` or because it asserts an argument that is
+    /// always false, as `assert(false)`. The paths through the call end
+    /// there, as they do in TypeScript.
+    Ends,
+}
+
+impl FlowCallEffect<'_> {
+    /// Returns whether the effect narrows the operands of the call: a type
+    /// predicate or an assertion. A call that ends the path narrows nothing
+    /// where it returns, because it never does.
+    pub(crate) const fn narrows(&self) -> bool {
+        matches!(self, Self::Predicate { .. } | Self::Assertion { .. })
+    }
 }
 
 /// The operand of a call that its signature's type predicate or assertion
@@ -172,6 +193,47 @@ pub(crate) struct FlowSubjectWritesInput<'db> {
     /// Id of the subject in that root's subject table.
     #[returns(copy)]
     pub subject: FlowSubjectId,
+}
+
+/// Identifies an execution root of a module by its range, to find which of
+/// its statements no path reaches. See [`super::infer_flow_reachability`].
+#[salsa::interned]
+#[derive(Debug)]
+pub(crate) struct FlowReachabilityInput<'db> {
+    #[returns(copy)]
+    pub module: ModuleInfo,
+    /// The trimmed range of the execution root.
+    #[returns(copy)]
+    pub root: TextRange,
+}
+
+/// Which statements of one execution root some path reaches, and whether a
+/// path reaches the root's end. See [`super::infer_flow_reachability`].
+#[derive(Clone, Debug, Eq, Hash, PartialEq, salsa::SalsaValue)]
+pub(crate) struct FlowReachability {
+    /// The ranges of the statements that the root's own code holds, sorted by
+    /// start, each with whether some path reaches it. A statement nested in
+    /// an unreachable one is never listed, because the unreachable ancestor
+    /// stands for it.
+    pub statements: Box<[(TextRange, bool)]>,
+    /// Whether some path reaches the end of the root, where a function
+    /// returns without a `return` statement.
+    pub end: bool,
+}
+
+impl FlowReachability {
+    /// Returns whether some path reaches the innermost listed statement that
+    /// contains `range`, or `None` when no listed statement contains it.
+    pub(crate) fn reaches(&self, range: TextRange) -> Option<bool> {
+        // Statements are sorted by start, and the statements that contain
+        // `range` nest, so the innermost of them is the last one listed.
+        self.statements
+            .iter()
+            .take_while(|(statement, _)| statement.start() <= range.start())
+            .filter(|(statement, _)| statement.contains_range(range))
+            .last()
+            .map(|(_, reached)| *reached)
+    }
 }
 
 /// Identifies one `switch` statement of an execution root, for the query
