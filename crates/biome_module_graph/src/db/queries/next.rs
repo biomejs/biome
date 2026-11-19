@@ -3,50 +3,6 @@
 use crate::ModuleDb;
 use biome_resolver::ResolverPathData;
 
-#[derive(Debug, Clone, Eq, PartialEq)]
-pub struct NextPage {
-    /// The URL segments of the page, without route groups and parallel route
-    /// slots. Dynamic segments are kept as written, such as `[slug]`,
-    /// `[...slug]`, or `[[...slug]]`.
-    route: Box<[Box<str>]>,
-}
-
-impl NextPage {
-    /// Returns whether the URL `path`, without query and fragment, leads to
-    /// this page.
-    pub fn matches(&self, path: &str) -> bool {
-        // Like `@next/next/no-html-link-for-pages`, dynamic segments don't
-        // match file names such as `report.pdf`, which are usually served
-        // from `public`.
-        let is_dynamic_value = |segment: &str| !segment.contains('.');
-        let mut segments = path.split('/').filter(|segment| !segment.is_empty());
-        for route_segment in &self.route {
-            if route_segment.starts_with("[[...") {
-                return segments.all(is_dynamic_value);
-            }
-            if route_segment.starts_with("[...") {
-                return segments.next().is_some_and(is_dynamic_value)
-                    && segments.all(is_dynamic_value);
-            }
-            let Some(segment) = segments.next() else {
-                return false;
-            };
-            let segment_matches = if route_segment.starts_with('[') {
-                is_dynamic_value(segment)
-            } else {
-                route_segment.as_ref() == segment
-            };
-            if !segment_matches {
-                return false;
-            }
-        }
-        segments.next().is_none()
-    }
-}
-
-/// The default `pageExtensions` of Next.js.
-const PAGE_EXTENSIONS: [&str; 4] = ["tsx", "ts", "jsx", "js"];
-
 /// Returns the pages of the Next.js app in the directory of `project`, which
 /// contains `app`/`pages` or `src/app`/`src/pages`.
 ///
@@ -92,19 +48,17 @@ pub fn next_pages(db: &dyn ModuleDb, project: ResolverPathData) -> Vec<NextPage>
                                 .collect()
                         }
                         "pages" => {
-                            let route: Box<[Box<str>]> = directories
-                                .chain((file_stem != "index").then_some(file_stem))
-                                .map(Box::from)
-                                .collect();
-                            let is_page = match route.as_ref() {
-                                [first, ..] if first.as_ref() == "api" => false,
-                                [only] => !matches!(only.as_ref(), "_app" | "_document" | "_error"),
-                                _ => true,
-                            };
-                            if !is_page {
+                            let route =
+                                directories.chain((file_stem != "index").then_some(file_stem));
+                            let mut segments = route.clone();
+                            let is_special_file = matches!(
+                                (segments.next(), segments.next()),
+                                (Some("api"), _) | (Some("_app" | "_document" | "_error"), None)
+                            );
+                            if is_special_file {
                                 continue;
                             }
-                            route
+                            route.map(Box::from).collect()
                         }
                         _ => continue,
                     };
@@ -124,6 +78,50 @@ pub fn next_pages(db: &dyn ModuleDb, project: ResolverPathData) -> Vec<NextPage>
     });
     pages
 }
+
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub struct NextPage {
+    /// The URL segments of the page, without route groups and parallel route
+    /// slots. Dynamic segments are kept as written, such as `[slug]`,
+    /// `[...slug]`, or `[[...slug]]`.
+    route: Box<[Box<str>]>,
+}
+
+impl NextPage {
+    /// Returns whether the URL `path`, without query and fragment, leads to
+    /// this page.
+    pub fn matches(&self, path: &str) -> bool {
+        // Like `@next/next/no-html-link-for-pages`, dynamic segments don't
+        // match file names such as `report.pdf`, which are usually served
+        // from `public`.
+        let is_dynamic_value = |segment: &str| !segment.contains('.');
+        let mut segments = path.split('/').filter(|segment| !segment.is_empty());
+        for route_segment in &self.route {
+            if route_segment.starts_with("[[...") {
+                return segments.all(is_dynamic_value);
+            }
+            if route_segment.starts_with("[...") {
+                return segments.next().is_some_and(is_dynamic_value)
+                    && segments.all(is_dynamic_value);
+            }
+            let Some(segment) = segments.next() else {
+                return false;
+            };
+            let segment_matches = if route_segment.starts_with('[') {
+                is_dynamic_value(segment)
+            } else {
+                route_segment.as_ref() == segment
+            };
+            if !segment_matches {
+                return false;
+            }
+        }
+        segments.next().is_none()
+    }
+}
+
+/// The default `pageExtensions` of Next.js.
+const PAGE_EXTENSIONS: [&str; 4] = ["tsx", "ts", "jsx", "js"];
 
 #[cfg(test)]
 mod tests {

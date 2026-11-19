@@ -76,6 +76,8 @@ fn ignores_files_that_are_not_pages() {
         "/web/app/feed/(..)photo/page.jsx",
         "/web/pages/_app.jsx",
         "/web/pages/_document.jsx",
+        "/web/pages/_error/index.jsx",
+        "/web/pages/api.js",
         "/web/pages/api/users.js",
         "/web/components/button.jsx",
     ]);
