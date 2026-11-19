@@ -371,6 +371,7 @@ mod tests {
             Box::default(),
             Box::default(),
             Text::new_static("Shape"),
+            None,
         ));
         let structural = TypeData::Intersection(InternedIntersection::new(
             &db,

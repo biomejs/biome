@@ -1150,6 +1150,7 @@ impl<'db> TypeData<'db> {
                 convert_type_members(db, &class.members, resolve_reference, resolve_member),
                 class.name.clone(),
                 is_builtin,
+                class.scope_id,
             )),
             raw::TypeData::Constructor(constructor) => Self::Constructor(InternedConstructor::new(
                 db,
@@ -1174,6 +1175,7 @@ impl<'db> TypeData<'db> {
                 convert_references(db, &interface.extends, resolve_reference),
                 convert_type_members(db, &interface.members, resolve_reference, resolve_member),
                 interface.name.clone(),
+                interface.scope_id,
             )),
             raw::TypeData::Module(module) => Self::Module(InternedModule::new(
                 db,
@@ -1676,6 +1678,7 @@ impl<'db> TypeDataSlotReplacements<'db> {
                 self.rebuild_type_members(class.members(db))?,
                 class.name(db).clone(),
                 class.is_builtin(db),
+                class.scope_id(db),
             )),
             TypeData::Constructor(constructor) => TypeData::Constructor(InternedConstructor::new(
                 db,
@@ -1710,6 +1713,7 @@ impl<'db> TypeDataSlotReplacements<'db> {
                 self.take_types(interface.extends(db).len())?,
                 self.rebuild_type_members(interface.members(db))?,
                 interface.name(db).clone(),
+                interface.scope_id(db),
             )),
             TypeData::Module(module) => TypeData::Module(InternedModule::new(
                 db,
@@ -2752,6 +2756,11 @@ pub struct InternedClass<'db> {
     pub name: Option<Text>,
     #[returns(copy)]
     pub is_builtin: bool,
+    /// The scope that the class opens, or `None` for a class without one.
+    /// Two classes with the same contents and different scopes are different
+    /// values. See [`crate::type_data::Class::scope_id`].
+    #[returns(copy)]
+    pub scope_id: Option<ScopeId>,
 }
 
 #[salsa::interned]
@@ -2787,6 +2796,11 @@ pub struct InternedInterface<'db> {
     pub extends: Box<[TypeData<'db>]>,
     pub members: Box<[TypeMember<'db>]>,
     pub name: Text,
+    /// The scope that the interface opens, or `None` for an interface without
+    /// one. Two interfaces with the same contents and different scopes are
+    /// different values. See [`crate::type_data::Interface::scope_id`].
+    #[returns(copy)]
+    pub scope_id: Option<ScopeId>,
 }
 
 #[salsa::interned]
@@ -3860,6 +3874,7 @@ mod tests {
                 boxed([named_member(s)]),
                 Some(text("Class")),
                 false,
+                None,
             ))
         });
         assert_identity(&db, |s| {
@@ -3916,6 +3931,7 @@ mod tests {
                 boxed([s.next()]),
                 boxed([named_member(s)]),
                 text("Interface"),
+                None,
             ))
         });
         assert_identity(&db, |s| {
