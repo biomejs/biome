@@ -61,7 +61,7 @@ use biome_js_type_info::{
     instantiate_intersection_alias, is_narrowing_invariant, is_type_parameter_or_intersection,
     may_narrow_by_instanceof, may_narrow_by_property, narrow_by_assignment, narrow_by_constructor,
     narrow_by_in_operator, narrow_by_instanceof, narrow_by_private_name, narrow_by_property,
-    narrow_by_type_predicate, narrow_type,
+    narrow_by_type_predicate, narrow_type, type_parameter_constraint,
 };
 use biome_rowan::{AstNode, NodeOrToken, Text, TextRange, TextSize, TokenText};
 use rustc_hash::FxHashMap;
@@ -2347,10 +2347,13 @@ impl<'db> ResolutionCtx<'db, '_> {
     /// That type is the narrowed type of the discriminant, or of the operand
     /// of `typeof`, at the statement, so a `string` that a test narrowed to
     /// `"a" | "b"` before the statement counts as `"a" | "b"`. Without
-    /// narrowing, it is the ordinary type. The statement is exhaustive when
-    /// the guard of its bypass, which tests that no case matched, leaves that
-    /// type `never`. For `switch (typeof x)` with `x: unknown` or `x: any`,
-    /// the cases must test every kind of value, as in TypeScript.
+    /// narrowing, it is the ordinary type. A type parameter counts as its
+    /// constraint, so `T extends "a" | "b"` needs a case for `"a"` and one
+    /// for `"b"`, and one without a constraint counts as itself. The
+    /// statement is exhaustive when the guard of its bypass, which tests that
+    /// no case matched, leaves that type `never`. For `switch (typeof x)`
+    /// with `x: unknown` or `x: any`, the cases must test every kind of
+    /// value, as in TypeScript.
     ///
     /// Returns false when the type is `Unknown`, `never`, or `any` outside
     /// `switch (typeof x)`. TypeScript gives false for `never` too, because
@@ -2379,6 +2382,8 @@ impl<'db> ResolutionCtx<'db, '_> {
         let Some(ty) = self.flow_baseline(discriminant) else {
             return false;
         };
+        // As in TypeScript, a type parameter's constraint decides it.
+        let ty = type_parameter_constraint(self.db, ty, self.narrowing_resolver()).unwrap_or(ty);
         if let (TypeData::AnyKeyword | TypeData::UnknownKeyword, Some(kinds)) =
             (ty, switch.typeof_kinds)
         {
@@ -3011,8 +3016,9 @@ impl<'db> ResolutionCtx<'db, '_> {
                 // Where no case matches, TypeScript removes the members whose
                 // every value a case covers and keeps the others whole. So a
                 // type parameter, or an intersection with one, stays as it is
-                // unless the guard leaves it no value, instead of becoming the
-                // intersection that the guard gives.
+                // unless the guard leaves it, or the constraint of a type
+                // parameter, no value, instead of becoming the intersection
+                // that the guard gives.
                 let mut kept = Vec::with_capacity(members.len());
                 let mut others = Vec::new();
                 for &member in members {
@@ -3020,6 +3026,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                         others.push(member);
                     } else if self.apply_guard(root, *guard, solve, member, remaining)?
                         != TypeData::NeverKeyword
+                        && !self.unmatched_constraint(root, *guard, solve, member, remaining)?
                     {
                         kept.push(member);
                     }
@@ -3060,6 +3067,39 @@ impl<'db> ResolutionCtx<'db, '_> {
                 }
             }
         })
+    }
+
+    /// Returns whether the guard at `guard`, which holds where no case of a
+    /// `switch` matches, leaves no value of the constraint of `member`, a
+    /// type parameter, so that TypeScript removes `member` there, as `T`
+    /// with `T extends null` after `case null:`. Returns `None` when the flow
+    /// work limit runs out.
+    ///
+    /// TypeScript removes a type parameter only when its constraint is one
+    /// type, as `null`, `"a"`, or `string` for `case "string":` on `typeof`.
+    /// It keeps `T extends "a" | "b"` whole after `case "a": case "b":`, so
+    /// a union keeps `member`. So do `boolean`, which TypeScript treats as
+    /// `true | false`, and `void` and `never`, which aren't unit types.
+    fn unmatched_constraint(
+        &mut self,
+        root: &RootFlow,
+        guard: usize,
+        solve: &mut GuardSolve<'db>,
+        member: TypeData<'db>,
+        remaining: &mut usize,
+    ) -> Option<bool> {
+        let Some(constraint) =
+            type_parameter_constraint(self.db, member, self.narrowing_resolver())
+        else {
+            return Some(false);
+        };
+        if matches!(
+            constraint,
+            TypeData::Union(_) | TypeData::Boolean | TypeData::VoidKeyword | TypeData::NeverKeyword
+        ) {
+            return Some(false);
+        }
+        Some(self.apply_guard(root, guard, solve, constraint, remaining)? == TypeData::NeverKeyword)
     }
 
     /// Returns the type of the subject that `solve` narrows after the guard

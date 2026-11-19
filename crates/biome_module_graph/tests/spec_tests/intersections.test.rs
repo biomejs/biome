@@ -1050,8 +1050,13 @@ mod narrowing {
     // on a value or on `typeof` of one matches, TypeScript removes the
     // members of the type that every case value or kind covers and keeps the
     // others as they are, so a type parameter stays whole unless its
-    // constraint leaves it no value that passes. An `if` with the same test
-    // gives an intersection. Biome keeps `T` where TypeScript gives `never`.
+    // constraint is a single type that no value of passes, where it reads
+    // `never`, which Biome reads as its Unknown type. A constraint that is a
+    // union, as `null | undefined` and `boolean` are, keeps the type
+    // parameter. An `if` with the same test gives an intersection. Where the
+    // constraint decides that a statement is exhaustive, the read after it
+    // excludes the bypass. TypeScript also gives `never` at `f22Default`,
+    // where Biome keeps `T`, which is wider.
     #[test]
     fn switch_defaults_keep_type_parameters() {
         let source = format!(
@@ -1072,6 +1077,16 @@ mod narrowing {
             function f13<T>(x: T | null) { switch (x) { case null: return; } p([/*f13After*/x] as const); } // T
             function f14<T extends null>(x: T) { switch (x) { case null: p([/*f14*/x] as const); break; default: p([/*f14Default*/x] as const); } } // T; never
             function f15<T>(x: T | null | undefined) { switch (x) { case null: case undefined: p([/*f15*/x] as const); break; default: p([/*f15Default*/x] as const); } } // T | null | undefined; T
+            function f16<T extends "a">(x: T) { switch (x) { case "a": p([/*f16*/x] as const); break; default: p([/*f16Default*/x] as const); } } // T; never
+            function f17<T extends string>(x: T) { switch (typeof x) { case "string": p([/*f17*/x] as const); break; default: p([/*f17Default*/x] as const); } } // T; never
+            function f18<T extends Foo>(x: T) { switch (typeof x) { case "object": p([/*f18*/x] as const); break; default: p([/*f18Default*/x] as const); } } // T; never
+            function f19<T extends null | undefined>(x: T) { switch (x) { case null: case undefined: p([/*f19*/x] as const); break; default: p([/*f19Default*/x] as const); } } // T; T
+            function f20<T extends boolean>(x: T) { switch (x) { case true: case false: p([/*f20*/x] as const); break; default: p([/*f20Default*/x] as const); } } // T; T
+            function f21<T extends void>(x: T) { switch (x) { case undefined: p([/*f21*/x] as const); break; default: p([/*f21Default*/x] as const); } } // T; T
+            function f22<T extends boolean>(x: T) { switch (typeof x) { case "boolean": p([/*f22*/x] as const); break; default: p([/*f22Default*/x] as const); } } // T; never
+            function f23<T extends null>(x: T, y: string | null) { switch (x) { case null: if (y === null) return; } p([/*f23After*/y] as const); } // string
+            function f24<T extends "a" | "b">(x: T, y: string | null) { switch (x) { case "a": case "b": if (y === null) return; } p([/*f24After*/y] as const); } // string
+            function f25<T extends string>(x: T, y: string | null) { switch (x) { case "a": if (y === null) return; } p([/*f25After*/y] as const); } // string | null
             "#
         );
         assert_reads(
@@ -1103,9 +1118,27 @@ mod narrowing {
                 ("f12After", "x", &["instanceof T"]),
                 ("f13After", "x", &["instanceof T"]),
                 ("f14", "x", &["instanceof T"]),
-                ("f14Default", "x", &["instanceof T"]),
+                ("f14Default", "x", &["Unknown"]),
                 ("f15", "x", &["instanceof T", "null", "undefined"]),
                 ("f15Default", "x", &["instanceof T"]),
+                ("f16", "x", &["instanceof T"]),
+                ("f16Default", "x", &["Unknown"]),
+                ("f17", "x", &["instanceof T"]),
+                ("f17Default", "x", &["Unknown"]),
+                ("f18", "x", &["instanceof T"]),
+                ("f18Default", "x", &["Unknown"]),
+                ("f19", "x", &["instanceof T"]),
+                ("f19Default", "x", &["instanceof T"]),
+                ("f20", "x", &["instanceof T"]),
+                ("f20Default", "x", &["instanceof T"]),
+                ("f21", "x", &["instanceof T"]),
+                ("f21Default", "x", &["instanceof T"]),
+                ("f22", "x", &["instanceof T"]),
+                // TypeScript: `never`.
+                ("f22Default", "x", &["instanceof T"]),
+                ("f23After", "y", &["string"]),
+                ("f24After", "y", &["string"]),
+                ("f25After", "y", &["null", "string"]),
             ],
         );
     }

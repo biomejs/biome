@@ -63,6 +63,20 @@ function afterExhaustiveSwitch(kind: "a" | "b", label: string | null) {
 	return label?.length;
 }
 
+function afterExhaustiveSwitchOnTypeParameter<K extends "a" | "b">(
+	kind: K,
+	label: string | null,
+) {
+	switch (kind) {
+		case "a":
+			if (label === null) return;
+			break;
+		case "b":
+			if (label === null) return;
+	}
+	return label?.length;
+}
+
 ```
 
 # Diagnostics
@@ -261,6 +275,32 @@ invalidSwitchNarrowing.ts:57:9 lint/suspicious/noUnnecessaryConditions ━━━
        │ 	            ^^
     58 │ }
     59 │ 
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+invalidSwitchNarrowing.ts:71:9 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    69 │ 			if (label === null) return;
+    70 │ 	}
+  > 71 │ 	return label?.length;
+       │ 	       ^^^^^
+    72 │ }
+    73 │ 
+  
+  i Replace ?. with ..
+  
+    69 │ 			if (label === null) return;
+    70 │ 	}
+  > 71 │ 	return label?.length;
+       │ 	            ^^
+    72 │ }
+    73 │ 
   
   i The receiver is guaranteed to be non-nullish.
   
