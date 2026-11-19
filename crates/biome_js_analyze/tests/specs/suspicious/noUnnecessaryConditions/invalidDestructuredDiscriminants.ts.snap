@@ -49,6 +49,13 @@ function rest(...[state, data]: ["loaded", { size: number }] | ["failed", null])
 	}
 }
 
+function asserted(result: Result | undefined) {
+	const { state, data } = result!;
+	if (state === "loaded") {
+		return data?.size;
+	}
+}
+
 ```
 
 # Diagnostics
@@ -143,6 +150,32 @@ invalidDestructuredDiscriminants.ts:42:10 lint/suspicious/noUnnecessaryCondition
        │ 		           ^^
     43 │ 	}
     44 │ }
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+invalidDestructuredDiscriminants.ts:49:10 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    47 │ 	const { state, data } = result!;
+    48 │ 	if (state === "loaded") {
+  > 49 │ 		return data?.size;
+       │ 		       ^^^^
+    50 │ 	}
+    51 │ }
+  
+  i Replace ?. with ..
+  
+    47 │ 	const { state, data } = result!;
+    48 │ 	if (state === "loaded") {
+  > 49 │ 		return data?.size;
+       │ 		           ^^
+    50 │ 	}
+    51 │ }
   
   i The receiver is guaranteed to be non-nullish.
   

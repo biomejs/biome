@@ -1856,13 +1856,36 @@ impl TypeData {
     /// its initializer with fresh literal types widened, so `let n = 1`
     /// declares `n` as `number`, while `const n = 1` declares it as `1`. See
     /// [`TypeofWidenedLiteralExpression`] for which literal types are fresh.
+    ///
+    /// A destructuring pattern without a type annotation whose initializer is
+    /// a non-null assertion, as `s!` in `const { kind } = s!`, takes apart the
+    /// type of `s`, because local inference gives the assertion itself no
+    /// type. The pattern's variables get nothing from the `null` and
+    /// `undefined` members of that type, which the assertion removes.
     pub fn typed_bindings_from_js_variable_declarator(
         collector: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         decl: &JsVariableDeclarator,
     ) -> Option<Box<[(Text, TypeReference)]>> {
         let pattern = decl.id().ok()?;
-        let mut ty = Self::from_js_variable_declarator(collector, scope_id, decl)?.into_owned();
+        let asserted = decl
+            .variable_annotation()
+            .is_none()
+            .then(|| decl.initializer()?.expression().ok())
+            .flatten()
+            .filter(|_| !matches!(pattern, AnyJsBindingPattern::AnyJsBinding(_)))
+            .and_then(|initializer| match initializer.omit_parentheses() {
+                AnyJsExpression::TsNonNullAssertionExpression(assertion) => {
+                    assertion.expression().ok()
+                }
+                _ => None,
+            });
+        let mut ty = match asserted {
+            Some(expression) => collector
+                .resolve_expression(scope_id, &expression)
+                .into_owned(),
+            None => Self::from_js_variable_declarator(collector, scope_id, decl)?.into_owned(),
+        };
         if decl.variable_annotation().is_none()
             && matches!(pattern, AnyJsBindingPattern::AnyJsBinding(_))
             && decl
