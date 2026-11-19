@@ -103,38 +103,58 @@ queries do everything that needs a resolved type.
 
 When type inference is enabled, collection (`src/js_module_info/flow.rs`)
 builds a graph of the possible paths through each execution root that tests
-one of its own variables or a path on its own `this`. Its parts live in
-`src/js_module_info/flow/`:
+or writes one of its own variables or a path on its own `this`. Its parts
+live in `src/js_module_info/flow/`:
 
 - `scanner.rs` selects roots while the module visitor walks the syntax tree,
   so collection never walks the whole module again. A root is selected when
   its own code contains a condition, counting every `switch` statement,
   every `for...in` loop, every logical assignment, and every `?.` that a key
-  or arguments follow in its chain, or, in a module with an `asserts`
-  annotation, a standalone call. It also records whether the root's own code
+  or arguments follow in its chain, a write (an assignment, `++`, `--`,
+  `delete`, a declarator with an initializer whose type annotation is a union
+  or that destructures a pattern, or the head of a `for...of` loop that
+  assigns a target), or, in a module with an `asserts` annotation, a
+  standalone call. It also records whether the root's own code
   uses `this`, so a root whose only subjects are paths on `this` still gets a
   graph. The scanner rejects a root when its own code contains a `with`
   statement or bogus syntax, and a root over its node or depth limit. Declaration files (`.d.ts`, `.d.mts`, `.d.cts`, in any letter
   case) contain no code that runs, so the visitor does not look for roots in
   them.
-- `builder.rs` builds the graph of one selected root from start, join, and
-  condition nodes. It records the incoming flow point of every reachable read
-  of a subject and, for each condition node, the subjects its guard may
-  narrow. A read of a property path is recorded after its object and key are
-  evaluated. Expressions are evaluated in the order in which JavaScript runs
-  them, with the conditions that TypeScript's binder adds: the key and the
-  arguments after a `?.` start from a condition that its object is not
-  nullish, as `bindOptionalChain` does, and the right operand of `&&=`,
-  `||=`, or `??=` from a test of its target, as `bindLogicalLikeExpression`
-  does. A declaration evaluates its initializer, then its binding pattern, a
-  destructuring assignment its right operand, then its pattern, and a
-  function its parameters, in order, before its body. A default of a pattern
-  or a parameter runs only when the value is `undefined`, so the flow after
-  it joins the flow before it, as `bindInitializer` does. While no point
-  changes a subject's type, the code after an optional chain continues from
-  the flow after the chain's root, where TypeScript's `bindOptionalChainFlow`
-  restores the flow from before the chain, so a test inside the chain
-  reaches no read after it. A `?.` whose object the raw tables show can't be
+- `builder.rs` builds the graph of one selected root from start, join,
+  condition, and write nodes. It records the incoming flow point of every
+  reachable read of a subject and, for each condition node, the subjects its
+  guard may narrow. A read of a property path is recorded after its object
+  and key are evaluated. Expressions are evaluated in the order in which
+  JavaScript runs them, with the conditions that TypeScript's binder adds:
+  the key and the arguments after a `?.` start from a condition that its
+  object is not nullish, as `bindOptionalChain` does, and the right operand
+  of `&&=`, `||=`, or `??=` from a test of its target, as
+  `bindLogicalLikeExpression` does. A function evaluates its parameters, in
+  order, before its body. A default of a parameter or of the pattern of a
+  declaration runs only when the value is `undefined`, so the flow after it
+  joins the flow before it, as `bindInitializer` does. As in TypeScript's
+  binder, a declaration evaluates its pattern before its initializer, and a
+  destructuring assignment its pattern, with unconditional defaults, before
+  its value.
+  Each write of a subject adds a write node (`FlowWriteEffect`, with the
+  assigned `FlowAssigned` value) that also joins the innermost exception
+  join, as `createFlowMutation` does: assignments of every kind, `++`, `--`,
+  `delete`, destructuring targets, loop-head targets, and the variables of an
+  annotated declarator. A value that Biome may type narrower than TypeScript
+  (`value_callees`) gets none, so the write gives the declared type. A call
+  whose callee's annotation the syntax doesn't show, an import or a method
+  (`FlowCallee`), is kept in `FlowAssigned::callees`, and the reading
+  context confirms it where it resolves the assigned types
+  (`ResolutionCtx::has_annotated_return`): an import by the declaration
+  that it names, and a method by every type of its object, which must get
+  the method from the lib, from a declaration file, or from a class or an
+  interface that declares it with a return type annotation
+  (`member_return`, which reads the declaration that the type's scope
+  records).
+  `BuiltRoot::written` lists the targets with a write node. The code after
+  an optional chain continues from the flow after its root, as
+  `bindOptionalChainFlow` restores it, unless a key or an argument has a
+  write node; then it joins each `?.`'s short circuit with the chain's end. A `?.` whose object the raw tables show can't be
   nullish (`raw_may_be_nullish` in `biome_js_type_info`), such as a variable
   that holds an object literal, adds no condition, so it doesn't make the
   object a tested subject. The builder skips class members: methods, accessors,
@@ -148,12 +168,13 @@ one of its own variables or a path on its own `this`. Its parts live in
   loop. Its header, where each iteration starts, joins the flow after the
   expression with the end of the body and each `continue`, as
   `bindForInOrForOfStatement` does, and each iteration evaluates the head,
-  such as the defaults of a destructuring pattern, from the header. The header is also the exit, so the code after the loop
-  continues from it and from each `break`, and a test in the body never
-  reaches it. The graph has no write point for the loop variable: the
-  header joins the entry, where the variable has its declared type, so the
-  facts that the end of the body carries back never make a read narrower
-  than that type. A `switch` evaluates every case test
+  such as the defaults of a destructuring pattern, from the header, then
+  writes an assignment target of the head. The header is also the exit, so
+  the code after the loop continues from it and from each `break`, and a
+  test in the body never reaches it. A variable that the head declares gets
+  no write node: the header joins the entry, where the variable has its
+  declared type, so the facts that the end of the body carries back never
+  make a read narrower than that type. A `switch` evaluates every case test
   from the flow after its discriminant. Its clauses form groups, a run of
   clauses without statements followed by the next clause, and a group's
   statements start from the join of a condition for each of its cases, a
@@ -162,13 +183,12 @@ one of its own variables or a path on its own `this`. Its parts live in
   statement also continues from the bypass, the condition that no case
   matched. `switch (true)` chains the conditions instead, as TypeScript's
   `narrowTypeBySwitchOnTrue` does: a group starts where every case before it
-  failed to match. A `try` statement starts its catch clause from the flow
-  before the statement, as `bindTryStatement` does: an exception can leave
-  the try block at any point, and while the graph has no write points, no
-  point inside the block is narrower than its start. The builder keeps the
-  join that the exceptions of each enclosing try block and catch clause
-  reach, which a point that changes a subject's type must join, as
-  TypeScript's `createFlowMutation` does. The code after the statement
+  failed to match. A `try` statement starts its catch clause from the join
+  that the exceptions of its try block reach, as `bindTryStatement` does: an
+  exception can leave the try block at any point, and conditions only
+  narrow, so no point inside the block is narrower than its start or one of
+  its write nodes, which the join holds. The builder keeps such a join for
+  each enclosing try block and catch clause. The code after the statement
   continues from the ends of the try block and the catch clause, and `break`
   and `continue` reach their targets directly. A finally block is built
   twice. The first build starts from the join of those ends, the exceptions,
@@ -180,12 +200,11 @@ one of its own variables or a path on its own `this`. Its parts live in
   declaration such as a class or an enum, is an opaque region. The builder
   evaluates the expressions of a region, as it evaluates any expression, from
   the flow point before it, and the next statement continues from the
-  result. Regions keep
-  narrowing sound because only subjects that the root never writes narrow:
-  the state before a region is never narrower than the state at any point
-  inside or after it. For the same reason, the builder joins the target of
-  any `break` or `continue` that leaves a region from the point before the
-  region.
+  result. The builder joins the target of any `break` or `continue` that
+  leaves a region from the point before the region, which is never narrower
+  than a point inside it while the region has no write node; a region with
+  both gets no graph. The remaining regions are declarations, which contain
+  no such jump.
 - `subjects.rs` maps an expression to the subject it reads or tests: a
   variable or `this`, or a property path that starts at one, such as `o.v`,
   `a.b.c`, `t[0]`, or `this.#v`. A static member access with a named property
@@ -205,13 +224,12 @@ one of its own variables or a path on its own `this`. Its parts live in
   its properties as those of a variable. That is a class method or accessor
   that is not `static` and has no `this` parameter, an object literal method
   or accessor, or an arrow function whose `this` comes from one of them or
-  from a field initializer, when Biome can name the class or object. A
-  constructor has no `this` subject, and neither does an arrow function whose
-  `this` comes from a constructor. There, TypeScript reads a field without an
-  initializer at its declared type after a test that leaves `undefined`
-  possible (TS2565), and an arrow function called where it is defined
-  continues the constructor's flow. Each root has its own `this`, so a test
-  of `this.v` never reaches a read in a nested function.
+  from a field initializer or a constructor, when Biome can name the class
+  or object, and a constructor. In a constructor, and in an arrow function
+  that it calls where it is defined, a path on `this` whose field has no
+  initializer may be read before it is assigned, as
+  `uninitialized_fields` decides. Each root has its own `this`, so a test of
+  `this.v` never reaches a read in a nested function.
 - `guards.rs` decomposes every condition into guards on subjects, combined
   the way `!`, `&&`, and `||` combine them. For example,
   `typeof value === "string"` becomes a runtime test of `value`, and
@@ -349,10 +367,14 @@ one of its own variables or a path on its own `this`. Its parts live in
   inside an inlined initializer, is marked as aliased: the `const` holds the
   value that the property had where the `const` is declared, and a write can
   change the property before the test.
-- `writes.rs` finds the property paths that a root may write. The graph has
-  no write points, so a written path does not narrow anywhere in its root,
-  and collection replaces an aliased property guard whose property the root
-  may write with `Keep`. Collection also replaces a `FlowGuard::ReadonlyPath`
+- `writes.rs` finds the writes of a root that its graph doesn't model, as
+  in a function called where it is defined or a class static block. A
+  variable narrows only when each of its semantic writes has a write node
+  or runs only when called (`runs_only_when_called`). `WrittenPaths` tells
+  the writes of paths and variables apart by `BuiltRoot::written`: a path
+  that an unmodeled write may change doesn't narrow anywhere in its root,
+  and an aliased property guard whose property or object the root writes at
+  all becomes `Keep`. Collection also replaces a `FlowGuard::ReadonlyPath`
   guard with `Keep` when the root tests an object along its path with
   `instanceof`, a type-guard function, or `typeof` with a primitive kind or
   `"function"`, because such a test can replace a member of the object's
@@ -363,15 +385,26 @@ one of its own variables or a path on its own `this`. Its parts live in
   The scan visits the root's own code, including function and arrow
   expressions called where they are defined and class static blocks, but not
   the bodies of other functions, methods, accessors, and constructors, which
-  run only when called. A write cancels the written path and every path that
+  run only when called. A write changes the written path and every path that
   extends it. A write through an element access whose key `subjects.rs`
   accepts, as in `o["v"] = x`, writes the path that the key names, and a
-  write through any other key, as in `o[k] = x`, cancels every path below its
+  write through any other key, as in `o[k] = x`, changes every path below its
   object. Every `this` and `super` along a written target stands for the
-  root's `this`, so `super.v = x` cancels `this.v`.
+  root's `this`, so `super.v = x` changes `this.v`.
 
-Collection then keeps only the reads that a runtime test of their subject can
-reach, and only for subjects that can narrow. It keeps a recorded `switch`
+A write node mentions its subject only where the collected types show that
+it can change the type (`write_may_change`: `raw_may_be_union`,
+`raw_may_have_literal`; a path's declared type isn't collected, so a path
+write always mentions it). A subject that only writes mention is in
+`RootFlow::assignment_only`, and its candidates are skipped, as those of
+`RootFlow::property_only`, when its declared type is neither a union nor a
+literal type. `RootFlow::uninitialized` lists the subjects that may be read
+before they are assigned (`uninitialized_subjects`), and
+`RootFlow::subject_writes` the values that each read subject's writes
+assign.
+
+Collection then keeps only the reads that a runtime test or a write of their
+subject can reach, and only for subjects that can narrow. It keeps a recorded `switch`
 only when its bypass reaches a kept read, and lists those reads' points in
 `RootFlow::bypassed` with the statements whose bypass reaches them. A read of an element of a
 pattern is also kept when a test of the pattern reaches it: its point becomes
@@ -393,13 +426,17 @@ type-guard function whose target has only object types checks is also in
 collected type shows that it has no object type
 (`raw_may_narrow_by_instanceof`). A
 variable whose type is a name, an import, or inferred from an expression stays. A variable can narrow when it is
-declared in the root, never written, neither untyped nor annotated `any`, and
-not supplied by a destructuring default, which the declared type ignores. A
-pattern can narrow when its elements can. A
+declared in the root, neither untyped nor annotated `any`, not supplied by a
+destructuring default, which the declared type ignores, and each of its writes
+has a write node or runs only when called, as `writes.rs` decides. A `let`
+without an annotation whose initializer is `null`, `undefined`, or `[]`
+doesn't narrow when it is written, because TypeScript gives it a type that
+evolves with its writes. A pattern can narrow when its elements can and none
+of them is written. A
 property path can narrow when its variable can, or when it starts at a `this`
-that is a subject, and the write scan finds no write that cancels it; the scan
-runs only when the root reads a tested path or has an aliased property guard
-on an object that can narrow.
+that is a subject, and the write scan finds no write without a write node
+that may change it; the scan runs only when the root reads a tested path or
+has an aliased property guard on an object that can narrow.
 Those reads, plus the enclosing expressions that can use a narrowed operand,
 become candidates. A test inside a nested function never reaches reads in the
 enclosing one, and an array or object literal ends the chain of enclosing
@@ -440,15 +477,30 @@ incoming flow point. Both queries take the starting type as part of their
 key, so reads of a subject share one solve when they start from the same
 type.
 
+A write node applies `apply_write`, following `getTypeAtFlowAssignment`:
+the declared type reduced by the assigned type (`narrow_by_assignment`,
+following `getAssignmentReducedType`), `base_literal_type` of the incoming
+type for a compound assignment, or the declared type for a write without a
+value or of a proper prefix of the path. The assigned types are part of the
+solve's key (`FlowSubjectRootInput::assigned`, `None` without such a write),
+resolved by the reading context, never by the solve's fresh one, and typed
+without narrowing (`assigned_types`), so no assigned type depends on a
+solve. Lookups share them per root and subject through
+`infer_flow_assigned_types`. A subject in `RootFlow::uninitialized` starts
+with `undefined`, and a read where `undefined` remains although the declared
+type lacks it gets the declared type.
+
 Complete module inference evaluates flow candidates in its own resolution
-context instead of through `infer_flow_expression_type` and
-`infer_flow_binding_baseline`. When it reaches expressions, that context has
-resolved every raw type of the module, so a variable's declared type, and the
-member access that gives a property path its declared type, read types it
-already holds, while the queries would resolve them again in a fresh context.
-It still solves through `infer_flow_subject_states` and
-`infer_flow_subject_type`. Cycle fallback and the import-depth fallback read
-imports differently from the flow queries, so they keep using the queries.
+context instead of through `infer_flow_expression_type`,
+`infer_flow_binding_baseline`, and `infer_flow_assigned_types`. When it
+reaches expressions, that context has resolved every raw type of the module,
+so a variable's declared type, the member access that gives a property path
+its declared type, and the assigned types (kept in `LocalFlow`) read types
+it already holds, while the queries would resolve them again in a fresh
+context. It still solves through `infer_flow_subject_states` and
+`infer_flow_subject_type`. Cycle
+fallback and the import-depth fallback read imports differently from the
+flow queries, so they keep using the queries.
 
 A subject in `RootFlow::property_only` starts from `property_baseline`
 instead of `narrowing_baseline`. It has no baseline, so its reads keep their

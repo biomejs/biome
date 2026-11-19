@@ -18,9 +18,10 @@ use crate::globals::{
 use crate::interned_types::{InternedLiteral, Literal};
 use crate::resolved::InferredTypeData;
 use crate::type_relation::{
-    Assignability, InstanceType, PropertyLookup, PropertyPresence, TypeResolver, find_property,
-    instance_types, is_derived_from, is_empty_object_type, is_subtype, primitive_can_satisfy,
-    property_presence, resolve_wrapped_type, widened_literal,
+    Assignability, InstanceType, PropertyLookup, PropertyPresence, TypeResolver,
+    assignment_reduced_members, find_property, instance_types, is_derived_from,
+    is_empty_object_type, is_subtype, primitive_can_satisfy, property_presence,
+    resolve_wrapped_type, widened_literal,
 };
 use crate::{
     ObjectKind, RawTypeData, RawTypeId, TypeDb, TypeReference, TypeReferenceQualifier,
@@ -158,6 +159,136 @@ pub fn raw_may_be_nullish(reference: &TypeReference, raw_types: &[RawTypeData]) 
         }
         target => raw_target_may_be_nullish(&target),
     }
+}
+
+/// Returns whether a collected type reference may resolve to a union,
+/// without resolving it.
+///
+/// An assignment narrows a variable or a property only when its declared
+/// type is a union; see [`narrow_by_assignment`]. This returns false when the
+/// raw tables show that the type is a primitive type, a literal type,
+/// `boolean`, an object, interface, class, function, constructor, or tuple
+/// type written in place, `object`, `any`, `unknown`, or the result of `new`,
+/// `+`, unary `-`, `~`, or `typeof`. `boolean` counts as no union because an
+/// assignment keeps it whole. A type name, an import, an intersection, other
+/// inferred types, and a chain of raw references longer than the step limit
+/// may be unions. Resolution widens the literal type of a mutable location to
+/// its primitive type. This follows such a type to its value, because
+/// widening keeps a union a union. `raw_types` is the module table that local
+/// references index.
+pub fn raw_may_be_union(reference: &TypeReference, raw_types: &[RawTypeData]) -> bool {
+    let Some(target) = raw_reference_target(reference, raw_types) else {
+        return true;
+    };
+    let data = match target {
+        RawReferenceTarget::Global(id) => {
+            return !is_primitive_global(id)
+                && ![
+                    GLOBAL_ANY_KEYWORD_ID,
+                    GLOBAL_UNKNOWN_ID,
+                    GLOBAL_UNKNOWN_KEYWORD_ID,
+                    GLOBAL_OBJECT_KEYWORD_ID,
+                ]
+                .contains(&id);
+        }
+        RawReferenceTarget::Local(data) => data,
+    };
+    match data {
+        RawTypeData::AnyKeyword
+        | RawTypeData::BigInt
+        | RawTypeData::Boolean
+        | RawTypeData::Class(_)
+        | RawTypeData::Constructor(_)
+        | RawTypeData::Function(_)
+        | RawTypeData::Interface(_)
+        | RawTypeData::Literal(_)
+        | RawTypeData::Null
+        | RawTypeData::Number
+        | RawTypeData::Object(_)
+        | RawTypeData::ObjectKeyword
+        | RawTypeData::String
+        | RawTypeData::Symbol
+        | RawTypeData::Tuple(_)
+        | RawTypeData::Undefined
+        | RawTypeData::Unknown
+        | RawTypeData::UnknownKeyword => false,
+        RawTypeData::TypeofExpression(expression) => !matches!(
+            expression.as_ref(),
+            TypeofExpression::New(_)
+                | TypeofExpression::Addition(_)
+                | TypeofExpression::BitwiseNot(_)
+                | TypeofExpression::Typeof(_)
+                | TypeofExpression::UnaryMinus(_)
+        ),
+        _ => true,
+    }
+}
+
+/// Returns whether a collected type reference may resolve to a type with a
+/// literal member, without resolving it.
+///
+/// A compound assignment, `++`, or `--` replaces each literal member of the
+/// type of a variable or a property with its primitive type, so it changes
+/// only a type with a literal member; see [`base_literal_type`]. This returns
+/// false when the raw tables show that the type has none: a primitive type,
+/// `boolean`, an object type written in place, the result of `new`, or the
+/// literal value of a mutable location, as for `let i = 0`, because
+/// resolution widens it to its primitive type. A type name, an import, a
+/// union with a member that may have one, other inferred types, and a chain
+/// of raw references longer than the step limit may have literal members.
+/// `raw_types` is the module table that local references index.
+pub fn raw_may_have_literal(reference: &TypeReference, raw_types: &[RawTypeData]) -> bool {
+    let mut pending = vec![reference];
+    let mut remaining = MAX_RAW_REFERENCE_STEPS;
+    while let Some(reference) = pending.pop() {
+        let Some(left) = remaining.checked_sub(1) else {
+            return true;
+        };
+        remaining = left;
+        let data = match reference {
+            TypeReference::Qualifier(_) | TypeReference::Import(_) => return true,
+            // Global handles stand for keywords and built-in types.
+            TypeReference::Resolved(RawTypeId::Global(_)) => continue,
+            TypeReference::Resolved(RawTypeId::Local(local)) => {
+                let Some(data) = raw_types.get(local.index()) else {
+                    return true;
+                };
+                data
+            }
+        };
+        match data {
+            RawTypeData::Reference(next) => pending.push(next),
+            RawTypeData::Union(union) => pending.extend(union.types()),
+            RawTypeData::Literal(literal) => {
+                if literal.is_primitive() {
+                    return true;
+                }
+            }
+            RawTypeData::TypeofExpression(expression) => match expression.as_ref() {
+                TypeofExpression::WidenedLiteral(_) | TypeofExpression::New(_) => {}
+                _ => return true,
+            },
+            RawTypeData::AnyKeyword
+            | RawTypeData::BigInt
+            | RawTypeData::Boolean
+            | RawTypeData::Class(_)
+            | RawTypeData::Constructor(_)
+            | RawTypeData::Function(_)
+            | RawTypeData::Interface(_)
+            | RawTypeData::Null
+            | RawTypeData::Number
+            | RawTypeData::Object(_)
+            | RawTypeData::ObjectKeyword
+            | RawTypeData::String
+            | RawTypeData::Symbol
+            | RawTypeData::Tuple(_)
+            | RawTypeData::Undefined
+            | RawTypeData::Unknown
+            | RawTypeData::UnknownKeyword => {}
+            _ => return true,
+        }
+    }
+    false
 }
 
 /// Returns whether `target` may be nullish. A union may be nullish without
@@ -1087,6 +1218,91 @@ pub fn narrow_by_type_predicate<'db>(
         kept.push(narrowed);
     }
     InferredTypeData::union_from_types(db, kept)
+}
+
+/// Returns the type of a variable or a property right after a value of type
+/// `assigned` is assigned to it, given its `declared` type. TypeScript
+/// narrows an assignment the same way, except for `boolean` as described
+/// below.
+///
+/// Only a union narrows. The result keeps the members of `declared` that a
+/// value of `assigned` may have, so `string | number` becomes `string` for
+/// `"a"`, and `"a" | "b"` becomes `"a"`. Members are filtered, not replaced
+/// by `assigned`. The result is `declared` itself when `declared` is not a
+/// union, when every member stays, and when `assigned` isn't assignable to
+/// the members that stay. The last case covers `any` and an `assigned` type
+/// that inference couldn't determine. A `never` value gives `never`.
+///
+/// `boolean` stays whole, and a boolean value counts as both `true` and
+/// `false`, because Biome types some comparisons, such as `1 === 1`, as
+/// `true` where TypeScript gives `boolean`. So `boolean | undefined` becomes
+/// `boolean` for `true`, where TypeScript gives `true`. A comparison that
+/// Biome can't decide keeps the member. The comparisons visit at most 256
+/// pairs and types, after which the result is `declared`. `resolve` replaces
+/// local and global handles with the types they stand for.
+pub fn narrow_by_assignment<'db>(
+    db: &'db dyn TypeDb,
+    declared: InferredTypeData<'db>,
+    assigned: InferredTypeData<'db>,
+    mut resolve: impl FnMut(InferredTypeData<'db>) -> InferredTypeData<'db>,
+) -> InferredTypeData<'db> {
+    if declared == assigned || !matches!(declared, InferredTypeData::Union(_)) {
+        return declared;
+    }
+    if assigned == InferredTypeData::NeverKeyword {
+        return assigned;
+    }
+    let mut remaining = MAX_NARROWING_STEPS;
+    let (Some(members), Some(values)) = (
+        union_members(db, declared, &mut remaining),
+        union_members(db, assigned, &mut remaining),
+    ) else {
+        return declared;
+    };
+    let mut expanded = Vec::with_capacity(values.len());
+    for value in values {
+        let is_boolean = matches!(value, InferredTypeData::Boolean)
+            || matches!(value, InferredTypeData::Literal(literal) if matches!(literal.literal(db), Literal::Boolean(_)));
+        if is_boolean {
+            expanded.extend([boolean_literal(db, true), boolean_literal(db, false)]);
+        } else {
+            expanded.push(value);
+        }
+    }
+    let resolve: &mut TypeResolver<'db, '_> = &mut resolve;
+    assignment_reduced_members(db, &members, &expanded, assigned, resolve).unwrap_or(declared)
+}
+
+/// Returns `ty` with each literal member replaced by its primitive type,
+/// matching TypeScript. For example, `1 | 2 | "a"` becomes `number | string`,
+/// and other members stay as they are.
+///
+/// This is the type of a variable or a property after a compound assignment
+/// such as `x += 1`, `x++`, or `x--`, and the type that an assignment such as
+/// `x = x + 1` narrows. Returns `Unknown` when the members exceed the work
+/// limit of 256 types, because keeping a literal would be narrower than
+/// TypeScript.
+pub fn base_literal_type<'db>(
+    db: &'db dyn TypeDb,
+    ty: InferredTypeData<'db>,
+) -> InferredTypeData<'db> {
+    match ty {
+        InferredTypeData::Literal(_) => widened_literal(db, ty).unwrap_or(ty),
+        InferredTypeData::Union(_) => {
+            let mut remaining = MAX_NARROWING_STEPS;
+            let Some(members) = union_members(db, ty, &mut remaining) else {
+                return InferredTypeData::Unknown;
+            };
+            InferredTypeData::union_from_types(
+                db,
+                members
+                    .into_iter()
+                    .map(|member| widened_literal(db, member).unwrap_or(member))
+                    .collect(),
+            )
+        }
+        _ => ty,
+    }
 }
 
 /// Returns the runtime test that the flattened target of a type predicate
@@ -4388,6 +4604,193 @@ mod tests {
         ));
         // A local id outside the table may stand for anything.
         assert!(raw_may_be_nullish(&local(3), &[]));
+    }
+
+    #[test]
+    fn raw_types_that_may_be_unions_or_have_literals() {
+        let local = |index| TypeReference::Resolved(RawTypeId::Local(crate::TypeId::new(index)));
+        let union_of = |types: Vec<TypeReference>| {
+            RawTypeData::Union(Box::new(crate::Union(types.into_boxed_slice())))
+        };
+        let number_literal = RawTypeData::Literal(Box::new(crate::Literal::Number(
+            crate::literal::NumberLiteral::new(Text::new_static("1")),
+        )));
+        let widened = |value| {
+            RawTypeData::from(TypeofExpression::WidenedLiteral(
+                crate::TypeofWidenedLiteralExpression {
+                    value,
+                    is_return_type: false,
+                },
+            ))
+        };
+        let call = RawTypeData::from(TypeofExpression::Call(crate::TypeofCallExpression {
+            callee: TypeReference::unknown(),
+            arguments: Box::default(),
+        }));
+        // Each case gives whether the type may be a union, then whether it
+        // may have a literal member.
+        for (raw_types, union, literal) in [
+            (vec![RawTypeData::String], false, false),
+            (vec![RawTypeData::Boolean], false, false),
+            (vec![number_literal.clone()], false, true),
+            (
+                vec![union_of(vec![
+                    TypeReference::Resolved(GLOBAL_STRING_KEYWORD_ID),
+                    TypeReference::Resolved(GLOBAL_UNDEFINED_ID),
+                ])],
+                true,
+                false,
+            ),
+            (
+                vec![
+                    union_of(vec![
+                        TypeReference::Resolved(GLOBAL_STRING_KEYWORD_ID),
+                        local(1),
+                    ]),
+                    number_literal.clone(),
+                ],
+                true,
+                true,
+            ),
+            // `let n = 1` widens to `number`, and widening keeps a union a
+            // union.
+            (
+                vec![widened(local(1)), number_literal.clone()],
+                false,
+                false,
+            ),
+            (
+                vec![
+                    widened(local(1)),
+                    union_of(vec![local(2), local(2)]),
+                    number_literal.clone(),
+                ],
+                true,
+                false,
+            ),
+            (
+                vec![RawTypeData::Reference(local(1)), number_literal],
+                false,
+                true,
+            ),
+            (vec![call], true, true),
+        ] {
+            assert_eq!(
+                raw_may_be_union(&local(0), &raw_types),
+                union,
+                "{raw_types:?}"
+            );
+            assert_eq!(
+                raw_may_have_literal(&local(0), &raw_types),
+                literal,
+                "{raw_types:?}"
+            );
+        }
+        // Names and ids outside the table may stand for anything.
+        assert!(raw_may_be_union(&local(3), &[]));
+        assert!(raw_may_have_literal(&local(3), &[]));
+        assert!(!raw_may_be_union(
+            &TypeReference::Resolved(GLOBAL_NUMBER_KEYWORD_ID),
+            &[]
+        ));
+        assert!(!raw_may_have_literal(
+            &TypeReference::Resolved(GLOBAL_NUMBER_KEYWORD_ID),
+            &[]
+        ));
+    }
+
+    #[test]
+    fn assignments_keep_the_members_of_the_declared_union_that_the_value_may_have() {
+        let db = TestDb::default();
+        let db = &db;
+        let reduce =
+            |declared, assigned| super::narrow_by_assignment(db, declared, assigned, |ty| ty);
+        let a = string(db, "a");
+        let b = string(db, "b");
+        let one = number(db, "1");
+        let string_or_number = union(db, &[InferredTypeData::String, InferredTypeData::Number]);
+        assert_eq!(reduce(string_or_number, a), InferredTypeData::String);
+        assert_eq!(reduce(string_or_number, one), InferredTypeData::Number);
+        assert_eq!(reduce(union(db, &[a, b]), a), a);
+        // The value of a union keeps each member that one of its values may
+        // have.
+        assert_eq!(reduce(string_or_number, string_or_number), string_or_number);
+        assert_eq!(
+            reduce(
+                union(db, &[a, b, InferredTypeData::Null]),
+                union(db, &[a, InferredTypeData::Null])
+            ),
+            union(db, &[a, InferredTypeData::Null])
+        );
+        // A type that is not a union, `any`, and a value that no member
+        // accepts keep the declared type, and `never` gives `never`.
+        assert_eq!(
+            reduce(InferredTypeData::String, a),
+            InferredTypeData::String
+        );
+        assert_eq!(
+            reduce(string_or_number, InferredTypeData::AnyKeyword),
+            string_or_number
+        );
+        assert_eq!(
+            reduce(union(db, &[a, b]), string(db, "c")),
+            union(db, &[a, b])
+        );
+        assert_eq!(
+            reduce(string_or_number, InferredTypeData::NeverKeyword),
+            InferredTypeData::NeverKeyword
+        );
+        // `boolean` stays whole, and a boolean value counts as both values.
+        let optional_boolean = union(
+            db,
+            &[InferredTypeData::Boolean, InferredTypeData::Undefined],
+        );
+        assert_eq!(
+            reduce(optional_boolean, boolean_literal(db, true)),
+            InferredTypeData::Boolean
+        );
+        let literals = union(
+            db,
+            &[
+                boolean_literal(db, true),
+                boolean_literal(db, false),
+                InferredTypeData::Undefined,
+            ],
+        );
+        assert_eq!(
+            reduce(literals, boolean_literal(db, true)),
+            union(db, &[boolean_literal(db, true), boolean_literal(db, false)])
+        );
+    }
+
+    #[test]
+    fn base_literal_types_replace_literals_with_their_primitives() {
+        let db = TestDb::default();
+        let db = &db;
+        assert_eq!(
+            base_literal_type(
+                db,
+                union(db, &[number(db, "1"), number(db, "2"), string(db, "a")])
+            ),
+            union(db, &[InferredTypeData::Number, InferredTypeData::String])
+        );
+        assert_eq!(
+            base_literal_type(db, boolean_literal(db, true)),
+            InferredTypeData::Boolean
+        );
+        assert_eq!(
+            base_literal_type(db, bigint(db, "1")),
+            InferredTypeData::BigInt
+        );
+        let nullable = union(db, &[number(db, "1"), InferredTypeData::Null]);
+        assert_eq!(
+            base_literal_type(db, nullable),
+            union(db, &[InferredTypeData::Number, InferredTypeData::Null])
+        );
+        assert_eq!(
+            base_literal_type(db, InferredTypeData::Null),
+            InferredTypeData::Null
+        );
     }
 
     #[test]

@@ -295,13 +295,13 @@ fn logical_assignments_test_their_target_before_their_right_operand() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives the narrower type in the comment for
-// each read below. A logical assignment writes its target, and a variable or a
-// property path that its execution root writes doesn't narrow. So the
-// target keeps its declared type in the right operand, which is wider than
-// TypeScript's type.
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
+// The right operand of a logical assignment sees the test of its target, and
+// the target is written where the right operand runs, so the code after the
+// assignment joins the written value with the path that skipped it. `any`
+// assigned to the target keeps its declared type.
 #[test]
-fn written_targets_of_logical_assignments_keep_their_declared_type() {
+fn written_targets_of_logical_assignments_narrow() {
     assert_reads(
         r#"
         function l1(x: string | undefined) { x ??= make(/*coalescing*/x); }
@@ -311,16 +311,12 @@ fn written_targets_of_logical_assignments_keep_their_declared_type() {
         function l5(o: { v: string | undefined }) { o.v ??= make(/*path*/o.v); }
         "#,
         &[
-            // TypeScript: `undefined`.
-            ("coalescing", "x", &["string", "undefined"]),
+            ("coalescing", "x", &["undefined"]),
             ("or", "x", &["string", "undefined"]),
-            // TypeScript: `string`.
-            ("and", "x", &["string", "undefined"]),
-            // TypeScript: `undefined`.
-            ("right", "x", &["string", "undefined"]),
+            ("and", "x", &["string"]),
+            ("right", "x", &["undefined"]),
             ("after", "x", &["string", "undefined"]),
-            // TypeScript: `undefined`.
-            ("path", "o.v", &["string", "undefined"]),
+            ("path", "o.v", &["undefined"]),
         ],
     );
 }

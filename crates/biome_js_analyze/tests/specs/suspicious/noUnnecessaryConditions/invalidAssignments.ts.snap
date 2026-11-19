@@ -1,0 +1,178 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidAssignments.ts
+---
+# Input
+```ts
+// An assignment narrows the variable or property that it writes, as in
+// TypeScript, so each condition below can't change.
+
+interface Timer {
+	cancel(): void;
+}
+
+declare function make(): Timer;
+
+function assigned() {
+	let timer: Timer | null = null;
+	timer = make();
+	timer?.cancel();
+}
+
+function initializer() {
+	const timer: Timer | null = make();
+	timer?.cancel();
+}
+
+function coalesced(timer: Timer | undefined) {
+	timer ??= make();
+	timer?.cancel();
+}
+
+class Scheduler {
+	timer: Timer | null = null;
+
+	constructor() {
+		if (this.timer !== null) {
+			this.timer?.cancel();
+		}
+	}
+
+	restart() {
+		this.timer = make();
+		this.timer?.cancel();
+	}
+}
+
+```
+
+# Diagnostics
+```
+invalidAssignments.ts:13:2 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    11 │ 	let timer: Timer | null = null;
+    12 │ 	timer = make();
+  > 13 │ 	timer?.cancel();
+       │ 	^^^^^
+    14 │ }
+    15 │ 
+  
+  i Replace ?. with ..
+  
+    11 │ 	let timer: Timer | null = null;
+    12 │ 	timer = make();
+  > 13 │ 	timer?.cancel();
+       │ 	     ^^
+    14 │ }
+    15 │ 
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+invalidAssignments.ts:18:2 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    16 │ function initializer() {
+    17 │ 	const timer: Timer | null = make();
+  > 18 │ 	timer?.cancel();
+       │ 	^^^^^
+    19 │ }
+    20 │ 
+  
+  i Replace ?. with ..
+  
+    16 │ function initializer() {
+    17 │ 	const timer: Timer | null = make();
+  > 18 │ 	timer?.cancel();
+       │ 	     ^^
+    19 │ }
+    20 │ 
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+invalidAssignments.ts:23:2 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    21 │ function coalesced(timer: Timer | undefined) {
+    22 │ 	timer ??= make();
+  > 23 │ 	timer?.cancel();
+       │ 	^^^^^
+    24 │ }
+    25 │ 
+  
+  i Replace ?. with ..
+  
+    21 │ function coalesced(timer: Timer | undefined) {
+    22 │ 	timer ??= make();
+  > 23 │ 	timer?.cancel();
+       │ 	     ^^
+    24 │ }
+    25 │ 
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+invalidAssignments.ts:31:4 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    29 │ 	constructor() {
+    30 │ 		if (this.timer !== null) {
+  > 31 │ 			this.timer?.cancel();
+       │ 			^^^^^^^^^^
+    32 │ 		}
+    33 │ 	}
+  
+  i Replace ?. with ..
+  
+    29 │ 	constructor() {
+    30 │ 		if (this.timer !== null) {
+  > 31 │ 			this.timer?.cancel();
+       │ 			          ^^
+    32 │ 		}
+    33 │ 	}
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+invalidAssignments.ts:37:3 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    35 │ 	restart() {
+    36 │ 		this.timer = make();
+  > 37 │ 		this.timer?.cancel();
+       │ 		^^^^^^^^^^
+    38 │ 	}
+    39 │ }
+  
+  i Replace ?. with ..
+  
+    35 │ 	restart() {
+    36 │ 		this.timer = make();
+  > 37 │ 		this.timer?.cancel();
+       │ 		          ^^
+    38 │ 	}
+    39 │ }
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```

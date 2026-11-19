@@ -514,24 +514,19 @@ fn writes_to_the_discriminant_keep_the_object_narrowed() {
             if (s.kind === "a") {
                 s.kind = "b";
                 /*written*/s;
-                // TypeScript gives `"b"`: a write narrows the property, which
-                // Biome does not model yet.
                 /*writtenKind*/s.kind;
             }
         }
         function same(s: Shape) { if (s.kind === "c") { s.kind = "c"; /*same*/s; } }
         function other(s: Shape) { if (s.kind === "c") { s.r = 2; /*other*/s; } }
-        // TypeScript gives `Square`: a write narrows the written object, which
-        // Biome does not model yet, so the written path keeps its declared
-        // type.
         function object(o: { a: Shape }) { if (o.a.kind === "c") { o.a = { kind: "s", w: 1 }; /*object*/o.a; } }
         "#,
         &[
             ("written", "s", &["A2"]),
-            ("writtenKind", "s.kind", &["string: a", "string: b"]),
+            ("writtenKind", "s.kind", &["string: b"]),
             ("same", "s", &["Circle"]),
             ("other", "s", &["Circle"]),
-            ("object", "o.a", &["Circle", "Square"]),
+            ("object", "o.a", &["Square"]),
         ],
     );
 }
@@ -1539,15 +1534,14 @@ fn destructured_elements_that_do_not_narrow_each_other() {
 }
 
 // TypeScript 7.0.2 (`tsc --strict`) gives `number` at every read below.
-// Biome keeps the declared type at each of them. Loose `==` with a literal
-// doesn't narrow an object. An element under a default of an enclosing
-// pattern never narrows because its declared type ignores the default. A
-// read in a closure never sees the test. A written parameter variable never
-// narrows, while TypeScript narrows `v` by the assignment `v = 1`. Biome
-// gives the declared type `unknown`, which no test narrows, to an element
-// destructured from `s!`, to a parameter destructured in a function that a
-// variable annotation types, and to the parameters of a function typed by a
-// rest parameter whose type is a union of tuples.
+// Biome keeps the declared type: loose `==` with a literal doesn't narrow an
+// object, an element under a default of an enclosing pattern never
+// narrows because its declared type ignores the default, and a read in a
+// closure never sees the test. Biome also gives an element destructured from
+// `s!`, a parameter destructured in a function that a variable annotation
+// types, and the parameters of a function typed by a rest parameter whose
+// type is a union of tuples the declared type `unknown`, which no test
+// narrows.
 #[test]
 fn destructured_elements_that_biome_does_not_narrow_yet() {
     assert_element_reads(
@@ -1555,7 +1549,7 @@ fn destructured_elements_that_biome_does_not_narrow_yet() {
         function loose(s: S) { const { kind, v } = s; if (kind == "c") /*loose*/v; }
         function enclosingDefault(w: { a?: S }) { const { a: { kind, v } = g } = w; if (kind === "c") /*enclosingDefault*/v; }
         function closure(s: S) { const { kind, v } = s; const h = () => { if (kind === "c") /*closure*/v; }; }
-        function assigned({ kind, v }: S) { v = 1; if (kind === "c") /*assigned*/v; }
+
         function nonNull(s: S | undefined) { const { kind, v } = s!; if (kind === "c") /*nonNull*/v; }
         const contextual: (s: S) => void = ({ kind, v }) => { if (kind === "c") /*contextual*/v; };
         const dependent: (...args: ["a", number] | ["b", string]) => void = (k, x) => { if (k === "a") /*dependent*/x; };
@@ -1564,7 +1558,6 @@ fn destructured_elements_that_biome_does_not_narrow_yet() {
             ("loose", "v", &["number", "string"]),
             ("enclosingDefault", "v", &["number", "string"]),
             ("closure", "v", &["number", "string"]),
-            ("assigned", "v", &["number", "string"]),
             ("nonNull", "v", &["unknown"]),
             ("contextual", "v", &["unknown"]),
             ("dependent", "x", &["unknown"]),

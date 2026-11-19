@@ -3,30 +3,35 @@ use super::guards::{
     decompose_assertion, decompose_assignment_target, decompose_condition, decompose_for_in,
     decompose_switch_case, exhaustive_operand, is_unit_case,
 };
-use super::subjects::subject_of;
+use super::subjects::{identifier_key, literal_key, member_name_key, property_key, subject_of};
+use super::writes::WrittenTargets;
 use super::{
-    AnyFlowExpression, FlowNode, FlowNodeId, FlowSubjectId, FlowSubjectTable, FlowSwitch, FlowTest,
-    MAX_SWITCHES, typeof_kind_bit,
+    AnyFlowExpression, FlowAssigned, FlowAssignedValue, FlowCallee, FlowDestructureStep, FlowNode,
+    FlowNodeId, FlowSubject, FlowSubjectId, FlowSubjectTable, FlowSwitch, FlowTest, FlowWrite,
+    FlowWriteEffect, MAX_SWITCHES, PropertyKey, typeof_kind_bit,
 };
 use biome_js_control_flow::{AnyJsControlFlowRoot, is_truthy_literal};
-use biome_js_semantic::SemanticModel;
+use biome_js_semantic::{Binding, SemanticModel};
 use biome_js_syntax::{
     AnyJsArrayAssignmentPatternElement, AnyJsArrayBindingPatternElement,
-    AnyJsArrowFunctionParameters, AnyJsAssignment, AnyJsAssignmentPattern, AnyJsBindingPattern,
-    AnyJsClassMember, AnyJsConstructorParameter, AnyJsExpression, AnyJsForInOrOfInitializer,
-    AnyJsForInitializer, AnyJsFormalParameter, AnyJsFunction, AnyJsFunctionBody,
-    AnyJsObjectAssignmentPatternMember, AnyJsObjectBindingPatternMember, AnyJsObjectMemberName,
-    AnyJsOptionalChainExpression, AnyJsParameter, AnyJsStatement, AnyJsSwitchClause,
-    AnyJsTryStatement, AnyJsVariableDeclaration, AnyTsType, JsAssignmentExpression,
-    JsAssignmentOperator, JsDoWhileStatement, JsForInStatement, JsForOfStatement, JsForStatement,
-    JsIdentifierExpression, JsIfStatement, JsInitializerClause, JsLanguage, JsParameters,
-    JsSwitchStatement, JsSyntaxNode, JsVariableDeclarator, JsWhileStatement, T,
+    AnyJsArrowFunctionParameters, AnyJsAssignment, AnyJsAssignmentPattern, AnyJsBinding,
+    AnyJsBindingPattern, AnyJsClass, AnyJsClassMember, AnyJsConstructorParameter, AnyJsExpression,
+    AnyJsForInOrOfInitializer, AnyJsForInitializer, AnyJsFormalParameter, AnyJsFunction,
+    AnyJsFunctionBody, AnyJsObjectAssignmentPatternMember, AnyJsObjectBindingPatternMember,
+    AnyJsObjectMemberName, AnyJsOptionalChainExpression, AnyJsParameter, AnyJsStatement,
+    AnyJsSwitchClause, AnyJsTryStatement, AnyJsVariableDeclaration, AnyTsType, AnyTsTypeMember,
+    ClassMemberName, JsAssignmentExpression, JsAssignmentOperator, JsBinaryOperator,
+    JsDoWhileStatement, JsForInStatement, JsForOfStatement, JsForStatement, JsIdentifierExpression,
+    JsIfStatement, JsInitializerClause, JsLanguage, JsParameters, JsSwitchStatement, JsSyntaxNode,
+    JsUnaryExpression, JsUnaryOperator, JsVariableDeclarator, JsWhileStatement, T,
+    TsInterfaceDeclaration, TsTypeAnnotation, binding_ext::AnyJsBindingDeclaration,
 };
+use biome_js_type_info::DestructureField;
 use biome_rowan::{
-    AstNode, AstNodeList, AstSeparatedList, SyntaxKindSet, SyntaxResult, TokenText,
+    AstNode, AstNodeList, AstSeparatedList, SyntaxKindSet, SyntaxResult, TextRange, TokenText,
     declare_node_union,
 };
-use rustc_hash::FxHashSet;
+use rustc_hash::{FxHashMap, FxHashSet};
 use std::ops::Range;
 
 const MAX_SYNTAX_NODES: usize = 16_384;
@@ -72,6 +77,13 @@ pub(super) struct BuiltRoot {
     /// The `switch` statements that the root's [`FlowGuard::Bypass`] guards
     /// stand for, in the order of their `switch` index.
     pub(super) switches: Vec<BuiltSwitch>,
+    /// The writes that the [`FlowNode::Write`] nodes stand for.
+    pub(super) writes: Vec<FlowWrite>,
+    /// The values that the writes assign.
+    pub(super) assigned: Vec<FlowAssigned>,
+    /// The assignment targets and `delete` expressions that have a write
+    /// point in the graph.
+    pub(super) written: WrittenTargets,
 }
 
 /// A `switch` statement whose [`FlowGuard::Bypass`] gives `never` when the
@@ -105,20 +117,23 @@ type Build<T> = Result<T, Unsupported>;
 /// Expression-bodied arrows are supported. Parameters run before the body.
 /// Class members, `declare` statements, and the expressions of module export
 /// declarations other than classes and enums are not evaluated, and
-/// unreachable code records no reads.
+/// unreachable code records no reads and adds no write points. A write there
+/// has no write point, so collection counts it as a write that the graph
+/// doesn't model, as [`BuiltRoot::written`] describes.
 ///
 /// The builder models the control flow of blocks, `if`, `while`, `do...while`,
 /// `for`, `for...in`, `for...of`, `switch`, `try`, labeled statements,
 /// `break`, `continue`, `return`, and `throw`, and evaluates expressions in
-/// the order in which JavaScript runs them. Any other statement, such as a
-/// class or enum declaration, is an opaque region: the builder evaluates its
-/// expressions from the flow before it, and the code after it continues from
-/// that evaluation.
-/// A condition inside a region narrows only the rest of the expression that
-/// contains it, as in `x && x.length`. Each `break` or `continue` that leaves
-/// the region joins its target with the flow before the region. Because only
-/// subjects that the root never writes narrow, the flow before a region is
-/// never narrower than the real flow at any point inside or after it.
+/// the order in which JavaScript runs them, with a write point after each
+/// write to a subject. Any other statement, such as a class or enum
+/// declaration, is an opaque region. The builder evaluates its expressions
+/// from the flow before it, and the code after it continues from that
+/// evaluation. A condition inside a region narrows only the rest of the
+/// expression that contains it, as in `x && x.length`. Each `break` or
+/// `continue` that leaves the region joins its target with the flow before
+/// the region. That flow is never narrower than the flow at any point inside
+/// the region while the region has no write point, so a region with both a
+/// write point and a `break` or `continue` that leaves it is not supported.
 ///
 /// Returns `None` for inputs exceeding construction limits. Like the statement
 /// control-flow graph, it also returns `None` when any statement, including
@@ -149,6 +164,13 @@ pub(super) fn build_root(
         instance_mentions: FxHashSet::default(),
         reads: Vec::new(),
         switches: Vec::new(),
+        writes: Vec::new(),
+        write_ids: FxHashMap::default(),
+        assigned: Vec::new(),
+        assigned_ids: FxHashMap::default(),
+        value_callees: FxHashMap::default(),
+        written: WrittenTargets::default(),
+        write_points: 0,
         jumps: Vec::new(),
         exceptions: Vec::new(),
         returns: Vec::new(),
@@ -177,6 +199,9 @@ pub(super) fn build_root(
         instance_mentions: builder.instance_mentions,
         reads: builder.reads,
         switches: builder.switches,
+        writes: builder.writes,
+        assigned: builder.assigned,
+        written: builder.written,
     })
 }
 
@@ -395,6 +420,316 @@ pub(super) fn has_operands(link: &AnyJsOptionalChainExpression) -> bool {
     }
 }
 
+/// Returns whether `right`, the right operand of `=`, makes the assignment
+/// compound-like, as in TypeScript. That is the case for a binary expression,
+/// in parentheses or not, with a shift or arithmetic operator, as in
+/// `x = x + 1`.
+fn is_compound_like(right: &AnyJsExpression) -> bool {
+    let AnyJsExpression::JsBinaryExpression(binary) = right.clone().omit_parentheses() else {
+        return false;
+    };
+    binary.operator().is_ok_and(|operator| {
+        matches!(
+            operator,
+            JsBinaryOperator::LeftShift
+                | JsBinaryOperator::RightShift
+                | JsBinaryOperator::UnsignedRightShift
+                | JsBinaryOperator::Plus
+                | JsBinaryOperator::Minus
+                | JsBinaryOperator::Times
+                | JsBinaryOperator::Divide
+                | JsBinaryOperator::Remainder
+                | JsBinaryOperator::Exponent
+        )
+    })
+}
+
+/// Limits the operands that [`value_callees`] visits.
+const MAX_VALUE_STEPS: usize = 32;
+
+/// Returns the callees whose return types must come from annotations before
+/// a write reduces by the value of `expression`. The reading context
+/// confirms them. Returns `None` when Biome may type the value narrower than
+/// TypeScript does, so that a write of it gives the subject its declared
+/// type.
+///
+/// The values that `expression` can give are visited through parentheses,
+/// the branches of a conditional expression, the operands of `&&`, `||`, and
+/// `??`, the last operand of the comma operator, and `await`. The objects
+/// along an optional chain are visited too, because `?.` gives `undefined`
+/// only when Biome's type of its object has it. Among them:
+///
+/// - A call depends on where the return type of its callee comes from; see
+///   [`callee_return`]. An inferred return type gives `None`, because Biome
+///   infers the return type of a function without a return type annotation
+///   without the `undefined` of an end that the function can reach.
+/// - `typeof` gives `None`, because Biome types it as the one kind of value
+///   that the operand's type has, where TypeScript gives every kind.
+///
+/// Also returns `None` when the operands exceed [`MAX_VALUE_STEPS`].
+fn value_callees(expression: &AnyJsExpression, model: &SemanticModel) -> Option<Vec<FlowCallee>> {
+    let mut pending = vec![expression.clone()];
+    let mut callees = Vec::new();
+    let mut remaining = MAX_VALUE_STEPS;
+    while let Some(expression) = pending.pop() {
+        remaining = remaining.checked_sub(1)?;
+        match expression {
+            AnyJsExpression::JsParenthesizedExpression(parenthesized) => {
+                pending.extend(parenthesized.expression().ok());
+            }
+            AnyJsExpression::JsConditionalExpression(conditional) => {
+                pending.extend(conditional.consequent().ok());
+                pending.extend(conditional.alternate().ok());
+            }
+            AnyJsExpression::JsLogicalExpression(logical) => {
+                pending.extend(logical.left().ok());
+                pending.extend(logical.right().ok());
+            }
+            AnyJsExpression::JsSequenceExpression(sequence) => {
+                pending.extend(sequence.right().ok());
+            }
+            AnyJsExpression::JsAwaitExpression(await_expression) => {
+                pending.extend(await_expression.argument().ok());
+            }
+            AnyJsExpression::JsUnaryExpression(unary)
+                if unary.operator() == Ok(JsUnaryOperator::Typeof) =>
+            {
+                return None;
+            }
+            AnyJsExpression::JsCallExpression(call) => {
+                let callee = call.callee().ok()?;
+                match callee_return(&callee, model) {
+                    CalleeReturn::Annotated => {}
+                    CalleeReturn::Inferred => return None,
+                    CalleeReturn::Resolved(callee) => callees.push(callee),
+                }
+                if call.is_optional_chain() {
+                    pending.push(callee);
+                }
+            }
+            AnyJsExpression::JsStaticMemberExpression(member) if member.is_optional_chain() => {
+                pending.extend(member.object().ok());
+            }
+            AnyJsExpression::JsComputedMemberExpression(member) if member.is_optional_chain() => {
+                pending.extend(member.object().ok());
+            }
+            _ => {}
+        }
+    }
+    Some(callees)
+}
+
+/// Where the return type of the callee of a call comes from, as far as the
+/// syntax of one module tells.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub(crate) enum CalleeReturn {
+    /// An annotation that the syntax shows, or a declaration in the lib or in
+    /// a declaration file, which has no function body to infer from.
+    Annotated,
+    /// A function body, or a type that the syntax doesn't show. A write of
+    /// the call's value gives the subject its declared type.
+    Inferred,
+    /// A declaration that the reading context finds.
+    ///
+    /// For an import, it is the declaration that the import names, in the
+    /// module that declares it. That declaration is annotated in a
+    /// declaration file, and elsewhere follows the rules for a local variable
+    /// (see [`declaration_return`]).
+    ///
+    /// For a member, every type that its object can have must get the member
+    /// from the lib, from a declaration file, or from methods with a return
+    /// type annotation. Such a type is a primitive, a tuple, a lib global, a
+    /// type that a declaration file declares, or a class or an interface that
+    /// declares such methods or inherits them, without a merged interface
+    /// that another module declares. [`member_return`] finds the methods in a
+    /// class or an interface.
+    Resolved(FlowCallee),
+}
+
+/// Returns where the return type of `callee`, the callee of a call, comes
+/// from:
+///
+/// - A function or arrow expression is annotated when it has a return type
+///   annotation.
+/// - A variable that the module doesn't declare is a global that the lib or
+///   a declaration file declares, so it is annotated.
+/// - A variable that the module declares depends on its declaration; see
+///   [`declaration_return`].
+/// - A member, as `a.m`, depends on the types that its object can have, so
+///   the reading context resolves it.
+///
+/// Other callees are inferred, including an element, as `a[0]`, whose type
+/// can come from a type argument, as in `[g][0]()`.
+pub(crate) fn callee_return(callee: &AnyJsExpression, model: &SemanticModel) -> CalleeReturn {
+    match callee.clone().omit_parentheses() {
+        AnyJsExpression::JsArrowFunctionExpression(function) => {
+            annotated_if(function.return_type_annotation().is_some())
+        }
+        AnyJsExpression::JsFunctionExpression(function) => {
+            annotated_if(function.return_type_annotation().is_some())
+        }
+        AnyJsExpression::JsIdentifierExpression(identifier) => {
+            let Ok(name) = identifier.name() else {
+                return CalleeReturn::Inferred;
+            };
+            model
+                .binding(&name)
+                .map_or(CalleeReturn::Annotated, |binding| {
+                    declaration_return(&binding)
+                })
+        }
+        AnyJsExpression::JsStaticMemberExpression(member) => {
+            CalleeReturn::Resolved(FlowCallee::Member(member.range()))
+        }
+        _ => CalleeReturn::Inferred,
+    }
+}
+
+declare_node_union! {
+    /// A class or an interface, whose own members [`member_return`] reads.
+    pub(crate) AnyMemberDeclaration = AnyJsClass | TsInterfaceDeclaration
+}
+
+/// Returns how many members named `name` `owner` declares itself, and where
+/// the return type of a call to them comes from: [`CalleeReturn::Annotated`]
+/// when each of them is a method that isn't `static` and has a return type
+/// annotation, and [`CalleeReturn::Inferred`] otherwise, as for a property,
+/// an accessor, or a method without an annotation. A private name is spelled
+/// with its `#`, as local inference stores member names.
+pub(crate) fn member_return(owner: &AnyMemberDeclaration, name: &str) -> (usize, CalleeReturn) {
+    let mut declared = 0;
+    let mut annotated = true;
+    match owner {
+        AnyMemberDeclaration::AnyJsClass(class) => {
+            for member in class.members() {
+                let is_named = member
+                    .name()
+                    .ok()
+                    .flatten()
+                    .and_then(|member_name| member_name.name())
+                    .is_some_and(|member_name| match member_name {
+                        ClassMemberName::Private(own) => name.strip_prefix('#') == Some(own.text()),
+                        ClassMemberName::Public(own) => own.text() == name,
+                    });
+                if !is_named {
+                    continue;
+                }
+                declared += 1;
+                annotated &= match member {
+                    AnyJsClassMember::JsMethodClassMember(method) => {
+                        method.return_type_annotation().is_some()
+                            && !method
+                                .modifiers()
+                                .iter()
+                                .any(|modifier| modifier.as_js_static_modifier().is_some())
+                    }
+                    AnyJsClassMember::TsMethodSignatureClassMember(method) => {
+                        method.return_type_annotation().is_some()
+                            && !method
+                                .modifiers()
+                                .iter()
+                                .any(|modifier| modifier.as_js_static_modifier().is_some())
+                    }
+                    _ => false,
+                };
+            }
+        }
+        AnyMemberDeclaration::TsInterfaceDeclaration(interface) => {
+            for member in interface.members() {
+                let (member_name, is_annotated) = match member {
+                    AnyTsTypeMember::TsMethodSignatureTypeMember(method) => {
+                        (method.name(), method.return_type_annotation().is_some())
+                    }
+                    AnyTsTypeMember::TsPropertySignatureTypeMember(property) => {
+                        (property.name(), false)
+                    }
+                    AnyTsTypeMember::TsGetterSignatureTypeMember(getter) => (getter.name(), false),
+                    AnyTsTypeMember::TsSetterSignatureTypeMember(setter) => (setter.name(), false),
+                    _ => continue,
+                };
+                if member_name
+                    .ok()
+                    .and_then(|member_name| member_name.name())
+                    .is_some_and(|member_name| member_name.text() == name)
+                {
+                    declared += 1;
+                    annotated &= is_annotated;
+                }
+            }
+        }
+    }
+    (declared, annotated_if(annotated))
+}
+
+/// Returns where the return type of a call to the variable that `binding`
+/// declares comes from: the return type annotation of a function
+/// declaration, or of the function or arrow expression that initializes a
+/// variable without a type annotation; the function type that annotates a
+/// variable or a parameter; or, for an import, the declaration it names, as
+/// [`CalleeReturn::Resolved`] describes. Other declarations are inferred.
+pub(crate) fn declaration_return(binding: &Binding) -> CalleeReturn {
+    match binding.tree().declaration() {
+        Some(AnyJsBindingDeclaration::JsFunctionDeclaration(function)) => {
+            annotated_if(function.return_type_annotation().is_some())
+        }
+        Some(AnyJsBindingDeclaration::JsFunctionExportDefaultDeclaration(function)) => {
+            annotated_if(function.return_type_annotation().is_some())
+        }
+        Some(AnyJsBindingDeclaration::JsFunctionExpression(function)) => {
+            annotated_if(function.return_type_annotation().is_some())
+        }
+        Some(
+            AnyJsBindingDeclaration::TsDeclareFunctionDeclaration(_)
+            | AnyJsBindingDeclaration::TsDeclareFunctionExportDefaultDeclaration(_),
+        ) => CalleeReturn::Annotated,
+        Some(AnyJsBindingDeclaration::JsVariableDeclarator(declarator)) => {
+            if let Some(annotation) = declarator.variable_annotation() {
+                return annotated_if(is_function_type(
+                    annotation.type_annotation().ok().flatten(),
+                ));
+            }
+            let initializer = declarator
+                .initializer()
+                .and_then(|initializer| initializer.expression().ok())
+                .map(AnyJsExpression::omit_parentheses);
+            match initializer {
+                Some(AnyJsExpression::JsArrowFunctionExpression(function)) => {
+                    annotated_if(function.return_type_annotation().is_some())
+                }
+                Some(AnyJsExpression::JsFunctionExpression(function)) => {
+                    annotated_if(function.return_type_annotation().is_some())
+                }
+                _ => CalleeReturn::Inferred,
+            }
+        }
+        Some(AnyJsBindingDeclaration::JsFormalParameter(parameter)) => {
+            annotated_if(is_function_type(parameter.type_annotation()))
+        }
+        Some(
+            AnyJsBindingDeclaration::JsNamedImportSpecifier(_)
+            | AnyJsBindingDeclaration::JsShorthandNamedImportSpecifier(_)
+            | AnyJsBindingDeclaration::JsDefaultImportSpecifier(_),
+        ) => CalleeReturn::Resolved(FlowCallee::Import(binding.range())),
+        _ => CalleeReturn::Inferred,
+    }
+}
+
+fn annotated_if(annotated: bool) -> CalleeReturn {
+    if annotated {
+        CalleeReturn::Annotated
+    } else {
+        CalleeReturn::Inferred
+    }
+}
+
+/// Returns whether `annotation` is a function type, as `() => number`,
+/// whose return type the syntax shows.
+fn is_function_type(annotation: Option<TsTypeAnnotation>) -> bool {
+    annotation
+        .and_then(|annotation| annotation.ty().ok())
+        .is_some_and(|ty| matches!(ty, AnyTsType::TsFunctionType(_)))
+}
+
 declare_node_union! {
     /// A `for...in` or `for...of` statement, which runs its body once for
     /// each key or element of the value of its expression.
@@ -421,6 +756,20 @@ impl AnyJsForInOrOfStatement {
         match self {
             Self::JsForInStatement(statement) => statement.body(),
             Self::JsForOfStatement(statement) => statement.body(),
+        }
+    }
+
+    /// Returns the value that each iteration assigns to an assignment target
+    /// in the head, given the loop's `expression`: a key of a `for...in`
+    /// loop, or an element of the iterable of a `for...of` loop, or `None`
+    /// for `for await`, whose elements Biome doesn't await.
+    fn assigned_value(&self, expression: &AnyJsExpression) -> Option<FlowAssignedValue> {
+        match self {
+            Self::JsForInStatement(_) => Some(FlowAssignedValue::Key),
+            Self::JsForOfStatement(statement) => statement
+                .await_token()
+                .is_none()
+                .then(|| FlowAssignedValue::IterableValue(expression.range())),
         }
     }
 
@@ -502,16 +851,30 @@ struct RootBuilder<'a, 'raw> {
     instance_mentions: FxHashSet<(FlowNodeId, FlowSubjectId)>,
     reads: Vec<BuiltRead>,
     switches: Vec<BuiltSwitch>,
+    writes: Vec<FlowWrite>,
+    /// The index of each write in `writes`, so that a write that a second
+    /// build of a finally block meets again keeps its index.
+    write_ids: FxHashMap<FlowWrite, u32>,
+    assigned: Vec<FlowAssigned>,
+    /// The index of each value in `assigned`.
+    assigned_ids: FxHashMap<FlowAssigned, u32>,
+    /// The callees that the reading context must confirm for each value and
+    /// default that a write assigns, by the range of its expression, as
+    /// [`Self::check_value`] records them.
+    value_callees: FxHashMap<TextRange, Box<[FlowCallee]>>,
+    written: WrittenTargets,
+    /// The number of write points added so far, which tells whether an
+    /// expression contains one.
+    write_points: usize,
     jumps: Vec<JumpTarget>,
     /// The joins that exceptions reach, one for each enclosing try block or
     /// catch clause, innermost last. Each join is the start of the catch clause
     /// or finally block that handles an exception thrown inside its block.
     ///
-    /// Each join starts with the flow where its block starts and gains the end
-    /// of each finally block nested in the block. The graph has no write
-    /// points, so no point inside the block is wider than its start, and the
-    /// join needs no other predecessor. A point that can widen a subject, such
-    /// as a write, must also be added to the innermost join, as in TypeScript.
+    /// Each join starts with the flow where its block starts. It gains each
+    /// write point inside the block, as in TypeScript, and the end of each
+    /// finally block nested in the block. Conditions only narrow, so no other
+    /// point inside the block is narrower than one of these.
     exceptions: Vec<FlowNodeId>,
     /// The flows that reach a finally block from a `return`, one list for each
     /// enclosing `try` statement with a finally block, innermost last.
@@ -818,6 +1181,11 @@ impl RootBuilder<'_, '_> {
         if !check.statement(statement.clone(), label) {
             return Err(Unsupported);
         }
+        let write_points = self.write_points;
+        self.current = Some(self.evaluate(statement.syntax(), current, 0)?);
+        if !check.escaping.is_empty() && self.write_points != write_points {
+            return Err(Unsupported);
+        }
         let mut connected = Vec::new();
         for jump in check.escaping {
             let target = self.jump_target(&jump)?;
@@ -826,7 +1194,6 @@ impl RootBuilder<'_, '_> {
                 self.connect_jump(target, &jump, current)?;
             }
         }
-        self.current = Some(self.evaluate(statement.syntax(), current, 0)?);
         Ok(())
     }
 
@@ -996,23 +1363,26 @@ impl RootBuilder<'_, '_> {
         let flow = self.evaluate(expression.syntax(), current, 0)?;
         let header = self.push(FlowNode::Join(vec![flow]))?;
         let mut flow = match statement.initializer().map_err(|_| Unsupported)? {
+            // Each iteration assigns the variables of a declaration after the
+            // defaults of its pattern, but the graph has no write point for
+            // them. None is needed because the header also joins the entry,
+            // where the variables and their paths have their declared types.
+            // Facts on the back edge from an earlier iteration therefore
+            // cannot narrow a read below its declared type. A `let`, `const`,
+            // or `using` declaration is scoped to the loop, so no test before
+            // the loop can mention its variables. Biome never narrows a `var`.
             AnyJsForInOrOfInitializer::JsForVariableDeclaration(declaration) => {
                 self.declaration(&declaration.into(), header, 0)?
             }
+            // An assignment target is written each iteration, after the
+            // pattern is evaluated, with a key for `for...in` and an element
+            // of the iterable for `for...of`, as in TypeScript.
             AnyJsForInOrOfInitializer::AnyJsAssignmentPattern(pattern) => {
-                self.assignment_pattern(&pattern, header, 0)?
+                let flow = self.assignment_pattern(&pattern, header, 0)?;
+                let value = statement.assigned_value(&expression);
+                self.pattern_writes(&pattern, value, &[], flow, 0)?
             }
         };
-        // Each iteration assigns the loop variable here, after the defaults
-        // of its pattern, but the graph has no write point for it. None is
-        // needed because the header also joins the entry, where the variable
-        // and its paths have their declared types. Facts on the back edge from
-        // an earlier iteration therefore cannot narrow a read below its
-        // declared type. Biome narrows a loop variable only when the head
-        // declares it with `let`, `const`, or `using`. Those declarations are
-        // scoped to the loop, so no test before the loop can mention the
-        // variable. Biome never narrows a `var` or an externally declared
-        // variable that the loop writes, such as `k` in `for (k of xs)`.
         if statement.assumes_non_nullish() {
             let condition = decompose_for_in(
                 &expression,
@@ -1327,13 +1697,12 @@ impl RootBuilder<'_, '_> {
     /// Builds `statement` from `current`, following TypeScript's control flow
     /// for `try` statements.
     ///
-    /// An exception can leave the try block at any point. Because the graph
-    /// has no write points, none of those points is wider than the start of
-    /// the block, so the catch clause starts from the flow before the
-    /// statement. See [`Self::exceptions`]. The normal exits are the ends of
-    /// the try block and of the catch clause. `break` and `continue` reach
-    /// their targets directly, without passing through the finally block, as
-    /// in TypeScript.
+    /// An exception can leave the try block at any point. None of those
+    /// points is narrower than the start of the block or one of its write
+    /// points (see [`Self::exceptions`]), so the catch clause starts from the
+    /// join of those. The normal exits are the ends of the try block and of the
+    /// catch clause. `break` and `continue` reach their targets directly,
+    /// without passing through the finally block, as in TypeScript.
     ///
     /// Without a finally block, the code after the statement continues from
     /// the normal exits. A finally block is built twice:
@@ -1491,6 +1860,19 @@ impl RootBuilder<'_, '_> {
             Some(AnyJsExpression::JsAssignmentExpression(assignment)) => {
                 self.assignment(&assignment, incoming, depth)
             }
+            Some(AnyJsExpression::JsPreUpdateExpression(update)) => {
+                let operand = update.operand().map_err(|_| Unsupported)?;
+                self.update(&operand, incoming, depth)
+            }
+            Some(AnyJsExpression::JsPostUpdateExpression(update)) => {
+                let operand = update.operand().map_err(|_| Unsupported)?;
+                self.update(&operand, incoming, depth)
+            }
+            Some(AnyJsExpression::JsUnaryExpression(unary))
+                if unary.operator() == Ok(JsUnaryOperator::Delete) =>
+            {
+                self.delete(&unary, incoming, depth)
+            }
             Some(AnyJsExpression::JsLogicalExpression(logical)) => {
                 let left = logical.left().map_err(|_| Unsupported)?;
                 let right = logical.right().map_err(|_| Unsupported)?;
@@ -1584,12 +1966,12 @@ impl RootBuilder<'_, '_> {
     /// object and key.
     ///
     /// The code after the chain also runs where a `?.` gave `undefined`, so
-    /// its flow joins the flow before each `?.` with the end of the chain. As
-    /// long as no key or argument can change the type of a subject, that join
-    /// gives every subject its type after the root. The code after the chain
-    /// therefore continues from the flow after the root, as TypeScript does
-    /// after a chain that changes no subject, and no test inside the chain
-    /// reaches a read after it.
+    /// its flow joins the flow before each `?.` with the end of the chain.
+    /// When no key or argument has a write point, that join has the type of
+    /// the flow after the root for every subject, so the code after the chain
+    /// continues from that flow instead. TypeScript likewise restores the flow
+    /// from before a chain that changes no subject. A test inside the chain
+    /// then reaches no read after it, so those reads need no flow.
     fn optional_chain(
         &mut self,
         chain: &AnyJsOptionalChainExpression,
@@ -1613,6 +1995,10 @@ impl RootBuilder<'_, '_> {
         };
         let root = root.ok_or(Unsupported)?;
         let after_root = self.evaluate(root.syntax(), incoming, depth + links.len())?;
+        let write_points = self.write_points;
+        // The flow where each `?.` gives `undefined` without evaluating the
+        // rest of the chain.
+        let mut short_circuits = Vec::new();
         // Only a `?.` that a key or arguments follow adds a condition, so `x`
         // in `x?.a.b` isn't tested.
         let tested = links
@@ -1622,6 +2008,9 @@ impl RootBuilder<'_, '_> {
         let mut flow = after_root;
         for (index, (link, object)) in links.iter().rev().enumerate() {
             let link_depth = depth + links.len() - 1 - index;
+            if link.is_optional() {
+                short_circuits.push(flow);
+            }
             if index < tested
                 && link.is_optional()
                 && self.functions.may_be_nullish(object, self.model)
@@ -1653,7 +2042,11 @@ impl RootBuilder<'_, '_> {
                 }
             }
         }
-        Ok(after_root)
+        if self.write_points == write_points {
+            return Ok(after_root);
+        }
+        short_circuits.push(flow);
+        Ok(self.join(short_circuits)?.unwrap_or(flow))
     }
 
     /// Evaluates `assignment`, which lies at `depth`, from `incoming`, and
@@ -1661,9 +2054,18 @@ impl RootBuilder<'_, '_> {
     ///
     /// An assignment to a variable or a property, including a compound
     /// assignment such as `o[k] += v`, evaluates the object and the key of its
-    /// target, then the right operand, after which the target is written. A
-    /// destructuring assignment evaluates the right operand first, then its
-    /// pattern.
+    /// target, as [`Self::assignment_target`] describes, then the right
+    /// operand, after which a write point writes the target, as
+    /// [`Self::write_target`] describes.
+    ///
+    /// A destructuring assignment follows TypeScript's binder rather than
+    /// runtime order. It evaluates its pattern first, as
+    /// [`Self::assignment_pattern`] describes, then the right operand, and
+    /// then writes each target in source order, as [`Self::pattern_writes`]
+    /// describes. At runtime, the right operand runs first and each default
+    /// only for `undefined`, but TypeScript evaluates the defaults
+    /// unconditionally before the value, so this order keeps every read
+    /// within TypeScript's types.
     ///
     /// A logical assignment evaluates its right operand only where its target
     /// is nullish for `??=`, falsy for `||=`, or truthy for `&&=`, as in
@@ -1680,8 +2082,10 @@ impl RootBuilder<'_, '_> {
         let target = match assignment.left().map_err(|_| Unsupported)? {
             AnyJsAssignmentPattern::AnyJsAssignment(target) => target,
             pattern => {
-                let flow = self.evaluate(right.syntax(), incoming, depth + 1)?;
-                return self.assignment_pattern(&pattern, flow, depth + 1);
+                let flow = self.assignment_pattern(&pattern, incoming, depth + 1)?;
+                let flow = self.evaluate(right.syntax(), flow, depth + 1)?;
+                let value = self.assigned_expression(&right);
+                return self.pattern_writes(&pattern, value, &[], flow, depth + 1);
             }
         };
         let flow = self.assignment_target(&target, incoming, depth + 1)?;
@@ -1691,8 +2095,20 @@ impl RootBuilder<'_, '_> {
             JsAssignmentOperator::NullishCoalescingAssign => {
                 (FlowOutcome::Nullish, FlowOutcome::NonNullish)
             }
-            JsAssignmentOperator::Assign
-            | JsAssignmentOperator::AddAssign
+            JsAssignmentOperator::Assign => {
+                let flow = self.evaluate(right.syntax(), flow, depth + 1)?;
+                let value = self.assigned_expression(&right);
+                let compound_like = is_compound_like(&right);
+                return self.write_target(&target, flow, |builder| {
+                    let value = builder.assigned_value(value, &[])?;
+                    Ok(if compound_like {
+                        FlowWriteEffect::CompoundLike(value)
+                    } else {
+                        FlowWriteEffect::Assign(value)
+                    })
+                });
+            }
+            JsAssignmentOperator::AddAssign
             | JsAssignmentOperator::SubtractAssign
             | JsAssignmentOperator::TimesAssign
             | JsAssignmentOperator::SlashAssign
@@ -1704,13 +2120,96 @@ impl RootBuilder<'_, '_> {
             | JsAssignmentOperator::BitwiseAndAssign
             | JsAssignmentOperator::BitwiseOrAssign
             | JsAssignmentOperator::BitwiseXorAssign => {
-                return self.evaluate(right.syntax(), flow, depth + 1);
+                let flow = self.evaluate(right.syntax(), flow, depth + 1)?;
+                return self.write_target(&target, flow, |_| Ok(FlowWriteEffect::Compound));
             }
         };
         let right_flow = self.target_condition(flow, &target, evaluate_right)?;
         let right_flow = self.evaluate(right.syntax(), right_flow, depth + 1)?;
+        let value = self.assigned_expression(&right);
+        let right_flow = self.write_target(&target, right_flow, |builder| {
+            Ok(FlowWriteEffect::Assign(builder.assigned_value(value, &[])?))
+        })?;
         let skip_flow = self.target_condition(flow, &target, skip_right)?;
         self.join_two(skip_flow, right_flow)
+    }
+
+    /// Evaluates `++` or `--` on `operand`, which lies at `depth`, from
+    /// `incoming`, and returns the flow after it. The object and the key of
+    /// the operand run first, and then the operand is written, as a compound
+    /// assignment writes its target.
+    fn update(
+        &mut self,
+        operand: &AnyJsAssignment,
+        incoming: FlowNodeId,
+        depth: usize,
+    ) -> Build<FlowNodeId> {
+        let flow = self.assignment_target(operand, incoming, depth + 1)?;
+        self.write_target(operand, flow, |_| Ok(FlowWriteEffect::Compound))
+    }
+
+    /// Evaluates `unary`, a `delete` expression, which lies at `depth`, from
+    /// `incoming`, and returns the flow after it.
+    ///
+    /// The object and the key of the deleted property run, and then a write
+    /// point removes the property. For `delete o.p`, the write assigns
+    /// `undefined`, as in TypeScript. TypeScript ignores `delete o["p"]`, while
+    /// Biome gives `o.p` its declared type there, and `delete o[k]` gives every
+    /// path below `o` its declared type. Any other operand, as
+    /// `delete (o.p)`, is evaluated as an expression and adds no write point,
+    /// so collection counts it as a write that the graph doesn't model.
+    fn delete(
+        &mut self,
+        unary: &JsUnaryExpression,
+        incoming: FlowNodeId,
+        depth: usize,
+    ) -> Build<FlowNodeId> {
+        self.visit(depth + 1)?;
+        let argument = unary.argument().map_err(|_| Unsupported)?;
+        let (object, key) = match &argument {
+            AnyJsExpression::JsStaticMemberExpression(member) => {
+                let object = member.object().map_err(|_| Unsupported)?;
+                let flow = self.evaluate(object.syntax(), incoming, depth + 2)?;
+                let key = member.member().ok().as_ref().and_then(property_key);
+                (
+                    object,
+                    (flow, key.map(|key| (key, FlowWriteEffect::Undefined))),
+                )
+            }
+            AnyJsExpression::JsComputedMemberExpression(member) => {
+                let object = member.object().map_err(|_| Unsupported)?;
+                let key = member.member().map_err(|_| Unsupported)?;
+                let flow = self.evaluate(object.syntax(), incoming, depth + 2)?;
+                let flow = self.evaluate(key.syntax(), flow, depth + 2)?;
+                (
+                    object,
+                    (
+                        flow,
+                        literal_key(&key).map(|key| (key, FlowWriteEffect::Reset)),
+                    ),
+                )
+            }
+            _ => return self.evaluate(argument.syntax(), incoming, depth + 1),
+        };
+        let (flow, property) = key;
+        let Some(object) = subject_of(&object, self.model, &mut self.subjects) else {
+            return Ok(flow);
+        };
+        self.written.members.insert(unary.range());
+        let write = match property {
+            Some((key, effect)) => FlowWrite {
+                subject: self
+                    .subjects
+                    .intern(FlowSubject::Member { object, key })
+                    .ok_or(Unsupported)?,
+                effect,
+            },
+            None => FlowWrite {
+                subject: object,
+                effect: FlowWriteEffect::Wildcard,
+            },
+        };
+        self.push_write(flow, write)
     }
 
     /// Adds a node where the target `target` of a logical assignment has
@@ -1771,15 +2270,17 @@ impl RootBuilder<'_, '_> {
         }
     }
 
-    /// Evaluates `pattern`, the target of a destructuring assignment, from
-    /// `incoming` and returns the flow after it. `incoming` is the flow after
-    /// the value that `pattern` destructures, and `pattern` lies at `depth`.
+    /// Evaluates `pattern`, the target of a destructuring assignment or of the
+    /// head of a `for...in` or `for...of` loop, which lies at `depth`, from
+    /// `incoming`, and returns the flow after it, before any target is
+    /// written.
     ///
-    /// The elements run in source order. Each element evaluates its computed
-    /// key, then the object and the key of its target, then its default, after
-    /// which the target is written. A default runs only when the value is
-    /// `undefined`. An element whose target is a nested pattern evaluates its
-    /// default, then the nested pattern.
+    /// The elements run in source order, as TypeScript's binder visits them.
+    /// Each evaluates its computed key, the object and the key of its target
+    /// as [`Self::assignment_target`] describes, and its default. A default
+    /// runs unconditionally here, as in TypeScript, so a write in it, as in
+    /// `[a = (x = 1)] = t`, holds after the pattern. An element whose target
+    /// is a nested pattern evaluates its default, then the nested pattern.
     fn assignment_pattern(
         &mut self,
         pattern: &AnyJsAssignmentPattern,
@@ -1828,7 +2329,7 @@ impl RootBuilder<'_, '_> {
                         }
                         AnyJsObjectAssignmentPatternMember::JsObjectAssignmentPatternShorthandProperty(
                             property,
-                        ) => self.default_value(property.init(), flow, depth + 1)?,
+                        ) => self.assignment_element(None, property.init(), flow, depth + 1)?,
                         AnyJsObjectAssignmentPatternMember::JsObjectAssignmentPatternRest(rest) => {
                             match rest.target() {
                                 Ok(target) => self.assignment_target(&target, flow, depth + 1)?,
@@ -1857,23 +2358,385 @@ impl RootBuilder<'_, '_> {
         incoming: FlowNodeId,
         depth: usize,
     ) -> Build<FlowNodeId> {
+        let default = default.and_then(|default| default.expression().ok());
+        let evaluate_default = |builder: &mut Self, flow| match &default {
+            Some(default) => builder.evaluate(default.syntax(), flow, depth + 1),
+            None => Ok(flow),
+        };
         match pattern {
             Some(AnyJsAssignmentPattern::AnyJsAssignment(target)) => {
                 let flow = self.assignment_target(&target, incoming, depth)?;
-                self.default_value(default, flow, depth)
+                evaluate_default(self, flow)
             }
             Some(pattern) => {
-                let flow = self.default_value(default, incoming, depth)?;
+                let flow = evaluate_default(self, incoming)?;
                 self.assignment_pattern(&pattern, flow, depth)
             }
-            None => self.default_value(default, incoming, depth),
+            None => evaluate_default(self, incoming),
         }
+    }
+
+    /// Writes each target of `pattern`, the target of a destructuring
+    /// assignment or of the head of a `for...in` or `for...of` loop, in source
+    /// order from `incoming`, and returns the flow after them.
+    ///
+    /// Each target is assigned the field of `value` that the elements around
+    /// it read, with `steps` for those outside `pattern` and the default of
+    /// each element along the way, as in TypeScript. A target gets its
+    /// declared type when `value` is `None`. A computed key that
+    /// [`member_name_key`] rejects reads an unknown field, and so does a rest
+    /// element after one, so their targets get their declared types.
+    fn pattern_writes(
+        &mut self,
+        pattern: &AnyJsAssignmentPattern,
+        value: Option<FlowAssignedValue>,
+        steps: &[FlowDestructureStep],
+        incoming: FlowNodeId,
+        depth: usize,
+    ) -> Build<FlowNodeId> {
+        self.visit(depth)?;
+        let mut flow = incoming;
+        match pattern {
+            AnyJsAssignmentPattern::AnyJsAssignment(target) => {
+                return self.write_target(target, flow, |builder| {
+                    Ok(FlowWriteEffect::Assign(
+                        builder.assigned_value(value, steps)?,
+                    ))
+                });
+            }
+            AnyJsAssignmentPattern::JsArrayAssignmentPattern(pattern) => {
+                for (index, element) in pattern.elements().iter().enumerate() {
+                    let (target, field, default) = match element.map_err(|_| Unsupported)? {
+                        AnyJsArrayAssignmentPatternElement::JsArrayAssignmentPatternElement(
+                            element,
+                        ) => (
+                            element.pattern(),
+                            DestructureField::Index {
+                                index,
+                                has_initializer: false,
+                            },
+                            element.init(),
+                        ),
+                        AnyJsArrayAssignmentPatternElement::JsArrayAssignmentPatternRestElement(
+                            element,
+                        ) => (element.pattern(), DestructureField::RestFrom(index), None),
+                        AnyJsArrayAssignmentPatternElement::JsArrayHole(_) => continue,
+                    };
+                    let Ok(target) = target else {
+                        continue;
+                    };
+                    let (value, steps) = self.with_step(value, steps, field, default.as_ref());
+                    flow = self.pattern_writes(&target, value, &steps, flow, depth + 1)?;
+                }
+            }
+            AnyJsAssignmentPattern::JsObjectAssignmentPattern(pattern) => {
+                // The names of the properties before a rest element, which
+                // it leaves out, or `None` once a key names no property and
+                // when there is no rest element.
+                let has_rest = matches!(
+                    pattern.properties().iter().next_back(),
+                    Some(Ok(
+                        AnyJsObjectAssignmentPatternMember::JsObjectAssignmentPatternRest(_)
+                    ))
+                );
+                let mut names = has_rest.then(Vec::new);
+                for property in pattern.properties().iter() {
+                    match property.map_err(|_| Unsupported)? {
+                        AnyJsObjectAssignmentPatternMember::JsObjectAssignmentPatternProperty(
+                            property,
+                        ) => {
+                            let Ok(target) = property.pattern() else {
+                                continue;
+                            };
+                            let key = property.member().ok().as_ref().and_then(member_name_key);
+                            let (value, steps) = match key {
+                                Some(PropertyKey::Name(name)) => {
+                                    if let Some(names) = &mut names {
+                                        names.push(name.clone());
+                                    }
+                                    let field = DestructureField::Name { name, has_initializer: false };
+                                    self.with_step(value, steps, field, property.init().as_ref())
+                                }
+                                Some(PropertyKey::Private(_)) | None => {
+                                    names = None;
+                                    (None, Vec::new())
+                                }
+                            };
+                            flow = self.pattern_writes(&target, value, &steps, flow, depth + 1)?;
+                        }
+                        AnyJsObjectAssignmentPatternMember::JsObjectAssignmentPatternShorthandProperty(
+                            property,
+                        ) => {
+                            let Ok(identifier) = property.identifier() else {
+                                continue;
+                            };
+                            let key = identifier.name_token().ok().as_ref().and_then(identifier_key);
+                            let (value, steps) = match key {
+                                Some(PropertyKey::Name(name)) => {
+                                    if let Some(names) = &mut names {
+                                        names.push(name.clone());
+                                    }
+                                    let field = DestructureField::Name { name, has_initializer: false };
+                                    self.with_step(value, steps, field, property.init().as_ref())
+                                }
+                                Some(PropertyKey::Private(_)) | None => {
+                                    names = None;
+                                    (None, Vec::new())
+                                }
+                            };
+                            let target = AnyJsAssignment::JsIdentifierAssignment(identifier);
+                            flow = self.write_target(&target, flow, |builder| {
+                                Ok(FlowWriteEffect::Assign(builder.assigned_value(value, &steps)?))
+                            })?;
+                        }
+                        AnyJsObjectAssignmentPatternMember::JsObjectAssignmentPatternRest(rest) => {
+                            let Ok(target) = rest.target() else {
+                                continue;
+                            };
+                            let (value, steps) = match names.take() {
+                                Some(names) => {
+                                    let field = DestructureField::RestExcept(names.into());
+                                    self.with_step(value, steps, field, None)
+                                }
+                                None => (None, Vec::new()),
+                            };
+                            flow = self.write_target(&target, flow, |builder| {
+                                Ok(FlowWriteEffect::Assign(builder.assigned_value(value, &steps)?))
+                            })?;
+                        }
+                        AnyJsObjectAssignmentPatternMember::JsBogusAssignment(_) => {
+                            return Err(Unsupported);
+                        }
+                    }
+                }
+            }
+        }
+        Ok(flow)
+    }
+
+    /// Adds a write point of the subject that `target` writes after
+    /// `incoming`, with the effect that `effect` gives, and returns the flow
+    /// after it.
+    ///
+    /// Parentheses and `!` around the target are skipped, as in TypeScript.
+    /// TypeScript doesn't narrow at a target behind `as`, `satisfies`, or
+    /// `<T>`, as `(x as T) = v`, so the write gives the subject its declared
+    /// type, which is wider. A write through a key that [`literal_key`]
+    /// rejects, as `o[k] = v`, writes any property of `o`, as
+    /// [`FlowWriteEffect::Wildcard`] describes.
+    ///
+    /// A target that is no subject and whose object is no subject, as `f().v`
+    /// or a global, adds no point and isn't recorded in
+    /// [`BuiltRoot::written`], so collection counts it as a write that the
+    /// graph doesn't model, as for writes outside the root's flow.
+    fn write_target(
+        &mut self,
+        target: &AnyJsAssignment,
+        incoming: FlowNodeId,
+        effect: impl FnOnce(&mut Self) -> Build<FlowWriteEffect>,
+    ) -> Build<FlowNodeId> {
+        let mut target = target.clone();
+        let mut asserted = false;
+        let (subject, wildcard) = loop {
+            target = match target {
+                AnyJsAssignment::JsParenthesizedAssignment(assignment) => assignment.assignment(),
+                AnyJsAssignment::TsNonNullAssertionAssignment(assignment) => {
+                    assignment.assignment()
+                }
+                AnyJsAssignment::TsAsAssignment(assignment) => {
+                    asserted = true;
+                    assignment.assignment()
+                }
+                AnyJsAssignment::TsSatisfiesAssignment(assignment) => {
+                    asserted = true;
+                    assignment.assignment()
+                }
+                AnyJsAssignment::TsTypeAssertionAssignment(assignment) => {
+                    asserted = true;
+                    assignment.assignment()
+                }
+                AnyJsAssignment::JsIdentifierAssignment(identifier) => {
+                    let Some(subject) = self.subjects.reference(self.model, &identifier) else {
+                        return Ok(incoming);
+                    };
+                    self.written
+                        .variables
+                        .insert(identifier.syntax().text_trimmed_range().start());
+                    break (subject, false);
+                }
+                AnyJsAssignment::JsStaticMemberAssignment(member) => {
+                    let (Ok(object), Ok(name)) = (member.object(), member.member()) else {
+                        return Ok(incoming);
+                    };
+                    let (Some(object), Some(key)) = (
+                        subject_of(&object, self.model, &mut self.subjects),
+                        property_key(&name),
+                    ) else {
+                        return Ok(incoming);
+                    };
+                    let subject = self
+                        .subjects
+                        .intern(FlowSubject::Member { object, key })
+                        .ok_or(Unsupported)?;
+                    self.written.members.insert(member.range());
+                    break (subject, false);
+                }
+                AnyJsAssignment::JsComputedMemberAssignment(member) => {
+                    let Some(object) = member
+                        .object()
+                        .ok()
+                        .and_then(|object| subject_of(&object, self.model, &mut self.subjects))
+                    else {
+                        return Ok(incoming);
+                    };
+                    self.written.members.insert(member.range());
+                    match member.member().ok().as_ref().and_then(literal_key) {
+                        Some(key) => {
+                            let subject = self
+                                .subjects
+                                .intern(FlowSubject::Member { object, key })
+                                .ok_or(Unsupported)?;
+                            break (subject, false);
+                        }
+                        None => break (object, true),
+                    }
+                }
+                AnyJsAssignment::JsBogusAssignment(_) => return Err(Unsupported),
+            }
+            .map_err(|_| Unsupported)?;
+        };
+        let effect = if wildcard {
+            FlowWriteEffect::Wildcard
+        } else if asserted {
+            FlowWriteEffect::Reset
+        } else {
+            effect(self)?
+        };
+        self.push_write(incoming, FlowWrite { subject, effect })
+    }
+
+    /// Adds a [`FlowNode::Write`] of `write` after `antecedent` and returns
+    /// it. The innermost exception join also gets the new node, as in
+    /// TypeScript.
+    fn push_write(&mut self, antecedent: FlowNodeId, write: FlowWrite) -> Build<FlowNodeId> {
+        let index = match self.write_ids.get(&write) {
+            Some(index) => *index,
+            None => {
+                let index = u32::try_from(self.writes.len()).map_err(|_| Unsupported)?;
+                self.writes.push(write.clone());
+                self.write_ids.insert(write, index);
+                index
+            }
+        };
+        let node = self.push(FlowNode::Write {
+            antecedent,
+            write: index,
+        })?;
+        self.write_points += 1;
+        if let Some(exception) = self.exceptions.last().copied() {
+            self.add_predecessor(exception, node)?;
+        }
+        Ok(node)
+    }
+
+    /// Returns the index in [`BuiltRoot::assigned`] of `value` read through
+    /// `steps`, or `None` when `value` is `None`, because Biome can't type it
+    /// as TypeScript does.
+    fn assigned_value(
+        &mut self,
+        value: Option<FlowAssignedValue>,
+        steps: &[FlowDestructureStep],
+    ) -> Build<Option<u32>> {
+        let Some(value) = value else {
+            return Ok(None);
+        };
+        let ranges = match value {
+            FlowAssignedValue::Expression(range) => Some(range),
+            FlowAssignedValue::IterableValue(_) | FlowAssignedValue::Key => None,
+        };
+        let callees = ranges
+            .into_iter()
+            .chain(steps.iter().filter_map(|step| step.default))
+            .filter_map(|range| self.value_callees.get(&range))
+            .flatten()
+            .copied()
+            .collect();
+        let assigned = FlowAssigned {
+            value,
+            steps: steps.into(),
+            callees,
+        };
+        if let Some(index) = self.assigned_ids.get(&assigned) {
+            return Ok(Some(*index));
+        }
+        let index = u32::try_from(self.assigned.len()).map_err(|_| Unsupported)?;
+        self.assigned.push(assigned.clone());
+        self.assigned_ids.insert(assigned, index);
+        Ok(Some(index))
+    }
+
+    /// Returns the value of `expression` as a write assigns it, or `None`
+    /// when Biome can't type it as TypeScript does, as for `typeof` or a call
+    /// to a function whose return type Biome infers; see [`value_callees`].
+    fn assigned_expression(&mut self, expression: &AnyJsExpression) -> Option<FlowAssignedValue> {
+        self.check_value(expression)
+            .then(|| FlowAssignedValue::Expression(expression.range()))
+    }
+
+    /// Returns whether Biome can type `expression`, a value or a default that
+    /// a write assigns, as TypeScript does, once the reading context confirms
+    /// the callees that [`value_callees`] gives. The callees are recorded by
+    /// the range of `expression`, where [`Self::assigned_value`] finds them.
+    fn check_value(&mut self, expression: &AnyJsExpression) -> bool {
+        let Some(callees) = value_callees(expression, self.model) else {
+            return false;
+        };
+        if !callees.is_empty() {
+            self.value_callees
+                .insert(expression.range(), callees.into_boxed_slice());
+        }
+        true
+    }
+
+    /// Returns `value` and `steps` with a step that reads `field`, supplied
+    /// by `default` when it is `undefined`, or `None` and no steps when
+    /// Biome can't type the default as TypeScript does, as
+    /// [`Self::check_value`] decides.
+    fn with_step(
+        &mut self,
+        value: Option<FlowAssignedValue>,
+        steps: &[FlowDestructureStep],
+        field: DestructureField,
+        default: Option<&JsInitializerClause>,
+    ) -> (Option<FlowAssignedValue>, Vec<FlowDestructureStep>) {
+        let default = default.and_then(|default| default.expression().ok());
+        if value.is_none()
+            || default
+                .as_ref()
+                .is_some_and(|default| !self.check_value(default))
+        {
+            return (None, Vec::new());
+        }
+        let mut steps = steps.to_vec();
+        steps.push(FlowDestructureStep {
+            field,
+            default: default.map(|default| default.range()),
+        });
+        (value, steps)
     }
 
     /// Evaluates the declarators of `declaration`, which lies at `depth`, in
     /// order from `incoming`, and returns the flow after them.
     ///
-    /// Each declarator evaluates its initializer, then its binding pattern. A
+    /// Each declarator evaluates its binding pattern as
+    /// [`Self::binding_pattern`] describes, then its initializer, as
+    /// TypeScript's binder does, although the initializer runs first at
+    /// runtime. TypeScript's types after a write in one of them, as in
+    /// `const [a = (x = 1)] = [x]`, follow that order. A declarator with a
+    /// type annotation then writes the variables it declares, as
+    /// [`Self::binding_writes`] describes. Other declarators add no write
+    /// point, because the declared type of the variable is the type of the
+    /// initializer, and the write would reduce it to that same type. A
     /// declarator without an initializer, as in a `for...of` head or
     /// `let x!: T`, evaluates only its pattern. `using` and `await using`
     /// declarations evaluate as `const` does.
@@ -1907,12 +2770,168 @@ impl RootBuilder<'_, '_> {
         incoming: FlowNodeId,
         depth: usize,
     ) -> Build<FlowNodeId> {
-        let mut flow = incoming;
+        let pattern = declarator.id().ok();
+        let mut flow = self.binding_element(pattern.clone(), None, incoming, depth + 1)?;
         if let Some(initializer) = declarator.initializer() {
             let expression = initializer.expression().map_err(|_| Unsupported)?;
             flow = self.evaluate(expression.syntax(), flow, depth + 1)?;
+            if declarator.variable_annotation().is_some()
+                && let Some(pattern) = &pattern
+            {
+                let value = self.assigned_expression(&expression);
+                flow = self.binding_writes(pattern, value, &[], flow, depth + 1)?;
+            }
         }
-        self.binding_element(declarator.id().ok(), None, flow, depth + 1)
+        Ok(flow)
+    }
+
+    /// Writes each variable that `pattern`, the binding pattern of a
+    /// declarator, declares, in source order from `incoming`, and returns the
+    /// flow after them.
+    ///
+    /// Each variable is assigned the field of `value` that the elements
+    /// around it read, as [`Self::pattern_writes`] describes for the targets
+    /// of a destructuring assignment.
+    fn binding_writes(
+        &mut self,
+        pattern: &AnyJsBindingPattern,
+        value: Option<FlowAssignedValue>,
+        steps: &[FlowDestructureStep],
+        incoming: FlowNodeId,
+        depth: usize,
+    ) -> Build<FlowNodeId> {
+        self.visit(depth)?;
+        let mut flow = incoming;
+        match pattern {
+            AnyJsBindingPattern::AnyJsBinding(binding) => {
+                return self.write_binding(binding, value, steps, flow);
+            }
+            AnyJsBindingPattern::JsArrayBindingPattern(pattern) => {
+                for (index, element) in pattern.elements().iter().enumerate() {
+                    let (element, field, default) = match element.map_err(|_| Unsupported)? {
+                        AnyJsArrayBindingPatternElement::JsArrayBindingPatternElement(element) => (
+                            element.pattern(),
+                            DestructureField::Index {
+                                index,
+                                has_initializer: false,
+                            },
+                            element.init(),
+                        ),
+                        AnyJsArrayBindingPatternElement::JsArrayBindingPatternRestElement(
+                            element,
+                        ) => (element.pattern(), DestructureField::RestFrom(index), None),
+                        AnyJsArrayBindingPatternElement::JsArrayHole(_) => continue,
+                    };
+                    let Ok(element) = element else {
+                        continue;
+                    };
+                    let (value, steps) = self.with_step(value, steps, field, default.as_ref());
+                    flow = self.binding_writes(&element, value, &steps, flow, depth + 1)?;
+                }
+            }
+            AnyJsBindingPattern::JsObjectBindingPattern(pattern) => {
+                // The names of the properties before a rest element, as for
+                // an assignment pattern.
+                let has_rest = matches!(
+                    pattern.properties().iter().next_back(),
+                    Some(Ok(
+                        AnyJsObjectBindingPatternMember::JsObjectBindingPatternRest(_)
+                    ))
+                );
+                let mut names = has_rest.then(Vec::new);
+                for property in pattern.properties().iter() {
+                    match property.map_err(|_| Unsupported)? {
+                        AnyJsObjectBindingPatternMember::JsObjectBindingPatternProperty(
+                            property,
+                        ) => {
+                            let Ok(element) = property.pattern() else {
+                                continue;
+                            };
+                            let key = property.member().ok().as_ref().and_then(member_name_key);
+                            let (value, steps) = match key {
+                                Some(PropertyKey::Name(name)) => {
+                                    if let Some(names) = &mut names {
+                                        names.push(name.clone());
+                                    }
+                                    let field = DestructureField::Name { name, has_initializer: false };
+                                    self.with_step(value, steps, field, property.init().as_ref())
+                                }
+                                Some(PropertyKey::Private(_)) | None => {
+                                    names = None;
+                                    (None, Vec::new())
+                                }
+                            };
+                            flow = self.binding_writes(&element, value, &steps, flow, depth + 1)?;
+                        }
+                        AnyJsObjectBindingPatternMember::JsObjectBindingPatternShorthandProperty(
+                            property,
+                        ) => {
+                            let Ok(binding) = property.identifier() else {
+                                continue;
+                            };
+                            let key = binding
+                                .as_js_identifier_binding()
+                                .and_then(|binding| binding.name_token().ok())
+                                .as_ref()
+                                .and_then(identifier_key);
+                            let (value, steps) = match key {
+                                Some(PropertyKey::Name(name)) => {
+                                    if let Some(names) = &mut names {
+                                        names.push(name.clone());
+                                    }
+                                    let field = DestructureField::Name { name, has_initializer: false };
+                                    self.with_step(value, steps, field, property.init().as_ref())
+                                }
+                                Some(PropertyKey::Private(_)) | None => {
+                                    names = None;
+                                    (None, Vec::new())
+                                }
+                            };
+                            flow = self.write_binding(&binding, value, &steps, flow)?;
+                        }
+                        AnyJsObjectBindingPatternMember::JsObjectBindingPatternRest(rest) => {
+                            let Ok(binding) = rest.binding() else {
+                                continue;
+                            };
+                            let (value, steps) = match names.take() {
+                                Some(names) => {
+                                    let field = DestructureField::RestExcept(names.into());
+                                    self.with_step(value, steps, field, None)
+                                }
+                                None => (None, Vec::new()),
+                            };
+                            flow = self.write_binding(&binding, value, &steps, flow)?;
+                        }
+                        AnyJsObjectBindingPatternMember::JsBogusBinding(_)
+                        | AnyJsObjectBindingPatternMember::JsMetavariable(_) => {
+                            return Err(Unsupported);
+                        }
+                    }
+                }
+            }
+        }
+        Ok(flow)
+    }
+
+    /// Adds a write point of the variable that `binding` declares after
+    /// `incoming`, which assigns it `value` read through `steps`, and returns
+    /// the flow after it.
+    fn write_binding(
+        &mut self,
+        binding: &AnyJsBinding,
+        value: Option<FlowAssignedValue>,
+        steps: &[FlowDestructureStep],
+        incoming: FlowNodeId,
+    ) -> Build<FlowNodeId> {
+        let Some(binding) = binding.as_js_identifier_binding() else {
+            return Ok(incoming);
+        };
+        let subject = self
+            .subjects
+            .intern(FlowSubject::Binding(binding.range()))
+            .ok_or(Unsupported)?;
+        let effect = FlowWriteEffect::Assign(self.assigned_value(value, steps)?);
+        self.push_write(incoming, FlowWrite { subject, effect })
     }
 
     /// Evaluates `pattern`, the binding pattern of a declaration, a
@@ -2244,6 +3263,22 @@ mod tests {
                     }
                     FlowNode::Condition { antecedent, guard } => {
                         self.facts(*guard, &mut facts);
+                        follow(*antecedent, facts);
+                    }
+                    // A write of `x` is written `x:Write`, with the kind of
+                    // its effect.
+                    FlowNode::Write { antecedent, write } => {
+                        let write = &root.writes[*write as usize];
+                        let effect = match write.effect {
+                            FlowWriteEffect::Assign(Some(_)) => "Assign",
+                            FlowWriteEffect::Assign(None) => "Reset",
+                            FlowWriteEffect::CompoundLike(_) => "CompoundLike",
+                            FlowWriteEffect::Compound => "Compound",
+                            FlowWriteEffect::Undefined => "Undefined",
+                            FlowWriteEffect::Reset => "Reset",
+                            FlowWriteEffect::Wildcard => "Wildcard",
+                        };
+                        facts.push(format!("{}:{effect}", self.subject_name(write.subject)));
                         follow(*antecedent, facts);
                     }
                 }
@@ -2631,19 +3666,47 @@ mod tests {
     }
 
     #[test]
-    fn declarations_evaluate_their_initializer_then_their_pattern() {
+    fn declarations_evaluate_their_pattern_then_their_initializer() {
+        // As in TypeScript's binder, the pattern runs before the initializer.
         let built = function(
             "function f(x, o) { const { [read(x)]: { b = read(x) } = read(x), ...rest } = x && o; }",
         );
         for occurrence in 1..=3 {
             assert_eq!(
                 sorted_paths(&built, "x", occurrence),
-                [facts(&["!x:Truthy"]), facts(&["x:Truthy"])],
+                [Vec::<String>::new()],
                 "{occurrence}"
             );
         }
         let built = function("function f(x, o) { for (let [a = x && read(x)] = o; ;) break; }");
         assert_eq!(built.paths("x", 2), [facts(&["x:Truthy"])]);
+        // A default that writes a variable runs conditionally, before the
+        // initializer, so the initializer sees both paths.
+        let built = function("function f(x) { const [b = g(x = 1)] = read(x); }");
+        assert_eq!(
+            sorted_paths(&built, "x", 2),
+            [Vec::new(), facts(&["x:Assign"])]
+        );
+    }
+
+    #[test]
+    fn annotated_declarators_write_their_variables_after_the_initializer() {
+        let built = function(
+            "function f(c) { let x: string | number = c; const [y, { z }]: [1, { z: 2 }] = c; read(x, y, z); }",
+        );
+        assert!(contains(&built.paths("x", 1), "x:Assign"));
+        assert!(contains(&built.paths("y", 1), "y:Assign"));
+        assert!(contains(&built.paths("z", 2), "z:Assign"));
+        // The initializer equals the declared type of an unannotated
+        // variable, so the declaration adds no write point.
+        let built = function("function f(c) { let x = c; read(x); }");
+        assert_eq!(built.paths("x", 1), [Vec::<String>::new()]);
+        // A call to a local function without a return annotation assigns an
+        // undetermined value.
+        let built = function(
+            "function f() { let x: number | undefined = g(); read(x); function g() { return 1; } }",
+        );
+        assert_eq!(built.paths("x", 1), [facts(&["x:Reset"])]);
     }
 
     #[test]
@@ -2680,21 +3743,98 @@ mod tests {
     }
 
     #[test]
-    fn destructuring_assignments_evaluate_their_value_then_their_pattern() {
+    fn destructuring_assignments_evaluate_their_pattern_then_their_value() {
+        // As in TypeScript's binder, the pattern, with its defaults, runs
+        // before the value, and the targets are written after the value.
         let built = function(
-            "function f(x, o) { ({ [read(x)]: o[read(x)] = read(x), b = x && read(x) } = x && o); }",
+            "function f(x, o, b) { ({ [read(x)]: o[read(x)] = read(x), b = x && read(x) } = x && o); read(b); }",
         );
         for occurrence in 1..=3 {
             assert_eq!(
                 sorted_paths(&built, "x", occurrence),
-                [facts(&["!x:Truthy"]), facts(&["x:Truthy"])],
+                [Vec::<String>::new()],
                 "{occurrence}"
             );
         }
         assert!(contains(&built.paths("x", 5), "x:Truthy"));
-        let built = function("function f(x, a) { [a = x && read(x)] = read(x); }");
+        assert!(contains(&built.paths("b", 2), "b:Assign"));
+        let built = function("function f(x, y) { [y = x && read(x)] = read(x); after(y); }");
         assert_eq!(built.paths("x", 2), [facts(&["x:Truthy"])]);
-        assert_eq!(built.paths("x", 3), [Vec::<String>::new()]);
+        assert_eq!(
+            sorted_paths(&built, "x", 3),
+            [facts(&["!x:Truthy"]), facts(&["x:Truthy"])]
+        );
+        assert!(contains(&built.paths("y", 2), "y:Assign"));
+        // A write in a default holds before the value.
+        let built = function("function f(x, y) { [y = (x = 1)] = read(x); }");
+        assert_eq!(built.paths("x", 2), [facts(&["x:Assign"])]);
+    }
+
+    #[test]
+    fn writes_follow_the_operators_that_make_them() {
+        for (body, fact) in [
+            ("x = 1", "x:Assign"),
+            ("x = x + 1", "x:CompoundLike"),
+            ("x = (x * 2)", "x:CompoundLike"),
+            ("x += 1", "x:Compound"),
+            ("x++", "x:Compound"),
+            ("--x", "x:Compound"),
+            ("(x) = 1", "x:Assign"),
+            ("x! = 1", "x:Assign"),
+            ("(x as any) = 1", "x:Reset"),
+            ("x = typeof x", "x:Reset"),
+            // Each iteration writes the target, and the loop exits before it.
+            ("for (x of xs) read(x)", "x:Assign"),
+            ("for (x in xs) read(x)", "x:Assign"),
+            ("o.x = 1", "o.x:Assign"),
+            ("o['x'] = 1", "o.x:Assign"),
+            ("o[k] = 1", "o:Wildcard"),
+            ("delete o.x", "o.x:Undefined"),
+            ("delete o['x']", "o.x:Reset"),
+            ("delete o[k]", "o:Wildcard"),
+        ] {
+            let built = function(&format!(
+                "function f(x, o, xs, k) {{ {body}; read(x); read(o.x); }}"
+            ));
+            let (path, read) = if fact.starts_with('o') {
+                ("o.x", "read(o.x)")
+            } else {
+                ("x", "read(x)")
+            };
+            let start = built.source.find(read).unwrap() + "read(".len();
+            let occurrence = built
+                .source
+                .match_indices(path)
+                .position(|(index, _)| index == start)
+                .unwrap();
+            assert!(
+                built
+                    .paths(path, occurrence)
+                    .iter()
+                    .flatten()
+                    .any(|candidate| candidate == fact),
+                "{body}: {:?}",
+                built.paths(path, occurrence)
+            );
+        }
+    }
+
+    #[test]
+    fn writes_reach_the_exceptions_of_their_try_block() {
+        let built = function("function f(x) { try { x = 1; g(); } catch { read(x); } }");
+        assert_eq!(
+            sorted_paths(&built, "x", 2),
+            [Vec::new(), facts(&["x:Assign"])]
+        );
+    }
+
+    #[test]
+    fn optional_chains_with_writes_join_their_short_circuits() {
+        let built = function("function f(x, o) { o?.f(x = 1); after(x); }");
+        assert_eq!(
+            sorted_paths(&built, "x", 2),
+            [Vec::new(), facts(&["!o:Nullish", "x:Assign"])]
+        );
     }
 
     #[test]
@@ -2709,7 +3849,10 @@ mod tests {
                 "function f(x) {{ x {operator} read(x); after(x); }}"
             ));
             assert_eq!(built.paths("x", 2), [facts(&[right])], "{operator}");
-            let mut joined = vec![facts(&[skip]), facts(&[right])];
+            // The target is written where the right operand runs.
+            let mut written = facts(&["x:Assign", right]);
+            written.sort();
+            let mut joined = vec![facts(&[skip]), written];
             joined.sort();
             assert_eq!(sorted_paths(&built, "x", 3), joined, "{operator}");
         }
@@ -2725,6 +3868,8 @@ mod tests {
         // A compound assignment evaluates its target, then its right operand.
         let built = function("function f(x, o) { o[x && read(x)] += read(x); }");
         assert_eq!(built.paths("x", 3).len(), 2);
+        let built = function("function f(s) { s.kind ||= read(s); after(s); }");
+        assert!(contains(&built.paths("s", 3), "s.kind:Assign") || built.paths("s", 3).len() == 2);
     }
 
     #[test]
@@ -2739,13 +3884,18 @@ mod tests {
 
     #[test]
     fn paths_on_this_are_read_and_tested_where_this_can_narrow() {
-        const SOURCE: &str = "class K { #w; m() { if (this.v) read(this.v); if (this.#w) read(this.#w); } constructor() { if (this.v) read(this.v); } }";
+        const SOURCE: &str = "class K { #w; m() { if (this.v) read(this.v); if (this.#w) read(this.#w); } constructor() { if (this.v) read(this.v); this.v = 1; read(this.v); } static s() { if (this.v) read(this.v); } }";
         let method = build(SOURCE, JsSyntaxKind::JS_METHOD_CLASS_MEMBER);
         assert!(contains(&method.paths("this.v", 1), "this.v:Truthy"));
         assert!(contains(&method.paths("this.#w", 1), "this.#w:Truthy"));
         let constructor = build(SOURCE, JsSyntaxKind::JS_CONSTRUCTOR_CLASS_MEMBER);
-        assert_eq!(constructor.point("this.v", 3), None);
-        assert!(constructor.root().mentions.is_empty());
+        assert!(contains(&constructor.paths("this.v", 3), "this.v:Truthy"));
+        assert!(contains(&constructor.paths("this.v", 5), "this.v:Assign"));
+        let method = build(
+            "class K { static s() { if (this.v) read(this.v); } }",
+            JsSyntaxKind::JS_METHOD_CLASS_MEMBER,
+        );
+        assert!(method.root().mentions.is_empty());
     }
 
     #[test]

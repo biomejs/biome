@@ -225,16 +225,17 @@ fn getters_narrow_like_fields() {
     assert_reads(SOURCE, &[("class", "g.v", &[String])]);
 }
 
-// Each expected type is `string | null` (or `number | null`, or
-// `string | undefined`). TypeScript 7.0.2 (`tsc --strict`) gives the type in
-// the comment after each read. Where it differs, TypeScript narrows the path
-// at the write itself. Biome does not model that, so a write anywhere in
-// the function stops the path from narrowing and Biome is deliberately wider.
-// TypeScript instead ignores a write through a key that is not a literal
-// (`unionKey`) and a write in an `async` function called where it is defined
-// (`asyncIife`). `NARROWING.md` lists both among the deliberate choices.
+// TypeScript 7.0.2 (`tsc --strict`) gives the type in the comment after each
+// read. A write narrows the path at the write, as in TypeScript, and a write
+// of a prefix gives it its declared type. Biome is wider where the comment
+// differs from the expected type: a write in a function called where it is
+// defined or in a class static block stops the path from narrowing in the
+// whole function, and a write through a key that is not a literal
+// (`constKey`, `unionKey`) gives every path of the object its declared type,
+// where TypeScript narrows for a `const` key and ignores other keys;
+// `NARROWING.md` lists the deliberate choices.
 #[test]
-fn writes_to_the_path_a_prefix_or_any_property_cancel_narrowing() {
+fn writes_to_the_path_a_prefix_or_any_property_narrow_or_cancel_narrowing() {
     use InferredTypeData::{Null, Number, String, Undefined};
     const SOURCE: &str = r#"
         declare function get(): string | null;
@@ -284,9 +285,9 @@ fn writes_to_the_path_a_prefix_or_any_property_cancel_narrowing() {
         SOURCE,
         &[
             ("assigned", "o.v", &[String, Null]),
-            ("literal", "o.v", &[String, Null]),
-            ("updated", "o.v", &[Number, Null]),
-            ("deleted", "o.v", &[String, Undefined]),
+            ("literal", "o.v", &[String]),
+            ("updated", "o.v", &[Number]),
+            ("deleted", "o.v", &[Undefined]),
             ("prefix", "o.v.w", &[String, Null]),
             ("variable", "o.v", &[String, Null]),
             ("arrowIife", "o.v", &[String, Null]),
@@ -295,9 +296,7 @@ fn writes_to_the_path_a_prefix_or_any_property_cancel_narrowing() {
             ("staticBlock", "o.v", &[String, Null]),
             ("constKey", "o.v", &[String, Null]),
             ("unionKey", "o.v", &[String, Null]),
-            // TypeScript narrows this read to `string`; the write after it
-            // still stops Biome from narrowing the path in the whole function.
-            ("beforeWrite", "o.v", &[String, Null]),
+            ("beforeWrite", "o.v", &[String]),
         ],
     );
 }
@@ -510,15 +509,15 @@ fn literal_key_writes_keep_other_properties() {
     );
 }
 
-// Each expected type keeps `null` or `undefined`. TypeScript 7.0.2
-// (`tsc --strict`) gives the type in the comment after each read. Where it
-// differs, TypeScript either narrows the path at the write itself, which Biome
-// does not model, or ignores the write. It ignores a write through a key
-// that is not a literal (`anyIndex` and `negativeZero`) and `delete` through
-// an element access (`deleted`). `NARROWING.md` lists both among the
-// deliberate choices. Biome's declared type of `a[0]` includes `undefined`.
+// TypeScript 7.0.2 (`tsc --strict`) gives the type in the comment after each
+// read. A write through a literal key narrows the path that it names, as in
+// TypeScript. Where the comment differs, TypeScript ignores the write, while
+// Biome gives the path its declared type: a write through a key that is not a
+// literal (`anyIndex` and `negativeZero`; `NARROWING.md` lists this among the
+// deliberate choices) and `delete` through an element access (`deleted`).
+// Biome's declared type of `a[0]` includes `undefined`.
 #[test]
-fn literal_key_writes_cancel_their_path() {
+fn literal_key_writes_narrow_their_path() {
     use InferredTypeData::{Null, String, Undefined};
     const SOURCE: &str = r#"
         function sameKey(o: { a: string | null }) {
@@ -549,11 +548,11 @@ fn literal_key_writes_cancel_their_path() {
     assert_reads(
         SOURCE,
         &[
-            ("sameKey", "o.a", &[String, Null]),
-            ("stringKey", "t[0]", &[String, Null]),
-            ("numberKey", r#"r["1"]"#, &[String, Null]),
+            ("sameKey", "o.a", &[Null]),
+            ("stringKey", "t[0]", &[Null]),
+            ("numberKey", r#"r["1"]"#, &[Null]),
             ("prefix", "o.a.b", &[String, Null]),
-            ("nestedWrite", "o.a.b", &[String, Null]),
+            ("nestedWrite", "o.a.b", &[Null]),
             ("anyIndex", "a[0]", &[String, Null, Undefined]),
             ("negativeZero", "t[0]", &[String, Null]),
             ("deleted", "o.v", &[String, Undefined]),
@@ -750,10 +749,8 @@ fn reads_in_nested_functions_see_no_facts_about_this() {
 // read. In a constructor, and in an arrow function called where the
 // constructor defines it, TypeScript reads a field without an initializer at
 // its declared type after a test that leaves `undefined` possible (TS2565).
-// Biome narrows no path on `this` in a constructor or in an arrow function
-// created there, so it is wider where TypeScript narrows.
 #[test]
-fn constructors_keep_paths_on_this_unnarrowed() {
+fn constructors_narrow_paths_on_this() {
     use InferredTypeData::{Null, String};
     const SOURCE: &str = r#"
         class WithInitializer {
@@ -775,8 +772,8 @@ fn constructors_keep_paths_on_this_unnarrowed() {
     assert_reads(
         SOURCE,
         &[
-            ("initializer", "this.x", &[String, Null]),
-            ("arrow", "this.x", &[String, Null]),
+            ("initializer", "this.x", &[String]),
+            ("arrow", "this.x", &[String]),
             ("withoutInitializer", "this.x", &[String, Null]),
             ("iife", "this.x", &[String, Null]),
         ],
@@ -1197,12 +1194,10 @@ fn optional_chain_receivers_stop_at_parentheses() {
 
 // TypeScript 7.0.2 (`tsc --strict`) gives `X | undefined` at `assigned`,
 // `undefined` at `cleared`, and `X` at `later` and `extension`. A write to a
-// receiver cancels its narrowing in the whole function, as for any other
-// path, so Biome is deliberately wider at `cleared` and `later`, where
-// TypeScript narrows at the write itself or before it. A write to a longer
-// path, such as `a.b.y`, keeps `a.b` narrowed.
+// receiver narrows it at the write, as for any other path, and a write to a
+// longer path, such as `a.b.y`, keeps `a.b` narrowed.
 #[test]
-fn writes_cancel_receiver_narrowing() {
+fn writes_narrow_receivers() {
     let source = format!(
         "{RECEIVER}{}",
         r#"
@@ -1217,10 +1212,8 @@ fn writes_cancel_receiver_narrowing() {
         &source,
         &[
             ("assigned", "a.b", true),
-            // TypeScript gives `undefined`.
             ("cleared", "a.b", true),
-            // TypeScript gives `X`.
-            ("later", "a.b", true),
+            ("later", "a.b", false),
             ("extension", "a.b", false),
         ],
     );

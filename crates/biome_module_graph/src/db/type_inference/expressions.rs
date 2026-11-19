@@ -1044,7 +1044,7 @@ impl<'db> ResolutionCtx<'db, '_> {
     ///
     /// Returns `None` when the argument is not an object or array expression,
     /// or when keeping the literal types gives `ty`, its resolved type.
-    fn literal_argument(
+    pub(super) fn literal_argument(
         &mut self,
         reference: &TypeReference,
         ty: InferredTypeData<'db>,
@@ -2810,7 +2810,7 @@ impl<'db> ResolutionCtx<'db, '_> {
     }
 
     /// Returns the type of the values that `for...of` produces from `subject`.
-    fn resolve_iterable_value_type(
+    pub(super) fn resolve_iterable_value_type(
         &mut self,
         subject: InferredTypeData<'db>,
     ) -> Option<InferredTypeData<'db>> {

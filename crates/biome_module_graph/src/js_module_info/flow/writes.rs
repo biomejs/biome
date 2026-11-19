@@ -1,10 +1,12 @@
-//! Finds the property paths that an execution root may write.
+//! Finds the writes of an execution root that its flow graph doesn't model.
 //!
-//! The flow graph has no write points, so a property path narrows only when
-//! its execution root never writes it. Like TypeScript, the scan counts the
-//! writes that run as part of the root's own flow and ignores the bodies of
-//! other functions, because those run only when called. A call never cancels
-//! narrowing, in TypeScript or in Biome.
+//! The builder adds a write point for each write in the root's own flow. A
+//! write that runs with the root but outside that flow, as in a function
+//! expression called where it is defined, a class static block, or a field
+//! initializer, has no point, so a subject that such code writes doesn't
+//! narrow anywhere in the root. Like TypeScript, the scan ignores the bodies
+//! of other functions, because they run only when called. A call never
+//! cancels narrowing, in TypeScript or in Biome.
 
 use super::subjects::{literal_key, property_key};
 use super::{FlowSubject, FlowSubjectId, FlowSubjectTable, PropertyKey};
@@ -12,12 +14,14 @@ use biome_js_control_flow::AnyJsControlFlowRoot;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
     AnyJsExpression, AnyJsFunction, AnyJsName, AnyTsCastExpression, JsArrowFunctionExpression,
-    JsComputedMemberAssignment, JsFunctionBody, JsFunctionExpression, JsLanguage,
-    JsNewOrCallExpression, JsParenthesizedExpression, JsStaticMemberAssignment,
-    JsTemplateExpression, JsUnaryExpression, JsUnaryOperator, TsInstantiationExpression,
-    TsNonNullAssertionExpression, assign_ext::AnyJsMemberAssignment,
+    JsComputedMemberAssignment, JsFunctionBody, JsFunctionExpression, JsIdentifierAssignment,
+    JsLanguage, JsNewOrCallExpression, JsParenthesizedExpression, JsStaticMemberAssignment,
+    JsSyntaxNode, JsTemplateExpression, JsUnaryExpression, JsUnaryOperator,
+    TsInstantiationExpression, TsNonNullAssertionExpression, assign_ext::AnyJsMemberAssignment,
 };
-use biome_rowan::{AstNode, SyntaxKindSet, SyntaxResult, WalkEvent, declare_node_union};
+use biome_rowan::{
+    AstNode, SyntaxKindSet, SyntaxResult, TextRange, TextSize, WalkEvent, declare_node_union,
+};
 use rustc_hash::FxHashSet;
 
 declare_node_union! {
@@ -30,7 +34,31 @@ declare_node_union! {
 /// skip.
 const WRITE_SCAN_KINDS: SyntaxKindSet<JsLanguage> = AnyDeferredCode::KIND_SET
     .union(AnyJsMemberAssignment::KIND_SET)
+    .union(JsIdentifierAssignment::KIND_SET)
     .union(JsUnaryExpression::KIND_SET);
+
+/// The writes that have a write point in the graph of an execution root, as
+/// the builder records them.
+#[derive(Default)]
+pub(super) struct WrittenTargets {
+    /// The start of each variable that an assignment target with a write
+    /// point names, which is where the semantic model's reference to the
+    /// variable starts.
+    pub(super) variables: FxHashSet<TextSize>,
+    /// The range of each member assignment target and `delete` expression
+    /// with a write point.
+    pub(super) members: FxHashSet<TextRange>,
+}
+
+/// Returns whether `node`, which lies below `root`, runs only when something
+/// calls the code around it, as in the body of a function declaration or of
+/// a callback, so that a write in it never runs as part of the root's flow.
+pub(super) fn runs_only_when_called(node: &JsSyntaxNode, root: &AnyJsControlFlowRoot) -> bool {
+    node.ancestors()
+        .take_while(|ancestor| ancestor != root.syntax())
+        .filter_map(AnyDeferredCode::cast)
+        .any(|code| runs_later(&code, root))
+}
 
 /// Function and arrow expressions, whose bodies run when the function does.
 const FUNCTION_EXPRESSION_KINDS: SyntaxKindSet<JsLanguage> =
@@ -47,16 +75,16 @@ const TYPE_WRAPPER_KINDS: SyntaxKindSet<JsLanguage> = JsParenthesizedExpression:
 const CALL_KINDS: SyntaxKindSet<JsLanguage> =
     JsNewOrCallExpression::KIND_SET.union(JsTemplateExpression::KIND_SET);
 
-/// The property paths that the code of one execution root may write.
+/// The subjects that the code of one execution root may write.
 ///
-/// Every assignment to a member counts, whether it is `=`, a compound or
-/// logical assignment, `++` or `--`, a destructuring target, or the target of
-/// a `for...in` or `for...of` loop, and so does `delete`. Parentheses, `!`,
-/// `as`, `satisfies`, and `<T>` around the objects of a written path are
-/// ignored, so `(o as T).v = x` writes `o.v`. An element access whose key
-/// spells the property's name writes that property, so `o["v"] = x` writes
-/// `o.v`. With any other key, as in `o[k] = x` or `o[0x0] = x`, it counts as a
-/// write of every property of its object.
+/// Every assignment to a variable or a member counts, whether it is `=`, a
+/// compound or logical assignment, `++` or `--`, a destructuring target, or
+/// the target of a `for...in` or `for...of` loop, and so does `delete`.
+/// Parentheses, `!`, `as`, `satisfies`, and `<T>` around the objects of a
+/// written path are ignored, so `(o as T).v = x` writes `o.v`. An element
+/// access writes the property that its key names when the key is a literal
+/// that [`literal_key`] accepts, so `o["v"] = x` writes `o.v`, and any
+/// property of its object otherwise, as in `o[k] = x`.
 ///
 /// The scan covers the whole root, including function and arrow expressions
 /// that are called where they are defined, class static blocks, field
@@ -73,6 +101,11 @@ const CALL_KINDS: SyntaxKindSet<JsLanguage> =
 /// through `as` and `satisfies`, and through `super`. Like the scan, TypeScript 7.0.2 treats
 /// `this.v = x` in a static block as a write of the root's `this.v`, although
 /// the static block's `this` is the class.
+///
+/// The scan tells apart the writes that the builder recorded with a write
+/// point in the graph from the others. The others run outside the root's
+/// flow or through a target that the builder doesn't map to a subject, as
+/// `(o as T).v = x`.
 pub(super) struct WrittenPaths {
     /// Subjects that an assignment or `delete` writes directly.
     written: FxHashSet<FlowSubjectId>,
@@ -80,11 +113,20 @@ pub(super) struct WrittenPaths {
     /// property's name, as in `o[k] = x`. Such a write counts as a write of
     /// every property of the subject.
     wildcards: FxHashSet<FlowSubjectId>,
+    /// The subjects of `written` that a write without a write point writes.
+    unmodeled: FxHashSet<FlowSubjectId>,
+    /// The subjects of `wildcards` that a write without a write point
+    /// writes.
+    unmodeled_wildcards: FxHashSet<FlowSubjectId>,
+    /// The subjects that the write being scanned writes, each with whether
+    /// it writes any of their properties instead.
+    found: Vec<(FlowSubjectId, bool)>,
 }
 
 impl WrittenPaths {
-    /// Collects the writes in the code of `root` to the paths stored in
-    /// `subjects`.
+    /// Collects the writes in the code of `root` to the subjects stored in
+    /// `subjects`, telling apart those that `modeled` records as having a
+    /// write point.
     ///
     /// A write to a path that `subjects` does not store is ignored, because
     /// none of the stored subjects starts with it.
@@ -92,10 +134,14 @@ impl WrittenPaths {
         root: &AnyJsControlFlowRoot,
         model: &SemanticModel,
         subjects: &FlowSubjectTable,
+        modeled: &WrittenTargets,
     ) -> Self {
         let mut paths = Self {
             written: FxHashSet::default(),
             wildcards: FxHashSet::default(),
+            unmodeled: FxHashSet::default(),
+            unmodeled_wildcards: FxHashSet::default(),
+            found: Vec::new(),
         };
         let mut events = root.syntax().preorder_of_kinds(WRITE_SCAN_KINDS);
         while let Some(event) = events.next() {
@@ -109,39 +155,76 @@ impl WrittenPaths {
                 events.skip_subtree();
                 continue;
             }
-            if let Some(assignment) = JsStaticMemberAssignment::cast_ref(&node) {
+            let is_modeled = if let Some(assignment) = JsStaticMemberAssignment::cast_ref(&node) {
                 if let Ok(object) = assignment.object() {
                     paths.member(object, assignment.member(), model, subjects);
                 }
+                modeled.members.contains(&assignment.range())
             } else if let Some(assignment) = JsComputedMemberAssignment::cast_ref(&node) {
                 if let Ok(object) = assignment.object() {
                     paths.computed_member(object, assignment.member(), model, subjects);
                 }
+                modeled.members.contains(&assignment.range())
+            } else if let Some(assignment) = JsIdentifierAssignment::cast_ref(&node) {
+                if let Some(subject) = model
+                    .binding(&assignment)
+                    .and_then(|binding| subjects.get(&FlowSubject::Binding(binding.range())))
+                {
+                    paths.found.push((subject, false));
+                }
+                modeled
+                    .variables
+                    .contains(&assignment.syntax().text_trimmed_range().start())
             } else if let Some(unary) = JsUnaryExpression::cast_ref(&node)
                 && unary.operator() == Ok(JsUnaryOperator::Delete)
                 && let Ok(argument) = unary.argument()
             {
                 paths.deleted(argument, model, subjects);
+                modeled.members.contains(&unary.range())
+            } else {
+                true
+            };
+            for (subject, wildcard) in std::mem::take(&mut paths.found) {
+                let (all, unmodeled) = if wildcard {
+                    (&mut paths.wildcards, &mut paths.unmodeled_wildcards)
+                } else {
+                    (&mut paths.written, &mut paths.unmodeled)
+                };
+                all.insert(subject);
+                if !is_modeled {
+                    unmodeled.insert(subject);
+                }
             }
         }
         paths
     }
 
     /// Returns whether a write in the root may change `subject`, given the
-    /// `subjects` of the root, each at the index of its id.
+    /// `subjects` of the root, each at the index of its id. When `modeled` is
+    /// false, only the writes without a write point count, because narrowing
+    /// can't follow them along the flow.
     ///
     /// That is the case when the root writes `subject` or one of its
     /// prefixes, or writes a property of a proper prefix through a key that
-    /// does not spell the property's name. A write to an extension of
-    /// `subject`, such as `o.v.w` for `o.v`, does not change the value of
-    /// `subject`.
-    pub(super) fn cancels(&self, subjects: &[FlowSubject], subject: FlowSubjectId) -> bool {
-        if self.written.contains(&subject) {
+    /// is not a literal. A write to an extension of `subject`, such as `o.v.w`
+    /// for `o.v`, does not change the value of `subject`.
+    pub(super) fn cancels(
+        &self,
+        subjects: &[FlowSubject],
+        subject: FlowSubjectId,
+        modeled: bool,
+    ) -> bool {
+        let (written, wildcards) = if modeled {
+            (&self.written, &self.wildcards)
+        } else {
+            (&self.unmodeled, &self.unmodeled_wildcards)
+        };
+        if written.contains(&subject) {
             return true;
         }
         let mut current = subject;
         while let Some(FlowSubject::Member { object, .. }) = subjects.get(current as usize) {
-            if self.written.contains(object) || self.wildcards.contains(object) {
+            if written.contains(object) || wildcards.contains(object) {
                 return true;
             }
             // A table stores objects before their members, so this only
@@ -195,12 +278,10 @@ impl WrittenPaths {
         match key {
             Some(key) => {
                 if let Some(subject) = subjects.get(&FlowSubject::Member { object, key }) {
-                    self.written.insert(subject);
+                    self.found.push((subject, false));
                 }
             }
-            None => {
-                self.wildcards.insert(object);
-            }
+            None => self.found.push((object, true)),
         }
     }
 
@@ -276,7 +357,7 @@ impl WrittenPaths {
                     })?;
                 }
                 None => {
-                    self.wildcards.insert(subject);
+                    self.found.push((subject, true));
                     return None;
                 }
             }
@@ -307,7 +388,7 @@ fn runs_later(code: &AnyDeferredCode, root: &AnyJsControlFlowRoot) -> bool {
 
 /// Returns whether `function`, a function or arrow expression, is called, or
 /// constructed, where it is defined, as in `(() => {})()`.
-fn is_invoked(function: &AnyJsFunction) -> bool {
+pub(super) fn is_invoked(function: &AnyJsFunction) -> bool {
     let mut parent = function.syntax().parent();
     while let Some(node) = parent {
         let kind = node.kind();
@@ -342,25 +423,39 @@ fn omit_wrappers(mut expression: AnyJsExpression) -> Option<AnyJsExpression> {
 
 #[cfg(test)]
 mod tests {
+    use super::super::builder::{BuiltRoot, build_root};
+    use super::super::guards::GuardFunctions;
     use super::super::subjects::subject_of;
     use super::*;
     use biome_js_parser::{JsParserOptions, parse};
     use biome_js_semantic::{SemanticModelOptions, semantic_model};
     use biome_js_syntax::{JsExpressionStatement, JsSyntaxKind};
     use biome_languages::JsFileSource;
+    use rustc_hash::FxHashMap;
 
     const PATHS: [&str; 5] = ["o.v", "o.v.w", "o.w", "q.v", "o.v.w.x"];
 
-    /// Returns the paths among [`PATHS`] that `body` cancels in the function
-    /// root of [`cancelled_among`].
+    /// Returns the paths among [`PATHS`] that any write of `body` cancels, as
+    /// [`cancelled_among`] does.
     fn cancelled(body: &str) -> Vec<&'static str> {
         cancelled_among(&PATHS, body)
     }
 
-    /// Returns the paths among `paths` that the method root
-    /// `m(o, q, k, xs, t) { ... }` with `body` cancels. The method's class
-    /// declares a private field `#p`, and paths on `this` can narrow in it.
+    /// Returns the paths among `paths` that any write of the method root
+    /// `m(o, q, k, xs, t) { ... }` with `body` cancels, as a property guard
+    /// held in a `const` needs. The method's class declares a private field
+    /// `#p`, and paths on `this` can narrow in it.
     fn cancelled_among(paths: &[&'static str], body: &str) -> Vec<&'static str> {
+        scanned(paths, body, true)
+    }
+
+    /// Returns the paths among `paths` that a write of `body` without a write
+    /// point cancels, as [`cancelled_among`] describes the root.
+    fn unmodeled_among(paths: &[&'static str], body: &str) -> Vec<&'static str> {
+        scanned(paths, body, false)
+    }
+
+    fn scanned(paths: &[&'static str], body: &str, modeled: bool) -> Vec<&'static str> {
         let source = format!(
             "class K extends Object {{ #p; m(o, q, k, xs, t) {{ {}; {body} }} }}",
             paths.join("; ")
@@ -374,7 +469,18 @@ mod tests {
             .filter_map(AnyJsControlFlowRoot::cast)
             .find(|root| root.syntax().kind() == JsSyntaxKind::JS_METHOD_CLASS_MEMBER)
             .unwrap();
-        let mut subjects = FlowSubjectTable::new(&root, true);
+        let raw_binding_types = FxHashMap::default();
+        let BuiltRoot {
+            mut subjects,
+            written,
+            ..
+        } = build_root(
+            &root,
+            &model,
+            &mut GuardFunctions::new(&[], &raw_binding_types),
+            true,
+        )
+        .expect("root must have flow");
         let ids: Vec<_> = parsed
             .syntax()
             .descendants()
@@ -384,12 +490,12 @@ mod tests {
                 subject_of(&statement.expression().unwrap(), &model, &mut subjects).unwrap()
             })
             .collect();
-        let written = WrittenPaths::new(&root, &model, &subjects);
+        let written = WrittenPaths::new(&root, &model, &subjects, &written);
         paths
             .iter()
             .copied()
             .zip(ids)
-            .filter(|(_, id)| written.cancels(subjects.as_slice(), *id))
+            .filter(|(_, id)| written.cancels(subjects.as_slice(), *id, modeled))
             .map(|(path, _)| path)
             .collect()
     }
@@ -494,7 +600,7 @@ mod tests {
     }
 
     #[test]
-    fn writes_that_run_with_the_root_cancel() {
+    fn writes_that_run_with_the_root_outside_its_flow_cancel() {
         for body in [
             "(() => { o.v = null; })()",
             "(() => o.v = null)()",
@@ -508,10 +614,36 @@ mod tests {
             "class C { x = (o.v = null); }",
             "class C { [(o.v = null, 'k')]() {} }",
             "class C { m(a = (o.v = null)) {} }",
-            "if (q) { o.v = null; }",
+            // The builder maps no subject to an object behind `as` or `!`.
+            "(o as any).v = null",
+            "o!.v = null",
         ] {
+            assert_eq!(
+                unmodeled_among(&PATHS, body),
+                ["o.v", "o.v.w", "o.v.w.x"],
+                "{body}"
+            );
             assert_eq!(cancelled(body), ["o.v", "o.v.w", "o.v.w.x"], "{body}");
         }
+    }
+
+    #[test]
+    fn writes_in_the_root_flow_are_write_points() {
+        for body in [
+            "if (q) { o.v = null; }",
+            "o.v = null",
+            "o['v'] ??= 1",
+            "o.v++",
+            "[o.v] = xs",
+            "for (o.v of xs) {}",
+            "delete o.v",
+            "(o.v as any) = null",
+            "o.v! = null",
+        ] {
+            assert_eq!(unmodeled_among(&PATHS, body), Vec::<&str>::new(), "{body}");
+            assert_eq!(cancelled(body), ["o.v", "o.v.w", "o.v.w.x"], "{body}");
+        }
+        assert_eq!(unmodeled_among(&PATHS, "o[k] = null"), Vec::<&str>::new());
     }
 
     #[test]
@@ -602,8 +734,14 @@ mod tests {
     }
 
     #[test]
-    fn a_write_to_the_variable_is_not_a_path_write() {
-        // Collection excludes written variables, and with them their paths.
-        assert_eq!(cancelled("o = q"), Vec::<&str>::new());
+    fn a_write_to_the_variable_writes_its_paths() {
+        assert_eq!(cancelled("o = q"), ["o.v", "o.v.w", "o.w", "o.v.w.x"]);
+        // The graph has a write point for it.
+        assert_eq!(unmodeled_among(&PATHS, "o = q"), Vec::<&str>::new());
+        // A write in a function called where it is defined has none.
+        assert_eq!(
+            unmodeled_among(&PATHS, "(() => { o = q; })()"),
+            ["o.v", "o.v.w", "o.w", "o.v.w.x"]
+        );
     }
 }

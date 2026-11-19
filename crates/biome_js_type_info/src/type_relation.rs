@@ -496,6 +496,44 @@ pub(crate) fn is_empty_object_type<'db>(
     check.is_empty_object(ty)
 }
 
+/// Returns the union of the `members` of a declared union type that a value
+/// of one of the `values` may have. `assigned` is the type that the values
+/// make up, and it must be assignable to that union. TypeScript filters a
+/// declared type at an assignment the same way.
+///
+/// A member is kept when one of `values` is the member itself, or when Biome
+/// can't rule out that the value is assignable to it, so an undetermined
+/// comparison keeps the member. Returns `None` when every member is kept, and
+/// when `assigned` is not, or may not be, assignable to the kept members. The
+/// caller then keeps the declared type, as TypeScript does when its filter
+/// gives a type that the assigned type is not assignable to. All comparisons
+/// share one budget of [`MAX_RELATION_STEPS`] steps, after which they are
+/// undetermined.
+pub(crate) fn assignment_reduced_members<'db>(
+    db: &'db dyn TypeDb,
+    members: &[TypeData<'db>],
+    values: &[TypeData<'db>],
+    assigned: TypeData<'db>,
+    resolve: &mut TypeResolver<'db, '_>,
+) -> Option<TypeData<'db>> {
+    let mut check = AssignabilityCheck::new(db, resolve, &[]);
+    let kept: Vec<_> = members
+        .iter()
+        .copied()
+        .filter(|member| {
+            values.iter().any(|value| {
+                value == member
+                    || check.is_assignable(*value, *member) != Assignability::NotAssignable
+            })
+        })
+        .collect();
+    if kept.len() == members.len() {
+        return None;
+    }
+    let reduced = TypeData::union_from_types(db, kept);
+    (check.is_assignable(assigned, reduced) == Assignability::Assignable).then_some(reduced)
+}
+
 /// One type of the instances of a constructor, which `value instanceof C`
 /// tests `value` against. [`instance_types`] returns these.
 #[derive(Clone, Copy, Debug)]
