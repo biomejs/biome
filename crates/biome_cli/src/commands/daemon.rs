@@ -211,6 +211,11 @@ fn setup_daemon_subscriber(
     log_file_name_prefix: String,
     level: LoggingLevel,
 ) {
+    // `tracing-appender` prunes old log files before it creates the log
+    // directory, and prints an error to stderr when the directory is missing.
+    // A failure here is reported by `build` below.
+    let _ = fs::create_dir_all(&log_path);
+
     let appender_builder = tracing_appender::rolling::RollingFileAppender::builder();
     let file_appender = appender_builder
         .filename_prefix(log_file_name_prefix)
