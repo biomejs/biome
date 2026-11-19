@@ -1482,7 +1482,8 @@ pub(super) fn is_unit_case(
                 | SyntaxGuard::Undefined { .. }
                 | SyntaxGuard::EnumMember { .. }
                 | SyntaxGuard::Imported { .. }
-                | SyntaxGuard::Typeof(_),
+                | SyntaxGuard::Typeof(_)
+                | SyntaxGuard::TypeofOther,
             ..
         })
     )
@@ -1996,6 +1997,9 @@ impl<'a, 'raw> Decomposer<'a, 'raw> {
         positive: bool,
         receivers: bool,
     ) -> FlowGuard {
+        if matches!(guard, SyntaxGuard::TypeofOther) {
+            return self.typeof_other_test(operand, positive, receivers);
+        }
         // The receivers of a chain whose end equals a value typed by its
         // declaration are not nullish only when that type excludes
         // `undefined`, which inference decides.
@@ -2007,6 +2011,7 @@ impl<'a, 'raw> Decomposer<'a, 'raw> {
             SyntaxGuard::Truthy => Some(FlowTest::Truthy),
             SyntaxGuard::Nullish => Some(FlowTest::Nullish),
             SyntaxGuard::Typeof(kind) => Some(FlowTest::Typeof(kind)),
+            SyntaxGuard::TypeofOther => None,
             SyntaxGuard::Null => Some(FlowTest::Null),
             SyntaxGuard::Literal { value, strict } => Some(FlowTest::Literal { value, strict }),
             SyntaxGuard::Undefined { strict } => Some(FlowTest::Undefined { strict }),
@@ -2101,6 +2106,61 @@ impl<'a, 'raw> Decomposer<'a, 'raw> {
             self.receiver_tests_by(chain, guard, receiver_test)
         } else {
             guard
+        }
+    }
+
+    /// Returns the guard for a comparison of `typeof operand` with a string
+    /// that names no kind of value, where the two are equal when `positive`
+    /// is true, testing the receivers of the optional chain around `operand`
+    /// when `receivers` holds.
+    ///
+    /// As in TypeScript, the comparison holds only for an object type, which
+    /// can be a host object whose `typeof` is any string, so the guard keeps
+    /// the members that `typeof` can find an object, other than `null`, or a
+    /// function. TypeScript also removes the object types where the
+    /// comparison fails, although an ordinary object gives `"object"`, so
+    /// that guard keeps the incoming type.
+    fn typeof_other_test(
+        &mut self,
+        operand: &AnyJsExpression,
+        positive: bool,
+        receivers: bool,
+    ) -> FlowGuard {
+        if !positive {
+            return FlowGuard::Keep;
+        }
+        let object = self.test(
+            operand,
+            SyntaxGuard::Typeof(TypeofKind::Object),
+            true,
+            false,
+        );
+        let left = self.push(object);
+        let not_null = self.test(operand, SyntaxGuard::Null, false, false);
+        let right = self.push(not_null);
+        let left = self.push(FlowGuard::Both {
+            left,
+            right,
+            sequential: true,
+        });
+        let function = self.test(
+            operand,
+            SyntaxGuard::Typeof(TypeofKind::Function),
+            true,
+            false,
+        );
+        let right = self.push(function);
+        let guard = FlowGuard::Both {
+            left,
+            right,
+            sequential: false,
+        };
+        if !receivers {
+            return guard;
+        }
+        match chain_receivers(operand, &mut self.remaining) {
+            Some(chain) => self.receiver_tests_by(chain, guard, FlowTest::Nullish),
+            None => FlowGuard::Keep,
         }
     }
 
@@ -2838,6 +2898,9 @@ enum SyntaxGuard {
     Truthy,
     Nullish,
     Typeof(TypeofKind),
+    /// A comparison of `typeof` with a string that names no kind of value,
+    /// as `typeof x === "strin"`.
+    TypeofOther,
     /// Strict equality with `null`.
     Null,
     /// Equality with the value at `value`, a [`UnitValue::Literal`].
@@ -3393,21 +3456,22 @@ fn comparison_step(
                 _ => return Some(ConditionStep::Unsupported),
             };
             let kind = match value.text() {
-                "undefined" => TypeofKind::Undefined,
-                "object" => TypeofKind::Object,
-                "boolean" => TypeofKind::Boolean,
-                "number" => TypeofKind::Number,
-                "bigint" => TypeofKind::BigInt,
-                "string" => TypeofKind::String,
-                "symbol" => TypeofKind::Symbol,
-                "function" => TypeofKind::Function,
-                _ => return Some(ConditionStep::Unsupported),
+                "undefined" => Some(TypeofKind::Undefined),
+                "object" => Some(TypeofKind::Object),
+                "boolean" => Some(TypeofKind::Boolean),
+                "number" => Some(TypeofKind::Number),
+                "bigint" => Some(TypeofKind::BigInt),
+                "string" => Some(TypeofKind::String),
+                "symbol" => Some(TypeofKind::Symbol),
+                "function" => Some(TypeofKind::Function),
+                _ => None,
             };
             let argument = omit_parentheses(argument, remaining)?;
             if !has_operand_shape(&argument)? {
                 return Some(ConditionStep::Unsupported);
             }
-            (argument, SyntaxGuard::Typeof(kind))
+            let guard = kind.map_or(SyntaxGuard::TypeofOther, SyntaxGuard::Typeof);
+            (argument, guard)
         }
         _ => return Some(ConditionStep::Unsupported),
     };
@@ -3424,6 +3488,7 @@ fn comparison_step(
         }
         SyntaxGuard::Nullish | SyntaxGuard::Undefined { .. } => !positive,
         SyntaxGuard::Typeof(kind) => positive == (*kind != TypeofKind::Undefined),
+        SyntaxGuard::TypeofOther => positive,
         SyntaxGuard::Truthy
         | SyntaxGuard::Imported { .. }
         | SyntaxGuard::Compared { .. }
