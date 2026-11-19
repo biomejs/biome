@@ -38,15 +38,17 @@ pub enum SassLoadRule {
 /// <https://sass-lang.com/documentation/at-rules/use/#finding-the-module>
 ///
 /// `options` configures the lookup:
-/// - [ResolveOptions::extensions] are tried in order, each on the URL as
-///   written and as a partial with a leading `_`, such as `theme.scss` and
-///   `_theme.scss`. Sass fails when both exist, and this returns
-///   [ResolveError::AmbiguousSassUrl]. A URL that already ends in one of the
-///   extensions only tries that one.
+/// - [ResolveOptions::extensions] are tried on the URL as written and as a
+///   partial with a leading `_`, such as `theme.scss` and `_theme.scss`. All
+///   extensions except `css` have equal precedence: Sass fails when more than
+///   one of these files exists, and this returns
+///   [ResolveError::AmbiguousSassUrl]. `css` files are only tried when none
+///   exists. A URL that already ends in one of the extensions only tries that
+///   one.
 /// - [ResolveOptions::default_files] are tried, with the same extensions and
 ///   partials, in the directory that a URL without an extension names, when
-///   the URL itself matches no file. A URL ending in `/` only names that
-///   directory.
+///   the URL itself matches no file. A URL ending in `/`, `.` or `..` only
+///   names that directory.
 /// - With [SassLoadRule::Import], each lookup above first tries the
 ///   import-only files, such as `_theme.import.scss`, for each extension it
 ///   tries, and only then the regular files.
@@ -73,13 +75,17 @@ pub fn resolve_sass(
     if is_bare && !options.assume_relative {
         return resolve_module(specifier, base_dir, fs, options).map(Resolution::into_path);
     }
+    // Normalization drops the trailing `/`, `.` or `..` that make the URL
+    // name a directory.
+    let names_directory =
+        specifier.ends_with('/') || matches!(specifier.rsplit('/').next(), Some("." | ".."));
     let url = normalize_owned_absolute_path(base_dir.join(specifier));
     let resolved = match url
         .extension()
         .filter(|extension| options.extensions.contains(extension))
     {
         Some(extension) => resolve_with_extension(&url, extension, fs, rule)?,
-        None if specifier.ends_with('/') => resolve_directory(&url, fs, rule, options)?,
+        None if names_directory => resolve_directory(&url, fs, rule, options)?,
         None => match resolve_without_extension(url.as_str(), fs, rule, options.extensions)? {
             Some(path) => Some(path),
             None => resolve_directory(&url, fs, rule, options)?,
@@ -125,19 +131,12 @@ fn resolve_without_extension(
     let Some(mut candidates) = Candidates::new(url) else {
         return Ok(None);
     };
-    if rule == SassLoadRule::Import {
-        for extension in extensions {
-            if let Some(path) = candidates.find(".import", extension, fs)? {
-                return Ok(Some(path));
-            }
-        }
+    if rule == SassLoadRule::Import
+        && let Some(path) = candidates.find_any(".import", extensions, fs)?
+    {
+        return Ok(Some(path));
     }
-    for extension in extensions {
-        if let Some(path) = candidates.find("", extension, fs)? {
-            return Ok(Some(path));
-        }
-    }
-    Ok(None)
+    candidates.find_any("", extensions, fs)
 }
 
 fn resolve_directory(
@@ -220,6 +219,29 @@ impl Candidates {
             }
         }
         Ok(found)
+    }
+
+    /// Like [Self::find], but tries each of `extensions`. Sass gives `.sass`
+    /// and `.scss` files equal precedence, so finding more than one is an
+    /// error, and loads a plain `.css` file only when neither exists.
+    fn find_any(
+        &mut self,
+        infix: &str,
+        extensions: &[&str],
+        fs: &dyn ResolverFsProxy,
+    ) -> Result<Option<Utf8PathBuf>, ResolveError> {
+        let mut found = None;
+        for extension in extensions.iter().filter(|extension| **extension != "css") {
+            if let Some(path) = self.find(infix, extension, fs)?
+                && found.replace(path).is_some()
+            {
+                return Err(ResolveError::AmbiguousSassUrl);
+            }
+        }
+        match found {
+            None if extensions.contains(&"css") => self.find(infix, "css", fs),
+            found => Ok(found),
+        }
     }
 }
 

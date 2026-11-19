@@ -53,9 +53,11 @@ pub enum ResolutionMode {
     /// Rules for stylesheets loaded by the Sass `@use`, `@forward` and
     /// `@import` rules of SCSS files.
     ///
-    /// Resolution follows Sass: the extensions `.scss` and `.css`, partials
-    /// with a leading `_`, `index` files, and import-only files for `@import`.
-    /// See [resolve_sass] for the rules that apply.
+    /// Resolution follows Sass: the extensions `.sass`, `.scss` and `.css`,
+    /// partials with a leading `_`, `index` files, and import-only files for
+    /// `@import`. See [resolve_sass] for the rules that apply. Biome doesn't
+    /// analyze `.sass` files, but resolving them keeps a load from selecting
+    /// a `.css` file that Sass wouldn't load.
     Sass(SassLoadRule),
 }
 
@@ -149,7 +151,7 @@ fn resolve_options(mode: ResolutionMode) -> ResolveOptions<'static> {
             assume_relative: true,
             condition_names: &["sass", "style", "default"],
             default_files: &["index"],
-            extensions: &["scss", "css"],
+            extensions: &["sass", "scss", "css"],
             ..Default::default()
         },
     }

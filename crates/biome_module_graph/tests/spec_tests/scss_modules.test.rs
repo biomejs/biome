@@ -80,6 +80,19 @@ fn test_ambiguous_scss_load_has_no_dependency() {
 }
 
 #[test]
+fn test_scss_load_prefers_sass_file_over_css() {
+    let (_, db) = build_css_db(&[
+        ("/src/main.scss", "@use \"theme\";\n"),
+        ("/src/_theme.sass", ".a\n  color: red\n"),
+        ("/src/_theme.css", ".b {}\n"),
+    ]);
+    assert_eq!(
+        dependencies(&db, "/src/main.scss"),
+        [Utf8PathBuf::from("/src/_theme.sass")]
+    );
+}
+
+#[test]
 fn test_classes_in_scss_partials_are_referenced_through_loads() {
     let (fs, mut db) = build_css_db(&[
         ("/src/styles.scss", "@use \"card\";\n.page {}\n"),

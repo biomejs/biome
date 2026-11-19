@@ -1229,7 +1229,7 @@ fn sass_options() -> ResolveOptions<'static> {
         assume_relative: true,
         condition_names: &["sass", "style", "default"],
         default_files: &["index"],
-        extensions: &["scss", "css"],
+        extensions: &["sass", "scss", "css"],
         ..Default::default()
     }
 }
@@ -1243,6 +1243,8 @@ fn test_resolve_sass_extensions_and_partials() {
         "/src/only.css",
         "/src/both.scss",
         "/src/both.css",
+        "/src/_indented-over-css.sass",
+        "/src/_indented-over-css.css",
         "/shared/_vars.scss",
     ]);
     for (specifier, expected) in [
@@ -1254,6 +1256,8 @@ fn test_resolve_sass_extensions_and_partials() {
         ("only", "/src/only.css"),
         ("both", "/src/both.scss"),
         ("both.css", "/src/both.css"),
+        ("indented", "/src/indented.sass"),
+        ("indented-over-css", "/src/_indented-over-css.sass"),
         ("../shared/vars", "/shared/_vars.scss"),
         ("/shared/vars", "/shared/_vars.scss"),
     ] {
@@ -1263,10 +1267,6 @@ fn test_resolve_sass_extensions_and_partials() {
             "{specifier}"
         );
     }
-    assert_eq!(
-        resolve_sass_in_src(&fs, "indented", SassLoadRule::Module),
-        Err(ResolveError::NotFound)
-    );
 }
 
 #[test]
@@ -1277,8 +1277,10 @@ fn test_resolve_sass_ambiguous_urls() {
         "/src/_double.scss",
         "/src/__double.scss",
         "/src/__only.scss",
+        "/src/syntax.sass",
+        "/src/_syntax.scss",
     ]);
-    for specifier in ["theme", "theme.scss", "_double"] {
+    for specifier in ["theme", "theme.scss", "_double", "syntax"] {
         assert_eq!(
             resolve_sass_in_src(&fs, specifier, SassLoadRule::Module),
             Err(ResolveError::AmbiguousSassUrl),
@@ -1442,6 +1444,8 @@ fn test_resolve_sass_trailing_slash_names_directory() {
         ("./theme", "/src/_theme.scss"),
         ("./theme/", "/src/theme/_index.scss"),
         ("theme/", "/src/theme/_index.scss"),
+        ("./theme/.", "/src/theme/_index.scss"),
+        ("./theme/missing/..", "/src/theme/_index.scss"),
     ] {
         assert_eq!(
             resolve_sass_in_src(&fs, specifier, SassLoadRule::Module),
