@@ -51,7 +51,7 @@ pub use narrowing::{
     narrow_by_assignment, narrow_by_constructor, narrow_by_in_operator, narrow_by_instanceof,
     narrow_by_private_name, narrow_by_property, narrow_by_type_predicate, narrow_type,
     raw_may_be_nullish, raw_may_be_object_union, raw_may_be_union, raw_may_have_literal,
-    raw_may_narrow_by_instanceof, raw_predicate_target,
+    raw_may_narrow_by_instanceof, raw_predicate_target, type_parameter_constraint,
 };
 pub use return_type_relation::{
     NarrowedTypeCandidates, ReturnTypeRelation, ReturnTypeVerdict, compare_declared_return_type,

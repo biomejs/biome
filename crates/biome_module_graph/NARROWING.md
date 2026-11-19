@@ -127,11 +127,19 @@ These results match TypeScript's and can surprise a reader.
 | Truthiness of a type parameter | `x: T; if (x) x` | `T & {}` |
 | `typeof` on a type parameter | `x: T; if (typeof x === "string") x` | `T & string` |
 | `switch` on a type parameter | `x: T; switch (x) { case null: case undefined: break; default: x }` | `T` |
+| `switch` on a type parameter whose constraint a case covers | `x: T, with T extends null; switch (x) { case null: break; default: x }` | Unknown |
+| An exhaustive `switch` on a type parameter | `x: T, with T extends "a" \| "b"; y: string \| null; switch (x) { case "a": case "b": if (y === null) return; } y` | `string` |
 | `#s in x` on a class | `class P { static #s = 2; static s1(x: typeof P \| Date) { if (#s in x) {} else x } }` | `Date \| typeof P` |
 | A discriminant through an optional chain | `x: Circle \| Square \| null; if (x?.kind !== "c") x` | `Square \| null` |
 
 Biome writes `{ b: 1 } & Record<"a", unknown>` as `{ b: 1; a: unknown }`, and
 `T & {}` where TypeScript writes `NonNullable<T>`.
+
+Where no case of a `switch` matches, a type parameter keeps its type unless
+its constraint is a single type that the cases cover, as `null` is: then the
+read is Unknown, where TypeScript gives `never`. A constraint that is a union,
+as `"a" | "b"` or `boolean`, keeps the type parameter there, but the `switch`
+is exhaustive when its cases cover every member of the constraint.
 
 ### Statements and calls
 
@@ -506,7 +514,7 @@ a parameter, written as the arrow's body or as the only statement, a
 
 | Code | TypeScript | Biome | Effect on rules |
 | --- | --- | --- | --- |
-| `x: T, with T extends null; switch (x) { case null: break; default: x }` | `never` | `T` | A rule can miss that `default` never runs. |
+| `x: T, with T extends boolean; switch (typeof x) { case "boolean": break; default: x }` | `never` | `T` | A rule can miss that `default` never runs. |
 | ``interface U { f(x: string): 2; f(x: `a`): 1 }; u: U; u.f("a")`` | `1` | `2` | Disjoint: `noUnnecessaryConditions` can report `case 1:` on the result as never matching. |
 
 Biome tries the overloads with a parameter of a literal type first, as

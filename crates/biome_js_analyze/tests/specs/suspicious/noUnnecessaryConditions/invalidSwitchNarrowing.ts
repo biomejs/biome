@@ -56,3 +56,17 @@ function afterExhaustiveSwitch(kind: "a" | "b", label: string | null) {
 	}
 	return label?.length;
 }
+
+function afterExhaustiveSwitchOnTypeParameter<K extends "a" | "b">(
+	kind: K,
+	label: string | null,
+) {
+	switch (kind) {
+		case "a":
+			if (label === null) return;
+			break;
+		case "b":
+			if (label === null) return;
+	}
+	return label?.length;
+}

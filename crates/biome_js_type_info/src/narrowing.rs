@@ -3299,6 +3299,23 @@ fn refers_to_type_parameter<'db>(db: &'db dyn TypeDb, ty: InferredTypeData<'db>)
     }
 }
 
+/// Returns the constraint of `ty` when `ty` is a type parameter, with its
+/// handles and those of its union members resolved through `resolve`, as
+/// `string | null` for `T extends string | null`.
+///
+/// Returns `None` for any other type, for a type parameter without a
+/// constraint, and for a constraint that is a type parameter, an
+/// intersection with one, or a union with such a member, as `U | null`.
+pub fn type_parameter_constraint<'db>(
+    db: &'db dyn TypeDb,
+    ty: InferredTypeData<'db>,
+    mut resolve: impl FnMut(InferredTypeData<'db>) -> InferredTypeData<'db>,
+) -> Option<InferredTypeData<'db>> {
+    let constraint = referenced_generic(db, ty)?.constraint(db)?;
+    let constraint = flattened(db, constraint, &mut resolve)?;
+    (!refers_to_type_parameter(db, constraint)).then_some(constraint)
+}
+
 /// Returns whether `ty` is a type parameter, or an intersection with a type
 /// parameter among its operands, such as the `T & {}` that narrowing gives.
 pub fn is_type_parameter_or_intersection<'db>(
