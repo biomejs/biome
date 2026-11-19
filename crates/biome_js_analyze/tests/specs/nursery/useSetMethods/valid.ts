@@ -1,0 +1,18 @@
+/* should not generate diagnostics */
+function filterAsArray(a: Set<string>, b: Set<string>) {
+	return [...a].filter((value) => b.has(value)) as string[];
+}
+
+function arrays(a: string[], b: Set<string>) {
+	return [...a].filter((value) => b.has(value));
+}
+
+function shadowedType(a: Set<string>, b: Set<string>) {
+	type Set<T> = Array<T>;
+	const c: Set<string> = [];
+	return [...c].filter((value) => b.has(value));
+}
+
+function setOrMap(a: Set<string> | Map<string, string>, b: Set<string>) {
+	return [...a].filter((value) => b.has(value));
+}

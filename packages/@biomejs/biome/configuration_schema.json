@@ -11606,6 +11606,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useSetMethods": {
+					"description": "Succinct description of the rule.\nSee https://biomejs.dev/linter/rules/use-set-methods",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseSetMethodsConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useSetSize": {
 					"description": "Prefer reading the size property of a Set over converting the Set to an array to read its length.\nSee https://biomejs.dev/linter/rules/use-set-size",
 					"anyOf": [
@@ -20591,6 +20598,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseSetMethodsOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseSetMethodsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseSetSizeOptions": {
 			"type": "object",
 			"properties": {
@@ -26802,6 +26818,13 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"UseSetMethodsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseSetMethodsOptions" }
+			]
+		},
+		"UseSetMethodsOptions": { "type": "object", "additionalProperties": false },
 		"UseSetSizeConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },

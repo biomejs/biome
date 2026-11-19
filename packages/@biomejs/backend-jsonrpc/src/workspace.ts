@@ -4415,6 +4415,11 @@ export interface Nursery {
 	 */
 	useRegexpExec?: UseRegexpExecConfiguration;
 	/**
+	 * Succinct description of the rule.
+	 * See https://biomejs.dev/linter/rules/use-set-methods
+	 */
+	useSetMethods?: UseSetMethodsConfiguration;
+	/**
 	 * Prefer reading the size property of a Set over converting the Set to an array to read its length.
 	 * See https://biomejs.dev/linter/rules/use-set-size
 	 */
@@ -7819,6 +7824,9 @@ export type UseReactNativeValidPlatformColorsConfiguration =
 export type UseRegexpExecConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseRegexpExecOptions;
+export type UseSetMethodsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseSetMethodsOptions;
 export type UseSetSizeConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseSetSizeOptions;
@@ -11683,6 +11691,10 @@ export interface RuleWithUseRegexpExecOptions {
 	level: RulePlainConfiguration;
 	options?: UseRegexpExecOptions;
 }
+export interface RuleWithUseSetMethodsOptions {
+	level: RulePlainConfiguration;
+	options?: UseSetMethodsOptions;
+}
 export interface RuleWithUseSetSizeOptions {
 	/**
 	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
@@ -14920,6 +14932,7 @@ export interface UseReactFunctionComponentDefinitionOptions {
 export type UseReactNamingConventionOptions = {};
 export type UseReactNativeValidPlatformColorsOptions = {};
 export type UseRegexpExecOptions = {};
+export type UseSetMethodsOptions = {};
 export type UseSetSizeOptions = {};
 export type UseSimplifiedBooleanReturnOptions = {};
 export interface UseSingleTopLevelHeadingOptions {
@@ -16993,6 +17006,7 @@ export type Category =
 	| "lint/nursery/useRegexpExec"
 	| "lint/nursery/useRegexpTest"
 	| "lint/nursery/useScopedStyles"
+	| "lint/nursery/useSetMethods"
 	| "lint/nursery/useSetSize"
 	| "lint/nursery/useSimplifiedBooleanReturn"
 	| "lint/nursery/useSingleTopLevelHeading"
