@@ -86,3 +86,11 @@ function annotatedParameter(value: string | null, check: (input: unknown) => ass
 	check(value);
 	return value?.length;
 }
+
+function returnOperand(value: string | null) {
+	return (assertString(value), value?.length);
+}
+
+function throwOperand(value: string | null) {
+	throw (assertString(value), value?.length);
+}

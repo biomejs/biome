@@ -2098,9 +2098,10 @@ impl RootBuilder<'_, '_> {
     /// the types from before it. The statement calls are those that
     /// TypeScript adds to the flow: the expression itself when it is a call,
     /// and each operand of the comma operator that is a call, through any
-    /// parentheses around the comma expression. A call in parentheses, as in
-    /// `(assert(x));`, is none. The operands run in order, so a write in an
-    /// operand comes before the next operand.
+    /// parentheses around the comma expression. [`Self::evaluate`] adds the
+    /// operands of a comma expression elsewhere, as in `return (assert(x), x)`.
+    /// A call in parentheses, as in `(assert(x));`, is none. The operands run
+    /// in order, so a write in an operand comes before the next operand.
     ///
     /// Returns `None` when a call of a local function that never returns ends
     /// the path, so the operands after it don't run. A call point whose
@@ -3033,6 +3034,17 @@ impl RootBuilder<'_, '_> {
                     None => None,
                 };
                 self.join_branches(test_flow, positive, negative)
+            }
+            // Each operand of the comma operator that is a call is a statement
+            // call, wherever the comma expression is.
+            Some(AnyJsExpression::JsSequenceExpression(sequence)) => {
+                let left = sequence.left().map_err(|_| Unsupported)?;
+                let right = sequence.right().map_err(|_| Unsupported)?;
+                let end = match self.statement_calls(&left, incoming, depth + 1)? {
+                    Some(flow) => self.statement_calls(&right, flow, depth + 1)?,
+                    None => None,
+                };
+                self.inline_end(end)
             }
             _ => self.children(node, incoming, depth),
         }

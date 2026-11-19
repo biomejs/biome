@@ -93,6 +93,14 @@ function annotatedParameter(value: string | null, check: (input: unknown) => ass
 	return value?.length;
 }
 
+function returnOperand(value: string | null) {
+	return (assertString(value), value?.length);
+}
+
+function throwOperand(value: string | null) {
+	throw (assertString(value), value?.length);
+}
+
 ```
 
 # Diagnostics
@@ -469,6 +477,54 @@ assertionFlow.ts:87:9 lint/suspicious/noUnnecessaryConditions ━━━━━━
        │ 	            ^^
     88 │ }
     89 │ 
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+assertionFlow.ts:91:31 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    90 │ function returnOperand(value: string | null) {
+  > 91 │ 	return (assertString(value), value?.length);
+       │ 	                             ^^^^^
+    92 │ }
+    93 │ 
+  
+  i Replace ?. with ..
+  
+    90 │ function returnOperand(value: string | null) {
+  > 91 │ 	return (assertString(value), value?.length);
+       │ 	                                  ^^
+    92 │ }
+    93 │ 
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+assertionFlow.ts:95:30 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    94 │ function throwOperand(value: string | null) {
+  > 95 │ 	throw (assertString(value), value?.length);
+       │ 	                            ^^^^^
+    96 │ }
+    97 │ 
+  
+  i Replace ?. with ..
+  
+    94 │ function throwOperand(value: string | null) {
+  > 95 │ 	throw (assertString(value), value?.length);
+       │ 	                                 ^^
+    96 │ }
+    97 │ 
   
   i The receiver is guaranteed to be non-nullish.
   

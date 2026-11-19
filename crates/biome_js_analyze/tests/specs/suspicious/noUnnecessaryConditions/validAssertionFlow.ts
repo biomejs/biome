@@ -52,14 +52,6 @@ function nested(value: string | null, flag: boolean) {
 	return value?.length;
 }
 
-function returnOperand(value: string | null) {
-	return (assertString(value), value?.length);
-}
-
-function throwOperand(value: string | null) {
-	throw (assertString(value), value?.length);
-}
-
 function shadowedSubject(value: string | null) {
 	assertString(value);
 	{

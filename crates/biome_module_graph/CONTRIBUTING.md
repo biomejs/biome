@@ -883,9 +883,10 @@ The behavior of each kind of test is in
   `any`. An imported name can be an alias of a primitive, so it doesn't count
   as an object type, and a target of `any` or `unknown` makes the function
   unsupported.
-- **Statement calls and assertions.** After each statement call, the builder
-  adds a condition node (`statement_calls`), so the call and its arguments
-  still use the types from before it. For a local assertion function,
+- **Statement calls and assertions.** After each statement call, the
+  expression of an expression statement or an operand of the comma operator
+  anywhere, the builder adds a condition node (`statement_calls`), so the
+  call and its arguments still use the types from before it. For a local assertion function,
   `asserts value is T` becomes a runtime test of the argument, and
   `asserts value` decomposes the argument as a condition that holds.
 - **Call points.** A call whose callee is a dotted name, and that no local

@@ -524,22 +524,33 @@ fn library_type_guard_functions_narrow() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) narrows the operand after a call that is
-// an operand of the comma operator, also inside the same expression
-// statement, and also in a `return` statement. Biome adds only the operands
-// of an expression statement to the flow, so the read in `return` keeps its
-// declared type, which is wider.
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected
+// type. It adds a call that is an operand of the comma operator to the flow
+// wherever the comma operator appears, also as the last operand, whose value
+// the expression uses, but not a call in parentheses.
 #[test]
-fn comma_operands_of_expression_statements_assert() {
+fn comma_operands_assert() {
     assert_reads(
         r#"
         declare function assertString(input: unknown): asserts input is string;
+        declare function g(): void;
+        declare function use(input: unknown): void;
         function statement(value: string | number) { (assertString(value), /*statement*/value); }
         function returned(value: string | number) { return (assertString(value), /*returned*/value); }
+        function thrown(value: string | number) { throw (assertString(value), /*thrown*/value); }
+        function middle(value: string | number) { const y = (g(), assertString(value), 1); /*middle*/value; }
+        function last(value: string | number) { use((0, assertString(value))); /*last*/value; }
+        function test(value: string | number) { if ((assertString(value), true)) /*test*/value; }
+        function parenthesized(value: string | number) { return ((assertString(value)), /*parenthesized*/value); }
         "#,
         &[
             ("statement", "value", &["string"]),
-            ("returned", "value", &["number", "string"]),
+            ("returned", "value", &["string"]),
+            ("thrown", "value", &["string"]),
+            ("middle", "value", &["string"]),
+            ("last", "value", &["string"]),
+            ("test", "value", &["string"]),
+            ("parenthesized", "value", &["number", "string"]),
         ],
     );
 }
