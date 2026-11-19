@@ -1431,10 +1431,14 @@ impl<'db> TypeData<'db> {
                 ))
             }
             raw::TypeData::TypeofExpression(expression) => {
-                Self::TypeofExpression(InternedTypeofExpression::new(
-                    db,
-                    convert_typeof_expression(db, expression.as_ref(), resolve_reference),
-                ))
+                match convert_typeof_expression(db, expression.as_ref(), resolve_reference) {
+                    Some(expression) => {
+                        Self::TypeofExpression(InternedTypeofExpression::new(db, expression))
+                    }
+                    // Only the module's flow tells whether a path reaches the
+                    // end of the function, so the end counts as reachable.
+                    None => Self::Undefined,
+                }
             }
             raw::TypeData::TypeofType(ty) => {
                 Self::TypeofType(InternedTypeofType::new(db, resolve_reference(ty)))
@@ -3484,13 +3488,15 @@ fn convert_literal<'db>(
     }
 }
 
+/// Converts a raw expression to its inferred form, or returns `None` for a
+/// [`raw::TypeofImplicitReturnExpression`], which has no inferred form.
 fn convert_typeof_expression<'db>(
     db: &'db dyn TypeDb,
     expression: &raw::TypeofExpression,
     resolve_reference: &mut ReferenceResolver<'db, '_>,
-) -> TypeofExpression<'db> {
+) -> Option<TypeofExpression<'db>> {
     let _ = db;
-    match expression {
+    let expression = match expression {
         raw::TypeofExpression::Addition(expression) => {
             TypeofExpression::Addition(TypeofAdditionExpression {
                 left: resolve_reference(&expression.left),
@@ -3623,7 +3629,9 @@ fn convert_typeof_expression<'db>(
                 is_return_type: expression.is_return_type,
             })
         }
-    }
+        raw::TypeofExpression::ImplicitReturn(_) => return None,
+    };
+    Some(expression)
 }
 
 fn convert_call_arguments<'db>(

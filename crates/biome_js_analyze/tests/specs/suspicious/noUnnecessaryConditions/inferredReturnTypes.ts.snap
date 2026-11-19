@@ -1,0 +1,130 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: inferredReturnTypes.ts
+---
+# Input
+```ts
+// should generate diagnostics
+
+declare const flag: boolean;
+declare function fail(message: string): never;
+
+function maybeBox() {
+	if (flag) return { size: 1 };
+}
+
+function alwaysBox() {
+	if (flag) return { size: 1 };
+	fail("missing");
+}
+
+function nestedMember() {
+	const helper = { fallback() { return null; } };
+	return { size: 1 };
+}
+
+// A path reaches the end of `maybeBox`, so the call can give `undefined`.
+function reachableEnd() {
+	const box = maybeBox();
+	return box?.size;
+}
+
+// No path reaches the end of `alwaysBox`.
+function unreachableEnd() {
+	const box = alwaysBox();
+	return box?.size;
+}
+
+// The `return` of the nested method returns from the method.
+function nestedReturn() {
+	const box = nestedMember();
+	return box?.size;
+}
+
+// The write assigns the inferred return type of `alwaysBox`.
+function assignedCall() {
+	let box: { size: number } | undefined = undefined;
+	box = alwaysBox();
+	return box?.size;
+}
+
+```
+
+# Diagnostics
+```
+inferredReturnTypes.ts:29:9 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    27 │ function unreachableEnd() {
+    28 │ 	const box = alwaysBox();
+  > 29 │ 	return box?.size;
+       │ 	       ^^^
+    30 │ }
+    31 │ 
+  
+  i Replace ?. with ..
+  
+    27 │ function unreachableEnd() {
+    28 │ 	const box = alwaysBox();
+  > 29 │ 	return box?.size;
+       │ 	          ^^
+    30 │ }
+    31 │ 
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+inferredReturnTypes.ts:35:9 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    33 │ function nestedReturn() {
+    34 │ 	const box = nestedMember();
+  > 35 │ 	return box?.size;
+       │ 	       ^^^
+    36 │ }
+    37 │ 
+  
+  i Replace ?. with ..
+  
+    33 │ function nestedReturn() {
+    34 │ 	const box = nestedMember();
+  > 35 │ 	return box?.size;
+       │ 	          ^^
+    36 │ }
+    37 │ 
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+inferredReturnTypes.ts:42:9 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    40 │ 	let box: { size: number } | undefined = undefined;
+    41 │ 	box = alwaysBox();
+  > 42 │ 	return box?.size;
+       │ 	       ^^^
+    43 │ }
+    44 │ 
+  
+  i Replace ?. with ..
+  
+    40 │ 	let box: { size: number } | undefined = undefined;
+    41 │ 	box = alwaysBox();
+  > 42 │ 	return box?.size;
+       │ 	          ^^
+    43 │ }
+    44 │ 
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```

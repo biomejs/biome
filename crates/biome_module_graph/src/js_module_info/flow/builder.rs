@@ -32,7 +32,7 @@ use biome_js_syntax::{
     JsWhileStatement, T, TsInterfaceDeclaration, TsNonNullAssertionExpression, TsTypeAnnotation,
     binding_ext::AnyJsBindingDeclaration,
 };
-use biome_js_type_info::DestructureField;
+use biome_js_type_info::{DestructureField, own_returns};
 use biome_rowan::{
     AstNode, AstNodeList, AstSeparatedList, SyntaxKindSet, SyntaxResult, TextRange, TokenText,
     WalkEvent, declare_node_union,
@@ -779,20 +779,28 @@ impl ElementKey {
 const EVOLVING_READ_KINDS: SyntaxKindSet<JsLanguage> =
     JsIdentifierExpression::KIND_SET.union(AnyJsControlFlowRoot::KIND_SET);
 
-/// Limits the operands that [`value_callees`] visits.
+/// Limits the operands that [`value_callees`] visits, including the values
+/// that the local functions it follows return.
 const MAX_VALUE_STEPS: usize = 32;
+
+/// Limits the nested calls of local functions without a return type
+/// annotation through which [`value_callees`] follows returned values.
+const MAX_LOCAL_CALL_DEPTH: usize = 4;
 
 /// Why Biome may type a value narrower than TypeScript does, as
 /// [`value_callees`] finds it.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 enum UntypedValue {
     /// The value can be the result of a call to a function whose return type
-    /// Biome infers. When an assignment in a scope other than the declaration
-    /// of a variable whose type evolves with its writes assigns such a value,
-    /// the variable's declared type includes the type that Biome infers.
+    /// Biome infers from values that [`value_callees`] doesn't visit, as a
+    /// method or an import. When an assignment in a scope other than the
+    /// declaration of a variable whose type evolves with its writes assigns
+    /// such a value, the variable's declared type includes the type that
+    /// Biome infers.
     InferredReturn,
-    /// The value can be the result of `typeof`, or its operands exceed
-    /// [`MAX_VALUE_STEPS`].
+    /// The value can be the result of `typeof`, or of a call to a local
+    /// function that returns a value that reads a variable whose type evolves
+    /// with its writes, or its operands exceed [`MAX_VALUE_STEPS`].
     Other,
 }
 
@@ -801,6 +809,8 @@ enum UntypedValue {
 /// confirms them. Returns an error when Biome may type the value narrower
 /// than TypeScript does, so that a write of it gives the subject its declared
 /// type, or Unknown for a variable whose type evolves with its writes.
+/// `reads_evolving` tells whether a value reads a variable whose type
+/// evolves with its writes, whose declared type doesn't follow them.
 ///
 /// The values that `expression` can give are visited through parentheses,
 /// the branches of a conditional expression, the operands of `&&`, `||`, and
@@ -809,10 +819,17 @@ enum UntypedValue {
 /// only when Biome's type of its object has it. Among them:
 ///
 /// - A call depends on where the return type of its callee comes from; see
-///   [`callee_return`]. An inferred return type gives
-///   [`UntypedValue::InferredReturn`], because Biome infers the return type
-///   of a function without a return type annotation without the `undefined`
-///   of an end that the function can reach.
+///   [`callee_return`]. Biome infers the return type of a local function
+///   without a return type annotation from its body as TypeScript does, with
+///   the `undefined` of an end that a path reaches, when it types each value
+///   that the function returns so. A call of such a function (see
+///   [`inferred_local_body`]) visits those values instead, through at most
+///   [`MAX_LOCAL_CALL_DEPTH`] nested calls, and gives [`UntypedValue::Other`]
+///   when one of them reads a variable whose type evolves. Any other inferred
+///   return type gives [`UntypedValue::InferredReturn`]: a method or an
+///   import, whose check needs the types of an object or the syntax of
+///   another module, a function expression called where it is defined, or a
+///   local function nested more deeply.
 /// - `typeof` gives [`UntypedValue::Other`], because Biome types it as the
 ///   one kind of value that the operand's type has, where TypeScript gives
 ///   every kind.
@@ -822,30 +839,27 @@ enum UntypedValue {
 fn value_callees(
     expression: &AnyJsExpression,
     model: &SemanticModel,
+    mut reads_evolving: impl FnMut(&AnyJsExpression) -> bool,
 ) -> Result<Vec<FlowCallee>, UntypedValue> {
-    let mut pending = vec![expression.clone()];
+    let mut pending = vec![(expression.clone(), MAX_LOCAL_CALL_DEPTH)];
     let mut callees = Vec::new();
     let mut remaining = MAX_VALUE_STEPS;
     let mut inferred = false;
-    while let Some(expression) = pending.pop() {
+    while let Some((expression, depth)) = pending.pop() {
         remaining = remaining.checked_sub(1).ok_or(UntypedValue::Other)?;
-        match expression {
+        let operands = match expression {
             AnyJsExpression::JsParenthesizedExpression(parenthesized) => {
-                pending.extend(parenthesized.expression().ok());
+                [parenthesized.expression().ok(), None]
             }
             AnyJsExpression::JsConditionalExpression(conditional) => {
-                pending.extend(conditional.consequent().ok());
-                pending.extend(conditional.alternate().ok());
+                [conditional.consequent().ok(), conditional.alternate().ok()]
             }
             AnyJsExpression::JsLogicalExpression(logical) => {
-                pending.extend(logical.left().ok());
-                pending.extend(logical.right().ok());
+                [logical.left().ok(), logical.right().ok()]
             }
-            AnyJsExpression::JsSequenceExpression(sequence) => {
-                pending.extend(sequence.right().ok());
-            }
+            AnyJsExpression::JsSequenceExpression(sequence) => [sequence.right().ok(), None],
             AnyJsExpression::JsAwaitExpression(await_expression) => {
-                pending.extend(await_expression.argument().ok());
+                [await_expression.argument().ok(), None]
             }
             AnyJsExpression::JsUnaryExpression(unary)
                 if unary.operator() == Ok(JsUnaryOperator::Typeof) =>
@@ -856,27 +870,95 @@ fn value_callees(
                 let callee = call.callee().map_err(|_| UntypedValue::Other)?;
                 match callee_return(&callee, model) {
                     CalleeReturn::Annotated => {}
-                    CalleeReturn::Inferred => inferred = true,
+                    CalleeReturn::Inferred => match depth
+                        .checked_sub(1)
+                        .and_then(|depth| Some((depth, inferred_local_body(&callee, model)?)))
+                    {
+                        Some((depth, body)) => {
+                            let values: Vec<_> = match body {
+                                AnyJsFunctionBody::AnyJsExpression(value) => Vec::from([value]),
+                                AnyJsFunctionBody::JsFunctionBody(body) => own_returns(&body)
+                                    .filter_map(|statement| statement.argument())
+                                    .collect(),
+                            };
+                            for value in values {
+                                if reads_evolving(&value) {
+                                    return Err(UntypedValue::Other);
+                                }
+                                pending.push((value, depth));
+                            }
+                        }
+                        None => inferred = true,
+                    },
                     CalleeReturn::Resolved(callee) => callees.push(callee),
                 }
-                if call.is_optional_chain() {
-                    pending.push(callee);
-                }
+                [call.is_optional_chain().then_some(callee), None]
             }
             AnyJsExpression::JsStaticMemberExpression(member) if member.is_optional_chain() => {
-                pending.extend(member.object().ok());
+                [member.object().ok(), None]
             }
             AnyJsExpression::JsComputedMemberExpression(member) if member.is_optional_chain() => {
-                pending.extend(member.object().ok());
+                [member.object().ok(), None]
             }
-            _ => {}
-        }
+            _ => continue,
+        };
+        pending.extend(
+            operands
+                .into_iter()
+                .flatten()
+                .map(|operand| (operand, depth)),
+        );
     }
     if inferred {
         Err(UntypedValue::InferredReturn)
     } else {
         Ok(callees)
     }
+}
+
+/// Returns the body of the local function that `callee`, the callee of a
+/// call, names, when Biome infers the call's return type from that body: a
+/// function declaration, or a function or arrow expression that initializes
+/// a variable without a type annotation, that has no return type annotation
+/// and isn't a generator. Returns `None` for any other callee, as a method,
+/// an import, or a function expression called where it is defined.
+fn inferred_local_body(
+    callee: &AnyJsExpression,
+    model: &SemanticModel,
+) -> Option<AnyJsFunctionBody> {
+    let AnyJsExpression::JsIdentifierExpression(identifier) = callee.clone().omit_parentheses()
+    else {
+        return None;
+    };
+    let binding = model.binding(&identifier.name().ok()?)?;
+    let function = match binding.tree().declaration()? {
+        AnyJsBindingDeclaration::JsFunctionDeclaration(function) => AnyJsFunction::from(function),
+        AnyJsBindingDeclaration::JsFunctionExportDefaultDeclaration(function) => {
+            AnyJsFunction::from(function)
+        }
+        AnyJsBindingDeclaration::JsVariableDeclarator(declarator) => {
+            if declarator.variable_annotation().is_some() {
+                return None;
+            }
+            match declarator
+                .initializer()?
+                .expression()
+                .ok()?
+                .omit_parentheses()
+            {
+                AnyJsExpression::JsArrowFunctionExpression(function) => {
+                    AnyJsFunction::from(function)
+                }
+                AnyJsExpression::JsFunctionExpression(function) => AnyJsFunction::from(function),
+                _ => return None,
+            }
+        }
+        _ => return None,
+    };
+    if function.return_type_annotation().is_some() || function.is_generator() {
+        return None;
+    }
+    function.body().ok()
 }
 
 /// Where the return type of the callee of a call comes from, as far as the
@@ -887,7 +969,9 @@ pub(crate) enum CalleeReturn {
     /// a declaration file, which has no function body to infer from.
     Annotated,
     /// A function body, or a type that the syntax doesn't show. A write of
-    /// the call's value gives the subject its declared type.
+    /// the call's value gives the subject its declared type, unless the
+    /// callee is a local function whose returned values [`value_callees`]
+    /// accepts.
     Inferred,
     /// A declaration that the reading context finds.
     ///
@@ -3292,7 +3376,8 @@ impl RootBuilder<'_, '_> {
     /// assignments when they lie in a scope other than the one that declares
     /// the variable, as `x = v` in `let x = null; if (c) { x = v; }`, so the
     /// assignment must lie in such a scope. The value must not read a
-    /// variable whose type evolves with its writes, and Biome must not type
+    /// variable whose type evolves with its writes, directly or through a
+    /// value that a local function it calls returns, and Biome must not type
     /// it narrower than TypeScript for a reason other than a call to a
     /// function whose return type Biome infers; see [`value_callees`].
     fn is_covered(&mut self, target: &AnyJsAssignment, right: &AnyJsExpression) -> bool {
@@ -3319,15 +3404,19 @@ impl RootBuilder<'_, '_> {
         let Some(binding) = self.model.binding(&identifier) else {
             return false;
         };
+        let model = self.model;
         self.evolving(binding.range()) == FlowEvolving::Variable
-            && self.model.scope(identifier.syntax()).id() != binding.scope().id()
+            && model.scope(identifier.syntax()).id() != binding.scope().id()
             && !self.reads_evolving(right)
-            && !matches!(value_callees(right, self.model), Err(UntypedValue::Other))
+            && !matches!(
+                value_callees(right, model, |value| self.reads_evolving(value)),
+                Err(UntypedValue::Other)
+            )
     }
 
     /// Returns the value of `expression` as a write assigns it, or `None`
     /// when Biome can't type it as TypeScript does, as for `typeof` or a call
-    /// to a function whose return type Biome infers; see [`value_callees`].
+    /// to a method whose return type Biome infers; see [`value_callees`].
     fn assigned_expression(&mut self, expression: &AnyJsExpression) -> Option<FlowAssignedValue> {
         self.check_value(expression)
             .then(|| FlowAssignedValue::Expression(expression.range()))
@@ -3341,7 +3430,9 @@ impl RootBuilder<'_, '_> {
         if self.reads_evolving(expression) {
             return false;
         }
-        let Ok(callees) = value_callees(expression, self.model) else {
+        let model = self.model;
+        let Ok(callees) = value_callees(expression, model, |value| self.reads_evolving(value))
+        else {
             return false;
         };
         if !callees.is_empty() {
@@ -4621,11 +4712,15 @@ mod tests {
         // variable, so the declaration adds no write point.
         let built = function("function f(c) { let x = c; read(x); }");
         assert_eq!(built.paths("x", 1), [Vec::<String>::new()]);
-        // A call to a local function without a return annotation assigns an
-        // undetermined value.
+        // A call to a local function without a return annotation assigns the
+        // values that the function returns, when Biome types them as
+        // TypeScript does. A function expression called where it is defined
+        // assigns an undetermined value.
         let built = function(
             "function f() { let x: number | undefined = g(); read(x); function g() { return 1; } }",
         );
+        assert_eq!(built.paths("x", 1), [facts(&["x:Assign"])]);
+        let built = function("function f() { let x: number | undefined = (() => 1)(); read(x); }");
         assert_eq!(built.paths("x", 1), [facts(&["x:Reset"])]);
     }
 
@@ -4808,10 +4903,11 @@ mod tests {
         // includes the values of `=` and logical assignments in scopes other
         // than its declaration. Values that Biome may type narrower than
         // TypeScript for a reason other than an inferred return type, as
-        // `typeof` and a read of such a variable, are left out, and so are
-        // compound and compound-like assignments.
+        // `typeof`, a read of such a variable, and a call of a local function
+        // that returns such a read, are left out, and so are compound and
+        // compound-like assignments.
         let built = function(
-            "function f(c, o, n) { let x = null; let y = null; x = o.m(); if (c) { x = o.m(); x ??= h(); x = typeof c; x = y; x = n + 1; x += 1; } { let z = null; z = o.m(); read(z); } read(x); }",
+            "function f(c, o, n) { let x = null; let y = null; x = o.m(); if (c) { x = o.m(); x ??= h(); x = typeof c; x = y; x = n + 1; x += 1; x = g(); x = k(); } { let z = null; z = o.m(); read(z); } read(x); function g() { return y; } function k() { return 1; } }",
         );
         let covered: Vec<_> = built
             .root()
@@ -4823,7 +4919,7 @@ mod tests {
                 FlowAssignedValue::IterableValue(_) | FlowAssignedValue::Key => "",
             })
             .collect();
-        assert_eq!(covered, ["o.m()", "h()"]);
+        assert_eq!(covered, ["o.m()", "h()", "k()"]);
     }
 
     #[test]

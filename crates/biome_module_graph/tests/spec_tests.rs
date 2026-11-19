@@ -112,6 +112,8 @@ mod queries;
 mod reachability;
 #[path = "spec_tests/requests.test.rs"]
 mod requests;
+#[path = "spec_tests/return_types.test.rs"]
+mod return_types;
 #[path = "spec_tests/substitutions.test.rs"]
 mod substitutions;
 #[path = "spec_tests/switch.test.rs"]

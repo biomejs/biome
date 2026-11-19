@@ -4007,10 +4007,9 @@ mod tests {
     fn elements_of_patterns_that_cannot_narrow_are_not_candidates() {
         const SOURCE: &str = r#"
             type S = { kind: "a"; v: 1 } | { kind: "b"; v: 2 };
-            function g() { return 1 as const; }
             function mutable(s: S) { let { kind, v } = s; if (kind === "a") { /*mutable*/v; } }
             function single(s: S) { const { kind } = s; const { v } = s; if (kind === "a") { /*single*/v; } }
-            function written({ kind, v }: S) { v = g(); if (kind === "a") { /*written*/v; } }
+            function written({ kind, v }: S) { v = (() => 1 as const)(); if (kind === "a") { /*written*/v; } }
             function enclosingDefault(w: { a?: S }, d: S) { const { a: { kind, v } = d } = w; if (kind === "a") { /*enclosingDefault*/v; } }
             function closure({ kind, v }: S) { const h = () => { if (kind === "a") { /*closure*/v; } }; }
             function notUnion({ a, b }: { a: string | null; b: number }) { if (a) { /*notUnion*/b; } }

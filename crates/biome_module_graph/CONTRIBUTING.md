@@ -173,13 +173,20 @@ a path on its own `this`. Its parts live in `src/js_module_info/flow/`:
   TypeScript (`value_callees`), or that reads a variable whose type evolves
   with its writes (`reads_evolving`), whose declared type doesn't follow
   them, gets none, so the write gives the declared type, or `Unknown` for a
-  variable whose type evolves with its writes. The value of an assignment
-  with `=`, `??=`, `||=`, or `&&=` to such a variable in a scope other than
-  its declaration is covered instead (`FlowAssigned::covered`, as
+  variable whose type evolves with its writes. A call of a local function
+  without a return type annotation, a function declaration or a function or
+  arrow expression that initializes a variable (`inferred_local_body`),
+  counts as typed as in TypeScript when each value that the function
+  returns passes the same checks, through at most four nested functions,
+  because Biome infers its return type with the `undefined` of an end that
+  a path reaches. The value of an assignment with `=`, `??=`, `||=`, or
+  `&&=` to a variable whose type evolves with its writes, in a scope other
+  than its declaration, is covered instead (`FlowAssigned::covered`, as
   `is_covered` decides) when an inferred return type is the only reason
   Biome may type it narrower: the collector's declared type joins those
   values (`widen_binding_from_writable_references`), so the write gives
-  Biome's type for the value. A call
+  Biome's type for the value. A value that a local function returns and
+  that reads a variable whose type evolves keeps the write uncovered. A call
   whose callee's annotation the syntax doesn't show, an import or a method
   (`FlowCallee`), is kept in `FlowAssigned::callees`, and the reading
   context confirms it where it resolves the assigned types
@@ -853,17 +860,30 @@ implements `TypeInferenceRequestMetadata` beside its execution implementation,
 which gives the request a stable profile ID and human label.
 
 `UnreachableCodeClassificationRequest` tells whether no path reaches a
-statement, as TypeScript's `isReachableFlowNode` decides. It asks the tracked
-query `infer_flow_reachability` about the execution root around the
-statement, which builds that root's graph from the module's syntax when it
-runs (`build_reachability`), with the builder that collection uses, so
-reachability costs nothing until a rule asks. The query resolves the effect
+statement, as TypeScript decides it. It asks the tracked query
+`infer_flow_reachability` about the execution root around the statement,
+which builds that root's graph from the module's syntax when it runs
+(`build_reachability`), with the builder that collection uses, so
+reachability costs nothing until a rule or an inferred return type asks. The
+query resolves the effect
 of each statement call, through `infer_flow_call_effect` when collection
 kept the call point, decides each `switch` statement as
 `switch_is_exhaustive` does, and walks from the root's start without
 crossing a call that never returns or the bypass of an exhaustive `switch`.
 A narrowed type, even `never`, never makes code unreachable. A work limit or
 a query cycle makes the answer `Indeterminate`.
+
+A return type that Biome infers from a function's body asks the same query
+whether a path reaches the end of the body, where the function returns
+`undefined`. Collection marks that `undefined` with a
+`TypeofExpression::ImplicitReturn` when the body's last statement may
+complete, and resolution gives `undefined`, or `never` when no path reaches
+the end (`ResolutionCtx::resolve_implicit_return`), so the reachability of
+a function's end is decided once for every context. Deciding whether a
+statement call never returns, or whether a `switch` is exhaustive, can need
+the same return type, as for `box.fail()` with
+`declare const box: { fail: typeof f }` in the body of `f`; the query cycle
+then leaves the end reachable, which keeps `undefined`.
 
 ### Tracked queries
 

@@ -22,11 +22,12 @@ use super::imports::{ExportOriginResult, find_export_origin};
 use super::{ImportResolution, ResolutionCtx, resolve_local_type_on_demand};
 use crate::db::queries::{
     BindingTypeInput, CallableFunctionInput, FlowAssignedTypes, FlowCallEffect, FlowCallEffects,
-    FlowCallInput, FlowCallParameter, FlowReachability, FlowSubjectRootInput, FlowSubjectTypeInput,
-    FlowSubjectWritesInput, FlowSwitchInput, LocalTypeInput, global_contributions,
-    infer_flow_assigned_types, infer_flow_binding_baseline, infer_flow_call_effect,
-    infer_flow_subject_states, infer_flow_subject_type, infer_flow_switch_exhaustive,
-    infer_local_type, resolve_callable_function,
+    FlowCallInput, FlowCallParameter, FlowReachability, FlowReachabilityInput,
+    FlowSubjectRootInput, FlowSubjectTypeInput, FlowSubjectWritesInput, FlowSwitchInput,
+    LocalTypeInput, global_contributions, infer_flow_assigned_types, infer_flow_binding_baseline,
+    infer_flow_call_effect, infer_flow_reachability, infer_flow_subject_states,
+    infer_flow_subject_type, infer_flow_switch_exhaustive, infer_local_type,
+    resolve_callable_function,
 };
 use crate::js_module_info::flow::{
     AnyMemberDeclaration, CalleeReturn, FlowAssigned, FlowAssignedValue, FlowCall, FlowCallKind,
@@ -1672,6 +1673,25 @@ impl<'db> ResolutionCtx<'db, '_> {
             }
         }
         true
+    }
+
+    /// Resolves the `undefined` that the function whose trimmed range is
+    /// `function` returns when a path reaches the end of its body (see
+    /// [`biome_js_type_info::TypeofImplicitReturnExpression`]): `undefined`
+    /// when a path reaches the end, and `never`, which a union drops, when
+    /// every path ends before it, as at a call that never returns or after
+    /// an exhaustive `switch`.
+    ///
+    /// The answer comes from [`infer_flow_reachability`], so every context
+    /// shares it. When that query gives no answer, because of a work limit
+    /// or a query cycle, as when deciding whether a call ends the path needs
+    /// this return type, the end counts as reachable, which only widens.
+    pub(super) fn resolve_implicit_return(&self, function: TextRange) -> TypeData<'db> {
+        let input = FlowReachabilityInput::new(self.db, self.module, function);
+        match infer_flow_reachability(self.db, input) {
+            Some(reachability) if !reachability.end => TypeData::NeverKeyword,
+            Some(_) | None => TypeData::Undefined,
+        }
     }
 
     /// Returns which statements of the root that `graph` holds some path
