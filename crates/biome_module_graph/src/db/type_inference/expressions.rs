@@ -1937,6 +1937,8 @@ impl<'db> ResolutionCtx<'db, '_> {
                 collected_type_result(self.db, types).or(Some(InferredTypeData::Unknown))
             }
             InferredTypeData::Global => self.resolve_global_name(member_name),
+            // Every property of `any` is `any`, as in TypeScript.
+            InferredTypeData::AnyKeyword => Some(InferredTypeData::AnyKeyword),
             InferredTypeData::Tuple(tuple) => {
                 let element_ty = InferredTypeData::union_from_types(
                     self.db,
@@ -1984,7 +1986,6 @@ impl<'db> ResolutionCtx<'db, '_> {
             | InferredTypeData::TypeofExpression(_)
             | InferredTypeData::TypeofType(_)
             | InferredTypeData::TypeofValue(_)
-            | InferredTypeData::AnyKeyword
             | InferredTypeData::NeverKeyword
             | InferredTypeData::ObjectKeyword
             | InferredTypeData::ThisKeyword

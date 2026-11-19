@@ -121,6 +121,7 @@ These results match TypeScript's and can surprise a reader.
 | `typeof` that replaces an object type | `interface Len { length: number }; x: number \| Len; if (typeof x === "string") x` | `string` |
 | `any` with `typeof` | `x: any; if (typeof x === "string") x` | `string` |
 | `any` with other checks | `x: any; if (x === "a") x` | `any` |
+| A property of `any` | `x: any; if (typeof x.v === "string") x.v` | `any` |
 | `any` from inference | `const y = JSON.parse(t); if (typeof y === "string") y` | `string` |
 | Truthiness of a type parameter | `x: T; if (x) x` | `T & {}` |
 | `typeof` on a type parameter | `x: T; if (typeof x === "string") x` | `T & string` |
@@ -277,7 +278,8 @@ result is wider unless the effect says otherwise, so a rule can miss a report.
 | Code | TypeScript | Biome | Effect on rules |
 | --- | --- | --- | --- |
 | `var x: string \| number = 1; var x: string \| number = "a"; x` | `string` | `string \| number` | `noUnnecessaryConditions` can miss an unnecessary check of `x`. |
-| `x: any; if (typeof x.v === "string") x.v` | `any` | Unknown | A rule can miss a report on `x.v`. |
+| `x: any; if (typeof x["v"] === "string") x["v"]` | `string` | `any` | A rule can miss a report on `x["v"]`. |
+| `x: any; const [b] = x; b` | `any` | Unknown | A rule can miss a report on `b`. |
 | `xs: AsyncIterable<string \| null>; for await (const v of xs) { if (v) v }` | `string` | Unknown | A rule can miss a report on `v`. |
 | `o: { a?: string \| number }; const { a = 0 } = o; if (typeof a === "string") a` | `string` | `string \| number` | `noUnnecessaryConditions` can miss an unnecessary check of `a`. |
 | `x: string; x !== null ? 1 : x` | `1` | Unknown | A rule can miss a report on the conditional. |

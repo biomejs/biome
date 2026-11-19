@@ -3,8 +3,9 @@
 // `unknown` to `object | null`, the `else` branch of a type guard for `{}`
 // leaves `unknown` only `null | undefined`, and `any` narrows by `typeof` with
 // a primitive kind, `instanceof`, and type-guard functions, also when it comes
-// from an alias or from inference, so a check that the narrowed value can't
-// fail is reported, as in TypeScript.
+// from an alias, from inference, or from a property of `any` that a
+// destructuring pattern takes, so a check that the narrowed value can't fail
+// is reported, as in TypeScript.
 
 type Loose = any;
 
@@ -65,5 +66,16 @@ function parsedInstance(text: string) {
 	const value = JSON.parse(text);
 	if (value instanceof Error) {
 		return value?.message;
+	}
+}
+
+class Handle {
+	close() {}
+}
+
+function destructuredInstance(value: any) {
+	const { handle } = value;
+	if (handle instanceof Handle) {
+		handle?.close();
 	}
 }
