@@ -229,6 +229,8 @@ impl ModuleDb for TestModuleDb {
 
     fn module_for_path(&self, path: &Utf8Path) -> Option<ModuleInfo> {
         self.module_lookup_count.fetch_add(1, Ordering::Relaxed);
+        // Like the workspace database, record the generation so adding or
+        // removing a module invalidates queries that look modules up.
         let _ = self.module_graph_generation();
         self.modules.get(path).copied()
     }

@@ -20,7 +20,13 @@ pub fn next_pages(db: &dyn ModuleDb, project: ResolverPathData) -> Vec<NextPage>
             && let Some(file_stem) = path.file_stem()
             && let Some(directory) = path.parent()
         {
-            for router in directory.ancestors() {
+            // The router is the outermost `app` or `pages` directory inside
+            // the project, so the walk can't stop at the first one it meets:
+            // `app/pages/marketing/page.jsx` is the `/pages/marketing` route.
+            for router in directory
+                .ancestors()
+                .take_while(|ancestor| ancestor.starts_with(project_path))
+            {
                 if let Some(router_name) = router.file_name()
                     && let Some(parent) = router.parent()
                     && let Ok(directories) = directory.strip_prefix(router)
@@ -71,6 +77,7 @@ pub fn next_pages(db: &dyn ModuleDb, project: ResolverPathData) -> Vec<NextPage>
                     // A nested project keeps its own pages.
                     if page_project_path == project_path {
                         pages.push(NextPage { route });
+                        break;
                     }
                 }
             }
@@ -79,6 +86,7 @@ pub fn next_pages(db: &dyn ModuleDb, project: ResolverPathData) -> Vec<NextPage>
     pages
 }
 
+/// A page of a Next.js app, read from a file of its `app` or `pages` router.
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct NextPage {
     /// The URL segments of the page, without route groups and parallel route

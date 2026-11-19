@@ -94,6 +94,18 @@ fn project_path_skips_src() {
 }
 
 #[test]
+fn reads_router_folders_named_like_a_router() {
+    let (_, db) = module_db(&[
+        "/web/app/pages/app/pages/marketing/page.jsx",
+        "/web/pages/app/pages/blog.jsx",
+    ]);
+
+    assert_eq!(pages(&db, "/web").len(), 2);
+    assert!(links_to_page(&db, "/web", "/pages/app/pages/marketing"));
+    assert!(links_to_page(&db, "/web", "/app/pages/blog"));
+}
+
+#[test]
 fn pages_are_scoped_to_their_project() {
     let (_, db) = module_db(&[
         "/repo/apps/web/app/about/page.jsx",
