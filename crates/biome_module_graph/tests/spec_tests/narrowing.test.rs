@@ -1827,8 +1827,51 @@ fn falsy_branch_removes_object_types_that_no_falsy_primitive_satisfies() {
             // TypeScript: `undefined`, because only `{}` written as a type
             // literal keeps falsy values.
             ("emptyClass", &["instanceof E", "undefined"]),
-            // TypeScript: `undefined`. Generics stay unchanged.
-            ("generic", &["instanceof T", "undefined"]),
+            ("generic", &["undefined"]),
+        ],
+    );
+}
+
+// Every expected type is the type that TypeScript 7.0.2 (`tsc --strict`) gives
+// the read, unless a comment gives TypeScript's type, and a read that
+// TypeScript types as `never` is Unknown. The falsy branch removes a type
+// parameter whose constraint has no falsy value and keeps one whose
+// constraint has one. Biome keeps `T extends Len`, because `""` is a falsy
+// `Len`, which is wider.
+#[test]
+fn falsy_branch_removes_type_parameters_without_falsy_values() {
+    assert_object_reads(
+        r#"
+        function g1<T extends Foo>(x: T | undefined) { if (!x) /*foo*/x; else /*fooElse*/x; }
+        function g2<T extends Foo>(x: T) { if (!x) /*only*/x; }
+        function g3<T extends Len>(x: T | undefined) { if (!x) /*len*/x; }
+        function g4<T extends string>(x: T | undefined) { if (!x) /*string*/x; }
+        function g5<T extends object>(x: T | null) { if (!x) /*object*/x; }
+        function g6<T extends {}>(x: T | null) { if (!x) /*empty*/x; }
+        function g7<T>(x: T | null) { if (!x) /*unconstrained*/x; }
+        function g8<T extends Foo | null>(x: T) { if (!x) /*nullable*/x; }
+        function g9<T extends () => void>(x: T | undefined) { if (!x) /*function*/x; }
+        function g10<T extends Foo>(x: T | undefined, c: boolean) { if (x && c) {} else /*and*/x; }
+        function g11<T extends Foo>(x: T | undefined) { if (!x) return; /*after*/x; }
+        function g12<T extends Foo>(x: T & {} | undefined) { if (!x) /*intersection*/x; }
+        function g13<T extends true>(x: T | undefined) { if (!x) /*true*/x; }
+        "#,
+        &[
+            ("foo", &["undefined"]),
+            ("fooElse", &["instanceof T"]),
+            ("only", &["unknown"]),
+            // TypeScript: `undefined`. `""` has `length`.
+            ("len", &["instanceof T", "undefined"]),
+            ("string", &["instanceof T", "undefined"]),
+            ("object", &["null"]),
+            ("empty", &["instanceof T", "null"]),
+            ("unconstrained", &["instanceof T", "null"]),
+            ("nullable", &["instanceof T"]),
+            ("function", &["undefined"]),
+            ("and", &["instanceof T", "undefined"]),
+            ("after", &["instanceof T"]),
+            ("intersection", &["undefined"]),
+            ("true", &["undefined"]),
         ],
     );
 }

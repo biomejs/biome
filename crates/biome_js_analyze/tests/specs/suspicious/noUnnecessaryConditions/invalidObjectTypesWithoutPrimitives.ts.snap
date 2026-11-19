@@ -6,7 +6,8 @@ expression: invalidObjectTypesWithoutPrimitives.ts
 ```ts
 // should generate diagnostics
 // No primitive and no function has the member `id`, so a falsy test and the
-// tests of `typeof` below remove `Config` and `Point`.
+// tests of `typeof` below remove `Config` and `Point`, and a falsy test removes
+// a type parameter whose constraint is `Config`.
 
 interface Config {
 	id: number;
@@ -44,20 +45,27 @@ function typeofFunction(value: Config | (() => void)) {
 	}
 }
 
+function falsyTypeParameter<T extends Config>(value: T | undefined) {
+	if (!value) {
+		if (value) {
+		}
+	}
+}
+
 ```
 
 # Diagnostics
 ```
-invalidObjectTypesWithoutPrimitives.ts:15:7 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━
+invalidObjectTypesWithoutPrimitives.ts:16:7 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━
 
   ! This condition is always falsy.
   
-    13 │ function falsyInterface(value: Config | undefined) {
-    14 │ 	if (!value) {
-  > 15 │ 		if (value) {
+    14 │ function falsyInterface(value: Config | undefined) {
+    15 │ 	if (!value) {
+  > 16 │ 		if (value) {
        │ 		    ^^^^^
-    16 │ 		}
-    17 │ 	}
+    17 │ 		}
+    18 │ 	}
   
   i The value's type can never be truthy, so this check is redundant.
   
@@ -67,16 +75,16 @@ invalidObjectTypesWithoutPrimitives.ts:15:7 lint/suspicious/noUnnecessaryConditi
 ```
 
 ```
-invalidObjectTypesWithoutPrimitives.ts:22:7 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━
+invalidObjectTypesWithoutPrimitives.ts:23:7 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━
 
   ! This condition is always falsy.
   
-    20 │ function falsyClass(value: Point | null) {
-    21 │ 	if (!value) {
-  > 22 │ 		if (value) {
+    21 │ function falsyClass(value: Point | null) {
+    22 │ 	if (!value) {
+  > 23 │ 		if (value) {
        │ 		    ^^^^^
-    23 │ 		}
-    24 │ 	}
+    24 │ 		}
+    25 │ 	}
   
   i The value's type can never be truthy, so this check is redundant.
   
@@ -86,16 +94,16 @@ invalidObjectTypesWithoutPrimitives.ts:22:7 lint/suspicious/noUnnecessaryConditi
 ```
 
 ```
-invalidObjectTypesWithoutPrimitives.ts:29:7 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━
+invalidObjectTypesWithoutPrimitives.ts:30:7 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━
 
   ! This condition is always falsy.
   
-    27 │ function typeofUndefined(value: Config | undefined) {
-    28 │ 	if (typeof value === "undefined") {
-  > 29 │ 		if (value) {
+    28 │ function typeofUndefined(value: Config | undefined) {
+    29 │ 	if (typeof value === "undefined") {
+  > 30 │ 		if (value) {
        │ 		    ^^^^^
-    30 │ 		}
-    31 │ 	}
+    31 │ 		}
+    32 │ 	}
   
   i The value's type can never be truthy, so this check is redundant.
   
@@ -105,20 +113,39 @@ invalidObjectTypesWithoutPrimitives.ts:29:7 lint/suspicious/noUnnecessaryConditi
 ```
 
 ```
-invalidObjectTypesWithoutPrimitives.ts:36:7 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━
+invalidObjectTypesWithoutPrimitives.ts:37:7 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━
 
   ! This condition is always truthy.
   
-    34 │ function typeofFunction(value: Config | (() => void)) {
-    35 │ 	if (typeof value === "function") {
-  > 36 │ 		if (value) {
+    35 │ function typeofFunction(value: Config | (() => void)) {
+    36 │ 	if (typeof value === "function") {
+  > 37 │ 		if (value) {
        │ 		    ^^^^^
-    37 │ 		}
-    38 │ 	}
+    38 │ 		}
+    39 │ 	}
   
   i The value's type can never be falsy, so this check is redundant.
   
   i Remove the condition, or check the value you meant to test.
+  
+
+```
+
+```
+invalidObjectTypesWithoutPrimitives.ts:44:7 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━
+
+  ! This condition is always falsy.
+  
+    42 │ function falsyTypeParameter<T extends Config>(value: T | undefined) {
+    43 │ 	if (!value) {
+  > 44 │ 		if (value) {
+       │ 		    ^^^^^
+    45 │ 		}
+    46 │ 	}
+  
+  i The value's type can never be truthy, so this check is redundant.
+  
+  i Remove the condition and the code it guards, or check the value you meant to test.
   
 
 ```
