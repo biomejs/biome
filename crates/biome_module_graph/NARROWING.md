@@ -437,13 +437,15 @@ such as `if (x!)` and `typeof x! === "string"`, narrow nothing.
 | `let wn = E.A; wn` | `E` | `number` | `useExhaustiveSwitchCases` can miss the missing cases of a `switch (wn)`. |
 | `enum H { X } enum H { Y = 1 }; H.X` | `0` | Unknown | A rule can miss a report on `H.X`. |
 | `enum NE { A } namespace NE {}; NE.A` | `0` | Unknown | A rule can miss a report on `NE.A`. |
-| `const K = "k"; enum F { X = K }; F.X` | `"k"` | Unknown | A rule can miss a report on `F.X`. |
+| `enum E { A, B }; enum F { Y = E.B }; F.Y` | `1` | Unknown | A rule can miss a report on `F.Y`. |
 | `enum G { C = "c".length }; G.C` | `G.C` | `number` | A rule can miss a report on `G.C`. |
 | `declare enum D { P, Q = 2 }; d: D; d` | `D` | `number` | `useExhaustiveSwitchCases` can miss the missing cases of a `switch (d)`. |
 
 Biome gives each enum member the literal type of its value, so a rule that
 tells an enum from its primitive type sees a member of a string enum as a
-string.
+string. A member that a `const` initializes has the `const`'s value, as
+`"k"` for `const K = "k"; enum F { X = K }`, when the `const` has no type
+annotation and is declared before the enum, as TypeScript requires.
 
 ### Truthiness and `typeof`
 

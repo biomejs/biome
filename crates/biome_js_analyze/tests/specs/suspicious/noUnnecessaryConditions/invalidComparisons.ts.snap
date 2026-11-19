@@ -6,9 +6,10 @@ expression: invalidComparisons.ts
 ```ts
 // should generate diagnostics
 // Loose equality with a literal, a comparison with a value whose type comes
-// from an annotation, and a comparison of a condition with a boolean narrow
-// the compared value, so a check that the narrowed value can't fail is
-// reported, as in TypeScript.
+// from an annotation, a comparison of a condition with a boolean, and a
+// comparison with an enum member that a `const` initializes narrow the
+// compared value, so a check that the narrowed value can't fail is reported,
+// as in TypeScript.
 
 function looseLiteral(value: "a" | "b" | null) {
 	if (value == "a") {
@@ -41,29 +42,46 @@ function aliasNotFalse(value: string | null) {
 	}
 }
 
+const CIRCLE = "circle";
+
+enum Kind {
+	Circle = CIRCLE,
+	Square = "square",
+}
+
+type KindShape =
+	| { kind: Kind.Circle; radius: number }
+	| { kind: Kind.Square; radius: null };
+
+function enumMemberFromConstant(shape: KindShape) {
+	if (shape.kind === Kind.Circle) {
+		return shape.radius ?? 0;
+	}
+}
+
 ```
 
 # Diagnostics
 ```
-invalidComparisons.ts:9:10 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidComparisons.ts:10:10 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unnecessary nullish coalescing.
   
-     7 │ function looseLiteral(value: "a" | "b" | null) {
-     8 │ 	if (value == "a") {
-   > 9 │ 		return value ?? "b";
+     8 │ function looseLiteral(value: "a" | "b" | null) {
+     9 │ 	if (value == "a") {
+  > 10 │ 		return value ?? "b";
        │ 		       ^^^^^
-    10 │ 	}
-    11 │ }
+    11 │ 	}
+    12 │ }
   
   i Drop ?? and the fallback expression.
   
-     7 │ function looseLiteral(value: "a" | "b" | null) {
-     8 │ 	if (value == "a") {
-   > 9 │ 		return value ?? "b";
+     8 │ function looseLiteral(value: "a" | "b" | null) {
+     9 │ 	if (value == "a") {
+  > 10 │ 		return value ?? "b";
        │ 		             ^^
-    10 │ 	}
-    11 │ }
+    11 │ 	}
+    12 │ }
   
   i The left-hand side is guaranteed to be non-nullish, so the fallback is unreachable.
   
@@ -71,25 +89,25 @@ invalidComparisons.ts:9:10 lint/suspicious/noUnnecessaryConditions ━━━━�
 ```
 
 ```
-invalidComparisons.ts:15:10 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidComparisons.ts:16:10 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unnecessary nullish coalescing.
   
-    13 │ function looseDiscriminant(shape: { kind: "c"; r: number } | { kind: "s"; r: null }) {
-    14 │ 	if (shape.kind == "c") {
-  > 15 │ 		return shape.r ?? 0;
+    14 │ function looseDiscriminant(shape: { kind: "c"; r: number } | { kind: "s"; r: null }) {
+    15 │ 	if (shape.kind == "c") {
+  > 16 │ 		return shape.r ?? 0;
        │ 		       ^^^^^^^
-    16 │ 	}
-    17 │ }
+    17 │ 	}
+    18 │ }
   
   i Drop ?? and the fallback expression.
   
-    13 │ function looseDiscriminant(shape: { kind: "c"; r: number } | { kind: "s"; r: null }) {
-    14 │ 	if (shape.kind == "c") {
-  > 15 │ 		return shape.r ?? 0;
+    14 │ function looseDiscriminant(shape: { kind: "c"; r: number } | { kind: "s"; r: null }) {
+    15 │ 	if (shape.kind == "c") {
+  > 16 │ 		return shape.r ?? 0;
        │ 		               ^^
-    16 │ 	}
-    17 │ }
+    17 │ 	}
+    18 │ }
   
   i The left-hand side is guaranteed to be non-nullish, so the fallback is unreachable.
   
@@ -97,25 +115,25 @@ invalidComparisons.ts:15:10 lint/suspicious/noUnnecessaryConditions ━━━━
 ```
 
 ```
-invalidComparisons.ts:21:10 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidComparisons.ts:22:10 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unnecessary nullish coalescing.
   
-    19 │ function annotatedValue(value: string | null, other: string) {
-    20 │ 	if (value === other) {
-  > 21 │ 		return value ?? "";
+    20 │ function annotatedValue(value: string | null, other: string) {
+    21 │ 	if (value === other) {
+  > 22 │ 		return value ?? "";
        │ 		       ^^^^^
-    22 │ 	}
-    23 │ }
+    23 │ 	}
+    24 │ }
   
   i Drop ?? and the fallback expression.
   
-    19 │ function annotatedValue(value: string | null, other: string) {
-    20 │ 	if (value === other) {
-  > 21 │ 		return value ?? "";
+    20 │ function annotatedValue(value: string | null, other: string) {
+    21 │ 	if (value === other) {
+  > 22 │ 		return value ?? "";
        │ 		             ^^
-    22 │ 	}
-    23 │ }
+    23 │ 	}
+    24 │ }
   
   i The left-hand side is guaranteed to be non-nullish, so the fallback is unreachable.
   
@@ -123,25 +141,25 @@ invalidComparisons.ts:21:10 lint/suspicious/noUnnecessaryConditions ━━━━
 ```
 
 ```
-invalidComparisons.ts:27:10 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidComparisons.ts:28:10 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unnecessary nullish coalescing.
   
-    25 │ function booleanComparison(value: string | null) {
-    26 │ 	if ((value !== null) === true) {
-  > 27 │ 		return value ?? "";
+    26 │ function booleanComparison(value: string | null) {
+    27 │ 	if ((value !== null) === true) {
+  > 28 │ 		return value ?? "";
        │ 		       ^^^^^
-    28 │ 	}
-    29 │ }
+    29 │ 	}
+    30 │ }
   
   i Drop ?? and the fallback expression.
   
-    25 │ function booleanComparison(value: string | null) {
-    26 │ 	if ((value !== null) === true) {
-  > 27 │ 		return value ?? "";
+    26 │ function booleanComparison(value: string | null) {
+    27 │ 	if ((value !== null) === true) {
+  > 28 │ 		return value ?? "";
        │ 		             ^^
-    28 │ 	}
-    29 │ }
+    29 │ 	}
+    30 │ }
   
   i The left-hand side is guaranteed to be non-nullish, so the fallback is unreachable.
   
@@ -149,25 +167,51 @@ invalidComparisons.ts:27:10 lint/suspicious/noUnnecessaryConditions ━━━━
 ```
 
 ```
-invalidComparisons.ts:34:10 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidComparisons.ts:35:10 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unnecessary nullish coalescing.
   
-    32 │ 	const present = value !== null;
-    33 │ 	if (present !== false) {
-  > 34 │ 		return value ?? "";
+    33 │ 	const present = value !== null;
+    34 │ 	if (present !== false) {
+  > 35 │ 		return value ?? "";
        │ 		       ^^^^^
-    35 │ 	}
-    36 │ }
+    36 │ 	}
+    37 │ }
   
   i Drop ?? and the fallback expression.
   
-    32 │ 	const present = value !== null;
-    33 │ 	if (present !== false) {
-  > 34 │ 		return value ?? "";
+    33 │ 	const present = value !== null;
+    34 │ 	if (present !== false) {
+  > 35 │ 		return value ?? "";
        │ 		             ^^
-    35 │ 	}
-    36 │ }
+    36 │ 	}
+    37 │ }
+  
+  i The left-hand side is guaranteed to be non-nullish, so the fallback is unreachable.
+  
+
+```
+
+```
+invalidComparisons.ts:52:10 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary nullish coalescing.
+  
+    50 │ function enumMemberFromConstant(shape: KindShape) {
+    51 │ 	if (shape.kind === Kind.Circle) {
+  > 52 │ 		return shape.radius ?? 0;
+       │ 		       ^^^^^^^^^^^^
+    53 │ 	}
+    54 │ }
+  
+  i Drop ?? and the fallback expression.
+  
+    50 │ function enumMemberFromConstant(shape: KindShape) {
+    51 │ 	if (shape.kind === Kind.Circle) {
+  > 52 │ 		return shape.radius ?? 0;
+       │ 		                    ^^
+    53 │ 	}
+    54 │ }
   
   i The left-hand side is guaranteed to be non-nullish, so the fallback is unreachable.
   

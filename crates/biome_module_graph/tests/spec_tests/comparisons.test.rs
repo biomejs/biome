@@ -558,11 +558,11 @@ fn comparisons_with_members_of_imported_enums_narrow() {
 // `G.C` and `G`. `H` has two declarations, and `NE` a namespace of its name,
 // which Biome doesn't merge, so `h`, `H.X`, and `NE.A` are Unknown;
 // TypeScript gives `H`, `H.X`, which is `0`, and `NE.A`, which is `0`.
-// `F.X = K` and `F.Y = E.B` reference values outside the enum, which Biome
-// doesn't follow, because they can be strings, so they are Unknown;
-// TypeScript gives `"k"` and `1`. `F.W` is a template literal with a
-// substitution, so it is `string`; TypeScript gives `"kw"`. Inside an enum,
-// a member's name reads the member, as `A` in `R.B = A`.
+// `F.Y = E.B` references a member of another enum, which Biome doesn't
+// follow, because it can be a string, so it is Unknown; TypeScript gives `1`.
+// `F.W` is a template literal with a substitution, so it is `string`;
+// TypeScript gives `"aw"`. `F.X = K` has the value of the `const` `K`, `"a"`.
+// Inside an enum, a member's name reads the member, as `A` in `R.B = A`.
 //
 // TypeScript widens a member's literal type to the enum's type where it
 // initializes a mutable location: `wn`, the field `f`, and the return type of
@@ -611,7 +611,7 @@ fn enums_have_the_types_of_their_values() {
             ("mc", "G.C", &["number"]),
             ("hx", "H.X", &["Unknown"]),
             ("nea", "NE.A", &["Unknown"]),
-            ("fx", "F.X", &["Unknown"]),
+            ("fx", "F.X", &["string: a"]),
             ("fy", "F.Y", &["Unknown"]),
             ("fz", "F.Z", &["string: z"]),
             ("fw", "F.W", &["string"]),
@@ -978,6 +978,76 @@ fn checks_of_non_null_assertions_keep_the_type() {
             ("truthy", "x", &["null", "string"]),
             // TypeScript: `string`.
             ("typeOf", "x", &["number", "string"]),
+        ],
+    );
+}
+
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the values of the
+// expected type, displaying a member's literal type by the member's name. A
+// member initialized with a `const` declared before the enum without a type
+// annotation has the `const`'s value, also through another `const`, an
+// operator, or a template literal, and inside a function. A name in the
+// initializer of such a `const` reads the variable, not a member of the enum,
+// as `A` in `FM.B`. Comparisons with such a member narrow by its value.
+#[test]
+fn enum_members_initialized_by_constants_have_their_values() {
+    assert_reads(
+        r#"
+        const KX = "k";
+        const NX = 2;
+        const KKX = KX;
+        const NS = NX + 1;
+        const A = "outer";
+        const AA = A;
+        const KT = `kt`;
+        enum F { X = KX, Y = NX, Z = KKX, W = NS }
+        enum FM { A = "member", B = AA }
+        enum FT { X = KT, Y = 1 }
+        function r() { /*fx*/F.X; /*fz*/F.Z; /*fw*/F.W; /*fmb*/FM.B; /*ftx*/FT.X; }
+        function c1(x: "k" | "j") { if (x === F.X) /*c1t*/x; else /*c1f*/x; }
+        function c2(f: F) { if (f === F.X) /*c2t*/f; else /*c2f*/f; }
+        function c3(f: F) { switch (f) { case F.X: case F.Y: break; default: /*c3*/f; } }
+        function o() { const L = "l"; enum FO { X = L } /*fox*/FO.X; }
+        "#,
+        &[
+            ("fx", "F.X", &["string: k"]),
+            ("fz", "F.Z", &["string: k"]),
+            ("fw", "F.W", &["number: 3"]),
+            ("fmb", "FM.B", &["string: outer"]),
+            ("ftx", "FT.X", &["string: kt"]),
+            ("c1t", "x", &["string: k"]),
+            ("c1f", "x", &["string: j"]),
+            ("c2t", "f", &["string: k"]),
+            ("c2f", "f", &["number: 2", "number: 3"]),
+            ("c3", "f", &["number: 3"]),
+            ("fox", "FO.X", &["string: l"]),
+        ],
+    );
+}
+
+// TypeScript 7.0.2 (`tsc --strict`) computes none of the members below, which
+// it reports, and gives each its own type. A `const` with a type annotation,
+// one initialized with `as const`, one declared after the enum, and a `let`
+// give their members Biome's Unknown type, which is wider.
+#[test]
+fn enum_members_initialized_by_other_variables_are_unknown() {
+    assert_reads(
+        r#"
+        const KA: string = "ka";
+        const KC = "kc" as const;
+        let KL = "kl";
+        enum FA { X = KA }
+        enum FC { X = KC }
+        enum FB { X = LATER }
+        enum FL { X = KL }
+        const LATER = "later";
+        function r() { /*fa*/FA.X; /*fc*/FC.X; /*fb*/FB.X; /*fl*/FL.X; }
+        "#,
+        &[
+            ("fa", "FA.X", &["Unknown"]),
+            ("fc", "FC.X", &["Unknown"]),
+            ("fb", "FB.X", &["Unknown"]),
+            ("fl", "FL.X", &["Unknown"]),
         ],
     );
 }
