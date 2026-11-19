@@ -365,6 +365,15 @@ These limits apply to every *Supported* and *Partial* row below:
   another class with the same members, because a class can declare private
   members, so the true branch keeps `P1.K | string`, where TypeScript gives
   `P2.K`.
+- A call narrows through its callee only when the callee is a dotted name: an
+  identifier or `this`, followed by property accesses with `.` or `?.`, in
+  parentheses or not, as `isString(x)`, `u.isString(x)`, or
+  `(this.check)(x)`. A call through an element access, as
+  `u["isString"](x)`, or through the result of a call, as `get()(x)`,
+  narrows nothing, where TypeScript narrows a call in a condition through
+  any callee whose type has a single signature with a type predicate. The
+  call must pass a subject as the tested argument, or call a method of a
+  subject that a `this is T` predicate tests.
 - A call to a type-guard function whose target is not a primitive type, as
   `isFoo(x)` with `x is Foo`, compares each member of the type of `x` with
   each member of the target in TypeScript's subtype relation, as TypeScript
@@ -614,7 +623,7 @@ code as TS7027, an error with `allowUnreachableCode: false`.
 
 | Behaviour | Example | TypeScript | Status |
 | --- | --- | --- | --- |
-| `Array.isArray` | `x: string \| string[]; if (Array.isArray(x)) x` | `string[]` | Not yet |
+| `Array.isArray` | `x: string \| string[]; if (Array.isArray(x)) x` | `string[]` | Supported, with the restrictions below the table of type predicates, except for `any`, which the row on `any` describes. Other type-guard functions of the lib, such as `ArrayBuffer.isView`, narrow too. |
 | `every` with a type predicate callback | `isString: (v: unknown) => v is string;`<br>`xs: (string \| number)[]; if (xs.every(isString)) xs` | `string[]` | Not yet |
 | DOM `matches` | `el: Element; if (el.matches("a")) el` (with the `dom` library) | `HTMLAnchorElement` | Not yet |
 
@@ -650,22 +659,33 @@ The rows use `type Circle = { kind: "c"; r: number }` and
 | A local, non-generic type-guard function with a primitive target | `function isString(v: unknown): v is string;`<br>`x: string \| number; if (isString(x)) x` | `string` | Supported, with the restrictions below the table |
 | The false branch excludes the target | `x: string \| number; if (!isString(x)) x` | `number` | Supported |
 | An object, interface, class, or union target | `function isFoo(v: unknown): v is Foo;`<br>`x: Foo \| string; if (isFoo(x)) x` | `Foo`; `string` in the `else` branch | Partial: both branches narrow by TypeScript's subtype relation, as the limits above describe. Biome keeps the type of `x` where TypeScript narrows a type without an object type by a target with only object types, or gives an intersection, and when two members can't be compared, as for instances of classes, which can declare private members, and the literal types that Biome keeps for properties whose values it can't tell are fresh literals, as `{ a: id(1) }`. The `else` branch also keeps a member that is a subtype of a member of the target and the other way around, as `{ a: number }` with the target `Foo`, and `unknown` with the target `{}`, where TypeScript gives `null \| undefined`. |
-| An imported, namespace, or method type-guard function | `import { isString } from "./guards"`; `u.isString(x)` | `string` | Not yet |
+| An imported, namespace, or method type-guard function | `import { isString } from "./guards"`; `u.isString(x)` | `string` | Supported, with the restrictions below the table |
 | A generic type-guard function | `function isNonNull<T>(v: T \| null): v is T;`<br>`x: string \| null; if (isNonNull(x)) x` | `string` | Not yet |
 | An overloaded type-guard function | `function isS(v: string \| number): v is string;`<br>`function isS(v: boolean): boolean;`<br>`x: string \| number; if (isS(x)) x` | `string` | Not yet |
-| `this is T` | `class TreeNode { isLeaf(): this is Leaf }`<br>`n: TreeNode; if (n.isLeaf()) n` | `Leaf` | Not yet |
+| `this is T` | `class TreeNode { isLeaf(): this is Leaf }`<br>`n: TreeNode; if (n.isLeaf()) n` | `Leaf` | Partial: the object of the method narrows as the argument of a type-guard function does, so `n: Leaf \| Branch` gives `Leaf` and `Branch` in the two branches, and so does a property path, as `o.n` in `if (o.n.isLeaf())`. Biome keeps the type of the example, because it can't compare an instance of `TreeNode` with one of a class derived from it, as the limits above describe, and keeps the declared type where TypeScript gives an intersection, as `this & { tag: 1 }` for `isTagged(): this is { tag: 1 }`. |
 | The argument is a property or an optional chain | `o: { v: string \| number }; if (isString(o.v)) o.v`<br>`x: { y: string \| number } \| undefined; if (isString(x?.y)) x` | `string`; `{ y: string \| number }` | Partial: the property narrows, but the receiver of an optional chain does not, so the second example gives `{ y: string \| number } \| undefined`. |
 | Inferred type predicates | `const isStr = (v: unknown) => typeof v === "string";`<br>`x: string \| number; if (isStr(x)) x` | `string` | Not yet |
-| A variable annotated with a function type that returns a type predicate | `const g: (v: unknown) => v is string = ...;`<br>`if (g(x)) x` | `string` | Not yet |
+| A variable annotated with a function type that returns a type predicate | `const g: (v: unknown) => v is string = ...;`<br>`if (g(x)) x` | `string` | Supported, with the restrictions below the table. So are a parameter annotated in the same way and a variable that holds another type-guard function, as `const alias = isString`. |
 
-A supported type-guard function is declared in the same module with
-`function` or `declare function`, or is an arrow or function expression that
-initializes an unannotated `let` or `const`. Nothing reassigns it, and it has
-one signature that is not generic, `async`, or a generator. The tested
-parameter is named, is not a rest parameter, and has no default value. The
-target is not `any` or `unknown`. The call is not optional, has no type
-arguments, passes a variable as the tested argument, and has no spread
-argument before or at the tested one. Neither Biome nor TypeScript checks the
+A type-guard function that the module declares with `function` or
+`declare function`, or as an arrow or function expression that initializes a
+`let` or `const` without a type annotation, narrows as its declaration says:
+nothing reassigns it, and it has one signature that is not generic, `async`,
+or a generator. The tested parameter is named, is not a rest parameter, and
+has no default value. The target is not `any` or `unknown`. The call is not
+optional, has no type arguments, passes a variable as the tested argument,
+and has no spread argument before or at the tested one.
+
+Any other callee, such as an import, a method, a variable or a parameter
+with a type annotation, or a variable that holds a function, narrows through
+the signature of its type, as TypeScript's `getEffectsSignature` finds it,
+within the limits above on callees: the type, without `null` and `undefined`,
+must have a single signature that is not generic. The tested parameter is
+named, is not a rest or an optional parameter, and gets an argument before
+any spread argument, and the target is not `any` or `unknown`. A callee of
+`any`, a union of functions, and an overloaded function narrow nothing. The
+call has no type arguments, and an optional call, as `g?.(x)`, narrows only
+where it is truthy, as in TypeScript. Neither Biome nor TypeScript checks the
 body of a type-guard function.
 
 ### Assertions
@@ -675,17 +695,31 @@ body of a type-guard function.
 | `asserts value` | `function assert(c: unknown): asserts c;`<br>`x: string \| null; assert(x !== null); x` | `string` | Supported, with the restrictions below the table |
 | `asserts value is T` with a primitive target | `function assertString(v: unknown): asserts v is string;`<br>`x: string \| number; assertString(x); x` | `string` | Supported |
 | `asserts value is T` with an object or union target | `function assertFoo(v: unknown): asserts v is Foo;`<br>`x: Foo \| string; assertFoo(x); x` | `Foo` | Partial: as the true branch of a type-guard function with the same target. |
-| `asserts this` and `asserts this is T` | `class R { ready?: string; assertReady(): asserts this is { ready: string } }`<br>`this.assertReady(); this` (inside `R`) | `this & { ready: string }` | Not yet |
-| A method, imported, or annotated assertion function | `x: string \| null; assert.ok(x); x`<br>`a: (v: unknown) => asserts v; a(x); x` | `string` | Not yet |
+| `asserts this` and `asserts this is T` | `class R { ready?: string; assertReady(): asserts this is { ready: string } }`<br>`this.assertReady(); this` (inside `R`) | `this & { ready: string }` | Partial: `asserts this is T` narrows the object of the method as the true branch of a `this is T` predicate does, so Biome keeps the declared type where TypeScript gives an intersection, as in the example. |
+| A method, imported, or annotated assertion function | `x: string \| null; assert.ok(x); x`<br>`a: (v: unknown) => asserts v; a(x); x` | `string` | Supported, with the restrictions below the table |
 | An assertion function declared as a variable without a type annotation is ignored (TS2775) | `const a = (v: unknown): asserts v => {};`<br>`x: string \| null; a(x); x` | `string \| null`, with error TS2775 | Supported |
-| An assertion call as an operand of the comma operator | `x: string \| null; (assert(x), 0); x` | `string` | Not yet |
+| An assertion call as an operand of the comma operator | `x: string \| null; (assert(x), 0); x` | `string` | Partial: an operand of the comma operator in an expression statement asserts, as in the example, also for the operands after it. TypeScript also asserts through such an operand anywhere else, as in `return (assert(x), x)`, where it takes the signature from the callee's type even when a name along the callee has no explicit type; Biome keeps the declared type there. |
 | `assert(false)` ends the path | `x: string \| null; if (x === null) assert(false); x` | `string`; code after `assert(false)` is unreachable (TS7027) | Not yet |
 
-An assertion function follows the restrictions of a type-guard function and
-must also be declared with `function` or `declare function`. The call must
-form a whole expression statement, optionally in parentheses, and must not be
-optional. Calls inside other expressions, and calls to a type-guard function
-whose result is not tested, do not narrow.
+A call asserts only as a statement call, as TypeScript's binder adds calls to
+the flow: the expression of an expression statement, or an operand of the
+comma operator there, not in parentheses, so `(assert(x));` asserts nothing.
+Calls inside other expressions, and calls to a type-guard function whose
+result is not tested, do not narrow.
+
+An assertion function that the module declares follows the restrictions of
+such a type-guard function, must be declared with `function` or
+`declare function`, and its call must not be optional. Any other callee
+follows the restrictions of other type-guard functions and TypeScript's rule
+for assertions (TS2775): every name along the callee has an explicit type. A
+function, a class, a namespace that `declare` declares, a variable, a
+parameter, or a property with a type annotation, a method, an import of one
+of these, a global, and `this` in a class member that is not `static` have
+one. A variable that an arrow function without a type annotation, `new`, or
+an object literal initializes, an element of a destructuring pattern, and an
+accessor have none, and neither does a callee whose type may be `undefined`,
+as `k?.(x)` with `k: ((v: unknown) => asserts v) | undefined`. TypeScript
+also ignores an assertion through an element access (TS2776).
 
 ### Calls that never return
 

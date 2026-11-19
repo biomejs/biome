@@ -3,8 +3,11 @@
 //! Collection records the incoming flow of each refinable read, the guards
 //! that the conditions of its execution root apply, and its writes (see
 //! [`crate::js_module_info::flow`]). This module resolves the type that the
-//! read's subject starts from and the types that its writes assign, and
-//! applies the guards and the writes along every path that reaches the read.
+//! read's subject starts from, the types that its writes assign, and the
+//! effects of the call points that may narrow it, and applies the guards and
+//! the writes along every path that reaches the read. The solve's key carries
+//! all of these, so a solve resolves no declared type, assigned value, or
+//! callee.
 //! A variable starts from its declared type. In a closure that continues the
 //! flow where it is created, the variable starts instead from its type at
 //! that point, its capture point. The solve of the enclosing root gives that
@@ -18,16 +21,18 @@ use super::flow_expressions::collected_member_name;
 use super::imports::{ExportOriginResult, find_export_origin};
 use super::{ImportResolution, ResolutionCtx, resolve_local_type_on_demand};
 use crate::db::queries::{
-    BindingTypeInput, FlowAssignedTypes, FlowSubjectRootInput, FlowSubjectTypeInput,
+    BindingTypeInput, CallableFunctionInput, FlowAssignedTypes, FlowCallEffect, FlowCallEffects,
+    FlowCallInput, FlowCallParameter, FlowSubjectRootInput, FlowSubjectTypeInput,
     FlowSubjectWritesInput, FlowSwitchInput, LocalTypeInput, global_contributions,
-    infer_flow_assigned_types, infer_flow_binding_baseline, infer_flow_subject_states,
-    infer_flow_subject_type, infer_flow_switch_exhaustive, infer_local_type,
+    infer_flow_assigned_types, infer_flow_binding_baseline, infer_flow_call_effect,
+    infer_flow_subject_states, infer_flow_subject_type, infer_flow_switch_exhaustive,
+    infer_local_type, resolve_callable_function,
 };
 use crate::js_module_info::flow::{
-    AnyMemberDeclaration, CalleeReturn, FlowAssigned, FlowAssignedValue, FlowCallee, FlowCapture,
-    FlowEvolving, FlowGuard, FlowNode, FlowNodeId, FlowRead, FlowSubject, FlowSubjectId, FlowTest,
-    FlowWriteEffect, PropertyKey, RootFlow, UnitValue, binding_unit_value, declaration_return,
-    guard_signature, member_return,
+    AnyMemberDeclaration, CalleeReturn, FlowAssigned, FlowAssignedValue, FlowCall, FlowCallKind,
+    FlowCallRoot, FlowCallee, FlowCapture, FlowEvolving, FlowGuard, FlowNode, FlowNodeId, FlowRead,
+    FlowSubject, FlowSubjectId, FlowTest, FlowWriteEffect, PropertyKey, RootFlow, UnitValue,
+    binding_unit_value, declaration_return, guard_signature, member_explicitness, member_return,
 };
 use crate::module_graph::ModuleInfoKind;
 use crate::{
@@ -35,11 +40,16 @@ use crate::{
     resolve_module_import,
 };
 use biome_js_semantic::ScopeId;
-use biome_js_syntax::{AnyJsExpression, JsIdentifierExpression};
-use biome_js_type_info::interned_types::{ClassParents, Literal, TypeData, TypeMember};
+use biome_js_syntax::{
+    AnyJsExpression, JsIdentifierExpression, TsDeclareStatement,
+    binding_ext::AnyJsBindingDeclaration,
+};
+use biome_js_type_info::interned_types::{
+    ClassParents, FunctionParameter, InternedFunction, Literal, ReturnType, TypeData, TypeMember,
+};
 use biome_js_type_info::{
-    ImportSymbol, Literal as RawLiteral, NarrowingPredicate, PropertyTest, RawTypeData, RawTypeId,
-    TypeId, TypeReference, TypeofExpression, base_literal_type, evolving_array_element,
+    ImportSymbol, Literal as RawLiteral, NarrowingPredicate, ObjectKind, PropertyTest, RawTypeData,
+    RawTypeId, TypeId, TypeReference, TypeofExpression, base_literal_type, evolving_array_element,
     evolving_assigned_type, has_readonly_property, is_narrowing_invariant,
     may_narrow_by_instanceof, may_narrow_by_property, narrow_by_assignment, narrow_by_in_operator,
     narrow_by_instanceof, narrow_by_property, narrow_by_type_predicate, narrow_type,
@@ -69,9 +79,16 @@ pub(in crate::db) fn flow_expression_type<'db>(
     {
         return None;
     }
+    let mut ctx = ResolutionCtx::new(db, module, info, ImportResolution::on_demand());
+    // A candidate made only by reads that only call points reach keeps its
+    // type when none of those calls narrows.
+    if let Some((root, subject)) = info.flow.call_only_candidate(range)
+        && ctx.call_effects(root, subject).is_none()
+    {
+        return None;
+    }
     let tree = info.semantic_model.root();
     let expression = info.flow.candidate(range)?.try_to_node(tree.syntax())?;
-    let mut ctx = ResolutionCtx::new(db, module, info, ImportResolution::on_demand());
     ctx.resolve_flow_expression(&expression)
 }
 
@@ -216,6 +233,16 @@ fn may_narrow_by_assignment(baseline: TypeData) -> bool {
     )
 }
 
+pub(in crate::db) fn flow_call_effect<'db>(
+    db: &'db dyn ModuleDb,
+    module: ModuleInfo,
+    info: &JsModuleInfo,
+    call: TextRange,
+) -> FlowCallEffect<'db> {
+    let mut ctx = ResolutionCtx::new(db, module, info, ImportResolution::on_demand());
+    ctx.call_effect(call)
+}
+
 pub(in crate::db) fn flow_switch_exhaustive(
     db: &dyn ModuleDb,
     module: ModuleInfo,
@@ -241,12 +268,13 @@ enum FlatteningError {
 /// readonly path, as [`FlowGuard::ReadonlyPath`] requires, the `switch`
 /// statements found exhaustive, as [`FlowGuard::Bypass`] requires, one bit
 /// each, the types that the subject's writes assign, how its type evolves
-/// with its writes, the results of the property guards, `in` tests,
-/// `instanceof` tests, and calls to type-guard functions applied so far, keyed
-/// by guard index and incoming type, the values of the imported variables
-/// that [`FlowTest::Imported`] compares with, found so far, keyed by
-/// declaration, and the type that each write of the subject that assigns a
-/// value gives it.
+/// with its writes, as [`FlowEvolving`] describes, the effects of the call
+/// points that narrow it, as [`FlowGuard::Call`] requires, the results of the
+/// property guards, `in` tests, `instanceof` tests, and calls to type-guard
+/// functions applied so far, keyed by guard index and incoming type, the
+/// values of the imported variables that [`FlowTest::Imported`] compares
+/// with, found so far, keyed by declaration, and the type that each write
+/// of the subject that assigns a value gives it.
 struct GuardSolve<'db> {
     /// The subject that the solve narrows.
     subject: FlowSubjectId,
@@ -261,6 +289,7 @@ struct GuardSolve<'db> {
     /// The types that the subject's writes assign.
     assigned: Option<FlowAssignedTypes<'db>>,
     evolving: FlowEvolving,
+    calls: Option<FlowCallEffects<'db>>,
     properties: FxHashMap<(usize, TypeData<'db>), TypeData<'db>>,
     /// The values of the imported variables that [`FlowTest::Imported`]
     /// compares with, found so far, keyed by declaration.
@@ -278,6 +307,7 @@ impl<'db> GuardSolve<'db> {
         exhaustive: u64,
         assigned: Option<FlowAssignedTypes<'db>>,
         evolving: FlowEvolving,
+        calls: Option<FlowCallEffects<'db>>,
     ) -> Self {
         Self {
             subject,
@@ -286,6 +316,7 @@ impl<'db> GuardSolve<'db> {
             exhaustive,
             assigned,
             evolving,
+            calls,
             properties: FxHashMap::default(),
             imported: FxHashMap::default(),
             writes: FxHashMap::default(),
@@ -446,6 +477,13 @@ pub(in crate::db) struct LocalFlow<'db> {
     /// keyed by the index of the enclosing root, the variable there, and the
     /// point, as [`ResolutionCtx::captured_type`] resolves it.
     captures: FxHashMap<(usize, FlowSubjectId, FlowNodeId), Option<(TypeData<'db>, bool)>>,
+    /// The effect of each call point resolved so far, keyed by the range of
+    /// its call, as [`ResolutionCtx::call_effect`] resolves it.
+    call_effects: FxHashMap<TextRange, FlowCallEffect<'db>>,
+    /// The effects of the call points that narrow each subject read so far,
+    /// keyed by the index of its root and its subject, as
+    /// [`ResolutionCtx::call_effects`] gives them.
+    subject_call_effects: FxHashMap<(usize, FlowSubjectId), Option<FlowCallEffects<'db>>>,
 }
 
 impl<'db> ResolutionCtx<'db, '_> {
@@ -481,6 +519,14 @@ impl<'db> ResolutionCtx<'db, '_> {
         // without the syntax node.
         if let Some(binding) = info.flow.property_only_candidate(range)
             && self.local_binding_baseline(binding).is_none()
+        {
+            self.local_flow.as_mut()?.expressions.insert(range, None);
+            return None;
+        }
+        // Likewise, a candidate made only by reads that only call points
+        // reach keeps its type when none of those calls narrows.
+        if let Some((root, subject)) = info.flow.call_only_candidate(range)
+            && self.call_effects(root, subject).is_none()
         {
             self.local_flow.as_mut()?.expressions.insert(range, None);
             return None;
@@ -559,9 +605,10 @@ impl<'db> ResolutionCtx<'db, '_> {
                 return (ty != declared).then_some(ty);
             }
         }
+        let calls = self.call_effects(read.root, read.subject);
         let baseline = match declared {
             Some(declared) => {
-                let baseline = if root.is_property_only(read.subject) {
+                let baseline = if root.is_property_only(read.subject) && calls.is_none() {
                     self.property_baseline(declared, root.is_instance_tested(read.subject))
                 } else {
                     self.narrowing_baseline(declared)
@@ -571,6 +618,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                     None => return Some(declared),
                 }
             }
+            None if calls.is_some() => self.called_binding_baseline(binding)?,
             None => self.flow_binding_baseline(binding)?,
         };
         let exhaustive = self.exhaustive_switches(read, start);
@@ -589,6 +637,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                     exhaustive,
                     assigned,
                     FlowEvolving::None,
+                    calls,
                 ),
                 read.point,
             ),
@@ -664,6 +713,13 @@ impl<'db> ResolutionCtx<'db, '_> {
             FlowEvolving::None => return None,
         }
         let exhaustive = self.exhaustive_switches(read, start);
+        // Runtime tests don't narrow an array whose type evolves with its
+        // writes.
+        let calls = if evolving == FlowEvolving::Variable {
+            self.call_effects(read.root, read.subject)
+        } else {
+            None
+        };
         infer_flow_subject_type(
             self.db,
             FlowSubjectTypeInput::new(
@@ -678,6 +734,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                     exhaustive,
                     assigned,
                     evolving,
+                    calls,
                 ),
                 read.point,
             ),
@@ -769,6 +826,7 @@ impl<'db> ResolutionCtx<'db, '_> {
         };
         let exhaustive = self.exhaustive_switches(read, start);
         let assigned = self.flow_assigned_types(read.root, read.subject);
+        let calls = self.call_effects(read.root, read.subject);
         infer_flow_subject_type(
             self.db,
             FlowSubjectTypeInput::new(
@@ -783,6 +841,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                     exhaustive,
                     assigned,
                     FlowEvolving::None,
+                    calls,
                 ),
                 read.point,
             ),
@@ -791,14 +850,16 @@ impl<'db> ResolutionCtx<'db, '_> {
     }
 
     /// Returns the type that narrowing of `read.subject` in the root of
-    /// `read` starts from when the subject has type `ty` where the root
-    /// starts. That type is `ty` flattened for narrowing, through
-    /// [`Self::property_baseline`] when the root narrows the subject only
-    /// through tests of its shape, and through [`Self::narrowing_baseline`]
-    /// otherwise. Returns `None` when no test of the root can change `ty`.
+    /// `read` starts from when the subject's type at the root's start is
+    /// `ty`: [`Self::property_baseline`] when the root narrows it only
+    /// through tests of its shape and none of its call points narrows, and
+    /// [`Self::narrowing_baseline`] otherwise. Returns `None` when no test of
+    /// the root can change `ty`.
     fn subject_baseline(&mut self, read: FlowRead, ty: TypeData<'db>) -> Option<TypeData<'db>> {
         let root = self.js_info.flow.root(read.root)?;
-        if root.is_property_only(read.subject) {
+        if root.is_property_only(read.subject)
+            && self.call_effects(read.root, read.subject).is_none()
+        {
             self.property_baseline(ty, root.is_instance_tested(read.subject))
         } else {
             self.narrowing_baseline(ty)
@@ -887,16 +948,21 @@ impl<'db> ResolutionCtx<'db, '_> {
             // read in the enclosing root itself gets its declared type when
             // that `undefined` remains, so the caller decides for the
             // closure's read.
-            (None, None) => (
-                self.flow_binding_baseline(binding)?,
-                root.is_uninitialized(capture.subject),
-            ),
+            (None, None) => {
+                let baseline = if self.call_effects(capture.root, capture.subject).is_some() {
+                    self.called_binding_baseline(binding)?
+                } else {
+                    self.flow_binding_baseline(binding)?
+                };
+                (baseline, root.is_uninitialized(capture.subject))
+            }
         };
         if baseline == TypeData::Unknown {
             return Some((TypeData::Unknown, uninitialized));
         }
         let exhaustive = self.exhaustive_switches(read, capture.start);
         let assigned = self.flow_assigned_types(capture.root, capture.subject);
+        let calls = self.call_effects(capture.root, capture.subject);
         let states = infer_flow_subject_states(
             self.db,
             FlowSubjectRootInput::new(
@@ -909,6 +975,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                 exhaustive,
                 assigned,
                 FlowEvolving::None,
+                calls,
             ),
         );
         let ty = states
@@ -947,6 +1014,7 @@ impl<'db> ResolutionCtx<'db, '_> {
         };
         let baseline = self.flow_binding_baseline(range)?;
         let exhaustive = self.exhaustive_switches(read, start);
+        let calls = self.call_effects(read.root, pattern);
         // No write changes the value that a pattern destructures.
         let narrowed = infer_flow_subject_type(
             self.db,
@@ -962,6 +1030,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                     exhaustive,
                     None,
                     FlowEvolving::None,
+                    calls,
                 ),
                 read.point,
             ),
@@ -992,6 +1061,26 @@ impl<'db> ResolutionCtx<'db, '_> {
         } else {
             infer_flow_binding_baseline(self.db, BindingTypeInput::new(self.db, self.module, range))
         }
+    }
+
+    /// Returns the type that narrowing of the binding declared at `binding`
+    /// starts from in a root where one of its call points narrows: its
+    /// declared type, flattened for narrowing by [`Self::narrowing_baseline`].
+    ///
+    /// [`Self::flow_binding_baseline`] gives that type unless the roots that
+    /// read the binding narrow it only through tests of its shape or only
+    /// through writes. It then gives a type that only those can narrow, so
+    /// this function resolves the declared type itself, in the reading
+    /// context. Only a call point that narrows needs this.
+    fn called_binding_baseline(&mut self, binding: TextRange) -> Option<TypeData<'db>> {
+        let info = self.js_info;
+        if !info.flow.is_property_only_binding(binding)
+            && !info.flow.is_assignment_only_binding(binding)
+        {
+            return self.flow_binding_baseline(binding);
+        }
+        let declared = self.resolve(info.raw_binding_types.get(&binding)?);
+        self.narrowing_baseline(declared)
     }
 
     /// Returns the type that narrowing of the binding declared at `binding`,
@@ -1041,12 +1130,16 @@ impl<'db> ResolutionCtx<'db, '_> {
         let info = self.js_info;
         let read = info.flow.read(member.range())?;
         let root = info.flow.root(read.root)?;
-        let baseline = if root.is_property_only(read.subject) {
+        let calls = self.call_effects(read.root, read.subject);
+        let baseline = if root.is_property_only(read.subject) && calls.is_none() {
             self.property_baseline(declared, root.is_instance_tested(read.subject))
         } else {
             self.narrowing_baseline(declared)
         }?;
-        if root.is_assignment_only(read.subject) && !may_narrow_by_assignment(baseline) {
+        if calls.is_none()
+            && root.is_assignment_only(read.subject)
+            && !may_narrow_by_assignment(baseline)
+        {
             return None;
         }
         let readonly_path =
@@ -1070,6 +1163,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                     exhaustive,
                     assigned,
                     FlowEvolving::None,
+                    calls,
                 ),
                 read.point,
             ),
@@ -1264,6 +1358,228 @@ impl<'db> ResolutionCtx<'db, '_> {
         }
     }
 
+    /// Returns the effects of the call points of the root at index `root`
+    /// that narrow `subject`, for [`FlowSubjectRootInput::calls`], or `None`
+    /// when none of them narrows. The call points checked are those that
+    /// [`RootFlow::subject_calls`] lists for the subject. The answer is
+    /// cached per root and subject when this context evaluates flow locally.
+    fn call_effects(
+        &mut self,
+        root: usize,
+        subject: FlowSubjectId,
+    ) -> Option<FlowCallEffects<'db>> {
+        let info = self.js_info;
+        let flow = info.flow.root(root)?;
+        let calls = flow.subject_calls(subject);
+        if calls.is_empty() {
+            return None;
+        }
+        let key = (root, subject);
+        if let Some(cached) = self
+            .local_flow
+            .as_ref()
+            .and_then(|local| local.subject_call_effects.get(&key))
+        {
+            return *cached;
+        }
+        let mut effects = Vec::new();
+        for call in calls {
+            let Some(flow_call) = flow.calls.get(*call as usize) else {
+                continue;
+            };
+            let effect = self.flow_call_effect(flow_call.range);
+            if effect != FlowCallEffect::None {
+                effects.push((*call, effect));
+            }
+        }
+        let effects = (!effects.is_empty())
+            .then(|| FlowCallEffects::new(self.db, effects.into_boxed_slice()));
+        if let Some(local) = self.local_flow.as_mut() {
+            local.subject_call_effects.insert(key, effects);
+        }
+        effects
+    }
+
+    /// Returns the effect of the call point at `range`. A context that
+    /// evaluates flow locally resolves it itself and caches it per call.
+    /// Other contexts read it from
+    /// [`crate::db::queries::infer_flow_call_effect`].
+    fn flow_call_effect(&mut self, range: TextRange) -> FlowCallEffect<'db> {
+        if !self.evaluates_flow_locally() {
+            return infer_flow_call_effect(
+                self.db,
+                FlowCallInput::new(self.db, self.module, range),
+            );
+        }
+        if let Some(effect) = self
+            .local_flow
+            .as_ref()
+            .and_then(|local| local.call_effects.get(&range))
+        {
+            return *effect;
+        }
+        let effect = self.call_effect(range);
+        if let Some(local) = self.local_flow.as_mut() {
+            local.call_effects.insert(range, effect);
+        }
+        effect
+    }
+
+    /// Resolves the effect of the call point at `range` in this context, or
+    /// [`FlowCallEffect::None`] when the call narrows nothing.
+    pub(super) fn call_effect(&mut self, range: TextRange) -> FlowCallEffect<'db> {
+        self.resolve_call_effect(range).unwrap_or_default()
+    }
+
+    /// Resolves the effect that [`Self::call_effect`] returns, or `None` when
+    /// the call narrows nothing.
+    ///
+    /// The callee's type is its ordinary type, without narrowing, as its raw
+    /// type resolves. For a call in a condition, a union callee loses its
+    /// `null` and `undefined` members, as in TypeScript, and must keep exactly
+    /// one. A statement call resolves only when every name along its callee
+    /// has an explicit type, as [`Self::has_explicit_callee`] checks, so its
+    /// ordinary type is that explicit type, and its callee can't be a union.
+    /// The callee must have exactly one signature without type parameters.
+    /// TypeScript resolves the call to pick a signature otherwise, which Biome
+    /// doesn't do here.
+    ///
+    /// A call in a condition narrows only through a type predicate, and a
+    /// statement call only through an assertion. The target is flattened as a
+    /// declared type is, and a target of `any` or `unknown` narrows nothing.
+    fn resolve_call_effect(&mut self, range: TextRange) -> Option<FlowCallEffect<'db>> {
+        let info = self.js_info;
+        let call = info.flow.call(range)?;
+        let TypeReference::Resolved(RawTypeId::Local(id)) = info.raw_expressions.get(&range)?
+        else {
+            return None;
+        };
+        let RawTypeData::TypeofExpression(raw) = info.raw_types.get(id.index())? else {
+            return None;
+        };
+        let TypeofExpression::Call(raw) = raw.as_ref() else {
+            return None;
+        };
+        let statement = match &call.kind {
+            FlowCallKind::Condition => false,
+            FlowCallKind::Statement { root, steps } => {
+                if !self.has_explicit_callee(*root, steps) {
+                    return None;
+                }
+                true
+            }
+        };
+        let callee = self.resolve(&raw.callee);
+        let mut callee = self.flow_baseline(callee)?;
+        if let TypeData::Union(union) = callee {
+            if statement {
+                return None;
+            }
+            let mut members = union
+                .types(self.db)
+                .iter()
+                .copied()
+                .filter(|member| !matches!(member, TypeData::Null | TypeData::Undefined));
+            callee = members.next()?;
+            if members.next().is_some() {
+                return None;
+            }
+        }
+        let function =
+            resolve_callable_function(self.db, CallableFunctionInput::new(self.db, callee))?;
+        if !function.type_parameters(self.db).is_empty() {
+            return None;
+        }
+        let (name, target, asserts) = match function.return_type(self.db) {
+            ReturnType::Predicate(predicate) => {
+                (&predicate.parameter_name, Some(predicate.ty), false)
+            }
+            ReturnType::Asserts(assertion) => {
+                // Collection records a bare `asserts value` as `Conditional`,
+                // which no type annotation names.
+                let target = resolve_local_type_on_demand(self.db, assertion.ty);
+                (
+                    &assertion.parameter_name,
+                    (target != TypeData::Conditional).then_some(target),
+                    true,
+                )
+            }
+            ReturnType::Type(_) => return None,
+        };
+        if asserts != statement {
+            return None;
+        }
+        let parameter = predicate_parameter(self.db, function, name, call)?;
+        let target = match target {
+            Some(target) => {
+                let target = self.flow_baseline(target)?;
+                if matches!(
+                    target,
+                    TypeData::AnyKeyword | TypeData::UnknownKeyword | TypeData::Unknown
+                ) {
+                    return None;
+                }
+                Some(target)
+            }
+            None => None,
+        };
+        Some(match target {
+            Some(target) if !statement => FlowCallEffect::Predicate { parameter, target },
+            None if !statement => return None,
+            target => FlowCallEffect::Assertion { parameter, target },
+        })
+    }
+
+    /// Returns whether every name along the callee of a statement call has
+    /// an explicit type, which TypeScript requires before it applies an
+    /// assertion. `root` is how collection classified the name that the
+    /// callee starts at, and `steps` are the ranges of its member accesses,
+    /// as [`FlowCallKind::Statement`] records them.
+    ///
+    /// An import has an explicit type when the declaration that it names has
+    /// one, as [`imported_declaration_is_explicit`] checks. A member access
+    /// has one when every type that its object can have declares the member
+    /// with one, as [`has_explicit_member`] checks. The object's type is its
+    /// declared type, as its raw type resolves, because TypeScript reads the
+    /// explicit types along the callee.
+    fn has_explicit_callee(&mut self, root: FlowCallRoot, steps: &[TextRange]) -> bool {
+        let info = self.js_info;
+        let mut steps = steps.iter();
+        match root {
+            FlowCallRoot::Explicit => {}
+            FlowCallRoot::Namespace => {
+                steps.next();
+            }
+            FlowCallRoot::Import(binding) => {
+                let is_namespace = matches!(
+                    info.raw_binding_types.get(&binding),
+                    Some(TypeReference::Import(import)) if import.symbol == ImportSymbol::All
+                );
+                let member = if is_namespace {
+                    match steps.next().and_then(|step| raw_member(info, *step)) {
+                        Some((_, member)) => Some(member),
+                        None => return false,
+                    }
+                } else {
+                    None
+                };
+                if !imported_declaration_is_explicit(self.db, self.module, info, binding, member) {
+                    return false;
+                }
+            }
+        }
+        for step in steps {
+            let Some((object, member)) = raw_member(info, *step) else {
+                return false;
+            };
+            let object = self.resolve(object);
+            if !has_explicit_member(self.db, object, member.text()) {
+                return false;
+            }
+        }
+        true
+    }
+
     /// Returns the exhaustive `switch` statements of the root of `read` whose
     /// bypass reaches the read, one bit each, as the mask in
     /// [`FlowSubjectRootInput::exhaustive`]. `start` is where the expression
@@ -1362,7 +1678,8 @@ impl<'db> ResolutionCtx<'db, '_> {
         if matches!(ty, TypeData::Unknown | TypeData::NeverKeyword) || is_narrowing_invariant(ty) {
             return false;
         }
-        let mut solve = GuardSolve::new(switch.subject, ty, false, 0, None, FlowEvolving::None);
+        let mut solve =
+            GuardSolve::new(switch.subject, ty, false, 0, None, FlowEvolving::None, None);
         if !self.compares_with_unit_values(root, switch.guard, &mut solve) {
             return false;
         }
@@ -1405,7 +1722,8 @@ impl<'db> ResolutionCtx<'db, '_> {
                     FlowGuard::Keep
                     | FlowGuard::Incomplete
                     | FlowGuard::Test { .. }
-                    | FlowGuard::Property { .. },
+                    | FlowGuard::Property { .. }
+                    | FlowGuard::Call { .. },
                 )
                 | None => {}
             }
@@ -1627,6 +1945,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                 input.exhaustive(db),
                 input.assigned(db),
                 input.evolving(db),
+                input.calls(db),
             ),
         )?;
         Some(
@@ -1914,6 +2233,9 @@ impl<'db> ResolutionCtx<'db, '_> {
                     return self.apply_guard(root, *guard, solve, ty, remaining);
                 }
             }
+            FlowGuard::Call { call, positive } => {
+                return self.apply_call(root, index, *call, *positive, solve, ty, remaining);
+            }
             FlowGuard::Both {
                 left,
                 right,
@@ -1934,6 +2256,80 @@ impl<'db> ResolutionCtx<'db, '_> {
                 }
             }
         })
+    }
+
+    /// Returns the type of the subject that `solve` narrows after the guard
+    /// at `index` holds, given its incoming type `ty`, or `None` when the
+    /// flow work limit runs out. The guard is the [`FlowGuard::Call`] of the
+    /// call point at index `call`, whose result is truthy when `positive` is
+    /// true.
+    ///
+    /// The effect comes from the solve's key, where the reading context put
+    /// it, so the solve resolves no callee. A type predicate narrows the
+    /// operand that it names to its target where the call is truthy, and
+    /// removes the target where the call is falsy. An assertion narrows the
+    /// operand as a truthy type predicate does. `asserts value` instead
+    /// applies the guard of the argument decomposed as a condition that
+    /// holds. A call whose effect the key lacks keeps `ty`.
+    #[expect(
+        clippy::too_many_arguments,
+        reason = "The arguments mirror `apply_guard`, with the call's guard."
+    )]
+    fn apply_call(
+        &mut self,
+        root: &RootFlow,
+        index: usize,
+        call: u32,
+        positive: bool,
+        solve: &mut GuardSolve<'db>,
+        ty: TypeData<'db>,
+        remaining: &mut usize,
+    ) -> Option<TypeData<'db>> {
+        let effect = solve.calls.and_then(|calls| {
+            let effects = calls.effects(self.db);
+            effects
+                .binary_search_by_key(&call, |(index, _)| *index)
+                .ok()
+                .map(|position| effects[position].1)
+        });
+        let (parameter, target, positive) = match effect {
+            Some(FlowCallEffect::Predicate { parameter, target }) => {
+                (parameter, Some(target), positive)
+            }
+            Some(FlowCallEffect::Assertion { parameter, target }) => (parameter, target, true),
+            Some(FlowCallEffect::None) | None => return Some(ty),
+        };
+        let Some(flow_call) = root.calls.get(call as usize) else {
+            return Some(ty);
+        };
+        let operand = match parameter {
+            FlowCallParameter::Argument(argument) => flow_call.arguments.get(argument as usize),
+            FlowCallParameter::Receiver => None,
+        };
+        let Some(target) = target else {
+            // `asserts value` holds the condition that its argument is
+            // truthy, and `asserts this` narrows nothing.
+            return match operand.and_then(|operand| operand.condition) {
+                Some(guard) => self.apply_guard(root, guard, solve, ty, remaining),
+                None => Some(ty),
+            };
+        };
+        let tested = match parameter {
+            FlowCallParameter::Argument(_) => operand.and_then(|operand| operand.subject),
+            FlowCallParameter::Receiver => flow_call.receiver,
+        };
+        if tested != Some(solve.subject) || solve.evolving == FlowEvolving::Array {
+            return Some(ty);
+        }
+        // Loops revisit conditions, and each application compares every
+        // member of the union.
+        if let Some(narrowed) = solve.properties.get(&(index, ty)) {
+            return Some(*narrowed);
+        }
+        let narrowed =
+            narrow_by_type_predicate(self.db, ty, target, positive, self.narrowing_resolver());
+        solve.properties.insert((index, ty), narrowed);
+        Some(narrowed)
     }
 
     /// Returns the type of the subject that `solve` narrows right after the
@@ -2382,6 +2778,320 @@ fn imported_return_is_annotated(
     false
 }
 
+/// Returns the operand of `call` that the type predicate or the assertion of
+/// `function` names with `name`: the receiver for `this`, or the argument at
+/// the position of the parameter with that name, counted without a `this`
+/// parameter.
+///
+/// Returns `None` when no parameter has the name or more than one has it,
+/// when it is a rest or an optional parameter, when the call passes no
+/// argument there before a spread, and for a name spelled with an escape. An
+/// optional parameter is rejected because a default can replace its
+/// argument.
+fn predicate_parameter<'db>(
+    db: &'db dyn ModuleDb,
+    function: InternedFunction<'db>,
+    name: &Text,
+    call: &FlowCall,
+) -> Option<FlowCallParameter> {
+    let name = name.text();
+    if name.contains('\\') {
+        return None;
+    }
+    if name == "this" {
+        return Some(FlowCallParameter::Receiver);
+    }
+    let mut found = None;
+    let parameters = function
+        .parameters(db)
+        .iter()
+        .filter(|parameter| !parameter.is_this());
+    for (index, parameter) in parameters.enumerate() {
+        let FunctionParameter::Named(named) = parameter else {
+            continue;
+        };
+        if named.name.text() != name {
+            continue;
+        }
+        if found.is_some() || named.is_rest || named.is_optional {
+            return None;
+        }
+        found = Some(index);
+    }
+    let index = found?;
+    if index >= call.arguments.len() {
+        return None;
+    }
+    Some(FlowCallParameter::Argument(u32::try_from(index).ok()?))
+}
+
+/// Returns the object and the name of the static member access at `range`
+/// in `js_info`, as local inference collected them.
+fn raw_member(js_info: &JsModuleInfo, range: TextRange) -> Option<(&TypeReference, &Text)> {
+    let TypeReference::Resolved(RawTypeId::Local(id)) = js_info.raw_expressions.get(&range)? else {
+        return None;
+    };
+    let RawTypeData::TypeofExpression(raw) = js_info.raw_types.get(id.index())? else {
+        return None;
+    };
+    if let TypeofExpression::StaticMember(expression)
+    | TypeofExpression::OptionalChainStaticMember(expression) = raw.as_ref()
+    {
+        Some((&expression.object, &expression.member))
+    } else {
+        None
+    }
+}
+
+/// Returns whether the declaration that an imported binding names has an
+/// explicit type, which TypeScript requires of every name along the callee
+/// of a statement call. `binding` is the range of the import in `js_info`,
+/// the module `module`. For a namespace import, the declaration is the
+/// export that `member` names.
+///
+/// The import is followed through re-exports to the module that declares the
+/// export, and a binding that an import declares there is followed in turn,
+/// at most [`MAX_IMPORT_STEPS`] of them. A declaration file declares only
+/// names with explicit types. Elsewhere, a function, a class, a variable
+/// with a type annotation, and a namespace that `declare` declares have one.
+fn imported_declaration_is_explicit(
+    db: &dyn ModuleDb,
+    mut module: ModuleInfo,
+    js_info: &JsModuleInfo,
+    mut binding: TextRange,
+    mut member: Option<&Text>,
+) -> bool {
+    let mut info = js_info;
+    for _ in 0..MAX_IMPORT_STEPS {
+        let Some(TypeReference::Import(import)) = info.raw_binding_types.get(&binding) else {
+            return false;
+        };
+        let name = match &import.symbol {
+            ImportSymbol::Named(name) => name.clone(),
+            ImportSymbol::Default => Text::new_static("default"),
+            ImportSymbol::All => match member.take() {
+                Some(member) => member.clone(),
+                None => return false,
+            },
+        };
+        let resolved =
+            resolve_module_import(db, module, &import.specifier, ResolutionMode::JavaScript);
+        let Some(target) = resolved
+            .path()
+            .as_path()
+            .and_then(|path| db.module_for_path(path))
+        else {
+            return false;
+        };
+        let ExportOriginResult::Found {
+            module: origin,
+            name,
+        } = find_export_origin(db, target, name)
+        else {
+            return false;
+        };
+        let ModuleInfoKind::Js(origin_info) = origin.kind(db) else {
+            return false;
+        };
+        let Some(JsExport::Own(JsOwnExport::Binding(declaration))) =
+            origin_info.exports.get(name.text())
+        else {
+            return false;
+        };
+        if is_declaration_file(db, origin) {
+            return true;
+        }
+        let Some(declared) = origin_info.semantic_model.as_binding_by_range(*declaration) else {
+            return false;
+        };
+        match declared.tree().declaration() {
+            Some(
+                AnyJsBindingDeclaration::JsNamedImportSpecifier(_)
+                | AnyJsBindingDeclaration::JsShorthandNamedImportSpecifier(_)
+                | AnyJsBindingDeclaration::JsDefaultImportSpecifier(_),
+            ) => {
+                module = origin;
+                info = origin_info;
+                binding = declared.range();
+            }
+            Some(
+                AnyJsBindingDeclaration::JsFunctionDeclaration(_)
+                | AnyJsBindingDeclaration::TsDeclareFunctionDeclaration(_)
+                | AnyJsBindingDeclaration::JsFunctionExportDefaultDeclaration(_)
+                | AnyJsBindingDeclaration::TsDeclareFunctionExportDefaultDeclaration(_)
+                | AnyJsBindingDeclaration::JsClassDeclaration(_)
+                | AnyJsBindingDeclaration::JsClassExportDefaultDeclaration(_),
+            ) => return true,
+            Some(AnyJsBindingDeclaration::JsVariableDeclarator(declarator)) => {
+                return declarator.variable_annotation().is_some();
+            }
+            Some(AnyJsBindingDeclaration::TsModuleDeclaration(namespace)) => {
+                return namespace.parent::<TsDeclareStatement>().is_some();
+            }
+            _ => return false,
+        }
+    }
+    false
+}
+
+/// Returns whether every type that `ty` can be declares its member `name`
+/// with an explicit type, which TypeScript requires of every member along
+/// the callee of a statement call.
+///
+/// These types qualify:
+///
+/// - a lib global or an instance of one, unless a module other than a
+///   declaration file merges an interface into it;
+/// - a primitive, a literal that isn't an object, and a tuple, because their
+///   members are those of their lib types;
+/// - a type literal, because all its members have explicit types;
+/// - a type that a declaration file declares, when the classes and
+///   interfaces that it extends qualify too;
+/// - a class or an interface that a module other than a declaration file
+///   declares, when its own members named `name` are methods, or properties
+///   with type annotations, or when it inherits the member from a type that
+///   qualifies. For the class itself, its `static` members count, as
+///   [`own_member`] checks.
+///
+/// An object literal, a union, `null`, and `undefined` don't qualify, and
+/// neither do namespaces and modules, whose members collection checks
+/// itself.
+fn has_explicit_member(db: &dyn ModuleDb, ty: TypeData, name: &str) -> bool {
+    // Each type comes with whether a value of it is an instance, as the
+    // object of a call of a class's method is.
+    let mut pending = vec![(ty, false)];
+    let mut remaining = MAX_FLOW_TYPE_STEPS;
+    while let Some((ty, instance)) = pending.pop() {
+        let Some(left) = remaining.checked_sub(1) else {
+            return false;
+        };
+        remaining = left;
+        match ty {
+            TypeData::GlobalType(id) => {
+                if !global_contributions(db, id).iter().all(|(module, _)| {
+                    module_for_key(db, *module)
+                        .is_some_and(|module| is_declaration_file(db, module))
+                }) {
+                    return false;
+                }
+            }
+            TypeData::Global
+            | TypeData::GlobalLocal(_)
+            | TypeData::BigInt
+            | TypeData::Boolean
+            | TypeData::Number
+            | TypeData::String
+            | TypeData::Symbol
+            | TypeData::Tuple(_) => {}
+            TypeData::Literal(literal) => {
+                if matches!(literal.literal(db), Literal::Object(_)) {
+                    return false;
+                }
+            }
+            TypeData::Object(object) => {
+                if object.kind(db) != ObjectKind::Shape {
+                    return false;
+                }
+            }
+            TypeData::InstanceOf(instance_of) => pending.push((instance_of.ty(db), true)),
+            TypeData::Local(handle) => {
+                let Some(module) = module_for_key(db, handle.module(db)) else {
+                    return false;
+                };
+                let input = LocalTypeInput::new(db, module, handle.type_id(db));
+                let Some(resolved) = infer_local_type(db, input) else {
+                    return false;
+                };
+                let in_declaration_file = is_declaration_file(db, module);
+                let (parents, own) = if let TypeData::Class(class) = resolved {
+                    let ClassParents {
+                        extends,
+                        interface_bases,
+                    } = class.parents(db);
+                    let own = if in_declaration_file {
+                        OwnMember::Inherited
+                    } else {
+                        own_member(
+                            db,
+                            module,
+                            class.scope_id(db),
+                            class.members(db),
+                            class.contributions(db),
+                            name,
+                            MemberRule::Explicit {
+                                is_static: !instance,
+                            },
+                        )
+                    };
+                    // The class itself inherits only the static members of
+                    // the class it extends, which Biome doesn't follow.
+                    let parents: Vec<_> = if instance {
+                        extends.iter().chain(interface_bases).copied().collect()
+                    } else {
+                        Vec::new()
+                    };
+                    (parents, own)
+                } else if let TypeData::Interface(interface) = resolved {
+                    let own = if in_declaration_file {
+                        OwnMember::Inherited
+                    } else {
+                        own_member(
+                            db,
+                            module,
+                            interface.scope_id(db),
+                            interface.members(db),
+                            interface.contributions(db),
+                            name,
+                            MemberRule::Explicit { is_static: false },
+                        )
+                    };
+                    (interface.extends(db).to_vec(), own)
+                } else {
+                    // A type literal, a handle in another module, or a type
+                    // that an alias names is checked as the type that it
+                    // resolves to in its own module.
+                    pending.push((resolved, instance));
+                    continue;
+                };
+                match own {
+                    OwnMember::Annotated => continue,
+                    OwnMember::Inherited if in_declaration_file || !parents.is_empty() => {}
+                    OwnMember::Inherited | OwnMember::Other => return false,
+                }
+                pending.extend(parents.into_iter().map(|parent| (parent, instance)));
+            }
+            TypeData::Unknown
+            | TypeData::Null
+            | TypeData::Undefined
+            | TypeData::Union(_)
+            | TypeData::Conditional
+            | TypeData::Class(_)
+            | TypeData::Constructor(_)
+            | TypeData::Function(_)
+            | TypeData::Interface(_)
+            | TypeData::Module(_)
+            | TypeData::Namespace(_)
+            | TypeData::Generic(_)
+            | TypeData::Intersection(_)
+            | TypeData::TypeOperator(_)
+            | TypeData::IndexedAccess(_)
+            | TypeData::MappedType(_)
+            | TypeData::Extends(_)
+            | TypeData::MergedReference(_)
+            | TypeData::TypeofExpression(_)
+            | TypeData::TypeofType(_)
+            | TypeData::TypeofValue(_)
+            | TypeData::AnyKeyword
+            | TypeData::NeverKeyword
+            | TypeData::ObjectKeyword
+            | TypeData::ThisKeyword
+            | TypeData::UnknownKeyword
+            | TypeData::VoidKeyword => return false,
+        }
+    }
+    true
+}
+
 /// Returns whether every type that `ty` can be gets its member `name` from
 /// the lib, from a declaration file, or from methods with a return type
 /// annotation, so that a call of the member has a return type that comes
@@ -2465,6 +3175,7 @@ fn has_annotated_member(db: &dyn ModuleDb, ty: TypeData, name: &str) -> bool {
                             class.members(db),
                             class.contributions(db),
                             name,
+                            MemberRule::AnnotatedReturn,
                         )
                     } else {
                         OwnMember::Other
@@ -2481,6 +3192,7 @@ fn has_annotated_member(db: &dyn ModuleDb, ty: TypeData, name: &str) -> bool {
                             interface.members(db),
                             interface.contributions(db),
                             name,
+                            MemberRule::AnnotatedReturn,
                         )
                     };
                     (interface.extends(db).to_vec(), own)
@@ -2539,7 +3251,7 @@ fn has_annotated_member(db: &dyn ModuleDb, ty: TypeData, name: &str) -> bool {
 
 /// Where a class or an interface gets a member that a call reads.
 enum OwnMember {
-    /// Its own methods, each with a return type annotation.
+    /// Its own members, each of them as the [`MemberRule`] requires.
     Annotated,
     /// The classes and interfaces that it extends, because it declares no
     /// member with the name, and no computed key or index signature that
@@ -2550,19 +3262,33 @@ enum OwnMember {
     Other,
 }
 
-/// Returns where an instance of a class or an interface gets its member
-/// `name`. `module` declares the class or interface and is not a declaration
-/// file. `scope_id` is the scope that the class or interface records,
-/// `members` are the members that local inference collected for it, and
-/// `contributions` is how many declarations other modules merge into it.
+/// What [`own_member`] requires of each own member that it finds.
+#[derive(Clone, Copy)]
+enum MemberRule {
+    /// A method of an instance with a return type annotation, as
+    /// [`member_return`] finds it.
+    AnnotatedReturn,
+    /// A method, or a property with a type annotation, among the `static`
+    /// members when `is_static` is true and among the others otherwise, as
+    /// [`member_explicitness`] finds it.
+    Explicit { is_static: bool },
+}
+
+/// Returns where a class or an interface gets its member `name`, among the
+/// members of an instance unless `rule` asks for `static` ones.
 ///
-/// Its own members are the members named `name` in the declaration that
-/// opens the scope; see [`member_return`]. Declarations merged into it can
-/// add members with the name. Member lookup finds a class's own members
-/// before them, but can find those of a later interface declaration first.
-/// So the member is its own only when local inference collected no more
-/// members with the name than the declaration declares, and inherited only
-/// when it collected none.
+/// `module` declares the class or interface and is no declaration file.
+/// `scope_id` is the scope that the class or interface records, `members`
+/// are the members that local inference collected for it, `contributions`
+/// counts the declarations that other modules merge into it, and `rule` is
+/// what its own members must satisfy.
+///
+/// Its own members are those that the rule finds in the declaration that
+/// opens the scope. Declarations merged into it can add members with the
+/// name. Member lookup finds a class's own members before them, but can find
+/// those of a later interface declaration first. So the member is its own
+/// only when local inference collected no more members with the name than
+/// the declaration declares, and inherited only when it collected none.
 fn own_member(
     db: &dyn ModuleDb,
     module: ModuleInfo,
@@ -2570,6 +3296,7 @@ fn own_member(
     members: &[TypeMember],
     contributions: usize,
     name: &str,
+    rule: MemberRule,
 ) -> OwnMember {
     // A module augmentation can declare the member as a property whose type
     // comes from an inferred return type.
@@ -2587,24 +3314,32 @@ fn own_member(
     else {
         return OwnMember::Other;
     };
+    let (is_static, (declared, own)) = match rule {
+        MemberRule::AnnotatedReturn => {
+            let (declared, callee_return) = member_return(&declaration, name);
+            (false, (declared, callee_return == CalleeReturn::Annotated))
+        }
+        MemberRule::Explicit { is_static } => (
+            is_static,
+            member_explicitness(&declaration, name, is_static),
+        ),
+    };
     let collected = members
         .iter()
-        .filter(|member| !member.kind.is_static() && member.kind.has_name(name))
+        .filter(|member| member.kind.is_static() == is_static && member.kind.has_name(name))
         .count();
-    match member_return(&declaration, name) {
-        (0, _)
-            if collected == 0
-                && members.iter().all(|member| {
-                    member.kind.computed_value_type().is_none()
-                        && member.kind.index_signature_type().is_none()
-                }) =>
-        {
-            OwnMember::Inherited
-        }
-        (declared, CalleeReturn::Annotated) if declared != 0 && collected <= declared => {
-            OwnMember::Annotated
-        }
-        _ => OwnMember::Other,
+    if declared == 0
+        && collected == 0
+        && members.iter().all(|member| {
+            member.kind.computed_value_type().is_none()
+                && member.kind.index_signature_type().is_none()
+        })
+    {
+        OwnMember::Inherited
+    } else if own && declared != 0 && collected <= declared {
+        OwnMember::Annotated
+    } else {
+        OwnMember::Other
     }
 }
 
@@ -2692,6 +3427,8 @@ mod tests {
             uninitialized: Default::default(),
             evolving: Default::default(),
             captures: Default::default(),
+            calls: Box::default(),
+            subject_calls: Default::default(),
         };
         let reaching = ReachingFlow::new(&root, &[2]).unwrap();
         assert_eq!(reaching.nodes, [2, 1, 3, 0]);

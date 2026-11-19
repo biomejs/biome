@@ -7,15 +7,15 @@
 
 use super::{
     BindingTypeInput, BindingTypeWithImportBudgetInput, ExpressionTypeInput, FlowAssignedTypes,
-    FlowSubjectRootInput, FlowSubjectTypeInput, FlowSubjectWritesInput, FlowSwitchInput,
-    LocalTypeInput, LocalTypeWithImportBudgetInput,
+    FlowCallEffect, FlowCallInput, FlowSubjectRootInput, FlowSubjectTypeInput,
+    FlowSubjectWritesInput, FlowSwitchInput, LocalTypeInput, LocalTypeWithImportBudgetInput,
 };
 use crate::ModuleDb;
 use crate::db::type_inference::{
     ImportResolution, ResolutionCtx, find_member_type_on_demand as find_member_type_impl,
     find_value_member_type_on_demand as find_value_member_type_impl, flow_assigned_types,
-    flow_binding_baseline, flow_expression_type, flow_subject_states, flow_subject_type,
-    flow_switch_exhaustive, resolve_local_type_on_demand,
+    flow_binding_baseline, flow_call_effect, flow_expression_type, flow_subject_states,
+    flow_subject_type, flow_switch_exhaustive, resolve_local_type_on_demand,
 };
 use crate::js_module_info::flow::FlowNodeId;
 use crate::module_graph::ModuleInfoKind;
@@ -266,6 +266,43 @@ pub(crate) fn infer_flow_assigned_types<'db>(
     )
 }
 
+/// Resolves how one call point narrows, from the signature of its callee: the
+/// type predicate of a call in a condition, or the assertion of a statement
+/// call, with its target.
+///
+/// The reads of every subject that the call may narrow share the result.
+/// Their solves take it in their keys, so a solve resolves no callee.
+/// Complete module inference resolves the same effect in its own context
+/// instead. A call in a condition takes the callee's ordinary type. A
+/// statement call requires every name along its callee to have an explicit
+/// type, as TypeScript does before it applies an assertion.
+///
+/// Returns [`FlowCallEffect::None`] for a call that is no call point, for a
+/// callee without exactly one signature or with a generic one, and when a
+/// query cycle passes through this lookup.
+#[salsa::tracked(returns(copy), cycle_result=infer_flow_call_effect_cycle_result)]
+pub(crate) fn infer_flow_call_effect<'db>(
+    db: &'db dyn ModuleDb,
+    input: FlowCallInput<'db>,
+) -> FlowCallEffect<'db> {
+    let module = input.module(db);
+    let call = input.call(db);
+    execute_query(
+        TypeInferenceQueryKind::Lookups,
+        TypeInferenceProfileOrigin::exact(module, call),
+        "infer_flow_call_effect",
+        || {
+            let ModuleInfoKind::Js(info) = module.kind(db) else {
+                return FlowCallEffect::None;
+            };
+            if !info.infer_types {
+                return FlowCallEffect::None;
+            }
+            flow_call_effect(db, module, info, call)
+        },
+    )
+}
+
 /// Attributes the flow queries of a subject to the declaration of the
 /// variable that its path starts at, or to the whole module for a path on
 /// `this` and when collection has no such subject.
@@ -457,6 +494,14 @@ fn infer_flow_assigned_types_cycle_result<'db>(
     _input: FlowSubjectWritesInput<'db>,
 ) -> Option<FlowAssignedTypes<'db>> {
     None
+}
+
+fn infer_flow_call_effect_cycle_result<'db>(
+    _db: &'db dyn ModuleDb,
+    _id: salsa::Id,
+    _input: FlowCallInput<'db>,
+) -> FlowCallEffect<'db> {
+    FlowCallEffect::None
 }
 
 fn infer_flow_switch_exhaustive_cycle_result<'db>(

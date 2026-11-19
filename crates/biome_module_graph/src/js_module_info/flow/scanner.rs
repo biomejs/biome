@@ -42,10 +42,12 @@ declare_node_union! {
 ///
 /// The visitor must report every node of the module in preorder through
 /// [`Self::enter`] and [`Self::leave`]. A root is selected when it directly
-/// contains a condition, a write to a variable or a property (see
-/// [`is_write`]), or a standalone call while the module declares an
-/// assertion, outside its nested roots, has fewer than [`MAX_ROOT_NODES`]
-/// syntax nodes, and uses only syntax the flow builder supports.
+/// contains a condition, a write that [`AnyFlowWriteSource`] describes, or a
+/// statement call that may assert, outside its nested roots, has fewer than
+/// [`MAX_ROOT_NODES`] syntax nodes, and uses only syntax the flow builder
+/// supports. A root selected only by statement calls keeps them. Collection,
+/// which has the semantic model, then builds the root only when one of their
+/// callees can assert.
 ///
 /// The builder treats statements it does not model, such as a class
 /// declaration, as opaque regions, so they do not reject a root. A root is not
@@ -73,17 +75,16 @@ pub(crate) struct FlowRootScanner {
     /// Depth of the outermost type, including type predicates, that encloses
     /// the current node.
     type_region: Option<usize>,
-    /// Depth of the next node when it is the expression of an expression
-    /// statement, or of parentheses that form that expression.
-    statement_expression: Option<usize>,
+    /// The roots that may need flow, in the order in which the walk leaves
+    /// them, so a nested root comes before the roots that enclose it.
     selected: Vec<SelectedRoot>,
-    /// Roots that need flow only if a standalone call in their own code calls
-    /// an assertion.
-    deferred: Vec<SelectedRoot>,
-    /// The bindings of the selected and deferred roots.
+    /// The bindings of the selected roots.
     kept_bindings: Vec<JsIdentifierBinding>,
-    /// Whether the module contains an `asserts` return annotation.
-    has_assertion_signature: bool,
+    /// The statement calls of the open roots that may assert, each root's
+    /// after those of the roots that enclose it.
+    calls: Vec<JsCallExpression>,
+    /// The statement calls of the roots selected only by them.
+    kept_calls: Vec<JsCallExpression>,
 }
 
 /// An execution root that may need flow.
@@ -95,6 +96,9 @@ pub(super) struct SelectedRoot {
     /// a `this` expression, so paths on its `this` may narrow without any
     /// variable of its own.
     pub(super) has_this: bool,
+    /// For a root that only statement calls select, the range of those calls
+    /// in [`FlowRootScanner::kept_calls`].
+    calls: Option<Range<usize>>,
 }
 
 impl FlowRootScanner {
@@ -102,9 +106,6 @@ impl FlowRootScanner {
         self.visited += 1;
         self.depth += 1;
         let kind = node.kind();
-        // An assertion can be declared after its calls, including as a function
-        // overload declaration.
-        self.has_assertion_signature |= kind == JsSyntaxKind::TS_ASSERTS_RETURN_TYPE;
         if self.declaration.is_some() {
             return;
         }
@@ -115,12 +116,12 @@ impl FlowRootScanner {
             self.open.push(OpenRoot {
                 first_node: self.visited - 1,
                 first_binding: self.bindings.len(),
+                first_call: self.calls.len(),
                 depth: self.depth,
                 has_condition: false,
                 has_write: false,
                 has_array_mutation: false,
                 has_empty_array: false,
-                has_call_statement: false,
                 has_this: false,
                 is_unsupported: false,
             });
@@ -148,15 +149,10 @@ impl FlowRootScanner {
         if self.type_region.is_some() {
             return;
         }
-        // The walk enters the expression of an expression statement right after
-        // the statement, because it is the statement's first child node.
-        if self.statement_expression.take() == Some(self.depth) {
-            match kind {
-                JsSyntaxKind::JS_PARENTHESIZED_EXPRESSION => {
-                    self.statement_expression = Some(self.depth + 1);
-                }
-                JsSyntaxKind::JS_CALL_EXPRESSION => root.has_call_statement = true,
-                _ => {}
+        if let Some(call) = JsCallExpression::cast_ref(node) {
+            root.has_array_mutation |= mutated_array(&call).is_some();
+            if is_statement_call(&call) && may_assert(&call) {
+                self.calls.push(call);
             }
         }
         if AnyTsReturnType::can_cast(kind) {
@@ -167,14 +163,10 @@ impl FlowRootScanner {
             root.has_this = true;
         } else if let Some(binding) = JsIdentifierBinding::cast_ref(node) {
             self.bindings.push(binding);
-        } else if kind == JsSyntaxKind::JS_EXPRESSION_STATEMENT {
-            self.statement_expression = Some(self.depth + 1);
         } else if !root.has_condition && is_evaluation_condition(node) {
             root.has_condition = true;
         } else if !root.has_write && is_write(node) {
             root.has_write = true;
-        } else if let Some(call) = JsCallExpression::cast_ref(node) {
-            root.has_array_mutation |= mutated_array(&call).is_some();
         } else if let Some(declarator) = JsVariableDeclarator::cast_ref(node) {
             root.has_empty_array |= declarator.variable_annotation().is_none()
                 && declarator
@@ -205,7 +197,8 @@ impl FlowRootScanner {
             return;
         };
         let has_write = root.has_write || (root.has_array_mutation && root.has_empty_array);
-        if (root.has_condition || has_write || root.has_call_statement)
+        let has_calls = self.calls.len() > root.first_call;
+        if (root.has_condition || has_write || has_calls)
             && !root.is_unsupported
             && self.visited - root.first_node < MAX_ROOT_NODES
             && let Some(node) = AnyJsControlFlowRoot::cast_ref(node)
@@ -213,32 +206,32 @@ impl FlowRootScanner {
             let start = self.kept_bindings.len();
             self.kept_bindings
                 .extend(self.bindings.drain(root.first_binding..));
-            let selected = SelectedRoot {
+            let calls = (!root.has_condition && !has_write).then(|| {
+                let start = self.kept_calls.len();
+                self.kept_calls.extend(self.calls.drain(root.first_call..));
+                start..self.kept_calls.len()
+            });
+            self.selected.push(SelectedRoot {
                 root: node,
                 bindings: start..self.kept_bindings.len(),
                 has_this: root.has_this,
-            };
-            if root.has_condition || has_write {
-                self.selected.push(selected);
-            } else {
-                self.deferred.push(selected);
-            }
+                calls,
+            });
         }
         self.bindings.truncate(root.first_binding);
+        self.calls.truncate(root.first_call);
     }
 
-    /// Returns the selected roots.
-    ///
-    /// A root with a standalone call but no condition of its own is selected
-    /// only when the module contains an `asserts` return annotation. The walk
-    /// can reach that annotation after the root.
+    /// Returns the selected roots, each nested root before the roots that
+    /// enclose it.
     pub(super) fn selected(&self) -> impl Iterator<Item = &SelectedRoot> {
-        let deferred: &[SelectedRoot] = if self.has_assertion_signature {
-            &self.deferred
-        } else {
-            &[]
-        };
-        self.selected.iter().chain(deferred)
+        self.selected.iter()
+    }
+
+    /// Returns the statement calls of `root` that may assert, when only they
+    /// select it, or `None` when a condition or a write of its own code does.
+    pub(super) fn statement_calls(&self, root: &SelectedRoot) -> Option<&[JsCallExpression]> {
+        root.calls.clone().map(|calls| &self.kept_calls[calls])
     }
 
     /// Returns the bindings that the own code of `root` declares, outside
@@ -292,6 +285,60 @@ fn is_evaluation_condition(node: &JsSyntaxNode) -> bool {
     }
 }
 
+/// Returns whether `call` is a statement call, one that TypeScript adds to
+/// the flow: the expression of an expression statement, or an operand of the
+/// comma operator there, through any parentheses around the comma
+/// expression. A call in parentheses is none, as in `(assert(x));`.
+fn is_statement_call(call: &JsCallExpression) -> bool {
+    let mut parent = call.syntax().parent();
+    let mut in_sequence = false;
+    while let Some(node) = parent {
+        match node.kind() {
+            JsSyntaxKind::JS_EXPRESSION_STATEMENT => return true,
+            JsSyntaxKind::JS_SEQUENCE_EXPRESSION => in_sequence = true,
+            JsSyntaxKind::JS_PARENTHESIZED_EXPRESSION if in_sequence => {}
+            _ => return false,
+        }
+        parent = node.parent();
+    }
+    false
+}
+
+/// Returns whether a statement call `call` may call an assertion, as far as
+/// its syntax tells: its callee, in parentheses or not, is an identifier,
+/// `this`, or a member access whose object is one of these or another such
+/// member access, and it passes an argument or reads its callee from an
+/// object, which `asserts this` narrows.
+fn may_assert(call: &JsCallExpression) -> bool {
+    let Ok(callee) = call.callee().map(AnyJsExpression::omit_parentheses) else {
+        return false;
+    };
+    let is_member = matches!(callee, AnyJsExpression::JsStaticMemberExpression(_));
+    let mut expression = callee;
+    for _ in 0..MAX_DEPTH {
+        expression = match expression {
+            AnyJsExpression::JsIdentifierExpression(_) | AnyJsExpression::JsThisExpression(_) => {
+                return is_member
+                    || call
+                        .arguments()
+                        .is_ok_and(|arguments| !arguments.args().is_empty());
+            }
+            AnyJsExpression::JsParenthesizedExpression(parenthesized) => {
+                match parenthesized.expression() {
+                    Ok(expression) => expression,
+                    Err(_) => return false,
+                }
+            }
+            AnyJsExpression::JsStaticMemberExpression(member) => match member.object() {
+                Ok(object) => object,
+                Err(_) => return false,
+            },
+            _ => return false,
+        };
+    }
+    false
+}
+
 /// Returns whether `node` may write a variable or a property at a write
 /// point of the flow graph. That is the case for an [`AnyFlowWriteSource`],
 /// `delete`, the head of a `for...of` loop that assigns a target, and a
@@ -332,6 +379,9 @@ struct OpenRoot {
     /// Index in [`FlowRootScanner::bindings`] of the first binding the root
     /// declares.
     first_binding: usize,
+    /// Index in [`FlowRootScanner::calls`] of the first statement call of
+    /// the root's own code.
+    first_call: usize,
     depth: usize,
     has_condition: bool,
     /// Whether the root's own code writes a variable or a property, as
@@ -345,9 +395,6 @@ struct OpenRoot {
     /// annotation that an empty array literal initializes, whose type may
     /// evolve with its writes.
     has_empty_array: bool,
-    /// Whether the root's own code has an expression statement that is a call,
-    /// possibly in parentheses.
-    has_call_statement: bool,
     /// Whether the root's own code reads `this`.
     has_this: bool,
     is_unsupported: bool,
@@ -385,19 +432,43 @@ mod tests {
     use biome_languages::JsFileSource;
     use biome_rowan::WalkEvent;
 
-    /// Returns the texts of the roots selected in the TypeScript `source`, in
-    /// selection order.
+    /// Returns the texts of the roots that a condition or a write selects in
+    /// the TypeScript `source`, in selection order.
     fn selected(source: &str) -> Vec<String> {
         let parsed = parse(source, JsFileSource::ts(), JsParserOptions::default());
         assert!(!parsed.has_errors(), "{source}");
         selected_in(&parsed.tree())
     }
 
-    /// Returns the texts of the roots selected in `root`, in selection order.
+    /// Returns the texts of the roots that a condition or a write selects in
+    /// `root`, in selection order.
     fn selected_in(root: &AnyJsRoot) -> Vec<String> {
-        scan(root)
+        let scanner = scan(root);
+        scanner
             .selected()
+            .filter(|selected| scanner.statement_calls(selected).is_none())
             .map(|selected| selected.root.syntax().text_trimmed().to_string())
+            .collect()
+    }
+
+    /// Returns the texts of the roots that only statement calls select in the
+    /// TypeScript `source`, each with the texts of those calls.
+    fn selected_by_calls(source: &str) -> Vec<(String, Vec<String>)> {
+        let parsed = parse(source, JsFileSource::ts(), JsParserOptions::default());
+        assert!(!parsed.has_errors(), "{source}");
+        let scanner = scan(&parsed.tree());
+        scanner
+            .selected()
+            .filter_map(|selected| {
+                let calls = scanner.statement_calls(selected)?;
+                Some((
+                    selected.root.syntax().text_trimmed().to_string(),
+                    calls
+                        .iter()
+                        .map(|call| call.syntax().text_trimmed().to_string())
+                        .collect(),
+                ))
+            })
             .collect()
     }
 
@@ -567,24 +638,44 @@ mod tests {
     }
 
     #[test]
-    fn standalone_calls_need_an_assertion_signature_in_the_module() {
-        const CALLS: &str = "function f(x) { check(x); } function g(x) { ((check)(x)); }";
-        assert!(selected(CALLS).is_empty());
-        // The signature can follow the calls that use it.
-        let source = format!("{CALLS} declare function check(input: unknown): asserts input;");
-        assert_eq!(
-            selected(&source),
-            [
-                "function f(x) { check(x); }",
-                "function g(x) { ((check)(x)); }"
-            ]
-        );
-        for body in ["void check(x);", "const y = check(x);", "(0, check(x));"] {
-            let source = format!(
-                "function f(x) {{ {body} }} declare function check(input: unknown): asserts input;"
+    fn statement_calls_that_may_assert_select_their_root() {
+        for (body, calls) in [
+            ("check(x);", &["check(x)"][..]),
+            ("(check)(x);", &["(check)(x)"]),
+            ("a.b.check(x);", &["a.b.check(x)"]),
+            ("this.check();", &["this.check()"]),
+            ("(0, check(x));", &["check(x)"]),
+            ("check(x), other(x);", &["check(x)", "other(x)"]),
+            ("((check(x), 0));", &["check(x)"]),
+        ] {
+            let source = format!("function f(x) {{ {body} }}");
+            assert_eq!(
+                selected_by_calls(&source),
+                [(
+                    source.clone(),
+                    calls.iter().map(|call| (*call).to_owned()).collect()
+                )],
+                "{body}"
             );
-            assert!(selected(&source).is_empty(), "{body}");
         }
+        // A call in parentheses, a call that is no statement, a callee that
+        // is no dotted name, and a call of a name without arguments can't
+        // assert anything.
+        for body in [
+            "(check(x));",
+            "((check)(x));",
+            "void check(x);",
+            "const y = check(x);",
+            "(0, (check(x)));",
+            "a[0](x);",
+            "get()(x);",
+            "check();",
+        ] {
+            let source = format!("function f(x) {{ {body} }}");
+            assert!(selected_by_calls(&source).is_empty(), "{body}");
+        }
+        // A root that a condition selects keeps no calls of its own.
+        assert!(selected_by_calls("function f(x) { check(x); if (x) {} }").is_empty());
     }
 
     #[test]

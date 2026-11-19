@@ -21,8 +21,8 @@ mod resolver;
 mod widening;
 
 pub(in crate::db) use flow::{
-    flow_assigned_types, flow_binding_baseline, flow_expression_type, flow_subject_states,
-    flow_subject_type, flow_switch_exhaustive,
+    flow_assigned_types, flow_binding_baseline, flow_call_effect, flow_expression_type,
+    flow_subject_states, flow_subject_type, flow_switch_exhaustive,
 };
 pub(in crate::db) use imports::{
     ExportOriginResult, collect_namespace_export_names, find_export_origin, module_for_import,

@@ -88,6 +88,65 @@ pub(crate) struct FlowSubjectRootInput<'db> {
     /// values that the writes assign.
     #[returns(copy)]
     pub evolving: FlowEvolving,
+    /// The effects of the root's call points that narrow the subject,
+    /// resolved by the context that reads the subject. `None` when none of
+    /// them narrows, so that other subjects keep sharing their solves.
+    #[returns(copy)]
+    pub calls: Option<FlowCallEffects<'db>>,
+}
+
+/// The effects of the call points of one root that narrow a subject, each
+/// with its index in the root's collected calls, sorted by index.
+#[salsa::interned]
+#[derive(Debug)]
+pub(crate) struct FlowCallEffects<'db> {
+    #[returns(ref)]
+    pub effects: Box<[(u32, FlowCallEffect<'db>)]>,
+}
+
+/// Identifies a call point of a module by the range of its call expression,
+/// whose effect [`super::infer_flow_call_effect`] resolves.
+#[salsa::interned]
+#[derive(Debug)]
+pub(crate) struct FlowCallInput<'db> {
+    #[returns(copy)]
+    pub module: ModuleInfo,
+    #[returns(copy)]
+    pub call: TextRange,
+}
+
+/// How a call point narrows, which the signature of its callee decides.
+#[derive(Clone, Copy, Debug, Default, Eq, Hash, PartialEq, salsa::SalsaValue)]
+pub(crate) enum FlowCallEffect<'db> {
+    /// The call narrows nothing.
+    #[default]
+    None,
+    /// A call in a condition whose signature returns a type predicate, such
+    /// as `value is T`. The call narrows the operand that `parameter` names
+    /// to `target` where it is truthy, and removes `target` from the operand
+    /// where it is falsy.
+    Predicate {
+        parameter: FlowCallParameter,
+        target: InferredTypeData<'db>,
+    },
+    /// A statement call whose signature asserts, such as `asserts value is T`,
+    /// or `asserts value` without a `target`. The call narrows the operand
+    /// that `parameter` names once it returns.
+    Assertion {
+        parameter: FlowCallParameter,
+        target: Option<InferredTypeData<'db>>,
+    },
+}
+
+/// The operand of a call that its signature's type predicate or assertion
+/// names.
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, salsa::SalsaValue)]
+pub(crate) enum FlowCallParameter {
+    /// The argument at this position, as `value` in `value is T`.
+    Argument(u32),
+    /// The object that the callee reads its function from, as `this` in
+    /// `this is T` names it.
+    Receiver,
 }
 
 /// The types of the values that the writes of one subject assign, in the

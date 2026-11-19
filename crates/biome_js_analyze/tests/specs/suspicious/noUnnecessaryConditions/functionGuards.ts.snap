@@ -91,6 +91,37 @@ function aliasTarget(value: string | null) {
 	}
 }
 
+const alias = isString;
+const owner = {
+	isString(input: unknown): input is string {
+		return typeof input === "string";
+	},
+};
+
+function annotatedParameterGuard(value: string | null, guard: (input: unknown) => input is string) {
+	if (guard(value)) {
+		return value?.length;
+	}
+}
+
+function aliasedGuard(value: string | null) {
+	if (alias(value)) return value?.length;
+}
+
+function methodGuard(value: string | null) {
+	if (owner.isString(value)) return value?.length;
+}
+
+function optionalGuard(value: string | null, guard: ((input: unknown) => input is string) | undefined) {
+	if (guard?.(value)) {
+		return value?.length;
+	}
+}
+
+function libraryGuard(value: string[] | null) {
+	if (Array.isArray(value)) return value?.length;
+}
+
 ```
 
 # Diagnostics
@@ -420,6 +451,130 @@ functionGuards.ts:84:10 lint/suspicious/noUnnecessaryConditions ━━━━━�
        │ 		            ^^
     85 │ 	}
     86 │ }
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+functionGuards.ts:97:10 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    95 │ function annotatedParameterGuard(value: string | null, guard: (input: unknown) => input is string) {
+    96 │ 	if (guard(value)) {
+  > 97 │ 		return value?.length;
+       │ 		       ^^^^^
+    98 │ 	}
+    99 │ }
+  
+  i Replace ?. with ..
+  
+    95 │ function annotatedParameterGuard(value: string | null, guard: (input: unknown) => input is string) {
+    96 │ 	if (guard(value)) {
+  > 97 │ 		return value?.length;
+       │ 		            ^^
+    98 │ 	}
+    99 │ }
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+functionGuards.ts:102:27 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    101 │ function aliasedGuard(value: string | null) {
+  > 102 │ 	if (alias(value)) return value?.length;
+        │ 	                         ^^^^^
+    103 │ }
+    104 │ 
+  
+  i Replace ?. with ..
+  
+    101 │ function aliasedGuard(value: string | null) {
+  > 102 │ 	if (alias(value)) return value?.length;
+        │ 	                              ^^
+    103 │ }
+    104 │ 
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+functionGuards.ts:106:36 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    105 │ function methodGuard(value: string | null) {
+  > 106 │ 	if (owner.isString(value)) return value?.length;
+        │ 	                                  ^^^^^
+    107 │ }
+    108 │ 
+  
+  i Replace ?. with ..
+  
+    105 │ function methodGuard(value: string | null) {
+  > 106 │ 	if (owner.isString(value)) return value?.length;
+        │ 	                                       ^^
+    107 │ }
+    108 │ 
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+functionGuards.ts:111:10 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    109 │ function optionalGuard(value: string | null, guard: ((input: unknown) => input is string) | undefined) {
+    110 │ 	if (guard?.(value)) {
+  > 111 │ 		return value?.length;
+        │ 		       ^^^^^
+    112 │ 	}
+    113 │ }
+  
+  i Replace ?. with ..
+  
+    109 │ function optionalGuard(value: string | null, guard: ((input: unknown) => input is string) | undefined) {
+    110 │ 	if (guard?.(value)) {
+  > 111 │ 		return value?.length;
+        │ 		            ^^
+    112 │ 	}
+    113 │ }
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+functionGuards.ts:116:35 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    115 │ function libraryGuard(value: string[] | null) {
+  > 116 │ 	if (Array.isArray(value)) return value?.length;
+        │ 	                                 ^^^^^
+    117 │ }
+    118 │ 
+  
+  i Replace ?. with ..
+  
+    115 │ function libraryGuard(value: string[] | null) {
+  > 116 │ 	if (Array.isArray(value)) return value?.length;
+        │ 	                                      ^^
+    117 │ }
+    118 │ 
   
   i The receiver is guaranteed to be non-nullish.
   

@@ -48,7 +48,6 @@ function nested(value: string | null, flag: boolean) {
 	consume(assertString(value), value?.length);
 	flag && assertString(value);
 	flag ? assertString(value) : undefined;
-	(assertString(value), value?.length);
 	void assertString(value);
 	return value?.length;
 }
@@ -69,8 +68,8 @@ function shadowedSubject(value: string | null) {
 	}
 }
 
-function shadowedCallee(value: string | null, assertString: (input: unknown) => asserts input is string) {
-	assertString(value);
+function parenthesizedStatement(value: string | null) {
+	(assertString(value));
 	return value?.length;
 }
 
