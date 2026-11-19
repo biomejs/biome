@@ -1,7 +1,7 @@
 // should not generate diagnostics
 // A falsy primitive can have each object type below, so a falsy test keeps
-// it, and the nested tests are not constant. TypeScript keeps only `{}` and
-// generics, but `""` has `length` and `0` has `valueOf`.
+// it, and the nested tests are not constant. TypeScript keeps only `{}`, but
+// `""` has `length` and `0` has `valueOf`.
 
 interface Sized {
 	length: number;
@@ -37,13 +37,6 @@ function emptyObject(value: {} | undefined) {
 }
 
 function classInstance(value: Measured | undefined) {
-	if (!value) {
-		if (value) {
-		}
-	}
-}
-
-function generic<T extends { id: number }>(value: T | undefined) {
 	if (!value) {
 		if (value) {
 		}

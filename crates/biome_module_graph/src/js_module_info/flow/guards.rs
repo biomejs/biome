@@ -251,7 +251,9 @@ pub(crate) enum FlowTest {
     },
     /// The `in` operator, as in `"a" in value`. The range is the key, a string
     /// or number literal that spells the property's name, such as `"a"` or `0`
-    /// but not `"\u0061"` or `0x0`. See [`literal_key`].
+    /// but not `"\u0061"` or `0x0`, or a `const` that holds one, as `k` in
+    /// `const k = "a"`. Inference narrows by the key's literal type. See
+    /// [`literal_key`].
     In(TextRange),
     /// The `instanceof` operator, as in `value instanceof Date`, whose right
     /// operand, the constructor, is the expression at this range.
@@ -1334,7 +1336,11 @@ pub(super) fn decompose_assignment_target(
 pub(super) enum SwitchKind {
     /// The discriminant has the shape of a subject, or is a call in an
     /// optional chain, as in `switch (x)`, `switch (s.kind)`, or
-    /// `switch (o?.f())`. A case narrows as `discriminant === test` does.
+    /// `switch (o?.f())`, also behind non-null assertions, as in
+    /// `switch (x!)`. A case narrows as `discriminant === test` does. Behind
+    /// a non-null assertion, it narrows only the operand itself, not the
+    /// object that holds it, the pattern that declares it, or the receivers
+    /// of its optional chain, as in TypeScript.
     Value,
     /// The discriminant is `typeof` of such an operand, and every case test
     /// is a string literal or a template literal without a tag and without
@@ -1348,8 +1354,8 @@ pub(super) enum SwitchKind {
     /// The discriminant is the literal `true` itself, without parentheses. A
     /// case narrows as a condition does when it is truthy.
     True,
-    /// Any other discriminant, such as `x!`, `(true)`, or `f()`, whose cases
-    /// narrow nothing.
+    /// Any other discriminant, such as `(true)`, `f()`, or `typeof x!`, whose
+    /// cases narrow nothing.
     Opaque,
 }
 
@@ -1397,10 +1403,11 @@ impl SwitchKind {
                 Self::Opaque
             };
         }
-        if has_operand_shape(&discriminant) == Some(true) {
-            Self::Value
-        } else {
-            Self::Opaque
+        match omit_non_null_assertions(discriminant, &mut remaining) {
+            Some((discriminant, _)) if has_operand_shape(&discriminant) == Some(true) => {
+                Self::Value
+            }
+            _ => Self::Opaque,
         }
     }
 }
@@ -1419,8 +1426,9 @@ fn typeof_operand(expression: &AnyJsExpression, remaining: &mut usize) -> Option
 
 /// Returns the expression whose type decides whether a `switch` statement
 /// of `kind` with the discriminant `discriminant` is exhaustive, without
-/// parentheses: the discriminant of a [`SwitchKind::Value`] statement, or the
-/// operand of a [`SwitchKind::Typeof`] one.
+/// parentheses: the discriminant of a [`SwitchKind::Value`] statement,
+/// without non-null assertions, or the operand of a [`SwitchKind::Typeof`]
+/// one.
 ///
 /// Returns `None` for other kinds, and for a `typeof` discriminant in
 /// parentheses. TypeScript checks such a discriminant as a string value
@@ -1432,7 +1440,8 @@ pub(super) fn exhaustive_operand(
 ) -> Option<AnyJsExpression> {
     let mut remaining = MAX_CONDITION_STEPS;
     match kind {
-        SwitchKind::Value => omit_parentheses(discriminant.clone(), &mut remaining),
+        SwitchKind::Value => omit_non_null_assertions(discriminant.clone(), &mut remaining)
+            .map(|(operand, _)| operand),
         SwitchKind::Typeof => typeof_operand(discriminant, &mut remaining),
         SwitchKind::True | SwitchKind::Opaque => None,
     }
@@ -1461,8 +1470,8 @@ pub(super) fn is_unit_case(
         return false;
     }
     let mut remaining = MAX_CONDITION_STEPS;
-    let (Some(discriminant), Some(test)) = (
-        omit_parentheses(discriminant.clone(), &mut remaining),
+    let (Some((discriminant, _)), Some(test)) = (
+        omit_non_null_assertions(discriminant.clone(), &mut remaining),
         omit_parentheses(test.clone(), &mut remaining),
     ) else {
         return false;
@@ -1475,7 +1484,8 @@ pub(super) fn is_unit_case(
                 | SyntaxGuard::Undefined { .. }
                 | SyntaxGuard::EnumMember { .. }
                 | SyntaxGuard::Imported { .. }
-                | SyntaxGuard::Typeof(_),
+                | SyntaxGuard::Typeof(_)
+                | SyntaxGuard::TypeofOther,
             ..
         })
     )
@@ -1538,19 +1548,24 @@ pub(super) fn decompose_switch_case(
         }
         SwitchKind::Value | SwitchKind::Typeof => {
             let mut decomposer = Decomposer::new(model, functions, subjects, guards);
-            decomposer.shape_guards = kind == SwitchKind::Value;
-            let step = omit_parentheses(discriminant.clone(), &mut decomposer.remaining)
-                .zip(omit_parentheses(test.clone(), &mut decomposer.remaining))
-                .and_then(|(discriminant, test)| {
-                    comparison_step(
-                        &discriminant,
-                        &test,
-                        true,
-                        matched,
-                        model,
-                        &mut decomposer.remaining,
-                    )
-                });
+            let operands =
+                omit_non_null_assertions(discriminant.clone(), &mut decomposer.remaining)
+                    .zip(omit_parentheses(test.clone(), &mut decomposer.remaining));
+            // Behind `!`, a case narrows only the operand itself.
+            let asserted = operands
+                .as_ref()
+                .is_some_and(|((_, asserted), _)| *asserted);
+            decomposer.shape_guards = kind == SwitchKind::Value && !asserted;
+            let step = operands.and_then(|((discriminant, _), test)| {
+                comparison_step(
+                    &discriminant,
+                    &test,
+                    true,
+                    matched,
+                    model,
+                    &mut decomposer.remaining,
+                )
+            });
             let guard = match step {
                 Some(ConditionStep::Unsupported) => return None,
                 Some(ConditionStep::Guard {
@@ -1563,7 +1578,7 @@ pub(super) fn decompose_switch_case(
                         operand,
                         guard,
                         positive,
-                        receivers: receivers && matched,
+                        receivers: receivers && matched && !asserted,
                     },
                     outcome,
                     0,
@@ -1984,6 +1999,9 @@ impl<'a, 'raw> Decomposer<'a, 'raw> {
         positive: bool,
         receivers: bool,
     ) -> FlowGuard {
+        if matches!(guard, SyntaxGuard::TypeofOther) {
+            return self.typeof_other_test(operand, positive, receivers);
+        }
         // The receivers of a chain whose end equals a value typed by its
         // declaration are not nullish only when that type excludes
         // `undefined`, which inference decides.
@@ -1995,6 +2013,7 @@ impl<'a, 'raw> Decomposer<'a, 'raw> {
             SyntaxGuard::Truthy => Some(FlowTest::Truthy),
             SyntaxGuard::Nullish => Some(FlowTest::Nullish),
             SyntaxGuard::Typeof(kind) => Some(FlowTest::Typeof(kind)),
+            SyntaxGuard::TypeofOther => None,
             SyntaxGuard::Null => Some(FlowTest::Null),
             SyntaxGuard::Literal { value, strict } => Some(FlowTest::Literal { value, strict }),
             SyntaxGuard::Undefined { strict } => Some(FlowTest::Undefined { strict }),
@@ -2089,6 +2108,61 @@ impl<'a, 'raw> Decomposer<'a, 'raw> {
             self.receiver_tests_by(chain, guard, receiver_test)
         } else {
             guard
+        }
+    }
+
+    /// Returns the guard for a comparison of `typeof operand` with a string
+    /// that names no kind of value, where the two are equal when `positive`
+    /// is true, testing the receivers of the optional chain around `operand`
+    /// when `receivers` holds.
+    ///
+    /// As in TypeScript, the comparison holds only for an object type, which
+    /// can be a host object whose `typeof` is any string, so the guard keeps
+    /// the members that `typeof` can find an object, other than `null`, or a
+    /// function. TypeScript also removes the object types where the
+    /// comparison fails, although an ordinary object gives `"object"`, so
+    /// that guard keeps the incoming type.
+    fn typeof_other_test(
+        &mut self,
+        operand: &AnyJsExpression,
+        positive: bool,
+        receivers: bool,
+    ) -> FlowGuard {
+        if !positive {
+            return FlowGuard::Keep;
+        }
+        let object = self.test(
+            operand,
+            SyntaxGuard::Typeof(TypeofKind::Object),
+            true,
+            false,
+        );
+        let left = self.push(object);
+        let not_null = self.test(operand, SyntaxGuard::Null, false, false);
+        let right = self.push(not_null);
+        let left = self.push(FlowGuard::Both {
+            left,
+            right,
+            sequential: true,
+        });
+        let function = self.test(
+            operand,
+            SyntaxGuard::Typeof(TypeofKind::Function),
+            true,
+            false,
+        );
+        let right = self.push(function);
+        let guard = FlowGuard::Both {
+            left,
+            right,
+            sequential: false,
+        };
+        if !receivers {
+            return guard;
+        }
+        match chain_receivers(operand, &mut self.remaining) {
+            Some(chain) => self.receiver_tests_by(chain, guard, FlowTest::Nullish),
+            None => FlowGuard::Keep,
         }
     }
 
@@ -2826,6 +2900,9 @@ enum SyntaxGuard {
     Truthy,
     Nullish,
     Typeof(TypeofKind),
+    /// A comparison of `typeof` with a string that names no kind of value,
+    /// as `typeof x === "strin"`.
+    TypeofOther,
     /// Strict equality with `null`.
     Null,
     /// Equality with the value at `value`, a [`UnitValue::Literal`].
@@ -2859,7 +2936,8 @@ enum SyntaxGuard {
     /// A call to a type-guard function, with the test it applies, a
     /// [`FlowTest::Predicate`].
     Predicate(FlowTest),
-    /// The `in` operator whose key is the literal at this range.
+    /// The `in` operator whose key, at this range, is a literal or a `const`
+    /// that holds one ([`is_literal_key`]).
     In(TextRange),
     /// The `instanceof` operator whose right operand is at this range.
     Instanceof(TextRange),
@@ -3023,7 +3101,7 @@ fn condition_step(
                 }
                 AnyJsInProperty::AnyJsExpression(key) => {
                     let key = omit_parentheses(key, remaining)?;
-                    if literal_key(&key).is_none() {
+                    if !is_literal_key(key.clone(), model, remaining) {
                         return Some(ConditionStep::Unsupported);
                     }
                     SyntaxGuard::In(key.range())
@@ -3381,21 +3459,22 @@ fn comparison_step(
                 _ => return Some(ConditionStep::Unsupported),
             };
             let kind = match value.text() {
-                "undefined" => TypeofKind::Undefined,
-                "object" => TypeofKind::Object,
-                "boolean" => TypeofKind::Boolean,
-                "number" => TypeofKind::Number,
-                "bigint" => TypeofKind::BigInt,
-                "string" => TypeofKind::String,
-                "symbol" => TypeofKind::Symbol,
-                "function" => TypeofKind::Function,
-                _ => return Some(ConditionStep::Unsupported),
+                "undefined" => Some(TypeofKind::Undefined),
+                "object" => Some(TypeofKind::Object),
+                "boolean" => Some(TypeofKind::Boolean),
+                "number" => Some(TypeofKind::Number),
+                "bigint" => Some(TypeofKind::BigInt),
+                "string" => Some(TypeofKind::String),
+                "symbol" => Some(TypeofKind::Symbol),
+                "function" => Some(TypeofKind::Function),
+                _ => None,
             };
             let argument = omit_parentheses(argument, remaining)?;
             if !has_operand_shape(&argument)? {
                 return Some(ConditionStep::Unsupported);
             }
-            (argument, SyntaxGuard::Typeof(kind))
+            let guard = kind.map_or(SyntaxGuard::TypeofOther, SyntaxGuard::Typeof);
+            (argument, guard)
         }
         _ => return Some(ConditionStep::Unsupported),
     };
@@ -3412,6 +3491,7 @@ fn comparison_step(
         }
         SyntaxGuard::Nullish | SyntaxGuard::Undefined { .. } => !positive,
         SyntaxGuard::Typeof(kind) => positive == (*kind != TypeofKind::Undefined),
+        SyntaxGuard::TypeofOther => positive,
         SyntaxGuard::Truthy
         | SyntaxGuard::Imported { .. }
         | SyntaxGuard::Compared { .. }
@@ -3605,6 +3685,32 @@ pub(crate) fn unit_value(
         }
     }
     None
+}
+
+/// Returns whether `key`, without parentheses, is a literal that spells a
+/// property's name ([`literal_key`]), or a `const` that holds one, following
+/// at most [`MAX_HELD_VALUES`] `const` declarations, as in
+/// `const k = "a"; k in x`. Inference narrows by the key's type, which is the
+/// literal's type for such a `const`, as in TypeScript.
+fn is_literal_key(mut key: AnyJsExpression, model: &SemanticModel, remaining: &mut usize) -> bool {
+    for _ in 0..MAX_HELD_VALUES {
+        let AnyJsExpression::JsIdentifierExpression(identifier) = &key else {
+            return literal_key(&key).is_some();
+        };
+        let Some(HeldValue::Initializer(initializer)) = identifier
+            .name()
+            .ok()
+            .and_then(|reference| model.binding(&reference))
+            .and_then(|binding| held_value(&binding))
+        else {
+            return false;
+        };
+        let Some(initializer) = omit_parentheses(initializer, remaining) else {
+            return false;
+        };
+        key = initializer;
+    }
+    false
 }
 
 /// Returns the unit value of `expression` when it reads a member of an enum
@@ -4186,6 +4292,23 @@ fn omit_parentheses(
     (!kind.is_bogus() && !kind.is_metavariable()).then_some(expression)
 }
 
+/// Returns `expression` without parentheses and non-null assertions, and
+/// whether it had an assertion, as `x` and true for `(x!)!`.
+fn omit_non_null_assertions(
+    expression: AnyJsExpression,
+    remaining: &mut usize,
+) -> Option<(AnyJsExpression, bool)> {
+    let mut expression = omit_parentheses(expression, remaining)?;
+    let mut asserted = false;
+    while let AnyJsExpression::TsNonNullAssertionExpression(assertion) = expression {
+        *remaining = remaining.checked_sub(1)?;
+        assertion.excl_token().ok()?;
+        expression = omit_parentheses(assertion.expression().ok()?, remaining)?;
+        asserted = true;
+    }
+    Some((expression, asserted))
+}
+
 #[cfg(test)]
 mod tests {
     use super::super::{FlowSubject, PropertyKey};
@@ -4277,7 +4400,10 @@ mod tests {
             ("switch (true) { case x: }", SwitchKind::True),
             ("switch ((true)) { case x: }", SwitchKind::Opaque),
             ("switch (false) { case x: }", SwitchKind::Opaque),
-            ("switch (x!) { case 1: }", SwitchKind::Opaque),
+            ("switch (x!) { case 1: }", SwitchKind::Value),
+            ("switch ((x)!!) { case 1: }", SwitchKind::Value),
+            ("switch (typeof x!) { case \"a\": }", SwitchKind::Opaque),
+            ("switch ((typeof x)!) { case \"a\": }", SwitchKind::Opaque),
             ("switch (f()) { case 1: }", SwitchKind::Opaque),
         ] {
             assert_eq!(switch_kind(source), kind, "{source}");
@@ -5189,6 +5315,29 @@ mod tests {
     }
 
     #[test]
+    fn in_with_a_const_that_holds_a_literal_name_tests_its_object() {
+        for program in [
+            r#"function f(value) { const k = "a"; if (k in value) {} }"#,
+            "const j = 0; function f(value) { const k = (j); if (k in value) {} }",
+        ] {
+            let decomposed = decomposed_last(program, FlowOutcome::Truthy);
+            assert_eq!(parent_names(&decomposed), ["value"], "{program}");
+            assert!(
+                matches!(
+                    decomposed.guards[decomposed.condition.guard],
+                    FlowGuard::Test {
+                        test: FlowTest::In(_),
+                        positive: true,
+                        ..
+                    }
+                ),
+                "{program}: {:?}",
+                decomposed.guards
+            );
+        }
+    }
+
+    #[test]
     fn in_with_a_key_that_is_not_a_literal_name_tests_nothing() {
         for program in [
             r#"function f(value) { if (`a${b}` in value) {} }"#,
@@ -5196,7 +5345,9 @@ mod tests {
             "function f(value) { if (0x0 in value) {} }",
             "function f(value) { if (1.0 in value) {} }",
             "function f(value) { if (-0 in value) {} }",
-            r#"function f(value) { const k = "a"; if (k in value) {} }"#,
+            r#"function f(value) { let k = "a"; if (k in value) {} }"#,
+            r#"function f(value) { const k: "a" = "a"; if (k in value) {} }"#,
+            r#"function f(value) { const k = f(); if (k in value) {} }"#,
             r#"function f(value) { if ("a" in value!) {} }"#,
             r#"function f(value) { if ("a" in value.f()) {} }"#,
             // No class around the test declares `#q`.

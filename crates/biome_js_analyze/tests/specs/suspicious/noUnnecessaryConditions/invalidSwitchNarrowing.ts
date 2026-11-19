@@ -18,10 +18,24 @@ function caseOfLiteral(value: string | null) {
 	}
 }
 
+function caseOfNonNullAssertion(value: string | null) {
+	switch (value!) {
+		case "a":
+			return value?.length;
+	}
+}
+
 function caseOfTypeof(value: string | number | null) {
 	switch (typeof value) {
 		case "string":
 			return value?.length;
+	}
+}
+
+function caseOfStringThatNamesNoKind(value: { size: number } | null) {
+	switch (typeof value) {
+		case "strin":
+			return value?.size;
 	}
 }
 
@@ -41,4 +55,31 @@ function afterExhaustiveSwitch(kind: "a" | "b", label: string | null) {
 			if (label === null) return;
 	}
 	return label?.length;
+}
+
+function afterExhaustiveSwitchOnTypeParameter<K extends "a" | "b">(
+	kind: K,
+	label: string | null,
+) {
+	switch (kind) {
+		case "a":
+			if (label === null) return;
+			break;
+		case "b":
+			if (label === null) return;
+	}
+	return label?.length;
+}
+
+type Pending = { state: "idle" | "loading"; data: null };
+type Done = { state: "done"; data: string };
+
+function defaultAfterUnionDiscriminant(result: Pending | Done) {
+	switch (result.state) {
+		case "idle":
+		case "loading":
+			break;
+		default:
+			return result.data?.length;
+	}
 }

@@ -1,6 +1,7 @@
 // should generate diagnostics
 // No primitive and no function has the member `id`, so a falsy test and the
-// tests of `typeof` below remove `Config` and `Point`.
+// tests of `typeof` below remove `Config` and `Point`, and a falsy test removes
+// a type parameter whose constraint is `Config`.
 
 interface Config {
 	id: number;
@@ -33,6 +34,13 @@ function typeofUndefined(value: Config | undefined) {
 
 function typeofFunction(value: Config | (() => void)) {
 	if (typeof value === "function") {
+		if (value) {
+		}
+	}
+}
+
+function falsyTypeParameter<T extends Config>(value: T | undefined) {
+	if (!value) {
 		if (value) {
 		}
 	}

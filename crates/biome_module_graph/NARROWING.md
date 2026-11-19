@@ -86,6 +86,7 @@ right operand of a logical assignment. Biome splits a condition through `!`,
 | `instanceof` | `x: Date \| string; if (x instanceof Date) x` | `Date` |
 | `x.constructor === C` | `class K1 { k1 = 1 }; class K2 { k2 = 2 }; x: K1 \| K2; if (x.constructor === K1) x` | `K1` |
 | `in` | `interface A { a: 1 }; interface B { b: 2 }; x: A \| B; if ("a" in x) x` | `A` |
+| `in` with a `const` key | `interface A { a: 1 }; interface B { b: 2 }; x: A \| B; const k = "a"; if (k in x) x` | `A` |
 | `#p in x` | `class P { #p = 1; m(x: P \| Date) { if (#p in x) x } }` | `P` |
 | A type-guard function | `x: Foo \| string; if (isFoo(x)) {} else x` | `string` |
 | A generic type-guard function | `isNonNull<T>(v: T \| null): v is T; x: string \| null; if (isNonNull(x)) x` | `string` |
@@ -119,18 +120,28 @@ These results match TypeScript's and can surprise a reader.
 | A type-guard function with an unrelated target | `x: Bar; if (isFoo(x)) x` | `Bar & Foo` |
 | A type-guard function for `{}` on `unknown` | `isObj(v: unknown): v is {}; x: unknown; if (isObj(x)) {} else x` | `null \| undefined` |
 | `typeof` that replaces an object type | `interface Len { length: number }; x: number \| Len; if (typeof x === "string") x` | `string` |
+| `typeof` with a string that names no kind of value | `x: string \| Foo; if (typeof x === "strin") x` | `Foo` |
 | `any` with `typeof` | `x: any; if (typeof x === "string") x` | `string` |
 | `any` with other checks | `x: any; if (x === "a") x` | `any` |
 | A property of `any` | `x: any; if (typeof x.v === "string") x.v` | `any` |
 | `any` from inference | `const y = JSON.parse(t); if (typeof y === "string") y` | `string` |
 | Truthiness of a type parameter | `x: T; if (x) x` | `T & {}` |
+| Falsiness of a type parameter whose constraint has no falsy value | `x: T \| undefined, with T extends Foo; if (!x) x` | `undefined` |
 | `typeof` on a type parameter | `x: T; if (typeof x === "string") x` | `T & string` |
 | `switch` on a type parameter | `x: T; switch (x) { case null: case undefined: break; default: x }` | `T` |
+| `switch` on a type parameter whose constraint a case covers | `x: T, with T extends null; switch (x) { case null: break; default: x }` | Unknown |
+| An exhaustive `switch` on a type parameter | `x: T, with T extends "a" \| "b"; y: string \| null; switch (x) { case "a": case "b": if (y === null) return; } y` | `string` |
 | `#s in x` on a class | `class P { static #s = 2; static s1(x: typeof P \| Date) { if (#s in x) {} else x } }` | `Date \| typeof P` |
 | A discriminant through an optional chain | `x: Circle \| Square \| null; if (x?.kind !== "c") x` | `Square \| null` |
 
 Biome writes `{ b: 1 } & Record<"a", unknown>` as `{ b: 1; a: unknown }`, and
 `T & {}` where TypeScript writes `NonNullable<T>`.
+
+Where no case of a `switch` matches, a type parameter keeps its type unless
+its constraint is a single type that the cases cover, as `null` is: then the
+read is Unknown, where TypeScript gives `never`. A constraint that is a union,
+as `"a" | "b"` or `boolean`, keeps the type parameter there, but the `switch`
+is exhaustive when its cases cover every member of the constraint.
 
 ### Statements and calls
 
@@ -139,7 +150,9 @@ Biome writes `{ b: 1 } & Record<"a", unknown>` as `{ b: 1; a: unknown }`, and
 | `return`, `throw`, `break`, and `continue` | `x: string \| null; if (x === null) return; x` | `string` |
 | `for...in` | `o: Circle \| undefined; for (const k in o) { o }` | `Circle` |
 | A `switch` case | `switch (s.kind) { case "c": s }` | `Circle` |
+| A `switch` case on `x!` | `x: "a" \| "b" \| "c"; switch (x!) { case "a": x }` | `"a"` |
 | `default` | `switch (s.kind) { case "c": break; default: s }` | `Square` |
+| `default` after cases that cover a discriminant together | `interface AB { kind: "a" \| "b"; x: 1 }; interface C { kind: "c"; y: 2 }; s: AB \| C; switch (s.kind) { case "a": case "b": break; default: s }` | `C` |
 | `switch (true)` | `x: string \| number \| null; switch (true) { case typeof x === "string": break; case x === null: break; default: x }` | `number` |
 | An exhaustive `switch` | `x: boolean \| null \| undefined; y: string \| null; switch (x) { case true: case false: case null: case undefined: if (y === null) return; } y` | `string` |
 | An assignment | `x: string \| number; [x] = ["a"]; x` | `string` |
@@ -176,6 +189,7 @@ precision, Biome uses it instead and differs from TypeScript.
 | The falsy part of `number` in `&&` | `n: number; t: string; n && t` | `string \| 0` | `number \| string` | `-0` and `NaN` are falsy too, so rules don't take the falsy result as `0`. |
 | Falsiness and object types | `interface Len { length: number }; x: Len \| undefined; if (!x) x` | `undefined` | `Len \| undefined` | `""` is a falsy `Len`, so `noUnnecessaryConditions` doesn't call a check of `x` there unnecessary. |
 | `typeof` and object types | `x: string \| Len \| null; if (typeof x !== "object") x` | `string` | `string \| Len` | A string can be a `Len`, so rules keep `Len` in that branch. |
+| A failed `typeof` test with a string that names no kind of value | `x: string \| Foo; if (typeof x === "strin") {} else x` | `string` | `string \| Foo` | A `Foo` has the `typeof` `"object"`, so rules keep `Foo` in that branch. |
 | A write through a key that isn't a literal | `o: { v: string \| null }; k: "v"; if (o.v) { o[k] = null; o.v }` | `string` | `string \| null` | `o[k]` can write `o.v`, so `noUnnecessaryConditions` doesn't call a later check of `o.v` unnecessary. |
 | A private name and a string key | `if (this.#x) this["#x"]` | `string` | `string \| null` | `this["#x"]` is another value, so rules don't apply the check of `this.#x` to it. |
 | A `const` that holds a property, after a write | `const k = s.kind; s.kind = "s"; if (k === "c") s` | `Circle` | `Circle \| Square` | `k` holds the value from before the write, so rules don't take `s` as a `Circle`. |
@@ -196,10 +210,11 @@ precision, Biome uses it instead and differs from TypeScript.
 | Overloads that augmentations add | `x: X; x.f(0)` | `2` | `3` | Biome has no program file order, so `noUnnecessaryConditions` can report `case 2:` as never matching. |
 
 Falsy branches remove only the object types that no falsy primitive can
-have, such as `interface Foo { a: number }`. Loose `==` removes a literal of
-another kind only when `==` is certainly false for it, as for a string without
-digits compared with a number. `delete o["v"]` gives `o.v` its declared type,
-where TypeScript ignores it.
+have, such as `interface Foo { a: number }`, and only the type parameters
+whose constraints are such types. Loose `==` removes a literal of another kind
+only when `==` is certainly false for it, as for a string without digits
+compared with a number. `delete o["v"]` gives `o.v` its declared type, where
+TypeScript ignores it.
 
 TypeScript widens a literal type when the value is fresh, as `1` in
 `let n = 1`. Biome keeps the literal type where it can't tell whether the
@@ -387,7 +402,6 @@ These rows use `type S = { kind: "c"; v: number } | { kind: "s"; v: string }`.
 | --- | --- | --- | --- |
 | `type Result<T> = { ok: true; value: T } \| { ok: false; error: string }; r: Result<number>; if (r.ok) r` | `{ ok: true; value: number }` | `Result<number>` | A rule can miss a report on `r`. |
 | `o: { k: { a: 1 }; x: 1 } \| { k: "x"; y: 2 }; if (o.k === "x") o` | `{ k: "x"; y: 2 }` | both members | A rule can miss a report on `o`. |
-| `interface AB { kind: "a" \| "b"; x: 1 }; interface C { kind: "c"; y: 2 }; s: AB \| C; switch (s.kind) { case "a": case "b": break; default: s }` | `C` | `AB \| C` | A rule can miss a report on `s` in `default`. |
 | `kindC(): "c"; if (s.kind === kindC()) s` | `Circle` | `Circle \| Square` | A rule can miss a report on `s`. |
 
 ### Aliased conditions
@@ -408,11 +422,14 @@ declared type of each object along it declares the property `readonly`.
 | `x: "a" \| "b"; let y = "a" as const; if (x === y) x` | `"a"` | `"a" \| "b"` | `noUnnecessaryConditions` can miss an unnecessary check of `x`. |
 | `make(): "a"; x: string \| number; const y = make(); if (x === y) x` | `"a"` | `string \| number` | `noUnnecessaryConditions` can miss an unnecessary check of `x`. |
 | `x: "a" \| "b"; y: "a" \| "b"; if (y === "a") { if (x !== y) x }` | `"b"` | `"a" \| "b"` | `noUnnecessaryConditions` can miss an unnecessary check of `x`. |
-| `x: "a" \| "b" \| "c"; switch (x!) { case "a": x }` | `"a"` | `"a" \| "b" \| "c"` | A rule can miss a report on `x` in the case. |
+| `x: "a" \| "b"; if (x! === "a") x` | `"a"` | `"a" \| "b"` | `noUnnecessaryConditions` can miss an unnecessary check of `x`. |
 
 A comparison narrows by a literal, `null`, `undefined`, `void 0`, `-1`, a
 template literal without substitutions, an enum member, a `const` that holds
-one of these, and the declared type of an annotated variable.
+one of these, and the declared type of an annotated variable. Only the
+discriminant of a `switch` narrows through `!`, and only the operand of `!`
+itself, not the object that holds it, as in TypeScript. Other checks of `x!`,
+such as `if (x!)` and `typeof x! === "string"`, narrow nothing.
 
 ### Enums
 
@@ -422,23 +439,25 @@ one of these, and the declared type of an annotated variable.
 | `let wn = E.A; wn` | `E` | `number` | `useExhaustiveSwitchCases` can miss the missing cases of a `switch (wn)`. |
 | `enum H { X } enum H { Y = 1 }; H.X` | `0` | Unknown | A rule can miss a report on `H.X`. |
 | `enum NE { A } namespace NE {}; NE.A` | `0` | Unknown | A rule can miss a report on `NE.A`. |
-| `const K = "k"; enum F { X = K }; F.X` | `"k"` | Unknown | A rule can miss a report on `F.X`. |
+| `enum E { A, B }; enum F { Y = E.B }; F.Y` | `1` | Unknown | A rule can miss a report on `F.Y`. |
 | `enum G { C = "c".length }; G.C` | `G.C` | `number` | A rule can miss a report on `G.C`. |
 | `declare enum D { P, Q = 2 }; d: D; d` | `D` | `number` | `useExhaustiveSwitchCases` can miss the missing cases of a `switch (d)`. |
 
 Biome gives each enum member the literal type of its value, so a rule that
 tells an enum from its primitive type sees a member of a string enum as a
-string.
+string. A member that a `const` initializes has the `const`'s value, as
+`"k"` for `const K = "k"; enum F { X = K }`, when the `const` has no type
+annotation and is declared before the enum, as TypeScript requires.
 
 ### Truthiness and `typeof`
 
 | Code | TypeScript | Biome | Effect on rules |
 | --- | --- | --- | --- |
-| `x: T \| undefined, with T extends Foo; if (!x) x` | `undefined` | `T \| undefined` | `noUnnecessaryConditions` can miss an unnecessary check of `x`. |
 | `x: T, with T extends string \| null \| undefined; if (x !== null) x` | `T & {}` | `(T & {}) \| (T & undefined)` | `noUnnecessaryConditions` can miss an unnecessary check of `x` against `undefined`. |
 | `class L { length = 0 }; x: L \| number; if (typeof x === "string") x` | `string` | `L` | A rule can miss a report on `x`. |
 | `interface Pad { padStart(n: number): string }; x: Pad \| number; if (typeof x === "string") x` | `string` | `Pad` | A rule can miss a report on `x`. |
-| `x: string \| number; switch (typeof x) { case "strin": x }` | `never` | `string \| number` | A rule can miss that the case never matches. |
+| `x: string \| Foo; switch (typeof x) { case "": x }` | `never` | `Foo` | A rule can miss that the case never matches. |
+| `x: any; if (typeof x === "strin") x` | `object` | `any` | A rule can miss a report on `x`. |
 | `x: string \| void; if (typeof x === "string") x` | `string` | Unknown | A rule can miss a report on `x`. |
 
 A narrowed read of a type with a `void` member is Unknown, because a function
@@ -452,16 +471,17 @@ ES2015 library files, which lack members that newer libraries add, such as
 
 | Code | TypeScript | Biome | Effect on rules |
 | --- | --- | --- | --- |
-| `interface A { a: 1 }; interface B { b: 2 }; x: A \| B; const k = "a"; if (k in x) x` | `A` | `A \| B` | A rule can miss a report on `x`. |
 | `class P { p = 1 }; class Q { q = 1 }; x: P \| Q; if ("p" in x) x` | `P` | `P \| Q` | A rule can miss a report on `x`. |
 | `x: { b: 1 } \| string[]; if ("a" in x) x` | `(string[] \| { b: 1 }) & Record<"a", unknown>` | `{ b: 1 } \| string[]` | A rule can miss a report on `x`. |
 | `class Checker { static [Symbol.hasInstance](v: unknown): v is string }; x: string \| Date; if (x instanceof Checker) x` | `string` | `string \| Date` | A rule can miss a report on `x`. |
 | `class Box<T> { v!: T }; class C { c = 3 }; GenCtor: new <T>() => Box<T>; x: Box<number> \| C; if (x instanceof GenCtor) x` | `Box<number>` | `Box<number> \| C` | A rule can miss a report on `x`. |
 
-`in` keeps a member in both branches when Biome can't tell whether it has the
-property: a primitive, a function, a tuple, an array, an instance of a class,
-a built-in type, or an object type with a call signature, a setter, a spread,
-or a computed key.
+`in` narrows by a key that is a literal or a `const` without a type
+annotation that holds one, so a key with a literal type from an annotation,
+as `k: "a"`, narrows nothing. `in` keeps a member in both branches when Biome
+can't tell whether it has the property: a primitive, a function, a tuple, an
+array, an instance of a class, a built-in type, or an object type with a call
+signature, a setter, a spread, or a computed key.
 
 ### Type-guard functions
 
@@ -499,7 +519,7 @@ a parameter, written as the arrow's body or as the only statement, a
 
 | Code | TypeScript | Biome | Effect on rules |
 | --- | --- | --- | --- |
-| `x: T, with T extends null; switch (x) { case null: break; default: x }` | `never` | `T` | A rule can miss that `default` never runs. |
+| `x: T, with T extends boolean; switch (typeof x) { case "boolean": break; default: x }` | `never` | `T` | A rule can miss that `default` never runs. |
 | ``interface U { f(x: string): 2; f(x: `a`): 1 }; u: U; u.f("a")`` | `1` | `2` | Disjoint: `noUnnecessaryConditions` can report `case 1:` on the result as never matching. |
 
 Biome tries the overloads with a parameter of a literal type first, as

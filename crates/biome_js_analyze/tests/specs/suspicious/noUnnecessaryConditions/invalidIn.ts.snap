@@ -37,6 +37,13 @@ function operand(result: Result) {
 	return !("error" in result) && result.data?.size;
 }
 
+function constantKey(result: Result) {
+	const key = "error";
+	if (!(key in result)) {
+		return result.data?.size;
+	}
+}
+
 ```
 
 # Diagnostics
@@ -103,6 +110,32 @@ invalidIn.ts:31:33 lint/suspicious/noUnnecessaryConditions ━━━━━━━
        │ 	                                          ^^
     32 │ }
     33 │ 
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+invalidIn.ts:37:10 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    35 │ 	const key = "error";
+    36 │ 	if (!(key in result)) {
+  > 37 │ 		return result.data?.size;
+       │ 		       ^^^^^^^^^^^
+    38 │ 	}
+    39 │ }
+  
+  i Replace ?. with ..
+  
+    35 │ 	const key = "error";
+    36 │ 	if (!(key in result)) {
+  > 37 │ 		return result.data?.size;
+       │ 		                  ^^
+    38 │ 	}
+    39 │ }
   
   i The receiver is guaranteed to be non-nullish.
   

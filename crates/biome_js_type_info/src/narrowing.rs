@@ -811,15 +811,43 @@ pub fn narrow_by_property<'db>(
     ty: InferredTypeData<'db>,
     declared: InferredTypeData<'db>,
     test: PropertyTest<'_, 'db>,
+    resolve: impl FnMut(InferredTypeData<'db>) -> InferredTypeData<'db>,
+) -> InferredTypeData<'db> {
+    narrow_by_property_tests(db, ty, declared, &[test], resolve)
+}
+
+/// Narrows `ty` by runtime tests of one of its properties that all hold, as
+/// [`narrow_by_property`] narrows it by one, but with the property values
+/// that pass every test: the members whose property type shares a value
+/// with what the tests leave together stay. So where neither `kind === "a"`
+/// nor `kind === "b"` holds, `{ kind: "a" | "b" } | { kind: "c" }` gives
+/// `{ kind: "c" }`, as in the `default` clause of a `switch`. Applying the
+/// tests one by one keeps both members, as TypeScript does for
+/// `kind !== "a" && kind !== "b"`.
+///
+/// Every test names the same property, and the first test tells whether the
+/// tests read it through an optional chain. Returns `ty` without tests.
+pub fn narrow_by_property_tests<'db>(
+    db: &'db dyn TypeDb,
+    ty: InferredTypeData<'db>,
+    declared: InferredTypeData<'db>,
+    tests: &[PropertyTest<'_, 'db>],
     mut resolve: impl FnMut(InferredTypeData<'db>) -> InferredTypeData<'db>,
 ) -> InferredTypeData<'db> {
+    let Some(test) = tests.first() else {
+        return ty;
+    };
     if is_narrowing_invariant(ty)
         || ty == InferredTypeData::NeverKeyword
         || !may_narrow_by_property(db, declared)
     {
         return ty;
     }
-    let Some(predicate) = PreparedPredicate::new(db, test.predicate) else {
+    let Some(predicates) = tests
+        .iter()
+        .map(|test| Some((PreparedPredicate::new(db, test.predicate)?, test.positive)))
+        .collect::<Option<Vec<_>>>()
+    else {
         return ty;
     };
     let resolve: &mut TypeResolver<'db, '_> = &mut resolve;
@@ -859,10 +887,12 @@ pub fn narrow_by_property<'db>(
     if has_nullish {
         property_types.push(InferredTypeData::Undefined);
     }
-    let property = InferredTypeData::union_from_types(db, property_types);
-    let narrowed = narrow_prepared(db, property, &predicate, test.positive, resolve);
-    if narrowed == InferredTypeData::NeverKeyword {
-        return narrowed;
+    let mut narrowed = InferredTypeData::union_from_types(db, property_types);
+    for (predicate, positive) in &predicates {
+        narrowed = narrow_prepared(db, narrowed, predicate, *positive, resolve);
+        if narrowed == InferredTypeData::NeverKeyword {
+            return narrowed;
+        }
     }
     let Some(remaining_values) = union_members(db, narrowed, &mut remaining).and_then(|types| {
         types
@@ -3090,11 +3120,14 @@ fn narrow_unknown<'db>(
 ///
 /// A test that every value of the constraint passes keeps `ty`, as for
 /// `x != null` with `T extends {}`, and so does a test that none passes,
-/// where TypeScript gives `never`. Every other test and branch keeps `ty`,
-/// as equality with another literal and the falsy branch do, and so does a
-/// constraint that refers to another type parameter at its top level, as
-/// `T extends U | null` does, which Biome doesn't narrow. `siblings` tells
-/// which nullish values the other members of the narrowed union are.
+/// where TypeScript gives `never`, except for the falsy branch: it gives
+/// `never` when no value of the constraint is falsy, as with `T extends Foo`
+/// for `interface Foo { a: number }`, as in TypeScript, and keeps `ty`
+/// otherwise. Every other test and branch keeps `ty`, as equality with
+/// another literal does, and so does a constraint that refers to another
+/// type parameter at its top level, as `T extends U | null` does, which Biome
+/// doesn't narrow. `siblings` tells which nullish values the other members of
+/// the narrowed union are.
 fn narrow_type_parameter<'db>(
     db: &'db dyn TypeDb,
     ty: InferredTypeData<'db>,
@@ -3129,6 +3162,13 @@ fn narrow_type_parameter<'db>(
         {
             return if passes(&PreparedPredicate::Nullish, true).is_some() {
                 intersect_narrowed(db, ty, empty_object(db))
+            } else {
+                ty
+            };
+        }
+        (PreparedPredicate::Truthy, false) => {
+            return if constraint.is_some() && passes(predicate, false).is_none() {
+                InferredTypeData::NeverKeyword
             } else {
                 ty
             };
@@ -3297,6 +3337,23 @@ fn refers_to_type_parameter<'db>(db: &'db dyn TypeDb, ty: InferredTypeData<'db>)
             .any(|member| is_type_parameter_or_intersection(db, *member)),
         ty => is_type_parameter_or_intersection(db, ty),
     }
+}
+
+/// Returns the constraint of `ty` when `ty` is a type parameter, with its
+/// handles and those of its union members resolved through `resolve`, as
+/// `string | null` for `T extends string | null`.
+///
+/// Returns `None` for any other type, for a type parameter without a
+/// constraint, and for a constraint that is a type parameter, an
+/// intersection with one, or a union with such a member, as `U | null`.
+pub fn type_parameter_constraint<'db>(
+    db: &'db dyn TypeDb,
+    ty: InferredTypeData<'db>,
+    mut resolve: impl FnMut(InferredTypeData<'db>) -> InferredTypeData<'db>,
+) -> Option<InferredTypeData<'db>> {
+    let constraint = referenced_generic(db, ty)?.constraint(db)?;
+    let constraint = flattened(db, constraint, &mut resolve)?;
+    (!refers_to_type_parameter(db, constraint)).then_some(constraint)
 }
 
 /// Returns whether `ty` is a type parameter, or an intersection with a type
@@ -5140,7 +5197,12 @@ mod tests {
             generic,
             InferredTypeData::instance_of(&db, generic, Box::default()),
         ] {
-            assert_eq!(narrow_type(&db, ty, NarrowingPredicate::Truthy, false), ty);
+            // No value of the constraint is falsy, so the falsy branch
+            // removes the type parameter, as in TypeScript.
+            assert_eq!(
+                narrow_type(&db, ty, NarrowingPredicate::Truthy, false),
+                InferredTypeData::NeverKeyword
+            );
             for kind in typeof_kinds() {
                 assert_eq!(
                     narrow_type(&db, ty, NarrowingPredicate::Typeof(kind), true),
@@ -7587,7 +7649,16 @@ mod tests {
                 true,
                 strings,
             ),
-            (objects, NarrowingPredicate::Truthy, false, objects),
+            // The falsy branch removes a type parameter whose constraint has
+            // no falsy value, as TypeScript does, and keeps one whose
+            // constraint has one.
+            (
+                objects,
+                NarrowingPredicate::Truthy,
+                false,
+                InferredTypeData::NeverKeyword,
+            ),
+            (strings, NarrowingPredicate::Truthy, false, strings),
             // No value of the constraint is `null`.
             (optional, null, false, optional),
             (

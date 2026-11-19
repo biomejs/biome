@@ -24,10 +24,24 @@ function caseOfLiteral(value: string | null) {
 	}
 }
 
+function caseOfNonNullAssertion(value: string | null) {
+	switch (value!) {
+		case "a":
+			return value?.length;
+	}
+}
+
 function caseOfTypeof(value: string | number | null) {
 	switch (typeof value) {
 		case "string":
 			return value?.length;
+	}
+}
+
+function caseOfStringThatNamesNoKind(value: { size: number } | null) {
+	switch (typeof value) {
+		case "strin":
+			return value?.size;
 	}
 }
 
@@ -47,6 +61,33 @@ function afterExhaustiveSwitch(kind: "a" | "b", label: string | null) {
 			if (label === null) return;
 	}
 	return label?.length;
+}
+
+function afterExhaustiveSwitchOnTypeParameter<K extends "a" | "b">(
+	kind: K,
+	label: string | null,
+) {
+	switch (kind) {
+		case "a":
+			if (label === null) return;
+			break;
+		case "b":
+			if (label === null) return;
+	}
+	return label?.length;
+}
+
+type Pending = { state: "idle" | "loading"; data: null };
+type Done = { state: "done"; data: string };
+
+function defaultAfterUnionDiscriminant(result: Pending | Done) {
+	switch (result.state) {
+		case "idle":
+		case "loading":
+			break;
+		default:
+			return result.data?.length;
+	}
 }
 
 ```
@@ -109,8 +150,8 @@ invalidSwitchNarrowing.ts:24:11 lint/suspicious/noUnnecessaryConditions ━━�
 
   ! Unnecessary optional chaining.
   
-    22 │ 	switch (typeof value) {
-    23 │ 		case "string":
+    22 │ 	switch (value!) {
+    23 │ 		case "a":
   > 24 │ 			return value?.length;
        │ 			       ^^^^^
     25 │ 	}
@@ -118,8 +159,8 @@ invalidSwitchNarrowing.ts:24:11 lint/suspicious/noUnnecessaryConditions ━━�
   
   i Replace ?. with ..
   
-    22 │ 	switch (typeof value) {
-    23 │ 		case "string":
+    22 │ 	switch (value!) {
+    23 │ 		case "a":
   > 24 │ 			return value?.length;
        │ 			            ^^
     25 │ 	}
@@ -135,8 +176,8 @@ invalidSwitchNarrowing.ts:31:11 lint/suspicious/noUnnecessaryConditions ━━�
 
   ! Unnecessary optional chaining.
   
-    29 │ 	switch (true) {
-    30 │ 		case value !== null:
+    29 │ 	switch (typeof value) {
+    30 │ 		case "string":
   > 31 │ 			return value?.length;
        │ 			       ^^^^^
     32 │ 	}
@@ -144,8 +185,8 @@ invalidSwitchNarrowing.ts:31:11 lint/suspicious/noUnnecessaryConditions ━━�
   
   i Replace ?. with ..
   
-    29 │ 	switch (true) {
-    30 │ 		case value !== null:
+    29 │ 	switch (typeof value) {
+    30 │ 		case "string":
   > 31 │ 			return value?.length;
        │ 			            ^^
     32 │ 	}
@@ -157,25 +198,148 @@ invalidSwitchNarrowing.ts:31:11 lint/suspicious/noUnnecessaryConditions ━━�
 ```
 
 ```
-invalidSwitchNarrowing.ts:43:9 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidSwitchNarrowing.ts:37:8 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This case is unreachable.
+  
+    35 │ function caseOfStringThatNamesNoKind(value: { size: number } | null) {
+    36 │ 	switch (typeof value) {
+  > 37 │ 		case "strin":
+       │ 		     ^^^^^^^
+    38 │ 			return value?.size;
+    39 │ 	}
+  
+  i The value passed to switch can never equal this value.
+  
+  i Remove the unreachable case, or change it to a value that the switch expression can have.
+  
+
+```
+
+```
+invalidSwitchNarrowing.ts:38:11 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unnecessary optional chaining.
   
-    41 │ 			if (label === null) return;
-    42 │ 	}
-  > 43 │ 	return label?.length;
-       │ 	       ^^^^^
-    44 │ }
-    45 │ 
+    36 │ 	switch (typeof value) {
+    37 │ 		case "strin":
+  > 38 │ 			return value?.size;
+       │ 			       ^^^^^
+    39 │ 	}
+    40 │ }
   
   i Replace ?. with ..
   
-    41 │ 			if (label === null) return;
-    42 │ 	}
-  > 43 │ 	return label?.length;
+    36 │ 	switch (typeof value) {
+    37 │ 		case "strin":
+  > 38 │ 			return value?.size;
+       │ 			            ^^
+    39 │ 	}
+    40 │ }
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+invalidSwitchNarrowing.ts:45:11 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    43 │ 	switch (true) {
+    44 │ 		case value !== null:
+  > 45 │ 			return value?.length;
+       │ 			       ^^^^^
+    46 │ 	}
+    47 │ }
+  
+  i Replace ?. with ..
+  
+    43 │ 	switch (true) {
+    44 │ 		case value !== null:
+  > 45 │ 			return value?.length;
+       │ 			            ^^
+    46 │ 	}
+    47 │ }
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+invalidSwitchNarrowing.ts:57:9 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    55 │ 			if (label === null) return;
+    56 │ 	}
+  > 57 │ 	return label?.length;
+       │ 	       ^^^^^
+    58 │ }
+    59 │ 
+  
+  i Replace ?. with ..
+  
+    55 │ 			if (label === null) return;
+    56 │ 	}
+  > 57 │ 	return label?.length;
        │ 	            ^^
-    44 │ }
-    45 │ 
+    58 │ }
+    59 │ 
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+invalidSwitchNarrowing.ts:71:9 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    69 │ 			if (label === null) return;
+    70 │ 	}
+  > 71 │ 	return label?.length;
+       │ 	       ^^^^^
+    72 │ }
+    73 │ 
+  
+  i Replace ?. with ..
+  
+    69 │ 			if (label === null) return;
+    70 │ 	}
+  > 71 │ 	return label?.length;
+       │ 	            ^^
+    72 │ }
+    73 │ 
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+invalidSwitchNarrowing.ts:83:11 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    81 │ 			break;
+    82 │ 		default:
+  > 83 │ 			return result.data?.length;
+       │ 			       ^^^^^^^^^^^
+    84 │ 	}
+    85 │ }
+  
+  i Replace ?. with ..
+  
+    81 │ 			break;
+    82 │ 		default:
+  > 83 │ 			return result.data?.length;
+       │ 			                  ^^
+    84 │ 	}
+    85 │ }
   
   i The receiver is guaranteed to be non-nullish.
   

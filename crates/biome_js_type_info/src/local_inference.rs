@@ -21,17 +21,18 @@ use biome_js_syntax::{
     JsClassExportDefaultDeclaration, JsClassExpression, JsClassMemberList, JsConstructorParameters,
     JsExport, JsExtendsClause, JsForInStatement, JsForOfStatement, JsForVariableDeclaration,
     JsFormalParameter, JsFunctionBody, JsFunctionDeclaration, JsFunctionExpression,
-    JsGetterObjectMember, JsIdentifierAssignment, JsIdentifierBinding, JsInitializerClause,
-    JsLanguage, JsLogicalExpression, JsLogicalOperator, JsMethodClassMember, JsMethodObjectMember,
-    JsModuleItemList, JsNewExpression, JsObjectBindingPattern, JsObjectExpression, JsParameterList,
-    JsParameters, JsParenthesizedExpression, JsPropertyClassMember, JsPropertyObjectMember,
-    JsReferenceIdentifier, JsRestParameter, JsReturnStatement, JsSetterObjectMember, JsSyntaxKind,
-    JsSyntaxNode, JsSyntaxToken, JsTemplateExpression, JsUnaryExpression, JsUnaryOperator,
-    JsVariableDeclaration, JsVariableDeclarator, TsConditionalType, TsDeclarationModule,
-    TsDeclareFunctionDeclaration, TsDeclareStatement, TsEnumDeclaration, TsExportDeclareClause,
-    TsExternalModuleDeclaration, TsGlobalDeclaration, TsInferType, TsInstantiationExpression,
-    TsInterfaceDeclaration, TsMappedType, TsMethodSignatureTypeMember, TsModuleBlock,
-    TsModuleDeclaration, TsPropertyParameterModifierList, TsReferenceType, TsReturnTypeAnnotation,
+    JsGetterObjectMember, JsIdentifierAssignment, JsIdentifierBinding, JsIdentifierExpression,
+    JsInitializerClause, JsLanguage, JsLogicalExpression, JsLogicalOperator, JsMethodClassMember,
+    JsMethodObjectMember, JsModuleItemList, JsNewExpression, JsObjectBindingPattern,
+    JsObjectExpression, JsParameterList, JsParameters, JsParenthesizedExpression,
+    JsPropertyClassMember, JsPropertyObjectMember, JsReferenceIdentifier, JsRestParameter,
+    JsReturnStatement, JsSetterObjectMember, JsSyntaxKind, JsSyntaxNode, JsSyntaxToken,
+    JsTemplateExpression, JsUnaryExpression, JsUnaryOperator, JsVariableDeclaration,
+    JsVariableDeclarator, TsConditionalType, TsDeclarationModule, TsDeclareFunctionDeclaration,
+    TsDeclareStatement, TsEnumDeclaration, TsExportDeclareClause, TsExternalModuleDeclaration,
+    TsGlobalDeclaration, TsInferType, TsInstantiationExpression, TsInterfaceDeclaration,
+    TsMappedType, TsMethodSignatureTypeMember, TsModuleBlock, TsModuleDeclaration,
+    TsPropertyParameterModifierList, TsReferenceType, TsReturnTypeAnnotation,
     TsSatisfiesExpression, TsTypeAliasDeclaration, TsTypeAnnotation, TsTypeArguments, TsTypeList,
     TsTypeMemberList, TsTypeParameter, TsTypeParameters, TsTypeofType, inner_string_text,
     unescape_js_string,
@@ -3967,23 +3968,24 @@ impl EnumTypes {
     /// the value as TypeScript does from number and string literals, template
     /// literals without substitutions, `+`, `-`, and `~` before a value,
     /// arithmetic and bitwise operators between values, `+` between strings,
-    /// and the earlier members of the declaration, named as `A`, `E.A`, or
-    /// `E["A"]`. A member without an initializer has the value of the member
-    /// before it plus one, or `0` for the first member. In an ambient enum
-    /// that isn't `const`, as one that `declare` declares, such a member has a
-    /// value that the code that defines the enum chooses, so its type is
-    /// `number`.
+    /// the earlier members of the declaration, named as `A`, `E.A`, or
+    /// `E["A"]`, and a `const` without a type annotation declared before the
+    /// enum and initialized with such values, as `K` in `const K = "k"`. A
+    /// member without an initializer has the value of the member before it
+    /// plus one, or `0` for the first member. In an ambient enum that isn't
+    /// `const`, as one that `declare` declares, such a member has a value
+    /// that the code that defines the enum chooses, so its type is `number`.
     ///
     /// When Biome can't compute a value, the member's type is `number` when
     /// the value is a number in code that TypeScript accepts, such as a call
     /// or `"c".length`, which TypeScript requires to be a number, `string`
     /// for a string, such as a template literal with substitutions, and
-    /// Unknown otherwise, such as for a reference to a `const` or to a member
-    /// of another enum, because TypeScript also computes those and they can
-    /// be strings. A computed number without a decimal spelling that Biome
-    /// can borrow, one other than an integer from 0 to 255, also has the type
-    /// `number`. Each of these types holds the member's value, so none is
-    /// narrower than TypeScript's.
+    /// Unknown otherwise, such as for a reference to a member of another enum
+    /// or to a `const` with a type annotation, because TypeScript computes
+    /// some of those and they can be strings. A computed number without a
+    /// decimal spelling that Biome can borrow, one other than an integer from
+    /// 0 to 255, also has the type `number`. Each of these types holds the
+    /// member's value, so none is narrower than TypeScript's.
     pub fn from_ts_enum_declaration(
         collector: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
@@ -4003,6 +4005,7 @@ impl EnumTypes {
                 .and_then(|id| id.as_js_identifier_binding()?.name_token().ok())
                 .map(|token| token.token_text_trimmed()),
             members: Vec::new(),
+            outside: false,
         };
         let mut members = Vec::new();
         for member in declaration.members() {
@@ -4156,6 +4159,10 @@ struct EnumEvaluator<'a> {
     name: Option<TokenText>,
     /// The name and the value of each member before the current one.
     members: Vec<(Option<TokenText>, EnumValue)>,
+    /// Whether the evaluator is computing the initializer of a `const` outside
+    /// the enum, where a name reads no member and TypeScript computes only
+    /// the expressions that [`is_constant_outside_enum`] accepts.
+    outside: bool,
 }
 
 impl EnumEvaluator<'_> {
@@ -4165,6 +4172,9 @@ impl EnumEvaluator<'_> {
         let Some(depth) = depth.checked_sub(1) else {
             return EnumValue::Unknown;
         };
+        if self.outside && !is_constant_outside_enum(expression) {
+            return EnumValue::Unknown;
+        }
         match expression {
             AnyJsExpression::AnyJsLiteralExpression(
                 AnyJsLiteralExpression::JsNumberLiteralExpression(literal),
@@ -4217,13 +4227,18 @@ impl EnumEvaluator<'_> {
                 let right = self.value_of(&right, depth);
                 binary_value(operator, &left, &right)
             }
-            AnyJsExpression::JsIdentifierExpression(identifier) => identifier
-                .name()
-                .ok()
-                .and_then(|name| name.value_token().ok())
-                .map_or(EnumValue::Unknown, |token| {
-                    self.member_value(token.text_trimmed())
-                }),
+            AnyJsExpression::JsIdentifierExpression(identifier) => {
+                let member = if self.outside {
+                    None
+                } else {
+                    identifier
+                        .name()
+                        .ok()
+                        .and_then(|name| name.value_token().ok())
+                        .and_then(|token| self.member_value(token.text_trimmed()))
+                };
+                member.unwrap_or_else(|| self.const_value(identifier, depth))
+            }
             AnyJsExpression::JsStaticMemberExpression(member) => {
                 let Ok(object) = member.object() else {
                     return EnumValue::Unknown;
@@ -4233,9 +4248,9 @@ impl EnumEvaluator<'_> {
                     .ok()
                     .and_then(|member| member.as_js_name()?.value_token().ok());
                 match name {
-                    Some(name) if !member.is_optional_chain() && self.names_enum(&object) => {
-                        self.member_value(name.text_trimmed())
-                    }
+                    Some(name) if !member.is_optional_chain() && self.names_enum(&object) => self
+                        .member_value(name.text_trimmed())
+                        .unwrap_or(EnumValue::Unknown),
                     // A dotted name can name a constant that TypeScript
                     // computes, such as a member of another enum.
                     _ if is_entity_name(&object) => EnumValue::Unknown,
@@ -4257,7 +4272,7 @@ impl EnumEvaluator<'_> {
                 };
                 match key {
                     Some(key) if !member.is_optional_chain() && self.names_enum(&object) => {
-                        self.member_value(key.text())
+                        self.member_value(key.text()).unwrap_or(EnumValue::Unknown)
                     }
                     _ => EnumValue::Unknown,
                 }
@@ -4278,15 +4293,35 @@ impl EnumEvaluator<'_> {
     }
 
     /// Returns the value of the member named `name` before the current one,
-    /// or Unknown when no member before it has that name, because the name
+    /// or `None` when no member before it has that name, because the name
     /// then refers to a later member, which TypeScript rejects, or to a
     /// variable outside the enum.
-    fn member_value(&self, name: &str) -> EnumValue {
+    fn member_value(&self, name: &str) -> Option<EnumValue> {
         self.members
             .iter()
             .rev()
             .find(|(member, _)| member.as_ref().is_some_and(|member| member.text() == name))
-            .map_or(EnumValue::Unknown, |(_, value)| value.clone())
+            .map(|(_, value)| value.clone())
+    }
+
+    /// Returns the value of the `const` outside the enum that `identifier`
+    /// reads, as `K` in `const K = "k"; enum F { X = K }`, which nests at most
+    /// `depth` operators.
+    ///
+    /// As TypeScript does, the evaluator computes the value only when the
+    /// `const` has no type annotation, is declared before `identifier`, and
+    /// is initialized with number or string literals, template literals,
+    /// operators, and other such `const`s. The value of any other `const`,
+    /// such as one initialized with `as const` or a call, which TypeScript
+    /// doesn't compute there, and of any other variable, is Unknown.
+    fn const_value(&mut self, identifier: &JsIdentifierExpression, depth: usize) -> EnumValue {
+        let Some(initializer) = self.collector.const_initializer(identifier) else {
+            return EnumValue::Unknown;
+        };
+        let outside = std::mem::replace(&mut self.outside, true);
+        let value = self.value_of(&initializer, depth);
+        self.outside = outside;
+        value
     }
 
     /// Returns whether `object` names the enum, as `E` in `E.A` does. When a
@@ -4345,6 +4380,25 @@ impl EnumEvaluator<'_> {
             EnumValue::String(None) => GLOBAL_STRING_KEYWORD_ID.into(),
             EnumValue::Unknown => TypeReference::unknown(),
         }
+    }
+}
+
+/// Returns whether TypeScript can compute `expression` in the initializer of
+/// a `const` that an enum member reads: a number or string literal, a template
+/// literal without a tag, parentheses, a unary or binary operator, or a name.
+fn is_constant_outside_enum(expression: &AnyJsExpression) -> bool {
+    match expression {
+        AnyJsExpression::JsTemplateExpression(template) => template.tag().is_none(),
+        _ => matches!(
+            expression,
+            AnyJsExpression::AnyJsLiteralExpression(
+                AnyJsLiteralExpression::JsNumberLiteralExpression(_)
+                    | AnyJsLiteralExpression::JsStringLiteralExpression(_)
+            ) | AnyJsExpression::JsParenthesizedExpression(_)
+                | AnyJsExpression::JsUnaryExpression(_)
+                | AnyJsExpression::JsBinaryExpression(_)
+                | AnyJsExpression::JsIdentifierExpression(_)
+        ),
     }
 }
 

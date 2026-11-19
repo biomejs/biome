@@ -334,19 +334,52 @@ fn cases_narrow_by_unit_values() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) narrows `x` to `"a"` at `nonNull`, and
-// gives `number` at `nan`. A discriminant that isn't a subject, such as `x!`,
-// narrows nothing, so Biome keeps the declared type, which is wider.
+// TypeScript 7.0.2 (`tsc --strict`) gives `number` at `nan`.
 #[test]
 fn cases_that_biome_does_not_compare_keep_the_declared_type() {
     assert_reads(
         r#"
         function f43(x: number) { switch (x) { case NaN: /*nan*/x; } }
-        function f45(x: ABC) { switch (x!) { case "a": /*nonNull*/x; } }
+        "#,
+        &[("nan", "x", &["number"])],
+    );
+}
+
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type,
+// and `string` at `nullableAfter`. A case narrows the operand of non-null
+// assertions in the discriminant, also in parentheses, but not the object
+// that holds the operand, at `heldObject`, or the receivers of its optional
+// chain, at `receiver`. The type of `x` at the statement in `f51` includes
+// `null`, so Biome doesn't find the statement exhaustive there, which is
+// wider.
+#[test]
+fn cases_narrow_through_non_null_assertions() {
+    assert_reads(
+        r#"
+        function f45(x: ABC) { switch (x!) { case "a": /*nonNull*/x; break; default: /*nonNullDefault*/x; } }
+        function f46(x: ABC | null) { switch ((x)!!) { case "a": /*nullable*/x; break; default: /*nullableDefault*/x; } }
+        function f47(o: { v: ABC }) { switch (o.v!) { case "a": /*property*/o.v; } }
+        function f48(s: Shape) { switch (s.kind!) { case "c": /*heldObject*/s; /*held*/s.kind; } }
+        function f49(o: { v: ABC } | undefined) { switch (o?.v!) { case "a": /*receiver*/o; } }
+        function f50(x: ABC, y: string | null) { switch (x!) { case "a": case "b": case "c": if (y === null) return; } /*exhaustive*/y; }
+        function f51(x: ABC | null, y: string | null) { switch (x!) { case "a": case "b": case "c": if (y === null) return; } /*nullableAfter*/y; }
         "#,
         &[
-            ("nan", "x", &["number"]),
-            ("nonNull", "x", &["string: a", "string: b", "string: c"]),
+            ("nonNull", "x", &["string: a"]),
+            ("nonNullDefault", "x", &["string: b", "string: c"]),
+            ("nullable", "x", &["string: a"]),
+            ("nullableDefault", "x", &["null", "string: b", "string: c"]),
+            ("property", "o.v", &["string: a"]),
+            ("heldObject", "s", &["Circle", "Square", "Tri"]),
+            ("held", "s.kind", &["string: c"]),
+            (
+                "receiver",
+                "o",
+                &["[\"v\": string: a | string: b | string: c]", "undefined"],
+            ),
+            ("exhaustive", "y", &["string"]),
+            // TypeScript: `string`.
+            ("nullableAfter", "y", &["null", "string"]),
         ],
     );
 }
@@ -446,23 +479,37 @@ fn discriminant_cases_narrow_the_object() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives `{ kind: "c"; y: 2 }` at both
-// reads, because its `default` removes every member whose discriminant is one
-// of the case values, even when the discriminant is a union of them. Biome
-// removes a member only when a single case removes all its values, so it
-// keeps both members, which is wider.
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
+// Its `default` removes every member whose discriminant is one of the case
+// values, even when the discriminant is a union of them, through a `const`
+// that holds the property and through an element of a destructuring pattern
+// too. An `if` that tests each value in turn keeps such a member, at
+// `separateIf`.
 #[test]
-fn default_keeps_members_whose_discriminant_is_a_union_of_case_values() {
+fn default_removes_members_whose_discriminant_is_a_union_of_case_values() {
     assert_reads(
         r#"
         interface AB { kind: "a" | "b"; x: 1 }
         interface C { kind: "c"; y: 2 }
+        interface D { kind: "c" | "d"; z: 3 }
+        type P = { kind: "a" | "b"; v: number } | { kind: "c"; v: string };
         function f13(s: AB | C) { switch (s.kind) { case "a": case "b": break; default: /*group*/s; } }
         function f14(s: AB | C) { switch (s.kind) { case "a": break; case "b": break; default: /*separate*/s; } }
+        function f15(s: AB | C | undefined) { switch (s?.kind) { case "a": case "b": break; default: /*optional*/s; } }
+        function f16(s: AB | C | D) { switch (s.kind) { case "a": case "b": case "c": break; default: /*partial*/s; } }
+        function f17(s: AB | C) { const k = s.kind; switch (k) { case "a": case "b": break; default: /*held*/s; } }
+        function f18(s: P) { const { kind, v } = s; switch (kind) { case "a": case "b": break; default: /*element*/v; /*pattern*/s; } }
+        function f19(s: AB | C) { if (s.kind !== "a" && s.kind !== "b") /*separateIf*/s; }
         "#,
         &[
-            ("group", "s", &["AB", "C"]),
-            ("separate", "s", &["AB", "C"]),
+            ("group", "s", &["C"]),
+            ("separate", "s", &["C"]),
+            ("optional", "s", &["C", "undefined"]),
+            ("partial", "s", &["D"]),
+            ("held", "s", &["C"]),
+            ("element", "v", &["string"]),
+            ("pattern", "s", &["[\"kind\": string: c, \"v\": string]"]),
+            ("separateIf", "s", &["AB", "C"]),
         ],
     );
 }
@@ -533,13 +580,64 @@ fn typeof_cases_narrow_the_operand() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives every read below but `invalid` the
-// expected type. A case that is neither a string literal nor a template
-// literal without substitutions makes no case of
-// `switch (typeof x)` narrow, and a `typeof` case narrows only the operand,
-// not the object that holds it or the pattern that declares it. TypeScript
-// gives `never` for an invalid kind (`"strin"`), where Biome keeps the
-// declared type, which is wider.
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type,
+// and `string` at `otherDefault` and `otherElse`, `object` at `otherUnknown`
+// and `otherAny`, and `never` at `empty`. A `typeof` test with a string that names no kind of
+// value, which TypeScript reports, holds only for an object type, so it keeps
+// the members that can be objects, other than `null`, or functions.
+// TypeScript also removes the object types where the test fails, although an
+// ordinary object gives `"object"`, so Biome keeps the incoming type there,
+// which is wider. With `unknown`, Biome also keeps `Function`, with `any`, it
+// keeps `any`, and an empty string narrows as any other string that names no
+// kind, all wider.
+#[test]
+fn typeof_tests_with_strings_that_name_no_kind_keep_object_types() {
+    assert_reads(
+        r#"
+        function t1(x: string | Foo) { switch (typeof x) { case "strin": /*other*/x; break; default: /*otherDefault*/x; } }
+        function t2(x: string | (() => void)) { switch (typeof x) { case "strin": /*otherFunction*/x; } }
+        function t3(x: string | object | null) { switch (typeof x) { case "strin": /*otherNull*/x; } }
+        function t4(x: unknown) { switch (typeof x) { case "strin": /*otherUnknown*/x; break; default: /*otherUnknownDefault*/x; } }
+        function t5(x: string | number) { switch (typeof x) { case "strin": case "string": /*group*/x; break; default: /*groupDefault*/x; } }
+        function t6(x: string | Foo, y: string | null) { switch (typeof x) { case "string": case "object": case "strin": if (y === null) return; } /*exhaustive*/y; }
+        function t7(x: string | Foo) { switch (typeof x) { case "": /*empty*/x; } }
+        function t8(x: string | Foo) { if (typeof x === "strin") /*otherIf*/x; else /*otherElse*/x; }
+        function t9(o: { v: string | Foo } | undefined) { if (typeof o?.v === "strin") /*receiver*/o; }
+        function t10(x: any) { if (typeof x === "strin") /*otherAny*/x; }
+        "#,
+        &[
+            ("other", "x", &["Foo"]),
+            // TypeScript: `string`.
+            ("otherDefault", "x", &["Foo", "string"]),
+            (
+                "otherFunction",
+                "x",
+                &["sync Function { accepts: { params: [] type_args: [] } returns: void }"],
+            ),
+            ("otherNull", "x", &["object"]),
+            // TypeScript: `object`.
+            ("otherUnknown", "x", &["instanceof Function", "object"]),
+            ("otherUnknownDefault", "x", &["unknown"]),
+            ("group", "x", &["string"]),
+            ("groupDefault", "x", &["number"]),
+            ("exhaustive", "y", &["string"]),
+            // TypeScript: `never`.
+            ("empty", "x", &["Foo"]),
+            ("otherIf", "x", &["Foo"]),
+            // TypeScript: `string`.
+            ("otherElse", "x", &["Foo", "string"]),
+            ("receiver", "o", &["[\"v\": string | instanceof Foo]"]),
+            // TypeScript: `object`.
+            ("otherAny", "x", &["any"]),
+        ],
+    );
+}
+
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type,
+// and `never` at `invalid`, where Biome gives its Unknown type. A case that is
+// neither a string literal nor a template literal without substitutions makes
+// no case of `switch (typeof x)` narrow, and a `typeof` case narrows only the
+// operand, not the object that holds it or the pattern that declares it.
 #[test]
 fn typeof_switches_narrow_only_their_operand() {
     assert_reads(
@@ -563,7 +661,7 @@ fn typeof_switches_narrow_only_their_operand() {
                     "[\"k\": string: a, \"a\": number: 1]",
                 ],
             ),
-            ("invalid", "x", &["number", "string"]),
+            ("invalid", "x", &["Unknown"]),
             ("template", "x", &["string"]),
             ("templateDefault", "x", &["number"]),
             ("templateIf", "x", &["string"]),
