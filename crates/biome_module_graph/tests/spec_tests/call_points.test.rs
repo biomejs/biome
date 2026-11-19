@@ -1150,3 +1150,46 @@ fn lookups_resolve_each_generic_call_point_once() {
         ],
     );
 }
+
+// TypeScript 7.0.2 (`tsc --strict`) gives `null` at `contradicted`, and so
+// does Biome. After `isNull(x)`, the argument of `isNonNull(x)` is `null`,
+// from which neither infers a type for `T`, so the second guard keeps `null`.
+#[test]
+fn type_guard_functions_after_a_guard_that_contradicts_them() {
+    assert_reads(
+        r#"
+        declare function isNull(v: unknown): v is null;
+        declare function isNonNull<T>(v: T | null): v is T;
+        function f(x: "a" | null) { if (isNull(x) && isNonNull(x)) /*contradicted*/x; }
+        "#,
+        &[("contradicted", "x", &["null"])],
+    );
+}
+
+// TypeScript 7.0.2 (`tsc --strict`) gives `{ y: string | number }` at
+// `receiver` and `string` at `property`: a type-guard function that accepts
+// `x?.y` shows that `x` isn't nullish. Biome narrows the property but not the
+// receiver of the optional chain.
+#[test]
+fn type_guard_functions_narrow_no_receiver_of_an_optional_chain() {
+    assert_reads(
+        r#"
+        declare function isString(v: unknown): v is string;
+        function f(x: { y: string | number } | undefined) {
+            if (isString(x?.y)) { /*receiver*/x; /*property*/x?.y; }
+        }
+        "#,
+        &[
+            // TypeScript: `{ y: string | number }`.
+            (
+                "receiver",
+                "x",
+                &[
+                    "Object { prototype: No prototype members: [\"y\": string | number] }",
+                    "undefined",
+                ],
+            ),
+            ("property", "x?.y", &["string"]),
+        ],
+    );
+}

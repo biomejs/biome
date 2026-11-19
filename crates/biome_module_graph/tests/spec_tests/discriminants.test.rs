@@ -1739,3 +1739,20 @@ fn loose_equality_of_a_discriminant_narrows_the_object() {
         ],
     );
 }
+
+// TypeScript 7.0.2 (`tsc --strict`) gives `Circle` at `call`, narrowing by the
+// return type `"c"` of `kindC`. Biome compares a discriminant only with a unit
+// value or a variable with a type annotation, so it keeps both members.
+#[test]
+fn comparisons_of_a_discriminant_with_a_call_keep_the_object() {
+    assert_reads(
+        r#"
+        declare function kindC(): "c";
+        function f(s: Circle | Square) { if (s.kind === kindC()) /*call*/s; }
+        "#,
+        &[
+            // TypeScript: `Circle`.
+            ("call", "s", &["Circle", "Square"]),
+        ],
+    );
+}

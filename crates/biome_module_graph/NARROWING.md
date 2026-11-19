@@ -34,8 +34,8 @@ read, with TypeScript run over the files that Biome indexes. When Biome can't
 decide a result, the read keeps its declared type. When a work limit or a
 query cycle stops the computation, or a check leaves a branch no possible
 value, the read is Unknown instead of `never`. Reads in code that TypeScript
-treats as unreachable or impossible can be narrower than TypeScript's, as the
-[deliberate choices](#differences-from-typescript) list.
+treats as unreachable, impossible, or erroneous can be narrower than
+TypeScript's, as the [deliberate choices](#differences-from-typescript) list.
 
 A wider type can make a rule report a union member that TypeScript has
 removed. A narrower type makes a rule report code that TypeScript accepts, or
@@ -166,6 +166,7 @@ precision, Biome uses it instead and differs from TypeScript.
 
 | Case | Example | TypeScript | Biome | Effect on rules |
 | --- | --- | --- | --- | --- |
+| `??` as a condition | `x: string \| null \| undefined; y: boolean; if (x ?? y) {} else x` | `null \| undefined` | `string \| null \| undefined` | `x` is `""` there when `y` is false, so rules keep `string` in that branch. |
 | The falsy part of `number` in `&&` | `n: number; t: string; n && t` | `string \| 0` | `number \| string` | `-0` and `NaN` are falsy too, so rules don't take the falsy result as `0`. |
 | Falsiness and object types | `interface Len { length: number }; x: Len \| undefined; if (!x) x` | `undefined` | `Len \| undefined` | `""` is a falsy `Len`, so `noUnnecessaryConditions` doesn't call a check of `x` there unnecessary. |
 | `typeof` and object types | `x: string \| Len \| null; if (typeof x !== "object") x` | `string` | `string \| Len` | A string can be a `Len`, so rules keep `Len` in that branch. |
@@ -182,7 +183,8 @@ precision, Biome uses it instead and differs from TypeScript.
 | A write through `super` | `if (this.x) { super.x = null; this.x }`, with `x: string \| null` | `string` | `string \| null` | `super.x = null` sets `this.x`, so `noUnnecessaryConditions` doesn't call a later check of it unnecessary. |
 | Literals whose freshness Biome can't trace | `const o = { a: id(1) }; o` | `{ a: number }` | `{ a: 1 }` | Rules keep the literal types that `useExhaustiveSwitchCases` and `noUnnecessaryConditions` check against. |
 | A guard passed to `every`, `filter`, or `find` | `xs: (string \| number)[]; if (xs.every(isNumber)) { const r = xs.filter(isString); r }` | `number[]` | `string[]` | Rules keep this narrowing on arrays of unions, and the result still describes the runtime values. |
-| Reads in code that TypeScript treats as unreachable or impossible | `x: boolean; const D = false; if (D) { if (x === D) x }` | `boolean` | `false` | `noUnnecessaryConditions` can call a check there unnecessary, in code that runs only with values outside TypeScript's types. |
+| A string literal assigned to a string enum | `enum S { A = "a", B = "b" }; let x: S \| number = "a"; x` | `number \| S`, with an error | `"a"` | Biome gives each member the literal type of its value, so rules see the assigned value in code that TypeScript reports. |
+| Reads in code that TypeScript treats as unreachable, impossible, or erroneous | `x: boolean; const D = false; if (D) { if (x === D) x }` | `boolean` | `false` | `noUnnecessaryConditions` can call a check there unnecessary, in code that runs only with values outside TypeScript's types. |
 | An augmentation in a file that the program leaves out | `pet: Cat \| Dog; if (!("purrs" in pet)) pet` | `Cat \| Dog` | `Dog` | Biome can't tell which files `tsconfig.json` includes, so `noUnnecessaryConditions` can call a needed check unnecessary. |
 | A top-level interface in a script that isn't a declaration file | `x: string \| Fmt; if (isFmt(x)) x` | `string \| Fmt` | `Fmt` | Biome can't tell a script from a module without `tsconfig.json`, so `noUnnecessaryConditions` can call a needed check unnecessary. |
 | Overloads that augmentations add | `x: X; x.f(0)` | `2` | `3` | Biome has no program file order, so `noUnnecessaryConditions` can report `case 2:` as never matching. |
@@ -211,21 +213,20 @@ passed the guard. Matching TypeScript would mean dropping this narrowing on
 arrays whose elements are a union, which rules rely on.
 
 Reads can also be narrower than TypeScript's in these places, which
-TypeScript treats as unreachable or impossible:
+TypeScript treats as unreachable, impossible, or erroneous:
 
 - after a `switch` that is exhaustive because TypeScript narrowed its
   discriminant to `never` through a check that Biome doesn't narrow by, as
   after `if (x === f()) return;`;
 - after a call that never returns that Biome doesn't recognize, as
-  `failAll(xs)` with `failAll<T>(v: T[]): never`, or that comes after the
-  first 64 statement calls of a function, and in closures created there;
+  `failAll(xs)` with `failAll<T>(v: T[]): never`, or `fail()` with
+  `fail(): Never` and `type Never = never`, or that comes after the first 64
+  statement calls of a function, and in closures created there;
 - after a call that never returns that Biome drops when a function exceeds its
-  work budget, that returns `never` through an alias in a local function, or
-  that is part of a query cycle;
-- after `isNull(x) && isNonNull(x)`, with `x: "a" | null`;
-- in `x; var x = null;`, where the read before the declaration is `null` and
-  TypeScript, which reports the read as a use before assignment, gives
-  `undefined`.
+  work budget, or that is part of a query cycle;
+- in a closure that reads a `let` that only `++` assigns, as `n` in
+  `let n: number | null; const g = () => { if (n !== null) n }; n++;`, where
+  TypeScript reports a use before assignment and gives `number | null`.
 
 TypeScript merges the augmentations of the files in its program, which
 `tsconfig.json` selects with options such as `include` and
@@ -274,9 +275,15 @@ result is wider unless the effect says otherwise, so a rule can miss a report.
 | `x: any; if (typeof x.v === "string") x.v` | `any` | Unknown | A rule can miss a report on `x.v`. |
 | `try { g(); } catch ({ message }) { message }` | `any`, with an error | Unknown | A rule can miss a report on `message`. |
 | `xs: AsyncIterable<string \| null>; for await (const v of xs) { if (v) v }` | `string` | Unknown | A rule can miss a report on `v`. |
+| `o: { a?: string \| number }; const { a = 0 } = o; if (typeof a === "string") a` | `string` | `string \| number` | `noUnnecessaryConditions` can miss an unnecessary check of `a`. |
+| `x: string; x !== null ? 1 : x` | `1` | Unknown | A rule can miss a report on the conditional. |
 
-A function gets no narrowing when it contains a `with` statement or a syntax
-error, or exceeds a work limit, so rules can miss reports in it.
+A variable that a destructuring default can supply never narrows, because
+its declared type ignores the default. A conditional expression is Unknown
+when a check leaves one of its branches no possible value, because a read in
+that branch is Unknown. A function gets no narrowing when it contains a
+`with` statement or a syntax error, or exceeds a work limit, so rules can miss
+reports in it.
 
 ### Closures, inline code, and class members
 
@@ -285,7 +292,6 @@ error, or exceeds a work limit, so rules can miss reports in it.
 | `let top: string \| null = f(); if (top) () => top`, at the top level of a module | `string` | `string \| null` | `noUnnecessaryConditions` can miss an unnecessary check of `top` in the closure. |
 | `var v: string \| null; function f() { if (v !== null) v }` | `string` | `string \| null` | `noUnnecessaryConditions` can miss an unnecessary check of `v`. |
 | `x: string \| number; ((y) => { y })(x)` | `string \| number` | Unknown | A rule can miss a report on `y`. |
-| `let n: number \| null; const g = () => { if (n !== null) n }; n++;` | `number \| null`, with an error | `number` | Narrower: `noUnnecessaryConditions` can call `n ?? 0` after the check unnecessary, although `n` can be `undefined`. |
 
 ### Writes
 
@@ -295,13 +301,18 @@ error, or exceeds a work limit, so rules can miss reports in it.
 | `class K { m() { return 1; } }; k: K; let x: number \| undefined = k.m(); x` | `number` | `number \| undefined` | `noUnnecessaryConditions` can miss an unnecessary `?.` on `x`. |
 | `let b: boolean \| undefined = true; b` | `true` | `boolean` | `noUnnecessaryConditions` can miss that `b` is always `true`. |
 | `let x: number \| string = 1; x = x + 1; x` | `number` | `number \| string` | A rule can miss that `x` is a number. |
+| `xs: string[]; let x: string \| number = 1; [x] = xs; x` | `string` | `string \| number` | `noUnnecessaryConditions` can miss an unnecessary check of `x`. |
 
-A write assigns the type of its value without narrowing. A call reduces the
-assigned type only when its callee has a return type annotation or is a local
-function whose returned values Biome can type. A `declare global` variable or
-a `.d.ts` member typed `typeof` a function without a return type annotation
-counts as annotated, so a call of it assigns the return type that Biome infers
-for that function.
+A write assigns the type of its value without narrowing. A destructuring
+target keeps its declared type when it reads an element of an array, as in
+`[x] = xs` and `[[x]] = [["a"]]`, or when its default supplies the value, as
+in `[x = 1] = []`. A call reduces the assigned type only when its callee has a
+return type annotation or is a local function whose returned values Biome can
+type. An export of a declaration file, or a member of an interface that a
+declaration file declares, typed `typeof` a function without a return type
+annotation counts as annotated, so a call of it assigns the return type that
+Biome infers for that function. A member of a type literal typed that way
+doesn't count.
 
 ### Variables whose type evolves with their writes
 
@@ -316,6 +327,7 @@ their writes, as in TypeScript. The code below uses
 | `let x = null; x = 0; x++; x` | `number` | Unknown | A rule can miss a report on `x`. |
 | `let x; x = null; x` | `null` | Unknown | A rule can miss a report on `x`. |
 | `let x; x` | `undefined` | Unknown | A rule can miss a report on `x`. |
+| `x; var x = null;`, the read before the declarator | `undefined` | `null` | Disjoint: rules see `null` where `x` is `undefined`. |
 | `let a = []; a.push(1); if (c) a = null; a` | `any[]`, with an error | Unknown | A rule can miss a report on `a`. |
 | `const a = []; a.push(null); a` | `null[]` | `unknown[]` | A rule can miss a report on the elements of `a`. |
 | `let a = []; a.push(1); a.push(store.load()); a` | `number[]` | `unknown[]` | A rule can miss a report on the elements of `a`. |
@@ -329,7 +341,9 @@ variable. A write in a nested block, as in
 `let x = null; if (c) { x = store.load(); } x`, gives `null | number`, as in
 TypeScript. A read in another function keeps the declared type only when every
 write is an `=` or a logical assignment outside the scope of the declaration,
-as in the last row.
+as in the last row. A read before the declarator of such a `var` is
+`undefined`, as in TypeScript, only when a write after the declarator assigns
+the variable.
 
 ### Property paths
 
@@ -337,9 +351,12 @@ as in the last row.
 | --- | --- | --- | --- |
 | ``o: { a: string \| null }; if (o[`a`]) o.a`` | `string` | `string \| null` | `noUnnecessaryConditions` can miss an unnecessary check of `o.a`. |
 | `x: { z?: { w: string } } \| undefined; if ((x?.z)?.w) x` | `{ z?: { w: string } }` | `{ z?: { w: string } } \| undefined` | `noUnnecessaryConditions` can miss an unnecessary `?.` on `x`. |
+| `o: { v: string \| null }; if (o.v) o.v; o!.v = null;` | `string` | `string \| null` | `noUnnecessaryConditions` can miss an unnecessary check of `o.v`. |
 
-Only a string literal without escapes or a decimal integer literal from 0 to
-2^53 - 1 is a key of a path, as `o["v"]` or `t[0]`.
+A write through `o!.v` or `(o as T).v` stops `o.v` from narrowing anywhere in
+the function, also before the write. Only a string literal without escapes or
+a decimal integer literal from 0 to 2^53 - 1 is a key of a path, as `o["v"]`
+or `t[0]`.
 
 ### `this`
 
@@ -370,6 +387,7 @@ These rows use `type S = { kind: "c"; v: number } | { kind: "s"; v: string }`.
 | `type Result<T> = { ok: true; value: T } \| { ok: false; error: string }; r: Result<number>; if (r.ok) r` | `{ ok: true; value: number }` | `Result<number>` | A rule can miss a report on `r`. |
 | `o: { k: { a: 1 }; x: 1 } \| { k: "x"; y: 2 }; if (o.k === "x") o` | `{ k: "x"; y: 2 }` | both members | A rule can miss a report on `o`. |
 | `interface AB { kind: "a" \| "b"; x: 1 }; interface C { kind: "c"; y: 2 }; s: AB \| C; switch (s.kind) { case "a": case "b": break; default: s }` | `C` | `AB \| C` | A rule can miss a report on `s` in `default`. |
+| `kindC(): "c"; if (s.kind === kindC()) s` | `Circle` | `Circle \| Square` | A rule can miss a report on `s`. |
 
 ### Aliased conditions
 
@@ -420,11 +438,14 @@ string.
 | `class L { length = 0 }; x: L \| number; if (typeof x === "string") x` | `string` | `L` | A rule can miss a report on `x`. |
 | `interface Pad { padStart(n: number): string }; x: Pad \| number; if (typeof x === "string") x` | `string` | `Pad` | A rule can miss a report on `x`. |
 | `x: string \| number; switch (typeof x) { case "strin": x }` | `never` | `string \| number` | A rule can miss that the case never matches. |
+| `x: string \| void; if (typeof x === "string") x` | `string` | Unknown | A rule can miss a report on `x`. |
 
-A class can declare private members, so Biome doesn't count a primitive as an
-instance of a class. Biome compares object types with the members that
-primitives have in TypeScript's ES2015 library files, which lack members that
-newer libraries add, such as `padStart`.
+A narrowed read of a type with a `void` member is Unknown, because a function
+whose return type is `void` can return any value. A class can declare private
+members, so Biome doesn't count a primitive as an instance of a class. Biome
+compares object types with the members that primitives have in TypeScript's
+ES2015 library files, which lack members that newer libraries add, such as
+`padStart`.
 
 ### `in` and `instanceof`
 
@@ -454,6 +475,7 @@ or a computed key.
 | `interface Same { a: number }; x: Same \| Bar; if (isFoo(x)) {} else x` | `Bar` | `Same \| Bar` | `noUnnecessaryConditions` can miss an unnecessary check of `x`. |
 | `isObj(v: unknown): v is {}; x: unknown; if (isObj(x)) {} else x` | `null \| undefined` | `unknown` | `noUnnecessaryConditions` can miss an unnecessary check of `x`. |
 | `x: string \| number; return (assertString(x), x)` | `string` | `string \| number` | A rule can miss a report on the returned `x`. |
+| `x: { y: string \| number } \| undefined; if (isString(x?.y)) x` | `{ y: string \| number }` | `{ y: string \| number } \| undefined` | `noUnnecessaryConditions` can miss an unnecessary `?.` on `x`. |
 
 Biome skips an earlier overload only when no narrowing could make it accept
 the arguments, and narrows only the true branch where TypeScript might infer
@@ -483,6 +505,18 @@ only statement, a `return`.
 
 Biome tries the overloads of one declaration in their written order, where
 TypeScript tries those with a parameter of a literal type first.
+
+### Declarations and globals
+
+| Code | TypeScript | Biome | Effect on rules |
+| --- | --- | --- | --- |
+| `namespace N { export interface I { a: 1 } } namespace N { export interface I { b: 2 } }; i: N.I; i.b` | `2` | Unknown | A rule can miss a report on `i.b`. |
+| `declare global { var __DEV__: string \| null }` in one module, `if (__DEV__) __DEV__` in another | `string` | Unknown | A rule can miss a report on `__DEV__`. |
+| `declare global { namespace App { interface Config { v: string \| null } } }` in one module, `c: App.Config; if (c.v) c.v` in another | `string` | Unknown | A rule can miss a report on `c.v`. |
+
+Interfaces of one name in two blocks of a namespace don't merge, and the
+first of them declares the type. Biome sees the interfaces of a
+`declare global` block, but not its variables and namespaces.
 
 ### Work limits
 

@@ -806,3 +806,23 @@ fn other_declarations_dont_evolve() {
         ],
     );
 }
+
+// TypeScript 7.0.2 (`tsc --strict`) gives `undefined` at `before` and
+// `beforeWritten`, the value of a `var` before its declarator runs, and
+// reports no error. Biome gives `undefined` only when a write after the
+// declarator assigns the variable. Without one, the read keeps the type that
+// the declaration gives, `null`.
+#[test]
+fn reads_before_the_declarator_of_a_var_initialized_with_null() {
+    assert_reads(
+        r#"
+        function f() { /*before*/x; var x = null; }
+        function g() { /*beforeWritten*/y; var y = null; y = 1; }
+        "#,
+        &[
+            // TypeScript: `undefined`.
+            ("before", "x", &["null"]),
+            ("beforeWritten", "y", &["undefined"]),
+        ],
+    );
+}

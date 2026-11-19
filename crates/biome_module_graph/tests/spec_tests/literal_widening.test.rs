@@ -360,3 +360,27 @@ let l2 = N.K; /*l2*/l2;
         ],
     );
 }
+
+// TypeScript 7.0.2 (`tsc --strict`) gives `number` at `n`, `string` at `s`,
+// and `1` at `k`, because `let` widens the fresh literal that `await` gives.
+// Biome can't tell whether the value of `await` is a fresh literal, so it
+// keeps the literal type.
+#[test]
+fn await_of_a_literal_keeps_its_literal_type() {
+    assert_reads(
+        r#"
+async function f() {
+    let n = await 1; /*n*/n;
+    let s = await "a"; /*s*/s;
+    const k = await 1; /*k*/k;
+}
+"#,
+        &[
+            // TypeScript: `number`.
+            ("n", "n", &["number: 1"]),
+            // TypeScript: `string`.
+            ("s", "s", &["string: a"]),
+            ("k", "k", &["number: 1"]),
+        ],
+    );
+}
