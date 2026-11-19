@@ -4646,9 +4646,9 @@ fn with_inferred_predicate(
 /// value mentions, and it takes only the first such parameter, skipping
 /// `this`, rest, and destructured parameters and those annotated `boolean`,
 /// which TypeScript skips too. That parameter must be named without escapes,
-/// have no default value, never be assigned anywhere in the function, and
-/// get its type from an annotation or, without one, from the call that the
-/// function is passed to. The value must also test it directly, as
+/// never be assigned anywhere in the function, and get its type from an
+/// annotation or, without one and without a default value, from the call
+/// that the function is passed to. The value must also test it directly, as
 /// [`tests_name`] describes, because inferring a type predicate costs a
 /// resolution of the parameter's type, which is wasted on a value such as
 /// `query(builder)` or `builder.done()`. Otherwise the function gets no type
@@ -4723,10 +4723,13 @@ pub fn inferred_predicate_parameter(
         if is_boolean && formal.question_mark_token().is_none() {
             continue;
         }
-        let is_typed = annotation.is_some() || function.is_call_argument();
+        // TypeScript tests the annotated type of a parameter, whatever its
+        // default value. Without an annotation, the default value takes part
+        // in the parameter's type, so such a parameter gets no type predicate.
+        let is_typed =
+            annotation.is_some() || (function.is_call_argument() && formal.initializer().is_none());
         let mut steps = MAX_BOOLEAN_STEPS;
         if !is_typed
-            || formal.initializer().is_some()
             || text.contains('\\')
             || !tests_name(&returned, text, &mut steps)
             || assigns_name(function, text)

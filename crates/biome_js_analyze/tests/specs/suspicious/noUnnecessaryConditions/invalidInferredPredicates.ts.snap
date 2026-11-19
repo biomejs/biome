@@ -29,6 +29,14 @@ function filteredElements(values: (string | null)[]) {
 	return values.filter((value) => value !== null).map((value) => value ?? "");
 }
 
+const isPresentOrDefault = (value: string | null = null) => value !== null;
+
+function defaultedParameter(value: string | null) {
+	if (isPresentOrDefault(value)) {
+		return value ?? "";
+	}
+}
+
 ```
 
 # Diagnostics
@@ -102,6 +110,32 @@ invalidInferredPredicates.ts:23:65 lint/suspicious/noUnnecessaryConditions ━�
        │ 	                                                                     ^^
     24 │ }
     25 │ 
+  
+  i The left-hand side is guaranteed to be non-nullish, so the fallback is unreachable.
+  
+
+```
+
+```
+invalidInferredPredicates.ts:30:10 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary nullish coalescing.
+  
+    28 │ function defaultedParameter(value: string | null) {
+    29 │ 	if (isPresentOrDefault(value)) {
+  > 30 │ 		return value ?? "";
+       │ 		       ^^^^^
+    31 │ 	}
+    32 │ }
+  
+  i Drop ?? and the fallback expression.
+  
+    28 │ function defaultedParameter(value: string | null) {
+    29 │ 	if (isPresentOrDefault(value)) {
+  > 30 │ 		return value ?? "";
+       │ 		             ^^
+    31 │ 	}
+    32 │ }
   
   i The left-hand side is guaranteed to be non-nullish, so the fallback is unreachable.
   

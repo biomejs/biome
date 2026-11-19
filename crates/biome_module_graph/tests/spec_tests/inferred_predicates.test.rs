@@ -215,7 +215,6 @@ fn functions_that_infer_no_type_predicate_narrow_nothing() {
         const isTrue = (v: boolean) => v === true;
         type B = boolean;
         const isTrueAlias = (v: B) => v === true;
-        const defaulted = (v: string | null = null) => v !== null;
         function prior(x: string | null | number) { if (x === null) throw 0; return typeof x === "string" || x === null; }
         function unrelated(x: string | number) { const k = 1; return typeof x === "string"; }
         const firstOf = (a: string | null, b: string | null) => a !== null && b !== null;
@@ -230,7 +229,6 @@ fn functions_that_infer_no_type_predicate_narrow_nothing() {
         function h3(x: string | null) { if (written(x)) /*written*/x; }
         function h4(x: boolean) { if (isTrue(x)) /*boolean*/x; }
         function h5(x: boolean) { if (isTrueAlias(x)) /*alias*/x; }
-        function h6(x: string | null) { if (defaulted(x)) /*defaulted*/x; }
         function h7(y: string | null | number) { if (prior(y)) /*prior*/y; }
         function h8(y: string | number) { if (unrelated(y)) /*unrelated*/y; }
         function h9(x: string | null, y: string | null) { if (firstOf(x, y)) /*first*/y; }
@@ -256,9 +254,6 @@ fn functions_that_infer_no_type_predicate_narrow_nothing() {
             ("written", "x", &["null", "string"]),
             ("boolean", "x", &["boolean"]),
             ("alias", "x", &["boolean"]),
-            // TypeScript gives `string`. Biome infers no type predicate for
-            // a parameter with a default value.
-            ("defaulted", "x", &["null", "string"]),
             // TypeScript gives `string`. Biome infers no type predicate when
             // a statement comes before the `return`, because such a
             // statement can narrow the parameter, as `x === null` does here.
@@ -525,5 +520,44 @@ fn callbacks_infer_type_predicates_without_a_cycle() {
     assert_eq!(
         function_query_will_execute_count_by_name(&db, "infer_flow_inferred_predicate", &events),
         1
+    );
+}
+
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
+// A parameter with a default value gets a type predicate from its annotated
+// type, as one without a default value does.
+#[test]
+fn inferred_type_predicates_test_the_annotation_of_a_parameter_with_a_default_value() {
+    assert_reads(
+        r#"
+        const d1 = (v: string | null = null) => v !== null;
+        const d4 = (v: string | undefined = "a") => v !== undefined;
+        const d5 = (v: string | number = 1) => typeof v === "string";
+        function d6(v: string | null = null) { return v !== null; }
+        const d7 = (a: number, v: string | null = null) => v !== null;
+        const d8 = (v: string | null | undefined = null) => v != null;
+        function c1(x: string | null) { if (d1(x)) /*d1t*/x; else /*d1f*/x; }
+        function c2(x: string | null | undefined) { if (d1(x)) /*d2t*/x; else /*d2f*/x; }
+        function c4(x: string | undefined) { if (d4(x)) /*d4t*/x; else /*d4f*/x; }
+        function c5(x: string | number) { if (d5(x)) /*d5t*/x; else /*d5f*/x; }
+        function c6(x: string | null) { if (d6(x)) /*d6t*/x; else /*d6f*/x; }
+        function c7(x: string | null) { if (d7(1, x)) /*d7t*/x; }
+        function c8(x: string | null | undefined) { if (d8(x)) /*d8t*/x; else /*d8f*/x; }
+        "#,
+        &[
+            ("d1t", "x", &["string"]),
+            ("d1f", "x", &["null"]),
+            ("d2t", "x", &["string"]),
+            ("d2f", "x", &["null", "undefined"]),
+            ("d4t", "x", &["string"]),
+            ("d4f", "x", &["undefined"]),
+            ("d5t", "x", &["string"]),
+            ("d5f", "x", &["number"]),
+            ("d6t", "x", &["string"]),
+            ("d6f", "x", &["null"]),
+            ("d7t", "x", &["string"]),
+            ("d8t", "x", &["string"]),
+            ("d8f", "x", &["null", "undefined"]),
+        ],
     );
 }

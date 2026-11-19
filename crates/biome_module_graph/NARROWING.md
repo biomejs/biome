@@ -487,13 +487,12 @@ explicit type, as TypeScript requires.
 
 | Code | TypeScript | Biome | Effect on rules |
 | --- | --- | --- | --- |
-| `const defaulted = (v: string \| null = null) => v !== null; x: string \| null; if (defaulted(x)) x` | `string` | `string \| null` | `noUnnecessaryConditions` can miss an unnecessary check of `x`. |
 | `const isObj = (v: unknown) => typeof v === "object" && v !== null; x: unknown; if (isObj(x)) x` | `object` | `unknown` | A rule can miss a report on `x`. |
 | `function isDefined<T>(v: T \| undefined) { return v !== undefined; }; x: string \| undefined; if (isDefined(x)) x` | `string` | `string \| undefined` | `noUnnecessaryConditions` can miss an unnecessary `?.` on `x`. |
 
 Biome infers a type predicate only when the body is a single boolean check of
-a parameter without a default value, written as the arrow's body or as the
-only statement, a `return`.
+a parameter, written as the arrow's body or as the only statement, a
+`return`. A parameter with a default value also needs a type annotation.
 
 ### `switch`, optional chains, and overloads
 
