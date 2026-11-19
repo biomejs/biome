@@ -1,8 +1,8 @@
 use crate::TestArgs as Args;
-use crate::run_cli;
 use crate::snap_test::{
     SnapshotPayload, assert_cli_snapshot, assert_file_contents, markup_to_string,
 };
+use crate::{run_cli, run_cli_with_server_workspace};
 use biome_console::{BufferConsole, markup};
 use biome_fs::MemoryFileSystem;
 use camino::Utf8Path;
@@ -1480,6 +1480,64 @@ fn comment_only_template_expression_formats() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "comment_only_template_expression_formats",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn no_html_link_for_pages_ignores_astro_templates() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        r#"{
+  "html": { "experimentalFullSupportEnabled": true },
+  "linter": {
+    "rules": {
+      "preset": "none",
+      "nursery": { "noHtmlLinkForPages": "error" }
+    }
+  }
+}"#
+        .as_bytes(),
+    );
+    fs.insert(
+        "package.json".into(),
+        r#"{ "dependencies": { "next": "*" } }"#.as_bytes(),
+    );
+    fs.insert(
+        "app/about/page.jsx".into(),
+        "export default function About() {}".as_bytes(),
+    );
+    fs.insert(
+        "app/page.jsx".into(),
+        r#"export default function Home() {
+    return <a href="/about">About</a>;
+}"#
+        .as_bytes(),
+    );
+    fs.insert(
+        "src/components/Nav.astro".into(),
+        r#"<a href="/about">About</a>
+{show && <a href="/about">About</a>}"#
+            .as_bytes(),
+    );
+
+    let (fs, result) = run_cli_with_server_workspace(
+        fs,
+        &mut console,
+        Args::from(["lint", "app", "src"].as_slice()),
+    );
+
+    // Only the JSX page reports: the same link in the Astro template is skipped.
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "no_html_link_for_pages_ignores_astro_templates",
         fs,
         console,
         result,
