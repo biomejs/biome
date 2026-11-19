@@ -1178,9 +1178,12 @@ same subject match.
   the enclosing root's own capture, so a chain of closures resolves outward.
   A `let` that may be read before it is assigned keeps the `undefined` of its
   start along the chain. A read in a closure starts it without `undefined`
-  when some code assigns it (`FlowCapture::assumes_initialized`,
+  when some code assigns it without reading it first, with `=`, a logical
+  assignment, a destructuring assignment, or the head of a `for...in` or
+  `for...of` loop (`is_definite_assignment`, `FlowCapture::assumes_initialized`,
   `FlowRead::assumes_initialized`), and otherwise gets the declared type where
-  `undefined` remains although the declared type lacks it.
+  `undefined` remains although the declared type lacks it, so a `let` that
+  only `++` or `+=` assigns keeps its declared type there.
 - **Subject classes.** A subject in `RootFlow::property_only` starts from
   `property_baseline` instead of `narrowing_baseline`. It has no baseline, so
   its reads keep their declared types without a solve, unless its flattened

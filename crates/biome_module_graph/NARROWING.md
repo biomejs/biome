@@ -223,10 +223,7 @@ TypeScript treats as unreachable, impossible, or erroneous:
   `fail(): Never` and `type Never = never`, or that comes after the first 64
   statement calls of a function, and in closures created there;
 - after a call that never returns that Biome drops when a function exceeds its
-  work budget, or that is part of a query cycle;
-- in a closure that reads a `let` that only `++` assigns, as `n` in
-  `let n: number | null; const g = () => { if (n !== null) n }; n++;`, where
-  TypeScript reports a use before assignment and gives `number | null`.
+  work budget, or that is part of a query cycle.
 
 TypeScript merges the augmentations of the files in its program, which
 `tsconfig.json` selects with options such as `include` and
