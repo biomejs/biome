@@ -395,3 +395,74 @@ fn in_keeps_the_declared_type_where_biome_cannot_tell() {
         ],
     );
 }
+
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type,
+// except where a comment gives TypeScript's type. Biome keeps an array, and
+// an object type with a setter, a spread, or a computed key, in both
+// branches, because it can't tell whether the member has the property. It
+// lists none of the members of the setter's type and of the spread object.
+#[test]
+fn in_keeps_the_members_whose_properties_biome_cannot_list() {
+    let computed = r#"[computed [string: a]: number: 1]"#;
+    assert_reads(
+        r#"
+        function array(x: string[] | A) { if ("a" in x) /*array*/x; else /*arrayElse*/x; }
+        function setterType(x: { set a(v: number) } | B) { if ("a" in x) /*setter*/x; else /*setterElse*/x; }
+        const base = { a: 1 as const };
+        const spread = { ...base };
+        function spreadType(x: typeof spread | B) { if ("a" in x) /*spread*/x; else /*spreadElse*/x; }
+        const key = "a";
+        const computed = { [key]: 1 as const };
+        function computedType(x: typeof computed | B) { if ("a" in x) /*computed*/x; else /*computedElse*/x; }
+        "#,
+        &[
+            // TypeScript: `A`.
+            ("array", "x", &["A", "instanceof Array<string>"]),
+            ("arrayElse", "x", &["instanceof Array<string>"]),
+            // TypeScript: `{ a: number }`.
+            ("setter", "x", &["B", "[]"]),
+            // TypeScript: `B`.
+            ("setterElse", "x", &["B", "[]"]),
+            // TypeScript: `{ a: 1 }`.
+            ("spread", "x", &["B", "[]"]),
+            // TypeScript: `B`.
+            ("spreadElse", "x", &["B", "[]"]),
+            // TypeScript: `{ a: 1 }`.
+            ("computed", "x", &["B", computed]),
+            // TypeScript: `B`.
+            ("computedElse", "x", &["B", computed]),
+        ],
+    );
+}
+
+// TypeScript 7.0.2 (`tsc --strict`) merges the interfaces of one name in two
+// blocks of a namespace, so `N.I` has `a` and `b`. Biome takes `N.I` as the
+// first of them, which lacks `b`, so `"b" in x` intersects both members with
+// an object type that has `b`, and `i.b` is Unknown.
+#[test]
+fn interfaces_in_two_blocks_of_a_namespace_dont_merge() {
+    assert_reads(
+        r#"
+        namespace N { export interface I { a: 1 } }
+        namespace N { export interface I { b: 2 } }
+        function f(x: N.I | { c: 3 }) { if ("b" in x) /*merged*/x; else /*mergedElse*/x; }
+        declare const i: N.I;
+        /*member*/i.b;
+        "#,
+        &[
+            // TypeScript: `N.I`.
+            (
+                "merged",
+                "x",
+                &[
+                    r#"["a": number: 1, "b": unknown]"#,
+                    r#"["c": number: 3, "b": unknown]"#,
+                ],
+            ),
+            // TypeScript: `{ c: 3 }`.
+            ("mergedElse", "x", &["I", r#"["c": number: 3]"#]),
+            // TypeScript: `2`.
+            ("member", "i.b", &["unknown"]),
+        ],
+    );
+}

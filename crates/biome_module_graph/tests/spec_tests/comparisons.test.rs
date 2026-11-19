@@ -432,7 +432,7 @@ fn comparisons_with_constants_narrow_discriminants_and_loose_nullish_tests() {
 // `D` is `never` where the comparisons run, so they compare with no value and
 // narrow nothing. Biome takes `D` as `false` there, so it gives `false`,
 // which is narrower than TypeScript in code that TypeScript types as
-// impossible, as the Limits in `NARROWING.md` describe.
+// impossible, as the deliberate choices in `NARROWING.md` describe.
 #[test]
 fn comparisons_with_constants_that_a_condition_makes_impossible_narrow() {
     assert_reads(
@@ -930,4 +930,32 @@ fn comparisons_keep_intersections_with_type_parameters() {
             ("g4", "x", &["instanceof T & string"]),
         ],
     );
+}
+
+// TypeScript 7.0.2 (`tsc --strict`) gives `S.A` at `member`, `S.B` at
+// `narrowed`, and `S` at `declared`, types that a rule can tell from
+// `string`. Biome gives each member the literal type of its value, so a rule
+// that asks whether a type is a string gets `true` for all three.
+#[test]
+fn members_of_string_enums_are_strings() {
+    const SOURCE: &str = r#"
+        enum S { A = "a", B = "b" }
+        function f(s: S) { /*member*/S.A; if (s === S.B) /*narrowed*/s; /*declared*/s; }
+    "#;
+    let db = build_files_db(&[("/src/index.ts", SOURCE)]);
+    let module = db.module_for_path(Utf8Path::new("/src/index.ts")).unwrap();
+    for (marker, expression) in [("member", "S.A"), ("narrowed", "s"), ("declared", "s")] {
+        let range = marked_range(SOURCE, marker, expression);
+        let ty = execute_type_inference_request(
+            &db,
+            TypeInferenceCaller::new("test", "comparisons"),
+            NormalizedExpressionTypeRequest::new(module, range),
+        )
+        .unwrap_or_else(|| panic!("expression at {marker} must be inferred"));
+        assert!(
+            InferredType::new(&db, ty).is_all_string_like(),
+            "{marker}: {}",
+            format_inferred_type(&db, ty)
+        );
+    }
 }

@@ -907,7 +907,7 @@ fn switches_after_comparisons_with_enum_members_are_not_exhaustive() {
 // exhaustive. Biome doesn't compare with a call, whose type it infers, so `x`
 // is `"a"` at the switch at `call`, and the switch is exhaustive. `y` reads as
 // `string` there, which is narrower than TypeScript in code that TypeScript
-// types as impossible, as the Limits in `NARROWING.md` describe.
+// types as impossible, as the deliberate choices in `NARROWING.md` describe.
 #[test]
 fn switches_after_comparisons_that_biome_does_not_decompose_can_be_exhaustive() {
     assert_reads(
@@ -960,4 +960,17 @@ fn lookups_decide_whether_a_switch_is_exhaustive_once() {
     assert_eq!(read("afterY", "y"), InferredTypeData::String);
     assert_eq!(read("afterZ", "z"), InferredTypeData::String);
     assert_eq!(decisions(&db.take_salsa_events()), 1);
+}
+
+// TypeScript 7.0.2 (`tsc --strict`) gives `string` at `group`: a group with
+// `default` sees the cases outside the group fail, here `x === null`. `x` can
+// still be `null` there, when `case c:` matches and the group runs.
+#[test]
+fn switch_true_groups_with_default_see_the_other_cases_fail() {
+    assert_reads(
+        r#"
+        function f(x: string | null, c: boolean) { switch (true) { case c: default: /*group*/x; break; case x === null: } }
+        "#,
+        &[("group", "x", &["string"])],
+    );
 }

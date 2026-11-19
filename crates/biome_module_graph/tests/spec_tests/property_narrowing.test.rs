@@ -226,13 +226,14 @@ fn getters_narrow_like_fields() {
 }
 
 // TypeScript 7.0.2 (`tsc --strict`) gives the type in the comment after each
-// read. A write narrows the path at the write, as in TypeScript, and a write
-// of a prefix gives it its declared type. Biome is wider where the comment
-// differs from the expected type: a write in a function called where it is
-// defined or in a class static block stops the path from narrowing in the
-// whole function, and a write through a key that is not a literal
-// (`constKey`, `unionKey`) gives every path of the object its declared type,
-// where TypeScript narrows for a `const` key and ignores other keys;
+// read. A write narrows the path at the write, as in TypeScript, also in a
+// function called where it is defined or in a class static block, and a
+// write of a prefix gives it its declared type. Biome is wider where the
+// comment differs from the expected type: a write in an `async` function
+// called where it is defined stops the path from narrowing in the whole
+// function, and a write through a key that is not a literal (`constKey`,
+// `unionKey`) gives every path of the object its declared type, where
+// TypeScript narrows for a `const` key and ignores other keys;
 // `NARROWING.md` lists the deliberate choices.
 #[test]
 fn writes_to_the_path_a_prefix_or_any_property_narrow_or_cancel_narrowing() {
@@ -290,10 +291,10 @@ fn writes_to_the_path_a_prefix_or_any_property_narrow_or_cancel_narrowing() {
             ("deleted", "o.v", &[Undefined]),
             ("prefix", "o.v.w", &[String, Null]),
             ("variable", "o.v", &[String, Null]),
-            ("arrowIife", "o.v", &[String, Null]),
-            ("functionIife", "o.v", &[String, Null]),
+            ("arrowIife", "o.v", &[Null]),
+            ("functionIife", "o.v", &[Null]),
             ("asyncIife", "o.v", &[String, Null]),
-            ("staticBlock", "o.v", &[String, Null]),
+            ("staticBlock", "o.v", &[Null]),
             ("constKey", "o.v", &[String, Null]),
             ("unionKey", "o.v", &[String, Null]),
             ("beforeWrite", "o.v", &[String]),
@@ -303,11 +304,10 @@ fn writes_to_the_path_a_prefix_or_any_property_narrow_or_cancel_narrowing() {
 
 // TypeScript 7.0.2 (`tsc --strict`) gives `string | null` at `arrow` and
 // `declaration`, because property narrowing never reaches a function created
-// later. It gives `string` at `iife`, where Biome is wider, because the body
-// of a function called where it is defined does not continue the outer flow.
-// TypeScript and Biome both give `string` at `enclosing`, because a path
-// on a variable of an enclosing function narrows by the tests of the function
-// that reads it.
+// later. It gives `string` at `iife`, because the body of a function called
+// where it is defined runs in the outer flow. TypeScript and Biome both give
+// `string` at `enclosing`, because a path on a variable of an enclosing
+// function narrows by the tests of the function that reads it.
 #[test]
 fn reads_in_nested_functions_see_no_property_facts() {
     use InferredTypeData::{Null, String};
@@ -326,7 +326,7 @@ fn reads_in_nested_functions_see_no_property_facts() {
         &[
             ("arrow", "o.v", &[String, Null]),
             ("declaration", "o.v", &[String, Null]),
-            ("iife", "o.v", &[String, Null]),
+            ("iife", "o.v", &[String]),
             ("enclosing", "o.v", &[String]),
         ],
     );
@@ -881,12 +881,14 @@ fn writes_to_this_in_other_functions_keep_narrowing() {
 
 // TypeScript 7.0.2 (`tsc --strict`) gives the type in the comment after each
 // read. Every write cancels the narrowing of the path it writes, so Biome reads
-// the path at its declared type. A write to another path, at `other` and
-// `superOther`, keeps the narrowing. TypeScript differs at three reads. At
-// `arrowIife` and `functionIife`, it narrows the path to the assigned type at
-// the write, which Biome does not model. At `super`, it ignores the write
-// through `super`, although that write can set `this.x` through a setter of
-// the parent class.
+// the path at its declared type, or at the assigned type after a write in an
+// arrow function called where it is defined, as at `arrowIife`. A write to
+// another path, at `other` and `superOther`, keeps the narrowing. TypeScript
+// differs at two reads. At `functionIife`, it narrows the path to the
+// assigned type at the write, although the `this` of a function expression is
+// its own, so Biome counts the write as one that the flow doesn't model. At
+// `super`, it ignores the write through `super`, although that write can set
+// `this.x` through a setter of the parent class.
 #[test]
 fn writes_to_this_in_the_same_root_cancel_narrowing() {
     use InferredTypeData::{Null, String};
@@ -921,7 +923,7 @@ fn writes_to_this_in_the_same_root_cancel_narrowing() {
             ("assigned", "this.x", &[String, Null]),
             ("privateName", "this.#y", &[String, Null]),
             ("prefix", "this.p.y", &[String, Null]),
-            ("arrowIife", "this.x", &[String, Null]),
+            ("arrowIife", "this.x", &[Null]),
             ("functionIife", "this.x", &[String, Null]),
             ("super", "this.x", &[String, Null]),
             ("other", "this.x", &[String]),
@@ -1216,6 +1218,31 @@ fn writes_narrow_receivers() {
             ("cleared", "a.b", true),
             ("later", "a.b", false),
             ("extension", "a.b", false),
+        ],
+    );
+}
+
+// TypeScript 7.0.2 (`tsc --strict`) gives each read the type in its comment.
+// It narrows `o.v` at a write through `o!.v` and ignores a write through
+// `(o as O).v`. Biome maps neither target to the path `o.v`, so `o.v` keeps
+// its declared type everywhere in the function, also before the write.
+#[test]
+fn writes_through_assertions_stop_narrowing_the_path() {
+    use InferredTypeData::{Null, String};
+    const SOURCE: &str = r#"
+        type O = { v: string | null };
+        function nonNull(o: O) { if (o.v) { o!.v = null; /*nonNull*/o.v; } } // null
+        function asserted(o: O) { if (o.v) { (o as O).v = null; /*asserted*/o.v; } } // string
+        function before(o: O) { if (o.v) { /*before*/o.v; } (o as O).v = "b"; } // string
+        function beforeNonNull(o: O) { if (o.v) { /*beforeNonNull*/o.v; } o!.v = null; } // string
+    "#;
+    assert_reads(
+        SOURCE,
+        &[
+            ("nonNull", "o.v", &[String, Null]),
+            ("asserted", "o.v", &[String, Null]),
+            ("before", "o.v", &[String, Null]),
+            ("beforeNonNull", "o.v", &[String, Null]),
         ],
     );
 }

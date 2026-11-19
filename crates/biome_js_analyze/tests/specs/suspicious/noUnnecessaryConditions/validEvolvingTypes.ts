@@ -45,3 +45,38 @@ function computedWithFallback() {
 	result = store.compute();
 	return result || fallback;
 }
+
+// An array that starts empty can be assigned another value, so where such a
+// write reaches it, it can be `null`.
+function cleared() {
+	let items = [];
+	items.push(1);
+	if (enabled) items = null;
+	return items?.length;
+}
+
+// A variable read in another function can hold any value that the code
+// assigns to it, as the timer below.
+let timer = null;
+function stop() {
+	if (timer) {
+		clearTimeout(timer);
+	}
+}
+timer = setTimeout(stop, 1);
+
+// A local function that can reach its end returns `undefined` there, so the
+// variable can still be `undefined` after the test of `null`.
+function find(found: boolean) {
+	if (found) return 1;
+}
+
+function searched() {
+	let match = null;
+	if (enabled) {
+		match = find(enabled);
+	}
+	if (match !== null) {
+		match?.toFixed();
+	}
+}

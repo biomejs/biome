@@ -2329,8 +2329,8 @@ fn jumps_out_of_try_and_switch_statements_reach_their_targets() {
 // TypeScript 7.0.2 (`tsc --strict`) narrows the decorator, the `extends`
 // expression, the enum initializer, the static block, and the read after the
 // class to `string`, and gives `string | null` in the method, because a method
-// of a class declaration does not see the narrowing around the class. Biome
-// analyzes the static block on its own, so it keeps the declared type there.
+// of a class declaration does not see the narrowing around the class. The
+// static block runs where the class is evaluated.
 #[test]
 fn class_and_enum_declarations_keep_narrowing_outside_their_members() {
     use InferredTypeData::{Null, String};
@@ -2360,7 +2360,7 @@ fn class_and_enum_declarations_keep_narrowing_outside_their_members() {
         ("decorator", &[String][..]),
         ("extends", &[String]),
         ("method", &[String, Null]),
-        ("static", &[String, Null]),
+        ("static", &[String]),
         ("enum", &[String]),
         ("after", &[String]),
     ] {
@@ -2769,4 +2769,95 @@ fn catch_variables_have_the_unknown_keyword_type() {
     }
     let logical = normalized_type_at(&db, module, SOURCE, "logical", "e");
     assert_eq!(variant_texts(&db, logical), ["instanceof Error"]);
+}
+
+/// Asserts the type of each `(marker, expression, expected)` read in `source`
+/// by its members, as [`variant_texts`] formats them.
+fn assert_texts(source: &str, reads: &[(&str, &str, &[&str])]) {
+    let (db, module) = narrowing_db(source);
+    let mismatches: Vec<_> = reads
+        .iter()
+        .filter_map(|(marker, expression, expected)| {
+            let ty = normalized_type_at(&db, module, source, marker, expression);
+            let actual = variant_texts(&db, ty);
+            (actual != *expected)
+                .then(|| format!("{marker}: expected {expected:?}, got {actual:?}"))
+        })
+        .collect();
+    assert!(mismatches.is_empty(), "{}", mismatches.join("\n"));
+}
+
+// TypeScript 7.0.2 (`tsc --strict`) gives `string | null | undefined` at
+// `coalesceTrue` and `null | undefined` at `coalesceFalse`. `x ?? y` is falsy
+// when `x` is `""`, which isn't nullish, so Biome narrows neither operand.
+#[test]
+fn nullish_coalescing_conditions_narrow_neither_operand() {
+    assert_texts(
+        r#"
+        function f(x: string | null | undefined, y: boolean) {
+            if (x ?? y) { /*coalesceTrue*/x; } else { /*coalesceFalse*/x; }
+        }
+        "#,
+        &[
+            ("coalesceTrue", "x", &["null", "string", "undefined"]),
+            // TypeScript: `null | undefined`.
+            ("coalesceFalse", "x", &["null", "string", "undefined"]),
+        ],
+    );
+}
+
+// TypeScript 7.0.2 (`tsc --strict`) gives `string` at every read below. A
+// variable that a destructuring default can supply keeps its declared type,
+// which ignores the default.
+#[test]
+fn variables_that_a_destructuring_default_can_supply_keep_their_declared_type() {
+    assert_texts(
+        r#"
+        function f(o: { a?: string | number }) { const { a = 0 } = o; if (typeof a === "string") /*typeOf*/a; }
+        function g(o: { a?: string | null }) { const { a = null } = o; if (a !== null) /*notNull*/a; }
+        "#,
+        &[
+            // TypeScript: `string`.
+            ("typeOf", "a", &["number", "string"]),
+            // TypeScript: `string`.
+            ("notNull", "a", &["null", "string"]),
+        ],
+    );
+}
+
+// TypeScript 7.0.2 (`tsc --strict`) gives `string` at `typeOf` and `truthy`,
+// and `void` at `typeOfElse`. A function whose return type is `void` can
+// return any value, so Biome reads a narrowed `void` member as Unknown.
+#[test]
+fn void_members_make_narrowed_reads_unknown() {
+    assert_texts(
+        r#"
+        function f(x: string | void) { if (typeof x === "string") /*typeOf*/x; else /*typeOfElse*/x; }
+        function g(x: string | void) { if (x) /*truthy*/x; }
+        "#,
+        &[
+            // TypeScript: `string`.
+            ("typeOf", "x", &["unknown"]),
+            // TypeScript: `void`.
+            ("typeOfElse", "x", &["unknown"]),
+            // TypeScript: `string`.
+            ("truthy", "x", &["unknown"]),
+        ],
+    );
+}
+
+// TypeScript 7.0.2 (`tsc --strict`) gives `1` at `impossible`, where the test
+// leaves `x` no value in the second branch. Biome reads `x` there as Unknown,
+// which makes the whole expression Unknown.
+#[test]
+fn conditional_expressions_with_an_impossible_branch_are_unknown() {
+    assert_texts(
+        r#"
+        function f(x: string) { const r = /*impossible*/x !== null ? 1 : x; }
+        "#,
+        &[
+            // TypeScript: `1`.
+            ("impossible", "x !== null ? 1 : x", &["unknown"]),
+        ],
+    );
 }

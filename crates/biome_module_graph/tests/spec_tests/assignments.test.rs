@@ -282,9 +282,10 @@ fn assignments_keep_type_parameters_that_biome_cant_compare() {
 // TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
 // A call to a local function without a return annotation reduces by the
 // return type that Biome infers from the function's body, which has the
-// `undefined` of an end that the function can reach. A function expression
-// called where it is defined, and `typeof`, which Biome types as one kind,
-// give the declared type.
+// `undefined` of an end that the function can reach, also through a `const`
+// that holds the call's result. A function expression called where it is
+// defined, and `typeof`, which Biome types as one kind, give the declared
+// type.
 #[test]
 fn calls_to_local_functions_keep_the_undefined_of_a_reachable_end() {
     assert_reads(
@@ -297,6 +298,7 @@ fn calls_to_local_functions_keep_the_undefined_of_a_reachable_end() {
         function v4(y: string) { let k: "string" | "number" = "number"; k = typeof y; /*typeof*/k; }
         function v5() { let x: number | undefined = c ? g1() : 2; /*branch*/x; }
         async function v7() { let x: number | undefined; x = await k1(); /*awaited*/x; async function k1() { if (c) return 1; } }
+        function v8() { let x: number | undefined = 0; const y = g1(); x = y; /*held*/x; }
         "#,
         &[
             ("declaration", "x", &["number", "undefined"]),
@@ -305,6 +307,7 @@ fn calls_to_local_functions_keep_the_undefined_of_a_reachable_end() {
             ("typeof", "k", &["string: number", "string: string"]),
             ("branch", "x", &["number", "undefined"]),
             ("awaited", "x", &["number", "undefined"]),
+            ("held", "x", &["number", "undefined"]),
         ],
     );
 }
@@ -742,9 +745,10 @@ fn writes_narrow_property_paths() {
 // each read below. Biome is wider: `delete` through an element access gives
 // the path its declared type, where TypeScript ignores it; a write through a
 // key that is not a literal gives every path of the object its declared type;
-// and a subject that a function called where it is defined, a class static
-// block, or a field initializer writes doesn't narrow anywhere in the
-// function. Calls and callbacks never cancel narrowing, as in TypeScript.
+// and a subject that an `async` function called where it is defined or a
+// field initializer writes doesn't narrow anywhere in the function. Calls
+// and callbacks never cancel narrowing, as in TypeScript, and a function
+// called where it is defined and a class static block write in the flow.
 #[test]
 fn writes_that_biome_follows_less_than_typescript() {
     assert_reads(
@@ -753,6 +757,7 @@ fn writes_that_biome_follows_less_than_typescript() {
         function q4(o: { v: string | null }, k: "v") { if (o.v) { o[k] = null; /*anyKey*/o.v; } }
         function q5(o: { v: string | null }) { if (o.v) { [1].forEach(() => { o.v = null; }); /*callback*/o.v; } }
         function q7(o: { v: string | null }) { if (o.v) { (() => { o.v = null; })(); /*invoked*/o.v; } }
+        function q8(o: { v: string | null }) { if (o.v) { (async () => { o.v = null; })(); /*async*/o.v; } }
         function o1(x: string | null) { if (x) { (() => { x = null; })(); /*invokedVariable*/x; } }
         function o2(x: string | null) { if (x) { class C { static { x = null; } } /*staticBlock*/x; } }
         function o3(x: string | null) { if (x) { [1].forEach(() => { x = null; }); /*callbackVariable*/x; } }
@@ -764,12 +769,11 @@ fn writes_that_biome_follows_less_than_typescript() {
             // TypeScript: `string`.
             ("anyKey", "o.v", &["null", "string"]),
             ("callback", "o.v", &["string"]),
-            // TypeScript: `null`.
-            ("invoked", "o.v", &["null", "string"]),
-            // TypeScript: `null`.
-            ("invokedVariable", "x", &["null", "string"]),
-            // TypeScript: `null`.
-            ("staticBlock", "x", &["null", "string"]),
+            ("invoked", "o.v", &["null"]),
+            // TypeScript: `string`.
+            ("async", "o.v", &["null", "string"]),
+            ("invokedVariable", "x", &["null"]),
+            ("staticBlock", "x", &["null"]),
             ("callbackVariable", "x", &["string"]),
             // TypeScript: `string`.
             ("fieldInitializer", "x", &["null", "string"]),
@@ -985,4 +989,98 @@ fn complete_module_inference_shares_assignment_solves_with_lookups() {
             "lookups starting from the same types must reuse the solve: {query}"
         );
     }
+}
+
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the type in its
+// comment and reports TS2322 at `enumLiteral`, because `"a"` isn't assignable
+// to the string enum `S`. A destructuring target that reads an element of an
+// array keeps its declared type, because Biome types the element as possibly
+// `undefined`, as in `[x] = xs` and `[[x]] = [["a"]]`. So does a target whose
+// default supplies the value because the array has no such element, as in
+// `[x = 1] = []`. Biome takes `"a"` as assignable to `S`, whose member `A`
+// has that value, so `x` reads `"a"`.
+#[test]
+fn assignments_from_array_elements_and_to_string_enums() {
+    assert_reads(
+        r#"
+        enum S { A = "a", B = "b" }
+        function a1(xs: string[]) { let x: string | number = 1; [x] = xs; /*element*/x; } // string
+        function a2() { let x: string | number = 1; [[x]] = [["a"]]; /*nested*/x; } // string
+        function a3() { let x: string | number = "a"; [x = 1] = []; /*missing*/x; } // number
+        function a4() { let x: S | number = "a"; /*enumLiteral*/x; } // number | S
+        "#,
+        &[
+            // TypeScript: `string`.
+            ("element", "x", &["number", "string"]),
+            // TypeScript: `string`.
+            ("nested", "x", &["number", "string"]),
+            // TypeScript: `number`.
+            ("missing", "x", &["number", "string"]),
+            // TypeScript: `number | S`.
+            ("enumLiteral", "x", &["string: a"]),
+        ],
+    );
+}
+
+// TypeScript 7.0.2 (`tsc --strict`) gives `number | undefined` at every read
+// below, the return type that it infers for `helperImpl`. An export of a
+// declaration file, a member of an interface that a declaration file
+// declares, and a member that a declaration file adds to a global interface
+// count as annotated when typed `typeof helperImpl`, so a call of them
+// assigns the return type that Biome infers for `helperImpl`. Biome doesn't
+// see a variable that `declare global` declares, and doesn't count a member
+// of a type literal, so a call of them keeps the declared type.
+#[test]
+fn calls_through_typeof_a_function_in_a_declaration_file() {
+    assert_reads_with(
+        r#"
+        import { exported, typed, holder } from "./globals";
+        import "./augment";
+        function a1() { let x: number | string | undefined = helper(c); /*globalVariable*/x; }
+        function a2() { let x: number | string | undefined = [1].helperMember(c); /*globalMember*/x; }
+        function a3() { let x: number | string | undefined = exported(c); /*exported*/x; }
+        function a4() { let x: number | string | undefined = typed.m(c); /*typeLiteral*/x; }
+        function a5() { let x: number | string | undefined = moduleHelper(c); /*moduleGlobal*/x; }
+        function a6() { let x: number | string | undefined = holder.m(c); /*interfaceMember*/x; }
+        "#,
+        &[
+            (
+                "/src/impl.ts",
+                "export function helperImpl(c: boolean) { if (c) return 1; }",
+            ),
+            (
+                "/src/globals.d.ts",
+                r#"
+                import { helperImpl } from "./impl";
+                declare global {
+                  var helper: typeof helperImpl;
+                  interface Array<T> { helperMember: typeof helperImpl; }
+                }
+                export declare const exported: typeof helperImpl;
+                export declare const typed: { m: typeof helperImpl };
+                export interface Holder { m: typeof helperImpl }
+                export declare const holder: Holder;
+                "#,
+            ),
+            (
+                "/src/augment.ts",
+                r#"
+                import { helperImpl } from "./impl";
+                declare global { var moduleHelper: typeof helperImpl; }
+                export {};
+                "#,
+            ),
+        ],
+        &[
+            // TypeScript: `number | undefined`.
+            ("globalVariable", "x", &["number", "string", "undefined"]),
+            ("globalMember", "x", &["number", "undefined"]),
+            ("exported", "x", &["number", "undefined"]),
+            // TypeScript: `number | undefined`.
+            ("typeLiteral", "x", &["number", "string", "undefined"]),
+            // TypeScript: `number | undefined`.
+            ("moduleGlobal", "x", &["number", "string", "undefined"]),
+            ("interfaceMember", "x", &["number", "undefined"]),
+        ],
+    );
 }

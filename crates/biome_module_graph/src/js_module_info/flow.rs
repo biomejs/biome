@@ -35,12 +35,16 @@
 //! [`subjects::this_can_narrow`] describes. A property path narrows only when
 //! its variable or `this` does.
 //!
+//! A function or arrow expression called where it is defined and a class
+//! static block run in the flow of the root around them, as TypeScript's
+//! binder runs them, so they are part of that root's graph.
+//!
 //! A write to a subject in the root's own flow is a write point of the graph,
 //! where the subject takes the type of the assigned value, reduced against
 //! its declared type as in TypeScript, and the paths that extend it take
 //! their declared types. A write that runs with the root but outside that
-//! flow, as in a function called where it is defined or a class static
-//! block, has no write point, so the subject it writes doesn't narrow
+//! flow, as in an `async` function called where it is defined or a field
+//! initializer, has no write point, so the subject it writes doesn't narrow
 //! anywhere in the root. Calls never invalidate facts, as in TypeScript.
 //! Writes in other roots don't either, because they run before the root
 //! runs or while a call inside it runs.
@@ -78,15 +82,15 @@ use biome_js_syntax::{
     JsArrayBindingPatternRestElement, JsBreakStatement, JsClassDeclaration,
     JsClassExportDefaultDeclaration, JsComputedMemberName, JsConstructorClassMember,
     JsContinueStatement, JsDecorator, JsDoWhileStatement, JsExpressionStatement, JsForInStatement,
-    JsForOfStatement, JsForStatement, JsGetterClassMember, JsGetterObjectMember,
-    JsIdentifierAssignment, JsIdentifierBinding, JsIdentifierExpression, JsIfStatement, JsLanguage,
-    JsMethodClassMember, JsMethodObjectMember, JsObjectBindingPattern,
+    JsForOfStatement, JsForStatement, JsFunctionExpression, JsGetterClassMember,
+    JsGetterObjectMember, JsIdentifierAssignment, JsIdentifierBinding, JsIdentifierExpression,
+    JsIfStatement, JsLanguage, JsMethodClassMember, JsMethodObjectMember, JsObjectBindingPattern,
     JsObjectBindingPatternProperty, JsObjectBindingPatternPropertyList, JsObjectBindingPatternRest,
     JsObjectBindingPatternShorthandProperty, JsReturnStatement, JsSetterClassMember,
     JsSetterObjectMember, JsSwitchStatement, JsSyntaxKind, JsSyntaxNode, JsThisExpression,
     JsThrowStatement, JsTryFinallyStatement, JsTryStatement, JsVariableDeclarationClause,
-    JsVariableKind, JsVariableStatement, JsWhileStatement, JsWithStatement, TsDeclareStatement,
-    binding_ext::AnyJsBindingDeclaration,
+    JsVariableDeclarator, JsVariableKind, JsVariableStatement, JsWhileStatement, JsWithStatement,
+    TsDeclareStatement, binding_ext::AnyJsBindingDeclaration,
 };
 use biome_js_type_info::{
     AnyPredicateFunction, DestructureField, RawTypeData, RawTypeId, TypeReference,
@@ -98,7 +102,8 @@ use biome_rowan::{
     WalkEvent, declare_node_union,
 };
 use builder::{
-    AnyContinuingClosure, BuiltCapture, BuiltRoot, BuiltSwitch, build_root, never_has_outcome,
+    AnyContinuingClosure, AnyInlineCode, BuiltCapture, BuiltRoot, BuiltSwitch, build_root,
+    never_has_outcome,
 };
 use guards::{FlowOutcome, GuardFunctions, decompose_condition};
 use rustc_hash::{FxHashMap, FxHashSet};
@@ -254,14 +259,18 @@ impl FlowSubjectTable {
     /// Also returns `None` for a `this` outside the root, because it can be
     /// the `this` of another function. The initializer of an aliased
     /// condition that an enclosing function declares can contain such a
-    /// `this`.
+    /// `this`. It returns `None` for a `this` inside a function expression
+    /// that runs inline in the root too, as in `(function () { this })()`,
+    /// because that `this` is the function's own, unlike an arrow
+    /// function's.
     pub(super) fn this(&mut self, expression: &JsThisExpression) -> Option<FlowSubjectId> {
         let root = self.this_root.as_ref()?;
         for node in expression.syntax().ancestors() {
             if node == *root {
                 return self.intern(FlowSubject::This);
             }
-            if OTHER_THIS_KINDS.matches(node.kind()) {
+            if OTHER_THIS_KINDS.matches(node.kind()) || JsFunctionExpression::can_cast(node.kind())
+            {
                 return None;
             }
         }
@@ -412,7 +421,10 @@ pub(crate) enum FlowWriteEffect {
 /// reach it. Biome's flow does the same with a solve whose state is that type,
 /// instead of a declared type that writes narrow. A read in another function,
 /// as in a closure, has an implicit `any` in TypeScript (TS7005), so the
-/// variable keeps its declared type outside the root that declares it.
+/// variable doesn't narrow outside the root that declares it. Such a read
+/// keeps the declared type when that type covers every write of the
+/// variable, and is Unknown otherwise (see
+/// [`RootCollector::add_outer_evolving_reads`]).
 #[derive(Clone, Copy, Debug, Default, Eq, Hash, PartialEq)]
 pub(crate) enum FlowEvolving {
     /// A subject whose writes narrow its declared type.
@@ -689,6 +701,10 @@ pub(crate) struct RootFlow {
     /// writes, with how each type evolves. The root declares every such
     /// variable.
     pub(crate) evolving: FxHashMap<FlowSubjectId, FlowEvolving>,
+    /// The variables in [`Self::evolving`] that a `var` declares. A path that
+    /// doesn't pass the declarator, as a read before it, gives them
+    /// `undefined`.
+    pub(crate) hoisted: FxHashSet<FlowSubjectId>,
     /// The capture point of each variable that the root continues from an
     /// enclosing root, keyed by the variable. When the root runs, such a
     /// variable starts with its type where the enclosing root creates the
@@ -971,6 +987,23 @@ impl RootFlow {
         self.evolving.get(&subject).copied().unwrap_or_default()
     }
 
+    /// Returns whether `subject`, an array whose type evolves with its
+    /// writes, is an array at every read: no path reaches a read without
+    /// passing its declarator, and every write adds values to it or assigns
+    /// it an empty array literal.
+    pub(crate) fn is_always_array(&self, subject: FlowSubjectId) -> bool {
+        !self.hoisted.contains(&subject)
+            && self.writes.iter().all(|write| {
+                write.subject != subject
+                    || matches!(
+                        write.effect,
+                        FlowWriteEffect::Elements(_)
+                            | FlowWriteEffect::EmptyArray
+                            | FlowWriteEffect::Wildcard
+                    )
+            })
+    }
+
     /// Returns whether a write of `subject`, a variable whose type evolves
     /// with its writes, gives it a type that no value in
     /// [`Self::subject_writes`] stands for: a write whose value Biome can't
@@ -1095,6 +1128,7 @@ pub(crate) fn build_reachability(
             assignment_only: FxHashSet::default(),
             uninitialized: FxHashSet::default(),
             evolving: FxHashMap::default(),
+            hoisted: FxHashSet::default(),
             captures: FxHashMap::default(),
             calls: calls.into_iter().map(|(call, _)| call).collect(),
             subject_calls: FxHashMap::default(),
@@ -1264,6 +1298,7 @@ impl FlowPredicate {
                 assignment_only: FxHashSet::default(),
                 uninitialized: FxHashSet::default(),
                 evolving: FxHashMap::default(),
+                hoisted: FxHashSet::default(),
                 captures: FxHashMap::default(),
                 calls: calls.into_iter().map(|(call, _)| call).collect(),
                 subject_calls,
@@ -1323,11 +1358,19 @@ pub(crate) struct ModuleFlow {
     /// that TypeScript infers from its body, keyed by the function's trimmed
     /// range. Its call points are not in [`Self::calls`].
     predicates: FxHashMap<TextRange, FlowPredicate>,
+    /// The reads of variables whose types evolve with their writes as
+    /// variables that are Unknown, keyed by range. Each read lies in code
+    /// that the root declaring its variable doesn't run in its own flow, as
+    /// a closure, and a write of the variable may assign a value that the
+    /// variable's declared type lacks. See
+    /// [`RootCollector::add_outer_evolving_reads`].
+    outer_evolving_reads: FxHashSet<TextRange>,
 }
 
 impl ModuleFlow {
     /// Collects flow for the execution roots that a [`FlowRootScanner`]
-    /// selected.
+    /// selected. Inline code that the scanner selects as a fallback gets
+    /// flow only when the root around it was not built.
     ///
     /// Reads are kept only when their binding has a narrowable collected type,
     /// as decided by [`is_raw_narrowing_invariant`], and a test, a write, or a
@@ -1373,6 +1416,15 @@ impl ModuleFlow {
             capture_rules: FxHashMap::default(),
         };
         for selected in roots.selected() {
+            // Inline code selected as a fallback is part of the graph of the
+            // root around it, which comes before it, so it gets a graph of its
+            // own only when that root wasn't built.
+            if selected
+                .enclosing()
+                .is_some_and(|enclosing| collector.built.contains(&enclosing))
+            {
+                continue;
+            }
             // A root that only statement calls select needs flow only when one
             // of them can establish a condition.
             if let Some(calls) = roots.statement_calls(selected)
@@ -1390,6 +1442,7 @@ impl ModuleFlow {
             );
         }
         flow.predicates = collect_predicates(model, raw_types, &mut collector.functions);
+        collector.add_outer_evolving_reads(&mut flow);
         for (range, reads) in collector.binding_reads {
             match reads {
                 BindingReads::PropertyOnly { instance_tested } => {
@@ -1517,6 +1570,12 @@ impl ModuleFlow {
                 self.call_only_candidates.remove(&range);
             }
         }
+    }
+
+    /// Returns whether the read at `range` is Unknown, as
+    /// [`Self::outer_evolving_reads`] describes.
+    pub(crate) fn is_outer_evolving_read(&self, range: TextRange) -> bool {
+        self.outer_evolving_reads.contains(&range)
     }
 
     /// Returns the flow of the read at `range`, an identifier or a member
@@ -1704,13 +1763,12 @@ impl RootCollector<'_> {
     /// and uses `this` there when `has_this` is true.
     ///
     /// A variable that an enclosing root declares, or an import read in a
-    /// function, narrows in `root` too, from its declared type, by the tests
-    /// and writes of `root` alone. TypeScript uses the flow at a closure's
-    /// creation to narrow a read when the variable is a `const`, or when
-    /// nothing assigns the variable after the closure is created. Biome
-    /// starts the captured variable from its declared type instead. So `root`
-    /// gets a graph even when it declares no variable that can narrow, and
-    /// relevance keeps no read when no subject can narrow.
+    /// function, narrows in `root` too, by the tests and writes of `root`. It
+    /// starts from its declared type, or, when the read continues the flow
+    /// of an enclosing root, from its type where that root creates the
+    /// closure that holds `root`. So `root` gets a graph even when it
+    /// declares no variable that can narrow, and relevance keeps no read when
+    /// no subject can narrow.
     ///
     /// A read inside a closure that `root` creates, directly or through other
     /// closures, continues the flow of `root` where `root` creates the
@@ -1751,7 +1809,7 @@ impl RootCollector<'_> {
             written,
             mut captures,
             initializers,
-            hoisted,
+            mut hoisted,
             ..
         }) = build_root(
             root,
@@ -1790,9 +1848,9 @@ impl RootCollector<'_> {
             }
         }
         // A variable narrows only where the graph has a write point for each
-        // write that can run in the root's flow. Other writes, as in a
-        // function called where it is defined or a class static block, run at
-        // points that the graph doesn't model.
+        // write that can run in the root's flow. Other writes, as in an
+        // `async` function called where it is defined or a field initializer,
+        // run at points that the graph doesn't model.
         eligible.retain(|range| {
             self.writes_are_modeled(*range, root, &written)
                 && (evolving_ranges.get(range) != Some(&FlowEvolving::Array)
@@ -1807,8 +1865,10 @@ impl RootCollector<'_> {
         // variable evolving. So does any other write of a variable initialized
         // with `null` or `undefined`, because its declared type can lack the
         // type of the write, which then gives the reads that it reaches
-        // Unknown. A variable without an initializer already has the declared
-        // type Unknown, and an array `unknown[]`, so such writes need no
+        // Unknown, and of an array that a `var` declares, whose declared type
+        // lacks the `undefined` of a path that doesn't pass the declarator.
+        // A variable without an initializer already has the declared type
+        // Unknown, and another array has `unknown[]`, so such writes need no
         // solve for them.
         let mut written_after: FxHashSet<FlowSubjectId> = FxHashSet::default();
         let mut typed: FxHashSet<FlowSubjectId> = FxHashSet::default();
@@ -1840,7 +1900,10 @@ impl RootCollector<'_> {
                     typed.contains(&subject)
                         || (initialized.contains(&subject) && written_after.contains(&subject))
                 }
-                FlowEvolving::Array => typed.contains(&subject),
+                FlowEvolving::Array => {
+                    typed.contains(&subject)
+                        || (hoisted.contains(&subject) && written_after.contains(&subject))
+                }
                 FlowEvolving::None => false,
             });
             match subject {
@@ -1852,6 +1915,7 @@ impl RootCollector<'_> {
                 }
             }
         }
+        hoisted.retain(|subject| evolving.contains_key(subject));
         let mut uninitialized = self.uninitialized_subjects(root, &subjects, &eligible);
         uninitialized.retain(|subject| !evolving.contains_key(subject));
         // A write mentions its subject where it can change the subject's
@@ -1894,10 +1958,7 @@ impl RootCollector<'_> {
                 write_mentioned.insert(write.subject);
             }
         }
-        for subject in hoisted
-            .iter()
-            .filter(|subject| evolving.contains_key(subject))
-        {
+        for subject in &hoisted {
             mentions.push((0, *subject));
         }
         // A subject that may be read before it is assigned, such as a `var`,
@@ -2049,8 +2110,8 @@ impl RootCollector<'_> {
             })
             .collect();
         // A read of a variable whose type evolves with its writes has an
-        // implicit `any` in a closure in TypeScript (TS7005), so it keeps its
-        // declared type there.
+        // implicit `any` in a closure in TypeScript (TS7005), so it doesn't
+        // continue the flow there. `add_outer_evolving_reads` types it.
         let (captured, assumed_initialized) = if captures.is_empty() {
             (Vec::new(), FxHashSet::default())
         } else if evolving.is_empty() {
@@ -2441,6 +2502,7 @@ impl RootCollector<'_> {
                 subject_writes,
                 uninitialized,
                 evolving,
+                hoisted,
                 assignment_only,
                 captures: FxHashMap::default(),
                 calls: calls.into_iter().map(|(call, _)| call).collect(),
@@ -2615,6 +2677,60 @@ impl RootCollector<'_> {
         }
     }
 
+    /// Records in [`ModuleFlow::outer_evolving_reads`] the reads of each
+    /// variable whose type evolves with its writes as a variable that lie in
+    /// code that the root declaring the variable doesn't run in its own flow,
+    /// and makes them and the expressions that evaluate them candidates.
+    ///
+    /// TypeScript gives such a read an implicit `any` (TS7005). Biome keeps
+    /// the variable's declared type there, which joins its initializer with
+    /// the values of some assignments in other scopes, only when that type
+    /// covers every write of the variable (see [`builder::covers_writes`]).
+    /// Otherwise the read is Unknown, so that it isn't narrower than the
+    /// values that the writes assign. A variable without an initializer
+    /// already has the declared type Unknown, so its reads need nothing.
+    fn add_outer_evolving_reads(&self, flow: &mut ModuleFlow) {
+        let model = self.model;
+        for binding in model.all_bindings() {
+            if binding.all_writes().next().is_none()
+                || evolving_declaration(&binding, model) != FlowEvolving::Variable
+            {
+                continue;
+            }
+            let Some(AnyJsBindingDeclaration::JsVariableDeclarator(declarator)) =
+                binding.tree().declaration()
+            else {
+                continue;
+            };
+            if declarator.initializer().is_none() {
+                continue;
+            }
+            let Some(root) = flow_root_of(&declarator) else {
+                continue;
+            };
+            let reads: Vec<_> = binding
+                .all_reads()
+                .filter_map(|read| {
+                    read.syntax()
+                        .parent()
+                        .and_then(JsIdentifierExpression::cast)
+                })
+                .filter(|identifier| !runs_in_flow_of(identifier, &root))
+                .collect();
+            if reads.is_empty() || builder::covers_writes(&binding, model) {
+                continue;
+            }
+            for identifier in reads {
+                let expression = AnyFlowExpression::from(identifier);
+                flow.outer_evolving_reads.insert(expression.range());
+                flow.insert_candidate(&expression, None, None);
+                for ancestor in expression.evaluated_ancestors() {
+                    flow.insert_candidate(&ancestor, None, None);
+                }
+            }
+        }
+    }
+
     /// Returns the range of `binding` when its reads can narrow, in the root
     /// that declares it and in the roots nested in that one. Each root still
     /// checks the writes of the variable with [`Self::writes_are_modeled`].
@@ -2638,7 +2754,8 @@ impl RootCollector<'_> {
     /// A variable whose type evolves narrows whatever its collected type is,
     /// because that type doesn't follow its writes. TypeScript gives such a
     /// variable an implicit `any` (TS7005) outside the function that declares
-    /// it, so it keeps its declared type in nested roots, including closures.
+    /// it, so it doesn't narrow in nested roots, including closures, where
+    /// [`Self::add_outer_evolving_reads`] types its reads.
     /// A variable that nothing writes, and that no call or element assignment
     /// adds values to, has the type of its initializer everywhere. That type
     /// is its collected type, so it narrows as any other variable.
@@ -2921,7 +3038,9 @@ impl RootCollector<'_> {
     /// Code that the function holding it doesn't run in its own flow stops
     /// the read: a decorator, a computed key of a member, a field initializer,
     /// a type, or a `declare` statement. The body of a `with` statement stops
-    /// it too.
+    /// it too. Inline code, a static block or a function called where it is
+    /// defined, is part of the function around it (see
+    /// [`AnyInlineCode::runs_inline`]).
     fn continues_to(
         &mut self,
         identifier: &JsIdentifierExpression,
@@ -2931,6 +3050,9 @@ impl RootCollector<'_> {
         for ancestor in identifier.syntax().ancestors().skip(1) {
             let kind = ancestor.kind();
             if AnyJsControlFlowRoot::can_cast(kind) {
+                if AnyInlineCode::cast_ref(&ancestor).is_some_and(|code| code.runs_inline()) {
+                    continue;
+                }
                 let Some(closure) = AnyContinuingClosure::cast(ancestor)
                     .filter(AnyContinuingClosure::continues_outer_flow)
                 else {
@@ -2972,7 +3094,10 @@ impl RootCollector<'_> {
     /// none. Such a statement is `return`, `throw`, `break`, `continue`, a
     /// loop whose test is missing or never falsy by the rules of TypeScript's
     /// binder, such as the literal `true`, or a call of a local function that
-    /// never returns. Each closure is scanned once.
+    /// never returns. Each closure is scanned once. The own code of `closure`
+    /// includes the inline code in it, a static block or a function called
+    /// where it is defined, whose `return`, `break`, and `continue` count
+    /// too.
     ///
     /// Code after that statement may be unreachable, and TypeScript gives a
     /// read in unreachable code its declared type. A statement that ends only
@@ -2993,7 +3118,9 @@ impl RootCollector<'_> {
             if node == *closure.syntax() {
                 continue;
             }
-            if AnyJsControlFlowRoot::can_cast(node.kind()) {
+            if AnyJsControlFlowRoot::can_cast(node.kind())
+                && !AnyInlineCode::cast_ref(&node).is_some_and(|code| code.runs_inline())
+            {
                 events.skip_subtree();
                 continue;
             }
@@ -3109,8 +3236,8 @@ impl RootCollector<'_> {
     /// never cancels narrowing, as in TypeScript. Neither does a write outside
     /// `root` to a variable that an enclosing root declares, because it runs
     /// in another function, or in the enclosing root before or after the
-    /// code of `root` runs. Any other write without a write point, as in a
-    /// function called where it is defined, a class static block, a field
+    /// code of `root` runs. Any other write without a write point, as in an
+    /// `async` function or a generator called where it is defined, a field
     /// initializer, or unreachable code, makes the variable keep its
     /// declared type in the whole root.
     fn writes_are_modeled(
@@ -3140,9 +3267,9 @@ impl RootCollector<'_> {
     ///
     /// Code that runs only when called doesn't count, because TypeScript
     /// ignores a `push` in a callback, as [`Self::writes_are_modeled`] ignores
-    /// other writes there. Any other such write without a write point, as in a
-    /// function called where it is defined, means that the array's type can't
-    /// follow its writes in the root.
+    /// other writes there. Any other such write without a write point, as in
+    /// an `async` function called where it is defined, means that the array's
+    /// type can't follow its writes in the root.
     fn mutations_are_modeled(
         &self,
         range: TextRange,
@@ -3206,11 +3333,11 @@ impl RootCollector<'_> {
     /// nested in the one that declares it, a `let` or a `var` counts only
     /// when it has no initializer and no write at all. TypeScript treats such
     /// a `let` the same way but assumes such a `var` initialized there. A
-    /// path on `this` counts in a constructor, and in an arrow function that
-    /// it calls where it is defined, when its first key names a field of the
-    /// constructor's class that is not `static`, has no initializer and no
-    /// `!`, and is not declared with `declare` or `accessor`, as in
-    /// TypeScript.
+    /// property of `this`, as `this.x` but not `this.x.y`, counts in a
+    /// constructor, and in an arrow function that it calls where it is
+    /// defined, when its key names a field of the constructor's class that is
+    /// not `static`, has no initializer and no `!`, and is not declared with
+    /// `declare` or `accessor`, as in TypeScript.
     fn uninitialized_subjects(
         &self,
         root: &AnyJsControlFlowRoot,
@@ -3456,7 +3583,7 @@ declare_node_union! {
 }
 
 /// The statements that [`RootCollector::first_exit`] looks for, and the
-/// nested roots it skips.
+/// nested roots it skips unless they run inline.
 const EXIT_SCAN_KINDS: SyntaxKindSet<JsLanguage> =
     AnyPathEnd::KIND_SET.union(AnyJsControlFlowRoot::KIND_SET);
 
@@ -3538,6 +3665,46 @@ const BINDING_PATTERN_KINDS: SyntaxKindSet<JsLanguage> = JsArrayBindingPattern::
     .union(JsObjectBindingPatternPropertyList::KIND_SET)
     .union(JsObjectBindingPatternRest::KIND_SET)
     .union(JsObjectBindingPatternShorthandProperty::KIND_SET);
+
+/// Returns the execution root whose flow runs `declarator`: the closest root
+/// around it that isn't inline code running in the flow of the root around
+/// it (see [`AnyInlineCode::runs_inline`]).
+fn flow_root_of(declarator: &JsVariableDeclarator) -> Option<AnyJsControlFlowRoot> {
+    declarator
+        .syntax()
+        .ancestors()
+        .skip(1)
+        .filter_map(AnyJsControlFlowRoot::cast)
+        .find(|root| !AnyInlineCode::cast_ref(root.syntax()).is_some_and(|code| code.runs_inline()))
+}
+
+/// Returns whether `root` runs the read `identifier` in its own flow. Code
+/// in a nested root that isn't inline code running in the flow of `root`
+/// stops the read, and so does code that `root` doesn't run in its flow: a
+/// class member other than a function, as a field initializer, a decorator,
+/// the computed key of a member, a type, a `declare` statement, or the body
+/// of a `with` statement.
+fn runs_in_flow_of(identifier: &JsIdentifierExpression, root: &AnyJsControlFlowRoot) -> bool {
+    for ancestor in identifier.syntax().ancestors().skip(1) {
+        let kind = ancestor.kind();
+        if AnyJsControlFlowRoot::can_cast(kind) {
+            if ancestor == *root.syntax() {
+                return true;
+            }
+            if !AnyInlineCode::cast_ref(&ancestor).is_some_and(|code| code.runs_inline()) {
+                return false;
+            }
+        } else if CLOSURE_BARRIER_KINDS.matches(kind)
+            || (JsComputedMemberName::can_cast(kind)
+                && ancestor
+                    .parent()
+                    .is_some_and(|member| MEMBER_KINDS.matches(member.kind())))
+        {
+            return false;
+        }
+    }
+    false
+}
 
 /// Returns how TypeScript types the variable `binding` from its writes.
 ///
@@ -3851,6 +4018,29 @@ mod tests {
     }
 
     #[test]
+    fn inline_code_gets_its_own_flow_when_the_root_around_it_gets_none() {
+        let source = |depth: usize| {
+            format!(
+                "function f(x: string | null) {{ if (x) /*outer*/x; ((y: string | null) => {{ if (y) /*inner*/y; }})(x); {}x{}; }}",
+                "(".repeat(depth),
+                ")".repeat(depth)
+            )
+        };
+        // The function runs in the flow of `f`, so `f` keeps both reads.
+        let built = source(1);
+        let info = module(&built);
+        let outer = info.flow.read(marked(&built, "outer", "x")).unwrap();
+        let inner = info.flow.read(marked(&built, "inner", "y")).unwrap();
+        assert_eq!(outer.root, inner.root);
+        // When syntax nested too deeply rejects `f`, the function is a root of
+        // its own, so its read still narrows.
+        let rejected = source(super::builder::MAX_DEPTH);
+        let info = module(&rejected);
+        assert!(info.flow.read(marked(&rejected, "outer", "x")).is_none());
+        assert!(info.flow.read(marked(&rejected, "inner", "y")).is_some());
+    }
+
+    #[test]
     fn declared_function_names_belong_to_the_enclosing_root() {
         for source in [
             "declare function g(): void; if (!g) { /*read*/g; }",
@@ -4050,6 +4240,10 @@ mod tests {
                 b.push(1);
                 (() => b.push(2))();
                 /*invoked*/b;
+                const d = [];
+                d.push(1);
+                (async () => d.push(2))();
+                /*async*/d;
                 var v = null;
                 /*hoisted*/v;
                 v = 1;
@@ -4063,9 +4257,10 @@ mod tests {
         // type other than the declared type, apart from a `var` read before
         // its declarator. A write without a value, as `w++`, counts, because
         // it makes the read Unknown. The declared type stays for a read in a
-        // closure or in a nested root, for a variable without such a write,
-        // and for an array that a function called where it is defined adds
-        // to.
+        // closure of a variable without an initializer, which is Unknown, for
+        // a variable without such a write, and for an array that an `async`
+        // function called where it is defined adds to. A function that runs
+        // inline adds in the flow.
         for (marker, expression, evolving) in [
             ("before", "x", None),
             ("after", "x", Some(FlowEvolving::Variable)),
@@ -4073,9 +4268,9 @@ mod tests {
             ("called", "u", Some(FlowEvolving::Variable)),
             ("valueless", "w", Some(FlowEvolving::Variable)),
             ("array", "a", Some(FlowEvolving::Array)),
-            ("invoked", "b", None),
+            ("invoked", "b", Some(FlowEvolving::Array)),
+            ("async", "d", None),
             ("hoisted", "v", Some(FlowEvolving::Variable)),
-            ("nested", "m", None),
         ] {
             let range = marked(SOURCE, marker, expression);
             let kind = info.flow.read(range).map(|read| {
@@ -4090,6 +4285,12 @@ mod tests {
                 "{marker}"
             );
         }
+        // A read in a nested root has no flow. It is a candidate that is
+        // Unknown when a write may assign a value that the declared type
+        // lacks, as `m = 1` in the scope that declares `m`.
+        let nested = marked(SOURCE, "nested", "m");
+        assert!(info.flow.read(nested).is_none());
+        assert!(info.flow.is_candidate(nested) && info.flow.is_outer_evolving_read(nested));
     }
 
     #[test]

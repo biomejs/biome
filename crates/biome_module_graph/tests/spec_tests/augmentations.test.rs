@@ -258,6 +258,38 @@ export {};
     );
 }
 
+// The top-level interfaces of a TypeScript file without imports or exports
+// that isn't a declaration file aren't globals, so `string` doesn't satisfy
+// `Fmt`. TypeScript treats such a file as a script whose interfaces are
+// globals. With `moduleDetection` set to `"force"`, TypeScript treats it as a
+// module and gives the expected types.
+#[test]
+fn scripts_that_arent_declaration_files_declare_no_globals() {
+    assert_file_reads(
+        &[
+            (
+                "/src/polyfills.ts",
+                "interface String { format(): string }\n",
+            ),
+            (
+                "/src/use.ts",
+                r#"
+interface Fmt { format(): string }
+declare function isFmt(v: unknown): v is Fmt;
+export function f(x: string | Fmt | null) { if (isFmt(x)) /*fmt*/x; else /*notFmt*/x; }
+"#,
+            ),
+        ],
+        "/src/use.ts",
+        &[
+            // TypeScript, with `polyfills.ts` in the program: `string | Fmt`.
+            ("fmt", "x", &["Fmt"]),
+            // TypeScript, with `polyfills.ts` in the program: `null`.
+            ("notFmt", "x", &["null", "string"]),
+        ],
+    );
+}
+
 #[test]
 fn in_sees_the_members_of_augmentations() {
     assert_file_reads(
@@ -570,6 +602,43 @@ declare const c: C;
         ],
         "/src/use.ts",
         &[("member", "c.m", &["number: 1"])],
+    );
+}
+
+// TypeScript 7.0.2 (`tsc --strict`) gives `string` at `variable` and
+// `property`: the variable and the namespace that `declare global` declares
+// are globals in every module. Biome merges only interfaces from a
+// `declare global` block, so it doesn't see `__DEV__` or `App`.
+#[test]
+fn declare_global_variables_and_namespaces_arent_seen() {
+    assert_file_reads(
+        &[
+            (
+                "/src/globals.ts",
+                r#"
+export {};
+declare global {
+  var __DEV__: string | null;
+  namespace App { interface Config { v: string | null } }
+}
+"#,
+            ),
+            (
+                "/src/use.ts",
+                r#"
+import "./globals";
+function variable() { if (__DEV__) /*variable*/__DEV__; }
+function property(config: App.Config) { if (config.v) /*property*/config.v; }
+"#,
+            ),
+        ],
+        "/src/use.ts",
+        &[
+            // TypeScript: `string`.
+            ("variable", "__DEV__", &["unknown"]),
+            // TypeScript: `string`.
+            ("property", "config.v", &["unknown"]),
+        ],
     );
 }
 

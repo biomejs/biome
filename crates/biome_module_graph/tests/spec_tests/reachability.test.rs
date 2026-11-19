@@ -604,3 +604,49 @@ fn unreachable_code_requests_build_only_the_asked_root() {
         0
     );
 }
+
+// TypeScript 7.0.2 (`tsc --strict`) gives `string | null` at every read
+// below, each after a call that never returns, in code that TypeScript finds
+// unreachable. Biome doesn't end the path at the calls before the reads that
+// expect `string`, so those reads are narrower than in TypeScript:
+//
+// - `alias`, `declaredAlias`, `memberAlias`, and `importedAlias`: the
+//   callee's return type is `never` through an alias;
+// - `limit` and `closure`: `log.fatal()` is the 65th statement call of the
+//   function, and only the first 64 can end a path.
+#[test]
+fn calls_that_biome_doesnt_end_the_path_at() {
+    let source = format!(
+        r#"
+        import {{ failImported }} from "./fail";
+        declare const log: {{ warn(): void; fatal(): never; fatalAlias(): Never }};
+        type Never = never;
+        function failLocal(): Never {{ throw 0; }}
+        declare function failDeclared(): Never;
+        function alias(x: string | null) {{ if (x !== null) {{ failLocal(); /*alias*/x; }} }}
+        function declaredAlias(x: string | null) {{ if (x !== null) {{ failDeclared(); /*declaredAlias*/x; }} }}
+        function memberAlias(x: string | null) {{ if (x !== null) {{ log.fatalAlias(); /*memberAlias*/x; }} }}
+        function importedAlias(x: string | null) {{ if (x !== null) {{ failImported(); /*importedAlias*/x; }} }}
+        function limit(x: string | null) {{ {warn64} if (x !== null) {{ log.fatal(); /*limit*/x; const h = () => /*closure*/x; }} }}
+        function withinLimit(x: string | null) {{ {warn63} if (x !== null) {{ log.fatal(); /*withinLimit*/x; }} }}
+        "#,
+        warn64 = "log.warn();".repeat(64),
+        warn63 = "log.warn();".repeat(63),
+    );
+    assert_reads_with(
+        &source,
+        &[(
+            "/src/fail.ts",
+            "type Never = never;\nexport declare function failImported(): Never;\n",
+        )],
+        &[
+            ("alias", "x", &["string"]),
+            ("declaredAlias", "x", &["string"]),
+            ("memberAlias", "x", &["string"]),
+            ("importedAlias", "x", &["string"]),
+            ("limit", "x", &["string"]),
+            ("closure", "x", &["string"]),
+            ("withinLimit", "x", &["null", "string"]),
+        ],
+    );
+}

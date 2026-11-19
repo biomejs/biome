@@ -7,7 +7,7 @@ type Day =
 	| 'Saturday'
 	| 'Sunday';
 
-const day: Day = 'Monday';
+declare const day: Day;
 let result = 0;
 
 switch (day) {

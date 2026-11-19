@@ -20,7 +20,7 @@ let nullish: Nullish = null;
 nullish || Promise.reject("logical operator bypass");
 nullish ?? Promise.reject("logical operator bypass");
 
-let either: Truthy | Nullish = 1;
+declare let either: Truthy | Nullish;
 either && Promise.reject("logical operator bypass");
 either || Promise.reject("logical operator bypass");
 either ?? Promise.reject("logical operator bypass");
@@ -207,7 +207,7 @@ function functionWithParams({ option }: Params) {
   > 15 │ nullish ?? Promise.reject("logical operator bypass");
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     16 │ 
-    17 │ let either: Truthy | Nullish = 1;
+    17 │ declare let either: Truthy | Nullish;
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   
@@ -221,11 +221,49 @@ function functionWithParams({ option }: Params) {
 
   i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
   
-    17 │ let either: Truthy | Nullish = 1;
+    17 │ declare let either: Truthy | Nullish;
   > 18 │ either && Promise.reject("logical operator bypass");
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     19 │ either || Promise.reject("logical operator bypass");
     20 │ either ?? Promise.reject("logical operator bypass");
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+13_invalid.ts:19:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    17 │ declare let either: Truthy | Nullish;
+    18 │ either && Promise.reject("logical operator bypass");
+  > 19 │ either || Promise.reject("logical operator bypass");
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    20 │ either ?? Promise.reject("logical operator bypass");
+    21 │ 
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+13_invalid.ts:20:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    18 │ either && Promise.reject("logical operator bypass");
+    19 │ either || Promise.reject("logical operator bypass");
+  > 20 │ either ?? Promise.reject("logical operator bypass");
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    21 │ 
+    22 │ interface Foo {}
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   

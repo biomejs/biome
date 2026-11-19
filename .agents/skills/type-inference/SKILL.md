@@ -206,7 +206,7 @@ must not be added together. Load `testing-codegen` for snapshot mechanics.
 - New query keys and dependencies are stable Salsa values.
 - Whole-module inference is absent or explicitly justified.
 - Correctness and selective-execution tests cover the changed boundary.
-- Narrowing changes update their rows in
-  [`biome_module_graph/NARROWING.md`](../../../crates/biome_module_graph/NARROWING.md),
-  the reference for what narrowing does and where it deliberately differs from
-  TypeScript.
+- Narrowing changes update the sections of
+  [`biome_module_graph/NARROWING.md`](../../../crates/biome_module_graph/NARROWING.md)
+  that they affect: what narrows, the deliberate choices that differ from
+  TypeScript, and the limits.
