@@ -1,0 +1,12 @@
+({}).a++;
+({}).a--;
+({})[key]++;
+({}).a.b++;
+(function () {}).a++;
+(async function () {}).a--;
+(class {}).a++;
+label: ({}).a++;
+if (condition) ({}).a++;
+const increment = () => ({}).a++;
+x = ({}).a++;
+++({}).a;

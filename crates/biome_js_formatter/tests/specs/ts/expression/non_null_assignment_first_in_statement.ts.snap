@@ -1,0 +1,33 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: ts/expression/non_null_assignment_first_in_statement.ts
+---
+
+# Input
+
+```ts
+({}).a! = 1;
+({}).a! += 1;
+({}).a!++;
+(function () {}).a! = 1;
+(class {}).a!--;
+const assign = () => (({}).a! = 1);
+const increment = () => ({}).a!++;
+x = ({}).a! = 1;
+
+```
+
+
+# Formatted
+
+```ts
+({}).a! = 1;
+({}).a! += 1;
+({}).a!++;
+(function () {}).a! = 1;
+(class {}).a!--;
+const assign = () => ({}.a! = 1);
+const increment = () => ({}).a!++;
+x = {}.a! = 1;
+
+```

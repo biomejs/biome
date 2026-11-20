@@ -53,6 +53,8 @@ mod tests {
         assert_needs_parentheses!("console.log(new (class {})())", JsClassExpression);
 
         assert_needs_parentheses!("(class {}).test", JsClassExpression);
+        assert_needs_parentheses!("(class {}).test++", JsClassExpression);
+        assert_needs_parentheses!("(class {}).test! = 1", JsClassExpression);
         assert_not_needs_parentheses!("a => class {} ", JsClassExpression);
 
         assert_needs_parentheses!("export default (class  {})", JsClassExpression);

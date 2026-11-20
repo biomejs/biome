@@ -42,6 +42,8 @@ mod tests {
         assert_needs_parentheses!("console.log(new (function () {})())", JsFunctionExpression);
 
         assert_needs_parentheses!("(function() {}).test", JsFunctionExpression);
+        assert_needs_parentheses!("(function() {}).test++", JsFunctionExpression);
+        assert_needs_parentheses!("(function() {}).test! = 1", JsFunctionExpression);
         assert_not_needs_parentheses!("a => function () {} ", JsFunctionExpression);
 
         assert_needs_parentheses!(
