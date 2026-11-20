@@ -1,16 +1,15 @@
-use biome_analyze::{
-    Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
-};
+use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
+use biome_css_semantic::model::SemanticModel;
 use biome_css_syntax::{
-    AnyScssIncludeTarget, CssImportAtRule, CssLanguage, CssLayerAtRule, CssNestedQualifiedRule,
-    CssQualifiedRule, CssSyntaxKind, CssSyntaxNode, ScssIncludeAtRule, ScssMixinAtRule,
+    CssImportAtRule, CssLanguage, CssLayerAtRule, CssNestedQualifiedRule, CssQualifiedRule,
+    CssSyntaxNode, ScssIncludeAtRule, ScssMixinAtRule,
 };
 use biome_diagnostics::Severity;
 use biome_rowan::{AstNode, SyntaxKindSet, TextSize, declare_node_union};
 use biome_rule_options::use_layered_styles::UseLayeredStylesOptions;
 
-use crate::utils::scss_function_names_equal;
+use crate::services::semantic::Semantic;
 
 /// Ancestors that decide the layer of a style rule: a layer, an outer style rule that is checked
 /// itself, or a mixin body, whose rules take the layer of the place the mixin is included.
@@ -126,7 +125,7 @@ declare_lint_rule! {
 }
 
 impl Rule for UseLayeredStyles {
-    type Query = Ast<AnyUseLayeredStylesQuery>;
+    type Query = Semantic<AnyUseLayeredStylesQuery>;
     type State = ();
     type Signals = Option<Self::State>;
     type Options = UseLayeredStylesOptions;
@@ -141,14 +140,22 @@ impl Rule for UseLayeredStyles {
             return import.layer().is_none().then_some(());
         }
 
-        if let AnyUseLayeredStylesQuery::ScssIncludeAtRule(include) = node {
-            return includes_unlayered_style_rules(include).then_some(());
+        // A containing layer satisfies the rule. Nested rules are covered by their outer style rule.
+        if layer_deciding_ancestor(node).is_some() {
+            return None;
         }
 
-        // A containing layer satisfies the rule. Nested rules are covered by their outer style rule.
-        layer_deciding_ancestor(node.syntax())
-            .is_none()
-            .then_some(())
+        if let AnyUseLayeredStylesQuery::ScssIncludeAtRule(include) = node {
+            return emits_unlayered_style_rules(
+                include,
+                include.range().start(),
+                &mut Vec::new(),
+                ctx.model(),
+            )
+            .then_some(());
+        }
+
+        Some(())
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
@@ -212,17 +219,11 @@ declare_node_union! {
     pub AnyUseLayeredStylesQuery = CssQualifiedRule | CssNestedQualifiedRule | CssImportAtRule | ScssIncludeAtRule
 }
 
-fn layer_deciding_ancestor(node: &CssSyntaxNode) -> Option<CssSyntaxNode> {
-    node.ancestors()
+fn layer_deciding_ancestor(node: &AnyUseLayeredStylesQuery) -> Option<CssSyntaxNode> {
+    node.syntax()
+        .ancestors()
         .skip(1)
         .find(|ancestor| LAYER_DECIDING_ANCESTOR_KINDS.matches(ancestor.kind()))
-}
-
-/// Returns `true` if `include` is outside a cascade layer and includes a mixin that emits a style
-/// rule outside a cascade layer.
-fn includes_unlayered_style_rules(include: &ScssIncludeAtRule) -> bool {
-    layer_deciding_ancestor(include.syntax()).is_none()
-        && emits_unlayered_style_rules(include, include.range().start(), &mut Vec::new())
 }
 
 /// Returns `true` if the mixin that `include` resolves to emits a style rule outside a cascade
@@ -235,54 +236,28 @@ fn emits_unlayered_style_rules(
     include: &ScssIncludeAtRule,
     called_at: TextSize,
     visited: &mut Vec<CssSyntaxNode>,
+    model: &SemanticModel,
 ) -> bool {
-    let Some(mixin) = resolve_mixin(include, called_at) else {
-        return false;
-    };
-    if visited.contains(mixin.syntax()) {
-        return false;
+    if let Some(mixin) = model.scss_mixin_for_include(include, called_at)
+        && !visited.contains(mixin.syntax())
+    {
+        visited.push(mixin.syntax().clone());
+        mixin
+            .syntax()
+            .descendants()
+            .filter_map(AnyUseLayeredStylesQuery::cast)
+            .any(|item| {
+                layer_deciding_ancestor(&item).as_ref() == Some(mixin.syntax())
+                    && match item {
+                        AnyUseLayeredStylesQuery::CssQualifiedRule(_)
+                        | AnyUseLayeredStylesQuery::CssNestedQualifiedRule(_) => true,
+                        AnyUseLayeredStylesQuery::ScssIncludeAtRule(nested) => {
+                            emits_unlayered_style_rules(&nested, called_at, visited, model)
+                        }
+                        AnyUseLayeredStylesQuery::CssImportAtRule(_) => false,
+                    }
+            })
+    } else {
+        false
     }
-    visited.push(mixin.syntax().clone());
-    mixin.syntax().descendants().any(|node| {
-        let is_style_rule = CssQualifiedRule::can_cast(node.kind())
-            || CssNestedQualifiedRule::can_cast(node.kind());
-        let nested_include = ScssIncludeAtRule::cast_ref(&node);
-        (is_style_rule || nested_include.is_some())
-            && layer_deciding_ancestor(&node).as_ref() == Some(mixin.syntax())
-            && (is_style_rule
-                || nested_include.is_some_and(|nested_include| {
-                    emits_unlayered_style_rules(&nested_include, called_at, visited)
-                }))
-    })
-}
-
-/// Returns the mixin defined in the same file that `include` refers to: the last one with its name
-/// that is defined before `called_at`, in a block that contains `include`.
-///
-/// Returns `None` for a mixin from another module, such as `@include theme.button`.
-fn resolve_mixin(include: &ScssIncludeAtRule, called_at: TextSize) -> Option<ScssMixinAtRule> {
-    let name = match include.name().ok()? {
-        AnyScssIncludeTarget::CssIdentifier(name) => name.value_token().ok()?,
-        AnyScssIncludeTarget::ScssModuleMemberAccess(_) => return None,
-    };
-    include
-        .syntax()
-        .ancestors()
-        .flat_map(|scope| {
-            scope
-                .children()
-                .take_while(move |item| item.text_trimmed_range().end() <= called_at)
-                .filter(|item| item.kind() == CssSyntaxKind::CSS_AT_RULE)
-                .filter_map(|item| item.first_child().and_then(ScssMixinAtRule::cast))
-        })
-        .filter(|mixin| {
-            mixin
-                .name()
-                .ok()
-                .and_then(|name| name.value_token().ok())
-                .is_some_and(|mixin_name| {
-                    scss_function_names_equal(mixin_name.text_trimmed(), name.text_trimmed())
-                })
-        })
-        .max_by_key(|mixin| mixin.range().start())
 }
