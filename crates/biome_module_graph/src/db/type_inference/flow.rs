@@ -14,18 +14,24 @@ use crate::db::queries::{
     infer_flow_subject_states, infer_flow_subject_type,
 };
 use crate::js_module_info::flow::{
-    FlowGuard, FlowNode, FlowNodeId, FlowSubject, FlowSubjectId, FlowTest, RootFlow,
+    FlowGuard, FlowNode, FlowNodeId, FlowSubject, FlowSubjectId, FlowTest, PropertyKey, RootFlow,
     guard_signature,
 };
 use crate::{JsModuleInfo, ModuleDb, ModuleInfo};
 use biome_js_syntax::JsIdentifierExpression;
 use biome_js_type_info::interned_types::{Literal, TypeData};
-use biome_js_type_info::{NarrowingPredicate, TypeofKind, is_narrowing_invariant, narrow_type};
+use biome_js_type_info::{
+    NarrowingPredicate, PropertyTest, TypeId, TypeofKind, is_narrowing_invariant,
+    may_narrow_by_property, narrow_by_property, narrow_type,
+};
 use biome_rowan::{AstNode, TextRange};
 use rustc_hash::FxHashMap;
 use std::collections::VecDeque;
 
 const MAX_FLOW_STEPS: usize = 16_384;
+/// Limits the handles to local types of a module that
+/// [`ResolutionCtx::resolve_module_handle`] follows.
+const MAX_MODULE_HANDLE_STEPS: usize = 16;
 /// Limits the types visited while flattening a flow baseline or checking the
 /// members of a refined union.
 pub(super) const MAX_FLOW_TYPE_STEPS: usize = 1024;
@@ -36,6 +42,13 @@ pub(in crate::db) fn flow_expression_type<'db>(
     info: &JsModuleInfo,
     range: TextRange,
 ) -> Option<TypeData<'db>> {
+    // A candidate made only by reads of a binding that no test of a property
+    // can narrow keeps its type, as in `local_flow_expression_type`.
+    if let Some(binding) = info.flow.property_only_candidate(range)
+        && infer_flow_binding_baseline(db, BindingTypeInput::new(db, module, binding)).is_none()
+    {
+        return None;
+    }
     let tree = info.semantic_model.root();
     let expression = info.flow.candidate(range)?.try_to_node(tree.syntax())?;
     let mut ctx = ResolutionCtx::new(db, module, info, ImportResolution::on_demand());
@@ -55,7 +68,7 @@ pub(in crate::db) fn flow_binding_baseline<'db>(
     let reference = info.raw_binding_types.get(&range)?;
     let mut ctx = ResolutionCtx::new(db, module, info, ImportResolution::on_demand());
     let declared = ctx.resolve(reference);
-    ctx.narrowing_baseline(declared)
+    ctx.binding_baseline(range, declared)
 }
 
 pub(in crate::db) fn flow_subject_states<'db>(
@@ -115,6 +128,27 @@ pub(in crate::db) fn flow_subject_type<'db>(
         return Some(TypeData::Unknown);
     }
     (narrowed != baseline).then_some(narrowed)
+}
+
+/// Why [`ResolutionCtx::flatten_baseline`] gives no type.
+enum FlatteningError {
+    /// Flattening exceeded its work limit.
+    Exceeded,
+    /// Handles to local types of the module form a cycle or a chain longer
+    /// than [`MAX_MODULE_HANDLE_STEPS`].
+    Cycle,
+}
+
+/// The state that the guards of one solve share.
+struct GuardSolve<'db> {
+    /// The subject that the solve narrows.
+    subject: FlowSubjectId,
+    /// The subject's declared type at the root's start, which decides whether
+    /// a tested property is a discriminant.
+    declared: TypeData<'db>,
+    /// The results of the property guards applied so far, keyed by guard
+    /// index and incoming type.
+    properties: FxHashMap<(usize, TypeData<'db>), TypeData<'db>>,
 }
 
 /// Marks a root node that the walk in [`ReachingFlow::new`] has not reached.
@@ -282,6 +316,16 @@ impl<'db> ResolutionCtx<'db, '_> {
         if let Some(ty) = self.local_flow.as_ref()?.expressions.get(&range) {
             return *ty;
         }
+        // A candidate made only by reads of a binding that conditions narrow
+        // only through tests of its properties keeps its type when no such
+        // test can narrow the binding. The binding's baseline shows that
+        // without the syntax node.
+        if let Some(binding) = info.flow.property_only_candidate(range)
+            && self.local_binding_baseline(binding).is_none()
+        {
+            self.local_flow.as_mut()?.expressions.insert(range, None);
+            return None;
+        }
         let tree = info.semantic_model.root();
         let ty = info
             .flow
@@ -320,11 +364,18 @@ impl<'db> ResolutionCtx<'db, '_> {
                 BindingTypeInput::new(self.db, self.module, binding),
             )
         };
+        let baseline = baseline?;
         infer_flow_subject_type(
             self.db,
             FlowSubjectTypeInput::new(
                 self.db,
-                FlowSubjectRootInput::new(self.db, self.module, read.root, read.subject, baseline),
+                FlowSubjectRootInput::new(
+                    self.db,
+                    self.module,
+                    read.root,
+                    read.subject,
+                    Some(baseline),
+                ),
                 read.point,
             ),
         )
@@ -347,7 +398,7 @@ impl<'db> ResolutionCtx<'db, '_> {
             .cloned()
             .and_then(|reference| {
                 let declared = self.resolve(&reference);
-                self.narrowing_baseline(declared)
+                self.binding_baseline(binding, declared)
             });
         self.local_flow
             .as_mut()?
@@ -370,12 +421,23 @@ impl<'db> ResolutionCtx<'db, '_> {
         declared: TypeData<'db>,
     ) -> Option<TypeData<'db>> {
         let read = self.js_info.flow.read(member)?;
-        let baseline = self.narrowing_baseline(declared);
+        let root = self.js_info.flow.root(read.root)?;
+        let baseline = if root.is_property_only(read.subject) {
+            self.property_baseline(declared)
+        } else {
+            self.narrowing_baseline(declared)
+        }?;
         infer_flow_subject_type(
             self.db,
             FlowSubjectTypeInput::new(
                 self.db,
-                FlowSubjectRootInput::new(self.db, self.module, read.root, read.subject, baseline),
+                FlowSubjectRootInput::new(
+                    self.db,
+                    self.module,
+                    read.root,
+                    read.subject,
+                    Some(baseline),
+                ),
                 read.point,
             ),
         )
@@ -394,6 +456,67 @@ impl<'db> ResolutionCtx<'db, '_> {
             Some(baseline) => Some(baseline),
             None => Some(TypeData::Unknown),
         }
+    }
+
+    /// Returns the type that narrowing of the binding declared at `binding`
+    /// starts from, given its `declared` type: [`Self::property_baseline`]
+    /// when conditions narrow the binding only through tests of its
+    /// properties, and [`Self::narrowing_baseline`] otherwise.
+    fn binding_baseline(
+        &mut self,
+        binding: TextRange,
+        declared: TypeData<'db>,
+    ) -> Option<TypeData<'db>> {
+        if self.js_info.flow.is_property_only_binding(binding) {
+            self.property_baseline(declared)
+        } else {
+            self.narrowing_baseline(declared)
+        }
+    }
+
+    /// Returns the type that narrowing of a subject in
+    /// [`RootFlow::property_only`] starts from, given its `declared` type, or
+    /// `None` when no test of a property can narrow it.
+    ///
+    /// Such a test narrows only a union with at least two members that are
+    /// neither `null`, `undefined`, nor primitive types, the condition that
+    /// [`may_narrow_by_property`] checks. When the flattened type is such a
+    /// union, the result matches [`Self::narrowing_baseline`]. Returns
+    /// `Unknown` when flattening exceeds its work limit, and `None` when
+    /// handles to local types of the module form a cycle or a chain longer
+    /// than [`MAX_MODULE_HANDLE_STEPS`].
+    ///
+    /// Unlike [`Self::narrowing_baseline`], flattening resolves handles to
+    /// local types of this context's module through this context instead of
+    /// lookups. Complete module inference has resolved all of those types by
+    /// the time it evaluates flow, so there, finding out that a subject can't
+    /// narrow costs only cache reads. A lookup would resolve each type again
+    /// in a fresh context.
+    fn property_baseline(&mut self, declared: TypeData<'db>) -> Option<TypeData<'db>> {
+        match self.flatten_baseline(declared, true) {
+            Ok(baseline) => (!is_narrowing_invariant(baseline)
+                && may_narrow_by_property(self.db, baseline))
+            .then_some(baseline),
+            Err(FlatteningError::Exceeded) => Some(TypeData::Unknown),
+            Err(FlatteningError::Cycle) => None,
+        }
+    }
+
+    /// Returns `ty`, resolved through this context while it is a handle to a
+    /// local type of this context's module, or `None` when such handles lead
+    /// back to one already seen or exceed [`MAX_MODULE_HANDLE_STEPS`].
+    fn resolve_module_handle(&mut self, mut ty: TypeData<'db>) -> Option<TypeData<'db>> {
+        let mut seen = Vec::new();
+        while let TypeData::Local(local) = ty
+            && local.module(self.db) == self.module_key
+        {
+            if seen.contains(&local) || seen.len() == MAX_MODULE_HANDLE_STEPS {
+                return None;
+            }
+            seen.push(local);
+            ty = self.resolve_raw_type_id(TypeId::new(local.type_id(self.db).index()));
+        }
+        Some(ty)
     }
 
     /// Returns the type of `subject` at each of `points`, given its `baseline`
@@ -417,16 +540,40 @@ impl<'db> ResolutionCtx<'db, '_> {
         )
     }
 
+    /// Returns `ty` with its unions, aliases, and `typeof` types flattened, or
+    /// `None` when flattening exceeds its work limit.
+    fn flow_baseline(&mut self, ty: TypeData<'db>) -> Option<TypeData<'db>> {
+        self.flatten_baseline(ty, false).ok()
+    }
+
+    /// Returns `ty` with its unions, aliases, and `typeof` types flattened, or
+    /// [`FlatteningError::Exceeded`] when flattening exceeds its work limit.
+    ///
+    /// When `in_context` is true, handles to local types of this context's
+    /// module are resolved through this context instead of lookups, as
+    /// [`Self::resolve_module_handle`] resolves them. A cycle of such handles,
+    /// or a chain longer than [`MAX_MODULE_HANDLE_STEPS`], stops the
+    /// flattening with [`FlatteningError::Cycle`].
     #[expect(
         clippy::wildcard_enum_match_arm,
         reason = "Other type shapes remain unchanged."
     )]
-    fn flow_baseline(&mut self, ty: TypeData<'db>) -> Option<TypeData<'db>> {
+    fn flatten_baseline(
+        &mut self,
+        ty: TypeData<'db>,
+        in_context: bool,
+    ) -> Result<TypeData<'db>, FlatteningError> {
         let mut pending = vec![ty];
         let mut types = Vec::new();
         for step in 0..MAX_FLOW_TYPE_STEPS {
             let Some(ty) = pending.pop() else {
-                return Some(TypeData::union_from_types(self.db, types));
+                return Ok(TypeData::union_from_types(self.db, types));
+            };
+            let ty = if in_context {
+                self.resolve_module_handle(ty)
+                    .ok_or(FlatteningError::Cycle)?
+            } else {
+                ty
             };
             let ty = resolve_local_type_on_demand(self.db, ty).expand_global_local(self.db);
             match ty {
@@ -435,14 +582,20 @@ impl<'db> ResolutionCtx<'db, '_> {
                     if children.len()
                         > (MAX_FLOW_TYPE_STEPS - step - 1).saturating_sub(pending.len())
                     {
-                        return None;
+                        return Err(FlatteningError::Exceeded);
                     }
                     pending.extend(children.iter().rev().copied());
                 }
                 TypeData::TypeofType(wrapper) => pending.push(wrapper.ty(self.db)),
                 TypeData::TypeofValue(wrapper) => pending.push(wrapper.ty(self.db)),
                 TypeData::InstanceOf(instance) => {
-                    let target = resolve_local_type_on_demand(self.db, instance.ty(self.db));
+                    let target = if in_context {
+                        self.resolve_module_handle(instance.ty(self.db))
+                            .ok_or(FlatteningError::Cycle)?
+                    } else {
+                        instance.ty(self.db)
+                    };
+                    let target = resolve_local_type_on_demand(self.db, target);
                     if target.should_flatten_instance(instance.type_parameters(self.db)) {
                         pending.push(target);
                     } else {
@@ -452,7 +605,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                 _ => types.push(ty),
             }
         }
-        None
+        Err(FlatteningError::Exceeded)
     }
 
     /// Returns the type of `subject` at every node of `reaching`, given its
@@ -475,6 +628,11 @@ impl<'db> ResolutionCtx<'db, '_> {
         let mut states = vec![TypeData::NeverKeyword; count];
         let mut queued = vec![false; count];
         let mut remaining = MAX_FLOW_STEPS;
+        let mut guards = GuardSolve {
+            subject,
+            declared: baseline,
+            properties: FxHashMap::default(),
+        };
         while let Some(number) = queue.pop_front() {
             let index = number as usize;
             queued[index] = false;
@@ -504,7 +662,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                     if incoming == TypeData::NeverKeyword {
                         incoming
                     } else {
-                        self.apply_guard(root, *guard, subject, incoming, &mut remaining)?
+                        self.apply_guard(root, *guard, &mut guards, incoming, &mut remaining)?
                     }
                 }
             };
@@ -521,20 +679,22 @@ impl<'db> ResolutionCtx<'db, '_> {
         Some(states)
     }
 
-    /// Returns the type of `subject` after the guard at `guard` holds, given
-    /// its incoming type `ty`, or `None` when the flow work limit runs out.
+    /// Returns the type of the subject that `solve` narrows after the guard
+    /// at `index` holds, given its incoming type `ty`, or `None` when the flow
+    /// work limit runs out.
     fn apply_guard(
         &mut self,
         root: &RootFlow,
-        guard: usize,
-        subject: FlowSubjectId,
+        index: usize,
+        solve: &mut GuardSolve<'db>,
         ty: TypeData<'db>,
         remaining: &mut usize,
     ) -> Option<TypeData<'db>> {
         *remaining = remaining.checked_sub(1)?;
-        let Some(guard) = root.guards.get(guard) else {
+        let Some(guard) = root.guards.get(index) else {
             return Some(TypeData::Unknown);
         };
+        let subject = solve.subject;
         Some(match guard {
             FlowGuard::Keep => ty,
             FlowGuard::Incomplete => TypeData::Unknown,
@@ -553,16 +713,54 @@ impl<'db> ResolutionCtx<'db, '_> {
                     None => ty,
                 }
             }
+            FlowGuard::Property {
+                object,
+                key: PropertyKey::Name(name),
+                test,
+                positive,
+                optional_chain,
+            } => {
+                if *object != subject {
+                    return Some(ty);
+                }
+                // Loops revisit conditions, and each application looks up the
+                // property in every member of the union.
+                if let Some(narrowed) = solve.properties.get(&(index, ty)) {
+                    return Some(*narrowed);
+                }
+                let narrowed = match self.test_predicate(*test) {
+                    Some(predicate) => {
+                        let test = PropertyTest {
+                            name: name.text(),
+                            predicate,
+                            positive: *positive,
+                            optional_chain: *optional_chain,
+                        };
+                        narrow_by_property(
+                            self.db,
+                            ty,
+                            solve.declared,
+                            test,
+                            self.narrowing_resolver(),
+                        )
+                    }
+                    None => ty,
+                };
+                solve.properties.insert((index, ty), narrowed);
+                narrowed
+            }
+            // Collection emits property guards only for named properties.
+            FlowGuard::Property { .. } => ty,
             FlowGuard::Both {
                 left,
                 right,
                 sequential,
             } => {
-                let left = self.apply_guard(root, *left, subject, ty, remaining)?;
+                let left = self.apply_guard(root, *left, solve, ty, remaining)?;
                 let right = self.apply_guard(
                     root,
                     *right,
-                    subject,
+                    solve,
                     if *sequential { left } else { ty },
                     remaining,
                 )?;
@@ -659,6 +857,7 @@ mod tests {
             guards: Box::from([FlowGuard::Keep]),
             subjects: Box::default(),
             read_points: Default::default(),
+            property_only: Default::default(),
         };
         let reaching = ReachingFlow::new(&root, &[2]).unwrap();
         assert_eq!(reaching.nodes, [2, 1, 3, 0]);

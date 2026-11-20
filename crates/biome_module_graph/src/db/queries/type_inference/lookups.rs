@@ -95,7 +95,10 @@ fn infer_flow_expression_type_impl<'db>(
 /// no collected type, or no supported runtime test can change its type. The
 /// last case applies when the type contains `any` or an undetermined
 /// (`Unknown`) member, because either one absorbs the whole union and narrowing
-/// leaves both unchanged; TypeScript's `unknown` can still narrow.
+/// leaves both unchanged; TypeScript's `unknown` can still narrow. For a
+/// binding that conditions narrow only through tests of its properties, it
+/// also returns `None` when its type is not a union that such a test can
+/// narrow.
 ///
 /// `Unknown` means the type exceeds the refinement budget or a query cycle
 /// passes through this lookup; a relevant test then produces an `Unknown`
