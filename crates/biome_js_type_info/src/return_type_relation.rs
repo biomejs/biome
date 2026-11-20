@@ -1079,6 +1079,7 @@ mod tests {
             Some(text(name)),
             false,
             None,
+            0,
         ))
     }
 
@@ -1092,6 +1093,7 @@ mod tests {
             Some(text("Leaf")),
             false,
             None,
+            0,
         );
         (1..distinct_types).fold(leaf, |base, _| {
             InternedClass::new(
@@ -1106,6 +1108,7 @@ mod tests {
                 None,
                 false,
                 None,
+                0,
             )
         })
     }

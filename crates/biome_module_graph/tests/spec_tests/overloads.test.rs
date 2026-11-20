@@ -275,3 +275,70 @@ fn test_infer_module_types_selects_method_overloads_of_interfaces_and_object_typ
         &fs,
     );
 }
+
+// TypeScript 7.0.2 (`tsc --strict`) tries the overloads of a later declaration
+// of a merged interface or class first, and signatures with a parameter of a
+// literal type before all others. It gives every read below the expected
+// type, unless a comment gives TypeScript's type.
+#[test]
+fn merged_declarations_try_the_overloads_of_later_declarations_first() {
+    let source = r#"
+interface O1 { f(x: unknown): 1 } interface O1 { f(x: unknown): 2 }
+declare const o1: O1;
+/*laterFirst*/o1.f(0);
+interface O2 { f(x: unknown): 1; f(x: unknown): 11 } interface O2 { f(x: unknown): 2; f(x: unknown): 22 } interface O2 { f(x: unknown): 3 }
+declare const o2: O2;
+/*lastFirst*/o2.f(0);
+interface O3 { f(x: "a"): 1 } interface O3 { f(x: string): 2 }
+declare const o3: O3;
+/*specialized*/o3.f("a");
+class K1 { m(x: unknown): 1 { return 1; } } interface K1 { m(x: unknown): 2 }
+declare const k1: K1;
+/*classFirst*/k1.m(0);
+interface K2 { m(x: unknown): 2 } class K2 { m(x: unknown): 1 { return 1; } }
+declare const k2: K2;
+/*interfaceFirst*/k2.m(0);
+interface M1 { m(): string } interface M1 { m(x: number): number }
+declare const m1: M1;
+/*byArity*/m1.m(1);
+interface Q1 { f?(x: unknown): 1 } interface Q1 { f?(x: unknown): 2 }
+declare const q1: Q1;
+/*optional*/q1.f?.(0);
+interface S1 { f(x: unknown): 1 } interface S1 { f: (x: unknown) => 2 }
+declare const s1: S1;
+/*property*/s1.f(0);
+interface O4 { f(x: "a" | "b"): 1 } interface O4 { f(x: string): 2 }
+declare const o4: O4;
+/*literalUnion*/o4.f("a");
+interface O5 { f(x: 1): 1 } interface O5 { f(x: number): 2 }
+declare const o5: O5;
+/*numberLiteral*/o5.f(1);
+interface O6 { f(x: string): 2; f(x: "a"): 1 }
+declare const o6: O6;
+/*oneDeclaration*/o6.f("a");
+interface O8 { f(x: string): 3 } interface O8 { f(x: "a"): 1; f(x: string): 2 }
+declare const o8: O8;
+/*specializedOfLater*/o8.f("b");
+"#;
+    assert_file_reads(
+        &[("/src/index.ts", source)],
+        "/src/index.ts",
+        &[
+            ("laterFirst", "o1.f(0)", &["number: 2"]),
+            ("lastFirst", "o2.f(0)", &["number: 3"]),
+            ("specialized", "o3.f(\"a\")", &["number: 1"]),
+            ("classFirst", "k1.m(0)", &["number: 2"]),
+            ("interfaceFirst", "k2.m(0)", &["number: 1"]),
+            ("byArity", "m1.m(1)", &["number"]),
+            ("optional", "q1.f?.(0)", &["number: 2", "undefined"]),
+            // TypeScript reports TS2300 and keeps the first declaration.
+            ("property", "s1.f(0)", &["number: 1"]),
+            ("literalUnion", "o4.f(\"a\")", &["number: 2"]),
+            ("numberLiteral", "o5.f(1)", &["number: 1"]),
+            // TypeScript: `1`. Biome keeps the order of the overloads of one
+            // declaration.
+            ("oneDeclaration", "o6.f(\"a\")", &["number: 2"]),
+            ("specializedOfLater", "o8.f(\"b\")", &["number: 2"]),
+        ],
+    );
+}

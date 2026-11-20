@@ -40,6 +40,8 @@ use std::sync::atomic::{AtomicUsize, Ordering};
 mod aliased_conditions;
 #[path = "spec_tests/assertions.test.rs"]
 mod assertions;
+#[path = "spec_tests/augmentations.test.rs"]
+mod augmentations;
 #[path = "spec_tests/callback_parameters.test.rs"]
 mod callback_parameters;
 #[path = "spec_tests/calls.test.rs"]
@@ -222,6 +224,13 @@ impl biome_module_graph::TypeDb for TestModuleDb {
             return None;
         };
         info.local_type_name(type_id)
+    }
+
+    fn global_contributions(
+        &self,
+        id: biome_js_type_info::GlobalTypeId,
+    ) -> &[(InferredModuleKey, InferredLocalTypeId)] {
+        biome_module_graph::global_contributions(self, id)
     }
 }
 
@@ -809,6 +818,92 @@ fn build_js_test_module_db(
         db.modules.insert(Utf8PathBuf::from(*path), module_info);
     }
     db
+}
+
+/// Builds a database that indexes `files`, each a path and a source, with
+/// type inference.
+fn build_files_db(files: &[(&str, &str)]) -> TestModuleDb {
+    let fs = MemoryFileSystem::default();
+    for (path, source) in files {
+        fs.insert((*path).into(), *source);
+    }
+    let paths: Vec<_> = files.iter().map(|(path, _)| *path).collect();
+    build_js_test_module_db(&fs, &paths, true)
+}
+
+/// Asserts the type of each `(marker, expression, expected)` read of the
+/// module `path`, one of `files`. `expected` lists the sorted names of the
+/// type's union members (see [`type_names`]). `marker` names the comment
+/// `/*marker*/` that comes right before the read.
+fn assert_file_reads(files: &[(&str, &str)], path: &str, reads: &[(&str, &str, &[&str])]) {
+    let db = build_files_db(files);
+    let module = db.module_for_path(Utf8Path::new(path)).unwrap();
+    let source = files
+        .iter()
+        .find_map(|(file, source)| (*file == path).then_some(*source))
+        .expect("the read module must be one of the files");
+    let mismatches: Vec<_> = reads
+        .iter()
+        .filter_map(|(marker, expression, expected)| {
+            let marker_text = format!("/*{marker}*/");
+            let (offset, _) = source
+                .match_indices(&marker_text)
+                .next()
+                .unwrap_or_else(|| panic!("marker {marker} must exist"));
+            let start = offset + marker_text.len();
+            assert!(source[start..].starts_with(expression), "{marker}");
+            let range = TextRange::at(
+                start.try_into().unwrap(),
+                expression.len().try_into().unwrap(),
+            );
+            let ty = biome_module_graph::type_inference::execute_type_inference_request(
+                &db,
+                biome_module_graph::type_inference::TypeInferenceCaller::new("test", "fileReads"),
+                biome_module_graph::type_inference::NormalizedExpressionTypeRequest::new(
+                    module, range,
+                ),
+            )
+            .unwrap_or_else(|| panic!("expression at {marker} must be inferred"));
+            let actual = type_names(&db, ty);
+            (actual != *expected)
+                .then(|| format!("{marker}: expected {expected:?}, got {actual:?}"))
+        })
+        .collect();
+    assert!(mismatches.is_empty(), "{}", mismatches.join("\n"));
+}
+
+/// Names each member of `ty`, sorted: an interface by its name, an object
+/// type literal by its members, and any other type by its formatted text on
+/// one line.
+fn type_names(db: &TestModuleDb, ty: InferredTypeData) -> Vec<String> {
+    let variants = match ty {
+        InferredTypeData::Union(union) => union.types(db).to_vec(),
+        _ => vec![ty],
+    };
+    let mut names: Vec<_> = variants
+        .into_iter()
+        .map(|ty| {
+            let text = format_inferred_type(db, ty);
+            let first = text.lines().next().unwrap_or_default();
+            if let Some(name) = first
+                .strip_prefix("interface \"")
+                .and_then(|name| name.split('"').next())
+            {
+                return name.to_owned();
+            }
+            let lines: Vec<_> = text.lines().map(str::trim).collect();
+            if first.starts_with("Object")
+                && let Some(start) = lines.iter().position(|line| line.starts_with("members: "))
+            {
+                // Skip `members: ` and the closing brace of the object.
+                let members = lines[start..lines.len() - 1].join(" ");
+                return members["members: ".len()..].to_owned();
+            }
+            lines.join(" ")
+        })
+        .collect();
+    names.sort();
+    names
 }
 
 fn binding_range_by_name(db: &dyn ModuleDb, module: ModuleInfo, name: &str) -> TextRange {

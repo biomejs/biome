@@ -23,7 +23,7 @@ pub(in crate::db) use flow::{
     flow_binding_baseline, flow_expression_type, flow_subject_states, flow_subject_type,
 };
 pub(in crate::db) use imports::{
-    ExportOriginResult, collect_namespace_export_names, find_export_origin,
+    ExportOriginResult, collect_namespace_export_names, find_export_origin, module_for_import,
     resolve_export_type_on_demand,
 };
 pub(in crate::db) use lookup::{

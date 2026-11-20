@@ -19,8 +19,8 @@ use biome_languages::DocumentFileSource;
 use biome_languages::LanguageDb;
 #[cfg(feature = "module_graph")]
 use biome_module_graph::{
-    InferredLocalTypeId, InferredModuleKey, ModuleDb, ModuleGraphGeneration, ModuleInfo,
-    ModuleInfoKind, TypeDb, module_for_key,
+    GlobalTypeId, InferredLocalTypeId, InferredModuleKey, ModuleDb, ModuleGraphGeneration,
+    ModuleInfo, ModuleInfoKind, TypeDb, module_for_key,
 };
 use biome_resolver::FsWithResolverProxy;
 #[cfg(feature = "module_graph")]
@@ -1551,6 +1551,13 @@ impl TypeDb for WorkspaceDb {
             return None;
         };
         info.local_type_name(type_id)
+    }
+
+    fn global_contributions(
+        &self,
+        id: GlobalTypeId,
+    ) -> &[(InferredModuleKey, InferredLocalTypeId)] {
+        biome_module_graph::global_contributions(self, id)
     }
 }
 

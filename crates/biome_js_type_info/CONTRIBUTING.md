@@ -101,6 +101,18 @@ decides about each kind: instance-side walks, such as member lookup, which
 tests, follow both, while static members, constructors, and `super` come
 from the parent class only.
 
+Interfaces that other modules merge into a declaration, through a module
+augmentation, a `declare global` block, or a declaration script, are its
+contributions. A contribution is never copied into its target, because its
+data belongs to the module that declares it. The target's inferred
+`InternedInterface` or `InternedClass` holds handles to the contributing
+declarations before its `extends` clauses or interface bases, and its
+`contributions` field counts them (`TypeData::with_contributions`). A reader
+of parents that doesn't know about contributions treats them as bases, so it
+sees their members and their `extends` clauses. Member lookup, which needs
+TypeScript's order, searches them before a class's parent class and merges
+the overloads of their methods with the target's.
+
 ## Inference Layers
 
 The type system can answer type questions at three levels. These levels are

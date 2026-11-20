@@ -170,9 +170,9 @@ These limits apply to every *Supported* and *Partial* row below:
     array under `as const`, which Biome types as a tuple whose elements
     aren't readonly; or a property that the type of the object inherits
     through `extends`, including the `extends` clause of an interface
-    merged into a class. A module augmentation can declare an inherited
-    property on the type itself without `readonly`, which Biome doesn't see,
-    as the limits below describe for other tests.
+    merged into a class, or that a module augmentation declares, because an
+    augmentation in a file that Biome doesn't index can declare the property
+    on the type itself without `readonly`.
   - An object along it is a generic, or a primitive, as for `s.length`.
   - The declared type of an object along it has a member that doesn't
     declare the property readonly, even where narrowing has removed that
@@ -357,29 +357,17 @@ These limits apply to every *Supported* and *Partial* row below:
   `x: "a" | { length: number }` with `v is string`, stays in the false
   branch, as in TypeScript, whose union of the two is the primitive type. A
   target of `any` or `unknown` narrows nothing.
-- Members that one module adds to an interface of another module through
-  module augmentation are not seen. So with
-  `declare module "./shapes" { interface X { extra: 1 } }` in one module,
-  `x: X | E`, and `interface E { extra: 2 }`, `"extra" in x` gives `E`, where
-  TypeScript gives `X | E`. In the same way, with
-  `function isExtra(v: unknown): v is { extra: 1 }`,
-  `x: X | { extra: 1; y: 2 } | string` gives `{ extra: 1; y: 2 }` in the true
-  branch of `isExtra(x)`, where TypeScript gives
-  `X | { extra: 1; y: 2 }`.
-- `extends` clauses that one module adds to an interface of another module
-  through module augmentation are not seen either. So with
-  `declare module "./shapes" { interface X extends Base {} }` in one module,
-  `x: X | Sub`, and `class Sub extends Base {}`, `x instanceof Base` gives
-  `Sub`, where TypeScript gives `X | Sub`.
 - Interfaces with the same name in one scope merge into one type, as in
   TypeScript, and so do a class and the interfaces with its name: the type
   has the members and the `extends` clauses of every declaration, and the
   first declaration of a property decides its type and whether it is
-  readonly. A method that several declarations declare takes all its
-  overloads from the first one, where TypeScript puts the overloads of later
-  declarations first, so with `interface M { m(): string }`, then
-  `interface M { m(x: number): number }`, and `x: M`, `x.m(1)` gives
-  `string`, where TypeScript gives `number`. Interfaces with the same name in two blocks of
+  readonly. A method that several declarations declare has the overloads of
+  all of them, and a call tries those of a later declaration first, and
+  those with a parameter of a literal type, such as `"a"`, before all others,
+  as in TypeScript. Within one declaration, Biome tries the overloads in
+  their order, so with `interface O { f(x: string): 2; f(x: "a"): 1 }` and
+  `o: O`, `o.f("a")` gives `2`, where TypeScript gives `1`. Interfaces with
+  the same name in two blocks of
   one namespace, as in `namespace N { export interface I { a: 1 } }` and
   `namespace N { export interface I { b: 2 } }`, don't merge yet: `N.I` is
   the first of them. A declaration in a `declare global` block merges only
@@ -388,16 +376,38 @@ These limits apply to every *Supported* and *Partial* row below:
   the first ones of another and leaves out ones with defaults, give
   Unknown, and so do interfaces that give a class a construct signature.
   Two classes with the same name (TS2300) keep their own types.
+- The interfaces of a module augmentation, such as
+  `declare module "./shapes" { interface X { extra: 1 } }`, merge into the
+  interface or class that the augmented module exports, also through
+  `export *` and named re-exports, and so do the interfaces of a
+  `declare global` block, and the top-level interfaces of a declaration file
+  (`.d.ts`) without imports or exports, into the global of their name, as in
+  TypeScript. Their members count after the target's own, so the target's
+  own declaration of a property decides its type and whether it is readonly,
+  and the overloads of their methods are tried before the target's, those
+  of the augmenting module with the last path first, where TypeScript
+  follows the order of the program's files. They merge from every module
+  that Biome indexes, which can be more or fewer files than the program of a
+  project's `tsconfig`. An augmentation in a file that the program leaves
+  out, such as a file outside its `include`, can make the false branch of
+  `instanceof` and of a type-guard function narrower than that program's
+  TypeScript: with `declare module "./shapes" { interface X extends Base {} }`
+  in such a file, `x: X | C` gives `C` in the false branch of
+  `x instanceof Base`, where TypeScript gives `X | C`.
+- Only interfaces merge from these declarations: namespaces and variables
+  that a `declare global` block or a module augmentation declares, as
+  `namespace NodeJS { interface ProcessEnv {} }` or `var __DEV__: boolean`,
+  are not seen, and neither are those of a TypeScript file without imports
+  or exports that isn't a declaration file. An interface that augmentations
+  add to a module that doesn't export its name is seen through imports of
+  that module, but not through modules that re-export it or through
+  `import * as`. A global that the standard library doesn't declare, and
+  that more than one module declares, is Unknown outside the modules that
+  declare it, and each of them sees only its own declarations.
 - Falsy and `typeof` tests compare an object type with the types that give
   primitives and functions their members, such as `String` and `Function`,
-  from TypeScript's ES2015 library files. Members that the project adds to
-  them with `declare global`, as in
-  `declare global { interface String { format(): string } }`, are not seen.
-  So with that declaration, `x: { format(): string } | number` gives Unknown
-  in `if (typeof x === "string") x`, where TypeScript gives `string`, and
-  `x: string | { format(): string; a: 1 }` gives `{ format(): string; a: 1 }`
-  in the true branch of a type-guard function with the target
-  `{ format(): string }`, where TypeScript gives the type of `x`.
+  from TypeScript's ES2015 library files and the interfaces that the project
+  merges into them.
 - Variables whose declared type is `any`, or includes a part that inference
   cannot determine, never narrow.
 - An execution root gets no narrowing at all when its own code, outside nested

@@ -25,6 +25,7 @@
 //! Call and constructor inference is best effort. Unsupported or unresolved
 //! shapes produce `Unknown` or `None` instead of a TypeScript diagnostic.
 
+mod augmentations;
 mod calls;
 mod exports;
 mod interned;
@@ -33,6 +34,11 @@ mod module_types;
 mod normalization;
 mod promises;
 
+pub use augmentations::global_contributions;
+pub(crate) use augmentations::{
+    DeclarationContributions, contribution_type, declaration_contributions,
+    global_name_declaration, module_new_exports,
+};
 pub(in crate::db) use calls::{
     ResolvedCallArgument, infer_call_expression_return_type_from_args, resolve_callable_function,
 };
@@ -47,7 +53,7 @@ pub use interned::{
 };
 pub(crate) use interned::{
     BindingTypeWithImportBudgetInput, CallableFunctionInput, FlowSubjectRootInput,
-    FlowSubjectTypeInput, LocalTypeWithImportBudgetInput, TypeSubstitutionInput,
+    FlowSubjectTypeInput, GlobalNameInput, LocalTypeWithImportBudgetInput, TypeSubstitutionInput,
 };
 pub use lookups::{
     find_member_type, find_value_member_type, infer_binding_type, infer_expression_type,

@@ -8,12 +8,14 @@ use biome_js_syntax::{
     AnyJsExportDefaultDeclaration, AnyJsExpression, AnyJsImportClause, JsArrowFunctionExpression,
     JsAssignmentExpression, JsCatchDeclaration, JsForVariableDeclaration, JsFormalParameter,
     JsLanguage, JsRestParameter, JsSyntaxNode, JsVariableDeclaration, TsGlobalDeclaration,
-    TsInferType, TsMappedType, TsModuleDeclaration, TsTypeParameter, inner_string_text,
+    TsInferType, TsInterfaceDeclaration, TsMappedType, TsModuleDeclaration, TsTypeParameter,
+    inner_string_text,
 };
 use biome_js_type_info::{
-    Class, FunctionParameter, FunctionParameterBinding, GenericTypeParameter, Interface,
-    RawTypeCollector, RawTypeData, RawTypeId, TypeData, TypeId, TypeImportQualifier, TypeMember,
-    TypeMemberKind, TypeReference, TypeStore, UnionCollector, resolved::InferredLocalTypeId,
+    Class, Function, FunctionParameter, FunctionParameterBinding, GenericTypeParameter, Interface,
+    Literal, RawTypeCollector, RawTypeData, RawTypeId, TypeData, TypeId, TypeImportQualifier,
+    TypeMember, TypeMemberKind, TypeReference, TypeStore, UnionCollector,
+    global_type_id_for_type_name, resolved::InferredLocalTypeId,
 };
 use biome_rowan::{AstNode, SyntaxKindSet, Text, TextRange, TokenText};
 use indexmap::IndexMap;
@@ -21,9 +23,10 @@ use rustc_hash::FxHashMap;
 
 use super::utils::MAX_NUM_TYPES;
 use super::{
-    Exports, ImportSymbol, Imports, JsExport, JsImport, JsModuleInfo, JsModuleInfoDiagnostic,
-    JsModuleInfoInner, JsOwnExport, JsReexport, NamespaceMember, binding::JsBindingData,
-    is_named_type_declaration,
+    ContributedInterface, Exports, ImportSymbol, Imports, JsExport, JsImport, JsModuleInfo,
+    JsModuleInfoDiagnostic, JsModuleInfoInner, JsOwnExport, JsReexport, ModuleAugmentation,
+    ModuleContributions, NamespaceMember, binding::JsBindingData, is_named_type_declaration,
+    order_merged_overloads,
 };
 use crate::{ImportPathMap, JsImportKind, JsImportPath, JsImportPhase};
 
@@ -87,6 +90,34 @@ pub(super) struct JsModuleInfoCollector {
     /// CSS class references from JSX `className` or `class` attributes
     /// (static string literals only).
     pub(super) referenced_classes: Vec<CssClassReference>,
+
+    /// The interfaces that [`Self::register_contribution`] registered, until
+    /// [`Self::finalise_contributions`] records them.
+    contribution_declarations: Vec<ContributionDeclaration>,
+
+    /// The interfaces that the module merges into declarations that it
+    /// doesn't own, once finalised.
+    pub(super) contributions: ModuleContributions,
+}
+
+/// Where an interface that a module declares merges, as TypeScript merges
+/// it.
+pub(super) enum ContributionTarget {
+    /// Into the module that the specifier of its `declare module
+    /// "specifier" {}` block names.
+    Module(TokenText),
+    /// Into the globals, from a `declare global {}` block or the top level
+    /// of a declaration script.
+    Global,
+}
+
+/// An interface that a module merges into a declaration that it doesn't
+/// own, before its type is collected.
+struct ContributionDeclaration {
+    target: ContributionTarget,
+    name: TokenText,
+    /// The range of the interface's name, which identifies its binding.
+    range: TextRange,
 }
 
 /// Intermediary representation for an exported symbol.
@@ -155,7 +186,34 @@ impl JsModuleInfoCollector {
             diagnostics: Vec::new(),
             inference_mode: TypeInferenceMode::Disabled,
             referenced_classes: Vec::new(),
+            contribution_declarations: Vec::new(),
+            contributions: ModuleContributions::default(),
         }
+    }
+
+    /// Registers `interface` as merging into `target`. Nothing is recorded
+    /// when the interface has no name.
+    pub(super) fn register_contribution(
+        &mut self,
+        target: ContributionTarget,
+        interface: &TsInterfaceDeclaration,
+    ) {
+        let Some(id) = interface
+            .id()
+            .ok()
+            .and_then(|id| id.as_ts_identifier_binding().cloned())
+        else {
+            return;
+        };
+        let Ok(name) = id.name_token() else {
+            return;
+        };
+        self.contribution_declarations
+            .push(ContributionDeclaration {
+                target,
+                name: name.token_text_trimmed(),
+                range: id.syntax().text_trimmed_range(),
+            });
     }
 
     /// The kinds of the nodes that [Self::leave_node] reads.
@@ -364,6 +422,7 @@ impl JsModuleInfoCollector {
     fn finalise(&mut self, semantic_model: &SemanticModel) -> FinalisedModuleTypes {
         if self.inference_mode != TypeInferenceMode::Disabled {
             self.infer_all_types(semantic_model);
+            self.finalise_contributions();
         }
 
         let exports = self.collect_exports_from(self.exports.clone());
@@ -480,14 +539,13 @@ impl JsModuleInfoCollector {
     /// into the class, with the class's members first, and the `extends`
     /// clauses of the interfaces as its [`Class::interface_bases`]. The
     /// merged type has the type parameters of the declaration that lists the
-    /// most of them. The merged type keeps the scope of the class or the first
-    /// interface, which tells it apart from an equal set in another scope.
-    ///
-    /// Member lookup takes the first member of a name. As in TypeScript, the
-    /// first declaration of a property sets its type and whether it is
-    /// readonly. The first declaration of a method also gives all its
-    /// overloads, where TypeScript puts the overloads of later declarations
-    /// first.
+    /// most of them. Member lookup takes the first member of a name, so the
+    /// first declaration of a property decides its type and whether it is
+    /// readonly, as in TypeScript. A method that several declarations declare
+    /// becomes one member with the overloads of all of them, in TypeScript's
+    /// order (see [`Self::with_merged_methods`]). The merged type keeps the
+    /// scope of the class or the first interface, which tells it apart from
+    /// an equal set in another scope.
     ///
     /// The bindings keep their own types when the set has two classes, which
     /// TypeScript rejects (TS2300), or when a declaration has no collected
@@ -606,11 +664,314 @@ impl JsModuleInfoCollector {
                 })),
                 (None, None) => return,
             };
+            let merged = self.with_merged_methods(&type_ids, merged);
             self.reference_to_owned_data(merged)
         };
         for id in set {
             self.bindings[id.index()].ty = ty.clone();
         }
+    }
+
+    /// Returns the merged class or interface `merged` with the overloads of
+    /// each method that two or more of its `declarations` declare merged
+    /// into one member.
+    ///
+    /// `declarations` are in source order. The merged member orders the
+    /// overloads as TypeScript does, so a later declaration's overloads are
+    /// tried first (see [`order_merged_overloads`]). It takes the place of
+    /// the method's first member, and the method's other members are
+    /// removed.
+    ///
+    /// A method keeps its first declaration's member when a declaration
+    /// gives its name to something else, such as a property, which
+    /// TypeScript rejects, or when the declarations disagree on whether it
+    /// is optional.
+    ///
+    /// For example, `[o.f(0)]` is `[2]` with these declarations:
+    ///
+    /// ```ts
+    /// interface O { f(x: unknown): 1 }
+    /// interface O { f(x: unknown): 2 }
+    /// ```
+    fn with_merged_methods(&mut self, declarations: &[TypeId], merged: TypeData) -> TypeData {
+        struct Method {
+            name: Text,
+            is_optional: bool,
+            signatures: Vec<Vec<(TypeReference, bool)>>,
+            is_mergeable: bool,
+        }
+
+        let mut methods: Vec<Method> = Vec::new();
+        for type_id in declarations {
+            let members = match self.types.get_by_id(*type_id) {
+                TypeData::Class(class) => &class.members,
+                TypeData::Interface(interface) => &interface.members,
+                _ => continue,
+            };
+            for member in members.iter() {
+                if member.kind.is_static() {
+                    continue;
+                }
+                let Some(name) = member.kind.name() else {
+                    continue;
+                };
+                let method = match &member.kind {
+                    TypeMemberKind::Named(_) => self.method_signatures(&member.ty, false),
+                    TypeMemberKind::NamedOptional(_) => self.method_signatures(&member.ty, true),
+                    _ => None,
+                };
+                let is_optional = member.kind.is_optional();
+                match methods.iter_mut().find(|method| method.name == name) {
+                    Some(entry) => match method {
+                        Some(signatures) if entry.is_optional == is_optional => {
+                            entry.signatures.push(signatures);
+                        }
+                        _ => entry.is_mergeable = false,
+                    },
+                    None => methods.push(Method {
+                        name,
+                        is_optional,
+                        is_mergeable: method.is_some(),
+                        signatures: method.into_iter().collect(),
+                    }),
+                }
+            }
+        }
+
+        let mut merged_types = Vec::new();
+        for method in methods {
+            if !method.is_mergeable || method.signatures.len() < 2 {
+                continue;
+            }
+            let signatures = order_merged_overloads(method.signatures);
+            let ty = match signatures.as_slice() {
+                [signature] => signature.clone(),
+                _ => self.reference_to_owned_data(TypeData::object_with_members(
+                    signatures
+                        .into_iter()
+                        .map(|ty| TypeMember {
+                            kind: TypeMemberKind::CallSignature,
+                            ty,
+                        })
+                        .collect(),
+                )),
+            };
+            let ty = if method.is_optional {
+                RawTypeId::Local(self.optional(ty)).into()
+            } else {
+                ty
+            };
+            merged_types.push((method.name, ty, false));
+        }
+        if merged_types.is_empty() {
+            return merged;
+        }
+
+        let mut merge_members = |members: &[TypeMember]| -> Box<[TypeMember]> {
+            members
+                .iter()
+                .filter_map(|member| {
+                    let name = member.kind.name().filter(|_| !member.kind.is_static());
+                    let Some((_, ty, placed)) = name.and_then(|name| {
+                        merged_types
+                            .iter_mut()
+                            .find(|(merged_name, ..)| *merged_name == name)
+                    }) else {
+                        return Some(member.clone());
+                    };
+                    if std::mem::replace(placed, true) {
+                        return None;
+                    }
+                    Some(TypeMember {
+                        kind: member.kind.clone(),
+                        ty: ty.clone(),
+                    })
+                })
+                .collect()
+        };
+        match merged {
+            TypeData::Class(mut class) => {
+                class.members = merge_members(&class.members);
+                TypeData::Class(class)
+            }
+            TypeData::Interface(mut interface) => {
+                interface.members = merge_members(&interface.members);
+                TypeData::Interface(interface)
+            }
+            other => other,
+        }
+    }
+
+    /// Returns the call signatures of a method whose type is `ty`, each
+    /// paired with whether it is specialized (see [`Self::is_specialized`]).
+    /// Returns `None` when `ty` isn't a method's type, as for a property.
+    ///
+    /// A method's type is a named function, or an object with one call
+    /// signature per overload. An optional method's type also includes
+    /// `undefined`.
+    fn method_signatures(
+        &self,
+        ty: &TypeReference,
+        is_optional: bool,
+    ) -> Option<Vec<(TypeReference, bool)>> {
+        let data = self.local_data(ty)?;
+        if is_optional {
+            // The type of an optional method is the method's type and
+            // `undefined`, as `RawTypeCollector::optional` builds it.
+            let TypeData::Union(union) = data else {
+                return None;
+            };
+            let [function, _undefined] = union.types() else {
+                return None;
+            };
+            return self.method_signatures(function, false);
+        }
+        match data {
+            TypeData::Function(function) if function.name.is_some() => {
+                Some(vec![(ty.clone(), self.is_specialized(function))])
+            }
+            TypeData::Object(object)
+                if object.prototype.is_none()
+                    && !object.members.is_empty()
+                    && object
+                        .members
+                        .iter()
+                        .all(|member| member.kind.is_call_signature()) =>
+            {
+                object
+                    .members
+                    .iter()
+                    .map(|member| match self.local_data(&member.ty)? {
+                        TypeData::Function(function) => {
+                            Some((member.ty.clone(), self.is_specialized(function)))
+                        }
+                        _ => None,
+                    })
+                    .collect()
+            }
+            _ => None,
+        }
+    }
+
+    /// Returns whether a parameter of `function` has a literal type, such
+    /// as `"a"`, `1`, or `true`, which makes TypeScript try the signature
+    /// before the others of its method.
+    fn is_specialized(&self, function: &Function) -> bool {
+        function.parameters.iter().any(|parameter| {
+            matches!(
+                self.local_data(parameter.ty()),
+                Some(TypeData::Literal(literal)) if matches!(
+                    literal.as_ref(),
+                    Literal::BigInt(_) | Literal::Boolean(_) | Literal::Number(_) | Literal::String(_)
+                )
+            )
+        })
+    }
+
+    /// Returns the data of a reference to the module's own table.
+    fn local_data(&self, reference: &TypeReference) -> Option<&TypeData> {
+        let TypeReference::Resolved(RawTypeId::Local(id)) = reference else {
+            return None;
+        };
+        Some(self.types.get_by_id(*id))
+    }
+
+    /// Records the interfaces that [`Self::register_contribution`]
+    /// registered in [`Self::contributions`], with the raw types of their
+    /// declarations.
+    ///
+    /// Also makes each interface's name refer to what the interface merges
+    /// into: the export of the augmented module, or the global that the
+    /// standard library declares with the name. A global name that the library
+    /// doesn't declare keeps naming the module's declaration. This matches
+    /// TypeScript, where the declaring module sees the merged type. For
+    /// example, `X` names the merged `X` of `./a` inside
+    /// `declare module "./a" { interface X { self(): X } }`, and `String`
+    /// names the global `String` after `declare global { interface String {} }`.
+    ///
+    /// Runs after the collector merges the interfaces of one name in one
+    /// block, so an interface declared twice in a block is one contribution.
+    /// An interface whose type isn't collected, as for a merge that
+    /// TypeScript rejects, contributes nothing.
+    fn finalise_contributions(&mut self) {
+        if self.contribution_declarations.is_empty() {
+            return;
+        }
+        let bindings_by_range: FxHashMap<_, _> = self
+            .bindings
+            .iter()
+            .enumerate()
+            .map(|(index, binding)| (binding.range, index))
+            .collect();
+        let mut augmentations: Vec<(JsImport, Vec<ContributedInterface>)> = Vec::new();
+        let mut globals: Vec<ContributedInterface> = Vec::new();
+        for declaration in std::mem::take(&mut self.contribution_declarations) {
+            let Some(&index) = bindings_by_range.get(&declaration.range) else {
+                continue;
+            };
+            let TypeReference::Resolved(RawTypeId::Local(type_id)) = self.bindings[index].ty else {
+                continue;
+            };
+            if !matches!(self.types.get_by_id(type_id), TypeData::Interface(_)) {
+                continue;
+            }
+            let name = Text::from(declaration.name);
+            let interface = ContributedInterface {
+                name: name.clone(),
+                type_id,
+            };
+            let interfaces = match declaration.target {
+                ContributionTarget::Module(specifier) => {
+                    let specifier = Text::from(specifier);
+                    self.bindings[index].ty = TypeReference::from(TypeImportQualifier {
+                        symbol: ImportSymbol::Named(name),
+                        specifier: Arc::new(specifier.clone()),
+                        type_only: true,
+                    });
+                    match augmentations
+                        .iter()
+                        .position(|(import, _)| import.specifier == specifier)
+                    {
+                        Some(position) => &mut augmentations[position].1,
+                        None => {
+                            augmentations.push((
+                                JsImport {
+                                    specifier,
+                                    symbol: ImportSymbol::All,
+                                },
+                                Vec::new(),
+                            ));
+                            &mut augmentations
+                                .last_mut()
+                                .expect("an augmentation was just pushed")
+                                .1
+                        }
+                    }
+                }
+                ContributionTarget::Global => {
+                    if let Some(id) = global_type_id_for_type_name(name.text()) {
+                        self.bindings[index].ty = TypeReference::Resolved(RawTypeId::Global(id));
+                    }
+                    &mut globals
+                }
+            };
+            if !interfaces
+                .iter()
+                .any(|recorded| recorded.type_id == interface.type_id)
+            {
+                interfaces.push(interface);
+            }
+        }
+        self.contributions = ModuleContributions {
+            augmentations: augmentations
+                .into_iter()
+                .map(|(import, interfaces)| ModuleAugmentation {
+                    import,
+                    interfaces: interfaces.into_boxed_slice(),
+                })
+                .collect(),
+            globals: globals.into_boxed_slice(),
+        };
     }
 
     fn has_writable_reference(&self, semantic_model: &SemanticModel, range: TextRange) -> bool {
@@ -1219,6 +1580,15 @@ impl JsModuleInfo {
     ) -> Self {
         collector.inference_mode = inference_mode;
         let finalised = collector.finalise(&semantic_model);
+        let contributions = std::mem::take(&mut collector.contributions);
+        // A contribution's binding refers to what it merges into, but its
+        // own declaration keeps its identity.
+        let contributed_type_ids = contributions
+            .augmentations
+            .iter()
+            .flat_map(|augmentation| augmentation.interfaces.iter())
+            .chain(contributions.globals.iter())
+            .map(|interface| InferredLocalTypeId::new(interface.type_id.index()));
         let mut named_type_ids = finalised
             .raw_binding_types
             .iter()
@@ -1232,6 +1602,7 @@ impl JsModuleInfo {
                 };
                 Some(InferredLocalTypeId::new(type_id.index()))
             })
+            .chain(contributed_type_ids)
             .collect::<Vec<_>>();
         named_type_ids.sort_unstable();
         named_type_ids.dedup();
@@ -1266,6 +1637,7 @@ impl JsModuleInfo {
             infer_types: collector.inference_mode != TypeInferenceMode::Disabled,
             flow,
             referenced_classes: collector.referenced_classes,
+            contributions,
         }))
     }
 }

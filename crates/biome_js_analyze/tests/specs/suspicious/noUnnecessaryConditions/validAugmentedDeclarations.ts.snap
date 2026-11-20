@@ -1,0 +1,32 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validAugmentedDeclarations.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+// In the module that declares it, `declare global` merges `String` into the
+// global, as in TypeScript, so `String` keeps its `length: number` and the
+// `in` test keeps it: `value.length` can be `0`.
+
+declare global {
+	interface String {
+		format(): string;
+	}
+}
+
+interface Local {
+	length: 1;
+}
+
+function local(value: String | Local) {
+	if ("length" in value) {
+		if (value.length) {
+			return 1;
+		}
+	}
+}
+
+export {};
+
+```
