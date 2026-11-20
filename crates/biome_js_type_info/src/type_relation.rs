@@ -7,6 +7,13 @@
 //! conditional remains unevaluated, and consumers treat it as indeterminate
 //! instead of assuming either branch.
 //!
+//! The module also answers the questions that narrowing asks about types.
+//! [`property_presence`] tells whether the values of a type have a property,
+//! for `in`. For `instanceof`, [`instance_types`] gives the instance types of
+//! a constructor, and [`is_derived_from`] compares a type with them by
+//! declaration. [`is_subtype`] follows TypeScript's subtype relation, which
+//! is stricter than assignability.
+//!
 //! The operands must already be normalized, as with the operations in
 //! [`crate::type_operations`].
 
@@ -17,7 +24,8 @@ use crate::generated::global_types::ids::{
     PROMISE_CONSTRUCT_ID_GLOBAL_TYPE_ID, PROMISE_FINALLY_ID_GLOBAL_TYPE_ID,
     PROMISE_RACE_ID_GLOBAL_TYPE_ID, PROMISE_REJECT_ID_GLOBAL_TYPE_ID,
     PROMISE_RESOLVE_ID_GLOBAL_TYPE_ID, PROMISE_THEN_ID_GLOBAL_TYPE_ID,
-    PROMISE_TRY_ID_GLOBAL_TYPE_ID, STRING_ID_GLOBAL_TYPE_ID, SYMBOL_ID_GLOBAL_TYPE_ID,
+    PROMISE_TRY_ID_GLOBAL_TYPE_ID, REG_EXP_ID_GLOBAL_TYPE_ID, STRING_ID_GLOBAL_TYPE_ID,
+    SYMBOL_ID_GLOBAL_TYPE_ID,
 };
 use crate::interned_types::{
     FunctionParameter, InternedClass, InternedConstructor, InternedExtendsType, InternedFunction,
@@ -28,8 +36,9 @@ use crate::interned_types::{
 use crate::literal::StringLiteral;
 use crate::type_operations::keyof;
 use crate::type_transform::TypeSubstitution;
-use crate::{GlobalTypeId, TypeOperator, TypeofKind};
+use crate::{GlobalTypeId, ObjectKind, TypeOperator, TypeofKind};
 use biome_js_syntax::numbers::canonicalize_js_bigint_literal;
+use biome_rowan::Text;
 use rustc_hash::FxHashSet;
 
 /// Maximum number of type pairs compared while evaluating one conditional.
@@ -401,6 +410,169 @@ fn is_decimal_integer_name(name: &str) -> bool {
         && name
             .parse::<u64>()
             .is_ok_and(|value| value <= MAX_SAFE_INTEGER)
+}
+
+/// Returns whether the normalized type `source` is a subtype of `target`
+/// under TypeScript's subtype relation.
+///
+/// This is assignability with two differences: `any` is a subtype only of
+/// `any` and `unknown`, and a source that lacks an optional property of an
+/// object type target is not a subtype of it, unless the source is the type
+/// of an object literal or a tuple.
+pub(crate) fn is_subtype<'db>(
+    db: &'db dyn TypeDb,
+    source: TypeData<'db>,
+    target: TypeData<'db>,
+    resolve: &mut TypeResolver<'db, '_>,
+) -> Assignability {
+    let mut check = AssignabilityCheck::new(db, resolve, &[]);
+    check.is_subtype = true;
+    check.is_assignable(source, target)
+}
+
+/// Returns whether the normalized type `ty` is `{}`, which every value other
+/// than `null` and `undefined` has.
+pub(crate) fn is_empty_object_type<'db>(
+    db: &'db dyn TypeDb,
+    ty: TypeData<'db>,
+    resolve: &mut TypeResolver<'db, '_>,
+) -> bool {
+    let mut check = AssignabilityCheck::new(db, resolve, &[]);
+    let ty = check.resolve(ty);
+    check.is_empty_object(ty)
+}
+
+/// One type of the instances of a constructor, which `value instanceof C`
+/// tests `value` against. [`instance_types`] returns these.
+#[derive(Clone, Copy, Debug)]
+pub(crate) struct InstanceType<'db> {
+    /// The instance type, whose declaration [`is_derived_from`] compares.
+    /// For a generic class it has no type arguments, so it must not become
+    /// the type of a read.
+    pub(crate) target: TypeData<'db>,
+    /// Whether the instance type is a generic class without type arguments,
+    /// whose instance TypeScript gives `any` type arguments.
+    pub(crate) is_generic: bool,
+}
+
+/// Returns the types of the instances of the normalized constructor type
+/// `constructor`, which `value instanceof C` narrows `value` to. They match
+/// TypeScript's instance types:
+///
+/// - a class gives an instance of itself;
+/// - another object type gives the type of its `prototype` property, unless
+///   that is `any`, and otherwise the return types of its construct
+///   signatures, as `new () => Foo` gives `Foo`;
+/// - a union of constructors gives the instance types of its members.
+///
+/// Returns `None` when Biome can't tell the instance types, so the test must
+/// leave the value unchanged. This happens for:
+///
+/// - a constructor that is not one of the above;
+/// - `Object` and `Function`, whose instances TypeScript treats specially;
+/// - a generic construct signature;
+/// - a constructor that declares or inherits a static `[Symbol.hasInstance]`
+///   method, or a static member with a computed key that may be one, because
+///   TypeScript narrows by that method's type predicate instead;
+/// - a constructor whose walk exceeds the work limit.
+pub(crate) fn instance_types<'db>(
+    db: &'db dyn TypeDb,
+    constructor: TypeData<'db>,
+    resolve: &mut TypeResolver<'db, '_>,
+) -> Option<Vec<InstanceType<'db>>> {
+    let mut check = AssignabilityCheck::new(db, resolve, &[]);
+    let mut instances = Vec::new();
+    let mut pending = vec![constructor];
+    while let Some(constructor) = pending.pop() {
+        check.remaining_steps = check.remaining_steps.checked_sub(1)?;
+        match check.resolve(constructor) {
+            TypeData::Union(union) => pending.extend(union.types(db).iter().rev().copied()),
+            resolved => {
+                let handle = matches!(constructor, TypeData::Local(_)).then_some(constructor);
+                for instance in check.instance_type(resolved, handle)? {
+                    // Overloaded construct signatures often return one type.
+                    if !instances
+                        .iter()
+                        .any(|known: &InstanceType| known.target == instance.target)
+                    {
+                        instances.push(instance);
+                    }
+                }
+            }
+        }
+    }
+    (!instances.is_empty()).then_some(instances)
+}
+
+/// Returns whether every value of the normalized type `source` is derived
+/// from `target`, an instance type or a member of a narrowed union, matching
+/// the relation that TypeScript uses for `instanceof`.
+///
+/// A class or an interface is derived from a class or an interface when its
+/// `extends` clauses lead to the same declaration, whatever their type
+/// arguments, so `Box<string>` is derived from `Box`. An instance of a class
+/// is not derived from an interface that the class implements. Arrays and
+/// tuples are derived from `Array`, every object type is derived from `{}`,
+/// and every object type other than `{}` is derived from `Object`. Nothing is
+/// derived from a type literal, a function type, a primitive, `object`, or
+/// another type without a declaration, and none of these is derived from a
+/// class or an interface.
+///
+/// Biome identifies a declaration by its collected contents, together with
+/// the handle that names it when Biome reaches it through one. Biome reaches
+/// a class declared in a module, or in a namespace that a module exports,
+/// through a handle. Two declarations with the same contents and different
+/// handles, such as two identical classes in two modules, can't be told from
+/// one declaration that Biome reaches through two handles, so they give
+/// `None`. Two such declarations without handles, as in two namespaces of
+/// one module, count as one.
+///
+/// Returns `None` when Biome can't tell: for a generic, an unresolved type,
+/// a parent that doesn't resolve, and when the walk exceeds its work limit.
+pub(crate) fn is_derived_from<'db>(
+    db: &'db dyn TypeDb,
+    source: TypeData<'db>,
+    target: TypeData<'db>,
+    resolve: &mut TypeResolver<'db, '_>,
+) -> Option<bool> {
+    let mut check = AssignabilityCheck::new(db, resolve, &[]);
+    let target = check.derivation_target(target)?;
+    check.derives(source, target, 0)
+}
+
+/// A class or an interface that [`is_derived_from`] compares by declaration.
+#[derive(Clone, Copy)]
+struct Declaration<'db> {
+    /// The resolved class or interface.
+    data: TypeData<'db>,
+    /// The handle to a local type of a module that names `data`, when Biome
+    /// reaches the declaration through one.
+    handle: Option<TypeData<'db>>,
+}
+
+impl<'db> Declaration<'db> {
+    /// Returns a declaration reached without a handle.
+    fn without_handle(data: TypeData<'db>) -> Self {
+        Self { data, handle: None }
+    }
+}
+
+/// What [`is_derived_from`] compares a type with.
+#[derive(Clone, Copy)]
+enum DerivationTarget<'db> {
+    /// A class or an interface, which a type derives from when its `extends`
+    /// clauses lead to the same declaration.
+    Declaration(Declaration<'db>),
+    /// `{}`, which every object type derives from.
+    EmptyObject,
+    /// The built-in `Object`, which every object type other than `{}`
+    /// derives from.
+    Object,
+    /// The built-in `Function`, which functions derive from.
+    Function,
+    /// A type without a declaration, such as a type literal, which no type
+    /// derives from.
+    Anonymous,
 }
 
 /// Resolves the handles of the normalized type `ty` and removes the wrappers
@@ -822,6 +994,9 @@ struct AssignabilityCheck<'db, 'a> {
     /// unless the parameter belongs to a method.
     parameter_position: InferencePosition,
     remaining_steps: usize,
+    /// Whether the check follows TypeScript's subtype relation instead of
+    /// assignability. [`is_subtype`] lists the differences.
+    is_subtype: bool,
 }
 
 impl<'db, 'a> AssignabilityCheck<'db, 'a> {
@@ -840,6 +1015,7 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
             candidates: Vec::new(),
             parameter_position: InferencePosition::Contravariant,
             remaining_steps: MAX_RELATION_STEPS,
+            is_subtype: false,
         }
     }
 
@@ -1032,6 +1208,10 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
         match (source, target) {
             (_, TypeData::AnyKeyword | TypeData::UnknownKeyword) | (TypeData::NeverKeyword, _) => {
                 return Assignability::Assignable;
+            }
+            // `any` is a subtype only of `any` and `unknown`.
+            (TypeData::AnyKeyword, _) if self.is_subtype => {
+                return Assignability::NotAssignable;
             }
             (TypeData::AnyKeyword, _) => {
                 return Assignability::from(target != TypeData::NeverKeyword);
@@ -2266,6 +2446,12 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
         }
 
         let target_is_weak = target_members.is_weak();
+        // The subtype relation requires the source to have the optional
+        // members of the target, unless the source is the type of an object
+        // literal or a tuple.
+        let requires_optional_members = self.is_subtype
+            && !matches!(source, TypeData::Literal(_) | TypeData::Tuple(_))
+            && !matches!(source, TypeData::Object(object) if object.kind(self.db) == ObjectKind::Expression);
 
         // Look for a missing member first, since that is conclusive without
         // comparing any member types.
@@ -2287,7 +2473,7 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
                     target_ty,
                     target_is_optional,
                 )),
-                MemberLookup::Missing if target_is_optional => {}
+                MemberLookup::Missing if target_is_optional && !requires_optional_members => {}
                 MemberLookup::Missing => return Assignability::NotAssignable,
                 MemberLookup::Unknown => result = Assignability::Undetermined,
             }
@@ -2762,6 +2948,500 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
             PropertyPresence::Missing
         } else {
             PropertyPresence::Unknown
+        }
+    }
+
+    /// Returns the instance types of the resolved constructor `resolved`, or
+    /// `None` when Biome can't tell them. `handle` is the handle to a local
+    /// type of a module that resolves to `resolved`, if any. [`instance_types`]
+    /// lists the cases.
+    fn instance_type(
+        &mut self,
+        resolved: TypeData<'db>,
+        handle: Option<TypeData<'db>>,
+    ) -> Option<Vec<InstanceType<'db>>> {
+        let members = match resolved.expand_canonical_global(self.db) {
+            TypeData::Class(class) => {
+                let name = self.builtin_name(resolved);
+                if matches!(name.as_ref().map(Text::text), Some("Object" | "Function"))
+                    || self.has_instance_hook(resolved, 0)?
+                {
+                    return None;
+                }
+                // An instance names its class by handle, as the type of a
+                // variable annotated with the class does. A built-in class
+                // stays a handle after resolution.
+                let class_type = match (resolved, handle) {
+                    (TypeData::GlobalType(_), _) => resolved,
+                    (_, Some(handle)) => handle,
+                    (_, None) => TypeData::Class(class),
+                };
+                return Some(vec![InstanceType {
+                    target: TypeData::instance_of(self.db, class_type, Box::default()),
+                    is_generic: !class.type_parameters(self.db).is_empty(),
+                }]);
+            }
+            TypeData::Constructor(constructor) => {
+                if !constructor.type_parameters(self.db).is_empty() {
+                    return None;
+                }
+                let target = constructor.return_type(self.db)?;
+                return Some(vec![InstanceType {
+                    target,
+                    is_generic: false,
+                }]);
+            }
+            TypeData::Interface(interface) => interface.members(self.db).to_vec(),
+            TypeData::Object(object) => object.members(self.db).to_vec(),
+            TypeData::Literal(literal) => match literal.literal(self.db) {
+                Literal::Object(members) => members.to_vec(),
+                _ => return None,
+            },
+            TypeData::InstanceOf(instance) if instance.type_parameters(self.db).is_empty() => {
+                let target = self.resolve(instance.ty(self.db));
+                return match target.expand_canonical_global(self.db) {
+                    TypeData::Interface(_) | TypeData::Object(_) => {
+                        self.instance_type(target, None)
+                    }
+                    _ => None,
+                };
+            }
+            _ => return None,
+        };
+        if self.has_instance_hook(resolved, 0)? {
+            return None;
+        }
+        let prototype = members
+            .iter()
+            .find(|member| !member.kind.is_static() && member.kind.has_name("prototype"))
+            .map(|member| self.resolve(member_type(self.db, member)));
+        if let Some(prototype) = prototype
+            && prototype != TypeData::AnyKeyword
+        {
+            return Some(vec![InstanceType {
+                target: prototype,
+                is_generic: false,
+            }]);
+        }
+        let mut instances = Vec::new();
+        for member in &members {
+            if !member.kind.is_constructor() {
+                continue;
+            }
+            let TypeData::Constructor(signature) = self.resolve(member.ty) else {
+                return None;
+            };
+            if !signature.type_parameters(self.db).is_empty() {
+                return None;
+            }
+            instances.push(InstanceType {
+                target: signature.return_type(self.db)?,
+                is_generic: false,
+            });
+        }
+        (!instances.is_empty()).then_some(instances)
+    }
+
+    /// Returns whether the constructor `ty`, or a class or an interface it
+    /// extends, declares a `[Symbol.hasInstance]` member, static in a class.
+    /// A member with a computed key that Biome can't name counts too, because
+    /// it may be one.
+    ///
+    /// Returns `None` when a parent doesn't resolve or the walk, which
+    /// `depth` counts, exceeds its limit.
+    fn has_instance_hook(&mut self, ty: TypeData<'db>, depth: usize) -> Option<bool> {
+        if depth > MAX_MEMBER_LOOKUP_DEPTH {
+            return None;
+        }
+        self.remaining_steps = self.remaining_steps.checked_sub(1)?;
+        let (members, parents, is_class) = match self.resolve(ty).expand_canonical_global(self.db) {
+            TypeData::Class(class) => (
+                class.members(self.db).to_vec(),
+                class.extends(self.db).into_iter().collect::<Vec<_>>(),
+                true,
+            ),
+            TypeData::Interface(interface) => (
+                interface.members(self.db).to_vec(),
+                interface.extends(self.db).to_vec(),
+                false,
+            ),
+            TypeData::Object(object) => (object.members(self.db).to_vec(), Vec::new(), false),
+            TypeData::Literal(literal) => match literal.literal(self.db) {
+                Literal::Object(members) => (members.to_vec(), Vec::new(), false),
+                _ => return None,
+            },
+            _ => return None,
+        };
+        for member in members {
+            let (name, key) = match (&member.kind, is_class) {
+                (
+                    TypeMemberKind::ComputedStaticNamed(name, _)
+                    | TypeMemberKind::ConstAssertedComputedStaticNamed(name, _),
+                    true,
+                )
+                | (
+                    TypeMemberKind::ComputedValueNamed(name, _)
+                    | TypeMemberKind::ConstAssertedComputedValueNamed(name, _),
+                    false,
+                ) => (Some(name.text() == "Symbol.hasInstance"), None),
+                (
+                    TypeMemberKind::ComputedStatic(key)
+                    | TypeMemberKind::ConstAssertedComputedStatic(key),
+                    true,
+                )
+                | (
+                    TypeMemberKind::ComputedValue(key)
+                    | TypeMemberKind::ConstAssertedComputedValue(key),
+                    false,
+                ) => (None, Some(*key)),
+                _ => continue,
+            };
+            let is_hook = name.unwrap_or_else(|| {
+                // A key that resolves to another well-known symbol, such as
+                // `Symbol.species`, names no `[Symbol.hasInstance]` member.
+                key.and_then(|key| {
+                    well_known_symbol_name(key)
+                        .or_else(|| well_known_symbol_name(self.resolve(key)))
+                })
+                .is_none_or(|name| name.text() == "Symbol.hasInstance")
+            });
+            if is_hook {
+                return Some(true);
+            }
+        }
+        for parent in parents {
+            let parent = match self.resolve(parent) {
+                TypeData::InstanceOf(instance) => instance.ty(self.db),
+                parent => parent,
+            };
+            if self.has_instance_hook(parent, depth + 1)? {
+                return Some(true);
+            }
+        }
+        Some(false)
+    }
+
+    /// Returns how [`is_derived_from`] compares types with `target`, or `None`
+    /// when no comparison with `target` can decide.
+    #[expect(
+        clippy::wildcard_enum_match_arm,
+        reason = "Only declarations, `{}`, and types without a declaration are targets."
+    )]
+    fn derivation_target(&mut self, target: TypeData<'db>) -> Option<DerivationTarget<'db>> {
+        let target = self.resolve(target);
+        Some(match target {
+            TypeData::InstanceOf(instance) => {
+                let class = instance.ty(self.db);
+                match self.builtin_name(class).as_ref().map(Text::text) {
+                    Some("Object") => return Some(DerivationTarget::Object),
+                    Some("Function") => return Some(DerivationTarget::Function),
+                    _ => {}
+                }
+                if let Some(declaration) = self.declaration(class, 0) {
+                    return Some(DerivationTarget::Declaration(declaration));
+                }
+                match self.resolve(class).expand_canonical_global(self.db) {
+                    // An instance of a type literal named by a generic alias.
+                    TypeData::Object(_) | TypeData::Literal(_) | TypeData::Function(_) => {
+                        DerivationTarget::Anonymous
+                    }
+                    _ => return None,
+                }
+            }
+            TypeData::Interface(_) => {
+                DerivationTarget::Declaration(Declaration::without_handle(target))
+            }
+            TypeData::GlobalType(_) => match target.expand_canonical_global(self.db) {
+                declaration @ TypeData::Interface(_) => {
+                    DerivationTarget::Declaration(Declaration::without_handle(declaration))
+                }
+                // The type of a built-in class value, as in `typeof Date`.
+                TypeData::Class(_) => DerivationTarget::Anonymous,
+                _ => return None,
+            },
+            TypeData::Object(object)
+                if object.prototype(self.db).is_some() || object.has_unknown_members(self.db) =>
+            {
+                return None;
+            }
+            target if self.is_empty_object(target) => DerivationTarget::EmptyObject,
+            TypeData::Object(_)
+            | TypeData::Literal(_)
+            | TypeData::Function(_)
+            | TypeData::Constructor(_)
+            | TypeData::Class(_)
+            | TypeData::BigInt
+            | TypeData::Boolean
+            | TypeData::Null
+            | TypeData::Number
+            | TypeData::String
+            | TypeData::Symbol
+            | TypeData::Undefined
+            | TypeData::ObjectKeyword
+            | TypeData::VoidKeyword => DerivationTarget::Anonymous,
+            _ => return None,
+        })
+    }
+
+    /// Returns whether every value of `source` is derived from `target`, or
+    /// `None` when Biome can't tell. [`is_derived_from`] defines the relation.
+    /// `depth` limits the nesting of unions and intersections.
+    #[expect(
+        clippy::wildcard_enum_match_arm,
+        reason = "Types that Biome can't compare with a declaration are undecided."
+    )]
+    fn derives(
+        &mut self,
+        source: TypeData<'db>,
+        target: DerivationTarget<'db>,
+        depth: usize,
+    ) -> Option<bool> {
+        if depth > MAX_MEMBER_LOOKUP_DEPTH {
+            return None;
+        }
+        self.remaining_steps = self.remaining_steps.checked_sub(1)?;
+        let source = match strip_readonly(self.db, self.resolve(source)) {
+            (source, true) => self.resolve(source),
+            (source, false) => source,
+        };
+        match source {
+            // Every member of a union must be derived, and some member of an
+            // intersection.
+            TypeData::Union(union) => {
+                let mut result = Some(true);
+                for member in union.types(self.db).iter().copied() {
+                    match self.derives(member, target, depth + 1) {
+                        Some(false) => return Some(false),
+                        Some(true) => {}
+                        None => result = None,
+                    }
+                }
+                return result;
+            }
+            TypeData::Intersection(intersection) => {
+                let mut result = Some(false);
+                for member in intersection.types(self.db).iter().copied() {
+                    match self.derives(member, target, depth + 1) {
+                        Some(true) => return Some(true),
+                        Some(false) => {}
+                        None => result = None,
+                    }
+                }
+                return result;
+            }
+            _ => {}
+        }
+        let declaration = match target {
+            DerivationTarget::Declaration(declaration) => declaration,
+            DerivationTarget::EmptyObject => return self.is_object_value(source),
+            DerivationTarget::Object => {
+                return self
+                    .is_object_value(source)
+                    .map(|is_object| is_object && !self.is_empty_object(source));
+            }
+            DerivationTarget::Function => return self.is_function_value(source),
+            DerivationTarget::Anonymous => return self.is_object_value(source).map(|_| false),
+        };
+        let source = match source {
+            TypeData::InstanceOf(instance) => {
+                let class = instance.ty(self.db);
+                match self.declaration(class, 0) {
+                    Some(source) => source,
+                    None => match self.resolve(class).expand_canonical_global(self.db) {
+                        TypeData::Tuple(_) => {
+                            return Some(declaration.data.is_array_class(self.db));
+                        }
+                        TypeData::Object(_) | TypeData::Literal(_) | TypeData::Function(_) => {
+                            return Some(false);
+                        }
+                        _ => return None,
+                    },
+                }
+            }
+            TypeData::Interface(_) => Declaration::without_handle(source),
+            TypeData::GlobalType(_) => match source.expand_canonical_global(self.db) {
+                interface @ TypeData::Interface(_) => Declaration::without_handle(interface),
+                TypeData::Class(_) => return Some(false),
+                _ => return None,
+            },
+            // A tuple's only parent is `Array`.
+            TypeData::Tuple(_) => return Some(declaration.data.is_array_class(self.db)),
+            TypeData::Literal(literal)
+                if matches!(literal.literal(self.db), Literal::RegExp(_)) =>
+            {
+                Declaration::without_handle(
+                    TypeData::GlobalType(REG_EXP_ID_GLOBAL_TYPE_ID)
+                        .expand_canonical_global(self.db),
+                )
+            }
+            TypeData::Object(object) if object.prototype(self.db).is_some() => return None,
+            source => return self.is_object_value(source).map(|_| false),
+        };
+        self.declaration_derives(source, declaration, 0, &mut FxHashSet::default())
+    }
+
+    /// Returns the class or interface that `ty` names, as an `extends`
+    /// clause or the target of an instance names it, or `None` when it names
+    /// neither. `depth` limits the instances followed.
+    fn declaration(&mut self, ty: TypeData<'db>, depth: usize) -> Option<Declaration<'db>> {
+        if depth > MAX_MEMBER_LOOKUP_DEPTH {
+            return None;
+        }
+        let handle = matches!(ty, TypeData::Local(_)).then_some(ty);
+        match self.resolve(ty) {
+            // An interface extends an instance of its parent.
+            TypeData::InstanceOf(instance) => self.declaration(instance.ty(self.db), depth + 1),
+            resolved => match resolved.expand_canonical_global(self.db) {
+                data @ (TypeData::Class(_) | TypeData::Interface(_)) => {
+                    Some(Declaration { data, handle })
+                }
+                _ => None,
+            },
+        }
+    }
+
+    /// Returns whether the `extends` clauses of the class or interface
+    /// `source` lead to the declaration `target`, or `None` when Biome can't
+    /// tell, as when a parent doesn't resolve or the walk exceeds its work
+    /// limit. `depth` limits the nesting of the walk, and `visited` holds the
+    /// declarations already walked, which the walk doesn't enter again.
+    fn declaration_derives(
+        &mut self,
+        source: Declaration<'db>,
+        target: Declaration<'db>,
+        depth: usize,
+        visited: &mut FxHashSet<TypeData<'db>>,
+    ) -> Option<bool> {
+        if depth > MAX_MEMBER_LOOKUP_DEPTH {
+            return None;
+        }
+        self.remaining_steps = self.remaining_steps.checked_sub(1)?;
+        if self.is_same_declaration(source, target)? {
+            return Some(true);
+        }
+        if !visited.insert(source.data) {
+            return Some(false);
+        }
+        let parents = match source.data {
+            TypeData::Class(class) => class.extends(self.db).into_iter().collect::<Vec<_>>(),
+            TypeData::Interface(interface) => interface.extends(self.db).to_vec(),
+            _ => return None,
+        };
+        let mut result = Some(false);
+        for parent in parents {
+            let derived = match self.declaration(parent, 0) {
+                Some(parent) => self.declaration_derives(parent, target, depth + 1, visited),
+                None => match self.resolve(parent) {
+                    // A type literal named by an alias has no parents.
+                    TypeData::Object(object) if object.prototype(self.db).is_none() => Some(false),
+                    TypeData::Literal(_) => Some(false),
+                    _ => None,
+                },
+            };
+            match derived {
+                Some(true) => return Some(true),
+                Some(false) => {}
+                None => result = None,
+            }
+        }
+        result
+    }
+
+    /// Returns whether `a` and `b` are the same declaration, which they are
+    /// when they have the same contents, or `None` when they also have
+    /// different handles. [`is_derived_from`] explains why. Normalization can
+    /// intern a second copy of a built-in class, so built-in classes are also
+    /// compared by name.
+    fn is_same_declaration(&self, a: Declaration<'db>, b: Declaration<'db>) -> Option<bool> {
+        let is_same = a.data == b.data
+            || matches!(
+                (a.data, b.data),
+                (TypeData::Class(a), TypeData::Class(b))
+                    if a.is_builtin(self.db)
+                        && b.is_builtin(self.db)
+                        && a.name(self.db).is_some()
+                        && a.name(self.db) == b.name(self.db)
+            );
+        match (a.handle, b.handle) {
+            (Some(a), Some(b)) if is_same && a != b => None,
+            _ => Some(is_same),
+        }
+    }
+
+    /// Returns whether the values of the resolved type `ty` are objects, or
+    /// `None` when Biome can't tell, as for a generic.
+    #[expect(
+        clippy::wildcard_enum_match_arm,
+        reason = "Types that may or may not be objects are undecided."
+    )]
+    fn is_object_value(&mut self, ty: TypeData<'db>) -> Option<bool> {
+        Some(match ty {
+            TypeData::BigInt
+            | TypeData::Boolean
+            | TypeData::Null
+            | TypeData::Number
+            | TypeData::String
+            | TypeData::Symbol
+            | TypeData::Undefined
+            | TypeData::NeverKeyword
+            | TypeData::UnknownKeyword
+            | TypeData::VoidKeyword => false,
+            TypeData::Literal(literal) => {
+                matches!(
+                    literal.literal(self.db),
+                    Literal::Object(_) | Literal::RegExp(_)
+                )
+            }
+            TypeData::InstanceOf(instance) => {
+                match self
+                    .resolve(instance.ty(self.db))
+                    .expand_canonical_global(self.db)
+                {
+                    TypeData::Class(_)
+                    | TypeData::Interface(_)
+                    | TypeData::Object(_)
+                    | TypeData::Tuple(_)
+                    | TypeData::Function(_) => true,
+                    _ => return None,
+                }
+            }
+            TypeData::ObjectKeyword
+            | TypeData::Object(_)
+            | TypeData::Interface(_)
+            | TypeData::Function(_)
+            | TypeData::Constructor(_)
+            | TypeData::Class(_)
+            | TypeData::Tuple(_)
+            | TypeData::GlobalType(_) => true,
+            _ => return None,
+        })
+    }
+
+    /// Returns whether the values of the resolved type `ty` are functions,
+    /// which derive from the built-in `Function`, or `None` when Biome can't
+    /// tell, as for an interface that may have a call signature.
+    #[expect(
+        clippy::wildcard_enum_match_arm,
+        reason = "Only functions, primitives, tuples, and class instances are decided."
+    )]
+    fn is_function_value(&mut self, ty: TypeData<'db>) -> Option<bool> {
+        match ty {
+            TypeData::Function(_) | TypeData::Constructor(_) | TypeData::Class(_) => Some(true),
+            TypeData::Tuple(_) => Some(false),
+            // A class can't declare a call signature, but it can extend
+            // `Function`.
+            TypeData::InstanceOf(instance) => match self
+                .resolve(instance.ty(self.db))
+                .expand_canonical_global(self.db)
+            {
+                TypeData::Class(class) if class.extends(self.db).is_none() => Some(false),
+                TypeData::Tuple(_) => Some(false),
+                _ => None,
+            },
+            ty => match self.is_object_value(ty) {
+                Some(false) => Some(false),
+                _ => None,
+            },
         }
     }
 
