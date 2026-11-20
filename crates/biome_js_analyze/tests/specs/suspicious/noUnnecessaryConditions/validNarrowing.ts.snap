@@ -41,14 +41,6 @@ function captured(value: string | null) {
 	}
 }
 
-function unsupportedRoot(value: string | null) {
-	try {
-		if (value !== null) {
-			return value?.length;
-		}
-	} finally {}
-}
-
 interface Value {}
 function structural(value: Value | null) {
 	if (!value) return value == null;

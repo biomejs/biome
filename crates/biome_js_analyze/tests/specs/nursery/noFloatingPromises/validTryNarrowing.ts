@@ -1,0 +1,27 @@
+// should not generate diagnostics
+
+function nullInTry(value: Promise<void> | null) {
+	try {
+		if (value === null) {
+			value;
+		}
+	} finally {
+	}
+}
+
+function stringAfterTry(value: Promise<void> | string) {
+	try {
+		if (typeof value !== "string") return;
+	} catch {
+		return;
+	}
+	value;
+}
+
+function stringAfterFinally(value: Promise<void> | string) {
+	try {
+		if (typeof value !== "string") return;
+	} finally {
+	}
+	value;
+}
