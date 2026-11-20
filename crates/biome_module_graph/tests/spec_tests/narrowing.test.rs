@@ -2120,7 +2120,6 @@ fn class_expressions_keep_narrowing_outside_their_members() {
 #[test]
 fn unmodelled_statements_elsewhere_keep_narrowing() {
     const SOURCE: &str = r#"
-        declare const items: (string | null)[];
         declare function check(): boolean;
         function tries(value: string | null) {
             try {
@@ -2132,14 +2131,6 @@ fn unmodelled_statements_elsewhere_keep_narrowing() {
             }
             if (value !== null) {
                 /*try*/value;
-            }
-        }
-        function loops(value: string | null) {
-            for (const item of items) {
-                check();
-            }
-            if (value !== null) {
-                /*forOf*/value;
             }
         }
         function classes(value: string | null) {
@@ -2161,7 +2152,7 @@ fn unmodelled_statements_elsewhere_keep_narrowing() {
         }
     "#;
     let (db, module) = narrowing_db(SOURCE);
-    for marker in ["try", "forOf", "class", "enum"] {
+    for marker in ["try", "class", "enum"] {
         let ty = normalized_type_at(&db, module, SOURCE, marker, "value");
         assert_variants(&db, ty, &[InferredTypeData::String], marker);
     }
@@ -2171,7 +2162,6 @@ fn unmodelled_statements_elsewhere_keep_narrowing() {
 #[test]
 fn reads_inside_unmodelled_statements_keep_the_facts_from_before_them() {
     const SOURCE: &str = r#"
-        declare const items: (string | null)[];
         function reads(value: string | null) {
             if (value === null) {
                 return;
@@ -2183,17 +2173,11 @@ fn reads_inside_unmodelled_statements_keep_the_facts_from_before_them() {
             } finally {
                 /*finally*/value;
             }
-            for (const item of items) {
-                /*forOf*/value;
-            }
-            for (const key in items) {
-                /*forIn*/value;
-            }
             /*after*/value;
         }
     "#;
     let (db, module) = narrowing_db(SOURCE);
-    for marker in ["try", "catch", "finally", "forOf", "forIn", "after"] {
+    for marker in ["try", "catch", "finally", "after"] {
         let ty = normalized_type_at(&db, module, SOURCE, marker, "value");
         assert_variants(&db, ty, &[InferredTypeData::String], marker);
     }

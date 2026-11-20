@@ -1,0 +1,32 @@
+// should not generate diagnostics
+// A test in the body of a loop never narrows the code after the loop, a read
+// before the test sees every value of the loop variable, and `for...in`
+// narrows only in the body, and only when its head declares a variable, as in
+// TypeScript.
+
+function afterTheLoop(values: string[], label: string | null) {
+	for (const value of values) {
+		if (label === null) continue;
+	}
+	return label?.length;
+}
+
+function beforeTheTest(values: (string | null)[]) {
+	for (const value of values) {
+		value?.length;
+		if (value === null) break;
+	}
+}
+
+function afterForIn(record: { a: 1 } | undefined) {
+	for (const key in record) {
+	}
+	return record?.a;
+}
+
+function assignedHead(record: { a: 1 } | undefined) {
+	let key: string;
+	for (key in record) {
+		record?.a;
+	}
+}

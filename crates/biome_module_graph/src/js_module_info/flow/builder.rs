@@ -1,7 +1,7 @@
 use super::guards::{
     DecomposedCondition, FlowGuard, FlowOutcome, GuardFunctions, SwitchCase, SwitchKind,
-    decompose_assertion, decompose_condition, decompose_switch_case, exhaustive_operand,
-    is_unit_case,
+    decompose_assertion, decompose_condition, decompose_for_in, decompose_switch_case,
+    exhaustive_operand, is_unit_case,
 };
 use super::subjects::subject_of;
 use super::{
@@ -11,11 +11,15 @@ use super::{
 use biome_js_control_flow::{AnyJsControlFlowRoot, is_truthy_literal};
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
-    AnyJsClassMember, AnyJsExpression, AnyJsFunction, AnyJsFunctionBody, AnyJsStatement,
-    AnyJsSwitchClause, AnyTsType, JsDoWhileStatement, JsForStatement, JsIdentifierExpression,
+    AnyJsBindingPattern, AnyJsClassMember, AnyJsExpression, AnyJsForInOrOfInitializer,
+    AnyJsFunction, AnyJsFunctionBody, AnyJsStatement, AnyJsSwitchClause, AnyTsType,
+    JsDoWhileStatement, JsForInStatement, JsForOfStatement, JsForStatement, JsIdentifierExpression,
     JsIfStatement, JsLanguage, JsSwitchStatement, JsSyntaxNode, JsWhileStatement, T,
 };
-use biome_rowan::{AstNode, AstNodeList, AstSeparatedList, SyntaxKindSet, TokenText};
+use biome_rowan::{
+    AstNode, AstNodeList, AstSeparatedList, SyntaxKindSet, SyntaxResult, TokenText,
+    declare_node_union,
+};
 use rustc_hash::FxHashSet;
 use std::ops::Range;
 
@@ -98,11 +102,11 @@ type Build<T> = Result<T, Unsupported>;
 /// unreachable code records no reads.
 ///
 /// The builder models the control flow of blocks, `if`, `while`, `do...while`,
-/// `for`, `switch`, labeled statements, `break`, `continue`, `return`, and
-/// `throw`. Any other statement, such as `try`, `for...in`, or `for...of`, is
-/// an opaque region: the builder evaluates its expressions in source order
-/// from the flow before it, and the code after it continues from that
-/// evaluation.
+/// `for`, `for...in`, `for...of`, `switch`, labeled statements, `break`,
+/// `continue`, `return`, and `throw`. Any other statement, such as `try` or a
+/// class declaration, is an opaque region: the builder evaluates its
+/// expressions in source order from the flow before it, and the code after it
+/// continues from that evaluation.
 /// A condition inside a region narrows only the rest of the expression that
 /// contains it, as in `x && x.length`. Each `break` or `continue` that leaves
 /// the region joins its target with the flow before the region. Because only
@@ -367,6 +371,58 @@ impl StatementCheck {
     }
 }
 
+declare_node_union! {
+    /// A `for...in` or `for...of` statement, which runs its body once for
+    /// each key or element of the value of its expression.
+    AnyJsForInOrOfStatement = JsForInStatement | JsForOfStatement
+}
+
+impl AnyJsForInOrOfStatement {
+    /// Returns the head of the loop, such as `const k` in `for (const k in o)`.
+    fn initializer(&self) -> SyntaxResult<AnyJsForInOrOfInitializer> {
+        match self {
+            Self::JsForInStatement(statement) => statement.initializer(),
+            Self::JsForOfStatement(statement) => statement.initializer(),
+        }
+    }
+
+    fn expression(&self) -> SyntaxResult<AnyJsExpression> {
+        match self {
+            Self::JsForInStatement(statement) => statement.expression(),
+            Self::JsForOfStatement(statement) => statement.expression(),
+        }
+    }
+
+    fn body(&self) -> SyntaxResult<AnyJsStatement> {
+        match self {
+            Self::JsForInStatement(statement) => statement.body(),
+            Self::JsForOfStatement(statement) => statement.body(),
+        }
+    }
+
+    /// Returns whether the body assumes that the expression is not nullish.
+    /// Only a `for...in` loop whose head declares one variable, such as
+    /// `const k`, `let k`, or `var k`, makes that assumption.
+    ///
+    /// As in TypeScript, an assignment target, as in `for (k in o)`, narrows
+    /// nothing. Neither does a destructuring pattern, which `for...in`
+    /// rejects (TS2491).
+    fn assumes_non_nullish(&self) -> bool {
+        let Self::JsForInStatement(statement) = self else {
+            return false;
+        };
+        let Ok(AnyJsForInOrOfInitializer::JsForVariableDeclaration(declaration)) =
+            statement.initializer()
+        else {
+            return false;
+        };
+        declaration
+            .declarator()
+            .and_then(|declarator| declarator.id())
+            .is_ok_and(|id| matches!(id, AnyJsBindingPattern::AnyJsBinding(_)))
+    }
+}
+
 /// The cases of a `switch` statement under construction.
 struct SwitchCases {
     kind: SwitchKind,
@@ -539,6 +595,12 @@ impl RootBuilder<'_, '_> {
             }
             AnyJsStatement::JsForStatement(statement) => {
                 self.for_statement(&statement, current, label)
+            }
+            AnyJsStatement::JsForInStatement(statement) => {
+                self.loop_statement(&statement.into(), current, label)
+            }
+            AnyJsStatement::JsForOfStatement(statement) => {
+                self.loop_statement(&statement.into(), current, label)
             }
             AnyJsStatement::JsSwitchStatement(statement) => {
                 self.switch_statement(&statement, current, label)
@@ -721,6 +783,61 @@ impl RootBuilder<'_, '_> {
             self.add_predecessor(header, flow)?;
         }
         self.current = self.join(exit.into_iter().chain(target.breaks))?;
+        Ok(())
+    }
+
+    /// Builds `statement` from `current`, with the control flow that
+    /// TypeScript gives `for...in` and `for...of` loops. `label` is the label
+    /// of `statement`, if any.
+    ///
+    /// The expression runs once, before the loop. Every iteration starts at
+    /// the loop's header and evaluates the head from there, including the
+    /// defaults of a destructuring pattern. The end of the body and each
+    /// `continue` that targets the loop return to the header. The header is
+    /// also the exit. The code after the loop continues from the header and
+    /// from each `break` that targets the loop, so a test in the body never
+    /// narrows the code after the loop. In a `for...in` loop whose head
+    /// declares one variable, the body also assumes that the expression and
+    /// the receivers of its optional chain are not nullish. See
+    /// [`decompose_for_in`].
+    fn loop_statement(
+        &mut self,
+        statement: &AnyJsForInOrOfStatement,
+        current: FlowNodeId,
+        label: Option<TokenText>,
+    ) -> Build<()> {
+        let expression = statement.expression().map_err(|_| Unsupported)?;
+        let flow = self.evaluate(expression.syntax(), current, 0)?;
+        let header = self.push(FlowNode::Join(vec![flow]))?;
+        let initializer = statement.initializer().map_err(|_| Unsupported)?;
+        let mut flow = self.evaluate(initializer.syntax(), header, 0)?;
+        // Each iteration assigns the loop variable here, after the defaults
+        // of its pattern, but the graph has no write point for it. None is
+        // needed because the header also joins the entry, where the variable
+        // and its paths have their declared types. Facts on the back edge from
+        // an earlier iteration therefore cannot narrow a read below its
+        // declared type. Biome narrows a loop variable only when the head
+        // declares it with `let`, `const`, or `using`. Those declarations are
+        // scoped to the loop, so no test before the loop can mention the
+        // variable. Biome never narrows a `var` or an externally declared
+        // variable that the loop writes, such as `k` in `for (k of xs)`.
+        if statement.assumes_non_nullish() {
+            let condition = decompose_for_in(
+                &expression,
+                self.model,
+                self.functions,
+                &mut self.subjects,
+                &mut self.guards,
+            );
+            flow = self.push_condition(flow, condition)?;
+        }
+        self.current = Some(flow);
+        self.loop_body(statement.body().ok(), label, header)?;
+        if let Some(end) = self.current {
+            self.add_predecessor(header, end)?;
+        }
+        let target = self.jumps.pop().ok_or(Unsupported)?;
+        self.current = self.join(std::iter::once(header).chain(target.breaks))?;
         Ok(())
     }
 
@@ -1469,6 +1586,8 @@ mod tests {
             "function f(x) { while (x) { read(x); } after(x); }",
             "function f(x) { do { read(x); } while (x); after(x); }",
             "function f(x) { for (; x;) { read(x); } after(x); }",
+            "function f(x, y) { for (const v of y) { x && read(x); } after(x); }",
+            "function f(x) { for (const k in x) { read(x); } after(x); }",
         ] {
             let built = function(source);
             assert!(
@@ -1560,6 +1679,69 @@ mod tests {
     }
 
     #[test]
+    fn for_in_and_for_of_loops_exit_from_their_header() {
+        for source in [
+            "function f(x, y) { for (const v of y) { if (!x) return; read(x); } after(x); }",
+            "function f(x, y) { for (const v in y()) { if (!x) continue; read(x); } after(x); }",
+        ] {
+            let built = function(source);
+            assert_eq!(built.paths("x", 2), [facts(&["x:Truthy"])], "{source}");
+            // The test in the body never reaches the code after the loop.
+            assert_eq!(built.paths("x", 3), [Vec::<String>::new()], "{source}");
+        }
+        let built = function("function f(x, y) { for (const v of y) { if (x) break; } after(x); }");
+        assert_eq!(
+            sorted_paths(&built, "x", 2),
+            [Vec::new(), facts(&["x:Truthy"])]
+        );
+        let built =
+            function("function f(x, y) { for (const v of y) { continue; dead(x); } after(x); }");
+        assert_eq!(built.point("x", 1), None);
+        assert_eq!(built.paths("x", 2), [Vec::<String>::new()]);
+    }
+
+    #[test]
+    fn for_in_and_for_of_loops_evaluate_the_expression_once_and_the_head_each_time() {
+        let built = function(
+            "function f(x) { for (const { a = read(x) } of read(x)) { if (!x) continue; } }",
+        );
+        // The expression runs once, from the start, and the default in the
+        // head runs at the header, which the body's `continue` and end reach.
+        assert_eq!(built.point("x", 2), Some(0));
+        let header = built.point("x", 1).unwrap();
+        assert_eq!(built.point("x", 3), Some(header));
+        assert!(matches!(
+            &built.root().nodes[header as usize],
+            FlowNode::Join(predecessors) if predecessors.len() == 3
+        ));
+    }
+
+    #[test]
+    fn for_in_bodies_assume_that_the_expression_is_not_nullish() {
+        let built = function("function f(obj) { for (const k in obj) read(obj); after(obj); }");
+        assert_eq!(built.paths("obj", 2), [facts(&["!obj:Nullish"])]);
+        assert_eq!(built.paths("obj", 3), [Vec::<String>::new()]);
+        let built = function("function f(obj) { for (var k in obj?.v) read(obj); }");
+        assert_eq!(
+            sorted_paths(&built, "obj", 2),
+            [facts(&["!obj.v:Nullish", "!obj:Nullish"])]
+        );
+        // Only a head that declares one variable narrows.
+        for source in [
+            "function f(obj) { for (k in obj) read(obj); }",
+            "function f(obj) { for (const [k] in obj) read(obj); }",
+            "function f(obj) { for (const k of obj) read(obj); }",
+        ] {
+            let built = function(source);
+            assert_eq!(built.paths("obj", 2), [Vec::<String>::new()], "{source}");
+        }
+        // The test of `obj.v` adds no guard on `obj`, which would be written
+        // `!obj[v]:Nullish`.
+        let built = function("function f(obj) { for (const k in obj.v) read(obj); }");
+        assert_eq!(built.paths("obj", 2), [facts(&["!obj.v:Nullish"])]);
+    }
+
+    #[test]
     fn optional_chains_keep_outer_facts_without_a_receiver_condition() {
         let built = function("function f(x, y) { if (y) x?.read(x); after(x); }");
         assert_eq!(built.paths("x", 2), [vec!["y:Truthy".to_owned()]]);
@@ -1601,9 +1783,9 @@ mod tests {
     #[test]
     fn reads_in_regions_keep_the_facts_from_before_them() {
         let built = function(
-            "function f(q, y) { if (q) { try { read(q); } catch (e) { read(q); } finally { read(q); } for (const v of y) read(q); for (const k in y) read(q); class C extends read(q) {} enum E { A = read(q) } after(q); } }",
+            "function f(q, y) { if (q) { try { read(q); } catch (e) { read(q); } finally { read(q); } class C extends read(q) {} enum E { A = read(q) } after(q); } }",
         );
-        for occurrence in 2..=9 {
+        for occurrence in 2..=7 {
             assert_eq!(
                 built.paths("q", occurrence),
                 [vec!["q:Truthy".to_owned()]],
