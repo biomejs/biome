@@ -42,33 +42,33 @@ private = [
 ]
 
 [bundles]
-biome_css = [
+biome_css      = [
   "biome_css_factory",
   "biome_css_formatter",
   "biome_css_parser",
   "biome_css_semantic",
   "biome_css_syntax",
 ]
-biome_graphql = [
+biome_graphql  = [
   "biome_graphql_factory",
   "biome_graphql_formatter",
   "biome_graphql_parser",
   "biome_graphql_semantic",
   "biome_graphql_syntax",
 ]
-biome_grit = [
+biome_grit     = [
   "biome_grit_factory",
   "biome_grit_formatter",
   "biome_grit_parser",
   "biome_grit_syntax",
 ]
-biome_html = [
+biome_html     = [
   "biome_html_factory",
   "biome_html_formatter",
   "biome_html_parser",
   "biome_html_syntax",
 ]
-biome_js = [
+biome_js       = [
   "biome_js_factory",
   "biome_js_formatter",
   "biome_js_parser",
