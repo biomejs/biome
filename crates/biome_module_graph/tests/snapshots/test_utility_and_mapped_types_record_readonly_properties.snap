@@ -1,0 +1,115 @@
+---
+source: crates/biome_module_graph/tests/spec_tests.rs
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+type Source = { readonly A: number; B?: string; readonly C?: boolean };
+declare const frozen: Readonly<{ A: number; B?: string; method(): void }>;
+declare const partial: Partial<Source>;
+declare const required: Required<Source>;
+declare const picked: Pick<Source, "A" | "B">;
+declare const homomorphic: { [K in keyof Source]: Source[K] };
+declare const added: { +readonly [K in keyof Source]: Source[K] };
+declare const removed: { -readonly [K in keyof Source]: Source[K] };
+declare const literalKeys: { readonly [K in "X" | "Y"]: number };
+declare const plainLiteralKeys: { [K in "X"]: number };
+const constant = { A: 1 } as const;
+declare const constantMapped: { [K in keyof typeof constant]: number };
+```
+
+## Inferred types
+
+```
+Binding Source "Source" => Object {
+  prototype: No prototype
+  members: [
+    readonly "A": number,
+    "B"?: string | undefined,
+    readonly "C"?: boolean | undefined
+  ]
+}
+
+Binding frozen "frozen" => instanceof Object {
+  prototype: No prototype
+  members: [
+    readonly "A": number,
+    readonly "B"?: string | undefined,
+    readonly "method":
+      sync Function "method" {
+        accepts: {
+          params: []
+          type_args: []
+        }
+        returns: void
+      }
+  ]
+}
+
+Binding partial "partial" => instanceof Object {
+  prototype: No prototype
+  members: [
+    readonly "A"?: number | undefined,
+    "B"?: string | undefined,
+    readonly "C"?: boolean | undefined
+  ]
+}
+
+Binding required "required" => instanceof Object {
+  prototype: No prototype
+  members: [readonly "A": number, "B": string, readonly "C": boolean]
+}
+
+Binding picked "picked" => instanceof Object {
+  prototype: No prototype
+  members: [readonly "A": number, "B"?: string | undefined]
+}
+
+Binding homomorphic "homomorphic" => instanceof { [K in keyof instanceof Source]: (instanceof Source)[instanceof K] }
+
+Binding K "K" => K
+
+Binding added "added" => instanceof { readonly [K in keyof instanceof Source]: (instanceof Source)[instanceof K] }
+
+Binding K "K" => K
+
+Binding removed "removed" => instanceof { -readonly [K in keyof instanceof Source]: (instanceof Source)[instanceof K] }
+
+Binding K "K" => K
+
+Binding literalKeys "literalKeys" => instanceof { readonly [K in string: X | string: Y]: number }
+
+Binding K "K" => K
+
+Binding plainLiteralKeys "plainLiteralKeys" => instanceof { [K in string: X]: number }
+
+Binding K "K" => K
+
+Binding constant "constant" => Object {
+  prototype: No prototype
+  members: ["A": number: 1]
+}
+
+Expression "{ A: 1 }" => Object {
+  prototype: No prototype
+  members: ["A": number: 1]
+}
+
+Expression "{ A: 1 } as const" => Object {
+  prototype: No prototype
+  members: ["A": number: 1]
+}
+
+Expression "1" => number: 1
+
+Binding constantMapped "constantMapped" => instanceof { [K in keyof typeof Object {
+  prototype: No prototype
+  members: ["A": number: 1]
+}]: number }
+
+Binding K "K" => K
+```

@@ -471,6 +471,12 @@ impl<'db> Format<FormatInferredTypeContext<'db>> for TypeMember<'db> {
 
 impl<'db> Format<FormatInferredTypeContext<'db>> for TypeMemberKind<'db> {
     fn fmt(&self, f: &mut Formatter<FormatInferredTypeContext<'db>>) -> FormatResult<()> {
+        if matches!(
+            self,
+            Self::ReadonlyNamed(_) | Self::ReadonlyNamedOptional(_)
+        ) {
+            write!(f, [token("readonly"), space()])?;
+        }
         match self {
             Self::CallSignature | Self::ConstAssertedCallSignature => write!(f, [token("()")]),
             Self::Constructor | Self::ConstAssertedConstructor => write!(f, [token("constructor")]),
@@ -502,10 +508,12 @@ impl<'db> Format<FormatInferredTypeContext<'db>> for TypeMemberKind<'db> {
             Self::ComputedValueNamed(name, _) | Self::ConstAssertedComputedValueNamed(name, _) => {
                 write!(f, [text(&std::format!("computed [{name}]"), None)])
             }
-            Self::Named(name) | Self::ConstAssertedNamed(name) => {
+            Self::Named(name) | Self::ConstAssertedNamed(name) | Self::ReadonlyNamed(name) => {
                 write!(f, [text(&std::format!("\"{name}\""), None)])
             }
-            Self::NamedOptional(name) | Self::ConstAssertedNamedOptional(name) => {
+            Self::NamedOptional(name)
+            | Self::ConstAssertedNamedOptional(name)
+            | Self::ReadonlyNamedOptional(name) => {
                 write!(f, [text(&std::format!("\"{name}\"?"), None)])
             }
             Self::NamedStatic(name) | Self::ConstAssertedNamedStatic(name) => {

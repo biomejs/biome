@@ -667,7 +667,10 @@ fn validate_promise_reference(type_node: &AnyTsType, owner: &str) -> Result<()> 
 /// Preserves whether lookup reaches the helper through an instance or the constructor.
 fn promise_member(specification: PromiseMethodSpecification) -> LoweredTypeMember {
     let kind = match specification.location {
-        PromiseMemberLocation::Instance => LoweredMemberKind::Named { optional: false },
+        PromiseMemberLocation::Instance => LoweredMemberKind::Named {
+            optional: false,
+            readonly: false,
+        },
         PromiseMemberLocation::Static => LoweredMemberKind::NamedStatic,
     };
     LoweredTypeMember {
@@ -1117,6 +1120,7 @@ fn lower_error_type_member(member: AnyTsTypeMember) -> Result<Option<LoweredType
         AnyTsTypeMember::TsPropertySignatureTypeMember(property) => {
             let name = lower_object_member_name(property.name()?)?;
             let optional = property.optional_token().is_some();
+            let readonly = property.readonly_token().is_some();
             let type_reference = property
                 .type_annotation()
                 .with_context(|| format!("Error member {name} is missing a type annotation"))?
@@ -1130,7 +1134,7 @@ fn lower_error_type_member(member: AnyTsTypeMember) -> Result<Option<LoweredType
             };
             Ok(Some(LoweredTypeMember {
                 name,
-                kind: LoweredMemberKind::Named { optional },
+                kind: LoweredMemberKind::Named { optional, readonly },
                 type_reference,
             }))
         }

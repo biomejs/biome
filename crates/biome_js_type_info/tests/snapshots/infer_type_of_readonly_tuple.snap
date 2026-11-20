@@ -1,0 +1,51 @@
+---
+source: crates/biome_js_type_info/tests/utils.rs
+expression: content
+---
+## Input
+
+```ts
+type Pair = readonly [string | null, number?];
+
+```
+
+## Result
+
+```
+TypeOperatorType {
+    operator: Readonly,
+    ty: Resolved(
+        Local TypeId(2),
+    ),
+}
+```
+
+## Registered types
+
+```
+Module TypeId(0) => null
+
+Module TypeId(1) => string | Local TypeId(0)
+
+Module TypeId(2) => Tuple {
+    elements: [
+        TupleElementType {
+            ty: Resolved(
+                Local TypeId(1),
+            ),
+            name: None,
+            is_optional: false,
+            is_rest: false,
+        },
+        TupleElementType {
+            ty: Resolved(
+                number,
+            ),
+            name: None,
+            is_optional: true,
+            is_rest: false,
+        },
+    ],
+    is_inferred_array: false,
+}
+```

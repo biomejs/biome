@@ -164,7 +164,10 @@ fn string_literal<'db>(db: &'db dyn TypeDb, name: &Text) -> TypeData<'db> {
 /// In both cases, each key replaces `K` everywhere in the property type. The
 /// `?` modifier then makes every property optional, as `Partial<T>` does, and
 /// `-?` makes every property required, as `Required<T>` does. The `readonly`
-/// modifier has no effect on the result, just as `Readonly<T>` has no effect.
+/// modifier makes every property readonly, as `Readonly<T>` does, and
+/// `-readonly` makes every property mutable. Without either, a property is
+/// readonly when the property of `T` it comes from is, so `Partial<T>` keeps
+/// the readonly properties of `T`.
 ///
 /// Returns `None` if the keys are not resolved, refer to an object with
 /// uncollected or inherited members, contain numeric or escaped names, number
@@ -186,6 +189,7 @@ pub(crate) fn mapped_type<'db>(
             .ok()
     };
 
+    let readonly_modifier = mapped.readonly_modifier(db);
     let mut members = Vec::new();
     match mapped.keys(db) {
         MappedTypeKeys::Keyof(source) => {
@@ -220,8 +224,13 @@ pub(crate) fn mapped_type<'db>(
                 } else {
                     ty
                 };
+                let is_readonly = match readonly_modifier {
+                    Some(MappedTypeModifier::Add) => true,
+                    Some(MappedTypeModifier::Remove) => false,
+                    None => member.kind.is_readonly(),
+                };
                 members.push(TypeMember {
-                    kind: mapped_member_kind(name, member.kind.is_optional()),
+                    kind: mapped_member_kind(name, member.kind.is_optional(), is_readonly),
                     ty,
                 });
             }
@@ -247,7 +256,11 @@ pub(crate) fn mapped_type<'db>(
                     replacement: key,
                 }])?;
                 members.push(TypeMember {
-                    kind: mapped_member_kind(&Text::from(name.clone()), false),
+                    kind: mapped_member_kind(
+                        &Text::from(name.clone()),
+                        false,
+                        readonly_modifier == Some(MappedTypeModifier::Add),
+                    ),
                     ty,
                 });
             }
@@ -266,16 +279,24 @@ pub(crate) fn mapped_type<'db>(
 
 /// Returns the kind of a property that a mapped type produces.
 ///
-/// Mapped properties are always plain named properties. The `ConstAsserted*`
-/// kinds record that a member came from an `as const` expression, and a mapped
-/// type is a type declaration rather than such an expression. Callers pass the
-/// source member's [`TypeMemberKind::is_optional`], which is also true for
-/// `ConstAssertedNamedOptional`, so optionality carries over from both kinds.
-fn mapped_member_kind<'db>(name: &Text, is_optional: bool) -> TypeMemberKind<'db> {
-    if is_optional {
-        TypeMemberKind::NamedOptional(name.clone())
-    } else {
-        TypeMemberKind::Named(name.clone())
+/// Mapped properties are always named properties, plain or readonly. The
+/// `ConstAsserted*` kinds record that a member came from an `as const`
+/// expression, and a mapped type is a type declaration rather than such an
+/// expression. Callers pass the source member's
+/// [`TypeMemberKind::is_optional`] and, unless a `readonly` or `-readonly`
+/// modifier overrides it, [`TypeMemberKind::is_readonly`]. Both also hold for
+/// the matching `ConstAsserted*` kinds, so optionality and readonly carry
+/// over from every kind.
+fn mapped_member_kind<'db>(
+    name: &Text,
+    is_optional: bool,
+    is_readonly: bool,
+) -> TypeMemberKind<'db> {
+    match (is_optional, is_readonly) {
+        (false, false) => TypeMemberKind::Named(name.clone()),
+        (true, false) => TypeMemberKind::NamedOptional(name.clone()),
+        (false, true) => TypeMemberKind::ReadonlyNamed(name.clone()),
+        (true, true) => TypeMemberKind::ReadonlyNamedOptional(name.clone()),
     }
 }
 
