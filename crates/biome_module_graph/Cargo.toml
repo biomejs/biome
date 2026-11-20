@@ -21,6 +21,10 @@ path = "tests/spec_tests.rs"
 name = "js_scc"
 path = "tests/js_scc.rs"
 
+[[test]]
+name = "next_pages"
+path = "tests/next_pages.rs"
+
 [[bench]]
 harness = false
 name    = "module_graph"

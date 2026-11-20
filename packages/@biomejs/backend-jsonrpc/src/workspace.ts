@@ -3109,6 +3109,11 @@ export interface Nursery {
 	 */
 	noFloatingPromises?: NoFloatingPromisesConfiguration;
 	/**
+	 * Disallow \<a> elements that navigate to a page of the Next.js app.
+	 * See https://biomejs.dev/linter/rules/no-html-link-for-pages
+	 */
+	noHtmlLinkForPages?: NoHtmlLinkForPagesConfiguration;
+	/**
 	 * Disallow the use of eval()-like methods.
 	 * See https://biomejs.dev/linter/rules/no-implied-eval
 	 */
@@ -6905,6 +6910,9 @@ export type NoExtendNativeConfiguration =
 export type NoFloatingPromisesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoFloatingPromisesOptions;
+export type NoHtmlLinkForPagesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoHtmlLinkForPagesOptions;
 export type NoImpliedEvalConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoImpliedEvalOptions;
@@ -10077,6 +10085,10 @@ export interface RuleWithNoFloatingPromisesOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
 	options?: NoFloatingPromisesOptions;
+}
+export interface RuleWithNoHtmlLinkForPagesOptions {
+	level: RulePlainConfiguration;
+	options?: NoHtmlLinkForPagesOptions;
 }
 export interface RuleWithNoImpliedEvalOptions {
 	level: RulePlainConfiguration;
@@ -13865,6 +13877,7 @@ export interface NoExtendNativeOptions {
 	ignore?: string[];
 }
 export type NoFloatingPromisesOptions = {};
+export type NoHtmlLinkForPagesOptions = {};
 export type NoImpliedEvalOptions = {};
 export type NoInvalidFetchOptionsOptions = {};
 export type NoInvalidFileInputAcceptOptions = {};
@@ -16268,6 +16281,7 @@ export type Category =
 	| "lint/nursery/noExcessiveStatementsPerFunction"
 	| "lint/nursery/noExtendNative"
 	| "lint/nursery/noFloatingPromises"
+	| "lint/nursery/noHtmlLinkForPages"
 	| "lint/nursery/noImplicitCoercion"
 	| "lint/nursery/noImpliedEval"
 	| "lint/nursery/noInvalidFetchOptions"

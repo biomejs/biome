@@ -74,6 +74,8 @@ mod js_doc;
 mod module_resolution;
 #[path = "spec_tests/narrowing.test.rs"]
 mod narrowing;
+#[path = "spec_tests/next_pages.test.rs"]
+mod next_pages;
 #[path = "spec_tests/normalization.test.rs"]
 mod normalization;
 #[path = "spec_tests/overloads.test.rs"]
@@ -223,14 +225,24 @@ impl biome_module_graph::TypeDb for TestModuleDb {
 
 #[salsa::db]
 impl ModuleDb for TestModuleDb {
+    fn module_graph_generation(&self) -> u64 {
+        ModuleGraphGeneration::get(self).value(self)
+    }
+
     fn module_for_path(&self, path: &Utf8Path) -> Option<ModuleInfo> {
         self.module_lookup_count.fetch_add(1, Ordering::Relaxed);
+        // Like the workspace database, record the generation so adding or
+        // removing a module invalidates queries that look modules up.
+        let _ = self.module_graph_generation();
         self.modules.get(path).copied()
     }
 
     fn for_each_module(&self, f: &mut dyn FnMut(ModuleInfo)) {
         self.module_enumeration_count
             .fetch_add(1, Ordering::Relaxed);
+        // Like the workspace database, record the generation so adding or
+        // removing a module invalidates queries that enumerate modules.
+        let _ = self.module_graph_generation();
         for module in self.modules.values() {
             f(*module);
         }

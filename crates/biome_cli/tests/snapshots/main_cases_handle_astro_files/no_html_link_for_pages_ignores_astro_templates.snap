@@ -1,0 +1,89 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome lint app src
+```
+
+## `biome.json`
+
+```json
+{
+  "html": { "experimentalFullSupportEnabled": true },
+  "linter": {
+    "rules": {
+      "preset": "none",
+      "nursery": { "noHtmlLinkForPages": "error" }
+    }
+  }
+}
+```
+
+## `app/about/page.jsx`
+
+```jsx
+export default function About() {}
+```
+
+## `app/page.jsx`
+
+```jsx
+export default function Home() {
+    return <a href="/about">About</a>;
+}
+```
+
+## `package.json`
+
+```json
+{ "dependencies": { "next": "*" } }
+```
+
+## `src/components/Nav.astro`
+
+```astro
+<a href="/about">About</a>
+{show && <a href="/about">About</a>}
+```
+
+# Termination Message
+
+```block
+lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+app/page.jsx:2:15 lint/nursery/noHtmlLinkForPages ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This <a> element navigates to /about, a page of this Next.js app.
+  
+    1 │ export default function Home() {
+  > 2 │     return <a href="/about">About</a>;
+      │               ^^^^^^^^^^^^^
+    3 │ }
+  
+  i An <a> element to another page loads a new document, so the client loses its state.
+  
+  i Use <Link /> from next/link instead, which navigates on the client and prefetches the page.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/7650 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```block
+Checked 3 files in <TIME>. No fixes applied.
+Found 1 error.
+```

@@ -1,0 +1,26 @@
+/* should generate diagnostics */
+export function Links({ props }) {
+	return (
+		<>
+			<a href="/">Home</a>
+			<a href="/about">About</a>
+			<a href="/about/">About, with a trailing slash</a>
+			<a href="/about?tab=team#history">About, with a query and a fragment</a>
+			<a href="/pricing">Pricing, in a route group</a>
+			<a href="/blog/hello-world">Blog post</a>
+			<a href="/docs/getting-started/installation">Docs, catch-all</a>
+			<a href="/settings">Settings, in a parallel route slot</a>
+			<a href="/contact">Contact, pages router</a>
+			<a href="/_preview">Preview, pages router file starting with an underscore</a>
+			<a href="/_help">Help, app router folder escaped with %5F</a>
+			<a href="/stores">Stores, pages router index</a>
+			<a href="/shop">Shop, optional catch-all without segments</a>
+			<a href="/shop/shoes/red">Shop, optional catch-all</a>
+			<a href={"/about"}>About, in an expression</a>
+			<a target="_self" href="/about">About, in the same tab</a>
+			<a {...props} href="/about">About, after a spread</a>
+			<a href="/team">Team, app router in src</a>
+			<a href="/careers">Careers, pages router in src</a>
+		</>
+	);
+}
