@@ -1,5 +1,6 @@
 ---
 source: crates/biome_css_analyze/tests/spec_tests.rs
+assertion_line: 148
 expression: valid.scss
 ---
 # Input
@@ -81,5 +82,27 @@ expression: valid.scss
 
 @include countdown(3);
 @include ping(3);
+
+@mixin in-base-layer {
+  @layer base {
+    @content;
+  }
+}
+
+@include in-base-layer {
+  .content-in-layer {
+    color: red;
+  }
+}
+
+@mixin passes-content-to-layer {
+  @include in-base-layer {
+    .nested-content-in-layer {
+      color: red;
+    }
+  }
+}
+
+@include passes-content-to-layer;
 
 ```

@@ -3,7 +3,7 @@ use biome_console::markup;
 use biome_css_semantic::model::SemanticModel;
 use biome_css_syntax::{
     CssImportAtRule, CssLanguage, CssLayerAtRule, CssNestedQualifiedRule, CssQualifiedRule,
-    CssSyntaxNode, ScssIncludeAtRule, ScssMixinAtRule,
+    CssSyntaxNode, ScssContentAtRule, ScssIncludeAtRule, ScssMixinAtRule,
 };
 use biome_diagnostics::Severity;
 use biome_rowan::{AstNode, SyntaxKindSet, TextSize, declare_node_union};
@@ -30,9 +30,10 @@ declare_lint_rule! {
     /// Layer membership is determined from the authored ancestors of a style rule. A style rule in a
     /// mixin body takes its layer from where the mixin is included, so the rule reports the
     /// `@include` instead: an `@include` outside a cascade layer is reported when the mixin emits a
-    /// style rule outside a cascade layer, directly or through the mixins it includes. Only mixins
-    /// defined in the same file before the outermost `@include` are resolved. Mixins from other modules, such
-    /// as `@include theme.button`, aren't checked.
+    /// style rule outside a cascade layer, directly or through the mixins it includes. A style rule
+    /// in an `@include` content block is layered when the mixin puts every `@content` inside a
+    /// cascade layer. Only mixins defined in the same file before the outermost `@include` are
+    /// resolved. Mixins from other modules, such as `@include theme.button`, aren't checked.
     ///
     /// ## Examples
     ///
@@ -141,7 +142,7 @@ impl Rule for UseLayeredStyles {
         }
 
         // A containing layer satisfies the rule. Nested rules are covered by their outer style rule.
-        if layer_deciding_ancestor(node).is_some() {
+        if layer_deciding_ancestor(node, node.range().start(), ctx.model()).is_some() {
             return None;
         }
 
@@ -219,11 +220,40 @@ declare_node_union! {
     pub AnyUseLayeredStylesQuery = CssQualifiedRule | CssNestedQualifiedRule | CssImportAtRule | ScssIncludeAtRule
 }
 
-fn layer_deciding_ancestor(node: &AnyUseLayeredStylesQuery) -> Option<CssSyntaxNode> {
-    node.syntax()
-        .ancestors()
-        .skip(1)
-        .find(|ancestor| LAYER_DECIDING_ANCESTOR_KINDS.matches(ancestor.kind()))
+fn layer_deciding_ancestor(
+    node: &AnyUseLayeredStylesQuery,
+    called_at: TextSize,
+    model: &SemanticModel,
+) -> Option<CssSyntaxNode> {
+    node.syntax().ancestors().skip(1).find(|ancestor| {
+        LAYER_DECIDING_ANCESTOR_KINDS.matches(ancestor.kind())
+            || ScssIncludeAtRule::cast_ref(ancestor)
+                .is_some_and(|include| puts_content_in_layer(&include, called_at, model))
+    })
+}
+
+/// Returns `true` if the mixin that `include` refers to puts every `@content` inside a `@layer`.
+fn puts_content_in_layer(
+    include: &ScssIncludeAtRule,
+    called_at: TextSize,
+    model: &SemanticModel,
+) -> bool {
+    model
+        .scss_mixin_for_include(include, called_at)
+        .is_some_and(|mixin| {
+            let mut contents = mixin
+                .syntax()
+                .descendants()
+                .filter(|node| ScssContentAtRule::can_cast(node.kind()))
+                .peekable();
+            contents.peek().is_some()
+                && contents.all(|content| {
+                    content
+                        .ancestors()
+                        .take_while(|ancestor| ancestor != mixin.syntax())
+                        .any(|ancestor| CssLayerAtRule::can_cast(ancestor.kind()))
+                })
+        })
 }
 
 /// Returns `true` if the mixin that `include` resolves to emits a style rule outside a cascade
@@ -247,7 +277,7 @@ fn emits_unlayered_style_rules(
             .descendants()
             .filter_map(AnyUseLayeredStylesQuery::cast)
             .any(|item| {
-                layer_deciding_ancestor(&item).as_ref() == Some(mixin.syntax())
+                layer_deciding_ancestor(&item, called_at, model).as_ref() == Some(mixin.syntax())
                     && match item {
                         AnyUseLayeredStylesQuery::CssQualifiedRule(_)
                         | AnyUseLayeredStylesQuery::CssNestedQualifiedRule(_) => true,

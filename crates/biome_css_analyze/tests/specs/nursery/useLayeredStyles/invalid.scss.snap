@@ -1,5 +1,6 @@
 ---
 source: crates/biome_css_analyze/tests/spec_tests.rs
+assertion_line: 148
 expression: invalid.scss
 ---
 # Input
@@ -48,6 +49,49 @@ $color: red;
 }
 
 @include wrapper;
+
+@mixin plain-wrapper {
+  @content;
+}
+
+@include plain-wrapper {
+  .content-unlayered {
+    color: red;
+  }
+}
+
+@mixin passes-content-to-plain-wrapper {
+  @include plain-wrapper {
+    .nested-content-unlayered {
+      color: red;
+    }
+  }
+}
+
+@include passes-content-to-plain-wrapper;
+
+@include breakpoints.tablet {
+  .unresolved-content {
+    color: red;
+  }
+}
+
+@mixin wraps-twice {
+  @include plain-wrapper {
+    @layer base {
+      .layered-content {
+        color: red;
+      }
+    }
+  }
+  @include plain-wrapper {
+    .second-content-unlayered {
+      color: red;
+    }
+  }
+}
+
+@include wraps-twice;
 
 ```
 
@@ -148,6 +192,94 @@ invalid.scss:44:2 lint/nursery/useLayeredStyles ━━━━━━━━━━�
   > 44 │ @include wrapper;
        │  ^^^^^^^^^^^^^^^^
     45 │ 
+    46 │ @mixin plain-wrapper {
+  
+  i Style rules outside a cascade layer always take precedence over layered styles, which makes the cascade harder to predict and override.
+  
+  i Wrap the include in a @layer block to control its place in the cascade.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:51:3 lint/nursery/useLayeredStyles ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This style rule is defined outside of a cascade layer.
+  
+    50 │ @include plain-wrapper {
+  > 51 │   .content-unlayered {
+       │   ^^^^^^^^^^^^^^^^^^^^
+  > 52 │     color: red;
+  > 53 │   }
+       │   ^
+    54 │ }
+    55 │ 
+  
+  i Style rules outside a cascade layer always take precedence over layered styles, which makes the cascade harder to predict and override.
+  
+  i Wrap the style rule in a @layer block to control its place in the cascade.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:64:2 lint/nursery/useLayeredStyles ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This include emits style rules outside of a cascade layer.
+  
+    62 │ }
+    63 │ 
+  > 64 │ @include passes-content-to-plain-wrapper;
+       │  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    65 │ 
+    66 │ @include breakpoints.tablet {
+  
+  i Style rules outside a cascade layer always take precedence over layered styles, which makes the cascade harder to predict and override.
+  
+  i Wrap the include in a @layer block to control its place in the cascade.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:67:3 lint/nursery/useLayeredStyles ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This style rule is defined outside of a cascade layer.
+  
+    66 │ @include breakpoints.tablet {
+  > 67 │   .unresolved-content {
+       │   ^^^^^^^^^^^^^^^^^^^^^
+  > 68 │     color: red;
+  > 69 │   }
+       │   ^
+    70 │ }
+    71 │ 
+  
+  i Style rules outside a cascade layer always take precedence over layered styles, which makes the cascade harder to predict and override.
+  
+  i Wrap the style rule in a @layer block to control its place in the cascade.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:87:2 lint/nursery/useLayeredStyles ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This include emits style rules outside of a cascade layer.
+  
+    85 │ }
+    86 │ 
+  > 87 │ @include wraps-twice;
+       │  ^^^^^^^^^^^^^^^^^^^^
+    88 │ 
   
   i Style rules outside a cascade layer always take precedence over layered styles, which makes the cascade harder to predict and override.
   

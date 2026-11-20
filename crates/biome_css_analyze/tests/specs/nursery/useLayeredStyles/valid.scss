@@ -75,3 +75,25 @@
 
 @include countdown(3);
 @include ping(3);
+
+@mixin in-base-layer {
+  @layer base {
+    @content;
+  }
+}
+
+@include in-base-layer {
+  .content-in-layer {
+    color: red;
+  }
+}
+
+@mixin passes-content-to-layer {
+  @include in-base-layer {
+    .nested-content-in-layer {
+      color: red;
+    }
+  }
+}
+
+@include passes-content-to-layer;
