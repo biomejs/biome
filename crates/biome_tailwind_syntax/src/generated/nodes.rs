@@ -1472,6 +1472,7 @@ impl AnyCssDimension {
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssExpression {
     CssBinaryExpression(CssBinaryExpression),
+    CssBogusPropertyValue(CssBogusPropertyValue),
     CssListOfComponentValuesExpression(CssListOfComponentValuesExpression),
     CssParenthesizedExpression(CssParenthesizedExpression),
     CssUnaryExpression(CssUnaryExpression),
@@ -1480,6 +1481,12 @@ impl AnyCssExpression {
     pub fn as_css_binary_expression(&self) -> Option<&CssBinaryExpression> {
         match &self {
             Self::CssBinaryExpression(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_bogus_property_value(&self) -> Option<&CssBogusPropertyValue> {
+        match &self {
+            Self::CssBogusPropertyValue(item) => Some(item),
             _ => None,
         }
     }
@@ -1573,6 +1580,7 @@ pub enum AnyCssValue {
     AnyCssDimension(AnyCssDimension),
     AnyCssFunction(AnyCssFunction),
     CssBinaryExpression(CssBinaryExpression),
+    CssBogusPropertyValue(CssBogusPropertyValue),
     CssColor(CssColor),
     CssDashedIdentifier(CssDashedIdentifier),
     CssIdentifier(CssIdentifier),
@@ -1599,6 +1607,12 @@ impl AnyCssValue {
     pub fn as_css_binary_expression(&self) -> Option<&CssBinaryExpression> {
         match &self {
             Self::CssBinaryExpression(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_bogus_property_value(&self) -> Option<&CssBogusPropertyValue> {
+        match &self {
+            Self::CssBogusPropertyValue(item) => Some(item),
             _ => None,
         }
     }
@@ -3694,6 +3708,11 @@ impl From<CssBinaryExpression> for AnyCssExpression {
         Self::CssBinaryExpression(node)
     }
 }
+impl From<CssBogusPropertyValue> for AnyCssExpression {
+    fn from(node: CssBogusPropertyValue) -> Self {
+        Self::CssBogusPropertyValue(node)
+    }
+}
 impl From<CssListOfComponentValuesExpression> for AnyCssExpression {
     fn from(node: CssListOfComponentValuesExpression) -> Self {
         Self::CssListOfComponentValuesExpression(node)
@@ -3712,6 +3731,7 @@ impl From<CssUnaryExpression> for AnyCssExpression {
 impl AstNode for AnyCssExpression {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = CssBinaryExpression::KIND_SET
+        .union(CssBogusPropertyValue::KIND_SET)
         .union(CssListOfComponentValuesExpression::KIND_SET)
         .union(CssParenthesizedExpression::KIND_SET)
         .union(CssUnaryExpression::KIND_SET);
@@ -3719,6 +3739,7 @@ impl AstNode for AnyCssExpression {
         matches!(
             kind,
             CSS_BINARY_EXPRESSION
+                | CSS_BOGUS_PROPERTY_VALUE
                 | CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION
                 | CSS_PARENTHESIZED_EXPRESSION
                 | CSS_UNARY_EXPRESSION
@@ -3727,6 +3748,9 @@ impl AstNode for AnyCssExpression {
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
             CSS_BINARY_EXPRESSION => Self::CssBinaryExpression(CssBinaryExpression { syntax }),
+            CSS_BOGUS_PROPERTY_VALUE => {
+                Self::CssBogusPropertyValue(CssBogusPropertyValue { syntax })
+            }
             CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION => {
                 Self::CssListOfComponentValuesExpression(CssListOfComponentValuesExpression {
                     syntax,
@@ -3743,6 +3767,7 @@ impl AstNode for AnyCssExpression {
     fn syntax(&self) -> &SyntaxNode {
         match self {
             Self::CssBinaryExpression(it) => it.syntax(),
+            Self::CssBogusPropertyValue(it) => it.syntax(),
             Self::CssListOfComponentValuesExpression(it) => it.syntax(),
             Self::CssParenthesizedExpression(it) => it.syntax(),
             Self::CssUnaryExpression(it) => it.syntax(),
@@ -3751,6 +3776,7 @@ impl AstNode for AnyCssExpression {
     fn into_syntax(self) -> SyntaxNode {
         match self {
             Self::CssBinaryExpression(it) => it.into_syntax(),
+            Self::CssBogusPropertyValue(it) => it.into_syntax(),
             Self::CssListOfComponentValuesExpression(it) => it.into_syntax(),
             Self::CssParenthesizedExpression(it) => it.into_syntax(),
             Self::CssUnaryExpression(it) => it.into_syntax(),
@@ -3761,6 +3787,7 @@ impl std::fmt::Debug for AnyCssExpression {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::CssBinaryExpression(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssBogusPropertyValue(it) => std::fmt::Debug::fmt(it, f),
             Self::CssListOfComponentValuesExpression(it) => std::fmt::Debug::fmt(it, f),
             Self::CssParenthesizedExpression(it) => std::fmt::Debug::fmt(it, f),
             Self::CssUnaryExpression(it) => std::fmt::Debug::fmt(it, f),
@@ -3771,6 +3798,7 @@ impl From<AnyCssExpression> for SyntaxNode {
     fn from(n: AnyCssExpression) -> Self {
         match n {
             AnyCssExpression::CssBinaryExpression(it) => it.into_syntax(),
+            AnyCssExpression::CssBogusPropertyValue(it) => it.into_syntax(),
             AnyCssExpression::CssListOfComponentValuesExpression(it) => it.into_syntax(),
             AnyCssExpression::CssParenthesizedExpression(it) => it.into_syntax(),
             AnyCssExpression::CssUnaryExpression(it) => it.into_syntax(),
@@ -3981,6 +4009,11 @@ impl From<CssBinaryExpression> for AnyCssValue {
         Self::CssBinaryExpression(node)
     }
 }
+impl From<CssBogusPropertyValue> for AnyCssValue {
+    fn from(node: CssBogusPropertyValue) -> Self {
+        Self::CssBogusPropertyValue(node)
+    }
+}
 impl From<CssColor> for AnyCssValue {
     fn from(node: CssColor) -> Self {
         Self::CssColor(node)
@@ -4031,6 +4064,7 @@ impl AstNode for AnyCssValue {
     const KIND_SET: SyntaxKindSet<Language> = AnyCssDimension::KIND_SET
         .union(AnyCssFunction::KIND_SET)
         .union(CssBinaryExpression::KIND_SET)
+        .union(CssBogusPropertyValue::KIND_SET)
         .union(CssColor::KIND_SET)
         .union(CssDashedIdentifier::KIND_SET)
         .union(CssIdentifier::KIND_SET)
@@ -4043,6 +4077,7 @@ impl AstNode for AnyCssValue {
     fn can_cast(kind: SyntaxKind) -> bool {
         match kind {
             CSS_BINARY_EXPRESSION
+            | CSS_BOGUS_PROPERTY_VALUE
             | CSS_COLOR
             | CSS_DASHED_IDENTIFIER
             | CSS_IDENTIFIER
@@ -4060,6 +4095,9 @@ impl AstNode for AnyCssValue {
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
             CSS_BINARY_EXPRESSION => Self::CssBinaryExpression(CssBinaryExpression { syntax }),
+            CSS_BOGUS_PROPERTY_VALUE => {
+                Self::CssBogusPropertyValue(CssBogusPropertyValue { syntax })
+            }
             CSS_COLOR => Self::CssColor(CssColor { syntax }),
             CSS_DASHED_IDENTIFIER => Self::CssDashedIdentifier(CssDashedIdentifier { syntax }),
             CSS_IDENTIFIER => Self::CssIdentifier(CssIdentifier { syntax }),
@@ -4089,6 +4127,7 @@ impl AstNode for AnyCssValue {
     fn syntax(&self) -> &SyntaxNode {
         match self {
             Self::CssBinaryExpression(it) => it.syntax(),
+            Self::CssBogusPropertyValue(it) => it.syntax(),
             Self::CssColor(it) => it.syntax(),
             Self::CssDashedIdentifier(it) => it.syntax(),
             Self::CssIdentifier(it) => it.syntax(),
@@ -4105,6 +4144,7 @@ impl AstNode for AnyCssValue {
     fn into_syntax(self) -> SyntaxNode {
         match self {
             Self::CssBinaryExpression(it) => it.into_syntax(),
+            Self::CssBogusPropertyValue(it) => it.into_syntax(),
             Self::CssColor(it) => it.into_syntax(),
             Self::CssDashedIdentifier(it) => it.into_syntax(),
             Self::CssIdentifier(it) => it.into_syntax(),
@@ -4125,6 +4165,7 @@ impl std::fmt::Debug for AnyCssValue {
             Self::AnyCssDimension(it) => std::fmt::Debug::fmt(it, f),
             Self::AnyCssFunction(it) => std::fmt::Debug::fmt(it, f),
             Self::CssBinaryExpression(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssBogusPropertyValue(it) => std::fmt::Debug::fmt(it, f),
             Self::CssColor(it) => std::fmt::Debug::fmt(it, f),
             Self::CssDashedIdentifier(it) => std::fmt::Debug::fmt(it, f),
             Self::CssIdentifier(it) => std::fmt::Debug::fmt(it, f),
@@ -4143,6 +4184,7 @@ impl From<AnyCssValue> for SyntaxNode {
             AnyCssValue::AnyCssDimension(it) => it.into_syntax(),
             AnyCssValue::AnyCssFunction(it) => it.into_syntax(),
             AnyCssValue::CssBinaryExpression(it) => it.into_syntax(),
+            AnyCssValue::CssBogusPropertyValue(it) => it.into_syntax(),
             AnyCssValue::CssColor(it) => it.into_syntax(),
             AnyCssValue::CssDashedIdentifier(it) => it.into_syntax(),
             AnyCssValue::CssIdentifier(it) => it.into_syntax(),

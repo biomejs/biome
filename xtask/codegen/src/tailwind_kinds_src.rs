@@ -35,7 +35,7 @@ pub const TAILWIND_KINDS_SRC: KindsSrc = KindsSrc {
     ],
     tokens: &["ERROR_TOKEN", "IDENT", "CSS_WHITESPACE"],
     keywords: &[
-        "data", "url", "var", // length units
+        "url", "var", // length units
         "em", "rem", "ex", "rex", "cap", "rcap", "ch", "rch", "ic", "ric", "lh", "rlh",
         // Viewport-percentage Lengths
         "vw", "svw", "lvw", "dvw", "vh", "svh", "lvh", "dvh", "vi", "svi", "lvi", "dvi", "vb",
