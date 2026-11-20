@@ -253,17 +253,14 @@ pub(crate) enum PropertyLookup<'db> {
     /// type arguments of the object substituted but its handles unresolved.
     /// `is_readonly` tells whether the property can't be assigned through
     /// the object's type.
+    /// `is_inherited` tells whether the type gets the property from a type
+    /// it inherits from, through an `extends` clause or a prototype, or from
+    /// `Object`, instead of declaring it itself.
     Found {
         ty: TypeData<'db>,
         is_optional: bool,
-        #[cfg_attr(
-            not(test),
-            expect(
-                dead_code,
-                reason = "no narrowing reads readonly properties, only tests do"
-            )
-        )]
         is_readonly: bool,
+        is_inherited: bool,
     },
     /// The type has no such property.
     Missing,
@@ -286,7 +283,9 @@ pub(crate) enum PropertyLookup<'db> {
 /// A found property is readonly when it is declared `readonly`, when it
 /// belongs to an object under an `as const` assertion, or when a mapped type
 /// such as `Readonly<T>` makes it readonly. A getter is never readonly,
-/// because Biome doesn't collect setters.
+/// because Biome doesn't collect setters. A found property is inherited when
+/// `ty` gets it through an `extends` clause or a prototype, or from `Object`.
+/// The elements of a tuple are never inherited.
 pub(crate) fn find_property<'db>(
     db: &'db dyn TypeDb,
     ty: TypeData<'db>,
@@ -303,10 +302,12 @@ pub(crate) fn find_property<'db>(
             ty,
             is_optional,
             is_readonly,
+            is_inherited,
         } => PropertyLookup::Found {
             ty,
             is_optional,
             is_readonly,
+            is_inherited,
         },
         MemberLookup::Missing => PropertyLookup::Missing,
         MemberLookup::Unknown => PropertyLookup::Unknown,
@@ -343,6 +344,7 @@ fn tuple_element<'db>(
                 ty: element.ty,
                 is_optional: element.is_optional,
                 is_readonly,
+                is_inherited: false,
             };
         }
     }
@@ -922,9 +924,33 @@ enum MemberLookup<'db> {
         /// Whether the member can't be assigned through the object's type.
         /// Comparisons ignore it, as TypeScript's assignability does.
         is_readonly: bool,
+        /// Whether the member comes from a type that the searched type
+        /// inherits from, or from the wrapper or `Object` that gives a value
+        /// its apparent members, instead of from the searched type itself.
+        is_inherited: bool,
     },
     Missing,
     Unknown,
+}
+
+impl MemberLookup<'_> {
+    /// Returns this lookup with a found member marked as inherited.
+    fn inherited(self) -> Self {
+        match self {
+            Self::Found {
+                ty,
+                is_optional,
+                is_readonly,
+                ..
+            } => Self::Found {
+                ty,
+                is_optional,
+                is_readonly,
+                is_inherited: true,
+            },
+            lookup => lookup,
+        }
+    }
 }
 
 /// Variance of the position where an `infer` generic matched a type, which
@@ -2033,6 +2059,7 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
                     ty: member_type(self.db, member),
                     is_optional: member.kind.is_optional(),
                     is_readonly: member.kind.is_readonly(),
+                    is_inherited: true,
                 };
             }
             // A member keyed by a well-known symbol, such as `[Symbol.iterator]`
@@ -2058,6 +2085,7 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
             Box::default(),
         );
         self.find_member(object, name, 0, &mut FxHashSet::default())
+            .inherited()
     }
 
     fn is_object_like(&mut self, mut ty: TypeData<'db>) -> bool {
@@ -2907,6 +2935,7 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
                     Box::default(),
                 );
                 self.find_member(object, name, 0, &mut FxHashSet::default())
+                    .inherited()
             }
             result => result,
         }
@@ -2981,6 +3010,7 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
                     ty,
                     is_optional: member.kind.is_optional(),
                     is_readonly: member.kind.is_readonly(),
+                    is_inherited: false,
                 },
                 None => MemberLookup::Unknown,
             };
@@ -3016,7 +3046,7 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
                 parent => parent,
             };
             match self.find_member(parent, name, depth + 1, visited) {
-                found @ MemberLookup::Found { .. } => return found,
+                found @ MemberLookup::Found { .. } => return found.inherited(),
                 MemberLookup::Missing => {}
                 MemberLookup::Unknown => result = MemberLookup::Unknown,
             }

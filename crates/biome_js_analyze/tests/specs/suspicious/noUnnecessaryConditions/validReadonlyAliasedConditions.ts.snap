@@ -1,0 +1,64 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validReadonlyAliasedConditions.ts
+---
+# Input
+```ts
+// should not generate diagnostics
+
+class Base {
+	readonly v: string | null = null;
+}
+
+class Derived extends Base {
+	v: string | null = null;
+}
+
+class Accessor {
+	get v(): string | null {
+		return null;
+	}
+
+	set v(value: string | null) {}
+}
+
+function mutableObject(o: { a: { readonly v: string | null } }) {
+	const ok = o.a.v !== null;
+	if (ok) {
+		return o.a.v?.length;
+	}
+}
+
+function getterWithSetter(o: Accessor) {
+	const ok = o.v !== null;
+	if (ok) {
+		return o.v?.length;
+	}
+}
+
+function replacedByInstanceof(o: Base) {
+	const ok = o.v !== null;
+	if (o instanceof Derived) {
+		if (ok) {
+			return o.v?.length;
+		}
+	}
+}
+
+function mixedIntersection(
+	o: { readonly v: string | null } & { v: string | null },
+) {
+	const ok = o.v !== null;
+	if (ok) {
+		return o.v?.length;
+	}
+}
+
+function letAlias(o: { readonly v: string | null }) {
+	let ok = o.v !== null;
+	if (ok) {
+		return o.v?.length;
+	}
+}
+
+```

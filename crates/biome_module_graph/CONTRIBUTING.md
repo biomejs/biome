@@ -213,9 +213,13 @@ one of its own variables or a path on its own `this`. Its parts live in
   combines it with the test of `ok` as `&&` combines its operands. Inside an
   inlined initializer, only a test of a variable whose value cannot change
   between the `const` and the test is kept, following TypeScript's
-  `isConstantReference`: a test of a property path, of `this`, of an exported
-  variable, or of a variable declared by a `let` statement at the top level
-  of a file becomes `Keep`. Inlining stops
+  `isConstantReference`: a test of `this`, of an exported variable, or of a
+  variable declared by a `let` statement at the top level of a file becomes
+  `Keep`. A test of a property path that starts at such a variable, or at a
+  `this` in the root's own code, is wrapped in `FlowGuard::ReadonlyPath`,
+  which applies it only when inference finds every property along the path
+  readonly, and so are a property guard whose object is such a path and the
+  test of such a receiver of an optional chain. Inlining stops
   once five aliased conditions enclose a test, where TypeScript stops too, so
   a deeper `const` tests only its own truthiness. When decomposition stops
   early, the subjects that inlined initializers read are mentioned too.
@@ -226,7 +230,14 @@ one of its own variables or a path on its own `this`. Its parts live in
 - `writes.rs` finds the property paths that a root may write. The graph has
   no write points, so a written path does not narrow anywhere in its root,
   and collection replaces an aliased property guard whose property the root
-  may write with `Keep`.
+  may write with `Keep`. Collection also replaces a `FlowGuard::ReadonlyPath`
+  guard with `Keep` when the root tests an object along its path with
+  `instanceof`, a type-guard function, or `typeof` with a primitive kind or
+  `"function"`, because such a test can replace a member of the object's
+  type with one whose property is not readonly, while inference decides from
+  the declared type. It lists the subjects of the other such guards in
+  `RootFlow::readonly_tested`, and those that no other guard narrows in
+  `RootFlow::only_readonly_tested`.
   The scan visits the root's own code, including function and arrow
   expressions called where they are defined and class static blocks, but not
   the bodies of other functions, methods, accessors, and constructors, which
@@ -329,6 +340,19 @@ variables can't narrow costs cache reads. Before evaluating a candidate that
 `ModuleFlow::property_only_candidate` names, both paths check that variable's
 baseline and skip the candidate when there is none, without finding its
 syntax node.
+
+A read of a property path in `RootFlow::readonly_tested` decides whether the
+path is readonly once its baseline exists (`is_readonly_path`): at every
+step, the declared type of the object, the type of its expression resolved
+from the raw tables without narrowing, must declare the property readonly in
+every member other than `null` and `undefined` (`has_readonly_property` in
+`biome_js_type_info`). The answer is part of the key of the solve queries, so
+`FlowGuard::ReadonlyPath` guards apply only in the solves of readonly paths,
+and paths without such guards share their solves as before. A path in
+`RootFlow::only_readonly_tested` that is not readonly skips the solve. The
+check resolves through the context that evaluates the read, so in complete
+module inference it reads the types that context already holds, and that
+context keeps the answer per root and subject.
 
 `src/db/type_inference/flow.rs` applies each runtime test with `narrow_type`
 from `biome_js_type_info`. Where branches meet, or a loop returns to an earlier

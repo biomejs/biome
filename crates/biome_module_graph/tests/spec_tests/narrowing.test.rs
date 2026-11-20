@@ -1248,7 +1248,7 @@ fn strict_literal_and_truthiness_guards_filter_literal_unions() {
     }
 }
 
-// Every expected type is the type that TypeScript 6.0.3 (`tsc --strict`) gives
+// Every expected type is the type that TypeScript 7.0.2 (`tsc --strict`) gives
 // the same read or expression. Reads inside `if (!value)` keep their declared
 // types, so `&&` and `||` there are typed as if no narrowing applied; only the
 // `typeof` cases type `&&` with a narrowed left operand.
@@ -1310,9 +1310,9 @@ fn falsy_branch_reads_keep_broad_primitives_while_logical_and_keeps_falsy_litera
     }
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) types these `&&` expressions as
+// TypeScript 7.0.2 (`tsc --strict`) types these `&&` expressions as
 // `string | 0`, `string | 0 | null`, and `string | 0`. Biome deliberately keeps
-// `number` in place of `0`: `-0` and `NaN` are falsy numbers too, so
+// `number` in place of `0`, because `-0` and `NaN` are falsy numbers too, so
 // `NaN && s` evaluates to `NaN`, which `0` does not describe.
 #[test]
 fn logical_and_keeps_broad_number_as_its_falsy_part() {
@@ -1552,8 +1552,9 @@ fn assert_object_reads(source: &str, reads: &[(&str, &[&str])]) {
 }
 
 // Every expected type is the type that TypeScript 7.0.2 (`tsc --strict`) gives
-// the read, unless a comment gives TypeScript's type and the reason Biome's
-// type is wider.
+// the read, unless a comment gives TypeScript's type. Where a comment gives it,
+// Biome keeps an object type that a falsy primitive can have, so its type is
+// wider.
 #[test]
 fn falsy_branch_removes_object_types_that_no_falsy_primitive_satisfies() {
     assert_object_reads(
@@ -1743,7 +1744,7 @@ fn hoisted_initialization_prevents_stale_facts() {
     );
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) narrows every read below to `string`,
+// TypeScript 7.0.2 (`tsc --strict`) narrows every read below to `string`,
 // although a direct `eval` or a mapped `arguments` object can set `value` to
 // `null`. Biome deliberately copies this unsound narrowing; `NARROWING.md`
 // lists it among the deliberate choices.
@@ -1782,7 +1783,7 @@ fn eval_and_arguments_do_not_prevent_narrowing() {
     }
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) narrows `a` to `string` and `first` to
+// TypeScript 7.0.2 (`tsc --strict`) narrows `a` to `string` and `first` to
 // `number`.
 #[test]
 fn variables_declared_by_destructuring_narrow() {
@@ -1815,7 +1816,7 @@ fn variables_declared_by_destructuring_narrow() {
     }
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) types `size` as `number | "auto"` at both
+// TypeScript 7.0.2 (`tsc --strict`) types `size` as `number | "auto"` at both
 // reads, and `first` as `string | number | undefined` before the condition and
 // `string | number` after it. The declared type that Biome gives a
 // destructured variable ignores defaults, so it lacks `"auto"` for `size` and
@@ -1850,7 +1851,7 @@ fn variables_with_destructuring_defaults_do_not_narrow() {
     }
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) narrows the read to `string`.
+// TypeScript 7.0.2 (`tsc --strict`) narrows the read to `string`.
 #[test]
 fn destructuring_and_logical_assignments_to_other_variables_keep_narrowing() {
     const SOURCE: &str = r#"
@@ -1873,7 +1874,7 @@ fn destructuring_and_logical_assignments_to_other_variables_keep_narrowing() {
     assert_variants(&db, ty, &[InferredTypeData::String], "read");
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) narrows every read below to `string`,
+// TypeScript 7.0.2 (`tsc --strict`) narrows every read below to `string`,
 // because none of the writes comes between the condition and the read. Biome
 // narrows only variables that are never written, so these reads keep their
 // declared type.
@@ -1916,10 +1917,11 @@ fn variables_written_by_destructuring_or_logical_assignments_do_not_narrow() {
     }
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) gives every read below the expected type,
-// except the read in `method`, which it narrows to `string`: it keeps the
-// narrowing of a parameter that a method of a class expression captures, when
-// nothing writes the parameter. Biome does not narrow reads in closures yet.
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type,
+// except the read in `method`. TypeScript narrows that read to `string`,
+// because it keeps the narrowing of a parameter that a method of a class
+// expression captures when nothing writes the parameter. Biome does not narrow
+// reads in closures.
 // TypeScript analyzes a class field with an initializer on its own, so reads
 // in the field keep their declared type.
 #[test]
@@ -1983,7 +1985,7 @@ fn class_expressions_keep_narrowing_outside_their_members() {
     assert_variants(&db, ty, &[String], "module");
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) narrows every read below to `string`.
+// TypeScript 7.0.2 (`tsc --strict`) narrows every read below to `string`.
 #[test]
 fn unmodelled_statements_elsewhere_keep_narrowing() {
     const SOURCE: &str = r#"
@@ -2046,7 +2048,7 @@ fn unmodelled_statements_elsewhere_keep_narrowing() {
     }
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) narrows every read below to `string`.
+// TypeScript 7.0.2 (`tsc --strict`) narrows every read below to `string`.
 #[test]
 fn reads_inside_unmodelled_statements_keep_the_facts_from_before_them() {
     const SOURCE: &str = r#"
@@ -2087,7 +2089,7 @@ fn reads_inside_unmodelled_statements_keep_the_facts_from_before_them() {
     }
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) narrows `tryAfterReturn`, `afterTry`, and
+// TypeScript 7.0.2 (`tsc --strict`) narrows `tryAfterReturn`, `afterTry`, and
 // `caseIf` to `string`, and gives `string | null` at `finally`. Biome does not
 // model the control flow inside a `try` or `switch` statement yet, so an `if`
 // or `return` inside one narrows nothing, and Biome deliberately keeps the
@@ -2121,8 +2123,8 @@ fn conditions_inside_unmodelled_statements_do_not_narrow_yet() {
     }
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) gives `string | null` after both loops:
-// the `break` leaves the first loop while `value` is a `string`, and the
+// TypeScript 7.0.2 (`tsc --strict`) gives `string | null` after both loops,
+// because the `break` leaves the first loop while `value` is a `string`, and the
 // `continue` reaches the test of the second loop while `value` is `null`. It
 // gives `string` at the test of the third loop, which only the `continue` in
 // its `switch` reaches.
@@ -2180,10 +2182,10 @@ fn jumps_out_of_unmodelled_statements_carry_their_entry_facts() {
     }
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) narrows the decorator, the `extends`
+// TypeScript 7.0.2 (`tsc --strict`) narrows the decorator, the `extends`
 // expression, the enum initializer, the static block, and the read after the
-// class to `string`, and gives `string | null` in the method: a method of a
-// class declaration does not see the narrowing around the class. Biome
+// class to `string`, and gives `string | null` in the method, because a method
+// of a class declaration does not see the narrowing around the class. Biome
 // analyzes the static block on its own, so it keeps the declared type there.
 #[test]
 fn class_and_enum_declarations_keep_narrowing_outside_their_members() {
@@ -2223,9 +2225,9 @@ fn class_and_enum_declarations_keep_narrowing_outside_their_members() {
     }
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) narrows `local` to `string` and keeps
-// `outer` as `string | null`: a namespace body does not see the narrowing of
-// the module around it.
+// TypeScript 7.0.2 (`tsc --strict`) narrows `local` to `string` and keeps
+// `outer` as `string | null`, because a namespace body does not see the
+// narrowing of the module around it.
 #[test]
 fn namespaces_narrow_their_own_variables() {
     use InferredTypeData::{Null, String};

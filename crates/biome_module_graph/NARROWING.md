@@ -1,7 +1,7 @@
 # Narrowing reference
 
 This file describes what flow-sensitive narrowing in Biome's type inference
-does, compared with TypeScript 6.0.3 run with `--strict`. It is the live
+does, compared with TypeScript 7.0.2 run with `--strict`. It is the live
 checklist of TypeScript's narrowing behaviour: a pull request that changes
 narrowing updates the rows it affects in the same pull request, including the
 deliberate choices below.
@@ -77,6 +77,7 @@ revisiting the row.
 | A getter narrows like a field | `class G { get v(): string \| null }`<br>`g: G; if (g.v) g.v` | `string` | `string`, the same as TypeScript | A getter can return a different value each time it runs, so `g.v` can be `null` at the second read. Treating getters as fields keeps narrowing for classes that expose their state through getters, while getters that change between two reads close together are rare. |
 | A private name and a string key with the same text | `class K { #x: string \| null = null; "#x": string \| null = null; m() { if (this.#x) this["#x"] } }` | `string`: TypeScript treats `this.#x` and `this["#x"]` as the same reference | `string \| null`: `this.#x` and `this["#x"]` are different paths, so neither narrows the other | A private name is not a property, so `this["#x"]` reads the property named `"#x"`, another value, which can be `null` after the test of `this.#x`. Keeping them apart is sound and loses nothing in code that has no property whose name starts with `#`. |
 | A write to a property between a `const` that holds it and the test of the `const` | `type Circle = { kind: "c"; r: number };`<br>`type Square = { kind: "s"; w: number };`<br>`s: Circle \| Square;`<br>`const k = s.kind; s.kind = "s"; if (k === "c") s`<br>`const ok = s.kind === "c"; s.kind = "s"; if (ok) s` | `Circle` | `Circle \| Square`: a test of a `const` that holds a property, and an aliased condition that tests a property, narrow the object only when the code of the execution root never writes the property, as a property path narrows only when the root never writes it. A write after the test counts too. A test of the property itself, as in `if (s.kind === "c")`, still narrows `s` after the write. Calls and callbacks that write the property don't count, as for property narrowing. | `k` holds the value of `s.kind` from before the write, so `s.kind` is `"s"` at the read and `s` matches neither member. TypeScript checks a write to a discriminant against the narrowed object, so code rarely writes a discriminant in a function that also tests it, and the sound result loses little. |
+| A property path narrows through an aliased condition only when every member declares it readonly | `o: { readonly v: string \| null } \| { v: string \| null; w: 1 };`<br>`const ok = o.v !== null; clear(o); if (ok) o.v` | `string` | `string \| null`: at every step of the path, every member of the declared type of the object other than `null` and `undefined` must declare the property readonly | TypeScript takes a property of a union as readonly when one member declares it readonly. A function that receives `o` with the same type, such as `clear(x: typeof o) { if ("w" in x) x.v = null; }`, can narrow it to the other member and assign the property, which TypeScript accepts, so `o.v` is `null` at the read. When every member declares the property readonly, code can assign it only through a value typed otherwise, and unions that declare a property readonly in some members only are rare. |
 | A rest element in a destructuring `const` holds no property | `r: { ok: true; v: number } \| { ok: false; e: string };`<br>`const { ...ok } = r; if (ok) r` | `{ ok: true; v: number }`: TypeScript takes `ok` as the property `r.ok` | The declared type of `r` | `ok` holds a new object with the other properties of `r`, which is always truthy, so `r` can have `ok: false` at the read. |
 | `in` treats object types as closed | `function f(x: { a: 1 } \| { b: 2 }) { if ("a" in x) x.a }`<br>`const v = { a: "s", b: 2 as const }; f(v)` | `1` | `1`, the same as TypeScript: `"a" in x` keeps `{ a: 1 }` and removes `{ b: 2 }` | `{ b: 2 }` also describes objects with other properties, so `f(v)` passes an object whose property `a` is `"s"`, and `x.a` is `"s"` at the read. Keeping `{ b: 2 }` in the true branch, as `{ b: 2 } & Record<"a", unknown>`, would make `in` useless for telling the members of a union apart, while code rarely passes an object whose type leaves out a property that the code tests with `in`. |
 | The true branch of `instanceof` removes members that are not derived from the class | `class A { a = 1 }; class B extends A { b = 2 }`<br>`x: B \| { c: number }; if (x instanceof A) x`<br>`const v: { c: number } = Object.assign(new A(), { c: 1 })` | `B` | `B`, the same as TypeScript: the true branch keeps the members derived from the class and removes object type literals, functions, and other types that are not | `{ c: number }` also describes an instance of `A` that has a property `c`, such as `v`, so `x` can be an instance of `A` that is not a `B` at the read. Keeping such members would make `instanceof` useless for telling the members of a union apart, while code rarely holds an instance of a class in a variable typed by an unrelated object type. |
@@ -146,14 +147,54 @@ These limits apply to every *Supported* and *Partial* row below:
   `let`, if they are never written and not exported. A `let` statement at the
   top level of a file does not count, because other scripts can write a
   top-level `let` of a script, and Biome cannot tell a script from a module.
-  A property path, or `this`, never narrows through an aliased condition,
-  but a test of a property in one still narrows the variable that holds the
-  property, as in `const ok = s.kind === "c"; if (ok) s`, unless the
-  execution root writes the property, as the deliberate choices above
-  describe. As in TypeScript,
+  A property path, such as `o.v`, `o.a.v`, or `this.v`, narrows through an
+  aliased condition only when it starts at such a variable or at `this`,
+  and every property along it is readonly: at every step, every member of
+  the declared type of the object, other than `null` and `undefined`,
+  declares the property itself as readonly, with `readonly`, `Readonly<T>`,
+  or `as const`. TypeScript needs this in one member only, as the
+  deliberate choices above describe. A path on `this`
+  narrows only through an aliased condition that the same function
+  declares. A test of a property in an aliased condition still narrows the
+  variable that holds the property, as in
+  `const ok = s.kind === "c"; if (ok) s`, whether the property is readonly
+  or not, unless the execution root writes the property, as the deliberate
+  choices above describe. As in TypeScript,
   aliased conditions inline into one another at most five
   levels deep, so in `const c2 = c1; ...; const c6 = c5; if (c6)`, only the
   truthiness of `c1` is tested.
+- A property path whose properties are readonly in TypeScript keeps its
+  declared type through an aliased condition in these cases:
+  - A property along it is a getter, because Biome doesn't collect setters,
+    so a getter may have one; a `static readonly` field; an element of an
+    array under `as const`, which Biome types as a tuple whose elements
+    aren't readonly; or a property that the type of the object inherits
+    through `extends`. Another declaration of an interface or a class in the
+    same module, or a module augmentation, can declare an inherited property
+    on the type itself without `readonly`, which Biome doesn't see, as the
+    limits below describe for other tests.
+  - An object along it is a generic, or a primitive, as for `s.length`.
+  - The declared type of an object along it has a member that doesn't
+    declare the property readonly, even where narrowing has removed that
+    member at the read, as `if (o.kind === "a")` does in
+    `o: { kind: "a"; readonly v: string | null } | { kind: "b"; v: string | null }`.
+    Biome decides from the declared type, while TypeScript uses the type at
+    the read.
+  - The execution root tests an object along the path, anywhere, with
+    `instanceof`, a type-guard function, or `typeof` with a kind other than
+    `"object"` and `"undefined"`. Such a test can replace a member of the
+    object's type with a type whose property TypeScript doesn't take as
+    readonly, as `o instanceof Derived` does for `class Derived extends Base`
+    when `Derived` redeclares a readonly property of `Base` without
+    `readonly`.
+  - The path starts at `this` in an arrow function and the aliased
+    condition is declared in the enclosing method.
+
+  The elements of a `readonly` tuple count as readonly, but Biome gives a
+  read such as `t[0]` in `t: readonly [string | null]` the type Unknown
+  even without a condition, so it doesn't narrow yet. A property of an
+  intersection is readonly only when every operand that declares it
+  declares it readonly, as in TypeScript.
 - A runtime test of a property, such as `s.kind === "c"`, `s["kind"]`, or
   `t[0] === "a"` on a tuple, also narrows the object that holds the property,
   as TypeScript narrows a discriminated union. Only that object narrows:
@@ -544,7 +585,7 @@ whose result is not tested, do not narrow.
 
 | Behaviour | Example | TypeScript | Status |
 | --- | --- | --- | --- |
-| A `const` holding a runtime test, up to five levels deep | `x: string \| number; const isS = typeof x === "string"; if (isS) x` | `string` | Partial: the `const` must have an initializer and no type annotation, must declare a name rather than a destructuring pattern, and must not be exported, and the condition narrows only the variables that the limits above allow. TypeScript also narrows a `readonly` property, as in `o: { readonly v: string \| null }; const ok = o.v !== null; if (ok) o.v`, a variable declared by a `let` statement at the top level of a module, and a `const` exported only by an `export { ... }` list, which it also accepts as the aliased condition. A comparison such as `if (isS === true)` does not narrow `x` yet, as the row on equality with the result of a runtime test describes. |
+| A `const` holding a runtime test, up to five levels deep | `x: string \| number; const isS = typeof x === "string"; if (isS) x` | `string` | Partial: the `const` must have an initializer and no type annotation, must declare a name rather than a destructuring pattern, and must not be exported, and the condition narrows only the variables and the readonly property paths that the limits above allow, as `o.v` in `o: { readonly v: string \| null }; const ok = o.v !== null; if (ok) o.v`. TypeScript also narrows a variable declared by a `let` statement at the top level of a module, a `const` exported only by an `export { ... }` list, which it also accepts as the aliased condition, a property path that it takes as readonly in the cases that the limits above list, and a property that is readonly in one member of a union, as the deliberate choices above describe. A comparison such as `if (isS === true)` does not narrow `x` yet, as the row on equality with the result of a runtime test describes. |
 | A `const` holding `&&` or `\|\|` of runtime tests | `a: string \| null; b: string \| null;`<br>`const ok = a !== null && b !== null; if (ok) a` | `string` | Supported |
 
 ### Closures
