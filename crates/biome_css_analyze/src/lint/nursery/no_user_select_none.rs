@@ -3,8 +3,8 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_css_syntax::{
-    AnyCssGenericPropertyValueOrExpression, CssDeclaration, CssGenericProperty, CssSyntaxKind,
-    decode_css_identifier,
+    AnyCssGenericComponentValue, AnyCssGenericPropertyValueOrExpression, AnyScssExpressionItem,
+    CssDeclaration, CssGenericProperty, CssSyntaxKind, decode_css_identifier, single_expression_item,
 };
 use biome_rowan::{AstNode, AstNodeList, TextRange};
 use biome_rule_options::no_user_select_none::NoUserSelectNoneOptions;
@@ -13,6 +13,8 @@ declare_lint_rule! {
     /// Disallow `user-select: none` and its vendor-prefixed forms.
     ///
     /// Disabling text selection can prevent users from selecting and copying text, making content harder to use. Allow selection unless an element needs to prevent it.
+    ///
+    /// In SCSS, the rule checks the literal `none` keyword without evaluating variables or functions.
     ///
     /// ## Examples
     ///
@@ -90,17 +92,24 @@ impl Rule for NoUserSelectNone {
             return None;
         }
 
-        let value = node.value().ok()?;
-        let AnyCssGenericPropertyValueOrExpression::CssGenericComponentValueList(value) = value
-        else {
-            return None;
+        let value = match node.value().ok()? {
+            AnyCssGenericPropertyValueOrExpression::CssGenericComponentValueList(values)
+                if values.len() == 1 =>
+            {
+                let AnyCssGenericComponentValue::AnyCssValue(value) = values.first()? else {
+                    return None;
+                };
+                value
+            }
+            AnyCssGenericPropertyValueOrExpression::ScssExpression(expression) => {
+                let AnyScssExpressionItem::AnyCssValue(value) = single_expression_item(&expression)?
+                else {
+                    return None;
+                };
+                value
+            }
+            _ => return None,
         };
-        if value.len() != 1 {
-            return None;
-        }
-
-        let component = value.first()?;
-        let value = component.as_any_css_value()?;
         let identifier = value.identifier_text()?;
         decode_css_identifier(identifier.text())
             .eq_ignore_ascii_case("none")

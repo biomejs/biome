@@ -1,0 +1,17 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: valid.scss
+---
+# Input
+```css
+/* should not generate diagnostics */
+
+$selection: none;
+
+.button {
+	user-select: $selection;
+	user-select: var(--selection, none);
+	user-select: none auto;
+}
+
+```

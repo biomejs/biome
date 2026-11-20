@@ -1,0 +1,9 @@
+/* should not generate diagnostics */
+
+$selection: none;
+
+.button {
+	user-select: $selection;
+	user-select: var(--selection, none);
+	user-select: none auto;
+}
