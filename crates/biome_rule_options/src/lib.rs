@@ -595,6 +595,7 @@ pub mod use_destructuring;
 pub mod use_disposables;
 pub mod use_dom_node_text_content;
 pub mod use_dom_query_selector;
+pub mod use_early_continue;
 pub mod use_enum_initializers;
 pub mod use_error_cause;
 pub mod use_error_message;
