@@ -1085,7 +1085,7 @@ impl SyntaxFactory for HtmlSyntaxFactory {
             }
             HTML_ROOT => {
                 let mut elements = (&children).into_iter();
-                let mut slots: RawNodeSlots<6usize> = RawNodeSlots::default();
+                let mut slots: RawNodeSlots<4usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element
                     && element.kind() == T![UNICODE_BOM]
@@ -1102,21 +1102,7 @@ impl SyntaxFactory for HtmlSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element
-                    && HtmlProcessingInstruction::can_cast(element.kind())
-                {
-                    slots.mark_present();
-                    current_element = elements.next();
-                }
-                slots.next_slot();
-                if let Some(element) = &current_element
-                    && HtmlDirective::can_cast(element.kind())
-                {
-                    slots.mark_present();
-                    current_element = elements.next();
-                }
-                slots.next_slot();
-                if let Some(element) = &current_element
-                    && HtmlElementList::can_cast(element.kind())
+                    && HtmlRootItemList::can_cast(element.kind())
                 {
                     slots.mark_present();
                     current_element = elements.next();
@@ -3930,6 +3916,9 @@ impl SyntaxFactory for HtmlSyntaxFactory {
             }
             HTML_ELEMENT_LIST => {
                 Self::make_node_list_syntax(kind, children, AnyHtmlElement::can_cast)
+            }
+            HTML_ROOT_ITEM_LIST => {
+                Self::make_node_list_syntax(kind, children, AnyHtmlRootItem::can_cast)
             }
             SVELTE_AWAIT_CLAUSES_LIST => {
                 Self::make_node_list_syntax(kind, children, AnySvelteAwaitClauses::can_cast)

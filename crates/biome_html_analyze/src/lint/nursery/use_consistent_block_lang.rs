@@ -151,7 +151,7 @@ impl Rule for UseConsistentBlockLang {
         let mut found = vec![false; blocks.len()];
         let mut signals = Vec::new();
 
-        for element in ctx.query().html() {
+        for element in ctx.query().elements() {
             let Some(element) = element.as_any_html_tag_element() else {
                 continue;
             };
