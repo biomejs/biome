@@ -264,6 +264,7 @@ define_categories! {
     "lint/nursery/noExcessiveSelectorClasses": "https://biomejs.dev/linter/rules/no-excessive-selector-classes",
     "lint/nursery/noExcessiveSelectorComplexity": "https://biomejs.dev/linter/rules/no-excessive-selector-complexity",
     "lint/nursery/noExcessiveStatementsPerFunction": "https://biomejs.dev/linter/rules/no-excessive-statements-per-function",
+    "lint/nursery/noExpectToHaveBeenCalledOnce": "https://biomejs.dev/linter/rules/no-expect-to-have-been-called-once",
     "lint/nursery/noExtendNative": "https://biomejs.dev/linter/rules/no-extend-native",
     "lint/nursery/noFloatingPromises": "https://biomejs.dev/linter/rules/no-floating-promises",
     "lint/nursery/noImplicitCoercion": "https://biomejs.dev/linter/rules/no-implicit-coercion",

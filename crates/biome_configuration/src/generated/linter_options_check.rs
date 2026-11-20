@@ -629,6 +629,7 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     ));
     result.push(("nursery", "noExcessiveSelectorComplexity", TypeId::of::<biome_rule_options::no_excessive_selector_complexity::NoExcessiveSelectorComplexityOptions>()));
     result.push(("nursery", "noExcessiveStatementsPerFunction", TypeId::of::<biome_rule_options::no_excessive_statements_per_function::NoExcessiveStatementsPerFunctionOptions>()));
+    result.push(("nursery", "noExpectToHaveBeenCalledOnce", TypeId::of::<biome_rule_options::no_expect_to_have_been_called_once::NoExpectToHaveBeenCalledOnceOptions>()));
     result.push((
         "suspicious",
         "noExplicitAny",
