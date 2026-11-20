@@ -2959,6 +2959,11 @@ export interface Nursery {
 	 */
 	noArgumentsCallerOrCallee?: NoArgumentsCallerOrCalleeConfiguration;
 	/**
+	 * Disallow using the delete operator on array elements.
+	 * See https://biomejs.dev/linter/rules/no-array-delete
+	 */
+	noArrayDelete?: NoArrayDeleteConfiguration;
+	/**
 	 * Disallow the forEach() method in favor of for...of loops.
 	 * See https://biomejs.dev/linter/rules/no-array-for-each
 	 */
@@ -6815,6 +6820,9 @@ export type NoAccidentalBitwiseOperatorsConfiguration =
 export type NoArgumentsCallerOrCalleeConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoArgumentsCallerOrCalleeOptions;
+export type NoArrayDeleteConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoArrayDeleteOptions;
 export type NoArrayForEachConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoArrayForEachOptions;
@@ -9921,6 +9929,14 @@ export interface RuleWithNoAccidentalBitwiseOperatorsOptions {
 export interface RuleWithNoArgumentsCallerOrCalleeOptions {
 	level: RulePlainConfiguration;
 	options?: NoArgumentsCallerOrCalleeOptions;
+}
+export interface RuleWithNoArrayDeleteOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: NoArrayDeleteOptions;
 }
 export interface RuleWithNoArrayForEachOptions {
 	level: RulePlainConfiguration;
@@ -13703,6 +13719,7 @@ export type UseVueValidVTextOptions = {};
 export type UseYieldOptions = {};
 export type NoAccidentalBitwiseOperatorsOptions = {};
 export type NoArgumentsCallerOrCalleeOptions = {};
+export type NoArrayDeleteOptions = {};
 export type NoArrayForEachOptions = {};
 export type NoArrayMethodsOnArgumentsOptions = {};
 export type NoArraySortForMinMaxOptions = {};
@@ -16226,6 +16243,7 @@ export type Category =
 	| "lint/correctness/useYield"
 	| "lint/nursery/noAccidentalBitwiseOperators"
 	| "lint/nursery/noArgumentsCallerOrCallee"
+	| "lint/nursery/noArrayDelete"
 	| "lint/nursery/noArrayForEach"
 	| "lint/nursery/noArrayMethodsOnArguments"
 	| "lint/nursery/noArraySortForMinMax"
