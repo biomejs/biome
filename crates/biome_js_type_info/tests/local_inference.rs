@@ -6,6 +6,7 @@ use biome_js_syntax::{
 };
 use biome_js_type_info::{
     Object, ObjectKind, RawTypeCollector, ReturnType, TypeData, TypeMember, TypeReference,
+    TypeofExpression,
 };
 use biome_rowan::{AstNode, Text};
 
@@ -404,6 +405,70 @@ fn infer_return_type_with_a_reachable_end() {
         &resolver,
         "infer_return_type_with_a_reachable_end",
     );
+}
+
+/// Returns whether the return type that collection gives the first function
+/// declaration of `code` holds the marker of the end of its body.
+fn marks_the_end(code: &str) -> bool {
+    let root = parse_ts(code);
+    let decl = get_function_declaration(&root);
+    let mut collector = TestTypeCollector::default();
+    TypeData::from_js_function_declaration(&mut collector, ScopeId::GLOBAL, &decl);
+    collector.types.as_slice().iter().any(|ty| {
+        matches!(ty, TypeData::TypeofExpression(expression)
+            if matches!(expression.as_ref(), TypeofExpression::ImplicitReturn(_)))
+    })
+}
+
+#[test]
+fn ends_that_syntax_closes_get_no_marker() {
+    for code in [
+        "function f() { switch (x) { case 1: return 1; default: return 2; } }",
+        "function f() { switch (x) { default: return 0; case 1: return 1; } }",
+        // The first clause falls through to `default`.
+        "function f() { switch (x) { case 1: if (c) return 1; default: return 2; } }",
+        // Each `break` targets a nested loop or `switch`.
+        "function f() { switch (x) { default: for (const v of a) { if (v) break; } return 1; } }",
+        "function f() { switch (x) { default: switch (y) { case 1: break; default: return 1; } return 2; } }",
+        "function f() { switch (x) { default: while (c) { if (d) continue; break; } return 1; } }",
+        // A jump in a nested function stays in that function.
+        "function f() { switch (x) { default: g(() => { for (;;) break; }); return 1; } }",
+        "function f() { try { return 1; } catch { return 2; } }",
+        "function f() { try { if (c) return 1; return 2; } catch (e) { throw e; } finally { log(); } }",
+        "function f() { if (c) return 1; return 2; function g() {} }",
+        "function f() { if (c) return 1; throw 0; type T = 1; interface I {} declare function h(): void; }",
+        "function f() { switch (x) { case 1: return 1; default: return 2; function g() {} } }",
+    ] {
+        assert!(!marks_the_end(code), "{code}");
+    }
+}
+
+#[test]
+fn ends_that_syntax_leaves_open_keep_the_marker() {
+    for code in [
+        // Without `default`, only the module's flow can tell whether the
+        // cases are exhaustive.
+        "function f() { switch (x) { case 1: return 1; case 2: return 2; } }",
+        // The last clause falls out of the end of the statement.
+        "function f() { switch (x) { case 1: return 1; default: return 2; case 2: } }",
+        "function f() { switch (x) { case 1: return 1; default: return 2; case 2: log(); } }",
+        // A `break` leaves the statement.
+        "function f() { switch (x) { case 1: break; default: return 2; } }",
+        "function f() { switch (x) { default: if (c) break; return 1; } }",
+        "function f() { switch (x) { default: try { if (c) break; } finally { log(); } return 1; } }",
+        // A jump with a label always counts as leaving.
+        "function f() { switch (x) { default: l: { if (c) break l; } return 1; } }",
+        "function f() { l: switch (x) { case 1: return 1; default: return 2; } }",
+        // A `try` without `catch` is left to the module's flow.
+        "function f() { try { return 1; } finally { log(); } }",
+        // The `catch` clause or the `try` block can complete.
+        "function f() { try { return 1; } catch { log(); } }",
+        "function f() { try { log(); } catch { return 1; } }",
+        // A declaration that runs no code follows a statement that completes.
+        "function f() { if (c) return 1; log(); function g() {} }",
+    ] {
+        assert!(marks_the_end(code), "{code}");
+    }
 }
 
 #[test]

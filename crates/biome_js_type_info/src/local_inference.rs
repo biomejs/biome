@@ -13,20 +13,22 @@ use biome_js_syntax::{
     AnyJsDeclarationClause, AnyJsExportDefaultDeclaration, AnyJsExpression, AnyJsFormalParameter,
     AnyJsFunction, AnyJsFunctionBody, AnyJsLiteralExpression, AnyJsName,
     AnyJsObjectBindingPatternMember, AnyJsObjectMember, AnyJsObjectMemberName, AnyJsParameter,
-    AnyJsStatement, AnyJsTemplateElement, AnyTsModuleName, AnyTsName, AnyTsReturnType,
-    AnyTsTupleTypeElement, AnyTsType, AnyTsTypeMember, AnyTsTypePredicateParameterName,
-    ClassMemberName, JsArrayBindingPattern, JsArrayExpression, JsArrowFunctionExpression,
-    JsAssignmentExpression, JsBinaryExpression, JsBinaryOperator, JsCallArgumentList,
-    JsCallArguments, JsCallExpression, JsClassDeclaration, JsClassExportDefaultDeclaration,
-    JsClassExpression, JsClassMemberList, JsConstructorParameters, JsExport, JsExtendsClause,
-    JsForInStatement, JsForOfStatement, JsForVariableDeclaration, JsFormalParameter,
-    JsFunctionBody, JsFunctionDeclaration, JsFunctionExpression, JsGetterObjectMember,
-    JsInitializerClause, JsLanguage, JsLogicalExpression, JsLogicalOperator, JsMethodObjectMember,
-    JsModuleItemList, JsNewExpression, JsObjectBindingPattern, JsObjectExpression, JsParameterList,
-    JsParameters, JsParenthesizedExpression, JsPropertyClassMember, JsPropertyObjectMember,
-    JsReferenceIdentifier, JsRestParameter, JsReturnStatement, JsSetterObjectMember, JsSyntaxKind,
-    JsSyntaxNode, JsSyntaxToken, JsTemplateExpression, JsUnaryExpression, JsUnaryOperator,
-    JsVariableDeclaration, JsVariableDeclarator, TsConditionalType, TsDeclareFunctionDeclaration,
+    AnyJsStatement, AnyJsSwitchClause, AnyJsTemplateElement, AnyJsTryStatement, AnyTsModuleName,
+    AnyTsName, AnyTsReturnType, AnyTsTupleTypeElement, AnyTsType, AnyTsTypeMember,
+    AnyTsTypePredicateParameterName, ClassMemberName, JsArrayBindingPattern, JsArrayExpression,
+    JsArrowFunctionExpression, JsAssignmentExpression, JsBinaryExpression, JsBinaryOperator,
+    JsBreakStatement, JsCallArgumentList, JsCallArguments, JsCallExpression, JsClassDeclaration,
+    JsClassExportDefaultDeclaration, JsClassExpression, JsClassMemberList, JsConstructorParameters,
+    JsContinueStatement, JsDoWhileStatement, JsExport, JsExtendsClause, JsForInStatement,
+    JsForOfStatement, JsForStatement, JsForVariableDeclaration, JsFormalParameter, JsFunctionBody,
+    JsFunctionDeclaration, JsFunctionExpression, JsGetterObjectMember, JsInitializerClause,
+    JsLanguage, JsLogicalExpression, JsLogicalOperator, JsMethodObjectMember, JsModuleItemList,
+    JsNewExpression, JsObjectBindingPattern, JsObjectExpression, JsParameterList, JsParameters,
+    JsParenthesizedExpression, JsPropertyClassMember, JsPropertyObjectMember,
+    JsReferenceIdentifier, JsRestParameter, JsReturnStatement, JsSetterObjectMember,
+    JsStatementList, JsSwitchStatement, JsSyntaxKind, JsSyntaxNode, JsSyntaxToken,
+    JsTemplateExpression, JsUnaryExpression, JsUnaryOperator, JsVariableDeclaration,
+    JsVariableDeclarator, JsWhileStatement, TsConditionalType, TsDeclareFunctionDeclaration,
     TsDeclareStatement, TsExternalModuleDeclaration, TsInferType, TsInstantiationExpression,
     TsInterfaceDeclaration, TsMappedType, TsMethodSignatureTypeMember, TsModuleBlock,
     TsModuleDeclaration, TsPropertyParameterModifierList, TsReferenceType, TsReturnTypeAnnotation,
@@ -3839,9 +3841,10 @@ pub fn own_returns(body: &JsFunctionBody) -> impl Iterator<Item = JsReturnStatem
 /// [`own_returns`]). When none of them has a value, the type is `void`.
 /// Otherwise it is the union of the types of their values, including those
 /// in code that no path reaches, with `undefined` when a `return` has no
-/// value. When the last statement of the body may complete, the union also
-/// holds a [`TypeofImplicitReturnExpression`], which resolves to `undefined`
-/// when a path reaches the end of the body.
+/// value. When the body may complete, as far as its syntax shows (see
+/// [`ends_by_exit`]), the union also holds a
+/// [`TypeofImplicitReturnExpression`], which resolves to `undefined` when a
+/// path reaches the end of the body.
 fn type_from_function_body(
     collector: &mut dyn RawTypeCollector,
     scope_id: ScopeId,
@@ -3862,7 +3865,7 @@ fn type_from_function_body(
     if has_bare_return {
         return_types.push(GLOBAL_UNDEFINED_ID.into());
     }
-    let is_closed = body.statements().last().is_some_and(ends_by_exit);
+    let is_closed = last_running_statement(body.statements()).is_some_and(ends_by_exit);
     if !is_closed && let Some(function) = body.syntax().parent() {
         return_types.push(collector.reference_to_owned_data(TypeData::from(
             TypeofExpression::ImplicitReturn(TypeofImplicitReturnExpression {
@@ -3877,19 +3880,27 @@ fn type_from_function_body(
     }
 }
 
-/// Returns whether `statement` never completes, because each path through it
-/// ends at a `return` or a `throw`: the statement is one of them, a block
-/// whose last statement never completes, or an `if` with an `else` whose
-/// branches both never complete.
+/// Returns whether `statement` never completes, as far as its syntax shows.
+/// Each path through such a statement ends at a `return` or a `throw`.
 ///
-/// Other statements may complete, as far as their syntax shows.
+/// A statement never completes when it is:
+/// - a `return` or a `throw`;
+/// - a block, and its last statement never completes;
+/// - an `if` with an `else`, and both branches never complete;
+/// - a `switch` with a `default` clause, the last statement of its last
+///   clause never completes, and no jump leaves it (see [`may_leave_switch`]);
+/// - a `try` with a `catch` clause, and the last statements of the `try`
+///   block and of the `catch` block never complete.
+///
+/// The last statement of a list is the last one that runs code (see
+/// [`last_running_statement`]). Any other statement may complete.
 fn ends_by_exit(statement: AnyJsStatement) -> bool {
     let mut pending = vec![statement];
     while let Some(statement) = pending.pop() {
         match statement {
             AnyJsStatement::JsReturnStatement(_) | AnyJsStatement::JsThrowStatement(_) => {}
             AnyJsStatement::JsBlockStatement(block) => {
-                let Some(last) = block.statements().last() else {
+                let Some(last) = last_running_statement(block.statements()) else {
                     return false;
                 };
                 pending.push(last);
@@ -3906,10 +3917,123 @@ fn ends_by_exit(statement: AnyJsStatement) -> bool {
                 pending.push(consequent);
                 pending.push(alternate);
             }
+            // Each clause falls through to the next one, so a path that stays
+            // in the statement reaches the end of the last clause. Without
+            // `default`, the path on which no case matches skips every clause.
+            AnyJsStatement::JsSwitchStatement(statement) => {
+                let clauses = statement.cases();
+                let has_default = clauses
+                    .iter()
+                    .any(|clause| matches!(clause, AnyJsSwitchClause::JsDefaultClause(_)));
+                if !has_default || may_leave_switch(&statement) {
+                    return false;
+                }
+                let Some(last) = clauses
+                    .last()
+                    .and_then(|clause| last_running_statement(clause.consequent()))
+                else {
+                    return false;
+                };
+                pending.push(last);
+            }
+            // The statement completes only when its `try` block or its `catch`
+            // clause completes. A `finally` block can't make it complete.
+            AnyJsStatement::JsTryStatement(_) | AnyJsStatement::JsTryFinallyStatement(_) => {
+                let Some(statement) = AnyJsTryStatement::cast_ref(statement.syntax()) else {
+                    return false;
+                };
+                let (Ok(block), Some(Ok(handler))) = (
+                    statement.body(),
+                    statement.catch_clause().map(|clause| clause.body()),
+                ) else {
+                    return false;
+                };
+                pending.push(AnyJsStatement::JsBlockStatement(block));
+                pending.push(AnyJsStatement::JsBlockStatement(handler));
+            }
             _ => return false,
         }
     }
     true
+}
+
+/// Returns the last statement of `statements` that runs code. Function
+/// declarations and TypeScript declarations of types or ambient values run
+/// no code where they appear, so trailing ones are skipped.
+fn last_running_statement(statements: JsStatementList) -> Option<AnyJsStatement> {
+    statements.iter().rev().find(|statement| {
+        !matches!(
+            statement,
+            AnyJsStatement::JsFunctionDeclaration(_)
+                | AnyJsStatement::TsDeclareFunctionDeclaration(_)
+                | AnyJsStatement::TsTypeAliasDeclaration(_)
+                | AnyJsStatement::TsInterfaceDeclaration(_)
+                | AnyJsStatement::TsDeclareStatement(_)
+                | AnyJsStatement::TsExternalModuleDeclaration(_)
+                | AnyJsStatement::TsGlobalDeclaration(_)
+        )
+    })
+}
+
+/// The loop statements. A `break` without a label targets the innermost loop
+/// or `switch`, and a `continue` without a label the innermost loop.
+const LOOP_KINDS: SyntaxKindSet<JsLanguage> = JsWhileStatement::KIND_SET
+    .union(JsDoWhileStatement::KIND_SET)
+    .union(JsForStatement::KIND_SET)
+    .union(JsForInStatement::KIND_SET)
+    .union(JsForOfStatement::KIND_SET);
+
+/// The nodes that [`may_leave_switch`] visits.
+const JUMP_SCAN_KINDS: SyntaxKindSet<JsLanguage> = JsBreakStatement::KIND_SET
+    .union(JsContinueStatement::KIND_SET)
+    .union(LOOP_KINDS)
+    .union(JsSwitchStatement::KIND_SET)
+    .union(NESTED_FUNCTION_KINDS);
+
+/// Returns whether a `break` or a `continue` in the clauses of `statement`
+/// may jump out of it.
+///
+/// A `break` without a label targets `statement` unless a loop or a `switch`
+/// nested in it encloses the `break`. A `continue` without a label needs a
+/// nested loop. A jump with a label always counts as leaving, so the walk
+/// never resolves labels. Jumps in nested functions, methods, accessors, and
+/// classes stay in their own code, so they are skipped.
+fn may_leave_switch(statement: &JsSwitchStatement) -> bool {
+    let mut loops = 0usize;
+    let mut switches = 0usize;
+    let clauses = statement.cases();
+    let mut events = clauses.syntax().preorder_of_kinds(JUMP_SCAN_KINDS);
+    while let Some(event) = events.next() {
+        match event {
+            WalkEvent::Enter(node) => {
+                let kind = node.kind();
+                if NESTED_FUNCTION_KINDS.matches(kind) {
+                    events.skip_subtree();
+                } else if LOOP_KINDS.matches(kind) {
+                    loops += 1;
+                } else if JsSwitchStatement::can_cast(kind) {
+                    switches += 1;
+                } else if let Some(jump) = JsBreakStatement::cast_ref(&node)
+                    && (jump.label().is_some() || loops + switches == 0)
+                {
+                    return true;
+                } else if let Some(jump) = JsContinueStatement::cast_ref(&node)
+                    && (jump.label().is_some() || loops == 0)
+                {
+                    return true;
+                }
+            }
+            WalkEvent::Leave(node) => {
+                let kind = node.kind();
+                if LOOP_KINDS.matches(kind) {
+                    loops -= 1;
+                } else if JsSwitchStatement::can_cast(kind) {
+                    switches -= 1;
+                }
+            }
+        }
+    }
+    false
 }
 
 /// Checks for TypeScript's special `const` assertion target.

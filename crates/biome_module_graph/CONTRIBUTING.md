@@ -876,10 +876,10 @@ a query cycle makes the answer `Indeterminate`.
 A return type that Biome infers from a function's body asks the same query
 whether a path reaches the end of the body, where the function returns
 `undefined`. Collection marks that `undefined` with a
-`TypeofExpression::ImplicitReturn` when the body's last statement may
-complete, and resolution gives `undefined`, or `never` when no path reaches
-the end (`ResolutionCtx::resolve_implicit_return`), so the reachability of
-a function's end is decided once for every context. Deciding whether a
+`TypeofExpression::ImplicitReturn` when the body may complete, as far as
+its syntax shows, and resolution gives `undefined`, or `never` when no path
+reaches the end (`ResolutionCtx::resolve_implicit_return`), so the
+reachability of a function's end is decided once for every context. Deciding whether a
 statement call never returns, or whether a `switch` is exhaustive, can need
 the same return type, as for `box.fail()` with
 `declare const box: { fail: typeof f }` in the body of `f`; the query cycle

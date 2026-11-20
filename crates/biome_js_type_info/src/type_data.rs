@@ -1560,9 +1560,9 @@ pub struct TypeofCallArgumentExpression {
 /// when a path reaches the end of its body, or `never` when no path does.
 ///
 /// The collector adds it to the union of the values that a function's
-/// `return` statements give, when one of them has a value and the last
-/// statement of the body doesn't end it as a `return` or a `throw` does. Only
-/// the function's control flow tells whether a path reaches the end, as in
+/// `return` statements give, when one of them has a value and the body may
+/// complete, as far as its syntax shows. Only the function's control flow
+/// tells whether a path reaches the end, as in
 /// `function f() { if (c) return 1; fail(); }`, which returns `number` when
 /// `fail` never returns and `1 | undefined` otherwise.
 ///

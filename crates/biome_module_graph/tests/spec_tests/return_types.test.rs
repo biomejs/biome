@@ -402,3 +402,86 @@ fn return_types_ask_the_reachability_of_their_own_function_once() {
         0
     );
 }
+
+// Collection adds no marker of the end when the syntax of the body shows
+// that no path reaches it. A `switch` statement with `default` reaches its
+// end only through its last clause or a `break`, because each clause falls
+// through to the next one. A `try` statement with `catch` reaches its end
+// only when the `try` block or the `catch` clause completes. Declarations
+// that run no code don't count as the last statement. The other functions
+// keep the marker, and the module's flow decides their end.
+#[test]
+fn ends_that_syntax_decides_match_the_flow() {
+    assert_reads(
+        r#"
+        declare const c: boolean;
+        declare const x: number;
+        declare function log(): void;
+        function a1() { switch (x) { case 1: return 1; default: return 2; } }
+        function a2() { switch (x) { default: return 0; case 1: return 1; } }
+        function a3() { switch (x) { case 1: if (c) return 1; default: return 2; } }
+        function a4() { switch (x) { case 1: return 1; default: for (const v of [1]) { if (v) break; } return 2; } }
+        function a5() { switch (x) { default: switch (x) { case 1: break; default: return 1; } return 2; } }
+        function a6() { switch (x) { case 1: return 1; default: return 2; function g() {} } }
+        function n1() { switch (x) { case 1: break; default: return 2; } }
+        function n2() { switch (x) { default: if (c) break; return 1; } }
+        function n3() { switch (x) { case 1: return 1; default: return 2; case 2: } }
+        function n4() { switch (x) { case 1: return 1; default: return 2; case 2: log(); } }
+        function n5() { switch (x) { case 1: return 1; case 2: return 2; } }
+        function n6() { l: switch (x) { case 1: return 1; default: return 2; } }
+        function t1() { try { return 1; } catch { return 2; } }
+        function t2() { try { if (c) return 1; return 2; } catch (e) { return 3; } finally { log(); } }
+        function t3() { try { return 1; } catch { throw 0; } }
+        function m1() { try { return 1; } finally { log(); } }
+        function m2() { try { return 1; } catch { log(); } }
+        function m3() { try { log(); } catch { return 1; } }
+        function d1() { if (c) return 1; return 2; function g() {} }
+        function d2() { if (c) return 1; throw 0; type T = string; interface I {} function h() {} }
+        function d3() { if (c) return 1; log(); function g() {} }
+        /*a1*/a1();
+        /*a2*/a2();
+        /*a3*/a3();
+        /*a4*/a4();
+        /*a5*/a5();
+        /*a6*/a6();
+        /*n1*/n1();
+        /*n2*/n2();
+        /*n3*/n3();
+        /*n4*/n4();
+        /*n5*/n5();
+        /*n6*/n6();
+        /*t1*/t1();
+        /*t2*/t2();
+        /*t3*/t3();
+        /*m1*/m1();
+        /*m2*/m2();
+        /*m3*/m3();
+        /*d1*/d1();
+        /*d2*/d2();
+        /*d3*/d3();
+        "#,
+        &[
+            ("a1", "a1()", &["number: 1", "number: 2"]),
+            ("a2", "a2()", &["number: 0", "number: 1"]),
+            ("a3", "a3()", &["number: 1", "number: 2"]),
+            ("a4", "a4()", &["number: 1", "number: 2"]),
+            ("a5", "a5()", &["number: 1", "number: 2"]),
+            ("a6", "a6()", &["number: 1", "number: 2"]),
+            ("n1", "n1()", &["number: 2", "undefined"]),
+            ("n2", "n2()", &["number: 1", "undefined"]),
+            ("n3", "n3()", &["number: 1", "number: 2", "undefined"]),
+            ("n4", "n4()", &["number: 1", "number: 2", "undefined"]),
+            ("n5", "n5()", &["number: 1", "number: 2", "undefined"]),
+            ("n6", "n6()", &["number: 1", "number: 2"]),
+            ("t1", "t1()", &["number: 1", "number: 2"]),
+            ("t2", "t2()", &["number: 1", "number: 2", "number: 3"]),
+            ("t3", "t3()", &["number"]),
+            ("m1", "m1()", &["number"]),
+            ("m2", "m2()", &["number: 1", "undefined"]),
+            ("m3", "m3()", &["number: 1", "undefined"]),
+            ("d1", "d1()", &["number: 1", "number: 2"]),
+            ("d2", "d2()", &["number"]),
+            ("d3", "d3()", &["number: 1", "undefined"]),
+        ],
+    );
+}

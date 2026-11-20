@@ -112,11 +112,16 @@ statements of the function's own code (`own_returns`), not those of nested
 functions, methods, accessors, or classes, and is `void` when none of them
 has a value. A function also returns `undefined` when a path reaches the end
 of its body, which depends on its control flow: a call that never returns or
-an exhaustive `switch` can end every path. When the last statement of the
-body may complete, the collector adds a
+an exhaustive `switch` can end every path. When the body may complete, as
+far as its syntax shows, the collector adds a
 `TypeofExpression::ImplicitReturn` to the union of the returned values, and
 resolution in the module graph gives `undefined` or `never` from the
-reachability of the function's end. A conversion without the module's flow
+reachability of the function's end. The syntax shows that the body never
+completes when each path through its last statement ends at a `return` or a
+`throw`, through blocks, `if` statements with `else`, `switch` statements
+with `default`, and `try` statements with `catch`. Trailing declarations
+that run no code, such as function declarations, don't count as the last
+statement. A conversion without the module's flow
 gives `undefined`, which is never narrower than TypeScript's type.
 
 Interfaces of one name in one scope, and a class with the interfaces of its
