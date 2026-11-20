@@ -558,6 +558,8 @@ struct AssignabilityCheck<'db, 'a> {
     /// comparison. Such a generic is in a parameter, which is contravariant
     /// unless the parameter belongs to a method.
     parameter_position: InferencePosition,
+    /// Instance pairs whose members are being compared, outermost first.
+    structural_instances: Vec<(InternedTypeInstance<'db>, InternedTypeInstance<'db>)>,
     remaining_steps: usize,
 }
 
@@ -576,6 +578,7 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
                 .collect(),
             candidates: Vec::new(),
             parameter_position: InferencePosition::Contravariant,
+            structural_instances: Vec::new(),
             remaining_steps: MAX_RELATION_STEPS,
         }
     }
@@ -1408,10 +1411,7 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
                 .iter()
                 .any(|argument| !may_refer_to_free_generic(self.db, *argument, &[]))
         {
-            return self.is_structurally_assignable(
-                TypeData::InstanceOf(source),
-                TypeData::InstanceOf(target),
-            );
+            return self.are_instance_members_assignable(source, target);
         }
         let pairs = source
             .type_parameters(self.db)
@@ -1423,6 +1423,27 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
             Assignability::NotAssignable if !is_builtin => Assignability::Undetermined,
             result => result,
         }
+    }
+
+    /// Compares the members of two instances structurally.
+    ///
+    /// A recursive type such as `interface List<T> { next: List<T> }` compares
+    /// the same pair of instances again through its members. That nested
+    /// comparison is left undetermined, so the outcome depends on the
+    /// remaining members.
+    fn are_instance_members_assignable(
+        &mut self,
+        source: InternedTypeInstance<'db>,
+        target: InternedTypeInstance<'db>,
+    ) -> Assignability {
+        if self.structural_instances.contains(&(source, target)) {
+            return Assignability::Undetermined;
+        }
+        self.structural_instances.push((source, target));
+        let result = self
+            .is_structurally_assignable(TypeData::InstanceOf(source), TypeData::InstanceOf(target));
+        self.structural_instances.pop();
+        result
     }
 
     fn is_tuple_assignable(
@@ -1794,6 +1815,16 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
 
         let target_is_weak = target_members.is_weak();
 
+        // Overloads would have to be compared as sets of signatures, so
+        // overloaded members are only checked for presence.
+        let mut seen = FxHashSet::default();
+        let overloaded = target_members
+            .named
+            .iter()
+            .filter(|(name, ..)| !seen.insert(name.text()))
+            .map(|(name, ..)| name.clone())
+            .collect::<Vec<_>>();
+
         // Look for a missing member first, since that is conclusive without
         // comparing any member types.
         let mut found = Vec::with_capacity(target_members.named.len());
@@ -1804,6 +1835,9 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
         };
         for (name, target_ty, target_is_optional) in target_members.named {
             match self.find_apparent_member(source, &name) {
+                MemberLookup::Found { .. } if overloaded.contains(&name) => {
+                    result = Assignability::Undetermined;
+                }
                 MemberLookup::Found {
                     ty: source_ty,
                     is_optional: source_is_optional,
@@ -2107,10 +2141,14 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
         else {
             return MemberLookup::Unknown;
         };
-        let member = members
+        let mut matching = members
             .iter()
-            .find(|member| !member.kind.is_static() && member.kind.has_name(name));
-        if let Some(member) = member {
+            .filter(|member| !member.kind.is_static() && member.kind.has_name(name));
+        if let Some(member) = matching.next() {
+            // Overloads would have to be compared as a set of signatures.
+            if matching.next().is_some() {
+                return MemberLookup::Unknown;
+            }
             return match substitute_all(self.db, member_type(self.db, member), substitutions) {
                 Some(ty) => MemberLookup::Found {
                     ty,
