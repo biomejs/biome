@@ -914,12 +914,14 @@ fn value_callees(
     }
 }
 
-/// Returns the body of the local function that `callee`, the callee of a
-/// call, names, when Biome infers the call's return type from that body: a
-/// function declaration, or a function or arrow expression that initializes
-/// a variable without a type annotation, that has no return type annotation
-/// and isn't a generator. Returns `None` for any other callee, as a method,
-/// an import, or a function expression called where it is defined.
+/// Returns the body of the local function that `callee` names, when Biome
+/// infers a call's return type from that body. The name comes from a
+/// function declaration, or from a variable initialized with a function or
+/// arrow expression and declared without a type annotation. The function
+/// has no return type annotation and isn't a generator, because calling a
+/// generator gives a generator object instead of its returned values.
+/// Returns `None` for any other callee, such as a method, an import, or a
+/// function expression called where it is defined.
 fn inferred_local_body(
     callee: &AnyJsExpression,
     model: &SemanticModel,
