@@ -550,6 +550,7 @@ define_categories! {
     "lint/nursery/useTailwindStaticClassStrings": "https://biomejs.dev/linter/rules/use-tailwind-static-class-strings",
     "lint/nursery/useTailwindVariablesShorthand": "https://biomejs.dev/linter/rules/use-tailwind-variables-shorthand",
     "lint/nursery/useTanstackQueryInfiniteQueryPropertyOrder": "https://biomejs.dev/linter/rules/use-tanstack-query-infinite-query-property-order",
+    "lint/nursery/useTanstackQueryQueryOptions": "https://biomejs.dev/linter/rules/use-tanstack-query-query-options",
     "lint/nursery/useTanstackQueryStableQueryClient": "https://biomejs.dev/linter/rules/use-tanstack-query-stable-query-client",
     "lint/nursery/useTopLevelDescribe": "https://biomejs.dev/linter/rules/use-top-level-describe",
     "lint/nursery/useTopLevelHeading": "https://biomejs.dev/linter/rules/use-top-level-heading",
