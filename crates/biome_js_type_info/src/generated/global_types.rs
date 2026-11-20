@@ -2309,6 +2309,7 @@ fn global_symbol() -> crate::TypeData {
                 ty: crate::globals::GLOBAL_SYMBOL_ASYNC_DISPOSE_ID.into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_property_key() -> crate::TypeData {
@@ -2351,6 +2352,7 @@ fn global_property_descriptor() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(1)).into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_property_descriptor_map() -> crate::TypeData {
@@ -2364,6 +2366,7 @@ fn global_property_descriptor_map() -> crate::TypeData {
             ),
             ty: crate::RawTypeId::Local(crate::TypeId::new(1)).into(),
         }]),
+        scope_id: None,
     }))
 }
 fn global_object() -> crate::TypeData {
@@ -2508,6 +2511,7 @@ fn global_object() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(62)).into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_object_constructor() -> crate::TypeData {
@@ -2613,6 +2617,7 @@ fn global_object_constructor() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(56)).into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_function() -> crate::TypeData {
@@ -2679,6 +2684,7 @@ fn global_function() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(5)).into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_function_constructor() -> crate::TypeData {
@@ -2702,6 +2708,7 @@ fn global_function_constructor() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(1)).into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_this_parameter_type() -> crate::TypeData {
@@ -2735,6 +2742,7 @@ fn global_callable_function() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(15)).into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_newable_function() -> crate::TypeData {
@@ -2756,6 +2764,7 @@ fn global_newable_function() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(13)).into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_i_arguments() -> crate::TypeData {
@@ -2785,6 +2794,7 @@ fn global_i_arguments() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(2)).into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_string() -> crate::TypeData {
@@ -3001,6 +3011,7 @@ fn global_string() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(85)).into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_string_constructor() -> crate::TypeData {
@@ -3036,6 +3047,7 @@ fn global_string_constructor() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(12)).into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_boolean() -> crate::TypeData {
@@ -3064,6 +3076,7 @@ fn global_boolean() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(1)).into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_boolean_constructor() -> crate::TypeData {
@@ -3087,6 +3100,7 @@ fn global_boolean_constructor() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_number() -> crate::TypeData {
@@ -3209,6 +3223,7 @@ fn global_number() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(17)).into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_number_constructor() -> crate::TypeData {
@@ -3302,6 +3317,7 @@ fn global_number_constructor() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(8)).into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_template_strings_array() -> crate::TypeData {
@@ -3313,6 +3329,7 @@ fn global_template_strings_array() -> crate::TypeData {
             kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static("raw")),
             ty: crate::RawTypeId::Local(crate::TypeId::new(1)).into(),
         }]),
+        scope_id: None,
     }))
 }
 fn global_import_meta() -> crate::TypeData {
@@ -3321,6 +3338,7 @@ fn global_import_meta() -> crate::TypeData {
         type_parameters: Box::default(),
         extends: Box::default(),
         members: Box::new([]),
+        scope_id: None,
     }))
 }
 fn global_import_call_options() -> crate::TypeData {
@@ -3338,6 +3356,7 @@ fn global_import_call_options() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(1)).into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_import_assertions() -> crate::TypeData {
@@ -3351,6 +3370,7 @@ fn global_import_assertions() -> crate::TypeData {
             ),
             ty: crate::globals::GLOBAL_STRING_KEYWORD_ID.into(),
         }]),
+        scope_id: None,
     }))
 }
 fn global_import_attributes() -> crate::TypeData {
@@ -3364,6 +3384,7 @@ fn global_import_attributes() -> crate::TypeData {
             ),
             ty: crate::globals::GLOBAL_STRING_KEYWORD_ID.into(),
         }]),
+        scope_id: None,
     }))
 }
 fn global_math() -> crate::TypeData {
@@ -3553,6 +3574,7 @@ fn global_math() -> crate::TypeData {
                 ty: crate::globals::GLOBAL_STRING_KEYWORD_ID.into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_math_value() -> crate::TypeData {
@@ -3796,6 +3818,7 @@ fn global_date() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(67)).into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_date_constructor() -> crate::TypeData {
@@ -3843,6 +3866,7 @@ fn global_date_constructor() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(10)).into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_reg_exp_match_array() -> crate::TypeData {
@@ -3864,6 +3888,7 @@ fn global_reg_exp_match_array() -> crate::TypeData {
                 ty: crate::globals::GLOBAL_STRING_KEYWORD_ID.into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_reg_exp_exec_array() -> crate::TypeData {
@@ -3885,6 +3910,7 @@ fn global_reg_exp_exec_array() -> crate::TypeData {
                 ty: crate::globals::GLOBAL_STRING_KEYWORD_ID.into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_reg_exp() -> crate::TypeData {
@@ -4089,6 +4115,7 @@ fn global_reg_exp() -> crate::TypeData {
                 ty: crate::globals::GLOBAL_REG_EXP_ID.into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_reg_exp_constructor() -> crate::TypeData {
@@ -4210,6 +4237,7 @@ fn global_reg_exp_constructor() -> crate::TypeData {
                 ty: crate::globals::GLOBAL_REG_EXP_ID.into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_error() -> crate::TypeData {
@@ -4246,6 +4274,7 @@ fn global_error() -> crate::TypeData {
                 ty: crate::globals::GLOBAL_INSTANCEOF_ERROR_ID.into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_error_constructor() -> crate::TypeData {
@@ -4269,6 +4298,7 @@ fn global_error_constructor() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_eval_error() -> crate::TypeData {
@@ -4293,6 +4323,7 @@ fn global_eval_error() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_eval_error_constructor() -> crate::TypeData {
@@ -4316,6 +4347,7 @@ fn global_eval_error_constructor() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_range_error() -> crate::TypeData {
@@ -4340,6 +4372,7 @@ fn global_range_error() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_range_error_constructor() -> crate::TypeData {
@@ -4363,6 +4396,7 @@ fn global_range_error_constructor() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_reference_error() -> crate::TypeData {
@@ -4387,6 +4421,7 @@ fn global_reference_error() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_reference_error_constructor() -> crate::TypeData {
@@ -4410,6 +4445,7 @@ fn global_reference_error_constructor() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_syntax_error() -> crate::TypeData {
@@ -4434,6 +4470,7 @@ fn global_syntax_error() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_syntax_error_constructor() -> crate::TypeData {
@@ -4457,6 +4494,7 @@ fn global_syntax_error_constructor() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_type_error() -> crate::TypeData {
@@ -4481,6 +4519,7 @@ fn global_type_error() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_type_error_constructor() -> crate::TypeData {
@@ -4504,6 +4543,7 @@ fn global_type_error_constructor() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_uri_error() -> crate::TypeData {
@@ -4528,6 +4568,7 @@ fn global_uri_error() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_uri_error_constructor() -> crate::TypeData {
@@ -4551,6 +4592,7 @@ fn global_uri_error_constructor() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_json() -> crate::TypeData {
@@ -4574,6 +4616,7 @@ fn global_json() -> crate::TypeData {
                 ty: crate::globals::GLOBAL_STRING_KEYWORD_ID.into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_json_value() -> crate::TypeData {
@@ -4684,6 +4727,7 @@ fn global_readonly_array() -> crate::TypeData {
                 ty: crate::globals::GLOBAL_UNKNOWN_ID.into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_concat_array() -> crate::TypeData {
@@ -4711,6 +4755,7 @@ fn global_concat_array() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(3)).into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_array() -> crate::TypeData {
@@ -4903,6 +4948,7 @@ fn global_array() -> crate::TypeData {
                 ty: crate::globals::GLOBAL_ARRAY_ID.into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_array_constructor() -> crate::TypeData {
@@ -4960,6 +5006,7 @@ fn global_array_constructor() -> crate::TypeData {
                 ty: crate::globals::GLOBAL_ARRAY_ID.into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_typed_property_descriptor() -> crate::TypeData {
@@ -4999,6 +5046,7 @@ fn global_typed_property_descriptor() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(2)).into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_promise_constructor_like() -> crate::TypeData {
@@ -5013,6 +5061,7 @@ fn global_promise_like() -> crate::TypeData {
             kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("then")),
             ty: crate::RawTypeId::Local(crate::TypeId::new(13)).into(),
         }]),
+        scope_id: None,
     }))
 }
 fn global_promise() -> crate::TypeData {
@@ -5069,6 +5118,7 @@ fn global_promise() -> crate::TypeData {
                 ty: crate::globals::GLOBAL_PROMISE_TRY_ID.into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_awaited() -> crate::TypeData {
@@ -5094,6 +5144,7 @@ fn global_array_like() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_partial() -> crate::TypeData {
@@ -5225,6 +5276,7 @@ fn global_this_type() -> crate::TypeData {
         type_parameters: Box::new([crate::RawTypeId::Local(crate::TypeId::new(0)).into()]),
         extends: Box::default(),
         members: Box::new([]),
+        scope_id: None,
     }))
 }
 fn global_weak_key_types() -> crate::TypeData {
@@ -5236,6 +5288,7 @@ fn global_weak_key_types() -> crate::TypeData {
             kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("object")),
             ty: crate::globals::GLOBAL_OBJECT_KEYWORD_ID.into(),
         }]),
+        scope_id: None,
     }))
 }
 fn global_weak_key() -> crate::TypeData {
@@ -5285,6 +5338,7 @@ fn global_array_buffer() -> crate::TypeData {
                 ty: crate::globals::GLOBAL_ARRAY_BUFFER_ID.into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_array_buffer_types() -> crate::TypeData {
@@ -5296,6 +5350,7 @@ fn global_array_buffer_types() -> crate::TypeData {
             kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("ArrayBuffer")),
             ty: crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
         }]),
+        scope_id: None,
     }))
 }
 fn global_array_buffer_like() -> crate::TypeData {
@@ -5328,6 +5383,7 @@ fn global_array_buffer_constructor() -> crate::TypeData {
                 ty: crate::globals::GLOBAL_ARRAY_BUFFER_ID.into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_array_buffer_view() -> crate::TypeData {
@@ -5353,6 +5409,7 @@ fn global_array_buffer_view() -> crate::TypeData {
                 ty: crate::globals::GLOBAL_NUMBER_KEYWORD_ID.into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_data_view() -> crate::TypeData {
@@ -5459,6 +5516,7 @@ fn global_data_view() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(23)).into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_data_view_constructor() -> crate::TypeData {
@@ -5478,6 +5536,7 @@ fn global_data_view_constructor() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(6)).into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_int8_array() -> crate::TypeData {
@@ -5676,6 +5735,7 @@ fn global_int8_array() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(72)).into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_int8_array_constructor() -> crate::TypeData {
@@ -5729,6 +5789,7 @@ fn global_int8_array_constructor() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(21)).into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_uint8_array() -> crate::TypeData {
@@ -5927,6 +5988,7 @@ fn global_uint8_array() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(72)).into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_uint8_array_constructor() -> crate::TypeData {
@@ -5980,6 +6042,7 @@ fn global_uint8_array_constructor() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(21)).into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_uint8_clamped_array() -> crate::TypeData {
@@ -6178,6 +6241,7 @@ fn global_uint8_clamped_array() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(72)).into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_uint8_clamped_array_constructor() -> crate::TypeData {
@@ -6231,6 +6295,7 @@ fn global_uint8_clamped_array_constructor() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(21)).into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_int16_array() -> crate::TypeData {
@@ -6429,6 +6494,7 @@ fn global_int16_array() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(72)).into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_int16_array_constructor() -> crate::TypeData {
@@ -6482,6 +6548,7 @@ fn global_int16_array_constructor() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(21)).into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_uint16_array() -> crate::TypeData {
@@ -6680,6 +6747,7 @@ fn global_uint16_array() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(72)).into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_uint16_array_constructor() -> crate::TypeData {
@@ -6733,6 +6801,7 @@ fn global_uint16_array_constructor() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(21)).into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_int32_array() -> crate::TypeData {
@@ -6931,6 +7000,7 @@ fn global_int32_array() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(72)).into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_int32_array_constructor() -> crate::TypeData {
@@ -6984,6 +7054,7 @@ fn global_int32_array_constructor() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(21)).into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_uint32_array() -> crate::TypeData {
@@ -7182,6 +7253,7 @@ fn global_uint32_array() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(72)).into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_uint32_array_constructor() -> crate::TypeData {
@@ -7235,6 +7307,7 @@ fn global_uint32_array_constructor() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(21)).into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_float32_array() -> crate::TypeData {
@@ -7433,6 +7506,7 @@ fn global_float32_array() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(72)).into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_float32_array_constructor() -> crate::TypeData {
@@ -7486,6 +7560,7 @@ fn global_float32_array_constructor() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(21)).into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_float64_array() -> crate::TypeData {
@@ -7684,6 +7759,7 @@ fn global_float64_array() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(72)).into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_float64_array_constructor() -> crate::TypeData {
@@ -7737,6 +7813,7 @@ fn global_float64_array_constructor() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(21)).into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_intl_collator_options() -> crate::TypeData {
@@ -7786,6 +7863,7 @@ fn global_intl_collator_options() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(6)).into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_intl_resolved_collator_options() -> crate::TypeData {
@@ -7825,6 +7903,7 @@ fn global_intl_resolved_collator_options() -> crate::TypeData {
                 ty: crate::globals::GLOBAL_BOOLEAN_KEYWORD_ID.into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_intl_collator() -> crate::TypeData {
@@ -7859,6 +7938,7 @@ fn global_intl_collator() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(9)).into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_intl_collator_constructor() -> crate::TypeData {
@@ -7882,6 +7962,7 @@ fn global_intl_collator_constructor() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(6)).into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_intl_number_format_options_style_registry() -> crate::TypeData {
@@ -7903,6 +7984,7 @@ fn global_intl_number_format_options_style_registry() -> crate::TypeData {
                 ty: crate::globals::GLOBAL_NEVER_KEYWORD_ID.into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_intl_number_format_options_style() -> crate::TypeData {
@@ -7927,6 +8009,7 @@ fn global_intl_number_format_options_currency_display_registry() -> crate::TypeD
                 ty: crate::globals::GLOBAL_NEVER_KEYWORD_ID.into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_intl_number_format_options_currency_display() -> crate::TypeData {
@@ -7938,6 +8021,7 @@ fn global_intl_number_format_options_use_grouping_registry() -> crate::TypeData 
         type_parameters: Box::default(),
         extends: Box::default(),
         members: Box::new([]),
+        scope_id: None,
     }))
 }
 fn global_intl_number_format_options_use_grouping() -> crate::TypeData {
@@ -8011,6 +8095,7 @@ fn global_intl_number_format_options() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(10)).into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_intl_resolved_number_format_options() -> crate::TypeData {
@@ -8080,6 +8165,7 @@ fn global_intl_resolved_number_format_options() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(2)).into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_intl_number_format() -> crate::TypeData {
@@ -8120,6 +8206,7 @@ fn global_intl_number_format() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(6)).into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_intl_number_format_constructor() -> crate::TypeData {
@@ -8149,6 +8236,7 @@ fn global_intl_number_format_constructor() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(3)).into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_intl_date_time_format_options() -> crate::TypeData {
@@ -8220,6 +8308,7 @@ fn global_intl_date_time_format_options() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(19)).into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_intl_resolved_date_time_format_options() -> crate::TypeData {
@@ -8291,6 +8380,7 @@ fn global_intl_resolved_date_time_format_options() -> crate::TypeData {
                 ty: crate::globals::GLOBAL_STRING_KEYWORD_ID.into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_intl_date_time_format() -> crate::TypeData {
@@ -8331,6 +8421,7 @@ fn global_intl_date_time_format() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(8)).into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_intl_date_time_format_constructor() -> crate::TypeData {
@@ -8360,6 +8451,7 @@ fn global_intl_date_time_format_constructor() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(3)).into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_map() -> crate::TypeData {
@@ -8453,6 +8545,7 @@ fn global_map() -> crate::TypeData {
                 ty: crate::globals::GLOBAL_MAP_ID.into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_map_constructor() -> crate::TypeData {
@@ -8490,6 +8583,7 @@ fn global_map_constructor() -> crate::TypeData {
                 ty: crate::globals::GLOBAL_MAP_ID.into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_readonly_map() -> crate::TypeData {
@@ -8536,6 +8630,7 @@ fn global_readonly_map() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(15)).into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_weak_map() -> crate::TypeData {
@@ -8585,6 +8680,7 @@ fn global_weak_map() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(21)).into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_weak_map_constructor() -> crate::TypeData {
@@ -8608,6 +8704,7 @@ fn global_weak_map_constructor() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(13)).into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_set() -> crate::TypeData {
@@ -8686,6 +8783,7 @@ fn global_set() -> crate::TypeData {
                 ty: crate::globals::GLOBAL_SET_ID.into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_set_constructor() -> crate::TypeData {
@@ -8715,6 +8813,7 @@ fn global_set_constructor() -> crate::TypeData {
                 ty: crate::globals::GLOBAL_SET_ID.into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_readonly_set() -> crate::TypeData {
@@ -8754,6 +8853,7 @@ fn global_readonly_set() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(11)).into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_weak_set() -> crate::TypeData {
@@ -8796,6 +8896,7 @@ fn global_weak_set() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(14)).into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_weak_set_constructor() -> crate::TypeData {
@@ -8819,6 +8920,7 @@ fn global_weak_set_constructor() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(9)).into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_symbol_constructor() -> crate::TypeData {
@@ -8924,6 +9026,7 @@ fn global_symbol_constructor() -> crate::TypeData {
                 ty: crate::globals::GLOBAL_SYMBOL_ASYNC_DISPOSE_ID.into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_iterator_yield_result() -> crate::TypeData {
@@ -8941,6 +9044,7 @@ fn global_iterator_yield_result() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_iterator_return_result() -> crate::TypeData {
@@ -8958,6 +9062,7 @@ fn global_iterator_return_result() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_iterator_result() -> crate::TypeData {
@@ -8992,6 +9097,7 @@ fn global_iterator() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(9)).into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_iterable() -> crate::TypeData {
@@ -9009,6 +9115,7 @@ fn global_iterable() -> crate::TypeData {
             ),
             ty: crate::RawTypeId::Local(crate::TypeId::new(4)).into(),
         }]),
+        scope_id: None,
     }))
 }
 fn global_iterable_iterator() -> crate::TypeData {
@@ -9026,6 +9133,7 @@ fn global_iterable_iterator() -> crate::TypeData {
             ),
             ty: crate::RawTypeId::Local(crate::TypeId::new(4)).into(),
         }]),
+        scope_id: None,
     }))
 }
 fn global_iterator_object() -> crate::TypeData {
@@ -9046,6 +9154,7 @@ fn global_iterator_object() -> crate::TypeData {
             ),
             ty: crate::RawTypeId::Local(crate::TypeId::new(4)).into(),
         }]),
+        scope_id: None,
     }))
 }
 fn global_builtin_iterator_return() -> crate::TypeData {
@@ -9062,6 +9171,7 @@ fn global_array_iterator() -> crate::TypeData {
             ),
             ty: crate::RawTypeId::Local(crate::TypeId::new(2)).into(),
         }]),
+        scope_id: None,
     }))
 }
 fn global_map_iterator() -> crate::TypeData {
@@ -9075,6 +9185,7 @@ fn global_map_iterator() -> crate::TypeData {
             ),
             ty: crate::RawTypeId::Local(crate::TypeId::new(2)).into(),
         }]),
+        scope_id: None,
     }))
 }
 fn global_set_iterator() -> crate::TypeData {
@@ -9088,6 +9199,7 @@ fn global_set_iterator() -> crate::TypeData {
             ),
             ty: crate::RawTypeId::Local(crate::TypeId::new(2)).into(),
         }]),
+        scope_id: None,
     }))
 }
 fn global_promise_constructor() -> crate::TypeData {
@@ -9145,6 +9257,7 @@ fn global_promise_constructor() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(45)).into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_string_iterator() -> crate::TypeData {
@@ -9158,6 +9271,7 @@ fn global_string_iterator() -> crate::TypeData {
             ),
             ty: crate::RawTypeId::Local(crate::TypeId::new(2)).into(),
         }]),
+        scope_id: None,
     }))
 }
 fn global_reflect_apply() -> crate::TypeData {
@@ -9436,6 +9550,7 @@ fn global_generator_function() -> crate::TypeData {
             ),
             ty: crate::globals::GLOBAL_STRING_KEYWORD_ID.into(),
         }]),
+        scope_id: None,
     }))
 }
 fn global_async_iterator() -> crate::TypeData {
@@ -9461,6 +9576,7 @@ fn global_async_iterator() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(12)).into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_async_iterable() -> crate::TypeData {
@@ -9478,6 +9594,7 @@ fn global_async_iterable() -> crate::TypeData {
             ),
             ty: crate::RawTypeId::Local(crate::TypeId::new(4)).into(),
         }]),
+        scope_id: None,
     }))
 }
 fn global_async_iterable_iterator() -> crate::TypeData {
@@ -9495,6 +9612,7 @@ fn global_async_iterable_iterator() -> crate::TypeData {
             ),
             ty: crate::RawTypeId::Local(crate::TypeId::new(4)).into(),
         }]),
+        scope_id: None,
     }))
 }
 fn global_async_iterator_object() -> crate::TypeData {
@@ -9515,6 +9633,7 @@ fn global_async_iterator_object() -> crate::TypeData {
             ),
             ty: crate::RawTypeId::Local(crate::TypeId::new(4)).into(),
         }]),
+        scope_id: None,
     }))
 }
 fn global_promise_fulfilled_result() -> crate::TypeData {
@@ -9532,6 +9651,7 @@ fn global_promise_fulfilled_result() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_promise_rejected_result() -> crate::TypeData {
@@ -9549,6 +9669,7 @@ fn global_promise_rejected_result() -> crate::TypeData {
                 ty: crate::globals::GLOBAL_ANY_KEYWORD_ID.into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_promise_settled_result() -> crate::TypeData {
@@ -9583,6 +9704,7 @@ fn global_aggregate_error() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(2)).into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_aggregate_error_constructor() -> crate::TypeData {
@@ -9606,6 +9728,7 @@ fn global_aggregate_error_constructor() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(1)).into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_promise_with_resolvers() -> crate::TypeData {
@@ -9627,6 +9750,7 @@ fn global_promise_with_resolvers() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(5)).into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_disposable() -> crate::TypeData {
@@ -9640,6 +9764,7 @@ fn global_disposable() -> crate::TypeData {
             ),
             ty: crate::globals::GLOBAL_DISPOSABLE_DISPOSE_ID.into(),
         }]),
+        scope_id: None,
     }))
 }
 fn global_async_disposable() -> crate::TypeData {
@@ -9653,6 +9778,7 @@ fn global_async_disposable() -> crate::TypeData {
             ),
             ty: crate::globals::GLOBAL_ASYNC_DISPOSABLE_ASYNC_DISPOSE_ID.into(),
         }]),
+        scope_id: None,
     }))
 }
 fn global_suppressed_error() -> crate::TypeData {
@@ -9685,6 +9811,7 @@ fn global_suppressed_error() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_suppressed_error_constructor() -> crate::TypeData {
@@ -9708,6 +9835,7 @@ fn global_suppressed_error_constructor() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_disposable_stack() -> crate::TypeData {
@@ -9766,6 +9894,7 @@ fn global_disposable_stack() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(10)).into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_disposable_stack_constructor() -> crate::TypeData {
@@ -9785,6 +9914,7 @@ fn global_disposable_stack_constructor() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_async_disposable_stack() -> crate::TypeData {
@@ -9843,6 +9973,7 @@ fn global_async_disposable_stack() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(14)).into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_async_disposable_stack_constructor() -> crate::TypeData {
@@ -9862,6 +9993,7 @@ fn global_async_disposable_stack_constructor() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_class_member_decorator_context() -> crate::TypeData {
@@ -9901,6 +10033,7 @@ fn global_class_decorator_context() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(6)).into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_class_method_decorator_context() -> crate::TypeData {
@@ -9945,6 +10078,7 @@ fn global_class_method_decorator_context() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(10)).into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_class_getter_decorator_context() -> crate::TypeData {
@@ -9989,6 +10123,7 @@ fn global_class_getter_decorator_context() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(9)).into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_class_setter_decorator_context() -> crate::TypeData {
@@ -10033,6 +10168,7 @@ fn global_class_setter_decorator_context() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(9)).into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_class_accessor_decorator_context() -> crate::TypeData {
@@ -10077,6 +10213,7 @@ fn global_class_accessor_decorator_context() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(10)).into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_class_accessor_decorator_target() -> crate::TypeData {
@@ -10097,6 +10234,7 @@ fn global_class_accessor_decorator_target() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(3)).into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_class_accessor_decorator_result() -> crate::TypeData {
@@ -10121,6 +10259,7 @@ fn global_class_accessor_decorator_result() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(4)).into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_class_field_decorator_context() -> crate::TypeData {
@@ -10165,6 +10304,7 @@ fn global_class_field_decorator_context() -> crate::TypeData {
                 ty: crate::RawTypeId::Local(crate::TypeId::new(10)).into(),
             },
         ]),
+        scope_id: None,
     }))
 }
 fn global_class_decorator() -> crate::TypeData {

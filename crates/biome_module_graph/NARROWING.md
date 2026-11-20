@@ -293,6 +293,15 @@ These limits apply to every *Supported* and *Partial* row below:
   name and members in two modules, such as `class K { k = 1 }` in `./a` and
   in `./b`, can't be told apart from one class that Biome reaches through two
   modules, so a test of one of them keeps the type of a value of the other.
+  Two such classes in two namespaces of one module, as in
+  `namespace P1 { export class K { k = 1 } }` and
+  `namespace P2 { export class K { k = 1 } }`, are two classes, as in
+  TypeScript, so `x: P1.K | string` keeps `P1.K | string` in the `else`
+  branch of `x instanceof P2.K`. When no member remains in the true branch,
+  Biome doesn't count an instance of a class as a subtype of an instance of
+  another class with the same members, because a class can declare private
+  members, so the true branch keeps `P1.K | string`, where TypeScript gives
+  `P2.K`.
 - A call to a type-guard function whose target is not a primitive type, as
   `isFoo(x)` with `x is Foo`, compares each member of the type of `x` with
   each member of the target in TypeScript's subtype relation, as TypeScript
@@ -319,8 +328,9 @@ These limits apply to every *Supported* and *Partial* row below:
     a type that isn't derived from the class, because a class can declare
     private members. So `x: L | string` with `class L { length = 0 }` keeps
     its type in both branches of `isL(x)`. So does an instance of a class
-    with the same name and members as the target class in another module or
-    namespace, which Biome can't tell from the target class.
+    with the same name and members as the target class in another namespace,
+    which is another class, or in another module, which Biome can't tell
+    from the target class.
   - Biome infers the literal type of the initializer for a property of an
     object literal or a class field, as `1` for `{ a: 1 }`, while TypeScript
     widens it to `number` unless the property is readonly or `as const`. Such
@@ -373,11 +383,6 @@ These limits apply to every *Supported* and *Partial* row below:
   `x: M | { m: 1; y: 2 } | string` gives `{ m: 1; y: 2 }` in the true branch
   of `isM(x)` with `v is { m: 1 }`, where TypeScript gives
   `M | { m: 1; y: 2 }`.
-- Two classes with the same name and members in two namespaces of one module,
-  as in `namespace P1 { export class K { k = 1 } }` and
-  `namespace P2 { export class K { k = 1 } }`, count as one class for
-  `instanceof`. So `x: P1.K | string` gives `string` in the `else` branch of
-  `x instanceof P2.K`, where TypeScript gives `P1.K | string`.
 - Falsy and `typeof` tests compare an object type with the types that give
   primitives and functions their members, such as `String` and `Function`,
   from TypeScript's ES2015 library files. Members that the project adds to
@@ -428,6 +433,7 @@ code as TS7027, an error with `allowUnreachableCode: false`.
 | `!`, `!!`, and parentheses | `x: string \| null; if (!!x) x` | `string` | Supported |
 | `&&` and `\|\|` in conditions and as operands | `x: string \| null; y: number \| undefined;`<br>`if (x && y) x`; `x && x.length` | `string` at both reads | Supported |
 | The branches of a conditional expression | `x: string \| null; x ? f(x) : g(x)` | `string` in `f(x)`, `string \| null` in `g(x)` | Supported |
+| A conditional expression has the types of both branches, whatever its test | `interface Foo { a: number }; x: Foo;`<br>`x ? 1 : "s"`; `true ? 1 : "s"`; `x ? 1 : x` | `1 \| "s"` at the first two; `1` at the third, whose `x` is `never` | Supported: a branch adds nothing to the type when its type is `never`, as a call to a function that never returns, or when it only reads the variable that the test reads and the test leaves that variable no value there, as `x` in `x ? 1 : x`. Another read that TypeScript narrows to `never` in a branch, as `x` in `x !== null ? 1 : x` with `x: string`, is Unknown in Biome, which makes the whole expression Unknown. |
 | Truthiness of a property narrows the property | `o: { v: string \| null }; if (o.v) o.v` | `string` | Supported |
 | Truthiness of a generic gives `NonNullable<T>` | `function f<T>(x: T) { x && x }` | `NonNullable<T>` at the right operand | Not yet |
 | A constant condition makes a branch unreachable | `x: string \| null;`<br>`if (x === null) { if (true) return; } x` | `string`; the branch of `if (false)` is unreachable (TS7027) | Partial: only `while` and `do...while` loops whose condition is a truthy literal, and `for` loops without a condition, have no exit other than `break`. The branches of `if (true)` and `if (false)` stay reachable, so the example gives `string \| null`. |

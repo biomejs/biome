@@ -76,6 +76,18 @@ phase. It registers raw values and creates local references. Imports and scoped
 qualifiers remain explicit so later database queries can resolve them against
 the current module graph and semantic model.
 
+The collector deduplicates raw values by content, so equal values share one
+`TypeId`. Classes, interfaces, and namespaces also record a scope, so two
+declarations with the same contents, such as `class K { k = 1 }` in two
+namespaces, stay two types. A class or an interface records the scope that it
+opens. A namespace records the scope that declares its outermost enclosing
+namespace, together with the names of the enclosing namespaces, so the
+namespaces that TypeScript merges, those of one name declared by one scope or
+one namespace, still share one type and its members. The inferred
+`InternedClass` and `InternedInterface` keep the scope, so two such
+declarations stay apart after their handles are resolved. Generated globals
+have no scope.
+
 ## Inference Layers
 
 The type system can answer type questions at three levels. These levels are

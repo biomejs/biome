@@ -1,4 +1,6 @@
 /* should not generate diagnostics */
 
+// A conditional expression has the type of both of its branches, whatever its
+// test, as in TypeScript, so a promise in either branch must be handled.
 const condition = 0; // Always falsy.
-condition ? Promise.reject("ternary bypass") : null;
+void (condition ? Promise.reject("ternary bypass") : null);

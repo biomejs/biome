@@ -50,11 +50,11 @@ Expression "\"s\" ?? missing" => string: s
 
 Expression "missing" => unknown
 
-Binding conditional "conditional" => string: yes
+Binding conditional "conditional" => string: yes | number: 1
 
 Expression "true" => bool: true
 
-Expression "true ? \"yes\" : 1" => string: yes
+Expression "true ? \"yes\" : 1" => string: yes | number: 1
 
 Expression "\"yes\"" => string: yes
 

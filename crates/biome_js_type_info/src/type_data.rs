@@ -531,6 +531,16 @@ pub struct Class {
 
     /// Class members.
     pub members: Box<[TypeMember]>,
+
+    /// The scope that the class declaration or expression opens, or `None`
+    /// for a class without one, such as a generated global.
+    ///
+    /// Two classes with the same contents and different scopes are different
+    /// types, so `instanceof` tells apart `class K { k = 1 }` in two
+    /// namespaces of one module. Raw types are deduplicated by content, so
+    /// without the scope those classes would be one type. One declaration
+    /// gives one type wherever it is collected, because its scope is the same.
+    pub scope_id: Option<ScopeId>,
 }
 
 /// A constructor definition.
@@ -756,6 +766,12 @@ pub struct Interface {
 
     /// Interface members.
     pub members: Box<[TypeMember]>,
+
+    /// The scope that the interface declaration opens, or `None` for an
+    /// interface without one, such as a generated global. It tells apart
+    /// interfaces with the same contents, as [`Class::scope_id`] does for
+    /// classes.
+    pub scope_id: Option<ScopeId>,
 }
 
 impl Debug for Interface {
@@ -812,10 +828,35 @@ pub struct Module {
 }
 
 /// A namespace definition.
-#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+#[derive(Clone, Eq, Hash, PartialEq)]
 pub struct Namespace {
     pub path: Path,
     pub members: Box<[TypeMember]>,
+
+    /// The scope that declares the outermost namespace around this one, or
+    /// the scope that declares this one when no namespace encloses it. `None`
+    /// when Biome has no scopes for the declaration.
+    ///
+    /// Together with [`Self::enclosing`], it tells namespaces with the same
+    /// path apart the way TypeScript does. Namespaces of one name merge when
+    /// the same namespace or scope declares them. So `namespace M {}` twice in
+    /// one module is one type that holds the members of both, while
+    /// `namespace A { namespace N {} }` and `namespace B { namespace N {} }`
+    /// are two.
+    pub scope_id: Option<ScopeId>,
+
+    /// The names of the namespaces around this one, outermost first, as
+    /// `["A"]` for `N` in `namespace A { namespace N {} }`.
+    pub enclosing: Box<[Text]>,
+}
+
+impl Debug for Namespace {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("Namespace")
+            .field("path", &self.path)
+            .field("members", &self.members)
+            .finish()
+    }
 }
 
 /// An object definition.
