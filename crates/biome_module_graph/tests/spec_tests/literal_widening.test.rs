@@ -303,6 +303,37 @@ let l6 = D; /*l6*/l6;
     );
 }
 
+// The search for the fresh literal types of a value visits a bounded number
+// of types. When it stops before it reaches every operand or `const`, every
+// literal kind widens.
+#[test]
+fn values_too_large_to_search_widen_every_literal_kind() {
+    let arms: String = (0..40)
+        .map(|index| format!("c ? \"s{index}\" : "))
+        .collect();
+    let source = format!(
+        "{DECLARATIONS}let m = {arms}7; /*m*/m;\n{}{}let n = c ? s40 : a40; /*n*/n;\n",
+        const_chain("s", "\"x\""),
+        const_chain("a", "1"),
+    );
+    assert_reads(
+        &source,
+        &[
+            ("m", "m", &["number", "string"]),
+            ("n", "n", &["number", "string"]),
+        ],
+    );
+}
+
+/// Returns the declarations of `{name}0`, initialized to `value`, and of
+/// `{name}1` to `{name}40`, each initialized to the one before.
+fn const_chain(name: &str, value: &str) -> String {
+    let aliases: String = (1..=40)
+        .map(|index| format!("const {name}{index} = {name}{};\n", index - 1))
+        .collect();
+    format!("const {name}0 = {value};\n{aliases}")
+}
+
 // Biome can't tell that these values are fresh literals, so it keeps their
 // literal types where TypeScript widens them.
 #[test]

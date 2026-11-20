@@ -1,0 +1,229 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidUnitComparisonNarrowing.ts
+---
+# Input
+```ts
+// should generate diagnostics
+
+const EMPTY = "";
+const NONE = -1;
+const A = "a";
+
+function afterNegativeComparison(index: number | null) {
+	if (index === -1) return index?.toFixed();
+}
+
+function afterConstantComparison(value: string | null) {
+	if (value === EMPTY) return value?.length;
+}
+
+function afterVoidComparison(value: string | undefined) {
+	if (value !== void 0) return value?.length;
+}
+
+function afterTemplateComparison(value: string | null) {
+	if (value === `a`) return value?.length;
+}
+
+function caseOfConstant(value: string | null) {
+	switch (value) {
+		case EMPTY:
+			return value?.length;
+	}
+}
+
+function caseOfNegative(value: number | null) {
+	switch (value) {
+		case NONE:
+			return value?.toFixed();
+	}
+}
+
+function afterExhaustiveSwitchWithConstants(kind: "a" | "b", label: string | null) {
+	switch (kind) {
+		case A:
+			if (label === null) return;
+			break;
+		case "b":
+			if (label === null) return;
+	}
+	return label?.length;
+}
+
+```
+
+# Diagnostics
+```
+invalidUnitComparisonNarrowing.ts:8:27 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+     7 │ function afterNegativeComparison(index: number | null) {
+   > 8 │ 	if (index === -1) return index?.toFixed();
+       │ 	                         ^^^^^
+     9 │ }
+    10 │ 
+  
+  i Replace ?. with ..
+  
+     7 │ function afterNegativeComparison(index: number | null) {
+   > 8 │ 	if (index === -1) return index?.toFixed();
+       │ 	                              ^^
+     9 │ }
+    10 │ 
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+invalidUnitComparisonNarrowing.ts:12:30 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    11 │ function afterConstantComparison(value: string | null) {
+  > 12 │ 	if (value === EMPTY) return value?.length;
+       │ 	                            ^^^^^
+    13 │ }
+    14 │ 
+  
+  i Replace ?. with ..
+  
+    11 │ function afterConstantComparison(value: string | null) {
+  > 12 │ 	if (value === EMPTY) return value?.length;
+       │ 	                                 ^^
+    13 │ }
+    14 │ 
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+invalidUnitComparisonNarrowing.ts:16:31 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    15 │ function afterVoidComparison(value: string | undefined) {
+  > 16 │ 	if (value !== void 0) return value?.length;
+       │ 	                             ^^^^^
+    17 │ }
+    18 │ 
+  
+  i Replace ?. with ..
+  
+    15 │ function afterVoidComparison(value: string | undefined) {
+  > 16 │ 	if (value !== void 0) return value?.length;
+       │ 	                                  ^^
+    17 │ }
+    18 │ 
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+invalidUnitComparisonNarrowing.ts:20:28 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    19 │ function afterTemplateComparison(value: string | null) {
+  > 20 │ 	if (value === `a`) return value?.length;
+       │ 	                          ^^^^^
+    21 │ }
+    22 │ 
+  
+  i Replace ?. with ..
+  
+    19 │ function afterTemplateComparison(value: string | null) {
+  > 20 │ 	if (value === `a`) return value?.length;
+       │ 	                               ^^
+    21 │ }
+    22 │ 
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+invalidUnitComparisonNarrowing.ts:26:11 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    24 │ 	switch (value) {
+    25 │ 		case EMPTY:
+  > 26 │ 			return value?.length;
+       │ 			       ^^^^^
+    27 │ 	}
+    28 │ }
+  
+  i Replace ?. with ..
+  
+    24 │ 	switch (value) {
+    25 │ 		case EMPTY:
+  > 26 │ 			return value?.length;
+       │ 			            ^^
+    27 │ 	}
+    28 │ }
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+invalidUnitComparisonNarrowing.ts:33:11 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    31 │ 	switch (value) {
+    32 │ 		case NONE:
+  > 33 │ 			return value?.toFixed();
+       │ 			       ^^^^^
+    34 │ 	}
+    35 │ }
+  
+  i Replace ?. with ..
+  
+    31 │ 	switch (value) {
+    32 │ 		case NONE:
+  > 33 │ 			return value?.toFixed();
+       │ 			            ^^
+    34 │ 	}
+    35 │ }
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+invalidUnitComparisonNarrowing.ts:45:9 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    43 │ 			if (label === null) return;
+    44 │ 	}
+  > 45 │ 	return label?.length;
+       │ 	       ^^^^^
+    46 │ }
+    47 │ 
+  
+  i Replace ?. with ..
+  
+    43 │ 			if (label === null) return;
+    44 │ 	}
+  > 45 │ 	return label?.length;
+       │ 	            ^^
+    46 │ }
+    47 │ 
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```

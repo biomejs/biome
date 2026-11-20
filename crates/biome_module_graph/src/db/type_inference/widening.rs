@@ -40,7 +40,7 @@ use biome_js_syntax::binding_ext::AnyJsBindingDeclaration;
 use biome_js_type_info::{
     FreshLiteralKinds, ImportSymbol, Object as RawObject, ObjectKind, PrimitiveLiteralKind,
     RawTypeData, RawTypeId, TypeImportQualifier, TypeReference, TypeResolverLevel,
-    TypeofExpression as RawTypeofExpression,
+    TypeofExpression as RawTypeofExpression, TypeofValue as RawTypeofValue,
     TypeofWidenedLiteralExpression as RawTypeofWidenedLiteralExpression,
     interned_types::{InternedObject as InferredObject, TypeData as InferredTypeData},
     widen_literal_of_kinds,
@@ -67,8 +67,12 @@ const MAX_WRAPPER_STEPS: usize = 16;
 /// `is_return_values`, the value is the union of the values that a function
 /// returns, and has the fresh literal types of each of them. Other values,
 /// such as calls, member accesses, assertions such as `1 as 1`, and the
-/// literal types of a union that a type annotation writes, have none. The
-/// search visits at most 64 raw types and keeps what it found when it stops.
+/// literal types of a union that a type annotation writes, have none.
+///
+/// The search visits at most 64 raw types, and at most 1024 scopes for the
+/// declaration of each name. When it stops at either limit, it returns every
+/// kind, because widening every literal kind is never narrower than
+/// TypeScript.
 pub(super) fn fresh_literal_kinds(
     db: &dyn ModuleDb,
     module: ModuleInfo,
@@ -103,6 +107,158 @@ pub(super) fn fresh_literal_kinds(
     search.kinds
 }
 
+/// Returns whether [`fresh_literal_kinds`] can find a kind for `reference`,
+/// the collected type of a value, with the same `is_return_values`. Decides
+/// from the raw type of the value without resolving it. Returns `false` only
+/// when the search finds no kind, so a caller can skip resolving a value
+/// with no fresh literal type.
+pub(super) fn may_have_fresh_literal(
+    js_info: &JsModuleInfo,
+    reference: &TypeReference,
+    is_return_values: bool,
+) -> bool {
+    if is_return_values
+        && let TypeReference::Resolved(id) = reference
+        && id.level() == TypeResolverLevel::Thin
+        && let Some(RawTypeData::Union(union)) = js_info.raw_types.get(id.id().index())
+    {
+        // The search takes every kind when the values outnumber its steps.
+        let values = union.types();
+        return values.len() > MAX_FRESH_LITERAL_STEPS
+            || values
+                .iter()
+                .any(|value| leads_to_fresh_literal(js_info, value));
+    }
+    leads_to_fresh_literal(js_info, reference)
+}
+
+/// Returns whether the search, when it visits `reference`, reaches a raw
+/// type that gives a fresh literal type or leads to one. A name or an import
+/// always can.
+fn leads_to_fresh_literal(js_info: &JsModuleInfo, reference: &TypeReference) -> bool {
+    match reference {
+        TypeReference::Resolved(id) => {
+            id.level() == TypeResolverLevel::Thin
+                && !js_info.is_named_type(id.id())
+                && js_info
+                    .raw_types
+                    .get(id.id().index())
+                    .and_then(fresh_literal_step)
+                    .is_some()
+        }
+        TypeReference::Qualifier(_) | TypeReference::Import(_) => true,
+    }
+}
+
+/// What the search for fresh literal types finds at a raw type.
+enum FreshLiteralStep<'a> {
+    /// A literal expression gives a fresh literal type of this kind.
+    Literal(PrimitiveLiteralKind),
+    /// A name, as `K` in `let n = K`, or a unary minus applied to a number
+    /// or bigint literal leads to this value.
+    Value(&'a TypeReference),
+    /// A conditional or logical expression leads to both of its operands.
+    Operands(&'a TypeReference, &'a TypeReference),
+    /// A shorthand property, as `K` in `{ K }`, leads to the value it names.
+    ShorthandProperty(&'a RawTypeofValue),
+}
+
+/// Returns what the search for fresh literal types finds at `raw`, or
+/// `None` when `raw` neither gives a fresh literal type nor leads to a value
+/// that can.
+fn fresh_literal_step(raw: &RawTypeData) -> Option<FreshLiteralStep<'_>> {
+    match raw {
+        RawTypeData::Literal(literal) => {
+            PrimitiveLiteralKind::from_literal_expression(literal).map(FreshLiteralStep::Literal)
+        }
+        RawTypeData::Reference(
+            reference @ (TypeReference::Qualifier(_) | TypeReference::Import(_)),
+        ) => Some(FreshLiteralStep::Value(reference)),
+        RawTypeData::TypeofValue(value) => Some(FreshLiteralStep::ShorthandProperty(value)),
+        RawTypeData::TypeofExpression(expression) => match expression.as_ref() {
+            RawTypeofExpression::UnaryMinus(expression) => expression
+                .is_literal_argument
+                .then_some(FreshLiteralStep::Value(&expression.argument)),
+            RawTypeofExpression::Conditional(expression) => Some(FreshLiteralStep::Operands(
+                &expression.consequent,
+                &expression.alternate,
+            )),
+            RawTypeofExpression::LogicalAnd(expression) => Some(FreshLiteralStep::Operands(
+                &expression.left,
+                &expression.right,
+            )),
+            RawTypeofExpression::LogicalOr(expression) => Some(FreshLiteralStep::Operands(
+                &expression.left,
+                &expression.right,
+            )),
+            RawTypeofExpression::NullishCoalescing(expression) => Some(FreshLiteralStep::Operands(
+                &expression.left,
+                &expression.right,
+            )),
+            // A widened value has no fresh literal type left. Biome can't
+            // tell whether the others give one, as `id(1)` and `await 1`
+            // do, so it takes them as giving none.
+            RawTypeofExpression::WidenedLiteral(_)
+            | RawTypeofExpression::Addition(_)
+            | RawTypeofExpression::Await(_)
+            | RawTypeofExpression::BitwiseNot(_)
+            | RawTypeofExpression::Call(_)
+            | RawTypeofExpression::CallArgument(_)
+            | RawTypeofExpression::ComputedMember(_)
+            | RawTypeofExpression::Destructure(_)
+            | RawTypeofExpression::Index(_)
+            | RawTypeofExpression::OptionalChainIndex(_)
+            | RawTypeofExpression::IterableValueOf(_)
+            | RawTypeofExpression::New(_)
+            | RawTypeofExpression::Parameter(_)
+            | RawTypeofExpression::StaticMember(_)
+            | RawTypeofExpression::OptionalChainStaticMember(_)
+            | RawTypeofExpression::Super(_)
+            | RawTypeofExpression::This(_)
+            | RawTypeofExpression::Typeof(_) => None,
+        },
+        // A reference to another local type stands for an assertion, such
+        // as `1 as 1`, whose literal type is not fresh. A union is a type
+        // annotation, whose literal types aren't fresh either.
+        RawTypeData::Reference(TypeReference::Resolved(_))
+        | RawTypeData::Union(_)
+        | RawTypeData::Unknown
+        | RawTypeData::Global
+        | RawTypeData::BigInt
+        | RawTypeData::Boolean
+        | RawTypeData::Null
+        | RawTypeData::Number
+        | RawTypeData::String
+        | RawTypeData::Symbol
+        | RawTypeData::Undefined
+        | RawTypeData::Conditional
+        | RawTypeData::ImportNamespace(_)
+        | RawTypeData::Class(_)
+        | RawTypeData::Constructor(_)
+        | RawTypeData::Function(_)
+        | RawTypeData::Interface(_)
+        | RawTypeData::Module(_)
+        | RawTypeData::Namespace(_)
+        | RawTypeData::Object(_)
+        | RawTypeData::Tuple(_)
+        | RawTypeData::Generic(_)
+        | RawTypeData::Intersection(_)
+        | RawTypeData::TypeOperator(_)
+        | RawTypeData::IndexedAccess(_)
+        | RawTypeData::MappedType(_)
+        | RawTypeData::Extends(_)
+        | RawTypeData::InstanceOf(_)
+        | RawTypeData::MergedReference(_)
+        | RawTypeData::TypeofType(_)
+        | RawTypeData::AnyKeyword
+        | RawTypeData::NeverKeyword
+        | RawTypeData::ObjectKeyword
+        | RawTypeData::ThisKeyword
+        | RawTypeData::UnknownKeyword
+        | RawTypeData::VoidKeyword => None,
+    }
+}
+
 struct FreshLiteralSearch<'a> {
     db: &'a dyn ModuleDb,
     remaining: usize,
@@ -112,6 +268,7 @@ struct FreshLiteralSearch<'a> {
 impl FreshLiteralSearch<'_> {
     fn visit(&mut self, module: ModuleInfo, js_info: &JsModuleInfo, reference: &TypeReference) {
         if self.remaining == 0 {
+            self.kinds = FreshLiteralKinds::all();
             return;
         }
         self.remaining -= 1;
@@ -136,18 +293,14 @@ impl FreshLiteralSearch<'_> {
     }
 
     fn visit_raw(&mut self, module: ModuleInfo, js_info: &JsModuleInfo, raw: &RawTypeData) {
-        match raw {
-            RawTypeData::Literal(literal) => {
-                if let Some(kind) = PrimitiveLiteralKind::from_literal_expression(literal) {
-                    self.kinds |= kind;
-                }
+        match fresh_literal_step(raw) {
+            Some(FreshLiteralStep::Literal(kind)) => self.kinds |= kind,
+            Some(FreshLiteralStep::Value(value)) => self.visit(module, js_info, value),
+            Some(FreshLiteralStep::Operands(first, second)) => {
+                self.visit(module, js_info, first);
+                self.visit(module, js_info, second);
             }
-            // A name, as `K` in `let n = K`.
-            RawTypeData::Reference(
-                reference @ (TypeReference::Qualifier(_) | TypeReference::Import(_)),
-            ) => self.visit(module, js_info, reference),
-            // A shorthand property, as `K` in `{ K }`.
-            RawTypeData::TypeofValue(value) => {
+            Some(FreshLiteralStep::ShorthandProperty(value)) => {
                 if value.ty.is_unknown() {
                     self.visit_name(
                         module,
@@ -159,95 +312,14 @@ impl FreshLiteralSearch<'_> {
                     self.visit(module, js_info, &value.ty);
                 }
             }
-            RawTypeData::TypeofExpression(expression) => match expression.as_ref() {
-                RawTypeofExpression::UnaryMinus(expression) => {
-                    if expression.is_literal_argument {
-                        self.visit(module, js_info, &expression.argument);
-                    }
-                }
-                RawTypeofExpression::Conditional(expression) => {
-                    self.visit(module, js_info, &expression.consequent);
-                    self.visit(module, js_info, &expression.alternate);
-                }
-                RawTypeofExpression::LogicalAnd(expression) => {
-                    self.visit(module, js_info, &expression.left);
-                    self.visit(module, js_info, &expression.right);
-                }
-                RawTypeofExpression::LogicalOr(expression) => {
-                    self.visit(module, js_info, &expression.left);
-                    self.visit(module, js_info, &expression.right);
-                }
-                RawTypeofExpression::NullishCoalescing(expression) => {
-                    self.visit(module, js_info, &expression.left);
-                    self.visit(module, js_info, &expression.right);
-                }
-                // A widened value has no fresh literal type left. Biome can't
-                // tell whether the others give one, as `id(1)` and `await 1`
-                // do, so it takes them as giving none.
-                RawTypeofExpression::WidenedLiteral(_)
-                | RawTypeofExpression::Addition(_)
-                | RawTypeofExpression::Await(_)
-                | RawTypeofExpression::BitwiseNot(_)
-                | RawTypeofExpression::Call(_)
-                | RawTypeofExpression::CallArgument(_)
-                | RawTypeofExpression::ComputedMember(_)
-                | RawTypeofExpression::Destructure(_)
-                | RawTypeofExpression::Index(_)
-                | RawTypeofExpression::OptionalChainIndex(_)
-                | RawTypeofExpression::IterableValueOf(_)
-                | RawTypeofExpression::New(_)
-                | RawTypeofExpression::Parameter(_)
-                | RawTypeofExpression::StaticMember(_)
-                | RawTypeofExpression::OptionalChainStaticMember(_)
-                | RawTypeofExpression::Super(_)
-                | RawTypeofExpression::This(_)
-                | RawTypeofExpression::Typeof(_) => {}
-            },
-            // A reference to another local type stands for an assertion, such
-            // as `1 as 1`, whose literal type is not fresh. A union is a type
-            // annotation, whose literal types aren't fresh either.
-            RawTypeData::Reference(TypeReference::Resolved(_))
-            | RawTypeData::Union(_)
-            | RawTypeData::Unknown
-            | RawTypeData::Global
-            | RawTypeData::BigInt
-            | RawTypeData::Boolean
-            | RawTypeData::Null
-            | RawTypeData::Number
-            | RawTypeData::String
-            | RawTypeData::Symbol
-            | RawTypeData::Undefined
-            | RawTypeData::Conditional
-            | RawTypeData::ImportNamespace(_)
-            | RawTypeData::Class(_)
-            | RawTypeData::Constructor(_)
-            | RawTypeData::Function(_)
-            | RawTypeData::Interface(_)
-            | RawTypeData::Module(_)
-            | RawTypeData::Namespace(_)
-            | RawTypeData::Object(_)
-            | RawTypeData::Tuple(_)
-            | RawTypeData::Generic(_)
-            | RawTypeData::Intersection(_)
-            | RawTypeData::TypeOperator(_)
-            | RawTypeData::IndexedAccess(_)
-            | RawTypeData::MappedType(_)
-            | RawTypeData::Extends(_)
-            | RawTypeData::InstanceOf(_)
-            | RawTypeData::MergedReference(_)
-            | RawTypeData::TypeofType(_)
-            | RawTypeData::AnyKeyword
-            | RawTypeData::NeverKeyword
-            | RawTypeData::ObjectKeyword
-            | RawTypeData::ThisKeyword
-            | RawTypeData::UnknownKeyword
-            | RawTypeData::VoidKeyword => {}
+            None => {}
         }
     }
 
     /// Visits the value that `name`, read in the scope `scope_id`, refers to
     /// when it names a `const` declared without a type annotation, or an
-    /// import.
+    /// import. Takes every kind as fresh when the declaration of `name` lies
+    /// beyond [`MAX_SCOPE_STEPS`] scopes.
     fn visit_name(
         &mut self,
         module: ModuleInfo,
@@ -269,6 +341,7 @@ impl FreshLiteralSearch<'_> {
             };
             scope = parent;
         }
+        self.kinds = FreshLiteralKinds::all();
     }
 
     /// Visits the value of `binding` when it is a `const` declared without a
@@ -359,14 +432,19 @@ impl<'db> ResolutionCtx<'db, '_> {
     /// type, as a return type inferred from a function's body does.
     ///
     /// Returns `ty` unchanged, with its handles and wrappers, when it has no
-    /// literal type to widen. The raw tables are searched only when `ty` has
-    /// a literal type.
+    /// literal type to widen. Checks the raw type of `value` first, and
+    /// resolves `ty` only when that raw type can give a fresh literal type.
+    /// The full search for fresh literal types runs only when `ty` has a
+    /// literal type.
     pub(super) fn widen_fresh_literals(
         &mut self,
         value: &TypeReference,
         ty: InferredTypeData<'db>,
         is_return_type: bool,
     ) -> InferredTypeData<'db> {
+        if !may_have_fresh_literal(self.js_info, value, is_return_type) {
+            return ty;
+        }
         self.widen_literals_of_kinds(ty, is_return_type, |ctx| {
             fresh_literal_kinds(ctx.db, ctx.module, ctx.js_info, value, is_return_type)
         })
