@@ -2,10 +2,11 @@ use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
+use biome_css_syntax::stmt_ext::AnyScssControlFlowAtRule;
 use biome_css_syntax::{
     AnyCssAtRule, CssCompoundSelector, CssNestedQualifiedRule, CssPseudoElementFunctionSelector,
-    CssQualifiedRule, CssRelativeSelector, CssSyntaxKind, CssTypeSelector, ScssEachAtRule,
-    ScssForAtRule, ScssIfAtRule, ScssIncludeAtRule, ScssMixinAtRule, ScssWhileAtRule,
+    CssQualifiedRule, CssRelativeSelector, CssSyntaxKind, CssTypeSelector, ScssIncludeAtRule,
+    ScssMixinAtRule,
 };
 use biome_diagnostics::Severity;
 use biome_languages::CssFileSource;
@@ -79,7 +80,7 @@ fn is_keyframe_selector_in_scss_block(type_selector: &CssTypeSelector, name: &st
             if ScssMixinAtRule::can_cast(kind) || ScssIncludeAtRule::can_cast(kind) {
                 Some(true)
             } else if is_style_rule(kind)
-                || (AnyCssAtRule::can_cast(kind) && !is_control_flow(kind))
+                || (AnyCssAtRule::can_cast(kind) && !AnyScssControlFlowAtRule::can_cast(kind))
             {
                 Some(false)
             } else {
@@ -87,13 +88,6 @@ fn is_keyframe_selector_in_scss_block(type_selector: &CssTypeSelector, name: &st
             }
         })
         .unwrap_or(false)
-}
-
-fn is_control_flow(kind: CssSyntaxKind) -> bool {
-    ScssIfAtRule::can_cast(kind)
-        || ScssEachAtRule::can_cast(kind)
-        || ScssForAtRule::can_cast(kind)
-        || ScssWhileAtRule::can_cast(kind)
 }
 
 fn is_style_rule(kind: CssSyntaxKind) -> bool {

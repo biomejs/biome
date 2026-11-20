@@ -1,7 +1,8 @@
 use crate::CssSyntaxToken;
 use crate::generated::{
     CssDeclarationBlock, CssDeclarationOrAtRuleBlock, CssDeclarationOrRuleBlock,
-    CssFontFeatureValuesBlock, CssKeyframesBlock, CssPageAtRuleBlock, CssRuleBlock,
+    CssFontFeatureValuesBlock, CssKeyframesBlock, CssPageAtRuleBlock, CssRuleBlock, ScssEachAtRule,
+    ScssForAtRule, ScssIfAtRule, ScssWhileAtRule,
 };
 use biome_rowan::{AstNodeList, SyntaxResult, declare_node_union};
 
@@ -83,4 +84,12 @@ impl CssBlockLike {
                 .r_curly_token()
                 .is_ok_and(|token| token.has_leading_comments())
     }
+}
+
+declare_node_union! {
+    /// An SCSS control-flow at-rule: `@if`, `@each`, `@for` or `@while`.
+    ///
+    /// Sass emits the contents of these at-rules where the at-rule stands, so they don't change
+    /// which rule or at-rule encloses their contents in the output.
+    pub AnyScssControlFlowAtRule = ScssIfAtRule | ScssEachAtRule | ScssForAtRule | ScssWhileAtRule
 }
