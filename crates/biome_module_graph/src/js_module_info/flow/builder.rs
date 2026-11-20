@@ -791,12 +791,17 @@ const MAX_LOCAL_CALL_DEPTH: usize = 4;
 /// [`value_callees`] finds it.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 enum UntypedValue {
-    /// The value can be the result of a call to a function whose return type
-    /// Biome infers from values that [`value_callees`] doesn't visit, as a
-    /// method or an import. When an assignment in a scope other than the
-    /// declaration of a variable whose type evolves with its writes assigns
-    /// such a value, the variable's declared type includes the type that
-    /// Biome infers.
+    /// The value can be the result of a call with an inferred return type
+    /// ([`CalleeReturn::Inferred`]), and [`value_callees`] doesn't follow the
+    /// values that the callee returns. Examples are a function expression
+    /// called where it is defined and an element call as `a[0]()`.
+    /// [`UntypedValue::Other`] takes precedence over this reason.
+    ///
+    /// Unlike [`UntypedValue::Other`], this reason still lets an assignment
+    /// count as covered (see [`RootBuilder::is_covered`]). A covered
+    /// assignment writes a [`FlowEvolving::Variable`] from a scope other than
+    /// the variable's declaration. The variable's declared type already
+    /// includes the type that Biome infers for such a value.
     InferredReturn,
     /// The value can be the result of `typeof`, or of a call to a local
     /// function that returns a value that reads a variable whose type evolves
