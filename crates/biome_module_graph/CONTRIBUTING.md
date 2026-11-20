@@ -95,9 +95,10 @@ one of its own variables or a path on its own `this`. Its parts live in
 
 - `scanner.rs` selects roots while the module visitor walks the syntax tree,
   so collection never walks the whole module again. A root is selected when
-  its own code contains a condition, counting every `switch` statement and
-  every `for...in` loop, or, in a module with an `asserts` annotation, a
-  standalone call. It also records whether the root's own code
+  its own code contains a condition, counting every `switch` statement,
+  every `for...in` loop, every logical assignment, and every `?.` that a key
+  or arguments follow in its chain, or, in a module with an `asserts`
+  annotation, a standalone call. It also records whether the root's own code
   uses `this`, so a root whose only subjects are paths on `this` still gets a
   graph. The scanner rejects a root when its own code contains a `with`
   statement or bogus syntax, and a root over its node or depth limit. Declaration files (`.d.ts`, `.d.mts`, `.d.cts`, in any letter
@@ -107,7 +108,23 @@ one of its own variables or a path on its own `this`. Its parts live in
   condition nodes. It records the incoming flow point of every reachable read
   of a subject and, for each condition node, the subjects its guard may
   narrow. A read of a property path is recorded after its object and key are
-  evaluated. The builder skips class members: methods, accessors,
+  evaluated. Expressions are evaluated in the order in which JavaScript runs
+  them, with the conditions that TypeScript's binder adds: the key and the
+  arguments after a `?.` start from a condition that its object is not
+  nullish, as `bindOptionalChain` does, and the right operand of `&&=`,
+  `||=`, or `??=` from a test of its target, as `bindLogicalLikeExpression`
+  does. A declaration evaluates its initializer, then its binding pattern, a
+  destructuring assignment its right operand, then its pattern, and a
+  function its parameters, in order, before its body. A default of a pattern
+  or a parameter runs only when the value is `undefined`, so the flow after
+  it joins the flow before it, as `bindInitializer` does. While no point
+  changes a subject's type, the code after an optional chain continues from
+  the flow after the chain's root, where TypeScript's `bindOptionalChainFlow`
+  restores the flow from before the chain, so a test inside the chain
+  reaches no read after it. A `?.` whose object the raw tables show can't be
+  nullish (`raw_may_be_nullish` in `biome_js_type_info`), such as a variable
+  that holds an object literal, adds no condition, so it doesn't make the
+  object a tested subject. The builder skips class members: methods, accessors,
   constructors, and static blocks are roots of their own, and TypeScript
   analyzes a class field that has an initializer apart from the code around
   the class. It also skips `declare` statements, which never run.
@@ -148,8 +165,9 @@ one of its own variables or a path on its own `this`. Its parts live in
   code runs only when the statement completed normally, as TypeScript's
   `createReduceLabel` over the normal exits says. Any other statement, a
   declaration such as a class or an enum, is an opaque region. The builder
-  evaluates the expressions of a region in source order from the flow point
-  before it, and the next statement continues from the result. Regions keep
+  evaluates the expressions of a region, as it evaluates any expression, from
+  the flow point before it, and the next statement continues from the
+  result. Regions keep
   narrowing sound because only subjects that the root never writes narrow:
   the state before a region is never narrower than the state at any point
   inside or after it. For the same reason, the builder joins the target of

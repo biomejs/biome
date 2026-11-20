@@ -44,14 +44,13 @@ pub(crate) use guards::{FlowGuard, FlowTest, guard_signature};
 pub(crate) use scanner::FlowRootScanner;
 
 use biome_js_control_flow::AnyJsControlFlowRoot;
-use biome_js_semantic::{JsDeclarationKind, SemanticModel};
+use biome_js_semantic::{HasDeclarationAstNode, JsDeclarationKind, SemanticModel};
 use biome_js_syntax::{
     AnyJsClass, JsArrayBindingPattern, JsArrayBindingPatternElement,
     JsArrayBindingPatternElementList, JsArrayBindingPatternRestElement, JsGetterObjectMember,
     JsIdentifierBinding, JsLanguage, JsMethodObjectMember, JsObjectBindingPattern,
     JsObjectBindingPatternProperty, JsObjectBindingPatternPropertyList, JsObjectBindingPatternRest,
-    JsObjectBindingPatternShorthandProperty, JsReferenceIdentifier, JsSetterObjectMember,
-    JsSyntaxNode, JsThisExpression,
+    JsObjectBindingPatternShorthandProperty, JsSetterObjectMember, JsSyntaxNode, JsThisExpression,
 };
 use biome_js_type_info::{
     RawTypeData, RawTypeId, TypeReference, TypeofExpression, TypeofKind,
@@ -185,15 +184,16 @@ impl FlowSubjectTable {
         &self.subjects
     }
 
-    /// Returns the id of the variable that `reference` refers to, adding the
-    /// variable to the table on first use.
+    /// Returns the id of the variable that `reference`, a read or an
+    /// assignment target, refers to, adding the variable to the table on
+    /// first use.
     ///
     /// Returns `None` when `reference` refers to no declaration, as a global
     /// does, or when the table has used every [`FlowSubjectId`].
     fn reference(
         &mut self,
         model: &SemanticModel,
-        reference: &JsReferenceIdentifier,
+        reference: &impl HasDeclarationAstNode,
     ) -> Option<FlowSubjectId> {
         let binding = model.binding(reference)?;
         self.intern(FlowSubject::Binding(binding.range()))
@@ -1893,6 +1893,35 @@ mod tests {
                 resolved.map(|expression| expression.range()),
                 expected.then_some(range),
                 "{marker}: {expression}"
+            );
+        }
+    }
+
+    #[test]
+    fn receivers_that_cannot_be_nullish_are_not_tested() {
+        const SOURCE: &str = r#"
+            interface X { f(v: unknown): void; k: "a" | "b" }
+            function f(x: X | undefined, s: string) {
+                const o = { f(v: unknown) {}, k: "a" };
+                o?.f(/*object*/o);
+                s?.charAt(/*string*/s as any);
+                x?.f(/*nullable*/x);
+                if (o.k === "a") /*afterProperty*/o;
+            }
+        "#;
+        let info = module(SOURCE);
+        for (marker, expression, expected) in [
+            ("object", "o", false),
+            ("string", "s", false),
+            ("nullable", "x", true),
+            // A test of a property alone narrows `o` only when its type is a
+            // union of objects, so `o` keeps no reads.
+            ("afterProperty", "o", false),
+        ] {
+            assert_eq!(
+                info.flow.is_candidate(marked(SOURCE, marker, expression)),
+                expected,
+                "{marker}"
             );
         }
     }
