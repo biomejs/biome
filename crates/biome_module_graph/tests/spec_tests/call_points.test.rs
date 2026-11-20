@@ -790,13 +790,12 @@ fn overload_selection_uses_argument_types_at_the_call() {
 
 // TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type,
 // except where a comment says otherwise. TypeScript selects the signature by
-// the argument types at the call, which a test that Biome doesn't decompose
-// can make narrower than Biome's, as `isStr`, whose type predicate TypeScript
-// infers, does for `x`. Biome skips a signature only when no narrowing of the
-// arguments can make it accept them, so a call that depends on such a
-// narrowing narrows nothing, and a call with a type argument inferred from an
-// argument other than the one that it narrows narrows only where it is
-// truthy.
+// the argument types at the call, which a test before the call can narrow, as
+// `isStr`, whose type predicate both TypeScript and Biome infer, does for `x`.
+// Biome skips a signature only when no narrowing of the arguments can make it
+// accept them, so a call that depends on a narrowing that Biome lacks narrows
+// nothing, and a call with a type argument inferred from an argument other
+// than the one that it narrows narrows only where it is truthy.
 #[test]
 fn overload_selection_skips_only_signatures_that_reject_every_narrowing() {
     assert_reads(
@@ -831,13 +830,10 @@ fn overload_selection_skips_only_signatures_that_reject_every_narrowing() {
         function s11(x: string | null) { if (same(x)) /*s11then*/x; else /*s11else*/x; }
         "#,
         &[
-            // TypeScript gives `string`. Biome doesn't infer the type
-            // predicate of `isStr`, so `x` may be `number` at the call, and
-            // the first signature of `g` accepts the `string` that
-            // TypeScript sees.
-            ("s1", "x", &["number", "string"]),
-            // TypeScript gives `"a"`.
-            ("s2", "x", &["number", "string"]),
+            // `isStr` narrows `x` to `string` at the call, which the first
+            // signature of `g` accepts.
+            ("s1", "x", &["string"]),
+            ("s2", "x", &["string: a"]),
             // The first signature accepts every member of `x`.
             ("s3then", "x", &["string: a"]),
             ("s3else", "x", &["string: b"]),
@@ -845,12 +841,10 @@ fn overload_selection_skips_only_signatures_that_reject_every_narrowing() {
             // signature.
             ("s4then", "x", &["string: a"]),
             ("s4else", "x", &["string: b"]),
-            // TypeScript gives `"b" | 1`, because `isA`, whose type
-            // predicate TypeScript infers, narrows `o` to `A`, which the
-            // first signature accepts.
-            ("s5", "x", &["number: 1", "string: a", "string: b"]),
-            // TypeScript gives `"a"`.
-            ("s6", "x", &["number: 1", "string: a", "string: b"]),
+            // `isA` narrows `o` to `A` at the call, which the first
+            // signature accepts.
+            ("s5", "x", &["number: 1", "string: b"]),
+            ("s6", "x", &["string: a"]),
             // The comparison with `K` narrows `x` to `"a"`, which the first
             // signature of `q` accepts.
             ("s7", "x", &["string: a"]),
@@ -859,11 +853,12 @@ fn overload_selection_skips_only_signatures_that_reject_every_narrowing() {
             // comparison in `s7` does.
             ("s8then", "x", &["string"]),
             ("s8else", "x", &["string"]),
-            // TypeScript gives `number | boolean`. `T` is `string` in
-            // TypeScript, while Biome infers `string | number` from `y`.
+            // TypeScript gives `number | boolean`. `T` is `string`, but it
+            // comes from `y`, not from the argument that the call narrows,
+            // so Biome takes it as possibly wider than TypeScript's, and the
+            // call narrows only where it is truthy.
             ("s9", "x", &["boolean", "number", "string"]),
-            // TypeScript gives `string`.
-            ("s10", "x", &["number", "string"]),
+            ("s10", "x", &["string"]),
             // Both signatures narrow alike, so it doesn't matter which one
             // TypeScript selects.
             ("s11then", "x", &["string"]),
@@ -1100,13 +1095,9 @@ fn constraints_read_the_receiver_at_the_call() {
         function r4(xs: (string | number)[]) { if (xs.every(isNumber)) { const r = xs.filter(isString); /*r4*/r; } }
         "#,
         &[
-            // Biome selects the first signature of `filter` for the call's
-            // result and infers nothing for `S` there.
-            (
-                "r1",
-                "xs.filter(isString)",
-                &["instanceof Array<S extends T>"],
-            ),
+            // The second signature of `filter`, because `string` violates
+            // `S extends number` with the type of `xs` at the call.
+            ("r1", "xs.filter(isString)", &["instanceof Array<number>"]),
             ("r2", "xs", &["instanceof Array<number>"]),
             ("r3", "xs", &["instanceof Array<number>"]),
             // Narrower than TypeScript: the type of `r` comes from its
