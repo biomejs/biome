@@ -753,6 +753,7 @@ pub mod use_tailwind_shorthand_classes;
 pub mod use_tailwind_sorted_classes;
 pub mod use_tailwind_static_class_strings;
 pub mod use_tailwind_variables_shorthand;
+pub mod use_tanstack_query_exhaustive_dependencies;
 pub mod use_tanstack_query_infinite_query_property_order;
 pub mod use_tanstack_query_mutation_property_order;
 pub mod use_tanstack_query_stable_query_client;
