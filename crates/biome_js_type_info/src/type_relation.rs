@@ -11,8 +11,8 @@
 //! [`crate::type_operations`].
 
 use crate::generated::global_types::ids::{
-    BOOLEAN_ID_GLOBAL_TYPE_ID, NUMBER_ID_GLOBAL_TYPE_ID, OBJECT_ID_GLOBAL_TYPE_ID,
-    PROMISE_ALL_ID_GLOBAL_TYPE_ID, PROMISE_ALL_SETTLED_ID_GLOBAL_TYPE_ID,
+    BOOLEAN_ID_GLOBAL_TYPE_ID, FUNCTION_ID_GLOBAL_TYPE_ID, NUMBER_ID_GLOBAL_TYPE_ID,
+    OBJECT_ID_GLOBAL_TYPE_ID, PROMISE_ALL_ID_GLOBAL_TYPE_ID, PROMISE_ALL_SETTLED_ID_GLOBAL_TYPE_ID,
     PROMISE_ANY_ID_GLOBAL_TYPE_ID, PROMISE_CATCH_ID_GLOBAL_TYPE_ID,
     PROMISE_CONSTRUCT_ID_GLOBAL_TYPE_ID, PROMISE_FINALLY_ID_GLOBAL_TYPE_ID,
     PROMISE_RACE_ID_GLOBAL_TYPE_ID, PROMISE_REJECT_ID_GLOBAL_TYPE_ID,
@@ -23,12 +23,12 @@ use crate::interned_types::{
     FunctionParameter, InternedClass, InternedConstructor, InternedExtendsType, InternedFunction,
     InternedGenericTypeParameter, InternedIntersection, InternedLiteral, InternedTuple,
     InternedTypeInstance, InternedUnion, Literal, ReturnType, TupleElementType, TypeData, TypeDb,
-    TypeMember, TypeMemberKind,
+    TypeMember, TypeMemberKind, well_known_symbol_name,
 };
 use crate::literal::StringLiteral;
 use crate::type_operations::keyof;
 use crate::type_transform::TypeSubstitution;
-use crate::{GlobalTypeId, TypeOperator};
+use crate::{GlobalTypeId, TypeOperator, TypeofKind};
 use biome_js_syntax::numbers::canonicalize_js_bigint_literal;
 use rustc_hash::FxHashSet;
 
@@ -188,6 +188,81 @@ impl<'db> InternedExtendsType<'db> {
     ) -> Option<TypeData<'db>> {
         evaluate_extends_with(db, self, check_type, extends_type, &mut resolve)
             .map(|evaluated| evaluated.ty)
+    }
+}
+
+/// Returns whether a value whose `typeof` is `kind` can have the object type
+/// `target`, by comparing `target` with the value's apparent type.
+///
+/// The apparent type of a primitive is its wrapper, such as `String` for
+/// `"string"`, together with the members of `Object`. For `"function"` it is
+/// `Function`. `target` must be normalized.
+///
+/// Returns `Assignable` when every such value has `target`. For example, every
+/// string has `{ length: number }`, and every value that isn't nullish has
+/// `{}`.
+///
+/// Returns `NotAssignable` when no such value has `target`:
+///
+/// - `kind` is `"undefined"`.
+/// - `target` requires a member that the apparent type lacks.
+/// - Every member of `target` is optional, and the apparent type has none of
+///   them.
+/// - `target` has a call or construct signature, and `kind` isn't
+///   `"function"`.
+///
+/// Returns `Undetermined` in every other case, including these:
+///
+/// - `kind` is `"object"`.
+/// - `kind` is `"function"`, and `target` has or may inherit a call or
+///   construct signature. Some functions have such a type and others don't.
+/// - A member of the apparent type has a different type from the member of
+///   `target`. Only a missing member is conclusive, because the generated
+///   globals come from the ES2015 library files, and newer ones add overloads
+///   to some members, such as `localeCompare` of `String`.
+/// - `target` has a member that a newer library adds to the wrapper, such as
+///   `padStart` of `String`. The `toString`, `toLocaleString`, and `valueOf`
+///   members of a `bigint` count the same way, because the generated globals
+///   have no `BigInt` wrapper.
+/// - `target` has more than 64 members, or members that can't be listed.
+///
+/// Members that the project adds to a wrapper through `declare global` aren't
+/// seen, so a `target` that requires one gives `NotAssignable`.
+pub(crate) fn primitive_can_satisfy<'db>(
+    db: &'db dyn TypeDb,
+    kind: TypeofKind,
+    target: TypeData<'db>,
+    resolve: &mut TypeResolver<'db, '_>,
+) -> Assignability {
+    AssignabilityCheck::new(db, resolve, &[]).primitive_can_satisfy(kind, target)
+}
+
+/// Returns the members that TypeScript 7.0.2's library files declare on the
+/// wrapper of a `typeof` kind but the generated globals lack. These members
+/// come from library files newer than ES2015.
+fn members_from_newer_libraries(kind: TypeofKind) -> &'static [&'static str] {
+    match kind {
+        TypeofKind::String => &[
+            "at",
+            "isWellFormed",
+            "matchAll",
+            "padEnd",
+            "padStart",
+            "replaceAll",
+            "toWellFormed",
+            "trimEnd",
+            "trimLeft",
+            "trimRight",
+            "trimStart",
+        ],
+        TypeofKind::Symbol => &["description"],
+        // The generated globals have no `BigInt` wrapper.
+        TypeofKind::BigInt => &["toLocaleString", "toString", "valueOf"],
+        TypeofKind::Boolean
+        | TypeofKind::Function
+        | TypeofKind::Number
+        | TypeofKind::Object
+        | TypeofKind::Undefined => &[],
     }
 }
 
@@ -434,6 +509,16 @@ impl StructuralMembers<'_> {
     }
 }
 
+/// Whether an object type has a call or construct signature, which only
+/// functions have.
+enum Signatures {
+    Present,
+    Absent,
+    /// The type may have a signature that isn't listed, or inherit one from a
+    /// parent that can't be inspected.
+    Unknown,
+}
+
 /// Outcome of looking up a member while comparing object types.
 enum MemberLookup<'db> {
     Found {
@@ -515,7 +600,7 @@ struct InferenceCandidate<'db> {
 /// A check answers only when it is certain. A conditional whose check is
 /// undetermined stays unevaluated.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
-enum Assignability {
+pub(crate) enum Assignability {
     Assignable,
     NotAssignable,
     /// The available type information can't decide the relation. For example,
@@ -1302,6 +1387,216 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
             }
             _ => Assignability::Undetermined,
         }
+    }
+
+    /// See [`primitive_can_satisfy`].
+    fn primitive_can_satisfy(&mut self, kind: TypeofKind, target: TypeData<'db>) -> Assignability {
+        let apparent = match kind {
+            TypeofKind::Undefined => return Assignability::NotAssignable,
+            TypeofKind::Object => return Assignability::Undetermined,
+            TypeofKind::BigInt => TypeData::BigInt,
+            TypeofKind::Boolean => TypeData::Boolean,
+            TypeofKind::Number => TypeData::Number,
+            TypeofKind::String => TypeData::String,
+            TypeofKind::Symbol => TypeData::Symbol,
+            TypeofKind::Function => TypeData::instance_of(
+                self.db,
+                TypeData::GlobalType(FUNCTION_ID_GLOBAL_TYPE_ID),
+                Box::default(),
+            ),
+        };
+        let target = self.resolve(target);
+        if self.is_empty_object(target) {
+            return Assignability::Assignable;
+        }
+        match (kind, self.signatures(target, 0)) {
+            (TypeofKind::Function, Signatures::Present | Signatures::Unknown) => {
+                return Assignability::Undetermined;
+            }
+            (_, Signatures::Present) => return Assignability::NotAssignable,
+            _ => {}
+        }
+        let Some(target_members) = self.structural_members(target) else {
+            return Assignability::Undetermined;
+        };
+        if target_members.named.len() > MAX_STRUCTURAL_MEMBERS {
+            return Assignability::Undetermined;
+        }
+
+        let target_is_weak = target_members.is_weak();
+        let mut found = Vec::with_capacity(target_members.named.len());
+        let mut may_share_member = false;
+        let mut result = if target_members.has_unlisted_members {
+            Assignability::Undetermined
+        } else {
+            Assignability::Assignable
+        };
+        for (name, target_ty, target_is_optional) in target_members.named {
+            match self.find_primitive_member(kind, &name) {
+                MemberLookup::Found {
+                    ty: source_ty,
+                    is_optional: source_is_optional,
+                } => {
+                    may_share_member = true;
+                    if source_is_optional && !target_is_optional {
+                        result = Assignability::Undetermined;
+                    }
+                    found.push((name, source_ty, target_ty, target_is_optional));
+                }
+                MemberLookup::Missing if target_is_optional => {}
+                MemberLookup::Missing => return Assignability::NotAssignable,
+                MemberLookup::Unknown => {
+                    may_share_member = true;
+                    result = Assignability::Undetermined;
+                }
+            }
+        }
+        if target_is_weak && !may_share_member {
+            return Assignability::NotAssignable;
+        }
+        if result != Assignability::Assignable {
+            return result;
+        }
+
+        for (name, source_ty, target_ty, target_is_optional) in found {
+            let target_ty = if target_is_optional {
+                with_undefined(self.db, target_ty)
+            } else {
+                target_ty
+            };
+            if self.is_member_assignable(source_ty, target_ty, &name) != Assignability::Assignable {
+                return Assignability::Undetermined;
+            }
+        }
+        if self.is_unrelated_class_instance(apparent, target) {
+            return Assignability::Undetermined;
+        }
+        Assignability::Assignable
+    }
+
+    /// Returns whether the values of the object type `ty` have a call or
+    /// construct signature, declared or inherited. `depth` counts the parents
+    /// already visited. Past [`MAX_MEMBER_LOOKUP_DEPTH`], the result is
+    /// [`Signatures::Unknown`].
+    ///
+    /// An instance of a class has one only through a built-in parent class
+    /// such as `Function`. The signatures listed on a built-in class, such as
+    /// the call signature of `String`, belong to its constructor.
+    fn signatures(&mut self, ty: TypeData<'db>, depth: usize) -> Signatures {
+        if depth > MAX_MEMBER_LOOKUP_DEPTH {
+            return Signatures::Unknown;
+        }
+        let ty = match self.resolve(ty) {
+            TypeData::InstanceOf(instance) => self.resolve(instance.ty(self.db)),
+            ty => ty,
+        };
+        let (members, parents, mut result) = match ty.expand_canonical_global(self.db) {
+            TypeData::Class(class) => {
+                if depth > 0 && class.is_builtin(self.db) {
+                    return Signatures::Unknown;
+                }
+                return match class.extends(self.db) {
+                    Some(parent) => self.signatures(parent, depth + 1),
+                    None => Signatures::Absent,
+                };
+            }
+            TypeData::Object(object) => (
+                object.members(self.db).as_ref(),
+                object.prototype(self.db).into_iter().collect(),
+                if object.has_unknown_members(self.db) {
+                    Signatures::Unknown
+                } else {
+                    Signatures::Absent
+                },
+            ),
+            TypeData::Literal(literal) => match literal.literal(self.db) {
+                Literal::Object(members) => (members.as_ref(), Vec::new(), Signatures::Absent),
+                _ => return Signatures::Unknown,
+            },
+            TypeData::Interface(interface) => (
+                interface.members(self.db).as_ref(),
+                interface.extends(self.db).to_vec(),
+                Signatures::Absent,
+            ),
+            _ => return Signatures::Unknown,
+        };
+        if members
+            .iter()
+            .any(|member| member.kind.is_call_signature() || member.kind.is_constructor())
+        {
+            return Signatures::Present;
+        }
+        for parent in parents {
+            match self.signatures(parent, depth + 1) {
+                Signatures::Present => return Signatures::Present,
+                Signatures::Absent => {}
+                Signatures::Unknown => result = Signatures::Unknown,
+            }
+        }
+        result
+    }
+
+    /// Looks up `name` on the apparent type of a value whose `typeof` is
+    /// `kind`: the instance members of the kind's wrapper, then the members of
+    /// `Object`. A `bigint` has no wrapper among the generated globals, so only
+    /// `Object` is searched.
+    ///
+    /// Returns `MemberLookup::Unknown` for a member that a library newer than
+    /// the generated globals adds to the wrapper, when an index signature or a
+    /// computed member of the wrapper may have `name`, and for `"object"` and
+    /// `"undefined"`.
+    fn find_primitive_member(&mut self, kind: TypeofKind, name: &str) -> MemberLookup<'db> {
+        if members_from_newer_libraries(kind).contains(&name) {
+            return MemberLookup::Unknown;
+        }
+        let wrapper = match kind {
+            TypeofKind::Boolean => Some(BOOLEAN_ID_GLOBAL_TYPE_ID),
+            TypeofKind::Function => Some(FUNCTION_ID_GLOBAL_TYPE_ID),
+            TypeofKind::Number => Some(NUMBER_ID_GLOBAL_TYPE_ID),
+            TypeofKind::String => Some(STRING_ID_GLOBAL_TYPE_ID),
+            TypeofKind::Symbol => Some(SYMBOL_ID_GLOBAL_TYPE_ID),
+            TypeofKind::BigInt => None,
+            TypeofKind::Object | TypeofKind::Undefined => return MemberLookup::Unknown,
+        };
+        if let Some(wrapper) = wrapper {
+            let TypeData::Class(class) =
+                TypeData::GlobalType(wrapper).expand_canonical_global(self.db)
+            else {
+                return MemberLookup::Unknown;
+            };
+            let members = class.members(self.db);
+            if let Some(member) = members
+                .iter()
+                .find(|member| !member.kind.is_static() && member.kind.has_name(name))
+            {
+                return MemberLookup::Found {
+                    ty: member_type(self.db, member),
+                    is_optional: member.kind.is_optional(),
+                };
+            }
+            // A member keyed by a well-known symbol, such as `[Symbol.iterator]`
+            // of `String`, can't have this name, so it doesn't make the lookup
+            // unknown. `find_member` treats every computed member as a possible
+            // match.
+            let is_numeric_name = name.parse::<f64>().is_ok();
+            if members.iter().any(|member| {
+                member.kind.index_signature_type().is_some_and(|key| {
+                    is_numeric_name || !matches!(key, TypeData::Number | TypeData::Symbol)
+                }) || matches!(
+                    member.kind,
+                    TypeMemberKind::ComputedValue(key) | TypeMemberKind::ConstAssertedComputedValue(key)
+                        if well_known_symbol_name(key).is_none()
+                )
+            }) {
+                return MemberLookup::Unknown;
+            }
+        }
+        let object = TypeData::instance_of(
+            self.db,
+            TypeData::GlobalType(OBJECT_ID_GLOBAL_TYPE_ID),
+            Box::default(),
+        );
+        self.find_member(object, name, 0, &mut FxHashSet::default())
     }
 
     fn is_object_like(&mut self, mut ty: TypeData<'db>) -> bool {

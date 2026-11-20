@@ -226,6 +226,14 @@ conditional expressions, `await`, the comma operator, and `+`. Complete module
 inference narrows each read as an individual expression query does, from the
 declared type its own context resolved.
 
+`narrow_type` and `falsy_values` take a resolver, as `keyof` and conditional
+types do: `ResolutionCtx::narrowing_resolver` resolves handles in the context
+that solves the read. Narrowing calls it only to compare an object type with
+primitives and functions in a falsy or `typeof` test, for example to find that
+no falsy primitive has the members of `interface Foo { a: number }`. Tests of
+primitive types never call it. The comparison itself, including the member
+lookups on wrapper types such as `String`, lives in `biome_js_type_info`.
+
 #### Caching
 
 Collected flow belongs to the module input, so an edit replaces it together
