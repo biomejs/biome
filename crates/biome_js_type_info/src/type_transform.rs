@@ -542,6 +542,10 @@ struct TypeNormalizer<'a, R> {
     resolve: &'a mut R,
     /// Remaining conditional instantiations, shared with nested normalizations.
     remaining_instantiations: &'a mut usize,
+    /// Whether generic parameters are kept as they are instead of having their
+    /// constraints and defaults normalized. See
+    /// [`TypeData::normalize_nested_types_keeping_generics`].
+    keep_generics: bool,
 }
 
 impl<'db, R> TypeNormalizer<'_, R>
@@ -564,6 +568,7 @@ where
                 &mut TypeNormalizer {
                     resolve: &mut *self.resolve,
                     remaining_instantiations: &mut *self.remaining_instantiations,
+                    keep_generics: self.keep_generics,
                 },
             )
             .map_or(ty, |ty| ty)
@@ -730,6 +735,9 @@ where
 {
     fn enter(&mut self, db: &'db dyn TypeDb, ty: TypeData<'db>) -> TypeTransformAction<'db> {
         let ty = (self.resolve)(ty);
+        if self.keep_generics && matches!(ty, TypeData::Generic(_)) {
+            return TypeTransformAction::Replace(ty);
+        }
         // This runs before the instance's target is expanded to its declaration.
         if let TypeData::InstanceOf(instance) = ty
             && let Some(awaited) = self.instantiate_awaited(db, instance)
@@ -825,7 +833,37 @@ impl<'db> TypeData<'db> {
     pub fn normalize_nested_types(
         self,
         db: &'db dyn TypeDb,
+        resolve: impl FnMut(Self) -> Self,
+    ) -> TypeTransformResult<Self> {
+        self.normalize_nested_types_with(db, resolve, false)
+    }
+
+    /// Resolves nested type handles and simplifies structural wrappers while
+    /// keeping generic parameters, including their constraints and defaults,
+    /// unchanged.
+    ///
+    /// Member lookup uses this normalization because member lookup normalizes a
+    /// member type every time it finds the member. Member types often declare
+    /// generic parameters with large constraints, such as
+    /// `RE extends ReferenceExpression<DB, TB>`. Keeping the parameters avoids
+    /// normalizing those constraints on every lookup.
+    ///
+    /// Analyzers read a parameter's normalized constraint, so they use
+    /// [`Self::normalize_nested_types`] instead. For example, a value of type
+    /// `T` is always truthy when `T extends "a" | "b"`.
+    pub fn normalize_nested_types_keeping_generics(
+        self,
+        db: &'db dyn TypeDb,
+        resolve: impl FnMut(Self) -> Self,
+    ) -> TypeTransformResult<Self> {
+        self.normalize_nested_types_with(db, resolve, true)
+    }
+
+    fn normalize_nested_types_with(
+        self,
+        db: &'db dyn TypeDb,
         mut resolve: impl FnMut(Self) -> Self,
+        keep_generics: bool,
     ) -> TypeTransformResult<Self> {
         let mut remaining_instantiations = MAX_CONDITIONAL_INSTANTIATIONS;
         TypeDataTransformer::new(MAX_TYPE_NORMALIZATION_STEPS).transform(
@@ -834,6 +872,7 @@ impl<'db> TypeData<'db> {
             &mut TypeNormalizer {
                 resolve: &mut resolve,
                 remaining_instantiations: &mut remaining_instantiations,
+                keep_generics,
             },
         )
     }
@@ -1217,6 +1256,42 @@ mod tests {
             source.substitute_types(&db, &substitutions),
             TypeTransformResult::LimitExceeded
         );
+    }
+
+    #[test]
+    fn normalization_keeping_generics_preserves_generic_parameter_identity() {
+        let db = TestDb::default();
+        let constraint = TypeData::TypeofType(InternedTypeofType::new(&db, TypeData::String));
+        let u = TypeData::Generic(InternedGenericTypeParameter::new(
+            &db,
+            false,
+            Some(constraint),
+            None,
+            Text::from("U"),
+        ));
+        let function = TypeData::Function(InternedFunction::new(
+            &db,
+            vec![u].into_boxed_slice(),
+            Box::default(),
+            ReturnType::Type(u),
+            false,
+            None,
+        ));
+        assert_eq!(
+            function
+                .normalize_nested_types_keeping_generics(&db, |ty| ty)
+                .unwrap(),
+            function
+        );
+        // Without keeping generics, the constraint normalizes to `string`.
+        let normalized = function.normalize_nested_types(&db, |ty| ty).unwrap();
+        let TypeData::Function(normalized) = normalized else {
+            panic!("expected a function, got {normalized:?}");
+        };
+        let [TypeData::Generic(parameter)] = normalized.type_parameters(&db).as_ref() else {
+            panic!("expected one generic parameter");
+        };
+        assert_eq!(parameter.constraint(&db), Some(TypeData::String));
     }
 
     #[test]

@@ -873,3 +873,159 @@ fn test_infer_call_expression_type_substitutes_inline_mapped_return_type() {
         format_inferred_type(&db, literal_a)
     );
 }
+
+#[test]
+fn test_class_method_type_parameters_resolve_in_method_scope() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            interface Tables {
+                payments: string;
+            }
+
+            declare class DeclaredQuery<DB> {
+                pick<TE extends keyof DB>(from: TE): TE;
+            }
+
+            class Query<DB> {
+                pick<TE extends keyof DB>(from: TE): TE {
+                    return from;
+                }
+            }
+
+            declare const declared: DeclaredQuery<Tables>;
+            declare const query: Query<Tables>;
+            export const declaredPicked = declared.pick("payments");
+            export const picked = query.pick("payments");
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let index_module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, index_module).expect("types must be inferred");
+
+    for name in ["declaredPicked", "picked"] {
+        let ty = inferred_binding_ty_by_name(&db, index_module, inferred, name)
+            .expect("binding type must be inferred");
+        let ty = inferred.resolve_type(&db, ty);
+        assert!(
+            is_inferred_string_literal(&db, ty, "payments"),
+            "{name} must be \"payments\", got {}",
+            format_inferred_type(&db, ty)
+        );
+    }
+}
+
+#[test]
+fn test_class_method_type_parameter_shadows_class_type_parameter() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            declare class DeclaredFactory<T> {
+                create<T = string>(): T;
+                outer(): T;
+            }
+
+            class Factory<T> {
+                create<T = string>(): T {
+                    return undefined as T;
+                }
+                outer(): T {
+                    return undefined as T;
+                }
+            }
+
+            declare const declared: DeclaredFactory<number>;
+            declare const factory: Factory<number>;
+            export const declaredExplicit = declared.create<boolean>();
+            export const declaredDefaulted = declared.create();
+            export const declaredOuter = declared.outer();
+            export const explicit = factory.create<boolean>();
+            export const defaulted = factory.create();
+            export const outer = factory.outer();
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let index_module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, index_module).expect("types must be inferred");
+    let binding_ty = |name: &str| {
+        let ty = inferred_binding_ty_by_name(&db, index_module, inferred, name)
+            .expect("binding type must be inferred");
+        inferred.resolve_type(&db, ty)
+    };
+
+    for name in ["declaredExplicit", "explicit"] {
+        let ty = binding_ty(name);
+        assert!(
+            is_inferred_boolean(&db, ty),
+            "{name} must be boolean, got {}",
+            format_inferred_type(&db, ty)
+        );
+    }
+    for name in ["declaredDefaulted", "defaulted"] {
+        let ty = binding_ty(name);
+        assert!(
+            is_inferred_string(&db, ty),
+            "{name} must be string, got {}",
+            format_inferred_type(&db, ty)
+        );
+    }
+    for name in ["declaredOuter", "outer"] {
+        let ty = binding_ty(name);
+        assert!(
+            is_inferred_number(&db, ty),
+            "{name} must be number, got {}",
+            format_inferred_type(&db, ty)
+        );
+    }
+}
+
+#[test]
+fn test_generic_class_method_computed_name_resolves_in_class_scope() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            const key = "run";
+
+            declare class DeclaredRunner {
+                [key]<T>(key: T): T;
+            }
+
+            class Runner {
+                [key]<T>(key: T): T {
+                    return key;
+                }
+            }
+
+            declare const declared: DeclaredRunner;
+            declare const runner: Runner;
+            export const declaredRan = declared.run(1);
+            export const ran = runner.run(1);
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let index_module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, index_module).expect("types must be inferred");
+
+    for name in ["declaredRan", "ran"] {
+        let ty = inferred_binding_ty_by_name(&db, index_module, inferred, name)
+            .expect("binding type must be inferred");
+        let ty = inferred.resolve_type(&db, ty);
+        assert!(
+            is_inferred_number(&db, ty),
+            "{name} must be number, got {}",
+            format_inferred_type(&db, ty)
+        );
+    }
+}

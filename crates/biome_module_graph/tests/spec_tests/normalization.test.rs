@@ -165,6 +165,52 @@ fn test_normalize_type_projections() {
 }
 
 #[test]
+fn test_member_type_normalization_is_shared_across_modules() {
+    // Both modules read `value` on the same imported instance, so the second
+    // module reuses the member type normalized for the first.
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/lib.ts".into(),
+        r#"
+        export interface Box<T> { value(): T }
+        export declare const box: Box<string>;
+    "#,
+    );
+    for path in ["/src/first.ts", "/src/second.ts"] {
+        fs.insert(
+            path.into(),
+            r#"
+            import { box } from "./lib";
+            export const value = box.value();
+        "#,
+        );
+    }
+    let db = build_js_test_module_db(
+        &fs,
+        &["/src/lib.ts", "/src/first.ts", "/src/second.ts"],
+        true,
+    );
+    let first = db.module_for_path(Utf8Path::new("/src/first.ts")).unwrap();
+    let second = db.module_for_path(Utf8Path::new("/src/second.ts")).unwrap();
+
+    db.clear_salsa_events();
+    let inferred = infer_module_types(&db, first).expect("types must be inferred");
+    let ty = inferred_binding_ty_by_name(&db, first, inferred, "value").unwrap();
+    assert_eq!(format_inferred_type(&db, ty), "string");
+    let events = db.take_salsa_events();
+    assert!(function_query_will_execute_count_by_name(&db, "normalize_member_type", &events) > 0);
+
+    let inferred = infer_module_types(&db, second).expect("types must be inferred");
+    let ty = inferred_binding_ty_by_name(&db, second, inferred, "value").unwrap();
+    assert_eq!(format_inferred_type(&db, ty), "string");
+    let events = db.take_salsa_events();
+    assert_eq!(
+        function_query_will_execute_count_by_name(&db, "normalize_member_type", &events),
+        0
+    );
+}
+
+#[test]
 fn test_type_projections_track_imports_without_whole_module_inference() {
     let fs = MemoryFileSystem::default();
     fs.insert(
