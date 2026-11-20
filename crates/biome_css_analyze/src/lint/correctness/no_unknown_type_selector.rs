@@ -50,52 +50,6 @@ fn is_in_view_transition_pseudo_element(type_selector: &CssTypeSelector) -> bool
         })
 }
 
-/// Returns whether the type selector is the whole selector `from` or `to` of a rule placed
-/// directly in a mixin body or an `@include` content block, where it becomes a keyframe selector
-/// once Sass places it inside `@keyframes`.
-///
-/// Control-flow at-rules such as `@if` between the rule and the block don't change where Sass puts
-/// the rule. An enclosing style rule or another at-rule, such as `@media`, does.
-fn is_keyframe_selector_in_scss_block(type_selector: &CssTypeSelector, name: &str) -> bool {
-    if !(name.eq_ignore_ascii_case("from") || name.eq_ignore_ascii_case("to"))
-        || type_selector.namespace().is_some()
-    {
-        return false;
-    }
-    let Some(compound) = type_selector.parent::<CssCompoundSelector>() else {
-        return false;
-    };
-    if !compound.nesting_selectors().is_empty() || !compound.sub_selectors().is_empty() {
-        return false;
-    }
-    let selector = match compound.parent::<CssRelativeSelector>() {
-        Some(relative) if relative.combinator().is_some() => return false,
-        Some(relative) => relative.into_syntax(),
-        None => compound.into_syntax(),
-    };
-    let Some(rule) = selector
-        .grand_parent()
-        .filter(|rule| STYLE_RULE_KINDS.matches(rule.kind()))
-    else {
-        return false;
-    };
-    rule.ancestors()
-        .skip(1)
-        .find_map(|node| {
-            let kind = node.kind();
-            if MIXIN_BLOCK_KINDS.matches(kind) {
-                Some(true)
-            } else if STYLE_RULE_KINDS.matches(kind)
-                || (AnyCssAtRule::can_cast(kind) && !AnyScssControlFlowAtRule::can_cast(kind))
-            {
-                Some(false)
-            } else {
-                None
-            }
-        })
-        .unwrap_or(false)
-}
-
 declare_lint_rule! {
     /// Disallow unrecognized element names in type selectors.
     ///
@@ -205,4 +159,50 @@ impl Rule for NoUnknownTypeSelector {
             }),
         )
     }
+}
+
+/// Returns whether the type selector is the whole selector `from` or `to` of a rule placed
+/// directly in a mixin body or an `@include` content block, where it becomes a keyframe selector
+/// once Sass places it inside `@keyframes`.
+///
+/// Control-flow at-rules such as `@if` between the rule and the block don't change where Sass puts
+/// the rule. An enclosing style rule or another at-rule, such as `@media`, does.
+fn is_keyframe_selector_in_scss_block(type_selector: &CssTypeSelector, name: &str) -> bool {
+    if !(name.eq_ignore_ascii_case("from") || name.eq_ignore_ascii_case("to"))
+        || type_selector.namespace().is_some()
+    {
+        return false;
+    }
+    let Some(compound) = type_selector.parent::<CssCompoundSelector>() else {
+        return false;
+    };
+    if !compound.nesting_selectors().is_empty() || !compound.sub_selectors().is_empty() {
+        return false;
+    }
+    let selector = match compound.parent::<CssRelativeSelector>() {
+        Some(relative) if relative.combinator().is_some() => return false,
+        Some(relative) => relative.into_syntax(),
+        None => compound.into_syntax(),
+    };
+    let Some(rule) = selector
+        .grand_parent()
+        .filter(|rule| STYLE_RULE_KINDS.matches(rule.kind()))
+    else {
+        return false;
+    };
+    rule.ancestors()
+        .skip(1)
+        .find_map(|node| {
+            let kind = node.kind();
+            if MIXIN_BLOCK_KINDS.matches(kind) {
+                Some(true)
+            } else if STYLE_RULE_KINDS.matches(kind)
+                || (AnyCssAtRule::can_cast(kind) && !AnyScssControlFlowAtRule::can_cast(kind))
+            {
+                Some(false)
+            } else {
+                None
+            }
+        })
+        .unwrap_or(false)
 }
