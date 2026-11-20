@@ -1,0 +1,23 @@
+// should not generate diagnostics
+// `in` keeps a member whose merged declarations declare the property, as in
+// TypeScript, so a read of the property can still be falsy.
+
+interface Loaded {
+	data: number | undefined;
+}
+
+interface Loaded {
+	state: "loaded";
+}
+
+interface Pending {
+	data: () => void;
+}
+
+function read(result: Loaded | Pending) {
+	if ("data" in result) {
+		if (result.data) {
+			return 1;
+		}
+	}
+}

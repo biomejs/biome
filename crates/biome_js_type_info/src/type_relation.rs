@@ -29,10 +29,10 @@ use crate::generated::global_types::ids::{
     SYMBOL_ID_GLOBAL_TYPE_ID,
 };
 use crate::interned_types::{
-    FunctionParameter, InternedClass, InternedConstructor, InternedExtendsType, InternedFunction,
-    InternedGenericTypeParameter, InternedIntersection, InternedLiteral, InternedTuple,
-    InternedTypeInstance, InternedUnion, Literal, ReturnType, TupleElementType, TypeData, TypeDb,
-    TypeMember, TypeMemberKind, well_known_symbol_name,
+    ClassParents, FunctionParameter, InternedClass, InternedConstructor, InternedExtendsType,
+    InternedFunction, InternedGenericTypeParameter, InternedIntersection, InternedLiteral,
+    InternedTuple, InternedTypeInstance, InternedUnion, Literal, ReturnType, TupleElementType,
+    TypeData, TypeDb, TypeMember, TypeMemberKind, well_known_symbol_name,
 };
 use crate::literal::StringLiteral;
 use crate::type_operations::keyof;
@@ -1968,8 +1968,10 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
     /// [`Signatures::Unknown`].
     ///
     /// An instance of a class has one only through a built-in parent class
-    /// such as `Function`. The signatures listed on a built-in class, such as
-    /// the call signature of `String`, belong to its constructor.
+    /// such as `Function`, or through the interfaces merged into the class,
+    /// which can declare one or extend a type that has one. The signatures
+    /// listed on a built-in class, such as the call signature of `String`,
+    /// belong to its constructor.
     fn signatures(&mut self, ty: TypeData<'db>, depth: usize) -> Signatures {
         if depth > MAX_MEMBER_LOOKUP_DEPTH {
             return Signatures::Unknown;
@@ -1983,10 +1985,30 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
                 if depth > 0 && class.is_builtin(self.db) {
                     return Signatures::Unknown;
                 }
-                return match class.extends(self.db) {
-                    Some(parent) => self.signatures(parent, depth + 1),
-                    None => Signatures::Absent,
-                };
+                // A class that isn't built in lists only the call signatures
+                // of the interfaces merged into it, which belong to its
+                // instances.
+                if !class.is_builtin(self.db)
+                    && class
+                        .members(self.db)
+                        .iter()
+                        .any(|member| member.kind.is_call_signature())
+                {
+                    return Signatures::Present;
+                }
+                let ClassParents {
+                    extends,
+                    interface_bases,
+                } = class.parents(self.db);
+                let mut result = Signatures::Absent;
+                for parent in extends.iter().chain(interface_bases.iter()) {
+                    match self.signatures(*parent, depth + 1) {
+                        Signatures::Present => return Signatures::Present,
+                        Signatures::Absent => {}
+                        Signatures::Unknown => result = Signatures::Unknown,
+                    }
+                }
+                return result;
             }
             TypeData::Object(object) => (
                 object.members(self.db).as_ref(),
@@ -2512,7 +2534,13 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
                 (Some(_), Some(_)) => return None,
                 (None, _) => {}
             }
-            let Some(parent) = class.extends(self.db) else {
+            // Interfaces merged into a class declare no constructor for it,
+            // so only the parent class can provide one.
+            let ClassParents {
+                extends,
+                interface_bases: _,
+            } = class.parents(self.db);
+            let Some(parent) = *extends else {
                 return Some(Vec::new());
             };
             class = match self.resolve(parent) {
@@ -2770,9 +2798,17 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
                 if class == Some(target_class) {
                     return false;
                 }
-                let Some(parent) = class.and_then(|class| class.extends(self.db)) else {
+                // A class that the source reaches only through the interface
+                // bases of a class counts as unrelated, so assignability
+                // stays undetermined.
+                let Some(ClassParents {
+                    extends: Some(parent),
+                    interface_bases: _,
+                }) = class.map(|class| class.parents(self.db))
+                else {
                     return true;
                 };
+                let parent = *parent;
                 current = parent;
             }
             true
@@ -2888,11 +2924,17 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
                         interface.members(self.db),
                         interface.extends(self.db).is_empty(),
                     ),
-                    TypeData::Class(class) => (
-                        class.type_parameters(self.db),
-                        class.members(self.db),
-                        class.extends(self.db).is_none(),
-                    ),
+                    TypeData::Class(class) => {
+                        let ClassParents {
+                            extends,
+                            interface_bases,
+                        } = class.parents(self.db);
+                        (
+                            class.type_parameters(self.db),
+                            class.members(self.db),
+                            extends.is_none() && interface_bases.is_empty(),
+                        )
+                    }
                     _ => return None,
                 };
                 let substitutions = self
@@ -2990,12 +3032,24 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
                 interface.extends(self.db).to_vec(),
                 true,
             ),
-            TypeData::Class(class) if matches!(ty, TypeData::InstanceOf(_)) => (
-                class.members(self.db).as_ref(),
-                class.type_parameters(self.db).as_ref(),
-                class.extends(self.db).into_iter().collect(),
-                true,
-            ),
+            // The parent class comes before the interface bases, so its
+            // members take precedence over theirs, as in TypeScript.
+            TypeData::Class(class) if matches!(ty, TypeData::InstanceOf(_)) => {
+                let ClassParents {
+                    extends,
+                    interface_bases,
+                } = class.parents(self.db);
+                (
+                    class.members(self.db).as_ref(),
+                    class.type_parameters(self.db).as_ref(),
+                    extends
+                        .iter()
+                        .chain(interface_bases.iter())
+                        .copied()
+                        .collect(),
+                    true,
+                )
+            }
             _ => return MemberLookup::Unknown,
         };
 
@@ -3103,12 +3157,22 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
                     false,
                     !is_builtin,
                 ),
-                TypeData::Class(class) if is_instance => (
-                    class.members(self.db).as_ref(),
-                    class.extends(self.db).into_iter().collect(),
-                    true,
-                    false,
-                ),
+                TypeData::Class(class) if is_instance => {
+                    let ClassParents {
+                        extends,
+                        interface_bases,
+                    } = class.parents(self.db);
+                    (
+                        class.members(self.db).as_ref(),
+                        extends
+                            .iter()
+                            .chain(interface_bases.iter())
+                            .copied()
+                            .collect(),
+                        true,
+                        false,
+                    )
+                }
                 _ => return PropertyPresence::Unknown,
             };
         let mut is_indexed = false;
@@ -3296,11 +3360,20 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
         }
         self.remaining_steps = self.remaining_steps.checked_sub(1)?;
         let (members, parents, is_class) = match self.resolve(ty).expand_canonical_global(self.db) {
-            TypeData::Class(class) => (
-                class.members(self.db).to_vec(),
-                class.extends(self.db).into_iter().collect::<Vec<_>>(),
-                true,
-            ),
+            // Interfaces merged into a class give members only to its
+            // instances, so only the parent class has static members to
+            // inherit.
+            TypeData::Class(class) => {
+                let ClassParents {
+                    extends,
+                    interface_bases: _,
+                } = class.parents(self.db);
+                (
+                    class.members(self.db).to_vec(),
+                    extends.iter().copied().collect::<Vec<_>>(),
+                    true,
+                )
+            }
             TypeData::Interface(interface) => (
                 interface.members(self.db).to_vec(),
                 interface.extends(self.db).to_vec(),
@@ -3564,7 +3637,17 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
             return Some(false);
         }
         let parents = match source.data {
-            TypeData::Class(class) => class.extends(self.db).into_iter().collect::<Vec<_>>(),
+            TypeData::Class(class) => {
+                let ClassParents {
+                    extends,
+                    interface_bases,
+                } = class.parents(self.db);
+                extends
+                    .iter()
+                    .chain(interface_bases.iter())
+                    .copied()
+                    .collect::<Vec<_>>()
+            }
             TypeData::Interface(interface) => interface.extends(self.db).to_vec(),
             _ => return None,
         };
@@ -3671,12 +3754,26 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
             TypeData::Function(_) | TypeData::Constructor(_) | TypeData::Class(_) => Some(true),
             TypeData::Tuple(_) => Some(false),
             // A class can't declare a call signature, but it can extend
-            // `Function`.
+            // `Function`, and an interface merged into it can declare one or
+            // extend a type that has one.
             TypeData::InstanceOf(instance) => match self
                 .resolve(instance.ty(self.db))
                 .expand_canonical_global(self.db)
             {
-                TypeData::Class(class) if class.extends(self.db).is_none() => Some(false),
+                TypeData::Class(class)
+                    if matches!(
+                        class.parents(self.db),
+                        ClassParents {
+                            extends: None,
+                            interface_bases,
+                        } if interface_bases.is_empty()
+                    ) && !class
+                        .members(self.db)
+                        .iter()
+                        .any(|member| member.kind.is_call_signature()) =>
+                {
+                    Some(false)
+                }
                 TypeData::Tuple(_) => Some(false),
                 _ => None,
             },

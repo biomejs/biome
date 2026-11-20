@@ -1,13 +1,21 @@
 use super::*;
 use biome_js_syntax::{
-    AnyJsDeclaration, AnyJsIdentifierReference, AnyJsRoot, JsExport, JsIdentifierAssignment,
-    JsLanguage, JsSyntaxNode, TextRange, TsConditionalType, TsDeclareStatement,
-    TsTypeParameterName, unescape_js_identifier,
+    AnyJsDeclaration, AnyJsIdentifierReference, AnyJsRoot, JsClassDeclaration,
+    JsClassExportDefaultDeclaration, JsExport, JsIdentifierAssignment, JsLanguage, JsSyntaxNode,
+    TextRange, TsConditionalType, TsDeclareStatement, TsInterfaceDeclaration, TsTypeParameterName,
+    unescape_js_identifier,
 };
 use biome_jsdoc_comment::JsdocComment;
 use biome_rowan::{SyntaxKindSet, SyntaxNodePtr};
 use rustc_hash::{FxHashMap, FxHashSet};
 use std::collections::hash_map::Entry;
+
+/// The kinds of the declarations that TypeScript merges into one type when
+/// they declare one name in one scope: interfaces and class declarations. A
+/// class expression is left out, because its name is local to it.
+const MERGEABLE_TYPE_DECLARATION_KINDS: SyntaxKindSet<JsLanguage> = JsClassDeclaration::KIND_SET
+    .union(JsClassExportDefaultDeclaration::KIND_SET)
+    .union(TsInterfaceDeclaration::KIND_SET);
 
 /// Builds the [SemanticModel] consuming [SemanticEvent] and [JsSyntaxNode].
 /// For a good example on how to use it see [semantic_model].
@@ -188,6 +196,7 @@ impl SemanticModelBuilder {
                     bindings: vec![],
                     bindings_by_name: FxHashMap::default(),
                     overloads_by_name: FxHashMap::default(),
+                    type_declarations_by_name: FxHashMap::default(),
                     read_references: vec![],
                     write_references: vec![],
                     is_closure,
@@ -268,22 +277,56 @@ impl SemanticModelBuilder {
                         };
 
                         // Record an overload set only when a function follows a
-                        // same-name function (rare). The common case of a unique
-                        // name adds nothing beyond the check above, keeping the
-                        // hot build path allocation- and rehash-free.
-                        if matches!(declaration_kind, JsDeclarationKind::Function)
-                            && let Some(previous) = previous
-                        {
-                            let previous_id = previous.value_ty_or_ty();
-                            if self.bindings[previous_id.index()].declaration_kind
-                                == JsDeclarationKind::Function
-                            {
-                                scope
-                                    .overloads_by_name
-                                    .entry(name)
-                                    .or_insert_with(|| smallvec::smallvec![previous_id])
-                                    .push(binding_id);
+                        // same-name function, and a merge set only when an
+                        // interface or a class declaration follows a same-name
+                        // interface or class declaration (both rare). The common
+                        // case of a unique name adds nothing beyond the check
+                        // above, keeping the hot build path allocation- and
+                        // rehash-free.
+                        match (declaration_kind, previous) {
+                            (JsDeclarationKind::Function, Some(previous)) => {
+                                let previous_id = previous.value_ty_or_ty();
+                                if self.bindings[previous_id.index()].declaration_kind
+                                    == JsDeclarationKind::Function
+                                {
+                                    scope
+                                        .overloads_by_name
+                                        .entry(name)
+                                        .or_insert_with(|| smallvec::smallvec![previous_id])
+                                        .push(binding_id);
+                                }
                             }
+                            (
+                                JsDeclarationKind::Class | JsDeclarationKind::Interface,
+                                Some(previous),
+                            ) => {
+                                let declares_mergeable_type = |start| {
+                                    self.binding_node_by_start
+                                        .get(&start)
+                                        .and_then(JsSyntaxNode::parent)
+                                        .is_some_and(|declaration| {
+                                            MERGEABLE_TYPE_DECLARATION_KINDS
+                                                .matches(declaration.kind())
+                                        })
+                                };
+                                // Two classes of one name don't merge (TS2300).
+                                if let Some(previous_id) = previous.type_binding()
+                                    && !(declaration_kind == JsDeclarationKind::Class
+                                        && self.bindings[previous_id.index()].declaration_kind
+                                            == JsDeclarationKind::Class)
+                                    && declares_mergeable_type(
+                                        self.bindings[previous_id.index()].range.start(),
+                                    )
+                                    && declares_mergeable_type(range.start())
+                                {
+                                    scope
+                                        .type_declarations_by_name
+                                        .entry(name)
+                                        .or_insert_with(|| smallvec::smallvec![previous_id])
+                                        .push(binding_id);
+                                }
+                            }
+                            _ => {}
                         }
                     }
                 }

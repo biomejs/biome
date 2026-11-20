@@ -20,9 +20,9 @@ use biome_js_type_info::{
     TypeResolverLevel, TypeofExpression as RawTypeofExpression, global_type_id_for_qualifier,
     global_types,
     interned_types::{
-        CallArgumentType as InferredCallArgumentType, ConditionalSubset, ConditionalType,
-        InternedClass as InferredClass, InternedConstructor as InferredConstructor,
-        InternedFunction as InferredFunction,
+        CallArgumentType as InferredCallArgumentType, ClassParents, ConditionalSubset,
+        ConditionalType, InternedClass as InferredClass,
+        InternedConstructor as InferredConstructor, InternedFunction as InferredFunction,
         InternedGenericTypeParameter as InferredGenericTypeParameter,
         InternedLiteral as InferredInternedLiteral, InternedMappedType as InferredMappedType,
         InternedTuple as InferredTuple, InternedTypeInstance as InferredTypeInstance,
@@ -1454,16 +1454,25 @@ impl<'db> ResolutionCtx<'db, '_> {
                 );
             }
 
-            if let InferredTypeData::Class(class) = target
-                && let Some(extends) = class.extends(self.db)
-            {
-                let substitutions = substitutions_for_instance(
-                    self.db,
-                    target,
-                    instance.type_parameters(self.db),
-                    &[],
-                );
-                pending.push(apply_substitutions(self.db, extends, &substitutions));
+            if let InferredTypeData::Class(class) = target {
+                let ClassParents {
+                    extends,
+                    interface_bases,
+                } = class.parents(self.db);
+                if extends.is_some() || !interface_bases.is_empty() {
+                    let substitutions = substitutions_for_instance(
+                        self.db,
+                        target,
+                        instance.type_parameters(self.db),
+                        &[],
+                    );
+                    pending.extend(
+                        extends
+                            .iter()
+                            .chain(interface_bases.iter())
+                            .map(|base| apply_substitutions(self.db, *base, &substitutions)),
+                    );
+                }
             }
         }
 
@@ -1523,11 +1532,16 @@ impl<'db> ResolutionCtx<'db, '_> {
 
     fn resolve_super_expression(&mut self, parent: InferredTypeData<'db>) -> InferredTypeData<'db> {
         match self.resolve_inferred_type(parent) {
-            InferredTypeData::Class(class) => class
-                .extends(self.db)
-                .map_or(InferredTypeData::Unknown, |extends| {
+            // `super` names the parent class, never an interface base.
+            InferredTypeData::Class(class) => {
+                let ClassParents {
+                    extends,
+                    interface_bases: _,
+                } = class.parents(self.db);
+                extends.map_or(InferredTypeData::Unknown, |extends| {
                     InferredTypeData::instance_of(self.db, extends, Box::default())
-                }),
+                })
+            }
             InferredTypeData::Unknown
             | InferredTypeData::Global
             | InferredTypeData::GlobalType(_)
@@ -2569,9 +2583,14 @@ impl<'db> ResolutionCtx<'db, '_> {
                         excluded_names,
                         RestMemberMode::Instance,
                     );
-                    if let Some(extends) = class.extends(self.db) {
-                        pending.push(extends);
-                    }
+                    // The parent class is pushed last, so it is searched before
+                    // the interface bases.
+                    let ClassParents {
+                        extends,
+                        interface_bases,
+                    } = class.parents(self.db);
+                    pending.extend(interface_bases.iter().rev().copied());
+                    pending.extend(*extends);
                 }
                 InferredTypeData::InstanceOf(instance) => pending.push(instance.ty(self.db)),
                 InferredTypeData::Interface(interface) => collect_rest_members(

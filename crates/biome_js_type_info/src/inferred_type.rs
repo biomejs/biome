@@ -6,7 +6,9 @@ pub use boolean_coercion::BooleanCoercion;
 pub use spread_misuse::ObjectSpreadMisuse;
 
 use crate::TypeDb;
-use crate::interned_types::{ConditionalType, Literal, ReturnType, TypeData, TypeMember};
+use crate::interned_types::{
+    ClassParents, ConditionalType, Literal, ReturnType, TypeData, TypeMember,
+};
 use crate::return_type_relation::{
     ReturnTypeRelation, compare_declared_return_type_owned,
     is_escape_hatch as relation_is_escape_hatch, promise_inner as relation_promise_inner,
@@ -501,17 +503,29 @@ impl<'db> InferredType<'db> {
             let available_frontier = remaining_steps.saturating_sub(pending.len());
             match data {
                 TypeData::Class(class) => {
-                    if let Some(base) = class.extends(self.db) {
-                        if available_frontier == 0 {
-                            return None;
-                        }
-                        pending.push_back((
-                            base,
-                            child_path,
+                    // Interface bases are instance types, so only an
+                    // instance inherits from them.
+                    let ClassParents {
+                        extends,
+                        interface_bases,
+                    } = class.parents(self.db);
+                    let interface_bases = if is_instance_target {
+                        interface_bases.as_ref()
+                    } else {
+                        &[]
+                    };
+                    let bases = extends.iter().chain(interface_bases.iter());
+                    if bases.clone().count() > available_frontier {
+                        return None;
+                    }
+                    pending.extend(bases.map(|base| {
+                        (
+                            *base,
+                            child_path.clone(),
                             is_instance_target,
                             is_promise_like_target,
-                        ));
-                    }
+                        )
+                    }));
                 }
                 TypeData::Generic(generic) => {
                     if let Some(constraint) = generic.constraint(self.db) {
@@ -703,7 +717,11 @@ impl<'db> InferredType<'db> {
             }
             let members = match data {
                 TypeData::Class(class) => {
-                    pending.extend(class.extends(self.db));
+                    let ClassParents {
+                        extends,
+                        interface_bases,
+                    } = class.parents(self.db);
+                    pending.extend(extends.iter().chain(interface_bases.iter()).copied());
                     Some(class.members(self.db))
                 }
                 TypeData::Interface(interface) => {
@@ -1256,7 +1274,11 @@ impl<'db> InferredType<'db> {
                     if has_index_signature(class.members(self.db)) {
                         return Some(true);
                     }
-                    pending.extend(class.extends(self.db));
+                    let ClassParents {
+                        extends,
+                        interface_bases,
+                    } = class.parents(self.db);
+                    pending.extend(extends.iter().chain(interface_bases.iter()).copied());
                 }
                 TypeData::Interface(interface) => {
                     if has_index_signature(interface.members(self.db)) {
@@ -1731,7 +1753,11 @@ impl<'db> InferredType<'db> {
                     }) {
                         return true;
                     }
-                    pending.extend(class.extends(self.db));
+                    let ClassParents {
+                        extends,
+                        interface_bases,
+                    } = class.parents(self.db);
+                    pending.extend(extends.iter().chain(interface_bases.iter()).copied());
                     pending.extend(class.implements(self.db).iter().copied());
                 }
                 TypeData::Interface(interface) => {
@@ -1988,9 +2014,10 @@ mod tests {
     use super::*;
     use crate::ObjectKind;
     use crate::interned_types::{
-        InternedClass, InternedConstructor, InternedFunction, InternedGenericTypeParameter,
-        InternedInterface, InternedIntersection, InternedLiteral, InternedObject, InternedTuple,
-        InternedTypeofType, InternedUnion, TypeMember, TypeMemberKind,
+        ClassParents, InternedClass, InternedConstructor, InternedFunction,
+        InternedGenericTypeParameter, InternedInterface, InternedIntersection, InternedLiteral,
+        InternedObject, InternedTuple, InternedTypeofType, InternedUnion, TypeMember,
+        TypeMemberKind,
     };
     use crate::literal::NumberLiteral;
 
@@ -2121,7 +2148,7 @@ mod tests {
             let class = TypeData::Class(InternedClass::new(
                 &db,
                 Box::default(),
-                None,
+                ClassParents::default(),
                 Box::default(),
                 Box::default(),
                 Some(Text::new_static(name)),
@@ -2177,7 +2204,7 @@ mod tests {
         let class = TypeData::Class(InternedClass::new(
             &db,
             Box::default(),
-            None,
+            ClassParents::default(),
             Box::default(),
             Box::default(),
             Some(Text::new_static("Shape")),

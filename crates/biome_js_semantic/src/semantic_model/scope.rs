@@ -22,6 +22,11 @@ pub(crate) struct SemanticModelScopeData {
     // in source order, keyed by name. Tracked separately from `bindings_by_name` so
     // overload sets survive declaration merging with a same-name type/namespace.
     pub(crate) overloads_by_name: FxHashMap<Text, SmallVec<[BindingId; 2]>>,
+    // Same-name interface and class declarations of this scope, in source
+    // order, keyed by name. Tracked separately from `bindings_by_name`, which
+    // keeps one binding per meaning, so a merge set survives declaration
+    // merging with a same-name namespace or value.
+    pub(crate) type_declarations_by_name: FxHashMap<Text, SmallVec<[BindingId; 2]>>,
     // All read references of a scope
     pub(crate) read_references: Vec<ReferenceId>,
     // All write references of a scope
@@ -149,6 +154,33 @@ impl Scope {
             .filter(|set| set.len() > 1)
             .map(|set| set.to_vec())
             .collect()
+    }
+
+    /// Returns the sets of interface and class declarations that share a name
+    /// in this scope. TypeScript merges each set into one type. Each set lists
+    /// its declarations in source order, and the sets are ordered by their
+    /// first declaration. Only names with two or more such declarations form
+    /// a set.
+    ///
+    /// A class expression is never part of a set, and neither is a
+    /// declaration of another kind, such as a namespace or a variable, between
+    /// the declarations of a set. A class that follows another class of the
+    /// name starts no set, because TypeScript rejects the pair (TS2300). A set
+    /// can still hold two classes that an interface separates, as in
+    /// `class A {}`, `interface A {}`, `class A {}`.
+    ///
+    /// For example, `interface A { a: 1 }`, `namespace A {}`, and
+    /// `class A {}` give one set with the interface and the class.
+    ///
+    /// It **does not** return sets of parent scopes.
+    pub fn merged_type_declarations(&self) -> Vec<Vec<BindingId>> {
+        let mut sets: Vec<_> = self.data.scopes[self.id.index()]
+            .type_declarations_by_name
+            .values()
+            .map(|set| set.to_vec())
+            .collect();
+        sets.sort_unstable_by_key(|set| set[0].index());
+        sets
     }
 
     /// Checks if the current scope is one of the ancestor of "other". Given

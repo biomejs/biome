@@ -261,7 +261,7 @@ fn test_infer_call_expression_type_resolves_annotated_function_return_type() {
 
 #[test]
 fn class_call_signatures_select_declared_returns() {
-    use biome_js_type_info::interned_types::InternedClass;
+    use biome_js_type_info::interned_types::{ClassParents, InternedClass};
 
     let fs = MemoryFileSystem::default();
     fs.insert(
@@ -293,7 +293,7 @@ fn class_call_signatures_select_declared_returns() {
         InferredTypeData::Class(InternedClass::new(
             &db,
             Box::default(),
-            None,
+            ClassParents::default(),
             Box::default(),
             members,
             Some(Text::from("Callable")),

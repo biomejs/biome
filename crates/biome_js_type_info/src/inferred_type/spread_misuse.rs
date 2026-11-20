@@ -5,7 +5,7 @@ use crate::generated::global_types::ids::{
     READONLY_SET_ID_GLOBAL_TYPE_ID, SET_ID_GLOBAL_TYPE_ID, SYMBOL_ITERATOR_ID_GLOBAL_TYPE_ID,
     WEAK_MAP_ID_GLOBAL_TYPE_ID,
 };
-use crate::interned_types::{Literal, TypeData, TypeMember};
+use crate::interned_types::{ClassParents, Literal, TypeData, TypeMember};
 use crate::{GlobalTypeId, TypeDb};
 use rustc_hash::FxHashSet;
 
@@ -123,7 +123,16 @@ impl<'db> InferredType<'db> {
                             Some(ObjectSpreadMisuse::Iterable)
                         } else {
                             // A base class may be a built-in type, such as `Promise`.
-                            pending.extend(class.extends(db).map(|ty| (ty, true)));
+                            let ClassParents {
+                                extends,
+                                interface_bases,
+                            } = class.parents(db);
+                            pending.extend(
+                                extends
+                                    .iter()
+                                    .chain(interface_bases.iter())
+                                    .map(|ty| (*ty, true)),
+                            );
                             Some(ObjectSpreadMisuse::ClassInstance)
                         }
                     }

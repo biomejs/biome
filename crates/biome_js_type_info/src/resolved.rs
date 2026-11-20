@@ -8,7 +8,8 @@
 pub use crate::globals_ids::GlobalTypeId;
 pub use crate::interned_types::{
     AssertsReturnType as InferredAssertsReturnType, CallArgumentType as InferredCallArgumentType,
-    ConditionalSubset, ConditionalType, ConstructorParameter as InferredConstructorParameter,
+    ClassParents, ConditionalSubset, ConditionalType,
+    ConstructorParameter as InferredConstructorParameter,
     FunctionParameter as InferredFunctionParameter,
     FunctionParameterBinding as InferredFunctionParameterBinding, InternedClass as InferredClass,
     InternedConstructor as InferredConstructor, InternedFunction as InferredFunction,

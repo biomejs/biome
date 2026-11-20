@@ -1808,6 +1808,31 @@ fn typeof_removes_or_replaces_object_types() {
     );
 }
 
+// Every expected type is the type that TypeScript 7.0.2 (`tsc --strict`) gives
+// the read, unless a comment gives TypeScript's type. An interface merged into
+// a class can give its instances a call signature, of its own or through its
+// `extends` clause.
+#[test]
+fn typeof_function_keeps_classes_that_merged_interfaces_make_callable() {
+    assert_object_reads(
+        r#"
+        class F { f = 1 } interface F extends Callable {}
+        class G { g = 1 } interface G { (): void }
+        function t1(x: F | string) { if (typeof x === "function") /*functionBase*/x; else /*functionBaseElse*/x; }
+        function t2(x: G | string) { if (typeof x === "function") /*functionOwn*/x; else /*functionOwnElse*/x; }
+        "#,
+        &[
+            ("functionBase", &["instanceof F"]),
+            // TypeScript: `string`. The false branch of `"function"` keeps
+            // object types.
+            ("functionBaseElse", &["instanceof F", "string"]),
+            ("functionOwn", &["instanceof G"]),
+            // TypeScript: `string`, as above.
+            ("functionOwnElse", &["instanceof G", "string"]),
+        ],
+    );
+}
+
 // TypeScript 7.0.2 (`tsc --strict`) types both `&&` expressions as
 // `1 | undefined`. `typeof` narrows each left operand, so the type of `&&`
 // includes the falsy values of the narrowed operand. Biome keeps `Len` because

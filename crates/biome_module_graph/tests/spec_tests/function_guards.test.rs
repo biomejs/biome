@@ -972,6 +972,40 @@ fn object_targets_that_differ_only_by_readonly_keep_both_members_in_the_else_bra
     );
 }
 
+// TypeScript 7.0.2 (`tsc --strict`) merges the interfaces of one name in one
+// scope into one type, and a class with them, and gives every read below the
+// expected type.
+#[test]
+fn object_targets_see_the_members_of_every_merged_declaration() {
+    assert_reads(
+        r#"
+        interface M { m: 1 } interface M { n: 2 }
+        declare function isM(v: unknown): v is { m: 1 };
+        function merged(x: M | { m: 1; y: 2 } | string) { if (isM(x)) /*merged*/x; else /*mergedElse*/x; }
+        interface Y1 { y: 1 } interface Y1 { z: 2 }
+        declare function isY(v: unknown): v is { y: 1 };
+        function first(q: Y1 | { y: 1; w: 2 } | string) { if (isY(q)) /*first*/q; else /*firstElse*/q; }
+        class Kj { k = 1 } interface Kj { j: string }
+        declare function isJ(v: unknown): v is { j: string };
+        function classMember(q: Kj | string) { if (isJ(q)) /*classMember*/q; else /*classMemberElse*/q; }
+        interface Base0 { b: string }
+        class Lb { l = 1 } interface Lb extends Base0 {}
+        declare function isB(v: unknown): v is { b: string };
+        function classBase(q: Lb | string) { if (isB(q)) /*classBase*/q; else /*classBaseElse*/q; }
+        "#,
+        &[
+            ("merged", "x", &["M", r#"["m": number: 1, "y": number: 2]"#]),
+            ("mergedElse", "x", &["string"]),
+            ("first", "q", &["Y1", r#"["y": number: 1, "w": number: 2]"#]),
+            ("firstElse", "q", &["string"]),
+            ("classMember", "q", &["instanceof Kj"]),
+            ("classMemberElse", "q", &["string"]),
+            ("classBase", "q", &["instanceof Lb"]),
+            ("classBaseElse", "q", &["string"]),
+        ],
+    );
+}
+
 // TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
 // A branch that no value reaches is `never` in TypeScript, which Biome reads
 // as Unknown.

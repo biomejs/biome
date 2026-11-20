@@ -246,6 +246,17 @@ impl TsBindingReference {
         }
     }
 
+    /// Returns the binding that declares the type of the name, such as an
+    /// interface or a class, or `None` when the name declares no type of its
+    /// own, as a variable or a namespace doesn't.
+    pub fn type_binding(self) -> Option<BindingId> {
+        match self {
+            Self::Type(binding_id) | Self::TypeAndValueType(binding_id) => Some(binding_id),
+            Self::Merged { ty, .. } => ty,
+            Self::ValueType(_) | Self::NamespaceAndValueType(_) => None,
+        }
+    }
+
     /// Returns the value type binding, or the type binding if the value type
     /// binding is unknown.
     pub fn value_ty_or_ty(self) -> BindingId {
