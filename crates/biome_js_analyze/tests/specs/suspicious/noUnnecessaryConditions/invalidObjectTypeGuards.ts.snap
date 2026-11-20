@@ -1,0 +1,279 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidObjectTypeGuards.ts
+---
+# Input
+```ts
+// should generate diagnostics
+// A type-guard function or an assertion function whose target is an object
+// type or a union narrows the tested value, as in TypeScript, so a check
+// that the narrowed value can't fail is reported.
+
+interface Loaded {
+	data: { size: number };
+}
+
+interface Failed {
+	error: string;
+}
+
+declare function isLoaded(value: unknown): value is Loaded;
+declare function isLoadedOrFailed(value: unknown): value is Loaded | Failed;
+declare function isText(value: unknown): value is string | number;
+declare function isNamed(value: unknown): value is { name: string };
+declare function assertLoaded(value: unknown): asserts value is Loaded;
+declare function assertText(value: unknown): asserts value is string | number;
+
+const isLoadedArrow = (value: unknown): value is Loaded => typeof value === "object";
+
+function trueBranch(result: Loaded | undefined) {
+	if (isLoaded(result)) {
+		return result?.data.size;
+	}
+}
+
+function falseBranch(result: Loaded | null) {
+	if (!isLoaded(result)) {
+		if (result) {
+			return 1;
+		}
+	}
+}
+
+function unknownValue(value: unknown) {
+	if (isNamed(value)) {
+		return value?.name;
+	}
+}
+
+function unionTarget(value: Loaded | Failed | null) {
+	if (isLoadedOrFailed(value)) {
+		return value ?? "fallback";
+	}
+}
+
+function primitiveUnionTarget(value: unknown) {
+	if (isText(value)) {
+		return value ?? "fallback";
+	}
+}
+
+function arrow(result: Loaded | undefined) {
+	if (isLoadedArrow(result)) {
+		return result?.data;
+	}
+}
+
+function assertion(value: unknown) {
+	assertLoaded(value);
+	return value?.data;
+}
+
+function unionAssertion(value: unknown) {
+	assertText(value);
+	return value ?? "fallback";
+}
+
+```
+
+# Diagnostics
+```
+invalidObjectTypeGuards.ts:25:10 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    23 │ function trueBranch(result: Loaded | undefined) {
+    24 │ 	if (isLoaded(result)) {
+  > 25 │ 		return result?.data.size;
+       │ 		       ^^^^^^
+    26 │ 	}
+    27 │ }
+  
+  i Replace ?. with ..
+  
+    23 │ function trueBranch(result: Loaded | undefined) {
+    24 │ 	if (isLoaded(result)) {
+  > 25 │ 		return result?.data.size;
+       │ 		             ^^
+    26 │ 	}
+    27 │ }
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+invalidObjectTypeGuards.ts:31:7 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition is always falsy.
+  
+    29 │ function falseBranch(result: Loaded | null) {
+    30 │ 	if (!isLoaded(result)) {
+  > 31 │ 		if (result) {
+       │ 		    ^^^^^^
+    32 │ 			return 1;
+    33 │ 		}
+  
+  i The value's type can never be truthy, so this check is redundant.
+  
+  i Remove the condition and the code it guards, or check the value you meant to test.
+  
+
+```
+
+```
+invalidObjectTypeGuards.ts:39:10 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    37 │ function unknownValue(value: unknown) {
+    38 │ 	if (isNamed(value)) {
+  > 39 │ 		return value?.name;
+       │ 		       ^^^^^
+    40 │ 	}
+    41 │ }
+  
+  i Replace ?. with ..
+  
+    37 │ function unknownValue(value: unknown) {
+    38 │ 	if (isNamed(value)) {
+  > 39 │ 		return value?.name;
+       │ 		            ^^
+    40 │ 	}
+    41 │ }
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+invalidObjectTypeGuards.ts:45:10 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary nullish coalescing.
+  
+    43 │ function unionTarget(value: Loaded | Failed | null) {
+    44 │ 	if (isLoadedOrFailed(value)) {
+  > 45 │ 		return value ?? "fallback";
+       │ 		       ^^^^^
+    46 │ 	}
+    47 │ }
+  
+  i Drop ?? and the fallback expression.
+  
+    43 │ function unionTarget(value: Loaded | Failed | null) {
+    44 │ 	if (isLoadedOrFailed(value)) {
+  > 45 │ 		return value ?? "fallback";
+       │ 		             ^^
+    46 │ 	}
+    47 │ }
+  
+  i The left-hand side is guaranteed to be non-nullish, so the fallback is unreachable.
+  
+
+```
+
+```
+invalidObjectTypeGuards.ts:51:10 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary nullish coalescing.
+  
+    49 │ function primitiveUnionTarget(value: unknown) {
+    50 │ 	if (isText(value)) {
+  > 51 │ 		return value ?? "fallback";
+       │ 		       ^^^^^
+    52 │ 	}
+    53 │ }
+  
+  i Drop ?? and the fallback expression.
+  
+    49 │ function primitiveUnionTarget(value: unknown) {
+    50 │ 	if (isText(value)) {
+  > 51 │ 		return value ?? "fallback";
+       │ 		             ^^
+    52 │ 	}
+    53 │ }
+  
+  i The left-hand side is guaranteed to be non-nullish, so the fallback is unreachable.
+  
+
+```
+
+```
+invalidObjectTypeGuards.ts:57:10 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    55 │ function arrow(result: Loaded | undefined) {
+    56 │ 	if (isLoadedArrow(result)) {
+  > 57 │ 		return result?.data;
+       │ 		       ^^^^^^
+    58 │ 	}
+    59 │ }
+  
+  i Replace ?. with ..
+  
+    55 │ function arrow(result: Loaded | undefined) {
+    56 │ 	if (isLoadedArrow(result)) {
+  > 57 │ 		return result?.data;
+       │ 		             ^^
+    58 │ 	}
+    59 │ }
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+invalidObjectTypeGuards.ts:63:9 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    61 │ function assertion(value: unknown) {
+    62 │ 	assertLoaded(value);
+  > 63 │ 	return value?.data;
+       │ 	       ^^^^^
+    64 │ }
+    65 │ 
+  
+  i Replace ?. with ..
+  
+    61 │ function assertion(value: unknown) {
+    62 │ 	assertLoaded(value);
+  > 63 │ 	return value?.data;
+       │ 	            ^^
+    64 │ }
+    65 │ 
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+invalidObjectTypeGuards.ts:68:9 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary nullish coalescing.
+  
+    66 │ function unionAssertion(value: unknown) {
+    67 │ 	assertText(value);
+  > 68 │ 	return value ?? "fallback";
+       │ 	       ^^^^^
+    69 │ }
+    70 │ 
+  
+  i Drop ?? and the fallback expression.
+  
+    66 │ function unionAssertion(value: unknown) {
+    67 │ 	assertText(value);
+  > 68 │ 	return value ?? "fallback";
+       │ 	             ^^
+    69 │ }
+    70 │ 
+  
+  i The left-hand side is guaranteed to be non-nullish, so the fallback is unreachable.
+  
+
+```

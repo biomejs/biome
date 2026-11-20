@@ -3,7 +3,6 @@
 declare function assert(condition: unknown): asserts condition;
 declare function assertString(input: unknown, ignored?: unknown): asserts input is string;
 declare function assertBoolean(input: unknown): asserts input is boolean;
-declare function assertCompound(input: unknown): asserts input is string | number;
 declare function consume(...values: unknown[]): void;
 declare function read(): string | null;
 
@@ -79,9 +78,4 @@ function written(value: string | null) {
 	assertString(value);
 	value = read();
 	return value?.length;
-}
-
-function unsupportedTarget(value: unknown) {
-	assertCompound(value);
-	return value ?? "fallback";
 }

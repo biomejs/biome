@@ -80,6 +80,7 @@ revisiting the row.
 | A rest element in a destructuring `const` holds no property | `r: { ok: true; v: number } \| { ok: false; e: string };`<br>`const { ...ok } = r; if (ok) r` | `{ ok: true; v: number }`: TypeScript takes `ok` as the property `r.ok` | The declared type of `r` | `ok` holds a new object with the other properties of `r`, which is always truthy, so `r` can have `ok: false` at the read. |
 | `in` treats object types as closed | `function f(x: { a: 1 } \| { b: 2 }) { if ("a" in x) x.a }`<br>`const v = { a: "s", b: 2 as const }; f(v)` | `1` | `1`, the same as TypeScript: `"a" in x` keeps `{ a: 1 }` and removes `{ b: 2 }` | `{ b: 2 }` also describes objects with other properties, so `f(v)` passes an object whose property `a` is `"s"`, and `x.a` is `"s"` at the read. Keeping `{ b: 2 }` in the true branch, as `{ b: 2 } & Record<"a", unknown>`, would make `in` useless for telling the members of a union apart, while code rarely passes an object whose type leaves out a property that the code tests with `in`. |
 | The true branch of `instanceof` removes members that are not derived from the class | `class A { a = 1 }; class B extends A { b = 2 }`<br>`x: B \| { c: number }; if (x instanceof A) x`<br>`const v: { c: number } = Object.assign(new A(), { c: 1 })` | `B` | `B`, the same as TypeScript: the true branch keeps the members derived from the class and removes object type literals, functions, and other types that are not | `{ c: number }` also describes an instance of `A` that has a property `c`, such as `v`, so `x` can be an instance of `A` that is not a `B` at the read. Keeping such members would make `instanceof` useless for telling the members of a union apart, while code rarely holds an instance of a class in a variable typed by an unrelated object type. |
+| The true branch of a type-guard function removes members that are not related to the target | `interface Foo { a: number }; interface Foo2 extends Foo { b: number }; interface Bar { c: number }`<br>`function isFoo(v: unknown): v is Foo;`<br>`x: Foo2 \| Bar; if (isFoo(x)) x.b`<br>`const o = { a: 1, c: 2 }; const v: Bar = o` | `Foo2` for `x`, and `number` | The same as TypeScript: the true branch keeps the members that are subtypes of the target or that the target is a subtype of, and removes the others | `Bar` also describes objects that have a property `a`, such as `v`, which `isFoo` accepts although it is not a `Foo2`, so `x.b` is `undefined` at the read when `x` is `v`. Keeping such members would make type-guard functions useless for telling the members of a union apart, while code rarely holds an object whose type leaves out a property that the type-guard function tests. |
 | The false branch of `instanceof` removes the class and its derived types | `class A { a = 1 }`<br>`x: A \| string; if (!(x instanceof A)) x`<br>`const v: A = { a: 1 }` | `string` | `string`, the same as TypeScript | TypeScript accepts a plain object for a class type whose members are all public, as `v` shows, so `x` can hold such an object, which is not an instance of `A`, and still be an `A` in the `else` branch. The sound result would remove nothing in the `else` branch, while code rarely types a plain object by a class. |
 | Code between two elements of a destructuring pattern keeps the narrowing | `s: { kind: "c"; x?: number; v: number } \| { kind: "s"; x?: number; v: string };`<br>`const { kind, x = reset(s), v } = s; if (kind === "c") v` | `number` | `number`, the same as TypeScript. A computed key between the elements, as in `{ kind, [key()]: x, v }`, keeps the narrowing too. | Destructuring reads `kind`, then runs the default of `x` when `s.x` is `undefined`, then reads `v`, so `reset` can change `s` before `v` is read and make `v` a string at the read. A computed key runs code at the same point. Defaults and computed keys rarely write the value being destructured, while stopping the narrowing at every default or computed key that can run code would lose it in patterns such as `{ kind, items = load(), v }`. |
 
@@ -251,11 +252,70 @@ These limits apply to every *Supported* and *Partial* row below:
   name and members in two modules, such as `class K { k = 1 }` in `./a` and
   in `./b`, can't be told apart from one class that Biome reaches through two
   modules, so a test of one of them keeps the type of a value of the other.
+- A call to a type-guard function whose target is not a primitive type, as
+  `isFoo(x)` with `x is Foo`, compares each member of the type of `x` with
+  each member of the target in TypeScript's subtype relation, as TypeScript
+  does. The true branch keeps a member that is a subtype of a member of the
+  target, such as `Foo2` with `interface Foo2 extends Foo`, replaces a member
+  with a member of the target that is a subtype of it, as `unknown` or
+  `object` becomes `Foo`, and removes the others. When no member remains, it
+  gives the target if that is a subtype of the type of `x`, and keeps the
+  type of `x` otherwise, where TypeScript gives an intersection such as
+  `(string | number) & Foo`. The false branch removes the members that the
+  true branch keeps as they are, and keeps `unknown`. A primitive is compared
+  with an object type through the members of its wrapper type, so `string`
+  is a subtype of `{ length: number }`.
+- A type-guard function keeps the type of `x` in both branches where
+  TypeScript narrows it in these cases:
+  - The target has only object types and the type of `x` has none and isn't
+    `unknown`, as `string | number`, which TypeScript can narrow to a
+    primitive, as to `string` with `{ length: number }`, or to an
+    intersection.
+  - Biome can't tell whether one of two members is a subtype of the other in
+    the way that decides the result: for a generic, an index signature,
+    `unknown` in a union, instances of two different built-in classes, as
+    `TypeError` and `Error`, and an instance of a class that is compared with
+    a type that isn't derived from the class, because a class can declare
+    private members. So `x: L | string` with `class L { length = 0 }` keeps
+    its type in both branches of `isL(x)`. So does an instance of a class
+    with the same name and members as the target class in another module or
+    namespace, which Biome can't tell from the target class.
+  - Biome infers the literal type of the initializer for a property of an
+    object literal or a class field, as `1` for `{ a: 1 }`, while TypeScript
+    widens it to `number` unless the property is readonly or `as const`. Such
+    a property is compared both ways, and Biome can't tell when the results
+    differ. So `x: { a: 1 } | string` keeps its type in both branches of
+    `isA(x)` with `class A { a = 1 }`, where TypeScript gives `{ a: 1 }` and
+    `string`.
+- The false branch of a type-guard function also keeps a member of the type
+  of `x` where TypeScript removes it in these cases:
+  - The member and a member of the target are subtypes of each other and not
+    the same type. TypeScript's strict subtype relation, which depends on
+    modifiers that Biome doesn't record, such as `readonly`, decides whether
+    the true branch keeps the member as it is. So with
+    `interface Same { a: number }`, `x: Same | Bar` keeps `Same` in the false
+    branch of `isFoo(x)`, where TypeScript gives `Bar`, and so does an
+    instance of a class that is a subtype of the target, as `A` with the
+    target `Foo`.
+  - The member is `unknown`, which TypeScript narrows to `null | undefined`
+    with the target `{}`.
+  - The true branch keeps no member, as for `(string | number) & Foo`. The
+    false branch is then the type of `x`, which TypeScript makes `never` when
+    the type of `x` is assignable to the target.
+- A literal type that the true branch of a type-guard function keeps, and
+  whose primitive type the true branch also gets, as `"a"` and `string` from
+  `x: "a" | { length: number }` with `v is string`, stays in the false
+  branch, as in TypeScript, whose union of the two is the primitive type. A
+  target of `any` or `unknown` narrows nothing.
 - Members that one module adds to an interface of another module through
   module augmentation are not seen. So with
   `declare module "./shapes" { interface X { extra: 1 } }` in one module,
   `x: X | E`, and `interface E { extra: 2 }`, `"extra" in x` gives `E`, where
-  TypeScript gives `X | E`.
+  TypeScript gives `X | E`. In the same way, with
+  `function isExtra(v: unknown): v is { extra: 1 }`,
+  `x: X | { extra: 1; y: 2 } | string` gives `{ extra: 1; y: 2 }` in the true
+  branch of `isExtra(x)`, where TypeScript gives
+  `X | { extra: 1; y: 2 }`.
 - `extends` clauses that one module adds to an interface of another module
   through module augmentation are not seen either. So with
   `declare module "./shapes" { interface X extends Base {} }` in one module,
@@ -266,7 +326,12 @@ These limits apply to every *Supported* and *Partial* row below:
   declarations in Biome, so `instanceof` doesn't see the `extends` clause of
   the other one. So with `class N extends C {}`, then
   `interface N extends A {}`, `x: N | D`, and `class D extends C { d = 1 }`,
-  `x instanceof C` gives `D`, where TypeScript gives `N | D`.
+  `x instanceof C` gives `D`, where TypeScript gives `N | D`. Two interfaces
+  with the same name in one module have only the members of the last one, so
+  with `interface M { m: 1 }`, then `interface M { n: 2 }`,
+  `x: M | { m: 1; y: 2 } | string` gives `{ m: 1; y: 2 }` in the true branch
+  of `isM(x)` with `v is { m: 1 }`, where TypeScript gives
+  `M | { m: 1; y: 2 }`.
 - Two classes with the same name and members in two namespaces of one module,
   as in `namespace P1 { export class K { k = 1 } }` and
   `namespace P2 { export class K { k = 1 } }`, count as one class for
@@ -278,7 +343,10 @@ These limits apply to every *Supported* and *Partial* row below:
   them with `declare global`, as in
   `declare global { interface String { format(): string } }`, are not seen.
   So with that declaration, `x: { format(): string } | number` gives Unknown
-  in `if (typeof x === "string") x`, where TypeScript gives `string`.
+  in `if (typeof x === "string") x`, where TypeScript gives `string`, and
+  `x: string | { format(): string; a: 1 }` gives `{ format(): string; a: 1 }`
+  in the true branch of a type-guard function with the target
+  `{ format(): string }`, where TypeScript gives the type of `x`.
 - Variables whose declared type is `any`, or includes a part that inference
   cannot determine, never narrow.
 - An execution root gets no narrowing at all when its own code, outside nested
@@ -415,7 +483,7 @@ The rows use `type Circle = { kind: "c"; r: number }` and
 | --- | --- | --- | --- |
 | A local, non-generic type-guard function with a primitive target | `function isString(v: unknown): v is string;`<br>`x: string \| number; if (isString(x)) x` | `string` | Supported, with the restrictions below the table |
 | The false branch excludes the target | `x: string \| number; if (!isString(x)) x` | `number` | Supported |
-| An object, interface, class, or union target | `function isFoo(v: unknown): v is Foo;`<br>`x: Foo \| string; if (isFoo(x)) x` | `Foo` | Not yet |
+| An object, interface, class, or union target | `function isFoo(v: unknown): v is Foo;`<br>`x: Foo \| string; if (isFoo(x)) x` | `Foo`; `string` in the `else` branch | Partial: both branches narrow by TypeScript's subtype relation, as the limits above describe. Biome keeps the type of `x` where TypeScript narrows a type without an object type by a target with only object types, or gives an intersection, and when two members can't be compared, as for instances of classes, which can declare private members, and the literal types that Biome infers for properties of object literals and class fields. The `else` branch also keeps a member that is a subtype of a member of the target and the other way around, as `{ a: number }` with the target `Foo`, and `unknown` with the target `{}`, where TypeScript gives `null \| undefined`. |
 | An imported, namespace, or method type-guard function | `import { isString } from "./guards"`; `u.isString(x)` | `string` | Not yet |
 | A generic type-guard function | `function isNonNull<T>(v: T \| null): v is T;`<br>`x: string \| null; if (isNonNull(x)) x` | `string` | Not yet |
 | An overloaded type-guard function | `function isS(v: string \| number): v is string;`<br>`function isS(v: boolean): boolean;`<br>`x: string \| number; if (isS(x)) x` | `string` | Not yet |
@@ -429,9 +497,8 @@ A supported type-guard function is declared in the same module with
 initializes an unannotated `let` or `const`. Nothing reassigns it, and it has
 one signature that is not generic, `async`, or a generator. The tested
 parameter is named, is not a rest parameter, and has no default value. The
-target is a primitive type or a primitive literal, directly, through a local
-type alias, or through `typeof` of a value. The call is not optional, has no
-type arguments, passes a variable as the tested argument, and has no spread
+target is not `any` or `unknown`. The call is not optional, has no type
+arguments, passes a variable as the tested argument, and has no spread
 argument before or at the tested one. Neither Biome nor TypeScript checks the
 body of a type-guard function.
 
@@ -441,7 +508,7 @@ body of a type-guard function.
 | --- | --- | --- | --- |
 | `asserts value` | `function assert(c: unknown): asserts c;`<br>`x: string \| null; assert(x !== null); x` | `string` | Supported, with the restrictions below the table |
 | `asserts value is T` with a primitive target | `function assertString(v: unknown): asserts v is string;`<br>`x: string \| number; assertString(x); x` | `string` | Supported |
-| `asserts value is T` with an object or union target | `function assertFoo(v: unknown): asserts v is Foo;`<br>`x: Foo \| string; assertFoo(x); x` | `Foo` | Not yet |
+| `asserts value is T` with an object or union target | `function assertFoo(v: unknown): asserts v is Foo;`<br>`x: Foo \| string; assertFoo(x); x` | `Foo` | Partial: as the true branch of a type-guard function with the same target. |
 | `asserts this` and `asserts this is T` | `class R { ready?: string; assertReady(): asserts this is { ready: string } }`<br>`this.assertReady(); this` (inside `R`) | `this & { ready: string }` | Not yet |
 | A method, imported, or annotated assertion function | `x: string \| null; assert.ok(x); x`<br>`a: (v: unknown) => asserts v; a(x); x` | `string` | Not yet |
 | An assertion function declared as a variable without a type annotation is ignored (TS2775) | `const a = (v: unknown): asserts v => {};`<br>`x: string \| null; a(x); x` | `string \| null`, with error TS2775 | Supported |
