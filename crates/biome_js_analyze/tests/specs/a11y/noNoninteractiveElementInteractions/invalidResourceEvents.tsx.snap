@@ -1,0 +1,66 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidResourceEvents.tsx
+---
+# Input
+```tsx
+/* should generate diagnostics */
+<>
+    <img src="image.png" alt="Example" onError={() => {}} onClick={() => {}} />
+    <img src="image.png" alt="Example" onError={() => {}} onKeyDown={() => {}} />
+    <img src="image.png" alt="Example" onError={() => {}} onFocus={() => {}} />
+</>
+
+```
+
+# Diagnostics
+```
+invalidResourceEvents.tsx:3:5 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected event handler on non-interactive element.
+  
+    1 │ /* should generate diagnostics */
+    2 │ <>
+  > 3 │     <img src="image.png" alt="Example" onError={() => {}} onClick={() => {}} />
+      │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │     <img src="image.png" alt="Example" onError={() => {}} onKeyDown={() => {}} />
+    5 │     <img src="image.png" alt="Example" onError={() => {}} onFocus={() => {}} />
+  
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
+  
+
+```
+
+```
+invalidResourceEvents.tsx:4:5 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected event handler on non-interactive element.
+  
+    2 │ <>
+    3 │     <img src="image.png" alt="Example" onError={() => {}} onClick={() => {}} />
+  > 4 │     <img src="image.png" alt="Example" onError={() => {}} onKeyDown={() => {}} />
+      │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │     <img src="image.png" alt="Example" onError={() => {}} onFocus={() => {}} />
+    6 │ </>
+  
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
+  
+
+```
+
+```
+invalidResourceEvents.tsx:5:5 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected event handler on non-interactive element.
+  
+    3 │     <img src="image.png" alt="Example" onError={() => {}} onClick={() => {}} />
+    4 │     <img src="image.png" alt="Example" onError={() => {}} onKeyDown={() => {}} />
+  > 5 │     <img src="image.png" alt="Example" onError={() => {}} onFocus={() => {}} />
+      │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ </>
+    7 │ 
+  
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
+  
+
+```
