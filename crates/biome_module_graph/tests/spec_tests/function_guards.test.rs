@@ -205,20 +205,24 @@ fn primitive_literal_guards_keep_the_complement_of_literal_unions() {
     }
 }
 
+// TypeScript 7.0.2 (`tsc --strict`) gives the target in the `then` branch and
+// the broad primitive in the `else` branch. The exception is `boolean`, which
+// is `true | false`, so the `else` branch of `input is true` gives `false`.
 #[test]
 fn literal_guards_do_not_exclude_individual_values_from_broad_primitives() {
-    use InferredTypeData::{BigInt, Boolean, Number, String};
-    for (target, primitive, expected) in [
-        (r#""ready""#, "string", String),
-        ("true", "boolean", Boolean),
-        ("1", "number", Number),
-        ("1n", "bigint", BigInt),
+    for (target, primitive, otherwise) in [
+        (r#""ready""#, "string", "string"),
+        ("true", "boolean", "false"),
+        ("1", "number", "number"),
+        ("1n", "bigint", "bigint"),
     ] {
         let source = format!(
             r#"
                 declare function guard(input: unknown): input is {target};
                 declare const expectedTarget: {target};
                 /*target*/expectedTarget;
+                declare const expectedOtherwise: {otherwise};
+                /*otherwise*/expectedOtherwise;
                 function inspect(value: {primitive}) {{
                     if (guard(value)) {{ /*then*/value; }} else {{ /*else*/value; }}
                 }}
@@ -226,6 +230,8 @@ fn literal_guards_do_not_exclude_individual_values_from_broad_primitives() {
         );
         let (db, module) = guard_db(&source);
         let expected_target = normalized_type_at(&db, module, &source, "target", "expectedTarget");
+        let expected_otherwise =
+            normalized_type_at(&db, module, &source, "otherwise", "expectedOtherwise");
         assert_eq!(
             normalized_type_at(&db, module, &source, "then", "value"),
             expected_target,
@@ -233,7 +239,7 @@ fn literal_guards_do_not_exclude_individual_values_from_broad_primitives() {
         );
         assert_eq!(
             normalized_type_at(&db, module, &source, "else", "value"),
-            expected,
+            expected_otherwise,
             "{primitive}: else"
         );
     }

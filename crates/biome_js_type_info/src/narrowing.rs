@@ -1827,6 +1827,12 @@ fn narrow_literal<'db>(
     if let Some(actual) = literal_value(db, ty) {
         return retain_if(ty, Some(actual == *value), positive);
     }
+    // `boolean` is `true | false`, so a value that differs from one of them
+    // is the other.
+    if let (InferredTypeData::Boolean, LiteralValue::Boolean(value), false) = (ty, value, positive)
+    {
+        return boolean_literal(db, !value);
+    }
     let matches_primitive = match ty {
         InferredTypeData::BigInt => matches!(value, LiteralValue::BigInt(_)),
         InferredTypeData::Boolean => matches!(value, LiteralValue::Boolean(_)),
@@ -2246,7 +2252,6 @@ mod tests {
         let db = TestDb::default();
         for (ty, literal) in [
             (InferredTypeData::BigInt, bigint(&db, "1n")),
-            (InferredTypeData::Boolean, boolean_literal(&db, true)),
             (InferredTypeData::Number, number(&db, "1")),
             (InferredTypeData::String, string(&db, "one")),
         ] {
@@ -2270,6 +2275,32 @@ mod tests {
                 false
             ),
             union(&db, &[string(&db, "b"), InferredTypeData::Number])
+        );
+    }
+
+    #[test]
+    fn strict_boolean_equality_splits_boolean() {
+        let db = TestDb::default();
+        for value in [true, false] {
+            let predicate = NarrowingPredicate::Literal(boolean_literal(&db, value));
+            assert_eq!(
+                narrow_type(&db, InferredTypeData::Boolean, predicate, true),
+                boolean_literal(&db, value)
+            );
+            assert_eq!(
+                narrow_type(&db, InferredTypeData::Boolean, predicate, false),
+                boolean_literal(&db, !value)
+            );
+        }
+        let ty = union(&db, &[InferredTypeData::Boolean, InferredTypeData::Null]);
+        assert_eq!(
+            narrow_type(
+                &db,
+                ty,
+                NarrowingPredicate::Literal(boolean_literal(&db, true)),
+                false
+            ),
+            union(&db, &[boolean_literal(&db, false), InferredTypeData::Null])
         );
     }
 

@@ -14,7 +14,7 @@ use biome_js_type_info::{
     interned_types::{Literal, TypeData},
     narrow_type,
 };
-use biome_rowan::{AstNode, AstSeparatedList};
+use biome_rowan::{AstNode, AstSeparatedList, TextRange};
 
 /// Limits how many [evaluated ancestors](AnyFlowExpression::evaluated_ancestors)
 /// an evaluated expression may have.
@@ -339,21 +339,30 @@ impl<'db> ResolutionCtx<'db, '_> {
     }
 
     fn flow_operand(&mut self, expression: &AnyJsExpression) -> Option<TypeData<'db>> {
+        self.flow_operand_at(expression.range())
+    }
+
+    /// Returns the flow-sensitive type of the expression at `range`, or
+    /// `None` when it is not a flow candidate or narrowing leaves its type
+    /// unchanged.
+    pub(super) fn flow_operand_at(&mut self, range: TextRange) -> Option<TypeData<'db>> {
         if self.evaluates_flow_locally() {
-            return self.local_flow_expression_type(expression.range());
+            return self.local_flow_expression_type(range);
         }
         infer_flow_expression_type(
             self.db,
-            ExpressionTypeInput::new(self.db, self.module, expression.range()),
+            ExpressionTypeInput::new(self.db, self.module, range),
         )
     }
 
     pub(super) fn raw_operand(&mut self, expression: &AnyJsExpression) -> Option<TypeData<'db>> {
-        let reference = self
-            .js_info
-            .raw_expressions
-            .get(&expression.range())?
-            .clone();
+        self.raw_operand_at(expression.range())
+    }
+
+    /// Returns the type of the expression at `range` without narrowing, or
+    /// `None` when collection recorded no expression there.
+    pub(super) fn raw_operand_at(&mut self, range: TextRange) -> Option<TypeData<'db>> {
+        let reference = self.js_info.raw_expressions.get(&range)?.clone();
         Some(self.resolve(&reference))
     }
 }
