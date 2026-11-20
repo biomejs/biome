@@ -851,12 +851,12 @@ fn overload_selection_skips_only_signatures_that_reject_every_narrowing() {
             ("s5", "x", &["number: 1", "string: a", "string: b"]),
             // TypeScript gives `"a"`.
             ("s6", "x", &["number: 1", "string: a", "string: b"]),
-            // TypeScript gives `"a"`, because the comparison with `K`
-            // narrows `x` to `"a"`, which the first signature of `q`
-            // accepts.
-            ("s7", "x", &["string"]),
-            // TypeScript gives `"b"`. A test that Biome doesn't decompose
-            // could narrow `x` to `"a"` before the call, as in `s7`.
+            // The comparison with `K` narrows `x` to `"a"`, which the first
+            // signature of `q` accepts.
+            ("s7", "x", &["string: a"]),
+            // TypeScript gives `"b"`. Biome can't skip the first signature,
+            // because a narrowing could give `x` the type `"a"`, as the
+            // comparison in `s7` does.
             ("s8then", "x", &["string"]),
             ("s8else", "x", &["string"]),
             // TypeScript gives `number | boolean`. `T` is `string` in
