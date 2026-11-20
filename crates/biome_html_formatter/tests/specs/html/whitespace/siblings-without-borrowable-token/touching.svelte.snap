@@ -1,0 +1,62 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: whitespace/siblings-without-borrowable-token/touching.svelte
+---
+
+# Input
+
+```svelte
+<p><span>label</span><Input value={label} /><span>hint</span></p>
+
+<p><span>label</span>{@render children?.()}<span>hint</span></p>
+
+<p>{@render leading()}{@render children?.()}{@render trailing()}</p>
+
+<p><span>label</span>{label}{description}<span>hint</span></p>
+
+```
+
+
+# Options
+
+```json
+{
+	"formatter": {
+		"lineWidth": 40
+	}
+}
+```
+
+# Formatted
+
+```svelte
+<p>
+	<span>label</span><Input
+		value={label}
+	/><span>hint</span>
+</p>
+
+<p>
+	<span
+		>label</span
+	>{@render children?.()}<span
+		>hint</span
+	>
+</p>
+
+<p>
+	{@render leading()}{@render children?.()}{@render trailing()}
+</p>
+
+<p>
+	<span
+		>label</span
+	>{label}{description}<span>hint</span>
+</p>
+
+```
+
+# Lines exceeding max width of 40 characters
+```
+   16: 	{@render leading()}{@render children?.()}{@render trailing()}
+```

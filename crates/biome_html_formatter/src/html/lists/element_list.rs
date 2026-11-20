@@ -524,10 +524,9 @@ impl FormatHtmlElementList {
             // Tracks whether the last NonText element already printed its trailing whitespace
             // as a line inside its own group (needs_trailing_line_in_inner).
             let mut last_nontext_had_trailing_line = false;
-            // Tracks the group ID of the previous inline element when it's directly followed
-            // by another inline element (no whitespace between them). This is used to implement
-            // Prettier's `ifBreak("", softline)` pattern where we conditionally add a line break
-            // before the current element only if the previous element's group fits on a single line.
+            // Group ID of the previous inline element when the current one touches it and borrows
+            // its closing token. A line break goes before the current element only if that group
+            // fits on one line, which mirrors Prettier's `ifBreak("", softline)`.
             let mut prev_inline_group_id: Option<GroupId> = None;
             // A following element or word prints the borrowed closing `>` so any break occurs
             // inside the preceding tag rather than between whitespace-sensitive siblings.
@@ -840,8 +839,8 @@ impl FormatHtmlElementList {
                             needs_trailing_line_in_inner.then(soft_line_break_or_space);
 
                         // Check if the next child is also an inline element with no whitespace between.
-                        // If so, we'll set prev_inline_group_id so the next element can use it for
-                        // conditional line breaks.
+                        // If so, and this child lends it a closing token, we'll set prev_inline_group_id
+                        // so the next element can use it for conditional line breaks.
                         let next_is_adjacent_inline =
                             if let Some(HtmlChild::NonText(non_text_next)) = children_iter.peek() {
                                 let next_css_display = get_element_css_display(non_text_next);
@@ -955,7 +954,8 @@ impl FormatHtmlElementList {
                         };
 
                         // When the previous element was an inline element directly followed by this
-                        // inline element (no whitespace), we need to conditionally add a line break.
+                        // inline element (no whitespace) and lent it a closing token, we need to
+                        // conditionally add a line break.
                         // This implements Prettier's `ifBreak("", softline)` pattern:
                         // - If the previous element's group broke: print nothing (keep elements touching)
                         // - If the previous element's group fits: print a soft line break
@@ -1135,23 +1135,6 @@ impl FormatHtmlElementList {
                             last_nontext_had_trailing_line = needs_trailing_line_in_inner;
                         }
 
-                        // A single-brace expression cannot lend its closing token to the
-                        // next child, so a sibling break would insert rendered whitespace.
-                        if next_is_adjacent_inline
-                            && !matches!(
-                                non_text,
-                                AnyHtmlElement::AnyHtmlContent(
-                                    AnyHtmlContent::AnyHtmlTextExpression(
-                                        AnyHtmlTextExpression::HtmlSingleTextExpression(_)
-                                    )
-                                )
-                            )
-                        {
-                            prev_inline_group_id = Some(non_text_group_id);
-                        } else {
-                            prev_inline_group_id = None;
-                        }
-
                         if r_double_curly_borrowed {
                             borrowed_sibling_interpolation_end = match non_text {
                                 AnyHtmlElement::AnyHtmlContent(
@@ -1165,6 +1148,13 @@ impl FormatHtmlElementList {
                             // Store the closing r_angle token from this element for the next sibling
                             borrowed_sibling_r_angle = non_text.closing_r_angle_token();
                         }
+
+                        // Without a borrowed closing token to put the break inside, a break
+                        // before the next child would insert rendered whitespace.
+                        prev_inline_group_id = (next_is_adjacent_inline
+                            && (borrowed_sibling_r_angle.is_some()
+                                || borrowed_sibling_interpolation_end.is_some()))
+                        .then_some(non_text_group_id);
                     }
 
                     // Verbatim content (suppressed formatting)
