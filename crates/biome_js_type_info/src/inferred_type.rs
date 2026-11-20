@@ -6,7 +6,9 @@ pub use boolean_coercion::BooleanCoercion;
 pub use spread_misuse::ObjectSpreadMisuse;
 
 use crate::TypeDb;
-use crate::interned_types::{ConditionalType, Literal, ReturnType, TypeData, TypeMember};
+use crate::interned_types::{
+    ConditionalType, Literal, ReturnType, TypeData, TypeMember, TypeMemberKind,
+};
 use crate::return_type_relation::{
     ReturnTypeRelation, compare_declared_return_type_owned,
     is_escape_hatch as relation_is_escape_hatch, promise_inner as relation_promise_inner,
@@ -1318,6 +1320,89 @@ impl<'db> InferredType<'db> {
         .ok()
     }
 
+    /// Returns the type of the property `name`, when this type is an object
+    /// type that declares the property once, without `?`.
+    ///
+    /// Only the object's own properties are checked. Returns `None` for
+    /// other types, including unions, intersections, classes, and
+    /// interfaces, and for properties that only match an index signature, as
+    /// in `{ [key: string]: string }`. Also returns `None` for objects with
+    /// members that inference couldn't model, such as `{ a: "", ...other }`,
+    /// because those members can replace the property.
+    pub fn required_property_type(self, name: &str) -> Option<Self> {
+        let members = match self.data {
+            TypeData::Object(object) if !object.has_unknown_members(self.db) => {
+                object.members(self.db)
+            }
+            TypeData::Literal(literal) => match literal.literal(self.db) {
+                Literal::Object(members) => members,
+                _ => return None,
+            },
+            _ => return None,
+        };
+        // When several members share the name, as in `{ a: 1, a: undefined }`,
+        // the last one wins at runtime and may be a getter, so none is chosen.
+        let mut matching = members.iter().filter(|member| member.kind.has_name(name));
+        let member = matching.next()?;
+        if matching.next().is_some() {
+            return None;
+        }
+        matches!(
+            member.kind,
+            TypeMemberKind::Named(_) | TypeMemberKind::ConstAssertedNamed(_)
+        )
+        .then(|| Self::new(self.db, member.ty))
+    }
+
+    /// Returns whether this type is a type parameter, such as `T` in
+    /// `function f<T>(value: T)`, whether or not it declares a constraint.
+    pub fn is_generic(self) -> bool {
+        matches!(self.data, TypeData::Generic(_))
+    }
+
+    /// Returns the type of the tuple element at `index`, when every value of
+    /// this tuple type has an element there.
+    ///
+    /// Returns `None` when this type isn't a tuple, or when the element at
+    /// `index` is missing or optional. Also returns `None` when a rest element
+    /// comes at or before `index`, because a rest element can match any number
+    /// of values. For example, `[boolean, ...number[], string]` only returns a
+    /// type for index `0`.
+    ///
+    /// Tuples inferred from array literals, as for `names` in
+    /// `const names = ["A"]`, also return `None`, because the array can lose
+    /// elements after it's created.
+    pub fn required_tuple_element_type(self, index: usize) -> Option<Self> {
+        let TypeData::Tuple(tuple) = self.data else {
+            return None;
+        };
+        if tuple.is_inferred_array(self.db) {
+            return None;
+        }
+        let elements = tuple.elements(self.db).get(..=index)?;
+        let element = elements.last()?;
+        (!element.is_optional && elements.iter().all(|element| !element.is_rest))
+            .then(|| Self::new(self.db, element.ty))
+    }
+
+    /// Returns the type of the parameter at `index`, not counting a `this`
+    /// parameter, when every call to this function must pass a value for it.
+    ///
+    /// Returns `None` when this type isn't a function with exactly one call
+    /// signature, or when the parameter is missing, optional, or a rest
+    /// parameter.
+    pub fn required_callable_parameter_type(self, index: usize) -> Option<Self> {
+        let callable = self.callable_type_with(|data| data)?;
+        let function = callable.callable_function(self.db)?;
+        let parameter = function
+            .parameters(self.db)
+            .iter()
+            .filter(|parameter| !parameter.is_this())
+            .nth(index)?;
+        (!parameter.is_optional() && !parameter.is_rest())
+            .then(|| Self::new(self.db, parameter.ty()))
+    }
+
     pub fn has_invalid_plus_operand_variant(self) -> bool {
         self.try_any_variant_matches(|data| match data {
             TypeData::NeverKeyword | TypeData::Symbol | TypeData::UnknownKeyword => true,
@@ -1988,9 +2073,10 @@ mod tests {
     use super::*;
     use crate::ObjectKind;
     use crate::interned_types::{
-        InternedClass, InternedConstructor, InternedFunction, InternedGenericTypeParameter,
-        InternedInterface, InternedIntersection, InternedLiteral, InternedObject, InternedTuple,
-        InternedTypeofType, InternedUnion, TypeMember, TypeMemberKind,
+        FunctionParameter, InternedClass, InternedConstructor, InternedFunction,
+        InternedGenericTypeParameter, InternedInterface, InternedIntersection, InternedLiteral,
+        InternedObject, InternedTuple, InternedTypeofType, InternedUnion, NamedFunctionParameter,
+        TupleElementType, TypeMember, TypeMemberKind,
     };
     use crate::literal::NumberLiteral;
 
@@ -2395,5 +2481,136 @@ mod tests {
         assert!(InferredType::new(&db, union).is_at_least_as_wide_as_object());
         assert!(!InferredType::new(&db, narrow_intersection).is_at_least_as_wide_as_object());
         assert!(InferredType::new(&db, any_intersection).is_at_least_as_wide_as_object());
+    }
+
+    #[test]
+    fn required_property_type_only_matches_required_named_members() {
+        let db = TestDb::default();
+        let object = TypeData::Literal(InternedLiteral::new(
+            &db,
+            Literal::Object(Box::<[_]>::from([
+                TypeMember {
+                    kind: TypeMemberKind::Named(Text::new_static("required")),
+                    ty: TypeData::String,
+                },
+                TypeMember {
+                    kind: TypeMemberKind::NamedOptional(Text::new_static("optional")),
+                    ty: TypeData::String,
+                },
+                TypeMember {
+                    kind: TypeMemberKind::IndexSignature(TypeData::String),
+                    ty: TypeData::String,
+                },
+                TypeMember {
+                    kind: TypeMemberKind::Named(Text::new_static("duplicate")),
+                    ty: TypeData::String,
+                },
+                TypeMember {
+                    kind: TypeMemberKind::Getter(Text::new_static("duplicate")),
+                    ty: TypeData::Undefined,
+                },
+            ])),
+        ));
+        let object_type = InferredType::new(&db, object);
+
+        assert!(
+            object_type
+                .required_property_type("required")
+                .is_some_and(|ty| ty.data == TypeData::String)
+        );
+        assert!(object_type.required_property_type("optional").is_none());
+        assert!(object_type.required_property_type("indexed").is_none());
+        assert!(object_type.required_property_type("duplicate").is_none());
+
+        let union = TypeData::Union(InternedUnion::new(
+            &db,
+            Box::<[_]>::from([object, TypeData::Undefined]),
+        ));
+        assert!(
+            InferredType::new(&db, union)
+                .required_property_type("required")
+                .is_none()
+        );
+    }
+
+    #[test]
+    fn required_tuple_element_type_stops_at_optional_and_rest_elements() {
+        let db = TestDb::default();
+        let element = |ty, is_optional, is_rest| TupleElementType {
+            ty,
+            name: None,
+            is_optional,
+            is_rest,
+        };
+        let tuple = InferredType::new(
+            &db,
+            TypeData::Tuple(InternedTuple::new(
+                &db,
+                Box::<[_]>::from([
+                    element(TypeData::String, false, false),
+                    element(TypeData::Number, true, false),
+                    element(TypeData::Boolean, false, true),
+                    element(TypeData::String, false, false),
+                ]),
+                false,
+            )),
+        );
+
+        assert!(
+            tuple
+                .required_tuple_element_type(0)
+                .is_some_and(|ty| ty.data == TypeData::String)
+        );
+        assert!(tuple.required_tuple_element_type(1).is_none());
+        assert!(tuple.required_tuple_element_type(3).is_none());
+        assert!(tuple.required_tuple_element_type(4).is_none());
+
+        let inferred_array = InferredType::new(
+            &db,
+            TypeData::Tuple(InternedTuple::new(
+                &db,
+                Box::<[_]>::from([element(TypeData::String, false, false)]),
+                true,
+            )),
+        );
+        assert!(inferred_array.required_tuple_element_type(0).is_none());
+    }
+
+    #[test]
+    fn required_callable_parameter_type_skips_this_optional_and_rest_parameters() {
+        let db = TestDb::default();
+        let parameter = |name, ty, is_optional, is_rest| {
+            FunctionParameter::Named(NamedFunctionParameter {
+                name: Text::new_static(name),
+                ty,
+                is_optional,
+                is_rest,
+            })
+        };
+        let function = InferredType::new(
+            &db,
+            TypeData::Function(InternedFunction::new(
+                &db,
+                Box::default(),
+                Box::<[_]>::from([
+                    parameter("this", TypeData::ObjectKeyword, false, false),
+                    parameter("required", TypeData::String, false, false),
+                    parameter("optional", TypeData::Number, true, false),
+                    parameter("rest", TypeData::Boolean, false, true),
+                ]),
+                ReturnType::Type(TypeData::VoidKeyword),
+                false,
+                None,
+            )),
+        );
+
+        assert!(
+            function
+                .required_callable_parameter_type(0)
+                .is_some_and(|ty| ty.data == TypeData::String)
+        );
+        assert!(function.required_callable_parameter_type(1).is_none());
+        assert!(function.required_callable_parameter_type(2).is_none());
+        assert!(function.required_callable_parameter_type(3).is_none());
     }
 }

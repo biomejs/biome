@@ -1896,7 +1896,21 @@ impl FunctionParameter {
     ) -> Self {
         match param {
             AnyJsParameter::AnyJsFormalParameter(param) => {
-                Self::from_any_js_formal_parameter(collector, scope_id, param)
+                let mut parameter = Self::from_any_js_formal_parameter(collector, scope_id, param);
+                // Callers can omit a parameter that has a default value, so the
+                // signature marks it optional. Its type doesn't include
+                // `undefined`, because inside the function the default
+                // replaces a missing value.
+                if param
+                    .as_js_formal_parameter()
+                    .is_some_and(|param| param.initializer().is_some())
+                {
+                    match &mut parameter {
+                        Self::Named(parameter) => parameter.is_optional = true,
+                        Self::Pattern(parameter) => parameter.is_optional = true,
+                    }
+                }
+                parameter
             }
             AnyJsParameter::JsRestParameter(param) => {
                 Self::from_js_rest_parameter(collector, scope_id, param)

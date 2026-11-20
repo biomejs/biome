@@ -387,6 +387,7 @@ define_categories! {
     "lint/nursery/noUselessBind": "https://biomejs.dev/linter/rules/no-useless-bind",
     "lint/nursery/noUselessCall": "https://biomejs.dev/linter/rules/no-useless-call",
     "lint/nursery/noUselessDateGetTime": "https://biomejs.dev/linter/rules/no-useless-date-get-time",
+    "lint/nursery/noUselessDefaultAssignment": "https://biomejs.dev/linter/rules/no-useless-default-assignment",
     "lint/nursery/noUselessFallbackInSpread": "https://biomejs.dev/linter/rules/no-useless-fallback-in-spread",
     "lint/nursery/noUselessLengthCheck": "https://biomejs.dev/linter/rules/no-useless-length-check",
     "lint/nursery/noUselessNestedTernary": "https://biomejs.dev/linter/rules/no-useless-nested-ternary",

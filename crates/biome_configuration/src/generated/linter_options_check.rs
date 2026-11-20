@@ -1982,6 +1982,13 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::no_useless_date_get_time::NoUselessDateGetTimeOptions>(),
     ));
     result.push((
+        "nursery",
+        "noUselessDefaultAssignment",
+        TypeId::of::<
+            biome_rule_options::no_useless_default_assignment::NoUselessDefaultAssignmentOptions,
+        >(),
+    ));
+    result.push((
         "style",
         "noUselessElse",
         TypeId::of::<biome_rule_options::no_useless_else::NoUselessElseOptions>(),

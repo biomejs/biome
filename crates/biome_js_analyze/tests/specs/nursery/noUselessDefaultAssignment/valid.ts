@@ -1,0 +1,160 @@
+/* should not generate diagnostics */
+
+function optionalProperty({ foo = "" }: { foo?: string }) {
+	return foo;
+}
+
+function undefinedProperty({ foo = "" }: { foo: string | undefined }) {
+	return foo;
+}
+
+function anyProperty({ foo = "" }: { foo: any }) {
+	return foo;
+}
+
+function unknownProperty({ foo = "" }: { foo: unknown }) {
+	return foo;
+}
+
+function partialProperty({ foo = "" }: Partial<{ foo: string }>) {
+	return foo;
+}
+
+function noDefault({ foo }: { foo: string }) {
+	return foo;
+}
+
+function nested({ nested: { foo = "" } = {} }: { nested?: { foo?: string } }) {
+	return foo;
+}
+
+function nestedRequired({ nested: { foo = "" } }: { nested: { foo: string } }) {
+	return foo;
+}
+
+function ownParameter(value: string = "") {
+	return value;
+}
+
+const ownArrowParameter = (value: string = "") => value;
+
+class Methods {
+	method({ foo = "" }: { foo: string }) {
+		return foo;
+	}
+}
+
+const { foo } = { foo: "bar" };
+
+const { missing = "" } = {};
+
+const { explicitUndefined = "" } = { explicitUndefined: undefined };
+
+const optionalObject: { optional?: string } = {};
+const { optional = "" } = optionalObject;
+
+const { annotated = "" }: { annotated: string } = { annotated: "" };
+
+declare const record: Record<string, string>;
+const { fromRecord = "" } = record;
+
+declare const indexed: { [key: string]: string };
+const { fromIndex = "" } = indexed;
+
+declare const cond: boolean;
+const { fromConditional = "" } = cond ? {} : { fromConditional: "bar" };
+const { fromLogical = "" } = cond && { fromLogical: "bar" };
+
+const { fromUnknownCall = "" } = someUnknownFunction();
+
+for (const { iterated = "" } of [{ iterated: "" }]) {
+}
+
+const [fromUndefined = ""] = [undefined];
+
+const mutable = ["bar"];
+mutable.pop();
+const [fromMutable = ""] = mutable;
+
+declare const strings: string[];
+const [fromArray = ""] = strings;
+
+declare const tuple: [string];
+const [inTuple, pastTuple = ""] = tuple;
+
+declare const optionalElement: [string, number?];
+const [requiredElement, optionalSecond = 0] = optionalElement;
+
+declare const withRest: [string, ...string[]];
+const [command, argument = "run"] = withRest;
+
+declare const middleRest: [boolean, ...number[], string];
+const [flag, middle, last = ""] = middleRest;
+
+declare const tuples: [string] | [];
+const [fromTupleUnion = ""] = tuples;
+
+const [a, b = ""] = "some.string".split(".");
+
+declare function takesOptional(callback: (value?: string) => void): void;
+takesOptional((value = "") => {});
+
+declare function takesUndefined(callback: (value: string | undefined) => void): void;
+takesUndefined((value = "") => {});
+
+declare function takesShort(callback: (value: string) => void): void;
+takesShort((value, extra = 0) => {});
+
+declare function takesRest(callback: (...values: unknown[]) => void): void;
+takesRest((value: boolean = true) => null);
+
+declare function takesGeneric<T>(callback: T): void;
+takesGeneric((value: number[] = []) => {});
+
+declare function takesOptionalCallback(callback?: (value: string) => void): void;
+takesOptionalCallback((value = "") => {});
+
+declare function takesAny(callback: (value: any) => void): void;
+takesAny((value = "") => {});
+
+declare function takesTypeParameter<T>(value: T, callback: (value: T) => void): void;
+takesTypeParameter("", (value = "") => {});
+
+declare function takesStringCallback(callback: (value: string) => void): void;
+takesStringCallback((value = undefined) => {});
+
+function undefinedDefault({ foo = undefined }: { foo: string }) {
+	return foo;
+}
+
+type Merge = boolean | ((incoming: string[]) => void);
+const policy: { merge: Merge } = {
+	merge: (incoming: string[] = []) => {
+		incoming;
+	},
+};
+
+function createValidator(): () => void {
+	return (param = 5) => {};
+}
+
+const { ["a" + "b"]: fromComputed = 1 } = { ab: 1 };
+
+const { getterValue = "" } = {
+	get getterValue() {
+		return "";
+	},
+};
+
+declare const overrides: { spread: string | undefined };
+const { spread = "" } = { spread: "x", ...overrides };
+
+function defaultRender(label: string = "none") {
+	return label;
+}
+function render(renderer: typeof defaultRender) {
+	return renderer();
+}
+render((label = "fallback") => label);
+
+const { duplicated = 1 } = { duplicated: 2, duplicated: undefined };
