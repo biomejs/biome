@@ -1,7 +1,7 @@
 use crate::{
     Text, TextRange, TextSize, TokenAtOffset,
     cursor::{SyntaxNode, SyntaxToken},
-    green::{GreenNodeData, Slot},
+    green::{GreenNodeRef, Slot},
 };
 use biome_text_size::TextLen;
 use std::iter::FusedIterator;
@@ -226,7 +226,7 @@ struct GreenChunks<'a> {
 impl<'a> GreenChunks<'a> {
     /// Creates the iterator for `range` of `node`, whose text starts at
     /// `offset`. `range` must lie inside the node's text.
-    fn new(node: &'a GreenNodeData, offset: TextSize, range: TextRange) -> Self {
+    fn new(node: GreenNodeRef<'a>, offset: TextSize, range: TextRange) -> Self {
         Self {
             range,
             pending_children: vec![(Self::children_from(node, offset, range.start()), offset)],
@@ -238,7 +238,7 @@ impl<'a> GreenChunks<'a> {
     /// `start` drops the children that end at or before it, which a binary
     /// search finds because child ends never decrease.
     fn children_from(
-        node: &'a GreenNodeData,
+        node: GreenNodeRef<'a>,
         offset: TextSize,
         start: TextSize,
     ) -> slice::Iter<'a, Slot> {
@@ -270,6 +270,7 @@ impl<'a> Iterator for GreenChunks<'a> {
 
             match slot {
                 Slot::Token { token, .. } => {
+                    let token = token.as_ref();
                     let token_range = TextRange::at(start, token.text_len());
                     if let Some(range) = token_range.intersect(self.range) {
                         // Slicing before the emptiness check panics on an
@@ -282,7 +283,7 @@ impl<'a> Iterator for GreenChunks<'a> {
                     }
                 }
                 Slot::Node { node, .. } => {
-                    let children = Self::children_from(node, start, self.range.start());
+                    let children = Self::children_from(node.as_ref(), start, self.range.start());
                     self.pending_children.push((children, start));
                 }
                 Slot::Empty { .. } => {}
@@ -1022,10 +1023,10 @@ mod tests {
             shared[0].text_range_with_trivia().start(),
             shared[1].text_range_with_trivia().start()
         );
-        assert!(std::ptr::eq(
-            shared[0].text_with_trivia().node.green(),
-            shared[1].text_with_trivia().node.green()
-        ));
+        assert_eq!(
+            shared[0].text_with_trivia().node.green().as_ptr(),
+            shared[1].text_with_trivia().node.green().as_ptr()
+        );
     }
 
     #[test]

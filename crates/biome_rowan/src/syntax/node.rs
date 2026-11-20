@@ -1177,8 +1177,9 @@ pub struct SendNode {
 impl SendNode {
     /// Consumes this node and returns its source text.
     pub fn into_source_text(self) -> String {
-        let mut source = String::with_capacity(self.green.text_len().into());
-        self.green.write_source_text(&mut source);
+        let green = self.green.as_ref();
+        let mut source = String::with_capacity(green.text_len().into());
+        green.write_source_text(&mut source);
         source
     }
 

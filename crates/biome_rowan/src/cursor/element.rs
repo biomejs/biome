@@ -7,6 +7,7 @@ use std::iter;
 pub(crate) type SyntaxElement = NodeOrToken<SyntaxNode, SyntaxToken>;
 
 impl SyntaxElement {
+    #[inline]
     pub(super) fn new(
         element: GreenElementRef<'_>,
         parent: SyntaxNode,

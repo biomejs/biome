@@ -6,8 +6,8 @@ mod trivia;
 
 pub(crate) use self::{
     element::{GreenElement, GreenElementRef},
-    node::{Child, Children, GreenNode, GreenNodeData, Slot},
-    token::{GreenToken, GreenTokenData},
+    node::{Child, Children, GreenNode, GreenNodeRef, Slot},
+    token::{GreenToken, GreenTokenRef},
     trivia::GreenTrivia,
 };
 

@@ -1,13 +1,13 @@
 use crate::cursor::node_rc::NodeRc;
 use crate::cursor::{NodeData, SyntaxElement, SyntaxNode, SyntaxTrivia};
 use crate::green::GreenElementRef;
-use crate::{Direction, GreenToken, GreenTokenData, RawSyntaxKind, TokenText, green};
+use crate::{Direction, GreenToken, GreenTokenRef, NodeOrToken, RawSyntaxKind, TokenText, green};
 use biome_text_size::{TextRange, TextSize};
 use std::hash::{Hash, Hasher};
 use std::ptr::NonNull;
 use std::{fmt, iter};
 
-use super::{GreenElement, NodeKind, WeakGreenElement};
+use super::GreenElement;
 
 #[derive(Clone, Debug)]
 pub(crate) struct SyntaxToken {
@@ -16,17 +16,15 @@ pub(crate) struct SyntaxToken {
 
 impl SyntaxToken {
     pub(super) fn new(
-        green: &GreenTokenData,
+        green: GreenTokenRef<'_>,
         parent: SyntaxNode,
         index: u32,
         offset: TextSize,
     ) -> Self {
         Self {
-            ptr: NodeRc::new(NodeData::new(
-                NodeKind::Child {
-                    green: WeakGreenElement::new(GreenElementRef::Token(green)),
-                    parent: parent.ptr,
-                },
+            ptr: NodeRc::new(NodeData::new_child(
+                GreenElementRef::Token(green),
+                parent.ptr,
                 index,
                 offset,
             )),
@@ -35,24 +33,18 @@ impl SyntaxToken {
 
     pub(crate) fn new_detached(green: GreenToken) -> Self {
         Self {
-            ptr: NodeRc::new(NodeData::new(
-                NodeKind::Root {
-                    green: GreenElement::Token(green),
-                },
-                0,
-                TextSize::from(0),
-            )),
+            ptr: NodeRc::new(NodeData::new_root(GreenElement::Token(green))),
         }
     }
 
     #[inline]
-    pub(crate) fn green(&self) -> &GreenTokenData {
-        match self.data().green().as_token() {
-            Some(token) => token,
-            None => {
+    pub(crate) fn green(&self) -> GreenTokenRef<'_> {
+        match self.data().green() {
+            NodeOrToken::Token(token) => token,
+            NodeOrToken::Node(node) => {
                 panic!(
                     "corrupted tree: a node thinks it is a token: {:?}",
-                    self.data().green().as_node().unwrap().to_string()
+                    node.to_string()
                 );
             }
         }
