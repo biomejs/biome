@@ -71,6 +71,9 @@ macro_rules! assert_lex {
 // This is for testing if the lexer is truly lossless
 // It parses random strings and puts them back together with the produced tokens and compares
 #[quickcheck]
+// Skipped under Miri. Lexing is slow enough there to exceed the two-second
+// timeout below, which makes the test fail.
+#[cfg_attr(miri, ignore)]
 fn losslessness(string: String) -> bool {
     // using an mpsc channel allows us to spawn a thread and spawn the lexer there, then if
     // it takes more than 2 seconds we panic because it is 100% infinite recursion

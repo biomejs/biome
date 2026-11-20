@@ -300,6 +300,9 @@ mod test {
         });
     }
 
+    // Skipped under Miri, which blocks the file access that `insta` needs to
+    // read the snapshot.
+    #[cfg_attr(miri, ignore)]
     #[test]
     fn formatter_syntax_error() {
         snap_diagnostic(
@@ -308,6 +311,9 @@ mod test {
         )
     }
 
+    // Skipped under Miri, which blocks the file access that `insta` needs to
+    // read the snapshot.
+    #[cfg_attr(miri, ignore)]
     #[test]
     fn poor_layout() {
         snap_diagnostic(
@@ -316,6 +322,9 @@ mod test {
         )
     }
 
+    // Skipped under Miri, which blocks the file access that `insta` needs to
+    // read the snapshot.
+    #[cfg_attr(miri, ignore)]
     #[test]
     fn invalid_document() {
         snap_diagnostic(
@@ -328,6 +337,9 @@ mod test {
         )
     }
 
+    // Skipped under Miri, which blocks the file access that `insta` needs to
+    // read the snapshot.
+    #[cfg_attr(miri, ignore)]
     #[test]
     fn range_error() {
         snap_diagnostic(
