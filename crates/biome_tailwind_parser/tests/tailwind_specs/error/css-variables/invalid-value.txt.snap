@@ -63,32 +63,25 @@ TwRoot {
             candidate: TwFunctionalCandidate {
                 base_token: TW_BASE@18..20 "bg" [] [],
                 minus_token: DASH@20..21 "-" [] [],
-                value: TwBogusValue {
-                    items: [
-                        L_PAREN@21..22 "(" [] [],
-                        TwBogus {
-                            items: [
-                                TwBogus {
+                value: TwCssVariableValue {
+                    l_paren_token: L_PAREN@21..22 "(" [] [],
+                    type_hint: missing (optional),
+                    value: CssParameterList [
+                        CssListOfComponentValuesExpression {
+                            css_component_value_list: CssComponentValueList [
+                                CssDashedIdentifier {
+                                    ident_token: IDENT@22..25 "--a" [] [],
+                                },
+                                CssBogusPropertyValue {
                                     items: [
-                                        TwBogus {
-                                            items: [
-                                                CssDashedIdentifier {
-                                                    ident_token: IDENT@22..25 "--a" [] [],
-                                                },
-                                                CssBogusPropertyValue {
-                                                    items: [
-                                                        COLON@25..26 ":" [] [],
-                                                        IDENT@26..27 "b" [] [],
-                                                    ],
-                                                },
-                                            ],
-                                        },
+                                        COLON@25..26 ":" [] [],
+                                        IDENT@26..27 "b" [] [],
                                     ],
                                 },
                             ],
                         },
-                        R_PAREN@27..28 ")" [] [],
                     ],
+                    r_paren_token: R_PAREN@27..28 ")" [] [],
                 },
                 modifier: missing (optional),
             },
@@ -145,17 +138,18 @@ TwRoot {
       3: TW_FUNCTIONAL_CANDIDATE@18..28
         0: TW_BASE@18..20 "bg" [] []
         1: DASH@20..21 "-" [] []
-        2: TW_BOGUS_VALUE@21..28
+        2: TW_CSS_VARIABLE_VALUE@21..28
           0: L_PAREN@21..22 "(" [] []
-          1: TW_BOGUS@22..27
-            0: TW_BOGUS@22..27
-              0: TW_BOGUS@22..27
+          1: (empty)
+          2: CSS_PARAMETER_LIST@22..27
+            0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@22..27
+              0: CSS_COMPONENT_VALUE_LIST@22..27
                 0: CSS_DASHED_IDENTIFIER@22..25
                   0: IDENT@22..25 "--a" [] []
                 1: CSS_BOGUS_PROPERTY_VALUE@25..27
                   0: COLON@25..26 ":" [] []
                   1: IDENT@26..27 "b" [] []
-          2: R_PAREN@27..28 ")" [] []
+          3: R_PAREN@27..28 ")" [] []
         3: (empty)
       4: (empty)
   3: EOF@28..28 "" [] []

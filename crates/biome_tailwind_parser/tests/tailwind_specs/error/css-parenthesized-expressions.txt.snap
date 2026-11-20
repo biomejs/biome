@@ -294,52 +294,40 @@ TwRoot {
             candidate: TwFunctionalCandidate {
                 base_token: TW_BASE@101..102 "w" [] [],
                 minus_token: DASH@102..103 "-" [] [],
-                value: TwBogusValue {
-                    items: [
-                        L_BRACKET@103..104 "[" [] [],
-                        TwBogus {
-                            items: [
-                                TwBogus {
-                                    items: [
-                                        CssIdentifier {
-                                            ident_token: IDENT@104..108 "calc" [] [],
+                value: TwArbitraryValue {
+                    l_brack_token: L_BRACKET@103..104 "[" [] [],
+                    value: CssGenericComponentValueList [
+                        CssFunction {
+                            name: CssIdentifier {
+                                ident_token: IDENT@104..108 "calc" [] [],
+                            },
+                            l_paren_token: L_PAREN@108..109 "(" [] [],
+                            parameters: CssParameterList [
+                                CssListOfComponentValuesExpression {
+                                    css_component_value_list: CssComponentValueList [
+                                        CssRegularDimension {
+                                            value_token: CSS_NUMBER_LITERAL@109..110 "1" [] [],
+                                            unit_token: IDENT@110..113 "px" [] [Whitespace("_")],
                                         },
-                                        L_PAREN@108..109 "(" [] [],
-                                        TwBogus {
+                                        CssBogusPropertyValue {
                                             items: [
-                                                TwBogus {
-                                                    items: [
-                                                        TwBogus {
-                                                            items: [
-                                                                CssRegularDimension {
-                                                                    value_token: CSS_NUMBER_LITERAL@109..110 "1" [] [],
-                                                                    unit_token: IDENT@110..113 "px" [] [Whitespace("_")],
-                                                                },
-                                                                CssBogusPropertyValue {
-                                                                    items: [
-                                                                        L_PAREN@113..114 "(" [] [],
-                                                                        CSS_NUMBER_LITERAL@114..115 "2" [] [],
-                                                                        PX_KW@115..117 "px" [] [],
-                                                                    ],
-                                                                },
-                                                            ],
-                                                        },
-                                                    ],
-                                                },
+                                                L_PAREN@113..114 "(" [] [],
+                                                CSS_NUMBER_LITERAL@114..115 "2" [] [],
+                                                PX_KW@115..117 "px" [] [],
                                             ],
                                         },
-                                        R_PAREN@117..118 ")" [] [],
-                                    ],
-                                },
-                                CssBogusPropertyValue {
-                                    items: [
-                                        R_PAREN@118..119 ")" [] [],
                                     ],
                                 },
                             ],
+                            r_paren_token: R_PAREN@117..118 ")" [] [],
                         },
-                        R_BRACKET@119..120 "]" [] [],
+                        CssBogusPropertyValue {
+                            items: [
+                                R_PAREN@118..119 ")" [] [],
+                            ],
+                        },
                     ],
+                    r_brack_token: R_BRACKET@119..120 "]" [] [],
                 },
                 modifier: missing (optional),
             },
@@ -556,16 +544,16 @@ TwRoot {
       3: TW_FUNCTIONAL_CANDIDATE@101..120
         0: TW_BASE@101..102 "w" [] []
         1: DASH@102..103 "-" [] []
-        2: TW_BOGUS_VALUE@103..120
+        2: TW_ARBITRARY_VALUE@103..120
           0: L_BRACKET@103..104 "[" [] []
-          1: TW_BOGUS@104..119
-            0: TW_BOGUS@104..118
+          1: CSS_GENERIC_COMPONENT_VALUE_LIST@104..119
+            0: CSS_FUNCTION@104..118
               0: CSS_IDENTIFIER@104..108
                 0: IDENT@104..108 "calc" [] []
               1: L_PAREN@108..109 "(" [] []
-              2: TW_BOGUS@109..117
-                0: TW_BOGUS@109..117
-                  0: TW_BOGUS@109..117
+              2: CSS_PARAMETER_LIST@109..117
+                0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@109..117
+                  0: CSS_COMPONENT_VALUE_LIST@109..117
                     0: CSS_REGULAR_DIMENSION@109..113
                       0: CSS_NUMBER_LITERAL@109..110 "1" [] []
                       1: IDENT@110..113 "px" [] [Whitespace("_")]

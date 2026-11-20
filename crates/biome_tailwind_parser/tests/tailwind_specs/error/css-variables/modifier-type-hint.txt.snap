@@ -29,34 +29,27 @@ TwRoot {
                 },
                 modifier: TwModifier {
                     slash_token: SLASH@10..11 "/" [] [],
-                    value: TwBogusValue {
-                        items: [
-                            L_PAREN@11..12 "(" [] [],
-                            TwBogus {
-                                items: [
-                                    TwBogus {
+                    value: TwCssVariableValue {
+                        l_paren_token: L_PAREN@11..12 "(" [] [],
+                        type_hint: missing (optional),
+                        value: CssParameterList [
+                            CssListOfComponentValuesExpression {
+                                css_component_value_list: CssComponentValueList [
+                                    CssIdentifier {
+                                        ident_token: IDENT@12..17 "color" [] [],
+                                    },
+                                    CssBogusPropertyValue {
                                         items: [
-                                            TwBogus {
-                                                items: [
-                                                    CssIdentifier {
-                                                        ident_token: IDENT@12..17 "color" [] [],
-                                                    },
-                                                    CssBogusPropertyValue {
-                                                        items: [
-                                                            COLON@17..18 ":" [] [],
-                                                        ],
-                                                    },
-                                                    CssDashedIdentifier {
-                                                        ident_token: IDENT@18..21 "--a" [] [],
-                                                    },
-                                                ],
-                                            },
+                                            COLON@17..18 ":" [] [],
                                         ],
+                                    },
+                                    CssDashedIdentifier {
+                                        ident_token: IDENT@18..21 "--a" [] [],
                                     },
                                 ],
                             },
-                            R_PAREN@21..22 ")" [] [],
                         ],
+                        r_paren_token: R_PAREN@21..22 ")" [] [],
                     },
                 },
             },
@@ -85,18 +78,19 @@ TwRoot {
           0: TW_VALUE@3..10 "red-500" [] []
         3: TW_MODIFIER@10..22
           0: SLASH@10..11 "/" [] []
-          1: TW_BOGUS_VALUE@11..22
+          1: TW_CSS_VARIABLE_VALUE@11..22
             0: L_PAREN@11..12 "(" [] []
-            1: TW_BOGUS@12..21
-              0: TW_BOGUS@12..21
-                0: TW_BOGUS@12..21
+            1: (empty)
+            2: CSS_PARAMETER_LIST@12..21
+              0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@12..21
+                0: CSS_COMPONENT_VALUE_LIST@12..21
                   0: CSS_IDENTIFIER@12..17
                     0: IDENT@12..17 "color" [] []
                   1: CSS_BOGUS_PROPERTY_VALUE@17..18
                     0: COLON@17..18 ":" [] []
                   2: CSS_DASHED_IDENTIFIER@18..21
                     0: IDENT@18..21 "--a" [] []
-            2: R_PAREN@21..22 ")" [] []
+            3: R_PAREN@21..22 ")" [] []
       4: (empty)
   3: EOF@22..22 "" [] []
 
