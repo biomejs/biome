@@ -1,16 +1,19 @@
 use std::{
     collections::{BTreeMap, BTreeSet},
-    fs,
+    fs::{self, OpenOptions},
     io::{self, Write},
     path::Path,
+    process,
+    sync::atomic::{AtomicU64, Ordering},
 };
 
 use anyhow::{Context, Result, ensure};
 use serde::Deserialize;
 
 use crate::{
+    cargo::SystemCargo,
     plan::topological_order,
-    workspace::{PublishPackage, Workspace},
+    workspace::{PublishPackage, README_PREFIX, Workspace, workspace_metadata},
 };
 
 #[derive(Debug, Deserialize)]
@@ -144,15 +147,111 @@ impl BundlePlan {
     }
 }
 
-pub(crate) fn print(directory: &Path) -> Result<()> {
+pub(crate) fn print(directory: &Path, check: bool) -> Result<()> {
     let workspace = Workspace::from_directory(directory, true)?;
-    let path = workspace.root.join("xtask/publish_crates/bundle-plan.toml");
+    let config = read_config(&workspace.root)?;
+    let plan = BundlePlan::new(&config, &workspace.packages)?;
+    let blockers = plan.blockers.len();
+    write_report(plan, workspace.packages.len(), io::stdout().lock())?;
+    ensure!(
+        !check || blockers == 0,
+        "bundle plan still needs crates marked for exclusion"
+    );
+    Ok(())
+}
+
+pub(crate) fn verify_staged(directory: &Path, staging_dir: &Path) -> Result<()> {
+    let root = workspace_metadata(directory)?.workspace_root;
+    let staging_dir = staging_dir
+        .canonicalize()
+        .context("opening the staging directory")?;
+    ensure!(
+        !staging_dir.starts_with(root.canonicalize()?),
+        "the staged bundle must be outside the Biome workspace"
+    );
+    let config = read_config(root.as_std_path())?;
+
+    let manifest_path = staging_dir.join("Cargo.toml");
+    ensure!(
+        fs::symlink_metadata(&manifest_path)?.is_file(),
+        "expected a regular staged Cargo.toml"
+    );
+    let mut manifest: toml::Table = toml::from_str(&fs::read_to_string(&manifest_path)?)?;
+    let package = manifest
+        .get_mut("package")
+        .and_then(toml::Value::as_table_mut)
+        .context("staged Cargo.toml has no [package] table")?;
+    let name = package
+        .get("name")
+        .and_then(toml::Value::as_str)
+        .context("staged Cargo.toml has no package name")?
+        .to_string();
+    let members = config
+        .bundles
+        .get(&name)
+        .with_context(|| format!("{name} is not a configured bundle"))?;
+
+    let readme_path = staging_dir.join("README.md");
+    match fs::symlink_metadata(&readme_path) {
+        Ok(metadata) => ensure!(metadata.is_file(), "expected a regular staged README.md"),
+        Err(error) if error.kind() == io::ErrorKind::NotFound => {}
+        Err(error) => return Err(error.into()),
+    }
+
+    let mut readme =
+        format!("{README_PREFIX}\n# `{name}`\n\nThis package combines these Biome crates:\n");
+    for member in members {
+        readme.push_str("\n- `");
+        readme.push_str(member);
+        readme.push('`');
+    }
+    readme.push('\n');
+    package.insert(
+        "readme".to_string(),
+        toml::Value::String("README.md".to_string()),
+    );
+    let manifest = toml::to_string(&manifest)?;
+    replace_staged_file(&staging_dir, &readme_path, &readme)
+        .with_context(|| format!("writing {}", readme_path.display()))?;
+    replace_staged_file(&staging_dir, &manifest_path, &manifest)
+        .with_context(|| format!("writing {}", manifest_path.display()))?;
+
+    ensure!(
+        fs::read_to_string(&readme_path)?.starts_with(README_PREFIX),
+        "staged README.md is missing the shared image"
+    );
+    SystemCargo::new().verify_staged_package(&staging_dir, &name)
+}
+
+fn replace_staged_file(directory: &Path, path: &Path, contents: &str) -> io::Result<()> {
+    static NEXT_FILE: AtomicU64 = AtomicU64::new(0);
+    let (temporary, mut file) = loop {
+        let id = NEXT_FILE.fetch_add(1, Ordering::Relaxed);
+        let temporary = directory.join(format!(".biome-bundle-{}-{id}", process::id()));
+        match OpenOptions::new()
+            .write(true)
+            .create_new(true)
+            .open(&temporary)
+        {
+            Ok(file) => break (temporary, file),
+            Err(error) if error.kind() == io::ErrorKind::AlreadyExists => {}
+            Err(error) => return Err(error),
+        }
+    };
+    let written = file.write_all(contents.as_bytes());
+    drop(file);
+    let replaced = written.and_then(|()| fs::rename(&temporary, path));
+    if replaced.is_err() {
+        let _ = fs::remove_file(&temporary);
+    }
+    replaced
+}
+
+fn read_config(root: &Path) -> Result<BundleConfig> {
+    let path = root.join("xtask/publish_crates/bundle-plan.toml");
     let source =
         fs::read_to_string(&path).with_context(|| format!("reading {}", path.display()))?;
-    let config = toml::from_str(&source).with_context(|| format!("parsing {}", path.display()))?;
-    let plan = BundlePlan::new(&config, &workspace.packages)?;
-    write_report(plan, workspace.packages.len(), io::stdout().lock())?;
-    Ok(())
+    toml::from_str(&source).with_context(|| format!("parsing {}", path.display()))
 }
 
 fn write_report(plan: BundlePlan, source_count: usize, mut output: impl Write) -> io::Result<()> {

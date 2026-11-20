@@ -212,14 +212,12 @@ impl Arguments {
             let test_name = transform_file_name(&test_name);
 
             // Build module path components based on directories relative to the static (non-glob) prefix.
-            let parent_components: Vec<String> = Path::new(&test_full_path)
-                .parent()
-                .map(|p| {
+            let parent_components: Vec<String> =
+                Path::new(&test_full_path).parent().map_or_default(|p| {
                     p.components()
                         .filter_map(|c| c.as_os_str().to_str().map(|s| s.to_string()))
-                        .collect::<Vec<String>>()
-                })
-                .unwrap_or_default();
+                        .collect()
+                });
 
             // Find where the static prefix appears in the file path; include the last static component (e.g. "ok")
             let mut start_idx: Option<usize> = None;

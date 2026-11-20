@@ -3,20 +3,6 @@
 CI publishes individual workspace crates marked `publish = true`. It does not publish language
 bundles yet.
 
-## Language bundles
-
-The plan is to publish one crate per language without moving the source crates. For example,
-the GraphQL source stays in separate workspace crates. The release would copy that code into
-`biome_graphql` in a staging directory. Rust users would add one GraphQL dependency instead of
-separate crates for parsing, formatting, and semantic analysis.
-
-JSON and YAML are exceptions. Their parsers stay in the language bundles, but their formatters
-stay separate. The formatters depend on the shared deserializer, which needs the parsers.
-Bundling either formatter with its parser would create a dependency cycle.
-
-`biome_db`, `biome_analyze`, and `biome_analyze_macros` stay public as separate crates. The
-language-specific analyzers, module graph, and resolver stay in the workspace.
-
 ## Release workflow
 
 Run the full locked Cargo dry-run verification on a clean release revision:
@@ -39,20 +25,55 @@ cargo run --locked -p xtask_publish_crates -- publish --execute --verified-revis
 
 The publisher packages the complete public-crate set, compares local archive checksums with crates.io, skips matching versions, and publishes the remaining crates in dependency order. A rerun reconstructs progress from crates.io; it does not use a local checkpoint file.
 
-## Inspect the bundle plan
+## Bundle plan
+
+[`bundle-plan.toml`](bundle-plan.toml) describes which workspace crates would ship together as
+one package. It models the release without moving source files or changing what CI publishes.
+The file has three required keys:
+
+- `roots`: A nonempty list of existing publishable crate names to start from. Their workspace
+  dependencies are included automatically. List source crate names here, not bundle names.
+- `private`: A list of package names to leave out. This does not change a crate's `publish` flag.
+  If the plan still needs a package on this list, the command reports it as a blocker instead of
+  silently dropping it. Use `[]` if there are no planned exclusions.
+- `[bundles]`: A table that maps each planned package name to at least two publishable source
+  crates. If the plan reaches any member, it includes all members and their dependencies. A
+  source crate can belong to only one bundle, a bundle name cannot match an existing publishable
+  crate, and every bundle must be reachable from a root.
+
+For example, `biome_graphql_parser` is a root and a member of the `biome_graphql` bundle. The
+plan lists one `biome_graphql` package instead of separate GraphQL syntax, factory, parser,
+formatter, and semantic crates. JSON and YAML are not in `[bundles]`, so their parser, formatter,
+syntax, and factory crates keep their own package names. Their analyzers remain workspace-only.
+
+Run the planner from the Biome checkout:
 
 ```shell
 cargo run --locked -p xtask_publish_crates -- bundle-plan
 ```
 
-[`bundle-plan.toml`](bundle-plan.toml) lists the starting crates, bundle members, and planned exclusions.
-The command first validates the current publishable crates. A dependency on a crate that is
-already workspace-only fails that validation before the plan runs.
+It first validates the current publishable crates. A normal or build dependency on a
+workspace-only crate fails that validation, even if the dependency is optional. The planner then
+follows workspace dependencies from `roots`, including dev dependencies with a version
+requirement. It omits packages it doesn't reach, rejects cycles, and prints the result in
+dependency order.
 
-The command follows dependencies from the starting crates and prints the planned packages in
-dependency order. It omits public crates that the plan doesn't reach unless they are part of a
-selected bundle. If a planned exclusion is still public and the plan needs it, the command lists
-it as a blocker. It checks for cycles but does not build or upload anything.
+CI runs `bundle-plan --check` before the publish dry run. The `--check` flag makes blockers fail
+the command. Neither mode assembles, builds, or uploads bundles.
+
+## Verify a staged bundle
+
+From the Biome checkout, point `verify` at a staged crate outside the checkout:
+
+```shell
+cargo run --locked -p xtask_publish_crates -- verify --staged-bundle /path/to/staged/crate
+```
+
+The staged crate needs its sources, a manifest, and a lockfile (its own or its staging workspace's).
+Verification replaces the staged `README.md` with one that has the shared Biome banner and sets
+`readme = "README.md"` in the staged manifest. It checks that Cargo will include the README, then
+packages and builds the crate under the staging directory's `target/package`. It does not upload
+anything. CI still runs `verify` without this option.
 
 ## Rate limits
 

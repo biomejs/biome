@@ -6,12 +6,12 @@ use std::{
 };
 
 use anyhow::{Context, Result, bail};
-use cargo_metadata::{DependencyKind, MetadataCommand, Package, semver::Version};
+use cargo_metadata::{DependencyKind, Metadata, MetadataCommand, Package, semver::Version};
 use ignore::gitignore::GitignoreBuilder;
 
 type TomlTable = toml::map::Map<String, toml::Value>;
 
-const README_PREFIX: &str = r#"<p align="center">
+pub(crate) const README_PREFIX: &str = r#"<p align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/biomejs/resources/main/svg/slogan-dark-transparent.svg">
     <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/biomejs/resources/main/svg/slogan-light-transparent.svg">
@@ -98,14 +98,18 @@ pub(crate) struct Workspace {
     include_policies: Vec<IncludePolicy>,
 }
 
+pub(crate) fn workspace_metadata(directory: &Path) -> Result<Metadata> {
+    MetadataCommand::new()
+        .current_dir(directory)
+        .no_deps()
+        .other_options(vec!["--locked".to_string()])
+        .exec()
+        .context("failed to read Cargo metadata")
+}
+
 impl Workspace {
     pub(crate) fn from_directory(directory: &Path, allow_dirty: bool) -> Result<Self> {
-        let mut command = MetadataCommand::new();
-        command
-            .current_dir(directory)
-            .no_deps()
-            .other_options(vec!["--locked".to_string()]);
-        let metadata = command.exec().context("failed to read Cargo metadata")?;
+        let metadata = workspace_metadata(directory)?;
         let root = metadata.workspace_root.clone().into_std_path_buf();
         let target_directory = metadata.target_directory.clone().into_std_path_buf();
         let fingerprint = GitFingerprint::from_repository(&root, allow_dirty)?;
@@ -180,16 +184,20 @@ impl Workspace {
                             relative_manifest(&root, package)
                         )),
                     }
-                    match workspace_dependencies.get(package.name.as_str()) {
-                        Some(dependency_version) if dependency_version == &version.to_string() => {}
-                        Some(dependency_version) => errors.push(format!(
-                            "Cargo.toml: {} workspace dependency must use {version}, found {dependency_version}",
-                            package.name
-                        )),
-                        None => errors.push(format!(
-                            "Cargo.toml: missing versioned workspace dependency for {}",
-                            package.name
-                        )),
+                    if let Some(dependency) = workspace_dependencies.get(package.name.as_str()) {
+                        let dependency_version =
+                            dependency.get("version").and_then(toml::Value::as_str);
+                        match dependency_version {
+                            Some(dependency_version) if dependency_version == version.to_string() => {}
+                            Some(dependency_version) => errors.push(format!(
+                                "Cargo.toml: {} workspace dependency must use {version}, found {dependency_version}",
+                                package.name
+                            )),
+                            None => errors.push(format!(
+                                "Cargo.toml: missing versioned workspace dependency for {}",
+                                package.name
+                            )),
+                        }
                     }
                 }
                 Some(false) => {
@@ -427,23 +435,13 @@ fn workspace_version(manifest: &TomlTable) -> Result<Version> {
         .context("invalid [workspace.package].version")
 }
 
-fn workspace_dependencies(manifest: &TomlTable) -> Result<BTreeMap<String, String>> {
-    let dependencies = manifest
+fn workspace_dependencies(manifest: &TomlTable) -> Result<&TomlTable> {
+    manifest
         .get("workspace")
         .and_then(toml::Value::as_table)
         .and_then(|workspace| workspace.get("dependencies"))
         .and_then(toml::Value::as_table)
-        .context("missing [workspace.dependencies]")?;
-    Ok(dependencies
-        .iter()
-        .filter_map(|(name, value)| {
-            value
-                .as_table()
-                .and_then(|dependency| dependency.get("version"))
-                .and_then(toml::Value::as_str)
-                .map(|version| (name.clone(), version.to_string()))
-        })
-        .collect())
+        .context("missing [workspace.dependencies]")
 }
 
 fn relative_manifest(root: &Path, package: &Package) -> String {
@@ -671,6 +669,137 @@ mod tests {
     }
 
     #[test]
+    fn verifies_a_staged_bundle_without_changing_its_source_files() {
+        let source = Fixture::new(
+            &root_manifest(&[("parser", "1.0.0"), ("syntax", "1.0.0")]),
+            &[
+                (
+                    "parser",
+                    package_manifest("parser", ".workspace = true\n", Some(true), ""),
+                ),
+                (
+                    "syntax",
+                    package_manifest("syntax", ".workspace = true\n", Some(true), ""),
+                ),
+            ],
+        );
+        write_file(
+            &source.root,
+            "xtask/publish_crates/bundle-plan.toml",
+            "roots = ['parser']\nprivate = []\n[bundles]\nbundle = ['parser', 'syntax']\n",
+        );
+        fs::remove_file(source.root.join("crates/syntax/README.md")).unwrap();
+        let staged = Fixture::new(
+            &root_manifest(&[]),
+            &[(
+                "bundle",
+                package_manifest(
+                    "bundle",
+                    ".workspace = true\n",
+                    Some(true),
+                    "include = ['src/**']\n",
+                ),
+            )],
+        );
+        let staged_crate = staged.root.join("crates/bundle");
+        let readme_source = source.root.join("crates/parser/README.md");
+        let original_readme = fs::read(&readme_source).unwrap();
+        let staged_manifest = staged_crate.join("Cargo.toml");
+        let manifest_source = source.root.join("bundle-template.toml");
+        let original_manifest = fs::read(&staged_manifest).unwrap();
+        fs::rename(&staged_manifest, &manifest_source).unwrap();
+        fs::hard_link(&manifest_source, &staged_manifest).unwrap();
+        fs::remove_file(staged_crate.join("README.md")).unwrap();
+        fs::hard_link(&readme_source, staged_crate.join("README.md")).unwrap();
+
+        crate::bundle_plan::verify_staged(&source.root, &staged_crate).unwrap();
+
+        assert_eq!(fs::read(readme_source).unwrap(), original_readme);
+        assert_eq!(fs::read(manifest_source).unwrap(), original_manifest);
+
+        let readme = fs::read_to_string(staged_crate.join("README.md")).unwrap();
+        assert!(readme.starts_with(README_PREFIX));
+        assert!(readme.contains("# `bundle`\n"));
+        assert!(readme.contains("- `parser`\n- `syntax`\n"));
+        let manifest = fs::read_to_string(staged_crate.join("Cargo.toml")).unwrap();
+        assert!(manifest.contains("readme = \"README.md\""));
+        assert!(
+            staged_crate
+                .join("target/package/bundle-1.0.0.crate")
+                .is_file()
+        );
+    }
+
+    #[test]
+    fn rejects_a_package_file_list_without_the_root_readme() {
+        let staged = Fixture::new(
+            &root_manifest(&[]),
+            &[(
+                "bundle",
+                package_manifest(
+                    "bundle",
+                    ".workspace = true\n",
+                    Some(true),
+                    "readme = false\ninclude = ['src/**', 'docs/**']\n",
+                ),
+            )],
+        );
+        let staged_crate = staged.root.join("crates/bundle");
+        write_file(&staged_crate, "docs/README.md", README_PREFIX);
+        let error = crate::cargo::SystemCargo::new()
+            .verify_staged_package(&staged_crate, "bundle")
+            .unwrap_err();
+        assert_eq!(
+            error.to_string(),
+            "cargo would not include README.md in bundle"
+        );
+        assert!(
+            !staged_crate
+                .join("target/package/bundle-1.0.0.crate")
+                .exists()
+        );
+    }
+
+    #[test]
+    fn bundle_plan_check_rejects_dependencies_marked_for_exclusion() {
+        let fixture = Fixture::new(
+            &root_manifest(&[("parser", "1.0.0"), ("internal", "1.0.0")]),
+            &[
+                (
+                    "parser",
+                    package_manifest(
+                        "parser",
+                        ".workspace = true\n",
+                        Some(true),
+                        "\n[dependencies]\ninternal.workspace = true\n",
+                    ),
+                ),
+                (
+                    "internal",
+                    package_manifest("internal", ".workspace = true\n", Some(true), ""),
+                ),
+            ],
+        );
+        let config = "roots = ['parser']\n[bundles]\n";
+        let path = "xtask/publish_crates/bundle-plan.toml";
+
+        write_file(&fixture.root, path, &format!("private = []\n{config}"));
+        crate::bundle_plan::print(&fixture.root, true).unwrap();
+
+        write_file(
+            &fixture.root,
+            path,
+            &format!("private = ['internal']\n{config}"),
+        );
+        crate::bundle_plan::print(&fixture.root, false).unwrap();
+        let error = crate::bundle_plan::print(&fixture.root, true).unwrap_err();
+        assert_eq!(
+            error.to_string(),
+            "bundle plan still needs crates marked for exclusion"
+        );
+    }
+
+    #[test]
     fn selects_only_explicit_public_crates() {
         let fixture = Fixture::new(
             &root_manifest(&[("public", "1.0.0")]),
@@ -761,6 +890,39 @@ mod tests {
             workspace
                 .ensure_verified_revision("unknown-revision")
                 .is_err()
+        );
+    }
+
+    #[test]
+    fn publishes_a_crate_without_a_shared_dependency_entry() {
+        let fixture = Fixture::new(
+            &root_manifest(&[]),
+            &[(
+                "public",
+                package_manifest("public", ".workspace = true\n", Some(true), ""),
+            )],
+        );
+
+        let workspace = Workspace::from_directory(&fixture.root, false).unwrap();
+        assert_eq!(workspace.packages, [PublishPackage::new("public", &[])]);
+    }
+
+    #[test]
+    fn rejects_an_unversioned_shared_dependency_for_a_public_crate() {
+        let mut root = root_manifest(&[]);
+        root.push_str("public = { path = 'crates/public' }\n");
+        let fixture = Fixture::new(
+            &root,
+            &[(
+                "public",
+                package_manifest("public", ".workspace = true\n", Some(true), ""),
+            )],
+        );
+
+        let error = Workspace::from_directory(&fixture.root, false).unwrap_err();
+        assert_eq!(
+            error.to_string(),
+            "Cargo.toml: missing versioned workspace dependency for public"
         );
     }
 

@@ -33,5 +33,7 @@ jobs:
           cache-base: main
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Check bundled release plan
+        run: cargo run --locked -p xtask_publish_crates -- bundle-plan --check
       - name: Verify crate publication
         run: cargo run --locked -p xtask_publish_crates -- verify

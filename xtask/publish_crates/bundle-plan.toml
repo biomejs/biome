@@ -38,6 +38,7 @@ private = [
   "biome_project_layout",
   "biome_resolver",
   "biome_rule_options",
+  "biome_yaml_analyze",
 ]
 
 [bundles]
@@ -75,9 +76,6 @@ biome_js = [
   "biome_js_syntax",
   "biome_jsdoc_comment",
 ]
-# Deserialization depends on the JSON and YAML parsers. Their formatters also
-# depend on deserialization, so they stay out of these bundles.
-biome_json = ["biome_json_factory", "biome_json_parser", "biome_json_syntax"]
 biome_markdown = [
   "biome_markdown_factory",
   "biome_markdown_formatter",
@@ -85,4 +83,3 @@ biome_markdown = [
   "biome_markdown_syntax",
 ]
 biome_tailwind = ["biome_tailwind_factory", "biome_tailwind_parser", "biome_tailwind_syntax"]
-biome_yaml = ["biome_yaml_factory", "biome_yaml_parser", "biome_yaml_syntax"]
