@@ -10,7 +10,10 @@ use biome_css_syntax::{
     ScssParentSelector,
 };
 use biome_module_graph::{SymbolFromModuleInfo, is_class_referenced_by_importers};
-use biome_rowan::{AstNode, AstNodeList, AstSeparatedList, TextRange, declare_node_union};
+use biome_rowan::{
+    AstNode, AstNodeList, AstSeparatedList, SyntaxNodeText, TextRange, TokenText,
+    declare_node_union,
+};
 use biome_rule_options::no_unused_classes::NoUnusedClassesOptions;
 
 declare_lint_rule! {
@@ -80,8 +83,7 @@ declare_node_union! {
 
 impl Rule for NoUnusedClasses {
     type Query = CssModuleGraph<AnyClassNameSelector>;
-    /// Index of the unused class in `ParentSuffixClassNames` is always 0 for a class selector
-    type State = usize;
+    type State = ClassRef;
     type Signals = Vec<Self::State>;
     type Options = NoUnusedClassesOptions;
 
@@ -105,39 +107,29 @@ impl Rule for NoUnusedClasses {
             AnyClassNameSelector::CssClassSelector(selector) => selector
                 .name_text()
                 .filter(|class_name| is_unused(class_name.text()))
-                .map(|_| 0)
+                .map(ClassRef::Css)
                 .into_iter()
                 .collect(),
             AnyClassNameSelector::ScssParentSelector(selector) => {
                 ParentSuffixClassNames::from_selector(selector)
                     .into_iter()
                     .flatten()
-                    .enumerate()
-                    .filter(|(_, class_name)| is_unused(class_name))
-                    .map(|(index, _)| index)
+                    .filter(|class_name| is_unused(class_name))
+                    .map(ClassRef::Scss)
                     .collect()
             }
         }
     }
 
-    fn text_range(ctx: &RuleContext<Self>, _index: &Self::State) -> Option<TextRange> {
+    fn text_range(ctx: &RuleContext<Self>, _class: &Self::State) -> Option<TextRange> {
         Some(ctx.query().range())
     }
 
-    fn diagnostic(ctx: &RuleContext<Self>, index: &Self::State) -> Option<RuleDiagnostic> {
+    fn diagnostic(ctx: &RuleContext<Self>, class: &Self::State) -> Option<RuleDiagnostic> {
         let node = ctx.query();
-        let token_text;
-        let parent_suffix_class_name;
-        let class_name = match node {
-            AnyClassNameSelector::CssClassSelector(selector) => {
-                token_text = selector.name_text()?;
-                token_text.text()
-            }
-            AnyClassNameSelector::ScssParentSelector(selector) => {
-                parent_suffix_class_name =
-                    ParentSuffixClassNames::from_selector(selector)?.nth(*index)?;
-                parent_suffix_class_name.as_str()
-            }
+        let class_name = match class {
+            ClassRef::Css(name) => name.text(),
+            ClassRef::Scss(name) => name.as_str(),
         };
         Some(
             RuleDiagnostic::new(
@@ -157,12 +149,21 @@ impl Rule for NoUnusedClasses {
     }
 }
 
+/// An unused class name.
+pub enum ClassRef {
+    /// A class written in the source, such as `foo` for `.foo`.
+    Css(TokenText),
+    /// A class Sass builds from a parent selector with a suffix, such as `block__element` for
+    /// `&__element` in `.block { &__element {} }`.
+    Scss(String),
+}
+
 /// Yields the class names Sass builds for a parent selector with a suffix, such as `block__element`
 /// for `&__element` in `.block { &__element {} }`, one for each parent selector that ends in a
 /// class.
 struct ParentSuffixClassNames {
     parents: std::vec::IntoIter<String>,
-    suffix: String,
+    suffix: SyntaxNodeText,
 }
 
 impl ParentSuffixClassNames {
@@ -182,7 +183,7 @@ impl ParentSuffixClassNames {
         parents.dedup();
         Some(Self {
             parents: parents.into_iter(),
-            suffix: suffix.syntax().text_trimmed().to_string(),
+            suffix: suffix.syntax().text_trimmed(),
         })
     }
 }
@@ -192,7 +193,9 @@ impl Iterator for ParentSuffixClassNames {
 
     fn next(&mut self) -> Option<Self::Item> {
         let mut class_name = self.parents.next()?;
-        class_name.push_str(&self.suffix);
+        class_name.reserve(usize::from(self.suffix.len()));
+        self.suffix
+            .for_each_chunk(|chunk| class_name.push_str(chunk));
         Some(class_name)
     }
 
