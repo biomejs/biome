@@ -1,0 +1,196 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+const array1: number[] = [1];
+array1.push(2);
+
+let foo1: number;
+foo1 = 1;
+
+let foo2!: number;
+foo2 = 1;
+
+let r: number, g: number;
+[r, g] = colors;
+
+const set1 = new Set<number> // comment
+set1.add(1)
+
+```
+
+# Diagnostics
+```
+invalid.ts:3:1 lint/nursery/noImmediateMutation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This array is changed right after it is created.
+  
+    1 │ /* should generate diagnostics */
+    2 │ const array1: number[] = [1];
+  > 3 │ array1.push(2);
+      │ ^^^^^^^^^^^
+    4 │ 
+    5 │ let foo1: number;
+  
+  i The array is created here.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const array1: number[] = [1];
+      │                          ^^^
+    3 │ array1.push(2);
+    4 │ 
+  
+  i Creating a value and changing it in the next statement splits its initial contents across two statements, which makes them harder to read.
+  
+  i Include the change in the initial value instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Move the change into the initial value.
+  
+     1  1 │   /* should generate diagnostics */
+     2    │ - const·array1:·number[]·=·[1];
+     3    │ - array1.push(2);
+        2 │ + const·array1:·number[]·=·[1,·2];
+     4  3 │   
+     5  4 │   let foo1: number;
+  
+
+```
+
+```
+invalid.ts:6:1 lint/nursery/noImmediateMutation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This variable is assigned right after it is declared.
+  
+    5 │ let foo1: number;
+  > 6 │ foo1 = 1;
+      │ ^^^^^^^^
+    7 │ 
+    8 │ let foo2!: number;
+  
+  i The declaration is here.
+  
+    3 │ array1.push(2);
+    4 │ 
+  > 5 │ let foo1: number;
+      │ ^^^^^^^^^^^^^^^^^
+    6 │ foo1 = 1;
+    7 │ 
+  
+  i Declaring a variable and assigning its first value in two statements makes the code longer and harder to follow.
+  
+  i Assign the value in the declaration instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Assign the value in the declaration.
+  
+     3  3 │   array1.push(2);
+     4  4 │   
+     5    │ - let·foo1:·number;
+     6    │ - foo1·=·1;
+        5 │ + let·foo1:·number·=·1;
+     7  6 │   
+     8  7 │   let foo2!: number;
+  
+
+```
+
+```
+invalid.ts:9:1 lint/nursery/noImmediateMutation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This variable is assigned right after it is declared.
+  
+     8 │ let foo2!: number;
+   > 9 │ foo2 = 1;
+       │ ^^^^^^^^
+    10 │ 
+    11 │ let r: number, g: number;
+  
+  i The declaration is here.
+  
+     6 │ foo1 = 1;
+     7 │ 
+   > 8 │ let foo2!: number;
+       │ ^^^^^^^^^^^^^^^^^^
+     9 │ foo2 = 1;
+    10 │ 
+  
+  i Declaring a variable and assigning its first value in two statements makes the code longer and harder to follow.
+  
+  i Assign the value in the declaration instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:12:1 lint/nursery/noImmediateMutation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These variables are assigned right after they are declared.
+  
+    11 │ let r: number, g: number;
+  > 12 │ [r, g] = colors;
+       │ ^^^^^^^^^^^^^^^
+    13 │ 
+    14 │ const set1 = new Set<number> // comment
+  
+  i The declaration is here.
+  
+     9 │ foo2 = 1;
+    10 │ 
+  > 11 │ let r: number, g: number;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ [r, g] = colors;
+    13 │ 
+  
+  i Declaring a variable and assigning its first value in two statements makes the code longer and harder to follow.
+  
+  i Assign the value in the declaration instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:15:1 lint/nursery/noImmediateMutation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Set is changed right after it is created.
+  
+    14 │ const set1 = new Set<number> // comment
+  > 15 │ set1.add(1)
+       │ ^^^^^^^^
+    16 │ 
+  
+  i The Set is created here.
+  
+    12 │ [r, g] = colors;
+    13 │ 
+  > 14 │ const set1 = new Set<number> // comment
+       │              ^^^^^^^^^^^^^^^
+    15 │ set1.add(1)
+    16 │ 
+  
+  i Creating a value and changing it in the next statement splits its initial contents across two statements, which makes them harder to read.
+  
+  i Include the change in the initial value instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Move the change into the initial value.
+  
+    12 12 │   [r, g] = colors;
+    13 13 │   
+    14    │ - const·set1·=·new·Set<number>·//·comment
+    15    │ - set1.add(1)
+       14 │ + const·set1·=·new·Set<number>([1])·//·comment
+    16 15 │   
+  
+
+```
