@@ -487,6 +487,7 @@ define_categories! {
     "lint/nursery/useConsistentTupleLabels": "https://biomejs.dev/linter/rules/use-consistent-tuple-labels",
     "lint/nursery/useConsistentUnicodeBom": "https://biomejs.dev/linter/rules/use-consistent-unicode-bom",
     "lint/nursery/useControlLabel": "https://biomejs.dev/linter/rules/use-control-label",
+    "lint/nursery/useDescribeFunctionTitle": "https://biomejs.dev/linter/rules/use-describe-function-title",
     "lint/nursery/useDisposables": "https://biomejs.dev/linter/rules/use-disposables",
     "lint/nursery/useExhaustiveSwitchCases": "https://biomejs.dev/linter/rules/use-exhaustive-switch-cases",
     "lint/nursery/useExpectToContain": "https://biomejs.dev/linter/rules/use-expect-to-contain",
