@@ -970,8 +970,8 @@ pub(crate) enum CalleeReturn {
     Annotated,
     /// A function body, or a type that the syntax doesn't show. A write of
     /// the call's value gives the subject its declared type, unless the
-    /// callee is a local function whose returned values [`value_callees`]
-    /// accepts.
+    /// callee is a local function that [`inferred_local_body`] finds. For
+    /// such a callee, [`value_callees`] checks the values that it returns.
     Inferred,
     /// A declaration that the reading context finds.
     ///
