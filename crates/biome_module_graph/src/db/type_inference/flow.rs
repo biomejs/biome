@@ -34,7 +34,7 @@ use crate::js_module_info::flow::{
     FlowCallRoot, FlowCallee, FlowCapture, FlowEvolving, FlowGuard, FlowNode, FlowNodeId, FlowRead,
     FlowSubject, FlowSubjectId, FlowSwitch, FlowTest, FlowWriteEffect, PropertyKey,
     ReachabilityGraph, RootFlow, UnitValue, binding_unit_value, build_reachability,
-    declaration_return, guard_signature, member_explicitness, member_return,
+    declaration_return, guard_signature, member_explicitness, member_return, reaches_end_by_syntax,
 };
 use crate::module_graph::ModuleInfoKind;
 use crate::{
@@ -255,15 +255,7 @@ pub(in crate::db) fn flow_reachability(
     info: &JsModuleInfo,
     root: TextRange,
 ) -> Option<FlowReachability> {
-    let tree = info.semantic_model.root();
-    let start = match tree.syntax().covering_element(root) {
-        NodeOrToken::Node(node) => node,
-        NodeOrToken::Token(token) => token.parent()?,
-    };
-    let root = start
-        .ancestors()
-        .filter_map(AnyJsControlFlowRoot::cast)
-        .find(|candidate| candidate.syntax().text_trimmed_range() == root)?;
+    let root = control_flow_root(info, root)?;
     let graph = build_reachability(
         &root,
         &info.semantic_model,
@@ -272,6 +264,19 @@ pub(in crate::db) fn flow_reachability(
     )?;
     let mut ctx = ResolutionCtx::new(db, module, info, ImportResolution::on_demand());
     ctx.reachability(&graph)
+}
+
+/// Returns the execution root of the module whose trimmed range is `range`.
+fn control_flow_root(info: &JsModuleInfo, range: TextRange) -> Option<AnyJsControlFlowRoot> {
+    let tree = info.semantic_model.root();
+    let start = match tree.syntax().covering_element(range) {
+        NodeOrToken::Node(node) => node,
+        NodeOrToken::Token(token) => token.parent()?,
+    };
+    start
+        .ancestors()
+        .filter_map(AnyJsControlFlowRoot::cast)
+        .find(|candidate| candidate.syntax().text_trimmed_range() == range)
 }
 
 pub(in crate::db) fn flow_switch_exhaustive(
@@ -1684,7 +1689,9 @@ impl<'db> ResolutionCtx<'db, '_> {
     /// When a `return` statement of the function has no value, the answer is
     /// `undefined` without asking whether a path reaches the end. That
     /// `return` already adds `undefined` to the union, so the union is the
-    /// same either way.
+    /// same either way. The answer is also `undefined` without the module's
+    /// flow when the syntax of the function shows a path to the end (see
+    /// [`reaches_end_by_syntax`]).
     ///
     /// Otherwise the answer comes from [`infer_flow_reachability`], so every
     /// resolution context shares it. The end counts as reachable when that
@@ -1697,7 +1704,7 @@ impl<'db> ResolutionCtx<'db, '_> {
         &self,
         expression: &TypeofImplicitReturnExpression,
     ) -> TypeData<'db> {
-        if expression.has_bare_return {
+        if expression.has_bare_return || self.reaches_end_by_syntax(expression.function) {
             return TypeData::Undefined;
         }
         let input = FlowReachabilityInput::new(self.db, self.module, expression.function);
@@ -1705,6 +1712,20 @@ impl<'db> ResolutionCtx<'db, '_> {
             Some(reachability) if !reachability.end => TypeData::NeverKeyword,
             Some(_) | None => TypeData::Undefined,
         }
+    }
+
+    /// Returns whether the syntax of the function whose trimmed range is
+    /// `function` shows a path to the end of its body.
+    fn reaches_end_by_syntax(&self, function: TextRange) -> bool {
+        let info = self.js_info;
+        control_flow_root(info, function).is_some_and(|root| {
+            reaches_end_by_syntax(
+                &root,
+                &info.semantic_model,
+                &info.raw_types,
+                &info.raw_binding_types,
+            )
+        })
     }
 
     /// Returns which statements of the root that `graph` holds some path

@@ -48,6 +48,7 @@
 mod builder;
 mod expressions;
 mod guards;
+mod reachable_end;
 mod scanner;
 mod subjects;
 mod writes;
@@ -70,7 +71,7 @@ use biome_js_syntax::{
     JsArrayBindingPatternRestElement, JsBreakStatement, JsClassDeclaration,
     JsClassExportDefaultDeclaration, JsComputedMemberName, JsConstructorClassMember,
     JsContinueStatement, JsDecorator, JsDoWhileStatement, JsExpressionStatement, JsForInStatement,
-    JsForOfStatement, JsForStatement, JsGetterClassMember, JsGetterObjectMember,
+    JsForOfStatement, JsForStatement, JsFunctionBody, JsGetterClassMember, JsGetterObjectMember,
     JsIdentifierAssignment, JsIdentifierBinding, JsIdentifierExpression, JsIfStatement, JsLanguage,
     JsMethodClassMember, JsMethodObjectMember, JsObjectBindingPattern,
     JsObjectBindingPatternProperty, JsObjectBindingPatternPropertyList, JsObjectBindingPatternRest,
@@ -1049,6 +1050,30 @@ pub(crate) fn build_reachability(
         statements: statements.into_boxed_slice(),
         end,
     })
+}
+
+/// Returns whether the syntax of `root`, an execution root of the module
+/// with a function body, shows a path from the start of the body to its end
+/// in the graph that [`build_reachability`] builds. `model` is the module's
+/// semantic model, and `raw_types` and `raw_binding_types` are its collected
+/// types.
+///
+/// The path crosses no statement call that may never return. Such a call is
+/// a call of a local function that never returns, or a call that
+/// [`build_reachability`] keeps for inference to decide. Returns false when
+/// no path exists, and also when the syntax can't show one, so only a true
+/// answer settles the question.
+pub(crate) fn reaches_end_by_syntax(
+    root: &AnyJsControlFlowRoot,
+    model: &SemanticModel,
+    raw_types: &[RawTypeData],
+    raw_binding_types: &FxHashMap<TextRange, TypeReference>,
+) -> bool {
+    let Some(body) = root.syntax().children().find_map(JsFunctionBody::cast) else {
+        return false;
+    };
+    let mut functions = GuardFunctions::new(raw_types, raw_binding_types);
+    reachable_end::reaches_end(&body, model, &mut functions)
 }
 
 /// A read whose type a test in its execution root may refine.
@@ -3419,6 +3444,75 @@ mod tests {
             TextSize::try_from(start).unwrap(),
             TextSize::try_from(expression.len()).unwrap(),
         )
+    }
+
+    /// Returns whether the syntax of the function declaration of `source`
+    /// shows a path to the end of its body.
+    fn reaches_end_of(source: &str) -> bool {
+        let info = module(source);
+        let tree = info.semantic_model.root();
+        let function = tree
+            .syntax()
+            .descendants()
+            .find_map(biome_js_syntax::JsFunctionDeclaration::cast)
+            .unwrap();
+        let root = biome_js_control_flow::AnyJsControlFlowRoot::AnyJsFunction(function.into());
+        super::reaches_end_by_syntax(
+            &root,
+            &info.semantic_model,
+            &info.raw_types,
+            &info.raw_binding_types,
+        )
+    }
+
+    #[test]
+    fn syntax_shows_paths_to_the_end_that_no_statement_call_can_cut() {
+        const DECLARATIONS: &str = r#"
+            declare const c: boolean;
+            declare const s: string;
+            declare function fail(): never;
+            declare function log(): void;
+            declare const box: { log(): void };
+            const g = () => {};
+        "#;
+        for (body, reaches) in [
+            ("if (c) return 1;", true),
+            ("if (c) return 1; g(); log();", true),
+            ("while (c) { if (c) return 1; }", true),
+            ("for (;;) { if (c) break; }", true),
+            ("do { if (c) return 1; } while (c);", true),
+            ("for (const v of [1]) { return v; }", true),
+            ("switch (s) { case 'a': return 1; default: g(); }", true),
+            ("switch (s) { case 'a': if (c) break; return 1; }", true),
+            (
+                "try { if (c) return 1; } catch { return 2; } finally { g(); }",
+                true,
+            ),
+            ("try { return 1; } catch { log(); }", true),
+            ("class K {} enum E { A } if (c) return 1;", true),
+            // A statement call that may end the path.
+            ("if (c) return 1; fail();", false),
+            ("if (c) return 1; box.log();", false),
+            ("if (c) return 1; (g(), box.log());", false),
+            ("try { if (c) return 1; } finally { box.log(); }", false),
+            // A loop that no path leaves. The `break` targets the `switch`.
+            ("while (true) { if (c) return 1; }", false),
+            (
+                "for (;;) { switch (s) { case 'a': break; } if (c) return 1; }",
+                false,
+            ),
+            // Every case ends, and a `switch` may be exhaustive.
+            ("switch (s) { case 'a': return 1; }", false),
+            ("try { return 1; } finally { g(); }", false),
+            ("if (true) return 1;", false),
+            ("return 1; g();", false),
+            // The walk doesn't model `continue` and labels.
+            ("do { if (c) return 1; continue; } while (c);", false),
+            ("l: { if (c) break l; return 1; }", false),
+        ] {
+            let source = format!("{DECLARATIONS} function f() {{ {body} }}");
+            assert_eq!(reaches_end_of(&source), reaches, "{body}");
+        }
     }
 
     #[test]

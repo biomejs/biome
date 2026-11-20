@@ -376,13 +376,15 @@ fn writes_of_calls_to_local_functions_use_their_inferred_return_types() {
 
 // A lookup of a call asks whether a path reaches the end of the function
 // that it calls, and of no other function, and a second lookup of a call to
-// the same function reuses the answer.
+// the same function reuses the answer. Both functions end at a call that may
+// never return, so their syntax can't decide their end.
 #[test]
 fn return_types_ask_the_reachability_of_their_own_function_once() {
     const SOURCE: &str = r#"
         declare const c: boolean;
-        function asked() { if (c) return 1; }
-        function other() { if (c) return 2; }
+        declare function fail(): never;
+        function asked() { if (c) return 1; fail(); }
+        function other() { if (c) return 2; fail(); }
         /*first*/asked();
         /*second*/asked();
     "#;
@@ -547,6 +549,111 @@ fn ends_decided_from_syntax_ask_no_reachability_query() {
         0
     );
     let range = marked_range(SOURCE, "asked", "asked()");
+    infer_expression_type(&db, ExpressionTypeInput::new(&db, module, range));
+    let events = db.take_salsa_events();
+    assert_eq!(
+        function_query_will_execute_count_by_name(&db, "infer_flow_reachability", &events),
+        1
+    );
+}
+
+// The syntax of each `r` function shows a path to the end of its body that
+// no statement call can cut, so resolution gives the end `undefined` without
+// the module's flow. A call of a function declared to return `void`, or of a
+// function or method without an annotation, can't end a path. The `q`
+// functions are left to the flow: a loop that only a `break` of an inner
+// `switch` leaves, a call that inference must decide, a loop without an
+// exit, a `continue`, and a label.
+#[test]
+fn ends_that_syntax_reaches_match_the_flow() {
+    assert_reads(
+        r#"
+        declare function log(): void;
+        declare const box: { log(): void };
+        declare const c: boolean;
+        declare const s: "a" | "b";
+        const g = () => {};
+        function r1() { if (c) return 1; }
+        function r2() { while (c) { if (c) return 1; } }
+        function r3() { for (;;) { if (c) break; if (c) return 1; } }
+        function r4(o: any) { if (c) return 1; o.m(); }
+        function r5() { if (c) return 1; g(); log(); }
+        function r6() { switch (s) { case "a": if (c) return 1; break; } }
+        function r7() { do { if (c) return 1; } while (c); }
+        function r8() { while (true) { if (c) return 1; if (c) break; } }
+        function r9() { try { if (c) return 1; } finally { g(); } }
+        function r10() { for (const v of [1]) { if (c) return "a"; } }
+        function r11() { try { if (c) return 1; g(); } catch { return 2; } }
+        function q1() { for (;;) { if (c) return 1; } }
+        function q2() { for (;;) { switch (s) { case "a": break; } if (c) return 1; } }
+        function q3() { if (c) return 1; box.log(); }
+        function q4() { while (true) { if (c) return 1; } }
+        function q5() { do { if (c) return 1; continue; } while (false); }
+        function q6() { lbl: { if (c) break lbl; return 1; } }
+        /*r1*/r1();
+        /*r2*/r2();
+        /*r3*/r3();
+        /*r4*/r4(0);
+        /*r5*/r5();
+        /*r6*/r6();
+        /*r7*/r7();
+        /*r8*/r8();
+        /*r9*/r9();
+        /*r10*/r10();
+        /*r11*/r11();
+        /*q1*/q1();
+        /*q2*/q2();
+        /*q3*/q3();
+        /*q4*/q4();
+        /*q5*/q5();
+        /*q6*/q6();
+        "#,
+        &[
+            ("r1", "r1()", &["number: 1", "undefined"]),
+            ("r2", "r2()", &["number: 1", "undefined"]),
+            ("r3", "r3()", &["number: 1", "undefined"]),
+            ("r4", "r4(0)", &["number: 1", "undefined"]),
+            ("r5", "r5()", &["number: 1", "undefined"]),
+            ("r6", "r6()", &["number: 1", "undefined"]),
+            ("r7", "r7()", &["number: 1", "undefined"]),
+            ("r8", "r8()", &["number: 1", "undefined"]),
+            ("r9", "r9()", &["number: 1", "undefined"]),
+            ("r10", "r10()", &["string: a", "undefined"]),
+            ("r11", "r11()", &["number: 1", "number: 2", "undefined"]),
+            ("q1", "q1()", &["number"]),
+            ("q2", "q2()", &["number"]),
+            ("q3", "q3()", &["number: 1", "undefined"]),
+            ("q4", "q4()", &["number"]),
+            ("q5", "q5()", &["number: 1", "undefined"]),
+            ("q6", "q6()", &["number: 1", "undefined"]),
+        ],
+    );
+}
+
+// The syntax of `reached` shows a path to the end of its body, so its end
+// needs no reachability query. `called` ends at a call that inference must
+// decide, so it still asks the query.
+#[test]
+fn ends_that_syntax_reaches_ask_no_reachability_query() {
+    const SOURCE: &str = r#"
+        declare const c: boolean;
+        declare const box: { log(): void };
+        const g = () => {};
+        function reached() { for (;;) { if (c) break; if (c) return 1; } g(); }
+        function called() { if (c) return 1; box.log(); }
+        /*reached*/reached();
+        /*called*/called();
+    "#;
+    let (db, module) = return_types_db(SOURCE);
+    db.clear_salsa_events();
+    let range = marked_range(SOURCE, "reached", "reached()");
+    infer_expression_type(&db, ExpressionTypeInput::new(&db, module, range));
+    let events = db.take_salsa_events();
+    assert_eq!(
+        function_query_will_execute_count_by_name(&db, "infer_flow_reachability", &events),
+        0
+    );
+    let range = marked_range(SOURCE, "called", "called()");
     infer_expression_type(&db, ExpressionTypeInput::new(&db, module, range));
     let events = db.take_salsa_events();
     assert_eq!(

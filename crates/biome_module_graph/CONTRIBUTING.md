@@ -881,11 +881,15 @@ its syntax shows, and resolution gives `undefined`, or `never` when no path
 reaches the end (`ResolutionCtx::resolve_implicit_return`), so the
 reachability of a function's end is decided once for every context. A
 function with a `return` without a value already returns `undefined`, so
-its end gives `undefined` without the query. Deciding whether a
-statement call never returns, or whether a `switch` is exhaustive, can need
-the same return type, as for `box.fail()` with
-`declare const box: { fail: typeof f }` in the body of `f`; the query cycle
-then leaves the end reachable, which keeps `undefined`.
+its end gives `undefined` without the query. So does a body whose syntax
+shows a path to the end (`reaches_end_by_syntax`): the path crosses no
+statement call that the graph keeps or that never returns, uses no `switch`
+bypass, and avoids every construct that the walk doesn't model, such as
+labels and `continue`. Deciding whether a statement call never returns, or
+whether a `switch` is exhaustive, can need the same return type, as for
+`box.fail()` with `declare const box: { fail: typeof f }` in the body of
+`f`; the query cycle then leaves the end reachable, which keeps
+`undefined`.
 
 ### Tracked queries
 
