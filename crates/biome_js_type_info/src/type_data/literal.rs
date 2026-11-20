@@ -83,26 +83,7 @@ impl NumberLiteral {
 
 /// Converts a number to a string the way JavaScript does, as in `` `${value}` ``.
 pub(crate) fn number_to_js_string(value: f64) -> String {
-    if value == 0.0 {
-        return "0".to_string();
-    }
-    if !value.is_finite() || (1e-6..1e21).contains(&value.abs()) {
-        return match value {
-            f64::INFINITY => "Infinity".to_string(),
-            f64::NEG_INFINITY => "-Infinity".to_string(),
-            value if value.is_nan() => "NaN".to_string(),
-            // Both languages print the shortest digits that round-trip, and
-            // JavaScript uses positional notation in this range.
-            value => value.to_string(),
-        };
-    }
-    let formatted = format!("{value:e}");
-    match formatted.split_once('e') {
-        Some((mantissa, exponent)) if !exponent.starts_with('-') => {
-            format!("{mantissa}e+{exponent}")
-        }
-        _ => formatted,
-    }
+    ryu_js::Buffer::new().format(value).to_string()
 }
 
 /// Converts a string to a number the way JavaScript's `Number(text)` does.

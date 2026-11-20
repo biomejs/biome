@@ -32,6 +32,7 @@ biome_rowan       = { workspace = true }
 camino            = { workspace = true }
 hashbrown         = { workspace = true }
 rustc-hash        = { workspace = true }
+ryu-js            = { workspace = true }
 salsa             = { workspace = true }
 
 [dev-dependencies]
