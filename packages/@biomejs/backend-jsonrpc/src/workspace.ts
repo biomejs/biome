@@ -3844,6 +3844,11 @@ export interface Nursery {
 	 */
 	noVueMutatingProps?: NoVueMutatingPropsConfiguration;
 	/**
+	 * Disallow negated conditions in v-if and v-else-if when a v-else branch follows.
+	 * See https://biomejs.dev/linter/rules/no-vue-negation-else
+	 */
+	noVueNegationElse?: NoVueNegationElseConfiguration;
+	/**
 	 * Disallow reading the value of a Vue ref in a place where the read runs only once.
 	 * See https://biomejs.dev/linter/rules/no-vue-ref-object-reactivity-loss
 	 */
@@ -7351,6 +7356,9 @@ export type NoVueMultipleSlotArgsConfiguration =
 export type NoVueMutatingPropsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueMutatingPropsOptions;
+export type NoVueNegationElseConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoVueNegationElseOptions;
 export type NoVueRefObjectReactivityLossConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueRefObjectReactivityLossOptions;
@@ -10850,6 +10858,14 @@ export interface RuleWithNoVueMutatingPropsOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueMutatingPropsOptions;
 }
+export interface RuleWithNoVueNegationElseOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: NoVueNegationElseOptions;
+}
 export interface RuleWithNoVueRefObjectReactivityLossOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueRefObjectReactivityLossOptions;
@@ -14193,6 +14209,7 @@ export type NoVueMixinOptions = {};
 export type NoVueMultipleObjectsInClassOptions = {};
 export type NoVueMultipleSlotArgsOptions = {};
 export type NoVueMutatingPropsOptions = {};
+export type NoVueNegationElseOptions = {};
 export type NoVueRefObjectReactivityLossOptions = {};
 export type NoVueRequiredPropWithDefaultOptions = {};
 export interface NoVueRestrictedCallAfterAwaitOptions {
@@ -16450,6 +16467,7 @@ export type Category =
 	| "lint/nursery/noVueMultipleObjectsInClass"
 	| "lint/nursery/noVueMultipleSlotArgs"
 	| "lint/nursery/noVueMutatingProps"
+	| "lint/nursery/noVueNegationElse"
 	| "lint/nursery/noVueRefAsOperand"
 	| "lint/nursery/noVueRefObjectReactivityLoss"
 	| "lint/nursery/noVueRequiredPropWithDefault"

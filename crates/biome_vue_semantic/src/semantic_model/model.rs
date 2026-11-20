@@ -378,10 +378,18 @@ pub enum RootShape {
         target: u64,
         from_event: bool,
     },
-    /// `!operand`.
-    Not,
-    /// `a != b` or `a !== b`.
-    NotEqual,
+    /// `!operand`, where the operand is not itself a `!` expression.
+    /// `operator` is the range of `!` in the host document.
+    Not {
+        operator: TextRange,
+    },
+    /// `!!operand`, which converts the operand to a boolean.
+    DoubleNot,
+    /// `a != b` or `a !== b`. `operator` is the range of `!=` or `!==` in the
+    /// host document.
+    NotEqual {
+        operator: TextRange,
+    },
     Binary,
     Logical,
     Conditional,

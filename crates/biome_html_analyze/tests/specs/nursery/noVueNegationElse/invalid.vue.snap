@@ -1,0 +1,598 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<template>
+  <div v-if="!foo" class="primary">Content</div>
+  <span v-else class="secondary">Alternative</span>
+
+  <div v-if="!(foo && bar)" id="negated">Negated condition</div>
+  <span v-else id="positive">Otherwise</span>
+
+  <div v-if="a != b">Not equal</div>
+  <div v-else>Equal</div>
+
+  <div v-if="a !== b">Strictly not equal</div>
+  <div v-else>Strictly equal</div>
+
+  <div v-if="foo" class="first">First</div>
+  <span v-else-if="!bar" class="second">Second</span>
+  <p v-else class="default">Default</p>
+
+  <div v-if="!a" data-first>First</div>
+  <span v-else-if="!b" data-second>Second</span>
+  <p v-else data-default>Default</p>
+
+  <div v-if="(!foo)">Parenthesized</div>
+  <div v-else>Otherwise</div>
+
+  <img v-if="!src" alt="placeholder" />
+  <img v-else :src="src" alt="image" />
+
+  <div v-if="!foo">First</div>
+  <!-- a comment between the branches -->
+  <div v-else>Second</div>
+
+  <MyComponent v-if="!ready" />
+  <div v-else>Ready</div>
+
+  <div v-if="!outer" class="outer-if">
+    <span v-if="!inner" class="inner-if">Inner if content</span>
+    <p v-else class="inner-else">Inner else content</p>
+  </div>
+  <section v-else class="outer-else">
+    <span v-if="!nested" class="nested-if">Nested if content</span>
+    <p v-else class="nested-else">Nested else content</p>
+  </section>
+
+  <div v-if="!once" v-once>Cached on the first branch</div>
+  <div v-else>Otherwise</div>
+
+  <div v-if="!once">First</div>
+  <div v-else v-once>Cached on the last branch</div>
+
+  <div v-if="cached" v-once>First</div>
+  <div v-else-if="!other">Second</div>
+  <div v-else>Third</div>
+
+  <div v-if="!outer" v-once>
+    <span v-if="!inner">Inner if content</span>
+    <span v-else>Inner else content</span>
+  </div>
+  <div v-else>Outer else content</div>
+</template>
+
+```
+
+# Diagnostics
+```
+invalid.vue:3:14 lint/nursery/noVueNegationElse  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This condition is negated, but a v-else branch follows it.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <template>
+  > 3 │   <div v-if="!foo" class="primary">Content</div>
+      │              ^^^^
+    4 │   <span v-else class="secondary">Alternative</span>
+    5 │ 
+  
+  i The reader has to reverse the condition twice to know when the v-else content shows.
+  
+  i Remove the negation and swap the content of the two branches.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the negation and swap the branches.
+  
+     1  1 │   <!-- should generate diagnostics -->
+     2  2 │   <template>
+     3    │ - ··<div·v-if="!foo"·class="primary">Content</div>
+     4    │ - ··<span·v-else·class="secondary">Alternative</span>
+        3 │ + ··<span·v-if="foo"·class="secondary">Alternative</span>
+        4 │ + ··<div·v-else·class="primary">Content</div>
+     5  5 │   
+     6  6 │     <div v-if="!(foo && bar)" id="negated">Negated condition</div>
+  
+
+```
+
+```
+invalid.vue:6:14 lint/nursery/noVueNegationElse  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This condition is negated, but a v-else branch follows it.
+  
+    4 │   <span v-else class="secondary">Alternative</span>
+    5 │ 
+  > 6 │   <div v-if="!(foo && bar)" id="negated">Negated condition</div>
+      │              ^^^^^^^^^^^^^
+    7 │   <span v-else id="positive">Otherwise</span>
+    8 │ 
+  
+  i The reader has to reverse the condition twice to know when the v-else content shows.
+  
+  i Remove the negation and swap the content of the two branches.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the negation and swap the branches.
+  
+     4  4 │     <span v-else class="secondary">Alternative</span>
+     5  5 │   
+     6    │ - ··<div·v-if="!(foo·&&·bar)"·id="negated">Negated·condition</div>
+     7    │ - ··<span·v-else·id="positive">Otherwise</span>
+        6 │ + ··<span·v-if="(foo·&&·bar)"·id="positive">Otherwise</span>
+        7 │ + ··<div·v-else·id="negated">Negated·condition</div>
+     8  8 │   
+     9  9 │     <div v-if="a != b">Not equal</div>
+  
+
+```
+
+```
+invalid.vue:9:14 lint/nursery/noVueNegationElse  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This condition is negated, but a v-else branch follows it.
+  
+     7 │   <span v-else id="positive">Otherwise</span>
+     8 │ 
+   > 9 │   <div v-if="a != b">Not equal</div>
+       │              ^^^^^^
+    10 │   <div v-else>Equal</div>
+    11 │ 
+  
+  i The reader has to reverse the condition twice to know when the v-else content shows.
+  
+  i Remove the negation and swap the content of the two branches.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the negation and swap the branches.
+  
+     7  7 │     <span v-else id="positive">Otherwise</span>
+     8  8 │   
+     9    │ - ··<div·v-if="a·!=·b">Not·equal</div>
+    10    │ - ··<div·v-else>Equal</div>
+        9 │ + ··<div·v-if="a·==·b">Equal</div>
+       10 │ + ··<div·v-else>Not·equal</div>
+    11 11 │   
+    12 12 │     <div v-if="a !== b">Strictly not equal</div>
+  
+
+```
+
+```
+invalid.vue:12:14 lint/nursery/noVueNegationElse  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This condition is negated, but a v-else branch follows it.
+  
+    10 │   <div v-else>Equal</div>
+    11 │ 
+  > 12 │   <div v-if="a !== b">Strictly not equal</div>
+       │              ^^^^^^^
+    13 │   <div v-else>Strictly equal</div>
+    14 │ 
+  
+  i The reader has to reverse the condition twice to know when the v-else content shows.
+  
+  i Remove the negation and swap the content of the two branches.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the negation and swap the branches.
+  
+    10 10 │     <div v-else>Equal</div>
+    11 11 │   
+    12    │ - ··<div·v-if="a·!==·b">Strictly·not·equal</div>
+    13    │ - ··<div·v-else>Strictly·equal</div>
+       12 │ + ··<div·v-if="a·===·b">Strictly·equal</div>
+       13 │ + ··<div·v-else>Strictly·not·equal</div>
+    14 14 │   
+    15 15 │     <div v-if="foo" class="first">First</div>
+  
+
+```
+
+```
+invalid.vue:16:20 lint/nursery/noVueNegationElse  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This condition is negated, but a v-else branch follows it.
+  
+    15 │   <div v-if="foo" class="first">First</div>
+  > 16 │   <span v-else-if="!bar" class="second">Second</span>
+       │                    ^^^^
+    17 │   <p v-else class="default">Default</p>
+    18 │ 
+  
+  i The reader has to reverse the condition twice to know when the v-else content shows.
+  
+  i Remove the negation and swap the content of the two branches.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the negation and swap the branches.
+  
+    14 14 │   
+    15 15 │     <div v-if="foo" class="first">First</div>
+    16    │ - ··<span·v-else-if="!bar"·class="second">Second</span>
+    17    │ - ··<p·v-else·class="default">Default</p>
+       16 │ + ··<p·v-else-if="bar"·class="default">Default</p>
+       17 │ + ··<span·v-else·class="second">Second</span>
+    18 18 │   
+    19 19 │     <div v-if="!a" data-first>First</div>
+  
+
+```
+
+```
+invalid.vue:20:20 lint/nursery/noVueNegationElse  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This condition is negated, but a v-else branch follows it.
+  
+    19 │   <div v-if="!a" data-first>First</div>
+  > 20 │   <span v-else-if="!b" data-second>Second</span>
+       │                    ^^
+    21 │   <p v-else data-default>Default</p>
+    22 │ 
+  
+  i The reader has to reverse the condition twice to know when the v-else content shows.
+  
+  i Remove the negation and swap the content of the two branches.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the negation and swap the branches.
+  
+    18 18 │   
+    19 19 │     <div v-if="!a" data-first>First</div>
+    20    │ - ··<span·v-else-if="!b"·data-second>Second</span>
+    21    │ - ··<p·v-else·data-default>Default</p>
+       20 │ + ··<p·v-else-if="b"·data-default>Default</p>
+       21 │ + ··<span·v-else·data-second>Second</span>
+    22 22 │   
+    23 23 │     <div v-if="(!foo)">Parenthesized</div>
+  
+
+```
+
+```
+invalid.vue:23:14 lint/nursery/noVueNegationElse  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This condition is negated, but a v-else branch follows it.
+  
+    21 │   <p v-else data-default>Default</p>
+    22 │ 
+  > 23 │   <div v-if="(!foo)">Parenthesized</div>
+       │              ^^^^^^
+    24 │   <div v-else>Otherwise</div>
+    25 │ 
+  
+  i The reader has to reverse the condition twice to know when the v-else content shows.
+  
+  i Remove the negation and swap the content of the two branches.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the negation and swap the branches.
+  
+    21 21 │     <p v-else data-default>Default</p>
+    22 22 │   
+    23    │ - ··<div·v-if="(!foo)">Parenthesized</div>
+    24    │ - ··<div·v-else>Otherwise</div>
+       23 │ + ··<div·v-if="(foo)">Otherwise</div>
+       24 │ + ··<div·v-else>Parenthesized</div>
+    25 25 │   
+    26 26 │     <img v-if="!src" alt="placeholder" />
+  
+
+```
+
+```
+invalid.vue:26:14 lint/nursery/noVueNegationElse  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This condition is negated, but a v-else branch follows it.
+  
+    24 │   <div v-else>Otherwise</div>
+    25 │ 
+  > 26 │   <img v-if="!src" alt="placeholder" />
+       │              ^^^^
+    27 │   <img v-else :src="src" alt="image" />
+    28 │ 
+  
+  i The reader has to reverse the condition twice to know when the v-else content shows.
+  
+  i Remove the negation and swap the content of the two branches.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the negation and swap the branches.
+  
+    24 24 │     <div v-else>Otherwise</div>
+    25 25 │   
+    26    │ - ··<img·v-if="!src"·alt="placeholder"·/>
+    27    │ - ··<img·v-else·:src="src"·alt="image"·/>
+       26 │ + ··<img·v-if="src"·:src="src"·alt="image"·/>
+       27 │ + ··<img·v-else·alt="placeholder"·/>
+    28 28 │   
+    29 29 │     <div v-if="!foo">First</div>
+  
+
+```
+
+```
+invalid.vue:29:14 lint/nursery/noVueNegationElse  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This condition is negated, but a v-else branch follows it.
+  
+    27 │   <img v-else :src="src" alt="image" />
+    28 │ 
+  > 29 │   <div v-if="!foo">First</div>
+       │              ^^^^
+    30 │   <!-- a comment between the branches -->
+    31 │   <div v-else>Second</div>
+  
+  i The reader has to reverse the condition twice to know when the v-else content shows.
+  
+  i Remove the negation and swap the content of the two branches.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the negation and swap the branches.
+  
+    27 27 │     <img v-else :src="src" alt="image" />
+    28 28 │   
+    29    │ - ··<div·v-if="!foo">First</div>
+       29 │ + ··<div·v-if="foo">Second</div>
+    30 30 │     <!-- a comment between the branches -->
+    31    │ - ··<div·v-else>Second</div>
+       31 │ + ··<div·v-else>First</div>
+    32 32 │   
+    33 33 │     <MyComponent v-if="!ready" />
+  
+
+```
+
+```
+invalid.vue:33:22 lint/nursery/noVueNegationElse  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This condition is negated, but a v-else branch follows it.
+  
+    31 │   <div v-else>Second</div>
+    32 │ 
+  > 33 │   <MyComponent v-if="!ready" />
+       │                      ^^^^^^
+    34 │   <div v-else>Ready</div>
+    35 │ 
+  
+  i The reader has to reverse the condition twice to know when the v-else content shows.
+  
+  i Remove the negation and swap the content of the two branches.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the negation and swap the branches.
+  
+    31 31 │     <div v-else>Second</div>
+    32 32 │   
+    33    │ - ··<MyComponent·v-if="!ready"·/>
+    34    │ - ··<div·v-else>Ready</div>
+       33 │ + ··<div·v-if="ready">Ready</div>
+       34 │ + ··<MyComponent·v-else·/>
+    35 35 │   
+    36 36 │     <div v-if="!outer" class="outer-if">
+  
+
+```
+
+```
+invalid.vue:36:14 lint/nursery/noVueNegationElse  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This condition is negated, but a v-else branch follows it.
+  
+    34 │   <div v-else>Ready</div>
+    35 │ 
+  > 36 │   <div v-if="!outer" class="outer-if">
+       │              ^^^^^^
+    37 │     <span v-if="!inner" class="inner-if">Inner if content</span>
+    38 │     <p v-else class="inner-else">Inner else content</p>
+  
+  i The reader has to reverse the condition twice to know when the v-else content shows.
+  
+  i Remove the negation and swap the content of the two branches.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the negation and swap the branches.
+  
+    34 34 │     <div v-else>Ready</div>
+    35 35 │   
+    36    │ - ··<div·v-if="!outer"·class="outer-if">
+    37    │ - ····<span·v-if="!inner"·class="inner-if">Inner·if·content</span>
+    38    │ - ····<p·v-else·class="inner-else">Inner·else·content</p>
+    39    │ - ··</div>
+    40    │ - ··<section·v-else·class="outer-else">
+    41    │ - ····<span·v-if="!nested"·class="nested-if">Nested·if·content</span>
+    42    │ - ····<p·v-else·class="nested-else">Nested·else·content</p>
+    43    │ - ··</section>
+       36 │ + ··<section·v-if="outer"·class="outer-else">
+       37 │ + ····<span·v-if="!nested"·class="nested-if">Nested·if·content</span>
+       38 │ + ····<p·v-else·class="nested-else">Nested·else·content</p>
+       39 │ + ··</section>
+       40 │ + ··<div·v-else·class="outer-if">
+       41 │ + ····<span·v-if="!inner"·class="inner-if">Inner·if·content</span>
+       42 │ + ····<p·v-else·class="inner-else">Inner·else·content</p>
+       43 │ + ··</div>
+    44 44 │   
+    45 45 │     <div v-if="!once" v-once>Cached on the first branch</div>
+  
+
+```
+
+```
+invalid.vue:37:17 lint/nursery/noVueNegationElse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This condition is negated, but a v-else branch follows it.
+  
+    36 │   <div v-if="!outer" class="outer-if">
+  > 37 │     <span v-if="!inner" class="inner-if">Inner if content</span>
+       │                 ^^^^^^
+    38 │     <p v-else class="inner-else">Inner else content</p>
+    39 │   </div>
+  
+  i The reader has to reverse the condition twice to know when the v-else content shows.
+  
+  i Remove the negation and swap the content of the two branches.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:41:17 lint/nursery/noVueNegationElse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This condition is negated, but a v-else branch follows it.
+  
+    39 │   </div>
+    40 │   <section v-else class="outer-else">
+  > 41 │     <span v-if="!nested" class="nested-if">Nested if content</span>
+       │                 ^^^^^^^
+    42 │     <p v-else class="nested-else">Nested else content</p>
+    43 │   </section>
+  
+  i The reader has to reverse the condition twice to know when the v-else content shows.
+  
+  i Remove the negation and swap the content of the two branches.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:45:14 lint/nursery/noVueNegationElse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This condition is negated, but a v-else branch follows it.
+  
+    43 │   </section>
+    44 │ 
+  > 45 │   <div v-if="!once" v-once>Cached on the first branch</div>
+       │              ^^^^^
+    46 │   <div v-else>Otherwise</div>
+    47 │ 
+  
+  i The reader has to reverse the condition twice to know when the v-else content shows.
+  
+  i Remove the negation and swap the content of the two branches.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:48:14 lint/nursery/noVueNegationElse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This condition is negated, but a v-else branch follows it.
+  
+    46 │   <div v-else>Otherwise</div>
+    47 │ 
+  > 48 │   <div v-if="!once">First</div>
+       │              ^^^^^
+    49 │   <div v-else v-once>Cached on the last branch</div>
+    50 │ 
+  
+  i The reader has to reverse the condition twice to know when the v-else content shows.
+  
+  i Remove the negation and swap the content of the two branches.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:52:19 lint/nursery/noVueNegationElse  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This condition is negated, but a v-else branch follows it.
+  
+    51 │   <div v-if="cached" v-once>First</div>
+  > 52 │   <div v-else-if="!other">Second</div>
+       │                   ^^^^^^
+    53 │   <div v-else>Third</div>
+    54 │ 
+  
+  i The reader has to reverse the condition twice to know when the v-else content shows.
+  
+  i Remove the negation and swap the content of the two branches.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the negation and swap the branches.
+  
+    50 50 │   
+    51 51 │     <div v-if="cached" v-once>First</div>
+    52    │ - ··<div·v-else-if="!other">Second</div>
+    53    │ - ··<div·v-else>Third</div>
+       52 │ + ··<div·v-else-if="other">Third</div>
+       53 │ + ··<div·v-else>Second</div>
+    54 54 │   
+    55 55 │     <div v-if="!outer" v-once>
+  
+
+```
+
+```
+invalid.vue:55:14 lint/nursery/noVueNegationElse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This condition is negated, but a v-else branch follows it.
+  
+    53 │   <div v-else>Third</div>
+    54 │ 
+  > 55 │   <div v-if="!outer" v-once>
+       │              ^^^^^^
+    56 │     <span v-if="!inner">Inner if content</span>
+    57 │     <span v-else>Inner else content</span>
+  
+  i The reader has to reverse the condition twice to know when the v-else content shows.
+  
+  i Remove the negation and swap the content of the two branches.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:56:17 lint/nursery/noVueNegationElse  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This condition is negated, but a v-else branch follows it.
+  
+    55 │   <div v-if="!outer" v-once>
+  > 56 │     <span v-if="!inner">Inner if content</span>
+       │                 ^^^^^^
+    57 │     <span v-else>Inner else content</span>
+    58 │   </div>
+  
+  i The reader has to reverse the condition twice to know when the v-else content shows.
+  
+  i Remove the negation and swap the content of the two branches.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the negation and swap the branches.
+  
+    54 54 │   
+    55 55 │     <div v-if="!outer" v-once>
+    56    │ - ····<span·v-if="!inner">Inner·if·content</span>
+    57    │ - ····<span·v-else>Inner·else·content</span>
+       56 │ + ····<span·v-if="inner">Inner·else·content</span>
+       57 │ + ····<span·v-else>Inner·if·content</span>
+    58 58 │     </div>
+    59 59 │     <div v-else>Outer else content</div>
+  
+
+```

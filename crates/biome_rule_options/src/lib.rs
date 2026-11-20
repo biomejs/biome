@@ -486,6 +486,7 @@ pub mod no_vue_mixin;
 pub mod no_vue_multiple_objects_in_class;
 pub mod no_vue_multiple_slot_args;
 pub mod no_vue_mutating_props;
+pub mod no_vue_negation_else;
 pub mod no_vue_options_api;
 pub mod no_vue_ref_as_operand;
 pub mod no_vue_ref_object_reactivity_loss;

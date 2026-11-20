@@ -2276,6 +2276,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::no_vue_mutating_props::NoVueMutatingPropsOptions>(),
     ));
     result.push((
+        "nursery",
+        "noVueNegationElse",
+        TypeId::of::<biome_rule_options::no_vue_negation_else::NoVueNegationElseOptions>(),
+    ));
+    result.push((
         "style",
         "noVueOptionsApi",
         TypeId::of::<biome_rule_options::no_vue_options_api::NoVueOptionsApiOptions>(),

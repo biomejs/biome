@@ -572,8 +572,28 @@ fn conditional_chains_and_operands() {
         .collect();
     assert_eq!(groups, [0, 1, 1]);
     let second = chains[0].branches().nth(1).unwrap().condition.unwrap();
-    assert_eq!(second.root(), &RootShape::Not);
+    assert_eq!(
+        second.root(),
+        &RootShape::Not {
+            operator: TextRange::new(59.into(), 60.into())
+        }
+    );
     assert_eq!(model.roots().count(), 4);
+}
+
+#[test]
+fn double_negation_is_not_a_negation() {
+    let model = sfc(r#"<template>
+  <p v-if="!!a">1</p>
+  <p v-if="!(!b)">2</p>
+</template>
+"#);
+    let shapes: Vec<_> = model
+        .chains()
+        .filter_map(|chain| chain.branches().next()?.condition)
+        .map(|condition| condition.root().clone())
+        .collect();
+    assert_eq!(shapes, [RootShape::DoubleNot, RootShape::DoubleNot]);
 }
 
 #[test]
