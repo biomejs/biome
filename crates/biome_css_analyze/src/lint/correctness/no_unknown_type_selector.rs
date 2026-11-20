@@ -4,16 +4,22 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_css_syntax::stmt_ext::AnyScssControlFlowAtRule;
 use biome_css_syntax::{
-    AnyCssAtRule, CssCompoundSelector, CssNestedQualifiedRule, CssPseudoElementFunctionSelector,
-    CssQualifiedRule, CssRelativeSelector, CssSyntaxKind, CssTypeSelector, ScssIncludeAtRule,
-    ScssMixinAtRule,
+    AnyCssAtRule, CssCompoundSelector, CssLanguage, CssNestedQualifiedRule,
+    CssPseudoElementFunctionSelector, CssQualifiedRule, CssRelativeSelector, CssTypeSelector,
+    ScssIncludeAtRule, ScssMixinAtRule,
 };
 use biome_diagnostics::Severity;
 use biome_languages::CssFileSource;
-use biome_rowan::{AstNode, AstNodeList};
+use biome_rowan::{AstNode, AstNodeList, SyntaxKindSet};
 use biome_rule_options::no_unknown_type_selector::NoUnknownTypeSelectorOptions;
 
 use crate::utils::is_known_type_selector;
+
+const STYLE_RULE_KINDS: SyntaxKindSet<CssLanguage> =
+    CssQualifiedRule::KIND_SET.union(CssNestedQualifiedRule::KIND_SET);
+
+const MIXIN_BLOCK_KINDS: SyntaxKindSet<CssLanguage> =
+    ScssMixinAtRule::KIND_SET.union(ScssIncludeAtRule::KIND_SET);
 
 const VIEW_TRANSITION_PSEUDO_ELEMENTS: [&str; 5] = [
     "view-transition",
@@ -69,7 +75,7 @@ fn is_keyframe_selector_in_scss_block(type_selector: &CssTypeSelector, name: &st
     };
     let Some(rule) = selector
         .grand_parent()
-        .filter(|rule| is_style_rule(rule.kind()))
+        .filter(|rule| STYLE_RULE_KINDS.matches(rule.kind()))
     else {
         return false;
     };
@@ -77,9 +83,9 @@ fn is_keyframe_selector_in_scss_block(type_selector: &CssTypeSelector, name: &st
         .skip(1)
         .find_map(|node| {
             let kind = node.kind();
-            if ScssMixinAtRule::can_cast(kind) || ScssIncludeAtRule::can_cast(kind) {
+            if MIXIN_BLOCK_KINDS.matches(kind) {
                 Some(true)
-            } else if is_style_rule(kind)
+            } else if STYLE_RULE_KINDS.matches(kind)
                 || (AnyCssAtRule::can_cast(kind) && !AnyScssControlFlowAtRule::can_cast(kind))
             {
                 Some(false)
@@ -88,10 +94,6 @@ fn is_keyframe_selector_in_scss_block(type_selector: &CssTypeSelector, name: &st
             }
         })
         .unwrap_or(false)
-}
-
-fn is_style_rule(kind: CssSyntaxKind) -> bool {
-    CssQualifiedRule::can_cast(kind) || CssNestedQualifiedRule::can_cast(kind)
 }
 
 declare_lint_rule! {
