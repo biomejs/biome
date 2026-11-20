@@ -185,7 +185,7 @@ Expression "async () => \"value\"" => async Function {
     params: []
     type_args: []
   }
-  returns: instanceof Promise<string: value>
+  returns: instanceof Promise<string>
 }
 
 Expression "\"value\"" => string: value
@@ -226,7 +226,7 @@ Expression "async () => \"value\"" => async Function {
     params: []
     type_args: []
   }
-  returns: instanceof Promise<string: value>
+  returns: instanceof Promise<string>
 }
 
 Expression "\"value\"" => string: value

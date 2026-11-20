@@ -1050,6 +1050,7 @@ fn object_targets_narrow_both_branches() {
         function g29(x: Foo | string) { if (isObj(x)) /*g29*/x; else /*g29Else*/x; }
         function g30(x: Foo | null | undefined) { if (isEmpty(x)) /*g30*/x; else /*g30Else*/x; }
         function g33() { const o = { a: 1, b: 2 }; if (isFoo(o)) /*g33*/o; else /*g33Else*/o; }
+        function w3() { const action = { type: "add", payload: 1 }; if (isAdd(action)) /*w3*/action; else /*w3Else*/action; }
         "#,
         &[
             ("f1", "x", &["Foo"]),
@@ -1113,10 +1114,21 @@ fn object_targets_narrow_both_branches() {
             ("g29Else", "x", &["string"]),
             ("g30", "x", &["Foo"]),
             ("g30Else", "x", &["null", "undefined"]),
-            // TypeScript types `o` as `{ a: number; b: number }`, a subtype of
-            // `Foo`.
-            ("g33", "o", &[r#"["a": number: 1, "b": number: 2]"#]),
+            // The object literal's properties have the widened literal types
+            // of their values, so `o` is a subtype of `Foo`.
+            ("g33", "o", &[r#"["a": number, "b": number]"#]),
             ("g33Else", "o", &["unknown"]),
+            // The target is a subtype of `{ type: string; payload: number }`.
+            (
+                "w3",
+                "action",
+                &[r#"["type": string: add, "payload": number]"#],
+            ),
+            (
+                "w3Else",
+                "action",
+                &[r#"["type": string, "payload": number]"#],
+            ),
         ],
     );
 }
@@ -1139,7 +1151,6 @@ fn object_targets_keep_the_declared_type_where_biome_cannot_tell() {
         function g27(x: { a: number } | string) { if (isA(x)) /*g27*/x; else /*g27Else*/x; }
         function w1(x: { a: 1 } | string) { if (isA(x)) /*w1*/x; else /*w1Else*/x; }
         function w2(x: A2 | string) { if (isA1(x)) /*w2*/x; else /*w2Else*/x; }
-        function w3() { const action = { type: "add", payload: 1 }; if (isAdd(action)) /*w3*/action; else /*w3Else*/action; }
         "#,
         &[
             // `(string | number) & Foo`
@@ -1188,18 +1199,6 @@ fn object_targets_keep_the_declared_type_where_biome_cannot_tell() {
             // `(string | A2) & { a: 1 }`
             ("w2", "x", &["instanceof A2", "string"]),
             ("w2Else", "x", &["instanceof A2", "string"]),
-            // `{ type: "add"; payload: number }`
-            (
-                "w3",
-                "action",
-                &[r#"["type": string: add, "payload": number: 1]"#],
-            ),
-            // `{ type: string; payload: number }`
-            (
-                "w3Else",
-                "action",
-                &[r#"["type": string: add, "payload": number: 1]"#],
-            ),
         ],
     );
 }

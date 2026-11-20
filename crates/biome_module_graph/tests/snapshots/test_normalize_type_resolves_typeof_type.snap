@@ -29,7 +29,7 @@ Binding source "source" => Object {
 
 Expression "{ name: \"source\", }" => Object {
   prototype: No prototype
-  members: ["name": string: source]
+  members: ["name": string]
 }
 
 Expression "{ name: \"source\", } as const" => Object {

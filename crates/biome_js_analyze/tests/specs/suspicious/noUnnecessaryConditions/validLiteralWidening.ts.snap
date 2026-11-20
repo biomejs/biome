@@ -1,0 +1,44 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validLiteralWidening.ts
+---
+# Input
+```ts
+// should not generate diagnostics
+// A location that the program can assign later takes the widened type of its
+// initializer, as in TypeScript: `number` for `0`, `boolean` for `false`, and
+// `string` for `"label"`. So none of these tests is always truthy or falsy.
+let retries = 3;
+export function canRetry() {
+    return retries ? "retry" : "stop";
+}
+
+const options = { verbose: false };
+export function isVerbose() {
+    return options.verbose ? "loud" : "quiet";
+}
+
+export class Counter {
+    value = 0;
+    isZero() {
+        return this.value ? "no" : "yes";
+    }
+}
+
+function label() {
+    return "label";
+}
+export function hasLabel() {
+    return label() || "default";
+}
+
+const [first] = [0];
+export function hasFirst() {
+    return first ? "yes" : "no";
+}
+
+export function step(size = 1) {
+    return size || 1;
+}
+
+```

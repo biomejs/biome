@@ -70,7 +70,7 @@ Binding mapper "mapper" => sync Function {
   returns: instanceof T
 }
 
-Binding aliased "aliased" => number: 42
+Binding aliased "aliased" => number
 
 Expression "mapAliased" => sync Function "mapAliased" {
   accepts: {
@@ -82,19 +82,19 @@ Expression "mapAliased" => sync Function "mapAliased" {
   returns: instanceof T
 }
 
-Expression "mapAliased(() => 42)" => number: 42
+Expression "mapAliased(() => 42)" => number
 
 Expression "() => 42" => sync Function {
   accepts: {
     params: []
     type_args: []
   }
-  returns: number: 42
+  returns: number
 }
 
 Expression "42" => number: 42
 
-Binding inline "inline" => number: 42
+Binding inline "inline" => number
 
 Expression "mapInline" => sync Function "mapInline" {
   accepts: {
@@ -112,14 +112,14 @@ Expression "mapInline" => sync Function "mapInline" {
   returns: instanceof T
 }
 
-Expression "mapInline(() => 42)" => number: 42
+Expression "mapInline(() => 42)" => number
 
 Expression "() => 42" => sync Function {
   accepts: {
     params: []
     type_args: []
   }
-  returns: number: 42
+  returns: number
 }
 
 Expression "42" => number: 42

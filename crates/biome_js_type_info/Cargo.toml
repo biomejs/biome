@@ -30,6 +30,7 @@ biome_languages   = { workspace = true, features = ["lang_js"] }
 biome_resolver    = { workspace = true }
 biome_rowan       = { workspace = true }
 camino            = { workspace = true }
+enumflags2        = { workspace = true }
 hashbrown         = { workspace = true }
 rustc-hash        = { workspace = true }
 salsa             = { workspace = true }

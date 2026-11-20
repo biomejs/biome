@@ -331,13 +331,15 @@ These limits apply to every *Supported* and *Partial* row below:
     with the same name and members as the target class in another namespace,
     which is another class, or in another module, which Biome can't tell
     from the target class.
-  - Biome infers the literal type of the initializer for a property of an
-    object literal or a class field, as `1` for `{ a: 1 }`, while TypeScript
-    widens it to `number` unless the property is readonly or `as const`. Such
-    a property is compared both ways, and Biome can't tell when the results
-    differ. So `x: { a: 1 } | string` keeps its type in both branches of
-    `isA(x)` with `class A { a = 1 }`, where TypeScript gives `{ a: 1 }` and
-    `string`.
+  - A property of an object literal or a class field keeps a literal type
+    where TypeScript widens it, because Biome can't tell that its value is a
+    fresh literal: the result of a generic call, as `1` in `{ a: id(1) }`, a
+    read of a `readonly` field or of a constant of a namespace, as `A.X`, and
+    an `await`. Biome widens the literal types of other values, as
+    TypeScript does. Such a property is compared both ways, and Biome can't
+    tell when the results differ. So `const o = { a: id(1) }` keeps its type
+    `{ a: 1 }` in both branches of `isA1(o)` with `v is { a: 1 }`, where
+    TypeScript gives `{ a: 1 }` and `{ a: number }`.
 - The false branch of a type-guard function also keeps a member of the type
   of `x` where TypeScript removes it in these cases:
   - The member and a member of the target are subtypes of each other and not
@@ -560,7 +562,7 @@ The rows use `type Circle = { kind: "c"; r: number }` and
 | --- | --- | --- | --- |
 | A local, non-generic type-guard function with a primitive target | `function isString(v: unknown): v is string;`<br>`x: string \| number; if (isString(x)) x` | `string` | Supported, with the restrictions below the table |
 | The false branch excludes the target | `x: string \| number; if (!isString(x)) x` | `number` | Supported |
-| An object, interface, class, or union target | `function isFoo(v: unknown): v is Foo;`<br>`x: Foo \| string; if (isFoo(x)) x` | `Foo`; `string` in the `else` branch | Partial: both branches narrow by TypeScript's subtype relation, as the limits above describe. Biome keeps the type of `x` where TypeScript narrows a type without an object type by a target with only object types, or gives an intersection, and when two members can't be compared, as for instances of classes, which can declare private members, and the literal types that Biome infers for properties of object literals and class fields. The `else` branch also keeps a member that is a subtype of a member of the target and the other way around, as `{ a: number }` with the target `Foo`, and `unknown` with the target `{}`, where TypeScript gives `null \| undefined`. |
+| An object, interface, class, or union target | `function isFoo(v: unknown): v is Foo;`<br>`x: Foo \| string; if (isFoo(x)) x` | `Foo`; `string` in the `else` branch | Partial: both branches narrow by TypeScript's subtype relation, as the limits above describe. Biome keeps the type of `x` where TypeScript narrows a type without an object type by a target with only object types, or gives an intersection, and when two members can't be compared, as for instances of classes, which can declare private members, and the literal types that Biome keeps for properties whose values it can't tell are fresh literals, as `{ a: id(1) }`. The `else` branch also keeps a member that is a subtype of a member of the target and the other way around, as `{ a: number }` with the target `Foo`, and `unknown` with the target `{}`, where TypeScript gives `null \| undefined`. |
 | An imported, namespace, or method type-guard function | `import { isString } from "./guards"`; `u.isString(x)` | `string` | Not yet |
 | A generic type-guard function | `function isNonNull<T>(v: T \| null): v is T;`<br>`x: string \| null; if (isNonNull(x)) x` | `string` | Not yet |
 | An overloaded type-guard function | `function isS(v: string \| number): v is string;`<br>`function isS(v: boolean): boolean;`<br>`x: string \| number; if (isS(x)) x` | `string` | Not yet |

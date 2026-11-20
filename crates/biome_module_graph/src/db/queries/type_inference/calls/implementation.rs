@@ -645,7 +645,9 @@ fn signature_accepts_arguments<'db>(
         && args.iter().all(|argument| {
             matches!(
                 argument,
-                ResolvedCallArgument::Argument(_) | ResolvedCallArgument::ConstArgument { .. }
+                ResolvedCallArgument::Argument(_)
+                    | ResolvedCallArgument::ConstArgument { .. }
+                    | ResolvedCallArgument::WidenedArgument { .. }
             )
         })
     {
@@ -692,7 +694,9 @@ fn infer_single_signature_resolved_parameter_type<'db>(
     if args[..argument_index].iter().all(|argument| {
         matches!(
             argument,
-            ResolvedCallArgument::Argument(_) | ResolvedCallArgument::ConstArgument { .. }
+            ResolvedCallArgument::Argument(_)
+                | ResolvedCallArgument::ConstArgument { .. }
+                | ResolvedCallArgument::WidenedArgument { .. }
         )
     }) && let Some(parameter) = parameters.get(argument_index)
         && parameters
@@ -743,7 +747,9 @@ fn infer_parameter_type_for_resolved_argument<'db>(
         && args.iter().all(|argument| {
             matches!(
                 argument,
-                ResolvedCallArgument::Argument(_) | ResolvedCallArgument::ConstArgument { .. }
+                ResolvedCallArgument::Argument(_)
+                    | ResolvedCallArgument::ConstArgument { .. }
+                    | ResolvedCallArgument::WidenedArgument { .. }
             )
         })
     {
@@ -2042,6 +2048,19 @@ pub(in crate::db) enum ResolvedCallArgument<'db> {
         ty: InferredTypeData<'db>,
         const_ty: InferredTypeData<'db>,
     },
+    /// An object or array expression whose properties have fresh literal
+    /// types. `ty` widens those literal types, as TypeScript does when no
+    /// parameter gives them a literal type, and `literal_ty` keeps them.
+    ///
+    /// A parameter is matched against `literal_ty`, because TypeScript keeps
+    /// the argument's literal types where the parameter has literal types,
+    /// so `{ kind: "b" }` matches `{ kind: "b" }` and not `{ kind: "a" }`
+    /// when an overload is selected. A generic parameter is inferred from
+    /// `ty`, so `T` is `{ a: number }` for `id({ a: 1 })`.
+    WidenedArgument {
+        ty: InferredTypeData<'db>,
+        literal_ty: InferredTypeData<'db>,
+    },
     /// An argument that may be absent and consumes at most one position.
     Optional(InferredTypeData<'db>),
     /// An argument that may consume zero or more parameter positions.
@@ -2050,7 +2069,10 @@ pub(in crate::db) enum ResolvedCallArgument<'db> {
 
 impl<'db> ResolvedCallArgument<'db> {
     fn accepts_zero(self) -> bool {
-        !matches!(self, Self::Argument(_) | Self::ConstArgument { .. })
+        !matches!(
+            self,
+            Self::Argument(_) | Self::ConstArgument { .. } | Self::WidenedArgument { .. }
+        )
     }
 
     fn is_spread(self) -> bool {
@@ -2060,11 +2082,14 @@ impl<'db> ResolvedCallArgument<'db> {
     pub(in crate::db) fn ty(self) -> InferredTypeData<'db> {
         match self {
             Self::Argument(ty) | Self::Optional(ty) | Self::Spread(ty) => ty,
-            Self::ConstArgument { ty, .. } => ty,
+            Self::ConstArgument { ty, .. } | Self::WidenedArgument { ty, .. } => ty,
         }
     }
 
     fn matches_parameter(self, db: &'db dyn ModuleDb, parameter: InferredTypeData<'db>) -> bool {
+        if let Self::WidenedArgument { literal_ty, .. } = self {
+            return ArgumentTypeCompatibility::new(parameter, literal_ty).is_satisfied(db);
+        }
         if ArgumentTypeCompatibility::new(parameter, self.ty()).is_satisfied(db) {
             return true;
         }

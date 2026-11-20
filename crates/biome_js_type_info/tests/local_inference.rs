@@ -7,7 +7,7 @@ use biome_js_syntax::{
 use biome_js_type_info::{
     Object, ObjectKind, RawTypeCollector, ReturnType, TypeData, TypeMember, TypeReference,
 };
-use biome_rowan::AstNode;
+use biome_rowan::{AstNode, Text};
 
 use utils::{
     TestTypeCollector, assert_type_data_snapshot, assert_typed_bindings_snapshot, get_expression,
@@ -978,5 +978,67 @@ fn infer_type_of_const_asserted_object_and_readonly_tuple() {
     mapped_type_alias_snapshot(
         "type Pair = readonly [string | null, number?];",
         "infer_type_of_readonly_tuple",
+    );
+}
+
+/// Returns the bindings of the first variable declaration of `code`, with a
+/// snapshot of them and of the collected types.
+fn variable_bindings_snapshot(code: &str, test_name: &str) -> Box<[(Text, TypeReference)]> {
+    let root = parse_ts(code);
+    let declaration = get_variable_declaration(&root);
+    let mut collector = TestTypeCollector::default();
+    let bindings = TypeData::typed_bindings_from_js_variable_declaration(
+        &mut collector,
+        ScopeId::GLOBAL,
+        &declaration,
+    );
+    assert_typed_bindings_snapshot(code, &bindings, &collector, test_name);
+    bindings
+}
+
+#[test]
+fn infer_widened_literal_types_of_let_declarations() {
+    // `n`, `s`, and `l` widen. An assertion's literal type isn't fresh, and
+    // an object literal is widened where it is resolved, so `a`, `k`, and
+    // `o` keep the types of their initializers.
+    variable_bindings_snapshot(
+        r#"let n = 1, s = flag ? "a" : 1, l = name || "anonymous", a = 1 as 1, k = 1 as const, o = { a: 1 };"#,
+        "infer_widened_literal_types_of_let_declarations",
+    );
+}
+
+#[test]
+fn infer_literal_types_of_const_declarations() {
+    // A `const` keeps the literal types of its initializer.
+    variable_bindings_snapshot(
+        r#"const n = 1, s = flag ? "a" : 1;"#,
+        "infer_literal_types_of_const_declarations",
+    );
+}
+
+#[test]
+fn infer_widened_literal_types_of_class_fields_parameters_and_return_types() {
+    // `count`, `label`, the parameter `step`, and the return types of
+    // `next` and `size` widen. `readonly` and annotated fields don't.
+    class_members_snapshot(
+        r#"class Counter {
+    count = 0;
+    static label = "counter";
+    readonly start = 0;
+    limit: 10 = 10;
+    next(step = 1) { return 1; }
+    get size() { return "s"; }
+}"#,
+        "infer_widened_literal_types_of_class_fields_parameters_and_return_types",
+    );
+}
+
+#[test]
+fn infer_widened_literal_types_of_destructured_array_elements() {
+    // A destructuring pattern gives the elements of its array no literal
+    // type, so they widen.
+    variable_bindings_snapshot(
+        "const [first, second] = [1n, 2];",
+        "infer_widened_literal_types_of_destructured_array_elements",
     );
 }

@@ -711,11 +711,13 @@ fn test_infer_module_types_reads_members_of_distinct_mapped_type_instances() {
         .expect("module must exist");
     let inferred = infer_module_types(&db, module).expect("types must be inferred");
 
+    // `T` is inferred from the object expressions, whose property types
+    // TypeScript 7.0.2 widens.
     for (name, expected) in [
-        ("firstA", "number: 1"),
-        ("firstB", "string: b"),
-        ("firstAAgain", "number: 1"),
-        ("secondA", "bool: true"),
+        ("firstA", "number"),
+        ("firstB", "string"),
+        ("firstAAgain", "number"),
+        ("secondA", "boolean"),
         ("secondB", "unknown"),
     ] {
         let ty = inferred_binding_ty_by_name(&db, module, inferred, name)
