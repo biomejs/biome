@@ -1,0 +1,59 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: astro/stability_baseline.astro
+---
+
+# Input
+
+```astro
+---
+import Card from "./Card.astro";
+const title="Hello";
+const items=[{id:1,label:"One"}];
+---
+<!doctype html>
+<html lang="en"><head><title>{title}</title></head><body><Card title={title}/><><ul class:list={["items",{active:items.length>0}]}>{items.map((item)=><li data-id={item.id}>{item.label}</li>)}</ul></><script>document.documentElement.dataset.ready="true";</script><style>.items{display:grid}</style><pre is:raw>{title}</pre></body></html>
+
+```
+
+
+# Formatted
+
+```astro
+---
+import Card from "./Card.astro";
+const title = "Hello";
+const items = [{ id: 1, label: "One" }];
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<title>{title}</title>
+	</head>
+	<body>
+		<Card title={title} />
+		<>
+			<ul class:list={["items", { active: items.length > 0 }]}>
+				{items.map((item) => <li data-id={item.id}>{item.label}</li>)}
+			</ul>
+		</>
+		<script>
+		document.documentElement.dataset.ready = "true";
+		</script>
+		<style>
+		.items {
+			display: grid;
+		}
+		</style>
+		<pre is:raw>{title}</pre>
+	</body>
+</html>
+
+```
+
+
+
+## Unimplemented nodes/tokens
+
+"{title}" => 504..511
