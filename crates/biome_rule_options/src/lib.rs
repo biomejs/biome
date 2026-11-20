@@ -36,6 +36,7 @@ pub mod no_blank_target;
 pub mod no_boolean_sort_comparator;
 pub mod no_buffer_constructor;
 pub mod no_bun_modules;
+pub mod no_canvas_to_image;
 pub mod no_catch_assign;
 pub mod no_chained_comparison;
 pub mod no_children_prop;
