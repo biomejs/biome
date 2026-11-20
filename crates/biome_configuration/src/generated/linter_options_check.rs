@@ -1855,6 +1855,13 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     ));
     result.push((
         "nursery",
+        "noUnsafeSqliteInterpolation",
+        TypeId::of::<
+            biome_rule_options::no_unsafe_sqlite_interpolation::NoUnsafeSqliteInterpolationOptions,
+        >(),
+    ));
+    result.push((
+        "nursery",
         "noUnsafeTypeAssertion",
         TypeId::of::<biome_rule_options::no_unsafe_type_assertion::NoUnsafeTypeAssertionOptions>(),
     ));
