@@ -809,38 +809,31 @@ enum UntypedValue {
     Other,
 }
 
-/// Returns the callees whose return types must come from annotations before
-/// a write reduces by the value of `expression`. The reading context
-/// confirms them. Returns an error when Biome may type the value narrower
-/// than TypeScript does, so that a write of it gives the subject its declared
-/// type, or Unknown for a variable whose type evolves with its writes.
-/// `reads_evolving` tells whether a value reads a variable whose type
-/// evolves with its writes, whose declared type doesn't follow them.
+/// Returns the callees that the reading context must confirm as annotated
+/// before a write reduces by the value of `expression`, or an
+/// [`UntypedValue`] when Biome may type the value narrower than TypeScript.
+/// A write of such a value gives the subject its declared type, or Unknown
+/// for an evolving variable, one whose type evolves with its writes.
+/// `reads_evolving` tells whether a value reads an evolving variable; see
+/// [`RootBuilder::reads_evolving`].
 ///
-/// The values that `expression` can give are visited through parentheses,
-/// the branches of a conditional expression, the operands of `&&`, `||`, and
-/// `??`, the last operand of the comma operator, and `await`. The objects
-/// along an optional chain are visited too, because `?.` gives `undefined`
-/// only when Biome's type of its object has it. Among them:
+/// It visits the values that `expression` can give through:
 ///
-/// - A call depends on where the return type of its callee comes from; see
-///   [`callee_return`]. Biome infers the return type of a local function
-///   without a return type annotation from its body as TypeScript does, with
-///   the `undefined` of an end that a path reaches, when it types each value
-///   that the function returns so. A call of such a function (see
-///   [`inferred_local_body`]) visits those values instead, through at most
-///   [`MAX_LOCAL_CALL_DEPTH`] nested calls, and gives [`UntypedValue::Other`]
-///   when one of them reads a variable whose type evolves. Any other inferred
-///   return type gives [`UntypedValue::InferredReturn`]: a method or an
-///   import, whose check needs the types of an object or the syntax of
-///   another module, a function expression called where it is defined, or a
-///   local function nested more deeply.
-/// - `typeof` gives [`UntypedValue::Other`], because Biome types it as the
-///   one kind of value that the operand's type has, where TypeScript gives
-///   every kind.
+/// - parentheses, `await`, and the last operand of the comma operator;
+/// - the branches of a conditional and the operands of `&&`, `||`, and `??`;
+/// - the objects along an optional chain, because `?.` gives `undefined`
+///   only when Biome's type of its object has it;
+/// - the returned values of a call when [`inferred_local_body`] finds the
+///   callee's body, through at most [`MAX_LOCAL_CALL_DEPTH`] nested calls.
+///   Biome infers the callee's return type from them as TypeScript does,
+///   including the `undefined` of a reachable end.
 ///
-/// Also returns [`UntypedValue::Other`] when the operands exceed
-/// [`MAX_VALUE_STEPS`].
+/// A call adds its callee when [`callee_return`] gives
+/// [`CalleeReturn::Resolved`]. When a call has an inferred return type and
+/// its returned values aren't visited, it gives
+/// [`UntypedValue::InferredReturn`]. `typeof` gives [`UntypedValue::Other`],
+/// because Biome types it as the one kind of value that the operand's type
+/// has, where TypeScript gives every kind. The variant lists its other cases.
 fn value_callees(
     expression: &AnyJsExpression,
     model: &SemanticModel,
