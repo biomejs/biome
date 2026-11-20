@@ -89,9 +89,9 @@ revisiting the row.
 
 These limits apply to every *Supported* and *Partial* row below:
 
-- A read narrows only when it reads a parameter, or a variable declared with
-  `let`, `const`, or `function`, that is declared in the execution root of the
-  read and never written after its declaration. `var` declarations and
+- A read narrows only when it reads a parameter, a `catch` variable, or a
+  variable declared with `let`, `const`, or `function`, that is declared in
+  the execution root of the read and never written after its declaration. `var` declarations and
   imported bindings never narrow, and neither does a variable that a
   destructuring default can supply, as in `const { a = 0 } = o`, because its
   declared type ignores the default. A read inside a nested function or class
@@ -190,11 +190,10 @@ These limits apply to every *Supported* and *Partial* row below:
   - The path starts at `this` in an arrow function and the aliased
     condition is declared in the enclosing method.
 
-  The elements of a `readonly` tuple count as readonly, but Biome gives a
-  read such as `t[0]` in `t: readonly [string | null]` the type Unknown
-  even without a condition, so it doesn't narrow yet. A property of an
-  intersection is readonly only when every operand that declares it
-  declares it readonly, as in TypeScript.
+  The elements of a `readonly` tuple count as readonly, so `t[0]` in
+  `t: readonly [string | null]` narrows through an aliased condition. A
+  property of an intersection is readonly only when every operand that
+  declares it declares it readonly, as in TypeScript.
 - A runtime test of a property, such as `s.kind === "c"`, `s["kind"]`, or
   `t[0] === "a"` on a tuple, also narrows the object that holds the property,
   as TypeScript narrows a discriminated union. Only that object narrows:
@@ -626,6 +625,7 @@ whose result is not tested, do not narrow.
 | Behaviour | Example | TypeScript | Status |
 | --- | --- | --- | --- |
 | `catch` and `finally` see every assignment in `try` | `let x: string \| number = "a"; try { x = 1; f(); } catch { x }` | `string \| number` | Not yet |
+| A `catch` variable is `unknown` and narrows | `try { f(); } catch (e) { e instanceof Error && e.message }` | `e` is `Error` in `e.message` | Supported: a `catch` variable has its annotation, `unknown` or `any`, or `unknown` without one, and narrows as other variables do. A test in an `if` statement inside the `catch` clause doesn't narrow yet, as the limits above describe for `try` statements. A variable of a destructuring pattern, as `message` in `catch ({ message })`, is Unknown, where TypeScript gives `any` after an error. |
 
 ### Optional chaining
 
