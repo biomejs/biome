@@ -700,6 +700,9 @@ mod tests {
     /// sequence of up to five slots drawn from missing slots, empty and
     /// non-empty tokens, and empty and non-empty nodes, for every range that
     /// starts and ends within one character past the node.
+    // Skipped under Miri. Enumerating every slot sequence and range takes tens
+    // of minutes there.
+    #[cfg_attr(miri, ignore)]
     #[test]
     fn slot_at_range_matches_search_by_lengths() {
         let token = |text: &str| {

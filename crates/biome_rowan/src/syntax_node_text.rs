@@ -1040,6 +1040,9 @@ mod tests {
         check_methods(&text.slice(..), "");
     }
 
+    // Skipped under Miri. Comparing every slice of every node with every
+    // slice of the root takes tens of minutes there.
+    #[cfg_attr(miri, ignore)]
     #[test]
     fn methods_on_every_range() {
         let root = build_edge_case_tree();

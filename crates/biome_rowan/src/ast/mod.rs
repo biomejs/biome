@@ -1587,6 +1587,9 @@ mod tests {
         ))
     }
 
+    // Skipped under Miri. Resolving a pointer for every range and kind in 300
+    // random trees takes tens of minutes there.
+    #[cfg_attr(miri, ignore)]
     #[test]
     fn syntax_ptr_resolves_like_child_steps_from_root() {
         let kinds = [
