@@ -480,8 +480,10 @@ impl<H, T> Drop for ThinArc<H, T> {
 
 /// A [ThinArc] borrowed for `'a`.
 ///
-/// Holds a copy of the pointer of the `ThinArc` without owning a reference, so
-/// copying it doesn't touch the reference count.
+/// Stands in for a `&'a ThinArc<H, T>` and is `Copy` like one. A copy is
+/// another borrow of the same allocation, not a new owner: it leaves the
+/// reference count alone and can't outlive `'a`. [Self::to_owned] returns an
+/// owned `ThinArc`.
 ///
 /// A `&HeaderSlice<H, [T; 0]>` can't replace it. A reference only grants
 /// access to the bytes of the type it points to, which leaves out the items

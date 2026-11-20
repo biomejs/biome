@@ -64,8 +64,10 @@ static_assert!(mem::size_of::<Slot>() == mem::size_of::<usize>() * 2);
 
 /// A [GreenNode] borrowed for `'a`.
 ///
-/// It is a copy of the pointer of the node that doesn't own a reference, so
-/// copying it doesn't touch the reference count of the node.
+/// Stands in for a `&'a GreenNode` and is `Copy` like one. A copy is another
+/// borrow of the same node, not a new owner: it leaves the reference count
+/// alone and can't outlive `'a`. [Self::to_owned] returns an owned
+/// [GreenNode].
 #[derive(Clone, Copy)]
 pub(crate) struct GreenNodeRef<'a> {
     ptr: ThinArcBorrow<'a, GreenNodeHead, Slot>,

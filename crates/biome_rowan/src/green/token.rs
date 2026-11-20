@@ -24,8 +24,10 @@ pub(crate) fn has_live() -> bool {
 
 /// A [GreenToken] borrowed for `'a`.
 ///
-/// It is a copy of the pointer of the token that doesn't own a reference, so
-/// copying it doesn't touch the reference count of the token.
+/// Stands in for a `&'a GreenToken` and is `Copy` like one. A copy is another
+/// borrow of the same token, not a new owner: it leaves the reference count
+/// alone and can't outlive `'a`. [Self::to_owned] returns an owned
+/// [GreenToken].
 #[derive(Clone, Copy)]
 pub(crate) struct GreenTokenRef<'a> {
     ptr: ThinArcBorrow<'a, GreenTokenHead, u8>,

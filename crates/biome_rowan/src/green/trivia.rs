@@ -18,7 +18,10 @@ pub(crate) fn has_live() -> bool {
 
 /// A [GreenTrivia] borrowed for `'a`.
 ///
-/// It is a copy of the pointer of the trivia that doesn't own a reference.
+/// Stands in for a `&'a GreenTrivia` and is `Copy` like one. A copy is another
+/// borrow of the same trivia, not a new owner: it leaves the reference count
+/// alone and can't outlive `'a`. [Self::to_owned] returns an owned
+/// [GreenTrivia].
 #[derive(Clone, Copy)]
 pub(crate) struct GreenTriviaRef<'a> {
     ptr: Option<ThinArcBorrow<'a, GreenTriviaHead, TriviaPiece>>,

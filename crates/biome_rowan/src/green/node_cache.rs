@@ -36,9 +36,13 @@ unsafe impl<T: IntoRawPointer + Send> Send for GenerationalPointer<T> {}
 unsafe impl<T: IntoRawPointer + Sync> Sync for GenerationalPointer<T> {}
 
 impl<T: IntoRawPointer> GenerationalPointer<T> {
+    /// Mask of the bit of `data` that stores the [Generation]. The remaining
+    /// bits are the address of the stored value.
+    const GENERATION_MASK: usize = 1;
+
     fn new(value: T, generation: Generation) -> Self {
         let ptr = value.into_raw();
-        debug_assert!(ptr.addr() & 1 == 0);
+        debug_assert!(ptr.addr() & Self::GENERATION_MASK == 0);
         Self {
             data: ptr.map_addr(|addr| addr | generation as usize),
             _ty: PhantomData,
@@ -48,10 +52,10 @@ impl<T: IntoRawPointer> GenerationalPointer<T> {
     /// Returns the pointer that [IntoRawPointer::into_raw] returned for the
     /// stored value.
     fn ptr(&self) -> *mut () {
-        // The least significant bit of `data` holds the generation. It is
-        // zero in the original pointer due to the alignment requirements of
-        // the underlying data, so clearing it restores that pointer.
-        self.data.map_addr(|addr| addr & !1)
+        // The generation bit is zero in the original pointer due to the
+        // alignment requirements of the underlying data, so clearing it
+        // restores that pointer.
+        self.data.map_addr(|addr| addr & !Self::GENERATION_MASK)
     }
 
     fn value(&self) -> T::Borrowed<'_> {
@@ -61,11 +65,11 @@ impl<T: IntoRawPointer> GenerationalPointer<T> {
     }
 
     fn generation(&self) -> Generation {
-        match self.data.addr() & 1 {
+        match self.data.addr() & Self::GENERATION_MASK {
             0 => Generation::A,
             1 => Generation::B,
-            // SAFETY: The `& 1` operation above ensures only the least
-            // significant bit can be set
+            // SAFETY: The mask above ensures only the least significant bit
+            // can be set
             _ => unreachable!(),
         }
     }
