@@ -3,16 +3,18 @@
 
 use super::ResolutionCtx;
 use super::flow::MAX_FLOW_TYPE_STEPS;
+use crate::JsModuleInfo;
 use crate::db::queries::{ExpressionTypeInput, infer_flow_expression_type};
 use crate::js_module_info::flow::AnyFlowExpression;
-use biome_js_syntax::{AnyJsCallArgument, AnyJsExpression, AnyJsName, JsLogicalOperator};
+use biome_js_syntax::{
+    AnyJsCallArgument, AnyJsExpression, AnyJsName, JsLogicalOperator, JsStaticMemberExpression,
+};
 use biome_js_type_info::{
     NarrowingPredicate, RawTypeData, RawTypeId, TypeReference, TypeofExpression, falsy_values,
     interned_types::{Literal, TypeData},
     narrow_type,
 };
 use biome_rowan::{AstNode, AstSeparatedList};
-use std::borrow::Cow;
 
 /// Limits how many [evaluated ancestors](AnyFlowExpression::evaluated_ancestors)
 /// an evaluated expression may have.
@@ -54,16 +56,18 @@ impl<'db> ResolutionCtx<'db, '_> {
                 // object has one.
                 let declared = match object {
                     Some(object) => {
+                        let js_info = self.js_info;
                         let name = member.member().ok()?;
                         let token = name.value_token().ok()?;
-                        // Class members store a private name with its `#`.
+                        // Class members store a private name with its `#`, which
+                        // its token lacks.
                         let name = if matches!(name, AnyJsName::JsPrivateName(_)) {
-                            Cow::Owned(format!("#{}", token.text_trimmed()))
+                            collected_member_name(js_info, member)?
                         } else {
-                            Cow::Borrowed(token.text_trimmed())
+                            token.text_trimmed()
                         };
                         let result = self
-                            .resolve_static_member_expression(object, &name)
+                            .resolve_static_member_expression(object, name)
                             .unwrap_or(TypeData::Unknown);
                         if member.is_optional_chain() {
                             self.optional_chain_result(object, result)
@@ -319,4 +323,27 @@ impl<'db> ResolutionCtx<'db, '_> {
             .clone();
         Some(self.resolve(&reference))
     }
+}
+
+/// Returns the member name that local inference collected for `member`, or
+/// `None` when it collected no static member expression for `member`. The
+/// name spells a private name with its `#`, as class members store it.
+fn collected_member_name<'a>(
+    js_info: &'a JsModuleInfo,
+    member: &JsStaticMemberExpression,
+) -> Option<&'a str> {
+    let TypeReference::Resolved(RawTypeId::Local(id)) =
+        js_info.raw_expressions.get(&member.range())?
+    else {
+        return None;
+    };
+    let RawTypeData::TypeofExpression(raw) = js_info.raw_types.get(id.index())? else {
+        return None;
+    };
+    let (TypeofExpression::StaticMember(expression)
+    | TypeofExpression::OptionalChainStaticMember(expression)) = raw.as_ref()
+    else {
+        return None;
+    };
+    Some(expression.member.text())
 }

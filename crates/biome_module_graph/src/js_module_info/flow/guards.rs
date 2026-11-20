@@ -1,13 +1,13 @@
-use super::subjects::{identifier_key, member_name_key, subject_of};
+use super::subjects::{identifier_key, index_key, literal_key, member_name_key, subject_of};
 use super::{FlowSubject, FlowSubjectId, FlowSubjectTable, PropertyKey};
 use crate::js_module_info::TsBindingReferenceExt;
 use biome_js_semantic::{Binding, JsDeclarationKind, SemanticModel};
 use biome_js_syntax::{
     AnyJsArrowFunctionParameters, AnyJsCallArgument, AnyJsExpression, AnyJsFormalParameter,
-    AnyJsLiteralExpression, AnyJsOptionalChainExpression, AnyJsParameter, AnyJsVariableDeclaration,
-    JsBinaryOperator, JsCallExpression, JsLogicalOperator, JsReferenceIdentifier, JsSyntaxKind,
-    JsSyntaxNode, JsUnaryOperator, JsVariableDeclarator, JsVariableKind,
-    binding_ext::AnyJsBindingDeclaration, unescape_js_identifier,
+    AnyJsInProperty, AnyJsLiteralExpression, AnyJsOptionalChainExpression, AnyJsParameter,
+    AnyJsVariableDeclaration, JsBinaryOperator, JsCallExpression, JsLogicalOperator,
+    JsReferenceIdentifier, JsSyntaxKind, JsSyntaxNode, JsUnaryOperator, JsVariableDeclarator,
+    JsVariableKind, binding_ext::AnyJsBindingDeclaration, unescape_js_identifier,
 };
 use biome_js_type_info::{
     Function, FunctionParameter, RawPrimitiveTarget, RawTypeData, RawTypeId, ReturnType,
@@ -110,6 +110,10 @@ pub(crate) enum FlowTest {
     /// annotation states the tested type, as in `value is string` or
     /// `asserts value is string`.
     Predicate(TextRange),
+    /// The `in` operator, as in `"a" in value`. The range is the key, a string
+    /// or number literal that spells the property's name, such as `"a"` or `0`
+    /// but not `"\u0061"` or `0x0`. See [`literal_key`].
+    In(TextRange),
 }
 
 /// What a guard's return annotation states about one of its parameters.
@@ -510,11 +514,14 @@ pub(super) struct DecomposedCondition {
     /// variable cannot change between the alias and its test. See
     /// [`narrows_through_aliases`] for the variables that qualify.
     pub(super) mentions: Vec<FlowSubjectId>,
-    /// Subjects whose type the condition may refine only through
-    /// [`FlowGuard::Property`], such as `s` in `s.kind === "c"`, unless
-    /// `mentions` also lists them. When decomposition stops early, this also
-    /// lists, for every variable in `mentions`, the destructuring pattern
-    /// that a test of the variable narrows.
+    /// Subjects whose type the condition may narrow only through
+    /// [`FlowGuard::Property`], such as `s` in `s.kind === "c"`, or through
+    /// [`FlowTest::In`], such as `x` in `"a" in x`, unless `mentions` also
+    /// lists them. Both narrow only a union with two object types.
+    ///
+    /// When decomposition stops early, this also lists a destructuring
+    /// pattern when `mentions` lists one of its elements and a test of that
+    /// element narrows the pattern.
     pub(super) parents: Vec<FlowSubjectId>,
 }
 
@@ -606,7 +613,8 @@ struct Decomposer<'a, 'raw> {
     guards: &'a mut Vec<FlowGuard>,
     remaining: usize,
     mentions: Vec<FlowSubjectId>,
-    /// The objects of the [`FlowGuard::Property`] guards decomposed so far.
+    /// The objects of the [`FlowGuard::Property`] guards and the subjects of
+    /// the [`FlowTest::In`] tests decomposed so far.
     parents: Vec<FlowSubjectId>,
     complete: bool,
     /// The number of aliased conditions whose initializers enclose the
@@ -730,6 +738,7 @@ impl Decomposer<'_, '_> {
             }
             SyntaxGuard::Undefined { strict, .. } => Some(FlowTest::Undefined { strict }),
             SyntaxGuard::Predicate(function) => Some(FlowTest::Predicate(function)),
+            SyntaxGuard::In(key) => Some(FlowTest::In(key)),
         };
         let Some(chain) = chain_receivers(operand, &mut self.remaining) else {
             return FlowGuard::Keep;
@@ -738,7 +747,13 @@ impl Decomposer<'_, '_> {
             test.and_then(|test| Some((test, subject_of(operand, self.model, self.subjects)?)));
         let mut guard = match tested {
             Some((test, subject)) if self.may_test(subject) => {
-                self.mentions.push(subject);
+                // Like a test of a property, `in` narrows only a union with
+                // two object types, so its subject is a parent.
+                if matches!(test, FlowTest::In(_)) {
+                    self.parents.push(subject);
+                } else {
+                    self.mentions.push(subject);
+                }
                 FlowGuard::Test {
                     subject,
                     test,
@@ -776,11 +791,10 @@ impl Decomposer<'_, '_> {
     /// [`Self::held_property`] for the declarations that hold a property. The
     /// object must be a subject other than `this` that a test may narrow.
     ///
-    /// Returns `None` unless `subject` is a property, other than a private
-    /// one, of a subject other than `this` that a test may narrow. Also
-    /// returns `None` for a call to a type-guard function, because TypeScript
-    /// never narrows `s` through `isC(s.kind)`. Only the object that holds the
-    /// property narrows, so `o.a.kind` narrows `o.a` but not `o`.
+    /// Returns `None` for a call to a type-guard function and for `in`,
+    /// because TypeScript never narrows `s` through `isC(s.kind)` or
+    /// `"a" in s.kind`. Only the object that holds the property narrows:
+    /// `o.a.kind` narrows `o.a`, not `o`.
     fn property_guard(
         &mut self,
         operand: &AnyJsExpression,
@@ -788,7 +802,7 @@ impl Decomposer<'_, '_> {
         test: FlowTest,
         positive: bool,
     ) -> Option<FlowGuard> {
-        if matches!(test, FlowTest::Predicate(_)) {
+        if matches!(test, FlowTest::Predicate(_) | FlowTest::In(_)) {
             return None;
         }
         let (object, key, optional_chain, aliased) =
@@ -833,12 +847,11 @@ impl Decomposer<'_, '_> {
     /// element, as `kind === "c"` applies to `{ kind, v }` in
     /// `const { kind, v } = s`.
     ///
-    /// Returns `None` when no pattern that a test can narrow holds the
-    /// variable, and for a call to a type-guard function, as for
-    /// [`Self::property_guard`]. Inside an inlined aliased condition, every
-    /// such pattern can be tested, because its values don't change after the
-    /// destructuring. See [`subjects::narrowing_pattern`] for the patterns
-    /// that a test can narrow.
+    /// Returns `None` for a call to a type-guard function and for `in`,
+    /// because TypeScript narrows no pattern through `isC(kind)` or
+    /// `"a" in kind`. Inside an inlined aliased condition, every such pattern
+    /// can be tested, because its values don't change after the
+    /// destructuring.
     ///
     /// [`subjects::narrowing_pattern`]: super::subjects::narrowing_pattern
     fn pattern_guard(
@@ -847,7 +860,7 @@ impl Decomposer<'_, '_> {
         test: FlowTest,
         positive: bool,
     ) -> Option<FlowGuard> {
-        if matches!(test, FlowTest::Predicate(_)) {
+        if matches!(test, FlowTest::Predicate(_) | FlowTest::In(_)) {
             return None;
         }
         let &FlowSubject::Binding(range) = self.subjects.as_slice().get(subject as usize)? else {
@@ -933,7 +946,7 @@ impl Decomposer<'_, '_> {
                     .parent()?
                     .children()
                     .position(|sibling| sibling == *element.syntax())?;
-                let key = PropertyKey::Name(Text::from(index.to_string()));
+                let key = index_key(index)?;
                 (pattern_declarator(element.syntax())?, Some(key))
             }
             _ => return None,
@@ -1166,6 +1179,8 @@ enum SyntaxGuard {
     },
     /// A call to the guard function declared at this range.
     Predicate(TextRange),
+    /// The `in` operator whose key is the literal at this range.
+    In(TextRange),
 }
 
 /// One syntax step, with child expressions left undecomposed.
@@ -1260,6 +1275,25 @@ fn condition_step(
                 right,
                 outcome,
                 sequential: (operator == JsLogicalOperator::LogicalAnd) == positive,
+            })
+        }
+        AnyJsExpression::JsInExpression(expression) => {
+            // A private name, as in `#p in value`, isn't decomposed.
+            let AnyJsInProperty::AnyJsExpression(key) = expression.property().ok()? else {
+                return Some(ConditionStep::Unsupported);
+            };
+            let key = omit_parentheses(key, remaining)?;
+            let object = omit_parentheses(expression.object().ok()?, remaining)?;
+            if literal_key(&key).is_none() || !has_subject_shape(&object)? {
+                return Some(ConditionStep::Unsupported);
+            }
+            Some(ConditionStep::Guard {
+                operand: object,
+                guard: SyntaxGuard::In(key.range()),
+                positive,
+                // `in` throws on `null` and `undefined`, but TypeScript
+                // narrows no receiver of an optional chain through it.
+                receivers: false,
             })
         }
         AnyJsExpression::JsBinaryExpression(binary) => {
@@ -1377,7 +1411,7 @@ fn comparison_step(
         SyntaxGuard::Literal(_) | SyntaxGuard::LooseLiteral => positive,
         SyntaxGuard::Nullish | SyntaxGuard::Undefined { .. } => !positive,
         SyntaxGuard::Typeof(kind) => positive == (*kind != TypeofKind::Undefined),
-        SyntaxGuard::Truthy | SyntaxGuard::Predicate(_) => false,
+        SyntaxGuard::Truthy | SyntaxGuard::Predicate(_) | SyntaxGuard::In(_) => false,
     };
     Some(ConditionStep::Guard {
         operand,
@@ -2316,6 +2350,99 @@ mod tests {
             .map(|(id, _)| subject_name(&model, &subjects, id))
             .collect();
         assert!(names.contains(&"value.kind".to_owned()), "{names:?}");
+    }
+
+    /// Names the subjects in [`DecomposedCondition::parents`] of the
+    /// decomposed condition.
+    fn parent_names(decomposed: &Decomposed) -> Vec<String> {
+        decomposed
+            .condition
+            .parents
+            .iter()
+            .map(|subject| subject_name(&decomposed.model, &decomposed.subjects, *subject))
+            .collect()
+    }
+
+    #[test]
+    fn in_tests_the_object_that_it_looks_into() {
+        use FlowOutcome::{Falsy, Truthy};
+        for (source, outcome, object, positive) in [
+            (r#""a" in value"#, Truthy, "value", true),
+            (r#""a" in value"#, Falsy, "value", false),
+            (r#"!("a" in value)"#, Truthy, "value", false),
+            ("0 in value", Truthy, "value", true),
+            (r#"("a") in (value)"#, Truthy, "value", true),
+            (r#""a" in value.v"#, Truthy, "value.v", true),
+            // `in` narrows no receiver of an optional chain.
+            (r#""a" in value?.v"#, Truthy, "value.v", true),
+        ] {
+            let decomposed = decomposed(source, outcome);
+            // Like a test of a property, `in` narrows only a union with two
+            // object types, so its subject is a parent. It narrows no object
+            // that holds the tested value.
+            assert!(decomposed.condition.mentions.is_empty(), "{source}");
+            assert_eq!(parent_names(&decomposed), [object], "{source}");
+            assert!(
+                !decomposed
+                    .guards
+                    .iter()
+                    .any(|guard| matches!(guard, FlowGuard::Property { .. })),
+                "{source}"
+            );
+            let FlowGuard::Test {
+                subject,
+                test: FlowTest::In(key),
+                positive: actual,
+            } = decomposed.guards[decomposed.condition.guard]
+            else {
+                panic!("{source}: {:?}", decomposed.guards);
+            };
+            assert_eq!(
+                subject_name(&decomposed.model, &decomposed.subjects, subject),
+                object,
+                "{source}"
+            );
+            assert_eq!(actual, positive, "{source}");
+            let program = decomposed.model.root().syntax().text_trimmed().to_string();
+            assert!(
+                matches!(&program[key], r#""a""# | "0"),
+                "{source}: {}",
+                &program[key]
+            );
+        }
+    }
+
+    #[test]
+    fn in_with_a_key_that_is_not_a_literal_name_tests_nothing() {
+        for program in [
+            r#"function f(value) { if (`a` in value) {} }"#,
+            r#"function f(value) { if ("\u0061" in value) {} }"#,
+            "function f(value) { if (0x0 in value) {} }",
+            "function f(value) { if (1.0 in value) {} }",
+            "function f(value) { if (-0 in value) {} }",
+            r#"function f(value) { const k = "a"; if (k in value) {} }"#,
+            r#"function f(value) { if ("a" in value!) {} }"#,
+            r#"function f(value) { if ("a" in value.f()) {} }"#,
+            "class K { #p = 1; m(value) { if (#p in value) {} } }",
+        ] {
+            let decomposed = decomposed_last(program, FlowOutcome::Truthy);
+            assert!(decomposed.condition.mentions.is_empty(), "{program}");
+            assert!(decomposed.condition.parents.is_empty(), "{program}");
+            assert_eq!(
+                decomposed.guards[decomposed.condition.guard],
+                FlowGuard::Keep,
+                "{program}"
+            );
+        }
+    }
+
+    #[test]
+    fn in_narrows_through_aliased_conditions() {
+        let decomposed = decomposed_last(
+            r#"function f(value) { const ok = "a" in value; if (ok) {} }"#,
+            FlowOutcome::Truthy,
+        );
+        assert_eq!(parent_names(&decomposed), ["value"]);
     }
 
     #[test]
