@@ -6,7 +6,7 @@ use biome_js_syntax::{
 };
 use biome_js_type_info::{
     Object, ObjectKind, RawTypeCollector, ReturnType, TypeData, TypeMember, TypeReference,
-    TypeofExpression,
+    TypeofExpression, TypeofImplicitReturnExpression,
 };
 use biome_rowan::{AstNode, Text};
 
@@ -407,17 +407,24 @@ fn infer_return_type_with_a_reachable_end() {
     );
 }
 
-/// Returns whether the return type that collection gives the first function
-/// declaration of `code` holds the marker of the end of its body.
-fn marks_the_end(code: &str) -> bool {
+/// Returns the marker of the end of the body that collection adds to the
+/// return type of the first function declaration of `code`, if any.
+fn end_marker(code: &str) -> Option<TypeofImplicitReturnExpression> {
     let root = parse_ts(code);
     let decl = get_function_declaration(&root);
     let mut collector = TestTypeCollector::default();
     TypeData::from_js_function_declaration(&mut collector, ScopeId::GLOBAL, &decl);
-    collector.types.as_slice().iter().any(|ty| {
-        matches!(ty, TypeData::TypeofExpression(expression)
-            if matches!(expression.as_ref(), TypeofExpression::ImplicitReturn(_)))
+    collector.types.as_slice().iter().find_map(|ty| match ty {
+        TypeData::TypeofExpression(expression) => match expression.as_ref() {
+            TypeofExpression::ImplicitReturn(marker) => Some(marker.clone()),
+            _ => None,
+        },
+        _ => None,
     })
+}
+
+fn marks_the_end(code: &str) -> bool {
+    end_marker(code).is_some()
 }
 
 #[test]
@@ -469,6 +476,18 @@ fn ends_that_syntax_leaves_open_keep_the_marker() {
     ] {
         assert!(marks_the_end(code), "{code}");
     }
+}
+
+#[test]
+fn end_markers_record_returns_without_values() {
+    let marker = end_marker("function f() { if (c) return; if (d) return 1; }").unwrap();
+    assert!(marker.has_bare_return);
+    let marker = end_marker("function f() { if (d) return 1; }").unwrap();
+    assert!(!marker.has_bare_return);
+    // The `return` of a nested function returns from that function.
+    let marker =
+        end_marker("function f() { const g = () => { return; }; if (d) return 1; }").unwrap();
+    assert!(!marker.has_bare_return);
 }
 
 #[test]

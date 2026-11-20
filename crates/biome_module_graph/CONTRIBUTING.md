@@ -879,7 +879,9 @@ whether a path reaches the end of the body, where the function returns
 `TypeofExpression::ImplicitReturn` when the body may complete, as far as
 its syntax shows, and resolution gives `undefined`, or `never` when no path
 reaches the end (`ResolutionCtx::resolve_implicit_return`), so the
-reachability of a function's end is decided once for every context. Deciding whether a
+reachability of a function's end is decided once for every context. A
+function with a `return` without a value already returns `undefined`, so
+its end gives `undefined` without the query. Deciding whether a
 statement call never returns, or whether a `switch` is exhaustive, can need
 the same return type, as for `box.fail()` with
 `declare const box: { fail: typeof f }` in the body of `f`; the query cycle

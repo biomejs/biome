@@ -3870,6 +3870,7 @@ fn type_from_function_body(
         return_types.push(collector.reference_to_owned_data(TypeData::from(
             TypeofExpression::ImplicitReturn(TypeofImplicitReturnExpression {
                 function: function.text_trimmed_range(),
+                has_bare_return,
             }),
         )));
     }

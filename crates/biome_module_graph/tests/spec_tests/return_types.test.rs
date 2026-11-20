@@ -485,3 +485,72 @@ fn ends_that_syntax_decides_match_the_flow() {
         ],
     );
 }
+
+// A `return` without a value adds `undefined` to the return type, so the end
+// of the body can only add `undefined` again. Resolution gives the end
+// `undefined` without asking whether a path reaches it, and the return type
+// stays the one that the module's flow gives.
+#[test]
+fn ends_after_returns_without_values_match_the_flow() {
+    assert_reads_after_declarations(
+        r#"
+        function u1() { if (c) return; if (c) return 1; fail(); }
+        function u2() { if (c) return; if (c) return 1; }
+        function u3() { if (c) return 1; else if (c) return; switch (s) { case "a": return 2; case "b": return 3; } }
+        const u4 = () => { if (c) return "a"; if (c) return; };
+        class K { m() { if (c) return 1; if (c) return; } }
+        /*u1*/u1();
+        /*u2*/u2();
+        /*u3*/u3();
+        /*u4*/u4();
+        /*method*/new K().m();
+        "#,
+        &[
+            ("u1", "u1()", &["number: 1", "undefined"]),
+            ("u2", "u2()", &["number: 1", "undefined"]),
+            (
+                "u3",
+                "u3()",
+                &["number: 1", "number: 2", "number: 3", "undefined"],
+            ),
+            ("u4", "u4()", &["string: a", "undefined"]),
+            ("method", "new K().m()", &["number: 1", "undefined"]),
+        ],
+    );
+}
+
+// A function decides the end of its body without the reachability query
+// when its syntax shows that no path reaches the end, or when a `return`
+// without a value already adds `undefined`. A `switch` without `default`
+// still needs the query.
+#[test]
+fn ends_decided_from_syntax_ask_no_reachability_query() {
+    const SOURCE: &str = r#"
+        declare const c: boolean;
+        declare const s: "a" | "b";
+        function closed() { switch (s) { case "a": return 1; default: return 2; } }
+        function bare() { if (c) return; if (c) return 1; }
+        function asked() { switch (s) { case "a": return 1; } }
+        /*closed*/closed();
+        /*bare*/bare();
+        /*asked*/asked();
+    "#;
+    let (db, module) = return_types_db(SOURCE);
+    db.clear_salsa_events();
+    for (marker, expression) in [("closed", "closed()"), ("bare", "bare()")] {
+        let range = marked_range(SOURCE, marker, expression);
+        infer_expression_type(&db, ExpressionTypeInput::new(&db, module, range));
+    }
+    let events = db.take_salsa_events();
+    assert_eq!(
+        function_query_will_execute_count_by_name(&db, "infer_flow_reachability", &events),
+        0
+    );
+    let range = marked_range(SOURCE, "asked", "asked()");
+    infer_expression_type(&db, ExpressionTypeInput::new(&db, module, range));
+    let events = db.take_salsa_events();
+    assert_eq!(
+        function_query_will_execute_count_by_name(&db, "infer_flow_reachability", &events),
+        1
+    );
+}

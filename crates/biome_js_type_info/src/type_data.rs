@@ -1572,6 +1572,10 @@ pub struct TypeofCallArgumentExpression {
 pub struct TypeofImplicitReturnExpression {
     /// The trimmed range of the function, method, or accessor whose body ends.
     pub function: TextRange,
+    /// Whether a `return` statement of the function has no value. That
+    /// `return` already adds `undefined` to the union, so resolution gives
+    /// `undefined` without deciding whether a path reaches the end.
+    pub has_bare_return: bool,
 }
 
 /// Type of the parameter at `index` of a callable type, not counting a

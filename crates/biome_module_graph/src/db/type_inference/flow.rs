@@ -52,10 +52,11 @@ use biome_js_type_info::interned_types::{
 };
 use biome_js_type_info::{
     ImportSymbol, Literal as RawLiteral, NarrowingPredicate, ObjectKind, PropertyTest, RawTypeData,
-    RawTypeId, TypeId, TypeReference, TypeofExpression, base_literal_type, evolving_array_element,
-    evolving_assigned_type, has_readonly_property, is_narrowing_invariant,
-    may_narrow_by_instanceof, may_narrow_by_property, narrow_by_assignment, narrow_by_in_operator,
-    narrow_by_instanceof, narrow_by_property, narrow_by_type_predicate, narrow_type,
+    RawTypeId, TypeId, TypeReference, TypeofExpression, TypeofImplicitReturnExpression,
+    base_literal_type, evolving_array_element, evolving_assigned_type, has_readonly_property,
+    is_narrowing_invariant, may_narrow_by_instanceof, may_narrow_by_property, narrow_by_assignment,
+    narrow_by_in_operator, narrow_by_instanceof, narrow_by_property, narrow_by_type_predicate,
+    narrow_type,
 };
 use biome_rowan::{AstNode, NodeOrToken, Text, TextRange, TextSize};
 use rustc_hash::FxHashMap;
@@ -1675,22 +1676,31 @@ impl<'db> ResolutionCtx<'db, '_> {
         true
     }
 
-    /// Returns `undefined` when a path reaches the end of the body of
-    /// `function`, and `never` when no path does. `function` is the trimmed
-    /// range of the function, method, or accessor that a
-    /// [`biome_js_type_info::TypeofImplicitReturnExpression`] names. A union
-    /// drops `never`, so when no path reaches the end, the function's return
-    /// type holds only the values of its `return` statements.
+    /// Returns `undefined` when a path reaches the end of the body of the
+    /// function that `expression` names, and `never` when no path does. A
+    /// union drops `never`, so when no path reaches the end, the function's
+    /// return type holds only the values of its `return` statements.
     ///
-    /// The answer comes from [`infer_flow_reachability`], so every resolution
-    /// context shares it. The end counts as reachable when that query has no
-    /// answer, such as at a work limit or in a query cycle. A query cycle
-    /// occurs when a statement call or a `switch` statement of `function`
-    /// needs the return type of `function` itself. Counting the end as
+    /// When a `return` statement of the function has no value, the answer is
+    /// `undefined` without asking whether a path reaches the end. That
+    /// `return` already adds `undefined` to the union, so the union is the
+    /// same either way.
+    ///
+    /// Otherwise the answer comes from [`infer_flow_reachability`], so every
+    /// resolution context shares it. The end counts as reachable when that
+    /// query has no answer, such as at a work limit or in a query cycle. A
+    /// query cycle occurs when a statement call or a `switch` statement of the
+    /// function needs the function's own return type. Counting the end as
     /// reachable keeps `undefined`, which can widen the return type but never
     /// narrows it.
-    pub(super) fn resolve_implicit_return(&self, function: TextRange) -> TypeData<'db> {
-        let input = FlowReachabilityInput::new(self.db, self.module, function);
+    pub(super) fn resolve_implicit_return(
+        &self,
+        expression: &TypeofImplicitReturnExpression,
+    ) -> TypeData<'db> {
+        if expression.has_bare_return {
+            return TypeData::Undefined;
+        }
+        let input = FlowReachabilityInput::new(self.db, self.module, expression.function);
         match infer_flow_reachability(self.db, input) {
             Some(reachability) if !reachability.end => TypeData::NeverKeyword,
             Some(_) | None => TypeData::Undefined,
