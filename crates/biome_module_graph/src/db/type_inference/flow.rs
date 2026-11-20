@@ -1675,17 +1675,20 @@ impl<'db> ResolutionCtx<'db, '_> {
         true
     }
 
-    /// Resolves the `undefined` that the function whose trimmed range is
-    /// `function` returns when a path reaches the end of its body (see
-    /// [`biome_js_type_info::TypeofImplicitReturnExpression`]): `undefined`
-    /// when a path reaches the end, and `never`, which a union drops, when
-    /// every path ends before it, as at a call that never returns or after
-    /// an exhaustive `switch`.
+    /// Returns `undefined` when a path reaches the end of the body of
+    /// `function`, and `never` when no path does. `function` is the trimmed
+    /// range of the function, method, or accessor that a
+    /// [`biome_js_type_info::TypeofImplicitReturnExpression`] names. A union
+    /// drops `never`, so when no path reaches the end, the function's return
+    /// type holds only the values of its `return` statements.
     ///
-    /// The answer comes from [`infer_flow_reachability`], so every context
-    /// shares it. When that query gives no answer, because of a work limit
-    /// or a query cycle, as when deciding whether a call ends the path needs
-    /// this return type, the end counts as reachable, which only widens.
+    /// The answer comes from [`infer_flow_reachability`], so every resolution
+    /// context shares it. The end counts as reachable when that query has no
+    /// answer, such as at a work limit or in a query cycle. A query cycle
+    /// occurs when a statement call or a `switch` statement of `function`
+    /// needs the return type of `function` itself. Counting the end as
+    /// reachable keeps `undefined`, which can widen the return type but never
+    /// narrows it.
     pub(super) fn resolve_implicit_return(&self, function: TextRange) -> TypeData<'db> {
         let input = FlowReachabilityInput::new(self.db, self.module, function);
         match infer_flow_reachability(self.db, input) {
