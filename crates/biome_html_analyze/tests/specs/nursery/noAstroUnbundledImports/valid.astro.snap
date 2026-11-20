@@ -1,0 +1,42 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: valid.astro
+---
+# Input
+```astro
+---
+import frontmatter from "./frontmatter.js";
+---
+<!-- should not generate diagnostics -->
+<script>import value from "./value.js";</script>
+<script type="module">import "./module.js";</script>
+<script is:inline type="module">import "./module.js";</script>
+<script define:vars={{ value }} type="module">import "./module.js";</script>
+<script is:inline>import("./dynamic.js");</script>
+<script is:inline>
+  const text = 'import value from "./text.js";';
+  const template = `import "./text.js";`;
+  // import value from "./comment.js";
+  /* import "./comment.js"; */
+  console.log(text, template, import.meta);
+</script>
+<script src="./external.js" is:inline>import "./ignored.js";</script>
+<script is:inline src={external}>import "./ignored.js";</script>
+<script is:inline {...attributes}>import "./unknown.js";</script>
+<script {...attributes} define:vars={{ value }}>import "./unknown.js";</script>
+<script is:inline type={type}>import "./unknown.js";</script>
+<script is:inline type={"text/javascript"}>import "./unknown.js";</script>
+<script is:inline type="">import "./unknown.js";</script>
+<script is:inline type>import "./unknown.js";</script>
+<script is:inline type="text/plain">import "./unknown.js";</script>
+<script is:inline type="text/ecmascript">import "./unsupported.js";</script>
+<script is:inline type=" text/javascript ">import "./unsupported.js";</script>
+<script is:inline type="text/javascript; charset=utf-8">import "./unsupported.js";</script>
+<script is:inline type="application/ld+json">{ "import": "./data.js" }</script>
+<script is:inline hoist>import "./hoisted.js";</script>
+<script define:vars={{ value }} hoist={false}>import "./hoisted.js";</script>
+<script is:inline set:html={content}>import "./replaced.js";</script>
+<script set:text={content} is:inline>import "./replaced.js";</script>
+<Script is:inline>import "./component.js";</Script>
+
+```

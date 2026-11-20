@@ -1,0 +1,139 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.astro
+---
+# Input
+```astro
+---
+// should generate diagnostics
+import Accordion from "./Accordion.astro";
+import { default as Card } from "./Card.astro";
+import { Image, Picture as Photo } from "astro:assets";
+---
+<p>日本語</p>
+<Accordion client:visible />
+<Card client:load></Card>
+<Image client:only="react" />
+<Photo client:idle />
+
+```
+
+# Diagnostics
+```
+invalid.astro:8:12 lint/nursery/noAstroClientDirectiveOnAstroComponent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This client directive is applied to an Astro component.
+  
+     6 │ ---
+     7 │ <p>日本語</p>
+   > 8 │ <Accordion client:visible />
+       │            ^^^^^^^^^^^^^^
+     9 │ <Card client:load></Card>
+    10 │ <Image client:only="react" />
+  
+  i This import is an Astro component.
+  
+    1 │ ---
+    2 │ // should generate diagnostics
+  > 3 │ import Accordion from "./Accordion.astro";
+      │        ^^^^^^^^^
+    4 │ import { default as Card } from "./Card.astro";
+    5 │ import { Image, Picture as Photo } from "astro:assets";
+  
+  i Astro components render on the server and cannot be hydrated in the browser.
+  
+  i Remove the directive. Use a framework component or a bundled script for browser interactivity.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.astro:9:7 lint/nursery/noAstroClientDirectiveOnAstroComponent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This client directive is applied to an Astro component.
+  
+     7 │ <p>日本語</p>
+     8 │ <Accordion client:visible />
+   > 9 │ <Card client:load></Card>
+       │       ^^^^^^^^^^^
+    10 │ <Image client:only="react" />
+    11 │ <Photo client:idle />
+  
+  i This import is an Astro component.
+  
+    2 │ // should generate diagnostics
+    3 │ import Accordion from "./Accordion.astro";
+  > 4 │ import { default as Card } from "./Card.astro";
+      │                     ^^^^
+    5 │ import { Image, Picture as Photo } from "astro:assets";
+    6 │ ---
+  
+  i Astro components render on the server and cannot be hydrated in the browser.
+  
+  i Remove the directive. Use a framework component or a bundled script for browser interactivity.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.astro:10:8 lint/nursery/noAstroClientDirectiveOnAstroComponent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This client directive is applied to an Astro component.
+  
+     8 │ <Accordion client:visible />
+     9 │ <Card client:load></Card>
+  > 10 │ <Image client:only="react" />
+       │        ^^^^^^^^^^^^^^^^^^^
+    11 │ <Photo client:idle />
+    12 │ 
+  
+  i This import is an Astro component.
+  
+    3 │ import Accordion from "./Accordion.astro";
+    4 │ import { default as Card } from "./Card.astro";
+  > 5 │ import { Image, Picture as Photo } from "astro:assets";
+      │          ^^^^^
+    6 │ ---
+    7 │ <p>日本語</p>
+  
+  i Astro components render on the server and cannot be hydrated in the browser.
+  
+  i Remove the directive. Use a framework component or a bundled script for browser interactivity.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.astro:11:8 lint/nursery/noAstroClientDirectiveOnAstroComponent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This client directive is applied to an Astro component.
+  
+     9 │ <Card client:load></Card>
+    10 │ <Image client:only="react" />
+  > 11 │ <Photo client:idle />
+       │        ^^^^^^^^^^^
+    12 │ 
+  
+  i This import is an Astro component.
+  
+    3 │ import Accordion from "./Accordion.astro";
+    4 │ import { default as Card } from "./Card.astro";
+  > 5 │ import { Image, Picture as Photo } from "astro:assets";
+      │                            ^^^^^
+    6 │ ---
+    7 │ <p>日本語</p>
+  
+  i Astro components render on the server and cannot be hydrated in the browser.
+  
+  i Remove the directive. Use a framework component or a bundled script for browser interactivity.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

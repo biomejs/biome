@@ -1,0 +1,11 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: valid_expression.astro
+---
+# Input
+```astro
+<!-- should not generate diagnostics -->
+{show && <p>Hello</p>}
+<style define:vars={{ color: "red" }}>p { color: var(--color); }</style>
+
+```

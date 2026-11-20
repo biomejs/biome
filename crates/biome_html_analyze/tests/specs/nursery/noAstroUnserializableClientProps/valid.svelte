@@ -1,0 +1,2 @@
+<!-- should not generate diagnostics -->
+<Button client:load onClick={() => {}} />

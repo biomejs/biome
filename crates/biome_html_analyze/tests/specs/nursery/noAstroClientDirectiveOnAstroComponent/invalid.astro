@@ -1,0 +1,11 @@
+---
+// should generate diagnostics
+import Accordion from "./Accordion.astro";
+import { default as Card } from "./Card.astro";
+import { Image, Picture as Photo } from "astro:assets";
+---
+<p>日本語</p>
+<Accordion client:visible />
+<Card client:load></Card>
+<Image client:only="react" />
+<Photo client:idle />

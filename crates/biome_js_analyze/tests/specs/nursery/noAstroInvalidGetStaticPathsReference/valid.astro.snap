@@ -1,0 +1,25 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.astro
+---
+# Input
+```astro
+---
+// should not generate diagnostics
+import { posts } from "./posts";
+export const shared = [];
+type Params = { post: string };
+const values = ["first"];
+function other() { return values; }
+export function getStaticPaths() {
+  const values = posts;
+  type Value = typeof other;
+  return values.map((post: Params) => ({ params: post, props: { shared } }));
+}
+---
+<script>
+const values = [];
+export function getStaticPaths() { return values; }
+</script>
+
+```

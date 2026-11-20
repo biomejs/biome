@@ -1,0 +1,14 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.astro
+---
+# Input
+```astro
+---
+// should not generate diagnostics
+import Card from "./Card.astro";
+import { Picture } from "astro:assets";
+---
+<Card /><Picture />
+
+```

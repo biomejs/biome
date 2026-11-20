@@ -1,0 +1,32 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid_escaped.tsx
+---
+# Input
+```tsx
+// should generate diagnostics
+import { \u0049mage as Photo } from "astro:assets";
+export default () => <Photo />;
+
+```
+
+# Diagnostics
+```
+invalid_escaped.tsx:2:24 lint/nursery/noAstroComponentInFramework ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This Astro component is imported into a framework component file.
+  
+    1 │ // should generate diagnostics
+  > 2 │ import { \u0049mage as Photo } from "astro:assets";
+      │                        ^^^^^
+    3 │ export default () => <Photo />;
+    4 │ 
+  
+  i UI frameworks cannot render Astro components directly.
+  
+  i Import the component in an .astro file and pass its rendered content through a slot or children.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

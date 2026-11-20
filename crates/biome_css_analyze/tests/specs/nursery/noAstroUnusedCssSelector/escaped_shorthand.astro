@@ -1,0 +1,9 @@
+<!-- should not generate diagnostics -->
+---
+const f\u006fo = true;
+---
+<div class:list={{ f\u006fo }}></div>
+
+<style>
+.foo { color: green; }
+</style>

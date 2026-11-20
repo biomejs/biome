@@ -1,0 +1,36 @@
+---
+import frontmatter from "./frontmatter.js";
+const message = "こんにちは";
+---
+<!-- should generate diagnostics -->
+<script define:vars={{ message }}>
+  import { greet } from "./greet.js";
+  greet(message);
+</script>
+<script is:inline>
+  import defaultValue from "./shared.js";
+  import { named } from "./shared.js";
+  import * as namespace from "./shared.js";
+  import "./shared.js";
+  import type { Shape } from "./shared.js";
+  import { type OtherShape } from "./shared.js";
+  import type DefaultShape from "./shared.js";
+  import type * as Types from "./shared.js";
+</script>
+<script data-label="日本語">
+  // 前のコメント
+  import {
+    value,
+  } from "./multiline.js";
+</script>
+<script defer>import "./deferred.js";</script>
+<script async>import "./async.js";</script>
+<script nonce={nonce}>import "./nonce.js";</script>
+<script lang="ts">import type { Options } from "./types.js";</script>
+<script type="text/javascript">import "./classic.js";</script>
+<script type='application/javascript'>import "./classic.js";</script>
+<script type=application/ecmascript>import "./classic.js";</script>
+<script type="TEXT/JAVASCRIPT" is:inline>import "./classic.js";</script>
+<script is:inline={false}>import "./inline.js";</script>
+<script>import "./bundled.js";</script>
+<script type="module" is:inline>import "./module.js";</script>

@@ -1,0 +1,67 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.astro
+---
+# Input
+```astro
+---
+// should generate diagnostics
+const color = "red";
+const gap = "1rem";
+---
+<style define:vars={{ color, gap, unused: "blue", "font-size": "2rem", __proto__: null }}>
+.card {
+	color: var(--color);
+	gap: var(--gap, 0);
+	font-size: var(--font-size);
+}
+</style>
+
+<style define:vars={{ separate: "red" }}>
+.other { color: var(--color); }
+</style>
+
+```
+
+# Diagnostics
+```
+invalid.astro:6:35 lint/nursery/noAstroUnusedDefineVarsInStyle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This style variable is defined but never used.
+  
+    4 │ const gap = "1rem";
+    5 │ ---
+  > 6 │ <style define:vars={{ color, gap, unused: "blue", "font-size": "2rem", __proto__: null }}>
+      │                                   ^^^^^^
+    7 │ .card {
+    8 │ 	color: var(--color);
+  
+  i The variable unused is not referenced by a matching CSS var() call in this style block.
+  
+  i Reference --unused from this style block or remove the definition.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.astro:14:23 lint/nursery/noAstroUnusedDefineVarsInStyle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This style variable is defined but never used.
+  
+    12 │ </style>
+    13 │ 
+  > 14 │ <style define:vars={{ separate: "red" }}>
+       │                       ^^^^^^^^
+    15 │ .other { color: var(--color); }
+    16 │ </style>
+  
+  i The variable separate is not referenced by a matching CSS var() call in this style block.
+  
+  i Reference --separate from this style block or remove the definition.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

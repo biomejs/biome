@@ -1,0 +1,10 @@
+---
+// should generate diagnostics
+const color = "red";
+---
+<style define:vars={{ color }}>
+  p { color: var(--color); }
+</style>
+<style is:global define:vars={{ color }}>
+  :root { background: var(--color); }
+</style>

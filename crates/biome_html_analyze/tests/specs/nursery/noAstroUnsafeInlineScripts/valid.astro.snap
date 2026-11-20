@@ -1,0 +1,14 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: valid.astro
+---
+# Input
+```astro
+<!-- should not generate diagnostics -->
+<script src="/app.js"></script>
+<script type=" APPLICATION/JSON ; charset=utf-8 ">{"value": true}</script>
+<script type="application/ld+json; profile=card">{"name": "card"}</script>
+<script type="application&#x2F;json">{"encoded": true}</script>
+<script {...attributes}>console.log("unknown attributes")</script>
+
+```

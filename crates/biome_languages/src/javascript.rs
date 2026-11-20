@@ -1,4 +1,4 @@
-use biome_rowan::FileSourceError;
+use biome_rowan::{FileSourceError, TextSize};
 use biome_string_case::StrLikeExtension;
 use camino::Utf8Path;
 use std::borrow::Cow;
@@ -179,11 +179,15 @@ pub enum SvelteEmbeddingKind {
 )]
 pub enum JsEmbeddingKind {
     Astro {
+        /// Offset of the embedded JavaScript in the Astro document.
+        content_offset: TextSize,
         /// Whether the script is inside Astro frontmatter
         frontmatter: bool,
         /// Whether this snippet is from a class-related attribute
         /// (e.g., `class:list={...}` or `class={...}`)
         is_class_attribute: bool,
+        /// Whether this snippet is from a `class:list` directive.
+        is_class_list_attribute: bool,
     },
     Vue {
         /// Whether the script is inside script tag with setup attribute
@@ -236,6 +240,12 @@ impl JsEmbeddingKind {
                 ..
             }
         )
+    }
+    pub const fn astro_content_offset(&self) -> Option<TextSize> {
+        match self {
+            Self::Astro { content_offset, .. } => Some(*content_offset),
+            _ => None,
+        }
     }
     /// Returns `true` when the code is embedded in the template of an Astro
     /// file, the only place template-only syntax such as JSX applies; the
@@ -300,6 +310,15 @@ impl JsEmbeddingKind {
                 ..
             } | Self::Svelte {
                 is_class_attribute: true,
+                ..
+            }
+        )
+    }
+    pub const fn is_class_list_attribute(&self) -> bool {
+        matches!(
+            self,
+            Self::Astro {
+                is_class_list_attribute: true,
                 ..
             }
         )
@@ -443,8 +462,10 @@ impl JsFileSource {
 
     pub fn astro() -> Self {
         Self::ts().with_embedding_kind(JsEmbeddingKind::Astro {
+            content_offset: TextSize::default(),
             frontmatter: true,
             is_class_attribute: false,
+            is_class_list_attribute: false,
         })
     }
 
@@ -846,8 +867,10 @@ mod tests {
     fn class_attribute_context_follows_embedding_kind() {
         for kind in [
             JsEmbeddingKind::Astro {
+                content_offset: TextSize::default(),
                 frontmatter: false,
                 is_class_attribute: true,
+                is_class_list_attribute: true,
             },
             JsEmbeddingKind::Vue {
                 setup: false,

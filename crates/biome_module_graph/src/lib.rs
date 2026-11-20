@@ -47,7 +47,8 @@ pub use db::{
 };
 pub use diagnostics::ModuleDiagnostic;
 pub use html_module_info::{
-    HtmlImport, HtmlModuleInfo, PreparedHtmlModule, SerializedHtmlModuleInfo, prepare_html_module,
+    AstroStyleInfo, AstroStyleVariable, HtmlImport, HtmlModuleInfo, PreparedHtmlModule,
+    SerializedHtmlModuleInfo, prepare_html_module,
 };
 pub use import_path_map::{ImportPathMap, ImportPathMapIterator};
 pub use js_module_info::{

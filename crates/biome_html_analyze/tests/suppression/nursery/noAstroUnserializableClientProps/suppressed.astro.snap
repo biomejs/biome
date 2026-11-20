@@ -1,0 +1,10 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: suppressed.astro
+---
+# Input
+```astro
+<!-- biome-ignore lint/nursery/noAstroUnserializableClientProps: test -->
+<Button client:load onClick={() => {}} />
+
+```

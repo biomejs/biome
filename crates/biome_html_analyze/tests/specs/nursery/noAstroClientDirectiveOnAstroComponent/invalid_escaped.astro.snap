@@ -1,0 +1,109 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid_escaped.astro
+---
+# Input
+```astro
+---
+// should generate diagnostics
+import \u0043ard from "./Card.astro";
+import { \u0049mage as \u0050hoto, Picture as \u0049llustration } from "astro:assets";
+import type \u0054ypeOnly from "./Card.astro";
+---
+<Card client:load />
+<Photo client:idle />
+<Illustration client:visible />
+<TypeOnly client:load />
+
+```
+
+# Diagnostics
+```
+invalid_escaped.astro:7:7 lint/nursery/noAstroClientDirectiveOnAstroComponent ━━━━━━━━━━━━━━━━━━━━━━
+
+  × This client directive is applied to an Astro component.
+  
+    5 │ import type \u0054ypeOnly from "./Card.astro";
+    6 │ ---
+  > 7 │ <Card client:load />
+      │       ^^^^^^^^^^^
+    8 │ <Photo client:idle />
+    9 │ <Illustration client:visible />
+  
+  i This import is an Astro component.
+  
+    1 │ ---
+    2 │ // should generate diagnostics
+  > 3 │ import \u0043ard from "./Card.astro";
+      │        ^^^^^^^^^
+    4 │ import { \u0049mage as \u0050hoto, Picture as \u0049llustration } from "astro:assets";
+    5 │ import type \u0054ypeOnly from "./Card.astro";
+  
+  i Astro components render on the server and cannot be hydrated in the browser.
+  
+  i Remove the directive. Use a framework component or a bundled script for browser interactivity.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_escaped.astro:8:8 lint/nursery/noAstroClientDirectiveOnAstroComponent ━━━━━━━━━━━━━━━━━━━━━━
+
+  × This client directive is applied to an Astro component.
+  
+     6 │ ---
+     7 │ <Card client:load />
+   > 8 │ <Photo client:idle />
+       │        ^^^^^^^^^^^
+     9 │ <Illustration client:visible />
+    10 │ <TypeOnly client:load />
+  
+  i This import is an Astro component.
+  
+    2 │ // should generate diagnostics
+    3 │ import \u0043ard from "./Card.astro";
+  > 4 │ import { \u0049mage as \u0050hoto, Picture as \u0049llustration } from "astro:assets";
+      │                        ^^^^^^^^^^
+    5 │ import type \u0054ypeOnly from "./Card.astro";
+    6 │ ---
+  
+  i Astro components render on the server and cannot be hydrated in the browser.
+  
+  i Remove the directive. Use a framework component or a bundled script for browser interactivity.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_escaped.astro:9:15 lint/nursery/noAstroClientDirectiveOnAstroComponent ━━━━━━━━━━━━━━━━━━━━━
+
+  × This client directive is applied to an Astro component.
+  
+     7 │ <Card client:load />
+     8 │ <Photo client:idle />
+   > 9 │ <Illustration client:visible />
+       │               ^^^^^^^^^^^^^^
+    10 │ <TypeOnly client:load />
+    11 │ 
+  
+  i This import is an Astro component.
+  
+    2 │ // should generate diagnostics
+    3 │ import \u0043ard from "./Card.astro";
+  > 4 │ import { \u0049mage as \u0050hoto, Picture as \u0049llustration } from "astro:assets";
+      │                                               ^^^^^^^^^^^^^^^^^
+    5 │ import type \u0054ypeOnly from "./Card.astro";
+    6 │ ---
+  
+  i Astro components render on the server and cannot be hydrated in the browser.
+  
+  i Remove the directive. Use a framework component or a bundled script for browser interactivity.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

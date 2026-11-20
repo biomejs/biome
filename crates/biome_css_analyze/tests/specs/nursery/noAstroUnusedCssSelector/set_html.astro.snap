@@ -1,0 +1,14 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: set_html.astro
+---
+# Input
+```astro
+<!-- should not generate diagnostics -->
+<Fragment set:html={markup} />
+
+<style>
+.possibly-used { color: green; }
+</style>
+
+```

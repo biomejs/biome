@@ -1,5 +1,7 @@
+use crate::astro::AstroData;
 use crate::bindings::EmbeddedBinding;
 use crate::components::{ComponentNameSegments, EmbeddedElement, find_component_at};
+use crate::imports::imports_in_range;
 use crate::references::{
     EmbeddedTypeReference, EmbeddedValueReference, is_potential_vue_directive_reference,
     svelte_store_reference_name, vue_directive_name_matches_reference_name,
@@ -132,6 +134,8 @@ pub struct EmbeddedData {
     vue_directive_declarations: VueDirectiveDeclarations,
     /// Tags of the host document in source order
     elements: Vec<EmbeddedElement>,
+    static_imports: Vec<TextRange>,
+    astro: AstroData,
 }
 
 impl EmbeddedData {
@@ -141,6 +145,8 @@ impl EmbeddedData {
         type_references: Vec<EmbeddedTypeReference>,
         vue_directive_declarations: VueDirectiveDeclarations,
         elements: Vec<EmbeddedElement>,
+        static_imports: Vec<TextRange>,
+        astro: AstroData,
     ) -> Self {
         Self {
             bindings,
@@ -148,6 +154,8 @@ impl EmbeddedData {
             type_references,
             vue_directive_declarations,
             elements,
+            static_imports,
+            astro,
         }
     }
 
@@ -207,6 +215,16 @@ impl EmbeddedData {
     /// document contains `range`.
     pub fn component_at(&self, range: TextRange) -> Option<&ComponentNameSegments> {
         find_component_at(&self.elements, range)
+    }
+
+    /// Returns Astro component imports and function-valued template expressions.
+    pub fn astro(&self) -> &AstroData {
+        &self.astro
+    }
+
+    /// Returns static import declaration ranges contained in `range`, in host-document offsets.
+    pub fn static_imports(&self, range: TextRange) -> &[TextRange] {
+        imports_in_range(&self.static_imports, range)
     }
 }
 
@@ -321,6 +339,8 @@ mod tests {
             Vec::new(),
             VueDirectiveDeclarations::default(),
             Vec::new(),
+            Vec::new(),
+            AstroData::default(),
         );
 
         assert!(data.is_vue_directive_used("vClickOutside"));

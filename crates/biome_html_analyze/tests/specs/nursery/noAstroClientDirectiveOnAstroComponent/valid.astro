@@ -1,0 +1,18 @@
+---
+// should not generate diagnostics
+import Card from "./Card.astro";
+import Button from "./Button.svelte";
+import { helper as Helper } from "./Card.astro";
+import * as Components from "./components";
+import type TypeOnly from "./Card.astro";
+---
+<Card />
+<Button client:load />
+<Helper client:visible />
+<Components.Card client:load />
+<TypeOnly client:load />
+<Unknown client:load />
+<script>
+import ScriptOnly from "./Card.astro";
+</script>
+<ScriptOnly client:load />

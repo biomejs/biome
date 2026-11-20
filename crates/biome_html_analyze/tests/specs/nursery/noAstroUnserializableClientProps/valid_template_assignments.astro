@@ -1,0 +1,34 @@
+---
+// should not generate diagnostics
+import Button from "./Button.svelte";
+function inText() {}
+function inAttribute() {}
+function escapedWrite() {}
+\u0065scapedWrite = "text";
+function \u0065scapedDeclaration() {}
+escapedDeclaration = null;
+function templateEscapedWrite() {}
+function \u0074emplateEscapedDeclaration() {}
+function initializedAgain() {}
+var initializedAgain = "text";
+function destructuredAgain() {}
+var { destructuredAgain } = { destructuredAgain: null };
+function initializedInBlock() {}
+if (true) { var initializedInBlock = false; }
+function iteratedAgain() {}
+for (var iteratedAgain of ["text"]) {}
+---
+{inText = null}
+<Button client:load value={inText} />
+<div data-value={inAttribute = "text"}></div>
+<Button client:load value={inAttribute} />
+<Button client:load value={escapedWrite} />
+<Button client:load value={\u0065scapedDeclaration} />
+{\u0074emplateEscapedWrite = 0}
+{templateEscapedDeclaration = false}
+<Button client:load value={templateEscapedWrite} />
+<Button client:load value={\u0074emplateEscapedDeclaration} />
+<Button client:load value={initializedAgain} />
+<Button client:load value={destructuredAgain} />
+<Button client:load value={initializedInBlock} />
+<Button client:load value={iteratedAgain} />

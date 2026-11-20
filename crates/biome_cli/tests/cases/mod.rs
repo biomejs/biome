@@ -2,6 +2,7 @@
 //! case that affects many commands
 
 mod assist;
+mod astro_unbundled_imports;
 mod biome_json_support;
 mod config_extends;
 mod config_path;

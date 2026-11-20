@@ -1,0 +1,10 @@
+<!-- should not generate diagnostics -->
+<!-- biome-ignore lint/nursery/noAstroUnbundledImports: browser fixture -->
+<script is:inline>
+  import first from "./first.js";
+  import second from "./second.js";
+</script>
+{/* biome-ignore lint/nursery/noAstroUnbundledImports: browser fixture */}
+<script define:vars={{ value }}>
+  import "./setup.js";
+</script>

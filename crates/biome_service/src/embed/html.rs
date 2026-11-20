@@ -77,6 +77,7 @@ pub(crate) enum EmbedCandidate {
         /// Whether the value holds component type parameters from a Vue
         /// `generic` attribute or a Svelte `generics` attribute.
         is_generics_list: bool,
+        is_class_list_attribute: bool,
     },
     Attribute {
         name: TokenText,

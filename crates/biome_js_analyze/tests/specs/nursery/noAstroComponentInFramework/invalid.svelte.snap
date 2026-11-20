@@ -1,0 +1,35 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.svelte
+---
+# Input
+```svelte
+<!-- should generate diagnostics -->
+<script>
+import { Picture } from "astro:assets";
+</script>
+<Picture src="/image.png" alt="日本語" />
+
+```
+
+# Diagnostics
+```
+invalid.svelte:3:10 lint/nursery/noAstroComponentInFramework ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This Astro component is imported into a framework component file.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <script>
+  > 3 │ import { Picture } from "astro:assets";
+      │          ^^^^^^^
+    4 │ </script>
+    5 │ <Picture src="/image.png" alt="日本語" />
+  
+  i UI frameworks cannot render Astro components directly.
+  
+  i Import the component in an .astro file and pass its rendered content through a slot or children.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

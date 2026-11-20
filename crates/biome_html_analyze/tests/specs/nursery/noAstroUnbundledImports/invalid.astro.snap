@@ -1,0 +1,618 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.astro
+---
+# Input
+```astro
+---
+import frontmatter from "./frontmatter.js";
+const message = "こんにちは";
+---
+<!-- should generate diagnostics -->
+<script define:vars={{ message }}>
+  import { greet } from "./greet.js";
+  greet(message);
+</script>
+<script is:inline>
+  import defaultValue from "./shared.js";
+  import { named } from "./shared.js";
+  import * as namespace from "./shared.js";
+  import "./shared.js";
+  import type { Shape } from "./shared.js";
+  import { type OtherShape } from "./shared.js";
+  import type DefaultShape from "./shared.js";
+  import type * as Types from "./shared.js";
+</script>
+<script data-label="日本語">
+  // 前のコメント
+  import {
+    value,
+  } from "./multiline.js";
+</script>
+<script defer>import "./deferred.js";</script>
+<script async>import "./async.js";</script>
+<script nonce={nonce}>import "./nonce.js";</script>
+<script lang="ts">import type { Options } from "./types.js";</script>
+<script type="text/javascript">import "./classic.js";</script>
+<script type='application/javascript'>import "./classic.js";</script>
+<script type=application/ecmascript>import "./classic.js";</script>
+<script type="TEXT/JAVASCRIPT" is:inline>import "./classic.js";</script>
+<script is:inline={false}>import "./inline.js";</script>
+<script>import "./bundled.js";</script>
+<script type="module" is:inline>import "./module.js";</script>
+
+```
+
+# Diagnostics
+```
+invalid.astro:7:3 lint/nursery/noAstroUnbundledImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This static import is in an unbundled, non-module script.
+  
+    5 │ <!-- should generate diagnostics -->
+    6 │ <script define:vars={{ message }}>
+  > 7 │   import { greet } from "./greet.js";
+      │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │   greet(message);
+    9 │ </script>
+  
+  i This attribute prevents Astro from bundling the script.
+  
+    4 │ ---
+    5 │ <!-- should generate diagnostics -->
+  > 6 │ <script define:vars={{ message }}>
+      │         ^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │   import { greet } from "./greet.js";
+    8 │   greet(message);
+  
+  i Browsers cannot use static imports in classic scripts. Astro leaves this script uncompiled.
+  
+  i Move the import and the code that uses it to a <script> with no attributes so Astro can bundle it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.astro:12:3 lint/nursery/noAstroUnbundledImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This static import is in an unbundled, non-module script.
+  
+    10 │ <script is:inline>
+    11 │   import defaultValue from "./shared.js";
+  > 12 │   import { named } from "./shared.js";
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │   import * as namespace from "./shared.js";
+    14 │   import "./shared.js";
+  
+  i This attribute prevents Astro from bundling the script.
+  
+     8 │   greet(message);
+     9 │ </script>
+  > 10 │ <script is:inline>
+       │         ^^^^^^^^^
+    11 │   import defaultValue from "./shared.js";
+    12 │   import { named } from "./shared.js";
+  
+  i Browsers cannot use static imports in classic scripts. Astro leaves this script uncompiled.
+  
+  i Move the import and the code that uses it to a <script> with no attributes so Astro can bundle it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.astro:16:3 lint/nursery/noAstroUnbundledImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This static import is in an unbundled, non-module script.
+  
+    14 │   import "./shared.js";
+    15 │   import type { Shape } from "./shared.js";
+  > 16 │   import { type OtherShape } from "./shared.js";
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    17 │   import type DefaultShape from "./shared.js";
+    18 │   import type * as Types from "./shared.js";
+  
+  i This attribute prevents Astro from bundling the script.
+  
+     8 │   greet(message);
+     9 │ </script>
+  > 10 │ <script is:inline>
+       │         ^^^^^^^^^
+    11 │   import defaultValue from "./shared.js";
+    12 │   import { named } from "./shared.js";
+  
+  i Browsers cannot use static imports in classic scripts. Astro leaves this script uncompiled.
+  
+  i Move the import and the code that uses it to a <script> with no attributes so Astro can bundle it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.astro:15:3 lint/nursery/noAstroUnbundledImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This static import is in an unbundled, non-module script.
+  
+    13 │   import * as namespace from "./shared.js";
+    14 │   import "./shared.js";
+  > 15 │   import type { Shape } from "./shared.js";
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    16 │   import { type OtherShape } from "./shared.js";
+    17 │   import type DefaultShape from "./shared.js";
+  
+  i This attribute prevents Astro from bundling the script.
+  
+     8 │   greet(message);
+     9 │ </script>
+  > 10 │ <script is:inline>
+       │         ^^^^^^^^^
+    11 │   import defaultValue from "./shared.js";
+    12 │   import { named } from "./shared.js";
+  
+  i Browsers cannot use static imports in classic scripts. Astro leaves this script uncompiled.
+  
+  i Move the import and the code that uses it to a <script> with no attributes so Astro can bundle it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.astro:11:3 lint/nursery/noAstroUnbundledImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This static import is in an unbundled, non-module script.
+  
+     9 │ </script>
+    10 │ <script is:inline>
+  > 11 │   import defaultValue from "./shared.js";
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │   import { named } from "./shared.js";
+    13 │   import * as namespace from "./shared.js";
+  
+  i This attribute prevents Astro from bundling the script.
+  
+     8 │   greet(message);
+     9 │ </script>
+  > 10 │ <script is:inline>
+       │         ^^^^^^^^^
+    11 │   import defaultValue from "./shared.js";
+    12 │   import { named } from "./shared.js";
+  
+  i Browsers cannot use static imports in classic scripts. Astro leaves this script uncompiled.
+  
+  i Move the import and the code that uses it to a <script> with no attributes so Astro can bundle it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.astro:14:3 lint/nursery/noAstroUnbundledImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This static import is in an unbundled, non-module script.
+  
+    12 │   import { named } from "./shared.js";
+    13 │   import * as namespace from "./shared.js";
+  > 14 │   import "./shared.js";
+       │   ^^^^^^^^^^^^^^^^^^^^^
+    15 │   import type { Shape } from "./shared.js";
+    16 │   import { type OtherShape } from "./shared.js";
+  
+  i This attribute prevents Astro from bundling the script.
+  
+     8 │   greet(message);
+     9 │ </script>
+  > 10 │ <script is:inline>
+       │         ^^^^^^^^^
+    11 │   import defaultValue from "./shared.js";
+    12 │   import { named } from "./shared.js";
+  
+  i Browsers cannot use static imports in classic scripts. Astro leaves this script uncompiled.
+  
+  i Move the import and the code that uses it to a <script> with no attributes so Astro can bundle it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.astro:13:3 lint/nursery/noAstroUnbundledImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This static import is in an unbundled, non-module script.
+  
+    11 │   import defaultValue from "./shared.js";
+    12 │   import { named } from "./shared.js";
+  > 13 │   import * as namespace from "./shared.js";
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    14 │   import "./shared.js";
+    15 │   import type { Shape } from "./shared.js";
+  
+  i This attribute prevents Astro from bundling the script.
+  
+     8 │   greet(message);
+     9 │ </script>
+  > 10 │ <script is:inline>
+       │         ^^^^^^^^^
+    11 │   import defaultValue from "./shared.js";
+    12 │   import { named } from "./shared.js";
+  
+  i Browsers cannot use static imports in classic scripts. Astro leaves this script uncompiled.
+  
+  i Move the import and the code that uses it to a <script> with no attributes so Astro can bundle it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.astro:18:3 lint/nursery/noAstroUnbundledImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This static import is in an unbundled, non-module script.
+  
+    16 │   import { type OtherShape } from "./shared.js";
+    17 │   import type DefaultShape from "./shared.js";
+  > 18 │   import type * as Types from "./shared.js";
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    19 │ </script>
+    20 │ <script data-label="日本語">
+  
+  i This attribute prevents Astro from bundling the script.
+  
+     8 │   greet(message);
+     9 │ </script>
+  > 10 │ <script is:inline>
+       │         ^^^^^^^^^
+    11 │   import defaultValue from "./shared.js";
+    12 │   import { named } from "./shared.js";
+  
+  i Browsers cannot use static imports in classic scripts. Astro leaves this script uncompiled.
+  
+  i Move the import and the code that uses it to a <script> with no attributes so Astro can bundle it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.astro:17:3 lint/nursery/noAstroUnbundledImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This static import is in an unbundled, non-module script.
+  
+    15 │   import type { Shape } from "./shared.js";
+    16 │   import { type OtherShape } from "./shared.js";
+  > 17 │   import type DefaultShape from "./shared.js";
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    18 │   import type * as Types from "./shared.js";
+    19 │ </script>
+  
+  i This attribute prevents Astro from bundling the script.
+  
+     8 │   greet(message);
+     9 │ </script>
+  > 10 │ <script is:inline>
+       │         ^^^^^^^^^
+    11 │   import defaultValue from "./shared.js";
+    12 │   import { named } from "./shared.js";
+  
+  i Browsers cannot use static imports in classic scripts. Astro leaves this script uncompiled.
+  
+  i Move the import and the code that uses it to a <script> with no attributes so Astro can bundle it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.astro:22:3 lint/nursery/noAstroUnbundledImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This static import is in an unbundled, non-module script.
+  
+    20 │ <script data-label="日本語">
+    21 │   // 前のコメント
+  > 22 │   import {
+       │   ^^^^^^^^
+  > 23 │     value,
+  > 24 │   } from "./multiline.js";
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^
+    25 │ </script>
+    26 │ <script defer>import "./deferred.js";</script>
+  
+  i This attribute prevents Astro from bundling the script.
+  
+    18 │   import type * as Types from "./shared.js";
+    19 │ </script>
+  > 20 │ <script data-label="日本語">
+       │         ^^^^^^^^^^^^^^^^^^^
+    21 │   // 前のコメント
+    22 │   import {
+  
+  i Browsers cannot use static imports in classic scripts. Astro leaves this script uncompiled.
+  
+  i Move the import and the code that uses it to a <script> with no attributes so Astro can bundle it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.astro:26:15 lint/nursery/noAstroUnbundledImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This static import is in an unbundled, non-module script.
+  
+    24 │   } from "./multiline.js";
+    25 │ </script>
+  > 26 │ <script defer>import "./deferred.js";</script>
+       │               ^^^^^^^^^^^^^^^^^^^^^^^
+    27 │ <script async>import "./async.js";</script>
+    28 │ <script nonce={nonce}>import "./nonce.js";</script>
+  
+  i This attribute prevents Astro from bundling the script.
+  
+    24 │   } from "./multiline.js";
+    25 │ </script>
+  > 26 │ <script defer>import "./deferred.js";</script>
+       │         ^^^^^
+    27 │ <script async>import "./async.js";</script>
+    28 │ <script nonce={nonce}>import "./nonce.js";</script>
+  
+  i Browsers cannot use static imports in classic scripts. Astro leaves this script uncompiled.
+  
+  i Move the import and the code that uses it to a <script> with no attributes so Astro can bundle it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.astro:27:15 lint/nursery/noAstroUnbundledImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This static import is in an unbundled, non-module script.
+  
+    25 │ </script>
+    26 │ <script defer>import "./deferred.js";</script>
+  > 27 │ <script async>import "./async.js";</script>
+       │               ^^^^^^^^^^^^^^^^^^^^
+    28 │ <script nonce={nonce}>import "./nonce.js";</script>
+    29 │ <script lang="ts">import type { Options } from "./types.js";</script>
+  
+  i This attribute prevents Astro from bundling the script.
+  
+    25 │ </script>
+    26 │ <script defer>import "./deferred.js";</script>
+  > 27 │ <script async>import "./async.js";</script>
+       │         ^^^^^
+    28 │ <script nonce={nonce}>import "./nonce.js";</script>
+    29 │ <script lang="ts">import type { Options } from "./types.js";</script>
+  
+  i Browsers cannot use static imports in classic scripts. Astro leaves this script uncompiled.
+  
+  i Move the import and the code that uses it to a <script> with no attributes so Astro can bundle it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.astro:28:23 lint/nursery/noAstroUnbundledImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This static import is in an unbundled, non-module script.
+  
+    26 │ <script defer>import "./deferred.js";</script>
+    27 │ <script async>import "./async.js";</script>
+  > 28 │ <script nonce={nonce}>import "./nonce.js";</script>
+       │                       ^^^^^^^^^^^^^^^^^^^^
+    29 │ <script lang="ts">import type { Options } from "./types.js";</script>
+    30 │ <script type="text/javascript">import "./classic.js";</script>
+  
+  i This attribute prevents Astro from bundling the script.
+  
+    26 │ <script defer>import "./deferred.js";</script>
+    27 │ <script async>import "./async.js";</script>
+  > 28 │ <script nonce={nonce}>import "./nonce.js";</script>
+       │         ^^^^^^^^^^^^^
+    29 │ <script lang="ts">import type { Options } from "./types.js";</script>
+    30 │ <script type="text/javascript">import "./classic.js";</script>
+  
+  i Browsers cannot use static imports in classic scripts. Astro leaves this script uncompiled.
+  
+  i Move the import and the code that uses it to a <script> with no attributes so Astro can bundle it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.astro:29:19 lint/nursery/noAstroUnbundledImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This static import is in an unbundled, non-module script.
+  
+    27 │ <script async>import "./async.js";</script>
+    28 │ <script nonce={nonce}>import "./nonce.js";</script>
+  > 29 │ <script lang="ts">import type { Options } from "./types.js";</script>
+       │                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    30 │ <script type="text/javascript">import "./classic.js";</script>
+    31 │ <script type='application/javascript'>import "./classic.js";</script>
+  
+  i This attribute prevents Astro from bundling the script.
+  
+    27 │ <script async>import "./async.js";</script>
+    28 │ <script nonce={nonce}>import "./nonce.js";</script>
+  > 29 │ <script lang="ts">import type { Options } from "./types.js";</script>
+       │         ^^^^^^^^^
+    30 │ <script type="text/javascript">import "./classic.js";</script>
+    31 │ <script type='application/javascript'>import "./classic.js";</script>
+  
+  i Browsers cannot use static imports in classic scripts. Astro leaves this script uncompiled.
+  
+  i Move the import and the code that uses it to a <script> with no attributes so Astro can bundle it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.astro:30:32 lint/nursery/noAstroUnbundledImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This static import is in an unbundled, non-module script.
+  
+    28 │ <script nonce={nonce}>import "./nonce.js";</script>
+    29 │ <script lang="ts">import type { Options } from "./types.js";</script>
+  > 30 │ <script type="text/javascript">import "./classic.js";</script>
+       │                                ^^^^^^^^^^^^^^^^^^^^^^
+    31 │ <script type='application/javascript'>import "./classic.js";</script>
+    32 │ <script type=application/ecmascript>import "./classic.js";</script>
+  
+  i This attribute prevents Astro from bundling the script.
+  
+    28 │ <script nonce={nonce}>import "./nonce.js";</script>
+    29 │ <script lang="ts">import type { Options } from "./types.js";</script>
+  > 30 │ <script type="text/javascript">import "./classic.js";</script>
+       │         ^^^^^^^^^^^^^^^^^^^^^^
+    31 │ <script type='application/javascript'>import "./classic.js";</script>
+    32 │ <script type=application/ecmascript>import "./classic.js";</script>
+  
+  i Browsers cannot use static imports in classic scripts. Astro leaves this script uncompiled.
+  
+  i Move the import and the code that uses it to a <script> with no attributes so Astro can bundle it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.astro:31:39 lint/nursery/noAstroUnbundledImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This static import is in an unbundled, non-module script.
+  
+    29 │ <script lang="ts">import type { Options } from "./types.js";</script>
+    30 │ <script type="text/javascript">import "./classic.js";</script>
+  > 31 │ <script type='application/javascript'>import "./classic.js";</script>
+       │                                       ^^^^^^^^^^^^^^^^^^^^^^
+    32 │ <script type=application/ecmascript>import "./classic.js";</script>
+    33 │ <script type="TEXT/JAVASCRIPT" is:inline>import "./classic.js";</script>
+  
+  i This attribute prevents Astro from bundling the script.
+  
+    29 │ <script lang="ts">import type { Options } from "./types.js";</script>
+    30 │ <script type="text/javascript">import "./classic.js";</script>
+  > 31 │ <script type='application/javascript'>import "./classic.js";</script>
+       │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    32 │ <script type=application/ecmascript>import "./classic.js";</script>
+    33 │ <script type="TEXT/JAVASCRIPT" is:inline>import "./classic.js";</script>
+  
+  i Browsers cannot use static imports in classic scripts. Astro leaves this script uncompiled.
+  
+  i Move the import and the code that uses it to a <script> with no attributes so Astro can bundle it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.astro:32:37 lint/nursery/noAstroUnbundledImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This static import is in an unbundled, non-module script.
+  
+    30 │ <script type="text/javascript">import "./classic.js";</script>
+    31 │ <script type='application/javascript'>import "./classic.js";</script>
+  > 32 │ <script type=application/ecmascript>import "./classic.js";</script>
+       │                                     ^^^^^^^^^^^^^^^^^^^^^^
+    33 │ <script type="TEXT/JAVASCRIPT" is:inline>import "./classic.js";</script>
+    34 │ <script is:inline={false}>import "./inline.js";</script>
+  
+  i This attribute prevents Astro from bundling the script.
+  
+    30 │ <script type="text/javascript">import "./classic.js";</script>
+    31 │ <script type='application/javascript'>import "./classic.js";</script>
+  > 32 │ <script type=application/ecmascript>import "./classic.js";</script>
+       │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    33 │ <script type="TEXT/JAVASCRIPT" is:inline>import "./classic.js";</script>
+    34 │ <script is:inline={false}>import "./inline.js";</script>
+  
+  i Browsers cannot use static imports in classic scripts. Astro leaves this script uncompiled.
+  
+  i Move the import and the code that uses it to a <script> with no attributes so Astro can bundle it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.astro:33:42 lint/nursery/noAstroUnbundledImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This static import is in an unbundled, non-module script.
+  
+    31 │ <script type='application/javascript'>import "./classic.js";</script>
+    32 │ <script type=application/ecmascript>import "./classic.js";</script>
+  > 33 │ <script type="TEXT/JAVASCRIPT" is:inline>import "./classic.js";</script>
+       │                                          ^^^^^^^^^^^^^^^^^^^^^^
+    34 │ <script is:inline={false}>import "./inline.js";</script>
+    35 │ <script>import "./bundled.js";</script>
+  
+  i This attribute prevents Astro from bundling the script.
+  
+    31 │ <script type='application/javascript'>import "./classic.js";</script>
+    32 │ <script type=application/ecmascript>import "./classic.js";</script>
+  > 33 │ <script type="TEXT/JAVASCRIPT" is:inline>import "./classic.js";</script>
+       │         ^^^^^^^^^^^^^^^^^^^^^^
+    34 │ <script is:inline={false}>import "./inline.js";</script>
+    35 │ <script>import "./bundled.js";</script>
+  
+  i Browsers cannot use static imports in classic scripts. Astro leaves this script uncompiled.
+  
+  i Move the import and the code that uses it to a <script> with no attributes so Astro can bundle it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.astro:34:27 lint/nursery/noAstroUnbundledImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This static import is in an unbundled, non-module script.
+  
+    32 │ <script type=application/ecmascript>import "./classic.js";</script>
+    33 │ <script type="TEXT/JAVASCRIPT" is:inline>import "./classic.js";</script>
+  > 34 │ <script is:inline={false}>import "./inline.js";</script>
+       │                           ^^^^^^^^^^^^^^^^^^^^^
+    35 │ <script>import "./bundled.js";</script>
+    36 │ <script type="module" is:inline>import "./module.js";</script>
+  
+  i This attribute prevents Astro from bundling the script.
+  
+    32 │ <script type=application/ecmascript>import "./classic.js";</script>
+    33 │ <script type="TEXT/JAVASCRIPT" is:inline>import "./classic.js";</script>
+  > 34 │ <script is:inline={false}>import "./inline.js";</script>
+       │         ^^^^^^^^^^^^^^^^^
+    35 │ <script>import "./bundled.js";</script>
+    36 │ <script type="module" is:inline>import "./module.js";</script>
+  
+  i Browsers cannot use static imports in classic scripts. Astro leaves this script uncompiled.
+  
+  i Move the import and the code that uses it to a <script> with no attributes so Astro can bundle it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

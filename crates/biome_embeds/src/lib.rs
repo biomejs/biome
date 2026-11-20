@@ -1,6 +1,8 @@
+pub mod astro;
 pub mod bindings;
 pub mod components;
 mod data;
+pub mod imports;
 pub mod references;
 #[cfg(test)]
 pub(crate) mod testing;
