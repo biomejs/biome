@@ -4057,6 +4057,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoConvexQueryFilterConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoConvexQueryFilterOptions" }
+			]
+		},
+		"NoConvexQueryFilterOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoDangerouslySetInnerHtmlConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -9585,6 +9595,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noConvexQueryFilter": {
+					"description": "Disallow calling .filter() on a Convex database query.\nSee https://biomejs.dev/linter/rules/no-convex-query-filter",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoConvexQueryFilterConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noDanglingUnderscore": {
 					"description": "Disallow names that start or end with an underscore.\nSee https://biomejs.dev/linter/rules/no-dangling-underscore",
 					"anyOf": [
@@ -13433,6 +13450,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoControlCharactersInRegexOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoConvexQueryFilterOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoConvexQueryFilterOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

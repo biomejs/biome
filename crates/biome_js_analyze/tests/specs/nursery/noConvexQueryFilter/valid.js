@@ -1,0 +1,55 @@
+/* should not generate diagnostics */
+
+async function withIndex(ctx, args) {
+	await ctx.db
+		.query("messages")
+		.withIndex("by_author", (q) => q.eq("author", args.author))
+		.collect();
+}
+
+async function filterAfterCollect(ctx) {
+	const messages = await ctx.db.query("messages").collect();
+	messages.filter((message) => !message.read);
+	(await ctx.db.query("messages").collect()).filter((message) => !message.read);
+	(await ctx.db.query("messages").take(10)).filter((message) => !message.read);
+	(await ctx.db.query("messages").first()).filter((message) => !message.read);
+	(await ctx.db.query("messages").unique()).filter((message) => !message.read);
+}
+
+async function filterAfterPaginate(ctx, paginationOpts) {
+	const { page } = await ctx.db.query("messages").paginate(paginationOpts);
+	page.filter((message) => !message.read);
+}
+
+function arrays(items) {
+	items.filter(Boolean);
+	[1, 2, 3].filter((n) => n > 1);
+	items.query("messages").filter(Boolean);
+}
+
+async function notTheDatabase(client, ctx) {
+	client.query("messages").filter(Boolean);
+	ctx.database.query("messages").filter(Boolean);
+	ctx.db.get("messages").filter(Boolean);
+	db.other.query("messages").filter(Boolean);
+}
+
+async function letVariable(ctx) {
+	let messages = ctx.db.query("messages");
+	messages = await messages.collect();
+	messages.filter((message) => !message.read);
+}
+
+async function variableHoldingResults(ctx) {
+	const messages = await ctx.db.query("messages").collect();
+	const unread = messages.filter((message) => !message.read);
+	return unread;
+}
+
+function usedBeforeDeclaration() {
+	function run() {
+		return later.filter(Boolean);
+	}
+	const later = db.query("messages");
+	return run;
+}
