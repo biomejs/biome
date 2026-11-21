@@ -408,6 +408,50 @@ fn test_export_equals_namespace_without_type_inference() {
 }
 
 #[test]
+fn test_export_equals_namespace_with_const_members() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/node_modules/react/index.d.ts".into(),
+        r#"
+            export = React;
+            export as namespace React;
+            declare namespace React {
+                interface ExoticComponent<P = {}> {
+                    (props: P): null;
+                }
+                type ReactNode = string | number | null | undefined;
+                function useState(): void;
+                const StrictMode: ExoticComponent<{ children?: ReactNode | undefined }>;
+                const Fragment: ExoticComponent<{ children?: ReactNode | undefined }>;
+                const version: string;
+            }
+        "#,
+    );
+    let db = build_js_db(
+        &fs,
+        &[BiomePath::new("/node_modules/react/index.d.ts")],
+        false,
+    );
+    let module = db
+        .module_for_path(Utf8Path::new("/node_modules/react/index.d.ts"))
+        .unwrap();
+    for name in ["useState", "StrictMode", "Fragment", "version"] {
+        assert!(
+            matches!(
+                find_js_exported_symbol(&db, SymbolFromModuleInfo::new(&db, name, module)),
+                JsExportedSymbolLookup::Found(..)
+            ),
+            "`{name}` should be exported through `export =`"
+        );
+    }
+    // Type parameters of members aren't members of the namespace.
+    assert!(!matches!(
+        find_js_exported_symbol(&db, SymbolFromModuleInfo::new(&db, "P", module)),
+        JsExportedSymbolLookup::Found(..)
+    ));
+}
+
+#[test]
 fn test_namespace_import_preserves_members_above_export_step_limit() {
     let fs = MemoryFileSystem::default();
     let exports = (0..1025)
@@ -993,4 +1037,77 @@ fn test_infer_module_types_resolves_redis_commander_types() {
         .expect("RedisCommander binding type must be inferred");
     let commander_ty = inferred.resolve_type(&db, commander_ty);
     assert_ne!(commander_ty, InferredTypeData::Unknown);
+}
+
+/// Asserts which names `export =` exposes from the namespace in `source`.
+fn assert_export_equals_members(path: &str, source: &str, expected: &[(&str, bool)]) {
+    let fs = MemoryFileSystem::default();
+    fs.insert(path.into(), source);
+    let db = build_js_db(&fs, &[BiomePath::new(path)], false);
+    let module = db.module_for_path(Utf8Path::new(path)).unwrap();
+    for (name, exported) in expected {
+        let found = matches!(
+            find_js_exported_symbol(&db, SymbolFromModuleInfo::new(&db, *name, module)),
+            JsExportedSymbolLookup::Found(..)
+        );
+        assert_eq!(
+            found, *exported,
+            "`{name}` exported: expected {exported}, got {found}\n{source}"
+        );
+    }
+}
+
+#[test]
+fn test_export_equals_namespace_member_visibility() {
+    // Only members with `export` are exported from a non-ambient namespace.
+    assert_export_equals_members(
+        "/src/index.ts",
+        "namespace N { const hidden = 1; function hiddenFn() {} export const visible = 2; export function shown() {} } export = N;",
+        &[
+            ("hidden", false),
+            ("hiddenFn", false),
+            ("visible", true),
+            ("shown", true),
+        ],
+    );
+    // Members of an ambient namespace are exported implicitly.
+    assert_export_equals_members(
+        "/src/index.ts",
+        "declare namespace R { const S: number; function f(): void; } export = R;",
+        &[("S", true), ("f", true)],
+    );
+    // So are members of any namespace in a declaration file.
+    assert_export_equals_members(
+        "/node_modules/x/index.d.ts",
+        "namespace R { const S: number; } export = R;",
+        &[("S", true)],
+    );
+    // An `export {}` turns off implicit exports in an ambient namespace.
+    assert_export_equals_members(
+        "/src/index.ts",
+        "declare namespace R { const hidden: number; export const shown: number; export {}; } export = R;",
+        &[("hidden", false), ("shown", true)],
+    );
+}
+
+#[test]
+fn test_export_equals_namespace_member_declaration_forms() {
+    // Destructured constants.
+    assert_export_equals_members(
+        "/src/index.ts",
+        "namespace N { export const { value, nested: [item] } = { value: 1, nested: [2] }; } export = N;",
+        &[("value", true), ("item", true)],
+    );
+    // `export declare` members.
+    assert_export_equals_members(
+        "/src/index.ts",
+        "namespace N { export const visible = 1; export declare function load(): void; } export = N;",
+        &[("visible", true), ("load", true)],
+    );
+    // Only the first segment of a dotted namespace is a member.
+    assert_export_equals_members(
+        "/src/index.d.ts",
+        "declare namespace A { export namespace B.C { function f(): void; } } export = A;",
+        &[("B", true), ("C", false), ("f", false)],
+    );
 }
