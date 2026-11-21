@@ -66,6 +66,42 @@ fn honors_nested_gitignore_negation() {
 }
 
 #[test]
+fn honors_nested_gitignore_in_project_inside_scanner_ignored_ancestor() {
+    let mut fs =
+        TemporaryFs::new("honors_nested_gitignore_in_project_inside_scanner_ignored_ancestor");
+    let mut console = BufferConsole::default();
+    fs.create_file(
+        ".cache/project/biome.json",
+        r#"{
+            "vcs": {
+                "enabled": true,
+                "clientKind": "git",
+                "useIgnoreFile": true
+            }
+        }"#,
+    );
+    fs.create_file(".cache/project/.gitignore", "dist/\n");
+    fs.create_file(".cache/project/sub/.gitignore", "generated/\n");
+    let included = fs.create_file(".cache/project/sub/index.js", UNFORMATTED);
+    let ignored = fs.create_file(".cache/project/sub/generated/index.js", UNFORMATTED);
+    fs.append_to_working_directory(".cache/project");
+
+    let result = run_cli_with_dyn_fs(
+        Box::new(fs.create_os()),
+        &mut console,
+        Args::from(["format", "--write", fs.cli_path()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert_eq!(std::fs::read_to_string(included).unwrap(), "statement();\n");
+    assert_eq!(
+        std::fs::read_to_string(ignored).unwrap(),
+        UNFORMATTED,
+        "the nested .gitignore must apply even though an ancestor of the project is named .cache"
+    );
+}
+
+#[test]
 fn honors_root_gitignore_directory_negation() {
     let mut fs = TemporaryFs::new("honors_root_gitignore_directory_negation");
     let mut console = BufferConsole::default();

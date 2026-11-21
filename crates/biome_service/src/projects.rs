@@ -155,9 +155,11 @@ pub trait ProjectDb: biome_db::Db {
         };
 
         // Deprecated: Check `experimentalScannerIgnores` too.
+        // Only components inside the project count: a project may live under `.cache`.
         let root_settings = project_data.root_settings(self);
         let ignore_entries = &root_settings.as_ref().files.scanner_ignore_entries;
-        if path.components().any(|component| {
+        let project_relative = path.strip_prefix(project_data.path(self)).unwrap_or(path);
+        if project_relative.components().any(|component| {
             ignore_entries
                 .iter()
                 .any(|entry| entry == component.as_os_str().as_encoded_bytes())
