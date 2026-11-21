@@ -572,6 +572,7 @@ pub mod use_consistent_boolean_name;
 pub mod use_consistent_builtin_instantiation;
 pub mod use_consistent_curly_braces;
 pub mod use_consistent_enum_value_type;
+pub mod use_consistent_existence_index_check;
 pub mod use_consistent_font_weight_notation;
 pub mod use_consistent_function_style;
 pub mod use_consistent_graphql_descriptions;

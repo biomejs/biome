@@ -4094,6 +4094,11 @@ export interface Nursery {
 	 */
 	useConsistentBooleanName?: UseConsistentBooleanNameConfiguration;
 	/**
+	 * Enforce comparing with -1 when checking whether indexOf(), lastIndexOf(), findIndex(), or findLastIndex() found an element.
+	 * See https://biomejs.dev/linter/rules/use-consistent-existence-index-check
+	 */
+	useConsistentExistenceIndexCheck?: UseConsistentExistenceIndexCheckConfiguration;
+	/**
 	 * Enforce a consistent notation for font weights.
 	 * See https://biomejs.dev/linter/rules/use-consistent-font-weight-notation
 	 */
@@ -7556,6 +7561,9 @@ export type UseConsistentBlockLangConfiguration =
 export type UseConsistentBooleanNameConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseConsistentBooleanNameOptions;
+export type UseConsistentExistenceIndexCheckConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseConsistentExistenceIndexCheckOptions;
 export type UseConsistentFontWeightNotationConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseConsistentFontWeightNotationOptions;
@@ -11198,6 +11206,14 @@ export interface RuleWithUseConsistentBooleanNameOptions {
 	level: RulePlainConfiguration;
 	options?: UseConsistentBooleanNameOptions;
 }
+export interface RuleWithUseConsistentExistenceIndexCheckOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseConsistentExistenceIndexCheckOptions;
+}
 export interface RuleWithUseConsistentFontWeightNotationOptions {
 	/**
 	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
@@ -14488,6 +14504,7 @@ export interface UseConsistentBooleanNameOptions {
 	 */
 	prefixes?: Record<string, boolean>;
 }
+export type UseConsistentExistenceIndexCheckOptions = {};
 export interface UseConsistentFontWeightNotationOptions {
 	/**
 	 * Whether to allow the relative keywords `bolder` and `lighter` when `notation` is `"numeric"`.
@@ -16473,8 +16490,6 @@ export type Category =
 	| "lint/nursery/noDynamicRequire"
 	| "lint/nursery/noEagerArrayMethodsInLoops"
 	| "lint/nursery/noEmptyObjectKeys"
-	| "lint/nursery/noTestHooks"
-	| "lint/nursery/noYamlEmptySequenceEntries"
 	| "lint/nursery/noErasingOperation"
 	| "lint/nursery/noExcessiveNestedBlocks"
 	| "lint/nursery/noExcessiveNestedCallbacks"
@@ -16580,6 +16595,7 @@ export type Category =
 	| "lint/nursery/noTanstackQueryRestDestructuring"
 	| "lint/nursery/noTanstackQueryVoidQueryFn"
 	| "lint/nursery/noTestGlobals"
+	| "lint/nursery/noTestHooks"
 	| "lint/nursery/noThisOutsideOfClass"
 	| "lint/nursery/noTripleSlashReference"
 	| "lint/nursery/noUndeclaredClasses"
@@ -16622,10 +16638,10 @@ export type Category =
 	| "lint/nursery/noVueComputedPropertiesInData"
 	| "lint/nursery/noVueDefineModelDefault"
 	| "lint/nursery/noVueDeprecatedConfigKeyCodes"
-	| "lint/nursery/noVueDeprecatedFilter"
 	| "lint/nursery/noVueDeprecatedDeleteSet"
 	| "lint/nursery/noVueDeprecatedDestroyedLifecycle"
 	| "lint/nursery/noVueDeprecatedEventsApi"
+	| "lint/nursery/noVueDeprecatedFilter"
 	| "lint/nursery/noVueDeprecatedFunctionalTemplate"
 	| "lint/nursery/noVueDeprecatedHtmlElementIs"
 	| "lint/nursery/noVueDeprecatedInlineTemplate"
@@ -16683,6 +16699,7 @@ export type Category =
 	| "lint/nursery/noYamlBooleanKeys"
 	| "lint/nursery/noYamlEmptyMapKeys"
 	| "lint/nursery/noYamlEmptyMapValues"
+	| "lint/nursery/noYamlEmptySequenceEntries"
 	| "lint/nursery/noZeroFractions"
 	| "lint/nursery/noZeroLengthUnit"
 	| "lint/nursery/useAccessorPairs"
@@ -16698,6 +16715,7 @@ export type Category =
 	| "lint/nursery/useCatchErrorName"
 	| "lint/nursery/useConsistentBlockLang"
 	| "lint/nursery/useConsistentBooleanName"
+	| "lint/nursery/useConsistentExistenceIndexCheck"
 	| "lint/nursery/useConsistentFontWeightNotation"
 	| "lint/nursery/useConsistentFunctionStyle"
 	| "lint/nursery/useConsistentHeadingLevel"
