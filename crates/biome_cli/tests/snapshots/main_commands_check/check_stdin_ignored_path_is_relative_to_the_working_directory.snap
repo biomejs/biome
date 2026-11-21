@@ -1,0 +1,25 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome check --stdin-file-path=src/mock.cc --files-ignore-unknown=true
+```
+
+# Input messages
+
+```block
+int main() {}
+```
+
+# Emitted Messages
+
+```block
+int main() {}
+```
+
+```block
+The content was not fixed because the path `src/mock.cc` is ignored.
+```

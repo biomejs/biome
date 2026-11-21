@@ -121,6 +121,7 @@ impl ProcessFile for FormatProcessFile {
             content,
             project_key,
             biome_path,
+            display_path,
             console,
             cli_options,
             execution,
@@ -145,13 +146,13 @@ impl ProcessFile for FormatProcessFile {
             console.append_raw(content);
             // Write error last because files may generally be long
             console.error(markup! {
-                <Warn>"The content was not formatted because the path `"{biome_path.as_str()}"` is ignored."</Warn>
+                <Warn>"The content was not formatted because the path `"{display_path.as_str()}"` is ignored."</Warn>
             });
             return Ok(());
         }
 
         if file_features.is_protected() {
-            let protected_diagnostic = WorkspaceError::protected_file(biome_path.to_string());
+            let protected_diagnostic = WorkspaceError::protected_file(display_path.clone());
             if protected_diagnostic.tags().is_verbose() {
                 if cli_options.verbose {
                     console.error(markup! {{PrintDiagnostic::verbose(&protected_diagnostic)}})
@@ -182,7 +183,13 @@ impl ProcessFile for FormatProcessFile {
                 skip_parse_errors: execution.should_skip_parse_errors(),
             })?;
             let source = result.output.as_deref().unwrap_or(content);
-            print_stdin_diagnostics(console, cli_options, biome_path, source, result.diagnostics);
+            print_stdin_diagnostics(
+                console,
+                cli_options,
+                &display_path,
+                source,
+                result.diagnostics,
+            );
             if result.format_with_errors_disabled {
                 return Err(WorkspaceError::format_with_errors_disabled().into());
             }
