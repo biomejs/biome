@@ -3,18 +3,49 @@ const { platform, arch, env, version, release } = process;
 const { execSync } = require("child_process");
 
 function isMusl() {
-	let stderr;
+	let nodeReport;
 	try {
-		stderr = execSync("ldd --version", {
-			stdio: ['pipe', 'pipe', 'pipe']
-		});
-	} catch (err) {
-		stderr = err.stderr;
+		const report = process.report;
+		const excludeNetwork = report?.excludeNetwork;
+		try {
+			if (typeof excludeNetwork === "boolean") {
+				report.excludeNetwork = true;
+			}
+			nodeReport = report?.getReport?.();
+		} finally {
+			if (typeof excludeNetwork === "boolean") {
+				report.excludeNetwork = excludeNetwork;
+			}
+		}
+	} catch {
+		nodeReport = undefined;
 	}
-	if (stderr.indexOf("musl") > -1) {
+
+	if (nodeReport?.header?.glibcVersionRuntime) {
+		return false;
+	}
+
+	if (
+		Array.isArray(nodeReport?.sharedObjects) &&
+		nodeReport.sharedObjects.some(
+			(path) => path.includes("libc.musl-") || path.includes("ld-musl-"),
+		)
+	) {
 		return true;
 	}
-	return false;
+
+	let lddOutput;
+	try {
+		lddOutput = execSync("ldd --version", {
+			stdio: ["pipe", "pipe", "pipe"],
+		});
+	} catch (err) {
+		return (
+			err.stdout?.includes("musl") || err.stderr?.includes("musl") || false
+		);
+	}
+
+	return lddOutput?.includes("musl") ?? false;
 }
 
 const PLATFORMS = {
