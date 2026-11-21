@@ -1,0 +1,623 @@
+---
+source: crates/biome_toml_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+```toml
+int1 = +99
+int2 = 42
+int3 = 0
+int4 = -17
+int5 = 1_000
+int6 = 5_349_221
+int7 = -0
+max = 9223372036854775807
+min = -9223372036854775808
+hex1 = 0xDEADBEEF
+hex2 = 0xdead_beef
+oct1 = 0o01234567
+bin1 = 0b11010110
+flt1 = +1.0
+flt2 = 3.1415
+flt3 = -0.01
+flt4 = 5e+22
+flt5 = 1e06
+flt6 = -2E-2
+flt7 = 6.626e-34
+flt8 = 224_617.445_991_228
+sf1 = inf
+sf2 = +inf
+sf3 = -inf
+sf4 = nan
+sf5 = +nan
+sf6 = -nan
+
+```
+
+## AST
+
+```
+TomlRoot {
+    bom_token: missing (optional),
+    items: TomlRootItemList [
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@0..5 "int1" [] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@5..7 "=" [] [Whitespace(" ")],
+            value: TomlInteger {
+                value_token: TOML_INTEGER_LITERAL@7..10 "+99" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@10..16 "int2" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@16..18 "=" [] [Whitespace(" ")],
+            value: TomlInteger {
+                value_token: TOML_INTEGER_LITERAL@18..20 "42" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@20..26 "int3" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@26..28 "=" [] [Whitespace(" ")],
+            value: TomlInteger {
+                value_token: TOML_INTEGER_LITERAL@28..29 "0" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@29..35 "int4" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@35..37 "=" [] [Whitespace(" ")],
+            value: TomlInteger {
+                value_token: TOML_INTEGER_LITERAL@37..40 "-17" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@40..46 "int5" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@46..48 "=" [] [Whitespace(" ")],
+            value: TomlInteger {
+                value_token: TOML_INTEGER_LITERAL@48..53 "1_000" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@53..59 "int6" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@59..61 "=" [] [Whitespace(" ")],
+            value: TomlInteger {
+                value_token: TOML_INTEGER_LITERAL@61..70 "5_349_221" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@70..76 "int7" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@76..78 "=" [] [Whitespace(" ")],
+            value: TomlInteger {
+                value_token: TOML_INTEGER_LITERAL@78..80 "-0" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@80..85 "max" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@85..87 "=" [] [Whitespace(" ")],
+            value: TomlInteger {
+                value_token: TOML_INTEGER_LITERAL@87..106 "9223372036854775807" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@106..111 "min" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@111..113 "=" [] [Whitespace(" ")],
+            value: TomlInteger {
+                value_token: TOML_INTEGER_LITERAL@113..133 "-9223372036854775808" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@133..139 "hex1" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@139..141 "=" [] [Whitespace(" ")],
+            value: TomlInteger {
+                value_token: TOML_INTEGER_LITERAL@141..151 "0xDEADBEEF" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@151..157 "hex2" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@157..159 "=" [] [Whitespace(" ")],
+            value: TomlInteger {
+                value_token: TOML_INTEGER_LITERAL@159..170 "0xdead_beef" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@170..176 "oct1" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@176..178 "=" [] [Whitespace(" ")],
+            value: TomlInteger {
+                value_token: TOML_INTEGER_LITERAL@178..188 "0o01234567" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@188..194 "bin1" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@194..196 "=" [] [Whitespace(" ")],
+            value: TomlInteger {
+                value_token: TOML_INTEGER_LITERAL@196..206 "0b11010110" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@206..212 "flt1" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@212..214 "=" [] [Whitespace(" ")],
+            value: TomlFloat {
+                value_token: TOML_FLOAT_LITERAL@214..218 "+1.0" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@218..224 "flt2" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@224..226 "=" [] [Whitespace(" ")],
+            value: TomlFloat {
+                value_token: TOML_FLOAT_LITERAL@226..232 "3.1415" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@232..238 "flt3" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@238..240 "=" [] [Whitespace(" ")],
+            value: TomlFloat {
+                value_token: TOML_FLOAT_LITERAL@240..245 "-0.01" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@245..251 "flt4" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@251..253 "=" [] [Whitespace(" ")],
+            value: TomlFloat {
+                value_token: TOML_FLOAT_LITERAL@253..258 "5e+22" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@258..264 "flt5" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@264..266 "=" [] [Whitespace(" ")],
+            value: TomlFloat {
+                value_token: TOML_FLOAT_LITERAL@266..270 "1e06" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@270..276 "flt6" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@276..278 "=" [] [Whitespace(" ")],
+            value: TomlFloat {
+                value_token: TOML_FLOAT_LITERAL@278..283 "-2E-2" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@283..289 "flt7" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@289..291 "=" [] [Whitespace(" ")],
+            value: TomlFloat {
+                value_token: TOML_FLOAT_LITERAL@291..300 "6.626e-34" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@300..306 "flt8" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@306..308 "=" [] [Whitespace(" ")],
+            value: TomlFloat {
+                value_token: TOML_FLOAT_LITERAL@308..327 "224_617.445_991_228" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@327..332 "sf1" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@332..334 "=" [] [Whitespace(" ")],
+            value: TomlFloat {
+                value_token: TOML_FLOAT_LITERAL@334..337 "inf" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@337..342 "sf2" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@342..344 "=" [] [Whitespace(" ")],
+            value: TomlFloat {
+                value_token: TOML_FLOAT_LITERAL@344..348 "+inf" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@348..353 "sf3" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@353..355 "=" [] [Whitespace(" ")],
+            value: TomlFloat {
+                value_token: TOML_FLOAT_LITERAL@355..359 "-inf" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@359..364 "sf4" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@364..366 "=" [] [Whitespace(" ")],
+            value: TomlFloat {
+                value_token: TOML_FLOAT_LITERAL@366..369 "nan" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@369..374 "sf5" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@374..376 "=" [] [Whitespace(" ")],
+            value: TomlFloat {
+                value_token: TOML_FLOAT_LITERAL@376..380 "+nan" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@380..385 "sf6" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@385..387 "=" [] [Whitespace(" ")],
+            value: TomlFloat {
+                value_token: TOML_FLOAT_LITERAL@387..391 "-nan" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@391..392 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: TOML_ROOT@0..392
+  0: (empty)
+  1: TOML_ROOT_ITEM_LIST@0..391
+    0: TOML_KEY_VALUE@0..10
+      0: TOML_KEY@0..5
+        0: TOML_KEY_PART_LIST@0..5
+          0: TOML_BARE_KEY@0..5
+            0: TOML_BARE_KEY_LITERAL@0..5 "int1" [] [Whitespace(" ")]
+      1: EQ@5..7 "=" [] [Whitespace(" ")]
+      2: TOML_INTEGER@7..10
+        0: TOML_INTEGER_LITERAL@7..10 "+99" [] []
+    1: TOML_KEY_VALUE@10..20
+      0: TOML_KEY@10..16
+        0: TOML_KEY_PART_LIST@10..16
+          0: TOML_BARE_KEY@10..16
+            0: TOML_BARE_KEY_LITERAL@10..16 "int2" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@16..18 "=" [] [Whitespace(" ")]
+      2: TOML_INTEGER@18..20
+        0: TOML_INTEGER_LITERAL@18..20 "42" [] []
+    2: TOML_KEY_VALUE@20..29
+      0: TOML_KEY@20..26
+        0: TOML_KEY_PART_LIST@20..26
+          0: TOML_BARE_KEY@20..26
+            0: TOML_BARE_KEY_LITERAL@20..26 "int3" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@26..28 "=" [] [Whitespace(" ")]
+      2: TOML_INTEGER@28..29
+        0: TOML_INTEGER_LITERAL@28..29 "0" [] []
+    3: TOML_KEY_VALUE@29..40
+      0: TOML_KEY@29..35
+        0: TOML_KEY_PART_LIST@29..35
+          0: TOML_BARE_KEY@29..35
+            0: TOML_BARE_KEY_LITERAL@29..35 "int4" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@35..37 "=" [] [Whitespace(" ")]
+      2: TOML_INTEGER@37..40
+        0: TOML_INTEGER_LITERAL@37..40 "-17" [] []
+    4: TOML_KEY_VALUE@40..53
+      0: TOML_KEY@40..46
+        0: TOML_KEY_PART_LIST@40..46
+          0: TOML_BARE_KEY@40..46
+            0: TOML_BARE_KEY_LITERAL@40..46 "int5" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@46..48 "=" [] [Whitespace(" ")]
+      2: TOML_INTEGER@48..53
+        0: TOML_INTEGER_LITERAL@48..53 "1_000" [] []
+    5: TOML_KEY_VALUE@53..70
+      0: TOML_KEY@53..59
+        0: TOML_KEY_PART_LIST@53..59
+          0: TOML_BARE_KEY@53..59
+            0: TOML_BARE_KEY_LITERAL@53..59 "int6" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@59..61 "=" [] [Whitespace(" ")]
+      2: TOML_INTEGER@61..70
+        0: TOML_INTEGER_LITERAL@61..70 "5_349_221" [] []
+    6: TOML_KEY_VALUE@70..80
+      0: TOML_KEY@70..76
+        0: TOML_KEY_PART_LIST@70..76
+          0: TOML_BARE_KEY@70..76
+            0: TOML_BARE_KEY_LITERAL@70..76 "int7" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@76..78 "=" [] [Whitespace(" ")]
+      2: TOML_INTEGER@78..80
+        0: TOML_INTEGER_LITERAL@78..80 "-0" [] []
+    7: TOML_KEY_VALUE@80..106
+      0: TOML_KEY@80..85
+        0: TOML_KEY_PART_LIST@80..85
+          0: TOML_BARE_KEY@80..85
+            0: TOML_BARE_KEY_LITERAL@80..85 "max" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@85..87 "=" [] [Whitespace(" ")]
+      2: TOML_INTEGER@87..106
+        0: TOML_INTEGER_LITERAL@87..106 "9223372036854775807" [] []
+    8: TOML_KEY_VALUE@106..133
+      0: TOML_KEY@106..111
+        0: TOML_KEY_PART_LIST@106..111
+          0: TOML_BARE_KEY@106..111
+            0: TOML_BARE_KEY_LITERAL@106..111 "min" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@111..113 "=" [] [Whitespace(" ")]
+      2: TOML_INTEGER@113..133
+        0: TOML_INTEGER_LITERAL@113..133 "-9223372036854775808" [] []
+    9: TOML_KEY_VALUE@133..151
+      0: TOML_KEY@133..139
+        0: TOML_KEY_PART_LIST@133..139
+          0: TOML_BARE_KEY@133..139
+            0: TOML_BARE_KEY_LITERAL@133..139 "hex1" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@139..141 "=" [] [Whitespace(" ")]
+      2: TOML_INTEGER@141..151
+        0: TOML_INTEGER_LITERAL@141..151 "0xDEADBEEF" [] []
+    10: TOML_KEY_VALUE@151..170
+      0: TOML_KEY@151..157
+        0: TOML_KEY_PART_LIST@151..157
+          0: TOML_BARE_KEY@151..157
+            0: TOML_BARE_KEY_LITERAL@151..157 "hex2" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@157..159 "=" [] [Whitespace(" ")]
+      2: TOML_INTEGER@159..170
+        0: TOML_INTEGER_LITERAL@159..170 "0xdead_beef" [] []
+    11: TOML_KEY_VALUE@170..188
+      0: TOML_KEY@170..176
+        0: TOML_KEY_PART_LIST@170..176
+          0: TOML_BARE_KEY@170..176
+            0: TOML_BARE_KEY_LITERAL@170..176 "oct1" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@176..178 "=" [] [Whitespace(" ")]
+      2: TOML_INTEGER@178..188
+        0: TOML_INTEGER_LITERAL@178..188 "0o01234567" [] []
+    12: TOML_KEY_VALUE@188..206
+      0: TOML_KEY@188..194
+        0: TOML_KEY_PART_LIST@188..194
+          0: TOML_BARE_KEY@188..194
+            0: TOML_BARE_KEY_LITERAL@188..194 "bin1" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@194..196 "=" [] [Whitespace(" ")]
+      2: TOML_INTEGER@196..206
+        0: TOML_INTEGER_LITERAL@196..206 "0b11010110" [] []
+    13: TOML_KEY_VALUE@206..218
+      0: TOML_KEY@206..212
+        0: TOML_KEY_PART_LIST@206..212
+          0: TOML_BARE_KEY@206..212
+            0: TOML_BARE_KEY_LITERAL@206..212 "flt1" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@212..214 "=" [] [Whitespace(" ")]
+      2: TOML_FLOAT@214..218
+        0: TOML_FLOAT_LITERAL@214..218 "+1.0" [] []
+    14: TOML_KEY_VALUE@218..232
+      0: TOML_KEY@218..224
+        0: TOML_KEY_PART_LIST@218..224
+          0: TOML_BARE_KEY@218..224
+            0: TOML_BARE_KEY_LITERAL@218..224 "flt2" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@224..226 "=" [] [Whitespace(" ")]
+      2: TOML_FLOAT@226..232
+        0: TOML_FLOAT_LITERAL@226..232 "3.1415" [] []
+    15: TOML_KEY_VALUE@232..245
+      0: TOML_KEY@232..238
+        0: TOML_KEY_PART_LIST@232..238
+          0: TOML_BARE_KEY@232..238
+            0: TOML_BARE_KEY_LITERAL@232..238 "flt3" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@238..240 "=" [] [Whitespace(" ")]
+      2: TOML_FLOAT@240..245
+        0: TOML_FLOAT_LITERAL@240..245 "-0.01" [] []
+    16: TOML_KEY_VALUE@245..258
+      0: TOML_KEY@245..251
+        0: TOML_KEY_PART_LIST@245..251
+          0: TOML_BARE_KEY@245..251
+            0: TOML_BARE_KEY_LITERAL@245..251 "flt4" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@251..253 "=" [] [Whitespace(" ")]
+      2: TOML_FLOAT@253..258
+        0: TOML_FLOAT_LITERAL@253..258 "5e+22" [] []
+    17: TOML_KEY_VALUE@258..270
+      0: TOML_KEY@258..264
+        0: TOML_KEY_PART_LIST@258..264
+          0: TOML_BARE_KEY@258..264
+            0: TOML_BARE_KEY_LITERAL@258..264 "flt5" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@264..266 "=" [] [Whitespace(" ")]
+      2: TOML_FLOAT@266..270
+        0: TOML_FLOAT_LITERAL@266..270 "1e06" [] []
+    18: TOML_KEY_VALUE@270..283
+      0: TOML_KEY@270..276
+        0: TOML_KEY_PART_LIST@270..276
+          0: TOML_BARE_KEY@270..276
+            0: TOML_BARE_KEY_LITERAL@270..276 "flt6" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@276..278 "=" [] [Whitespace(" ")]
+      2: TOML_FLOAT@278..283
+        0: TOML_FLOAT_LITERAL@278..283 "-2E-2" [] []
+    19: TOML_KEY_VALUE@283..300
+      0: TOML_KEY@283..289
+        0: TOML_KEY_PART_LIST@283..289
+          0: TOML_BARE_KEY@283..289
+            0: TOML_BARE_KEY_LITERAL@283..289 "flt7" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@289..291 "=" [] [Whitespace(" ")]
+      2: TOML_FLOAT@291..300
+        0: TOML_FLOAT_LITERAL@291..300 "6.626e-34" [] []
+    20: TOML_KEY_VALUE@300..327
+      0: TOML_KEY@300..306
+        0: TOML_KEY_PART_LIST@300..306
+          0: TOML_BARE_KEY@300..306
+            0: TOML_BARE_KEY_LITERAL@300..306 "flt8" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@306..308 "=" [] [Whitespace(" ")]
+      2: TOML_FLOAT@308..327
+        0: TOML_FLOAT_LITERAL@308..327 "224_617.445_991_228" [] []
+    21: TOML_KEY_VALUE@327..337
+      0: TOML_KEY@327..332
+        0: TOML_KEY_PART_LIST@327..332
+          0: TOML_BARE_KEY@327..332
+            0: TOML_BARE_KEY_LITERAL@327..332 "sf1" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@332..334 "=" [] [Whitespace(" ")]
+      2: TOML_FLOAT@334..337
+        0: TOML_FLOAT_LITERAL@334..337 "inf" [] []
+    22: TOML_KEY_VALUE@337..348
+      0: TOML_KEY@337..342
+        0: TOML_KEY_PART_LIST@337..342
+          0: TOML_BARE_KEY@337..342
+            0: TOML_BARE_KEY_LITERAL@337..342 "sf2" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@342..344 "=" [] [Whitespace(" ")]
+      2: TOML_FLOAT@344..348
+        0: TOML_FLOAT_LITERAL@344..348 "+inf" [] []
+    23: TOML_KEY_VALUE@348..359
+      0: TOML_KEY@348..353
+        0: TOML_KEY_PART_LIST@348..353
+          0: TOML_BARE_KEY@348..353
+            0: TOML_BARE_KEY_LITERAL@348..353 "sf3" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@353..355 "=" [] [Whitespace(" ")]
+      2: TOML_FLOAT@355..359
+        0: TOML_FLOAT_LITERAL@355..359 "-inf" [] []
+    24: TOML_KEY_VALUE@359..369
+      0: TOML_KEY@359..364
+        0: TOML_KEY_PART_LIST@359..364
+          0: TOML_BARE_KEY@359..364
+            0: TOML_BARE_KEY_LITERAL@359..364 "sf4" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@364..366 "=" [] [Whitespace(" ")]
+      2: TOML_FLOAT@366..369
+        0: TOML_FLOAT_LITERAL@366..369 "nan" [] []
+    25: TOML_KEY_VALUE@369..380
+      0: TOML_KEY@369..374
+        0: TOML_KEY_PART_LIST@369..374
+          0: TOML_BARE_KEY@369..374
+            0: TOML_BARE_KEY_LITERAL@369..374 "sf5" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@374..376 "=" [] [Whitespace(" ")]
+      2: TOML_FLOAT@376..380
+        0: TOML_FLOAT_LITERAL@376..380 "+nan" [] []
+    26: TOML_KEY_VALUE@380..391
+      0: TOML_KEY@380..385
+        0: TOML_KEY_PART_LIST@380..385
+          0: TOML_BARE_KEY@380..385
+            0: TOML_BARE_KEY_LITERAL@380..385 "sf6" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@385..387 "=" [] [Whitespace(" ")]
+      2: TOML_FLOAT@387..391
+        0: TOML_FLOAT_LITERAL@387..391 "-nan" [] []
+  2: EOF@391..392 "" [Newline("\n")] []
+
+```

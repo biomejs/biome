@@ -1,0 +1,161 @@
+---
+source: crates/biome_toml_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+```toml
+utc = 2016-12-31T23:59:60Z
+fraction = 2015-06-30T23:59:60.5Z
+offset_same_day = 2016-12-31T18:59:60-05:00
+offset_next_day = 2017-01-01T08:59:60+09:00
+local_date_time = 2000-01-01T12:30:60
+local_time = 12:30:60
+
+```
+
+## AST
+
+```
+TomlRoot {
+    bom_token: missing (optional),
+    items: TomlRootItemList [
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@0..4 "utc" [] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@4..6 "=" [] [Whitespace(" ")],
+            value: TomlDateTime {
+                value_token: TOML_OFFSET_DATE_TIME_LITERAL@6..26 "2016-12-31T23:59:60Z" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@26..36 "fraction" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@36..38 "=" [] [Whitespace(" ")],
+            value: TomlDateTime {
+                value_token: TOML_OFFSET_DATE_TIME_LITERAL@38..60 "2015-06-30T23:59:60.5Z" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@60..77 "offset_same_day" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@77..79 "=" [] [Whitespace(" ")],
+            value: TomlDateTime {
+                value_token: TOML_OFFSET_DATE_TIME_LITERAL@79..104 "2016-12-31T18:59:60-05:00" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@104..121 "offset_next_day" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@121..123 "=" [] [Whitespace(" ")],
+            value: TomlDateTime {
+                value_token: TOML_OFFSET_DATE_TIME_LITERAL@123..148 "2017-01-01T08:59:60+09:00" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@148..165 "local_date_time" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@165..167 "=" [] [Whitespace(" ")],
+            value: TomlDateTime {
+                value_token: TOML_LOCAL_DATE_TIME_LITERAL@167..186 "2000-01-01T12:30:60" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@186..198 "local_time" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@198..200 "=" [] [Whitespace(" ")],
+            value: TomlDateTime {
+                value_token: TOML_LOCAL_TIME_LITERAL@200..208 "12:30:60" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@208..209 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: TOML_ROOT@0..209
+  0: (empty)
+  1: TOML_ROOT_ITEM_LIST@0..208
+    0: TOML_KEY_VALUE@0..26
+      0: TOML_KEY@0..4
+        0: TOML_KEY_PART_LIST@0..4
+          0: TOML_BARE_KEY@0..4
+            0: TOML_BARE_KEY_LITERAL@0..4 "utc" [] [Whitespace(" ")]
+      1: EQ@4..6 "=" [] [Whitespace(" ")]
+      2: TOML_DATE_TIME@6..26
+        0: TOML_OFFSET_DATE_TIME_LITERAL@6..26 "2016-12-31T23:59:60Z" [] []
+    1: TOML_KEY_VALUE@26..60
+      0: TOML_KEY@26..36
+        0: TOML_KEY_PART_LIST@26..36
+          0: TOML_BARE_KEY@26..36
+            0: TOML_BARE_KEY_LITERAL@26..36 "fraction" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@36..38 "=" [] [Whitespace(" ")]
+      2: TOML_DATE_TIME@38..60
+        0: TOML_OFFSET_DATE_TIME_LITERAL@38..60 "2015-06-30T23:59:60.5Z" [] []
+    2: TOML_KEY_VALUE@60..104
+      0: TOML_KEY@60..77
+        0: TOML_KEY_PART_LIST@60..77
+          0: TOML_BARE_KEY@60..77
+            0: TOML_BARE_KEY_LITERAL@60..77 "offset_same_day" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@77..79 "=" [] [Whitespace(" ")]
+      2: TOML_DATE_TIME@79..104
+        0: TOML_OFFSET_DATE_TIME_LITERAL@79..104 "2016-12-31T18:59:60-05:00" [] []
+    3: TOML_KEY_VALUE@104..148
+      0: TOML_KEY@104..121
+        0: TOML_KEY_PART_LIST@104..121
+          0: TOML_BARE_KEY@104..121
+            0: TOML_BARE_KEY_LITERAL@104..121 "offset_next_day" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@121..123 "=" [] [Whitespace(" ")]
+      2: TOML_DATE_TIME@123..148
+        0: TOML_OFFSET_DATE_TIME_LITERAL@123..148 "2017-01-01T08:59:60+09:00" [] []
+    4: TOML_KEY_VALUE@148..186
+      0: TOML_KEY@148..165
+        0: TOML_KEY_PART_LIST@148..165
+          0: TOML_BARE_KEY@148..165
+            0: TOML_BARE_KEY_LITERAL@148..165 "local_date_time" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@165..167 "=" [] [Whitespace(" ")]
+      2: TOML_DATE_TIME@167..186
+        0: TOML_LOCAL_DATE_TIME_LITERAL@167..186 "2000-01-01T12:30:60" [] []
+    5: TOML_KEY_VALUE@186..208
+      0: TOML_KEY@186..198
+        0: TOML_KEY_PART_LIST@186..198
+          0: TOML_BARE_KEY@186..198
+            0: TOML_BARE_KEY_LITERAL@186..198 "local_time" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@198..200 "=" [] [Whitespace(" ")]
+      2: TOML_DATE_TIME@200..208
+        0: TOML_LOCAL_TIME_LITERAL@200..208 "12:30:60" [] []
+  2: EOF@208..209 "" [Newline("\n")] []
+
+```

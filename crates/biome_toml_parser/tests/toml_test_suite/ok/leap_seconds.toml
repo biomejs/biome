@@ -1,0 +1,6 @@
+utc = 2016-12-31T23:59:60Z
+fraction = 2015-06-30T23:59:60.5Z
+offset_same_day = 2016-12-31T18:59:60-05:00
+offset_next_day = 2017-01-01T08:59:60+09:00
+local_date_time = 2000-01-01T12:30:60
+local_time = 12:30:60

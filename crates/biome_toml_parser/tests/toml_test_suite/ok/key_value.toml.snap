@@ -1,0 +1,365 @@
+---
+source: crates/biome_toml_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+```toml
+key = "value"
+bare_key = 1
+bare-key = 2
+1234 = 3
+"quoted key" = 4
+'literal key' = 5
+"" = 6
+physical.color = "orange"
+site."google.com" = true
+fruit . flavor = "banana"
+3.14159 = "pi"
+true = false
+inf = nan
+2021-01-01 = "date-like key"
+
+```
+
+## AST
+
+```
+TomlRoot {
+    bom_token: missing (optional),
+    items: TomlRootItemList [
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@0..4 "key" [] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@4..6 "=" [] [Whitespace(" ")],
+            value: TomlString {
+                value_token: TOML_BASIC_STRING_LITERAL@6..13 "\"value\"" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@13..23 "bare_key" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@23..25 "=" [] [Whitespace(" ")],
+            value: TomlInteger {
+                value_token: TOML_INTEGER_LITERAL@25..26 "1" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@26..36 "bare-key" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@36..38 "=" [] [Whitespace(" ")],
+            value: TomlInteger {
+                value_token: TOML_INTEGER_LITERAL@38..39 "2" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@39..45 "1234" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@45..47 "=" [] [Whitespace(" ")],
+            value: TomlInteger {
+                value_token: TOML_INTEGER_LITERAL@47..48 "3" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlQuotedKey {
+                        value_token: TOML_BASIC_STRING_LITERAL@48..62 "\"quoted key\"" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@62..64 "=" [] [Whitespace(" ")],
+            value: TomlInteger {
+                value_token: TOML_INTEGER_LITERAL@64..65 "4" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlQuotedKey {
+                        value_token: TOML_LITERAL_STRING_LITERAL@65..80 "'literal key'" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@80..82 "=" [] [Whitespace(" ")],
+            value: TomlInteger {
+                value_token: TOML_INTEGER_LITERAL@82..83 "5" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlQuotedKey {
+                        value_token: TOML_BASIC_STRING_LITERAL@83..87 "\"\"" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@87..89 "=" [] [Whitespace(" ")],
+            value: TomlInteger {
+                value_token: TOML_INTEGER_LITERAL@89..90 "6" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@90..99 "physical" [Newline("\n")] [],
+                    },
+                    DOT@99..100 "." [] [],
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@100..106 "color" [] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@106..108 "=" [] [Whitespace(" ")],
+            value: TomlString {
+                value_token: TOML_BASIC_STRING_LITERAL@108..116 "\"orange\"" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@116..121 "site" [Newline("\n")] [],
+                    },
+                    DOT@121..122 "." [] [],
+                    TomlQuotedKey {
+                        value_token: TOML_BASIC_STRING_LITERAL@122..135 "\"google.com\"" [] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@135..137 "=" [] [Whitespace(" ")],
+            value: TomlBoolean {
+                value_token: TRUE_KW@137..141 "true" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@141..148 "fruit" [Newline("\n")] [Whitespace(" ")],
+                    },
+                    DOT@148..150 "." [] [Whitespace(" ")],
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@150..157 "flavor" [] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@157..159 "=" [] [Whitespace(" ")],
+            value: TomlString {
+                value_token: TOML_BASIC_STRING_LITERAL@159..167 "\"banana\"" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@167..169 "3" [Newline("\n")] [],
+                    },
+                    DOT@169..170 "." [] [],
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@170..176 "14159" [] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@176..178 "=" [] [Whitespace(" ")],
+            value: TomlString {
+                value_token: TOML_BASIC_STRING_LITERAL@178..182 "\"pi\"" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@182..188 "true" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@188..190 "=" [] [Whitespace(" ")],
+            value: TomlBoolean {
+                value_token: FALSE_KW@190..195 "false" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@195..200 "inf" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@200..202 "=" [] [Whitespace(" ")],
+            value: TomlFloat {
+                value_token: TOML_FLOAT_LITERAL@202..205 "nan" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@205..217 "2021-01-01" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@217..219 "=" [] [Whitespace(" ")],
+            value: TomlString {
+                value_token: TOML_BASIC_STRING_LITERAL@219..234 "\"date-like key\"" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@234..235 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: TOML_ROOT@0..235
+  0: (empty)
+  1: TOML_ROOT_ITEM_LIST@0..234
+    0: TOML_KEY_VALUE@0..13
+      0: TOML_KEY@0..4
+        0: TOML_KEY_PART_LIST@0..4
+          0: TOML_BARE_KEY@0..4
+            0: TOML_BARE_KEY_LITERAL@0..4 "key" [] [Whitespace(" ")]
+      1: EQ@4..6 "=" [] [Whitespace(" ")]
+      2: TOML_STRING@6..13
+        0: TOML_BASIC_STRING_LITERAL@6..13 "\"value\"" [] []
+    1: TOML_KEY_VALUE@13..26
+      0: TOML_KEY@13..23
+        0: TOML_KEY_PART_LIST@13..23
+          0: TOML_BARE_KEY@13..23
+            0: TOML_BARE_KEY_LITERAL@13..23 "bare_key" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@23..25 "=" [] [Whitespace(" ")]
+      2: TOML_INTEGER@25..26
+        0: TOML_INTEGER_LITERAL@25..26 "1" [] []
+    2: TOML_KEY_VALUE@26..39
+      0: TOML_KEY@26..36
+        0: TOML_KEY_PART_LIST@26..36
+          0: TOML_BARE_KEY@26..36
+            0: TOML_BARE_KEY_LITERAL@26..36 "bare-key" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@36..38 "=" [] [Whitespace(" ")]
+      2: TOML_INTEGER@38..39
+        0: TOML_INTEGER_LITERAL@38..39 "2" [] []
+    3: TOML_KEY_VALUE@39..48
+      0: TOML_KEY@39..45
+        0: TOML_KEY_PART_LIST@39..45
+          0: TOML_BARE_KEY@39..45
+            0: TOML_BARE_KEY_LITERAL@39..45 "1234" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@45..47 "=" [] [Whitespace(" ")]
+      2: TOML_INTEGER@47..48
+        0: TOML_INTEGER_LITERAL@47..48 "3" [] []
+    4: TOML_KEY_VALUE@48..65
+      0: TOML_KEY@48..62
+        0: TOML_KEY_PART_LIST@48..62
+          0: TOML_QUOTED_KEY@48..62
+            0: TOML_BASIC_STRING_LITERAL@48..62 "\"quoted key\"" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@62..64 "=" [] [Whitespace(" ")]
+      2: TOML_INTEGER@64..65
+        0: TOML_INTEGER_LITERAL@64..65 "4" [] []
+    5: TOML_KEY_VALUE@65..83
+      0: TOML_KEY@65..80
+        0: TOML_KEY_PART_LIST@65..80
+          0: TOML_QUOTED_KEY@65..80
+            0: TOML_LITERAL_STRING_LITERAL@65..80 "'literal key'" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@80..82 "=" [] [Whitespace(" ")]
+      2: TOML_INTEGER@82..83
+        0: TOML_INTEGER_LITERAL@82..83 "5" [] []
+    6: TOML_KEY_VALUE@83..90
+      0: TOML_KEY@83..87
+        0: TOML_KEY_PART_LIST@83..87
+          0: TOML_QUOTED_KEY@83..87
+            0: TOML_BASIC_STRING_LITERAL@83..87 "\"\"" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@87..89 "=" [] [Whitespace(" ")]
+      2: TOML_INTEGER@89..90
+        0: TOML_INTEGER_LITERAL@89..90 "6" [] []
+    7: TOML_KEY_VALUE@90..116
+      0: TOML_KEY@90..106
+        0: TOML_KEY_PART_LIST@90..106
+          0: TOML_BARE_KEY@90..99
+            0: TOML_BARE_KEY_LITERAL@90..99 "physical" [Newline("\n")] []
+          1: DOT@99..100 "." [] []
+          2: TOML_BARE_KEY@100..106
+            0: TOML_BARE_KEY_LITERAL@100..106 "color" [] [Whitespace(" ")]
+      1: EQ@106..108 "=" [] [Whitespace(" ")]
+      2: TOML_STRING@108..116
+        0: TOML_BASIC_STRING_LITERAL@108..116 "\"orange\"" [] []
+    8: TOML_KEY_VALUE@116..141
+      0: TOML_KEY@116..135
+        0: TOML_KEY_PART_LIST@116..135
+          0: TOML_BARE_KEY@116..121
+            0: TOML_BARE_KEY_LITERAL@116..121 "site" [Newline("\n")] []
+          1: DOT@121..122 "." [] []
+          2: TOML_QUOTED_KEY@122..135
+            0: TOML_BASIC_STRING_LITERAL@122..135 "\"google.com\"" [] [Whitespace(" ")]
+      1: EQ@135..137 "=" [] [Whitespace(" ")]
+      2: TOML_BOOLEAN@137..141
+        0: TRUE_KW@137..141 "true" [] []
+    9: TOML_KEY_VALUE@141..167
+      0: TOML_KEY@141..157
+        0: TOML_KEY_PART_LIST@141..157
+          0: TOML_BARE_KEY@141..148
+            0: TOML_BARE_KEY_LITERAL@141..148 "fruit" [Newline("\n")] [Whitespace(" ")]
+          1: DOT@148..150 "." [] [Whitespace(" ")]
+          2: TOML_BARE_KEY@150..157
+            0: TOML_BARE_KEY_LITERAL@150..157 "flavor" [] [Whitespace(" ")]
+      1: EQ@157..159 "=" [] [Whitespace(" ")]
+      2: TOML_STRING@159..167
+        0: TOML_BASIC_STRING_LITERAL@159..167 "\"banana\"" [] []
+    10: TOML_KEY_VALUE@167..182
+      0: TOML_KEY@167..176
+        0: TOML_KEY_PART_LIST@167..176
+          0: TOML_BARE_KEY@167..169
+            0: TOML_BARE_KEY_LITERAL@167..169 "3" [Newline("\n")] []
+          1: DOT@169..170 "." [] []
+          2: TOML_BARE_KEY@170..176
+            0: TOML_BARE_KEY_LITERAL@170..176 "14159" [] [Whitespace(" ")]
+      1: EQ@176..178 "=" [] [Whitespace(" ")]
+      2: TOML_STRING@178..182
+        0: TOML_BASIC_STRING_LITERAL@178..182 "\"pi\"" [] []
+    11: TOML_KEY_VALUE@182..195
+      0: TOML_KEY@182..188
+        0: TOML_KEY_PART_LIST@182..188
+          0: TOML_BARE_KEY@182..188
+            0: TOML_BARE_KEY_LITERAL@182..188 "true" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@188..190 "=" [] [Whitespace(" ")]
+      2: TOML_BOOLEAN@190..195
+        0: FALSE_KW@190..195 "false" [] []
+    12: TOML_KEY_VALUE@195..205
+      0: TOML_KEY@195..200
+        0: TOML_KEY_PART_LIST@195..200
+          0: TOML_BARE_KEY@195..200
+            0: TOML_BARE_KEY_LITERAL@195..200 "inf" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@200..202 "=" [] [Whitespace(" ")]
+      2: TOML_FLOAT@202..205
+        0: TOML_FLOAT_LITERAL@202..205 "nan" [] []
+    13: TOML_KEY_VALUE@205..234
+      0: TOML_KEY@205..217
+        0: TOML_KEY_PART_LIST@205..217
+          0: TOML_BARE_KEY@205..217
+            0: TOML_BARE_KEY_LITERAL@205..217 "2021-01-01" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@217..219 "=" [] [Whitespace(" ")]
+      2: TOML_STRING@219..234
+        0: TOML_BASIC_STRING_LITERAL@219..234 "\"date-like key\"" [] []
+  2: EOF@234..235 "" [Newline("\n")] []
+
+```

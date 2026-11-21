@@ -1,0 +1,14 @@
+key = "value"
+bare_key = 1
+bare-key = 2
+1234 = 3
+"quoted key" = 4
+'literal key' = 5
+"" = 6
+physical.color = "orange"
+site."google.com" = true
+fruit . flavor = "banana"
+3.14159 = "pi"
+true = false
+inf = nan
+2021-01-01 = "date-like key"

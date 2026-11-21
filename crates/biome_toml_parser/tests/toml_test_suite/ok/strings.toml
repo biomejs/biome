@@ -1,0 +1,22 @@
+basic = "I'm a string. \"You can quote me\". Name\tJos\u00E9\nLocation\tSF."
+escapes = "\b\t\n\f\r\e\"\\\x41\u00E9\U0001F600"
+literal = 'C:\Users\nodejs\templates'
+empty_basic = ""
+empty_literal = ''
+multiline_basic = """
+Roses are red
+Violets are blue"""
+line_ending_backslash = """\
+       The quick brown \
+       fox jumps over \
+       the lazy dog.\
+       """
+quotes_at_end = """Here are two quotation marks: "". Simple enough.""""
+multiline_literal = '''
+The first newline is
+trimmed in raw strings.
+   All other whitespace
+   is preserved.
+'''
+literal_quotes = '''Here are fifteen quotation marks: """""""""""""""'''
+apostrophes = ''''That,' she said, 'is still pointless.''''
