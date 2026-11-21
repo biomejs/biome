@@ -2240,6 +2240,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "biome_toml_parser"
+version = "0.7.0"
+dependencies = [
+ "biome_diagnostics",
+ "biome_parser",
+ "biome_rowan",
+ "biome_toml_syntax",
+ "biome_unicode_table",
+]
+
+[[package]]
 name = "biome_toml_syntax"
 version = "0.7.0"
 dependencies = [
