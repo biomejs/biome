@@ -3,7 +3,8 @@ use super::{format, format_embeds_enabled, resolve_format_options};
 use crate::WorkspaceError;
 use crate::db::WorkspaceDb;
 use crate::file_handlers::{
-    ParsedOrigin, ParsedSnippetOrigin, css, graphql, grit, html, javascript, json, yaml,
+    ParsedOrigin, ParsedSnippetOrigin, css, graphql, grit, html, is_mdx_snippet, javascript, json,
+    yaml,
 };
 use crate::settings::{ServiceLanguage, SettingsWithEditor};
 use biome_css_formatter::CssFormatLanguage;
@@ -12,14 +13,15 @@ use biome_formatter::rowan::prelude::{
     Document, Formatter, RowanSource, literal_line_break_without_parent, text,
 };
 use biome_formatter::{
-    Buffer, Format, FormatContext, FormatLanguage, FormatResult, SimpleFormatContext,
-    SimpleFormatOptions, TrailingNewline, normalize_newlines, write,
+    Buffer, EmbeddedLayout, Format, FormatContext, FormatLanguage, FormatResult, LineWidth,
+    SimpleFormatContext, SimpleFormatOptions, TrailingNewline, normalize_newlines, write,
 };
 use biome_fs::BiomePath;
 use biome_graphql_formatter::GraphqlFormatLanguage;
 use biome_grit_formatter::GritFormatLanguage;
 use biome_html_formatter::HtmlFormatLanguage;
 use biome_js_formatter::JsFormatLanguage;
+use biome_js_syntax::{JsExpressionTemplateRoot, JsLanguage};
 use biome_json_formatter::JsonFormatLanguage;
 use biome_languages::DocumentFileSource;
 use biome_markdown_formatter::{MdFormatLanguage, format_node};
@@ -36,7 +38,9 @@ use rustc_hash::FxHashMap;
 ///
 /// Snippets stay as written when `markdown.formatter.formatEmbeds` is disabled
 /// for the file, when they contain syntax errors, or when the formatter of
-/// their language is disabled or unavailable.
+/// their language is disabled or unavailable. The JavaScript of MDX constructs
+/// is formatted regardless of `formatEmbeds`, because MDX compiles it into the
+/// document's module.
 pub(super) fn format_embedded(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
@@ -45,7 +49,16 @@ pub(super) fn format_embedded(
     embedded_nodes: Vec<ParsedSnippetOrigin>,
     workspace_db: WorkspaceDb,
 ) -> Result<Printed, WorkspaceError> {
-    if !format_embeds_enabled(settings.as_ref(), biome_path) {
+    let format_embeds = format_embeds_enabled(settings.as_ref(), biome_path);
+    let embedded_nodes = if format_embeds {
+        embedded_nodes
+    } else {
+        embedded_nodes
+            .into_iter()
+            .filter(|snippet| is_mdx_snippet(snippet, &workspace_db))
+            .collect()
+    };
+    if !format_embeds && embedded_nodes.is_empty() {
         return format(
             biome_path,
             document_file_source,
@@ -66,7 +79,7 @@ pub(super) fn format_embedded(
         .map(|snippet| (snippet.content_range(), snippet))
         .collect();
     let mut formatted = format_node(options, &tree, snippets.keys().copied().collect())?;
-    formatted.format_embedded(move |range| {
+    formatted.format_embedded_with_layout(move |range, layout| {
         let snippet = snippets.get(&range)?;
         let file_source = snippet.file_source(&workspace_db)?;
         // This is needed due to the parsed representation of code blocks (mostly rowan), so we need
@@ -88,7 +101,14 @@ pub(super) fn format_embedded(
         if parse.has_errors() {
             return None;
         }
-        format_snippet(biome_path, file_source, parse, settings, &workspace_db)
+        format_snippet(
+            biome_path,
+            file_source,
+            parse,
+            settings,
+            &workspace_db,
+            layout == EmbeddedLayout::SingleLine,
+        )
     });
 
     match formatted.print() {
@@ -210,20 +230,39 @@ impl IndentedFenceCode {
 /// Returns `None` when that formatter is disabled for the Markdown file or the
 /// language has no formatter. The document has no trailing line break, because
 /// the Markdown formatter ends the snippet's last line.
+///
+/// With `single_line`, the code is formatted to fit on one line: its line
+/// width is the maximum, so only the line breaks that the code requires
+/// remain. The Markdown formatter keeps the snippet as written when the
+/// result still breaks.
 fn format_snippet(
     path: &BiomePath,
     file_source: DocumentFileSource,
     parse: AnyParse,
     settings: &SettingsWithEditor,
     workspace_db: &WorkspaceDb,
+    single_line: bool,
 ) -> Option<Document> {
     let trailing_newline = TrailingNewline::from(false);
     match file_source {
         DocumentFileSource::Js(_) => {
-            let options =
+            let mut options =
                 javascript::resolve_format_options(path, &file_source, settings, workspace_db)
                     .with_trailing_newline(trailing_newline);
-            format_with_language(path, settings, parse, JsFormatLanguage::new(options))
+            if single_line && let Ok(line_width) = LineWidth::try_from(LineWidth::MAX) {
+                options = options.with_line_width(line_width);
+            }
+            // The `}` of an MDX expression follows its code, so code that ends
+            // with a line comment must end with a line break.
+            let ends_with_line_comment = JsExpressionTemplateRoot::cast(
+                parse.clone().embedded_syntax::<JsLanguage>().into_inner(),
+            )
+            .is_some_and(|root| root.ends_with_line_comment());
+            let mut code = format_code(path, settings, parse, JsFormatLanguage::new(options))?;
+            if ends_with_line_comment {
+                code.push('\n');
+            }
+            printed_document(&code)
         }
         DocumentFileSource::Json(_) => {
             let options = json::resolve_format_options(&file_source, settings, workspace_db)
@@ -277,6 +316,21 @@ where
     F: FormatLanguage,
     F::SyntaxLanguage: ServiceLanguage + 'static,
 {
+    printed_document(&format_code(path, settings, parse, language)?)
+}
+
+/// Returns the code of `parse` formatted with `language`, when the formatter
+/// of that language is enabled for the Markdown file at `path`.
+fn format_code<F>(
+    path: &BiomePath,
+    settings: &SettingsWithEditor,
+    parse: AnyParse,
+    language: F,
+) -> Option<String>
+where
+    F: FormatLanguage,
+    F::SyntaxLanguage: ServiceLanguage + 'static,
+{
     if !settings.formatter_enabled_for_file_path::<F::SyntaxLanguage>(path) {
         return None;
     }
@@ -285,7 +339,7 @@ where
         .ok()?
         .print()
         .ok()?;
-    printed_document(printed.as_code())
+    Some(printed.into_code())
 }
 
 /// Formats Markdown written inside a fenced code block.
@@ -331,13 +385,14 @@ fn printed_document(code: &str) -> Option<Document> {
 /// writes with the line ending of the Markdown file and without adding
 /// indentation, so the snippet keeps its own indentation. The code can use any
 /// line ending, because the formatter of its language prints it with its own
-/// `lineEnding` option.
+/// `lineEnding` option. A line break at the end of the code is kept, so that
+/// what follows the snippet starts on a new line.
 struct PrintedCode<'a>(&'a str);
 
 impl<Context: FormatContext> Format<Context> for PrintedCode<'_> {
     fn fmt(&self, f: &mut Formatter<Context>) -> FormatResult<()> {
         let code = normalize_newlines(self.0, ['\r']);
-        for (index, line) in code.lines().enumerate() {
+        for (index, line) in code.split('\n').enumerate() {
             if index > 0 {
                 write!(f, [literal_line_break_without_parent()])?;
             }

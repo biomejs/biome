@@ -384,7 +384,8 @@ impl<'a> SnippetsIterator<'a> {
         Self::Workspace(snippets.into_iter())
     }
 
-    /// Excludes host-owned template comments from guest analysis, and every
+    /// Excludes host-owned template comments and MDX JavaScript that spans
+    /// lines inside a block quote from guest analysis, and every
     /// snippet of a Markdown file whose `markdown.analyzeEmbeds` is disabled. The unfiltered iterator remains available for formatting and
     /// host suppression extraction.
     pub(crate) fn for_analysis(
@@ -409,24 +410,44 @@ impl<'a> SnippetsIterator<'a> {
             if html::is_astro_template_comment(host, source, snippet, db) {
                 return false;
             }
+            #[cfg(feature = "lang_mdx")]
+            if md::is_quoted_multiline_mdx_snippet(host, snippet, db) {
+                return false;
+            }
             true
         })
     }
 
     /// Excludes the snippets whose syntax errors don't stop formatting the
     /// containing file: the formatter of a Markdown file keeps such snippets as
-    /// written.
+    /// written. The JavaScript of an MDX construct is part of the document's
+    /// syntax, so its syntax errors stop formatting like the document's own.
     pub(crate) fn blocking_formatting(
         self,
         source: DocumentFileSource,
+        db: &'a WorkspaceDb,
     ) -> impl Iterator<Item = ParsedSnippetOrigin> + 'a {
-        let _ = source;
+        let _ = (source, db);
         #[cfg(feature = "lang_md")]
         let blocks = source.to_markdown_file_source().is_none();
         #[cfg(not(feature = "lang_md"))]
         let blocks = true;
-        self.filter(move |_| blocks)
+        self.filter(move |snippet| blocks || is_mdx_snippet(snippet, db))
     }
+}
+
+/// Returns whether `snippet` holds the JavaScript of an MDX construct.
+#[cfg(feature = "lang_mdx")]
+pub(crate) fn is_mdx_snippet(snippet: &ParsedSnippetOrigin, db: &WorkspaceDb) -> bool {
+    snippet
+        .file_source(db)
+        .and_then(|source| source.to_js_file_source())
+        .is_some_and(|source| source.as_embedding_kind().is_mdx())
+}
+
+#[cfg(not(feature = "lang_mdx"))]
+pub(crate) fn is_mdx_snippet(_snippet: &ParsedSnippetOrigin, _db: &WorkspaceDb) -> bool {
+    false
 }
 
 impl Iterator for SnippetsIterator<'_> {

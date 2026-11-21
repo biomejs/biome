@@ -1,0 +1,47 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/mdx/single_line_snippets.mdx
+---
+
+# Input
+
+```mdx
+A long tag <Link   href='https://example.com/docs/getting-started'   target='_blank'   rel='noopener'>is formatted on one line</Link>.
+
+- An item with <Card   title='A rather long title for the card'   description='And a long description too' />
+
+An expression {a // with a line comment
+} keeps its source.
+
+- A tag that spans lines <Note
+    type='tip' /> keeps its source.
+
+{value // a block expression
+}
+
+```
+
+
+# Formatted
+
+```mdx
+A long tag <Link href="https://example.com/docs/getting-started" target="_blank" rel="noopener">is formatted on one line</Link>.
+
+- An item with <Card title="A rather long title for the card" description="And a long description too" />
+
+An expression {a // with a line comment
+} keeps its source.
+
+- A tag that spans lines <Note
+    type='tip' /> keeps its source.
+
+{value // a block expression
+}
+
+```
+
+# Lines exceeding max width of 80 characters
+```
+    1: A long tag <Link href="https://example.com/docs/getting-started" target="_blank" rel="noopener">is formatted on one line</Link>.
+    3: - An item with <Card title="A rather long title for the card" description="And a long description too" />
+```
