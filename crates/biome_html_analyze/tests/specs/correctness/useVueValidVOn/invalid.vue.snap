@@ -104,28 +104,28 @@ invalid.vue:14:18 lint/correctness/useVueValidVOn ━━━━━━━━━━
   
   i Allowed modifiers:
   
-  - delete
-  - native
-  - capture
-  - down
   - self
-  - meta
-  - left
-  - stop
-  - enter
-  - space
-  - up
   - once
   - middle
-  - ctrl
+  - stop
+  - native
+  - capture
+  - right
   - alt
+  - shift
+  - up
   - tab
+  - space
+  - left
+  - meta
+  - down
+  - ctrl
+  - esc
+  - delete
+  - enter
+  - prevent
   - exact
   - passive
-  - prevent
-  - esc
-  - right
-  - shift
   
 
 ```
@@ -145,28 +145,28 @@ invalid.vue:17:15 lint/correctness/useVueValidVOn ━━━━━━━━━━
   
   i Allowed modifiers:
   
-  - delete
-  - native
-  - capture
-  - down
   - self
-  - meta
-  - left
-  - stop
-  - enter
-  - space
-  - up
   - once
   - middle
-  - ctrl
+  - stop
+  - native
+  - capture
+  - right
   - alt
+  - shift
+  - up
   - tab
+  - space
+  - left
+  - meta
+  - down
+  - ctrl
+  - esc
+  - delete
+  - enter
+  - prevent
   - exact
   - passive
-  - prevent
-  - esc
-  - right
-  - shift
   
 
 ```
@@ -186,28 +186,28 @@ invalid.vue:20:17 lint/correctness/useVueValidVOn ━━━━━━━━━━
   
   i Allowed modifiers:
   
-  - delete
-  - native
-  - capture
-  - down
   - self
-  - meta
-  - left
-  - stop
-  - enter
-  - space
-  - up
   - once
   - middle
-  - ctrl
+  - stop
+  - native
+  - capture
+  - right
   - alt
+  - shift
+  - up
   - tab
+  - space
+  - left
+  - meta
+  - down
+  - ctrl
+  - esc
+  - delete
+  - enter
+  - prevent
   - exact
   - passive
-  - prevent
-  - esc
-  - right
-  - shift
   
 
 ```
@@ -227,28 +227,28 @@ invalid.vue:23:18 lint/correctness/useVueValidVOn ━━━━━━━━━━
   
   i Allowed modifiers:
   
-  - delete
-  - native
-  - capture
-  - down
   - self
-  - meta
-  - left
-  - stop
-  - enter
-  - space
-  - up
   - once
   - middle
-  - ctrl
+  - stop
+  - native
+  - capture
+  - right
   - alt
+  - shift
+  - up
   - tab
+  - space
+  - left
+  - meta
+  - down
+  - ctrl
+  - esc
+  - delete
+  - enter
+  - prevent
   - exact
   - passive
-  - prevent
-  - esc
-  - right
-  - shift
   
 
 ```
@@ -268,28 +268,28 @@ invalid.vue:26:18 lint/correctness/useVueValidVOn ━━━━━━━━━━
   
   i Allowed modifiers:
   
-  - delete
-  - native
-  - capture
-  - down
   - self
-  - meta
-  - left
-  - stop
-  - enter
-  - space
-  - up
   - once
   - middle
-  - ctrl
+  - stop
+  - native
+  - capture
+  - right
   - alt
+  - shift
+  - up
   - tab
+  - space
+  - left
+  - meta
+  - down
+  - ctrl
+  - esc
+  - delete
+  - enter
+  - prevent
   - exact
   - passive
-  - prevent
-  - esc
-  - right
-  - shift
   
 
 ```
@@ -309,28 +309,28 @@ invalid.vue:29:22 lint/correctness/useVueValidVOn ━━━━━━━━━━
   
   i Allowed modifiers:
   
-  - delete
-  - native
-  - capture
-  - down
   - self
-  - meta
-  - left
-  - stop
-  - enter
-  - space
-  - up
   - once
   - middle
-  - ctrl
+  - stop
+  - native
+  - capture
+  - right
   - alt
+  - shift
+  - up
   - tab
+  - space
+  - left
+  - meta
+  - down
+  - ctrl
+  - esc
+  - delete
+  - enter
+  - prevent
   - exact
   - passive
-  - prevent
-  - esc
-  - right
-  - shift
   
 
 ```
