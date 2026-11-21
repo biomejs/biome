@@ -1,0 +1,13 @@
+#notifications-toolbar {
+	&:has(> #tab-notification-deck-template, > #tab-notification-deck:where([selected-view=""], :not([selected-view])), > #tab-notification-deck > [slot="selected"]:empty) {
+		display: none;
+	}
+
+	.toolbar-item:not(.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, .bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb) {
+		color: red;
+	}
+
+	> .toolbar-item:is(.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, .bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb) {
+		color: red;
+	}
+}
