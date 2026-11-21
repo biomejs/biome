@@ -27,6 +27,10 @@ pub(super) struct StackFrame {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub(super) struct PrintElementArgs {
     mode: PrintMode,
+    /// Whether the element is excluded from the fits check. `FitsMeasurer` sets
+    /// it inside [crate::builders::skip_fits_check] content, except when it
+    /// measures fill entries. `Printer` never sets or reads it.
+    skip_fits_check: bool,
 }
 
 impl PrintElementArgs {
@@ -42,12 +46,22 @@ impl PrintElementArgs {
         self.mode = mode;
         self
     }
+
+    pub(super) fn skips_fits_check(&self) -> bool {
+        self.skip_fits_check
+    }
+
+    pub(super) fn with_skip_fits_check(mut self) -> Self {
+        self.skip_fits_check = true;
+        self
+    }
 }
 
 impl Default for PrintElementArgs {
     fn default() -> Self {
         Self {
             mode: PrintMode::Expanded,
+            skip_fits_check: false,
         }
     }
 }
