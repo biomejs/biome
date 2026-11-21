@@ -1258,6 +1258,7 @@ export interface RuleDomains {
 	astro?: RuleDomainValue;
 	convex?: RuleDomainValue;
 	drizzle?: RuleDomainValue;
+	gitHub?: RuleDomainValue;
 	next?: RuleDomainValue;
 	playwright?: RuleDomainValue;
 	project?: RuleDomainValue;
@@ -4213,6 +4214,11 @@ export interface Nursery {
 	 * See https://biomejs.dev/linter/rules/use-flat-math-min-max
 	 */
 	useFlatMathMinMax?: UseFlatMathMinMaxConfiguration;
+	/**
+	 * Require a name for GitHub Actions workflows.
+	 * See https://biomejs.dev/linter/rules/use-github-workflow-name
+	 */
+	useGithubWorkflowName?: UseGithubWorkflowNameConfiguration;
 	/**
 	 * Require regular expressions passed to matchAll() to have the g flag.
 	 * See https://biomejs.dev/linter/rules/use-global-regex-in-match-all
@@ -7628,6 +7634,9 @@ export type UseFencedCodeLanguageConfiguration =
 export type UseFlatMathMinMaxConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseFlatMathMinMaxOptions;
+export type UseGithubWorkflowNameConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseGithubWorkflowNameOptions;
 export type UseGlobalRegexInMatchAllConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseGlobalRegexInMatchAllOptions;
@@ -11362,6 +11371,10 @@ export interface RuleWithUseFlatMathMinMaxOptions {
 	level: RulePlainConfiguration;
 	options?: UseFlatMathMinMaxOptions;
 }
+export interface RuleWithUseGithubWorkflowNameOptions {
+	level: RulePlainConfiguration;
+	options?: UseGithubWorkflowNameOptions;
+}
 export interface RuleWithUseGlobalRegexInMatchAllOptions {
 	level: RulePlainConfiguration;
 	options?: UseGlobalRegexInMatchAllOptions;
@@ -14612,6 +14625,7 @@ export interface UseFencedCodeLanguageOptions {
 	languageOnly?: boolean;
 }
 export type UseFlatMathMinMaxOptions = {};
+export type UseGithubWorkflowNameOptions = {};
 export type UseGlobalRegexInMatchAllOptions = {};
 export type UseGlobalRegexInReplaceAllOptions = {};
 /**
@@ -16725,6 +16739,7 @@ export type Category =
 	| "lint/nursery/useFencedCodeLanguage"
 	| "lint/nursery/useFind"
 	| "lint/nursery/useFlatMathMinMax"
+	| "lint/nursery/useGithubWorkflowName"
 	| "lint/nursery/useGlobalRegexInMatchAll"
 	| "lint/nursery/useGlobalRegexInReplaceAll"
 	| "lint/nursery/useImportRestrictions"
