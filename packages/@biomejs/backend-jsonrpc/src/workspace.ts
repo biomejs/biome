@@ -4354,6 +4354,11 @@ export interface Nursery {
 	 */
 	useRegexpExec?: UseRegexpExecConfiguration;
 	/**
+	 * Require color.channel() instead of the older Sass functions that read one channel of a color.
+	 * See https://biomejs.dev/linter/rules/use-scss-color-channel
+	 */
+	useScssColorChannel?: UseScssColorChannelConfiguration;
+	/**
 	 * Prefer reading the size property of a Set over converting the Set to an array to read its length.
 	 * See https://biomejs.dev/linter/rules/use-set-size
 	 */
@@ -7717,6 +7722,9 @@ export type UseReactNativeValidPlatformColorsConfiguration =
 export type UseRegexpExecConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseRegexpExecOptions;
+export type UseScssColorChannelConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseScssColorChannelOptions;
 export type UseSetSizeConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseSetSizeOptions;
@@ -11522,6 +11530,10 @@ export interface RuleWithUseRegexpExecOptions {
 	level: RulePlainConfiguration;
 	options?: UseRegexpExecOptions;
 }
+export interface RuleWithUseScssColorChannelOptions {
+	level: RulePlainConfiguration;
+	options?: UseScssColorChannelOptions;
+}
 export interface RuleWithUseSetSizeOptions {
 	/**
 	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
@@ -14718,6 +14730,7 @@ export interface UseReactFunctionComponentDefinitionOptions {
 export type UseReactNamingConventionOptions = {};
 export type UseReactNativeValidPlatformColorsOptions = {};
 export type UseRegexpExecOptions = {};
+export type UseScssColorChannelOptions = {};
 export type UseSetSizeOptions = {};
 export type UseSimplifiedBooleanReturnOptions = {};
 export interface UseSingleTopLevelHeadingOptions {
@@ -16777,6 +16790,7 @@ export type Category =
 	| "lint/nursery/useRegexpExec"
 	| "lint/nursery/useRegexpTest"
 	| "lint/nursery/useScopedStyles"
+	| "lint/nursery/useScssColorChannel"
 	| "lint/nursery/useSetSize"
 	| "lint/nursery/useSimplifiedBooleanReturn"
 	| "lint/nursery/useSingleTopLevelHeading"

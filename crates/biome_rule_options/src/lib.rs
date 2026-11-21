@@ -718,6 +718,7 @@ pub mod use_regexp_exec;
 pub mod use_regexp_test;
 pub mod use_required_scripts;
 pub mod use_scoped_styles;
+pub mod use_scss_color_channel;
 pub mod use_self_closing_elements;
 pub mod use_semantic_elements;
 pub mod use_set_size;
