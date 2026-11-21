@@ -10,7 +10,7 @@ use std::str;
 use std::sync::Arc;
 
 use crate::fs::OpenOptions;
-use crate::utils::{normalize_path, normalize_path_buf};
+use crate::utils::normalize_path_buf;
 use crate::{BiomePath, FileSystem, TraversalContext, TraversalScope};
 
 use super::{BoxedTraversal, File, FileSystemDiagnostic, FsErrorKind, PathKind};
@@ -113,7 +113,10 @@ impl MemoryFileSystem {
 
     /// Remove a file from the filesystem
     pub fn remove(&self, path: &Utf8Path) {
-        self.files.0.write().remove(&normalize_path(path));
+        self.files
+            .0
+            .write()
+            .remove(&normalize_path_buf(path.to_path_buf()));
     }
 
     pub fn set_on_get_changed_files(
@@ -147,7 +150,7 @@ impl FileSystem for MemoryFileSystem {
         }
 
         // Keys are stored normalized, matching the paths emitted by traversal.
-        let path = normalize_path(path);
+        let path = normalize_path_buf(path.to_path_buf());
         let path = path.as_path();
         let mut inner = if options.create || options.create_new {
             // Acquire write access to the files map if the file may need to be created
@@ -209,12 +212,12 @@ impl FileSystem for MemoryFileSystem {
 
     fn path_exists(&self, path: &Utf8Path) -> bool {
         let files = self.files.0.read();
-        files.contains_key(&normalize_path(path))
+        files.contains_key(&normalize_path_buf(path.to_path_buf()))
     }
 
     fn path_kind(&self, path: &Utf8Path) -> Result<PathKind, FileSystemDiagnostic> {
         let files = self.files.0.read();
-        let normalized_path = normalize_path(path);
+        let normalized_path = normalize_path_buf(path.to_path_buf());
         match files.get(&normalized_path) {
             Some(_) => Ok(PathKind::File { is_symlink: false }),
             None if files

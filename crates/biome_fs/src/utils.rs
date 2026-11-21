@@ -67,27 +67,60 @@ pub fn normalize_path(path: &Utf8Path) -> Utf8PathBuf {
     result
 }
 
+/// The bytes that separate path components on the current platform.
+#[cfg(windows)]
+const SEPARATORS: &[u8] = b"/\\";
+#[cfg(not(windows))]
+const SEPARATORS: &[u8] = b"/";
+
+/// Normalizes `path` like [normalize_path] without rewriting the separators of the input.
+///
+/// A path that is already normalized is returned unchanged. Otherwise, the separators after the
+/// prefix are written as the first separator of the input, so on Windows `/repo/../file.js`
+/// becomes `/file.js` and `\repo\..\file.js` becomes `\file.js`. Paths with a verbatim prefix,
+/// where `/` isn't a separator, are normalized by [normalize_path].
 pub(crate) fn normalize_path_buf(path: Utf8PathBuf) -> Utf8PathBuf {
-    #[cfg(not(windows))]
-    if is_normalized_path(&path) {
+    let prefix_len = match path.components().next() {
+        Some(Utf8Component::Prefix(prefix)) if prefix.kind().is_verbatim() => {
+            return normalize_path(&path);
+        }
+        Some(Utf8Component::Prefix(prefix)) => prefix.as_str().len(),
+        _ => 0,
+    };
+    let unprefixed = &path.as_str().as_bytes()[prefix_len..];
+    if is_normalized_path(unprefixed, SEPARATORS) {
         return path;
     }
 
-    normalize_path(&path)
+    let normalized = normalize_path(&path);
+    match unprefixed
+        .iter()
+        .copied()
+        .find(|byte| SEPARATORS.contains(byte))
+    {
+        Some(b'/') if path::MAIN_SEPARATOR != '/' => {
+            let (prefix, unprefixed) = normalized.as_str().split_at(prefix_len);
+            Utf8PathBuf::from(format!(
+                "{prefix}{}",
+                unprefixed.replace(path::MAIN_SEPARATOR, "/")
+            ))
+        }
+        _ => normalized,
+    }
 }
 
-#[cfg(not(windows))]
-fn is_normalized_path(path: &Utf8Path) -> bool {
-    let path = path.as_str().as_bytes();
-    if path.is_empty() || path == b"/" {
+/// Returns whether normalization leaves `path`, without its prefix, unchanged.
+fn is_normalized_path(path: &[u8], separators: &[u8]) -> bool {
+    let is_separator = |byte: &u8| separators.contains(byte);
+    if path.is_empty() || (path.len() == 1 && is_separator(&path[0])) {
         return true;
     }
-    if path.ends_with(b"/") {
+    if path.last().is_some_and(is_separator) {
         return false;
     }
 
-    let is_absolute = path.starts_with(b"/");
-    let mut components = path.split(|byte| *byte == b'/');
+    let is_absolute = path.first().is_some_and(is_separator);
+    let mut components = path.split(is_separator);
     if is_absolute {
         components.next();
     }
@@ -216,7 +249,7 @@ fn follow_symlink(
 
 #[cfg(test)]
 mod tests {
-    use super::{normalize_path, normalize_path_buf};
+    use super::{is_normalized_path, normalize_path, normalize_path_buf};
     use camino::Utf8PathBuf;
 
     #[test]
@@ -241,6 +274,43 @@ mod tests {
         ] {
             let path = Utf8PathBuf::from(path);
             assert_eq!(normalize_path_buf(path.clone()), normalize_path(&path));
+        }
+    }
+
+    #[test]
+    fn backslashes_separate_components_when_they_are_separators() {
+        const WINDOWS: &[u8] = b"/\\";
+
+        for path in [r"\", r"\repo\file.js", r"/repo\file.js", r"..\file.js"] {
+            assert!(is_normalized_path(path.as_bytes(), WINDOWS), "{path}");
+        }
+        for path in [
+            r"\repo\",
+            r"\repo\.\file.js",
+            r"/repo\..\file.js",
+            r"repo\\file.js",
+        ] {
+            assert!(!is_normalized_path(path.as_bytes(), WINDOWS), "{path}");
+        }
+        assert!(is_normalized_path(br"repo\.\file.js", b"/"));
+    }
+
+    #[cfg(windows)]
+    #[test]
+    fn normalization_keeps_the_separators_of_the_input() {
+        for (path, expected) in [
+            ("/project/file.js", "/project/file.js"),
+            (r"C:\repo\src/file.js", r"C:\repo\src/file.js"),
+            ("project/./src/../file.js", "project/file.js"),
+            (
+                r"/repo/project\missing/../dist/file.js",
+                "/repo/project/dist/file.js",
+            ),
+            (r"C:\repo\src\..\file.js", r"C:\repo\file.js"),
+            ("C:/repo/src/../file.js", "C:/repo/file.js"),
+            (r"\\server\share\src/../file.js", r"\\server\share\file.js"),
+        ] {
+            assert_eq!(normalize_path_buf(path.into()).as_str(), expected, "{path}");
         }
     }
 }
