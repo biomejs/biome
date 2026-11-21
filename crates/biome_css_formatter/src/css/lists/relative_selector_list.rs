@@ -10,32 +10,15 @@ impl FormatRule<CssRelativeSelectorList> for FormatCssRelativeSelectorList {
         // preserving empty lines from the input source. See the comment in
         // [FormatCssSelectorList] for more information.
         let separator = soft_line_break_or_space();
+        let comments = f.comments().clone();
         let mut joiner = f.join_with(&separator);
 
         for formatted in node.format_separated(",") {
-            let has_leading_comments = formatted
-                .node()?
-                .as_css_relative_selector()
-                .and_then(|relative_selector| {
-                    relative_selector
-                        .selector()
-                        .ok()?
-                        .as_css_compound_selector()
-                        .cloned()
-                })
-                .and_then(|computed_selector| computed_selector.simple_selector())
-                .and_then(|simple_selector| simple_selector.as_css_type_selector().cloned())
-                .and_then(|type_selector| {
-                    type_selector
-                        .ident()
-                        .ok()?
-                        .as_css_identifier()
-                        .and_then(|ident| ident.value_token().ok())
-                })
-                .is_some_and(|value_token| value_token.has_leading_comments());
+            let entry = formatted.node()?.syntax();
 
-            if has_leading_comments {
-                // Computed Selector which contains a leading comments should be formatted without indent.
+            // The entry prints its own leading comments, so indenting it as well
+            // would move the selector away from its comment.
+            if comments.has_leading_comments(entry) && entry.has_leading_comments() {
                 joiner.entry(&group(&formatted));
             } else {
                 // Each selector gets `indent` added in case it breaks over multiple
