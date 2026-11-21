@@ -3167,6 +3167,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "useNamingConvention",
         TypeId::of::<biome_rule_options::use_naming_convention::UseNamingConventionOptions>(),
     ));
+    result.push((
+        "nursery",
+        "useNegativeIndex",
+        TypeId::of::<biome_rule_options::use_negative_index::UseNegativeIndexOptions>(),
+    ));
     result.push(("nursery", "useNextScriptForGoogleAnalytics", TypeId::of::<biome_rule_options::use_next_script_for_google_analytics::UseNextScriptForGoogleAnalyticsOptions>()));
     result.push((
         "style",
