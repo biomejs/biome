@@ -284,7 +284,10 @@ fn declaration_interfaces_preserve_types_and_signatures() -> Result<()> {
     assert_instance_of(catalog_global, item_ref, "GLOBAL_ITEM_ID");
     assert_eq!(
         catalog.member("selected").unwrap().kind(),
-        &LoweredMemberKind::Named { optional: true }
+        &LoweredMemberKind::Named {
+            optional: true,
+            readonly: false,
+        }
     );
     let assert_nullable = |reference: &LoweredTypeReference| {
         let LoweredTypeData::Union(types) = local(catalog_global, reference) else {
@@ -322,7 +325,13 @@ fn declaration_interfaces_preserve_types_and_signatures() -> Result<()> {
         &LoweredTypeData::StringLiteral("pending".into())
     );
     let method = catalog.member("find").unwrap();
-    assert_eq!(method.kind(), &LoweredMemberKind::Named { optional: true });
+    assert_eq!(
+        method.kind(),
+        &LoweredMemberKind::Named {
+            optional: true,
+            readonly: false,
+        }
+    );
     let LoweredTypeData::Function(function) = local(catalog_global, method.type_reference()) else {
         panic!("expected function")
     };
@@ -368,6 +377,49 @@ fn declaration_interfaces_preserve_types_and_signatures() -> Result<()> {
 
 fn state_reference(catalog: &LoweredInterface) -> LoweredTypeReference {
     catalog.member("state").unwrap().type_reference().clone()
+}
+
+#[test]
+fn readonly_properties_lower_to_readonly_members() -> Result<()> {
+    let file = source(
+        "readonly.d.ts",
+        r#"
+        interface Frozen {
+            readonly size: number;
+            readonly label?: string;
+            count: number;
+            get value(): number;
+            find(): number;
+        }
+    "#,
+    )?;
+    let lowered = lower(&[file])?;
+    let frozen = interface(&lowered, "Frozen");
+    // A getter is lowered as a property, which isn't readonly, because a
+    // setter may come with it.
+    for (name, optional, readonly) in [
+        ("size", false, true),
+        ("label", true, true),
+        ("count", false, false),
+        ("value", false, false),
+        ("find", false, false),
+    ] {
+        assert_eq!(
+            frozen.member(name).unwrap().kind(),
+            &LoweredMemberKind::Named { optional, readonly },
+            "{name}"
+        );
+    }
+    let pin = SourcePin::new("v0.0.0", "0000000000000000000000000000000000000000");
+    let output = render_global_types(&pin, &lowered);
+    for expected in [
+        r#"crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static("size"))"#,
+        r#"crate::TypeMemberKind::ReadonlyNamedOptional(biome_rowan::Text::new_static("label"))"#,
+        r#"crate::TypeMemberKind::Named(biome_rowan::Text::new_static("count"))"#,
+    ] {
+        assert!(output.contains(expected), "{expected}");
+    }
+    Ok(())
 }
 
 #[test]

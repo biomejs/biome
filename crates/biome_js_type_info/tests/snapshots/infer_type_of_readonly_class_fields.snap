@@ -1,0 +1,136 @@
+---
+source: crates/biome_js_type_info/tests/utils.rs
+expression: content
+---
+## Input
+
+```ts
+class Fields {
+	readonly value: string | null = null;
+	readonly label?: string;
+	count = 0;
+	static readonly shared = 1;
+	declare readonly declared: string;
+	get size() {
+		return 1;
+	}
+	constructor(
+		readonly first: string,
+		private readonly second?: number,
+		public third: boolean,
+		fourth: number,
+	) {}
+}
+
+```
+
+## Result
+
+```
+Object {
+  prototype: No prototype
+  members: [
+    readonly "value": Local TypeId(1),
+    readonly "label"?: Local TypeId(2),
+    "count": Local TypeId(3),
+    static "shared": Local TypeId(4),
+    readonly "declared": string,
+    get "size": Local TypeId(5),
+    constructor: Local TypeId(8),
+    readonly "first": string,
+    readonly "second"?: Local TypeId(6),
+    "third": Local TypeId(7)
+  ]
+}
+```
+
+## Registered types
+
+```
+Module TypeId(0) => null
+
+Module TypeId(1) => string | Local TypeId(0)
+
+Module TypeId(2) => string | undefined
+
+Module TypeId(3) => number: 0
+
+Module TypeId(4) => number: 1
+
+Module TypeId(5) => sync Function "size" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: Local TypeId(4)
+}
+
+Module TypeId(6) => number | undefined
+
+Module TypeId(7) => boolean
+
+Module TypeId(8) => Constructor {
+    type_parameters: [],
+    parameters: [
+        ConstructorParameter {
+            parameter: Named(
+                NamedFunctionParameter {
+                    name: "first",
+                    ty: Resolved(
+                        string,
+                    ),
+                    is_optional: false,
+                    is_rest: false,
+                },
+            ),
+            accessibility: Some(
+                Public,
+            ),
+        },
+        ConstructorParameter {
+            parameter: Named(
+                NamedFunctionParameter {
+                    name: "second",
+                    ty: Resolved(
+                        Local TypeId(6),
+                    ),
+                    is_optional: true,
+                    is_rest: false,
+                },
+            ),
+            accessibility: Some(
+                Private,
+            ),
+        },
+        ConstructorParameter {
+            parameter: Named(
+                NamedFunctionParameter {
+                    name: "third",
+                    ty: Resolved(
+                        Local TypeId(7),
+                    ),
+                    is_optional: false,
+                    is_rest: false,
+                },
+            ),
+            accessibility: Some(
+                Public,
+            ),
+        },
+        ConstructorParameter {
+            parameter: Named(
+                NamedFunctionParameter {
+                    name: "fourth",
+                    ty: Resolved(
+                        number,
+                    ),
+                    is_optional: false,
+                    is_rest: false,
+                },
+            ),
+            accessibility: None,
+        },
+    ],
+    return_type: None,
+}
+```

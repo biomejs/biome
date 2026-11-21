@@ -1,0 +1,37 @@
+---
+source: crates/biome_js_type_info/tests/utils.rs
+expression: content
+---
+## Input
+
+```ts
+declare class Ambient {
+	readonly value: string;
+	readonly initialized = 1;
+	readonly label?: string;
+	count: number;
+}
+
+```
+
+## Result
+
+```
+Object {
+  prototype: No prototype
+  members: [
+    readonly "value": string,
+    readonly "initialized": Local TypeId(0),
+    readonly "label"?: Local TypeId(1),
+    "count": number
+  ]
+}
+```
+
+## Registered types
+
+```
+Module TypeId(0) => number: 1
+
+Module TypeId(1) => string | undefined
+```

@@ -1167,7 +1167,13 @@ mod tests {
         assert_eq!(class.name(), "Error");
 
         let name = class.member("name").expect("name member should be lowered");
-        assert_eq!(name.kind(), &LoweredMemberKind::Named { optional: false });
+        assert_eq!(
+            name.kind(),
+            &LoweredMemberKind::Named {
+                optional: false,
+                readonly: false,
+            }
+        );
         assert_eq!(
             name.type_reference(),
             &LoweredTypeReference::Predefined("GLOBAL_STRING_KEYWORD_ID")
@@ -1178,7 +1184,10 @@ mod tests {
             .expect("message member should be lowered");
         assert_eq!(
             message.kind(),
-            &LoweredMemberKind::Named { optional: false }
+            &LoweredMemberKind::Named {
+                optional: false,
+                readonly: false,
+            }
         );
         assert_eq!(
             message.type_reference(),
@@ -1187,7 +1196,13 @@ mod tests {
         let stack = class
             .member("stack")
             .expect("stack member should be lowered");
-        assert_eq!(stack.kind(), &LoweredMemberKind::Named { optional: true });
+        assert_eq!(
+            stack.kind(),
+            &LoweredMemberKind::Named {
+                optional: true,
+                readonly: false,
+            }
+        );
         assert_eq!(
             stack.type_reference(),
             &LoweredTypeReference::Predefined("GLOBAL_STRING_KEYWORD_ID")
