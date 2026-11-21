@@ -208,6 +208,11 @@ pub trait WorkspaceWatcherBridge {
     /// logical alias and must be unwatched.
     fn remove_watch_aliases(&self, path: &Utf8Path, callback: impl FnMut(&Utf8Path));
 
+    /// Stops tracking the physical folder `path` as watched when no logical alias maps to it.
+    ///
+    /// Returns `true` if the folder was watched and must be unwatched, `false` otherwise.
+    fn remove_unused_watched_folder(&self, path: &Utf8Path) -> bool;
+
     /// Unloads the index of the file with the given `path` within the
     /// workspace.
     fn unload_file(
@@ -254,6 +259,12 @@ impl<'a, W: WorkspaceScannerBridge> ScannerWatcherBridge<'a, W> {
 
     fn vcs_watch_projects(&self, path: &Utf8Path) -> Vec<ProjectKey> {
         let path = self.workspace.fs().biome_path(path);
+        // VCS watch paths are ignore files or the Git `info/exclude` file. Checking the file name
+        // first avoids resolving the watch paths of every project, which reads the filesystem,
+        // for ordinary file events.
+        if !path.is_ignore() && path.as_path().file_name() != Some("exclude") {
+            return Vec::new();
+        }
         self.scanner
             .projects
             .pin()
@@ -272,6 +283,10 @@ impl<'a, W: WorkspaceScannerBridge> ScannerWatcherBridge<'a, W> {
         project_key: ProjectKey,
         path: &Utf8Path,
     ) -> Result<Vec<Diagnostic>, WorkspaceError> {
+        // Ignore files don't change the index of a project that doesn't use VCS ignores.
+        if self.workspace.get_vcs_root(project_key).is_none() {
+            return Ok(Vec::new());
+        }
         let mut diagnostics =
             self.scanner
                 .refresh_ignore_files(self.workspace, project_key, path)?;
@@ -398,12 +413,27 @@ where
     fn refresh_vcs_watch_path(&self, path: &Utf8Path) -> Result<Vec<Diagnostic>, WorkspaceError> {
         let mut diagnostics = Vec::new();
         for project_key in self.vcs_watch_projects(path) {
-            self.workspace
-                .refresh_project_vcs_ignore_settings(project_key)?;
-            if let Some(project_path) = self.workspace.get_project_path(project_key) {
-                diagnostics.extend(
-                    self.refresh_project_ignore_files(project_key, project_path.as_path())?,
-                );
+            // Projects can share the ignore file, so the failure of one project is reported
+            // without stopping the refresh of the others.
+            let result = self
+                .workspace
+                .refresh_project_vcs_ignore_settings(project_key)
+                .and_then(|()| {
+                    self.workspace
+                        .get_project_path(project_key)
+                        .map_or_else(
+                            || Ok(Vec::new()),
+                            |project_path| {
+                                self.refresh_project_ignore_files(
+                                    project_key,
+                                    project_path.as_path(),
+                                )
+                            },
+                        )
+                });
+            match result {
+                Ok(project_diagnostics) => diagnostics.extend(project_diagnostics),
+                Err(error) => diagnostics.push(Diagnostic::new(error)),
             }
         }
         Ok(diagnostics)
@@ -422,6 +452,11 @@ where
     #[inline]
     fn remove_watch_aliases(&self, path: &Utf8Path, callback: impl FnMut(&Utf8Path)) {
         self.scanner.remove_watch_aliases(path, callback)
+    }
+
+    #[inline]
+    fn remove_unused_watched_folder(&self, path: &Utf8Path) -> bool {
+        self.scanner.remove_unused_watched_folder(path)
     }
 
     fn unload_file(

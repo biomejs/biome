@@ -1397,16 +1397,22 @@ impl WorkspaceDb {
         let project = self
             .get_project(&project_key)
             .ok_or_else(WorkspaceError::no_project)?;
+        let root_settings = project.root_settings(self);
+        let ignore_matches = root_settings.as_ref().vcs_settings.ignore_matches.as_ref();
+        // A root matcher for another VCS root is stale: the configuration changed after its
+        // ignore files were read.
+        if root_git_ignore.is_some_and(|root_git_ignore| {
+            ignore_matches.is_none_or(|ignore_matches| {
+                ignore_matches.root_path() != root_git_ignore.root()
+            })
+        }) {
+            return Ok(());
+        }
         let should_update = root_git_ignore.is_some()
-            || project
-                .root_settings(self)
-                .as_ref()
-                .vcs_settings
-                .ignore_matches
-                .as_ref()
-                .is_some_and(|ignore_matches| {
-                    !nested_git_ignores.is_empty() || ignore_matches.has_git_matches_in(scope)
-                });
+            || ignore_matches.is_some_and(|ignore_matches| {
+                !nested_git_ignores.is_empty() || ignore_matches.has_git_matches_in(scope)
+            });
+        drop(root_settings);
         if !should_update {
             return Ok(());
         }

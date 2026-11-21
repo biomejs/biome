@@ -1,12 +1,12 @@
 use biome_configuration::Configuration;
+use biome_configuration::vcs::{VcsClientKind, VcsConfiguration};
 use biome_deserialize::json::deserialize_from_json_str;
 use biome_fs::{BiomePath, FileSystem, MemoryFileSystem, OsFileSystem};
 use biome_json_parser::JsonParserOptions;
-use camino::Utf8PathBuf;
+use camino::{Utf8Path, Utf8PathBuf};
 #[cfg(unix)]
 use rustc_hash::FxHashSet;
 
-#[cfg(unix)]
 use crate::WatcherInstruction;
 use crate::Workspace;
 #[cfg(unix)]
@@ -14,9 +14,11 @@ use crate::scanner::Scanner;
 use crate::scanner::WorkspaceScannerBridge;
 use crate::settings::ModuleGraphResolutionKind;
 use crate::test_utils::setup_workspace_and_open_project;
-#[cfg(unix)]
 use crate::test_utils::setup_workspace_and_open_project_and_get_watcher_instruction_receiver;
-use crate::workspace::{GetFileContentParams, ScanKind, ScanProjectParams, UpdateSettingsParams};
+use crate::workspace::{
+    CloseProjectParams, GetFileContentParams, OpenProjectParams, ScanKind, ScanProjectParams,
+    UpdateSettingsParams,
+};
 
 #[test]
 fn scan_project_result_does_not_expose_source_file_candidates() {
@@ -151,7 +153,7 @@ fn watcher_projects_events_to_every_symlink_alias() {
         FxHashSet::from_iter([first_alias.clone(), second_alias.clone()]),
     );
 
-    let WatcherInstruction::WatchFolders(physical_paths) = watcher_rx.recv().unwrap() else {
+    let Ok(WatcherInstruction::WatchFolders(physical_paths)) = watcher_rx.try_recv() else {
         panic!("expected watcher folders");
     };
     assert_eq!(
@@ -209,7 +211,7 @@ fn watcher_projects_events_through_nested_physical_roots() {
         FxHashSet::from_iter([nested_alias.clone(), parent_alias.clone()]),
     );
 
-    let WatcherInstruction::WatchFolders(physical_paths) = watcher_rx.recv().unwrap() else {
+    let Ok(WatcherInstruction::WatchFolders(physical_paths)) = watcher_rx.try_recv() else {
         panic!("expected watcher folders");
     };
     assert_eq!(
@@ -230,6 +232,227 @@ fn watcher_projects_events_through_nested_physical_roots() {
 
     drop(scanner);
     std::fs::remove_dir_all(fs.working_directory).unwrap();
+}
+
+#[test]
+#[cfg(unix)]
+fn watcher_moves_retargeted_symlink_aliases_to_the_new_target() {
+    use std::os::unix::fs::symlink;
+
+    let mut fs = biome_fs::TemporaryFs::new("watcher_moves_retargeted_symlink_aliases");
+    fs.create_file("project/root.js", "statement();");
+    fs.create_file("old/sub/file.js", "statement();");
+    fs.create_file("new/sub/file.js", "statement();");
+    let link = fs.working_directory.join("project/link");
+    let old_target = fs.working_directory.join("old");
+    let new_target = fs.working_directory.join("new");
+    symlink(&old_target, &link).unwrap();
+
+    let (watcher_tx, watcher_rx) = crossbeam::channel::unbounded();
+    let scanner = Scanner::new(watcher_tx);
+    let os = fs.create_os();
+    scanner.watch_folders(&os, FxHashSet::from_iter([link.clone(), link.join("sub")]));
+    let Ok(WatcherInstruction::WatchFolders(physical_paths)) = watcher_rx.try_recv() else {
+        panic!("expected watcher folders");
+    };
+    for physical_path in physical_paths {
+        assert!(scanner.insert_watched_folder(physical_path));
+    }
+
+    std::fs::remove_file(&link).unwrap();
+    symlink(&new_target, &link).unwrap();
+    scanner.watch_folders(&os, FxHashSet::from_iter([link.clone(), link.join("sub")]));
+
+    let instructions = watcher_rx.try_iter().collect::<Vec<_>>();
+    assert!(
+        instructions.iter().any(|instruction| matches!(
+            instruction,
+            WatcherInstruction::UnwatchUnusedFolders(paths)
+                if *paths == FxHashSet::from_iter([old_target.clone(), old_target.join("sub")])
+        )),
+        "watcher instructions: {instructions:?}"
+    );
+    let old_file = old_target.join("sub/file.js");
+    assert_eq!(
+        scanner.logical_paths_for_watcher_event(&old_file),
+        vec![old_file]
+    );
+    assert_eq!(
+        scanner.logical_paths_for_watcher_event(&new_target.join("sub/file.js")),
+        vec![link.join("sub/file.js")]
+    );
+    assert!(scanner.remove_unused_watched_folder(&old_target));
+    assert!(!scanner.remove_unused_watched_folder(&new_target));
+
+    drop(scanner);
+    std::fs::remove_dir_all(fs.working_directory).unwrap();
+}
+
+fn git_settings_with_root(root: Option<&str>) -> Configuration {
+    Configuration {
+        vcs: Some(VcsConfiguration {
+            use_ignore_file: Some(true.into()),
+            enabled: Some(true.into()),
+            client_kind: Some(VcsClientKind::Git),
+            root: root.map(String::from),
+            ..Default::default()
+        }),
+        ..Default::default()
+    }
+}
+
+#[test]
+fn watched_scan_indexes_a_project_whose_vcs_watch_was_acknowledged_early() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from("/project/.git/HEAD"), "ref: refs/heads/main\n");
+    fs.insert(Utf8PathBuf::from("/project/.gitignore"), "ignored.js\n");
+    fs.insert(Utf8PathBuf::from("/project/package.json"), "{}");
+
+    let (workspace, project_key, _watcher_rx) =
+        setup_workspace_and_open_project_and_get_watcher_instruction_receiver(fs, "/project");
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            workspace_directory: Some(BiomePath::new("/project")),
+            configuration: git_settings_with_root(None),
+            extended_configurations: Default::default(),
+            module_graph_resolution_kind: ModuleGraphResolutionKind::ModulesAndTypes,
+        })
+        .unwrap();
+    // The watcher can acknowledge the folder of the root ignore file, which is the project
+    // folder, before the scan reaches its setup phase.
+    workspace
+        .scanner
+        .insert_watched_folder(Utf8PathBuf::from("/project"));
+
+    workspace
+        .scan_project(ScanProjectParams {
+            project_key,
+            watch: true,
+            force: false,
+            scan_kind: ScanKind::Project,
+            verbose: false,
+        })
+        .unwrap();
+
+    assert!(workspace.is_indexed(Utf8Path::new("/project/package.json")));
+}
+
+#[test]
+#[cfg(unix)]
+fn scan_reports_an_unreadable_nested_ignore_file_and_keeps_indexing() {
+    use std::os::unix::fs::PermissionsExt;
+
+    let mut fs = biome_fs::TemporaryFs::new("scan_reports_an_unreadable_nested_ignore_file");
+    fs.create_file(".git/HEAD", "ref: refs/heads/main\n");
+    fs.create_file(".gitignore", "");
+    fs.create_file("pkg/.gitignore", "ignored.js\n");
+    fs.create_file("package.json", "{}");
+    let nested_ignore_file = fs.working_directory.join("pkg/.gitignore");
+    std::fs::set_permissions(&nested_ignore_file, PermissionsExt::from_mode(0o000)).unwrap();
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs.create_os(), fs.cli_path());
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            workspace_directory: Some(BiomePath::new(&fs.working_directory)),
+            configuration: git_settings_with_root(None),
+            extended_configurations: Default::default(),
+            module_graph_resolution_kind: ModuleGraphResolutionKind::ModulesAndTypes,
+        })
+        .unwrap();
+    let result = workspace.scan_project(ScanProjectParams {
+        project_key,
+        watch: false,
+        force: false,
+        scan_kind: ScanKind::Project,
+        verbose: false,
+    });
+    std::fs::set_permissions(&nested_ignore_file, PermissionsExt::from_mode(0o644)).unwrap();
+
+    let result = result.expect("an unreadable ignore file doesn't abort the scan");
+    assert!(!result.diagnostics.is_empty());
+    assert!(workspace.is_indexed(&fs.working_directory.join("package.json")));
+    drop(workspace);
+    std::fs::remove_dir_all(fs.working_directory).unwrap();
+}
+
+#[test]
+fn closing_a_project_releases_its_vcs_watches_outside_the_project() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from("/repo/.git/HEAD"), "ref: refs/heads/main\n");
+    fs.insert(Utf8PathBuf::from("/repo/.gitignore"), "ignored.js\n");
+    fs.insert(Utf8PathBuf::from("/repo/web/file.js"), "statement();");
+    fs.insert(Utf8PathBuf::from("/repo/api/file.js"), "statement();");
+
+    let (workspace, web_key, watcher_rx) =
+        setup_workspace_and_open_project_and_get_watcher_instruction_receiver(fs, "/repo/web");
+    let api_key = workspace
+        .open_project(OpenProjectParams {
+            path: BiomePath::new("/repo/api"),
+            open_uninitialized: true,
+        })
+        .unwrap()
+        .project_key;
+    for (project_key, path) in [(web_key, "/repo/web"), (api_key, "/repo/api")] {
+        workspace
+            .update_settings(UpdateSettingsParams {
+                project_key,
+                workspace_directory: Some(BiomePath::new(path)),
+                configuration: git_settings_with_root(Some("..")),
+                extended_configurations: Default::default(),
+                module_graph_resolution_kind: ModuleGraphResolutionKind::ModulesAndTypes,
+            })
+            .unwrap();
+        workspace
+            .scan_project(ScanProjectParams {
+                project_key,
+                watch: true,
+                force: false,
+                scan_kind: ScanKind::Project,
+                verbose: false,
+            })
+            .unwrap();
+    }
+    let acknowledge = || {
+        for instruction in watcher_rx.try_iter() {
+            match instruction {
+                WatcherInstruction::WatchFolders(paths) => {
+                    for path in paths {
+                        workspace.scanner.insert_watched_folder(path);
+                    }
+                }
+                WatcherInstruction::UnwatchFolder(path) => {
+                    workspace.scanner.remove_watch_aliases(&path, |_| {});
+                }
+                WatcherInstruction::UnwatchUnusedFolders(paths) => {
+                    for path in paths {
+                        workspace.scanner.remove_unused_watched_folder(&path);
+                    }
+                }
+                WatcherInstruction::ReindexFile(_) | WatcherInstruction::Stop => {}
+            }
+        }
+    };
+    acknowledge();
+    assert!(workspace.scanner.is_watched(Utf8Path::new("/repo")));
+
+    workspace
+        .close_project(CloseProjectParams {
+            project_key: web_key,
+        })
+        .unwrap();
+    acknowledge();
+    assert!(workspace.scanner.is_watched(Utf8Path::new("/repo")));
+
+    workspace
+        .close_project(CloseProjectParams {
+            project_key: api_key,
+        })
+        .unwrap();
+    acknowledge();
+    assert!(!workspace.scanner.is_watched(Utf8Path::new("/repo")));
+    assert!(!workspace.scanner.is_watched(Utf8Path::new("/repo/.git/info")));
 }
 
 // If this test hangs, it probably recurses on one of the symlinks, such as

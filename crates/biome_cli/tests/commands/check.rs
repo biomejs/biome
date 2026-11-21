@@ -1449,28 +1449,53 @@ fn directory_only_vcs_ignore_does_not_ignore_file_symlink() {
         .unwrap();
     File::create(root_path.join(".gitignore"))
         .unwrap()
-        .write_all(b"alias.js/\n")
+        .write_all(b"alias.js/\nignored.js\n")
         .unwrap();
     let target_path = root_path.join("target.js");
     File::create(&target_path)
         .unwrap()
         .write_all(APPLY_SUGGESTED_BEFORE.as_bytes())
         .unwrap();
+    let ignored_target_path = root_path.join("ignored_target.js");
+    File::create(&ignored_target_path)
+        .unwrap()
+        .write_all(APPLY_SUGGESTED_BEFORE.as_bytes())
+        .unwrap();
     let alias_path = root_path.join("alias.js");
+    let ignored_alias_path = root_path.join("ignored.js");
 
     #[cfg(target_family = "unix")]
-    symlink(&target_path, &alias_path).unwrap();
+    {
+        symlink(&target_path, &alias_path).unwrap();
+        symlink(&ignored_target_path, &ignored_alias_path).unwrap();
+    }
 
     #[cfg(target_os = "windows")]
-    check_windows_symlink!(symlink_file(&target_path, &alias_path));
+    {
+        check_windows_symlink!(symlink_file(&target_path, &alias_path));
+        check_windows_symlink!(symlink_file(&ignored_target_path, &ignored_alias_path));
+    }
 
     let result = run_cli_with_dyn_fs(
         Box::new(OsFileSystem::new(root_path.clone())),
         &mut console,
-        Args::from(["check", "--write", "--unsafe", alias_path.as_str()].as_slice()),
+        Args::from(
+            [
+                "check",
+                "--write",
+                "--unsafe",
+                alias_path.as_str(),
+                ignored_alias_path.as_str(),
+            ]
+            .as_slice(),
+        ),
     );
 
     assert_eq!(read_to_string(&target_path).unwrap(), APPLY_SUGGESTED_AFTER);
+    assert_eq!(
+        read_to_string(&ignored_target_path).unwrap(),
+        APPLY_SUGGESTED_BEFORE
+    );
     remove_dir_all(root_path).unwrap();
 
     assert!(result.is_ok(), "run_cli returned {result:?}");

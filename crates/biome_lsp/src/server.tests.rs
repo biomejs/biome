@@ -494,6 +494,88 @@ async fn document_range_formatting() -> Result<()> {
 }
 
 #[tokio::test]
+async fn legacy_embedded_range_formatting_maps_ranges_to_the_script() -> Result<()> {
+    let factory = ServerFactory::default();
+    let (service, client) = factory.create().into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let (sender, _) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    server.initialize().await?;
+    server.initialized().await?;
+
+    server
+        .notify(
+            "textDocument/didOpen",
+            DidOpenTextDocumentParams {
+                text_document: TextDocumentItem {
+                    uri: uri!("document.vue"),
+                    language_id: String::from("vue"),
+                    version: 0,
+                    text: String::from(
+                        "<template>\n  <div></div>\n</template>\n<script>\nformatHere()\n</script>\n",
+                    ),
+                },
+            },
+        )
+        .await?;
+
+    let format_range = |range| DocumentRangeFormattingParams {
+        text_document: TextDocumentIdentifier {
+            uri: uri!("document.vue"),
+        },
+        range,
+        options: FormattingOptions {
+            tab_size: 4,
+            insert_spaces: false,
+            properties: HashMap::default(),
+            trim_trailing_whitespace: None,
+            insert_final_newline: None,
+            trim_final_newlines: None,
+        },
+        work_done_progress_params: WorkDoneProgressParams {
+            work_done_token: None,
+        },
+    };
+
+    let template_edits: Option<Vec<TextEdit>> = server
+        .request(
+            "textDocument/rangeFormatting",
+            "formatting",
+            format_range(Range::new(Position::new(1, 0), Position::new(2, 0))),
+        )
+        .await?
+        .context("formatting returned None")?;
+    assert!(
+        template_edits.as_ref().is_none_or(Vec::is_empty),
+        "a selection before the script must not format it: {template_edits:?}"
+    );
+
+    let script_edits: Option<Vec<TextEdit>> = server
+        .request(
+            "textDocument/rangeFormatting",
+            "formatting",
+            format_range(Range::new(Position::new(4, 0), Position::new(5, 0))),
+        )
+        .await?
+        .context("formatting returned None")?;
+    assert_eq!(
+        script_edits.context("formatting did not return an edit list")?,
+        vec![TextEdit::new(
+            Range::new(Position::new(4, 12), Position::new(4, 12)),
+            ";".to_string()
+        )]
+    );
+
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}
+
+#[tokio::test]
 async fn pull_diagnostics() -> Result<()> {
     let factory = ServerFactory::default();
     let (service, client) = factory.create().into_inner();
@@ -1772,6 +1854,17 @@ async fn removing_one_workspace_folder_keeps_shared_project_loaded() -> Result<(
         .await?
         .context("initialize returned no response")?;
     server.initialized().await?;
+    let session = factory
+        .sessions
+        .lock()
+        .unwrap()
+        .values()
+        .next()
+        .cloned()
+        .context("server session not found")?;
+    let project_key = session
+        .project_for_path(second_path.as_path())
+        .context("shared project not found")?;
 
     server
         .notify(
@@ -1787,9 +1880,17 @@ async fn removing_one_workspace_folder_keeps_shared_project_loaded() -> Result<(
             },
         )
         .await?;
+    assert!(session.is_project_registered(project_key));
     server
         .open_named_document("statement(   );", file_uri.clone(), "javascript")
         .await?;
+    assert_eq!(
+        session
+            .document(&file_uri)
+            .context("document not open")?
+            .project_key,
+        project_key
+    );
 
     let edits: Option<Vec<TextEdit>> = server
         .request(

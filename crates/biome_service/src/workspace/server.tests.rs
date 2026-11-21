@@ -17,6 +17,7 @@ use biome_configuration::{
     javascript::{JsFormatterConfiguration, JsParserConfiguration, JsResolverConfiguration},
     json::{JsonConfiguration, JsonFormatterConfiguration},
     max_size::MaxSize,
+    vcs::{VcsClientKind, VcsConfiguration},
 };
 use biome_css_syntax::CssLanguage;
 use biome_formatter::{IndentStyle, LineWidth, QuoteStyle};
@@ -3324,6 +3325,104 @@ fn owned_scan_reuses_inputs_of_closed_files() {
     assert_eq!(&**scanned_changed.text(&db), UPDATED);
     drop(db);
     assert_eq!(allocated_file_inputs(&workspace), (2, 2));
+}
+
+/// Clears a pause flag when dropped.
+///
+/// A panicking assertion inside [std::thread::scope] would otherwise leave the paused thread
+/// spinning, and the scope would wait for it forever instead of reporting the failure.
+struct ClearOnDrop<'a>(&'a AtomicBool);
+
+impl Drop for ClearOnDrop<'_> {
+    fn drop(&mut self) {
+        self.0.store(false, Ordering::Release);
+    }
+}
+
+#[test]
+fn vcs_ignore_refresh_keeps_concurrent_settings_updates() {
+    const TIMEOUT: Duration = Duration::from_secs(5);
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from("/project/.gitignore"), "ignored.js\n");
+    let (watcher_tx, _) = crossbeam::channel::unbounded();
+    let (service_tx, _) = tokio::sync::watch::channel(ServiceNotification::IndexUpdated);
+    let mut workspace = LocalWorkspace::new(
+        Arc::new(fs),
+        watcher_tx,
+        service_tx,
+        Arc::new(NoopQueryProvider {}),
+        None,
+    );
+    workspace.db_state = DbState::lsp(workspace.server.fs.clone());
+    let OpenProjectResult { project_key } = workspace
+        .open_project(OpenProjectParams {
+            path: BiomePath::new("/project"),
+            open_uninitialized: true,
+        })
+        .unwrap();
+    let update_settings = |formatter_enabled: bool| {
+        workspace
+            .update_settings(UpdateSettingsParams {
+                project_key,
+                workspace_directory: Some(BiomePath::new("/project")),
+                configuration: Configuration {
+                    vcs: Some(VcsConfiguration {
+                        enabled: Some(true.into()),
+                        client_kind: Some(VcsClientKind::Git),
+                        use_ignore_file: Some(true.into()),
+                        ..Default::default()
+                    }),
+                    formatter: Some(FormatterConfiguration {
+                        enabled: Some(formatter_enabled.into()),
+                        ..Default::default()
+                    }),
+                    ..Default::default()
+                },
+                extended_configurations: vec![],
+                module_graph_resolution_kind: ModuleGraphResolutionKind::None,
+            })
+            .unwrap();
+    };
+    update_settings(true);
+
+    let test_state = &workspace.server.scanner_test_state;
+    test_state
+        .pause_vcs_ignore_publish
+        .store(true, Ordering::Release);
+    let (refresh_paused, refresh_result) = std::thread::scope(|scope| {
+        let resume_refresh = ClearOnDrop(&test_state.pause_vcs_ignore_publish);
+        let refresh_workspace = &workspace;
+        let refresh = scope.spawn(move || {
+            refresh_workspace
+                .as_workspace()
+                .refresh_project_vcs_ignore_settings(project_key)
+        });
+        let refresh_paused = wait_until(TIMEOUT, || {
+            test_state
+                .vcs_ignore_publish_attempts
+                .load(Ordering::Acquire)
+                >= 1
+        });
+        if refresh_paused {
+            update_settings(false);
+        }
+        drop(resume_refresh);
+        (refresh_paused, refresh.join().unwrap())
+    });
+
+    assert!(refresh_paused, "the refresh did not read the ignore files");
+    refresh_result.unwrap();
+    let settings = workspace
+        .as_workspace()
+        .project_get_root_settings(project_key)
+        .unwrap();
+    assert_eq!(settings.formatter.enabled, Some(false.into()));
+    assert!(
+        settings
+            .vcs_settings
+            .is_ignored(&BiomePath::new("/project/ignored.js"), false)
+    );
 }
 
 #[test]
@@ -6677,6 +6776,7 @@ fn concurrent_virtual_open_survives_the_last_view_closing() {
         .pause_close_after_document_update
         .store(true, Ordering::Release);
     let (closed, opened) = std::thread::scope(|scope| {
+        let resume_close = ClearOnDrop(&workspace.server.pause_close_after_document_update);
         let close_path = document_path.clone();
         let close = scope.spawn(move || {
             first.close_file(CloseFileParams {
@@ -6704,10 +6804,7 @@ fn concurrent_virtual_open_survives_the_last_view_closing() {
             inline_config: None,
             editor_features: None,
         });
-        workspace
-            .server
-            .pause_close_after_document_update
-            .store(false, Ordering::Release);
+        drop(resume_close);
         (close.join(), opened)
     });
 

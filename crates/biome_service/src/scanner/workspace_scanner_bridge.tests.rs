@@ -262,9 +262,11 @@ fn should_not_index_an_ignored_file_inside_vcs_ignore_file() {
 #[test]
 fn nested_ignore_at_project_root_overrides_parent_vcs_root() {
     let file_path = Utf8PathBuf::from("/repo/project/keep.js");
+    let dropped_path = Utf8PathBuf::from("/repo/project/drop.js");
 
     let fs = MemoryFileSystem::default();
     fs.insert(file_path.clone(), "import 'foo';");
+    fs.insert(dropped_path.clone(), "import 'foo';");
     fs.insert(Utf8PathBuf::from("/repo/.gitignore"), "*.js\n");
     fs.insert(Utf8PathBuf::from("/repo/project/.gitignore"), "!keep.js\n");
 
@@ -300,14 +302,17 @@ fn nested_ignore_at_project_root_overrides_parent_vcs_root() {
         .expect("can scan the project");
 
     assert!(workspace.is_indexed(&file_path));
+    assert!(!workspace.is_indexed(&dropped_path));
 }
 
 #[test]
 fn intermediate_ancestor_ignore_applies_to_nested_project() {
     let file_path = Utf8PathBuf::from("/repo/packages/project/ignored.js");
+    let kept_path = Utf8PathBuf::from("/repo/packages/project/keep.js");
 
     let fs = MemoryFileSystem::default();
     fs.insert(file_path.clone(), "import 'foo';");
+    fs.insert(kept_path.clone(), "import 'foo';");
     fs.insert(Utf8PathBuf::from("/repo/.gitignore"), "");
     fs.insert(
         Utf8PathBuf::from("/repo/packages/.gitignore"),
@@ -346,6 +351,7 @@ fn intermediate_ancestor_ignore_applies_to_nested_project() {
         .expect("can scan the project");
 
     assert!(!workspace.is_indexed(&file_path));
+    assert!(workspace.is_indexed(&kept_path));
 }
 
 #[test]

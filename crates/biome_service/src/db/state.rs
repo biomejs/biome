@@ -868,6 +868,27 @@ impl DbState {
         }
     }
 
+    /// Returns whether this scan session queued nested ignore matchers for `project_key` that are
+    /// located in `scope`.
+    ///
+    /// Queued matchers aren't visible in the database until the session commits, so clearing
+    /// `scope` must still be queued to replace them.
+    fn has_queued_git_ignores_in(&self, project_key: ProjectKey, scope: &BiomePath) -> bool {
+        self.scanner_changes.as_ref().is_some_and(|changes| {
+            changes.project_updates.lock().iter().any(|update| {
+                matches!(
+                    update,
+                    ProjectUpdate::GitIgnores {
+                        project_key: queued_project_key,
+                        nested_git_ignores,
+                        ..
+                    } if *queued_project_key == project_key
+                        && nested_git_ignores.iter().any(|matcher| matcher.is_in(scope))
+                )
+            })
+        })
+    }
+
     /// Replaces the supplied root matcher and the nested matchers below `scope`.
     /// Each entry of `payload` contains an ignore-file directory and its patterns.
     pub fn store_git_ignores(
@@ -884,6 +905,7 @@ impl DbState {
                 if root_git_ignore.is_none()
                     && payload.is_empty()
                     && !db.has_nested_git_ignores_in(project_key, &scope)?
+                    && !self.has_queued_git_ignores_in(project_key, &scope)
                 {
                     return Ok(());
                 }
@@ -1376,6 +1398,7 @@ mod tests {
     use super::*;
 
     use crate::projects::ProjectDb;
+    use crate::settings::VcsIgnoredPatterns;
     use biome_configuration::vcs::VcsClientKind;
     use biome_languages::JsFileSource;
     use camino::Utf8PathBuf;
@@ -1729,6 +1752,38 @@ mod tests {
             .store_git_ignores(project_key, None, Utf8PathBuf::from("/project"), Vec::new())
             .unwrap();
         assert_eq!(read(), before);
+    }
+
+    #[test]
+    fn clearing_a_scope_replaces_git_ignores_queued_in_the_same_scan() {
+        let state = DbState::lsp(test_fs());
+        let project_key = state.insert_project(Utf8PathBuf::from("/project"));
+        let mut settings = git_settings();
+        settings.vcs_settings.ignore_matches = Some(VcsIgnoredPatterns::Git {
+            root: VcsIgnoredPatterns::git_ignore(&BiomePath::new("/project"), &[]).unwrap(),
+            nested: vec![],
+        });
+        state.insert_root_settings(project_key, settings);
+
+        {
+            let session = state.scan_session();
+            let view = session.view();
+            view.store_git_ignores(
+                project_key,
+                None,
+                Utf8PathBuf::from("/project/app"),
+                vec![(Utf8PathBuf::from("/project/app/src"), vec!["*.js".into()])],
+            )
+            .unwrap();
+            view.store_git_ignores(project_key, None, Utf8PathBuf::from("/project"), Vec::new())
+                .unwrap();
+        }
+
+        let db = state.fork();
+        assert!(
+            !db.has_nested_git_ignores_in(project_key, &BiomePath::new("/project"))
+                .unwrap()
+        );
     }
 
     #[test]

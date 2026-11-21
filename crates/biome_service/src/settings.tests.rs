@@ -613,6 +613,38 @@ fn nested_vcs_whitelist_cannot_reinclude_file_below_ignored_parent() {
     assert!(ignored_patterns.is_ignored(&BiomePath::new("repo/ignored/file.js"), false));
 }
 
+#[test]
+fn nested_vcs_directory_whitelist_does_not_reinclude_files_matched_by_parent_rules() {
+    let mut ignored_patterns = VcsIgnoredPatterns::Git {
+        root: VcsIgnoredPatterns::git_ignore(&BiomePath::new("/repo"), &["*.js"]).unwrap(),
+        nested: vec![],
+    };
+    ignored_patterns.insert_git_match(
+        VcsIgnoredPatterns::git_ignore(&BiomePath::new("/repo/pkg"), &["*.css", "!src/"])
+            .unwrap(),
+    );
+    ignored_patterns.insert_git_match(
+        VcsIgnoredPatterns::git_ignore(&BiomePath::new("/repo/pkg/src"), &["!b/"]).unwrap(),
+    );
+
+    assert!(!ignored_patterns.is_ignored(&BiomePath::new("/repo/pkg/src"), true));
+    assert!(!ignored_patterns.is_ignored(&BiomePath::new("/repo/pkg/src/file.json"), false));
+    assert!(ignored_patterns.is_ignored(&BiomePath::new("/repo/pkg/src/file.js"), false));
+    assert!(ignored_patterns.is_ignored(&BiomePath::new("/repo/pkg/src/b/file.css"), false));
+}
+
+#[test]
+fn relative_vcs_root_is_stripped_once() {
+    let ignored_patterns = VcsIgnoredPatterns::Git {
+        root: VcsIgnoredPatterns::git_ignore(&BiomePath::new("lib"), &["/lib/file.js", "/rary"])
+            .unwrap(),
+        nested: vec![],
+    };
+
+    assert!(ignored_patterns.is_ignored(&BiomePath::new("lib/lib/file.js"), false));
+    assert!(!ignored_patterns.is_ignored(&BiomePath::new("lib/library/file.js"), false));
+}
+
 fn resolve_html_parse_options(
     settings: &Settings,
     parser: &<HtmlLanguage as ServiceLanguage>::ParserSettings,

@@ -4,7 +4,7 @@
 //! components without filesystem access, and derives the path's processing role. It does not
 //! canonicalize paths or resolve symbolic links.
 use crate::{ConfigName, PathKind, utils::normalize_path_buf};
-use camino::{Utf8Path, Utf8PathBuf};
+use camino::{Utf8Component, Utf8Path, Utf8PathBuf};
 use std::borrow::Cow;
 use std::cmp::Ordering;
 use std::fmt::{Debug, Formatter};
@@ -224,7 +224,11 @@ impl BiomePath {
     pub fn relation_to<'a>(&'a self, candidate: &'a Self) -> PathRelation<'a> {
         if self.path == candidate.path {
             PathRelation::Same
-        } else if let Ok(relative) = candidate.path.strip_prefix(&self.path) {
+        } else if let Ok(relative) = candidate.path.strip_prefix(&self.path)
+            // Normalized relative paths keep `..` only as leading components, which escape a
+            // relative root instead of descending into it.
+            && relative.components().next() != Some(Utf8Component::ParentDir)
+        {
             PathRelation::Descendant(relative)
         } else {
             PathRelation::Outside
@@ -563,6 +567,7 @@ mod test {
         assert!(reconstructed.is_virtual());
     }
 
+    #[cfg(debug_assertions)]
     #[test]
     #[should_panic(expected = "virtual paths must be constructed with BiomePath::new_virtual")]
     fn filesystem_constructor_rejects_the_virtual_namespace() {
@@ -594,5 +599,21 @@ mod test {
             PathRelation::Descendant(Utf8Path::new("dist/file.js"))
         );
         assert_eq!(root.relation_to(&outside), PathRelation::Outside);
+    }
+
+    #[test]
+    fn relative_roots_do_not_contain_parent_escapes() {
+        assert_eq!(
+            BiomePath::new("..").relation_to(&BiomePath::new("../../outside.js")),
+            PathRelation::Outside
+        );
+        assert_eq!(
+            BiomePath::new("").relation_to(&BiomePath::new("../outside.js")),
+            PathRelation::Outside
+        );
+        assert_eq!(
+            BiomePath::new("").relation_to(&BiomePath::new("inside.js")),
+            PathRelation::Descendant(Utf8Path::new("inside.js"))
+        );
     }
 }

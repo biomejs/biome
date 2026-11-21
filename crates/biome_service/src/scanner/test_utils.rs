@@ -41,6 +41,10 @@ pub(super) struct MockWorkspaceWatcherBridge<'a> {
 
     /// Logical aliases keyed by physical watcher event path.
     pub logical_paths_by_physical_path: FxHashMap<Utf8PathBuf, Vec<Utf8PathBuf>>,
+    /// Folders whose ignore files fail to refresh.
+    ///
+    /// Exposed to allow tests to simulate unreadable ignore files.
+    pub failing_ignore_refreshes: FxHashSet<Utf8PathBuf>,
 }
 
 impl<'a> MockWorkspaceWatcherBridge<'a> {
@@ -68,6 +72,7 @@ impl<'a> MockWorkspaceWatcherBridge<'a> {
             indexed_folders: Default::default(),
             watched_folders: Default::default(),
             logical_paths_by_physical_path: Default::default(),
+            failing_ignore_refreshes: Default::default(),
         };
         (this, rx)
     }
@@ -123,6 +128,9 @@ impl WorkspaceWatcherBridge for MockWorkspaceWatcherBridge<'_> {
     }
 
     fn refresh_ignore_files(&self, path: &Utf8Path) -> Result<Vec<Diagnostic>, WorkspaceError> {
+        if self.failing_ignore_refreshes.contains(path) {
+            return Err(WorkspaceError::no_project());
+        }
         self.index_folder(path)
     }
 
@@ -157,6 +165,12 @@ impl WorkspaceWatcherBridge for MockWorkspaceWatcherBridge<'_> {
             }
         });
         self.tx.send(()).expect("can send notification");
+    }
+
+    fn remove_unused_watched_folder(&self, path: &Utf8Path) -> bool {
+        let removed = self.watched_folders.pin().remove(path);
+        self.tx.send(()).expect("can send notification");
+        removed
     }
 
     fn unload_file(

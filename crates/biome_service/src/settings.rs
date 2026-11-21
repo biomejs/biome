@@ -1456,19 +1456,6 @@ impl VcsSettings {
 
         Ok(())
     }
-
-    pub(crate) fn store_nested_ignore_patterns(
-        &mut self,
-        path: &BiomePath,
-        patterns: &[&str],
-    ) -> Result<(), WorkspaceError> {
-        if let Some(ignore_matches) = self.ignore_matches.as_mut()
-            && self.client_kind == Some(VcsClientKind::Git)
-        {
-            ignore_matches.insert_git_match(VcsIgnoredPatterns::git_ignore(path, patterns)?);
-        }
-        Ok(())
-    }
 }
 
 #[derive(Clone, Debug)]
@@ -1491,31 +1478,24 @@ pub struct GitIgnoreMatcher {
 }
 
 impl GitIgnoreMatcher {
-    /// Evaluates root patterns against a candidate and each of its relative parents.
-    fn match_root(&self, path: &BiomePath, is_dir: bool) -> Option<bool> {
-        let matched = match self.root.relation_to(path) {
-            PathRelation::Descendant(relative) => {
-                self.matcher.matched_path_or_any_parents(relative, is_dir)
-            }
-            PathRelation::Same | PathRelation::Outside => return None,
-        };
-        if matched.is_ignore() {
-            Some(true)
-        } else if matched.is_whitelist() {
-            Some(false)
-        } else {
-            None
-        }
+    /// Returns the directory of the ignore file of this matcher.
+    pub(crate) fn root(&self) -> &BiomePath {
+        &self.root
     }
 
-    /// Evaluates patterns from a nested ignore file against a candidate and its parents.
-    fn match_nested(&self, path: &BiomePath, is_dir: bool) -> Option<bool> {
-        let matched = match self.root.relation_to(path) {
-            PathRelation::Descendant(relative) => {
-                self.matcher.matched_path_or_any_parents(relative, is_dir)
-            }
-            PathRelation::Same | PathRelation::Outside => return None,
+    /// Returns whether the ignore file of this matcher is located in `scope`.
+    pub(crate) fn is_in(&self, scope: &BiomePath) -> bool {
+        !matches!(scope.relation_to(&self.root), PathRelation::Outside)
+    }
+
+    /// Returns whether the last pattern matching `path` itself ignores or whitelists it.
+    ///
+    /// Parent directories aren't considered, and paths outside the matcher root never match.
+    fn matched(&self, path: &BiomePath, is_dir: bool) -> Option<bool> {
+        let PathRelation::Descendant(relative) = self.root.relation_to(path) else {
+            return None;
         };
+        let matched = self.matcher.matched(relative, is_dir);
         if matched.is_ignore() {
             Some(true)
         } else if matched.is_whitelist() {
@@ -1533,6 +1513,9 @@ impl VcsIgnoredPatterns {
         }
     }
 
+    /// Returns the decision for `path` itself from the deepest ignore file with a matching pattern.
+    ///
+    /// Patterns from a nested ignore file take precedence over patterns from its parents.
     fn match_git_path(
         root: &GitIgnoreMatcher,
         nested: &[GitIgnoreMatcher],
@@ -1541,35 +1524,36 @@ impl VcsIgnoredPatterns {
     ) -> Option<bool> {
         nested
             .iter()
-            .filter_map(|matcher| matcher.match_nested(path, is_dir))
-            .next_back()
-            .or_else(|| root.match_root(path, is_dir))
+            .rev()
+            .find_map(|matcher| matcher.matched(path, is_dir))
+            .or_else(|| root.matched(path, is_dir))
     }
 
     /// Returns whether a configured ignore file excludes `path`.
+    ///
+    /// A path is excluded when its own decision ignores it or when any of its parent directories is
+    /// ignored. Git doesn't descend into ignored directories, so no pattern can re-include their
+    /// contents. Whitelisting a directory only allows descending into it: each child is still
+    /// matched on its own.
     pub fn is_ignored(&self, path: &BiomePath, is_dir: bool) -> bool {
         match self {
             Self::Git { root, nested } => {
-                let matched = Self::match_git_path(root, nested, path, is_dir);
-                if matched != Some(false) {
-                    return matched.unwrap_or(false);
+                if Self::match_git_path(root, nested, path, is_dir) == Some(true) {
+                    return true;
                 }
 
-                if let PathRelation::Descendant(relative) = root.root.relation_to(path)
-                    && let Some(parent) = relative.parent()
-                {
-                    let mut ancestor = root.root.to_path_buf();
-                    for component in parent.components() {
-                        ancestor.push(component.as_str());
-                        if Self::match_git_path(root, nested, &BiomePath::new(&ancestor), true)
-                            == Some(true)
-                        {
-                            return true;
-                        }
-                    }
-                }
-
-                false
+                let PathRelation::Descendant(relative) = root.root.relation_to(path) else {
+                    return false;
+                };
+                let Some(parent) = relative.parent() else {
+                    return false;
+                };
+                let mut ancestor = root.root.to_path_buf();
+                parent.components().any(|component| {
+                    ancestor.push(component.as_str());
+                    Self::match_git_path(root, nested, &BiomePath::new(&ancestor), true)
+                        == Some(true)
+                })
             }
         }
     }
@@ -1592,9 +1576,7 @@ impl VcsIgnoredPatterns {
 
     pub(crate) fn has_git_matches_in(&self, scope: &BiomePath) -> bool {
         match self {
-            Self::Git { nested, .. } => nested
-                .iter()
-                .any(|matcher| !matches!(scope.relation_to(&matcher.root), PathRelation::Outside)),
+            Self::Git { nested, .. } => nested.iter().any(|matcher| matcher.is_in(scope)),
         }
     }
 
@@ -1605,9 +1587,7 @@ impl VcsIgnoredPatterns {
     ) {
         match self {
             Self::Git { nested, .. } => {
-                nested.retain(|matcher| {
-                    matches!(scope.relation_to(&matcher.root), PathRelation::Outside)
-                });
+                nested.retain(|matcher| !matcher.is_in(scope));
                 nested.extend_from_slice(replacements);
                 nested.sort_by_key(|matcher| matcher.root.as_path().components().count());
             }
@@ -1622,7 +1602,9 @@ impl VcsIgnoredPatterns {
         patterns: &[&str],
     ) -> Result<GitIgnoreMatcher, WorkspaceError> {
         let root = path.clone();
-        let mut gitignore_builder = GitignoreBuilder::new(root.as_path().as_std_path());
+        // Candidates are already relative to `root`. Rooting the builder at `.` stops the `ignore`
+        // crate from stripping a relative root from them a second time.
+        let mut gitignore_builder = GitignoreBuilder::new(".");
 
         for the_match in patterns {
             gitignore_builder

@@ -3,6 +3,8 @@
 use std::env::temp_dir;
 use std::fs::{FileType, Metadata};
 use std::process::Command;
+use std::sync::Arc;
+use std::sync::atomic::{AtomicUsize, Ordering};
 use std::{
     env, fs,
     io::{self, Read, Seek, Write},
@@ -72,6 +74,7 @@ impl FileSystem for OsFileSystem {
             let traversal_scope = OsTraversalScope {
                 scope,
                 working_directory,
+                directory_aliases: Arc::default(),
             };
             func(&traversal_scope);
         })
@@ -188,6 +191,51 @@ struct OsTraversalScope<'scope, 'env> {
     scope: &'env Scope<'scope>,
     /// The immutable anchor used for relative traversal input.
     working_directory: &'env Utf8Path,
+    /// Bounds directory enumerations through symbolic-link aliases across this traversal.
+    directory_aliases: Arc<DirectoryAliases>,
+}
+
+/// Counts how often each physical directory is enumerated through an alias route.
+///
+/// Each logical alias of a directory is a distinct path with its own ignore rules, so traversal
+/// enumerates a physical directory once per alias. Acyclic symbolic-link graphs can reach one
+/// directory through exponentially many aliases, so enumerations through aliases are bounded per
+/// physical directory. Routes that aren't aliases are never bounded, which keeps their precedence
+/// when physical files are deduplicated.
+#[derive(Default)]
+struct DirectoryAliases(papaya::HashMap<Utf8PathBuf, AtomicUsize>);
+
+impl DirectoryAliases {
+    /// The maximum number of alias routes enumerated for one physical directory.
+    const MAX_ENUMERATIONS: usize = 8;
+
+    /// Records an alias enumeration of `physical_path`, returning `false` past the bound.
+    fn try_enumerate(&self, physical_path: &Utf8Path) -> bool {
+        let enumerations = self.0.pin();
+        let count = match enumerations.get(physical_path) {
+            Some(count) => count,
+            None => enumerations.get_or_insert_with(physical_path.to_path_buf(), AtomicUsize::default),
+        };
+        count.fetch_add(1, Ordering::Relaxed) < Self::MAX_ENUMERATIONS
+    }
+}
+
+/// The route traversal followed to reach the entries of a directory.
+#[derive(Clone, Default)]
+struct Route {
+    /// The logical directory, when its entries are read through a different physical path.
+    logical_parent: Option<Utf8PathBuf>,
+    /// The physical directories enclosing the entries, used to detect cycles.
+    physical_ancestors: Vec<Utf8PathBuf>,
+    /// Whether the route followed a symbolic link below the evaluated root.
+    ///
+    /// The evaluated root is spelled by the caller, so following it doesn't make the entries
+    /// symbolic-link paths. This is the flag reported through [PathKind].
+    followed_symlink: bool,
+    /// Whether the logical path differs from the physical one, including through the root.
+    ///
+    /// Paths that aren't aliases take precedence when physical files are deduplicated.
+    is_alias: bool,
 }
 
 impl<'scope> TraversalScope<'scope> for OsTraversalScope<'scope, '_> {
@@ -212,7 +260,14 @@ impl<'scope> TraversalScope<'scope> for OsTraversalScope<'scope, '_> {
                 return;
             }
         };
-        handle_any_file(self.scope, ctx, path, file_type, None, &[]);
+        handle_any_file(
+            self.scope,
+            ctx,
+            &self.directory_aliases,
+            path,
+            file_type,
+            &Route::default(),
+        );
     }
 
     fn handle(&self, context: &'scope dyn TraversalContext, path: BiomePath) {
@@ -226,12 +281,11 @@ impl<'scope> TraversalScope<'scope> for OsTraversalScope<'scope, '_> {
 fn handle_dir<'scope>(
     scope: &Scope<'scope>,
     ctx: &'scope dyn TraversalContext,
+    directory_aliases: &Arc<DirectoryAliases>,
     path: &Utf8Path,
-    // The unresolved origin path in case the directory is behind a symbolic link
-    origin_path: Option<Utf8PathBuf>,
-    physical_ancestors: Vec<Utf8PathBuf>,
+    route: Route,
 ) {
-    let diagnostic_path = origin_path.as_deref().unwrap_or(path);
+    let diagnostic_path = route.logical_parent.as_deref().unwrap_or(path);
     let iter = match path.read_dir_utf8() {
         Ok(iter) => iter,
         Err(err) => {
@@ -246,9 +300,7 @@ fn handle_dir<'scope>(
 
     for entry in iter {
         match entry {
-            Ok(entry) => {
-                handle_dir_entry(scope, ctx, entry, origin_path.clone(), &physical_ancestors)
-            }
+            Ok(entry) => handle_dir_entry(scope, ctx, directory_aliases, entry, &route),
             Err(err) => {
                 ctx.push_diagnostic(
                     IoError::from(err)
@@ -265,13 +317,13 @@ fn handle_dir<'scope>(
 fn handle_dir_entry<'scope>(
     scope: &Scope<'scope>,
     ctx: &'scope dyn TraversalContext,
+    directory_aliases: &Arc<DirectoryAliases>,
     entry: Utf8DirEntry,
-    // The unresolved origin path in case the directory is behind a symbolic link
-    origin_path: Option<Utf8PathBuf>,
-    physical_ancestors: &[Utf8PathBuf],
+    route: &Route,
 ) {
     let path = entry.path();
-    let diagnostic_path = origin_path
+    let diagnostic_path = route
+        .logical_parent
         .as_deref()
         .and_then(|parent| path.file_name().map(|file_name| parent.join(file_name)))
         .unwrap_or_else(|| path.to_path_buf());
@@ -289,10 +341,10 @@ fn handle_dir_entry<'scope>(
     handle_any_file(
         scope,
         ctx,
+        directory_aliases,
         path.to_path_buf(),
         file_type,
-        origin_path,
-        physical_ancestors,
+        route,
     );
 }
 
@@ -360,16 +412,18 @@ fn physical_path_differs(path: &Utf8Path, physical_path: &Utf8Path) -> bool {
 fn handle_any_file<'scope>(
     scope: &Scope<'scope>,
     ctx: &'scope dyn TraversalContext,
+    directory_aliases: &Arc<DirectoryAliases>,
     mut path: Utf8PathBuf,
     mut file_type: FileType,
-    logical_parent: Option<Utf8PathBuf>,
-    physical_ancestors: &[Utf8PathBuf],
+    route: &Route,
 ) {
-    let mut physical_path = physical_ancestors
+    let is_root = route.physical_ancestors.is_empty();
+    let mut physical_path = route
+        .physical_ancestors
         .last()
         .and_then(|parent| path.file_name().map(|file_name| parent.join(file_name)))
         .unwrap_or_else(|| canonicalize_physical_path(&path));
-    let mut logical_path = match logical_parent {
+    let mut logical_path = match &route.logical_parent {
         Some(parent) => match path.file_name() {
             Some(file_name) => Some(parent.join(file_name)),
             None => {
@@ -384,9 +438,14 @@ fn handle_any_file<'scope>(
         },
         None => None,
     };
+    let mut followed_symlink = route.followed_symlink;
+    // A root operand can be spelled through symbolic links in its parent directories.
+    let mut is_alias = route.is_alias || (is_root && physical_path_differs(&path, &physical_path));
 
     let mut logical_path_is_interned = false;
     if file_type.is_symlink() {
+        followed_symlink |= !is_root;
+        is_alias = true;
         let unresolved_path = logical_path.take().unwrap_or_else(|| path.clone());
         if !ctx.interner().intern_path(unresolved_path.clone()) {
             return;
@@ -405,26 +464,31 @@ fn handle_any_file<'scope>(
 
         if target_file_type.is_dir() {
             let biome_path = BiomePath::new(&unresolved_path);
-            let path_kind = PathKind::Directory { is_symlink: true };
+            let path_kind = PathKind::Directory {
+                is_symlink: followed_symlink,
+            };
             if !ctx.can_handle_with_kind(&biome_path, path_kind) {
                 return;
             }
             if ctx.should_store_dirs() {
                 ctx.store_path(biome_path);
             }
-            if physical_ancestors.contains(&physical_path) {
+            if route.physical_ancestors.contains(&physical_path)
+                || !directory_aliases.try_enumerate(&physical_path)
+            {
                 return;
             }
-            let mut physical_ancestors = physical_ancestors.to_vec();
+            let mut physical_ancestors = route.physical_ancestors.clone();
             physical_ancestors.push(physical_path);
+            let route = Route {
+                logical_parent: Some(unresolved_path),
+                physical_ancestors,
+                followed_symlink,
+                is_alias,
+            };
+            let directory_aliases = Arc::clone(directory_aliases);
             scope.spawn(move |scope| {
-                handle_dir(
-                    scope,
-                    ctx,
-                    &target_path,
-                    Some(unresolved_path),
-                    physical_ancestors,
-                );
+                handle_dir(scope, ctx, &directory_aliases, &target_path, route);
             });
             return;
         }
@@ -434,11 +498,14 @@ fn handle_any_file<'scope>(
         file_type = target_file_type;
     }
 
-    let is_symlink = logical_path.is_some() || physical_path_differs(&path, &physical_path);
     let path_kind = if file_type.is_dir() {
-        PathKind::Directory { is_symlink }
+        PathKind::Directory {
+            is_symlink: followed_symlink,
+        }
     } else {
-        PathKind::File { is_symlink }
+        PathKind::File {
+            is_symlink: followed_symlink,
+        }
     };
     let traversal_logical_path = logical_path.clone();
     let logical_path = logical_path.unwrap_or_else(|| path.clone());
@@ -455,25 +522,28 @@ fn handle_any_file<'scope>(
         if ctx.should_store_dirs() {
             ctx.store_path(biome_path);
         }
-        if physical_ancestors.contains(&physical_path) {
+        if route.physical_ancestors.contains(&physical_path)
+            || (is_alias && !directory_aliases.try_enumerate(&physical_path))
+        {
             return;
         }
-        let mut physical_ancestors = physical_ancestors.to_vec();
+        let mut physical_ancestors = route.physical_ancestors.clone();
         physical_ancestors.push(physical_path);
+        let route = Route {
+            logical_parent: traversal_logical_path,
+            physical_ancestors,
+            followed_symlink,
+            is_alias,
+        };
+        let directory_aliases = Arc::clone(directory_aliases);
         scope.spawn(move |scope| {
-            handle_dir(
-                scope,
-                ctx,
-                &path,
-                traversal_logical_path,
-                physical_ancestors,
-            );
+            handle_dir(scope, ctx, &directory_aliases, &path, route);
         });
         return;
     }
 
     if file_type.is_file() {
-        ctx.store_physical_path(physical_path, biome_path, is_symlink);
+        ctx.store_physical_path(physical_path, biome_path, is_alias);
         return;
     }
 
@@ -645,6 +715,10 @@ mod tests {
         interner: PathInterner,
         physical_files: PhysicalFileOwners,
         visited: HashSet<BiomePath>,
+        /// Files reported to [TraversalContext::can_handle_with_kind] as symbolic-link paths.
+        symlink_files: HashSet<BiomePath>,
+        /// The number of entries reported to [TraversalContext::can_handle_with_kind].
+        handled_entries: AtomicUsize,
         ignored_path: Option<BiomePath>,
         store_dirs: bool,
     }
@@ -656,6 +730,8 @@ mod tests {
                 interner,
                 physical_files: PhysicalFileOwners::default(),
                 visited: HashSet::default(),
+                symlink_files: HashSet::default(),
+                handled_entries: AtomicUsize::default(),
                 ignored_path,
                 store_dirs,
             }
@@ -695,7 +771,11 @@ mod tests {
             panic!("unexpected diagnostic: {error:?}");
         }
 
-        fn can_handle_with_kind(&self, path: &BiomePath, _path_kind: PathKind) -> bool {
+        fn can_handle_with_kind(&self, path: &BiomePath, path_kind: PathKind) -> bool {
+            self.handled_entries.fetch_add(1, Ordering::Relaxed);
+            if path_kind == (PathKind::File { is_symlink: true }) {
+                self.symlink_files.pin().insert(path.clone());
+            }
             self.ignored_path
                 .as_ref()
                 .is_none_or(|ignored| ignored != path)
@@ -811,6 +891,70 @@ mod tests {
         assert!(visited.contains(&fs.biome_path(&target.join("nested/file.js"))));
         assert!(!visited.contains(&fs.biome_path(&nested_alias.join("file.js"))));
         drop(visited);
+        std::fs::remove_dir_all(temporary.project_directory).unwrap();
+    }
+
+    #[test]
+    fn bounds_enumerations_through_directory_aliases() {
+        const LEVELS: usize = 12;
+        let mut temporary = TemporaryFs::new("bounds_enumerations_through_directory_aliases");
+        temporary.create_file(&format!("level{LEVELS}/file.js"), "statement();");
+        for level in 0..LEVELS {
+            let directory = temporary.working_directory.join(format!("level{level}"));
+            let next = temporary.working_directory.join(format!("level{}", level + 1));
+            std::fs::create_dir_all(&directory).unwrap();
+            symlink(&next, directory.join("a")).unwrap();
+            symlink(&next, directory.join("b")).unwrap();
+        }
+
+        let fs = temporary.create_os();
+        let ctx = TestContext::new(None, false);
+        let root = temporary.working_directory.join("level0");
+        fs.traversal(Box::new(|scope| {
+            scope.evaluate(&ctx, root.clone());
+        }));
+
+        // Without a bound, level `n` is enumerated through 2^n routes.
+        let handled_entries = ctx.handled_entries.load(Ordering::Relaxed);
+        assert!(
+            handled_entries < 2 * LEVELS * (DirectoryAliases::MAX_ENUMERATIONS + 1),
+            "handled {handled_entries} entries"
+        );
+        assert_eq!(ctx.visited.len(), 1);
+        std::fs::remove_dir_all(temporary.project_directory).unwrap();
+    }
+
+    #[test]
+    fn files_below_a_symlinked_root_are_not_symlink_paths() {
+        let mut temporary = TemporaryFs::new("files_below_a_symlinked_root");
+        temporary.create_file("real/project/file.js", "statement();");
+        temporary.create_file("real/other/dependency.js", "statement();");
+        let real = temporary.working_directory.join("real");
+        let linked_parent = temporary.working_directory.join("linked");
+        let linked_project = temporary.working_directory.join("project_alias");
+        symlink(&real, &linked_parent).unwrap();
+        symlink(real.join("project"), &linked_project).unwrap();
+        symlink(real.join("other"), real.join("project/nested")).unwrap();
+
+        let fs = temporary.create_os();
+        for root in [linked_parent.join("project"), linked_project] {
+            let ctx = TestContext::new(None, false);
+            fs.traversal(Box::new(|scope| {
+                scope.evaluate(&ctx, root.clone());
+            }));
+
+            let file = fs.biome_path(&root.join("file.js"));
+            let dependency = fs.biome_path(&root.join("nested/dependency.js"));
+            let visited = ctx.visited.pin();
+            let symlink_files = ctx.symlink_files.pin();
+            assert!(visited.contains(&file), "{file} was not visited");
+            assert!(!symlink_files.contains(&file), "{file} is reported as a symlink");
+            assert!(visited.contains(&dependency), "{dependency} was not visited");
+            assert!(
+                symlink_files.contains(&dependency),
+                "{dependency} is not reported as a symlink"
+            );
+        }
         std::fs::remove_dir_all(temporary.project_directory).unwrap();
     }
 

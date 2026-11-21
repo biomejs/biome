@@ -226,6 +226,10 @@ struct ScannerTestState {
     project_scan_attempts: AtomicUsize,
     /// Whether the first project scan should be cancelled before it starts.
     cancel_first_scan_attempt: AtomicBool,
+    /// Number of VCS ignore refreshes that read their ignore files and are about to publish.
+    vcs_ignore_publish_attempts: AtomicUsize,
+    /// Whether VCS ignore refreshes should pause after reading their ignore files.
+    pause_vcs_ignore_publish: AtomicBool,
 }
 
 #[cfg(test)]
@@ -245,6 +249,15 @@ impl ScannerTestState {
             while self.pause_file_settings_read.load(Ordering::Acquire) {
                 std::thread::yield_now();
             }
+        }
+    }
+
+    /// Records a VCS ignore refresh that read its ignore files and is about to publish them.
+    fn enter_vcs_ignore_publish(&self) {
+        self.vcs_ignore_publish_attempts
+            .fetch_add(1, Ordering::AcqRel);
+        while self.pause_vcs_ignore_publish.load(Ordering::Acquire) {
+            std::thread::yield_now();
         }
     }
 
@@ -490,38 +503,77 @@ fn read_root_git_ignore_patterns(
     patterns
 }
 
-fn load_project_git_ignore_patterns(
+/// The ignore rules of a project, read from its VCS root and from the directories between the VCS
+/// root and the project folder.
+struct ProjectGitIgnores {
+    /// The matchers of every ignore file that was read.
+    matches: VcsIgnoredPatterns,
+    /// The patterns of the ignore files between the VCS root and the project folder, keyed by
+    /// their directory.
+    ancestor_patterns: Vec<(Utf8PathBuf, Vec<String>)>,
+    /// Whether the ignore files of the VCS root contain no pattern.
+    root_is_empty: bool,
+}
+
+/// Reads the ignore files of `vcs_root` and of the directories between `vcs_root` and
+/// `project_path`.
+///
+/// The walk stops at the first directory that the patterns read so far ignore, because Git doesn't
+/// read the ignore files of ignored directories.
+fn read_project_git_ignores(
     fs: &dyn FsWithResolverProxy,
     vcs_root: &BiomePath,
     project_path: Option<&Utf8Path>,
-    settings: &mut Settings,
-) -> Result<bool, WorkspaceError> {
+) -> Result<ProjectGitIgnores, WorkspaceError> {
     let root_patterns = read_root_git_ignore_patterns(fs, vcs_root.as_path());
-    let no_ignore_patterns = root_patterns.is_empty();
-    let root_patterns = root_patterns.iter().map(String::as_str).collect::<Vec<_>>();
-    settings
-        .vcs_settings
-        .store_root_ignore_patterns(vcs_root, root_patterns.as_slice())?;
+    let root_pattern_refs = root_patterns.iter().map(String::as_str).collect::<Vec<_>>();
+    let mut matches = VcsIgnoredPatterns::Git {
+        root: VcsIgnoredPatterns::git_ignore(vcs_root, root_pattern_refs.as_slice())?,
+        nested: vec![],
+    };
 
+    let mut ancestor_patterns = Vec::new();
     if let Some(project_path) = project_path {
         for ignore_directory in vcs_ignore_ancestor_directories(vcs_root.as_path(), project_path)
             .into_iter()
             .skip(1)
         {
             let ignore_directory = fs.biome_path(&ignore_directory);
-            if settings.vcs_settings.is_ignored(&ignore_directory, true) {
+            if matches.is_ignored(&ignore_directory, true) {
                 break;
             }
             if let Some(patterns) = read_ignore_file_patterns(fs, ignore_directory.as_path()) {
                 let pattern_refs = patterns.iter().map(String::as_str).collect::<Vec<_>>();
-                settings
-                    .vcs_settings
-                    .store_nested_ignore_patterns(&ignore_directory, pattern_refs.as_slice())?;
+                matches.insert_git_match(VcsIgnoredPatterns::git_ignore(
+                    &ignore_directory,
+                    pattern_refs.as_slice(),
+                )?);
+                ancestor_patterns.push((ignore_directory.to_path_buf(), patterns));
             }
         }
     }
 
-    Ok(no_ignore_patterns)
+    Ok(ProjectGitIgnores {
+        matches,
+        ancestor_patterns,
+        root_is_empty: root_patterns.is_empty(),
+    })
+}
+
+/// Replaces the Git ignore matchers of `settings` with the ignore files of the project.
+///
+/// Returns whether the ignore files of the VCS root contain no pattern.
+fn load_project_git_ignore_patterns(
+    fs: &dyn FsWithResolverProxy,
+    vcs_root: &BiomePath,
+    project_path: Option<&Utf8Path>,
+    settings: &mut Settings,
+) -> Result<bool, WorkspaceError> {
+    let ignores = read_project_git_ignores(fs, vcs_root, project_path)?;
+    if settings.vcs_settings.client_kind == Some(VcsClientKind::Git) {
+        settings.vcs_settings.ignore_matches = Some(ignores.matches);
+    }
+    Ok(ignores.root_is_empty)
 }
 
 fn resolve_git_dir(fs: &dyn FsWithResolverProxy, directory: &Utf8Path) -> Option<Utf8PathBuf> {
@@ -2785,15 +2837,18 @@ impl WorkspaceServerWithDb<'_> {
         }
     }
 
+    /// Rereads the ignore files of the VCS root and of the directories between the VCS root and
+    /// the project folder.
+    ///
+    /// Only the matchers are published, on top of the settings that are current at publication,
+    /// so a concurrent settings update isn't overwritten.
     fn refresh_project_vcs_ignore_settings(
         &self,
         project_key: ProjectKey,
     ) -> Result<(), WorkspaceError> {
-        let mut settings = self
+        let settings = self
             .project_get_root_settings(project_key)
-            .ok_or_else(WorkspaceError::no_project)?
-            .as_ref()
-            .clone();
+            .ok_or_else(WorkspaceError::no_project)?;
         if !settings.is_vcs_enabled()
             || !settings.vcs_settings.should_use_ignore_file()
             || settings.vcs_settings.client_kind != Some(VcsClientKind::Git)
@@ -2809,14 +2864,19 @@ impl WorkspaceServerWithDb<'_> {
             return Ok(());
         };
         let project_path = self.project_get_path(project_key);
-        load_project_git_ignore_patterns(
-            self.fs.as_ref(),
-            &vcs_root,
-            project_path.as_deref(),
-            &mut settings,
-        )?;
-        self.project_set_root_settings(project_key, settings);
-        Ok(())
+        let ProjectGitIgnores {
+            matches: VcsIgnoredPatterns::Git { root, .. },
+            ancestor_patterns,
+            ..
+        } = read_project_git_ignores(self.fs.as_ref(), &vcs_root, project_path.as_deref())?;
+        #[cfg(test)]
+        self.scanner_test_state.enter_vcs_ignore_publish();
+        self.store_git_ignores(
+            project_key,
+            Some(root),
+            vcs_root.to_path_buf(),
+            ancestor_patterns,
+        )
     }
 
     pub(crate) fn find_project_for_path(&self, path: &Utf8Path) -> Option<ProjectKey> {

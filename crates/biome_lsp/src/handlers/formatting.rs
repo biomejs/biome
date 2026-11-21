@@ -169,12 +169,14 @@ pub(crate) fn format_range(
             path: path.clone(),
         })?;
 
-    let format_range = embedded_format_range(
+    let Some((format_range, script_offset)) = embedded_format_range(
         format_range,
         file_features.supports_full_html_support(),
         doc.extension(),
         content.as_str(),
-    );
+    ) else {
+        return Ok(None);
+    };
 
     let formatted = session
         .workspace_for_request()
@@ -185,9 +187,10 @@ pub(crate) fn format_range(
             inline_config: session.inline_config(),
         })?;
 
-    let formatted_range = formatted
-        .range()
-        .unwrap_or_else(|| TextRange::up_to(content.text_len()));
+    let formatted_range = formatted.range().map_or_else(
+        || TextRange::up_to(content.text_len()),
+        |range| range + script_offset,
+    );
     let indels = biome_text_edit::TextEdit::from_unicode_words(
         &content.as_str()[formatted_range],
         formatted.as_code(),
@@ -295,12 +298,17 @@ pub(crate) fn format_on_type(
     Ok(Some(edits))
 }
 
+/// Maps a document range to the script of a document that uses the legacy embedded handlers.
+///
+/// Returns the range relative to the script, and the offset of the script in the document. Ranges
+/// of other documents are returned unchanged with a zero offset. Returns `None` when the range
+/// ends before the script, and clamps a range that starts before the script to its start.
 fn embedded_format_range(
     range: TextRange,
     supports_full_html_support: bool,
     extension: Option<&str>,
     content: &str,
-) -> TextRange {
+) -> Option<(TextRange, TextSize)> {
     let offset = if supports_full_html_support {
         None
     } else {
@@ -311,13 +319,14 @@ fn embedded_format_range(
             _ => None,
         }
     };
-    if let Some(offset) = offset.map(TextSize::from)
-        && range.start() >= offset
-    {
-        TextRange::new(range.start() - offset, range.end() - offset)
-    } else {
-        range
+    let Some(offset) = offset.map(TextSize::from) else {
+        return Some((range, TextSize::from(0)));
+    };
+    if range.end() <= offset {
+        return None;
     }
+    let start = range.start().max(offset);
+    Some((TextRange::new(start - offset, range.end() - offset), offset))
 }
 
 fn notify_user<T>(
@@ -358,12 +367,23 @@ mod tests {
     use super::*;
 
     #[test]
-    fn embedded_offset_is_not_applied_before_the_script() {
+    fn embedded_range_before_the_script_is_not_formatted() {
         let content = "<template></template><script>\nstatement()\n</script>";
         let range = TextRange::new(TextSize::from(2), TextSize::from(4));
         assert_eq!(
             embedded_format_range(range, false, Some("vue"), content),
-            range
+            None
+        );
+    }
+
+    #[test]
+    fn embedded_range_starting_before_the_script_is_clamped() {
+        let content = "<template></template><script>\nstatement()\n</script>";
+        let offset = TextSize::from(VueFileHandler::start(content).unwrap());
+        let range = TextRange::new(TextSize::from(2), offset + TextSize::from(6));
+        assert_eq!(
+            embedded_format_range(range, false, Some("vue"), content),
+            Some((TextRange::up_to(TextSize::from(6)), offset))
         );
     }
 
@@ -374,7 +394,7 @@ mod tests {
         let range = TextRange::new(offset + TextSize::from(2), offset + TextSize::from(6));
         assert_eq!(
             embedded_format_range(range, false, Some("vue"), content),
-            TextRange::new(TextSize::from(2), TextSize::from(6))
+            Some((TextRange::new(TextSize::from(2), TextSize::from(6)), offset))
         );
     }
 
@@ -385,7 +405,7 @@ mod tests {
         let range = TextRange::new(offset + TextSize::from(2), offset + TextSize::from(6));
         assert_eq!(
             embedded_format_range(range, true, Some("vue"), content),
-            range
+            Some((range, TextSize::from(0)))
         );
     }
 }

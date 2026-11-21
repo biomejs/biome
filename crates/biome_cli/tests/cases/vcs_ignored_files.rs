@@ -95,14 +95,24 @@ fn nested_gitignore_cannot_reinclude_file_below_ignored_parent() {
     fs.create_file(".gitignore", "ignored/\n");
     fs.create_file("ignored/.gitignore", "!file.js\n");
     let ignored = fs.create_file("ignored/file.js", UNFORMATTED);
+    let kept = fs.create_file("kept.js", UNFORMATTED);
 
-    let _ = run_cli_with_dyn_fs(
+    let result = run_cli_with_dyn_fs(
         Box::new(fs.create_os()),
         &mut console,
-        Args::from(["format", "--write", ignored.as_str()].as_slice()),
+        Args::from(["format", "--write", ignored.as_str(), kept.as_str()].as_slice()),
     );
 
+    assert!(result.is_ok(), "run_cli returned {result:?}");
     assert_eq!(std::fs::read_to_string(ignored).unwrap(), UNFORMATTED);
+    assert_ne!(std::fs::read_to_string(kept).unwrap(), UNFORMATTED);
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "nested_gitignore_cannot_reinclude_file_below_ignored_parent",
+        fs.create_mem(),
+        console,
+        result,
+    ));
 }
 
 #[test]

@@ -94,6 +94,9 @@ pub enum WatcherInstruction {
     /// Unwatches the watched paths starting with the specified path.
     UnwatchFolder(Utf8PathBuf),
 
+    /// Unwatches the specified physical folders when they no longer have a logical alias.
+    UnwatchUnusedFolders(FxHashSet<Utf8PathBuf>),
+
     /// Re-indexes a file after it was closed by a client.
     ReindexFile(Utf8PathBuf),
 
@@ -236,6 +239,9 @@ impl Watcher {
                     Ok(WatcherInstruction::UnwatchFolder(path)) => {
                         self.unwatch_folder(workspace, path);
                     }
+                    Ok(WatcherInstruction::UnwatchUnusedFolders(paths)) => {
+                        self.unwatch_unused_folders(workspace, paths);
+                    }
                     Ok(WatcherInstruction::ReindexFile(path)) => {
                         Self::reindex_file(workspace, &path);
                     }
@@ -285,11 +291,14 @@ impl Watcher {
                 // Without it, we'll miss events on Windows or macOS.
                 ModifyKind::Data(_) | ModifyKind::Name(RenameMode::Any) | ModifyKind::Any => {
                     // It's possible to receive Modify(Data) event after the file is removed on macOS.
-                    if paths[0].exists() {
-                        Self::index_paths(workspace, paths)
-                    } else {
-                        Self::unload_paths(workspace, paths)
-                    }
+                    // The logical aliases of one physical path can also disagree, when a stale
+                    // alias no longer exists, so each path is checked on its own.
+                    let (existing_paths, missing_paths) =
+                        paths.into_iter().partition(|path| path.exists());
+                    Self::unload_paths(workspace, missing_paths).and_then(|mut diagnostics| {
+                        diagnostics.extend(Self::index_paths(workspace, existing_paths)?);
+                        Ok(diagnostics)
+                    })
                 }
                 _ => Ok(vec![]),
             },
@@ -316,8 +325,12 @@ impl Watcher {
         };
         let from_paths = Self::watched_paths(workspace, vec![from]);
         let to_paths = Self::watched_paths(workspace, vec![to]);
-        let mut diagnostics = Self::unload_paths(workspace, from_paths)?;
-        diagnostics.extend(Self::index_paths(workspace, to_paths)?);
+        // The destination is indexed even when unloading the source fails, because the source
+        // can be an ignore file whose refresh fails on an unrelated ignore file.
+        let unloaded = Self::unload_paths(workspace, from_paths);
+        let indexed = Self::index_paths(workspace, to_paths);
+        let mut diagnostics = unloaded?;
+        diagnostics.extend(indexed?);
         Ok(diagnostics)
     }
 
@@ -511,6 +524,30 @@ impl Watcher {
                     warn!("Error unwatching path {}: {error}", watched_path);
                 }
             });
+
+            if let Err(error) = watcher_paths.commit() {
+                // TODO: Improve error propagation.
+                warn!("Error committing the watched paths: {error}");
+            }
+        }
+    }
+
+    #[tracing::instrument(level = "debug", skip(self, workspace))]
+    fn unwatch_unused_folders(
+        &mut self,
+        workspace: &impl WorkspaceWatcherBridge,
+        paths: FxHashSet<Utf8PathBuf>,
+    ) {
+        if let Some(mut watcher_paths) = self.watcher.as_mut().map(|w| w.paths_mut()) {
+            for path in paths {
+                if !workspace.remove_unused_watched_folder(&path) {
+                    continue;
+                }
+                if let Err(error) = watcher_paths.remove(path.as_std_path()) {
+                    // TODO: Improve error propagation.
+                    warn!("Error unwatching path {path}: {error}");
+                }
+            }
 
             if let Err(error) = watcher_paths.commit() {
                 // TODO: Improve error propagation.

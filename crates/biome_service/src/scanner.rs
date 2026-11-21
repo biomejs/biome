@@ -166,11 +166,26 @@ pub(crate) struct Scanner {
     /// Projects physical watcher roots back to every logical path alias.
     watch_aliases: ParkingLotMutex<FxHashMap<Utf8PathBuf, FxHashSet<Utf8PathBuf>>>,
 
+    /// The physical target of every symbolic link registered as a logical watch folder.
+    ///
+    /// Locked only while [`Self::watch_aliases`] is locked. A link that resolves to a new target
+    /// was retargeted, so the aliases derived through its previous target are stale.
+    watched_symlink_targets: ParkingLotMutex<FxHashMap<Utf8PathBuf, Utf8PathBuf>>,
+
+    /// The logical folders watched for the VCS ignore files of each project.
+    ///
+    /// These folders can be outside the project folder, so they are released separately when the
+    /// project is unloaded.
+    vcs_watch_folders: ParkingLotMutex<FxHashMap<ProjectKey, FxHashSet<Utf8PathBuf>>>,
+
     /// Channel sender for instructions to the [`Watcher`].
     watcher_tx: Sender<WatcherInstruction>,
 }
 
 struct ScannedProject {
+    /// The folder of the project.
+    path: Utf8PathBuf,
+
     /// The scan kind used for this project.
     scan_kind: ScanKind,
 
@@ -185,6 +200,8 @@ impl Scanner {
             projects: Default::default(),
             watched_folders: Default::default(),
             watch_aliases: Default::default(),
+            watched_symlink_targets: Default::default(),
+            vcs_watch_folders: Default::default(),
             watcher_tx,
         }
     }
@@ -217,7 +234,7 @@ impl Scanner {
             .get_project_path(project_key)
             .ok_or_else(WorkspaceError::no_project)?;
 
-        if !scan_options.force && self.is_watched(&project_path) {
+        if !scan_options.force && self.is_project_watched(project_key, &project_path) {
             return Ok(None);
         }
 
@@ -308,6 +325,7 @@ impl Scanner {
         );
 
         let scanned_project = ScannedProject {
+            path: project_path,
             scan_kind: scan_options.scan_kind.clone_without_targeting_info(),
             watched: scan_options.watch,
         };
@@ -380,7 +398,7 @@ impl Scanner {
             .get_project_path(project_key)
             .ok_or_else(WorkspaceError::no_project)?;
         if scan_options.scan_kind.is_none()
-            || (!scan_options.force && self.is_watched(&project_path))
+            || (!scan_options.force && self.is_project_watched(project_key, &project_path))
             || workspace.get_vcs_root(project_key).is_none()
         {
             return Ok((Vec::new(), start.elapsed()));
@@ -406,7 +424,16 @@ impl Scanner {
                 scan_options,
             );
             diagnostics.extend(discovery_diagnostics);
-            workspace.update_project_ignore_files(project_key, path, &ignore_paths)?;
+            // A failed update keeps the last usable matchers of `path`, so the rest of the
+            // project is still indexed. The error is reported like any other scan diagnostic.
+            if let Err(error) =
+                workspace.update_project_ignore_files(project_key, path, &ignore_paths)
+            {
+                let diagnostic = Diagnostic::new(error);
+                if DiagnosticsCollector::new(scan_options.verbose).should_collect(&diagnostic) {
+                    diagnostics.push(diagnostic);
+                }
+            }
         }
         Ok((diagnostics, start.elapsed()))
     }
@@ -626,7 +653,22 @@ impl Scanner {
         })
     }
 
+    /// Returns whether the project was scanned with a watcher that still watches its folder.
+    ///
+    /// A folder can also be watched for the ignore files of another project, so a watched folder
+    /// alone doesn't mean that the watcher keeps the index of the project up to date.
+    fn is_project_watched(&self, project_key: ProjectKey, project_path: &Utf8Path) -> bool {
+        self.projects
+            .pin()
+            .get(&project_key)
+            .is_some_and(|project| project.watched)
+            && self.is_watched(project_path)
+    }
+
     /// Registers logical folders and asks the watcher to watch their physical locations.
+    ///
+    /// Physical folders that lose their last alias because a symbolic link now resolves to a new
+    /// target are unwatched.
     fn watch_folders(&self, fs: &dyn FileSystem, folders: FxHashSet<Utf8PathBuf>) {
         if folders.is_empty() {
             return;
@@ -635,12 +677,27 @@ impl Scanner {
         let mut folders: Vec<_> = folders.into_iter().collect();
         folders.sort_by_key(|path| path.components().count());
 
-        let physical_folders = {
+        let (physical_folders, unused_folders) = {
             let mut aliases = self.watch_aliases.lock();
+            let mut symlink_targets = self.watched_symlink_targets.lock();
             let mut physical_folders = FxHashSet::default();
+            let mut unused_folders = FxHashSet::default();
 
             for logical_path in folders {
-                let physical_path = physical_watch_path(fs, &logical_path, &aliases);
+                let is_symlink = fs.path_is_symlink(&logical_path);
+                let physical_path = physical_watch_path(fs, &logical_path, is_symlink, &aliases);
+                if is_symlink
+                    && symlink_targets
+                        .insert(logical_path.clone(), physical_path.clone())
+                        .is_some_and(|previous_target| previous_target != physical_path)
+                {
+                    remove_retargeted_aliases(
+                        &mut aliases,
+                        &logical_path,
+                        &physical_path,
+                        &mut unused_folders,
+                    );
+                }
                 let mut logical_paths = logical_watch_paths(&physical_path, &aliases);
                 logical_paths.insert(logical_path);
                 aliases
@@ -650,12 +707,23 @@ impl Scanner {
                 physical_folders.insert(physical_path);
             }
 
-            physical_folders
+            unused_folders.retain(|physical_path| !aliases.contains_key(physical_path));
+            (physical_folders, unused_folders)
         };
 
         let _ = self
             .watcher_tx
             .try_send(WatcherInstruction::WatchFolders(physical_folders));
+        self.unwatch_unused_folders(unused_folders);
+    }
+
+    /// Asks the watcher to unwatch physical folders that no longer have a logical alias.
+    fn unwatch_unused_folders(&self, physical_folders: FxHashSet<Utf8PathBuf>) {
+        if !physical_folders.is_empty() {
+            let _ = self
+                .watcher_tx
+                .try_send(WatcherInstruction::UnwatchUnusedFolders(physical_folders));
+        }
     }
 
     /// Projects a physical watcher event to every registered logical alias.
@@ -689,10 +757,50 @@ impl Scanner {
         self.watched_folders.pin().insert(path)
     }
 
+    /// Stops tracking the physical folder `path` as watched when no logical alias maps to it.
+    ///
+    /// Returns `true` if the folder was watched and must be unwatched, `false` otherwise.
+    fn remove_unused_watched_folder(&self, path: &Utf8Path) -> bool {
+        // Holding the alias lock orders this check after any registration of a new alias.
+        let aliases = self.watch_aliases.lock();
+        !aliases.contains_key(path) && self.watched_folders.pin().remove(path)
+    }
+
+    /// Removes the logical aliases `logical_paths` and unwatches physical folders left without
+    /// an alias.
+    ///
+    /// Unlike [`Self::remove_watch_aliases()`], aliases below `logical_paths` are kept.
+    fn remove_exact_watch_aliases(&self, logical_paths: &FxHashSet<Utf8PathBuf>) {
+        if logical_paths.is_empty() {
+            return;
+        }
+        let unused_folders = {
+            let mut aliases = self.watch_aliases.lock();
+            let mut unused_folders = FxHashSet::default();
+            aliases.retain(|physical_path, aliases_of_folder| {
+                aliases_of_folder.retain(|logical_path| !logical_paths.contains(logical_path));
+                if aliases_of_folder.is_empty() {
+                    unused_folders.insert(physical_path.clone());
+                    false
+                } else {
+                    true
+                }
+            });
+            self.watched_symlink_targets
+                .lock()
+                .retain(|logical_path, _| !logical_paths.contains(logical_path));
+            unused_folders
+        };
+        self.unwatch_unused_folders(unused_folders);
+    }
+
     /// Removes logical aliases under `path` and unwatches unused physical folders.
     fn remove_watch_aliases(&self, path: &Utf8Path, mut callback: impl FnMut(&Utf8Path)) {
         let unused_physical_paths = {
             let mut aliases = self.watch_aliases.lock();
+            self.watched_symlink_targets
+                .lock()
+                .retain(|logical_path, _| !logical_path.starts_with(path));
             let mut unused_physical_paths = Vec::new();
             aliases.retain(|physical_path, logical_paths| {
                 logical_paths.retain(|logical_path| !logical_path.starts_with(path));
@@ -718,11 +826,16 @@ impl Scanner {
         workspace: &W,
         project_key: ProjectKey,
     ) {
-        let folders = workspace
+        let folders: FxHashSet<_> = workspace
             .get_vcs_watch_paths(project_key)
             .into_iter()
             .filter_map(|path| path.parent().map(Utf8Path::to_path_buf))
             .collect();
+        self.vcs_watch_folders
+            .lock()
+            .entry(project_key)
+            .or_default()
+            .extend(folders.iter().cloned());
         self.watch_folders(workspace.fs(), folders);
     }
 
@@ -960,9 +1073,36 @@ impl Scanner {
     ///
     /// This does _not_ take care of unloading the documents inside the folder.
     pub fn unload_project(&self, project_key: ProjectKey, project_path: Utf8PathBuf) {
-        self.unload_folder(project_path);
-
         self.projects.pin().remove(&project_key);
+        let vcs_folders = self.release_vcs_watch_folders(project_key, &project_path);
+        self.unload_folder(project_path);
+        self.remove_exact_watch_aliases(&vcs_folders);
+    }
+
+    /// Returns the VCS watch folders of `project_key` that no other open project uses.
+    ///
+    /// Folders inside `project_path` are excluded, because unloading the project folder removes
+    /// them. Folders inside another watched project are kept, because its scan may watch them.
+    fn release_vcs_watch_folders(
+        &self,
+        project_key: ProjectKey,
+        project_path: &Utf8Path,
+    ) -> FxHashSet<Utf8PathBuf> {
+        let mut vcs_watch_folders = self.vcs_watch_folders.lock();
+        let Some(mut folders) = vcs_watch_folders.remove(&project_key) else {
+            return FxHashSet::default();
+        };
+        let projects = self.projects.pin();
+        folders.retain(|folder| {
+            !folder.starts_with(project_path)
+                && !vcs_watch_folders
+                    .values()
+                    .any(|other_folders| other_folders.contains(folder))
+                && !projects
+                    .values()
+                    .any(|project| project.watched && folder.starts_with(&project.path))
+        });
+        folders
     }
 }
 
@@ -1016,12 +1156,15 @@ impl ProjectScan {
 }
 
 /// Resolves the physical folder that must be watched for a logical folder.
+///
+/// `is_symlink` tells whether `logical_path` itself is a symbolic link.
 fn physical_watch_path(
     fs: &dyn FileSystem,
     logical_path: &Utf8Path,
+    is_symlink: bool,
     aliases: &FxHashMap<Utf8PathBuf, FxHashSet<Utf8PathBuf>>,
 ) -> Utf8PathBuf {
-    if fs.path_is_symlink(logical_path) {
+    if is_symlink {
         let mut physical_path = logical_path.to_path_buf();
         for _ in 0..=3 {
             if !fs.path_is_symlink(&physical_path) {
@@ -1057,6 +1200,30 @@ fn physical_watch_path(
         })
         .max_by_key(|(depth, _)| *depth)
         .map_or_else(|| logical_path.to_path_buf(), |(_, path)| path)
+}
+
+/// Removes the aliases at or below the retargeted symbolic link `logical_path` from physical
+/// folders outside its new target `physical_path`.
+///
+/// Physical folders left without an alias are removed and collected into `unused_folders`.
+fn remove_retargeted_aliases(
+    aliases: &mut FxHashMap<Utf8PathBuf, FxHashSet<Utf8PathBuf>>,
+    logical_path: &Utf8Path,
+    physical_path: &Utf8Path,
+    unused_folders: &mut FxHashSet<Utf8PathBuf>,
+) {
+    aliases.retain(|physical_root, logical_roots| {
+        if physical_root.starts_with(physical_path) {
+            return true;
+        }
+        logical_roots.retain(|logical_root| !logical_root.starts_with(logical_path));
+        if logical_roots.is_empty() {
+            unused_folders.insert(physical_root.clone());
+            false
+        } else {
+            true
+        }
+    });
 }
 
 /// Returns every logical alias of a physical watcher folder.
