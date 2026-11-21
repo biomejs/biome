@@ -4279,6 +4279,11 @@ export interface Nursery {
 	 */
 	useNamedLayer?: UseNamedLayerConfiguration;
 	/**
+	 * Prefer negative indexes over subtracting from .length.
+	 * See https://biomejs.dev/linter/rules/use-negative-index
+	 */
+	useNegativeIndex?: UseNegativeIndexConfiguration;
+	/**
 	 * Enforce the use of the @next/third-parties/google components to load Google Analytics and Google Tag Manager.
 	 * See https://biomejs.dev/linter/rules/use-next-script-for-google-analytics
 	 */
@@ -7667,6 +7672,9 @@ export type UseNamedFunctionConfiguration =
 export type UseNamedLayerConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseNamedLayerOptions;
+export type UseNegativeIndexConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseNegativeIndexOptions;
 export type UseNextScriptForGoogleAnalyticsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseNextScriptForGoogleAnalyticsOptions;
@@ -11438,6 +11446,14 @@ export interface RuleWithUseNamedLayerOptions {
 	level: RulePlainConfiguration;
 	options?: UseNamedLayerOptions;
 }
+export interface RuleWithUseNegativeIndexOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseNegativeIndexOptions;
+}
 export interface RuleWithUseNextScriptForGoogleAnalyticsOptions {
 	level: RulePlainConfiguration;
 	options?: UseNextScriptForGoogleAnalyticsOptions;
@@ -14643,6 +14659,7 @@ export type UseMathTruncOptions = {};
 export type UseModernMathApisOptions = {};
 export type UseNamedFunctionOptions = {};
 export type UseNamedLayerOptions = {};
+export type UseNegativeIndexOptions = {};
 export type UseNextScriptForGoogleAnalyticsOptions = {};
 /**
  * Options for the `useNullishCoalescing` rule.
@@ -16473,8 +16490,6 @@ export type Category =
 	| "lint/nursery/noDynamicRequire"
 	| "lint/nursery/noEagerArrayMethodsInLoops"
 	| "lint/nursery/noEmptyObjectKeys"
-	| "lint/nursery/noTestHooks"
-	| "lint/nursery/noYamlEmptySequenceEntries"
 	| "lint/nursery/noErasingOperation"
 	| "lint/nursery/noExcessiveNestedBlocks"
 	| "lint/nursery/noExcessiveNestedCallbacks"
@@ -16580,6 +16595,7 @@ export type Category =
 	| "lint/nursery/noTanstackQueryRestDestructuring"
 	| "lint/nursery/noTanstackQueryVoidQueryFn"
 	| "lint/nursery/noTestGlobals"
+	| "lint/nursery/noTestHooks"
 	| "lint/nursery/noThisOutsideOfClass"
 	| "lint/nursery/noTripleSlashReference"
 	| "lint/nursery/noUndeclaredClasses"
@@ -16622,10 +16638,10 @@ export type Category =
 	| "lint/nursery/noVueComputedPropertiesInData"
 	| "lint/nursery/noVueDefineModelDefault"
 	| "lint/nursery/noVueDeprecatedConfigKeyCodes"
-	| "lint/nursery/noVueDeprecatedFilter"
 	| "lint/nursery/noVueDeprecatedDeleteSet"
 	| "lint/nursery/noVueDeprecatedDestroyedLifecycle"
 	| "lint/nursery/noVueDeprecatedEventsApi"
+	| "lint/nursery/noVueDeprecatedFilter"
 	| "lint/nursery/noVueDeprecatedFunctionalTemplate"
 	| "lint/nursery/noVueDeprecatedHtmlElementIs"
 	| "lint/nursery/noVueDeprecatedInlineTemplate"
@@ -16683,6 +16699,7 @@ export type Category =
 	| "lint/nursery/noYamlBooleanKeys"
 	| "lint/nursery/noYamlEmptyMapKeys"
 	| "lint/nursery/noYamlEmptyMapValues"
+	| "lint/nursery/noYamlEmptySequenceEntries"
 	| "lint/nursery/noZeroFractions"
 	| "lint/nursery/noZeroLengthUnit"
 	| "lint/nursery/useAccessorPairs"
@@ -16743,6 +16760,7 @@ export type Category =
 	| "lint/nursery/useNamedCaptureGroup"
 	| "lint/nursery/useNamedFunction"
 	| "lint/nursery/useNamedLayer"
+	| "lint/nursery/useNegativeIndex"
 	| "lint/nursery/useNextScriptForGoogleAnalytics"
 	| "lint/nursery/useNullishCoalescing"
 	| "lint/nursery/useObjectFromEntries"
