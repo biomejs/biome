@@ -2,29 +2,23 @@
 
 use crate::prelude::*;
 use biome_formatter::write;
-use biome_toml_syntax::{TomlInlineTable, TomlKeyValueList, TomlSyntaxNode};
+use biome_toml_syntax::{TomlInlineTable, TomlKeyValueList};
 
-/// Formats what follows a table header: the comments at the end of the header
-/// line and the key/value pairs on the following lines.
+/// Formats the key/value pairs on the lines that follow a table header.
 ///
 /// A blank line between the header and its first entry is preserved.
 pub(crate) struct FormatTableEntries<'a> {
-    table: &'a TomlSyntaxNode,
     entries: &'a TomlKeyValueList,
 }
 
 impl<'a> FormatTableEntries<'a> {
-    pub(crate) fn new(table: &'a TomlSyntaxNode, entries: &'a TomlKeyValueList) -> Self {
-        Self { table, entries }
+    pub(crate) fn new(entries: &'a TomlKeyValueList) -> Self {
+        Self { entries }
     }
 }
 
 impl Format<TomlFormatContext> for FormatTableEntries<'_> {
     fn fmt(&self, f: &mut TomlFormatter) -> FormatResult<()> {
-        if f.comments().has_dangling_comments(self.table) {
-            write!(f, [space(), format_dangling_comments(self.table)])?;
-        }
-
         if let Some(first) = self.entries.iter().next() {
             if get_lines_before(first.syntax()) > 1 {
                 write!(f, [empty_line()])?;
