@@ -574,6 +574,7 @@ enum NodeDialect {
     Markdown,
     Angular,
     Gfm,
+    Toml,
 }
 
 impl NodeDialect {
@@ -591,6 +592,7 @@ impl NodeDialect {
             Self::Yaml,
             Self::Markdown,
             Self::Gfm,
+            Self::Toml,
         ]
     }
 
@@ -617,6 +619,7 @@ impl NodeDialect {
             Self::Markdown => "markdown",
             Self::Angular => "angular",
             Self::Gfm => "gfm",
+            Self::Toml => "toml",
         }
     }
 
@@ -639,6 +642,7 @@ impl NodeDialect {
             "Yaml" => Self::Yaml,
             "Md" => Self::Markdown,
             "Gfm" => Self::Gfm,
+            "Toml" => Self::Toml,
             _ => {
                 eprintln!("missing prefix {name}");
                 Self::Js
@@ -871,6 +875,12 @@ fn get_node_concept(
                 "TW_CANDIDATE" => NodeConcept::Expression,
                 _ => NodeConcept::Auxiliary,
             },
+
+            LanguageKind::Toml => match name {
+                "String" | "Integer" | "Float" | "Boolean" | "DateTime" | "Array"
+                | "InlineTable" => NodeConcept::Value,
+                _ => NodeConcept::Auxiliary,
+            },
         }
     }
 }
@@ -938,6 +948,7 @@ impl LanguageKind {
             Self::Yaml => "YamlFormatter",
             Self::Markdown => "MarkdownFormatter",
             Self::Tailwind => "TailwindFormatter",
+            Self::Toml => "TomlFormatter",
         };
 
         Ident::new(name, Span::call_site())
@@ -954,6 +965,7 @@ impl LanguageKind {
             Self::Yaml => "YamlFormatContext",
             Self::Markdown => "MarkdownFormatContext",
             Self::Tailwind => "TailwindFormatContext",
+            Self::Toml => "TomlFormatContext",
         };
 
         Ident::new(name, Span::call_site())
