@@ -300,11 +300,12 @@ export class BiomeCommon<Configuration, Diagnostic> {
 
 	private withFile<T>(
 		projectKey: ProjectKey,
-		path: string,
+		filePath: string,
 		content: string,
 		func: (path: BiomePath) => T,
 	): T {
 		return tryCatchWrapper(() => {
+			const path = filePath.replaceAll("\\", "/");
 			this.workspace.openFile({
 				projectKey,
 				content: { type: "fromClient", content, version: 0 },
