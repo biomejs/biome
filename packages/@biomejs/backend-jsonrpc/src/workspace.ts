@@ -4360,6 +4360,11 @@ export interface Nursery {
 	 */
 	useNamedLayer?: UseNamedLayerConfiguration;
 	/**
+	 * Prefer negative indexes over subtracting from .length.
+	 * See https://biomejs.dev/linter/rules/use-negative-index
+	 */
+	useNegativeIndex?: UseNegativeIndexConfiguration;
+	/**
 	 * Enforce the use of the @next/third-parties/google components to load Google Analytics and Google Tag Manager.
 	 * See https://biomejs.dev/linter/rules/use-next-script-for-google-analytics
 	 */
@@ -7806,6 +7811,9 @@ export type UseNamedFunctionConfiguration =
 export type UseNamedLayerConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseNamedLayerOptions;
+export type UseNegativeIndexConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseNegativeIndexOptions;
 export type UseNextScriptForGoogleAnalyticsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseNextScriptForGoogleAnalyticsOptions;
@@ -11663,6 +11671,14 @@ export interface RuleWithUseNamedLayerOptions {
 	level: RulePlainConfiguration;
 	options?: UseNamedLayerOptions;
 }
+export interface RuleWithUseNegativeIndexOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseNegativeIndexOptions;
+}
 export interface RuleWithUseNextScriptForGoogleAnalyticsOptions {
 	level: RulePlainConfiguration;
 	options?: UseNextScriptForGoogleAnalyticsOptions;
@@ -14921,6 +14937,7 @@ export type UseMathTruncOptions = {};
 export type UseModernMathApisOptions = {};
 export type UseNamedFunctionOptions = {};
 export type UseNamedLayerOptions = {};
+export type UseNegativeIndexOptions = {};
 export type UseNextScriptForGoogleAnalyticsOptions = {};
 /**
  * Options for the `useNullishCoalescing` rule.
@@ -17040,6 +17057,7 @@ export type Category =
 	| "lint/nursery/useNamedCaptureGroup"
 	| "lint/nursery/useNamedFunction"
 	| "lint/nursery/useNamedLayer"
+	| "lint/nursery/useNegativeIndex"
 	| "lint/nursery/useNextScriptForGoogleAnalytics"
 	| "lint/nursery/useNullishCoalescing"
 	| "lint/nursery/useObjectFromEntries"

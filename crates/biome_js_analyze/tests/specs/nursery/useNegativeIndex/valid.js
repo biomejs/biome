@@ -1,0 +1,86 @@
+/* should not generate diagnostics */
+foo.slice(-2, -1);
+foo.splice(-1, 1);
+foo.at(-1);
+Array.prototype.slice.call(foo, -2, -1);
+Array.prototype.slice.apply(foo, [-2, -1]);
+
+// Not a supported method
+slice(foo.length - 1);
+foo.forEach(foo.length - 1);
+foo.with(foo.length - 1, value);
+foo["slice"](foo.length - 1);
+new Foo.slice(Foo.length - 1);
+Array.prototype.forEach.call(foo, foo.length - 1);
+Array.prototype.with.call(foo, foo.length - 3, foo.length - 6);
+
+// The count argument of `splice()` isn't an index
+foo.splice(0, foo.length - 1);
+foo.toSpliced(0, foo.length - 1);
+
+// A different receiver
+foo.slice(bar.length - 1);
+[1, 2, 3].slice([1, 2, 3].length - 1);
+foo[bar++].slice(foo[bar++].length - 1);
+foo[a + b].slice(foo[a + b].length - 1);
+foo[`${bar}`].slice(foo[`${bar}`].length - 1);
+foo().slice(foo().length - 1);
+foo.slice(foo?.length - 1);
+foo.slice(foo["length"] - 1);
+
+// Not a positive whole number
+foo.slice(foo.length - 0);
+foo.slice(foo.length - 0.5);
+foo.slice(foo.length - 1.5);
+foo.at(foo.length - 0.5);
+foo.splice(foo.length - 1.5, 1);
+foo.slice(foo.length - "1");
+foo.slice(foo.length - (-1));
+foo.slice(foo.length - -1);
+foo.slice(foo.length - bar);
+
+// Not a subtraction from `.length`
+foo.slice(foo.length + 1);
+foo.slice(foo.length - 2 + 1);
+foo.slice((foo.length - 1) + 1);
+foo.slice(foo.length - 1 / 1);
+foo.slice(-foo.length - 1);
+foo.slice(bar - foo.length - 1);
+foo.slice(foo.length);
+
+// Spread arguments hide the positions of the arguments after them
+foo.slice(...args, foo.length - 1);
+Array.prototype.slice.call(...args, foo.length - 1);
+Array.prototype.slice.call(foo, ...args, foo.length - 1);
+Array.prototype.slice.apply(foo, [...args, foo.length - 1]);
+
+// `apply()` without an array literal
+Array.prototype.slice.apply(foo, "");
+Array.prototype.slice.apply(foo, args);
+function f() {
+	return [].slice.apply(arguments);
+}
+
+// Not `[]`, `''`, or the prototype of a built-in that has the method
+[NOT_EMPTY].slice.call(foo, foo.length - 1);
+'NOT_EMPTY'.slice.call(foo, foo.length - 1);
+`nonempty`.slice.call(foo, foo.length - 1);
+tag``.slice.call(foo, foo.length - 1);
+''.splice.call(foo, foo.length - 1, 1);
+``.splice.call(foo, foo.length - 1, 1);
+''.at.call(foo, foo.length - 1);
+FOO.prototype.slice.call(foo, foo.length - 1);
+String.prototype.splice.call(foo, foo.length - 1);
+String.prototype.toSpliced.call(foo, foo.length - 1);
+ArrayBuffer.prototype.splice.call(foo, foo.length - 1);
+ArrayBuffer.prototype.at.call(foo, foo.length - 1);
+Int8Array.prototype.splice.call(foo, foo.length - 1);
+Uint8Array.prototype.toSpliced.call(foo, foo.length - 1);
+Array.prototype.subarray.call(foo, foo.length - 1);
+Array["prototype"].slice.call(foo, foo.length - 1);
+Array.prototype.slice.bind(foo, foo.length - 1);
+
+// A local variable that shadows a built-in
+function g(Array) {
+	Array.prototype.slice.call(foo, foo.length - 1);
+}

@@ -1,0 +1,4 @@
+/* should not generate diagnostics */
+(foo as string[]).slice(-1);
+foo!.slice(bar!.length - 1);
+foo.slice(foo.length - (1.5 as const));
