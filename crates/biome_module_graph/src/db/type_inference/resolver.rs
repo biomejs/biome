@@ -1164,6 +1164,17 @@ impl<'db, 'a> ResolutionCtx<'db, 'a> {
             self.resolve_inferred_type(ty).expand_structural_global(db)
         })
     }
+
+    /// Returns the resolver that `narrow_type` and `falsy_values` use to
+    /// compare object types with primitives. It resolves local handles and
+    /// structural globals, like the resolver of
+    /// [`Self::select_conditional_branch`].
+    pub(in crate::db::type_inference) fn narrowing_resolver(
+        &mut self,
+    ) -> impl FnMut(InferredTypeData<'db>) -> InferredTypeData<'db> + '_ {
+        let db = self.db;
+        move |ty| self.resolve_inferred_type(ty).expand_structural_global(db)
+    }
 }
 
 /// Returns the primitive type of a primitive literal type, or `None` for other
