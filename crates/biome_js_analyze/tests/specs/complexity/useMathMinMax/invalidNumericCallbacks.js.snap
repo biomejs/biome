@@ -51,6 +51,9 @@ changingElement = 1;
 const valuesWithChangedElement = [changingElement, 2];
 const changedElementMaximum = valuesWithChangedElement.reduce((a, b) => (a > b ? a : b));
 
+const mappedNumbers = [1, 2].map((value) => value);
+const mappedMaximum = mappedNumbers.reduce((a, b) => (a > b ? a : b), 0);
+
 ```
 
 # Diagnostics
@@ -322,6 +325,7 @@ invalidNumericCallbacks.js:46:74 lint/complexity/useMathMinMax  FIXABLE  ━━�
   > 46 │ const changedElementMaximum = valuesWithChangedElement.reduce((a, b) => (a > b ? a : b));
        │                                                                          ^^^^^^^^^^^^^
     47 │ 
+    48 │ const mappedNumbers = [1, 2].map((value) => value);
   
   i Dedicated min/max functions like Math.max() are clearer and more concise for this purpose.
   
@@ -332,6 +336,30 @@ invalidNumericCallbacks.js:46:74 lint/complexity/useMathMinMax  FIXABLE  ━━�
     46    │ - const·changedElementMaximum·=·valuesWithChangedElement.reduce((a,·b)·=>·(a·>·b·?·a·:·b));
        46 │ + const·changedElementMaximum·=·valuesWithChangedElement.reduce((a,·b)·=>·(Math.max(a·,·b)));
     47 47 │   
+    48 48 │   const mappedNumbers = [1, 2].map((value) => value);
+  
+
+```
+
+```
+invalidNumericCallbacks.js:49:55 lint/complexity/useMathMinMax  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ternary is selecting the larger of the same two operands, which can be simplified.
+  
+    48 │ const mappedNumbers = [1, 2].map((value) => value);
+  > 49 │ const mappedMaximum = mappedNumbers.reduce((a, b) => (a > b ? a : b), 0);
+       │                                                       ^^^^^^^^^^^^^
+    50 │ 
+  
+  i Dedicated min/max functions like Math.max() are clearer and more concise for this purpose.
+  
+  i Unsafe fix: Use Math.max() instead.
+  
+    47 47 │   
+    48 48 │   const mappedNumbers = [1, 2].map((value) => value);
+    49    │ - const·mappedMaximum·=·mappedNumbers.reduce((a,·b)·=>·(a·>·b·?·a·:·b),·0);
+       49 │ + const·mappedMaximum·=·mappedNumbers.reduce((a,·b)·=>·(Math.max(a·,·b)),·0);
+    50 50 │   
   
 
 ```

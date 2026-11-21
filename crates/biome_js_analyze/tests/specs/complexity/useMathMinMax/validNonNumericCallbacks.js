@@ -44,3 +44,7 @@ const firstWord = "foo";
 const secondWord = "bar";
 const boundStrings = [firstWord, secondWord];
 const largestBoundString = boundStrings.reduce((a, b) => (a > b ? a : b));
+
+const mappedStrings = ["foo", "bar"].map((value) => value);
+const largestMappedString = mappedStrings.reduce((a, b) => (a > b ? a : b), "");
+const smallestMappedString = mappedStrings.reduce((a, b) => (a < b ? a : b), "");
