@@ -326,7 +326,7 @@ output.
         --config-path=PATH    Sets the path to the configuration file or the directory where Biome
                               should search for `biome.json` or `biome.jsonc`. This option disables
                               the default configuration file resolution.
-                              [env:BIOME_CONFIG_PATH: N/A]
+                              [env: BIOME_CONFIG_PATH]
         --max-diagnostics=<none|NUMBER>  Limits the number of diagnostics displayed. Use `none` to
                               remove the limit.
                               [default: 20]
@@ -351,23 +351,23 @@ output.
 Options that control internal CLI and daemon server logging.
         --log-file=PATH       For file-processing commands, writes internal CLI logs to this file
                               instead of standard output.
-                              [env:BIOME_LOG_FILE: N/A]
+                              [env: BIOME_LOG_FILE]
         --log-prefix-name=STRING  When starting the daemon server, sets the file name prefix used
                               for rotated log files.
-                              [env:BIOME_LOG_PREFIX_NAME: N/A]
+                              [env: BIOME_LOG_PREFIX_NAME]
                               [default: server.log]
         --log-path=PATH       When starting the daemon server, sets the directory where log files
                               are stored.
-                              [env:BIOME_LOG_PATH: N/A]
+                              [env: BIOME_LOG_PATH]
                               [default: <BIOME_DIR>/biome-logs]
         --log-level=<none|tracing|debug|info|warn|error>  For file-processing commands, sets the
                               internal CLI logging level to `tracing`, `debug`, `info`, `warn`,
                               `error`, or `none`.
-                              [env:BIOME_LOG_LEVEL: N/A]
+                              [env: BIOME_LOG_LEVEL]
                               [default: none]
         --log-kind=<pretty|compact|json>  For file-processing commands, selects the internal CLI log
                               format: `pretty`, `compact`, or `json`.
-                              [env:BIOME_LOG_KIND: N/A]
+                              [env: BIOME_LOG_KIND]
                               [default: pretty]
 
 Available positional items:
