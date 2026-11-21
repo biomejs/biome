@@ -6,7 +6,7 @@
 //! each of them. In exchange, a [BorrowedToken] only describes the token
 //! itself: it can't navigate to its parent or to its siblings.
 
-use crate::green::Slot;
+use crate::green::{GreenTokens, GreenTokensWithComments};
 use crate::{GreenNodeRef, GreenTokenRef, Language, SyntaxKind, TriviaPiece, TriviaPieceKind};
 use biome_text_size::{TextLen, TextRange, TextSize};
 use std::iter::FusedIterator;
@@ -17,12 +17,7 @@ use std::slice;
 ///
 /// Created by [SyntaxNode::borrowed_tokens](crate::SyntaxNode::borrowed_tokens).
 pub struct BorrowedTokensIterator<'a, L: Language> {
-    /// For each node the walk has entered, outermost first: its children
-    /// that haven't been visited yet, and the offset where the node starts.
-    ///
-    /// For example, after `a` is returned from `a + b`, the entry for the
-    /// binary expression holds `+` and `b`.
-    pending_children: Vec<(slice::Iter<'a, Slot>, TextSize)>,
+    tokens: GreenTokens<'a>,
     _p: PhantomData<L>,
 }
 
@@ -30,7 +25,7 @@ impl<'a, L: Language> BorrowedTokensIterator<'a, L> {
     /// Creates the iterator for `node`, whose range starts at `offset`.
     pub(super) fn new(node: GreenNodeRef<'a>, offset: TextSize) -> Self {
         Self {
-            pending_children: vec![(node.slice().iter(), offset)],
+            tokens: GreenTokens::new(node, offset),
             _p: PhantomData,
         }
     }
@@ -40,29 +35,12 @@ impl<'a, L: Language> Iterator for BorrowedTokensIterator<'a, L> {
     type Item = BorrowedToken<'a, L>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        // Depth-first walk: enter child nodes by pushing their children, and
-        // return to the parent by popping a node once it has none left.
-        loop {
-            let (slots, node_offset) = self.pending_children.last_mut()?;
-            match slots.next() {
-                Some(Slot::Token { rel_offset, token }) => {
-                    return Some(BorrowedToken {
-                        green: token.as_ref(),
-                        offset: *node_offset + *rel_offset,
-                        _p: PhantomData,
-                    });
-                }
-                Some(Slot::Node { rel_offset, node }) => {
-                    let offset = *node_offset + *rel_offset;
-                    self.pending_children
-                        .push((node.as_ref().slice().iter(), offset));
-                }
-                Some(Slot::Empty { .. }) => {}
-                None => {
-                    self.pending_children.pop();
-                }
-            }
-        }
+        let token = self.tokens.next()?;
+        Some(BorrowedToken {
+            green: token.green,
+            offset: token.offset,
+            _p: PhantomData,
+        })
     }
 }
 
@@ -75,22 +53,15 @@ impl<L: Language> FusedIterator for BorrowedTokensIterator<'_, L> {}
 /// It skips every subtree without comments, so its cost depends on where the
 /// comments are, not on the size of the tree.
 pub struct BorrowedTokensWithCommentsIterator<'a, L: Language> {
-    /// Same as [BorrowedTokensIterator::pending_children], for the nodes that
-    /// have comments.
-    pending_children: Vec<(slice::Iter<'a, Slot>, TextSize)>,
+    tokens: GreenTokensWithComments<'a>,
     _p: PhantomData<L>,
 }
 
 impl<'a, L: Language> BorrowedTokensWithCommentsIterator<'a, L> {
     /// Creates the iterator for `node`, whose range starts at `offset`.
     pub(super) fn new(node: GreenNodeRef<'a>, offset: TextSize) -> Self {
-        let pending_children = if node.has_comments() {
-            vec![(node.slice().iter(), offset)]
-        } else {
-            Vec::new()
-        };
         Self {
-            pending_children,
+            tokens: GreenTokensWithComments::new(node, offset),
             _p: PhantomData,
         }
     }
@@ -100,27 +71,12 @@ impl<'a, L: Language> Iterator for BorrowedTokensWithCommentsIterator<'a, L> {
     type Item = BorrowedToken<'a, L>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        loop {
-            let (slots, node_offset) = self.pending_children.last_mut()?;
-            match slots.next() {
-                Some(Slot::Token { rel_offset, token }) if token.as_ref().has_comments() => {
-                    return Some(BorrowedToken {
-                        green: token.as_ref(),
-                        offset: *node_offset + *rel_offset,
-                        _p: PhantomData,
-                    });
-                }
-                Some(Slot::Node { rel_offset, node }) if node.as_ref().has_comments() => {
-                    let offset = *node_offset + *rel_offset;
-                    self.pending_children
-                        .push((node.as_ref().slice().iter(), offset));
-                }
-                Some(_) => {}
-                None => {
-                    self.pending_children.pop();
-                }
-            }
-        }
+        let token = self.tokens.next()?;
+        Some(BorrowedToken {
+            green: token.green,
+            offset: token.offset,
+            _p: PhantomData,
+        })
     }
 }
 

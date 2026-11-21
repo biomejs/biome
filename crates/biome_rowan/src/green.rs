@@ -2,12 +2,14 @@ mod element;
 mod node;
 mod node_cache;
 mod token;
+mod token_walk;
 mod trivia;
 
 pub(crate) use self::{
     element::{GreenElement, GreenElementRef},
     node::{Child, Children, GreenNode, GreenNodeRef, Slot},
     token::{GreenToken, GreenTokenRef},
+    token_walk::{GreenTokens, GreenTokensForRange, GreenTokensWithComments},
     trivia::GreenTrivia,
 };
 
