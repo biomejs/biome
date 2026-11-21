@@ -36,6 +36,13 @@ pub(crate) fn is_page_or_frame_name(name: &str) -> bool {
     name == "page" || name == "frame" || name.ends_with("Page") || name.ends_with("Frame")
 }
 
+/// Returns `true` if `name` represents a Playwright locator variable or parameter.
+///
+/// Matches "locator" or names ending with "Locator" (e.g., `myLocator`).
+pub(crate) fn is_locator_name(name: &str) -> bool {
+    name == "locator" || name.ends_with("Locator")
+}
+
 /// Gets the page/frame name from an expression if it represents a page or frame.
 ///
 /// Combines `get_object_name` and `is_page_or_frame_name` for convenience.
@@ -316,12 +323,13 @@ pub(crate) fn find_member_in_chain(
 /// - `myPage.locator('x').click()` (variable ending with "Page")
 pub(crate) fn is_playwright_call_chain(expr: &AnyJsExpression) -> bool {
     match expr {
-        // Base case: identifier like `page` or `frame`
+        // Base case: identifier like `page`, `frame`, or `locator`
         AnyJsExpression::JsIdentifierExpression(id) => {
             if let Ok(name) = id.name()
                 && let Ok(token) = name.value_token()
             {
-                return is_page_or_frame_name(token.text_trimmed());
+                let text = token.text_trimmed();
+                return is_page_or_frame_name(text) || is_locator_name(text);
             }
             false
         }
@@ -332,8 +340,9 @@ pub(crate) fn is_playwright_call_chain(expr: &AnyJsExpression) -> bool {
                 && let Some(name) = member_name.as_js_name()
                 && let Ok(token) = name.value_token()
             {
-                // Check if member name is page/frame
-                if is_page_or_frame_name(token.text_trimmed()) {
+                let text = token.text_trimmed();
+                // Check if member name is page/frame or locator
+                if is_page_or_frame_name(text) || is_locator_name(text) {
                     return true;
                 }
             }
@@ -534,6 +543,20 @@ mod tests {
         assert!(!is_page_or_frame_name("element"));
         assert!(!is_page_or_frame_name("pageBuilder")); // "Page" must be at the end
         assert!(!is_page_or_frame_name("frameWork")); // "Frame" must be at the end
+    }
+
+    #[test]
+    fn test_is_locator_name_valid() {
+        assert!(is_locator_name("locator"));
+        assert!(is_locator_name("myLocator"));
+        assert!(is_locator_name("childLocator"));
+    }
+
+    #[test]
+    fn test_is_locator_name_invalid() {
+        assert!(!is_locator_name("query"));
+        assert!(!is_locator_name("page"));
+        assert!(!is_locator_name("locatorBuilder"));
     }
 
     #[test]
