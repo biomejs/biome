@@ -1,0 +1,20 @@
+.form-control > select {
+	@-moz-document url-prefix() {
+		--padding-inline-start: var(--inset-base);
+		color: red;
+
+		> option {
+			color: blue;
+		}
+	}
+}
+
+div {
+	@document url(http://www.example.com/), domain(example.com) {
+		padding: 1em;
+
+		& .class {
+			color: green;
+		}
+	}
+}

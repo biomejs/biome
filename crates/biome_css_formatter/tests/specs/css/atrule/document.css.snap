@@ -31,6 +31,13 @@ info: css/atrule/document.css
 	}
 }
 
+.form-control > select {
+	@-moz-document url-prefix() {--padding-inline-start:var(--inset-base);
+		color:red;
+		> option { color: blue }
+	}
+}
+
 ```
 
 
@@ -61,6 +68,16 @@ info: css/atrule/document.css
 	@media screen and (min-width: 900px) {
 		article {
 			padding: 1rem 3rem;
+		}
+	}
+}
+
+.form-control > select {
+	@-moz-document url-prefix() {
+		--padding-inline-start: var(--inset-base);
+		color: red;
+		> option {
+			color: blue;
 		}
 	}
 }

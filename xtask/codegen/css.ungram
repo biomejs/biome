@@ -2153,7 +2153,7 @@ CssStartingStyleAtRule =
 CssDocumentAtRule =
 	'document'
 	matchers: CssDocumentMatcherList
-	block: AnyCssRuleBlock
+	block: AnyCssConditionalBlock
 
 CssDocumentMatcherList = (AnyCssDocumentMatcher (',' AnyCssDocumentMatcher)*)
 
