@@ -51,7 +51,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseExpectToStrictEqual {
-        version: "next",
+        version: "2.6.9",
         name: "useExpectToStrictEqual",
         language: "js",
         recommended: false,

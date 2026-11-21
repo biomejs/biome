@@ -78,7 +78,7 @@ declare_lint_rule! {
     ///   unchanged. Both rules report `delete array[0]`.
     ///
     pub NoArrayDelete {
-        version: "next",
+        version: "2.6.9",
         name: "noArrayDelete",
         language: "js",
         recommended: true,

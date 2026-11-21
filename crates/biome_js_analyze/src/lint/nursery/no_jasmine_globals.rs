@@ -111,7 +111,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoJasmineGlobals {
-        version: "next",
+        version: "2.6.9",
         name: "noJasmineGlobals",
         language: "js",
         recommended: false,

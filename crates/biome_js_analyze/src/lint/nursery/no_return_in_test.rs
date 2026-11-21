@@ -83,7 +83,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoReturnInTest {
-        version: "next",
+        version: "2.6.9",
         name: "noReturnInTest",
         language: "js",
         recommended: true,

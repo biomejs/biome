@@ -164,7 +164,7 @@ declare_lint_rule! {
     ///   opposite style. Don't enable both rules.
     ///
     pub UseEarlyContinue {
-        version: "next",
+        version: "2.6.9",
         name: "useEarlyContinue",
         language: "js",
         sources: &[RuleSource::EslintUnicorn("prefer-continue").same()],

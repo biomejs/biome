@@ -74,7 +74,7 @@ declare_lint_rule! {
     /// - If you want to remove default values that are `undefined`, see [`noUselessUndefined`](https://biomejs.dev/linter/rules/no-useless-undefined/).
     ///
     pub NoUselessDefaultAssignment {
-        version: "next",
+        version: "2.6.9",
         name: "noUselessDefaultAssignment",
         language: "ts",
         recommended: false,
