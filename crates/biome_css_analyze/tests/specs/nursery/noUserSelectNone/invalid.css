@@ -1,0 +1,14 @@
+/* should generate diagnostics */
+
+.button {
+	user-select: none;
+	-webkit-user-select: none;
+	-moz-user-select: NONE;
+	user-select: n\6f ne;
+}
+
+.nested {
+	& .child {
+		user-select: none;
+	}
+}

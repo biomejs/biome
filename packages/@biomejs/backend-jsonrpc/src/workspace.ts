@@ -3699,6 +3699,11 @@ export interface Nursery {
 	 */
 	noUselessTypeConversion?: NoUselessTypeConversionConfiguration;
 	/**
+	 * Disallow user-select: none and its vendor-prefixed forms.
+	 * See https://biomejs.dev/linter/rules/no-user-select-none
+	 */
+	noUserSelectNone?: NoUserSelectNoneConfiguration;
+	/**
 	 * Disallow asynchronous code in Vue computed properties.
 	 * See https://biomejs.dev/linter/rules/no-vue-async-computed
 	 */
@@ -7319,6 +7324,9 @@ export type NoUselessTypeAssertionConfiguration =
 export type NoUselessTypeConversionConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUselessTypeConversionOptions;
+export type NoUserSelectNoneConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoUserSelectNoneOptions;
 export type NoVueAsyncComputedConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueAsyncComputedOptions;
@@ -10814,6 +10822,10 @@ export interface RuleWithNoUselessTypeConversionOptions {
 	level: RulePlainConfiguration;
 	options?: NoUselessTypeConversionOptions;
 }
+export interface RuleWithNoUserSelectNoneOptions {
+	level: RulePlainConfiguration;
+	options?: NoUserSelectNoneOptions;
+}
 export interface RuleWithNoVueAsyncComputedOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueAsyncComputedOptions;
@@ -14290,6 +14302,7 @@ export type NoUselessSpliceOptions = {};
 export type NoUselessSpreadOptions = {};
 export type NoUselessTypeAssertionOptions = {};
 export type NoUselessTypeConversionOptions = {};
+export type NoUserSelectNoneOptions = {};
 export interface NoVueAsyncComputedOptions {
 	/**
 	 * Names of objects whose `then()`, `catch()`, and `finally()` methods aren't treated as
@@ -16473,8 +16486,6 @@ export type Category =
 	| "lint/nursery/noDynamicRequire"
 	| "lint/nursery/noEagerArrayMethodsInLoops"
 	| "lint/nursery/noEmptyObjectKeys"
-	| "lint/nursery/noTestHooks"
-	| "lint/nursery/noYamlEmptySequenceEntries"
 	| "lint/nursery/noErasingOperation"
 	| "lint/nursery/noExcessiveNestedBlocks"
 	| "lint/nursery/noExcessiveNestedCallbacks"
@@ -16580,6 +16591,7 @@ export type Category =
 	| "lint/nursery/noTanstackQueryRestDestructuring"
 	| "lint/nursery/noTanstackQueryVoidQueryFn"
 	| "lint/nursery/noTestGlobals"
+	| "lint/nursery/noTestHooks"
 	| "lint/nursery/noThisOutsideOfClass"
 	| "lint/nursery/noTripleSlashReference"
 	| "lint/nursery/noUndeclaredClasses"
@@ -16616,16 +16628,17 @@ export type Category =
 	| "lint/nursery/noUselessSpread"
 	| "lint/nursery/noUselessTypeAssertion"
 	| "lint/nursery/noUselessTypeConversion"
+	| "lint/nursery/noUserSelectNone"
 	| "lint/nursery/noVueAsyncComputed"
 	| "lint/nursery/noVueBooleanDefault"
 	| "lint/nursery/noVueChildContent"
 	| "lint/nursery/noVueComputedPropertiesInData"
 	| "lint/nursery/noVueDefineModelDefault"
 	| "lint/nursery/noVueDeprecatedConfigKeyCodes"
-	| "lint/nursery/noVueDeprecatedFilter"
 	| "lint/nursery/noVueDeprecatedDeleteSet"
 	| "lint/nursery/noVueDeprecatedDestroyedLifecycle"
 	| "lint/nursery/noVueDeprecatedEventsApi"
+	| "lint/nursery/noVueDeprecatedFilter"
 	| "lint/nursery/noVueDeprecatedFunctionalTemplate"
 	| "lint/nursery/noVueDeprecatedHtmlElementIs"
 	| "lint/nursery/noVueDeprecatedInlineTemplate"
@@ -16683,6 +16696,7 @@ export type Category =
 	| "lint/nursery/noYamlBooleanKeys"
 	| "lint/nursery/noYamlEmptyMapKeys"
 	| "lint/nursery/noYamlEmptyMapValues"
+	| "lint/nursery/noYamlEmptySequenceEntries"
 	| "lint/nursery/noZeroFractions"
 	| "lint/nursery/noZeroLengthUnit"
 	| "lint/nursery/useAccessorPairs"
