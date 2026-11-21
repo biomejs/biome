@@ -193,3 +193,13 @@ function createWrappedHook(key) {
   });
   return useWrapped;
 }
+
+// Factory returning components as object properties
+function createSlots(theme) {
+  return {
+    Header: () => <header style={{ color: theme.primary }} />,
+    Footer: function () {
+      return <footer style={{ color: theme.secondary }} />;
+    },
+  };
+}
