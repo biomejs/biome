@@ -11,6 +11,7 @@ use biome_js_syntax::declaration_ext::is_in_ambient_context;
 use biome_js_syntax::{
     AnyJsExpression, JsArrayBindingPattern, JsArrayBindingPatternElement,
     JsArrayBindingPatternElementList, JsArrayBindingPatternRestElement, JsArrowFunctionExpression,
+    JsAssignmentExpression, JsAssignmentOperator,
     JsBogusNamedImportSpecifier, JsCallExpression, JsClassExpression, JsDefaultImportSpecifier,
     JsForStatement, JsFormalParameter, JsFunctionExpression, JsIdentifierExpression, JsLanguage,
     JsModuleItemList, JsNamedImportSpecifier, JsNamespaceImportSpecifier, JsObjectBindingPattern,
@@ -1007,11 +1008,35 @@ fn is_unused_by_references(binding: &Binding, declaration: &JsSyntaxNode) -> boo
 /// not use the binding: a write that only updates it in statement position, such
 /// as `a += 1` or `a++`, or a read whose value is discarded, such as `a;`.
 ///
+/// A logical assignment such as `a ??= b` always uses the binding, because the
+/// current value decides whether `b` is evaluated.
+///
 /// The reference's node is built from the closest ancestor of `declaration`
 /// that contains it.
 fn use_parent(reference: &Reference, declaration: &JsSyntaxNode) -> Option<JsSyntaxNode> {
     let ref_parent = reference.syntax_near(declaration).parent()?;
     if reference.is_write() {
+        // Skips the wrappers of the target in `(a) ??= b` or `a! ??= b`.
+        let assignment = ref_parent.ancestors().find(|ancestor| {
+            !matches!(
+                ancestor.kind(),
+                JsSyntaxKind::JS_PARENTHESIZED_ASSIGNMENT
+                    | JsSyntaxKind::TS_NON_NULL_ASSERTION_ASSIGNMENT
+                    | JsSyntaxKind::TS_AS_ASSIGNMENT
+                    | JsSyntaxKind::TS_SATISFIES_ASSIGNMENT
+                    | JsSyntaxKind::TS_TYPE_ASSERTION_ASSIGNMENT
+            )
+        });
+        if let Some(assignment) = assignment.and_then(JsAssignmentExpression::cast)
+            && matches!(
+                assignment.operator(),
+                Ok(JsAssignmentOperator::LogicalAndAssign
+                    | JsAssignmentOperator::LogicalOrAssign
+                    | JsAssignmentOperator::NullishCoalescingAssign)
+            )
+        {
+            return Some(ref_parent);
+        }
         // Ensure that the assignment is not used in an used expression.
         let is_statement_like = ref_parent
             .ancestors()
