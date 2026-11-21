@@ -3719,6 +3719,11 @@ export interface Nursery {
 	 */
 	noVueComputedPropertiesInData?: NoVueComputedPropertiesInDataConfiguration;
 	/**
+	 * Disallow content outside of the top-level blocks in Vue components.
+	 * See https://biomejs.dev/linter/rules/no-vue-content-outside-block
+	 */
+	noVueContentOutsideBlock?: NoVueContentOutsideBlockConfiguration;
+	/**
 	 * Disallow default values in Vue's defineModel().
 	 * See https://biomejs.dev/linter/rules/no-vue-define-model-default
 	 */
@@ -7331,6 +7336,9 @@ export type NoVueChildContentConfiguration =
 export type NoVueComputedPropertiesInDataConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueComputedPropertiesInDataOptions;
+export type NoVueContentOutsideBlockConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoVueContentOutsideBlockOptions;
 export type NoVueDefineModelDefaultConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueDefineModelDefaultOptions;
@@ -10834,6 +10842,14 @@ export interface RuleWithNoVueComputedPropertiesInDataOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueComputedPropertiesInDataOptions;
 }
+export interface RuleWithNoVueContentOutsideBlockOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: NoVueContentOutsideBlockOptions;
+}
 export interface RuleWithNoVueDefineModelDefaultOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueDefineModelDefaultOptions;
@@ -14307,6 +14323,7 @@ export interface NoVueChildContentOptions {
 	additionalDirectives?: string[];
 }
 export type NoVueComputedPropertiesInDataOptions = {};
+export type NoVueContentOutsideBlockOptions = {};
 export type NoVueDefineModelDefaultOptions = {};
 export type NoVueDeprecatedConfigKeyCodesOptions = {};
 export type NoVueDeprecatedDeleteSetOptions = {};
@@ -16473,8 +16490,6 @@ export type Category =
 	| "lint/nursery/noDynamicRequire"
 	| "lint/nursery/noEagerArrayMethodsInLoops"
 	| "lint/nursery/noEmptyObjectKeys"
-	| "lint/nursery/noTestHooks"
-	| "lint/nursery/noYamlEmptySequenceEntries"
 	| "lint/nursery/noErasingOperation"
 	| "lint/nursery/noExcessiveNestedBlocks"
 	| "lint/nursery/noExcessiveNestedCallbacks"
@@ -16580,6 +16595,7 @@ export type Category =
 	| "lint/nursery/noTanstackQueryRestDestructuring"
 	| "lint/nursery/noTanstackQueryVoidQueryFn"
 	| "lint/nursery/noTestGlobals"
+	| "lint/nursery/noTestHooks"
 	| "lint/nursery/noThisOutsideOfClass"
 	| "lint/nursery/noTripleSlashReference"
 	| "lint/nursery/noUndeclaredClasses"
@@ -16620,12 +16636,13 @@ export type Category =
 	| "lint/nursery/noVueBooleanDefault"
 	| "lint/nursery/noVueChildContent"
 	| "lint/nursery/noVueComputedPropertiesInData"
+	| "lint/nursery/noVueContentOutsideBlock"
 	| "lint/nursery/noVueDefineModelDefault"
 	| "lint/nursery/noVueDeprecatedConfigKeyCodes"
-	| "lint/nursery/noVueDeprecatedFilter"
 	| "lint/nursery/noVueDeprecatedDeleteSet"
 	| "lint/nursery/noVueDeprecatedDestroyedLifecycle"
 	| "lint/nursery/noVueDeprecatedEventsApi"
+	| "lint/nursery/noVueDeprecatedFilter"
 	| "lint/nursery/noVueDeprecatedFunctionalTemplate"
 	| "lint/nursery/noVueDeprecatedHtmlElementIs"
 	| "lint/nursery/noVueDeprecatedInlineTemplate"
@@ -16683,6 +16700,7 @@ export type Category =
 	| "lint/nursery/noYamlBooleanKeys"
 	| "lint/nursery/noYamlEmptyMapKeys"
 	| "lint/nursery/noYamlEmptyMapValues"
+	| "lint/nursery/noYamlEmptySequenceEntries"
 	| "lint/nursery/noZeroFractions"
 	| "lint/nursery/noZeroLengthUnit"
 	| "lint/nursery/useAccessorPairs"
