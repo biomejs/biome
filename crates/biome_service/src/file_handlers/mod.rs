@@ -105,11 +105,12 @@ use camino::{Utf8Path, Utf8PathBuf};
 use html::HtmlFileHandler;
 #[cfg(feature = "lang_js")]
 pub use javascript::JsFormatterSettings;
-use rustc_hash::FxHashSet;
+use rustc_hash::{FxHashMap, FxHashSet};
 #[cfg(test)]
 use salsa::plumbing::ZalsaDatabase;
 use std::borrow::Cow;
 use std::collections::HashSet;
+use std::collections::hash_map::Entry;
 use std::hash::{Hash, Hasher};
 #[cfg(feature = "module_graph")]
 use std::rc::Rc;
@@ -828,6 +829,14 @@ impl<'a> ProcessLint<'a> {
     }
 }
 
+/// Identifies an applied fix batch.
+#[derive(Eq, PartialEq, Hash)]
+struct AppliedEdit {
+    rule_name: Option<(&'static str, &'static str)>,
+    range: TextRange,
+    edit: TextEdit,
+}
+
 /// Use this type to process fix all actions
 pub(crate) struct ProcessFixAll<'a> {
     fix_file_mode: &'a FixFileMode,
@@ -836,6 +845,13 @@ pub(crate) struct ProcessFixAll<'a> {
     skipped_suggested_fixes: u32,
     actions: Vec<FixAction>,
     growth_guard: GrowthGuard,
+    /// Every batch applied so far, mapped to the length of `actions` before
+    /// that batch was recorded.
+    ///
+    /// Fixing is deterministic, so a rule producing an identical edit twice
+    /// means its earlier fix was undone in between and the loop would never
+    /// terminate.
+    applied_edits: FxHashMap<AppliedEdit, usize>,
 }
 
 impl<'a> ProcessFixAll<'a> {
@@ -847,6 +863,7 @@ impl<'a> ProcessFixAll<'a> {
             skipped_suggested_fixes: 0,
             actions: Vec::new(),
             growth_guard: GrowthGuard::new(syntax_len),
+            applied_edits: FxHashMap::default(),
         }
     }
 
@@ -997,7 +1014,7 @@ impl<'a> ProcessFixAll<'a> {
         };
 
         let (root, text_range_and_edit) = master.commit_with_text_range_and_edit(true);
-        if let Some((range, _)) = text_range_and_edit {
+        if let Some((range, edit)) = text_range_and_edit {
             let Some(curr_len) = update_tree_return_text_len(root) else {
                 return Err(WorkspaceError::RuleError(
                     RuleError::ReplacedRootWithNonRootError {
@@ -1006,11 +1023,36 @@ impl<'a> ProcessFixAll<'a> {
                 ));
             };
 
+            let first_action = self.actions.len();
             for _ in 0..count {
                 self.actions.push(FixAction {
                     rule_name: target_rule.map(|(g, r)| (Cow::Borrowed(g), Cow::Borrowed(r))),
                     range,
                 });
+            }
+
+            match self.applied_edits.entry(AppliedEdit {
+                rule_name: target_rule,
+                range,
+                edit,
+            }) {
+                Entry::Occupied(entry) => {
+                    let mut cycle_rules = Vec::new();
+                    for rule_name in self.actions[*entry.get()..]
+                        .iter()
+                        .filter_map(|a| a.rule_name.clone())
+                    {
+                        if !cycle_rules.contains(&rule_name) {
+                            cycle_rules.push(rule_name);
+                        }
+                    }
+                    return Err(WorkspaceError::RuleError(
+                        RuleError::ConflictingRuleFixesError { rules: cycle_rules },
+                    ));
+                }
+                Entry::Vacant(entry) => {
+                    entry.insert(first_action);
+                }
             }
 
             if !self.growth_guard.check(curr_len) {
