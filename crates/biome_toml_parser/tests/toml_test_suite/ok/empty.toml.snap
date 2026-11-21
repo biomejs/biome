@@ -1,0 +1,28 @@
+---
+source: crates/biome_toml_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+```toml
+
+```
+
+## AST
+
+```
+TomlRoot {
+    bom_token: missing (optional),
+    items: TomlRootItemList [],
+    eof_token: EOF@0..0 "" [] [],
+}
+```
+
+## CST
+
+```
+0: TOML_ROOT@0..0
+  0: (empty)
+  1: TOML_ROOT_ITEM_LIST@0..0
+  2: EOF@0..0 "" [] []
+
+```

@@ -1,0 +1,337 @@
+---
+source: crates/biome_toml_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+```toml
+odt1 = 1979-05-27T07:32:00Z
+odt2 = 1979-05-27T00:32:00-07:00
+odt3 = 1979-05-27T00:32:00.999999-07:00
+odt4 = 1979-05-27 07:32:00Z
+odt5 = 1979-05-27t07:32z
+ldt1 = 1979-05-27T07:32:00
+ldt2 = 1979-05-27T07:32
+ldt3 = 1979-05-27 00:32:00.999999
+ld1 = 1979-05-27
+ld2 = 1979-05-27 # a date followed by a comment
+lt1 = 07:32:00
+lt2 = 00:32:00.999999
+lt3 = 13:37
+leap = 2000-02-29
+
+```
+
+## AST
+
+```
+TomlRoot {
+    bom_token: missing (optional),
+    items: TomlRootItemList [
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@0..5 "odt1" [] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@5..7 "=" [] [Whitespace(" ")],
+            value: TomlDateTime {
+                value_token: TOML_OFFSET_DATE_TIME_LITERAL@7..27 "1979-05-27T07:32:00Z" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@27..33 "odt2" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@33..35 "=" [] [Whitespace(" ")],
+            value: TomlDateTime {
+                value_token: TOML_OFFSET_DATE_TIME_LITERAL@35..60 "1979-05-27T00:32:00-07:00" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@60..66 "odt3" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@66..68 "=" [] [Whitespace(" ")],
+            value: TomlDateTime {
+                value_token: TOML_OFFSET_DATE_TIME_LITERAL@68..100 "1979-05-27T00:32:00.999999-07:00" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@100..106 "odt4" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@106..108 "=" [] [Whitespace(" ")],
+            value: TomlDateTime {
+                value_token: TOML_OFFSET_DATE_TIME_LITERAL@108..128 "1979-05-27 07:32:00Z" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@128..134 "odt5" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@134..136 "=" [] [Whitespace(" ")],
+            value: TomlDateTime {
+                value_token: TOML_OFFSET_DATE_TIME_LITERAL@136..153 "1979-05-27t07:32z" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@153..159 "ldt1" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@159..161 "=" [] [Whitespace(" ")],
+            value: TomlDateTime {
+                value_token: TOML_LOCAL_DATE_TIME_LITERAL@161..180 "1979-05-27T07:32:00" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@180..186 "ldt2" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@186..188 "=" [] [Whitespace(" ")],
+            value: TomlDateTime {
+                value_token: TOML_LOCAL_DATE_TIME_LITERAL@188..204 "1979-05-27T07:32" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@204..210 "ldt3" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@210..212 "=" [] [Whitespace(" ")],
+            value: TomlDateTime {
+                value_token: TOML_LOCAL_DATE_TIME_LITERAL@212..238 "1979-05-27 00:32:00.999999" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@238..243 "ld1" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@243..245 "=" [] [Whitespace(" ")],
+            value: TomlDateTime {
+                value_token: TOML_LOCAL_DATE_LITERAL@245..255 "1979-05-27" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@255..260 "ld2" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@260..262 "=" [] [Whitespace(" ")],
+            value: TomlDateTime {
+                value_token: TOML_LOCAL_DATE_LITERAL@262..303 "1979-05-27" [] [Whitespace(" "), Comments("# a date followed by  ...")],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@303..308 "lt1" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@308..310 "=" [] [Whitespace(" ")],
+            value: TomlDateTime {
+                value_token: TOML_LOCAL_TIME_LITERAL@310..318 "07:32:00" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@318..323 "lt2" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@323..325 "=" [] [Whitespace(" ")],
+            value: TomlDateTime {
+                value_token: TOML_LOCAL_TIME_LITERAL@325..340 "00:32:00.999999" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@340..345 "lt3" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@345..347 "=" [] [Whitespace(" ")],
+            value: TomlDateTime {
+                value_token: TOML_LOCAL_TIME_LITERAL@347..352 "13:37" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@352..358 "leap" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@358..360 "=" [] [Whitespace(" ")],
+            value: TomlDateTime {
+                value_token: TOML_LOCAL_DATE_LITERAL@360..370 "2000-02-29" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@370..371 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: TOML_ROOT@0..371
+  0: (empty)
+  1: TOML_ROOT_ITEM_LIST@0..370
+    0: TOML_KEY_VALUE@0..27
+      0: TOML_KEY@0..5
+        0: TOML_KEY_PART_LIST@0..5
+          0: TOML_BARE_KEY@0..5
+            0: TOML_BARE_KEY_LITERAL@0..5 "odt1" [] [Whitespace(" ")]
+      1: EQ@5..7 "=" [] [Whitespace(" ")]
+      2: TOML_DATE_TIME@7..27
+        0: TOML_OFFSET_DATE_TIME_LITERAL@7..27 "1979-05-27T07:32:00Z" [] []
+    1: TOML_KEY_VALUE@27..60
+      0: TOML_KEY@27..33
+        0: TOML_KEY_PART_LIST@27..33
+          0: TOML_BARE_KEY@27..33
+            0: TOML_BARE_KEY_LITERAL@27..33 "odt2" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@33..35 "=" [] [Whitespace(" ")]
+      2: TOML_DATE_TIME@35..60
+        0: TOML_OFFSET_DATE_TIME_LITERAL@35..60 "1979-05-27T00:32:00-07:00" [] []
+    2: TOML_KEY_VALUE@60..100
+      0: TOML_KEY@60..66
+        0: TOML_KEY_PART_LIST@60..66
+          0: TOML_BARE_KEY@60..66
+            0: TOML_BARE_KEY_LITERAL@60..66 "odt3" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@66..68 "=" [] [Whitespace(" ")]
+      2: TOML_DATE_TIME@68..100
+        0: TOML_OFFSET_DATE_TIME_LITERAL@68..100 "1979-05-27T00:32:00.999999-07:00" [] []
+    3: TOML_KEY_VALUE@100..128
+      0: TOML_KEY@100..106
+        0: TOML_KEY_PART_LIST@100..106
+          0: TOML_BARE_KEY@100..106
+            0: TOML_BARE_KEY_LITERAL@100..106 "odt4" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@106..108 "=" [] [Whitespace(" ")]
+      2: TOML_DATE_TIME@108..128
+        0: TOML_OFFSET_DATE_TIME_LITERAL@108..128 "1979-05-27 07:32:00Z" [] []
+    4: TOML_KEY_VALUE@128..153
+      0: TOML_KEY@128..134
+        0: TOML_KEY_PART_LIST@128..134
+          0: TOML_BARE_KEY@128..134
+            0: TOML_BARE_KEY_LITERAL@128..134 "odt5" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@134..136 "=" [] [Whitespace(" ")]
+      2: TOML_DATE_TIME@136..153
+        0: TOML_OFFSET_DATE_TIME_LITERAL@136..153 "1979-05-27t07:32z" [] []
+    5: TOML_KEY_VALUE@153..180
+      0: TOML_KEY@153..159
+        0: TOML_KEY_PART_LIST@153..159
+          0: TOML_BARE_KEY@153..159
+            0: TOML_BARE_KEY_LITERAL@153..159 "ldt1" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@159..161 "=" [] [Whitespace(" ")]
+      2: TOML_DATE_TIME@161..180
+        0: TOML_LOCAL_DATE_TIME_LITERAL@161..180 "1979-05-27T07:32:00" [] []
+    6: TOML_KEY_VALUE@180..204
+      0: TOML_KEY@180..186
+        0: TOML_KEY_PART_LIST@180..186
+          0: TOML_BARE_KEY@180..186
+            0: TOML_BARE_KEY_LITERAL@180..186 "ldt2" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@186..188 "=" [] [Whitespace(" ")]
+      2: TOML_DATE_TIME@188..204
+        0: TOML_LOCAL_DATE_TIME_LITERAL@188..204 "1979-05-27T07:32" [] []
+    7: TOML_KEY_VALUE@204..238
+      0: TOML_KEY@204..210
+        0: TOML_KEY_PART_LIST@204..210
+          0: TOML_BARE_KEY@204..210
+            0: TOML_BARE_KEY_LITERAL@204..210 "ldt3" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@210..212 "=" [] [Whitespace(" ")]
+      2: TOML_DATE_TIME@212..238
+        0: TOML_LOCAL_DATE_TIME_LITERAL@212..238 "1979-05-27 00:32:00.999999" [] []
+    8: TOML_KEY_VALUE@238..255
+      0: TOML_KEY@238..243
+        0: TOML_KEY_PART_LIST@238..243
+          0: TOML_BARE_KEY@238..243
+            0: TOML_BARE_KEY_LITERAL@238..243 "ld1" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@243..245 "=" [] [Whitespace(" ")]
+      2: TOML_DATE_TIME@245..255
+        0: TOML_LOCAL_DATE_LITERAL@245..255 "1979-05-27" [] []
+    9: TOML_KEY_VALUE@255..303
+      0: TOML_KEY@255..260
+        0: TOML_KEY_PART_LIST@255..260
+          0: TOML_BARE_KEY@255..260
+            0: TOML_BARE_KEY_LITERAL@255..260 "ld2" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@260..262 "=" [] [Whitespace(" ")]
+      2: TOML_DATE_TIME@262..303
+        0: TOML_LOCAL_DATE_LITERAL@262..303 "1979-05-27" [] [Whitespace(" "), Comments("# a date followed by  ...")]
+    10: TOML_KEY_VALUE@303..318
+      0: TOML_KEY@303..308
+        0: TOML_KEY_PART_LIST@303..308
+          0: TOML_BARE_KEY@303..308
+            0: TOML_BARE_KEY_LITERAL@303..308 "lt1" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@308..310 "=" [] [Whitespace(" ")]
+      2: TOML_DATE_TIME@310..318
+        0: TOML_LOCAL_TIME_LITERAL@310..318 "07:32:00" [] []
+    11: TOML_KEY_VALUE@318..340
+      0: TOML_KEY@318..323
+        0: TOML_KEY_PART_LIST@318..323
+          0: TOML_BARE_KEY@318..323
+            0: TOML_BARE_KEY_LITERAL@318..323 "lt2" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@323..325 "=" [] [Whitespace(" ")]
+      2: TOML_DATE_TIME@325..340
+        0: TOML_LOCAL_TIME_LITERAL@325..340 "00:32:00.999999" [] []
+    12: TOML_KEY_VALUE@340..352
+      0: TOML_KEY@340..345
+        0: TOML_KEY_PART_LIST@340..345
+          0: TOML_BARE_KEY@340..345
+            0: TOML_BARE_KEY_LITERAL@340..345 "lt3" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@345..347 "=" [] [Whitespace(" ")]
+      2: TOML_DATE_TIME@347..352
+        0: TOML_LOCAL_TIME_LITERAL@347..352 "13:37" [] []
+    13: TOML_KEY_VALUE@352..370
+      0: TOML_KEY@352..358
+        0: TOML_KEY_PART_LIST@352..358
+          0: TOML_BARE_KEY@352..358
+            0: TOML_BARE_KEY_LITERAL@352..358 "leap" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@358..360 "=" [] [Whitespace(" ")]
+      2: TOML_DATE_TIME@360..370
+        0: TOML_LOCAL_DATE_LITERAL@360..370 "2000-02-29" [] []
+  2: EOF@370..371 "" [Newline("\n")] []
+
+```

@@ -1,0 +1,217 @@
+---
+source: crates/biome_toml_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+```toml
+a = [
+  1,
+  [[2]]
+]
+b = [
+  [1],
+  [2]
+]
+c = [
+  [x]
+]
+
+```
+
+## AST
+
+```
+TomlRoot {
+    bom_token: missing (optional),
+    items: TomlRootItemList [
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@0..2 "a" [] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@2..4 "=" [] [Whitespace(" ")],
+            value: TomlArray {
+                l_brack_token: L_BRACK@4..5 "[" [] [],
+                elements: TomlArrayElementList [
+                    TomlInteger {
+                        value_token: TOML_INTEGER_LITERAL@5..9 "1" [Newline("\n"), Whitespace("  ")] [],
+                    },
+                    COMMA@9..10 "," [] [],
+                    TomlArray {
+                        l_brack_token: L_BRACK@10..14 "[" [Newline("\n"), Whitespace("  ")] [],
+                        elements: TomlArrayElementList [
+                            TomlArray {
+                                l_brack_token: L_BRACK@14..15 "[" [] [],
+                                elements: TomlArrayElementList [
+                                    TomlInteger {
+                                        value_token: TOML_INTEGER_LITERAL@15..16 "2" [] [],
+                                    },
+                                ],
+                                r_brack_token: R_BRACK@16..17 "]" [] [],
+                            },
+                        ],
+                        r_brack_token: R_BRACK@17..18 "]" [] [],
+                    },
+                ],
+                r_brack_token: R_BRACK@18..20 "]" [Newline("\n")] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@20..23 "b" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@23..25 "=" [] [Whitespace(" ")],
+            value: TomlArray {
+                l_brack_token: L_BRACK@25..26 "[" [] [],
+                elements: TomlArrayElementList [
+                    TomlArray {
+                        l_brack_token: L_BRACK@26..30 "[" [Newline("\n"), Whitespace("  ")] [],
+                        elements: TomlArrayElementList [
+                            TomlInteger {
+                                value_token: TOML_INTEGER_LITERAL@30..31 "1" [] [],
+                            },
+                        ],
+                        r_brack_token: R_BRACK@31..32 "]" [] [],
+                    },
+                    COMMA@32..33 "," [] [],
+                    TomlArray {
+                        l_brack_token: L_BRACK@33..37 "[" [Newline("\n"), Whitespace("  ")] [],
+                        elements: TomlArrayElementList [
+                            TomlInteger {
+                                value_token: TOML_INTEGER_LITERAL@37..38 "2" [] [],
+                            },
+                        ],
+                        r_brack_token: R_BRACK@38..39 "]" [] [],
+                    },
+                ],
+                r_brack_token: R_BRACK@39..41 "]" [Newline("\n")] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@41..44 "c" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@44..46 "=" [] [Whitespace(" ")],
+            value: TomlArray {
+                l_brack_token: L_BRACK@46..47 "[" [] [],
+                elements: TomlArrayElementList [
+                    TomlArray {
+                        l_brack_token: L_BRACK@47..51 "[" [Newline("\n"), Whitespace("  ")] [],
+                        elements: TomlArrayElementList [
+                            TomlBogusValue {
+                                items: [
+                                    ERROR_TOKEN@51..52 "x" [] [],
+                                ],
+                            },
+                        ],
+                        r_brack_token: R_BRACK@52..53 "]" [] [],
+                    },
+                ],
+                r_brack_token: R_BRACK@53..55 "]" [Newline("\n")] [],
+            },
+        },
+    ],
+    eof_token: EOF@55..56 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: TOML_ROOT@0..56
+  0: (empty)
+  1: TOML_ROOT_ITEM_LIST@0..55
+    0: TOML_KEY_VALUE@0..20
+      0: TOML_KEY@0..2
+        0: TOML_KEY_PART_LIST@0..2
+          0: TOML_BARE_KEY@0..2
+            0: TOML_BARE_KEY_LITERAL@0..2 "a" [] [Whitespace(" ")]
+      1: EQ@2..4 "=" [] [Whitespace(" ")]
+      2: TOML_ARRAY@4..20
+        0: L_BRACK@4..5 "[" [] []
+        1: TOML_ARRAY_ELEMENT_LIST@5..18
+          0: TOML_INTEGER@5..9
+            0: TOML_INTEGER_LITERAL@5..9 "1" [Newline("\n"), Whitespace("  ")] []
+          1: COMMA@9..10 "," [] []
+          2: TOML_ARRAY@10..18
+            0: L_BRACK@10..14 "[" [Newline("\n"), Whitespace("  ")] []
+            1: TOML_ARRAY_ELEMENT_LIST@14..17
+              0: TOML_ARRAY@14..17
+                0: L_BRACK@14..15 "[" [] []
+                1: TOML_ARRAY_ELEMENT_LIST@15..16
+                  0: TOML_INTEGER@15..16
+                    0: TOML_INTEGER_LITERAL@15..16 "2" [] []
+                2: R_BRACK@16..17 "]" [] []
+            2: R_BRACK@17..18 "]" [] []
+        2: R_BRACK@18..20 "]" [Newline("\n")] []
+    1: TOML_KEY_VALUE@20..41
+      0: TOML_KEY@20..23
+        0: TOML_KEY_PART_LIST@20..23
+          0: TOML_BARE_KEY@20..23
+            0: TOML_BARE_KEY_LITERAL@20..23 "b" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@23..25 "=" [] [Whitespace(" ")]
+      2: TOML_ARRAY@25..41
+        0: L_BRACK@25..26 "[" [] []
+        1: TOML_ARRAY_ELEMENT_LIST@26..39
+          0: TOML_ARRAY@26..32
+            0: L_BRACK@26..30 "[" [Newline("\n"), Whitespace("  ")] []
+            1: TOML_ARRAY_ELEMENT_LIST@30..31
+              0: TOML_INTEGER@30..31
+                0: TOML_INTEGER_LITERAL@30..31 "1" [] []
+            2: R_BRACK@31..32 "]" [] []
+          1: COMMA@32..33 "," [] []
+          2: TOML_ARRAY@33..39
+            0: L_BRACK@33..37 "[" [Newline("\n"), Whitespace("  ")] []
+            1: TOML_ARRAY_ELEMENT_LIST@37..38
+              0: TOML_INTEGER@37..38
+                0: TOML_INTEGER_LITERAL@37..38 "2" [] []
+            2: R_BRACK@38..39 "]" [] []
+        2: R_BRACK@39..41 "]" [Newline("\n")] []
+    2: TOML_KEY_VALUE@41..55
+      0: TOML_KEY@41..44
+        0: TOML_KEY_PART_LIST@41..44
+          0: TOML_BARE_KEY@41..44
+            0: TOML_BARE_KEY_LITERAL@41..44 "c" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@44..46 "=" [] [Whitespace(" ")]
+      2: TOML_ARRAY@46..55
+        0: L_BRACK@46..47 "[" [] []
+        1: TOML_ARRAY_ELEMENT_LIST@47..53
+          0: TOML_ARRAY@47..53
+            0: L_BRACK@47..51 "[" [Newline("\n"), Whitespace("  ")] []
+            1: TOML_ARRAY_ELEMENT_LIST@51..52
+              0: TOML_BOGUS_VALUE@51..52
+                0: ERROR_TOKEN@51..52 "x" [] []
+            2: R_BRACK@52..53 "]" [] []
+        2: R_BRACK@53..55 "]" [Newline("\n")] []
+  2: EOF@55..56 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+nested_array_elements.toml:10:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Invalid value.
+  
+     8 │ ]
+     9 │ c = [
+  > 10 │   [x]
+       │    ^
+    11 │ ]
+    12 │ 
+  
+  i Strings must be quoted, for example `"value"`.
+  
+```

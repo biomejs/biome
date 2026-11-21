@@ -369,6 +369,27 @@ pub trait Parser: Sized {
         self.do_bump_with_context(kind, context);
     }
 
+    /// Consumes the current token if its kind is in `kinds` and lexes the next
+    /// token using the specified `context`.
+    fn bump_ts_with_context(
+        &mut self,
+        kinds: TokenSet<Self::Kind>,
+        context: <Self::Source as BumpWithContext>::Context,
+    ) where
+        Self::Source: BumpWithContext,
+    {
+        assert!(
+            kinds.contains(self.cur()),
+            "expected {:?} but at {:?} -- text: \"{}\" at {:?}",
+            kinds,
+            self.cur(),
+            self.cur_text(),
+            self.source().current_range(),
+        );
+
+        self.do_bump_with_context(self.cur(), context);
+    }
+
     #[doc(hidden)]
     fn do_bump_with_context(
         &mut self,

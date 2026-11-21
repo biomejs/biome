@@ -2243,11 +2243,16 @@ dependencies = [
 name = "biome_toml_parser"
 version = "0.7.0"
 dependencies = [
+ "biome_console",
  "biome_diagnostics",
  "biome_parser",
  "biome_rowan",
+ "biome_test_utils",
+ "biome_toml_factory",
  "biome_toml_syntax",
  "biome_unicode_table",
+ "insta",
+ "tests_macros",
 ]
 
 [[package]]

@@ -1,0 +1,15 @@
+unquoted = value
+bool = True
+leading_zero = 012
+underscore = 1__000
+sign_hex = -0xFF
+overflow = 9223372036854775808
+underflow = -9223372036854775809
+hex_overflow = 0x8000000000000000
+float_dot = 1.
+float_exp = 1e
+bad_date = 2023-02-29
+bad_time = 25:00:00
+bad_offset = 1979-05-27T07:32:00+24:00
+nan_case = NaN
+after = "still parsed"
