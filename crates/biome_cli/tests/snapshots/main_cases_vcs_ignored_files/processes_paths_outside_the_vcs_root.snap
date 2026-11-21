@@ -1,0 +1,42 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome format --write '<TEMP_DIR>/processes_paths_outside_the_vcs_root/engine/../outside/file.js'
+```
+
+## `engine/biome.json`
+
+```json
+{
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true,
+    "root": "."
+  }
+}
+```
+
+## `engine/.gitignore`
+
+```gitignore
+ignored.js
+
+```
+
+## `outside/file.js`
+
+```js
+statement();
+
+```
+
+# Emitted Messages
+
+```block
+Formatted 1 file in <TIME>. Fixed 1 file.
+```

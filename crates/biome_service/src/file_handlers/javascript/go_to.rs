@@ -2,8 +2,6 @@
 use crate::db::WorkspaceDb;
 use crate::file_handlers::{ResolveBindingParams, ResolveDefinitionParams};
 use crate::workspace::{DefinitionReference, GoToDefinitionResult};
-#[cfg(feature = "module_graph")]
-use biome_fs::BiomePath;
 use biome_js_semantic::js_semantic_model;
 use biome_js_syntax::binding_ext::AnyJsIdentifierBinding;
 use biome_js_syntax::{
@@ -243,13 +241,13 @@ fn resolve_import_definition(
             match lookup {
                 JsExportedSymbolLookup::Missing | JsExportedSymbolLookup::Unknown => {
                     result.store(
-                        BiomePath::new(target_path),
+                        module_db.biome_path(target_path),
                         TextRange::new(TextSize::from(0), TextSize::from(0)),
                     );
                 }
                 JsExportedSymbolLookup::Found(own_export, _) => match own_export {
                     JsOwnExport::Binding(range) => {
-                        result.store(BiomePath::new(target_path), *range)
+                        result.store(module_db.biome_path(target_path), *range)
                     }
                     JsOwnExport::Type(_) | JsOwnExport::Namespace(_) => {}
                 },
@@ -274,13 +272,13 @@ fn resolve_import_definition(
                 ) {
                     JsExportedSymbolLookup::Missing | JsExportedSymbolLookup::Unknown => {
                         result.store(
-                            BiomePath::new(target_path),
+                            module_db.biome_path(target_path),
                             TextRange::new(TextSize::from(0), TextSize::from(0)),
                         );
                     }
                     JsExportedSymbolLookup::Found(own_export, _) => match own_export {
                         JsOwnExport::Binding(range) => {
-                            result.store(BiomePath::new(target_path), *range)
+                            result.store(module_db.biome_path(target_path), *range)
                         }
                         JsOwnExport::Type(_) | JsOwnExport::Namespace(_) => {}
                     },
@@ -289,7 +287,7 @@ fn resolve_import_definition(
             // if not, it's the whole file as a component
             else {
                 result.store(
-                    BiomePath::new(target_path),
+                    module_db.biome_path(target_path),
                     TextRange::new(TextSize::from(0), TextSize::from(0)),
                 );
             }

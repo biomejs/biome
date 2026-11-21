@@ -1,0 +1,86 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome check --write '<TEMP_DIR>/honors_nested_gitignore_negation_file/project.inlang/settings.json'
+```
+
+## `biome.json`
+
+```json
+{
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true
+  },
+  "files": { "includes": ["**"] },
+  "formatter": { "indentStyle": "tab" }
+}
+```
+
+## `.gitignore`
+
+```gitignore
+dist/
+
+```
+
+## `dist/settings.json`
+
+```json
+{
+	"a": [
+		"b"
+	]
+}
+
+```
+
+## `project.inlang/.gitignore`
+
+```gitignore
+*
+!settings.json
+
+```
+
+## `project.inlang/ignored.json`
+
+```json
+{
+	"a": [
+		"b"
+	]
+}
+
+```
+
+## `project.inlang/ignored/settings.json`
+
+```json
+{
+	"a": [
+		"b"
+	]
+}
+
+```
+
+## `project.inlang/settings.json`
+
+```json
+{
+	"a": ["b"]
+}
+
+```
+
+# Emitted Messages
+
+```block
+Checked 1 file in <TIME>. Fixed 1 file.
+```

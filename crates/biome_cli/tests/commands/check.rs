@@ -13,7 +13,7 @@ use biome_console::{BufferConsole, LogLevel, MarkupBuf, markup};
 use biome_fs::{ErrorEntry, FileSystemExt, MemoryFileSystem, OsFileSystem};
 use camino::{Utf8Path, Utf8PathBuf};
 use std::env::temp_dir;
-use std::fs::{File, create_dir, create_dir_all, remove_dir_all};
+use std::fs::{File, create_dir, create_dir_all, read_to_string, remove_dir_all};
 use std::io::Write;
 #[cfg(target_family = "unix")]
 use std::os::unix::fs::symlink;
@@ -1403,6 +1403,14 @@ fn fs_files_ignore_symlink() {
         ),
     );
 
+    assert_eq!(
+        read_to_string(testcase1_sub_path.join("test.js")).unwrap(),
+        APPLY_SUGGESTED_AFTER
+    );
+    assert_eq!(
+        read_to_string(testcase2_path.join("test.js")).unwrap(),
+        APPLY_SUGGESTED_AFTER
+    );
     remove_dir_all(root_path).unwrap();
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -1410,6 +1418,149 @@ fn fs_files_ignore_symlink() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "fs_files_ignore_symlink",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn directory_only_vcs_ignore_does_not_ignore_file_symlink() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let root_path = Utf8PathBuf::from_path_buf(temp_dir())
+        .unwrap()
+        .join("directory_only_vcs_ignore_does_not_ignore_file_symlink");
+    let _ = remove_dir_all(&root_path);
+    create_dir(&root_path).unwrap();
+
+    File::create(root_path.join("biome.json"))
+        .unwrap()
+        .write_all(
+            br#"{
+                "vcs": {
+                    "enabled": true,
+                    "clientKind": "git",
+                    "useIgnoreFile": true
+                }
+            }"#,
+        )
+        .unwrap();
+    File::create(root_path.join(".gitignore"))
+        .unwrap()
+        .write_all(b"alias.js/\nignored.js\n")
+        .unwrap();
+    let target_path = root_path.join("target.js");
+    File::create(&target_path)
+        .unwrap()
+        .write_all(APPLY_SUGGESTED_BEFORE.as_bytes())
+        .unwrap();
+    let ignored_target_path = root_path.join("ignored_target.js");
+    File::create(&ignored_target_path)
+        .unwrap()
+        .write_all(APPLY_SUGGESTED_BEFORE.as_bytes())
+        .unwrap();
+    let alias_path = root_path.join("alias.js");
+    let ignored_alias_path = root_path.join("ignored.js");
+
+    #[cfg(target_family = "unix")]
+    {
+        symlink(&target_path, &alias_path).unwrap();
+        symlink(&ignored_target_path, &ignored_alias_path).unwrap();
+    }
+
+    #[cfg(target_os = "windows")]
+    {
+        check_windows_symlink!(symlink_file(&target_path, &alias_path));
+        check_windows_symlink!(symlink_file(&ignored_target_path, &ignored_alias_path));
+    }
+
+    let result = run_cli_with_dyn_fs(
+        Box::new(OsFileSystem::new(root_path.clone())),
+        &mut console,
+        Args::from(
+            [
+                "check",
+                "--write",
+                "--unsafe",
+                alias_path.as_str(),
+                ignored_alias_path.as_str(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert_eq!(read_to_string(&target_path).unwrap(), APPLY_SUGGESTED_AFTER);
+    assert_eq!(
+        read_to_string(&ignored_target_path).unwrap(),
+        APPLY_SUGGESTED_BEFORE
+    );
+    remove_dir_all(root_path).unwrap();
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "directory_only_vcs_ignore_does_not_ignore_file_symlink",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn deduplicates_top_level_symlink_aliases() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let root_path = Utf8PathBuf::from_path_buf(temp_dir())
+        .unwrap()
+        .join("deduplicates_top_level_symlink_aliases");
+    let _ = remove_dir_all(&root_path);
+    create_dir(&root_path).unwrap();
+
+    let target_path = root_path.join("target.js");
+    File::create(&target_path)
+        .unwrap()
+        .write_all(APPLY_SUGGESTED_BEFORE.as_bytes())
+        .unwrap();
+    let first_alias = root_path.join("first");
+    let second_alias = root_path.join("second");
+
+    #[cfg(target_family = "unix")]
+    {
+        symlink(&target_path, &first_alias).unwrap();
+        symlink(&target_path, &second_alias).unwrap();
+    }
+
+    #[cfg(target_os = "windows")]
+    {
+        check_windows_symlink!(symlink_file(&target_path, &first_alias));
+        check_windows_symlink!(symlink_file(&target_path, &second_alias));
+    }
+
+    let result = run_cli_with_dyn_fs(
+        Box::new(OsFileSystem::new(root_path.clone())),
+        &mut console,
+        Args::from(
+            [
+                "check",
+                "--write",
+                "--unsafe",
+                first_alias.as_ref(),
+                second_alias.as_ref(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert_eq!(read_to_string(&target_path).unwrap(), APPLY_SUGGESTED_AFTER);
+    remove_dir_all(root_path).unwrap();
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "deduplicates_top_level_symlink_aliases",
         fs,
         console,
         result,

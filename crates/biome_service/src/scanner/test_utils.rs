@@ -6,7 +6,7 @@ use biome_diagnostics::serde::Diagnostic;
 use biome_fs::{BiomePath, FileSystem, PathKind};
 use camino::{Utf8Path, Utf8PathBuf};
 use papaya::HashSet;
-use rustc_hash::{FxBuildHasher, FxHashSet};
+use rustc_hash::{FxBuildHasher, FxHashMap, FxHashSet};
 
 use super::watcher::WatcherInstructionChannel;
 use super::{ScanKind, WorkspaceWatcherBridge};
@@ -38,6 +38,13 @@ pub(super) struct MockWorkspaceWatcherBridge<'a> {
     ///
     /// Exposed in order to observe watcher side-effects.
     pub watched_folders: HashSet<Utf8PathBuf, FxBuildHasher>,
+
+    /// Logical aliases keyed by physical watcher event path.
+    pub logical_paths_by_physical_path: FxHashMap<Utf8PathBuf, Vec<Utf8PathBuf>>,
+    /// Folders whose ignore files fail to refresh.
+    ///
+    /// Exposed to allow tests to simulate unreadable ignore files.
+    pub failing_ignore_refreshes: FxHashSet<Utf8PathBuf>,
 }
 
 impl<'a> MockWorkspaceWatcherBridge<'a> {
@@ -64,6 +71,8 @@ impl<'a> MockWorkspaceWatcherBridge<'a> {
             indexed_files: Default::default(),
             indexed_folders: Default::default(),
             watched_folders: Default::default(),
+            logical_paths_by_physical_path: Default::default(),
+            failing_ignore_refreshes: Default::default(),
         };
         (this, rx)
     }
@@ -101,11 +110,11 @@ impl WorkspaceWatcherBridge for MockWorkspaceWatcherBridge<'_> {
     fn index_file(
         &self,
         project_key: ProjectKey,
-        path: impl Into<BiomePath>,
+        path: BiomePath,
     ) -> Result<Vec<Diagnostic>, WorkspaceError> {
         assert_eq!(project_key, self.project_key);
 
-        self.indexed_files.pin().insert(path.into().into());
+        self.indexed_files.pin().insert(path.into());
         self.tx.send(()).expect("can send notification");
 
         Ok(vec![])
@@ -118,15 +127,50 @@ impl WorkspaceWatcherBridge for MockWorkspaceWatcherBridge<'_> {
         Ok(vec![])
     }
 
+    fn refresh_ignore_files(&self, path: &Utf8Path) -> Result<Vec<Diagnostic>, WorkspaceError> {
+        if self.failing_ignore_refreshes.contains(path) {
+            return Err(WorkspaceError::no_project());
+        }
+        self.index_folder(path)
+    }
+
+    fn is_vcs_watch_path(&self, _path: &Utf8Path) -> bool {
+        false
+    }
+
+    fn refresh_vcs_watch_path(&self, _path: &Utf8Path) -> Result<Vec<Diagnostic>, WorkspaceError> {
+        Ok(Vec::new())
+    }
+
     fn insert_watched_folder(&self, path: Utf8PathBuf) -> bool {
         let newly_watched = self.watched_folders.pin().insert(path);
         self.tx.send(()).expect("can send notification");
         newly_watched
     }
 
-    fn remove_watched_folders(&self, mut callback: impl FnMut(&Utf8Path) -> bool) {
-        self.watched_folders.pin().retain(|path| !callback(path));
+    fn logical_paths_for_watcher_event(&self, path: &Utf8Path) -> Vec<Utf8PathBuf> {
+        self.logical_paths_by_physical_path
+            .get(path)
+            .cloned()
+            .unwrap_or_else(|| vec![path.to_path_buf()])
+    }
+
+    fn remove_watch_aliases(&self, path: &Utf8Path, mut callback: impl FnMut(&Utf8Path)) {
+        self.watched_folders.pin().retain(|watched_path| {
+            if watched_path.starts_with(path) {
+                callback(watched_path);
+                false
+            } else {
+                true
+            }
+        });
         self.tx.send(()).expect("can send notification");
+    }
+
+    fn remove_unused_watched_folder(&self, path: &Utf8Path) -> bool {
+        let removed = self.watched_folders.pin().remove(path);
+        self.tx.send(()).expect("can send notification");
+        removed
     }
 
     fn unload_file(

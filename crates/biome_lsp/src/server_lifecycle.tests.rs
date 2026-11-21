@@ -1,5 +1,7 @@
 use super::*;
-use crate::server_test_utils::{CHANNEL_BUFFER_SIZE, Server as TestServer, client_handler, uri};
+use crate::server_test_utils::{
+    BiomePathTestExt, CHANNEL_BUFFER_SIZE, Server as TestServer, client_handler, uri,
+};
 use anyhow::Result;
 use biome_fs::BiomePath;
 use biome_service::WorkspaceError;
@@ -128,7 +130,8 @@ async fn disconnect_closes_the_files_of_the_session() -> Result<()> {
         .unwrap();
     let file_exists = || {
         session.workspace().file_exists(FileExistsParams {
-            file_path: BiomePath::try_from(uri!("document.js").to_file_path().unwrap()).unwrap(),
+            file_path: BiomePath::from_platform_path(uri!("document.js").to_file_path().unwrap())
+                .unwrap(),
         })
     };
     assert!(file_exists()?);

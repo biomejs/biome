@@ -47,7 +47,7 @@ biome init
 }
 ```
 
-## `./node_modules/@biomejs/biome/configuration_schema.json`
+## `node_modules/@biomejs/biome/configuration_schema.json`
 
 ```json
 {}

@@ -917,7 +917,9 @@ fn build_inferred_db(name: &str) -> (WorkspaceDb, ModuleInfo, ModuleInfoKind) {
 }
 
 fn get_js_root(fs: &dyn FileSystem, path: &BiomePath) -> AnyJsRoot {
-    let content = fs.read_file_from_path(path).expect("cannot read file");
+    let content = fs
+        .read_file_from_path(path.as_path())
+        .expect("cannot read file");
     let file_source = JsFileSource::try_from(path.as_path()).unwrap_or_default();
     let parsed = biome_js_parser::parse(&content, file_source, JsParserOptions::default());
     let diagnostics = parsed.diagnostics();

@@ -197,7 +197,7 @@ impl ServiceLanguage for CssLanguage {
             tailwind_directives: language.tailwind_directives.unwrap_or_default().into(),
         };
 
-        overrides.apply_override_css_parser_options(path, &mut options);
+        overrides.apply_override_css_parser_options(path.as_path(), &mut options);
 
         options
     }

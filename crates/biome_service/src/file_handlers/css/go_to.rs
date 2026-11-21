@@ -2,7 +2,6 @@ use crate::file_handlers::ResolveDefinitionParams;
 use crate::workspace::{DefinitionReference, GoToDefinitionResult};
 use biome_css_semantic::db::css_semantic_model;
 use biome_css_syntax::CssClassSelector;
-use biome_fs::BiomePath;
 use biome_languages::LanguageDb;
 #[cfg(feature = "module_graph")]
 use biome_module_graph::{ModuleDb, SymbolFromModuleInfo, find_css_class_definition};
@@ -27,7 +26,7 @@ pub(crate) fn resolve_definition(params: ResolveDefinitionParams) -> Option<GoTo
                 if let Some(offset) = content_offset {
                     range += *offset;
                 }
-                result.store(BiomePath::new(css_path), range);
+                result.store(params.workspace_db.biome_path(css_path), range);
             }
         }
 
@@ -62,7 +61,7 @@ pub(crate) fn resolve_definition(params: ResolveDefinitionParams) -> Option<GoTo
                         if let Some(offset) = diagnostic_offset {
                             range = range.add(offset);
                         }
-                        result.store(BiomePath::new(path), range);
+                        result.store(params.workspace_db.biome_path(path), range);
                     }
                 }
             }
