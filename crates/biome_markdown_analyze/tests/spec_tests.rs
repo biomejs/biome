@@ -18,12 +18,12 @@ use std::ops::Deref;
 use std::{fs::read_to_string, slice};
 
 tests_macros::gen_tests! {
-    "tests/specs/**/*.{md,json,jsonc}",
+    "tests/specs/**/*.{md,mdx,json,jsonc}",
     crate::run_test,
     "module"
 }
 tests_macros::gen_tests! {
-    "tests/suppression/**/*.{md,json,jsonc}",
+    "tests/suppression/**/*.{md,mdx,json,jsonc}",
     crate::run_suppression_test,
     "module"
 }
@@ -98,9 +98,10 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
 
     let mut snapshot = String::new();
     let mut diagnostics = Vec::new();
-    let parser_options =
-        create_parser_options::<MarkdownLanguage>(input_file, &mut diagnostics).unwrap_or_default();
     let extension = input_file.extension().unwrap_or_default();
+    let parser_options = create_parser_options::<MarkdownLanguage>(input_file, &mut diagnostics)
+        .unwrap_or_default()
+        .with_mdx(extension == "mdx");
     let input_code = read_to_string(input_file)
         .unwrap_or_else(|err| panic!("failed to read {input_file:?}: {err:?}"));
 
@@ -345,7 +346,11 @@ pub(crate) fn run_suppression_test(input: &'static str, _: &str, _: &str, _: &st
         file_name,
         input_file,
         CheckActionType::Suppression,
-        MarkdownParserOptions::default(),
+        MarkdownParserOptions::default().with_mdx(
+            input_file
+                .extension()
+                .is_some_and(|extension| extension == "mdx"),
+        ),
     );
 
     insta::with_settings!({

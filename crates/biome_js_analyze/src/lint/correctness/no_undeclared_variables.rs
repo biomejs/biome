@@ -104,6 +104,16 @@ impl Rule for NoUndeclaredVariables {
             return None;
         }
 
+        // An MDX document receives `props` from the code that renders it, and
+        // the components its JSX tags name can come from that code too,
+        // through the `components` prop or an `MDXProvider`.
+        if source_type.as_embedding_kind().is_mdx()
+            && (text == "props"
+                || matches!(identifier, AnyJsIdentifierReference::JsxReferenceIdentifier(_)))
+        {
+            return None;
+        }
+
         // Typescript Const Assertion
         if text == "const" && under_as_expression {
             return None;
