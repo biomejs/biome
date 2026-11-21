@@ -309,24 +309,51 @@ impl<'scope> TraversalScope<'scope> for MemoryTraversalScope<'scope> {
         // those that are prefixed with the provided `base` path
         {
             let files = &self.fs.files.0.read();
-            for path in files.keys() {
-                let should_process_file = if base.starts_with(".") || base.starts_with("./") {
+            let is_under_base = |path: &Utf8Path| {
+                if base.starts_with(".") || base.starts_with("./") {
                     // we simulate absolute paths, so we can correctly strips out the base path from the path
                     let absolute_base = Utf8PathBuf::from("/").join(&base);
                     let absolute_path = Utf8Path::new("/").join(path);
                     absolute_path.strip_prefix(&absolute_base).is_ok()
                 } else {
                     path.strip_prefix(&base).is_ok()
-                };
-
-                if should_process_file {
-                    let _ = ctx.interner().intern_path(path.into());
-                    let biome_path = BiomePath::new(path);
-                    if !ctx.can_handle(&biome_path) {
-                        continue;
-                    }
-                    ctx.store_path(biome_path);
                 }
+            };
+            let matching_files: Vec<_> = files
+                .keys()
+                .filter(|path| is_under_base(path))
+                .cloned()
+                .collect();
+
+            if ctx.should_store_dirs() {
+                let mut directories: Vec<_> = matching_files
+                    .iter()
+                    .flat_map(|path| path.ancestors().skip(1))
+                    .filter(|path| is_under_base(path))
+                    .map(Utf8Path::to_path_buf)
+                    .collect();
+                directories.sort();
+                directories.dedup();
+
+                for path in directories {
+                    let _ = ctx.interner().intern_path(path.clone());
+                    let biome_path = BiomePath::new(path);
+                    if ctx.can_handle_with_kind(
+                        &biome_path,
+                        PathKind::Directory { is_symlink: false },
+                    ) {
+                        ctx.store_path(biome_path);
+                    }
+                }
+            }
+
+            for path in matching_files {
+                let _ = ctx.interner().intern_path(path.clone());
+                let biome_path = BiomePath::new(path);
+                if !ctx.can_handle_with_kind(&biome_path, PathKind::File { is_symlink: false }) {
+                    continue;
+                }
+                ctx.store_path(biome_path);
             }
         }
 
@@ -544,7 +571,7 @@ mod tests {
             }
 
             fn handle_path(&self, path: BiomePath) {
-                self.visited.pin().insert(path.to_written());
+                self.visited.pin().insert(path);
             }
 
             fn store_path(&self, path: BiomePath) {
@@ -582,5 +609,13 @@ mod tests {
 
         assert_eq!(visited.len(), 1);
         assert!(visited.pin().contains(&BiomePath::new("dir2/file2")));
+
+        let logical_path = BiomePath::new("alias/file.js");
+        ctx.store_physical_path(
+            Utf8PathBuf::from("target/file.js"),
+            logical_path.clone(),
+            true,
+        );
+        assert!(ctx.visited.pin().contains(&logical_path));
     }
 }

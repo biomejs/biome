@@ -255,6 +255,17 @@ impl Watcher {
         workspace: &impl WorkspaceWatcherBridge,
         event: NotifyEvent,
     ) -> Vec<Diagnostic> {
+        if matches!(
+            &event.kind,
+            EventKind::Modify(ModifyKind::Name(RenameMode::Both))
+        ) {
+            return Self::rename_paths(workspace, event.paths).unwrap_or_else(|error| {
+                // TODO: improve error propagation
+                warn!("Error processing watch event: {error}");
+                vec![]
+            });
+        }
+
         let paths = Self::watched_paths(workspace, event.paths);
         if paths.is_empty() {
             return vec![];
@@ -269,23 +280,7 @@ impl Watcher {
             EventKind::Modify(modify_kind) => match modify_kind {
                 ModifyKind::Name(RenameMode::From) => Self::unload_paths(workspace, paths),
                 ModifyKind::Name(RenameMode::To) => Self::index_paths(workspace, paths),
-                ModifyKind::Name(RenameMode::Both) => match paths.len() {
-                    2 => {
-                        // Good, 2 paths are expected.
-                        Self::rename_path(workspace, &paths[0], &paths[1])
-                    }
-                    1 => {
-                        // Probably either the `to` or the `from` path was
-                        // filtered out, but we don't know which one, so we need
-                        // to check:
-                        if paths[0].exists() {
-                            Self::index_paths(workspace, paths)
-                        } else {
-                            Self::unload_paths(workspace, paths)
-                        }
-                    }
-                    _ => Ok(vec![]),
-                },
+                ModifyKind::Name(RenameMode::Both) => Ok(vec![]),
                 // `RenameMode::Any` and `ModifyKind::Any` need to be included as a catch-all.
                 // Without it, we'll miss events on Windows or macOS.
                 ModifyKind::Data(_) | ModifyKind::Name(RenameMode::Any) | ModifyKind::Any => {
@@ -311,6 +306,21 @@ impl Watcher {
         })
     }
 
+    fn rename_paths(
+        workspace: &impl WorkspaceWatcherBridge,
+        paths: Vec<PathBuf>,
+    ) -> Result<Vec<Diagnostic>, WorkspaceError> {
+        let mut paths = paths.into_iter();
+        let (Some(from), Some(to), None) = (paths.next(), paths.next(), paths.next()) else {
+            return Ok(vec![]);
+        };
+        let from_paths = Self::watched_paths(workspace, vec![from]);
+        let to_paths = Self::watched_paths(workspace, vec![to]);
+        let mut diagnostics = Self::unload_paths(workspace, from_paths)?;
+        diagnostics.extend(Self::index_paths(workspace, to_paths)?);
+        Ok(diagnostics)
+    }
+
     /// Filters the paths to make sure only paths within watched folders remain.
     fn watched_paths(
         workspace: &impl WorkspaceWatcherBridge,
@@ -318,8 +328,14 @@ impl Watcher {
     ) -> Vec<Utf8PathBuf> {
         paths
             .into_iter()
+            .filter_map(|path| Utf8PathBuf::from_path_buf(path).ok())
+            .flat_map(|path| workspace.logical_paths_for_watcher_event(&path))
             .filter_map(|path| {
-                let path = Utf8PathBuf::from_path_buf(path).ok()?;
+                if workspace.is_vcs_watch_path(&path)
+                    || workspace.fs().biome_path(&path).is_ignore()
+                {
+                    return Some(path);
+                }
                 workspace
                     .find_project_with_scan_kind_for_path(&path)
                     .and_then(|(project_key, scan_kind)| {
@@ -371,6 +387,15 @@ impl Watcher {
         workspace: &impl WorkspaceWatcherBridge,
         path: &Utf8Path,
     ) -> Result<Vec<Diagnostic>, WorkspaceError> {
+        if workspace.is_vcs_watch_path(path) {
+            return workspace.refresh_vcs_watch_path(path);
+        }
+        if workspace.fs().biome_path(path).is_ignore() {
+            return path.parent().map_or_else(
+                || Ok(vec![]),
+                |parent| workspace.refresh_ignore_files(parent),
+            );
+        }
         if workspace.fs().path_is_dir(path) {
             workspace.index_folder(path)
         } else {
@@ -378,7 +403,7 @@ impl Watcher {
                 return Ok(vec![]); // file events outside our projects can be safely ignored.
             };
 
-            workspace.index_file(project_key, path)
+            workspace.index_file(project_key, workspace.fs().biome_path(path))
         }
     }
 
@@ -389,6 +414,16 @@ impl Watcher {
     ) -> Result<Vec<Diagnostic>, WorkspaceError> {
         let mut diagnostics = vec![];
         for path in paths {
+            if workspace.is_vcs_watch_path(&path) {
+                diagnostics.extend(workspace.refresh_vcs_watch_path(&path)?);
+                continue;
+            }
+            if workspace.fs().biome_path(&path).is_ignore() {
+                if let Some(parent) = path.parent() {
+                    diagnostics.extend(workspace.refresh_ignore_files(parent)?);
+                }
+                continue;
+            }
             let Some(project_key) = workspace.find_project_for_path(&path) else {
                 return Ok(vec![]);
             };
@@ -408,6 +443,16 @@ impl Watcher {
     ) -> Result<Vec<Diagnostic>, WorkspaceError> {
         let mut diagnostics = vec![];
         for path in &paths {
+            if workspace.is_vcs_watch_path(path) {
+                diagnostics.extend(workspace.refresh_vcs_watch_path(path)?);
+                continue;
+            }
+            if workspace.fs().biome_path(path).is_ignore() {
+                if let Some(parent) = path.parent() {
+                    diagnostics.extend(workspace.refresh_ignore_files(parent)?);
+                }
+                continue;
+            }
             let Some(project_key) = workspace.find_project_for_path(path) else {
                 return Ok(vec![]);
             };
@@ -418,24 +463,6 @@ impl Watcher {
         Ok(diagnostics)
     }
 
-    fn rename_path(
-        workspace: &impl WorkspaceWatcherBridge,
-        from: &Utf8Path,
-        to: &Utf8Path,
-    ) -> Result<Vec<Diagnostic>, WorkspaceError> {
-        let mut diagnostics = vec![];
-        let Some(project_key) = workspace.find_project_for_path(from) else {
-            return Ok(vec![]);
-        };
-        if workspace.fs().path_is_file(from) {
-            diagnostics.extend(workspace.unload_file(from, project_key)?);
-        } else {
-            diagnostics.extend(workspace.unload_path(from, project_key)?);
-        }
-        diagnostics.extend(Self::index_path(workspace, to)?);
-        Ok(diagnostics)
-    }
-
     /// Reindexes an individual file if the watcher (still) has interest in it.
     #[tracing::instrument(level = "debug", skip(workspace))]
     fn reindex_file(workspace: &impl WorkspaceWatcherBridge, path: &Utf8Path) {
@@ -443,7 +470,7 @@ impl Watcher {
             return; // file events outside our projects can be safely ignored.
         };
 
-        if let Err(error) = workspace.index_file(project_key, path) {
+        if let Err(error) = workspace.index_file(project_key, workspace.fs().biome_path(path)) {
             // TODO: Improve error propagation.
             warn!("Error re-indexing path {path}: {error}");
         }
@@ -478,15 +505,10 @@ impl Watcher {
     #[tracing::instrument(level = "debug", skip(self, workspace))]
     fn unwatch_folder(&mut self, workspace: &impl WorkspaceWatcherBridge, path: Utf8PathBuf) {
         if let Some(mut watcher_paths) = self.watcher.as_mut().map(|w| w.paths_mut()) {
-            workspace.remove_watched_folders(|watched_path| {
-                if watched_path.starts_with(path.as_std_path()) {
-                    if let Err(error) = watcher_paths.remove(watched_path.as_std_path()) {
-                        // TODO: Improve error propagation.
-                        warn!("Error unwatching path {}: {error}", watched_path);
-                    }
-                    true
-                } else {
-                    false
+            workspace.remove_watch_aliases(&path, |watched_path| {
+                if let Err(error) = watcher_paths.remove(watched_path.as_std_path()) {
+                    // TODO: Improve error propagation.
+                    warn!("Error unwatching path {}: {error}", watched_path);
                 }
             });
 

@@ -7,7 +7,7 @@ use biome_console::{Console, ConsoleExt};
 use biome_diagnostics::{
     DiagnosticExt, DiagnosticTags, Error, PrintDiagnostic, Severity, category,
 };
-use biome_fs::{BiomePath, File, OpenOptions};
+use biome_fs::{BiomePath, File, FileSystem, OpenOptions, resolve_symbolic_link_target};
 use biome_languages::DocumentFileSource;
 use biome_service::diagnostics::FileTooLarge;
 use biome_service::projects::ProjectKey;
@@ -123,6 +123,23 @@ pub(crate) struct ProcessStdinFilePayload<'a> {
     pub(crate) skip_ignore_check: bool,
 }
 
+pub(crate) fn document_file_source(
+    fs: &dyn FileSystem,
+    biome_path: &BiomePath,
+) -> DocumentFileSource {
+    let source = DocumentFileSource::from_path(biome_path.as_path(), false);
+    if source != DocumentFileSource::Unknown {
+        return source;
+    }
+
+    resolve_symbolic_link_target(fs, biome_path.as_path())
+        .ok()
+        .flatten()
+        .map_or(source, |target| {
+            DocumentFileSource::from_path(&target, false)
+        })
+}
+
 pub(crate) fn print_stdin_diagnostics(
     console: &mut dyn Console,
     cli_options: &CliOptions,
@@ -193,7 +210,9 @@ pub(crate) trait ProcessFile: Send + Sync + std::panic::RefUnwindSafe {
         // first we stop if there are some files that don't have ALL features enabled, e.g. images, fonts, etc.
         if file_features.is_ignored() || file_features.is_not_enabled() {
             return Ok(FileStatus::Ignored);
-        } else if file_features.is_not_supported() || !DocumentFileSource::can_read(biome_path) {
+        } else if file_features.is_not_supported()
+            || !document_file_source(ctx.fs(), biome_path).is_readable()
+        {
             return Err(Message::from(
                 UnhandledDiagnostic.with_file_path(biome_path.to_string()),
             ));
@@ -341,7 +360,8 @@ mod tests {
     use biome_console::MarkupBuf;
     use biome_diagnostics::{Category, Error, Severity, category};
     use biome_fs::{
-        BiomePath, FileSystem, FileSystemExt, MemoryFileSystem, PathInterner, TraversalContext,
+        BiomePath, FileSystem, FileSystemExt, MemoryFileSystem, PathInterner, PathKind,
+        PhysicalFileOwners, TraversalContext,
     };
     use biome_service::Workspace;
     use biome_service::projects::ProjectKey;
@@ -408,6 +428,7 @@ mod tests {
         project_key: ProjectKey,
         execution: TestExecution,
         interner: PathInterner,
+        physical_files: PhysicalFileOwners,
         evaluated_paths: HashSet<BiomePath>,
         file_features: HashMap<BiomePath, FeaturesSupported>,
     }
@@ -453,9 +474,29 @@ mod tests {
             &self.interner
         }
 
+        fn store_physical_path(
+            &self,
+            physical_path: Utf8PathBuf,
+            logical_path: BiomePath,
+            is_symlink: bool,
+        ) {
+            self.physical_files.select(
+                physical_path,
+                logical_path,
+                is_symlink,
+                |previous, selected| {
+                    let evaluated_paths = self.evaluated_paths.pin();
+                    if let Some(previous) = previous {
+                        evaluated_paths.remove(previous);
+                    }
+                    evaluated_paths.insert(selected.clone());
+                },
+            );
+        }
+
         fn push_diagnostic(&self, _error: Error) {}
 
-        fn can_handle(&self, _path: &BiomePath) -> bool {
+        fn can_handle_with_kind(&self, _path: &BiomePath, _path_kind: PathKind) -> bool {
             true
         }
 
@@ -505,6 +546,7 @@ mod tests {
             project_key,
             execution: TestExecution { write: false },
             interner,
+            physical_files: PhysicalFileOwners::default(),
             evaluated_paths: HashSet::default(),
             file_features: HashMap::default(),
         };
@@ -545,6 +587,7 @@ mod tests {
             project_key,
             execution: TestExecution { write: true },
             interner,
+            physical_files: PhysicalFileOwners::default(),
             evaluated_paths: HashSet::default(),
             file_features: HashMap::default(),
         };
@@ -598,6 +641,7 @@ mod tests {
             project_key,
             execution: TestExecution { write: false },
             interner,
+            physical_files: PhysicalFileOwners::default(),
             evaluated_paths: HashSet::default(),
             file_features: HashMap::default(),
         };

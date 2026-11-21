@@ -22,6 +22,18 @@ pub(crate) trait WorkspaceScannerBridge: Send + Sync + RefUnwindSafe {
     /// Returns the project path for the project with the given `project_key`.
     fn get_project_path(&self, project_key: ProjectKey) -> Option<Utf8PathBuf>;
 
+    /// Returns the VCS ignore files that must be watched for the given project.
+    fn get_vcs_watch_paths(&self, project_key: ProjectKey) -> Vec<BiomePath>;
+
+    /// Returns the VCS root whose ignore files apply to the given project.
+    fn get_vcs_root(&self, project_key: ProjectKey) -> Option<Utf8PathBuf>;
+
+    /// Reloads the root and ancestor VCS ignore matchers for the given project.
+    fn refresh_project_vcs_ignore_settings(
+        &self,
+        project_key: ProjectKey,
+    ) -> Result<(), WorkspaceError>;
+
     /// Asks the workspace whether the given `path` that falls under the project
     /// with the given `project_key` is ignored, assuming the given `scan_kind`
     /// and `request_kind`.
@@ -47,7 +59,7 @@ pub(crate) trait WorkspaceScannerBridge: Send + Sync + RefUnwindSafe {
     fn index_file(
         &self,
         project_key: ProjectKey,
-        path: impl Into<BiomePath>,
+        path: BiomePath,
         trigger: IndexTrigger,
     ) -> Result<(ModuleDependencies, Vec<Error>), WorkspaceError>;
 
@@ -82,6 +94,7 @@ pub(crate) trait WorkspaceScannerBridge: Send + Sync + RefUnwindSafe {
     fn update_project_ignore_files(
         &self,
         project_key: ProjectKey,
+        scanned_directory: &Utf8Path,
         files: &[BiomePath],
     ) -> Result<(), WorkspaceError>;
 
@@ -161,7 +174,7 @@ pub trait WorkspaceWatcherBridge {
     fn index_file(
         &self,
         project_key: ProjectKey,
-        path: impl Into<BiomePath>,
+        path: BiomePath,
     ) -> Result<Vec<Diagnostic>, WorkspaceError>;
 
     /// Scans and watches the folder with the given `path` within the project
@@ -172,17 +185,28 @@ pub trait WorkspaceWatcherBridge {
     /// folder are indexed as well.
     fn index_folder(&self, path: &Utf8Path) -> Result<Vec<Diagnostic>, WorkspaceError>;
 
+    /// Reloads ignore matchers, unloads disk-backed entries under `path`, and rescans it.
+    fn refresh_ignore_files(&self, path: &Utf8Path) -> Result<Vec<Diagnostic>, WorkspaceError>;
+
+    /// Returns whether `path` is an exact VCS ignore file watched by a project.
+    fn is_vcs_watch_path(&self, path: &Utf8Path) -> bool;
+
+    /// Reloads projects affected by a change to an exact VCS ignore file.
+    fn refresh_vcs_watch_path(&self, path: &Utf8Path) -> Result<Vec<Diagnostic>, WorkspaceError>;
+
     /// Informs the workspace the given folder is watched.
     ///
     /// Returns `true` if the folder was not yet watched, `false` otherwise.
     fn insert_watched_folder(&self, path: Utf8PathBuf) -> bool;
 
-    /// Removes watched folders from the workspace.
+    /// Returns every logical alias for a physical watcher event path.
+    fn logical_paths_for_watcher_event(&self, path: &Utf8Path) -> Vec<Utf8PathBuf>;
+
+    /// Removes logical watch aliases under `path`.
     ///
-    /// `callback` is invoked for every currently watched folder with the path
-    /// of said folder. Folders for which the `callback` returns `true` are
-    /// removed, others are retained.
-    fn remove_watched_folders(&self, callback: impl FnMut(&Utf8Path) -> bool);
+    /// `callback` is invoked for every physical folder that no longer has a
+    /// logical alias and must be unwatched.
+    fn remove_watch_aliases(&self, path: &Utf8Path, callback: impl FnMut(&Utf8Path));
 
     /// Unloads the index of the file with the given `path` within the
     /// workspace.
@@ -226,6 +250,41 @@ pub(crate) struct ScannerWatcherBridge<'a, W: WorkspaceScannerBridge> {
 impl<'a, W: WorkspaceScannerBridge> ScannerWatcherBridge<'a, W> {
     pub fn new((scanner, workspace): (&'a Scanner, &'a W)) -> Self {
         Self { scanner, workspace }
+    }
+
+    fn vcs_watch_projects(&self, path: &Utf8Path) -> Vec<ProjectKey> {
+        let path = self.workspace.fs().biome_path(path);
+        self.scanner
+            .projects
+            .pin()
+            .keys()
+            .copied()
+            .filter(|project_key| {
+                self.workspace
+                    .get_vcs_watch_paths(*project_key)
+                    .contains(&path)
+            })
+            .collect()
+    }
+
+    fn refresh_project_ignore_files(
+        &self,
+        project_key: ProjectKey,
+        path: &Utf8Path,
+    ) -> Result<Vec<Diagnostic>, WorkspaceError> {
+        let mut diagnostics =
+            self.scanner
+                .refresh_ignore_files(self.workspace, project_key, path)?;
+        diagnostics.extend(self.unload_path(path, project_key)?);
+        let manifest_changed = self.workspace.sync_path_info(path);
+        diagnostics.extend(
+            self.scanner
+                .index_folder(self.workspace, project_key, path)?,
+        );
+        if manifest_changed {
+            diagnostics.extend(self.workspace.index_new_module_dependencies(project_key)?);
+        }
+        Ok(diagnostics)
     }
 }
 
@@ -277,12 +336,11 @@ where
     fn index_file(
         &self,
         project_key: ProjectKey,
-        path: impl Into<BiomePath>,
+        path: BiomePath,
     ) -> Result<Vec<Diagnostic>, WorkspaceError> {
-        let path = path.into();
         // The file is indexed with the refreshed path info, so its imports resolve
         // against the current filesystem.
-        let manifest_changed = self.workspace.sync_path_info(&path);
+        let manifest_changed = self.workspace.sync_path_info(path.as_path());
         let (dependencies, diagnostics) =
             self.workspace
                 .index_file(project_key, path, IndexTrigger::Update)?;
@@ -313,11 +371,40 @@ where
         };
 
         let manifest_changed = self.workspace.sync_path_info(path);
-        let mut diagnostics = self
-            .scanner
-            .index_folder(self.workspace, project_key, path)?;
+        let mut diagnostics =
+            self.scanner
+                .refresh_ignore_files(self.workspace, project_key, path)?;
+        diagnostics.extend(
+            self.scanner
+                .index_folder(self.workspace, project_key, path)?,
+        );
         if manifest_changed {
             diagnostics.extend(self.workspace.index_new_module_dependencies(project_key)?);
+        }
+        Ok(diagnostics)
+    }
+
+    fn refresh_ignore_files(&self, path: &Utf8Path) -> Result<Vec<Diagnostic>, WorkspaceError> {
+        let Some(project_key) = self.find_project_for_path(path) else {
+            return Ok(vec![]);
+        };
+        self.refresh_project_ignore_files(project_key, path)
+    }
+
+    fn is_vcs_watch_path(&self, path: &Utf8Path) -> bool {
+        !self.vcs_watch_projects(path).is_empty()
+    }
+
+    fn refresh_vcs_watch_path(&self, path: &Utf8Path) -> Result<Vec<Diagnostic>, WorkspaceError> {
+        let mut diagnostics = Vec::new();
+        for project_key in self.vcs_watch_projects(path) {
+            self.workspace
+                .refresh_project_vcs_ignore_settings(project_key)?;
+            if let Some(project_path) = self.workspace.get_project_path(project_key) {
+                diagnostics.extend(
+                    self.refresh_project_ignore_files(project_key, project_path.as_path())?,
+                );
+            }
         }
         Ok(diagnostics)
     }
@@ -328,8 +415,13 @@ where
     }
 
     #[inline]
-    fn remove_watched_folders(&self, callback: impl FnMut(&Utf8Path) -> bool) {
-        self.scanner.remove_watched_folders(callback)
+    fn logical_paths_for_watcher_event(&self, path: &Utf8Path) -> Vec<Utf8PathBuf> {
+        self.scanner.logical_paths_for_watcher_event(path)
+    }
+
+    #[inline]
+    fn remove_watch_aliases(&self, path: &Utf8Path, callback: impl FnMut(&Utf8Path)) {
+        self.scanner.remove_watch_aliases(path, callback)
     }
 
     fn unload_file(

@@ -1,5 +1,5 @@
 use biome_configuration::Configuration;
-use biome_fs::BiomePath;
+use biome_fs::FileSystem;
 use biome_service::workspace::ScanKind;
 use camino::Utf8Path;
 
@@ -7,7 +7,7 @@ use camino::Utf8Path;
 fn get_forced_scan_kind(
     stdin_file_path: Option<&Utf8Path>,
     root_configuration_dir: &Utf8Path,
-    working_dir: &Utf8Path,
+    fs: &dyn FileSystem,
     maybe_scan_kind: Option<ScanKind>,
 ) -> Option<ScanKind> {
     if let Some(stdin_file_path) = stdin_file_path {
@@ -18,7 +18,7 @@ fn get_forced_scan_kind(
             return Some(ScanKind::NoScanner);
         } else {
             return Some(ScanKind::TargetedKnownFiles {
-                target_paths: vec![BiomePath::new(working_dir.join(stdin_file_path))],
+                target_paths: vec![fs.biome_path(stdin_file_path)],
                 descend_from_targets: false,
             });
         }
@@ -43,17 +43,11 @@ pub(crate) fn derive_best_scan_kind(
     requested_scan_kind: ScanKind,
     stdin: Option<&Utf8Path>,
     root_configuration_dir: &Utf8Path,
-    working_dir: &Utf8Path,
+    fs: &dyn FileSystem,
     configuration: &Configuration,
     command_scan_kind: Option<ScanKind>,
 ) -> ScanKind {
-    get_forced_scan_kind(
-        stdin,
-        root_configuration_dir,
-        working_dir,
-        command_scan_kind,
-    )
-    .unwrap_or({
+    get_forced_scan_kind(stdin, root_configuration_dir, fs, command_scan_kind).unwrap_or({
         let required_minimum_scan_kind =
             if configuration.is_root() || configuration.use_ignore_file() {
                 ScanKind::KnownFiles

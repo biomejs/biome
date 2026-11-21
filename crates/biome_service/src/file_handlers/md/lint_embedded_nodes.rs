@@ -20,7 +20,7 @@ pub(super) fn snippet_analyzers<'a>(
             &params.parsed_source,
             params.language,
             params.settings.as_ref(),
-            params.path,
+            params.path.as_path(),
             &params.workspace_db,
         )
     {

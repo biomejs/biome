@@ -51,8 +51,8 @@ pub(crate) fn parse_embedded_nodes(params: ParseEmbeddedParams) -> ParseEmbedRes
         return ParseEmbedResult::default();
     }
     // Snippets are only parsed to format or lint their code.
-    if !format_embeds_enabled(settings.as_ref(), path)
-        && !analyze_embeds_enabled(settings.as_ref(), path)
+    if !format_embeds_enabled(settings.as_ref(), path.as_path())
+        && !analyze_embeds_enabled(settings.as_ref(), path.as_path())
     {
         return ParseEmbedResult::default();
     }

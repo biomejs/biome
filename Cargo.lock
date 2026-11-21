@@ -698,7 +698,6 @@ dependencies = [
  "enumflags2",
  "papaya",
  "parking_lot 0.13.0",
- "path-absolutize",
  "rayon",
  "rustc-hash 2.1.3",
  "schemars",

@@ -1,7 +1,9 @@
 use crate::TestArgs as Args;
 use crate::run_cli_with_dyn_fs;
-use crate::snap_test::{SnapshotPayload, assert_cli_snapshot, assert_file_contents};
-use biome_console::BufferConsole;
+use crate::snap_test::{
+    SnapshotPayload, assert_cli_snapshot, assert_file_contents, markup_to_string,
+};
+use biome_console::{BufferConsole, markup};
 use biome_fs::TemporaryFs;
 use camino::Utf8Path;
 
@@ -12,11 +14,12 @@ fn honors_nested_gitignore_negation() {
     let unformatted = "{\n\t\"a\": [\n\t\t\"b\"\n\t]\n}\n";
     let formatted = "{\n\t\"a\": [\"b\"]\n}\n";
 
-    for (index, target) in ["project.inlang/settings.json", "project.inlang", "."]
-        .into_iter()
-        .enumerate()
-    {
-        let mut fs = TemporaryFs::new(&format!("honors_nested_gitignore_negation_{index}"));
+    for (case, target) in [
+        ("file", "project.inlang/settings.json"),
+        ("directory", "project.inlang"),
+        ("project", "."),
+    ] {
+        let mut fs = TemporaryFs::new(&format!("honors_nested_gitignore_negation_{case}"));
         let mut console = BufferConsole::default();
         fs.create_file(
             "biome.json",
@@ -62,6 +65,113 @@ fn honors_nested_gitignore_negation() {
                 "target {target} must leave {ignored} ignored"
             );
         }
+
+        let snapshot_name = format!("honors_nested_gitignore_negation_{case}");
+        assert_cli_snapshot(SnapshotPayload::new(
+            module_path!(),
+            &snapshot_name,
+            fs.create_mem(),
+            console,
+            result,
+        ));
+    }
+}
+
+#[test]
+fn nested_gitignore_cannot_reinclude_file_below_ignored_parent() {
+    let mut fs = TemporaryFs::new("nested_gitignore_cannot_reinclude_file_below_ignored_parent");
+    let mut console = BufferConsole::default();
+    fs.create_file(
+        "biome.json",
+        r#"{
+            "vcs": {
+                "enabled": true,
+                "clientKind": "git",
+                "useIgnoreFile": true,
+                "root": "."
+            }
+        }"#,
+    );
+    fs.create_file(".gitignore", "ignored/\n");
+    fs.create_file("ignored/.gitignore", "!file.js\n");
+    let ignored = fs.create_file("ignored/file.js", UNFORMATTED);
+
+    let _ = run_cli_with_dyn_fs(
+        Box::new(fs.create_os()),
+        &mut console,
+        Args::from(["format", "--write", ignored.as_str()].as_slice()),
+    );
+
+    assert_eq!(std::fs::read_to_string(ignored).unwrap(), UNFORMATTED);
+}
+
+#[test]
+fn combines_gitignore_and_ignore_files_at_every_scope() {
+    let mut fs = TemporaryFs::new("combines_gitignore_and_ignore_files_at_every_scope");
+    let mut console = BufferConsole::default();
+    fs.create_file(
+        ".gitignore",
+        "packages/app/root-git.js\npackages/app/root-precedence.js\n",
+    );
+    fs.create_file(
+        ".ignore",
+        "packages/app/root-ignore.js\n!packages/app/root-precedence.js\n",
+    );
+    fs.create_file(
+        "packages/.gitignore",
+        "app/ancestor-git.js\napp/ancestor-precedence.js\n",
+    );
+    fs.create_file(
+        "packages/.ignore",
+        "app/ancestor-ignore.js\n!app/ancestor-precedence.js\n",
+    );
+    fs.create_file(
+        "packages/app/.gitignore",
+        "nested-git.js\nnested-precedence.js\n",
+    );
+    fs.create_file(
+        "packages/app/.ignore",
+        "nested-ignore.js\n!nested-precedence.js\n",
+    );
+    fs.create_file(
+        "packages/app/biome.json",
+        r#"{
+            "vcs": {
+                "enabled": true,
+                "clientKind": "git",
+                "useIgnoreFile": true,
+                "root": "../.."
+            }
+        }"#,
+    );
+    let included = [
+        fs.create_file("packages/app/included.js", UNFORMATTED),
+        fs.create_file("packages/app/root-precedence.js", UNFORMATTED),
+        fs.create_file("packages/app/ancestor-precedence.js", UNFORMATTED),
+        fs.create_file("packages/app/nested-precedence.js", UNFORMATTED),
+    ];
+    let ignored = [
+        fs.create_file("packages/app/root-git.js", UNFORMATTED),
+        fs.create_file("packages/app/root-ignore.js", UNFORMATTED),
+        fs.create_file("packages/app/ancestor-git.js", UNFORMATTED),
+        fs.create_file("packages/app/ancestor-ignore.js", UNFORMATTED),
+        fs.create_file("packages/app/nested-git.js", UNFORMATTED),
+        fs.create_file("packages/app/nested-ignore.js", UNFORMATTED),
+    ];
+    fs.append_to_working_directory("packages/app");
+
+    let result = run_cli_with_dyn_fs(
+        Box::new(fs.create_os()),
+        &mut console,
+        Args::from(["format", "--write", fs.cli_path()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+    for path in included {
+        assert_eq!(std::fs::read_to_string(path).unwrap(), "statement();\n");
+    }
+    for path in ignored {
+        assert_eq!(std::fs::read_to_string(path).unwrap(), UNFORMATTED);
     }
 }
 
@@ -211,11 +321,12 @@ fn ignore_git_info_exclude() {
     }"#,
     );
 
-    fs.create_file(".gitignore", "");
-    fs.create_file(".git/info/exclude", "file2.js\n");
+    fs.create_file(".gitignore", "!file2.js\n");
+    fs.create_file(".git/info/exclude", "file2.js\nfile3.js\n");
 
     fs.create_file("file1.js", UNFORMATTED);
     fs.create_file("file2.js", UNFORMATTED);
+    fs.create_file("file3.js", UNFORMATTED);
 
     let result = run_cli_with_dyn_fs(
         Box::new(fs.create_os()),
@@ -481,6 +592,189 @@ fn should_resolve_gitignore_using_vcs_root() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "should_resolve_gitignore_using_vcs_root",
+        fs.create_mem(),
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn processes_paths_outside_the_vcs_root() {
+    let mut fs = TemporaryFs::new("processes_paths_outside_the_vcs_root");
+    let mut console = BufferConsole::default();
+
+    fs.create_file("engine/.gitignore", "ignored.js\n");
+    fs.create_file(
+        "engine/biome.json",
+        r#"{
+            "vcs": {
+                "enabled": true,
+                "clientKind": "git",
+                "useIgnoreFile": true,
+                "root": "."
+            }
+        }"#,
+    );
+    fs.create_file("outside/file.js", UNFORMATTED);
+    fs.append_to_working_directory("engine");
+    let outside_path = fs.working_directory.join("../outside/file.js");
+
+    let result = run_cli_with_dyn_fs(
+        Box::new(fs.create_os()),
+        &mut console,
+        Args::from(["format", "--write", outside_path.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+    let fs = fs.create_mem();
+    assert_file_contents(&fs, Utf8Path::new("outside/file.js"), "statement();\n");
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "processes_paths_outside_the_vcs_root",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn honors_vcs_ignore_for_sibling_paths() {
+    let mut fs = TemporaryFs::new("honors_vcs_ignore_for_sibling_paths");
+    let mut console = BufferConsole::default();
+
+    fs.create_file(".gitignore", "plans/root-ignored.js\n");
+    fs.create_file("plans/.gitignore", "nested-ignored.js\n");
+    fs.create_file(
+        "engine/biome.json",
+        r#"{
+            "vcs": {
+                "enabled": true,
+                "clientKind": "git",
+                "useIgnoreFile": true,
+                "root": ".."
+            }
+        }"#,
+    );
+    fs.create_file("plans/included.js", UNFORMATTED);
+    fs.create_file("plans/root-ignored.js", UNFORMATTED);
+    fs.create_file("plans/nested-ignored.js", UNFORMATTED);
+    fs.append_to_working_directory("engine");
+    let plans_path = fs.working_directory.join("../plans");
+
+    let result = run_cli_with_dyn_fs(
+        Box::new(fs.create_os()),
+        &mut console,
+        Args::from(["format", "--write", plans_path.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+    let fs = fs.create_mem();
+    assert_file_contents(&fs, Utf8Path::new("plans/included.js"), "statement();\n");
+    assert_file_contents(&fs, Utf8Path::new("plans/root-ignored.js"), UNFORMATTED);
+    assert_file_contents(&fs, Utf8Path::new("plans/nested-ignored.js"), UNFORMATTED);
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "honors_vcs_ignore_for_sibling_paths",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn normalizes_stdin_paths_before_vcs_matching() {
+    let mut fs = TemporaryFs::new("normalizes_stdin_paths_before_vcs_matching");
+    let mut console = BufferConsole::default();
+
+    fs.create_file(".gitignore", "dist/\n");
+    fs.create_file(
+        "biome.json",
+        r#"{
+            "vcs": {
+                "enabled": true,
+                "clientKind": "git",
+                "useIgnoreFile": true
+            }
+        }"#,
+    );
+    console.in_buffer.push(UNFORMATTED.to_string());
+
+    let result = run_cli_with_dyn_fs(
+        Box::new(fs.create_os()),
+        &mut console,
+        Args::from(["format", "--stdin-file-path", "missing/../dist/file.js"].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+    let output = console
+        .out_buffer
+        .first()
+        .expect("the original content should be printed");
+    assert_eq!(markup_to_string(markup!({ output.content })), UNFORMATTED);
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "normalizes_stdin_paths_before_vcs_matching",
+        fs.create_mem(),
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn processes_symlink_with_target_outside_the_project() {
+    let mut fs = TemporaryFs::new("processes_symlink_with_target_outside_the_project");
+    let mut console = BufferConsole::default();
+
+    fs.create_file("project/.gitignore", "dist\n");
+    fs.create_file(
+        "project/biome.json",
+        r#"{
+            "vcs": {
+                "enabled": true,
+                "clientKind": "git",
+                "useIgnoreFile": true
+            },
+            "linter": {
+                "rules": {
+                    "suspicious": {
+                        "noDebugger": "warn"
+                    }
+                }
+            }
+        }"#,
+    );
+    let target = fs.create_file("shared/file.js", "debugger;\n");
+    let link = fs.working_directory.join("project/file.js");
+
+    #[cfg(unix)]
+    std::os::unix::fs::symlink(&target, &link).unwrap();
+    #[cfg(windows)]
+    if let Err(error) = std::os::windows::fs::symlink_file(&target, &link) {
+        if option_env!("CI") == Some("1") {
+            panic!("failed to create symlink: {error}");
+        }
+        return;
+    }
+
+    fs.append_to_working_directory("project");
+    let result = run_cli_with_dyn_fs(
+        Box::new(fs.create_os()),
+        &mut console,
+        Args::from(["lint"].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+    let emitted = console
+        .out_buffer
+        .iter()
+        .map(|message| markup_to_string(markup!({ &message.content })))
+        .collect::<Vec<_>>()
+        .join("\n");
+    assert!(emitted.contains("file.js:1:1"), "{emitted}");
+    assert!(!emitted.contains("shared/file.js"), "{emitted}");
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "processes_symlink_with_target_outside_the_project",
         fs.create_mem(),
         console,
         result,

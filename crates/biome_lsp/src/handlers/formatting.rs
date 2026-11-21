@@ -3,6 +3,7 @@ use crate::session::Session;
 use crate::utils::text_edit;
 use anyhow::Context;
 use biome_fs::BiomePath;
+use biome_languages::DocumentFileSource;
 use biome_lsp_converters::from_proto;
 use biome_rowan::{TextLen, TextRange, TextSize};
 use biome_service::Workspace;
@@ -15,7 +16,6 @@ use biome_service::workspace::{
     SupportsFeatureParams,
 };
 use biome_service::{WorkspaceError, extension_error};
-use std::ops::Sub;
 use tower_lsp_server::ls_types::*;
 
 #[tracing::instrument(level = "debug", skip(session), err)]
@@ -24,10 +24,10 @@ pub(crate) fn format(
     params: DocumentFormattingParams,
 ) -> Result<Option<Vec<TextEdit>>, LspError> {
     let url = params.text_document.uri;
-    let path = session.file_path(&url)?;
     let Some(doc) = session.document(&url) else {
         return Ok(None);
     };
+    let path = doc.path.clone();
     if !session
         .workspace_for_request()
         .file_exists(path.clone().into())?
@@ -50,7 +50,7 @@ pub(crate) fn format(
             not_requested_features: FeaturesBuilder::new().with_search().build(),
         })?;
     if !file_features.supports_format() {
-        return notify_user(file_features, path);
+        return notify_user(file_features, &url, doc.file_source);
     }
 
     let size_limit_result =
@@ -83,7 +83,7 @@ pub(crate) fn format(
         return Ok(None);
     }
     if !file_features.supports_full_html_support() {
-        match path.extension() {
+        match doc.extension() {
             Some("astro") => {
                 output = AstroFileHandler::output(input.as_str(), output.as_str());
             }
@@ -110,10 +110,14 @@ pub(crate) fn format_range(
     params: DocumentRangeFormattingParams,
 ) -> Result<Option<Vec<TextEdit>>, LspError> {
     let url = params.text_document.uri;
-    let path = session.file_path(&url)?;
     let Some(doc) = session.document(&url) else {
+        let Some(file_path) = Session::filesystem_path(&url) else {
+            return Ok(None);
+        };
+        let path: BiomePath = file_path.into();
         return Err(extension_error(&path).into());
     };
+    let path = doc.path.clone();
     if !session
         .workspace_for_request()
         .file_exists(path.clone().into())?
@@ -135,7 +139,7 @@ pub(crate) fn format_range(
             not_requested_features: FeaturesBuilder::new().with_search().build(),
         })?;
     if !file_features.supports_format() {
-        return notify_user(file_features, path);
+        return notify_user(file_features, &url, doc.file_source);
     }
 
     let size_limit_result =
@@ -165,24 +169,12 @@ pub(crate) fn format_range(
             path: path.clone(),
         })?;
 
-    let offset = match path.extension() {
-        Some("vue") => VueFileHandler::start(content.as_str()),
-        Some("astro") => AstroFileHandler::start(content.as_str()),
-        Some("svelte") => SvelteFileHandler::start(content.as_str()),
-        _ => None,
-    };
-    let format_range = if let Some(offset) = offset {
-        if format_range.start() - TextSize::from(offset) >= TextSize::from(0) {
-            TextRange::new(
-                format_range.start().sub(TextSize::from(offset)),
-                format_range.end().sub(TextSize::from(offset)),
-            )
-        } else {
-            format_range
-        }
-    } else {
-        format_range
-    };
+    let format_range = embedded_format_range(
+        format_range,
+        file_features.supports_full_html_support(),
+        doc.extension(),
+        content.as_str(),
+    );
 
     let formatted = session
         .workspace_for_request()
@@ -218,10 +210,14 @@ pub(crate) fn format_on_type(
 ) -> Result<Option<Vec<TextEdit>>, LspError> {
     let url = params.text_document_position.text_document.uri;
     let position = params.text_document_position.position;
-    let path = session.file_path(&url)?;
     let Some(doc) = session.document(&url) else {
+        let Some(file_path) = Session::filesystem_path(&url) else {
+            return Ok(None);
+        };
+        let path: BiomePath = file_path.into();
         return Err(extension_error(&path).into());
     };
+    let path = doc.path.clone();
     if !session
         .workspace_for_request()
         .file_exists(path.clone().into())?
@@ -243,7 +239,7 @@ pub(crate) fn format_on_type(
             not_requested_features: FeaturesBuilder::new().with_search().build(),
         })?;
     if !file_features.supports_format() {
-        return notify_user(file_features, path);
+        return notify_user(file_features, &url, doc.file_source);
     }
 
     let size_limit_result =
@@ -299,22 +295,97 @@ pub(crate) fn format_on_type(
     Ok(Some(edits))
 }
 
+fn embedded_format_range(
+    range: TextRange,
+    supports_full_html_support: bool,
+    extension: Option<&str>,
+    content: &str,
+) -> TextRange {
+    let offset = if supports_full_html_support {
+        None
+    } else {
+        match extension {
+            Some("vue") => VueFileHandler::start(content),
+            Some("astro") => AstroFileHandler::start(content),
+            Some("svelte") => SvelteFileHandler::start(content),
+            _ => None,
+        }
+    };
+    if let Some(offset) = offset.map(TextSize::from)
+        && range.start() >= offset
+    {
+        TextRange::new(range.start() - offset, range.end() - offset)
+    } else {
+        range
+    }
+}
+
 fn notify_user<T>(
     file_features: FeaturesSupported,
-    biome_path: BiomePath,
+    document_uri: &Uri,
+    document_file_source: DocumentFileSource,
 ) -> Result<Option<T>, LspError> {
     let support_kind = file_features.support_kind_for(FeatureKind::Format);
     if support_kind.is_not_enabled() {
         return Ok(None);
     }
 
+    let display_path = Session::filesystem_path(document_uri).map_or_else(
+        || document_uri.as_str().to_string(),
+        |path| path.to_string(),
+    );
     let error = if support_kind.is_ignored() {
-        WorkspaceError::file_ignored(biome_path.to_string())
+        WorkspaceError::file_ignored(display_path)
     } else if support_kind.is_protected() {
-        WorkspaceError::protected_file(biome_path.to_string())
+        WorkspaceError::protected_file(display_path)
+    } else if let Some(file_path) = Session::filesystem_path(document_uri) {
+        let path: BiomePath = file_path.into();
+        extension_error(&path)
     } else {
-        extension_error(&biome_path)
+        // This is a virtual file
+        WorkspaceError::source_file_not_supported(
+            document_file_source,
+            display_path,
+            Session::virtual_document_extension(document_uri).map(str::to_string),
+        )
     };
 
     Err(error.into())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn embedded_offset_is_not_applied_before_the_script() {
+        let content = "<template></template><script>\nstatement()\n</script>";
+        let range = TextRange::new(TextSize::from(2), TextSize::from(4));
+        assert_eq!(
+            embedded_format_range(range, false, Some("vue"), content),
+            range
+        );
+    }
+
+    #[test]
+    fn embedded_offset_is_applied_inside_the_script() {
+        let content = "<template></template><script>\nstatement()\n</script>";
+        let offset = TextSize::from(VueFileHandler::start(content).unwrap());
+        let range = TextRange::new(offset + TextSize::from(2), offset + TextSize::from(6));
+        assert_eq!(
+            embedded_format_range(range, false, Some("vue"), content),
+            TextRange::new(TextSize::from(2), TextSize::from(6))
+        );
+    }
+
+    #[test]
+    fn full_html_range_uses_document_coordinates() {
+        let content = "<template></template><script>\nstatement()\n</script>";
+        let offset = TextSize::from(VueFileHandler::start(content).unwrap());
+        let range = TextRange::new(offset + TextSize::from(2), offset + TextSize::from(6));
+        assert_eq!(
+            embedded_format_range(range, true, Some("vue"), content),
+            range
+        );
+    }
 }

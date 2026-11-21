@@ -5,7 +5,6 @@ use biome_console::{ConsoleExt, markup};
 use biome_diagnostics::{
     Advices, Category, Diagnostic, LogCategory, PrintDiagnostic, Severity, Visit, category,
 };
-use biome_fs::BiomePath;
 use biome_service::WorkspaceError;
 use biome_service::configuration::load_configuration;
 use biome_service::settings::ModuleGraphResolutionKind;
@@ -37,9 +36,9 @@ pub(crate) fn inspect_file(payload: InspectFile) -> Result<(), CliDiagnostic> {
     let console = session.app.console;
     let fs = workspace.fs();
 
-    let path = BiomePath::new(Utf8PathBuf::try_from(path).unwrap());
+    let path = fs.biome_path(&Utf8PathBuf::try_from(path).unwrap());
 
-    if !fs.path_is_file(&path) {
+    if !fs.path_is_file(path.as_path()) {
         return Err(CliDiagnostic::unexpected_argument(
             "The path must be a file",
             "inspect file file.js",
@@ -51,8 +50,8 @@ pub(crate) fn inspect_file(payload: InspectFile) -> Result<(), CliDiagnostic> {
     let extended_configurations = loaded_configuration.extended_configurations();
     let configuration = loaded_configuration.resolved_configuration();
 
-    let project_directory = BiomePath::new(
-        loaded_configuration
+    let project_directory = fs.biome_path(
+        &loaded_configuration
             .directory_path()
             .map_or_default(Utf8PathBuf::from),
     );
@@ -69,7 +68,7 @@ pub(crate) fn inspect_file(payload: InspectFile) -> Result<(), CliDiagnostic> {
         workspace_directory: Some(project_directory),
         extended_configurations: extended_configurations
             .into_iter()
-            .map(|(path, config)| (BiomePath::from(path), config))
+            .map(|(path, config)| (fs.biome_path(&path), config))
             .collect(),
         module_graph_resolution_kind: ModuleGraphResolutionKind::default(),
     })?;

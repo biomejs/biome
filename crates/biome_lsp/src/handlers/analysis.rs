@@ -59,10 +59,10 @@ pub(crate) fn code_actions(
     info!("Code actions request");
     let features = FeaturesBuilder::new().with_linter().with_assist().build();
     let url = params.text_document.uri.clone();
-    let path = session.file_path(&url)?;
     let Some(doc) = session.document(&url) else {
         return Ok(None);
     };
+    let path = doc.path.clone();
     if !session
         .workspace_for_request()
         .file_exists(path.clone().into())?
@@ -73,7 +73,7 @@ pub(crate) fn code_actions(
     if session
         .workspace_for_request()
         .is_path_ignored(PathIsIgnoredParams {
-            path: path.clone(),
+            path: doc.path.clone(),
             is_dir: false,
             project_key: doc.project_key,
             features,
@@ -155,7 +155,7 @@ pub(crate) fn code_actions(
                 project_key: doc.project_key,
                 path: path.clone(),
             })?;
-        match path.extension() {
+        match doc.extension() {
             Some("vue") => VueFileHandler::start(content.as_str()),
             Some("astro") => AstroFileHandler::start(content.as_str()),
             Some("svelte") => SvelteFileHandler::start(content.as_str()),
@@ -423,10 +423,14 @@ pub(crate) fn code_action_resolve(
 ) -> Result<lsp::CodeAction, LspError> {
     let (resolve_data, url) = resolve_code_action_data(params.data.clone())?;
 
-    let path = session.file_path(&url)?;
     let Some(doc) = session.document(&url) else {
+        let Some(file_path) = Session::filesystem_path(&url) else {
+            return Err(anyhow::anyhow!("document is not open").into());
+        };
+        let path = session.workspace().fs().biome_path(&file_path);
         return Err(extension_error(&path).into());
     };
+    let path = doc.path.clone();
     let position_encoding = session.position_encoding();
 
     // Handle fix_all resolve
@@ -454,7 +458,7 @@ pub(crate) fn code_action_resolve(
     let result = session
         .workspace_for_request()
         .pull_actions(PullActionsParams {
-            project_key: resolve_data.project_key,
+            project_key: doc.project_key,
             path: path.clone(),
             range: Some(resolve_data.range),
             suppression_reason: None,
@@ -645,7 +649,7 @@ fn fix_all(
     let output = if file_features.supports_full_html_support() {
         fixed.code
     } else {
-        match path.as_path().extension() {
+        match doc.extension() {
             Some(extension) => {
                 let input =
                     session

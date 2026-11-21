@@ -3,7 +3,7 @@ use biome_configuration::analyzer::AnalyzerSelector;
 use biome_console::MarkupBuf;
 use biome_diagnostics::Category;
 use biome_flags::{CiProvider, Environment};
-use biome_fs::BiomePath;
+use biome_fs::FileSystem;
 use biome_service::configuration::ProjectScanComputer;
 use biome_service::workspace::{
     FeatureName, FeaturesSupported, FixFileMode, PatternId, ScanKind, SearchLanguage, SupportKind,
@@ -60,14 +60,14 @@ pub(crate) trait Execution: Send + Sync + std::panic::RefUnwindSafe {
     fn compute_scan_kind(
         &self,
         target_known_paths: &[String],
-        working_dir: &Utf8Path,
+        fs: &dyn FileSystem,
         scan_kind: ScanKind,
     ) -> ScanKind {
         match scan_kind {
             ScanKind::KnownFiles => {
                 let target_paths = target_known_paths
                     .iter()
-                    .map(|path| BiomePath::new(working_dir.join(path)))
+                    .map(|path| fs.biome_path(Utf8Path::new(path)))
                     .collect();
                 ScanKind::TargetedKnownFiles {
                     target_paths,

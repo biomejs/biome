@@ -3,11 +3,19 @@ use biome_deserialize::json::deserialize_from_json_str;
 use biome_fs::{BiomePath, FileSystem, MemoryFileSystem, OsFileSystem};
 use biome_json_parser::JsonParserOptions;
 use camino::Utf8PathBuf;
+#[cfg(unix)]
+use rustc_hash::FxHashSet;
 
+#[cfg(unix)]
+use crate::WatcherInstruction;
 use crate::Workspace;
+#[cfg(unix)]
+use crate::scanner::Scanner;
 use crate::scanner::WorkspaceScannerBridge;
 use crate::settings::ModuleGraphResolutionKind;
 use crate::test_utils::setup_workspace_and_open_project;
+#[cfg(unix)]
+use crate::test_utils::setup_workspace_and_open_project_and_get_watcher_instruction_receiver;
 use crate::workspace::{GetFileContentParams, ScanKind, ScanProjectParams, UpdateSettingsParams};
 
 #[test]
@@ -78,6 +86,150 @@ fn scanner_doesnt_show_errors_for_inaccessible_files() {
         .unwrap();
 
     assert_eq!(result.diagnostics.len(), 1);
+}
+
+#[test]
+#[cfg(unix)]
+fn scanner_watches_external_symlink_directories() {
+    use std::os::unix::fs::symlink;
+
+    let mut fs = biome_fs::TemporaryFs::new("scanner_watches_external_symlink_directories");
+    fs.create_file("project/file.js", "statement();");
+    fs.create_file("external/linked.js", "statement();");
+    let project_path = fs.working_directory.join("project");
+    let external_path = fs.working_directory.join("external");
+    symlink(&external_path, project_path.join("linked")).unwrap();
+
+    let (workspace, project_key, watcher_rx) =
+        setup_workspace_and_open_project_and_get_watcher_instruction_receiver(
+            fs.create_os(),
+            project_path.as_str(),
+        );
+    workspace
+        .scan_project(ScanProjectParams {
+            project_key,
+            watch: true,
+            force: false,
+            scan_kind: ScanKind::Project,
+            verbose: false,
+        })
+        .unwrap();
+
+    let instructions = watcher_rx.try_iter().collect::<Vec<_>>();
+    assert!(
+        instructions.iter().any(|instruction| {
+            matches!(
+                instruction,
+                WatcherInstruction::WatchFolders(paths) if paths.contains(&external_path)
+            )
+        }),
+        "watcher instructions: {instructions:?}"
+    );
+    drop(workspace);
+    std::fs::remove_dir_all(fs.working_directory).unwrap();
+}
+
+#[test]
+#[cfg(unix)]
+fn watcher_projects_events_to_every_symlink_alias() {
+    use std::os::unix::fs::symlink;
+
+    let mut fs = biome_fs::TemporaryFs::new("watcher_projects_events_to_every_symlink_alias");
+    fs.create_file("project/file.js", "statement();");
+    fs.create_file("external/linked.js", "statement();");
+    let project_path = fs.working_directory.join("project");
+    let external_path = fs.working_directory.join("external");
+    let first_alias = project_path.join("first");
+    let second_alias = project_path.join("second");
+    symlink(&external_path, &first_alias).unwrap();
+    symlink(&external_path, &second_alias).unwrap();
+
+    let (watcher_tx, watcher_rx) = crossbeam::channel::unbounded();
+    let scanner = Scanner::new(watcher_tx);
+    scanner.watch_folders(
+        &fs.create_os(),
+        FxHashSet::from_iter([first_alias.clone(), second_alias.clone()]),
+    );
+
+    let WatcherInstruction::WatchFolders(physical_paths) = watcher_rx.recv().unwrap() else {
+        panic!("expected watcher folders");
+    };
+    assert_eq!(
+        physical_paths,
+        FxHashSet::from_iter([external_path.clone()])
+    );
+    for physical_path in &physical_paths {
+        assert!(scanner.insert_watched_folder(physical_path.clone()));
+    }
+
+    let physical_file = external_path.join("linked.js");
+    std::fs::remove_file(&physical_file).unwrap();
+    let mut projected = scanner.logical_paths_for_watcher_event(&physical_file);
+    let mut expected = vec![
+        first_alias.join("linked.js"),
+        second_alias.join("linked.js"),
+    ];
+    expected.sort();
+    assert_eq!(projected, expected);
+
+    let mut unwatched = Vec::new();
+    scanner.remove_watch_aliases(&first_alias, |path| unwatched.push(path.to_path_buf()));
+    assert!(unwatched.is_empty());
+    assert!(!scanner.is_watched(&first_alias));
+    assert!(scanner.is_watched(&second_alias));
+    projected = scanner.logical_paths_for_watcher_event(&physical_file);
+    assert_eq!(projected, vec![second_alias.join("linked.js")]);
+
+    scanner.remove_watch_aliases(&second_alias, |path| unwatched.push(path.to_path_buf()));
+    assert_eq!(unwatched, vec![external_path]);
+    drop(scanner);
+    std::fs::remove_dir_all(fs.working_directory).unwrap();
+}
+
+#[test]
+#[cfg(unix)]
+fn watcher_projects_events_through_nested_physical_roots() {
+    use std::os::unix::fs::symlink;
+
+    let mut fs = biome_fs::TemporaryFs::new("watcher_nested_physical_roots");
+    fs.create_file("project/root.js", "statement();");
+    fs.create_file("project/very/root.js", "statement();");
+    fs.create_file("external/sub/linked.js", "statement();");
+    let project_path = fs.working_directory.join("project");
+    let external_path = fs.working_directory.join("external");
+    let nested_alias = project_path.join("b");
+    let parent_alias = project_path.join("very/deep");
+    symlink(external_path.join("sub"), &nested_alias).unwrap();
+    symlink(&external_path, &parent_alias).unwrap();
+
+    let (watcher_tx, watcher_rx) = crossbeam::channel::unbounded();
+    let scanner = Scanner::new(watcher_tx);
+    scanner.watch_folders(
+        &fs.create_os(),
+        FxHashSet::from_iter([nested_alias.clone(), parent_alias.clone()]),
+    );
+
+    let WatcherInstruction::WatchFolders(physical_paths) = watcher_rx.recv().unwrap() else {
+        panic!("expected watcher folders");
+    };
+    assert_eq!(
+        physical_paths,
+        FxHashSet::from_iter([external_path.clone(), external_path.join("sub")])
+    );
+    for physical_path in physical_paths {
+        assert!(scanner.insert_watched_folder(physical_path));
+    }
+
+    assert_eq!(
+        scanner.logical_paths_for_watcher_event(&external_path.join("sub/linked.js")),
+        vec![
+            nested_alias.join("linked.js"),
+            parent_alias.join("sub/linked.js"),
+        ]
+    );
+
+    drop(scanner);
+    std::fs::remove_dir_all(fs.working_directory).unwrap();
 }
 
 // If this test hangs, it probably recurses on one of the symlinks, such as

@@ -563,17 +563,54 @@ fn test_project_scan_disables_module_graph_type_inference() {
 
 #[test]
 fn vcs_ignore_whitelist_patterns_apply_to_child_paths() {
+    let root = BiomePath::new("repo");
     let ignored_patterns = VcsIgnoredPatterns::Git {
         root: VcsIgnoredPatterns::git_ignore(
-            Utf8Path::new("repo"),
+            &root,
             &["/*", "!/src", "!/biome.jsonc", "!/.gitignore"],
         )
         .unwrap(),
         nested: vec![],
     };
 
-    assert!(!ignored_patterns.is_ignored(Utf8Path::new("repo/src/file.js"), false, None));
-    assert!(ignored_patterns.is_ignored(Utf8Path::new("repo/tests/file.js"), false, None));
+    assert!(!ignored_patterns.is_ignored(&BiomePath::new("repo/src/file.js"), false));
+    assert!(ignored_patterns.is_ignored(&BiomePath::new("repo/tests/file.js"), false));
+}
+
+#[test]
+fn nested_vcs_ignore_patterns_override_parent_patterns() {
+    let root = BiomePath::new("repo");
+    let mut ignored_patterns = VcsIgnoredPatterns::Git {
+        root: VcsIgnoredPatterns::git_ignore(&root, &["*.js"]).unwrap(),
+        nested: vec![],
+    };
+    ignored_patterns.insert_git_match(
+        VcsIgnoredPatterns::git_ignore(&BiomePath::new("repo/src/generated"), &["keep.js"])
+            .unwrap(),
+    );
+    ignored_patterns.insert_git_match(
+        VcsIgnoredPatterns::git_ignore(&BiomePath::new("repo/src"), &["!keep.js", "dist/"])
+            .unwrap(),
+    );
+
+    assert!(!ignored_patterns.is_ignored(&BiomePath::new("repo/src/keep.js"), false));
+    assert!(ignored_patterns.is_ignored(&BiomePath::new("repo/src/generated/keep.js"), false));
+    assert!(ignored_patterns.is_ignored(&BiomePath::new("repo/src/dist/file.css"), false));
+    assert!(ignored_patterns.is_ignored(&BiomePath::new("repo/other.js"), false));
+}
+
+#[test]
+fn nested_vcs_whitelist_cannot_reinclude_file_below_ignored_parent() {
+    let root = BiomePath::new("repo");
+    let mut ignored_patterns = VcsIgnoredPatterns::Git {
+        root: VcsIgnoredPatterns::git_ignore(&root, &["ignored/"]).unwrap(),
+        nested: vec![],
+    };
+    ignored_patterns.insert_git_match(
+        VcsIgnoredPatterns::git_ignore(&BiomePath::new("repo/ignored"), &["!file.js"]).unwrap(),
+    );
+
+    assert!(ignored_patterns.is_ignored(&BiomePath::new("repo/ignored/file.js"), false));
 }
 
 fn resolve_html_parse_options(
