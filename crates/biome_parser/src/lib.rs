@@ -128,7 +128,18 @@ impl<K: SyntaxKind> ParserContext<K> {
         }
     }
 
-    pub fn finish(self) -> (Vec<Event<K>>, Vec<ParseDiagnostic>) {
+    /// Returns the events and the diagnostics, sorted by the start of their range.
+    ///
+    /// A parser can report a diagnostic for a range that starts before the
+    /// range of an already reported diagnostic, for example when it discovers
+    /// an error only after parsing the code that follows it.
+    /// Diagnostics without a range are kept after the ones with a range.
+    pub fn finish(mut self) -> (Vec<Event<K>>, Vec<ParseDiagnostic>) {
+        self.diagnostics
+            .sort_by_key(|diagnostic| match diagnostic.diagnostic_range() {
+                Some(range) => (false, range.start()),
+                None => (true, TextSize::default()),
+            });
         (self.events, self.diagnostics)
     }
 }

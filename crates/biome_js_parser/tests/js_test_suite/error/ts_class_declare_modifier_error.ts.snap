@@ -398,17 +398,6 @@ ts_class_declare_modifier_error.ts:2:5 parse ━━━━━━━━━━━�
     3 │     declare constructor(declare readonly prop) {}
     4 │     declare get test() { return "a" }
   
-ts_class_declare_modifier_error.ts:3:25 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × 'declare' cannot appear on a parameter.
-  
-    1 │ class Test {
-    2 │     declare method(): string;
-  > 3 │     declare constructor(declare readonly prop) {}
-      │                         ^^^^^^^
-    4 │     declare get test() { return "a" }
-    5 │     declare set test(value: string) {}
-  
 ts_class_declare_modifier_error.ts:3:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × 'declare' cannot appear on a constructor declaration.
@@ -417,6 +406,17 @@ ts_class_declare_modifier_error.ts:3:5 parse ━━━━━━━━━━━�
     2 │     declare method(): string;
   > 3 │     declare constructor(declare readonly prop) {}
       │     ^^^^^^^
+    4 │     declare get test() { return "a" }
+    5 │     declare set test(value: string) {}
+  
+ts_class_declare_modifier_error.ts:3:25 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × 'declare' cannot appear on a parameter.
+  
+    1 │ class Test {
+    2 │     declare method(): string;
+  > 3 │     declare constructor(declare readonly prop) {}
+      │                         ^^^^^^^
     4 │     declare get test() { return "a" }
     5 │     declare set test(value: string) {}
   

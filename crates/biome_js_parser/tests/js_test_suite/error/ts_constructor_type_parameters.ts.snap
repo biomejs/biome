@@ -234,6 +234,15 @@ ts_constructor_type_parameters.ts:1:22 parse ━━━━━━━━━━━�
     2 │ class A { constructor<>(b) {} }
     3 │ 
   
+ts_constructor_type_parameters.ts:2:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × constructors cannot have type parameters.
+  
+    1 │ class A { constructor<A>(b) {} }
+  > 2 │ class A { constructor<>(b) {} }
+      │                      ^^
+    3 │ 
+  
 ts_constructor_type_parameters.ts:2:23 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a type parameter but instead found '>'.
@@ -248,15 +257,6 @@ ts_constructor_type_parameters.ts:2:23 parse ━━━━━━━━━━━�
     1 │ class A { constructor<A>(b) {} }
   > 2 │ class A { constructor<>(b) {} }
       │                       ^
-    3 │ 
-  
-ts_constructor_type_parameters.ts:2:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × constructors cannot have type parameters.
-  
-    1 │ class A { constructor<A>(b) {} }
-  > 2 │ class A { constructor<>(b) {} }
-      │                      ^^
     3 │ 
   
 ```

@@ -329,17 +329,6 @@ typescript_abstract_class_member_should_not_have_body.ts:5:32 parse ━━━━
     6 │     abstract #private_name() { }
     7 │ }
   
-typescript_abstract_class_member_should_not_have_body.ts:6:30 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × abstract members should not have a body
-  
-    4 │     abstract get my_name() { }
-    5 │     abstract set my_name(name) { }
-  > 6 │     abstract #private_name() { }
-      │                              ^^^
-    7 │ }
-    8 │ 
-  
 typescript_abstract_class_member_should_not_have_body.ts:6:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × 'abstract' modifier cannot be used with a private identifier'.
@@ -348,6 +337,17 @@ typescript_abstract_class_member_should_not_have_body.ts:6:5 parse ━━━━�
     5 │     abstract set my_name(name) { }
   > 6 │     abstract #private_name() { }
       │     ^^^^^^^^
+    7 │ }
+    8 │ 
+  
+typescript_abstract_class_member_should_not_have_body.ts:6:30 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × abstract members should not have a body
+  
+    4 │     abstract get my_name() { }
+    5 │     abstract set my_name(name) { }
+  > 6 │     abstract #private_name() { }
+      │                              ^^^
     7 │ }
     8 │ 
   

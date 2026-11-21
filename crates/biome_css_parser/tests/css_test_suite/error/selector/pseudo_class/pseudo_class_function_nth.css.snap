@@ -1438,26 +1438,6 @@ pseudo_class_function_nth.css:7:20 parse ━━━━━━━━━━━━━
   
   i Remove {
   
-pseudo_class_function_nth.css:8:17 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a number but instead found 'not'.
-  
-     6 │ :nth-child(2n invalid +1) {}
-     7 │ :nth-child(2n + +1 {}
-   > 8 │ :nth-child(2n + not) {}
-       │                 ^^^
-     9 │ :nth-child(2n + not {}
-    10 │ :nth-child(even .div) {}
-  
-  i Expected a number here.
-  
-     6 │ :nth-child(2n invalid +1) {}
-     7 │ :nth-child(2n + +1 {}
-   > 8 │ :nth-child(2n + not) {}
-       │                 ^^^
-     9 │ :nth-child(2n + not {}
-    10 │ :nth-child(even .div) {}
-  
 pseudo_class_function_nth.css:8:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected an even, an odd, a n, a <An+B>, or a number but instead found '2n + not'.
@@ -1478,25 +1458,25 @@ pseudo_class_function_nth.css:8:12 parse ━━━━━━━━━━━━━
      9 │ :nth-child(2n + not {}
     10 │ :nth-child(even .div) {}
   
-pseudo_class_function_nth.css:9:17 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+pseudo_class_function_nth.css:8:17 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a number but instead found 'not'.
   
+     6 │ :nth-child(2n invalid +1) {}
      7 │ :nth-child(2n + +1 {}
-     8 │ :nth-child(2n + not) {}
-   > 9 │ :nth-child(2n + not {}
+   > 8 │ :nth-child(2n + not) {}
        │                 ^^^
+     9 │ :nth-child(2n + not {}
     10 │ :nth-child(even .div) {}
-    11 │ :nth-child(even .div {}
   
   i Expected a number here.
   
+     6 │ :nth-child(2n invalid +1) {}
      7 │ :nth-child(2n + +1 {}
-     8 │ :nth-child(2n + not) {}
-   > 9 │ :nth-child(2n + not {}
+   > 8 │ :nth-child(2n + not) {}
        │                 ^^^
+     9 │ :nth-child(2n + not {}
     10 │ :nth-child(even .div) {}
-    11 │ :nth-child(even .div {}
   
 pseudo_class_function_nth.css:9:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -1515,6 +1495,26 @@ pseudo_class_function_nth.css:9:12 parse ━━━━━━━━━━━━━
      8 │ :nth-child(2n + not) {}
    > 9 │ :nth-child(2n + not {}
        │            ^^^^^^^^
+    10 │ :nth-child(even .div) {}
+    11 │ :nth-child(even .div {}
+  
+pseudo_class_function_nth.css:9:17 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a number but instead found 'not'.
+  
+     7 │ :nth-child(2n + +1 {}
+     8 │ :nth-child(2n + not) {}
+   > 9 │ :nth-child(2n + not {}
+       │                 ^^^
+    10 │ :nth-child(even .div) {}
+    11 │ :nth-child(even .div {}
+  
+  i Expected a number here.
+  
+     7 │ :nth-child(2n + +1 {}
+     8 │ :nth-child(2n + not) {}
+   > 9 │ :nth-child(2n + not {}
+       │                 ^^^
     10 │ :nth-child(even .div) {}
     11 │ :nth-child(even .div {}
   

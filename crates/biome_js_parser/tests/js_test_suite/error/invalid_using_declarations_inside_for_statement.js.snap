@@ -189,6 +189,29 @@ invalid_using_declarations_inside_for_statement.js:1:22 parse ━━━━━━
   
   i Remove )
   
+invalid_using_declarations_inside_for_statement.js:2:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × await can only be used in conjunction with `for...of` statements
+  
+    1 │ for (await using of x) {};
+  > 2 │ for await (await using of x) {};
+      │     ^^^^^
+    3 │ 
+  
+  i Remove the await here
+  
+    1 │ for (await using of x) {};
+  > 2 │ for await (await using of x) {};
+      │     ^^^^^
+    3 │ 
+  
+  i or convert this to a `for...of` statement
+  
+    1 │ for (await using of x) {};
+  > 2 │ for await (await using of x) {};
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ 
+  
 invalid_using_declarations_inside_for_statement.js:2:24 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Using declarations must have an initialized value.
@@ -221,28 +244,5 @@ invalid_using_declarations_inside_for_statement.js:2:28 parse ━━━━━━
     3 │ 
   
   i Remove )
-  
-invalid_using_declarations_inside_for_statement.js:2:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × await can only be used in conjunction with `for...of` statements
-  
-    1 │ for (await using of x) {};
-  > 2 │ for await (await using of x) {};
-      │     ^^^^^
-    3 │ 
-  
-  i Remove the await here
-  
-    1 │ for (await using of x) {};
-  > 2 │ for await (await using of x) {};
-      │     ^^^^^
-    3 │ 
-  
-  i or convert this to a `for...of` statement
-  
-    1 │ for (await using of x) {};
-  > 2 │ for await (await using of x) {};
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    3 │ 
   
 ```

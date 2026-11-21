@@ -323,6 +323,18 @@ invalid_assignment_target.js:5:1 parse ━━━━━━━━━━━━━�
   
   i This expression cannot be assigned to
   
+invalid_assignment_target.js:6:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Invalid assignment to `a +`
+  
+    4 │ a?.b = b;
+    5 │ a?.["b"] = b;
+  > 6 │ (a +) = b;
+      │  ^^^
+    7 │ 
+  
+  i This expression cannot be assigned to
+  
 invalid_assignment_target.js:6:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected an expression but instead found ')'.
@@ -340,17 +352,5 @@ invalid_assignment_target.js:6:5 parse ━━━━━━━━━━━━━�
   > 6 │ (a +) = b;
       │     ^
     7 │ 
-  
-invalid_assignment_target.js:6:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Invalid assignment to `a +`
-  
-    4 │ a?.b = b;
-    5 │ a?.["b"] = b;
-  > 6 │ (a +) = b;
-      │  ^^^
-    7 │ 
-  
-  i This expression cannot be assigned to
   
 ```

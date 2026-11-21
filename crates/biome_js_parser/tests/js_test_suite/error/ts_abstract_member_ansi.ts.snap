@@ -218,6 +218,14 @@ JsModule {
 ## Diagnostics
 
 ```
+ts_abstract_member_ansi.ts:1:20 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × 'abstract' cannot appear on a constructor declaration.
+  
+  > 1 │ abstract class A { abstract constructor() abstract method() abstract get getter() abstract set setter(value) abstract prop }
+      │                    ^^^^^^^^
+    2 │ 
+  
 ts_abstract_member_ansi.ts:1:43 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a class method body but instead found 'abstract'.
@@ -230,14 +238,6 @@ ts_abstract_member_ansi.ts:1:43 parse ━━━━━━━━━━━━━━
   
   > 1 │ abstract class A { abstract constructor() abstract method() abstract get getter() abstract set setter(value) abstract prop }
       │                                           ^^^^^^^^
-    2 │ 
-  
-ts_abstract_member_ansi.ts:1:20 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × 'abstract' cannot appear on a constructor declaration.
-  
-  > 1 │ abstract class A { abstract constructor() abstract method() abstract get getter() abstract set setter(value) abstract prop }
-      │                    ^^^^^^^^
     2 │ 
   
 ts_abstract_member_ansi.ts:1:43 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

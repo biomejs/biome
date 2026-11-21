@@ -1514,17 +1514,6 @@ ts_instantiation_expressions_1.ts:19:11 parse ━━━━━━━━━━━�
     20 │ class C5 {
     21 │     protected specialFoo = f<string> #bar = 123
   
-ts_instantiation_expressions_1.ts:21:38 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Private names are only allowed on the left side of a 'in' expression
-  
-    19 │ satisfies {};
-    20 │ class C5 {
-  > 21 │     protected specialFoo = f<string> #bar = 123
-       │                                      ^^^^
-    22 │ }
-    23 │ for (const a = b.test<string> in []) {}
-  
 ts_instantiation_expressions_1.ts:21:28 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Invalid assignment to `f<string> #bar`
@@ -1537,6 +1526,17 @@ ts_instantiation_expressions_1.ts:21:28 parse ━━━━━━━━━━━�
     23 │ for (const a = b.test<string> in []) {}
   
   i This expression cannot be assigned to
+  
+ts_instantiation_expressions_1.ts:21:38 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Private names are only allowed on the left side of a 'in' expression
+  
+    19 │ satisfies {};
+    20 │ class C5 {
+  > 21 │     protected specialFoo = f<string> #bar = 123
+       │                                      ^^^^
+    22 │ }
+    23 │ for (const a = b.test<string> in []) {}
   
 ts_instantiation_expressions_1.ts:23:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
