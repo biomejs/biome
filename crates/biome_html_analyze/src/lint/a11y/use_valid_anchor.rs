@@ -4,6 +4,7 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_html_syntax::element_ext::AnyHtmlTagElement;
+use biome_html_syntax::{AnyHtmlAttribute, AnyVueDirective};
 use biome_languages::HtmlFileSource;
 use biome_rowan::{AstNode, TextRange};
 use biome_rule_options::use_valid_anchor::UseValidAnchorOptions;
@@ -84,7 +85,10 @@ impl Rule for UseValidAnchor {
                         .as_html_attribute()
                         .is_some_and(|attr| attr.initializer().is_none())
                     {
-                        return Some(UseValidAnchorState::IncorrectHref(anchor_attribute.range()));
+                        if !has_trailing_dynamic_spread(node, &anchor_attribute) {
+                            return Some(UseValidAnchorState::IncorrectHref(anchor_attribute.range()));
+                        }
+                        return None;
                     }
 
                     let attribute_value = anchor_attribute.as_static_value()?;
@@ -94,16 +98,22 @@ impl Rule for UseValidAnchor {
                         || static_value == "#"
                         || static_value.starts_with("javascript:")
                     {
-                        return Some(UseValidAnchorState::IncorrectHref(anchor_attribute.range()));
+                        if !has_trailing_dynamic_spread(node, &anchor_attribute) {
+                            return Some(UseValidAnchorState::IncorrectHref(anchor_attribute.range()));
+                        }
                     }
                 }
                 (None, Some(on_click_attribute)) => {
-                    return Some(UseValidAnchorState::CantBeAnchor(
-                        on_click_attribute.range(),
-                    ));
+                    if !has_trailing_dynamic_spread(node, &on_click_attribute) {
+                        return Some(UseValidAnchorState::CantBeAnchor(
+                            on_click_attribute.range(),
+                        ));
+                    }
                 }
                 (None, None) => {
-                    return Some(UseValidAnchorState::MissingHrefAttribute(node.range()));
+                    if !has_dynamic_spread(node) {
+                        return Some(UseValidAnchorState::MissingHrefAttribute(node.range()));
+                    }
                 }
             };
         }
@@ -175,5 +185,36 @@ impl UseValidAnchorState {
             | Self::CantBeAnchor(range)
             | Self::IncorrectHref(range) => range,
         }
+    }
+}
+
+fn has_dynamic_spread(element: &AnyHtmlTagElement) -> bool {
+    element
+        .attributes()
+        .into_iter()
+        .any(|attribute| is_dynamic_spread(&attribute))
+}
+
+fn has_trailing_dynamic_spread(
+    element: &AnyHtmlTagElement,
+    current_attribute: &AnyHtmlAttribute,
+) -> bool {
+    element.attributes().into_iter().any(|attribute| {
+        attribute.range().start() >= current_attribute.range().end()
+            && is_dynamic_spread(&attribute)
+    })
+}
+
+fn is_dynamic_spread(attribute: &AnyHtmlAttribute) -> bool {
+    let has_static_name = attribute.name().is_some();
+    match attribute {
+        AnyHtmlAttribute::HtmlSpreadAttribute(_) => true,
+        AnyHtmlAttribute::AnyVueDirective(AnyVueDirective::VueVBindShorthandDirective(_)) => {
+            !has_static_name
+        }
+        AnyHtmlAttribute::AnyVueDirective(AnyVueDirective::VueDirective(directive)) => {
+            directive.is_binding() && !has_static_name
+        }
+        _ => false,
     }
 }

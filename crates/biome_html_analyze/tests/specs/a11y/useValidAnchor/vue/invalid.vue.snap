@@ -13,6 +13,10 @@ expression: invalid.vue
 <!-- static Vue href bindings with invalid values should also be flagged -->
 <a :href="'javascript:void(0)'">invalid</a>
 <a v-bind:href="'javascript:'">invalid</a>
+<a v-bind="spread" href="#">invalid</a>
+<a v-bind="spread" href>invalid</a>
+<a v-bind="spread" @click="count++">invalid</a>
+<a v-bind="spread" :href="'javascript:void(0)'">invalid</a>
 </template>
 
 ```
@@ -104,7 +108,7 @@ invalid.vue:8:4 lint/a11y/useValidAnchor ━━━━━━━━━━━━━
    > 8 │ <a :href="'javascript:void(0)'">invalid</a>
        │    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
      9 │ <a v-bind:href="'javascript:'">invalid</a>
-    10 │ </template>
+    10 │ <a v-bind="spread" href="#">invalid</a>
   
   i The href attribute should be a valid URL
   
@@ -122,8 +126,84 @@ invalid.vue:9:4 lint/a11y/useValidAnchor ━━━━━━━━━━━━━
      8 │ <a :href="'javascript:void(0)'">invalid</a>
    > 9 │ <a v-bind:href="'javascript:'">invalid</a>
        │    ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    10 │ </template>
-    11 │ 
+    10 │ <a v-bind="spread" href="#">invalid</a>
+    11 │ <a v-bind="spread" href>invalid</a>
+  
+  i The href attribute should be a valid URL
+  
+  i Check this thorough explanation to better understand the context.
+  
+
+```
+
+```
+invalid.vue:10:20 lint/a11y/useValidAnchor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide a valid value for the attribute href.
+  
+     8 │ <a :href="'javascript:void(0)'">invalid</a>
+     9 │ <a v-bind:href="'javascript:'">invalid</a>
+  > 10 │ <a v-bind="spread" href="#">invalid</a>
+       │                    ^^^^^^^^
+    11 │ <a v-bind="spread" href>invalid</a>
+    12 │ <a v-bind="spread" @click="count++">invalid</a>
+  
+  i The href attribute should be a valid URL
+  
+  i Check this thorough explanation to better understand the context.
+  
+
+```
+
+```
+invalid.vue:11:20 lint/a11y/useValidAnchor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide a valid value for the attribute href.
+  
+     9 │ <a v-bind:href="'javascript:'">invalid</a>
+    10 │ <a v-bind="spread" href="#">invalid</a>
+  > 11 │ <a v-bind="spread" href>invalid</a>
+       │                    ^^^^
+    12 │ <a v-bind="spread" @click="count++">invalid</a>
+    13 │ <a v-bind="spread" :href="'javascript:void(0)'">invalid</a>
+  
+  i The href attribute should be a valid URL
+  
+  i Check this thorough explanation to better understand the context.
+  
+
+```
+
+```
+invalid.vue:12:20 lint/a11y/useValidAnchor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Use a button element instead of an a element.
+  
+    10 │ <a v-bind="spread" href="#">invalid</a>
+    11 │ <a v-bind="spread" href>invalid</a>
+  > 12 │ <a v-bind="spread" @click="count++">invalid</a>
+       │                    ^^^^^^^^^^^^^^^^
+    13 │ <a v-bind="spread" :href="'javascript:void(0)'">invalid</a>
+    14 │ </template>
+  
+  i Anchor elements should only be used for default sections or page navigation
+  
+  i Check this thorough explanation to better understand the context.
+  
+
+```
+
+```
+invalid.vue:13:20 lint/a11y/useValidAnchor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide a valid value for the attribute href.
+  
+    11 │ <a v-bind="spread" href>invalid</a>
+    12 │ <a v-bind="spread" @click="count++">invalid</a>
+  > 13 │ <a v-bind="spread" :href="'javascript:void(0)'">invalid</a>
+       │                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    14 │ </template>
+    15 │ 
   
   i The href attribute should be a valid URL
   
