@@ -1,0 +1,133 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+assertion_line: 148
+expression: invalid.tailwind.css
+---
+# Input
+```css
+@utility plain {
+  --accent: red;
+  --accent: blue;
+}
+
+@utility nested {
+  &:hover {
+    --accent: red;
+    --accent: blue;
+  }
+}
+
+@utility mixed-* {
+  --accent: red;
+  --tab: --value(integer);
+  --accent: blue;
+}
+
+a {
+  --tab: --value(integer);
+  --tab: --value(number);
+}
+
+```
+
+# Diagnostics
+```
+invalid.tailwind.css:3:3 lint/suspicious/noDuplicateCustomProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate custom properties can lead to unexpected behavior and may override previous declarations unintentionally.
+  
+    1 │ @utility plain {
+    2 │   --accent: red;
+  > 3 │   --accent: blue;
+      │   ^^^^^^^^
+    4 │ }
+    5 │ 
+  
+  i --accent is already defined here.
+  
+    1 │ @utility plain {
+  > 2 │   --accent: red;
+      │   ^^^^^^^^
+    3 │   --accent: blue;
+    4 │ }
+  
+  i Remove or rename the duplicate custom property to ensure consistent styling.
+  
+
+```
+
+```
+invalid.tailwind.css:9:5 lint/suspicious/noDuplicateCustomProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate custom properties can lead to unexpected behavior and may override previous declarations unintentionally.
+  
+     7 │   &:hover {
+     8 │     --accent: red;
+   > 9 │     --accent: blue;
+       │     ^^^^^^^^
+    10 │   }
+    11 │ }
+  
+  i --accent is already defined here.
+  
+     6 │ @utility nested {
+     7 │   &:hover {
+   > 8 │     --accent: red;
+       │     ^^^^^^^^
+     9 │     --accent: blue;
+    10 │   }
+  
+  i Remove or rename the duplicate custom property to ensure consistent styling.
+  
+
+```
+
+```
+invalid.tailwind.css:16:3 lint/suspicious/noDuplicateCustomProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate custom properties can lead to unexpected behavior and may override previous declarations unintentionally.
+  
+    14 │   --accent: red;
+    15 │   --tab: --value(integer);
+  > 16 │   --accent: blue;
+       │   ^^^^^^^^
+    17 │ }
+    18 │ 
+  
+  i --accent is already defined here.
+  
+    13 │ @utility mixed-* {
+  > 14 │   --accent: red;
+       │   ^^^^^^^^
+    15 │   --tab: --value(integer);
+    16 │   --accent: blue;
+  
+  i Remove or rename the duplicate custom property to ensure consistent styling.
+  
+
+```
+
+```
+invalid.tailwind.css:21:3 lint/suspicious/noDuplicateCustomProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate custom properties can lead to unexpected behavior and may override previous declarations unintentionally.
+  
+    19 │ a {
+    20 │   --tab: --value(integer);
+  > 21 │   --tab: --value(number);
+       │   ^^^^^
+    22 │ }
+    23 │ 
+  
+  i --tab is already defined here.
+  
+    19 │ a {
+  > 20 │   --tab: --value(integer);
+       │   ^^^^^
+    21 │   --tab: --value(number);
+    22 │ }
+  
+  i Remove or rename the duplicate custom property to ensure consistent styling.
+  
+
+```

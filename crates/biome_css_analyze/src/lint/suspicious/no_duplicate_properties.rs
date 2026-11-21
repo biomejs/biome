@@ -1,13 +1,17 @@
-use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
+use biome_analyze::{
+    Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
+};
 use biome_console::markup;
-use biome_css_syntax::{CssDeclarationOrRuleList, CssKeyframesAtRule};
+use biome_css_syntax::{
+    AnyCssDeclarationOrRule, CssDeclarationOrRuleList, CssKeyframesAtRule, TwUtilityAtRule,
+};
 use biome_diagnostics::Severity;
 use biome_rowan::{AstNode, TextRange, TokenText};
 use biome_rule_options::no_duplicate_properties::NoDuplicatePropertiesOptions;
 use rustc_hash::FxHashMap;
 use std::collections::hash_map::Entry;
 
-use crate::services::semantic::Semantic;
+use crate::utils::{AnyPropertyStatement, is_tailwind_utility_fallback};
 
 declare_lint_rule! {
     /// Disallow duplicate properties within declaration blocks.
@@ -50,54 +54,49 @@ declare_lint_rule! {
 }
 
 impl Rule for NoDuplicateProperties {
-    type Query = Semantic<CssDeclarationOrRuleList>;
+    type Query = Ast<CssDeclarationOrRuleList>;
     type State = (TextRange, (TextRange, TokenText));
     type Signals = Option<Self::State>;
     type Options = NoDuplicatePropertiesOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();
-        let model = ctx.model();
 
-        let declarations = model.get_declarations_by_range(node.range());
+        let mut in_utility = false;
+        for ancestor in node.syntax().ancestors() {
+            if CssKeyframesAtRule::can_cast(ancestor.kind()) {
+                return None;
+            }
+            in_utility |= TwUtilityAtRule::can_cast(ancestor.kind());
+        }
 
         let mut seen: FxHashMap<TokenText, TextRange> = FxHashMap::default();
 
-        for declaration in declarations.iter().filter(|declaration| {
-            declaration
-                .declaration()
-                .syntax()
-                .parent()
-                .and_then(|parent| parent.parent())
-                .as_ref()
-                == Some(node.syntax())
-        }) {
-            let prop = declaration.property();
-            let prop_name = prop.value().ok()?;
-            let prop_range = prop.range();
+        for item in node {
+            let AnyCssDeclarationOrRule::CssDeclarationWithSemicolon(declaration) = item else {
+                continue;
+            };
+            if in_utility && is_tailwind_utility_fallback(&declaration) {
+                continue;
+            }
+            let Some(name) = AnyPropertyStatement::from(declaration).name() else {
+                continue;
+            };
+            let prop_name = name.token_text_trimmed();
 
-            let is_custom_property = prop_name.text().starts_with("--");
-
-            if is_custom_property {
+            if prop_name.text().starts_with("--") {
                 continue;
             }
 
-            // We skip this declaration if it's inside a keyframes block.
-            if prop
-                .syntax()
-                .ancestors()
-                .skip(1)
-                .any(|node| CssKeyframesAtRule::can_cast(node.kind()))
-            {
-                continue;
-            }
-
-            match seen.entry(prop_name.clone()) {
+            match seen.entry(prop_name) {
                 Entry::Occupied(entry) => {
-                    return Some((*entry.get(), (prop_range, prop_name)));
+                    return Some((
+                        *entry.get(),
+                        (name.text_trimmed_range(), entry.key().clone()),
+                    ));
                 }
                 Entry::Vacant(entry) => {
-                    entry.insert(prop_range);
+                    entry.insert(name.text_trimmed_range());
                 }
             }
         }
