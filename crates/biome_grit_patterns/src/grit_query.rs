@@ -276,15 +276,18 @@ impl GritQuery {
 
         // Execute inner pattern (Bubble) at each anchor-kind node.
         let mut matched = false;
+        let mut value_history = Vec::new();
         for node in anchor_nodes {
             let binding = GritResolvedPattern::from_node_binding(node);
             let saved = state.clone();
             if inner.execute(&binding, &mut state, &context, &mut logs)? {
                 matched = true;
+                take_value_history(&mut state, &mut value_history);
             } else {
                 state = saved;
             }
         }
+        restore_value_history(&mut state, value_history);
 
         // Collect match ranges and set on file (replicate exec_step behavior).
         if matched {
@@ -827,6 +830,73 @@ fn extract_anchor_kinds_from_predicate(
     }
 }
 
+/// Value histories moved out of the last binding instance of a scope.
+#[derive(Default)]
+struct ScopeHistory<'a> {
+    /// Instance count of the scope when the histories were moved out.
+    /// Predicate and function calls push instances without popping them, so
+    /// a different count means another instance is now the last one.
+    depth: usize,
+
+    /// Value history of each variable in the instance.
+    variables: Vec<Vec<GritResolvedPattern<'a>>>,
+}
+
+/// Moves the value histories of each scope's last instance out of `state`
+/// into `history`.
+///
+/// Every state clone copies these histories, which grow with each match. The
+/// matcher only appends to them and reads them when computing match ranges,
+/// so [restore_value_history] must put them back before that.
+fn take_value_history<'a>(
+    state: &mut State<'a, GritQueryContext>,
+    history: &mut Vec<ScopeHistory<'a>>,
+) {
+    if history.len() < state.bindings.len() {
+        history.resize_with(state.bindings.len(), ScopeHistory::default);
+    }
+
+    for (scope, scope_history) in state.bindings.iter_mut().zip(history.iter_mut()) {
+        let depth = scope.len();
+        let Some(instance) = scope.last_mut() else {
+            continue;
+        };
+        // Only the last instance is reported, so histories moved out of an
+        // earlier one are dropped instead of merged.
+        if scope_history.depth != depth {
+            scope_history.depth = depth;
+            scope_history.variables.clear();
+        }
+        if scope_history.variables.len() < instance.len() {
+            scope_history
+                .variables
+                .resize_with(instance.len(), Vec::new);
+        }
+        for (variable, variable_history) in
+            instance.iter_mut().zip(scope_history.variables.iter_mut())
+        {
+            variable_history.append(&mut variable.value_history);
+        }
+    }
+}
+
+/// Puts the value histories moved out by [take_value_history] back into
+/// `state`, before any entries the state recorded since.
+fn restore_value_history<'a>(
+    state: &mut State<'a, GritQueryContext>,
+    history: Vec<ScopeHistory<'a>>,
+) {
+    for (scope, scope_history) in state.bindings.iter_mut().zip(history) {
+        if scope_history.depth == scope.len()
+            && let Some(instance) = scope.last_mut()
+        {
+            for (variable, variable_history) in instance.iter_mut().zip(scope_history.variables) {
+                variable.value_history.splice(0..0, variable_history);
+            }
+        }
+    }
+}
+
 /// Navigates the auto-wrapped pattern tree to find the inner pattern
 /// of the Contains node (the Bubble pattern).
 ///
@@ -1047,6 +1117,25 @@ mod tests {
             opt_result.effects.len(),
             full_result.effects.len(),
             "rewrite: optimized and full should produce same number of effects"
+        );
+    }
+
+    #[test]
+    fn execute_optimized_matches_execute_for_predicate_locals() {
+        let query = compile_js_query(
+            r#"predicate is_bar($x) { $x <: `bar($y)` }
+            `foo($a)` where { is_bar($a) }"#,
+        );
+        let code = "foo(bar(1)); foo(bar(2)); foo(bar(3));";
+
+        let opt_result = query
+            .execute_optimized(make_js_file(code))
+            .expect("optimized failed");
+        let full_result = query.execute(make_js_file(code)).expect("execute failed");
+
+        assert_eq!(
+            opt_result.effects, full_result.effects,
+            "predicate locals: optimized and full should report the same variables"
         );
     }
 
