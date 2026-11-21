@@ -1,0 +1,162 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```ts
+pair<const A, B = A>(a: A, b: B)
+
+```
+
+
+## AST
+
+```
+JsSvelteSnippetRoot {
+    name: JsIdentifierBinding {
+        name_token: IDENT@0..4 "pair" [] [],
+    },
+    type_parameters: TsTypeParameters {
+        l_angle_token: L_ANGLE@4..5 "<" [] [],
+        items: TsTypeParameterList [
+            TsTypeParameter {
+                modifiers: TsTypeParameterModifierList [
+                    TsConstModifier {
+                        modifier_token: CONST_KW@5..11 "const" [] [Whitespace(" ")],
+                    },
+                ],
+                name: TsTypeParameterName {
+                    ident_token: IDENT@11..12 "A" [] [],
+                },
+                constraint: missing (optional),
+                default: missing (optional),
+            },
+            COMMA@12..14 "," [] [Whitespace(" ")],
+            TsTypeParameter {
+                modifiers: TsTypeParameterModifierList [],
+                name: TsTypeParameterName {
+                    ident_token: IDENT@14..16 "B" [] [Whitespace(" ")],
+                },
+                constraint: missing (optional),
+                default: TsDefaultTypeClause {
+                    eq_token: EQ@16..18 "=" [] [Whitespace(" ")],
+                    ty: TsReferenceType {
+                        name: JsReferenceIdentifier {
+                            value_token: IDENT@18..19 "A" [] [],
+                        },
+                        type_arguments: missing (optional),
+                    },
+                },
+            },
+        ],
+        r_angle_token: R_ANGLE@19..20 ">" [] [],
+    },
+    parameters: JsParameters {
+        l_paren_token: L_PAREN@20..21 "(" [] [],
+        items: JsParameterList [
+            JsFormalParameter {
+                decorators: JsDecoratorList [],
+                binding: JsIdentifierBinding {
+                    name_token: IDENT@21..22 "a" [] [],
+                },
+                question_mark_token: missing (optional),
+                type_annotation: TsTypeAnnotation {
+                    colon_token: COLON@22..24 ":" [] [Whitespace(" ")],
+                    ty: TsReferenceType {
+                        name: JsReferenceIdentifier {
+                            value_token: IDENT@24..25 "A" [] [],
+                        },
+                        type_arguments: missing (optional),
+                    },
+                },
+                initializer: missing (optional),
+            },
+            COMMA@25..27 "," [] [Whitespace(" ")],
+            JsFormalParameter {
+                decorators: JsDecoratorList [],
+                binding: JsIdentifierBinding {
+                    name_token: IDENT@27..28 "b" [] [],
+                },
+                question_mark_token: missing (optional),
+                type_annotation: TsTypeAnnotation {
+                    colon_token: COLON@28..30 ":" [] [Whitespace(" ")],
+                    ty: TsReferenceType {
+                        name: JsReferenceIdentifier {
+                            value_token: IDENT@30..31 "B" [] [],
+                        },
+                        type_arguments: missing (optional),
+                    },
+                },
+                initializer: missing (optional),
+            },
+        ],
+        r_paren_token: R_PAREN@31..32 ")" [] [],
+    },
+    eof_token: EOF@32..33 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_SVELTE_SNIPPET_ROOT@0..33
+  0: JS_IDENTIFIER_BINDING@0..4
+    0: IDENT@0..4 "pair" [] []
+  1: TS_TYPE_PARAMETERS@4..20
+    0: L_ANGLE@4..5 "<" [] []
+    1: TS_TYPE_PARAMETER_LIST@5..19
+      0: TS_TYPE_PARAMETER@5..12
+        0: TS_TYPE_PARAMETER_MODIFIER_LIST@5..11
+          0: TS_CONST_MODIFIER@5..11
+            0: CONST_KW@5..11 "const" [] [Whitespace(" ")]
+        1: TS_TYPE_PARAMETER_NAME@11..12
+          0: IDENT@11..12 "A" [] []
+        2: (empty)
+        3: (empty)
+      1: COMMA@12..14 "," [] [Whitespace(" ")]
+      2: TS_TYPE_PARAMETER@14..19
+        0: TS_TYPE_PARAMETER_MODIFIER_LIST@14..14
+        1: TS_TYPE_PARAMETER_NAME@14..16
+          0: IDENT@14..16 "B" [] [Whitespace(" ")]
+        2: (empty)
+        3: TS_DEFAULT_TYPE_CLAUSE@16..19
+          0: EQ@16..18 "=" [] [Whitespace(" ")]
+          1: TS_REFERENCE_TYPE@18..19
+            0: JS_REFERENCE_IDENTIFIER@18..19
+              0: IDENT@18..19 "A" [] []
+            1: (empty)
+    2: R_ANGLE@19..20 ">" [] []
+  2: JS_PARAMETERS@20..32
+    0: L_PAREN@20..21 "(" [] []
+    1: JS_PARAMETER_LIST@21..31
+      0: JS_FORMAL_PARAMETER@21..25
+        0: JS_DECORATOR_LIST@21..21
+        1: JS_IDENTIFIER_BINDING@21..22
+          0: IDENT@21..22 "a" [] []
+        2: (empty)
+        3: TS_TYPE_ANNOTATION@22..25
+          0: COLON@22..24 ":" [] [Whitespace(" ")]
+          1: TS_REFERENCE_TYPE@24..25
+            0: JS_REFERENCE_IDENTIFIER@24..25
+              0: IDENT@24..25 "A" [] []
+            1: (empty)
+        4: (empty)
+      1: COMMA@25..27 "," [] [Whitespace(" ")]
+      2: JS_FORMAL_PARAMETER@27..31
+        0: JS_DECORATOR_LIST@27..27
+        1: JS_IDENTIFIER_BINDING@27..28
+          0: IDENT@27..28 "b" [] []
+        2: (empty)
+        3: TS_TYPE_ANNOTATION@28..31
+          0: COLON@28..30 ":" [] [Whitespace(" ")]
+          1: TS_REFERENCE_TYPE@30..31
+            0: JS_REFERENCE_IDENTIFIER@30..31
+              0: IDENT@30..31 "B" [] []
+            1: (empty)
+        4: (empty)
+    2: R_PAREN@31..32 ")" [] []
+  3: EOF@32..33 "" [Newline("\n")] []
+
+```

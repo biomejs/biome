@@ -12672,6 +12672,33 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsSvelteLegacyConstDecl
         FormatOwnedWithRule :: new (self , crate :: js :: any :: svelte_legacy_const_declarator :: FormatAnyJsSvelteLegacyConstDeclarator :: default ())
     }
 }
+impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsSvelteSnippetParameters {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_js_syntax::AnyJsSvelteSnippetParameters,
+        crate::js::any::svelte_snippet_parameters::FormatAnyJsSvelteSnippetParameters,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::js::any::svelte_snippet_parameters::FormatAnyJsSvelteSnippetParameters::default(
+            ),
+        )
+    }
+}
+impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsSvelteSnippetParameters {
+    type Format = FormatOwnedWithRule<
+        biome_js_syntax::AnyJsSvelteSnippetParameters,
+        crate::js::any::svelte_snippet_parameters::FormatAnyJsSvelteSnippetParameters,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::js::any::svelte_snippet_parameters::FormatAnyJsSvelteSnippetParameters::default(
+            ),
+        )
+    }
+}
 impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsSwitchClause {
     type Format<'a> = FormatRefWithRule<
         'a,

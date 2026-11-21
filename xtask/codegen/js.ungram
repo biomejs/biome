@@ -95,8 +95,13 @@ JsExpressionTemplateRoot =
 // Special root created for Svelte #snippet block
 JsSvelteSnippetRoot =
 		name: AnyJsBinding
-		parameters: JsParameters
+		type_parameters: TsTypeParameters?
+		parameters: AnyJsSvelteSnippetParameters
 		eof: 'EOF'
+
+AnyJsSvelteSnippetParameters =
+	JsParameters
+	| JsBogus
 
 // Special root created for the props of Vue slot directives: `v-slot="{ item }: Props"`
 // Vue compiles the value as the parameters of an arrow function, without parentheses.
