@@ -727,26 +727,6 @@ pseudo_class_function_selector_list.css:5:8 parse ━━━━━━━━━━
     6 │ :where(.div .class,^invalid) {}
     7 │ :where(.div .class {}
   
-pseudo_class_function_selector_list.css:6:20 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a selector but instead found '^'.
-  
-    4 │ :where(^invalid {}
-    5 │ :where(^invalid .class) {}
-  > 6 │ :where(.div .class,^invalid) {}
-      │                    ^
-    7 │ :where(.div .class {}
-    8 │ :where(.div {}
-  
-  i Expected a selector here.
-  
-    4 │ :where(^invalid {}
-    5 │ :where(^invalid .class) {}
-  > 6 │ :where(.div .class,^invalid) {}
-      │                    ^
-    7 │ :where(.div .class {}
-    8 │ :where(.div {}
-  
 pseudo_class_function_selector_list.css:6:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a selector but instead found '.div .class,^invalid'.
@@ -764,6 +744,26 @@ pseudo_class_function_selector_list.css:6:8 parse ━━━━━━━━━━
     5 │ :where(^invalid .class) {}
   > 6 │ :where(.div .class,^invalid) {}
       │        ^^^^^^^^^^^^^^^^^^^^
+    7 │ :where(.div .class {}
+    8 │ :where(.div {}
+  
+pseudo_class_function_selector_list.css:6:20 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a selector but instead found '^'.
+  
+    4 │ :where(^invalid {}
+    5 │ :where(^invalid .class) {}
+  > 6 │ :where(.div .class,^invalid) {}
+      │                    ^
+    7 │ :where(.div .class {}
+    8 │ :where(.div {}
+  
+  i Expected a selector here.
+  
+    4 │ :where(^invalid {}
+    5 │ :where(^invalid .class) {}
+  > 6 │ :where(.div .class,^invalid) {}
+      │                    ^
     7 │ :where(.div .class {}
     8 │ :where(.div {}
   

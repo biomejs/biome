@@ -238,6 +238,15 @@ ts_object_setter_type_parameters.ts:1:9 parse ━━━━━━━━━━━�
     2 │ ({ set a<>(value: A) {} });
     3 │ 
   
+ts_object_setter_type_parameters.ts:2:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × An accessor cannot have type parameters.
+  
+    1 │ ({ set a<A>(value: A) {} });
+  > 2 │ ({ set a<>(value: A) {} });
+      │         ^^
+    3 │ 
+  
 ts_object_setter_type_parameters.ts:2:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a type parameter but instead found '>'.
@@ -252,15 +261,6 @@ ts_object_setter_type_parameters.ts:2:10 parse ━━━━━━━━━━━
     1 │ ({ set a<A>(value: A) {} });
   > 2 │ ({ set a<>(value: A) {} });
       │          ^
-    3 │ 
-  
-ts_object_setter_type_parameters.ts:2:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × An accessor cannot have type parameters.
-  
-    1 │ ({ set a<A>(value: A) {} });
-  > 2 │ ({ set a<>(value: A) {} });
-      │         ^^
     3 │ 
   
 ```

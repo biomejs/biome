@@ -203,6 +203,17 @@ ts_export_declare.ts:2:16 parse ━━━━━━━━━━━━━━━━
   
   i Decorators are only valid on class declarations, class expressions, and class methods.
   
+ts_export_declare.ts:4:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Decorators are not valid here.
+  
+    2 │ export declare @decorator abstract class D {}
+    3 │ 
+  > 4 │ declare@
+      │        ^
+  
+  i Decorators are only valid on class declarations, class expressions, and class methods.
+  
 ts_export_declare.ts:4:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected an expression but instead found the end of the file.
@@ -218,17 +229,6 @@ ts_export_declare.ts:4:9 parse ━━━━━━━━━━━━━━━━�
     3 │ 
   > 4 │ declare@
       │         
-  
-ts_export_declare.ts:4:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Decorators are not valid here.
-  
-    2 │ export declare @decorator abstract class D {}
-    3 │ 
-  > 4 │ declare@
-      │        ^
-  
-  i Decorators are only valid on class declarations, class expressions, and class methods.
   
 ts_export_declare.ts:4:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

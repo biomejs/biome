@@ -331,17 +331,6 @@ assign_eval_or_arguments.js:5:1 parse ━━━━━━━━━━━━━━
     6 │ ({ eval } = o)
     7 │ ({ foo: { eval }}) = o
   
-assign_eval_or_arguments.js:6:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Illegal use of `eval` as an identifier in strict mode
-  
-    4 │ arguments = "foo"
-    5 │ arguments ||= "baz"
-  > 6 │ ({ eval } = o)
-      │    ^^^^
-    7 │ ({ foo: { eval }}) = o
-    8 │ 
-  
 assign_eval_or_arguments.js:5:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Invalid assignment to `"baz"
@@ -358,5 +347,16 @@ assign_eval_or_arguments.js:5:15 parse ━━━━━━━━━━━━━�
     8 │ 
   
   i This expression cannot be assigned to
+  
+assign_eval_or_arguments.js:6:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Illegal use of `eval` as an identifier in strict mode
+  
+    4 │ arguments = "foo"
+    5 │ arguments ||= "baz"
+  > 6 │ ({ eval } = o)
+      │    ^^^^
+    7 │ ({ foo: { eval }}) = o
+    8 │ 
   
 ```

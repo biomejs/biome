@@ -56,6 +56,16 @@ testObjLiteral =  <PermissionsChecker<any> | undefined>
 
 # Errors
 ```
+tuple-and-record.ts:2:74 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Private names are only allowed on the left side of a 'in' expression
+  
+    1 │ breakAfterCast = <PermissionsChecker<any> | undefined>(<any>permissions)[receiverType];
+  > 2 │ breakAfterCast = <PermissionsChecker<any> | undefined>(<any>permissions)(#[receiverType]);
+      │                                                                          ^
+    3 │ 
+    4 │ testObjLiteral =  <PermissionsChecker<any> | undefined>{ prop1: "myPropVal" };
+  
 tuple-and-record.ts:2:75 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected an identifier but instead found '['.
@@ -71,16 +81,6 @@ tuple-and-record.ts:2:75 parse ━━━━━━━━━━━━━━━━�
     1 │ breakAfterCast = <PermissionsChecker<any> | undefined>(<any>permissions)[receiverType];
   > 2 │ breakAfterCast = <PermissionsChecker<any> | undefined>(<any>permissions)(#[receiverType]);
       │                                                                           ^
-    3 │ 
-    4 │ testObjLiteral =  <PermissionsChecker<any> | undefined>{ prop1: "myPropVal" };
-  
-tuple-and-record.ts:2:74 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Private names are only allowed on the left side of a 'in' expression
-  
-    1 │ breakAfterCast = <PermissionsChecker<any> | undefined>(<any>permissions)[receiverType];
-  > 2 │ breakAfterCast = <PermissionsChecker<any> | undefined>(<any>permissions)(#[receiverType]);
-      │                                                                          ^
     3 │ 
     4 │ testObjLiteral =  <PermissionsChecker<any> | undefined>{ prop1: "myPropVal" };
   
@@ -112,6 +112,15 @@ tuple-and-record.ts:5:56 parse ━━━━━━━━━━━━━━━━�
       │                                                        ^
     6 │ 
   
+tuple-and-record.ts:5:56 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Private names are only allowed on the left side of a 'in' expression
+  
+    4 │ testObjLiteral =  <PermissionsChecker<any> | undefined>{ prop1: "myPropVal" };
+  > 5 │ testObjLiteral =  <PermissionsChecker<any> | undefined>#{ prop1: "myPropVal" };
+      │                                                        ^
+    6 │ 
+  
 tuple-and-record.ts:5:57 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected an identifier but instead found '{'.
@@ -126,15 +135,6 @@ tuple-and-record.ts:5:57 parse ━━━━━━━━━━━━━━━━�
     4 │ testObjLiteral =  <PermissionsChecker<any> | undefined>{ prop1: "myPropVal" };
   > 5 │ testObjLiteral =  <PermissionsChecker<any> | undefined>#{ prop1: "myPropVal" };
       │                                                         ^
-    6 │ 
-  
-tuple-and-record.ts:5:56 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Private names are only allowed on the left side of a 'in' expression
-  
-    4 │ testObjLiteral =  <PermissionsChecker<any> | undefined>{ prop1: "myPropVal" };
-  > 5 │ testObjLiteral =  <PermissionsChecker<any> | undefined>#{ prop1: "myPropVal" };
-      │                                                        ^
     6 │ 
   
 tuple-and-record.ts:5:57 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

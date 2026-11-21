@@ -118,16 +118,6 @@ JsModule {
 ## Diagnostics
 
 ```
-unary_delete_rewrite_skipped_trivia.js:1:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × type assertion are a TypeScript only feature. Convert your file to a TypeScript file or remove the syntax.
-  
-  > 1 │ delete<v l={{}i }
-      │       ^^^^
-    2 │ 
-  
-  i TypeScript only syntax
-  
 unary_delete_rewrite_skipped_trivia.js:1:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Invalid assignment to `delete<v l`
@@ -137,6 +127,16 @@ unary_delete_rewrite_skipped_trivia.js:1:1 parse ━━━━━━━━━━�
     2 │ 
   
   i This expression cannot be assigned to
+  
+unary_delete_rewrite_skipped_trivia.js:1:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × type assertion are a TypeScript only feature. Convert your file to a TypeScript file or remove the syntax.
+  
+  > 1 │ delete<v l={{}i }
+      │       ^^^^
+    2 │ 
+  
+  i TypeScript only syntax
   
 unary_delete_rewrite_skipped_trivia.js:1:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

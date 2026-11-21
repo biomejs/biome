@@ -189,6 +189,16 @@ JsModule {
 ## Diagnostics
 
 ```
+ts_getter_setter_type_parameters_errors.ts:2:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × An accessor cannot have type parameters.
+  
+    1 │ class Test {
+  > 2 │  get a<>(): A {}
+      │       ^^
+    3 │  set a<>(value: A) {}
+    4 │ }
+  
 ts_getter_setter_type_parameters_errors.ts:2:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a type parameter but instead found '>'.
@@ -207,15 +217,16 @@ ts_getter_setter_type_parameters_errors.ts:2:8 parse ━━━━━━━━━
     3 │  set a<>(value: A) {}
     4 │ }
   
-ts_getter_setter_type_parameters_errors.ts:2:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ts_getter_setter_type_parameters_errors.ts:3:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × An accessor cannot have type parameters.
   
     1 │ class Test {
-  > 2 │  get a<>(): A {}
+    2 │  get a<>(): A {}
+  > 3 │  set a<>(value: A) {}
       │       ^^
-    3 │  set a<>(value: A) {}
     4 │ }
+    5 │ 
   
 ts_getter_setter_type_parameters_errors.ts:3:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -234,17 +245,6 @@ ts_getter_setter_type_parameters_errors.ts:3:8 parse ━━━━━━━━━
     2 │  get a<>(): A {}
   > 3 │  set a<>(value: A) {}
       │        ^
-    4 │ }
-    5 │ 
-  
-ts_getter_setter_type_parameters_errors.ts:3:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × An accessor cannot have type parameters.
-  
-    1 │ class Test {
-    2 │  get a<>(): A {}
-  > 3 │  set a<>(value: A) {}
-      │       ^^
     4 │ }
     5 │ 
   

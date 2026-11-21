@@ -1210,6 +1210,17 @@ selectors.css:242:12 parse ━━━━━━━━━━━━━━━━━�
     243 │ .parent>>>{
     244 │   .child-one {}
   
+selectors.css:243:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × SCSS partial combinator selectors are an SCSS only feature. Convert your file to an SCSS file or remove the syntax.
+  
+    241 │ .parent >>> .child {}
+    242 │ .parent  >>>  .child {}
+  > 243 │ .parent>>>{
+        │ ^^^^^^^^^^
+    244 │   .child-one {}
+    245 │   .child-two {}
+  
 selectors.css:243:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a compound selector but instead found '>'.
@@ -1250,16 +1261,16 @@ selectors.css:243:10 parse ━━━━━━━━━━━━━━━━━�
     244 │   .child-one {}
     245 │   .child-two {}
   
-selectors.css:243:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+selectors.css:247:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × SCSS partial combinator selectors are an SCSS only feature. Convert your file to an SCSS file or remove the syntax.
   
-    241 │ .parent >>> .child {}
-    242 │ .parent  >>>  .child {}
-  > 243 │ .parent>>>{
-        │ ^^^^^^^^^^
-    244 │   .child-one {}
     245 │   .child-two {}
+    246 │ }
+  > 247 │ .parent >>> {
+        │ ^^^^^^^^^^^
+    248 │   .child-one {}
+    249 │   .child-two {}
   
 selectors.css:247:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -1301,16 +1312,16 @@ selectors.css:247:11 parse ━━━━━━━━━━━━━━━━━�
     248 │   .child-one {}
     249 │   .child-two {}
   
-selectors.css:247:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+selectors.css:251:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × SCSS partial combinator selectors are an SCSS only feature. Convert your file to an SCSS file or remove the syntax.
   
-    245 │   .child-two {}
-    246 │ }
-  > 247 │ .parent >>> {
-        │ ^^^^^^^^^^^
-    248 │   .child-one {}
     249 │   .child-two {}
+    250 │ }
+  > 251 │ .parent  >>>  {
+        │ ^^^^^^^^^^^^
+    252 │   .child-one {}
+    253 │   .child-two {}
   
 selectors.css:251:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -1352,16 +1363,18 @@ selectors.css:251:12 parse ━━━━━━━━━━━━━━━━━�
     252 │   .child-one {}
     253 │   .child-two {}
   
-selectors.css:251:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+selectors.css:255:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × SCSS partial combinator selectors are an SCSS only feature. Convert your file to an SCSS file or remove the syntax.
   
-    249 │   .child-two {}
-    250 │ }
-  > 251 │ .parent  >>>  {
-        │ ^^^^^^^^^^^^
-    252 │   .child-one {}
     253 │   .child-two {}
+    254 │ }
+  > 255 │ .parent
+        │ ^^^^^^^
+  > 256 │ >>>
+        │ ^^^
+    257 │ {
+    258 │   .child-one
   
 selectors.css:256:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -1403,18 +1416,19 @@ selectors.css:256:3 parse ━━━━━━━━━━━━━━━━━━
     257 │ {
     258 │   .child-one
   
-selectors.css:255:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+selectors.css:263:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × SCSS partial combinator selectors are an SCSS only feature. Convert your file to an SCSS file or remove the syntax.
   
-    253 │   .child-two {}
-    254 │ }
-  > 255 │ .parent
+    261 │   {}
+    262 │ }
+  > 263 │ .parent
         │ ^^^^^^^
-  > 256 │ >>>
+  > 264 │ 
+  > 265 │ >>>
         │ ^^^
-    257 │ {
-    258 │   .child-one
+    266 │ 
+    267 │ {
   
 selectors.css:265:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -1453,20 +1467,6 @@ selectors.css:265:3 parse ━━━━━━━━━━━━━━━━━━
     264 │ 
   > 265 │ >>>
         │   ^
-    266 │ 
-    267 │ {
-  
-selectors.css:263:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × SCSS partial combinator selectors are an SCSS only feature. Convert your file to an SCSS file or remove the syntax.
-  
-    261 │   {}
-    262 │ }
-  > 263 │ .parent
-        │ ^^^^^^^
-  > 264 │ 
-  > 265 │ >>>
-        │ ^^^
     266 │ 
     267 │ {
   

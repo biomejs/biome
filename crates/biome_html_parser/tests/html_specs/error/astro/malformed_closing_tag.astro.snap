@@ -90,16 +90,6 @@ HtmlRoot {
 ## Diagnostics
 
 ```
-malformed_closing_tag.astro:1:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `>` but instead found `{`
-  
-  > 1 │ <div></{<//
-      │        ^
-    2 │ 
-  
-  i Remove {
-  
 malformed_closing_tag.astro:1:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a matching closing tag but instead found '</'.
@@ -116,6 +106,16 @@ malformed_closing_tag.astro:1:6 parse ━━━━━━━━━━━━━━
   
 malformed_closing_tag.astro:1:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
+  × expected `>` but instead found `{`
+  
+  > 1 │ <div></{<//
+      │        ^
+    2 │ 
+  
+  i Remove {
+  
+malformed_closing_tag.astro:1:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
   × Found a text expression that doesn't have the closing expression:
   
   > 1 │ <div></{<//
@@ -126,6 +126,20 @@ malformed_closing_tag.astro:1:8 parse ━━━━━━━━━━━━━━
   
   > 1 │ <div></{<//
       │        ^
+    2 │ 
+  
+malformed_closing_tag.astro:1:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a matching closing tag but instead found '<'.
+  
+  > 1 │ <div></{<//
+      │         ^
+    2 │ 
+  
+  i Expected a matching closing tag here.
+  
+  > 1 │ <div></{<//
+      │         ^
     2 │ 
   
 malformed_closing_tag.astro:2:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -141,20 +155,6 @@ malformed_closing_tag.astro:2:1 parse ━━━━━━━━━━━━━━
     1 │ <div></{<//
   > 2 │ 
       │ 
-  
-malformed_closing_tag.astro:1:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a matching closing tag but instead found '<'.
-  
-  > 1 │ <div></{<//
-      │         ^
-    2 │ 
-  
-  i Expected a matching closing tag here.
-  
-  > 1 │ <div></{<//
-      │         ^
-    2 │ 
   
 malformed_closing_tag.astro:2:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

@@ -498,17 +498,6 @@ closing-tag-name-contains-opening-name.html:5:5 parse ━━━━━━━━�
     6 │ <p>x</span p></p>
     7 │ <after>y</after>
   
-closing-tag-name-contains-opening-name.html:6:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Closing tags should not have attributes.
-  
-    4 │ <i>x</div></i>
-    5 │ <b>x</tbody></b>
-  > 6 │ <p>x</span p></p>
-      │            ^
-    7 │ <after>y</after>
-    8 │ 
-  
 closing-tag-name-contains-opening-name.html:6:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a matching closing tag but instead found '</span p>'.
@@ -526,6 +515,17 @@ closing-tag-name-contains-opening-name.html:6:5 parse ━━━━━━━━�
     5 │ <b>x</tbody></b>
   > 6 │ <p>x</span p></p>
       │     ^^^^^^^^^
+    7 │ <after>y</after>
+    8 │ 
+  
+closing-tag-name-contains-opening-name.html:6:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Closing tags should not have attributes.
+  
+    4 │ <i>x</div></i>
+    5 │ <b>x</tbody></b>
+  > 6 │ <p>x</span p></p>
+      │            ^
     7 │ <after>y</after>
     8 │ 
   

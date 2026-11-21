@@ -687,19 +687,6 @@ pseudo_class_function_compound_selector_list.css:4:16 parse ━━━━━━�
   
   i Remove {
   
-pseudo_class_function_compound_selector_list.css:5:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found ` `
-  
-    3 │ :past(^invalid) {}
-    4 │ :past(^invalid {}
-  > 5 │ :past(.div .class) {}
-      │           ^
-    6 │ :past(.div .class,) {}
-    7 │ :past(.div .class {}
-  
-  i Remove  
-  
 pseudo_class_function_compound_selector_list.css:5:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a compound selector but instead found '.div .class'.
@@ -720,16 +707,16 @@ pseudo_class_function_compound_selector_list.css:5:7 parse ━━━━━━━
     6 │ :past(.div .class,) {}
     7 │ :past(.div .class {}
   
-pseudo_class_function_compound_selector_list.css:6:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+pseudo_class_function_compound_selector_list.css:5:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `,` but instead found ` `
   
+    3 │ :past(^invalid) {}
     4 │ :past(^invalid {}
-    5 │ :past(.div .class) {}
-  > 6 │ :past(.div .class,) {}
+  > 5 │ :past(.div .class) {}
       │           ^
+    6 │ :past(.div .class,) {}
     7 │ :past(.div .class {}
-    8 │ :past(.div {}
   
   i Remove  
   
@@ -753,16 +740,16 @@ pseudo_class_function_compound_selector_list.css:6:7 parse ━━━━━━━
     7 │ :past(.div .class {}
     8 │ :past(.div {}
   
-pseudo_class_function_compound_selector_list.css:7:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+pseudo_class_function_compound_selector_list.css:6:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `,` but instead found ` `
   
+    4 │ :past(^invalid {}
     5 │ :past(.div .class) {}
-    6 │ :past(.div .class,) {}
-  > 7 │ :past(.div .class {}
+  > 6 │ :past(.div .class,) {}
       │           ^
+    7 │ :past(.div .class {}
     8 │ :past(.div {}
-    9 │ :past(.div
   
   i Remove  
   
@@ -785,6 +772,19 @@ pseudo_class_function_compound_selector_list.css:7:7 parse ━━━━━━━
       │       ^^^^^^^^^^^
     8 │ :past(.div {}
     9 │ :past(.div
+  
+pseudo_class_function_compound_selector_list.css:7:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found ` `
+  
+    5 │ :past(.div .class) {}
+    6 │ :past(.div .class,) {}
+  > 7 │ :past(.div .class {}
+      │           ^
+    8 │ :past(.div {}
+    9 │ :past(.div
+  
+  i Remove  
   
 pseudo_class_function_compound_selector_list.css:7:19 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

@@ -221,6 +221,16 @@ ts_broken_class_member_modifiers.ts:7:7 parse ━━━━━━━━━━━�
   
   i Remove @
   
+ts_broken_class_member_modifiers.ts:8:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Invalid decorator `class C@`
+  
+    6 │ 	}
+    7 │ class @
+  > 8 │ class C@
+      │ ^^^^^^^^
+    9 │ 
+  
 ts_broken_class_member_modifiers.ts:8:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `{` but instead found `@`
@@ -248,16 +258,6 @@ ts_broken_class_member_modifiers.ts:9:1 parse ━━━━━━━━━━━�
     8 │ class C@
   > 9 │ 
       │ 
-  
-ts_broken_class_member_modifiers.ts:8:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Invalid decorator `class C@`
-  
-    6 │ 	}
-    7 │ class @
-  > 8 │ class C@
-      │ ^^^^^^^^
-    9 │ 
   
 ts_broken_class_member_modifiers.ts:9:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

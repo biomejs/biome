@@ -102,6 +102,16 @@ JsModule {
 ## Diagnostics
 
 ```
+private_name_with_space.js:2:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected a semicolon to end the class property, but found none
+  
+    1 │ class A {
+  > 2 │ 	# test;
+      │ 	^
+    3 │ }
+    4 │ 
+  
 private_name_with_space.js:2:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Unexpected space or comment between `#` and identifier
@@ -113,15 +123,5 @@ private_name_with_space.js:2:3 parse ━━━━━━━━━━━━━━�
     4 │ 
   
   i remove the space here
-  
-private_name_with_space.js:2:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected a semicolon to end the class property, but found none
-  
-    1 │ class A {
-  > 2 │ 	# test;
-      │ 	^
-    3 │ }
-    4 │ 
   
 ```

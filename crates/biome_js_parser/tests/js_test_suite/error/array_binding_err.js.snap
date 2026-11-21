@@ -400,18 +400,6 @@ array_binding_err.js:3:6 parse ━━━━━━━━━━━━━━━━�
     4 │ let [[c ] = [];
     5 │ 
   
-array_binding_err.js:4:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `;`
-  
-    2 │ let [="default"] = [1, 2];
-    3 │ let ["default"] = [1, 2];
-  > 4 │ let [[c ] = [];
-      │               ^
-    5 │ 
-  
-  i Remove ;
-  
 array_binding_err.js:4:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Object and Array patterns require initializers.
@@ -423,5 +411,17 @@ array_binding_err.js:4:5 parse ━━━━━━━━━━━━━━━━�
     5 │ 
   
   i This pattern is declared, but it is not given an initialized value.
+  
+array_binding_err.js:4:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `;`
+  
+    2 │ let [="default"] = [1, 2];
+    3 │ let ["default"] = [1, 2];
+  > 4 │ let [[c ] = [];
+      │               ^
+    5 │ 
+  
+  i Remove ;
   
 ```

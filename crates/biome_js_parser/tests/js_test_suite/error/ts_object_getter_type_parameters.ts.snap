@@ -210,6 +210,15 @@ ts_object_getter_type_parameters.ts:1:9 parse ━━━━━━━━━━━�
     2 │ ({ get a<>(): A {} });
     3 │ 
   
+ts_object_getter_type_parameters.ts:2:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × An accessor cannot have type parameters.
+  
+    1 │ ({ get a<A>(): A {} });
+  > 2 │ ({ get a<>(): A {} });
+      │         ^^
+    3 │ 
+  
 ts_object_getter_type_parameters.ts:2:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a type parameter but instead found '>'.
@@ -224,15 +233,6 @@ ts_object_getter_type_parameters.ts:2:10 parse ━━━━━━━━━━━
     1 │ ({ get a<A>(): A {} });
   > 2 │ ({ get a<>(): A {} });
       │          ^
-    3 │ 
-  
-ts_object_getter_type_parameters.ts:2:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × An accessor cannot have type parameters.
-  
-    1 │ ({ get a<A>(): A {} });
-  > 2 │ ({ get a<>(): A {} });
-      │         ^^
     3 │ 
   
 ```

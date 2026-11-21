@@ -368,6 +368,16 @@ import_defer_err.ts:2:33 parse ━━━━━━━━━━━━━━━━�
     3 │ import type defer { doSomething } from "some-module3"
     4 │ import defer type * as foo from "bar";
   
+import_defer_err.ts:3:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × A type-only import can specify a default import or named bindings, but not both.
+  
+    1 │ import defer { doSomething } from "some-module1";
+    2 │ import defer defaultExport from "some-module2";
+  > 3 │ import type defer { doSomething } from "some-module3"
+      │        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ import defer type * as foo from "bar";
+  
 import_defer_err.ts:3:19 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `,` but instead found `{`
@@ -379,16 +389,6 @@ import_defer_err.ts:3:19 parse ━━━━━━━━━━━━━━━━�
     4 │ import defer type * as foo from "bar";
   
   i Remove {
-  
-import_defer_err.ts:3:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × A type-only import can specify a default import or named bindings, but not both.
-  
-    1 │ import defer { doSomething } from "some-module1";
-    2 │ import defer defaultExport from "some-module2";
-  > 3 │ import type defer { doSomething } from "some-module3"
-      │        ^^^^^^^^^^^^^^^^^^^^^^^^^^
-    4 │ import defer type * as foo from "bar";
   
 import_defer_err.ts:4:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
