@@ -19,3 +19,16 @@ function f() {var x=1; return{x}} class Foo {}
 ```block
 function _f() {var x=1; return{x}} class Foo {}
 ```
+
+```block
+mock.js:1:42 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This class Foo is unused.
+  
+  > 1 │ function _f() {var x=1; return{x}} class Foo {}
+      │                                          ^^^
+  
+  i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
+  
+
+```
