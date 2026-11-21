@@ -11,8 +11,8 @@ use biome_css_syntax::keywords::{
     VENDOR_PREFIXES, VENDOR_SPECIFIC_PSEUDO_ELEMENTS,
 };
 use biome_css_syntax::{
-    CssDeclarationWithSemicolon, CssSyntaxKind, CssSyntaxNode, CssSyntaxToken, ScssFunctionAtRule,
-    ScssNestingDeclaration,
+    CssDeclarationOrRuleList, CssDeclarationWithSemicolon, CssFunction, CssSyntaxKind,
+    CssSyntaxNode, CssSyntaxToken, ScssFunctionAtRule, ScssNestingDeclaration,
 };
 use biome_rowan::{AstNode, declare_node_union};
 use biome_string_case::{StrLikeExtension, StrOnlyExtension};
@@ -195,9 +195,14 @@ impl AnyPropertyStatement {
     /// group, or if a nested rule or any other at-rule, such as `@media`, is
     /// between them.
     pub fn group(&self) -> Option<Self> {
-        self.syntax()
+        Self::from_contained_list(&CssDeclarationOrRuleList::cast(self.syntax().parent()?)?)
+    }
+
+    /// Returns the SCSS group of nested properties whose block contains
+    /// `list`, looking through the same blocks as [Self::group].
+    pub fn from_contained_list(list: &CssDeclarationOrRuleList) -> Option<Self> {
+        list.syntax()
             .ancestors()
-            .skip(1)
             .find(|ancestor| {
                 !matches!(
                     ancestor.kind(),
@@ -215,6 +220,26 @@ impl AnyPropertyStatement {
             .and_then(ScssNestingDeclaration::cast)
             .map(Self::from)
     }
+}
+
+/// Whether the value of `declaration` calls Tailwind's `--value()` or `--modifier()`.
+///
+/// In a `@utility`, Tailwind leaves out a declaration whose `--value()` or `--modifier()` doesn't
+/// resolve, so repeating a property with these calls is how a utility lists fallbacks.
+pub fn is_tailwind_utility_fallback(declaration: &CssDeclarationWithSemicolon) -> bool {
+    declaration
+        .syntax()
+        .descendants()
+        .filter_map(CssFunction::cast)
+        .filter_map(|function| {
+            function
+                .name()
+                .ok()?
+                .as_css_identifier()?
+                .value_token()
+                .ok()
+        })
+        .any(|name| matches!(name.text_trimmed(), "--value" | "--modifier"))
 }
 
 /// Returns the name Sass emits for the property `name` nested in `group`.
