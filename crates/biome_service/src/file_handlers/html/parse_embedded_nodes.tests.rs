@@ -81,6 +81,25 @@ fn snippet_svelte_ts_parsing() {
 }
 
 #[test]
+fn snippet_svelte_ts_type_parameters_parsing() {
+    const FILE_PATH: &str = "/project/file.svelte";
+    const FILE_CONTENT: &str = r#"<script lang="ts">
+	let items = $state(["a", "b"]);
+</script>
+
+{#snippet row<T extends string>(item: T)}
+	<li>{item}</li>
+{/snippet}
+
+{#each items as item (item)}
+	{@render row(item)}
+{/each}
+"#;
+
+    assert_no_diagnostics(FILE_PATH, FILE_CONTENT);
+}
+
+#[test]
 fn snippet_svelte_incorrect() {
     const FILE_PATH: &str = "/project/file.svelte";
     const FILE_CONTENT: &str = r#"<script lang="ts">

@@ -6610,6 +6610,7 @@ impl JsSvelteSnippetRoot {
     pub fn as_fields(&self) -> JsSvelteSnippetRootFields {
         JsSvelteSnippetRootFields {
             name: self.name(),
+            type_parameters: self.type_parameters(),
             parameters: self.parameters(),
             eof_token: self.eof_token(),
         }
@@ -6617,11 +6618,14 @@ impl JsSvelteSnippetRoot {
     pub fn name(&self) -> SyntaxResult<AnyJsBinding> {
         support::required_node(&self.syntax, 0usize)
     }
-    pub fn parameters(&self) -> SyntaxResult<JsParameters> {
-        support::required_node(&self.syntax, 1usize)
+    pub fn type_parameters(&self) -> Option<TsTypeParameters> {
+        support::node(&self.syntax, 1usize)
+    }
+    pub fn parameters(&self) -> SyntaxResult<AnyJsSvelteSnippetParameters> {
+        support::required_node(&self.syntax, 2usize)
     }
     pub fn eof_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 2usize)
+        support::required_token(&self.syntax, 3usize)
     }
 }
 impl Serialize for JsSvelteSnippetRoot {
@@ -6635,7 +6639,8 @@ impl Serialize for JsSvelteSnippetRoot {
 #[derive(Serialize)]
 pub struct JsSvelteSnippetRootFields {
     pub name: SyntaxResult<AnyJsBinding>,
-    pub parameters: SyntaxResult<JsParameters>,
+    pub type_parameters: Option<TsTypeParameters>,
+    pub parameters: SyntaxResult<AnyJsSvelteSnippetParameters>,
     pub eof_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -15840,6 +15845,25 @@ impl AnyJsSvelteLegacyConstDeclarator {
     }
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub enum AnyJsSvelteSnippetParameters {
+    JsBogus(JsBogus),
+    JsParameters(JsParameters),
+}
+impl AnyJsSvelteSnippetParameters {
+    pub fn as_js_bogus(&self) -> Option<&JsBogus> {
+        match &self {
+            Self::JsBogus(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_js_parameters(&self) -> Option<&JsParameters> {
+        match &self {
+            Self::JsParameters(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyJsSwitchClause {
     JsCaseClause(JsCaseClause),
     JsDefaultClause(JsDefaultClause),
@@ -24624,6 +24648,10 @@ impl std::fmt::Debug for JsSvelteSnippetRoot {
             DEPTH.set(current_depth + 1);
             f.debug_struct("JsSvelteSnippetRoot")
                 .field("name", &support::DebugSyntaxResult(self.name()))
+                .field(
+                    "type_parameters",
+                    &support::DebugOptionalElement(self.type_parameters()),
+                )
                 .field("parameters", &support::DebugSyntaxResult(self.parameters()))
                 .field("eof_token", &support::DebugSyntaxResult(self.eof_token()))
                 .finish()
@@ -38427,6 +38455,65 @@ impl From<AnyJsSvelteLegacyConstDeclarator> for SyntaxElement {
         node.into()
     }
 }
+impl From<JsBogus> for AnyJsSvelteSnippetParameters {
+    fn from(node: JsBogus) -> Self {
+        Self::JsBogus(node)
+    }
+}
+impl From<JsParameters> for AnyJsSvelteSnippetParameters {
+    fn from(node: JsParameters) -> Self {
+        Self::JsParameters(node)
+    }
+}
+impl AstNode for AnyJsSvelteSnippetParameters {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> = JsBogus::KIND_SET.union(JsParameters::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(kind, JS_BOGUS | JS_PARAMETERS)
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            JS_BOGUS => Self::JsBogus(JsBogus { syntax }),
+            JS_PARAMETERS => Self::JsParameters(JsParameters { syntax }),
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            Self::JsBogus(it) => it.syntax(),
+            Self::JsParameters(it) => it.syntax(),
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            Self::JsBogus(it) => it.into_syntax(),
+            Self::JsParameters(it) => it.into_syntax(),
+        }
+    }
+}
+impl std::fmt::Debug for AnyJsSvelteSnippetParameters {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::JsBogus(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsParameters(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyJsSvelteSnippetParameters> for SyntaxNode {
+    fn from(n: AnyJsSvelteSnippetParameters) -> Self {
+        match n {
+            AnyJsSvelteSnippetParameters::JsBogus(it) => it.into_syntax(),
+            AnyJsSvelteSnippetParameters::JsParameters(it) => it.into_syntax(),
+        }
+    }
+}
+impl From<AnyJsSvelteSnippetParameters> for SyntaxElement {
+    fn from(n: AnyJsSvelteSnippetParameters) -> Self {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
 impl From<JsCaseClause> for AnyJsSwitchClause {
     fn from(node: JsCaseClause) -> Self {
         Self::JsCaseClause(node)
@@ -41481,6 +41568,11 @@ impl std::fmt::Display for AnyJsSvelteDeclaration {
     }
 }
 impl std::fmt::Display for AnyJsSvelteLegacyConstDeclarator {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AnyJsSvelteSnippetParameters {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
