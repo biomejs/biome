@@ -9,7 +9,7 @@ use self::source_cursor::SourceCursor;
 use crate::CssParserOptions;
 use biome_css_syntax::{
     CssNumberScanOptions, CssSyntaxKind, CssSyntaxKind::*, T, TextLen, TextRange, TextSize,
-    scan_css_number,
+    html_quote_entity_at, scan_css_number,
 };
 use biome_languages::CssFileSource;
 use biome_languages::css::CssEmbeddingKind;
@@ -667,10 +667,45 @@ impl<'src> CssLexer<'src> {
             EQL => self.consume_eql(),
             EXL => self.consume_exl(),
             PRC => self.consume_byte(T![%]),
-            Dispatch::AMP => self.consume_byte(T![&]),
+            Dispatch::AMP => self
+                .consume_html_entity_quoted_string()
+                .unwrap_or_else(|| self.consume_byte(T![&])),
 
             _ => self.consume_fallback(fallback),
         }
+    }
+
+    fn consume_html_entity_quoted_string(&mut self) -> Option<CssSyntaxKind> {
+        if !matches!(
+            self.source_type.as_embedding_kind(),
+            CssEmbeddingKind::HtmlStyleAttribute
+        ) {
+            return None;
+        }
+
+        let source = self.source();
+        let start = self.position();
+        let (opening_len, quote) = html_quote_entity_at(&source[start..])?;
+
+        let mut position = start + opening_len;
+        while let Some(byte) = source.as_bytes().get(position) {
+            match byte {
+                b'\n' | b'\r' => return None,
+                b'&' => {
+                    if let Some((closing_len, closing_quote)) =
+                        html_quote_entity_at(&source[position..])
+                        && closing_quote == quote
+                    {
+                        self.set_position(position + closing_len);
+                        return Some(CSS_STRING_LITERAL);
+                    }
+                }
+                _ => {}
+            }
+            position += 1;
+        }
+
+        None
     }
 
     fn consume_fallback(&mut self, fallback: TokenFallback) -> CssSyntaxKind {
