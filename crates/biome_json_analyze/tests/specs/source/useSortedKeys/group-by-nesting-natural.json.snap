@@ -77,7 +77,10 @@ group-by-nesting-natural.json:1:1 assist/source/useSortedKeys  FIXABLE  ━━�
      9    │ - ··"metadata":·{
     10    │ - ····"created":·"2024-01-01",
     11    │ - ····"updated":·"2024-01-02"
-    12    │ - ··},
+        6 │ + ··"details":·{
+        7 │ + ····"description":·"This·is·a·nested·object",
+        8 │ + ····"status":·"active"
+    12  9 │     },
     13    │ - ··"count":·42,
     14    │ - ··"multiLineArray":·[
     15    │ - ····"item1",
@@ -85,10 +88,6 @@ group-by-nesting-natural.json:1:1 assist/source/useSortedKeys  FIXABLE  ━━�
     17    │ - ····"item3"
     18    │ - ··],
     19    │ - ··"edgeCase1":·{
-        6 │ + ··"details":·{
-        7 │ + ····"description":·"This·is·a·nested·object",
-        8 │ + ····"status":·"active"
-        9 │ + ··},
        10 │ + ··"edgeCase1":·{
     20 11 │       "obj": {
     21 12 │         "b": "" },

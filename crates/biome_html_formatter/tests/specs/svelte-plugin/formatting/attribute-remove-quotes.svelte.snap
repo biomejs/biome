@@ -47,9 +47,9 @@ info: formatting/attribute-remove-quotes.svelte
 -<input bind:value={foo} />
 +<input bind:value="{foo}" />
  <input bind:value={foo} />
--<input class:value={foo} />
 +<input class:value="{foo}" />
  <input class:value={foo} />
+-<input class:value={foo} />
 -<input style:value={foo} />
 +<input style:value="{foo}" />
  <input style:value={foo} />

@@ -1516,7 +1516,7 @@ invalid.js:66:1 lint/nursery/noUselessNestedTernary  FIXABLE  ━━━━━━
   i Unsafe fix: Remove the first condition.
   
     66 │ enabled·&&·x·===·1·?·c·:·(x·===·2·?·a·:·(x·===·3·?·b·:·c));
-       │ -----------     ------ ---------                        -  
+       │ -----------      ---------------                        -  
 
 ```
 

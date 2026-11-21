@@ -967,7 +967,7 @@ invalid.ts:97:1 lint/nursery/noUselessTypeAssertion  FIXABLE  ━━━━━━
   i Unsafe fix: Remove the type assertions.
   
     97 │ (getText()·as·unknown)·as·string;
-       │ -        ------------ ---------- 
+       │ -         ---------------------- 
 
 ```
 
