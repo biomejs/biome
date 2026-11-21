@@ -595,7 +595,7 @@ fn resolve<'a>(target_path: Cow<'a, str>, from_file: Cow<'a, str>) -> GritResult
         )));
     };
     let our_path = Path::new(target_path.as_ref());
-    let absolutized = our_path.absolutize_from(source_path)?;
+    let absolutized = our_path.absolutize_from(source_path);
     Ok(absolutized
         .to_str()
         .ok_or_else(|| {

@@ -34,19 +34,19 @@ info: formatting/attribute-shorthand.svelte
  <input {value} />
  <input {value} />
 -<input {value} />
+-<input bind:value />
 +<input value="{value}" />
  <input bind:value />
  <input bind:value />
--<input bind:value />
 +<input bind:value="{value}" />
  <input class:value />
 -<input class:value />
 -<input class:value />
+-<input style:value />
+-<input style:value />
 +<input class:value={value} />
 +<input class:value="{value}" />
  <input style:value />
--<input style:value />
--<input style:value />
 +<input style:value={value} />
 +<input style:value="{value}" />
 ```

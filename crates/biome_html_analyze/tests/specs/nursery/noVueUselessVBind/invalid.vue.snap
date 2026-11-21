@@ -329,7 +329,7 @@ invalid.vue:14:8 lint/nursery/noVueUselessVBind  FIXABLE  ━━━━━━━�
   i Unsafe fix: Replace the directive with a plain attribute.
   
     14 │ ··<div·:id="'\\r'"·/>
-       │        -    - - -    
+       │        -    --  -    
 
 ```
 

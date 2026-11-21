@@ -335,7 +335,7 @@ fn file_owner_from_matches(
         std::env::current_dir()?
     };
 
-    let absolute_path = name.absolutize_from(base_dir)?.to_path_buf();
+    let absolute_path = name.absolutize_from(base_dir).to_path_buf();
 
     Ok(Some(FileOwner {
         name,
@@ -367,7 +367,7 @@ pub(crate) fn new_file_owner(
         std::env::current_dir()?
     };
 
-    let absolute_path = name.absolutize_from(base_dir)?.to_path_buf();
+    let absolute_path = name.absolutize_from(base_dir).to_path_buf();
 
     Ok(Some(FileOwner {
         name,
