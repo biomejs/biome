@@ -26,6 +26,26 @@ use std::str::FromStr;
 use std::sync::{Arc, Barrier};
 
 #[test]
+fn biome_path_preserves_string_wire_format() {
+    let file = BiomePath::new("/project/file.js");
+    assert_eq!(
+        serde_json::to_value(&file).unwrap(),
+        serde_json::json!("/project/file.js")
+    );
+    assert_eq!(
+        serde_json::from_value::<BiomePath>(serde_json::json!("/project/./file.js")).unwrap(),
+        file
+    );
+
+    let virtual_path = BiomePath::new_virtual("untitled:Untitled-1");
+    let serialized = serde_json::to_value(&virtual_path).unwrap();
+    assert_eq!(serialized, serde_json::json!(virtual_path.to_string()));
+    let deserialized = serde_json::from_value::<BiomePath>(serialized).unwrap();
+    assert_eq!(deserialized, virtual_path);
+    assert!(deserialized.is_virtual());
+}
+
+#[test]
 fn local_server_retries_reads_interrupted_by_module_updates() {
     const BASE_PATH: &str = "/project/base.ts";
     const INDEX_PATH: &str = "/project/index.ts";
@@ -1403,7 +1423,8 @@ fn debug_module_graph_mixed_project() {
         .unwrap();
 
     workspace
-        .open_file(OpenFileParams {
+        .open_file(
+            OpenFileParams {
             project_key,
             path: BiomePath::new("/project/page.html"),
             content: FileContent::from_client(

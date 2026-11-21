@@ -45,7 +45,7 @@ pub(super) fn format_embedded(
     embedded_nodes: Vec<ParsedSnippetOrigin>,
     workspace_db: WorkspaceDb,
 ) -> Result<Printed, WorkspaceError> {
-    if !format_embeds_enabled(settings.as_ref(), biome_path) {
+    if !format_embeds_enabled(settings.as_ref(), biome_path.as_path()) {
         return format(
             biome_path,
             document_file_source,
@@ -277,7 +277,7 @@ where
     F: FormatLanguage,
     F::SyntaxLanguage: ServiceLanguage + 'static,
 {
-    if !settings.formatter_enabled_for_file_path::<F::SyntaxLanguage>(path) {
+    if !settings.formatter_enabled_for_file_path::<F::SyntaxLanguage>(path.as_path()) {
         return None;
     }
     let node = parse.embedded_syntax::<F::SyntaxLanguage>();
@@ -301,7 +301,7 @@ fn format_markdown_snippet(
     parse: AnyParse,
     language: MdFormatLanguage,
 ) -> Option<Document> {
-    if !settings.formatter_enabled_for_file_path::<MarkdownLanguage>(path) {
+    if !settings.formatter_enabled_for_file_path::<MarkdownLanguage>(path.as_path()) {
         return None;
     }
     let node = parse.embedded_syntax::<MarkdownLanguage>();

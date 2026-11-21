@@ -1664,8 +1664,10 @@ pub trait Workspace: Send + Sync + RefUnwindSafe {
 
     /// Closes the project with the given key.
     ///
-    /// Any settings related to the project are unloaded, and any open files
-    /// that belong to the project are also closed.
+    /// Releases the calling client's use of the project. The project is unloaded only after every
+    /// client releases it. Filesystem-backed documents that belong only to the unloaded project are
+    /// closed. Virtual documents remain open until their clients close them, and later operations
+    /// must use another open project as their processing context.
     ///
     /// Projects should normally **not** be closed, so that follow-up
     /// invocations to Biome can reuse the loaded settings and open files. Only
@@ -1689,8 +1691,10 @@ pub trait Workspace: Send + Sync + RefUnwindSafe {
     /// share, such as the module graph, use the content of the client that
     /// opened it first.
     ///
-    /// If the file path is under a folder that belongs to an opened project
+    /// If a filesystem path is under a folder that belongs to an opened project
     /// other than the current one, the current project is changed accordingly.
+    /// Virtual documents use the project's root settings and do not participate
+    /// in filesystem ignore or override matching.
     fn open_file(&self, params: OpenFileParams) -> Result<OpenFileResult, WorkspaceError>;
 
     /// Checks if `file_path` exists in the workspace for this client: the

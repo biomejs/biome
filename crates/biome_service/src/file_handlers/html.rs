@@ -560,7 +560,7 @@ impl ServiceLanguage for HtmlLanguage {
             options = options.with_vue().with_double_text_expression();
         }
 
-        overrides.apply_override_html_parser_options(path, &mut options);
+        overrides.apply_override_html_parser_options(path.as_path(), &mut options);
 
         options
     }
@@ -1136,7 +1136,7 @@ pub(super) fn lint_with_inspector(
                 &params.parsed_source,
                 params.language,
                 params.settings.as_ref(),
-                params.path,
+                params.path.as_path(),
                 &params.workspace_db,
             )
         {

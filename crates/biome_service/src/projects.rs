@@ -2,7 +2,7 @@ use crate::WorkspaceError;
 use crate::file_handlers::Capabilities;
 use crate::settings::{Settings, SettingsIdentity, SettingsSelectionKey, SettingsWithEditor};
 use crate::workspace::{FeatureName, FeaturesSupported, FileFeaturesResult, IgnoreKind};
-use biome_fs::{ConfigName, FileSystem};
+use biome_fs::{BiomePath, ConfigName, FileSystem};
 use biome_languages::DocumentFileSource;
 use camino::{Utf8Path, Utf8PathBuf};
 use serde::{Deserialize, Serialize};
@@ -22,6 +22,7 @@ pub struct GetFileFeaturesParams<'a> {
     pub capabilities: &'a Capabilities,
     pub handle: &'a SettingsWithEditor<'a>,
     pub skip_ignore_check: bool,
+    pub check_vcs_ignore: bool,
     pub not_requested_features: FeatureName,
 }
 
@@ -62,6 +63,9 @@ pub trait ProjectDb: biome_db::Db {
     fn get_project(&self, project_key: &ProjectKey) -> Option<ProjectInput>;
 
     fn find_project_for_path(&self, path: &Utf8Path) -> Option<ProjectKey>;
+
+    /// Creates a logical Biome path using the database filesystem anchor.
+    fn biome_path(&self, path: &Utf8Path) -> BiomePath;
 
     fn for_each_project(&self, f: &mut dyn FnMut(ProjectInput));
 
@@ -192,6 +196,18 @@ pub trait ProjectDb: biome_db::Db {
         }
     }
 
+    fn is_ignored_by_files_config(
+        &self,
+        project_key: ProjectKey,
+        path: &Utf8Path,
+        is_dir: bool,
+        ignore_kind: IgnoreKind,
+    ) -> bool {
+        self.get_project(&project_key).is_some_and(|project_data| {
+            self.is_ignored_by_files_config_inner(&project_data, path, is_dir, ignore_kind)
+        })
+    }
+
     fn is_ignored(
         &self,
         project_key: ProjectKey,
@@ -232,6 +248,7 @@ pub trait ProjectDb: biome_db::Db {
             capabilities,
             handle,
             skip_ignore_check,
+            check_vcs_ignore,
             not_requested_features: denied_features,
         }: GetFileFeaturesParams<'_>,
     ) -> Result<FileFeaturesResult, WorkspaceError> {
@@ -253,6 +270,14 @@ pub trait ProjectDb: biome_db::Db {
             .is_some_and(|dir_path| dir_path == project_data.path(self))
         {
             // Never ignore Biome's top-level config file
+        } else if check_vcs_ignore
+            && project_data
+                .root_settings(self)
+                .as_ref()
+                .vcs_settings
+                .is_ignored(&self.biome_path(path), false)
+        {
+            file_features.set_ignored_for_all_features();
         } else if !skip_ignore_check {
             let is_ignored = {
                 let is_ignored_by_top_level_config = self.is_ignored_by_top_level_config_inner(
@@ -311,8 +336,28 @@ pub trait ProjectDb: biome_db::Db {
         is_dir: bool,
         ignore_kind: IgnoreKind,
     ) -> bool {
-        // First check if the path is ignored by the `files.includes` setting
-        // relevant to the given `path`.
+        let is_ignored_by_files =
+            self.is_ignored_by_files_config_inner(project_data, path, is_dir, ignore_kind);
+
+        // VCS settings are used from the root settings, regardless of what
+        // package we are analyzing, so we ignore the `path` for those.
+        let path = self.biome_path(path);
+        let is_ignored_by_vcs = project_data
+            .root_settings(self)
+            .as_ref()
+            .vcs_settings
+            .is_ignored(&path, is_dir);
+
+        is_ignored_by_files || is_ignored_by_vcs
+    }
+
+    fn is_ignored_by_files_config_inner(
+        &self,
+        project_data: &ProjectInput,
+        path: &Utf8Path,
+        is_dir: bool,
+        ignore_kind: IgnoreKind,
+    ) -> bool {
         let nested_settings = project_data.nested_settings(self);
         let root_settings = project_data.root_settings(self);
         let includes = nested_settings
@@ -327,7 +372,6 @@ pub trait ProjectDb: biome_db::Db {
             includes.is_file_included(path)
         };
 
-        // If necessary, check all the ancestors too.
         if ignore_kind == IgnoreKind::Ancestors {
             for ancestor in path.ancestors().skip(1) {
                 if !is_included
@@ -341,19 +385,7 @@ pub trait ProjectDb: biome_db::Db {
             }
         }
 
-        let root_path = match ignore_kind {
-            IgnoreKind::Ancestors => Some(project_data.path(self).as_path()),
-            IgnoreKind::Path => None,
-        };
-        // VCS settings are used from the root settings, regardless of what
-        // package we are analyzing, so we ignore the `path` for those.
-        let is_ignored_by_vcs = project_data
-            .root_settings(self)
-            .as_ref()
-            .vcs_settings
-            .is_ignored(path, is_dir, root_path);
-
-        !is_included || is_ignored_by_vcs
+        !is_included
     }
 
     /// Checks whether the given `path` belongs to project with the given path

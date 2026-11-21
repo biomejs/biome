@@ -11,13 +11,13 @@
 //!
 //! The workspace starts the scan with
 //! [`DbState::scan_session`](crate::db::DbState::scan_session), which runs it
-//! in three phases:
+//! in four phases:
 //!
-//! 1. The setup phase reads the configuration files, manifests and ignore
-//!    files.
-//! 2. The files phase indexes again the files that the setup phase deferred,
+//! 1. The ignore-file phase discovers ignore files and publishes their matchers.
+//! 2. The setup phase reads configuration files and manifests using those matchers.
+//! 3. The files phase indexes again the files that the setup phase deferred,
 //!    then the other files and their dependencies.
-//! 3. The deferred files phase indexes again the files that the files phase
+//! 4. The deferred files phase indexes again the files that the files phase
 //!    deferred.
 //!
 //! When the LSP owns the database, the scanner works on a view that can't run
@@ -58,12 +58,16 @@ use crate::projects::ProjectKey;
 use crate::workspace::{ScanProjectResult, ServiceNotification, WorkspaceError};
 use biome_diagnostics::serde::Diagnostic;
 use biome_diagnostics::{Diagnostic as _, DiagnosticExt, Error, Severity};
-use biome_fs::{BiomePath, PathInterner, PathKind, TraversalContext, TraversalScope};
+use biome_fs::{
+    BiomePath, FileSystem, PathInterner, PathKind, PhysicalFileOwners, TraversalContext,
+    TraversalScope, normalize_path,
+};
 use camino::{Utf8Path, Utf8PathBuf};
 use crossbeam::channel::{Receiver, Sender, unbounded};
 use papaya::{HashMap, HashSet, HashSetRef, LocalGuard};
+use parking_lot::Mutex as ParkingLotMutex;
 use rayon::Scope;
-use rustc_hash::FxHashSet;
+use rustc_hash::{FxHashMap, FxHashSet};
 use std::hash::RandomState;
 use std::mem;
 use std::panic::catch_unwind;
@@ -95,6 +99,12 @@ pub(crate) struct ScanOptions {
     pub watch: bool,
 }
 
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+enum ScanFolderKind {
+    Project,
+    IgnoreFiles,
+}
+
 pub(crate) struct ScanResult {
     /// Diagnostics reported while scanning the project.
     ///
@@ -111,7 +121,7 @@ pub(crate) struct ScanResult {
     pub configuration_files: Vec<BiomePath>,
 }
 
-/// The kind of request for why a path is being indexed.
+/// The reason a traversal considers a path for indexing.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum IndexRequestKind {
     /// There is an explicit request for the path to be indexed, due to being
@@ -121,12 +131,16 @@ pub enum IndexRequestKind {
     /// The file is being indexed because it is a dependency of one or more
     /// files that were explicitly indexed.
     Dependency(IndexTrigger),
+
+    /// Ignore files are being discovered before a scan uses their matchers.
+    IgnoreFileDiscovery,
 }
 
 impl IndexRequestKind {
     pub fn trigger(self) -> IndexTrigger {
         match self {
             Self::Explicit(trigger) | Self::Dependency(trigger) => trigger,
+            Self::IgnoreFileDiscovery => IndexTrigger::Update,
         }
     }
 }
@@ -146,14 +160,32 @@ pub(crate) struct Scanner {
     /// Open projects that have been scanned.
     projects: HashMap<ProjectKey, ScannedProject>,
 
-    /// All the folders that are being watched by the watcher.
+    /// All the physical folders that are being watched by the watcher.
     watched_folders: HashSet<Utf8PathBuf>,
+
+    /// Projects physical watcher roots back to every logical path alias.
+    watch_aliases: ParkingLotMutex<FxHashMap<Utf8PathBuf, FxHashSet<Utf8PathBuf>>>,
+
+    /// The physical target of every symbolic link registered as a logical watch folder.
+    ///
+    /// Locked only while [`Self::watch_aliases`] is locked. A link that resolves to a new target
+    /// was retargeted, so the aliases derived through its previous target are stale.
+    watched_symlink_targets: ParkingLotMutex<FxHashMap<Utf8PathBuf, Utf8PathBuf>>,
+
+    /// The logical folders watched for the VCS ignore files of each project.
+    ///
+    /// These folders can be outside the project folder, so they are released separately when the
+    /// project is unloaded.
+    vcs_watch_folders: ParkingLotMutex<FxHashMap<ProjectKey, FxHashSet<Utf8PathBuf>>>,
 
     /// Channel sender for instructions to the [`Watcher`].
     watcher_tx: Sender<WatcherInstruction>,
 }
 
 struct ScannedProject {
+    /// The folder of the project.
+    path: Utf8PathBuf,
+
     /// The scan kind used for this project.
     scan_kind: ScanKind,
 
@@ -167,6 +199,9 @@ impl Scanner {
         Self {
             projects: Default::default(),
             watched_folders: Default::default(),
+            watch_aliases: Default::default(),
+            watched_symlink_targets: Default::default(),
+            vcs_watch_folders: Default::default(),
             watcher_tx,
         }
     }
@@ -199,16 +234,23 @@ impl Scanner {
             .get_project_path(project_key)
             .ok_or_else(WorkspaceError::no_project)?;
 
-        if !scan_options.force && self.is_watched(&project_path) {
+        if !scan_options.force && self.is_project_watched(project_key, &project_path) {
             return Ok(None);
         }
 
+        let additional_ignore_roots = self.targeted_vcs_ignore_roots(
+            workspace,
+            project_key,
+            &project_path,
+            &scan_options.scan_kind,
+        );
         let setup = self.set_up_scan(
             workspace,
             project_key,
             &project_path,
             IndexTrigger::InitialScan,
             &scan_options,
+            &additional_ignore_roots,
         );
         Ok(Some(ProjectScan {
             project_key,
@@ -216,6 +258,42 @@ impl Scanner {
             scan_options,
             setup,
         }))
+    }
+
+    fn targeted_vcs_ignore_roots<W: WorkspaceScannerBridge>(
+        &self,
+        workspace: &W,
+        project_key: ProjectKey,
+        project_path: &Utf8Path,
+        scan_kind: &ScanKind,
+    ) -> Vec<Utf8PathBuf> {
+        let ScanKind::TargetedKnownFiles { target_paths, .. } = scan_kind else {
+            return Vec::new();
+        };
+        let Some(vcs_root) = workspace.get_vcs_root(project_key) else {
+            return Vec::new();
+        };
+
+        let mut roots = FxHashSet::default();
+        for target_path in target_paths {
+            if target_path.starts_with(project_path) || !target_path.starts_with(&vcs_root) {
+                continue;
+            }
+            let Ok(relative) = target_path.as_path().strip_prefix(&vcs_root) else {
+                continue;
+            };
+            let root = relative.components().next().map_or_else(
+                || vcs_root.clone(),
+                |component| vcs_root.join(component.as_str()),
+            );
+            if workspace.fs().path_is_dir(&root) {
+                roots.insert(root);
+            }
+        }
+
+        let mut roots: Vec<_> = roots.into_iter().collect();
+        roots.sort_unstable();
+        roots
     }
 
     /// Runs the files phase of `scan`: indexes again the files that the setup
@@ -247,6 +325,7 @@ impl Scanner {
         );
 
         let scanned_project = ScannedProject {
+            path: project_path,
             scan_kind: scan_options.scan_kind.clone_without_targeting_info(),
             watched: scan_options.watch,
         };
@@ -303,6 +382,122 @@ impl Scanner {
         // No need to notify after this scan, because the individual file
         // updates will already trigger notifications.
         Ok(result.diagnostics)
+    }
+
+    /// Loads ignore matchers before the setup phase of a project scan.
+    ///
+    /// Returns diagnostics from discovery and the time spent loading the matchers.
+    pub(crate) fn prepare_project_ignore_files<W: WorkspaceScannerBridge>(
+        &self,
+        workspace: &W,
+        project_key: ProjectKey,
+        scan_options: &ScanOptions,
+    ) -> Result<(Vec<Diagnostic>, Duration), WorkspaceError> {
+        let start = web_time::Instant::now();
+        let project_path = workspace
+            .get_project_path(project_key)
+            .ok_or_else(WorkspaceError::no_project)?;
+        if scan_options.scan_kind.is_none()
+            || (!scan_options.force && self.is_project_watched(project_key, &project_path))
+            || workspace.get_vcs_root(project_key).is_none()
+        {
+            return Ok((Vec::new(), start.elapsed()));
+        }
+
+        if scan_options.watch {
+            self.watch_project_vcs_paths(workspace, project_key);
+        }
+
+        let additional_ignore_roots = self.targeted_vcs_ignore_roots(
+            workspace,
+            project_key,
+            &project_path,
+            &scan_options.scan_kind,
+        );
+        let mut diagnostics = Vec::new();
+        for path in std::iter::once(&project_path).chain(&additional_ignore_roots) {
+            let (ignore_paths, discovery_diagnostics) = self.discover_ignore_files(
+                workspace,
+                project_key,
+                path,
+                IndexTrigger::InitialScan,
+                scan_options,
+            );
+            diagnostics.extend(discovery_diagnostics);
+            // A failed update keeps the last usable matchers of `path`, so the rest of the
+            // project is still indexed. The error is reported like any other scan diagnostic.
+            if let Err(error) =
+                workspace.update_project_ignore_files(project_key, path, &ignore_paths)
+            {
+                let diagnostic = Diagnostic::new(error);
+                if DiagnosticsCollector::new(scan_options.verbose).should_collect(&diagnostic) {
+                    diagnostics.push(diagnostic);
+                }
+            }
+        }
+        Ok((diagnostics, start.elapsed()))
+    }
+
+    /// Refreshes ignore matchers before rescanning a folder after an ignore-file event.
+    pub fn refresh_ignore_files<W: WorkspaceScannerBridge>(
+        &self,
+        workspace: &W,
+        project_key: ProjectKey,
+        path: &Utf8Path,
+    ) -> Result<Vec<Diagnostic>, WorkspaceError> {
+        if workspace.get_vcs_root(project_key).is_none() {
+            return Ok(Vec::new());
+        }
+        let scan_kind = self
+            .get_scan_kind_for_project(project_key)
+            .ok_or_else(WorkspaceError::no_project)?;
+        let scan_options = ScanOptions {
+            scan_kind,
+            force: true,
+            verbose: false,
+            watch: false,
+        };
+        let (ignore_paths, diagnostics) = self.discover_ignore_files(
+            workspace,
+            project_key,
+            path,
+            IndexTrigger::Update,
+            &scan_options,
+        );
+        workspace.update_project_ignore_files(project_key, path, &ignore_paths)?;
+        Ok(diagnostics)
+    }
+
+    fn discover_ignore_files<W: WorkspaceScannerBridge>(
+        &self,
+        workspace: &W,
+        project_key: ProjectKey,
+        path: &Utf8Path,
+        trigger: IndexTrigger,
+        scan_options: &ScanOptions,
+    ) -> (Vec<BiomePath>, Vec<Diagnostic>) {
+        let (mut ignore_paths, diagnostics) = self.run_scan_phase(
+            workspace,
+            project_key,
+            trigger,
+            IndexRequestKind::IgnoreFileDiscovery,
+            scan_options,
+            |ctx| {
+                workspace
+                    .fs()
+                    .traversal(Box::new(|scope: &dyn TraversalScope| {
+                        scope.evaluate(ctx, path.to_path_buf());
+                    }));
+                ctx.evaluated_paths
+                    .pin()
+                    .iter()
+                    .filter(|path| path.is_ignore())
+                    .cloned()
+                    .collect::<Vec<_>>()
+            },
+        );
+        ignore_paths.sort_unstable();
+        (ignore_paths, diagnostics)
     }
 
     pub fn index_dependencies<W: WorkspaceScannerBridge>(
@@ -364,12 +559,16 @@ impl Scanner {
             verbose: false,
             watch,
         };
-        let (folders_to_watch, diagnostics) =
-            self.run_scan_phase(workspace, project_key, trigger, &scan_options, index);
+        let (folders_to_watch, diagnostics) = self.run_scan_phase(
+            workspace,
+            project_key,
+            trigger,
+            IndexRequestKind::Explicit(trigger),
+            &scan_options,
+            index,
+        );
         if watch {
-            let _ = self
-                .watcher_tx
-                .try_send(WatcherInstruction::WatchFolders(folders_to_watch));
+            self.watch_folders(workspace.fs(), folders_to_watch);
         }
         Ok(diagnostics)
     }
@@ -381,6 +580,7 @@ impl Scanner {
         workspace: &'a W,
         project_key: ProjectKey,
         trigger: IndexTrigger,
+        request_kind: IndexRequestKind,
         scan_options: &ScanOptions,
         phase: impl FnOnce(&mut ScanContext<'a, W>) -> R,
     ) -> (R, Vec<Diagnostic>) {
@@ -394,10 +594,12 @@ impl Scanner {
             workspace,
             project_key,
             interner,
+            physical_files: PhysicalFileOwners::default(),
             diagnostics_sender,
             evaluated_paths: Default::default(),
             scan_kind: scan_options.scan_kind.clone(),
             trigger,
+            request_kind,
             watch: scan_options.watch,
             dependencies: Default::default(),
         };
@@ -441,28 +643,200 @@ impl Scanner {
         let _ = self.watcher_tx.send(WatcherInstruction::ReindexFile(path));
     }
 
-    /// Returns whether the given path is watched.
+    /// Returns whether the given logical folder is watched.
     ///
-    /// Note that only folders are watched. Passing the path to a file will
-    /// always return `false`.
+    /// Passing the path to a file always returns `false`.
     fn is_watched(&self, path: &Utf8Path) -> bool {
-        self.watched_folders.pin().contains(path)
+        let aliases = self.watch_aliases.lock();
+        aliases.iter().any(|(physical_path, logical_paths)| {
+            logical_paths.contains(path) && self.watched_folders.pin().contains(physical_path)
+        })
     }
 
-    /// Informs the workspace the given folder is watched.
+    /// Returns whether the project was scanned with a watcher that still watches its folder.
+    ///
+    /// A folder can also be watched for the ignore files of another project, so a watched folder
+    /// alone doesn't mean that the watcher keeps the index of the project up to date.
+    fn is_project_watched(&self, project_key: ProjectKey, project_path: &Utf8Path) -> bool {
+        self.projects
+            .pin()
+            .get(&project_key)
+            .is_some_and(|project| project.watched)
+            && self.is_watched(project_path)
+    }
+
+    /// Registers logical folders and asks the watcher to watch their physical locations.
+    ///
+    /// Physical folders that lose their last alias because a symbolic link now resolves to a new
+    /// target are unwatched.
+    fn watch_folders(&self, fs: &dyn FileSystem, folders: FxHashSet<Utf8PathBuf>) {
+        if folders.is_empty() {
+            return;
+        }
+
+        let mut folders: Vec<_> = folders.into_iter().collect();
+        folders.sort_by_key(|path| path.components().count());
+
+        let (physical_folders, unused_folders) = {
+            let mut aliases = self.watch_aliases.lock();
+            let mut symlink_targets = self.watched_symlink_targets.lock();
+            let mut physical_folders = FxHashSet::default();
+            let mut unused_folders = FxHashSet::default();
+
+            for logical_path in folders {
+                let is_symlink = fs.path_is_symlink(&logical_path);
+                let physical_path = physical_watch_path(fs, &logical_path, is_symlink, &aliases);
+                if is_symlink
+                    && symlink_targets
+                        .insert(logical_path.clone(), physical_path.clone())
+                        .is_some_and(|previous_target| previous_target != physical_path)
+                {
+                    remove_retargeted_aliases(
+                        &mut aliases,
+                        &logical_path,
+                        &physical_path,
+                        &mut unused_folders,
+                    );
+                }
+                let mut logical_paths = logical_watch_paths(&physical_path, &aliases);
+                logical_paths.insert(logical_path);
+                aliases
+                    .entry(physical_path.clone())
+                    .or_default()
+                    .extend(logical_paths);
+                physical_folders.insert(physical_path);
+            }
+
+            unused_folders.retain(|physical_path| !aliases.contains_key(physical_path));
+            (physical_folders, unused_folders)
+        };
+
+        let _ = self
+            .watcher_tx
+            .try_send(WatcherInstruction::WatchFolders(physical_folders));
+        self.unwatch_unused_folders(unused_folders);
+    }
+
+    /// Asks the watcher to unwatch physical folders that no longer have a logical alias.
+    fn unwatch_unused_folders(&self, physical_folders: FxHashSet<Utf8PathBuf>) {
+        if !physical_folders.is_empty() {
+            let _ = self
+                .watcher_tx
+                .try_send(WatcherInstruction::UnwatchUnusedFolders(physical_folders));
+        }
+    }
+
+    /// Projects a physical watcher event to every registered logical alias.
+    fn logical_paths_for_watcher_event(&self, path: &Utf8Path) -> Vec<Utf8PathBuf> {
+        let aliases = self.watch_aliases.lock();
+        let mut paths: Vec<_> = aliases
+            .iter()
+            .flat_map(|(root, logical_paths)| {
+                path.strip_prefix(root)
+                    .ok()
+                    .into_iter()
+                    .flat_map(move |relative_path| {
+                        logical_paths
+                            .iter()
+                            .map(move |logical_path| logical_path.join(relative_path))
+                    })
+            })
+            .collect();
+        if paths.is_empty() {
+            return vec![path.to_path_buf()];
+        }
+        paths.sort();
+        paths.dedup();
+        paths
+    }
+
+    /// Informs the workspace the given physical folder is watched.
     ///
     /// Returns `true` if the folder was not yet watched, `false` otherwise.
     fn insert_watched_folder(&self, path: Utf8PathBuf) -> bool {
         self.watched_folders.pin().insert(path)
     }
 
-    /// Removes watched folders from the workspace.
+    /// Stops tracking the physical folder `path` as watched when no logical alias maps to it.
     ///
-    /// `callback` is invoked for every currently watched folder with the path
-    /// of said folder. Folders for which the `callback` returns `true` are
-    /// removed, others are retained.
-    fn remove_watched_folders(&self, mut callback: impl FnMut(&Utf8Path) -> bool) {
-        self.watched_folders.pin().retain(|path| !callback(path));
+    /// Returns `true` if the folder was watched and must be unwatched, `false` otherwise.
+    fn remove_unused_watched_folder(&self, path: &Utf8Path) -> bool {
+        // Holding the alias lock orders this check after any registration of a new alias.
+        let aliases = self.watch_aliases.lock();
+        !aliases.contains_key(path) && self.watched_folders.pin().remove(path)
+    }
+
+    /// Removes the logical aliases `logical_paths` and unwatches physical folders left without
+    /// an alias.
+    ///
+    /// Unlike [`Self::remove_watch_aliases()`], aliases below `logical_paths` are kept.
+    fn remove_exact_watch_aliases(&self, logical_paths: &FxHashSet<Utf8PathBuf>) {
+        if logical_paths.is_empty() {
+            return;
+        }
+        let unused_folders = {
+            let mut aliases = self.watch_aliases.lock();
+            let mut unused_folders = FxHashSet::default();
+            aliases.retain(|physical_path, aliases_of_folder| {
+                aliases_of_folder.retain(|logical_path| !logical_paths.contains(logical_path));
+                if aliases_of_folder.is_empty() {
+                    unused_folders.insert(physical_path.clone());
+                    false
+                } else {
+                    true
+                }
+            });
+            self.watched_symlink_targets
+                .lock()
+                .retain(|logical_path, _| !logical_paths.contains(logical_path));
+            unused_folders
+        };
+        self.unwatch_unused_folders(unused_folders);
+    }
+
+    /// Removes logical aliases under `path` and unwatches unused physical folders.
+    fn remove_watch_aliases(&self, path: &Utf8Path, mut callback: impl FnMut(&Utf8Path)) {
+        let unused_physical_paths = {
+            let mut aliases = self.watch_aliases.lock();
+            self.watched_symlink_targets
+                .lock()
+                .retain(|logical_path, _| !logical_path.starts_with(path));
+            let mut unused_physical_paths = Vec::new();
+            aliases.retain(|physical_path, logical_paths| {
+                logical_paths.retain(|logical_path| !logical_path.starts_with(path));
+                if logical_paths.is_empty() {
+                    unused_physical_paths.push(physical_path.clone());
+                    false
+                } else {
+                    true
+                }
+            });
+            unused_physical_paths
+        };
+
+        for physical_path in unused_physical_paths {
+            if self.watched_folders.pin().remove(&physical_path) {
+                callback(&physical_path);
+            }
+        }
+    }
+
+    fn watch_project_vcs_paths<W: WorkspaceScannerBridge>(
+        &self,
+        workspace: &W,
+        project_key: ProjectKey,
+    ) {
+        let folders: FxHashSet<_> = workspace
+            .get_vcs_watch_paths(project_key)
+            .into_iter()
+            .filter_map(|path| path.parent().map(Utf8Path::to_path_buf))
+            .collect();
+        self.vcs_watch_folders
+            .lock()
+            .entry(project_key)
+            .or_default()
+            .extend(folders.iter().cloned());
+        self.watch_folders(workspace.fs(), folders);
     }
 
     /// Performs a file system scan and indexes all supported documents that
@@ -476,7 +850,10 @@ impl Scanner {
         trigger: IndexTrigger,
         scan_options: &ScanOptions,
     ) -> ScanResult {
-        let setup = self.set_up_scan(workspace, project_key, folder, trigger, scan_options);
+        if scan_options.watch {
+            self.watch_project_vcs_paths(workspace, project_key);
+        }
+        let setup = self.set_up_scan(workspace, project_key, folder, trigger, scan_options, &[]);
         self.scan_files(workspace, project_key, folder, trigger, scan_options, setup)
     }
 
@@ -489,13 +866,23 @@ impl Scanner {
         folder: &Utf8Path,
         trigger: IndexTrigger,
         scan_options: &ScanOptions,
+        additional_ignore_roots: &[Utf8PathBuf],
     ) -> ScanSetupResult {
-        let ((folder_result, dependencies), diagnostics) =
-            self.run_scan_phase(workspace, project_key, trigger, scan_options, |ctx| {
-                let folder_result = self.scan_folder(folder, ctx);
+        let ((folder_result, dependencies), diagnostics) = self.run_scan_phase(
+            workspace,
+            project_key,
+            trigger,
+            IndexRequestKind::Explicit(trigger),
+            scan_options,
+            |ctx| {
+                let folder_result = self.scan_folder(folder, ctx, ScanFolderKind::Project);
+                for ignore_root in additional_ignore_roots {
+                    self.scan_folder(ignore_root, ctx, ScanFolderKind::IgnoreFiles);
+                }
                 let dependencies = mem::take(&mut ctx.dependencies).into_inner().unwrap();
                 (folder_result, dependencies)
-            });
+            },
+        );
         let ScanFolderResult {
             duration,
             configuration_files,
@@ -531,8 +918,13 @@ impl Scanner {
             mut diagnostics,
             duration: setup_duration,
         } = setup;
-        let (duration, files_diagnostics) =
-            self.run_scan_phase(workspace, project_key, trigger, scan_options, |ctx| {
+        let (duration, files_diagnostics) = self.run_scan_phase(
+            workspace,
+            project_key,
+            trigger,
+            IndexRequestKind::Explicit(trigger),
+            scan_options,
+            |ctx| {
                 let start = web_time::Instant::now();
                 // The other files read the manifests that the setup phase
                 // deferred, so they're indexed first.
@@ -542,7 +934,7 @@ impl Scanner {
                     .fs()
                     .traversal(Box::new(|scope: &dyn TraversalScope| {
                         for path in &handleable_paths {
-                            scope.handle(traversal_ctx, path.to_path_buf());
+                            scope.handle(traversal_ctx, path.clone());
                         }
                     }));
                 #[cfg_attr(target_family = "wasm", expect(unused_mut))]
@@ -559,16 +951,15 @@ impl Scanner {
                         let (dependencies_duration, folders_to_watch) =
                             scan_dependencies(folder, all_dependencies.into_iter().collect(), ctx);
                         duration += dependencies_duration;
-                        let _ = self
-                            .watcher_tx
-                            .try_send(WatcherInstruction::WatchFolders(folders_to_watch));
+                        self.watch_folders(workspace.fs(), folders_to_watch);
                     }
                 }
                 #[cfg(target_family = "wasm")]
                 let _ = (folder, dependencies);
 
                 duration
-            });
+            },
+        );
         diagnostics.extend(files_diagnostics);
 
         ScanResult {
@@ -587,6 +978,7 @@ impl Scanner {
         &self,
         folder: &Utf8Path,
         ctx: &ScanContext<W>,
+        kind: ScanFolderKind,
     ) -> ScanFolderResult {
         let start = web_time::Instant::now();
 
@@ -599,7 +991,8 @@ impl Scanner {
         let mut evaluated_paths: Vec<_> = ctx
             .evaluated_paths()
             .iter()
-            .map(|p| BiomePath::new(p.as_path()))
+            .filter(|path| path.starts_with(folder))
+            .cloned()
             .collect();
         let mut configs = Vec::new();
         let mut manifests = Vec::new();
@@ -607,51 +1000,53 @@ impl Scanner {
         let mut ignore_paths = Vec::new();
         let mut folders_to_watch = FxHashSet::<Utf8PathBuf>::default();
 
-        evaluated_paths.sort_unstable();
+        evaluated_paths.sort_unstable_by(BiomePath::cmp_processing_priority);
 
         // We want to process files that closest to the project root first. For
         // example, we must process first the `.gitignore` at the root of the
         // project.
         for path in evaluated_paths {
-            if path.is_config() {
-                configs.push(path);
-            } else if path.is_manifest() {
-                manifests.push(path);
-            } else if path.is_ignore() {
+            if path.is_ignore() {
                 ignore_paths.push(path);
-            } else if ctx.watch && fs.symlink_path_kind(&path).is_ok_and(PathKind::is_dir) {
+            } else if ctx.watch && fs.path_kind(path.as_path()).is_ok_and(PathKind::is_dir) {
                 folders_to_watch.insert(path.into());
-            } else {
-                handleable_paths.push(path);
-            }
-        }
-        let _ = self
-            .watcher_tx
-            .try_send(WatcherInstruction::WatchFolders(folders_to_watch));
-        fs.traversal(Box::new(|scope: &dyn TraversalScope| {
-            for path in &configs {
-                scope.handle(ctx, path.to_path_buf());
-            }
-        }));
-        fs.traversal(Box::new(|scope: &dyn TraversalScope| {
-            for path in &manifests {
-                scope.handle(ctx, path.to_path_buf());
-            }
-        }));
-
-        let result = workspace.update_project_config_files(ctx.project_key, &configs);
-        match result {
-            Ok(diagnostics) => {
-                for diagnostic in diagnostics {
-                    ctx.send_diagnostic(diagnostic)
+            } else if kind == ScanFolderKind::Project {
+                if path.is_config() {
+                    configs.push(path);
+                } else if path.is_manifest() {
+                    manifests.push(path);
+                } else {
+                    handleable_paths.push(path);
                 }
             }
-            Err(error) => {
-                ctx.send_diagnostic(error);
+        }
+        self.watch_folders(fs, folders_to_watch);
+        if kind == ScanFolderKind::Project {
+            fs.traversal(Box::new(|scope: &dyn TraversalScope| {
+                for path in &configs {
+                    scope.handle(ctx, path.clone());
+                }
+            }));
+            fs.traversal(Box::new(|scope: &dyn TraversalScope| {
+                for path in &manifests {
+                    scope.handle(ctx, path.clone());
+                }
+            }));
+
+            let result = workspace.update_project_config_files(ctx.project_key, &configs);
+            match result {
+                Ok(diagnostics) => {
+                    for diagnostic in diagnostics {
+                        ctx.send_diagnostic(diagnostic)
+                    }
+                }
+                Err(error) => {
+                    ctx.send_diagnostic(error);
+                }
             }
         }
 
-        let result = workspace.update_project_ignore_files(ctx.project_key, &ignore_paths);
+        let result = workspace.update_project_ignore_files(ctx.project_key, folder, &ignore_paths);
         if let Err(error) = result {
             ctx.send_diagnostic(error);
         }
@@ -678,9 +1073,36 @@ impl Scanner {
     ///
     /// This does _not_ take care of unloading the documents inside the folder.
     pub fn unload_project(&self, project_key: ProjectKey, project_path: Utf8PathBuf) {
-        self.unload_folder(project_path);
-
         self.projects.pin().remove(&project_key);
+        let vcs_folders = self.release_vcs_watch_folders(project_key, &project_path);
+        self.unload_folder(project_path);
+        self.remove_exact_watch_aliases(&vcs_folders);
+    }
+
+    /// Returns the VCS watch folders of `project_key` that no other open project uses.
+    ///
+    /// Folders inside `project_path` are excluded, because unloading the project folder removes
+    /// them. Folders inside another watched project are kept, because its scan may watch them.
+    fn release_vcs_watch_folders(
+        &self,
+        project_key: ProjectKey,
+        project_path: &Utf8Path,
+    ) -> FxHashSet<Utf8PathBuf> {
+        let mut vcs_watch_folders = self.vcs_watch_folders.lock();
+        let Some(mut folders) = vcs_watch_folders.remove(&project_key) else {
+            return FxHashSet::default();
+        };
+        let projects = self.projects.pin();
+        folders.retain(|folder| {
+            !folder.starts_with(project_path)
+                && !vcs_watch_folders
+                    .values()
+                    .any(|other_folders| other_folders.contains(folder))
+                && !projects
+                    .values()
+                    .any(|project| project.watched && folder.starts_with(&project.path))
+        });
+        folders
     }
 }
 
@@ -733,6 +1155,98 @@ impl ProjectScan {
     }
 }
 
+/// Resolves the physical folder that must be watched for a logical folder.
+///
+/// `is_symlink` tells whether `logical_path` itself is a symbolic link.
+fn physical_watch_path(
+    fs: &dyn FileSystem,
+    logical_path: &Utf8Path,
+    is_symlink: bool,
+    aliases: &FxHashMap<Utf8PathBuf, FxHashSet<Utf8PathBuf>>,
+) -> Utf8PathBuf {
+    if is_symlink {
+        let mut physical_path = logical_path.to_path_buf();
+        for _ in 0..=3 {
+            if !fs.path_is_symlink(&physical_path) {
+                return physical_path;
+            }
+
+            let Ok(target) = fs.read_link(&physical_path) else {
+                break;
+            };
+            physical_path = if target.is_absolute() {
+                normalize_path(&target)
+            } else {
+                let parent = physical_path.parent().unwrap_or(Utf8Path::new(""));
+                normalize_path(&parent.join(target))
+            };
+        }
+    }
+
+    aliases
+        .iter()
+        .flat_map(|(physical_root, logical_roots)| {
+            logical_roots.iter().filter_map(move |logical_root| {
+                logical_path
+                    .strip_prefix(logical_root)
+                    .ok()
+                    .map(|relative| {
+                        (
+                            logical_root.components().count(),
+                            physical_root.join(relative),
+                        )
+                    })
+            })
+        })
+        .max_by_key(|(depth, _)| *depth)
+        .map_or_else(|| logical_path.to_path_buf(), |(_, path)| path)
+}
+
+/// Removes the aliases at or below the retargeted symbolic link `logical_path` from physical
+/// folders outside its new target `physical_path`.
+///
+/// Physical folders left without an alias are removed and collected into `unused_folders`.
+fn remove_retargeted_aliases(
+    aliases: &mut FxHashMap<Utf8PathBuf, FxHashSet<Utf8PathBuf>>,
+    logical_path: &Utf8Path,
+    physical_path: &Utf8Path,
+    unused_folders: &mut FxHashSet<Utf8PathBuf>,
+) {
+    aliases.retain(|physical_root, logical_roots| {
+        if physical_root.starts_with(physical_path) {
+            return true;
+        }
+        logical_roots.retain(|logical_root| !logical_root.starts_with(logical_path));
+        if logical_roots.is_empty() {
+            unused_folders.insert(physical_root.clone());
+            false
+        } else {
+            true
+        }
+    });
+}
+
+/// Returns every logical alias of a physical watcher folder.
+fn logical_watch_paths(
+    physical_path: &Utf8Path,
+    aliases: &FxHashMap<Utf8PathBuf, FxHashSet<Utf8PathBuf>>,
+) -> FxHashSet<Utf8PathBuf> {
+    aliases
+        .iter()
+        .flat_map(|(physical_root, logical_roots)| {
+            physical_path
+                .strip_prefix(physical_root)
+                .ok()
+                .into_iter()
+                .flat_map(move |relative| {
+                    logical_roots
+                        .iter()
+                        .map(move |logical_root| logical_root.join(relative))
+                })
+        })
+        .collect()
+}
+
 #[instrument(level = "debug", skip(ctx))]
 fn scan_dependencies<W: WorkspaceScannerBridge>(
     project_path: &Utf8Path,
@@ -771,7 +1285,8 @@ fn scan_dependencies<W: WorkspaceScannerBridge>(
             ctx: &'a ScanContext<'a, W>,
             dependency_path: Utf8PathBuf,
         ) {
-            let dependencies = open_file(ctx, BiomePath::new(dependency_path), ctx.trigger);
+            let path = ctx.workspace.fs().biome_path(&dependency_path);
+            let dependencies = open_file(ctx, path, ctx.trigger);
             ctx.dependencies
                 .lock()
                 .unwrap()
@@ -873,8 +1388,11 @@ pub(crate) struct ScanContext<'app, W: WorkspaceScannerBridge> {
     /// Key of the project within which this scanner is active.
     project_key: ProjectKey,
 
-    /// File paths interner cache used by the filesystem traversal.
+    /// Logical path interner used by the filesystem traversal.
     interner: PathInterner,
+
+    /// Physical files selected after logical path policy is applied.
+    physical_files: PhysicalFileOwners,
 
     /// Channel for reporting diagnostics during scanning.
     pub(crate) diagnostics_sender: Sender<Diagnostic>,
@@ -887,6 +1405,9 @@ pub(crate) struct ScanContext<'app, W: WorkspaceScannerBridge> {
 
     /// The trigger that initiated this scan.
     trigger: IndexTrigger,
+
+    /// The policy used to select paths during traversal.
+    request_kind: IndexRequestKind,
 
     /// Whether the scanned folders need to be watched.
     watch: bool,
@@ -970,7 +1491,8 @@ impl<W: WorkspaceScannerBridge> ScanContext<'_, W> {
         rayon::scope(|scope| {
             for path in paths {
                 scope.spawn(move |_| {
-                    let dependencies = open_file(self, BiomePath::new(path), self.trigger);
+                    let path = self.workspace.fs().biome_path(&path);
+                    let dependencies = open_file(self, path, self.trigger);
                     self.dependencies.lock().unwrap().extend(dependencies);
                 });
             }
@@ -981,6 +1503,26 @@ impl<W: WorkspaceScannerBridge> ScanContext<'_, W> {
 impl<W: WorkspaceScannerBridge> TraversalContext for ScanContext<'_, W> {
     fn interner(&self) -> &PathInterner {
         &self.interner
+    }
+
+    fn store_physical_path(
+        &self,
+        physical_path: Utf8PathBuf,
+        logical_path: BiomePath,
+        is_symlink: bool,
+    ) {
+        self.physical_files.select(
+            physical_path,
+            logical_path,
+            is_symlink,
+            |previous, selected| {
+                let evaluated_paths = self.evaluated_paths.pin();
+                if let Some(previous) = previous {
+                    evaluated_paths.remove(previous);
+                }
+                evaluated_paths.insert(selected.clone());
+            },
+        );
     }
 
     fn evaluated_paths(&self) -> HashSetRef<'_, BiomePath, RandomState, LocalGuard<'_>> {
@@ -998,13 +1540,13 @@ impl<W: WorkspaceScannerBridge> TraversalContext for ScanContext<'_, W> {
     //   the path belongs to a dependency.
     // - The kind of file system entry the path points to.
     // - The kind of scan we are performing.
-    fn can_handle(&self, path: &BiomePath) -> bool {
+    fn can_handle_with_kind(&self, path: &BiomePath, path_kind: PathKind) -> bool {
         match self.workspace.is_ignored(
             self.project_key,
             &self.scan_kind,
-            path,
-            IndexRequestKind::Explicit(self.trigger),
-            Some(path.path_kind()),
+            path.as_path(),
+            self.request_kind,
+            Some(path_kind),
         ) {
             Ok(is_ignored) => !is_ignored,
             Err(_) => {
@@ -1062,10 +1604,10 @@ fn open_file<W: WorkspaceScannerBridge>(
         }
         Err(err) => {
             let error = match err.downcast::<String>() {
-                Ok(description) => Panic::with_file_and_message(&path, *description),
+                Ok(description) => Panic::with_file_and_message(path.as_path(), *description),
                 Err(err) => match err.downcast::<&'static str>() {
-                    Ok(description) => Panic::with_file_and_message(&path, *description),
-                    Err(_) => Panic::with_file(&path),
+                    Ok(description) => Panic::with_file_and_message(path.as_path(), *description),
+                    Err(_) => Panic::with_file(path.as_path()),
                 },
             };
 

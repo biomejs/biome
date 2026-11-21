@@ -240,11 +240,18 @@ impl LSPServer {
                     .collect(),
             };
             let relative_pattern_support = self.session.supports_relative_watched_file_patterns();
-            let watchers: Vec<_> = base_uris
+            let mut watchers: Vec<_> = base_uris
                 .into_iter()
                 .filter_map(|base_uri| watched_file_watchers(base_uri, relative_pattern_support))
                 .flatten()
                 .collect();
+            let mut vcs_watch_paths = self.session.vcs_watch_paths();
+            vcs_watch_paths.sort_unstable();
+            vcs_watch_paths.dedup();
+            watchers.extend(vcs_watch_paths.into_iter().map(|path| FileSystemWatcher {
+                glob_pattern: GlobPattern::String(escape_string_glob_base(path.as_str())),
+                kind: Some(WatchKind::all()),
+            }));
 
             if watchers.is_empty() {
                 CapabilityStatus::Disable
@@ -430,43 +437,34 @@ impl LanguageServer for LSPServer {
         let file_paths = params
             .changes
             .iter()
-            .filter_map(|change| change.uri.to_file_path())
+            .filter_map(|change| Session::filesystem_path(&change.uri))
             .collect::<Vec<_>>();
         for file_path in file_paths {
-            let base_path = self.session.base_path();
-            if let Some(base_path) = base_path {
-                let possible_biome_json = file_path.strip_prefix(&base_path);
-                if let Ok(watched_file) = possible_biome_json
-                    && (ConfigName::file_names()
-                        .iter()
-                        .any(|file_name| watched_file.ends_with(file_name))
-                        || (watched_file.ends_with(".editorconfig"))
-                        || watched_file.ends_with("pnpm-workspace.yaml")
-                        || watched_file.ends_with(".gitignore")
-                        || watched_file.ends_with(".ignore"))
-                {
-                    info!(
-                        path = %watched_file.display(),
-                        "Received watched file change notification"
-                    );
-                    self.session
-                        .client
-                        .log_message(
-                            MessageType::INFO,
-                            format!(
-                                "Received watched file change notification: {}",
-                                watched_file.display()
-                            ),
-                        )
-                        .await;
-                    self.session.load_extension_settings(None).await;
-                    self.session.load_workspace_settings(true).await;
-                    self.setup_capabilities().await;
-                    self.session.update_all_diagnostics().await;
-                    // for now we are only interested to the configuration file,
-                    // so it's OK to exit the loop
-                    break;
-                }
+            let is_watched_file = ConfigName::file_names()
+                .iter()
+                .any(|file_name| file_path.ends_with(file_name))
+                || file_path.ends_with(".editorconfig")
+                || file_path.ends_with("pnpm-workspace.yaml")
+                || file_path.ends_with(".gitignore")
+                || file_path.ends_with(".ignore")
+                || self.session.is_vcs_watch_path(&file_path);
+            if is_watched_file {
+                info!(
+                    path = %file_path,
+                    "Received watched file change notification"
+                );
+                self.session
+                    .client
+                    .log_message(
+                        MessageType::INFO,
+                        format!("Received watched file change notification: {}", file_path),
+                    )
+                    .await;
+                self.session.load_extension_settings(None).await;
+                self.session.load_workspace_settings(true).await;
+                self.setup_capabilities().await;
+                self.session.update_all_diagnostics().await;
+                break;
             }
         }
     }
@@ -497,30 +495,79 @@ impl LanguageServer for LSPServer {
 
     #[instrument(level = "debug", skip_all)]
     async fn did_change_workspace_folders(&self, params: DidChangeWorkspaceFoldersParams) {
+        let mut removed_projects = Vec::new();
         for removed in &params.event.removed {
-            if let Some(project_key) = self
-                .session
-                .file_path(&removed.uri)
-                .ok()
-                .and_then(|project_path| self.session.project_for_path(&project_path))
+            if let Some(project_path) = Session::filesystem_path(&removed.uri)
+                && let Some(project_key) = self.session.project_for_path(&project_path)
+                && !removed_projects.contains(&project_key)
             {
-                let result = self
-                    .session
-                    .workspace()
-                    .close_project(CloseProjectParams { project_key })
-                    .map_err(LspError::from);
-
-                if let Err(err) = result {
-                    error!("Failed to remove project from the workspace: {}", err);
-                    self.notify_error(err).await;
-                }
+                removed_projects.push(project_key);
             }
         }
 
         self.session
             .update_workspace_folders(params.event.added, params.event.removed);
+        for project_key in &removed_projects {
+            self.session.unregister_project(*project_key);
+        }
         self.session.clear_configuration_cache().await;
         self.session.load_workspace_settings(true).await;
+
+        for project_key in removed_projects {
+            if self.session.is_project_registered(project_key) {
+                continue;
+            }
+            if self.session.has_documents_for_project(project_key) {
+                self.session.detach_project(project_key);
+                continue;
+            }
+
+            let result = self
+                .session
+                .workspace()
+                .close_project(CloseProjectParams { project_key })
+                .map_err(LspError::from);
+            if let Err(err) = result {
+                error!("Failed to remove project from the workspace: {}", err);
+                self.notify_error(err).await;
+            }
+        }
+
+        let replacement_project = self
+            .session
+            .primary_project_path()
+            .as_deref()
+            .and_then(|path| self.session.project_for_path(path));
+        if let Some(replacement_project) = replacement_project {
+            for project_key in self.session.detached_project_keys() {
+                if let Err(err) = self
+                    .session
+                    .rebind_virtual_documents(project_key, replacement_project)
+                {
+                    error!("Failed to rebind virtual documents: {err}");
+                    self.notify_error(err.into()).await;
+                    continue;
+                }
+                if self.session.has_documents_for_project(project_key) {
+                    continue;
+                }
+                let result = self
+                    .session
+                    .workspace()
+                    .close_project(CloseProjectParams { project_key })
+                    .map_err(LspError::from);
+                match result {
+                    Ok(()) => {
+                        self.session.forget_detached_project(project_key);
+                    }
+                    Err(err) => {
+                        error!("Failed to remove project from the workspace: {}", err);
+                        self.notify_error(err).await;
+                    }
+                }
+            }
+        }
+
         self.setup_capabilities().await;
         self.session.update_all_diagnostics().await;
     }

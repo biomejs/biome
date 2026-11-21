@@ -105,6 +105,37 @@ impl PathKind {
 }
 
 pub trait FileSystem: Send + Sync + RefUnwindSafe {
+    /// Creates a logical Biome path from filesystem input.
+    ///
+    /// Relative input is anchored to this filesystem's working directory before `.` and `..`
+    /// components are normalized. Empty input resolves to the working directory. Construction
+    /// does not access the filesystem or resolve symbolic links.
+    fn biome_path(&self, input: &Utf8Path) -> BiomePath {
+        if let Some(path) = BiomePath::from_virtual_path(input) {
+            path
+        } else if input.is_absolute() {
+            BiomePath::new(input)
+        } else {
+            let working_directory = self.working_directory().unwrap_or_default();
+            BiomePath::new(working_directory.join(input))
+        }
+    }
+
+    /// Creates a logical Biome path relative to `base`.
+    ///
+    /// Absolute input does not use `base`. Relative input, including empty input, is joined to
+    /// `base` before lexical normalization. Construction does not access the filesystem or resolve
+    /// symbolic links.
+    fn biome_path_from(&self, base: &BiomePath, input: &Utf8Path) -> BiomePath {
+        if let Some(path) = BiomePath::from_virtual_path(input) {
+            path
+        } else if input.is_absolute() {
+            BiomePath::new(input)
+        } else {
+            BiomePath::new(base.join(input))
+        }
+    }
+
     /// It opens a file with the given set of options
     fn open_with_options(&self, path: &Utf8Path, options: OpenOptions)
     -> io::Result<Box<dyn File>>;
@@ -446,7 +477,7 @@ pub trait TraversalScope<'scope> {
     /// It's assumed that the provided already exist and was already evaluated via [TraversalContext::can_handle].
     ///
     /// This method will call [TraversalContext::handle_path].
-    fn handle(&self, context: &'scope dyn TraversalContext, path: Utf8PathBuf);
+    fn handle(&self, context: &'scope dyn TraversalContext, path: BiomePath);
 }
 
 pub trait TraversalContext: Sync {
@@ -454,14 +485,36 @@ pub trait TraversalContext: Sync {
     /// to emit diagnostics for IO errors that may happen in the traversal process
     fn interner(&self) -> &PathInterner;
 
+    /// Stores a logical path after selecting it as the stable owner of a physical file.
+    ///
+    /// The default forwards the logical path to [`Self::store_path`]. Implementations that
+    /// traverse symbolic links can override this to deduplicate aliases by physical identity.
+    fn store_physical_path(
+        &self,
+        _physical_path: Utf8PathBuf,
+        logical_path: BiomePath,
+        _is_symlink: bool,
+    ) {
+        self.store_path(logical_path);
+    }
+
     /// Called by the traversal process to emit an error diagnostic associated
     /// with a particular file ID when an IO error happens
     fn push_diagnostic(&self, error: Error);
 
     /// Checks if the traversal context can handle a particular path, used as
     /// an optimization to bail out of scheduling a file handler if it wouldn't
-    /// be able to process the file anyway
-    fn can_handle(&self, path: &BiomePath) -> bool;
+    /// be able to process the file anyway.
+    fn can_handle(&self, _path: &BiomePath) -> bool {
+        true
+    }
+
+    /// Checks whether the traversal context can handle a path with the given entry kind.
+    ///
+    /// The default preserves the behavior of implementations that only inspect the path.
+    fn can_handle_with_kind(&self, path: &BiomePath, _kind: PathKind) -> bool {
+        self.can_handle(path)
+    }
 
     /// This method will be called by the traversal for each file it finds
     /// where [TraversalContext::can_handle] returned true

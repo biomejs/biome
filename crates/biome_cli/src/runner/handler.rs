@@ -1,9 +1,8 @@
 use crate::runner::crawler::CrawlerContext;
 use crate::runner::diagnostics::PanicDiagnostic;
-use crate::runner::process_file::{FileStatus, ProcessFile};
+use crate::runner::process_file::{FileStatus, ProcessFile, document_file_source};
 use biome_diagnostics::{DiagnosticExt, DiagnosticTags, Severity, category};
-use biome_fs::{BiomePath, FileSystem, TraversalContext};
-use biome_languages::DocumentFileSource;
+use biome_fs::{BiomePath, FileSystem, PathKind, TraversalContext};
 use biome_service::workspace::{
     FileFeaturesResult, IgnoreKind, PathIsIgnoredParams, SupportsFeatureParams,
 };
@@ -22,7 +21,7 @@ pub const TRAVERSAL_IGNORE_ENTRIES: &[&[u8]] = &[
 ];
 
 pub trait Handler: Default + Send + Sync + Debug + std::panic::RefUnwindSafe {
-    fn can_handle<Ctx>(&self, biome_path: &BiomePath, ctx: &Ctx) -> bool
+    fn can_handle<Ctx>(&self, biome_path: &BiomePath, path_kind: PathKind, ctx: &Ctx) -> bool
     where
         Ctx: CrawlerContext,
     {
@@ -36,19 +35,11 @@ pub trait Handler: Default + Send + Sync + Debug + std::panic::RefUnwindSafe {
         let workspace = ctx.workspace();
         let execution = ctx.execution();
         let project_key = ctx.project_key();
-        if biome_path.path_kind().is_dir() || biome_path.path_kind().is_symlink() {
-            // handle:
-            // - directories
-            // - symlinks
-            // - unresolved symlinks
-            //   e.g `symlink/subdir` where symlink points to a directory that includes `subdir`.
-            //   Note that `symlink/subdir` is not an existing file.
+        if path_kind.is_dir() {
             let can_handle = !workspace
                 .is_path_ignored(PathIsIgnoredParams {
                     project_key,
                     path: biome_path.clone(),
-                    // Treat symlinks the same as directories for include/ignore matching,
-                    // since symlinks in this branch point to directories.
                     is_dir: true,
                     features: execution.wanted_features(),
                     ignore_kind: IgnoreKind::Ancestors,
@@ -62,7 +53,7 @@ pub trait Handler: Default + Send + Sync + Debug + std::panic::RefUnwindSafe {
         }
 
         // bail on fifo and socket files
-        if !biome_path.path_kind().is_file() {
+        if !path_kind.is_file() {
             return false;
         }
 
@@ -88,7 +79,7 @@ pub trait Handler: Default + Send + Sync + Debug + std::panic::RefUnwindSafe {
 
                 if file_features.is_not_supported()
                     && !file_features.is_ignored()
-                    && !DocumentFileSource::can_read(biome_path)
+                    && !document_file_source(fs, biome_path).is_readable()
                 {
                     // we should throw a diagnostic if we can't handle a file that isn't ignored
                     miss_handler_err(ctx, fs, extension_error(biome_path), biome_path);
@@ -184,6 +175,7 @@ pub(crate) fn miss_handler_err(
         .as_ref()
         .and_then(|wd| {
             biome_path
+                .as_path()
                 .strip_prefix(wd)
                 .ok()
                 .map(|path| path.to_string())

@@ -287,7 +287,7 @@ impl ServiceLanguage for JsLanguage {
                 .into(),
         };
 
-        overrides.apply_override_js_parser_options(path, &mut options);
+        overrides.apply_override_js_parser_options(path.as_path(), &mut options);
 
         options
     }
@@ -1348,7 +1348,7 @@ pub(super) fn lint_with_inspector(
                 &params.parsed_source,
                 params.language,
                 params.settings.as_ref(),
-                params.path,
+                params.path.as_path(),
                 &params.workspace_db,
             )
         {

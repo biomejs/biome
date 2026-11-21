@@ -324,7 +324,9 @@ pub fn module_graph_for_test_file(
             else {
                 continue;
             };
-            let content = fs.read_file_from_path(path).expect("CSS test file exists");
+            let content = fs
+                .read_file_from_path(path.as_path())
+                .expect("CSS test file exists");
             let source_index = db.insert_source(file_source.into());
             let parsed_source = Source::new(
                 &db,
@@ -371,7 +373,9 @@ pub fn module_graph_for_css_test_file(
         else {
             continue;
         };
-        let content = fs.read_file_from_path(path).expect("CSS test file exists");
+        let content = fs
+            .read_file_from_path(path.as_path())
+            .expect("CSS test file exists");
         let source_index = db.insert_source(file_source.into());
         let parsed_source = Source::new(
             &db,
@@ -475,7 +479,7 @@ pub fn module_graph_for_html_test_file(
     // We pass document_file_source explicitly with experimental_full_html_support=true
     // so that .vue/.astro/.svelte files are correctly parsed as HTML-like.
     let files_with_sources = all_files.iter().map(|file_path| {
-        let biome_path = BiomePath::new(file_path.clone());
+        let biome_path = BiomePath::new(file_path);
         let document_file_source = DocumentFileSource::from_well_known(file_path.as_path(), true);
         (biome_path, document_file_source)
     });
@@ -540,16 +544,19 @@ pub fn get_added_js_paths<'a>(
                 return None;
             };
 
-            let root = fs.read_file_from_path(path).ok().and_then(|content| {
-                let parsed =
-                    biome_js_parser::parse(&content, file_source, JsParserOptions::default());
-                let diagnostics = parsed.diagnostics();
-                assert!(
-                    diagnostics.is_empty(),
-                    "Unexpected diagnostics: {diagnostics:?}\nWhile parsing:\n{content}"
-                );
-                parsed.try_tree()
-            })?;
+            let root = fs
+                .read_file_from_path(path.as_path())
+                .ok()
+                .and_then(|content| {
+                    let parsed =
+                        biome_js_parser::parse(&content, file_source, JsParserOptions::default());
+                    let diagnostics = parsed.diagnostics();
+                    assert!(
+                        diagnostics.is_empty(),
+                        "Unexpected diagnostics: {diagnostics:?}\nWhile parsing:\n{content}"
+                    );
+                    parsed.try_tree()
+                })?;
 
             // Build semantic model for the parsed root
             let semantic_model = biome_js_semantic::semantic_model(
@@ -576,7 +583,7 @@ pub fn get_css_added_paths<'a>(
             else {
                 return None;
             };
-            let root = fs.read_file_from_path(path).ok().map(|content| {
+            let root = fs.read_file_from_path(path.as_path()).ok().map(|content| {
                 let options = if file_source.is_css_modules() {
                     CssParserOptions::default().allow_css_modules()
                 } else {
@@ -609,7 +616,7 @@ pub fn get_html_added_paths<'a>(
             else {
                 return None;
             };
-            let parse = fs.read_file_from_path(path).ok().map(|content| {
+            let parse = fs.read_file_from_path(path.as_path()).ok().map(|content| {
                 let parsed =
                     biome_html_parser::parse_html(&content, HtmlParserOptions::from(&file_source));
                 let diagnostics = parsed.diagnostics();
@@ -1348,7 +1355,7 @@ pub fn analyze_with_workspace(
     let mut all_virtual_files = sidecar_paths;
     all_virtual_files.push(virtual_file_path.clone());
     let files_with_sources = all_virtual_files.iter().map(|path| {
-        let biome_path = BiomePath::new(path.clone());
+        let biome_path = BiomePath::new(path);
         let doc_source = DocumentFileSource::from_well_known(path.as_path(), true);
         (biome_path, doc_source)
     });
