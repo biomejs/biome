@@ -1,0 +1,283 @@
+---
+source: crates/biome_toml_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+```toml
+a. = 1
+b = 2
+.c = 3
+d..e = 4
+f = 5
+g.
+h = 6
+
+```
+
+## AST
+
+```
+TomlRoot {
+    bom_token: missing (optional),
+    items: TomlRootItemList [
+        TomlMember {
+            key: TomlBogusKey {
+                items: [
+                    TomlKeyFragmentList [
+                        TomlBareKey {
+                            value_token: TOML_BARE_KEY_LITERAL@0..1 "a" [] [],
+                        },
+                        DOT@1..3 "." [] [Whitespace(" ")],
+                        missing element,
+                    ],
+                ],
+            },
+            eq_token: EQ@3..5 "=" [] [Whitespace(" ")],
+            value: TomlInteger {
+                value_token: TOML_INTEGER_LITERAL@5..6 "1" [] [],
+            },
+        },
+        TomlMember {
+            key: TomlKey {
+                fragments: TomlKeyFragmentList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@6..9 "b" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@9..11 "=" [] [Whitespace(" ")],
+            value: TomlInteger {
+                value_token: TOML_INTEGER_LITERAL@11..12 "2" [] [],
+            },
+        },
+        TomlMember {
+            key: TomlBogusKey {
+                items: [
+                    TomlKeyFragmentList [
+                        missing element,
+                        DOT@12..14 "." [Newline("\n")] [],
+                        TomlBareKey {
+                            value_token: TOML_BARE_KEY_LITERAL@14..16 "c" [] [Whitespace(" ")],
+                        },
+                    ],
+                ],
+            },
+            eq_token: EQ@16..18 "=" [] [Whitespace(" ")],
+            value: TomlInteger {
+                value_token: TOML_INTEGER_LITERAL@18..19 "3" [] [],
+            },
+        },
+        TomlMember {
+            key: TomlBogusKey {
+                items: [
+                    TomlKeyFragmentList [
+                        TomlBareKey {
+                            value_token: TOML_BARE_KEY_LITERAL@19..21 "d" [Newline("\n")] [],
+                        },
+                        DOT@21..22 "." [] [],
+                        missing element,
+                        DOT@22..23 "." [] [],
+                        TomlBareKey {
+                            value_token: TOML_BARE_KEY_LITERAL@23..25 "e" [] [Whitespace(" ")],
+                        },
+                    ],
+                ],
+            },
+            eq_token: EQ@25..27 "=" [] [Whitespace(" ")],
+            value: TomlInteger {
+                value_token: TOML_INTEGER_LITERAL@27..28 "4" [] [],
+            },
+        },
+        TomlMember {
+            key: TomlKey {
+                fragments: TomlKeyFragmentList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@28..31 "f" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@31..33 "=" [] [Whitespace(" ")],
+            value: TomlInteger {
+                value_token: TOML_INTEGER_LITERAL@33..34 "5" [] [],
+            },
+        },
+        TomlMember {
+            key: TomlBogusKey {
+                items: [
+                    TomlKeyFragmentList [
+                        TomlBareKey {
+                            value_token: TOML_BARE_KEY_LITERAL@34..36 "g" [Newline("\n")] [],
+                        },
+                        DOT@36..37 "." [] [],
+                        missing element,
+                    ],
+                ],
+            },
+            eq_token: missing (required),
+            value: missing (required),
+        },
+        TomlMember {
+            key: TomlKey {
+                fragments: TomlKeyFragmentList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@37..40 "h" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@40..42 "=" [] [Whitespace(" ")],
+            value: TomlInteger {
+                value_token: TOML_INTEGER_LITERAL@42..43 "6" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@43..44 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: TOML_ROOT@0..44
+  0: (empty)
+  1: TOML_ROOT_ITEM_LIST@0..43
+    0: TOML_MEMBER@0..6
+      0: TOML_BOGUS_KEY@0..3
+        0: TOML_KEY_FRAGMENT_LIST@0..3
+          0: TOML_BARE_KEY@0..1
+            0: TOML_BARE_KEY_LITERAL@0..1 "a" [] []
+          1: DOT@1..3 "." [] [Whitespace(" ")]
+          2: (empty)
+      1: EQ@3..5 "=" [] [Whitespace(" ")]
+      2: TOML_INTEGER@5..6
+        0: TOML_INTEGER_LITERAL@5..6 "1" [] []
+    1: TOML_MEMBER@6..12
+      0: TOML_KEY@6..9
+        0: TOML_KEY_FRAGMENT_LIST@6..9
+          0: TOML_BARE_KEY@6..9
+            0: TOML_BARE_KEY_LITERAL@6..9 "b" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@9..11 "=" [] [Whitespace(" ")]
+      2: TOML_INTEGER@11..12
+        0: TOML_INTEGER_LITERAL@11..12 "2" [] []
+    2: TOML_MEMBER@12..19
+      0: TOML_BOGUS_KEY@12..16
+        0: TOML_KEY_FRAGMENT_LIST@12..16
+          0: (empty)
+          1: DOT@12..14 "." [Newline("\n")] []
+          2: TOML_BARE_KEY@14..16
+            0: TOML_BARE_KEY_LITERAL@14..16 "c" [] [Whitespace(" ")]
+      1: EQ@16..18 "=" [] [Whitespace(" ")]
+      2: TOML_INTEGER@18..19
+        0: TOML_INTEGER_LITERAL@18..19 "3" [] []
+    3: TOML_MEMBER@19..28
+      0: TOML_BOGUS_KEY@19..25
+        0: TOML_KEY_FRAGMENT_LIST@19..25
+          0: TOML_BARE_KEY@19..21
+            0: TOML_BARE_KEY_LITERAL@19..21 "d" [Newline("\n")] []
+          1: DOT@21..22 "." [] []
+          2: (empty)
+          3: DOT@22..23 "." [] []
+          4: TOML_BARE_KEY@23..25
+            0: TOML_BARE_KEY_LITERAL@23..25 "e" [] [Whitespace(" ")]
+      1: EQ@25..27 "=" [] [Whitespace(" ")]
+      2: TOML_INTEGER@27..28
+        0: TOML_INTEGER_LITERAL@27..28 "4" [] []
+    4: TOML_MEMBER@28..34
+      0: TOML_KEY@28..31
+        0: TOML_KEY_FRAGMENT_LIST@28..31
+          0: TOML_BARE_KEY@28..31
+            0: TOML_BARE_KEY_LITERAL@28..31 "f" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@31..33 "=" [] [Whitespace(" ")]
+      2: TOML_INTEGER@33..34
+        0: TOML_INTEGER_LITERAL@33..34 "5" [] []
+    5: TOML_MEMBER@34..37
+      0: TOML_BOGUS_KEY@34..37
+        0: TOML_KEY_FRAGMENT_LIST@34..37
+          0: TOML_BARE_KEY@34..36
+            0: TOML_BARE_KEY_LITERAL@34..36 "g" [Newline("\n")] []
+          1: DOT@36..37 "." [] []
+          2: (empty)
+      1: (empty)
+      2: (empty)
+    6: TOML_MEMBER@37..43
+      0: TOML_KEY@37..40
+        0: TOML_KEY_FRAGMENT_LIST@37..40
+          0: TOML_BARE_KEY@37..40
+            0: TOML_BARE_KEY_LITERAL@37..40 "h" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@40..42 "=" [] [Whitespace(" ")]
+      2: TOML_INTEGER@42..43
+        0: TOML_INTEGER_LITERAL@42..43 "6" [] []
+  2: EOF@43..44 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+bogus_key.toml:1:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a key but instead found '='.
+  
+  > 1 │ a. = 1
+      │    ^
+    2 │ b = 2
+    3 │ .c = 3
+  
+  i Expected a key here.
+  
+  > 1 │ a. = 1
+      │    ^
+    2 │ b = 2
+    3 │ .c = 3
+  
+bogus_key.toml:3:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a key but instead found '.'.
+  
+    1 │ a. = 1
+    2 │ b = 2
+  > 3 │ .c = 3
+      │ ^
+    4 │ d..e = 4
+    5 │ f = 5
+  
+  i Expected a key here.
+  
+    1 │ a. = 1
+    2 │ b = 2
+  > 3 │ .c = 3
+      │ ^
+    4 │ d..e = 4
+    5 │ f = 5
+  
+bogus_key.toml:4:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a key but instead found '.'.
+  
+    2 │ b = 2
+    3 │ .c = 3
+  > 4 │ d..e = 4
+      │   ^
+    5 │ f = 5
+    6 │ g.
+  
+  i Expected a key here.
+  
+    2 │ b = 2
+    3 │ .c = 3
+  > 4 │ d..e = 4
+      │   ^
+    5 │ f = 5
+    6 │ g.
+  
+bogus_key.toml:6:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a key before the end of the line.
+  
+    4 │ d..e = 4
+    5 │ f = 5
+  > 6 │ g.
+      │  ^
+    7 │ h = 6
+    8 │ 
+  
+```

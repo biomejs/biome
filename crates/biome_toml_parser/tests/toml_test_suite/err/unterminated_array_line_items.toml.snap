@@ -1,0 +1,596 @@
+---
+source: crates/biome_toml_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+```toml
+f = [1,
+[[g]]
+h = 1
+[t]
+i = [
+  2,
+  [t2]
+j = 3
+k = [1,
+"l" = 2
+m = [
+  true = 3
+n = [1,
+"o".p = 4
+q = [
+  true.r = 5
+s = [1.5,
+  1.5 = 6
+
+```
+
+## AST
+
+```
+TomlRoot {
+    bom_token: missing (optional),
+    items: TomlRootItemList [
+        TomlMember {
+            key: TomlKey {
+                fragments: TomlKeyFragmentList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@0..2 "f" [] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@2..4 "=" [] [Whitespace(" ")],
+            value: TomlArray {
+                l_brack_token: L_BRACK@4..5 "[" [] [],
+                elements: TomlArrayElementList [
+                    TomlInteger {
+                        value_token: TOML_INTEGER_LITERAL@5..6 "1" [] [],
+                    },
+                    COMMA@6..7 "," [] [],
+                ],
+                r_brack_token: missing (required),
+            },
+        },
+        TomlArrayTable {
+            header: TomlArrayTableHeader {
+                l_double_brack_token: L_DOUBLE_BRACK@7..10 "[[" [Newline("\n")] [],
+                key: TomlKey {
+                    fragments: TomlKeyFragmentList [
+                        TomlBareKey {
+                            value_token: TOML_BARE_KEY_LITERAL@10..11 "g" [] [],
+                        },
+                    ],
+                },
+                r_double_brack_token: R_DOUBLE_BRACK@11..13 "]]" [] [],
+            },
+            members: TomlMemberList [
+                TomlMember {
+                    key: TomlKey {
+                        fragments: TomlKeyFragmentList [
+                            TomlBareKey {
+                                value_token: TOML_BARE_KEY_LITERAL@13..16 "h" [Newline("\n")] [Whitespace(" ")],
+                            },
+                        ],
+                    },
+                    eq_token: EQ@16..18 "=" [] [Whitespace(" ")],
+                    value: TomlInteger {
+                        value_token: TOML_INTEGER_LITERAL@18..19 "1" [] [],
+                    },
+                },
+            ],
+        },
+        TomlTable {
+            header: TomlTableHeader {
+                l_brack_token: L_BRACK@19..21 "[" [Newline("\n")] [],
+                key: TomlKey {
+                    fragments: TomlKeyFragmentList [
+                        TomlBareKey {
+                            value_token: TOML_BARE_KEY_LITERAL@21..22 "t" [] [],
+                        },
+                    ],
+                },
+                r_brack_token: R_BRACK@22..23 "]" [] [],
+            },
+            members: TomlMemberList [
+                TomlMember {
+                    key: TomlKey {
+                        fragments: TomlKeyFragmentList [
+                            TomlBareKey {
+                                value_token: TOML_BARE_KEY_LITERAL@23..26 "i" [Newline("\n")] [Whitespace(" ")],
+                            },
+                        ],
+                    },
+                    eq_token: EQ@26..28 "=" [] [Whitespace(" ")],
+                    value: TomlArray {
+                        l_brack_token: L_BRACK@28..29 "[" [] [],
+                        elements: TomlArrayElementList [
+                            TomlInteger {
+                                value_token: TOML_INTEGER_LITERAL@29..33 "2" [Newline("\n"), Whitespace("  ")] [],
+                            },
+                            COMMA@33..34 "," [] [],
+                        ],
+                        r_brack_token: missing (required),
+                    },
+                },
+            ],
+        },
+        TomlTable {
+            header: TomlTableHeader {
+                l_brack_token: L_BRACK@34..38 "[" [Newline("\n"), Whitespace("  ")] [],
+                key: TomlKey {
+                    fragments: TomlKeyFragmentList [
+                        TomlBareKey {
+                            value_token: TOML_BARE_KEY_LITERAL@38..40 "t2" [] [],
+                        },
+                    ],
+                },
+                r_brack_token: R_BRACK@40..41 "]" [] [],
+            },
+            members: TomlMemberList [
+                TomlMember {
+                    key: TomlKey {
+                        fragments: TomlKeyFragmentList [
+                            TomlBareKey {
+                                value_token: TOML_BARE_KEY_LITERAL@41..44 "j" [Newline("\n")] [Whitespace(" ")],
+                            },
+                        ],
+                    },
+                    eq_token: EQ@44..46 "=" [] [Whitespace(" ")],
+                    value: TomlInteger {
+                        value_token: TOML_INTEGER_LITERAL@46..47 "3" [] [],
+                    },
+                },
+                TomlMember {
+                    key: TomlKey {
+                        fragments: TomlKeyFragmentList [
+                            TomlBareKey {
+                                value_token: TOML_BARE_KEY_LITERAL@47..50 "k" [Newline("\n")] [Whitespace(" ")],
+                            },
+                        ],
+                    },
+                    eq_token: EQ@50..52 "=" [] [Whitespace(" ")],
+                    value: TomlArray {
+                        l_brack_token: L_BRACK@52..53 "[" [] [],
+                        elements: TomlArrayElementList [
+                            TomlInteger {
+                                value_token: TOML_INTEGER_LITERAL@53..54 "1" [] [],
+                            },
+                            COMMA@54..55 "," [] [],
+                        ],
+                        r_brack_token: missing (required),
+                    },
+                },
+                TomlMember {
+                    key: TomlKey {
+                        fragments: TomlKeyFragmentList [
+                            TomlQuotedKey {
+                                value_token: TOML_BASIC_STRING_LITERAL@55..60 "\"l\"" [Newline("\n")] [Whitespace(" ")],
+                            },
+                        ],
+                    },
+                    eq_token: EQ@60..62 "=" [] [Whitespace(" ")],
+                    value: TomlInteger {
+                        value_token: TOML_INTEGER_LITERAL@62..63 "2" [] [],
+                    },
+                },
+                TomlMember {
+                    key: TomlKey {
+                        fragments: TomlKeyFragmentList [
+                            TomlBareKey {
+                                value_token: TOML_BARE_KEY_LITERAL@63..66 "m" [Newline("\n")] [Whitespace(" ")],
+                            },
+                        ],
+                    },
+                    eq_token: EQ@66..68 "=" [] [Whitespace(" ")],
+                    value: TomlArray {
+                        l_brack_token: L_BRACK@68..69 "[" [] [],
+                        elements: TomlArrayElementList [],
+                        r_brack_token: missing (required),
+                    },
+                },
+                TomlMember {
+                    key: TomlKey {
+                        fragments: TomlKeyFragmentList [
+                            TomlBareKey {
+                                value_token: TOML_BARE_KEY_LITERAL@69..77 "true" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")],
+                            },
+                        ],
+                    },
+                    eq_token: EQ@77..79 "=" [] [Whitespace(" ")],
+                    value: TomlInteger {
+                        value_token: TOML_INTEGER_LITERAL@79..80 "3" [] [],
+                    },
+                },
+                TomlMember {
+                    key: TomlKey {
+                        fragments: TomlKeyFragmentList [
+                            TomlBareKey {
+                                value_token: TOML_BARE_KEY_LITERAL@80..83 "n" [Newline("\n")] [Whitespace(" ")],
+                            },
+                        ],
+                    },
+                    eq_token: EQ@83..85 "=" [] [Whitespace(" ")],
+                    value: TomlArray {
+                        l_brack_token: L_BRACK@85..86 "[" [] [],
+                        elements: TomlArrayElementList [
+                            TomlInteger {
+                                value_token: TOML_INTEGER_LITERAL@86..87 "1" [] [],
+                            },
+                            COMMA@87..88 "," [] [],
+                        ],
+                        r_brack_token: missing (required),
+                    },
+                },
+                TomlMember {
+                    key: TomlKey {
+                        fragments: TomlKeyFragmentList [
+                            TomlQuotedKey {
+                                value_token: TOML_BASIC_STRING_LITERAL@88..92 "\"o\"" [Newline("\n")] [],
+                            },
+                            DOT@92..93 "." [] [],
+                            TomlBareKey {
+                                value_token: TOML_BARE_KEY_LITERAL@93..95 "p" [] [Whitespace(" ")],
+                            },
+                        ],
+                    },
+                    eq_token: EQ@95..97 "=" [] [Whitespace(" ")],
+                    value: TomlInteger {
+                        value_token: TOML_INTEGER_LITERAL@97..98 "4" [] [],
+                    },
+                },
+                TomlMember {
+                    key: TomlKey {
+                        fragments: TomlKeyFragmentList [
+                            TomlBareKey {
+                                value_token: TOML_BARE_KEY_LITERAL@98..101 "q" [Newline("\n")] [Whitespace(" ")],
+                            },
+                        ],
+                    },
+                    eq_token: EQ@101..103 "=" [] [Whitespace(" ")],
+                    value: TomlArray {
+                        l_brack_token: L_BRACK@103..104 "[" [] [],
+                        elements: TomlArrayElementList [],
+                        r_brack_token: missing (required),
+                    },
+                },
+                TomlMember {
+                    key: TomlKey {
+                        fragments: TomlKeyFragmentList [
+                            TomlBareKey {
+                                value_token: TOML_BARE_KEY_LITERAL@104..111 "true" [Newline("\n"), Whitespace("  ")] [],
+                            },
+                            DOT@111..112 "." [] [],
+                            TomlBareKey {
+                                value_token: TOML_BARE_KEY_LITERAL@112..114 "r" [] [Whitespace(" ")],
+                            },
+                        ],
+                    },
+                    eq_token: EQ@114..116 "=" [] [Whitespace(" ")],
+                    value: TomlInteger {
+                        value_token: TOML_INTEGER_LITERAL@116..117 "5" [] [],
+                    },
+                },
+                TomlMember {
+                    key: TomlKey {
+                        fragments: TomlKeyFragmentList [
+                            TomlBareKey {
+                                value_token: TOML_BARE_KEY_LITERAL@117..120 "s" [Newline("\n")] [Whitespace(" ")],
+                            },
+                        ],
+                    },
+                    eq_token: EQ@120..122 "=" [] [Whitespace(" ")],
+                    value: TomlArray {
+                        l_brack_token: L_BRACK@122..123 "[" [] [],
+                        elements: TomlArrayElementList [
+                            TomlFloat {
+                                value_token: TOML_FLOAT_LITERAL@123..126 "1.5" [] [],
+                            },
+                            COMMA@126..127 "," [] [],
+                        ],
+                        r_brack_token: missing (required),
+                    },
+                },
+                TomlMember {
+                    key: TomlKey {
+                        fragments: TomlKeyFragmentList [
+                            TomlBareKey {
+                                value_token: TOML_BARE_KEY_LITERAL@127..131 "1" [Newline("\n"), Whitespace("  ")] [],
+                            },
+                            DOT@131..132 "." [] [],
+                            TomlBareKey {
+                                value_token: TOML_BARE_KEY_LITERAL@132..134 "5" [] [Whitespace(" ")],
+                            },
+                        ],
+                    },
+                    eq_token: EQ@134..136 "=" [] [Whitespace(" ")],
+                    value: TomlInteger {
+                        value_token: TOML_INTEGER_LITERAL@136..137 "6" [] [],
+                    },
+                },
+            ],
+        },
+    ],
+    eof_token: EOF@137..138 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: TOML_ROOT@0..138
+  0: (empty)
+  1: TOML_ROOT_ITEM_LIST@0..137
+    0: TOML_MEMBER@0..7
+      0: TOML_KEY@0..2
+        0: TOML_KEY_FRAGMENT_LIST@0..2
+          0: TOML_BARE_KEY@0..2
+            0: TOML_BARE_KEY_LITERAL@0..2 "f" [] [Whitespace(" ")]
+      1: EQ@2..4 "=" [] [Whitespace(" ")]
+      2: TOML_ARRAY@4..7
+        0: L_BRACK@4..5 "[" [] []
+        1: TOML_ARRAY_ELEMENT_LIST@5..7
+          0: TOML_INTEGER@5..6
+            0: TOML_INTEGER_LITERAL@5..6 "1" [] []
+          1: COMMA@6..7 "," [] []
+        2: (empty)
+    1: TOML_ARRAY_TABLE@7..19
+      0: TOML_ARRAY_TABLE_HEADER@7..13
+        0: L_DOUBLE_BRACK@7..10 "[[" [Newline("\n")] []
+        1: TOML_KEY@10..11
+          0: TOML_KEY_FRAGMENT_LIST@10..11
+            0: TOML_BARE_KEY@10..11
+              0: TOML_BARE_KEY_LITERAL@10..11 "g" [] []
+        2: R_DOUBLE_BRACK@11..13 "]]" [] []
+      1: TOML_MEMBER_LIST@13..19
+        0: TOML_MEMBER@13..19
+          0: TOML_KEY@13..16
+            0: TOML_KEY_FRAGMENT_LIST@13..16
+              0: TOML_BARE_KEY@13..16
+                0: TOML_BARE_KEY_LITERAL@13..16 "h" [Newline("\n")] [Whitespace(" ")]
+          1: EQ@16..18 "=" [] [Whitespace(" ")]
+          2: TOML_INTEGER@18..19
+            0: TOML_INTEGER_LITERAL@18..19 "1" [] []
+    2: TOML_TABLE@19..34
+      0: TOML_TABLE_HEADER@19..23
+        0: L_BRACK@19..21 "[" [Newline("\n")] []
+        1: TOML_KEY@21..22
+          0: TOML_KEY_FRAGMENT_LIST@21..22
+            0: TOML_BARE_KEY@21..22
+              0: TOML_BARE_KEY_LITERAL@21..22 "t" [] []
+        2: R_BRACK@22..23 "]" [] []
+      1: TOML_MEMBER_LIST@23..34
+        0: TOML_MEMBER@23..34
+          0: TOML_KEY@23..26
+            0: TOML_KEY_FRAGMENT_LIST@23..26
+              0: TOML_BARE_KEY@23..26
+                0: TOML_BARE_KEY_LITERAL@23..26 "i" [Newline("\n")] [Whitespace(" ")]
+          1: EQ@26..28 "=" [] [Whitespace(" ")]
+          2: TOML_ARRAY@28..34
+            0: L_BRACK@28..29 "[" [] []
+            1: TOML_ARRAY_ELEMENT_LIST@29..34
+              0: TOML_INTEGER@29..33
+                0: TOML_INTEGER_LITERAL@29..33 "2" [Newline("\n"), Whitespace("  ")] []
+              1: COMMA@33..34 "," [] []
+            2: (empty)
+    3: TOML_TABLE@34..137
+      0: TOML_TABLE_HEADER@34..41
+        0: L_BRACK@34..38 "[" [Newline("\n"), Whitespace("  ")] []
+        1: TOML_KEY@38..40
+          0: TOML_KEY_FRAGMENT_LIST@38..40
+            0: TOML_BARE_KEY@38..40
+              0: TOML_BARE_KEY_LITERAL@38..40 "t2" [] []
+        2: R_BRACK@40..41 "]" [] []
+      1: TOML_MEMBER_LIST@41..137
+        0: TOML_MEMBER@41..47
+          0: TOML_KEY@41..44
+            0: TOML_KEY_FRAGMENT_LIST@41..44
+              0: TOML_BARE_KEY@41..44
+                0: TOML_BARE_KEY_LITERAL@41..44 "j" [Newline("\n")] [Whitespace(" ")]
+          1: EQ@44..46 "=" [] [Whitespace(" ")]
+          2: TOML_INTEGER@46..47
+            0: TOML_INTEGER_LITERAL@46..47 "3" [] []
+        1: TOML_MEMBER@47..55
+          0: TOML_KEY@47..50
+            0: TOML_KEY_FRAGMENT_LIST@47..50
+              0: TOML_BARE_KEY@47..50
+                0: TOML_BARE_KEY_LITERAL@47..50 "k" [Newline("\n")] [Whitespace(" ")]
+          1: EQ@50..52 "=" [] [Whitespace(" ")]
+          2: TOML_ARRAY@52..55
+            0: L_BRACK@52..53 "[" [] []
+            1: TOML_ARRAY_ELEMENT_LIST@53..55
+              0: TOML_INTEGER@53..54
+                0: TOML_INTEGER_LITERAL@53..54 "1" [] []
+              1: COMMA@54..55 "," [] []
+            2: (empty)
+        2: TOML_MEMBER@55..63
+          0: TOML_KEY@55..60
+            0: TOML_KEY_FRAGMENT_LIST@55..60
+              0: TOML_QUOTED_KEY@55..60
+                0: TOML_BASIC_STRING_LITERAL@55..60 "\"l\"" [Newline("\n")] [Whitespace(" ")]
+          1: EQ@60..62 "=" [] [Whitespace(" ")]
+          2: TOML_INTEGER@62..63
+            0: TOML_INTEGER_LITERAL@62..63 "2" [] []
+        3: TOML_MEMBER@63..69
+          0: TOML_KEY@63..66
+            0: TOML_KEY_FRAGMENT_LIST@63..66
+              0: TOML_BARE_KEY@63..66
+                0: TOML_BARE_KEY_LITERAL@63..66 "m" [Newline("\n")] [Whitespace(" ")]
+          1: EQ@66..68 "=" [] [Whitespace(" ")]
+          2: TOML_ARRAY@68..69
+            0: L_BRACK@68..69 "[" [] []
+            1: TOML_ARRAY_ELEMENT_LIST@69..69
+            2: (empty)
+        4: TOML_MEMBER@69..80
+          0: TOML_KEY@69..77
+            0: TOML_KEY_FRAGMENT_LIST@69..77
+              0: TOML_BARE_KEY@69..77
+                0: TOML_BARE_KEY_LITERAL@69..77 "true" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")]
+          1: EQ@77..79 "=" [] [Whitespace(" ")]
+          2: TOML_INTEGER@79..80
+            0: TOML_INTEGER_LITERAL@79..80 "3" [] []
+        5: TOML_MEMBER@80..88
+          0: TOML_KEY@80..83
+            0: TOML_KEY_FRAGMENT_LIST@80..83
+              0: TOML_BARE_KEY@80..83
+                0: TOML_BARE_KEY_LITERAL@80..83 "n" [Newline("\n")] [Whitespace(" ")]
+          1: EQ@83..85 "=" [] [Whitespace(" ")]
+          2: TOML_ARRAY@85..88
+            0: L_BRACK@85..86 "[" [] []
+            1: TOML_ARRAY_ELEMENT_LIST@86..88
+              0: TOML_INTEGER@86..87
+                0: TOML_INTEGER_LITERAL@86..87 "1" [] []
+              1: COMMA@87..88 "," [] []
+            2: (empty)
+        6: TOML_MEMBER@88..98
+          0: TOML_KEY@88..95
+            0: TOML_KEY_FRAGMENT_LIST@88..95
+              0: TOML_QUOTED_KEY@88..92
+                0: TOML_BASIC_STRING_LITERAL@88..92 "\"o\"" [Newline("\n")] []
+              1: DOT@92..93 "." [] []
+              2: TOML_BARE_KEY@93..95
+                0: TOML_BARE_KEY_LITERAL@93..95 "p" [] [Whitespace(" ")]
+          1: EQ@95..97 "=" [] [Whitespace(" ")]
+          2: TOML_INTEGER@97..98
+            0: TOML_INTEGER_LITERAL@97..98 "4" [] []
+        7: TOML_MEMBER@98..104
+          0: TOML_KEY@98..101
+            0: TOML_KEY_FRAGMENT_LIST@98..101
+              0: TOML_BARE_KEY@98..101
+                0: TOML_BARE_KEY_LITERAL@98..101 "q" [Newline("\n")] [Whitespace(" ")]
+          1: EQ@101..103 "=" [] [Whitespace(" ")]
+          2: TOML_ARRAY@103..104
+            0: L_BRACK@103..104 "[" [] []
+            1: TOML_ARRAY_ELEMENT_LIST@104..104
+            2: (empty)
+        8: TOML_MEMBER@104..117
+          0: TOML_KEY@104..114
+            0: TOML_KEY_FRAGMENT_LIST@104..114
+              0: TOML_BARE_KEY@104..111
+                0: TOML_BARE_KEY_LITERAL@104..111 "true" [Newline("\n"), Whitespace("  ")] []
+              1: DOT@111..112 "." [] []
+              2: TOML_BARE_KEY@112..114
+                0: TOML_BARE_KEY_LITERAL@112..114 "r" [] [Whitespace(" ")]
+          1: EQ@114..116 "=" [] [Whitespace(" ")]
+          2: TOML_INTEGER@116..117
+            0: TOML_INTEGER_LITERAL@116..117 "5" [] []
+        9: TOML_MEMBER@117..127
+          0: TOML_KEY@117..120
+            0: TOML_KEY_FRAGMENT_LIST@117..120
+              0: TOML_BARE_KEY@117..120
+                0: TOML_BARE_KEY_LITERAL@117..120 "s" [Newline("\n")] [Whitespace(" ")]
+          1: EQ@120..122 "=" [] [Whitespace(" ")]
+          2: TOML_ARRAY@122..127
+            0: L_BRACK@122..123 "[" [] []
+            1: TOML_ARRAY_ELEMENT_LIST@123..127
+              0: TOML_FLOAT@123..126
+                0: TOML_FLOAT_LITERAL@123..126 "1.5" [] []
+              1: COMMA@126..127 "," [] []
+            2: (empty)
+        10: TOML_MEMBER@127..137
+          0: TOML_KEY@127..134
+            0: TOML_KEY_FRAGMENT_LIST@127..134
+              0: TOML_BARE_KEY@127..131
+                0: TOML_BARE_KEY_LITERAL@127..131 "1" [Newline("\n"), Whitespace("  ")] []
+              1: DOT@131..132 "." [] []
+              2: TOML_BARE_KEY@132..134
+                0: TOML_BARE_KEY_LITERAL@132..134 "5" [] [Whitespace(" ")]
+          1: EQ@134..136 "=" [] [Whitespace(" ")]
+          2: TOML_INTEGER@136..137
+            0: TOML_INTEGER_LITERAL@136..137 "6" [] []
+  2: EOF@137..138 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+unterminated_array_line_items.toml:2:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `]` but instead found `[[`
+  
+    1 │ f = [1,
+  > 2 │ [[g]]
+      │ ^^
+    3 │ h = 1
+    4 │ [t]
+  
+  i Remove [[
+  
+unterminated_array_line_items.toml:7:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `]` but instead found `[`
+  
+    5 │ i = [
+    6 │   2,
+  > 7 │   [t2]
+      │   ^
+    8 │ j = 3
+    9 │ k = [1,
+  
+  i Remove [
+  
+unterminated_array_line_items.toml:10:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `]` but instead found `"l"`
+  
+     8 │ j = 3
+     9 │ k = [1,
+  > 10 │ "l" = 2
+       │ ^^^
+    11 │ m = [
+    12 │   true = 3
+  
+  i Remove "l"
+  
+unterminated_array_line_items.toml:12:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `]` but instead found `true`
+  
+    10 │ "l" = 2
+    11 │ m = [
+  > 12 │   true = 3
+       │   ^^^^
+    13 │ n = [1,
+    14 │ "o".p = 4
+  
+  i Remove true
+  
+unterminated_array_line_items.toml:14:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `]` but instead found `"o"`
+  
+    12 │   true = 3
+    13 │ n = [1,
+  > 14 │ "o".p = 4
+       │ ^^^
+    15 │ q = [
+    16 │   true.r = 5
+  
+  i Remove "o"
+  
+unterminated_array_line_items.toml:16:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `]` but instead found `true.r`
+  
+    14 │ "o".p = 4
+    15 │ q = [
+  > 16 │   true.r = 5
+       │   ^^^^^^
+    17 │ s = [1.5,
+    18 │   1.5 = 6
+  
+  i Remove true.r
+  
+unterminated_array_line_items.toml:18:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `]` but instead found `1`
+  
+    16 │   true.r = 5
+    17 │ s = [1.5,
+  > 18 │   1.5 = 6
+       │   ^
+    19 │ 
+  
+  i Remove 1
+  
+```
