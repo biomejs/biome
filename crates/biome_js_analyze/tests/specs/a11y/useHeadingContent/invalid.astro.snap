@@ -1,0 +1,117 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.astro
+---
+# Input
+```astro
+<!-- should generate diagnostics -->
+
+{show && <h1 />}
+{show && <h2></h2>}
+{show && <h3 set:foo={html} />}
+{show && <h4 set:HTML={html} />}
+{show && <h5 aria-hidden="true" set:html={html} />}
+{show && <h6 aria-hidden="true" set:text={text}></h6>}
+
+```
+
+# Diagnostics
+```
+invalid.astro:3:10 lint/a11y/useHeadingContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide screen reader accessible content when using heading  elements.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ 
+  > 3 │ {show && <h1 />}
+      │          ^^^^^^
+    4 │ {show && <h2></h2>}
+    5 │ {show && <h3 set:foo={html} />}
+  
+  i All headings on a page should have content that is accessible to screen readers.
+  
+
+```
+
+```
+invalid.astro:4:10 lint/a11y/useHeadingContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide screen reader accessible content when using heading  elements.
+  
+    3 │ {show && <h1 />}
+  > 4 │ {show && <h2></h2>}
+      │          ^^^^^^^^^
+    5 │ {show && <h3 set:foo={html} />}
+    6 │ {show && <h4 set:HTML={html} />}
+  
+  i All headings on a page should have content that is accessible to screen readers.
+  
+
+```
+
+```
+invalid.astro:5:10 lint/a11y/useHeadingContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide screen reader accessible content when using heading  elements.
+  
+    3 │ {show && <h1 />}
+    4 │ {show && <h2></h2>}
+  > 5 │ {show && <h3 set:foo={html} />}
+      │          ^^^^^^^^^^^^^^^^^^^^^
+    6 │ {show && <h4 set:HTML={html} />}
+    7 │ {show && <h5 aria-hidden="true" set:html={html} />}
+  
+  i All headings on a page should have content that is accessible to screen readers.
+  
+
+```
+
+```
+invalid.astro:6:10 lint/a11y/useHeadingContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide screen reader accessible content when using heading  elements.
+  
+    4 │ {show && <h2></h2>}
+    5 │ {show && <h3 set:foo={html} />}
+  > 6 │ {show && <h4 set:HTML={html} />}
+      │          ^^^^^^^^^^^^^^^^^^^^^^
+    7 │ {show && <h5 aria-hidden="true" set:html={html} />}
+    8 │ {show && <h6 aria-hidden="true" set:text={text}></h6>}
+  
+  i All headings on a page should have content that is accessible to screen readers.
+  
+
+```
+
+```
+invalid.astro:7:10 lint/a11y/useHeadingContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide screen reader accessible content when using heading  elements.
+  
+    5 │ {show && <h3 set:foo={html} />}
+    6 │ {show && <h4 set:HTML={html} />}
+  > 7 │ {show && <h5 aria-hidden="true" set:html={html} />}
+      │          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ {show && <h6 aria-hidden="true" set:text={text}></h6>}
+    9 │ 
+  
+  i All headings on a page should have content that is accessible to screen readers.
+  
+
+```
+
+```
+invalid.astro:8:10 lint/a11y/useHeadingContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide screen reader accessible content when using heading  elements.
+  
+    6 │ {show && <h4 set:HTML={html} />}
+    7 │ {show && <h5 aria-hidden="true" set:html={html} />}
+  > 8 │ {show && <h6 aria-hidden="true" set:text={text}></h6>}
+      │          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    9 │ 
+  
+  i All headings on a page should have content that is accessible to screen readers.
+  
+
+```

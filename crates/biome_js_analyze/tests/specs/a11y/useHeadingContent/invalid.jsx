@@ -17,4 +17,6 @@
 	<h1 children={null} />
 	<h1 children={undefined} />
 	<h1 {...props} aria-hidden="true" />
+	<h1 set:html={html} />
+	<h1 set:text={text}></h1>
 </>;

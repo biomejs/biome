@@ -23,6 +23,8 @@ expression: invalid.jsx
 	<h1 children={null} />
 	<h1 children={undefined} />
 	<h1 {...props} aria-hidden="true" />
+	<h1 set:html={html} />
+	<h1 set:text={text}></h1>
 </>;
 
 ```
@@ -231,7 +233,7 @@ invalid.jsx:18:2 lint/a11y/useHeadingContent ━━━━━━━━━━━�
   > 18 │ 	<h1 children={undefined} />
        │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^
     19 │ 	<h1 {...props} aria-hidden="true" />
-    20 │ </>;
+    20 │ 	<h1 set:html={html} />
   
   i All headings on a page should have content that is accessible to screen readers.
   
@@ -247,8 +249,42 @@ invalid.jsx:19:2 lint/a11y/useHeadingContent ━━━━━━━━━━━�
     18 │ 	<h1 children={undefined} />
   > 19 │ 	<h1 {...props} aria-hidden="true" />
        │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    20 │ </>;
-    21 │ 
+    20 │ 	<h1 set:html={html} />
+    21 │ 	<h1 set:text={text}></h1>
+  
+  i All headings on a page should have content that is accessible to screen readers.
+  
+
+```
+
+```
+invalid.jsx:20:2 lint/a11y/useHeadingContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide screen reader accessible content when using heading  elements.
+  
+    18 │ 	<h1 children={undefined} />
+    19 │ 	<h1 {...props} aria-hidden="true" />
+  > 20 │ 	<h1 set:html={html} />
+       │ 	^^^^^^^^^^^^^^^^^^^^^^
+    21 │ 	<h1 set:text={text}></h1>
+    22 │ </>;
+  
+  i All headings on a page should have content that is accessible to screen readers.
+  
+
+```
+
+```
+invalid.jsx:21:2 lint/a11y/useHeadingContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide screen reader accessible content when using heading  elements.
+  
+    19 │ 	<h1 {...props} aria-hidden="true" />
+    20 │ 	<h1 set:html={html} />
+  > 21 │ 	<h1 set:text={text}></h1>
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^
+    22 │ </>;
+    23 │ 
   
   i All headings on a page should have content that is accessible to screen readers.
   
