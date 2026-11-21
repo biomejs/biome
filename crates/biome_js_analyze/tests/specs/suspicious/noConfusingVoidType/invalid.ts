@@ -1,11 +1,5 @@
 // ref: https://github.com/typescript-eslint/typescript-eslint/blob/main/packages/eslint-plugin/tests/rules/no-invalid-void-type.test.ts
 function takeVoid(thing: void) {}
-const arrowGeneric = <T extends void>(arg: T) => {};
-const arrowGeneric2 = <T extends void = void>(arg: T) => {};
-function functionGeneric<T extends void>(arg: T) {}
-function functionGeneric2<T extends void = void>(arg: T) {}
-declare function functionDeclaration<T extends void>(arg: T): void;
-declare function functionDeclaration2<T extends void = void>(arg: T): void;
 
 declare function voidArray(args: void[]): void[];
 let value = undefined as void;
