@@ -2251,8 +2251,11 @@ dependencies = [
  "biome_toml_factory",
  "biome_toml_syntax",
  "biome_unicode_table",
+ "codspeed-criterion-compat",
  "insta",
+ "mimalloc",
  "tests_macros",
+ "tikv-jemallocator",
 ]
 
 [[package]]
