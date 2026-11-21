@@ -2620,3 +2620,115 @@ fn adding_and_removing_conditions_invalidates_flow_candidates_with_equal_semanti
         assert_function_query_was_not_run(&db, infer_module_types, module, &events);
     }
 }
+
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type,
+// except where a comment gives TypeScript's type. A primitive has the members
+// of its wrapper, such as `String`, and `readonly T[]` and `readonly` tuples
+// have the members of `ReadonlyArray`, with or without narrowing.
+#[test]
+fn primitive_and_readonly_array_members_resolve() {
+    const SOURCE: &str = r#"
+        function f(s: string, os: string | undefined, n: number, b: boolean, lit: "ab" | "c", t: readonly [string | null, number], ra: readonly string[], ro: ReadonlyArray<number>) {
+            /*length*/s.length;
+            /*literalLength*/"abc".length;
+            /*literalUnionLength*/lit.length;
+            /*optionalLength*/os?.length;
+            /*method*/s.toUpperCase();
+            /*number*/n.toFixed();
+            /*boolean*/b.valueOf();
+            /*tupleElement*/t[0];
+            /*tupleSecond*/t[1];
+            /*tupleLength*/t.length;
+            /*arrayElement*/ra[0];
+            /*arrayLength*/ra.length;
+            /*readonlyArrayElement*/ro[0];
+            /*push*/ra.push;
+        }
+        function narrowTuple(t: readonly [string | null]) { if (t[0] !== null) /*narrowedTuple*/t[0]; }
+        function narrowString(x: string | null) { if (x) /*narrowedString*/x.length; }
+    "#;
+    let (db, module) = narrowing_db(SOURCE);
+    let mismatches: Vec<_> = [
+        ("length", "s.length", &["number"][..]),
+        ("literalLength", r#""abc".length"#, &["number"]),
+        ("literalUnionLength", "lit.length", &["number"]),
+        ("optionalLength", "os?.length", &["number", "undefined"]),
+        ("method", "s.toUpperCase()", &["string"]),
+        ("number", "n.toFixed()", &["string"]),
+        ("boolean", "b.valueOf()", &["boolean"]),
+        ("tupleElement", "t[0]", &["null", "string"]),
+        ("tupleSecond", "t[1]", &["number"]),
+        // `2`. Biome types the `length` of every tuple as `number`, because a
+        // tuple has the members of `Array`, or of `ReadonlyArray` when it is
+        // `readonly`.
+        ("tupleLength", "t.length", &["number"]),
+        // `string`. Biome adds `undefined` to an element of every array,
+        // `readonly` or not, because the index may be out of bounds.
+        ("arrayElement", "ra[0]", &["string", "undefined"]),
+        ("arrayLength", "ra.length", &["number"]),
+        // `number`, as for `arrayElement`.
+        ("readonlyArrayElement", "ro[0]", &["number", "undefined"]),
+        // `any`, because `ReadonlyArray` has no `push` (TS2339).
+        ("push", "ra.push", &["unknown"]),
+        ("narrowedTuple", "t[0]", &["string"]),
+        ("narrowedString", "x.length", &["number"]),
+    ]
+    .into_iter()
+    .filter_map(|(marker, expression, expected)| {
+        let ty = normalized_type_at(&db, module, SOURCE, marker, expression);
+        let actual = variant_texts(&db, ty);
+        (actual != expected).then(|| format!("{marker}: expected {expected:?}, got {actual:?}"))
+    })
+    .collect();
+    assert!(mismatches.is_empty(), "{}", mismatches.join("\n"));
+}
+
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type,
+// except where a comment gives TypeScript's type. A variable that `catch`
+// declares has its annotation, or `unknown` without one, wherever the `catch`
+// clause is, and narrows as a value of type `unknown` does. Biome doesn't
+// model the control flow inside a `try` statement, so a test in an `if`
+// statement inside `catch` narrows nothing, and these reads narrow only within
+// one expression.
+#[test]
+fn catch_variables_have_the_unknown_keyword_type() {
+    use InferredTypeData::{AnyKeyword, Unknown, UnknownKeyword};
+    const SOURCE: &str = r#"
+        declare function g(): void;
+        function plain() { try { g(); } catch (e) { /*plain*/e; } }
+        function annotatedAny() { try { g(); } catch (e: any) { /*annotatedAny*/e; } }
+        function annotatedUnknown() { try { g(); } catch (e: unknown) { /*annotatedUnknown*/e; } }
+        function shadow(x: string | null) { try { g(); } catch (x) { /*shadow*/x; } }
+        function objectPattern() { try { g(); } catch ({ message }) { /*objectPattern*/message; } }
+        function arrayPattern() { try { g(); } catch ([first]) { /*arrayPattern*/first; } }
+        function anyPattern() { try { g(); } catch ({ message }: any) { /*anyPattern*/message; } }
+        const arrow = () => { try { g(); } catch (e) { /*arrow*/e; } };
+        class C { m() { try { g(); } catch (e) { /*method*/e; } } }
+        function logical() { try { g(); } catch (e) { e instanceof Error && /*logical*/e; } }
+        function conditional() { try { g(); } catch (e) { typeof e === "string" ? /*conditional*/e : 0; } }
+    "#;
+    let (db, module) = narrowing_db(SOURCE);
+    for (marker, expression, expected) in [
+        ("plain", "e", UnknownKeyword),
+        ("annotatedAny", "e", AnyKeyword),
+        ("annotatedUnknown", "e", UnknownKeyword),
+        ("shadow", "x", UnknownKeyword),
+        // `any` after error TS2339, because `unknown` has no property `message`.
+        ("objectPattern", "message", Unknown),
+        // `any` after error TS2488, because `unknown` is not iterable.
+        ("arrayPattern", "first", Unknown),
+        // `any`
+        ("anyPattern", "message", Unknown),
+        ("arrow", "e", UnknownKeyword),
+        ("method", "e", UnknownKeyword),
+        ("conditional", "e", InferredTypeData::String),
+    ] {
+        assert_eq!(
+            normalized_type_at(&db, module, SOURCE, marker, expression),
+            expected,
+            "{marker}"
+        );
+    }
+    let logical = normalized_type_at(&db, module, SOURCE, "logical", "e");
+    assert_eq!(variant_texts(&db, logical), ["instanceof Error"]);
+}

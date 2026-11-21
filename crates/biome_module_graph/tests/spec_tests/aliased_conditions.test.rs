@@ -385,10 +385,9 @@ fn assert_named_reads(source: &str, reads: &[(&str, &str, &[&str])]) {
     assert!(mismatches.is_empty(), "{}", mismatches.join("\n"));
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type,
-// because an inlined condition narrows a property path when every property
-// along it is readonly. TypeScript also narrows an element of a readonly
-// tuple, which Biome types as Unknown even without a condition.
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
+// An inlined condition narrows a property path when every property along it
+// is readonly, including an element of a readonly tuple.
 #[test]
 fn readonly_property_paths_narrow_through_aliased_conditions() {
     use InferredTypeData::{Null, Number, String};
@@ -414,6 +413,7 @@ fn readonly_property_paths_narrow_through_aliased_conditions() {
         function nullable(o: { readonly v: string | null } | null) { const ok = o?.v !== null && o !== null; if (ok) /*nullable*/o.v; }
         function predicate(o: { readonly v: string | number }) { const ok = isString(o.v); if (ok) /*predicate*/o.v; }
         function truthy(o: { readonly v: string | null }) { const ok = !!o.v; if (ok) /*truthy*/o.v; }
+        function tuple(t: readonly [string | null]) { const ok = t[0] !== null; if (ok) /*tuple*/t[0]; }
     "#;
     assert_reads(
         SOURCE,
@@ -440,6 +440,7 @@ fn readonly_property_paths_narrow_through_aliased_conditions() {
             ("nullable", "o.v", &[String]),
             ("predicate", "o.v", &[String]),
             ("truthy", "o.v", &[String]),
+            ("tuple", "t[0]", &[String]),
         ],
     );
 }
