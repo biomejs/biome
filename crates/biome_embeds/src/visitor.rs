@@ -807,7 +807,9 @@ impl EmbeddedBindingsBuilder {
             self.register_binding(token.text_trimmed_range(), token.token_text_trimmed());
         }
 
-        if let Ok(parameters) = root.parameters() {
+        if let Ok(parameters) = root.parameters()
+            && let Some(parameters) = parameters.as_js_parameters()
+        {
             for param in parameters.items().iter().flatten() {
                 if let Some(formal) = param
                     .as_any_js_formal_parameter()

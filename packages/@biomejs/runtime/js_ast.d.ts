@@ -2000,8 +2000,10 @@ export interface JsSvelteSnippetRoot extends JsAstNode {
 	readonly kind: "JS_SVELTE_SNIPPET_ROOT";
 	readonly name: AnyJsBinding | undefined;
 	withName(value: AnyJsBinding): JsSvelteSnippetRoot;
-	readonly parameters: JsParameters | undefined;
-	withParameters(value: JsParameters): JsSvelteSnippetRoot;
+	readonly typeParameters: TsTypeParameters | undefined;
+	withTypeParameters(value: TsTypeParameters | undefined): JsSvelteSnippetRoot;
+	readonly parameters: AnyJsSvelteSnippetParameters | undefined;
+	withParameters(value: AnyJsSvelteSnippetParameters): JsSvelteSnippetRoot;
 	readonly eofToken: string | undefined;
 	withEofToken(value: JsAstToken): JsSvelteSnippetRoot;
 	token(field: "eofToken"): JsAstToken | undefined;
@@ -4248,6 +4250,7 @@ export type AnyJsSvelteDeclaration =
 	| JsBogusVariableDeclaration
 	| JsVariableDeclaration;
 export type AnyJsSvelteLegacyConstDeclarator = JsBogus | JsVariableDeclarator;
+export type AnyJsSvelteSnippetParameters = JsBogus | JsParameters;
 export type AnyJsSwitchClause = JsCaseClause | JsDefaultClause;
 export type AnyJsTemplateElement = JsTemplateChunkElement | JsTemplateElement;
 export type AnyJsVueGenericTypeParameters = JsBogus | TsTypeParameterList;
