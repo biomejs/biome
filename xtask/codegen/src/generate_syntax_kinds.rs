@@ -216,6 +216,28 @@ pub fn generate_syntax_kinds(grammar: KindsSrc, language_kind: LanguageKind) -> 
                 }
             }
         }
+        LanguageKind::Toml => {
+            quote! {
+                pub const fn to_string(&self) -> Option<&'static str> {
+                    let tok = match self {
+                        #(#punctuation => #punctuation_strings,)*
+                        #(#full_keywords => #all_keyword_to_strings,)*
+                        EOF => "",
+                        TOML_BARE_KEY_LITERAL => "bare key",
+                        TOML_BASIC_STRING_LITERAL => "basic string",
+                        TOML_LITERAL_STRING_LITERAL => "literal string",
+                        TOML_ML_BASIC_STRING_LITERAL => "multi-line basic string",
+                        TOML_ML_LITERAL_STRING_LITERAL => "multi-line literal string",
+                        TOML_INTEGER_LITERAL => "integer",
+                        TOML_FLOAT_LITERAL => "float",
+                        TOML_DATE_LITERAL => "date",
+                        TOML_TIME_LITERAL => "time",
+                        _ => return None,
+                    };
+                    Some(tok)
+                }
+            }
+        }
         LanguageKind::Tailwind => {
             quote! {
                 pub const fn to_string(&self) -> Option<&'static str> {

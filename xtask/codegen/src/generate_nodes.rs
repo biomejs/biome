@@ -1213,5 +1213,7 @@ pub fn should_token_be_quoted(token: &str) -> bool {
             | "{:" // Note: "'" and "\"" are handled separately in token_kind_to_code
             | "[("
             | ")]"
+            | "[["
+            | "]]"
     )
 }

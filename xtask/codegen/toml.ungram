@@ -1,0 +1,236 @@
+// TOML Un-Grammar.
+//
+// This grammar specifies the structure of TOML's concrete syntax tree.
+// It does not specify parsing rules (ambiguities, precedence, etc are out of scope).
+// Tokens are processed -- contextual keywords are recognised, compound operators glued.
+//
+// The grammar follows TOML 1.1.0: https://toml.io/en/v1.1.0
+//
+// Legend:
+//
+//   //                          -- comment
+//   Name =                      -- non-terminal definition
+//   'ident'                     -- token (terminal)
+//   A B                         -- sequence
+//   A | B                       -- alternation
+//   A*                          -- zero or more repetition
+//   (A (',' A)* ','?)            -- repetition of node A separated by ',' and allowing a trailing comma
+//   (A (',' A)*)                -- repetition of node A separated by ',' without a trailing comma
+//   A?                          -- zero or one repetition
+//   (A)                         -- same as A
+//   label:A                     -- suggested name for field of AST node
+
+// NOTES
+//
+// - SyntaxNode, SyntaxToken and SyntaxElement will be stripped from the codegen
+// - Bogus nodes are special nodes used to keep track of broken code; they are
+//   not part of the grammar but they will appear inside the green tree
+// - Newlines, whitespace, and comments are trivia. The parser enforces the
+//   places where TOML requires or forbids a newline.
+
+
+///////////////
+// BOGUS NODES
+///////////////
+// SyntaxElement is a generic data structure that is meant to track nodes and tokens
+// in cases where we care about both types
+//
+// As Bogus* node will need to yield both tokens and nodes without discrimination,
+// and their children will need to yield nodes and tokens as well.
+// For this reason, SyntaxElement = SyntaxElement
+
+SyntaxElement = SyntaxElement
+
+TomlBogus = SyntaxElement*
+TomlBogusValue = SyntaxElement*
+TomlBogusKey = SyntaxElement*
+TomlBogusTableHeader = SyntaxElement*
+TomlBogusMember = SyntaxElement*
+TomlBogusKeyFragment = SyntaxElement*
+
+TomlRoot =
+    bom: 'UNICODE_BOM'?
+    items: TomlRootItemList
+    eof: 'EOF'
+
+// The members that precede the first table header, followed by the tables.
+// Each table owns the members that follow its header.
+TomlRootItemList = AnyTomlRootItem*
+
+AnyTomlRootItem =
+    TomlMember
+    | TomlTable
+    | TomlArrayTable
+    | TomlBogusMember
+
+///////////////
+// TABLES
+///////////////
+
+// [a.b]
+// ^^^^^
+// c = 1
+// ^^^^^
+TomlTable =
+    header: AnyTomlTableHeader
+    members: TomlMemberList
+
+AnyTomlTableHeader =
+    TomlTableHeader
+    | TomlBogusTableHeader
+
+// [a.b]
+// ^^^^^
+TomlTableHeader =
+    '['
+    key: AnyTomlKey
+    ']'
+
+// [[a.b]]
+// ^^^^^^^
+// c = 1
+// ^^^^^
+TomlArrayTable =
+    header: AnyTomlArrayTableHeader
+    members: TomlMemberList
+
+AnyTomlArrayTableHeader =
+    TomlArrayTableHeader
+    | TomlBogusTableHeader
+
+// [[a.b]]
+// ^^^^^^^
+TomlArrayTableHeader =
+    '[['
+    key: AnyTomlKey
+    ']]'
+
+// [a]
+// b = 1
+// ^^^^^
+// c = 2
+// ^^^^^
+TomlMemberList = AnyTomlMember*
+
+AnyTomlMember =
+    TomlMember
+    | TomlBogusMember
+
+///////////////
+// KEYS
+///////////////
+
+// a.b = 1
+// ^^^^^^^
+TomlMember =
+    key: AnyTomlKey
+    '='
+    value: AnyTomlValue
+
+AnyTomlKey =
+    TomlKey
+    | TomlBogusKey
+
+// a."b".'c' = 1
+// ^^^^^^^^^
+TomlKey = fragments: TomlKeyFragmentList
+
+// a."b".'c' = 1
+// ^^^^^^^^^
+TomlKeyFragmentList = (AnyTomlKeyFragment ('.' AnyTomlKeyFragment)*)
+
+AnyTomlKeyFragment =
+    TomlBareKey
+    | TomlQuotedKey
+    | TomlBogusKeyFragment
+
+// a."b" = 1
+// ^
+TomlBareKey = value: 'toml_bare_key_literal'
+
+// a."b".'c' = 1
+//   ^^^ ^^^
+TomlQuotedKey = value_token: ('toml_basic_string_literal' | 'toml_literal_string_literal')
+
+///////////////
+// VALUES
+///////////////
+
+AnyTomlValue =
+    AnyTomlString
+    | TomlInteger
+    | TomlFloat
+    | TomlBoolean
+    | TomlDate
+    | TomlTime
+    | TomlArray
+    | TomlInlineTable
+    | TomlBogusValue
+
+AnyTomlString =
+    TomlBasicString
+    | TomlLiteralString
+    | TomlMultilineBasicString
+    | TomlMultilineLiteralString
+
+// a = "b"
+//     ^^^
+TomlBasicString = value: 'toml_basic_string_literal'
+
+// a = 'b'
+//     ^^^
+TomlLiteralString = value: 'toml_literal_string_literal'
+
+// a = """b"""
+//     ^^^^^^^
+TomlMultilineBasicString = value: 'toml_ml_basic_string_literal'
+
+// a = '''b'''
+//     ^^^^^^^
+TomlMultilineLiteralString = value: 'toml_ml_literal_string_literal'
+
+// a = 1
+//     ^
+TomlInteger = value: 'toml_integer_literal'
+
+// a = 1.5
+//     ^^^
+TomlFloat = value: 'toml_float_literal'
+
+// a = true
+//     ^^^^
+TomlBoolean = value_token: ('true' | 'false')
+
+// A local date, a local date-time, or an offset date-time.
+// a = 1979-05-27
+//     ^^^^^^^^^^
+// a = 1979-05-27T07:32:00Z
+//     ^^^^^^^^^^^^^^^^^^^^
+TomlDate = value: 'toml_date_literal'
+
+// A local time.
+// a = 07:32:00
+//     ^^^^^^^^
+TomlTime = value: 'toml_time_literal'
+
+// a = [1, 2, 3]
+//     ^^^^^^^^^
+TomlArray =
+    '['
+    elements: TomlArrayElementList
+    ']'
+
+// a = [1, 2, 3]
+//      ^^^^^^^
+TomlArrayElementList = (AnyTomlValue (',' AnyTomlValue)* ','?)
+
+// a = { b = 1, c = 2 }
+//     ^^^^^^^^^^^^^^^^
+TomlInlineTable =
+    '{'
+    members: TomlInlineTableMemberList
+    '}'
+
+// a = { b = 1, c = 2 }
+//       ^^^^^^^^^^^^
+TomlInlineTableMemberList = (AnyTomlMember (',' AnyTomlMember)* ','?)
