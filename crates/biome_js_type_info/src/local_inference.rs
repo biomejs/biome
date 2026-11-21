@@ -18,22 +18,25 @@ use biome_js_syntax::{
     JsArrowFunctionExpression, JsAssignmentExpression, JsBinaryExpression, JsBinaryOperator,
     JsCallArgumentList, JsCallArguments, JsCallExpression, JsClassDeclaration,
     JsClassExportDefaultDeclaration, JsClassExpression, JsClassMemberList, JsConstructorParameters,
-    JsExtendsClause, JsForInStatement, JsForOfStatement, JsForVariableDeclaration,
+    JsExport, JsExtendsClause, JsForInStatement, JsForOfStatement, JsForVariableDeclaration,
     JsFormalParameter, JsFunctionBody, JsFunctionDeclaration, JsFunctionExpression,
-    JsGetterObjectMember, JsInitializerClause, JsLogicalExpression, JsLogicalOperator,
-    JsMethodObjectMember, JsNewExpression, JsObjectBindingPattern, JsObjectExpression,
-    JsParameterList, JsParameters, JsParenthesizedExpression, JsPropertyClassMember,
-    JsPropertyObjectMember, JsReferenceIdentifier, JsRestParameter, JsReturnStatement,
-    JsSetterObjectMember, JsSyntaxKind, JsSyntaxNode, JsSyntaxToken, JsTemplateExpression,
-    JsUnaryExpression, JsUnaryOperator, JsVariableDeclaration, JsVariableDeclarator,
-    TsConditionalType, TsDeclareFunctionDeclaration, TsExternalModuleDeclaration, TsInferType,
-    TsInstantiationExpression, TsInterfaceDeclaration, TsMappedType, TsMethodSignatureTypeMember,
-    TsModuleDeclaration, TsPropertyParameterModifierList, TsReferenceType, TsReturnTypeAnnotation,
+    JsGetterObjectMember, JsInitializerClause, JsLanguage, JsLogicalExpression, JsLogicalOperator,
+    JsMethodObjectMember, JsModuleItemList, JsNewExpression, JsObjectBindingPattern,
+    JsObjectExpression, JsParameterList, JsParameters, JsParenthesizedExpression,
+    JsPropertyClassMember, JsPropertyObjectMember, JsReferenceIdentifier, JsRestParameter,
+    JsReturnStatement, JsSetterObjectMember, JsSyntaxKind, JsSyntaxNode, JsSyntaxToken,
+    JsTemplateExpression, JsUnaryExpression, JsUnaryOperator, JsVariableDeclaration,
+    JsVariableDeclarator, TsConditionalType, TsDeclareFunctionDeclaration, TsDeclareStatement,
+    TsExternalModuleDeclaration, TsInferType, TsInstantiationExpression, TsInterfaceDeclaration,
+    TsMappedType, TsMethodSignatureTypeMember, TsModuleBlock, TsModuleDeclaration,
+    TsPropertyParameterModifierList, TsReferenceType, TsReturnTypeAnnotation,
     TsSatisfiesExpression, TsTypeAliasDeclaration, TsTypeAnnotation, TsTypeArguments, TsTypeList,
     TsTypeMemberList, TsTypeParameter, TsTypeParameters, TsTypeofType, inner_string_text,
     unescape_js_string,
 };
-use biome_rowan::{AstNode, AstSeparatedList, SyntaxResult, Text, TextRange, TokenText};
+use biome_rowan::{
+    AstNode, AstSeparatedList, SyntaxKindSet, SyntaxResult, Text, TextRange, TokenText,
+};
 use rustc_hash::FxHashMap;
 
 use crate::globals::{
@@ -345,7 +348,7 @@ impl TypeData {
                 Self::from_ts_interface_declaration(collector, scope_id, decl).unwrap_or_default()
             }
             AnyJsDeclaration::TsModuleDeclaration(decl) => {
-                Self::from_ts_module_declaration(decl).unwrap_or_default()
+                Self::from_ts_module_declaration(collector, decl).unwrap_or_default()
             }
             AnyJsDeclaration::TsTypeAliasDeclaration(decl) => {
                 Self::from_ts_type_alias_declaration(collector, scope_id, decl).unwrap_or_default()
@@ -391,6 +394,7 @@ impl TypeData {
                     }),
                     members: TypeMember::collect_class_members(collector, scope_id, decl.members())
                         .into_boxed_slice(),
+                    scope_id: collector.scope_for_node(decl.syntax()),
                 }))
             }
             AnyJsExportDefaultDeclaration::JsFunctionExportDefaultDeclaration(decl) => {
@@ -1041,6 +1045,7 @@ impl TypeData {
                 scope_id,
                 decl.members(),
             ),
+            scope_id: collector.scope_for_node(decl.syntax()),
         }))
     }
 
@@ -1072,6 +1077,7 @@ impl TypeData {
                 scope_id,
                 decl.members(),
             ),
+            scope_id: collector.scope_for_node(decl.syntax()),
         }))
     }
 
@@ -1518,10 +1524,21 @@ impl TypeData {
                 .into_iter()
                 .map(|member| member.unwrap_or_else(TypeMember::uncollected))
                 .collect(),
+            scope_id: collector.scope_for_node(decl.syntax()),
         }))
     }
 
-    pub fn from_ts_module_declaration(decl: &TsModuleDeclaration) -> Option<Self> {
+    pub fn from_ts_module_declaration(
+        collector: &dyn RawTypeCollector,
+        decl: &TsModuleDeclaration,
+    ) -> Option<Self> {
+        let mut enclosing = Vec::new();
+        let mut outermost = decl.clone();
+        while let Some(outer) = enclosing_namespace(&outermost) {
+            push_reversed_module_name_parts(outer.name().ok()?, &mut enclosing)?;
+            outermost = outer;
+        }
+        enclosing.reverse();
         let namespace = Namespace {
             path: path_from_any_ts_module_name(decl.name().ok()?)?,
             // We don't initialise members of namespaces during local inference.
@@ -1529,6 +1546,8 @@ impl TypeData {
             // module-level inference, so we add references for them at that
             // time.
             members: Box::new([]),
+            scope_id: collector.enclosing_scope_for_node(outermost.syntax()),
+            enclosing: enclosing.into_boxed_slice(),
         };
         Some(namespace.into())
     }
@@ -3631,24 +3650,48 @@ fn generic_params_from_ts_type_params(
 #[inline]
 fn path_from_any_ts_module_name(module_name: AnyTsModuleName) -> Option<Path> {
     let mut reversed_path = Vec::new();
-    let mut module_name = module_name;
+    push_reversed_module_name_parts(module_name, &mut reversed_path)?;
+    Some(Path::from_reversed_parts(reversed_path))
+}
+
+/// Pushes the names that `module_name` is made of to `parts`, last first, so
+/// `A.B` pushes `B`, then `A`.
+fn push_reversed_module_name_parts(
+    mut module_name: AnyTsModuleName,
+    parts: &mut Vec<Text>,
+) -> Option<()> {
     loop {
         match module_name {
             AnyTsModuleName::AnyTsIdentifierBinding(binding) => {
                 let binding = binding.as_ts_identifier_binding()?;
-                reversed_path.push(text_from_token(binding.name_token())?);
-                break;
+                parts.push(text_from_token(binding.name_token())?);
+                return Some(());
             }
             AnyTsModuleName::TsQualifiedModuleName(qualified) => {
                 let right = qualified.right().ok()?;
-                reversed_path.push(text_from_token(right.value_token())?);
+                parts.push(text_from_token(right.value_token())?);
 
                 module_name = qualified.left().ok()?;
             }
         }
     }
+}
 
-    Some(Path::from_reversed_parts(reversed_path))
+/// The nodes that can stand between a namespace declaration and the body of
+/// the namespace that encloses it, as in `namespace A { export namespace N {} }`.
+const NAMESPACE_ITEM_KINDS: SyntaxKindSet<JsLanguage> = JsModuleItemList::KIND_SET
+    .union(JsExport::KIND_SET)
+    .union(TsDeclareStatement::KIND_SET);
+
+/// Returns the namespace whose body declares `decl`, or `None` when `decl` is
+/// not declared directly in the body of a namespace.
+fn enclosing_namespace(decl: &TsModuleDeclaration) -> Option<TsModuleDeclaration> {
+    let mut node = decl.syntax().parent()?;
+    while NAMESPACE_ITEM_KINDS.matches(node.kind()) {
+        node = node.parent()?;
+    }
+    let block = TsModuleBlock::cast(node)?;
+    block.syntax().parent().and_then(TsModuleDeclaration::cast)
 }
 
 #[inline]

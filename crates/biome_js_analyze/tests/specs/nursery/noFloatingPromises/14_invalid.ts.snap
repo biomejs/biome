@@ -7,6 +7,11 @@ expression: 14_invalid.ts
 const condition = Math.random() > -1; // Always true, but dynamic to linter
 condition ? Promise.reject("ternary bypass") : null;
 
+// A test that is always falsy keeps the promise in the type of the expression,
+// as in TypeScript.
+const alwaysFalsy = 0;
+alwaysFalsy ? Promise.reject("ternary bypass") : null;
+
 ```
 
 # Diagnostics
@@ -19,6 +24,25 @@ condition ? Promise.reject("ternary bypass") : null;
   > 2 │ condition ? Promise.reject("ternary bypass") : null;
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     3 │ 
+    4 │ // A test that is always falsy keeps the promise in the type of the expression,
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+14_invalid.ts:7:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    5 │ // as in TypeScript.
+    6 │ const alwaysFalsy = 0;
+  > 7 │ alwaysFalsy ? Promise.reject("ternary bypass") : null;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ 
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   

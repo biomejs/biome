@@ -359,9 +359,12 @@ from `biome_js_type_info`. Where branches meet, or a loop returns to an earlier
 point, it keeps every type still possible on a reachable path. A read on a path
 that no value can take gets type Unknown, not `never`. `flow_expressions.rs`
 uses narrowed operands when inferring member accesses, calls, logical and
-conditional expressions, `await`, the comma operator, and `+`. Complete module
-inference narrows each read as an individual expression query does, from the
-declared type its own context resolved.
+conditional expressions, `await`, the comma operator, and `+`. A conditional
+expression is the union of its branches, as in TypeScript, so its test matters
+only for a branch that reads the tested variable, which `conditional_branch`
+leaves out when the test gives that variable no value there, as TypeScript's
+`never` does. Complete module inference narrows each read as an individual
+expression query does, from the declared type its own context resolved.
 
 `narrow_type` and `falsy_values` take a resolver, as `keyof` and conditional
 types do: `ResolutionCtx::narrowing_resolver` resolves handles in the context

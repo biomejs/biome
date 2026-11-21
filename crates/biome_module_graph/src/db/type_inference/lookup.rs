@@ -1116,6 +1116,7 @@ mod tests {
             Box::default(),
             Box::default(),
             Text::from("Base"),
+            None,
         ));
         let parent = substitutions_for_instance(&db, target, &[InferredTypeData::Number], &[]);
         let unchanged =
@@ -1184,6 +1185,7 @@ mod tests {
             Box::default(),
             Box::default(),
             Text::from("Pair"),
+            None,
         ));
         let parent = substitutions_for_instance(
             &db,
@@ -1224,6 +1226,7 @@ mod tests {
             Box::default(),
             Box::default(),
             Text::from("Recursive"),
+            None,
         ));
         let argument = InferredTypeData::IndexedAccess(InternedIndexedAccessType::new(
             &db,
