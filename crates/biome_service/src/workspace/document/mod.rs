@@ -30,7 +30,7 @@ pub(crate) struct DocumentView {
     pub(crate) file_source_index: usize,
 
     /// Request-scoped settings applied on top of the project configuration.
-    pub(crate) inline_config: Option<Configuration>,
+    pub(crate) inline_config: Option<Arc<Configuration>>,
 
     /// The result of the parser (syntax tree + diagnostics).
     /// Types explained:

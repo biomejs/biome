@@ -375,8 +375,8 @@ impl<'scope> TraversalScope<'scope> for MemoryTraversalScope<'scope> {
         }
     }
 
-    fn handle(&self, context: &'scope dyn TraversalContext, path: Utf8PathBuf) {
-        context.handle_path(BiomePath::new(path));
+    fn handle(&self, context: &'scope dyn TraversalContext, path: BiomePath) {
+        context.handle_path(path);
     }
 }
 

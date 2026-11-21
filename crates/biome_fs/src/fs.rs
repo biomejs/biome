@@ -477,7 +477,7 @@ pub trait TraversalScope<'scope> {
     /// It's assumed that the provided already exist and was already evaluated via [TraversalContext::can_handle].
     ///
     /// This method will call [TraversalContext::handle_path].
-    fn handle(&self, context: &'scope dyn TraversalContext, path: Utf8PathBuf);
+    fn handle(&self, context: &'scope dyn TraversalContext, path: BiomePath);
 }
 
 pub trait TraversalContext: Sync {

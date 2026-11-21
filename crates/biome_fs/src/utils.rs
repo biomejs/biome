@@ -67,6 +67,48 @@ pub fn normalize_path(path: &Utf8Path) -> Utf8PathBuf {
     result
 }
 
+pub(crate) fn normalize_path_buf(path: Utf8PathBuf) -> Utf8PathBuf {
+    #[cfg(not(windows))]
+    if is_normalized_path(&path) {
+        return path;
+    }
+
+    normalize_path(&path)
+}
+
+#[cfg(not(windows))]
+fn is_normalized_path(path: &Utf8Path) -> bool {
+    let path = path.as_str().as_bytes();
+    if path.is_empty() || path == b"/" {
+        return true;
+    }
+    if path.ends_with(b"/") {
+        return false;
+    }
+
+    let is_absolute = path.starts_with(b"/");
+    let mut components = path.split(|byte| *byte == b'/');
+    if is_absolute {
+        components.next();
+    }
+
+    let mut saw_normal_component = false;
+    for component in components {
+        if component.is_empty() || component == b"." {
+            return false;
+        }
+        if component == b".." {
+            if is_absolute || saw_normal_component {
+                return false;
+            }
+        } else {
+            saw_normal_component = true;
+        }
+    }
+
+    true
+}
+
 /// Resolves a symbolic-link target without changing the logical path used for identity.
 ///
 /// Returns `None` when `path` is not a symbolic link. Relative targets are resolved against the
@@ -170,4 +212,35 @@ fn follow_symlink(
     };
 
     Ok((target_path, target_file_type))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{normalize_path, normalize_path_buf};
+    use camino::Utf8PathBuf;
+
+    #[test]
+    fn owned_normalization_matches_borrowed_normalization() {
+        for path in [
+            "",
+            ".",
+            "./project",
+            "project/.",
+            "project/./file.js",
+            "project//file.js",
+            "project/",
+            "project/file.js",
+            "../project/file.js",
+            "../../file.js",
+            "../project/../file.js",
+            "/",
+            "//project/file.js",
+            "/project/file.js",
+            "/project/../file.js",
+            "/../../file.js",
+        ] {
+            let path = Utf8PathBuf::from(path);
+            assert_eq!(normalize_path_buf(path.clone()), normalize_path(&path));
+        }
+    }
 }

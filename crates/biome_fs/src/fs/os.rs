@@ -215,9 +215,9 @@ impl<'scope> TraversalScope<'scope> for OsTraversalScope<'scope, '_> {
         handle_any_file(self.scope, ctx, path, file_type, None, &[]);
     }
 
-    fn handle(&self, context: &'scope dyn TraversalContext, path: Utf8PathBuf) {
+    fn handle(&self, context: &'scope dyn TraversalContext, path: BiomePath) {
         self.scope.spawn(move |_| {
-            context.handle_path(BiomePath::new(path));
+            context.handle_path(path);
         });
     }
 }

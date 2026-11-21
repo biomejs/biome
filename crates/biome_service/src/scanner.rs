@@ -821,7 +821,7 @@ impl Scanner {
                     .fs()
                     .traversal(Box::new(|scope: &dyn TraversalScope| {
                         for path in &handleable_paths {
-                            scope.handle(traversal_ctx, path.to_path_buf());
+                            scope.handle(traversal_ctx, path.clone());
                         }
                     }));
                 #[cfg_attr(target_family = "wasm", expect(unused_mut))]
@@ -911,12 +911,12 @@ impl Scanner {
         if kind == ScanFolderKind::Project {
             fs.traversal(Box::new(|scope: &dyn TraversalScope| {
                 for path in &configs {
-                    scope.handle(ctx, path.to_path_buf());
+                    scope.handle(ctx, path.clone());
                 }
             }));
             fs.traversal(Box::new(|scope: &dyn TraversalScope| {
                 for path in &manifests {
-                    scope.handle(ctx, path.to_path_buf());
+                    scope.handle(ctx, path.clone());
                 }
             }));
 

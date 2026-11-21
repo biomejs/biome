@@ -3,7 +3,7 @@
 //! [`BiomePath`] preserves the logical path supplied by an adapter, normalizes `.` and `..`
 //! components without filesystem access, and derives the path's processing role. It does not
 //! canonicalize paths or resolve symbolic links.
-use crate::{ConfigName, PathKind, normalize_path};
+use crate::{ConfigName, PathKind, utils::normalize_path_buf};
 use camino::{Utf8Path, Utf8PathBuf};
 use std::borrow::Cow;
 use std::cmp::Ordering;
@@ -95,8 +95,7 @@ impl BiomePath {
     ///
     /// If it's a virtual path (in debug)
     pub fn new(path: impl Into<Utf8PathBuf>) -> Self {
-        let path = path.into();
-        let path = normalize_path(&path);
+        let path = normalize_path_buf(path.into());
         debug_assert!(
             !is_virtual_path(&path),
             "virtual paths must be constructed with BiomePath::new_virtual"

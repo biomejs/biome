@@ -965,22 +965,13 @@ impl WorkspaceServerWithDb<'_> {
         if params.path.is_virtual() && matches!(&params.content, FileContent::FromServer) {
             return Err(WorkspaceError::not_found(params.path.to_string()));
         }
-        let path = params.path.clone();
-        self.open_file_at_path(reason, params, path)
-    }
 
-    fn open_file_at_path(
-        &self,
-        reason: OpenFileReason,
-        params: OpenFileParams,
-        biome_path: BiomePath,
-    ) -> Result<InternalOpenFileResult, WorkspaceError> {
         #[cfg(test)]
         self.scanner_test_state.enter_file_indexing(reason);
 
         let OpenFileParams {
             project_key,
-            path: _,
+            path: biome_path,
             content,
             document_file_source,
             persist_node_cache,
@@ -1178,7 +1169,7 @@ impl WorkspaceServerWithDb<'_> {
                 content: content.clone(),
                 version,
                 file_source_index,
-                inline_config,
+                inline_config: inline_config.map(Arc::new),
                 syntax: syntax.clone(),
             };
             self.documents.pin().update_or_insert_with(
@@ -3856,7 +3847,7 @@ impl Workspace for WorkspaceServerWithDb<'_> {
             else {
                 return Err(WorkspaceError::not_found(params.path.to_string()));
             };
-            (view.content.len(), view.inline_config.clone())
+            (view.content.len(), view.inline_config.as_deref().cloned())
         };
         let db = self.get_db();
         let limit = self
@@ -3993,7 +3984,7 @@ impl Workspace for WorkspaceServerWithDb<'_> {
             content: content.clone(),
             version: matches!(view, ViewId::Editor(_)).then_some(version),
             file_source_index,
-            inline_config,
+            inline_config: inline_config.map(Arc::new),
             syntax: Some(Ok(())),
         };
         let updated = documents.update(path.to_path_buf(), |document| {
@@ -4906,8 +4897,7 @@ impl Workspace for WorkspaceServerWithDb<'_> {
     /// indexed by the scanner. If the scanner has the file indexed, it may
     /// still be required for multi-file analysis.
     fn close_file(&self, params: CloseFileParams) -> Result<(), WorkspaceError> {
-        let path = params.path.clone();
-        self.close_editor_view(path.as_path(), Some(params.project_key))
+        self.close_editor_view(params.path.as_path(), Some(params.project_key))
     }
 
     fn update_module_graph(&self, params: UpdateModuleGraphParams) -> Result<(), WorkspaceError> {

@@ -148,7 +148,7 @@ pub trait Crawler<Output> {
         handle_paths.sort_unstable_by(BiomePath::cmp_processing_priority);
         fs.traversal(Box::new(|scope: &dyn TraversalScope| {
             for path in &handle_paths {
-                scope.handle(ctx, path.to_path_buf());
+                scope.handle(ctx, path.clone());
             }
         }));
 

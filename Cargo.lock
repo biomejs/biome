@@ -693,6 +693,7 @@ version = "0.7.3"
 dependencies = [
  "biome_diagnostics",
  "camino",
+ "codspeed-divan-compat",
  "crossbeam",
  "directories",
  "enumflags2",
