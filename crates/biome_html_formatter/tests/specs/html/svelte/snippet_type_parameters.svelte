@@ -1,0 +1,17 @@
+<script lang="ts">
+  let items = $state(["a", "b"]);
+</script>
+
+{#snippet row<T extends string>(item: T)}
+  <li>{item}</li>
+{/snippet}
+
+{#snippet pair<const K,   V = number>(key: K, value: V)}
+  {key}: {value}
+{/snippet}
+
+<ul>
+  {#each items as item (item)}
+    {@render row(item)}
+  {/each}
+</ul>

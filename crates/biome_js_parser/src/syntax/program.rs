@@ -6,6 +6,7 @@ use super::stmt::{
     parse_variable_declaration,
 };
 use crate::JsParser;
+use crate::JsSyntaxFeature::TypeScript;
 use crate::prelude::*;
 use crate::state::{ChangeParserState, EnableStrictMode, SignatureFlags};
 use crate::syntax::binding::parse_binding;
@@ -16,7 +17,10 @@ use crate::syntax::function::{
 use crate::syntax::js_parse_error;
 use crate::syntax::jsx::skip_astro_html_comments;
 use crate::syntax::stmt::parse_directives;
-use crate::syntax::typescript::{TypeContext, parse_generic_type_parameters};
+use crate::syntax::typescript::ts_parse_error::ts_only_syntax_error;
+use crate::syntax::typescript::{
+    TypeContext, parse_generic_type_parameters, parse_ts_type_parameters,
+};
 use biome_js_syntax::JsSyntaxKind::*;
 use biome_js_syntax::{JsSyntaxKind, T};
 use biome_languages::javascript::ModuleKind;
@@ -283,11 +287,26 @@ fn parse_generic(p: &mut JsParser, m: Marker) -> CompletedMarker {
     m.complete(p, JS_VUE_GENERIC_ROOT)
 }
 
-/// Parses a Svelte snippet declaration: `add(a: any, b: float)`.
-/// Produces a JsIdentifierBinding for the name and JsParameters for the
-/// parameter list, wrapped in a JsSnippetSignatureTemplateRoot.
+/// Parses a Svelte snippet declaration: `add(a: any, b: float)` or
+/// `row<T extends string>(item: T)`.
+/// Produces a JsIdentifierBinding for the name, optional TsTypeParameters, and
+/// JsParameters for the parameter list, wrapped in a JsSvelteSnippetRoot.
 fn parse_snippet_signature(p: &mut JsParser, m: Marker) -> CompletedMarker {
     parse_binding(p).or_add_diagnostic(p, js_parse_error::expected_binding);
+
+    // The type parameters aren't changed to bogus in JavaScript files because
+    // the snippet root has no bogus variant that can hold them.
+    let type_parameters =
+        parse_ts_type_parameters(p, TypeContext::default().and_allow_const_modifier(true));
+    if let ParsedSyntax::Present(type_parameters) = type_parameters
+        && TypeScript.is_unsupported(p)
+    {
+        p.error(ts_only_syntax_error(
+            p,
+            "type parameters",
+            type_parameters.range(p),
+        ));
+    }
 
     // These are not mandatory
     parse_parameter_list(

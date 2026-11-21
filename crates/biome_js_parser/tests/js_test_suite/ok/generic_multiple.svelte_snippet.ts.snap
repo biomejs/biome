@@ -1,0 +1,157 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```ts
+row<const T, U = number>(first: T, second: U)
+
+```
+
+
+## AST
+
+```
+JsSvelteSnippetRoot {
+    name: JsIdentifierBinding {
+        name_token: IDENT@0..3 "row" [] [],
+    },
+    type_parameters: TsTypeParameters {
+        l_angle_token: L_ANGLE@3..4 "<" [] [],
+        items: TsTypeParameterList [
+            TsTypeParameter {
+                modifiers: TsTypeParameterModifierList [
+                    TsConstModifier {
+                        modifier_token: CONST_KW@4..10 "const" [] [Whitespace(" ")],
+                    },
+                ],
+                name: TsTypeParameterName {
+                    ident_token: IDENT@10..11 "T" [] [],
+                },
+                constraint: missing (optional),
+                default: missing (optional),
+            },
+            COMMA@11..13 "," [] [Whitespace(" ")],
+            TsTypeParameter {
+                modifiers: TsTypeParameterModifierList [],
+                name: TsTypeParameterName {
+                    ident_token: IDENT@13..15 "U" [] [Whitespace(" ")],
+                },
+                constraint: missing (optional),
+                default: TsDefaultTypeClause {
+                    eq_token: EQ@15..17 "=" [] [Whitespace(" ")],
+                    ty: TsNumberType {
+                        number_token: NUMBER_KW@17..23 "number" [] [],
+                    },
+                },
+            },
+        ],
+        r_angle_token: R_ANGLE@23..24 ">" [] [],
+    },
+    parameters: JsParameters {
+        l_paren_token: L_PAREN@24..25 "(" [] [],
+        items: JsParameterList [
+            JsFormalParameter {
+                decorators: JsDecoratorList [],
+                binding: JsIdentifierBinding {
+                    name_token: IDENT@25..30 "first" [] [],
+                },
+                question_mark_token: missing (optional),
+                type_annotation: TsTypeAnnotation {
+                    colon_token: COLON@30..32 ":" [] [Whitespace(" ")],
+                    ty: TsReferenceType {
+                        name: JsReferenceIdentifier {
+                            value_token: IDENT@32..33 "T" [] [],
+                        },
+                        type_arguments: missing (optional),
+                    },
+                },
+                initializer: missing (optional),
+            },
+            COMMA@33..35 "," [] [Whitespace(" ")],
+            JsFormalParameter {
+                decorators: JsDecoratorList [],
+                binding: JsIdentifierBinding {
+                    name_token: IDENT@35..41 "second" [] [],
+                },
+                question_mark_token: missing (optional),
+                type_annotation: TsTypeAnnotation {
+                    colon_token: COLON@41..43 ":" [] [Whitespace(" ")],
+                    ty: TsReferenceType {
+                        name: JsReferenceIdentifier {
+                            value_token: IDENT@43..44 "U" [] [],
+                        },
+                        type_arguments: missing (optional),
+                    },
+                },
+                initializer: missing (optional),
+            },
+        ],
+        r_paren_token: R_PAREN@44..45 ")" [] [],
+    },
+    eof_token: EOF@45..46 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_SVELTE_SNIPPET_ROOT@0..46
+  0: JS_IDENTIFIER_BINDING@0..3
+    0: IDENT@0..3 "row" [] []
+  1: TS_TYPE_PARAMETERS@3..24
+    0: L_ANGLE@3..4 "<" [] []
+    1: TS_TYPE_PARAMETER_LIST@4..23
+      0: TS_TYPE_PARAMETER@4..11
+        0: TS_TYPE_PARAMETER_MODIFIER_LIST@4..10
+          0: TS_CONST_MODIFIER@4..10
+            0: CONST_KW@4..10 "const" [] [Whitespace(" ")]
+        1: TS_TYPE_PARAMETER_NAME@10..11
+          0: IDENT@10..11 "T" [] []
+        2: (empty)
+        3: (empty)
+      1: COMMA@11..13 "," [] [Whitespace(" ")]
+      2: TS_TYPE_PARAMETER@13..23
+        0: TS_TYPE_PARAMETER_MODIFIER_LIST@13..13
+        1: TS_TYPE_PARAMETER_NAME@13..15
+          0: IDENT@13..15 "U" [] [Whitespace(" ")]
+        2: (empty)
+        3: TS_DEFAULT_TYPE_CLAUSE@15..23
+          0: EQ@15..17 "=" [] [Whitespace(" ")]
+          1: TS_NUMBER_TYPE@17..23
+            0: NUMBER_KW@17..23 "number" [] []
+    2: R_ANGLE@23..24 ">" [] []
+  2: JS_PARAMETERS@24..45
+    0: L_PAREN@24..25 "(" [] []
+    1: JS_PARAMETER_LIST@25..44
+      0: JS_FORMAL_PARAMETER@25..33
+        0: JS_DECORATOR_LIST@25..25
+        1: JS_IDENTIFIER_BINDING@25..30
+          0: IDENT@25..30 "first" [] []
+        2: (empty)
+        3: TS_TYPE_ANNOTATION@30..33
+          0: COLON@30..32 ":" [] [Whitespace(" ")]
+          1: TS_REFERENCE_TYPE@32..33
+            0: JS_REFERENCE_IDENTIFIER@32..33
+              0: IDENT@32..33 "T" [] []
+            1: (empty)
+        4: (empty)
+      1: COMMA@33..35 "," [] [Whitespace(" ")]
+      2: JS_FORMAL_PARAMETER@35..44
+        0: JS_DECORATOR_LIST@35..35
+        1: JS_IDENTIFIER_BINDING@35..41
+          0: IDENT@35..41 "second" [] []
+        2: (empty)
+        3: TS_TYPE_ANNOTATION@41..44
+          0: COLON@41..43 ":" [] [Whitespace(" ")]
+          1: TS_REFERENCE_TYPE@43..44
+            0: JS_REFERENCE_IDENTIFIER@43..44
+              0: IDENT@43..44 "U" [] []
+            1: (empty)
+        4: (empty)
+    2: R_PAREN@44..45 ")" [] []
+  3: EOF@45..46 "" [Newline("\n")] []
+
+```

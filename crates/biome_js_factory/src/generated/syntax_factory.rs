@@ -5076,10 +5076,17 @@ impl SyntaxFactory for JsSyntaxFactory {
             }
             JS_SVELTE_SNIPPET_ROOT => {
                 let mut elements = (&children).into_iter();
-                let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
+                let mut slots: RawNodeSlots<4usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element
                     && AnyJsBinding::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && TsTypeParameters::can_cast(element.kind())
                 {
                     slots.mark_present();
                     current_element = elements.next();

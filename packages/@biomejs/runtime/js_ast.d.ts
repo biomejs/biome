@@ -2000,6 +2000,8 @@ export interface JsSvelteSnippetRoot extends JsAstNode {
 	readonly kind: "JS_SVELTE_SNIPPET_ROOT";
 	readonly name: AnyJsBinding | undefined;
 	withName(value: AnyJsBinding): JsSvelteSnippetRoot;
+	readonly typeParameters: TsTypeParameters | undefined;
+	withTypeParameters(value: TsTypeParameters | undefined): JsSvelteSnippetRoot;
 	readonly parameters: JsParameters | undefined;
 	withParameters(value: JsParameters): JsSvelteSnippetRoot;
 	readonly eofToken: string | undefined;

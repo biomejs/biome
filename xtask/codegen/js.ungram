@@ -95,6 +95,7 @@ JsExpressionTemplateRoot =
 // Special root created for Svelte #snippet block
 JsSvelteSnippetRoot =
 		name: AnyJsBinding
+		type_parameters: TsTypeParameters?
 		parameters: JsParameters
 		eof: 'EOF'
 

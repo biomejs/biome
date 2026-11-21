@@ -6610,6 +6610,7 @@ impl JsSvelteSnippetRoot {
     pub fn as_fields(&self) -> JsSvelteSnippetRootFields {
         JsSvelteSnippetRootFields {
             name: self.name(),
+            type_parameters: self.type_parameters(),
             parameters: self.parameters(),
             eof_token: self.eof_token(),
         }
@@ -6617,11 +6618,14 @@ impl JsSvelteSnippetRoot {
     pub fn name(&self) -> SyntaxResult<AnyJsBinding> {
         support::required_node(&self.syntax, 0usize)
     }
+    pub fn type_parameters(&self) -> Option<TsTypeParameters> {
+        support::node(&self.syntax, 1usize)
+    }
     pub fn parameters(&self) -> SyntaxResult<JsParameters> {
-        support::required_node(&self.syntax, 1usize)
+        support::required_node(&self.syntax, 2usize)
     }
     pub fn eof_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 2usize)
+        support::required_token(&self.syntax, 3usize)
     }
 }
 impl Serialize for JsSvelteSnippetRoot {
@@ -6635,6 +6639,7 @@ impl Serialize for JsSvelteSnippetRoot {
 #[derive(Serialize)]
 pub struct JsSvelteSnippetRootFields {
     pub name: SyntaxResult<AnyJsBinding>,
+    pub type_parameters: Option<TsTypeParameters>,
     pub parameters: SyntaxResult<JsParameters>,
     pub eof_token: SyntaxResult<SyntaxToken>,
 }
@@ -24624,6 +24629,10 @@ impl std::fmt::Debug for JsSvelteSnippetRoot {
             DEPTH.set(current_depth + 1);
             f.debug_struct("JsSvelteSnippetRoot")
                 .field("name", &support::DebugSyntaxResult(self.name()))
+                .field(
+                    "type_parameters",
+                    &support::DebugOptionalElement(self.type_parameters()),
+                )
                 .field("parameters", &support::DebugSyntaxResult(self.parameters()))
                 .field("eof_token", &support::DebugSyntaxResult(self.eof_token()))
                 .finish()

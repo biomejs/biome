@@ -810,7 +810,7 @@ pub fn native_slots_for_name(node_name: &str) -> &'static [(&'static str, u32)] 
         "JsStaticMemberExpression" => &[("object", 0), ("member", 2)],
         "JsSvelteDeclarationRoot" => &[("declaration", 0)],
         "JsSvelteLegacyConstRoot" => &[("declarator", 0)],
-        "JsSvelteSnippetRoot" => &[("name", 0), ("parameters", 1)],
+        "JsSvelteSnippetRoot" => &[("name", 0), ("type_parameters", 1), ("parameters", 2)],
         "JsSwitchStatement" => &[("discriminant", 2), ("cases", 5)],
         "JsTemplateElement" => &[("expression", 1)],
         "JsTemplateExpression" => &[("tag", 0), ("type_arguments", 1), ("elements", 3)],

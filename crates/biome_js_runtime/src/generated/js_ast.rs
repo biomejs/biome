@@ -6944,6 +6944,15 @@ static JS_SVELTE_SNIPPET_ROOT_FIELDS: JsAstNodeFields = JsAstNodeFields {
             },
         },
         JsAstField {
+            property: "typeParameters",
+            updater: "withTypeParameters",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "TsTypeParameters",
+                can_cast: TsTypeParameters::can_cast,
+            },
+        },
+        JsAstField {
             property: "parameters",
             updater: "withParameters",
             optional: false,
