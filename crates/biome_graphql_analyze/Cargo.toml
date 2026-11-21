@@ -1,6 +1,6 @@
 [package]
 name                 = "biome_graphql_analyze"
-version.workspace    = true
+version              = "0.0.0"
 authors.workspace    = true
 edition.workspace    = true
 description          = "Biome's GraphQL linter"
@@ -10,7 +10,7 @@ license.workspace    = true
 keywords.workspace   = true
 categories.workspace = true
 include              = ["build.rs", "src/**/*"]
-publish              = true
+publish              = false
 
 [dependencies]
 biome_analyze            = { workspace = true }

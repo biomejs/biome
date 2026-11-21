@@ -385,7 +385,7 @@ dependencies = [
 
 [[package]]
 name = "biome_css_analyze"
-version = "0.7.3"
+version = "0.0.0"
 dependencies = [
  "biome_analyze",
  "biome_analyze_macros",
@@ -690,9 +690,10 @@ dependencies = [
 
 [[package]]
 name = "biome_fs"
-version = "0.7.3"
+version = "0.0.0"
 dependencies = [
  "biome_diagnostics",
+ "biome_languages",
  "camino",
  "crossbeam",
  "directories",
@@ -723,7 +724,7 @@ dependencies = [
 
 [[package]]
 name = "biome_graphql_analyze"
-version = "0.7.3"
+version = "0.0.0"
 dependencies = [
  "biome_analyze",
  "biome_analyze_macros",
@@ -885,7 +886,7 @@ dependencies = [
 
 [[package]]
 name = "biome_grit_patterns"
-version = "0.7.3"
+version = "0.0.0"
 dependencies = [
  "biome_analyze",
  "biome_console",
@@ -1239,7 +1240,7 @@ dependencies = [
 
 [[package]]
 name = "biome_js_runtime"
-version = "0.7.3"
+version = "0.0.0"
 dependencies = [
  "biome_analyze",
  "biome_diagnostics",
@@ -1298,7 +1299,7 @@ dependencies = [
 
 [[package]]
 name = "biome_js_transform"
-version = "0.7.3"
+version = "0.0.0"
 dependencies = [
  "biome_analyze",
  "biome_console",
@@ -1316,7 +1317,7 @@ dependencies = [
 
 [[package]]
 name = "biome_js_type_info"
-version = "0.7.3"
+version = "0.0.0"
 dependencies = [
  "biome_db",
  "biome_formatter",
@@ -1348,7 +1349,7 @@ dependencies = [
 
 [[package]]
 name = "biome_json_analyze"
-version = "0.7.3"
+version = "0.0.0"
 dependencies = [
  "biome_analyze",
  "biome_analyze_macros",
@@ -1473,7 +1474,6 @@ version = "0.7.3"
 dependencies = [
  "biome_console",
  "biome_db",
- "biome_fs",
  "biome_parser",
  "biome_rowan",
  "biome_string_case",
@@ -1544,7 +1544,7 @@ dependencies = [
 
 [[package]]
 name = "biome_manifest"
-version = "0.7.3"
+version = "0.0.0"
 dependencies = [
  "biome_console",
  "biome_deserialize",
@@ -1706,7 +1706,7 @@ dependencies = [
 
 [[package]]
 name = "biome_module_graph"
-version = "0.7.3"
+version = "0.0.0"
 dependencies = [
  "biome_configuration",
  "biome_console",
@@ -1769,7 +1769,7 @@ dependencies = [
 
 [[package]]
 name = "biome_package"
-version = "0.7.3"
+version = "0.0.0"
 dependencies = [
  "biome_console",
  "biome_deserialize",
@@ -1813,7 +1813,7 @@ dependencies = [
 
 [[package]]
 name = "biome_plugin_loader"
-version = "0.7.3"
+version = "0.0.0"
 dependencies = [
  "biome_analyze",
  "biome_console",
@@ -1859,7 +1859,7 @@ dependencies = [
 
 [[package]]
 name = "biome_project_layout"
-version = "0.7.3"
+version = "0.0.0"
 dependencies = [
  "biome_package",
  "biome_parser",
@@ -1891,7 +1891,7 @@ dependencies = [
 
 [[package]]
 name = "biome_resolver"
-version = "0.7.3"
+version = "0.0.0"
 dependencies = [
  "biome_console",
  "biome_db",
@@ -1927,7 +1927,7 @@ dependencies = [
 
 [[package]]
 name = "biome_rule_options"
-version = "0.7.3"
+version = "0.0.0"
 dependencies = [
  "biome_console",
  "biome_deserialize",

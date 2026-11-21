@@ -1,0 +1,85 @@
+roots = [
+  "biome_analyze",
+  "biome_css_formatter",
+  "biome_css_parser",
+  "biome_css_semantic",
+  "biome_graphql_formatter",
+  "biome_graphql_parser",
+  "biome_graphql_semantic",
+  "biome_grit_formatter",
+  "biome_grit_parser",
+  "biome_html_formatter",
+  "biome_html_parser",
+  "biome_js_formatter",
+  "biome_js_parser",
+  "biome_js_semantic",
+  "biome_json_formatter",
+  "biome_json_parser",
+  "biome_markdown_formatter",
+  "biome_markdown_parser",
+  "biome_tailwind_parser",
+  "biome_yaml_formatter",
+  "biome_yaml_parser",
+]
+
+private = [
+  "biome_css_analyze",
+  "biome_fs",
+  "biome_graphql_analyze",
+  "biome_grit_patterns",
+  "biome_js_runtime",
+  "biome_js_transform",
+  "biome_js_type_info",
+  "biome_json_analyze",
+  "biome_manifest",
+  "biome_module_graph",
+  "biome_package",
+  "biome_plugin_loader",
+  "biome_project_layout",
+  "biome_resolver",
+  "biome_rule_options",
+  "biome_yaml_analyze",
+]
+
+[bundles]
+biome_css      = [
+  "biome_css_factory",
+  "biome_css_formatter",
+  "biome_css_parser",
+  "biome_css_semantic",
+  "biome_css_syntax",
+]
+biome_graphql  = [
+  "biome_graphql_factory",
+  "biome_graphql_formatter",
+  "biome_graphql_parser",
+  "biome_graphql_semantic",
+  "biome_graphql_syntax",
+]
+biome_grit     = [
+  "biome_grit_factory",
+  "biome_grit_formatter",
+  "biome_grit_parser",
+  "biome_grit_syntax",
+]
+biome_html     = [
+  "biome_html_factory",
+  "biome_html_formatter",
+  "biome_html_parser",
+  "biome_html_syntax",
+]
+biome_js       = [
+  "biome_js_factory",
+  "biome_js_formatter",
+  "biome_js_parser",
+  "biome_js_semantic",
+  "biome_js_syntax",
+  "biome_jsdoc_comment",
+]
+biome_markdown = [
+  "biome_markdown_factory",
+  "biome_markdown_formatter",
+  "biome_markdown_parser",
+  "biome_markdown_syntax",
+]
+biome_tailwind = ["biome_tailwind_factory", "biome_tailwind_parser", "biome_tailwind_syntax"]

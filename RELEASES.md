@@ -37,5 +37,10 @@ Stable releases are published on GitHub, and `npmjs.org` under the `latest` tag.
 The Biome internal crates are published on `crates.io` on demand to avoid too much work on our end.
 You can reach us out on [discord](https://biomejs.dev/chat) if you require a version of the crates to be published.
 
-All Biome crates are published under a single version (either patch or minor), and they are tagged with a
-single git tag.
+The published crates share a single version (either patch or minor) and a single git tag.
+
+The language-specific analyzers are workspace-only. The shared `biome_analyze` crate and its macros
+remain published. We also no longer publish new versions of `biome_fs`, `biome_grit_patterns`, `biome_js_runtime`,
+`biome_js_transform`, `biome_js_type_info`, `biome_manifest`, `biome_module_graph`, `biome_package`,
+`biome_plugin_loader`, `biome_project_layout`, `biome_resolver`, or `biome_rule_options`.
+Existing releases remain available on crates.io. This does not change the CLI's capabilities.

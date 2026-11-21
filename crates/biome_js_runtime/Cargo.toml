@@ -1,6 +1,6 @@
 [package]
 name                 = "biome_js_runtime"
-version.workspace    = true
+version              = "0.0.0"
 authors.workspace    = true
 edition.workspace    = true
 description          = "ECMAScript runtime for JS plugins"
@@ -9,7 +9,7 @@ repository.workspace = true
 license.workspace    = true
 keywords.workspace   = true
 categories.workspace = true
-publish              = true
+publish              = false
 
 [dependencies]
 biome_analyze      = { workspace = true }

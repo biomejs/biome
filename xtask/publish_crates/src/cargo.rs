@@ -35,10 +35,43 @@ impl SystemCargo {
         command
     }
 
-    fn run_checked(&self, root: &Path, args: &[String]) -> Result<()> {
-        let status = self
+    pub(crate) fn verify_staged_package(&self, root: &Path, package: &str) -> Result<()> {
+        let args = [
+            "package",
+            "--locked",
+            "--allow-dirty",
+            "--registry",
+            "crates-io",
+            "--package",
+            package,
+            "--target-dir",
+            "target",
+        ];
+        let output = self
             .command(root)
             .args(args)
+            .arg("--list")
+            .output()
+            .context("running cargo package --list")?;
+        if !output.status.success() {
+            bail!(
+                "cargo package --list failed for {package}: {}",
+                String::from_utf8_lossy(&output.stderr)
+            );
+        }
+        let files = String::from_utf8(output.stdout)
+            .context("cargo package --list returned non-UTF-8 paths")?;
+        if !files.lines().any(|path| path == "README.md") {
+            bail!("cargo would not include README.md in {package}");
+        }
+        self.run_checked(root, &args)
+    }
+
+    fn run_checked(&self, root: &Path, args: &[impl AsRef<str>]) -> Result<()> {
+        let args: Vec<_> = args.iter().map(AsRef::as_ref).collect();
+        let status = self
+            .command(root)
+            .args(&args)
             .status()
             .with_context(|| format!("failed to run cargo {}", args.join(" ")))?;
         if !status.success() {

@@ -4,6 +4,7 @@ use camino::Utf8Path;
 use std::borrow::Cow;
 use tracing::instrument;
 
+mod config_name;
 mod db;
 
 #[cfg(feature = "lang_css")]
@@ -40,6 +41,7 @@ pub use crate::md::MdFileSource;
 #[cfg(feature = "lang_yaml")]
 pub use crate::yaml::YamlFileSource;
 
+pub use crate::config_name::ConfigName;
 pub use crate::db::{LanguageDb, has_embedded_content};
 
 // NOTE: when adding a new ignore file, update [DocumentFileSource::try_from_path]

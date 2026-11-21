@@ -13,6 +13,7 @@ const REPOSITORY_ROOT = path.resolve(
 const ROOT_MANIFEST = path.join(REPOSITORY_ROOT, "Cargo.toml");
 const CRATES_DIRECTORY = path.join(REPOSITORY_ROOT, "crates");
 const VERSION_PATTERN = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/;
+const DEPENDENCY_VERSION_PATTERN = /([,{]\s*version\s*=\s*)"([^"]+)"/;
 
 type BumpType = "minor" | "patch";
 type PublishSetting = "true" | "false";
@@ -78,25 +79,32 @@ export function updateRootManifest(
 		throw new Error("Could not update [workspace.package].version");
 	}
 
-	let updated =
+	const updated =
 		manifest.slice(0, section.start) +
 		updatedSection +
 		manifest.slice(section.end);
+	const dependencies = getSection(updated, "workspace.dependencies");
+	let updatedDependencies = dependencies.content;
 
 	for (const crateName of crateNames) {
-		const dependency = new RegExp(
-			`^(${escapeRegExp(crateName)}\\s*=\\s*\\{[^}\\n]*\\bversion\\s*=\\s*)"[^"]+"`,
-			"m",
+		updatedDependencies = updatedDependencies.replace(
+			workspaceDependencyPattern(crateName),
+			(entry) => {
+				if (!DEPENDENCY_VERSION_PATTERN.test(entry)) {
+					throw new Error(
+						`Missing versioned workspace dependency for ${crateName}`,
+					);
+				}
+				return entry.replace(DEPENDENCY_VERSION_PATTERN, `$1"${newVersion}"`);
+			},
 		);
-		if (!dependency.test(updated)) {
-			throw new Error(
-				`Missing versioned workspace dependency for ${crateName}`,
-			);
-		}
-		updated = updated.replace(dependency, `$1"${newVersion}"`);
 	}
 
-	return updated;
+	return (
+		updated.slice(0, dependencies.start) +
+		updatedDependencies +
+		updated.slice(dependencies.end)
+	);
 }
 
 export function detectVersionChange(
@@ -145,6 +153,10 @@ function getSection(manifest: string, name: string): ManifestSection {
 	return { content: manifest.slice(start, end), start, end };
 }
 
+function workspaceDependencyPattern(name: string): RegExp {
+	return new RegExp(`^${escapeRegExp(name)}[ \\t]*=[^\\r\\n]*`, "m");
+}
+
 function escapeRegExp(value: string): string {
 	return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
@@ -190,6 +202,10 @@ function readCrates(): CrateInfo[] {
 function validateRepository(): ValidationResult {
 	const rootManifest = fs.readFileSync(ROOT_MANIFEST, "utf8");
 	const version = getWorkspaceVersion(rootManifest);
+	const dependencies = getSection(
+		rootManifest,
+		"workspace.dependencies",
+	).content;
 	const crates = readCrates();
 	const publicCrates = crates.filter((crate) => crate.publish === "true");
 	const errors: string[] = [];
@@ -228,11 +244,10 @@ function validateRepository(): ValidationResult {
 			}
 		}
 
-		const dependency = new RegExp(
-			`^${escapeRegExp(crate.name)}\\s*=\\s*\\{[^}\\n]*\\bversion\\s*=\\s*"${escapeRegExp(version)}"`,
-			"m",
-		);
-		if (!dependency.test(rootManifest)) {
+		const entry = workspaceDependencyPattern(crate.name).exec(
+			dependencies,
+		)?.[0];
+		if (entry && DEPENDENCY_VERSION_PATTERN.exec(entry)?.[2] !== version) {
 			errors.push(
 				`Cargo.toml: ${crate.name} workspace dependency must use ${version}`,
 			);
