@@ -2,6 +2,7 @@ use biome_analyze::{Ast, FixKind, Rule, RuleDiagnostic, context::RuleContext, de
 use biome_console::markup;
 use biome_css_syntax::{CssString, CssSyntaxToken};
 use biome_diagnostics::Severity;
+use biome_languages::CssFileSource;
 use biome_rowan::{BatchMutationExt, TextRange};
 use biome_rule_options::no_useless_escape_in_string::NoUselessEscapeInStringOptions;
 
@@ -12,6 +13,8 @@ declare_lint_rule! {
     ///
     /// Escaping non-special characters in string literals doesn't have any effect.
     /// Hence, they may confuse a reader.
+    ///
+    /// In SCSS files, `\#{` isn't reported, because the backslash stops Sass the interpolation.
     ///
     /// ## Examples
     ///
@@ -69,7 +72,8 @@ impl Rule for NoUselessEscapeInString {
         let node = ctx.query();
         let token = node.value_token().ok()?;
         let text = token.text_trimmed();
-        next_useless_escape(text, text.bytes().next()?).map(|index| (token, index))
+        let is_scss = ctx.source_type::<CssFileSource>().is_scss();
+        next_useless_escape(text, text.bytes().next()?, is_scss).map(|index| (token, index))
     }
 
     fn diagnostic(_: &RuleContext<Self>, (token, index): &Self::State) -> Option<RuleDiagnostic> {
@@ -104,8 +108,9 @@ impl Rule for NoUselessEscapeInString {
 }
 
 /// Returns the index in `str` of the first useless escape.
-fn next_useless_escape(str: &str, quote: u8) -> Option<usize> {
-    let mut it = str.bytes().enumerate();
+fn next_useless_escape(str: &str, quote: u8, is_scss: bool) -> Option<usize> {
+    let mut it = str.bytes().enumerate().peekable();
+    let mut prev = 0;
     while let Some((i, c)) = it.next() {
         if c == b'\\'
             && let Some((_, c)) = it.next()
@@ -125,6 +130,9 @@ fn next_useless_escape(str: &str, quote: u8) -> Option<usize> {
                 | b'u'
                 | b'v'
                 | b'x' => {}
+                // Sass interpolates `#{` inside strings; `\#{` and `#\{` both write it literally.
+                b'#' if is_scss && matches!(it.peek(), Some((_, b'{'))) => {}
+                b'{' if is_scss && prev == b'#' => {}
                 // Preserve escaping of Unicode characters U+2028 and U+2029
                 0xE2 => {
                     if !(matches!(it.next(), Some((_, 0x80)))
@@ -141,6 +149,7 @@ fn next_useless_escape(str: &str, quote: u8) -> Option<usize> {
                 }
             }
         }
+        prev = c;
     }
     None
 }
