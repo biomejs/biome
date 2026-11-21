@@ -62,9 +62,6 @@ insta             = { workspace = true, features = ["glob"] }
 salsa             = { workspace = true }
 tests_macros      = { path = "../tests_macros" }
 
-[build-dependencies]
-filetime = { workspace = true }
-
 [target.'cfg(all(target_family="unix", not(all(target_arch = "aarch64", target_env = "musl"))))'.dev-dependencies]
 tikv-jemallocator = { workspace = true }
 

@@ -8,7 +8,7 @@
 #![doc = r" This build script watches for changes to rule files in group directories"]
 #![doc = r#" and "touches" the corresponding group files to trigger recompilation."#]
 use std::env;
-use std::fs;
+use std::fs::{self, FileTimes};
 use std::io;
 use std::path::PathBuf;
 use std::time::SystemTime;
@@ -46,7 +46,6 @@ fn touch_file(path: &PathBuf) -> io::Result<()> {
     if !path.exists() {
         return Ok(());
     }
-    let now = filetime::FileTime::from_system_time(SystemTime::now());
-    filetime::set_file_mtime(path, now)?;
+    fs::set_times(path, FileTimes::new().set_modified(SystemTime::now()))?;
     Ok(())
 }
