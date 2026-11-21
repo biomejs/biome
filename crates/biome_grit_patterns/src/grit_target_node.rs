@@ -1,6 +1,7 @@
 use crate::grit_tree::GritTargetTree;
 use crate::util::TextRangeGritExt;
 use biome_css_syntax::{CssSyntaxKind, CssSyntaxNode, CssSyntaxToken};
+use biome_diagnostics::LineIndex;
 use biome_js_syntax::{JsSyntaxKind, JsSyntaxNode, JsSyntaxToken};
 use biome_json_syntax::{JsonSyntaxKind, JsonSyntaxNode, JsonSyntaxToken};
 use biome_rowan::syntax::SyntaxElementKey;
@@ -260,6 +261,11 @@ impl<'a> GritTargetNode<'a> {
     #[inline]
     pub fn source(&self) -> &'a str {
         self.tree.text()
+    }
+
+    #[inline]
+    pub fn line_index(&self) -> &'a LineIndex {
+        self.tree.line_index()
     }
 
     #[inline]
