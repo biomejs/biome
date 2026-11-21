@@ -1,0 +1,23 @@
+@function be-slider-thumb($lite, $dark) {
+	@return be-bevel-list((1 1 var(--ink-240)), (-1 -1 var(--ink-144))), 0 bpx(-1) 0 0 $lite, bpx(-1) 0 0 0 $lite, 0 bpx(1) 0 0 $dark;
+}
+
+@function multi-word-items() {
+	@return aaaaaaaaaaaaaaaaaaaa bbbbbbbbbbbbbbbbbbbbbbb, cccccccccccccccccccccccc dddddddddddddddddddddd;
+}
+
+@function single-word-items() {
+	@return aaaaaaaaaaaaaaaaaaaaaaaaaa, bbbbbbbbbbbbbbbbbbbbbbbbbbbbbb, cccccccccccccccccccccccccccc, dddd;
+}
+
+@debug aaaaaaaaaaaaaaaaaaaa bbbbbbbbbbbbbbbbbbbbbbb, cccccccccccccccccccccccc dddddddddddddddddddddd;
+@warn aaaaaaaaaaaaaaaaaaaa bbbbbbbbbbbbbbbbbbbbbbb, cccccccccccccccccccccccc dddddddddddddddddddddd;
+@error aaaaaaaaaaaaaaaaaaaa bbbbbbbbbbbbbbbbbbbbbbb, cccccccccccccccccccccccc dddddddddddddddddddddd;
+
+@function fits() {
+	@return a b, c d;
+}
+
+@function nested-list-call() {
+	@return be-bevel-list((1 1 var(--ink-240)), (-1 -1 var(--ink-144)), (2 2 var(--ink-240)), (-2 -2 var(--ink-200))), 0 bpx(-1) 0 0 $lite;
+}
