@@ -11,15 +11,16 @@ use biome_rowan::Text;
 use crate::generated::global_types::ids::FUNCTION_ID_GLOBAL_TYPE_ID;
 use crate::globals::{
     GLOBAL_ANY_KEYWORD_ID, GLOBAL_BIGINT_KEYWORD_ID, GLOBAL_BOOLEAN_KEYWORD_ID,
-    GLOBAL_NULL_KEYWORD_ID, GLOBAL_NUMBER_KEYWORD_ID, GLOBAL_STRING_KEYWORD_ID,
-    GLOBAL_SYMBOL_KEYWORD_ID, GLOBAL_UNDEFINED_ID, GLOBAL_UNKNOWN_ID,
+    GLOBAL_NULL_KEYWORD_ID, GLOBAL_NUMBER_KEYWORD_ID, GLOBAL_OBJECT_KEYWORD_ID,
+    GLOBAL_STRING_KEYWORD_ID, GLOBAL_SYMBOL_KEYWORD_ID, GLOBAL_UNDEFINED_ID, GLOBAL_UNKNOWN_ID,
+    GLOBAL_UNKNOWN_KEYWORD_ID,
 };
 use crate::interned_types::{InternedLiteral, Literal};
 use crate::resolved::InferredTypeData;
 use crate::type_relation::{
     Assignability, InstanceType, PropertyLookup, PropertyPresence, TypeResolver, find_property,
     instance_types, is_derived_from, is_empty_object_type, is_subtype, primitive_can_satisfy,
-    property_presence, resolve_wrapped_type,
+    property_presence, resolve_wrapped_type, widened_literal,
 };
 use crate::{
     ObjectKind, RawTypeData, RawTypeId, TypeDb, TypeReference, TypeReferenceQualifier,
@@ -245,97 +246,101 @@ fn raw_reference_target<'a>(
     None
 }
 
-/// Limits the chain of raw references that [`raw_primitive_target`] follows.
+/// Limits the chain of raw references that [`raw_reference_target`] and
+/// [`raw_predicate_target`] follow.
 const MAX_RAW_REFERENCE_STEPS: usize = 16;
 
-/// What a collected type reference can resolve to, as far as raw tables tell.
+/// What a collected type reference names as the target of a type predicate,
+/// such as `Foo` in `value is Foo`, as far as raw tables tell.
 #[derive(Debug)]
-pub enum RawPrimitiveTarget<'a> {
-    /// The reference resolves to a primitive type or a primitive literal.
-    Primitive,
-    /// The reference cannot resolve to a primitive type or a primitive literal.
+pub enum RawPredicateTarget<'a> {
+    /// An object type: a type literal, an interface or a class written in
+    /// place, a function or constructor type, a tuple, `object`, an object
+    /// literal type, or a name with type arguments, such as `Promise<void>`
+    /// or `Record<string, number>`. A name with type arguments can also name
+    /// a type alias.
+    Object,
+    /// A type whose values may be primitives: a primitive type, a primitive
+    /// literal, `null`, `undefined`, `void`, `never`, a `typeof` query, an
+    /// intersection, an import, or any other type that raw tables don't show
+    /// to be an object type.
     Other,
-    /// The reference names a type without type arguments. Only the scope that
-    /// declares the name tells whether it is a type alias for a primitive.
+    /// `any`, `unknown`, or a type that inference couldn't determine. None of
+    /// these narrows anything as a target.
+    Top,
+    /// A union, whose members are classified separately.
+    Union(&'a [TypeReference]),
+    /// A name without type arguments. Only the scope that declares the name
+    /// tells whether it is an interface, a class, or a type alias.
     Named(&'a TypeReferenceQualifier),
-    /// The reference queries the type of a value, as in `typeof READY`. Only
-    /// inference tells whether the value has a primitive type or a primitive
-    /// literal type.
-    Typeof,
 }
 
-/// Classifies whether a collected type reference can resolve to a primitive
-/// type or a primitive literal, without resolving it.
+/// Classifies the target of a type predicate as an object type, a type whose
+/// values may be primitives, a type that narrows nothing, a union, or a name
+/// without type arguments, without resolving it.
 ///
 /// `raw_types` is the module table that local references index. A chain of
-/// raw references longer than the step limit is [`RawPrimitiveTarget::Other`].
-pub fn raw_primitive_target<'a>(
+/// raw references longer than the step limit is [`RawPredicateTarget::Other`].
+pub fn raw_predicate_target<'a>(
     reference: &'a TypeReference,
     raw_types: &'a [RawTypeData],
-) -> RawPrimitiveTarget<'a> {
+) -> RawPredicateTarget<'a> {
     let mut reference = reference;
     for _ in 0..MAX_RAW_REFERENCE_STEPS {
         let local = match reference {
             TypeReference::Qualifier(qualifier) if qualifier.type_parameters.is_empty() => {
-                return RawPrimitiveTarget::Named(qualifier);
+                return RawPredicateTarget::Named(qualifier);
             }
-            TypeReference::Qualifier(_) | TypeReference::Import(_) => {
-                return RawPrimitiveTarget::Other;
-            }
+            TypeReference::Qualifier(_) => return RawPredicateTarget::Object,
+            TypeReference::Import(_) => return RawPredicateTarget::Other,
             TypeReference::Resolved(id @ RawTypeId::Global(_)) => {
-                let primitive = [
-                    GLOBAL_BIGINT_KEYWORD_ID,
-                    GLOBAL_BOOLEAN_KEYWORD_ID,
-                    GLOBAL_NULL_KEYWORD_ID,
-                    GLOBAL_NUMBER_KEYWORD_ID,
-                    GLOBAL_STRING_KEYWORD_ID,
-                    GLOBAL_SYMBOL_KEYWORD_ID,
+                return if [
+                    GLOBAL_ANY_KEYWORD_ID,
+                    GLOBAL_UNKNOWN_ID,
+                    GLOBAL_UNKNOWN_KEYWORD_ID,
                 ]
-                .contains(id);
-                return if primitive {
-                    RawPrimitiveTarget::Primitive
+                .contains(id)
+                {
+                    RawPredicateTarget::Top
+                } else if *id == GLOBAL_OBJECT_KEYWORD_ID {
+                    RawPredicateTarget::Object
                 } else {
-                    RawPrimitiveTarget::Other
+                    RawPredicateTarget::Other
                 };
             }
             TypeReference::Resolved(RawTypeId::Local(local)) => local,
         };
-        let primitive = match raw_types.get(local.index()) {
+        return match raw_types.get(local.index()) {
             Some(RawTypeData::Reference(next)) => {
                 reference = next;
                 continue;
             }
-            Some(
-                RawTypeData::BigInt
-                | RawTypeData::Boolean
-                | RawTypeData::Null
-                | RawTypeData::Number
-                | RawTypeData::String
-                | RawTypeData::Symbol
-                | RawTypeData::Undefined,
-            ) => true,
-            Some(RawTypeData::Literal(literal)) => matches!(
-                literal.as_ref(),
-                crate::Literal::BigInt(_)
-                    | crate::Literal::Boolean(_)
-                    | crate::Literal::Number(_)
-                    | crate::Literal::String(_)
-            ),
             // A reference by name to a type collects as an instance of it.
             Some(RawTypeData::InstanceOf(instance)) if instance.type_parameters.is_empty() => {
                 reference = &instance.ty;
                 continue;
             }
-            Some(RawTypeData::TypeofType(_)) => return RawPrimitiveTarget::Typeof,
-            _ => false,
-        };
-        return if primitive {
-            RawPrimitiveTarget::Primitive
-        } else {
-            RawPrimitiveTarget::Other
+            Some(RawTypeData::Union(union)) => RawPredicateTarget::Union(union.types()),
+            Some(RawTypeData::Literal(literal)) if literal.is_primitive() => {
+                RawPredicateTarget::Other
+            }
+            Some(
+                RawTypeData::Class(_)
+                | RawTypeData::Constructor(_)
+                | RawTypeData::Function(_)
+                | RawTypeData::InstanceOf(_)
+                | RawTypeData::Interface(_)
+                | RawTypeData::Literal(_)
+                | RawTypeData::Object(_)
+                | RawTypeData::ObjectKeyword
+                | RawTypeData::Tuple(_),
+            ) => RawPredicateTarget::Object,
+            Some(RawTypeData::AnyKeyword | RawTypeData::Unknown | RawTypeData::UnknownKeyword)
+            | None => RawPredicateTarget::Top,
+            Some(_) => RawPredicateTarget::Other,
         };
     }
-    RawPrimitiveTarget::Other
+    RawPredicateTarget::Other
 }
 
 /// Narrows `ty` to the values that can pass a runtime test when `positive` is
@@ -813,6 +818,10 @@ fn instances_excluded<'db>(
 ///
 /// No primitive is derived from a class, so `instanceof` can only make a
 /// branch impossible for a value of a primitive type, or leave it unchanged.
+/// Biome applies a type predicate whose target has only object types only to
+/// a declared type that this function accepts. TypeScript also narrows a
+/// primitive by such a target when the primitive's wrapper type satisfies
+/// it, as it narrows `string` by `{ length: number }`.
 pub fn may_narrow_by_instanceof(db: &dyn TypeDb, declared: InferredTypeData) -> bool {
     let is_object = |member: &InferredTypeData| {
         !matches!(
@@ -836,6 +845,287 @@ pub fn may_narrow_by_instanceof(db: &dyn TypeDb, declared: InferredTypeData) -> 
         InferredTypeData::Union(union) => union.types(db).iter().any(is_object),
         declared => is_object(&declared),
     }
+}
+
+/// Narrows `ty` by a call to a type-guard function whose type predicate
+/// targets `target`, as `isFoo(value)` with `value is Foo` narrows `value`.
+/// The result matches TypeScript except where noted below. `target` must be
+/// flattened, as the declared type of a variable is.
+///
+/// A primitive type, a primitive literal, `null`, or `undefined` as `target`
+/// applies the runtime test that it stands for through [`narrow_type`]:
+/// `typeof value === "string"` for `string`, and strict equality for a
+/// literal. The false branch of a primitive type keeps the literals of that
+/// primitive, as `"a"` for `string`, when the true branch gets the primitive
+/// type from an object type, as from `{ length: number }`. TypeScript keeps
+/// them too, because its union of such a literal and the primitive type is
+/// the primitive type.
+///
+/// For other targets, Biome compares each member of `ty` with each member of
+/// `target` in TypeScript's subtype relation, using [`is_subtype`]:
+///
+/// - When `positive` is true, a member of `ty` that is a subtype of a member
+///   of `target` stays, a member of `target` that is a subtype of a member of
+///   `ty` replaces it, and the other members are removed. So `Foo2 | Bar`
+///   becomes `Foo2` with `interface Foo2 extends Foo`, and `unknown` becomes
+///   `target`. When no member remains, the result is `target` if it is a
+///   subtype of `ty`, and `ty` otherwise, where TypeScript gives an
+///   intersection such as `(string | number) & Foo`.
+/// - When `positive` is false, the result removes each member that the true
+///   branch keeps as it is rather than replacing it with a member of
+///   `target`. As in TypeScript, this can give `never`.
+///
+/// When a member and a member of `target` are subtypes of each other, the
+/// false branch keeps the member unless the two are the same type. In that
+/// case, TypeScript's strict subtype relation picks which of the two the
+/// true branch keeps, and that relation depends on modifiers that Biome
+/// doesn't record, such as `readonly`. With `interface Same { a: number }`
+/// and the target `Foo`, `Same | Bar` keeps `Same` in both branches, where
+/// TypeScript removes it from the false branch. The false branch also keeps
+/// a member when Biome can tell only that a member of `target` is a subtype
+/// of it. It keeps `unknown`, and it keeps every member when the true branch
+/// is empty.
+///
+/// `ty` is returned unchanged in these cases:
+///
+/// - A comparison of two members can't tell whether either is a subtype of
+///   the other, as for generics, classes that can declare private members,
+///   and literal types that TypeScript may widen. [`is_subtype`] describes
+///   these comparisons.
+/// - `ty` is a union with `unknown`.
+/// - Biome may reach two classes with the same contents as one.
+/// - `target` has `any` or an undetermined member.
+/// - The comparisons run out of their budget of 256 visited types and pairs.
+///
+/// `resolve` resolves handles as for [`narrow_type`].
+pub fn narrow_by_type_predicate<'db>(
+    db: &'db dyn TypeDb,
+    ty: InferredTypeData<'db>,
+    target: InferredTypeData<'db>,
+    positive: bool,
+    mut resolve: impl FnMut(InferredTypeData<'db>) -> InferredTypeData<'db>,
+) -> InferredTypeData<'db> {
+    if is_narrowing_invariant(ty) || ty == InferredTypeData::NeverKeyword {
+        return ty;
+    }
+    let resolve: &mut TypeResolver<'db, '_> = &mut resolve;
+    let Some(predicate) = primitive_predicate(db, target) else {
+        return predicate_branch(db, ty, target, positive, resolve).unwrap_or(ty);
+    };
+    let narrowed = narrow_type(db, ty, predicate, positive, &mut *resolve);
+    let NarrowingPredicate::Typeof(kind) = predicate else {
+        return narrowed;
+    };
+    let Some(primitive) = typeof_type(db, kind).filter(|_| !positive) else {
+        return narrowed;
+    };
+    let mut remaining = MAX_NARROWING_STEPS;
+    let true_branch = narrow_type(db, ty, predicate, true, &mut *resolve);
+    let (Some(members), Some(true_members)) = (
+        union_members(db, ty, &mut remaining),
+        union_members(db, true_branch, &mut remaining),
+    ) else {
+        return narrowed;
+    };
+    if !true_members.contains(&primitive) {
+        return narrowed;
+    }
+    let literals: Vec<_> = members
+        .into_iter()
+        .filter(|member| has_primitive_of_literal(db, *member, &true_members))
+        .collect();
+    if literals.is_empty() {
+        return narrowed;
+    }
+    let mut kept = literals;
+    if narrowed != InferredTypeData::NeverKeyword {
+        kept.push(narrowed);
+    }
+    InferredTypeData::union_from_types(db, kept)
+}
+
+/// Returns the runtime test that the flattened target of a type predicate
+/// stands for when it is a primitive type, a primitive literal, `null`, or
+/// `undefined`, or `None` for other targets.
+fn primitive_predicate<'db>(
+    db: &'db dyn TypeDb,
+    target: InferredTypeData<'db>,
+) -> Option<NarrowingPredicate<'db>> {
+    Some(match target {
+        InferredTypeData::BigInt => NarrowingPredicate::Typeof(TypeofKind::BigInt),
+        InferredTypeData::Boolean => NarrowingPredicate::Typeof(TypeofKind::Boolean),
+        InferredTypeData::Number => NarrowingPredicate::Typeof(TypeofKind::Number),
+        InferredTypeData::String => NarrowingPredicate::Typeof(TypeofKind::String),
+        InferredTypeData::Symbol => NarrowingPredicate::Typeof(TypeofKind::Symbol),
+        InferredTypeData::Null | InferredTypeData::Undefined => NarrowingPredicate::Literal(target),
+        InferredTypeData::Literal(literal)
+            if matches!(
+                literal.literal(db),
+                Literal::BigInt(_) | Literal::Boolean(_) | Literal::Number(_) | Literal::String(_)
+            ) =>
+        {
+            NarrowingPredicate::Literal(target)
+        }
+        _ => return None,
+    })
+}
+
+/// Returns the branch of [`narrow_by_type_predicate`] that `positive`
+/// selects, or `None` when it leaves `ty` unchanged.
+fn predicate_branch<'db>(
+    db: &'db dyn TypeDb,
+    ty: InferredTypeData<'db>,
+    target: InferredTypeData<'db>,
+    positive: bool,
+    resolve: &mut TypeResolver<'db, '_>,
+) -> Option<InferredTypeData<'db>> {
+    let mut remaining = MAX_NARROWING_STEPS;
+    let candidates = union_members(db, target, &mut remaining)?;
+    if candidates
+        .iter()
+        .any(|candidate| is_narrowing_invariant(*candidate))
+    {
+        return None;
+    }
+    if ty == InferredTypeData::UnknownKeyword {
+        return positive.then_some(target);
+    }
+    let members = union_members(db, ty, &mut remaining)?;
+    if members.contains(&InferredTypeData::UnknownKeyword) {
+        return None;
+    }
+    let mut narrowed = Vec::new();
+    let mut kept_as_is = vec![false; members.len()];
+    for candidate in &candidates {
+        for (member, kept) in members.iter().zip(&mut kept_as_is) {
+            remaining = remaining.checked_sub(1)?;
+            match predicate_match(db, *member, *candidate, resolve)? {
+                PredicateMatch::Member => {
+                    narrowed.push(*member);
+                    *kept = true;
+                }
+                PredicateMatch::Either => narrowed.push(*member),
+                PredicateMatch::Target => narrowed.push(*candidate),
+                PredicateMatch::Unrelated => {}
+            }
+        }
+    }
+    if positive {
+        return if narrowed.is_empty() {
+            (is_subtype(db, target, ty, resolve) == Assignability::Assignable).then_some(target)
+        } else {
+            Some(InferredTypeData::union_from_types(db, narrowed))
+        };
+    }
+    if narrowed.is_empty() {
+        return None;
+    }
+    let kept: Vec<_> = members
+        .iter()
+        .zip(&kept_as_is)
+        .filter(|(member, kept_as_is)| {
+            !**kept_as_is || has_primitive_of_literal(db, **member, &narrowed)
+        })
+        .map(|(member, _)| *member)
+        .collect();
+    Some(if kept.len() == members.len() {
+        ty
+    } else if kept.is_empty() {
+        InferredTypeData::NeverKeyword
+    } else {
+        InferredTypeData::union_from_types(db, kept)
+    })
+}
+
+/// How a member of a narrowed type relates to a member of the target of a
+/// type predicate in the subtype relation.
+enum PredicateMatch {
+    /// The member is a subtype of the target member, and TypeScript keeps it
+    /// as it is. This holds when the two are the same type, or when the
+    /// target member is not a subtype of the member.
+    Member,
+    /// The true branch keeps the member, but TypeScript may keep the target
+    /// member instead. This holds when the member is a subtype of the target
+    /// member and the target member may be a subtype of the member, because
+    /// TypeScript's strict subtype relation then picks one. It also holds
+    /// when Biome can tell only that the target member is a subtype of the
+    /// member. In both cases, the member contains whichever TypeScript keeps.
+    Either,
+    /// The target member is a subtype of the member and replaces it.
+    Target,
+    /// Neither is a subtype of the other.
+    Unrelated,
+}
+
+/// Returns how `member` relates to `candidate`, a member of the target of a
+/// type predicate.
+///
+/// Returns `None` when Biome can't tell whether either is a subtype of the
+/// other, and when the two may be instances of distinct classes with the
+/// same contents.
+fn predicate_match<'db>(
+    db: &'db dyn TypeDb,
+    member: InferredTypeData<'db>,
+    candidate: InferredTypeData<'db>,
+    resolve: &mut TypeResolver<'db, '_>,
+) -> Option<PredicateMatch> {
+    let is_candidate_subtype =
+        |resolve: &mut TypeResolver<'db, '_>| is_subtype(db, candidate, member, resolve);
+    Some(match is_subtype(db, member, candidate, resolve) {
+        // Biome identifies a class by its contents and by the handle that
+        // names it. Two classes with the same contents and no handle, as in
+        // two namespaces of one module, may be two declarations, which
+        // TypeScript tells apart when they have private members.
+        Assignability::Assignable
+            if member == candidate && is_class_instance_without_handle(db, member, resolve) =>
+        {
+            return None;
+        }
+        Assignability::Assignable if member == candidate => PredicateMatch::Member,
+        Assignability::Assignable => match is_candidate_subtype(resolve) {
+            Assignability::NotAssignable => PredicateMatch::Member,
+            Assignability::Assignable | Assignability::Undetermined => PredicateMatch::Either,
+        },
+        Assignability::NotAssignable => match is_candidate_subtype(resolve) {
+            Assignability::Assignable => PredicateMatch::Target,
+            Assignability::NotAssignable => PredicateMatch::Unrelated,
+            Assignability::Undetermined => return None,
+        },
+        Assignability::Undetermined => match is_candidate_subtype(resolve) {
+            Assignability::Assignable => PredicateMatch::Either,
+            Assignability::NotAssignable | Assignability::Undetermined => return None,
+        },
+    })
+}
+
+/// Returns whether `ty` is an instance of a class that is not built in and
+/// that Biome reaches without a handle to a local type of a module.
+fn is_class_instance_without_handle<'db>(
+    db: &'db dyn TypeDb,
+    ty: InferredTypeData<'db>,
+    resolve: &mut TypeResolver<'db, '_>,
+) -> bool {
+    let InferredTypeData::InstanceOf(instance) = ty else {
+        return false;
+    };
+    let class = instance.ty(db);
+    !matches!(class, InferredTypeData::Local(_))
+        && matches!(
+            resolve(class).expand_canonical_global(db),
+            InferredTypeData::Class(class) if !class.is_builtin(db)
+        )
+}
+
+/// Returns whether `member` is a literal type, such as `"a"` or `true`, and
+/// `types` has its primitive type, such as `string` or `boolean`.
+/// TypeScript reduces the union of a literal type and its primitive type to
+/// the primitive type.
+fn has_primitive_of_literal<'db>(
+    db: &'db dyn TypeDb,
+    member: InferredTypeData<'db>,
+    types: &[InferredTypeData<'db>],
+) -> bool {
+    widened_literal(db, member).is_some_and(|primitive| types.contains(&primitive))
 }
 
 /// Returns whether the property `name` is a discriminant of `declared`: the
@@ -3577,5 +3867,297 @@ mod tests {
             &TypeReference::Resolved(GLOBAL_NUMBER_KEYWORD_ID),
             &[]
         ));
+    }
+
+    /// Narrows `ty` by a type predicate whose target is `target`, with a
+    /// resolver that returns its input.
+    fn narrow_predicate<'db>(
+        db: &'db dyn TypeDb,
+        ty: InferredTypeData<'db>,
+        target: InferredTypeData<'db>,
+        positive: bool,
+    ) -> InferredTypeData<'db> {
+        super::narrow_by_type_predicate(db, ty, target, positive, |ty| ty)
+    }
+
+    /// Returns the interface `name` with `members`, extending `parents`.
+    fn named_interface<'db>(
+        db: &'db TestDb,
+        name: &'static str,
+        parents: &[InferredTypeData<'db>],
+        members: Vec<TypeMember<'db>>,
+    ) -> InferredTypeData<'db> {
+        InferredTypeData::Interface(InternedInterface::new(
+            db,
+            Box::default(),
+            Box::<[_]>::from(parents),
+            members.into_boxed_slice(),
+            Text::new_static(name),
+        ))
+    }
+
+    #[test]
+    fn type_predicates_keep_subtypes_and_replace_supertypes() {
+        let db = &TestDb::default();
+        let foo = named_interface(db, "Foo", &[], vec![member("a", InferredTypeData::Number)]);
+        let foo2 = named_interface(
+            db,
+            "Foo2",
+            &[foo],
+            vec![member("b", InferredTypeData::Number)],
+        );
+        let bar = named_interface(db, "Bar", &[], vec![member("c", InferredTypeData::Number)]);
+        let ia = named_interface(db, "IA", &[], vec![member("x", InferredTypeData::Number)]);
+        let optional = object(
+            db,
+            vec![
+                member("x", InferredTypeData::Number),
+                optional_member("y", InferredTypeData::String),
+            ],
+        );
+        let primitives = union(db, &[InferredTypeData::String, InferredTypeData::Number]);
+        for (ty, target, positive, expected) in [
+            (union(db, &[foo, InferredTypeData::String]), foo, true, foo),
+            (
+                union(db, &[foo, InferredTypeData::String]),
+                foo,
+                false,
+                InferredTypeData::String,
+            ),
+            (union(db, &[foo2, bar]), foo, true, foo2),
+            (union(db, &[foo2, bar]), foo, false, bar),
+            (InferredTypeData::UnknownKeyword, foo, true, foo),
+            (
+                InferredTypeData::UnknownKeyword,
+                foo,
+                false,
+                InferredTypeData::UnknownKeyword,
+            ),
+            // `optional` replaces `IA`, which lacks its optional property, so
+            // the `else` branch keeps `IA`.
+            (union(db, &[ia, bar]), optional, true, optional),
+            (
+                union(db, &[ia, bar]),
+                optional,
+                false,
+                union(db, &[ia, bar]),
+            ),
+            (InferredTypeData::ObjectKeyword, foo, true, foo),
+            (
+                InferredTypeData::ObjectKeyword,
+                foo,
+                false,
+                InferredTypeData::ObjectKeyword,
+            ),
+            (
+                union(db, &[primitives, InferredTypeData::Boolean]),
+                primitives,
+                true,
+                primitives,
+            ),
+            (
+                union(db, &[primitives, InferredTypeData::Boolean]),
+                primitives,
+                false,
+                InferredTypeData::Boolean,
+            ),
+            (
+                union(db, &[foo, InferredTypeData::Undefined]),
+                foo,
+                false,
+                InferredTypeData::Undefined,
+            ),
+            (foo, foo, false, InferredTypeData::NeverKeyword),
+            (
+                union(db, &[foo, bar, InferredTypeData::String]),
+                union(db, &[foo, bar]),
+                true,
+                union(db, &[foo, bar]),
+            ),
+            // No member is related to `Foo`, and `Foo` is not a subtype of the
+            // union, where TypeScript gives `(string | number) & Foo`.
+            (primitives, foo, true, primitives),
+            (primitives, foo, false, primitives),
+            // `never` reaches no value.
+            (
+                foo,
+                InferredTypeData::NeverKeyword,
+                true,
+                InferredTypeData::NeverKeyword,
+            ),
+            (foo, InferredTypeData::NeverKeyword, false, foo),
+        ] {
+            assert_eq!(
+                narrow_predicate(db, ty, target, positive),
+                expected,
+                "{positive}"
+            );
+        }
+    }
+
+    #[test]
+    fn type_predicates_compare_primitives_with_the_members_of_their_wrappers() {
+        let db = &TestDb::default();
+        let foo = named_interface(db, "Foo", &[], vec![member("a", InferredTypeData::Number)]);
+        let length = object(db, vec![member("length", InferredTypeData::Number)]);
+        let ty = union(
+            db,
+            &[InferredTypeData::String, InferredTypeData::Number, foo],
+        );
+        // Every string has `length`, which numbers and `Foo` lack.
+        assert_eq!(
+            narrow_predicate(db, ty, length, true),
+            InferredTypeData::String
+        );
+        assert_eq!(
+            narrow_predicate(db, ty, length, false),
+            union(db, &[InferredTypeData::Number, foo])
+        );
+        // A subtype must have the optional properties of the target too.
+        let weak = object(
+            db,
+            vec![
+                member("length", InferredTypeData::Number),
+                optional_member("unknownMember", InferredTypeData::Number),
+            ],
+        );
+        assert_eq!(
+            narrow_predicate(db, union(db, &[InferredTypeData::String, foo]), weak, false),
+            union(db, &[InferredTypeData::String, foo])
+        );
+    }
+
+    #[test]
+    fn type_predicates_keep_literals_whose_primitive_the_true_branch_gets() {
+        let db = &TestDb::default();
+        let length = object(db, vec![member("length", InferredTypeData::Number)]);
+        let ty = union(db, &[string(db, "a"), length]);
+        assert_eq!(
+            narrow_predicate(db, ty, InferredTypeData::String, true),
+            InferredTypeData::String
+        );
+        // TypeScript's union of `"a"` and `string` is `string`, so the false
+        // branch keeps `"a"`.
+        assert_eq!(
+            narrow_predicate(db, ty, InferredTypeData::String, false),
+            ty
+        );
+        let ty = union(db, &[string(db, "a"), InferredTypeData::Number]);
+        assert_eq!(
+            narrow_predicate(db, ty, InferredTypeData::String, false),
+            InferredTypeData::Number
+        );
+    }
+
+    #[test]
+    fn type_predicates_keep_members_that_may_replace_each_other_in_the_false_branch() {
+        let db = &TestDb::default();
+        let foo = named_interface(db, "Foo", &[], vec![member("a", InferredTypeData::Number)]);
+        let same = named_interface(db, "Same", &[], vec![member("a", InferredTypeData::Number)]);
+        let bar = named_interface(db, "Bar", &[], vec![member("c", InferredTypeData::Number)]);
+        let ty = union(db, &[same, bar]);
+        assert_eq!(narrow_predicate(db, ty, foo, true), same);
+        assert_eq!(narrow_predicate(db, ty, foo, false), ty);
+    }
+
+    #[test]
+    fn type_predicates_leave_the_type_unchanged_when_biome_cannot_tell() {
+        let db = &TestDb::default();
+        let foo = named_interface(db, "Foo", &[], vec![member("a", InferredTypeData::Number)]);
+        let generic = InferredTypeData::Generic(InternedGenericTypeParameter::new(
+            db,
+            false,
+            None,
+            None,
+            Text::new_static("T"),
+        ));
+        for (ty, target) in [
+            (union(db, &[generic, InferredTypeData::String]), foo),
+            (union(db, &[foo, InferredTypeData::UnknownKeyword]), foo),
+            (
+                union(db, &[foo, InferredTypeData::String]),
+                InferredTypeData::AnyKeyword,
+            ),
+            (
+                union(db, &[foo, InferredTypeData::String]),
+                union(db, &[foo, InferredTypeData::Unknown]),
+            ),
+        ] {
+            for positive in [true, false] {
+                assert_eq!(narrow_predicate(db, ty, target, positive), ty, "{positive}");
+            }
+        }
+    }
+
+    #[test]
+    fn type_predicates_compare_literal_types_of_initializers_as_widened() {
+        let db = &TestDb::default();
+        let one = number(db, "1");
+        let literal = InferredTypeData::Object(InternedObject::new(
+            db,
+            None,
+            Box::from([member("a", one)]),
+            false,
+            ObjectKind::Expression,
+        ));
+        let shape = object(db, vec![member("a", one)]);
+        // TypeScript widens `{ a: 1 }` to `{ a: number }`, which is not a
+        // subtype of `{ a: 1 }`, so the `else` branch keeps it.
+        let ty = union(db, &[literal, InferredTypeData::String]);
+        assert_eq!(narrow_predicate(db, ty, shape, true), literal);
+        assert_eq!(narrow_predicate(db, ty, shape, false), ty);
+        // A type literal keeps its literal types.
+        let ty = union(db, &[shape, InferredTypeData::String]);
+        assert_eq!(
+            narrow_predicate(db, ty, shape, false),
+            InferredTypeData::String
+        );
+        // TypeScript types a class field initialized with `1` as `number`, so
+        // `{ a: number }` is a subtype of the class.
+        let class = instance(db, class(db, "A", None, vec![member("a", one)]));
+        let wide = object(db, vec![member("a", InferredTypeData::Number)]);
+        let ty = union(db, &[wide, InferredTypeData::String]);
+        assert_eq!(narrow_predicate(db, ty, class, true), wide);
+        assert_eq!(narrow_predicate(db, ty, class, false), ty);
+    }
+
+    #[test]
+    fn type_predicates_tell_apart_classes_with_the_same_contents_only_by_handle() {
+        let db = &TestDb::default();
+        let wrapper = InternedTypeofType::new(db, InferredTypeData::Number);
+        let handle = |index| {
+            InferredTypeData::Local(LocalTypeHandle::new(
+                db,
+                ModuleKey::new(wrapper.as_id()),
+                LocalTypeId::new(index),
+            ))
+        };
+        let (first, second) = (handle(0), handle(1));
+        let k = class(db, "K", None, vec![member("k", InferredTypeData::Number)]);
+        let resolve = |ty| if ty == first || ty == second { k } else { ty };
+        let ty = union(db, &[instance(db, first), InferredTypeData::String]);
+        assert_eq!(
+            super::narrow_by_type_predicate(db, ty, instance(db, first), true, resolve),
+            instance(db, first)
+        );
+        assert_eq!(
+            super::narrow_by_type_predicate(db, ty, instance(db, first), false, resolve),
+            InferredTypeData::String
+        );
+        // Another handle to the same contents may be another declaration, and
+        // so may the same contents without a handle.
+        let ty_without_handle = union(db, &[instance(db, k), InferredTypeData::String]);
+        for (ty, target) in [
+            (ty, instance(db, second)),
+            (ty_without_handle, instance(db, k)),
+        ] {
+            for positive in [true, false] {
+                assert_eq!(
+                    super::narrow_by_type_predicate(db, ty, target, positive, resolve),
+                    ty,
+                    "{positive}"
+                );
+            }
+        }
     }
 }

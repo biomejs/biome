@@ -751,8 +751,12 @@ fn long_signatures_names_and_parenthesized_callees_narrow() {
     }
 }
 
+// TypeScript 7.0.2 (`tsc --strict`) gives every `then` read the target and
+// every `else` read `unknown`, except that in the `else` branch a target of
+// `{}` gives `null | undefined` and `void` gives `{} | null`, where Biome
+// keeps `unknown`.
 #[test]
-fn unsupported_predicate_targets_preserve_unknown_and_indeterminate_classifications() {
+fn predicate_targets_narrow_unknown_to_the_target() {
     for target in [
         "{}",
         "{ name: string }",
@@ -761,11 +765,59 @@ fn unsupported_predicate_targets_preserve_unknown_and_indeterminate_classificati
         "string & {}",
         "Promise<void>",
         "string[]",
-        "any",
-        "unknown",
         "void",
-        "never",
     ] {
+        let source = format!(
+            r#"
+                declare function guard(input: unknown): input is {target};
+                declare const expected: {target};
+                /*expected*/expected;
+                function inspect(value: unknown) {{
+                    if (guard(value)) {{ /*then*/value; }} else {{ /*else*/value; }}
+                }}
+            "#
+        );
+        let (db, module) = guard_db(&source);
+        let expected = normalized_type_at(&db, module, &source, "expected", "expected");
+        assert_eq!(
+            normalized_type_at(&db, module, &source, "then", "value"),
+            expected,
+            "{target}: then"
+        );
+        assert_eq!(
+            normalized_type_at(&db, module, &source, "else", "value"),
+            InferredTypeData::UnknownKeyword,
+            "{target}: else"
+        );
+        assert_no_whole_module_inference(&db, &db.take_salsa_events());
+    }
+    // No value reaches the `then` branch of a `never` target.
+    let source = r#"
+        declare function guard(input: unknown): input is never;
+        function inspect(value: unknown) {
+            if (guard(value)) { /*then*/value; } else { /*else*/value; }
+        }
+    "#;
+    let (db, module) = guard_db(source);
+    for (marker, expected) in [
+        ("then", InferredTypeData::Unknown),
+        ("else", InferredTypeData::UnknownKeyword),
+    ] {
+        assert_eq!(
+            normalized_type_at(&db, module, source, marker, "value"),
+            expected,
+            "never: {marker}"
+        );
+    }
+}
+
+// TypeScript 7.0.2 (`tsc --strict`) gives `any` in the `then` branch of an
+// `any` target and `unknown` in the `then` branch of an `unknown` target.
+// Both `else` branches are `never`. Biome supports neither target, so both
+// branches keep the declared type.
+#[test]
+fn any_and_unknown_predicate_targets_preserve_unknown_and_indeterminate_classifications() {
+    for target in ["any", "unknown"] {
         let source = format!(
             r#"
                 declare function guard(input: unknown): input is {target};
@@ -796,6 +848,471 @@ fn unsupported_predicate_targets_preserve_unknown_and_indeterminate_classificati
         }
         assert_no_whole_module_inference(&db, &db.take_salsa_events());
     }
+}
+
+/// Names each member of `ty`, sorted: an interface by its name, an object
+/// type literal by its members, and any other type by its formatted text on
+/// one line.
+fn variant_names(db: &TestModuleDb, ty: InferredTypeData) -> Vec<String> {
+    let variants = match ty {
+        InferredTypeData::Union(union) => union.types(db).to_vec(),
+        _ => vec![ty],
+    };
+    let mut names: Vec<_> = variants
+        .into_iter()
+        .map(|ty| {
+            let text = format_inferred_type(db, ty);
+            let first = text.lines().next().unwrap_or_default();
+            if let Some(name) = first
+                .strip_prefix("interface \"")
+                .and_then(|name| name.split('"').next())
+            {
+                return name.to_owned();
+            }
+            let lines: Vec<_> = text.lines().map(str::trim).collect();
+            if first.starts_with("Object")
+                && let Some(start) = lines.iter().position(|line| line.starts_with("members: "))
+            {
+                // Skip `members: ` and the closing brace of the object.
+                let members = lines[start..lines.len() - 1].join(" ");
+                return members["members: ".len()..].to_owned();
+            }
+            lines.join(" ")
+        })
+        .collect();
+    names.sort();
+    names
+}
+
+/// Types and type-guard functions shared by the tests of targets that are not
+/// primitives.
+const OBJECT_TARGETS: &str = r#"
+    interface Foo { a: number }
+    interface Foo2 extends Foo { b: number }
+    interface Bar { c: number }
+    interface IA { x: number }
+    interface Same { a: number }
+    class A { a = 1 }
+    class A2 { a = 1; b = 2 }
+    class B extends A { b = 2 }
+    class C { c = 3 }
+    class K { k = 1 }
+    class L { length = 0 }
+    type OC = { x: number; y?: string };
+    type FooT = { a: number };
+    type Len = { length: number };
+    declare function isFoo(v: unknown): v is Foo;
+    declare function isFooT(v: unknown): v is FooT;
+    declare function isA(v: unknown): v is A;
+    declare function isA1(v: unknown): v is { a: 1 };
+    declare function isK(v: unknown): v is K;
+    declare function isL(v: unknown): v is L;
+    declare function isSN(v: unknown): v is string | number;
+    declare function isOC(v: unknown): v is OC;
+    declare function isMap(v: unknown): v is Map<string, number>;
+    declare function isFooOrBar(v: unknown): v is Foo | Bar;
+    declare function isStrOrFoo(v: unknown): v is string | Foo;
+    declare function isLen(v: unknown): v is Len;
+    declare function isObj(v: unknown): v is object;
+    declare function isEmpty(v: unknown): v is {};
+    declare function isFn(v: unknown): v is () => void;
+    declare function isArr(v: unknown): v is string[];
+    declare function isPromise(v: unknown): v is Promise<void>;
+    declare function isError(v: unknown): v is Error;
+    declare function isTypeError(v: unknown): v is TypeError;
+    declare function isString(v: unknown): v is string;
+    declare function isNever(v: unknown): v is never;
+    declare function isAdd(v: unknown): v is { type: "add"; payload: number };
+"#;
+
+/// How [`variant_names`] names `() => void`.
+const VOID_FUNCTION: &str = "sync Function { accepts: { params: [] type_args: [] } returns: void }";
+
+/// Asserts that the type of each `(marker, expression, expected)` read in
+/// `source` has the member names `expected`, sorted and spelled as
+/// [`variant_names`] spells them. `source` follows [`OBJECT_TARGETS`] in the
+/// module.
+fn assert_reads(source: &str, reads: &[(&str, &str, &[&str])]) {
+    let source = format!("{OBJECT_TARGETS}{source}");
+    let (db, module) = guard_db(&source);
+    let mismatches: Vec<_> = reads
+        .iter()
+        .filter_map(|(marker, expression, expected)| {
+            let ty = normalized_type_at(&db, module, &source, marker, expression);
+            let actual = variant_names(&db, ty);
+            (actual != *expected)
+                .then(|| format!("{marker}: expected {expected:?}, got {actual:?}"))
+        })
+        .collect();
+    assert!(mismatches.is_empty(), "{}", mismatches.join("\n"));
+    assert_no_whole_module_inference(&db, &db.take_salsa_events());
+}
+
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
+// A branch that no value reaches is `never` in TypeScript, which Biome reads
+// as Unknown.
+#[test]
+fn object_targets_narrow_both_branches() {
+    assert_reads(
+        r#"
+        function f1(x: Foo | string) { if (isFoo(x)) /*f1*/x; else /*f1Else*/x; }
+        function f2(x: Foo2 | Bar) { if (isFoo(x)) /*f2*/x; else /*f2Else*/x; }
+        function f3(x: string | number | boolean) { if (isSN(x)) /*f3*/x; else /*f3Else*/x; }
+        function f4(x: B | C) { if (isA(x)) /*f4*/x; else /*f4Else*/x; }
+        function f5(x: { a: 1; b: 2 } | { c: 3 }) { if (isFoo(x)) /*f5*/x; else /*f5Else*/x; }
+        function f7(x: unknown) { if (isFoo(x)) /*f7*/x; else /*f7Else*/x; }
+        function f8(x: IA | Bar) { if (isOC(x)) /*f8*/x; else /*f8Else*/x; }
+        function f9(x: Foo | undefined) { if (isFoo(x)) /*f9*/x; else /*f9Else*/x; }
+        function f11(x: Map<string, number> | string) { if (isMap(x)) /*f11*/x; else /*f11Else*/x; }
+        function f14(x: { a: any } | Bar) { if (isFoo(x)) /*f14*/x; else /*f14Else*/x; }
+        function f15(x: { a: number; b?: string } | Bar) { if (isFoo(x)) /*f15*/x; else /*f15Else*/x; }
+        function f16(x: object) { if (isFoo(x)) /*f16*/x; else /*f16Else*/x; }
+        function f17(x: {}) { if (isFoo(x)) /*f17*/x; else /*f17Else*/x; }
+        function f19(x: Foo2 | string) { if (!isFoo(x)) /*f19*/x; }
+        function f21(x: { a: 1 | 2 } | Bar) { if (isFoo(x)) /*f21*/x; else /*f21Else*/x; }
+        function g1(x: Foo | Bar | string) { if (isFooOrBar(x)) /*g1*/x; else /*g1Else*/x; }
+        function g2(x: K | string) { if (isK(x)) /*g2*/x; else /*g2Else*/x; }
+        function g4(x: string | number | Foo) { if (isLen(x)) /*g4*/x; else /*g4Else*/x; }
+        function g5(x: string | Foo | number) { if (isStrOrFoo(x)) /*g5*/x; else /*g5Else*/x; }
+        function g7(x: FooT | Bar) { if (isFooT(x)) /*g7*/x; else /*g7Else*/x; }
+        function g8(x: Error | string) { if (isError(x)) /*g8*/x; else /*g8Else*/x; }
+        function g11(x: (() => void) | string) { if (isFn(x)) /*g11*/x; else /*g11Else*/x; }
+        function g12(x: string[] | string) { if (isArr(x)) /*g12*/x; else /*g12Else*/x; }
+        function g13(x: Promise<void> | null) { if (isPromise(x)) /*g13*/x; else /*g13Else*/x; }
+        function g26(x: Foo | string) { if (isNever(x)) /*g26*/x; else /*g26Else*/x; }
+        function g28(x: unknown) { if (isFooOrBar(x)) /*g28*/x; else /*g28Else*/x; }
+        function g29(x: Foo | string) { if (isObj(x)) /*g29*/x; else /*g29Else*/x; }
+        function g30(x: Foo | null | undefined) { if (isEmpty(x)) /*g30*/x; else /*g30Else*/x; }
+        function g33() { const o = { a: 1, b: 2 }; if (isFoo(o)) /*g33*/o; else /*g33Else*/o; }
+        "#,
+        &[
+            ("f1", "x", &["Foo"]),
+            ("f1Else", "x", &["string"]),
+            // Biome matches TypeScript here, although it is unsound. `Bar` is
+            // removed, but a `Bar` that also has `a` is a `Foo`.
+            ("f2", "x", &["Foo2"]),
+            ("f2Else", "x", &["Bar"]),
+            ("f3", "x", &["number", "string"]),
+            ("f3Else", "x", &["boolean"]),
+            ("f4", "x", &["instanceof B"]),
+            ("f4Else", "x", &["instanceof C"]),
+            ("f5", "x", &[r#"["a": number: 1, "b": number: 2]"#]),
+            ("f5Else", "x", &[r#"["c": number: 3]"#]),
+            ("f7", "x", &["Foo"]),
+            ("f7Else", "x", &["unknown"]),
+            // `OC` replaces `IA`, which lacks its optional property `y`.
+            ("f8", "x", &[r#"["x": number, "y"?: string | undefined]"#]),
+            ("f8Else", "x", &["Bar", "IA"]),
+            ("f9", "x", &["Foo"]),
+            ("f9Else", "x", &["undefined"]),
+            ("f11", "x", &["instanceof Map<string, number>"]),
+            ("f11Else", "x", &["string"]),
+            // `any` is a subtype only of `any` and `unknown`, so `Foo`
+            // replaces `{ a: any }`, which the `else` branch keeps.
+            ("f14", "x", &["Foo"]),
+            ("f14Else", "x", &["Bar", r#"["a": any]"#]),
+            ("f15", "x", &[r#"["a": number, "b"?: string | undefined]"#]),
+            ("f15Else", "x", &["Bar"]),
+            ("f16", "x", &["Foo"]),
+            ("f16Else", "x", &["object"]),
+            ("f17", "x", &["Foo"]),
+            ("f17Else", "x", &["[]"]),
+            ("f19", "x", &["string"]),
+            ("f21", "x", &[r#"["a": number: 1 | number: 2]"#]),
+            ("f21Else", "x", &["Bar"]),
+            ("g1", "x", &["Bar", "Foo"]),
+            ("g1Else", "x", &["string"]),
+            ("g2", "x", &["instanceof K"]),
+            ("g2Else", "x", &["string"]),
+            // Every string has `length`, so `string` is a subtype of `Len`.
+            ("g4", "x", &["string"]),
+            ("g4Else", "x", &["Foo", "number"]),
+            ("g5", "x", &["Foo", "string"]),
+            ("g5Else", "x", &["number"]),
+            ("g7", "x", &[r#"["a": number]"#]),
+            ("g7Else", "x", &["Bar"]),
+            ("g8", "x", &["instanceof Error"]),
+            ("g8Else", "x", &["string"]),
+            ("g11", "x", &[VOID_FUNCTION]),
+            ("g11Else", "x", &["string"]),
+            ("g12", "x", &["instanceof Array<string>"]),
+            ("g12Else", "x", &["string"]),
+            ("g13", "x", &["instanceof Promise<void>"]),
+            ("g13Else", "x", &["null"]),
+            ("g26", "x", &["unknown"]),
+            ("g26Else", "x", &["Foo", "string"]),
+            ("g28", "x", &["Bar", "Foo"]),
+            ("g28Else", "x", &["unknown"]),
+            ("g29", "x", &["Foo"]),
+            ("g29Else", "x", &["string"]),
+            ("g30", "x", &["Foo"]),
+            ("g30Else", "x", &["null", "undefined"]),
+            // TypeScript types `o` as `{ a: number; b: number }`, a subtype of
+            // `Foo`.
+            ("g33", "o", &[r#"["a": number: 1, "b": number: 2]"#]),
+            ("g33Else", "o", &["unknown"]),
+        ],
+    );
+}
+
+// Biome keeps the declared type in both branches of every read below, or in
+// the `else` branch where it narrows only the `then` branch. A comment gives
+// the type that TypeScript 7.0.2 (`tsc --strict`) gives where it differs.
+#[test]
+fn object_targets_keep_the_declared_type_where_biome_cannot_tell() {
+    assert_reads(
+        r#"
+        function f6(x: string | number) { if (isFoo(x)) /*f6*/x; else /*f6Else*/x; }
+        function f12(x: { a: number } | Bar) { if (isFoo(x)) /*f12*/x; else /*f12Else*/x; }
+        function f13(x: A | C) { if (isFoo(x)) /*f13*/x; else /*f13Else*/x; }
+        function f18(x: Foo | Bar) { if (isSN(x)) /*f18*/x; else /*f18Else*/x; }
+        function f20(x: Same | Bar) { if (isFoo(x)) /*f20*/x; else /*f20Else*/x; }
+        function g3(x: L | string) { if (isL(x)) /*g3*/x; else /*g3Else*/x; }
+        function g9(x: TypeError | string) { if (isError(x)) /*g9*/x; else /*g9Else*/x; }
+        function g10(x: Error | string) { if (isTypeError(x)) /*g10*/x; else /*g10Else*/x; }
+        function g27(x: { a: number } | string) { if (isA(x)) /*g27*/x; else /*g27Else*/x; }
+        function w1(x: { a: 1 } | string) { if (isA(x)) /*w1*/x; else /*w1Else*/x; }
+        function w2(x: A2 | string) { if (isA1(x)) /*w2*/x; else /*w2Else*/x; }
+        function w3() { const action = { type: "add", payload: 1 }; if (isAdd(action)) /*w3*/action; else /*w3Else*/action; }
+        "#,
+        &[
+            // `(string | number) & Foo`
+            ("f6", "x", &["number", "string"]),
+            ("f6Else", "x", &["number", "string"]),
+            // TypeScript's strict subtype relation keeps `{ a: number }` and
+            // `A` as they are. Biome can't tell, because that relation depends
+            // on modifiers such as `readonly`, so the `else` branch keeps them.
+            ("f12", "x", &[r#"["a": number]"#]),
+            // `Bar`
+            ("f12Else", "x", &["Bar", r#"["a": number]"#]),
+            ("f13", "x", &["instanceof A"]),
+            // `C`
+            ("f13Else", "x", &["instanceof A", "instanceof C"]),
+            // `(Foo | Bar) & (string | number)`
+            ("f18", "x", &["Bar", "Foo"]),
+            ("f18Else", "x", &["Bar", "Foo"]),
+            ("f20", "x", &["Same"]),
+            // `Bar`
+            ("f20Else", "x", &["Bar", "Same"]),
+            // A class can declare private members, so Biome can't tell
+            // whether `string` is a subtype of `L`.
+            ("g3", "x", &["instanceof L", "string"]),
+            // `never`
+            ("g3Else", "x", &["instanceof L", "string"]),
+            // Biome compares instances of two built-in classes only as the
+            // same class. `TypeError`
+            ("g9", "x", &["instanceof TypeError", "string"]),
+            // `string`
+            ("g9Else", "x", &["instanceof TypeError", "string"]),
+            // `Error`
+            ("g10", "x", &["instanceof Error", "string"]),
+            // `string`
+            ("g10Else", "x", &["instanceof Error", "string"]),
+            ("g27", "x", &[r#"["a": number]"#]),
+            // `string`
+            ("g27Else", "x", &[r#"["a": number]"#, "string"]),
+            // Biome types the field of `A` and the properties of the object
+            // literal `action` with the literal types of their initializers.
+            // TypeScript widens those to `number` and `string`, so Biome can't
+            // tell whether one type is a subtype of the other.
+            // `{ a: 1 }`
+            ("w1", "x", &[r#"["a": number: 1]"#, "string"]),
+            // `string`
+            ("w1Else", "x", &[r#"["a": number: 1]"#, "string"]),
+            // `(string | A2) & { a: 1 }`
+            ("w2", "x", &["instanceof A2", "string"]),
+            ("w2Else", "x", &["instanceof A2", "string"]),
+            // `{ type: "add"; payload: number }`
+            (
+                "w3",
+                "action",
+                &[r#"["type": string: add, "payload": number: 1]"#],
+            ),
+            // `{ type: string; payload: number }`
+            (
+                "w3Else",
+                "action",
+                &[r#"["type": string: add, "payload": number: 1]"#],
+            ),
+        ],
+    );
+}
+
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
+#[test]
+fn object_targets_narrow_through_the_flow() {
+    assert_reads(
+        r#"
+        const isFooArrow = (v: unknown): v is Foo => typeof v === "object";
+        const isFooExpression = function (v: unknown): v is Foo { return true; };
+        function arrow(x: Foo | string) { if (isFooArrow(x)) /*arrow*/x; else /*arrowElse*/x; }
+        function expression(x: Foo | string) { if (isFooExpression(x)) /*expression*/x; else /*expressionElse*/x; }
+        function path(o: { v: Foo | string }) { if (isFoo(o.v)) /*path*/o.v; else /*pathElse*/o.v; }
+        function aliased(x: Foo | string) { const ok = isFoo(x); if (ok) /*aliased*/x; else /*aliasedElse*/x; }
+        function operands(x: Foo | string) { isFoo(x) && /*and*/x; isFoo(x) || /*or*/x; }
+        function conditional(x: Foo | string) { isFoo(x) ? /*conditional*/x : /*conditionalElse*/x; }
+        function returned(x: Foo | string) { if (!isFoo(x)) return; /*returned*/x; }
+        function loop(x: Foo | string) { while (isFoo(x)) { /*loop*/x; } /*loopExit*/x; }
+        function both(x: Foo | Bar | string) { if (isFooOrBar(x) && !isFoo(x)) /*both*/x; }
+        function either(x: Foo | Bar | string) { if (isFoo(x) || typeof x === "string") /*either*/x; else /*eitherElse*/x; }
+        function nested(x: Foo | string | null) { if (x) { if (isFoo(x)) /*nested*/x; else /*nestedElse*/x; } }
+        function two(x: Foo | string, y: B | C) { if (isFoo(x) && isA(y)) { /*twoX*/x; /*twoY*/y; } }
+        function member(x: Foo | string) { if (isFoo(x)) /*member*/x.a; }
+        "#,
+        &[
+            ("arrow", "x", &["Foo"]),
+            ("arrowElse", "x", &["string"]),
+            ("expression", "x", &["Foo"]),
+            ("expressionElse", "x", &["string"]),
+            ("path", "o.v", &["Foo"]),
+            ("pathElse", "o.v", &["string"]),
+            ("aliased", "x", &["Foo"]),
+            ("aliasedElse", "x", &["string"]),
+            ("and", "x", &["Foo"]),
+            ("or", "x", &["string"]),
+            ("conditional", "x", &["Foo"]),
+            ("conditionalElse", "x", &["string"]),
+            ("returned", "x", &["Foo"]),
+            ("loop", "x", &["Foo"]),
+            ("loopExit", "x", &["string"]),
+            ("both", "x", &["Bar"]),
+            ("either", "x", &["Foo", "string"]),
+            ("eitherElse", "x", &["Bar"]),
+            ("nested", "x", &["Foo"]),
+            ("nestedElse", "x", &["string"]),
+            ("twoX", "x", &["Foo"]),
+            ("twoY", "y", &["instanceof B"]),
+            ("member", "x.a", &["number"]),
+        ],
+    );
+}
+
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
+// The `then` branch gets `"a"` and `string`, whose union in TypeScript is
+// `string`, so the `else` branch keeps `"a"`.
+#[test]
+fn primitive_targets_keep_the_literals_that_the_then_branch_absorbs() {
+    assert_reads(
+        r#"
+        function absorbed(x: "a" | Len) { if (isString(x)) /*absorbed*/x; else /*absorbedElse*/x; }
+        function literals(x: "a" | number) { if (isString(x)) /*literals*/x; else /*literalsElse*/x; }
+        "#,
+        &[
+            ("absorbed", "x", &["string"]),
+            ("absorbedElse", "x", &[r#"["length": number]"#, "string: a"]),
+            ("literals", "x", &["string: a"]),
+            ("literalsElse", "x", &["number"]),
+        ],
+    );
+}
+
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type,
+// except where a comment gives TypeScript's type.
+#[test]
+fn object_targets_resolve_types_of_other_modules() {
+    let files = [
+        (
+            "/src/shapes.ts",
+            "export interface Foo { a: number }
+export type Bar = { c: number };
+export class K { k = 1 }
+",
+        ),
+        (
+            "/src/copy.ts",
+            "export class K { k = 1 }
+",
+        ),
+        (
+            "/src/index.ts",
+            r#"import type { Foo, Bar } from "./shapes";
+import { K } from "./shapes";
+import { K as KC } from "./copy";
+declare function isFoo(v: unknown): v is Foo;
+declare function isBar(v: unknown): v is Bar;
+declare function isK(v: unknown): v is K;
+declare function isCopy(v: unknown): v is KC;
+function foo(x: Foo | string) { if (isFoo(x)) /*foo*/x; else /*fooElse*/x; }
+function bar(x: Bar | string) { if (isBar(x)) /*bar*/x; else /*barElse*/x; }
+function k(x: K | string) { if (isK(x)) /*k*/x; else /*kElse*/x; }
+function copy(x: K | string) { if (isCopy(x)) /*copy*/x; else /*copyElse*/x; }
+"#,
+        ),
+    ];
+    let fs = MemoryFileSystem::default();
+    for (path, source) in files {
+        fs.insert(path.into(), source);
+    }
+    let paths: Vec<_> = files.iter().map(|(path, _)| *path).collect();
+    let db = build_js_test_module_db(&fs, &paths, true);
+    let module = db.module_for_path(Utf8Path::new("/src/index.ts")).unwrap();
+    let source = files[2].1;
+    for (marker, expected) in [
+        ("foo", &["Foo"][..]),
+        ("fooElse", &["string"]),
+        ("bar", &[r#"["c": number]"#]),
+        ("barElse", &["string"]),
+        ("k", &["instanceof K"]),
+        ("kElse", &["string"]),
+        // Two classes with the same name and members in two modules can't be
+        // told from one class that Biome reaches through two modules, so the
+        // read keeps its type. `K`
+        ("copy", &["instanceof K", "string"]),
+        // `string`
+        ("copyElse", &["instanceof K", "string"]),
+    ] {
+        let ty = normalized_type_at(&db, module, source, marker, "x");
+        assert_eq!(variant_names(&db, ty), expected, "{marker}");
+    }
+    assert_no_whole_module_inference(&db, &db.take_salsa_events());
+}
+
+// In Biome, a type predicate whose target has only object types can't narrow
+// a value whose declared type has no object type. So the target `Local`,
+// which extends `Foo` from another module, is never resolved for such a
+// value, even when another test of the same value is solved.
+#[test]
+fn object_targets_are_not_resolved_for_values_without_object_types() {
+    const SOURCE: &str = r#"
+        import type { Foo } from "./foo.ts";
+        interface Local extends Foo { b: number }
+        type Primitive = string | number;
+        declare function isLocal(input: unknown): input is Local;
+        function only(value: Primitive) {
+            if (isLocal(value)) { /*only*/value; }
+        }
+        function other(value: Primitive | null) {
+            if (value !== null && isLocal(value)) { /*other*/value; }
+        }
+        function object(value: Local | string) {
+            if (isLocal(value)) { /*object*/value; }
+        }
+    "#;
+    let fs = MemoryFileSystem::default();
+    fs.insert("/src/index.ts".into(), SOURCE);
+    fs.insert("/src/foo.ts".into(), "export interface Foo { a: number }");
+    let db = build_js_test_module_db(&fs, &["/src/index.ts", "/src/foo.ts"], true);
+    let module = db.module_for_path(Utf8Path::new("/src/index.ts")).unwrap();
+    use InferredTypeData::{Number, String};
+    for (marker, solves) in [("only", 0), ("other", 1)] {
+        db.clear_salsa_events();
+        let ty = normalized_type_at(&db, module, SOURCE, marker, "value");
+        assert_variants(&db, ty, &[String, Number], marker);
+        let events = db.take_salsa_events();
+        assert_eq!(
+            function_query_will_execute_count_by_name(&db, "infer_flow_subject_states", &events),
+            solves,
+            "{marker}"
+        );
+        assert_eq!(
+            function_query_will_execute_count_by_name(&db, "resolved_export_origin", &events),
+            0,
+            "{marker}"
+        );
+        assert_no_whole_module_inference(&db, &events);
+    }
+    let ty = normalized_type_at(&db, module, SOURCE, "object", "value");
+    assert_eq!(variant_names(&db, ty), ["Local"]);
 }
 
 #[test]

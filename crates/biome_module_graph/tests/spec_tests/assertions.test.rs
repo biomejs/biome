@@ -527,15 +527,20 @@ fn optional_and_nested_assertion_calls_preserve_incoming_types() {
     }
 }
 
+// TypeScript 7.0.2 (`tsc --strict`) gives `string | null` in each row without
+// a comment. A row comment gives TypeScript's type where Biome differs.
 #[test]
 fn unsupported_assertion_signatures_and_never_returns_do_not_add_facts() {
     use InferredTypeData::{Null, String};
     for declaration in [
-        "declare function check(input: unknown): asserts input is string | number;",
+        // TypeScript gives `string & Promise<void>`. Biome keeps
+        // `string | null` because neither member is related to the target.
         "declare function check(input: unknown): asserts input is Promise<void>;",
         "function check(this: unknown, input: unknown): asserts this is string {}",
         "function check(this: unknown, input: unknown): asserts this {}",
+        // TypeScript gives `string` after the generic truthiness assertion.
         "declare function check<T>(input: unknown): asserts input;",
+        // TypeScript gives `string` after resolving the overload.
         "declare function check(input: string): asserts input; declare function check(input: unknown): asserts input is string;",
         "declare function check(input: unknown): never;",
     ] {
@@ -617,25 +622,26 @@ fn assertion_functions_must_be_declared_with_function() {
     assert_no_whole_module_inference(&db, &db.take_salsa_events());
 }
 
+// A target of `any` or `unknown` narrows nothing. A target whose members are
+// all object types narrows nothing in a value whose collected type has no
+// object type, such as this union of string literals. So neither target
+// needs the flow of the value.
 #[test]
-fn unsupported_assertion_targets_do_not_expand_large_baselines() {
+fn assertion_targets_that_cannot_narrow_do_not_expand_large_baselines() {
     let variants = (0..1100)
         .map(|index| format!("\"value{index}\""))
         .collect::<Vec<_>>()
         .join(" | ");
     for target in [
-        "string | number",
         "Promise<void>",
         "unknown",
         "any",
-        "never",
-        "void",
         "object",
         "() => void",
         "Shape",
         "Box",
-        "Kind",
         "Error",
+        "Shape | Box",
     ] {
         let source = format!(
             "interface Shape {{ kind: string }} class Box {{}} enum Kind {{ A }}\n\
@@ -687,6 +693,55 @@ fn alias_assertion_targets_narrow_like_the_types_they_name() {
             "{marker}"
         );
     }
+}
+
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected
+// type.
+#[test]
+fn object_and_union_assertion_targets_narrow_the_following_reads() {
+    const SOURCE: &str = r#"
+        interface Foo { a: number }
+        interface Bar { c: number }
+        declare const expectedFoo: Foo;
+        declare const expectedBar: Bar;
+        /*expectedFoo*/expectedFoo;
+        /*expectedBar*/expectedBar;
+        declare function assertFoo(input: unknown): asserts input is Foo;
+        declare function assertFooOrBar(input: unknown): asserts input is Foo | Bar;
+        declare function assertSN(input: unknown): asserts input is string | number;
+        function object(value: Foo | string) {
+            assertFoo(value);
+            /*object*/value;
+        }
+        function union(value: Foo | Bar | string) {
+            assertFooOrBar(value);
+            /*union*/value;
+        }
+        function primitives(value: string | null) {
+            assertSN(value);
+            /*primitives*/value;
+        }
+        function unknownValue(value: unknown) {
+            /*before*/value;
+            assertFoo(value);
+            /*unknown*/value;
+        }
+    "#;
+    let (db, module) = assertion_db(SOURCE);
+    let foo = normalized_type_at(&db, module, SOURCE, "expectedFoo", "expectedFoo");
+    let bar = normalized_type_at(&db, module, SOURCE, "expectedBar", "expectedBar");
+    db.clear_salsa_events();
+    for (marker, expected) in [
+        ("object", &[foo][..]),
+        ("union", &[foo, bar]),
+        ("primitives", &[InferredTypeData::String]),
+        ("before", &[InferredTypeData::UnknownKeyword]),
+        ("unknown", &[foo]),
+    ] {
+        let ty = normalized_type_at(&db, module, SOURCE, marker, "value");
+        assert_variants(&db, ty, expected, marker);
+    }
+    assert_no_whole_module_inference(&db, &db.take_salsa_events());
 }
 
 #[test]
