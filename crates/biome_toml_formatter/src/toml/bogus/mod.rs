@@ -2,4 +2,6 @@
 
 #[expect(clippy::module_inception)]
 pub(crate) mod bogus;
+pub(crate) mod bogus_key;
+pub(crate) mod bogus_table_header;
 pub(crate) mod bogus_value;

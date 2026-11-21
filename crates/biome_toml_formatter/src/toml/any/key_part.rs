@@ -9,7 +9,6 @@ impl FormatRule<AnyTomlKeyPart> for FormatAnyTomlKeyPart {
     fn fmt(&self, node: &AnyTomlKeyPart, f: &mut TomlFormatter) -> FormatResult<()> {
         match node {
             AnyTomlKeyPart::TomlBareKey(node) => node.format().fmt(f),
-            AnyTomlKeyPart::TomlBogus(node) => node.format().fmt(f),
             AnyTomlKeyPart::TomlQuotedKey(node) => node.format().fmt(f),
         }
     }

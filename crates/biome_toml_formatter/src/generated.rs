@@ -70,6 +70,44 @@ impl IntoFormat<TomlFormatContext> for biome_toml_syntax::TomlArrayTable {
         )
     }
 }
+impl FormatRule<biome_toml_syntax::TomlArrayTableHeader>
+    for crate::toml::auxiliary::array_table_header::FormatTomlArrayTableHeader
+{
+    type Context = TomlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_toml_syntax::TomlArrayTableHeader,
+        f: &mut TomlFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_toml_syntax::TomlArrayTableHeader>::fmt(self, node, f)
+    }
+}
+impl AsFormat<TomlFormatContext> for biome_toml_syntax::TomlArrayTableHeader {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_toml_syntax::TomlArrayTableHeader,
+        crate::toml::auxiliary::array_table_header::FormatTomlArrayTableHeader,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::toml::auxiliary::array_table_header::FormatTomlArrayTableHeader::default(),
+        )
+    }
+}
+impl IntoFormat<TomlFormatContext> for biome_toml_syntax::TomlArrayTableHeader {
+    type Format = FormatOwnedWithRule<
+        biome_toml_syntax::TomlArrayTableHeader,
+        crate::toml::auxiliary::array_table_header::FormatTomlArrayTableHeader,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::toml::auxiliary::array_table_header::FormatTomlArrayTableHeader::default(),
+        )
+    }
+}
 impl FormatRule<biome_toml_syntax::TomlBareKey>
     for crate::toml::auxiliary::bare_key::FormatTomlBareKey
 {
@@ -478,6 +516,44 @@ impl IntoFormat<TomlFormatContext> for biome_toml_syntax::TomlTable {
         )
     }
 }
+impl FormatRule<biome_toml_syntax::TomlTableHeader>
+    for crate::toml::auxiliary::table_header::FormatTomlTableHeader
+{
+    type Context = TomlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_toml_syntax::TomlTableHeader,
+        f: &mut TomlFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_toml_syntax::TomlTableHeader>::fmt(self, node, f)
+    }
+}
+impl AsFormat<TomlFormatContext> for biome_toml_syntax::TomlTableHeader {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_toml_syntax::TomlTableHeader,
+        crate::toml::auxiliary::table_header::FormatTomlTableHeader,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::toml::auxiliary::table_header::FormatTomlTableHeader::default(),
+        )
+    }
+}
+impl IntoFormat<TomlFormatContext> for biome_toml_syntax::TomlTableHeader {
+    type Format = FormatOwnedWithRule<
+        biome_toml_syntax::TomlTableHeader,
+        crate::toml::auxiliary::table_header::FormatTomlTableHeader,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::toml::auxiliary::table_header::FormatTomlTableHeader::default(),
+        )
+    }
+}
 impl AsFormat<TomlFormatContext> for biome_toml_syntax::TomlArrayElementList {
     type Format<'a> = FormatRefWithRule<
         'a,
@@ -629,6 +705,82 @@ impl IntoFormat<TomlFormatContext> for biome_toml_syntax::TomlBogus {
         FormatOwnedWithRule::new(self, crate::toml::bogus::bogus::FormatTomlBogus::default())
     }
 }
+impl FormatRule<biome_toml_syntax::TomlBogusKey>
+    for crate::toml::bogus::bogus_key::FormatTomlBogusKey
+{
+    type Context = TomlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_toml_syntax::TomlBogusKey,
+        f: &mut TomlFormatter,
+    ) -> FormatResult<()> {
+        FormatBogusNodeRule::<biome_toml_syntax::TomlBogusKey>::fmt(self, node, f)
+    }
+}
+impl AsFormat<TomlFormatContext> for biome_toml_syntax::TomlBogusKey {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_toml_syntax::TomlBogusKey,
+        crate::toml::bogus::bogus_key::FormatTomlBogusKey,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::toml::bogus::bogus_key::FormatTomlBogusKey::default(),
+        )
+    }
+}
+impl IntoFormat<TomlFormatContext> for biome_toml_syntax::TomlBogusKey {
+    type Format = FormatOwnedWithRule<
+        biome_toml_syntax::TomlBogusKey,
+        crate::toml::bogus::bogus_key::FormatTomlBogusKey,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::toml::bogus::bogus_key::FormatTomlBogusKey::default(),
+        )
+    }
+}
+impl FormatRule<biome_toml_syntax::TomlBogusTableHeader>
+    for crate::toml::bogus::bogus_table_header::FormatTomlBogusTableHeader
+{
+    type Context = TomlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_toml_syntax::TomlBogusTableHeader,
+        f: &mut TomlFormatter,
+    ) -> FormatResult<()> {
+        FormatBogusNodeRule::<biome_toml_syntax::TomlBogusTableHeader>::fmt(self, node, f)
+    }
+}
+impl AsFormat<TomlFormatContext> for biome_toml_syntax::TomlBogusTableHeader {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_toml_syntax::TomlBogusTableHeader,
+        crate::toml::bogus::bogus_table_header::FormatTomlBogusTableHeader,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::toml::bogus::bogus_table_header::FormatTomlBogusTableHeader::default(),
+        )
+    }
+}
+impl IntoFormat<TomlFormatContext> for biome_toml_syntax::TomlBogusTableHeader {
+    type Format = FormatOwnedWithRule<
+        biome_toml_syntax::TomlBogusTableHeader,
+        crate::toml::bogus::bogus_table_header::FormatTomlBogusTableHeader,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::toml::bogus::bogus_table_header::FormatTomlBogusTableHeader::default(),
+        )
+    }
+}
 impl FormatRule<biome_toml_syntax::TomlBogusValue>
     for crate::toml::bogus::bogus_value::FormatTomlBogusValue
 {
@@ -665,6 +817,48 @@ impl IntoFormat<TomlFormatContext> for biome_toml_syntax::TomlBogusValue {
             self,
             crate::toml::bogus::bogus_value::FormatTomlBogusValue::default(),
         )
+    }
+}
+impl AsFormat<TomlFormatContext> for biome_toml_syntax::AnyTomlArrayTableHeader {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_toml_syntax::AnyTomlArrayTableHeader,
+        crate::toml::any::array_table_header::FormatAnyTomlArrayTableHeader,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::toml::any::array_table_header::FormatAnyTomlArrayTableHeader::default(),
+        )
+    }
+}
+impl IntoFormat<TomlFormatContext> for biome_toml_syntax::AnyTomlArrayTableHeader {
+    type Format = FormatOwnedWithRule<
+        biome_toml_syntax::AnyTomlArrayTableHeader,
+        crate::toml::any::array_table_header::FormatAnyTomlArrayTableHeader,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::toml::any::array_table_header::FormatAnyTomlArrayTableHeader::default(),
+        )
+    }
+}
+impl AsFormat<TomlFormatContext> for biome_toml_syntax::AnyTomlKey {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_toml_syntax::AnyTomlKey,
+        crate::toml::any::key::FormatAnyTomlKey,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(self, crate::toml::any::key::FormatAnyTomlKey::default())
+    }
+}
+impl IntoFormat<TomlFormatContext> for biome_toml_syntax::AnyTomlKey {
+    type Format =
+        FormatOwnedWithRule<biome_toml_syntax::AnyTomlKey, crate::toml::any::key::FormatAnyTomlKey>;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(self, crate::toml::any::key::FormatAnyTomlKey::default())
     }
 }
 impl AsFormat<TomlFormatContext> for biome_toml_syntax::AnyTomlKeyPart {
@@ -739,6 +933,31 @@ impl IntoFormat<TomlFormatContext> for biome_toml_syntax::AnyTomlRootItem {
         FormatOwnedWithRule::new(
             self,
             crate::toml::any::root_item::FormatAnyTomlRootItem::default(),
+        )
+    }
+}
+impl AsFormat<TomlFormatContext> for biome_toml_syntax::AnyTomlTableHeader {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_toml_syntax::AnyTomlTableHeader,
+        crate::toml::any::table_header::FormatAnyTomlTableHeader,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::toml::any::table_header::FormatAnyTomlTableHeader::default(),
+        )
+    }
+}
+impl IntoFormat<TomlFormatContext> for biome_toml_syntax::AnyTomlTableHeader {
+    type Format = FormatOwnedWithRule<
+        biome_toml_syntax::AnyTomlTableHeader,
+        crate::toml::any::table_header::FormatAnyTomlTableHeader,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::toml::any::table_header::FormatAnyTomlTableHeader::default(),
         )
     }
 }
