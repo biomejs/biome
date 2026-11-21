@@ -5074,6 +5074,196 @@ async fn watcher_updates_tailwind_stylesheet() -> Result<()> {
     Ok(())
 }
 
+const TAILWIND_STYLESHEET_CONFIGURATION: &str = r#"{
+    "tailwind": { "stylesheet": "./app.css" },
+    "linter": { "rules": { "nursery": { "useTailwindSortedClasses": "error" } } }
+}"#;
+
+/// Returns the URI of the folder at `path`.
+fn folder_uri(path: &camino::Utf8Path) -> Uri {
+    Uri::from_str(url::Url::from_file_path(path).unwrap().as_str()).unwrap()
+}
+
+/// Pulls the diagnostics of `useTailwindSortedClasses` for `path`.
+async fn pull_tailwind_sorted_classes_diagnostics(
+    server: &mut Server,
+    project_key: biome_service::projects::ProjectKey,
+    path: camino::Utf8PathBuf,
+) -> Result<PullDiagnosticsResult> {
+    server
+        .request(
+            "biome/pull_diagnostics",
+            "pull_diagnostics",
+            PullDiagnosticsParams {
+                project_key,
+                path: path.into(),
+                categories: RuleCategories::all(),
+                only: Vec::new(),
+                skip: Vec::new(),
+                enabled_rules: vec![
+                    RuleSelector::Rule("nursery", "useTailwindSortedClasses").into(),
+                ],
+                include_code_fix: false,
+                inline_config: None,
+                max_diagnostics: None,
+                diagnostic_level: biome_diagnostics::Severity::Hint,
+                enforce_assist: false,
+            },
+        )
+        .await?
+        .context("pull_diagnostics returned an error")
+}
+
+#[tokio::test]
+async fn watches_project_with_tailwind_stylesheet_and_no_project_rules() -> Result<()> {
+    // ARRANGE: The Tailwind rules don't need a project scan, but the
+    // stylesheet at the project root and its import must stay up to date.
+    let mut fs = TemporaryFs::new("watches_project_with_tailwind_stylesheet_and_no_project_rules");
+    fs.create_file("biome.json", TAILWIND_STYLESHEET_CONFIGURATION);
+    fs.create_file("app.css", "@import \"./styles/theme.css\";\n");
+    fs.create_file("styles/theme.css", "@theme { --color-brand: #00f; }\n");
+
+    // No watcher runs, so the instructions stay in the channel.
+    let (instruction_tx, instruction_rx) = crossbeam::channel::unbounded();
+    let factory = ServerFactory::new(true, instruction_tx);
+    let (service, client) = factory.create().into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+    let (sender, _) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    // ACT: Load `biome.json` and scan the project.
+    server
+        .initialize_with_root(folder_uri(&fs.working_directory))
+        .await?;
+    server.initialized().await?;
+
+    // ASSERT
+    let watched_folders: Vec<_> = instruction_rx
+        .try_iter()
+        .filter_map(|instruction| match instruction {
+            biome_service::WatcherInstruction::WatchFolders(folders) => Some(folders),
+            _ => None,
+        })
+        .flatten()
+        .collect();
+    assert!(
+        watched_folders.contains(&fs.working_directory),
+        "the project folder should be watched, got {watched_folders:?}"
+    );
+    assert!(
+        watched_folders.contains(&fs.working_directory.join("styles")),
+        "the folder of the import should be watched, got {watched_folders:?}"
+    );
+
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}
+
+#[tokio::test]
+#[ignore = "Relies on filesystem events, like the other watcher tests"]
+async fn watcher_updates_tailwind_stylesheet_without_project_rules() -> Result<()> {
+    const THEME_WITH_BRAND: &str = "@theme {\n    --color-brand: #00f;\n}\n";
+    const THEME_WITHOUT_BRAND: &str = "@theme {\n}\n";
+
+    // ARRANGE: `bg-brand` is only known through the theme that `app.css`
+    // imports, so the class list is only unsorted while the theme defines it.
+    let mut fs = TemporaryFs::new("watcher_updates_tailwind_stylesheet_without_project_rules");
+    fs.create_file("biome.json", TAILWIND_STYLESHEET_CONFIGURATION);
+    fs.create_file("app.css", "@import \"./styles/theme.css\";\n");
+    fs.create_file("styles/theme.css", THEME_WITH_BRAND);
+    fs.create_file(
+        "App.jsx",
+        "export const a = <div className=\"bg-brand flex\" />;\n",
+    );
+
+    let (watcher, instruction_channel) = Watcher::new(WatcherOptions::default())?;
+    let mut factory = ServerFactory::new(true, instruction_channel.sender.clone());
+    let workspace = factory.workspace();
+    let db_state = factory.db_state();
+    spawn_blocking(move || {
+        workspace.start_watcher(&db_state, watcher);
+    });
+    let (service, client) = factory.create().into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+    let (sender, _) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    // Loads `biome.json` and scans the project.
+    server
+        .initialize_with_root(folder_uri(&fs.working_directory))
+        .await?;
+    server.initialized().await?;
+
+    // The project is already open, so this returns its key.
+    let OpenProjectResult { project_key } = server
+        .request(
+            "biome/open_project",
+            "open_project",
+            OpenProjectParams {
+                path: fs.working_directory.clone().into(),
+                open_uninitialized: true,
+            },
+        )
+        .await?
+        .expect("open_project returned an error");
+    let _: OpenFileResult = server
+        .request(
+            "biome/open_file",
+            "open_file",
+            OpenFileParams {
+                project_key,
+                path: fs.working_directory.join("App.jsx").into(),
+                content: FileContent::FromServer,
+                document_file_source: None,
+                persist_node_cache: false,
+                inline_config: None,
+                editor_features: None,
+            },
+        )
+        .await?
+        .expect("open_file returned an error");
+    let app_path = fs.working_directory.join("App.jsx");
+
+    // ASSERT: `bg-brand` is a known color, so it sorts after `flex`.
+    let result =
+        pull_tailwind_sorted_classes_diagnostics(&mut server, project_key, app_path.clone())
+            .await?;
+    assert_eq!(result.diagnostics.len(), 1);
+
+    // ACT: Remove `--color-brand` from the imported theme.
+    clear_notifications!(factory.service_rx);
+    fs.create_file("styles/theme.css", THEME_WITHOUT_BRAND);
+    await_notification!(factory.service_rx);
+
+    // ASSERT: `bg-brand` is unknown now, so it keeps its place in front.
+    let result =
+        pull_tailwind_sorted_classes_diagnostics(&mut server, project_key, app_path.clone())
+            .await?;
+    assert_eq!(result.diagnostics.len(), 0);
+
+    // ACT: Define `--color-brand` in the stylesheet at the project root.
+    clear_notifications!(factory.service_rx);
+    fs.create_file(
+        "app.css",
+        "@import \"./styles/theme.css\";\n@theme { --color-brand: #00f; }\n",
+    );
+    await_notification!(factory.service_rx);
+
+    // ASSERT: The diagnostic reappears.
+    let result =
+        pull_tailwind_sorted_classes_diagnostics(&mut server, project_key, app_path).await?;
+    assert_eq!(result.diagnostics.len(), 1);
+
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}
+
 #[tokio::test]
 #[ignore]
 async fn watcher_updates_module_graph_with_directories() -> Result<()> {

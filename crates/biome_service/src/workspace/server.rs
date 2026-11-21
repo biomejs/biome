@@ -1926,15 +1926,47 @@ impl WorkspaceServerWithDb<'_> {
                 match scan_kind {
                     ScanKind::KnownFiles | ScanKind::TargetedKnownFiles { .. } => match ignore_kind
                     {
+                        // The files phase of the scan indexes the Tailwind
+                        // stylesheets as dependencies.
                         IgnoreKind::Path => !path.is_required_during_scan(),
-                        IgnoreKind::Ancestors => path.parent().is_none_or(|folder_path| {
-                            self.project_is_ignored_by_top_level_config(
-                                project_key,
-                                folder_path,
-                                true,
-                                ignore_kind,
-                            )
-                        }),
+                        // Updates only reach this branch for paths that aren't
+                        // indexed. The watched folders also hold files that
+                        // this scan kind doesn't index, such as the source
+                        // files next to a stylesheet.
+                        IgnoreKind::Ancestors => {
+                            let stylesheets = self.project_get_tailwind_stylesheets(project_key);
+                            if stylesheets
+                                .iter()
+                                .any(|stylesheet| stylesheet == path.as_path())
+                            {
+                                // A stylesheet that is removed and created
+                                // again is indexed again, even in an ignored
+                                // folder.
+                                false
+                            } else if path.is_required_during_scan() {
+                                path.parent().is_none_or(|folder_path| {
+                                    self.project_is_ignored_by_top_level_config(
+                                        project_key,
+                                        folder_path,
+                                        true,
+                                        ignore_kind,
+                                    )
+                                })
+                            } else if !stylesheets.is_empty() && path.extension() == Some("css") {
+                                // Once removed, a file that a stylesheet
+                                // imports isn't its dependency anymore, so
+                                // every CSS file that isn't ignored is
+                                // accepted.
+                                self.project_is_ignored_by_top_level_config(
+                                    project_key,
+                                    &path,
+                                    false,
+                                    ignore_kind,
+                                )
+                            } else {
+                                true
+                            }
+                        }
                     },
                     ScanKind::Project | ScanKind::TypeAware => {
                         if path.is_dependency() {
@@ -2507,6 +2539,12 @@ impl WorkspaceServerWithDb<'_> {
         let db = self.db_state.fork();
         let project_db: &dyn ProjectDb = db.deref();
         project_db.get_root_settings(project_key)
+    }
+
+    fn project_get_tailwind_stylesheets(&self, project_key: ProjectKey) -> Vec<Utf8PathBuf> {
+        let db = self.db_state.fork();
+        let project_db: &dyn ProjectDb = db.deref();
+        project_db.get_tailwind_stylesheets(project_key)
     }
 
     fn project_get_nested_settings(
@@ -4571,6 +4609,14 @@ impl Workspace for WorkspaceServerWithDb<'_> {
     }
 }
 
+/// The watcher calls these methods outside a project scan, so a concurrent
+/// client update can interrupt their database reads with
+/// [`salsa::Cancelled::PendingWrite`]. The methods that read the database
+/// retry when that happens, because the unwind would otherwise stop the
+/// watcher thread.
+///
+/// An initial scan queues the client updates until it ends, so the methods
+/// that receive an [`IndexTrigger`] only retry for [`IndexTrigger::Update`].
 impl WorkspaceScannerBridge for WorkspaceServerWithDb<'_> {
     #[inline]
     fn fs(&self) -> &dyn biome_fs::FileSystem {
@@ -4579,12 +4625,12 @@ impl WorkspaceScannerBridge for WorkspaceServerWithDb<'_> {
 
     #[inline]
     fn find_project_for_path(&self, path: &Utf8Path) -> Option<ProjectKey> {
-        self.find_project_for_path(path)
+        retry_on_pending_write(|| self.find_project_for_path(path))
     }
 
     #[inline]
     fn get_project_path(&self, project_key: ProjectKey) -> Option<Utf8PathBuf> {
-        self.project_get_path(project_key)
+        retry_on_pending_write(|| self.project_get_path(project_key))
     }
 
     #[inline]
@@ -4596,7 +4642,17 @@ impl WorkspaceScannerBridge for WorkspaceServerWithDb<'_> {
         request_kind: IndexRequestKind,
         path_kind: Option<PathKind>,
     ) -> Result<bool, WorkspaceError> {
-        self.is_ignored_by_scanner(project_key, scan_kind, path, request_kind, path_kind)
+        let is_ignored =
+            || self.is_ignored_by_scanner(project_key, scan_kind, path, request_kind, path_kind);
+        match request_kind.trigger() {
+            IndexTrigger::InitialScan => is_ignored(),
+            IndexTrigger::Update => retry_on_pending_write(is_ignored),
+        }
+    }
+
+    #[inline]
+    fn get_tailwind_stylesheets(&self, project_key: ProjectKey) -> Vec<Utf8PathBuf> {
+        retry_on_pending_write(|| self.project_get_tailwind_stylesheets(project_key))
     }
 
     #[inline]
@@ -4658,88 +4714,90 @@ impl WorkspaceScannerBridge for WorkspaceServerWithDb<'_> {
         project_key: ProjectKey,
         paths: &[BiomePath],
     ) -> Result<Vec<SerdeDiagnostic>, WorkspaceError> {
-        let project_path = self
-            .project_get_path(project_key)
-            .ok_or_else(WorkspaceError::no_project)?;
+        retry_on_pending_write(|| {
+            let project_path = self
+                .project_get_path(project_key)
+                .ok_or_else(WorkspaceError::no_project)?;
 
-        let mut returned_diagnostics = Vec::new();
+            let mut returned_diagnostics = Vec::new();
 
-        let filtered_paths = paths
-            .iter()
-            // We remove the root configuration file from the list of paths
-            // SAFETY: the paths received are files, so it's safe to assume they have a parent folder
-            .filter(|config_path| project_path != config_path.parent().unwrap().as_std_path());
+            let filtered_paths = paths
+                .iter()
+                // We remove the root configuration file from the list of paths
+                // SAFETY: the paths received are files, so it's safe to assume they have a parent folder
+                .filter(|config_path| project_path != config_path.parent().unwrap().as_std_path());
 
-        for filtered_path in filtered_paths {
-            let config = read_config(
-                self.fs.as_ref(),
-                ConfigurationPathHint::FromWorkspace(filtered_path.as_path().to_path_buf()),
-                false,
-            )?;
-            let loaded_nested_configuration =
-                LoadedConfiguration::try_from_payload(config, self.fs.as_ref())?;
+            for filtered_path in filtered_paths {
+                let config = read_config(
+                    self.fs.as_ref(),
+                    ConfigurationPathHint::FromWorkspace(filtered_path.as_path().to_path_buf()),
+                    false,
+                )?;
+                let loaded_nested_configuration =
+                    LoadedConfiguration::try_from_payload(config, self.fs.as_ref())?;
 
-            let nested_directory_path = loaded_nested_configuration
-                .directory_path()
-                .map(Utf8Path::to_path_buf);
-            let nested_configuration = loaded_nested_configuration.resolved_configuration();
-            let extended_configurations = loaded_nested_configuration.extended_configurations();
-            let diagnostics = loaded_nested_configuration.diagnostics;
-            let has_errors = diagnostics.iter().any(|d| d.severity() >= Severity::Error);
-            returned_diagnostics.extend(
-                diagnostics
-                    .into_iter()
-                    .map(biome_diagnostics::serde::Diagnostic::new),
-            );
+                let nested_directory_path = loaded_nested_configuration
+                    .directory_path()
+                    .map(Utf8Path::to_path_buf);
+                let nested_configuration = loaded_nested_configuration.resolved_configuration();
+                let extended_configurations = loaded_nested_configuration.extended_configurations();
+                let diagnostics = loaded_nested_configuration.diagnostics;
+                let has_errors = diagnostics.iter().any(|d| d.severity() >= Severity::Error);
+                returned_diagnostics.extend(
+                    diagnostics
+                        .into_iter()
+                        .map(biome_diagnostics::serde::Diagnostic::new),
+                );
 
-            if has_errors {
-                continue;
+                if has_errors {
+                    continue;
+                }
+
+                if nested_configuration.is_root() {
+                    returned_diagnostics.push(biome_diagnostics::serde::Diagnostic::new(
+                        BiomeDiagnostic::root_in_root(
+                            filtered_path.to_string(),
+                            Some(project_path.to_string()),
+                        ),
+                    ));
+                    continue;
+                }
+
+                let nested_configuration = if nested_configuration.extends_root() {
+                    let root_settings = self
+                        .project_get_root_settings(project_key)
+                        .ok_or_else(WorkspaceError::no_project)?;
+                    let mut root_configuration = root_settings
+                        .source()
+                        .ok_or_else(WorkspaceError::no_project)?;
+
+                    root_configuration.merge_with(nested_configuration);
+                    // We need to be careful that our merge doesn't leave
+                    // `root: true` from the root config.
+                    root_configuration.root = Some(Bool(false));
+                    root_configuration
+                } else {
+                    nested_configuration
+                };
+
+                let scan_kind = ProjectScanComputer::new(&nested_configuration).compute();
+                let params = UpdateSettingsParams {
+                    project_key,
+                    workspace_directory: nested_directory_path.map(BiomePath::from),
+                    configuration: nested_configuration,
+                    extended_configurations: extended_configurations
+                        .into_iter()
+                        .map(|(path, config)| (BiomePath::from(path), config))
+                        .collect(),
+                    module_graph_resolution_kind: ModuleGraphResolutionKind::from(&scan_kind),
+                };
+                let result = self.update_settings(params)?;
+
+                returned_diagnostics.extend(result.diagnostics)
             }
 
-            if nested_configuration.is_root() {
-                returned_diagnostics.push(biome_diagnostics::serde::Diagnostic::new(
-                    BiomeDiagnostic::root_in_root(
-                        filtered_path.to_string(),
-                        Some(project_path.to_string()),
-                    ),
-                ));
-                continue;
-            }
-
-            let nested_configuration = if nested_configuration.extends_root() {
-                let root_settings = self
-                    .project_get_root_settings(project_key)
-                    .ok_or_else(WorkspaceError::no_project)?;
-                let mut root_configuration = root_settings
-                    .source()
-                    .ok_or_else(WorkspaceError::no_project)?;
-
-                root_configuration.merge_with(nested_configuration);
-                // We need to be careful that our merge doesn't leave
-                // `root: true` from the root config.
-                root_configuration.root = Some(Bool(false));
-                root_configuration
-            } else {
-                nested_configuration
-            };
-
-            let scan_kind = ProjectScanComputer::new(&nested_configuration).compute();
-            let params = UpdateSettingsParams {
-                project_key,
-                workspace_directory: nested_directory_path.map(BiomePath::from),
-                configuration: nested_configuration,
-                extended_configurations: extended_configurations
-                    .into_iter()
-                    .map(|(path, config)| (BiomePath::from(path), config))
-                    .collect(),
-                module_graph_resolution_kind: ModuleGraphResolutionKind::from(&scan_kind),
-            };
-            let result = self.update_settings(params)?;
-
-            returned_diagnostics.extend(result.diagnostics)
-        }
-
-        Ok(returned_diagnostics)
+            Ok(returned_diagnostics)
+        })
     }
 
     fn update_project_ignore_files(
@@ -4747,42 +4805,44 @@ impl WorkspaceScannerBridge for WorkspaceServerWithDb<'_> {
         project_key: ProjectKey,
         paths: &[BiomePath],
     ) -> Result<(), WorkspaceError> {
-        let project_path = self
-            .project_get_path(project_key)
-            .ok_or_else(WorkspaceError::no_project)?;
-        let settings = self
-            .project_get_root_settings(project_key)
-            .ok_or_else(WorkspaceError::no_project)?;
+        retry_on_pending_write(|| {
+            let project_path = self
+                .project_get_path(project_key)
+                .ok_or_else(WorkspaceError::no_project)?;
+            let settings = self
+                .project_get_root_settings(project_key)
+                .ok_or_else(WorkspaceError::no_project)?;
 
-        let vcs_settings = &settings.vcs_settings;
+            let vcs_settings = &settings.vcs_settings;
 
-        if !vcs_settings.is_enabled() || !vcs_settings.should_use_ignore_file() {
-            return Ok(());
-        }
-
-        let filtered_paths = paths.iter().filter(|path| path.is_ignore()).filter(|path| {
-            // We filter out the root ignore file, because it's stored when calling `update_settings`
-            // SAFETY: the paths received are files, so it's safe to assume they have a parent folder
-            project_path != path.parent().unwrap()
-        });
-
-        let mut payload = vec![];
-        for path in filtered_paths {
-            let is_in_project_path = path.starts_with(&project_path);
-
-            // We need to pass the **directory** that contains the ignore file.
-            let dir_ignore_file = path.parent().unwrap_or(path);
-
-            if vcs_settings.is_ignore_file(path) && is_in_project_path {
-                let content = self.fs.read_file_from_path(path)?;
-                let patterns = content.lines().map(String::from).collect::<Vec<_>>();
-                payload.push((dir_ignore_file.to_path_buf(), patterns));
+            if !vcs_settings.is_enabled() || !vcs_settings.should_use_ignore_file() {
+                return Ok(());
             }
-        }
 
-        self.store_nested_ignore_patterns(project_key, payload)?;
+            let filtered_paths = paths.iter().filter(|path| path.is_ignore()).filter(|path| {
+                // We filter out the root ignore file, because it's stored when calling `update_settings`
+                // SAFETY: the paths received are files, so it's safe to assume they have a parent folder
+                project_path != path.parent().unwrap()
+            });
 
-        Ok(())
+            let mut payload = vec![];
+            for path in filtered_paths {
+                let is_in_project_path = path.starts_with(&project_path);
+
+                // We need to pass the **directory** that contains the ignore file.
+                let dir_ignore_file = path.parent().unwrap_or(path);
+
+                if vcs_settings.is_ignore_file(path) && is_in_project_path {
+                    let content = self.fs.read_file_from_path(path)?;
+                    let patterns = content.lines().map(String::from).collect::<Vec<_>>();
+                    payload.push((dir_ignore_file.to_path_buf(), patterns));
+                }
+            }
+
+            self.store_nested_ignore_patterns(project_key, payload)?;
+
+            Ok(())
+        })
     }
 
     fn notify(&self, notification: ServiceNotification) {
@@ -4794,13 +4854,15 @@ impl WorkspaceScannerBridge for WorkspaceServerWithDb<'_> {
         path: &Utf8Path,
         project_key: ProjectKey,
     ) -> Result<Vec<biome_diagnostics::serde::Diagnostic>, WorkspaceError> {
-        self.update_service_data(path, UpdateKind::Removed, project_key)
-            .map(|(_, diagnostics)| {
-                diagnostics
-                    .into_iter()
-                    .map(biome_diagnostics::serde::Diagnostic::new)
-                    .collect()
-            })
+        retry_on_pending_write(|| {
+            self.update_service_data(path, UpdateKind::Removed, project_key)
+                .map(|(_, diagnostics)| {
+                    diagnostics
+                        .into_iter()
+                        .map(biome_diagnostics::serde::Diagnostic::new)
+                        .collect()
+                })
+        })
     }
 
     fn unload_path(
@@ -4821,13 +4883,7 @@ impl WorkspaceScannerBridge for WorkspaceServerWithDb<'_> {
         self.project_layout.unload_folder(path);
 
         // Finally unloads the path itself.
-        self.update_service_data(path, UpdateKind::Removed, project_key)
-            .map(|(_, diagnostics)| {
-                diagnostics
-                    .into_iter()
-                    .map(biome_diagnostics::serde::Diagnostic::new)
-                    .collect()
-            })
+        self.unload_file(path, project_key)
     }
 
     fn sync_path_info(&self, path: &Utf8Path) -> bool {
@@ -4868,12 +4924,13 @@ impl WorkspaceScannerBridge for LocalWorkspace {
 
     #[inline]
     fn find_project_for_path(&self, path: &Utf8Path) -> Option<ProjectKey> {
-        self.as_workspace().find_project_for_path(path)
+        // The inherent method of the same name doesn't retry.
+        WorkspaceScannerBridge::find_project_for_path(&self.as_workspace(), path)
     }
 
     #[inline]
     fn get_project_path(&self, project_key: ProjectKey) -> Option<Utf8PathBuf> {
-        self.as_workspace().project_get_path(project_key)
+        self.as_workspace().get_project_path(project_key)
     }
 
     #[inline]
@@ -4887,6 +4944,11 @@ impl WorkspaceScannerBridge for LocalWorkspace {
     ) -> Result<bool, WorkspaceError> {
         self.as_workspace()
             .is_ignored(project_key, scan_kind, path, request_kind, path_kind)
+    }
+
+    #[inline]
+    fn get_tailwind_stylesheets(&self, project_key: ProjectKey) -> Vec<Utf8PathBuf> {
+        self.as_workspace().get_tailwind_stylesheets(project_key)
     }
 
     #[inline]

@@ -92,9 +92,6 @@ declare_lint_rule! {
     /// the utilities defined there with `@utility`. For example, with `@utility slide-in-from-top-*`,
     /// the key `slide-in-from-top-*` matches `slide-in-from-top-4`.
     ///
-    /// Biome scans your project when this rule is enabled, so that it can read the
-    /// stylesheet and the files it imports.
-    ///
     /// When several keys match the same class or variant, the rule uses the first one.
     ///
     /// ## Recognized class strings
@@ -182,7 +179,7 @@ declare_lint_rule! {
         name: "noTailwindRestrictedClasses",
         language: "jsx",
         sources: &[RuleSource::EslintBetterTailwindcss("no-restricted-classes").inspired()],
-        domains: &[RuleDomain::Tailwind, RuleDomain::Project],
+        domains: &[RuleDomain::Tailwind],
         recommended: false,
         fix_kind: FixKind::Unsafe,
     }

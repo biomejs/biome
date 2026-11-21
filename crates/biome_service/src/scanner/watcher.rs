@@ -250,8 +250,10 @@ impl Watcher {
         workspace.notify_stopped();
     }
 
+    /// Updates the index for the filesystem `event`, and returns the
+    /// diagnostics of the update.
     #[tracing::instrument(level = "trace", skip(workspace))]
-    fn handle_notify_event(
+    pub(crate) fn handle_notify_event(
         workspace: &impl WorkspaceWatcherBridge,
         event: NotifyEvent,
     ) -> Vec<Diagnostic> {

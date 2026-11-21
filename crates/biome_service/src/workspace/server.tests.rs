@@ -972,6 +972,174 @@ fn watcher_updates_retry_when_a_write_is_pending() {
     );
 }
 
+/// Runs `operation` on another thread while a write to the database of
+/// `workspace` is pending, and returns its result once the write completed.
+///
+/// Returns an error if `operation` unwinds.
+///
+/// # Panics
+///
+/// Panics if the pending write doesn't interrupt a read of `operation`.
+#[cfg(feature = "module_graph")]
+fn run_while_a_write_is_pending<T: Send>(
+    workspace: &LocalWorkspace,
+    project_key: ProjectKey,
+    operation: impl FnOnce() -> T + Send,
+) -> std::thread::Result<T> {
+    const TIMEOUT: Duration = Duration::from_secs(5);
+
+    // The retained read keeps the setter pending, so `operation` must read
+    // the database while a write is waiting.
+    let retained_db = workspace.get_db();
+    std::thread::scope(|scope| {
+        let update = scope.spawn(|| {
+            workspace
+                .db_state
+                .insert_root_settings(project_key, Settings::default());
+        });
+        assert!(wait_until(TIMEOUT, || workspace.db_state.pending_setters() == 1));
+
+        let interrupted_reads = workspace.db_state.interrupted_reads();
+        let operation = scope.spawn(operation);
+        let is_interrupted = wait_until(TIMEOUT, || {
+            workspace.db_state.interrupted_reads() > interrupted_reads
+        });
+        drop(retained_db);
+        assert!(
+            is_interrupted,
+            "the write interrupts a read of the operation"
+        );
+
+        update.join().expect("the setter completes");
+        operation.join()
+    })
+}
+
+#[cfg(feature = "module_graph")]
+#[test]
+fn watcher_events_retry_when_a_write_is_pending() {
+    const FILE: &str = "/project/src/index.ts";
+
+    let fs = Arc::new(MemoryFileSystem::default());
+    fs.insert("/project/package.json".into(), br#"{"name":"project"}"#);
+    fs.insert(FILE.into(), b"export const value = 1;");
+    let (workspace, project_key) = scanned_lsp_workspace(&fs, "/project");
+    assert!(workspace.is_indexed(Utf8Path::new(FILE)));
+
+    let event = notify::Event::new(notify::EventKind::Remove(notify::event::RemoveKind::File))
+        .add_path(FILE.into());
+    run_while_a_write_is_pending(&workspace, project_key, || {
+        crate::Watcher::handle_notify_event(&watcher(&workspace), event)
+    })
+    .expect("the watcher must not unwind");
+
+    assert!(
+        !workspace.is_indexed(Utf8Path::new(FILE)),
+        "the watcher unloads the removed file after the write completes"
+    );
+}
+
+#[cfg(feature = "module_graph")]
+#[test]
+fn watcher_reads_retry_when_a_write_is_pending() {
+    const FILE: &str = "/project/src/index.ts";
+
+    let fs = Arc::new(MemoryFileSystem::default());
+    fs.insert("/project/package.json".into(), br#"{"name":"project"}"#);
+    fs.insert(FILE.into(), b"export const value = 1;");
+    let (workspace, project_key) = scanned_lsp_workspace(&fs, "/project");
+    let file = Utf8Path::new(FILE);
+
+    // Each read is the first one of its operation, so it's the one that meets
+    // the pending write.
+    let reads: [(_, &(dyn Fn() + Sync)); _] = [
+        ("find_project_for_path", &|| {
+            let project = WorkspaceScannerBridge::find_project_for_path(&workspace, file);
+            assert_eq!(project, Some(project_key));
+        }),
+        ("get_project_path", &|| {
+            let path = WorkspaceScannerBridge::get_project_path(&workspace, project_key);
+            assert_eq!(path, Some(Utf8PathBuf::from("/project")));
+        }),
+        ("is_ignored", &|| {
+            let is_ignored = WorkspaceScannerBridge::is_ignored(
+                &workspace,
+                project_key,
+                &ScanKind::Project,
+                file,
+                IndexRequestKind::Explicit(IndexTrigger::Update),
+                None,
+            );
+            assert!(matches!(is_ignored, Ok(false)));
+        }),
+        ("get_tailwind_stylesheets", &|| {
+            let stylesheets =
+                WorkspaceScannerBridge::get_tailwind_stylesheets(&workspace, project_key);
+            assert!(stylesheets.is_empty());
+        }),
+        ("update_project_config_files", &|| {
+            let result =
+                WorkspaceScannerBridge::update_project_config_files(&workspace, project_key, &[]);
+            assert!(result.is_ok());
+        }),
+        ("update_project_ignore_files", &|| {
+            let result =
+                WorkspaceScannerBridge::update_project_ignore_files(&workspace, project_key, &[]);
+            assert!(result.is_ok());
+        }),
+        ("unload_file", &|| {
+            let result = WorkspaceScannerBridge::unload_file(&workspace, file, project_key);
+            assert!(result.is_ok());
+        }),
+    ];
+    for (name, read) in reads {
+        let result = run_while_a_write_is_pending(&workspace, project_key, read);
+        assert!(result.is_ok(), "`{name}` must not unwind");
+    }
+}
+
+#[cfg(feature = "module_graph")]
+#[test]
+fn project_scan_runs_when_a_scan_of_known_files_watches_the_project() {
+    const SOURCE: &str = "/project/src/index.js";
+    const NEW_SOURCE: &str = "/project/src/new.js";
+
+    let fs = MemoryFileSystem::default();
+    fs.insert("/project/package.json".into(), br#"{"name":"project"}"#);
+    fs.insert(SOURCE.into(), b"export const value = 1;");
+    let fs = Arc::new(fs);
+    let (workspace, project_key) = setup_workspace_and_open_project(fs.clone(), "/project");
+    let scan = |scan_kind| {
+        workspace
+            .scan_project(ScanProjectParams {
+                project_key,
+                watch: true,
+                force: false,
+                scan_kind,
+                verbose: false,
+            })
+            .expect("can scan the project");
+        // No watcher runs, so the project folder is marked as watched here.
+        watcher(&workspace).insert_watched_folder("/project".into());
+    };
+
+    scan(ScanKind::KnownFiles);
+    assert!(!workspace.is_indexed(Utf8Path::new(SOURCE)));
+
+    scan(ScanKind::Project);
+    assert!(
+        workspace.is_indexed(Utf8Path::new(SOURCE)),
+        "the project scan doesn't reuse the scan of known files"
+    );
+
+    fs.insert(NEW_SOURCE.into(), b"export const other = 1;");
+    scan(ScanKind::Project);
+    assert!(
+        !workspace.is_indexed(Utf8Path::new(NEW_SOURCE)),
+        "the second project scan reuses the first one"
+    );
+}
+
 #[cfg(feature = "module_graph")]
 #[test]
 fn renaming_a_manifest_indexes_newly_reachable_dependencies() {
