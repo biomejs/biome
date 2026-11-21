@@ -1,9 +1,9 @@
 use biome_css_syntax::{
     AnyCssRoot, CssContainerAtRule, CssDeclaration, CssLanguage, CssMediaAtRule, CssScopeAtRule,
-    CssStartingStyleAtRule, CssSupportsAtRule, CssSyntaxKind, CssSyntaxToken, ScssAtRootAtRule, T,
-    single_expression_item,
+    CssStartingStyleAtRule, CssSupportsAtRule, CssSyntaxKind, CssSyntaxToken, ScssAtRootAtRule,
+    ScssIncludeAtRule, ScssMixinAtRule, T, single_expression_item,
 };
-use biome_rowan::{AstNode, AstPtr, SyntaxKindSet, TextRange, TokenText};
+use biome_rowan::{AstNode, AstPtr, SyntaxKindSet, Text, TextRange, TokenText};
 use rustc_hash::FxHashMap;
 use std::{collections::BTreeMap, sync::LazyLock};
 
@@ -34,6 +34,8 @@ pub struct SemanticModelBuilder {
     /// IDs of top-level rules only
     top_level_rule_ids: Vec<RuleId>,
     root_declarations: Vec<CssModelDeclarationData>,
+    scss_mixin_declarations: Vec<CssModelDeclarationData>,
+    custom_property_prefixes: Vec<(Text, TextRange)>,
     global_custom_variables: FxHashMap<TokenText, CssGlobalCustomVariableData>,
     at_property_rules: Vec<CssPropertyAtRuleData>,
     at_property_by_range: FxHashMap<TextRange, usize>,
@@ -54,6 +56,8 @@ impl SemanticModelBuilder {
             all_rules: Vec::new(),
             top_level_rule_ids: Vec::new(),
             root_declarations: Vec::new(),
+            scss_mixin_declarations: Vec::new(),
+            custom_property_prefixes: Vec::new(),
             current_rule_stack: Vec::new(),
             global_custom_variables: FxHashMap::default(),
             at_property_rules: Vec::new(),
@@ -144,6 +148,8 @@ impl SemanticModelBuilder {
             all_rules: self.all_rules,
             top_level_rule_ids: self.top_level_rule_ids,
             root_declarations: self.root_declarations,
+            scss_mixin_declarations: self.scss_mixin_declarations,
+            custom_property_prefixes: self.custom_property_prefixes,
             global_custom_variables: self.global_custom_variables,
             at_property_rules: self.at_property_rules,
             at_property_by_range: self.at_property_by_range,
@@ -274,6 +280,8 @@ impl SemanticModelBuilder {
                             .push(declaration);
                     } else if self.is_root_declaration(&node) {
                         self.root_declarations.push(declaration);
+                    } else if is_in_scss_mixin_or_include(&node) {
+                        self.scss_mixin_declarations.push(declaration);
                     }
                 }
             }
@@ -316,6 +324,9 @@ impl SemanticModelBuilder {
             }
             SemanticEvent::ScssFunctionDeclaration { name } => {
                 self.scss_function_names.push(name.token_text_trimmed());
+            }
+            SemanticEvent::CustomPropertyPrefixDeclaration { prefix, range } => {
+                self.custom_property_prefixes.push((prefix, range));
             }
         }
     }
@@ -428,4 +439,12 @@ fn resolve_selector(current: &[CssSyntaxToken], parents: &[SelectorData]) -> Vec
             }
         })
         .collect()
+}
+
+/// Returns `true` if `declaration` is in an SCSS mixin body or `@include` block, where it takes
+/// effect in the rule that includes it.
+fn is_in_scss_mixin_or_include(declaration: &CssDeclaration) -> bool {
+    declaration.syntax().ancestors().any(|ancestor| {
+        ScssMixinAtRule::can_cast(ancestor.kind()) || ScssIncludeAtRule::can_cast(ancestor.kind())
+    })
 }

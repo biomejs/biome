@@ -1,0 +1,10 @@
+/* should not generate diagnostics */
+@mixin hover {
+  color: red;
+  color: blue;
+}
+
+@include hover {
+  margin: 0;
+  margin: 1px;
+}

@@ -2,3 +2,13 @@
 .themed {
   color: var(--missing-color);
 }
+
+:root {
+  @each $name in primary, secondary {
+    --color-#{$name}: red;
+  }
+}
+
+.prefix-mismatch {
+  color: var(--colour-primary);
+}
