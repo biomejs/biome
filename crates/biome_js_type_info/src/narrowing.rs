@@ -17,8 +17,8 @@ use crate::globals::{
 use crate::interned_types::{InternedLiteral, Literal};
 use crate::resolved::InferredTypeData;
 use crate::type_relation::{
-    Assignability, PropertyLookup, TypeResolver, find_property, primitive_can_satisfy,
-    resolve_wrapped_type,
+    Assignability, PropertyLookup, PropertyPresence, TypeResolver, find_property,
+    primitive_can_satisfy, property_presence, resolve_wrapped_type,
 };
 use crate::{
     ObjectKind, RawTypeData, RawTypeId, TypeDb, TypeReference, TypeReferenceQualifier,
@@ -558,6 +558,95 @@ pub fn may_narrow_by_property(db: &dyn TypeDb, declared: InferredTypeData) -> bo
         })
         .nth(1)
         .is_some()
+}
+
+/// Narrows `ty` by the runtime test `name in value`, as TypeScript does.
+///
+/// Like TypeScript, Biome treats an object type as closed, so a member of the
+/// union `ty` lacks every property that it doesn't declare.
+/// [`property_presence`] looks up the property in each member.
+///
+/// - When `positive` is true, the members that lack the property are
+///   removed. A member stays when it declares the property, even as
+///   optional, or when one of its index signatures accepts the name. A member
+///   also stays when Biome can't tell whether it has the property, as for a
+///   primitive, a function, a tuple, or a class instance. When no member
+///   declares the property or has such an index signature, `ty` is returned
+///   unchanged. TypeScript gives `ty & Record<name, unknown>` instead.
+/// - When `positive` is false, the members that declare the property as
+///   required are removed, which can give `never`.
+///
+/// `null` and `undefined` lack every property. A `name` that starts with `#`
+/// leaves `ty` unchanged, because Biome spells a private name such as `#p`
+/// with its `#`, while the string `"#p"` never names a private member.
+/// `ty` is also returned unchanged when the union traversal, which visits at
+/// most 256 types, runs out. `resolve` replaces local and global handles with
+/// the types they stand for, both to narrow `ty` and to look up the property.
+pub fn narrow_by_in_operator<'db>(
+    db: &'db dyn TypeDb,
+    ty: InferredTypeData<'db>,
+    name: &str,
+    positive: bool,
+    mut resolve: impl FnMut(InferredTypeData<'db>) -> InferredTypeData<'db>,
+) -> InferredTypeData<'db> {
+    if is_narrowing_invariant(ty) || ty == InferredTypeData::NeverKeyword || name.starts_with('#') {
+        return ty;
+    }
+    let resolve: &mut TypeResolver<'db, '_> = &mut resolve;
+    let mut remaining = MAX_NARROWING_STEPS;
+    let Some(members) = union_members(db, ty, &mut remaining) else {
+        return ty;
+    };
+    let mut presences = Vec::with_capacity(members.len());
+    for member in &members {
+        let Some(left) = remaining.checked_sub(1) else {
+            return ty;
+        };
+        remaining = left;
+        let is_primitive = matches!(
+            typeof_kind(db, *member),
+            Some(
+                TypeofKind::BigInt
+                    | TypeofKind::Boolean
+                    | TypeofKind::Number
+                    | TypeofKind::String
+                    | TypeofKind::Symbol
+            )
+        );
+        presences.push(if is_primitive {
+            PropertyPresence::Unknown
+        } else {
+            property_presence(db, *member, name, resolve)
+        });
+    }
+    if positive
+        && !presences.iter().any(|presence| {
+            matches!(
+                presence,
+                PropertyPresence::Required | PropertyPresence::Optional | PropertyPresence::Indexed
+            )
+        })
+    {
+        return ty;
+    }
+    let removed = if positive {
+        PropertyPresence::Missing
+    } else {
+        PropertyPresence::Required
+    };
+    let kept: Vec<_> = members
+        .iter()
+        .zip(&presences)
+        .filter(|(_, presence)| **presence != removed)
+        .map(|(member, _)| *member)
+        .collect();
+    if kept.len() == members.len() {
+        ty
+    } else if kept.is_empty() {
+        InferredTypeData::NeverKeyword
+    } else {
+        InferredTypeData::union_from_types(db, kept)
+    }
 }
 
 /// Returns whether the property `name` is a discriminant of `declared`: the
@@ -1231,6 +1320,7 @@ fn narrow_literal<'db>(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::generated::global_types::ids::ERROR_ID_GLOBAL_TYPE_ID;
     use crate::interned_types::{
         InternedClass, InternedFunction, InternedGenericTypeParameter, InternedInterface,
         InternedIntersection, InternedObject, InternedTuple, InternedTypeInstance,
@@ -2739,6 +2829,155 @@ mod tests {
                 "{name}"
             );
         }
+    }
+
+    /// Narrows `ty` by `name in ty`, with a resolver that returns its input.
+    fn narrow_in<'db>(
+        db: &'db dyn TypeDb,
+        ty: InferredTypeData<'db>,
+        name: &str,
+        positive: bool,
+    ) -> InferredTypeData<'db> {
+        super::narrow_by_in_operator(db, ty, name, positive, |ty| ty)
+    }
+
+    /// Returns an index signature member whose key has type `key`.
+    fn index_signature<'db>(key: InferredTypeData<'db>) -> TypeMember<'db> {
+        TypeMember {
+            kind: TypeMemberKind::IndexSignature(key),
+            ty: InferredTypeData::Number,
+        }
+    }
+
+    #[test]
+    fn in_keeps_the_members_that_declare_the_property() {
+        let db = &TestDb::default();
+        let a = object(db, vec![member("a", InferredTypeData::Number)]);
+        let b = object(db, vec![member("b", InferredTypeData::Number)]);
+        let optional = object(db, vec![optional_member("a", InferredTypeData::Number)]);
+        let dict = object(db, vec![index_signature(InferredTypeData::String)]);
+        let numbers = object(db, vec![index_signature(InferredTypeData::Number)]);
+        let inherited = interface(db, &[interface(db, &[], vec![member("a", b)])], vec![]);
+        for (ty, name, positive, expected) in [
+            (union(db, &[a, b]), "a", true, a),
+            (union(db, &[a, b]), "a", false, b),
+            (union(db, &[optional, b]), "a", true, optional),
+            (
+                union(db, &[optional, b]),
+                "a",
+                false,
+                union(db, &[optional, b]),
+            ),
+            (union(db, &[dict, b]), "a", true, dict),
+            (union(db, &[dict, b]), "a", false, union(db, &[dict, b])),
+            (union(db, &[numbers, b]), "0", true, numbers),
+            (union(db, &[inherited, b]), "a", true, inherited),
+            (union(db, &[inherited, b]), "a", false, b),
+            // `null` and `undefined` have no property.
+            (
+                union(db, &[a, b, InferredTypeData::Undefined]),
+                "a",
+                true,
+                a,
+            ),
+            (
+                union(db, &[a, b, InferredTypeData::Null]),
+                "a",
+                false,
+                union(db, &[b, InferredTypeData::Null]),
+            ),
+            // Every object has the members of `Object`.
+            (union(db, &[a, b]), "toString", true, union(db, &[a, b])),
+            (
+                union(db, &[a, dict]),
+                "toString",
+                false,
+                InferredTypeData::NeverKeyword,
+            ),
+        ] {
+            assert_eq!(
+                narrow_in(db, ty, name, positive),
+                expected,
+                "{name} {positive}"
+            );
+        }
+    }
+
+    #[test]
+    fn in_keeps_the_type_when_no_member_declares_the_property() {
+        let db = &TestDb::default();
+        let a = object(db, vec![member("a", InferredTypeData::Number)]);
+        let b = object(db, vec![member("b", InferredTypeData::Number)]);
+        let numbers = object(db, vec![index_signature(InferredTypeData::Number)]);
+        let class = class_instance(db, vec![member("p", InferredTypeData::Number)]);
+        for ty in [
+            union(db, &[a, b]),
+            // A numeric index signature accepts only numeric names.
+            union(db, &[numbers, b]),
+            // A class can have a property that Biome doesn't collect.
+            union(db, &[class, b]),
+        ] {
+            assert_eq!(narrow_in(db, ty, "c", true), ty);
+            assert_eq!(narrow_in(db, ty, "c", false), ty);
+        }
+        // The `#` of a private name is part of the name Biome gives it.
+        let private = object(db, vec![member("#a", InferredTypeData::Number)]);
+        assert_eq!(
+            narrow_in(db, union(db, &[private, b]), "#a", true),
+            union(db, &[private, b])
+        );
+    }
+
+    #[test]
+    fn in_keeps_the_members_whose_property_biome_cannot_tell() {
+        let db = &TestDb::default();
+        let a = object(db, vec![member("a", InferredTypeData::Number)]);
+        let class = class_instance(db, vec![member("p", InferredTypeData::Number)]);
+        let error = InferredTypeData::instance_of(
+            db,
+            InferredTypeData::GlobalType(ERROR_ID_GLOBAL_TYPE_ID),
+            Box::default(),
+        );
+        let callable = interface(
+            db,
+            &[],
+            vec![TypeMember {
+                kind: TypeMemberKind::CallSignature,
+                ty: method(db, "call", InferredTypeData::VoidKeyword),
+            }],
+        );
+        let computed = object(
+            db,
+            vec![TypeMember {
+                kind: TypeMemberKind::ComputedValue(InferredTypeData::Unknown),
+                ty: InferredTypeData::Number,
+            }],
+        );
+        // `{ "\u0061": number }` has the property `a`.
+        let escaped_name = object(db, vec![member("\\u0061", InferredTypeData::Number)]);
+        // `{ 1.0: number }` has the property `1`.
+        let number_name = object(db, vec![member("1.0", InferredTypeData::Number)]);
+        let named_a = object(db, vec![member("1", a)]);
+        for (other, name) in [
+            (class, "a"),
+            // Biome's `Error` lacks `cause`, which TypeScript's newer
+            // library files add.
+            (error, "a"),
+            (InferredTypeData::String, "a"),
+            (callable, "a"),
+            (computed, "a"),
+            (escaped_name, "a"),
+            (number_name, "1"),
+        ] {
+            let target = if name == "1" { named_a } else { a };
+            let ty = union(db, &[target, other]);
+            assert_eq!(narrow_in(db, ty, name, true), ty, "{name}");
+            assert_eq!(narrow_in(db, ty, name, false), other, "{name}");
+        }
+        // A class that declares the property is known to have it.
+        let ty = union(db, &[a, class]);
+        assert_eq!(narrow_in(db, ty, "p", true), class);
+        assert_eq!(narrow_in(db, ty, "p", false), a);
     }
 
     #[test]

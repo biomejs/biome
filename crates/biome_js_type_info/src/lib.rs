@@ -40,8 +40,9 @@ pub use inferred_type::{
 pub use interned_types::{RawTypeData, TypeDb};
 pub use narrowing::{
     NarrowingPredicate, PropertyTest, RawPrimitiveTarget, TypeofKind, falsy_values,
-    is_narrowing_invariant, is_raw_narrowing_invariant, may_narrow_by_property, narrow_by_property,
-    narrow_type, raw_may_be_object_union, raw_primitive_target,
+    is_narrowing_invariant, is_raw_narrowing_invariant, may_narrow_by_property,
+    narrow_by_in_operator, narrow_by_property, narrow_type, raw_may_be_object_union,
+    raw_primitive_target,
 };
 pub use return_type_relation::{
     NarrowedTypeCandidates, ReturnTypeRelation, ReturnTypeVerdict, compare_declared_return_type,
