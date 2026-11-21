@@ -1,0 +1,45 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidNested.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+export function apiKey() {
+	return process.env.GIPHY_KEY;
+}
+
+```
+
+# Diagnostics
+```
+invalidNested.ts:3:9 lint/nursery/noConvexProcessEnv  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use process.env in Convex functions.
+  
+    1 │ /* should generate diagnostics */
+    2 │ export function apiKey() {
+  > 3 │ 	return process.env.GIPHY_KEY;
+      │ 	       ^^^^^^^^^^^
+    4 │ }
+    5 │ 
+  
+  i Variables read from process.env have no types, so misspelled or missing variables are only found when the code runs.
+  
+  i Declare the environment variables in convex/convex.config.ts, and read them from the env object exported by _generated/server.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the env object from _generated/server instead.
+  
+    1   │ - /*·should·generate·diagnostics·*/
+      1 │ + import·{·env·}·from·"../_generated/server";
+      2 │ + /*·should·generate·diagnostics·*/
+    2 3 │   export function apiKey() {
+    3   │ - → return·process.env.GIPHY_KEY;
+      4 │ + → return·env.GIPHY_KEY;
+    4 5 │   }
+    5 6 │   
+  
+
+```

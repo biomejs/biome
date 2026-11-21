@@ -150,6 +150,7 @@ pub enum RuleName {
     NoConstructorReturn,
     NoContinue,
     NoControlCharactersInRegex,
+    NoConvexProcessEnv,
     NoDangerouslySetInnerHtml,
     NoDangerouslySetInnerHtmlWithChildren,
     NoDanglingUnderscore,
@@ -997,6 +998,7 @@ impl RuleName {
             Self::NoConstructorReturn => "noConstructorReturn",
             Self::NoContinue => "noContinue",
             Self::NoControlCharactersInRegex => "noControlCharactersInRegex",
+            Self::NoConvexProcessEnv => "noConvexProcessEnv",
             Self::NoDangerouslySetInnerHtml => "noDangerouslySetInnerHtml",
             Self::NoDangerouslySetInnerHtmlWithChildren => "noDangerouslySetInnerHtmlWithChildren",
             Self::NoDanglingUnderscore => "noDanglingUnderscore",
@@ -1856,6 +1858,7 @@ impl RuleName {
             Self::NoConstructorReturn => RuleGroup::Correctness,
             Self::NoContinue => RuleGroup::Style,
             Self::NoControlCharactersInRegex => RuleGroup::Suspicious,
+            Self::NoConvexProcessEnv => RuleGroup::Nursery,
             Self::NoDangerouslySetInnerHtml => RuleGroup::Security,
             Self::NoDangerouslySetInnerHtmlWithChildren => RuleGroup::Security,
             Self::NoDanglingUnderscore => RuleGroup::Nursery,
@@ -2706,6 +2709,7 @@ impl std::str::FromStr for RuleName {
             "noConstructorReturn" => Ok(Self::NoConstructorReturn),
             "noContinue" => Ok(Self::NoContinue),
             "noControlCharactersInRegex" => Ok(Self::NoControlCharactersInRegex),
+            "noConvexProcessEnv" => Ok(Self::NoConvexProcessEnv),
             "noDangerouslySetInnerHtml" => Ok(Self::NoDangerouslySetInnerHtml),
             "noDangerouslySetInnerHtmlWithChildren" => {
                 Ok(Self::NoDangerouslySetInnerHtmlWithChildren)

@@ -1,0 +1,44 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidAliasedImport.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+import { env as config } from "./_generated/server";
+
+const apiKey = process.env.GIPHY_KEY;
+const other = config.OTHER_KEY;
+
+```
+
+# Diagnostics
+```
+invalidAliasedImport.ts:4:16 lint/nursery/noConvexProcessEnv  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use process.env in Convex functions.
+  
+    2 │ import { env as config } from "./_generated/server";
+    3 │ 
+  > 4 │ const apiKey = process.env.GIPHY_KEY;
+      │                ^^^^^^^^^^^
+    5 │ const other = config.OTHER_KEY;
+    6 │ 
+  
+  i Variables read from process.env have no types, so misspelled or missing variables are only found when the code runs.
+  
+  i Declare the environment variables in convex/convex.config.ts, and read them from the env object exported by _generated/server.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the env object from _generated/server instead.
+  
+    2 2 │   import { env as config } from "./_generated/server";
+    3 3 │   
+    4   │ - const·apiKey·=·process.env.GIPHY_KEY;
+      4 │ + const·apiKey·=·config.GIPHY_KEY;
+    5 5 │   const other = config.OTHER_KEY;
+    6 6 │   
+  
+
+```

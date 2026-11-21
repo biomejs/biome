@@ -1,0 +1,413 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+const apiKey = process.env.GIPHY_KEY;
+const computed = process.env["GIPHY_KEY"];
+const template = process.env[`GIPHY_KEY`];
+const optional = process?.env.GIPHY_KEY;
+const computedEnv = process["env"].GIPHY_KEY;
+const global = globalThis.process.env.GIPHY_KEY;
+const nonNull = process.env.GIPHY_KEY!;
+const { GIPHY_KEY, OTHER_KEY: renamed } = process.env;
+const { ...rest } = process.env;
+const name = "GIPHY_KEY";
+const dynamic = process.env[name];
+const keys = Object.keys(process.env);
+const copy = { ...process.env };
+process.env.GIPHY_KEY = "value";
+delete process.env.GIPHY_KEY;
+
+```
+
+# Diagnostics
+```
+invalid.ts:2:16 lint/nursery/noConvexProcessEnv  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use process.env in Convex functions.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const apiKey = process.env.GIPHY_KEY;
+      │                ^^^^^^^^^^^
+    3 │ const computed = process.env["GIPHY_KEY"];
+    4 │ const template = process.env[`GIPHY_KEY`];
+  
+  i Variables read from process.env have no types, so misspelled or missing variables are only found when the code runs.
+  
+  i Declare the environment variables in convex/convex.config.ts, and read them from the env object exported by _generated/server.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the env object from _generated/server instead.
+  
+        1 │ + import·{·env·}·from·"./_generated/server";
+     1  2 │   /* should generate diagnostics */
+     2    │ - const·apiKey·=·process.env.GIPHY_KEY;
+        3 │ + const·apiKey·=·env.GIPHY_KEY;
+     3  4 │   const computed = process.env["GIPHY_KEY"];
+     4  5 │   const template = process.env[`GIPHY_KEY`];
+  
+
+```
+
+```
+invalid.ts:3:18 lint/nursery/noConvexProcessEnv  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use process.env in Convex functions.
+  
+    1 │ /* should generate diagnostics */
+    2 │ const apiKey = process.env.GIPHY_KEY;
+  > 3 │ const computed = process.env["GIPHY_KEY"];
+      │                  ^^^^^^^^^^^
+    4 │ const template = process.env[`GIPHY_KEY`];
+    5 │ const optional = process?.env.GIPHY_KEY;
+  
+  i Variables read from process.env have no types, so misspelled or missing variables are only found when the code runs.
+  
+  i Declare the environment variables in convex/convex.config.ts, and read them from the env object exported by _generated/server.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the env object from _generated/server instead.
+  
+        1 │ + import·{·env·}·from·"./_generated/server";
+     1  2 │   /* should generate diagnostics */
+     2  3 │   const apiKey = process.env.GIPHY_KEY;
+     3    │ - const·computed·=·process.env["GIPHY_KEY"];
+        4 │ + const·computed·=·env["GIPHY_KEY"];
+     4  5 │   const template = process.env[`GIPHY_KEY`];
+     5  6 │   const optional = process?.env.GIPHY_KEY;
+  
+
+```
+
+```
+invalid.ts:4:18 lint/nursery/noConvexProcessEnv  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use process.env in Convex functions.
+  
+    2 │ const apiKey = process.env.GIPHY_KEY;
+    3 │ const computed = process.env["GIPHY_KEY"];
+  > 4 │ const template = process.env[`GIPHY_KEY`];
+      │                  ^^^^^^^^^^^
+    5 │ const optional = process?.env.GIPHY_KEY;
+    6 │ const computedEnv = process["env"].GIPHY_KEY;
+  
+  i Variables read from process.env have no types, so misspelled or missing variables are only found when the code runs.
+  
+  i Declare the environment variables in convex/convex.config.ts, and read them from the env object exported by _generated/server.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the env object from _generated/server instead.
+  
+        1 │ + import·{·env·}·from·"./_generated/server";
+     1  2 │   /* should generate diagnostics */
+     2  3 │   const apiKey = process.env.GIPHY_KEY;
+     3  4 │   const computed = process.env["GIPHY_KEY"];
+     4    │ - const·template·=·process.env[`GIPHY_KEY`];
+        5 │ + const·template·=·env[`GIPHY_KEY`];
+     5  6 │   const optional = process?.env.GIPHY_KEY;
+     6  7 │   const computedEnv = process["env"].GIPHY_KEY;
+  
+
+```
+
+```
+invalid.ts:5:18 lint/nursery/noConvexProcessEnv  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use process.env in Convex functions.
+  
+    3 │ const computed = process.env["GIPHY_KEY"];
+    4 │ const template = process.env[`GIPHY_KEY`];
+  > 5 │ const optional = process?.env.GIPHY_KEY;
+      │                  ^^^^^^^^^^^^
+    6 │ const computedEnv = process["env"].GIPHY_KEY;
+    7 │ const global = globalThis.process.env.GIPHY_KEY;
+  
+  i Variables read from process.env have no types, so misspelled or missing variables are only found when the code runs.
+  
+  i Declare the environment variables in convex/convex.config.ts, and read them from the env object exported by _generated/server.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the env object from _generated/server instead.
+  
+     1    │ - /*·should·generate·diagnostics·*/
+        1 │ + import·{·env·}·from·"./_generated/server";
+        2 │ + /*·should·generate·diagnostics·*/
+     2  3 │   const apiKey = process.env.GIPHY_KEY;
+     3  4 │   const computed = process.env["GIPHY_KEY"];
+     4  5 │   const template = process.env[`GIPHY_KEY`];
+     5    │ - const·optional·=·process?.env.GIPHY_KEY;
+        6 │ + const·optional·=·env.GIPHY_KEY;
+     6  7 │   const computedEnv = process["env"].GIPHY_KEY;
+     7  8 │   const global = globalThis.process.env.GIPHY_KEY;
+  
+
+```
+
+```
+invalid.ts:6:21 lint/nursery/noConvexProcessEnv  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use process.env in Convex functions.
+  
+    4 │ const template = process.env[`GIPHY_KEY`];
+    5 │ const optional = process?.env.GIPHY_KEY;
+  > 6 │ const computedEnv = process["env"].GIPHY_KEY;
+      │                     ^^^^^^^^^^^^^^
+    7 │ const global = globalThis.process.env.GIPHY_KEY;
+    8 │ const nonNull = process.env.GIPHY_KEY!;
+  
+  i Variables read from process.env have no types, so misspelled or missing variables are only found when the code runs.
+  
+  i Declare the environment variables in convex/convex.config.ts, and read them from the env object exported by _generated/server.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the env object from _generated/server instead.
+  
+     1    │ - /*·should·generate·diagnostics·*/
+        1 │ + import·{·env·}·from·"./_generated/server";
+        2 │ + /*·should·generate·diagnostics·*/
+     2  3 │   const apiKey = process.env.GIPHY_KEY;
+     3  4 │   const computed = process.env["GIPHY_KEY"];
+     4  5 │   const template = process.env[`GIPHY_KEY`];
+     5  6 │   const optional = process?.env.GIPHY_KEY;
+     6    │ - const·computedEnv·=·process["env"].GIPHY_KEY;
+        7 │ + const·computedEnv·=·env.GIPHY_KEY;
+     7  8 │   const global = globalThis.process.env.GIPHY_KEY;
+     8  9 │   const nonNull = process.env.GIPHY_KEY!;
+  
+
+```
+
+```
+invalid.ts:7:16 lint/nursery/noConvexProcessEnv  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use process.env in Convex functions.
+  
+    5 │ const optional = process?.env.GIPHY_KEY;
+    6 │ const computedEnv = process["env"].GIPHY_KEY;
+  > 7 │ const global = globalThis.process.env.GIPHY_KEY;
+      │                ^^^^^^^^^^^^^^^^^^^^^^
+    8 │ const nonNull = process.env.GIPHY_KEY!;
+    9 │ const { GIPHY_KEY, OTHER_KEY: renamed } = process.env;
+  
+  i Variables read from process.env have no types, so misspelled or missing variables are only found when the code runs.
+  
+  i Declare the environment variables in convex/convex.config.ts, and read them from the env object exported by _generated/server.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the env object from _generated/server instead.
+  
+        1 │ + import·{·env·}·from·"./_generated/server";
+     1  2 │   /* should generate diagnostics */
+     2  3 │   const apiKey = process.env.GIPHY_KEY;
+    ····· │ 
+     5  6 │   const optional = process?.env.GIPHY_KEY;
+     6  7 │   const computedEnv = process["env"].GIPHY_KEY;
+     7    │ - const·global·=·globalThis.process.env.GIPHY_KEY;
+        8 │ + const·global·=·env.GIPHY_KEY;
+     8  9 │   const nonNull = process.env.GIPHY_KEY!;
+     9 10 │   const { GIPHY_KEY, OTHER_KEY: renamed } = process.env;
+  
+
+```
+
+```
+invalid.ts:8:17 lint/nursery/noConvexProcessEnv  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use process.env in Convex functions.
+  
+     6 │ const computedEnv = process["env"].GIPHY_KEY;
+     7 │ const global = globalThis.process.env.GIPHY_KEY;
+   > 8 │ const nonNull = process.env.GIPHY_KEY!;
+       │                 ^^^^^^^^^^^
+     9 │ const { GIPHY_KEY, OTHER_KEY: renamed } = process.env;
+    10 │ const { ...rest } = process.env;
+  
+  i Variables read from process.env have no types, so misspelled or missing variables are only found when the code runs.
+  
+  i Declare the environment variables in convex/convex.config.ts, and read them from the env object exported by _generated/server.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the env object from _generated/server instead.
+  
+        1 │ + import·{·env·}·from·"./_generated/server";
+     1  2 │   /* should generate diagnostics */
+     2  3 │   const apiKey = process.env.GIPHY_KEY;
+    ····· │ 
+     6  7 │   const computedEnv = process["env"].GIPHY_KEY;
+     7  8 │   const global = globalThis.process.env.GIPHY_KEY;
+     8    │ - const·nonNull·=·process.env.GIPHY_KEY!;
+        9 │ + const·nonNull·=·env.GIPHY_KEY!;
+     9 10 │   const { GIPHY_KEY, OTHER_KEY: renamed } = process.env;
+    10 11 │   const { ...rest } = process.env;
+  
+
+```
+
+```
+invalid.ts:9:43 lint/nursery/noConvexProcessEnv  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use process.env in Convex functions.
+  
+     7 │ const global = globalThis.process.env.GIPHY_KEY;
+     8 │ const nonNull = process.env.GIPHY_KEY!;
+   > 9 │ const { GIPHY_KEY, OTHER_KEY: renamed } = process.env;
+       │                                           ^^^^^^^^^^^
+    10 │ const { ...rest } = process.env;
+    11 │ const name = "GIPHY_KEY";
+  
+  i Variables read from process.env have no types, so misspelled or missing variables are only found when the code runs.
+  
+  i Declare the environment variables in convex/convex.config.ts, and read them from the env object exported by _generated/server.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the env object from _generated/server instead.
+  
+        1 │ + import·{·env·}·from·"./_generated/server";
+     1  2 │   /* should generate diagnostics */
+     2  3 │   const apiKey = process.env.GIPHY_KEY;
+    ····· │ 
+     7  8 │   const global = globalThis.process.env.GIPHY_KEY;
+     8  9 │   const nonNull = process.env.GIPHY_KEY!;
+     9    │ - const·{·GIPHY_KEY,·OTHER_KEY:·renamed·}·=·process.env;
+       10 │ + const·{·GIPHY_KEY,·OTHER_KEY:·renamed·}·=·env;
+    10 11 │   const { ...rest } = process.env;
+    11 12 │   const name = "GIPHY_KEY";
+  
+
+```
+
+```
+invalid.ts:10:21 lint/nursery/noConvexProcessEnv ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use process.env in Convex functions.
+  
+     8 │ const nonNull = process.env.GIPHY_KEY!;
+     9 │ const { GIPHY_KEY, OTHER_KEY: renamed } = process.env;
+  > 10 │ const { ...rest } = process.env;
+       │                     ^^^^^^^^^^^
+    11 │ const name = "GIPHY_KEY";
+    12 │ const dynamic = process.env[name];
+  
+  i Variables read from process.env have no types, so misspelled or missing variables are only found when the code runs.
+  
+  i Declare the environment variables in convex/convex.config.ts, and read them from the env object exported by _generated/server.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:12:17 lint/nursery/noConvexProcessEnv ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use process.env in Convex functions.
+  
+    10 │ const { ...rest } = process.env;
+    11 │ const name = "GIPHY_KEY";
+  > 12 │ const dynamic = process.env[name];
+       │                 ^^^^^^^^^^^
+    13 │ const keys = Object.keys(process.env);
+    14 │ const copy = { ...process.env };
+  
+  i Variables read from process.env have no types, so misspelled or missing variables are only found when the code runs.
+  
+  i Declare the environment variables in convex/convex.config.ts, and read them from the env object exported by _generated/server.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:13:26 lint/nursery/noConvexProcessEnv ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use process.env in Convex functions.
+  
+    11 │ const name = "GIPHY_KEY";
+    12 │ const dynamic = process.env[name];
+  > 13 │ const keys = Object.keys(process.env);
+       │                          ^^^^^^^^^^^
+    14 │ const copy = { ...process.env };
+    15 │ process.env.GIPHY_KEY = "value";
+  
+  i Variables read from process.env have no types, so misspelled or missing variables are only found when the code runs.
+  
+  i Declare the environment variables in convex/convex.config.ts, and read them from the env object exported by _generated/server.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:14:19 lint/nursery/noConvexProcessEnv ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use process.env in Convex functions.
+  
+    12 │ const dynamic = process.env[name];
+    13 │ const keys = Object.keys(process.env);
+  > 14 │ const copy = { ...process.env };
+       │                   ^^^^^^^^^^^
+    15 │ process.env.GIPHY_KEY = "value";
+    16 │ delete process.env.GIPHY_KEY;
+  
+  i Variables read from process.env have no types, so misspelled or missing variables are only found when the code runs.
+  
+  i Declare the environment variables in convex/convex.config.ts, and read them from the env object exported by _generated/server.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:15:1 lint/nursery/noConvexProcessEnv ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use process.env in Convex functions.
+  
+    13 │ const keys = Object.keys(process.env);
+    14 │ const copy = { ...process.env };
+  > 15 │ process.env.GIPHY_KEY = "value";
+       │ ^^^^^^^^^^^
+    16 │ delete process.env.GIPHY_KEY;
+    17 │ 
+  
+  i Variables read from process.env have no types, so misspelled or missing variables are only found when the code runs.
+  
+  i Declare the environment variables in convex/convex.config.ts, and read them from the env object exported by _generated/server.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:16:8 lint/nursery/noConvexProcessEnv ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use process.env in Convex functions.
+  
+    14 │ const copy = { ...process.env };
+    15 │ process.env.GIPHY_KEY = "value";
+  > 16 │ delete process.env.GIPHY_KEY;
+       │        ^^^^^^^^^^^
+    17 │ 
+  
+  i Variables read from process.env have no types, so misspelled or missing variables are only found when the code runs.
+  
+  i Declare the environment variables in convex/convex.config.ts, and read them from the env object exported by _generated/server.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
