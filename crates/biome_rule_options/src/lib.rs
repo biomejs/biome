@@ -350,6 +350,7 @@ pub mod no_tailwind_raw_colors;
 pub mod no_tailwind_restricted_classes;
 pub mod no_tailwind_restyled_components;
 pub mod no_tanstack_query_rest_destructuring;
+pub mod no_tanstack_query_unstable_deps;
 pub mod no_tanstack_query_void_query_fn;
 pub mod no_template_curly_in_string;
 pub mod no_ternary;

@@ -359,6 +359,7 @@ define_categories! {
     "lint/nursery/noTailwindRestrictedClasses": "https://biomejs.dev/linter/rules/no-tailwind-restricted-classes",
     "lint/nursery/noTailwindRestyledComponents": "https://biomejs.dev/linter/rules/no-tailwind-restyled-components",
     "lint/nursery/noTanstackQueryRestDestructuring": "https://biomejs.dev/linter/rules/no-tanstack-query-rest-destructuring",
+    "lint/nursery/noTanstackQueryUnstableDeps": "https://biomejs.dev/linter/rules/no-tanstack-query-unstable-deps",
     "lint/nursery/noTanstackQueryVoidQueryFn": "https://biomejs.dev/linter/rules/no-tanstack-query-void-query-fn",
     "lint/nursery/noTestGlobals": "https://biomejs.dev/linter/rules/no-test-globals",
     "lint/nursery/noTestHooks": "https://biomejs.dev/linter/rules/no-test-hooks",
