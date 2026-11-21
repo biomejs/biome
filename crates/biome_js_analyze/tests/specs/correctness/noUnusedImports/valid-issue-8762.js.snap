@@ -1,0 +1,16 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-issue-8762.js
+---
+# Input
+```js
+/**
+ * Re-exports the {@link helper} utilities.
+ * @module helpers
+ */
+
+/* should not generate diagnostics */
+
+import { helper } from "./helper";
+
+```
