@@ -419,17 +419,12 @@ where
                 .workspace
                 .refresh_project_vcs_ignore_settings(project_key)
                 .and_then(|()| {
-                    self.workspace
-                        .get_project_path(project_key)
-                        .map_or_else(
-                            || Ok(Vec::new()),
-                            |project_path| {
-                                self.refresh_project_ignore_files(
-                                    project_key,
-                                    project_path.as_path(),
-                                )
-                            },
-                        )
+                    self.workspace.get_project_path(project_key).map_or_else(
+                        || Ok(Vec::new()),
+                        |project_path| {
+                            self.refresh_project_ignore_files(project_key, project_path.as_path())
+                        },
+                    )
                 });
             match result {
                 Ok(project_diagnostics) => diagnostics.extend(project_diagnostics),

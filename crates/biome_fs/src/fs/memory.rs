@@ -100,7 +100,10 @@ impl MemoryFileSystem {
     /// Create or update a file in the filesystem
     pub fn insert(&self, path: Utf8PathBuf, content: impl Into<Vec<u8>>) {
         let mut files = self.files.0.write();
-        files.insert(normalize_path_buf(path), Arc::new(Mutex::new(content.into())));
+        files.insert(
+            normalize_path_buf(path),
+            Arc::new(Mutex::new(content.into())),
+        );
     }
 
     /// Create or update an error in the filesystem
@@ -383,7 +386,9 @@ impl<'scope> TraversalScope<'scope> for MemoryTraversalScope<'scope> {
 
 #[cfg(test)]
 mod tests {
-    use crate::{BiomePath, FileSystem, MemoryFileSystem, PathInterner, PathKind, TraversalContext};
+    use crate::{
+        BiomePath, FileSystem, MemoryFileSystem, PathInterner, PathKind, TraversalContext,
+    };
     use crate::{OpenOptions, fs::FileSystemExt};
     use biome_diagnostics::Error;
     use camino::{Utf8Path, Utf8PathBuf};
@@ -599,8 +604,14 @@ mod tests {
         assert_eq!(ctx.visited.len(), 1);
         assert!(ctx.visited.pin().contains(&file));
         assert!(fs.path_exists(file.as_path()));
-        assert!(fs.path_kind(Utf8Path::new("dir/sub/..")).is_ok_and(PathKind::is_dir));
-        assert_eq!(fs.read_file_from_path(file.as_path()).unwrap(), "statement();");
+        assert!(
+            fs.path_kind(Utf8Path::new("dir/sub/.."))
+                .is_ok_and(PathKind::is_dir)
+        );
+        assert_eq!(
+            fs.read_file_from_path(file.as_path()).unwrap(),
+            "statement();"
+        );
 
         fs.remove(Utf8Path::new("dir/./file.js"));
         assert!(!fs.path_exists(file.as_path()));

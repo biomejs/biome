@@ -1402,9 +1402,8 @@ impl WorkspaceDb {
         // A root matcher for another VCS root is stale: the configuration changed after its
         // ignore files were read.
         if root_git_ignore.is_some_and(|root_git_ignore| {
-            ignore_matches.is_none_or(|ignore_matches| {
-                ignore_matches.root_path() != root_git_ignore.root()
-            })
+            ignore_matches
+                .is_none_or(|ignore_matches| ignore_matches.root_path() != root_git_ignore.root())
         }) {
             return Ok(());
         }

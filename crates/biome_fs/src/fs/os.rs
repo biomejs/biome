@@ -214,7 +214,9 @@ impl DirectoryAliases {
         let enumerations = self.0.pin();
         let count = match enumerations.get(physical_path) {
             Some(count) => count,
-            None => enumerations.get_or_insert_with(physical_path.to_path_buf(), AtomicUsize::default),
+            None => {
+                enumerations.get_or_insert_with(physical_path.to_path_buf(), AtomicUsize::default)
+            }
         };
         count.fetch_add(1, Ordering::Relaxed) < Self::MAX_ENUMERATIONS
     }
@@ -901,7 +903,9 @@ mod tests {
         temporary.create_file(&format!("level{LEVELS}/file.js"), "statement();");
         for level in 0..LEVELS {
             let directory = temporary.working_directory.join(format!("level{level}"));
-            let next = temporary.working_directory.join(format!("level{}", level + 1));
+            let next = temporary
+                .working_directory
+                .join(format!("level{}", level + 1));
             std::fs::create_dir_all(&directory).unwrap();
             symlink(&next, directory.join("a")).unwrap();
             symlink(&next, directory.join("b")).unwrap();
@@ -948,8 +952,14 @@ mod tests {
             let visited = ctx.visited.pin();
             let symlink_files = ctx.symlink_files.pin();
             assert!(visited.contains(&file), "{file} was not visited");
-            assert!(!symlink_files.contains(&file), "{file} is reported as a symlink");
-            assert!(visited.contains(&dependency), "{dependency} was not visited");
+            assert!(
+                !symlink_files.contains(&file),
+                "{file} is reported as a symlink"
+            );
+            assert!(
+                visited.contains(&dependency),
+                "{dependency} was not visited"
+            );
             assert!(
                 symlink_files.contains(&dependency),
                 "{dependency} is not reported as a symlink"

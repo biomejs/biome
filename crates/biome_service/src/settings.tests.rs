@@ -620,8 +620,7 @@ fn nested_vcs_directory_whitelist_does_not_reinclude_files_matched_by_parent_rul
         nested: vec![],
     };
     ignored_patterns.insert_git_match(
-        VcsIgnoredPatterns::git_ignore(&BiomePath::new("/repo/pkg"), &["*.css", "!src/"])
-            .unwrap(),
+        VcsIgnoredPatterns::git_ignore(&BiomePath::new("/repo/pkg"), &["*.css", "!src/"]).unwrap(),
     );
     ignored_patterns.insert_git_match(
         VcsIgnoredPatterns::git_ignore(&BiomePath::new("/repo/pkg/src"), &["!b/"]).unwrap(),

@@ -304,7 +304,10 @@ fn git_settings_with_root(root: Option<&str>) -> Configuration {
 #[test]
 fn watched_scan_indexes_a_project_whose_vcs_watch_was_acknowledged_early() {
     let fs = MemoryFileSystem::default();
-    fs.insert(Utf8PathBuf::from("/project/.git/HEAD"), "ref: refs/heads/main\n");
+    fs.insert(
+        Utf8PathBuf::from("/project/.git/HEAD"),
+        "ref: refs/heads/main\n",
+    );
     fs.insert(Utf8PathBuf::from("/project/.gitignore"), "ignored.js\n");
     fs.insert(Utf8PathBuf::from("/project/package.json"), "{}");
 
@@ -380,7 +383,10 @@ fn scan_reports_an_unreadable_nested_ignore_file_and_keeps_indexing() {
 #[test]
 fn closing_a_project_releases_its_vcs_watches_outside_the_project() {
     let fs = MemoryFileSystem::default();
-    fs.insert(Utf8PathBuf::from("/repo/.git/HEAD"), "ref: refs/heads/main\n");
+    fs.insert(
+        Utf8PathBuf::from("/repo/.git/HEAD"),
+        "ref: refs/heads/main\n",
+    );
     fs.insert(Utf8PathBuf::from("/repo/.gitignore"), "ignored.js\n");
     fs.insert(Utf8PathBuf::from("/repo/web/file.js"), "statement();");
     fs.insert(Utf8PathBuf::from("/repo/api/file.js"), "statement();");
@@ -452,7 +458,11 @@ fn closing_a_project_releases_its_vcs_watches_outside_the_project() {
         .unwrap();
     acknowledge();
     assert!(!workspace.scanner.is_watched(Utf8Path::new("/repo")));
-    assert!(!workspace.scanner.is_watched(Utf8Path::new("/repo/.git/info")));
+    assert!(
+        !workspace
+            .scanner
+            .is_watched(Utf8Path::new("/repo/.git/info"))
+    );
 }
 
 // If this test hangs, it probably recurses on one of the symlinks, such as

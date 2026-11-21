@@ -175,7 +175,10 @@ fn modify_events_keep_existing_aliases_indexed_next_to_stale_aliases() {
         vec![stale_alias.clone(), existing_alias.clone()],
     );
     mock_bridge.indexed_files.pin().insert(stale_alias.clone());
-    mock_bridge.indexed_files.pin().insert(existing_alias.clone());
+    mock_bridge
+        .indexed_files
+        .pin()
+        .insert(existing_alias.clone());
 
     Watcher::handle_notify_event(
         &mock_bridge,
@@ -358,12 +361,19 @@ fn shared_ignore_file_refreshes_every_project_when_one_project_fails() {
     }
 
     // The nested ignore file of the first project becomes unreadable after the scan.
-    fs_handle.insert(Utf8PathBuf::from("/repo/a/pkg/.gitignore"), [0xff].as_slice());
+    fs_handle.insert(
+        Utf8PathBuf::from("/repo/a/pkg/.gitignore"),
+        [0xff].as_slice(),
+    );
     fs_handle.insert(Utf8PathBuf::from("/repo/.gitignore"), "ignored.js\n");
     let bridge = ScannerWatcherBridge::new((&workspace.scanner, &workspace));
     let result = bridge.refresh_vcs_watch_path(Utf8Path::new("/repo/.gitignore"));
 
-    assert!(!result.expect("a failing project doesn't abort the refresh").is_empty());
+    assert!(
+        !result
+            .expect("a failing project doesn't abort the refresh")
+            .is_empty()
+    );
     assert!(
         workspace
             .is_path_ignored(PathIsIgnoredParams {
