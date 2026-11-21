@@ -1,6 +1,6 @@
 use crate::TestArgs as Args;
-use crate::run_cli;
 use crate::snap_test::{SnapshotPayload, assert_cli_snapshot, assert_file_contents};
+use crate::{run_cli, run_cli_with_server_workspace};
 use biome_console::BufferConsole;
 use biome_fs::MemoryFileSystem;
 use camino::Utf8Path;
@@ -679,6 +679,181 @@ fn prettier_migrate_bracket_spacing() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "prettier_migrate_bracket_spacing",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn prettier_migrate_write_formats_with_migrated_options() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let configuration = r#"{ "formatter": { "indentStyle": "tab" } }"#;
+    let prettier = r#"{}"#;
+
+    let configuration_path = Utf8Path::new("biome.json");
+    fs.insert(configuration_path.into(), configuration.as_bytes());
+
+    let prettier_path = Utf8Path::new(".prettierrc");
+    fs.insert(prettier_path.into(), prettier.as_bytes());
+
+    let (fs, migrate_result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["migrate", "prettier", "--write"].as_slice()),
+    );
+
+    assert!(
+        migrate_result.is_ok(),
+        "run_cli returned {migrate_result:?}"
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["format", configuration_path.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli rerun returned {result:?}");
+    let result = migrate_result.followed_by(result);
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "prettier_migrate_write_formats_with_migrated_options",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn prettier_migrate_write_keeps_extended_formatter_options() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let base = r#"{ "formatter": { "indentStyle": "tab", "trailingNewline": false } }"#;
+    let configuration = r#"{ "extends": ["./base.json"] }"#;
+    let prettier = r#"{}"#;
+
+    fs.insert(Utf8Path::new("base.json").into(), base.as_bytes());
+
+    let configuration_path = Utf8Path::new("biome.json");
+    fs.insert(configuration_path.into(), configuration.as_bytes());
+
+    let prettier_path = Utf8Path::new(".prettierrc");
+    fs.insert(prettier_path.into(), prettier.as_bytes());
+
+    let (fs, migrate_result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["migrate", "prettier", "--write"].as_slice()),
+    );
+
+    assert!(
+        migrate_result.is_ok(),
+        "run_cli returned {migrate_result:?}"
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["format", configuration_path.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli rerun returned {result:?}");
+    let result = migrate_result.followed_by(result);
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "prettier_migrate_write_keeps_extended_formatter_options",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn prettier_migrate_write_keeps_nested_inherited_formatter_options() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        r#"{ "formatter": { "trailingNewline": false } }"#,
+    );
+    fs.insert("packages/a/biome.json".into(), r#"{ "extends": "//" }"#);
+    fs.insert(
+        "packages/b/base.json".into(),
+        r#"{ "formatter": { "trailingNewline": false } }"#,
+    );
+    fs.insert(
+        "packages/b/biome.json".into(),
+        r#"{ "root": false, "extends": ["./base.json"] }"#,
+    );
+    fs.insert(".prettierrc".into(), r#"{}"#);
+
+    let (fs, migrate_result) = run_cli_with_server_workspace(
+        fs,
+        &mut console,
+        Args::from(["migrate", "prettier", "--write"].as_slice()),
+    );
+
+    assert!(
+        migrate_result.is_ok(),
+        "run_cli returned {migrate_result:?}"
+    );
+
+    let (fs, result) = run_cli_with_server_workspace(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "format",
+                "biome.json",
+                "packages/a/biome.json",
+                "packages/b/biome.json",
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli rerun returned {result:?}");
+    let result = migrate_result.followed_by(result);
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "prettier_migrate_write_keeps_nested_inherited_formatter_options",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn prettier_migrate_write_with_unresolved_nested_extends() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert("biome.json".into(), r#"{}"#);
+    fs.insert(
+        "packages/a/biome.json".into(),
+        r#"{ "root": false, "extends": ["./missing.json"] }"#,
+    );
+    fs.insert(".prettierrc".into(), r#"{}"#);
+
+    let (fs, result) = run_cli_with_server_workspace(
+        fs,
+        &mut console,
+        Args::from(["migrate", "prettier", "--write"].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "prettier_migrate_write_with_unresolved_nested_extends",
         fs,
         console,
         result,

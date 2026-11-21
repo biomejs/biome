@@ -331,6 +331,7 @@ dependencies = [
  "rustc-hash 2.1.3",
  "schemars",
  "serde",
+ "serde_json",
  "tests_macros",
  "tikv-jemallocator",
 ]

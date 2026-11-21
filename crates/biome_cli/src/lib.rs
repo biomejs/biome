@@ -324,6 +324,7 @@ impl<'app> CliSession<'app> {
                     sub_command,
                     configuration_directory_path: None,
                     configuration_file_path: None,
+                    resolved_configuration: None,
                 }),
             ),
             BiomeCommand::Search {
