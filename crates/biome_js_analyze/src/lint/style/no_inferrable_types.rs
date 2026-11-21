@@ -106,7 +106,7 @@ declare_lint_rule! {
 
 impl Rule for NoInferrableTypes {
     type Query = Ast<JsInitializerClause>;
-    type State = TsTypeAnnotation;
+    type State = (TsTypeAnnotation, bool);
     type Signals = Option<Self::State>;
     type Options = NoInferrableTypesOptions;
 
@@ -117,6 +117,7 @@ impl Rule for NoInferrableTypes {
             // `is_const` signals a const context (const declarations, readonly properties)
             // non const contexts are other situations (let/var declarations, mutable properties, formal parameters)
             let mut is_const = false;
+            let mut is_const_var = false;
             let mut type_annotation = None;
             if let Some(param) = init.parent::<JsFormalParameter>() {
                 if let Some(prop_param) = param.parent::<TsPropertyParameter>() {
@@ -140,6 +141,7 @@ impl Rule for NoInferrableTypes {
                     .parent::<JsVariableDeclaratorList>()?
                     .parent::<JsVariableDeclaration>()?
                     .is_const();
+                is_const_var = is_const;
                 type_annotation = match declarator.variable_annotation()? {
                     AnyTsVariableAnnotation::TsTypeAnnotation(annotation) => Some(annotation),
                     _ => None,
@@ -158,24 +160,26 @@ impl Rule for NoInferrableTypes {
                 //
                 // However, we ignore the case where <literal> is `null`,
                 // because in unsafe null mode, it is possible to assign `null` and `undefined` to any type.
-                if (is_const && ty.is_non_null_literal_type())
-                    || (!is_const
-                        && ty.is_primitive_type()
-                        && !matches!(
-                            init_expr,
-                            AnyJsExpression::AnyJsLiteralExpression(
-                                AnyJsLiteralExpression::JsNullLiteralExpression(_)
-                            )
-                        ))
+                if is_const && ty.is_non_null_literal_type() {
+                    return Some((type_annotation, is_const_var));
+                }
+                if !is_const
+                    && ty.is_primitive_type()
+                    && !matches!(
+                        init_expr,
+                        AnyJsExpression::AnyJsLiteralExpression(
+                            AnyJsLiteralExpression::JsNullLiteralExpression(_)
+                        )
+                    )
                 {
-                    return Some(type_annotation);
+                    return Some((type_annotation, false));
                 }
             }
         }
         None
     }
 
-    fn diagnostic(_: &RuleContext<Self>, annotation: &Self::State) -> Option<RuleDiagnostic> {
+    fn diagnostic(_: &RuleContext<Self>, (annotation, _): &Self::State) -> Option<RuleDiagnostic> {
         Some(RuleDiagnostic::new(
             rule_category!(),
             annotation.ty().ok()?.range(),
@@ -188,7 +192,10 @@ impl Rule for NoInferrableTypes {
         }))
     }
 
-    fn action(ctx: &RuleContext<Self>, annotation: &Self::State) -> Option<JsRuleAction> {
+    fn action(
+        ctx: &RuleContext<Self>,
+        (annotation, is_const_var_literal): &Self::State,
+    ) -> Option<JsRuleAction> {
         let mut mutation = ctx.root().begin();
         let first_token = annotation.syntax().first_token()?;
         let prev_token = first_token.prev_token()?;
@@ -200,9 +207,14 @@ impl Rule for NoInferrableTypes {
         mutation.replace_token_discard_trivia(prev_token, new_prev_token);
         mutation.replace_token_discard_trivia(next_token, new_next_token);
         mutation.remove_node(annotation.clone());
+        let applicability = if *is_const_var_literal {
+            biome_diagnostics::Applicability::MaybeIncorrect
+        } else {
+            ctx.metadata().applicability()
+        };
         Some(JsRuleAction::new(
             ctx.metadata().action_category(ctx.category(), ctx.group()),
-            ctx.metadata().applicability(),
+            applicability,
             markup! { "Remove the type annotation." }.to_owned(),
             mutation,
         ))
