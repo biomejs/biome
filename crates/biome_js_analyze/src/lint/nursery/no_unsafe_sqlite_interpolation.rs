@@ -89,7 +89,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoUnsafeSqliteInterpolation {
-        version: "next",
+        version: "2.6.9",
         name: "noUnsafeSqliteInterpolation",
         language: "js",
         sources: &[RuleSource::EslintUnicorn("no-unsafe-sqlite-interpolation").same()],

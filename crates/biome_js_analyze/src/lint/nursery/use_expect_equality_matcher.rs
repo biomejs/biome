@@ -49,7 +49,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseExpectEqualityMatcher {
-        version: "next",
+        version: "2.6.9",
         name: "useExpectEqualityMatcher",
         language: "js",
         recommended: false,

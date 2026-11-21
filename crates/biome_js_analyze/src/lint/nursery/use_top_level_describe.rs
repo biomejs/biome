@@ -104,7 +104,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseTopLevelDescribe {
-        version: "next",
+        version: "2.6.9",
         name: "useTopLevelDescribe",
         language: "js",
         recommended: false,

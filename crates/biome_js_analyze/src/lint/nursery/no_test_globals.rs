@@ -68,7 +68,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoTestGlobals {
-        version: "next",
+        version: "2.6.9",
         name: "noTestGlobals",
         language: "js",
         recommended: false,

@@ -82,7 +82,7 @@ declare_lint_rule! {
     /// such as `sm:hover:flex` and `hover:sm:grid`.
     ///
     pub NoTailwindConflictingClasses {
-        version: "next",
+        version: "2.6.9",
         name: "noTailwindConflictingClasses",
         language: "html",
         domains: &[RuleDomain::Tailwind, RuleDomain::Project],
