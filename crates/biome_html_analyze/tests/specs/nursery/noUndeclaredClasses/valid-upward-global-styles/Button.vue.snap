@@ -1,0 +1,12 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: Button.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<template>
+	<button class="a bar foo">Classes at the same offset in separate global style blocks of the importer</button>
+</template>
+
+```

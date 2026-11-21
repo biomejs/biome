@@ -1,5 +1,5 @@
-use crate::{is_css_newline_byte, is_css_whitespace_byte};
-use biome_rowan::{TextRange, TextSize};
+use crate::{CssSyntaxToken, is_css_newline_byte, is_css_whitespace_byte};
+use biome_rowan::{Text, TextRange, TextSize};
 use std::borrow::Cow;
 
 /// Resolves CSS escape sequences in an identifier or dimension unit.
@@ -13,6 +13,18 @@ pub fn decode_css_identifier(value: &str) -> Cow<'_, str> {
             .map(|character| character.value)
             .collect(),
     )
+}
+
+/// Returns the text of an identifier token with CSS escapes decoded, so `foo\+bar` yields
+/// `foo+bar`.
+///
+/// Only allocates when the token contains an escape.
+pub fn decoded_identifier_text(token: &CssSyntaxToken) -> Text {
+    let text = token.token_text_trimmed();
+    match decode_css_identifier(text.text()) {
+        Cow::Borrowed(_) => text.into(),
+        Cow::Owned(name) => name.into(),
+    }
 }
 
 fn decode_css_code_point(value: u32) -> char {

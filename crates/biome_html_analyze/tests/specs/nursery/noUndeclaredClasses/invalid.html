@@ -3,7 +3,7 @@
 <html>
 <head>
 <style>.card { border: 1px solid; } .title { font-weight: bold; }</style>
-<style>.container { max-width: 1200px; } .btn { padding: 8px; }</style>
+<style>.container { max-width: 1200px; } .btn { padding: 8px; } .foo\+bar { color: blue; }</style>
 </head>
 <body>
 	<!-- .header is not declared in any <style> block -->
@@ -21,5 +21,8 @@
 			<button class="btn unknown-btn">Element types</button>
 		</main>
 	</div>
+
+	<!-- .foo\+bar declares foo+bar, so the escaped spelling is undeclared -->
+	<div class="foo\+bar">Escaped spelling</div>
 </body>
 </html>
