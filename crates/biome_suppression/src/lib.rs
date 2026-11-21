@@ -261,6 +261,7 @@ impl Diagnostic for SuppressionDiagnostic {
                 )?;
             }
             SuppressionDiagnosticKind::MissingClosingParen => {}
+            SuppressionDiagnosticKind::NonAsciiWhitespace => {}
         }
 
         visitor.record_log(
@@ -277,6 +278,7 @@ impl Diagnostic for SuppressionDiagnostic {
 #[derive(Clone, Debug, PartialEq, Eq)]
 enum SuppressionDiagnosticKind {
     MissingColon,
+    NonAsciiWhitespace,
     ParseCategory(String),
     MissingCategory,
     MissingClosingParen,
@@ -290,6 +292,12 @@ impl std::fmt::Display for SuppressionDiagnosticKind {
                 write!(
                     f,
                     "Unexpected token, expected one of ':', '(' or whitespace. Example of suppression: // biome-ignore lint: reason"
+                )
+            }
+            Self::NonAsciiWhitespace => {
+                write!(
+                    f,
+                    "Unexpected non-ASCII whitespace separator; use ASCII whitespace, ':' or '('. Example of suppression: // biome-ignore lint: reason"
                 )
             }
             Self::ParseCategory(category) => {
@@ -327,6 +335,10 @@ impl biome_console::fmt::Display for SuppressionDiagnosticKind {
                 fmt,
                 "Unexpected token, expected one of ':', '(' or whitespace"
             ),
+            Self::NonAsciiWhitespace => write!(
+                fmt,
+                "Unexpected non-ASCII whitespace separator; use ASCII whitespace, ':' or '('."
+            ),
             Self::ParseCategory(category) => {
                 write!(fmt, "Failed to parse category {category:?}")
             }
@@ -339,6 +351,28 @@ impl biome_console::fmt::Display for SuppressionDiagnosticKind {
             Self::MissingReason => write!(fmt, "Reason is missing and can't be empty."),
         }
     }
+}
+
+/// Returns a diagnostic if the whitespace trimmed between category specs contains
+/// non-ASCII whitespace. Leading/trailing/reason whitespace is intentionally left
+/// Unicode-aware; only the separators between category specs are ASCII-only.
+fn non_ascii_separator_diagnostic(
+    base: &str,
+    source: &str,
+    trimmed: &str,
+) -> Option<SuppressionDiagnostic> {
+    let prefix = &source[..source.len() - trimmed.len()];
+    let (offset, character) = prefix
+        .char_indices()
+        .find(|(_, character)| character.is_whitespace() && !character.is_ascii())?;
+
+    Some(SuppressionDiagnostic {
+        message: SuppressionDiagnosticKind::NonAsciiWhitespace,
+        span: TextRange::at(
+            offset_from(base, source) + TextSize::from(offset as u32),
+            TextSize::from(character.len_utf8() as u32),
+        ),
+    })
 }
 
 /// Parse the `{ <category> { (<value>) }? }+: <reason>` section of a suppression line
@@ -368,7 +402,14 @@ fn parse_suppression_line(
         let (category, subcategory) = parse_category(base, category)?;
 
         // Skip over and match the separator
-        let (separator, rest) = rest.split_at(1);
+        let separator_offset =
+            offset_from(base, line) + TextSize::from((line.len() - rest.len()) as u32);
+        let separator_len = rest
+            .chars()
+            .next()
+            .expect("`find` matched a character in `line`")
+            .len_utf8();
+        let (separator, rest) = rest.split_at(separator_len);
 
         match separator {
             // Colon token: stop parsing categories
@@ -399,15 +440,33 @@ fn parse_suppression_line(
 
                 categories.push((category, subcategory, Some(value)));
 
-                line = rest.strip_prefix(')').unwrap().trim_start();
+                let rest = rest.strip_prefix(')').unwrap();
+                let trimmed = rest.trim_start();
+                if let Some(diagnostic) = non_ascii_separator_diagnostic(base, rest, trimmed) {
+                    return Err(diagnostic);
+                }
+
+                line = trimmed;
+            }
+            // Non-ASCII whitespace is not accepted as a separator.
+            _ if !separator.is_ascii() => {
+                return Err(SuppressionDiagnostic {
+                    message: SuppressionDiagnosticKind::NonAsciiWhitespace,
+                    span: TextRange::at(separator_offset, TextSize::of(separator)),
+                });
             }
             // Whitespace: push a category without value
             _ => {
+                let trimmed = rest.trim_start();
+                if let Some(diagnostic) = non_ascii_separator_diagnostic(base, rest, trimmed) {
+                    return Err(diagnostic);
+                }
+
                 if let Some(category) = category {
                     categories.push((category, subcategory, None));
                 }
 
-                line = rest.trim_start();
+                line = trimmed;
             }
         }
     }
@@ -783,6 +842,113 @@ mod tests_biome_ignore_inline {
                 reason_range: TextRange::new(TextSize::from(29), TextSize::from(40))
             })],
         );
+    }
+
+    #[test]
+    fn parse_non_ascii_whitespace_rejected() {
+        for (input, span) in [
+            (
+                "// biome-ignore lint\u{a0}format: explanation",
+                TextRange::new(TextSize::from(20), TextSize::from(22)),
+            ),
+            (
+                "// biome-ignore lint\u{3000}format: explanation",
+                TextRange::new(TextSize::from(20), TextSize::from(23)),
+            ),
+            (
+                "// biome-ignore lint\u{a0}: explanation",
+                TextRange::new(TextSize::from(20), TextSize::from(22)),
+            ),
+            (
+                "// biome-ignore lint\u{a0}format\u{a0}parse: explanation",
+                TextRange::new(TextSize::from(20), TextSize::from(22)),
+            ),
+            (
+                "// biome-ignore lint format\u{a0}parse: explanation",
+                TextRange::new(TextSize::from(27), TextSize::from(29)),
+            ),
+            (
+                "// biome-ignore lint \u{a0}format: explanation",
+                TextRange::new(TextSize::from(21), TextSize::from(23)),
+            ),
+            (
+                "// biome-ignore lint(format)\u{a0}parse: explanation",
+                TextRange::new(TextSize::from(28), TextSize::from(30)),
+            ),
+            (
+                "// biome-ignore lint(a)\u{a0}: explanation",
+                TextRange::new(TextSize::from(23), TextSize::from(25)),
+            ),
+            (
+                "// biome-ignore lint\u{a0}",
+                TextRange::new(TextSize::from(20), TextSize::from(22)),
+            ),
+        ] {
+            assert_eq!(
+                parse_suppression_comment(input).collect::<Vec<_>>(),
+                vec![Err(SuppressionDiagnostic {
+                    message: SuppressionDiagnosticKind::NonAsciiWhitespace,
+                    span,
+                })],
+                "input: {input:?}"
+            );
+        }
+
+        for separator in (0x80..=0x0010_ffff)
+            .filter_map(char::from_u32)
+            .filter(|c| c.is_whitespace())
+        {
+            for template in [
+                "// biome-ignore lint{}format: explanation",
+                "// biome-ignore lint{}: explanation",
+                "// biome-ignore lint{}format{}parse: explanation",
+            ] {
+                let ascii = template.replace("{}", " ");
+                let parsed_ascii = parse_suppression_comment(&ascii).collect::<Vec<_>>();
+                let [Ok(_)] = parsed_ascii.as_slice() else {
+                    panic!("expected one parsed suppression for the ASCII-space case")
+                };
+
+                let non_ascii = template.replace("{}", &separator.to_string());
+                let parsed_non_ascii = parse_suppression_comment(&non_ascii).collect::<Vec<_>>();
+                let [Err(diagnostic)] = parsed_non_ascii.as_slice() else {
+                    panic!("expected one diagnostic for separator {separator:?}")
+                };
+                assert_eq!(
+                    diagnostic.message,
+                    SuppressionDiagnosticKind::NonAsciiWhitespace,
+                    "unexpected diagnostic for separator {separator:?}"
+                );
+                assert_eq!(
+                    diagnostic.span,
+                    TextRange::new(
+                        TextSize::from(20),
+                        TextSize::from(20 + separator.len_utf8() as u32)
+                    ),
+                    "unexpected span for separator {separator:?}"
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn non_ascii_whitespace_in_content_is_accepted() {
+        for input in [
+            // comment prefix / directive boundary
+            "//\u{a0}biome-ignore lint: reason",
+            "// biome-ignore\u{a0}lint: reason",
+            // reason leading, reason content, trailing
+            "// biome-ignore lint:\u{a0}reason",
+            "// biome-ignore lint: rea\u{a0}son",
+            "// biome-ignore lint: reason\u{a0}",
+            // parenthesized value
+            "// biome-ignore lint(format\u{a0}): reason",
+            // ASCII tab is a separator
+            "// biome-ignore lint\tformat: reason",
+        ] {
+            let parsed = parse_suppression_comment(input).collect::<Vec<_>>();
+            assert!(matches!(parsed.as_slice(), [Ok(_)]), "input: {input:?}");
+        }
     }
 
     #[test]
