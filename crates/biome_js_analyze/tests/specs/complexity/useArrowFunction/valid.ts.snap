@@ -98,4 +98,45 @@ const usingNewTarget = function () {
 
 class ExtendsClause extends (function() {}) {}
 
+const usingThisInComputedClassMethod = function () {
+    return class {
+        [this.methodName]() {
+            return "hello";
+        }
+    };
+};
+
+const usingArgumentsInComputedClassMethod = function () {
+    return class {
+        [arguments[0]]() {
+            return "hello";
+        }
+    };
+};
+
+const usingThisInComputedObjectMethod = function () {
+    return {
+        [this.methodName]() {
+            return "hello";
+        }
+    };
+};
+
+const usingThisInComputedClassGetter = function () {
+    return class {
+        get [this.propName]() {
+            return 1;
+        }
+    };
+};
+
+const usingThisInComputedClassSetter = function () {
+    return class {
+        set [this.propName](val) {
+            this.val = val;
+        }
+    };
+};
+
+
 ```
