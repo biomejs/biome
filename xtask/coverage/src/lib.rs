@@ -7,6 +7,7 @@ pub mod results;
 mod runner;
 pub mod scss;
 pub mod symbols;
+pub mod toml;
 pub mod ts;
 mod util;
 pub mod yaml;
@@ -27,6 +28,7 @@ use scss::sass_spec::SassSpecTestSuite;
 use serde::{Deserialize, Serialize};
 use std::any::Any;
 use symbols::msts::SymbolsMicrosoftTestSuite;
+use toml::toml_test::TomlTestSuite;
 use ts::ts_babel::BabelTypescriptTestSuite;
 use ts::ts_microsoft::MicrosoftTypescriptTestSuite;
 use util::decode_maybe_utf16_string;
@@ -177,6 +179,7 @@ const ALL_SYMBOLS_SUITES: &str = "symbols";
 const ALL_MARKDOWN_SUITES: &str = "markdown";
 const ALL_SCSS_SUITES: &str = "scss";
 const ALL_YAML_SUITES: &str = "yaml";
+const ALL_TOML_SUITES: &str = "toml";
 
 fn get_test_suites(suites: Option<&str>) -> Vec<Box<dyn TestSuite>> {
     let suites = suites.unwrap_or("*").to_lowercase_cow();
@@ -193,7 +196,10 @@ fn get_test_suites(suites: Option<&str>) -> Vec<Box<dyn TestSuite>> {
             ALL_MARKDOWN_SUITES => ids.extend(["markdown/commonmark"]),
             ALL_SCSS_SUITES => ids.extend(["scss/sass-spec"]),
             ALL_YAML_SUITES => ids.extend(["yaml/yaml-test-suite"]),
-            ALL_SUITES => ids.extend(["js", "ts", "jsx", "symbols", "markdown", "scss", "yaml"]),
+            ALL_TOML_SUITES => ids.extend(["toml/toml-test"]),
+            ALL_SUITES => ids.extend([
+                "js", "ts", "jsx", "symbols", "markdown", "scss", "yaml", "toml",
+            ]),
 
             "js/262" => suites.push(Box::new(Test262TestSuite)),
             "ts/microsoft" => suites.push(Box::new(MicrosoftTypescriptTestSuite)),
@@ -203,6 +209,7 @@ fn get_test_suites(suites: Option<&str>) -> Vec<Box<dyn TestSuite>> {
             "markdown/commonmark" => suites.push(Box::new(CommonMarkTestSuite)),
             "scss/sass-spec" => suites.push(Box::new(SassSpecTestSuite)),
             "yaml/yaml-test-suite" => suites.push(Box::new(YamlTestSuite)),
+            "toml/toml-test" => suites.push(Box::new(TomlTestSuite)),
 
             _ => {}
         }

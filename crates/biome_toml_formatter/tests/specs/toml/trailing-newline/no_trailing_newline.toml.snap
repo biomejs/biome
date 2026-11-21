@@ -1,0 +1,27 @@
+---
+source: crates/biome_toml_formatter/tests/spec_test.rs
+expression: snapshot
+---
+# Input
+
+```toml
+a = 1
+b = [1, 2]
+```
+
+# Options
+
+```
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Expand: Auto
+Trailing newline: false
+```
+
+# Output
+
+```toml
+a = 1
+b = [1, 2]```

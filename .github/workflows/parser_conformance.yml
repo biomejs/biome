@@ -20,6 +20,9 @@ on:
       - 'crates/biome_markdown_syntax/**'
       - 'crates/biome_parser/**'
       - 'crates/biome_rowan/**'
+      - 'crates/biome_toml_factory/**'
+      - 'crates/biome_toml_parser/**'
+      - 'crates/biome_toml_syntax/**'
       - 'crates/biome_yaml_factory/**'
       - 'crates/biome_yaml_parser/**'
       - 'crates/biome_yaml_syntax/**'
@@ -80,6 +83,15 @@ jobs:
               - 'crates/biome_yaml_parser/**'
               - 'crates/biome_yaml_syntax/**'
               - 'xtask/coverage/**'
+            toml:
+              - '.github/workflows/parser_conformance.yml'
+              - 'Cargo.lock'
+              - 'crates/biome_parser/**'
+              - 'crates/biome_rowan/**'
+              - 'crates/biome_toml_factory/**'
+              - 'crates/biome_toml_parser/**'
+              - 'crates/biome_toml_syntax/**'
+              - 'xtask/coverage/**'
 
       - name: Set coverage suites
         id: outputs
@@ -90,12 +102,14 @@ jobs:
           SCSS: ${{ steps.filter.outputs.scss }}
           MARKDOWN: ${{ steps.filter.outputs.markdown }}
           YAML: ${{ steps.filter.outputs.yaml }}
+          TOML: ${{ steps.filter.outputs.toml }}
         run: |
           if [ "$EVENT_NAME" = 'merge_group' ]; then
             JAVASCRIPT=true
             SCSS=true
             MARKDOWN=true
             YAML=true
+            TOML=true
           fi
 
           SUITES=()
@@ -110,6 +124,9 @@ jobs:
           fi
           if [ "$YAML" = 'true' ]; then
             SUITES+=(yaml)
+          fi
+          if [ "$TOML" = 'true' ]; then
+            SUITES+=(toml)
           fi
 
           SUITES_CSV=$(IFS=,; echo "${SUITES[*]}")

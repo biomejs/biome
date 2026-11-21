@@ -2240,6 +2240,26 @@ dependencies = [
 ]
 
 [[package]]
+name = "biome_toml_formatter"
+version = "0.7.0"
+dependencies = [
+ "biome_console",
+ "biome_diagnostics",
+ "biome_formatter",
+ "biome_rowan",
+ "biome_test_utils",
+ "biome_toml_parser",
+ "biome_toml_syntax",
+ "codspeed-criterion-compat",
+ "countme",
+ "insta",
+ "mimalloc",
+ "serde_json",
+ "tests_macros",
+ "tikv-jemallocator",
+]
+
+[[package]]
 name = "biome_toml_parser"
 version = "0.7.0"
 dependencies = [
@@ -2251,8 +2271,11 @@ dependencies = [
  "biome_toml_factory",
  "biome_toml_syntax",
  "biome_unicode_table",
+ "codspeed-criterion-compat",
  "insta",
+ "mimalloc",
  "tests_macros",
+ "tikv-jemallocator",
 ]
 
 [[package]]
@@ -7904,6 +7927,7 @@ dependencies = [
  "biome_parser",
  "biome_rowan",
  "biome_string_case",
+ "biome_toml_parser",
  "biome_yaml_parser",
  "biome_yaml_syntax",
  "camino",

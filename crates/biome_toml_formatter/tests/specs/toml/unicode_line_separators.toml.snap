@@ -1,0 +1,40 @@
+---
+source: crates/biome_toml_formatter/tests/spec_test.rs
+expression: snapshot
+---
+# Input
+
+```toml
+# note a = 1
+b = "a b"
+# biome-ignore format: preserve
+c   =   "a b"
+e = """a b"""
+# biome-ignore format: preserve
+d   =   """a 
+b"""
+```
+
+# Options
+
+```
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Expand: Auto
+Trailing newline: true
+```
+
+# Output
+
+```toml
+# note a = 1
+b = "a b"
+# biome-ignore format: preserve
+c   =   "a b"
+e = """a b"""
+# biome-ignore format: preserve
+d   =   """a 
+b"""
+```
