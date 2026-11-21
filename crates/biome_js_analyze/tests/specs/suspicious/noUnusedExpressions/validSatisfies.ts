@@ -1,0 +1,21 @@
+/* should not generate diagnostics */
+type Shape = "circle" | "square";
+
+export const area = (shape: Shape): number => {
+	switch (shape) {
+		case "circle": {
+			return 1;
+		}
+		case "square": {
+			return 2;
+		}
+		default: {
+			shape satisfies never;
+			return 0;
+		}
+	}
+};
+
+declare const config: unknown;
+config satisfies Record<string, string>;
+(config satisfies unknown);
