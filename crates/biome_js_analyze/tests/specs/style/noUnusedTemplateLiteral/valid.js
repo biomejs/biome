@@ -9,3 +9,6 @@ var foo = `back${x}tick`;
 var foo = tag`backtick`;
 var foo = `something 
 else`;
+var foo = `tail \${user_config.path}`;
+var foo = `a \` b`;
+var foo = `$\{x}`;
