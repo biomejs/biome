@@ -211,6 +211,100 @@ fn test_member_type_normalization_is_shared_across_modules() {
 }
 
 #[test]
+fn test_normalize_numeric_literal_index_projections() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+        type Pair = [string, number];
+        declare const first: Pair[0];
+        declare const second: Pair[1];
+        declare const readonlySecond: (readonly [string, number])[1];
+        declare const optionalSecond: [string, boolean?][1];
+        declare const beforeRest: [string, ...number[]][0];
+        declare const inRest: [string, ...number[]][3];
+        declare const leadingRest: [...string[], number][0];
+        declare const outOfRange: [string][1];
+        declare const fractional: [string, number][0.5];
+        declare const hexadecimal: [string, number][0x1];
+        declare const arrayElement: string[][0];
+        declare const unionIndex: [string, number, boolean][0 | 2];
+        declare const mixedIndex: [string, number][0 | number];
+        declare const partlyOutOfRange: [string][0 | 1];
+        const values = ["A", "B"] as const;
+        declare const constElement: (typeof values)[1];
+        declare const property: { 0: "zero"; 1: "one" }[1];
+        declare const quotedProperty: { "1": "one" }[1];
+        declare const optionalProperty: { 0?: "zero" }[0];
+        declare const missingProperty: { 0: "zero" }[1];
+        interface Parent { 0: "parent"; 1: "inherited" }
+        interface Child extends Parent { 0: "child" }
+        declare const ownProperty: Child[0];
+        declare const inheritedProperty: Child[1];
+        interface Box<T> { 0: T }
+        declare const genericProperty: Box<string>[0];
+        declare function f(name: string, count: number): void;
+        declare const parameter: Parameters<typeof f>[1];
+        declare const stringIndex: { a: string }["a"];
+        declare const negative: [string, number][-1];
+        declare const unsafeInteger: { "9007199254740993": "a" }[9007199254740993];
+        const mutable = ["a"];
+        declare const mutableElement: (typeof mutable)[0];
+        declare const other: { 1: "b" };
+        const spread = { 0: "a", ...other };
+        declare const spreadProperty: (typeof spread)[0];
+        const expression = { 0: "a" };
+        declare const expressionProperty: (typeof expression)[0];
+        const constExpression = { 0: "a" } as const;
+        declare const constExpressionProperty: (typeof constExpression)[0];
+        interface Defaulted<T = string> { 0: T }
+        declare const defaultedProperty: Defaulted[0];
+        interface DefaultedChild extends Defaulted {}
+        declare const inheritedDefaultedProperty: DefaultedChild[0];
+    "#,
+    );
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db.module_for_path(Utf8Path::new("/src/index.ts")).unwrap();
+    for (name, expected) in [
+        ("first", "string"),
+        ("second", "number"),
+        ("readonlySecond", "number"),
+        ("optionalSecond", "boolean | undefined"),
+        ("beforeRest", "string"),
+        ("inRest", "number"),
+        ("leadingRest", "unknown"),
+        ("outOfRange", "unknown"),
+        ("fractional", "unknown"),
+        ("hexadecimal", "unknown"),
+        ("arrayElement", "string"),
+        ("unionIndex", "string | boolean"),
+        ("mixedIndex", "string | number"),
+        ("partlyOutOfRange", "unknown"),
+        ("constElement", "string: B"),
+        ("property", "string: one"),
+        ("quotedProperty", "string: one"),
+        ("optionalProperty", "string: zero | undefined"),
+        ("missingProperty", "unknown"),
+        ("ownProperty", "string: child"),
+        ("inheritedProperty", "string: inherited"),
+        ("genericProperty", "unknown"),
+        ("parameter", "number"),
+        ("stringIndex", "unknown"),
+        ("negative", "unknown"),
+        ("unsafeInteger", "unknown"),
+        ("mutableElement", "string"),
+        ("spreadProperty", "unknown"),
+        ("expressionProperty", "unknown"),
+        ("constExpressionProperty", "string: a"),
+        ("defaultedProperty", "unknown"),
+        ("inheritedDefaultedProperty", "unknown"),
+    ] {
+        let ty = projected_binding(&db, module, name);
+        assert_eq!(format_inferred_type(&db, ty), expected, "{name}");
+    }
+}
+
+#[test]
 fn test_type_projections_track_imports_without_whole_module_inference() {
     let fs = MemoryFileSystem::default();
     fs.insert(

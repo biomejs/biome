@@ -3093,12 +3093,13 @@ impl<'db> MappedTypeKeys<'db> {
     /// Returns whether these keys cannot be enumerated whatever substitutions
     /// are applied first.
     ///
-    /// Indexing with a literal, as in `[K in T[0]]` or `[K in keyof T["key"]]`,
-    /// normalizes to unknown, so the mapped type cannot be evaluated.
+    /// Indexing with an unsupported literal, as in `[K in T["key"]]` or
+    /// `[K in keyof T[-1]]`, normalizes to unknown, so the mapped type cannot be
+    /// evaluated.
     pub fn are_never_enumerable(self, db: &'db dyn TypeDb) -> bool {
         matches!(
             self.operand(),
-            TypeData::IndexedAccess(access) if access.index(db).is_never_supported_index()
+            TypeData::IndexedAccess(access) if access.index(db).is_never_supported_index(db)
         )
     }
 }
