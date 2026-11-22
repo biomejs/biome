@@ -4108,6 +4108,31 @@ impl IntoFormat<HtmlFormatContext> for biome_html_syntax::HtmlElementList {
         )
     }
 }
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::HtmlRootItemList {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::HtmlRootItemList,
+        crate::html::lists::root_item_list::FormatHtmlRootItemList,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::html::lists::root_item_list::FormatHtmlRootItemList::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::HtmlRootItemList {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::HtmlRootItemList,
+        crate::html::lists::root_item_list::FormatHtmlRootItemList,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::html::lists::root_item_list::FormatHtmlRootItemList::default(),
+        )
+    }
+}
 impl AsFormat<HtmlFormatContext> for biome_html_syntax::SvelteAwaitClausesList {
     type Format<'a> = FormatRefWithRule<
         'a,
@@ -4778,6 +4803,31 @@ impl IntoFormat<HtmlFormatContext> for biome_html_syntax::AnyHtmlElement {
         FormatOwnedWithRule::new(
             self,
             crate::html::any::element::FormatAnyHtmlElement::default(),
+        )
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::AnyHtmlRootItem {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::AnyHtmlRootItem,
+        crate::html::any::root_item::FormatAnyHtmlRootItem,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::html::any::root_item::FormatAnyHtmlRootItem::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::AnyHtmlRootItem {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::AnyHtmlRootItem,
+        crate::html::any::root_item::FormatAnyHtmlRootItem,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::html::any::root_item::FormatAnyHtmlRootItem::default(),
         )
     }
 }

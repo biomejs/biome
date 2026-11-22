@@ -6,7 +6,7 @@ use crate::{
     AnyAstroDirective, AnyHtmlAttribute, AnyHtmlContent, AnyHtmlElement, AnyHtmlTagName,
     AnyHtmlTextExpression, AnySvelteBlock, AnyVueDirective, AstroEmbeddedContent,
     HtmlAttributeList, HtmlElement, HtmlEmbeddedContent, HtmlOpeningElement,
-    HtmlProcessingInstruction, HtmlSelfClosingElement, HtmlSyntaxToken, HtmlTagName,
+    HtmlProcessingInstruction, HtmlRoot, HtmlSelfClosingElement, HtmlSyntaxToken, HtmlTagName,
     HtmlTextExpression, ScriptType, inner_string_text,
 };
 use biome_aria::Attribute;
@@ -21,6 +21,16 @@ const VOID_ELEMENTS: TokenSet<HtmlSyntaxKind> = token_set!(
     AREA_KW, BASE_KW, BR_KW, COL_KW, EMBED_KW, HR_KW, IMG_KW, INPUT_KW, LINK_KW, META_KW,
     SOURCE_KW, TRACK_KW, WBR_KW
 );
+
+impl HtmlRoot {
+    /// Returns root items that can also appear inside an element, excluding
+    /// root-only directives such as doctypes.
+    pub fn elements(&self) -> impl Iterator<Item = AnyHtmlElement> + '_ {
+        self.items()
+            .iter()
+            .filter_map(|item| item.as_any_html_element().cloned())
+    }
+}
 
 /// Helper to get the text value from any tag name variant
 fn get_tag_name_text(name: &AnyHtmlTagName) -> Option<TokenText> {
