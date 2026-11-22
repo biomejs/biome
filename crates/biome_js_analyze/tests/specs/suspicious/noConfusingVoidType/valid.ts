@@ -25,6 +25,7 @@ const arrowGeneric2 = <T extends void>(arg: T) => {};
 const arrowGeneric3 = <T extends void = void>(arg: T) => {};
 function functionGeneric2<T extends void>(arg: T) {}
 function functionGeneric3<T extends void = void>(arg: T) {}
+function functionGeneric4<T extends (void)>(arg: T) {}
 declare function functionDeclaration2<T extends void>(arg: T): void;
 declare function functionDeclaration3<T extends void = void>(arg: T): void;
 

@@ -38,3 +38,5 @@ type ManyVoid = readonly void[];
 function foo(arr: readonly void[]) {}
 type invalidVoidUnion = void | Map<string, number>;
 type voidNeverStringUnion = void | never | string;
+type NestedVoidConstraint<U, T extends (U extends string ? void : number)> = T;
+type NestedVoidConstraint2<U, T extends U extends string ? void : number> = T;

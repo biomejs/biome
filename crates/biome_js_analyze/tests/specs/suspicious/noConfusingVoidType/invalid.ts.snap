@@ -44,6 +44,8 @@ type ManyVoid = readonly void[];
 function foo(arr: readonly void[]) {}
 type invalidVoidUnion = void | Map<string, number>;
 type voidNeverStringUnion = void | never | string;
+type NestedVoidConstraint<U, T extends (U extends string ? void : number)> = T;
+type NestedVoidConstraint2<U, T extends U extends string ? void : number> = T;
 
 ```
 
@@ -571,7 +573,7 @@ invalid.ts:39:25 lint/suspicious/noConfusingVoidType  FIXABLE  ━━━━━�
   > 39 │ type invalidVoidUnion = void | Map<string, number>;
        │                         ^^^^
     40 │ type voidNeverStringUnion = void | never | string;
-    41 │ 
+    41 │ type NestedVoidConstraint<U, T extends (U extends string ? void : number)> = T;
   
   i void is meant for the return type of a function. In other positions it is easy to mix up with undefined, which makes the type harder to understand.
   
@@ -582,7 +584,7 @@ invalid.ts:39:25 lint/suspicious/noConfusingVoidType  FIXABLE  ━━━━━�
     39    │ - type·invalidVoidUnion·=·void·|·Map<string,·number>;
        39 │ + type·invalidVoidUnion·=·undefined·|·Map<string,·number>;
     40 40 │   type voidNeverStringUnion = void | never | string;
-    41 41 │   
+    41 41 │   type NestedVoidConstraint<U, T extends (U extends string ? void : number)> = T;
   
 
 ```
@@ -596,7 +598,8 @@ invalid.ts:40:29 lint/suspicious/noConfusingVoidType  FIXABLE  ━━━━━�
     39 │ type invalidVoidUnion = void | Map<string, number>;
   > 40 │ type voidNeverStringUnion = void | never | string;
        │                             ^^^^
-    41 │ 
+    41 │ type NestedVoidConstraint<U, T extends (U extends string ? void : number)> = T;
+    42 │ type NestedVoidConstraint2<U, T extends U extends string ? void : number> = T;
   
   i void is meant for the return type of a function. In other positions it is easy to mix up with undefined, which makes the type harder to understand.
   
@@ -606,7 +609,58 @@ invalid.ts:40:29 lint/suspicious/noConfusingVoidType  FIXABLE  ━━━━━�
     39 39 │   type invalidVoidUnion = void | Map<string, number>;
     40    │ - type·voidNeverStringUnion·=·void·|·never·|·string;
        40 │ + type·voidNeverStringUnion·=·undefined·|·never·|·string;
-    41 41 │   
+    41 41 │   type NestedVoidConstraint<U, T extends (U extends string ? void : number)> = T;
+    42 42 │   type NestedVoidConstraint2<U, T extends U extends string ? void : number> = T;
+  
+
+```
+
+```
+invalid.ts:41:60 lint/suspicious/noConfusingVoidType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! void is confusing outside a return type or a type parameter.
+  
+    39 │ type invalidVoidUnion = void | Map<string, number>;
+    40 │ type voidNeverStringUnion = void | never | string;
+  > 41 │ type NestedVoidConstraint<U, T extends (U extends string ? void : number)> = T;
+       │                                                            ^^^^
+    42 │ type NestedVoidConstraint2<U, T extends U extends string ? void : number> = T;
+    43 │ 
+  
+  i void is meant for the return type of a function. In other positions it is easy to mix up with undefined, which makes the type harder to understand.
+  
+  i Unsafe fix: Use undefined instead.
+  
+    39 39 │   type invalidVoidUnion = void | Map<string, number>;
+    40 40 │   type voidNeverStringUnion = void | never | string;
+    41    │ - type·NestedVoidConstraint<U,·T·extends·(U·extends·string·?·void·:·number)>·=·T;
+       41 │ + type·NestedVoidConstraint<U,·T·extends·(U·extends·string·?·undefined·:·number)>·=·T;
+    42 42 │   type NestedVoidConstraint2<U, T extends U extends string ? void : number> = T;
+    43 43 │   
+  
+
+```
+
+```
+invalid.ts:42:60 lint/suspicious/noConfusingVoidType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! void is confusing outside a return type or a type parameter.
+  
+    40 │ type voidNeverStringUnion = void | never | string;
+    41 │ type NestedVoidConstraint<U, T extends (U extends string ? void : number)> = T;
+  > 42 │ type NestedVoidConstraint2<U, T extends U extends string ? void : number> = T;
+       │                                                            ^^^^
+    43 │ 
+  
+  i void is meant for the return type of a function. In other positions it is easy to mix up with undefined, which makes the type harder to understand.
+  
+  i Unsafe fix: Use undefined instead.
+  
+    40 40 │   type voidNeverStringUnion = void | never | string;
+    41 41 │   type NestedVoidConstraint<U, T extends (U extends string ? void : number)> = T;
+    42    │ - type·NestedVoidConstraint2<U,·T·extends·U·extends·string·?·void·:·number>·=·T;
+       42 │ + type·NestedVoidConstraint2<U,·T·extends·U·extends·string·?·undefined·:·number>·=·T;
+    43 43 │   
   
 
 ```

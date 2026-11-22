@@ -5,7 +5,9 @@ use biome_console::markup;
 use biome_diagnostics::Applicability;
 use biome_diagnostics::Severity;
 use biome_js_factory::make;
-use biome_js_syntax::{AnyTsType, JsSyntaxKind, JsSyntaxNode, T, TsConditionalType, TsVoidType};
+use biome_js_syntax::{
+    AnyTsType, JsSyntaxKind, JsSyntaxNode, T, TsConditionalType, TsTypeConstraintClause, TsVoidType,
+};
 use biome_rowan::{AstNode, BatchMutationExt};
 use biome_rule_options::no_confusing_void_type::NoConfusingVoidTypeOptions;
 
@@ -159,12 +161,22 @@ fn decide_void_type_context(node: &JsSyntaxNode) -> Option<VoidTypeContext> {
             // string & void
             // arg: void
             // fn<T = void>() {}
-            // fn<T extends void>() {}
             JsSyntaxKind::TS_PARENTHESIZED_TYPE
             | JsSyntaxKind::TS_INTERSECTION_TYPE_ELEMENT_LIST
             | JsSyntaxKind::TS_TYPE_ANNOTATION
-            | JsSyntaxKind::TS_DEFAULT_TYPE_CLAUSE
-            | JsSyntaxKind::TS_TYPE_CONSTRAINT_CLAUSE => {}
+            | JsSyntaxKind::TS_DEFAULT_TYPE_CLAUSE => {}
+
+            // fn<T extends void>() {}
+            // Only a `void` that is the constraint itself is allowed. One nested deeper, as in
+            // `T extends (U extends string ? void : number)`, is still reported.
+            JsSyntaxKind::TS_TYPE_CONSTRAINT_CLAUSE => {
+                let is_constraint = TsTypeConstraintClause::unwrap_cast(parent.clone())
+                    .ty()
+                    .is_ok_and(|ty| matches!(ty.omit_parentheses(), AnyTsType::TsVoidType(_)));
+                if !is_constraint {
+                    return Some(VoidTypeContext::Unknown);
+                }
+            }
 
             JsSyntaxKind::TS_UNION_TYPE => {
                 return Some(VoidTypeContext::Union);
