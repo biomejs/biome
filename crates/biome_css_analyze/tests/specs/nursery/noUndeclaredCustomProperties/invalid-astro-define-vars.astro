@@ -1,0 +1,11 @@
+---
+const foreground = "red";
+---
+<!-- should generate diagnostics -->
+
+<style define:vars={{ foreground }}>
+.card {
+  color: var(--foreground);
+  background: var(--missing);
+}
+</style>
