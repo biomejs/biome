@@ -1,0 +1,41 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid_decorators_before_export.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+@sealed
+export default class Foo {}
+
+```
+
+# Diagnostics
+```
+invalid_decorators_before_export.ts:3:1 lint/nursery/useConsistentDefaultExportStyle  FIXABLE  ━━━━━━━━━━
+
+  i This class is declared inside its export default statement.
+  
+    1 │ /* should generate diagnostics */
+    2 │ @sealed
+  > 3 │ export default class Foo {}
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ 
+  
+  i This project declares default-exported classes separately, so that all default exports look the same.
+  
+  i Declare the class first, then export it with export default and its name.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Declare the class separately.
+  
+    1 1 │   /* should generate diagnostics */
+    2 2 │   @sealed
+    3   │ - export·default·class·Foo·{}
+      3 │ + class·Foo·{}
+      4 │ + export·default·Foo;
+    4 5 │   
+  
+
+```

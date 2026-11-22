@@ -4175,6 +4175,11 @@ export interface Nursery {
 	 */
 	useConsistentBooleanProps?: UseConsistentBooleanPropsConfiguration;
 	/**
+	 * Enforce a consistent style for default-exported functions and classes.
+	 * See https://biomejs.dev/linter/rules/use-consistent-default-export-style
+	 */
+	useConsistentDefaultExportStyle?: UseConsistentDefaultExportStyleConfiguration;
+	/**
 	 * Enforce comparing with -1 when checking whether indexOf(), lastIndexOf(), findIndex(), or findLastIndex() found an element.
 	 * See https://biomejs.dev/linter/rules/use-consistent-existence-index-check
 	 */
@@ -7715,6 +7720,9 @@ export type UseConsistentBooleanNameConfiguration =
 export type UseConsistentBooleanPropsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseConsistentBooleanPropsOptions;
+export type UseConsistentDefaultExportStyleConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseConsistentDefaultExportStyleOptions;
 export type UseConsistentExistenceIndexCheckConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseConsistentExistenceIndexCheckOptions;
@@ -11451,6 +11459,14 @@ export interface RuleWithUseConsistentBooleanPropsOptions {
 	level: RulePlainConfiguration;
 	options?: UseConsistentBooleanPropsOptions;
 }
+export interface RuleWithUseConsistentDefaultExportStyleOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseConsistentDefaultExportStyleOptions;
+}
 export interface RuleWithUseConsistentExistenceIndexCheckOptions {
 	/**
 	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
@@ -14808,6 +14824,19 @@ export interface UseConsistentBooleanPropsOptions {
 	 */
 	mode?: BooleanPropMode;
 }
+/**
+ * Configures the required declaration style for default-exported functions and classes.
+ */
+export interface UseConsistentDefaultExportStyleOptions {
+	/**
+	 * The declaration style for default-exported classes. Default: `"inline"`.
+	 */
+	classes?: DefaultExportStyle;
+	/**
+	 * The declaration style for default-exported functions. Default: `"inline"`.
+	 */
+	functions?: DefaultExportStyle;
+}
 export type UseConsistentExistenceIndexCheckOptions = {};
 export interface UseConsistentFontWeightNotationOptions {
 	/**
@@ -16237,6 +16266,10 @@ export interface BlockLangOptions {
 	required?: boolean;
 }
 export type BooleanPropMode = "implicit" | "explicit";
+/**
+ * Where a default-exported function or class is declared.
+ */
+export type DefaultExportStyle = "inline" | "separate" | "ignore";
 export type FontWeightNotation = "numeric" | "namedWherePossible";
 /**
  * The required form for function definitions: `"expression"` or `"declaration"`.
@@ -17055,6 +17088,7 @@ export type Category =
 	| "lint/nursery/useConsistentBlockLang"
 	| "lint/nursery/useConsistentBooleanName"
 	| "lint/nursery/useConsistentBooleanProps"
+	| "lint/nursery/useConsistentDefaultExportStyle"
 	| "lint/nursery/useConsistentExistenceIndexCheck"
 	| "lint/nursery/useConsistentFontWeightNotation"
 	| "lint/nursery/useConsistentFunctionStyle"

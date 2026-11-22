@@ -1,0 +1,11 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid_let_arrow_function.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+let foo = () => {};
+export default foo;
+
+```

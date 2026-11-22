@@ -1,0 +1,11 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid_inline_class.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+/** Leading comment */
+export default class Foo {}
+
+```

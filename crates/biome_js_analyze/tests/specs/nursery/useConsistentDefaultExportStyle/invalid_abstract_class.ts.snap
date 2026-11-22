@@ -1,0 +1,52 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid_abstract_class.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+abstract class Foo<T> implements Bar {
+	property: T;
+}
+export default Foo;
+
+```
+
+# Diagnostics
+```
+invalid_abstract_class.ts:5:1 lint/nursery/useConsistentDefaultExportStyle  FIXABLE  ━━━━━━━━━━━━━━━
+
+  i This default-exported class is declared separately from its export default statement.
+  
+    3 │ 	property: T;
+    4 │ }
+  > 5 │ export default Foo;
+      │ ^^^^^^^^^^^^^^^^^^^
+    6 │ 
+  
+  i The class is declared here.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ abstract class Foo<T> implements Bar {
+      │                ^^^
+    3 │ 	property: T;
+    4 │ }
+  
+  i This project declares default-exported classes inside the export default statement, so that all default exports look the same.
+  
+  i Move the declaration into the export default statement.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Declare the class inside the export default statement.
+  
+    1 1 │   /* should generate diagnostics */
+    2   │ - abstract·class·Foo<T>·implements·Bar·{
+      2 │ + export·default·abstract·class·Foo<T>·implements·Bar·{
+    3 3 │   	property: T;
+    4 4 │   }
+    5   │ - export·default·Foo;
+    6 5 │   
+  
+
+```

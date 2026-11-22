@@ -2732,6 +2732,7 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
             biome_rule_options::use_consistent_curly_braces::UseConsistentCurlyBracesOptions,
         >(),
     ));
+    result.push(("nursery", "useConsistentDefaultExportStyle", TypeId::of::<biome_rule_options::use_consistent_default_export_style::UseConsistentDefaultExportStyleOptions>()));
     result.push((
         "style",
         "useConsistentEnumValueType",
