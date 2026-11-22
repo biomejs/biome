@@ -1,0 +1,101 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 211
+expression: invalidExportAllReplaced.js
+---
+# Input
+```js
+/* should generate diagnostics */
+export * from "./exportAll/a.js";
+export const x = 3;
+export { f } from "./exportAll/b.js";
+export * as onlyA from "./exportAll/c.js";
+
+```
+
+# Diagnostics
+```
+invalidExportAllReplaced.js:2:15 lint/nursery/noDuplicateExports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The name x is exported more than once.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ export * from "./exportAll/a.js";
+      │               ^^^^^^^^^^^^^^^^^^
+    3 │ export const x = 3;
+    4 │ export { f } from "./exportAll/b.js";
+  
+  i This export replaces the name from the module.
+  
+    1 │ /* should generate diagnostics */
+    2 │ export * from "./exportAll/a.js";
+  > 3 │ export const x = 3;
+      │              ^
+    4 │ export { f } from "./exportAll/b.js";
+    5 │ export * as onlyA from "./exportAll/c.js";
+  
+  i A name that the module exports itself takes precedence over the same name from export * from, so the name from the other module is never exported.
+  
+  i Give the module's own export a different name, or remove it to export the name from the other module.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidExportAllReplaced.js:2:15 lint/nursery/noDuplicateExports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The name f is exported more than once.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ export * from "./exportAll/a.js";
+      │               ^^^^^^^^^^^^^^^^^^
+    3 │ export const x = 3;
+    4 │ export { f } from "./exportAll/b.js";
+  
+  i This export replaces the name from the module.
+  
+    2 │ export * from "./exportAll/a.js";
+    3 │ export const x = 3;
+  > 4 │ export { f } from "./exportAll/b.js";
+      │          ^
+    5 │ export * as onlyA from "./exportAll/c.js";
+    6 │ 
+  
+  i A name that the module exports itself takes precedence over the same name from export * from, so the name from the other module is never exported.
+  
+  i Give the module's own export a different name, or remove it to export the name from the other module.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidExportAllReplaced.js:2:15 lint/nursery/noDuplicateExports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The name onlyA is exported more than once.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ export * from "./exportAll/a.js";
+      │               ^^^^^^^^^^^^^^^^^^
+    3 │ export const x = 3;
+    4 │ export { f } from "./exportAll/b.js";
+  
+  i This export replaces the name from the module.
+  
+    3 │ export const x = 3;
+    4 │ export { f } from "./exportAll/b.js";
+  > 5 │ export * as onlyA from "./exportAll/c.js";
+      │             ^^^^^
+    6 │ 
+  
+  i A name that the module exports itself takes precedence over the same name from export * from, so the name from the other module is never exported.
+  
+  i Give the module's own export a different name, or remove it to export the name from the other module.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

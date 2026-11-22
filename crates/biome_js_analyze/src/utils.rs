@@ -15,6 +15,7 @@ pub mod early_exit;
 pub mod function_return;
 pub mod import;
 pub mod indexed_collection;
+pub mod module_exports;
 pub mod rename;
 pub mod same_reference;
 #[cfg(test)]

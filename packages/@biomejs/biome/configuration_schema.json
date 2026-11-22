@@ -4501,6 +4501,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoDuplicateExportsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoDuplicateExportsOptions" }
+			]
+		},
+		"NoDuplicateExportsOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoDuplicateFieldDefinitionNamesConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -8445,6 +8455,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoUselessReExportAllConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoUselessReExportAllOptions" }
+			]
+		},
+		"NoUselessReExportAllOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoUselessRecursionConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -9818,6 +9838,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noDuplicateExports": {
+					"description": "Disallow exporting the same name more than once.\nSee https://biomejs.dev/linter/rules/no-duplicate-exports",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoDuplicateExportsConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noDuplicateMapKeys": {
 					"description": "Disallow two keys with the same name inside YAML maps.\nSee https://biomejs.dev/linter/rules/no-duplicate-map-keys",
 					"anyOf": [
@@ -10696,6 +10723,13 @@
 					"description": "Disallow unnecessary namespace and enum qualifiers.\nSee https://biomejs.dev/linter/rules/no-useless-qualifier",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoUselessQualifierConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noUselessReExportAll": {
+					"description": "Disallow export * from a module that has no named exports.\nSee https://biomejs.dev/linter/rules/no-useless-re-export-all",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoUselessReExportAllConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -14118,6 +14152,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoDuplicateEnumValuesOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoDuplicateExportsOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoDuplicateExportsOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -17645,6 +17688,15 @@
 				},
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoUselessQualifierOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoUselessReExportAllOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoUselessReExportAllOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

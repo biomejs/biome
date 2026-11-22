@@ -1,0 +1,76 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 211
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+export * from "./modules/onlyDefault.js";
+export * from "./modules/sideEffects.js";
+// The re-exported module has no named exports either.
+export * from "./modules/reexportOnlyDefault.js";
+
+```
+
+# Diagnostics
+```
+invalid.js:2:15 lint/nursery/noUselessReExportAll ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The module ./modules/onlyDefault.js has no named exports, so this statement exports nothing.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ export * from "./modules/onlyDefault.js";
+      │               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ export * from "./modules/sideEffects.js";
+    4 │ // The re-exported module has no named exports either.
+  
+  i export * from doesn't re-export the default export.
+  
+  i Re-export the default export with export { default } from, or remove this statement.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:3:15 lint/nursery/noUselessReExportAll ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The module ./modules/sideEffects.js has no named exports, so this statement exports nothing.
+  
+    1 │ /* should generate diagnostics */
+    2 │ export * from "./modules/onlyDefault.js";
+  > 3 │ export * from "./modules/sideEffects.js";
+      │               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ // The re-exported module has no named exports either.
+    5 │ export * from "./modules/reexportOnlyDefault.js";
+  
+  i export * from doesn't re-export the default export.
+  
+  i Re-export the default export with export { default } from, or remove this statement.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:5:15 lint/nursery/noUselessReExportAll ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The module ./modules/reexportOnlyDefault.js has no named exports, so this statement exports nothing.
+  
+    3 │ export * from "./modules/sideEffects.js";
+    4 │ // The re-exported module has no named exports either.
+  > 5 │ export * from "./modules/reexportOnlyDefault.js";
+      │               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ 
+  
+  i export * from doesn't re-export the default export.
+  
+  i Re-export the default export with export { default } from, or remove this statement.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
