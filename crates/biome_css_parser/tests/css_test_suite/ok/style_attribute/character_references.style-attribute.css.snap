@@ -1,0 +1,263 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+font-family: &quot;Rotis Sans&quot;, &#34;Rotis&#x22;, &apos;Rotis&#39;, &QUOT;Rotis&#X0022;;
+content: &quot;a\&quot;b&quot;;
+content: &quot;a&apos;b&quot;;
+content: &quot;a";
+content: "a&quot;;
+content: "&amp;&quot;;
+color: red
+
+```
+
+
+## AST
+
+```
+CssDeclarationSnippetRoot {
+    declarations: CssDeclarationList [
+        CssDeclarationWithSemicolon {
+            declaration: CssDeclaration {
+                property: CssGenericProperty {
+                    name: CssIdentifier {
+                        value_token: IDENT@0..11 "font-family" [] [],
+                    },
+                    colon_token: COLON@11..13 ":" [] [Whitespace(" ")],
+                    value: CssGenericComponentValueList [
+                        CssString {
+                            value_token: CSS_STRING_LITERAL@13..35 "&quot;Rotis Sans&quot;" [] [],
+                        },
+                        CssGenericDelimiter {
+                            value: COMMA@35..37 "," [] [Whitespace(" ")],
+                        },
+                        CssString {
+                            value_token: CSS_STRING_LITERAL@37..53 "&#34;Rotis&#x22;" [] [],
+                        },
+                        CssGenericDelimiter {
+                            value: COMMA@53..55 "," [] [Whitespace(" ")],
+                        },
+                        CssString {
+                            value_token: CSS_STRING_LITERAL@55..71 "&apos;Rotis&#39;" [] [],
+                        },
+                        CssGenericDelimiter {
+                            value: COMMA@71..73 "," [] [Whitespace(" ")],
+                        },
+                        CssString {
+                            value_token: CSS_STRING_LITERAL@73..92 "&QUOT;Rotis&#X0022;" [] [],
+                        },
+                    ],
+                },
+                important: missing (optional),
+            },
+            semicolon_token: SEMICOLON@92..93 ";" [] [],
+        },
+        CssDeclarationWithSemicolon {
+            declaration: CssDeclaration {
+                property: CssGenericProperty {
+                    name: CssIdentifier {
+                        value_token: IDENT@93..101 "content" [Newline("\n")] [],
+                    },
+                    colon_token: COLON@101..103 ":" [] [Whitespace(" ")],
+                    value: CssGenericComponentValueList [
+                        CssString {
+                            value_token: CSS_STRING_LITERAL@103..124 "&quot;a\\&quot;b&quot;" [] [],
+                        },
+                    ],
+                },
+                important: missing (optional),
+            },
+            semicolon_token: SEMICOLON@124..125 ";" [] [],
+        },
+        CssDeclarationWithSemicolon {
+            declaration: CssDeclaration {
+                property: CssGenericProperty {
+                    name: CssIdentifier {
+                        value_token: IDENT@125..133 "content" [Newline("\n")] [],
+                    },
+                    colon_token: COLON@133..135 ":" [] [Whitespace(" ")],
+                    value: CssGenericComponentValueList [
+                        CssString {
+                            value_token: CSS_STRING_LITERAL@135..155 "&quot;a&apos;b&quot;" [] [],
+                        },
+                    ],
+                },
+                important: missing (optional),
+            },
+            semicolon_token: SEMICOLON@155..156 ";" [] [],
+        },
+        CssDeclarationWithSemicolon {
+            declaration: CssDeclaration {
+                property: CssGenericProperty {
+                    name: CssIdentifier {
+                        value_token: IDENT@156..164 "content" [Newline("\n")] [],
+                    },
+                    colon_token: COLON@164..166 ":" [] [Whitespace(" ")],
+                    value: CssGenericComponentValueList [
+                        CssString {
+                            value_token: CSS_STRING_LITERAL@166..174 "&quot;a\"" [] [],
+                        },
+                    ],
+                },
+                important: missing (optional),
+            },
+            semicolon_token: SEMICOLON@174..175 ";" [] [],
+        },
+        CssDeclarationWithSemicolon {
+            declaration: CssDeclaration {
+                property: CssGenericProperty {
+                    name: CssIdentifier {
+                        value_token: IDENT@175..183 "content" [Newline("\n")] [],
+                    },
+                    colon_token: COLON@183..185 ":" [] [Whitespace(" ")],
+                    value: CssGenericComponentValueList [
+                        CssString {
+                            value_token: CSS_STRING_LITERAL@185..193 "\"a&quot;" [] [],
+                        },
+                    ],
+                },
+                important: missing (optional),
+            },
+            semicolon_token: SEMICOLON@193..194 ";" [] [],
+        },
+        CssDeclarationWithSemicolon {
+            declaration: CssDeclaration {
+                property: CssGenericProperty {
+                    name: CssIdentifier {
+                        value_token: IDENT@194..202 "content" [Newline("\n")] [],
+                    },
+                    colon_token: COLON@202..204 ":" [] [Whitespace(" ")],
+                    value: CssGenericComponentValueList [
+                        CssString {
+                            value_token: CSS_STRING_LITERAL@204..216 "\"&amp;&quot;" [] [],
+                        },
+                    ],
+                },
+                important: missing (optional),
+            },
+            semicolon_token: SEMICOLON@216..217 ";" [] [],
+        },
+        CssDeclarationWithSemicolon {
+            declaration: CssDeclaration {
+                property: CssGenericProperty {
+                    name: CssIdentifier {
+                        value_token: IDENT@217..223 "color" [Newline("\n")] [],
+                    },
+                    colon_token: COLON@223..225 ":" [] [Whitespace(" ")],
+                    value: CssGenericComponentValueList [
+                        CssIdentifier {
+                            value_token: IDENT@225..228 "red" [] [],
+                        },
+                    ],
+                },
+                important: missing (optional),
+            },
+            semicolon_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@228..229 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_DECLARATION_SNIPPET_ROOT@0..229
+  0: CSS_DECLARATION_LIST@0..228
+    0: CSS_DECLARATION_WITH_SEMICOLON@0..93
+      0: CSS_DECLARATION@0..92
+        0: CSS_GENERIC_PROPERTY@0..92
+          0: CSS_IDENTIFIER@0..11
+            0: IDENT@0..11 "font-family" [] []
+          1: COLON@11..13 ":" [] [Whitespace(" ")]
+          2: CSS_GENERIC_COMPONENT_VALUE_LIST@13..92
+            0: CSS_STRING@13..35
+              0: CSS_STRING_LITERAL@13..35 "&quot;Rotis Sans&quot;" [] []
+            1: CSS_GENERIC_DELIMITER@35..37
+              0: COMMA@35..37 "," [] [Whitespace(" ")]
+            2: CSS_STRING@37..53
+              0: CSS_STRING_LITERAL@37..53 "&#34;Rotis&#x22;" [] []
+            3: CSS_GENERIC_DELIMITER@53..55
+              0: COMMA@53..55 "," [] [Whitespace(" ")]
+            4: CSS_STRING@55..71
+              0: CSS_STRING_LITERAL@55..71 "&apos;Rotis&#39;" [] []
+            5: CSS_GENERIC_DELIMITER@71..73
+              0: COMMA@71..73 "," [] [Whitespace(" ")]
+            6: CSS_STRING@73..92
+              0: CSS_STRING_LITERAL@73..92 "&QUOT;Rotis&#X0022;" [] []
+        1: (empty)
+      1: SEMICOLON@92..93 ";" [] []
+    1: CSS_DECLARATION_WITH_SEMICOLON@93..125
+      0: CSS_DECLARATION@93..124
+        0: CSS_GENERIC_PROPERTY@93..124
+          0: CSS_IDENTIFIER@93..101
+            0: IDENT@93..101 "content" [Newline("\n")] []
+          1: COLON@101..103 ":" [] [Whitespace(" ")]
+          2: CSS_GENERIC_COMPONENT_VALUE_LIST@103..124
+            0: CSS_STRING@103..124
+              0: CSS_STRING_LITERAL@103..124 "&quot;a\\&quot;b&quot;" [] []
+        1: (empty)
+      1: SEMICOLON@124..125 ";" [] []
+    2: CSS_DECLARATION_WITH_SEMICOLON@125..156
+      0: CSS_DECLARATION@125..155
+        0: CSS_GENERIC_PROPERTY@125..155
+          0: CSS_IDENTIFIER@125..133
+            0: IDENT@125..133 "content" [Newline("\n")] []
+          1: COLON@133..135 ":" [] [Whitespace(" ")]
+          2: CSS_GENERIC_COMPONENT_VALUE_LIST@135..155
+            0: CSS_STRING@135..155
+              0: CSS_STRING_LITERAL@135..155 "&quot;a&apos;b&quot;" [] []
+        1: (empty)
+      1: SEMICOLON@155..156 ";" [] []
+    3: CSS_DECLARATION_WITH_SEMICOLON@156..175
+      0: CSS_DECLARATION@156..174
+        0: CSS_GENERIC_PROPERTY@156..174
+          0: CSS_IDENTIFIER@156..164
+            0: IDENT@156..164 "content" [Newline("\n")] []
+          1: COLON@164..166 ":" [] [Whitespace(" ")]
+          2: CSS_GENERIC_COMPONENT_VALUE_LIST@166..174
+            0: CSS_STRING@166..174
+              0: CSS_STRING_LITERAL@166..174 "&quot;a\"" [] []
+        1: (empty)
+      1: SEMICOLON@174..175 ";" [] []
+    4: CSS_DECLARATION_WITH_SEMICOLON@175..194
+      0: CSS_DECLARATION@175..193
+        0: CSS_GENERIC_PROPERTY@175..193
+          0: CSS_IDENTIFIER@175..183
+            0: IDENT@175..183 "content" [Newline("\n")] []
+          1: COLON@183..185 ":" [] [Whitespace(" ")]
+          2: CSS_GENERIC_COMPONENT_VALUE_LIST@185..193
+            0: CSS_STRING@185..193
+              0: CSS_STRING_LITERAL@185..193 "\"a&quot;" [] []
+        1: (empty)
+      1: SEMICOLON@193..194 ";" [] []
+    5: CSS_DECLARATION_WITH_SEMICOLON@194..217
+      0: CSS_DECLARATION@194..216
+        0: CSS_GENERIC_PROPERTY@194..216
+          0: CSS_IDENTIFIER@194..202
+            0: IDENT@194..202 "content" [Newline("\n")] []
+          1: COLON@202..204 ":" [] [Whitespace(" ")]
+          2: CSS_GENERIC_COMPONENT_VALUE_LIST@204..216
+            0: CSS_STRING@204..216
+              0: CSS_STRING_LITERAL@204..216 "\"&amp;&quot;" [] []
+        1: (empty)
+      1: SEMICOLON@216..217 ";" [] []
+    6: CSS_DECLARATION_WITH_SEMICOLON@217..228
+      0: CSS_DECLARATION@217..228
+        0: CSS_GENERIC_PROPERTY@217..228
+          0: CSS_IDENTIFIER@217..223
+            0: IDENT@217..223 "color" [Newline("\n")] []
+          1: COLON@223..225 ":" [] [Whitespace(" ")]
+          2: CSS_GENERIC_COMPONENT_VALUE_LIST@225..228
+            0: CSS_IDENTIFIER@225..228
+              0: IDENT@225..228 "red" [] []
+        1: (empty)
+      1: (empty)
+  1: EOF@228..229 "" [Newline("\n")] []
+
+```
