@@ -3808,6 +3808,22 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoBreakInNestedLoopConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoBreakInNestedLoopOptions" }
+			]
+		},
+		"NoBreakInNestedLoopOptions": {
+			"type": "object",
+			"properties": {
+				"checkContinue": {
+					"description": "Also report `continue` statements without a label inside nested loops and inside\n`switch` statements in loops (default: false).",
+					"type": ["boolean", "null"]
+				}
+			},
+			"additionalProperties": false
+		},
 		"NoBufferConstructorConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -9594,6 +9610,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noBreakInNestedLoop": {
+					"description": "Disallow break statements inside nested loops and inside switch statements in loops.\nSee https://biomejs.dev/linter/rules/no-break-in-nested-loop",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoBreakInNestedLoopConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noBufferConstructor": {
 					"description": "Disallow the deprecated Buffer() constructor in Node.js.\nSee https://biomejs.dev/linter/rules/no-buffer-constructor",
 					"anyOf": [
@@ -13278,6 +13301,15 @@
 				},
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoBooleanSortComparatorOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoBreakInNestedLoopOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoBreakInNestedLoopOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
