@@ -1,0 +1,62 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-astro-namespace-collision.astro
+---
+# Input
+```astro
+---
+import type { Thing } from "./types";
+const Thing = 1;
+---
+<!-- should generate diagnostics -->
+{Thing}
+<script>
+import ClientUnused from "./client";
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-astro-namespace-collision.astro:2:13 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━
+
+  ! This import is unused.
+  
+    1 │ ---
+  > 2 │ import type { Thing } from "./types";
+      │             ^^^^^^^^^
+    3 │ const Thing = 1;
+    4 │ ---
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: Remove the unused imports.
+  
+    1 │ import·type·{·Thing·}·from·"./types";
+      │ -------------------------------------
+
+```
+
+```
+invalid-astro-namespace-collision.astro:8:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━
+
+  ! This import is unused.
+  
+     6 │ {Thing}
+     7 │ <script>
+   > 8 │ import ClientUnused from "./client";
+       │        ^^^^^^^^^^^^
+     9 │ </script>
+    10 │ 
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: Remove the unused imports.
+  
+    1 1 │   
+    2   │ - import·ClientUnused·from·"./client";
+      2 │ + export·{}
+    3 3 │   
+  
+
+```
