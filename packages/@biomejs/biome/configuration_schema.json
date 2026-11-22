@@ -5958,6 +5958,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoMutableExportsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoMutableExportsOptions" }
+			]
+		},
+		"NoMutableExportsOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoNamespaceConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -10023,6 +10033,13 @@
 					"description": "Disallow spreading values in ways that can cause unexpected results.\nSee https://biomejs.dev/linter/rules/no-misused-spread",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoMisusedSpreadConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noMutableExports": {
+					"description": "Disallow exporting variables declared with let or var.\nSee https://biomejs.dev/linter/rules/no-mutable-exports",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoMutableExportsConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -15329,6 +15346,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoMultilineStringOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoMutableExportsOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoMutableExportsOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

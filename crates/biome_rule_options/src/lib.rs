@@ -224,6 +224,7 @@ pub mod no_misused_promises;
 pub mod no_misused_spread;
 pub mod no_multi_assign;
 pub mod no_multiline_string;
+pub mod no_mutable_exports;
 pub mod no_namespace;
 pub mod no_namespace_import;
 pub mod no_negated_array_predicate;

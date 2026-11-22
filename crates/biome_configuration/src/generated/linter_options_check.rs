@@ -1046,6 +1046,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::no_multiline_string::NoMultilineStringOptions>(),
     ));
     result.push((
+        "nursery",
+        "noMutableExports",
+        TypeId::of::<biome_rule_options::no_mutable_exports::NoMutableExportsOptions>(),
+    ));
+    result.push((
         "style",
         "noNamespace",
         TypeId::of::<biome_rule_options::no_namespace::NoNamespaceOptions>(),
