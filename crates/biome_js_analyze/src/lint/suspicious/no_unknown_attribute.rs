@@ -4,6 +4,7 @@ use biome_aria_metadata::AriaAttribute;
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{AnyJsxElementName, JsxAttribute, jsx_ext::AnyJsxElement};
+use biome_languages::JsFileSource;
 use biome_rowan::AstNode;
 use biome_rule_options::no_unknown_attribute::NoUnknownAttributeOptions;
 use biome_string_case::StrLikeExtension;
@@ -27,6 +28,9 @@ declare_lint_rule! {
     /// `credentialless`, and `maskType` require a React dependency range in `package.json` that allows React 19.3 or later.
     /// Without that dependency, these properties are reported as unknown.
     /// `credentialless` is only allowed on `<iframe>`, and `maskType` is only allowed on `<mask>`.
+    ///
+    /// `precedence` requires a React dependency range that allows React 19 or later, and is only allowed on
+    /// `<link>` and `<style>`.
     ///
     /// ## Examples
     ///
@@ -159,6 +163,10 @@ impl Rule for NoUnknownAttribute {
                 .as_ref()
                 .is_some_and(|manifest| manifest.matches_dependency("react", ">=19.3.0"))
         {
+            return Some(NoUnknownAttributeState::UnknownProp);
+        }
+
+        if name == "precedence" && !is_react_19_or_later(ctx) {
             return Some(NoUnknownAttributeState::UnknownProp);
         }
 
@@ -337,6 +345,7 @@ const ATTRIBUTE_TAGS_MAP: &[(&str, &[&str])] = &[
     ("onWaiting", &["audio", "video"]),
     ("playsInline", &["video"]),
     ("poster", &["video"]),
+    ("precedence", &["link", "style"]),
     ("preload", &["audio", "video"]),
     ("property", &["meta"]),
     ("returnValue", &["dialog"]),
@@ -1069,12 +1078,7 @@ fn get_standard_name(ctx: &RuleContext<NoUnknownAttribute>, name: &str) -> Optio
     if let Some(&standard_name) = DOM_ATTRIBUTE_LOOKUP.get(name) {
         return Some(standard_name);
     }
-    let is_react_19_or_later = ctx
-        .manifest
-        .as_ref()
-        .is_some_and(|manifest| manifest.matches_dependency("react", ">=19.0.0"));
-
-    if is_react_19_or_later {
+    if is_react_19_or_later(ctx) {
         if let Some(prop) = find_ignore_ascii_case(REACT_19_PROPS, name) {
             return Some(prop);
         }
@@ -1087,6 +1091,16 @@ fn get_standard_name(ctx: &RuleContext<NoUnknownAttribute>, name: &str) -> Optio
 
     find_ignore_ascii_case(DOM_PROPERTY_NAMES, name)
         .or_else(|| find_ignore_ascii_case(REACT_19_3_PROPS, name))
+}
+
+fn is_react_19_or_later(ctx: &RuleContext<NoUnknownAttribute>) -> bool {
+    !ctx.source_type::<JsFileSource>()
+        .as_embedding_kind()
+        .is_astro_template()
+        && ctx
+            .manifest
+            .as_ref()
+            .is_some_and(|manifest| manifest.matches_dependency("react", ">=19.0.0"))
 }
 
 /// Finds `name` in `names`, which must be sorted case-insensitively.

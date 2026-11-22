@@ -1,0 +1,6 @@
+{
+  "name": "no-unknown-attribute",
+  "dependencies": {
+    "react": "18.3.1"
+  }
+}

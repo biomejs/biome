@@ -1,0 +1,28 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.jsx
+---
+# Input
+```jsx
+/* should generate diagnostics */
+<div precedence="default" />;
+
+```
+
+# Diagnostics
+```
+invalid.jsx:2:6 lint/suspicious/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Property 'precedence' is not valid on a <div> element.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ <div precedence="default" />;
+      │      ^^^^^^^^^^^^^^^^^^^^
+    3 │ 
+  
+  i This attribute is restricted and cannot be used on this HTML element
+  
+  i This attribute is only allowed on: link,style
+  
+
+```
