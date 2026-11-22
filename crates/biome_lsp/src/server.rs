@@ -1071,6 +1071,10 @@ mod server_lifecycle;
 mod tests;
 
 #[cfg(test)]
+#[path = "server_astro.tests.rs"]
+mod server_astro;
+
+#[cfg(test)]
 #[path = "server_goto.tests.rs"]
 mod server_goto;
 
