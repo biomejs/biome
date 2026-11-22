@@ -1,8 +1,8 @@
 //! Character classes of the source bytes, computed 64 bytes at a time.
 //!
 //! Each class is a bitmap per 64-byte block, where bit `i` describes byte `i` of the block.
-//! x86_64 uses AVX2 when the CPU has it and SSE2 otherwise; other targets classify one byte at a
-//! time with a lookup table.
+//! x86_64 uses AVX2 when the CPU has it and SSE2 otherwise, and little-endian aarch64 uses NEON.
+//! Other targets classify one byte at a time with a lookup table.
 
 /// The class bitmaps of one 64-byte block.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
@@ -90,6 +90,34 @@ const CLASSES: [u16; 8] = [
     HASH,
 ];
 
+/// For each class, a bitset of the ASCII bytes in it: bit `byte & 7` of entry `byte >> 3`.
+#[cfg(any(
+    target_arch = "x86_64",
+    all(target_arch = "aarch64", target_endian = "little")
+))]
+static BITSETS: [[u8; 16]; 8] = {
+    let mut tables = [[0; 16]; 8];
+    let mut class = 0;
+    while class < 8 {
+        let mut byte = 0;
+        while byte < 128 {
+            if ASCII_CLASSES[byte] & CLASSES[class] != 0 {
+                tables[class][byte >> 3] |= 1 << (byte & 7);
+            }
+            byte += 1;
+        }
+        class += 1;
+    }
+    tables
+};
+
+/// The byte with only bit `index & 7` set, for each index into a 16-byte vector.
+#[cfg(any(
+    target_arch = "x86_64",
+    all(target_arch = "aarch64", target_endian = "little")
+))]
+static BITS: [u8; 16] = [1, 2, 4, 8, 16, 32, 64, 128, 1, 2, 4, 8, 16, 32, 64, 128];
+
 #[cfg(any(test, not(target_arch = "x86_64")))]
 fn classify_scalar(bytes: &[u8; 64], len: usize) -> [u64; CLASS_COUNT] {
     let mut classes = [0; CLASS_COUNT];
@@ -124,6 +152,11 @@ pub(super) fn classify(source: &[u8], blocks: &mut Vec<Block>) {
     }
     #[cfg(not(target_arch = "x86_64"))]
     {
+        #[cfg(all(target_arch = "aarch64", target_endian = "little"))]
+        if std::arch::is_aarch64_feature_detected!("neon") {
+            // SAFETY: the CPU supports NEON.
+            return unsafe { aarch64::classify_neon(source, blocks) };
+        }
         classify_with(source, blocks, classify_scalar)
     }
 }
@@ -184,27 +217,8 @@ fn classify_with(
 
 #[cfg(target_arch = "x86_64")]
 mod x86 {
-    use super::{ASCII_CLASSES, Block, CLASS_COUNT, CLASSES, classify_with};
+    use super::{BITS, BITSETS, Block, CLASS_COUNT, classify_with};
     use std::arch::x86_64::*;
-
-    /// For each class, a bitset of the ASCII bytes in it: bit `byte & 7` of entry `byte >> 3`.
-    static BITSETS: [[u8; 16]; 8] = {
-        let mut tables = [[0; 16]; 8];
-        let mut class = 0;
-        while class < 8 {
-            let mut byte = 0;
-            while byte < 128 {
-                if ASCII_CLASSES[byte] & CLASSES[class] != 0 {
-                    tables[class][byte >> 3] |= 1 << (byte & 7);
-                }
-                byte += 1;
-            }
-            class += 1;
-        }
-        tables
-    };
-
-    static BITS: [u8; 16] = [1, 2, 4, 8, 16, 32, 64, 128, 1, 2, 4, 8, 16, 32, 64, 128];
 
     /// # Safety
     /// The CPU must support AVX2.
@@ -331,17 +345,8 @@ mod x86 {
 
     #[cfg(test)]
     mod tests {
+        use super::super::tests::sample;
         use super::super::{classify_scalar, classify_with};
-
-        fn sample() -> Vec<u8> {
-            let mut bytes: Vec<u8> = (0..=255u8).collect();
-            bytes.extend_from_slice(
-                "hover:bg-red-500/50 [&_p]:m-[calc(1px+2px)] \u{e9}(x)%y @sm:*:flex\r\n\x0B#abz"
-                    .as_bytes(),
-            );
-            bytes.extend((0..300u32).map(|i| (i.wrapping_mul(2_654_435_761) >> 7) as u8));
-            bytes
-        }
 
         #[test]
         fn simd_classes_match_scalar() {
@@ -360,6 +365,136 @@ mod x86 {
                     assert_eq!(actual, expected, "avx2, len {len}");
                 }
             }
+        }
+    }
+}
+
+/// The NEON classifier. It reinterprets vectors between lane widths, which only keeps the order
+/// of the bytes on little-endian targets.
+#[cfg(all(target_arch = "aarch64", target_endian = "little"))]
+mod aarch64 {
+    use super::{BITS, BITSETS, Block, classify_with};
+    use std::arch::aarch64::*;
+
+    /// # Safety
+    /// The CPU must support NEON.
+    #[target_feature(enable = "neon")]
+    pub(super) unsafe fn classify_neon(source: &[u8], blocks: &mut Vec<Block>) {
+        // SAFETY: the tables are 16 bytes long.
+        let load = |table: &[u8; 16]| unsafe { vld1q_u8(table.as_ptr()) };
+        let bitsets = [
+            load(&BITSETS[0]),
+            load(&BITSETS[1]),
+            load(&BITSETS[2]),
+            load(&BITSETS[3]),
+            load(&BITSETS[4]),
+            load(&BITSETS[5]),
+            load(&BITSETS[6]),
+            load(&BITSETS[7]),
+        ];
+        let bits = load(&BITS);
+        let seven = vdupq_n_u8(7);
+        // Continuation bytes, 0x80 to 0xBF, are the signed bytes below -64.
+        let continuation_limit = vdupq_n_s8(-64);
+
+        // Classifies 16 bytes. Returns the bitmaps of the ASCII classes, one per 16-bit lane,
+        // and the bitmap of the continuation bytes.
+        let quarter = |bytes: &[u8]| {
+            // SAFETY: `bytes` is 16 bytes long.
+            let v = unsafe { vld1q_u8(bytes.as_ptr()) };
+            // The lookup of an index past the end of a table is zero, so non-ASCII bytes are in
+            // no class.
+            let index = vshrq_n_u8::<3>(v);
+            let bit = vqtbl1q_u8(bits, vandq_u8(v, seven));
+            // NEON has no instruction that packs a comparison into a bitmap. Each byte of a
+            // class keeps only the bit of its index in its half of the vector, so that the sum
+            // of the bytes of a half is the bitmap of that half.
+            let class = |table| vandq_u8(vtstq_u8(vqtbl1q_u8(table, index), bit), bits);
+            // Each pairwise addition halves the bytes of its operands. Three of them leave two
+            // bytes per class, which are its 16-bit bitmap.
+            let sum = |a: usize, b: usize| vpaddq_u8(class(bitsets[a]), class(bitsets[b]));
+            let classes = vpaddq_u8(
+                vpaddq_u8(sum(0, 1), sum(2, 3)),
+                vpaddq_u8(sum(4, 5), sum(6, 7)),
+            );
+            let continuation = vandq_u8(vcltq_s8(vreinterpretq_s8_u8(v), continuation_limit), bits);
+            let continuation = vpaddq_u8(continuation, continuation);
+            let continuation = vpaddq_u8(continuation, continuation);
+            let continuation = vpaddq_u8(continuation, continuation);
+            (
+                vreinterpretq_u16_u8(classes),
+                vgetq_lane_u16::<0>(vreinterpretq_u16_u8(continuation)) as u64,
+            )
+        };
+
+        classify_with(source, blocks, |bytes, len| {
+            let part = |index: usize| {
+                if len > 16 * index {
+                    quarter(&bytes[16 * index..16 * (index + 1)])
+                } else {
+                    (vdupq_n_u16(0), 0)
+                }
+            };
+            let [(a, a8), (b, b8), (c, c8), (d, d8)] = [part(0), part(1), part(2), part(3)];
+            // Interleaves the 16-bit bitmaps of the four parts into the 64-bit bitmaps of the
+            // classes, two per vector.
+            let (ab_low, ab_high) = (
+                vreinterpretq_u32_u16(vzip1q_u16(a, b)),
+                vreinterpretq_u32_u16(vzip2q_u16(a, b)),
+            );
+            let (cd_low, cd_high) = (
+                vreinterpretq_u32_u16(vzip1q_u16(c, d)),
+                vreinterpretq_u32_u16(vzip2q_u16(c, d)),
+            );
+            let pairs = [
+                vreinterpretq_u64_u32(vzip1q_u32(ab_low, cd_low)),
+                vreinterpretq_u64_u32(vzip2q_u32(ab_low, cd_low)),
+                vreinterpretq_u64_u32(vzip1q_u32(ab_high, cd_high)),
+                vreinterpretq_u64_u32(vzip2q_u32(ab_high, cd_high)),
+            ];
+            [
+                vgetq_lane_u64::<0>(pairs[0]),
+                vgetq_lane_u64::<1>(pairs[0]),
+                vgetq_lane_u64::<0>(pairs[1]),
+                vgetq_lane_u64::<1>(pairs[1]),
+                vgetq_lane_u64::<0>(pairs[2]),
+                vgetq_lane_u64::<1>(pairs[2]),
+                vgetq_lane_u64::<0>(pairs[3]),
+                vgetq_lane_u64::<1>(pairs[3]),
+                a8 | (b8 << 16) | (c8 << 32) | (d8 << 48),
+            ]
+        })
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{classify, classify_scalar, classify_with};
+
+    /// Returns every byte value, a class string, and pseudorandom bytes, which together span
+    /// several blocks.
+    pub(super) fn sample() -> Vec<u8> {
+        let mut bytes: Vec<u8> = (0..=255u8).collect();
+        bytes.extend_from_slice(
+            "hover:bg-red-500/50 [&_p]:m-[calc(1px+2px)] \u{e9}(x)%y @sm:*:flex\r\n\x0B#abz"
+                .as_bytes(),
+        );
+        bytes.extend((0..300u32).map(|i| (i.wrapping_mul(2_654_435_761) >> 7) as u8));
+        bytes
+    }
+
+    /// Covers the classifier that [classify] selects on the current CPU. On aarch64, that is
+    /// the NEON classifier.
+    #[test]
+    fn classes_match_scalar() {
+        let source = sample();
+        for len in 0..source.len() {
+            let source = &source[..len];
+            let mut expected = Vec::new();
+            classify_with(source, &mut expected, classify_scalar);
+            let mut actual = Vec::new();
+            classify(source, &mut actual);
+            assert_eq!(actual, expected, "len {len}");
         }
     }
 }
