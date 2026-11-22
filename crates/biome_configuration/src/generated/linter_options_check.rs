@@ -148,6 +148,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     result.push(("nursery", "noBooleanSortComparator", TypeId::of::<biome_rule_options::no_boolean_sort_comparator::NoBooleanSortComparatorOptions>()));
     result.push((
         "nursery",
+        "noBreakInNestedLoop",
+        TypeId::of::<biome_rule_options::no_break_in_nested_loop::NoBreakInNestedLoopOptions>(),
+    ));
+    result.push((
+        "nursery",
         "noBufferConstructor",
         TypeId::of::<biome_rule_options::no_buffer_constructor::NoBufferConstructorOptions>(),
     ));
