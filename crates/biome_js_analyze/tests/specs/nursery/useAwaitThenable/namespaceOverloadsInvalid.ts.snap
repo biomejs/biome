@@ -1,0 +1,44 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: namespaceOverloadsInvalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+
+declare const UNDEFINED_VOID_ONLY: unique symbol;
+type VoidOrUndefinedOnly = void | { [UNDEFINED_VOID_ONLY]: never };
+
+export namespace ReactLike {
+    export function act(callback: () => VoidOrUndefinedOnly): void;
+    export function act<T>(callback: () => T | Promise<T>): Promise<T>;
+}
+
+// The void-returning overload is selected for a synchronous callback.
+export async function awaitVoidOverload(): Promise<void> {
+    await ReactLike.act(() => {});
+}
+
+```
+
+# Diagnostics
+```
+namespaceOverloadsInvalid.ts:13:5 lint/nursery/useAwaitThenable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i `await` used on a non-Promise value.
+  
+    11 │ // The void-returning overload is selected for a synchronous callback.
+    12 │ export async function awaitVoidOverload(): Promise<void> {
+  > 13 │     await ReactLike.act(() => {});
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    14 │ }
+    15 │ 
+  
+  i This may happen if you accidentally used `await` on a synchronous value.
+  
+  i Please ensure the value is not a custom "thenable" implementation before removing the `await`: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise#thenables
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

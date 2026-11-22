@@ -1161,3 +1161,53 @@ fn test_const_generic_arguments() {
     assert_eq!(binding("nestedFallback"), binding("nestedExpected"));
     assert_eq!(binding("existingArray"), binding("ordinaryArray"));
 }
+
+#[test]
+fn test_infer_call_expression_type_selects_namespace_overloads_by_callback_promise() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            declare const UNDEFINED_VOID_ONLY: unique symbol;
+            type VoidOrUndefinedOnly = void | { [UNDEFINED_VOID_ONLY]: never };
+            export namespace ReactLike {
+                export function act(callback: () => VoidOrUndefinedOnly): void;
+                export function act<T>(callback: () => T | Promise<T>): Promise<T>;
+            }
+
+            declare const asyncCallback: () => Promise<void>;
+            export const result = ReactLike.act(asyncCallback);
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let index_module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, index_module).expect("types must be inferred");
+
+    let namespace_ty = inferred_binding_ty_by_name(&db, index_module, inferred, "ReactLike")
+        .map(|ty| inferred.resolve_type(&db, ty))
+        .expect("ReactLike binding type must be inferred");
+    let act_ty =
+        find_value_member_type(&db, namespace_ty, "act").map(|ty| inferred.resolve_type(&db, ty));
+    let Some(act_ty) = act_ty else {
+        panic!("ReactLike.act member type must be found");
+    };
+    assert!(
+        matches!(act_ty, InferredTypeData::Object(_)),
+        "ReactLike.act must merge its overloads into one call-signature object, got {}",
+        format_inferred_type(&db, act_ty)
+    );
+
+    let callback_ty = inferred_binding_ty_by_name(&db, index_module, inferred, "asyncCallback")
+        .map(|ty| inferred.resolve_type(&db, ty))
+        .expect("asyncCallback binding type must be inferred");
+
+    let call_ty = infer_call_expression_type(&db, index_module, act_ty, Vec::from([callback_ty]));
+    assert!(
+        call_ty == InferredTypeData::Unknown || is_inferred_promise_instance(&db, call_ty),
+        "ReactLike.act(asyncCallback) must not resolve to the leading void overload, got {}",
+        format_inferred_type(&db, call_ty)
+    );
+}

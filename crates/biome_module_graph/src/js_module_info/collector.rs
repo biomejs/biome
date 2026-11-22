@@ -679,6 +679,22 @@ impl JsModuleInfoCollector {
                     .or_insert_with(|| JsExport::Own(JsOwnExport::Binding(child_binding.range)));
             }
         }
+
+        // Same-name function overloads in the namespace merge into a single
+        // overloaded symbol. The bindings flattened above keep the first
+        // declaration, which would export only the leading signature, so
+        // point the export at the set's last binding, the one that carries
+        // the merged overload set after type inference.
+        let namespace_scope = self.semantic_model.scope_from_id(binding.scope_id);
+        for set in namespace_scope.overload_sets() {
+            let Some(representative) = set.last() else {
+                continue;
+            };
+            let data = &self.bindings[representative.index()];
+            if let Some(JsExport::Own(JsOwnExport::Binding(range))) = exports.get_mut(&data.name) {
+                *range = data.range;
+            }
+        }
     }
 
     fn collect_exports_from(
@@ -1023,6 +1039,7 @@ impl JsModuleInfo {
         named_type_ids.dedup();
         let namespace_members = collect_namespace_members(
             &semantic_model,
+            &collector.bindings,
             &finalised.raw_types,
             &finalised.raw_binding_types,
         );
@@ -1062,6 +1079,7 @@ impl JsModuleInfo {
 /// See [`JsModuleInfoInner::namespace_members`] for the ordering contract.
 fn collect_namespace_members(
     semantic_model: &SemanticModel,
+    bindings: &[JsBindingData],
     raw_types: &[RawTypeData],
     raw_binding_types: &FxHashMap<TextRange, TypeReference>,
 ) -> FxHashMap<TypeId, Box<[NamespaceMember]>> {
@@ -1087,7 +1105,8 @@ fn collect_namespace_members(
         };
 
         let entry = members.entry(*type_id).or_default();
-        for member in semantic_model.scope(declaration.syntax()).bindings() {
+        let scope = semantic_model.scope(declaration.syntax());
+        for member in scope.bindings() {
             let Ok(name) = member.tree().name_token() else {
                 continue;
             };
@@ -1095,6 +1114,21 @@ fn collect_namespace_members(
                 name: name.token_text_trimmed().into(),
                 range: member.range(),
             });
+        }
+
+        // Same-name function overloads in the namespace merge into a single
+        // overloaded symbol. The scope's bindings keep one entry for the name,
+        // and the overload set's last binding is the one that carries the
+        // merged overload set after type inference, so the member must point
+        // at that binding for call sites to select among the overloads.
+        for set in scope.overload_sets() {
+            let Some(representative) = set.last() else {
+                continue;
+            };
+            let data = &bindings[representative.index()];
+            if let Some(existing) = entry.iter_mut().find(|member| member.name == data.name) {
+                existing.range = data.range;
+            }
         }
     }
 
