@@ -81,6 +81,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     ));
     result.push((
         "nursery",
+        "noArrayReduce",
+        TypeId::of::<biome_rule_options::no_array_reduce::NoArrayReduceOptions>(),
+    ));
+    result.push((
+        "nursery",
         "noArraySortForMinMax",
         TypeId::of::<biome_rule_options::no_array_sort_for_min_max::NoArraySortForMinMaxOptions>(),
     ));

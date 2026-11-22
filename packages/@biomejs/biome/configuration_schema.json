@@ -3611,6 +3611,13 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoArrayReduceConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoArrayReduceOptions" }
+			]
+		},
+		"NoArrayReduceOptions": { "type": "object", "additionalProperties": false },
 		"NoArraySortForMinMaxConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -9604,6 +9611,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noArrayReduce": {
+					"description": "Disallow the reduce() and reduceRight() array methods.\nSee https://biomejs.dev/linter/rules/no-array-reduce",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoArrayReduceConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noArraySortForMinMax": {
 					"description": "Disallow sorting an array only to read its smallest or largest value.\nSee https://biomejs.dev/linter/rules/no-array-sort-for-min-max",
 					"anyOf": [
@@ -13222,6 +13236,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoArrayMethodsOnArgumentsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoArrayReduceOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoArrayReduceOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

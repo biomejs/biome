@@ -225,6 +225,7 @@ define_categories! {
     "lint/nursery/noArrayDelete": "https://biomejs.dev/linter/rules/no-array-delete",
     "lint/nursery/noArrayForEach": "https://biomejs.dev/linter/rules/no-array-for-each",
     "lint/nursery/noArrayMethodsOnArguments": "https://biomejs.dev/linter/rules/no-array-methods-on-arguments",
+    "lint/nursery/noArrayReduce": "https://biomejs.dev/linter/rules/no-array-reduce",
     "lint/nursery/noArraySortForMinMax": "https://biomejs.dev/linter/rules/no-array-sort-for-min-max",
     "lint/nursery/noAstroComponentDefaultExport": "https://biomejs.dev/linter/rules/no-astro-component-default-export",
     "lint/nursery/noAstroConflictingSetDirectives": "https://biomejs.dev/linter/rules/no-astro-conflicting-set-directives",
