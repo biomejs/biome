@@ -41,6 +41,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Build main binary
+        id: build-cli
+        background: true
         run: cargo build -p biome_cli --release
       - name: Install Node.js
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
@@ -62,6 +64,9 @@ jobs:
         run: |
           pnpm --filter @biomejs/runtime i
           pnpm --filter @biomejs/runtime run test:types
+
+      - name: Wait for main binary
+        wait: build-cli
 
       - name: Build TypeScript code
         # We use the `*-dev` builds below because release builds take very long.
