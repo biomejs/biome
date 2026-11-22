@@ -4,7 +4,7 @@ pub(crate) mod array_table;
 pub(crate) mod array_table_header;
 pub(crate) mod bare_key;
 pub(crate) mod key;
-pub(crate) mod key_value;
+pub(crate) mod member;
 pub(crate) mod quoted_key;
 pub(crate) mod root;
 pub(crate) mod table;

@@ -69,7 +69,7 @@ fn handle_empty_value_comment(
             TomlArray::cast_ref(enclosing).is_some_and(|array| array.elements().is_empty())
         }
         TomlSyntaxKind::TOML_INLINE_TABLE => {
-            TomlInlineTable::cast_ref(enclosing).is_some_and(|table| table.entries().is_empty())
+            TomlInlineTable::cast_ref(enclosing).is_some_and(|table| table.members().is_empty())
         }
         _ => false,
     };

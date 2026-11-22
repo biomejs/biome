@@ -8,14 +8,15 @@ impl FormatRule<AnyTomlValue> for FormatAnyTomlValue {
     type Context = TomlFormatContext;
     fn fmt(&self, node: &AnyTomlValue, f: &mut TomlFormatter) -> FormatResult<()> {
         match node {
+            AnyTomlValue::AnyTomlString(node) => node.format().fmt(f),
             AnyTomlValue::TomlArray(node) => node.format().fmt(f),
             AnyTomlValue::TomlBogusValue(node) => node.format().fmt(f),
             AnyTomlValue::TomlBoolean(node) => node.format().fmt(f),
-            AnyTomlValue::TomlDateTime(node) => node.format().fmt(f),
+            AnyTomlValue::TomlDate(node) => node.format().fmt(f),
             AnyTomlValue::TomlFloat(node) => node.format().fmt(f),
             AnyTomlValue::TomlInlineTable(node) => node.format().fmt(f),
             AnyTomlValue::TomlInteger(node) => node.format().fmt(f),
-            AnyTomlValue::TomlString(node) => node.format().fmt(f),
+            AnyTomlValue::TomlTime(node) => node.format().fmt(f),
         }
     }
 }

@@ -9,8 +9,8 @@ impl FormatRule<AnyTomlRootItem> for FormatAnyTomlRootItem {
     fn fmt(&self, node: &AnyTomlRootItem, f: &mut TomlFormatter) -> FormatResult<()> {
         match node {
             AnyTomlRootItem::TomlArrayTable(node) => node.format().fmt(f),
-            AnyTomlRootItem::TomlBogus(node) => node.format().fmt(f),
-            AnyTomlRootItem::TomlKeyValue(node) => node.format().fmt(f),
+            AnyTomlRootItem::TomlBogusMember(node) => node.format().fmt(f),
+            AnyTomlRootItem::TomlMember(node) => node.format().fmt(f),
             AnyTomlRootItem::TomlTable(node) => node.format().fmt(f),
         }
     }

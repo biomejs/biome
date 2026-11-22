@@ -2,24 +2,24 @@
 
 use crate::prelude::*;
 use biome_formatter::write;
-use biome_toml_syntax::{TomlInlineTable, TomlKeyValueList};
+use biome_toml_syntax::{TomlInlineTable, TomlMemberList};
 
-/// Formats the key/value pairs on the lines that follow a table header.
+/// Formats the members on the lines that follow a table header.
 ///
-/// A blank line between the header and its first entry is preserved.
-pub(crate) struct FormatTableEntries<'a> {
-    entries: &'a TomlKeyValueList,
+/// A blank line between the header and its first member is preserved.
+pub(crate) struct FormatTableMembers<'a> {
+    members: &'a TomlMemberList,
 }
 
-impl<'a> FormatTableEntries<'a> {
-    pub(crate) fn new(entries: &'a TomlKeyValueList) -> Self {
-        Self { entries }
+impl<'a> FormatTableMembers<'a> {
+    pub(crate) fn new(members: &'a TomlMemberList) -> Self {
+        Self { members }
     }
 }
 
-impl Format<TomlFormatContext> for FormatTableEntries<'_> {
+impl Format<TomlFormatContext> for FormatTableMembers<'_> {
     fn fmt(&self, f: &mut TomlFormatter) -> FormatResult<()> {
-        if let Some(first) = self.entries.iter().next() {
+        if let Some(first) = self.members.iter().next() {
             if get_lines_before(first.syntax()) > 1 {
                 write!(f, [empty_line()])?;
             } else {
@@ -27,18 +27,18 @@ impl Format<TomlFormatContext> for FormatTableEntries<'_> {
             }
         }
 
-        write!(f, [self.entries.format()])
+        write!(f, [self.members.format()])
     }
 }
 
 /// Returns `true` if the inline table has a line break between its braces,
 /// outside of its values. Inline tables can only span lines since TOML 1.1.
 pub(crate) fn is_multiline_inline_table(table: &TomlInlineTable) -> bool {
-    let entries = table.entries();
-    entries
+    let members = table.members();
+    members
         .iter()
-        .any(|entry| entry.is_ok_and(|entry| entry.syntax().has_leading_newline()))
-        || entries.elements().any(|element| {
+        .any(|member| member.is_ok_and(|member| member.syntax().has_leading_newline()))
+        || members.elements().any(|element| {
             element.trailing_separator().is_ok_and(|separator| {
                 separator.is_some_and(|separator| separator.has_leading_newline())
             })
@@ -46,5 +46,5 @@ pub(crate) fn is_multiline_inline_table(table: &TomlInlineTable) -> bool {
         || table
             .r_curly_token()
             .is_ok_and(|token| token.has_leading_newline())
-        || (entries.is_empty() && table.syntax().has_comments_descendants())
+        || (members.is_empty() && table.syntax().has_comments_descendants())
 }

@@ -7,7 +7,7 @@ pub(crate) struct FormatTomlKey;
 
 impl FormatNodeRule<TomlKey> for FormatTomlKey {
     fn fmt_fields(&self, node: &TomlKey, f: &mut TomlFormatter) -> FormatResult<()> {
-        let TomlKeyFields { parts } = node.as_fields();
-        write!(f, [parts.format()])
+        let TomlKeyFields { fragments } = node.as_fields();
+        write!(f, [fragments.format()])
     }
 }

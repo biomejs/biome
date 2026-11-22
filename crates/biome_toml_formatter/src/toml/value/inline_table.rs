@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use crate::toml::lists::inline_table_entry_list::InlineTableLayout;
+use crate::toml::lists::inline_table_member_list::InlineTableLayout;
 use crate::utils::is_multiline_inline_table;
 use biome_formatter::{format_args, write};
 use biome_toml_syntax::{TomlInlineTable, TomlInlineTableFields};
@@ -16,7 +16,7 @@ impl FormatNodeRule<TomlInlineTable> for FormatTomlInlineTable {
     fn fmt_fields(&self, node: &TomlInlineTable, f: &mut TomlFormatter) -> FormatResult<()> {
         let TomlInlineTableFields {
             l_curly_token,
-            entries,
+            members,
             r_curly_token,
         } = node.as_fields();
 
@@ -26,13 +26,13 @@ impl FormatNodeRule<TomlInlineTable> for FormatTomlInlineTable {
                 [
                     l_curly_token.format(),
                     block_indent(&format_args![
-                        entries.format().with_options(InlineTableLayout::Multiline),
+                        members.format().with_options(InlineTableLayout::Multiline),
                         format_dangling_comments(node.syntax())
                     ]),
                     r_curly_token.format()
                 ]
             )
-        } else if entries.is_empty() {
+        } else if members.is_empty() {
             write!(f, [l_curly_token.format(), r_curly_token.format()])
         } else {
             write!(
@@ -40,7 +40,7 @@ impl FormatNodeRule<TomlInlineTable> for FormatTomlInlineTable {
                 [
                     l_curly_token.format(),
                     space(),
-                    entries.format().with_options(InlineTableLayout::SingleLine),
+                    members.format().with_options(InlineTableLayout::SingleLine),
                     space(),
                     r_curly_token.format()
                 ]

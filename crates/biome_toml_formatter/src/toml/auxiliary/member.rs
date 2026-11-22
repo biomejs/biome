@@ -1,13 +1,13 @@
 use crate::prelude::*;
 use biome_formatter::write;
-use biome_toml_syntax::{TomlKeyValue, TomlKeyValueFields};
+use biome_toml_syntax::{TomlMember, TomlMemberFields};
 
 #[derive(Debug, Clone, Default)]
-pub(crate) struct FormatTomlKeyValue;
+pub(crate) struct FormatTomlMember;
 
-impl FormatNodeRule<TomlKeyValue> for FormatTomlKeyValue {
-    fn fmt_fields(&self, node: &TomlKeyValue, f: &mut TomlFormatter) -> FormatResult<()> {
-        let TomlKeyValueFields {
+impl FormatNodeRule<TomlMember> for FormatTomlMember {
+    fn fmt_fields(&self, node: &TomlMember, f: &mut TomlFormatter) -> FormatResult<()> {
+        let TomlMemberFields {
             key,
             eq_token,
             value,
