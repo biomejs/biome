@@ -2856,6 +2856,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::use_early_continue::UseEarlyContinueOptions>(),
     ));
     result.push((
+        "nursery",
+        "useElseIf",
+        TypeId::of::<biome_rule_options::use_else_if::UseElseIfOptions>(),
+    ));
+    result.push((
         "style",
         "useEnumInitializers",
         TypeId::of::<biome_rule_options::use_enum_initializers::UseEnumInitializersOptions>(),

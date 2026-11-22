@@ -512,6 +512,7 @@ define_categories! {
     "lint/nursery/useDescribeFunctionTitle": "https://biomejs.dev/linter/rules/use-describe-function-title",
     "lint/nursery/useDisposables": "https://biomejs.dev/linter/rules/use-disposables",
     "lint/nursery/useEarlyContinue": "https://biomejs.dev/linter/rules/use-early-continue",
+    "lint/nursery/useElseIf": "https://biomejs.dev/linter/rules/use-else-if",
     "lint/nursery/useExhaustiveSwitchCases": "https://biomejs.dev/linter/rules/use-exhaustive-switch-cases",
     "lint/nursery/useExpectEqualityMatcher": "https://biomejs.dev/linter/rules/use-expect-equality-matcher",
     "lint/nursery/useExpectToContain": "https://biomejs.dev/linter/rules/use-expect-to-contain",

@@ -6,9 +6,7 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_factory::make;
-use biome_js_syntax::{
-    AnyJsStatement, AnyJsSwitchClause, JsIfStatement, JsStatementList, JsSyntaxKind,
-};
+use biome_js_syntax::{AnyJsStatement, JsIfStatement, JsStatementList, JsSyntaxKind};
 use biome_rowan::{
     AstNode, AstNodeList, BatchMutationExt, SyntaxNodeOptionExt, chain_trivia_pieces,
     trim_leading_trivia_pieces,
@@ -16,6 +14,7 @@ use biome_rowan::{
 use biome_rule_options::no_useless_else::NoUselessElseOptions;
 
 use crate::JsRuleAction;
+use crate::utils::early_exit::breaks_early;
 
 declare_lint_rule! {
     /// Disallow `else` block when the `if` block breaks early.
@@ -191,73 +190,4 @@ impl Rule for NoUselessElse {
         }
         None
     }
-}
-
-#[derive(Debug, Copy, Clone, Default)]
-struct ScopeMetadata {
-    // We are inside a breakable structure
-    is_breakable: bool,
-}
-
-fn breaks_early(statement: AnyJsStatement) -> Option<()> {
-    let mut stmt_stack = vec![(statement, ScopeMetadata::default())];
-    while let Some((stmt, metadata)) = stmt_stack.pop() {
-        match stmt {
-            AnyJsStatement::JsBlockStatement(block_stmt) => {
-                let Some(last) = block_stmt.statements().iter().last() else {
-                    // empty statement block
-                    return None;
-                };
-                stmt_stack.push((last, metadata));
-            }
-            AnyJsStatement::JsBreakStatement(_) => {
-                if metadata.is_breakable {
-                    // We are inside a breakable structure (switch statement)
-                    // that we saw in a previous iteration.
-                    return None;
-                }
-            }
-            AnyJsStatement::JsContinueStatement(_)
-            | AnyJsStatement::JsReturnStatement(_)
-            | AnyJsStatement::JsThrowStatement(_) => {}
-            AnyJsStatement::JsIfStatement(if_stmt) => {
-                let Some(else_clause) = if_stmt.else_clause() else {
-                    // No else clause
-                    return None;
-                };
-                stmt_stack.push((if_stmt.consequent().ok()?, metadata));
-                stmt_stack.push((else_clause.alternate().ok()?, metadata));
-            }
-            AnyJsStatement::JsSwitchStatement(switch_stmt) => {
-                // To simplify, We do not take fallthroughs into account.
-                // Thus, this can miss some useless else.
-                let cases = switch_stmt.cases();
-                let Some(last_case) = cases.last() else {
-                    // Empty switch
-                    return None;
-                };
-                if last_case.consequent().is_empty() {
-                    return None;
-                }
-                // Without a `default` clause, no case may match and control
-                // continues after the switch.
-                if !cases
-                    .iter()
-                    .any(|clause| matches!(clause, AnyJsSwitchClause::JsDefaultClause(_)))
-                {
-                    return None;
-                }
-                for switch_clause in cases.iter() {
-                    if let Some(last) = switch_clause.consequent().last() {
-                        stmt_stack.push((last, ScopeMetadata { is_breakable: true }));
-                    }
-                }
-            }
-            _ => {
-                // labeled statements, loops, try-catch, with statement, and others
-                return None;
-            }
-        }
-    }
-    Some(())
 }

@@ -11,6 +11,7 @@ use std::iter;
 pub mod batch;
 pub mod builtin_collection;
 pub mod condition;
+pub mod early_exit;
 pub mod function_return;
 pub mod import;
 pub mod indexed_collection;

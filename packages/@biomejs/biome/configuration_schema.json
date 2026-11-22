@@ -11401,6 +11401,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useElseIf": {
+					"description": "Require else if when adjacent if statements compare the same value against different values.\nSee https://biomejs.dev/linter/rules/use-else-if",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseElseIfConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useExhaustiveSwitchCases": {
 					"description": "Require switch-case statements to be exhaustive.\nSee https://biomejs.dev/linter/rules/use-exhaustive-switch-cases",
 					"anyOf": [
@@ -19461,6 +19468,19 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseElseIfOptions": {
+			"type": "object",
+			"properties": {
+				"fix": {
+					"description": "Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.",
+					"anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }]
+				},
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseElseIfOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseEnumInitializersOptions": {
 			"type": "object",
 			"properties": {
@@ -25513,6 +25533,13 @@
 			},
 			"additionalProperties": false
 		},
+		"UseElseIfConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseElseIfOptions" }
+			]
+		},
+		"UseElseIfOptions": { "type": "object", "additionalProperties": false },
 		"UseEnumInitializersConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
