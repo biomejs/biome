@@ -1,0 +1,153 @@
+---
+source: crates/biome_astro_semantic/src/tests.rs
+assertion_line: 811
+expression: "semantic_snapshot(source, &model)"
+---
+## Input
+
+```astro
+---
+const serverOnly = "server";
+const theme = "dark";
+const dynamic = { fromSpread: 1 };
+---
+<script define:vars={{ theme, count: 1, count: 2, local: 1, foo: 1, "\x66oo": 2, bar: 1, [`\x62ar`]: 2, zero: 1, "\u{0000007A}ero": 2, "😀": 3, "\uD83D\uDE00": 4, "\\u0066oo": 5, "\u{10400}": 6, "\u{D801}\u{DC00}": 7, "": 8, [``]: 9, [(``)]: 10 }}>
+console.log(theme, count, local, foo, \u0066oo, bar, zero, serverOnly, Astro);
+const local = theme;
+</script>
+<script>
+console.log(theme, local, serverOnly, Astro);
+const own = 1;
+</script>
+<script define:vars={{ ...dynamic }}>
+console.log(maybeInjected);
+</script>
+<script define:vars={dynamic}>
+console.log(unknownBinding);
+</script>
+<script define:vars={{ ["literalKey"]: 1, [theme]: 2 }}>
+console.log(literalKey, maybeComputed);
+</script>
+<script define:vars>
+console.log(missingInitializer);
+</script>
+<script define:vars={{ broken:, known: { nested: } }}>
+console.log(broken, known, malformedUnknown);
+</script>
+<script define:vars={{ "\01": 1 }}>
+console.log(octalUnknown);
+</script>
+<script type="application/json" define:vars={{ ignoredJson: serverOnly }}>{"ok":true}</script>
+<script define:vars={{ selfClosing: 1 }} />
+<script define:vars />
+<script src="/ignored.js" define:vars={{ externalInjected: serverOnly }}>
+const ignored = 1;
+console.log(ignored);
+</script>
+<script src="/external.js" />
+```
+
+## Semantic model
+
+```text
+block Frontmatter 0..93 content=4..90 scope#1 snippet#0
+block Script 94..454 content=344..445 scope#2 snippet#2
+block Script 455..534 content=463..525 scope#3 snippet#3
+block Script 535..610 content=572..601 scope#4 snippet#5
+block Script 611..680 content=641..671 scope#5 snippet#7
+block Script 681..787 content=737..778 scope#6 snippet#9
+block Script 788..851 content=808..842 scope#7 snippet#10
+block Script 852..962 content=906..953 scope#8 snippet#12
+block Script 963..1035 content=998..1026 scope#9 snippet#14
+block Script 1036..1130 content=1110..1121
+block Script 1131..1174 scope#10
+block Script 1175..1197 scope#11
+block Script 1198..1322 content=1271..1313 external scope#12 snippet#18
+block Script 1323..1352 external scope#13
+snippet#0 4..90 Frontmatter(BlockId(0)) offset=4 source=astro-frontmatter scope#1
+snippet#1 115..342 ScriptDefineVars(BlockId(1)) offset=115 source=astro-template scope#1
+snippet#2 344..445 Script(BlockId(1)) offset=344 source=typescript scope#2
+snippet#3 463..525 Script(BlockId(2)) offset=463 source=typescript scope#3
+snippet#4 556..570 ScriptDefineVars(BlockId(3)) offset=556 source=astro-template scope#1
+snippet#5 572..601 Script(BlockId(3)) offset=572 source=typescript scope#4
+snippet#6 632..639 ScriptDefineVars(BlockId(4)) offset=632 source=astro-template scope#1
+snippet#7 641..671 Script(BlockId(4)) offset=641 source=typescript scope#5
+snippet#8 702..735 ScriptDefineVars(BlockId(5)) offset=702 source=astro-template scope#1
+snippet#9 737..778 Script(BlockId(5)) offset=737 source=typescript scope#6
+snippet#10 808..842 Script(BlockId(6)) offset=808 source=typescript scope#7
+snippet#11 873..904 ScriptDefineVars(BlockId(7)) offset=873 source=astro-template scope#1
+snippet#12 906..953 Script(BlockId(7)) offset=906 source=typescript scope#8
+snippet#13 984..996 ScriptDefineVars(BlockId(8)) offset=984 source=astro-template scope#1
+snippet#14 998..1026 Script(BlockId(8)) offset=998 source=typescript scope#9
+snippet#15 1081..1108 Unknown offset=1081 source=astro-template
+snippet#16 1152..1170 ScriptDefineVars(BlockId(10)) offset=1152 source=astro-template scope#1
+snippet#17 1237..1269 Unknown offset=1237 source=astro-template
+snippet#18 1271..1313 Script(BlockId(12)) offset=1271 source=typescript scope#12
+scope#0 Builtins
+  Builtin Astro 0..0 origin=AstroBuiltin
+scope#1 Module(Some(BlockId(0))) parent=scope#0 open-Value=ParseError open-Type=ParseError open-Namespace=ParseError
+  Local serverOnly 10..20
+  Local theme 39..44
+  Local dynamic 61..68
+scope#2 Module(Some(BlockId(1)))
+  Synthetic theme 117..122 origin=DefineVars
+  Synthetic count 134..139 origin=DefineVars
+  Synthetic local 144..149 origin=DefineVars
+  Synthetic \x66oo 163..169 origin=DefineVars
+  Synthetic \x62ar 185..191 origin=DefineVars
+  Synthetic \u{0000007A}ero 208..223 origin=DefineVars
+  Synthetic \uD83D\uDE00 241..253 origin=DefineVars
+  Synthetic \\u0066oo 260..269 origin=DefineVars
+  Synthetic \u{D801}\u{DC00} 292..308 origin=DefineVars
+  Synthetic  333..333 origin=DefineVars
+  Local local 430..435
+scope#3 Module(Some(BlockId(2)))
+  Local own 516..519
+scope#4 Module(Some(BlockId(3))) open-Value=Spread
+scope#5 Module(Some(BlockId(4))) open-Value=NonLiteral
+scope#6 Module(Some(BlockId(5))) open-Value=Computed
+  Synthetic literalKey 706..716 origin=DefineVars
+scope#7 Module(Some(BlockId(6))) open-Value=ParseError
+scope#8 Module(Some(BlockId(7))) open-Value=ParseError
+scope#9 Module(Some(BlockId(8))) open-Value=ParseError
+scope#10 Module(Some(BlockId(10)))
+  Synthetic selfClosing 1154..1165 origin=DefineVars
+scope#11 Module(Some(BlockId(11))) open-Value=ParseError
+scope#12 Module(Some(BlockId(12))) open-Value=ExternalSource open-Type=ExternalSource open-Namespace=ExternalSource
+scope#13 Module(Some(BlockId(13))) open-Value=ExternalSource open-Type=ExternalSource open-Namespace=ExternalSource
+ref theme 117..122 Value Identifier Read -> Local theme
+ref console 345..352 Value Identifier Read -> Global
+ref theme 357..362 Value Identifier Read -> Synthetic theme
+ref count 364..369 Value Identifier Read -> Synthetic count
+ref local 371..376 Value Identifier Read -> Local local
+ref foo 378..381 Value Identifier Read -> Synthetic \x66oo
+ref \u0066oo 383..391 Value Identifier Read -> Synthetic \x66oo
+ref bar 393..396 Value Identifier Read -> Synthetic \x62ar
+ref zero 398..402 Value Identifier Read -> Synthetic \u{0000007A}ero
+ref serverOnly 404..414 Value Identifier Read -> Unresolved
+ref Astro 416..421 Value Identifier Read -> Unresolved
+ref theme 438..443 Value Identifier Read -> Synthetic theme
+ref console 464..471 Value Identifier Read -> Global
+ref theme 476..481 Value Identifier Read -> Unresolved
+ref local 483..488 Value Identifier Read -> Unresolved
+ref serverOnly 490..500 Value Identifier Read -> Unresolved
+ref Astro 502..507 Value Identifier Read -> Unresolved
+ref dynamic 561..568 Value Identifier Read -> Local dynamic
+ref console 573..580 Value Identifier Read -> Unknowable
+ref maybeInjected 585..598 Value Identifier Read -> Unknowable
+ref dynamic 632..639 Value Identifier Read -> Local dynamic
+ref console 642..649 Value Identifier Read -> Unknowable
+ref unknownBinding 654..668 Value Identifier Read -> Unknowable
+ref theme 724..729 Value Identifier Read -> Local theme
+ref console 738..745 Value Identifier Read -> Unknowable
+ref literalKey 750..760 Value Identifier Read -> Synthetic literalKey
+ref maybeComputed 762..775 Value Identifier Read -> Unknowable
+ref console 809..816 Value Identifier Read -> Unknowable
+ref missingInitializer 821..839 Value Identifier Read -> Unknowable
+ref console 907..914 Value Identifier Read -> Unknowable
+ref broken 919..925 Value Identifier Read -> Unknowable
+ref known 927..932 Value Identifier Read -> Unknowable
+ref malformedUnknown 934..950 Value Identifier Read -> Unknowable
+ref console 999..1006 Value Identifier Read -> Unknowable
+ref octalUnknown 1011..1023 Value Identifier Read -> Unknowable
+```
