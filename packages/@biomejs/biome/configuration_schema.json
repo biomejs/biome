@@ -11252,6 +11252,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useGithubWorkflowJobName": {
+					"description": "Require a name for the jobs of GitHub Actions workflows.\nSee https://biomejs.dev/linter/rules/use-github-workflow-job-name",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseGithubWorkflowJobNameConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useGithubWorkflowName": {
 					"description": "Require a name for GitHub Actions workflows.\nSee https://biomejs.dev/linter/rules/use-github-workflow-name",
 					"anyOf": [
@@ -19364,6 +19371,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseGithubWorkflowJobNameOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseGithubWorkflowJobNameOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseGithubWorkflowNameOptions": {
 			"type": "object",
 			"properties": {
@@ -25366,6 +25382,16 @@
 			]
 		},
 		"UseGetterReturnOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseGithubWorkflowJobNameConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseGithubWorkflowJobNameOptions" }
+			]
+		},
+		"UseGithubWorkflowJobNameOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},

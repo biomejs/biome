@@ -1,0 +1,61 @@
+---
+source: crates/biome_yaml_analyze/tests/spec_tests.rs
+expression: ci.yaml
+---
+# Input
+```yaml
+# should generate diagnostics
+name: CI
+on: push
+jobs:
+  empty:
+    name:
+    runs-on: ubuntu-latest
+  blank:
+    name: "  "
+    runs-on: ubuntu-latest
+
+```
+
+# Diagnostics
+```
+ci.yaml:5:3 lint/nursery/useGithubWorkflowJobName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This job doesn't have a name.
+  
+    3 │ on: push
+    4 │ jobs:
+  > 5 │   empty:
+      │   ^^^^^
+    6 │     name:
+    7 │     runs-on: ubuntu-latest
+  
+  i Without a name, GitHub shows the job ID in the workflow run and in pull request checks, which makes jobs harder to understand.
+  
+  i Add a name key to the job that describes what it does.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+ci.yaml:8:3 lint/nursery/useGithubWorkflowJobName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This job doesn't have a name.
+  
+     6 │     name:
+     7 │     runs-on: ubuntu-latest
+   > 8 │   blank:
+       │   ^^^^^
+     9 │     name: "  "
+    10 │     runs-on: ubuntu-latest
+  
+  i Without a name, GitHub shows the job ID in the workflow run and in pull request checks, which makes jobs harder to understand.
+  
+  i Add a name key to the job that describes what it does.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
