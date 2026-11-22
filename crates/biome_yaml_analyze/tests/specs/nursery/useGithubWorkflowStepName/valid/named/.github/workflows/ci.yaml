@@ -1,0 +1,12 @@
+# should not generate diagnostics
+name: CI
+on: push
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+      - name: Test
+        run: cargo test

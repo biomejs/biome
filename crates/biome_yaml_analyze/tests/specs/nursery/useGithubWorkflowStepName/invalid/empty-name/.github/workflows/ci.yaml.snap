@@ -1,0 +1,63 @@
+---
+source: crates/biome_yaml_analyze/tests/spec_tests.rs
+expression: ci.yaml
+---
+# Input
+```yaml
+# should generate diagnostics
+name: CI
+on: push
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name:
+        run: echo "empty"
+      - name: "  "
+        run: echo "blank"
+
+```
+
+# Diagnostics
+```
+ci.yaml:9:9 lint/nursery/useGithubWorkflowStepName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This step doesn't have a name.
+  
+     7 │     runs-on: ubuntu-latest
+     8 │     steps:
+   > 9 │       - name:
+       │         ^^^^
+    10 │         run: echo "empty"
+    11 │       - name: "  "
+  
+  i Without a name, GitHub shows the action or the command of the step in the job log, which makes it harder to see what the step is for.
+  
+  i Add a name key to the step that describes what it does.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+ci.yaml:11:9 lint/nursery/useGithubWorkflowStepName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This step doesn't have a name.
+  
+     9 │       - name:
+    10 │         run: echo "empty"
+  > 11 │       - name: "  "
+       │         ^^^^
+    12 │         run: echo "blank"
+    13 │ 
+  
+  i Without a name, GitHub shows the action or the command of the step in the job log, which makes it harder to see what the step is for.
+  
+  i Add a name key to the step that describes what it does.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

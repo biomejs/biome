@@ -4230,6 +4230,11 @@ export interface Nursery {
 	 */
 	useGithubWorkflowName?: UseGithubWorkflowNameConfiguration;
 	/**
+	 * Require a name for the steps of GitHub Actions workflows.
+	 * See https://biomejs.dev/linter/rules/use-github-workflow-step-name
+	 */
+	useGithubWorkflowStepName?: UseGithubWorkflowStepNameConfiguration;
+	/**
 	 * Require regular expressions passed to matchAll() to have the g flag.
 	 * See https://biomejs.dev/linter/rules/use-global-regex-in-match-all
 	 */
@@ -7653,6 +7658,9 @@ export type UseGithubWorkflowJobNameConfiguration =
 export type UseGithubWorkflowNameConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseGithubWorkflowNameOptions;
+export type UseGithubWorkflowStepNameConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseGithubWorkflowStepNameOptions;
 export type UseGlobalRegexInMatchAllConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseGlobalRegexInMatchAllOptions;
@@ -11399,6 +11407,10 @@ export interface RuleWithUseGithubWorkflowNameOptions {
 	level: RulePlainConfiguration;
 	options?: UseGithubWorkflowNameOptions;
 }
+export interface RuleWithUseGithubWorkflowStepNameOptions {
+	level: RulePlainConfiguration;
+	options?: UseGithubWorkflowStepNameOptions;
+}
 export interface RuleWithUseGlobalRegexInMatchAllOptions {
 	level: RulePlainConfiguration;
 	options?: UseGlobalRegexInMatchAllOptions;
@@ -14652,6 +14664,7 @@ export interface UseFencedCodeLanguageOptions {
 export type UseFlatMathMinMaxOptions = {};
 export type UseGithubWorkflowJobNameOptions = {};
 export type UseGithubWorkflowNameOptions = {};
+export type UseGithubWorkflowStepNameOptions = {};
 export type UseGlobalRegexInMatchAllOptions = {};
 export type UseGlobalRegexInReplaceAllOptions = {};
 /**
@@ -16768,6 +16781,7 @@ export type Category =
 	| "lint/nursery/useFlatMathMinMax"
 	| "lint/nursery/useGithubWorkflowJobName"
 	| "lint/nursery/useGithubWorkflowName"
+	| "lint/nursery/useGithubWorkflowStepName"
 	| "lint/nursery/useGlobalRegexInMatchAll"
 	| "lint/nursery/useGlobalRegexInReplaceAll"
 	| "lint/nursery/useImportRestrictions"
