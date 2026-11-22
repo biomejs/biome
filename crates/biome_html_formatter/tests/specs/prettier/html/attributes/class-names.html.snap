@@ -67,14 +67,6 @@ width="205px" alt="Yahoo"/></a></h1></div></div>
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,6 +1,6 @@
- <img class="foo bar" />
- 
--<img class="  " />
-+<img class="" />
- <img class />
- 
- <img
 @@ -35,7 +35,8 @@
            height="58px"
            width="205px"
@@ -92,7 +84,7 @@ width="205px" alt="Yahoo"/></a></h1></div></div>
 ```html
 <img class="foo bar" />
 
-<img class="" />
+<img class="  " />
 <img class />
 
 <img

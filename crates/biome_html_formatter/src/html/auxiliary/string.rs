@@ -182,6 +182,13 @@ fn requote(value_text: &str) -> Option<String> {
     Some(result)
 }
 
+/// Returns the quoted `class` attribute value with its class names separated by
+/// single spaces, or `None` when the value should be printed as written.
+///
+/// `value_text` is the value token including its quotes, and `content` is the
+/// text between them. Template literal values and values that contain no class
+/// name, such as `"  "`, return `None`. Keeping whitespace-only values as
+/// written matches Prettier.
 pub(crate) fn normalize_class_attribute(value_text: &str, content: &str) -> Option<String> {
     if value_text.starts_with('`') {
         return None;
@@ -191,6 +198,9 @@ pub(crate) fn normalize_class_attribute(value_text: &str, content: &str) -> Opti
         .split_ascii_whitespace()
         .collect::<Vec<_>>()
         .join(" ");
+    if normalized.is_empty() {
+        return None;
+    }
     let delimiter = match (value_text.as_bytes().first(), value_text.as_bytes().last()) {
         (Some(b'\''), Some(b'\'')) => '\'',
         _ => '"',
@@ -273,5 +283,11 @@ mod tests {
             normalize_class_attribute("`foo ${bar}`", "`foo ${bar}`"),
             None
         );
+    }
+
+    #[test]
+    fn keeps_class_attributes_without_class_names() {
+        assert_eq!(normalize_class_attribute("\"  \"", "  "), None);
+        assert_eq!(normalize_class_attribute("\"\"", ""), None);
     }
 }
