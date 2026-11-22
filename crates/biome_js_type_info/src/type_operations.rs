@@ -316,6 +316,10 @@ impl<'db> TypeData<'db> {
     /// Only `number` and number literals written as decimal integers, as in
     /// `T[0]`, are evaluated. Other literal indexes, as in `T["key"]` or
     /// `T[-1]`, stay unsupported, and substituting generics can't change them.
+    ///
+    /// TODO: This function is temporary. Remove it once type inference fully
+    /// supports indexed access types, because every index can then be
+    /// evaluated.
     pub(crate) fn is_never_supported_index(self, db: &'db dyn TypeDb) -> bool {
         matches!(self, Self::Literal(_)) && literal_index(db, self).is_none()
     }
