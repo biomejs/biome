@@ -1,0 +1,10 @@
+---
+import { Mixed, TypeOnly, TypeQuery } from "./types";
+import * as Namespace from "./namespace";
+---
+<!-- should generate diagnostics -->
+{null as TypeOnly}
+{null as Namespace.Member}
+{null as typeof TypeQuery}
+{Mixed}
+{null as Mixed}

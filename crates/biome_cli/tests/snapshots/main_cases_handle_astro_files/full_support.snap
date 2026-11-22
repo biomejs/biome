@@ -24,6 +24,7 @@ biome check --write --unsafe file.astro
 
 ```astro
 ---
+import s from "src/utils";
 import { sure } from "sure.js";
 import z from "zod";
 
@@ -45,7 +46,7 @@ type Bar = {
 	name: string;
 };
 
-function _doSomething() {
+function doSomething() {
 	// Still reported as unused, Props interface must be at top-level
 	interface Props {
 		name: string;
@@ -97,15 +98,35 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
 # Emitted Messages
 
 ```block
-file.astro:15:11 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+file.astro:2:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This import is unused.
+  
+    1 │ ---
+  > 2 │ import s from "src/utils";
+      │        ^
+    3 │ import { sure } from "sure.js";
+    4 │ import z from "zod";
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: Remove the unused imports.
+  
+    1 │ import·s·from·"src/utils";
+      │ --------------------------
+
+```
+
+```block
+file.astro:16:11 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This interface Foo is unused.
   
-    14 │ // Still reported as unused
-  > 15 │ interface Foo {
+    15 │ // Still reported as unused
+  > 16 │ interface Foo {
        │           ^^^
-    16 │ 	name: string;
-    17 │ }
+    17 │ 	name: string;
+    18 │ }
   
   i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
   
@@ -113,16 +134,16 @@ file.astro:15:11 lint/correctness/noUnusedVariables ━━━━━━━━━�
 ```
 
 ```block
-file.astro:19:6 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+file.astro:20:6 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This type alias Bar is unused.
   
-    17 │ }
-    18 │ 
-  > 19 │ type Bar = {
+    18 │ }
+    19 │ 
+  > 20 │ type Bar = {
        │      ^^^
-    20 │ 	name: string;
-    21 │ };
+    21 │ 	name: string;
+    22 │ };
   
   i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
   
@@ -130,16 +151,42 @@ file.astro:19:6 lint/correctness/noUnusedVariables ━━━━━━━━━�
 ```
 
 ```block
-file.astro:25:12 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+file.astro:24:10 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function doSomething is unused.
+  
+    22 │ };
+    23 │ 
+  > 24 │ function doSomething() {
+       │          ^^^^^^^^^^^
+    25 │ 	// Still reported as unused, Props interface must be at top-level
+    26 │ 	interface Props {
+  
+  i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend doSomething with an underscore.
+  
+    21 21 │   };
+    22 22 │   
+    23    │ - function·doSomething()·{
+       23 │ + function·_doSomething()·{
+    24 24 │   	// Still reported as unused, Props interface must be at top-level
+    25 25 │   	interface Props {
+  
+
+```
+
+```block
+file.astro:26:12 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This interface Props is unused.
   
-    23 │ function _doSomething() {
-    24 │ 	// Still reported as unused, Props interface must be at top-level
-  > 25 │ 	interface Props {
+    24 │ function doSomething() {
+    25 │ 	// Still reported as unused, Props interface must be at top-level
+  > 26 │ 	interface Props {
        │ 	          ^^^^^
-    26 │ 		name: string;
-    27 │ 	}
+    27 │ 		name: string;
+    28 │ 	}
   
   i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
   
@@ -147,16 +194,16 @@ file.astro:25:12 lint/correctness/noUnusedVariables ━━━━━━━━━�
 ```
 
 ```block
-file.astro:29:7 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+file.astro:30:7 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This type alias Props is unused.
   
-    27 │ 	}
-    28 │ 
-  > 29 │ 	type Props = {
+    28 │ 	}
+    29 │ 
+  > 30 │ 	type Props = {
        │ 	     ^^^^^
-    30 │ 		name: string;
-    31 │ 	};
+    31 │ 		name: string;
+    32 │ 	};
   
   i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
   
@@ -164,16 +211,16 @@ file.astro:29:7 lint/correctness/noUnusedVariables ━━━━━━━━━�
 ```
 
 ```block
-file.astro:34:9 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+file.astro:35:9 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This variable name is unused.
   
-    32 │ }
-    33 │ 
-  > 34 │ const { name } = Astro.props;
+    33 │ }
+    34 │ 
+  > 35 │ const { name } = Astro.props;
        │         ^^^^
-    35 │ 
-    36 │ let schema = z.object().optional();
+    36 │ 
+    37 │ let schema = z.object().optional();
   
   i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
   
@@ -181,16 +228,51 @@ file.astro:34:9 lint/correctness/noUnusedVariables ━━━━━━━━━�
 ```
 
 ```block
-file.astro:40:1 lint/a11y/useHtmlLang ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+file.astro:37:1 lint/style/useConst  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This let declares a variable that is only assigned once.
+  
+    35 │ const { name } = Astro.props;
+    36 │ 
+  > 37 │ let schema = z.object().optional();
+       │ ^^^
+    38 │ schema + sure();
+    39 │ ---
+  
+  i 'schema' is never reassigned.
+  
+    35 │ const { name } = Astro.props;
+    36 │ 
+  > 37 │ let schema = z.object().optional();
+       │     ^^^^^^
+    38 │ schema + sure();
+    39 │ ---
+  
+  i A variable that is never reassigned is clearer as const, because it prevents the binding from being reassigned.
+  
+  i Safe fix: Use const instead.
+  
+    34 34 │   const { name } = Astro.props;
+    35 35 │   
+    36    │ - let·schema·=·z.object().optional();
+       36 │ + const·schema·=·z.object().optional();
+    37 37 │   schema + sure();
+    38 38 │   
+  
+
+```
+
+```block
+file.astro:41:1 lint/a11y/useHtmlLang ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Provide a lang attribute when using the html element.
   
-    38 │ ---
-    39 │ 
-  > 40 │ <html>
+    39 │ ---
+    40 │ 
+  > 41 │ <html>
        │ ^^^^^^
-    41 │ 	<head>
-    42 │ 		<title>Astro</title>
+    42 │ 	<head>
+    43 │ 		<title>Astro</title>
   
   i Setting a lang attribute on HTML document elements configures the language used by screen readers when no user default is specified.
   
@@ -198,24 +280,24 @@ file.astro:40:1 lint/a11y/useHtmlLang ━━━━━━━━━━━━━━
 ```
 
 ```block
-file.astro:10:6 lint/suspicious/noRedeclare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+file.astro:11:6 lint/suspicious/noRedeclare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × 'Props' is redeclared in the same scope.
   
-     8 │ }
-     9 │ 
-  > 10 │ type Props = {
+     9 │ }
+    10 │ 
+  > 11 │ type Props = {
        │      ^^^^^
-    11 │ 	name: string;
-    12 │ };
+    12 │ 	name: string;
+    13 │ };
   
   i 'Props' is defined here:
   
-    5 │ // Always considered as used
-  > 6 │ interface Props {
+    6 │ // Always considered as used
+  > 7 │ interface Props {
       │           ^^^^^
-    7 │ 	name: string;
-    8 │ }
+    8 │ 	name: string;
+    9 │ }
   
   i Redeclarations make it unclear which variable a reference points to and can hide earlier declarations.
   
@@ -225,25 +307,25 @@ file.astro:10:6 lint/suspicious/noRedeclare ━━━━━━━━━━━━
 ```
 
 ```block
-file.astro:29:7 lint/suspicious/noRedeclare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+file.astro:30:7 lint/suspicious/noRedeclare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × 'Props' is redeclared in the same scope.
   
-    27 │ 	}
-    28 │ 
-  > 29 │ 	type Props = {
+    28 │ 	}
+    29 │ 
+  > 30 │ 	type Props = {
        │ 	     ^^^^^
-    30 │ 		name: string;
-    31 │ 	};
+    31 │ 		name: string;
+    32 │ 	};
   
   i 'Props' is defined here:
   
-    23 │ function _doSomething() {
-    24 │ 	// Still reported as unused, Props interface must be at top-level
-  > 25 │ 	interface Props {
+    24 │ function doSomething() {
+    25 │ 	// Still reported as unused, Props interface must be at top-level
+  > 26 │ 	interface Props {
        │ 	          ^^^^^
-    26 │ 		name: string;
-    27 │ 	}
+    27 │ 		name: string;
+    28 │ 	}
   
   i Redeclarations make it unclear which variable a reference points to and can hide earlier declarations.
   
@@ -253,16 +335,16 @@ file.astro:29:7 lint/suspicious/noRedeclare ━━━━━━━━━━━━
 ```
 
 ```block
-file.astro:49:15 lint/a11y/useGenericFontNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+file.astro:50:15 lint/a11y/useGenericFontNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Generic font family missing.
   
-    47 │ <style>
-    48 │ #id {
-  > 49 │ 	font-family: comic-sans;
+    48 │ <style>
+    49 │ #id {
+  > 50 │ 	font-family: comic-sans;
        │ 	             ^^^^^^^^^^
-    50 │ }
-    51 │ .class {
+    51 │ }
+    52 │ .class {
   
   i If none of the listed font families is available, the browser falls back to its default font, which can look very different from the intended design.
   
@@ -281,5 +363,5 @@ file.astro:49:15 lint/a11y/useGenericFontNames ━━━━━━━━━━━
 ```block
 Checked 1 file in <TIME>. Fixed 1 file.
 Found 4 errors.
-Found 5 warnings.
+Found 8 warnings.
 ```

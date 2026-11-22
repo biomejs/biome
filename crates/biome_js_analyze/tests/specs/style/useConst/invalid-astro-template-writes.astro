@@ -1,0 +1,15 @@
+---
+let constant = "constant";
+let written = "before";
+let mutated = 0;
+let assignedLater;
+function nested() {
+    let nestedConstant = "nested";
+    return nestedConstant;
+}
+---
+<!-- should generate diagnostics -->
+{constant}
+{written = "after"}
+{mutated += 1}
+{assignedLater = "later"}
