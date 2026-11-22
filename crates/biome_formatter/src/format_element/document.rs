@@ -36,27 +36,11 @@ impl<S: Source> Document<S> {
     /// Boundary groups, see [crate::builders::boundary_group], stop the expansion the same way:
     /// their content never expands them or the groups around them.
     ///
+    /// Groups set to [GroupMode::Propagated] by an earlier call are recomputed, so calling
+    /// this again after [Self::replace_embedded] reflects the replaced content.
+    ///
     /// [`BestFitting`]: FormatElement::BestFitting
     pub(crate) fn propagate_expand(&mut self) {
-        fn reset_propagated_expands<S: Source>(elements: &[FormatElement<S>]) {
-            for element in elements {
-                match element {
-                    FormatElement::Tag(Tag::StartGroup(group)) => {
-                        group.reset_propagated_expand();
-                    }
-                    FormatElement::Interned(interned) => {
-                        reset_propagated_expands(interned);
-                    }
-                    FormatElement::BestFitting(variants) => {
-                        reset_propagated_expands(variants);
-                    }
-                    _ => {}
-                }
-            }
-        }
-
-        reset_propagated_expands(self);
-
         #[derive(Debug)]
         enum Enclosing<'a> {
             Group(&'a tag::Group),
@@ -81,12 +65,15 @@ impl<S: Source> Document<S> {
             let outer_len = enclosing.len();
             for element in elements {
                 let element_expands = match element {
-                    FormatElement::Tag(Tag::StartGroup(group)) if group.is_boundary() => {
-                        enclosing.push(Enclosing::BoundaryGroup);
-                        false
-                    }
                     FormatElement::Tag(Tag::StartGroup(group)) => {
-                        enclosing.push(Enclosing::Group(group));
+                        // Only content visited after this point can expand the group,
+                        // so a mode propagated by an earlier call is recomputed here.
+                        group.reset_propagated_expand();
+                        enclosing.push(if group.is_boundary() {
+                            Enclosing::BoundaryGroup
+                        } else {
+                            Enclosing::Group(group)
+                        });
                         false
                     }
                     FormatElement::Tag(Tag::EndGroup) => match enclosing.pop() {
