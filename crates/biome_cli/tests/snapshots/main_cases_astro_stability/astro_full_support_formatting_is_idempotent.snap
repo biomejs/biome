@@ -38,8 +38,7 @@ const items = [{ id: 1, label: "One" }];
 		<title>{title}</title>
 	</head>
 	<body>
-		<Card title={title} />
-		<>
+		<Card title={title} /><>
 			<ul class:list={["items", { active: items.length > 0 }]}>
 				{items.map((item) => <li data-id={item.id}>{item.label}</li>)}
 			</ul>
