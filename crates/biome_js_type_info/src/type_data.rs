@@ -813,7 +813,7 @@ impl Literal {
 pub struct TemplateLiteral {
     /// The text before, between, and after the placeholders, as written in
     /// the source. There is one more text than there are placeholders.
-    pub texts: Box<[Text]>,
+    pub texts: Box<[String]>,
 
     /// The type of each placeholder.
     pub types: Box<[TypeReference]>,

@@ -907,7 +907,7 @@ impl<'db> TypeData<'db> {
     ///   `` `a${"x" | "y"}` `` is `"ax" | "ay"`. Templates that would distribute
     ///   into too many variants are left as they are. A template with a `never`
     ///   placeholder is `never`.
-    pub fn template_literal(db: &'db dyn TypeDb, texts: Box<[Text]>, types: Box<[Self]>) -> Self {
+    pub fn template_literal(db: &'db dyn TypeDb, texts: Box<[String]>, types: Box<[Self]>) -> Self {
         debug_assert_eq!(texts.len(), types.len() + 1);
         if types.contains(&Self::NeverKeyword) {
             return Self::NeverKeyword;
@@ -2238,7 +2238,7 @@ pub enum Literal<'db> {
 pub struct TemplateLiteral<'db> {
     /// The text before, between, and after the placeholders, as written in
     /// the source. There is one more text than there are placeholders.
-    pub texts: Box<[Text]>,
+    pub texts: Box<[String]>,
     /// The type of each placeholder.
     pub types: Box<[TypeData<'db>]>,
 }
@@ -2247,31 +2247,31 @@ pub struct TemplateLiteral<'db> {
 /// folded into the text and its nested templates spliced in.
 fn fold_template_placeholders<'db>(
     db: &'db dyn TypeDb,
-    texts: &[Text],
+    texts: &[String],
     types: &[TypeData<'db>],
-) -> (Box<[Text]>, Box<[TypeData<'db>]>) {
+) -> (Box<[String]>, Box<[TypeData<'db>]>) {
     let mut folded_texts = Vec::with_capacity(texts.len());
     let mut folded_types = Vec::with_capacity(types.len());
-    let mut text = texts[0].to_string();
+    let mut text = texts[0].clone();
     for (ty, next_text) in types.iter().zip(&texts[1..]) {
         if let TypeData::Literal(literal) = ty
             && let Literal::Template(nested) = literal.literal(db)
         {
             text.push_str(&nested.texts[0]);
             for (nested_ty, nested_text) in nested.types.iter().zip(&nested.texts[1..]) {
-                folded_texts.push(Text::from(std::mem::take(&mut text)));
+                folded_texts.push(std::mem::take(&mut text));
                 folded_types.push(*nested_ty);
                 text.push_str(nested_text);
             }
         } else if let Some(value) = placeholder_text(db, *ty) {
             text.push_str(&value);
         } else {
-            folded_texts.push(Text::from(std::mem::take(&mut text)));
+            folded_texts.push(std::mem::take(&mut text));
             folded_types.push(*ty);
         }
         text.push_str(next_text);
     }
-    folded_texts.push(Text::from(text));
+    folded_texts.push(text);
     (folded_texts.into(), folded_types.into())
 }
 

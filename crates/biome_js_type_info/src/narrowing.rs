@@ -918,7 +918,7 @@ mod tests {
             number(&db, "0x100000000000000000000000000000000"),
             InferredTypeData::template_literal(
                 &db,
-                Box::new([Text::new_static("text"), Text::new_static("")]),
+                Box::new(["text".to_string(), String::new()]),
                 Box::new([InferredTypeData::String]),
             ),
         ] {

@@ -1400,7 +1400,7 @@ impl TypeData {
                     let Ok(ty) = element.ty() else {
                         return Self::unknown();
                     };
-                    texts.push(Text::from(std::mem::take(&mut text)));
+                    texts.push(std::mem::take(&mut text));
                     types.push(TypeReference::from_any_ts_type(collector, scope_id, &ty));
                 }
             }
@@ -1409,7 +1409,7 @@ impl TypeData {
         if types.is_empty() {
             return Literal::String(text.into()).into();
         }
-        texts.push(text.into());
+        texts.push(text);
         Self::Literal(Box::new(Literal::Template(TemplateLiteral {
             texts: texts.into(),
             types: types.into(),

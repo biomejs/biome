@@ -1335,9 +1335,13 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
         source: TypeData<'db>,
         target: &'db TemplateLiteral<'db>,
     ) -> Assignability {
+        let string_texts;
         let (source_texts, source_types) = match source {
             TypeData::Literal(literal) => match literal.literal(self.db) {
-                Literal::String(string) => (std::slice::from_ref(string.as_ref()), &[][..]),
+                Literal::String(string) => {
+                    string_texts = [string.as_str().to_string()];
+                    (&string_texts[..], &[][..])
+                }
                 Literal::Template(template) => (&template.texts[..], &template.types[..]),
                 _ => return Assignability::NotAssignable,
             },
@@ -2593,16 +2597,16 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
 /// Returns `None` if the source doesn't contain the target's texts in order.
 fn match_template_parts<'db>(
     db: &'db dyn TypeDb,
-    source_texts: &[Text],
+    source_texts: &[String],
     source_types: &[TypeData<'db>],
-    target_texts: &[Text],
+    target_texts: &[String],
 ) -> Option<Vec<TypeData<'db>>> {
     let last_source = source_texts.len() - 1;
     let last_target = target_texts.len() - 1;
-    let source_start = source_texts[0].text();
-    let source_end = source_texts[last_source].text();
-    let target_start = target_texts[0].text();
-    let target_end = target_texts[last_target].text();
+    let source_start = source_texts[0].as_str();
+    let source_end = source_texts[last_source].as_str();
+    let target_start = target_texts[0].as_str();
+    let target_end = target_texts[last_target].as_str();
     if (last_source == 0 && source_start.len() < target_start.len() + target_end.len())
         || !source_start.starts_with(target_start)
         || !source_end.ends_with(target_end)
@@ -2615,7 +2619,7 @@ fn match_template_parts<'db>(
     let remaining_end = &source_end[..source_end.len() - target_end.len()];
     let source_text = |index: usize| {
         if index < last_source {
-            source_texts[index].text()
+            source_texts[index].as_str()
         } else {
             remaining_end
         }
@@ -2628,14 +2632,14 @@ fn match_template_parts<'db>(
             let text = &source_text(end_index)[start_offset..end_offset];
             TypeData::Literal(InternedLiteral::new(db, Literal::String(text.into())))
         } else {
-            let texts = std::iter::once(&source_texts[start_index].text()[start_offset..])
+            let texts = std::iter::once(&source_texts[start_index][start_offset..])
                 .chain(
                     source_texts[start_index + 1..end_index]
                         .iter()
-                        .map(Text::text),
+                        .map(String::as_str),
                 )
                 .chain(std::iter::once(&source_text(end_index)[..end_offset]))
-                .map(|text| Text::from(text.to_string()))
+                .map(str::to_string)
                 .collect();
             TypeData::template_literal(db, texts, source_types[start_index..end_index].into())
         };
@@ -2649,7 +2653,7 @@ fn match_template_parts<'db>(
             let end = (index..=last_source).find_map(|index| {
                 let from = if index == start.0 { offset } else { 0 };
                 source_text(index)[from..]
-                    .find(delimiter.text())
+                    .find(delimiter.as_str())
                     .map(|found| (index, from + found))
             })?;
             push_part(&mut start, end);
