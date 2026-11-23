@@ -1568,7 +1568,7 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
         };
 
         let db = self.db;
-        let literal = |literal| TypeData::Literal(InternedLiteral::new(db, literal));
+        let intern_literal = |literal| TypeData::Literal(InternedLiteral::new(db, literal));
         let number = number_from_canonical_string(value);
         let bigint = bigint_literal_from_string(value)
             .filter(|canonical| canonical.strip_suffix('n') == Some(value));
@@ -1602,18 +1602,22 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
                 TypeData::Number => number.map(|_| {
                     (
                         3,
-                        literal(Literal::Number(NumberLiteral::new(Text::from(
+                        intern_literal(Literal::Number(NumberLiteral::new(Text::from(
                             value.to_string(),
                         )))),
                     )
                 }),
-                TypeData::BigInt => bigint
-                    .as_ref()
-                    .map(|bigint| (5, literal(Literal::BigInt(Text::from(bigint.clone()))))),
+                TypeData::BigInt => bigint.as_ref().map(|bigint| {
+                    (
+                        5,
+                        intern_literal(Literal::BigInt(Text::from(bigint.clone()))),
+                    )
+                }),
                 TypeData::Boolean => match value {
-                    "true" | "false" => {
-                        Some((7, literal(Literal::Boolean((value == "true").into()))))
-                    }
+                    "true" | "false" => Some((
+                        7,
+                        intern_literal(Literal::Boolean((value == "true").into())),
+                    )),
                     _ => None,
                 },
                 TypeData::Undefined => (value == "undefined").then_some((9, member)),
