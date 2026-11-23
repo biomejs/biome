@@ -543,7 +543,8 @@ where
             remaining,
         );
         if !self.deny_top_level_suppressions && !token_range.is_empty() {
-            self.deny_top_level_suppressions = !token.kind().is_allowed_before_suppressions();
+            self.deny_top_level_suppressions = !token.kind().is_allowed_before_suppressions()
+                && !self.suppression.is_comment_snippet(token_range);
         }
 
         for piece in token.trailing_trivia_pieces() {

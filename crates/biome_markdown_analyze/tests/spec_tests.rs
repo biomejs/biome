@@ -18,12 +18,12 @@ use std::ops::Deref;
 use std::{fs::read_to_string, slice};
 
 tests_macros::gen_tests! {
-    "tests/specs/**/*.{md,json,jsonc}",
+    "tests/specs/**/*.{md,mdx,json,jsonc}",
     crate::run_test,
     "module"
 }
 tests_macros::gen_tests! {
-    "tests/suppression/**/*.{md,json,jsonc}",
+    "tests/suppression/**/*.{md,mdx,json,jsonc}",
     crate::run_suppression_test,
     "module"
 }
@@ -98,9 +98,10 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
 
     let mut snapshot = String::new();
     let mut diagnostics = Vec::new();
-    let parser_options =
-        create_parser_options::<MarkdownLanguage>(input_file, &mut diagnostics).unwrap_or_default();
     let extension = input_file.extension().unwrap_or_default();
+    let parser_options = create_parser_options::<MarkdownLanguage>(input_file, &mut diagnostics)
+        .unwrap_or_default()
+        .with_mdx(extension == "mdx");
     let input_code = read_to_string(input_file)
         .unwrap_or_else(|err| panic!("failed to read {input_file:?}: {err:?}"));
 
@@ -163,7 +164,7 @@ pub(crate) fn analyze_and_snap(
         &root,
         filter,
         &options,
-        MdFileSource::markdown(),
+        file_source(input_file),
         |event| {
             if let Some(mut diag) = event.diagnostic() {
                 for action in event.actions(ActionFilter::all()) {
@@ -247,6 +248,16 @@ pub(crate) fn analyze_and_snap(
     assert_diagnostics_expectation_comment(input_file, root.syntax(), diagnostics);
 }
 
+/// Returns the file source of the fixture at `path`: MDX for `.mdx` files,
+/// matching the parser options of the fixture.
+fn file_source(path: &Utf8Path) -> MdFileSource {
+    if path.extension().is_some_and(|extension| extension == "mdx") {
+        MdFileSource::mdx()
+    } else {
+        MdFileSource::markdown()
+    }
+}
+
 fn check_code_action(
     path: &Utf8Path,
     source: &str,
@@ -286,22 +297,16 @@ fn check_code_action(
     if action.is_suppression() {
         let count_diagnostics = |root: &MdRoot| {
             let mut count = 0;
-            biome_markdown_analyze::analyze(
-                root,
-                filter,
-                options,
-                MdFileSource::markdown(),
-                |event| {
-                    if event
-                        .diagnostic()
-                        .and_then(|diagnostic| diagnostic.category())
-                        .is_some_and(|category| category.name().starts_with("lint/"))
-                    {
-                        count += 1;
-                    }
-                    ControlFlow::<Never>::Continue(())
-                },
-            );
+            biome_markdown_analyze::analyze(root, filter, options, file_source(path), |event| {
+                if event
+                    .diagnostic()
+                    .and_then(|diagnostic| diagnostic.category())
+                    .is_some_and(|category| category.name().starts_with("lint/"))
+                {
+                    count += 1;
+                }
+                ControlFlow::<Never>::Continue(())
+            });
             count
         };
         let remaining = count_diagnostics(&re_parse.tree());
@@ -345,7 +350,11 @@ pub(crate) fn run_suppression_test(input: &'static str, _: &str, _: &str, _: &st
         file_name,
         input_file,
         CheckActionType::Suppression,
-        MarkdownParserOptions::default(),
+        MarkdownParserOptions::default().with_mdx(
+            input_file
+                .extension()
+                .is_some_and(|extension| extension == "mdx"),
+        ),
     );
 
     insta::with_settings!({

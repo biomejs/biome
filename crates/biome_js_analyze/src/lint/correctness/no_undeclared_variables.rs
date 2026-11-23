@@ -110,6 +110,19 @@ impl Rule for NoUndeclaredVariables {
             return None;
         }
 
+        // The content of an MDX document receives `props` from the code that
+        // renders it. ESM blocks are module code, where `props` isn't defined.
+        // The components that JSX tags name can come from that code too,
+        // through the `components` prop or an `MDXProvider`, which also
+        // provides them to the functions that ESM blocks export.
+        let embedding_kind = source_type.as_embedding_kind();
+        if embedding_kind.is_mdx()
+            && ((text == "props" && !embedding_kind.is_mdx_esm())
+                || matches!(identifier, AnyJsIdentifierReference::JsxReferenceIdentifier(_)))
+        {
+            return None;
+        }
+
         // Typescript Const Assertion
         if text == "const" && under_as_expression {
             return None;
