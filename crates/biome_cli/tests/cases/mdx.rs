@@ -470,6 +470,32 @@ import {Unused} from './unused.js'
 }
 
 #[test]
+fn lint_mdx_files_with_suppress() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(Utf8Path::new("biome.json").into(), LINT_CONFIG.as_bytes());
+    let file_path = Utf8Path::new("file.mdx");
+    fs.insert(file_path.into(), "{props.title}\n\nSome text\n".as_bytes());
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", "--suppress", file_path.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "lint_mdx_files_with_suppress",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn lint_mdx_files_bindings_across_constructs() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();

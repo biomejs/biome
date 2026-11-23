@@ -69,6 +69,15 @@ impl MarkdownSuppression {
                 .filter_map(|content| {
                     let ranges = content.comment_ranges().ok()??;
                     let token = content.value_token().ok()?;
+                    // The lines of an expression in a block quote keep their
+                    // `>` markers, like quoted HTML comments.
+                    if content
+                        .syntax()
+                        .ancestors()
+                        .any(|node| MdQuote::can_cast(node.kind()))
+                    {
+                        quoted_comments.extend(ranges.iter().copied());
+                    }
                     Some((
                         token.text_trimmed_range(),
                         token.text_trimmed().to_string(),
