@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use crate::verbatim::format_html_source_node_preserving_line_endings;
 use biome_formatter::write;
 use biome_formatter::{CstFormatContext, FormatRuleWithOptions, normalize_newlines};
 use biome_html_syntax::HtmlTextExpression;
@@ -21,6 +22,19 @@ pub(crate) struct FormatHtmlTextExpressionOptions {
 }
 
 impl FormatNodeRule<HtmlTextExpression> for FormatHtmlTextExpression {
+    fn fmt_verbatim_embedded_node(
+        &self,
+        node: &HtmlTextExpression,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        let token = node.html_literal_token()?;
+        if self.options.compact {
+            format_removed(&token).fmt(f)
+        } else {
+            format_html_source_node_preserving_line_endings(node.syntax()).fmt(f)
+        }
+    }
+
     fn fmt_fields(&self, node: &HtmlTextExpression, f: &mut HtmlFormatter) -> FormatResult<()> {
         if f.context().comments().is_suppressed(node.syntax()) {
             return write!(f, [format_suppressed_node(node.syntax())]);

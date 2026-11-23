@@ -2,6 +2,7 @@ use crate::bindings::EmbeddedBinding;
 use crate::components::collect_embedded_elements;
 use crate::data::{EmbeddedData, VueDirectiveDeclarations};
 use crate::references::{EmbeddedTypeReference, EmbeddedValueReference};
+use biome_astro_semantic::{AstroSemanticModel, AstroSnippet, astro_model};
 use biome_db::Source;
 use biome_html_syntax::{
     AnyHtmlComponentObjectName, AnyHtmlTagName, AnySvelteBindingAssignmentBinding,
@@ -10,6 +11,7 @@ use biome_html_syntax::{
     AnyVueVForBinding, AnyVueVForBindingListElement, AnyVueVForDestructuredBinding, HtmlElement,
     HtmlRoot, HtmlSelfClosingElement, VueDirective, VueVForIdentifierBinding, VueVForValue,
 };
+use biome_js_semantic::{SemanticModelOptions, semantic_model};
 use biome_js_syntax::{
     AnyJsArrayAssignmentPatternElement, AnyJsArrayBindingPatternElement, AnyJsArrayElement,
     AnyJsAssignmentPattern, AnyJsBindingPattern, AnyJsCallArgument, AnyJsDeclarationClause,
@@ -63,10 +65,22 @@ pub fn collect_embedded_data<'a>(
     host_parse: &AnyParse,
     snippets: Vec<EmbeddedSnippet<'a>>,
 ) -> EmbeddedData {
+    if matches!(host_source, DocumentFileSource::Html(html) if html.is_astro()) {
+        return EmbeddedData::new(
+            collect_astro_model(host_source, host_parse, &snippets),
+            Vec::new(),
+            Vec::new(),
+            Vec::new(),
+            VueDirectiveDeclarations::default(),
+            collect_embedded_elements(host_source, host_parse),
+        );
+    }
+
     let collected_bindings = collect_embedded_bindings(host_source, host_parse, &snippets);
     let references = collect_embedded_references(host_source, host_parse, &snippets);
 
     EmbeddedData::new(
+        None,
         collected_bindings.bindings,
         references
             .as_ref()
@@ -77,6 +91,51 @@ pub fn collect_embedded_data<'a>(
         collected_bindings.vue_directive_declarations,
         collect_embedded_elements(host_source, host_parse),
     )
+}
+
+fn collect_astro_model(
+    host_source: DocumentFileSource,
+    host_parse: &AnyParse,
+    snippets: &[EmbeddedSnippet<'_>],
+) -> Option<AstroSemanticModel> {
+    let DocumentFileSource::Html(html) = host_source else {
+        return None;
+    };
+    if !html.is_astro() {
+        return None;
+    }
+
+    let host: HtmlRoot = host_parse.tree();
+    let parsed: Vec<_> = snippets
+        .iter()
+        .filter_map(|snippet| {
+            let source = snippet.file_source.to_js_file_source()?;
+            let root: AnyJsRoot = snippet.parse.tree();
+            let js = semantic_model(&root, SemanticModelOptions::from(&source));
+            Some((
+                root,
+                js,
+                source,
+                snippet.content_range,
+                snippet.parse.has_errors(),
+            ))
+        })
+        .collect();
+    let snippets: Vec<_> = parsed
+        .iter()
+        .map(
+            |(root, js, source, content_range, has_errors)| AstroSnippet {
+                root,
+                js,
+                source: *source,
+                content_range: *content_range,
+                content_offset: content_range.start(),
+                has_errors: *has_errors,
+            },
+        )
+        .collect();
+
+    Some(astro_model(&host, &snippets))
 }
 
 #[derive(Debug, Default, Clone, Copy)]
@@ -172,6 +231,10 @@ fn collect_embedded_bindings(
     host_parse: &AnyParse,
     snippets: &[EmbeddedSnippet],
 ) -> CollectedEmbeddedBindings {
+    if is_mdx_document(snippets) {
+        return collect_mdx_bindings(snippets);
+    }
+
     let Some(host_file_source) = host_source.to_html_file_source() else {
         return CollectedEmbeddedBindings::default();
     };
@@ -221,6 +284,46 @@ fn collect_embedded_bindings(
             builder.vue_directive_option_names,
             builder.has_unknown_vue_directive_options,
         ),
+    }
+}
+
+/// Returns whether `snippets` come from an MDX document, whose JavaScript is
+/// split into ESM, expression, and tag snippets.
+fn is_mdx_document(snippets: &[EmbeddedSnippet]) -> bool {
+    snippets.iter().any(|snippet| {
+        snippet
+            .file_source
+            .to_js_file_source()
+            .is_some_and(|source| source.as_embedding_kind().is_mdx())
+    })
+}
+
+/// Collects the bindings of an MDX document: the imports and declarations of
+/// its ESM snippets, which its expressions and JSX tags can reference.
+fn collect_mdx_bindings(snippets: &[EmbeddedSnippet]) -> CollectedEmbeddedBindings {
+    let mut builder = EmbeddedBindingsBuilder::new();
+    for snippet in snippets {
+        let is_esm = snippet
+            .file_source
+            .to_js_file_source()
+            .is_some_and(|source| source.as_embedding_kind().is_mdx_esm());
+        if let AnyJsRoot::JsModule(module) = snippet.parse.tree()
+            && is_esm
+        {
+            builder.visit_module_item_list(module.items());
+        }
+    }
+    CollectedEmbeddedBindings {
+        bindings: builder
+            .js_bindings
+            .into_iter()
+            .map(|(range, text, source)| EmbeddedBinding {
+                range,
+                text,
+                source,
+            })
+            .collect(),
+        vue_directive_declarations: VueDirectiveDeclarations::default(),
     }
 }
 
@@ -284,6 +387,9 @@ fn collect_embedded_references(
     let is_svelte = host_source
         .to_html_file_source()
         .is_some_and(|s| s.is_svelte());
+    // An MDX document compiles to one module, so a binding of one ESM block
+    // counts as used when another ESM block references it.
+    let is_mdx = is_mdx_document(snippets);
 
     let mut builder = EmbeddedReferencesBuilder::new();
     let generic_names: Vec<_> = generic_parameter_names(snippets)
@@ -298,7 +404,13 @@ fn collect_embedded_references(
         // A Svelte component's `<script module>` and `<script>` compile to
         // one module and share a top-level scope, so a binding used only in
         // the other block must still count as used.
-        if !js_file_source.is_embedded_source() || is_svelte {
+        // In an MDX document, only the snippets of MDX constructs are part of
+        // the module: code fences are examples.
+        if is_mdx {
+            if js_file_source.as_embedding_kind().is_mdx() {
+                builder.visit_non_source_snippet(&snippet.parse.tree(), &js_file_source);
+            }
+        } else if !js_file_source.is_embedded_source() || is_svelte {
             builder.visit_non_source_snippet(&snippet.parse.tree(), &js_file_source);
         } else if js_file_source.as_embedding_kind().is_vue_setup() && !generic_names.is_empty() {
             builder.visit_vue_setup_generic_references(&snippet.parse.tree(), &generic_names);

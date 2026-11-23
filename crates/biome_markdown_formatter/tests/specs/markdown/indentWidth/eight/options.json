@@ -1,0 +1,10 @@
+{
+  "markdown": {
+    "formatter": {
+      "indentWidth": 8
+    },
+    "parser": {
+      "gfm": true
+    }
+  }
+}

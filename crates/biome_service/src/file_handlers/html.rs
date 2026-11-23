@@ -56,7 +56,7 @@ use biome_formatter::rowan::Printed;
 #[cfg(feature = "html_embeds")]
 use biome_formatter::rowan::prelude::{
     Document, Interned, RowanSource, SimpleFormatContext, format_args, format_with, group, indent,
-    line_suffix_boundary, soft_line_break, token,
+    line_suffix_boundary, soft_line_break, text, token,
 };
 use biome_formatter::{
     AttributePosition, BracketSameLine, IndentStyle, IndentWidth, LineEnding, LineWidth,
@@ -73,15 +73,13 @@ use biome_html_formatter::context::SelfCloseVoidElements;
 use biome_html_formatter::{
     HtmlFormatOptions,
     context::{IndentScriptAndStyle, WhitespaceSensitivity},
-    format_node,
+    format_node, format_node_with_verbatim_ranges,
 };
 use biome_html_parser::{HtmlParserOptions, parse_html_with_cache};
 use biome_html_syntax::element_ext::{AnyEmbeddedContent, AnyHtmlTagElement};
 use biome_html_syntax::{HtmlAttribute, HtmlLanguage, HtmlRoot, HtmlSyntaxNode};
 #[cfg(feature = "html_embeds")]
-use biome_html_syntax::{
-    HtmlElementList, HtmlSingleTextExpression, HtmlSyntaxKind, HtmlTextExpression,
-};
+use biome_html_syntax::{HtmlSingleTextExpression, HtmlSyntaxKind, HtmlTextExpression};
 #[cfg(feature = "html_embeds")]
 use biome_js_analyze::JsSuppression;
 #[cfg(feature = "html_embeds")]
@@ -96,6 +94,8 @@ use biome_js_syntax::{
 #[cfg(feature = "html_embeds")]
 use biome_json_syntax::JsonLanguage;
 use biome_languages::HtmlFileSource;
+#[cfg(feature = "html_embeds")]
+use biome_languages::html::HtmlVariant;
 #[cfg(feature = "html_embeds")]
 use biome_parser::AnyParse;
 use biome_parser::db::AnalyzedSource;
@@ -153,7 +153,12 @@ impl HtmlSuppressionService {
                 .descendants()
                 .filter_map(HtmlSingleTextExpression::cast)
             {
-                if expression.parent::<HtmlElementList>().is_none() {
+                if !expression.syntax().parent().is_some_and(|parent| {
+                    matches!(
+                        parent.kind(),
+                        HtmlSyntaxKind::HTML_ELEMENT_LIST | HtmlSyntaxKind::HTML_ROOT_ITEM_LIST
+                    )
+                }) {
                     continue;
                 }
                 let Some(token) = expression
@@ -216,7 +221,12 @@ impl HtmlSuppressionService {
         }
         let body = HtmlTextExpression::cast(token.parent()?)?;
         let expression = body.parent::<HtmlSingleTextExpression>()?;
-        expression.parent::<HtmlElementList>()?;
+        expression.syntax().parent().filter(|parent| {
+            matches!(
+                parent.kind(),
+                HtmlSyntaxKind::HTML_ELEMENT_LIST | HtmlSyntaxKind::HTML_ROOT_ITEM_LIST
+            )
+        })?;
         expression.l_curly_token().ok()?;
         expression.r_curly_token().ok()?;
         if eof.text() != token.text() {
@@ -820,11 +830,25 @@ fn format_embedded(
     // The HTML formatter writes a placeholder for each snippet, and the closure
     // below replaces it with the formatted code. A snippet that can't be
     // formatted keeps the HTML formatter's output.
-    let snippets: FxHashMap<TextRange, super::ParsedSnippetOrigin> = embedded_nodes
-        .into_iter()
-        .map(|snippet| (snippet.content_range(), snippet))
-        .collect();
-    let mut formatted = format_node(options, &tree, snippets.keys().copied().collect())?;
+    let preserve_failed_snippets = document_file_source
+        .to_html_file_source()
+        .is_some_and(|source| source.is_astro());
+    let mut snippets = FxHashMap::default();
+    let mut verbatim_snippet_ranges = Vec::new();
+    for snippet in embedded_nodes {
+        let range = snippet.content_range();
+        if preserve_failed_snippets && snippet.parsed_origin().parse(&workspace_db).has_errors() {
+            verbatim_snippet_ranges.push(range);
+        } else {
+            snippets.insert(range, snippet);
+        }
+    }
+    let mut formatted = format_node_with_verbatim_ranges(
+        options,
+        &tree,
+        snippets.keys().copied().collect(),
+        verbatim_snippet_ranges,
+    )?;
     formatted.format_embedded(move |range| {
         let snippet = snippets.get(&range)?;
         let snippet_file_source = snippet.file_source(&workspace_db)?;
@@ -917,20 +941,30 @@ fn format_embedded(
                     .ok()?
                     .into_document()
             }
-            // The CSS formatter prints each declaration of a `style` attribute
-            // on its own line.
-            DocumentFileSource::Css(_) if attribute_snippet.is_some() => return None,
             DocumentFileSource::Css(_) => {
-                let css_options = css::resolve_format_options(
+                let mut css_options = css::resolve_format_options(
                     biome_path,
                     &snippet_file_source,
                     settings,
                     &workspace_db,
                 );
+                if attribute_snippet.is_some() {
+                    css_options = css_options
+                        .with_quote_style(QuoteStyle::Single)
+                        .with_trailing_newline(TrailingNewline::from(false));
+                }
                 let node = parse.embedded_syntax::<CssLanguage>();
-                biome_css_formatter::format_node_with_offset(css_options, &node)
-                    .ok()?
-                    .into_document()
+                let formatted =
+                    biome_css_formatter::format_node_with_offset(css_options, &node).ok()?;
+                if attribute_snippet.is_some() {
+                    let printed = formatted.print().ok()?;
+                    if printed.as_code().contains(['\n', '\r']) {
+                        return None;
+                    }
+                    format_css_attribute_value(printed.as_code())?
+                } else {
+                    formatted.into_document()
+                }
             }
             _ => return None,
         };
@@ -1065,6 +1099,25 @@ fn format_attribute_value(root: &AnyJsRoot, document: Document) -> Option<Docume
     Some(formatted.ok()?.into_document())
 }
 
+#[cfg(feature = "html_embeds")]
+fn format_css_attribute_value(code: &str) -> Option<Document> {
+    let code = if code.contains('"') {
+        Cow::Owned(code.replace('"', "&quot;"))
+    } else {
+        Cow::Borrowed(code)
+    };
+    biome_formatter::format!(
+        SimpleFormatContext::<RowanSource>::from_options(SimpleFormatOptions::default()),
+        [
+            token("\""),
+            text(code.as_ref(), None::<TextSize>),
+            token("\"")
+        ]
+    )
+    .ok()
+    .map(|formatted| formatted.into_document())
+}
+
 #[cfg(not(feature = "html_embeds"))]
 fn format_embedded(
     biome_path: &BiomePath,
@@ -1129,7 +1182,7 @@ pub(super) fn lint_with_inspector(
     let mut snippets = {
         let mut snippets: Vec<Box<dyn SnippetAnalyzer<Never, Output = LintResults> + '_>> =
             Vec::new();
-        for snippet in params
+        let parsed_snippets: Vec<_> = params
             .parsed_source
             .snippets(&params.workspace_db)
             .for_analysis(
@@ -1139,7 +1192,31 @@ pub(super) fn lint_with_inspector(
                 params.path.as_path(),
                 &params.workspace_db,
             )
-        {
+            .collect();
+        let host_document_js_snippet =
+            super::js_host_document_snippet_index(&parsed_snippets, &params.workspace_db);
+        if host_document_js_snippet.is_none() {
+            let host_source = match params
+                .language
+                .to_html_file_source()
+                .unwrap_or_default()
+                .variant()
+            {
+                HtmlVariant::Astro => biome_languages::JsFileSource::astro(),
+                HtmlVariant::Vue => biome_languages::JsFileSource::vue(),
+                HtmlVariant::Svelte => biome_languages::JsFileSource::svelte(),
+                HtmlVariant::Standard(_) | HtmlVariant::Angular => {
+                    biome_languages::JsFileSource::js_module()
+                }
+            };
+            snippets.push(Box::new(LintSnippetAnalyzer::new(
+                params.for_js_host_document(host_source),
+                TextSize::default(),
+                &biome_js_analyze::METADATA,
+                javascript::lint_with_inspector,
+            )));
+        }
+        for (index, snippet) in parsed_snippets.into_iter().enumerate() {
             let Some(language) = snippet.file_source(&params.workspace_db) else {
                 continue;
             };
@@ -1147,7 +1224,9 @@ pub(super) fn lint_with_inspector(
             let snippet_params = params.for_snippet(&snippet, language);
             let analyzer = if language.to_js_file_source().is_some() {
                 LintSnippetAnalyzer::new(
-                    snippet_params,
+                    snippet_params.with_rule_execution(super::js_rule_execution_context(
+                        host_document_js_snippet == Some(index),
+                    )),
                     offset,
                     &biome_js_analyze::METADATA,
                     javascript::lint_with_inspector,

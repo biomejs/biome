@@ -26,9 +26,7 @@ HtmlRoot {
         },
         r_fence_token: FENCE@13..16 "---" [] [],
     },
-    processing_instruction: missing (optional),
-    directive: missing (optional),
-    html: HtmlElementList [
+    items: HtmlRootItemList [
         HtmlElement {
             opening_element: HtmlOpeningElement {
                 l_angle_token: L_ANGLE@16..18 "<" [Newline("\n")] [],
@@ -67,9 +65,7 @@ HtmlRoot {
     1: ASTRO_EMBEDDED_CONTENT@3..13
       0: HTML_LITERAL@3..13 "--count;\n" [Newline("\n")] []
     2: FENCE@13..16 "---" [] []
-  2: (empty)
-  3: (empty)
-  4: HTML_ELEMENT_LIST@16..25
+  2: HTML_ROOT_ITEM_LIST@16..25
     0: HTML_ELEMENT@16..25
       0: HTML_OPENING_ELEMENT@16..20
         0: L_ANGLE@16..18 "<" [Newline("\n")] []
@@ -86,6 +82,6 @@ HtmlRoot {
         2: HTML_TAG_NAME@23..24
           0: P_KW@23..24 "p" [] []
         3: R_ANGLE@24..25 ">" [] []
-  5: EOF@25..26 "" [Newline("\n")] []
+  3: EOF@25..26 "" [Newline("\n")] []
 
 ```

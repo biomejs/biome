@@ -7,3 +7,9 @@
 
 <!-- invalid tristate value -->
 <span aria-checked="test">some text</span>
+
+<!-- invalid static template value -->
+<button aria-pressed=`yes`>Button</button>
+
+<!-- escaped interpolation is static text -->
+<button aria-pressed=`\${view}`>Button</button>

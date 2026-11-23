@@ -17,10 +17,7 @@ impl FormatNodeRule<MdSetextHeader> for FormatMdSetextHeader {
 
         let underline_token = underline_token?;
 
-        let prose_wrap = f.options().prose_wrap();
-        if prose_wrap == ProseWrap::Always
-            || prose_wrap == ProseWrap::Preserve && content.will_break()
-        {
+        if setext_header_keeps_underline(node, f) {
             write!(
                 f,
                 [
@@ -60,4 +57,12 @@ impl FormatNodeRule<MdSetextHeader> for FormatMdSetextHeader {
             )
         }
     }
+}
+
+/// Whether `node` is printed with its underline. Otherwise, it is printed as
+/// an ATX heading, such as `## Heading`.
+pub(crate) fn setext_header_keeps_underline(node: &MdSetextHeader, f: &MarkdownFormatter) -> bool {
+    let prose_wrap = f.options().prose_wrap();
+    prose_wrap == ProseWrap::Always
+        || prose_wrap == ProseWrap::Preserve && node.content().will_break()
 }

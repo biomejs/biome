@@ -219,6 +219,25 @@ dependencies = [
 ]
 
 [[package]]
+name = "biome_astro_semantic"
+version = "0.1.0"
+dependencies = [
+ "biome_db",
+ "biome_html_parser",
+ "biome_html_syntax",
+ "biome_js_parser",
+ "biome_js_semantic",
+ "biome_js_syntax",
+ "biome_languages",
+ "biome_parser",
+ "biome_rowan",
+ "enumflags2",
+ "insta",
+ "ryu-js",
+ "salsa",
+]
+
+[[package]]
 name = "biome_cli"
 version = "0.0.0"
 dependencies = [
@@ -389,6 +408,7 @@ version = "0.7.3"
 dependencies = [
  "biome_analyze",
  "biome_analyze_macros",
+ "biome_astro_semantic",
  "biome_console",
  "biome_css_factory",
  "biome_css_parser",
@@ -449,6 +469,7 @@ dependencies = [
  "biome_string_case",
  "biome_suppression",
  "biome_test_utils",
+ "biome_unicode_table",
  "camino",
  "codspeed-criterion-compat",
  "countme",
@@ -516,6 +537,7 @@ dependencies = [
  "biome_css_parser",
  "biome_diagnostics",
  "biome_formatter",
+ "biome_languages",
  "biome_rowan",
  "biome_string_case",
  "biome_unicode_table",
@@ -616,11 +638,13 @@ dependencies = [
 name = "biome_embeds"
 version = "0.1.0"
 dependencies = [
+ "biome_astro_semantic",
  "biome_db",
  "biome_fs",
  "biome_html_parser",
  "biome_html_syntax",
  "biome_js_parser",
+ "biome_js_semantic",
  "biome_js_syntax",
  "biome_languages",
  "biome_module_graph",
@@ -1067,6 +1091,7 @@ dependencies = [
  "biome_analyze_macros",
  "biome_aria",
  "biome_aria_metadata",
+ "biome_astro_semantic",
  "biome_console",
  "biome_control_flow",
  "biome_css_parser",
@@ -1079,6 +1104,7 @@ dependencies = [
  "biome_embeds",
  "biome_fs",
  "biome_glob",
+ "biome_html_parser",
  "biome_js_control_flow",
  "biome_js_factory",
  "biome_js_parser",
@@ -1702,6 +1728,7 @@ dependencies = [
 name = "biome_module_graph"
 version = "0.7.3"
 dependencies = [
+ "biome_astro_semantic",
  "biome_configuration",
  "biome_console",
  "biome_css_formatter",
@@ -3590,9 +3617,9 @@ checksum = "77ce24cb58228fbb8aa041425bb1050850ac19177686ea6e0f41a70416f56fdb"
 
 [[package]]
 name = "form_urlencoded"
-version = "1.2.2"
+version = "1.2.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cb4cb245038516f5f85277875cdaa4f7d2c9a0fa0468de06ed190163b1581fcf"
+checksum = "afa489199eaffb1211795df1c6236ce1ad0d41a6fa45250add73e3b02420f06e"
 dependencies = [
  "percent-encoding",
 ]
@@ -7172,9 +7199,9 @@ dependencies = [
 
 [[package]]
 name = "url"
-version = "2.5.8"
+version = "2.5.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ff67a8a4397373c3ef660812acab3268222035010ab8680ec4215f38ba3d0eed"
+checksum = "f00cd2407bb42c0ef17be88d4cf020f5cceffd121665bac9b8b9493a369b3b1a"
 dependencies = [
  "form_urlencoded",
  "idna",

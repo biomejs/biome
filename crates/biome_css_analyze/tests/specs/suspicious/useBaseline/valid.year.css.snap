@@ -6,8 +6,8 @@ expression: valid.year.css
 ```css
 /* should not generate diagnostics */
 
-/* overscroll-behavior became newly available in 2022 - ok */
-.messages { overscroll-behavior: contain; }
+/* translate became newly available in 2022 - ok */
+.box { translate: 10px; }
 
 /* @container is widely available */
 @container (min-width: 800px) { a { color: red; } }

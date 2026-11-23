@@ -3451,15 +3451,17 @@ fn at_blank_line_after_prefix(p: &mut MarkdownParser) -> bool {
     })
 }
 
+/// Consumes one blank line after any container prefixes.
+///
+/// Each `MD_TEXTUAL_LITERAL` made only of spaces and tabs becomes whitespace
+/// trivia, and the following `NEWLINE` becomes an `MdNewline` node. At EOF only
+/// the whitespace is consumed. Any other token stops consumption without an
+/// error, so callers must classify the line as blank first; otherwise a caller
+/// loop can stop advancing.
 fn consume_blank_line(p: &mut MarkdownParser) {
     // Consume blank-line whitespace as whitespace trivia (structural, no skipped trivia).
-    while p.at(MD_TEXTUAL_LITERAL) {
-        let text = p.cur_text();
-        if text == " " || text == "\t" {
-            p.consume_as_whitespace_trivia();
-        } else {
-            break;
-        }
+    while p.at(MD_TEXTUAL_LITERAL) && is_whitespace_only(p.cur_text()) {
+        p.consume_as_whitespace_trivia();
     }
 
     if p.at(NEWLINE) {

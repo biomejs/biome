@@ -1,0 +1,46 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome lint --suppress file.mdx
+```
+
+## `biome.json`
+
+```json
+{
+  "markdown": {
+    "analyzeEmbeds": true
+  },
+  "linter": {
+    "rules": {
+      "correctness": {
+        "noUndeclaredVariables": "error",
+        "noUnusedImports": "error"
+      },
+      "nursery": {
+        "useTopLevelHeading": "error"
+      }
+    }
+  }
+}
+```
+
+## `file.mdx`
+
+```mdx
+{/* biome-ignore lint/nursery/useTopLevelHeading: ignored using `--suppress` */}
+{props.title}
+
+Some text
+
+```
+
+# Emitted Messages
+
+```block
+Checked 1 file in <TIME>. Fixed 1 file.
+```

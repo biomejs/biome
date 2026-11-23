@@ -18,9 +18,7 @@ expression: snapshot
 HtmlRoot {
     bom_token: missing (optional),
     frontmatter: missing (optional),
-    processing_instruction: missing (optional),
-    directive: missing (optional),
-    html: HtmlElementList [
+    items: HtmlRootItemList [
         HtmlElement {
             opening_element: HtmlOpeningElement {
                 l_angle_token: L_ANGLE@0..1 "<" [] [],
@@ -140,9 +138,7 @@ HtmlRoot {
 0: HTML_ROOT@0..124
   0: (empty)
   1: (empty)
-  2: (empty)
-  3: (empty)
-  4: HTML_ELEMENT_LIST@0..123
+  2: HTML_ROOT_ITEM_LIST@0..123
     0: HTML_ELEMENT@0..46
       0: HTML_OPENING_ELEMENT@0..30
         0: L_ANGLE@0..1 "<" [] []
@@ -217,6 +213,6 @@ HtmlRoot {
         2: HTML_TAG_NAME@119..122
           0: DIV_KW@119..122 "div" [] []
         3: R_ANGLE@122..123 ">" [] []
-  5: EOF@123..124 "" [Newline("\n")] []
+  3: EOF@123..124 "" [Newline("\n")] []
 
 ```

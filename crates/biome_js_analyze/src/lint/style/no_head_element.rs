@@ -4,6 +4,7 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::JsxOpeningElement;
+use biome_languages::JsFileSource;
 use biome_rowan::AstNode;
 use biome_rowan::TextRange;
 use biome_rule_options::no_head_element::NoHeadElementOptions;
@@ -62,6 +63,14 @@ impl Rule for NoHeadElement {
     type Options = NoHeadElementOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
+        if ctx
+            .source_type::<JsFileSource>()
+            .as_embedding_kind()
+            .is_astro_template()
+        {
+            return None;
+        }
+
         let element = ctx.query();
         let name = element.name().ok()?.name_value_token().ok()?;
 

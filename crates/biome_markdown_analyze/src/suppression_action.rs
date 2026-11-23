@@ -1,14 +1,33 @@
 use biome_analyze::{ApplySuppression, SuppressionAction};
+use biome_languages::MdFileSource;
 use biome_markdown_syntax::{MarkdownLanguage, MarkdownSyntaxToken, MdRoot};
 use biome_rowan::{AstNode, BatchMutation, TriviaPieceKind};
 
-pub(crate) struct MarkdownSuppressionAction;
+pub(crate) struct MarkdownSuppressionAction {
+    file_source: MdFileSource,
+}
+
+impl MarkdownSuppressionAction {
+    pub(crate) fn new(file_source: MdFileSource) -> Self {
+        Self { file_source }
+    }
+
+    /// Returns `text` as a comment: `{/* text */}` in MDX, which doesn't
+    /// support HTML comments, and `<!-- text -->` otherwise.
+    fn comment(&self, text: &str) -> String {
+        if self.file_source.is_mdx() {
+            format!("{{/* {text} */}}")
+        } else {
+            format!("<!-- {text} -->")
+        }
+    }
+}
 
 impl SuppressionAction for MarkdownSuppressionAction {
     type Language = MarkdownLanguage;
 
     fn suppression_top_level_comment(&self, suppression_text: &str) -> String {
-        format!("<!-- {suppression_text}: <explanation> -->")
+        self.comment(&format!("{suppression_text}: <explanation>"))
     }
 
     fn find_token_for_inline_suppression(
@@ -36,7 +55,7 @@ impl SuppressionAction for MarkdownSuppressionAction {
         } = apply_suppression;
 
         if let Some(line_prefix) = suppression_line_prefix(&token_to_apply_suppression) {
-            let comment = format!("<!-- {suppression_text}: {suppression_reason} -->");
+            let comment = self.comment(&format!("{suppression_text}: {suppression_reason}"));
             insert_comment_trivia(mutation, token_to_apply_suppression, &line_prefix, &comment);
         }
     }

@@ -48,11 +48,25 @@ pub fn format_node(
     root: &HtmlSyntaxNode,
     embedded_node_ranges: Vec<TextRange>,
 ) -> FormatResult<Formatted<HtmlFormatContext>> {
-    let delegate_fmt_embedded_nodes = !embedded_node_ranges.is_empty();
+    format_node_with_verbatim_ranges(options, root, embedded_node_ranges, Vec::new())
+}
+
+/// Formats HTML while preserving failed embedded snippets in `verbatim_embedded_node_ranges`.
+/// Successful snippets in `embedded_node_ranges` remain available for guest-language replacement.
+pub fn format_node_with_verbatim_ranges(
+    options: HtmlFormatOptions,
+    root: &HtmlSyntaxNode,
+    embedded_node_ranges: Vec<TextRange>,
+    verbatim_embedded_node_ranges: Vec<TextRange>,
+) -> FormatResult<Formatted<HtmlFormatContext>> {
+    let has_embedded_nodes =
+        !embedded_node_ranges.is_empty() || !verbatim_embedded_node_ranges.is_empty();
     biome_formatter::format_node(
         root,
-        HtmlFormatLanguage::new(options).with_embedded_node_ranges(embedded_node_ranges),
-        delegate_fmt_embedded_nodes,
+        HtmlFormatLanguage::new(options)
+            .with_embedded_node_ranges(embedded_node_ranges)
+            .with_verbatim_embedded_node_ranges(verbatim_embedded_node_ranges),
+        has_embedded_nodes,
     )
 }
 
@@ -156,6 +170,7 @@ where
 pub struct HtmlFormatLanguage {
     options: HtmlFormatOptions,
     embedded_node_ranges: Vec<TextRange>,
+    verbatim_embedded_node_ranges: Vec<TextRange>,
 }
 
 impl HtmlFormatLanguage {
@@ -163,11 +178,20 @@ impl HtmlFormatLanguage {
         Self {
             options,
             embedded_node_ranges: Vec::new(),
+            verbatim_embedded_node_ranges: Vec::new(),
         }
     }
 
     pub fn with_embedded_node_ranges(mut self, embedded_node_ranges: Vec<TextRange>) -> Self {
         self.embedded_node_ranges = embedded_node_ranges;
+        self
+    }
+
+    pub fn with_verbatim_embedded_node_ranges(
+        mut self,
+        verbatim_embedded_node_ranges: Vec<TextRange>,
+    ) -> Self {
+        self.verbatim_embedded_node_ranges = verbatim_embedded_node_ranges;
         self
     }
 }
@@ -190,7 +214,9 @@ impl FormatLanguage for HtmlFormatLanguage {
         let comments = Comments::from_node(root, &HtmlCommentStyle, source_map.as_ref());
         let context = HtmlFormatContext::new(self.options, comments).with_source_map(source_map);
         if delegate_fmt_embedded_nodes {
-            context.with_embedded_node_ranges(self.embedded_node_ranges)
+            context
+                .with_embedded_node_ranges(self.embedded_node_ranges)
+                .with_verbatim_embedded_node_ranges(self.verbatim_embedded_node_ranges)
         } else {
             context
         }
@@ -243,14 +269,24 @@ where
 
     /// Formats the node without comments. Ignores any suppression comments.
     fn fmt_node(&self, node: &N, f: &mut HtmlFormatter) -> FormatResult<()> {
-        if f.context().should_delegate_fmt_embedded_nodes() {
+        if f.context().has_embedded_node_ranges() {
             let range = self.embedded_range(node);
-            if f.context().is_embedded_node_range(range) {
+            if f.context().is_verbatim_embedded_node_range(range) {
+                return self.fmt_verbatim_embedded_node(node, f);
+            }
+            if f.context().should_delegate_fmt_embedded_nodes()
+                && f.context().is_embedded_node_range(range)
+            {
                 let content = format_with(|f| self.fmt_fields(node, f));
                 let embedded = FormatEmbedded::new(range, &content, f)?;
                 return self.wrap_embed(node, &embedded, f);
             }
         }
+        self.fmt_fields(node, f)
+    }
+
+    /// Formats a failed embedded snippet without normalizing its guest-language source.
+    fn fmt_verbatim_embedded_node(&self, node: &N, f: &mut HtmlFormatter) -> FormatResult<()> {
         self.fmt_fields(node, f)
     }
 

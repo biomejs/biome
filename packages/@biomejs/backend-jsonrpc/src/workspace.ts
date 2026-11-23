@@ -2979,6 +2979,11 @@ export interface Nursery {
 	 */
 	noArraySortForMinMax?: NoArraySortForMinMaxConfiguration;
 	/**
+	 * Disallow runtime default exports in Astro component frontmatter.
+	 * See https://biomejs.dev/linter/rules/no-astro-component-default-export
+	 */
+	noAstroComponentDefaultExport?: NoAstroComponentDefaultExportConfiguration;
+	/**
 	 * Disallow conflicting content sources on Astro elements.
 	 * See https://biomejs.dev/linter/rules/no-astro-conflicting-set-directives
 	 */
@@ -6887,6 +6892,9 @@ export type NoArrayMethodsOnArgumentsConfiguration =
 export type NoArraySortForMinMaxConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoArraySortForMinMaxOptions;
+export type NoAstroComponentDefaultExportConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoAstroComponentDefaultExportOptions;
 export type NoAstroConflictingSetDirectivesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoAstroConflictingSetDirectivesOptions;
@@ -10041,6 +10049,10 @@ export interface RuleWithNoArraySortForMinMaxOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
 	options?: NoArraySortForMinMaxOptions;
+}
+export interface RuleWithNoAstroComponentDefaultExportOptions {
+	level: RulePlainConfiguration;
+	options?: NoAstroComponentDefaultExportOptions;
 }
 export interface RuleWithNoAstroConflictingSetDirectivesOptions {
 	level: RulePlainConfiguration;
@@ -13891,6 +13903,7 @@ export type NoArrayDeleteOptions = {};
 export type NoArrayForEachOptions = {};
 export type NoArrayMethodsOnArgumentsOptions = {};
 export type NoArraySortForMinMaxOptions = {};
+export type NoAstroComponentDefaultExportOptions = {};
 export type NoAstroConflictingSetDirectivesOptions = {};
 export type NoAstroSetHtmlDirectiveOptions = {};
 export type NoAsyncPromiseFinallyOptions = {};
@@ -16443,6 +16456,7 @@ export type Category =
 	| "lint/nursery/noArrayForEach"
 	| "lint/nursery/noArrayMethodsOnArguments"
 	| "lint/nursery/noArraySortForMinMax"
+	| "lint/nursery/noAstroComponentDefaultExport"
 	| "lint/nursery/noAstroConflictingSetDirectives"
 	| "lint/nursery/noAstroSetHtmlDirective"
 	| "lint/nursery/noAsyncPromiseFinally"
@@ -17521,7 +17535,8 @@ export type JsEmbeddingKind =
 				 */
 				is_module_script: boolean;
 			};
-	  };
+	  }
+	| { Mdx: { kind: MdxEmbeddingKind } };
 export type Language =
 	| "javaScript"
 	| { typeScript: { definition_file: boolean } };
@@ -17592,6 +17607,13 @@ export type SvelteEmbeddingKind =
 	| "Declaration"
 	| "Generics";
 export type SvelteFileKind = "Component" | "SourceModule";
+/**
+ * Identifies the JavaScript construct an MDX snippet comes from.
+ *
+ * MDX keeps the Markdown between an opening and a closing JSX tag outside
+ * JavaScript, so each construct is a separate snippet with its own root.
+ */
+export type MdxEmbeddingKind = "Esm" | "Expression" | "Tag";
 export type EmbeddingHtmlKind =
 	| "None"
 	| "Html"

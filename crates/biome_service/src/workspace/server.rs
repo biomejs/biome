@@ -335,7 +335,7 @@ impl ProcessFileState {
             .any(|diagnostic| diagnostic.severity() >= Severity::Error)
             || self
                 .iter_snippets()
-                .blocking_formatting(self.file_source)
+                .blocking_formatting(self.file_source, &self.db)
                 .any(|snippet| snippet.has_errors())
     }
 
@@ -354,7 +354,7 @@ impl ProcessFileState {
             || !self.parsed.diagnostics(&self.db).is_empty()
             || self
                 .iter_snippets()
-                .blocking_formatting(self.file_source)
+                .blocking_formatting(self.file_source, &self.db)
                 .any(|snippet| {
                     !snippet.diagnostics().is_empty()
                         || snippet
@@ -369,7 +369,7 @@ impl ProcessFileState {
     fn error_count(&self, settings: &Settings, path: &BiomePath, analyzed: bool) -> usize {
         let mut counted: FxHashSet<_> = self
             .iter_snippets()
-            .blocking_formatting(self.file_source)
+            .blocking_formatting(self.file_source, &self.db)
             .map(|snippet| snippet.content_range())
             .collect();
         if analyzed {
@@ -868,8 +868,8 @@ impl WorkspaceServerWithDb<'_> {
         )
     }
 
-    /// LSP language ids cover broad languages (`javascript`, `typescript`) but
-    /// not path-specific framework variants like `.svelte.ts`.
+    /// LSP language ids cover broad languages (`javascript`, `typescript`,
+    /// `markdown`) but not path-specific variants like `.svelte.ts` or `.mdx`.
     fn should_prefer_path_source(
         document_file_source: DocumentFileSource,
         path_source: DocumentFileSource,
@@ -885,6 +885,11 @@ impl WorkspaceServerWithDb<'_> {
             (DocumentFileSource::Json(_), DocumentFileSource::Json(path_source)) => {
                 !path_source.kind().is_regular()
             }
+            #[cfg(feature = "lang_mdx")]
+            (
+                DocumentFileSource::Markdown(document_source),
+                DocumentFileSource::Markdown(path_source),
+            ) => !document_source.is_mdx() && path_source.is_mdx(),
             _ => false,
         }
     }
@@ -1074,10 +1079,10 @@ impl WorkspaceServerWithDb<'_> {
                     document_file_source
                 };
 
-            // LSP language ids cannot encode path-specific framework variants like
-            // `.svelte.ts` / `.svelte.js`, and HTML full support can also upgrade
-            // JS-like hints to HTML. Prefer the path-derived source only when it
-            // carries richer semantics than the editor-provided JS hint.
+            // LSP language ids cannot encode path-specific variants like
+            // `.svelte.ts` / `.svelte.js` or `.mdx`, and HTML full support can
+            // also upgrade JS-like hints to HTML. Prefer the path-derived source
+            // only when it carries richer semantics than the editor-provided hint.
             if Self::should_prefer_path_source(document_file_source, path_source) {
                 path_source
             } else {
@@ -1968,6 +1973,7 @@ impl WorkspaceServerWithDb<'_> {
                 skip: &skip,
                 language: state.file_source,
                 categories,
+                rule_execution: Default::default(),
                 workspace_db: state.db.clone(),
                 #[cfg(feature = "html_embeds")]
                 embedded_data,
@@ -1995,7 +2001,10 @@ impl WorkspaceServerWithDb<'_> {
                 .iter()
                 .filter(|diagnostic| diagnostic.severity() >= Severity::Error)
                 .count();
-            for embedded_node in state.iter_snippets().blocking_formatting(state.file_source) {
+            for embedded_node in state
+                .iter_snippets()
+                .blocking_formatting(state.file_source, &state.db)
+            {
                 let embedded_diagnostics: Vec<_> = embedded_node
                     .serde_diagnostics()
                     .into_iter()
@@ -4643,7 +4652,7 @@ impl Workspace for WorkspaceServerWithDb<'_> {
         if !effective_settings.format_with_errors_enabled_for_this_file_path(path.as_path())
             && (parse.parsed(&*workspace_db).has_errors()
                 || SnippetsIterator::from_source(parse, &workspace_db)
-                    .blocking_formatting(document_file_source)
+                    .blocking_formatting(document_file_source, &workspace_db)
                     .any(|snippet| snippet.has_errors()))
         {
             return Err(WorkspaceError::format_with_errors_disabled());
