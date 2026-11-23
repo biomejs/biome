@@ -91,10 +91,24 @@ impl Rule for UseNumberNamespace {
         if !GLOBAL_NUMBER_PROPERTIES.contains(&global_ident.text()) {
             return None;
         }
-        ctx.model()
-            .binding(&reference)
-            .is_none()
-            .then_some(global_ident)
+        if ctx.model().binding(&reference).is_some() {
+            return None;
+        }
+        // The fix for a bare identifier introduces a new reference to the
+        // `Number` global. Skip it when `Number` resolves to a local binding,
+        // otherwise the safe fix would change runtime behavior.
+        // Member accesses on a known global (e.g. `globalThis.NaN`) insert
+        // `Number` as a member name instead, so shadowing cannot affect them.
+        if matches!(node, AnyPossibleGlobalIdentifier::JsIdentifierExpression(_))
+            && ctx
+                .model()
+                .scope(reference.syntax())
+                .ancestors()
+                .any(|scope| scope.get_binding("Number").is_some())
+        {
+            return None;
+        }
+        Some(global_ident)
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, global_ident: &Self::State) -> Option<RuleDiagnostic> {

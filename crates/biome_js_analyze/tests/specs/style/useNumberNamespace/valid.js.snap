@@ -26,4 +26,26 @@ function f(parseFloat) {
 	parseFloat("1.1");
 }
 
+// `Number` is shadowed by a function parameter: the safe fix would
+// introduce a reference to the local binding, so no diagnostic is emitted.
+function f(Number) {
+	return { [NaN]: 1 }.NaN;
+}
+
+function g(Number) {
+	return parseInt("1");
+}
+
+function h(Number) {
+	function inner() {
+		return parseFloat("1.1");
+	}
+	return inner();
+}
+
+{
+	const Number = {};
+	const value = Infinity;
+}
+
 ```

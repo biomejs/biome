@@ -87,6 +87,12 @@ window.parseFloat(foo);
 
 globalThis.NaN - globalThis.Infinity;
 
+// Member accesses on a known global are unaffected by a shadowed `Number`
+// binding: `globalThis.Number` still refers to the real global.
+function withShadowedNumber(Number) {
+	return globalThis.NaN;
+}
+
 ```
 
 # Diagnostics
@@ -1082,6 +1088,7 @@ invalid.js:82:1 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━━
   > 82 │ globalThis.NaN - globalThis.Infinity;
        │ ^^^^^^^^^^^^^^
     83 │ 
+    84 │ // Member accesses on a known global are unaffected by a shadowed `Number`
   
   i ES2015 moved some globals into the Number namespace for consistency.
   
@@ -1092,6 +1099,7 @@ invalid.js:82:1 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━━
     82    │ - globalThis.NaN·-·globalThis.Infinity;
        82 │ + globalThis.Number.NaN·-·globalThis.Infinity;
     83 83 │   
+    84 84 │   // Member accesses on a known global are unaffected by a shadowed `Number`
   
 
 ```
@@ -1106,6 +1114,7 @@ invalid.js:82:18 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━�
   > 82 │ globalThis.NaN - globalThis.Infinity;
        │                  ^^^^^^^^^^^^^^^^^^^
     83 │ 
+    84 │ // Member accesses on a known global are unaffected by a shadowed `Number`
   
   i ES2015 moved some globals into the Number namespace for consistency.
   
@@ -1116,6 +1125,33 @@ invalid.js:82:18 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━�
     82    │ - globalThis.NaN·-·globalThis.Infinity;
        82 │ + globalThis.NaN·-·globalThis.Number.POSITIVE_INFINITY;
     83 83 │   
+    84 84 │   // Member accesses on a known global are unaffected by a shadowed `Number`
+  
+
+```
+
+```
+invalid.js:87:9 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use Number.NaN instead of the equivalent global.
+  
+    85 │ // binding: `globalThis.Number` still refers to the real global.
+    86 │ function withShadowedNumber(Number) {
+  > 87 │ 	return globalThis.NaN;
+       │ 	       ^^^^^^^^^^^^^^
+    88 │ }
+    89 │ 
+  
+  i ES2015 moved some globals into the Number namespace for consistency.
+  
+  i Safe fix: Use Number.NaN instead.
+  
+    85 85 │   // binding: `globalThis.Number` still refers to the real global.
+    86 86 │   function withShadowedNumber(Number) {
+    87    │ - → return·globalThis.NaN;
+       87 │ + → return·globalThis.Number.NaN;
+    88 88 │   }
+    89 89 │   
   
 
 ```
