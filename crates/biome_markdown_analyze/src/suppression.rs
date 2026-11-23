@@ -1,6 +1,7 @@
 use biome_analyze::{
     AnalyzerSuppression, Suppression, SuppressionComment, to_analyzer_suppressions,
 };
+use biome_languages::MdFileSource;
 use biome_markdown_syntax::{MdQuote, MdRoot, MdxExpressionContent};
 use biome_rowan::{AstNode, Direction, SyntaxElement, TextRange, WalkEvent};
 use biome_suppression::{
@@ -24,13 +25,14 @@ pub struct MarkdownSuppression {
     /// This is a limitation of how rowan works, and it represents data (CST).
     quoted_comments: Vec<TextRange>,
     /// The literal range, literal text, and comment ranges of each MDX
-    /// expression that holds only comments, in source order.
+    /// expression that holds only comments, in source order. Empty unless
+    /// the file is MDX.
     /// `{/* biome-ignore ... */}` is the MDX form of a suppression comment.
     mdx_comments: Vec<(TextRange, String, Vec<TextRange>)>,
 }
 
 impl MarkdownSuppression {
-    pub fn new(root: &MdRoot) -> Self {
+    pub fn new(root: &MdRoot, file_source: MdFileSource) -> Self {
         let mut quoted_comments = Vec::new();
         let mut preorder = root.syntax().preorder_with_tokens(Direction::Next);
         while let Some(event) = preorder.next() {
@@ -55,20 +57,28 @@ impl MarkdownSuppression {
             }
         }
 
-        let mdx_comments = root
-            .syntax()
-            .descendants()
-            .filter_map(MdxExpressionContent::cast)
-            .filter_map(|content| {
-                let ranges = content.comment_ranges().ok()??;
-                let token = content.value_token().ok()?;
-                Some((
-                    token.text_trimmed_range(),
-                    token.text_trimmed().to_string(),
-                    ranges,
-                ))
-            })
-            .collect();
+        // `preorder_of_kinds` only creates the nodes it yields, unlike a walk
+        // over every descendant.
+        let mdx_comments = if file_source.is_mdx() {
+            root.syntax()
+                .preorder_of_kinds(MdxExpressionContent::KIND_SET)
+                .filter_map(|event| match event {
+                    WalkEvent::Enter(node) => MdxExpressionContent::cast(node),
+                    WalkEvent::Leave(_) => None,
+                })
+                .filter_map(|content| {
+                    let ranges = content.comment_ranges().ok()??;
+                    let token = content.value_token().ok()?;
+                    Some((
+                        token.text_trimmed_range(),
+                        token.text_trimmed().to_string(),
+                        ranges,
+                    ))
+                })
+                .collect()
+        } else {
+            Vec::new()
+        };
 
         Self {
             quoted_comments,
@@ -105,16 +115,9 @@ impl Suppression for MarkdownSuppression {
     }
 
     fn parse_snippet(&self, range: TextRange) -> Vec<SuppressionComment<'_, Self::Diagnostic>> {
-        let Ok(index) = self
-            .mdx_comments
-            .binary_search_by_key(&range.start(), |(literal, ..)| literal.start())
-        else {
+        let Some((_, text, comments)) = self.mdx_comment(range) else {
             return Vec::new();
         };
-        let (literal, text, comments) = &self.mdx_comments[index];
-        if *literal != range {
-            return Vec::new();
-        }
         comments
             .iter()
             .filter_map(|comment| {
@@ -126,6 +129,26 @@ impl Suppression for MarkdownSuppression {
                 })
             })
             .collect()
+    }
+
+    fn has_snippet_comments(&self) -> bool {
+        !self.mdx_comments.is_empty()
+    }
+
+    fn is_comment_snippet(&self, range: TextRange) -> bool {
+        self.mdx_comment(range).is_some()
+    }
+}
+
+impl MarkdownSuppression {
+    /// Returns the comment-only MDX expression whose literal spans `range`.
+    fn mdx_comment(&self, range: TextRange) -> Option<&(TextRange, String, Vec<TextRange>)> {
+        let index = self
+            .mdx_comments
+            .binary_search_by_key(&range.start(), |(literal, ..)| literal.start())
+            .ok()?;
+        let comment = &self.mdx_comments[index];
+        (comment.0 == range).then_some(comment)
     }
 }
 

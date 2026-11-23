@@ -164,7 +164,7 @@ pub(crate) fn analyze_and_snap(
         &root,
         filter,
         &options,
-        MdFileSource::markdown(),
+        file_source(input_file),
         |event| {
             if let Some(mut diag) = event.diagnostic() {
                 for action in event.actions(ActionFilter::all()) {
@@ -248,6 +248,16 @@ pub(crate) fn analyze_and_snap(
     assert_diagnostics_expectation_comment(input_file, root.syntax(), diagnostics);
 }
 
+/// Returns the file source of the fixture at `path`: MDX for `.mdx` files,
+/// matching the parser options of the fixture.
+fn file_source(path: &Utf8Path) -> MdFileSource {
+    if path.extension().is_some_and(|extension| extension == "mdx") {
+        MdFileSource::mdx()
+    } else {
+        MdFileSource::markdown()
+    }
+}
+
 fn check_code_action(
     path: &Utf8Path,
     source: &str,
@@ -287,22 +297,16 @@ fn check_code_action(
     if action.is_suppression() {
         let count_diagnostics = |root: &MdRoot| {
             let mut count = 0;
-            biome_markdown_analyze::analyze(
-                root,
-                filter,
-                options,
-                MdFileSource::markdown(),
-                |event| {
-                    if event
-                        .diagnostic()
-                        .and_then(|diagnostic| diagnostic.category())
-                        .is_some_and(|category| category.name().starts_with("lint/"))
-                    {
-                        count += 1;
-                    }
-                    ControlFlow::<Never>::Continue(())
-                },
-            );
+            biome_markdown_analyze::analyze(root, filter, options, file_source(path), |event| {
+                if event
+                    .diagnostic()
+                    .and_then(|diagnostic| diagnostic.category())
+                    .is_some_and(|category| category.name().starts_with("lint/"))
+                {
+                    count += 1;
+                }
+                ControlFlow::<Never>::Continue(())
+            });
             count
         };
         let remaining = count_diagnostics(&re_parse.tree());
