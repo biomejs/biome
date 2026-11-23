@@ -1,6 +1,7 @@
 use std::ops;
 
-use crate::{AstNode, AstNodeList, AstSeparatedList, SyntaxToken};
+use super::trivia::{self, TokenlessSource};
+use crate::{AstNode, AstNodeList, AstSeparatedList, SyntaxElement, SyntaxToken};
 
 pub trait AstNodeExt: AstNode {
     /// Return a new version of this node with the node `prev_node` replaced with `next_node`
@@ -69,40 +70,22 @@ where
         )?))
     }
 
-    fn replace_node<N>(self, prev_node: N, mut next_node: N) -> Option<Self>
+    fn replace_node<N>(self, prev_node: N, next_node: N) -> Option<Self>
     where
         N: AstNode<Language = Self::Language>,
         Self: Sized,
     {
-        // Lookup the first token of `prev_node` and `next_node`, and transfer the leading
-        // trivia of the former to the later
-        let prev_first = prev_node.syntax().first_token();
-        let next_first = next_node.syntax().first_token();
+        let prev_element = SyntaxElement::Node(prev_node.into_syntax());
+        let next_element = trivia::copy(
+            &prev_element,
+            SyntaxElement::Node(next_node.into_syntax()),
+            TokenlessSource::PreserveDestination,
+        )?;
 
-        if let (Some(prev_first), Some(next_first)) = (prev_first, next_first) {
-            let pieces: Vec<_> = prev_first.leading_trivia().pieces().collect();
-
-            next_node = next_node.replace_token_discard_trivia(
-                next_first.clone(),
-                next_first
-                    .with_leading_trivia(pieces.iter().map(|piece| (piece.kind(), piece.text()))),
-            )?;
-        }
-
-        // Lookup the last token of `prev_node` and `next_node`, and transfer the trailing
-        // trivia of the former to the later
-        let prev_last = prev_node.syntax().last_token();
-        let next_last = next_node.syntax().last_token();
-
-        if let (Some(prev_last), Some(next_last)) = (prev_last, next_last) {
-            next_node = next_node.replace_token_discard_trivia(
-                next_last.clone(),
-                next_last.with_trailing_trivia_pieces(prev_last.trailing_trivia().pieces()),
-            )?;
-        }
-
-        // Call replace node with the modified `next_node`
-        self.replace_node_discard_trivia(prev_node, next_node)
+        Some(Self::unwrap_cast(
+            self.into_syntax()
+                .replace_child(prev_element, next_element)?,
+        ))
     }
 
     fn replace_token_discard_trivia(
@@ -127,15 +110,17 @@ where
     where
         Self: Sized,
     {
-        let leading_trivia = prev_token.leading_trivia().pieces();
-        let trailing_trivia = prev_token.trailing_trivia().pieces();
+        let prev_element = SyntaxElement::Token(prev_token);
+        let next_element = trivia::copy(
+            &prev_element,
+            SyntaxElement::Token(next_token),
+            TokenlessSource::PreserveDestination,
+        )?;
 
-        self.replace_token_discard_trivia(
-            prev_token,
-            next_token
-                .with_leading_trivia_pieces(leading_trivia)
-                .with_trailing_trivia_pieces(trailing_trivia),
-        )
+        Some(Self::unwrap_cast(
+            self.into_syntax()
+                .replace_child(prev_element, next_element)?,
+        ))
     }
 
     /// Return a new version of this node detached from its parent node

@@ -13,7 +13,6 @@ use std::hash::{Hash, Hasher};
 use std::iter::FusedIterator;
 use std::marker::PhantomData;
 
-mod batch;
 mod mutation;
 
 use crate::syntax::{SyntaxSlot, SyntaxSlots};
@@ -21,8 +20,7 @@ use crate::{
     Language, RawSyntaxKind, SyntaxKind, SyntaxList, SyntaxNode, SyntaxToken, SyntaxTriviaPiece,
     Text,
 };
-pub use batch::*;
-pub use mutation::{AstNodeExt, AstNodeListExt, AstSeparatedListExt};
+pub use mutation::*;
 
 /// Represents a set of [SyntaxKind] as a bitfield, with each bit representing
 /// whether the corresponding [RawSyntaxKind] value is contained in the set
