@@ -1,0 +1,736 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+if (isAdmin) {
+	showDashboard();
+	loadStats();
+} else {
+	showDashboard();
+	loadStats();
+}
+
+if (foo) {
+	bar();
+} else if (baz) {
+	bar();
+}
+
+if (foo) {
+	bar();
+} else if (baz) {
+	bar();
+} else {
+	bar();
+}
+
+if (foo) {
+	bar();
+} else if (baz) {
+	qux();
+} else {
+	qux();
+}
+
+function returns() {
+	if (foo)
+		return bar();
+	else
+		return bar();
+}
+
+if (foo)
+	bar();
+else {
+	bar();
+}
+
+if (foo)
+	bar();
+else
+	bar()
+
+if (foo) {
+	// Comment does not make the branch different.
+	bar();
+} else {
+	bar();
+}
+
+if (foo) {
+	bar(
+		baz
+	);
+} else {
+	bar(baz);
+}
+
+function semicolons() {
+	if (foo) {
+		return bar();
+	} else {
+		return bar()
+	}
+}
+
+function doWhile() {
+	if (foo) {
+		do {
+			bar();
+		} while (baz);
+	} else {
+		do {
+			bar();
+		} while (baz)
+	}
+}
+
+// Empty statements are ignored.
+if (foo) {
+	bar();
+	;
+} else {
+	bar();
+}
+
+if (foo) {
+	const value = 'unicorn';
+} else {
+	const value = "unicorn";
+}
+
+if (foo) {
+	callback = () => {
+		return 42;
+	};
+} else {
+	callback = () => {
+		return 42
+	};
+}
+
+function nested() {
+	if (foo) {
+		if (bar) {
+			baz();
+		} else {
+			baz();
+		}
+	}
+}
+
+if (foo) {
+	for (let i = 0; i < n; i++) step();
+} else {
+	for (let i = 0; i < n; i++) step()
+}
+
+```
+
+# Diagnostics
+```
+invalid.js:5:8 lint/nursery/noDuplicateIfBranches ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This branch runs the same code as the branch before it.
+  
+     3 │ 	showDashboard();
+     4 │ 	loadStats();
+   > 5 │ } else {
+       │        ^
+   > 6 │ 	showDashboard();
+   > 7 │ 	loadStats();
+   > 8 │ }
+       │ ^
+     9 │ 
+    10 │ if (foo) {
+  
+  i The branch before it is here:
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ if (isAdmin) {
+      │              ^
+  > 3 │ 	showDashboard();
+  > 4 │ 	loadStats();
+  > 5 │ } else {
+      │ ^
+    6 │ 	showDashboard();
+    7 │ 	loadStats();
+  
+  i The condition that chooses between these branches makes no difference, which is often a copy-paste mistake.
+  
+  i Change the code of one of the branches, or merge the branches into one.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:12:17 lint/nursery/noDuplicateIfBranches ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This branch runs the same code as the branch before it.
+  
+    10 │ if (foo) {
+    11 │ 	bar();
+  > 12 │ } else if (baz) {
+       │                 ^
+  > 13 │ 	bar();
+  > 14 │ }
+       │ ^
+    15 │ 
+    16 │ if (foo) {
+  
+  i The branch before it is here:
+  
+     8 │ }
+     9 │ 
+  > 10 │ if (foo) {
+       │          ^
+  > 11 │ 	bar();
+  > 12 │ } else if (baz) {
+       │ ^
+    13 │ 	bar();
+    14 │ }
+  
+  i The condition that chooses between these branches makes no difference, which is often a copy-paste mistake.
+  
+  i Change the code of one of the branches, or merge the branches into one.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:18:17 lint/nursery/noDuplicateIfBranches ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This branch runs the same code as the branch before it.
+  
+    16 │ if (foo) {
+    17 │ 	bar();
+  > 18 │ } else if (baz) {
+       │                 ^
+  > 19 │ 	bar();
+  > 20 │ } else {
+       │ ^
+    21 │ 	bar();
+    22 │ }
+  
+  i The branch before it is here:
+  
+    14 │ }
+    15 │ 
+  > 16 │ if (foo) {
+       │          ^
+  > 17 │ 	bar();
+  > 18 │ } else if (baz) {
+       │ ^
+    19 │ 	bar();
+    20 │ } else {
+  
+  i The condition that chooses between these branches makes no difference, which is often a copy-paste mistake.
+  
+  i Change the code of one of the branches, or merge the branches into one.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:20:8 lint/nursery/noDuplicateIfBranches ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This branch runs the same code as the branch before it.
+  
+    18 │ } else if (baz) {
+    19 │ 	bar();
+  > 20 │ } else {
+       │        ^
+  > 21 │ 	bar();
+  > 22 │ }
+       │ ^
+    23 │ 
+    24 │ if (foo) {
+  
+  i The branch before it is here:
+  
+    16 │ if (foo) {
+    17 │ 	bar();
+  > 18 │ } else if (baz) {
+       │                 ^
+  > 19 │ 	bar();
+  > 20 │ } else {
+       │ ^
+    21 │ 	bar();
+    22 │ }
+  
+  i The condition that chooses between these branches makes no difference, which is often a copy-paste mistake.
+  
+  i Change the code of one of the branches, or merge the branches into one.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:28:8 lint/nursery/noDuplicateIfBranches ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This branch runs the same code as the branch before it.
+  
+    26 │ } else if (baz) {
+    27 │ 	qux();
+  > 28 │ } else {
+       │        ^
+  > 29 │ 	qux();
+  > 30 │ }
+       │ ^
+    31 │ 
+    32 │ function returns() {
+  
+  i The branch before it is here:
+  
+    24 │ if (foo) {
+    25 │ 	bar();
+  > 26 │ } else if (baz) {
+       │                 ^
+  > 27 │ 	qux();
+  > 28 │ } else {
+       │ ^
+    29 │ 	qux();
+    30 │ }
+  
+  i The condition that chooses between these branches makes no difference, which is often a copy-paste mistake.
+  
+  i Change the code of one of the branches, or merge the branches into one.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:36:3 lint/nursery/noDuplicateIfBranches ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This branch runs the same code as the branch before it.
+  
+    34 │ 		return bar();
+    35 │ 	else
+  > 36 │ 		return bar();
+       │ 		^^^^^^^^^^^^^
+    37 │ }
+    38 │ 
+  
+  i The branch before it is here:
+  
+    32 │ function returns() {
+    33 │ 	if (foo)
+  > 34 │ 		return bar();
+       │ 		^^^^^^^^^^^^^
+    35 │ 	else
+    36 │ 		return bar();
+  
+  i The condition that chooses between these branches makes no difference, which is often a copy-paste mistake.
+  
+  i Change the code of one of the branches, or merge the branches into one.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:41:6 lint/nursery/noDuplicateIfBranches ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This branch runs the same code as the branch before it.
+  
+    39 │ if (foo)
+    40 │ 	bar();
+  > 41 │ else {
+       │      ^
+  > 42 │ 	bar();
+  > 43 │ }
+       │ ^
+    44 │ 
+    45 │ if (foo)
+  
+  i The branch before it is here:
+  
+    39 │ if (foo)
+  > 40 │ 	bar();
+       │ 	^^^^^^
+    41 │ else {
+    42 │ 	bar();
+  
+  i The condition that chooses between these branches makes no difference, which is often a copy-paste mistake.
+  
+  i Change the code of one of the branches, or merge the branches into one.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:48:2 lint/nursery/noDuplicateIfBranches ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This branch runs the same code as the branch before it.
+  
+    46 │ 	bar();
+    47 │ else
+  > 48 │ 	bar()
+       │ 	^^^^^
+    49 │ 
+    50 │ if (foo) {
+  
+  i The branch before it is here:
+  
+    45 │ if (foo)
+  > 46 │ 	bar();
+       │ 	^^^^^^
+    47 │ else
+    48 │ 	bar()
+  
+  i The condition that chooses between these branches makes no difference, which is often a copy-paste mistake.
+  
+  i Change the code of one of the branches, or merge the branches into one.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:53:8 lint/nursery/noDuplicateIfBranches ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This branch runs the same code as the branch before it.
+  
+    51 │ 	// Comment does not make the branch different.
+    52 │ 	bar();
+  > 53 │ } else {
+       │        ^
+  > 54 │ 	bar();
+  > 55 │ }
+       │ ^
+    56 │ 
+    57 │ if (foo) {
+  
+  i The branch before it is here:
+  
+    48 │ 	bar()
+    49 │ 
+  > 50 │ if (foo) {
+       │          ^
+  > 51 │ 	// Comment does not make the branch different.
+  > 52 │ 	bar();
+  > 53 │ } else {
+       │ ^
+    54 │ 	bar();
+    55 │ }
+  
+  i The condition that chooses between these branches makes no difference, which is often a copy-paste mistake.
+  
+  i Change the code of one of the branches, or merge the branches into one.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:61:8 lint/nursery/noDuplicateIfBranches ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This branch runs the same code as the branch before it.
+  
+    59 │ 		baz
+    60 │ 	);
+  > 61 │ } else {
+       │        ^
+  > 62 │ 	bar(baz);
+  > 63 │ }
+       │ ^
+    64 │ 
+    65 │ function semicolons() {
+  
+  i The branch before it is here:
+  
+    55 │ }
+    56 │ 
+  > 57 │ if (foo) {
+       │          ^
+  > 58 │ 	bar(
+  > 59 │ 		baz
+  > 60 │ 	);
+  > 61 │ } else {
+       │ ^
+    62 │ 	bar(baz);
+    63 │ }
+  
+  i The condition that chooses between these branches makes no difference, which is often a copy-paste mistake.
+  
+  i Change the code of one of the branches, or merge the branches into one.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:68:9 lint/nursery/noDuplicateIfBranches ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This branch runs the same code as the branch before it.
+  
+    66 │ 	if (foo) {
+    67 │ 		return bar();
+  > 68 │ 	} else {
+       │ 	       ^
+  > 69 │ 		return bar()
+  > 70 │ 	}
+       │ 	^
+    71 │ }
+    72 │ 
+  
+  i The branch before it is here:
+  
+    65 │ function semicolons() {
+  > 66 │ 	if (foo) {
+       │ 	         ^
+  > 67 │ 		return bar();
+  > 68 │ 	} else {
+       │ 	^
+    69 │ 		return bar()
+    70 │ 	}
+  
+  i The condition that chooses between these branches makes no difference, which is often a copy-paste mistake.
+  
+  i Change the code of one of the branches, or merge the branches into one.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:78:9 lint/nursery/noDuplicateIfBranches ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This branch runs the same code as the branch before it.
+  
+    76 │ 			bar();
+    77 │ 		} while (baz);
+  > 78 │ 	} else {
+       │ 	       ^
+  > 79 │ 		do {
+  > 80 │ 			bar();
+  > 81 │ 		} while (baz)
+  > 82 │ 	}
+       │ 	^
+    83 │ }
+    84 │ 
+  
+  i The branch before it is here:
+  
+    73 │ function doWhile() {
+  > 74 │ 	if (foo) {
+       │ 	         ^
+  > 75 │ 		do {
+  > 76 │ 			bar();
+  > 77 │ 		} while (baz);
+  > 78 │ 	} else {
+       │ 	^
+    79 │ 		do {
+    80 │ 			bar();
+  
+  i The condition that chooses between these branches makes no difference, which is often a copy-paste mistake.
+  
+  i Change the code of one of the branches, or merge the branches into one.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:89:8 lint/nursery/noDuplicateIfBranches ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This branch runs the same code as the branch before it.
+  
+    87 │ 	bar();
+    88 │ 	;
+  > 89 │ } else {
+       │        ^
+  > 90 │ 	bar();
+  > 91 │ }
+       │ ^
+    92 │ 
+    93 │ if (foo) {
+  
+  i The branch before it is here:
+  
+    85 │ // Empty statements are ignored.
+  > 86 │ if (foo) {
+       │          ^
+  > 87 │ 	bar();
+  > 88 │ 	;
+  > 89 │ } else {
+       │ ^
+    90 │ 	bar();
+    91 │ }
+  
+  i The condition that chooses between these branches makes no difference, which is often a copy-paste mistake.
+  
+  i Change the code of one of the branches, or merge the branches into one.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:95:8 lint/nursery/noDuplicateIfBranches ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This branch runs the same code as the branch before it.
+  
+    93 │ if (foo) {
+    94 │ 	const value = 'unicorn';
+  > 95 │ } else {
+       │        ^
+  > 96 │ 	const value = "unicorn";
+  > 97 │ }
+       │ ^
+    98 │ 
+    99 │ if (foo) {
+  
+  i The branch before it is here:
+  
+    91 │ }
+    92 │ 
+  > 93 │ if (foo) {
+       │          ^
+  > 94 │ 	const value = 'unicorn';
+  > 95 │ } else {
+       │ ^
+    96 │ 	const value = "unicorn";
+    97 │ }
+  
+  i The condition that chooses between these branches makes no difference, which is often a copy-paste mistake.
+  
+  i Change the code of one of the branches, or merge the branches into one.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:103:8 lint/nursery/noDuplicateIfBranches ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This branch runs the same code as the branch before it.
+  
+    101 │ 		return 42;
+    102 │ 	};
+  > 103 │ } else {
+        │        ^
+  > 104 │ 	callback = () => {
+  > 105 │ 		return 42
+  > 106 │ 	};
+  > 107 │ }
+        │ ^
+    108 │ 
+    109 │ function nested() {
+  
+  i The branch before it is here:
+  
+     97 │ }
+     98 │ 
+   > 99 │ if (foo) {
+        │          ^
+  > 100 │ 	callback = () => {
+  > 101 │ 		return 42;
+  > 102 │ 	};
+  > 103 │ } else {
+        │ ^
+    104 │ 	callback = () => {
+    105 │ 		return 42
+  
+  i The condition that chooses between these branches makes no difference, which is often a copy-paste mistake.
+  
+  i Change the code of one of the branches, or merge the branches into one.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:113:10 lint/nursery/noDuplicateIfBranches ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This branch runs the same code as the branch before it.
+  
+    111 │ 		if (bar) {
+    112 │ 			baz();
+  > 113 │ 		} else {
+        │ 		       ^
+  > 114 │ 			baz();
+  > 115 │ 		}
+        │ 		^
+    116 │ 	}
+    117 │ }
+  
+  i The branch before it is here:
+  
+    109 │ function nested() {
+    110 │ 	if (foo) {
+  > 111 │ 		if (bar) {
+        │ 		         ^
+  > 112 │ 			baz();
+  > 113 │ 		} else {
+        │ 		^
+    114 │ 			baz();
+    115 │ 		}
+  
+  i The condition that chooses between these branches makes no difference, which is often a copy-paste mistake.
+  
+  i Change the code of one of the branches, or merge the branches into one.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:121:8 lint/nursery/noDuplicateIfBranches ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This branch runs the same code as the branch before it.
+  
+    119 │ if (foo) {
+    120 │ 	for (let i = 0; i < n; i++) step();
+  > 121 │ } else {
+        │        ^
+  > 122 │ 	for (let i = 0; i < n; i++) step()
+  > 123 │ }
+        │ ^
+    124 │ 
+  
+  i The branch before it is here:
+  
+    117 │ }
+    118 │ 
+  > 119 │ if (foo) {
+        │          ^
+  > 120 │ 	for (let i = 0; i < n; i++) step();
+  > 121 │ } else {
+        │ ^
+    122 │ 	for (let i = 0; i < n; i++) step()
+    123 │ }
+  
+  i The condition that chooses between these branches makes no difference, which is often a copy-paste mistake.
+  
+  i Change the code of one of the branches, or merge the branches into one.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

@@ -105,6 +105,7 @@ pub mod no_duplicate_field_definition_names;
 pub mod no_duplicate_fields;
 pub mod no_duplicate_font_names;
 pub mod no_duplicate_graphql_operation_name;
+pub mod no_duplicate_if_branches;
 pub mod no_duplicate_input_field_names;
 pub mod no_duplicate_jsx_props;
 pub mod no_duplicate_map_keys;

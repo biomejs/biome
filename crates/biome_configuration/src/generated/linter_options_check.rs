@@ -496,6 +496,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     ));
     result.push(("suspicious", "noDuplicateGraphqlOperationName", TypeId::of::<biome_rule_options::no_duplicate_graphql_operation_name::NoDuplicateGraphqlOperationNameOptions>()));
     result.push((
+        "nursery",
+        "noDuplicateIfBranches",
+        TypeId::of::<biome_rule_options::no_duplicate_if_branches::NoDuplicateIfBranchesOptions>(),
+    ));
+    result.push((
         "correctness",
         "noDuplicateInputFieldNames",
         TypeId::of::<
