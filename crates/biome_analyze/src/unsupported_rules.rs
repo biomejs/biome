@@ -240,6 +240,7 @@ pub const UNSUPPORTED_RULES: &[UnsupportedRule] = &[
     UnsupportedRule(EslintReact("jsx-space-before-closing"), FormatterCovers),
     UnsupportedRule(EslintReact("jsx-tag-spacing"), FormatterCovers),
     UnsupportedRule(EslintReact("jsx-wrap-multilines"), Stylistic),
+    UnsupportedRule(EslintSolid("prefer-classlist"), Deprecated),
     UnsupportedRule(EslintSvelte("comment-directive"), NotApplicable),
     UnsupportedRule(EslintSvelte("first-attribute-linebreak"), Stylistic),
     UnsupportedRule(EslintSvelte("html-closing-bracket-new-line"), Stylistic),

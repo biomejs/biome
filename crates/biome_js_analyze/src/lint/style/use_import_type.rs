@@ -157,7 +157,10 @@ declare_lint_rule! {
         version: "1.5.0",
         name: "useImportType",
         language: "ts",
-        sources: &[RuleSource::EslintTypeScript("consistent-type-imports").inspired()],
+        sources: &[
+            RuleSource::EslintTypeScript("consistent-type-imports").inspired(),
+            RuleSource::EslintImport("consistent-type-specifier-style").inspired(),
+        ],
         recommended: true,
         severity: Severity::Warning,
         fix_kind: FixKind::Safe,
