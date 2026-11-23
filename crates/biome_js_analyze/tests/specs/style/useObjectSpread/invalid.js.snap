@@ -48,6 +48,8 @@ const test2 = Object.assign({ ...bar }, {
     baz: "cats"
 });
 globalThis.Object.assign({}, foo);
+const asiTarget = f
+Object.assign({}, { a: 1 });
 
 ```
 
@@ -712,7 +714,7 @@ invalid.js:37:15 lint/style/useObjectSpread  FIXABLE  ━━━━━━━━�
     43    │ - });
        42 │ + ····baz:·"cats",});
     44 43 │   globalThis.Object.assign({}, foo);
-    45 44 │   
+    45 44 │   const asiTarget = f
   
 
 ```
@@ -726,7 +728,8 @@ invalid.js:44:1 lint/style/useObjectSpread  FIXABLE  ━━━━━━━━━
     43 │ });
   > 44 │ globalThis.Object.assign({}, foo);
        │ ^^^^^^^^^^^^^^^^^^^^^^^^
-    45 │ 
+    45 │ const asiTarget = f
+    46 │ Object.assign({}, { a: 1 });
   
   i Object spread syntax is more concise, readable, and performs better than Object.assign.
   
@@ -736,7 +739,24 @@ invalid.js:44:1 lint/style/useObjectSpread  FIXABLE  ━━━━━━━━━
     43 43 │   });
     44    │ - globalThis.Object.assign({},·foo);
        44 │ + ({...foo,});
-    45 45 │   
+    45 45 │   const asiTarget = f
+    46 46 │   Object.assign({}, { a: 1 });
+  
+
+```
+
+```
+invalid.js:46:1 lint/style/useObjectSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use object spread instead of Object.assign.
+  
+    44 │ globalThis.Object.assign({}, foo);
+    45 │ const asiTarget = f
+  > 46 │ Object.assign({}, { a: 1 });
+       │ ^^^^^^^^^^^^^
+    47 │ 
+  
+  i Object spread syntax is more concise, readable, and performs better than Object.assign.
   
 
 ```

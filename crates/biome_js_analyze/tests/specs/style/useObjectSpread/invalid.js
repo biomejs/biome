@@ -42,3 +42,5 @@ const test2 = Object.assign({ ...bar }, {
     baz: "cats"
 });
 globalThis.Object.assign({}, foo);
+const asiTarget = f
+Object.assign({}, { a: 1 });
