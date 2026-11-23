@@ -26,7 +26,7 @@ A <Badge>new</Badge> tag and {  value  } in text.
 # Formatted
 
 ```mdx
-import {Chart} from './chart.js'
+import { Chart } from "./chart.js";
 
 # Hello, {props.name}
 
@@ -36,8 +36,8 @@ Some text.
 
 </Note>
 
-<Card>{ props.children }</Card>
+<Card>{props.children}</Card>
 
-A <Badge>new</Badge> tag and {  value  } in text.
+A <Badge>new</Badge> tag and {value} in text.
 
 ```
