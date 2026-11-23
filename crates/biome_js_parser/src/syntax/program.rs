@@ -75,7 +75,14 @@ pub(crate) fn parse(p: &mut JsParser) -> CompletedMarker {
         return parse_template_expression(p, m);
     }
 
-    let (statement_list, strict_snapshot) = parse_directives(p);
+    // An MDX ESM block holds only imports and exports, so a leading string is
+    // a statement that the module item list reports, not a directive.
+    let (statement_list, strict_snapshot) = if p.source_type().as_embedding_kind().is_mdx_esm() {
+        p.start().complete(p, JS_DIRECTIVE_LIST);
+        (p.start(), None)
+    } else {
+        parse_directives(p)
+    };
 
     let result = match p.source_type().module_kind() {
         ModuleKind::Script => {
