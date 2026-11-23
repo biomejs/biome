@@ -1,0 +1,41 @@
+---
+source: crates/biome_yaml_analyze/tests/spec_tests.rs
+expression: ci.yaml
+---
+# Input
+```yaml
+# should generate diagnostics
+---
+on: [push, pull_request]
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+
+```
+
+# Diagnostics
+```
+ci.yaml:2:1 lint/nursery/useGithubWorkflowName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This workflow doesn't have a name.
+  
+    1 │ # should generate diagnostics
+  > 2 │ ---
+      │ ^^^
+  > 3 │ on: [push, pull_request]
+  > 4 │ jobs:
+  > 5 │   build:
+  > 6 │     name: Build
+  > 7 │     runs-on: ubuntu-latest
+      │     ^^^^^^^^^^^^^^^^^^^^^^
+    8 │ 
+  
+  i Without a name, GitHub shows the path of the workflow file in the Actions tab and in pull request checks, which makes workflows harder to tell apart.
+  
+  i Add a top-level name key that describes what the workflow does.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
