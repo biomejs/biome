@@ -3547,6 +3547,13 @@
 			},
 			"additionalProperties": false
 		},
+		"NoAmdConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoAmdOptions" }
+			]
+		},
+		"NoAmdOptions": { "type": "object", "additionalProperties": false },
 		"NoApproximativeNumericConstantConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -9633,6 +9640,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noAmd": {
+					"description": "Disallow AMD require() and define() calls.\nSee https://biomejs.dev/linter/rules/no-amd",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoAmdConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noArgumentsCallerOrCallee": {
 					"description": "Disallow the use of arguments.caller and arguments.callee.\nSee https://biomejs.dev/linter/rules/no-arguments-caller-or-callee",
 					"anyOf": [
@@ -13224,6 +13238,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoAmbiguousAnchorTextOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoAmdOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoAmdOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
