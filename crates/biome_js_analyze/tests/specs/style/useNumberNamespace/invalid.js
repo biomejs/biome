@@ -80,3 +80,9 @@ window.parseFloat(foo);
 // self.parseFloat(foo);
 
 globalThis.NaN - globalThis.Infinity;
+
+// Member accesses on a known global are unaffected by a shadowed `Number`
+// binding: `globalThis.Number` still refers to the real global.
+function withShadowedNumber(Number) {
+	return globalThis.NaN;
+}
