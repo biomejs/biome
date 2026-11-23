@@ -13,7 +13,7 @@ pub(super) fn copy<L: Language>(
     source: &SyntaxElement<L>,
     destination: SyntaxElement<L>,
     tokenless: TokenlessSource,
-) -> SyntaxElement<L> {
+) -> Option<SyntaxElement<L>> {
     match outer_trivia(source) {
         Some(source) => rewrite(
             destination,
@@ -21,7 +21,7 @@ pub(super) fn copy<L: Language>(
             source.trailing.pieces(),
         ),
         None => match tokenless {
-            TokenlessSource::PreserveDestination => destination,
+            TokenlessSource::PreserveDestination => Some(destination),
             TokenlessSource::ClearDestination => rewrite(
                 destination,
                 empty::<SyntaxTriviaPiece<L>>(),
@@ -38,17 +38,17 @@ pub(super) fn transfer<L: Language>(
     let source = outer_trivia(source)?;
     let destination_trivia = outer_trivia(&destination)?;
 
-    Some(rewrite(
+    rewrite(
         destination,
         chain_trivia_pieces(source.leading.pieces(), destination_trivia.leading.pieces()),
         chain_trivia_pieces(
             source.trailing.pieces(),
             destination_trivia.trailing.pieces(),
         ),
-    ))
+    )
 }
 
-pub(super) fn strip<L: Language>(element: SyntaxElement<L>) -> SyntaxElement<L> {
+pub(super) fn strip<L: Language>(element: SyntaxElement<L>) -> Option<SyntaxElement<L>> {
     rewrite(
         element,
         empty::<SyntaxTriviaPiece<L>>(),
@@ -59,7 +59,7 @@ pub(super) fn strip<L: Language>(element: SyntaxElement<L>) -> SyntaxElement<L> 
 pub(super) fn surround<L: Language>(
     source: &SyntaxElement<L>,
     destination: SyntaxElement<L>,
-) -> SyntaxElement<L> {
+) -> Option<SyntaxElement<L>> {
     if let Some(source) = outer_trivia(source)
         && let Some(destination_trivia) = outer_trivia(&destination)
     {
@@ -72,7 +72,7 @@ pub(super) fn surround<L: Language>(
             ),
         )
     } else {
-        destination
+        Some(destination)
     }
 }
 
@@ -106,7 +106,7 @@ fn rewrite<L, Leading, Trailing>(
     element: SyntaxElement<L>,
     leading: Leading,
     trailing: Trailing,
-) -> SyntaxElement<L>
+) -> Option<SyntaxElement<L>>
 where
     L: Language,
     Leading: IntoIterator<Item = SyntaxTriviaPiece<L>>,
@@ -117,36 +117,26 @@ where
     match element {
         SyntaxElement::Node(node) => {
             let Some(first_token) = node.first_token() else {
-                return SyntaxElement::Node(node);
+                return Some(SyntaxElement::Node(node));
             };
-            let last_token = node
-                .last_token()
-                .expect("a node with a first token must have a last token");
+            let last_token = node.last_token()?;
 
             if first_token == last_token {
                 let new_token = first_token.with_trivia_pieces(leading, trailing);
-                let node = node
-                    .replace_child(first_token.into(), new_token.into())
-                    .expect("an edge token must belong to its node");
-                SyntaxElement::Node(node)
+                let node = node.replace_child(first_token.into(), new_token.into())?;
+                Some(SyntaxElement::Node(node))
             } else {
                 let new_first_token = first_token.with_leading_trivia_pieces(leading);
-                let node = node
-                    .replace_child(first_token.into(), new_first_token.into())
-                    .expect("an edge token must belong to its node");
-                let last_token = node
-                    .last_token()
-                    .expect("a node with a first token must have a last token");
+                let node = node.replace_child(first_token.into(), new_first_token.into())?;
+                let last_token = node.last_token()?;
                 let new_last_token = last_token.with_trailing_trivia_pieces(trailing);
-                let node = node
-                    .replace_child(last_token.into(), new_last_token.into())
-                    .expect("an edge token must belong to its node");
-                SyntaxElement::Node(node)
+                let node = node.replace_child(last_token.into(), new_last_token.into())?;
+                Some(SyntaxElement::Node(node))
             }
         }
-        SyntaxElement::Token(token) => {
-            SyntaxElement::Token(token.with_trivia_pieces(leading, trailing))
-        }
+        SyntaxElement::Token(token) => Some(SyntaxElement::Token(
+            token.with_trivia_pieces(leading, trailing),
+        )),
     }
 }
 
@@ -225,13 +215,14 @@ mod tests {
             &source,
             destination.clone(),
             TokenlessSource::PreserveDestination,
-        );
+        )
+        .unwrap();
         assert_eq!(
             text(&preserved),
             format!("{DESTINATION_LEADING}d{DESTINATION_TRAILING}")
         );
 
-        let cleared = copy(&source, destination, TokenlessSource::ClearDestination);
+        let cleared = copy(&source, destination, TokenlessSource::ClearDestination).unwrap();
         assert_eq!(text(&cleared), "d");
 
         let empty_source = SyntaxElement::Token(token("s", "", ""));
@@ -239,7 +230,8 @@ mod tests {
             &empty_source,
             SyntaxElement::Token(token("d", DESTINATION_LEADING, DESTINATION_TRAILING)),
             TokenlessSource::PreserveDestination,
-        );
+        )
+        .unwrap();
         assert_eq!(text(&copied), "d");
     }
 
@@ -249,9 +241,9 @@ mod tests {
         let destination =
             || SyntaxElement::Token(token("d", DESTINATION_LEADING, DESTINATION_TRAILING));
 
-        let copied = copy(&source, destination(), TokenlessSource::PreserveDestination);
+        let copied = copy(&source, destination(), TokenlessSource::PreserveDestination).unwrap();
         assert_eq!(text(&copied), format!("{SOURCE_LEADING}d{SOURCE_TRAILING}"));
-        assert_eq!(text(&strip(source.clone())), "s");
+        assert_eq!(text(&strip(source.clone()).unwrap()), "s");
 
         let transferred = transfer(&source, destination()).unwrap();
         assert_eq!(
@@ -261,7 +253,7 @@ mod tests {
             )
         );
 
-        let surrounded = surround(&source, destination());
+        let surrounded = surround(&source, destination()).unwrap();
         assert_eq!(
             text(&surrounded),
             format!(
@@ -292,7 +284,7 @@ mod tests {
             token("d2", "/*destination-inner-right*/", DESTINATION_TRAILING),
         ));
 
-        let result = copy(&source, destination, TokenlessSource::PreserveDestination);
+        let result = copy(&source, destination, TokenlessSource::PreserveDestination).unwrap();
         assert_eq!(
             text(&result),
             format!(
@@ -309,16 +301,13 @@ mod tests {
 
         assert!(transfer(&tokenless, destination.clone()).is_none());
         assert!(transfer(&destination, SyntaxElement::Node(tokenless_node())).is_none());
-        assert_eq!(text(&strip(tokenless.clone())), "");
+        assert_eq!(text(&strip(tokenless.clone()).unwrap()), "");
         assert_eq!(
-            text(&surround(&tokenless, destination.clone())),
+            text(&surround(&tokenless, destination.clone()).unwrap()),
             text(&destination)
         );
         assert_eq!(
-            text(&surround(
-                &destination,
-                SyntaxElement::Node(tokenless_node())
-            )),
+            text(&surround(&destination, SyntaxElement::Node(tokenless_node())).unwrap()),
             ""
         );
         assert_eq!(

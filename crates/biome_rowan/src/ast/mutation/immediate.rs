@@ -80,7 +80,7 @@ where
             &prev_element,
             SyntaxElement::Node(next_node.into_syntax()),
             TokenlessSource::PreserveDestination,
-        );
+        )?;
 
         Some(Self::unwrap_cast(
             self.into_syntax()
@@ -115,7 +115,7 @@ where
             &prev_element,
             SyntaxElement::Token(next_token),
             TokenlessSource::PreserveDestination,
-        );
+        )?;
 
         Some(Self::unwrap_cast(
             self.into_syntax()

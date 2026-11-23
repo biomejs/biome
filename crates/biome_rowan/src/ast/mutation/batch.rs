@@ -225,12 +225,13 @@ where
         prev_element: SyntaxElement<L>,
         next_element: SyntaxElement<L>,
     ) {
-        let next_element = trivia::copy(
+        if let Some(next_element) = trivia::copy(
             &prev_element,
             next_element,
             TokenlessSource::ClearDestination,
-        );
-        self.push_change(prev_element, Some(next_element))
+        ) {
+            self.push_change(prev_element, Some(next_element));
+        }
     }
 
     /// Push a change to replace the "prev_node" with "next_node".
@@ -287,10 +288,11 @@ where
         next_token: SyntaxToken<L>,
     ) {
         let prev_element = SyntaxElement::Token(prev_token);
-        let next_element = trivia::transfer(&prev_element, SyntaxElement::Token(next_token))
-            .expect("tokens always have outer trivia");
-
-        self.replace_element_discard_trivia(prev_element, next_element)
+        if let Some(next_element) =
+            trivia::transfer(&prev_element, SyntaxElement::Token(next_token))
+        {
+            self.replace_element_discard_trivia(prev_element, next_element);
+        }
     }
 
     /// Push a change to replace `node` with the node that `wrap` builds around it, such as
@@ -305,13 +307,14 @@ where
         U: AstNode<Language = L>,
     {
         let prev_element = SyntaxElement::Node(node.syntax().clone());
-        let stripped = trivia::strip(SyntaxElement::Node(node.into_syntax()))
-            .into_node()
-            .expect("stripping trivia preserves the element kind");
-        let wrapped = wrap(T::unwrap_cast(stripped)).into_syntax();
-        let wrapped = trivia::surround(&prev_element, SyntaxElement::Node(wrapped));
-
-        self.replace_element_discard_trivia(prev_element, wrapped);
+        if let Some(stripped) = trivia::strip(SyntaxElement::Node(node.into_syntax()))
+            .and_then(|element| element.into_node())
+        {
+            let wrapped = wrap(T::unwrap_cast(stripped)).into_syntax();
+            if let Some(wrapped) = trivia::surround(&prev_element, SyntaxElement::Node(wrapped)) {
+                self.replace_element_discard_trivia(prev_element, wrapped);
+            }
+        }
     }
 
     /// Push a change to replace the "prev_element" with "next_element".
