@@ -57,6 +57,7 @@ declare_lint_rule! {
         sources: &[
             RuleSource::Oxc("erasing-op").same(),
             RuleSource::Clippy("erasing_op").same(),
+            RuleSource::EslintUnicorn("no-constant-zero-expression").inspired(),
         ],
         recommended: true,
         severity: Severity::Error,
