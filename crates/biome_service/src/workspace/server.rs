@@ -868,8 +868,8 @@ impl WorkspaceServerWithDb<'_> {
         )
     }
 
-    /// LSP language ids cover broad languages (`javascript`, `typescript`) but
-    /// not path-specific framework variants like `.svelte.ts`.
+    /// LSP language ids cover broad languages (`javascript`, `typescript`,
+    /// `markdown`) but not path-specific variants like `.svelte.ts` or `.mdx`.
     fn should_prefer_path_source(
         document_file_source: DocumentFileSource,
         path_source: DocumentFileSource,
@@ -885,6 +885,11 @@ impl WorkspaceServerWithDb<'_> {
             (DocumentFileSource::Json(_), DocumentFileSource::Json(path_source)) => {
                 !path_source.kind().is_regular()
             }
+            #[cfg(feature = "lang_mdx")]
+            (
+                DocumentFileSource::Markdown(document_source),
+                DocumentFileSource::Markdown(path_source),
+            ) => !document_source.is_mdx() && path_source.is_mdx(),
             _ => false,
         }
     }
@@ -1074,10 +1079,10 @@ impl WorkspaceServerWithDb<'_> {
                     document_file_source
                 };
 
-            // LSP language ids cannot encode path-specific framework variants like
-            // `.svelte.ts` / `.svelte.js`, and HTML full support can also upgrade
-            // JS-like hints to HTML. Prefer the path-derived source only when it
-            // carries richer semantics than the editor-provided JS hint.
+            // LSP language ids cannot encode path-specific variants like
+            // `.svelte.ts` / `.svelte.js` or `.mdx`, and HTML full support can
+            // also upgrade JS-like hints to HTML. Prefer the path-derived source
+            // only when it carries richer semantics than the editor-provided hint.
             if Self::should_prefer_path_source(document_file_source, path_source) {
                 path_source
             } else {
