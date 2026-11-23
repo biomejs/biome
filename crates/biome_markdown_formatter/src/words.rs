@@ -432,18 +432,8 @@ impl WordGroup {
         let Some(ProseAtom::Word(word)) = self.atoms.first() else {
             return false;
         };
-        let text = word.text.text();
 
-        if text.starts_with('>')
-            || matches!(text, "*" | "+" | "-")
-            || matches!(text, "#" | "##" | "###" | "####" | "#####" | "######")
-        {
-            return true;
-        }
-
-        text.strip_suffix(['.', ')']).is_some_and(|number| {
-            !number.is_empty() && number.bytes().all(|byte| byte.is_ascii_digit())
-        })
+        is_block_marker_word(word.text.text())
     }
 
     fn first_significant_character(&self) -> Option<char> {
@@ -500,6 +490,21 @@ impl WordGroup {
             || is_cjk_punctuation(before)
             || is_cjk_punctuation(after)
     }
+}
+
+/// Whether `word` would start a blockquote, a list item, or a heading at the
+/// start of a line.
+pub(crate) fn is_block_marker_word(word: &str) -> bool {
+    if word.starts_with('>')
+        || matches!(word, "*" | "+" | "-")
+        || matches!(word, "#" | "##" | "###" | "####" | "#####" | "######")
+    {
+        return true;
+    }
+
+    word.strip_suffix(['.', ')']).is_some_and(|number| {
+        !number.is_empty() && number.bytes().all(|byte| byte.is_ascii_digit())
+    })
 }
 
 /// An item in a flattened prose list.
