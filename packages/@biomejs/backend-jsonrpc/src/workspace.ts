@@ -1258,6 +1258,7 @@ export interface RuleDomains {
 	astro?: RuleDomainValue;
 	convex?: RuleDomainValue;
 	drizzle?: RuleDomainValue;
+	github?: RuleDomainValue;
 	next?: RuleDomainValue;
 	playwright?: RuleDomainValue;
 	project?: RuleDomainValue;
