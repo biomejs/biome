@@ -496,6 +496,50 @@ fn lint_mdx_files_with_suppress() {
 }
 
 #[test]
+fn lint_mdx_files_with_file_rules_on_esm() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        Utf8Path::new("biome.json").into(),
+        r#"{
+    "linter": {
+        "rules": {
+            "style": {
+                "useFilenamingConvention": "error"
+            }
+        }
+    }
+}"#
+        .as_bytes(),
+    );
+    // The expression comes first, but the ESM block exports the name of the
+    // file, which the rule accepts.
+    let file_path = Utf8Path::new("MyDoc.mdx");
+    let content = r#"# {title}
+
+export const MyDoc = 1
+"#;
+    fs.insert(file_path.into(), content.as_bytes());
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", file_path.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "lint_mdx_files_with_file_rules_on_esm",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn lint_mdx_files_bindings_across_constructs() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
