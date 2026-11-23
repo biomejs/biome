@@ -5851,6 +5851,35 @@ fn lsp_language_hints_keep_svelte_source_module_path_semantics() {
     assert!(!js.is_typescript());
 }
 
+#[cfg(feature = "lang_mdx")]
+#[test]
+fn lsp_markdown_language_hint_keeps_mdx_path_semantics() {
+    const MDX_FILE_PATH: &str = "/project/page.mdx";
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from(MDX_FILE_PATH), b"# Hello, {props.name}\n");
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/");
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new(MDX_FILE_PATH),
+            content: FileContent::FromServer,
+            document_file_source: Some(DocumentFileSource::from_language_id("markdown", None)),
+            persist_node_cache: false,
+            inline_config: None,
+            editor_features: None,
+        })
+        .unwrap();
+
+    let file_source = workspace.get_file_source(MDX_FILE_PATH.into(), false);
+    let markdown = file_source
+        .to_markdown_file_source()
+        .expect("Markdown file source");
+    assert!(markdown.is_mdx());
+}
+
 // noUndeclaredClasses
 
 /// A class used in `class="..."` that has no matching `.foo {}` in any `<style>`
