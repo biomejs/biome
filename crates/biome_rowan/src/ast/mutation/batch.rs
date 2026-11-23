@@ -1,10 +1,9 @@
+use super::trivia::{self, TokenlessSource};
 use crate::syntax::SyntaxKind;
-use crate::{
-    AstNode, Language, SyntaxElement, SyntaxNode, SyntaxSlot, SyntaxToken, chain_trivia_pieces,
-};
+use crate::{AstNode, Language, SyntaxElement, SyntaxNode, SyntaxSlot, SyntaxToken};
 use biome_text_edit::{TextEdit, TextEditBuilder};
 use biome_text_size::{TextRange, TextSize};
-use std::{cmp, collections::BinaryHeap, iter::empty};
+use std::{cmp, collections::BinaryHeap};
 
 pub trait BatchMutationExt<L>: AstNode<Language = L>
 where
@@ -226,60 +225,11 @@ where
         prev_element: SyntaxElement<L>,
         next_element: SyntaxElement<L>,
     ) {
-        let (prev_leading_trivia, prev_trailing_trivia) = match &prev_element {
-            SyntaxElement::Node(node) => (
-                node.first_token().map(|token| token.leading_trivia()),
-                node.last_token().map(|token| token.trailing_trivia()),
-            ),
-            SyntaxElement::Token(token) => {
-                (Some(token.leading_trivia()), Some(token.trailing_trivia()))
-            }
-        };
-
-        let next_element = match next_element {
-            SyntaxElement::Node(mut node) => {
-                if let Some(token) = node.first_token() {
-                    let new_token = match prev_leading_trivia {
-                        Some(prev_leading_trivia) => {
-                            token.with_leading_trivia_pieces(prev_leading_trivia.pieces())
-                        }
-                        None => token.with_leading_trivia_pieces(empty()),
-                    };
-
-                    node = node.replace_child(token.into(), new_token.into()).unwrap();
-                }
-
-                if let Some(token) = node.last_token() {
-                    let new_token = match prev_trailing_trivia {
-                        Some(prev_trailing_trivia) => {
-                            token.with_trailing_trivia_pieces(prev_trailing_trivia.pieces())
-                        }
-                        None => token.with_trailing_trivia_pieces([]),
-                    };
-
-                    node = node.replace_child(token.into(), new_token.into()).unwrap();
-                }
-
-                SyntaxElement::Node(node)
-            }
-            SyntaxElement::Token(token) => {
-                let new_token = match prev_leading_trivia {
-                    Some(prev_leading_trivia) => {
-                        token.with_leading_trivia_pieces(prev_leading_trivia.pieces())
-                    }
-                    None => token.with_leading_trivia_pieces([]),
-                };
-
-                let new_token = match prev_trailing_trivia {
-                    Some(prev_trailing_trivia) => {
-                        new_token.with_trailing_trivia_pieces(prev_trailing_trivia.pieces())
-                    }
-                    None => new_token.with_trailing_trivia_pieces([]),
-                };
-                SyntaxElement::Token(new_token)
-            }
-        };
-
+        let next_element = trivia::copy(
+            &prev_element,
+            next_element,
+            TokenlessSource::ClearDestination,
+        );
         self.push_change(prev_element, Some(next_element))
     }
 
@@ -317,24 +267,11 @@ where
     where
         T: AstNode<Language = L>,
     {
-        let prev_node = prev_node.into_syntax();
-        let next_node = next_node.into_syntax();
+        let prev_element = SyntaxElement::Node(prev_node.into_syntax());
+        let next_element =
+            trivia::transfer(&prev_element, SyntaxElement::Node(next_node.into_syntax()))?;
 
-        let leading_trivia = chain_trivia_pieces(
-            prev_node.first_token()?.leading_trivia().pieces(),
-            next_node.first_token()?.leading_trivia().pieces(),
-        );
-
-        let trailing_trivia = chain_trivia_pieces(
-            prev_node.last_token()?.trailing_trivia().pieces(),
-            next_node.last_token()?.trailing_trivia().pieces(),
-        );
-        let new_node = next_node
-            .with_leading_trivia_pieces(leading_trivia)?
-            .with_trailing_trivia_pieces(trailing_trivia)?;
-
-        self.replace_element_discard_trivia(prev_node.into(), new_node.into());
-
+        self.replace_element_discard_trivia(prev_element, next_element);
         Some(())
     }
 
@@ -349,20 +286,11 @@ where
         prev_token: SyntaxToken<L>,
         next_token: SyntaxToken<L>,
     ) {
-        let leading_trivia = chain_trivia_pieces(
-            prev_token.leading_trivia().pieces(),
-            next_token.leading_trivia().pieces(),
-        );
+        let prev_element = SyntaxElement::Token(prev_token);
+        let next_element = trivia::transfer(&prev_element, SyntaxElement::Token(next_token))
+            .expect("tokens always have outer trivia");
 
-        let trailing_trivia = chain_trivia_pieces(
-            prev_token.trailing_trivia().pieces(),
-            next_token.trailing_trivia().pieces(),
-        );
-        let new_token = next_token
-            .with_leading_trivia_pieces(leading_trivia)
-            .with_trailing_trivia_pieces(trailing_trivia);
-
-        self.replace_token_discard_trivia(prev_token, new_token)
+        self.replace_element_discard_trivia(prev_element, next_element)
     }
 
     /// Push a change to replace `node` with the node that `wrap` builds around it, such as
@@ -376,25 +304,14 @@ where
         T: AstNode<Language = L>,
         U: AstNode<Language = L>,
     {
-        let prev_node = node.syntax().clone();
-        let leading = prev_node.first_leading_trivia();
-        let trailing = prev_node.last_trailing_trivia();
-        // Trimming only fails when `node` has no tokens, in which case it has no trivia either.
-        let node = node.clone().trim_comments_and_trivia().unwrap_or(node);
+        let prev_element = SyntaxElement::Node(node.syntax().clone());
+        let stripped = trivia::strip(SyntaxElement::Node(node.into_syntax()))
+            .into_node()
+            .expect("stripping trivia preserves the element kind");
+        let wrapped = wrap(T::unwrap_cast(stripped)).into_syntax();
+        let wrapped = trivia::surround(&prev_element, SyntaxElement::Node(wrapped));
 
-        let mut wrapped = wrap(node).into_syntax();
-        if let Some(leading) = leading
-            && let Some(with_leading) = wrapped.clone().prepend_trivia_pieces(leading.pieces())
-        {
-            wrapped = with_leading;
-        }
-        if let Some(trailing) = trailing
-            && let Some(with_trailing) = wrapped.clone().append_trivia_pieces(trailing.pieces())
-        {
-            wrapped = with_trailing;
-        }
-
-        self.replace_element_discard_trivia(prev_node.into(), wrapped.into());
+        self.replace_element_discard_trivia(prev_element, wrapped);
     }
 
     /// Push a change to replace the "prev_element" with "next_element".
@@ -439,29 +356,14 @@ where
     where
         T: AstNode<Language = L>,
     {
-        let node = prev_node.into_syntax();
-
-        let leading_pieces = node
-            .first_leading_trivia()
-            .map(|t| t.pieces().collect::<Vec<_>>())
-            .unwrap_or_default();
-        let trailing_pieces = node
-            .last_trailing_trivia()
-            .map(|t| t.pieces().collect::<Vec<_>>())
-            .unwrap_or_default();
-
-        let combined_trivia =
-            chain_trivia_pieces(leading_pieces.into_iter(), trailing_pieces.into_iter());
+        let node = SyntaxElement::Node(prev_node.into_syntax());
 
         if let Some(next_token) = node.next_token() {
-            let new_next_token = next_token.with_leading_trivia_pieces(chain_trivia_pieces(
-                combined_trivia,
-                next_token.leading_trivia().pieces(),
-            ));
+            let new_next_token = trivia::redirect_to_leading(&node, next_token.clone());
             self.replace_token_discard_trivia(next_token, new_next_token);
         }
 
-        self.remove_element(node.into());
+        self.remove_element(node);
     }
 
     fn push_change(
@@ -1008,6 +910,25 @@ pub mod test {
             .descendants_tokens(crate::Direction::Next)
             .any(|t| t.text_trimmed() == "a");
         assert!(!has_a, "node 'a' should have been removed");
+    }
+
+    #[test]
+    pub fn ok_remove_tokenless_node_keep_trivia_still_replaces_the_next_token() {
+        let mut builder = RawSyntaxTreeBuilder::new();
+        builder.start_node(RawLanguageKind::ROOT);
+        builder.start_node(RawLanguageKind::LITERAL_EXPRESSION);
+        builder.finish_node();
+        builder.start_node(RawLanguageKind::LITERAL_EXPRESSION);
+        builder.token(RawLanguageKind::STRING_TOKEN, "b");
+        builder.finish_node();
+        builder.finish_node();
+        let root = builder.finish().cast::<RawLanguageRoot>().unwrap();
+        let tokenless: LiteralExpression = root.syntax().first_child().unwrap().cast().unwrap();
+
+        let mut batch = root.begin();
+        batch.remove_node_keep_trivia(tokenless);
+        assert_eq!(batch.changes.len(), 2);
+        assert_eq!(batch.commit().to_string(), "b");
     }
 
     /// Removes the only real node in a tree; its comment trivia must migrate to

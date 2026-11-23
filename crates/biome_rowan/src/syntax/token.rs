@@ -226,6 +226,45 @@ impl<L: Language> SyntaxToken<L> {
         }
     }
 
+    /// Returns a detached token with both its leading and trailing trivia replaced.
+    #[must_use = "syntax elements are immutable, the result of update methods must be propagated to have any effect"]
+    pub(crate) fn with_trivia_pieces<Leading, Trailing>(
+        &self,
+        leading: Leading,
+        trailing: Trailing,
+    ) -> Self
+    where
+        Leading: IntoIterator<Item = SyntaxTriviaPiece<L>>,
+        Leading::IntoIter: ExactSizeIterator,
+        Trailing: IntoIterator<Item = SyntaxTriviaPiece<L>>,
+        Trailing::IntoIter: ExactSizeIterator,
+    {
+        let mut token_text = String::new();
+        let leading = leading.into_iter().map(|piece| {
+            token_text.push_str(piece.text());
+            piece.into_raw_piece()
+        });
+        let leading = GreenTrivia::new(leading);
+
+        token_text.push_str(self.text_trimmed());
+
+        let trailing = trailing.into_iter().map(|piece| {
+            token_text.push_str(piece.text());
+            piece.into_raw_piece()
+        });
+        let trailing = GreenTrivia::new(trailing);
+
+        Self {
+            raw: cursor::SyntaxToken::new_detached(GreenToken::with_trivia(
+                self.kind().to_raw(),
+                &token_text,
+                leading,
+                trailing,
+            )),
+            _p: PhantomData,
+        }
+    }
+
     /// Return a new version of this token with its leading trivia replaced with `trivia`
     #[must_use = "syntax elements are immutable, the result of update methods must be propagated to have any effect"]
     pub fn with_leading_trivia<'a, I>(&self, trivia: I) -> Self
