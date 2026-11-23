@@ -221,6 +221,7 @@ define_categories! {
     "lint/correctness/useVueValidVText": "https://biomejs.dev/linter/rules/use-vue-valid-v-text",
     "lint/correctness/useYield": "https://biomejs.dev/linter/rules/use-yield",
     "lint/nursery/noAccidentalBitwiseOperators": "https://biomejs.dev/linter/rules/no-accidental-bitwise-operators",
+    "lint/nursery/noAmd": "https://biomejs.dev/linter/rules/no-amd",
     "lint/nursery/noArgumentsCallerOrCallee": "https://biomejs.dev/linter/rules/no-arguments-caller-or-callee",
     "lint/nursery/noArrayDelete": "https://biomejs.dev/linter/rules/no-array-delete",
     "lint/nursery/noArrayForEach": "https://biomejs.dev/linter/rules/no-array-for-each",

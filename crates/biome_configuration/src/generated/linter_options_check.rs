@@ -36,6 +36,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "noAmbiguousAnchorText",
         TypeId::of::<biome_rule_options::no_ambiguous_anchor_text::NoAmbiguousAnchorTextOptions>(),
     ));
+    result.push((
+        "nursery",
+        "noAmd",
+        TypeId::of::<biome_rule_options::no_amd::NoAmdOptions>(),
+    ));
     result.push(("suspicious", "noApproximativeNumericConstant", TypeId::of::<biome_rule_options::no_approximative_numeric_constant::NoApproximativeNumericConstantOptions>()));
     result.push((
         "complexity",
