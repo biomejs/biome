@@ -647,12 +647,31 @@ pub(crate) fn lint_with_inspector(
     // The syntax errors of MDX JavaScript belong to the document. Snippets
     // that aren't analyzed don't report them, so they're added here.
     #[cfg(feature = "lang_mdx")]
-    if !analyze_embeds_enabled(params.settings.as_ref(), params.path) {
+    if params
+        .language
+        .to_markdown_file_source()
+        .is_some_and(|source| source.is_mdx())
+    {
+        let analyzed: rustc_hash::FxHashSet<_> = params
+            .parsed_source
+            .snippets(&params.workspace_db)
+            .for_analysis(
+                &params.parsed_source,
+                params.language,
+                params.settings.as_ref(),
+                params.path.as_path(),
+                &params.workspace_db,
+            )
+            .map(|snippet| snippet.content_range())
+            .collect();
         diagnostics.extend(
             params
                 .parsed_source
                 .snippets(&params.workspace_db)
-                .filter(|snippet| super::is_mdx_snippet(snippet, &params.workspace_db))
+                .filter(|snippet| {
+                    super::is_mdx_snippet(snippet, &params.workspace_db)
+                        && !analyzed.contains(&snippet.content_range())
+                })
                 .flat_map(|snippet| snippet.serde_diagnostics()),
         );
     }

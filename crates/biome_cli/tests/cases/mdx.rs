@@ -167,6 +167,35 @@ fn lint_mdx_files_with_javascript_syntax_errors_in_block_quotes() {
 }
 
 #[test]
+fn lint_mdx_files_with_javascript_syntax_errors_in_block_quotes_and_analyze_embeds() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        Utf8Path::new("biome.json").into(),
+        r#"{ "markdown": { "analyzeEmbeds": true } }"#.as_bytes(),
+    );
+    let file_path = Utf8Path::new("file.mdx");
+    fs.insert(file_path.into(), "> {\n>   1 +\n> }\n".as_bytes());
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", file_path.as_str()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "lint_mdx_files_with_javascript_syntax_errors_in_block_quotes_and_analyze_embeds",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn format_mdx_files_with_embedded_formatting_disabled() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
