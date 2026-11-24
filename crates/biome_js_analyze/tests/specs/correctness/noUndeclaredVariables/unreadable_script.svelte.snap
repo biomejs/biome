@@ -1,0 +1,61 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: unreadable_script.svelte
+---
+# Input
+```svelte
+<!-- should generate diagnostics -->
+<script module>
+  const broken = ;
+</script>
+<script>console.log(possiblyFromModule);</script>
+<p>{possiblyFromModule}</p>
+<div><script type="module">console.log(stillMissing);</script></div>
+
+```
+
+# Diagnostics
+```
+unreadable_script.svelte:3:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an expression, or an assignment but instead found ';'.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <script module>
+  > 3 │   const broken = ;
+      │                  ^
+    4 │ </script>
+    5 │ <script>console.log(possiblyFromModule);</script>
+  
+  i Expected an expression, or an assignment here.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <script module>
+  > 3 │   const broken = ;
+      │                  ^
+    4 │ </script>
+    5 │ <script>console.log(possiblyFromModule);</script>
+  
+
+```
+
+```
+unreadable_script.svelte:7:40 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The stillMissing variable is undeclared.
+  
+    5 │ <script>console.log(possiblyFromModule);</script>
+    6 │ <p>{possiblyFromModule}</p>
+  > 7 │ <div><script type="module">console.log(stillMissing);</script></div>
+      │                                        ^^^^^^^^^^^^
+    8 │ 
+  
+  i Using an undeclared variable at runtime can throw a ReferenceError. It often points to a typo or a missing import.
+  
+  i Declare or import the variable, or fix its name.
+  
+  i By default, Biome recognizes browser and Node.js globals.
+    You can ignore more globals using the javascript.globals configuration.
+  
+
+```

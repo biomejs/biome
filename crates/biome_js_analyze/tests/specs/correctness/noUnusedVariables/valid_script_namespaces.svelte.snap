@@ -1,0 +1,18 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid_script_namespaces.svelte
+---
+# Input
+```svelte
+<!-- should not generate diagnostics -->
+<script module lang="ts">
+  const Label = 'hello';
+  type Count = number;
+</script>
+<script lang="ts">
+  type Label = string;
+  const Count = 1;
+</script>
+<p>{Label as Label}: {Count as Count}</p>
+
+```

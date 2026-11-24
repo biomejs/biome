@@ -1,0 +1,30 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidShadowedRune.svelte.ts
+---
+# Input
+```ts
+// should generate diagnostics
+export function read($props, $bindable) {
+    const { unused = $bindable() } = $props();
+}
+
+```
+
+# Diagnostics
+```
+invalidShadowedRune.svelte.ts:3:13 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable unused is unused.
+  
+    1 │ // should generate diagnostics
+    2 │ export function read($props, $bindable) {
+  > 3 │     const { unused = $bindable() } = $props();
+      │             ^^^^^^
+    4 │ }
+    5 │ 
+  
+  i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
+  
+
+```

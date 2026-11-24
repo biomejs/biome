@@ -1,0 +1,37 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: template_access.svelte
+---
+# Input
+```svelte
+<!-- should generate diagnostics -->
+<script>
+  import * as UI from './ui';
+  import { writable } from 'svelte/store';
+  const counter = writable(0);
+  const label = 'Increment';
+  let discarded;
+  let total = $state(0);
+</script>
+
+<UI.Button {label} onclick={() => { discarded = 1; total += 1; $counter = 2; }} />
+
+```
+
+# Diagnostics
+```
+template_access.svelte:7:7 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable discarded is unused.
+  
+    5 │   const counter = writable(0);
+    6 │   const label = 'Increment';
+  > 7 │   let discarded;
+      │       ^^^^^^^^^
+    8 │   let total = $state(0);
+    9 │ </script>
+  
+  i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
+  
+
+```

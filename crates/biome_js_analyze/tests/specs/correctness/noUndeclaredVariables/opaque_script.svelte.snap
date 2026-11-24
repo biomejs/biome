@@ -1,0 +1,36 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: opaque_script.svelte
+---
+# Input
+```svelte
+<!-- should generate diagnostics -->
+<script lang="coffee">
+  fromCoffee = 1
+</script>
+<p>{fromCoffee}</p>
+<div><script type="module">console.log(isolatedMissing);</script></div>
+
+```
+
+# Diagnostics
+```
+opaque_script.svelte:6:40 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The isolatedMissing variable is undeclared.
+  
+    4 │ </script>
+    5 │ <p>{fromCoffee}</p>
+  > 6 │ <div><script type="module">console.log(isolatedMissing);</script></div>
+      │                                        ^^^^^^^^^^^^^^^
+    7 │ 
+  
+  i Using an undeclared variable at runtime can throw a ReferenceError. It often points to a typo or a missing import.
+  
+  i Declare or import the variable, or fix its name.
+  
+  i By default, Biome recognizes browser and Node.js globals.
+    You can ignore more globals using the javascript.globals configuration.
+  
+
+```

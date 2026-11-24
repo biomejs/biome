@@ -1,0 +1,48 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: opaque_script.svelte
+---
+# Input
+```svelte
+<!-- should generate diagnostics -->
+<script module>
+  const count = 1;
+  count++;
+</script>
+<script src="./instance.coffee"></script>
+<button onclick={() => count++}>update</button>
+
+```
+
+# Diagnostics
+```
+opaque_script.svelte:4:3 lint/correctness/noConstAssign  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Can't assign count because it's a constant.
+  
+    2 │ <script module>
+    3 │   const count = 1;
+  > 4 │   count++;
+      │   ^^^^^
+    5 │ </script>
+    6 │ <script src="./instance.coffee"></script>
+  
+  i This is where the variable is defined as constant.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <script module>
+  > 3 │   const count = 1;
+      │         ^^^^^
+    4 │   count++;
+    5 │ </script>
+  
+  i Unsafe fix: Replace const with let if you assign it to a new value.
+  
+    1 1 │   
+    2   │ - ··const·count·=·1;
+      2 │ + ··let·count·=·1;
+    3 3 │     count++;
+    4 4 │   
+  
+
+```

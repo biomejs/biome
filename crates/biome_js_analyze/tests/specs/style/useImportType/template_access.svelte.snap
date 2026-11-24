@@ -1,0 +1,41 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: template_access.svelte
+---
+# Input
+```svelte
+<!-- should generate diagnostics -->
+<script module lang="ts">
+  import { Entry } from './types';
+  export type Entries = Entry[];
+</script>
+<script lang="ts">
+  import Row from './Row.svelte';
+  const Entry = 'row';
+</script>
+
+<Row label={Entry} />
+
+```
+
+# Diagnostics
+```
+template_access.svelte:3:10 lint/style/useImportType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! All these imports are only used as types.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <script module lang="ts">
+  > 3 │   import { Entry } from './types';
+      │          ^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │   export type Entries = Entry[];
+    5 │ </script>
+  
+  i Importing the types with import type ensures that they are removed by the compilers and avoids loading unnecessary modules.
+  
+  i Safe fix: Use import type.
+  
+    2 │ ··import·type·{·Entry·}·from·'./types';
+      │          +++++                         
+
+```

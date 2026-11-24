@@ -1,6 +1,5 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 196
 expression: invalid.svelte.js
 ---
 # Input
@@ -20,6 +19,11 @@ export class Counter {
 	count = $state(0);
 	doubled = $derived.by(() => this.count * 2);
 }
+
+const sequence = $der\u0069ved.by(() => { return first(), /* keep */ second(); });
+const indirect = $derived.by(function compute() { return eval?.("compute"); });
+const nested = $derived.by(function () { return { value(x = arguments) { return x; } }; });
+const commented = $derived./* keep */by(() => 1);
 
 ```
 
@@ -76,6 +80,107 @@ invalid.svelte.js:14:12 lint/nursery/noSvelteUselessDerivedBy  FIXABLE  ━━�
        14 │ + → doubled·=·$derived(this.count·*·2);
     15 15 │   }
     16 16 │   
+  
+
+```
+
+```
+invalid.svelte.js:17:18 lint/nursery/noSvelteUselessDerivedBy  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This $derived.by() function only returns a single expression.
+  
+    15 │ }
+    16 │ 
+  > 17 │ const sequence = $der\u0069ved.by(() => { return first(), /* keep */ second(); });
+       │                  ^^^^^^^^^^^^^^^^
+    18 │ const indirect = $derived.by(function compute() { return eval?.("compute"); });
+    19 │ const nested = $derived.by(function () { return { value(x = arguments) { return x; } }; });
+  
+  i $derived.by() is only needed when the derivation requires statements, such as loops or intermediate variables. Passing the expression to $derived() directly is shorter and behaves the same way.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Pass the expression to $derived() directly.
+  
+    15 15 │   }
+    16 16 │   
+    17    │ - const·sequence·=·$der\u0069ved.by(()·=>·{·return·first(),·/*·keep·*/·second();·});
+       17 │ + const·sequence·=·$der\u0069ved((first(),·/*·keep·*/·second()));
+    18 18 │   const indirect = $derived.by(function compute() { return eval?.("compute"); });
+    19 19 │   const nested = $derived.by(function () { return { value(x = arguments) { return x; } }; });
+  
+
+```
+
+```
+invalid.svelte.js:18:18 lint/nursery/noSvelteUselessDerivedBy  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This $derived.by() function only returns a single expression.
+  
+    17 │ const sequence = $der\u0069ved.by(() => { return first(), /* keep */ second(); });
+  > 18 │ const indirect = $derived.by(function compute() { return eval?.("compute"); });
+       │                  ^^^^^^^^^^^
+    19 │ const nested = $derived.by(function () { return { value(x = arguments) { return x; } }; });
+    20 │ const commented = $derived./* keep */by(() => 1);
+  
+  i $derived.by() is only needed when the derivation requires statements, such as loops or intermediate variables. Passing the expression to $derived() directly is shorter and behaves the same way.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Pass the expression to $derived() directly.
+  
+    16 16 │   
+    17 17 │   const sequence = $der\u0069ved.by(() => { return first(), /* keep */ second(); });
+    18    │ - const·indirect·=·$derived.by(function·compute()·{·return·eval?.("compute");·});
+       18 │ + const·indirect·=·$derived(eval?.("compute"));
+    19 19 │   const nested = $derived.by(function () { return { value(x = arguments) { return x; } }; });
+    20 20 │   const commented = $derived./* keep */by(() => 1);
+  
+
+```
+
+```
+invalid.svelte.js:19:16 lint/nursery/noSvelteUselessDerivedBy  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This $derived.by() function only returns a single expression.
+  
+    17 │ const sequence = $der\u0069ved.by(() => { return first(), /* keep */ second(); });
+    18 │ const indirect = $derived.by(function compute() { return eval?.("compute"); });
+  > 19 │ const nested = $derived.by(function () { return { value(x = arguments) { return x; } }; });
+       │                ^^^^^^^^^^^
+    20 │ const commented = $derived./* keep */by(() => 1);
+    21 │ 
+  
+  i $derived.by() is only needed when the derivation requires statements, such as loops or intermediate variables. Passing the expression to $derived() directly is shorter and behaves the same way.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Pass the expression to $derived() directly.
+  
+    17 17 │   const sequence = $der\u0069ved.by(() => { return first(), /* keep */ second(); });
+    18 18 │   const indirect = $derived.by(function compute() { return eval?.("compute"); });
+    19    │ - const·nested·=·$derived.by(function·()·{·return·{·value(x·=·arguments)·{·return·x;·}·};·});
+       19 │ + const·nested·=·$derived({·value(x·=·arguments)·{·return·x;·}·});
+    20 20 │   const commented = $derived./* keep */by(() => 1);
+    21 21 │   
+  
+
+```
+
+```
+invalid.svelte.js:20:19 lint/nursery/noSvelteUselessDerivedBy ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This $derived.by() function only returns a single expression.
+  
+    18 │ const indirect = $derived.by(function compute() { return eval?.("compute"); });
+    19 │ const nested = $derived.by(function () { return { value(x = arguments) { return x; } }; });
+  > 20 │ const commented = $derived./* keep */by(() => 1);
+       │                   ^^^^^^^^^^^^^^^^^^^^^
+    21 │ 
+  
+  i $derived.by() is only needed when the derivation requires statements, such as loops or intermediate variables. Passing the expression to $derived() directly is shorter and behaves the same way.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```

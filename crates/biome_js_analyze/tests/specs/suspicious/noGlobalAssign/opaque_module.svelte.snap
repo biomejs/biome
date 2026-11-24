@@ -1,0 +1,31 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: opaque_module.svelte
+---
+# Input
+```svelte
+<!-- should generate diagnostics -->
+<script module lang="coffee">window = 1</script>
+<script>window = 2;</script>
+<div><script type="module">window = 3;</script></div>
+
+```
+
+# Diagnostics
+```
+opaque_module.svelte:4:28 lint/suspicious/noGlobalAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × A global variable should not be reassigned.
+  
+    2 │ <script module lang="coffee">window = 1</script>
+    3 │ <script>window = 2;</script>
+  > 4 │ <div><script type="module">window = 3;</script></div>
+      │                            ^^^^^^
+    5 │ 
+  
+  i Assigning to a global variable can override essential functionality.
+  
+  i Remove the assignment, or declare a local variable with a different name and assign to that instead.
+  
+
+```

@@ -122,6 +122,7 @@ impl VueDirectiveDeclarations {
 /// Svelte store and Vue custom-directive naming rules.
 #[derive(Debug, Default)]
 pub struct EmbeddedData {
+    pub(crate) svelte_model: Option<std::sync::Arc<biome_svelte_semantic::SvelteSemanticModel>>,
     astro_model: Option<AstroSemanticModel>,
     /// Bindings created in embedded documents
     bindings: Vec<EmbeddedBinding>,
@@ -145,6 +146,7 @@ impl EmbeddedData {
         elements: Vec<EmbeddedElement>,
     ) -> Self {
         Self {
+            svelte_model: None,
             astro_model,
             bindings,
             value_references,
@@ -152,6 +154,12 @@ impl EmbeddedData {
             vue_directive_declarations,
             elements,
         }
+    }
+
+    pub fn svelte_model(
+        &self,
+    ) -> Option<&std::sync::Arc<biome_svelte_semantic::SvelteSemanticModel>> {
+        self.svelte_model.as_ref()
     }
 
     /// Returns the native semantic model when the host document is Astro.

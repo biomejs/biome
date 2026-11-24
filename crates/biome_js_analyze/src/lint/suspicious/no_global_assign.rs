@@ -68,23 +68,26 @@ impl Rule for NoGlobalAssign {
         }
         let token = assignment.name_token().ok()?;
 
-        // Only trust a cross-embed binding from non-source embeds like template
-        // expressions. Source embeds (e.g. Vue's `<script>` and `<script setup>`)
-        // don't necessarily see each other's bindings, so trusting it there
-        // would hide genuine global assignments.
-        if !ctx.source_type::<JsFileSource>().is_embedded_source() {
-            let embedded = ctx
-                .get_service::<EmbeddedService>()
-                .expect("embedded service");
-            if embedded.contains_binding(token.token_text_trimmed()) {
+        let source_type = ctx.source_type::<JsFileSource>();
+        let embedded = ctx
+            .get_service::<EmbeddedService>()
+            .expect("embedded service");
+        if source_type.is_svelte_component()
+            && let Some(unresolved) =
+                embedded.is_known_unresolved_reference(token.text_trimmed_range())
+        {
+            if !unresolved {
                 return None;
             }
+        } else if !source_type.is_embedded_source()
+            && embedded.contains_binding(token.token_text_trimmed())
+        {
+            return None;
         }
 
         let name = token.text_trimmed();
         // Apps Script service globals (e.g. `SpreadsheetApp`) are read-only
         // globals too, so reassigning them in a `.gs` file is reported.
-        let source_type = ctx.source_type::<JsFileSource>();
         let is_global_var = is_js_global(name)
             || (source_type.is_google_apps_script() && is_google_apps_script_global(name));
         is_global_var.then(|| token.text_trimmed_range())

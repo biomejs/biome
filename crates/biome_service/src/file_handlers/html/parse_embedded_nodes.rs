@@ -8,12 +8,13 @@ use crate::file_handlers::{DocumentFileSource, ParseEmbedResult, ParseEmbeddedPa
 use biome_css_parser::{CssModulesKind, parse_css_with_offset_and_cache};
 use biome_css_syntax::{AnyCssRoot, CssFunction, CssLanguage, CssString};
 use biome_html_syntax::{
-    AnyAstroDirective, AnySvelteBlock, AnySvelteBlockItem, AnySvelteDirective,
+    AnyAstroDirective, AnyHtmlAttribute, AnySvelteBlock, AnySvelteBlockItem, AnySvelteDirective,
     AnySvelteDirectiveInitializerClause, AstroEmbeddedContent, HtmlAttribute,
     HtmlAttributeInitializerClause, HtmlAttributeSingleTextExpression, HtmlDoubleTextExpression,
     HtmlElement, HtmlRoot, HtmlSingleTextExpression, HtmlSpreadAttribute, HtmlTextExpression,
     SvelteAttachAttribute, SvelteName, VueDirective, VueVBindShorthandDirective,
     VueVForDefaultBinding, VueVForValue, VueVOnShorthandDirective, VueVSlotShorthandDirective,
+    element_ext::AnyHtmlTagElement,
 };
 use biome_js_parser::parse_js_with_offset_and_cache;
 use biome_js_syntax::JsLanguage;
@@ -353,38 +354,40 @@ pub(crate) fn parse_embedded_nodes(params: ParseEmbeddedParams) -> ParseEmbedRes
                     snippet_expressions.push(text_expression);
                 }
 
-                if let Some(element) = HtmlElement::cast_ref(&element) {
-                    elements.push(element);
+                if let Some(tag) = AnyHtmlTagElement::cast_ref(&element) {
+                    elements.push(tag);
                 }
             }
 
             // Pass 1: elements via registry, collecting JS file sources
             let mut embedded_file_source = JsFileSource::js_module();
-            let mut generic_candidates = vec![];
-            for element in elements {
-                if let Some(candidate) = build_html_candidate(&element)
-                    && let Some(parsed) = ctx.detect_and_parse(&candidate, &doc_file_source, None)
+            for tag in elements {
+                if tag.requires_verbatim_svelte_content() {
+                    continue;
+                }
+                let Some(candidate) = build_tag_candidate(&tag) else {
+                    continue;
+                };
+                let Some(matched) =
+                    EmbedDetectorsRegistry::detect_match(&candidate, &doc_file_source)
+                else {
+                    continue;
+                };
+                if tag.is_root_script()
+                    && let Some(source) =
+                        DocumentFileSource::from(matched.guest).to_js_file_source()
                 {
-                    if let Some(js_fs) = parsed.js_file_source {
-                        embedded_file_source = merge_js_file_source(embedded_file_source, js_fs);
-
-                        if js_fs.is_typescript()
-                            && let Some(candidate) = build_svelte_generic_candidate(&element)
-                        {
-                            generic_candidates.push(candidate);
-                        }
+                    embedded_file_source = merge_js_file_source(embedded_file_source, source);
+                    if source.is_typescript()
+                        && let Some(attribute) = tag.find_attribute_by_name("generics")
+                        && let Some(generics) = build_generic_candidate(&attribute)
+                    {
+                        ctx.parse_and_push(&generics, &doc_file_source, Some(source), &mut nodes);
                     }
+                }
+                if let Some(parsed) = parse_matched_embed(&candidate, &matched, &mut ctx, None) {
                     nodes.push(parsed.node);
                 }
-            }
-
-            for candidate in generic_candidates {
-                ctx.parse_and_push(
-                    &candidate,
-                    &doc_file_source,
-                    Some(embedded_file_source),
-                    &mut nodes,
-                );
             }
 
             // Pass 2: text expressions via registry using merged embedded_file_source
@@ -411,7 +414,9 @@ pub(crate) fn parse_embedded_nodes(params: ParseEmbeddedParams) -> ParseEmbedRes
             );
 
             // Pass 4: directive attributes and attributes which initializer is a text expression
-            for element in html_root.syntax().descendants() {
+            for element in html_root.syntax().pruned_descendents(|node| {
+                !HtmlAttribute::cast_ref(node).is_some_and(|attr| attr.has_opaque_svelte_generics())
+            }) {
                 // Handle special Svelte directives (bind:, class:, etc.)
                 if let Some(directive) = AnySvelteDirective::cast_ref(&element) {
                     for candidate in build_svelte_directive_candidates(&directive) {
@@ -582,26 +587,17 @@ fn parse_svelte_blocks(
                         );
                     }
 
-                    if let Some(item) = opening_block.item() {
-                        match item {
-                            AnySvelteBlockItem::SvelteEachAsKeyedItem(as_keyed) => {
-                                if let Some(key) = as_keyed.key()
-                                    && let Ok(key_expression) = key.expression()
-                                    && let Some(candidate) = build_svelte_text_expression_candidate(
-                                        &key_expression,
-                                        &svelte_block,
-                                    )
-                                {
-                                    ctx.parse_and_push(
-                                        &candidate,
-                                        &doc_file_source,
-                                        Some(embedded_file_source),
-                                        nodes,
-                                    );
-                                }
-                            }
-                            AnySvelteBlockItem::SvelteEachKeyedItem(_) => {}
-                        }
+                    if let Some(AnySvelteBlockItem::SvelteEachBindingClause(binding)) =
+                        opening_block.item()
+                        && let Ok(clause) = binding.clause()
+                        && let Some(candidate) = build_svelte_each_binding_candidate(&clause)
+                    {
+                        ctx.parse_and_push(
+                            &candidate,
+                            &doc_file_source,
+                            Some(embedded_file_source),
+                            nodes,
+                        );
                     }
                 }
             }
@@ -807,6 +803,19 @@ fn build_svelte_name_candidate(svelte_name: &SvelteName) -> Option<EmbedCandidat
     })
 }
 
+fn build_svelte_each_binding_candidate(expression: &HtmlTextExpression) -> Option<EmbedCandidate> {
+    let content_token = expression.html_literal_token().ok()?;
+    Some(EmbedCandidate::TextExpression {
+        content: EmbedContent {
+            element_range: expression.range(),
+            content_range: content_token.text_range(),
+            content_offset: content_token.text_range().start(),
+            text: content_token.token_text(),
+        },
+        block_kind: EmbedBlockKind::Svelte(SvelteBlockKind::EachBinding),
+    })
+}
+
 fn build_svelte_text_expression_candidate(
     expression: &HtmlTextExpression,
     svelte_block: &AnySvelteBlock,
@@ -857,20 +866,13 @@ fn build_vue_directive_candidate(
 /// `<script setup>` element.
 fn build_vue_generic_candidate(element: &HtmlElement) -> Option<EmbedCandidate> {
     element.find_attribute_by_name("setup")?;
-    build_generic_candidate(element, "generic")
-}
-
-/// Builds a type-parameter candidate from the `generics` attribute of a Svelte
-/// `<script>` element.
-fn build_svelte_generic_candidate(element: &HtmlElement) -> Option<EmbedCandidate> {
-    build_generic_candidate(element, "generics")
-}
-
-fn build_generic_candidate(element: &HtmlElement, attribute_name: &str) -> Option<EmbedCandidate> {
     if !element.is_script_tag() {
         return None;
     }
-    let attribute = element.find_attribute_by_name(attribute_name)?;
+    build_generic_candidate(&element.find_attribute_by_name("generic")?)
+}
+
+fn build_generic_candidate(attribute: &AnyHtmlAttribute) -> Option<EmbedCandidate> {
     let initializer = attribute.as_html_attribute()?.initializer()?;
     let html_string = initializer.value().ok()?.as_html_string()?.clone();
     let content_token = html_string.value_token().ok()?;
@@ -974,27 +976,36 @@ fn build_attribute_candidate(
     })
 }
 
-/// Build an `EmbedCandidate::Element` from an `HtmlElement`.
-/// Returns `None` if the element has no embedded content or has multiple children (error).
 fn build_html_candidate(element: &HtmlElement) -> Option<EmbedCandidate> {
-    // Multiple children is likely an error — skip
-    if element.children().len() > 1 {
+    build_tag_candidate(&element.opening_element().ok()?.into())
+}
+
+fn build_tag_candidate(tag: &AnyHtmlTagElement) -> Option<EmbedCandidate> {
+    let element = tag.parent::<HtmlElement>();
+    if element
+        .as_ref()
+        .is_some_and(|element| element.children().len() > 1 || element.has_astro_is_raw())
+    {
         return None;
     }
-
-    // Astro emits the children of `is:raw` verbatim, so they are not a guest language.
-    if element.has_astro_is_raw() {
+    let content = element.and_then(|element| {
+        let child = element.children().iter().next()?;
+        let content_child = child.as_any_html_content()?.as_html_embedded_content()?;
+        let value_token = content_child.value_token().ok()?;
+        Some(EmbedContent {
+            element_range: content_child.range(),
+            content_range: value_token.text_range(),
+            content_offset: value_token.text_range().start(),
+            text: value_token.token_text(),
+        })
+    });
+    let is_root_script = tag.is_root_script();
+    // An empty root script can still declare the guest language of its attributes and template.
+    if content.is_none() && !is_root_script {
         return None;
     }
-
-    let tag_name = element.tag_name()?;
-
-    let attributes: Vec<_> = element
-        .opening_element()
-        .ok()
-        .into_iter()
-        .flat_map(|opening| opening.attributes())
-        .collect();
+    let tag_name = tag.tag_name()?;
+    let attributes: Vec<_> = tag.attributes().iter().collect();
 
     let is_global = attributes
         .iter()
@@ -1026,25 +1037,12 @@ fn build_html_candidate(element: &HtmlElement) -> Option<EmbedCandidate> {
         })
         .collect();
 
-    // Extract content from HtmlEmbeddedContent child
-    let content_child = element.children().iter().next().and_then(|child| {
-        let child = child.as_any_html_content()?;
-        child.as_html_embedded_content().cloned()
-    })?;
-    let value_token = content_child.value_token().ok()?;
-
     Some(EmbedCandidate::Element {
         tag_name,
         attributes,
         is_global,
-        content: EmbedContent {
-            element_range: content_child.range(),
-            content_range: value_token.text_range(),
-            content_offset: value_token.text_range().start(),
-            // Use full token text (including trivia) to match the untrimmed content_offset.
-            // The parser needs text and offset to be consistent.
-            text: value_token.token_text(),
-        },
+        is_root_script,
+        content,
     })
 }
 
@@ -1171,7 +1169,7 @@ impl EmbedParseContext<'_, '_> {
     /// Runs the detector on a candidate and, if matched, parses the embed.
     /// Returns the raw `ParsedEmbed` for callers that need to inspect the
     /// resolved JS file source before deciding what to do with the node
-    /// (the Vue/Svelte element pass that seeds `embedded_file_source`).
+    /// (the Vue element pass that seeds `embedded_file_source`).
     fn detect_and_parse(
         &mut self,
         candidate: &EmbedCandidate,
@@ -1211,7 +1209,7 @@ fn parse_matched_embed(
     ctx: &mut EmbedParseContext,
     embedded_file_source: Option<JsFileSource>,
 ) -> Option<ParsedEmbed> {
-    let content = candidate.content();
+    let content = candidate.content()?;
 
     match embed_match.guest {
         GuestLanguage::JsModule
@@ -1240,8 +1238,8 @@ fn parse_matched_embed(
                     });
                     true
                 }
-                EmbedCandidate::Element { .. } => {
-                    if ctx.host_file_source.is_svelte() {
+                EmbedCandidate::Element { is_root_script, .. } => {
+                    if ctx.host_file_source.is_svelte() && *is_root_script {
                         js_source = js_source.with_embedding_kind(JsEmbeddingKind::Svelte {
                             is_module_script: candidate.has_attribute("module")
                                 || candidate.has_attribute_value("context", "module"),
@@ -1260,8 +1258,7 @@ fn parse_matched_embed(
                             generics_list: false,
                         });
                     }
-                    // Astro <script> tags and plain HTML: no EmbeddingKind
-                    true
+                    !ctx.host_file_source.is_svelte() || *is_root_script
                 }
                 EmbedCandidate::TextExpression { block_kind, .. } => {
                     if ctx.host_file_source.is_astro() {
@@ -1273,6 +1270,9 @@ fn parse_matched_embed(
                         let embedding_kind = match block_kind {
                             EmbedBlockKind::Svelte(SvelteBlockKind::Snippet) => {
                                 SvelteEmbeddingKind::SnippetSignature
+                            }
+                            EmbedBlockKind::Svelte(SvelteBlockKind::EachBinding) => {
+                                SvelteEmbeddingKind::EachBinding
                             }
                             EmbedBlockKind::Svelte(SvelteBlockKind::Const) => {
                                 SvelteEmbeddingKind::LegacyConst

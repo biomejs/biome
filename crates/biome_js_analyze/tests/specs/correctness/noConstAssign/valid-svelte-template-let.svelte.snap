@@ -1,0 +1,13 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-svelte-template-let.svelte
+---
+# Input
+```svelte
+<!-- should not generate diagnostics -->
+{#each [1] as value}
+    {let mutable = value}
+    <button onclick={() => mutable++}>Update</button>
+{/each}
+
+```

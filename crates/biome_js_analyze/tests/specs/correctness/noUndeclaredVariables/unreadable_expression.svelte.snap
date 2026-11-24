@@ -1,0 +1,55 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: unreadable_expression.svelte
+---
+# Input
+```svelte
+<!-- should generate diagnostics -->
+<p>{uncertain + }</p>
+<p>{definitelyMissing}</p>
+
+```
+
+# Diagnostics
+```
+unreadable_expression.svelte:2:17 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an expression but instead found the end of the file.
+  
+    1 │ <!-- should generate diagnostics -->
+  > 2 │ <p>{uncertain + }</p>
+      │                 
+    3 │ <p>{definitelyMissing}</p>
+    4 │ 
+  
+  i Expected an expression here.
+  
+    1 │ <!-- should generate diagnostics -->
+  > 2 │ <p>{uncertain + }</p>
+      │                 
+    3 │ <p>{definitelyMissing}</p>
+    4 │ 
+  
+
+```
+
+```
+unreadable_expression.svelte:3:5 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The definitelyMissing variable is undeclared.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <p>{uncertain + }</p>
+  > 3 │ <p>{definitelyMissing}</p>
+      │     ^^^^^^^^^^^^^^^^^
+    4 │ 
+  
+  i Using an undeclared variable at runtime can throw a ReferenceError. It often points to a typo or a missing import.
+  
+  i Declare or import the variable, or fix its name.
+  
+  i By default, Biome recognizes browser and Node.js globals.
+    You can ignore more globals using the javascript.globals configuration.
+  
+
+```

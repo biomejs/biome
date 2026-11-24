@@ -59,6 +59,11 @@ pub fn semantic_model(root: &AnyJsRoot, options: SemanticModelOptions) -> Semant
     extractor.set_flavor(flavor);
     builder.set_flavor(flavor);
 
+    if flavor == SemanticFlavor::SvelteSourceModule {
+        for rune in SVELTE_RUNES {
+            builder.push_global(rune);
+        }
+    }
     for global in globals {
         builder.push_global(global);
     }

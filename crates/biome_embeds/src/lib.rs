@@ -8,4 +8,4 @@ pub(crate) mod visitor;
 pub mod vue_directives;
 
 pub use data::{EmbeddedData, VueDirectiveResolution, vue_directive_binding_name};
-pub use visitor::{EmbeddedSnippet, collect_embedded_data};
+pub use visitor::{EmbeddedSnippet, collect_embedded_data, svelte_model_from_source};

@@ -1,0 +1,65 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: script_type_bindings.svelte
+---
+# Input
+```svelte
+<!-- should generate diagnostics -->
+<script module lang="ts">
+  interface Row { id: number }
+  interface Row { label: string }
+  const Row = 1;
+  type T = boolean;
+  const T = 2;
+  type Count = number;
+</script>
+<script lang="ts" generics="T">
+  let { value, row, count }: { value: T; row: Row; count: Count } = $props();
+  console.log(value, row, count, T);
+</script>
+
+```
+
+# Diagnostics
+```
+script_type_bindings.svelte:5:9 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable Row is unused.
+  
+    3 │   interface Row { id: number }
+    4 │   interface Row { label: string }
+  > 5 │   const Row = 1;
+      │         ^^^
+    6 │   type T = boolean;
+    7 │   const T = 2;
+  
+  i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend Row with an underscore.
+  
+    2 2 │     interface Row { id: number }
+    3 3 │     interface Row { label: string }
+    4   │ - ··const·Row·=·1;
+      4 │ + ··const·_Row·=·1;
+    5 5 │     type T = boolean;
+    6 6 │     const T = 2;
+  
+
+```
+
+```
+script_type_bindings.svelte:6:8 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This type alias T is unused.
+  
+    4 │   interface Row { label: string }
+    5 │   const Row = 1;
+  > 6 │   type T = boolean;
+      │        ^
+    7 │   const T = 2;
+    8 │   type Count = number;
+  
+  i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
+  
+
+```

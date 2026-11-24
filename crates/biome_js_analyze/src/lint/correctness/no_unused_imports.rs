@@ -699,7 +699,7 @@ fn is_unused(
     if let Some(token) = binding_name.as_ref()
         && (embedded.is_binding_used(token)
             || file_source.as_embedding_kind().is_svelte()
-                && embedded.is_svelte_store_used(token.token_text_trimmed()))
+                && embedded.is_svelte_store_used(token))
     {
         return false;
     }

@@ -1,0 +1,35 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: bind_access.svelte
+---
+# Input
+```svelte
+<!-- should generate diagnostics -->
+<script>
+  let element;
+  let value = $state('');
+  const refs = {};
+</script>
+
+<input bind:this={element} bind:value />
+<button bind:this={refs.button}>Submit</button>
+
+```
+
+# Diagnostics
+```
+bind_access.svelte:3:7 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable element is unused.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <script>
+  > 3 │   let element;
+      │       ^^^^^^^
+    4 │   let value = $state('');
+    5 │   const refs = {};
+  
+  i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
+  
+
+```

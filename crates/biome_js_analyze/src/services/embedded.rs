@@ -13,8 +13,9 @@ use biome_embeds::references::{
     InternedReference, is_reference_used, is_svelte_store_reference_used, is_type_reference_used,
     is_value_reference_used, is_vue_directive_reference_used,
 };
-use biome_js_syntax::{JsSyntaxToken, unescape_js_identifier};
-use biome_languages::{DocumentFileSource, LanguageDb, has_embedded_content};
+use biome_js_semantic::{JsDeclarationKind, SemanticModel};
+use biome_js_syntax::{JsReferenceIdentifier, JsSyntaxToken, unescape_js_identifier};
+use biome_languages::{LanguageDb, has_embedded_content};
 use biome_parser::db::SourceExt;
 use biome_rowan::{TextRange, TextSize, TokenText};
 use std::rc::Rc;
@@ -44,6 +45,7 @@ enum EmbeddedSource {
 
 #[derive(Clone)]
 enum FrameworkModel {
+    Svelte(Arc<biome_svelte_semantic::SvelteSemanticModel>),
     /// The model describes the analyzed tree.
     Current(EmbeddedSemanticModel),
     /// The analyzed tree was edited after its host document was parsed, for
@@ -58,7 +60,6 @@ enum FrameworkModel {
 #[derive(Clone)]
 enum EmbeddedSemanticModel {
     Astro(AstroSemanticModel),
-    // TODO: Add Vue and Svelte when their analyzer integrations use native semantic models.
 }
 
 #[derive(Clone, Copy, Debug, Default)]
@@ -260,17 +261,18 @@ impl EmbeddedService {
         tree_is_edited: bool,
         globals: &[Box<str>],
     ) -> Self {
-        let astro_document = document.filter(|document| {
-            matches!(
-                db.source_from_index(document.document_source_index(db.as_ref())),
-                Some(DocumentFileSource::Html(html)) if html.is_astro()
-            )
-        });
-        let framework_model = astro_document.map(|document| {
-            if tree_is_edited {
-                FrameworkModel::Outdated
-            } else {
-                FrameworkModel::Current(EmbeddedSemanticModel::Astro(
+        let framework_model = document.and_then(|document| {
+            let html = db
+                .source_from_index(document.document_source_index(db.as_ref()))?
+                .to_html_file_source()?;
+            if tree_is_edited && (html.is_astro() || html.is_svelte()) {
+                Some(FrameworkModel::Outdated)
+            } else if html.is_svelte() {
+                biome_embeds::svelte_model_from_source(db.as_ref(), document)
+                    .clone()
+                    .map(FrameworkModel::Svelte)
+            } else if html.is_astro() {
+                Some(FrameworkModel::Current(EmbeddedSemanticModel::Astro(
                     astro_model_from_source_with_options(
                         db.as_ref(),
                         document,
@@ -278,12 +280,14 @@ impl EmbeddedService {
                             globals: globals.to_vec(),
                         },
                     ),
-                ))
+                )))
+            } else {
+                None
             }
         });
         let source = match document {
             Some(document)
-                if astro_document.is_some() || has_embedded_content(db.as_ref(), document) =>
+                if framework_model.is_some() || has_embedded_content(db.as_ref(), document) =>
             {
                 EmbeddedSource::Workspace { db, document }
             }
@@ -308,17 +312,46 @@ impl EmbeddedService {
         snippet_offset: TextSize,
         tree_is_edited: bool,
     ) -> Self {
-        let framework_model = data.astro_model().map(|model| {
-            if tree_is_edited {
-                FrameworkModel::Outdated
-            } else {
-                FrameworkModel::Current(EmbeddedSemanticModel::Astro(model.clone()))
-            }
-        });
+        let framework_model = if tree_is_edited
+            && (data.astro_model().is_some() || data.svelte_model().is_some())
+        {
+            Some(FrameworkModel::Outdated)
+        } else if let Some(model) = data.svelte_model() {
+            Some(FrameworkModel::Svelte(model.clone()))
+        } else {
+            data.astro_model()
+                .map(|model| FrameworkModel::Current(EmbeddedSemanticModel::Astro(model.clone())))
+        };
         Self {
             source: EmbeddedSource::Interned(data),
             framework_model,
             snippet_offset,
+        }
+    }
+
+    pub(crate) fn is_svelte_const_write(&self, range: TextRange) -> bool {
+        matches!(&self.framework_model, Some(FrameworkModel::Svelte(model)) if model.is_const_write(range + self.snippet_offset))
+    }
+
+    pub(crate) fn is_svelte_rune_reference(
+        &self,
+        model: &SemanticModel,
+        reference: &JsReferenceIdentifier,
+        rune: &str,
+    ) -> bool {
+        model.is_svelte_rune_reference(reference, rune)
+            && reference.value_token().is_ok_and(|token| {
+                self.is_known_unresolved_reference(token.text_trimmed_range())
+                    .unwrap_or(true)
+            })
+    }
+
+    pub(crate) fn svelte_declaration_kind(&self, range: TextRange) -> Option<JsDeclarationKind> {
+        match &self.framework_model {
+            Some(FrameworkModel::Svelte(model)) => {
+                model.declaration_kind_for_reference(range + self.snippet_offset)
+            }
+            _ => None,
         }
     }
 
@@ -328,14 +361,18 @@ impl EmbeddedService {
                 Some(model.is_known_unresolved_reference(self.snippet_offset, range))
             }
             FrameworkModel::Outdated => Some(false),
+            FrameworkModel::Svelte(model) => {
+                Some(model.is_unresolved_reference(range + self.snippet_offset))
+            }
         }
     }
 
     pub(crate) fn contains_binding_declaration(&self, binding: &JsSyntaxToken) -> bool {
         match &self.framework_model {
+            Some(FrameworkModel::Svelte(_)) => false,
             Some(FrameworkModel::Current(model)) => model.contains_binding_declaration(binding),
             Some(FrameworkModel::Outdated) => true,
-            None => self.contains_binding(binding.token_text_trimmed()),
+            _ => self.contains_binding(binding.token_text_trimmed()),
         }
     }
 
@@ -345,7 +382,19 @@ impl EmbeddedService {
                 model.binding_usage(self.snippet_offset, binding)
             }
             Some(FrameworkModel::Outdated) => None,
-            None => {
+            Some(FrameworkModel::Svelte(model)) => {
+                let usage =
+                    model.binding_uses(self.snippet_offset, binding.text_trimmed_range())?;
+                Some(EmbeddedBindingUsage {
+                    any: usage.value_read || usage.write || usage.type_read,
+                    read: usage.value_read || usage.type_read,
+                    write: usage.write,
+                    writes_known: true,
+                    value: usage.value_read || usage.write,
+                    ty: usage.type_read,
+                })
+            }
+            _ => {
                 let name = binding.token_text_trimmed();
                 let value = self.is_used_as_value(name.clone());
                 let ty = self.is_used_as_type(name);
@@ -362,6 +411,9 @@ impl EmbeddedService {
 
     pub(crate) fn is_binding_used(&self, binding: &JsSyntaxToken) -> bool {
         match &self.framework_model {
+            Some(FrameworkModel::Svelte(model)) => model
+                .script_binding_used(self.snippet_offset, binding.text_trimmed_range())
+                .unwrap_or(true),
             Some(FrameworkModel::Current(model)) => {
                 model.is_binding_used(self.snippet_offset, binding)
             }
@@ -372,6 +424,9 @@ impl EmbeddedService {
 
     pub(crate) fn is_binding_read(&self, binding: &JsSyntaxToken) -> bool {
         match &self.framework_model {
+            Some(FrameworkModel::Svelte(_)) => self
+                .binding_usage(binding)
+                .is_none_or(EmbeddedBindingUsage::is_read),
             Some(FrameworkModel::Current(model)) => {
                 model.is_binding_read(self.snippet_offset, binding)
             }
@@ -382,6 +437,9 @@ impl EmbeddedService {
 
     pub(crate) fn contains_binding(&self, binding: TokenText) -> bool {
         match &self.framework_model {
+            Some(FrameworkModel::Svelte(model)) => model
+                .contains_binding(self.snippet_offset, binding.text())
+                .unwrap_or(true),
             Some(FrameworkModel::Current(model)) => {
                 model.contains_binding(self.snippet_offset, binding.text())
             }
@@ -400,6 +458,9 @@ impl EmbeddedService {
 
     pub(crate) fn contains_binding_text(&self, binding: &str) -> bool {
         match &self.framework_model {
+            Some(FrameworkModel::Svelte(model)) => model
+                .contains_binding(self.snippet_offset, binding)
+                .unwrap_or(true),
             Some(FrameworkModel::Current(model)) => {
                 model.contains_binding(self.snippet_offset, binding)
             }
@@ -422,7 +483,7 @@ impl EmbeddedService {
                 model.is_used_in(self.snippet_offset, &[Namespace::Value], identifier.text())
             }
             Some(FrameworkModel::Outdated) => true,
-            None => match &self.source {
+            _ => match &self.source {
                 EmbeddedSource::Empty => false,
                 EmbeddedSource::Workspace { db, document } => is_value_reference_used(
                     db.as_ref(),
@@ -441,7 +502,7 @@ impl EmbeddedService {
                 identifier.text(),
             ),
             Some(FrameworkModel::Outdated) => true,
-            None => match &self.source {
+            _ => match &self.source {
                 EmbeddedSource::Empty => false,
                 EmbeddedSource::Workspace { db, document } => is_type_reference_used(
                     db.as_ref(),
@@ -460,7 +521,7 @@ impl EmbeddedService {
                 identifier.text(),
             ),
             Some(FrameworkModel::Outdated) => true,
-            None => match &self.source {
+            _ => match &self.source {
                 EmbeddedSource::Empty => false,
                 EmbeddedSource::Workspace { db, document } => is_reference_used(
                     db.as_ref(),
@@ -474,13 +535,15 @@ impl EmbeddedService {
     /// Svelte stores are a special case. The `$` prefix is used to "dereference" the store and get its value.
     ///
     /// See also: https://svelte.dev/docs/svelte/stores
-    pub(crate) fn is_svelte_store_used(&self, identifier: TokenText) -> bool {
+    pub(crate) fn is_svelte_store_used(&self, binding: &JsSyntaxToken) -> bool {
+        let identifier = binding.token_text_trimmed();
         match &self.framework_model {
             Some(FrameworkModel::Current(model)) => {
                 model.is_svelte_store_used(self.snippet_offset, identifier.text())
             }
             Some(FrameworkModel::Outdated) => true,
-            None => match &self.source {
+            Some(FrameworkModel::Svelte(_)) => false,
+            _ => match &self.source {
                 EmbeddedSource::Empty => false,
                 EmbeddedSource::Workspace { db, document } => is_svelte_store_reference_used(
                     db.as_ref(),
@@ -502,7 +565,7 @@ impl EmbeddedService {
                 model.is_vue_directive_used(self.snippet_offset, identifier.text())
             }
             Some(FrameworkModel::Outdated) => true,
-            None => match &self.source {
+            _ => match &self.source {
                 EmbeddedSource::Empty => false,
                 EmbeddedSource::Workspace { db, document } => is_vue_directive_reference_used(
                     db.as_ref(),
@@ -742,7 +805,16 @@ mod tests {
         assert!(!service.is_used(token_text("used")));
         assert!(!service.is_used_as_value(token_text("used")));
         assert!(!service.is_used_as_type(token_text("used")));
-        assert!(!service.is_svelte_store_used(token_text("used")));
+        let binding = parse(
+            "used",
+            JsFileSource::js_module(),
+            JsParserOptions::default(),
+        )
+        .tree()
+        .syntax()
+        .first_token()
+        .unwrap();
+        assert!(!service.is_svelte_store_used(&binding));
         assert!(!service.is_vue_directive_used(token_text("vUsed")));
         assert!(
             service

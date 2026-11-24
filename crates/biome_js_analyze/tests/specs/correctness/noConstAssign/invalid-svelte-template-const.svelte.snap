@@ -1,0 +1,45 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-svelte-template-const.svelte
+---
+# Input
+```svelte
+<!-- should generate diagnostics -->
+{#each [1] as value}
+    {@const legacy = value}
+    {const declared = value}
+    <button onclick={() => { legacy++; declared++; }}>Update</button>
+{/each}
+
+```
+
+# Diagnostics
+```
+invalid-svelte-template-const.svelte:5:30 lint/correctness/noConstAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Can't assign legacy because it's a constant.
+  
+    3 │     {@const legacy = value}
+    4 │     {const declared = value}
+  > 5 │     <button onclick={() => { legacy++; declared++; }}>Update</button>
+      │                              ^^^^^^
+    6 │ {/each}
+    7 │ 
+  
+
+```
+
+```
+invalid-svelte-template-const.svelte:5:40 lint/correctness/noConstAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Can't assign declared because it's a constant.
+  
+    3 │     {@const legacy = value}
+    4 │     {const declared = value}
+  > 5 │     <button onclick={() => { legacy++; declared++; }}>Update</button>
+      │                                        ^^^^^^^^
+    6 │ {/each}
+    7 │ 
+  
+
+```

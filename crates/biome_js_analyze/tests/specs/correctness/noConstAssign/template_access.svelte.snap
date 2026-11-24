@@ -1,0 +1,33 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: template_access.svelte
+---
+# Input
+```svelte
+<!-- should generate diagnostics -->
+<script>
+  import { writable } from 'svelte/store';
+  const counter = writable(0);
+  const limit = 10;
+  $counter = 1;
+</script>
+<button onclick={() => { $counter++; limit = 2; }}>Update</button>
+<button onclick={(limit) => limit++}>Local</button>
+
+```
+
+# Diagnostics
+```
+template_access.svelte:8:38 lint/correctness/noConstAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Can't assign limit because it's a constant.
+  
+     6 │   $counter = 1;
+     7 │ </script>
+   > 8 │ <button onclick={() => { $counter++; limit = 2; }}>Update</button>
+       │                                      ^^^^^
+     9 │ <button onclick={(limit) => limit++}>Local</button>
+    10 │ 
+  
+
+```

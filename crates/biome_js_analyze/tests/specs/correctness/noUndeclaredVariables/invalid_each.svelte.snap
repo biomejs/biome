@@ -31,6 +31,10 @@ let pairs = [];
     <span>{others}</span>
 {/each}
 
+{#each rows as { id = missingFallback }}
+    <span>{id}</span>
+{/each}
+
 {#each items as item (key)}
     <span>{item.name}</span>
 {/each}
@@ -125,14 +129,36 @@ invalid_each.svelte:25:12 lint/correctness/noUndeclaredVariables ━━━━━
 ```
 invalid_each.svelte:28:23 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The key variable is undeclared.
+  × The missingFallback variable is undeclared.
   
     26 │ {/each}
     27 │ 
-  > 28 │ {#each items as item (key)}
-       │                       ^^^
-    29 │     <span>{item.name}</span>
+  > 28 │ {#each rows as { id = missingFallback }}
+       │                       ^^^^^^^^^^^^^^^
+    29 │     <span>{id}</span>
     30 │ {/each}
+  
+  i Using an undeclared variable at runtime can throw a ReferenceError. It often points to a typo or a missing import.
+  
+  i Declare or import the variable, or fix its name.
+  
+  i By default, Biome recognizes browser and Node.js globals.
+    You can ignore more globals using the javascript.globals configuration.
+  
+
+```
+
+```
+invalid_each.svelte:32:23 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The key variable is undeclared.
+  
+    30 │ {/each}
+    31 │ 
+  > 32 │ {#each items as item (key)}
+       │                       ^^^
+    33 │     <span>{item.name}</span>
+    34 │ {/each}
   
   i Using an undeclared variable at runtime can throw a ReferenceError. It often points to a typo or a missing import.
   

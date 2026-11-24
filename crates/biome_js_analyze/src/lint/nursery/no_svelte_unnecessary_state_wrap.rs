@@ -12,7 +12,7 @@ use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, TokenText};
 use biome_rule_options::no_svelte_unnecessary_state_wrap::NoSvelteUnnecessaryStateWrapOptions;
 
 use crate::JsRuleAction;
-use crate::services::semantic::Semantic;
+use crate::services::{embedded::EmbeddedService, semantic::Semantic};
 
 /// Classes from `svelte/reactivity` that are already reactive without `$state`.
 const REACTIVE_CLASSES: &[&str] = &[
@@ -158,7 +158,12 @@ impl Rule for NoSvelteUnnecessaryStateWrap {
         // Callee must be the `$state` rune.
         let callee = call.callee().ok()?;
         let callee_ident = callee.as_js_identifier_expression()?;
-        if callee_ident.name().ok()?.value_token().ok()?.text_trimmed() != "$state" {
+        let reference = callee_ident.name().ok()?;
+        if !ctx
+            .get_service::<EmbeddedService>()
+            .expect("embedded service")
+            .is_svelte_rune_reference(model, &reference, "$state")
+        {
             return None;
         }
 

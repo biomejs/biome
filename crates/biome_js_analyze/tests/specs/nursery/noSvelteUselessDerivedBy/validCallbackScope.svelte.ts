@@ -1,0 +1,8 @@
+// should not generate diagnostics
+const key = { name: "outer" };
+const computed = $derived.by(function key() { return { [key.name](key) {} }; });
+const closure = $derived.by(function compute() { return () => comp\u0075te.name; });
+const arrowDefault = $derived.by(function () { return (value = this) => value; });
+const dynamic = $derived.by(function compute() { return () => (eval as typeof eval)("compute"); });
+const generic = $derived.by(<T>() => [] as T[]);
+const annotated = $derived.by(function (): number | null { return 0; });

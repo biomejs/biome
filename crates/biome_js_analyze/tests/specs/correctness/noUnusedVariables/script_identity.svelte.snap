@@ -1,0 +1,122 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: script_identity.svelte
+---
+# Input
+```svelte
+<!-- should generate diagnostics -->
+<script module>
+  const shared = 1;
+  const shadowed = 0;
+</script>
+<script>
+  import { readable } from 'svelte/store';
+  const shadowed = shared;
+  const store = readable(0);
+  function run() {
+    const shadowed = 2;
+  }
+  run();
+</script>
+<button onclick={() => { const shadowed = 3; }}>{shadowed}</button>
+<button onclick={() => { const shadowed = 4; console.log(shadowed); }}>Log</button>
+{#snippet display(shadowed)}<p>{shadowed}</p>{/snippet}
+{@render display(shadowed)}
+<button onclick={() => { const store = 0; }}>{$store}</button>
+
+```
+
+# Diagnostics
+```
+script_identity.svelte:4:9 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable shadowed is unused.
+  
+    2 │ <script module>
+    3 │   const shared = 1;
+  > 4 │   const shadowed = 0;
+      │         ^^^^^^^^
+    5 │ </script>
+    6 │ <script>
+  
+  i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend shadowed with an underscore.
+  
+    1 1 │   
+    2 2 │     const shared = 1;
+    3   │ - ··const·shadowed·=·0;
+      3 │ + ··const·_shadowed·=·0;
+    4 4 │   
+  
+
+```
+
+```
+script_identity.svelte:11:11 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable shadowed is unused.
+  
+     9 │   const store = readable(0);
+    10 │   function run() {
+  > 11 │     const shadowed = 2;
+       │           ^^^^^^^^
+    12 │   }
+    13 │   run();
+  
+  i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend shadowed with an underscore.
+  
+    4 4 │     const store = readable(0);
+    5 5 │     function run() {
+    6   │ - ····const·shadowed·=·2;
+      6 │ + ····const·_shadowed·=·2;
+    7 7 │     }
+    8 8 │     run();
+  
+
+```
+
+```
+script_identity.svelte:15:32 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable shadowed is unused.
+  
+    13 │   run();
+    14 │ </script>
+  > 15 │ <button onclick={() => { const shadowed = 3; }}>{shadowed}</button>
+       │                                ^^^^^^^^
+    16 │ <button onclick={() => { const shadowed = 4; console.log(shadowed); }}>Log</button>
+    17 │ {#snippet display(shadowed)}<p>{shadowed}</p>{/snippet}
+  
+  i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend shadowed with an underscore.
+  
+  - ()·=>·{·const·shadowed·=·3;·}
+  + ()·=>·{·const·_shadowed·=·3;·}
+  
+
+```
+
+```
+script_identity.svelte:19:32 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable store is unused.
+  
+    17 │ {#snippet display(shadowed)}<p>{shadowed}</p>{/snippet}
+    18 │ {@render display(shadowed)}
+  > 19 │ <button onclick={() => { const store = 0; }}>{$store}</button>
+       │                                ^^^^^
+    20 │ 
+  
+  i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend store with an underscore.
+  
+  - ()·=>·{·const·store·=·0;·}
+  + ()·=>·{·const·_store·=·0;·}
+  
+
+```

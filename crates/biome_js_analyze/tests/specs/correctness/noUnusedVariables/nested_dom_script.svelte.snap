@@ -1,0 +1,75 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: nested_dom_script.svelte
+---
+# Input
+```svelte
+<!-- should generate diagnostics -->
+<script module>
+  const shared = 1;
+</script>
+<script>
+  const instance = shared;
+  const componentOnly = 2;
+</script>
+<div>
+  <script type="module">
+    const nestedOnly = 3;
+    const local = 4;
+    console.log(local, componentOnly);
+  </script>
+</div>
+<p>{instance} {nestedOnly}</p>
+
+```
+
+# Diagnostics
+```
+nested_dom_script.svelte:7:9 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable componentOnly is unused.
+  
+    5 │ <script>
+    6 │   const instance = shared;
+  > 7 │   const componentOnly = 2;
+      │         ^^^^^^^^^^^^^
+    8 │ </script>
+    9 │ <div>
+  
+  i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend componentOnly with an underscore.
+  
+    1 1 │   
+    2 2 │     const instance = shared;
+    3   │ - ··const·componentOnly·=·2;
+      3 │ + ··const·_componentOnly·=·2;
+    4 4 │   
+  
+
+```
+
+```
+nested_dom_script.svelte:11:11 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable nestedOnly is unused.
+  
+     9 │ <div>
+    10 │   <script type="module">
+  > 11 │     const nestedOnly = 3;
+       │           ^^^^^^^^^^
+    12 │     const local = 4;
+    13 │     console.log(local, componentOnly);
+  
+  i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend nestedOnly with an underscore.
+  
+    1 1 │   
+    2   │ - ····const·nestedOnly·=·3;
+      2 │ + ····const·_nestedOnly·=·3;
+    3 3 │       const local = 4;
+    4 4 │       console.log(local, componentOnly);
+  
+
+```

@@ -1,0 +1,250 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: template_scopes.svelte
+---
+# Input
+```svelte
+<!-- should generate diagnostics -->
+<script lang="ts">
+    const rows = [{ id: 1 }];
+    const promise = Promise.resolve(rows[0]);
+</script>
+{#each rows as { id: item }, i (item + i)}
+    {const label = item}
+    {#snippet card<T>(value: T)}{value as T} {label}{/snippet}
+    {@render card(label)}
+{:else}
+    {item} {i} {label} {@render card(1)}
+{/each}
+{value}
+{#await promise}
+    {result}
+{:then { id: result }}
+    {result} {error}
+{:catch error}
+    {error} {result}
+{/await}
+{#await promise then current}{current.id}{/await}
+{#await promise catch problem}{problem}{/await}
+{current} {problem}
+
+```
+
+# Diagnostics
+```
+template_scopes.svelte:11:6 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The item variable is undeclared.
+  
+     9 │     {@render card(label)}
+    10 │ {:else}
+  > 11 │     {item} {i} {label} {@render card(1)}
+       │      ^^^^
+    12 │ {/each}
+    13 │ {value}
+  
+  i Using an undeclared variable at runtime can throw a ReferenceError. It often points to a typo or a missing import.
+  
+  i Declare or import the variable, or fix its name.
+  
+  i By default, Biome recognizes browser and Node.js globals.
+    You can ignore more globals using the javascript.globals configuration.
+  
+
+```
+
+```
+template_scopes.svelte:11:13 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The i variable is undeclared.
+  
+     9 │     {@render card(label)}
+    10 │ {:else}
+  > 11 │     {item} {i} {label} {@render card(1)}
+       │             ^
+    12 │ {/each}
+    13 │ {value}
+  
+  i Using an undeclared variable at runtime can throw a ReferenceError. It often points to a typo or a missing import.
+  
+  i Declare or import the variable, or fix its name.
+  
+  i By default, Biome recognizes browser and Node.js globals.
+    You can ignore more globals using the javascript.globals configuration.
+  
+
+```
+
+```
+template_scopes.svelte:11:17 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The label variable is undeclared.
+  
+     9 │     {@render card(label)}
+    10 │ {:else}
+  > 11 │     {item} {i} {label} {@render card(1)}
+       │                 ^^^^^
+    12 │ {/each}
+    13 │ {value}
+  
+  i Using an undeclared variable at runtime can throw a ReferenceError. It often points to a typo or a missing import.
+  
+  i Declare or import the variable, or fix its name.
+  
+  i By default, Biome recognizes browser and Node.js globals.
+    You can ignore more globals using the javascript.globals configuration.
+  
+
+```
+
+```
+template_scopes.svelte:13:2 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The value variable is undeclared.
+  
+    11 │     {item} {i} {label} {@render card(1)}
+    12 │ {/each}
+  > 13 │ {value}
+       │  ^^^^^
+    14 │ {#await promise}
+    15 │     {result}
+  
+  i Using an undeclared variable at runtime can throw a ReferenceError. It often points to a typo or a missing import.
+  
+  i Declare or import the variable, or fix its name.
+  
+  i By default, Biome recognizes browser and Node.js globals.
+    You can ignore more globals using the javascript.globals configuration.
+  
+
+```
+
+```
+template_scopes.svelte:15:6 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The result variable is undeclared.
+  
+    13 │ {value}
+    14 │ {#await promise}
+  > 15 │     {result}
+       │      ^^^^^^
+    16 │ {:then { id: result }}
+    17 │     {result} {error}
+  
+  i Using an undeclared variable at runtime can throw a ReferenceError. It often points to a typo or a missing import.
+  
+  i Declare or import the variable, or fix its name.
+  
+  i By default, Biome recognizes browser and Node.js globals.
+    You can ignore more globals using the javascript.globals configuration.
+  
+
+```
+
+```
+template_scopes.svelte:17:15 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The error variable is undeclared.
+  
+    15 │     {result}
+    16 │ {:then { id: result }}
+  > 17 │     {result} {error}
+       │               ^^^^^
+    18 │ {:catch error}
+    19 │     {error} {result}
+  
+  i Using an undeclared variable at runtime can throw a ReferenceError. It often points to a typo or a missing import.
+  
+  i Declare or import the variable, or fix its name.
+  
+  i By default, Biome recognizes browser and Node.js globals.
+    You can ignore more globals using the javascript.globals configuration.
+  
+
+```
+
+```
+template_scopes.svelte:19:14 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The result variable is undeclared.
+  
+    17 │     {result} {error}
+    18 │ {:catch error}
+  > 19 │     {error} {result}
+       │              ^^^^^^
+    20 │ {/await}
+    21 │ {#await promise then current}{current.id}{/await}
+  
+  i Using an undeclared variable at runtime can throw a ReferenceError. It often points to a typo or a missing import.
+  
+  i Declare or import the variable, or fix its name.
+  
+  i By default, Biome recognizes browser and Node.js globals.
+    You can ignore more globals using the javascript.globals configuration.
+  
+
+```
+
+```
+template_scopes.svelte:23:2 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The current variable is undeclared.
+  
+    21 │ {#await promise then current}{current.id}{/await}
+    22 │ {#await promise catch problem}{problem}{/await}
+  > 23 │ {current} {problem}
+       │  ^^^^^^^
+    24 │ 
+  
+  i Using an undeclared variable at runtime can throw a ReferenceError. It often points to a typo or a missing import.
+  
+  i Declare or import the variable, or fix its name.
+  
+  i By default, Biome recognizes browser and Node.js globals.
+    You can ignore more globals using the javascript.globals configuration.
+  
+
+```
+
+```
+template_scopes.svelte:23:12 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The problem variable is undeclared.
+  
+    21 │ {#await promise then current}{current.id}{/await}
+    22 │ {#await promise catch problem}{problem}{/await}
+  > 23 │ {current} {problem}
+       │            ^^^^^^^
+    24 │ 
+  
+  i Using an undeclared variable at runtime can throw a ReferenceError. It often points to a typo or a missing import.
+  
+  i Declare or import the variable, or fix its name.
+  
+  i By default, Biome recognizes browser and Node.js globals.
+    You can ignore more globals using the javascript.globals configuration.
+  
+
+```
+
+```
+template_scopes.svelte:11:33 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The card variable is undeclared.
+  
+     9 │     {@render card(label)}
+    10 │ {:else}
+  > 11 │     {item} {i} {label} {@render card(1)}
+       │                                 ^^^^
+    12 │ {/each}
+    13 │ {value}
+  
+  i Using an undeclared variable at runtime can throw a ReferenceError. It often points to a typo or a missing import.
+  
+  i Declare or import the variable, or fix its name.
+  
+  i By default, Biome recognizes browser and Node.js globals.
+    You can ignore more globals using the javascript.globals configuration.
+  
+
+```

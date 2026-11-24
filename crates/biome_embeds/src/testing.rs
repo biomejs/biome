@@ -32,6 +32,9 @@ fn parse_text(db: &dyn LanguageDb, text: &str, source_index: usize) -> AnyParse 
         Some(DocumentFileSource::Html(source)) if source.is_vue() => {
             parse_html(text, HtmlParserOptions::default().with_vue()).into()
         }
+        Some(DocumentFileSource::Html(source)) if source.is_svelte() => {
+            parse_html(text, HtmlParserOptions::from(&source)).into()
+        }
         Some(DocumentFileSource::Html(_)) => parse_html(text, HtmlParserOptions::default()).into(),
         source => {
             let source = source
@@ -143,6 +146,24 @@ impl LanguageDb for TestDb {
                 JsFileSource::ts()
                     .with_embedding_kind(*JsFileSource::vue_setup().as_embedding_kind()),
             ),
+            6 => DocumentFileSource::Html(HtmlFileSource::svelte()),
+            7 => DocumentFileSource::Js(JsFileSource::svelte()),
+            8 => DocumentFileSource::Js(JsFileSource::js_module().with_embedding_kind(
+                biome_languages::javascript::JsEmbeddingKind::Svelte {
+                    embedding_kind: biome_languages::javascript::SvelteEmbeddingKind::Expression,
+                    is_module_script: false,
+                    is_class_attribute: false,
+                    file_kind: biome_languages::javascript::SvelteFileKind::Component,
+                },
+            )),
+            9 => DocumentFileSource::Js(JsFileSource::js_module().with_embedding_kind(
+                biome_languages::javascript::JsEmbeddingKind::Svelte {
+                    embedding_kind: biome_languages::javascript::SvelteEmbeddingKind::EachBinding,
+                    is_module_script: false,
+                    is_class_attribute: false,
+                    file_kind: biome_languages::javascript::SvelteFileKind::Component,
+                },
+            )),
             _ => DocumentFileSource::Js(JsFileSource::vue()),
         })
     }

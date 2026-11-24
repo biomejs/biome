@@ -1,0 +1,37 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: unreadable_expression.svelte
+---
+# Input
+```svelte
+<!-- should generate diagnostics -->
+<script lang="ts">
+  import { Item } from './types';
+  export let item: Item;
+</script>
+<p>{broken + }</p>
+
+```
+
+# Diagnostics
+```
+unreadable_expression.svelte:6:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an expression but instead found the end of the file.
+  
+    4 │   export let item: Item;
+    5 │ </script>
+  > 6 │ <p>{broken + }</p>
+      │              
+    7 │ 
+  
+  i Expected an expression here.
+  
+    4 │   export let item: Item;
+    5 │ </script>
+  > 6 │ <p>{broken + }</p>
+      │              
+    7 │ 
+  
+
+```

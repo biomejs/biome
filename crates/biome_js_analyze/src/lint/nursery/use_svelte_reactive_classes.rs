@@ -146,6 +146,9 @@ impl Rule for UseSvelteReactiveClasses {
 
         let new_expression = ctx.query();
         let model = ctx.model();
+        let embedded = ctx
+            .get_service::<EmbeddedService>()
+            .expect("embedded service");
 
         let reference = callee_reference(new_expression)?;
         let name = reference.value_token().ok()?;
@@ -157,20 +160,26 @@ impl Rule for UseSvelteReactiveClasses {
         if model.binding(&reference).is_some() {
             return None;
         }
-        if ctx
-            .get_service::<EmbeddedService>()
-            .is_some_and(|embedded| embedded.contains_binding(name.token_text_trimmed()))
-        {
+        if embedded.contains_binding(name.token_text_trimmed()) {
             return None;
         }
 
         let mut visited = Vec::new();
         let expression = AnyJsExpression::JsNewExpression(new_expression.clone());
-        if let Some(range) = find_mutation(model, class, expression.clone(), false, &mut visited) {
+        if let Some(range) = find_mutation(
+            model,
+            embedded,
+            class,
+            expression.clone(),
+            false,
+            &mut visited,
+        ) {
             return Some(RuleState::Mutated(range));
         }
 
-        if embedding_kind.is_svelte_source_module() && is_exported_value(model, expression) {
+        if embedding_kind.is_svelte_source_module()
+            && is_exported_value(model, embedded, expression)
+        {
             return Some(RuleState::Exported);
         }
 
@@ -322,6 +331,7 @@ fn callee_reference(new_expression: &JsNewExpression) -> Option<JsReferenceIdent
 /// once.
 fn find_mutation(
     model: &SemanticModel,
+    embedded: &EmbeddedService,
     class: BuiltinClass,
     expression: AnyJsExpression,
     persistent: bool,
@@ -376,6 +386,7 @@ fn find_mutation(
             };
             find_binding_mutation(
                 model,
+                embedded,
                 class,
                 model.as_binding(&binding),
                 persistent,
@@ -392,18 +403,25 @@ fn find_mutation(
             )) = assignment.left().ok()?
                 && let Some(binding) = model.binding(&identifier)
                 && let Some(range) =
-                    find_binding_mutation(model, class, binding, persistent, visited)
+                    find_binding_mutation(model, embedded, class, binding, persistent, visited)
             {
                 return Some(range);
             }
-            find_mutation(model, class, assignment.into(), persistent, visited)
+            find_mutation(
+                model,
+                embedded,
+                class,
+                assignment.into(),
+                persistent,
+                visited,
+            )
         }
         JsSyntaxKind::JS_CALL_ARGUMENT_LIST => {
             let call = parent.parent()?.parent().and_then(JsCallExpression::cast)?;
-            if !is_state_rune(&call) || call.arguments().ok()?.args().len() != 1 {
+            if !is_state_rune(model, embedded, &call) || call.arguments().ok()?.args().len() != 1 {
                 return None;
             }
-            find_mutation(model, class, call.into(), persistent, visited)
+            find_mutation(model, embedded, class, call.into(), persistent, visited)
         }
         _ => None,
     }
@@ -413,6 +431,7 @@ fn find_mutation(
 /// read references.
 fn find_binding_mutation(
     model: &SemanticModel,
+    embedded: &EmbeddedService,
     class: BuiltinClass,
     binding: Binding,
     persistent: bool,
@@ -435,7 +454,16 @@ fn find_binding_mutation(
                 .parent()
                 .and_then(JsIdentifierExpression::cast)
         })
-        .find_map(|expression| find_mutation(model, class, expression.into(), persistent, visited))
+        .find_map(|expression| {
+            find_mutation(
+                model,
+                embedded,
+                class,
+                expression.into(),
+                persistent,
+                visited,
+            )
+        })
 }
 
 /// Returns the outermost expression that has the same value as `expression`.
@@ -475,7 +503,11 @@ fn value_position(expression: AnyJsExpression) -> AnyJsExpression {
 }
 
 /// Returns whether `call` is a `$state()` or `$state.raw()` rune call.
-fn is_state_rune(call: &JsCallExpression) -> bool {
+fn is_state_rune(
+    model: &SemanticModel,
+    embedded: &EmbeddedService,
+    call: &JsCallExpression,
+) -> bool {
     let Ok(callee) = call.callee() else {
         return false;
     };
@@ -498,8 +530,10 @@ fn is_state_rune(call: &JsCallExpression) -> bool {
     };
     object
         .as_js_identifier_expression()
-        .and_then(|identifier| identifier.name().ok()?.value_token().ok())
-        .is_some_and(|name| name.text_trimmed() == "$state")
+        .and_then(|identifier| identifier.name().ok())
+        .is_some_and(|reference| {
+            embedded.is_svelte_rune_reference(model, &reference, "$state")
+        })
 }
 
 /// Returns whether the value of `expression` is exported, directly or as part of an exported
@@ -508,7 +542,11 @@ fn is_state_rune(call: &JsCallExpression) -> bool {
 /// Only containers that hold the value itself are followed, so the instance in
 /// `export const time = new Date().getTime()` or `export const now = () => new Date()` isn't
 /// exported.
-fn is_exported_value(model: &SemanticModel, expression: AnyJsExpression) -> bool {
+fn is_exported_value(
+    model: &SemanticModel,
+    embedded: &EmbeddedService,
+    expression: AnyJsExpression,
+) -> bool {
     let mut expression = expression;
     loop {
         let outer = value_position(expression);
@@ -576,7 +614,7 @@ fn is_exported_value(model: &SemanticModel, expression: AnyJsExpression) -> bool
                 let Some(call) = parent.grand_parent().and_then(JsCallExpression::cast) else {
                     return false;
                 };
-                if !is_state_rune(&call) {
+                if !is_state_rune(model, embedded, &call) {
                     return false;
                 }
                 call.into()

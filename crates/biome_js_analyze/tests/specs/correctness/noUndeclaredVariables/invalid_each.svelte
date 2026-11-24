@@ -25,6 +25,10 @@ let pairs = [];
     <span>{others}</span>
 {/each}
 
+{#each rows as { id = missingFallback }}
+    <span>{id}</span>
+{/each}
+
 {#each items as item (key)}
     <span>{item.name}</span>
 {/each}

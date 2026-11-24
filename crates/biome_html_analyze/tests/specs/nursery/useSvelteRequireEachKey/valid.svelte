@@ -15,3 +15,7 @@
 {#each items, i}
   <div>{i}</div>
 {/each}
+
+{#each users as { [field]: name = fallback } (name)}
+  <div>{name}</div>
+{/each}

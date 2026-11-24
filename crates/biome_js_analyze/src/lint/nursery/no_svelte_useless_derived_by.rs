@@ -1,21 +1,24 @@
 use biome_analyze::{
-    Ast, FixKind, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext,
-    declare_lint_rule,
+    FixKind, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
+use biome_js_factory::make;
+use biome_js_semantic::ReferencesExtensions;
 use biome_js_syntax::{
-    AnyJsArrowFunctionParameters, AnyJsExpression, AnyJsFunctionBody, AnyJsStatement,
-    JsCallExpression, JsFunctionBody, JsLanguage, JsNewTargetExpression, JsReferenceIdentifier,
-    JsThisExpression,
+    AnyJsArrowFunctionParameters, AnyJsExpression, AnyJsFunctionBody, AnyJsIdentifierReference,
+    AnyJsStatement, JsCallExpression, JsComputedMemberName, JsConstructorParameters, JsDecorator,
+    JsFormalParameter, JsFunctionBody, JsLanguage, JsNewTargetExpression, JsParameters,
+    JsReferenceIdentifier, JsThisExpression, unescape_js_identifier,
 };
 use biome_languages::JsFileSource;
 use biome_rowan::{
-    AstNode, AstNodeList, AstSeparatedList, BatchMutationExt, Direction, SyntaxKindSet, WalkEvent,
+    AstNode, AstNodeList, AstSeparatedList, BatchMutationExt, SyntaxKindSet, WalkEvent,
 };
 use biome_rule_options::no_svelte_useless_derived_by::NoSvelteUselessDerivedByOptions;
 
 use crate::JsRuleAction;
 use crate::lint::complexity::use_arrow_function::AnyThisScope;
+use crate::services::{embedded::EmbeddedService, semantic::Semantic};
 
 declare_lint_rule! {
     /// Disallow `$derived.by()` when `$derived()` is sufficient.
@@ -26,7 +29,8 @@ declare_lint_rule! {
     /// and behaves the same way.
     ///
     /// The rule reports functions that take no parameters, are neither async nor generators, and
-    /// whose body is either a single expression or a single `return` statement.
+    /// whose body is either a single expression or a single `return` statement. It keeps named
+    /// functions when the returned expression refers to the function by name.
     ///
     /// ## Examples
     ///
@@ -73,7 +77,7 @@ declare_lint_rule! {
 }
 
 impl Rule for NoSvelteUselessDerivedBy {
-    type Query = Ast<JsCallExpression>;
+    type Query = Semantic<JsCallExpression>;
     /// The expression returned by the function passed to `$derived.by()`.
     type State = AnyJsExpression;
     type Signals = Option<Self::State>;
@@ -102,15 +106,16 @@ impl Rule for NoSvelteUselessDerivedBy {
         {
             return None;
         }
-        // Svelte forbids declaring `$`-prefixed bindings, so `$derived` always refers to the rune.
-        if !member
+        let reference = member
             .object()
             .ok()?
             .as_js_identifier_expression()?
             .name()
-            .ok()?
-            .has_name("$derived")
-        {
+            .ok()?;
+        let embedded = ctx
+            .get_service::<EmbeddedService>()
+            .expect("embedded service");
+        if !embedded.is_svelte_rune_reference(ctx.model(), &reference, "$derived") {
             return None;
         }
 
@@ -122,7 +127,10 @@ impl Rule for NoSvelteUselessDerivedBy {
 
         let expression = match &function {
             AnyJsExpression::JsArrowFunctionExpression(arrow) => {
-                if arrow.async_token().is_some() {
+                if arrow.async_token().is_some()
+                    || arrow.type_parameters().is_some()
+                    || arrow.return_type_annotation().is_some()
+                {
                     return None;
                 }
                 match arrow.parameters().ok()? {
@@ -138,11 +146,24 @@ impl Rule for NoSvelteUselessDerivedBy {
             AnyJsExpression::JsFunctionExpression(function_expression) => {
                 if function_expression.async_token().is_some()
                     || function_expression.star_token().is_some()
+                    || function_expression.type_parameters().is_some()
+                    || function_expression.return_type_annotation().is_some()
                     || !function_expression.parameters().ok()?.items().is_empty()
                 {
                     return None;
                 }
                 let expression = single_returned_expression(&function_expression.body().ok()?)?;
+                if let Some(name) = function_expression.id() {
+                    let binding = name.as_js_identifier_binding()?;
+                    if binding.all_references(ctx.model()).next().is_some()
+                        || method_key_mentions(
+                            &expression,
+                            &unescape_js_identifier(binding.name_token().ok()?.text_trimmed()),
+                        )
+                    {
+                        return None;
+                    }
+                }
                 // Moving the expression out of the function would change what `this`,
                 // `arguments`, and `new.target` refer to.
                 if uses_function_bindings(&expression) {
@@ -152,6 +173,27 @@ impl Rule for NoSvelteUselessDerivedBy {
             }
             _ => return None,
         };
+
+        // Direct eval can observe the callback scope even inside a returned closure.
+        if expression
+            .syntax()
+            .preorder_of_kinds(JsCallExpression::KIND_SET)
+            .filter_map(|event| match event {
+                WalkEvent::Enter(node) => JsCallExpression::cast(node),
+                WalkEvent::Leave(_) => None,
+            })
+            .any(|call| {
+                !call.is_optional()
+                    && call
+                        .callee()
+                        .ok()
+                        .and_then(AnyJsExpression::omit_type_wrappers)
+                        .and_then(|callee| callee.as_js_reference_identifier())
+                        .is_some_and(|reference| has_identifier_name(&reference, "eval"))
+            })
+        {
+            return None;
+        }
 
         // Keep the parentheses around sequence expressions, otherwise each operand would become
         // a separate argument of `$derived()`.
@@ -192,13 +234,19 @@ impl Rule for NoSvelteUselessDerivedBy {
             .as_any_js_expression()?
             .clone();
 
-        if drops_comments(&function, expression) {
+        let object = member.object().ok()?;
+        if drops_comments(&callee, &object) || drops_comments(&function, expression) {
             return None;
         }
 
         let mut mutation = ctx.root().begin();
-        mutation.replace_node(callee.clone(), member.object().ok()?);
-        mutation.replace_node(function, expression.clone());
+        mutation.replace_node(callee, object);
+        let argument = if matches!(expression, AnyJsExpression::JsSequenceExpression(_)) {
+            make::parenthesized(expression.clone().trim_trivia()?).into()
+        } else {
+            expression.clone()
+        };
+        mutation.replace_node(function, argument);
         Some(JsRuleAction::new(
             ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
@@ -228,11 +276,42 @@ fn single_returned_expression(body: &JsFunctionBody) -> Option<AnyJsExpression> 
     return_statement.argument()
 }
 
+// A method parameter can mask a reference in the semantic model even though the key
+// is evaluated outside the method scope. Keep the callback if the key might use its name.
+fn method_key_mentions(expression: &AnyJsExpression, name: &str) -> bool {
+    let mut keys = expression
+        .syntax()
+        .preorder_of_kinds(JsComputedMemberName::KIND_SET);
+    while let Some(event) = keys.next() {
+        let WalkEvent::Enter(key) = event else {
+            continue;
+        };
+        if key
+            .parent()
+            .is_some_and(|parent| AnyThisScope::can_cast(parent.kind()))
+        {
+            if key.preorder_of_kinds(AnyJsIdentifierReference::KIND_SET).any(|event| {
+                matches!(event, WalkEvent::Enter(node) if AnyJsIdentifierReference::cast_ref(&node)
+                    .and_then(|reference| reference.value_token().ok())
+                    .is_some_and(|token| unescape_js_identifier(token.text_trimmed()) == name))
+            }) {
+                return true;
+            }
+            keys.skip_subtree();
+        }
+    }
+    false
+}
+
 /// Returns `true` if `expression` refers to `this`, `arguments`, or `new.target` of the function
 /// that contains it.
 fn uses_function_bindings(expression: &AnyJsExpression) -> bool {
+    let parameter_kinds = JsParameters::KIND_SET
+        .union(JsConstructorParameters::KIND_SET)
+        .union(JsFormalParameter::KIND_SET);
     let mut preorder = expression.syntax().preorder_of_kinds(
-        AnyThisScope::KIND_SET
+        JsFunctionBody::KIND_SET
+            .union(parameter_kinds)
             .union(FUNCTION_BINDING_KINDS)
             .union(JsReferenceIdentifier::KIND_SET),
     );
@@ -240,12 +319,22 @@ fn uses_function_bindings(expression: &AnyJsExpression) -> bool {
         let WalkEvent::Enter(node) = event else {
             continue;
         };
-        if AnyThisScope::can_cast(node.kind()) {
-            // Nested functions bind their own `this`, `arguments`, and `new.target`.
+        // Non-arrow parameters and bodies have their own function bindings. Computed
+        // names and parameter decorators can still see the surrounding callback.
+        if (JsFunctionBody::can_cast(node.kind()) || parameter_kinds.matches(node.kind()))
+            && node
+                .parent()
+                .is_some_and(|parent| AnyThisScope::can_cast(parent.kind()))
+            && (JsFunctionBody::can_cast(node.kind())
+                || node
+                    .preorder_of_kinds(JsDecorator::KIND_SET)
+                    .next()
+                    .is_none())
+        {
             preorder.skip_subtree();
         } else if FUNCTION_BINDING_KINDS.matches(node.kind())
             || JsReferenceIdentifier::cast_ref(&node)
-            .is_some_and(|reference| reference.has_name("arguments"))
+                .is_some_and(|reference| has_identifier_name(&reference, "arguments"))
         {
             return true;
         }
@@ -253,25 +342,24 @@ fn uses_function_bindings(expression: &AnyJsExpression) -> bool {
     false
 }
 
-/// Returns `true` if replacing `function` with `expression` would remove a comment.
-///
-/// The replacement keeps the comments inside `expression` and the outer trivia of `function`.
-/// It drops every other token of `function`, as well as the outer trivia of `expression`.
-fn drops_comments(function: &AnyJsExpression, expression: &AnyJsExpression) -> bool {
-    let function = function.syntax();
-    let expression = expression.syntax();
-    let expression_range = expression.text_trimmed_range();
-    let function_first = function.first_token();
-    let function_last = function.last_token();
-    let expression_first = expression.first_token();
-    let expression_last = expression.last_token();
-    function.descendants_tokens(Direction::Next).any(|token| {
-        let in_expression = expression_range.contains_range(token.text_trimmed_range());
-        let keeps_leading = function_first.as_ref() == Some(&token)
-            || (in_expression && expression_first.as_ref() != Some(&token));
-        let keeps_trailing = function_last.as_ref() == Some(&token)
-            || (in_expression && expression_last.as_ref() != Some(&token));
-        (!keeps_leading && token.has_leading_comments())
-            || (!keeps_trailing && token.has_trailing_comments())
+fn has_identifier_name(reference: &JsReferenceIdentifier, name: &str) -> bool {
+    reference
+        .value_token()
+        .is_ok_and(|token| unescape_js_identifier(token.text_trimmed()) == name)
+}
+
+/// Replacing a node keeps its outer trivia and the replacement's interior trivia.
+fn drops_comments(original: &AnyJsExpression, replacement: &AnyJsExpression) -> bool {
+    let original_range = original.range();
+    let replacement_range = replacement.range();
+    original.syntax().borrowed_tokens().any(|token| {
+        token
+            .leading_trivia_pieces()
+            .chain(token.trailing_trivia_pieces())
+            .any(|piece| {
+                piece.kind().is_comment()
+                    && original_range.contains_range(piece.text_range())
+                    && !replacement_range.contains_range(piece.text_range())
+            })
     })
 }

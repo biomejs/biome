@@ -651,6 +651,7 @@ dependencies = [
  "biome_parser",
  "biome_project_layout",
  "biome_rowan",
+ "biome_svelte_semantic",
  "camino",
  "papaya",
  "salsa",
@@ -979,6 +980,7 @@ dependencies = [
  "biome_rule_options",
  "biome_string_case",
  "biome_suppression",
+ "biome_svelte_semantic",
  "biome_tailwind_logic",
  "biome_tailwind_parser",
  "biome_tailwind_syntax",
@@ -1021,6 +1023,7 @@ dependencies = [
  "biome_fs",
  "biome_html_parser",
  "biome_html_syntax",
+ "biome_js_parser",
  "biome_languages",
  "biome_parser",
  "biome_rowan",
@@ -1126,6 +1129,7 @@ dependencies = [
  "biome_service",
  "biome_string_case",
  "biome_suppression",
+ "biome_svelte_semantic",
  "biome_tailwind_logic",
  "biome_tailwind_parser",
  "biome_tailwind_syntax",
@@ -2140,6 +2144,19 @@ dependencies = [
  "biome_console",
  "biome_diagnostics",
  "biome_rowan",
+]
+
+[[package]]
+name = "biome_svelte_semantic"
+version = "0.1.0"
+dependencies = [
+ "biome_js_parser",
+ "biome_js_semantic",
+ "biome_js_syntax",
+ "biome_languages",
+ "biome_rowan",
+ "rustc-hash 2.1.3",
+ "smallvec",
 ]
 
 [[package]]

@@ -1,9 +1,11 @@
+use crate::SvelteSemantic;
 use biome_analyze::{
-    Ast, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
+    Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
-use biome_html_syntax::{AnySvelteBlockItem, SvelteEachOpeningBlock};
+use biome_html_syntax::SvelteEachOpeningBlock;
 use biome_rowan::AstNode;
+use biome_svelte_semantic::SvelteEachKeyStatus;
 use biome_rule_options::use_svelte_require_each_key::UseSvelteRequireEachKeyOptions;
 
 declare_lint_rule! {
@@ -43,19 +45,16 @@ declare_lint_rule! {
 }
 
 impl Rule for UseSvelteRequireEachKey {
-    type Query = Ast<SvelteEachOpeningBlock>;
+    type Query = SvelteSemantic<SvelteEachOpeningBlock>;
     type State = ();
     type Signals = Option<Self::State>;
     type Options = UseSvelteRequireEachKeyOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let opening_block = ctx.query();
-        let item = opening_block.item()?;
-
-        match item {
-            AnySvelteBlockItem::SvelteEachAsKeyedItem(item) if item.key().is_none() => Some(()),
-            _ => None,
-        }
+        (ctx.model().each_key_status(opening_block.range())
+            == Some(SvelteEachKeyStatus::Unkeyed))
+        .then_some(())
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
