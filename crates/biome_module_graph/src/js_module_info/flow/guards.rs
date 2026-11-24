@@ -114,6 +114,9 @@ pub(crate) enum FlowTest {
     /// or number literal that spells the property's name, such as `"a"` or `0`
     /// but not `"\u0061"` or `0x0`. See [`literal_key`].
     In(TextRange),
+    /// The `instanceof` operator, as in `value instanceof Date`, whose right
+    /// operand, the constructor, is the expression at this range.
+    Instanceof(TextRange),
 }
 
 /// What a guard's return annotation states about one of its parameters.
@@ -489,6 +492,7 @@ pub(super) fn decompose_assertion(
                 guard: guards.len() - 1,
                 mentions: vec![subject],
                 parents: Vec::new(),
+                instance_tested: Vec::new(),
             })
         }
     }
@@ -514,15 +518,21 @@ pub(super) struct DecomposedCondition {
     /// variable cannot change between the alias and its test. See
     /// [`narrows_through_aliases`] for the variables that qualify.
     pub(super) mentions: Vec<FlowSubjectId>,
-    /// Subjects whose type the condition may narrow only through
-    /// [`FlowGuard::Property`], such as `s` in `s.kind === "c"`, or through
-    /// [`FlowTest::In`], such as `x` in `"a" in x`, unless `mentions` also
-    /// lists them. Both narrow only a union with two object types.
+    /// Subjects whose type the condition may narrow only through these
+    /// tests, unless `mentions` also lists them:
     ///
-    /// When decomposition stops early, this also lists a destructuring
-    /// pattern when `mentions` lists one of its elements and a test of that
-    /// element narrows the pattern.
+    /// - [`FlowGuard::Property`], such as `s` in `s.kind === "c"`;
+    /// - [`FlowTest::In`], such as `x` in `"a" in x`;
+    /// - [`FlowTest::Instanceof`], such as `x` in `x instanceof Date`.
+    ///
+    /// The first two narrow only a union with two object types, and
+    /// `instanceof` only a type with an object type or `unknown`. When
+    /// decomposition stops early, this also lists the pattern of every
+    /// variable in `mentions` that is an element of a destructuring pattern
+    /// that a test of the variable narrows.
     pub(super) parents: Vec<FlowSubjectId>,
+    /// The subjects in `parents` that an `instanceof` test checks.
+    pub(super) instance_tested: Vec<FlowSubjectId>,
 }
 
 /// Decomposes `expression`, assuming `outcome`, into guards appended to
@@ -551,12 +561,14 @@ pub(super) fn decompose_condition(
         remaining: MAX_CONDITION_STEPS,
         mentions: Vec::new(),
         parents: Vec::new(),
+        instance_tested: Vec::new(),
         complete: true,
         aliases: 0,
         initializers: Vec::new(),
     };
     let guard = decomposer.guard(expression.clone(), outcome, 0);
     let mut parents = std::mem::take(&mut decomposer.parents);
+    let instance_tested = std::mem::take(&mut decomposer.instance_tested);
     let mentions = if decomposer.complete {
         decomposer.mentions
     } else {
@@ -603,6 +615,7 @@ pub(super) fn decompose_condition(
         guard,
         mentions,
         parents,
+        instance_tested,
     }
 }
 
@@ -614,8 +627,11 @@ struct Decomposer<'a, 'raw> {
     remaining: usize,
     mentions: Vec<FlowSubjectId>,
     /// The objects of the [`FlowGuard::Property`] guards and the subjects of
-    /// the [`FlowTest::In`] tests decomposed so far.
+    /// the [`FlowTest::In`] and [`FlowTest::Instanceof`] tests decomposed so
+    /// far.
     parents: Vec<FlowSubjectId>,
+    /// The subjects of the [`FlowTest::Instanceof`] tests decomposed so far.
+    instance_tested: Vec<FlowSubjectId>,
     complete: bool,
     /// The number of aliased conditions whose initializers enclose the
     /// expression being decomposed.
@@ -739,6 +755,7 @@ impl Decomposer<'_, '_> {
             SyntaxGuard::Undefined { strict, .. } => Some(FlowTest::Undefined { strict }),
             SyntaxGuard::Predicate(function) => Some(FlowTest::Predicate(function)),
             SyntaxGuard::In(key) => Some(FlowTest::In(key)),
+            SyntaxGuard::Instanceof(constructor) => Some(FlowTest::Instanceof(constructor)),
         };
         let Some(chain) = chain_receivers(operand, &mut self.remaining) else {
             return FlowGuard::Keep;
@@ -747,12 +764,16 @@ impl Decomposer<'_, '_> {
             test.and_then(|test| Some((test, subject_of(operand, self.model, self.subjects)?)));
         let mut guard = match tested {
             Some((test, subject)) if self.may_test(subject) => {
-                // Like a test of a property, `in` narrows only a union with
-                // two object types, so its subject is a parent.
-                if matches!(test, FlowTest::In(_)) {
-                    self.parents.push(subject);
-                } else {
-                    self.mentions.push(subject);
+                // `in` narrows only a union with two object types, as a test
+                // of a property narrows its object, and `instanceof` only a
+                // type with an object type or `unknown`.
+                match test {
+                    FlowTest::In(_) => self.parents.push(subject),
+                    FlowTest::Instanceof(_) => {
+                        self.parents.push(subject);
+                        self.instance_tested.push(subject);
+                    }
+                    _ => self.mentions.push(subject),
                 }
                 FlowGuard::Test {
                     subject,
@@ -791,10 +812,11 @@ impl Decomposer<'_, '_> {
     /// [`Self::held_property`] for the declarations that hold a property. The
     /// object must be a subject other than `this` that a test may narrow.
     ///
-    /// Returns `None` for a call to a type-guard function and for `in`,
-    /// because TypeScript never narrows `s` through `isC(s.kind)` or
-    /// `"a" in s.kind`. Only the object that holds the property narrows:
-    /// `o.a.kind` narrows `o.a`, not `o`.
+    /// Returns `None` for a call to a type-guard function, for `in`, and for
+    /// `instanceof`, because TypeScript never narrows `s` through
+    /// `isC(s.kind)`, `"a" in s.kind`, or `s.kind instanceof C`. Only the
+    /// object that holds the property narrows: `o.a.kind` narrows `o.a`, not
+    /// `o`.
     fn property_guard(
         &mut self,
         operand: &AnyJsExpression,
@@ -802,7 +824,10 @@ impl Decomposer<'_, '_> {
         test: FlowTest,
         positive: bool,
     ) -> Option<FlowGuard> {
-        if matches!(test, FlowTest::Predicate(_) | FlowTest::In(_)) {
+        if matches!(
+            test,
+            FlowTest::Predicate(_) | FlowTest::In(_) | FlowTest::Instanceof(_)
+        ) {
             return None;
         }
         let (object, key, optional_chain, aliased) =
@@ -847,11 +872,11 @@ impl Decomposer<'_, '_> {
     /// element, as `kind === "c"` applies to `{ kind, v }` in
     /// `const { kind, v } = s`.
     ///
-    /// Returns `None` for a call to a type-guard function and for `in`,
-    /// because TypeScript narrows no pattern through `isC(kind)` or
-    /// `"a" in kind`. Inside an inlined aliased condition, every such pattern
-    /// can be tested, because its values don't change after the
-    /// destructuring.
+    /// Returns `None` for a call to a type-guard function, for `in`, and for
+    /// `instanceof`, because TypeScript never narrows a pattern through these
+    /// tests of one of its elements. Inside an inlined aliased condition,
+    /// every such pattern can be tested, because its values don't change
+    /// after the destructuring.
     ///
     /// [`subjects::narrowing_pattern`]: super::subjects::narrowing_pattern
     fn pattern_guard(
@@ -860,7 +885,10 @@ impl Decomposer<'_, '_> {
         test: FlowTest,
         positive: bool,
     ) -> Option<FlowGuard> {
-        if matches!(test, FlowTest::Predicate(_) | FlowTest::In(_)) {
+        if matches!(
+            test,
+            FlowTest::Predicate(_) | FlowTest::In(_) | FlowTest::Instanceof(_)
+        ) {
             return None;
         }
         let &FlowSubject::Binding(range) = self.subjects.as_slice().get(subject as usize)? else {
@@ -1181,6 +1209,8 @@ enum SyntaxGuard {
     Predicate(TextRange),
     /// The `in` operator whose key is the literal at this range.
     In(TextRange),
+    /// The `instanceof` operator whose right operand is at this range.
+    Instanceof(TextRange),
 }
 
 /// One syntax step, with child expressions left undecomposed.
@@ -1294,6 +1324,21 @@ fn condition_step(
                 // `in` throws on `null` and `undefined`, but TypeScript
                 // narrows no receiver of an optional chain through it.
                 receivers: false,
+            })
+        }
+        AnyJsExpression::JsInstanceofExpression(expression) => {
+            let left = omit_parentheses(expression.left().ok()?, remaining)?;
+            let right = omit_parentheses(expression.right().ok()?, remaining)?;
+            if !has_operand_shape(&left)? {
+                return Some(ConditionStep::Unsupported);
+            }
+            Some(ConditionStep::Guard {
+                operand: left,
+                guard: SyntaxGuard::Instanceof(right.range()),
+                positive,
+                // As in TypeScript, an instance is never nullish, so the
+                // receivers of an optional chain narrow in the true branch.
+                receivers: positive,
             })
         }
         AnyJsExpression::JsBinaryExpression(binary) => {
@@ -1411,7 +1456,10 @@ fn comparison_step(
         SyntaxGuard::Literal(_) | SyntaxGuard::LooseLiteral => positive,
         SyntaxGuard::Nullish | SyntaxGuard::Undefined { .. } => !positive,
         SyntaxGuard::Typeof(kind) => positive == (*kind != TypeofKind::Undefined),
-        SyntaxGuard::Truthy | SyntaxGuard::Predicate(_) | SyntaxGuard::In(_) => false,
+        SyntaxGuard::Truthy
+        | SyntaxGuard::Predicate(_)
+        | SyntaxGuard::In(_)
+        | SyntaxGuard::Instanceof(_) => false,
     };
     Some(ConditionStep::Guard {
         operand,
@@ -1749,7 +1797,9 @@ mod tests {
             ),
             ("value?.a === other", Truthy, vec![]),
             ("value?.a === -1", Truthy, vec![]),
-            ("value?.a instanceof other", Truthy, vec![]),
+            ("value?.a instanceof other", Truthy, vec!["value"]),
+            ("value?.a instanceof other", Falsy, vec![]),
+            ("!(value?.a instanceof other)", Falsy, vec!["value"]),
             ("value.a", Truthy, vec![]),
         ] {
             assert_eq!(receiver_names(source, outcome).0, expected, "{source}");
@@ -2440,6 +2490,89 @@ mod tests {
     fn in_narrows_through_aliased_conditions() {
         let decomposed = decomposed_last(
             r#"function f(value) { const ok = "a" in value; if (ok) {} }"#,
+            FlowOutcome::Truthy,
+        );
+        assert_eq!(parent_names(&decomposed), ["value"]);
+    }
+
+    #[test]
+    fn instanceof_tests_its_left_operand() {
+        use FlowOutcome::{Falsy, Truthy};
+        for (source, outcome, subject, positive) in [
+            ("value instanceof Date", Truthy, "value", true),
+            ("value instanceof Date", Falsy, "value", false),
+            ("!(value instanceof Date)", Truthy, "value", false),
+            ("(value) instanceof (other)", Truthy, "value", true),
+            ("value.v instanceof other.C", Truthy, "value.v", true),
+            ("value[0] instanceof Date", Truthy, "value.0", true),
+        ] {
+            let decomposed = decomposed(source, outcome);
+            // Like the object of a property test, the subject of `instanceof`
+            // is a parent, because `instanceof` narrows only a type with an
+            // object type or `unknown`. It narrows no object that holds the
+            // tested value.
+            assert!(decomposed.condition.mentions.is_empty(), "{source}");
+            assert_eq!(parent_names(&decomposed), [subject], "{source}");
+            let instance_tested: Vec<_> = decomposed
+                .condition
+                .instance_tested
+                .iter()
+                .map(|tested| subject_name(&decomposed.model, &decomposed.subjects, *tested))
+                .collect();
+            assert_eq!(instance_tested, [subject], "{source}");
+            assert!(
+                !decomposed
+                    .guards
+                    .iter()
+                    .any(|guard| matches!(guard, FlowGuard::Property { .. })),
+                "{source}"
+            );
+            let FlowGuard::Test {
+                subject: tested,
+                test: FlowTest::Instanceof(constructor),
+                positive: actual,
+            } = decomposed.guards[decomposed.condition.guard]
+            else {
+                panic!("{source}: {:?}", decomposed.guards);
+            };
+            assert_eq!(
+                subject_name(&decomposed.model, &decomposed.subjects, tested),
+                subject,
+                "{source}"
+            );
+            assert_eq!(actual, positive, "{source}");
+            let program = decomposed.model.root().syntax().text_trimmed().to_string();
+            assert!(
+                matches!(&program[constructor], "Date" | "other" | "other.C"),
+                "{source}: {}",
+                &program[constructor]
+            );
+        }
+    }
+
+    #[test]
+    fn instanceof_of_an_expression_that_is_not_a_subject_tests_nothing() {
+        for source in [
+            "value.f() instanceof Date",
+            "value! instanceof Date",
+            "(value as object) instanceof Date",
+            "value[other] instanceof Date",
+        ] {
+            let decomposed = decomposed(source, FlowOutcome::Truthy);
+            assert!(decomposed.condition.mentions.is_empty(), "{source}");
+            assert!(decomposed.condition.parents.is_empty(), "{source}");
+            assert_eq!(
+                decomposed.guards[decomposed.condition.guard],
+                FlowGuard::Keep,
+                "{source}"
+            );
+        }
+    }
+
+    #[test]
+    fn instanceof_narrows_through_aliased_conditions() {
+        let decomposed = decomposed_last(
+            "function f(value) { const ok = value instanceof Date; if (ok) {} }",
             FlowOutcome::Truthy,
         );
         assert_eq!(parent_names(&decomposed), ["value"]);
