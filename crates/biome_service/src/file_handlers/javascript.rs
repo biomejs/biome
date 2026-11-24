@@ -1570,6 +1570,20 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
 
 /// If applies all the safe fixes to the given syntax tree.
 pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, WorkspaceError> {
+    fix_all_with_inspector(params, None)
+}
+
+pub(super) fn fix_once_with_inspector(
+    params: FixAllParams,
+    inspector: EmbeddedSignalInspector<'_, '_>,
+) -> Result<Option<FixedFileResult>, WorkspaceError> {
+    fix_all_with_inspector(params, Some(inspector))
+}
+
+fn fix_all_with_inspector(
+    params: FixAllParams,
+    inspector: Option<EmbeddedSignalInspector<'_, '_>>,
+) -> Result<Option<FixedFileResult>, WorkspaceError> {
     let mut tree: AnyJsRoot = params.parsed_source.tree(&params.workspace_db);
     let mut parsed_source = match &params.parsed_source {
         super::ParsedOrigin::Workspace(source) => Some(source),
@@ -1616,6 +1630,84 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, W
 
     let mut process_fix_all =
         ProcessFixAll::new(&params, tree.syntax().text_range_with_trivia().len().into());
+
+    let fixable_filter = AnalysisFilter {
+        categories: params.rule_categories,
+        enabled_rules: Some(fixable_rules.as_slice()),
+        disabled_rules: &disabled_rules,
+        range: None,
+    };
+
+    if let Some(inspector) = inspector {
+        let services = js_analyzer_services_for_fix(
+            &tree,
+            parsed_source,
+            &params,
+            file_source,
+            tree_is_edited,
+        );
+        let active_filter = if params.collect_final_diagnostics
+            || matches!(params.fix_file_mode, FixFileMode::ApplySuppressions)
+        {
+            filter
+        } else {
+            fixable_filter
+        };
+        let mut pending_actions = Vec::new();
+        let (_, _) = analyze_snippet(
+            &tree,
+            active_filter,
+            &analyzer_options,
+            &params.plugins,
+            services,
+            inspector,
+            |signal| {
+                if params.collect_final_diagnostics {
+                    process_fix_all.collect_signal(signal, &mut pending_actions)
+                } else {
+                    process_fix_all.collect_signal_fixes_only(signal, &mut pending_actions)
+                }
+            },
+        );
+
+        let mut plugin_text_edit = None;
+        pending_actions.retain_mut(|action| {
+            if let Some(text_edit) = action.text_edit.take() {
+                plugin_text_edit.get_or_insert(text_edit);
+                false
+            } else {
+                true
+            }
+        });
+        let result = process_fix_all.process_batch_actions(pending_actions, |root| {
+            tree = match AnyJsRoot::cast(root) {
+                Some(tree) => tree,
+                None => return None,
+            };
+            parsed_source = None;
+            tree_is_edited = true;
+            Some(tree.syntax().text_range_with_trivia().len().into())
+        })?;
+
+        if result.is_none()
+            && let Some(plugin_text_edit) = plugin_text_edit
+        {
+            let new_text = {
+                let current_text = tree.syntax().to_string();
+                process_fix_all.apply_plugin_text_edit(plugin_text_edit, &current_text)?
+            };
+            if let Some(new_text) = new_text {
+                let options = params
+                    .settings
+                    .parse_options::<JsLanguage>(params.biome_path, &params.document_file_source);
+                tree = biome_js_parser::parse(&new_text, file_source, options).tree();
+            }
+        }
+
+        return Ok(Some(
+            process_fix_all.finish(tree.syntax().as_send().unwrap()),
+        ));
+    }
 
     if matches!(params.fix_file_mode, FixFileMode::ApplySuppressions) {
         // Suppressions apply to all rules -- keep original single-phase loop
@@ -1666,12 +1758,6 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, W
     // Two-phase fix-all: Phase 1 runs only fixable rules, Phase 2 runs all rules for diagnostics.
 
     // Phase 1: fix loop with fixable-only rules
-    let fixable_filter = AnalysisFilter {
-        categories: params.rule_categories,
-        enabled_rules: Some(fixable_rules.as_slice()),
-        disabled_rules: &disabled_rules,
-        range: None,
-    };
     loop {
         let services = js_analyzer_services_for_fix(
             &tree,
