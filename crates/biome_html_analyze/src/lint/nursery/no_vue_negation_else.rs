@@ -71,7 +71,7 @@ declare_lint_rule! {
     ///
     /// - To disallow negated conditions in JavaScript `if` statements and ternaries, see [`noNegationElse`](https://biomejs.dev/linter/rules/no-negation-else/).
     pub NoVueNegationElse {
-        version: "next",
+        version: "2.6.9",
         name: "noVueNegationElse",
         language: "html",
         recommended: false,

@@ -35,7 +35,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoAstroComponentDefaultExport {
-        version: "next",
+        version: "2.6.9",
         name: "noAstroComponentDefaultExport",
         language: "js",
         recommended: true,

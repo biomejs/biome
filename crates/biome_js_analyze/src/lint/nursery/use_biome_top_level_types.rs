@@ -82,7 +82,7 @@ declare_lint_rule! {
     /// - To use kind sets instead of comparing kind names one by one, see [`useBiomeKindSets`](https://biomejs.dev/linter/rules/use-biome-kind-sets/).
     ///
     pub UseBiomeTopLevelTypes {
-        version: "next",
+        version: "2.6.9",
         name: "useBiomeTopLevelTypes",
         language: "js",
         recommended: true,

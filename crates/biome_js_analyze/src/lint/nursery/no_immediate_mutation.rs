@@ -92,7 +92,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoImmediateMutation {
-        version: "next",
+        version: "2.6.9",
         name: "noImmediateMutation",
         language: "js",
         sources: &[RuleSource::EslintUnicorn("no-immediate-mutation").inspired()],

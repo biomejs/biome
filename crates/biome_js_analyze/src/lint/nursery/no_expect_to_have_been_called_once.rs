@@ -40,7 +40,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoExpectToHaveBeenCalledOnce {
-        version: "next",
+        version: "2.6.9",
         name: "noExpectToHaveBeenCalledOnce",
         language: "js",
         recommended: false,

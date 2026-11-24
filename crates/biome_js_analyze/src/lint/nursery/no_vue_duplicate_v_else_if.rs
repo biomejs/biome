@@ -80,7 +80,7 @@ declare_lint_rule! {
     /// - For the same check on `if` statements in JavaScript, see [`noDuplicateElseIf`](https://biomejs.dev/linter/rules/no-duplicate-else-if/).
     ///
     pub NoVueDuplicateVElseIf {
-        version: "next",
+        version: "2.6.9",
         name: "noVueDuplicateVElseIf",
         language: "js",
         recommended: true,

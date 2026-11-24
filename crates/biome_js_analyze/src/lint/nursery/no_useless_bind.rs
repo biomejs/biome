@@ -68,7 +68,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoUselessBind {
-        version: "next",
+        version: "2.6.9",
         name: "noUselessBind",
         language: "js",
         recommended: false,

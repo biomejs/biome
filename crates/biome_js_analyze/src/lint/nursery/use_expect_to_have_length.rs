@@ -48,7 +48,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseExpectToHaveLength {
-        version: "next",
+        version: "2.6.9",
         name: "useExpectToHaveLength",
         language: "js",
         recommended: false,
