@@ -228,9 +228,9 @@ Binding readReadonly "readReadonly" => sync Function "readReadonly" {
         prototype: No prototype
         members: [
           [string]: string | number | undefined,
-          "name": string,
-          "value": number,
-          "optional"?: string | undefined
+          readonly "name": string,
+          readonly "value": number,
+          readonly "optional"?: string | undefined
         ]
       }
     ]
@@ -240,9 +240,9 @@ Binding readReadonly "readReadonly" => sync Function "readReadonly" {
     prototype: No prototype
     members: [
       [string]: string | number | undefined,
-      "name": string,
-      "value": number,
-      "optional"?: string | undefined
+      readonly "name": string,
+      readonly "value": number,
+      readonly "optional"?: string | undefined
     ]
   }
 }
@@ -251,9 +251,9 @@ Binding value "value" => instanceof Object {
   prototype: No prototype
   members: [
     [string]: string | number | undefined,
-    "name": string,
-    "value": number,
-    "optional"?: string | undefined
+    readonly "name": string,
+    readonly "value": number,
+    readonly "optional"?: string | undefined
   ]
 }
 
@@ -261,9 +261,9 @@ Expression "value" => instanceof Object {
   prototype: No prototype
   members: [
     [string]: string | number | undefined,
-    "name": string,
-    "value": number,
-    "optional"?: string | undefined
+    readonly "name": string,
+    readonly "value": number,
+    readonly "optional"?: string | undefined
   ]
 }
 ```
