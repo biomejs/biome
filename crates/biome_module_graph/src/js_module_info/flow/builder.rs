@@ -41,14 +41,16 @@ pub(super) struct BuiltRoot {
     pub(super) mentions: Vec<(FlowNodeId, FlowSubjectId)>,
     /// The subjects that conditions narrow only through
     /// [`FlowGuard::Property`], such as `s` when the only condition that
-    /// mentions it is `s.kind === "c"`, or through `in` or `instanceof`, as
-    /// in `"a" in s` or `s instanceof Date`.
+    /// mentions it is `s.kind === "c"`, or through `in`, `instanceof`, or a
+    /// type-guard function whose target has only object types, as in
+    /// `"a" in s`, `s instanceof Date`, or `isFoo(s)`.
     pub(super) property_only: FxHashSet<FlowSubjectId>,
-    /// The subjects in `property_only` that an `instanceof` test narrows.
+    /// The subjects in `property_only` that `instanceof` or a type-guard
+    /// function whose target has only object types narrows.
     pub(super) instance_tested: FxHashSet<FlowSubjectId>,
-    /// The pairs in `mentions` where the condition tests the subject with
-    /// `instanceof`, and otherwise mentions it only as the object of a
-    /// [`FlowGuard::Property`] or the subject of `in`.
+    /// The condition nodes, each with a subject in `mentions`, whose
+    /// condition mentions the subject only as the subject of `instanceof` or
+    /// of a type-guard function whose target has only object types.
     pub(super) instance_mentions: FxHashSet<(FlowNodeId, FlowSubjectId)>,
     /// Reachable reads of subjects with their incoming flow.
     pub(super) reads: Vec<BuiltRead>,
@@ -371,12 +373,15 @@ struct RootBuilder<'a, 'raw> {
     subjects: FlowSubjectTable,
     mentions: Vec<(FlowNodeId, FlowSubjectId)>,
     /// The subjects that a condition mentions other than as the object of a
-    /// [`FlowGuard::Property`] or the subject of `in` or `instanceof`.
+    /// [`FlowGuard::Property`] or the subject of `in`, `instanceof`, or a
+    /// type-guard function whose target has only object types.
     tested: FxHashSet<FlowSubjectId>,
     /// The objects of the [`FlowGuard::Property`] guards and the subjects of
-    /// the `in` and `instanceof` tests of all conditions.
+    /// the `in` and `instanceof` tests and of the calls to type-guard
+    /// functions whose targets have only object types, in all conditions.
     parents: FxHashSet<FlowSubjectId>,
-    /// The subjects of the `instanceof` tests of all conditions.
+    /// The subjects of the `instanceof` tests and of the calls to type-guard
+    /// functions whose targets have only object types, in all conditions.
     instance_tested: FxHashSet<FlowSubjectId>,
     instance_mentions: FxHashSet<(FlowNodeId, FlowSubjectId)>,
     reads: Vec<BuiltRead>,
