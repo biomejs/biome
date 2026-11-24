@@ -203,28 +203,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                     return Some(self.destructured_type(ty, *has_initializer));
                 }
                 let subject = self.resolve(&expression.ty);
-                match &expression.destructure_field {
-                    RawDestructureField::Index {
-                        index,
-                        has_initializer,
-                    } => {
-                        let ty = self.resolve_element_type_at_index(subject, *index)?;
-                        Some(self.destructured_type(ty, *has_initializer))
-                    }
-                    RawDestructureField::Name {
-                        name,
-                        has_initializer,
-                    } => {
-                        let ty = self.resolve_static_member_expression(subject, name.text())?;
-                        Some(self.destructured_type(ty, *has_initializer))
-                    }
-                    RawDestructureField::RestExcept(names) => {
-                        Some(self.resolve_rest_except_expression(subject, names))
-                    }
-                    RawDestructureField::RestFrom(index) => {
-                        self.resolve_element_types_from_index(subject, *index)
-                    }
-                }
+                self.resolve_destructure_field(subject, &expression.destructure_field)
             }
             RawTypeofExpression::Index(expression) => {
                 let object = self.resolve(&expression.object);
@@ -347,29 +326,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                     expression.alternate,
                 ),
             InferredTypeofExpression::Destructure(expression) => {
-                match &expression.destructure_field {
-                    RawDestructureField::Index {
-                        index,
-                        has_initializer,
-                    } => {
-                        let ty = self.resolve_element_type_at_index(expression.ty, *index)?;
-                        Some(self.destructured_type(ty, *has_initializer))
-                    }
-                    RawDestructureField::Name {
-                        name,
-                        has_initializer,
-                    } => {
-                        let ty =
-                            self.resolve_static_member_expression(expression.ty, name.text())?;
-                        Some(self.destructured_type(ty, *has_initializer))
-                    }
-                    RawDestructureField::RestExcept(names) => {
-                        Some(self.resolve_rest_except_expression(expression.ty, names))
-                    }
-                    RawDestructureField::RestFrom(index) => {
-                        self.resolve_element_types_from_index(expression.ty, *index)
-                    }
-                }
+                self.resolve_destructure_field(expression.ty, &expression.destructure_field)
             }
             InferredTypeofExpression::Index(expression) => {
                 self.resolve_element_type_at_index(expression.object, expression.index)
@@ -2284,6 +2241,37 @@ impl<'db> ResolutionCtx<'db, '_> {
         }
 
         false
+    }
+
+    /// Returns the type of the variable that a destructuring pattern binds
+    /// to `field` of a value of type `subject`, as `v` in `const { v } = s`.
+    pub(super) fn resolve_destructure_field(
+        &mut self,
+        subject: InferredTypeData<'db>,
+        field: &RawDestructureField,
+    ) -> Option<InferredTypeData<'db>> {
+        match field {
+            RawDestructureField::Index {
+                index,
+                has_initializer,
+            } => {
+                let ty = self.resolve_element_type_at_index(subject, *index)?;
+                Some(self.destructured_type(ty, *has_initializer))
+            }
+            RawDestructureField::Name {
+                name,
+                has_initializer,
+            } => {
+                let ty = self.resolve_static_member_expression(subject, name.text())?;
+                Some(self.destructured_type(ty, *has_initializer))
+            }
+            RawDestructureField::RestExcept(names) => {
+                Some(self.resolve_rest_except_expression(subject, names))
+            }
+            RawDestructureField::RestFrom(index) => {
+                self.resolve_element_types_from_index(subject, *index)
+            }
+        }
     }
 
     /// Resolves the type held at a fixed index of `subject`.

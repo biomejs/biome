@@ -1,0 +1,150 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidDestructuredDiscriminants.ts
+---
+# Input
+```ts
+// should generate diagnostics
+// A test of one element of a destructuring pattern narrows the value that the
+// pattern destructures, so another element of the same pattern takes its type
+// from the narrowed members, as in TypeScript.
+
+interface Loaded {
+	state: "loaded";
+	data: { size: number };
+}
+
+interface Failed {
+	state: "failed";
+	data: null;
+}
+
+type Result = Loaded | Failed;
+
+function parameter({ state, data }: Result) {
+	if (state === "loaded") {
+		return data?.size;
+	}
+}
+
+function declared(result: Result) {
+	const { state, data } = result;
+	if (state !== "loaded") {
+		if (data) {
+			return 1;
+		}
+	}
+}
+
+function aliased({ state, data }: Result) {
+	const loaded = state === "loaded";
+	if (loaded) {
+		return data?.size;
+	}
+}
+
+function rest(...[state, data]: ["loaded", { size: number }] | ["failed", null]) {
+	if (state === "loaded") {
+		return data?.size;
+	}
+}
+
+```
+
+# Diagnostics
+```
+invalidDestructuredDiscriminants.ts:20:10 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    18 │ function parameter({ state, data }: Result) {
+    19 │ 	if (state === "loaded") {
+  > 20 │ 		return data?.size;
+       │ 		       ^^^^
+    21 │ 	}
+    22 │ }
+  
+  i Replace ?. with ..
+  
+    18 │ function parameter({ state, data }: Result) {
+    19 │ 	if (state === "loaded") {
+  > 20 │ 		return data?.size;
+       │ 		           ^^
+    21 │ 	}
+    22 │ }
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+invalidDestructuredDiscriminants.ts:27:7 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━
+
+  ! This condition is always falsy.
+  
+    25 │ 	const { state, data } = result;
+    26 │ 	if (state !== "loaded") {
+  > 27 │ 		if (data) {
+       │ 		    ^^^^
+    28 │ 			return 1;
+    29 │ 		}
+  
+  i The value's type can never be truthy, so this check is redundant.
+  
+  i Remove the condition and the code it guards, or check the value you meant to test.
+  
+
+```
+
+```
+invalidDestructuredDiscriminants.ts:36:10 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    34 │ 	const loaded = state === "loaded";
+    35 │ 	if (loaded) {
+  > 36 │ 		return data?.size;
+       │ 		       ^^^^
+    37 │ 	}
+    38 │ }
+  
+  i Replace ?. with ..
+  
+    34 │ 	const loaded = state === "loaded";
+    35 │ 	if (loaded) {
+  > 36 │ 		return data?.size;
+       │ 		           ^^
+    37 │ 	}
+    38 │ }
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+invalidDestructuredDiscriminants.ts:42:10 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    40 │ function rest(...[state, data]: ["loaded", { size: number }] | ["failed", null]) {
+    41 │ 	if (state === "loaded") {
+  > 42 │ 		return data?.size;
+       │ 		       ^^^^
+    43 │ 	}
+    44 │ }
+  
+  i Replace ?. with ..
+  
+    40 │ function rest(...[state, data]: ["loaded", { size: number }] | ["failed", null]) {
+    41 │ 	if (state === "loaded") {
+  > 42 │ 		return data?.size;
+       │ 		           ^^
+    43 │ 	}
+    44 │ }
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
