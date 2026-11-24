@@ -93,6 +93,13 @@ pub struct FormatHtmlVerbatimNode<'node> {
     preserve_line_endings: bool,
 }
 
+impl FormatHtmlVerbatimNode<'_> {
+    pub(crate) fn without_comments(mut self) -> Self {
+        self.format_comments = false;
+        self
+    }
+}
+
 impl Format<HtmlFormatContext> for FormatHtmlVerbatimNode<'_> {
     fn fmt(&self, f: &mut Formatter<HtmlFormatContext>) -> FormatResult<()> {
         fn source_range<Context>(f: &Formatter<Context>, range: TextRange) -> TextRange
@@ -190,7 +197,12 @@ impl Format<HtmlFormatContext> for FormatHtmlVerbatimNode<'_> {
             },
         );
 
-        if self.preserve_line_endings {
+        if self.preserve_line_endings
+            || (matches!(
+                self.kind,
+                Some(VerbatimKind::Bogus | VerbatimKind::Suppressed | VerbatimKind::Skipped)
+            ) && f.options().file_source().is_svelte())
+        {
             if f.source_map_generation().is_enabled() {
                 f.write_element(FormatElement::SourcePosition(verbatim_text_start))?;
             }
@@ -285,6 +297,71 @@ impl Format<HtmlFormatContext> for FormatHtmlVerbatimElementChildren<'_> {
         if range.is_empty() {
             return Ok(());
         }
+        let length = f
+            .context()
+            .source_map()
+            .map_or(range, |map| map.source_range(range))
+            .len();
+        f.write_element(FormatElement::Tag(Tag::StartVerbatim(
+            VerbatimKind::Verbatim { length },
+        )))?;
+        FormatHtmlVerbatimRange {
+            node,
+            range,
+            preserve_line_endings: self.preserve_line_endings,
+        }
+        .fmt(f)?;
+        f.write_element(FormatElement::Tag(Tag::EndVerbatim))
+    }
+}
+
+/// Prints an opening or branch header through its closing brace. The body shares the
+/// same syntax node but owns the following tokens and comments.
+pub(crate) struct FormatSvelteVerbatimHeader<'a> {
+    pub node: &'a HtmlSyntaxNode,
+    pub range: TextRange,
+}
+
+impl Format<HtmlFormatContext> for FormatSvelteVerbatimHeader<'_> {
+    fn fmt(&self, f: &mut HtmlFormatter) -> FormatResult<()> {
+        for element in self.node.descendants_with_tokens(Direction::Next) {
+            match element {
+                SyntaxElement::Token(token) => {
+                    f.state_mut().track_token(&token);
+                    if token.text_trimmed_range().end() == self.range.end() {
+                        break;
+                    }
+                }
+                SyntaxElement::Node(node) => {
+                    let comments = f.context().comments();
+                    comments.mark_suppression_checked(&node);
+                    for comment in comments.leading_dangling_trailing_comments(&node) {
+                        if self.range.contains_range(comment.piece().text_range()) {
+                            comment.mark_formatted();
+                        }
+                    }
+                }
+            }
+        }
+        FormatHtmlVerbatimRange {
+            node: self.node,
+            range: self.range,
+            preserve_line_endings: true,
+        }
+        .fmt(f)
+    }
+}
+
+/// Prints source bytes without consuming tokens or comments; the caller owns the range.
+pub(crate) struct FormatHtmlVerbatimRange<'a> {
+    pub node: &'a HtmlSyntaxNode,
+    pub range: TextRange,
+    pub preserve_line_endings: bool,
+}
+
+impl Format<HtmlFormatContext> for FormatHtmlVerbatimRange<'_> {
+    fn fmt(&self, f: &mut HtmlFormatter) -> FormatResult<()> {
+        let Self { node, range, .. } = *self;
         let source_range = f
             .context()
             .source_map()
@@ -297,11 +374,6 @@ impl Format<HtmlFormatContext> for FormatHtmlVerbatimElementChildren<'_> {
             },
             |map| map.source().text_slice(source_range).to_string(),
         );
-        f.write_element(FormatElement::Tag(Tag::StartVerbatim(
-            VerbatimKind::Verbatim {
-                length: source_range.len(),
-            },
-        )))?;
         if self.preserve_line_endings {
             if f.source_map_generation().is_enabled() {
                 f.write_element(FormatElement::SourcePosition(range.start()))?;
@@ -319,7 +391,7 @@ impl Format<HtmlFormatContext> for FormatHtmlVerbatimElementChildren<'_> {
             )
             .fmt(f)?;
         }
-        f.write_element(FormatElement::Tag(Tag::EndVerbatim))
+        Ok(())
     }
 }
 

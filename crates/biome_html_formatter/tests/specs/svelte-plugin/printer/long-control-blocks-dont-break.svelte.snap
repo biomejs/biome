@@ -1,0 +1,105 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: printer/long-control-blocks-dont-break.svelte
+---
+
+# Input
+
+```svelte
+{#if andIiiiiiiiiiiiiiiiiiiiiiiiiiiWillNeverBreaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaak === true && cool}
+    a
+{:else if andIiiiiiiiiiiiiiiiiiiiiiiiiiiWillNeverBreaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaak === true && cool}
+    b
+{/if}
+
+{#each [1, andIiiiiiiiiiiiiiiiiiiiiiiiiiiWillNeverBreaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaak] as { cool, veryCool }}
+    a
+{/each}
+
+{#key andIiiiiiiiiiiiiiiiiiiiiiiiiiiWillNeverBreaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaak.no.no.no}
+    a
+{/key}
+
+{#await Promise.resolve(andIiiiiiiiiiiiiiiiiiiiiiiiiiiWillNeverBreaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaak) then cool}
+    a
+{/await}
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,17 +1,25 @@
+-{#if andIiiiiiiiiiiiiiiiiiiiiiiiiiiWillNeverBreaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaak === true && cool}
++{#if andIiiiiiiiiiiiiiiiiiiiiiiiiiiWillNeverBreaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaak ===
++    true && cool}
+     a
+-{:else if andIiiiiiiiiiiiiiiiiiiiiiiiiiiWillNeverBreaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaak === true && cool}
++{:else if andIiiiiiiiiiiiiiiiiiiiiiiiiiiWillNeverBreaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaak ===
++    true && cool}
+     b
+ {/if}
+ 
+-{#each [1, andIiiiiiiiiiiiiiiiiiiiiiiiiiiWillNeverBreaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaak] as { cool, veryCool }}
++{#each [
++    1,
++    andIiiiiiiiiiiiiiiiiiiiiiiiiiiWillNeverBreaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaak,
++] as { cool, veryCool }}
+     a
+ {/each}
+ 
+-{#key andIiiiiiiiiiiiiiiiiiiiiiiiiiiWillNeverBreaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaak.no.no.no}
++{#key andIiiiiiiiiiiiiiiiiiiiiiiiiiiWillNeverBreaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaak
++    .no.no.no}
+     a
+ {/key}
+ 
+-{#await Promise.resolve(andIiiiiiiiiiiiiiiiiiiiiiiiiiiWillNeverBreaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaak) then cool}
++{#await Promise.resolve(
++    andIiiiiiiiiiiiiiiiiiiiiiiiiiiWillNeverBreaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaak,
++) then cool}
+     a
+ {/await}
+```
+
+# Output
+
+```svelte
+{#if andIiiiiiiiiiiiiiiiiiiiiiiiiiiWillNeverBreaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaak ===
+    true && cool}
+    a
+{:else if andIiiiiiiiiiiiiiiiiiiiiiiiiiiWillNeverBreaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaak ===
+    true && cool}
+    b
+{/if}
+
+{#each [
+    1,
+    andIiiiiiiiiiiiiiiiiiiiiiiiiiiWillNeverBreaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaak,
+] as { cool, veryCool }}
+    a
+{/each}
+
+{#key andIiiiiiiiiiiiiiiiiiiiiiiiiiiWillNeverBreaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaak
+    .no.no.no}
+    a
+{/key}
+
+{#await Promise.resolve(
+    andIiiiiiiiiiiiiiiiiiiiiiiiiiiWillNeverBreaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaak,
+) then cool}
+    a
+{/await}
+```
+
+# Lines exceeding max width of 80 characters
+```
+    1: {#if andIiiiiiiiiiiiiiiiiiiiiiiiiiiWillNeverBreaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaak ===
+    4: {:else if andIiiiiiiiiiiiiiiiiiiiiiiiiiiWillNeverBreaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaak ===
+   11:     andIiiiiiiiiiiiiiiiiiiiiiiiiiiWillNeverBreaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaak,
+   16: {#key andIiiiiiiiiiiiiiiiiiiiiiiiiiiWillNeverBreaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaak
+   22:     andIiiiiiiiiiiiiiiiiiiiiiiiiiiWillNeverBreaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaak,
+```

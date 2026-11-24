@@ -22,9 +22,9 @@ info: svelte/await_with_whitespace.svelte
 ```svelte
 {#await promise}
 	<p>Loading...</p>
-{:then value}
+{:then     value    }
 	<p>The value is {value}</p>
-{:catch error}
+{:catch      error     }
 	<p>Error: {error.message}</p>
 {/await}
 

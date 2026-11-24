@@ -16,6 +16,7 @@ use biome_html_syntax::{
         STYLE_KW, TEMPLATE_KW, UL_KW, VIDEO_KW,
     },
     HtmlSyntaxToken,
+    element_ext::AnyHtmlTagElement,
 };
 use biome_parser::{TokenSet, token_set};
 
@@ -182,15 +183,23 @@ impl FormatHtmlElement {
         // The parser hands us a single `HtmlEmbeddedContent` child whenever it
         // read the content as raw text, which covers the tags below as well as
         // the blocks of a Vue single-file component, whose names are arbitrary.
-        let has_embedded_content = children.iter().any(|child| {
-            matches!(
-                child,
-                AnyHtmlElement::AnyHtmlContent(AnyHtmlContent::HtmlEmbeddedContent(_))
-            )
+        let embedded_content = children.iter().find_map(|child| match child {
+            AnyHtmlElement::AnyHtmlContent(AnyHtmlContent::HtmlEmbeddedContent(content)) => {
+                Some(content)
+            }
+            _ => None,
         });
-        let should_be_verbatim = has_embedded_content || is_verbatim_tag(&tag_name);
+        let opaque_svelte_content = f.options().file_source().is_svelte()
+            && AnyHtmlTagElement::from(opening_element.clone()).requires_verbatim_svelte_content();
+        let should_be_verbatim =
+            opaque_svelte_content || embedded_content.is_some() || is_verbatim_tag(&tag_name);
 
-        let should_format_embedded_nodes = if f.context().should_delegate_fmt_embedded_nodes() {
+        let should_format_embedded_nodes = if f.options().file_source().is_svelte() {
+            !opaque_svelte_content
+                && embedded_content
+                    .as_ref()
+                    .is_some_and(|content| f.context().is_embedded_node_range(content.range()))
+        } else if f.context().should_delegate_fmt_embedded_nodes() {
             // Only delegate for supported <script> or <style> content
             node.is_supported_script_tag() || node.is_supported_style_tag()
         } else {
@@ -310,7 +319,8 @@ impl FormatHtmlElement {
                 f,
                 [FormatHtmlVerbatimElementChildren {
                     node,
-                    preserve_line_endings: has_embedded_content,
+                    preserve_line_endings: f.options().file_source().is_svelte()
+                        || embedded_content.is_some(),
                 }]
             )?;
         } else {

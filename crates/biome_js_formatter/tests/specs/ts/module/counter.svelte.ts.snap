@@ -1,0 +1,23 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: ts/module/counter.svelte.ts
+---
+
+# Input
+
+```ts
+let count:number=$state(1)
+const doubled=$derived(count*2)
+export const read=($offset:number)=>doubled+$offset
+
+```
+
+
+# Formatted
+
+```ts
+let count: number = $state(1);
+const doubled = $derived(count * 2);
+export const read = ($offset: number) => doubled + $offset;
+
+```

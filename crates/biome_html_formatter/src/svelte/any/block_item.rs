@@ -8,7 +8,7 @@ impl FormatRule<AnySvelteBlockItem> for FormatAnySvelteBlockItem {
     type Context = HtmlFormatContext;
     fn fmt(&self, node: &AnySvelteBlockItem, f: &mut HtmlFormatter) -> FormatResult<()> {
         match node {
-            AnySvelteBlockItem::SvelteEachAsKeyedItem(node) => node.format().fmt(f),
+            AnySvelteBlockItem::SvelteEachBindingClause(node) => node.format().fmt(f),
             AnySvelteBlockItem::SvelteEachKeyedItem(node) => node.format().fmt(f),
         }
     }

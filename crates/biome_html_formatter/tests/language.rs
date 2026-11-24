@@ -1,5 +1,8 @@
-use biome_configuration::{Configuration, HtmlConfiguration, html::HtmlFormatterConfiguration};
-use biome_formatter::FormatLanguage;
+use biome_configuration::{
+    Configuration, HtmlConfiguration, JsConfiguration, html::HtmlFormatterConfiguration,
+    javascript::JsFormatterConfiguration,
+};
+use biome_formatter::{FormatLanguage, QuoteStyle};
 use biome_formatter_test::TestFormatLanguage;
 use biome_fs::BiomePath;
 use biome_html_formatter::HtmlFormatLanguage;
@@ -12,11 +15,15 @@ use biome_service::settings::Settings;
 
 pub struct HtmlTestFormatLanguage {
     source_type: HtmlFileSource,
+    pub(crate) js_quote_style: Option<QuoteStyle>,
 }
 
 impl HtmlTestFormatLanguage {
     pub fn new(source_type: HtmlFileSource) -> Self {
-        Self { source_type }
+        Self {
+            source_type,
+            js_quote_style: None,
+        }
     }
 }
 
@@ -62,5 +69,14 @@ impl TestFormatLanguage for HtmlTestFormatLanguage {
             }),
             ..Default::default()
         });
+        if let Some(quote_style) = self.js_quote_style {
+            configuration.javascript = Some(JsConfiguration {
+                formatter: Some(JsFormatterConfiguration {
+                    quote_style: Some(quote_style),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            });
+        }
     }
 }

@@ -58,8 +58,9 @@ pub(crate) enum EmbedCandidate {
     Element {
         tag_name: TokenText,
         attributes: Vec<(TokenText, Option<TokenText>)>,
-        content: EmbedContent,
+        content: Option<EmbedContent>,
         is_global: bool,
+        is_root_script: bool,
     },
     Frontmatter {
         content: EmbedContent,
@@ -98,6 +99,7 @@ pub(crate) enum EmbedBlockKind {
 pub(crate) enum SvelteBlockKind {
     Render,
     Snippet,
+    EachBinding,
     Const,
     Declaration,
 }
@@ -121,13 +123,13 @@ impl From<&AnySvelteBlock> for EmbedBlockKind {
 }
 
 impl EmbedCandidate {
-    pub fn content(&self) -> EmbedContent {
+    pub fn content(&self) -> Option<EmbedContent> {
         match self {
-            Self::Element { content, .. }
-            | Self::Frontmatter { content }
+            Self::Element { content, .. } => content.clone(),
+            Self::Frontmatter { content }
             | Self::TextExpression { content, .. }
             | Self::Directive { content, .. }
-            | Self::Attribute { content, .. } => content.clone(),
+            | Self::Attribute { content, .. } => Some(content.clone()),
         }
     }
 
@@ -182,6 +184,23 @@ impl EmbedDetectorsRegistry {
         candidate: &EmbedCandidate,
         file_source: &DocumentFileSource,
     ) -> Option<EmbedMatch> {
+        if file_source
+            .to_html_file_source()
+            .is_some_and(|source| source.is_svelte())
+            && let EmbedCandidate::Element { attributes, .. } = candidate
+        {
+            for key in ["lang", "type"] {
+                let mut declarations = attributes
+                    .iter()
+                    .filter(|(name, _)| name.text().eq_ignore_ascii_case(key));
+                if let Some((_, value)) = declarations.next()
+                    && (value.is_none() || declarations.next().is_some())
+                {
+                    // A dynamic or repeated declaration cannot select a unique guest parser.
+                    return None;
+                }
+            }
+        }
         for detector in HTML_DETECTORS.iter() {
             if let Some(guest) = detector.try_match(candidate, file_source) {
                 return Some(EmbedMatch { guest });
@@ -314,6 +333,20 @@ fn resolve_script_language(
 
     if let Some(type_value) = candidate.attribute("type") {
         let script_type = ScriptType::from_type_value(type_value.text());
+        if html_source.is_svelte()
+            && let Some(lang) = candidate.attribute("lang").map(TokenText::text)
+            && !lang.trim().is_empty()
+        {
+            let compatible = match script_type {
+                ScriptType::Classic => matches_ignore_ascii_case(lang, &["js", "javascript"]),
+                ScriptType::JSON | ScriptType::ImportMap => lang.eq_ignore_ascii_case("json"),
+                ScriptType::Module => true,
+                ScriptType::Unsupported => false,
+            };
+            if !compatible {
+                return None;
+            }
+        }
         if script_type.is_json() {
             return Some(GuestLanguage::Json);
         }

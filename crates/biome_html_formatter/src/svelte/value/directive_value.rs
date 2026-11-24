@@ -64,10 +64,13 @@ impl FormatSvelteDirectiveValue {
                 return Ok(false);
             };
             let Some(expression) = initializer.value().ok().and_then(|value| {
-                value
-                    .as_html_attribute_single_text_expression()?
-                    .expression()
-                    .ok()
+                let delimited = value.as_html_attribute_single_text_expression()?;
+                if f.context()
+                    .is_verbatim_embedded_node_range(delimited.range())
+                {
+                    return None;
+                }
+                delimited.expression().ok()
             }) else {
                 return Ok(false);
             };

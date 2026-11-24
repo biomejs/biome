@@ -6,13 +6,13 @@
 //!
 //! See `scripts/update-svelte-plugin-tests.mjs` for how the suite is imported.
 
-use biome_formatter::{AttributePosition, IndentStyle, IndentWidth, LineWidth};
+use biome_formatter::{AttributePosition, IndentStyle, IndentWidth, LineWidth, QuoteStyle};
 use biome_formatter_test::test_prettier_snapshot::{PrettierSnapshot, PrettierTestFile};
 use biome_html_formatter::context::{
     IndentScriptAndStyle, SelfCloseVoidElements, WhitespaceSensitivity,
 };
 use biome_html_formatter::{HtmlFormatLanguage, context::HtmlFormatOptions};
-use biome_languages::HtmlFileSource;
+use biome_languages::{DocumentFileSource, HtmlFileSource};
 use camino::Utf8Path;
 use std::env;
 use std::fs::read_to_string;
@@ -32,10 +32,22 @@ fn test_snapshot(input: &'static str, _: &str, _: &str, _: &str) {
     let test_file = PrettierTestFile::new(input, root_path);
     let source_type: HtmlFileSource = test_file.input_file().try_into().unwrap();
 
-    let options = plugin_options(test_file.input_file());
-    let language = language::HtmlTestFormatLanguage::new(source_type);
+    let overrides = read_sample_options(test_file.input_file());
+    let options = plugin_options(overrides.as_ref());
+    let mut language = language::HtmlTestFormatLanguage::new(source_type);
+    if let Some(single_quote) = overrides
+        .as_ref()
+        .and_then(|overrides| overrides["singleQuote"].as_bool())
+    {
+        language.js_quote_style = Some(if single_quote {
+            QuoteStyle::Single
+        } else {
+            QuoteStyle::Double
+        });
+    }
 
-    let snapshot = PrettierSnapshot::new(test_file, language, HtmlFormatLanguage::new(options));
+    let snapshot = PrettierSnapshot::new(test_file, language, HtmlFormatLanguage::new(options))
+        .with_document_file_source(DocumentFileSource::from(source_type));
 
     snapshot.test()
 }
@@ -46,14 +58,14 @@ fn test_snapshot(input: &'static str, _: &str, _: &str, _: &str) {
 /// at its default, then merge in the sample's `options.json`. Options we have
 /// no equivalent for, such as `svelteSortOrder`, are ignored; the sample then
 /// shows up as a difference rather than silently passing for the wrong reason.
-fn plugin_options(input_file: &Utf8Path) -> HtmlFormatOptions {
+fn plugin_options(overrides: Option<&serde_json::Value>) -> HtmlFormatOptions {
     let mut options = HtmlFormatOptions::new(HtmlFileSource::svelte())
         .with_indent_style(IndentStyle::Space)
         .with_indent_width(IndentWidth::try_from(4).expect("4 is a valid indent width"))
         .with_self_close_void_elements(SelfCloseVoidElements::Always)
         .with_indent_script_and_style(IndentScriptAndStyle::from(true));
 
-    let Some(overrides) = read_sample_options(input_file) else {
+    let Some(overrides) = overrides else {
         return options;
     };
 

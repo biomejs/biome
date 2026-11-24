@@ -70,10 +70,12 @@ use biome_html_analyze::analyze_with_snippets;
 use biome_html_analyze::{HtmlAnalyzerServices, HtmlSuppression, analyze, analyze_snippet};
 use biome_html_factory::make::ident;
 use biome_html_formatter::context::SelfCloseVoidElements;
+#[cfg(feature = "html_embeds")]
+use biome_html_formatter::format_node_with_verbatim_ranges;
 use biome_html_formatter::{
     HtmlFormatOptions,
     context::{IndentScriptAndStyle, WhitespaceSensitivity},
-    format_node, format_node_with_verbatim_ranges,
+    format_node,
 };
 use biome_html_parser::{HtmlParserOptions, parse_html_with_cache};
 use biome_html_syntax::element_ext::{AnyEmbeddedContent, AnyHtmlTagElement};
@@ -827,149 +829,34 @@ fn format_embedded(
 
     let tree = parse.syntax(&workspace_db);
 
-    // The HTML formatter writes a placeholder for each snippet, and the closure
-    // below replaces it with the formatted code. A snippet that can't be
-    // formatted keeps the HTML formatter's output.
+    // Preformat guests before building the host layout so Astro and Svelte can
+    // preserve failed snippets verbatim. Other hosts retain the HTML fallback.
     let preserve_failed_snippets = document_file_source
         .to_html_file_source()
-        .is_some_and(|source| source.is_astro());
-    let mut snippets = FxHashMap::default();
+        .is_some_and(|source| source.is_astro() || source.is_svelte());
+    let mut formatted_snippets = FxHashMap::default();
+    let mut embedded_snippet_ranges = Vec::new();
     let mut verbatim_snippet_ranges = Vec::new();
     for snippet in embedded_nodes {
         let range = snippet.content_range();
-        if preserve_failed_snippets && snippet.parsed_origin().parse(&workspace_db).has_errors() {
-            verbatim_snippet_ranges.push(range);
-        } else {
-            snippets.insert(range, snippet);
-        }
+        let document =
+            format_embedded_snippet(biome_path, settings, &tree, &snippet, &workspace_db);
+        store_embedded_format_result(
+            preserve_failed_snippets,
+            range,
+            document,
+            &mut embedded_snippet_ranges,
+            &mut verbatim_snippet_ranges,
+            &mut formatted_snippets,
+        );
     }
     let mut formatted = format_node_with_verbatim_ranges(
         options,
         &tree,
-        snippets.keys().copied().collect(),
+        embedded_snippet_ranges,
         verbatim_snippet_ranges,
     )?;
-    formatted.format_embedded(move |range| {
-        let snippet = snippets.get(&range)?;
-        let snippet_file_source = snippet.file_source(&workspace_db)?;
-        let parse = snippet.parsed_origin().parse(&workspace_db);
-        if parse.has_errors() {
-            return None;
-        }
-        let attribute_snippet = AttributeSnippet::find(&tree, range);
-
-        let document = match snippet_file_source {
-            DocumentFileSource::Js(_) => {
-                let root = parse.tree::<AnyJsRoot>();
-                match &root {
-                    // The JavaScript formatter adds a space after a comment that is
-                    // the only content of an expression, such as `{/* note */}`.
-                    AnyJsRoot::JsExpressionTemplateRoot(root) if root.expression().is_none() => {
-                        return None;
-                    }
-                    // A script in an attribute value holds the statements of a Vue
-                    // event handler, such as `@click="count++"`.
-                    AnyJsRoot::JsExpressionTemplateRoot(_)
-                    | AnyJsRoot::JsVueSlotPropsRoot(_)
-                    | AnyJsRoot::JsVueGenericRoot(_)
-                    | AnyJsRoot::JsScript(_) => {}
-                    _ if attribute_snippet.is_some() => return None,
-                    _ => {}
-                }
-                let mut js_options = javascript::resolve_format_options(
-                    biome_path,
-                    &snippet_file_source,
-                    settings,
-                    &workspace_db,
-                );
-                // An attribute value is written between double quotes.
-                if attribute_snippet.is_some() {
-                    js_options = js_options
-                        .with_quote_style(QuoteStyle::Single)
-                        .with_jsx_quote_style(QuoteStyle::Single)
-                        .with_trailing_newline(TrailingNewline::from(false));
-                }
-                // Vue compiles an event handler as the body of a function only
-                // when it contains a `;`, and as an expression otherwise.
-                let handler_needs_semicolon = match &root {
-                    AnyJsRoot::JsScript(script) if attribute_snippet.is_some() => {
-                        !is_single_expression_statement(script)
-                    }
-                    _ => false,
-                };
-                if handler_needs_semicolon {
-                    js_options = js_options.with_semicolons(Semicolons::Always);
-                }
-                let node = parse.embedded_syntax::<JsLanguage>();
-                let formatted =
-                    biome_js_formatter::format_node_with_offset(js_options, &node).ok()?;
-                // The preferred quote gives way to the other one when it needs
-                // fewer escapes, and template literals and comments keep their
-                // quotes. Either would end the attribute value early.
-                if attribute_snippet.is_some() {
-                    let printed = formatted.print().ok()?;
-                    if printed.as_code().contains('"') {
-                        return None;
-                    }
-                    // Vue splits a `v-for` value at the first `in` or `of`
-                    // between whitespace, so a default value can't contain
-                    // one that its source didn't have, such as `'k' in obj`
-                    // formatted from `'k'in obj`.
-                    if matches!(attribute_snippet, Some(AttributeSnippet::VForDefault))
-                        && contains_v_for_operator(printed.as_code())
-                    {
-                        return None;
-                    }
-                    // Removing an empty statement, such as the `;` of
-                    // `if (ok) {};`, can leave a handler without any `;`.
-                    if handler_needs_semicolon && !printed.as_code().contains(';') {
-                        return None;
-                    }
-                }
-                match attribute_snippet {
-                    Some(AttributeSnippet::Value) => {
-                        format_attribute_value(&root, formatted.into_document())?
-                    }
-                    _ => formatted.into_document(),
-                }
-            }
-            DocumentFileSource::Json(_) => {
-                let json_options =
-                    json::resolve_format_options(&snippet_file_source, settings, &workspace_db);
-                let node = parse.embedded_syntax::<JsonLanguage>();
-                biome_json_formatter::format_node_with_offset(json_options, &node)
-                    .ok()?
-                    .into_document()
-            }
-            DocumentFileSource::Css(_) => {
-                let mut css_options = css::resolve_format_options(
-                    biome_path,
-                    &snippet_file_source,
-                    settings,
-                    &workspace_db,
-                );
-                if attribute_snippet.is_some() {
-                    css_options = css_options
-                        .with_quote_style(QuoteStyle::Single)
-                        .with_trailing_newline(TrailingNewline::from(false));
-                }
-                let node = parse.embedded_syntax::<CssLanguage>();
-                let formatted =
-                    biome_css_formatter::format_node_with_offset(css_options, &node).ok()?;
-                if attribute_snippet.is_some() {
-                    let printed = formatted.print().ok()?;
-                    if printed.as_code().contains(['\n', '\r']) {
-                        return None;
-                    }
-                    format_css_attribute_value(printed.as_code())?
-                } else {
-                    formatted.into_document()
-                }
-            }
-            _ => return None,
-        };
-        Some(document)
-    });
+    formatted.format_embedded(move |range| formatted_snippets.remove(&range));
 
     // Propagate expand flags again after inserting embedded content,
     // so that groups inside the embedded documents properly expand.
@@ -979,6 +866,156 @@ fn format_embedded(
         Ok(printed) => Ok(printed),
         Err(error) => Err(WorkspaceError::FormatError(error.into())),
     }
+}
+
+#[cfg(feature = "html_embeds")]
+fn store_embedded_format_result(
+    preserve_failed_snippets: bool,
+    range: TextRange,
+    document: Option<Document>,
+    embedded_snippet_ranges: &mut Vec<TextRange>,
+    verbatim_snippet_ranges: &mut Vec<TextRange>,
+    formatted_snippets: &mut FxHashMap<TextRange, Document>,
+) {
+    match document {
+        Some(document) => {
+            embedded_snippet_ranges.push(range);
+            formatted_snippets.insert(range, document);
+        }
+        None if preserve_failed_snippets => verbatim_snippet_ranges.push(range),
+        None => embedded_snippet_ranges.push(range),
+    }
+}
+
+#[cfg(feature = "html_embeds")]
+fn format_embedded_snippet(
+    biome_path: &BiomePath,
+    settings: &SettingsWithEditor,
+    tree: &HtmlSyntaxNode,
+    snippet: &super::ParsedSnippetOrigin,
+    workspace_db: &WorkspaceDb,
+) -> Option<Document> {
+    let range = snippet.content_range();
+    let snippet_file_source = snippet.file_source(workspace_db)?;
+    let parse = snippet.parsed_origin().parse(workspace_db);
+    if parse.has_errors() {
+        return None;
+    }
+    let attribute_snippet = AttributeSnippet::find(tree, range);
+
+    let document = match snippet_file_source {
+        DocumentFileSource::Js(_) => {
+            let root = parse.tree::<AnyJsRoot>();
+            match &root {
+                // The JavaScript formatter adds a space after a comment that is
+                // the only content of an expression, such as `{/* note */}`.
+                AnyJsRoot::JsExpressionTemplateRoot(root) if root.expression().is_none() => {
+                    return None;
+                }
+                // A script in an attribute value holds the statements of a Vue
+                // event handler, such as `@click="count++"`.
+                AnyJsRoot::JsExpressionTemplateRoot(_)
+                | AnyJsRoot::JsVueSlotPropsRoot(_)
+                | AnyJsRoot::JsVueGenericRoot(_)
+                | AnyJsRoot::JsScript(_) => {}
+                _ if attribute_snippet.is_some() => return None,
+                _ => {}
+            }
+            let mut js_options = javascript::resolve_format_options(
+                biome_path,
+                &snippet_file_source,
+                settings,
+                workspace_db,
+            );
+            // An attribute value is written between double quotes.
+            if attribute_snippet.is_some() {
+                js_options = js_options
+                    .with_quote_style(QuoteStyle::Single)
+                    .with_jsx_quote_style(QuoteStyle::Single)
+                    .with_trailing_newline(TrailingNewline::from(false));
+            }
+            // Vue compiles an event handler as the body of a function only
+            // when it contains a `;`, and as an expression otherwise.
+            let handler_needs_semicolon = match &root {
+                AnyJsRoot::JsScript(script) if attribute_snippet.is_some() => {
+                    !is_single_expression_statement(script)
+                }
+                _ => false,
+            };
+            if handler_needs_semicolon {
+                js_options = js_options.with_semicolons(Semicolons::Always);
+            }
+            let node = parse.embedded_syntax::<JsLanguage>();
+            let formatted = biome_js_formatter::format_node_with_offset(js_options, &node).ok()?;
+            // The preferred quote gives way to the other one when it needs
+            // fewer escapes, and template literals and comments keep their
+            // quotes. Either would end the attribute value early.
+            if attribute_snippet.is_some() {
+                let printed = formatted.print().ok()?;
+                if printed.as_code().contains('"') {
+                    return None;
+                }
+                // Vue splits a `v-for` value at the first `in` or `of`
+                // between whitespace, so a default value can't contain
+                // one that its source didn't have, such as `'k' in obj`
+                // formatted from `'k'in obj`.
+                if matches!(attribute_snippet, Some(AttributeSnippet::VForDefault))
+                    && contains_v_for_operator(printed.as_code())
+                {
+                    return None;
+                }
+                // Removing an empty statement, such as the `;` of
+                // `if (ok) {};`, can leave a handler without any `;`.
+                if handler_needs_semicolon && !printed.as_code().contains(';') {
+                    return None;
+                }
+            }
+            let document = match attribute_snippet {
+                Some(AttributeSnippet::Value) => {
+                    format_attribute_value(&root, formatted.into_document())?
+                }
+                _ => formatted.into_document(),
+            };
+            let mut elements = document.into_elements();
+            elements.push(FormatElement::LineSuffixBoundary);
+            Document::new(elements)
+        }
+        DocumentFileSource::Json(_) => {
+            let json_options =
+                json::resolve_format_options(&snippet_file_source, settings, workspace_db);
+            let node = parse.embedded_syntax::<JsonLanguage>();
+            biome_json_formatter::format_node_with_offset(json_options, &node)
+                .ok()?
+                .into_document()
+        }
+        DocumentFileSource::Css(_) => {
+            let mut css_options = css::resolve_format_options(
+                biome_path,
+                &snippet_file_source,
+                settings,
+                workspace_db,
+            );
+            if attribute_snippet.is_some() {
+                css_options = css_options
+                    .with_quote_style(QuoteStyle::Single)
+                    .with_trailing_newline(TrailingNewline::from(false));
+            }
+            let node = parse.embedded_syntax::<CssLanguage>();
+            let formatted =
+                biome_css_formatter::format_node_with_offset(css_options, &node).ok()?;
+            if attribute_snippet.is_some() {
+                let printed = formatted.print().ok()?;
+                if printed.as_code().contains(['\n', '\r']) {
+                    return None;
+                }
+                format_css_attribute_value(printed.as_code())?
+            } else {
+                formatted.into_document()
+            }
+        }
+        _ => return None,
+    };
+    Some(document)
 }
 
 /// An embedded snippet written inside the quotes of an attribute value. The
@@ -1446,9 +1483,220 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
     PullActionsResult { actions }
 }
 
+#[cfg(feature = "html_embeds")]
+struct FixedJsSnippet {
+    element_range: TextRange,
+    content_offset: TextSize,
+    result: Option<FixedFileResult>,
+}
+
+#[cfg(feature = "html_embeds")]
+struct JsFixSnippetAnalyzer<'a> {
+    params: Option<FixAllParams<'a>>,
+    element_range: TextRange,
+    content_offset: TextSize,
+    result: Option<FixedFileResult>,
+}
+
+#[cfg(feature = "html_embeds")]
+impl SnippetAnalyzer<WorkspaceError> for JsFixSnippetAnalyzer<'_> {
+    type Output = FixedJsSnippet;
+
+    fn diagnostics_offset(&self) -> TextSize {
+        self.content_offset
+    }
+
+    fn metadata(&self) -> &'static biome_analyze::MetadataRegistry {
+        &biome_js_analyze::METADATA
+    }
+
+    fn run(&mut self, inspector: EmbeddedSignalInspector<'_, '_>) -> ControlFlow<WorkspaceError> {
+        let params = self.params.take().unwrap();
+        match javascript::fix_once_with_inspector(params, inspector) {
+            Ok(result) => {
+                self.result = result;
+                ControlFlow::Continue(())
+            }
+            Err(error) => ControlFlow::Break(error),
+        }
+    }
+
+    fn into_output(self: Box<Self>) -> Self::Output {
+        FixedJsSnippet {
+            element_range: self.element_range,
+            content_offset: self.content_offset,
+            result: self.result,
+        }
+    }
+}
+
+#[cfg(feature = "html_embeds")]
+fn fix_javascript_snippets(params: &FixAllParams) -> Result<Vec<FixedJsSnippet>, WorkspaceError> {
+    let mut snippets: Vec<Box<dyn SnippetAnalyzer<WorkspaceError, Output = FixedJsSnippet> + '_>> =
+        Vec::new();
+    for snippet in params
+        .parsed_source
+        .snippets(&params.workspace_db)
+        .for_analysis(
+            &params.parsed_source,
+            params.document_file_source,
+            params.settings.as_ref(),
+            params.biome_path.as_path(),
+            &params.workspace_db,
+        )
+    {
+        let Some(document_file_source) = snippet.file_source(&params.workspace_db) else {
+            continue;
+        };
+        if document_file_source.to_js_file_source().is_none() {
+            continue;
+        }
+        snippets.push(Box::new(JsFixSnippetAnalyzer {
+            params: Some(FixAllParams {
+                parsed_source: snippet.parsed_origin(),
+                fix_file_mode: params.fix_file_mode,
+                settings: params.settings,
+                biome_path: params.biome_path,
+                workspace_db: params.workspace_db.clone(),
+                embedded_data: params.embedded_data.clone(),
+                #[cfg(feature = "module_graph")]
+                module_db: params.module_db.clone(),
+                project_layout: params.project_layout.clone(),
+                document_file_source,
+                only: params.only,
+                skip: params.skip,
+                rule_categories: params.rule_categories,
+                suppression_reason: params.suppression_reason.clone(),
+                enabled_rules: params.enabled_rules,
+                plugins: params.plugins.clone(),
+                working_directory: params.working_directory,
+                collect_final_diagnostics: params.collect_final_diagnostics,
+            }),
+            element_range: snippet.element_range(),
+            content_offset: snippet.content_offset(),
+            result: None,
+        }));
+    }
+    if snippets.is_empty() {
+        return Ok(Vec::new());
+    }
+
+    let tree: HtmlRoot = params.parsed_source.tree(&params.workspace_db);
+    let source_type = params
+        .document_file_source
+        .to_html_file_source()
+        .unwrap_or_default();
+    let analyzer_options = resolve_analyzer_options(
+        params.biome_path,
+        params.working_directory,
+        &params.document_file_source,
+        params.suppression_reason.as_deref(),
+        params.settings,
+        &params.workspace_db,
+    );
+    let html_services = HtmlAnalyzerServices {
+        module_db: {
+            #[cfg(feature = "module_graph")]
+            {
+                Some(params.module_db.clone())
+            }
+            #[cfg(not(feature = "module_graph"))]
+            {
+                None
+            }
+        },
+        project_layout: Some(params.project_layout.clone()),
+        document: params.parsed_source.document(),
+        ..HtmlAnalyzerServices::default()
+    }
+    .with_language_db(params.workspace_db.rc_language_db())
+    .with_embedded_data(params.embedded_data.clone());
+    let suppression = HtmlSuppressionService::new(
+        &tree,
+        source_type,
+        &params.parsed_source,
+        &params.workspace_db,
+    );
+    let (error, _) = analyze_with_snippets(
+        &tree,
+        AnalysisFilter {
+            categories: params.rule_categories,
+            enabled_rules: Some(&[]),
+            ..AnalysisFilter::default()
+        },
+        &analyzer_options,
+        source_type,
+        html_services,
+        Some(Box::new(suppression)),
+        &mut snippets,
+        |_| ControlFlow::Continue(()),
+    );
+    if let Some(error) = error {
+        return Err(error);
+    }
+
+    Ok(snippets
+        .into_iter()
+        .map(|snippet| snippet.into_output())
+        .collect())
+}
+
 #[tracing::instrument(level = "debug", skip(params))]
 pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, WorkspaceError> {
     let mut tree: HtmlRoot = params.parsed_source.tree(&params.workspace_db);
+    #[cfg(feature = "html_embeds")]
+    let (mut embedded_errors, mut embedded_skipped_suggested_fixes) = (0, 0);
+    #[cfg(not(feature = "html_embeds"))]
+    let (embedded_errors, embedded_skipped_suggested_fixes) = (0, 0);
+
+    #[cfg(feature = "html_embeds")]
+    if params
+        .document_file_source
+        .to_html_file_source()
+        .is_some_and(|source| source.is_svelte())
+    {
+        let mut actions = Vec::new();
+        let mut new_snippets = Vec::new();
+        for fixed_snippet in fix_javascript_snippets(&params)? {
+            let Some(result) = fixed_snippet.result else {
+                continue;
+            };
+            let FixedFileResult {
+                root,
+                errors,
+                actions: mut snippet_actions,
+                skipped_suggested_fixes,
+            } = result;
+            embedded_errors += errors;
+            embedded_skipped_suggested_fixes += skipped_suggested_fixes;
+            if snippet_actions.is_empty() {
+                continue;
+            }
+            for action in &mut snippet_actions {
+                action.range += fixed_snippet.content_offset;
+            }
+            actions.extend(snippet_actions);
+            new_snippets.push(UpdateSnippetsNodes {
+                range: fixed_snippet.element_range,
+                new_code: root.into_source_text(),
+                needs_reindent: false,
+                verbatim_ranges: Vec::new(),
+            });
+        }
+        if !new_snippets.is_empty() {
+            let root = update_snippets(
+                params.parsed_source.clone(),
+                params.workspace_db.clone(),
+                new_snippets,
+            )?;
+            return Ok(Some(FixedFileResult {
+                root,
+                errors: embedded_errors,
+                actions,
+                skipped_suggested_fixes: embedded_skipped_suggested_fixes,
+            }));
+        }
+    }
 
     let analyzer_options = resolve_analyzer_options(
         params.biome_path,
@@ -1539,9 +1787,10 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, W
             })?;
 
             if result.is_none() {
-                return Ok(Some(
-                    process_fix_all.finish(tree.syntax().as_send().unwrap()),
-                ));
+                let mut result = process_fix_all.finish(tree.syntax().as_send().unwrap());
+                result.errors += embedded_errors;
+                result.skipped_suggested_fixes += embedded_skipped_suggested_fixes;
+                return Ok(Some(result));
             }
         }
     }
@@ -1641,9 +1890,10 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, W
         );
     }
 
-    Ok(Some(
-        process_fix_all.finish(tree.syntax().as_send().unwrap()),
-    ))
+    let mut result = process_fix_all.finish(tree.syntax().as_send().unwrap());
+    result.errors += embedded_errors;
+    result.skipped_suggested_fixes += embedded_skipped_suggested_fixes;
+    Ok(Some(result))
 }
 
 #[instrument(level = "debug", skip_all)]
@@ -1898,13 +2148,36 @@ fn is_component_element(attr: &HtmlAttribute) -> bool {
 mod tests {
     use super::{
         content_indent_prefix, css_verbatim_ranges, js_verbatim_ranges, push_reindented_code,
+        store_embedded_format_result,
     };
     use biome_rowan::TextRange;
+    use rustc_hash::FxHashMap;
 
     fn reindent_embedded_code(code: &str, indent: &str, verbatim_ranges: &[TextRange]) -> String {
         let mut output = String::new();
         push_reindented_code(&mut output, code, indent, verbatim_ranges);
         output
+    }
+
+    #[test]
+    fn failed_svelte_embedded_formatting_uses_verbatim_range() {
+        let range = TextRange::new(3.into(), 9.into());
+        let mut embedded_ranges = Vec::new();
+        let mut verbatim_ranges = Vec::new();
+        let mut formatted_snippets = FxHashMap::default();
+
+        store_embedded_format_result(
+            true,
+            range,
+            None,
+            &mut embedded_ranges,
+            &mut verbatim_ranges,
+            &mut formatted_snippets,
+        );
+
+        assert!(embedded_ranges.is_empty());
+        assert_eq!(verbatim_ranges, [range]);
+        assert!(formatted_snippets.is_empty());
     }
 
     #[test]

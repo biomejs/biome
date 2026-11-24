@@ -45,33 +45,16 @@ info: formatting/script-style-tags-multiple-nested.svelte
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,14 +1,13 @@
+@@ -1,8 +1,7 @@
 +<div>above</div>
  <script>
--    const hi = "";
-+    const hi = '';
+     const hi = "";
  </script>
 -
 -<div>above</div>
  <div>below</div>
  
  <div>
-     <div>above</div>
-     <script>
--        const hi = "";
-+        const hi = '';
-     </script>
-     <div>below</div>
- </div>
-@@ -16,7 +15,7 @@
- <div>
-     <div>above</div>
-     <script>
--        const hi = "";
-+        const hi = '';
-     </script>
-     <style></style>
- </div>
 ```
 
 # Output
@@ -79,14 +62,14 @@ info: formatting/script-style-tags-multiple-nested.svelte
 ```svelte
 <div>above</div>
 <script>
-    const hi = '';
+    const hi = "";
 </script>
 <div>below</div>
 
 <div>
     <div>above</div>
     <script>
-        const hi = '';
+        const hi = "";
     </script>
     <div>below</div>
 </div>
@@ -94,7 +77,7 @@ info: formatting/script-style-tags-multiple-nested.svelte
 <div>
     <div>above</div>
     <script>
-        const hi = '';
+        const hi = "";
     </script>
     <style></style>
 </div>

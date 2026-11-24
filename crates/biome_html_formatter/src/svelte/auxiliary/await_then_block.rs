@@ -1,5 +1,6 @@
 use crate::html::lists::element_list::FormatHtmlElementList;
 use crate::prelude::*;
+use crate::shared::FormatSvelteAwaitBinding;
 use biome_formatter::write;
 use biome_html_syntax::{SvelteAwaitThenBlock, SvelteAwaitThenBlockFields};
 
@@ -15,11 +16,12 @@ impl FormatNodeRule<SvelteAwaitThenBlock> for FormatSvelteAwaitThenBlock {
             then_token,
         } = node.as_fields();
 
-        write!(f, [sv_curly_colon_token.format(), then_token.format()])?;
-
-        if let Some(name) = name {
-            write!(f, [space(), name.format()])?;
+        sv_curly_colon_token.format().fmt(f)?;
+        FormatSvelteAwaitBinding {
+            keyword: then_token?,
+            name,
         }
+        .fmt(f)?;
 
         write!(f, [r_curly_token.format()])?;
 

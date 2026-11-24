@@ -1,9 +1,33 @@
 use crate::AsFormat;
 use crate::context::HtmlFormatContext;
 use crate::html::auxiliary::attribute_single_text_expression::HtmlAttributeSingleTextExpressionLayout;
+use crate::html::auxiliary::text_expression::FormatHtmlTextExpressionOptions;
 use biome_formatter::formatter::Formatter;
 use biome_formatter::{Format, FormatResult};
-use biome_html_syntax::{AnyHtmlAttributeInitializer, AnySvelteBindingProperty};
+use biome_html_syntax::{
+    AnyHtmlAttributeInitializer, AnySvelteBindingProperty, HtmlSyntaxToken, HtmlTextExpression,
+};
+
+/// Await bindings have no guest binding-pattern parse. Preserve everything after the keyword.
+pub(crate) struct FormatSvelteAwaitBinding {
+    pub keyword: HtmlSyntaxToken,
+    pub name: Option<HtmlTextExpression>,
+}
+
+impl Format<HtmlFormatContext> for FormatSvelteAwaitBinding {
+    fn fmt(&self, f: &mut Formatter<HtmlFormatContext>) -> FormatResult<()> {
+        self.keyword.format().fmt(f)?;
+        if let Some(name) = &self.name {
+            name.format()
+                .with_options(FormatHtmlTextExpressionOptions {
+                    verbatim_from: Some(self.keyword.text_trimmed_range().end()),
+                    ..Default::default()
+                })
+                .fmt(f)?;
+        }
+        Ok(())
+    }
+}
 
 pub(crate) struct FmtAnyAttributeInitializer {
     pub(crate) node: AnyHtmlAttributeInitializer,

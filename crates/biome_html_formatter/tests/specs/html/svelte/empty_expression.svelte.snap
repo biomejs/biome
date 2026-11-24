@@ -1,0 +1,21 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: svelte/empty_expression.svelte
+---
+
+# Input
+
+```svelte
+<p><!-- before -->{   }<!-- after --></p>
+<div   id="ok"></div>
+
+```
+
+
+# Formatted
+
+```svelte
+<p><!-- before -->{   }<!-- after --></p>
+<div id="ok"></div>
+
+```

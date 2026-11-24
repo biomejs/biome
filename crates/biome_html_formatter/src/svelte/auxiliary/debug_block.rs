@@ -1,6 +1,7 @@
 use crate::prelude::*;
 use biome_formatter::write;
 use biome_html_syntax::{SvelteDebugBlock, SvelteDebugBlockFields};
+use biome_js_parser::syntax::ModuleNameSyntax;
 use biome_rowan::AstSeparatedList;
 
 #[derive(Debug, Clone, Default)]
@@ -13,6 +14,16 @@ impl FormatNodeRule<SvelteDebugBlock> for FormatSvelteDebugBlock {
             bindings,
             r_curly_token,
         } = node.as_fields();
+
+        if !bindings.iter().all(|name| {
+            name.and_then(|name| name.ident_token()).is_ok_and(|token| {
+                ModuleNameSyntax::ReferenceIdentifier.accepts(token.text_trimmed())
+            })
+        }) {
+            return format_html_source_node_preserving_line_endings(node.syntax())
+                .without_comments()
+                .fmt(f);
+        }
 
         write!(f, [sv_curly_at_token.format(), debug_token.format(),])?;
 

@@ -26,6 +26,10 @@ mod formatter {
         tests_macros::gen_tests! {"tests/specs/astro_expr/**/*.tsx", crate::spec_test::run, "astro_expr"}
     }
 
+    mod svelte_each_binding {
+        tests_macros::gen_tests! {"tests/specs/svelte_each_binding/**/*.ts", crate::spec_test::run, "svelte_each_binding"}
+    }
+
     mod mdx_tag {
         tests_macros::gen_tests! {"tests/specs/mdx_tag/**/*.jsx", crate::spec_test::run, "mdx_tag"}
     }

@@ -3,6 +3,7 @@ use crate::verbatim::format_html_source_node_preserving_line_endings;
 use biome_formatter::write;
 use biome_formatter::{CstFormatContext, FormatRuleWithOptions, normalize_newlines};
 use biome_html_syntax::HtmlTextExpression;
+use biome_rowan::{TextRange, TextSize};
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatHtmlTextExpression {
@@ -19,6 +20,8 @@ pub(crate) struct FormatHtmlTextExpressionOptions {
     /// for an expression written between double quotes. The source text is
     /// written when the expression isn't formatted as JavaScript.
     pub escape_double_quotes: bool,
+    /// Start of an unparsed binding, including trivia attached to its preceding keyword.
+    pub verbatim_from: Option<TextSize>,
 }
 
 impl FormatNodeRule<HtmlTextExpression> for FormatHtmlTextExpression {
@@ -43,6 +46,22 @@ impl FormatNodeRule<HtmlTextExpression> for FormatHtmlTextExpression {
 
         if self.options.compact {
             return format_removed(&token).fmt(f);
+        }
+
+        if let Some(start) = self.options.verbatim_from {
+            let parent = node
+                .syntax()
+                .parent()
+                .ok_or(biome_formatter::FormatError::SyntaxError)?;
+            return format_replaced(
+                &token,
+                &FormatHtmlVerbatimRange {
+                    node: &parent,
+                    range: TextRange::new(start, token.text_range().end()),
+                    preserve_line_endings: true,
+                },
+            )
+            .fmt(f);
         }
 
         let token_text = token.text();
