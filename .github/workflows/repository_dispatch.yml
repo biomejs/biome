@@ -38,15 +38,15 @@ jobs:
             ./packages/@biomejs/wasm-web
           key: ${{ env.WASM_CACHE_KEY }}
 
-      - name: Install just
-        uses: extractions/setup-just@53165ef7e734c5c07cb06b3c8e7b647c5aa16db3 # v4.0.0
-
-      - name: Install toolchain
-        uses: moonrepo/setup-rust@abb2d32350334249b178c401e5ec5836e0cd88d3 # v1.3.0
-        with:
-          bins: wasm-bindgen-cli@0.2.117, wasm-opt
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - parallel:
+          - name: Install just
+            uses: extractions/setup-just@53165ef7e734c5c07cb06b3c8e7b647c5aa16db3 # v4.0.0
+          - name: Install toolchain
+            uses: moonrepo/setup-rust@abb2d32350334249b178c401e5ec5836e0cd88d3 # v1.3.0
+            with:
+              bins: wasm-bindgen-cli@0.2.117, wasm-opt
+            env:
+              GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build WASM module for the web
         run: just build-wasm-web --features=unstable
