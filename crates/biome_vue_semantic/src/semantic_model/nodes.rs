@@ -8,10 +8,13 @@
 //! analyzer gives its visitors, which can't be made from a root alone. A rule of the analyzer of
 //! an HTML document therefore can't resolve a JavaScript node of a snippet,
 //! and the reverse.
+//!
+//! The same analysis finds the row a node stands for: it keeps the id of each
+//! node it resolved, keyed by the node.
 
 use super::model::{
-    Attr, Component, Computed, Element, Emit, Method, Prop, PropDefault, SnippetId, Symbol,
-    VueSemanticModel,
+    Attr, Component, Computed, Element, Emit, HtmlRow, Method, Prop, PropDefault, SnippetId,
+    Symbol, VueSemanticModel,
 };
 use biome_analyze::AnalyzedTree;
 use biome_html_syntax::{
@@ -22,6 +25,7 @@ use biome_js_syntax::{
     JsStringLiteralExpression, TsMethodSignatureTypeMember, TsPropertySignatureTypeMember,
 };
 use biome_rowan::{AstNode, Language, SyntaxNode, declare_node_union};
+use rustc_hash::FxHashMap;
 use std::marker::PhantomData;
 use std::ops::Deref;
 use std::rc::Rc;
@@ -64,13 +68,32 @@ pub type HtmlNodeId = NodeId<HtmlLanguage>;
 #[derive(Debug)]
 pub(crate) struct Nodes<L: Language> {
     nodes: Box<[Option<SyntaxNode<L>>]>,
+    /// The id of each node of `nodes`.
+    ids: FxHashMap<SyntaxNode<L>, NodeId<L>>,
 }
 
 impl<L: Language> Nodes<L> {
+    /// Creates the nodes of one tree from the node each id names, or `None`
+    /// for an id whose node is in another tree.
+    fn new(nodes: Box<[Option<SyntaxNode<L>>]>) -> Self {
+        let ids = nodes
+            .iter()
+            .enumerate()
+            .filter_map(|(index, node)| Some((node.clone()?, NodeId::new(index))))
+            .collect();
+        Self { nodes, ids }
+    }
+
     /// Returns the node `id` names, or `None` when it is not in the tree
     /// these nodes were resolved in.
     pub(crate) fn get(&self, id: NodeId<L>) -> Option<&SyntaxNode<L>> {
         self.nodes.get(id.index())?.as_ref()
+    }
+
+    /// Returns the id that names `node`, or `None` when no row of the model
+    /// stands for it.
+    pub(crate) fn id(&self, node: &SyntaxNode<L>) -> Option<NodeId<L>> {
+        self.ids.get(node).copied()
     }
 
     /// Returns the node `row` stands for, or `None` when it is not in the
@@ -86,6 +109,9 @@ impl<L: Language> Nodes<L> {
 /// It reads as a [`VueSemanticModel`], and [`Self::node`] returns the node of
 /// a row in constant time. Rows written in another tree, such as another
 /// script block of the same single-file component, have no node.
+///
+/// The reverse lookups, such as [`Self::attr_of`], return the row a node
+/// stands for in constant time.
 ///
 /// Code that holds a root without the [`AnalyzedTree`] of its analysis
 /// cannot resolve nodes:
@@ -152,6 +178,39 @@ impl AnalyzedVueModel<HtmlLanguage> {
     pub fn new(model: VueSemanticModel, tree: AnalyzedTree<'_, HtmlLanguage>) -> Self {
         let nodes = Rc::new(model.resolve_html_nodes(tree.root()));
         Self { model, nodes }
+    }
+
+    /// Returns the element of the model that `node` is.
+    ///
+    /// `node` must be the whole element, an [`HtmlElement`] or an
+    /// [`HtmlSelfClosingElement`]. Returns `None` for any other node, such as
+    /// the opening tag of an element, and for every node when the model does
+    /// not describe the analyzed tree.
+    pub fn element_of(&self, node: &impl AstNode<Language = HtmlLanguage>) -> Option<Element> {
+        match self.row_of(node)? {
+            HtmlRow::Element(id) => Some(self.model.element(id)),
+            HtmlRow::Attr(_) => None,
+        }
+    }
+
+    /// Returns the attribute or directive of the model that `node` is.
+    ///
+    /// Returns `None` for any other node, for an attribute the model does not
+    /// describe, such as a directive the parser could not read, and for every
+    /// node when the model does not describe the analyzed tree.
+    pub fn attr_of(&self, node: &impl AstNode<Language = HtmlLanguage>) -> Option<Attr> {
+        match self.row_of(node)? {
+            HtmlRow::Attr(id) => Some(Attr {
+                data: self.model.data.clone(),
+                id,
+            }),
+            HtmlRow::Element(_) => None,
+        }
+    }
+
+    fn row_of(&self, node: &impl AstNode<Language = HtmlLanguage>) -> Option<HtmlRow> {
+        let id = self.nodes.id(node.syntax())?;
+        Some(self.model.data.html_nodes[id.index()].row)
     }
 }
 
@@ -293,7 +352,7 @@ impl VueSemanticModel {
                     .flatten()
             })
             .collect();
-        Nodes { nodes }
+        Nodes::new(nodes)
     }
 
     /// Resolves the nodes of the host document rooted at `root`.
@@ -305,8 +364,8 @@ impl VueSemanticModel {
             .data
             .html_nodes
             .iter()
-            .map(|ptr| ptr.try_to_node(root.syntax()))
+            .map(|node| node.ptr.try_to_node(root.syntax()))
             .collect();
-        Nodes { nodes }
+        Nodes::new(nodes)
     }
 }

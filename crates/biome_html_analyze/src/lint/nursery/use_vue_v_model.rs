@@ -15,7 +15,7 @@ use biome_languages::HtmlFileSource;
 use biome_parser::{TokenSet, token_set};
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt};
 use biome_rule_options::use_vue_v_model::UseVueVModelOptions;
-use biome_vue_semantic::{Element, RootShape, Snippet};
+use biome_vue_semantic::RootShape;
 
 declare_lint_rule! {
     /// Enforce `v-model` instead of a prop binding paired with an `update:` listener that writes the value back.
@@ -115,9 +115,7 @@ impl Rule for UseVueVModel {
             return Box::default();
         }
 
-        let Some(model_element) = ctx.model().element_at(element.range()) else {
-            return Box::default();
-        };
+        let model = ctx.model();
         bindings
             .into_iter()
             .filter_map(|(binding, prop)| {
@@ -125,8 +123,8 @@ impl Rule for UseVueVModel {
                 let (listener, _) = listeners
                     .iter()
                     .find(|(_, updated)| is_same_prop(prop.text_trimmed(), updated.text_trimmed()))?;
-                let bound = value_snippet(&model_element, &binding)?;
-                let handler = value_snippet(&model_element, listener)?;
+                let bound = model.attr_of(&binding)?.value_snippet()?;
+                let handler = model.attr_of(listener)?.value_snippet()?;
                 let writes_back = *handler.root()
                     == RootShape::Assignment {
                         target: bound.fingerprint(),
@@ -311,15 +309,6 @@ fn camelized(name: &str) -> impl Iterator<Item = char> + '_ {
         }
         Some(char)
     })
-}
-
-/// Returns the snippet holding the value of `directive`.
-fn value_snippet(element: &Element, directive: &AnyVueDirective) -> Option<Snippet> {
-    let range = directive.range();
-    element
-        .attrs()
-        .find(|attr| attr.range() == range)?
-        .value_snippet()
 }
 
 /// Writes the `v-model` directive that replaces the binding of `prop`: `v-model` for `modelValue`,

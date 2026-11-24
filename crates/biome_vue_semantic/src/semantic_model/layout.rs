@@ -211,7 +211,7 @@ fn visit_tag(
 
     let parent_scope = parent.map(|parent| builder.data.elements[parent.index()].scope);
     let scope = builder.add_scope(ScopeKind::Element(id), parent_scope);
-    let node = builder.add_html_node(&tag.node);
+    let node = builder.add_html_node(&tag.node, HtmlRow::Element(id));
 
     builder.data.elements.push(ElementData {
         range: tag.range,
@@ -341,7 +341,8 @@ fn visit_attribute(
                     _ => {}
                 }
             }
-            let node = builder.add_html_node(attribute.syntax());
+            let row = HtmlRow::Attr(AttrId::new(builder.data.attrs.len()));
+            let node = builder.add_html_node(attribute.syntax(), row);
             builder.data.attrs.push(AttrData {
                 element,
                 range,
@@ -380,7 +381,8 @@ fn visit_attribute(
                 }
                 Some(_) => (AttrValueData::Unparsed, None),
             };
-            let node = builder.add_html_node(attribute.syntax());
+            let row = HtmlRow::Attr(AttrId::new(builder.data.attrs.len()));
+            let node = builder.add_html_node(attribute.syntax(), row);
             builder.data.attrs.push(AttrData {
                 element,
                 range,

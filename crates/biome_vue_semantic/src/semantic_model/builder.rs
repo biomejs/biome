@@ -119,10 +119,14 @@ impl ModelBuilder {
         })
     }
 
-    /// Returns the id of `node`, a node of the host document.
-    pub(crate) fn add_html_node(&mut self, node: &HtmlSyntaxNode) -> HtmlNodeId {
+    /// Returns the id of `node`, the node of the host document that `row`
+    /// stands for.
+    pub(crate) fn add_html_node(&mut self, node: &HtmlSyntaxNode, row: HtmlRow) -> HtmlNodeId {
         let id = HtmlNodeId::new(self.data.html_nodes.len());
-        self.data.html_nodes.push(SyntaxNodePtr::new(node));
+        self.data.html_nodes.push(HtmlNodeData {
+            ptr: SyntaxNodePtr::new(node),
+            row,
+        });
         id
     }
 

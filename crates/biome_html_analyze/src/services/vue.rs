@@ -7,6 +7,9 @@
 //!
 //! When a rule needs the syntax of an element or attribute the model
 //! describes, [`AnalyzedVueModel::node`] returns its node in constant time.
+//! When a rule matched the node of an element or attribute,
+//! [`AnalyzedVueModel::element_of`] and [`AnalyzedVueModel::attr_of`] return
+//! what the model knows about it, also in constant time.
 //!
 //! The model is built from the file stored in the language database, because
 //! the database also holds the parsed scripts and template expressions. It is
@@ -150,7 +153,7 @@ mod tests {
     use biome_languages::{DocumentFileSource, HtmlFileSource, LanguageDb};
     use biome_parser::db::{ParseDb, SourceExt, SourceOutput};
     use biome_rowan::{AstNode, WalkEvent};
-    use biome_vue_semantic::AnalyzedVueModel;
+    use biome_vue_semantic::{AnalyzedVueModel, AnyVueElementNode};
     use camino::{Utf8Path, Utf8PathBuf};
     use std::cell::RefCell;
     use std::ops::{ControlFlow, Deref};
@@ -237,7 +240,7 @@ mod tests {
     }
 
     /// Reads the node of each element and attribute of the model through
-    /// [`AnalyzedVueModel`], as a rule does.
+    /// [`AnalyzedVueModel`], and the row of each node, as a rule does.
     struct NodeProbe<'a> {
         nodes: &'a RefCell<Vec<String>>,
     }
@@ -251,11 +254,20 @@ mod tests {
             for element in model.elements() {
                 let node = model.node(&element).expect("an element node");
                 assert_eq!(node.range(), element.range());
+                assert_eq!(model.element_of(&node), Some(element.clone()));
+                assert_eq!(model.attr_of(&node), None);
+                // The opening tag of an element is not the element.
+                if let AnyVueElementNode::HtmlElement(node) = &node {
+                    let opening = node.opening_element().expect("an opening tag");
+                    assert_eq!(model.element_of(&opening), None);
+                }
                 self.nodes
                     .borrow_mut()
                     .push(node.syntax().text_trimmed().to_string());
                 for attr in element.attrs() {
                     let node = model.node(&attr).expect("an attribute node");
+                    assert_eq!(model.attr_of(&node), Some(attr.clone()));
+                    assert_eq!(model.element_of(&node), None);
                     self.nodes
                         .borrow_mut()
                         .push(node.syntax().text_trimmed().to_string());
@@ -273,7 +285,7 @@ mod tests {
     }
 
     #[test]
-    fn rows_resolve_to_nodes_of_the_analyzed_document() {
+    fn rows_and_nodes_of_the_analyzed_document_resolve_to_each_other() {
         let (services, root) = services(HtmlFileSource::vue());
         let found = RefCell::new(Vec::new());
         let mut emit = |_: &dyn AnalyzerSignal<HtmlLanguage>| ControlFlow::<()>::Continue(());
