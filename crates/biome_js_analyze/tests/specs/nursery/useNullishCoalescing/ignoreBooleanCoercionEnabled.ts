@@ -1,51 +1,47 @@
-// Tests for ignoreBooleanCoercion: true
-// `||` and `||=` inside a Boolean() call should NOT generate diagnostics.
+/* should generate diagnostics */
 
 declare const a: string | null;
 declare const b: string;
 declare const c: string;
+declare const d: string;
+declare const n: number | undefined;
 
-// || directly inside Boolean()
+// `||` inside `Boolean()`: not reported
 const r1 = Boolean(a || b);
 
-// chained || inside Boolean()
+// Chained `||` inside `Boolean()`: not reported
 const r2 = Boolean(a || b || c);
 
-// || inside parenthesized argument
+// Parenthesized argument: not reported
 const r3 = Boolean((a || b));
 
-// ||= inside Boolean()
+// `||=` inside `Boolean()`: not reported
 declare let assigned: string | null;
 const r4 = Boolean(assigned ||= b);
 
-// || nested inside Boolean() within another call: still suppressed because the
-// value still flows into the Boolean() coercion.
+// `Boolean()` nested in another call: not reported
 declare function identity<T>(value: T): T;
-const r4b = identity(Boolean(a || 'default'));
+const r5 = identity(Boolean(a || 'default'));
 
-// || mixed with && inside Boolean(): the whole argument is boolean-coerced,
-// so the walk steps through the && parent and suppresses the ||.
-declare const d: string;
-const r4c = Boolean(d && (a || 'default'));
+// `||` under `&&` inside `Boolean()`: not reported
+const r6 = Boolean(d && (a || 'default'));
 
-// These SHOULD still generate diagnostics (not inside Boolean()).
-const r5 = a || 'default';
-
-declare const n: number | undefined;
-const r6 = n || 0;
+// Outside `Boolean()`
+const r7 = a || 'default';
+const r8 = n || 0;
 
 declare let assignPlain: string | null;
 assignPlain ||= 'default';
 
-// Inside a non-Boolean call: SHOULD generate a diagnostic.
-const r7 = identity(a || 'default');
+// Inside another call
+const r9 = identity(a || 'default');
 
-// Boolean shadowed by a parameter: SHOULD generate a diagnostic.
+// `Boolean` shadowed by a parameter
 function shadowedByParameter(Boolean: (value: unknown) => boolean) {
 	return Boolean(a || 'default');
 }
 
-// Boolean shadowed by a local binding: SHOULD generate a diagnostic.
+// `Boolean` shadowed by a local variable
 function shadowedByLocal() {
 	const Boolean = (value: unknown) => !!value;
 	return Boolean(a || 'default');

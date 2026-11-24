@@ -545,6 +545,11 @@ impl<'src> CssLexer<'src> {
             self.is_line_comment_enabled(),
         )
         .with_metavariables(self.metavariables)
+        .with_html_quote_references(
+            self.source_type
+                .as_embedding_kind()
+                .is_html_style_attribute(),
+        )
     }
 
     fn byte_before(&self, position: usize, offset: usize) -> Option<u8> {
@@ -667,7 +672,7 @@ impl<'src> CssLexer<'src> {
             EQL => self.consume_eql(),
             EXL => self.consume_exl(),
             PRC => self.consume_byte(T![%]),
-            Dispatch::AMP => self.consume_byte(T![&]),
+            Dispatch::AMP => self.consume_amp(),
 
             _ => self.consume_fallback(fallback),
         }
@@ -869,10 +874,35 @@ impl<'src> CssLexer<'src> {
             };
         }
 
-        match self.lex_string_token(StringLexMode::Plain { quote }) {
+        self.consume_plain_string_literal(quote, 1)
+    }
+
+    /// Lexes a string whose opening quote is `opening_len` bytes long.
+    fn consume_plain_string_literal(
+        &mut self,
+        quote: CssStringQuote,
+        opening_len: usize,
+    ) -> CssSyntaxKind {
+        match self.lex_string_token(StringLexMode::Plain { quote, opening_len }) {
             StringLexResult::Token(kind) => kind,
             StringLexResult::Unterminated => ERROR_TOKEN,
         }
+    }
+
+    /// Lexes `&`, or a string that starts with an HTML character reference for
+    /// a quote in the source of an HTML `style` attribute:
+    ///
+    /// ```css
+    /// font-family: &quot;Rotis Sans&quot;;
+    /// ```
+    fn consume_amp(&mut self) -> CssSyntaxKind {
+        if let Some((len, quote)) = self.scan_cursor().html_quote_reference()
+            && let Ok(quote) = CssStringQuote::try_from(quote)
+        {
+            return self.consume_plain_string_literal(quote, len);
+        }
+
+        self.consume_byte(T![&])
     }
 
     fn consume_token_in_scss_string_interpolation(
@@ -926,8 +956,10 @@ impl<'src> CssLexer<'src> {
         let start = self.position();
 
         match mode {
-            StringLexMode::Plain { quote } => {
-                let scan = self.scan_cursor_at(start + 1).scan_plain_string_body(quote);
+            StringLexMode::Plain { quote, opening_len } => {
+                let scan = self
+                    .scan_cursor_at(start + opening_len)
+                    .scan_plain_string_body(quote);
                 self.commit_plain_string_literal(start, scan)
             }
             StringLexMode::ScssStart { quote } => {
@@ -986,7 +1018,7 @@ impl<'src> CssLexer<'src> {
 
         match scan.stop {
             StringBodyScanStop::Interpolation { position }
-            | StringBodyScanStop::ClosingQuote { position } => {
+            | StringBodyScanStop::ClosingQuote { position, .. } => {
                 debug_assert!(
                     position > start,
                     "SCSS string content must never be zero-length"
@@ -1032,8 +1064,8 @@ impl<'src> CssLexer<'src> {
         scan: StringBodyScan,
     ) -> StringLexResult {
         match scan.stop {
-            StringBodyScanStop::ClosingQuote { position } => {
-                self.set_position(position + 1);
+            StringBodyScanStop::ClosingQuote { position, len } => {
+                self.set_position(position + len);
                 self.push_string_issues(&scan.invalid_escape_ranges);
                 StringLexResult::Token(if !scan.invalid_escape_ranges.is_empty() {
                     ERROR_TOKEN
@@ -2005,8 +2037,12 @@ struct PendingScssInterpolatedStringStart {
 /// - SCSS interpolated-string start detection
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 enum StringLexMode {
-    /// Lex a plain quoted string that cannot start SCSS segmentation.
-    Plain { quote: CssStringQuote },
+    /// Lex a plain quoted string that cannot start SCSS segmentation. The
+    /// opening quote is `opening_len` bytes long.
+    Plain {
+        quote: CssStringQuote,
+        opening_len: usize,
+    },
     /// Lex the opening quote of an SCSS string, starting segmentation if an
     /// interpolation boundary appears before the closing quote.
     ScssStart { quote: CssStringQuote },

@@ -1,3 +1,4 @@
+use crate::builders::EmbeddedLayout;
 use crate::format_element::PrintMode;
 use crate::prelude::AlignedStr;
 use crate::source::Source;
@@ -73,7 +74,7 @@ pub enum Tag<S: Source> {
     /// can format later.
     ///
     /// See [crate::builders::FormatEmbedded] for documentation.
-    StartEmbedded(S::EmbeddedKey),
+    StartEmbedded(S::EmbeddedKey, EmbeddedLayout),
     EndEmbedded,
 
     /// Entry inside of a [crate::FormatElement::BestFitting]
@@ -102,7 +103,7 @@ impl<S: Source> Tag<S> {
                 | Self::StartLineSuffix
                 | Self::StartVerbatim(_)
                 | Self::StartLabelled(_)
-                | Self::StartEmbedded(_)
+                | Self::StartEmbedded(..)
                 | Self::StartBestFittingEntry
                 | Self::StartSkipFitsCheck
         )
@@ -128,7 +129,7 @@ impl<S: Source> Tag<S> {
             StartLineSuffix | EndLineSuffix => TagKind::LineSuffix,
             StartVerbatim(_) | EndVerbatim => TagKind::Verbatim,
             StartLabelled(_) | EndLabelled => TagKind::Labelled,
-            StartEmbedded(_) | EndEmbedded => TagKind::Embedded,
+            StartEmbedded(..) | EndEmbedded => TagKind::Embedded,
             StartBestFittingEntry | EndBestFittingEntry => TagKind::BestFittingEntry,
             StartSkipFitsCheck | EndSkipFitsCheck => TagKind::SkipFitsCheck,
         }
@@ -220,6 +221,12 @@ impl Group {
     pub fn propagate_expand(&self) {
         if self.mode.get() == GroupMode::Flat {
             self.mode.set(GroupMode::Propagated)
+        }
+    }
+
+    pub(crate) fn reset_propagated_expand(&self) {
+        if self.mode.get() == GroupMode::Propagated {
+            self.mode.set(GroupMode::Flat)
         }
     }
 

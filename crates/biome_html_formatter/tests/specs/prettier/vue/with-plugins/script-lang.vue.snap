@@ -14,17 +14,25 @@ world!
 ```
 
 
-# Error
-```text
-reformat: output mismatch
---- re-formatted
-+++ formatted
-@@ -1,6 +1,5 @@
- <script lang="uppercase-rocks">
- 
--
- hello,
- world!
- </script>
+# Prettier differences
 
+```diff
+--- Prettier
++++ Biome
+@@ -1,4 +1,4 @@
+ <script lang="uppercase-rocks">
+-HELLO,
+-WORLD!
++hello,
++world!
+ </script>
+```
+
+# Output
+
+```vue
+<script lang="uppercase-rocks">
+hello,
+world!
+</script>
 ```

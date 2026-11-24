@@ -1,6 +1,4 @@
-// Tests for ignoreBooleanCoercion: true
-// `Boolean` is declared in this module, so it is not the global built-in and
-// every case below SHOULD generate a diagnostic.
+/* should generate diagnostics */
 
 function Boolean(value: unknown): boolean {
 	return !!value;

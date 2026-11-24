@@ -1,0 +1,59 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: genericConstraintInvalid.ts
+---
+# Input
+```ts
+// should generate diagnostics
+
+// A generic parameter constrained to string literals is always truthy.
+type Kind = "bar" | "baz";
+function named<T extends Kind>(value: T) {
+	if (value) {
+	}
+}
+
+function inline<T extends "bar" | "baz">(value: T) {
+	if (value) {
+	}
+}
+
+```
+
+# Diagnostics
+```
+genericConstraintInvalid.ts:6:6 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition is always truthy.
+  
+    4 │ type Kind = "bar" | "baz";
+    5 │ function named<T extends Kind>(value: T) {
+  > 6 │ 	if (value) {
+      │ 	    ^^^^^
+    7 │ 	}
+    8 │ }
+  
+  i The value's type can never be falsy, so this check is redundant.
+  
+  i Remove the condition, or check the value you meant to test.
+  
+
+```
+
+```
+genericConstraintInvalid.ts:11:6 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition is always truthy.
+  
+    10 │ function inline<T extends "bar" | "baz">(value: T) {
+  > 11 │ 	if (value) {
+       │ 	    ^^^^^
+    12 │ 	}
+    13 │ }
+  
+  i The value's type can never be falsy, so this check is redundant.
+  
+  i Remove the condition, or check the value you meant to test.
+  
+
+```

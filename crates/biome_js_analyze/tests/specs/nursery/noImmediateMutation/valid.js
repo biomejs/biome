@@ -1,0 +1,163 @@
+/* should not generate diagnostics */
+const array1 = [1, 2, 3];
+
+const array2 = [];
+array2.push(array2.length);
+
+const array3 = [];
+array3.push();
+
+const array4 = [];
+array4?.push(1);
+
+const array5 = [];
+array5.push?.(1);
+
+const array6 = [];
+other.push(1);
+
+const array7 = [];
+foo();
+array7.push(1);
+
+const array8 = [1], other1 = 2;
+array8.push(2);
+
+const array9 = [];
+array9["push"](1);
+
+const object1 = {};
+object1.foo += 1;
+
+const object2 = {};
+object2.foo = object2;
+
+const object3 = {};
+object3[object3.key] = 1;
+
+const object4 = {};
+Object.assign(object4, ...sources);
+
+const object5 = {};
+Object.assign(other, { foo: 1 });
+
+const object6 = {};
+Object.assign(object6, { foo: object6 });
+
+const object7 = {};
+Object.assign(object7);
+
+class Foo {
+	#bar;
+	method() {
+		const object = {};
+		object.#bar = 1;
+	}
+}
+
+const set1 = new Set(values);
+set1.add(1);
+
+const set2 = new Set([1]);
+set2.add(1, 2);
+
+const set3 = new Set([1]);
+set3.add(...values);
+
+const set4 = new Set([1]);
+set4.add(set4);
+
+const set5 = new Set([1]);
+set5.delete(1);
+
+const set6 = new Set([1]);
+set6?.add(1);
+
+const map1 = new Map(entries);
+map1.set("foo", 1);
+
+const map2 = new Map();
+map2.set("foo");
+
+const map3 = new Map();
+map3.add("foo");
+
+const map4 = new Map();
+map4.set(map4, 1);
+
+if (foo) array10 = [];
+
+for (const array = [];;) array.push(1);
+
+export const array11 = [];
+array11.push(1);
+
+function shadowed() {
+	const Set = class {};
+	const set = new Set();
+	set.add(1);
+
+	const Object = { assign() {} };
+	const object = {};
+	Object.assign(object, { foo: 1 });
+}
+
+let foo1 = 1;
+foo1 = 2;
+
+let foo2;
+foo2 += 1;
+
+let foo3;
+foo3.bar = 1;
+
+const foo4 = 1;
+foo4 = 2;
+
+let foo5;
+other = 1;
+
+let foo6;
+foo6 = foo6 + 1;
+
+let foo7;
+foo7 = bar(() => foo7);
+
+let foo8;
+[foo8, other2] = values;
+
+let foo9;
+[foo9 = 1] = values;
+
+let foo10;
+[...foo10] = values;
+
+let foo11;
+[foo11, foo11] = values;
+
+let foo12, foo13;
+({ foo12, foo13 } = values);
+
+let foo14;
+(foo14) = 1;
+
+let foo15;
+foo();
+foo15 = 1;
+
+let foo16;
+foo16.push(1);
+
+const array12 = [];
+if (enabled) array12.push(1);
+
+const array13 = [];
+if (enabled) {
+	array13.push(1);
+}
+
+const set7 = new Set();
+enabled && set7.add(1);
+
+const object8 = {};
+enabled ? (object8.foo = 1) : (object8.bar = 2);

@@ -1256,6 +1256,7 @@ export interface JsonParserConfiguration {
 }
 export interface RuleDomains {
 	astro?: RuleDomainValue;
+	convex?: RuleDomainValue;
 	drizzle?: RuleDomainValue;
 	next?: RuleDomainValue;
 	playwright?: RuleDomainValue;
@@ -2958,6 +2959,11 @@ export interface Nursery {
 	 */
 	noArgumentsCallerOrCallee?: NoArgumentsCallerOrCalleeConfiguration;
 	/**
+	 * Disallow using the delete operator on array elements.
+	 * See https://biomejs.dev/linter/rules/no-array-delete
+	 */
+	noArrayDelete?: NoArrayDeleteConfiguration;
+	/**
 	 * Disallow the forEach() method in favor of for...of loops.
 	 * See https://biomejs.dev/linter/rules/no-array-for-each
 	 */
@@ -2972,6 +2978,11 @@ export interface Nursery {
 	 * See https://biomejs.dev/linter/rules/no-array-sort-for-min-max
 	 */
 	noArraySortForMinMax?: NoArraySortForMinMaxConfiguration;
+	/**
+	 * Disallow runtime default exports in Astro component frontmatter.
+	 * See https://biomejs.dev/linter/rules/no-astro-component-default-export
+	 */
+	noAstroComponentDefaultExport?: NoAstroComponentDefaultExportConfiguration;
 	/**
 	 * Disallow conflicting content sources on Astro elements.
 	 * See https://biomejs.dev/linter/rules/no-astro-conflicting-set-directives
@@ -3012,6 +3023,11 @@ export interface Nursery {
 	 * See https://biomejs.dev/linter/rules/no-bun-modules
 	 */
 	noBunModules?: NoBunModulesConfiguration;
+	/**
+	 * Disallow converting a canvas to an image only to draw it onto another canvas.
+	 * See https://biomejs.dev/linter/rules/no-canvas-to-image
+	 */
+	noCanvasToImage?: NoCanvasToImageConfiguration;
 	/**
 	 * Disallow chaining comparisons, as in a \< b \< c.
 	 * See https://biomejs.dev/linter/rules/no-chained-comparison
@@ -3098,6 +3114,11 @@ export interface Nursery {
 	 */
 	noExcessiveStatementsPerFunction?: NoExcessiveStatementsPerFunctionConfiguration;
 	/**
+	 * Disallow toHaveBeenCalledOnce() in favor of toHaveBeenCalledTimes(1).
+	 * See https://biomejs.dev/linter/rules/no-expect-to-have-been-called-once
+	 */
+	noExpectToHaveBeenCalledOnce?: NoExpectToHaveBeenCalledOnceConfiguration;
+	/**
 	 * Disallow extending the prototype of built-in objects.
 	 * See https://biomejs.dev/linter/rules/no-extend-native
 	 */
@@ -3107,6 +3128,11 @@ export interface Nursery {
 	 * See https://biomejs.dev/linter/rules/no-floating-promises
 	 */
 	noFloatingPromises?: NoFloatingPromisesConfiguration;
+	/**
+	 * Disallow changing a value right after it is created.
+	 * See https://biomejs.dev/linter/rules/no-immediate-mutation
+	 */
+	noImmediateMutation?: NoImmediateMutationConfiguration;
 	/**
 	 * Disallow the use of eval()-like methods.
 	 * See https://biomejs.dev/linter/rules/no-implied-eval
@@ -3573,6 +3599,11 @@ export interface Nursery {
 	 */
 	noUnsafeReturn?: NoUnsafeReturnConfiguration;
 	/**
+	 * Disallow inserting values into SQL strings passed to the exec() and prepare() methods of node:sqlite databases.
+	 * See https://biomejs.dev/linter/rules/no-unsafe-sqlite-interpolation
+	 */
+	noUnsafeSqliteInterpolation?: NoUnsafeSqliteInterpolationConfiguration;
+	/**
 	 * Disallow TypeScript type assertions other than const assertions.
 	 * See https://biomejs.dev/linter/rules/no-unsafe-type-assertion
 	 */
@@ -3612,6 +3643,11 @@ export interface Nursery {
 	 * See https://biomejs.dev/linter/rules/no-useless-date-get-time
 	 */
 	noUselessDateGetTime?: NoUselessDateGetTimeConfiguration;
+	/**
+	 * Disallow default values that can never be used.
+	 * See https://biomejs.dev/linter/rules/no-useless-default-assignment
+	 */
+	noUselessDefaultAssignment?: NoUselessDefaultAssignmentConfiguration;
 	/**
 	 * Disallow empty object fallbacks when spreading a value into an object.
 	 * See https://biomejs.dev/linter/rules/no-useless-fallback-in-spread
@@ -3837,6 +3873,11 @@ export interface Nursery {
 	 * See https://biomejs.dev/linter/rules/no-vue-mutating-props
 	 */
 	noVueMutatingProps?: NoVueMutatingPropsConfiguration;
+	/**
+	 * Disallow negated conditions in v-if and v-else-if when a v-else branch follows.
+	 * See https://biomejs.dev/linter/rules/no-vue-negation-else
+	 */
+	noVueNegationElse?: NoVueNegationElseConfiguration;
 	/**
 	 * Disallow reading the value of a Vue ref in a place where the read runs only once.
 	 * See https://biomejs.dev/linter/rules/no-vue-ref-object-reactivity-loss
@@ -4108,15 +4149,30 @@ export interface Nursery {
 	 */
 	useControlLabel?: UseControlLabelConfiguration;
 	/**
+	 * Require passing an imported function as a test suite title instead of a string with its name.
+	 * See https://biomejs.dev/linter/rules/use-describe-function-title
+	 */
+	useDescribeFunctionTitle?: UseDescribeFunctionTitleConfiguration;
+	/**
 	 * Detects a disposable object assigned to a variable without using or await using syntax.
 	 * See https://biomejs.dev/linter/rules/use-disposables
 	 */
 	useDisposables?: UseDisposablesConfiguration;
 	/**
+	 * Require an early continue instead of an if statement that wraps the rest of a loop body.
+	 * See https://biomejs.dev/linter/rules/use-early-continue
+	 */
+	useEarlyContinue?: UseEarlyContinueConfiguration;
+	/**
 	 * Require switch-case statements to be exhaustive.
 	 * See https://biomejs.dev/linter/rules/use-exhaustive-switch-cases
 	 */
 	useExhaustiveSwitchCases?: UseExhaustiveSwitchCasesConfiguration;
+	/**
+	 * Enforce using an equality matcher instead of comparing values with === or !== inside expect().
+	 * See https://biomejs.dev/linter/rules/use-expect-equality-matcher
+	 */
+	useExpectEqualityMatcher?: UseExpectEqualityMatcherConfiguration;
 	/**
 	 * Enforce using toContain() to check whether an array or string contains a value.
 	 * See https://biomejs.dev/linter/rules/use-expect-to-contain
@@ -4383,10 +4439,20 @@ export interface Nursery {
 	 */
 	useTailwindVariablesShorthand?: UseTailwindVariablesShorthandConfiguration;
 	/**
+	 * Require query keys to include every value that the query function uses.
+	 * See https://biomejs.dev/linter/rules/use-tanstack-query-exhaustive-dependencies
+	 */
+	useTanstackQueryExhaustiveDependencies?: UseTanstackQueryExhaustiveDependenciesConfiguration;
+	/**
 	 * Enforce a consistent property order in the options of TanStack Query infinite query functions.
 	 * See https://biomejs.dev/linter/rules/use-tanstack-query-infinite-query-property-order
 	 */
 	useTanstackQueryInfiniteQueryPropertyOrder?: UseTanstackQueryInfiniteQueryPropertyOrderConfiguration;
+	/**
+	 * Enforce that onMutate comes before onError and onSettled in the options of TanStack Query mutations.
+	 * See https://biomejs.dev/linter/rules/use-tanstack-query-mutation-property-order
+	 */
+	useTanstackQueryMutationPropertyOrder?: UseTanstackQueryMutationPropertyOrderConfiguration;
 	/**
 	 * Require the TanStack Query QueryClient to be created once, not on every render.
 	 * See https://biomejs.dev/linter/rules/use-tanstack-query-stable-query-client
@@ -6814,6 +6880,9 @@ export type NoAccidentalBitwiseOperatorsConfiguration =
 export type NoArgumentsCallerOrCalleeConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoArgumentsCallerOrCalleeOptions;
+export type NoArrayDeleteConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoArrayDeleteOptions;
 export type NoArrayForEachConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoArrayForEachOptions;
@@ -6823,6 +6892,9 @@ export type NoArrayMethodsOnArgumentsConfiguration =
 export type NoArraySortForMinMaxConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoArraySortForMinMaxOptions;
+export type NoAstroComponentDefaultExportConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoAstroComponentDefaultExportOptions;
 export type NoAstroConflictingSetDirectivesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoAstroConflictingSetDirectivesOptions;
@@ -6847,6 +6919,9 @@ export type NoBufferConstructorConfiguration =
 export type NoBunModulesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoBunModulesOptions;
+export type NoCanvasToImageConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoCanvasToImageOptions;
 export type NoChainedComparisonConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoChainedComparisonOptions;
@@ -6898,12 +6973,18 @@ export type NoExcessiveSelectorComplexityConfiguration =
 export type NoExcessiveStatementsPerFunctionConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoExcessiveStatementsPerFunctionOptions;
+export type NoExpectToHaveBeenCalledOnceConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoExpectToHaveBeenCalledOnceOptions;
 export type NoExtendNativeConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoExtendNativeOptions;
 export type NoFloatingPromisesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoFloatingPromisesOptions;
+export type NoImmediateMutationConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoImmediateMutationOptions;
 export type NoImpliedEvalConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoImpliedEvalOptions;
@@ -7183,6 +7264,9 @@ export type NoUnsafePlusOperandsConfiguration =
 export type NoUnsafeReturnConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUnsafeReturnOptions;
+export type NoUnsafeSqliteInterpolationConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoUnsafeSqliteInterpolationOptions;
 export type NoUnsafeTypeAssertionConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUnsafeTypeAssertionOptions;
@@ -7207,6 +7291,9 @@ export type NoUselessCallConfiguration =
 export type NoUselessDateGetTimeConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUselessDateGetTimeOptions;
+export type NoUselessDefaultAssignmentConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoUselessDefaultAssignmentOptions;
 export type NoUselessFallbackInSpreadConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUselessFallbackInSpreadOptions;
@@ -7342,6 +7429,9 @@ export type NoVueMultipleSlotArgsConfiguration =
 export type NoVueMutatingPropsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueMutatingPropsOptions;
+export type NoVueNegationElseConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoVueNegationElseOptions;
 export type NoVueRefObjectReactivityLossConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueRefObjectReactivityLossOptions;
@@ -7504,12 +7594,21 @@ export type UseConsistentUnicodeBomConfiguration =
 export type UseControlLabelConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseControlLabelOptions;
+export type UseDescribeFunctionTitleConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseDescribeFunctionTitleOptions;
 export type UseDisposablesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseDisposablesOptions;
+export type UseEarlyContinueConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseEarlyContinueOptions;
 export type UseExhaustiveSwitchCasesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseExhaustiveSwitchCasesOptions;
+export type UseExpectEqualityMatcherConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseExpectEqualityMatcherOptions;
 export type UseExpectToContainConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseExpectToContainOptions;
@@ -7669,9 +7768,15 @@ export type UseTailwindStaticClassStringsConfiguration =
 export type UseTailwindVariablesShorthandConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseTailwindVariablesShorthandOptions;
+export type UseTanstackQueryExhaustiveDependenciesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseTanstackQueryExhaustiveDependenciesOptions;
 export type UseTanstackQueryInfiniteQueryPropertyOrderConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseTanstackQueryInfiniteQueryPropertyOrderOptions;
+export type UseTanstackQueryMutationPropertyOrderConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseTanstackQueryMutationPropertyOrderOptions;
 export type UseTanstackQueryStableQueryClientConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseTanstackQueryStableQueryClientOptions;
@@ -9921,6 +10026,14 @@ export interface RuleWithNoArgumentsCallerOrCalleeOptions {
 	level: RulePlainConfiguration;
 	options?: NoArgumentsCallerOrCalleeOptions;
 }
+export interface RuleWithNoArrayDeleteOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: NoArrayDeleteOptions;
+}
 export interface RuleWithNoArrayForEachOptions {
 	level: RulePlainConfiguration;
 	options?: NoArrayForEachOptions;
@@ -9936,6 +10049,10 @@ export interface RuleWithNoArraySortForMinMaxOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
 	options?: NoArraySortForMinMaxOptions;
+}
+export interface RuleWithNoAstroComponentDefaultExportOptions {
+	level: RulePlainConfiguration;
+	options?: NoAstroComponentDefaultExportOptions;
 }
 export interface RuleWithNoAstroConflictingSetDirectivesOptions {
 	level: RulePlainConfiguration;
@@ -9976,6 +10093,10 @@ export interface RuleWithNoBufferConstructorOptions {
 export interface RuleWithNoBunModulesOptions {
 	level: RulePlainConfiguration;
 	options?: NoBunModulesOptions;
+}
+export interface RuleWithNoCanvasToImageOptions {
+	level: RulePlainConfiguration;
+	options?: NoCanvasToImageOptions;
 }
 export interface RuleWithNoChainedComparisonOptions {
 	level: RulePlainConfiguration;
@@ -10065,6 +10186,14 @@ export interface RuleWithNoExcessiveStatementsPerFunctionOptions {
 	level: RulePlainConfiguration;
 	options?: NoExcessiveStatementsPerFunctionOptions;
 }
+export interface RuleWithNoExpectToHaveBeenCalledOnceOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: NoExpectToHaveBeenCalledOnceOptions;
+}
 export interface RuleWithNoExtendNativeOptions {
 	level: RulePlainConfiguration;
 	options?: NoExtendNativeOptions;
@@ -10076,6 +10205,14 @@ export interface RuleWithNoFloatingPromisesOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
 	options?: NoFloatingPromisesOptions;
+}
+export interface RuleWithNoImmediateMutationOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: NoImmediateMutationOptions;
 }
 export interface RuleWithNoImpliedEvalOptions {
 	level: RulePlainConfiguration;
@@ -10557,6 +10694,10 @@ export interface RuleWithNoUnsafeReturnOptions {
 	level: RulePlainConfiguration;
 	options?: NoUnsafeReturnOptions;
 }
+export interface RuleWithNoUnsafeSqliteInterpolationOptions {
+	level: RulePlainConfiguration;
+	options?: NoUnsafeSqliteInterpolationOptions;
+}
 export interface RuleWithNoUnsafeTypeAssertionOptions {
 	level: RulePlainConfiguration;
 	options?: NoUnsafeTypeAssertionOptions;
@@ -10600,6 +10741,14 @@ export interface RuleWithNoUselessDateGetTimeOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
 	options?: NoUselessDateGetTimeOptions;
+}
+export interface RuleWithNoUselessDefaultAssignmentOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: NoUselessDefaultAssignmentOptions;
 }
 export interface RuleWithNoUselessFallbackInSpreadOptions {
 	/**
@@ -10832,6 +10981,14 @@ export interface RuleWithNoVueMultipleSlotArgsOptions {
 export interface RuleWithNoVueMutatingPropsOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueMutatingPropsOptions;
+}
+export interface RuleWithNoVueNegationElseOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: NoVueNegationElseOptions;
 }
 export interface RuleWithNoVueRefObjectReactivityLossOptions {
 	level: RulePlainConfiguration;
@@ -11117,6 +11274,14 @@ export interface RuleWithUseControlLabelOptions {
 	level: RulePlainConfiguration;
 	options?: UseControlLabelOptions;
 }
+export interface RuleWithUseDescribeFunctionTitleOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseDescribeFunctionTitleOptions;
+}
 export interface RuleWithUseDisposablesOptions {
 	/**
 	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
@@ -11125,6 +11290,14 @@ export interface RuleWithUseDisposablesOptions {
 	level: RulePlainConfiguration;
 	options?: UseDisposablesOptions;
 }
+export interface RuleWithUseEarlyContinueOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseEarlyContinueOptions;
+}
 export interface RuleWithUseExhaustiveSwitchCasesOptions {
 	/**
 	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
@@ -11132,6 +11305,14 @@ export interface RuleWithUseExhaustiveSwitchCasesOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
 	options?: UseExhaustiveSwitchCasesOptions;
+}
+export interface RuleWithUseExpectEqualityMatcherOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseExpectEqualityMatcherOptions;
 }
 export interface RuleWithUseExpectToContainOptions {
 	/**
@@ -11437,6 +11618,14 @@ export interface RuleWithUseTailwindVariablesShorthandOptions {
 	level: RulePlainConfiguration;
 	options?: UseTailwindVariablesShorthandOptions;
 }
+export interface RuleWithUseTanstackQueryExhaustiveDependenciesOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseTanstackQueryExhaustiveDependenciesOptions;
+}
 export interface RuleWithUseTanstackQueryInfiniteQueryPropertyOrderOptions {
 	/**
 	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
@@ -11444,6 +11633,14 @@ export interface RuleWithUseTanstackQueryInfiniteQueryPropertyOrderOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
 	options?: UseTanstackQueryInfiniteQueryPropertyOrderOptions;
+}
+export interface RuleWithUseTanstackQueryMutationPropertyOrderOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseTanstackQueryMutationPropertyOrderOptions;
 }
 export interface RuleWithUseTanstackQueryStableQueryClientOptions {
 	/**
@@ -13702,9 +13899,11 @@ export type UseVueValidVTextOptions = {};
 export type UseYieldOptions = {};
 export type NoAccidentalBitwiseOperatorsOptions = {};
 export type NoArgumentsCallerOrCalleeOptions = {};
+export type NoArrayDeleteOptions = {};
 export type NoArrayForEachOptions = {};
 export type NoArrayMethodsOnArgumentsOptions = {};
 export type NoArraySortForMinMaxOptions = {};
+export type NoAstroComponentDefaultExportOptions = {};
 export type NoAstroConflictingSetDirectivesOptions = {};
 export type NoAstroSetHtmlDirectiveOptions = {};
 export type NoAsyncPromiseFinallyOptions = {};
@@ -13715,6 +13914,7 @@ export interface NoBaseToStringOptions {
 export type NoBooleanSortComparatorOptions = {};
 export type NoBufferConstructorOptions = {};
 export type NoBunModulesOptions = {};
+export type NoCanvasToImageOptions = {};
 export type NoChainedComparisonOptions = {};
 export type NoConfusingArraySpliceOptions = {};
 export type NoConsoleSpacesOptions = {};
@@ -13853,6 +14053,7 @@ export interface NoExcessiveStatementsPerFunctionOptions {
 	 */
 	max?: number;
 }
+export type NoExpectToHaveBeenCalledOnceOptions = {};
 /**
  * Options for the `noExtendNative` rule.
  */
@@ -13864,6 +14065,7 @@ export interface NoExtendNativeOptions {
 	ignore?: string[];
 }
 export type NoFloatingPromisesOptions = {};
+export type NoImmediateMutationOptions = {};
 export type NoImpliedEvalOptions = {};
 export type NoInvalidFetchOptionsOptions = {};
 export type NoInvalidFileInputAcceptOptions = {};
@@ -14080,6 +14282,7 @@ export type NoUnresolvedDefaultImportOptions = {};
 export type NoUnsafeIframeSandboxOptions = {};
 export type NoUnsafePlusOperandsOptions = {};
 export type NoUnsafeReturnOptions = {};
+export type NoUnsafeSqliteInterpolationOptions = {};
 export type NoUnsafeTypeAssertionOptions = {};
 export type NoUnsafeUnaryMinusOptions = {};
 export type NoUnusedClassesOptions = {};
@@ -14088,6 +14291,7 @@ export type NoUselessAwaitOptions = {};
 export type NoUselessBindOptions = {};
 export type NoUselessCallOptions = {};
 export type NoUselessDateGetTimeOptions = {};
+export type NoUselessDefaultAssignmentOptions = {};
 export type NoUselessFallbackInSpreadOptions = {};
 export type NoUselessLengthCheckOptions = {};
 export type NoUselessNestedTernaryOptions = {};
@@ -14175,6 +14379,7 @@ export type NoVueMixinOptions = {};
 export type NoVueMultipleObjectsInClassOptions = {};
 export type NoVueMultipleSlotArgsOptions = {};
 export type NoVueMutatingPropsOptions = {};
+export type NoVueNegationElseOptions = {};
 export type NoVueRefObjectReactivityLossOptions = {};
 export type NoVueRequiredPropWithDefaultOptions = {};
 export interface NoVueRestrictedCallAfterAwaitOptions {
@@ -14363,7 +14568,15 @@ export interface UseConsistentUnicodeBomOptions {
  * Configuration for the `useControlLabel` lint rule.
  */
 export type UseControlLabelOptions = {};
+export type UseDescribeFunctionTitleOptions = {};
 export type UseDisposablesOptions = {};
+export interface UseEarlyContinueOptions {
+	/**
+	 * The largest number of statements that an `if` statement at the end of a loop body can
+	 * contain before the rule reports it (default: 1).
+	 */
+	maximumStatements?: number;
+}
 export interface UseExhaustiveSwitchCasesOptions {
 	/**
 	 * Require a `case` for each value in the union, even when the switch has a `default` clause.
@@ -14371,6 +14584,7 @@ export interface UseExhaustiveSwitchCasesOptions {
 	 */
 	requireExplicitCase?: boolean;
 }
+export type UseExpectEqualityMatcherOptions = {};
 export type UseExpectToContainOptions = {};
 export type UseExpectToHaveBeenCalledOptions = {};
 export type UseExpectToHaveBeenCalledTimesOptions = {};
@@ -14539,7 +14753,20 @@ export type UseTailwindShorthandClassesOptions = {};
 export type UseTailwindSortedClassesOptions = {};
 export type UseTailwindStaticClassStringsOptions = {};
 export type UseTailwindVariablesShorthandOptions = {};
+export interface UseTanstackQueryExhaustiveDependenciesOptions {
+	/**
+	 * Names of TypeScript types. The query function can use a variable or parameter declared
+	 * with one of these types, such as `client: ApiClient`, without adding it to the query key.
+	 */
+	ignoredTypes?: string[];
+	/**
+	 * Names of variables that the query function can use without adding them to the query
+	 * key. This also covers the properties read from these variables.
+	 */
+	ignoredVariables?: string[];
+}
 export type UseTanstackQueryInfiniteQueryPropertyOrderOptions = {};
+export type UseTanstackQueryMutationPropertyOrderOptions = {};
 export type UseTanstackQueryStableQueryClientOptions = {};
 export interface UseTopLevelDescribeOptions {
 	/**
@@ -16225,9 +16452,11 @@ export type Category =
 	| "lint/correctness/useYield"
 	| "lint/nursery/noAccidentalBitwiseOperators"
 	| "lint/nursery/noArgumentsCallerOrCallee"
+	| "lint/nursery/noArrayDelete"
 	| "lint/nursery/noArrayForEach"
 	| "lint/nursery/noArrayMethodsOnArguments"
 	| "lint/nursery/noArraySortForMinMax"
+	| "lint/nursery/noAstroComponentDefaultExport"
 	| "lint/nursery/noAstroConflictingSetDirectives"
 	| "lint/nursery/noAstroSetHtmlDirective"
 	| "lint/nursery/noAsyncPromiseFinally"
@@ -16236,6 +16465,7 @@ export type Category =
 	| "lint/nursery/noBooleanSortComparator"
 	| "lint/nursery/noBufferConstructor"
 	| "lint/nursery/noBunModules"
+	| "lint/nursery/noCanvasToImage"
 	| "lint/nursery/noChainedComparison"
 	| "lint/nursery/noColorInvalidHex"
 	| "lint/nursery/noComponentHookFactories"
@@ -16265,8 +16495,10 @@ export type Category =
 	| "lint/nursery/noExcessiveSelectorClasses"
 	| "lint/nursery/noExcessiveSelectorComplexity"
 	| "lint/nursery/noExcessiveStatementsPerFunction"
+	| "lint/nursery/noExpectToHaveBeenCalledOnce"
 	| "lint/nursery/noExtendNative"
 	| "lint/nursery/noFloatingPromises"
+	| "lint/nursery/noImmediateMutation"
 	| "lint/nursery/noImplicitCoercion"
 	| "lint/nursery/noImpliedEval"
 	| "lint/nursery/noInvalidFetchOptions"
@@ -16375,6 +16607,7 @@ export type Category =
 	| "lint/nursery/noUnsafeIframeSandbox"
 	| "lint/nursery/noUnsafePlusOperands"
 	| "lint/nursery/noUnsafeReturn"
+	| "lint/nursery/noUnsafeSqliteInterpolation"
 	| "lint/nursery/noUnsafeTypeAssertion"
 	| "lint/nursery/noUnsafeUnaryMinus"
 	| "lint/nursery/noUnusedClasses"
@@ -16385,6 +16618,7 @@ export type Category =
 	| "lint/nursery/noUselessBind"
 	| "lint/nursery/noUselessCall"
 	| "lint/nursery/noUselessDateGetTime"
+	| "lint/nursery/noUselessDefaultAssignment"
 	| "lint/nursery/noUselessFallbackInSpread"
 	| "lint/nursery/noUselessLengthCheck"
 	| "lint/nursery/noUselessNestedTernary"
@@ -16431,6 +16665,7 @@ export type Category =
 	| "lint/nursery/noVueMultipleObjectsInClass"
 	| "lint/nursery/noVueMultipleSlotArgs"
 	| "lint/nursery/noVueMutatingProps"
+	| "lint/nursery/noVueNegationElse"
 	| "lint/nursery/noVueRefAsOperand"
 	| "lint/nursery/noVueRefObjectReactivityLoss"
 	| "lint/nursery/noVueRequiredPropWithDefault"
@@ -16488,8 +16723,11 @@ export type Category =
 	| "lint/nursery/useConsistentTupleLabels"
 	| "lint/nursery/useConsistentUnicodeBom"
 	| "lint/nursery/useControlLabel"
+	| "lint/nursery/useDescribeFunctionTitle"
 	| "lint/nursery/useDisposables"
+	| "lint/nursery/useEarlyContinue"
 	| "lint/nursery/useExhaustiveSwitchCases"
+	| "lint/nursery/useExpectEqualityMatcher"
 	| "lint/nursery/useExpectToContain"
 	| "lint/nursery/useExpectToHaveBeenCalled"
 	| "lint/nursery/useExpectToHaveBeenCalledTimes"
@@ -16552,7 +16790,9 @@ export type Category =
 	| "lint/nursery/useTailwindSortedClasses"
 	| "lint/nursery/useTailwindStaticClassStrings"
 	| "lint/nursery/useTailwindVariablesShorthand"
+	| "lint/nursery/useTanstackQueryExhaustiveDependencies"
 	| "lint/nursery/useTanstackQueryInfiniteQueryPropertyOrder"
+	| "lint/nursery/useTanstackQueryMutationPropertyOrder"
 	| "lint/nursery/useTanstackQueryStableQueryClient"
 	| "lint/nursery/useTopLevelDescribe"
 	| "lint/nursery/useTopLevelHeading"
@@ -17295,7 +17535,8 @@ export type JsEmbeddingKind =
 				 */
 				is_module_script: boolean;
 			};
-	  };
+	  }
+	| { Mdx: { kind: MdxEmbeddingKind } };
 export type Language =
 	| "javaScript"
 	| { typeScript: { definition_file: boolean } };
@@ -17366,6 +17607,13 @@ export type SvelteEmbeddingKind =
 	| "Declaration"
 	| "Generics";
 export type SvelteFileKind = "Component" | "SourceModule";
+/**
+ * Identifies the JavaScript construct an MDX snippet comes from.
+ *
+ * MDX keeps the Markdown between an opening and a closing JSX tag outside
+ * JavaScript, so each construct is a separate snippet with its own root.
+ */
+export type MdxEmbeddingKind = "Esm" | "Expression" | "Tag";
 export type EmbeddingHtmlKind =
 	| "None"
 	| "Html"

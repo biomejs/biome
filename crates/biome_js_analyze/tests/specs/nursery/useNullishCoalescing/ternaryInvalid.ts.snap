@@ -4,43 +4,45 @@ expression: ternaryInvalid.ts
 ---
 # Input
 ```ts
-// Strict !== null
+/* should generate diagnostics */
+
+// `!== null`
 declare const a: string | null;
 const r1 = a !== null ? a : 'default';
 
-// Strict !== undefined
+// `!== undefined`
 declare const b: string | undefined;
 const r2 = b !== undefined ? b : 'fallback';
 
-// Loose != null
+// `!= null`
 declare const c: string | null;
 const r3 = c != null ? c : 'default';
 
-// Inverted === null
+// `=== null`
 declare const d: string | null;
 const r4 = d === null ? 'default' : d;
 
-// Inverted === undefined
+// `=== undefined`
 declare const e: string | undefined;
 const r5 = e === undefined ? 'fallback' : e;
 
-// Inverted == null
+// `== null`
 declare const f: string | null;
 const r6 = f == null ? 'default' : f;
 
-// Compound !== null && !== undefined
+// `!== null && !== undefined`
 declare const g: string | null | undefined;
 const r7 = g !== null && g !== undefined ? g : 'default';
 
-// Compound === null || === undefined
+// `=== null || === undefined`
 declare const h: string | null | undefined;
 const r8 = h === null || h === undefined ? 'default' : h;
 
-// Null on left side
+// `null` on the left
 declare const i: string | null;
 const r9 = null !== i ? i : 'default';
 
-// Undefined on left side
+// `undefined` on the left
 declare const j: string | undefined;
 const r10 = undefined !== j ? j : 'fallback';
 
@@ -48,98 +50,98 @@ const r10 = undefined !== j ? j : 'fallback';
 declare const obj: { prop: string | null };
 const r11 = obj.prop !== null ? obj.prop : 'default';
 
-// Loose != undefined
+// `!= undefined`
 declare const l: string | undefined;
 const r12 = l != undefined ? l : 'default';
 
-// Inverted, null on left
+// `=== null` with `null` on the left
 declare const n: string | null;
 const r13 = null === n ? 'default' : n;
 
-// Fallback is conditional (needs parens)
+// Conditional fallback is parenthesized
 declare const p: string | null;
 const r14 = p !== null ? p : p ? 'a' : 'b';
 
-// Fallback is logical OR (needs parens, ?? cannot mix with ||)
+// `||` fallback is parenthesized
 declare const q: string | null;
 const r15 = q !== null ? q : q || 'default';
 
-// Fallback is logical AND (needs parens, ?? cannot mix with &&)
+// `&&` fallback is parenthesized
 declare const s: string | null;
 const r16 = s !== null ? s : s && 'value';
 
-// Call expression in subject (diagnostic only, no fix: side-effect safety)
+// Call in the subject: no fix
 declare function foo(): string | null;
-const r18 = foo() !== null ? foo() : 'default';
+const r17 = foo() !== null ? foo() : 'default';
 
-// New expression in subject (diagnostic only, no fix: side-effect safety)
+// `new` in the subject: no fix
 declare class Bar { value: string | null }
-const r25 = new Bar().value !== null ? new Bar().value : 'default';
+const r18 = new Bar().value !== null ? new Bar().value : 'default';
 
-// Undefined literal type
+// `undefined` type
 const undef: undefined = undefined;
 const r19 = undef !== undefined ? undef : 'fallback';
 
-// Number | undefined (non-string union)
+// `number | undefined`
 declare const maybeNum: number | undefined;
 const r20 = maybeNum !== undefined ? maybeNum : 42;
 
-// Loose != null with triple union (covers both null and undefined)
+// `!= null` on a union with both `null` and `undefined`
 declare const tripleUnion: string | null | undefined;
 const r21 = tripleUnion != null ? tripleUnion : 'default';
 
-// Optional property (a?: string creates string | undefined)
+// Optional property
 interface Config { timeout?: number; }
 declare const config: Config;
 const r22 = config.timeout !== undefined ? config.timeout : 3000;
 
-// Array element access
+// Array element
 declare const arr: (number | null)[];
 const r23 = arr[0] !== null ? arr[0] : 0;
 
-// Function return context
+// Function return
 function getVal(x: string | null): string {
   return x !== null ? x : 'default';
 }
 
-// Nested in parentheses
+// Parenthesized ternary
 declare const paren: string | null;
 const r24 = (paren !== null ? paren : 'default').toUpperCase();
 
-// --- StrictSingle fixability: type has only the checked nullish variant ---
+// Strict check of the only nullish variant
 
-// Checks !== null, type has only null: fix IS safe
+// `!== null` on a union with `null`
 declare const ss5: string | null;
-const r30 = ss5 !== null ? ss5 : 'default';
+const r25 = ss5 !== null ? ss5 : 'default';
 
-// Checks !== undefined, type has only undefined: fix IS safe
+// `!== undefined` on a union with `undefined`
 declare const ss6: string | undefined;
-const r31 = ss6 !== undefined ? ss6 : 'default';
+const r26 = ss6 !== undefined ? ss6 : 'default';
 
-// --- Compound fixability: complementary literals ---
+// Compound check of both nullish variants
 
-// Complementary: one null, one undefined: fix IS safe
+// `null` then `undefined`
 declare const cp2: string | null | undefined;
-const r34 = cp2 !== null && cp2 !== undefined ? cp2 : 'default';
+const r27 = cp2 !== null && cp2 !== undefined ? cp2 : 'default';
 
-// Complementary reversed order: fix IS safe
+// `undefined` then `null`
 declare const cp3: string | null | undefined;
-const r35 = cp3 !== undefined && cp3 !== null ? cp3 : 'default';
+const r28 = cp3 !== undefined && cp3 !== null ? cp3 : 'default';
 
 ```
 
 # Diagnostics
 ```
-ternaryInvalid.ts:3:12 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ternaryInvalid.ts:5:12 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Prefer ?? over a ternary expression checking for nullish.
   
-    1 │ // Strict !== null
-    2 │ declare const a: string | null;
-  > 3 │ const r1 = a !== null ? a : 'default';
+    3 │ // `!== null`
+    4 │ declare const a: string | null;
+  > 5 │ const r1 = a !== null ? a : 'default';
       │            ^^^^^^^^^^
-    4 │ 
-    5 │ // Strict !== undefined
+    6 │ 
+    7 │ // `!== undefined`
   
   i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
   
@@ -149,117 +151,27 @@ ternaryInvalid.ts:3:12 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━�
   
   i Safe fix: Replace the ternary with ??.
   
-      1   1 │   // Strict !== null
-      2   2 │   declare const a: string | null;
-      3     │ - const·r1·=·a·!==·null·?·a·:·'default';
-          3 │ + const·r1·=·a·??·'default';
-      4   4 │   
-      5   5 │   // Strict !== undefined
+      3   3 │   // `!== null`
+      4   4 │   declare const a: string | null;
+      5     │ - const·r1·=·a·!==·null·?·a·:·'default';
+          5 │ + const·r1·=·a·??·'default';
+      6   6 │   
+      7   7 │   // `!== undefined`
   
 
 ```
 
 ```
-ternaryInvalid.ts:7:12 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ternaryInvalid.ts:9:12 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Prefer ?? over a ternary expression checking for nullish.
   
-    5 │ // Strict !== undefined
-    6 │ declare const b: string | undefined;
-  > 7 │ const r2 = b !== undefined ? b : 'fallback';
-      │            ^^^^^^^^^^^^^^^
-    8 │ 
-    9 │ // Loose != null
-  
-  i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-  i Safe fix: Replace the ternary with ??.
-  
-      5   5 │   // Strict !== undefined
-      6   6 │   declare const b: string | undefined;
-      7     │ - const·r2·=·b·!==·undefined·?·b·:·'fallback';
-          7 │ + const·r2·=·b·??·'fallback';
-      8   8 │   
-      9   9 │   // Loose != null
-  
-
-```
-
-```
-ternaryInvalid.ts:11:12 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i Prefer ?? over a ternary expression checking for nullish.
-  
-     9 │ // Loose != null
-    10 │ declare const c: string | null;
-  > 11 │ const r3 = c != null ? c : 'default';
-       │            ^^^^^^^^^
-    12 │ 
-    13 │ // Inverted === null
-  
-  i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-  i Safe fix: Replace the ternary with ??.
-  
-      9   9 │   // Loose != null
-     10  10 │   declare const c: string | null;
-     11     │ - const·r3·=·c·!=·null·?·c·:·'default';
-         11 │ + const·r3·=·c·??·'default';
-     12  12 │   
-     13  13 │   // Inverted === null
-  
-
-```
-
-```
-ternaryInvalid.ts:15:12 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i Prefer ?? over a ternary expression checking for nullish.
-  
-    13 │ // Inverted === null
-    14 │ declare const d: string | null;
-  > 15 │ const r4 = d === null ? 'default' : d;
-       │            ^^^^^^^^^^
-    16 │ 
-    17 │ // Inverted === undefined
-  
-  i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-  i Safe fix: Replace the ternary with ??.
-  
-     13  13 │   // Inverted === null
-     14  14 │   declare const d: string | null;
-     15     │ - const·r4·=·d·===·null·?·'default'·:·d;
-         15 │ + const·r4·=·d·??·'default';
-     16  16 │   
-     17  17 │   // Inverted === undefined
-  
-
-```
-
-```
-ternaryInvalid.ts:19:12 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i Prefer ?? over a ternary expression checking for nullish.
-  
-    17 │ // Inverted === undefined
-    18 │ declare const e: string | undefined;
-  > 19 │ const r5 = e === undefined ? 'fallback' : e;
+     7 │ // `!== undefined`
+     8 │ declare const b: string | undefined;
+   > 9 │ const r2 = b !== undefined ? b : 'fallback';
        │            ^^^^^^^^^^^^^^^
-    20 │ 
-    21 │ // Inverted == null
+    10 │ 
+    11 │ // `!= null`
   
   i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
   
@@ -269,27 +181,27 @@ ternaryInvalid.ts:19:12 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━
   
   i Safe fix: Replace the ternary with ??.
   
-     17  17 │   // Inverted === undefined
-     18  18 │   declare const e: string | undefined;
-     19     │ - const·r5·=·e·===·undefined·?·'fallback'·:·e;
-         19 │ + const·r5·=·e·??·'fallback';
-     20  20 │   
-     21  21 │   // Inverted == null
+      7   7 │   // `!== undefined`
+      8   8 │   declare const b: string | undefined;
+      9     │ - const·r2·=·b·!==·undefined·?·b·:·'fallback';
+          9 │ + const·r2·=·b·??·'fallback';
+     10  10 │   
+     11  11 │   // `!= null`
   
 
 ```
 
 ```
-ternaryInvalid.ts:23:12 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ternaryInvalid.ts:13:12 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Prefer ?? over a ternary expression checking for nullish.
   
-    21 │ // Inverted == null
-    22 │ declare const f: string | null;
-  > 23 │ const r6 = f == null ? 'default' : f;
+    11 │ // `!= null`
+    12 │ declare const c: string | null;
+  > 13 │ const r3 = c != null ? c : 'default';
        │            ^^^^^^^^^
-    24 │ 
-    25 │ // Compound !== null && !== undefined
+    14 │ 
+    15 │ // `=== null`
   
   i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
   
@@ -299,87 +211,27 @@ ternaryInvalid.ts:23:12 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━
   
   i Safe fix: Replace the ternary with ??.
   
-     21  21 │   // Inverted == null
-     22  22 │   declare const f: string | null;
-     23     │ - const·r6·=·f·==·null·?·'default'·:·f;
-         23 │ + const·r6·=·f·??·'default';
-     24  24 │   
-     25  25 │   // Compound !== null && !== undefined
+     11  11 │   // `!= null`
+     12  12 │   declare const c: string | null;
+     13     │ - const·r3·=·c·!=·null·?·c·:·'default';
+         13 │ + const·r3·=·c·??·'default';
+     14  14 │   
+     15  15 │   // `=== null`
   
 
 ```
 
 ```
-ternaryInvalid.ts:27:12 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ternaryInvalid.ts:17:12 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Prefer ?? over a ternary expression checking for nullish.
   
-    25 │ // Compound !== null && !== undefined
-    26 │ declare const g: string | null | undefined;
-  > 27 │ const r7 = g !== null && g !== undefined ? g : 'default';
-       │            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    28 │ 
-    29 │ // Compound === null || === undefined
-  
-  i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-  i Safe fix: Replace the ternary with ??.
-  
-     25  25 │   // Compound !== null && !== undefined
-     26  26 │   declare const g: string | null | undefined;
-     27     │ - const·r7·=·g·!==·null·&&·g·!==·undefined·?·g·:·'default';
-         27 │ + const·r7·=·g·??·'default';
-     28  28 │   
-     29  29 │   // Compound === null || === undefined
-  
-
-```
-
-```
-ternaryInvalid.ts:31:12 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i Prefer ?? over a ternary expression checking for nullish.
-  
-    29 │ // Compound === null || === undefined
-    30 │ declare const h: string | null | undefined;
-  > 31 │ const r8 = h === null || h === undefined ? 'default' : h;
-       │            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    32 │ 
-    33 │ // Null on left side
-  
-  i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-  i Safe fix: Replace the ternary with ??.
-  
-     29  29 │   // Compound === null || === undefined
-     30  30 │   declare const h: string | null | undefined;
-     31     │ - const·r8·=·h·===·null·||·h·===·undefined·?·'default'·:·h;
-         31 │ + const·r8·=·h·??·'default';
-     32  32 │   
-     33  33 │   // Null on left side
-  
-
-```
-
-```
-ternaryInvalid.ts:35:12 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i Prefer ?? over a ternary expression checking for nullish.
-  
-    33 │ // Null on left side
-    34 │ declare const i: string | null;
-  > 35 │ const r9 = null !== i ? i : 'default';
+    15 │ // `=== null`
+    16 │ declare const d: string | null;
+  > 17 │ const r4 = d === null ? 'default' : d;
        │            ^^^^^^^^^^
-    36 │ 
-    37 │ // Undefined on left side
+    18 │ 
+    19 │ // `=== undefined`
   
   i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
   
@@ -389,27 +241,177 @@ ternaryInvalid.ts:35:12 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━
   
   i Safe fix: Replace the ternary with ??.
   
-     33  33 │   // Null on left side
-     34  34 │   declare const i: string | null;
-     35     │ - const·r9·=·null·!==·i·?·i·:·'default';
-         35 │ + const·r9·=·i·??·'default';
-     36  36 │   
-     37  37 │   // Undefined on left side
+     15  15 │   // `=== null`
+     16  16 │   declare const d: string | null;
+     17     │ - const·r4·=·d·===·null·?·'default'·:·d;
+         17 │ + const·r4·=·d·??·'default';
+     18  18 │   
+     19  19 │   // `=== undefined`
   
 
 ```
 
 ```
-ternaryInvalid.ts:39:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ternaryInvalid.ts:21:12 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Prefer ?? over a ternary expression checking for nullish.
   
-    37 │ // Undefined on left side
-    38 │ declare const j: string | undefined;
-  > 39 │ const r10 = undefined !== j ? j : 'fallback';
+    19 │ // `=== undefined`
+    20 │ declare const e: string | undefined;
+  > 21 │ const r5 = e === undefined ? 'fallback' : e;
+       │            ^^^^^^^^^^^^^^^
+    22 │ 
+    23 │ // `== null`
+  
+  i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace the ternary with ??.
+  
+     19  19 │   // `=== undefined`
+     20  20 │   declare const e: string | undefined;
+     21     │ - const·r5·=·e·===·undefined·?·'fallback'·:·e;
+         21 │ + const·r5·=·e·??·'fallback';
+     22  22 │   
+     23  23 │   // `== null`
+  
+
+```
+
+```
+ternaryInvalid.ts:25:12 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer ?? over a ternary expression checking for nullish.
+  
+    23 │ // `== null`
+    24 │ declare const f: string | null;
+  > 25 │ const r6 = f == null ? 'default' : f;
+       │            ^^^^^^^^^
+    26 │ 
+    27 │ // `!== null && !== undefined`
+  
+  i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace the ternary with ??.
+  
+     23  23 │   // `== null`
+     24  24 │   declare const f: string | null;
+     25     │ - const·r6·=·f·==·null·?·'default'·:·f;
+         25 │ + const·r6·=·f·??·'default';
+     26  26 │   
+     27  27 │   // `!== null && !== undefined`
+  
+
+```
+
+```
+ternaryInvalid.ts:29:12 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer ?? over a ternary expression checking for nullish.
+  
+    27 │ // `!== null && !== undefined`
+    28 │ declare const g: string | null | undefined;
+  > 29 │ const r7 = g !== null && g !== undefined ? g : 'default';
+       │            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    30 │ 
+    31 │ // `=== null || === undefined`
+  
+  i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace the ternary with ??.
+  
+     27  27 │   // `!== null && !== undefined`
+     28  28 │   declare const g: string | null | undefined;
+     29     │ - const·r7·=·g·!==·null·&&·g·!==·undefined·?·g·:·'default';
+         29 │ + const·r7·=·g·??·'default';
+     30  30 │   
+     31  31 │   // `=== null || === undefined`
+  
+
+```
+
+```
+ternaryInvalid.ts:33:12 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer ?? over a ternary expression checking for nullish.
+  
+    31 │ // `=== null || === undefined`
+    32 │ declare const h: string | null | undefined;
+  > 33 │ const r8 = h === null || h === undefined ? 'default' : h;
+       │            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    34 │ 
+    35 │ // `null` on the left
+  
+  i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace the ternary with ??.
+  
+     31  31 │   // `=== null || === undefined`
+     32  32 │   declare const h: string | null | undefined;
+     33     │ - const·r8·=·h·===·null·||·h·===·undefined·?·'default'·:·h;
+         33 │ + const·r8·=·h·??·'default';
+     34  34 │   
+     35  35 │   // `null` on the left
+  
+
+```
+
+```
+ternaryInvalid.ts:37:12 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer ?? over a ternary expression checking for nullish.
+  
+    35 │ // `null` on the left
+    36 │ declare const i: string | null;
+  > 37 │ const r9 = null !== i ? i : 'default';
+       │            ^^^^^^^^^^
+    38 │ 
+    39 │ // `undefined` on the left
+  
+  i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace the ternary with ??.
+  
+     35  35 │   // `null` on the left
+     36  36 │   declare const i: string | null;
+     37     │ - const·r9·=·null·!==·i·?·i·:·'default';
+         37 │ + const·r9·=·i·??·'default';
+     38  38 │   
+     39  39 │   // `undefined` on the left
+  
+
+```
+
+```
+ternaryInvalid.ts:41:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer ?? over a ternary expression checking for nullish.
+  
+    39 │ // `undefined` on the left
+    40 │ declare const j: string | undefined;
+  > 41 │ const r10 = undefined !== j ? j : 'fallback';
        │             ^^^^^^^^^^^^^^^
-    40 │ 
-    41 │ // Member access
+    42 │ 
+    43 │ // Member access
   
   i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
   
@@ -419,27 +421,27 @@ ternaryInvalid.ts:39:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━
   
   i Safe fix: Replace the ternary with ??.
   
-     37  37 │   // Undefined on left side
-     38  38 │   declare const j: string | undefined;
-     39     │ - const·r10·=·undefined·!==·j·?·j·:·'fallback';
-         39 │ + const·r10·=·j·??·'fallback';
-     40  40 │   
-     41  41 │   // Member access
+     39  39 │   // `undefined` on the left
+     40  40 │   declare const j: string | undefined;
+     41     │ - const·r10·=·undefined·!==·j·?·j·:·'fallback';
+         41 │ + const·r10·=·j·??·'fallback';
+     42  42 │   
+     43  43 │   // Member access
   
 
 ```
 
 ```
-ternaryInvalid.ts:43:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ternaryInvalid.ts:45:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Prefer ?? over a ternary expression checking for nullish.
   
-    41 │ // Member access
-    42 │ declare const obj: { prop: string | null };
-  > 43 │ const r11 = obj.prop !== null ? obj.prop : 'default';
+    43 │ // Member access
+    44 │ declare const obj: { prop: string | null };
+  > 45 │ const r11 = obj.prop !== null ? obj.prop : 'default';
        │             ^^^^^^^^^^^^^^^^^
-    44 │ 
-    45 │ // Loose != undefined
+    46 │ 
+    47 │ // `!= undefined`
   
   i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
   
@@ -449,27 +451,27 @@ ternaryInvalid.ts:43:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━
   
   i Safe fix: Replace the ternary with ??.
   
-     41  41 │   // Member access
-     42  42 │   declare const obj: { prop: string | null };
-     43     │ - const·r11·=·obj.prop·!==·null·?·obj.prop·:·'default';
-         43 │ + const·r11·=·obj.prop·??·'default';
-     44  44 │   
-     45  45 │   // Loose != undefined
+     43  43 │   // Member access
+     44  44 │   declare const obj: { prop: string | null };
+     45     │ - const·r11·=·obj.prop·!==·null·?·obj.prop·:·'default';
+         45 │ + const·r11·=·obj.prop·??·'default';
+     46  46 │   
+     47  47 │   // `!= undefined`
   
 
 ```
 
 ```
-ternaryInvalid.ts:47:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ternaryInvalid.ts:49:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Prefer ?? over a ternary expression checking for nullish.
   
-    45 │ // Loose != undefined
-    46 │ declare const l: string | undefined;
-  > 47 │ const r12 = l != undefined ? l : 'default';
+    47 │ // `!= undefined`
+    48 │ declare const l: string | undefined;
+  > 49 │ const r12 = l != undefined ? l : 'default';
        │             ^^^^^^^^^^^^^^
-    48 │ 
-    49 │ // Inverted, null on left
+    50 │ 
+    51 │ // `=== null` with `null` on the left
   
   i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
   
@@ -479,27 +481,27 @@ ternaryInvalid.ts:47:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━
   
   i Safe fix: Replace the ternary with ??.
   
-     45  45 │   // Loose != undefined
-     46  46 │   declare const l: string | undefined;
-     47     │ - const·r12·=·l·!=·undefined·?·l·:·'default';
-         47 │ + const·r12·=·l·??·'default';
-     48  48 │   
-     49  49 │   // Inverted, null on left
+     47  47 │   // `!= undefined`
+     48  48 │   declare const l: string | undefined;
+     49     │ - const·r12·=·l·!=·undefined·?·l·:·'default';
+         49 │ + const·r12·=·l·??·'default';
+     50  50 │   
+     51  51 │   // `=== null` with `null` on the left
   
 
 ```
 
 ```
-ternaryInvalid.ts:51:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ternaryInvalid.ts:53:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Prefer ?? over a ternary expression checking for nullish.
   
-    49 │ // Inverted, null on left
-    50 │ declare const n: string | null;
-  > 51 │ const r13 = null === n ? 'default' : n;
+    51 │ // `=== null` with `null` on the left
+    52 │ declare const n: string | null;
+  > 53 │ const r13 = null === n ? 'default' : n;
        │             ^^^^^^^^^^
-    52 │ 
-    53 │ // Fallback is conditional (needs parens)
+    54 │ 
+    55 │ // Conditional fallback is parenthesized
   
   i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
   
@@ -509,27 +511,27 @@ ternaryInvalid.ts:51:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━
   
   i Safe fix: Replace the ternary with ??.
   
-     49  49 │   // Inverted, null on left
-     50  50 │   declare const n: string | null;
-     51     │ - const·r13·=·null·===·n·?·'default'·:·n;
-         51 │ + const·r13·=·n·??·'default';
-     52  52 │   
-     53  53 │   // Fallback is conditional (needs parens)
+     51  51 │   // `=== null` with `null` on the left
+     52  52 │   declare const n: string | null;
+     53     │ - const·r13·=·null·===·n·?·'default'·:·n;
+         53 │ + const·r13·=·n·??·'default';
+     54  54 │   
+     55  55 │   // Conditional fallback is parenthesized
   
 
 ```
 
 ```
-ternaryInvalid.ts:55:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ternaryInvalid.ts:57:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Prefer ?? over a ternary expression checking for nullish.
   
-    53 │ // Fallback is conditional (needs parens)
-    54 │ declare const p: string | null;
-  > 55 │ const r14 = p !== null ? p : p ? 'a' : 'b';
+    55 │ // Conditional fallback is parenthesized
+    56 │ declare const p: string | null;
+  > 57 │ const r14 = p !== null ? p : p ? 'a' : 'b';
        │             ^^^^^^^^^^
-    56 │ 
-    57 │ // Fallback is logical OR (needs parens, ?? cannot mix with ||)
+    58 │ 
+    59 │ // `||` fallback is parenthesized
   
   i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
   
@@ -539,27 +541,27 @@ ternaryInvalid.ts:55:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━
   
   i Safe fix: Replace the ternary with ??.
   
-     53  53 │   // Fallback is conditional (needs parens)
-     54  54 │   declare const p: string | null;
-     55     │ - const·r14·=·p·!==·null·?·p·:·p·?·'a'·:·'b';
-         55 │ + const·r14·=·p·??·(p·?·'a'·:·'b');
-     56  56 │   
-     57  57 │   // Fallback is logical OR (needs parens, ?? cannot mix with ||)
+     55  55 │   // Conditional fallback is parenthesized
+     56  56 │   declare const p: string | null;
+     57     │ - const·r14·=·p·!==·null·?·p·:·p·?·'a'·:·'b';
+         57 │ + const·r14·=·p·??·(p·?·'a'·:·'b');
+     58  58 │   
+     59  59 │   // `||` fallback is parenthesized
   
 
 ```
 
 ```
-ternaryInvalid.ts:59:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ternaryInvalid.ts:61:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Prefer ?? over a ternary expression checking for nullish.
   
-    57 │ // Fallback is logical OR (needs parens, ?? cannot mix with ||)
-    58 │ declare const q: string | null;
-  > 59 │ const r15 = q !== null ? q : q || 'default';
+    59 │ // `||` fallback is parenthesized
+    60 │ declare const q: string | null;
+  > 61 │ const r15 = q !== null ? q : q || 'default';
        │             ^^^^^^^^^^
-    60 │ 
-    61 │ // Fallback is logical AND (needs parens, ?? cannot mix with &&)
+    62 │ 
+    63 │ // `&&` fallback is parenthesized
   
   i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
   
@@ -569,27 +571,27 @@ ternaryInvalid.ts:59:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━
   
   i Safe fix: Replace the ternary with ??.
   
-     57  57 │   // Fallback is logical OR (needs parens, ?? cannot mix with ||)
-     58  58 │   declare const q: string | null;
-     59     │ - const·r15·=·q·!==·null·?·q·:·q·||·'default';
-         59 │ + const·r15·=·q·??·(q·||·'default');
-     60  60 │   
-     61  61 │   // Fallback is logical AND (needs parens, ?? cannot mix with &&)
+     59  59 │   // `||` fallback is parenthesized
+     60  60 │   declare const q: string | null;
+     61     │ - const·r15·=·q·!==·null·?·q·:·q·||·'default';
+         61 │ + const·r15·=·q·??·(q·||·'default');
+     62  62 │   
+     63  63 │   // `&&` fallback is parenthesized
   
 
 ```
 
 ```
-ternaryInvalid.ts:59:32 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ternaryInvalid.ts:61:32 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use ?? instead of ||.
   
-    57 │ // Fallback is logical OR (needs parens, ?? cannot mix with ||)
-    58 │ declare const q: string | null;
-  > 59 │ const r15 = q !== null ? q : q || 'default';
+    59 │ // `||` fallback is parenthesized
+    60 │ declare const q: string | null;
+  > 61 │ const r15 = q !== null ? q : q || 'default';
        │                                ^^
-    60 │ 
-    61 │ // Fallback is logical AND (needs parens, ?? cannot mix with &&)
+    62 │ 
+    63 │ // `&&` fallback is parenthesized
   
   i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
   
@@ -599,27 +601,27 @@ ternaryInvalid.ts:59:32 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━
   
   i Safe fix: Replace || with ??.
   
-     57  57 │   // Fallback is logical OR (needs parens, ?? cannot mix with ||)
-     58  58 │   declare const q: string | null;
-     59     │ - const·r15·=·q·!==·null·?·q·:·q·||·'default';
-         59 │ + const·r15·=·q·!==·null·?·q·:·q·??·'default';
-     60  60 │   
-     61  61 │   // Fallback is logical AND (needs parens, ?? cannot mix with &&)
+     59  59 │   // `||` fallback is parenthesized
+     60  60 │   declare const q: string | null;
+     61     │ - const·r15·=·q·!==·null·?·q·:·q·||·'default';
+         61 │ + const·r15·=·q·!==·null·?·q·:·q·??·'default';
+     62  62 │   
+     63  63 │   // `&&` fallback is parenthesized
   
 
 ```
 
 ```
-ternaryInvalid.ts:63:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ternaryInvalid.ts:65:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Prefer ?? over a ternary expression checking for nullish.
   
-    61 │ // Fallback is logical AND (needs parens, ?? cannot mix with &&)
-    62 │ declare const s: string | null;
-  > 63 │ const r16 = s !== null ? s : s && 'value';
+    63 │ // `&&` fallback is parenthesized
+    64 │ declare const s: string | null;
+  > 65 │ const r16 = s !== null ? s : s && 'value';
        │             ^^^^^^^^^^
-    64 │ 
-    65 │ // Call expression in subject (diagnostic only, no fix: side-effect safety)
+    66 │ 
+    67 │ // Call in the subject: no fix
   
   i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
   
@@ -629,27 +631,27 @@ ternaryInvalid.ts:63:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━
   
   i Safe fix: Replace the ternary with ??.
   
-     61  61 │   // Fallback is logical AND (needs parens, ?? cannot mix with &&)
-     62  62 │   declare const s: string | null;
-     63     │ - const·r16·=·s·!==·null·?·s·:·s·&&·'value';
-         63 │ + const·r16·=·s·??·(s·&&·'value');
-     64  64 │   
-     65  65 │   // Call expression in subject (diagnostic only, no fix: side-effect safety)
+     63  63 │   // `&&` fallback is parenthesized
+     64  64 │   declare const s: string | null;
+     65     │ - const·r16·=·s·!==·null·?·s·:·s·&&·'value';
+         65 │ + const·r16·=·s·??·(s·&&·'value');
+     66  66 │   
+     67  67 │   // Call in the subject: no fix
   
 
 ```
 
 ```
-ternaryInvalid.ts:67:13 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ternaryInvalid.ts:69:13 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Prefer ?? over a ternary expression checking for nullish.
   
-    65 │ // Call expression in subject (diagnostic only, no fix: side-effect safety)
-    66 │ declare function foo(): string | null;
-  > 67 │ const r18 = foo() !== null ? foo() : 'default';
+    67 │ // Call in the subject: no fix
+    68 │ declare function foo(): string | null;
+  > 69 │ const r17 = foo() !== null ? foo() : 'default';
        │             ^^^^^^^^^^^^^^
-    68 │ 
-    69 │ // New expression in subject (diagnostic only, no fix: side-effect safety)
+    70 │ 
+    71 │ // `new` in the subject: no fix
   
   i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
   
@@ -661,16 +663,16 @@ ternaryInvalid.ts:67:13 lint/nursery/useNullishCoalescing ━━━━━━━�
 ```
 
 ```
-ternaryInvalid.ts:71:13 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ternaryInvalid.ts:73:13 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Prefer ?? over a ternary expression checking for nullish.
   
-    69 │ // New expression in subject (diagnostic only, no fix: side-effect safety)
-    70 │ declare class Bar { value: string | null }
-  > 71 │ const r25 = new Bar().value !== null ? new Bar().value : 'default';
+    71 │ // `new` in the subject: no fix
+    72 │ declare class Bar { value: string | null }
+  > 73 │ const r18 = new Bar().value !== null ? new Bar().value : 'default';
        │             ^^^^^^^^^^^^^^^^^^^^^^^^
-    72 │ 
-    73 │ // Undefined literal type
+    74 │ 
+    75 │ // `undefined` type
   
   i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
   
@@ -682,16 +684,16 @@ ternaryInvalid.ts:71:13 lint/nursery/useNullishCoalescing ━━━━━━━�
 ```
 
 ```
-ternaryInvalid.ts:79:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ternaryInvalid.ts:81:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Prefer ?? over a ternary expression checking for nullish.
   
-    77 │ // Number | undefined (non-string union)
-    78 │ declare const maybeNum: number | undefined;
-  > 79 │ const r20 = maybeNum !== undefined ? maybeNum : 42;
+    79 │ // `number | undefined`
+    80 │ declare const maybeNum: number | undefined;
+  > 81 │ const r20 = maybeNum !== undefined ? maybeNum : 42;
        │             ^^^^^^^^^^^^^^^^^^^^^^
-    80 │ 
-    81 │ // Loose != null with triple union (covers both null and undefined)
+    82 │ 
+    83 │ // `!= null` on a union with both `null` and `undefined`
   
   i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
   
@@ -701,27 +703,27 @@ ternaryInvalid.ts:79:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━
   
   i Safe fix: Replace the ternary with ??.
   
-     77  77 │   // Number | undefined (non-string union)
-     78  78 │   declare const maybeNum: number | undefined;
-     79     │ - const·r20·=·maybeNum·!==·undefined·?·maybeNum·:·42;
-         79 │ + const·r20·=·maybeNum·??·42;
-     80  80 │   
-     81  81 │   // Loose != null with triple union (covers both null and undefined)
+     79  79 │   // `number | undefined`
+     80  80 │   declare const maybeNum: number | undefined;
+     81     │ - const·r20·=·maybeNum·!==·undefined·?·maybeNum·:·42;
+         81 │ + const·r20·=·maybeNum·??·42;
+     82  82 │   
+     83  83 │   // `!= null` on a union with both `null` and `undefined`
   
 
 ```
 
 ```
-ternaryInvalid.ts:83:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ternaryInvalid.ts:85:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Prefer ?? over a ternary expression checking for nullish.
   
-    81 │ // Loose != null with triple union (covers both null and undefined)
-    82 │ declare const tripleUnion: string | null | undefined;
-  > 83 │ const r21 = tripleUnion != null ? tripleUnion : 'default';
+    83 │ // `!= null` on a union with both `null` and `undefined`
+    84 │ declare const tripleUnion: string | null | undefined;
+  > 85 │ const r21 = tripleUnion != null ? tripleUnion : 'default';
        │             ^^^^^^^^^^^^^^^^^^^
-    84 │ 
-    85 │ // Optional property (a?: string creates string | undefined)
+    86 │ 
+    87 │ // Optional property
   
   i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
   
@@ -731,27 +733,27 @@ ternaryInvalid.ts:83:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━
   
   i Safe fix: Replace the ternary with ??.
   
-     81  81 │   // Loose != null with triple union (covers both null and undefined)
-     82  82 │   declare const tripleUnion: string | null | undefined;
-     83     │ - const·r21·=·tripleUnion·!=·null·?·tripleUnion·:·'default';
-         83 │ + const·r21·=·tripleUnion·??·'default';
-     84  84 │   
-     85  85 │   // Optional property (a?: string creates string | undefined)
+     83  83 │   // `!= null` on a union with both `null` and `undefined`
+     84  84 │   declare const tripleUnion: string | null | undefined;
+     85     │ - const·r21·=·tripleUnion·!=·null·?·tripleUnion·:·'default';
+         85 │ + const·r21·=·tripleUnion·??·'default';
+     86  86 │   
+     87  87 │   // Optional property
   
 
 ```
 
 ```
-ternaryInvalid.ts:88:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ternaryInvalid.ts:90:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Prefer ?? over a ternary expression checking for nullish.
   
-    86 │ interface Config { timeout?: number; }
-    87 │ declare const config: Config;
-  > 88 │ const r22 = config.timeout !== undefined ? config.timeout : 3000;
+    88 │ interface Config { timeout?: number; }
+    89 │ declare const config: Config;
+  > 90 │ const r22 = config.timeout !== undefined ? config.timeout : 3000;
        │             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    89 │ 
-    90 │ // Array element access
+    91 │ 
+    92 │ // Array element
   
   i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
   
@@ -761,27 +763,27 @@ ternaryInvalid.ts:88:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━
   
   i Safe fix: Replace the ternary with ??.
   
-     86  86 │   interface Config { timeout?: number; }
-     87  87 │   declare const config: Config;
-     88     │ - const·r22·=·config.timeout·!==·undefined·?·config.timeout·:·3000;
-         88 │ + const·r22·=·config.timeout·??·3000;
-     89  89 │   
-     90  90 │   // Array element access
+     88  88 │   interface Config { timeout?: number; }
+     89  89 │   declare const config: Config;
+     90     │ - const·r22·=·config.timeout·!==·undefined·?·config.timeout·:·3000;
+         90 │ + const·r22·=·config.timeout·??·3000;
+     91  91 │   
+     92  92 │   // Array element
   
 
 ```
 
 ```
-ternaryInvalid.ts:96:10 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ternaryInvalid.ts:98:10 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Prefer ?? over a ternary expression checking for nullish.
   
-    94 │ // Function return context
-    95 │ function getVal(x: string | null): string {
-  > 96 │   return x !== null ? x : 'default';
-       │          ^^^^^^^^^^
-    97 │ }
-    98 │ 
+     96 │ // Function return
+     97 │ function getVal(x: string | null): string {
+   > 98 │   return x !== null ? x : 'default';
+        │          ^^^^^^^^^^
+     99 │ }
+    100 │ 
   
   i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
   
@@ -791,27 +793,27 @@ ternaryInvalid.ts:96:10 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━
   
   i Safe fix: Replace the ternary with ??.
   
-     94  94 │   // Function return context
-     95  95 │   function getVal(x: string | null): string {
-     96     │ - ··return·x·!==·null·?·x·:·'default';
-         96 │ + ··return·x·??·'default';
-     97  97 │   }
-     98  98 │   
+     96  96 │   // Function return
+     97  97 │   function getVal(x: string | null): string {
+     98     │ - ··return·x·!==·null·?·x·:·'default';
+         98 │ + ··return·x·??·'default';
+     99  99 │   }
+    100 100 │   
   
 
 ```
 
 ```
-ternaryInvalid.ts:101:14 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ternaryInvalid.ts:103:14 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Prefer ?? over a ternary expression checking for nullish.
   
-     99 │ // Nested in parentheses
-    100 │ declare const paren: string | null;
-  > 101 │ const r24 = (paren !== null ? paren : 'default').toUpperCase();
+    101 │ // Parenthesized ternary
+    102 │ declare const paren: string | null;
+  > 103 │ const r24 = (paren !== null ? paren : 'default').toUpperCase();
         │              ^^^^^^^^^^^^^^
-    102 │ 
-    103 │ // --- StrictSingle fixability: type has only the checked nullish variant ---
+    104 │ 
+    105 │ // Strict check of the only nullish variant
   
   i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
   
@@ -821,27 +823,27 @@ ternaryInvalid.ts:101:14 lint/nursery/useNullishCoalescing  FIXABLE  ━━━�
   
   i Safe fix: Replace the ternary with ??.
   
-     99  99 │   // Nested in parentheses
-    100 100 │   declare const paren: string | null;
-    101     │ - const·r24·=·(paren·!==·null·?·paren·:·'default').toUpperCase();
-        101 │ + const·r24·=·(paren·??·'default').toUpperCase();
-    102 102 │   
-    103 103 │   // --- StrictSingle fixability: type has only the checked nullish variant ---
+    101 101 │   // Parenthesized ternary
+    102 102 │   declare const paren: string | null;
+    103     │ - const·r24·=·(paren·!==·null·?·paren·:·'default').toUpperCase();
+        103 │ + const·r24·=·(paren·??·'default').toUpperCase();
+    104 104 │   
+    105 105 │   // Strict check of the only nullish variant
   
 
 ```
 
 ```
-ternaryInvalid.ts:107:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ternaryInvalid.ts:109:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Prefer ?? over a ternary expression checking for nullish.
   
-    105 │ // Checks !== null, type has only null: fix IS safe
-    106 │ declare const ss5: string | null;
-  > 107 │ const r30 = ss5 !== null ? ss5 : 'default';
+    107 │ // `!== null` on a union with `null`
+    108 │ declare const ss5: string | null;
+  > 109 │ const r25 = ss5 !== null ? ss5 : 'default';
         │             ^^^^^^^^^^^^
-    108 │ 
-    109 │ // Checks !== undefined, type has only undefined: fix IS safe
+    110 │ 
+    111 │ // `!== undefined` on a union with `undefined`
   
   i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
   
@@ -851,27 +853,27 @@ ternaryInvalid.ts:107:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━�
   
   i Safe fix: Replace the ternary with ??.
   
-    105 105 │   // Checks !== null, type has only null: fix IS safe
-    106 106 │   declare const ss5: string | null;
-    107     │ - const·r30·=·ss5·!==·null·?·ss5·:·'default';
-        107 │ + const·r30·=·ss5·??·'default';
-    108 108 │   
-    109 109 │   // Checks !== undefined, type has only undefined: fix IS safe
+    107 107 │   // `!== null` on a union with `null`
+    108 108 │   declare const ss5: string | null;
+    109     │ - const·r25·=·ss5·!==·null·?·ss5·:·'default';
+        109 │ + const·r25·=·ss5·??·'default';
+    110 110 │   
+    111 111 │   // `!== undefined` on a union with `undefined`
   
 
 ```
 
 ```
-ternaryInvalid.ts:111:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ternaryInvalid.ts:113:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Prefer ?? over a ternary expression checking for nullish.
   
-    109 │ // Checks !== undefined, type has only undefined: fix IS safe
-    110 │ declare const ss6: string | undefined;
-  > 111 │ const r31 = ss6 !== undefined ? ss6 : 'default';
+    111 │ // `!== undefined` on a union with `undefined`
+    112 │ declare const ss6: string | undefined;
+  > 113 │ const r26 = ss6 !== undefined ? ss6 : 'default';
         │             ^^^^^^^^^^^^^^^^^
-    112 │ 
-    113 │ // --- Compound fixability: complementary literals ---
+    114 │ 
+    115 │ // Compound check of both nullish variants
   
   i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
   
@@ -881,27 +883,27 @@ ternaryInvalid.ts:111:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━�
   
   i Safe fix: Replace the ternary with ??.
   
-    109 109 │   // Checks !== undefined, type has only undefined: fix IS safe
-    110 110 │   declare const ss6: string | undefined;
-    111     │ - const·r31·=·ss6·!==·undefined·?·ss6·:·'default';
-        111 │ + const·r31·=·ss6·??·'default';
-    112 112 │   
-    113 113 │   // --- Compound fixability: complementary literals ---
+    111 111 │   // `!== undefined` on a union with `undefined`
+    112 112 │   declare const ss6: string | undefined;
+    113     │ - const·r26·=·ss6·!==·undefined·?·ss6·:·'default';
+        113 │ + const·r26·=·ss6·??·'default';
+    114 114 │   
+    115 115 │   // Compound check of both nullish variants
   
 
 ```
 
 ```
-ternaryInvalid.ts:117:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ternaryInvalid.ts:119:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Prefer ?? over a ternary expression checking for nullish.
   
-    115 │ // Complementary: one null, one undefined: fix IS safe
-    116 │ declare const cp2: string | null | undefined;
-  > 117 │ const r34 = cp2 !== null && cp2 !== undefined ? cp2 : 'default';
+    117 │ // `null` then `undefined`
+    118 │ declare const cp2: string | null | undefined;
+  > 119 │ const r27 = cp2 !== null && cp2 !== undefined ? cp2 : 'default';
         │             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    118 │ 
-    119 │ // Complementary reversed order: fix IS safe
+    120 │ 
+    121 │ // `undefined` then `null`
   
   i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
   
@@ -911,26 +913,26 @@ ternaryInvalid.ts:117:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━�
   
   i Safe fix: Replace the ternary with ??.
   
-    115 115 │   // Complementary: one null, one undefined: fix IS safe
-    116 116 │   declare const cp2: string | null | undefined;
-    117     │ - const·r34·=·cp2·!==·null·&&·cp2·!==·undefined·?·cp2·:·'default';
-        117 │ + const·r34·=·cp2·??·'default';
-    118 118 │   
-    119 119 │   // Complementary reversed order: fix IS safe
+    117 117 │   // `null` then `undefined`
+    118 118 │   declare const cp2: string | null | undefined;
+    119     │ - const·r27·=·cp2·!==·null·&&·cp2·!==·undefined·?·cp2·:·'default';
+        119 │ + const·r27·=·cp2·??·'default';
+    120 120 │   
+    121 121 │   // `undefined` then `null`
   
 
 ```
 
 ```
-ternaryInvalid.ts:121:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ternaryInvalid.ts:123:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Prefer ?? over a ternary expression checking for nullish.
   
-    119 │ // Complementary reversed order: fix IS safe
-    120 │ declare const cp3: string | null | undefined;
-  > 121 │ const r35 = cp3 !== undefined && cp3 !== null ? cp3 : 'default';
+    121 │ // `undefined` then `null`
+    122 │ declare const cp3: string | null | undefined;
+  > 123 │ const r28 = cp3 !== undefined && cp3 !== null ? cp3 : 'default';
         │             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    122 │ 
+    124 │ 
   
   i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
   
@@ -940,11 +942,11 @@ ternaryInvalid.ts:121:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━�
   
   i Safe fix: Replace the ternary with ??.
   
-    119 119 │   // Complementary reversed order: fix IS safe
-    120 120 │   declare const cp3: string | null | undefined;
-    121     │ - const·r35·=·cp3·!==·undefined·&&·cp3·!==·null·?·cp3·:·'default';
-        121 │ + const·r35·=·cp3·??·'default';
-    122 122 │   
+    121 121 │   // `undefined` then `null`
+    122 122 │   declare const cp3: string | null | undefined;
+    123     │ - const·r28·=·cp3·!==·undefined·&&·cp3·!==·null·?·cp3·:·'default';
+        123 │ + const·r28·=·cp3·??·'default';
+    124 124 │   
   
 
 ```

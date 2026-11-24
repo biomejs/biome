@@ -226,6 +226,45 @@ impl<L: Language> SyntaxToken<L> {
         }
     }
 
+    /// Returns a detached token with both its leading and trailing trivia replaced.
+    #[must_use = "syntax elements are immutable, the result of update methods must be propagated to have any effect"]
+    pub(crate) fn with_trivia_pieces<Leading, Trailing>(
+        &self,
+        leading: Leading,
+        trailing: Trailing,
+    ) -> Self
+    where
+        Leading: IntoIterator<Item = SyntaxTriviaPiece<L>>,
+        Leading::IntoIter: ExactSizeIterator,
+        Trailing: IntoIterator<Item = SyntaxTriviaPiece<L>>,
+        Trailing::IntoIter: ExactSizeIterator,
+    {
+        let mut token_text = String::new();
+        let leading = leading.into_iter().map(|piece| {
+            token_text.push_str(piece.text());
+            piece.into_raw_piece()
+        });
+        let leading = GreenTrivia::new(leading);
+
+        token_text.push_str(self.text_trimmed());
+
+        let trailing = trailing.into_iter().map(|piece| {
+            token_text.push_str(piece.text());
+            piece.into_raw_piece()
+        });
+        let trailing = GreenTrivia::new(trailing);
+
+        Self {
+            raw: cursor::SyntaxToken::new_detached(GreenToken::with_trivia(
+                self.kind().to_raw(),
+                &token_text,
+                leading,
+                trailing,
+            )),
+            _p: PhantomData,
+        }
+    }
+
     /// Return a new version of this token with its leading trivia replaced with `trivia`
     #[must_use = "syntax elements are immutable, the result of update methods must be propagated to have any effect"]
     pub fn with_leading_trivia<'a, I>(&self, trivia: I) -> Self
@@ -250,7 +289,7 @@ impl<L: Language> SyntaxToken<L> {
                 self.kind().to_raw(),
                 &token_text,
                 leading,
-                self.green_token().trailing_trivia().clone(),
+                self.raw.green().trailing_trivia().clone(),
             )),
             _p: PhantomData,
         }
@@ -280,7 +319,7 @@ impl<L: Language> SyntaxToken<L> {
                 self.kind().to_raw(),
                 &token_text,
                 leading,
-                self.green_token().trailing_trivia().clone(),
+                self.raw.green().trailing_trivia().clone(),
             )),
             _p: PhantomData,
         }
@@ -296,7 +335,7 @@ impl<L: Language> SyntaxToken<L> {
         let mut token_text = String::new();
 
         // copy over leading trivia and token text
-        let trailing_len = self.green_token().trailing_trivia().text_len();
+        let trailing_len = self.raw.green().trailing_trivia().text_len();
         token_text.push_str(&self.text()[..usize::from(self.text().text_len() - trailing_len)]);
 
         let trivia = trivia.into_iter().map(|(kind, text)| {
@@ -310,7 +349,7 @@ impl<L: Language> SyntaxToken<L> {
             raw: cursor::SyntaxToken::new_detached(GreenToken::with_trivia(
                 self.kind().to_raw(),
                 &token_text,
-                self.green_token().leading_trivia().clone(),
+                self.raw.green().leading_trivia().clone(),
                 trailing,
             )),
             _p: PhantomData,
@@ -327,7 +366,7 @@ impl<L: Language> SyntaxToken<L> {
         let mut token_text = String::new();
 
         // copy over leading trivia and token text
-        let trailing_len = self.green_token().trailing_trivia().text_len();
+        let trailing_len = self.raw.green().trailing_trivia().text_len();
         token_text.push_str(&self.text()[..usize::from(self.text().text_len() - trailing_len)]);
 
         let trivia = trivia.into_iter().map(|piece| {
@@ -341,7 +380,7 @@ impl<L: Language> SyntaxToken<L> {
             raw: cursor::SyntaxToken::new_detached(GreenToken::with_trivia(
                 self.kind().to_raw(),
                 &token_text,
-                self.green_token().leading_trivia().clone(),
+                self.raw.green().leading_trivia().clone(),
                 trailing,
             )),
             _p: PhantomData,

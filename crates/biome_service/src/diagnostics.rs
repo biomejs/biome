@@ -588,7 +588,7 @@ impl Diagnostic for QueryDiagnostic {
 }
 
 pub fn extension_error(path: &BiomePath) -> WorkspaceError {
-    let file_source = DocumentFileSource::from_path(path, false);
+    let file_source = DocumentFileSource::from_path(path.as_path(), false);
     WorkspaceError::source_file_not_supported(
         file_source,
         path.clone().to_string(),

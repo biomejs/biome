@@ -1,0 +1,1058 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+const array1 = [1, 2];
+array1.push(3, 4);
+
+const array2 = [3, 4];
+array2.unshift(1, 2);
+
+const array3 = [];
+array3.push(1);
+
+const array4 = [1, 2,];
+array4.push(...rest);
+
+let array5;
+array5 = [1];
+array5.push(2);
+
+const array6 = ([1]);
+(array6).push(2);
+
+const object1 = { foo: 1 };
+object1.bar = 2;
+
+const object2 = {};
+object2[key] = value;
+
+const object3 = { foo: 1 };
+Object.assign(object3, { bar: 2, baz: 3 });
+
+const object4 = { foo: 1 };
+Object.assign(object4, bar);
+
+const object5 = { foo: 1 };
+Object.assign(object5, {});
+
+const set1 = new Set([1, 2]);
+set1.add(3);
+
+const set2 = new Set();
+set2.add(1);
+
+const set3 = new Set;
+set3.add(1);
+
+const weakSet = new WeakSet([foo, bar]);
+weakSet.add(baz);
+
+const map1 = new Map([["foo", 1]]);
+map1.set("bar", 2);
+
+const map2 = new Map();
+map2.set("foo", 1);
+
+const weakMap = new WeakMap([[foo, 1]]);
+weakMap.set(bar, 2);
+
+var array7 = [1];
+array7.push(foo());
+
+function inFunction() {
+	const array = [1];
+	array.push(2);
+}
+
+switch (foo) {
+	case 1:
+		const array = [1];
+		array.push(2);
+}
+
+const globalSet = new globalThis.Set();
+globalSet.add(1);
+
+const a = [], array8 = [1];
+array8.push(2);
+
+const set4 = new Set // comment
+set4.add(1)
+
+```
+
+# Diagnostics
+```
+invalid.js:3:1 lint/nursery/noImmediateMutation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This array is changed right after it is created.
+  
+    1 │ /* should generate diagnostics */
+    2 │ const array1 = [1, 2];
+  > 3 │ array1.push(3, 4);
+      │ ^^^^^^^^^^^
+    4 │ 
+    5 │ const array2 = [3, 4];
+  
+  i The array is created here.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const array1 = [1, 2];
+      │                ^^^^^^
+    3 │ array1.push(3, 4);
+    4 │ 
+  
+  i Creating a value and changing it in the next statement splits its initial contents across two statements, which makes them harder to read.
+  
+  i Include the change in the initial value instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Move the change into the initial value.
+  
+     1  1 │   /* should generate diagnostics */
+     2    │ - const·array1·=·[1,·2];
+     3    │ - array1.push(3,·4);
+        2 │ + const·array1·=·[1,·2,·3,·4];
+     4  3 │   
+     5  4 │   const array2 = [3, 4];
+  
+
+```
+
+```
+invalid.js:6:1 lint/nursery/noImmediateMutation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This array is changed right after it is created.
+  
+    5 │ const array2 = [3, 4];
+  > 6 │ array2.unshift(1, 2);
+      │ ^^^^^^^^^^^^^^
+    7 │ 
+    8 │ const array3 = [];
+  
+  i The array is created here.
+  
+    3 │ array1.push(3, 4);
+    4 │ 
+  > 5 │ const array2 = [3, 4];
+      │                ^^^^^^
+    6 │ array2.unshift(1, 2);
+    7 │ 
+  
+  i Creating a value and changing it in the next statement splits its initial contents across two statements, which makes them harder to read.
+  
+  i Include the change in the initial value instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Move the change into the initial value.
+  
+     3  3 │   array1.push(3, 4);
+     4  4 │   
+     5    │ - const·array2·=·[3,·4];
+     6    │ - array2.unshift(1,·2);
+        5 │ + const·array2·=·[1,·2,·3,·4];
+     7  6 │   
+     8  7 │   const array3 = [];
+  
+
+```
+
+```
+invalid.js:9:1 lint/nursery/noImmediateMutation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This array is changed right after it is created.
+  
+     8 │ const array3 = [];
+   > 9 │ array3.push(1);
+       │ ^^^^^^^^^^^
+    10 │ 
+    11 │ const array4 = [1, 2,];
+  
+  i The array is created here.
+  
+     6 │ array2.unshift(1, 2);
+     7 │ 
+   > 8 │ const array3 = [];
+       │                ^^
+     9 │ array3.push(1);
+    10 │ 
+  
+  i Creating a value and changing it in the next statement splits its initial contents across two statements, which makes them harder to read.
+  
+  i Include the change in the initial value instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Move the change into the initial value.
+  
+     6  6 │   array2.unshift(1, 2);
+     7  7 │   
+     8    │ - const·array3·=·[];
+     9    │ - array3.push(1);
+        8 │ + const·array3·=·[1];
+    10  9 │   
+    11 10 │   const array4 = [1, 2,];
+  
+
+```
+
+```
+invalid.js:12:1 lint/nursery/noImmediateMutation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This array is changed right after it is created.
+  
+    11 │ const array4 = [1, 2,];
+  > 12 │ array4.push(...rest);
+       │ ^^^^^^^^^^^
+    13 │ 
+    14 │ let array5;
+  
+  i The array is created here.
+  
+     9 │ array3.push(1);
+    10 │ 
+  > 11 │ const array4 = [1, 2,];
+       │                ^^^^^^^
+    12 │ array4.push(...rest);
+    13 │ 
+  
+  i Creating a value and changing it in the next statement splits its initial contents across two statements, which makes them harder to read.
+  
+  i Include the change in the initial value instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Move the change into the initial value.
+  
+     9  9 │   array3.push(1);
+    10 10 │   
+    11    │ - const·array4·=·[1,·2,];
+    12    │ - array4.push(...rest);
+       11 │ + const·array4·=·[1,·2,·...rest];
+    13 12 │   
+    14 13 │   let array5;
+  
+
+```
+
+```
+invalid.js:15:1 lint/nursery/noImmediateMutation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This variable is assigned right after it is declared.
+  
+    14 │ let array5;
+  > 15 │ array5 = [1];
+       │ ^^^^^^^^^^^^
+    16 │ array5.push(2);
+    17 │ 
+  
+  i The declaration is here.
+  
+    12 │ array4.push(...rest);
+    13 │ 
+  > 14 │ let array5;
+       │ ^^^^^^^^^^^
+    15 │ array5 = [1];
+    16 │ array5.push(2);
+  
+  i Declaring a variable and assigning its first value in two statements makes the code longer and harder to follow.
+  
+  i Assign the value in the declaration instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Assign the value in the declaration.
+  
+    12 12 │   array4.push(...rest);
+    13 13 │   
+    14    │ - let·array5;
+    15    │ - array5·=·[1];
+       14 │ + let·array5·=·[1];
+    16 15 │   array5.push(2);
+    17 16 │   
+  
+
+```
+
+```
+invalid.js:16:1 lint/nursery/noImmediateMutation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This array is changed right after it is created.
+  
+    14 │ let array5;
+    15 │ array5 = [1];
+  > 16 │ array5.push(2);
+       │ ^^^^^^^^^^^
+    17 │ 
+    18 │ const array6 = ([1]);
+  
+  i The array is created here.
+  
+    14 │ let array5;
+  > 15 │ array5 = [1];
+       │          ^^^
+    16 │ array5.push(2);
+    17 │ 
+  
+  i Creating a value and changing it in the next statement splits its initial contents across two statements, which makes them harder to read.
+  
+  i Include the change in the initial value instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Move the change into the initial value.
+  
+    13 13 │   
+    14 14 │   let array5;
+    15    │ - array5·=·[1];
+    16    │ - array5.push(2);
+       15 │ + array5·=·[1,·2];
+    17 16 │   
+    18 17 │   const array6 = ([1]);
+  
+
+```
+
+```
+invalid.js:19:1 lint/nursery/noImmediateMutation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This array is changed right after it is created.
+  
+    18 │ const array6 = ([1]);
+  > 19 │ (array6).push(2);
+       │ ^^^^^^^^^^^^^
+    20 │ 
+    21 │ const object1 = { foo: 1 };
+  
+  i The array is created here.
+  
+    16 │ array5.push(2);
+    17 │ 
+  > 18 │ const array6 = ([1]);
+       │                 ^^^
+    19 │ (array6).push(2);
+    20 │ 
+  
+  i Creating a value and changing it in the next statement splits its initial contents across two statements, which makes them harder to read.
+  
+  i Include the change in the initial value instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Move the change into the initial value.
+  
+    16 16 │   array5.push(2);
+    17 17 │   
+    18    │ - const·array6·=·([1]);
+    19    │ - (array6).push(2);
+       18 │ + const·array6·=·([1,·2]);
+    20 19 │   
+    21 20 │   const object1 = { foo: 1 };
+  
+
+```
+
+```
+invalid.js:22:1 lint/nursery/noImmediateMutation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This object is changed right after it is created.
+  
+    21 │ const object1 = { foo: 1 };
+  > 22 │ object1.bar = 2;
+       │ ^^^^^^^^^^^^^
+    23 │ 
+    24 │ const object2 = {};
+  
+  i The object is created here.
+  
+    19 │ (array6).push(2);
+    20 │ 
+  > 21 │ const object1 = { foo: 1 };
+       │                 ^^^^^^^^^^
+    22 │ object1.bar = 2;
+    23 │ 
+  
+  i Creating a value and changing it in the next statement splits its initial contents across two statements, which makes them harder to read.
+  
+  i Include the change in the initial value instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Move the change into the initial value.
+  
+    19 19 │   (array6).push(2);
+    20 20 │   
+    21    │ - const·object1·=·{·foo:·1·};
+    22    │ - object1.bar·=·2;
+       21 │ + const·object1·=·{·foo:·1,·bar:·2·};
+    23 22 │   
+    24 23 │   const object2 = {};
+  
+
+```
+
+```
+invalid.js:25:1 lint/nursery/noImmediateMutation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This object is changed right after it is created.
+  
+    24 │ const object2 = {};
+  > 25 │ object2[key] = value;
+       │ ^^^^^^^^^^^^^^
+    26 │ 
+    27 │ const object3 = { foo: 1 };
+  
+  i The object is created here.
+  
+    22 │ object1.bar = 2;
+    23 │ 
+  > 24 │ const object2 = {};
+       │                 ^^
+    25 │ object2[key] = value;
+    26 │ 
+  
+  i Creating a value and changing it in the next statement splits its initial contents across two statements, which makes them harder to read.
+  
+  i Include the change in the initial value instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Move the change into the initial value.
+  
+    22 22 │   object1.bar = 2;
+    23 23 │   
+    24    │ - const·object2·=·{};
+    25    │ - object2[key]·=·value;
+       24 │ + const·object2·=·{[key]:·value};
+    26 25 │   
+    27 26 │   const object3 = { foo: 1 };
+  
+
+```
+
+```
+invalid.js:28:1 lint/nursery/noImmediateMutation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This object is changed right after it is created.
+  
+    27 │ const object3 = { foo: 1 };
+  > 28 │ Object.assign(object3, { bar: 2, baz: 3 });
+       │ ^^^^^^^^^^^^^
+    29 │ 
+    30 │ const object4 = { foo: 1 };
+  
+  i The object is created here.
+  
+    25 │ object2[key] = value;
+    26 │ 
+  > 27 │ const object3 = { foo: 1 };
+       │                 ^^^^^^^^^^
+    28 │ Object.assign(object3, { bar: 2, baz: 3 });
+    29 │ 
+  
+  i Creating a value and changing it in the next statement splits its initial contents across two statements, which makes them harder to read.
+  
+  i Include the change in the initial value instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Move the change into the initial value.
+  
+    25 25 │   object2[key] = value;
+    26 26 │   
+    27    │ - const·object3·=·{·foo:·1·};
+    28    │ - Object.assign(object3,·{·bar:·2,·baz:·3·});
+       27 │ + const·object3·=·{·foo:·1,·bar:·2,·baz:·3·};
+    29 28 │   
+    30 29 │   const object4 = { foo: 1 };
+  
+
+```
+
+```
+invalid.js:31:1 lint/nursery/noImmediateMutation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This object is changed right after it is created.
+  
+    30 │ const object4 = { foo: 1 };
+  > 31 │ Object.assign(object4, bar);
+       │ ^^^^^^^^^^^^^
+    32 │ 
+    33 │ const object5 = { foo: 1 };
+  
+  i The object is created here.
+  
+    28 │ Object.assign(object3, { bar: 2, baz: 3 });
+    29 │ 
+  > 30 │ const object4 = { foo: 1 };
+       │                 ^^^^^^^^^^
+    31 │ Object.assign(object4, bar);
+    32 │ 
+  
+  i Creating a value and changing it in the next statement splits its initial contents across two statements, which makes them harder to read.
+  
+  i Include the change in the initial value instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Move the change into the initial value.
+  
+    28 28 │   Object.assign(object3, { bar: 2, baz: 3 });
+    29 29 │   
+    30    │ - const·object4·=·{·foo:·1·};
+    31    │ - Object.assign(object4,·bar);
+       30 │ + const·object4·=·{·foo:·1,·...bar·};
+    32 31 │   
+    33 32 │   const object5 = { foo: 1 };
+  
+
+```
+
+```
+invalid.js:34:1 lint/nursery/noImmediateMutation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This object is changed right after it is created.
+  
+    33 │ const object5 = { foo: 1 };
+  > 34 │ Object.assign(object5, {});
+       │ ^^^^^^^^^^^^^
+    35 │ 
+    36 │ const set1 = new Set([1, 2]);
+  
+  i The object is created here.
+  
+    31 │ Object.assign(object4, bar);
+    32 │ 
+  > 33 │ const object5 = { foo: 1 };
+       │                 ^^^^^^^^^^
+    34 │ Object.assign(object5, {});
+    35 │ 
+  
+  i Creating a value and changing it in the next statement splits its initial contents across two statements, which makes them harder to read.
+  
+  i Include the change in the initial value instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Move the change into the initial value.
+  
+    32 32 │   
+    33 33 │   const object5 = { foo: 1 };
+    34    │ - Object.assign(object5,·{});
+    35 34 │   
+    36 35 │   const set1 = new Set([1, 2]);
+  
+
+```
+
+```
+invalid.js:37:1 lint/nursery/noImmediateMutation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Set is changed right after it is created.
+  
+    36 │ const set1 = new Set([1, 2]);
+  > 37 │ set1.add(3);
+       │ ^^^^^^^^
+    38 │ 
+    39 │ const set2 = new Set();
+  
+  i The Set is created here.
+  
+    34 │ Object.assign(object5, {});
+    35 │ 
+  > 36 │ const set1 = new Set([1, 2]);
+       │              ^^^^^^^^^^^^^^^
+    37 │ set1.add(3);
+    38 │ 
+  
+  i Creating a value and changing it in the next statement splits its initial contents across two statements, which makes them harder to read.
+  
+  i Include the change in the initial value instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Move the change into the initial value.
+  
+    34 34 │   Object.assign(object5, {});
+    35 35 │   
+    36    │ - const·set1·=·new·Set([1,·2]);
+    37    │ - set1.add(3);
+       36 │ + const·set1·=·new·Set([1,·2,·3]);
+    38 37 │   
+    39 38 │   const set2 = new Set();
+  
+
+```
+
+```
+invalid.js:40:1 lint/nursery/noImmediateMutation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Set is changed right after it is created.
+  
+    39 │ const set2 = new Set();
+  > 40 │ set2.add(1);
+       │ ^^^^^^^^
+    41 │ 
+    42 │ const set3 = new Set;
+  
+  i The Set is created here.
+  
+    37 │ set1.add(3);
+    38 │ 
+  > 39 │ const set2 = new Set();
+       │              ^^^^^^^^^
+    40 │ set2.add(1);
+    41 │ 
+  
+  i Creating a value and changing it in the next statement splits its initial contents across two statements, which makes them harder to read.
+  
+  i Include the change in the initial value instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Move the change into the initial value.
+  
+    37 37 │   set1.add(3);
+    38 38 │   
+    39    │ - const·set2·=·new·Set();
+    40    │ - set2.add(1);
+       39 │ + const·set2·=·new·Set([1]);
+    41 40 │   
+    42 41 │   const set3 = new Set;
+  
+
+```
+
+```
+invalid.js:43:1 lint/nursery/noImmediateMutation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Set is changed right after it is created.
+  
+    42 │ const set3 = new Set;
+  > 43 │ set3.add(1);
+       │ ^^^^^^^^
+    44 │ 
+    45 │ const weakSet = new WeakSet([foo, bar]);
+  
+  i The Set is created here.
+  
+    40 │ set2.add(1);
+    41 │ 
+  > 42 │ const set3 = new Set;
+       │              ^^^^^^^
+    43 │ set3.add(1);
+    44 │ 
+  
+  i Creating a value and changing it in the next statement splits its initial contents across two statements, which makes them harder to read.
+  
+  i Include the change in the initial value instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Move the change into the initial value.
+  
+    40 40 │   set2.add(1);
+    41 41 │   
+    42    │ - const·set3·=·new·Set;
+    43    │ - set3.add(1);
+       42 │ + const·set3·=·new·Set([1]);
+    44 43 │   
+    45 44 │   const weakSet = new WeakSet([foo, bar]);
+  
+
+```
+
+```
+invalid.js:46:1 lint/nursery/noImmediateMutation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This WeakSet is changed right after it is created.
+  
+    45 │ const weakSet = new WeakSet([foo, bar]);
+  > 46 │ weakSet.add(baz);
+       │ ^^^^^^^^^^^
+    47 │ 
+    48 │ const map1 = new Map([["foo", 1]]);
+  
+  i The WeakSet is created here.
+  
+    43 │ set3.add(1);
+    44 │ 
+  > 45 │ const weakSet = new WeakSet([foo, bar]);
+       │                 ^^^^^^^^^^^^^^^^^^^^^^^
+    46 │ weakSet.add(baz);
+    47 │ 
+  
+  i Creating a value and changing it in the next statement splits its initial contents across two statements, which makes them harder to read.
+  
+  i Include the change in the initial value instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Move the change into the initial value.
+  
+    43 43 │   set3.add(1);
+    44 44 │   
+    45    │ - const·weakSet·=·new·WeakSet([foo,·bar]);
+    46    │ - weakSet.add(baz);
+       45 │ + const·weakSet·=·new·WeakSet([foo,·bar,·baz]);
+    47 46 │   
+    48 47 │   const map1 = new Map([["foo", 1]]);
+  
+
+```
+
+```
+invalid.js:49:1 lint/nursery/noImmediateMutation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Map is changed right after it is created.
+  
+    48 │ const map1 = new Map([["foo", 1]]);
+  > 49 │ map1.set("bar", 2);
+       │ ^^^^^^^^
+    50 │ 
+    51 │ const map2 = new Map();
+  
+  i The Map is created here.
+  
+    46 │ weakSet.add(baz);
+    47 │ 
+  > 48 │ const map1 = new Map([["foo", 1]]);
+       │              ^^^^^^^^^^^^^^^^^^^^^
+    49 │ map1.set("bar", 2);
+    50 │ 
+  
+  i Creating a value and changing it in the next statement splits its initial contents across two statements, which makes them harder to read.
+  
+  i Include the change in the initial value instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Move the change into the initial value.
+  
+    46 46 │   weakSet.add(baz);
+    47 47 │   
+    48    │ - const·map1·=·new·Map([["foo",·1]]);
+    49    │ - map1.set("bar",·2);
+       48 │ + const·map1·=·new·Map([["foo",·1],·["bar",·2]]);
+    50 49 │   
+    51 50 │   const map2 = new Map();
+  
+
+```
+
+```
+invalid.js:52:1 lint/nursery/noImmediateMutation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Map is changed right after it is created.
+  
+    51 │ const map2 = new Map();
+  > 52 │ map2.set("foo", 1);
+       │ ^^^^^^^^
+    53 │ 
+    54 │ const weakMap = new WeakMap([[foo, 1]]);
+  
+  i The Map is created here.
+  
+    49 │ map1.set("bar", 2);
+    50 │ 
+  > 51 │ const map2 = new Map();
+       │              ^^^^^^^^^
+    52 │ map2.set("foo", 1);
+    53 │ 
+  
+  i Creating a value and changing it in the next statement splits its initial contents across two statements, which makes them harder to read.
+  
+  i Include the change in the initial value instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Move the change into the initial value.
+  
+    49 49 │   map1.set("bar", 2);
+    50 50 │   
+    51    │ - const·map2·=·new·Map();
+    52    │ - map2.set("foo",·1);
+       51 │ + const·map2·=·new·Map([["foo",·1]]);
+    53 52 │   
+    54 53 │   const weakMap = new WeakMap([[foo, 1]]);
+  
+
+```
+
+```
+invalid.js:55:1 lint/nursery/noImmediateMutation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This WeakMap is changed right after it is created.
+  
+    54 │ const weakMap = new WeakMap([[foo, 1]]);
+  > 55 │ weakMap.set(bar, 2);
+       │ ^^^^^^^^^^^
+    56 │ 
+    57 │ var array7 = [1];
+  
+  i The WeakMap is created here.
+  
+    52 │ map2.set("foo", 1);
+    53 │ 
+  > 54 │ const weakMap = new WeakMap([[foo, 1]]);
+       │                 ^^^^^^^^^^^^^^^^^^^^^^^
+    55 │ weakMap.set(bar, 2);
+    56 │ 
+  
+  i Creating a value and changing it in the next statement splits its initial contents across two statements, which makes them harder to read.
+  
+  i Include the change in the initial value instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Move the change into the initial value.
+  
+    52 52 │   map2.set("foo", 1);
+    53 53 │   
+    54    │ - const·weakMap·=·new·WeakMap([[foo,·1]]);
+    55    │ - weakMap.set(bar,·2);
+       54 │ + const·weakMap·=·new·WeakMap([[foo,·1],·[bar,·2]]);
+    56 55 │   
+    57 56 │   var array7 = [1];
+  
+
+```
+
+```
+invalid.js:58:1 lint/nursery/noImmediateMutation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This array is changed right after it is created.
+  
+    57 │ var array7 = [1];
+  > 58 │ array7.push(foo());
+       │ ^^^^^^^^^^^
+    59 │ 
+    60 │ function inFunction() {
+  
+  i The array is created here.
+  
+    55 │ weakMap.set(bar, 2);
+    56 │ 
+  > 57 │ var array7 = [1];
+       │              ^^^
+    58 │ array7.push(foo());
+    59 │ 
+  
+  i Creating a value and changing it in the next statement splits its initial contents across two statements, which makes them harder to read.
+  
+  i Include the change in the initial value instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Move the change into the initial value.
+  
+    55 55 │   weakMap.set(bar, 2);
+    56 56 │   
+    57    │ - var·array7·=·[1];
+    58    │ - array7.push(foo());
+       57 │ + var·array7·=·[1,·foo()];
+    59 58 │   
+    60 59 │   function inFunction() {
+  
+
+```
+
+```
+invalid.js:62:2 lint/nursery/noImmediateMutation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This array is changed right after it is created.
+  
+    60 │ function inFunction() {
+    61 │ 	const array = [1];
+  > 62 │ 	array.push(2);
+       │ 	^^^^^^^^^^
+    63 │ }
+    64 │ 
+  
+  i The array is created here.
+  
+    60 │ function inFunction() {
+  > 61 │ 	const array = [1];
+       │ 	              ^^^
+    62 │ 	array.push(2);
+    63 │ }
+  
+  i Creating a value and changing it in the next statement splits its initial contents across two statements, which makes them harder to read.
+  
+  i Include the change in the initial value instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Move the change into the initial value.
+  
+    59 59 │   
+    60 60 │   function inFunction() {
+    61    │ - → const·array·=·[1];
+    62    │ - → array.push(2);
+       61 │ + → const·array·=·[1,·2];
+    63 62 │   }
+    64 63 │   
+  
+
+```
+
+```
+invalid.js:68:3 lint/nursery/noImmediateMutation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This array is changed right after it is created.
+  
+    66 │ 	case 1:
+    67 │ 		const array = [1];
+  > 68 │ 		array.push(2);
+       │ 		^^^^^^^^^^
+    69 │ }
+    70 │ 
+  
+  i The array is created here.
+  
+    65 │ switch (foo) {
+    66 │ 	case 1:
+  > 67 │ 		const array = [1];
+       │ 		              ^^^
+    68 │ 		array.push(2);
+    69 │ }
+  
+  i Creating a value and changing it in the next statement splits its initial contents across two statements, which makes them harder to read.
+  
+  i Include the change in the initial value instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Move the change into the initial value.
+  
+    65 65 │   switch (foo) {
+    66 66 │     case 1:
+    67    │ - → → const·array·=·[1];
+    68    │ - → → array.push(2);
+       67 │ + → → const·array·=·[1,·2];
+    69 68 │   }
+    70 69 │   
+  
+
+```
+
+```
+invalid.js:72:1 lint/nursery/noImmediateMutation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Set is changed right after it is created.
+  
+    71 │ const globalSet = new globalThis.Set();
+  > 72 │ globalSet.add(1);
+       │ ^^^^^^^^^^^^^
+    73 │ 
+    74 │ const a = [], array8 = [1];
+  
+  i The Set is created here.
+  
+    69 │ }
+    70 │ 
+  > 71 │ const globalSet = new globalThis.Set();
+       │                   ^^^^^^^^^^^^^^^^^^^^
+    72 │ globalSet.add(1);
+    73 │ 
+  
+  i Creating a value and changing it in the next statement splits its initial contents across two statements, which makes them harder to read.
+  
+  i Include the change in the initial value instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Move the change into the initial value.
+  
+    69 69 │   }
+    70 70 │   
+    71    │ - const·globalSet·=·new·globalThis.Set();
+    72    │ - globalSet.add(1);
+       71 │ + const·globalSet·=·new·globalThis.Set([1]);
+    73 72 │   
+    74 73 │   const a = [], array8 = [1];
+  
+
+```
+
+```
+invalid.js:75:1 lint/nursery/noImmediateMutation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This array is changed right after it is created.
+  
+    74 │ const a = [], array8 = [1];
+  > 75 │ array8.push(2);
+       │ ^^^^^^^^^^^
+    76 │ 
+    77 │ const set4 = new Set // comment
+  
+  i The array is created here.
+  
+    72 │ globalSet.add(1);
+    73 │ 
+  > 74 │ const a = [], array8 = [1];
+       │                        ^^^
+    75 │ array8.push(2);
+    76 │ 
+  
+  i Creating a value and changing it in the next statement splits its initial contents across two statements, which makes them harder to read.
+  
+  i Include the change in the initial value instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Move the change into the initial value.
+  
+    72 72 │   globalSet.add(1);
+    73 73 │   
+    74    │ - const·a·=·[],·array8·=·[1];
+    75    │ - array8.push(2);
+       74 │ + const·a·=·[],·array8·=·[1,·2];
+    76 75 │   
+    77 76 │   const set4 = new Set // comment
+  
+
+```
+
+```
+invalid.js:78:1 lint/nursery/noImmediateMutation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Set is changed right after it is created.
+  
+    77 │ const set4 = new Set // comment
+  > 78 │ set4.add(1)
+       │ ^^^^^^^^
+    79 │ 
+  
+  i The Set is created here.
+  
+    75 │ array8.push(2);
+    76 │ 
+  > 77 │ const set4 = new Set // comment
+       │              ^^^^^^^
+    78 │ set4.add(1)
+    79 │ 
+  
+  i Creating a value and changing it in the next statement splits its initial contents across two statements, which makes them harder to read.
+  
+  i Include the change in the initial value instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Move the change into the initial value.
+  
+    75 75 │   array8.push(2);
+    76 76 │   
+    77    │ - const·set4·=·new·Set·//·comment
+    78    │ - set4.add(1)
+       77 │ + const·set4·=·new·Set([1])·//·comment
+    79 78 │   
+  
+
+```

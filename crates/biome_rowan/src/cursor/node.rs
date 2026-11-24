@@ -2,7 +2,7 @@ use crate::cursor::node_rc::NodeRc;
 use crate::cursor::{NodeData, SyntaxElement, SyntaxToken, SyntaxTrivia};
 use crate::green::{Child, Children, GreenElementRef, Slot};
 use crate::{
-    Direction, GreenNode, GreenNodeData, Language, NodeOrToken, RawSyntaxKind, SyntaxKindSet,
+    Direction, GreenNode, GreenNodeRef, Language, NodeOrToken, RawSyntaxKind, SyntaxKindSet,
     SyntaxNodeText, TokenAtOffset, WalkEvent,
 };
 use biome_text_size::{TextRange, TextSize};
@@ -13,7 +13,7 @@ use std::ops;
 use std::ptr::NonNull;
 use std::{fmt, iter};
 
-use super::{GreenElement, NodeKind, WeakGreenElement};
+use super::GreenElement;
 
 #[derive(Clone)]
 pub(crate) struct SyntaxNode {
@@ -23,28 +23,20 @@ pub(crate) struct SyntaxNode {
 impl SyntaxNode {
     pub(crate) fn new_root(green: GreenNode) -> Self {
         Self {
-            ptr: NodeRc::new(NodeData::new(
-                NodeKind::Root {
-                    green: GreenElement::Node(green),
-                },
-                0,
-                0.into(),
-            )),
+            ptr: NodeRc::new(NodeData::new_root(GreenElement::Node(green))),
         }
     }
 
     pub(super) fn new_child(
-        green: &GreenNodeData,
+        green: GreenNodeRef<'_>,
         parent: Self,
         slot: u32,
         offset: TextSize,
     ) -> Self {
         Self {
-            ptr: NodeRc::new(NodeData::new(
-                NodeKind::Child {
-                    green: WeakGreenElement::new(GreenElementRef::Node(green)),
-                    parent: parent.ptr,
-                },
+            ptr: NodeRc::new(NodeData::new_child(
+                GreenElementRef::Node(green),
+                parent.ptr,
                 slot,
                 offset,
             )),
@@ -186,7 +178,7 @@ impl SyntaxNode {
     }
 
     #[inline]
-    pub(crate) fn green(&self) -> &GreenNodeData {
+    pub(crate) fn green(&self) -> GreenNodeRef<'_> {
         self.data().green().into_node().unwrap()
     }
 
@@ -667,7 +659,7 @@ impl SyntaxNode {
 /// remembering the siblings that follow it, so the search runs in constant
 /// memory on deep trees. Returns `None` when the text of that child is all
 /// trivia, as well as when the subtree has no token with non-empty text.
-fn trimmed_start_in_subtree(mut node: &GreenNodeData) -> Option<TextSize> {
+fn trimmed_start_in_subtree(mut node: GreenNodeRef<'_>) -> Option<TextSize> {
     let mut offset = TextSize::from(0);
 
     'descend: loop {
@@ -698,7 +690,7 @@ fn trimmed_start_in_subtree(mut node: &GreenNodeData) -> Option<TextSize> {
 /// token with non-empty text ends, trailing trivia excluded.
 ///
 /// The mirror image of [trimmed_start_in_subtree], with the same limits.
-fn trimmed_end_in_subtree(mut node: &GreenNodeData) -> Option<TextSize> {
+fn trimmed_end_in_subtree(mut node: GreenNodeRef<'_>) -> Option<TextSize> {
     let mut offset = TextSize::from(0);
 
     'descend: loop {
@@ -816,6 +808,7 @@ impl<L: Language> Iterator for SyntaxNodeChildrenOfKinds<L> {
             let Slot::Node { node, rel_offset } = slot else {
                 continue;
             };
+            let node = node.as_ref();
             if !self.kinds.matches_raw(node.kind()) {
                 continue;
             }
@@ -981,7 +974,7 @@ pub(crate) struct PreorderMatching<'a, L: Language> {
 }
 
 struct PathSegment<'a> {
-    green: &'a GreenNodeData,
+    green: GreenNodeRef<'a>,
     /// Index of the next slot of `green` to read.
     next_slot: u32,
     slot: u32,
@@ -1054,7 +1047,7 @@ impl<L: Language> Iterator for PreorderMatching<'_, L> {
                 .iter()
                 .enumerate()
                 .find_map(|(index, slot)| match slot {
-                    Slot::Node { rel_offset, node } => Some((index, *rel_offset, &**node)),
+                    Slot::Node { rel_offset, node } => Some((index, *rel_offset, node.as_ref())),
                     Slot::Token { .. } | Slot::Empty { .. } => None,
                 });
             let Some((index, rel_offset, green)) = next_child else {
@@ -1232,13 +1225,13 @@ impl SyntaxSlot {
                 index: slot_index,
             },
             Slot::Token { rel_offset, token } => Self::Token(SyntaxToken::new(
-                token,
+                token.as_ref(),
                 parent.clone(),
                 slot_index,
                 parent.offset() + rel_offset,
             )),
             Slot::Node { rel_offset, node } => Self::Node(SyntaxNode::new_child(
-                node,
+                node.as_ref(),
                 parent.clone(),
                 slot_index,
                 parent.offset() + rel_offset,
@@ -1422,12 +1415,12 @@ impl FusedIterator for SlotsPreorder {}
 
 #[derive(Debug, Clone)]
 pub(crate) struct Siblings<'a> {
-    parent: &'a GreenNodeData,
+    parent: GreenNodeRef<'a>,
     start_slot: u32,
 }
 
 impl<'a> Siblings<'a> {
-    pub fn new(parent: &'a GreenNodeData, start_slot: u32) -> Self {
+    pub fn new(parent: GreenNodeRef<'a>, start_slot: u32) -> Self {
         assert!(
             (start_slot as usize) < parent.slots().len(),
             "Start slot {} out of bounds {}",

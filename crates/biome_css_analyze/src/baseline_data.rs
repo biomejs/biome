@@ -22,7 +22,6 @@ pub enum BaselineYear {
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct BaselineStatus {
     pub tier: BaselineTier,
-
     pub year: BaselineYear,
 }
 #[doc = r" Look up the Baseline status of a feature by name."]
@@ -33,12 +32,12 @@ pub fn find_baseline(
     table.get(name).copied()
 }
 #[doc = r" Look up the Baseline status of a specific CSS property value."]
-#[doc = " The key format is `\"property:value\"` (lowercase)."]
+#[doc = r#" The key format is `"property:value"` (lowercase)."#]
 pub fn find_property_value_baseline(property: &str, value: &str) -> Option<BaselineStatus> {
     let key = format!("{property}:{value}");
     BASELINE_PROPERTY_VALUES.get(key.as_str()).copied()
 }
-#[doc = r" Baseline status for CSS properties."]
+/// Baseline status for CSS properties.
 pub static BASELINE_PROPERTIES: phf::Map<&'static str, BaselineStatus> = phf::phf_map! {
     "-webkit-text-fill-color" => BaselineStatus {
             tier: BaselineTier::Widely,
@@ -125,24 +124,28 @@ pub static BASELINE_PROPERTIES: phf::Map<&'static str, BaselineStatus> = phf::ph
             year: BaselineYear::Known(2015),
         },
     "animation-range" => BaselineStatus {
-            tier: BaselineTier::Limited,
-            year: BaselineYear::Unknown,
+            tier: BaselineTier::Newly,
+            year: BaselineYear::Known(2026),
         },
     "animation-range-end" => BaselineStatus {
-            tier: BaselineTier::Limited,
-            year: BaselineYear::Unknown,
+            tier: BaselineTier::Newly,
+            year: BaselineYear::Known(2026),
         },
     "animation-range-start" => BaselineStatus {
-            tier: BaselineTier::Limited,
-            year: BaselineYear::Unknown,
+            tier: BaselineTier::Newly,
+            year: BaselineYear::Known(2026),
         },
     "animation-timeline" => BaselineStatus {
-            tier: BaselineTier::Limited,
-            year: BaselineYear::Unknown,
+            tier: BaselineTier::Newly,
+            year: BaselineYear::Known(2026),
         },
     "animation-timing-function" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
+        },
+    "animation-trigger" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
         },
     "appearance" => BaselineStatus {
             tier: BaselineTier::Widely,
@@ -209,8 +212,8 @@ pub static BASELINE_PROPERTIES: phf::Map<&'static str, BaselineStatus> = phf::ph
             year: BaselineYear::Known(2015),
         },
     "baseline-shift" => BaselineStatus {
-            tier: BaselineTier::Limited,
-            year: BaselineYear::Unknown,
+            tier: BaselineTier::Newly,
+            year: BaselineYear::Known(2026),
         },
     "baseline-source" => BaselineStatus {
             tier: BaselineTier::Limited,
@@ -420,6 +423,10 @@ pub static BASELINE_PROPERTIES: phf::Map<&'static str, BaselineStatus> = phf::ph
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
+    "border-shape" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
     "border-spacing" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
@@ -552,17 +559,65 @@ pub static BASELINE_PROPERTIES: phf::Map<&'static str, BaselineStatus> = phf::ph
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
+    "column-height" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
     "column-rule" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
+        },
+    "column-rule-break" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
         },
     "column-rule-color" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
+    "column-rule-inset" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "column-rule-inset-cap" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "column-rule-inset-cap-end" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "column-rule-inset-cap-start" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "column-rule-inset-end" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "column-rule-inset-junction" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "column-rule-inset-junction-end" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "column-rule-inset-junction-start" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "column-rule-inset-start" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
     "column-rule-style" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
+        },
+    "column-rule-visibility-items" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
         },
     "column-rule-width" => BaselineStatus {
             tier: BaselineTier::Widely,
@@ -576,6 +631,10 @@ pub static BASELINE_PROPERTIES: phf::Map<&'static str, BaselineStatus> = phf::ph
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
+    "column-wrap" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
     "columns" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
@@ -585,23 +644,23 @@ pub static BASELINE_PROPERTIES: phf::Map<&'static str, BaselineStatus> = phf::ph
             year: BaselineYear::Known(2022),
         },
     "contain-intrinsic-block-size" => BaselineStatus {
-            tier: BaselineTier::Newly,
+            tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
     "contain-intrinsic-height" => BaselineStatus {
-            tier: BaselineTier::Newly,
+            tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
     "contain-intrinsic-inline-size" => BaselineStatus {
-            tier: BaselineTier::Newly,
+            tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
     "contain-intrinsic-size" => BaselineStatus {
-            tier: BaselineTier::Newly,
+            tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
     "contain-intrinsic-width" => BaselineStatus {
-            tier: BaselineTier::Newly,
+            tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
     "container" => BaselineStatus {
@@ -701,7 +760,7 @@ pub static BASELINE_PROPERTIES: phf::Map<&'static str, BaselineStatus> = phf::ph
             year: BaselineYear::Known(2015),
         },
     "counter-set" => BaselineStatus {
-            tier: BaselineTier::Newly,
+            tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
     "custom-property" => BaselineStatus {
@@ -732,13 +791,17 @@ pub static BASELINE_PROPERTIES: phf::Map<&'static str, BaselineStatus> = phf::ph
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
+    "dynamic-range-limit" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
     "empty-cells" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
     "field-sizing" => BaselineStatus {
-            tier: BaselineTier::Limited,
-            year: BaselineYear::Unknown,
+            tier: BaselineTier::Newly,
+            year: BaselineYear::Known(2026),
         },
     "fill" => BaselineStatus {
             tier: BaselineTier::Widely,
@@ -755,6 +818,10 @@ pub static BASELINE_PROPERTIES: phf::Map<&'static str, BaselineStatus> = phf::ph
     "filter" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2016),
+        },
+    "fit-tolerance" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
         },
     "flex" => BaselineStatus {
             tier: BaselineTier::Widely,
@@ -806,7 +873,7 @@ pub static BASELINE_PROPERTIES: phf::Map<&'static str, BaselineStatus> = phf::ph
         },
     "font-feature-settings" => BaselineStatus {
             tier: BaselineTier::Widely,
-            year: BaselineYear::Known(2017),
+            year: BaselineYear::Known(2016),
         },
     "font-kerning" => BaselineStatus {
             tier: BaselineTier::Widely,
@@ -908,6 +975,10 @@ pub static BASELINE_PROPERTIES: phf::Map<&'static str, BaselineStatus> = phf::ph
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
+    "frame-sizing" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
     "gap" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
@@ -985,15 +1056,19 @@ pub static BASELINE_PROPERTIES: phf::Map<&'static str, BaselineStatus> = phf::ph
             year: BaselineYear::Known(2015),
         },
     "hyphenate-character" => BaselineStatus {
-            tier: BaselineTier::Newly,
+            tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
     "hyphenate-limit-chars" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
+    "hyphenate-limit-lines" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
     "hyphens" => BaselineStatus {
-            tier: BaselineTier::Newly,
+            tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
     "image-orientation" => BaselineStatus {
@@ -1048,6 +1123,18 @@ pub static BASELINE_PROPERTIES: phf::Map<&'static str, BaselineStatus> = phf::ph
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
+    "interest-delay" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "interest-delay-end" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "interest-delay-start" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
     "interpolate-size" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
@@ -1091,6 +1178,10 @@ pub static BASELINE_PROPERTIES: phf::Map<&'static str, BaselineStatus> = phf::ph
     "line-height" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
+        },
+    "link-parameters" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
         },
     "list-style" => BaselineStatus {
             tier: BaselineTier::Widely,
@@ -1173,7 +1264,7 @@ pub static BASELINE_PROPERTIES: phf::Map<&'static str, BaselineStatus> = phf::ph
             year: BaselineYear::Known(2020),
         },
     "mask" => BaselineStatus {
-            tier: BaselineTier::Newly,
+            tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
     "mask-border" => BaselineStatus {
@@ -1201,35 +1292,35 @@ pub static BASELINE_PROPERTIES: phf::Map<&'static str, BaselineStatus> = phf::ph
             year: BaselineYear::Unknown,
         },
     "mask-clip" => BaselineStatus {
-            tier: BaselineTier::Newly,
+            tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
     "mask-composite" => BaselineStatus {
-            tier: BaselineTier::Newly,
+            tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
     "mask-image" => BaselineStatus {
-            tier: BaselineTier::Newly,
+            tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
     "mask-mode" => BaselineStatus {
-            tier: BaselineTier::Newly,
+            tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
     "mask-origin" => BaselineStatus {
-            tier: BaselineTier::Newly,
+            tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
     "mask-position" => BaselineStatus {
-            tier: BaselineTier::Newly,
+            tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
     "mask-repeat" => BaselineStatus {
-            tier: BaselineTier::Newly,
+            tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
     "mask-size" => BaselineStatus {
-            tier: BaselineTier::Newly,
+            tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
     "mask-type" => BaselineStatus {
@@ -1357,8 +1448,8 @@ pub static BASELINE_PROPERTIES: phf::Map<&'static str, BaselineStatus> = phf::ph
             year: BaselineYear::Known(2020),
         },
     "overflow-anchor" => BaselineStatus {
-            tier: BaselineTier::Limited,
-            year: BaselineYear::Unknown,
+            tier: BaselineTier::Newly,
+            year: BaselineYear::Known(2026),
         },
     "overflow-block" => BaselineStatus {
             tier: BaselineTier::Widely,
@@ -1389,24 +1480,24 @@ pub static BASELINE_PROPERTIES: phf::Map<&'static str, BaselineStatus> = phf::ph
             year: BaselineYear::Unknown,
         },
     "overscroll-behavior" => BaselineStatus {
-            tier: BaselineTier::Widely,
-            year: BaselineYear::Known(2022),
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
         },
     "overscroll-behavior-block" => BaselineStatus {
-            tier: BaselineTier::Widely,
-            year: BaselineYear::Known(2022),
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
         },
     "overscroll-behavior-inline" => BaselineStatus {
-            tier: BaselineTier::Widely,
-            year: BaselineYear::Known(2022),
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
         },
     "overscroll-behavior-x" => BaselineStatus {
-            tier: BaselineTier::Widely,
-            year: BaselineYear::Known(2022),
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
         },
     "overscroll-behavior-y" => BaselineStatus {
-            tier: BaselineTier::Widely,
-            year: BaselineYear::Known(2022),
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
         },
     "padding" => BaselineStatus {
             tier: BaselineTier::Widely,
@@ -1469,7 +1560,7 @@ pub static BASELINE_PROPERTIES: phf::Map<&'static str, BaselineStatus> = phf::ph
             year: BaselineYear::Unknown,
         },
     "paint-order" => BaselineStatus {
-            tier: BaselineTier::Newly,
+            tier: BaselineTier::Widely,
             year: BaselineYear::Known(2024),
         },
     "perspective" => BaselineStatus {
@@ -1560,6 +1651,66 @@ pub static BASELINE_PROPERTIES: phf::Map<&'static str, BaselineStatus> = phf::ph
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
+    "row-rule" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "row-rule-break" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "row-rule-color" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "row-rule-inset" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "row-rule-inset-cap" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "row-rule-inset-cap-end" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "row-rule-inset-cap-start" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "row-rule-inset-end" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "row-rule-inset-junction" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "row-rule-inset-junction-end" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "row-rule-inset-junction-start" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "row-rule-inset-start" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "row-rule-style" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "row-rule-visibility-items" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "row-rule-width" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
     "ruby-align" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2024),
@@ -1572,6 +1723,54 @@ pub static BASELINE_PROPERTIES: phf::Map<&'static str, BaselineStatus> = phf::ph
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2024),
         },
+    "rule" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "rule-break" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "rule-color" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "rule-inset" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "rule-inset-cap" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "rule-inset-end" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "rule-inset-junction" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "rule-inset-start" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "rule-overlap" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "rule-style" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "rule-visibility-items" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "rule-width" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
     "rx" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
@@ -1583,6 +1782,10 @@ pub static BASELINE_PROPERTIES: phf::Map<&'static str, BaselineStatus> = phf::ph
     "scale" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
+        },
+    "scroll-axis-lock" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
         },
     "scroll-behavior" => BaselineStatus {
             tier: BaselineTier::Widely,
@@ -1701,16 +1904,16 @@ pub static BASELINE_PROPERTIES: phf::Map<&'static str, BaselineStatus> = phf::ph
             year: BaselineYear::Unknown,
         },
     "scroll-timeline" => BaselineStatus {
-            tier: BaselineTier::Limited,
-            year: BaselineYear::Unknown,
+            tier: BaselineTier::Newly,
+            year: BaselineYear::Known(2026),
         },
     "scroll-timeline-axis" => BaselineStatus {
-            tier: BaselineTier::Limited,
-            year: BaselineYear::Unknown,
+            tier: BaselineTier::Newly,
+            year: BaselineYear::Known(2026),
         },
     "scroll-timeline-name" => BaselineStatus {
-            tier: BaselineTier::Limited,
-            year: BaselineYear::Unknown,
+            tier: BaselineTier::Newly,
+            year: BaselineYear::Known(2026),
         },
     "scrollbar-color" => BaselineStatus {
             tier: BaselineTier::Newly,
@@ -1840,17 +2043,21 @@ pub static BASELINE_PROPERTIES: phf::Map<&'static str, BaselineStatus> = phf::ph
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    "text-decoration-line" => BaselineStatus {
-            tier: BaselineTier::Widely,
-            year: BaselineYear::Known(2015),
+    "text-decoration-inset" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
         },
-    "text-decoration-skip" => BaselineStatus {
+    "text-decoration-line" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
     "text-decoration-skip-ink" => BaselineStatus {
             tier: BaselineTier::Widely,
-            year: BaselineYear::Known(2015),
+            year: BaselineYear::Known(2022),
+        },
+    "text-decoration-skip-spaces" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
         },
     "text-decoration-style" => BaselineStatus {
             tier: BaselineTier::Widely,
@@ -1875,6 +2082,10 @@ pub static BASELINE_PROPERTIES: phf::Map<&'static str, BaselineStatus> = phf::ph
     "text-emphasis-style" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
+        },
+    "text-fit" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
         },
     "text-indent" => BaselineStatus {
             tier: BaselineTier::Widely,
@@ -1933,6 +2144,42 @@ pub static BASELINE_PROPERTIES: phf::Map<&'static str, BaselineStatus> = phf::ph
             year: BaselineYear::Known(2024),
         },
     "timeline-scope" => BaselineStatus {
+            tier: BaselineTier::Newly,
+            year: BaselineYear::Known(2026),
+        },
+    "timeline-trigger" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "timeline-trigger-activation-range" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "timeline-trigger-activation-range-end" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "timeline-trigger-activation-range-start" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "timeline-trigger-active-range" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "timeline-trigger-active-range-end" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "timeline-trigger-active-range-start" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "timeline-trigger-name" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "timeline-trigger-source" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
@@ -1949,7 +2196,7 @@ pub static BASELINE_PROPERTIES: phf::Map<&'static str, BaselineStatus> = phf::ph
             year: BaselineYear::Known(2015),
         },
     "transform-box" => BaselineStatus {
-            tier: BaselineTier::Newly,
+            tier: BaselineTier::Widely,
             year: BaselineYear::Known(2024),
         },
     "transform-origin" => BaselineStatus {
@@ -1988,6 +2235,10 @@ pub static BASELINE_PROPERTIES: phf::Map<&'static str, BaselineStatus> = phf::ph
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
+    "trigger-scope" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
     "unicode-bidi" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
@@ -2005,20 +2256,20 @@ pub static BASELINE_PROPERTIES: phf::Map<&'static str, BaselineStatus> = phf::ph
             year: BaselineYear::Known(2015),
         },
     "view-timeline" => BaselineStatus {
-            tier: BaselineTier::Limited,
-            year: BaselineYear::Unknown,
+            tier: BaselineTier::Newly,
+            year: BaselineYear::Known(2026),
         },
     "view-timeline-axis" => BaselineStatus {
-            tier: BaselineTier::Limited,
-            year: BaselineYear::Unknown,
+            tier: BaselineTier::Newly,
+            year: BaselineYear::Known(2026),
         },
     "view-timeline-inset" => BaselineStatus {
-            tier: BaselineTier::Limited,
-            year: BaselineYear::Unknown,
+            tier: BaselineTier::Newly,
+            year: BaselineYear::Known(2026),
         },
     "view-timeline-name" => BaselineStatus {
-            tier: BaselineTier::Limited,
-            year: BaselineYear::Unknown,
+            tier: BaselineTier::Newly,
+            year: BaselineYear::Known(2026),
         },
     "view-transition-class" => BaselineStatus {
             tier: BaselineTier::Newly,
@@ -2027,6 +2278,10 @@ pub static BASELINE_PROPERTIES: phf::Map<&'static str, BaselineStatus> = phf::ph
     "view-transition-name" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2025),
+        },
+    "view-transition-scope" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
         },
     "visibility" => BaselineStatus {
             tier: BaselineTier::Widely,
@@ -2037,8 +2292,12 @@ pub static BASELINE_PROPERTIES: phf::Map<&'static str, BaselineStatus> = phf::ph
             year: BaselineYear::Known(2015),
         },
     "white-space-collapse" => BaselineStatus {
-            tier: BaselineTier::Newly,
+            tier: BaselineTier::Widely,
             year: BaselineYear::Known(2024),
+        },
+    "white-space-trim" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
         },
     "widows" => BaselineStatus {
             tier: BaselineTier::Limited,
@@ -2052,6 +2311,10 @@ pub static BASELINE_PROPERTIES: phf::Map<&'static str, BaselineStatus> = phf::ph
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
+    "window-drag" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
     "word-break" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
@@ -2059,6 +2322,10 @@ pub static BASELINE_PROPERTIES: phf::Map<&'static str, BaselineStatus> = phf::ph
     "word-spacing" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
+        },
+    "wrap-inside" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
         },
     "writing-mode" => BaselineStatus {
             tier: BaselineTier::Widely,
@@ -2077,23 +2344,120 @@ pub static BASELINE_PROPERTIES: phf::Map<&'static str, BaselineStatus> = phf::ph
             year: BaselineYear::Known(2015),
         },
     "zoom" => BaselineStatus {
-            tier: BaselineTier::Newly,
+            tier: BaselineTier::Widely,
             year: BaselineYear::Known(2024),
         },
 };
-#[doc = r" Baseline status for CSS property values (identifier keywords only). Key format: property:value."]
+/// Baseline status for CSS property values (identifier keywords only).
+/// Keys are in `"property:value"` format (lowercase).
 pub static BASELINE_PROPERTY_VALUES: phf::Map<&'static str, BaselineStatus> = phf::phf_map! {
     "accent-color:auto" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
+    "accent-color:currentColor" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "accent-color:transparent" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "align-content:baseline" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "align-content:center" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "align-content:end" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "align-content:flex-end" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "align-content:flex-start" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
     "align-content:normal" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "align-content:safe" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "align-content:space-around" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "align-content:space-between" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "align-content:space-evenly" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "align-content:start" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "align-content:stretch" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "align-content:unsafe" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
     "align-items:anchor-center" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
+        },
+    "align-items:baseline" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "align-items:center" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "align-items:end" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "align-items:normal" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "align-items:safe" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "align-items:self-end" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "align-items:self-start" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "align-items:start" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "align-items:stretch" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "align-items:unsafe" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
         },
     "align-self:anchor-center" => BaselineStatus {
             tier: BaselineTier::Limited,
@@ -2103,11 +2467,51 @@ pub static BASELINE_PROPERTY_VALUES: phf::Map<&'static str, BaselineStatus> = ph
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
+    "align-self:baseline" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "align-self:center" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "align-self:end" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "align-self:flex-end" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "align-self:flex-start" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
     "align-self:normal" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
+    "align-self:safe" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "align-self:self-end" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "align-self:self-start" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "align-self:start" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
     "align-self:stretch" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "align-self:unsafe" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
@@ -2211,7 +2615,15 @@ pub static BASELINE_PROPERTY_VALUES: phf::Map<&'static str, BaselineStatus> = ph
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
+    "animation:paused" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
     "animation:reverse" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "animation:running" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
@@ -2276,20 +2688,20 @@ pub static BASELINE_PROPERTY_VALUES: phf::Map<&'static str, BaselineStatus> = ph
             year: BaselineYear::Known(2015),
         },
     "animation-range-end:normal" => BaselineStatus {
-            tier: BaselineTier::Limited,
-            year: BaselineYear::Unknown,
+            tier: BaselineTier::Newly,
+            year: BaselineYear::Known(2026),
         },
     "animation-range-start:normal" => BaselineStatus {
-            tier: BaselineTier::Limited,
-            year: BaselineYear::Unknown,
+            tier: BaselineTier::Newly,
+            year: BaselineYear::Known(2026),
         },
     "animation-timeline:scroll" => BaselineStatus {
-            tier: BaselineTier::Limited,
-            year: BaselineYear::Unknown,
+            tier: BaselineTier::Newly,
+            year: BaselineYear::Known(2026),
         },
     "animation-timeline:view" => BaselineStatus {
-            tier: BaselineTier::Limited,
-            year: BaselineYear::Unknown,
+            tier: BaselineTier::Newly,
+            year: BaselineYear::Known(2026),
         },
     "animation-timing-function:ease" => BaselineStatus {
             tier: BaselineTier::Widely,
@@ -2322,6 +2734,10 @@ pub static BASELINE_PROPERTY_VALUES: phf::Map<&'static str, BaselineStatus> = ph
     "animation-timing-function:step-start" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
+        },
+    "animation-trigger:none" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
         },
     "appearance:auto" => BaselineStatus {
             tier: BaselineTier::Widely,
@@ -2383,6 +2799,14 @@ pub static BASELINE_PROPERTY_VALUES: phf::Map<&'static str, BaselineStatus> = ph
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2021),
         },
+    "backface-visibility:hidden" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2022),
+        },
+    "backface-visibility:visible" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2022),
+        },
     "background:background-clip" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
@@ -2392,6 +2816,10 @@ pub static BASELINE_PROPERTY_VALUES: phf::Map<&'static str, BaselineStatus> = ph
             year: BaselineYear::Known(2015),
         },
     "background:background-size" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "background:currentColor" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
@@ -2431,6 +2859,10 @@ pub static BASELINE_PROPERTY_VALUES: phf::Map<&'static str, BaselineStatus> = ph
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
+    "background:text" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
     "background:transparent" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
@@ -2446,6 +2878,70 @@ pub static BASELINE_PROPERTY_VALUES: phf::Map<&'static str, BaselineStatus> = ph
     "background-attachment:scroll" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
+        },
+    "background-blend-mode:color" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2020),
+        },
+    "background-blend-mode:color-burn" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2020),
+        },
+    "background-blend-mode:color-dodge" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2020),
+        },
+    "background-blend-mode:darken" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2020),
+        },
+    "background-blend-mode:difference" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2020),
+        },
+    "background-blend-mode:exclusion" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2020),
+        },
+    "background-blend-mode:hard-light" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2020),
+        },
+    "background-blend-mode:hue" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2020),
+        },
+    "background-blend-mode:lighten" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2020),
+        },
+    "background-blend-mode:luminosity" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2020),
+        },
+    "background-blend-mode:multiply" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2020),
+        },
+    "background-blend-mode:normal" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2020),
+        },
+    "background-blend-mode:overlay" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2020),
+        },
+    "background-blend-mode:saturation" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2020),
+        },
+    "background-blend-mode:screen" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2020),
+        },
+    "background-blend-mode:soft-light" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2020),
         },
     "background-clip:border-area" => BaselineStatus {
             tier: BaselineTier::Limited,
@@ -2467,6 +2963,10 @@ pub static BASELINE_PROPERTY_VALUES: phf::Map<&'static str, BaselineStatus> = ph
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
+    "background-color:currentColor" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
     "background-color:transparent" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
@@ -2480,7 +2980,7 @@ pub static BASELINE_PROPERTY_VALUES: phf::Map<&'static str, BaselineStatus> = ph
             year: BaselineYear::Known(2015),
         },
     "background-image:image-set" => BaselineStatus {
-            tier: BaselineTier::Newly,
+            tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
     "background-image:none" => BaselineStatus {
@@ -2516,6 +3016,30 @@ pub static BASELINE_PROPERTY_VALUES: phf::Map<&'static str, BaselineStatus> = ph
             year: BaselineYear::Known(2015),
         },
     "background-position:top" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "background-position-x:center" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "background-position-x:left" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "background-position-x:right" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "background-position-y:bottom" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "background-position-y:center" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "background-position-y:top" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
@@ -2559,17 +3083,13 @@ pub static BASELINE_PROPERTY_VALUES: phf::Map<&'static str, BaselineStatus> = ph
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    "baseline-shift:baseline" => BaselineStatus {
-            tier: BaselineTier::Limited,
-            year: BaselineYear::Unknown,
-        },
     "baseline-shift:sub" => BaselineStatus {
-            tier: BaselineTier::Limited,
-            year: BaselineYear::Unknown,
+            tier: BaselineTier::Newly,
+            year: BaselineYear::Known(2026),
         },
     "baseline-shift:super" => BaselineStatus {
-            tier: BaselineTier::Limited,
-            year: BaselineYear::Unknown,
+            tier: BaselineTier::Newly,
+            year: BaselineYear::Known(2026),
         },
     "baseline-source:auto" => BaselineStatus {
             tier: BaselineTier::Limited,
@@ -2598,6 +3118,10 @@ pub static BASELINE_PROPERTY_VALUES: phf::Map<&'static str, BaselineStatus> = ph
     "block-size:min-content" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2021),
+        },
+    "border:currentColor" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
         },
     "border:dashed" => BaselineStatus {
             tier: BaselineTier::Widely,
@@ -2655,6 +3179,370 @@ pub static BASELINE_PROPERTY_VALUES: phf::Map<&'static str, BaselineStatus> = ph
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
+    "border-block:currentColor" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-block:dashed" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-block:dotted" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-block:double" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-block:groove" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-block:hidden" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-block:inset" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-block:medium" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-block:none" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-block:outset" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-block:ridge" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-block:solid" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-block:thick" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-block:thin" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-block:transparent" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-block-color:currentColor" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-block-color:transparent" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-block-end:currentColor" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-block-end:dashed" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-block-end:dotted" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-block-end:double" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-block-end:groove" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-block-end:hidden" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-block-end:inset" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-block-end:medium" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-block-end:none" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-block-end:outset" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-block-end:ridge" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-block-end:solid" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-block-end:thick" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-block-end:thin" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-block-end:transparent" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-block-end-color:currentColor" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-block-end-color:transparent" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-block-end-style:dashed" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-block-end-style:dotted" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-block-end-style:double" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-block-end-style:groove" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-block-end-style:hidden" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-block-end-style:inset" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-block-end-style:none" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-block-end-style:outset" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-block-end-style:ridge" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-block-end-style:solid" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-block-end-width:medium" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-block-end-width:thick" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-block-end-width:thin" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-block-start:currentColor" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-block-start:dashed" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-block-start:dotted" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-block-start:double" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-block-start:groove" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-block-start:hidden" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-block-start:inset" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-block-start:medium" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-block-start:none" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-block-start:outset" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-block-start:ridge" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-block-start:solid" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-block-start:thick" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-block-start:thin" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-block-start:transparent" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-block-start-color:currentColor" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-block-start-color:transparent" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-block-start-style:dashed" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-block-start-style:dotted" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-block-start-style:double" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-block-start-style:groove" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-block-start-style:hidden" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-block-start-style:inset" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-block-start-style:none" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-block-start-style:outset" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-block-start-style:ridge" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-block-start-style:solid" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-block-start-width:medium" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-block-start-width:thick" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-block-start-width:thin" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-block-style:dashed" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-block-style:dotted" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-block-style:double" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-block-style:groove" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-block-style:hidden" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-block-style:inset" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-block-style:none" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-block-style:outset" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-block-style:ridge" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-block-style:solid" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-block-width:medium" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-block-width:thick" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-block-width:thin" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-bottom:currentColor" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
     "border-bottom:dashed" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
@@ -2708,6 +3596,10 @@ pub static BASELINE_PROPERTY_VALUES: phf::Map<&'static str, BaselineStatus> = ph
             year: BaselineYear::Known(2015),
         },
     "border-bottom:transparent" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "border-bottom-color:currentColor" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
@@ -2783,6 +3675,10 @@ pub static BASELINE_PROPERTY_VALUES: phf::Map<&'static str, BaselineStatus> = ph
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
+    "border-color:currentColor" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
     "border-color:transparent" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
@@ -2831,9 +3727,377 @@ pub static BASELINE_PROPERTY_VALUES: phf::Map<&'static str, BaselineStatus> = ph
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
+    "border-image-source:none" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2017),
+        },
     "border-image-width:auto" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
+        },
+    "border-inline:currentColor" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-inline:dashed" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-inline:dotted" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-inline:double" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-inline:groove" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-inline:hidden" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-inline:inset" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-inline:medium" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-inline:none" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-inline:outset" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-inline:ridge" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-inline:solid" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-inline:thick" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-inline:thin" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-inline:transparent" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-inline-color:currentColor" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-inline-color:transparent" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-inline-end:currentColor" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-inline-end:dashed" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-inline-end:dotted" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-inline-end:double" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-inline-end:groove" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-inline-end:hidden" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-inline-end:inset" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-inline-end:medium" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-inline-end:none" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-inline-end:outset" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-inline-end:ridge" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-inline-end:solid" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-inline-end:thick" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-inline-end:thin" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-inline-end:transparent" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-inline-end-color:currentColor" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-inline-end-color:transparent" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-inline-end-style:dashed" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-inline-end-style:dotted" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-inline-end-style:double" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-inline-end-style:groove" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-inline-end-style:hidden" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-inline-end-style:inset" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-inline-end-style:none" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-inline-end-style:outset" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-inline-end-style:ridge" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-inline-end-style:solid" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-inline-end-width:medium" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-inline-end-width:thick" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-inline-end-width:thin" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-inline-start:currentColor" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-inline-start:dashed" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-inline-start:dotted" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-inline-start:double" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-inline-start:groove" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-inline-start:hidden" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-inline-start:inset" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-inline-start:medium" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-inline-start:none" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-inline-start:outset" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-inline-start:ridge" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-inline-start:solid" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-inline-start:thick" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-inline-start:thin" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-inline-start:transparent" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-inline-start-color:currentColor" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-inline-start-color:transparent" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-inline-start-style:dashed" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-inline-start-style:dotted" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-inline-start-style:double" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-inline-start-style:groove" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-inline-start-style:hidden" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-inline-start-style:inset" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-inline-start-style:none" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-inline-start-style:outset" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-inline-start-style:ridge" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-inline-start-style:solid" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-inline-start-width:medium" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-inline-start-width:thick" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-inline-start-width:thin" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-inline-style:dashed" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-inline-style:dotted" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-inline-style:double" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-inline-style:groove" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-inline-style:hidden" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-inline-style:inset" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-inline-style:none" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-inline-style:outset" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-inline-style:ridge" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-inline-style:solid" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-inline-width:medium" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-inline-width:thick" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-inline-width:thin" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
+        },
+    "border-left:currentColor" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
         },
     "border-left:dashed" => BaselineStatus {
             tier: BaselineTier::Widely,
@@ -2888,6 +4152,10 @@ pub static BASELINE_PROPERTY_VALUES: phf::Map<&'static str, BaselineStatus> = ph
             year: BaselineYear::Known(2015),
         },
     "border-left:transparent" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "border-left-color:currentColor" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
@@ -2951,6 +4219,10 @@ pub static BASELINE_PROPERTY_VALUES: phf::Map<&'static str, BaselineStatus> = ph
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
+    "border-right:currentColor" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
     "border-right:dashed" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
@@ -3004,6 +4276,10 @@ pub static BASELINE_PROPERTY_VALUES: phf::Map<&'static str, BaselineStatus> = ph
             year: BaselineYear::Known(2015),
         },
     "border-right:transparent" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "border-right-color:currentColor" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
@@ -3063,6 +4339,10 @@ pub static BASELINE_PROPERTY_VALUES: phf::Map<&'static str, BaselineStatus> = ph
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
+    "border-shape:none" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
     "border-style:dashed" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
@@ -3100,6 +4380,10 @@ pub static BASELINE_PROPERTY_VALUES: phf::Map<&'static str, BaselineStatus> = ph
             year: BaselineYear::Known(2015),
         },
     "border-style:solid" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "border-top:currentColor" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
@@ -3156,6 +4440,10 @@ pub static BASELINE_PROPERTY_VALUES: phf::Map<&'static str, BaselineStatus> = ph
             year: BaselineYear::Known(2015),
         },
     "border-top:transparent" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "border-top-color:currentColor" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
@@ -3391,6 +4679,14 @@ pub static BASELINE_PROPERTY_VALUES: phf::Map<&'static str, BaselineStatus> = ph
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
+    "caret-color:currentColor" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2020),
+        },
+    "caret-color:transparent" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2020),
+        },
     "caret-shape:auto" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
@@ -3436,19 +4732,23 @@ pub static BASELINE_PROPERTY_VALUES: phf::Map<&'static str, BaselineStatus> = ph
             year: BaselineYear::Unknown,
         },
     "clip-path:fill-box" => BaselineStatus {
-            tier: BaselineTier::Newly,
+            tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
+        },
+    "clip-path:none" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2021),
         },
     "clip-path:path" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2021),
         },
     "clip-path:stroke-box" => BaselineStatus {
-            tier: BaselineTier::Newly,
+            tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
     "clip-path:view-box" => BaselineStatus {
-            tier: BaselineTier::Newly,
+            tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
     "clip-rule:evenodd" => BaselineStatus {
@@ -3459,6 +4759,10 @@ pub static BASELINE_PROPERTY_VALUES: phf::Map<&'static str, BaselineStatus> = ph
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
+    "color:currentColor" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
     "color:transparent" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
@@ -3468,6 +4772,10 @@ pub static BASELINE_PROPERTY_VALUES: phf::Map<&'static str, BaselineStatus> = ph
             year: BaselineYear::Known(2020),
         },
     "color-interpolation:linearGradient" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2020),
+        },
+    "color-interpolation:linearRGB" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
@@ -3516,6 +4824,10 @@ pub static BASELINE_PROPERTY_VALUES: phf::Map<&'static str, BaselineStatus> = ph
             year: BaselineYear::Known(2017),
         },
     "column-gap:normal" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2017),
+        },
+    "column-rule:currentColor" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
@@ -3575,9 +4887,65 @@ pub static BASELINE_PROPERTY_VALUES: phf::Map<&'static str, BaselineStatus> = ph
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
+    "column-rule-break:intersection" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "column-rule-break:none" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "column-rule-break:normal" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "column-rule-color:currentColor" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2017),
+        },
+    "column-rule-color:repeat" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
     "column-rule-color:transparent" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
+        },
+    "column-rule-inset:overlap-join" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "column-rule-inset-cap:overlap-join" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "column-rule-inset-cap-end:overlap-join" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "column-rule-inset-cap-start:overlap-join" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "column-rule-inset-end:overlap-join" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "column-rule-inset-junction:overlap-join" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "column-rule-inset-junction-end:overlap-join" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "column-rule-inset-junction-start:overlap-join" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "column-rule-inset-start:overlap-join" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
         },
     "column-rule-style:dashed" => BaselineStatus {
             tier: BaselineTier::Widely,
@@ -3619,6 +4987,22 @@ pub static BASELINE_PROPERTY_VALUES: phf::Map<&'static str, BaselineStatus> = ph
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
+    "column-rule-visibility-items:all" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "column-rule-visibility-items:around" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "column-rule-visibility-items:between" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "column-rule-visibility-items:normal" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
     "column-rule-width:medium" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
@@ -3642,6 +5026,14 @@ pub static BASELINE_PROPERTY_VALUES: phf::Map<&'static str, BaselineStatus> = ph
     "column-width:auto" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
+        },
+    "columns:auto" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2017),
+        },
+    "columns:column-height" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
         },
     "contain:content" => BaselineStatus {
             tier: BaselineTier::Widely,
@@ -3676,23 +5068,23 @@ pub static BASELINE_PROPERTY_VALUES: phf::Map<&'static str, BaselineStatus> = ph
             year: BaselineYear::Known(2022),
         },
     "contain-intrinsic-block-size:none" => BaselineStatus {
-            tier: BaselineTier::Newly,
+            tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
     "contain-intrinsic-height:none" => BaselineStatus {
-            tier: BaselineTier::Newly,
+            tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
     "contain-intrinsic-inline-size:none" => BaselineStatus {
-            tier: BaselineTier::Newly,
+            tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
     "contain-intrinsic-size:none" => BaselineStatus {
-            tier: BaselineTier::Newly,
+            tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
     "contain-intrinsic-width:none" => BaselineStatus {
-            tier: BaselineTier::Newly,
+            tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
     "container-name:none" => BaselineStatus {
@@ -3728,7 +5120,7 @@ pub static BASELINE_PROPERTY_VALUES: phf::Map<&'static str, BaselineStatus> = ph
             year: BaselineYear::Known(2015),
         },
     "content:image-set" => BaselineStatus {
-            tier: BaselineTier::Newly,
+            tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
     "content:no-close-quote" => BaselineStatus {
@@ -3767,6 +5159,414 @@ pub static BASELINE_PROPERTY_VALUES: phf::Map<&'static str, BaselineStatus> = ph
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2025),
         },
+    "corner-block-end-shape:bevel" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "corner-block-end-shape:notch" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "corner-block-end-shape:round" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "corner-block-end-shape:scoop" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "corner-block-end-shape:square" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "corner-block-end-shape:squircle" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "corner-block-start-shape:bevel" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "corner-block-start-shape:notch" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "corner-block-start-shape:round" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "corner-block-start-shape:scoop" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "corner-block-start-shape:square" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "corner-block-start-shape:squircle" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "corner-bottom-left-shape:bevel" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "corner-bottom-left-shape:notch" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "corner-bottom-left-shape:round" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "corner-bottom-left-shape:scoop" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "corner-bottom-left-shape:square" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "corner-bottom-left-shape:squircle" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "corner-bottom-right-shape:bevel" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "corner-bottom-right-shape:notch" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "corner-bottom-right-shape:round" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "corner-bottom-right-shape:scoop" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "corner-bottom-right-shape:square" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "corner-bottom-right-shape:squircle" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "corner-bottom-shape:bevel" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "corner-bottom-shape:notch" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "corner-bottom-shape:round" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "corner-bottom-shape:scoop" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "corner-bottom-shape:square" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "corner-bottom-shape:squircle" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "corner-end-end-shape:bevel" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "corner-end-end-shape:notch" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "corner-end-end-shape:round" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "corner-end-end-shape:scoop" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "corner-end-end-shape:square" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "corner-end-end-shape:squircle" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "corner-end-start-shape:bevel" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "corner-end-start-shape:notch" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "corner-end-start-shape:round" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "corner-end-start-shape:scoop" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "corner-end-start-shape:square" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "corner-end-start-shape:squircle" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "corner-inline-end-shape:bevel" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "corner-inline-end-shape:notch" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "corner-inline-end-shape:round" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "corner-inline-end-shape:scoop" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "corner-inline-end-shape:square" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "corner-inline-end-shape:squircle" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "corner-inline-start-shape:bevel" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "corner-inline-start-shape:notch" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "corner-inline-start-shape:round" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "corner-inline-start-shape:scoop" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "corner-inline-start-shape:square" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "corner-inline-start-shape:squircle" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "corner-left-shape:bevel" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "corner-left-shape:notch" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "corner-left-shape:round" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "corner-left-shape:scoop" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "corner-left-shape:square" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "corner-left-shape:squircle" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "corner-right-shape:bevel" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "corner-right-shape:notch" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "corner-right-shape:round" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "corner-right-shape:scoop" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "corner-right-shape:square" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "corner-right-shape:squircle" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "corner-shape:bevel" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "corner-shape:notch" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "corner-shape:round" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "corner-shape:scoop" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "corner-shape:square" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "corner-shape:squircle" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "corner-start-end-shape:bevel" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "corner-start-end-shape:notch" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "corner-start-end-shape:round" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "corner-start-end-shape:scoop" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "corner-start-end-shape:square" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "corner-start-end-shape:squircle" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "corner-start-start-shape:bevel" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "corner-start-start-shape:notch" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "corner-start-start-shape:round" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "corner-start-start-shape:scoop" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "corner-start-start-shape:square" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "corner-start-start-shape:squircle" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "corner-top-left-shape:bevel" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "corner-top-left-shape:notch" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "corner-top-left-shape:round" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "corner-top-left-shape:scoop" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "corner-top-left-shape:square" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "corner-top-left-shape:squircle" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "corner-top-right-shape:bevel" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "corner-top-right-shape:notch" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "corner-top-right-shape:round" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "corner-top-right-shape:scoop" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "corner-top-right-shape:square" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "corner-top-right-shape:squircle" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "corner-top-shape:bevel" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "corner-top-shape:notch" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "corner-top-shape:round" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "corner-top-shape:scoop" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "corner-top-shape:square" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "corner-top-shape:squircle" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
     "counter-increment:list-item" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
@@ -3788,11 +5588,11 @@ pub static BASELINE_PROPERTY_VALUES: phf::Map<&'static str, BaselineStatus> = ph
             year: BaselineYear::Unknown,
         },
     "counter-set:list-item" => BaselineStatus {
-            tier: BaselineTier::Newly,
+            tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
     "counter-set:none" => BaselineStatus {
-            tier: BaselineTier::Newly,
+            tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
     "direction:ltr" => BaselineStatus {
@@ -3823,6 +5623,10 @@ pub static BASELINE_PROPERTY_VALUES: phf::Map<&'static str, BaselineStatus> = ph
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
+    "display:grid-lanes" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
     "display:inline" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
@@ -3839,9 +5643,13 @@ pub static BASELINE_PROPERTY_VALUES: phf::Map<&'static str, BaselineStatus> = ph
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
+    "display:inline-grid-lanes" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
     "display:inline-table" => BaselineStatus {
             tier: BaselineTier::Widely,
-            year: BaselineYear::Known(2017),
+            year: BaselineYear::Known(2015),
         },
     "display:list-item" => BaselineStatus {
             tier: BaselineTier::Widely,
@@ -3877,39 +5685,39 @@ pub static BASELINE_PROPERTY_VALUES: phf::Map<&'static str, BaselineStatus> = ph
         },
     "display:table" => BaselineStatus {
             tier: BaselineTier::Widely,
-            year: BaselineYear::Known(2017),
+            year: BaselineYear::Known(2015),
         },
     "display:table-caption" => BaselineStatus {
             tier: BaselineTier::Widely,
-            year: BaselineYear::Known(2017),
+            year: BaselineYear::Known(2015),
         },
     "display:table-cell" => BaselineStatus {
             tier: BaselineTier::Widely,
-            year: BaselineYear::Known(2017),
+            year: BaselineYear::Known(2015),
         },
     "display:table-column" => BaselineStatus {
             tier: BaselineTier::Widely,
-            year: BaselineYear::Known(2017),
+            year: BaselineYear::Known(2015),
         },
     "display:table-column-group" => BaselineStatus {
             tier: BaselineTier::Widely,
-            year: BaselineYear::Known(2017),
+            year: BaselineYear::Known(2015),
         },
     "display:table-footer-group" => BaselineStatus {
             tier: BaselineTier::Widely,
-            year: BaselineYear::Known(2017),
+            year: BaselineYear::Known(2015),
         },
     "display:table-header-group" => BaselineStatus {
             tier: BaselineTier::Widely,
-            year: BaselineYear::Known(2017),
+            year: BaselineYear::Known(2015),
         },
     "display:table-row" => BaselineStatus {
             tier: BaselineTier::Widely,
-            year: BaselineYear::Known(2017),
+            year: BaselineYear::Known(2015),
         },
     "display:table-row-group" => BaselineStatus {
             tier: BaselineTier::Widely,
-            year: BaselineYear::Known(2017),
+            year: BaselineYear::Known(2015),
         },
     "dominant-baseline:alphabetic" => BaselineStatus {
             tier: BaselineTier::Widely,
@@ -3939,6 +5747,18 @@ pub static BASELINE_PROPERTY_VALUES: phf::Map<&'static str, BaselineStatus> = ph
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
+    "dynamic-range-limit:constrained" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "dynamic-range-limit:no-limit" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "dynamic-range-limit:standard" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
     "empty-cells:hide" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
@@ -3948,12 +5768,12 @@ pub static BASELINE_PROPERTY_VALUES: phf::Map<&'static str, BaselineStatus> = ph
             year: BaselineYear::Known(2015),
         },
     "field-sizing:content" => BaselineStatus {
-            tier: BaselineTier::Limited,
-            year: BaselineYear::Unknown,
+            tier: BaselineTier::Newly,
+            year: BaselineYear::Known(2026),
         },
     "field-sizing:fixed" => BaselineStatus {
-            tier: BaselineTier::Limited,
-            year: BaselineYear::Unknown,
+            tier: BaselineTier::Newly,
+            year: BaselineYear::Known(2026),
         },
     "fill:none" => BaselineStatus {
             tier: BaselineTier::Widely,
@@ -3995,6 +5815,10 @@ pub static BASELINE_PROPERTY_VALUES: phf::Map<&'static str, BaselineStatus> = ph
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2016),
         },
+    "filter:none" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2016),
+        },
     "filter:opacity" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2016),
@@ -4006,6 +5830,34 @@ pub static BASELINE_PROPERTY_VALUES: phf::Map<&'static str, BaselineStatus> = ph
     "filter:sepia" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2016),
+        },
+    "fit-tolerance:infinite" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "fit-tolerance:normal" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "flex:auto" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "flex:content" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "flex:fit-content" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "flex:max-content" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "flex:min-content" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
         },
     "flex:none" => BaselineStatus {
             tier: BaselineTier::Widely,
@@ -4031,6 +5883,10 @@ pub static BASELINE_PROPERTY_VALUES: phf::Map<&'static str, BaselineStatus> = ph
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
+    "flex-basis:stretch" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
     "flex-direction:column" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
@@ -4046,6 +5902,38 @@ pub static BASELINE_PROPERTY_VALUES: phf::Map<&'static str, BaselineStatus> = ph
     "flex-direction:row-reverse" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
+        },
+    "flex-flow:column" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "flex-flow:column-reverse" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "flex-flow:nowrap" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "flex-flow:row" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "flex-flow:row-reverse" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "flex-flow:wrap" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "flex-flow:wrap-reverse" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "flex-wrap:balance" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
         },
     "flex-wrap:nowrap" => BaselineStatus {
             tier: BaselineTier::Widely,
@@ -4115,31 +6003,15 @@ pub static BASELINE_PROPERTY_VALUES: phf::Map<&'static str, BaselineStatus> = ph
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    "font-family:fangsong" => BaselineStatus {
-            tier: BaselineTier::Widely,
-            year: BaselineYear::Known(2015),
-        },
     "font-family:fantasy" => BaselineStatus {
-            tier: BaselineTier::Widely,
-            year: BaselineYear::Known(2015),
-        },
-    "font-family:kai" => BaselineStatus {
-            tier: BaselineTier::Widely,
-            year: BaselineYear::Known(2015),
-        },
-    "font-family:khmer-mul" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
     "font-family:math" => BaselineStatus {
             tier: BaselineTier::Newly,
-            year: BaselineYear::Known(2025),
+            year: BaselineYear::Known(2026),
         },
     "font-family:monospace" => BaselineStatus {
-            tier: BaselineTier::Widely,
-            year: BaselineYear::Known(2015),
-        },
-    "font-family:nastaliq" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
@@ -4173,7 +6045,7 @@ pub static BASELINE_PROPERTY_VALUES: phf::Map<&'static str, BaselineStatus> = ph
         },
     "font-feature-settings:normal" => BaselineStatus {
             tier: BaselineTier::Widely,
-            year: BaselineYear::Known(2017),
+            year: BaselineYear::Known(2016),
         },
     "font-kerning:auto" => BaselineStatus {
             tier: BaselineTier::Widely,
@@ -4207,9 +6079,45 @@ pub static BASELINE_PROPERTY_VALUES: phf::Map<&'static str, BaselineStatus> = ph
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
+    "font-size:large" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "font-size:larger" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
     "font-size:math" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
+        },
+    "font-size:medium" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "font-size:small" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "font-size:smaller" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "font-size:x-large" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "font-size:x-small" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "font-size:xx-large" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "font-size:xx-small" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
         },
     "font-size:xxx-large" => BaselineStatus {
             tier: BaselineTier::Widely,
@@ -4331,9 +6239,77 @@ pub static BASELINE_PROPERTY_VALUES: phf::Map<&'static str, BaselineStatus> = ph
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
+    "font-variant:all-petite-caps" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2020),
+        },
+    "font-variant:all-small-caps" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2020),
+        },
+    "font-variant:common-ligatures" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2020),
+        },
+    "font-variant:contextual" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2020),
+        },
+    "font-variant:diagonal-fractions" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2020),
+        },
+    "font-variant:discretionary-ligatures" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2020),
+        },
+    "font-variant:full-width" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2020),
+        },
     "font-variant:historical-forms" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
+        },
+    "font-variant:historical-ligatures" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2020),
+        },
+    "font-variant:jis04" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2020),
+        },
+    "font-variant:jis78" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2020),
+        },
+    "font-variant:jis83" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2020),
+        },
+    "font-variant:jis90" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2020),
+        },
+    "font-variant:lining-nums" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2020),
+        },
+    "font-variant:no-common-ligatures" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2020),
+        },
+    "font-variant:no-contextual" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2020),
+        },
+    "font-variant:no-discretionary-ligatures" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2020),
+        },
+    "font-variant:no-historical-ligatures" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2020),
         },
     "font-variant:none" => BaselineStatus {
             tier: BaselineTier::Widely,
@@ -4343,6 +6319,46 @@ pub static BASELINE_PROPERTY_VALUES: phf::Map<&'static str, BaselineStatus> = ph
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
+    "font-variant:oldstyle-nums" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2020),
+        },
+    "font-variant:ordinal" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2020),
+        },
+    "font-variant:petite-caps" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2020),
+        },
+    "font-variant:proportional-nums" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2020),
+        },
+    "font-variant:proportional-width" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2020),
+        },
+    "font-variant:ruby" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2020),
+        },
+    "font-variant:simplified" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2020),
+        },
+    "font-variant:slashed-zero" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2020),
+        },
+    "font-variant:small-caps" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2020),
+        },
+    "font-variant:stacked-fractions" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2020),
+        },
     "font-variant:sub" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
@@ -4350,6 +6366,22 @@ pub static BASELINE_PROPERTY_VALUES: phf::Map<&'static str, BaselineStatus> = ph
     "font-variant:super" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
+        },
+    "font-variant:tabular-nums" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2020),
+        },
+    "font-variant:titling-caps" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2020),
+        },
+    "font-variant:traditional" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2020),
+        },
+    "font-variant:unicase" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2020),
         },
     "font-variant-alternates:annotation" => BaselineStatus {
             tier: BaselineTier::Widely,
@@ -4619,7 +6651,47 @@ pub static BASELINE_PROPERTY_VALUES: phf::Map<&'static str, BaselineStatus> = ph
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
+    "frame-sizing:auto" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "frame-sizing:content-block-size" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "frame-sizing:content-height" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "frame-sizing:content-inline-size" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "frame-sizing:content-width" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
     "gap:normal" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2017),
+        },
+    "grid:none" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2017),
+        },
+    "grid-area:auto" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2017),
+        },
+    "grid-auto-columns:auto" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2017),
+        },
+    "grid-auto-columns:max-content" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2017),
+        },
+    "grid-auto-columns:min-content" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
@@ -4632,6 +6704,42 @@ pub static BASELINE_PROPERTY_VALUES: phf::Map<&'static str, BaselineStatus> = ph
             year: BaselineYear::Known(2017),
         },
     "grid-auto-flow:row" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2017),
+        },
+    "grid-auto-rows:auto" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2017),
+        },
+    "grid-auto-rows:max-content" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2017),
+        },
+    "grid-auto-rows:min-content" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2017),
+        },
+    "grid-column:auto" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2017),
+        },
+    "grid-column-end:auto" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2017),
+        },
+    "grid-column-start:auto" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2017),
+        },
+    "grid-row:auto" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2017),
+        },
+    "grid-row-end:auto" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2017),
+        },
+    "grid-row-start:auto" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
@@ -4655,10 +6763,6 @@ pub static BASELINE_PROPERTY_VALUES: phf::Map<&'static str, BaselineStatus> = ph
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    "grid-template-columns:masonry" => BaselineStatus {
-            tier: BaselineTier::Limited,
-            year: BaselineYear::Unknown,
-        },
     "grid-template-columns:max-content" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
@@ -4680,7 +6784,7 @@ pub static BASELINE_PROPERTY_VALUES: phf::Map<&'static str, BaselineStatus> = ph
             year: BaselineYear::Known(2017),
         },
     "grid-template-columns:subgrid" => BaselineStatus {
-            tier: BaselineTier::Newly,
+            tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
     "grid-template-rows:animation" => BaselineStatus {
@@ -4694,10 +6798,6 @@ pub static BASELINE_PROPERTY_VALUES: phf::Map<&'static str, BaselineStatus> = ph
     "grid-template-rows:fit-content" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
-        },
-    "grid-template-rows:masonry" => BaselineStatus {
-            tier: BaselineTier::Limited,
-            year: BaselineYear::Unknown,
         },
     "grid-template-rows:max-content" => BaselineStatus {
             tier: BaselineTier::Widely,
@@ -4720,7 +6820,7 @@ pub static BASELINE_PROPERTY_VALUES: phf::Map<&'static str, BaselineStatus> = ph
             year: BaselineYear::Known(2017),
         },
     "grid-template-rows:subgrid" => BaselineStatus {
-            tier: BaselineTier::Newly,
+            tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
     "hanging-punctuation:allow-end" => BaselineStatus {
@@ -4728,6 +6828,10 @@ pub static BASELINE_PROPERTY_VALUES: phf::Map<&'static str, BaselineStatus> = ph
             year: BaselineYear::Unknown,
         },
     "hanging-punctuation:first" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "hanging-punctuation:force-end" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
@@ -4764,15 +6868,19 @@ pub static BASELINE_PROPERTY_VALUES: phf::Map<&'static str, BaselineStatus> = ph
             year: BaselineYear::Unknown,
         },
     "hyphenate-character:auto" => BaselineStatus {
-            tier: BaselineTier::Newly,
+            tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
     "hyphenate-limit-chars:auto" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
+    "hyphenate-limit-lines:no-limit" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
     "hyphens:auto" => BaselineStatus {
-            tier: BaselineTier::Newly,
+            tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
     "image-orientation:from-image" => BaselineStatus {
@@ -4788,8 +6896,8 @@ pub static BASELINE_PROPERTY_VALUES: phf::Map<&'static str, BaselineStatus> = ph
             year: BaselineYear::Known(2021),
         },
     "image-rendering:crisp-edges" => BaselineStatus {
-            tier: BaselineTier::Limited,
-            year: BaselineYear::Unknown,
+            tier: BaselineTier::Newly,
+            year: BaselineYear::Known(2026),
         },
     "image-rendering:pixelated" => BaselineStatus {
             tier: BaselineTier::Widely,
@@ -4911,6 +7019,18 @@ pub static BASELINE_PROPERTY_VALUES: phf::Map<&'static str, BaselineStatus> = ph
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
+    "interest-delay:normal" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "interest-delay-end:normal" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "interest-delay-start:normal" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
     "interpolate-size:allow-keywords" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
@@ -4918,6 +7038,22 @@ pub static BASELINE_PROPERTY_VALUES: phf::Map<&'static str, BaselineStatus> = ph
     "interpolate-size:numeric-only" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
+        },
+    "justify-content:center" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "justify-content:end" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "justify-content:flex-end" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "justify-content:flex-start" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
         },
     "justify-content:left" => BaselineStatus {
             tier: BaselineTier::Widely,
@@ -4931,11 +7067,55 @@ pub static BASELINE_PROPERTY_VALUES: phf::Map<&'static str, BaselineStatus> = ph
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
+    "justify-content:safe" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "justify-content:space-around" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "justify-content:space-between" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "justify-content:space-evenly" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "justify-content:start" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "justify-content:stretch" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "justify-content:unsafe" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
     "justify-items:anchor-center" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
+    "justify-items:baseline" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
     "justify-items:center" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "justify-items:end" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "justify-items:flex-end" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "justify-items:flex-start" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
@@ -4947,7 +7127,27 @@ pub static BASELINE_PROPERTY_VALUES: phf::Map<&'static str, BaselineStatus> = ph
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
+    "justify-items:normal" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
     "justify-items:right" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "justify-items:self-end" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "justify-items:self-start" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "justify-items:start" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "justify-items:stretch" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
@@ -4956,6 +7156,26 @@ pub static BASELINE_PROPERTY_VALUES: phf::Map<&'static str, BaselineStatus> = ph
             year: BaselineYear::Unknown,
         },
     "justify-self:auto" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2017),
+        },
+    "justify-self:baseline" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2017),
+        },
+    "justify-self:center" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2017),
+        },
+    "justify-self:end" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2017),
+        },
+    "justify-self:flex-end" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2017),
+        },
+    "justify-self:flex-start" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
@@ -4968,6 +7188,18 @@ pub static BASELINE_PROPERTY_VALUES: phf::Map<&'static str, BaselineStatus> = ph
             year: BaselineYear::Known(2017),
         },
     "justify-self:right" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2017),
+        },
+    "justify-self:self-end" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2017),
+        },
+    "justify-self:self-start" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2017),
+        },
+    "justify-self:start" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
@@ -5027,6 +7259,10 @@ pub static BASELINE_PROPERTY_VALUES: phf::Map<&'static str, BaselineStatus> = ph
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
+    "link-parameters:none" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
     "list-style:inside" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
@@ -5040,8 +7276,8 @@ pub static BASELINE_PROPERTY_VALUES: phf::Map<&'static str, BaselineStatus> = ph
             year: BaselineYear::Known(2015),
         },
     "list-style:symbols" => BaselineStatus {
-            tier: BaselineTier::Widely,
-            year: BaselineYear::Known(2015),
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
         },
     "list-style-image:none" => BaselineStatus {
             tier: BaselineTier::Widely,
@@ -5244,8 +7480,8 @@ pub static BASELINE_PROPERTY_VALUES: phf::Map<&'static str, BaselineStatus> = ph
             year: BaselineYear::Known(2015),
         },
     "list-style-type:symbols" => BaselineStatus {
-            tier: BaselineTier::Widely,
-            year: BaselineYear::Known(2015),
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
         },
     "list-style-type:tamil" => BaselineStatus {
             tier: BaselineTier::Widely,
@@ -5395,72 +7631,320 @@ pub static BASELINE_PROPERTY_VALUES: phf::Map<&'static str, BaselineStatus> = ph
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
+    "mask:add" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2023),
+        },
+    "mask:alpha" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2023),
+        },
+    "mask:border-box" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2023),
+        },
+    "mask:bottom" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2023),
+        },
+    "mask:center" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2023),
+        },
+    "mask:content-box" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2023),
+        },
+    "mask:exclude" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2023),
+        },
+    "mask:fill-box" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2023),
+        },
+    "mask:intersect" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2023),
+        },
+    "mask:left" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2023),
+        },
+    "mask:luminance" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2023),
+        },
+    "mask:match-source" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2023),
+        },
+    "mask:no-clip" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2023),
+        },
+    "mask:no-repeat" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2023),
+        },
+    "mask:none" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2023),
+        },
+    "mask:padding-box" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2023),
+        },
+    "mask:repeat" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2023),
+        },
+    "mask:repeat-x" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2023),
+        },
+    "mask:repeat-y" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2023),
+        },
+    "mask:right" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2023),
+        },
+    "mask:round" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2023),
+        },
+    "mask:space" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2023),
+        },
+    "mask:stroke-box" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2023),
+        },
+    "mask:subtract" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2023),
+        },
+    "mask:top" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2023),
+        },
+    "mask:view-box" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2023),
+        },
+    "mask-border:none" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "mask-border:repeat" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "mask-border:round" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "mask-border:space" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "mask-border:stretch" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "mask-border-repeat:repeat" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "mask-border-repeat:round" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "mask-border-repeat:space" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "mask-border-repeat:stretch" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "mask-border-source:none" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "mask-border-width:auto" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
     "mask-clip:border" => BaselineStatus {
-            tier: BaselineTier::Newly,
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2023),
+        },
+    "mask-clip:border-box" => BaselineStatus {
+            tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
     "mask-clip:content" => BaselineStatus {
-            tier: BaselineTier::Newly,
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2023),
+        },
+    "mask-clip:content-box" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2023),
+        },
+    "mask-clip:fill-box" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2023),
+        },
+    "mask-clip:no-clip" => BaselineStatus {
+            tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
     "mask-clip:padding" => BaselineStatus {
-            tier: BaselineTier::Newly,
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2023),
+        },
+    "mask-clip:padding-box" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2023),
+        },
+    "mask-clip:stroke-box" => BaselineStatus {
+            tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
     "mask-clip:text" => BaselineStatus {
-            tier: BaselineTier::Newly,
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2023),
+        },
+    "mask-clip:view-box" => BaselineStatus {
+            tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
     "mask-composite:add" => BaselineStatus {
-            tier: BaselineTier::Newly,
+            tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
     "mask-composite:exclude" => BaselineStatus {
-            tier: BaselineTier::Newly,
+            tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
     "mask-composite:intersect" => BaselineStatus {
-            tier: BaselineTier::Newly,
+            tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
     "mask-composite:subtract" => BaselineStatus {
-            tier: BaselineTier::Newly,
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2023),
+        },
+    "mask-image:none" => BaselineStatus {
+            tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
     "mask-mode:alpha" => BaselineStatus {
-            tier: BaselineTier::Newly,
+            tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
     "mask-mode:luminance" => BaselineStatus {
-            tier: BaselineTier::Newly,
+            tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
     "mask-mode:match-source" => BaselineStatus {
-            tier: BaselineTier::Newly,
+            tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
     "mask-origin:border" => BaselineStatus {
-            tier: BaselineTier::Newly,
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2023),
+        },
+    "mask-origin:border-box" => BaselineStatus {
+            tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
     "mask-origin:content" => BaselineStatus {
-            tier: BaselineTier::Newly,
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2023),
+        },
+    "mask-origin:content-box" => BaselineStatus {
+            tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
     "mask-origin:fill-box" => BaselineStatus {
-            tier: BaselineTier::Newly,
+            tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
     "mask-origin:padding" => BaselineStatus {
-            tier: BaselineTier::Newly,
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2023),
+        },
+    "mask-origin:padding-box" => BaselineStatus {
+            tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
     "mask-origin:stroke-box" => BaselineStatus {
-            tier: BaselineTier::Newly,
+            tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
     "mask-origin:view-box" => BaselineStatus {
-            tier: BaselineTier::Newly,
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2023),
+        },
+    "mask-position:bottom" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2023),
+        },
+    "mask-position:center" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2023),
+        },
+    "mask-position:left" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2023),
+        },
+    "mask-position:right" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2023),
+        },
+    "mask-position:top" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2023),
+        },
+    "mask-repeat:no-repeat" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2023),
+        },
+    "mask-repeat:repeat" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2023),
+        },
+    "mask-repeat:repeat-x" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2023),
+        },
+    "mask-repeat:repeat-y" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2023),
+        },
+    "mask-repeat:round" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2023),
+        },
+    "mask-repeat:space" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2023),
+        },
+    "mask-size:auto" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2023),
+        },
+    "mask-size:contain" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2023),
+        },
+    "mask-size:cover" => BaselineStatus {
+            tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
     "mask-type:alpha" => BaselineStatus {
@@ -5771,6 +8255,14 @@ pub static BASELINE_PROPERTY_VALUES: phf::Map<&'static str, BaselineStatus> = ph
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
+    "outline:auto" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2023),
+        },
+    "outline:currentColor" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2023),
+        },
     "outline:dashed" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
@@ -5822,6 +8314,10 @@ pub static BASELINE_PROPERTY_VALUES: phf::Map<&'static str, BaselineStatus> = ph
     "outline:transparent" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
+        },
+    "outline-color:currentColor" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
         },
     "outline-color:transparent" => BaselineStatus {
             tier: BaselineTier::Widely,
@@ -5900,16 +8396,12 @@ pub static BASELINE_PROPERTY_VALUES: phf::Map<&'static str, BaselineStatus> = ph
             year: BaselineYear::Known(2020),
         },
     "overflow-anchor:auto" => BaselineStatus {
-            tier: BaselineTier::Limited,
-            year: BaselineYear::Unknown,
+            tier: BaselineTier::Newly,
+            year: BaselineYear::Known(2026),
         },
     "overflow-anchor:none" => BaselineStatus {
-            tier: BaselineTier::Limited,
-            year: BaselineYear::Unknown,
-        },
-    "overflow-block:overlay" => BaselineStatus {
-            tier: BaselineTier::Widely,
-            year: BaselineYear::Known(2021),
+            tier: BaselineTier::Newly,
+            year: BaselineYear::Known(2026),
         },
     "overflow-clip-margin:border-box" => BaselineStatus {
             tier: BaselineTier::Limited,
@@ -5922,10 +8414,6 @@ pub static BASELINE_PROPERTY_VALUES: phf::Map<&'static str, BaselineStatus> = ph
     "overflow-clip-margin:padding-box" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
-        },
-    "overflow-inline:overlay" => BaselineStatus {
-            tier: BaselineTier::Widely,
-            year: BaselineYear::Known(2021),
         },
     "overflow-wrap:anywhere" => BaselineStatus {
             tier: BaselineTier::Widely,
@@ -5988,64 +8476,64 @@ pub static BASELINE_PROPERTY_VALUES: phf::Map<&'static str, BaselineStatus> = ph
             year: BaselineYear::Unknown,
         },
     "overscroll-behavior:auto" => BaselineStatus {
-            tier: BaselineTier::Widely,
-            year: BaselineYear::Known(2022),
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
         },
     "overscroll-behavior:contain" => BaselineStatus {
-            tier: BaselineTier::Widely,
-            year: BaselineYear::Known(2022),
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
         },
     "overscroll-behavior:none" => BaselineStatus {
-            tier: BaselineTier::Widely,
-            year: BaselineYear::Known(2022),
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
         },
     "overscroll-behavior-block:auto" => BaselineStatus {
-            tier: BaselineTier::Widely,
-            year: BaselineYear::Known(2022),
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
         },
     "overscroll-behavior-block:contain" => BaselineStatus {
-            tier: BaselineTier::Widely,
-            year: BaselineYear::Known(2022),
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
         },
     "overscroll-behavior-block:none" => BaselineStatus {
-            tier: BaselineTier::Widely,
-            year: BaselineYear::Known(2022),
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
         },
     "overscroll-behavior-inline:auto" => BaselineStatus {
-            tier: BaselineTier::Widely,
-            year: BaselineYear::Known(2022),
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
         },
     "overscroll-behavior-inline:contain" => BaselineStatus {
-            tier: BaselineTier::Widely,
-            year: BaselineYear::Known(2022),
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
         },
     "overscroll-behavior-inline:none" => BaselineStatus {
-            tier: BaselineTier::Widely,
-            year: BaselineYear::Known(2022),
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
         },
     "overscroll-behavior-x:auto" => BaselineStatus {
-            tier: BaselineTier::Widely,
-            year: BaselineYear::Known(2022),
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
         },
     "overscroll-behavior-x:contain" => BaselineStatus {
-            tier: BaselineTier::Widely,
-            year: BaselineYear::Known(2022),
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
         },
     "overscroll-behavior-x:none" => BaselineStatus {
-            tier: BaselineTier::Widely,
-            year: BaselineYear::Known(2022),
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
         },
     "overscroll-behavior-y:auto" => BaselineStatus {
-            tier: BaselineTier::Widely,
-            year: BaselineYear::Known(2022),
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
         },
     "overscroll-behavior-y:contain" => BaselineStatus {
-            tier: BaselineTier::Widely,
-            year: BaselineYear::Known(2022),
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
         },
     "overscroll-behavior-y:none" => BaselineStatus {
-            tier: BaselineTier::Widely,
-            year: BaselineYear::Known(2022),
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
         },
     "page-break-after:always" => BaselineStatus {
             tier: BaselineTier::Limited,
@@ -6119,13 +8607,169 @@ pub static BASELINE_PROPERTY_VALUES: phf::Map<&'static str, BaselineStatus> = ph
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
+    "place-content:baseline" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "place-content:center" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "place-content:end" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "place-content:flex-end" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "place-content:flex-start" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "place-content:normal" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "place-content:space-around" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "place-content:space-between" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "place-content:space-evenly" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "place-content:start" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "place-content:stretch" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
     "place-items:anchor-center" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
+    "place-items:baseline" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "place-items:center" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "place-items:end" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "place-items:flex-end" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "place-items:flex-start" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "place-items:normal" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "place-items:self-end" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "place-items:self-start" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "place-items:start" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "place-items:stretch" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
     "place-self:anchor-center" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
+        },
+    "place-self:auto" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "place-self:baseline" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "place-self:center" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "place-self:end" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "place-self:flex-end" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "place-self:flex-start" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "place-self:normal" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "place-self:self-end" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "place-self:self-start" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "place-self:start" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "place-self:stretch" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "pointer-events:all" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "pointer-events:auto" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "pointer-events:fill" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "pointer-events:none" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "pointer-events:painted" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "pointer-events:stroke" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "pointer-events:visible" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
         },
     "position:absolute" => BaselineStatus {
             tier: BaselineTier::Widely,
@@ -6152,6 +8796,10 @@ pub static BASELINE_PROPERTY_VALUES: phf::Map<&'static str, BaselineStatus> = ph
             year: BaselineYear::Unknown,
         },
     "position-anchor:none" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "position-anchor:normal" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
@@ -6359,6 +9007,90 @@ pub static BASELINE_PROPERTY_VALUES: phf::Map<&'static str, BaselineStatus> = ph
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
+    "position-try:block-end" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "position-try:block-start" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "position-try:bottom" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "position-try:center" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "position-try:end" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "position-try:flip-block" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "position-try:flip-inline" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "position-try:flip-start" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "position-try:flip-x" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "position-try:flip-y" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "position-try:inline-end" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "position-try:inline-start" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "position-try:left" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "position-try:none" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "position-try:right" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "position-try:self-block-end" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "position-try:self-block-start" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "position-try:self-end" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "position-try:self-inline-end" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "position-try:self-inline-start" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "position-try:self-start" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
     "position-try:self-x-end" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
@@ -6372,6 +9104,66 @@ pub static BASELINE_PROPERTY_VALUES: phf::Map<&'static str, BaselineStatus> = ph
             year: BaselineYear::Unknown,
         },
     "position-try:self-y-start" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "position-try:span-all" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "position-try:span-block-end" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "position-try:span-block-start" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "position-try:span-bottom" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "position-try:span-end" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "position-try:span-inline-end" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "position-try:span-inline-start" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "position-try:span-left" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "position-try:span-right" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "position-try:span-self-block-end" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "position-try:span-self-block-start" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "position-try:span-self-end" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "position-try:span-self-inline-end" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "position-try:span-self-inline-start" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "position-try:span-self-start" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
@@ -6391,6 +9183,74 @@ pub static BASELINE_PROPERTY_VALUES: phf::Map<&'static str, BaselineStatus> = ph
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
+    "position-try:span-start" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "position-try:span-top" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "position-try:span-x-end" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "position-try:span-x-start" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "position-try:span-y-end" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "position-try:span-y-start" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "position-try:start" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "position-try:top" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "position-try:x-end" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "position-try:x-start" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "position-try:y-end" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "position-try:y-start" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "position-try-fallbacks:block-end" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "position-try-fallbacks:block-start" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "position-try-fallbacks:bottom" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "position-try-fallbacks:center" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "position-try-fallbacks:end" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
     "position-try-fallbacks:flip-block" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
@@ -6403,11 +9263,59 @@ pub static BASELINE_PROPERTY_VALUES: phf::Map<&'static str, BaselineStatus> = ph
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
+    "position-try-fallbacks:flip-x" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "position-try-fallbacks:flip-y" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "position-try-fallbacks:inline-end" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "position-try-fallbacks:inline-start" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "position-try-fallbacks:left" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
     "position-try-fallbacks:none" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
     "position-try-fallbacks:position-area" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "position-try-fallbacks:right" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "position-try-fallbacks:self-block-end" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "position-try-fallbacks:self-block-start" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "position-try-fallbacks:self-end" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "position-try-fallbacks:self-inline-end" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "position-try-fallbacks:self-inline-start" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "position-try-fallbacks:self-start" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
@@ -6427,6 +9335,66 @@ pub static BASELINE_PROPERTY_VALUES: phf::Map<&'static str, BaselineStatus> = ph
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
+    "position-try-fallbacks:span-all" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "position-try-fallbacks:span-block-end" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "position-try-fallbacks:span-block-start" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "position-try-fallbacks:span-bottom" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "position-try-fallbacks:span-end" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "position-try-fallbacks:span-inline-end" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "position-try-fallbacks:span-inline-start" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "position-try-fallbacks:span-left" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "position-try-fallbacks:span-right" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "position-try-fallbacks:span-self-block-end" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "position-try-fallbacks:span-self-block-start" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "position-try-fallbacks:span-self-end" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "position-try-fallbacks:span-self-inline-end" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "position-try-fallbacks:span-self-inline-start" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "position-try-fallbacks:span-self-start" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
     "position-try-fallbacks:span-self-x-end" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
@@ -6440,6 +9408,54 @@ pub static BASELINE_PROPERTY_VALUES: phf::Map<&'static str, BaselineStatus> = ph
             year: BaselineYear::Unknown,
         },
     "position-try-fallbacks:span-self-y-start" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "position-try-fallbacks:span-start" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "position-try-fallbacks:span-top" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "position-try-fallbacks:span-x-end" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "position-try-fallbacks:span-x-start" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "position-try-fallbacks:span-y-end" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "position-try-fallbacks:span-y-start" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "position-try-fallbacks:start" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "position-try-fallbacks:top" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "position-try-fallbacks:x-end" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "position-try-fallbacks:x-start" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "position-try-fallbacks:y-end" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "position-try-fallbacks:y-start" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
@@ -6464,6 +9480,18 @@ pub static BASELINE_PROPERTY_VALUES: phf::Map<&'static str, BaselineStatus> = ph
             year: BaselineYear::Unknown,
         },
     "position-visibility:always" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "position-visibility:anchor-valid" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "position-visibility:anchor-visible" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "position-visibility:anchors-valid" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
@@ -6547,6 +9575,190 @@ pub static BASELINE_PROPERTY_VALUES: phf::Map<&'static str, BaselineStatus> = ph
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
+    "row-rule:currentColor" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "row-rule:dashed" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "row-rule:dotted" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "row-rule:double" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "row-rule:groove" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "row-rule:hidden" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "row-rule:inset" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "row-rule:medium" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "row-rule:none" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "row-rule:outset" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "row-rule:ridge" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "row-rule:solid" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "row-rule:thick" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "row-rule:thin" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "row-rule:transparent" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "row-rule-break:intersection" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "row-rule-break:none" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "row-rule-break:normal" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "row-rule-color:currentColor" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "row-rule-color:transparent" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "row-rule-inset:overlap-join" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "row-rule-inset-cap:overlap-join" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "row-rule-inset-cap-end:overlap-join" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "row-rule-inset-cap-start:overlap-join" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "row-rule-inset-end:overlap-join" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "row-rule-inset-junction:overlap-join" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "row-rule-inset-junction-end:overlap-join" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "row-rule-inset-junction-start:overlap-join" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "row-rule-inset-start:overlap-join" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "row-rule-style:dashed" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "row-rule-style:dotted" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "row-rule-style:double" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "row-rule-style:groove" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "row-rule-style:hidden" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "row-rule-style:inset" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "row-rule-style:none" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "row-rule-style:outset" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "row-rule-style:ridge" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "row-rule-style:solid" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "row-rule-visibility-items:all" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "row-rule-visibility-items:around" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "row-rule-visibility-items:between" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "row-rule-visibility-items:normal" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "row-rule-width:medium" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "row-rule-width:thick" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "row-rule-width:thin" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
     "ruby-align:center" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2024),
@@ -6587,9 +9799,193 @@ pub static BASELINE_PROPERTY_VALUES: phf::Map<&'static str, BaselineStatus> = ph
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2024),
         },
+    "rule:currentColor" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "rule:dashed" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "rule:dotted" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "rule:double" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "rule:groove" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "rule:hidden" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "rule:inset" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "rule:medium" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "rule:none" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "rule:outset" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "rule:ridge" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "rule:solid" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "rule:thick" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "rule:thin" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "rule:transparent" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "rule-break:intersection" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "rule-break:none" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "rule-break:normal" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "rule-color:currentColor" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "rule-color:transparent" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "rule-inset:overlap-join" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "rule-inset-cap:overlap-join" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "rule-inset-end:overlap-join" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "rule-inset-junction:overlap-join" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "rule-inset-start:overlap-join" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "rule-overlap:column-over-row" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "rule-overlap:row-over-column" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "rule-style:dashed" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "rule-style:dotted" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "rule-style:double" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "rule-style:groove" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "rule-style:hidden" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "rule-style:inset" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "rule-style:none" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "rule-style:outset" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "rule-style:ridge" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "rule-style:solid" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "rule-visibility-items:all" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "rule-visibility-items:around" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "rule-visibility-items:between" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "rule-visibility-items:normal" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "rule-width:medium" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "rule-width:thick" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "rule-width:thin" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
     "scale:none" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
+        },
+    "scroll-axis-lock:auto" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "scroll-axis-lock:none" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
         },
     "scroll-behavior:auto" => BaselineStatus {
             tier: BaselineTier::Widely,
@@ -6687,6 +10083,10 @@ pub static BASELINE_PROPERTY_VALUES: phf::Map<&'static str, BaselineStatus> = ph
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
+    "scroll-snap-type:pair" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
     "scroll-snap-type:x" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
@@ -6704,20 +10104,20 @@ pub static BASELINE_PROPERTY_VALUES: phf::Map<&'static str, BaselineStatus> = ph
             year: BaselineYear::Unknown,
         },
     "scroll-timeline-axis:block" => BaselineStatus {
-            tier: BaselineTier::Limited,
-            year: BaselineYear::Unknown,
+            tier: BaselineTier::Newly,
+            year: BaselineYear::Known(2026),
         },
     "scroll-timeline-axis:inline" => BaselineStatus {
-            tier: BaselineTier::Limited,
-            year: BaselineYear::Unknown,
+            tier: BaselineTier::Newly,
+            year: BaselineYear::Known(2026),
         },
     "scroll-timeline-axis:x" => BaselineStatus {
-            tier: BaselineTier::Limited,
-            year: BaselineYear::Unknown,
+            tier: BaselineTier::Newly,
+            year: BaselineYear::Known(2026),
         },
     "scroll-timeline-axis:y" => BaselineStatus {
-            tier: BaselineTier::Limited,
-            year: BaselineYear::Unknown,
+            tier: BaselineTier::Newly,
+            year: BaselineYear::Known(2026),
         },
     "scrollbar-color:auto" => BaselineStatus {
             tier: BaselineTier::Newly,
@@ -6799,7 +10199,23 @@ pub static BASELINE_PROPERTY_VALUES: phf::Map<&'static str, BaselineStatus> = ph
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
+    "stop-color:currentColor" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2020),
+        },
+    "stop-color:transparent" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2020),
+        },
     "stroke:none" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2020),
+        },
+    "stroke-color:currentColor" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2020),
+        },
+    "stroke-color:transparent" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
@@ -6911,14 +10327,6 @@ pub static BASELINE_PROPERTY_VALUES: phf::Map<&'static str, BaselineStatus> = ph
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    "text-autospace:punctuation" => BaselineStatus {
-            tier: BaselineTier::Limited,
-            year: BaselineYear::Unknown,
-        },
-    "text-autospace:replace" => BaselineStatus {
-            tier: BaselineTier::Limited,
-            year: BaselineYear::Unknown,
-        },
     "text-box:normal" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
@@ -6951,13 +10359,49 @@ pub static BASELINE_PROPERTY_VALUES: phf::Map<&'static str, BaselineStatus> = ph
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
+    "text-decoration:currentColor" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "text-decoration:line-through" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "text-decoration:none" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "text-decoration:overline" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "text-decoration:transparent" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "text-decoration:underline" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "text-decoration-color:currentColor" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "text-decoration-color:transparent" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
+        },
+    "text-decoration-inset:auto" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
     "text-decoration-line:blink" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
     "text-decoration-line:grammar-error" => BaselineStatus {
-            tier: BaselineTier::Widely,
-            year: BaselineYear::Known(2015),
+            tier: BaselineTier::Newly,
+            year: BaselineYear::Known(2025),
         },
     "text-decoration-line:line-through" => BaselineStatus {
             tier: BaselineTier::Widely,
@@ -6972,32 +10416,40 @@ pub static BASELINE_PROPERTY_VALUES: phf::Map<&'static str, BaselineStatus> = ph
             year: BaselineYear::Known(2015),
         },
     "text-decoration-line:spelling-error" => BaselineStatus {
-            tier: BaselineTier::Widely,
-            year: BaselineYear::Known(2015),
+            tier: BaselineTier::Newly,
+            year: BaselineYear::Known(2025),
         },
     "text-decoration-line:underline" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    "text-decoration-skip:auto" => BaselineStatus {
-            tier: BaselineTier::Widely,
-            year: BaselineYear::Known(2015),
-        },
-    "text-decoration-skip:none" => BaselineStatus {
-            tier: BaselineTier::Widely,
-            year: BaselineYear::Known(2015),
-        },
     "text-decoration-skip-ink:all" => BaselineStatus {
-            tier: BaselineTier::Widely,
-            year: BaselineYear::Known(2015),
+            tier: BaselineTier::Newly,
+            year: BaselineYear::Known(2026),
         },
     "text-decoration-skip-ink:auto" => BaselineStatus {
             tier: BaselineTier::Widely,
-            year: BaselineYear::Known(2015),
+            year: BaselineYear::Known(2022),
         },
     "text-decoration-skip-ink:none" => BaselineStatus {
             tier: BaselineTier::Widely,
-            year: BaselineYear::Known(2015),
+            year: BaselineYear::Known(2022),
+        },
+    "text-decoration-skip-spaces:all" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "text-decoration-skip-spaces:end" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "text-decoration-skip-spaces:none" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "text-decoration-skip-spaces:start" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
         },
     "text-decoration-style:wavy" => BaselineStatus {
             tier: BaselineTier::Widely,
@@ -7014,6 +10466,22 @@ pub static BASELINE_PROPERTY_VALUES: phf::Map<&'static str, BaselineStatus> = ph
     "text-decoration-thickness:percentage" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
+        },
+    "text-emphasis:currentColor" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2022),
+        },
+    "text-emphasis:transparent" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2022),
+        },
+    "text-emphasis-color:currentColor" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2022),
+        },
+    "text-emphasis-color:transparent" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2022),
         },
     "text-emphasis-position:auto" => BaselineStatus {
             tier: BaselineTier::Widely,
@@ -7063,13 +10531,25 @@ pub static BASELINE_PROPERTY_VALUES: phf::Map<&'static str, BaselineStatus> = ph
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    "text-indent:each-line" => BaselineStatus {
+    "text-fit:grow" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    "text-indent:hanging" => BaselineStatus {
+    "text-fit:none" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
+        },
+    "text-fit:shrink" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "text-indent:each-line" => BaselineStatus {
+            tier: BaselineTier::Newly,
+            year: BaselineYear::Known(2026),
+        },
+    "text-indent:hanging" => BaselineStatus {
+            tier: BaselineTier::Newly,
+            year: BaselineYear::Known(2026),
         },
     "text-justify:auto" => BaselineStatus {
             tier: BaselineTier::Limited,
@@ -7118,6 +10598,10 @@ pub static BASELINE_PROPERTY_VALUES: phf::Map<&'static str, BaselineStatus> = ph
     "text-rendering:geometricPrecision" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
+        },
+    "text-shadow:none" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2015),
         },
     "text-size-adjust:auto" => BaselineStatus {
             tier: BaselineTier::Limited,
@@ -7204,7 +10688,7 @@ pub static BASELINE_PROPERTY_VALUES: phf::Map<&'static str, BaselineStatus> = ph
             year: BaselineYear::Known(2020),
         },
     "text-wrap:balance" => BaselineStatus {
-            tier: BaselineTier::Newly,
+            tier: BaselineTier::Widely,
             year: BaselineYear::Known(2024),
         },
     "text-wrap:nowrap" => BaselineStatus {
@@ -7236,7 +10720,7 @@ pub static BASELINE_PROPERTY_VALUES: phf::Map<&'static str, BaselineStatus> = ph
             year: BaselineYear::Known(2024),
         },
     "text-wrap-style:balance" => BaselineStatus {
-            tier: BaselineTier::Newly,
+            tier: BaselineTier::Widely,
             year: BaselineYear::Known(2024),
         },
     "text-wrap-style:pretty" => BaselineStatus {
@@ -7248,10 +10732,70 @@ pub static BASELINE_PROPERTY_VALUES: phf::Map<&'static str, BaselineStatus> = ph
             year: BaselineYear::Known(2024),
         },
     "timeline-scope:all" => BaselineStatus {
+            tier: BaselineTier::Newly,
+            year: BaselineYear::Known(2026),
+        },
+    "timeline-scope:none" => BaselineStatus {
+            tier: BaselineTier::Newly,
+            year: BaselineYear::Known(2026),
+        },
+    "timeline-trigger:auto" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    "timeline-scope:none" => BaselineStatus {
+    "timeline-trigger:none" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "timeline-trigger:normal" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "timeline-trigger-activation-range:normal" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "timeline-trigger-activation-range-end:normal" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "timeline-trigger-activation-range-start:normal" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "timeline-trigger-active-range:auto" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "timeline-trigger-active-range:normal" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "timeline-trigger-active-range-end:auto" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "timeline-trigger-active-range-end:normal" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "timeline-trigger-active-range-start:auto" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "timeline-trigger-active-range-start:normal" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "timeline-trigger-name:none" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "timeline-trigger-source:auto" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "timeline-trigger-source:none" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
@@ -7312,23 +10856,23 @@ pub static BASELINE_PROPERTY_VALUES: phf::Map<&'static str, BaselineStatus> = ph
             year: BaselineYear::Known(2015),
         },
     "transform-box:border-box" => BaselineStatus {
-            tier: BaselineTier::Newly,
+            tier: BaselineTier::Widely,
             year: BaselineYear::Known(2024),
         },
     "transform-box:content-box" => BaselineStatus {
-            tier: BaselineTier::Newly,
+            tier: BaselineTier::Widely,
             year: BaselineYear::Known(2024),
         },
     "transform-box:fill-box" => BaselineStatus {
-            tier: BaselineTier::Newly,
+            tier: BaselineTier::Widely,
             year: BaselineYear::Known(2024),
         },
     "transform-box:stroke-box" => BaselineStatus {
-            tier: BaselineTier::Newly,
+            tier: BaselineTier::Widely,
             year: BaselineYear::Known(2024),
         },
     "transform-box:view-box" => BaselineStatus {
-            tier: BaselineTier::Newly,
+            tier: BaselineTier::Widely,
             year: BaselineYear::Known(2024),
         },
     "transform-origin:bottom" => BaselineStatus {
@@ -7350,6 +10894,14 @@ pub static BASELINE_PROPERTY_VALUES: phf::Map<&'static str, BaselineStatus> = ph
     "transform-origin:top" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
+        },
+    "transform-style:flat" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2022),
+        },
+    "transform-style:preserve-3d" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2022),
         },
     "transition:all" => BaselineStatus {
             tier: BaselineTier::Widely,
@@ -7435,6 +10987,14 @@ pub static BASELINE_PROPERTY_VALUES: phf::Map<&'static str, BaselineStatus> = ph
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
+    "trigger-scope:all" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "trigger-scope:none" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
     "unicode-bidi:bidi-override" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
@@ -7475,6 +11035,14 @@ pub static BASELINE_PROPERTY_VALUES: phf::Map<&'static str, BaselineStatus> = ph
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
+    "vector-effect:non-scaling-stroke" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2020),
+        },
+    "vector-effect:none" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2020),
+        },
     "vertical-align:baseline" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
@@ -7508,24 +11076,24 @@ pub static BASELINE_PROPERTY_VALUES: phf::Map<&'static str, BaselineStatus> = ph
             year: BaselineYear::Known(2015),
         },
     "view-timeline-axis:block" => BaselineStatus {
-            tier: BaselineTier::Limited,
-            year: BaselineYear::Unknown,
+            tier: BaselineTier::Newly,
+            year: BaselineYear::Known(2026),
         },
     "view-timeline-axis:inline" => BaselineStatus {
-            tier: BaselineTier::Limited,
-            year: BaselineYear::Unknown,
+            tier: BaselineTier::Newly,
+            year: BaselineYear::Known(2026),
         },
     "view-timeline-axis:x" => BaselineStatus {
-            tier: BaselineTier::Limited,
-            year: BaselineYear::Unknown,
+            tier: BaselineTier::Newly,
+            year: BaselineYear::Known(2026),
         },
     "view-timeline-axis:y" => BaselineStatus {
-            tier: BaselineTier::Limited,
-            year: BaselineYear::Unknown,
+            tier: BaselineTier::Newly,
+            year: BaselineYear::Known(2026),
         },
     "view-timeline-inset:auto" => BaselineStatus {
-            tier: BaselineTier::Limited,
-            year: BaselineYear::Unknown,
+            tier: BaselineTier::Newly,
+            year: BaselineYear::Known(2026),
         },
     "view-transition-class:none" => BaselineStatus {
             tier: BaselineTier::Newly,
@@ -7538,6 +11106,14 @@ pub static BASELINE_PROPERTY_VALUES: phf::Map<&'static str, BaselineStatus> = ph
     "view-transition-name:none" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2025),
+        },
+    "view-transition-scope:all" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "view-transition-scope:none" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
         },
     "visibility:collapse" => BaselineStatus {
             tier: BaselineTier::Widely,
@@ -7576,24 +11152,40 @@ pub static BASELINE_PROPERTY_VALUES: phf::Map<&'static str, BaselineStatus> = ph
             year: BaselineYear::Known(2015),
         },
     "white-space-collapse:break-spaces" => BaselineStatus {
-            tier: BaselineTier::Newly,
+            tier: BaselineTier::Widely,
             year: BaselineYear::Known(2024),
         },
     "white-space-collapse:collapse" => BaselineStatus {
-            tier: BaselineTier::Newly,
+            tier: BaselineTier::Widely,
             year: BaselineYear::Known(2024),
         },
     "white-space-collapse:preserve" => BaselineStatus {
-            tier: BaselineTier::Newly,
+            tier: BaselineTier::Widely,
             year: BaselineYear::Known(2024),
         },
     "white-space-collapse:preserve-breaks" => BaselineStatus {
-            tier: BaselineTier::Newly,
+            tier: BaselineTier::Widely,
             year: BaselineYear::Known(2024),
         },
     "white-space-collapse:preserve-spaces" => BaselineStatus {
-            tier: BaselineTier::Newly,
+            tier: BaselineTier::Widely,
             year: BaselineYear::Known(2024),
+        },
+    "white-space-trim:discard-after" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "white-space-trim:discard-before" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "white-space-trim:discard-inner" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "white-space-trim:none" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
         },
     "width:anchor-size" => BaselineStatus {
             tier: BaselineTier::Limited,
@@ -7631,6 +11223,14 @@ pub static BASELINE_PROPERTY_VALUES: phf::Map<&'static str, BaselineStatus> = ph
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
+    "window-drag:move" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "window-drag:none" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
     "word-break:auto-phrase" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
@@ -7654,6 +11254,14 @@ pub static BASELINE_PROPERTY_VALUES: phf::Map<&'static str, BaselineStatus> = ph
     "word-spacing:normal" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
+        },
+    "wrap-inside:auto" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "wrap-inside:avoid" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
         },
     "writing-mode:horizontal-tb" => BaselineStatus {
             tier: BaselineTier::Widely,
@@ -7704,7 +11312,7 @@ pub static BASELINE_PROPERTY_VALUES: phf::Map<&'static str, BaselineStatus> = ph
             year: BaselineYear::Known(2015),
         },
 };
-#[doc = r" Baseline status for CSS at-rules."]
+/// Baseline status for CSS at-rules.
 pub static BASELINE_AT_RULES: phf::Map<&'static str, BaselineStatus> = phf::phf_map! {
     "charset" => BaselineStatus {
             tier: BaselineTier::Widely,
@@ -7715,7 +11323,7 @@ pub static BASELINE_AT_RULES: phf::Map<&'static str, BaselineStatus> = phf::phf_
             year: BaselineYear::Known(2023),
         },
     "counter-style" => BaselineStatus {
-            tier: BaselineTier::Newly,
+            tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
     "custom-media" => BaselineStatus {
@@ -7772,7 +11380,7 @@ pub static BASELINE_AT_RULES: phf::Map<&'static str, BaselineStatus> = phf::phf_
         },
     "scope" => BaselineStatus {
             tier: BaselineTier::Newly,
-            year: BaselineYear::Known(2025),
+            year: BaselineYear::Known(2026),
         },
     "starting-style" => BaselineStatus {
             tier: BaselineTier::Newly,
@@ -7787,7 +11395,7 @@ pub static BASELINE_AT_RULES: phf::Map<&'static str, BaselineStatus> = phf::phf_
             year: BaselineYear::Unknown,
         },
 };
-#[doc = r" Baseline status for CSS media query conditions."]
+/// Baseline status for CSS media query conditions.
 pub static BASELINE_MEDIA_CONDITIONS: phf::Map<&'static str, BaselineStatus> = phf::phf_map! {
     "-webkit-device-pixel-ratio" => BaselineStatus {
             tier: BaselineTier::Widely,
@@ -7853,6 +11461,10 @@ pub static BASELINE_MEDIA_CONDITIONS: phf::Map<&'static str, BaselineStatus> = p
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
+    "display-state" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
     "dynamic-range" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
@@ -7906,11 +11518,11 @@ pub static BASELINE_MEDIA_CONDITIONS: phf::Map<&'static str, BaselineStatus> = p
             year: BaselineYear::Known(2015),
         },
     "overflow-block" => BaselineStatus {
-            tier: BaselineTier::Newly,
+            tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
     "overflow-inline" => BaselineStatus {
-            tier: BaselineTier::Newly,
+            tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
     "pointer" => BaselineStatus {
@@ -7941,16 +11553,20 @@ pub static BASELINE_MEDIA_CONDITIONS: phf::Map<&'static str, BaselineStatus> = p
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
+    "resizable" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
     "resolution" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
     "scripting" => BaselineStatus {
-            tier: BaselineTier::Newly,
+            tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
     "update" => BaselineStatus {
-            tier: BaselineTier::Newly,
+            tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
     "vertical-viewport-segments" => BaselineStatus {
@@ -7966,7 +11582,7 @@ pub static BASELINE_MEDIA_CONDITIONS: phf::Map<&'static str, BaselineStatus> = p
             year: BaselineYear::Known(2015),
         },
 };
-#[doc = r" Baseline status for CSS value functions."]
+/// Baseline status for CSS value functions.
 pub static BASELINE_FUNCTIONS: phf::Map<&'static str, BaselineStatus> = phf::phf_map! {
     "abs" => BaselineStatus {
             tier: BaselineTier::Newly,
@@ -7975,6 +11591,14 @@ pub static BASELINE_FUNCTIONS: phf::Map<&'static str, BaselineStatus> = phf::phf
     "acos" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
+        },
+    "anchor" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
+    "anchor-size" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
         },
     "asin" => BaselineStatus {
             tier: BaselineTier::Widely,
@@ -8069,7 +11693,7 @@ pub static BASELINE_FUNCTIONS: phf::Map<&'static str, BaselineStatus> = phf::phf
             year: BaselineYear::Known(2020),
         },
     "exp" => BaselineStatus {
-            tier: BaselineTier::Newly,
+            tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
     "grayscale" => BaselineStatus {
@@ -8077,6 +11701,10 @@ pub static BASELINE_FUNCTIONS: phf::Map<&'static str, BaselineStatus> = phf::phf
             year: BaselineYear::Known(2016),
         },
     "hsl" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2020),
+        },
+    "hsla" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
@@ -8089,7 +11717,7 @@ pub static BASELINE_FUNCTIONS: phf::Map<&'static str, BaselineStatus> = phf::phf
             year: BaselineYear::Known(2022),
         },
     "hypot" => BaselineStatus {
-            tier: BaselineTier::Newly,
+            tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
     "image" => BaselineStatus {
@@ -8097,7 +11725,7 @@ pub static BASELINE_FUNCTIONS: phf::Map<&'static str, BaselineStatus> = phf::phf
             year: BaselineYear::Known(2015),
         },
     "image-set" => BaselineStatus {
-            tier: BaselineTier::Newly,
+            tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
     "inset" => BaselineStatus {
@@ -8117,7 +11745,7 @@ pub static BASELINE_FUNCTIONS: phf::Map<&'static str, BaselineStatus> = phf::phf
             year: BaselineYear::Known(2023),
         },
     "light-dark" => BaselineStatus {
-            tier: BaselineTier::Newly,
+            tier: BaselineTier::Widely,
             year: BaselineYear::Known(2024),
         },
     "linear-gradient" => BaselineStatus {
@@ -8125,7 +11753,7 @@ pub static BASELINE_FUNCTIONS: phf::Map<&'static str, BaselineStatus> = phf::phf
             year: BaselineYear::Known(2015),
         },
     "log" => BaselineStatus {
-            tier: BaselineTier::Newly,
+            tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
     "matrix" => BaselineStatus {
@@ -8145,7 +11773,7 @@ pub static BASELINE_FUNCTIONS: phf::Map<&'static str, BaselineStatus> = phf::phf
             year: BaselineYear::Known(2020),
         },
     "mod" => BaselineStatus {
-            tier: BaselineTier::Newly,
+            tier: BaselineTier::Widely,
             year: BaselineYear::Known(2024),
         },
     "oklab" => BaselineStatus {
@@ -8177,7 +11805,7 @@ pub static BASELINE_FUNCTIONS: phf::Map<&'static str, BaselineStatus> = phf::phf
             year: BaselineYear::Known(2020),
         },
     "pow" => BaselineStatus {
-            tier: BaselineTier::Newly,
+            tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
     "radial-gradient" => BaselineStatus {
@@ -8189,7 +11817,7 @@ pub static BASELINE_FUNCTIONS: phf::Map<&'static str, BaselineStatus> = phf::phf
             year: BaselineYear::Known(2022),
         },
     "rect" => BaselineStatus {
-            tier: BaselineTier::Newly,
+            tier: BaselineTier::Widely,
             year: BaselineYear::Known(2024),
         },
     "rem" => BaselineStatus {
@@ -8233,7 +11861,7 @@ pub static BASELINE_FUNCTIONS: phf::Map<&'static str, BaselineStatus> = phf::phf
             year: BaselineYear::Known(2022),
         },
     "round" => BaselineStatus {
-            tier: BaselineTier::Newly,
+            tier: BaselineTier::Widely,
             year: BaselineYear::Known(2024),
         },
     "saturate" => BaselineStatus {
@@ -8285,7 +11913,7 @@ pub static BASELINE_FUNCTIONS: phf::Map<&'static str, BaselineStatus> = phf::phf
             year: BaselineYear::Known(2015),
         },
     "sqrt" => BaselineStatus {
-            tier: BaselineTier::Newly,
+            tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
     "steps" => BaselineStatus {
@@ -8324,8 +11952,16 @@ pub static BASELINE_FUNCTIONS: phf::Map<&'static str, BaselineStatus> = phf::phf
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2016),
         },
+    "var" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2017),
+        },
+    "xywh" => BaselineStatus {
+            tier: BaselineTier::Widely,
+            year: BaselineYear::Known(2024),
+        },
 };
-#[doc = r" Baseline status for CSS pseudo-class and pseudo-element selectors."]
+/// Baseline status for CSS pseudo-class and pseudo-element selectors.
 pub static BASELINE_SELECTORS: phf::Map<&'static str, BaselineStatus> = phf::phf_map! {
     "active" => BaselineStatus {
             tier: BaselineTier::Widely,
@@ -8408,7 +12044,7 @@ pub static BASELINE_SELECTORS: phf::Map<&'static str, BaselineStatus> = phf::phf
             year: BaselineYear::Known(2025),
         },
     "dir" => BaselineStatus {
-            tier: BaselineTier::Newly,
+            tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
     "disabled" => BaselineStatus {
@@ -8422,6 +12058,10 @@ pub static BASELINE_SELECTORS: phf::Map<&'static str, BaselineStatus> = phf::phf
     "enabled" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
+        },
+    "field-content" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
         },
     "file-selector-button" => BaselineStatus {
             tier: BaselineTier::Widely,
@@ -8472,7 +12112,7 @@ pub static BASELINE_SELECTORS: phf::Map<&'static str, BaselineStatus> = phf::phf
             year: BaselineYear::Unknown,
         },
     "has" => BaselineStatus {
-            tier: BaselineTier::Newly,
+            tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
     "has-slotted" => BaselineStatus {
@@ -8488,8 +12128,8 @@ pub static BASELINE_SELECTORS: phf::Map<&'static str, BaselineStatus> = phf::phf
             year: BaselineYear::Unknown,
         },
     "highlight" => BaselineStatus {
-            tier: BaselineTier::Limited,
-            year: BaselineYear::Unknown,
+            tier: BaselineTier::Newly,
+            year: BaselineYear::Known(2026),
         },
     "host" => BaselineStatus {
             tier: BaselineTier::Widely,
@@ -8518,6 +12158,10 @@ pub static BASELINE_SELECTORS: phf::Map<&'static str, BaselineStatus> = phf::phf
     "indeterminate" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
+        },
+    "interest-button" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
         },
     "interest-source" => BaselineStatus {
             tier: BaselineTier::Limited,
@@ -8575,8 +12219,12 @@ pub static BASELINE_SELECTORS: phf::Map<&'static str, BaselineStatus> = phf::phf
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
+    "navigation-source" => BaselineStatus {
+            tier: BaselineTier::Limited,
+            year: BaselineYear::Unknown,
+        },
     "nesting" => BaselineStatus {
-            tier: BaselineTier::Newly,
+            tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
     "next-sibling" => BaselineStatus {
@@ -8612,8 +12260,8 @@ pub static BASELINE_SELECTORS: phf::Map<&'static str, BaselineStatus> = phf::phf
             year: BaselineYear::Known(2015),
         },
     "open" => BaselineStatus {
-            tier: BaselineTier::Limited,
-            year: BaselineYear::Unknown,
+            tier: BaselineTier::Newly,
+            year: BaselineYear::Known(2026),
         },
     "optional" => BaselineStatus {
             tier: BaselineTier::Widely,
@@ -8720,7 +12368,7 @@ pub static BASELINE_SELECTORS: phf::Map<&'static str, BaselineStatus> = phf::phf
             year: BaselineYear::Unknown,
         },
     "state" => BaselineStatus {
-            tier: BaselineTier::Newly,
+            tier: BaselineTier::Widely,
             year: BaselineYear::Known(2024),
         },
     "subsequent-sibling" => BaselineStatus {
@@ -8756,11 +12404,11 @@ pub static BASELINE_SELECTORS: phf::Map<&'static str, BaselineStatus> = phf::phf
             year: BaselineYear::Known(2015),
         },
     "user-invalid" => BaselineStatus {
-            tier: BaselineTier::Newly,
+            tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
     "user-valid" => BaselineStatus {
-            tier: BaselineTier::Newly,
+            tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
     "valid" => BaselineStatus {

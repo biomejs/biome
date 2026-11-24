@@ -2000,8 +2000,10 @@ export interface JsSvelteSnippetRoot extends JsAstNode {
 	readonly kind: "JS_SVELTE_SNIPPET_ROOT";
 	readonly name: AnyJsBinding | undefined;
 	withName(value: AnyJsBinding): JsSvelteSnippetRoot;
-	readonly parameters: JsParameters | undefined;
-	withParameters(value: JsParameters): JsSvelteSnippetRoot;
+	readonly typeParameters: TsTypeParameters | undefined;
+	withTypeParameters(value: TsTypeParameters | undefined): JsSvelteSnippetRoot;
+	readonly parameters: AnyJsSvelteSnippetParameters | undefined;
+	withParameters(value: AnyJsSvelteSnippetParameters): JsSvelteSnippetRoot;
 	readonly eofToken: string | undefined;
 	withEofToken(value: JsAstToken): JsSvelteSnippetRoot;
 	token(field: "eofToken"): JsAstToken | undefined;
@@ -2403,6 +2405,15 @@ export interface JsxShorthandAttribute extends JsAstNode {
 	readonly rCurlyToken: string | undefined;
 	withRCurlyToken(value: JsAstToken): JsxShorthandAttribute;
 	token(field: "lCurlyToken" | "rCurlyToken"): JsAstToken | undefined;
+	token(field: string): JsAstToken | undefined;
+}
+export interface JsxSingleTagRoot extends JsAstNode {
+	readonly kind: "JSX_SINGLE_TAG_ROOT";
+	readonly tag: AnyJsxSingleTag | undefined;
+	withTag(value: AnyJsxSingleTag): JsxSingleTagRoot;
+	readonly eofToken: string | undefined;
+	withEofToken(value: JsAstToken): JsxSingleTagRoot;
+	token(field: "eofToken"): JsAstToken | undefined;
 	token(field: string): JsAstToken | undefined;
 }
 export interface JsxSpreadAttribute extends JsAstNode {
@@ -4209,6 +4220,7 @@ export type AnyJsRoot =
 	| JsSvelteSnippetRoot
 	| JsVueGenericRoot
 	| JsVueSlotPropsRoot
+	| JsxSingleTagRoot
 	| TsDeclarationModule;
 export type AnyJsStatement =
 	| JsBlockStatement
@@ -4248,6 +4260,7 @@ export type AnyJsSvelteDeclaration =
 	| JsBogusVariableDeclaration
 	| JsVariableDeclaration;
 export type AnyJsSvelteLegacyConstDeclarator = JsBogus | JsVariableDeclarator;
+export type AnyJsSvelteSnippetParameters = JsBogus | JsParameters;
 export type AnyJsSwitchClause = JsCaseClause | JsDefaultClause;
 export type AnyJsTemplateElement = JsTemplateChunkElement | JsTemplateElement;
 export type AnyJsVueGenericTypeParameters = JsBogus | TsTypeParameterList;
@@ -4281,6 +4294,13 @@ export type AnyJsxObjectName =
 	| JsxMemberName
 	| JsxNamespaceName
 	| JsxReferenceIdentifier;
+export type AnyJsxSingleTag =
+	| JsBogus
+	| JsxClosingElement
+	| JsxClosingFragment
+	| JsxOpeningElement
+	| JsxOpeningFragment
+	| JsxSelfClosingElement;
 export type AnyJsxTag =
 	| AstroImplicitFragment
 	| JsxElement
@@ -4567,6 +4587,7 @@ export interface JsNodeByKind {
 	readonly JSX_REFERENCE_IDENTIFIER: JsxReferenceIdentifier;
 	readonly JSX_SELF_CLOSING_ELEMENT: JsxSelfClosingElement;
 	readonly JSX_SHORTHAND_ATTRIBUTE: JsxShorthandAttribute;
+	readonly JSX_SINGLE_TAG_ROOT: JsxSingleTagRoot;
 	readonly JSX_SPREAD_ATTRIBUTE: JsxSpreadAttribute;
 	readonly JSX_SPREAD_CHILD: JsxSpreadChild;
 	readonly JSX_STRING: JsxString;

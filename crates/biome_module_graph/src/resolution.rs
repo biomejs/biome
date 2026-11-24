@@ -1,7 +1,7 @@
 use crate::{ModuleDb, ModuleInfo, SUPPORTED_EXTENSIONS};
 use biome_resolver::{
-    ResolveOptions, ResolvedSpecifier, ResolverDb, ResolverDbAdapter, ResolverPathData,
-    resolve_with_metadata,
+    ResolutionKind, ResolveOptions, ResolvedPath, ResolvedSpecifier, ResolverDb, ResolverDbAdapter,
+    ResolverPathData, SassLoadRule, resolve_sass, resolve_with_metadata,
 };
 use camino::Utf8Path;
 
@@ -49,6 +49,16 @@ pub enum ResolutionMode {
     /// These are the [ResolutionMode::JavaScript] rules, extended with the
     /// `.vue`, `.svelte` and `.astro` component extensions.
     HtmlScript,
+
+    /// Rules for stylesheets loaded by the Sass `@use`, `@forward` and
+    /// `@import` rules of SCSS files.
+    ///
+    /// Resolution follows Sass: the extensions `.sass`, `.scss` and `.css`,
+    /// partials with a leading `_`, `index` files, and import-only files for
+    /// `@import`. See [resolve_sass] for the rules that apply. Biome doesn't
+    /// analyze `.sass` files, but resolving them keeps a load from selecting
+    /// a `.css` file that Sass wouldn't load.
+    Sass(SassLoadRule),
 }
 
 /// Identifies one module-resolution query.
@@ -68,15 +78,18 @@ pub fn resolve_module_request<'db>(
     db: &'db dyn ResolverDb,
     request: ResolutionRequest<'db>,
 ) -> ResolvedSpecifier {
-    let options = resolve_options(request.mode(db));
+    let mode = request.mode(db);
+    let options = resolve_options(mode);
     let proxy = ResolverDbAdapter::new(db);
-    resolve_with_metadata(
-        request.specifier(db),
-        request.base_directory(db).path(db),
-        &proxy,
-        &options,
-    )
-    .into()
+    let specifier = request.specifier(db);
+    let base_directory = request.base_directory(db).path(db);
+    match mode {
+        ResolutionMode::Sass(rule) => {
+            let resolved = resolve_sass(specifier, base_directory, &proxy, rule, &options);
+            ResolvedSpecifier::new(ResolvedPath::new(resolved), ResolutionKind::Other)
+        }
+        _ => resolve_with_metadata(specifier, base_directory, &proxy, &options).into(),
+    }
 }
 
 /// Resolves `specifier` relative to `base_directory`.
@@ -132,6 +145,13 @@ fn resolve_options(mode: ResolutionMode) -> ResolveOptions<'static> {
             resolve_node_builtins: true,
             resolve_bun_builtins: true,
             resolve_types: true,
+            ..Default::default()
+        },
+        ResolutionMode::Sass(_) => ResolveOptions {
+            assume_relative: true,
+            condition_names: &["sass", "style", "default"],
+            default_files: &["index"],
+            extensions: &["sass", "scss", "css"],
             ..Default::default()
         },
     }

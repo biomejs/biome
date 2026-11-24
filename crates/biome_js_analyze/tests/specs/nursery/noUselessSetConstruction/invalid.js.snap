@@ -164,7 +164,7 @@ invalid.js:10:18 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━
   i Unsafe fix: Remove the unnecessary copy.
   
     10 │ (selected).union(new·Set((other)));
-       │                  ------- -     -   
+       │                  --------      -   
 
 ```
 
@@ -761,7 +761,7 @@ invalid.js:42:1 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━�
   i Unsafe fix: Remove the unnecessary copy.
   
     42 │ new·Set((selected.union(other)));
-       │ ------- -                    -   
+       │ --------                     -   
 
 ```
 
@@ -786,7 +786,7 @@ invalid.js:43:1 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━�
   i Unsafe fix: Remove the unnecessary copy.
   
     43 │ new·Set((selected).union(other));
-       │ ------- -                     -  
+       │ --------                      -  
 
 ```
 
@@ -835,7 +835,7 @@ invalid.js:47:5 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━�
   i Unsafe fix: Remove the unnecessary copy.
   
     47 │ new·new·Set((selected.union(other))).constructor();
-       │     ------- -                    -                 
+       │     --------                     -                 
 
 ```
 

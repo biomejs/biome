@@ -55,8 +55,7 @@ info: svelte/comments/comment-after-block-delimiter.svelte
 	<!-- before expression -->{g}
 {/if}
 {#if h}
-	<!-- before block -->
-	{#if i}
+	<!-- before block -->{#if i}
 		<i>x</i>
 	{/if}
 {/if}

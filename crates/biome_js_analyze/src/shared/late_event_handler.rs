@@ -88,10 +88,16 @@ pub fn find_event_handler(
 /// A pause counts when it completes before `node` does, or when `node` is in the condition or
 /// body of a loop that pauses, because the next iteration then runs after the pause. Pauses
 /// inside functions nested in `handler` don't count.
+///
+/// Returns `None` without searching when `handler` is neither `async` nor a generator, because
+/// such a function can't pause.
 pub fn find_earlier_pause(
     node: &impl AstNode<Language = JsLanguage>,
     handler: &AnyFunctionBoundary,
 ) -> Option<TextRange> {
+    if !handler.is_async() && !handler.is_generator() {
+        return None;
+    }
     let node = node.syntax();
     let node_range = node.text_trimmed_range();
     let earlier_pause = pause_points(handler, node_range.end()).find(|pause| {

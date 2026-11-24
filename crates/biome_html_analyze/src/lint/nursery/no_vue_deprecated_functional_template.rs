@@ -4,7 +4,6 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_html_syntax::{AnyHtmlAttribute, AnyHtmlElement, HtmlRoot, T};
 use biome_languages::HtmlFileSource;
-use biome_rowan::AstNodeList;
 use biome_rule_options::no_vue_deprecated_functional_template::NoVueDeprecatedFunctionalTemplateOptions;
 
 declare_lint_rule! {
@@ -58,7 +57,7 @@ impl Rule for NoVueDeprecatedFunctionalTemplate {
         }
 
         // Only the first top-level `<template>` is the component's template.
-        let template = ctx.query().html().iter().find_map(|element| match element {
+        let template = ctx.query().elements().find_map(|element| match element {
             AnyHtmlElement::HtmlElement(element)
                 if element
                     .opening_element()

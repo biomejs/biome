@@ -1,10 +1,9 @@
 use crate::TriviaPiece;
-use crate::arc::{Arc, HeaderSlice, ThinArc};
+use crate::arc::{ThinArc, ThinArcBorrow};
 use crate::green::GreenElementFlags;
 use biome_text_size::TextSize;
 use std::fmt::Formatter;
-use std::mem::ManuallyDrop;
-use std::{fmt, mem, ptr};
+use std::{fmt, ptr};
 
 #[derive(PartialEq, Eq, Hash)]
 pub(crate) struct GreenTriviaHead {
@@ -17,42 +16,49 @@ pub(crate) fn has_live() -> bool {
     countme::get::<GreenTrivia>().live > 0
 }
 
-type ReprThin = HeaderSlice<GreenTriviaHead, [TriviaPiece; 0]>;
-
-#[repr(transparent)]
-pub(crate) struct GreenTriviaData {
-    data: ReprThin,
+/// A [GreenTrivia] borrowed for `'a`.
+///
+/// Stands in for a `&'a GreenTrivia` and is `Copy` like one. A copy is another
+/// borrow of the same trivia, not a new owner: it leaves the reference count
+/// alone and can't outlive `'a`. [Self::to_owned] returns an owned
+/// [GreenTrivia].
+#[derive(Clone, Copy)]
+pub(crate) struct GreenTriviaRef<'a> {
+    ptr: Option<ThinArcBorrow<'a, GreenTriviaHead, TriviaPiece>>,
 }
 
-impl GreenTriviaData {
-    #[expect(unused)]
+impl<'a> GreenTriviaRef<'a> {
     #[inline]
-    pub fn header(&self) -> &GreenTriviaHead {
-        &self.data.header
+    pub fn pieces(self) -> &'a [TriviaPiece] {
+        match self.ptr {
+            None => &[],
+            Some(ptr) => ptr.slice(),
+        }
     }
 
+    /// Returns an owned handle to the trivia, incrementing its reference count.
     #[inline]
-    pub fn pieces(&self) -> &[TriviaPiece] {
-        self.data.slice()
+    pub(crate) fn to_owned(self) -> GreenTrivia {
+        GreenTrivia {
+            ptr: self.ptr.map(ThinArcBorrow::to_owned),
+        }
     }
 
+    /// Creates a borrow from a pointer returned by [GreenTrivia::into_raw].
+    ///
+    /// # Safety
+    ///
+    /// `ptr` must be null or point to a green trivia that stays alive for `'a`.
     #[inline]
-    pub(crate) fn to_owned(&self) -> GreenTrivia {
-        unsafe {
-            let green = GreenTrivia::from_raw(self as *const _ as *mut _);
-            let green = ManuallyDrop::new(green);
-            GreenTrivia::clone(&green)
+    pub(crate) unsafe fn from_ptr(ptr: *mut ()) -> Self {
+        Self {
+            // SAFETY: Guaranteed by the caller.
+            ptr: ptr::NonNull::new(ptr).map(|ptr| unsafe { ThinArcBorrow::from_ptr(ptr) }),
         }
     }
 }
 
-impl PartialEq for GreenTriviaData {
-    fn eq(&self, other: &Self) -> bool {
-        self.pieces() == other.pieces()
-    }
-}
-
-impl fmt::Debug for GreenTriviaData {
+impl fmt::Debug for GreenTriviaRef<'_> {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         f.debug_list().entries(self.pieces().iter()).finish()
     }
@@ -144,22 +150,29 @@ impl GreenTrivia {
         self.pieces().get(index)
     }
 
-    pub(crate) fn into_raw(self) -> *mut GreenTriviaData {
-        self.ptr.map_or_else(ptr::null_mut, |ptr| {
-            Arc::from_thin(ptr).into_raw().cast().as_ptr()
-        })
+    /// Converts the trivia into a pointer without decrementing its reference
+    /// count.
+    ///
+    /// Returns a null pointer for [Self::empty], which has no allocation.
+    /// Every other trivia returns a non-null pointer, including one that
+    /// [Self::new] created from no pieces. A non-null pointer carries a
+    /// reference that leaks unless the pointer is passed to [Self::from_raw]
+    /// exactly once.
+    pub(crate) fn into_raw(self) -> *mut () {
+        self.ptr
+            .map_or_else(ptr::null_mut, |ptr| ptr.into_raw().as_ptr())
     }
 
-    pub(crate) unsafe fn from_raw(ptr: *mut GreenTriviaData) -> Self {
-        unsafe {
-            if let Some(ptr) = ptr.as_ref() {
-                let arc = Arc::from_raw(&ptr.data as *const ReprThin);
-                let arc =
-                    mem::transmute::<Arc<ReprThin>, ThinArc<GreenTriviaHead, TriviaPiece>>(arc);
-                Self { ptr: Some(arc) }
-            } else {
-                Self { ptr: None }
-            }
+    /// Reconstructs the trivia from a pointer returned by [Self::into_raw].
+    ///
+    /// # Safety
+    ///
+    /// `ptr` must come from [Self::into_raw], and each call to
+    /// [Self::into_raw] allows a single call to this function.
+    pub(crate) unsafe fn from_raw(ptr: *mut ()) -> Self {
+        Self {
+            // SAFETY: Guaranteed by the caller.
+            ptr: ptr::NonNull::new(ptr).map(|ptr| unsafe { ThinArc::from_raw(ptr) }),
         }
     }
 }

@@ -1,0 +1,44 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome format --stdin-file-path missing/../dist/file.js
+```
+
+## `biome.json`
+
+```json
+{
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true
+  }
+}
+```
+
+## `.gitignore`
+
+```gitignore
+dist/
+
+```
+
+# Input messages
+
+```block
+  statement(  )  
+```
+
+# Emitted Messages
+
+```block
+  statement(  )  
+```
+
+```block
+The content was not formatted because the path `<TEMP_DIR>/normalizes_stdin_paths_before_vcs_matching/dist/file.js` is ignored.
+```

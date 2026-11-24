@@ -8,19 +8,702 @@
 
 use std::{
     fs,
+    sync::Arc,
     thread::{self, sleep},
     time::Duration,
 };
 
-use biome_fs::TemporaryFs;
+use biome_configuration::{Configuration, vcs::VcsClientKind, vcs::VcsConfiguration};
+use biome_fs::{BiomePath, MemoryFileSystem, TemporaryFs};
 
 use crate::{
+    Workspace,
     projects::ProjectKey,
     scanner::ScanKind,
     scanner::test_utils::{MockWorkspaceWatcherBridge, StopSender},
+    scanner::workspace_bridges::{ScannerWatcherBridge, WorkspaceScannerBridge},
+    settings::ModuleGraphResolutionKind,
+    test_utils::{
+        setup_workspace_and_open_project,
+        setup_workspace_and_open_project_and_get_watcher_instruction_receiver,
+    },
+    workspace::{
+        FeatureName, IgnoreKind, OpenProjectParams, PathIsIgnoredParams, ScanProjectParams,
+        UpdateSettingsParams,
+    },
 };
 
 use super::*;
+
+#[test]
+fn ignore_file_events_rescan_parent_directory() {
+    let mut fs = TemporaryFs::new("ignore_file_events_rescan_parent_directory");
+    fs.create_file("nested/.gitignore", "generated.js\n");
+
+    let os_fs = fs.create_os();
+    let project_path = Utf8Path::new(fs.cli_path());
+    let ignore_directory = project_path.join("nested");
+    let ignore_path = ignore_directory.join(".gitignore");
+    let renamed_path = ignore_directory.join(".ignore");
+    let (mut mock_bridge, _bridge_rx) =
+        MockWorkspaceWatcherBridge::new(&os_fs, ProjectKey::new(), ScanKind::Project);
+    mock_bridge.ignored_paths.insert(ignore_path.clone());
+    mock_bridge.ignored_paths.insert(renamed_path.clone());
+
+    for event in [
+        NotifyEvent {
+            kind: EventKind::Create(CreateKind::File),
+            paths: vec![ignore_path.clone().into_std_path_buf()],
+            attrs: Default::default(),
+        },
+        NotifyEvent {
+            kind: EventKind::Modify(ModifyKind::Any),
+            paths: vec![ignore_path.clone().into_std_path_buf()],
+            attrs: Default::default(),
+        },
+        NotifyEvent {
+            kind: EventKind::Remove(RemoveKind::File),
+            paths: vec![ignore_path.clone().into_std_path_buf()],
+            attrs: Default::default(),
+        },
+        NotifyEvent {
+            kind: EventKind::Modify(ModifyKind::Name(RenameMode::Both)),
+            paths: vec![
+                ignore_path.clone().into_std_path_buf(),
+                renamed_path.clone().into_std_path_buf(),
+            ],
+            attrs: Default::default(),
+        },
+    ] {
+        mock_bridge.indexed_folders.pin().clear();
+        Watcher::handle_notify_event(&mock_bridge, event);
+        assert!(
+            mock_bridge
+                .indexed_folders
+                .pin()
+                .contains(&ignore_directory)
+        );
+        assert!(mock_bridge.indexed_files.is_empty());
+    }
+}
+
+#[test]
+fn rename_events_preserve_unequal_alias_groups() {
+    let fs = MemoryFileSystem::default();
+    let physical_from = Utf8PathBuf::from("/physical/from.js");
+    let physical_to = Utf8PathBuf::from("/physical/to.js");
+    let from = Utf8PathBuf::from("/project/from.js");
+    let ignored_from = Utf8PathBuf::from("/project/ignored-from.js");
+    let first_to = Utf8PathBuf::from("/project/first-to.js");
+    let second_to = Utf8PathBuf::from("/project/second-to.js");
+    let (mut mock_bridge, _bridge_rx) =
+        MockWorkspaceWatcherBridge::new(&fs, ProjectKey::new(), ScanKind::Project);
+    mock_bridge.ignored_paths.insert(ignored_from.clone());
+    mock_bridge
+        .logical_paths_by_physical_path
+        .insert(physical_from.clone(), vec![from.clone(), ignored_from]);
+    mock_bridge.logical_paths_by_physical_path.insert(
+        physical_to.clone(),
+        vec![first_to.clone(), second_to.clone()],
+    );
+    mock_bridge.indexed_files.pin().insert(from.clone());
+
+    Watcher::handle_notify_event(
+        &mock_bridge,
+        NotifyEvent {
+            kind: EventKind::Modify(ModifyKind::Name(RenameMode::Both)),
+            paths: vec![
+                physical_from.into_std_path_buf(),
+                physical_to.into_std_path_buf(),
+            ],
+            attrs: Default::default(),
+        },
+    );
+
+    let indexed_files = mock_bridge.indexed_files.pin();
+    assert!(!indexed_files.contains(&from));
+    assert!(indexed_files.contains(&first_to));
+    assert!(indexed_files.contains(&second_to));
+}
+
+#[test]
+fn rename_events_index_the_destination_when_the_source_refresh_fails() {
+    let fs = MemoryFileSystem::default();
+    let physical_from = Utf8PathBuf::from("/physical/a/.gitignore");
+    let physical_to = Utf8PathBuf::from("/physical/b/rules.js");
+    let from = Utf8PathBuf::from("/project/a/.gitignore");
+    let to = Utf8PathBuf::from("/project/b/rules.js");
+    let (mut mock_bridge, _bridge_rx) =
+        MockWorkspaceWatcherBridge::new(&fs, ProjectKey::new(), ScanKind::Project);
+    mock_bridge
+        .failing_ignore_refreshes
+        .insert(Utf8PathBuf::from("/project/a"));
+    mock_bridge
+        .logical_paths_by_physical_path
+        .insert(physical_from.clone(), vec![from]);
+    mock_bridge
+        .logical_paths_by_physical_path
+        .insert(physical_to.clone(), vec![to.clone()]);
+
+    Watcher::handle_notify_event(
+        &mock_bridge,
+        NotifyEvent {
+            kind: EventKind::Modify(ModifyKind::Name(RenameMode::Both)),
+            paths: vec![
+                physical_from.into_std_path_buf(),
+                physical_to.into_std_path_buf(),
+            ],
+            attrs: Default::default(),
+        },
+    );
+
+    assert!(mock_bridge.indexed_files.pin().contains(&to));
+}
+
+#[test]
+fn modify_events_keep_existing_aliases_indexed_next_to_stale_aliases() {
+    let mut fs = TemporaryFs::new("modify_events_keep_existing_aliases_indexed");
+    fs.create_file("b/file.js", "statement();");
+    let physical_path = fs.working_directory.join("physical/file.js");
+    let stale_alias = fs.working_directory.join("a/file.js");
+    let existing_alias = fs.working_directory.join("b/file.js");
+    let os = fs.create_os();
+    let (mut mock_bridge, _bridge_rx) =
+        MockWorkspaceWatcherBridge::new(&os, ProjectKey::new(), ScanKind::Project);
+    mock_bridge.logical_paths_by_physical_path.insert(
+        physical_path.clone(),
+        vec![stale_alias.clone(), existing_alias.clone()],
+    );
+    mock_bridge.indexed_files.pin().insert(stale_alias.clone());
+    mock_bridge
+        .indexed_files
+        .pin()
+        .insert(existing_alias.clone());
+
+    Watcher::handle_notify_event(
+        &mock_bridge,
+        NotifyEvent {
+            kind: EventKind::Modify(ModifyKind::Data(notify::event::DataChange::Content)),
+            paths: vec![physical_path.into_std_path_buf()],
+            attrs: Default::default(),
+        },
+    );
+
+    let indexed_files = mock_bridge.indexed_files.pin();
+    assert!(!indexed_files.contains(&stale_alias));
+    assert!(indexed_files.contains(&existing_alias));
+    drop(indexed_files);
+    fs::remove_dir_all(fs.working_directory).unwrap();
+}
+
+#[test]
+fn nested_ignore_file_events_refresh_matchers() {
+    let file_path = Utf8PathBuf::from("/project/nested/generated/file.js");
+    let ignore_path = Utf8PathBuf::from("/project/nested/.gitignore");
+    let renamed_path = Utf8PathBuf::from("/project/nested/renamed.txt");
+    let fs = Arc::new(MemoryFileSystem::default());
+    fs.insert(Utf8PathBuf::from("/project/.gitignore"), "");
+    fs.insert(ignore_path.clone(), "generated/\n");
+    fs.insert(
+        Utf8PathBuf::from("/project/nested/generated/.gitignore"),
+        "!file.js\n",
+    );
+    fs.insert(file_path.clone(), "statement();");
+    let fs_handle = fs.clone();
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/project");
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            workspace_directory: Some(BiomePath::new("/project")),
+            configuration: Configuration {
+                vcs: Some(VcsConfiguration {
+                    use_ignore_file: Some(true.into()),
+                    enabled: Some(true.into()),
+                    client_kind: Some(VcsClientKind::Git),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            },
+            extended_configurations: Default::default(),
+            module_graph_resolution_kind: ModuleGraphResolutionKind::ModulesAndTypes,
+        })
+        .expect("can update settings");
+    workspace
+        .scan_project(ScanProjectParams {
+            project_key,
+            watch: false,
+            force: false,
+            scan_kind: ScanKind::Project,
+            verbose: false,
+        })
+        .expect("can scan the project");
+
+    let is_ignored = || {
+        workspace
+            .is_path_ignored(PathIsIgnoredParams {
+                project_key,
+                path: BiomePath::new(&file_path),
+                is_dir: false,
+                features: FeatureName::default(),
+                ignore_kind: IgnoreKind::Path,
+            })
+            .unwrap()
+    };
+    let bridge = ScannerWatcherBridge::new((&workspace.scanner, &workspace));
+    let send_event = |kind, paths: Vec<Utf8PathBuf>| {
+        Watcher::handle_notify_event(
+            &bridge,
+            NotifyEvent {
+                kind,
+                paths: paths
+                    .into_iter()
+                    .map(Utf8PathBuf::into_std_path_buf)
+                    .collect(),
+                attrs: Default::default(),
+            },
+        );
+    };
+
+    assert!(is_ignored());
+    assert!(!workspace.is_indexed(&file_path));
+
+    fs_handle.insert(ignore_path.clone(), "");
+    send_event(
+        EventKind::Modify(ModifyKind::Any),
+        vec![ignore_path.clone()],
+    );
+    assert!(!is_ignored());
+    assert!(workspace.is_indexed(&file_path));
+
+    fs_handle.insert(ignore_path.clone(), "generated/\n");
+    send_event(
+        EventKind::Create(CreateKind::File),
+        vec![ignore_path.clone()],
+    );
+    assert!(is_ignored());
+    assert!(!workspace.is_indexed(&file_path));
+
+    fs_handle.remove(&ignore_path);
+    send_event(
+        EventKind::Remove(RemoveKind::File),
+        vec![ignore_path.clone()],
+    );
+    assert!(!is_ignored());
+    assert!(workspace.is_indexed(&file_path));
+
+    fs_handle.insert(ignore_path.clone(), "generated/\n");
+    send_event(
+        EventKind::Create(CreateKind::File),
+        vec![ignore_path.clone()],
+    );
+    assert!(is_ignored());
+    assert!(!workspace.is_indexed(&file_path));
+
+    fs_handle.remove(&ignore_path);
+    fs_handle.insert(renamed_path.clone(), "generated/\n");
+    send_event(
+        EventKind::Modify(ModifyKind::Name(RenameMode::Both)),
+        vec![ignore_path, renamed_path],
+    );
+    assert!(!is_ignored());
+    assert!(workspace.is_indexed(&file_path));
+}
+
+fn git_configuration(root: Option<&str>) -> Configuration {
+    Configuration {
+        vcs: Some(VcsConfiguration {
+            use_ignore_file: Some(true.into()),
+            enabled: Some(true.into()),
+            client_kind: Some(VcsClientKind::Git),
+            root: root.map(String::from),
+            ..Default::default()
+        }),
+        ..Default::default()
+    }
+}
+
+#[test]
+fn shared_ignore_file_refreshes_every_project_when_one_project_fails() {
+    let fs = Arc::new(MemoryFileSystem::default());
+    fs.insert(Utf8PathBuf::from("/repo/.gitignore"), "");
+    fs.insert(Utf8PathBuf::from("/repo/a/file.js"), "statement();");
+    fs.insert(Utf8PathBuf::from("/repo/b/ignored.js"), "statement();");
+    let fs_handle = fs.clone();
+
+    let (workspace, first_key) = setup_workspace_and_open_project(fs, "/repo/a");
+    let second_key = workspace
+        .open_project(OpenProjectParams {
+            path: BiomePath::new("/repo/b"),
+            open_uninitialized: true,
+        })
+        .unwrap()
+        .project_key;
+    for (project_key, path) in [(first_key, "/repo/a"), (second_key, "/repo/b")] {
+        workspace
+            .update_settings(UpdateSettingsParams {
+                project_key,
+                workspace_directory: Some(BiomePath::new(path)),
+                configuration: git_configuration(Some("..")),
+                extended_configurations: Default::default(),
+                module_graph_resolution_kind: ModuleGraphResolutionKind::ModulesAndTypes,
+            })
+            .expect("can update settings");
+        workspace
+            .scan_project(ScanProjectParams {
+                project_key,
+                watch: false,
+                force: false,
+                scan_kind: ScanKind::Project,
+                verbose: false,
+            })
+            .expect("can scan the project");
+    }
+
+    // The nested ignore file of the first project becomes unreadable after the scan.
+    fs_handle.insert(
+        Utf8PathBuf::from("/repo/a/pkg/.gitignore"),
+        [0xff].as_slice(),
+    );
+    fs_handle.insert(Utf8PathBuf::from("/repo/.gitignore"), "ignored.js\n");
+    let bridge = ScannerWatcherBridge::new((&workspace.scanner, &workspace));
+    let result = bridge.refresh_vcs_watch_path(Utf8Path::new("/repo/.gitignore"));
+
+    assert!(
+        !result
+            .expect("a failing project doesn't abort the refresh")
+            .is_empty()
+    );
+    assert!(
+        workspace
+            .is_path_ignored(PathIsIgnoredParams {
+                project_key: second_key,
+                path: BiomePath::new("/repo/b/ignored.js"),
+                is_dir: false,
+                features: FeatureName::default(),
+                ignore_kind: IgnoreKind::Path,
+            })
+            .unwrap()
+    );
+}
+
+#[test]
+fn ignore_file_events_do_not_rescan_projects_without_vcs_ignores() {
+    let file_path = Utf8PathBuf::from("/project/nested/file.js");
+    let ignore_path = Utf8PathBuf::from("/project/nested/.gitignore");
+    let fs = Arc::new(MemoryFileSystem::default());
+    fs.insert(ignore_path.clone(), "file.js\n");
+    fs.insert(file_path.clone(), "statement();");
+    let fs_handle = fs.clone();
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/project");
+    workspace
+        .scan_project(ScanProjectParams {
+            project_key,
+            watch: false,
+            force: false,
+            scan_kind: ScanKind::Project,
+            verbose: false,
+        })
+        .expect("can scan the project");
+    assert!(workspace.is_indexed(&file_path));
+
+    // Removing the file without an event exposes a rescan of its folder.
+    fs_handle.remove(&file_path);
+    let bridge = ScannerWatcherBridge::new((&workspace.scanner, &workspace));
+    Watcher::handle_notify_event(
+        &bridge,
+        NotifyEvent {
+            kind: EventKind::Modify(ModifyKind::Any),
+            paths: vec![ignore_path.into_std_path_buf()],
+            attrs: Default::default(),
+        },
+    );
+
+    assert!(workspace.is_indexed(&file_path));
+}
+
+#[test]
+fn root_ignore_file_events_refresh_matcher() {
+    let file_path = Utf8PathBuf::from("/project/generated.js");
+    let ignore_path = Utf8PathBuf::from("/project/.gitignore");
+    let fs = Arc::new(MemoryFileSystem::default());
+    fs.insert(ignore_path.clone(), "generated.js\n");
+    fs.insert(file_path.clone(), "statement();");
+    let fs_handle = fs.clone();
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/project");
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            workspace_directory: Some(BiomePath::new("/project")),
+            configuration: Configuration {
+                vcs: Some(VcsConfiguration {
+                    use_ignore_file: Some(true.into()),
+                    enabled: Some(true.into()),
+                    client_kind: Some(VcsClientKind::Git),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            },
+            extended_configurations: Default::default(),
+            module_graph_resolution_kind: ModuleGraphResolutionKind::ModulesAndTypes,
+        })
+        .expect("can update settings");
+    workspace
+        .scan_project(ScanProjectParams {
+            project_key,
+            watch: false,
+            force: false,
+            scan_kind: ScanKind::Project,
+            verbose: false,
+        })
+        .expect("can scan the project");
+
+    let is_ignored = || {
+        workspace
+            .is_path_ignored(PathIsIgnoredParams {
+                project_key,
+                path: BiomePath::new(&file_path),
+                is_dir: false,
+                features: FeatureName::default(),
+                ignore_kind: IgnoreKind::Path,
+            })
+            .unwrap()
+    };
+    let bridge = ScannerWatcherBridge::new((&workspace.scanner, &workspace));
+    let send_event = |kind| {
+        Watcher::handle_notify_event(
+            &bridge,
+            NotifyEvent {
+                kind,
+                paths: vec![ignore_path.clone().into_std_path_buf()],
+                attrs: Default::default(),
+            },
+        );
+    };
+
+    assert!(is_ignored());
+    assert!(!workspace.is_indexed(&file_path));
+
+    fs_handle.insert(ignore_path.clone(), "");
+    send_event(EventKind::Modify(ModifyKind::Any));
+    assert!(!is_ignored());
+    assert!(workspace.is_indexed(&file_path));
+
+    fs_handle.insert(ignore_path.clone(), "generated.js\n");
+    send_event(EventKind::Create(CreateKind::File));
+    assert!(is_ignored());
+    assert!(!workspace.is_indexed(&file_path));
+
+    fs_handle.remove(&ignore_path);
+    send_event(EventKind::Remove(RemoveKind::File));
+    assert!(!is_ignored());
+    assert!(workspace.is_indexed(&file_path));
+}
+
+#[test]
+fn root_ignore_file_events_preserve_coexisting_ignore_files() {
+    let git_ignored_path = Utf8PathBuf::from("/project/git-ignored.js");
+    let ignored_path = Utf8PathBuf::from("/project/ignored.js");
+    let updated_path = Utf8PathBuf::from("/project/updated.js");
+    let gitignore_path = Utf8PathBuf::from("/project/.gitignore");
+    let ignore_path = Utf8PathBuf::from("/project/.ignore");
+    let fs = Arc::new(MemoryFileSystem::default());
+    fs.insert(gitignore_path.clone(), "git-ignored.js\n");
+    fs.insert(ignore_path.clone(), "ignored.js\n");
+    for path in [&git_ignored_path, &ignored_path, &updated_path] {
+        fs.insert(path.clone(), "statement();");
+    }
+    let fs_handle = fs.clone();
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/project");
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            workspace_directory: Some(BiomePath::new("/project")),
+            configuration: Configuration {
+                vcs: Some(VcsConfiguration {
+                    use_ignore_file: Some(true.into()),
+                    enabled: Some(true.into()),
+                    client_kind: Some(VcsClientKind::Git),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            },
+            extended_configurations: Default::default(),
+            module_graph_resolution_kind: ModuleGraphResolutionKind::ModulesAndTypes,
+        })
+        .expect("can update settings");
+    workspace
+        .scan_project(ScanProjectParams {
+            project_key,
+            watch: false,
+            force: false,
+            scan_kind: ScanKind::Project,
+            verbose: false,
+        })
+        .expect("can scan the project");
+
+    let is_ignored = |path: &Utf8Path| {
+        workspace
+            .is_path_ignored(PathIsIgnoredParams {
+                project_key,
+                path: BiomePath::new(path),
+                is_dir: false,
+                features: FeatureName::default(),
+                ignore_kind: IgnoreKind::Path,
+            })
+            .unwrap()
+    };
+    let bridge = ScannerWatcherBridge::new((&workspace.scanner, &workspace));
+    let send_event = |kind, path: &Utf8Path| {
+        Watcher::handle_notify_event(
+            &bridge,
+            NotifyEvent {
+                kind,
+                paths: vec![path.to_path_buf().into_std_path_buf()],
+                attrs: Default::default(),
+            },
+        );
+    };
+
+    assert!(is_ignored(&git_ignored_path));
+    assert!(is_ignored(&ignored_path));
+    assert!(!is_ignored(&updated_path));
+
+    fs_handle.insert(ignore_path.clone(), "updated.js\n");
+    send_event(EventKind::Modify(ModifyKind::Any), &ignore_path);
+    assert!(is_ignored(&git_ignored_path));
+    assert!(!is_ignored(&ignored_path));
+    assert!(is_ignored(&updated_path));
+
+    fs_handle.remove(&gitignore_path);
+    send_event(EventKind::Remove(RemoveKind::File), &gitignore_path);
+    assert!(!is_ignored(&git_ignored_path));
+    assert!(is_ignored(&updated_path));
+}
+
+#[test]
+fn git_info_exclude_events_refresh_root_matcher() {
+    let file_path = Utf8PathBuf::from("/project/generated.js");
+    let exclude_path = Utf8PathBuf::from("/project/.git/info/exclude");
+    let renamed_path = Utf8PathBuf::from("/project/.git/info/renamed");
+    let fs = Arc::new(MemoryFileSystem::default());
+    fs.insert(
+        Utf8PathBuf::from("/project/.git/HEAD"),
+        "ref: refs/heads/main\n",
+    );
+    fs.insert(exclude_path.clone(), "generated.js\n");
+    fs.insert(file_path.clone(), "statement();");
+    let fs_handle = fs.clone();
+
+    let (workspace, project_key, watcher_rx) =
+        setup_workspace_and_open_project_and_get_watcher_instruction_receiver(fs, "/project");
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            workspace_directory: Some(BiomePath::new("/project")),
+            configuration: Configuration {
+                vcs: Some(VcsConfiguration {
+                    use_ignore_file: Some(true.into()),
+                    enabled: Some(true.into()),
+                    client_kind: Some(VcsClientKind::Git),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            },
+            extended_configurations: Default::default(),
+            module_graph_resolution_kind: ModuleGraphResolutionKind::ModulesAndTypes,
+        })
+        .expect("can update settings");
+    workspace
+        .scan_project(ScanProjectParams {
+            project_key,
+            watch: true,
+            force: false,
+            scan_kind: ScanKind::Project,
+            verbose: false,
+        })
+        .expect("can scan the project");
+    assert!(watcher_rx.try_iter().any(|instruction| {
+        matches!(
+            instruction,
+            WatcherInstruction::WatchFolders(paths)
+                if paths.contains(Utf8Path::new("/project/.git/info"))
+        )
+    }));
+
+    let is_ignored = || {
+        workspace
+            .is_path_ignored(PathIsIgnoredParams {
+                project_key,
+                path: BiomePath::new(&file_path),
+                is_dir: false,
+                features: FeatureName::default(),
+                ignore_kind: IgnoreKind::Path,
+            })
+            .unwrap()
+    };
+    let bridge = ScannerWatcherBridge::new((&workspace.scanner, &workspace));
+    let send_event = |kind, paths: Vec<Utf8PathBuf>| {
+        Watcher::handle_notify_event(
+            &bridge,
+            NotifyEvent {
+                kind,
+                paths: paths
+                    .into_iter()
+                    .map(Utf8PathBuf::into_std_path_buf)
+                    .collect(),
+                attrs: Default::default(),
+            },
+        );
+    };
+
+    assert!(is_ignored());
+    assert!(!workspace.is_indexed(&file_path));
+
+    fs_handle.insert(exclude_path.clone(), "");
+    send_event(
+        EventKind::Modify(ModifyKind::Any),
+        vec![exclude_path.clone()],
+    );
+    assert!(!is_ignored());
+    assert!(workspace.is_indexed(&file_path));
+
+    fs_handle.insert(exclude_path.clone(), "generated.js\n");
+    send_event(
+        EventKind::Create(CreateKind::File),
+        vec![exclude_path.clone()],
+    );
+    assert!(is_ignored());
+    assert!(!workspace.is_indexed(&file_path));
+
+    fs_handle.remove(&exclude_path);
+    send_event(
+        EventKind::Remove(RemoveKind::File),
+        vec![exclude_path.clone()],
+    );
+    assert!(!is_ignored());
+    assert!(workspace.is_indexed(&file_path));
+
+    fs_handle.insert(exclude_path.clone(), "generated.js\n");
+    send_event(
+        EventKind::Create(CreateKind::File),
+        vec![exclude_path.clone()],
+    );
+    assert!(is_ignored());
+    assert!(!workspace.is_indexed(&file_path));
+
+    fs_handle.remove(&exclude_path);
+    fs_handle.insert(renamed_path.clone(), "generated.js\n");
+    send_event(
+        EventKind::Modify(ModifyKind::Name(RenameMode::Both)),
+        vec![exclude_path, renamed_path],
+    );
+    assert!(!is_ignored());
+    assert!(workspace.is_indexed(&file_path));
+}
 
 #[test]
 #[cfg_attr(target_os = "macos", ignore = "flaky on macOS")]

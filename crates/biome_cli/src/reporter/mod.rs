@@ -10,11 +10,11 @@ pub(crate) mod summary;
 pub(crate) mod terminal;
 
 use crate::cli_options::MaxDiagnostics;
+use crate::runner::crawler::EvaluatedPath;
 use crate::runner::execution::Execution;
 use biome_console::{Console, ConsoleExt, FileBufferConsole, Markup};
 use biome_diagnostics::advice::ListAdvice;
 use biome_diagnostics::{Diagnostic, Error, Severity};
-use biome_fs::BiomePath;
 use biome_json_factory::make::{
     json_member, json_member_list, json_member_name, json_number_literal, json_number_value,
     json_object_value, json_string_literal, token,
@@ -183,7 +183,7 @@ pub(crate) trait ReporterVisitor {
     fn report_handled_paths(
         &mut self,
         _writer: &mut dyn ReporterWriter,
-        _evaluated_paths: Vec<BiomePath>,
+        _evaluated_paths: Vec<EvaluatedPath>,
         _working_directory: Option<&Utf8Path>,
     ) -> io::Result<()> {
         Ok(())

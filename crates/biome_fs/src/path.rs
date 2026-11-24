@@ -1,10 +1,10 @@
-//! This module is responsible to manage paths inside Biome.
-//! It is a small wrapper around [path::Utf8PathBuf] but it is also able to
-//! give additional information around the file that holds:
-//! - the [FileHandlers] for the specific file
-//! - shortcuts to open/write to the file
-use crate::{ConfigName, PathKind};
-use camino::{Utf8Path, Utf8PathBuf};
+//! Defines filesystem path identity and path-derived behavior used throughout Biome.
+//!
+//! [`BiomePath`] preserves the logical path supplied by an adapter, normalizes `.` and `..`
+//! components without filesystem access, and derives the path's processing role. It does not
+//! canonicalize paths or resolve symbolic links.
+use crate::{ConfigName, PathKind, utils::normalize_path_buf};
+use camino::{Utf8Component, Utf8Path, Utf8PathBuf};
 use std::borrow::Cow;
 use std::cmp::Ordering;
 use std::fmt::{Debug, Formatter};
@@ -20,8 +20,7 @@ pub fn is_node_modules_path(path: &Utf8Path) -> bool {
         .any(|component| component.as_str().as_bytes() == b"node_modules")
 }
 
-/// The priority of the file
-// NOTE: The order of the variants is important, the one on the top has the highest priority
+/// Classifies paths that require different processing priorities.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Ord, PartialOrd, Hash)]
 #[cfg_attr(
     feature = "serde",
@@ -29,94 +28,126 @@ pub fn is_node_modules_path(path: &Utf8Path) -> bool {
     serde(rename_all = "camelCase")
 )]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
-pub enum FileKinds {
-    /// A configuration file has the highest priority. It's usually `biome.json` and `biome.jsonc`
-    ///
-    /// Other third-party configuration files might be added in the future
+pub enum FileRole {
+    /// A Biome configuration file that must be processed before other paths.
     Config,
-    /// It's usually `package.json` and `tsconfig.json`
+    /// A project manifest, such as `package.json` or `tsconfig.json`.
     Manifest,
-    /// An ignore file, like `.gitignore`
+    /// An ignore file, such as `.gitignore` or `.ignore`.
     Ignore,
-    /// A file to handle has the lowest priority. It's usually a traversed file, or a file opened by the LSP
+    /// A path that does not require configuration, manifest, or ignore-file priority.
     #[default]
     Handleable,
 }
 
-/// This is an internal representation of a path inside the Biome daemon.
-/// This type has its own [Ord] implementation driven by its [FileKinds], where certain files must be inspected
-/// before others. For example, configuration files and ignore files must have priority over other files.
+/// Describes how a candidate path relates to a scoped root.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum PathRelation<'a> {
+    /// The candidate and root identify the same logical path.
+    Same,
+    /// The candidate is below the root by the given normalized relative path.
+    Descendant(&'a Utf8Path),
+    /// The candidate is not contained by the root.
+    Outside,
+}
+
+const VIRTUAL_PATH_MARKER: &str = "\0biome-virtual-document\0";
+
+fn is_virtual_path(path: &Utf8Path) -> bool {
+    let mut components = path.components();
+    while let Some(component) = components.next() {
+        if component.as_str() == VIRTUAL_PATH_MARKER {
+            return components.next().is_some() && components.next().is_none();
+        }
+    }
+    false
+}
+
+/// Identifies a logical path throughout Biome.
 #[derive(Debug, Clone, Eq, Default)]
 pub struct BiomePath {
-    /// The path to the file
+    /// The logical path used for identity, policies, storage, and diagnostics.
     path: Utf8PathBuf,
-    /// Determines the kind of the file inside Biome. Some files are considered as configuration files, others as manifest files, and others as files to handle
-    kind: FileKinds,
-    /// Whether this path (usually a file) was fixed as a result of a format/lint/check command with the `--write` flag.
-    was_written: bool,
-    /// The kind of path e.g. file or directory
+    /// The processing role derived from the logical file name.
+    role: FileRole,
+    /// Compatibility metadata supplied through [`Self::new_with_kind`].
     path_kind: PathKind,
+    /// Whether this path is an opaque key for a document without filesystem backing.
+    is_virtual: bool,
 }
 
 impl PartialEq for BiomePath {
     fn eq(&self, other: &Self) -> bool {
-        self.path == other.path && self.kind == other.kind
+        self.path == other.path
     }
 }
 
 impl std::hash::Hash for BiomePath {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
         self.path.hash(state);
-        self.kind.hash(state);
     }
 }
 
 impl BiomePath {
-    pub fn new(path_to_file: impl Into<Utf8PathBuf>) -> Self {
-        let path = path_to_file.into();
-        let kind = path.file_name().map_or_default(Self::priority);
-        Self {
-            path,
-            kind,
-            was_written: false,
-            path_kind: PathKind::default(),
-        }
+    /// Constructs a normalized filesystem-backed logical path.
+    ///
+    /// ## Panic
+    ///
+    /// If it's a virtual path (in debug)
+    pub fn new(path: impl Into<Utf8PathBuf>) -> Self {
+        let path = normalize_path_buf(path.into());
+        debug_assert!(
+            !is_virtual_path(&path),
+            "virtual paths must be constructed with BiomePath::new_virtual"
+        );
+        Self::from_parts(path, false)
     }
 
-    pub fn new_with_kind(path_to_file: impl Into<Utf8PathBuf>, path_kind: PathKind) -> Self {
-        let path = path_to_file.into();
-        let kind = path.file_name().map_or_default(Self::priority);
+    pub(crate) fn from_virtual_path(path: &Utf8Path) -> Option<Self> {
+        is_virtual_path(path).then(|| Self::from_parts(path.to_path_buf(), true))
+    }
+
+    /// Constructs an opaque path key for a document without filesystem backing.
+    pub fn new_virtual(key: impl AsRef<str>) -> Self {
+        const HEX_DIGITS: &[u8; 16] = b"0123456789abcdef";
+
+        let key = key.as_ref();
+        let mut path = String::with_capacity(VIRTUAL_PATH_MARKER.len() + key.len() * 2 + 2);
+        path.push('/');
+        path.push_str(VIRTUAL_PATH_MARKER);
+        path.push_str("/v");
+        for byte in key.bytes() {
+            path.push(HEX_DIGITS[(byte >> 4) as usize] as char);
+            path.push(HEX_DIGITS[(byte & 0xf) as usize] as char);
+        }
+        Self::from_parts(path.into(), true)
+    }
+
+    /// Constructs a normalized logical path with compatibility metadata about its entry kind.
+    pub fn new_with_kind(path: impl Into<Utf8PathBuf>, path_kind: PathKind) -> Self {
         Self {
-            path,
-            kind,
-            was_written: false,
             path_kind,
+            ..Self::new(path)
         }
     }
 
-    pub fn new_written(path_to_file: impl Into<Utf8PathBuf>) -> Self {
-        let path = path_to_file.into();
-        let kind = path.file_name().map_or_default(Self::priority);
+    fn from_parts(path: Utf8PathBuf, is_virtual: bool) -> Self {
+        let role = path.file_name().map_or_default(Self::priority);
         Self {
             path,
-            kind,
-            was_written: true,
+            role,
             path_kind: PathKind::default(),
+            is_virtual,
         }
     }
 
-    /// Creates a new [BiomePath], marked as fixed
-    pub fn to_written(&self) -> Self {
-        Self {
-            path: self.path.clone(),
-            kind: self.kind,
-            was_written: true,
-            path_kind: self.path_kind,
+    #[cfg(feature = "serde")]
+    fn from_serialized(path: Utf8PathBuf) -> Self {
+        if is_virtual_path(&path) {
+            Self::from_parts(path, true)
+        } else {
+            Self::new(path)
         }
-    }
-
-    pub fn was_written(&self) -> bool {
-        self.was_written
     }
 
     /// Accepts a file opened in read mode and saves into it
@@ -141,13 +172,82 @@ impl BiomePath {
         read_to_string(path)
     }
 
-    /// The priority of the file.
-    /// - `biome.json` and `biome.jsonc` have the highest priority
-    /// - `package.json`, `tsconfig.json`/`jsconfig.json`, `turbo.json`, and `pnpm-workspace.yaml` have the second-highest priority, and they are considered as manifest files
-    /// - Other files are considered as files to handle
-    fn priority(file_name: &str) -> FileKinds {
-        if file_name == ConfigName::biome_json() || file_name == ConfigName::biome_jsonc() {
-            FileKinds::Config
+    /// Returns the logical path without exposing its owned storage.
+    pub fn as_path(&self) -> &Utf8Path {
+        &self.path
+    }
+
+    /// Returns the normalized logical path as a UTF-8 string slice.
+    pub fn as_str(&self) -> &str {
+        self.path.as_str()
+    }
+
+    /// Returns whether this is an opaque key for a document without filesystem backing.
+    pub fn is_virtual(&self) -> bool {
+        self.is_virtual
+    }
+
+    /// Returns the final path component, if one exists.
+    pub fn file_name(&self) -> Option<&str> {
+        self.path.file_name()
+    }
+
+    /// Returns the file extension without the leading dot, if one exists.
+    pub fn extension(&self) -> Option<&str> {
+        self.path.extension()
+    }
+
+    /// Returns the logical parent path, if one exists.
+    pub fn parent(&self) -> Option<&Utf8Path> {
+        self.path.parent()
+    }
+
+    /// Returns whether this logical path starts with `base` on component boundaries.
+    pub fn starts_with(&self, base: impl AsRef<Utf8Path>) -> bool {
+        self.path.starts_with(base.as_ref())
+    }
+
+    /// Returns whether this logical path ends with `child` on component boundaries.
+    pub fn ends_with(&self, child: impl AsRef<Utf8Path>) -> bool {
+        self.path.ends_with(child.as_ref())
+    }
+
+    /// Copies the normalized logical path into a raw UTF-8 path buffer.
+    pub fn to_path_buf(&self) -> Utf8PathBuf {
+        self.path.clone()
+    }
+
+    /// Relates `candidate` to this path as the scoped root.
+    ///
+    /// Descendant paths are returned relative to this root. Both paths are already lexically
+    /// normalized, so callers can pass the relative path directly to scoped matchers.
+    pub fn relation_to<'a>(&'a self, candidate: &'a Self) -> PathRelation<'a> {
+        if self.path == candidate.path {
+            PathRelation::Same
+        } else if let Ok(relative) = candidate.path.strip_prefix(&self.path)
+            // Normalized relative paths keep `..` only as leading components, which escape a
+            // relative root instead of descending into it.
+            && relative.components().next() != Some(Utf8Component::ParentDir)
+        {
+            PathRelation::Descendant(relative)
+        } else {
+            PathRelation::Outside
+        }
+    }
+
+    /// Compares paths by processing role and then by logical path.
+    ///
+    /// General [`Ord`] remains lexical; traversal and scanning use this comparison when
+    /// configuration, manifest, and ignore files must be handled first.
+    pub fn cmp_processing_priority(&self, other: &Self) -> Ordering {
+        self.role
+            .cmp(&other.role)
+            .then_with(|| self.path.cmp(&other.path))
+    }
+
+    fn priority(file_name: &str) -> FileRole {
+        if ConfigName::matches_file_name(file_name) {
+            FileRole::Config
         } else if matches!(
             file_name,
             "package.json"
@@ -157,45 +257,44 @@ impl BiomePath {
                 | "turbo.jsonc"
                 | "pnpm-workspace.yaml"
         ) {
-            FileKinds::Manifest
+            FileRole::Manifest
         } else if matches!(file_name, ".gitignore" | ".ignore") {
-            FileKinds::Ignore
+            FileRole::Ignore
         } else {
-            FileKinds::Handleable
+            FileRole::Handleable
         }
     }
 
     #[inline(always)]
     pub fn is_config(&self) -> bool {
-        matches!(self.kind, FileKinds::Config)
+        matches!(self.role, FileRole::Config)
     }
 
     #[inline(always)]
     pub fn is_manifest(&self) -> bool {
-        matches!(self.kind, FileKinds::Manifest)
+        matches!(self.role, FileRole::Manifest)
     }
 
     #[inline(always)]
     pub fn is_ignore(&self) -> bool {
-        matches!(self.kind, FileKinds::Ignore)
+        matches!(self.role, FileRole::Ignore)
     }
 
     #[inline(always)]
     pub fn is_handleable(&self) -> bool {
-        matches!(self.kind, FileKinds::Handleable)
+        matches!(self.role, FileRole::Handleable)
     }
 
-    /// Returns `true` for file types that must be scanned (if the scanner is
-    /// enabled) because Biome's own functionality relies on them.
+    /// Returns `true` for paths that Biome must inspect while scanning.
     #[inline(always)]
     pub fn is_required_during_scan(&self) -> bool {
         matches!(
-            self.kind,
-            FileKinds::Config | FileKinds::Ignore | FileKinds::Manifest
+            self.role,
+            FileRole::Config | FileRole::Ignore | FileRole::Manifest
         )
     }
 
-    #[inline(always)]
+    /// Returns the compatibility entry kind supplied at construction.
     pub fn path_kind(&self) -> PathKind {
         self.path_kind
     }
@@ -233,17 +332,17 @@ impl From<&Utf8Path> for BiomePath {
 
 impl TryFrom<PathBuf> for BiomePath {
     type Error = PathBuf;
+
     fn try_from(value: PathBuf) -> Result<Self, Self::Error> {
-        let path = Utf8PathBuf::from_path_buf(value)?;
-        Ok(Self::new(path))
+        Utf8PathBuf::from_path_buf(value).map(Self::new)
     }
 }
 
 impl TryFrom<Cow<'_, Path>> for BiomePath {
     type Error = PathBuf;
+
     fn try_from(value: Cow<'_, Path>) -> Result<Self, Self::Error> {
-        let path = Utf8PathBuf::from_path_buf(value.as_ref().into())?;
-        Ok(Self::new(path))
+        Utf8PathBuf::from_path_buf(value.as_ref().into()).map(Self::new)
     }
 }
 
@@ -293,7 +392,13 @@ impl<'de> serde::Deserialize<'de> for BiomePath {
         let path = Utf8PathBuf::from_path_buf(path).map_err(|e| {
             serde::de::Error::custom(format!("Unable to deserialize path {}", e.display()))
         })?;
-        Ok(Self::new(path))
+        Ok(Self::from_serialized(path))
+    }
+}
+
+impl From<BiomePath> for Utf8PathBuf {
+    fn from(path: BiomePath) -> Self {
+        path.path
     }
 }
 
@@ -308,12 +413,6 @@ impl schemars::JsonSchema for BiomePath {
     }
 }
 
-impl From<BiomePath> for Utf8PathBuf {
-    fn from(path: BiomePath) -> Self {
-        path.path
-    }
-}
-
 impl PartialOrd for BiomePath {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         Some(self.cmp(other))
@@ -322,19 +421,17 @@ impl PartialOrd for BiomePath {
 
 impl Ord for BiomePath {
     fn cmp(&self, other: &Self) -> Ordering {
-        match self.kind.cmp(&other.kind) {
-            Ordering::Equal => self.path.cmp(&other.path),
-            ordering => ordering,
-        }
+        self.path.cmp(&other.path)
     }
 }
 
 #[cfg(test)]
 mod test {
-    use crate::path::FileKinds;
     use camino::Utf8Path;
 
-    use super::is_node_modules_path;
+    use crate::{FileSystem, OsFileSystem};
+
+    use super::{BiomePath, FileRole, PathRelation, is_node_modules_path};
 
     #[test]
     fn detects_node_modules_paths() {
@@ -351,23 +448,21 @@ mod test {
 
     #[test]
     fn test_biome_paths() {
-        use super::BiomePath;
-        use camino::Utf8PathBuf;
-
-        let path = Utf8PathBuf::from("src/package.json");
-        let biome_path = BiomePath::new(path);
+        let biome_path = BiomePath::new("src/package.json");
         assert_eq!(biome_path.file_name(), Some("package.json"));
-        assert_eq!(BiomePath::priority("package.json"), FileKinds::Manifest);
-        assert_eq!(BiomePath::priority("turbo.json"), FileKinds::Manifest);
-        assert_eq!(BiomePath::priority("turbo.jsonc"), FileKinds::Manifest);
+        assert_eq!(BiomePath::priority("package.json"), FileRole::Manifest);
+        assert_eq!(BiomePath::priority("turbo.json"), FileRole::Manifest);
+        assert_eq!(BiomePath::priority("turbo.jsonc"), FileRole::Manifest);
         assert_eq!(
             BiomePath::priority("pnpm-workspace.yaml"),
-            FileKinds::Manifest
+            FileRole::Manifest
         );
-        assert_eq!(BiomePath::priority("biome.json"), FileKinds::Config);
-        assert_eq!(BiomePath::priority("biome.jsonc"), FileKinds::Config);
-        assert_eq!(BiomePath::priority(".gitignore"), FileKinds::Ignore);
-        assert_eq!(BiomePath::priority(".ignore"), FileKinds::Ignore);
+        assert_eq!(BiomePath::priority("biome.json"), FileRole::Config);
+        assert_eq!(BiomePath::priority("biome.jsonc"), FileRole::Config);
+        assert_eq!(BiomePath::priority(".biome.json"), FileRole::Config);
+        assert_eq!(BiomePath::priority(".biome.jsonc"), FileRole::Config);
+        assert_eq!(BiomePath::priority(".gitignore"), FileRole::Ignore);
+        assert_eq!(BiomePath::priority(".ignore"), FileRole::Ignore);
     }
 
     #[test]
@@ -383,7 +478,7 @@ mod test {
         let path6 = BiomePath::new(Utf8PathBuf::from("src/frontend/biome.jsonc"));
 
         let mut paths = [path1, path2, path3, path4, path5, path6];
-        paths.sort();
+        paths.sort_by(BiomePath::cmp_processing_priority);
         let mut iter = paths.iter();
         assert_eq!(iter.next().unwrap().file_name(), Some("biome.json"));
         assert_eq!(iter.next().unwrap().file_name(), Some("biome.jsonc"));
@@ -407,7 +502,7 @@ mod test {
         let path7 = BiomePath::new(Utf8PathBuf::from("src/frontend/package.json"));
 
         let mut paths = [path1, path2, path3, path4, path5, path6, path7];
-        paths.sort();
+        paths.sort_by(BiomePath::cmp_processing_priority);
         let mut iter = paths.iter();
         assert_eq!(iter.next().unwrap().to_string(), "src/biome.json");
         assert_eq!(iter.next().unwrap().to_string(), "src/biome.jsonc");
@@ -419,5 +514,106 @@ mod test {
         assert_eq!(iter.next().unwrap().to_string(), "src/package.json");
         assert_eq!(iter.next().unwrap().to_string(), "src/tsconfig.json");
         assert_eq!(iter.next().unwrap().to_string(), "src/README.md");
+    }
+
+    #[test]
+    fn normalizes_paths_lexically() {
+        assert_eq!(
+            BiomePath::new("project/./src/../file.js").as_str(),
+            "project/file.js"
+        );
+        assert_eq!(BiomePath::new("../../file.js").as_str(), "../../file.js");
+        assert_eq!(BiomePath::new("/../../file.js").as_str(), "/file.js");
+    }
+
+    #[test]
+    fn anchors_before_normalizing() {
+        let fs = OsFileSystem::new("/repo/project".into());
+
+        assert_eq!(
+            fs.biome_path(Utf8Path::new("missing/../dist/file.js"))
+                .as_str(),
+            "/repo/project/dist/file.js"
+        );
+        assert_eq!(fs.biome_path(Utf8Path::new("")).as_str(), "/repo/project");
+
+        let root = fs.biome_path(Utf8Path::new("config"));
+        assert_eq!(
+            fs.biome_path_from(&root, Utf8Path::new("../shared/file.js"))
+                .as_str(),
+            "/repo/project/shared/file.js"
+        );
+    }
+
+    #[test]
+    fn virtual_paths_preserve_identity_without_becoming_filesystem_paths() {
+        let first = BiomePath::new_virtual("untitled:first/../document.js");
+        let second = BiomePath::new_virtual("untitled:second/../document.js");
+
+        assert!(first.is_virtual());
+        assert!(second.is_virtual());
+        assert_ne!(first, second);
+        assert!(!BiomePath::new("/project/file.js").is_virtual());
+    }
+
+    #[test]
+    fn filesystem_adapters_preserve_virtual_paths() {
+        let fs = OsFileSystem::new("/repo/project".into());
+        let path = BiomePath::new_virtual("untitled:document.js");
+
+        let reconstructed = fs.biome_path(path.as_path());
+
+        assert_eq!(reconstructed, path);
+        assert!(reconstructed.is_virtual());
+    }
+
+    #[cfg(debug_assertions)]
+    #[test]
+    #[should_panic(expected = "virtual paths must be constructed with BiomePath::new_virtual")]
+    fn filesystem_constructor_rejects_the_virtual_namespace() {
+        let virtual_path = BiomePath::new_virtual("untitled:document.js");
+        BiomePath::new(virtual_path.to_path_buf());
+    }
+
+    #[cfg(feature = "serde")]
+    #[test]
+    fn serialized_virtual_paths_preserve_their_origin() {
+        let path = BiomePath::new_virtual("untitled:document.js");
+        let serialized = serde_json::to_string(&path).unwrap();
+        let deserialized: BiomePath = serde_json::from_str(&serialized).unwrap();
+
+        assert_eq!(deserialized, path);
+        assert!(deserialized.is_virtual());
+    }
+
+    #[test]
+    fn relates_normalized_paths() {
+        let root = BiomePath::new("/repo/project/../project");
+        let same = BiomePath::new("/repo/project");
+        let descendant = BiomePath::new("/repo/project/dist/file.js");
+        let outside = BiomePath::new("/repo/other/file.js");
+
+        assert_eq!(root.relation_to(&same), PathRelation::Same);
+        assert_eq!(
+            root.relation_to(&descendant),
+            PathRelation::Descendant(Utf8Path::new("dist/file.js"))
+        );
+        assert_eq!(root.relation_to(&outside), PathRelation::Outside);
+    }
+
+    #[test]
+    fn relative_roots_do_not_contain_parent_escapes() {
+        assert_eq!(
+            BiomePath::new("..").relation_to(&BiomePath::new("../../outside.js")),
+            PathRelation::Outside
+        );
+        assert_eq!(
+            BiomePath::new("").relation_to(&BiomePath::new("../outside.js")),
+            PathRelation::Outside
+        );
+        assert_eq!(
+            BiomePath::new("").relation_to(&BiomePath::new("inside.js")),
+            PathRelation::Descendant(Utf8Path::new("inside.js"))
+        );
     }
 }

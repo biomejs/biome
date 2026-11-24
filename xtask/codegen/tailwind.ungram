@@ -254,6 +254,7 @@ AnyCssValue =
 	| CssUnaryExpression
 	| CssBinaryExpression
 	| CssParenthesizedExpression
+	| CssBogusPropertyValue
 
 CssIdentifier = 'ident'
 
@@ -310,6 +311,7 @@ AnyCssExpression =
 	| CssBinaryExpression
 	| CssUnaryExpression
 	| CssParenthesizedExpression
+	| CssBogusPropertyValue
 
 CssListOfComponentValuesExpression = CssComponentValueList
 

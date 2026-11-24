@@ -148,6 +148,14 @@ pub struct CallArgumentTypeInput<'db> {
     pub argument_index: usize,
 }
 
+/// Interned input for [`super::normalize_member_type`].
+#[salsa::interned]
+#[derive(Debug)]
+pub(crate) struct MemberTypeInput<'db> {
+    #[returns(copy)]
+    pub ty: InferredTypeData<'db>,
+}
+
 /// Interned input for [`super::normalize_type`].
 #[salsa::interned]
 #[derive(Debug)]

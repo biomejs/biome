@@ -16,10 +16,10 @@ pub(crate) fn goto_definition(
     params: tower_lsp_server::ls_types::GotoDefinitionParams,
 ) -> Result<Option<GotoDefinitionResponse>, LspError> {
     let url = params.text_document_position_params.text_document.uri;
-    let path = session.file_path(&url)?;
     let Some(doc) = session.document(&url) else {
         return Ok(None);
     };
+    let path = doc.path.clone();
 
     let position_encoding = session.position_encoding();
     let cursor_offset = from_proto::offset(
@@ -71,6 +71,7 @@ pub(crate) fn goto_definition(
                     range,
                     &doc,
                     position_encoding,
+                    &url,
                     &path,
                 )?))
             } else {
@@ -84,6 +85,7 @@ pub(crate) fn goto_definition(
                             range,
                             &doc,
                             position_encoding,
+                            &url,
                             &path,
                         )
                     })
@@ -104,9 +106,14 @@ fn to_location(
     definition_range: &TextRange,
     doc: &Document,
     position_encoding: PositionEncoding,
+    original_uri: &Uri,
     original_path: &BiomePath,
 ) -> Result<Location, LspError> {
-    let target_uri = uri_from_path(definition_path)?;
+    let target_uri = if definition_path == original_path {
+        original_uri.clone()
+    } else {
+        uri_from_document_path(session, definition_path)?
+    };
 
     // For same-file definitions, reuse the existing LineIndex.
     // For cross-file definitions, read the target and build a LineIndex.
@@ -127,6 +134,13 @@ fn to_location(
         uri: target_uri,
         range: target_range,
     })
+}
+
+fn uri_from_document_path(session: &Session, path: &BiomePath) -> Result<Uri, LspError> {
+    match session.document_uri(path) {
+        Some(uri) => Ok(uri),
+        None => uri_from_path(path),
+    }
 }
 
 fn uri_from_path(path: &BiomePath) -> Result<Uri, LspError> {

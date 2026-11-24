@@ -22,6 +22,7 @@ jobs:
             #**/node_modules
             #xtask/coverage
             #target
+            #crates/biome_cli/tests/specs/migrate_prettier
             #crates/biome_markdown_parser/tests
             #crates/biome_markdown_parser/benches/fixtures
             #crates/biome_markdown_formatter/tests

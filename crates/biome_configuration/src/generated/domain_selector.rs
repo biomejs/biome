@@ -5,6 +5,7 @@ use biome_analyze::{Rule, RuleFilter, RuleGroup};
 use std::sync::LazyLock;
 static ASTRO_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
     vec![
+        RuleFilter::Rule("nursery", "noAstroComponentDefaultExport"),
         RuleFilter::Rule("nursery", "noAstroConflictingSetDirectives"),
         RuleFilter::Rule("nursery", "noAstroSetHtmlDirective"),
         RuleFilter::Rule("nursery", "useAstroClientOnlyDirectiveValue"),
@@ -178,17 +179,22 @@ static TANSTACKQUERY_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new
     vec![
         RuleFilter::Rule("nursery", "noTanstackQueryRestDestructuring"),
         RuleFilter::Rule("nursery", "noTanstackQueryVoidQueryFn"),
+        RuleFilter::Rule("nursery", "useTanstackQueryExhaustiveDependencies"),
         RuleFilter::Rule("nursery", "useTanstackQueryInfiniteQueryPropertyOrder"),
+        RuleFilter::Rule("nursery", "useTanstackQueryMutationPropertyOrder"),
         RuleFilter::Rule("nursery", "useTanstackQueryStableQueryClient"),
     ]
 });
 static TEST_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
     vec![
         RuleFilter::Rule("complexity", "noExcessiveNestedTestSuites"),
+        RuleFilter::Rule("nursery", "noExpectToHaveBeenCalledOnce"),
         RuleFilter::Rule("nursery", "noReturnInTest"),
         RuleFilter::Rule("nursery", "noTestGlobals"),
         RuleFilter::Rule("nursery", "noTestHooks"),
         RuleFilter::Rule("nursery", "useCalledWith"),
+        RuleFilter::Rule("nursery", "useDescribeFunctionTitle"),
+        RuleFilter::Rule("nursery", "useExpectEqualityMatcher"),
         RuleFilter::Rule("nursery", "useExpectToContain"),
         RuleFilter::Rule("nursery", "useExpectToHaveBeenCalled"),
         RuleFilter::Rule("nursery", "useExpectToHaveBeenCalledTimes"),
@@ -215,6 +221,7 @@ static TURBOREPO_FILTERS: LazyLock<Vec<RuleFilter<'static>>> =
 static TYPES_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
     vec![
         RuleFilter::Rule("complexity", "useArrayFind"),
+        RuleFilter::Rule("nursery", "noArrayDelete"),
         RuleFilter::Rule("nursery", "noBaseToString"),
         RuleFilter::Rule("nursery", "noFloatingPromises"),
         RuleFilter::Rule("nursery", "noMeaninglessVoidOperator"),
@@ -225,6 +232,7 @@ static TYPES_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
         RuleFilter::Rule("nursery", "noUnsafePlusOperands"),
         RuleFilter::Rule("nursery", "noUnsafeReturn"),
         RuleFilter::Rule("nursery", "noUnsafeUnaryMinus"),
+        RuleFilter::Rule("nursery", "noUselessDefaultAssignment"),
         RuleFilter::Rule("nursery", "noUselessTypeAssertion"),
         RuleFilter::Rule("nursery", "noUselessTypeConversion"),
         RuleFilter::Rule("nursery", "useAwaitThenable"),
@@ -298,6 +306,7 @@ static VUE_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
         RuleFilter::Rule("nursery", "noVueMultipleObjectsInClass"),
         RuleFilter::Rule("nursery", "noVueMultipleSlotArgs"),
         RuleFilter::Rule("nursery", "noVueMutatingProps"),
+        RuleFilter::Rule("nursery", "noVueNegationElse"),
         RuleFilter::Rule("nursery", "noVueRefObjectReactivityLoss"),
         RuleFilter::Rule("nursery", "noVueRequiredPropWithDefault"),
         RuleFilter::Rule("nursery", "noVueRestrictedCallAfterAwait"),

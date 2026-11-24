@@ -323,17 +323,33 @@ fn resolve_script_language(
     }
 
     if html_source.is_vue() || html_source.is_svelte() {
-        if candidate.has_attribute_value("lang", "ts") {
-            Some(GuestLanguage::Ts)
-        } else if candidate.has_attribute_value("lang", "tsx") {
-            Some(GuestLanguage::Tsx)
-        } else if candidate.has_attribute_value("lang", "jsx") {
-            Some(GuestLanguage::Jsx)
-        } else {
-            Some(GuestLanguage::JsModule)
+        match candidate.attribute("lang").map(TokenText::text) {
+            None => Some(GuestLanguage::JsModule),
+            Some(lang) if lang.trim().is_empty() => Some(GuestLanguage::JsModule),
+            Some(lang) if matches_ignore_ascii_case(lang, &["js", "javascript"]) => {
+                Some(GuestLanguage::JsModule)
+            }
+            Some(lang) if matches_ignore_ascii_case(lang, &["ts", "typescript"]) => {
+                Some(GuestLanguage::Ts)
+            }
+            Some(lang) if lang.eq_ignore_ascii_case("tsx") => Some(GuestLanguage::Tsx),
+            Some(lang) if lang.eq_ignore_ascii_case("jsx") => Some(GuestLanguage::Jsx),
+            Some(_) => None,
         }
     } else if html_source.is_astro() {
-        Some(GuestLanguage::Ts)
+        match candidate.attribute("lang").map(TokenText::text) {
+            None => Some(GuestLanguage::Ts),
+            Some(lang) if lang.trim().is_empty() => Some(GuestLanguage::Ts),
+            Some(lang) if matches_ignore_ascii_case(lang, &["ts", "typescript"]) => {
+                Some(GuestLanguage::Ts)
+            }
+            Some(lang) if matches_ignore_ascii_case(lang, &["js", "javascript"]) => {
+                Some(GuestLanguage::JsModule)
+            }
+            Some(lang) if lang.eq_ignore_ascii_case("tsx") => Some(GuestLanguage::Tsx),
+            Some(lang) if lang.eq_ignore_ascii_case("jsx") => Some(GuestLanguage::Jsx),
+            Some(_) => None,
+        }
     } else if candidate.has_attribute_value("type", "module") {
         Some(GuestLanguage::JsModule)
     } else {
@@ -345,11 +361,24 @@ fn resolve_style_language(
     candidate: &EmbedCandidate,
     _file_source: &DocumentFileSource,
 ) -> Option<GuestLanguage> {
-    if candidate.has_attribute_value("lang", "scss") {
-        None
-    } else {
-        Some(GuestLanguage::Css)
+    if candidate
+        .attribute("type")
+        .is_some_and(|value| !value.text().eq_ignore_ascii_case("text/css"))
+    {
+        return None;
     }
+    match candidate.attribute("lang").map(TokenText::text) {
+        None => Some(GuestLanguage::Css),
+        Some(lang) if lang.trim().is_empty() => Some(GuestLanguage::Css),
+        Some(lang) if lang.eq_ignore_ascii_case("css") => Some(GuestLanguage::Css),
+        Some(_) => None,
+    }
+}
+
+fn matches_ignore_ascii_case(value: &str, expected: &[&str]) -> bool {
+    expected
+        .iter()
+        .any(|expected| value.eq_ignore_ascii_case(expected))
 }
 
 fn resolve_text_expression_language(

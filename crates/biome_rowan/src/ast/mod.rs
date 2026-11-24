@@ -13,7 +13,6 @@ use std::hash::{Hash, Hasher};
 use std::iter::FusedIterator;
 use std::marker::PhantomData;
 
-mod batch;
 mod mutation;
 
 use crate::syntax::{SyntaxSlot, SyntaxSlots};
@@ -21,8 +20,7 @@ use crate::{
     Language, RawSyntaxKind, SyntaxKind, SyntaxList, SyntaxNode, SyntaxToken, SyntaxTriviaPiece,
     Text,
 };
-pub use batch::*;
-pub use mutation::{AstNodeExt, AstNodeListExt, AstSeparatedListExt};
+pub use mutation::*;
 
 /// Represents a set of [SyntaxKind] as a bitfield, with each bit representing
 /// whether the corresponding [RawSyntaxKind] value is contained in the set
@@ -1587,6 +1585,9 @@ mod tests {
         ))
     }
 
+    // Skipped under Miri. Resolving a pointer for every range and kind in 300
+    // random trees takes tens of minutes there.
+    #[cfg_attr(miri, ignore)]
     #[test]
     fn syntax_ptr_resolves_like_child_steps_from_root() {
         let kinds = [

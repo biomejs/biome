@@ -120,10 +120,8 @@ impl Rule for NoLateEventControl {
             LateEventControlKind::NestedFunction
         } else if handler.is_generator() {
             LateEventControlKind::Generator
-        } else if handler.is_async() {
-            LateEventControlKind::AfterPause(find_earlier_pause(call, &handler)?)
         } else {
-            return None;
+            LateEventControlKind::AfterPause(find_earlier_pause(call, &handler)?)
         };
 
         Some(LateEventControl {

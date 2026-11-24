@@ -273,7 +273,11 @@ impl SummaryReporter {
             values
         });
 
-        table.format(rows)
+        let mut output = Vec::new();
+        table
+            .writeln(&mut output, rows.collect::<Vec<_>>())
+            .unwrap();
+        String::from_utf8(output).unwrap()
     }
 
     fn write_errors(&mut self, errors: &[Error], files: &TestCaseFiles) {

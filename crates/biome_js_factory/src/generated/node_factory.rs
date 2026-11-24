@@ -3458,17 +3458,39 @@ pub fn js_svelte_legacy_const_root(
 }
 pub fn js_svelte_snippet_root(
     name: AnyJsBinding,
-    parameters: JsParameters,
+    parameters: AnyJsSvelteSnippetParameters,
     eof_token: SyntaxToken,
-) -> JsSvelteSnippetRoot {
-    JsSvelteSnippetRoot::unwrap_cast(SyntaxNode::new_detached(
-        JsSyntaxKind::JS_SVELTE_SNIPPET_ROOT,
-        [
-            Some(SyntaxElement::Node(name.into_syntax())),
-            Some(SyntaxElement::Node(parameters.into_syntax())),
-            Some(SyntaxElement::Token(eof_token)),
-        ],
-    ))
+) -> JsSvelteSnippetRootBuilder {
+    JsSvelteSnippetRootBuilder {
+        name,
+        parameters,
+        eof_token,
+        type_parameters: None,
+    }
+}
+pub struct JsSvelteSnippetRootBuilder {
+    name: AnyJsBinding,
+    parameters: AnyJsSvelteSnippetParameters,
+    eof_token: SyntaxToken,
+    type_parameters: Option<TsTypeParameters>,
+}
+impl JsSvelteSnippetRootBuilder {
+    pub fn with_type_parameters(mut self, type_parameters: TsTypeParameters) -> Self {
+        self.type_parameters = Some(type_parameters);
+        self
+    }
+    pub fn build(self) -> JsSvelteSnippetRoot {
+        JsSvelteSnippetRoot::unwrap_cast(SyntaxNode::new_detached(
+            JsSyntaxKind::JS_SVELTE_SNIPPET_ROOT,
+            [
+                Some(SyntaxElement::Node(self.name.into_syntax())),
+                self.type_parameters
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                Some(SyntaxElement::Node(self.parameters.into_syntax())),
+                Some(SyntaxElement::Token(self.eof_token)),
+            ],
+        ))
+    }
 }
 pub fn js_switch_statement(
     switch_token: SyntaxToken,
@@ -4181,6 +4203,15 @@ pub fn jsx_shorthand_attribute(
             Some(SyntaxElement::Token(l_curly_token)),
             Some(SyntaxElement::Node(expression.into_syntax())),
             Some(SyntaxElement::Token(r_curly_token)),
+        ],
+    ))
+}
+pub fn jsx_single_tag_root(tag: AnyJsxSingleTag, eof_token: SyntaxToken) -> JsxSingleTagRoot {
+    JsxSingleTagRoot::unwrap_cast(SyntaxNode::new_detached(
+        JsSyntaxKind::JSX_SINGLE_TAG_ROOT,
+        [
+            Some(SyntaxElement::Node(tag.into_syntax())),
+            Some(SyntaxElement::Token(eof_token)),
         ],
     ))
 }

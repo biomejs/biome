@@ -138,7 +138,7 @@ invalid.js:5:28 lint/nursery/noUselessFallbackInSpread  FIXABLE  ━━━━━
   i Unsafe fix: Remove the empty object fallback.
   
     5 │ const·a4·=·{·...(((·foo·))·??·((·{}·)))·};
-      │                   -    ------ -------     
+      │                   -     -------------     
 
 ```
 
@@ -638,7 +638,7 @@ invalid.js:26:42 lint/nursery/noUselessFallbackInSpread  FIXABLE  ━━━━�
   i Unsafe fix: Remove the empty object fallback.
   
     26 │ const·e3·=·{·...({·/*·keep·*/·value:·1·}·||·{})·};
-       │                 -                     ----- - -   
+       │                 -                       -------   
 
 ```
 

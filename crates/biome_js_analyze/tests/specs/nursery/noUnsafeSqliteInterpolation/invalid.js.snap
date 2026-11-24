@@ -1,0 +1,772 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+import { DatabaseSync } from "node:sqlite";
+import { DatabaseSync as Database } from "node:sqlite";
+import * as sqlite from "node:sqlite";
+import sqliteDefault from "node:sqlite";
+import { "DatabaseSync" as QuotedDatabase } from "node:sqlite";
+import { "default" as quotedSqlite } from "node:sqlite";
+
+{
+	const database = new DatabaseSync(":memory:");
+	database.exec(`SELECT * FROM users WHERE id = ${id}`);
+}
+
+{
+	const database = new Database(":memory:");
+	database.prepare(`SELECT * FROM users WHERE id = ${id}`);
+}
+
+{
+	const database = new sqlite.DatabaseSync(":memory:");
+	database.exec(`SELECT * FROM users WHERE id = ${id}`);
+}
+
+{
+	const database = new sqliteDefault.DatabaseSync(":memory:");
+	database.prepare(`SELECT * FROM users WHERE id = ${id}`);
+}
+
+new DatabaseSync(":memory:").exec(`SELECT * FROM users WHERE id = ${id}`);
+
+{
+	const database = new DatabaseSync(":memory:");
+	const query = `SELECT * FROM users WHERE id = ${id}`;
+	const alias = query;
+	database.prepare(alias);
+}
+
+{
+	const database = new DatabaseSync(":memory:");
+	database?.exec(`SELECT * FROM users WHERE id = ${id}`);
+	database.exec?.(`SELECT * FROM users WHERE id = ${id}`);
+	database?.["exec"](`SELECT * FROM users WHERE id = ${id}`);
+	database["prepare"]?.(`SELECT * FROM users WHERE id = ${id}`);
+	database["prepare"](`SELECT * FROM users WHERE id = ${id}`);
+	database.exec(`SELECT ${first} FROM users WHERE id = ${second}`);
+	database.exec(/* keep */ `SELECT * FROM users WHERE id = ${id}`);
+	(database).exec((`SELECT * FROM users WHERE id = ${id}`));
+}
+
+{
+	const database = new DatabaseSync(":memory:");
+	database.exec(String.raw`SELECT * FROM users WHERE id = ${id}`);
+	database.prepare(String.raw`SELECT 1`);
+	database.prepare(customTag`SELECT ${id}`);
+}
+
+{
+	const database = new DatabaseSync(":memory:");
+	const sql = String.raw`SELECT ${id}`;
+	database.exec(sql);
+}
+
+{
+	const database = new DatabaseSync(":memory:");
+	const sql = `SELECT ${id}`;
+	database.exec(sql);
+	database.prepare(sql);
+}
+
+{
+	const database = new DatabaseSync(":memory:");
+	const alias = database;
+	alias.exec(`SELECT ${id}`);
+}
+
+{
+	const database = new DatabaseSync(":memory:");
+	const method = "exec";
+	database[method](`SELECT ${id}`);
+}
+
+{
+	const Alias = DatabaseSync;
+	const database = new Alias(":memory:");
+	database.exec(`SELECT ${id}`);
+}
+
+{
+	const alias = sqlite;
+	const database = new alias.DatabaseSync(":memory:");
+	database.exec(`SELECT ${id}`);
+}
+
+{
+	const Alias = sqlite.DatabaseSync;
+	const database = new Alias(":memory:");
+	database.exec(`SELECT ${id}`);
+}
+
+{
+	const database = new sqlite["DatabaseSync"](":memory:");
+	database.exec(`SELECT ${id}`);
+}
+
+{
+	const database = new QuotedDatabase(":memory:");
+	database.exec(`SELECT ${id}`);
+}
+
+{
+	const database = new quotedSqlite.DatabaseSync(":memory:");
+	database.exec(`SELECT ${id}`);
+}
+
+function query() {
+	const database = new DatabaseSync(":memory:");
+	database.exec(`SELECT ${id}`);
+}
+
+```
+
+# Diagnostics
+```
+invalid.js:11:16 lint/nursery/noUnsafeSqliteInterpolation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This SQL string passed to exec() inserts values with ${}.
+  
+     9 │ {
+    10 │ 	const database = new DatabaseSync(":memory:");
+  > 11 │ 	database.exec(`SELECT * FROM users WHERE id = ${id}`);
+       │ 	              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ }
+    13 │ 
+  
+  i Inserted values become part of the SQL code, so a value that contains SQL can change what the query does. This is called SQL injection.
+  
+  i Write a ? placeholder in the SQL string, and pass the values when you run the prepared statement, for example database.prepare("SELECT * FROM users WHERE id = ?").get(id).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:16:19 lint/nursery/noUnsafeSqliteInterpolation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This SQL string passed to prepare() inserts values with ${}.
+  
+    14 │ {
+    15 │ 	const database = new Database(":memory:");
+  > 16 │ 	database.prepare(`SELECT * FROM users WHERE id = ${id}`);
+       │ 	                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    17 │ }
+    18 │ 
+  
+  i Inserted values become part of the SQL code, so a value that contains SQL can change what the query does. This is called SQL injection.
+  
+  i Write a ? placeholder in the SQL string, and pass the values when you run the prepared statement, for example database.prepare("SELECT * FROM users WHERE id = ?").get(id).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:21:16 lint/nursery/noUnsafeSqliteInterpolation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This SQL string passed to exec() inserts values with ${}.
+  
+    19 │ {
+    20 │ 	const database = new sqlite.DatabaseSync(":memory:");
+  > 21 │ 	database.exec(`SELECT * FROM users WHERE id = ${id}`);
+       │ 	              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    22 │ }
+    23 │ 
+  
+  i Inserted values become part of the SQL code, so a value that contains SQL can change what the query does. This is called SQL injection.
+  
+  i Write a ? placeholder in the SQL string, and pass the values when you run the prepared statement, for example database.prepare("SELECT * FROM users WHERE id = ?").get(id).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:26:19 lint/nursery/noUnsafeSqliteInterpolation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This SQL string passed to prepare() inserts values with ${}.
+  
+    24 │ {
+    25 │ 	const database = new sqliteDefault.DatabaseSync(":memory:");
+  > 26 │ 	database.prepare(`SELECT * FROM users WHERE id = ${id}`);
+       │ 	                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    27 │ }
+    28 │ 
+  
+  i Inserted values become part of the SQL code, so a value that contains SQL can change what the query does. This is called SQL injection.
+  
+  i Write a ? placeholder in the SQL string, and pass the values when you run the prepared statement, for example database.prepare("SELECT * FROM users WHERE id = ?").get(id).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:29:35 lint/nursery/noUnsafeSqliteInterpolation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This SQL string passed to exec() inserts values with ${}.
+  
+    27 │ }
+    28 │ 
+  > 29 │ new DatabaseSync(":memory:").exec(`SELECT * FROM users WHERE id = ${id}`);
+       │                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    30 │ 
+    31 │ {
+  
+  i Inserted values become part of the SQL code, so a value that contains SQL can change what the query does. This is called SQL injection.
+  
+  i Write a ? placeholder in the SQL string, and pass the values when you run the prepared statement, for example database.prepare("SELECT * FROM users WHERE id = ?").get(id).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:35:19 lint/nursery/noUnsafeSqliteInterpolation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This SQL string passed to prepare() inserts values with ${}.
+  
+    33 │ 	const query = `SELECT * FROM users WHERE id = ${id}`;
+    34 │ 	const alias = query;
+  > 35 │ 	database.prepare(alias);
+       │ 	                 ^^^^^
+    36 │ }
+    37 │ 
+  
+  i The SQL string is built here.
+  
+    31 │ {
+    32 │ 	const database = new DatabaseSync(":memory:");
+  > 33 │ 	const query = `SELECT * FROM users WHERE id = ${id}`;
+       │ 	              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    34 │ 	const alias = query;
+    35 │ 	database.prepare(alias);
+  
+  i Inserted values become part of the SQL code, so a value that contains SQL can change what the query does. This is called SQL injection.
+  
+  i Write a ? placeholder in the SQL string, and pass the values when you run the prepared statement, for example database.prepare("SELECT * FROM users WHERE id = ?").get(id).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:40:17 lint/nursery/noUnsafeSqliteInterpolation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This SQL string passed to exec() inserts values with ${}.
+  
+    38 │ {
+    39 │ 	const database = new DatabaseSync(":memory:");
+  > 40 │ 	database?.exec(`SELECT * FROM users WHERE id = ${id}`);
+       │ 	               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    41 │ 	database.exec?.(`SELECT * FROM users WHERE id = ${id}`);
+    42 │ 	database?.["exec"](`SELECT * FROM users WHERE id = ${id}`);
+  
+  i Inserted values become part of the SQL code, so a value that contains SQL can change what the query does. This is called SQL injection.
+  
+  i Write a ? placeholder in the SQL string, and pass the values when you run the prepared statement, for example database.prepare("SELECT * FROM users WHERE id = ?").get(id).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:41:18 lint/nursery/noUnsafeSqliteInterpolation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This SQL string passed to exec() inserts values with ${}.
+  
+    39 │ 	const database = new DatabaseSync(":memory:");
+    40 │ 	database?.exec(`SELECT * FROM users WHERE id = ${id}`);
+  > 41 │ 	database.exec?.(`SELECT * FROM users WHERE id = ${id}`);
+       │ 	                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    42 │ 	database?.["exec"](`SELECT * FROM users WHERE id = ${id}`);
+    43 │ 	database["prepare"]?.(`SELECT * FROM users WHERE id = ${id}`);
+  
+  i Inserted values become part of the SQL code, so a value that contains SQL can change what the query does. This is called SQL injection.
+  
+  i Write a ? placeholder in the SQL string, and pass the values when you run the prepared statement, for example database.prepare("SELECT * FROM users WHERE id = ?").get(id).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:42:21 lint/nursery/noUnsafeSqliteInterpolation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This SQL string passed to exec() inserts values with ${}.
+  
+    40 │ 	database?.exec(`SELECT * FROM users WHERE id = ${id}`);
+    41 │ 	database.exec?.(`SELECT * FROM users WHERE id = ${id}`);
+  > 42 │ 	database?.["exec"](`SELECT * FROM users WHERE id = ${id}`);
+       │ 	                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    43 │ 	database["prepare"]?.(`SELECT * FROM users WHERE id = ${id}`);
+    44 │ 	database["prepare"](`SELECT * FROM users WHERE id = ${id}`);
+  
+  i Inserted values become part of the SQL code, so a value that contains SQL can change what the query does. This is called SQL injection.
+  
+  i Write a ? placeholder in the SQL string, and pass the values when you run the prepared statement, for example database.prepare("SELECT * FROM users WHERE id = ?").get(id).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:43:24 lint/nursery/noUnsafeSqliteInterpolation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This SQL string passed to prepare() inserts values with ${}.
+  
+    41 │ 	database.exec?.(`SELECT * FROM users WHERE id = ${id}`);
+    42 │ 	database?.["exec"](`SELECT * FROM users WHERE id = ${id}`);
+  > 43 │ 	database["prepare"]?.(`SELECT * FROM users WHERE id = ${id}`);
+       │ 	                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    44 │ 	database["prepare"](`SELECT * FROM users WHERE id = ${id}`);
+    45 │ 	database.exec(`SELECT ${first} FROM users WHERE id = ${second}`);
+  
+  i Inserted values become part of the SQL code, so a value that contains SQL can change what the query does. This is called SQL injection.
+  
+  i Write a ? placeholder in the SQL string, and pass the values when you run the prepared statement, for example database.prepare("SELECT * FROM users WHERE id = ?").get(id).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:44:22 lint/nursery/noUnsafeSqliteInterpolation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This SQL string passed to prepare() inserts values with ${}.
+  
+    42 │ 	database?.["exec"](`SELECT * FROM users WHERE id = ${id}`);
+    43 │ 	database["prepare"]?.(`SELECT * FROM users WHERE id = ${id}`);
+  > 44 │ 	database["prepare"](`SELECT * FROM users WHERE id = ${id}`);
+       │ 	                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    45 │ 	database.exec(`SELECT ${first} FROM users WHERE id = ${second}`);
+    46 │ 	database.exec(/* keep */ `SELECT * FROM users WHERE id = ${id}`);
+  
+  i Inserted values become part of the SQL code, so a value that contains SQL can change what the query does. This is called SQL injection.
+  
+  i Write a ? placeholder in the SQL string, and pass the values when you run the prepared statement, for example database.prepare("SELECT * FROM users WHERE id = ?").get(id).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:45:16 lint/nursery/noUnsafeSqliteInterpolation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This SQL string passed to exec() inserts values with ${}.
+  
+    43 │ 	database["prepare"]?.(`SELECT * FROM users WHERE id = ${id}`);
+    44 │ 	database["prepare"](`SELECT * FROM users WHERE id = ${id}`);
+  > 45 │ 	database.exec(`SELECT ${first} FROM users WHERE id = ${second}`);
+       │ 	              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    46 │ 	database.exec(/* keep */ `SELECT * FROM users WHERE id = ${id}`);
+    47 │ 	(database).exec((`SELECT * FROM users WHERE id = ${id}`));
+  
+  i Inserted values become part of the SQL code, so a value that contains SQL can change what the query does. This is called SQL injection.
+  
+  i Write a ? placeholder in the SQL string, and pass the values when you run the prepared statement, for example database.prepare("SELECT * FROM users WHERE id = ?").get(id).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:46:27 lint/nursery/noUnsafeSqliteInterpolation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This SQL string passed to exec() inserts values with ${}.
+  
+    44 │ 	database["prepare"](`SELECT * FROM users WHERE id = ${id}`);
+    45 │ 	database.exec(`SELECT ${first} FROM users WHERE id = ${second}`);
+  > 46 │ 	database.exec(/* keep */ `SELECT * FROM users WHERE id = ${id}`);
+       │ 	                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    47 │ 	(database).exec((`SELECT * FROM users WHERE id = ${id}`));
+    48 │ }
+  
+  i Inserted values become part of the SQL code, so a value that contains SQL can change what the query does. This is called SQL injection.
+  
+  i Write a ? placeholder in the SQL string, and pass the values when you run the prepared statement, for example database.prepare("SELECT * FROM users WHERE id = ?").get(id).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:47:18 lint/nursery/noUnsafeSqliteInterpolation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This SQL string passed to exec() inserts values with ${}.
+  
+    45 │ 	database.exec(`SELECT ${first} FROM users WHERE id = ${second}`);
+    46 │ 	database.exec(/* keep */ `SELECT * FROM users WHERE id = ${id}`);
+  > 47 │ 	(database).exec((`SELECT * FROM users WHERE id = ${id}`));
+       │ 	                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    48 │ }
+    49 │ 
+  
+  i Inserted values become part of the SQL code, so a value that contains SQL can change what the query does. This is called SQL injection.
+  
+  i Write a ? placeholder in the SQL string, and pass the values when you run the prepared statement, for example database.prepare("SELECT * FROM users WHERE id = ?").get(id).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:52:16 lint/nursery/noUnsafeSqliteInterpolation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This SQL string passed to exec() is built by a tagged template.
+  
+    50 │ {
+    51 │ 	const database = new DatabaseSync(":memory:");
+  > 52 │ 	database.exec(String.raw`SELECT * FROM users WHERE id = ${id}`);
+       │ 	              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    53 │ 	database.prepare(String.raw`SELECT 1`);
+    54 │ 	database.prepare(customTag`SELECT ${id}`);
+  
+  i The tag function turns the template into a plain string before the database receives it, so the inserted values become part of the SQL code. A value that contains SQL can change what the query does. This is called SQL injection.
+  
+  i Write a ? placeholder in the SQL string, and pass the values when you run the prepared statement, for example database.prepare("SELECT * FROM users WHERE id = ?").get(id).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:53:19 lint/nursery/noUnsafeSqliteInterpolation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This SQL string passed to prepare() is built by a tagged template.
+  
+    51 │ 	const database = new DatabaseSync(":memory:");
+    52 │ 	database.exec(String.raw`SELECT * FROM users WHERE id = ${id}`);
+  > 53 │ 	database.prepare(String.raw`SELECT 1`);
+       │ 	                 ^^^^^^^^^^^^^^^^^^^^
+    54 │ 	database.prepare(customTag`SELECT ${id}`);
+    55 │ }
+  
+  i The tag function decides the text of the SQL code, so the database receives whatever string the function returns.
+  
+  i Remove the tag and pass a plain string instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:54:19 lint/nursery/noUnsafeSqliteInterpolation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This SQL string passed to prepare() is built by a tagged template.
+  
+    52 │ 	database.exec(String.raw`SELECT * FROM users WHERE id = ${id}`);
+    53 │ 	database.prepare(String.raw`SELECT 1`);
+  > 54 │ 	database.prepare(customTag`SELECT ${id}`);
+       │ 	                 ^^^^^^^^^^^^^^^^^^^^^^^
+    55 │ }
+    56 │ 
+  
+  i The tag function turns the template into a plain string before the database receives it, so the inserted values become part of the SQL code. A value that contains SQL can change what the query does. This is called SQL injection.
+  
+  i Write a ? placeholder in the SQL string, and pass the values when you run the prepared statement, for example database.prepare("SELECT * FROM users WHERE id = ?").get(id).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:60:16 lint/nursery/noUnsafeSqliteInterpolation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This SQL string passed to exec() is built by a tagged template.
+  
+    58 │ 	const database = new DatabaseSync(":memory:");
+    59 │ 	const sql = String.raw`SELECT ${id}`;
+  > 60 │ 	database.exec(sql);
+       │ 	              ^^^
+    61 │ }
+    62 │ 
+  
+  i The SQL string is built here.
+  
+    57 │ {
+    58 │ 	const database = new DatabaseSync(":memory:");
+  > 59 │ 	const sql = String.raw`SELECT ${id}`;
+       │ 	            ^^^^^^^^^^^^^^^^^^^^^^^^
+    60 │ 	database.exec(sql);
+    61 │ }
+  
+  i The tag function turns the template into a plain string before the database receives it, so the inserted values become part of the SQL code. A value that contains SQL can change what the query does. This is called SQL injection.
+  
+  i Write a ? placeholder in the SQL string, and pass the values when you run the prepared statement, for example database.prepare("SELECT * FROM users WHERE id = ?").get(id).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:66:16 lint/nursery/noUnsafeSqliteInterpolation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This SQL string passed to exec() inserts values with ${}.
+  
+    64 │ 	const database = new DatabaseSync(":memory:");
+    65 │ 	const sql = `SELECT ${id}`;
+  > 66 │ 	database.exec(sql);
+       │ 	              ^^^
+    67 │ 	database.prepare(sql);
+    68 │ }
+  
+  i The SQL string is built here.
+  
+    63 │ {
+    64 │ 	const database = new DatabaseSync(":memory:");
+  > 65 │ 	const sql = `SELECT ${id}`;
+       │ 	            ^^^^^^^^^^^^^^
+    66 │ 	database.exec(sql);
+    67 │ 	database.prepare(sql);
+  
+  i Inserted values become part of the SQL code, so a value that contains SQL can change what the query does. This is called SQL injection.
+  
+  i Write a ? placeholder in the SQL string, and pass the values when you run the prepared statement, for example database.prepare("SELECT * FROM users WHERE id = ?").get(id).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:67:19 lint/nursery/noUnsafeSqliteInterpolation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This SQL string passed to prepare() inserts values with ${}.
+  
+    65 │ 	const sql = `SELECT ${id}`;
+    66 │ 	database.exec(sql);
+  > 67 │ 	database.prepare(sql);
+       │ 	                 ^^^
+    68 │ }
+    69 │ 
+  
+  i The SQL string is built here.
+  
+    63 │ {
+    64 │ 	const database = new DatabaseSync(":memory:");
+  > 65 │ 	const sql = `SELECT ${id}`;
+       │ 	            ^^^^^^^^^^^^^^
+    66 │ 	database.exec(sql);
+    67 │ 	database.prepare(sql);
+  
+  i Inserted values become part of the SQL code, so a value that contains SQL can change what the query does. This is called SQL injection.
+  
+  i Write a ? placeholder in the SQL string, and pass the values when you run the prepared statement, for example database.prepare("SELECT * FROM users WHERE id = ?").get(id).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:73:13 lint/nursery/noUnsafeSqliteInterpolation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This SQL string passed to exec() inserts values with ${}.
+  
+    71 │ 	const database = new DatabaseSync(":memory:");
+    72 │ 	const alias = database;
+  > 73 │ 	alias.exec(`SELECT ${id}`);
+       │ 	           ^^^^^^^^^^^^^^
+    74 │ }
+    75 │ 
+  
+  i Inserted values become part of the SQL code, so a value that contains SQL can change what the query does. This is called SQL injection.
+  
+  i Write a ? placeholder in the SQL string, and pass the values when you run the prepared statement, for example database.prepare("SELECT * FROM users WHERE id = ?").get(id).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:79:19 lint/nursery/noUnsafeSqliteInterpolation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This SQL string passed to exec() inserts values with ${}.
+  
+    77 │ 	const database = new DatabaseSync(":memory:");
+    78 │ 	const method = "exec";
+  > 79 │ 	database[method](`SELECT ${id}`);
+       │ 	                 ^^^^^^^^^^^^^^
+    80 │ }
+    81 │ 
+  
+  i Inserted values become part of the SQL code, so a value that contains SQL can change what the query does. This is called SQL injection.
+  
+  i Write a ? placeholder in the SQL string, and pass the values when you run the prepared statement, for example database.prepare("SELECT * FROM users WHERE id = ?").get(id).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:85:16 lint/nursery/noUnsafeSqliteInterpolation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This SQL string passed to exec() inserts values with ${}.
+  
+    83 │ 	const Alias = DatabaseSync;
+    84 │ 	const database = new Alias(":memory:");
+  > 85 │ 	database.exec(`SELECT ${id}`);
+       │ 	              ^^^^^^^^^^^^^^
+    86 │ }
+    87 │ 
+  
+  i Inserted values become part of the SQL code, so a value that contains SQL can change what the query does. This is called SQL injection.
+  
+  i Write a ? placeholder in the SQL string, and pass the values when you run the prepared statement, for example database.prepare("SELECT * FROM users WHERE id = ?").get(id).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:91:16 lint/nursery/noUnsafeSqliteInterpolation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This SQL string passed to exec() inserts values with ${}.
+  
+    89 │ 	const alias = sqlite;
+    90 │ 	const database = new alias.DatabaseSync(":memory:");
+  > 91 │ 	database.exec(`SELECT ${id}`);
+       │ 	              ^^^^^^^^^^^^^^
+    92 │ }
+    93 │ 
+  
+  i Inserted values become part of the SQL code, so a value that contains SQL can change what the query does. This is called SQL injection.
+  
+  i Write a ? placeholder in the SQL string, and pass the values when you run the prepared statement, for example database.prepare("SELECT * FROM users WHERE id = ?").get(id).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:97:16 lint/nursery/noUnsafeSqliteInterpolation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This SQL string passed to exec() inserts values with ${}.
+  
+    95 │ 	const Alias = sqlite.DatabaseSync;
+    96 │ 	const database = new Alias(":memory:");
+  > 97 │ 	database.exec(`SELECT ${id}`);
+       │ 	              ^^^^^^^^^^^^^^
+    98 │ }
+    99 │ 
+  
+  i Inserted values become part of the SQL code, so a value that contains SQL can change what the query does. This is called SQL injection.
+  
+  i Write a ? placeholder in the SQL string, and pass the values when you run the prepared statement, for example database.prepare("SELECT * FROM users WHERE id = ?").get(id).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:102:16 lint/nursery/noUnsafeSqliteInterpolation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This SQL string passed to exec() inserts values with ${}.
+  
+    100 │ {
+    101 │ 	const database = new sqlite["DatabaseSync"](":memory:");
+  > 102 │ 	database.exec(`SELECT ${id}`);
+        │ 	              ^^^^^^^^^^^^^^
+    103 │ }
+    104 │ 
+  
+  i Inserted values become part of the SQL code, so a value that contains SQL can change what the query does. This is called SQL injection.
+  
+  i Write a ? placeholder in the SQL string, and pass the values when you run the prepared statement, for example database.prepare("SELECT * FROM users WHERE id = ?").get(id).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:107:16 lint/nursery/noUnsafeSqliteInterpolation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This SQL string passed to exec() inserts values with ${}.
+  
+    105 │ {
+    106 │ 	const database = new QuotedDatabase(":memory:");
+  > 107 │ 	database.exec(`SELECT ${id}`);
+        │ 	              ^^^^^^^^^^^^^^
+    108 │ }
+    109 │ 
+  
+  i Inserted values become part of the SQL code, so a value that contains SQL can change what the query does. This is called SQL injection.
+  
+  i Write a ? placeholder in the SQL string, and pass the values when you run the prepared statement, for example database.prepare("SELECT * FROM users WHERE id = ?").get(id).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:112:16 lint/nursery/noUnsafeSqliteInterpolation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This SQL string passed to exec() inserts values with ${}.
+  
+    110 │ {
+    111 │ 	const database = new quotedSqlite.DatabaseSync(":memory:");
+  > 112 │ 	database.exec(`SELECT ${id}`);
+        │ 	              ^^^^^^^^^^^^^^
+    113 │ }
+    114 │ 
+  
+  i Inserted values become part of the SQL code, so a value that contains SQL can change what the query does. This is called SQL injection.
+  
+  i Write a ? placeholder in the SQL string, and pass the values when you run the prepared statement, for example database.prepare("SELECT * FROM users WHERE id = ?").get(id).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:117:16 lint/nursery/noUnsafeSqliteInterpolation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This SQL string passed to exec() inserts values with ${}.
+  
+    115 │ function query() {
+    116 │ 	const database = new DatabaseSync(":memory:");
+  > 117 │ 	database.exec(`SELECT ${id}`);
+        │ 	              ^^^^^^^^^^^^^^
+    118 │ }
+    119 │ 
+  
+  i Inserted values become part of the SQL code, so a value that contains SQL can change what the query does. This is called SQL injection.
+  
+  i Write a ? placeholder in the SQL string, and pass the values when you run the prepared statement, for example database.prepare("SELECT * FROM users WHERE id = ?").get(id).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

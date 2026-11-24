@@ -7,14 +7,16 @@ use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::{
     AnyJsAssignment, AnyJsAssignmentPattern, AnyJsExpression, AnyJsStatement, JsAssignmentExpression,
-    JsAssignmentOperator, JsBinaryOperator, JsCallArgumentList, JsCallArguments, JsCallExpression,
-    JsConditionalExpression, JsDoWhileStatement, JsForStatement,
-    JsIfStatement, JsLogicalExpression, JsLogicalOperator, JsParenthesizedExpression, JsSyntaxKind,
-    JsUnaryOperator, JsWhileStatement, OperatorPrecedence, T,
+    JsAssignmentOperator,
+    JsBinaryOperator,
+    JsCallArgumentList, JsCallArguments, JsCallExpression, JsConditionalExpression,
+    JsDoWhileStatement, JsForStatement, JsIfStatement, JsLogicalExpression, JsLogicalOperator,
+    JsParenthesizedExpression, JsSyntaxKind, JsUnaryOperator, JsWhileStatement, OperatorPrecedence,
+    T, static_value::StaticValue,
 };
 use biome_js_type_info::{IgnoredPrimitiveTypes, InferredType};
 use biome_rowan::{
-    AstNode, AstNodeList, BatchMutationExt, SyntaxResult, TextRange, declare_node_union,
+    AstNode, AstNodeList, BatchMutationExt, TextRange, declare_node_union,
     trim_leading_trivia_pieces,
 };
 use biome_rule_options::use_nullish_coalescing::UseNullishCoalescingOptions;
@@ -23,8 +25,11 @@ declare_lint_rule! {
     /// Enforce using the nullish coalescing operator (`??`) instead of logical or (`||`).
     ///
     /// `??` only checks for `null` and `undefined`, while `||` checks for any falsy value
-    /// including `0`, `''`, and `false`. The rule reports `||`, `||=`, and ternary patterns
-    /// (`x !== null ? x : y`) when type analysis shows the left operand is possibly nullish.
+    /// including `0`, `''`, and `false`. The rule reports `||` and `||=` when type analysis
+    /// shows the left operand is possibly nullish, and ternary expressions that compare a
+    /// value with `null` or `undefined` to pick a fallback. A strict comparison with only
+    /// one of `null` and `undefined` is reported only when the value cannot hold the other
+    /// one.
     ///
     /// ## Examples
     ///
@@ -45,12 +50,12 @@ declare_lint_rule! {
     /// x ||= 'default';
     /// ```
     ///
-    /// ```ts,expect_diagnostic
+    /// ```ts,expect_diagnostic,file=invalid-ternary-not-null.ts
     /// declare const x: string | null;
     /// const value = x !== null ? x : 'default';
     /// ```
     ///
-    /// ```ts,expect_diagnostic
+    /// ```ts,expect_diagnostic,file=invalid-ternary-loose-null.ts
     /// declare const x: string | null;
     /// const value = x == null ? 'default' : x;
     /// ```
@@ -68,24 +73,17 @@ declare_lint_rule! {
     ///
     /// ### Valid
     ///
-    /// ```ts
+    /// ```ts,file=valid-nullish-coalescing.ts
     /// declare const maybeString: string | null;
     /// const value = maybeString ?? 'default';
     /// ```
     ///
-    /// ```ts
+    /// ```ts,file=valid-non-nullish.ts
     /// declare const definiteString: string;
     /// const value = definiteString || 'fallback';
     /// ```
     ///
-    /// ```ts
-    /// declare const cond: string | null;
-    /// if (cond || 'fallback') {
-    ///   console.log('in if');
-    /// }
-    /// ```
-    ///
-    /// ```ts
+    /// ```ts,file=valid-nullish-assign.ts
     /// declare let y: string | null;
     /// y ??= 'default';
     /// ```
@@ -94,8 +92,9 @@ declare_lint_rule! {
     ///
     /// ### ignoreConditionalTests
     ///
-    /// Ignore `||` expressions inside conditional test positions (if/while/for/do-while/ternary).
-    /// Default: `true`.
+    /// By default, Biome ignores `||` expressions inside the test of an `if`, `while`,
+    /// `for`, or `do-while` statement or of a ternary expression. Set this to `false` to
+    /// report them. Default: `true`.
     ///
     /// ```json,options
     /// {
@@ -105,14 +104,27 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
-    /// ```ts,expect_diagnostic,use_options
+    /// #### Invalid
+    ///
+    /// ```ts,expect_diagnostic,use_options,file=invalid-conditional-tests.ts
     /// declare const cond: string | null;
     /// if (cond || 'fallback') {}
     /// ```
     ///
+    /// #### Valid
+    ///
+    /// With the default value, `||` in a conditional test is not reported.
+    ///
+    /// ```ts,file=valid-conditional-tests.ts
+    /// declare const cond: string | null;
+    /// while (cond || 'fallback') {}
+    /// ```
+    ///
     /// ### ignoreTernaryTests
     ///
-    /// Ignore ternary expressions that check for `null` or `undefined`. Default: `false`.
+    /// By default, Biome reports ternary expressions that compare a value with `null` or
+    /// `undefined` and can be replaced with `??`. Set this to `true` to ignore them.
+    /// Default: `false`.
     ///
     /// ```json,options
     /// {
@@ -122,14 +134,27 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
-    /// ```ts,use_options
+    /// #### Invalid
+    ///
+    /// `||` is still reported when ternary expressions are ignored.
+    ///
+    /// ```ts,expect_diagnostic,use_options,file=invalid-ternary-tests.ts
+    /// declare const maybeString: string | null;
+    /// const value = maybeString || 'default';
+    /// ```
+    ///
+    /// #### Valid
+    ///
+    /// ```ts,use_options,file=valid-ternary-tests.ts
     /// declare const x: string | null;
     /// const value = x !== null ? x : 'default';
     /// ```
     ///
     /// ### ignoreMixedLogicalExpressions
     ///
-    /// Ignore `||` and `||=` whose connected logical tree also contains a `&&`. Default: `false`.
+    /// By default, Biome reports `||` and `||=` even when they are combined with `&&`, as in
+    /// `(a || b) && c` or `a || (b && c)`. Set this to `true` to ignore `||` and `||=` whose
+    /// connected logical tree also contains a `&&`. Default: `false`.
     ///
     /// ```json,options
     /// {
@@ -157,13 +182,13 @@ declare_lint_rule! {
     ///
     /// `||` and `||=` mixed with `&&` in the same logical tree are not reported.
     ///
-    /// ```ts,use_options
+    /// ```ts,use_options,file=valid-mixed-or.ts
     /// declare const a: string | null;
     /// declare const b: string;
     /// const r = (a || 'default') && b;
     /// ```
     ///
-    /// ```ts,use_options
+    /// ```ts,use_options,file=valid-mixed-or-assign.ts
     /// declare const b: string;
     /// declare let assigned: string | null;
     /// assigned ||= b && 'fallback';
@@ -171,8 +196,9 @@ declare_lint_rule! {
     ///
     /// ### ignoreBooleanCoercion
     ///
-    /// Ignore `||` and `||=` used inside a `Boolean()` call, where coalescing on
-    /// falsy values is intentional. Default: `false`.
+    /// By default, Biome reports `||` and `||=` even when they are the argument of a call to
+    /// the global `Boolean()` function. Set this to `true` to ignore them there, where
+    /// coalescing on falsy values is intentional. Default: `false`.
     ///
     /// ```json,options
     /// {
@@ -184,7 +210,7 @@ declare_lint_rule! {
     ///
     /// #### Invalid
     ///
-    /// `||` and `||=` outside a `Boolean()` call are still reported.
+    /// `||` and `||=` that are not the argument of a `Boolean()` call are still reported.
     ///
     /// ```ts,expect_diagnostic,use_options,file=invalid-boolean-coercion.ts
     /// declare const maybeString: string | null;
@@ -193,7 +219,8 @@ declare_lint_rule! {
     ///
     /// #### Valid
     ///
-    /// `||` and `||=` inside a `Boolean()` call are not reported.
+    /// `||` and `||=` that are the argument of a `Boolean()` call are not reported. The
+    /// argument may be parenthesized or combined with other `||` and `&&` operators.
     ///
     /// ```ts,use_options,file=valid-boolean-coercion.ts
     /// declare const a: string | null;
@@ -203,10 +230,13 @@ declare_lint_rule! {
     ///
     /// ### ignorePrimitives
     ///
-    /// Ignore `||`, `||=`, and ternary expressions when every non-nullish variant
-    /// of the operand is a primitive the option opts out of. Use `true` to ignore
-    /// all primitives, or an object selecting `string`, `number`, `boolean`, or
-    /// `bigint`. Default: none.
+    /// By default, Biome reports `||`, `||=`, ternary expressions, and `if` statements
+    /// whatever primitive types their operand includes. Set this to `true` to ignore them
+    /// when the operand is a nullable union whose non-nullish variants are all `string`,
+    /// `number`, `boolean`, or `bigint`, or to an object with any of the keys `string`,
+    /// `number`, `boolean`, and `bigint` set to `true` to ignore only unions made of those
+    /// kinds. Other types, such as a `symbol | null` union or a non-union `string`, are
+    /// still reported. Default: none.
     ///
     /// ```json,options
     /// {
@@ -236,9 +266,9 @@ declare_lint_rule! {
     ///
     /// ### ignoreIfStatements
     ///
-    /// By default, Biome reports an `if` statement that only assigns to a
-    /// nullish variable, since it can be rewritten as `??=`. Set this to `true`
-    /// to ignore those statements. Default: `false`.
+    /// By default, Biome reports an `if` statement that only assigns to a nullish variable,
+    /// since it can be rewritten as `??=`. Set this to `true` to ignore those statements.
+    /// Default: `false`.
     ///
     /// ```json,options
     /// {
@@ -301,6 +331,14 @@ impl AnyJsLogicalOrLikeExpression {
             }
         }
     }
+
+    fn is_logical_and(&self) -> bool {
+        matches!(
+            self,
+            Self::JsLogicalExpression(logical)
+                if logical.operator().ok() == Some(JsLogicalOperator::LogicalAnd)
+        )
+    }
 }
 
 pub enum UseNullishCoalescingState {
@@ -314,8 +352,13 @@ pub enum UseNullishCoalescingState {
     },
     Ternary {
         test_range: TextRange,
-        checked_expr: AnyJsExpression,
-        fallback_expr: AnyJsExpression,
+        /// The branch taken when the tested value is present, which becomes the left
+        /// operand of `??`.
+        subject: AnyJsExpression,
+        /// The branch taken when the tested value is missing, which becomes the right
+        /// operand of `??`.
+        fallback: AnyJsExpression,
+        /// Whether the consequent is the branch taken when the tested value is present.
         is_positive: bool,
         can_fix: bool,
     },
@@ -407,12 +450,9 @@ impl Rule for UseNullishCoalescing {
 
         let message = match (state, query) {
             (
-                UseNullishCoalescingState::LogicalOr { can_fix, .. },
+                UseNullishCoalescingState::LogicalOr { can_fix: true, .. },
                 UseNullishCoalescingQuery::JsLogicalExpression(logical),
             ) => {
-                if !can_fix {
-                    return None;
-                }
                 let old_token = logical.operator_token().ok()?;
 
                 let new_token = make::token(T![??])
@@ -423,12 +463,9 @@ impl Rule for UseNullishCoalescing {
                 markup! { "Replace "<Emphasis>"||"</Emphasis>" with "<Emphasis>"??"</Emphasis>"." }.to_owned()
             }
             (
-                UseNullishCoalescingState::LogicalOrAssignment { can_fix, .. },
+                UseNullishCoalescingState::LogicalOrAssignment { can_fix: true, .. },
                 UseNullishCoalescingQuery::JsAssignmentExpression(assignment),
             ) => {
-                if !can_fix {
-                    return None;
-                }
                 let old_token = assignment.operator_token().ok()?;
 
                 let new_token = make::token(T![??=])
@@ -440,21 +477,17 @@ impl Rule for UseNullishCoalescing {
             }
             (
                 UseNullishCoalescingState::Ternary {
-                    checked_expr,
-                    fallback_expr,
+                    subject,
+                    fallback,
                     is_positive,
-                    can_fix,
+                    can_fix: true,
                     ..
                 },
                 UseNullishCoalescingQuery::JsConditionalExpression(ternary),
             ) => {
-                if !can_fix {
-                    return None;
-                }
-
                 // Strip trailing whitespace. Ternary layout trivia is not appropriate for `??`.
-                let checked_expr = checked_expr.clone().trim_trailing_trivia()?;
-                let fallback_expr = fallback_expr.clone().trim_trailing_trivia()?;
+                let subject = subject.clone().trim_trailing_trivia()?;
+                let fallback = fallback.clone().trim_trailing_trivia()?;
 
                 // Transfer trivia from the ? and : tokens to the branch expressions they precede.
                 let question = ternary.question_mark_token().ok()?;
@@ -464,25 +497,22 @@ impl Rule for UseNullishCoalescing {
                 let colon_trivia =
                     trim_leading_trivia_pieces(colon.trailing_trivia().pieces());
 
-                let (checked_expr, fallback_expr) = if *is_positive {
+                let (subject, fallback) = if *is_positive {
                     (
-                        checked_expr.prepend_trivia_pieces(question_trivia)?,
-                        fallback_expr.prepend_trivia_pieces(colon_trivia)?,
+                        subject.prepend_trivia_pieces(question_trivia)?,
+                        fallback.prepend_trivia_pieces(colon_trivia)?,
                     )
                 } else {
                     (
-                        checked_expr.prepend_trivia_pieces(colon_trivia)?,
-                        fallback_expr.prepend_trivia_pieces(question_trivia)?,
+                        subject.prepend_trivia_pieces(colon_trivia)?,
+                        fallback.prepend_trivia_pieces(question_trivia)?,
                     )
                 };
 
-                let checked = maybe_parenthesize_for_nullish(checked_expr);
-                let fallback = maybe_parenthesize_for_nullish(fallback_expr);
-
                 let new_expr = make::js_logical_expression(
-                    checked,
+                    maybe_parenthesize_for_nullish(subject),
                     make::token_decorated_with_space(T![??]),
-                    fallback,
+                    maybe_parenthesize_for_nullish(fallback),
                 );
 
                 // Transfer leading/trailing trivia from the original ternary
@@ -504,14 +534,11 @@ impl Rule for UseNullishCoalescing {
                 UseNullishCoalescingState::IfStatement {
                     assignment_target,
                     assignment_value,
-                    can_fix,
+                    can_fix: true,
                     ..
                 },
                 UseNullishCoalescingQuery::JsIfStatement(if_stmt),
             ) => {
-                if !can_fix {
-                    return None;
-                }
                 let target = assignment_target.clone().trim_trivia()?;
                 let value = assignment_value.clone().trim_trivia()?;
 
@@ -548,6 +575,173 @@ impl Rule for UseNullishCoalescing {
     }
 }
 
+/// A ternary or `if` test that decides whether a value is missing.
+enum NullishTest {
+    /// `!x`, where `x` is a variable or a property.
+    Falsy(AnyJsExpression),
+    /// A comparison with `==`, `!=`, `===`, or `!==`, or two strict ones joined by `||` or `&&`.
+    Comparison {
+        /// The operator of the comparison, or of both comparisons of a compound.
+        operator: JsBinaryOperator,
+        first: (AnyJsExpression, AnyJsExpression),
+        second: Option<(AnyJsExpression, AnyJsExpression)>,
+    },
+}
+
+impl NullishTest {
+    /// Reads how `test` checks for a missing value, or returns `None` for any other test.
+    fn from_test(test: AnyJsExpression) -> Option<Self> {
+        match test {
+            AnyJsExpression::JsUnaryExpression(unary) => {
+                if unary.operator().ok()? != JsUnaryOperator::LogicalNot {
+                    return None;
+                }
+                let argument = unary.argument().ok()?;
+                is_variable_or_property(&argument).then_some(Self::Falsy(argument))
+            }
+            AnyJsExpression::JsBinaryExpression(binary) => {
+                let operator = binary.operator().ok()?;
+                if !matches!(
+                    operator,
+                    JsBinaryOperator::Equality
+                        | JsBinaryOperator::Inequality
+                        | JsBinaryOperator::StrictEquality
+                        | JsBinaryOperator::StrictInequality
+                ) {
+                    return None;
+                }
+                Some(Self::Comparison {
+                    operator,
+                    first: (binary.left().ok()?, binary.right().ok()?),
+                    second: None,
+                })
+            }
+            AnyJsExpression::JsLogicalExpression(logical) => {
+                let (
+                    AnyJsExpression::JsBinaryExpression(left),
+                    AnyJsExpression::JsBinaryExpression(right),
+                ) = (logical.left().ok()?, logical.right().ok()?)
+                else {
+                    return None;
+                };
+                let operator = compound_operator(
+                    logical.operator().ok()?,
+                    left.operator().ok()?,
+                    right.operator().ok()?,
+                )?;
+                Some(Self::Comparison {
+                    operator,
+                    first: (left.left().ok()?, left.right().ok()?),
+                    second: Some((right.left().ok()?, right.right().ok()?)),
+                })
+            }
+            _ => None,
+        }
+    }
+
+    /// Whether the test is true when the value is missing, so the ternary's consequent
+    /// or the `if` body provides the fallback.
+    fn is_true_when_missing(&self) -> bool {
+        match self {
+            Self::Falsy(_) => true,
+            Self::Comparison { operator, .. } => matches!(
+                operator,
+                JsBinaryOperator::Equality | JsBinaryOperator::StrictEquality
+            ),
+        }
+    }
+
+    /// Returns the tested value that `is_subject` accepts and how the test checks it, or
+    /// `None` unless every comparison compares `null` or `undefined` with that value.
+    /// The operand of a second comparison must equal the one of the first.
+    fn into_subject(self, is_subject: impl Fn(&AnyJsExpression) -> bool) -> Option<NullishSubject> {
+        let (operator, first, second) = match self {
+            Self::Falsy(expression) => {
+                return is_subject(&expression).then_some(NullishSubject {
+                    expression,
+                    check: NullishCheck::Truthiness,
+                });
+            }
+            Self::Comparison {
+                operator,
+                first,
+                second,
+            } => (operator, first, second),
+        };
+
+        let (first_literal, expression) = nullish_comparison(first, is_subject)?;
+        let second_literal = match second {
+            Some(second) => {
+                let (literal, _) = nullish_comparison(second, |operand| {
+                    expressions_equivalent(operand, &expression)
+                })?;
+                Some(literal)
+            }
+            None => None,
+        };
+
+        if matches!(
+            operator,
+            JsBinaryOperator::Equality | JsBinaryOperator::Inequality
+        ) {
+            return Some(NullishSubject {
+                expression,
+                check: NullishCheck::Nullish,
+            });
+        }
+
+        let check = match (first_literal, second_literal) {
+            (NullishLiteral::Null, Some(NullishLiteral::Undefined))
+            | (NullishLiteral::Undefined, Some(NullishLiteral::Null)) => NullishCheck::Nullish,
+            (literal, _) => NullishCheck::Strict(literal),
+        };
+        Some(NullishSubject { expression, check })
+    }
+}
+
+/// The value that a [`NullishTest`] checks, and how it checks it.
+struct NullishSubject {
+    expression: AnyJsExpression,
+    check: NullishCheck,
+}
+
+#[derive(Clone, Copy, Eq, PartialEq)]
+enum NullishCheck {
+    /// `!x`, which also treats `0`, `''`, and `false` as missing.
+    Truthiness,
+    /// Covers both `null` and `undefined`: a loose comparison with either, or strict
+    /// comparisons with both.
+    Nullish,
+    /// A strict comparison with only one of `null` and `undefined`.
+    Strict(NullishLiteral),
+}
+
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum NullishLiteral {
+    Null,
+    Undefined,
+}
+
+impl NullishLiteral {
+    fn from_expression(expression: &AnyJsExpression) -> Option<Self> {
+        match expression.as_static_value()? {
+            StaticValue::Null(_) => Some(Self::Null),
+            StaticValue::Undefined(_) => Some(Self::Undefined),
+            _ => None,
+        }
+    }
+
+    /// Whether a strict comparison with this literal catches every nullish variant of
+    /// `ty`, or `None` when the type cannot be resolved.
+    fn covers_nullish_variants_of(self, ty: InferredType) -> Option<bool> {
+        let misses_a_variant = match self {
+            Self::Null => ty.has_undefined_variant()?,
+            Self::Undefined => ty.has_null_variant()?,
+        };
+        Some(!misses_a_variant)
+    }
+}
+
 fn run_logical_or(
     ctx: &RuleContext<UseNullishCoalescing>,
     logical: &JsLogicalExpression,
@@ -562,32 +756,17 @@ fn run_logical_or(
         return None;
     }
 
-    if options.ignore_mixed_logical_expressions()
-        && is_in_mixed_logical_tree(AnyJsLogicalOrLikeExpression::from(logical.clone()))
-            .is_some_and(|mixed| mixed)
-    {
+    let node = AnyJsLogicalOrLikeExpression::from(logical.clone());
+    if options.ignore_mixed_logical_expressions() && is_in_mixed_logical_tree(&node) {
         return None;
     }
 
-    if options.ignore_boolean_coercion()
-        && is_in_boolean_call_context(ctx, &AnyJsLogicalOrLikeExpression::from(logical.clone()))
-    {
+    if options.ignore_boolean_coercion() && is_in_boolean_call_context(ctx, &node) {
         return None;
     }
 
-    let left = logical.left().ok()?;
-    let left_ty = ctx.type_of_expression(&left)?;
-
-    if !left_ty.has_nullish_variant()? {
-        return None;
-    }
-
-    if options.has_any_ignore_primitives() && should_ignore_for_primitives(options, left_ty)? {
-        return None;
-    }
-
-    let can_fix = left_ty.is_safe_for_nullish_coalescing()?
-        && is_safe_syntax_context_for_replacement(logical);
+    let left_ty = ctx.type_of_expression(&logical.left().ok()?)?;
+    let can_fix = report_truthiness(options, left_ty)? && can_replace_operator(logical);
 
     Some(UseNullishCoalescingState::LogicalOr {
         operator_range: logical.operator_token().ok()?.text_trimmed_range(),
@@ -605,16 +784,12 @@ fn run_logical_or_assignment(
     }
 
     let options = ctx.options();
-    if options.ignore_mixed_logical_expressions()
-        && is_in_mixed_logical_tree(AnyJsLogicalOrLikeExpression::from(assignment.clone()))
-            .is_some_and(|mixed| mixed)
-    {
+    let node = AnyJsLogicalOrLikeExpression::from(assignment.clone());
+    if options.ignore_mixed_logical_expressions() && is_in_mixed_logical_tree(&node) {
         return None;
     }
 
-    if options.ignore_boolean_coercion()
-        && is_in_boolean_call_context(ctx, &AnyJsLogicalOrLikeExpression::from(assignment.clone()))
-    {
+    if options.ignore_boolean_coercion() && is_in_boolean_call_context(ctx, &node) {
         return None;
     }
 
@@ -627,19 +802,56 @@ fn run_logical_or_assignment(
         }
         _ => return None,
     };
-
-    if !left_ty.has_nullish_variant()? {
-        return None;
-    }
-
-    if options.has_any_ignore_primitives() && should_ignore_for_primitives(options, left_ty)? {
-        return None;
-    }
-
-    let can_fix = left_ty.is_safe_for_nullish_coalescing()?;
+    let can_fix = report_truthiness(options, left_ty)?;
 
     Some(UseNullishCoalescingState::LogicalOrAssignment {
         operator_range: assignment.operator_token().ok()?.text_trimmed_range(),
+        can_fix,
+    })
+}
+
+fn run_ternary(
+    ctx: &RuleContext<UseNullishCoalescing>,
+    ternary: &JsConditionalExpression,
+) -> Option<UseNullishCoalescingState> {
+    if ctx.options().ignore_ternary_tests() {
+        return None;
+    }
+
+    let test = ternary.test().ok()?;
+    let test_range = test.syntax().text_trimmed_range();
+    let consequent = ternary.consequent().ok()?;
+    let alternate = ternary.alternate().ok()?;
+
+    let nullish_test = NullishTest::from_test(test)?;
+    if matches!(nullish_test, NullishTest::Falsy(_)) {
+        return None;
+    }
+    let is_positive = !nullish_test.is_true_when_missing();
+    let (present_branch, fallback) = if is_positive {
+        (consequent, alternate)
+    } else {
+        (alternate, consequent)
+    };
+    let check = nullish_test
+        .into_subject(|operand| expressions_equivalent(operand, &present_branch))?
+        .check;
+
+    // The branch is what `??` keeps, so it is the expression typed and rewritten.
+    let subject = NullishSubject {
+        expression: present_branch,
+        check,
+    };
+    // The ternary evaluates a subject containing a call or `new` twice (test + branch)
+    // while `??` evaluates it once.
+    let can_fix =
+        report_check(ctx, &subject)? && !contains_call_or_new_expression(&subject.expression);
+
+    Some(UseNullishCoalescingState::Ternary {
+        test_range,
+        subject: subject.expression,
+        fallback,
+        is_positive,
         can_fix,
     })
 }
@@ -648,8 +860,7 @@ fn run_if_statement(
     ctx: &RuleContext<UseNullishCoalescing>,
     if_stmt: &JsIfStatement,
 ) -> Option<UseNullishCoalescingState> {
-    let options = ctx.options();
-    if options.ignore_if_statements() {
+    if ctx.options().ignore_if_statements() {
         return None;
     }
 
@@ -658,81 +869,46 @@ fn run_if_statement(
         return None;
     }
 
-    let assignment = extract_if_body_assignment(if_stmt)?;
-
-    let left = assignment.left().ok()?;
-    if !matches!(
-        left.syntax().kind(),
-        JsSyntaxKind::JS_IDENTIFIER_ASSIGNMENT
-            | JsSyntaxKind::JS_STATIC_MEMBER_ASSIGNMENT
-            | JsSyntaxKind::JS_COMPUTED_MEMBER_ASSIGNMENT
-    ) {
-        return None;
-    }
+    let assignment = if_body_assignment(if_stmt)?;
+    let target = assignment.left().ok()?;
 
     // The test must check the same reference that is assigned in the body.
-    let test = if_stmt.test().ok()?;
-    let (subject, test_kind) = extract_if_null_check(&test)?;
-    if !subject_matches_assignment_target(&subject, &left) {
+    let nullish_test = NullishTest::from_test(if_stmt.test().ok()?)?;
+    if !nullish_test.is_true_when_missing() {
         return None;
     }
+    let subject = nullish_test
+        .into_subject(|operand| subject_matches_assignment_target(operand, &target))?;
 
-    let subject_ty = ctx.type_of_expression(&subject)?;
-    if !subject_ty.has_nullish_variant()? {
-        return None;
-    }
-    if options.has_any_ignore_primitives() && should_ignore_for_primitives(options, subject_ty)? {
-        return None;
-    }
-
-    if let IfTestKind::Nullish(NullishCheckKind::StrictSingle(literal)) = test_kind
-        && !literal.covers_nullish_variants_of(subject_ty)?
+    // Unlike a ternary, an `if` is reported only for a subject that can be nullish.
+    if !ctx
+        .type_of_expression(&subject.expression)?
+        .has_nullish_variant()?
     {
         return None;
     }
-
-    // A `!x` truthiness test also catches other falsy values (`0`, `''`, `false`), so the
-    // fix to `??=` is only safe when the non-nullish part of the type cannot itself be falsy.
-    let type_allows_fix = match test_kind {
-        IfTestKind::Truthiness => subject_ty.is_safe_for_nullish_coalescing()?,
-        IfTestKind::Nullish(_) => true,
-    };
 
     // The original `if` evaluates the subject twice (test + assignment) while `??=`
     // evaluates it once, so the rewrite only preserves semantics when re-evaluating the
     // reference is side-effect-free and stable (e.g. `getObj().x` or `arr[i++]` are not).
     // Inner comments would be discarded by the rewrite, so skip the fix in that case too.
-    let can_fix = type_allows_fix
-        && is_stable_reference(&subject)
+    let can_fix = report_check(ctx, &subject)?
+        && is_stable_reference(&subject.expression)
         && !if_stmt.syntax().has_inner_comments();
 
     Some(UseNullishCoalescingState::IfStatement {
         if_range: if_stmt.syntax().text_trimmed_range(),
-        assignment_target: assignment.left().ok()?,
+        assignment_target: target,
         assignment_value: assignment.right().ok()?,
         can_fix,
     })
 }
 
-/// How an `if` condition tests its subject for nullishness.
-#[derive(Clone, Copy)]
-enum IfTestKind {
-    /// `!x` truthiness negation. Catches every falsy value, not only nullish ones.
-    Truthiness,
-    /// A comparison against `null`/`undefined`, carrying the same coverage kinds
-    /// as the ternary path.
-    Nullish(NullishCheckKind),
-}
-
-/// Returns the single plain `=` assignment in an `if` body.
-/// Handles both `if (test) { target = value; }` and `if (test) target = value;`.
-/// `||=`/`??=` bodies are left to the operator logic, avoiding a double report.
-fn extract_if_body_assignment(if_stmt: &JsIfStatement) -> Option<JsAssignmentExpression> {
-    let consequent = if_stmt.consequent().ok()?;
-
-    // Unwrap a block body to its sole statement. An empty body has nothing to
-    // rewrite, and a body with several statements does more than a fallback.
-    let statement = match consequent {
+/// Returns the single plain `=` assignment in an `if` body, either
+/// `if (test) { target = value; }` or `if (test) target = value;`.
+/// `||=` and `??=` bodies are left to the operator logic, avoiding a double report.
+fn if_body_assignment(if_stmt: &JsIfStatement) -> Option<JsAssignmentExpression> {
+    let statement = match if_stmt.consequent().ok()? {
         AnyJsStatement::JsBlockStatement(block) => {
             let mut statements = block.statements().iter();
             let first = statements.next()?;
@@ -744,19 +920,178 @@ fn extract_if_body_assignment(if_stmt: &JsIfStatement) -> Option<JsAssignmentExp
         statement => statement,
     };
 
-    // Only an expression statement can hold the plain `target = value;`
-    // assignment; any other kind (a declaration, a nested `if`, a `return`,
-    // ...) means the body is not a nullish fallback.
-    let AnyJsStatement::JsExpressionStatement(expr_stmt) = statement else {
-        return None;
-    };
-
-    let assignment = expr_stmt
+    let assignment = statement
+        .as_js_expression_statement()?
         .expression()
         .ok()?
         .as_js_assignment_expression()?
         .clone();
     (assignment.operator().ok()? == JsAssignmentOperator::Assign).then_some(assignment)
+}
+
+/// Returns `None` when the check of `subject` is not reported, otherwise whether the
+/// `??` or `??=` rewrite keeps its behavior.
+fn report_check(ctx: &RuleContext<UseNullishCoalescing>, subject: &NullishSubject) -> Option<bool> {
+    let options = ctx.options();
+    let ty = ctx.type_of_expression(&subject.expression);
+    if subject.check == NullishCheck::Truthiness {
+        return report_truthiness(options, ty?);
+    }
+
+    if options.has_any_ignore_primitives()
+        && let Some(ty) = ty
+        && should_ignore_for_primitives(options, ty)?
+    {
+        return None;
+    }
+
+    if let NullishCheck::Strict(literal) = subject.check {
+        return literal.covers_nullish_variants_of(ty?)?.then_some(true);
+    }
+    Some(true)
+}
+
+/// Returns `None` when a truthiness check of a value of type `ty` is not reported,
+/// otherwise whether `??` keeps its behavior.
+fn report_truthiness(options: &UseNullishCoalescingOptions, ty: InferredType) -> Option<bool> {
+    if !ty.has_nullish_variant()? {
+        return None;
+    }
+
+    if options.has_any_ignore_primitives() && should_ignore_for_primitives(options, ty)? {
+        return None;
+    }
+
+    ty.is_safe_for_nullish_coalescing()
+}
+
+/// Returns `true` when `ty` is a nullish union whose non-nullish variants are all
+/// primitives that the configured `ignorePrimitives` option suppresses. A non-union
+/// type is never ignored.
+fn should_ignore_for_primitives(
+    options: &UseNullishCoalescingOptions,
+    ty: InferredType,
+) -> Option<bool> {
+    ty.nullish_union_matches_ignored_primitives(IgnoredPrimitiveTypes {
+        string: options.should_ignore_primitive_string(),
+        number: options.should_ignore_primitive_number(),
+        boolean: options.should_ignore_primitive_boolean(),
+        bigint: options.should_ignore_primitive_bigint(),
+    })
+}
+
+fn is_in_test_position(logical: &JsLogicalExpression) -> bool {
+    let logical_range = logical.syntax().text_trimmed_range();
+
+    let test_contains_logical = |test: Option<AnyJsExpression>| -> bool {
+        test.is_some_and(|t| t.syntax().text_trimmed_range().contains_range(logical_range))
+    };
+
+    for ancestor in logical.syntax().ancestors() {
+        let is_in_test = match ancestor.kind() {
+            JsSyntaxKind::JS_IF_STATEMENT => test_contains_logical(
+                JsIfStatement::cast_ref(&ancestor).and_then(|s| s.test().ok()),
+            ),
+            JsSyntaxKind::JS_WHILE_STATEMENT => test_contains_logical(
+                JsWhileStatement::cast_ref(&ancestor).and_then(|s| s.test().ok()),
+            ),
+            JsSyntaxKind::JS_FOR_STATEMENT => test_contains_logical(
+                JsForStatement::cast_ref(&ancestor).and_then(|s| s.test()),
+            ),
+            JsSyntaxKind::JS_DO_WHILE_STATEMENT => test_contains_logical(
+                JsDoWhileStatement::cast_ref(&ancestor).and_then(|s| s.test().ok()),
+            ),
+            JsSyntaxKind::JS_CONDITIONAL_EXPRESSION => test_contains_logical(
+                JsConditionalExpression::cast_ref(&ancestor).and_then(|s| s.test().ok()),
+            ),
+            _ => false,
+        };
+        if is_in_test {
+            return true;
+        }
+    }
+    false
+}
+
+/// Whether the `||` or `||=` `node` is an argument of a call to the global `Boolean`,
+/// reached through parentheses and logical expressions. A `Boolean` bound in scope is a
+/// different function.
+fn is_in_boolean_call_context(
+    ctx: &RuleContext<UseNullishCoalescing>,
+    node: &AnyJsLogicalOrLikeExpression,
+) -> bool {
+    node.syntax()
+        .ancestors()
+        .skip(1)
+        .find(|ancestor| {
+            !(JsParenthesizedExpression::can_cast(ancestor.kind())
+                || JsLogicalExpression::can_cast(ancestor.kind()))
+        })
+        .and_then(JsCallArgumentList::cast)
+        .and_then(|list| list.parent::<JsCallArguments>())
+        .and_then(|args| args.parent::<JsCallExpression>())
+        .and_then(|call| call.callee().ok())
+        .is_some_and(|callee| {
+            callee
+                .as_js_reference_identifier()
+                .is_some_and(|reference| {
+                    reference.has_name("Boolean") && !ctx.has_binding(&reference)
+                })
+        })
+}
+
+/// Whether `node`, a `||` or `||=`, is combined with `&&`: a `&&` is an operand of the
+/// chain of `||` and `||=` that `node` belongs to, or that chain is an operand of `&&`.
+fn is_in_mixed_logical_tree(node: &AnyJsLogicalOrLikeExpression) -> bool {
+    let mut root = node.clone();
+    while let Some(parent) =
+        parent_logical(&root).filter(AnyJsLogicalOrLikeExpression::is_logical_or_form)
+    {
+        root = parent;
+    }
+    parent_logical(&root).is_some_and(|parent| parent.is_logical_and())
+        || chain_contains_logical_and(&root)
+}
+
+/// Returns the logical expression or assignment that `node` is an operand of, ignoring
+/// parentheses.
+fn parent_logical(node: &AnyJsLogicalOrLikeExpression) -> Option<AnyJsLogicalOrLikeExpression> {
+    let mut parent = node.parent::<AnyJsExpression>()?;
+    while let AnyJsExpression::JsParenthesizedExpression(parenthesized) = parent {
+        parent = parenthesized.parent::<AnyJsExpression>()?;
+    }
+    AnyJsLogicalOrLikeExpression::cast(parent.into_syntax())
+}
+
+/// Whether a `&&` is an operand of `node` or of a `||` or `||=` reached from `node`
+/// through operands, where only the right-hand side of a `||=` is an operand.
+fn chain_contains_logical_and(node: &AnyJsLogicalOrLikeExpression) -> bool {
+    let mut pending = match node {
+        AnyJsLogicalOrLikeExpression::JsLogicalExpression(logical) => {
+            vec![logical.left(), logical.right()]
+        }
+        AnyJsLogicalOrLikeExpression::JsAssignmentExpression(assignment) => {
+            vec![assignment.right()]
+        }
+    };
+    while let Some(operand) = pending.pop() {
+        match operand.ok().map(AnyJsExpression::omit_parentheses) {
+            Some(AnyJsExpression::JsLogicalExpression(logical)) => match logical.operator() {
+                Ok(JsLogicalOperator::LogicalAnd) => return true,
+                Ok(JsLogicalOperator::LogicalOr) => {
+                    pending.extend([logical.left(), logical.right()]);
+                }
+                _ => {}
+            },
+            Some(AnyJsExpression::JsAssignmentExpression(assignment))
+                if assignment.operator().ok() == Some(JsAssignmentOperator::LogicalOrAssign) =>
+            {
+                pending.push(assignment.right());
+            }
+            _ => {}
+        }
+    }
+    false
 }
 
 /// Whether the `if` test's `subject` and the body's assignment `target` reference the
@@ -816,73 +1151,56 @@ fn subject_matches_assignment_target(
     }
 }
 
-/// Classifies an `if` test as a truthiness negation (`!x`) or a nullish comparison,
-/// returning the tested reference and the kind.
-///
-/// Supported tests:
-/// - `!x`
-/// - `x == null` / `x == undefined` (and reversed operands)
-/// - `x === null` / `x === undefined` (and reversed operands)
-/// - `x === null || x === undefined`
-fn extract_if_null_check(test: &AnyJsExpression) -> Option<(AnyJsExpression, IfTestKind)> {
-    match test {
-        AnyJsExpression::JsUnaryExpression(unary) => {
-            if unary.operator().ok()? != JsUnaryOperator::LogicalNot {
-                return None;
-            }
-            let arg = unary.argument().ok()?;
-            is_member_access_like_expr(&arg).then_some((arg, IfTestKind::Truthiness))
-        }
-        AnyJsExpression::JsBinaryExpression(_) => {
-            let (subject, kind) = match test.as_js_binary_expression()?.operator().ok()? {
-                JsBinaryOperator::Equality => {
-                    let (subject, _) =
-                        extract_nullish_comparison_operand(test, JsBinaryOperator::Equality)?;
-                    (subject, NullishCheckKind::Loose)
-                }
-                JsBinaryOperator::StrictEquality => {
-                    let (subject, lit) =
-                        extract_nullish_comparison_operand(test, JsBinaryOperator::StrictEquality)?;
-                    (subject, NullishCheckKind::StrictSingle(lit))
-                }
-                _ => return None,
-            };
-            is_member_access_like_expr(&subject).then_some((subject, IfTestKind::Nullish(kind)))
-        }
-        AnyJsExpression::JsLogicalExpression(logical) => {
-            if logical.operator().ok()? != JsLogicalOperator::LogicalOr {
-                return None;
-            }
-            let left = logical.left().ok()?;
-            let right = logical.right().ok()?;
-            let (left_subject, left_lit) =
-                extract_nullish_comparison_operand(&left, JsBinaryOperator::StrictEquality)?;
-            let (right_subject, right_lit) =
-                extract_nullish_comparison_operand(&right, JsBinaryOperator::StrictEquality)?;
-            if !is_member_access_like_expr(&left_subject)
-                || !expressions_equivalent(&left_subject, &right_subject)
-            {
-                return None;
-            }
-            // Distinct literals (one null, one undefined) cover both nullish values.
-            let kind = if left_lit != right_lit {
-                NullishCheckKind::Compound
-            } else {
-                NullishCheckKind::StrictSingle(left_lit)
-            };
-            Some((left_subject, IfTestKind::Nullish(kind)))
-        }
+/// Splits a comparison into the nullish literal it compares with and the operand that
+/// `is_subject` accepts.
+fn nullish_comparison(
+    (left, right): (AnyJsExpression, AnyJsExpression),
+    is_subject: impl Fn(&AnyJsExpression) -> bool,
+) -> Option<(NullishLiteral, AnyJsExpression)> {
+    let (literal, operand) = match (
+        NullishLiteral::from_expression(&left),
+        NullishLiteral::from_expression(&right),
+    ) {
+        (Some(literal), None) => (literal, right),
+        (None, Some(literal)) => (literal, left),
+        _ => return None,
+    };
+    is_subject(&operand).then_some((literal, operand))
+}
+
+/// Returns the operator that a compound of two comparisons acts as, or `None` when
+/// the compound does not check for a missing value.
+fn compound_operator(
+    logical: JsLogicalOperator,
+    left: JsBinaryOperator,
+    right: JsBinaryOperator,
+) -> Option<JsBinaryOperator> {
+    match (logical, left, right) {
+        (
+            JsLogicalOperator::LogicalOr,
+            JsBinaryOperator::StrictEquality,
+            JsBinaryOperator::StrictEquality,
+        ) => Some(JsBinaryOperator::StrictEquality),
+        (
+            JsLogicalOperator::LogicalAnd,
+            JsBinaryOperator::StrictInequality,
+            JsBinaryOperator::StrictInequality,
+        ) => Some(JsBinaryOperator::StrictInequality),
         _ => None,
     }
 }
 
-fn is_member_access_like_expr(expr: &AnyJsExpression) -> bool {
+fn is_variable_or_property(expression: &AnyJsExpression) -> bool {
     matches!(
-        expr,
+        expression,
         AnyJsExpression::JsIdentifierExpression(_)
             | AnyJsExpression::JsStaticMemberExpression(_)
             | AnyJsExpression::JsComputedMemberExpression(_)
     )
+}
+
+fn expressions_equivalent(a: &AnyJsExpression, b: &AnyJsExpression) -> bool {
+    is_node_equal(a.syntax(), b.syntax())
 }
 
 /// Whether re-evaluating `expr` is side-effect-free and yields the same reference.
@@ -924,398 +1242,6 @@ fn is_stable_index(expr: &AnyJsExpression) -> bool {
     matches!(expr, AnyJsExpression::AnyJsLiteralExpression(_)) || is_stable_reference(expr)
 }
 
-/// Returns `true` when every non-nullish variant of `ty` is a primitive that the
-/// configured `ignorePrimitives` option suppresses. A non-union type is never
-/// ignored here, since the diagnostic only fires once the operand is a nullish
-/// union in the first place.
-fn should_ignore_for_primitives(
-    options: &UseNullishCoalescingOptions,
-    ty: InferredType,
-) -> Option<bool> {
-    ty.nullish_union_matches_ignored_primitives(IgnoredPrimitiveTypes {
-        string: options.should_ignore_primitive_string(),
-        number: options.should_ignore_primitive_number(),
-        boolean: options.should_ignore_primitive_boolean(),
-        bigint: options.should_ignore_primitive_bigint(),
-    })
-}
-
-fn is_safe_syntax_context_for_replacement(logical: &JsLogicalExpression) -> bool {
-    // Without parentheses, swapping `||` for `??` next to another logical operator changes precedence.
-    let is_parenthesized = logical
-        .syntax()
-        .parent()
-        .is_some_and(|parent| JsParenthesizedExpression::can_cast(parent.kind()));
-
-    if !is_parenthesized
-        && logical
-            .syntax()
-            .parent()
-            .is_some_and(|parent| JsLogicalExpression::can_cast(parent.kind()))
-    {
-        return false;
-    }
-
-    let left = logical.left().ok();
-    let right = logical.right().ok();
-
-    !(left
-        .as_ref()
-        .is_some_and(is_unparenthesized_and_or_expression)
-        || right
-            .as_ref()
-            .is_some_and(is_unparenthesized_and_or_expression))
-}
-
-fn is_unparenthesized_and_or_expression(expr: &AnyJsExpression) -> bool {
-    match expr {
-        AnyJsExpression::JsParenthesizedExpression(_) => false,
-        AnyJsExpression::JsLogicalExpression(logical) => {
-            logical.operator().is_ok_and(|op| {
-                matches!(
-                    op,
-                    JsLogicalOperator::LogicalAnd | JsLogicalOperator::LogicalOr
-                )
-            })
-        }
-        _ => false,
-    }
-}
-
-/// Returns `Some(true)` when `node` belongs to a connected tree of `||`/`||=`
-/// operations that also contains a `&&`; `Some(false)` when no `&&` is present
-/// in that tree. Returns `None` when `node` is not a `||`/`||=` form, so
-/// callers can use `?` to bail out.
-fn is_in_mixed_logical_tree(node: AnyJsLogicalOrLikeExpression) -> Option<bool> {
-    node.is_logical_or_form().then_some(())?;
-    let root = climb_to_logical_or_root(node);
-    Some(has_logical_and_directly_above(&root) || tree_contains_logical_and(&root))
-}
-
-fn has_logical_and_directly_above(node: &AnyJsLogicalOrLikeExpression) -> bool {
-    node.syntax()
-        .ancestors()
-        .skip(1)
-        .find(|ancestor| !JsParenthesizedExpression::can_cast(ancestor.kind()))
-        .and_then(JsLogicalExpression::cast)
-        .and_then(|logical| logical.operator().ok())
-        == Some(JsLogicalOperator::LogicalAnd)
-}
-
-/// Walks up through `||`/`||=` parents (skipping parens) and stops at the
-/// first non-`||`/`||=` ancestor. This keeps the traversal bounded to the
-/// connected logical tree rather than walking the full ancestor chain.
-fn climb_to_logical_or_root(
-    start: AnyJsLogicalOrLikeExpression,
-) -> AnyJsLogicalOrLikeExpression {
-    let mut current = start;
-    while let Some(parent) = parent_logical_or(&current) {
-        current = parent;
-    }
-    current
-}
-
-fn parent_logical_or(
-    current: &AnyJsLogicalOrLikeExpression,
-) -> Option<AnyJsLogicalOrLikeExpression> {
-    let mut parent = current.syntax().parent()?;
-    while JsParenthesizedExpression::can_cast(parent.kind()) {
-        parent = parent.parent()?;
-    }
-    let parent_logical = AnyJsLogicalOrLikeExpression::cast(parent)?;
-    parent_logical.is_logical_or_form().then_some(parent_logical)
-}
-
-fn tree_contains_logical_and(node: &AnyJsLogicalOrLikeExpression) -> bool {
-    match node {
-        AnyJsLogicalOrLikeExpression::JsLogicalExpression(logical) => {
-            match logical.operator() {
-                Ok(JsLogicalOperator::LogicalAnd) => true,
-                Ok(JsLogicalOperator::LogicalOr) => {
-                    operand_reaches_logical_and(logical.left())
-                        || operand_reaches_logical_and(logical.right())
-                }
-                _ => false,
-            }
-        }
-        AnyJsLogicalOrLikeExpression::JsAssignmentExpression(assignment) => {
-            // For `||=`, only the right-hand side is part of the logical tree.
-            operand_reaches_logical_and(assignment.right())
-        }
-    }
-}
-
-fn operand_reaches_logical_and(operand: SyntaxResult<AnyJsExpression>) -> bool {
-    operand.is_ok_and(|expr| {
-        match expr.omit_parentheses() {
-            AnyJsExpression::JsLogicalExpression(logical) => {
-                tree_contains_logical_and(&AnyJsLogicalOrLikeExpression::from(logical))
-            }
-            AnyJsExpression::JsAssignmentExpression(assignment)
-                if assignment.operator().ok()
-                    == Some(JsAssignmentOperator::LogicalOrAssign) =>
-            {
-                tree_contains_logical_and(&AnyJsLogicalOrLikeExpression::from(assignment))
-            }
-            _ => false,
-        }
-    })
-}
-
-/// Returns `true` when the `||`/`||=` expression is boolean-coerced by an
-/// enclosing `Boolean(...)` call, where coalescing on falsy values is the
-/// intended behavior.
-///
-/// It skips parenthesized and logical-expression ancestors (both `||` and `&&`,
-/// since the coerced value still flows into the call) so that
-/// `Boolean(a || b || c)` and `Boolean(x && (a || b))` are both treated as
-/// coerced, then inspects the first ancestor that is neither. That ancestor must
-/// be the argument list of a call to the global `Boolean` for the expression to
-/// be considered coerced. A `Boolean` bound in scope is a different function.
-fn is_in_boolean_call_context(
-    ctx: &RuleContext<UseNullishCoalescing>,
-    node: &AnyJsLogicalOrLikeExpression,
-) -> bool {
-    node.syntax()
-        .ancestors()
-        .skip(1)
-        .find(|ancestor| {
-            !(JsParenthesizedExpression::can_cast(ancestor.kind())
-                || JsLogicalExpression::can_cast(ancestor.kind()))
-        })
-        .and_then(JsCallArgumentList::cast)
-        .and_then(|list| list.parent::<JsCallArguments>())
-        .and_then(|args| args.parent::<JsCallExpression>())
-        .and_then(|call| call.callee().ok())
-        .is_some_and(|callee| {
-            callee
-                .as_js_reference_identifier()
-                .is_some_and(|reference| {
-                    reference.has_name("Boolean") && !ctx.has_binding(&reference)
-                })
-        })
-}
-
-fn is_in_test_position(logical: &JsLogicalExpression) -> bool {
-    let logical_range = logical.syntax().text_trimmed_range();
-
-    let test_contains_logical = |test: Option<AnyJsExpression>| -> bool {
-        test.is_some_and(|t| t.syntax().text_trimmed_range().contains_range(logical_range))
-    };
-
-    for ancestor in logical.syntax().ancestors() {
-        let is_in_test = match ancestor.kind() {
-            JsSyntaxKind::JS_IF_STATEMENT => test_contains_logical(
-                JsIfStatement::cast_ref(&ancestor).and_then(|s| s.test().ok()),
-            ),
-            JsSyntaxKind::JS_WHILE_STATEMENT => test_contains_logical(
-                JsWhileStatement::cast_ref(&ancestor).and_then(|s| s.test().ok()),
-            ),
-            JsSyntaxKind::JS_FOR_STATEMENT => test_contains_logical(
-                JsForStatement::cast_ref(&ancestor).and_then(|s| s.test()),
-            ),
-            JsSyntaxKind::JS_DO_WHILE_STATEMENT => test_contains_logical(
-                JsDoWhileStatement::cast_ref(&ancestor).and_then(|s| s.test().ok()),
-            ),
-            JsSyntaxKind::JS_CONDITIONAL_EXPRESSION => test_contains_logical(
-                JsConditionalExpression::cast_ref(&ancestor).and_then(|s| s.test().ok()),
-            ),
-            _ => false,
-        };
-        if is_in_test {
-            return true;
-        }
-    }
-    false
-}
-
-fn run_ternary(
-    ctx: &RuleContext<UseNullishCoalescing>,
-    ternary: &JsConditionalExpression,
-) -> Option<UseNullishCoalescingState> {
-    if ctx.options().ignore_ternary_tests() {
-        return None;
-    }
-
-    let test = ternary.test().ok()?;
-    let consequent = ternary.consequent().ok()?;
-    let alternate = ternary.alternate().ok()?;
-
-    let (checked_expr, fallback_expr, is_positive, check_kind) =
-        check_ternary_nullish_pattern(&test, &consequent, &alternate)?;
-
-    let options = ctx.options();
-    if options.has_any_ignore_primitives()
-        && let Some(ty) = ctx.type_of_expression(&checked_expr)
-        && should_ignore_for_primitives(options, ty)?
-    {
-        return None;
-    }
-
-    if let NullishCheckKind::StrictSingle(literal) = check_kind
-        && !literal.covers_nullish_variants_of(ctx.type_of_expression(&checked_expr)?)?
-    {
-        return None;
-    }
-
-    // The ternary evaluates a subject containing a call or `new` twice (test + branch) while `??` evaluates it once.
-    let can_fix = !contains_call_or_new_expression(&checked_expr);
-
-    Some(UseNullishCoalescingState::Ternary {
-        test_range: test.syntax().text_trimmed_range(),
-        checked_expr,
-        fallback_expr,
-        is_positive,
-        can_fix,
-    })
-}
-
-/// Returns `(checked, fallback, is_positive, check_kind)` if the ternary can be converted to `??`.
-/// `is_positive` is true when checked = consequent (e.g. `x !== null ? x : y`).
-fn check_ternary_nullish_pattern(
-    test: &AnyJsExpression,
-    consequent: &AnyJsExpression,
-    alternate: &AnyJsExpression,
-) -> Option<(AnyJsExpression, AnyJsExpression, bool, NullishCheckKind)> {
-    // `x !== null ? x : y` or `x != null ? x : y`
-    if let Some((_, kind)) = match_nullish_check(
-        test,
-        consequent,
-        JsBinaryOperator::Inequality,
-        JsBinaryOperator::StrictInequality,
-        JsLogicalOperator::LogicalAnd,
-    ) {
-        return Some((consequent.clone(), alternate.clone(), true, kind));
-    }
-
-    // `x === null ? y : x` or `x == null ? y : x`
-    if let Some((_, kind)) = match_nullish_check(
-        test,
-        alternate,
-        JsBinaryOperator::Equality,
-        JsBinaryOperator::StrictEquality,
-        JsLogicalOperator::LogicalOr,
-    ) {
-        return Some((alternate.clone(), consequent.clone(), false, kind));
-    }
-
-    None
-}
-
-/// Returns the checked expression and the kind of nullish check if the test matches
-/// a nullish comparison pattern (loose, strict, or compound) using the given operator family.
-fn match_nullish_check(
-    test: &AnyJsExpression,
-    value: &AnyJsExpression,
-    loose_op: JsBinaryOperator,
-    strict_op: JsBinaryOperator,
-    compound_logical_op: JsLogicalOperator,
-) -> Option<(AnyJsExpression, NullishCheckKind)> {
-    // Loose: `x != null` or `x == null`
-    if let Some((checked, _)) = extract_nullish_comparison_operand(test, loose_op)
-        && expressions_equivalent(&checked, value)
-    {
-        return Some((checked, NullishCheckKind::Loose));
-    }
-
-    // Strict: `x !== null` or `x === undefined`
-    if let Some((checked, lit)) = extract_nullish_comparison_operand(test, strict_op)
-        && expressions_equivalent(&checked, value)
-    {
-        return Some((checked, NullishCheckKind::StrictSingle(lit)));
-    }
-
-    // Compound: `x !== null && x !== undefined` or `x === null || x === undefined`
-    if let Some(logical) = test.as_js_logical_expression()
-        && logical.operator().ok()? == compound_logical_op
-    {
-        let left = logical.left().ok()?;
-        let right = logical.right().ok()?;
-
-        if let (Some((checked_left, lit_left)), Some((checked_right, lit_right))) = (
-            extract_nullish_comparison_operand(&left, strict_op),
-            extract_nullish_comparison_operand(&right, strict_op),
-        ) && expressions_equivalent(&checked_left, &checked_right)
-            && expressions_equivalent(&checked_left, value)
-        {
-            // Both sides must test different literals (one null, one undefined)
-            // to be a true compound check. If both test the same literal,
-            // treat it as a single strict check.
-            if lit_left != lit_right {
-                return Some((checked_left, NullishCheckKind::Compound));
-            }
-            return Some((checked_left, NullishCheckKind::StrictSingle(lit_left)));
-        }
-    }
-
-    None
-}
-
-#[derive(Clone, Copy, PartialEq, Eq)]
-enum NullishLiteral {
-    Null,
-    Undefined,
-}
-
-impl NullishLiteral {
-    /// Whether a strict comparison against this literal catches every nullish
-    /// variant of `ty`. Returns `None` when the type cannot be resolved.
-    fn covers_nullish_variants_of(self, ty: InferredType) -> Option<bool> {
-        let misses_a_variant = match self {
-            Self::Null => ty.has_undefined_variant()?,
-            Self::Undefined => ty.has_null_variant()?,
-        };
-        Some(!misses_a_variant)
-    }
-}
-
-#[derive(Clone, Copy)]
-enum NullishCheckKind {
-    /// Loose equality: `!= null` or `== null` (covers both null and undefined)
-    Loose,
-    /// Single strict equality: `!== null` or `=== undefined`. It covers only one nullish
-    /// value, so the rule reports it only when the type cannot hold the other one.
-    StrictSingle(NullishLiteral),
-    /// Compound strict: `!== null && !== undefined` (covers both)
-    Compound,
-}
-
-/// Returns the non-nullish operand of a binary comparison against `null` or `undefined`.
-///
-/// Checks the right operand first because the conventional form places the literal
-/// on the right (`x !== null`). The left check handles the reversed form (`null !== x`).
-fn extract_nullish_comparison_operand(
-    expr: &AnyJsExpression,
-    expected_op: JsBinaryOperator,
-) -> Option<(AnyJsExpression, NullishLiteral)> {
-    let binary = expr.as_js_binary_expression()?;
-    if binary.operator().ok()? != expected_op {
-        return None;
-    }
-    let left = binary.left().ok()?;
-    let right = binary.right().ok()?;
-    if let Some(lit) = nullish_literal_kind(&right) {
-        return Some((left, lit));
-    }
-    if let Some(lit) = nullish_literal_kind(&left) {
-        return Some((right, lit));
-    }
-    None
-}
-
-fn nullish_literal_kind(expr: &AnyJsExpression) -> Option<NullishLiteral> {
-    use biome_js_syntax::static_value::StaticValue;
-    match expr.as_static_value()? {
-        StaticValue::Null(_) => Some(NullishLiteral::Null),
-        StaticValue::Undefined(_) => Some(NullishLiteral::Undefined),
-        _ => None,
-    }
-}
-
-fn expressions_equivalent(a: &AnyJsExpression, b: &AnyJsExpression) -> bool {
-    is_node_equal(a.syntax(), b.syntax())
-}
-
 /// Returns true if the expression contains a call or `new` expression.
 ///
 /// In a ternary like `foo() !== null ? foo() : y`, the subject is evaluated twice
@@ -1328,6 +1254,22 @@ fn contains_call_or_new_expression(expr: &AnyJsExpression) -> bool {
             JsSyntaxKind::JS_CALL_EXPRESSION | JsSyntaxKind::JS_NEW_EXPRESSION
         )
     })
+}
+
+/// Whether `??` can replace the `||` of `logical` without adding parentheses next to
+/// another `&&` or `||`.
+fn can_replace_operator(logical: &JsLogicalExpression) -> bool {
+    logical.parent::<JsLogicalExpression>().is_none()
+        && [logical.left(), logical.right()].into_iter().all(|operand| {
+            !operand.is_ok_and(|operand| {
+                operand.as_js_logical_expression().is_some_and(|operand| {
+                    matches!(
+                        operand.operator(),
+                        Ok(JsLogicalOperator::LogicalAnd | JsLogicalOperator::LogicalOr)
+                    )
+                })
+            })
+        })
 }
 
 /// Wraps the expression in parentheses if it would be invalid or change meaning

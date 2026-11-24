@@ -265,9 +265,9 @@ info: markdown/list/followed-by-indented-things.md
     1. item 1-1
     2. item 1-2
 -2. item 1
+-
 +2.   item 1
  
--
      top level indented code block
  
  ---
@@ -285,11 +285,11 @@ info: markdown/list/followed-by-indented-things.md
      top level indented code block
  
  ---
--
+ 
 -- item 1
 -  - item 1-1
 -  - item 1-2
- 
+-
 -
 -      indented code block
 -

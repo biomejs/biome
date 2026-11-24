@@ -1896,7 +1896,21 @@ impl FunctionParameter {
     ) -> Self {
         match param {
             AnyJsParameter::AnyJsFormalParameter(param) => {
-                Self::from_any_js_formal_parameter(collector, scope_id, param)
+                let mut parameter = Self::from_any_js_formal_parameter(collector, scope_id, param);
+                // Callers can omit a parameter that has a default value, so the
+                // signature marks it optional. Its type doesn't include
+                // `undefined`, because inside the function the default
+                // replaces a missing value.
+                if param
+                    .as_js_formal_parameter()
+                    .is_some_and(|param| param.initializer().is_some())
+                {
+                    match &mut parameter {
+                        Self::Named(parameter) => parameter.is_optional = true,
+                        Self::Pattern(parameter) => parameter.is_optional = true,
+                    }
+                }
+                parameter
             }
             AnyJsParameter::JsRestParameter(param) => {
                 Self::from_js_rest_parameter(collector, scope_id, param)
@@ -2266,23 +2280,34 @@ impl TypeMember {
                 })
             }
             AnyJsClassMember::JsMethodClassMember(member) => member.name().ok().and_then(|name| {
+                let type_parameters = member.type_parameters();
+                // Nongeneric methods keep the enclosing class scope. Their raw
+                // types then match those of the other class members, so the
+                // collector registers each shared type once.
+                let method_scope_id = if type_parameters.is_some() {
+                    collector
+                        .scope_for_node(member.syntax())
+                        .unwrap_or(scope_id)
+                } else {
+                    scope_id
+                };
                 let is_async = member.async_token().is_some();
                 let function = Function {
                     is_async,
                     type_parameters: generic_params_from_ts_type_params(
                         collector,
-                        scope_id,
-                        member.type_parameters(),
+                        method_scope_id,
+                        type_parameters,
                     ),
                     name: name.name().map(text_from_class_member_name),
                     parameters: function_params_from_js_params(
                         collector,
-                        scope_id,
+                        method_scope_id,
                         member.parameters(),
                     ),
                     return_type: function_return_type(
                         collector,
-                        scope_id,
+                        method_scope_id,
                         is_async,
                         member.return_type_annotation(),
                         member.body().ok().map(AnyJsFunctionBody::JsFunctionBody),
@@ -2296,24 +2321,35 @@ impl TypeMember {
                 Self::from_class_member_info(collector, scope_id, name, ty.into(), is_static, false)
             }),
             AnyJsClassMember::TsMethodSignatureClassMember(member) => {
+                let type_parameters = member.type_parameters();
+                // Nongeneric signatures keep the enclosing class scope. Their
+                // raw types then match those of the other class members, so
+                // the collector registers each shared type once.
+                let method_scope_id = if type_parameters.is_some() {
+                    collector
+                        .scope_for_node(member.syntax())
+                        .unwrap_or(scope_id)
+                } else {
+                    scope_id
+                };
                 member.name().ok().and_then(|name| {
                     let is_async = member.async_token().is_some();
                     let function = Function {
                         is_async,
                         type_parameters: generic_params_from_ts_type_params(
                             collector,
-                            scope_id,
-                            member.type_parameters(),
+                            method_scope_id,
+                            type_parameters,
                         ),
                         name: name.name().map(text_from_class_member_name),
                         parameters: function_params_from_js_params(
                             collector,
-                            scope_id,
+                            method_scope_id,
                             member.parameters(),
                         ),
                         return_type: function_return_type(
                             collector,
-                            scope_id,
+                            method_scope_id,
                             is_async,
                             member.return_type_annotation(),
                             None,

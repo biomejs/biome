@@ -28,7 +28,11 @@ TwRoot {
                 value: TwBogusValue {
                     items: [
                         L_BRACKET@5..6 "[" [] [],
-                        TW_SELECTOR@6..17 "foo:text-sm" [] [],
+                        IDENT@6..9 "foo" [] [],
+                        COLON@9..10 ":" [] [],
+                        IDENT@10..14 "text" [] [],
+                        DASH@14..15 "-" [] [],
+                        IDENT@15..17 "sm" [] [],
                     ],
                 },
                 modifier: missing (optional),
@@ -57,7 +61,11 @@ TwRoot {
         1: DASH@4..5 "-" [] []
         2: TW_BOGUS_VALUE@5..17
           0: L_BRACKET@5..6 "[" [] []
-          1: TW_SELECTOR@6..17 "foo:text-sm" [] []
+          1: IDENT@6..9 "foo" [] []
+          2: COLON@9..10 ":" [] []
+          3: IDENT@10..14 "text" [] []
+          4: DASH@14..15 "-" [] []
+          5: IDENT@15..17 "sm" [] []
         3: (empty)
       4: (empty)
     1: WHITESPACE@17..18 "\n" [] []

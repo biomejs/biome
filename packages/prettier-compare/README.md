@@ -2,7 +2,23 @@
 
 ## Overview
 
-A CLI tool that compares Prettier and Biome formatting output and IR side-by-side. Uses OpenTUI (with React renderer) for the terminal UI, including spinners during WASM rebuilds and debounced watch mode.
+A CLI tool that compares Prettier and Biome formatting output and IR side-by-side.
+
+## Quick start for agents
+
+Without `--watch`, the tool prints plain text to stdout and exits. It starts no TUI and needs no TTY. Use it instead of writing your own Prettier script.
+
+```bash
+# From the repo root
+bun packages/prettier-compare/bin/prettier-compare.js --rebuild --output-only -f path/to/input.svelte
+```
+
+- The first line of output ends in `[MATCH]` or `[DIFF]`. Biome's output follows, then Prettier's.
+- `--output-only` drops the IR. `--ir-only` prints the IR alone. With neither flag you get both.
+- The tool formats with the WASM bundle, not `target/debug/biome`. Pass `--rebuild` after every Rust change, or you compare stale output. It runs `just build-wasm-node-dev`.
+- The language comes from the extension of the `-f` file. A snippet or stdin defaults to JavaScript, so pass `-l <lang>`. Svelte and Astro run through their Prettier plugins.
+- No flag sets formatter options. Biome's configuration is in `src/biome.ts` and Prettier's is in `src/prettier.ts`. To compare under another option, such as `whitespaceSensitivity` or the line width, edit both files locally and leave the edit out of your commit.
+- The JS dependencies come from `pnpm install` at the repo root.
 
 ## Architecture
 

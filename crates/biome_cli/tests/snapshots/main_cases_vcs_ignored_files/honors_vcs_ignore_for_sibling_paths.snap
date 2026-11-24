@@ -1,0 +1,61 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome format --write '<TEMP_DIR>/honors_vcs_ignore_for_sibling_paths/engine/../plans'
+```
+
+## `engine/biome.json`
+
+```json
+{
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true,
+    "root": ".."
+  }
+}
+```
+
+## `.gitignore`
+
+```gitignore
+plans/root-ignored.js
+
+```
+
+## `plans/.gitignore`
+
+```gitignore
+nested-ignored.js
+
+```
+
+## `plans/included.js`
+
+```js
+statement();
+
+```
+
+## `plans/nested-ignored.js`
+
+```js
+  statement(  )  
+```
+
+## `plans/root-ignored.js`
+
+```js
+  statement(  )  
+```
+
+# Emitted Messages
+
+```block
+Formatted 1 file in <TIME>. Fixed 1 file.
+```
