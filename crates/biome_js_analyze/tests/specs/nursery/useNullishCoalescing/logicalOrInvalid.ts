@@ -162,3 +162,26 @@ function withDefault(value: string | undefined) {
 	assertDefined(value);
 	return value || "default";
 }
+
+// `||` on a parameter whose default keeps `null` in the type
+export function nullableParameterWithDefault(value: string | null | undefined = "fallback") {
+	return value || "default";
+}
+
+// `||` on a parameter whose default may itself be `undefined`
+declare const maybeFallback: string | undefined;
+export function undefinedDefault(value: string | undefined = maybeFallback) {
+	return value || "default";
+}
+
+// `||` on a defaulted parameter that is reassigned
+export function reassignedDefault(value: string | undefined = "fallback") {
+	value = undefined;
+	return value || "default";
+}
+
+// `||` on a parameter whose `any` default keeps `null` in the type
+declare const anyFallback: any;
+export function anyDefault(value: string | null | undefined = anyFallback) {
+	return value || "default";
+}

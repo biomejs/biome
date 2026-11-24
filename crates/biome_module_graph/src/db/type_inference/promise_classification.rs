@@ -630,6 +630,12 @@ fn classify_expression(
                                 projection: state.projection,
                             }
                         }
+                        // Removing `undefined` doesn't change whether the
+                        // declared type is a promise.
+                        TypeofExpression::DefaultedParameter(expression) => ClassificationState {
+                            target: ClassificationTarget::Reference(expression.ty.clone()),
+                            ..state
+                        },
                         TypeofExpression::This(_)
                             if matches!(state.mode, MemberLookupMode::Constructed { .. }) =>
                         {

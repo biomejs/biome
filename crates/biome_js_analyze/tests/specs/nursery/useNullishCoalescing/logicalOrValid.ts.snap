@@ -80,4 +80,12 @@ declare const list: (number | undefined)[];
 const [first = 1] = list;
 export const arrayResult = first || undefined;
 
+// `||` on a parameter whose default removes `undefined`
+export function annotatedWithDefault(flag: boolean | undefined = false, other: boolean) {
+	return flag || other;
+}
+
+export const arrowWithDefault = (flag: boolean | undefined = false, other: boolean) =>
+	flag || other;
+
 ```
