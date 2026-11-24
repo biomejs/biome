@@ -357,6 +357,7 @@ fn collect_mdx_bindings(snippets: &[EmbeddedSnippet]) -> CollectedEmbeddedBindin
         }
     }
     CollectedEmbeddedBindings {
+        template: SvelteTemplateNames::default(),
         bindings: builder
             .js_bindings
             .into_iter()
