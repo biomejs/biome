@@ -68,6 +68,8 @@ mod html_classes;
 mod html_components;
 #[path = "spec_tests/imports.test.rs"]
 mod imports;
+#[path = "spec_tests/in_operator.test.rs"]
+mod in_operator;
 #[path = "spec_tests/intersections.test.rs"]
 mod intersections;
 #[path = "spec_tests/js_doc.test.rs"]

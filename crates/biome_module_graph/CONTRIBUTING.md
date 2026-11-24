@@ -185,6 +185,12 @@ one of its own variables or a path on its own `this`. Its parts live in
   the pattern. No write changes the values that a pattern destructured, so
   such a guard is never marked as aliased, and it applies inside an inlined
   aliased condition too.
+  A test `"a" in x` becomes a runtime test of `x` whose key is the string or
+  decimal integer literal, spelled as a property path requires, so `"a"` and
+  `0` are keys while `` `a` ``, `0x0`, and a `const` are not. The decomposed
+  condition lists `x` with the objects of property guards, because `in` too
+  narrows only a union with two object types. It adds no property guard:
+  TypeScript narrows no object through `"a" in s.k`.
   A truthiness test of an aliased condition, a `const` that is not exported,
   has no type annotation, and binds a name to an initializer, as `ok` in
   `const ok = x !== null; if (ok)`, also decomposes that initializer and
@@ -220,11 +226,11 @@ reach, and only for subjects that can narrow. A read of an element of a
 pattern is also kept when a test of the pattern reaches it: its point becomes
 a read point of the pattern, and `RootFlow::pattern_elements` maps the
 element to the pattern. A subject that conditions narrow
-only through property guards is in `RootFlow::property_only`, and every
+only through property guards or `in` is in `RootFlow::property_only`, and every
 pattern is. The declared type of a pattern is the collected type of the value
 that its elements' collected `Destructure` types read from
 (`ModuleFlow::pattern_type`). A property
-guard can narrow only a union with at least two object types, so collection
+guard or `in` can narrow only a union with at least two object types, so collection
 drops a variable or a pattern in it when its collected type shows that it is not one,
 without resolving anything (`raw_may_be_object_union` in
 `biome_js_type_info`): a primitive, a single object type or class written in
@@ -314,9 +320,15 @@ lookups on wrapper types such as `String`, lives in `biome_js_type_info`.
 A property guard applies `narrow_by_property`, which looks up the property in
 every member of the union with the same resolver and keeps the members whose
 property type can share a value with what the test leaves of the union of
-those types, following TypeScript's `narrowTypeByDiscriminant`. The solve
-memoizes each property guard's result by guard and incoming type, because a
-loop applies the same guard again.
+those types, following TypeScript's `narrowTypeByDiscriminant`. An `in` test
+applies `narrow_by_in_operator`, following TypeScript's
+`narrowTypeByInKeyword`: `property_presence` in `type_relation.rs` looks up the
+property in each member and treats object types as closed, but reports that
+it can't tell for a type whose member list Biome may not know completely,
+such as a class or a built-in type. The solve resolves the key from
+`raw_expressions` only when the subject's declared type is a union with two
+object types. It memoizes each property guard's and `in` test's result by
+guard and incoming type, because a loop applies the same guard again.
 
 #### Caching
 

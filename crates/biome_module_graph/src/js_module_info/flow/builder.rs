@@ -40,8 +40,8 @@ pub(super) struct BuiltRoot {
     /// Condition nodes paired with each subject their guard may narrow.
     pub(super) mentions: Vec<(FlowNodeId, FlowSubjectId)>,
     /// The subjects that conditions narrow only through
-    /// [`FlowGuard::Property`] guards, such as `s` when the only condition
-    /// that mentions it is `s.kind === "c"`.
+    /// [`FlowGuard::Property`], such as `s` when the only condition that
+    /// mentions it is `s.kind === "c"`, or through `in`, as in `"a" in s`.
     pub(super) property_only: FxHashSet<FlowSubjectId>,
     /// Reachable reads of subjects with their incoming flow.
     pub(super) reads: Vec<BuiltRead>,
@@ -355,9 +355,10 @@ struct RootBuilder<'a, 'raw> {
     subjects: FlowSubjectTable,
     mentions: Vec<(FlowNodeId, FlowSubjectId)>,
     /// The subjects that a condition mentions other than as the object of a
-    /// [`FlowGuard::Property`].
+    /// [`FlowGuard::Property`] or the subject of `in`.
     tested: FxHashSet<FlowSubjectId>,
-    /// The objects of the [`FlowGuard::Property`] guards of all conditions.
+    /// The objects of the [`FlowGuard::Property`] guards and the subjects of
+    /// the `in` tests of all conditions.
     parents: FxHashSet<FlowSubjectId>,
     reads: Vec<BuiltRead>,
     jumps: Vec<JumpTarget>,
