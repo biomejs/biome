@@ -609,10 +609,18 @@ fn merge_members<'db>(
         });
 
         match existing {
-            Some(existing) if existing.ty != member.ty => {
-                existing.ty = TypeData::union_from_types(db, Vec::from([existing.ty, member.ty]));
+            Some(existing) => {
+                if existing.ty != member.ty {
+                    existing.ty =
+                        TypeData::union_from_types(db, Vec::from([existing.ty, member.ty]));
+                }
+                // As in TypeScript, a property of an intersection is readonly
+                // only when every operand that declares it declares it
+                // readonly.
+                if existing.kind.is_readonly() && !member.kind.is_readonly() {
+                    existing.kind = existing.kind.clone().without_readonly();
+                }
             }
-            Some(_) => {}
             None => merged.push(member.clone()),
         }
     }

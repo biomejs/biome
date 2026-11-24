@@ -61,6 +61,12 @@ pub(crate) struct FlowSubjectRootInput<'db> {
     /// from different types.
     #[returns(copy)]
     pub baseline: Option<InferredTypeData<'db>>,
+    /// Whether the subject is a property path that is readonly at every
+    /// step, so that the runtime tests that aliased conditions apply to it
+    /// narrow it. Always false for other subjects and for paths that no such
+    /// test narrows, so their reads share one solve.
+    #[returns(copy)]
+    pub readonly_path: bool,
 }
 
 /// Identifies a subject's incoming state at one point of its execution root.
