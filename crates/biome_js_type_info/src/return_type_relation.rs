@@ -1078,6 +1078,7 @@ mod tests {
             Box::default(),
             Some(text(name)),
             false,
+            None,
         ))
     }
 
@@ -1090,6 +1091,7 @@ mod tests {
             Box::default(),
             Some(text("Leaf")),
             false,
+            None,
         );
         (1..distinct_types).fold(leaf, |base, _| {
             InternedClass::new(
@@ -1100,6 +1102,7 @@ mod tests {
                 Box::default(),
                 None,
                 false,
+                None,
             )
         })
     }

@@ -455,3 +455,41 @@ function copy(x: KA | string) { if (x instanceof KB) /*copy*/x; else /*copyElse*
         assert_eq!(variant_names(&db, ty), expected, "{marker}");
     }
 }
+
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type,
+// except where a comment gives TypeScript's type. Two classes with the same
+// name and members in two namespaces of one module are two declarations.
+#[test]
+fn instanceof_tells_classes_with_the_same_contents_apart() {
+    assert_reads(
+        r#"
+        namespace P1 { export class K { k = 1 } }
+        namespace P2 { export class K { k = 1 } }
+        namespace Q1 { export class K { k = 1 } export class L extends K {} }
+        namespace Q2 { export class K { k = 1 } }
+        function other(x: P1.K | string) { if (x instanceof P2.K) /*other*/x; else /*otherElse*/x; }
+        function same(x: P1.K | string) { if (x instanceof P1.K) /*same*/x; else /*sameElse*/x; }
+        function both(x: P1.K | P2.K) { /*bothDeclared*/x; if (x instanceof P1.K) /*both*/x; else /*bothElse*/x; }
+        function parent(x: Q1.L | string) { if (x instanceof Q2.K) /*parent*/x; else /*parentElse*/x; }
+        function ownParent(x: Q1.L | string) { if (x instanceof Q1.K) /*ownParent*/x; else /*ownParentElse*/x; }
+        "#,
+        &[
+            // TypeScript gives `P2.K`, because it relates `P2.K` to `P1.K` by
+            // their members. Biome doesn't, because a class can declare
+            // private members, so the read keeps its type.
+            ("other", "x", &["instanceof K", "string"]),
+            ("otherElse", "x", &["instanceof K", "string"]),
+            ("same", "x", &["instanceof K"]),
+            ("sameElse", "x", &["string"]),
+            ("bothDeclared", "x", &["instanceof K", "instanceof K"]),
+            ("both", "x", &["instanceof K"]),
+            ("bothElse", "x", &["instanceof K"]),
+            // TypeScript gives `Q2.K`, because it relates `Q2.K` to `Q1.L` by
+            // their members. Biome doesn't, so the read keeps its type.
+            ("parent", "x", &["instanceof L", "string"]),
+            ("parentElse", "x", &["instanceof L", "string"]),
+            ("ownParent", "x", &["instanceof L"]),
+            ("ownParentElse", "x", &["string"]),
+        ],
+    );
+}

@@ -1,0 +1,52 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidConditionalExpressions.ts
+---
+# Input
+```ts
+// should generate diagnostics
+// A conditional expression has the type of both of its branches, as in
+// TypeScript, even when its test can never be falsy, so `label` can be `""`
+// and its checks are needed. Only the test in `declaredObject` is reported:
+// a value of type `object` is never falsy.
+
+interface Entry {
+	size: number;
+}
+
+function declaredObject(entry: object) {
+	const label = entry ? "entry" : "";
+	if (label) {
+		return 1;
+	}
+}
+
+function narrowedInterface(entry: Entry | undefined) {
+	if (entry !== undefined) {
+		const label = entry ? "entry" : "";
+		if (label) {
+			return 1;
+		}
+	}
+}
+
+```
+
+# Diagnostics
+```
+invalidConditionalExpressions.ts:12:16 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition is always truthy.
+  
+    11 │ function declaredObject(entry: object) {
+  > 12 │ 	const label = entry ? "entry" : "";
+       │ 	              ^^^^^
+    13 │ 	if (label) {
+    14 │ 		return 1;
+  
+  i The value's type can never be falsy, so this check is redundant.
+  
+  i Remove the condition, or check the value you meant to test.
+  
+
+```
