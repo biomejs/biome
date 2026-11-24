@@ -557,6 +557,8 @@ pub mod use_baseline;
 pub mod use_better_dom_traversing;
 pub mod use_bigint_literals;
 pub mod use_biome_ignore_folder;
+pub mod use_biome_kind_sets;
+pub mod use_biome_top_level_types;
 pub mod use_block_statement_over_iife;
 pub mod use_block_statements;
 pub mod use_button_type;

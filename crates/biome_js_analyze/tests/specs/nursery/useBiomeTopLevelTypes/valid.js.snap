@@ -1,0 +1,40 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+import { defineRule, nodeKinds, tokenKinds } from "@biomejs/runtime/plugin";
+import * as plugin from "@biomejs/runtime/plugin";
+import { nodeKinds as otherKinds } from "some-other-package";
+
+const CALLS = nodeKinds("JS_CALL_EXPRESSION");
+const TOKENS = tokenKinds("EQ2");
+const NAMESPACED = plugin.tokenKinds("NEQ");
+const BOTH = CALLS.union(nodeKinds("JS_IMPORT_CALL_EXPRESSION"));
+let MUTABLE = nodeKinds("JS_NEW_EXPRESSION");
+
+class Visitor {
+	static KINDS = nodeKinds("JS_CALL_EXPRESSION");
+	static {
+		this.OTHER = nodeKinds("JS_NEW_EXPRESSION");
+	}
+}
+
+export const rule = defineRule({
+	run(node, set) {
+		otherKinds("JS_CALL_EXPRESSION");
+		set.union(CALLS);
+		MUTABLE.union(CALLS);
+		new Set([1]).union(other);
+		return BOTH.has(node);
+	},
+});
+
+function shadowed() {
+	const nodeKinds = (...names) => names;
+	return nodeKinds("JS_CALL_EXPRESSION");
+}
+
+```
