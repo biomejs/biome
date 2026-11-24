@@ -13,8 +13,8 @@
 //! node it resolved, keyed by the node.
 
 use super::model::{
-    Attr, Component, Computed, Element, Emit, HtmlRow, Method, Prop, PropDefault, SnippetId,
-    Symbol, VueSemanticModel,
+    Attr, Component, Computed, Element, Emit, HtmlRow, Method, Prop, PropDefault, Reference,
+    SnippetId, Symbol, VueSemanticModel,
 };
 use biome_analyze::AnalyzedTree;
 use biome_html_syntax::{
@@ -170,6 +170,25 @@ impl AnalyzedVueModel<JsLanguage> {
         let nodes = Rc::new(model.resolve_js_nodes(tree.root(), snippet));
         Self { model, nodes }
     }
+
+    /// Returns the reference of the model that is written at `node`.
+    ///
+    /// `node` must be the node that holds the name, the one
+    /// [`Reference::range`] covers:
+    ///
+    /// - For `title`, the `JsReferenceIdentifier`, or the
+    ///   `JsIdentifierAssignment` in `title = 1`. The `JsIdentifierExpression`
+    ///   around a reference is not that node.
+    /// - For `this.title`, the `JsName` of the member.
+    /// - For `emit('change')`, the `JsStringLiteralExpression`.
+    ///
+    /// Returns `None` for any other node, and for a name the model records no
+    /// reference for.
+    pub fn reference_of(&self, node: &impl AstNode<Language = JsLanguage>) -> Option<Reference> {
+        let id = self.nodes.id(node.syntax())?;
+        let reference = self.model.data.js_nodes[id.index()].reference?;
+        Some(self.model.reference(reference))
+    }
 }
 
 impl AnalyzedVueModel<HtmlLanguage> {
@@ -273,6 +292,9 @@ impl_vue_row!(JsLanguage, |row| Symbol::js_node(row); Symbol, Emit, Method, Comp
 // The node of a component is the one `Component::range` covers, and the node
 // of a default value the one `PropDefault::range` covers.
 impl_vue_row!(JsLanguage, |row| Some(row.js_node()); Component, PropDefault);
+
+// The node of a reference is the one `Reference::range` covers.
+impl_vue_row!(JsLanguage, |row| row.js_node(); Reference);
 
 impl VueRow<JsLanguage> for Prop {
     type Node = AnyVuePropNode;

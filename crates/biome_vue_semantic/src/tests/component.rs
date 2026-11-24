@@ -1301,3 +1301,125 @@ const fromThis = computed(function () { return this.count; });"#,
         ]
     );
 }
+
+#[test]
+fn references_point_to_the_node_of_their_name() {
+    let source = JsFileSource::vue();
+    let code = r#"import { useTemplateRef } from "vue";
+export default {
+  props: ["title"],
+  emits: ["change"],
+  watch: { title: "onTitle" },
+  expose: ["reset"],
+  setup() { useTemplateRef("input"); },
+  methods: {
+    onTitle() { this.$emit("change", this.title); },
+    reset() { this.$refs.input.focus(); this.title = ""; },
+  },
+};"#;
+    let parsed = biome_js_parser::parse(code, source, JsParserOptions::default());
+    let root = parsed.tree();
+    let js = semantic_model(&root, SemanticModelOptions::from(&source));
+    let model = component_model(&root, &js, source);
+    let nodes = model.resolve_js_nodes(&root, None);
+
+    let mut references: Vec<_> = model
+        .references()
+        .map(|reference| {
+            let id = reference.js_node().expect("a node");
+            let node = nodes.get(id).expect("a resolved node");
+            assert_eq!(node.text_trimmed_range(), reference.range());
+            // The node leads back to the reference.
+            assert_eq!(nodes.id(node), Some(id));
+            assert_eq!(
+                model.data.js_nodes[id.index()].reference,
+                Some(reference.id())
+            );
+            (
+                reference.range().start(),
+                node.text_trimmed().to_string(),
+                reference.site(),
+                node.kind(),
+            )
+        })
+        .collect();
+    references.sort_by_key(|(start, ..)| *start);
+    let references: Vec<_> = references
+        .into_iter()
+        .map(|(_, text, site, kind)| (text, site, kind))
+        .collect();
+    assert_eq!(
+        references,
+        [
+            (
+                "title".into(),
+                RefSite::OptionName,
+                JsSyntaxKind::JS_LITERAL_MEMBER_NAME
+            ),
+            (
+                "\"onTitle\"".into(),
+                RefSite::OptionName,
+                JsSyntaxKind::JS_STRING_LITERAL_EXPRESSION
+            ),
+            (
+                "\"reset\"".into(),
+                RefSite::OptionName,
+                JsSyntaxKind::JS_STRING_LITERAL_EXPRESSION
+            ),
+            (
+                "\"input\"".into(),
+                RefSite::TemplateRefKey,
+                JsSyntaxKind::JS_STRING_LITERAL_EXPRESSION
+            ),
+            (
+                "\"change\"".into(),
+                RefSite::EventName,
+                JsSyntaxKind::JS_STRING_LITERAL_EXPRESSION
+            ),
+            ("title".into(), RefSite::Identifier, JsSyntaxKind::JS_NAME),
+            (
+                "input".into(),
+                RefSite::TemplateRefKey,
+                JsSyntaxKind::JS_NAME
+            ),
+            ("title".into(), RefSite::Identifier, JsSyntaxKind::JS_NAME),
+        ]
+    );
+}
+
+#[test]
+fn bindings_point_to_the_node_of_their_name() {
+    let source = setup_ts();
+    let code = r#"import { ref } from "vue";
+const props = defineProps<{ title: string }>();
+function reset() {}"#;
+    let parsed = biome_js_parser::parse(code, source, JsParserOptions::default());
+    let root = parsed.tree();
+    let js = semantic_model(&root, SemanticModelOptions::from(&source));
+    let model = component_model(&root, &js, source);
+    let nodes = model.resolve_js_nodes(&root, None);
+
+    let component = model.components().next().expect("a component");
+    let names: Vec<_> = component
+        .setup_bindings()
+        .map(|symbol| {
+            let node = nodes
+                .get(symbol.name_node().expect("a name node"))
+                .expect("a resolved node");
+            assert_eq!(node.text_trimmed_range(), symbol.range());
+            (symbol.name().to_string(), node.kind())
+        })
+        .collect();
+    assert_eq!(
+        names,
+        [
+            ("ref".into(), JsSyntaxKind::JS_IDENTIFIER_BINDING),
+            ("props".into(), JsSyntaxKind::JS_IDENTIFIER_BINDING),
+            ("reset".into(), JsSyntaxKind::JS_IDENTIFIER_BINDING),
+        ]
+    );
+
+    // The name of a prop is part of the syntax of its declaration.
+    let title = component.props().next().expect("a prop");
+    assert_eq!(title.name_node(), None);
+}

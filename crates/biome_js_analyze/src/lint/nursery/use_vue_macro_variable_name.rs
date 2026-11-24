@@ -302,10 +302,8 @@ impl Rule for UseVueMacroVariableName {
             return None;
         }
         let binding = ctx
-            .root()
-            .syntax()
-            .covering_element(symbol.range())
-            .parent()
+            .vue_model()
+            .node(&symbol.name_node()?)
             .and_then(JsIdentifierBinding::cast)?;
         let mut mutation = ctx.root().begin();
         if !mutation.rename_node_declaration(ctx.model(), &binding, expected) {

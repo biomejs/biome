@@ -718,6 +718,8 @@ pub(crate) struct SymbolData {
     /// The node of the whole declaration, for a declaration written in
     /// JavaScript.
     pub(crate) node: Option<JsNodeId>,
+    /// The node of the name, for a declaration made by a JavaScript binding.
+    pub(crate) name_node: Option<JsNodeId>,
 }
 
 /// Where a reference is written.
@@ -797,6 +799,8 @@ pub(crate) struct ReferenceData {
     pub(crate) access: Access,
     pub(crate) call_args: Option<u8>,
     pub(crate) resolution: Resolution,
+    /// The node `range` covers, for a reference written in JavaScript.
+    pub(crate) node: Option<JsNodeId>,
 }
 
 /// The syntax a component was defined with.
@@ -910,6 +914,8 @@ pub(crate) struct JsNodeData {
     pub(crate) snippet: Option<SnippetId>,
     /// The node, in the coordinates of its tree.
     pub(crate) ptr: SyntaxNodePtr<JsLanguage>,
+    /// The first reference written at the node, if any.
+    pub(crate) reference: Option<ReferenceId>,
 }
 
 impl SemanticModelData {
@@ -1866,6 +1872,18 @@ impl Symbol {
         self.row().node
     }
 
+    /// The node of the name, the one [`Self::range`] covers, for a
+    /// declaration made by a JavaScript binding: a top-level binding of a
+    /// script block, or a parameter of `v-slot`.
+    ///
+    /// Returns `None` for every other declaration. The name of a prop, for
+    /// example, is part of the syntax of [`Self::js_node`].
+    ///
+    /// The node is in the tree [`Self::snippet`] names.
+    pub fn name_node(&self) -> Option<JsNodeId> {
+        self.row().name_node
+    }
+
     /// The references that resolve to this symbol.
     pub fn uses(&self) -> impl Iterator<Item = Reference> + '_ {
         self.data.uses[self.id.index()].iter().map(|id| Reference {
@@ -1911,6 +1929,17 @@ impl Reference {
     /// The range of the reference in the host document.
     pub fn host_range(&self) -> TextRange {
         self.row().range
+    }
+
+    /// The node of the reference, the one [`Self::range`] covers, for a
+    /// reference written in JavaScript.
+    ///
+    /// Returns `None` for a reference written in the markup of the template,
+    /// whose [`Self::site`] names its element or attribute instead.
+    ///
+    /// The node is in the tree [`Self::snippet`] names.
+    pub fn js_node(&self) -> Option<JsNodeId> {
+        self.row().node
     }
 
     pub fn snippet(&self) -> Option<Snippet> {

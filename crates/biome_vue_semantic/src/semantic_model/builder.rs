@@ -42,6 +42,8 @@ pub(crate) struct OptionName {
     pub(crate) component: ComponentId,
     /// The host range of the string.
     pub(crate) range: TextRange,
+    /// The node `range` covers.
+    pub(crate) node: JsNodeId,
     pub(crate) name: TokenText,
     /// The members a dotted watch key reads after the name.
     pub(crate) path: Box<[TokenText]>,
@@ -59,6 +61,7 @@ pub(crate) struct NewSymbol {
     pub(crate) kind: SymbolKind,
     pub(crate) component: Option<ComponentId>,
     pub(crate) node: Option<JsNodeId>,
+    pub(crate) name_node: Option<JsNodeId>,
 }
 
 impl ModelBuilder {
@@ -96,6 +99,7 @@ impl ModelBuilder {
             detail: Detail::None,
             type_only: false,
             node: symbol.node,
+            name_node: symbol.name_node,
         });
         self.data.uses.push(Vec::new());
         id
@@ -114,7 +118,11 @@ impl ModelBuilder {
         let ptr = SyntaxNodePtr::new(node);
         *self.js_node_ids.entry((snippet, ptr)).or_insert_with(|| {
             let id = JsNodeId::new(self.data.js_nodes.len());
-            self.data.js_nodes.push(JsNodeData { snippet, ptr });
+            self.data.js_nodes.push(JsNodeData {
+                snippet,
+                ptr,
+                reference: None,
+            });
             id
         })
     }
@@ -280,6 +288,9 @@ impl ModelBuilder {
         let id = ReferenceId::new(self.data.references.len());
         if let Resolution::Symbol(symbol) = reference.resolution {
             self.data.uses[symbol.index()].push(id);
+        }
+        if let Some(node) = reference.node {
+            self.data.js_nodes[node.index()].reference.get_or_insert(id);
         }
         let slot = reference.snippet.map_or(0, |snippet| snippet.index() + 1);
         if self.data.references_by_snippet.len() <= slot {
