@@ -666,17 +666,15 @@ fn write_grouped_arguments(
         && !grouped_breaks
         && matches!(group_layout, GroupedCallArgumentLayout::GroupedLastArgument)
     {
-        // Store the unwrapped middle variant with `expand_parent` instead of
-        // wrapping it in `best_fitting!`. Member chains place this layout
-        // inside a flat `best_fitting!` variant, where a nested `best_fitting!`
-        // would always measure and print its most flat variant instead of the
-        // middle one.
+        // Store the middle variant without wrapping it in `best_fitting!`.
+        // Member chains place this layout inside a flat `best_fitting!`
+        // variant, where a nested `best_fitting!` would always measure and
+        // print its most flat variant instead of the middle one.
         let middle_variant = middle_variant_with_spaces
             .as_deref()
             .unwrap_or(&middle_variant_no_spaces);
-        let mut hugged = vec![FormatElement::ExpandParent];
         // Strip the surrounding `StartBestFittingEntry` and `EndBestFittingEntry` tags.
-        hugged.extend_from_slice(&middle_variant[1..middle_variant.len() - 1]);
+        let hugged = middle_variant[1..middle_variant.len() - 1].to_vec();
         if let Some(hugged) = f.intern_vec(hugged) {
             f.context_mut()
                 .set_hugged_call_arguments(call_arguments, hugged);
