@@ -23,17 +23,13 @@ That's not the case with other attributes. "
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,8 +1,8 @@
+@@ -1,5 +1,5 @@
  <div
 -    class=" {longExpressionThatForcesLinebreaks} longExpressionThatForcesLinebreaks longExpressionThatForcesLinebreaks"
 +    class=" {longExpressionThatForcesLinebreaks} longExpressionThatForcesLinebreaks longExpressionThatForcesLinebreaks  "
      alt="When reformatting class attributes it is fine to trim and add new line breaks. 
  That's not the case with other attributes. "
      data-value={array.map((item) => {
--        return item + 1;
-+        return item + 1
-     })}
- ></div>
 ```
 
 # Output
@@ -44,7 +40,7 @@ That's not the case with other attributes. "
     alt="When reformatting class attributes it is fine to trim and add new line breaks. 
 That's not the case with other attributes. "
     data-value={array.map((item) => {
-        return item + 1
+        return item + 1;
     })}
 ></div>
 ```

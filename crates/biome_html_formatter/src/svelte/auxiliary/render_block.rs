@@ -12,6 +12,13 @@ impl FormatNodeRule<SvelteRenderBlock> for FormatSvelteRenderBlock {
             render_token,
         } = node.as_fields();
 
+        if expression.is_err() {
+            r_curly_token?;
+            return format_html_source_node_preserving_line_endings(node.syntax())
+                .without_comments()
+                .fmt(f);
+        }
+
         write!(
             f,
             [

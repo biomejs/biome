@@ -58,7 +58,7 @@ info: svelte/issue_10839.svelte
 		null,
 		(width: number) => {
 			if (!vertical) {
-				trackSize = width
+				trackSize = width;
 			}
 		}
 	}
@@ -66,7 +66,7 @@ info: svelte/issue_10839.svelte
 		null,
 		(height: number) => {
 			if (vertical) {
-				trackSize = height
+				trackSize = height;
 			}
 		}
 	}

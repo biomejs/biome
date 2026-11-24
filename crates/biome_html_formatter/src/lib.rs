@@ -4,6 +4,7 @@
     reason = "Formatting Svelte expressions requires complete node text."
 )]
 
+use crate::html::lists::element_list::FormatHtmlElementList;
 use crate::prelude::*;
 use biome_formatter::comments::Comments;
 use biome_formatter::trivia::{FormatToken, format_skipped_token_trivia};
@@ -11,7 +12,13 @@ use biome_formatter::{
     CstFormatContext, FormatOwnedWithRule, FormatRefWithRule, rowan::prelude::*,
 };
 use biome_formatter::{FormatLanguage, FormatResult, Formatted, write};
-use biome_html_syntax::{HtmlLanguage, HtmlSyntaxNode, HtmlSyntaxToken};
+use biome_html_syntax::{
+    AnySvelteBlock, HtmlAttributeSingleTextExpression, HtmlBogusTextExpression, HtmlElement,
+    HtmlElementList, HtmlLanguage, HtmlSingleTextExpression, HtmlSpreadAttribute,
+    HtmlSyntaxElement, HtmlSyntaxKind, HtmlSyntaxNode, HtmlSyntaxToken, HtmlTextExpression,
+    SvelteAttachAttribute, SvelteBindFunctionBindingExpression, SvelteBogusBlock, SvelteName,
+    element_ext::AnyHtmlTagElement,
+};
 use biome_rowan::{AstNode, SyntaxToken, TextRange};
 use comments::HtmlCommentStyle;
 use context::HtmlFormatContext;
@@ -57,8 +64,83 @@ pub fn format_node_with_verbatim_ranges(
     options: HtmlFormatOptions,
     root: &HtmlSyntaxNode,
     embedded_node_ranges: Vec<TextRange>,
-    verbatim_embedded_node_ranges: Vec<TextRange>,
+    mut verbatim_embedded_node_ranges: Vec<TextRange>,
 ) -> FormatResult<Formatted<HtmlFormatContext>> {
+    if options.file_source().is_svelte() {
+        // Suppressed and verbatim ancestors skip their children's rules. Reject uncertain
+        // boundaries before formatting anything the parser treated as a sibling.
+        let recovery_kinds = AnySvelteBlock::KIND_SET
+            .union(HtmlBogusTextExpression::KIND_SET)
+            .union(HtmlElementList::KIND_SET);
+        let mut opaque_contents = Vec::new();
+        let mut events = root.preorder_of_kinds(recovery_kinds);
+        while let Some(event) = events.next() {
+            let biome_rowan::WalkEvent::Enter(node) = event else {
+                continue;
+            };
+            if HtmlElementList::can_cast(node.kind()) {
+                let Some(element) = node.parent().and_then(HtmlElement::cast) else {
+                    continue;
+                };
+                let opening = element.opening_element()?;
+                let opaque =
+                    AnyHtmlTagElement::from(opening.clone()).requires_verbatim_svelte_content();
+                if opaque || element.is_script_tag() || element.is_style_tag() {
+                    opening.r_angle_token()?;
+                    let closing = element.closing_element()?;
+                    closing.name()?;
+                    closing.r_angle_token()?;
+                }
+                if opaque {
+                    // Only the body belongs to the preprocessor. Attribute expressions are host syntax.
+                    opaque_contents.push(node.text_range_with_trivia());
+                    events.skip_subtree();
+                }
+            } else if HtmlBogusTextExpression::can_cast(node.kind())
+                || !has_svelte_closing_delimiter(&node)
+            {
+                return Err(biome_formatter::FormatError::SyntaxError);
+            }
+        }
+        for range in &mut verbatim_embedded_node_ranges {
+            let index = opaque_contents.partition_point(|body| body.end() <= range.start());
+            if opaque_contents
+                .get(index)
+                .is_some_and(|body| body.contains_range(*range))
+            {
+                continue;
+            }
+            // Whitespace inside `{  expr }` can belong to the opening delimiter.
+            // Protect the containing construct, not just the guest token.
+            if root.text_range_with_trivia().contains_range(*range)
+                && let Some(expression) = root.covering_element(*range).parent().filter(|node| {
+                    HtmlTextExpression::can_cast(node.kind()) || SvelteName::can_cast(node.kind())
+                })
+                && let Some(delimited) = expression
+                    .ancestors()
+                    .take_while(|node| !HtmlElementList::can_cast(node.kind()))
+                    .find(|node| {
+                        HtmlSingleTextExpression::can_cast(node.kind())
+                            || HtmlAttributeSingleTextExpression::can_cast(node.kind())
+                            || HtmlSpreadAttribute::can_cast(node.kind())
+                            || SvelteAttachAttribute::can_cast(node.kind())
+                            || SvelteBindFunctionBindingExpression::can_cast(node.kind())
+                            || is_svelte_header(node.kind())
+                            || AnySvelteBlock::can_cast(node.kind())
+                    })
+            {
+                if is_svelte_header(delimited.kind()) {
+                    *range = svelte_header_range(&delimited)
+                        .ok_or(biome_formatter::FormatError::SyntaxError)?;
+                    continue;
+                }
+                if !has_svelte_closing_delimiter(&delimited) {
+                    return Err(biome_formatter::FormatError::SyntaxError);
+                }
+                *range = delimited.text_trimmed_range();
+            }
+        }
+    }
     let has_embedded_nodes =
         !embedded_node_ranges.is_empty() || !verbatim_embedded_node_ranges.is_empty();
     biome_formatter::format_node(
@@ -68,6 +150,59 @@ pub fn format_node_with_verbatim_ranges(
             .with_verbatim_embedded_node_ranges(verbatim_embedded_node_ranges),
         has_embedded_nodes,
     )
+}
+
+fn is_svelte_header(kind: HtmlSyntaxKind) -> bool {
+    matches!(
+        kind,
+        HtmlSyntaxKind::SVELTE_IF_OPENING_BLOCK
+            | HtmlSyntaxKind::SVELTE_ELSE_IF_CLAUSE
+            | HtmlSyntaxKind::SVELTE_AWAIT_OPENING_BLOCK
+            | HtmlSyntaxKind::SVELTE_AWAIT_THEN_BLOCK
+            | HtmlSyntaxKind::SVELTE_AWAIT_CATCH_BLOCK
+            | HtmlSyntaxKind::SVELTE_SNIPPET_OPENING_BLOCK
+            | HtmlSyntaxKind::SVELTE_EACH_OPENING_BLOCK
+            | HtmlSyntaxKind::SVELTE_KEY_OPENING_BLOCK
+    )
+}
+
+/// Ends at the header's own brace, even when its node also contains the body.
+fn svelte_header_range(node: &HtmlSyntaxNode) -> Option<TextRange> {
+    let close = node
+        .children_with_tokens()
+        .find(|child| child.kind() == HtmlSyntaxKind::R_CURLY)?;
+    Some(TextRange::new(
+        node.text_trimmed_range().start(),
+        close.text_trimmed_range().end(),
+    ))
+}
+
+/// A nested expression's closing brace does not delimit its containing block.
+fn has_svelte_closing_delimiter(node: &HtmlSyntaxNode) -> bool {
+    match node.last_child_or_token() {
+        // Recovery stops at the first brace. Only an argument-free `{@name}`
+        // rules out nested delimiters and the need for a later closing block.
+        Some(HtmlSyntaxElement::Token(_)) if SvelteBogusBlock::can_cast(node.kind()) => {
+            !node.has_skipped_descendants()
+                && node.borrowed_tokens().map(|token| token.kind()).eq([
+                    HtmlSyntaxKind::SV_CURLY_AT,
+                    HtmlSyntaxKind::IDENT,
+                    HtmlSyntaxKind::R_CURLY,
+                ])
+        }
+        Some(HtmlSyntaxElement::Token(token)) => token.kind() == HtmlSyntaxKind::R_CURLY,
+        Some(HtmlSyntaxElement::Node(closing)) => {
+            matches!(
+                closing.kind(),
+                HtmlSyntaxKind::SVELTE_AWAIT_CLOSING_BLOCK
+                    | HtmlSyntaxKind::SVELTE_EACH_CLOSING_BLOCK
+                    | HtmlSyntaxKind::SVELTE_IF_CLOSING_BLOCK
+                    | HtmlSyntaxKind::SVELTE_KEY_CLOSING_BLOCK
+                    | HtmlSyntaxKind::SVELTE_SNIPPET_CLOSING_BLOCK
+            ) && closing.slots().all(|slot| slot.into_token().is_some())
+        }
+        None => false,
+    }
 }
 
 /// Used to get an object that knows how to format this object.
@@ -262,6 +397,31 @@ where
         }
 
         self.fmt_leading_comments(node, f)?;
+        if is_svelte_header(node.syntax().kind())
+            && f.context().has_embedded_node_ranges()
+            && let Some(range) = svelte_header_range(node.syntax())
+            && f.context().is_verbatim_embedded_node_range(range)
+            && let Some(children) = node.syntax().last_child().and_then(HtmlElementList::cast)
+        {
+            FormatSvelteVerbatimHeader {
+                node: node.syntax(),
+                range,
+            }
+            .fmt(f)?;
+            FormatHtmlElementList::default()
+                .with_multiline()
+                .fmt(&children, f)?;
+            hard_line_break().fmt(f)?;
+            return self.fmt_trailing_comments(node, f);
+        }
+        if f.options().file_source().is_svelte()
+            && f.context().is_verbatim_embedded_node_range(node.range())
+        {
+            verbatim::format_html_source_node_preserving_line_endings(node.syntax())
+                .without_comments()
+                .fmt(f)?;
+            return self.fmt_trailing_comments(node, f);
+        }
         self.fmt_node(node, f)?;
         self.fmt_dangling_comments(node, f)?;
         self.fmt_trailing_comments(node, f)

@@ -136,6 +136,83 @@ fn malformed_expression_preserves_guest_line_endings() {
 }
 
 #[test]
+fn failed_svelte_attribute_preserves_whitespace_between_delimiters() {
+    assert_format_with_verbatim_embeds(
+        HtmlFormatOptions::new(HtmlFileSource::svelte()),
+        "<C value = {  broken +\r\n } />\r\n",
+        "<C\n\tvalue={  broken +\r\n }\n/>\n",
+    );
+}
+
+#[test]
+fn failed_svelte_header_does_not_own_body_comments_or_markup() {
+    for (header, closing) in [
+        ("{#if  value +\r\n  }", "{/if}"),
+        ("{#await  promise +\r\n  then value}", "{/await}"),
+        ("{#snippet  bad(\r\n  }", "{/snippet}"),
+        ("{#each  list +\r\n  as x}", "{/each}"),
+        ("{#key  value +\r\n  }", "{/key}"),
+    ] {
+        let source = format!("{header}<!-- body --><p class = \"ok\"></p>{closing}\n");
+        let expected = format!("{header}\n\t<!-- body -->\n\t<p class=\"ok\"></p>\n{closing}\n");
+        for input in [&source, &expected] {
+            assert_format_with_verbatim_embeds(
+                HtmlFormatOptions::new(HtmlFileSource::svelte()),
+                input,
+                &expected,
+            );
+        }
+    }
+}
+
+#[test]
+fn invalid_each_binding_preserves_pattern_bytes_but_not_sibling_spacing() {
+    let source =
+        "<p class = \"ok\"></p>\n{#each xs as [   if,\r\n   x ]}{/each}\n<p class = \"ok\"></p>\n";
+    let expected =
+        "<p class=\"ok\"></p>\n{#each xs as [   if,\r\n   x ]}{/each}\n<p class=\"ok\"></p>\n";
+    for input in [source, expected] {
+        assert_format(
+            HtmlFormatOptions::new(HtmlFileSource::svelte()),
+            input,
+            expected,
+        );
+    }
+}
+
+#[test]
+fn opaque_template_body_bounds_guest_recovery() {
+    for body in [
+        "<template lang=\"pug\">\r\n| {@unknown x}\r\n</template>",
+        "<template lang=\"pug\">\r\n| {#if broken + }\r\n</template>",
+    ] {
+        let source = format!("{body}\n<p class = \"ok\"></p>\n");
+        let expected = format!("{body}\n<p class=\"ok\"></p>\n");
+        for input in [&source, &expected] {
+            assert_format_with_verbatim_embeds(
+                HtmlFormatOptions::new(HtmlFileSource::svelte()),
+                input,
+                &expected,
+            );
+        }
+    }
+}
+
+#[test]
+fn recovered_svelte_tag_preserves_only_its_delimited_bytes() {
+    let tag = "{@html  \r\n  }";
+    let source = format!("{tag}\r\n<p class = \"ok\"></p>\r\n");
+    let expected = format!("{tag}\n<p class=\"ok\"></p>\n");
+    for input in [&source, &expected] {
+        assert_format_with_verbatim_embeds(
+            HtmlFormatOptions::new(HtmlFileSource::svelte()),
+            input,
+            &expected,
+        );
+    }
+}
+
+#[test]
 fn opaque_script_ignores_the_line_ending_option() {
     assert_format_with_verbatim_embeds(
         HtmlFormatOptions::new(HtmlFileSource::astro()).with_line_ending(LineEnding::Crlf),

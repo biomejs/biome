@@ -47,19 +47,18 @@ info: formatting/attribute-remove-quotes.svelte
 -<input bind:value={foo} />
 +<input bind:value="{foo}" />
  <input bind:value={foo} />
+-<input class:value={foo} />
 +<input class:value="{foo}" />
  <input class:value={foo} />
--<input class:value={foo} />
--<input style:value={foo} />
 +<input style:value="{foo}" />
  <input style:value={foo} />
+-<input style:value={foo} />
  
 -<svelte:component this={foo} />
 +<svelte:component this="{foo}" />
  <div style="width: {width}px"></div>
 -<div class:awesome={isOk}></div>
-+<div class:awesome="{isOk}"></div>
- <div class="asd {otherclass + 'b'}"></div>
+-<div class="asd {otherclass + 'b'}"></div>
 -<input bind:value={fooValue} on:change={onChange} />
 -<a use:link={linkValues + "asd"}>Link</a>
 -<a href={linkValues + "asd"}>Link</a>
@@ -67,13 +66,15 @@ info: formatting/attribute-remove-quotes.svelte
 -<div in:asd={foo + "bar"} out:asd={foo + "bar"}></div>
 -<div transistion:asd={foo + "bar"}></div>
 -<div animate:asd={foo + "bar"}></div>
++<div class:awesome="{isOk}"></div>
++<div class="asd {otherclass + "b"}"></div>
 +<input bind:value="{fooValue}" on:change="{onChange}" />
-+<a use:link="{linkValues + 'asd'}">Link</a>
-+<a href="{linkValues + 'asd'}">Link</a>
-+<button on:click="{() => console.log('hi')}">hi</button>
-+<div in:asd="{foo + 'bar'}" out:asd="{foo + 'bar'}"></div>
-+<div transistion:asd="{foo + 'bar'}"></div>
-+<div animate:asd="{foo + 'bar'}"></div>
++<a use:link="{linkValues + "asd"}">Link</a>
++<a href="{linkValues + "asd"}">Link</a>
++<button on:click="{() => console.log("hi")}">hi</button>
++<div in:asd="{foo + "bar"}" out:asd="{foo + "bar"}"></div>
++<div transistion:asd="{foo + "bar"}"></div>
++<div animate:asd="{foo + "bar"}"></div>
  
  <div />
  <div></div>
@@ -94,14 +95,14 @@ info: formatting/attribute-remove-quotes.svelte
 <svelte:component this="{foo}" />
 <div style="width: {width}px"></div>
 <div class:awesome="{isOk}"></div>
-<div class="asd {otherclass + 'b'}"></div>
+<div class="asd {otherclass + "b"}"></div>
 <input bind:value="{fooValue}" on:change="{onChange}" />
-<a use:link="{linkValues + 'asd'}">Link</a>
-<a href="{linkValues + 'asd'}">Link</a>
-<button on:click="{() => console.log('hi')}">hi</button>
-<div in:asd="{foo + 'bar'}" out:asd="{foo + 'bar'}"></div>
-<div transistion:asd="{foo + 'bar'}"></div>
-<div animate:asd="{foo + 'bar'}"></div>
+<a use:link="{linkValues + "asd"}">Link</a>
+<a href="{linkValues + "asd"}">Link</a>
+<button on:click="{() => console.log("hi")}">hi</button>
+<div in:asd="{foo + "bar"}" out:asd="{foo + "bar"}"></div>
+<div transistion:asd="{foo + "bar"}"></div>
+<div animate:asd="{foo + "bar"}"></div>
 
 <div />
 <div></div>

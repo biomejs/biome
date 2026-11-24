@@ -1,4 +1,5 @@
 use crate::html::auxiliary::attribute_initializer_clause::CompactKind;
+use crate::verbatim::format_html_source_node_preserving_line_endings;
 use crate::{
     html::auxiliary::{
         attribute_initializer_clause::FormatHtmlAttributeInitializerClauseOptions,
@@ -10,7 +11,6 @@ use biome_formatter::{FormatContext, FormatRuleWithOptions, write};
 use biome_html_syntax::{
     AnyHtmlAttributeInitializer, AnyHtmlTagName, HtmlAttribute, HtmlAttributeFields,
 };
-use std::fmt::Debug;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatHtmlAttribute {
@@ -62,6 +62,12 @@ fn can_compact(node: &HtmlAttribute, f: &mut HtmlFormatter) -> bool {
             return false;
         };
 
+        if f.context()
+            .is_verbatim_embedded_node_range(initializer_value.range())
+        {
+            return false;
+        }
+
         let initializer_value = initializer_value
             .expression()
             .ok()
@@ -77,6 +83,12 @@ fn can_compact(node: &HtmlAttribute, f: &mut HtmlFormatter) -> bool {
 
 impl FormatNodeRule<HtmlAttribute> for FormatHtmlAttribute {
     fn fmt_fields(&self, node: &HtmlAttribute, f: &mut HtmlFormatter) -> FormatResult<()> {
+        if f.options().file_source().is_svelte() && node.has_opaque_svelte_generics() {
+            return format_html_source_node_preserving_line_endings(node.syntax())
+                .without_comments()
+                .fmt(f);
+        }
+
         let HtmlAttributeFields { name, initializer } = node.as_fields();
 
         if self.compact {

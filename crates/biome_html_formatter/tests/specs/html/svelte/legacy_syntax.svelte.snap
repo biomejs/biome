@@ -1,0 +1,26 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: svelte/legacy_syntax.svelte
+---
+
+# Input
+
+```svelte
+<script>export let count=0; $: doubled=count*2;</script>
+<button on:click = {() => count++}>{doubled}</button>
+<slot name = "label" />
+
+```
+
+
+# Formatted
+
+```svelte
+<script>
+export let count = 0;
+$: doubled = count * 2;
+</script>
+<button on:click={() => count++}>{doubled}</button>
+<slot name="label" />
+
+```

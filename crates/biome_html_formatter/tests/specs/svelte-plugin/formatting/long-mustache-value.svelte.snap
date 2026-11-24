@@ -21,20 +21,21 @@ info: formatting/long-mustache-value.svelte
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,12 +1,11 @@
+@@ -1,12 +1,13 @@
  <input
      type="password"
 -    class="attributes are not broken up by default which is the prettier behavior but {'breakable' +
 -        'mustache tags'} can be broken up"
-+    class="attributes are not broken up by default which is the prettier behavior but {'breakable' + 'mustache tags'} can be broken up"
++    class="attributes are not broken up by default which is the prettier behavior but {"breakable" +
++        "mustache tags"} can be broken up"
  />
  
  <p>
      Text with spaces inbetween should break at the most fitting point and not
 -    wait for a {"breakable" + "mustache tags"} to be broken up. {"If the mustache tag itself is very long, however" +
--        "it should be broken uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuup"}
-+    wait for a {'breakable' + 'mustache tags'} to be broken up.
-+    {'If the mustache tag itself is very long, however' + 'it should be broken uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuup'}
++    wait for a {"breakable" + "mustache tags"} to be broken up.
++    {"If the mustache tag itself is very long, however" +
+         "it should be broken uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuup"}
      {andIiiiiiiiiiiiiiiiiiiiiiiiiiiWillNeverBreaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaakaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa}
  </p>
 ```
@@ -44,20 +45,22 @@ info: formatting/long-mustache-value.svelte
 ```svelte
 <input
     type="password"
-    class="attributes are not broken up by default which is the prettier behavior but {'breakable' + 'mustache tags'} can be broken up"
+    class="attributes are not broken up by default which is the prettier behavior but {"breakable" +
+        "mustache tags"} can be broken up"
 />
 
 <p>
     Text with spaces inbetween should break at the most fitting point and not
-    wait for a {'breakable' + 'mustache tags'} to be broken up.
-    {'If the mustache tag itself is very long, however' + 'it should be broken uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuup'}
+    wait for a {"breakable" + "mustache tags"} to be broken up.
+    {"If the mustache tag itself is very long, however" +
+        "it should be broken uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuup"}
     {andIiiiiiiiiiiiiiiiiiiiiiiiiiiWillNeverBreaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaakaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa}
 </p>
 ```
 
 # Lines exceeding max width of 80 characters
 ```
-    3:     class="attributes are not broken up by default which is the prettier behavior but {'breakable' + 'mustache tags'} can be broken up"
-    9:     {'If the mustache tag itself is very long, however' + 'it should be broken uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuup'}
-   10:     {andIiiiiiiiiiiiiiiiiiiiiiiiiiiWillNeverBreaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaakaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa}
+    3:     class="attributes are not broken up by default which is the prettier behavior but {"breakable" +
+   11:         "it should be broken uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuup"}
+   12:     {andIiiiiiiiiiiiiiiiiiiiiiiiiiiWillNeverBreaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaakaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa}
 ```

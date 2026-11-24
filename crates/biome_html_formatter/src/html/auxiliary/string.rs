@@ -1,7 +1,10 @@
 use crate::prelude::*;
 use crate::verbatim::format_html_source_node_preserving_line_endings;
 use biome_formatter::{FormatRuleWithOptions, format_args, write};
-use biome_html_syntax::{HtmlString, HtmlStringFields};
+use biome_html_syntax::{
+    HtmlAttribute, HtmlAttributeInitializerClause, HtmlAttributeList, HtmlString, HtmlStringFields,
+    element_ext::AnyHtmlTagElement,
+};
 use biome_rowan::TextRange;
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatHtmlString {
@@ -34,6 +37,14 @@ impl FormatNodeRule<HtmlString> for FormatHtmlString {
         if self.compact {
             let value_token = value_token.clone()?;
             return format_removed(&value_token).fmt(f);
+        }
+
+        // When no guest formatter supplies a replacement, its source is the fallback,
+        // including the original delimiters, entities and line endings.
+        if f.options().file_source().is_svelte() && is_svelte_guest_value(node) {
+            return format_html_source_node_preserving_line_endings(node.syntax())
+                .without_comments()
+                .fmt(f);
         }
 
         if let Ok(value) = value_token.as_ref()
@@ -73,6 +84,36 @@ impl FormatNodeRule<HtmlString> for FormatHtmlString {
         }
 
         write!(f, [value_token.format()])
+    }
+}
+
+fn is_svelte_guest_value(node: &HtmlString) -> bool {
+    let Some(attribute) = node
+        .parent::<HtmlAttributeInitializerClause>()
+        .and_then(|clause| clause.parent::<HtmlAttribute>())
+    else {
+        return false;
+    };
+    let Some(name) = attribute
+        .name()
+        .ok()
+        .and_then(|name| name.token_text_trimmed())
+    else {
+        return false;
+    };
+    if !name.eq_ignore_ascii_case("style") && !name.eq_ignore_ascii_case("generics") {
+        return false;
+    }
+    let Some(tag) = attribute
+        .parent::<HtmlAttributeList>()
+        .and_then(|list| list.parent::<AnyHtmlTagElement>())
+    else {
+        return false;
+    };
+    if name.eq_ignore_ascii_case("style") {
+        !tag.is_custom_component()
+    } else {
+        tag.is_root_script()
     }
 }
 

@@ -19,6 +19,14 @@ impl FormatNodeRule<HtmlSingleTextExpression> for FormatHtmlSingleTextExpression
             r_curly_token,
         } = node.as_fields();
 
+        if expression.is_none() && f.options().file_source().is_svelte() {
+            l_curly_token?;
+            r_curly_token?;
+            return format_html_source_node_preserving_line_endings(node.syntax())
+                .without_comments()
+                .fmt(f);
+        }
+
         if self.compact {
             let l_curly_token = l_curly_token?;
             let r_curly_token = r_curly_token.clone()?;

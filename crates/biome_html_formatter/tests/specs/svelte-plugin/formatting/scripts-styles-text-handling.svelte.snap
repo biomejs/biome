@@ -25,8 +25,9 @@ hello
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,10 +1,10 @@
-+<script> </script>
+@@ -1,8 +1,8 @@
++<script>
++</script>
 +
  <!-- above module script -->
  <script module></script>
@@ -36,15 +37,13 @@ hello
  
  hello
  
- <style>
-+
- </style>
 ```
 
 # Output
 
 ```svelte
-<script> </script>
+<script>
+</script>
 
 <!-- above module script -->
 <script module></script>
@@ -52,6 +51,5 @@ hello
 hello
 
 <style>
-
 </style>
 ```
