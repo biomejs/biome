@@ -1985,6 +1985,43 @@ export interface JsSvelteDeclarationRoot extends JsAstNode {
 	token(field: "semicolonToken" | "eofToken"): JsAstToken | undefined;
 	token(field: string): JsAstToken | undefined;
 }
+export interface JsSvelteEachBindingRoot extends JsAstNode {
+	readonly kind: "JS_SVELTE_EACH_BINDING_ROOT";
+	readonly context: AnyJsBindingPattern | undefined;
+	withContext(value: AnyJsBindingPattern): JsSvelteEachBindingRoot;
+	readonly typeAnnotation: TsTypeAnnotation | undefined;
+	withTypeAnnotation(
+		value: TsTypeAnnotation | undefined,
+	): JsSvelteEachBindingRoot;
+	readonly index: JsSvelteEachIndex | undefined;
+	withIndex(value: JsSvelteEachIndex | undefined): JsSvelteEachBindingRoot;
+	readonly key: JsSvelteEachKey | undefined;
+	withKey(value: JsSvelteEachKey | undefined): JsSvelteEachBindingRoot;
+	readonly eofToken: string | undefined;
+	withEofToken(value: JsAstToken): JsSvelteEachBindingRoot;
+	token(field: "eofToken"): JsAstToken | undefined;
+	token(field: string): JsAstToken | undefined;
+}
+export interface JsSvelteEachIndex extends JsAstNode {
+	readonly kind: "JS_SVELTE_EACH_INDEX";
+	readonly commaToken: string | undefined;
+	withCommaToken(value: JsAstToken): JsSvelteEachIndex;
+	readonly binding: AnyJsBinding | undefined;
+	withBinding(value: AnyJsBinding): JsSvelteEachIndex;
+	token(field: "commaToken"): JsAstToken | undefined;
+	token(field: string): JsAstToken | undefined;
+}
+export interface JsSvelteEachKey extends JsAstNode {
+	readonly kind: "JS_SVELTE_EACH_KEY";
+	readonly lParenToken: string | undefined;
+	withLParenToken(value: JsAstToken): JsSvelteEachKey;
+	readonly expression: AnyJsExpression | undefined;
+	withExpression(value: AnyJsExpression): JsSvelteEachKey;
+	readonly rParenToken: string | undefined;
+	withRParenToken(value: JsAstToken): JsSvelteEachKey;
+	token(field: "lParenToken" | "rParenToken"): JsAstToken | undefined;
+	token(field: string): JsAstToken | undefined;
+}
 export interface JsSvelteLegacyConstRoot extends JsAstNode {
 	readonly kind: "JS_SVELTE_LEGACY_CONST_ROOT";
 	readonly declarator: AnyJsSvelteLegacyConstDeclarator | undefined;
@@ -4216,6 +4253,7 @@ export type AnyJsRoot =
 	| JsModule
 	| JsScript
 	| JsSvelteDeclarationRoot
+	| JsSvelteEachBindingRoot
 	| JsSvelteLegacyConstRoot
 	| JsSvelteSnippetRoot
 	| JsVueGenericRoot
@@ -4550,6 +4588,9 @@ export interface JsNodeByKind {
 	readonly JS_STRING_LITERAL_EXPRESSION: JsStringLiteralExpression;
 	readonly JS_SUPER_EXPRESSION: JsSuperExpression;
 	readonly JS_SVELTE_DECLARATION_ROOT: JsSvelteDeclarationRoot;
+	readonly JS_SVELTE_EACH_BINDING_ROOT: JsSvelteEachBindingRoot;
+	readonly JS_SVELTE_EACH_INDEX: JsSvelteEachIndex;
+	readonly JS_SVELTE_EACH_KEY: JsSvelteEachKey;
 	readonly JS_SVELTE_LEGACY_CONST_ROOT: JsSvelteLegacyConstRoot;
 	readonly JS_SVELTE_SNIPPET_ROOT: JsSvelteSnippetRoot;
 	readonly JS_SWITCH_STATEMENT: JsSwitchStatement;

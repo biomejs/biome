@@ -3444,6 +3444,77 @@ impl JsSvelteDeclarationRootBuilder {
         ))
     }
 }
+pub fn js_svelte_each_binding_root(
+    context: AnyJsBindingPattern,
+    eof_token: SyntaxToken,
+) -> JsSvelteEachBindingRootBuilder {
+    JsSvelteEachBindingRootBuilder {
+        context,
+        eof_token,
+        type_annotation: None,
+        index: None,
+        key: None,
+    }
+}
+pub struct JsSvelteEachBindingRootBuilder {
+    context: AnyJsBindingPattern,
+    eof_token: SyntaxToken,
+    type_annotation: Option<TsTypeAnnotation>,
+    index: Option<JsSvelteEachIndex>,
+    key: Option<JsSvelteEachKey>,
+}
+impl JsSvelteEachBindingRootBuilder {
+    pub fn with_type_annotation(mut self, type_annotation: TsTypeAnnotation) -> Self {
+        self.type_annotation = Some(type_annotation);
+        self
+    }
+    pub fn with_index(mut self, index: JsSvelteEachIndex) -> Self {
+        self.index = Some(index);
+        self
+    }
+    pub fn with_key(mut self, key: JsSvelteEachKey) -> Self {
+        self.key = Some(key);
+        self
+    }
+    pub fn build(self) -> JsSvelteEachBindingRoot {
+        JsSvelteEachBindingRoot::unwrap_cast(SyntaxNode::new_detached(
+            JsSyntaxKind::JS_SVELTE_EACH_BINDING_ROOT,
+            [
+                Some(SyntaxElement::Node(self.context.into_syntax())),
+                self.type_annotation
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                self.index
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                self.key
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                Some(SyntaxElement::Token(self.eof_token)),
+            ],
+        ))
+    }
+}
+pub fn js_svelte_each_index(comma_token: SyntaxToken, binding: AnyJsBinding) -> JsSvelteEachIndex {
+    JsSvelteEachIndex::unwrap_cast(SyntaxNode::new_detached(
+        JsSyntaxKind::JS_SVELTE_EACH_INDEX,
+        [
+            Some(SyntaxElement::Token(comma_token)),
+            Some(SyntaxElement::Node(binding.into_syntax())),
+        ],
+    ))
+}
+pub fn js_svelte_each_key(
+    l_paren_token: SyntaxToken,
+    expression: AnyJsExpression,
+    r_paren_token: SyntaxToken,
+) -> JsSvelteEachKey {
+    JsSvelteEachKey::unwrap_cast(SyntaxNode::new_detached(
+        JsSyntaxKind::JS_SVELTE_EACH_KEY,
+        [
+            Some(SyntaxElement::Token(l_paren_token)),
+            Some(SyntaxElement::Node(expression.into_syntax())),
+            Some(SyntaxElement::Token(r_paren_token)),
+        ],
+    ))
+}
 pub fn js_svelte_legacy_const_root(
     declarator: AnyJsSvelteLegacyConstDeclarator,
     eof_token: SyntaxToken,

@@ -1,0 +1,244 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```ts
+{ [items[0]?.id]: [first = fallback < 1 ? 0 : fallback, ...rest] }: Pair<string, number>, index (items[index]?.id)
+
+```
+
+
+## AST
+
+```
+JsSvelteEachBindingRoot {
+    context: JsObjectBindingPattern {
+        l_curly_token: L_CURLY@0..2 "{" [] [Whitespace(" ")],
+        properties: JsObjectBindingPatternPropertyList [
+            JsObjectBindingPatternProperty {
+                member: JsComputedMemberName {
+                    l_brack_token: L_BRACK@2..3 "[" [] [],
+                    expression: JsStaticMemberExpression {
+                        object: JsComputedMemberExpression {
+                            object: JsIdentifierExpression {
+                                name: JsReferenceIdentifier {
+                                    value_token: IDENT@3..8 "items" [] [],
+                                },
+                            },
+                            optional_chain_token: missing (optional),
+                            l_brack_token: L_BRACK@8..9 "[" [] [],
+                            member: JsNumberLiteralExpression {
+                                value_token: JS_NUMBER_LITERAL@9..10 "0" [] [],
+                            },
+                            r_brack_token: R_BRACK@10..11 "]" [] [],
+                        },
+                        operator_token: QUESTIONDOT@11..13 "?." [] [],
+                        member: JsName {
+                            value_token: IDENT@13..15 "id" [] [],
+                        },
+                    },
+                    r_brack_token: R_BRACK@15..16 "]" [] [],
+                },
+                colon_token: COLON@16..18 ":" [] [Whitespace(" ")],
+                pattern: JsArrayBindingPattern {
+                    l_brack_token: L_BRACK@18..19 "[" [] [],
+                    elements: JsArrayBindingPatternElementList [
+                        JsArrayBindingPatternElement {
+                            pattern: JsIdentifierBinding {
+                                name_token: IDENT@19..25 "first" [] [Whitespace(" ")],
+                            },
+                            init: JsInitializerClause {
+                                eq_token: EQ@25..27 "=" [] [Whitespace(" ")],
+                                expression: JsConditionalExpression {
+                                    test: JsBinaryExpression {
+                                        left: JsIdentifierExpression {
+                                            name: JsReferenceIdentifier {
+                                                value_token: IDENT@27..36 "fallback" [] [Whitespace(" ")],
+                                            },
+                                        },
+                                        operator_token: L_ANGLE@36..38 "<" [] [Whitespace(" ")],
+                                        right: JsNumberLiteralExpression {
+                                            value_token: JS_NUMBER_LITERAL@38..40 "1" [] [Whitespace(" ")],
+                                        },
+                                    },
+                                    question_mark_token: QUESTION@40..42 "?" [] [Whitespace(" ")],
+                                    consequent: JsNumberLiteralExpression {
+                                        value_token: JS_NUMBER_LITERAL@42..44 "0" [] [Whitespace(" ")],
+                                    },
+                                    colon_token: COLON@44..46 ":" [] [Whitespace(" ")],
+                                    alternate: JsIdentifierExpression {
+                                        name: JsReferenceIdentifier {
+                                            value_token: IDENT@46..54 "fallback" [] [],
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                        COMMA@54..56 "," [] [Whitespace(" ")],
+                        JsArrayBindingPatternRestElement {
+                            dotdotdot_token: DOT3@56..59 "..." [] [],
+                            pattern: JsIdentifierBinding {
+                                name_token: IDENT@59..63 "rest" [] [],
+                            },
+                        },
+                    ],
+                    r_brack_token: R_BRACK@63..65 "]" [] [Whitespace(" ")],
+                },
+                init: missing (optional),
+            },
+        ],
+        r_curly_token: R_CURLY@65..66 "}" [] [],
+    },
+    type_annotation: TsTypeAnnotation {
+        colon_token: COLON@66..68 ":" [] [Whitespace(" ")],
+        ty: TsReferenceType {
+            name: JsReferenceIdentifier {
+                value_token: IDENT@68..72 "Pair" [] [],
+            },
+            type_arguments: TsTypeArguments {
+                l_angle_token: L_ANGLE@72..73 "<" [] [],
+                ts_type_argument_list: TsTypeArgumentList [
+                    TsStringType {
+                        string_token: STRING_KW@73..79 "string" [] [],
+                    },
+                    COMMA@79..81 "," [] [Whitespace(" ")],
+                    TsNumberType {
+                        number_token: NUMBER_KW@81..87 "number" [] [],
+                    },
+                ],
+                r_angle_token: R_ANGLE@87..88 ">" [] [],
+            },
+        },
+    },
+    index: JsSvelteEachIndex {
+        comma_token: COMMA@88..90 "," [] [Whitespace(" ")],
+        binding: JsIdentifierBinding {
+            name_token: IDENT@90..96 "index" [] [Whitespace(" ")],
+        },
+    },
+    key: JsSvelteEachKey {
+        l_paren_token: L_PAREN@96..97 "(" [] [],
+        expression: JsStaticMemberExpression {
+            object: JsComputedMemberExpression {
+                object: JsIdentifierExpression {
+                    name: JsReferenceIdentifier {
+                        value_token: IDENT@97..102 "items" [] [],
+                    },
+                },
+                optional_chain_token: missing (optional),
+                l_brack_token: L_BRACK@102..103 "[" [] [],
+                member: JsIdentifierExpression {
+                    name: JsReferenceIdentifier {
+                        value_token: IDENT@103..108 "index" [] [],
+                    },
+                },
+                r_brack_token: R_BRACK@108..109 "]" [] [],
+            },
+            operator_token: QUESTIONDOT@109..111 "?." [] [],
+            member: JsName {
+                value_token: IDENT@111..113 "id" [] [],
+            },
+        },
+        r_paren_token: R_PAREN@113..114 ")" [] [],
+    },
+    eof_token: EOF@114..115 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_SVELTE_EACH_BINDING_ROOT@0..115
+  0: JS_OBJECT_BINDING_PATTERN@0..66
+    0: L_CURLY@0..2 "{" [] [Whitespace(" ")]
+    1: JS_OBJECT_BINDING_PATTERN_PROPERTY_LIST@2..65
+      0: JS_OBJECT_BINDING_PATTERN_PROPERTY@2..65
+        0: JS_COMPUTED_MEMBER_NAME@2..16
+          0: L_BRACK@2..3 "[" [] []
+          1: JS_STATIC_MEMBER_EXPRESSION@3..15
+            0: JS_COMPUTED_MEMBER_EXPRESSION@3..11
+              0: JS_IDENTIFIER_EXPRESSION@3..8
+                0: JS_REFERENCE_IDENTIFIER@3..8
+                  0: IDENT@3..8 "items" [] []
+              1: (empty)
+              2: L_BRACK@8..9 "[" [] []
+              3: JS_NUMBER_LITERAL_EXPRESSION@9..10
+                0: JS_NUMBER_LITERAL@9..10 "0" [] []
+              4: R_BRACK@10..11 "]" [] []
+            1: QUESTIONDOT@11..13 "?." [] []
+            2: JS_NAME@13..15
+              0: IDENT@13..15 "id" [] []
+          2: R_BRACK@15..16 "]" [] []
+        1: COLON@16..18 ":" [] [Whitespace(" ")]
+        2: JS_ARRAY_BINDING_PATTERN@18..65
+          0: L_BRACK@18..19 "[" [] []
+          1: JS_ARRAY_BINDING_PATTERN_ELEMENT_LIST@19..63
+            0: JS_ARRAY_BINDING_PATTERN_ELEMENT@19..54
+              0: JS_IDENTIFIER_BINDING@19..25
+                0: IDENT@19..25 "first" [] [Whitespace(" ")]
+              1: JS_INITIALIZER_CLAUSE@25..54
+                0: EQ@25..27 "=" [] [Whitespace(" ")]
+                1: JS_CONDITIONAL_EXPRESSION@27..54
+                  0: JS_BINARY_EXPRESSION@27..40
+                    0: JS_IDENTIFIER_EXPRESSION@27..36
+                      0: JS_REFERENCE_IDENTIFIER@27..36
+                        0: IDENT@27..36 "fallback" [] [Whitespace(" ")]
+                    1: L_ANGLE@36..38 "<" [] [Whitespace(" ")]
+                    2: JS_NUMBER_LITERAL_EXPRESSION@38..40
+                      0: JS_NUMBER_LITERAL@38..40 "1" [] [Whitespace(" ")]
+                  1: QUESTION@40..42 "?" [] [Whitespace(" ")]
+                  2: JS_NUMBER_LITERAL_EXPRESSION@42..44
+                    0: JS_NUMBER_LITERAL@42..44 "0" [] [Whitespace(" ")]
+                  3: COLON@44..46 ":" [] [Whitespace(" ")]
+                  4: JS_IDENTIFIER_EXPRESSION@46..54
+                    0: JS_REFERENCE_IDENTIFIER@46..54
+                      0: IDENT@46..54 "fallback" [] []
+            1: COMMA@54..56 "," [] [Whitespace(" ")]
+            2: JS_ARRAY_BINDING_PATTERN_REST_ELEMENT@56..63
+              0: DOT3@56..59 "..." [] []
+              1: JS_IDENTIFIER_BINDING@59..63
+                0: IDENT@59..63 "rest" [] []
+          2: R_BRACK@63..65 "]" [] [Whitespace(" ")]
+        3: (empty)
+    2: R_CURLY@65..66 "}" [] []
+  1: TS_TYPE_ANNOTATION@66..88
+    0: COLON@66..68 ":" [] [Whitespace(" ")]
+    1: TS_REFERENCE_TYPE@68..88
+      0: JS_REFERENCE_IDENTIFIER@68..72
+        0: IDENT@68..72 "Pair" [] []
+      1: TS_TYPE_ARGUMENTS@72..88
+        0: L_ANGLE@72..73 "<" [] []
+        1: TS_TYPE_ARGUMENT_LIST@73..87
+          0: TS_STRING_TYPE@73..79
+            0: STRING_KW@73..79 "string" [] []
+          1: COMMA@79..81 "," [] [Whitespace(" ")]
+          2: TS_NUMBER_TYPE@81..87
+            0: NUMBER_KW@81..87 "number" [] []
+        2: R_ANGLE@87..88 ">" [] []
+  2: JS_SVELTE_EACH_INDEX@88..96
+    0: COMMA@88..90 "," [] [Whitespace(" ")]
+    1: JS_IDENTIFIER_BINDING@90..96
+      0: IDENT@90..96 "index" [] [Whitespace(" ")]
+  3: JS_SVELTE_EACH_KEY@96..114
+    0: L_PAREN@96..97 "(" [] []
+    1: JS_STATIC_MEMBER_EXPRESSION@97..113
+      0: JS_COMPUTED_MEMBER_EXPRESSION@97..109
+        0: JS_IDENTIFIER_EXPRESSION@97..102
+          0: JS_REFERENCE_IDENTIFIER@97..102
+            0: IDENT@97..102 "items" [] []
+        1: (empty)
+        2: L_BRACK@102..103 "[" [] []
+        3: JS_IDENTIFIER_EXPRESSION@103..108
+          0: JS_REFERENCE_IDENTIFIER@103..108
+            0: IDENT@103..108 "index" [] []
+        4: R_BRACK@108..109 "]" [] []
+      1: QUESTIONDOT@109..111 "?." [] []
+      2: JS_NAME@111..113
+        0: IDENT@111..113 "id" [] []
+    2: R_PAREN@113..114 ")" [] []
+  4: EOF@114..115 "" [Newline("\n")] []
+
+```

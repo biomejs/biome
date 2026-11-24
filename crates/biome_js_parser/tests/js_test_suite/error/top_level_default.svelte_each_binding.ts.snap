@@ -1,0 +1,60 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```ts
+item = fallback
+
+```
+
+
+## AST
+
+```
+JsSvelteEachBindingRoot {
+    context: JsBogusBinding {
+        items: [
+            IDENT@0..5 "item" [] [Whitespace(" ")],
+            EQ@5..7 "=" [] [Whitespace(" ")],
+            IDENT@7..15 "fallback" [] [],
+        ],
+    },
+    type_annotation: missing (optional),
+    index: missing (optional),
+    key: missing (optional),
+    eof_token: EOF@15..16 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_SVELTE_EACH_BINDING_ROOT@0..16
+  0: JS_BOGUS_BINDING@0..15
+    0: IDENT@0..5 "item" [] [Whitespace(" ")]
+    1: EQ@5..7 "=" [] [Whitespace(" ")]
+    2: IDENT@7..15 "fallback" [] []
+  1: (empty)
+  2: (empty)
+  3: (empty)
+  4: EOF@15..16 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+top_level_default.svelte_each_binding.ts:1:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Template expressions can only contain a single expression
+  
+  > 1 │ item = fallback
+      │      ^
+    2 │ 
+  
+  i Remove the extra code or split into multiple template expressions.
+  
+```

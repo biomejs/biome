@@ -773,84 +773,81 @@ impl<'src> HtmlLexer<'src> {
     }
 
     /// Consumes a restricted single text expression that stops at specific keywords
-    /// (e.g., 'as' in Svelte #each blocks). Tracks nested brackets and stops when
-    /// encountering a keyword at the top level.
-    ///
-    /// Finding a `{` at the top level will emit an error token.
+    /// such as `as` in Svelte each blocks. Keywords and punctuation inside JavaScript
+    /// literals, comments, and nested delimiters remain part of the expression.
     fn consume_restricted_single_text_expression(
         &mut self,
         kind: RestrictedExpressionStopAt,
     ) -> HtmlSyntaxKind {
-        let start_pos = self.position;
-        let mut brackets_stack = 0;
-        // For `AsOrCommaSkipFirstAs`: tracks whether the first stop keyword has
-        // already been skipped (i.e., the TypeScript `as` in `as const`).
+        let source = &self.source.as_bytes()[self.position..];
+        let previous_byte = self.prev_byte();
         let mut first_stop_keyword_seen = false;
-
-        let is_opening_paren = |byte: u8| byte == b'(' || byte == b'[' || byte == b'{';
-        let is_closing_paren = |byte: u8| byte == b')' || byte == b']' || byte == b'}';
-
-        while let Some(current) = self.current_byte() {
-            match current {
-                // That's usually the case where we find a tag
-                _ if current == b'<' && brackets_stack == 0 => break,
-                _ if is_opening_paren(current) && !kind.matches_punct(current) => {
-                    brackets_stack += 1;
-                    self.advance(1)
-                }
-                _ if is_closing_paren(current) => {
-                    if brackets_stack == 0 {
-                        // Reached the closing brace
-                        break;
-                    } else {
-                        brackets_stack -= 1;
-                        self.advance(1)
-                    }
-                }
-
-                _ if brackets_stack == 0 && !is_at_start_identifier(current) => {
-                    let should_stop = kind.matches_punct(current);
-                    if should_stop {
-                        break;
-                    }
-                    self.advance(1);
-                }
-                _ if brackets_stack == 0 && is_at_start_identifier(current) => {
-                    // Check if we're at a stop keyword
-                    let checkpoint_pos = self.position;
-                    let prev_byte = self.prev_byte();
-                    if let Some(keyword_kind) = self.consume_language_identifier(current) {
-                        let should_stop =
-                            kind.matches_keyword(keyword_kind) && prev_byte == Some(b' ');
-
-                        if should_stop {
-                            if kind == RestrictedExpressionStopAt::AsOrCommaSkipFirstAs
-                                && !first_stop_keyword_seen
-                            {
-                                // First `as` belongs to a TypeScript `as const` assertion;
-                                // the parser determined this via lookahead. Skip it and
-                                // continue scanning for the Svelte binding `as`.
-                                first_stop_keyword_seen = true;
-                            } else {
-                                // Rewind — don't consume the keyword
-                                self.position = checkpoint_pos;
-                                break;
-                            }
-                        }
-                        // Not a stop keyword (or skipped), continue
-                        // (position already advanced by consume_language_identifier)
-                    } else {
-                        // Not a keyword, advance one byte (position was reset by consume_language_identifier)
-                        self.advance_byte_or_char(current);
-                    }
-                }
-                _ => {
-                    self.advance(1);
-                }
+        let mut recovery_keyword = None;
+        let mut stopped_at_delimiter = false;
+        let scanned_length = JsExtent::expression_length_until(source, |position| {
+            let offset = position.offset();
+            let rest = position.remaining();
+            let Some(&current) = rest.first() else {
+                return false;
+            };
+            if kind.matches_punct(current) {
+                stopped_at_delimiter = true;
+                return true;
             }
-        }
+            if current == b'<' && (!position.has_preceding_code() || rest.starts_with(b"<!--")) {
+                return true;
+            }
+            if !is_at_start_identifier(current) {
+                return false;
+            }
+            let previous = if offset == 0 {
+                previous_byte
+            } else {
+                source.get(offset - 1).copied()
+            };
+            if !previous.is_some_and(|byte| byte.is_ascii_whitespace()) {
+                return false;
+            }
+            let identifier_len = rest
+                .iter()
+                .take_while(|byte| is_at_continue_identifier(**byte))
+                .count();
+            if !kind.matches_keyword(&rest[..identifier_len]) {
+                return false;
+            }
+            if position.has_preceding_code() && !position.can_end_expression() {
+                let after_keyword = &rest[identifier_len..];
+                if recovery_keyword.is_none()
+                    && after_keyword.first().is_some_and(u8::is_ascii_whitespace)
+                    && after_keyword
+                        .iter()
+                        .copied()
+                        .find(|byte| !byte.is_ascii_whitespace())
+                        .is_some_and(|byte| {
+                            is_at_start_identifier(byte) || matches!(byte, b'{' | b'[')
+                        })
+                {
+                    recovery_keyword = Some(offset);
+                }
+                return false;
+            }
+            if kind == RestrictedExpressionStopAt::AsOrCommaSkipFirstAs && !first_stop_keyword_seen
+            {
+                first_stop_keyword_seen = true;
+                false
+            } else {
+                stopped_at_delimiter = true;
+                true
+            }
+        });
+        let length = if stopped_at_delimiter {
+            scanned_length
+        } else {
+            recovery_keyword.unwrap_or(scanned_length)
+        };
+        self.advance(length);
 
-        if self.position > start_pos {
+        if length > 0 {
             HTML_LITERAL
         } else {
             ERROR_TOKEN

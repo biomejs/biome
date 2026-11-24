@@ -1,0 +1,1352 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```svelte
+{#each " as " as character}
+	{character}
+{/each}
+
+{#each ` as ` as character}
+	{character}
+{/each}
+
+{#each / as /.exec("value") ?? [] as match}
+	{match}
+{/each}
+
+{#each values /* as */ as value}
+	{value}
+{/each}
+
+{#each values // as
+ as value}
+	{value}
+{/each}
+
+{#each values . as as value}
+	{value}
+{/each}
+
+{#await " then " then value}
+	{value}
+{/await}
+
+{#await value /* then */ then result}
+	{result}
+{/await}
+
+{#await promise . then(resolve) then result}
+	{result}
+{/await}
+
+{#await promise ?. then(resolve) then result}
+	{result}
+{/await}
+
+{#await condition ? then : fallback then result}
+	{result}
+{/await}
+
+{#await /then/ then result}
+	{result}
+{/await}
+
+{#await "6" / 2 then result}
+	{result}
+{/await}
+
+{#await `6` / 2 then result}
+	{result}
+{/await}
+
+{#await /6/ / 2 then result}
+	{result}
+{/await}
+
+<p>{"6" / 2}</p>
+<p>{`6` / 2}</p>
+
+{#await " catch " catch error}
+	{error}
+{/await}
+
+{#await value /* catch */ catch error}
+	{error}
+{/await}
+
+{#await promise . catch(handle) catch error}
+	{error}
+{/await}
+
+{#await left < right then result}
+	{result}
+{/await}
+
+{#each left < right ? values : fallback as value}
+	{value}
+{/each}
+
+{#each values as value (value.rank < limit ? value.rank : limit)}
+	{value}
+{/each}
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    items: HtmlRootItemList [
+        SvelteEachBlock {
+            opening_block: SvelteEachOpeningBlock {
+                sv_curly_hash_token: SV_CURLY_HASH@0..2 "{#" [] [],
+                each_token: EACH_KW@2..6 "each" [] [],
+                list: HtmlTextExpression {
+                    html_literal_token: HTML_LITERAL@6..14 " \" as \" " [] [],
+                },
+                item: SvelteEachBindingClause {
+                    as_token: AS_KW@14..17 "as" [] [Whitespace(" ")],
+                    clause: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@17..26 "character" [] [],
+                    },
+                },
+                r_curly_token: R_CURLY@26..27 "}" [] [],
+            },
+            children: HtmlElementList [
+                HtmlSingleTextExpression {
+                    l_curly_token: L_CURLY@27..30 "{" [Newline("\n"), Whitespace("\t")] [],
+                    expression: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@30..39 "character" [] [],
+                    },
+                    r_curly_token: R_CURLY@39..40 "}" [] [],
+                },
+            ],
+            else_clause: missing (optional),
+            closing_block: SvelteEachClosingBlock {
+                sv_curly_slash_token: SV_CURLY_SLASH@40..43 "{/" [Newline("\n")] [],
+                each_token: EACH_KW@43..47 "each" [] [],
+                r_curly_token: R_CURLY@47..48 "}" [] [],
+            },
+        },
+        SvelteEachBlock {
+            opening_block: SvelteEachOpeningBlock {
+                sv_curly_hash_token: SV_CURLY_HASH@48..52 "{#" [Newline("\n"), Newline("\n")] [],
+                each_token: EACH_KW@52..56 "each" [] [],
+                list: HtmlTextExpression {
+                    html_literal_token: HTML_LITERAL@56..64 " ` as ` " [] [],
+                },
+                item: SvelteEachBindingClause {
+                    as_token: AS_KW@64..67 "as" [] [Whitespace(" ")],
+                    clause: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@67..76 "character" [] [],
+                    },
+                },
+                r_curly_token: R_CURLY@76..77 "}" [] [],
+            },
+            children: HtmlElementList [
+                HtmlSingleTextExpression {
+                    l_curly_token: L_CURLY@77..80 "{" [Newline("\n"), Whitespace("\t")] [],
+                    expression: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@80..89 "character" [] [],
+                    },
+                    r_curly_token: R_CURLY@89..90 "}" [] [],
+                },
+            ],
+            else_clause: missing (optional),
+            closing_block: SvelteEachClosingBlock {
+                sv_curly_slash_token: SV_CURLY_SLASH@90..93 "{/" [Newline("\n")] [],
+                each_token: EACH_KW@93..97 "each" [] [],
+                r_curly_token: R_CURLY@97..98 "}" [] [],
+            },
+        },
+        SvelteEachBlock {
+            opening_block: SvelteEachOpeningBlock {
+                sv_curly_hash_token: SV_CURLY_HASH@98..102 "{#" [Newline("\n"), Newline("\n")] [],
+                each_token: EACH_KW@102..106 "each" [] [],
+                list: HtmlTextExpression {
+                    html_literal_token: HTML_LITERAL@106..134 " / as /.exec(\"value\") ?? [] " [] [],
+                },
+                item: SvelteEachBindingClause {
+                    as_token: AS_KW@134..137 "as" [] [Whitespace(" ")],
+                    clause: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@137..142 "match" [] [],
+                    },
+                },
+                r_curly_token: R_CURLY@142..143 "}" [] [],
+            },
+            children: HtmlElementList [
+                HtmlSingleTextExpression {
+                    l_curly_token: L_CURLY@143..146 "{" [Newline("\n"), Whitespace("\t")] [],
+                    expression: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@146..151 "match" [] [],
+                    },
+                    r_curly_token: R_CURLY@151..152 "}" [] [],
+                },
+            ],
+            else_clause: missing (optional),
+            closing_block: SvelteEachClosingBlock {
+                sv_curly_slash_token: SV_CURLY_SLASH@152..155 "{/" [Newline("\n")] [],
+                each_token: EACH_KW@155..159 "each" [] [],
+                r_curly_token: R_CURLY@159..160 "}" [] [],
+            },
+        },
+        SvelteEachBlock {
+            opening_block: SvelteEachOpeningBlock {
+                sv_curly_hash_token: SV_CURLY_HASH@160..164 "{#" [Newline("\n"), Newline("\n")] [],
+                each_token: EACH_KW@164..168 "each" [] [],
+                list: HtmlTextExpression {
+                    html_literal_token: HTML_LITERAL@168..185 " values /* as */ " [] [],
+                },
+                item: SvelteEachBindingClause {
+                    as_token: AS_KW@185..188 "as" [] [Whitespace(" ")],
+                    clause: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@188..193 "value" [] [],
+                    },
+                },
+                r_curly_token: R_CURLY@193..194 "}" [] [],
+            },
+            children: HtmlElementList [
+                HtmlSingleTextExpression {
+                    l_curly_token: L_CURLY@194..197 "{" [Newline("\n"), Whitespace("\t")] [],
+                    expression: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@197..202 "value" [] [],
+                    },
+                    r_curly_token: R_CURLY@202..203 "}" [] [],
+                },
+            ],
+            else_clause: missing (optional),
+            closing_block: SvelteEachClosingBlock {
+                sv_curly_slash_token: SV_CURLY_SLASH@203..206 "{/" [Newline("\n")] [],
+                each_token: EACH_KW@206..210 "each" [] [],
+                r_curly_token: R_CURLY@210..211 "}" [] [],
+            },
+        },
+        SvelteEachBlock {
+            opening_block: SvelteEachOpeningBlock {
+                sv_curly_hash_token: SV_CURLY_HASH@211..215 "{#" [Newline("\n"), Newline("\n")] [],
+                each_token: EACH_KW@215..219 "each" [] [],
+                list: HtmlTextExpression {
+                    html_literal_token: HTML_LITERAL@219..234 " values // as\n " [] [],
+                },
+                item: SvelteEachBindingClause {
+                    as_token: AS_KW@234..237 "as" [] [Whitespace(" ")],
+                    clause: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@237..242 "value" [] [],
+                    },
+                },
+                r_curly_token: R_CURLY@242..243 "}" [] [],
+            },
+            children: HtmlElementList [
+                HtmlSingleTextExpression {
+                    l_curly_token: L_CURLY@243..246 "{" [Newline("\n"), Whitespace("\t")] [],
+                    expression: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@246..251 "value" [] [],
+                    },
+                    r_curly_token: R_CURLY@251..252 "}" [] [],
+                },
+            ],
+            else_clause: missing (optional),
+            closing_block: SvelteEachClosingBlock {
+                sv_curly_slash_token: SV_CURLY_SLASH@252..255 "{/" [Newline("\n")] [],
+                each_token: EACH_KW@255..259 "each" [] [],
+                r_curly_token: R_CURLY@259..260 "}" [] [],
+            },
+        },
+        SvelteEachBlock {
+            opening_block: SvelteEachOpeningBlock {
+                sv_curly_hash_token: SV_CURLY_HASH@260..264 "{#" [Newline("\n"), Newline("\n")] [],
+                each_token: EACH_KW@264..268 "each" [] [],
+                list: HtmlTextExpression {
+                    html_literal_token: HTML_LITERAL@268..281 " values . as " [] [],
+                },
+                item: SvelteEachBindingClause {
+                    as_token: AS_KW@281..284 "as" [] [Whitespace(" ")],
+                    clause: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@284..289 "value" [] [],
+                    },
+                },
+                r_curly_token: R_CURLY@289..290 "}" [] [],
+            },
+            children: HtmlElementList [
+                HtmlSingleTextExpression {
+                    l_curly_token: L_CURLY@290..293 "{" [Newline("\n"), Whitespace("\t")] [],
+                    expression: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@293..298 "value" [] [],
+                    },
+                    r_curly_token: R_CURLY@298..299 "}" [] [],
+                },
+            ],
+            else_clause: missing (optional),
+            closing_block: SvelteEachClosingBlock {
+                sv_curly_slash_token: SV_CURLY_SLASH@299..302 "{/" [Newline("\n")] [],
+                each_token: EACH_KW@302..306 "each" [] [],
+                r_curly_token: R_CURLY@306..307 "}" [] [],
+            },
+        },
+        SvelteAwaitBlock {
+            opening_block: SvelteAwaitOpeningBlock {
+                sv_curly_hash_token: SV_CURLY_HASH@307..311 "{#" [Newline("\n"), Newline("\n")] [],
+                await_token: AWAIT_KW@311..316 "await" [] [],
+                expression: HtmlTextExpression {
+                    html_literal_token: HTML_LITERAL@316..326 " \" then \" " [] [],
+                },
+                then_clause: SvelteAwaitThenClause {
+                    then_token: THEN_KW@326..331 "then" [] [Whitespace(" ")],
+                    name: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@331..336 "value" [] [],
+                    },
+                },
+                catch_clause: missing (optional),
+                r_curly_token: R_CURLY@336..337 "}" [] [],
+                children: HtmlElementList [
+                    HtmlSingleTextExpression {
+                        l_curly_token: L_CURLY@337..340 "{" [Newline("\n"), Whitespace("\t")] [],
+                        expression: HtmlTextExpression {
+                            html_literal_token: HTML_LITERAL@340..345 "value" [] [],
+                        },
+                        r_curly_token: R_CURLY@345..346 "}" [] [],
+                    },
+                ],
+            },
+            clauses: SvelteAwaitClausesList [],
+            closing_block: SvelteAwaitClosingBlock {
+                sv_curly_slash_token: SV_CURLY_SLASH@346..349 "{/" [Newline("\n")] [],
+                await_token: AWAIT_KW@349..354 "await" [] [],
+                r_curly_token: R_CURLY@354..355 "}" [] [],
+            },
+        },
+        SvelteAwaitBlock {
+            opening_block: SvelteAwaitOpeningBlock {
+                sv_curly_hash_token: SV_CURLY_HASH@355..359 "{#" [Newline("\n"), Newline("\n")] [],
+                await_token: AWAIT_KW@359..364 "await" [] [],
+                expression: HtmlTextExpression {
+                    html_literal_token: HTML_LITERAL@364..382 " value /* then */ " [] [],
+                },
+                then_clause: SvelteAwaitThenClause {
+                    then_token: THEN_KW@382..387 "then" [] [Whitespace(" ")],
+                    name: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@387..393 "result" [] [],
+                    },
+                },
+                catch_clause: missing (optional),
+                r_curly_token: R_CURLY@393..394 "}" [] [],
+                children: HtmlElementList [
+                    HtmlSingleTextExpression {
+                        l_curly_token: L_CURLY@394..397 "{" [Newline("\n"), Whitespace("\t")] [],
+                        expression: HtmlTextExpression {
+                            html_literal_token: HTML_LITERAL@397..403 "result" [] [],
+                        },
+                        r_curly_token: R_CURLY@403..404 "}" [] [],
+                    },
+                ],
+            },
+            clauses: SvelteAwaitClausesList [],
+            closing_block: SvelteAwaitClosingBlock {
+                sv_curly_slash_token: SV_CURLY_SLASH@404..407 "{/" [Newline("\n")] [],
+                await_token: AWAIT_KW@407..412 "await" [] [],
+                r_curly_token: R_CURLY@412..413 "}" [] [],
+            },
+        },
+        SvelteAwaitBlock {
+            opening_block: SvelteAwaitOpeningBlock {
+                sv_curly_hash_token: SV_CURLY_HASH@413..417 "{#" [Newline("\n"), Newline("\n")] [],
+                await_token: AWAIT_KW@417..422 "await" [] [],
+                expression: HtmlTextExpression {
+                    html_literal_token: HTML_LITERAL@422..447 " promise . then(resolve) " [] [],
+                },
+                then_clause: SvelteAwaitThenClause {
+                    then_token: THEN_KW@447..452 "then" [] [Whitespace(" ")],
+                    name: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@452..458 "result" [] [],
+                    },
+                },
+                catch_clause: missing (optional),
+                r_curly_token: R_CURLY@458..459 "}" [] [],
+                children: HtmlElementList [
+                    HtmlSingleTextExpression {
+                        l_curly_token: L_CURLY@459..462 "{" [Newline("\n"), Whitespace("\t")] [],
+                        expression: HtmlTextExpression {
+                            html_literal_token: HTML_LITERAL@462..468 "result" [] [],
+                        },
+                        r_curly_token: R_CURLY@468..469 "}" [] [],
+                    },
+                ],
+            },
+            clauses: SvelteAwaitClausesList [],
+            closing_block: SvelteAwaitClosingBlock {
+                sv_curly_slash_token: SV_CURLY_SLASH@469..472 "{/" [Newline("\n")] [],
+                await_token: AWAIT_KW@472..477 "await" [] [],
+                r_curly_token: R_CURLY@477..478 "}" [] [],
+            },
+        },
+        SvelteAwaitBlock {
+            opening_block: SvelteAwaitOpeningBlock {
+                sv_curly_hash_token: SV_CURLY_HASH@478..482 "{#" [Newline("\n"), Newline("\n")] [],
+                await_token: AWAIT_KW@482..487 "await" [] [],
+                expression: HtmlTextExpression {
+                    html_literal_token: HTML_LITERAL@487..513 " promise ?. then(resolve) " [] [],
+                },
+                then_clause: SvelteAwaitThenClause {
+                    then_token: THEN_KW@513..518 "then" [] [Whitespace(" ")],
+                    name: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@518..524 "result" [] [],
+                    },
+                },
+                catch_clause: missing (optional),
+                r_curly_token: R_CURLY@524..525 "}" [] [],
+                children: HtmlElementList [
+                    HtmlSingleTextExpression {
+                        l_curly_token: L_CURLY@525..528 "{" [Newline("\n"), Whitespace("\t")] [],
+                        expression: HtmlTextExpression {
+                            html_literal_token: HTML_LITERAL@528..534 "result" [] [],
+                        },
+                        r_curly_token: R_CURLY@534..535 "}" [] [],
+                    },
+                ],
+            },
+            clauses: SvelteAwaitClausesList [],
+            closing_block: SvelteAwaitClosingBlock {
+                sv_curly_slash_token: SV_CURLY_SLASH@535..538 "{/" [Newline("\n")] [],
+                await_token: AWAIT_KW@538..543 "await" [] [],
+                r_curly_token: R_CURLY@543..544 "}" [] [],
+            },
+        },
+        SvelteAwaitBlock {
+            opening_block: SvelteAwaitOpeningBlock {
+                sv_curly_hash_token: SV_CURLY_HASH@544..548 "{#" [Newline("\n"), Newline("\n")] [],
+                await_token: AWAIT_KW@548..553 "await" [] [],
+                expression: HtmlTextExpression {
+                    html_literal_token: HTML_LITERAL@553..582 " condition ? then : fallback " [] [],
+                },
+                then_clause: SvelteAwaitThenClause {
+                    then_token: THEN_KW@582..587 "then" [] [Whitespace(" ")],
+                    name: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@587..593 "result" [] [],
+                    },
+                },
+                catch_clause: missing (optional),
+                r_curly_token: R_CURLY@593..594 "}" [] [],
+                children: HtmlElementList [
+                    HtmlSingleTextExpression {
+                        l_curly_token: L_CURLY@594..597 "{" [Newline("\n"), Whitespace("\t")] [],
+                        expression: HtmlTextExpression {
+                            html_literal_token: HTML_LITERAL@597..603 "result" [] [],
+                        },
+                        r_curly_token: R_CURLY@603..604 "}" [] [],
+                    },
+                ],
+            },
+            clauses: SvelteAwaitClausesList [],
+            closing_block: SvelteAwaitClosingBlock {
+                sv_curly_slash_token: SV_CURLY_SLASH@604..607 "{/" [Newline("\n")] [],
+                await_token: AWAIT_KW@607..612 "await" [] [],
+                r_curly_token: R_CURLY@612..613 "}" [] [],
+            },
+        },
+        SvelteAwaitBlock {
+            opening_block: SvelteAwaitOpeningBlock {
+                sv_curly_hash_token: SV_CURLY_HASH@613..617 "{#" [Newline("\n"), Newline("\n")] [],
+                await_token: AWAIT_KW@617..622 "await" [] [],
+                expression: HtmlTextExpression {
+                    html_literal_token: HTML_LITERAL@622..630 " /then/ " [] [],
+                },
+                then_clause: SvelteAwaitThenClause {
+                    then_token: THEN_KW@630..635 "then" [] [Whitespace(" ")],
+                    name: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@635..641 "result" [] [],
+                    },
+                },
+                catch_clause: missing (optional),
+                r_curly_token: R_CURLY@641..642 "}" [] [],
+                children: HtmlElementList [
+                    HtmlSingleTextExpression {
+                        l_curly_token: L_CURLY@642..645 "{" [Newline("\n"), Whitespace("\t")] [],
+                        expression: HtmlTextExpression {
+                            html_literal_token: HTML_LITERAL@645..651 "result" [] [],
+                        },
+                        r_curly_token: R_CURLY@651..652 "}" [] [],
+                    },
+                ],
+            },
+            clauses: SvelteAwaitClausesList [],
+            closing_block: SvelteAwaitClosingBlock {
+                sv_curly_slash_token: SV_CURLY_SLASH@652..655 "{/" [Newline("\n")] [],
+                await_token: AWAIT_KW@655..660 "await" [] [],
+                r_curly_token: R_CURLY@660..661 "}" [] [],
+            },
+        },
+        SvelteAwaitBlock {
+            opening_block: SvelteAwaitOpeningBlock {
+                sv_curly_hash_token: SV_CURLY_HASH@661..665 "{#" [Newline("\n"), Newline("\n")] [],
+                await_token: AWAIT_KW@665..670 "await" [] [],
+                expression: HtmlTextExpression {
+                    html_literal_token: HTML_LITERAL@670..679 " \"6\" / 2 " [] [],
+                },
+                then_clause: SvelteAwaitThenClause {
+                    then_token: THEN_KW@679..684 "then" [] [Whitespace(" ")],
+                    name: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@684..690 "result" [] [],
+                    },
+                },
+                catch_clause: missing (optional),
+                r_curly_token: R_CURLY@690..691 "}" [] [],
+                children: HtmlElementList [
+                    HtmlSingleTextExpression {
+                        l_curly_token: L_CURLY@691..694 "{" [Newline("\n"), Whitespace("\t")] [],
+                        expression: HtmlTextExpression {
+                            html_literal_token: HTML_LITERAL@694..700 "result" [] [],
+                        },
+                        r_curly_token: R_CURLY@700..701 "}" [] [],
+                    },
+                ],
+            },
+            clauses: SvelteAwaitClausesList [],
+            closing_block: SvelteAwaitClosingBlock {
+                sv_curly_slash_token: SV_CURLY_SLASH@701..704 "{/" [Newline("\n")] [],
+                await_token: AWAIT_KW@704..709 "await" [] [],
+                r_curly_token: R_CURLY@709..710 "}" [] [],
+            },
+        },
+        SvelteAwaitBlock {
+            opening_block: SvelteAwaitOpeningBlock {
+                sv_curly_hash_token: SV_CURLY_HASH@710..714 "{#" [Newline("\n"), Newline("\n")] [],
+                await_token: AWAIT_KW@714..719 "await" [] [],
+                expression: HtmlTextExpression {
+                    html_literal_token: HTML_LITERAL@719..728 " `6` / 2 " [] [],
+                },
+                then_clause: SvelteAwaitThenClause {
+                    then_token: THEN_KW@728..733 "then" [] [Whitespace(" ")],
+                    name: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@733..739 "result" [] [],
+                    },
+                },
+                catch_clause: missing (optional),
+                r_curly_token: R_CURLY@739..740 "}" [] [],
+                children: HtmlElementList [
+                    HtmlSingleTextExpression {
+                        l_curly_token: L_CURLY@740..743 "{" [Newline("\n"), Whitespace("\t")] [],
+                        expression: HtmlTextExpression {
+                            html_literal_token: HTML_LITERAL@743..749 "result" [] [],
+                        },
+                        r_curly_token: R_CURLY@749..750 "}" [] [],
+                    },
+                ],
+            },
+            clauses: SvelteAwaitClausesList [],
+            closing_block: SvelteAwaitClosingBlock {
+                sv_curly_slash_token: SV_CURLY_SLASH@750..753 "{/" [Newline("\n")] [],
+                await_token: AWAIT_KW@753..758 "await" [] [],
+                r_curly_token: R_CURLY@758..759 "}" [] [],
+            },
+        },
+        SvelteAwaitBlock {
+            opening_block: SvelteAwaitOpeningBlock {
+                sv_curly_hash_token: SV_CURLY_HASH@759..763 "{#" [Newline("\n"), Newline("\n")] [],
+                await_token: AWAIT_KW@763..768 "await" [] [],
+                expression: HtmlTextExpression {
+                    html_literal_token: HTML_LITERAL@768..777 " /6/ / 2 " [] [],
+                },
+                then_clause: SvelteAwaitThenClause {
+                    then_token: THEN_KW@777..782 "then" [] [Whitespace(" ")],
+                    name: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@782..788 "result" [] [],
+                    },
+                },
+                catch_clause: missing (optional),
+                r_curly_token: R_CURLY@788..789 "}" [] [],
+                children: HtmlElementList [
+                    HtmlSingleTextExpression {
+                        l_curly_token: L_CURLY@789..792 "{" [Newline("\n"), Whitespace("\t")] [],
+                        expression: HtmlTextExpression {
+                            html_literal_token: HTML_LITERAL@792..798 "result" [] [],
+                        },
+                        r_curly_token: R_CURLY@798..799 "}" [] [],
+                    },
+                ],
+            },
+            clauses: SvelteAwaitClausesList [],
+            closing_block: SvelteAwaitClosingBlock {
+                sv_curly_slash_token: SV_CURLY_SLASH@799..802 "{/" [Newline("\n")] [],
+                await_token: AWAIT_KW@802..807 "await" [] [],
+                r_curly_token: R_CURLY@807..808 "}" [] [],
+            },
+        },
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@808..811 "<" [Newline("\n"), Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: P_KW@811..812 "p" [] [],
+                },
+                attributes: HtmlAttributeList [],
+                r_angle_token: R_ANGLE@812..813 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlSingleTextExpression {
+                    l_curly_token: L_CURLY@813..814 "{" [] [],
+                    expression: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@814..821 "\"6\" / 2" [] [],
+                    },
+                    r_curly_token: R_CURLY@821..822 "}" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@822..823 "<" [] [],
+                slash_token: SLASH@823..824 "/" [] [],
+                name: HtmlTagName {
+                    value_token: P_KW@824..825 "p" [] [],
+                },
+                r_angle_token: R_ANGLE@825..826 ">" [] [],
+            },
+        },
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@826..828 "<" [Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: P_KW@828..829 "p" [] [],
+                },
+                attributes: HtmlAttributeList [],
+                r_angle_token: R_ANGLE@829..830 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlSingleTextExpression {
+                    l_curly_token: L_CURLY@830..831 "{" [] [],
+                    expression: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@831..838 "`6` / 2" [] [],
+                    },
+                    r_curly_token: R_CURLY@838..839 "}" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@839..840 "<" [] [],
+                slash_token: SLASH@840..841 "/" [] [],
+                name: HtmlTagName {
+                    value_token: P_KW@841..842 "p" [] [],
+                },
+                r_angle_token: R_ANGLE@842..843 ">" [] [],
+            },
+        },
+        SvelteAwaitBlock {
+            opening_block: SvelteAwaitOpeningBlock {
+                sv_curly_hash_token: SV_CURLY_HASH@843..847 "{#" [Newline("\n"), Newline("\n")] [],
+                await_token: AWAIT_KW@847..852 "await" [] [],
+                expression: HtmlTextExpression {
+                    html_literal_token: HTML_LITERAL@852..863 " \" catch \" " [] [],
+                },
+                then_clause: missing (optional),
+                catch_clause: SvelteAwaitCatchClause {
+                    catch_token: CATCH_KW@863..869 "catch" [] [Whitespace(" ")],
+                    name: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@869..874 "error" [] [],
+                    },
+                },
+                r_curly_token: R_CURLY@874..875 "}" [] [],
+                children: HtmlElementList [
+                    HtmlSingleTextExpression {
+                        l_curly_token: L_CURLY@875..878 "{" [Newline("\n"), Whitespace("\t")] [],
+                        expression: HtmlTextExpression {
+                            html_literal_token: HTML_LITERAL@878..883 "error" [] [],
+                        },
+                        r_curly_token: R_CURLY@883..884 "}" [] [],
+                    },
+                ],
+            },
+            clauses: SvelteAwaitClausesList [],
+            closing_block: SvelteAwaitClosingBlock {
+                sv_curly_slash_token: SV_CURLY_SLASH@884..887 "{/" [Newline("\n")] [],
+                await_token: AWAIT_KW@887..892 "await" [] [],
+                r_curly_token: R_CURLY@892..893 "}" [] [],
+            },
+        },
+        SvelteAwaitBlock {
+            opening_block: SvelteAwaitOpeningBlock {
+                sv_curly_hash_token: SV_CURLY_HASH@893..897 "{#" [Newline("\n"), Newline("\n")] [],
+                await_token: AWAIT_KW@897..902 "await" [] [],
+                expression: HtmlTextExpression {
+                    html_literal_token: HTML_LITERAL@902..921 " value /* catch */ " [] [],
+                },
+                then_clause: missing (optional),
+                catch_clause: SvelteAwaitCatchClause {
+                    catch_token: CATCH_KW@921..927 "catch" [] [Whitespace(" ")],
+                    name: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@927..932 "error" [] [],
+                    },
+                },
+                r_curly_token: R_CURLY@932..933 "}" [] [],
+                children: HtmlElementList [
+                    HtmlSingleTextExpression {
+                        l_curly_token: L_CURLY@933..936 "{" [Newline("\n"), Whitespace("\t")] [],
+                        expression: HtmlTextExpression {
+                            html_literal_token: HTML_LITERAL@936..941 "error" [] [],
+                        },
+                        r_curly_token: R_CURLY@941..942 "}" [] [],
+                    },
+                ],
+            },
+            clauses: SvelteAwaitClausesList [],
+            closing_block: SvelteAwaitClosingBlock {
+                sv_curly_slash_token: SV_CURLY_SLASH@942..945 "{/" [Newline("\n")] [],
+                await_token: AWAIT_KW@945..950 "await" [] [],
+                r_curly_token: R_CURLY@950..951 "}" [] [],
+            },
+        },
+        SvelteAwaitBlock {
+            opening_block: SvelteAwaitOpeningBlock {
+                sv_curly_hash_token: SV_CURLY_HASH@951..955 "{#" [Newline("\n"), Newline("\n")] [],
+                await_token: AWAIT_KW@955..960 "await" [] [],
+                expression: HtmlTextExpression {
+                    html_literal_token: HTML_LITERAL@960..985 " promise . catch(handle) " [] [],
+                },
+                then_clause: missing (optional),
+                catch_clause: SvelteAwaitCatchClause {
+                    catch_token: CATCH_KW@985..991 "catch" [] [Whitespace(" ")],
+                    name: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@991..996 "error" [] [],
+                    },
+                },
+                r_curly_token: R_CURLY@996..997 "}" [] [],
+                children: HtmlElementList [
+                    HtmlSingleTextExpression {
+                        l_curly_token: L_CURLY@997..1000 "{" [Newline("\n"), Whitespace("\t")] [],
+                        expression: HtmlTextExpression {
+                            html_literal_token: HTML_LITERAL@1000..1005 "error" [] [],
+                        },
+                        r_curly_token: R_CURLY@1005..1006 "}" [] [],
+                    },
+                ],
+            },
+            clauses: SvelteAwaitClausesList [],
+            closing_block: SvelteAwaitClosingBlock {
+                sv_curly_slash_token: SV_CURLY_SLASH@1006..1009 "{/" [Newline("\n")] [],
+                await_token: AWAIT_KW@1009..1014 "await" [] [],
+                r_curly_token: R_CURLY@1014..1015 "}" [] [],
+            },
+        },
+        SvelteAwaitBlock {
+            opening_block: SvelteAwaitOpeningBlock {
+                sv_curly_hash_token: SV_CURLY_HASH@1015..1019 "{#" [Newline("\n"), Newline("\n")] [],
+                await_token: AWAIT_KW@1019..1024 "await" [] [],
+                expression: HtmlTextExpression {
+                    html_literal_token: HTML_LITERAL@1024..1038 " left < right " [] [],
+                },
+                then_clause: SvelteAwaitThenClause {
+                    then_token: THEN_KW@1038..1043 "then" [] [Whitespace(" ")],
+                    name: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@1043..1049 "result" [] [],
+                    },
+                },
+                catch_clause: missing (optional),
+                r_curly_token: R_CURLY@1049..1050 "}" [] [],
+                children: HtmlElementList [
+                    HtmlSingleTextExpression {
+                        l_curly_token: L_CURLY@1050..1053 "{" [Newline("\n"), Whitespace("\t")] [],
+                        expression: HtmlTextExpression {
+                            html_literal_token: HTML_LITERAL@1053..1059 "result" [] [],
+                        },
+                        r_curly_token: R_CURLY@1059..1060 "}" [] [],
+                    },
+                ],
+            },
+            clauses: SvelteAwaitClausesList [],
+            closing_block: SvelteAwaitClosingBlock {
+                sv_curly_slash_token: SV_CURLY_SLASH@1060..1063 "{/" [Newline("\n")] [],
+                await_token: AWAIT_KW@1063..1068 "await" [] [],
+                r_curly_token: R_CURLY@1068..1069 "}" [] [],
+            },
+        },
+        SvelteEachBlock {
+            opening_block: SvelteEachOpeningBlock {
+                sv_curly_hash_token: SV_CURLY_HASH@1069..1073 "{#" [Newline("\n"), Newline("\n")] [],
+                each_token: EACH_KW@1073..1077 "each" [] [],
+                list: HtmlTextExpression {
+                    html_literal_token: HTML_LITERAL@1077..1111 " left < right ? values : fallback " [] [],
+                },
+                item: SvelteEachBindingClause {
+                    as_token: AS_KW@1111..1114 "as" [] [Whitespace(" ")],
+                    clause: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@1114..1119 "value" [] [],
+                    },
+                },
+                r_curly_token: R_CURLY@1119..1120 "}" [] [],
+            },
+            children: HtmlElementList [
+                HtmlSingleTextExpression {
+                    l_curly_token: L_CURLY@1120..1123 "{" [Newline("\n"), Whitespace("\t")] [],
+                    expression: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@1123..1128 "value" [] [],
+                    },
+                    r_curly_token: R_CURLY@1128..1129 "}" [] [],
+                },
+            ],
+            else_clause: missing (optional),
+            closing_block: SvelteEachClosingBlock {
+                sv_curly_slash_token: SV_CURLY_SLASH@1129..1132 "{/" [Newline("\n")] [],
+                each_token: EACH_KW@1132..1136 "each" [] [],
+                r_curly_token: R_CURLY@1136..1137 "}" [] [],
+            },
+        },
+        SvelteEachBlock {
+            opening_block: SvelteEachOpeningBlock {
+                sv_curly_hash_token: SV_CURLY_HASH@1137..1141 "{#" [Newline("\n"), Newline("\n")] [],
+                each_token: EACH_KW@1141..1145 "each" [] [],
+                list: HtmlTextExpression {
+                    html_literal_token: HTML_LITERAL@1145..1153 " values " [] [],
+                },
+                item: SvelteEachBindingClause {
+                    as_token: AS_KW@1153..1156 "as" [] [Whitespace(" ")],
+                    clause: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@1156..1203 "value (value.rank < limit ? value.rank : limit)" [] [],
+                    },
+                },
+                r_curly_token: R_CURLY@1203..1204 "}" [] [],
+            },
+            children: HtmlElementList [
+                HtmlSingleTextExpression {
+                    l_curly_token: L_CURLY@1204..1207 "{" [Newline("\n"), Whitespace("\t")] [],
+                    expression: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@1207..1212 "value" [] [],
+                    },
+                    r_curly_token: R_CURLY@1212..1213 "}" [] [],
+                },
+            ],
+            else_clause: missing (optional),
+            closing_block: SvelteEachClosingBlock {
+                sv_curly_slash_token: SV_CURLY_SLASH@1213..1216 "{/" [Newline("\n")] [],
+                each_token: EACH_KW@1216..1220 "each" [] [],
+                r_curly_token: R_CURLY@1220..1221 "}" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@1221..1222 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..1222
+  0: (empty)
+  1: (empty)
+  2: HTML_ROOT_ITEM_LIST@0..1221
+    0: SVELTE_EACH_BLOCK@0..48
+      0: SVELTE_EACH_OPENING_BLOCK@0..27
+        0: SV_CURLY_HASH@0..2 "{#" [] []
+        1: EACH_KW@2..6 "each" [] []
+        2: HTML_TEXT_EXPRESSION@6..14
+          0: HTML_LITERAL@6..14 " \" as \" " [] []
+        3: SVELTE_EACH_BINDING_CLAUSE@14..26
+          0: AS_KW@14..17 "as" [] [Whitespace(" ")]
+          1: HTML_TEXT_EXPRESSION@17..26
+            0: HTML_LITERAL@17..26 "character" [] []
+        4: R_CURLY@26..27 "}" [] []
+      1: HTML_ELEMENT_LIST@27..40
+        0: HTML_SINGLE_TEXT_EXPRESSION@27..40
+          0: L_CURLY@27..30 "{" [Newline("\n"), Whitespace("\t")] []
+          1: HTML_TEXT_EXPRESSION@30..39
+            0: HTML_LITERAL@30..39 "character" [] []
+          2: R_CURLY@39..40 "}" [] []
+      2: (empty)
+      3: SVELTE_EACH_CLOSING_BLOCK@40..48
+        0: SV_CURLY_SLASH@40..43 "{/" [Newline("\n")] []
+        1: EACH_KW@43..47 "each" [] []
+        2: R_CURLY@47..48 "}" [] []
+    1: SVELTE_EACH_BLOCK@48..98
+      0: SVELTE_EACH_OPENING_BLOCK@48..77
+        0: SV_CURLY_HASH@48..52 "{#" [Newline("\n"), Newline("\n")] []
+        1: EACH_KW@52..56 "each" [] []
+        2: HTML_TEXT_EXPRESSION@56..64
+          0: HTML_LITERAL@56..64 " ` as ` " [] []
+        3: SVELTE_EACH_BINDING_CLAUSE@64..76
+          0: AS_KW@64..67 "as" [] [Whitespace(" ")]
+          1: HTML_TEXT_EXPRESSION@67..76
+            0: HTML_LITERAL@67..76 "character" [] []
+        4: R_CURLY@76..77 "}" [] []
+      1: HTML_ELEMENT_LIST@77..90
+        0: HTML_SINGLE_TEXT_EXPRESSION@77..90
+          0: L_CURLY@77..80 "{" [Newline("\n"), Whitespace("\t")] []
+          1: HTML_TEXT_EXPRESSION@80..89
+            0: HTML_LITERAL@80..89 "character" [] []
+          2: R_CURLY@89..90 "}" [] []
+      2: (empty)
+      3: SVELTE_EACH_CLOSING_BLOCK@90..98
+        0: SV_CURLY_SLASH@90..93 "{/" [Newline("\n")] []
+        1: EACH_KW@93..97 "each" [] []
+        2: R_CURLY@97..98 "}" [] []
+    2: SVELTE_EACH_BLOCK@98..160
+      0: SVELTE_EACH_OPENING_BLOCK@98..143
+        0: SV_CURLY_HASH@98..102 "{#" [Newline("\n"), Newline("\n")] []
+        1: EACH_KW@102..106 "each" [] []
+        2: HTML_TEXT_EXPRESSION@106..134
+          0: HTML_LITERAL@106..134 " / as /.exec(\"value\") ?? [] " [] []
+        3: SVELTE_EACH_BINDING_CLAUSE@134..142
+          0: AS_KW@134..137 "as" [] [Whitespace(" ")]
+          1: HTML_TEXT_EXPRESSION@137..142
+            0: HTML_LITERAL@137..142 "match" [] []
+        4: R_CURLY@142..143 "}" [] []
+      1: HTML_ELEMENT_LIST@143..152
+        0: HTML_SINGLE_TEXT_EXPRESSION@143..152
+          0: L_CURLY@143..146 "{" [Newline("\n"), Whitespace("\t")] []
+          1: HTML_TEXT_EXPRESSION@146..151
+            0: HTML_LITERAL@146..151 "match" [] []
+          2: R_CURLY@151..152 "}" [] []
+      2: (empty)
+      3: SVELTE_EACH_CLOSING_BLOCK@152..160
+        0: SV_CURLY_SLASH@152..155 "{/" [Newline("\n")] []
+        1: EACH_KW@155..159 "each" [] []
+        2: R_CURLY@159..160 "}" [] []
+    3: SVELTE_EACH_BLOCK@160..211
+      0: SVELTE_EACH_OPENING_BLOCK@160..194
+        0: SV_CURLY_HASH@160..164 "{#" [Newline("\n"), Newline("\n")] []
+        1: EACH_KW@164..168 "each" [] []
+        2: HTML_TEXT_EXPRESSION@168..185
+          0: HTML_LITERAL@168..185 " values /* as */ " [] []
+        3: SVELTE_EACH_BINDING_CLAUSE@185..193
+          0: AS_KW@185..188 "as" [] [Whitespace(" ")]
+          1: HTML_TEXT_EXPRESSION@188..193
+            0: HTML_LITERAL@188..193 "value" [] []
+        4: R_CURLY@193..194 "}" [] []
+      1: HTML_ELEMENT_LIST@194..203
+        0: HTML_SINGLE_TEXT_EXPRESSION@194..203
+          0: L_CURLY@194..197 "{" [Newline("\n"), Whitespace("\t")] []
+          1: HTML_TEXT_EXPRESSION@197..202
+            0: HTML_LITERAL@197..202 "value" [] []
+          2: R_CURLY@202..203 "}" [] []
+      2: (empty)
+      3: SVELTE_EACH_CLOSING_BLOCK@203..211
+        0: SV_CURLY_SLASH@203..206 "{/" [Newline("\n")] []
+        1: EACH_KW@206..210 "each" [] []
+        2: R_CURLY@210..211 "}" [] []
+    4: SVELTE_EACH_BLOCK@211..260
+      0: SVELTE_EACH_OPENING_BLOCK@211..243
+        0: SV_CURLY_HASH@211..215 "{#" [Newline("\n"), Newline("\n")] []
+        1: EACH_KW@215..219 "each" [] []
+        2: HTML_TEXT_EXPRESSION@219..234
+          0: HTML_LITERAL@219..234 " values // as\n " [] []
+        3: SVELTE_EACH_BINDING_CLAUSE@234..242
+          0: AS_KW@234..237 "as" [] [Whitespace(" ")]
+          1: HTML_TEXT_EXPRESSION@237..242
+            0: HTML_LITERAL@237..242 "value" [] []
+        4: R_CURLY@242..243 "}" [] []
+      1: HTML_ELEMENT_LIST@243..252
+        0: HTML_SINGLE_TEXT_EXPRESSION@243..252
+          0: L_CURLY@243..246 "{" [Newline("\n"), Whitespace("\t")] []
+          1: HTML_TEXT_EXPRESSION@246..251
+            0: HTML_LITERAL@246..251 "value" [] []
+          2: R_CURLY@251..252 "}" [] []
+      2: (empty)
+      3: SVELTE_EACH_CLOSING_BLOCK@252..260
+        0: SV_CURLY_SLASH@252..255 "{/" [Newline("\n")] []
+        1: EACH_KW@255..259 "each" [] []
+        2: R_CURLY@259..260 "}" [] []
+    5: SVELTE_EACH_BLOCK@260..307
+      0: SVELTE_EACH_OPENING_BLOCK@260..290
+        0: SV_CURLY_HASH@260..264 "{#" [Newline("\n"), Newline("\n")] []
+        1: EACH_KW@264..268 "each" [] []
+        2: HTML_TEXT_EXPRESSION@268..281
+          0: HTML_LITERAL@268..281 " values . as " [] []
+        3: SVELTE_EACH_BINDING_CLAUSE@281..289
+          0: AS_KW@281..284 "as" [] [Whitespace(" ")]
+          1: HTML_TEXT_EXPRESSION@284..289
+            0: HTML_LITERAL@284..289 "value" [] []
+        4: R_CURLY@289..290 "}" [] []
+      1: HTML_ELEMENT_LIST@290..299
+        0: HTML_SINGLE_TEXT_EXPRESSION@290..299
+          0: L_CURLY@290..293 "{" [Newline("\n"), Whitespace("\t")] []
+          1: HTML_TEXT_EXPRESSION@293..298
+            0: HTML_LITERAL@293..298 "value" [] []
+          2: R_CURLY@298..299 "}" [] []
+      2: (empty)
+      3: SVELTE_EACH_CLOSING_BLOCK@299..307
+        0: SV_CURLY_SLASH@299..302 "{/" [Newline("\n")] []
+        1: EACH_KW@302..306 "each" [] []
+        2: R_CURLY@306..307 "}" [] []
+    6: SVELTE_AWAIT_BLOCK@307..355
+      0: SVELTE_AWAIT_OPENING_BLOCK@307..346
+        0: SV_CURLY_HASH@307..311 "{#" [Newline("\n"), Newline("\n")] []
+        1: AWAIT_KW@311..316 "await" [] []
+        2: HTML_TEXT_EXPRESSION@316..326
+          0: HTML_LITERAL@316..326 " \" then \" " [] []
+        3: SVELTE_AWAIT_THEN_CLAUSE@326..336
+          0: THEN_KW@326..331 "then" [] [Whitespace(" ")]
+          1: HTML_TEXT_EXPRESSION@331..336
+            0: HTML_LITERAL@331..336 "value" [] []
+        4: (empty)
+        5: R_CURLY@336..337 "}" [] []
+        6: HTML_ELEMENT_LIST@337..346
+          0: HTML_SINGLE_TEXT_EXPRESSION@337..346
+            0: L_CURLY@337..340 "{" [Newline("\n"), Whitespace("\t")] []
+            1: HTML_TEXT_EXPRESSION@340..345
+              0: HTML_LITERAL@340..345 "value" [] []
+            2: R_CURLY@345..346 "}" [] []
+      1: SVELTE_AWAIT_CLAUSES_LIST@346..346
+      2: SVELTE_AWAIT_CLOSING_BLOCK@346..355
+        0: SV_CURLY_SLASH@346..349 "{/" [Newline("\n")] []
+        1: AWAIT_KW@349..354 "await" [] []
+        2: R_CURLY@354..355 "}" [] []
+    7: SVELTE_AWAIT_BLOCK@355..413
+      0: SVELTE_AWAIT_OPENING_BLOCK@355..404
+        0: SV_CURLY_HASH@355..359 "{#" [Newline("\n"), Newline("\n")] []
+        1: AWAIT_KW@359..364 "await" [] []
+        2: HTML_TEXT_EXPRESSION@364..382
+          0: HTML_LITERAL@364..382 " value /* then */ " [] []
+        3: SVELTE_AWAIT_THEN_CLAUSE@382..393
+          0: THEN_KW@382..387 "then" [] [Whitespace(" ")]
+          1: HTML_TEXT_EXPRESSION@387..393
+            0: HTML_LITERAL@387..393 "result" [] []
+        4: (empty)
+        5: R_CURLY@393..394 "}" [] []
+        6: HTML_ELEMENT_LIST@394..404
+          0: HTML_SINGLE_TEXT_EXPRESSION@394..404
+            0: L_CURLY@394..397 "{" [Newline("\n"), Whitespace("\t")] []
+            1: HTML_TEXT_EXPRESSION@397..403
+              0: HTML_LITERAL@397..403 "result" [] []
+            2: R_CURLY@403..404 "}" [] []
+      1: SVELTE_AWAIT_CLAUSES_LIST@404..404
+      2: SVELTE_AWAIT_CLOSING_BLOCK@404..413
+        0: SV_CURLY_SLASH@404..407 "{/" [Newline("\n")] []
+        1: AWAIT_KW@407..412 "await" [] []
+        2: R_CURLY@412..413 "}" [] []
+    8: SVELTE_AWAIT_BLOCK@413..478
+      0: SVELTE_AWAIT_OPENING_BLOCK@413..469
+        0: SV_CURLY_HASH@413..417 "{#" [Newline("\n"), Newline("\n")] []
+        1: AWAIT_KW@417..422 "await" [] []
+        2: HTML_TEXT_EXPRESSION@422..447
+          0: HTML_LITERAL@422..447 " promise . then(resolve) " [] []
+        3: SVELTE_AWAIT_THEN_CLAUSE@447..458
+          0: THEN_KW@447..452 "then" [] [Whitespace(" ")]
+          1: HTML_TEXT_EXPRESSION@452..458
+            0: HTML_LITERAL@452..458 "result" [] []
+        4: (empty)
+        5: R_CURLY@458..459 "}" [] []
+        6: HTML_ELEMENT_LIST@459..469
+          0: HTML_SINGLE_TEXT_EXPRESSION@459..469
+            0: L_CURLY@459..462 "{" [Newline("\n"), Whitespace("\t")] []
+            1: HTML_TEXT_EXPRESSION@462..468
+              0: HTML_LITERAL@462..468 "result" [] []
+            2: R_CURLY@468..469 "}" [] []
+      1: SVELTE_AWAIT_CLAUSES_LIST@469..469
+      2: SVELTE_AWAIT_CLOSING_BLOCK@469..478
+        0: SV_CURLY_SLASH@469..472 "{/" [Newline("\n")] []
+        1: AWAIT_KW@472..477 "await" [] []
+        2: R_CURLY@477..478 "}" [] []
+    9: SVELTE_AWAIT_BLOCK@478..544
+      0: SVELTE_AWAIT_OPENING_BLOCK@478..535
+        0: SV_CURLY_HASH@478..482 "{#" [Newline("\n"), Newline("\n")] []
+        1: AWAIT_KW@482..487 "await" [] []
+        2: HTML_TEXT_EXPRESSION@487..513
+          0: HTML_LITERAL@487..513 " promise ?. then(resolve) " [] []
+        3: SVELTE_AWAIT_THEN_CLAUSE@513..524
+          0: THEN_KW@513..518 "then" [] [Whitespace(" ")]
+          1: HTML_TEXT_EXPRESSION@518..524
+            0: HTML_LITERAL@518..524 "result" [] []
+        4: (empty)
+        5: R_CURLY@524..525 "}" [] []
+        6: HTML_ELEMENT_LIST@525..535
+          0: HTML_SINGLE_TEXT_EXPRESSION@525..535
+            0: L_CURLY@525..528 "{" [Newline("\n"), Whitespace("\t")] []
+            1: HTML_TEXT_EXPRESSION@528..534
+              0: HTML_LITERAL@528..534 "result" [] []
+            2: R_CURLY@534..535 "}" [] []
+      1: SVELTE_AWAIT_CLAUSES_LIST@535..535
+      2: SVELTE_AWAIT_CLOSING_BLOCK@535..544
+        0: SV_CURLY_SLASH@535..538 "{/" [Newline("\n")] []
+        1: AWAIT_KW@538..543 "await" [] []
+        2: R_CURLY@543..544 "}" [] []
+    10: SVELTE_AWAIT_BLOCK@544..613
+      0: SVELTE_AWAIT_OPENING_BLOCK@544..604
+        0: SV_CURLY_HASH@544..548 "{#" [Newline("\n"), Newline("\n")] []
+        1: AWAIT_KW@548..553 "await" [] []
+        2: HTML_TEXT_EXPRESSION@553..582
+          0: HTML_LITERAL@553..582 " condition ? then : fallback " [] []
+        3: SVELTE_AWAIT_THEN_CLAUSE@582..593
+          0: THEN_KW@582..587 "then" [] [Whitespace(" ")]
+          1: HTML_TEXT_EXPRESSION@587..593
+            0: HTML_LITERAL@587..593 "result" [] []
+        4: (empty)
+        5: R_CURLY@593..594 "}" [] []
+        6: HTML_ELEMENT_LIST@594..604
+          0: HTML_SINGLE_TEXT_EXPRESSION@594..604
+            0: L_CURLY@594..597 "{" [Newline("\n"), Whitespace("\t")] []
+            1: HTML_TEXT_EXPRESSION@597..603
+              0: HTML_LITERAL@597..603 "result" [] []
+            2: R_CURLY@603..604 "}" [] []
+      1: SVELTE_AWAIT_CLAUSES_LIST@604..604
+      2: SVELTE_AWAIT_CLOSING_BLOCK@604..613
+        0: SV_CURLY_SLASH@604..607 "{/" [Newline("\n")] []
+        1: AWAIT_KW@607..612 "await" [] []
+        2: R_CURLY@612..613 "}" [] []
+    11: SVELTE_AWAIT_BLOCK@613..661
+      0: SVELTE_AWAIT_OPENING_BLOCK@613..652
+        0: SV_CURLY_HASH@613..617 "{#" [Newline("\n"), Newline("\n")] []
+        1: AWAIT_KW@617..622 "await" [] []
+        2: HTML_TEXT_EXPRESSION@622..630
+          0: HTML_LITERAL@622..630 " /then/ " [] []
+        3: SVELTE_AWAIT_THEN_CLAUSE@630..641
+          0: THEN_KW@630..635 "then" [] [Whitespace(" ")]
+          1: HTML_TEXT_EXPRESSION@635..641
+            0: HTML_LITERAL@635..641 "result" [] []
+        4: (empty)
+        5: R_CURLY@641..642 "}" [] []
+        6: HTML_ELEMENT_LIST@642..652
+          0: HTML_SINGLE_TEXT_EXPRESSION@642..652
+            0: L_CURLY@642..645 "{" [Newline("\n"), Whitespace("\t")] []
+            1: HTML_TEXT_EXPRESSION@645..651
+              0: HTML_LITERAL@645..651 "result" [] []
+            2: R_CURLY@651..652 "}" [] []
+      1: SVELTE_AWAIT_CLAUSES_LIST@652..652
+      2: SVELTE_AWAIT_CLOSING_BLOCK@652..661
+        0: SV_CURLY_SLASH@652..655 "{/" [Newline("\n")] []
+        1: AWAIT_KW@655..660 "await" [] []
+        2: R_CURLY@660..661 "}" [] []
+    12: SVELTE_AWAIT_BLOCK@661..710
+      0: SVELTE_AWAIT_OPENING_BLOCK@661..701
+        0: SV_CURLY_HASH@661..665 "{#" [Newline("\n"), Newline("\n")] []
+        1: AWAIT_KW@665..670 "await" [] []
+        2: HTML_TEXT_EXPRESSION@670..679
+          0: HTML_LITERAL@670..679 " \"6\" / 2 " [] []
+        3: SVELTE_AWAIT_THEN_CLAUSE@679..690
+          0: THEN_KW@679..684 "then" [] [Whitespace(" ")]
+          1: HTML_TEXT_EXPRESSION@684..690
+            0: HTML_LITERAL@684..690 "result" [] []
+        4: (empty)
+        5: R_CURLY@690..691 "}" [] []
+        6: HTML_ELEMENT_LIST@691..701
+          0: HTML_SINGLE_TEXT_EXPRESSION@691..701
+            0: L_CURLY@691..694 "{" [Newline("\n"), Whitespace("\t")] []
+            1: HTML_TEXT_EXPRESSION@694..700
+              0: HTML_LITERAL@694..700 "result" [] []
+            2: R_CURLY@700..701 "}" [] []
+      1: SVELTE_AWAIT_CLAUSES_LIST@701..701
+      2: SVELTE_AWAIT_CLOSING_BLOCK@701..710
+        0: SV_CURLY_SLASH@701..704 "{/" [Newline("\n")] []
+        1: AWAIT_KW@704..709 "await" [] []
+        2: R_CURLY@709..710 "}" [] []
+    13: SVELTE_AWAIT_BLOCK@710..759
+      0: SVELTE_AWAIT_OPENING_BLOCK@710..750
+        0: SV_CURLY_HASH@710..714 "{#" [Newline("\n"), Newline("\n")] []
+        1: AWAIT_KW@714..719 "await" [] []
+        2: HTML_TEXT_EXPRESSION@719..728
+          0: HTML_LITERAL@719..728 " `6` / 2 " [] []
+        3: SVELTE_AWAIT_THEN_CLAUSE@728..739
+          0: THEN_KW@728..733 "then" [] [Whitespace(" ")]
+          1: HTML_TEXT_EXPRESSION@733..739
+            0: HTML_LITERAL@733..739 "result" [] []
+        4: (empty)
+        5: R_CURLY@739..740 "}" [] []
+        6: HTML_ELEMENT_LIST@740..750
+          0: HTML_SINGLE_TEXT_EXPRESSION@740..750
+            0: L_CURLY@740..743 "{" [Newline("\n"), Whitespace("\t")] []
+            1: HTML_TEXT_EXPRESSION@743..749
+              0: HTML_LITERAL@743..749 "result" [] []
+            2: R_CURLY@749..750 "}" [] []
+      1: SVELTE_AWAIT_CLAUSES_LIST@750..750
+      2: SVELTE_AWAIT_CLOSING_BLOCK@750..759
+        0: SV_CURLY_SLASH@750..753 "{/" [Newline("\n")] []
+        1: AWAIT_KW@753..758 "await" [] []
+        2: R_CURLY@758..759 "}" [] []
+    14: SVELTE_AWAIT_BLOCK@759..808
+      0: SVELTE_AWAIT_OPENING_BLOCK@759..799
+        0: SV_CURLY_HASH@759..763 "{#" [Newline("\n"), Newline("\n")] []
+        1: AWAIT_KW@763..768 "await" [] []
+        2: HTML_TEXT_EXPRESSION@768..777
+          0: HTML_LITERAL@768..777 " /6/ / 2 " [] []
+        3: SVELTE_AWAIT_THEN_CLAUSE@777..788
+          0: THEN_KW@777..782 "then" [] [Whitespace(" ")]
+          1: HTML_TEXT_EXPRESSION@782..788
+            0: HTML_LITERAL@782..788 "result" [] []
+        4: (empty)
+        5: R_CURLY@788..789 "}" [] []
+        6: HTML_ELEMENT_LIST@789..799
+          0: HTML_SINGLE_TEXT_EXPRESSION@789..799
+            0: L_CURLY@789..792 "{" [Newline("\n"), Whitespace("\t")] []
+            1: HTML_TEXT_EXPRESSION@792..798
+              0: HTML_LITERAL@792..798 "result" [] []
+            2: R_CURLY@798..799 "}" [] []
+      1: SVELTE_AWAIT_CLAUSES_LIST@799..799
+      2: SVELTE_AWAIT_CLOSING_BLOCK@799..808
+        0: SV_CURLY_SLASH@799..802 "{/" [Newline("\n")] []
+        1: AWAIT_KW@802..807 "await" [] []
+        2: R_CURLY@807..808 "}" [] []
+    15: HTML_ELEMENT@808..826
+      0: HTML_OPENING_ELEMENT@808..813
+        0: L_ANGLE@808..811 "<" [Newline("\n"), Newline("\n")] []
+        1: HTML_TAG_NAME@811..812
+          0: P_KW@811..812 "p" [] []
+        2: HTML_ATTRIBUTE_LIST@812..812
+        3: R_ANGLE@812..813 ">" [] []
+      1: HTML_ELEMENT_LIST@813..822
+        0: HTML_SINGLE_TEXT_EXPRESSION@813..822
+          0: L_CURLY@813..814 "{" [] []
+          1: HTML_TEXT_EXPRESSION@814..821
+            0: HTML_LITERAL@814..821 "\"6\" / 2" [] []
+          2: R_CURLY@821..822 "}" [] []
+      2: HTML_CLOSING_ELEMENT@822..826
+        0: L_ANGLE@822..823 "<" [] []
+        1: SLASH@823..824 "/" [] []
+        2: HTML_TAG_NAME@824..825
+          0: P_KW@824..825 "p" [] []
+        3: R_ANGLE@825..826 ">" [] []
+    16: HTML_ELEMENT@826..843
+      0: HTML_OPENING_ELEMENT@826..830
+        0: L_ANGLE@826..828 "<" [Newline("\n")] []
+        1: HTML_TAG_NAME@828..829
+          0: P_KW@828..829 "p" [] []
+        2: HTML_ATTRIBUTE_LIST@829..829
+        3: R_ANGLE@829..830 ">" [] []
+      1: HTML_ELEMENT_LIST@830..839
+        0: HTML_SINGLE_TEXT_EXPRESSION@830..839
+          0: L_CURLY@830..831 "{" [] []
+          1: HTML_TEXT_EXPRESSION@831..838
+            0: HTML_LITERAL@831..838 "`6` / 2" [] []
+          2: R_CURLY@838..839 "}" [] []
+      2: HTML_CLOSING_ELEMENT@839..843
+        0: L_ANGLE@839..840 "<" [] []
+        1: SLASH@840..841 "/" [] []
+        2: HTML_TAG_NAME@841..842
+          0: P_KW@841..842 "p" [] []
+        3: R_ANGLE@842..843 ">" [] []
+    17: SVELTE_AWAIT_BLOCK@843..893
+      0: SVELTE_AWAIT_OPENING_BLOCK@843..884
+        0: SV_CURLY_HASH@843..847 "{#" [Newline("\n"), Newline("\n")] []
+        1: AWAIT_KW@847..852 "await" [] []
+        2: HTML_TEXT_EXPRESSION@852..863
+          0: HTML_LITERAL@852..863 " \" catch \" " [] []
+        3: (empty)
+        4: SVELTE_AWAIT_CATCH_CLAUSE@863..874
+          0: CATCH_KW@863..869 "catch" [] [Whitespace(" ")]
+          1: HTML_TEXT_EXPRESSION@869..874
+            0: HTML_LITERAL@869..874 "error" [] []
+        5: R_CURLY@874..875 "}" [] []
+        6: HTML_ELEMENT_LIST@875..884
+          0: HTML_SINGLE_TEXT_EXPRESSION@875..884
+            0: L_CURLY@875..878 "{" [Newline("\n"), Whitespace("\t")] []
+            1: HTML_TEXT_EXPRESSION@878..883
+              0: HTML_LITERAL@878..883 "error" [] []
+            2: R_CURLY@883..884 "}" [] []
+      1: SVELTE_AWAIT_CLAUSES_LIST@884..884
+      2: SVELTE_AWAIT_CLOSING_BLOCK@884..893
+        0: SV_CURLY_SLASH@884..887 "{/" [Newline("\n")] []
+        1: AWAIT_KW@887..892 "await" [] []
+        2: R_CURLY@892..893 "}" [] []
+    18: SVELTE_AWAIT_BLOCK@893..951
+      0: SVELTE_AWAIT_OPENING_BLOCK@893..942
+        0: SV_CURLY_HASH@893..897 "{#" [Newline("\n"), Newline("\n")] []
+        1: AWAIT_KW@897..902 "await" [] []
+        2: HTML_TEXT_EXPRESSION@902..921
+          0: HTML_LITERAL@902..921 " value /* catch */ " [] []
+        3: (empty)
+        4: SVELTE_AWAIT_CATCH_CLAUSE@921..932
+          0: CATCH_KW@921..927 "catch" [] [Whitespace(" ")]
+          1: HTML_TEXT_EXPRESSION@927..932
+            0: HTML_LITERAL@927..932 "error" [] []
+        5: R_CURLY@932..933 "}" [] []
+        6: HTML_ELEMENT_LIST@933..942
+          0: HTML_SINGLE_TEXT_EXPRESSION@933..942
+            0: L_CURLY@933..936 "{" [Newline("\n"), Whitespace("\t")] []
+            1: HTML_TEXT_EXPRESSION@936..941
+              0: HTML_LITERAL@936..941 "error" [] []
+            2: R_CURLY@941..942 "}" [] []
+      1: SVELTE_AWAIT_CLAUSES_LIST@942..942
+      2: SVELTE_AWAIT_CLOSING_BLOCK@942..951
+        0: SV_CURLY_SLASH@942..945 "{/" [Newline("\n")] []
+        1: AWAIT_KW@945..950 "await" [] []
+        2: R_CURLY@950..951 "}" [] []
+    19: SVELTE_AWAIT_BLOCK@951..1015
+      0: SVELTE_AWAIT_OPENING_BLOCK@951..1006
+        0: SV_CURLY_HASH@951..955 "{#" [Newline("\n"), Newline("\n")] []
+        1: AWAIT_KW@955..960 "await" [] []
+        2: HTML_TEXT_EXPRESSION@960..985
+          0: HTML_LITERAL@960..985 " promise . catch(handle) " [] []
+        3: (empty)
+        4: SVELTE_AWAIT_CATCH_CLAUSE@985..996
+          0: CATCH_KW@985..991 "catch" [] [Whitespace(" ")]
+          1: HTML_TEXT_EXPRESSION@991..996
+            0: HTML_LITERAL@991..996 "error" [] []
+        5: R_CURLY@996..997 "}" [] []
+        6: HTML_ELEMENT_LIST@997..1006
+          0: HTML_SINGLE_TEXT_EXPRESSION@997..1006
+            0: L_CURLY@997..1000 "{" [Newline("\n"), Whitespace("\t")] []
+            1: HTML_TEXT_EXPRESSION@1000..1005
+              0: HTML_LITERAL@1000..1005 "error" [] []
+            2: R_CURLY@1005..1006 "}" [] []
+      1: SVELTE_AWAIT_CLAUSES_LIST@1006..1006
+      2: SVELTE_AWAIT_CLOSING_BLOCK@1006..1015
+        0: SV_CURLY_SLASH@1006..1009 "{/" [Newline("\n")] []
+        1: AWAIT_KW@1009..1014 "await" [] []
+        2: R_CURLY@1014..1015 "}" [] []
+    20: SVELTE_AWAIT_BLOCK@1015..1069
+      0: SVELTE_AWAIT_OPENING_BLOCK@1015..1060
+        0: SV_CURLY_HASH@1015..1019 "{#" [Newline("\n"), Newline("\n")] []
+        1: AWAIT_KW@1019..1024 "await" [] []
+        2: HTML_TEXT_EXPRESSION@1024..1038
+          0: HTML_LITERAL@1024..1038 " left < right " [] []
+        3: SVELTE_AWAIT_THEN_CLAUSE@1038..1049
+          0: THEN_KW@1038..1043 "then" [] [Whitespace(" ")]
+          1: HTML_TEXT_EXPRESSION@1043..1049
+            0: HTML_LITERAL@1043..1049 "result" [] []
+        4: (empty)
+        5: R_CURLY@1049..1050 "}" [] []
+        6: HTML_ELEMENT_LIST@1050..1060
+          0: HTML_SINGLE_TEXT_EXPRESSION@1050..1060
+            0: L_CURLY@1050..1053 "{" [Newline("\n"), Whitespace("\t")] []
+            1: HTML_TEXT_EXPRESSION@1053..1059
+              0: HTML_LITERAL@1053..1059 "result" [] []
+            2: R_CURLY@1059..1060 "}" [] []
+      1: SVELTE_AWAIT_CLAUSES_LIST@1060..1060
+      2: SVELTE_AWAIT_CLOSING_BLOCK@1060..1069
+        0: SV_CURLY_SLASH@1060..1063 "{/" [Newline("\n")] []
+        1: AWAIT_KW@1063..1068 "await" [] []
+        2: R_CURLY@1068..1069 "}" [] []
+    21: SVELTE_EACH_BLOCK@1069..1137
+      0: SVELTE_EACH_OPENING_BLOCK@1069..1120
+        0: SV_CURLY_HASH@1069..1073 "{#" [Newline("\n"), Newline("\n")] []
+        1: EACH_KW@1073..1077 "each" [] []
+        2: HTML_TEXT_EXPRESSION@1077..1111
+          0: HTML_LITERAL@1077..1111 " left < right ? values : fallback " [] []
+        3: SVELTE_EACH_BINDING_CLAUSE@1111..1119
+          0: AS_KW@1111..1114 "as" [] [Whitespace(" ")]
+          1: HTML_TEXT_EXPRESSION@1114..1119
+            0: HTML_LITERAL@1114..1119 "value" [] []
+        4: R_CURLY@1119..1120 "}" [] []
+      1: HTML_ELEMENT_LIST@1120..1129
+        0: HTML_SINGLE_TEXT_EXPRESSION@1120..1129
+          0: L_CURLY@1120..1123 "{" [Newline("\n"), Whitespace("\t")] []
+          1: HTML_TEXT_EXPRESSION@1123..1128
+            0: HTML_LITERAL@1123..1128 "value" [] []
+          2: R_CURLY@1128..1129 "}" [] []
+      2: (empty)
+      3: SVELTE_EACH_CLOSING_BLOCK@1129..1137
+        0: SV_CURLY_SLASH@1129..1132 "{/" [Newline("\n")] []
+        1: EACH_KW@1132..1136 "each" [] []
+        2: R_CURLY@1136..1137 "}" [] []
+    22: SVELTE_EACH_BLOCK@1137..1221
+      0: SVELTE_EACH_OPENING_BLOCK@1137..1204
+        0: SV_CURLY_HASH@1137..1141 "{#" [Newline("\n"), Newline("\n")] []
+        1: EACH_KW@1141..1145 "each" [] []
+        2: HTML_TEXT_EXPRESSION@1145..1153
+          0: HTML_LITERAL@1145..1153 " values " [] []
+        3: SVELTE_EACH_BINDING_CLAUSE@1153..1203
+          0: AS_KW@1153..1156 "as" [] [Whitespace(" ")]
+          1: HTML_TEXT_EXPRESSION@1156..1203
+            0: HTML_LITERAL@1156..1203 "value (value.rank < limit ? value.rank : limit)" [] []
+        4: R_CURLY@1203..1204 "}" [] []
+      1: HTML_ELEMENT_LIST@1204..1213
+        0: HTML_SINGLE_TEXT_EXPRESSION@1204..1213
+          0: L_CURLY@1204..1207 "{" [Newline("\n"), Whitespace("\t")] []
+          1: HTML_TEXT_EXPRESSION@1207..1212
+            0: HTML_LITERAL@1207..1212 "value" [] []
+          2: R_CURLY@1212..1213 "}" [] []
+      2: (empty)
+      3: SVELTE_EACH_CLOSING_BLOCK@1213..1221
+        0: SV_CURLY_SLASH@1213..1216 "{/" [Newline("\n")] []
+        1: EACH_KW@1216..1220 "each" [] []
+        2: R_CURLY@1220..1221 "}" [] []
+  3: EOF@1221..1222 "" [Newline("\n")] []
+
+```

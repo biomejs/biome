@@ -605,6 +605,18 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::JsSvelteDeclarationRoot::new_unchecked(node) };
                     $body
                 }
+                $crate::JsSyntaxKind::JS_SVELTE_EACH_BINDING_ROOT => {
+                    let $pattern = unsafe { $crate::JsSvelteEachBindingRoot::new_unchecked(node) };
+                    $body
+                }
+                $crate::JsSyntaxKind::JS_SVELTE_EACH_INDEX => {
+                    let $pattern = unsafe { $crate::JsSvelteEachIndex::new_unchecked(node) };
+                    $body
+                }
+                $crate::JsSyntaxKind::JS_SVELTE_EACH_KEY => {
+                    let $pattern = unsafe { $crate::JsSvelteEachKey::new_unchecked(node) };
+                    $body
+                }
                 $crate::JsSyntaxKind::JS_SVELTE_LEGACY_CONST_ROOT => {
                     let $pattern = unsafe { $crate::JsSvelteLegacyConstRoot::new_unchecked(node) };
                     $body
