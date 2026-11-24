@@ -192,6 +192,11 @@ impl<'db> ResolutionCtx<'db, '_> {
                 let alternate = self.resolve(&expression.alternate);
                 self.resolve_conditional_expression(test, consequent, alternate)
             }
+            RawTypeofExpression::DefaultedParameter(expression) => {
+                let ty = self.resolve(&expression.ty);
+                let default = self.resolve(&expression.default);
+                Some(self.defaulted_parameter_type(ty, default))
+            }
             RawTypeofExpression::Destructure(expression) => {
                 if self.import_resolution.is_on_demand()
                     && let RawDestructureField::Name {
@@ -346,6 +351,9 @@ impl<'db> ResolutionCtx<'db, '_> {
                     expression.consequent,
                     expression.alternate,
                 ),
+            InferredTypeofExpression::DefaultedParameter(expression) => {
+                Some(self.defaulted_parameter_type(expression.ty, expression.default))
+            }
             InferredTypeofExpression::Destructure(expression) => {
                 match &expression.destructure_field {
                     RawDestructureField::Index {
@@ -989,6 +997,33 @@ impl<'db> ResolutionCtx<'db, '_> {
         has_initializer: bool,
     ) -> InferredTypeData<'db> {
         if !has_initializer {
+            return ty;
+        }
+        let ty = self.resolve_inferred_type(ty);
+        if ty == InferredTypeData::Undefined {
+            return InferredTypeData::NeverKeyword;
+        }
+        self.type_without_undefined(ty)
+    }
+
+    /// A parameter's default value replaces `undefined` in its declared type
+    /// `ty`, unless the type of `default` may be `undefined` itself or is
+    /// unknown.
+    fn defaulted_parameter_type(
+        &mut self,
+        ty: InferredTypeData<'db>,
+        default: InferredTypeData<'db>,
+    ) -> InferredTypeData<'db> {
+        let default = self.resolve_inferred_type(default);
+        let default_may_be_undefined = if let InferredTypeData::Union(union) = default {
+            union
+                .types(self.db)
+                .iter()
+                .any(|variant| self.resolve_inferred_type(*variant) == InferredTypeData::Undefined)
+        } else {
+            default == InferredTypeData::Undefined || default == InferredTypeData::Unknown
+        };
+        if default_may_be_undefined {
             return ty;
         }
         let ty = self.resolve_inferred_type(ty);

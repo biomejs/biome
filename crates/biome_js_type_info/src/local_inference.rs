@@ -51,12 +51,12 @@ use crate::{
     TypeMemberAccessibility, TypeMemberKind, TypeOperator, TypeOperatorType, TypeReference,
     TypeReferenceQualifier, TypeofAdditionExpression, TypeofAwaitExpression,
     TypeofBitwiseNotExpression, TypeofCallArgumentExpression, TypeofCallExpression,
-    TypeofComputedMemberExpression, TypeofConditionalExpression, TypeofDestructureExpression,
-    TypeofExpression, TypeofIndexExpression, TypeofIterableValueOfExpression,
-    TypeofLogicalAndExpression, TypeofLogicalOrExpression, TypeofNewExpression,
-    TypeofNullishCoalescingExpression, TypeofParameterExpression, TypeofStaticMemberExpression,
-    TypeofThisOrSuperExpression, TypeofTypeofExpression, TypeofUnaryMinusExpression, TypeofValue,
-    Union,
+    TypeofComputedMemberExpression, TypeofConditionalExpression,
+    TypeofDefaultedParameterExpression, TypeofDestructureExpression, TypeofExpression,
+    TypeofIndexExpression, TypeofIterableValueOfExpression, TypeofLogicalAndExpression,
+    TypeofLogicalOrExpression, TypeofNewExpression, TypeofNullishCoalescingExpression,
+    TypeofParameterExpression, TypeofStaticMemberExpression, TypeofThisOrSuperExpression,
+    TypeofTypeofExpression, TypeofUnaryMinusExpression, TypeofValue, Union,
 };
 
 const MAX_CONST_ASSERTION_DEPTH: usize = 50;
@@ -295,6 +295,21 @@ impl TypeData {
         let destructured = collector.reference_to_owned_data(destructured);
         let default = collector.reference_to_resolved_expression(scope_id, &default);
         Self::Union(Box::new(Union(Box::new([destructured, default]))))
+    }
+
+    /// Types a parameter with a default value inside its function as its
+    /// declared type `ty` without `undefined`; see
+    /// [`TypeofDefaultedParameterExpression`].
+    pub fn from_defaulted_parameter(
+        collector: &mut dyn RawTypeCollector,
+        scope_id: ScopeId,
+        ty: TypeReference,
+        default: &AnyJsExpression,
+    ) -> Self {
+        let default = collector.reference_to_resolved_expression(scope_id, default);
+        Self::from(TypeofExpression::DefaultedParameter(
+            TypeofDefaultedParameterExpression { ty, default },
+        ))
     }
 
     fn destructuring_of(ty: TypeReference, destructure_field: DestructureField) -> Self {

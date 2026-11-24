@@ -1528,6 +1528,9 @@ impl<'db> TypeDataSlots<'db> {
                 self.slots
                     .extend([expression.test, expression.consequent, expression.alternate]);
             }
+            TypeofExpression::DefaultedParameter(expression) => {
+                self.slots.extend([expression.ty, expression.default]);
+            }
             TypeofExpression::Destructure(expression) => self.slots.push(expression.ty),
             TypeofExpression::Index(expression)
             | TypeofExpression::OptionalChainIndex(expression) => {
@@ -2019,6 +2022,12 @@ impl<'db> TypeDataSlotReplacements<'db> {
                     alternate: self.take_type()?,
                 })
             }
+            TypeofExpression::DefaultedParameter(_) => {
+                TypeofExpression::DefaultedParameter(TypeofDefaultedParameterExpression {
+                    ty: self.take_type()?,
+                    default: self.take_type()?,
+                })
+            }
             TypeofExpression::Destructure(expression) => {
                 TypeofExpression::Destructure(TypeofDestructureExpression {
                     ty: self.take_type()?,
@@ -2479,6 +2488,7 @@ pub enum TypeofExpression<'db> {
     CallArgument(TypeofCallArgumentExpression<'db>),
     ComputedMember(TypeofComputedMemberExpression<'db>),
     Conditional(TypeofConditionalExpression<'db>),
+    DefaultedParameter(TypeofDefaultedParameterExpression<'db>),
     Destructure(TypeofDestructureExpression<'db>),
     Index(TypeofIndexExpression<'db>),
     OptionalChainIndex(TypeofIndexExpression<'db>),
@@ -2531,6 +2541,12 @@ pub struct TypeofParameterExpression<'db> {
     pub function: TypeData<'db>,
     pub index: u16,
     pub has_initializer: bool,
+}
+
+#[derive(Clone, Debug, Eq, Hash, PartialEq, salsa::SalsaValue)]
+pub struct TypeofDefaultedParameterExpression<'db> {
+    pub ty: TypeData<'db>,
+    pub default: TypeData<'db>,
 }
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq, salsa::SalsaValue)]
@@ -3200,6 +3216,12 @@ fn convert_typeof_expression<'db>(
                 test: resolve_reference(&expression.test),
                 consequent: resolve_reference(&expression.consequent),
                 alternate: resolve_reference(&expression.alternate),
+            })
+        }
+        raw::TypeofExpression::DefaultedParameter(expression) => {
+            TypeofExpression::DefaultedParameter(TypeofDefaultedParameterExpression {
+                ty: resolve_reference(&expression.ty),
+                default: resolve_reference(&expression.default),
             })
         }
         raw::TypeofExpression::Destructure(expression) => {
@@ -3938,6 +3960,15 @@ mod tests {
             typeof_type(
                 &db,
                 TypeofExpression::Await(TypeofAwaitExpression { argument: s.next() }),
+            )
+        });
+        assert_identity(&db, |s| {
+            typeof_type(
+                &db,
+                TypeofExpression::DefaultedParameter(TypeofDefaultedParameterExpression {
+                    ty: s.next(),
+                    default: s.next(),
+                }),
             )
         });
         assert_identity(&db, |s| {
