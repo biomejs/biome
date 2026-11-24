@@ -1,0 +1,115 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: unreadable_expression.svelte
+---
+# Input
+```svelte
+<!-- should generate diagnostics -->
+<script>
+  const maybeRead = 1;
+  const shadowed = 2;
+  function run() { const definitelyUnused = 2; }
+  run();
+</script>
+{#each [1] as shadowed}{broken + }{/each}
+{#if false}{@const sibling = 3}{/if}
+
+```
+
+# Diagnostics
+```
+unreadable_expression.svelte:4:9 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable shadowed is unused.
+  
+    2 │ <script>
+    3 │   const maybeRead = 1;
+  > 4 │   const shadowed = 2;
+      │         ^^^^^^^^
+    5 │   function run() { const definitelyUnused = 2; }
+    6 │   run();
+  
+  i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend shadowed with an underscore.
+  
+    1 1 │   
+    2 2 │     const maybeRead = 1;
+    3   │ - ··const·shadowed·=·2;
+      3 │ + ··const·_shadowed·=·2;
+    4 4 │     function run() { const definitelyUnused = 2; }
+    5 5 │     run();
+  
+
+```
+
+```
+unreadable_expression.svelte:5:26 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable definitelyUnused is unused.
+  
+    3 │   const maybeRead = 1;
+    4 │   const shadowed = 2;
+  > 5 │   function run() { const definitelyUnused = 2; }
+      │                          ^^^^^^^^^^^^^^^^
+    6 │   run();
+    7 │ </script>
+  
+  i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend definitelyUnused with an underscore.
+  
+    2 2 │     const maybeRead = 1;
+    3 3 │     const shadowed = 2;
+    4   │ - ··function·run()·{·const·definitelyUnused·=·2;·}
+      4 │ + ··function·run()·{·const·_definitelyUnused·=·2;·}
+    5 5 │     run();
+    6 6 │   
+  
+
+```
+
+```
+unreadable_expression.svelte:8:34 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an expression but instead found the end of the file.
+  
+     6 │   run();
+     7 │ </script>
+   > 8 │ {#each [1] as shadowed}{broken + }{/each}
+       │                                  
+     9 │ {#if false}{@const sibling = 3}{/if}
+    10 │ 
+  
+  i Expected an expression here.
+  
+     6 │   run();
+     7 │ </script>
+   > 8 │ {#each [1] as shadowed}{broken + }{/each}
+       │                                  
+     9 │ {#if false}{@const sibling = 3}{/if}
+    10 │ 
+  
+
+```
+
+```
+unreadable_expression.svelte:9:20 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable sibling is unused.
+  
+     7 │ </script>
+     8 │ {#each [1] as shadowed}{broken + }{/each}
+   > 9 │ {#if false}{@const sibling = 3}{/if}
+       │                    ^^^^^^^
+    10 │ 
+  
+  i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend sibling with an underscore.
+  
+  - sibling·=·3
+  + _sibling·=·3
+  
+
+```

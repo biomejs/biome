@@ -1,0 +1,159 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: snippet_visibility.svelte
+---
+# Input
+```svelte
+<!-- should generate diagnostics -->
+<script module lang="ts">
+  type OnlyType = string;
+  console.log(c\u0061rd, banner, m\u0069ssing);
+  console.log(independent, captured, indirect, subscribed);
+</script>
+<script lang="ts">
+  import { store } from './stores';
+  let message = 'hello';
+  console.log(independent, captured, indirect);
+</script>
+{#snippet independent(message)}{message} {store}{/snippet}
+{#snippet card()}ok{/snippet}
+{#snippet b\u0061nner()}ok{/snippet}
+{#snippet subscribed()}{$store}{/snippet}
+{#snippet captured()}{message}{/snippet}
+{#snippet indirect()}{@render captured()}{/snippet}
+{@render missing()}
+{OnlyType}
+
+```
+
+# Diagnostics
+```
+snippet_visibility.svelte:4:34 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The m\u0069ssing variable is undeclared.
+  
+    2 │ <script module lang="ts">
+    3 │   type OnlyType = string;
+  > 4 │   console.log(c\u0061rd, banner, m\u0069ssing);
+      │                                  ^^^^^^^^^^^^
+    5 │   console.log(independent, captured, indirect, subscribed);
+    6 │ </script>
+  
+  i Using an undeclared variable at runtime can throw a ReferenceError. It often points to a typo or a missing import.
+  
+  i Declare or import the variable, or fix its name.
+  
+  i By default, Biome recognizes browser and Node.js globals.
+    You can ignore more globals using the javascript.globals configuration.
+  
+
+```
+
+```
+snippet_visibility.svelte:5:28 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The captured variable is undeclared.
+  
+    3 │   type OnlyType = string;
+    4 │   console.log(c\u0061rd, banner, m\u0069ssing);
+  > 5 │   console.log(independent, captured, indirect, subscribed);
+      │                            ^^^^^^^^
+    6 │ </script>
+    7 │ <script lang="ts">
+  
+  i Using an undeclared variable at runtime can throw a ReferenceError. It often points to a typo or a missing import.
+  
+  i Declare or import the variable, or fix its name.
+  
+  i By default, Biome recognizes browser and Node.js globals.
+    You can ignore more globals using the javascript.globals configuration.
+  
+
+```
+
+```
+snippet_visibility.svelte:5:38 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The indirect variable is undeclared.
+  
+    3 │   type OnlyType = string;
+    4 │   console.log(c\u0061rd, banner, m\u0069ssing);
+  > 5 │   console.log(independent, captured, indirect, subscribed);
+      │                                      ^^^^^^^^
+    6 │ </script>
+    7 │ <script lang="ts">
+  
+  i Using an undeclared variable at runtime can throw a ReferenceError. It often points to a typo or a missing import.
+  
+  i Declare or import the variable, or fix its name.
+  
+  i By default, Biome recognizes browser and Node.js globals.
+    You can ignore more globals using the javascript.globals configuration.
+  
+
+```
+
+```
+snippet_visibility.svelte:5:48 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The subscribed variable is undeclared.
+  
+    3 │   type OnlyType = string;
+    4 │   console.log(c\u0061rd, banner, m\u0069ssing);
+  > 5 │   console.log(independent, captured, indirect, subscribed);
+      │                                                ^^^^^^^^^^
+    6 │ </script>
+    7 │ <script lang="ts">
+  
+  i Using an undeclared variable at runtime can throw a ReferenceError. It often points to a typo or a missing import.
+  
+  i Declare or import the variable, or fix its name.
+  
+  i By default, Biome recognizes browser and Node.js globals.
+    You can ignore more globals using the javascript.globals configuration.
+  
+
+```
+
+```
+snippet_visibility.svelte:19:2 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The OnlyType variable is undeclared.
+  
+    17 │ {#snippet indirect()}{@render captured()}{/snippet}
+    18 │ {@render missing()}
+  > 19 │ {OnlyType}
+       │  ^^^^^^^^
+    20 │ 
+  
+  i Using an undeclared variable at runtime can throw a ReferenceError. It often points to a typo or a missing import.
+  
+  i Declare or import the variable, or fix its name.
+  
+  i By default, Biome recognizes browser and Node.js globals.
+    You can ignore more globals using the javascript.globals configuration.
+  
+
+```
+
+```
+snippet_visibility.svelte:18:10 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The missing variable is undeclared.
+  
+    16 │ {#snippet captured()}{message}{/snippet}
+    17 │ {#snippet indirect()}{@render captured()}{/snippet}
+  > 18 │ {@render missing()}
+       │          ^^^^^^^
+    19 │ {OnlyType}
+    20 │ 
+  
+  i Using an undeclared variable at runtime can throw a ReferenceError. It often points to a typo or a missing import.
+  
+  i Declare or import the variable, or fix its name.
+  
+  i By default, Biome recognizes browser and Node.js globals.
+    You can ignore more globals using the javascript.globals configuration.
+  
+
+```

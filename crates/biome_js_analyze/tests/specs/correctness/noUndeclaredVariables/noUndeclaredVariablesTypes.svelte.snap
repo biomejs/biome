@@ -1,0 +1,40 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: noUndeclaredVariablesTypes.svelte
+---
+# Input
+```svelte
+<!-- should generate diagnostics -->
+<script module lang="ts">
+  declare module API { export interface Result {} }
+  declare module "ExternalLib" { export interface Result {} }
+</script>
+<script lang="ts">
+  type Result = API.Result;
+  type Missing = ExternalLib.Result;
+</script>
+
+```
+
+# Diagnostics
+```
+noUndeclaredVariablesTypes.svelte:8:18 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━
+
+  × The ExternalLib variable is undeclared.
+  
+     6 │ <script lang="ts">
+     7 │   type Result = API.Result;
+   > 8 │   type Missing = ExternalLib.Result;
+       │                  ^^^^^^^^^^^
+     9 │ </script>
+    10 │ 
+  
+  i Using an undeclared variable at runtime can throw a ReferenceError. It often points to a typo or a missing import.
+  
+  i Declare or import the variable, or fix its name.
+  
+  i By default, Biome recognizes browser and Node.js globals.
+    You can ignore more globals using the javascript.globals configuration.
+  
+
+```

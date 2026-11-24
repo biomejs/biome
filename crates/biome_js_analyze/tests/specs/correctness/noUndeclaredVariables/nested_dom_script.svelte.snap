@@ -1,0 +1,68 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: nested_dom_script.svelte
+---
+# Input
+```svelte
+<!-- should generate diagnostics -->
+<script module>
+  const shared = 1;
+</script>
+<script>
+  const instance = shared;
+  const componentOnly = 2;
+</script>
+<div>
+  <script type="module">
+    const nestedOnly = 3;
+    const local = 4;
+    console.log(local, componentOnly);
+  </script>
+</div>
+<p>{instance} {nestedOnly}</p>
+
+```
+
+# Diagnostics
+```
+nested_dom_script.svelte:13:24 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The componentOnly variable is undeclared.
+  
+    11 │     const nestedOnly = 3;
+    12 │     const local = 4;
+  > 13 │     console.log(local, componentOnly);
+       │                        ^^^^^^^^^^^^^
+    14 │   </script>
+    15 │ </div>
+  
+  i Using an undeclared variable at runtime can throw a ReferenceError. It often points to a typo or a missing import.
+  
+  i Declare or import the variable, or fix its name.
+  
+  i By default, Biome recognizes browser and Node.js globals.
+    You can ignore more globals using the javascript.globals configuration.
+  
+
+```
+
+```
+nested_dom_script.svelte:16:16 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The nestedOnly variable is undeclared.
+  
+    14 │   </script>
+    15 │ </div>
+  > 16 │ <p>{instance} {nestedOnly}</p>
+       │                ^^^^^^^^^^
+    17 │ 
+  
+  i Using an undeclared variable at runtime can throw a ReferenceError. It often points to a typo or a missing import.
+  
+  i Declare or import the variable, or fix its name.
+  
+  i By default, Biome recognizes browser and Node.js globals.
+    You can ignore more globals using the javascript.globals configuration.
+  
+
+```

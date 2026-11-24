@@ -1,0 +1,11 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: opaque_module.svelte
+---
+# Input
+```svelte
+<!-- should not generate diagnostics -->
+<script module lang="coffee">console.log imported</script>
+<script>import imported from './imported';</script>
+
+```

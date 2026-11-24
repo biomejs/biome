@@ -1,4 +1,5 @@
 use crate::JsRuleAction;
+use crate::services::embedded::EmbeddedService;
 use crate::services::semantic::Semantic;
 use biome_analyze::context::RuleContext;
 use biome_analyze::{FixKind, Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
@@ -59,22 +60,33 @@ declare_lint_rule! {
     }
 }
 
+pub enum ConstantDeclaration {
+    Local(TextRange),
+    OtherSnippet,
+}
+
 impl Rule for NoConstAssign {
     type Query = Semantic<JsIdentifierAssignment>;
-    type State = TextRange;
+    type State = ConstantDeclaration;
     type Signals = Option<Self::State>;
     type Options = NoConstAssignOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
         let model = ctx.model();
-        let id_binding = model.binding(node)?.tree();
+        let Some(binding) = model.binding(node) else {
+            return ctx
+                .get_service::<EmbeddedService>()?
+                .is_svelte_const_write(node.range())
+                .then_some(ConstantDeclaration::OtherSnippet);
+        };
+        let id_binding = binding.tree();
         let decl = id_binding.declaration()?;
         if let AnyJsBindingDeclaration::JsVariableDeclarator(declarator) =
             decl.parent_binding_pattern_declaration().unwrap_or(decl)
             && declarator.declaration()?.is_const()
         {
-            return Some(id_binding.range());
+            return Some(ConstantDeclaration::Local(id_binding.range()));
         };
         None
     }
@@ -83,20 +95,25 @@ impl Rule for NoConstAssign {
         let node = ctx.query();
         let name = node.name_token().ok()?;
         let name = name.text_trimmed();
-        Some(
-            RuleDiagnostic::new(
-                rule_category!(),
-                node.syntax().text_trimmed_range(),
-                markup! {"Can't assign "<Emphasis>{name}</Emphasis>" because it's a constant."},
-            )
-            .detail(
-                state,
+        let mut diagnostic = RuleDiagnostic::new(
+            rule_category!(),
+            node.syntax().text_trimmed_range(),
+            markup! {"Can't assign "<Emphasis>{name}</Emphasis>" because it's a constant."},
+        );
+        // Detail ranges and mutations are local to the analyzed snippet.
+        if let ConstantDeclaration::Local(range) = state {
+            diagnostic = diagnostic.detail(
+                range,
                 markup! {"This is where the variable is defined as constant."},
-            ),
-        )
+            );
+        }
+        Some(diagnostic)
     }
 
-    fn action(ctx: &RuleContext<Self>, _: &Self::State) -> Option<JsRuleAction> {
+    fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
+        if matches!(state, ConstantDeclaration::OtherSnippet) {
+            return None;
+        }
         let node = ctx.query();
         let model = ctx.model();
         let mut mutation = ctx.root().begin();

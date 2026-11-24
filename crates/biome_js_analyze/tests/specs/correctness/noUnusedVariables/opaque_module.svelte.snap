@@ -1,0 +1,40 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: opaque_module.svelte
+---
+# Input
+```svelte
+<!-- should generate diagnostics -->
+<script module lang="coffee">console.log imported</script>
+<script>
+  import imported from './imported';
+  const instanceOnly = 1;
+</script>
+
+```
+
+# Diagnostics
+```
+opaque_module.svelte:5:9 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable instanceOnly is unused.
+  
+    3 │ <script>
+    4 │   import imported from './imported';
+  > 5 │   const instanceOnly = 1;
+      │         ^^^^^^^^^^^^
+    6 │ </script>
+    7 │ 
+  
+  i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend instanceOnly with an underscore.
+  
+    1 1 │   
+    2 2 │     import imported from './imported';
+    3   │ - ··const·instanceOnly·=·1;
+      3 │ + ··const·_instanceOnly·=·1;
+    4 4 │   
+  
+
+```

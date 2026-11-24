@@ -1,0 +1,60 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: unreadable_declaration.svelte
+---
+# Input
+```svelte
+<!-- should generate diagnostics -->
+{#if true}
+  {@const = 1}
+  {possiblyLocal}
+{/if}
+{outside}
+
+```
+
+# Diagnostics
+```
+unreadable_declaration.svelte:6:2 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The outside variable is undeclared.
+  
+    4 │   {possiblyLocal}
+    5 │ {/if}
+  > 6 │ {outside}
+      │  ^^^^^^^
+    7 │ 
+  
+  i Using an undeclared variable at runtime can throw a ReferenceError. It often points to a typo or a missing import.
+  
+  i Declare or import the variable, or fix its name.
+  
+  i By default, Biome recognizes browser and Node.js globals.
+    You can ignore more globals using the javascript.globals configuration.
+  
+
+```
+
+```
+unreadable_declaration.svelte:3:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an identifier, an array pattern, or an object pattern but instead found '='.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ {#if true}
+  > 3 │   {@const = 1}
+      │           ^
+    4 │   {possiblyLocal}
+    5 │ {/if}
+  
+  i Expected an identifier, an array pattern, or an object pattern here.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ {#if true}
+  > 3 │   {@const = 1}
+      │           ^
+    4 │   {possiblyLocal}
+    5 │ {/if}
+  
+
+```

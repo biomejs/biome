@@ -1,3 +1,5 @@
+use super::SemanticModel;
+use biome_js_syntax::{JsReferenceIdentifier, unescape_js_identifier};
 use biome_languages::JsFileSource;
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
@@ -5,8 +7,10 @@ pub enum SemanticFlavor {
     /// Regular JavaScript/TypeScript semantics.
     #[default]
     Vanilla,
-    /// Svelte-specific semantics, such as `$store` dereference syntax.
+    /// Svelte component scripts and template expressions support runes and store subscriptions.
     Svelte,
+    /// Standalone `.svelte.js` and `.svelte.ts` modules support runes but not store subscriptions.
+    SvelteSourceModule,
 }
 
 pub const SVELTE_RUNES: [&str; 7] = [
@@ -21,7 +25,7 @@ pub const SVELTE_RUNES: [&str; 7] = [
 
 impl SemanticFlavor {
     pub fn is_svelte_rune(self, name: &str) -> bool {
-        self == Self::Svelte && SVELTE_RUNES.contains(&name)
+        matches!(self, Self::Svelte | Self::SvelteSourceModule) && SVELTE_RUNES.contains(&name)
     }
 
     /// Returns the store binding name for Svelte auto-subscription references (`$store` -> `store`).
@@ -41,9 +45,22 @@ impl SemanticFlavor {
     }
 }
 
+impl SemanticModel {
+    /// A lexically bound identifier takes precedence over the Svelte rune of the same name.
+    pub fn is_svelte_rune_reference(&self, reference: &JsReferenceIdentifier, rune: &str) -> bool {
+        self.flavor().is_svelte_rune(rune)
+            && reference
+                .value_token()
+                .is_ok_and(|name| unescape_js_identifier(name.text_trimmed()) == rune)
+            && self.binding(reference).is_none()
+    }
+}
+
 impl From<&JsFileSource> for SemanticFlavor {
     fn from(source_type: &JsFileSource) -> Self {
-        if source_type.as_embedding_kind().is_svelte() {
+        if source_type.is_svelte_source_module() {
+            Self::SvelteSourceModule
+        } else if source_type.is_svelte_component() {
             Self::Svelte
         } else {
             Self::Vanilla

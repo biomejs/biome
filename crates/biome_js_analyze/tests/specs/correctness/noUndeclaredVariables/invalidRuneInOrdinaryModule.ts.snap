@@ -1,0 +1,31 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidRuneInOrdinaryModule.ts
+---
+# Input
+```ts
+// should generate diagnostics
+export const count = $state(0);
+
+```
+
+# Diagnostics
+```
+invalidRuneInOrdinaryModule.ts:2:22 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The $state variable is undeclared.
+  
+    1 │ // should generate diagnostics
+  > 2 │ export const count = $state(0);
+      │                      ^^^^^^
+    3 │ 
+  
+  i Using an undeclared variable at runtime can throw a ReferenceError. It often points to a typo or a missing import.
+  
+  i Declare or import the variable, or fix its name.
+  
+  i By default, Biome recognizes browser and Node.js globals.
+    You can ignore more globals using the javascript.globals configuration.
+  
+
+```

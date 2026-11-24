@@ -19,7 +19,7 @@ pub use semantic_model::*;
 ///
 /// Unicode escapes are decoded without applying Unicode normalization. Names
 /// without escapes retain their token-backed storage.
-fn identifier_name(text: TokenText) -> Text {
+pub fn identifier_name(text: TokenText) -> Text {
     let decoded = match unescape_js_identifier(text.text()) {
         std::borrow::Cow::Borrowed(_) => None,
         std::borrow::Cow::Owned(decoded) => Some(decoded),

@@ -1,13 +1,16 @@
-use crate::Workspace;
+use crate::projects::ProjectKey;
 use crate::settings::ModuleGraphResolutionKind;
 use crate::test_utils::setup_workspace_and_open_project;
-use crate::workspace::{FileContent, OpenFileParams, UpdateSettingsParams};
+use crate::workspace::{FileContent, OpenFileParams, PullDiagnosticsParams, UpdateSettingsParams};
+use crate::{LocalWorkspace, Workspace};
+use biome_analyze::RuleCategoriesBuilder;
 use biome_configuration::{Configuration, HtmlConfiguration};
+use biome_diagnostics::{Diagnostic, Severity};
 use biome_fs::{BiomePath, MemoryFileSystem};
 use biome_parser::prelude::ParseDiagnostic;
 use camino::{Utf8Path, Utf8PathBuf};
 
-fn prepare(file: &str, content: &str) -> Vec<ParseDiagnostic> {
+fn prepare_workspace(file: &str, content: &str) -> (LocalWorkspace, ProjectKey) {
     let fs = MemoryFileSystem::default();
     fs.insert(Utf8PathBuf::from(file), content);
 
@@ -41,6 +44,11 @@ fn prepare(file: &str, content: &str) -> Vec<ParseDiagnostic> {
         })
         .unwrap();
 
+    (workspace, project_key)
+}
+
+fn prepare(file: &str, content: &str) -> Vec<ParseDiagnostic> {
+    let (workspace, _) = prepare_workspace(file, content);
     workspace.db_get_parse_diagnostics(Utf8Path::new(file))
 }
 
@@ -58,6 +66,36 @@ fn assert_diagnostics(file: &str, content: &str) {
     assert!(
         !diagnostics.is_empty(),
         "Expected diagnostics, but none were emitted"
+    );
+}
+
+fn assert_diagnostic_text(file: &str, content: &str, expected: &str) {
+    let (workspace, project_key) = prepare_workspace(file, content);
+    let diagnostics = workspace
+        .pull_diagnostics(PullDiagnosticsParams {
+            project_key,
+            path: BiomePath::new(file),
+            categories: RuleCategoriesBuilder::default().build(),
+            only: vec![],
+            skip: vec![],
+            enabled_rules: vec![],
+            include_code_fix: false,
+            inline_config: None,
+            max_diagnostics: None,
+            diagnostic_level: Severity::Hint,
+            enforce_assist: false,
+        })
+        .unwrap()
+        .diagnostics;
+
+    assert!(
+        diagnostics.iter().any(|diagnostic| {
+            diagnostic
+                .location()
+                .span
+                .is_some_and(|span| &content[span] == expected)
+        }),
+        "Expected a diagnostic on {expected:?}, got: {diagnostics:#?}"
     );
 }
 
@@ -144,6 +182,30 @@ fn svelte_each_with_incorrect_method_call_key() {
 "#;
 
     assert_diagnostics(FILE_PATH, FILE_CONTENT);
+}
+
+#[test]
+fn svelte_each_advanced_binding_parsing() {
+    const FILE_PATH: &str = "/project/file.svelte";
+    const FILE_CONTENT: &str = r#"<script lang="ts">
+    const items = [];
+    const property = "value";
+    const fallback = 0;
+</script>
+{#each items as { [property]: [value = fallback, ...rest] }: Record<string, number[]>, index (value)}
+  <p>{index}: {value}: {rest}</p>
+{/each}
+"#;
+
+    assert_no_diagnostics(FILE_PATH, FILE_CONTENT);
+}
+
+#[test]
+fn svelte_each_binding_diagnostic_uses_host_range() {
+    const FILE_PATH: &str = "/project/file.svelte";
+    const FILE_CONTENT: &str = "{#each items as item = fallback}{item}{/each}";
+
+    assert_diagnostic_text(FILE_PATH, FILE_CONTENT, "=");
 }
 
 #[test]
@@ -266,6 +328,27 @@ let items: T[] = [];
 let items: T[] = [];
 </script>"#,
     );
+}
+
+#[test]
+fn svelte_generics_follow_the_root_script_language_even_without_a_body() {
+    const FILE_PATH: &str = "/project/file.svelte";
+
+    assert_diagnostics(
+        FILE_PATH,
+        r#"<script generics="T extends" lang="ts"></script>"#,
+    );
+    assert_diagnostics(FILE_PATH, r#"<script lang="ts" generics="T extends" />"#);
+    for source in [
+        r#"<script lang="typescript" generics="T extends string"></script>{value as T}"#,
+        r#"<div><script lang="ts" generics="T extends"></script></div>"#,
+        r#"<script lang="ts" type="application/json" generics="T extends"></script>"#,
+        r#"<script lang="ts" {...attrs} generics="T extends" />"#,
+        r#"<script lang="ts" {...attrs} generics={T+} />"#,
+        r#"<script {...attrs} lang="ts" generics="T extends">const x = ;</script>"#,
+    ] {
+        assert_no_diagnostics(FILE_PATH, source);
+    }
 }
 
 #[test]

@@ -1,0 +1,62 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: script_identity.svelte
+---
+# Input
+```svelte
+<!-- should generate diagnostics -->
+<script module>
+  const shared = 1;
+  console.log(instanceOnly);
+</script>
+<script>
+  const instanceOnly = shared;
+  console.log(content);
+</script>
+{#snippet content()}<p>{instanceOnly} {missing}</p>{/snippet}
+
+```
+
+# Diagnostics
+```
+script_identity.svelte:4:15 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The instanceOnly variable is undeclared.
+  
+    2 │ <script module>
+    3 │   const shared = 1;
+  > 4 │   console.log(instanceOnly);
+      │               ^^^^^^^^^^^^
+    5 │ </script>
+    6 │ <script>
+  
+  i Using an undeclared variable at runtime can throw a ReferenceError. It often points to a typo or a missing import.
+  
+  i Declare or import the variable, or fix its name.
+  
+  i By default, Biome recognizes browser and Node.js globals.
+    You can ignore more globals using the javascript.globals configuration.
+  
+
+```
+
+```
+script_identity.svelte:10:40 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The missing variable is undeclared.
+  
+     8 │   console.log(content);
+     9 │ </script>
+  > 10 │ {#snippet content()}<p>{instanceOnly} {missing}</p>{/snippet}
+       │                                        ^^^^^^^
+    11 │ 
+  
+  i Using an undeclared variable at runtime can throw a ReferenceError. It often points to a typo or a missing import.
+  
+  i Declare or import the variable, or fix its name.
+  
+  i By default, Biome recognizes browser and Node.js globals.
+    You can ignore more globals using the javascript.globals configuration.
+  
+
+```

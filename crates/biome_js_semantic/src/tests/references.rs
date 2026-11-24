@@ -1,7 +1,7 @@
 use crate::assert_semantics;
 use crate::{SemanticFlavor, SemanticModelOptions, semantic_model};
 use biome_js_parser::JsParserOptions;
-use biome_js_syntax::{AnyJsIdentifierReference, JsIdentifierAssignment};
+use biome_js_syntax::{AnyJsIdentifierReference, JsIdentifierAssignment, JsReferenceIdentifier};
 use biome_languages::JsFileSource;
 use biome_rowan::AstNode;
 
@@ -146,6 +146,40 @@ fn svelte_options() -> SemanticModelOptions {
     SemanticModelOptions {
         flavor: SemanticFlavor::Svelte,
         ..SemanticModelOptions::default()
+    }
+}
+
+#[test]
+fn standalone_svelte_modules_use_lexical_dollar_bindings() {
+    for path in ["counter.svelte.js", "counter.svelte.ts"] {
+        let source = JsFileSource::try_from(camino::Utf8Path::new(path)).unwrap();
+        let parse = biome_js_parser::parse(
+            r"const store = 1; $store; let value = $st\u0061te(1); export function update($value) { $value = 1; return $value; }",
+            source,
+            JsParserOptions::default(),
+        );
+        let model = semantic_model(&parse.tree(), SemanticModelOptions::from(&source));
+        let rune = parse
+            .syntax()
+            .descendants()
+            .filter_map(JsReferenceIdentifier::cast)
+            .find(|reference| reference.syntax().text_trimmed() == r"$st\u0061te")
+            .unwrap();
+        assert!(model.is_svelte_rune_reference(&rune, "$state"));
+        assert!(model.is_global_reference(&rune));
+        let scope = model.global_scope();
+        assert_eq!(scope.get_binding("store").unwrap().all_reads().count(), 0);
+        let value = model
+            .all_bindings()
+            .find(|binding| binding.syntax().text_trimmed() == "$value")
+            .unwrap();
+        assert_eq!(value.all_writes().count(), 1);
+        assert_eq!(value.all_reads().count(), 1);
+        let unresolved: Vec<_> = model
+            .all_unresolved_references()
+            .map(|reference| reference.tree().syntax().text_trimmed().to_string())
+            .collect();
+        assert_eq!(unresolved, ["$store"]);
     }
 }
 

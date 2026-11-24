@@ -18,6 +18,10 @@ expression: invalid.svelte
   <div>{id}: {name}</div>
 {/each}
 
+{#each users as { [field]: name = fallback }}
+  <div>{name}</div>
+{/each}
+
 ```
 
 # Diagnostics
@@ -74,6 +78,27 @@ invalid.svelte:11:1 lint/nursery/useSvelteRequireEachKey ━━━━━━━�
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     12 │   <div>{id}: {name}</div>
     13 │ {/each}
+  
+  i Providing a key helps Svelte track each item when the list changes.
+  
+  i Add a unique key using the (key) syntax, for example: {#each items as item (item.id)}.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:15:1 lint/nursery/useSvelteRequireEachKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This {#each} block is missing a key.
+  
+    13 │ {/each}
+    14 │ 
+  > 15 │ {#each users as { [field]: name = fallback }}
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    16 │   <div>{name}</div>
+    17 │ {/each}
   
   i Providing a key helps Svelte track each item when the list changes.
   

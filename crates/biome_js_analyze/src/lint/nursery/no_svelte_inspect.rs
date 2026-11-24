@@ -1,10 +1,10 @@
+use crate::services::{embedded::EmbeddedService, semantic::Semantic};
 use biome_analyze::{
-    Ast, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
+    Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::JsReferenceIdentifier;
-use biome_languages::JsFileSource;
 use biome_rowan::AstNode;
 use biome_rule_options::no_svelte_inspect::NoSvelteInspectOptions;
 
@@ -61,26 +61,16 @@ declare_lint_rule! {
 }
 
 impl Rule for NoSvelteInspect {
-    type Query = Ast<JsReferenceIdentifier>;
+    type Query = Semantic<JsReferenceIdentifier>;
     type State = ();
     type Signals = Option<Self::State>;
     type Options = NoSvelteInspectOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        if !ctx
-            .source_type::<JsFileSource>()
-            .as_embedding_kind()
-            .is_svelte()
-        {
-            return None;
-        }
-
-        let reference = ctx.query();
-        if reference.value_token().ok()?.text_trimmed() != "$inspect" {
-            return None;
-        }
-
-        Some(())
+        ctx.get_service::<EmbeddedService>()
+            .expect("embedded service")
+            .is_svelte_rune_reference(ctx.model(), ctx.query(), "$inspect")
+            .then_some(())
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
