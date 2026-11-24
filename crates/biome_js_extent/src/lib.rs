@@ -53,6 +53,8 @@ pub struct JsExtent<'src> {
     /// whitespace separates them, so that a run of comments at the end of the
     /// scanned code can be skipped as one.
     comments: Option<Range<usize>>,
+    /// The offset just past the latest regular expression literal.
+    regex_end: Option<usize>,
     /// The offset just past the `>` of the latest JSX element that closed in
     /// plain code. Code that ends there is complete, although it ends with a
     /// byte that is otherwise an operator.
@@ -60,6 +62,47 @@ pub struct JsExtent<'src> {
     /// Whether a [`JsScanStop::BlankLine`] scan stopped before a line that
     /// can't belong to the ESM block, rather than at a blank line.
     stopped_at_non_esm_line: bool,
+}
+
+/// A top-level position visited by [`JsExtent::expression_length_until`].
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct JsExpressionPosition<'src> {
+    source: &'src [u8],
+    offset: usize,
+    comments: Option<Range<usize>>,
+    regex_end: Option<usize>,
+}
+
+impl JsExpressionPosition<'_> {
+    /// Returns the byte offset of this position in the scanned source.
+    pub const fn offset(&self) -> usize {
+        self.offset
+    }
+
+    /// Returns the source starting at this position.
+    pub fn remaining(&self) -> &[u8] {
+        &self.source[self.offset..]
+    }
+
+    /// Returns whether non-comment JavaScript code precedes this position.
+    pub fn has_preceding_code(&self) -> bool {
+        !self.preceding_code().is_empty()
+    }
+
+    /// Returns whether the preceding code can end a JavaScript expression.
+    pub fn can_end_expression(&self) -> bool {
+        code_can_end_expression(self.preceding_code(), self.regex_end)
+    }
+
+    fn preceding_code(&self) -> &[u8] {
+        let code = self.source[..self.offset].trim_ascii_end();
+        match &self.comments {
+            Some(comments) if comments.end >= code.len() => {
+                self.source[..comments.start].trim_ascii_end()
+            }
+            _ => code,
+        }
+    }
 }
 
 /// Where an MDX ESM block ends, as found by [`JsExtent::esm_end`].
@@ -100,7 +143,19 @@ static INTERESTING_BYTES: [u8; 256] = {
         let mut mask = 0u8;
         if matches!(
             byte,
-            b'"' | b'\'' | b'`' | b'/' | b'{' | b'[' | b'}' | b']' | b'-' | b'<' | b'\n' | b'\r'
+            b'"' | b'\''
+                | b'`'
+                | b'/'
+                | b'('
+                | b')'
+                | b'{'
+                | b'['
+                | b'}'
+                | b']'
+                | b'-'
+                | b'<'
+                | b'\n'
+                | b'\r'
         ) {
             mask |= CODE_BYTES;
         }
@@ -168,6 +223,8 @@ impl JsContext {
     }
 }
 
+type StopPredicate<'callback, 'src> = &'callback mut dyn FnMut(JsExpressionPosition<'src>) -> bool;
+
 /// The delimiter a [`JsExtent`] run stops at.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum JsScanStop {
@@ -201,6 +258,30 @@ impl<'src> JsExtent<'src> {
     /// just past the opening `{`.
     pub fn expression_length(source: &'src [u8], jsx: Jsx) -> usize {
         Self::scan(source, JsScanStop::ExpressionEnd, jsx)
+    }
+
+    /// Returns the offset of the first top-level position where `should_stop`
+    /// returns `true`, the closing `}`, or `source.len()` when neither occurs.
+    /// The callback is not invoked inside strings, comments, regular expression
+    /// literals, template literals, or nested delimiters. It can use
+    /// [`JsExpressionPosition::can_end_expression`] to distinguish a contextual
+    /// host delimiter from a JavaScript operand that follows an operator.
+    pub fn expression_length_until(
+        source: &'src [u8],
+        mut should_stop: impl FnMut(JsExpressionPosition<'src>) -> bool,
+    ) -> usize {
+        let mut extent = Self {
+            source,
+            position: 0,
+            stack: SmallVec::new(),
+            jsx: Jsx::Disabled,
+            entered_jsx: false,
+            comments: None,
+            regex_end: None,
+            jsx_end: None,
+            stopped_at_non_esm_line: false,
+        };
+        extent.run_with_stop(JsScanStop::ExpressionEnd, Some(&mut should_stop))
     }
 
     /// Returns the offset of the `---` that closes Astro frontmatter, or
@@ -254,6 +335,7 @@ impl<'src> JsExtent<'src> {
             },
             entered_jsx: false,
             comments: None,
+            regex_end: None,
             jsx_end: None,
             stopped_at_non_esm_line: false,
         };
@@ -274,6 +356,7 @@ impl<'src> JsExtent<'src> {
             jsx,
             entered_jsx: false,
             comments: None,
+            regex_end: None,
             jsx_end: None,
             stopped_at_non_esm_line: false,
         };
@@ -289,6 +372,7 @@ impl<'src> JsExtent<'src> {
         extent.stack.clear();
         extent.jsx = Jsx::Disabled;
         extent.comments = None;
+        extent.regex_end = None;
         extent.jsx_end = None;
         extent.stopped_at_non_esm_line = false;
         let length = extent.run(stop);
@@ -342,11 +426,35 @@ impl<'src> JsExtent<'src> {
     }
 
     fn run(&mut self, stop: JsScanStop) -> usize {
+        self.run_with_stop(stop, None)
+    }
+
+    fn run_with_stop(
+        &mut self,
+        stop: JsScanStop,
+        mut should_stop: Option<StopPredicate<'_, 'src>>,
+    ) -> usize {
         while let Some(byte) = self.current_byte() {
             let context = self.stack.last().copied();
+            if context.is_none()
+                && should_stop.as_mut().is_some_and(|should_stop| {
+                    should_stop(JsExpressionPosition {
+                        source: self.source,
+                        offset: self.position,
+                        comments: self.comments.clone(),
+                        regex_end: self.regex_end,
+                    })
+                })
+            {
+                return self.position;
+            }
             let mask = interest_mask(context);
             if INTERESTING_BYTES[byte as usize] & mask == 0 {
-                self.skip_uninteresting(mask);
+                if context.is_none() && should_stop.is_some() {
+                    self.advance(1);
+                } else {
+                    self.skip_uninteresting(mask);
+                }
                 continue;
             }
             match context {
@@ -357,15 +465,21 @@ impl<'src> JsExtent<'src> {
                         self.advance(1);
                     }
                     SLH => self.skip_slash(),
-                    BEO => {
-                        self.stack.push(JsContext::Code(b'}'));
+                    _ if byte == b'{'
+                        || matches!(byte, b'(' | b'[')
+                            && (stop != JsScanStop::ExpressionEnd || should_stop.is_some()) =>
+                    {
+                        let closing = if byte == b'(' {
+                            b')'
+                        } else if byte == b'{' {
+                            b'}'
+                        } else {
+                            b']'
+                        };
+                        self.stack.push(JsContext::Code(closing));
                         self.advance(1);
                     }
-                    BTO if stop == JsScanStop::ArgumentEnd => {
-                        self.stack.push(JsContext::Code(b']'));
-                        self.advance(1);
-                    }
-                    BEC | BTC => {
+                    _ if matches!(byte, b')' | b'}' | b']') => {
                         if self.stack.last() == Some(&JsContext::Code(byte)) {
                             self.stack.pop();
                         } else if self.stack.is_empty() && stop.ends_at(byte) {
@@ -552,9 +666,12 @@ impl<'src> JsExtent<'src> {
             // `/>` closes a tag that was not recognized as JSX, unless the slash
             // sits where only an operand can start: `s.replace(/>/g, "")`.
             Some(b'>') if !self.at_operand_start() => self.advance(1),
-            _ if self.scanned().last() != Some(&b'<') && slash_starts_regex(self.scanned()) => {
+            _ if self.scanned().last() != Some(&b'<')
+                && slash_starts_regex(self.scanned(), self.regex_end) =>
+            {
                 self.advance(1);
                 self.skip_regex();
+                self.regex_end = Some(self.position);
             }
             _ => self.advance(1),
         }
@@ -736,16 +853,50 @@ fn starts_unquoted_value(byte: Option<u8>) -> bool {
     })
 }
 
+/// Returns whether `code` can end a JavaScript expression.
+fn code_can_end_expression(code: &[u8], regex_end: Option<usize>) -> bool {
+    let Some(&last) = code.last() else {
+        return false;
+    };
+    if !last.is_ascii() {
+        return true;
+    }
+    if is_js_word_byte(last) {
+        return trailing_keyword(code)
+            .is_none_or(|word| EXPRESSION_KEYWORDS.binary_search(&word).is_err());
+    }
+    match last {
+        b')' | b']' | b'}' | b'"' | b'\'' | b'`' => true,
+        b'/' => regex_end == Some(code.len()),
+        b'+' | b'-' => {
+            let operator_len = code.iter().rev().take_while(|byte| **byte == last).count();
+            operator_len == 2
+                && code_can_end_expression(
+                    code[..code.len() - operator_len].trim_ascii_end(),
+                    regex_end,
+                )
+        }
+        b'!' => code_can_end_expression(code[..code.len() - 1].trim_ascii_end(), regex_end),
+        b'.' => code
+            .get(code.len().saturating_sub(2))
+            .is_some_and(u8::is_ascii_digit),
+        _ => false,
+    }
+}
+
 /// Returns whether a `/` after the code scanned so far opens a regex literal
 /// rather than a division.
-fn slash_starts_regex(scanned: &[u8]) -> bool {
+fn slash_starts_regex(scanned: &[u8], regex_end: Option<usize>) -> bool {
     let Some(end) = scanned.iter().rposition(|byte| !byte.is_ascii_whitespace()) else {
         return true;
     };
+    if regex_end == Some(end + 1) {
+        return false;
+    }
     match lookup_byte(scanned[end]) {
         // A keyword such as `return` leaves an operand position; other words do not.
         IDT => ends_with_expression_keyword(&scanned[..=end]),
-        DOL | DIG | ZER | PNC | BTC | PLS | MIN => false,
+        DOL | DIG | ZER | QOT | PNC | BTC | PLS | MIN | TPL => false,
         _ => true,
     }
 }

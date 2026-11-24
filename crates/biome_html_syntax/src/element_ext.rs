@@ -1,17 +1,17 @@
 use crate::HtmlSyntaxKind::{
     self, AREA_KW, BASE_KW, BR_KW, COL_KW, EMBED_KW, HR_KW, IMG_KW, INPUT_KW, LINK_KW, META_KW,
-    SCRIPT_KW, SOURCE_KW, STYLE_KW, TRACK_KW, WBR_KW,
+    SCRIPT_KW, SOURCE_KW, STYLE_KW, TEMPLATE_KW, TRACK_KW, WBR_KW,
 };
 use crate::{
     AnyAstroDirective, AnyHtmlAttribute, AnyHtmlContent, AnyHtmlElement, AnyHtmlTagName,
     AnyHtmlTextExpression, AnySvelteBlock, AnyVueDirective, AstroEmbeddedContent,
     HtmlAttributeList, HtmlElement, HtmlEmbeddedContent, HtmlOpeningElement,
-    HtmlProcessingInstruction, HtmlRoot, HtmlSelfClosingElement, HtmlSyntaxToken, HtmlTagName,
-    HtmlTextExpression, ScriptType, inner_string_text,
+    HtmlProcessingInstruction, HtmlRoot, HtmlRootItemList, HtmlSelfClosingElement, HtmlSyntaxToken,
+    HtmlTagName, HtmlTextExpression, ScriptType, inner_string_text,
 };
 use biome_aria::Attribute;
 use biome_parser::{TokenSet, token_set};
-use biome_rowan::{AstNodeList, SyntaxResult, TokenText, declare_node_union};
+use biome_rowan::{AstNode, AstNodeList, SyntaxResult, TokenText, declare_node_union};
 use biome_string_case::StrOnlyExtension;
 
 /// [Void elements](https://html.spec.whatwg.org/#void-elements): they never have
@@ -533,6 +533,47 @@ declare_node_union! {
 }
 
 impl AnyHtmlTagElement {
+    /// A spread or dynamic language declaration can hide the guest language. A template
+    /// with a non-HTML language also needs its original source, not formatted markup.
+    pub fn requires_verbatim_svelte_content(&self) -> bool {
+        let tag = self.tag_name_kind();
+        if !matches!(tag, Some(SCRIPT_KW | STYLE_KW | TEMPLATE_KW)) {
+            return false;
+        }
+        self.attributes().iter().any(|attr| {
+            if attr.as_html_spread_attribute().is_some() {
+                return true;
+            }
+            let Some(name) = attr.name() else {
+                return false;
+            };
+            let is_lang = name.trim().eq_ignore_ascii_case("lang");
+            if !is_lang && !name.trim().eq_ignore_ascii_case("type") {
+                return false;
+            }
+            let Some(value) = attr
+                .as_html_attribute()
+                .and_then(|attr| attr.html_string())
+                .and_then(|value| value.inner_string_text().ok())
+            else {
+                return true;
+            };
+            tag == Some(TEMPLATE_KW)
+                && !value.is_empty()
+                && !value.eq_ignore_ascii_case(if is_lang { "html" } else { "text/html" })
+        })
+    }
+
+    pub fn is_root_script(&self) -> bool {
+        self.tag_name_kind() == Some(SCRIPT_KW)
+            && match self {
+                Self::HtmlOpeningElement(tag) => tag
+                    .parent::<HtmlElement>()
+                    .is_some_and(|element| element.parent::<HtmlRootItemList>().is_some()),
+                Self::HtmlSelfClosingElement(tag) => tag.parent::<HtmlRootItemList>().is_some(),
+            }
+    }
+
     pub fn tag_name(&self) -> Option<TokenText> {
         match self {
             Self::HtmlOpeningElement(element) => element.tag_name(),

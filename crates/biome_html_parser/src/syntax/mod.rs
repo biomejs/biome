@@ -19,9 +19,9 @@ use crate::syntax::astro::{
 };
 use crate::syntax::parse_error::*;
 use crate::syntax::svelte::{
-    SVELTE_KEYWORDS, is_at_svelte_directive_start, parse_attach_attribute, parse_svelte_at_block,
-    parse_svelte_declaration_or_expression, parse_svelte_directive, parse_svelte_hash_block,
-    parse_svelte_spread_or_expression,
+    SVELTE_KEYWORDS, is_at_svelte_closing_block, is_at_svelte_directive_start,
+    parse_attach_attribute, parse_svelte_at_block, parse_svelte_declaration_or_expression,
+    parse_svelte_directive, parse_svelte_hash_block, parse_svelte_spread_or_expression,
 };
 use crate::syntax::vue::{
     VUE_KEYWORDS, parse_vue_directive, parse_vue_v_bind_shorthand_directive, parse_vue_v_for_value,
@@ -779,6 +779,10 @@ pub(crate) fn parse_html_element(
             p.re_lex(HtmlReLexContext::SingleCurly);
             parse_single_text_expression(p, regular_context(p))
         }
+        T!["{/"] if Svelte.is_supported(p) && !is_at_svelte_closing_block(p) => {
+            p.re_lex(HtmlReLexContext::SingleCurly);
+            parse_single_text_expression(p, regular_context(p))
+        }
         T!["{{"] => HtmlSyntaxFeatures::DoubleTextExpressions.parse_exclusive_syntax(
             p,
             |p| parse_double_text_expression(p, regular_context(p)),
@@ -1028,6 +1032,10 @@ fn parse_attribute(p: &mut HtmlParser, is_svelte_script: bool) -> ParsedSyntax {
         T!["{{"] if SingleTextExpressions.is_supported(p) => {
             p.re_lex(HtmlReLexContext::SingleCurly);
             parse_single_text_expression(p, inside_tag_context(p))
+        }
+        T!["{/"] if Svelte.is_supported(p) => {
+            p.re_lex(HtmlReLexContext::SingleCurly);
+            parse_svelte_spread_or_expression(p)
         }
         T!["{{"] => {
             let m = p.start();

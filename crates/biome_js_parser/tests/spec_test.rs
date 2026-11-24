@@ -108,6 +108,13 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
             file_kind: SvelteFileKind::Component,
             embedding_kind: SvelteEmbeddingKind::SnippetSignature,
         });
+    } else if file_name.contains(".svelte_each_binding.") {
+        file_source = file_source.with_embedding_kind(JsEmbeddingKind::Svelte {
+            is_module_script: false,
+            is_class_attribute: false,
+            file_kind: SvelteFileKind::Component,
+            embedding_kind: SvelteEmbeddingKind::EachBinding,
+        });
     } else if file_name.contains(".svelte_declaration.") {
         file_source = file_source.with_embedding_kind(JsEmbeddingKind::Svelte {
             is_module_script: false,
