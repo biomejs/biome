@@ -341,17 +341,20 @@ impl MemberChain {
     /// object, which adds that line break. The second formatting then keeps the
     /// chain on one line.
     ///
-    /// Even if it returns `true`, the chain uses the hugged layout only if the
-    /// last call can format its arguments that way and the first line of the
-    /// layout fits.
+    /// Returning `true` only enables trying the hugged layout. The chain uses
+    /// it only when the last call produces a hugged layout and the first line
+    /// of that layout fits.
     ///
-    /// The last argument must be a non-empty object, or an arrow function
-    /// whose body is a non-empty object. Parentheses, `as`, `satisfies`,
-    /// `<T>`, and `!` around the object are ignored. `should_group_last_argument`
-    /// must also accept the arguments, and it has its own rules for these
-    /// wrappers. The argument list must have no comments attached, and the
-    /// last argument no leading or trailing comments. The comments in the body
-    /// explain the remaining conditions.
+    /// Returns `true` only when:
+    /// - `expand` is `"auto"`;
+    /// - the chain has at least two tail groups and no function-like argument
+    ///   before the last call;
+    /// - the hugged first line is at least as wide as every expanded line;
+    /// - the last group has a single call with simple type arguments and no
+    ///   comments on its argument list;
+    /// - the last argument is a non-empty object (or an arrow function whose
+    ///   body is one, ignoring parentheses, `as`, `satisfies`, `<T>`, and `!`)
+    ///   and `should_group_last_argument` accepts the arguments.
     fn can_hug_last_argument(&self, f: &JsFormatter) -> bool {
         if f.options().expand() != Expand::Auto {
             return false;
@@ -360,8 +363,9 @@ impl MemberChain {
         if self.tail.len() < 2 || self.has_function_like_argument_before_last_call() {
             // Chains with fewer than two tail groups and no comments return
             // before the `best_fitting!` in `MemberChain::fmt`, and comments
-            // make `groups_should_break` expand them. `groups_should_break` also expands the chain when the last
-            // call breaks after a call with a function argument.
+            // make `groups_should_break` expand them. `groups_should_break`
+            // also expands the chain when the last call breaks after a call
+            // with a function argument.
             return false;
         }
 
@@ -446,13 +450,11 @@ impl MemberChain {
         last_argument_is_object && should_group_last_argument(&args, comments).unwrap_or(false)
     }
 
-    /// Returns a lower bound of the width that `group` takes on the first
-    /// line of the hugged layout.
+    /// Returns a lower bound for the width `group` takes on the first line of
+    /// the hugged layout.
     ///
-    /// Only counts tokens that always print the same: names, `this`, `.` and
-    /// `?.`, 2 for each call (`(` and the character after it), 2 for the
-    /// brackets of each computed member, and 1 for each `!`. Everything else
-    /// counts as zero.
+    /// Counts only tokens with a fixed minimum width on that line; everything
+    /// else counts as zero.
     fn min_group_width(&self, group: &MemberChainGroup, f: &JsFormatter) -> usize {
         let indent_width = f.options().indent_width();
         let width = |token: SyntaxResult<JsSyntaxToken>| {
@@ -471,6 +473,7 @@ impl MemberChain {
                     width(expression.operator_token())
                         + width(expression.member().and_then(|member| member.value_token()))
                 }
+                // At least `(` or `[` and either the closing delimiter or the first inner token.
                 ChainMember::CallExpression { .. } | ChainMember::ComputedMember { .. } => 2,
                 ChainMember::TsNonNullAssertionExpression { .. } => 1,
                 ChainMember::Node(node) => {
@@ -577,9 +580,9 @@ impl Format<JsFormatContext> for MemberChain {
                         f.write_element(hugged_last_group.clone())
                     });
 
-                    // Try the expanded chain before the hugged layout: if its
-                    // last group fits, the output is already stable. See
-                    // `can_hug_last_argument` for why the hugged layout exists.
+                    // Try the expanded chain before the hugged layout because
+                    // the output is already stable when the last group fits on
+                    // its own line.
                     write!(
                         f,
                         [best_fitting!(
@@ -605,16 +608,16 @@ impl Format<JsFormatContext> for MemberChain {
     }
 }
 
-/// Formats a member chain in its expanded layout and excludes the head and the
-/// leading tail groups from the fits check, so only the line of the last group
+/// Formats a member chain in its expanded layout and excludes the head and
+/// leading tail groups from the fits check so only the last group's line
 /// decides whether the layout fits.
 ///
-/// `MemberChain::fmt` tries it as a `best_fitting!` variant before the hugged
-/// layout. [MemberChain::can_hug_last_argument] allows that only if the last
+/// `MemberChain::fmt` tries this as a `best_fitting!` variant before the hugged
+/// layout. [MemberChain::can_hug_last_argument] allows that only when the last
 /// group prints the same in flat and expanded mode, so this variant prints the
-/// same as the expanded chain that the printer uses when no variant fits. It
-/// also requires the excluded lines to be no wider than the first line of the
-/// hugged layout, so they fit whenever the hugged layout fits.
+/// same as the expanded chain used when no variant fits. That check also
+/// requires the excluded lines to be no wider than the first line of the hugged
+/// layout, so they fit whenever the hugged layout fits.
 struct FormatExpandedLastLine<'a>(&'a MemberChain);
 
 impl Format<JsFormatContext> for FormatExpandedLastLine<'_> {

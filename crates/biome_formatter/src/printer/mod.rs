@@ -1552,8 +1552,8 @@ impl<'a, 'print, S: Source> FitsMeasurer<'a, 'print, S> {
                 self.stack.push(tag.kind(), args);
             }
             FormatElement::Tag(tag @ StartSkipFitsCheck) => {
-                // Only fill entries are measured with `must_be_flat`. See
-                // `skip_fits_check` for why they ignore it.
+                // `must_be_flat` is only set when measuring `fill` entries,
+                // which still need each entry's width to decide where to wrap.
                 let args = if self.must_be_flat {
                     args
                 } else {
@@ -1634,9 +1634,9 @@ impl<'a, 'print, S: Source> FitsMeasurer<'a, 'print, S> {
                                     return Fits::No;
                                 }
                                 if self.stack.top().skips_fits_check() {
-                                    // Unlike `start_new_line`, this keeps `has_line_suffix`:
+                                    // Unlike `start_new_line`, keep `has_line_suffix` because
                                     // the printer doesn't flush line suffixes at a newline
-                                    // in text.
+                                    // inside text.
                                     self.state.line_width = 0;
                                     continue;
                                 }
@@ -1669,12 +1669,12 @@ impl<'a, 'print, S: Source> FitsMeasurer<'a, 'print, S> {
             && !self.stack.top().skips_fits_check()
     }
 
-    /// Updates the measured line as the printer does when it prints a line
-    /// break, so the next line starts empty at the current indentation, or at
-    /// column zero if `is_literal` is `true`.
+    /// Resets the measured line state for a printed line break.
     ///
-    /// Called only where the measured content prints a line break. Elsewhere,
-    /// it would discard the width of the current line.
+    /// The next line starts empty at the current indentation, or at column
+    /// zero when `is_literal` is `true`. Call this only where the measured
+    /// content prints a line break. Calling it elsewhere discards the current
+    /// line's width.
     fn start_new_line(&mut self, is_literal: bool) {
         // The printer flushes pending line suffixes before printing a line
         // break.

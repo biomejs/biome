@@ -214,9 +214,10 @@ impl MemberChainGroup {
     /// argument hugged, if the arguments have a hugged layout (see
     /// [JsFormatContext::hugged_call_arguments]).
     ///
-    /// Both versions share the formatted callee, so the group is formatted only
-    /// once. The regular version goes into the same cache as
-    /// [MemberChainGroup::will_break], so later writes of the group reuse it.
+    /// Both versions share the formatted prefix before the call arguments, so
+    /// the group is formatted only once. The regular version goes into the
+    /// same cache as [MemberChainGroup::will_break], so later writes of the
+    /// group reuse it.
     ///
     /// Returns `None` without formatting if the group is already formatted or
     /// doesn't end with the chain's last call. Returns `None` after formatting

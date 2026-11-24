@@ -759,25 +759,26 @@ impl<Context: FormatContext> Format<Context> for LineSuffixBoundary {
 /// is called the fits check. It adds up the width of the current line, fails
 /// if the line gets wider than the print width, and passes at the first line
 /// break. Inside `content`, a line wider than the print width doesn't fail
-/// the check, and line breaks don't end it. A line suffix boundary with a
-/// pending line suffix still fails it. After `content`, the check continues on
-/// the line where `content` ends, including the width that `content` adds to
-/// it.
+/// the check, and line breaks don't end the check. A line suffix boundary with
+/// a pending line suffix still fails the check. After `content`, the check
+/// resumes on the line where `content` ends, starting from the width `content`
+/// placed on that line.
 ///
 /// Fits checks that start inside `content` are unaffected, but groups around
-/// and before `content` can print differently. A group before it expands if
-/// the line where `content` ends doesn't fit. A group around it can print flat
-/// even if `content` is wider than the print width, and groups inside
-/// `content` then print flat too, unless they must expand. Fits checks of
-/// [`fill`](Formatter::fill) entries ignore `skip_fits_check`, so a fill still
-/// uses the width of each entry to decide where to wrap.
+/// and before `content` can print differently. A preceding group on the same
+/// line expands if the line where `content` ends doesn't fit. A group around
+/// `content` can print flat even if `content` is wider than the print width,
+/// and groups inside `content` then print flat too, unless they must expand.
+/// Fits checks of [`fill`](Formatter::fill) entries ignore `skip_fits_check`,
+/// so a fill still uses the width of each entry to decide where to wrap.
 ///
-/// In a [`best_fitting!`](crate::best_fitting) variant, use it for lines that
-/// print the same as in the most expanded variant, which the printer prints
-/// when no other variant fits. Only the other lines then decide whether this
-/// variant fits. The variant is then picked over every later variant, even if
-/// the excluded lines don't fit. If a later variant other than the most
-/// expanded one can fit, make sure the excluded lines fit whenever it does.
+/// In a [`best_fitting!`](crate::best_fitting) variant, wrap lines that print
+/// the same as in the most expanded variant (which the printer uses when no
+/// earlier variant fits). Only the remaining lines then decide whether this
+/// variant fits, so the printer picks it over every later variant even if the
+/// excluded lines don't fit. If a later variant other than the most expanded
+/// one can fit, make sure the excluded lines fit whenever that later variant
+/// fits.
 ///
 /// # Examples
 ///

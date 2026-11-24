@@ -48,16 +48,16 @@ pub struct JsFormatContext {
     /// This should be rare enough for us not to care about it.
     cached_function_body: Option<(AnyJsFunctionBody, FormatElement)>,
 
-    /// The hugged layout of a call's arguments: `(`, the other arguments and
-    /// the start of the last argument stay on the current line, and the last
-    /// argument breaks across lines, as in `.send({` followed by the object's
-    /// members.
+    /// Cached hugged layout of a call's arguments, where `(`, any leading
+    /// arguments, and the opening of the last argument stay on the current
+    /// line while the last argument breaks across lines (as in `.send({`
+    /// followed by the object's members).
     ///
-    /// Member chains use it to keep the chain on one line and break only the
-    /// last argument. When the member chain asks for it, the call arguments
-    /// formatter stores it while formatting the arguments, if the last argument
-    /// is grouped and doesn't already break. This way the member chain doesn't
-    /// format the arguments twice.
+    /// Member chains use this layout to keep the chain on one line and break
+    /// only the last argument. When a member chain requests it, the call
+    /// arguments formatter stores the hugged layout while formatting the
+    /// arguments if the last argument is grouped and doesn't already break, so
+    /// the member chain doesn't format the arguments twice.
     hugged_call_arguments: Option<(JsCallArguments, FormatElement)>,
 
     source_map: Option<TransformSourceMap>,
