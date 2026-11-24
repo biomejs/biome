@@ -3,8 +3,8 @@ use biome_formatter_test::spec::{SpecSnapshot, SpecTestFile};
 use biome_languages::{
     DocumentFileSource, JsFileSource,
     javascript::{
-        JsEmbeddingKind, LanguageVariant, ModuleKind, SvelteEmbeddingKind, SvelteFileKind,
-        MdxEmbeddingKind,
+        JsEmbeddingKind, LanguageVariant, MdxEmbeddingKind, ModuleKind, SvelteEmbeddingKind,
+        SvelteFileKind,
     },
 };
 use camino::Utf8Path;
