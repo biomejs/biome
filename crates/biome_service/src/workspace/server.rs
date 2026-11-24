@@ -82,7 +82,7 @@ use biome_js_syntax::AnyJsRoot;
 use biome_json_parser::JsonParserOptions;
 #[cfg(feature = "lang_css")]
 use biome_languages::CssFileSource;
-#[cfg(feature = "lang_html")]
+#[cfg(all(feature = "lang_html", feature = "lang_js"))]
 use biome_languages::HtmlFileSource;
 #[cfg(feature = "lang_js")]
 use biome_languages::JsFileSource;
@@ -103,6 +103,7 @@ use biome_plugin_loader::{BiomePlugin, PluginCache, PluginDiagnostic};
 use biome_project_layout::ProjectLayout;
 use biome_resolver::FsWithResolverProxy;
 use biome_rowan::NodeCache;
+use biome_text_edit::{CompressedOp, DiffOp, TextEdit};
 use camino::{Utf8Path, Utf8PathBuf};
 use crossbeam::channel::Sender;
 use papaya::{Compute, HashMap, Operation};
@@ -110,7 +111,7 @@ use parking_lot::Mutex;
 use rustc_hash::{FxBuildHasher, FxHashMap, FxHashSet};
 use std::collections::BTreeSet;
 use std::fmt::Debug;
-use std::ops::Deref;
+use std::ops::{Deref, Range};
 use std::panic::RefUnwindSafe;
 #[cfg(feature = "module_graph")]
 use std::rc::Rc;
@@ -776,6 +777,420 @@ impl LocalWorkspace {
     }
 }
 
+#[derive(Clone, Debug)]
+struct OriginalRangeMap {
+    segments: Vec<OriginalRangeSegment>,
+    current_len: usize,
+}
+
+#[derive(Clone, Debug)]
+struct OriginalRangeSegment {
+    current: Range<usize>,
+    original: Range<usize>,
+}
+
+#[derive(Debug)]
+struct SourceDiff {
+    chunks: Vec<SourceDiffChunk>,
+}
+
+#[derive(Debug)]
+enum SourceDiffChunk {
+    Equal {
+        old: Range<usize>,
+        new: Range<usize>,
+    },
+    Changed {
+        old: Range<usize>,
+        new: Range<usize>,
+    },
+}
+
+impl SourceDiffChunk {
+    fn old_range(&self) -> &Range<usize> {
+        match self {
+            Self::Equal { old, .. } | Self::Changed { old, .. } => old,
+        }
+    }
+
+    fn new_range(&self) -> &Range<usize> {
+        match self {
+            Self::Equal { new, .. } | Self::Changed { new, .. } => new,
+        }
+    }
+}
+
+impl SourceDiff {
+    fn new(old: &str, new: &str) -> Self {
+        let edit = TextEdit::from_unicode_words(old, new);
+        let mut chunks = Vec::new();
+        let mut old_offset = 0;
+        let mut new_offset = 0;
+        let mut changed_start = None;
+
+        for op in &edit {
+            let equal_len = match op {
+                CompressedOp::DiffOp(DiffOp::Equal { range }) => Some(usize::from(range.len())),
+                CompressedOp::EqualLines { line_count } => {
+                    let line_count = line_count.get() as usize + 1;
+                    Some(
+                        old[old_offset..]
+                            .split_inclusive('\n')
+                            .take(line_count)
+                            .map(str::len)
+                            .sum(),
+                    )
+                }
+                _ => None,
+            };
+
+            if let Some(equal_len) = equal_len {
+                if let Some((old_start, new_start)) = changed_start.take() {
+                    chunks.push(SourceDiffChunk::Changed {
+                        old: old_start..old_offset,
+                        new: new_start..new_offset,
+                    });
+                }
+                if equal_len > 0 {
+                    chunks.push(SourceDiffChunk::Equal {
+                        old: old_offset..old_offset + equal_len,
+                        new: new_offset..new_offset + equal_len,
+                    });
+                    old_offset += equal_len;
+                    new_offset += equal_len;
+                }
+                continue;
+            }
+
+            changed_start.get_or_insert((old_offset, new_offset));
+            match op {
+                CompressedOp::DiffOp(DiffOp::Delete { range }) => {
+                    old_offset += usize::from(range.len());
+                }
+                CompressedOp::DiffOp(DiffOp::Insert { range }) => {
+                    new_offset += usize::from(range.len());
+                }
+                CompressedOp::DiffOp(DiffOp::Equal { .. }) | CompressedOp::EqualLines { .. } => {
+                    unreachable!()
+                }
+            }
+        }
+
+        if let Some((old_start, new_start)) = changed_start {
+            chunks.push(SourceDiffChunk::Changed {
+                old: old_start..old_offset,
+                new: new_start..new_offset,
+            });
+        }
+
+        debug_assert_eq!(old_offset, old.len());
+        debug_assert_eq!(new_offset, new.len());
+        Self { chunks }
+    }
+}
+
+impl OriginalRangeSegment {
+    fn map_offset(&self, offset: usize, round_up: bool) -> usize {
+        let current_len = self.current.len();
+        let original_len = self.original.len();
+        if current_len == 0 || original_len == 0 {
+            return self.original.start;
+        }
+        let relative = offset.saturating_sub(self.current.start).min(current_len);
+        let numerator = relative * original_len;
+        let mapped = if round_up {
+            numerator.div_ceil(current_len)
+        } else {
+            numerator / current_len
+        };
+        self.original.start + mapped
+    }
+
+    fn map_range(&self, range: Range<usize>) -> Range<usize> {
+        self.map_offset(range.start, false)..self.map_offset(range.end, true)
+    }
+}
+
+impl OriginalRangeMap {
+    fn new(source_len: usize) -> Self {
+        Self {
+            segments: (source_len > 0)
+                .then_some(OriginalRangeSegment {
+                    current: 0..source_len,
+                    original: 0..source_len,
+                })
+                .into_iter()
+                .collect(),
+            current_len: source_len,
+        }
+    }
+
+    fn map_action_range(
+        &self,
+        original: &str,
+        current: &str,
+        fixed: &str,
+        diff: &SourceDiff,
+        range: TextRange,
+    ) -> TextRange {
+        let action_range = usize::from(range.start())..usize::from(range.end());
+        if let Some(mapped) = Self::map_matching_range(original, current, action_range.clone()) {
+            return Self::text_range(mapped);
+        }
+
+        let start_line_end = current[action_range.start..]
+            .find('\n')
+            .map_or(current.len(), |offset| action_range.start + offset + 1);
+        let mapped_start =
+            Self::map_matching_range(original, current, action_range.start..start_line_end)
+                .map_or_else(
+                    || self.map_boundary(action_range.start),
+                    |range| range.start,
+                );
+        let end_line_start = current[..action_range.end]
+            .rfind('\n')
+            .map_or(0, |offset| offset + 1);
+        let mapped_end =
+            Self::map_matching_range(original, current, end_line_start..action_range.end)
+                .map_or_else(|| self.map_boundary(action_range.end), |range| range.end);
+        if mapped_start <= mapped_end {
+            return Self::text_range(mapped_start..mapped_end);
+        }
+
+        let mut mapped = diff.chunks.iter().filter_map(|chunk| {
+            let SourceDiffChunk::Changed { old, .. } = chunk else {
+                return None;
+            };
+            let start = old.start.max(action_range.start);
+            let end = old.end.min(action_range.end);
+            if start >= end {
+                return None;
+            }
+            let changed = &current[start..end];
+            let leading = changed.len() - changed.trim_start().len();
+            let trailing = changed.len() - changed.trim_end().len();
+            let trimmed = start + leading..end - trailing;
+            let changed_range = if trimmed.is_empty() {
+                start..end
+            } else {
+                trimmed
+            };
+            Some(
+                Self::map_matching_range(original, current, start..end)
+                    .or_else(|| Self::map_matching_range(original, current, changed_range.clone()))
+                    .or_else(|| {
+                        Self::map_removed_lines(
+                            original,
+                            current,
+                            fixed,
+                            action_range.clone(),
+                            changed_range.clone(),
+                        )
+                    })
+                    .unwrap_or_else(|| self.map_range(changed_range)),
+            )
+        });
+
+        let mapped_range = if let Some(first) = mapped.next() {
+            mapped.fold(first, |range, next| {
+                range.start.min(next.start)..range.end.max(next.end)
+            })
+        } else {
+            self.map_range(action_range)
+        };
+        Self::text_range(mapped_range)
+    }
+
+    fn text_range(range: Range<usize>) -> TextRange {
+        TextRange::new(
+            TextSize::try_from(range.start).expect("source range exceeds 4 GiB"),
+            TextSize::try_from(range.end).expect("source range exceeds 4 GiB"),
+        )
+    }
+
+    fn map_removed_lines(
+        original: &str,
+        current: &str,
+        fixed: &str,
+        action_range: Range<usize>,
+        changed_range: Range<usize>,
+    ) -> Option<Range<usize>> {
+        let mut mapped = Vec::new();
+        let mut line_start = action_range.start;
+        while line_start < action_range.end {
+            let line_end = current[line_start..action_range.end]
+                .find('\n')
+                .map_or(action_range.end, |offset| line_start + offset + 1);
+            let line = &current[line_start..line_end];
+            let leading = line.len() - line.trim_start().len();
+            let trailing = line.len() - line.trim_end().len();
+            let trimmed = line_start + leading..line_end - trailing;
+            if !trimmed.is_empty()
+                && trimmed.start < changed_range.end
+                && changed_range.start < trimmed.end
+            {
+                let text = &current[trimmed.clone()];
+                if current.match_indices(text).count() > fixed.match_indices(text).count()
+                    && let Some(range) = Self::map_matching_range(original, current, trimmed)
+                {
+                    mapped.push(range);
+                }
+            }
+            line_start = line_end;
+        }
+
+        let mut mapped = mapped.into_iter();
+        let first = mapped.next()?;
+        Some(mapped.fold(first, |range, next| {
+            range.start.min(next.start)..range.end.max(next.end)
+        }))
+    }
+
+    fn map_matching_range(
+        original: &str,
+        current: &str,
+        range: Range<usize>,
+    ) -> Option<Range<usize>> {
+        let text = current.get(range.clone())?;
+        if text.is_empty() {
+            return None;
+        }
+        let current_matches = current
+            .match_indices(text)
+            .map(|(start, _)| start)
+            .collect::<Vec<_>>();
+        let original_matches = original
+            .match_indices(text)
+            .map(|(start, _)| start)
+            .collect::<Vec<_>>();
+        if current_matches.len() != original_matches.len() {
+            return None;
+        }
+        let occurrence = current_matches
+            .iter()
+            .position(|start| *start == range.start)?;
+        let start = original_matches[occurrence];
+        Some(start..start + text.len())
+    }
+
+    fn apply(&mut self, old: &str, new: &str, diff: &SourceDiff) {
+        let changed = diff
+            .chunks
+            .iter()
+            .enumerate()
+            .filter(|(_, chunk)| matches!(chunk, SourceDiffChunk::Changed { .. }))
+            .collect::<Vec<_>>();
+        let mut used_sources = vec![false; diff.chunks.len()];
+        let mut moved_from = vec![None; diff.chunks.len()];
+
+        for (target_index, target) in &changed {
+            let target_new = target.new_range();
+            if target_new.is_empty() {
+                continue;
+            }
+            let target_text = &new[target_new.clone()];
+            if let Some((source_index, source)) = changed.iter().find(|(source_index, source)| {
+                if used_sources[*source_index] {
+                    return false;
+                }
+                let source_old = source.old_range();
+                !source_old.is_empty() && old[source_old.clone()] == *target_text
+            }) {
+                used_sources[*source_index] = true;
+                moved_from[*target_index] = Some(source.old_range().clone());
+            }
+        }
+
+        let mut segments = Vec::new();
+        for (index, chunk) in diff.chunks.iter().enumerate() {
+            match chunk {
+                SourceDiffChunk::Equal { old, new } => {
+                    self.copy_range(old.clone(), new.start, &mut segments);
+                }
+                SourceDiffChunk::Changed { old, new } if !new.is_empty() => {
+                    if let Some(source) = moved_from[index].clone() {
+                        self.copy_range(source, new.start, &mut segments);
+                    } else {
+                        let original = if old.is_empty() {
+                            let anchor = self.map_boundary(old.start);
+                            anchor..anchor
+                        } else {
+                            self.map_range(old.clone())
+                        };
+                        segments.push(OriginalRangeSegment {
+                            current: new.clone(),
+                            original,
+                        });
+                    }
+                }
+                SourceDiffChunk::Changed { .. } => {}
+            }
+        }
+
+        self.segments = segments;
+        self.current_len = new.len();
+    }
+
+    fn copy_range(
+        &self,
+        range: Range<usize>,
+        new_start: usize,
+        output: &mut Vec<OriginalRangeSegment>,
+    ) {
+        for segment in &self.segments {
+            let start = segment.current.start.max(range.start);
+            let end = segment.current.end.min(range.end);
+            if start >= end {
+                continue;
+            }
+            output.push(OriginalRangeSegment {
+                current: new_start + start - range.start..new_start + end - range.start,
+                original: segment.map_range(start..end),
+            });
+        }
+    }
+
+    fn map_range(&self, range: Range<usize>) -> Range<usize> {
+        if range.is_empty() {
+            let anchor = self.map_boundary(range.start);
+            return anchor..anchor;
+        }
+
+        let mut mapped = self.segments.iter().filter_map(|segment| {
+            let start = segment.current.start.max(range.start);
+            let end = segment.current.end.min(range.end);
+            (start < end).then(|| segment.map_range(start..end))
+        });
+        let Some(first) = mapped.next() else {
+            let anchor = self.map_boundary(range.start);
+            return anchor..anchor;
+        };
+        mapped.fold(first, |range, next| {
+            range.start.min(next.start)..range.end.max(next.end)
+        })
+    }
+
+    fn map_boundary(&self, offset: usize) -> usize {
+        if let Some(segment) = self
+            .segments
+            .iter()
+            .find(|segment| segment.current.contains(&offset))
+        {
+            return segment.map_offset(offset, false);
+        }
+        if offset >= self.current_len {
+            return self
+                .segments
+                .last()
+                .map_or(0, |segment| segment.original.end);
+        }
+        self.segments
+            .iter()
+            .find(|segment| segment.current.start >= offset)
+            .map_or(0, |segment| segment.original.start)
+    }
+}
+
 impl WorkspaceServerWithDb<'_> {
     fn finish_change_file(
         &self,
@@ -1095,7 +1510,7 @@ impl WorkspaceServerWithDb<'_> {
         #[cfg(feature = "lang_js")]
         if let DocumentFileSource::Js(js) = &mut source {
             match path.extension() {
-                Some("js") => {
+                Some("js") if !js.is_svelte_source_module() => {
                     let manifest = self.project_layout.find_node_manifest_for_path(&path);
                     if let Some((_, manifest)) = manifest
                         && manifest.r#type == Some(PackageType::CommonJs)
@@ -1623,6 +2038,125 @@ impl WorkspaceServerWithDb<'_> {
         #[cfg(feature = "module_graph")] module_db: Rc<dyn ModuleDb>,
         collect_final_diagnostics: bool,
     ) -> Result<Option<FixedFileResult>, WorkspaceError> {
+        let refreshes_embedded_state = cfg!(feature = "html_embeds")
+            && state
+                .file_source
+                .to_html_file_source()
+                .is_some_and(|source| source.is_svelte())
+            && self
+                .features
+                .get_deprecated_capabilities(state.file_source)
+                .analyzer
+                .update_snippets
+                .is_some();
+        if !refreshes_embedded_state {
+            return self.fix_file_state_once(
+                params,
+                state,
+                #[cfg(feature = "module_graph")]
+                module_db,
+                collect_final_diagnostics,
+            );
+        }
+
+        let mut actions = Vec::new();
+        let original = state.parsed.send_node(&state.db).into_source_text();
+        let mut current = original.clone();
+        let mut original_ranges = OriginalRangeMap::new(original.len());
+        let mut seen = FxHashSet::default();
+        seen.insert(original.clone());
+
+        for _ in 0..100 {
+            let Some(result) = self.fix_file_state_once(
+                params.clone(),
+                state,
+                #[cfg(feature = "module_graph")]
+                module_db.clone(),
+                collect_final_diagnostics,
+            )?
+            else {
+                return Ok(None);
+            };
+            let FixedFileResult {
+                root,
+                errors,
+                actions: mut pass_actions,
+                skipped_suggested_fixes,
+            } = result;
+            let applied_fixes = !pass_actions.is_empty();
+            if !applied_fixes {
+                return Ok(Some(FixedFileResult {
+                    root,
+                    errors,
+                    actions,
+                    skipped_suggested_fixes,
+                }));
+            }
+
+            let fixed = root.clone().into_source_text();
+            let diff = SourceDiff::new(&current, &fixed);
+            for action in &mut pass_actions {
+                action.range = original_ranges.map_action_range(
+                    &original,
+                    &current,
+                    &fixed,
+                    &diff,
+                    action.range,
+                );
+            }
+            actions.append(&mut pass_actions);
+            if !seen.insert(fixed.clone()) {
+                break;
+            }
+            original_ranges.apply(&current, &fixed, &diff);
+            let (_, settings, query_context) = self
+                .project_get_settings_query(
+                    &state.db,
+                    params.project_key,
+                    &params.path,
+                    params.inline_config.clone(),
+                )
+                .ok_or_else(WorkspaceError::no_project)?;
+            let experimental_full_html_support = query_context
+                .effective_settings(&settings)
+                .experimental_full_html_support_enabled();
+            let settings = self.settings_handle_with_query(
+                &settings,
+                EditorFeatures::default(),
+                query_context,
+            );
+            let file_source = state.file_source;
+            *state = self.parse_process_file_state(
+                &params.path,
+                &fixed,
+                file_source,
+                &settings,
+                experimental_full_html_support,
+            )?;
+            current = fixed;
+        }
+
+        Err(WorkspaceError::RuleError(
+            biome_analyze::RuleError::ConflictingRuleFixesError {
+                rules: actions
+                    .iter()
+                    .rev()
+                    .take(10)
+                    .filter_map(|action| action.rule_name.clone())
+                    .collect::<FxHashSet<_>>()
+                    .into_iter()
+                    .collect(),
+            },
+        ))
+    }
+
+    fn fix_file_state_once(
+        &self,
+        params: FixFileParams,
+        state: &mut ProcessFileState,
+        #[cfg(feature = "module_graph")] module_db: Rc<dyn ModuleDb>,
+        collect_final_diagnostics: bool,
+    ) -> Result<Option<FixedFileResult>, WorkspaceError> {
         let FixFileParams {
             project_key,
             path,
@@ -1636,7 +2170,7 @@ impl WorkspaceServerWithDb<'_> {
             inline_config,
         } = params;
         #[cfg(feature = "html_embeds")]
-        let embedded_data = state.collect_embedded_data();
+        let mut embedded_data = state.collect_embedded_data();
         let (working_directory, settings, query_context) = self
             .project_get_settings_query(&state.db, project_key, &path, inline_config)
             .ok_or_else(WorkspaceError::no_project)?;
@@ -1689,6 +2223,15 @@ impl WorkspaceServerWithDb<'_> {
                 let capabilities = self
                     .features
                     .get_deprecated_capabilities(document_file_source);
+                #[cfg(feature = "html_embeds")]
+                if state
+                    .file_source
+                    .to_html_file_source()
+                    .is_some_and(|source| source.is_svelte())
+                    && document_file_source.to_js_file_source().is_some()
+                {
+                    continue;
+                }
                 let Some(fix_all) = capabilities.analyzer.fix_all else {
                     continue;
                 };
@@ -1720,10 +2263,14 @@ impl WorkspaceServerWithDb<'_> {
                 let FixedFileResult {
                     root,
                     skipped_suggested_fixes: snippet_skipped_suggested_fixes,
-                    actions: snippet_actions,
+                    actions: mut snippet_actions,
                     errors: snippet_errors,
                 } = results;
                 let reconstruct_snippet = should_format || !snippet_actions.is_empty();
+                let snippet_offset = embedded_snippet.content_offset();
+                for action in &mut snippet_actions {
+                    action.range += snippet_offset;
+                }
                 let new_code = if reconstruct_snippet {
                     if should_format {
                         let fixed_snippet = ParsedOrigin::interned(
@@ -1808,6 +2355,10 @@ impl WorkspaceServerWithDb<'_> {
                         )
                         .collect(),
                 );
+                #[cfg(feature = "html_embeds")]
+                {
+                    embedded_data = state.collect_embedded_data();
+                }
             }
         }
 

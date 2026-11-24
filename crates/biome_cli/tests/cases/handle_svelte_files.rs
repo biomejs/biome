@@ -527,6 +527,78 @@ const source = { value: 1 };
 }
 
 #[test]
+fn format_preserves_template_literal_and_inline_spacing() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+    fs.insert(
+        "biome.json".into(),
+        r#"{
+            "javascript": { "formatter": { "semicolons": "asNeeded" } },
+            "html": { "experimentalFullSupportEnabled": true, "formatter": { "enabled": true } }
+        }"#,
+    );
+    console.in_buffer.push(
+        r#"<script>
+let label=$state(`first
+  second`)
+</script>
+
+<p class = 'label'>{label}<i>!</i> <b>next</b></p>
+"#
+        .to_string(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["format", "--stdin-file-path", "Label.svelte"].as_slice()),
+    );
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "format_preserves_template_literal_and_inline_spacing",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn format_preserves_unsupported_style_and_malformed_expression() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+    fs.insert(
+        "biome.json".into(),
+        r#"{
+            "formatter": { "formatWithErrors": true },
+            "html": { "experimentalFullSupportEnabled": true, "formatter": { "enabled": true } }
+        }"#,
+    );
+    console.in_buffer.push(
+        r#"<script>let count=$state(0)</script>
+<style lang="less">  @ink: blue;
+    p { color: @ink }  </style>
+<p>𝄞{  count +  } <b class = "after">after</b></p>
+"#
+        .to_string(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["format", "--stdin-file-path", "Recovery.svelte"].as_slice()),
+    );
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "format_preserves_unsupported_style_and_malformed_expression",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn format_stdin_successfully() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
@@ -894,6 +966,171 @@ fn full_support_writes_attribute_expression_fix() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "full_support_writes_attribute_expression_fix",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn full_support_lint_parity_for_components_and_modules() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+    fs.insert(
+        "biome.json".into(),
+        br#"{
+            "formatter": { "enabled": false },
+            "html": {
+                "experimentalFullSupportEnabled": true,
+                "linter": { "enabled": true }
+            },
+            "linter": {
+                "rules": {
+                    "preset": "none",
+                    "complexity": { "noUselessStringConcat": "warn" }
+                }
+            },
+            "assist": { "enabled": false }
+        }"#,
+    );
+
+    let component_path = Utf8Path::new("Component.svelte");
+    fs.insert(
+        component_path.into(),
+        br#"<!-- biome-ignore-start lint/complexity/noUselessStringConcat: intentional concatenation -->
+<script context="module">
+export const preserved = "a" + "b";
+</script>
+<!-- biome-ignore-end lint/complexity/noUselessStringConcat: intentional concatenation -->
+
+<script>
+const fixed = "c" + "d";
+</script>
+
+<p>{preserved}{fixed}</p>
+"#,
+    );
+    let module_path = Utf8Path::new("state.svelte.ts");
+    fs.insert(
+        module_path.into(),
+        br#"// biome-ignore lint/complexity/noUselessStringConcat: intentional concatenation
+export const preserved = "a" + "b";
+export const fixed = "c" + "d";
+"#,
+    );
+
+    let (fs, lint_result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", component_path.as_str(), module_path.as_str()].as_slice()),
+    );
+    assert!(lint_result.is_ok(), "run_cli returned {lint_result:?}");
+
+    let (fs, write_result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "lint",
+                "--write",
+                component_path.as_str(),
+                module_path.as_str(),
+            ]
+            .as_slice(),
+        ),
+    );
+    assert!(write_result.is_ok(), "run_cli returned {write_result:?}");
+    assert_file_contents(
+        &fs,
+        component_path,
+        r#"<!-- biome-ignore-start lint/complexity/noUselessStringConcat: intentional concatenation -->
+<script context="module">
+export const preserved = "a" + "b";
+</script>
+<!-- biome-ignore-end lint/complexity/noUselessStringConcat: intentional concatenation -->
+
+<script>
+const fixed = "cd";
+</script>
+
+<p>{preserved}{fixed}</p>
+"#,
+    );
+    assert_file_contents(
+        &fs,
+        module_path,
+        r#"// biome-ignore lint/complexity/noUselessStringConcat: intentional concatenation
+export const preserved = "a" + "b";
+export const fixed = "cd";
+"#,
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "full_support_lint_parity_for_components_and_modules",
+        fs,
+        console,
+        lint_result.followed_by(write_result),
+    ));
+}
+
+#[test]
+fn full_support_reports_cross_snippet_reassignments() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+    fs.insert(
+        "biome.json".into(),
+        br#"{
+            "formatter": { "enabled": false },
+            "html": {
+                "experimentalFullSupportEnabled": true,
+                "linter": { "enabled": true }
+            },
+            "linter": {
+                "rules": {
+                    "preset": "none",
+                    "suspicious": {
+                        "noClassAssign": "error",
+                        "noFunctionAssign": "error",
+                        "noImportAssign": "error"
+                    }
+                }
+            },
+            "assist": { "enabled": false }
+        }"#,
+    );
+
+    let component_path = Utf8Path::new("Component.svelte");
+    fs.insert(
+        component_path.into(),
+        br#"<script>
+import value from "pkg";
+function update() {}
+class Widget {}
+</script>
+
+<button
+    onclick={() => {
+        value = 1;
+        update = () => {};
+        Widget = class {};
+    }}
+>
+    Update
+</button>
+"#,
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", component_path.as_str()].as_slice()),
+    );
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "full_support_reports_cross_snippet_reassignments",
         fs,
         console,
         result,

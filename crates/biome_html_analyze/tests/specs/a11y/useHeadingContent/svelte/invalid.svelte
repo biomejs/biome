@@ -4,3 +4,5 @@
 <h1 aria-hidden="true">invisible content</h1>
 <h1><span aria-hidden="true">hidden</span></h1>
 <h3></h3>
+<h2><span aria-hidden="true"><titles.Current /></span></h2>
+<h2><custom-label aria-hidden="true">Text</custom-label></h2>

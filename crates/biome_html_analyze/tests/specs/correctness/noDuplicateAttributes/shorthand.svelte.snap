@@ -1,0 +1,67 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: shorthand.svelte
+---
+# Input
+```svelte
+<!-- should generate diagnostics -->
+<div id="first" {id}></div>
+<Panel { title } {...props} title={label} />
+<div {id} {...props} title={id}></div>
+
+```
+
+# Diagnostics
+```
+shorthand.svelte:2:17 lint/correctness/noDuplicateAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate attribute 'id'.
+  
+    1 │ <!-- should generate diagnostics -->
+  > 2 │ <div id="first" {id}></div>
+      │                 ^^^^
+    3 │ <Panel { title } {...props} title={label} />
+    4 │ <div {id} {...props} title={id}></div>
+  
+  i This is the first occurrence of the attribute.
+  
+    1 │ <!-- should generate diagnostics -->
+  > 2 │ <div id="first" {id}></div>
+      │      ^^
+    3 │ <Panel { title } {...props} title={label} />
+    4 │ <div {id} {...props} title={id}></div>
+  
+  i Each attribute name must be unique within a single element. Duplicate attributes are invalid and can lead to unexpected browser behavior.
+  
+  i Consider removing or renaming the duplicate 'id' attribute.
+  
+
+```
+
+```
+shorthand.svelte:3:29 lint/correctness/noDuplicateAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate attribute 'title'.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <div id="first" {id}></div>
+  > 3 │ <Panel { title } {...props} title={label} />
+      │                             ^^^^^^^^^^^^^
+    4 │ <div {id} {...props} title={id}></div>
+    5 │ 
+  
+  i This is the first occurrence of the attribute.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <div id="first" {id}></div>
+  > 3 │ <Panel { title } {...props} title={label} />
+      │          ^^^^^
+    4 │ <div {id} {...props} title={id}></div>
+    5 │ 
+  
+  i Each attribute name must be unique within a single element. Duplicate attributes are invalid and can lead to unexpected browser behavior.
+  
+  i Consider removing or renaming the duplicate 'title' attribute.
+  
+
+```

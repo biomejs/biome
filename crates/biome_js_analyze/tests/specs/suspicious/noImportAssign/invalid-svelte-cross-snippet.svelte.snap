@@ -1,0 +1,31 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-svelte-cross-snippet.svelte
+---
+# Input
+```svelte
+<!-- should generate diagnostics -->
+<script>
+import value from "pkg";
+</script>
+
+<button onclick={() => (value = 1)}>Update</button>
+
+```
+
+# Diagnostics
+```
+invalid-svelte-cross-snippet.svelte:6:25 lint/suspicious/noImportAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The imported variable value is read-only
+  
+    4 │ </script>
+    5 │ 
+  > 6 │ <button onclick={() => (value = 1)}>Update</button>
+      │                         ^^^^^
+    7 │ 
+  
+  i Use a local variable instead of reassigning an import.
+  
+
+```

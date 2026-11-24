@@ -1,0 +1,53 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-svelte-template-read.svelte
+---
+# Input
+```svelte
+<!-- should generate a diagnostic -->
+<script>
+let hello = "Hello World";
+let written = "Before";
+</script>
+
+<div>
+    <span>{hello}</span>
+    <span>{written = "After"}</span>
+</div>
+
+```
+
+# Diagnostics
+```
+invalid-svelte-template-read.svelte:3:1 lint/style/useConst  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This let declares a variable that is only assigned once.
+  
+    1 │ <!-- should generate a diagnostic -->
+    2 │ <script>
+  > 3 │ let hello = "Hello World";
+      │ ^^^
+    4 │ let written = "Before";
+    5 │ </script>
+  
+  i 'hello' is never reassigned.
+  
+    1 │ <!-- should generate a diagnostic -->
+    2 │ <script>
+  > 3 │ let hello = "Hello World";
+      │     ^^^^^
+    4 │ let written = "Before";
+    5 │ </script>
+  
+  i A variable that is never reassigned is clearer as const, because it prevents the binding from being reassigned.
+  
+  i Safe fix: Use const instead.
+  
+    1 1 │   
+    2   │ - let·hello·=·"Hello·World";
+      2 │ + const·hello·=·"Hello·World";
+    3 3 │   let written = "Before";
+    4 4 │   
+  
+
+```

@@ -1,0 +1,31 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-svelte-cross-snippet.svelte
+---
+# Input
+```svelte
+<!-- should generate diagnostics -->
+<script>
+function update() {}
+</script>
+
+<button onclick={() => (update = () => {})}>Update</button>
+
+```
+
+# Diagnostics
+```
+invalid-svelte-cross-snippet.svelte:6:25 lint/suspicious/noFunctionAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Do not reassign a function declaration.
+  
+    4 │ </script>
+    5 │ 
+  > 6 │ <button onclick={() => (update = () => {})}>Update</button>
+      │                         ^^^^^^
+    7 │ 
+  
+  i Use a local variable instead.
+  
+
+```

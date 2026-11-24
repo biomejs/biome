@@ -27,7 +27,7 @@ biome check --write --unsafe file.svelte
 import { sure } from "sure.js";
 import z from "zod";
 
-let schema = z.object().optional();
+const schema = z.object().optional();
 schema + sure();
 </script>
 

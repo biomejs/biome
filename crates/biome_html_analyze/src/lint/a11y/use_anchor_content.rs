@@ -13,7 +13,7 @@ use crate::a11y::{
     get_truthy_aria_hidden_attribute, html_element_has_truthy_aria_hidden,
     html_self_closing_element_has_accessible_name,
     html_self_closing_element_has_non_empty_attribute,
-    html_self_closing_element_has_truthy_aria_hidden,
+    html_self_closing_element_has_truthy_aria_hidden, is_opaque_svelte_child,
 };
 
 declare_lint_rule! {
@@ -126,8 +126,7 @@ impl Rule for UseAnchorContent {
         }
 
         // Check if the anchor has accessible content
-        let is_astro = source_type.is_astro();
-        if has_accessible_content(&html_element.children(), is_astro) {
+        if has_accessible_content(&html_element.children(), source_type) {
             return None;
         }
 
@@ -174,18 +173,19 @@ impl Rule for UseAnchorContent {
 }
 
 /// Checks if `HtmlElementList` contains accessible content (non-empty text or visible elements).
-fn has_accessible_content(html_child_list: &HtmlElementList, is_astro: bool) -> bool {
+fn has_accessible_content(html_child_list: &HtmlElementList, source: &HtmlFileSource) -> bool {
     html_child_list.into_iter().any(|child| match &child {
+        _ if is_opaque_svelte_child(&child, source) => true,
         AnyHtmlElement::AnyHtmlContent(content) => is_accessible_text_content(content),
         // A fragment renders nothing itself, so its children carry the content.
         AnyHtmlElement::AstroFragment(fragment) => {
-            has_accessible_content(&fragment.children(), is_astro)
+            has_accessible_content(&fragment.children(), source)
         }
         AnyHtmlElement::HtmlElement(element) => {
             if html_element_has_truthy_aria_hidden(element) {
                 false
             } else {
-                has_accessible_content(&element.children(), is_astro)
+                has_accessible_content(&element.children(), source)
             }
         }
         AnyHtmlElement::HtmlSelfClosingElement(element) => {
@@ -200,7 +200,10 @@ fn has_accessible_content(html_child_list: &HtmlElementList, is_astro: bool) -> 
             let tag_text = element.name().ok().and_then(|n| n.token_text_trimmed());
 
             match tag_text.as_ref().map(|t| t.as_ref()) {
-                Some(name) if name.eq_ignore_ascii_case("img") || (is_astro && name == "Image") => {
+                Some(name)
+                    if name.eq_ignore_ascii_case("img")
+                        || (source.is_astro() && name == "Image") =>
+                {
                     html_self_closing_element_has_non_empty_attribute(element, "alt")
                 }
                 Some(name)

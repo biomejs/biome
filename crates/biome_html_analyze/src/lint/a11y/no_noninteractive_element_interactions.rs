@@ -2,6 +2,7 @@ use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, decl
 use biome_aria_metadata::AriaRole;
 use biome_console::markup;
 use biome_html_syntax::element_ext::AnyHtmlTagElement;
+use biome_languages::HtmlFileSource;
 use biome_rowan::AstNode;
 use biome_rule_options::no_noninteractive_element_interactions::NoNoninteractiveElementInteractionsOptions;
 
@@ -94,8 +95,11 @@ impl Rule for NoNoninteractiveElementInteractions {
         let role = aria_roles.get_role_by_element_name(element);
         let has_interactive_role = role.is_some_and(|role| role.is_interactive());
 
-        if !has_event_handler(EVENT_HANDLER_TYPES, element)
-            || is_content_editable(element)
+        if !has_event_handler(
+            EVENT_HANDLER_TYPES,
+            element,
+            ctx.source_type::<HtmlFileSource>(),
+        ) || is_content_editable(element)
             || aria_roles.is_presentation_role(element)
             || is_hidden_from_screen_reader(element)
             || has_interactive_role

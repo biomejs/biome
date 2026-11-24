@@ -1,0 +1,113 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome lint Component.svelte state.svelte.ts
+biome lint --write Component.svelte state.svelte.ts
+```
+
+## `biome.json`
+
+```json
+{
+  "formatter": { "enabled": false },
+  "html": {
+    "experimentalFullSupportEnabled": true,
+    "linter": { "enabled": true }
+  },
+  "linter": {
+    "rules": {
+      "preset": "none",
+      "complexity": { "noUselessStringConcat": "warn" }
+    }
+  },
+  "assist": { "enabled": false }
+}
+```
+
+## `Component.svelte`
+
+```svelte
+<!-- biome-ignore-start lint/complexity/noUselessStringConcat: intentional concatenation -->
+<script context="module">
+export const preserved = "a" + "b";
+</script>
+<!-- biome-ignore-end lint/complexity/noUselessStringConcat: intentional concatenation -->
+
+<script>
+const fixed = "cd";
+</script>
+
+<p>{preserved}{fixed}</p>
+
+```
+
+## `state.svelte.ts`
+
+```ts
+// biome-ignore lint/complexity/noUselessStringConcat: intentional concatenation
+export const preserved = "a" + "b";
+export const fixed = "cd";
+
+```
+
+# Emitted Messages
+
+```block
+Component.svelte:8:15 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Useless string concatenation.
+  
+     7 │ <script>
+   > 8 │ const fixed = "c" + "d";
+       │               ^^^^^^^^^
+     9 │ </script>
+    10 │ 
+  
+  i Consider turning the expression into a single string to improve readability and runtime performance.
+  
+  i Safe fix: Remove the useless concatenation
+  
+    1 1 │   
+    2   │ - const·fixed·=·"c"·+·"d";
+      2 │ + const·fixed·=·"cd";
+    3 3 │   
+  
+
+```
+
+```block
+state.svelte.ts:3:22 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Useless string concatenation.
+  
+    1 │ // biome-ignore lint/complexity/noUselessStringConcat: intentional concatenation
+    2 │ export const preserved = "a" + "b";
+  > 3 │ export const fixed = "c" + "d";
+      │                      ^^^^^^^^^
+    4 │ 
+  
+  i Consider turning the expression into a single string to improve readability and runtime performance.
+  
+  i Safe fix: Remove the useless concatenation
+  
+    1 1 │   // biome-ignore lint/complexity/noUselessStringConcat: intentional concatenation
+    2 2 │   export const preserved = "a" + "b";
+    3   │ - export·const·fixed·=·"c"·+·"d";
+      3 │ + export·const·fixed·=·"cd";
+    4 4 │   
+  
+
+```
+
+```block
+Checked 2 files in <TIME>. No fixes applied.
+Found 2 warnings.
+```
+
+```block
+Checked 2 files in <TIME>. Fixed 2 files.
+```

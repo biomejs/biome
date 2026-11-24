@@ -1,0 +1,44 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-svelte-source-module.svelte.ts
+---
+# Input
+```ts
+// should generate a diagnostic
+let value = 1;
+console.log(value);
+
+```
+
+# Diagnostics
+```
+invalid-svelte-source-module.svelte.ts:2:1 lint/style/useConst  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This let declares a variable that is only assigned once.
+  
+    1 │ // should generate a diagnostic
+  > 2 │ let value = 1;
+      │ ^^^
+    3 │ console.log(value);
+    4 │ 
+  
+  i 'value' is never reassigned.
+  
+    1 │ // should generate a diagnostic
+  > 2 │ let value = 1;
+      │     ^^^^^
+    3 │ console.log(value);
+    4 │ 
+  
+  i A variable that is never reassigned is clearer as const, because it prevents the binding from being reassigned.
+  
+  i Safe fix: Use const instead.
+  
+    1 1 │   // should generate a diagnostic
+    2   │ - let·value·=·1;
+      2 │ + const·value·=·1;
+    3 3 │   console.log(value);
+    4 4 │   
+  
+
+```

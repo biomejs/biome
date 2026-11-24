@@ -19,5 +19,8 @@ expression: valid.svelte
 <!-- PascalCase: custom components, should NOT trigger the rule -->
 <H1></H1>
 <MyHeading></MyHeading>
+<h2><titles.Current /></h2>
+<h2><titles.Current></titles.Current></h2>
+<h2><HeadingText aria-hidden="true" /></h2>
 
 ```

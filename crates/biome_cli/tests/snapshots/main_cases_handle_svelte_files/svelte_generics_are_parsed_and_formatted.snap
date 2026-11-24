@@ -27,7 +27,7 @@ biome check --write file.svelte
 	lang="ts"
 	generics="TData extends { selected?: boolean; name?: string }, TRow"
 >
-let { items, selected }: { items: TData[]; selected: TRow } = $props();
+const { items, selected }: { items: TData[]; selected: TRow } = $props();
 </script>
 
 <p>{items.length}{selected}</p>

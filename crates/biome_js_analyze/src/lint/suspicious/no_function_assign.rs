@@ -1,10 +1,11 @@
+use crate::services::embedded::EmbeddedService;
 use crate::services::semantic::Semantic;
 use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_js_semantic::{Reference, ReferencesExtensions};
-use biome_js_syntax::{JsFunctionDeclaration, JsIdentifierBinding};
-use biome_rowan::AstNode;
+use biome_js_semantic::{JsDeclarationKind, Reference};
+use biome_js_syntax::JsIdentifierAssignment;
+use biome_rowan::{AstNode, TextRange};
 use biome_rule_options::no_function_assign::NoFunctionAssignOptions;
 
 declare_lint_rule! {
@@ -105,50 +106,70 @@ declare_lint_rule! {
     }
 }
 
-pub struct State {
-    id: JsIdentifierBinding,
-    all_writes: Box<[Reference]>,
+pub enum FunctionDeclaration {
+    Local {
+        range: TextRange,
+        all_writes: Box<[Reference]>,
+    },
+    OtherSnippet,
 }
 
 impl Rule for NoFunctionAssign {
-    type Query = Semantic<JsFunctionDeclaration>;
-    type State = State;
+    type Query = Semantic<JsIdentifierAssignment>;
+    type State = FunctionDeclaration;
     type Signals = Option<Self::State>;
     type Options = NoFunctionAssignOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
-        let declaration = ctx.query();
+        let assignment = ctx.query();
         let model = ctx.model();
-
-        let id = declaration.id().ok()?;
-        let id = id.as_js_identifier_binding()?;
-        let all_writes: Vec<Reference> = id.all_writes(model).collect();
-
-        if all_writes.is_empty() {
-            None
-        } else {
-            Some(State {
-                id: id.clone(),
+        if let Some(binding) = model.binding(assignment) {
+            if binding.declaration_kind() != JsDeclarationKind::Function {
+                return None;
+            }
+            let all_writes: Vec<Reference> = binding.all_writes().collect();
+            if all_writes.first()?.syntax().text_trimmed_range()
+                != assignment.syntax().text_trimmed_range()
+            {
+                return None;
+            }
+            return Some(FunctionDeclaration::Local {
+                range: binding.range(),
                 all_writes: all_writes.into_boxed_slice(),
-            })
+            });
         }
+
+        (ctx.get_service::<EmbeddedService>()?
+            .svelte_declaration_kind(assignment.range())?
+            == JsDeclarationKind::Function)
+            .then_some(FunctionDeclaration::OtherSnippet)
     }
 
-    fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
+    fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
+        let (range, all_writes) = match state {
+            FunctionDeclaration::Local { range, all_writes } => {
+                (*range, Some(all_writes.as_ref()))
+            }
+            FunctionDeclaration::OtherSnippet => {
+                (ctx.query().syntax().text_trimmed_range(), None)
+            }
+        };
         let mut diag = RuleDiagnostic::new(
             rule_category!(),
-            state.id.syntax().text_trimmed_range(),
+            range,
             markup! {
                 "Do not reassign a function declaration."
             },
         );
 
         let mut hoisted_quantity = 0;
-        for reference in state.all_writes.iter() {
-            let node = reference.syntax();
-            diag = diag.detail(node.text_trimmed_range(), "Reassigned here.");
+        if let Some(all_writes) = all_writes {
+            for reference in all_writes {
+                let node = reference.syntax();
+                diag = diag.detail(node.text_trimmed_range(), "Reassigned here.");
 
-            hoisted_quantity += i32::from(reference.is_using_hoisted_declaration());
+                hoisted_quantity += i32::from(reference.is_using_hoisted_declaration());
+            }
         }
 
         let diag = if hoisted_quantity > 0 {

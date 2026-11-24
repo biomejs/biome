@@ -1,0 +1,65 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome format --stdin-file-path Recovery.svelte
+```
+
+## `biome.json`
+
+```json
+{
+  "formatter": { "formatWithErrors": true },
+  "html": {
+    "experimentalFullSupportEnabled": true,
+    "formatter": { "enabled": true }
+  }
+}
+```
+
+# Input messages
+
+```block
+<script>let count=$state(0)</script>
+<style lang="less">  @ink: blue;
+    p { color: @ink }  </style>
+<p>𝄞{  count +  } <b class = "after">after</b></p>
+
+```
+
+# Emitted Messages
+
+```block
+Recovery.svelte:6:17 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an expression but instead found the end of the file.
+  
+    4 │ <style lang="less">  @ink: blue;
+    5 │     p { color: @ink }  </style>
+  > 6 │ <p>𝄞{  count +  } <b class="after">after</b></p>
+      │                 
+    7 │ 
+  
+  i Expected an expression here.
+  
+    4 │ <style lang="less">  @ink: blue;
+    5 │     p { color: @ink }  </style>
+  > 6 │ <p>𝄞{  count +  } <b class="after">after</b></p>
+      │                 
+    7 │ 
+  
+
+```
+
+```block
+<script>
+let count = $state(0);
+</script>
+<style lang="less">  @ink: blue;
+    p { color: @ink }  </style>
+<p>𝄞{  count +  } <b class="after">after</b></p>
+
+```

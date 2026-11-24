@@ -1,0 +1,53 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: shorthand.svelte
+---
+# Input
+```svelte
+<!-- should generate diagnostics -->
+<script>
+    let { onclick, click, onClick } = $props();
+</script>
+
+<div { onclick }></div>
+<div onclickcapture={onclick}></div>
+<button {onclick}>Run</button>
+<div {click}></div>
+<div click={click}></div>
+<div {onClick}></div>
+
+```
+
+# Diagnostics
+```
+shorthand.svelte:6:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected event handler on static element.
+  
+    4 │ </script>
+    5 │ 
+  > 6 │ <div { onclick }></div>
+      │ ^^^^^^^^^^^^^^^^^
+    7 │ <div onclickcapture={onclick}></div>
+    8 │ <button {onclick}>Run</button>
+  
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+shorthand.svelte:7:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected event handler on static element.
+  
+    6 │ <div { onclick }></div>
+  > 7 │ <div onclickcapture={onclick}></div>
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ <button {onclick}>Run</button>
+    9 │ <div {click}></div>
+  
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```

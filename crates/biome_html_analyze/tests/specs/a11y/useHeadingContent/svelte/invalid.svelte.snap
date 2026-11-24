@@ -10,6 +10,8 @@ expression: invalid.svelte
 <h1 aria-hidden="true">invisible content</h1>
 <h1><span aria-hidden="true">hidden</span></h1>
 <h3></h3>
+<h2><span aria-hidden="true"><titles.Current /></span></h2>
+<h2><custom-label aria-hidden="true">Text</custom-label></h2>
 
 ```
 
@@ -74,7 +76,7 @@ invalid.svelte:5:1 lint/a11y/useHeadingContent ━━━━━━━━━━━
   > 5 │ <h1><span aria-hidden="true">hidden</span></h1>
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     6 │ <h3></h3>
-    7 │ 
+    7 │ <h2><span aria-hidden="true"><titles.Current /></span></h2>
   
   i All headings on a page should have content that is accessible to screen readers.
   
@@ -90,7 +92,41 @@ invalid.svelte:6:1 lint/a11y/useHeadingContent ━━━━━━━━━━━
     5 │ <h1><span aria-hidden="true">hidden</span></h1>
   > 6 │ <h3></h3>
       │ ^^^^^^^^^
-    7 │ 
+    7 │ <h2><span aria-hidden="true"><titles.Current /></span></h2>
+    8 │ <h2><custom-label aria-hidden="true">Text</custom-label></h2>
+  
+  i All headings on a page should have content that is accessible to screen readers.
+  
+
+```
+
+```
+invalid.svelte:7:1 lint/a11y/useHeadingContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide screen reader accessible content when using heading elements.
+  
+    5 │ <h1><span aria-hidden="true">hidden</span></h1>
+    6 │ <h3></h3>
+  > 7 │ <h2><span aria-hidden="true"><titles.Current /></span></h2>
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ <h2><custom-label aria-hidden="true">Text</custom-label></h2>
+    9 │ 
+  
+  i All headings on a page should have content that is accessible to screen readers.
+  
+
+```
+
+```
+invalid.svelte:8:1 lint/a11y/useHeadingContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide screen reader accessible content when using heading elements.
+  
+    6 │ <h3></h3>
+    7 │ <h2><span aria-hidden="true"><titles.Current /></span></h2>
+  > 8 │ <h2><custom-label aria-hidden="true">Text</custom-label></h2>
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    9 │ 
   
   i All headings on a page should have content that is accessible to screen readers.
   

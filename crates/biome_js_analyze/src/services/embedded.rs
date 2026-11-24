@@ -13,7 +13,7 @@ use biome_embeds::references::{
     InternedReference, is_reference_used, is_svelte_store_reference_used, is_type_reference_used,
     is_value_reference_used, is_vue_directive_reference_used,
 };
-use biome_js_semantic::SemanticModel;
+use biome_js_semantic::{JsDeclarationKind, SemanticModel};
 use biome_js_syntax::{JsReferenceIdentifier, JsSyntaxToken, unescape_js_identifier};
 use biome_languages::{LanguageDb, has_embedded_content};
 use biome_parser::db::SourceExt;
@@ -344,6 +344,15 @@ impl EmbeddedService {
                 self.is_known_unresolved_reference(token.text_trimmed_range())
                     .unwrap_or(true)
             })
+    }
+
+    pub(crate) fn svelte_declaration_kind(&self, range: TextRange) -> Option<JsDeclarationKind> {
+        match &self.framework_model {
+            Some(FrameworkModel::Svelte(model)) => {
+                model.declaration_kind_for_reference(range + self.snippet_offset)
+            }
+            _ => None,
+        }
     }
 
     pub(crate) fn is_known_unresolved_reference(&self, range: TextRange) -> Option<bool> {

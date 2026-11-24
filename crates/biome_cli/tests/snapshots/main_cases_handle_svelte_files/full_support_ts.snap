@@ -31,7 +31,7 @@ interface Props {
 	title: string;
 }
 
-let schema = z.object().optional();
+const schema = z.object().optional();
 schema + sure();
 const _props: Props = { title: "Hello" };
 </script>

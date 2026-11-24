@@ -8,6 +8,9 @@ mod handlers;
 mod requests;
 mod server;
 #[cfg(test)]
+#[path = "server_svelte.tests.rs"]
+mod server_svelte;
+#[cfg(test)]
 mod server_test_utils;
 mod session;
 mod utils;

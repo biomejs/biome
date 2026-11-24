@@ -4,8 +4,10 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_html_syntax::{AnyHtmlAttribute, AnyVueDirective, HtmlAttributeList};
+use biome_languages::HtmlFileSource;
 use biome_rowan::{AstNodeList, TextRange, TokenText};
 use biome_rule_options::no_duplicate_attributes::NoDuplicateAttributesOptions;
+use biome_unicode_table::is_js_ident;
 use std::collections::HashSet;
 
 declare_lint_rule! {
@@ -78,9 +80,10 @@ impl Rule for NoDuplicateAttributes {
         let node = ctx.query();
         let mut seen = HashSet::<(TokenText, TextRange)>::new();
         let mut violations = Vec::new();
+        let is_svelte = ctx.source_type::<HtmlFileSource>().is_svelte();
 
         for attribute in node.iter() {
-            let Some(key) = attribute_key(&attribute) else {
+            let Some(key) = attribute_key(&attribute, is_svelte) else {
                 continue;
             };
 
@@ -118,7 +121,14 @@ impl Rule for NoDuplicateAttributes {
     }
 }
 
-fn attribute_key(attribute: &AnyHtmlAttribute) -> Option<(TokenText, TextRange)> {
+fn attribute_key(attribute: &AnyHtmlAttribute, is_svelte: bool) -> Option<(TokenText, TextRange)> {
+    if is_svelte && let Some(shorthand) = attribute.as_html_attribute_single_text_expression() {
+        let token = shorthand.expression().ok()?.html_literal_token().ok()?;
+        let name = token.token_text_trimmed().trim_token();
+        let range = name.source_range(token.text_range());
+        return is_js_ident(&name).then_some((name, range));
+    }
+
     // Plain HTML attribute (eg. `foo`)
     if let Some(html_attr) = attribute.as_html_attribute()
         && let Ok(name) = html_attr.name()

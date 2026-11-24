@@ -9,7 +9,8 @@
 
 use biome_aria::event_handlers::matches_event_handler;
 use biome_html_syntax::element_ext::AnyHtmlTagElement;
-use biome_html_syntax::{AnyHtmlAttribute, AnyVueDirective};
+use biome_html_syntax::{AnyHtmlAttribute, AnyHtmlElement, AnyHtmlTagName, AnyVueDirective};
+use biome_languages::HtmlFileSource;
 use biome_rowan::AstNodeList;
 
 // ============================================================================
@@ -274,8 +275,48 @@ pub(crate) fn is_content_editable(element: &AnyHtmlTagElement) -> bool {
     false
 }
 
-/// Check if the element contains event handler
-pub fn has_event_handler(handler_types: &[&str], element: &AnyHtmlTagElement) -> bool {
+/// Svelte components can render content that is absent at the call site. Their
+/// props, including `aria-hidden`, need not be forwarded to a DOM element.
+pub(crate) fn is_opaque_svelte_child(child: &AnyHtmlElement, source: &HtmlFileSource) -> bool {
+    if !source.is_svelte() {
+        return false;
+    }
+    let name = match child {
+        AnyHtmlElement::HtmlElement(element) => element.name(),
+        AnyHtmlElement::HtmlSelfClosingElement(element) => element.name().ok(),
+        _ => None,
+    };
+    match name {
+        Some(AnyHtmlTagName::HtmlMemberName(_)) => true,
+        Some(AnyHtmlTagName::HtmlComponentName(component)) => component
+            .value_token()
+            .is_ok_and(|token| biome_unicode_table::is_js_ident(token.text_trimmed())),
+        _ => false,
+    }
+}
+
+/// Checks for a handler in the requested event categories. Svelte uses the
+/// case-sensitive attribute name for both `onclick={handler}` and `{onclick}`;
+/// a `capture` suffix selects the capture phase of the same event.
+pub fn has_event_handler(
+    handler_types: &[&str],
+    element: &AnyHtmlTagElement,
+    source: &HtmlFileSource,
+) -> bool {
+    if source.is_svelte() {
+        return element.attributes().iter().any(|attribute| {
+            attribute.name().is_some_and(|name| {
+                let name = name.trim();
+                name.starts_with("on")
+                    && name.bytes().all(|b| b.is_ascii_lowercase())
+                    && matches_event_handler(
+                        handler_types,
+                        name.strip_suffix("capture").unwrap_or(name),
+                    )
+            })
+        });
+    }
+
     element.attributes().iter().any(|attribute| {
         match attribute {
             AnyHtmlAttribute::HtmlAttribute(html_attribute) => html_attribute

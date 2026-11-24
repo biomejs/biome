@@ -1,0 +1,33 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-svelte-cross-snippet.svelte
+---
+# Input
+```svelte
+<!-- should generate diagnostics -->
+<script>
+class Widget {}
+</script>
+
+<button onclick={() => (Widget = class {})}>Update</button>
+
+```
+
+# Diagnostics
+```
+invalid-svelte-cross-snippet.svelte:6:25 lint/suspicious/noClassAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The class 'Widget' is reassigned.
+  
+    4 │ </script>
+    5 │ 
+  > 6 │ <button onclick={() => (Widget = class {})}>Update</button>
+      │                         ^^^^^^
+    7 │ 
+  
+  i Reassigning a class replaces it. Code that expects the original class, such as new calls and instanceof checks, can then break.
+  
+  i Store the new value in a separate variable, or give the new class a different name.
+  
+
+```

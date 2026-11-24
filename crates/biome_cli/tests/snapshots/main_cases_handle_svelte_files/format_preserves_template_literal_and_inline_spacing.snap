@@ -1,0 +1,45 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome format --stdin-file-path Label.svelte
+```
+
+## `biome.json`
+
+```json
+{
+  "javascript": { "formatter": { "semicolons": "asNeeded" } },
+  "html": {
+    "experimentalFullSupportEnabled": true,
+    "formatter": { "enabled": true }
+  }
+}
+```
+
+# Input messages
+
+```block
+<script>
+let label=$state(`first
+  second`)
+</script>
+
+<p class = 'label'>{label}<i>!</i> <b>next</b></p>
+
+```
+
+# Emitted Messages
+
+```block
+<script>
+let label = $state(`first
+  second`)
+</script>
+
+<p class="label">{label}<i>!</i> <b>next</b></p>
+
+```

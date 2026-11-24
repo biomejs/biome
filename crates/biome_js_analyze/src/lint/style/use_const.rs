@@ -112,8 +112,8 @@ impl Rule for UseConst {
         let declaration = ctx.query();
         let model = ctx.model();
 
-        // Other framework source snippets may have writes the local JavaScript model cannot see.
-        // Astro frontmatter uses the resolved host model below.
+        // Framework source snippets may have writes the local JavaScript model cannot see.
+        // Astro frontmatter and Svelte component scripts use their resolved host models below.
         let file_source = ctx.source_type::<JsFileSource>();
         let is_astro_frontmatter = matches!(
             file_source.as_embedding_kind(),
@@ -122,7 +122,13 @@ impl Rule for UseConst {
                 ..
             }
         );
-        if file_source.is_embedded_source() && !is_astro_frontmatter && declaration.is_let() {
+        let is_svelte_source = file_source.is_embedded_source() && file_source.is_svelte_component();
+        let has_host_model = is_astro_frontmatter || is_svelte_source;
+        if file_source.is_embedded_source()
+            && !file_source.is_svelte_source_module()
+            && !has_host_model
+            && declaration.is_let()
+        {
             return None;
         }
 
@@ -131,7 +137,7 @@ impl Rule for UseConst {
             return None;
         }
 
-        let embedded = if is_astro_frontmatter {
+        let embedded = if has_host_model {
             Some(ctx.get_service::<EmbeddedService>()?)
         } else {
             None

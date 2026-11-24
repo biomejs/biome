@@ -22,3 +22,7 @@
 <!-- Custom components may render accessible content -->
 <a><Image alt="description" /></a>
 <a><CustomIcon /></a>
+<a><LinkText></LinkText></a>
+<a><Icons.Home /></a>
+<a><Img /></a>
+<a><LinkText aria-hidden="true" /></a>

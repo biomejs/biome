@@ -1,0 +1,124 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome lint Component.svelte
+```
+
+## `biome.json`
+
+```json
+{
+  "formatter": { "enabled": false },
+  "html": {
+    "experimentalFullSupportEnabled": true,
+    "linter": { "enabled": true }
+  },
+  "linter": {
+    "rules": {
+      "preset": "none",
+      "suspicious": {
+        "noClassAssign": "error",
+        "noFunctionAssign": "error",
+        "noImportAssign": "error"
+      }
+    }
+  },
+  "assist": { "enabled": false }
+}
+```
+
+## `Component.svelte`
+
+```svelte
+<script>
+import value from "pkg";
+function update() {}
+class Widget {}
+</script>
+
+<button
+    onclick={() => {
+        value = 1;
+        update = () => {};
+        Widget = class {};
+    }}
+>
+    Update
+</button>
+
+```
+
+# Termination Message
+
+```block
+lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+Component.svelte:9:9 lint/suspicious/noImportAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The imported variable value is read-only
+  
+     7 │ <button
+     8 │     onclick={() => {
+   > 9 │         value = 1;
+       │         ^^^^^
+    10 │         update = () => {};
+    11 │         Widget = class {};
+  
+  i Use a local variable instead of reassigning an import.
+  
+
+```
+
+```block
+Component.svelte:10:9 lint/suspicious/noFunctionAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Do not reassign a function declaration.
+  
+     8 │     onclick={() => {
+     9 │         value = 1;
+  > 10 │         update = () => {};
+       │         ^^^^^^
+    11 │         Widget = class {};
+    12 │     }}
+  
+  i Use a local variable instead.
+  
+
+```
+
+```block
+Component.svelte:11:9 lint/suspicious/noClassAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The class 'Widget' is reassigned.
+  
+     9 │         value = 1;
+    10 │         update = () => {};
+  > 11 │         Widget = class {};
+       │         ^^^^^^
+    12 │     }}
+    13 │ >
+  
+  i Reassigning a class replaces it. Code that expects the original class, such as new calls and instanceof checks, can then break.
+  
+  i Store the new value in a separate variable, or give the new class a different name.
+  
+
+```
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+Found 3 errors.
+```

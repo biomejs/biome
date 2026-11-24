@@ -16,7 +16,7 @@ use crate::a11y::{
     get_truthy_aria_hidden_attribute, has_accessible_name, html_element_has_truthy_aria_hidden,
     html_self_closing_element_has_accessible_name,
     html_self_closing_element_has_non_empty_attribute,
-    html_self_closing_element_has_truthy_aria_hidden,
+    html_self_closing_element_has_truthy_aria_hidden, is_opaque_svelte_child,
 };
 
 declare_lint_rule! {
@@ -138,9 +138,7 @@ impl Rule for UseHeadingContent {
                 if html_element.opening_element().is_err() {
                     return None;
                 }
-                let is_html = source_type.is_html();
-                let is_astro = source_type.is_astro();
-                if has_accessible_content(&html_element.children(), is_html, is_astro) {
+                if has_accessible_content(&html_element.children(), source_type) {
                     None
                 } else {
                     Some(())
@@ -207,13 +205,16 @@ fn has_content_injecting_directive(
 /// Checks if an `HtmlElementList` contains accessible content.
 ///
 /// Text nodes, text expressions, and embedded content are considered accessible.
-/// Child elements with `aria-hidden` are excluded.
-fn has_accessible_content(children: &HtmlElementList, is_html: bool, is_astro: bool) -> bool {
+/// Native child elements with `aria-hidden` are excluded.
+fn has_accessible_content(children: &HtmlElementList, source: &HtmlFileSource) -> bool {
+    let is_html = source.is_html();
+    let is_astro = source.is_astro();
     children.into_iter().any(|child| match &child {
+        _ if is_opaque_svelte_child(&child, source) => true,
         AnyHtmlElement::AnyHtmlContent(content) => is_accessible_text_content(content),
         // A fragment renders nothing itself, so its children carry the content.
         AnyHtmlElement::AstroFragment(fragment) => {
-            has_accessible_content(&fragment.children(), is_html, is_astro)
+            has_accessible_content(&fragment.children(), source)
         }
         AnyHtmlElement::HtmlElement(element) => {
             if html_element_has_truthy_aria_hidden(element) {
@@ -236,7 +237,7 @@ fn has_accessible_content(children: &HtmlElementList, is_html: bool, is_astro: b
                     return true;
                 }
             }
-            has_accessible_content(&element.children(), is_html, is_astro)
+            has_accessible_content(&element.children(), source)
         }
         AnyHtmlElement::HtmlSelfClosingElement(element) => {
             if html_self_closing_element_has_truthy_aria_hidden(element) {

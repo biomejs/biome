@@ -3770,6 +3770,53 @@ fn commonjs_file_rejects_import_statement() {
 }
 
 #[test]
+fn svelte_javascript_source_module_remains_a_module_in_a_commonjs_package() {
+    const FILE_PATH: &str = "/project/state.svelte.js";
+    const FILE_CONTENT: &[u8] = b"export const count = $state(0);";
+    const MANIFEST_CONTENT: &[u8] = b"{ \"type\": \"commonjs\" }";
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from(FILE_PATH), FILE_CONTENT);
+    fs.insert(Utf8PathBuf::from("/project/package.json"), MANIFEST_CONTENT);
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/");
+    workspace
+        .scan_project(ScanProjectParams {
+            project_key,
+            watch: false,
+            force: false,
+            scan_kind: ScanKind::Project,
+            verbose: false,
+        })
+        .unwrap();
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new(FILE_PATH),
+            content: FileContent::FromServer,
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+            editor_features: None,
+        })
+        .unwrap();
+
+    let source = workspace
+        .get_file_source(FILE_PATH.into(), false)
+        .to_js_file_source()
+        .expect("JS file source");
+    assert!(source.is_svelte_source_module());
+    assert!(source.is_module());
+    assert!(
+        workspace
+            .get_parse(FILE_PATH.into())
+            .unwrap()
+            .parse_diagnostics(&workspace.get_db())
+            .is_empty()
+    );
+}
+
+#[test]
 fn pnpm_workspace_update_reapplies_catalogs() {
     const PACKAGE_JSON: &[u8] = br#"{
   "name": "app",
@@ -8101,6 +8148,499 @@ fn go_to_definition_css_class_via_transitive_import() {
     assert_document_path(path, Utf8Path::new("/project/components.css"));
     // "card" in `.card` starts at offset 1 (after the dot)
     assert_eq!(range, &TextRange::new(TextSize::from(1), TextSize::from(5)));
+}
+
+#[cfg(feature = "stable")]
+mod svelte_fixes {
+    use super::*;
+    use biome_configuration::html::{HtmlFormatterConfiguration, HtmlLinterConfiguration};
+
+    const FILE_PATH: &str = "/project/component.svelte";
+
+    fn setup_workspace(
+        source: &str,
+        only: &[&str],
+    ) -> (LocalWorkspace, ProjectKey, Vec<AnalyzerSelector>) {
+        let fs = MemoryFileSystem::default();
+        fs.insert(Utf8PathBuf::from(FILE_PATH), source);
+        let (workspace, project_key) = setup_workspace_and_open_project(fs, "/project");
+        workspace
+            .update_settings(UpdateSettingsParams {
+                project_key,
+                workspace_directory: Some(BiomePath::new("/project")),
+                configuration: Configuration {
+                    html: Some(HtmlConfiguration {
+                        experimental_full_support_enabled: Some(true.into()),
+                        formatter: Some(HtmlFormatterConfiguration {
+                            enabled: Some(true.into()),
+                            ..Default::default()
+                        }),
+                        linter: Some(HtmlLinterConfiguration {
+                            enabled: Some(true.into()),
+                        }),
+                        ..Default::default()
+                    }),
+                    ..Default::default()
+                },
+                extended_configurations: vec![],
+                module_graph_resolution_kind: ModuleGraphResolutionKind::None,
+            })
+            .unwrap();
+        workspace
+            .open_file(OpenFileParams {
+                project_key,
+                path: BiomePath::new(FILE_PATH),
+                content: FileContent::FromServer,
+                document_file_source: None,
+                persist_node_cache: false,
+                inline_config: None,
+                editor_features: None,
+            })
+            .unwrap();
+        let only = only
+            .iter()
+            .map(|selector| AnalyzerSelector::from_str(selector).unwrap())
+            .collect();
+        (workspace, project_key, only)
+    }
+
+    fn fix_file(
+        workspace: &LocalWorkspace,
+        project_key: ProjectKey,
+        only: Vec<AnalyzerSelector>,
+        mode: FixFileMode,
+    ) -> FixFileResult {
+        fix_file_with_format(workspace, project_key, only, mode, false)
+    }
+
+    fn fix_file_with_format(
+        workspace: &LocalWorkspace,
+        project_key: ProjectKey,
+        only: Vec<AnalyzerSelector>,
+        mode: FixFileMode,
+        should_format: bool,
+    ) -> FixFileResult {
+        workspace
+            .fix_file(FixFileParams {
+                project_key,
+                path: BiomePath::new(FILE_PATH),
+                fix_file_mode: mode,
+                should_format,
+                only: only.clone(),
+                skip: vec![],
+                enabled_rules: only,
+                rule_categories: RuleCategoriesBuilder::default()
+                    .with_lint()
+                    .with_assist()
+                    .build(),
+                suppression_reason: None,
+                inline_config: None,
+            })
+            .unwrap()
+    }
+
+    #[test]
+    fn formatting_embeds_refreshes_svelte_semantic_data_before_fixes() {
+        let source = r#"<style>
+p {
+    color: red;
+}
+</style>
+<script lang="ts">
+import Foo from "./Foo.svelte";
+import { Model } from "./types";
+
+let value: Foo;
+let model: Model;
+</script>
+<Foo />
+"#;
+        let (workspace, project_key, only) = setup_workspace(source, &["lint/style/useImportType"]);
+
+        let result = fix_file_with_format(
+            &workspace,
+            project_key,
+            only.clone(),
+            FixFileMode::SafeFixes,
+            true,
+        );
+
+        assert_eq!(
+            result.code,
+            r#"<style>
+p {
+	color: red;
+}
+</style>
+<script lang="ts">
+import Foo from "./Foo.svelte";
+import type { Model } from "./types";
+
+let value: Foo;
+let model: Model;
+</script>
+<Foo />
+"#
+        );
+        assert_eq!(result.actions.len(), 1);
+
+        workspace
+            .change_file(ChangeFileParams {
+                project_key,
+                path: BiomePath::new(FILE_PATH),
+                content: result.code.clone(),
+                version: 1,
+                inline_config: None,
+                editor_features: None,
+            })
+            .unwrap();
+        let repeated =
+            fix_file_with_format(&workspace, project_key, only, FixFileMode::SafeFixes, true);
+        assert_eq!(repeated.code, result.code);
+        assert!(repeated.actions.is_empty());
+    }
+
+    #[test]
+    fn applies_later_script_fix_after_an_earlier_edit() {
+        let source = r#"<script>
+import z from "zod";
+import { sure } from "sure.js";
+import unused from "src/utils";
+
+z + sure;
+</script>
+"#;
+        let (workspace, project_key, only) = setup_workspace(
+            source,
+            &[
+                "assist/source/organizeImports",
+                "lint/correctness/noUnusedImports",
+            ],
+        );
+
+        let safe_result = fix_file(
+            &workspace,
+            project_key,
+            only.clone(),
+            FixFileMode::SafeFixes,
+        );
+        assert_eq!(
+            safe_result.code,
+            "<script>\nimport unused from \"src/utils\";\nimport { sure } from \"sure.js\";\nimport z from \"zod\";\n\nz + sure;\n</script>\n"
+        );
+        assert_eq!(safe_result.actions.len(), 1);
+        assert_eq!(safe_result.skipped_suggested_fixes, 1);
+
+        let result = fix_file(
+            &workspace,
+            project_key,
+            only.clone(),
+            FixFileMode::SafeAndUnsafeFixes,
+        );
+
+        assert_eq!(
+            result.code,
+            "<script>\nimport { sure } from \"sure.js\";\nimport z from \"zod\";\n\nz + sure;\n</script>\n"
+        );
+        assert_eq!(result.actions.len(), 2);
+        let unused_import = "\nimport unused from \"src/utils\";";
+        let unused_start = source.find(unused_import).unwrap() as u32;
+        assert_eq!(
+            result.actions[1].range,
+            TextRange::at(TextSize::from(unused_start), TextSize::of(unused_import))
+        );
+        assert_eq!(result.errors, 0);
+        assert_eq!(result.skipped_suggested_fixes, 0);
+
+        workspace
+            .change_file(ChangeFileParams {
+                project_key,
+                path: BiomePath::new(FILE_PATH),
+                content: result.code.clone(),
+                version: 1,
+                inline_config: None,
+                editor_features: None,
+            })
+            .unwrap();
+        let repeated = fix_file(
+            &workspace,
+            project_key,
+            only,
+            FixFileMode::SafeAndUnsafeFixes,
+        );
+        assert_eq!(repeated.code, result.code);
+        assert!(repeated.actions.is_empty());
+    }
+
+    #[test]
+    fn reports_original_range_when_first_import_moves_later() {
+        let source = r#"<script>import unused from "zod";
+import { sure } from "sure.js";
+import z from "src/utils";
+
+z + sure;
+</script>
+"#;
+        let (baseline_workspace, baseline_project_key, baseline_only) =
+            setup_workspace(source, &["lint/correctness/noUnusedImports"]);
+        let baseline = fix_file(
+            &baseline_workspace,
+            baseline_project_key,
+            baseline_only,
+            FixFileMode::SafeAndUnsafeFixes,
+        );
+        assert_eq!(baseline.actions.len(), 1);
+
+        let (workspace, project_key, only) = setup_workspace(
+            source,
+            &[
+                "assist/source/organizeImports",
+                "lint/correctness/noUnusedImports",
+            ],
+        );
+        let result = fix_file(
+            &workspace,
+            project_key,
+            only,
+            FixFileMode::SafeAndUnsafeFixes,
+        );
+
+        assert_eq!(
+            result.code,
+            "<script>import z from \"src/utils\";\nimport { sure } from \"sure.js\";\n\nz + sure;\n</script>\n"
+        );
+        assert_eq!(result.actions.len(), 2);
+        assert_eq!(result.actions[1].range, baseline.actions[0].range);
+    }
+
+    #[test]
+    fn reports_original_ranges_for_duplicate_imports_in_both_scripts() {
+        let source = r#"<script module>import unused from "zod";
+import { sure } from "sure.js";
+import z from "src/utils";
+
+z + sure;
+</script>
+
+<script>import unused from "zod";
+import { sure } from "sure.js";
+import z from "src/utils";
+
+z + sure;
+</script>
+"#;
+        let (baseline_workspace, baseline_project_key, baseline_only) =
+            setup_workspace(source, &["lint/correctness/noUnusedImports"]);
+        let baseline = fix_file(
+            &baseline_workspace,
+            baseline_project_key,
+            baseline_only,
+            FixFileMode::SafeAndUnsafeFixes,
+        );
+        let baseline_ranges = baseline
+            .actions
+            .iter()
+            .map(|action| action.range)
+            .collect::<Vec<_>>();
+        assert_eq!(baseline_ranges.len(), 2);
+
+        let (workspace, project_key, only) = setup_workspace(
+            source,
+            &[
+                "assist/source/organizeImports",
+                "lint/correctness/noUnusedImports",
+            ],
+        );
+        let result = fix_file(
+            &workspace,
+            project_key,
+            only,
+            FixFileMode::SafeAndUnsafeFixes,
+        );
+        let no_unused_ranges = result
+            .actions
+            .iter()
+            .filter(|action| {
+                action
+                    .rule_name
+                    .as_ref()
+                    .is_some_and(|(_, rule)| rule == "noUnusedImports")
+            })
+            .map(|action| action.range)
+            .collect::<Vec<_>>();
+
+        assert_eq!(no_unused_ranges, baseline_ranges);
+    }
+
+    #[test]
+    fn applies_a_host_fix_after_script_edits() {
+        let source = r#"<script>
+import z from "zod";
+import { sure } from "sure.js";
+import unused from "src/utils";
+
+z + sure;
+</script>
+
+<input autofocus />
+"#;
+        let (workspace, project_key, only) = setup_workspace(
+            source,
+            &[
+                "assist/source/organizeImports",
+                "lint/correctness/noUnusedImports",
+                "lint/a11y/noAutofocus",
+            ],
+        );
+
+        let result = fix_file(
+            &workspace,
+            project_key,
+            only,
+            FixFileMode::SafeAndUnsafeFixes,
+        );
+
+        assert_eq!(
+            result.code,
+            "<script>\nimport { sure } from \"sure.js\";\nimport z from \"zod\";\n\nz + sure;\n</script>\n\n<input />\n"
+        );
+        assert_eq!(result.actions.len(), 3);
+        assert_eq!(
+            result.actions[2].range,
+            TextRange::new(
+                TextSize::from(0),
+                TextSize::from(source.find(" />\n").unwrap() as u32 + 1)
+            )
+        );
+        assert_eq!(result.errors, 0);
+    }
+
+    #[test]
+    fn fixes_each_binding_keys_and_respects_host_suppressions() {
+        let source = r#"<script>
+const items = [];
+const selected = 0;
+</script>
+
+{#each items as item (item.id == selected)}
+    <p>{item.id}</p>
+{/each}
+"#;
+        let (workspace, project_key, only) =
+            setup_workspace(source, &["lint/suspicious/noDoubleEquals"]);
+        let result = fix_file(
+            &workspace,
+            project_key,
+            only,
+            FixFileMode::SafeAndUnsafeFixes,
+        );
+
+        assert_eq!(
+            result.code,
+            "<script>\nconst items = [];\nconst selected = 0;\n</script>\n\n{#each items as item (item.id === selected)}\n    <p>{item.id}</p>\n{/each}\n"
+        );
+        let [action] = result.actions.as_slice() else {
+            panic!("Expected one fix action, got: {:?}", result.actions);
+        };
+        assert!(source[action.range].contains("=="));
+
+        let suppressed = source.replace(
+            "{#each items",
+            "<!-- biome-ignore lint/suspicious/noDoubleEquals: stable suppression -->\n{#each items",
+        );
+        let (workspace, project_key, only) =
+            setup_workspace(&suppressed, &["lint/suspicious/noDoubleEquals"]);
+        let result = fix_file(
+            &workspace,
+            project_key,
+            only,
+            FixFileMode::SafeAndUnsafeFixes,
+        );
+        assert_eq!(result.code, suppressed);
+        assert!(result.actions.is_empty());
+    }
+
+    #[test]
+    fn inserts_script_suppressions_and_converges() {
+        let source = "<script>\ndebugger;\n</script>\n";
+        let (workspace, project_key, only) =
+            setup_workspace(source, &["lint/suspicious/noDebugger"]);
+
+        let result = fix_file(
+            &workspace,
+            project_key,
+            only.clone(),
+            FixFileMode::ApplySuppressions,
+        );
+
+        assert_eq!(
+            result.code,
+            "<script>\n// biome-ignore lint/suspicious/noDebugger: <explanation>\ndebugger;\n</script>\n"
+        );
+        assert_eq!(result.actions.len(), 1);
+        assert_eq!(result.errors, 0);
+
+        workspace
+            .change_file(ChangeFileParams {
+                project_key,
+                path: BiomePath::new(FILE_PATH),
+                content: result.code.clone(),
+                version: 1,
+                inline_config: None,
+                editor_features: None,
+            })
+            .unwrap();
+        let repeated = fix_file(
+            &workspace,
+            project_key,
+            only,
+            FixFileMode::ApplySuppressions,
+        );
+        assert_eq!(repeated.code, result.code);
+        assert!(repeated.actions.is_empty());
+    }
+
+    #[test]
+    fn respects_host_suppressions_and_reports_host_action_ranges() {
+        let source = r#"<!-- biome-ignore-start lint/suspicious/noDebugger: stable suppression -->
+<script context="module">
+debugger;
+</script>
+<!-- biome-ignore-end lint/suspicious/noDebugger: stable suppression -->
+
+<script>
+debugger;
+</script>
+"#;
+        let (workspace, project_key, only) =
+            setup_workspace(source, &["lint/suspicious/noDebugger"]);
+
+        let result = fix_file(
+            &workspace,
+            project_key,
+            only,
+            FixFileMode::SafeAndUnsafeFixes,
+        );
+
+        assert_eq!(
+            result.code,
+            "<!-- biome-ignore-start lint/suspicious/noDebugger: stable suppression -->\n<script context=\"module\">\ndebugger;\n</script>\n<!-- biome-ignore-end lint/suspicious/noDebugger: stable suppression -->\n\n<script>\n</script>\n"
+        );
+        assert_eq!(result.actions.len(), 1);
+        assert_eq!(
+            result.actions[0]
+                .rule_name
+                .as_ref()
+                .map(|(_, rule)| rule.as_ref()),
+            Some("noDebugger")
+        );
+        let start = source.rfind("\ndebugger;").unwrap() as u32;
+        let end = start + "\ndebugger;".len() as u32;
+        assert_eq!(
+            result.actions[0].range,
+            TextRange::new(TextSize::from(start), TextSize::from(end))
+        );
+    }
 }
 
 #[test]
