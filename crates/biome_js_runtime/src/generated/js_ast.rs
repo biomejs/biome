@@ -185,6 +185,11 @@ impl JsAstNode {
                 js_string!("JS_EXPRESSION_TEMPLATE_ROOT")
             }
             JsSyntaxKind::JS_SVELTE_SNIPPET_ROOT => js_string!("JS_SVELTE_SNIPPET_ROOT"),
+            JsSyntaxKind::JS_SVELTE_EACH_BINDING_ROOT => {
+                js_string!("JS_SVELTE_EACH_BINDING_ROOT")
+            }
+            JsSyntaxKind::JS_SVELTE_EACH_INDEX => js_string!("JS_SVELTE_EACH_INDEX"),
+            JsSyntaxKind::JS_SVELTE_EACH_KEY => js_string!("JS_SVELTE_EACH_KEY"),
             JsSyntaxKind::JS_SVELTE_DECLARATION_ROOT => {
                 js_string!("JS_SVELTE_DECLARATION_ROOT")
             }
@@ -1192,6 +1197,9 @@ impl JsAstNode {
             "JS_STRING_LITERAL_EXPRESSION" => JsSyntaxKind::JS_STRING_LITERAL_EXPRESSION,
             "JS_SUPER_EXPRESSION" => JsSyntaxKind::JS_SUPER_EXPRESSION,
             "JS_SVELTE_DECLARATION_ROOT" => JsSyntaxKind::JS_SVELTE_DECLARATION_ROOT,
+            "JS_SVELTE_EACH_BINDING_ROOT" => JsSyntaxKind::JS_SVELTE_EACH_BINDING_ROOT,
+            "JS_SVELTE_EACH_INDEX" => JsSyntaxKind::JS_SVELTE_EACH_INDEX,
+            "JS_SVELTE_EACH_KEY" => JsSyntaxKind::JS_SVELTE_EACH_KEY,
             "JS_SVELTE_LEGACY_CONST_ROOT" => JsSyntaxKind::JS_SVELTE_LEGACY_CONST_ROOT,
             "JS_SVELTE_SNIPPET_ROOT" => JsSyntaxKind::JS_SVELTE_SNIPPET_ROOT,
             "JS_SWITCH_STATEMENT" => JsSyntaxKind::JS_SWITCH_STATEMENT,
@@ -1612,6 +1620,9 @@ impl JsAstNode {
             JsSyntaxKind::JS_STRING_LITERAL_EXPRESSION => &JS_STRING_LITERAL_EXPRESSION_FIELDS,
             JsSyntaxKind::JS_SUPER_EXPRESSION => &JS_SUPER_EXPRESSION_FIELDS,
             JsSyntaxKind::JS_SVELTE_DECLARATION_ROOT => &JS_SVELTE_DECLARATION_ROOT_FIELDS,
+            JsSyntaxKind::JS_SVELTE_EACH_BINDING_ROOT => &JS_SVELTE_EACH_BINDING_ROOT_FIELDS,
+            JsSyntaxKind::JS_SVELTE_EACH_INDEX => &JS_SVELTE_EACH_INDEX_FIELDS,
+            JsSyntaxKind::JS_SVELTE_EACH_KEY => &JS_SVELTE_EACH_KEY_FIELDS,
             JsSyntaxKind::JS_SVELTE_LEGACY_CONST_ROOT => &JS_SVELTE_LEGACY_CONST_ROOT_FIELDS,
             JsSyntaxKind::JS_SVELTE_SNIPPET_ROOT => &JS_SVELTE_SNIPPET_ROOT_FIELDS,
             JsSyntaxKind::JS_SWITCH_STATEMENT => &JS_SWITCH_STATEMENT_FIELDS,
@@ -6902,6 +6913,114 @@ static JS_SVELTE_DECLARATION_ROOT_FIELDS: JsAstNodeFields = JsAstNodeFields {
             value: JsAstFieldValue::Token {
                 kinds: &[T![EOF]],
                 expected: "\"EOF\"",
+            },
+        },
+    ],
+};
+static JS_SVELTE_EACH_BINDING_ROOT_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_SVELTE_EACH_BINDING_ROOT,
+    name: "JsSvelteEachBindingRoot",
+    fields: &[
+        JsAstField {
+            property: "context",
+            updater: "withContext",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsBindingPattern",
+                can_cast: AnyJsBindingPattern::can_cast,
+            },
+        },
+        JsAstField {
+            property: "typeAnnotation",
+            updater: "withTypeAnnotation",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "TsTypeAnnotation",
+                can_cast: TsTypeAnnotation::can_cast,
+            },
+        },
+        JsAstField {
+            property: "index",
+            updater: "withIndex",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "JsSvelteEachIndex",
+                can_cast: JsSvelteEachIndex::can_cast,
+            },
+        },
+        JsAstField {
+            property: "key",
+            updater: "withKey",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "JsSvelteEachKey",
+                can_cast: JsSvelteEachKey::can_cast,
+            },
+        },
+        JsAstField {
+            property: "eofToken",
+            updater: "withEofToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![EOF]],
+                expected: "\"EOF\"",
+            },
+        },
+    ],
+};
+static JS_SVELTE_EACH_INDEX_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_SVELTE_EACH_INDEX,
+    name: "JsSvelteEachIndex",
+    fields: &[
+        JsAstField {
+            property: "commaToken",
+            updater: "withCommaToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![,]],
+                expected: "\",\"",
+            },
+        },
+        JsAstField {
+            property: "binding",
+            updater: "withBinding",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsBinding",
+                can_cast: AnyJsBinding::can_cast,
+            },
+        },
+    ],
+};
+static JS_SVELTE_EACH_KEY_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_SVELTE_EACH_KEY,
+    name: "JsSvelteEachKey",
+    fields: &[
+        JsAstField {
+            property: "lParenToken",
+            updater: "withLParenToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T!['(']],
+                expected: "\"'('\"",
+            },
+        },
+        JsAstField {
+            property: "expression",
+            updater: "withExpression",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsExpression",
+                can_cast: AnyJsExpression::can_cast,
+            },
+        },
+        JsAstField {
+            property: "rParenToken",
+            updater: "withRParenToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![')']],
+                expected: "\"')'\"",
             },
         },
     ],

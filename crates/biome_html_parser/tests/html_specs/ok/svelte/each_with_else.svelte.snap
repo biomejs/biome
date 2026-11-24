@@ -29,13 +29,11 @@ HtmlRoot {
                 list: HtmlTextExpression {
                     html_literal_token: HTML_LITERAL@6..13 " items " [] [],
                 },
-                item: SvelteEachAsKeyedItem {
+                item: SvelteEachBindingClause {
                     as_token: AS_KW@13..16 "as" [] [Whitespace(" ")],
-                    name: SvelteName {
-                        ident_token: IDENT@16..20 "item" [] [],
+                    clause: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@16..20 "item" [] [],
                     },
-                    index: missing (optional),
-                    key: missing (optional),
                 },
                 r_curly_token: R_CURLY@20..21 "}" [] [],
             },
@@ -122,12 +120,10 @@ HtmlRoot {
         1: EACH_KW@2..6 "each" [] []
         2: HTML_TEXT_EXPRESSION@6..13
           0: HTML_LITERAL@6..13 " items " [] []
-        3: SVELTE_EACH_AS_KEYED_ITEM@13..20
+        3: SVELTE_EACH_BINDING_CLAUSE@13..20
           0: AS_KW@13..16 "as" [] [Whitespace(" ")]
-          1: SVELTE_NAME@16..20
-            0: IDENT@16..20 "item" [] []
-          2: (empty)
-          3: (empty)
+          1: HTML_TEXT_EXPRESSION@16..20
+            0: HTML_LITERAL@16..20 "item" [] []
         4: R_CURLY@20..21 "}" [] []
       1: HTML_ELEMENT_LIST@21..41
         0: HTML_ELEMENT@21..41

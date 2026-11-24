@@ -56,6 +56,7 @@ AnyJsRoot =
 	| TsDeclarationModule
 	| JsExpressionTemplateRoot
 	| JsSvelteSnippetRoot
+	| JsSvelteEachBindingRoot
 	| JsSvelteDeclarationRoot
 	| JsSvelteLegacyConstRoot
 	| JsVueSlotPropsRoot
@@ -102,6 +103,25 @@ JsSvelteSnippetRoot =
 AnyJsSvelteSnippetParameters =
 	JsParameters
 	| JsBogus
+
+// The binding clause after `as` in a Svelte each block.
+// {#each items as { id }: Item, index (id)}
+//                 ^^^^^^^^^^^^^^^^^^^^^^^^
+JsSvelteEachBindingRoot =
+		context: AnyJsBindingPattern
+		type_annotation: TsTypeAnnotation?
+		index: JsSvelteEachIndex?
+		key: JsSvelteEachKey?
+		eof: 'EOF'
+
+JsSvelteEachIndex =
+		','
+		binding: AnyJsBinding
+
+JsSvelteEachKey =
+		'('
+		expression: AnyJsExpression
+		')'
 
 // Special root created for the props of Vue slot directives: `v-slot="{ item }: Props"`
 // Vue compiles the value as the parameters of an arrow function, without parentheses.

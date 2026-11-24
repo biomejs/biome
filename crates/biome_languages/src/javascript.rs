@@ -158,6 +158,8 @@ pub enum SvelteEmbeddingKind {
     TextInterpolation,
     /// The name and parameters from a `{#snippet ...}` block parsed as a Svelte snippet root.
     SnippetSignature,
+    /// The binding, optional index, and optional key after `as` in an each block.
+    EachBinding,
     /// The payload of a `{@const ...}` block parsed as a variable declarator.
     ///
     /// The HTML syntax stores the `const` token separately, so this mode receives
@@ -355,6 +357,16 @@ impl JsEmbeddingKind {
             }
         )
     }
+    pub const fn is_svelte_each_binding(&self) -> bool {
+        matches!(
+            self,
+            Self::Svelte {
+                embedding_kind: SvelteEmbeddingKind::EachBinding,
+                ..
+            }
+        )
+    }
+
     pub const fn is_svelte_const_block(&self) -> bool {
         matches!(
             self,
@@ -617,6 +629,10 @@ impl JsFileSource {
         self.embedding_kind.is_generics_list()
     }
 
+    pub const fn is_svelte_each_binding(&self) -> bool {
+        self.embedding_kind.is_svelte_each_binding()
+    }
+
     /// Returns true if this is a Svelte `{@const}` block
     pub const fn is_svelte_const_block(&self) -> bool {
         self.embedding_kind.is_svelte_const_block()
@@ -672,9 +688,8 @@ impl JsFileSource {
 
     /// Returns whether the path points to a Svelte source-module file.
     ///
-    /// These files are JavaScript/TypeScript modules with Svelte semantics
-    /// (for example, `$store` auto-subscriptions), not `.svelte` component
-    /// documents with embedded `<script>` content.
+    /// These JavaScript and TypeScript modules recognize Svelte runes but do not
+    /// support the implicit `$store` subscriptions available in `.svelte` components.
     pub fn is_svelte_source_module_path(path: &Utf8Path) -> bool {
         let Some(file_name) = path
             .file_name()

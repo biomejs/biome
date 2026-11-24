@@ -9,7 +9,7 @@ use crate::JsParser;
 use crate::JsSyntaxFeature::TypeScript;
 use crate::prelude::*;
 use crate::state::{ChangeParserState, EnableStrictMode, SignatureFlags};
-use crate::syntax::binding::parse_binding;
+use crate::syntax::binding::{parse_binding, parse_binding_pattern};
 use crate::syntax::expr::{ExpressionContext, parse_expression};
 use crate::syntax::function::{
     ParameterContext, parse_parameter_list, parse_vue_slot_parameters_list,
@@ -18,7 +18,7 @@ use crate::syntax::js_parse_error;
 use crate::syntax::jsx::skip_astro_html_comments;
 use crate::syntax::stmt::parse_directives;
 use crate::syntax::typescript::{
-    TypeContext, parse_generic_type_parameters, parse_ts_type_parameters,
+    TypeContext, parse_generic_type_parameters, parse_ts_type_annotation, parse_ts_type_parameters,
 };
 use biome_js_syntax::JsSyntaxKind::*;
 use biome_js_syntax::{JsSyntaxKind, T};
@@ -46,6 +46,10 @@ pub(crate) fn parse(p: &mut JsParser) -> CompletedMarker {
     // are handlers, and all other expressions are inline statements.
     if p.source_type().is_vue_event_handler() {
         return parse_vue_event_handler(p, m);
+    }
+
+    if p.source_type().is_svelte_each_binding() {
+        return parse_svelte_each_binding(p, m);
     }
 
     if p.source_type().is_svelte_const_block() {
@@ -155,6 +159,69 @@ fn parse_svelte_legacy_const(p: &mut JsParser, m: Marker) -> CompletedMarker {
     }
 
     m.complete(p, JS_SVELTE_LEGACY_CONST_ROOT)
+}
+
+fn parse_svelte_each_binding(p: &mut JsParser, m: Marker) -> CompletedMarker {
+    let binding_recovery = p.start();
+    let binding = parse_binding_pattern(p, ExpressionContext::default())
+        .or_add_diagnostic(p, js_parse_error::expected_binding);
+
+    if let ParsedSyntax::Present(annotation) = parse_ts_type_annotation(p, TypeContext::default())
+        && TypeScript.is_unsupported(p)
+    {
+        p.error(p.err_builder(
+            "type annotations can only be used in TypeScript files",
+            annotation.range(p),
+        ));
+    }
+
+    parse_svelte_each_index(p).ok();
+    parse_svelte_each_key(p).ok();
+
+    if !p.at(EOF) {
+        let recovery = if let Some(binding) = binding {
+            binding_recovery.abandon(p);
+            binding.undo_completion(p)
+        } else {
+            binding_recovery
+        };
+        p.error(js_parse_error::template_expression_trailing_code(
+            p,
+            p.cur_range(),
+        ));
+        while !p.at(EOF) {
+            p.bump_any();
+        }
+        recovery.complete(p, JS_BOGUS_BINDING);
+    } else {
+        binding_recovery.abandon(p);
+    }
+
+    m.complete(p, JS_SVELTE_EACH_BINDING_ROOT)
+}
+
+fn parse_svelte_each_index(p: &mut JsParser) -> ParsedSyntax {
+    if !p.at(T![,]) {
+        return ParsedSyntax::Absent;
+    }
+
+    let m = p.start();
+    p.bump(T![,]);
+    parse_binding(p).or_add_diagnostic(p, js_parse_error::expected_identifier);
+    ParsedSyntax::Present(m.complete(p, JS_SVELTE_EACH_INDEX))
+}
+
+fn parse_svelte_each_key(p: &mut JsParser) -> ParsedSyntax {
+    if !p.at(T!['(']) {
+        return ParsedSyntax::Absent;
+    }
+
+    let m = p.start();
+    p.bump(T!['(']);
+    parse_expression(p, ExpressionContext::default())
+        .or_add_diagnostic(p, js_parse_error::template_expression_expected_expression);
+    p.expect(T![')']);
+    ParsedSyntax::Present(m.complete(p, JS_SVELTE_EACH_KEY))
 }
 
 /// Parses template expressions like Vue {{ expr }}, Svelte { expr }, or Astro { expr }.

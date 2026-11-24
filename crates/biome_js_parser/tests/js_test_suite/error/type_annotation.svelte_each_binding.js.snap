@@ -1,0 +1,65 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```js
+item: Item
+
+```
+
+
+## AST
+
+```
+JsSvelteEachBindingRoot {
+    context: JsIdentifierBinding {
+        name_token: IDENT@0..4 "item" [] [],
+    },
+    type_annotation: TsTypeAnnotation {
+        colon_token: COLON@4..6 ":" [] [Whitespace(" ")],
+        ty: TsReferenceType {
+            name: JsReferenceIdentifier {
+                value_token: IDENT@6..10 "Item" [] [],
+            },
+            type_arguments: missing (optional),
+        },
+    },
+    index: missing (optional),
+    key: missing (optional),
+    eof_token: EOF@10..11 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_SVELTE_EACH_BINDING_ROOT@0..11
+  0: JS_IDENTIFIER_BINDING@0..4
+    0: IDENT@0..4 "item" [] []
+  1: TS_TYPE_ANNOTATION@4..10
+    0: COLON@4..6 ":" [] [Whitespace(" ")]
+    1: TS_REFERENCE_TYPE@6..10
+      0: JS_REFERENCE_IDENTIFIER@6..10
+        0: IDENT@6..10 "Item" [] []
+      1: (empty)
+  2: (empty)
+  3: (empty)
+  4: EOF@10..11 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+type_annotation.svelte_each_binding.js:1:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × type annotations can only be used in TypeScript files
+  
+  > 1 │ item: Item
+      │     ^^^^^^
+    2 │ 
+  
+```

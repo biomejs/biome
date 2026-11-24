@@ -1,7 +1,7 @@
 use crate::{
     AnyHtmlAttribute, AnyHtmlAttributeInitializer, AnySvelteTemplateElement, AnyVueDirective,
-    HtmlAttribute, HtmlAttributeList, HtmlAttributeName, HtmlString, is_quoted,
-    static_value::StaticValue,
+    HtmlAttribute, HtmlAttributeList, HtmlAttributeName, HtmlString,
+    element_ext::AnyHtmlTagElement, is_quoted, static_value::StaticValue,
 };
 use biome_aria::Attribute;
 use biome_rowan::{AstNode, AstNodeList, TextRange, TokenText};
@@ -89,6 +89,20 @@ impl AnyHtmlAttributeInitializer {
 }
 
 impl HtmlAttribute {
+    /// Only string values can supply a root script's type parameter list. Other
+    /// initializers are opaque, not ordinary Svelte attribute expressions.
+    pub fn has_opaque_svelte_generics(&self) -> bool {
+        self.name()
+            .ok()
+            .and_then(|name| name.token_text_trimmed())
+            .is_some_and(|name| name.eq_ignore_ascii_case("generics"))
+            && self
+                .parent::<HtmlAttributeList>()
+                .and_then(|list| list.parent::<AnyHtmlTagElement>())
+                .is_some_and(|tag| tag.is_root_script())
+            && self.html_string().is_none()
+    }
+
     /// Returns the attribute value when its initializer is an HTML string.
     pub fn html_string(&self) -> Option<HtmlString> {
         self.initializer()?.value().ok()?.as_html_string().cloned()

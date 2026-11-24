@@ -1,0 +1,70 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```ts
+item, index: number
+
+```
+
+
+## AST
+
+```
+JsSvelteEachBindingRoot {
+    context: JsBogusBinding {
+        items: [
+            IDENT@0..4 "item" [] [],
+            JsSvelteEachIndex {
+                comma_token: COMMA@4..6 "," [] [Whitespace(" ")],
+                binding: JsIdentifierBinding {
+                    name_token: IDENT@6..11 "index" [] [],
+                },
+            },
+            COLON@11..13 ":" [] [Whitespace(" ")],
+            NUMBER_KW@13..19 "number" [] [],
+        ],
+    },
+    type_annotation: missing (optional),
+    index: missing (optional),
+    key: missing (optional),
+    eof_token: EOF@19..20 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_SVELTE_EACH_BINDING_ROOT@0..20
+  0: JS_BOGUS_BINDING@0..19
+    0: IDENT@0..4 "item" [] []
+    1: JS_SVELTE_EACH_INDEX@4..11
+      0: COMMA@4..6 "," [] [Whitespace(" ")]
+      1: JS_IDENTIFIER_BINDING@6..11
+        0: IDENT@6..11 "index" [] []
+    2: COLON@11..13 ":" [] [Whitespace(" ")]
+    3: NUMBER_KW@13..19 "number" [] []
+  1: (empty)
+  2: (empty)
+  3: (empty)
+  4: EOF@19..20 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+typed_index.svelte_each_binding.ts:1:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Template expressions can only contain a single expression
+  
+  > 1 │ item, index: number
+      │            ^
+    2 │ 
+  
+  i Remove the extra code or split into multiple template expressions.
+  
+```
