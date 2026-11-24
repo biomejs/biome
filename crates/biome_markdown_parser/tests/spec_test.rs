@@ -661,3 +661,49 @@ fn fuzz_quoted_list_link_reference_before_dash_thematic_break_with_tabs_non_brea
         "<blockquote>\n<ul>\n<li>--x</li>\n</ul>\n</blockquote>\n",
     );
 }
+
+#[test]
+fn quoted_list_fenced_code_does_not_leak_across_unquoted_siblings() {
+    let cases = [
+        (
+            16,
+            "- > - ```text\n  >   hello\n  >   ```\n\n- > - ```text\n  >   there\n  >   ```\n",
+            "<ul>\n<li>\n<blockquote>\n<ul>\n<li>\n<pre><code class=\"language-text\">hello\n</code></pre>\n</li>\n</ul>\n</blockquote>\n</li>\n<li>\n<blockquote>\n<ul>\n<li>\n<pre><code class=\"language-text\">there\n</code></pre>\n</li>\n</ul>\n</blockquote>\n</li>\n</ul>\n",
+        ),
+        (
+            17,
+            "- > - ```text\n  >   hello\n  >   ```\n- > - ```text\n  >   there\n  >   ```\n",
+            "<ul>\n<li>\n<blockquote>\n<ul>\n<li>\n<pre><code class=\"language-text\">hello\n</code></pre>\n</li>\n</ul>\n</blockquote>\n</li>\n<li>\n<blockquote>\n<ul>\n<li>\n<pre><code class=\"language-text\">there\n</code></pre>\n</li>\n</ul>\n</blockquote>\n</li>\n</ul>\n",
+        ),
+        (
+            18,
+            "1. > 1. ```text\n   >    hello\n   >    ```\n\n2. > 1. ```text\n   >    there\n   >    ```\n",
+            "<ol>\n<li>\n<blockquote>\n<ol>\n<li>\n<pre><code class=\"language-text\">hello\n</code></pre>\n</li>\n</ol>\n</blockquote>\n</li>\n<li>\n<blockquote>\n<ol>\n<li>\n<pre><code class=\"language-text\">there\n</code></pre>\n</li>\n</ol>\n</blockquote>\n</li>\n</ol>\n",
+        ),
+        (
+            19,
+            "1. > 1. ```text\n   >    hello\n   >    ```\n2. > 1. ```text\n   >    there\n   >    ```\n",
+            "<ol>\n<li>\n<blockquote>\n<ol>\n<li>\n<pre><code class=\"language-text\">hello\n</code></pre>\n</li>\n</ol>\n</blockquote>\n</li>\n<li>\n<blockquote>\n<ol>\n<li>\n<pre><code class=\"language-text\">there\n</code></pre>\n</li>\n</ol>\n</blockquote>\n</li>\n</ol>\n",
+        ),
+        (
+            20,
+            "- > -\n\n- foo\n",
+            "<ul>\n<li>\n<blockquote>\n<ul>\n<li></li>\n</ul>\n</blockquote>\n</li>\n<li>\n<p>foo</p>\n</li>\n</ul>\n",
+        ),
+        (
+            21,
+            "1. > 1.\n\n2. foo\n",
+            "<ol>\n<li>\n<blockquote>\n<ol>\n<li></li>\n</ol>\n</blockquote>\n</li>\n<li>\n<p>foo</p>\n</li>\n</ol>\n",
+        ),
+    ];
+
+    for (num, input, expected) in cases {
+        let root = parse_markdown(input, MarkdownParserOptions::default());
+        assert!(
+            root.diagnostics().is_empty(),
+            "Case {num} unexpectedly emitted diagnostics: {:?}",
+            root.diagnostics()
+        );
+        fuzz_test_example(num, input, expected);
+    }
+}

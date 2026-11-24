@@ -568,6 +568,14 @@ where
     // Also check if we're directly AT a NEWLINE token (blank line)
     // This handles the case where we're at the newline itself, not after it
     if p.at(NEWLINE) {
+        // Inside a block quote, a list item can leave the parser on the line's
+        // trailing NEWLINE when the following line drops the quote prefix
+        // (ending the block quote). Do not peek past that NEWLINE for unquoted
+        // list markers outside the quote, or the inner list would try to parse
+        // the NEWLINE as a list item and emit a spurious diagnostic.
+        if quote_depth > 0 {
+            return true;
+        }
         if let Some(result) = handle_newline(p, marker_state) {
             return result;
         }
@@ -3534,6 +3542,13 @@ fn has_list_item_after_blank_lines_at_indent<F>(
 where
     F: Fn(&mut MarkdownParser) -> bool,
 {
+    // Unquoted blank lines terminate any enclosing block quote (CommonMark §5.1),
+    // so a list inside a block quote cannot continue across them to an unquoted
+    // list item outside the quote.
+    if p.state().block_quote_depth > 0 {
+        return false;
+    }
+
     p.lookahead(|p| {
         // Skip all blank lines, tracking the indent of the last line visited.
         // The loop consumes whitespace on each line to check if it's blank
