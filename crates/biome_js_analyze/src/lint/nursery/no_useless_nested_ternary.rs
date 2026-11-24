@@ -79,7 +79,7 @@ declare_lint_rule! {
     /// - To disallow all nested ternary expressions, see [`noNestedTernary`](https://biomejs.dev/linter/rules/no-nested-ternary/).
     ///
     pub NoUselessNestedTernary {
-        version: "next",
+        version: "2.6.9",
         name: "noUselessNestedTernary",
         language: "js",
         sources: &[RuleSource::EslintUnicorn("no-unnecessary-nested-ternary").inspired()],

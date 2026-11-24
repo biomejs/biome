@@ -84,7 +84,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseTanstackQueryMutationPropertyOrder {
-        version: "next",
+        version: "2.6.9",
         name: "useTanstackQueryMutationPropertyOrder",
         language: "js",
         sources: &[RuleSource::EslintTanstackQuery("mutation-property-order").same()],

@@ -61,7 +61,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoCanvasToImage {
-        version: "next",
+        version: "2.6.9",
         name: "noCanvasToImage",
         language: "js",
         sources: &[RuleSource::EslintUnicorn("no-canvas-to-image").same()],

@@ -77,7 +77,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoTestHooks {
-        version: "next",
+        version: "2.6.9",
         name: "noTestHooks",
         language: "js",
         recommended: false,

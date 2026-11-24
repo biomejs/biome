@@ -87,7 +87,7 @@ declare_lint_rule! {
     /// - To avoid creating the same kind set again every time a function runs, see [`useBiomeTopLevelTypes`](https://biomejs.dev/linter/rules/use-biome-top-level-types/).
     ///
     pub UseBiomeKindSets {
-        version: "next",
+        version: "2.6.9",
         name: "useBiomeKindSets",
         language: "js",
         recommended: true,

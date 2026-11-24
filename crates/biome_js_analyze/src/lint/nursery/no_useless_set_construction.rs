@@ -122,7 +122,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoUselessSetConstruction {
-        version: "next",
+        version: "2.6.9",
         name: "noUselessSetConstruction",
         language: "js",
         sources: &[RuleSource::EslintUnicorn("no-useless-set-construction").same()],

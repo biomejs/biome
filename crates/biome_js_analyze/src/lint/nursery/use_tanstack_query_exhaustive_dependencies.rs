@@ -152,7 +152,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseTanstackQueryExhaustiveDependencies {
-        version: "next",
+        version: "2.6.9",
         name: "useTanstackQueryExhaustiveDependencies",
         language: "js",
         sources: &[RuleSource::EslintTanstackQuery("exhaustive-deps").same()],

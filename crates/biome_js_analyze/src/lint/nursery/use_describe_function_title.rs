@@ -69,7 +69,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseDescribeFunctionTitle {
-        version: "next",
+        version: "2.6.9",
         name: "useDescribeFunctionTitle",
         language: "js",
         recommended: false,
