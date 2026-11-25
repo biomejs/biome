@@ -85,8 +85,9 @@ impl<'a> SpdxExpression<'a> {
                     return Ok(());
                 }
 
-                // Must be a valid SPDX identifier
-                let Some(license) = LICENSE_LIST.find(id) else {
+                // Must be a valid SPDX identifier (optionally followed by `+` "or later")
+                let base_id = id.strip_suffix('+').unwrap_or(id);
+                let Some(license) = LICENSE_LIST.find(base_id) else {
                     return Err(RejectReason::Untrusted);
                 };
 
@@ -549,5 +550,36 @@ mod tests {
             ..TrustConfig::default()
         };
         assert_eq!(expr.check_trust(&config), Err(RejectReason::NotOsiApproved));
+    }
+
+    #[test]
+    fn check_trust_spdx_plus_or_later() {
+        let config = TrustConfig::default();
+        assert!(
+            SpdxExpression::parse("Apache-2.0+")
+                .unwrap()
+                .check_trust(&config)
+                .is_ok()
+        );
+        assert!(
+            SpdxExpression::parse("MPL-2.0+")
+                .unwrap()
+                .check_trust(&config)
+                .is_ok()
+        );
+        assert_eq!(
+            SpdxExpression::parse("MIT++").unwrap().check_trust(&config),
+            Err(RejectReason::Untrusted)
+        );
+        assert_eq!(
+            SpdxExpression::parse("+").unwrap().check_trust(&config),
+            Err(RejectReason::Untrusted)
+        );
+        assert_eq!(
+            SpdxExpression::parse("NotALicense+")
+                .unwrap()
+                .check_trust(&config),
+            Err(RejectReason::Untrusted)
+        );
     }
 }
