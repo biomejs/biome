@@ -723,10 +723,13 @@ fn sets_intersect(set1: &[Comparator], set2: &[Comparator]) -> bool {
 }
 
 /// Returns the next discrete version boundary after `version`: for a prerelease,
-/// its corresponding stable release (`M.m.p`); otherwise the next patch (`M.m.(p+1)`).
+/// appends numeric identifier `0` (`M.m.p-pre.0`); otherwise the next patch (`M.m.(p+1)`).
 fn next_version_after(version: &Version) -> Version {
     if version.is_prerelease() {
-        Version::new(version.major, version.minor, version.patch)
+        let mut next = version.clone();
+        next.build.clear();
+        next.prerelease.push("0".to_string());
+        next
     } else {
         version.inc_patch()
     }

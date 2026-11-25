@@ -81,9 +81,15 @@ fn test_caret_range_all_zeros() {
 
     let greater_than_zero_prerelease = ">0.0.0-alpha".parse::<Range>().unwrap();
     assert!(exact_zero.intersects(&greater_than_zero_prerelease));
+    assert!(greater_than_zero_prerelease.intersects(&exact_zero));
+
+    let less_than_zero = "<0.0.0".parse::<Range>().unwrap();
+    assert!(greater_than_zero_prerelease.intersects(&less_than_zero));
+    assert!(less_than_zero.intersects(&greater_than_zero_prerelease));
 
     let greater_than_zero = ">0.0.0".parse::<Range>().unwrap();
     assert!(!exact_zero.intersects(&greater_than_zero));
+    assert!(!greater_than_zero.intersects(&exact_zero));
 }
 
 #[test]
