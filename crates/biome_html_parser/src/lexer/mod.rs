@@ -2214,8 +2214,8 @@ fn restricted_expression_stop(
         return RestrictedExpressionStop::Delimiter;
     }
     let preceding = &source[..offset];
-    let whitespace_before = &preceding[preceding.trim_ascii_end().len()..];
     if current == b'<' {
+        let whitespace_before = &preceding[preceding.trim_ascii_end().len()..];
         let starts_tag = rest
             .get(1)
             .is_some_and(|byte| byte.is_ascii_alphabetic() || matches!(byte, b'/' | b'!'));
