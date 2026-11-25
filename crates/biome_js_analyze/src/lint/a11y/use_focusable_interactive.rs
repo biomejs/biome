@@ -35,6 +35,13 @@ declare_lint_rule! {
     /// <div role="button" tabIndex={0} />
     /// ```
     ///
+    /// The HTML attribute name `tabindex`, used by JSX dialects that mirror HTML
+    /// attribute names, is accepted as well.
+    ///
+    /// ```jsx
+    /// <div role="button" tabindex={0} />
+    /// ```
+    ///
     /// ```jsx
     /// <div />
     /// ```
@@ -67,7 +74,9 @@ impl Rule for UseFocusableInteractive {
         if ctx.aria_roles().is_not_interactive_element(node) {
             let role_attribute = node.find_attribute_by_name("role");
             if let Some(role_attribute) = role_attribute {
-                let tabindex_attribute = node.find_attribute_by_name("tabIndex");
+                let tabindex_attribute = node
+                    .find_attribute_by_name("tabIndex")
+                    .or_else(|| node.find_attribute_by_name("tabindex"));
                 let role_attribute_value = role_attribute.initializer()?.value().ok()?;
                 if attribute_has_interactive_role(&role_attribute_value)?
                     && tabindex_attribute.is_none()
