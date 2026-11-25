@@ -8,6 +8,7 @@ static ASTRO_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
         RuleFilter::Rule("nursery", "noAstroComponentDefaultExport"),
         RuleFilter::Rule("nursery", "noAstroConflictingSetDirectives"),
         RuleFilter::Rule("nursery", "noAstroSetHtmlDirective"),
+        RuleFilter::Rule("nursery", "noTopLevelBrowserGlobals"),
         RuleFilter::Rule("nursery", "useAstroClientOnlyDirectiveValue"),
     ]
 });
@@ -69,6 +70,7 @@ static PROJECT_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
         RuleFilter::Rule("nursery", "noTailwindConflictingClasses"),
         RuleFilter::Rule("nursery", "noTailwindRawColors"),
         RuleFilter::Rule("nursery", "noTailwindRestrictedClasses"),
+        RuleFilter::Rule("nursery", "noTopLevelBrowserGlobals"),
         RuleFilter::Rule("nursery", "noUndeclaredClasses"),
         RuleFilter::Rule("nursery", "noUndeclaredCustomProperties"),
         RuleFilter::Rule("nursery", "noUnresolvedDefaultImport"),

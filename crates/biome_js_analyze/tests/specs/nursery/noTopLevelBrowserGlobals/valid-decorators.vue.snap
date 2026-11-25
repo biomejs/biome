@@ -1,0 +1,16 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 197
+expression: valid-decorators.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<script setup lang="ts">
+class Service {
+    constructor(factory = @register(window) class {}) {}
+    method(factory = class { method(@inject(document) value: unknown) {} }) {}
+}
+</script>
+
+```

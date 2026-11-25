@@ -32,6 +32,8 @@ enum PreparedHtmlSnippet {
     JavaScript {
         root: AnyJsRoot,
         content_offset: TextSize,
+        /// Whether the snippet runs during server-side rendering.
+        server_rendered: bool,
     },
 }
 
@@ -50,10 +52,14 @@ pub fn prepare_html_module(db: &dyn LanguageDb, parsed_source: Source) -> Prepar
                     file_source,
                     content_offset,
                 })
-            } else if file_source.to_js_file_source().is_some() {
+            } else if let Some(file_source) = file_source.to_js_file_source() {
                 Some(PreparedHtmlSnippet::JavaScript {
                     root: snippet.parsed(db).tree::<AnyJsRoot>(),
                     content_offset,
+                    // Component sources run during server-side rendering. Astro `<script>` tags
+                    // and plain HTML scripts have no embedding kind because they only run in the
+                    // browser.
+                    server_rendered: file_source.is_embedded_source(),
                 })
             } else {
                 None
@@ -118,12 +124,19 @@ impl HtmlModuleVisitor {
                         range: import.range + content_offset,
                         specifier: import.specifier.clone(),
                         applicability: file_source.embedding_applicability(),
+                        server_rendered: false,
                     }));
                 }
                 PreparedHtmlSnippet::JavaScript {
                     root,
                     content_offset,
-                } => self.collect_js_imports(&root, content_offset, &mut import_paths),
+                    server_rendered,
+                } => self.collect_js_imports(
+                    &root,
+                    content_offset,
+                    server_rendered,
+                    &mut import_paths,
+                ),
             }
         }
 
@@ -137,10 +150,13 @@ impl HtmlModuleVisitor {
 
     /// Walks a parsed JS/TS root (from an embedded `<script>` block) and
     /// collects all static and dynamic import specifiers.
+    ///
+    /// `server_rendered` marks static imports from sources that run during server-side rendering.
     fn collect_js_imports(
         &mut self,
         js_root: &AnyJsRoot,
         content_offset: TextSize,
+        server_rendered: bool,
         import_paths: &mut ImportPathMap<HtmlImport>,
     ) {
         for event in js_root
@@ -166,6 +182,7 @@ impl HtmlModuleVisitor {
                                 range: source.range() + content_offset,
                                 specifier,
                                 applicability: EmbeddingStyleApplicability::Global,
+                                server_rendered,
                             },
                         );
                     }
@@ -197,6 +214,7 @@ impl HtmlModuleVisitor {
                                 range: source.range() + content_offset,
                                 specifier,
                                 applicability: EmbeddingStyleApplicability::Global,
+                                server_rendered: false,
                             },
                         );
                     }
@@ -291,6 +309,7 @@ impl HtmlModuleVisitor {
                 range: element.range(),
                 specifier: href_value.text().to_string().into(),
                 applicability: EmbeddingStyleApplicability::Global,
+                server_rendered: false,
             });
         }
     }

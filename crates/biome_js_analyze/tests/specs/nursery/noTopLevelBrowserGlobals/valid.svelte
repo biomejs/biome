@@ -13,6 +13,8 @@ function read(value = window.innerWidth) { return document.title; }
 const callback = () => window.innerWidth;
 const methods = { read() { return document.title; }, get width() { return window.innerWidth; } };
 class Component { read() { return document.title; } }
+class Size { constructor(width = window.innerWidth) {} }
+const { console: logger } = globalThis;
 { const window = { innerWidth: 1 }; console.log(window.innerWidth); }
 { const document = {}; console.log(document); }
 console.log(fetch, URL, setTimeout, Math);

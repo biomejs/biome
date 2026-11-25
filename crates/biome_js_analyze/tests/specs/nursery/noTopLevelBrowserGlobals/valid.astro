@@ -1,0 +1,11 @@
+---
+// should not generate diagnostics
+const width = typeof window !== "undefined" ? window.innerWidth : 0;
+function read() { return document.title; }
+---
+
+<button onclick="window.alert('hello')">{width}</button>
+<script>
+    import "./valid-astro-client-imported.js";
+    console.log(document.title, window.innerWidth);
+</script>

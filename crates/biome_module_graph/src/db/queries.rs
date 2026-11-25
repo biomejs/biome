@@ -8,6 +8,7 @@
 //! Public query entry points live in this module. Helpers stay near the query
 //! whose behavior they implement.
 
+mod components;
 mod css;
 mod dependencies;
 mod js_scc;
@@ -18,6 +19,7 @@ use biome_js_type_info::ImportSymbol;
 use biome_jsdoc_comment::JsdocComment;
 
 pub use crate::db::type_inference::InferredModuleTypes;
+pub use components::*;
 pub use css::*;
 pub use dependencies::module_dependencies;
 pub(crate) use dependencies::{

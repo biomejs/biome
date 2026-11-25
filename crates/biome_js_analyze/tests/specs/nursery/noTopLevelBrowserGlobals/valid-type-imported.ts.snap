@@ -1,0 +1,12 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 198
+expression: valid-type-imported.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+export type Theme = string;
+export const theme = localStorage.getItem("theme");
+
+```

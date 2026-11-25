@@ -1,0 +1,80 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 197
+expression: invalid-decorators.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<script setup lang="ts">
+class Service {
+    constructor(@inject(window) value: unknown, @inject(location) private readonly store: unknown) {}
+    method(@inject(document.title) value = localStorage) {}
+}
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-decorators.vue:4:25 lint/nursery/noTopLevelBrowserGlobals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected top-level browser global window.
+  
+    2 │ <script setup lang="ts">
+    3 │ class Service {
+  > 4 │     constructor(@inject(window) value: unknown, @inject(location) private readonly store: unknown) {}
+      │                         ^^^^^^
+    5 │     method(@inject(document.title) value = localStorage) {}
+    6 │ }
+  
+  i Browser globals may be unavailable on the server. Accessing them can throw an error and prevent the page from rendering.
+  
+  i Move this access into onMounted in Vue or onMount in Svelte, or guard it with a browser availability check.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-decorators.vue:4:57 lint/nursery/noTopLevelBrowserGlobals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected top-level browser global location.
+  
+    2 │ <script setup lang="ts">
+    3 │ class Service {
+  > 4 │     constructor(@inject(window) value: unknown, @inject(location) private readonly store: unknown) {}
+      │                                                         ^^^^^^^^
+    5 │     method(@inject(document.title) value = localStorage) {}
+    6 │ }
+  
+  i Browser globals may be unavailable on the server. Accessing them can throw an error and prevent the page from rendering.
+  
+  i Move this access into onMounted in Vue or onMount in Svelte, or guard it with a browser availability check.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-decorators.vue:5:20 lint/nursery/noTopLevelBrowserGlobals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected top-level browser global document.
+  
+    3 │ class Service {
+    4 │     constructor(@inject(window) value: unknown, @inject(location) private readonly store: unknown) {}
+  > 5 │     method(@inject(document.title) value = localStorage) {}
+      │                    ^^^^^^^^
+    6 │ }
+    7 │ </script>
+  
+  i Browser globals may be unavailable on the server. Accessing them can throw an error and prevent the page from rendering.
+  
+  i Move this access into onMounted in Vue or onMount in Svelte, or guard it with a browser availability check.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

@@ -10306,7 +10306,7 @@
 					]
 				},
 				"noTopLevelBrowserGlobals": {
-					"description": "Disallow unguarded browser globals at the top level of Vue and Svelte scripts.\nSee https://biomejs.dev/linter/rules/no-top-level-browser-globals",
+					"description": "Disallow unguarded browser globals at the top level of code that runs during server-side rendering.\nSee https://biomejs.dev/linter/rules/no-top-level-browser-globals",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoTopLevelBrowserGlobalsConfiguration" },
 						{ "type": "null" }

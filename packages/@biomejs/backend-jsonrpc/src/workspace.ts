@@ -3540,7 +3540,7 @@ export interface Nursery {
 	 */
 	noThisOutsideOfClass?: NoThisOutsideOfClassConfiguration;
 	/**
-	 * Disallow unguarded browser globals at the top level of Vue and Svelte scripts.
+	 * Disallow unguarded browser globals at the top level of code that runs during server-side rendering.
 	 * See https://biomejs.dev/linter/rules/no-top-level-browser-globals
 	 */
 	noTopLevelBrowserGlobals?: NoTopLevelBrowserGlobalsConfiguration;

@@ -1,5 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 198
 expression: invalid.svelte
 ---
 # Input
@@ -21,6 +22,9 @@ const obj = { [window.name]() {} };
 class Component { static width = window.innerWidth; }
 const globals = { window, document };
 window = {};
+const { document: { title } } = globalThis;
+const { window: w, console: c, "localStorage": storage } = globalThis;
+let nav; ({ location: nav } = globalThis);
 </script>
 
 ```
@@ -330,7 +334,7 @@ invalid.svelte:16:19 lint/nursery/noTopLevelBrowserGlobals ━━━━━━━
   > 16 │ const globals = { window, document };
        │                   ^^^^^^
     17 │ window = {};
-    18 │ </script>
+    18 │ const { document: { title } } = globalThis;
   
   i Browser globals may be unavailable on the server. Accessing them can throw an error and prevent the page from rendering.
   
@@ -351,7 +355,7 @@ invalid.svelte:16:27 lint/nursery/noTopLevelBrowserGlobals ━━━━━━━
   > 16 │ const globals = { window, document };
        │                           ^^^^^^^^
     17 │ window = {};
-    18 │ </script>
+    18 │ const { document: { title } } = globalThis;
   
   i Browser globals may be unavailable on the server. Accessing them can throw an error and prevent the page from rendering.
   
@@ -371,8 +375,92 @@ invalid.svelte:17:1 lint/nursery/noTopLevelBrowserGlobals ━━━━━━━�
     16 │ const globals = { window, document };
   > 17 │ window = {};
        │ ^^^^^^
-    18 │ </script>
-    19 │ 
+    18 │ const { document: { title } } = globalThis;
+    19 │ const { window: w, console: c, "localStorage": storage } = globalThis;
+  
+  i Browser globals may be unavailable on the server. Accessing them can throw an error and prevent the page from rendering.
+  
+  i Move this access into onMounted in Vue or onMount in Svelte, or guard it with a browser availability check.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:18:9 lint/nursery/noTopLevelBrowserGlobals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected top-level browser global document.
+  
+    16 │ const globals = { window, document };
+    17 │ window = {};
+  > 18 │ const { document: { title } } = globalThis;
+       │         ^^^^^^^^
+    19 │ const { window: w, console: c, "localStorage": storage } = globalThis;
+    20 │ let nav; ({ location: nav } = globalThis);
+  
+  i Browser globals may be unavailable on the server. Accessing them can throw an error and prevent the page from rendering.
+  
+  i Move this access into onMounted in Vue or onMount in Svelte, or guard it with a browser availability check.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:19:9 lint/nursery/noTopLevelBrowserGlobals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected top-level browser global window.
+  
+    17 │ window = {};
+    18 │ const { document: { title } } = globalThis;
+  > 19 │ const { window: w, console: c, "localStorage": storage } = globalThis;
+       │         ^^^^^^
+    20 │ let nav; ({ location: nav } = globalThis);
+    21 │ </script>
+  
+  i Browser globals may be unavailable on the server. Accessing them can throw an error and prevent the page from rendering.
+  
+  i Move this access into onMounted in Vue or onMount in Svelte, or guard it with a browser availability check.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:19:32 lint/nursery/noTopLevelBrowserGlobals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected top-level browser global localStorage.
+  
+    17 │ window = {};
+    18 │ const { document: { title } } = globalThis;
+  > 19 │ const { window: w, console: c, "localStorage": storage } = globalThis;
+       │                                ^^^^^^^^^^^^^^
+    20 │ let nav; ({ location: nav } = globalThis);
+    21 │ </script>
+  
+  i Browser globals may be unavailable on the server. Accessing them can throw an error and prevent the page from rendering.
+  
+  i Move this access into onMounted in Vue or onMount in Svelte, or guard it with a browser availability check.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:20:13 lint/nursery/noTopLevelBrowserGlobals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected top-level browser global location.
+  
+    18 │ const { document: { title } } = globalThis;
+    19 │ const { window: w, console: c, "localStorage": storage } = globalThis;
+  > 20 │ let nav; ({ location: nav } = globalThis);
+       │             ^^^^^^^^
+    21 │ </script>
+    22 │ 
   
   i Browser globals may be unavailable on the server. Accessing them can throw an error and prevent the page from rendering.
   

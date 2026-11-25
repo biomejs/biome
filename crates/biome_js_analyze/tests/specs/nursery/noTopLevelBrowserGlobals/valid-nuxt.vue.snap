@@ -1,0 +1,16 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 198
+expression: valid-nuxt.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<script setup>
+if (import.meta.client) { document.title; }
+if (!import.meta.server) { document.title; }
+if (import.meta.server) {} else { document.title; }
+import.meta.client && window.innerWidth;
+</script>
+
+```

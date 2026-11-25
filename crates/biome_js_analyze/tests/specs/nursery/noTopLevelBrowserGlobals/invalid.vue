@@ -15,4 +15,7 @@ const obj = { [window.name]() {} };
 class Component { static width = window.innerWidth; }
 const globals = { window, document };
 window = {};
+const { document: { title } } = globalThis;
+const { window: w, console: c, "localStorage": storage } = globalThis;
+let nav; ({ location: nav } = globalThis);
 </script>
