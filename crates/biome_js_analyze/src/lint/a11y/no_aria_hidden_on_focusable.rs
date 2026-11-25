@@ -4,7 +4,9 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_js_syntax::{AnyJsxAttributeValue, AnyNumberLikeExpression, jsx_ext::AnyJsxElement};
+use biome_js_syntax::{
+    AnyJsxAttributeValue, AnyNumberLikeExpression, JsxAttribute, jsx_ext::AnyJsxElement,
+};
 use biome_rowan::{AstNode, BatchMutationExt};
 use biome_rule_options::no_aria_hidden_on_focusable::NoAriaHiddenOnFocusableOptions;
 
@@ -17,6 +19,9 @@ declare_lint_rule! {
     ///
     /// The tab index is read from either the React attribute name `tabIndex` or the
     /// HTML attribute name `tabindex`, used by JSX dialects that mirror HTML names.
+    /// A tab index whose value the rule cannot read as a number, such as
+    /// `tabIndex={0 + 0}`, says nothing about the element either way, so the element
+    /// is then judged on whether it is focusable in its own right.
     ///
     /// ## Example
     ///
@@ -82,38 +87,10 @@ impl Rule for NoAriaHiddenOnFocusable {
                 return None;
             }
 
-            if let Some(tabindex_attr) = find_tabindex_attribute(node) {
-                let tabindex_val = tabindex_attr.initializer()?.value().ok()?;
-
-                match tabindex_val {
-                    AnyJsxAttributeValue::AnyJsxTag(jsx_tag) => {
-                        let value = jsx_tag.to_trimmed_text().text().parse::<i32>();
-                        if let Ok(num) = value {
-                            return (num >= 0).then_some(());
-                        }
-                    }
-                    AnyJsxAttributeValue::JsxString(jsx_string) => {
-                        let value = jsx_string
-                            .inner_string_text()
-                            .ok()?
-                            .to_string()
-                            .parse::<i32>();
-                        if let Ok(num) = value {
-                            return (num >= 0).then_some(());
-                        }
-                    }
-                    AnyJsxAttributeValue::JsxExpressionAttributeValue(value) => {
-                        let expression = value.expression().ok()?;
-                        let expression_value =
-                            AnyNumberLikeExpression::cast(expression.into_syntax())?
-                                .value()?
-                                .parse::<i32>();
-                        if let Ok(num) = expression_value {
-                            return (num >= 0).then_some(());
-                        }
-                    }
-                    AnyJsxAttributeValue::JsTemplateExpression(_) => {}
-                }
+            if let Some(tabindex_attr) = find_tabindex_attribute(node)
+                && let Some(tabindex) = tabindex_value(&tabindex_attr)
+            {
+                return (tabindex >= 0).then_some(());
             }
 
             if !ctx.aria_roles().is_not_interactive_element(node) {
@@ -150,5 +127,26 @@ impl Rule for NoAriaHiddenOnFocusable {
             markup! { "Remove the "<Emphasis>"aria-hidden"</Emphasis>" attribute from the element." }.to_owned(),
             mutation,
         ))
+    }
+}
+
+/// Read the element's tab index as a number.
+///
+/// Returns `None` when the value is not one the rule can read, such as an
+/// arbitrary expression: the element is then judged on its own focusability.
+fn tabindex_value(tabindex_attr: &JsxAttribute) -> Option<i32> {
+    match tabindex_attr.initializer()?.value().ok()? {
+        AnyJsxAttributeValue::AnyJsxTag(jsx_tag) => jsx_tag.to_trimmed_text().text().parse().ok(),
+        AnyJsxAttributeValue::JsxString(jsx_string) => {
+            jsx_string.inner_string_text().ok()?.text().parse().ok()
+        }
+        AnyJsxAttributeValue::JsxExpressionAttributeValue(value) => {
+            let expression = value.expression().ok()?;
+            AnyNumberLikeExpression::cast(expression.into_syntax())?
+                .value()?
+                .parse()
+                .ok()
+        }
+        AnyJsxAttributeValue::JsTemplateExpression(_) => None,
     }
 }
