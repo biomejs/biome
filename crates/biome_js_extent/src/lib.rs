@@ -465,9 +465,12 @@ impl<'src> JsExtent<'src> {
                         self.advance(1);
                     }
                     SLH => self.skip_slash(),
+                    // A delimiter scan tracks every bracket so that its callback only sees
+                    // top-level code. Other scans stop on an empty stack, so tracking brackets
+                    // there would let one unbalanced `(` or `[` hide a `---` fence or blank line.
                     _ if byte == b'{'
-                        || matches!(byte, b'(' | b'[')
-                            && (stop != JsScanStop::ExpressionEnd || should_stop.is_some()) =>
+                        || byte == b'[' && stop == JsScanStop::ArgumentEnd
+                        || matches!(byte, b'(' | b'[') && should_stop.is_some() =>
                     {
                         let closing = if byte == b'(' {
                             b')'
@@ -484,6 +487,18 @@ impl<'src> JsExtent<'src> {
                             self.stack.pop();
                         } else if self.stack.is_empty() && stop.ends_at(byte) {
                             return self.position;
+                        } else if should_stop.is_some() && byte == b'}' {
+                            // An unclosed `(` or `[` must not hide the `}` that ends a
+                            // delimiter scan: the `}` closes the innermost open `{`, or
+                            // ends the expression when none is open.
+                            match self
+                                .stack
+                                .iter()
+                                .rposition(|context| *context == JsContext::Code(b'}'))
+                            {
+                                Some(open) => self.stack.truncate(open),
+                                None => return self.position,
+                            }
                         }
                         self.advance(1);
                     }

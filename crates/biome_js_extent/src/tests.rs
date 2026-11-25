@@ -182,6 +182,34 @@ fn a_custom_expression_stop_requires_a_complete_expression() {
 }
 
 #[test]
+fn a_custom_expression_stop_ends_at_a_curly_that_closes_no_bracket() {
+    let source = "items.filter((item) => item.ok}\n<li>{item}</li>";
+    let length = JsExtent::expression_length_until(source.as_bytes(), |_| false);
+    assert_eq!(length, source.find('}').unwrap());
+
+    // The `}` closes the object, so the call and the stop after it stay visible.
+    let source = "call({ key: value(}) as item}";
+    let length = JsExtent::expression_length_until(source.as_bytes(), |position| {
+        position.remaining().starts_with(b"as ") && position.can_end_expression()
+    });
+    assert_eq!(length, source.rfind("as item").unwrap());
+}
+
+#[test]
+fn an_unbalanced_bracket_leaves_the_fence_visible() {
+    assert_eq!(fence("[\n---\n"), Some(2));
+    assert_eq!(fence("call(\n---\n"), Some(6));
+}
+
+#[test]
+fn an_unbalanced_bracket_does_not_hide_the_blank_line() {
+    assert_eq!(
+        esm("export const a = call(\n\n# Title"),
+        EsmEnd::BlankLine(22)
+    );
+}
+
+#[test]
 fn nested_template_interpolation_closes_the_fence() {
     assert!(fence("const a = `x${`/y`}`;\n---\n").is_some());
 }

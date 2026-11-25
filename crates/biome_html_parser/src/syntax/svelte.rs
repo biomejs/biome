@@ -753,7 +753,6 @@ pub(crate) fn parse_opening_block(
     Present(m.complete(p, node))
 }
 
-/// Returns whether the current token starts a Svelte closing block header.
 /// Parses a `{/<keyword> }` block.
 ///
 /// `node` is the name of the node to emit.
