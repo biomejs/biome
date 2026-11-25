@@ -273,6 +273,8 @@ fn test_intersects() {
         ("~1.2.3", "~1.3.2", false),
         (">=1.3.0", "<=1.2.0", false),
         (">=1.3.0", "<1.3.0", false),
+        (">0.0.0 <0.0.1-alpha", "=0.0.1-0", true),
+        (">0.0.0 <0.0.1-0", "=0.0.1-0", false),
     ];
 
     for (range1_str, range2_str, should_intersect) in intersects_cases {
