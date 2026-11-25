@@ -17,6 +17,8 @@ static BIOMEPLUGIN_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|
         RuleFilter::Rule("nursery", "useBiomeTopLevelTypes"),
     ]
 });
+static CONVEX_FILTERS: LazyLock<Vec<RuleFilter<'static>>> =
+    LazyLock::new(|| vec![RuleFilter::Rule("nursery", "noConvexTopOfHourCrons")]);
 static DRIZZLE_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
     vec![
         RuleFilter::Rule("nursery", "noDrizzleDbObjectInsideTransaction"),
@@ -404,6 +406,7 @@ impl DomainSelector {
         match self.0 {
             "astro" => ASTRO_FILTERS.clone(),
             "biomePlugin" => BIOMEPLUGIN_FILTERS.clone(),
+            "convex" => CONVEX_FILTERS.clone(),
             "drizzle" => DRIZZLE_FILTERS.clone(),
             "next" => NEXT_FILTERS.clone(),
             "playwright" => PLAYWRIGHT_FILTERS.clone(),
@@ -434,6 +437,9 @@ impl DomainSelector {
                 .iter()
                 .any(|filter| filter.match_rule_name(group_name, rule_name)),
             "biomePlugin" => BIOMEPLUGIN_FILTERS
+                .iter()
+                .any(|filter| filter.match_rule_name(group_name, rule_name)),
+            "convex" => CONVEX_FILTERS
                 .iter()
                 .any(|filter| filter.match_rule_name(group_name, rule_name)),
             "drizzle" => DRIZZLE_FILTERS
