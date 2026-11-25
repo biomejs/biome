@@ -1,0 +1,111 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+assertion_line: 157
+expression: snapshot
+---
+
+## Input
+
+```svelte
+{#each items
+  <li>Fruits such as apples, pears</li>
+{/each}
+<p>After</p>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    items: HtmlRootItemList [
+        SvelteEachBlock {
+            opening_block: SvelteEachOpeningBlock {
+                sv_curly_hash_token: SV_CURLY_HASH@0..2 "{#" [] [],
+                each_token: EACH_KW@2..6 "each" [] [],
+                list: HtmlTextExpression {
+                    html_literal_token: HTML_LITERAL@6..15 " items\n  " [] [],
+                },
+                item: missing (optional),
+                r_curly_token: missing (required),
+            },
+            children: HtmlElementList [
+                HtmlContent {
+                    value_token: HTML_LITERAL@15..74 "<li>Fruits such as apples, pears</li>\n{/each}\n<p>After</p>\n" [] [],
+                },
+            ],
+            else_clause: missing (optional),
+            closing_block: missing (required),
+        },
+    ],
+    eof_token: EOF@74..74 "" [] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..74
+  0: (empty)
+  1: (empty)
+  2: HTML_ROOT_ITEM_LIST@0..74
+    0: SVELTE_EACH_BLOCK@0..74
+      0: SVELTE_EACH_OPENING_BLOCK@0..15
+        0: SV_CURLY_HASH@0..2 "{#" [] []
+        1: EACH_KW@2..6 "each" [] []
+        2: HTML_TEXT_EXPRESSION@6..15
+          0: HTML_LITERAL@6..15 " items\n  " [] []
+        3: (empty)
+        4: (empty)
+      1: HTML_ELEMENT_LIST@15..74
+        0: HTML_CONTENT@15..74
+          0: HTML_LITERAL@15..74 "<li>Fruits such as apples, pears</li>\n{/each}\n<p>After</p>\n" [] []
+      2: (empty)
+      3: (empty)
+  3: EOF@74..74 "" [] []
+
+```
+
+## Diagnostics
+
+```
+each_unclosed_header.svelte:2:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `}` but instead found `<li>Fruits such as apples, pears</li>
+    {/each}
+    <p>After</p>
+    `
+  
+    1 │ {#each items
+  > 2 │   <li>Fruits such as apples, pears</li>
+      │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 3 │ {/each}
+  > 4 │ <p>After</p>
+  > 5 │ 
+      │ 
+  
+  i Remove <li>Fruits such as apples, pears</li>
+    {/each}
+    <p>After</p>
+  
+  
+each_unclosed_header.svelte:5:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a closing block, instead found none.
+  
+    3 │ {/each}
+    4 │ <p>After</p>
+  > 5 │ 
+      │ 
+  
+  i This is where the block started.
+  
+    3 │ {/each}
+    4 │ <p>After</p>
+  > 5 │ 
+      │ 
+  
+```

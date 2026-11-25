@@ -98,6 +98,7 @@ pub(crate) enum EmbedBlockKind {
 pub(crate) enum SvelteBlockKind {
     Render,
     Snippet,
+    EachBinding,
     Const,
     Declaration,
 }

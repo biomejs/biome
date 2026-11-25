@@ -2469,51 +2469,6 @@ pub struct SvelteConstBlockFields {
     pub r_curly_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
-pub struct SvelteCurlyDestructuredName {
-    pub(crate) syntax: SyntaxNode,
-}
-impl SvelteCurlyDestructuredName {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn as_fields(&self) -> SvelteCurlyDestructuredNameFields {
-        SvelteCurlyDestructuredNameFields {
-            l_curly_token: self.l_curly_token(),
-            names: self.names(),
-            r_curly_token: self.r_curly_token(),
-        }
-    }
-    pub fn l_curly_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 0usize)
-    }
-    pub fn names(&self) -> SvelteBindingAssignmentBindingList {
-        support::list(&self.syntax, 1usize)
-    }
-    pub fn r_curly_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 2usize)
-    }
-}
-impl Serialize for SvelteCurlyDestructuredName {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        self.as_fields().serialize(serializer)
-    }
-}
-#[derive(Serialize)]
-pub struct SvelteCurlyDestructuredNameFields {
-    pub l_curly_token: SyntaxResult<SyntaxToken>,
-    pub names: SvelteBindingAssignmentBindingList,
-    pub r_curly_token: SyntaxResult<SyntaxToken>,
-}
-#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct SvelteDebugBlock {
     pub(crate) syntax: SyntaxNode,
 }
@@ -2699,10 +2654,10 @@ pub struct SvelteDirectiveValueFields {
     pub initializer: Option<AnySvelteDirectiveInitializerClause>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
-pub struct SvelteEachAsKeyedItem {
+pub struct SvelteEachBindingClause {
     pub(crate) syntax: SyntaxNode,
 }
-impl SvelteEachAsKeyedItem {
+impl SvelteEachBindingClause {
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -2712,28 +2667,20 @@ impl SvelteEachAsKeyedItem {
     pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
         Self { syntax }
     }
-    pub fn as_fields(&self) -> SvelteEachAsKeyedItemFields {
-        SvelteEachAsKeyedItemFields {
+    pub fn as_fields(&self) -> SvelteEachBindingClauseFields {
+        SvelteEachBindingClauseFields {
             as_token: self.as_token(),
-            name: self.name(),
-            index: self.index(),
-            key: self.key(),
+            clause: self.clause(),
         }
     }
     pub fn as_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
-    pub fn name(&self) -> SyntaxResult<AnySvelteEachName> {
+    pub fn clause(&self) -> SyntaxResult<HtmlTextExpression> {
         support::required_node(&self.syntax, 1usize)
     }
-    pub fn index(&self) -> Option<SvelteEachIndex> {
-        support::node(&self.syntax, 2usize)
-    }
-    pub fn key(&self) -> Option<SvelteEachKey> {
-        support::node(&self.syntax, 3usize)
-    }
 }
-impl Serialize for SvelteEachAsKeyedItem {
+impl Serialize for SvelteEachBindingClause {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
@@ -2742,11 +2689,9 @@ impl Serialize for SvelteEachAsKeyedItem {
     }
 }
 #[derive(Serialize)]
-pub struct SvelteEachAsKeyedItemFields {
+pub struct SvelteEachBindingClauseFields {
     pub as_token: SyntaxResult<SyntaxToken>,
-    pub name: SyntaxResult<AnySvelteEachName>,
-    pub index: Option<SvelteEachIndex>,
-    pub key: Option<SvelteEachKey>,
+    pub clause: SyntaxResult<HtmlTextExpression>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct SvelteEachBlock {
@@ -2882,51 +2827,6 @@ impl Serialize for SvelteEachIndex {
 pub struct SvelteEachIndexFields {
     pub comma_token: SyntaxResult<SyntaxToken>,
     pub value: SyntaxResult<SvelteName>,
-}
-#[derive(Clone, PartialEq, Eq, Hash)]
-pub struct SvelteEachKey {
-    pub(crate) syntax: SyntaxNode,
-}
-impl SvelteEachKey {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn as_fields(&self) -> SvelteEachKeyFields {
-        SvelteEachKeyFields {
-            l_paren_token: self.l_paren_token(),
-            expression: self.expression(),
-            r_paren_token: self.r_paren_token(),
-        }
-    }
-    pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 0usize)
-    }
-    pub fn expression(&self) -> SyntaxResult<HtmlTextExpression> {
-        support::required_node(&self.syntax, 1usize)
-    }
-    pub fn r_paren_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 2usize)
-    }
-}
-impl Serialize for SvelteEachKey {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        self.as_fields().serialize(serializer)
-    }
-}
-#[derive(Serialize)]
-pub struct SvelteEachKeyFields {
-    pub l_paren_token: SyntaxResult<SyntaxToken>,
-    pub expression: SyntaxResult<HtmlTextExpression>,
-    pub r_paren_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct SvelteEachKeyedItem {
@@ -3664,51 +3564,6 @@ pub struct SvelteOutDirectiveFields {
     pub value: SyntaxResult<SvelteDirectiveValue>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
-pub struct SvelteRenameBinding {
-    pub(crate) syntax: SyntaxNode,
-}
-impl SvelteRenameBinding {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn as_fields(&self) -> SvelteRenameBindingFields {
-        SvelteRenameBindingFields {
-            key: self.key(),
-            colon_token: self.colon_token(),
-            name: self.name(),
-        }
-    }
-    pub fn key(&self) -> SyntaxResult<SvelteName> {
-        support::required_node(&self.syntax, 0usize)
-    }
-    pub fn colon_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 1usize)
-    }
-    pub fn name(&self) -> SyntaxResult<AnySvelteBindingAssignmentBinding> {
-        support::required_node(&self.syntax, 2usize)
-    }
-}
-impl Serialize for SvelteRenameBinding {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        self.as_fields().serialize(serializer)
-    }
-}
-#[derive(Serialize)]
-pub struct SvelteRenameBindingFields {
-    pub key: SyntaxResult<SvelteName>,
-    pub colon_token: SyntaxResult<SyntaxToken>,
-    pub name: SyntaxResult<AnySvelteBindingAssignmentBinding>,
-}
-#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct SvelteRenderBlock {
     pub(crate) syntax: SyntaxNode,
 }
@@ -3757,46 +3612,6 @@ pub struct SvelteRenderBlockFields {
     pub render_token: SyntaxResult<SyntaxToken>,
     pub expression: SyntaxResult<HtmlTextExpression>,
     pub r_curly_token: SyntaxResult<SyntaxToken>,
-}
-#[derive(Clone, PartialEq, Eq, Hash)]
-pub struct SvelteRestBinding {
-    pub(crate) syntax: SyntaxNode,
-}
-impl SvelteRestBinding {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn as_fields(&self) -> SvelteRestBindingFields {
-        SvelteRestBindingFields {
-            dotdotdot_token: self.dotdotdot_token(),
-            name: self.name(),
-        }
-    }
-    pub fn dotdotdot_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 0usize)
-    }
-    pub fn name(&self) -> SyntaxResult<SvelteName> {
-        support::required_node(&self.syntax, 1usize)
-    }
-}
-impl Serialize for SvelteRestBinding {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        self.as_fields().serialize(serializer)
-    }
-}
-#[derive(Serialize)]
-pub struct SvelteRestBindingFields {
-    pub dotdotdot_token: SyntaxResult<SyntaxToken>,
-    pub name: SyntaxResult<SvelteName>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct SvelteSnippetBlock {
@@ -3937,51 +3752,6 @@ pub struct SvelteSnippetOpeningBlockFields {
     pub expression: SyntaxResult<HtmlTextExpression>,
     pub r_curly_token: SyntaxResult<SyntaxToken>,
     pub children: HtmlElementList,
-}
-#[derive(Clone, PartialEq, Eq, Hash)]
-pub struct SvelteSquareDestructuredName {
-    pub(crate) syntax: SyntaxNode,
-}
-impl SvelteSquareDestructuredName {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn as_fields(&self) -> SvelteSquareDestructuredNameFields {
-        SvelteSquareDestructuredNameFields {
-            l_brack_token: self.l_brack_token(),
-            names: self.names(),
-            r_brack_token: self.r_brack_token(),
-        }
-    }
-    pub fn l_brack_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 0usize)
-    }
-    pub fn names(&self) -> SvelteBindingAssignmentBindingList {
-        support::list(&self.syntax, 1usize)
-    }
-    pub fn r_brack_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 2usize)
-    }
-}
-impl Serialize for SvelteSquareDestructuredName {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        self.as_fields().serialize(serializer)
-    }
-}
-#[derive(Serialize)]
-pub struct SvelteSquareDestructuredNameFields {
-    pub l_brack_token: SyntaxResult<SyntaxToken>,
-    pub names: SvelteBindingAssignmentBindingList,
-    pub r_brack_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct SvelteStyleDirective {
@@ -5444,39 +5214,6 @@ impl AnySvelteAwaitClauses {
     }
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
-pub enum AnySvelteBindingAssignmentBinding {
-    AnySvelteDestructuredName(AnySvelteDestructuredName),
-    SvelteName(SvelteName),
-    SvelteRenameBinding(SvelteRenameBinding),
-    SvelteRestBinding(SvelteRestBinding),
-}
-impl AnySvelteBindingAssignmentBinding {
-    pub fn as_any_svelte_destructured_name(&self) -> Option<&AnySvelteDestructuredName> {
-        match &self {
-            Self::AnySvelteDestructuredName(item) => Some(item),
-            _ => None,
-        }
-    }
-    pub fn as_svelte_name(&self) -> Option<&SvelteName> {
-        match &self {
-            Self::SvelteName(item) => Some(item),
-            _ => None,
-        }
-    }
-    pub fn as_svelte_rename_binding(&self) -> Option<&SvelteRenameBinding> {
-        match &self {
-            Self::SvelteRenameBinding(item) => Some(item),
-            _ => None,
-        }
-    }
-    pub fn as_svelte_rest_binding(&self) -> Option<&SvelteRestBinding> {
-        match &self {
-            Self::SvelteRestBinding(item) => Some(item),
-            _ => None,
-        }
-    }
-}
-#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnySvelteBindingProperty {
     SvelteLiteral(SvelteLiteral),
     SvelteMemberProperty(SvelteMemberProperty),
@@ -5586,38 +5323,19 @@ impl AnySvelteBlock {
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnySvelteBlockItem {
-    SvelteEachAsKeyedItem(SvelteEachAsKeyedItem),
+    SvelteEachBindingClause(SvelteEachBindingClause),
     SvelteEachKeyedItem(SvelteEachKeyedItem),
 }
 impl AnySvelteBlockItem {
-    pub fn as_svelte_each_as_keyed_item(&self) -> Option<&SvelteEachAsKeyedItem> {
+    pub fn as_svelte_each_binding_clause(&self) -> Option<&SvelteEachBindingClause> {
         match &self {
-            Self::SvelteEachAsKeyedItem(item) => Some(item),
+            Self::SvelteEachBindingClause(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_svelte_each_keyed_item(&self) -> Option<&SvelteEachKeyedItem> {
         match &self {
             Self::SvelteEachKeyedItem(item) => Some(item),
-            _ => None,
-        }
-    }
-}
-#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
-pub enum AnySvelteDestructuredName {
-    SvelteCurlyDestructuredName(SvelteCurlyDestructuredName),
-    SvelteSquareDestructuredName(SvelteSquareDestructuredName),
-}
-impl AnySvelteDestructuredName {
-    pub fn as_svelte_curly_destructured_name(&self) -> Option<&SvelteCurlyDestructuredName> {
-        match &self {
-            Self::SvelteCurlyDestructuredName(item) => Some(item),
-            _ => None,
-        }
-    }
-    pub fn as_svelte_square_destructured_name(&self) -> Option<&SvelteSquareDestructuredName> {
-        match &self {
-            Self::SvelteSquareDestructuredName(item) => Some(item),
             _ => None,
         }
     }
@@ -5700,32 +5418,6 @@ impl AnySvelteDirectiveInitializerClause {
     ) -> Option<&SvelteBindFunctionBindingInitializerClause> {
         match &self {
             Self::SvelteBindFunctionBindingInitializerClause(item) => Some(item),
-            _ => None,
-        }
-    }
-}
-#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
-pub enum AnySvelteEachName {
-    AnySvelteDestructuredName(AnySvelteDestructuredName),
-    HtmlTextExpression(HtmlTextExpression),
-    SvelteName(SvelteName),
-}
-impl AnySvelteEachName {
-    pub fn as_any_svelte_destructured_name(&self) -> Option<&AnySvelteDestructuredName> {
-        match &self {
-            Self::AnySvelteDestructuredName(item) => Some(item),
-            _ => None,
-        }
-    }
-    pub fn as_html_text_expression(&self) -> Option<&HtmlTextExpression> {
-        match &self {
-            Self::HtmlTextExpression(item) => Some(item),
-            _ => None,
-        }
-    }
-    pub fn as_svelte_name(&self) -> Option<&SvelteName> {
-        match &self {
-            Self::SvelteName(item) => Some(item),
             _ => None,
         }
     }
@@ -7929,42 +7621,6 @@ impl From<SvelteConstBlock> for SyntaxElement {
         n.syntax.into()
     }
 }
-impl AstNode for SvelteCurlyDestructuredName {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(SVELTE_CURLY_DESTRUCTURED_NAME as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == SVELTE_CURLY_DESTRUCTURED_NAME
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for SvelteCurlyDestructuredName {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        debug_syntax_node(&self.syntax, f)
-    }
-}
-impl From<SvelteCurlyDestructuredName> for SyntaxNode {
-    fn from(n: SvelteCurlyDestructuredName) -> Self {
-        n.syntax
-    }
-}
-impl From<SvelteCurlyDestructuredName> for SyntaxElement {
-    fn from(n: SvelteCurlyDestructuredName) -> Self {
-        n.syntax.into()
-    }
-}
 impl AstNode for SvelteDebugBlock {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -8109,12 +7765,12 @@ impl From<SvelteDirectiveValue> for SyntaxElement {
         n.syntax.into()
     }
 }
-impl AstNode for SvelteEachAsKeyedItem {
+impl AstNode for SvelteEachBindingClause {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(SVELTE_EACH_AS_KEYED_ITEM as u16));
+        SyntaxKindSet::from_raw(RawSyntaxKind(SVELTE_EACH_BINDING_CLAUSE as u16));
     fn can_cast(kind: SyntaxKind) -> bool {
-        kind == SVELTE_EACH_AS_KEYED_ITEM
+        kind == SVELTE_EACH_BINDING_CLAUSE
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         if Self::can_cast(syntax.kind()) {
@@ -8130,18 +7786,18 @@ impl AstNode for SvelteEachAsKeyedItem {
         self.syntax
     }
 }
-impl std::fmt::Debug for SvelteEachAsKeyedItem {
+impl std::fmt::Debug for SvelteEachBindingClause {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         debug_syntax_node(&self.syntax, f)
     }
 }
-impl From<SvelteEachAsKeyedItem> for SyntaxNode {
-    fn from(n: SvelteEachAsKeyedItem) -> Self {
+impl From<SvelteEachBindingClause> for SyntaxNode {
+    fn from(n: SvelteEachBindingClause) -> Self {
         n.syntax
     }
 }
-impl From<SvelteEachAsKeyedItem> for SyntaxElement {
-    fn from(n: SvelteEachAsKeyedItem) -> Self {
+impl From<SvelteEachBindingClause> for SyntaxElement {
+    fn from(n: SvelteEachBindingClause) -> Self {
         n.syntax.into()
     }
 }
@@ -8250,42 +7906,6 @@ impl From<SvelteEachIndex> for SyntaxNode {
 }
 impl From<SvelteEachIndex> for SyntaxElement {
     fn from(n: SvelteEachIndex) -> Self {
-        n.syntax.into()
-    }
-}
-impl AstNode for SvelteEachKey {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(SVELTE_EACH_KEY as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == SVELTE_EACH_KEY
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for SvelteEachKey {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        debug_syntax_node(&self.syntax, f)
-    }
-}
-impl From<SvelteEachKey> for SyntaxNode {
-    fn from(n: SvelteEachKey) -> Self {
-        n.syntax
-    }
-}
-impl From<SvelteEachKey> for SyntaxElement {
-    fn from(n: SvelteEachKey) -> Self {
         n.syntax.into()
     }
 }
@@ -8865,42 +8485,6 @@ impl From<SvelteOutDirective> for SyntaxElement {
         n.syntax.into()
     }
 }
-impl AstNode for SvelteRenameBinding {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(SVELTE_RENAME_BINDING as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == SVELTE_RENAME_BINDING
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for SvelteRenameBinding {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        debug_syntax_node(&self.syntax, f)
-    }
-}
-impl From<SvelteRenameBinding> for SyntaxNode {
-    fn from(n: SvelteRenameBinding) -> Self {
-        n.syntax
-    }
-}
-impl From<SvelteRenameBinding> for SyntaxElement {
-    fn from(n: SvelteRenameBinding) -> Self {
-        n.syntax.into()
-    }
-}
 impl AstNode for SvelteRenderBlock {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -8934,42 +8518,6 @@ impl From<SvelteRenderBlock> for SyntaxNode {
 }
 impl From<SvelteRenderBlock> for SyntaxElement {
     fn from(n: SvelteRenderBlock) -> Self {
-        n.syntax.into()
-    }
-}
-impl AstNode for SvelteRestBinding {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(SVELTE_REST_BINDING as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == SVELTE_REST_BINDING
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for SvelteRestBinding {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        debug_syntax_node(&self.syntax, f)
-    }
-}
-impl From<SvelteRestBinding> for SyntaxNode {
-    fn from(n: SvelteRestBinding) -> Self {
-        n.syntax
-    }
-}
-impl From<SvelteRestBinding> for SyntaxElement {
-    fn from(n: SvelteRestBinding) -> Self {
         n.syntax.into()
     }
 }
@@ -9078,42 +8626,6 @@ impl From<SvelteSnippetOpeningBlock> for SyntaxNode {
 }
 impl From<SvelteSnippetOpeningBlock> for SyntaxElement {
     fn from(n: SvelteSnippetOpeningBlock) -> Self {
-        n.syntax.into()
-    }
-}
-impl AstNode for SvelteSquareDestructuredName {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(SVELTE_SQUARE_DESTRUCTURED_NAME as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == SVELTE_SQUARE_DESTRUCTURED_NAME
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for SvelteSquareDestructuredName {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        debug_syntax_node(&self.syntax, f)
-    }
-}
-impl From<SvelteSquareDestructuredName> for SyntaxNode {
-    fn from(n: SvelteSquareDestructuredName) -> Self {
-        n.syntax
-    }
-}
-impl From<SvelteSquareDestructuredName> for SyntaxElement {
-    fn from(n: SvelteSquareDestructuredName) -> Self {
         n.syntax.into()
     }
 }
@@ -11035,89 +10547,6 @@ impl From<AnySvelteAwaitClauses> for SyntaxElement {
         node.into()
     }
 }
-impl From<SvelteName> for AnySvelteBindingAssignmentBinding {
-    fn from(node: SvelteName) -> Self {
-        Self::SvelteName(node)
-    }
-}
-impl From<SvelteRenameBinding> for AnySvelteBindingAssignmentBinding {
-    fn from(node: SvelteRenameBinding) -> Self {
-        Self::SvelteRenameBinding(node)
-    }
-}
-impl From<SvelteRestBinding> for AnySvelteBindingAssignmentBinding {
-    fn from(node: SvelteRestBinding) -> Self {
-        Self::SvelteRestBinding(node)
-    }
-}
-impl AstNode for AnySvelteBindingAssignmentBinding {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> = AnySvelteDestructuredName::KIND_SET
-        .union(SvelteName::KIND_SET)
-        .union(SvelteRenameBinding::KIND_SET)
-        .union(SvelteRestBinding::KIND_SET);
-    fn can_cast(kind: SyntaxKind) -> bool {
-        match kind {
-            SVELTE_NAME | SVELTE_RENAME_BINDING | SVELTE_REST_BINDING => true,
-            k if AnySvelteDestructuredName::can_cast(k) => true,
-            _ => false,
-        }
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        let res = match syntax.kind() {
-            SVELTE_NAME => Self::SvelteName(SvelteName { syntax }),
-            SVELTE_RENAME_BINDING => Self::SvelteRenameBinding(SvelteRenameBinding { syntax }),
-            SVELTE_REST_BINDING => Self::SvelteRestBinding(SvelteRestBinding { syntax }),
-            _ => {
-                if let Some(any_svelte_destructured_name) = AnySvelteDestructuredName::cast(syntax)
-                {
-                    return Some(Self::AnySvelteDestructuredName(
-                        any_svelte_destructured_name,
-                    ));
-                }
-                return None;
-            }
-        };
-        Some(res)
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        match self {
-            Self::SvelteName(it) => it.syntax(),
-            Self::SvelteRenameBinding(it) => it.syntax(),
-            Self::SvelteRestBinding(it) => it.syntax(),
-            Self::AnySvelteDestructuredName(it) => it.syntax(),
-        }
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        match self {
-            Self::SvelteName(it) => it.into_syntax(),
-            Self::SvelteRenameBinding(it) => it.into_syntax(),
-            Self::SvelteRestBinding(it) => it.into_syntax(),
-            Self::AnySvelteDestructuredName(it) => it.into_syntax(),
-        }
-    }
-}
-impl std::fmt::Debug for AnySvelteBindingAssignmentBinding {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        debug_syntax_node(self.syntax(), f)
-    }
-}
-impl From<AnySvelteBindingAssignmentBinding> for SyntaxNode {
-    fn from(n: AnySvelteBindingAssignmentBinding) -> Self {
-        match n {
-            AnySvelteBindingAssignmentBinding::AnySvelteDestructuredName(it) => it.into_syntax(),
-            AnySvelteBindingAssignmentBinding::SvelteName(it) => it.into_syntax(),
-            AnySvelteBindingAssignmentBinding::SvelteRenameBinding(it) => it.into_syntax(),
-            AnySvelteBindingAssignmentBinding::SvelteRestBinding(it) => it.into_syntax(),
-        }
-    }
-}
-impl From<AnySvelteBindingAssignmentBinding> for SyntaxElement {
-    fn from(n: AnySvelteBindingAssignmentBinding) -> Self {
-        let node: SyntaxNode = n.into();
-        node.into()
-    }
-}
 impl From<SvelteLiteral> for AnySvelteBindingProperty {
     fn from(node: SvelteLiteral) -> Self {
         Self::SvelteLiteral(node)
@@ -11347,9 +10776,9 @@ impl From<AnySvelteBlock> for SyntaxElement {
         node.into()
     }
 }
-impl From<SvelteEachAsKeyedItem> for AnySvelteBlockItem {
-    fn from(node: SvelteEachAsKeyedItem) -> Self {
-        Self::SvelteEachAsKeyedItem(node)
+impl From<SvelteEachBindingClause> for AnySvelteBlockItem {
+    fn from(node: SvelteEachBindingClause) -> Self {
+        Self::SvelteEachBindingClause(node)
     }
 }
 impl From<SvelteEachKeyedItem> for AnySvelteBlockItem {
@@ -11360,14 +10789,14 @@ impl From<SvelteEachKeyedItem> for AnySvelteBlockItem {
 impl AstNode for AnySvelteBlockItem {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
-        SvelteEachAsKeyedItem::KIND_SET.union(SvelteEachKeyedItem::KIND_SET);
+        SvelteEachBindingClause::KIND_SET.union(SvelteEachKeyedItem::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(kind, SVELTE_EACH_AS_KEYED_ITEM | SVELTE_EACH_KEYED_ITEM)
+        matches!(kind, SVELTE_EACH_BINDING_CLAUSE | SVELTE_EACH_KEYED_ITEM)
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            SVELTE_EACH_AS_KEYED_ITEM => {
-                Self::SvelteEachAsKeyedItem(SvelteEachAsKeyedItem { syntax })
+            SVELTE_EACH_BINDING_CLAUSE => {
+                Self::SvelteEachBindingClause(SvelteEachBindingClause { syntax })
             }
             SVELTE_EACH_KEYED_ITEM => Self::SvelteEachKeyedItem(SvelteEachKeyedItem { syntax }),
             _ => return None,
@@ -11376,13 +10805,13 @@ impl AstNode for AnySvelteBlockItem {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::SvelteEachAsKeyedItem(it) => it.syntax(),
+            Self::SvelteEachBindingClause(it) => it.syntax(),
             Self::SvelteEachKeyedItem(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::SvelteEachAsKeyedItem(it) => it.into_syntax(),
+            Self::SvelteEachBindingClause(it) => it.into_syntax(),
             Self::SvelteEachKeyedItem(it) => it.into_syntax(),
         }
     }
@@ -11395,77 +10824,13 @@ impl std::fmt::Debug for AnySvelteBlockItem {
 impl From<AnySvelteBlockItem> for SyntaxNode {
     fn from(n: AnySvelteBlockItem) -> Self {
         match n {
-            AnySvelteBlockItem::SvelteEachAsKeyedItem(it) => it.into_syntax(),
+            AnySvelteBlockItem::SvelteEachBindingClause(it) => it.into_syntax(),
             AnySvelteBlockItem::SvelteEachKeyedItem(it) => it.into_syntax(),
         }
     }
 }
 impl From<AnySvelteBlockItem> for SyntaxElement {
     fn from(n: AnySvelteBlockItem) -> Self {
-        let node: SyntaxNode = n.into();
-        node.into()
-    }
-}
-impl From<SvelteCurlyDestructuredName> for AnySvelteDestructuredName {
-    fn from(node: SvelteCurlyDestructuredName) -> Self {
-        Self::SvelteCurlyDestructuredName(node)
-    }
-}
-impl From<SvelteSquareDestructuredName> for AnySvelteDestructuredName {
-    fn from(node: SvelteSquareDestructuredName) -> Self {
-        Self::SvelteSquareDestructuredName(node)
-    }
-}
-impl AstNode for AnySvelteDestructuredName {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SvelteCurlyDestructuredName::KIND_SET.union(SvelteSquareDestructuredName::KIND_SET);
-    fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(
-            kind,
-            SVELTE_CURLY_DESTRUCTURED_NAME | SVELTE_SQUARE_DESTRUCTURED_NAME
-        )
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        let res = match syntax.kind() {
-            SVELTE_CURLY_DESTRUCTURED_NAME => {
-                Self::SvelteCurlyDestructuredName(SvelteCurlyDestructuredName { syntax })
-            }
-            SVELTE_SQUARE_DESTRUCTURED_NAME => {
-                Self::SvelteSquareDestructuredName(SvelteSquareDestructuredName { syntax })
-            }
-            _ => return None,
-        };
-        Some(res)
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        match self {
-            Self::SvelteCurlyDestructuredName(it) => it.syntax(),
-            Self::SvelteSquareDestructuredName(it) => it.syntax(),
-        }
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        match self {
-            Self::SvelteCurlyDestructuredName(it) => it.into_syntax(),
-            Self::SvelteSquareDestructuredName(it) => it.into_syntax(),
-        }
-    }
-}
-impl std::fmt::Debug for AnySvelteDestructuredName {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        debug_syntax_node(self.syntax(), f)
-    }
-}
-impl From<AnySvelteDestructuredName> for SyntaxNode {
-    fn from(n: AnySvelteDestructuredName) -> Self {
-        match n {
-            AnySvelteDestructuredName::SvelteCurlyDestructuredName(it) => it.into_syntax(),
-            AnySvelteDestructuredName::SvelteSquareDestructuredName(it) => it.into_syntax(),
-        }
-    }
-}
-impl From<AnySvelteDestructuredName> for SyntaxElement {
-    fn from(n: AnySvelteDestructuredName) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
@@ -11667,79 +11032,6 @@ impl From<AnySvelteDirectiveInitializerClause> for SyntaxNode {
 }
 impl From<AnySvelteDirectiveInitializerClause> for SyntaxElement {
     fn from(n: AnySvelteDirectiveInitializerClause) -> Self {
-        let node: SyntaxNode = n.into();
-        node.into()
-    }
-}
-impl From<HtmlTextExpression> for AnySvelteEachName {
-    fn from(node: HtmlTextExpression) -> Self {
-        Self::HtmlTextExpression(node)
-    }
-}
-impl From<SvelteName> for AnySvelteEachName {
-    fn from(node: SvelteName) -> Self {
-        Self::SvelteName(node)
-    }
-}
-impl AstNode for AnySvelteEachName {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> = AnySvelteDestructuredName::KIND_SET
-        .union(HtmlTextExpression::KIND_SET)
-        .union(SvelteName::KIND_SET);
-    fn can_cast(kind: SyntaxKind) -> bool {
-        match kind {
-            HTML_TEXT_EXPRESSION | SVELTE_NAME => true,
-            k if AnySvelteDestructuredName::can_cast(k) => true,
-            _ => false,
-        }
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        let res = match syntax.kind() {
-            HTML_TEXT_EXPRESSION => Self::HtmlTextExpression(HtmlTextExpression { syntax }),
-            SVELTE_NAME => Self::SvelteName(SvelteName { syntax }),
-            _ => {
-                if let Some(any_svelte_destructured_name) = AnySvelteDestructuredName::cast(syntax)
-                {
-                    return Some(Self::AnySvelteDestructuredName(
-                        any_svelte_destructured_name,
-                    ));
-                }
-                return None;
-            }
-        };
-        Some(res)
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        match self {
-            Self::HtmlTextExpression(it) => it.syntax(),
-            Self::SvelteName(it) => it.syntax(),
-            Self::AnySvelteDestructuredName(it) => it.syntax(),
-        }
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        match self {
-            Self::HtmlTextExpression(it) => it.into_syntax(),
-            Self::SvelteName(it) => it.into_syntax(),
-            Self::AnySvelteDestructuredName(it) => it.into_syntax(),
-        }
-    }
-}
-impl std::fmt::Debug for AnySvelteEachName {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        debug_syntax_node(self.syntax(), f)
-    }
-}
-impl From<AnySvelteEachName> for SyntaxNode {
-    fn from(n: AnySvelteEachName) -> Self {
-        match n {
-            AnySvelteEachName::AnySvelteDestructuredName(it) => it.into_syntax(),
-            AnySvelteEachName::HtmlTextExpression(it) => it.into_syntax(),
-            AnySvelteEachName::SvelteName(it) => it.into_syntax(),
-        }
-    }
-}
-impl From<AnySvelteEachName> for SyntaxElement {
-    fn from(n: AnySvelteEachName) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
@@ -12406,11 +11698,6 @@ impl std::fmt::Display for AnySvelteAwaitClauses {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
-impl std::fmt::Display for AnySvelteBindingAssignmentBinding {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(self.syntax(), f)
-    }
-}
 impl std::fmt::Display for AnySvelteBindingProperty {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -12426,22 +11713,12 @@ impl std::fmt::Display for AnySvelteBlockItem {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
-impl std::fmt::Display for AnySvelteDestructuredName {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(self.syntax(), f)
-    }
-}
 impl std::fmt::Display for AnySvelteDirective {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
 impl std::fmt::Display for AnySvelteDirectiveInitializerClause {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(self.syntax(), f)
-    }
-}
-impl std::fmt::Display for AnySvelteEachName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -12761,11 +12038,6 @@ impl std::fmt::Display for SvelteConstBlock {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
-impl std::fmt::Display for SvelteCurlyDestructuredName {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(self.syntax(), f)
-    }
-}
 impl std::fmt::Display for SvelteDebugBlock {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -12786,7 +12058,7 @@ impl std::fmt::Display for SvelteDirectiveValue {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
-impl std::fmt::Display for SvelteEachAsKeyedItem {
+impl std::fmt::Display for SvelteEachBindingClause {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -12802,11 +12074,6 @@ impl std::fmt::Display for SvelteEachClosingBlock {
     }
 }
 impl std::fmt::Display for SvelteEachIndex {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(self.syntax(), f)
-    }
-}
-impl std::fmt::Display for SvelteEachKey {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -12891,17 +12158,7 @@ impl std::fmt::Display for SvelteOutDirective {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
-impl std::fmt::Display for SvelteRenameBinding {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(self.syntax(), f)
-    }
-}
 impl std::fmt::Display for SvelteRenderBlock {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(self.syntax(), f)
-    }
-}
-impl std::fmt::Display for SvelteRestBinding {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -12917,11 +12174,6 @@ impl std::fmt::Display for SvelteSnippetClosingBlock {
     }
 }
 impl std::fmt::Display for SvelteSnippetOpeningBlock {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(self.syntax(), f)
-    }
-}
-impl std::fmt::Display for SvelteSquareDestructuredName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -13804,87 +13056,6 @@ impl IntoIterator for SvelteAwaitClausesList {
     }
 }
 #[derive(Clone, Eq, PartialEq, Hash)]
-pub struct SvelteBindingAssignmentBindingList {
-    syntax_list: SyntaxList,
-}
-impl SvelteBindingAssignmentBindingList {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self {
-            syntax_list: syntax.into_list(),
-        }
-    }
-}
-impl AstNode for SvelteBindingAssignmentBindingList {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(SVELTE_BINDING_ASSIGNMENT_BINDING_LIST as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == SVELTE_BINDING_ASSIGNMENT_BINDING_LIST
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self {
-                syntax_list: syntax.into_list(),
-            })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        self.syntax_list.node()
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax_list.into_node()
-    }
-}
-impl Serialize for SvelteBindingAssignmentBindingList {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        let mut seq = serializer.serialize_seq(Some(self.len()))?;
-        for e in self.iter() {
-            seq.serialize_element(&e)?;
-        }
-        seq.end()
-    }
-}
-impl AstSeparatedList for SvelteBindingAssignmentBindingList {
-    type Language = Language;
-    type Node = AnySvelteBindingAssignmentBinding;
-    fn syntax_list(&self) -> &SyntaxList {
-        &self.syntax_list
-    }
-    fn into_syntax_list(self) -> SyntaxList {
-        self.syntax_list
-    }
-}
-impl Debug for SvelteBindingAssignmentBindingList {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        debug_syntax_node(self.syntax_list.node(), f)
-    }
-}
-impl IntoIterator for SvelteBindingAssignmentBindingList {
-    type Item = SyntaxResult<AnySvelteBindingAssignmentBinding>;
-    type IntoIter = AstSeparatedListNodesIterator<Language, AnySvelteBindingAssignmentBinding>;
-    fn into_iter(self) -> Self::IntoIter {
-        self.iter()
-    }
-}
-impl IntoIterator for &SvelteBindingAssignmentBindingList {
-    type Item = SyntaxResult<AnySvelteBindingAssignmentBinding>;
-    type IntoIter = AstSeparatedListNodesIterator<Language, AnySvelteBindingAssignmentBinding>;
-    fn into_iter(self) -> Self::IntoIter {
-        self.iter()
-    }
-}
-#[derive(Clone, Eq, PartialEq, Hash)]
 pub struct SvelteBindingList {
     syntax_list: SyntaxList,
 }
@@ -14448,16 +13619,14 @@ impl support::DebugNodeShapes for DebugShapes {
         "nSvelteBindFunctionBindingInitializerClause,eq_token,value\n",
         "nSvelteClassDirective,class_token,value\n",
         "nSvelteConstBlock,sv_curly_at_token,const_token,expression,r_curly_token\n",
-        "nSvelteCurlyDestructuredName,l_curly_token,names,r_curly_token\n",
         "nSvelteDebugBlock,sv_curly_at_token,debug_token,bindings,r_curly_token\n",
         "nSvelteDeclarationBlock,l_curly_token,declaration,r_curly_token\n",
         "nSvelteDirectiveModifier,bitwise_or_token,name\n",
         "nSvelteDirectiveValue,colon_token,property,modifiers,?initializer\n",
-        "nSvelteEachAsKeyedItem,as_token,name,?index,?key\n",
+        "nSvelteEachBindingClause,as_token,clause\n",
         "nSvelteEachBlock,opening_block,children,?else_clause,closing_block\n",
         "nSvelteEachClosingBlock,sv_curly_slash_token,each_token,r_curly_token\n",
         "nSvelteEachIndex,comma_token,value\n",
-        "nSvelteEachKey,l_paren_token,expression,r_paren_token\n",
         "nSvelteEachKeyedItem,?index\n",
         "nSvelteEachOpeningBlock,sv_curly_hash_token,each_token,list,?item,r_curly_token\n",
         "nSvelteElseClause,sv_curly_colon_token,else_token,r_curly_token,children\n",
@@ -14474,13 +13643,10 @@ impl support::DebugNodeShapes for DebugShapes {
         "nSvelteMemberProperty,object,dot_token,member\n",
         "nSvelteName,ident_token\n",
         "nSvelteOutDirective,out_token,value\n",
-        "nSvelteRenameBinding,key,colon_token,name\n",
         "nSvelteRenderBlock,sv_curly_at_token,render_token,expression,r_curly_token\n",
-        "nSvelteRestBinding,dotdotdot_token,name\n",
         "nSvelteSnippetBlock,opening_block,closing_block\n",
         "nSvelteSnippetClosingBlock,sv_curly_slash_token,snippet_token,r_curly_token\n",
         "nSvelteSnippetOpeningBlock,sv_curly_hash_token,snippet_token,expression,r_curly_token,children\n",
-        "nSvelteSquareDestructuredName,l_brack_token,names,r_brack_token\n",
         "nSvelteStyleDirective,style_token,value\n",
         "nSvelteTemplateAttributeValue,l_quote,elements,r_quote\n",
         "nSvelteTemplateChunkElement,html_template_chunk_token\n",
@@ -14517,7 +13683,6 @@ impl support::DebugNodeShapes for DebugShapes {
         "lHtmlElementList\n",
         "lHtmlRootItemList\n",
         "lSvelteAwaitClausesList\n",
-        "sSvelteBindingAssignmentBindingList\n",
         "sSvelteBindingList\n",
         "lSvelteDirectiveModifierList\n",
         "lSvelteElseIfClauseList\n",
@@ -14582,82 +13747,76 @@ impl support::DebugNodeShapes for DebugShapes {
             SVELTE_BIND_FUNCTION_BINDING_INITIALIZER_CLAUSE => 2957u32,
             SVELTE_CLASS_DIRECTIVE => 3016u32,
             SVELTE_CONST_BLOCK => 3056u32,
-            SVELTE_CURLY_DESTRUCTURED_NAME => 3129u32,
-            SVELTE_DEBUG_BLOCK => 3192u32,
-            SVELTE_DECLARATION_BLOCK => 3263u32,
-            SVELTE_DIRECTIVE_MODIFIER => 3327u32,
-            SVELTE_DIRECTIVE_VALUE => 3374u32,
-            SVELTE_EACH_AS_KEYED_ITEM => 3440u32,
-            SVELTE_EACH_BLOCK => 3489u32,
-            SVELTE_EACH_CLOSING_BLOCK => 3556u32,
-            SVELTE_EACH_INDEX => 3626u32,
-            SVELTE_EACH_KEY => 3661u32,
-            SVELTE_EACH_KEYED_ITEM => 3715u32,
-            SVELTE_EACH_OPENING_BLOCK => 3743u32,
-            SVELTE_ELSE_CLAUSE => 3823u32,
-            SVELTE_ELSE_IF_CLAUSE => 3896u32,
-            SVELTE_HTML_BLOCK => 3991u32,
-            SVELTE_IF_BLOCK => 4062u32,
-            SVELTE_IF_CLOSING_BLOCK => 4134u32,
-            SVELTE_IF_OPENING_BLOCK => 4200u32,
-            SVELTE_IN_DIRECTIVE => 4285u32,
-            SVELTE_KEY_BLOCK => 4319u32,
-            SVELTE_KEY_CLOSING_BLOCK => 4372u32,
-            SVELTE_KEY_OPENING_BLOCK => 4440u32,
-            SVELTE_LITERAL => 4518u32,
-            SVELTE_MEMBER_PROPERTY => 4545u32,
-            SVELTE_NAME => 4591u32,
-            SVELTE_OUT_DIRECTIVE => 4615u32,
-            SVELTE_RENAME_BINDING => 4651u32,
-            SVELTE_RENDER_BLOCK => 4693u32,
-            SVELTE_REST_BINDING => 4768u32,
-            SVELTE_SNIPPET_BLOCK => 4808u32,
-            SVELTE_SNIPPET_CLOSING_BLOCK => 4856u32,
-            SVELTE_SNIPPET_OPENING_BLOCK => 4932u32,
-            SVELTE_SQUARE_DESTRUCTURED_NAME => 5027u32,
-            SVELTE_STYLE_DIRECTIVE => 5091u32,
-            SVELTE_TEMPLATE_ATTRIBUTE_VALUE => 5131u32,
-            SVELTE_TEMPLATE_CHUNK_ELEMENT => 5186u32,
-            SVELTE_TRANSITION_DIRECTIVE => 5240u32,
-            SVELTE_USE_DIRECTIVE => 5290u32,
-            VUE_DIRECTIVE => 5326u32,
-            VUE_DIRECTIVE_ARGUMENT => 5379u32,
-            VUE_DYNAMIC_ARGUMENT => 5418u32,
-            VUE_MODIFIER => 5477u32,
-            VUE_STATIC_ARGUMENT => 5515u32,
-            VUE_V_BIND_SHORTHAND_DIRECTIVE => 5545u32,
-            VUE_V_FOR_ARRAY_BINDING => 5600u32,
-            VUE_V_FOR_DEFAULT_BINDING => 5658u32,
-            VUE_V_FOR_IDENTIFIER_BINDING => 5706u32,
-            VUE_V_FOR_IN_OPERATOR => 5743u32,
-            VUE_V_FOR_OBJECT_BINDING => 5771u32,
-            VUE_V_FOR_OBJECT_PROPERTY_BINDING => 5830u32,
-            VUE_V_FOR_OF_OPERATOR => 5889u32,
-            VUE_V_FOR_REST_BINDING => 5917u32,
-            VUE_V_FOR_TUPLE_BINDING => 5961u32,
-            VUE_V_FOR_TUPLE_ELEMENT => 6031u32,
-            VUE_V_FOR_VALUE => 6072u32,
-            VUE_V_ON_SHORTHAND_DIRECTIVE => 6130u32,
-            VUE_V_SLOT_SHORTHAND_DIRECTIVE => 6192u32,
-            ASTRO_BOGUS_FRONTMATTER => 6258u32,
-            HTML_BOGUS => 6281u32,
-            HTML_BOGUS_ATTRIBUTE => 6292u32,
-            HTML_BOGUS_ELEMENT => 6312u32,
-            HTML_BOGUS_TEXT_EXPRESSION => 6330u32,
-            SVELTE_BOGUS_BLOCK => 6355u32,
-            VUE_BOGUS_DIRECTIVE => 6373u32,
-            VUE_BOGUS_DIRECTIVE_ARGUMENT => 6392u32,
-            HTML_ATTRIBUTE_LIST => 6419u32,
-            HTML_ELEMENT_LIST => 6438u32,
-            HTML_ROOT_ITEM_LIST => 6455u32,
-            SVELTE_AWAIT_CLAUSES_LIST => 6473u32,
-            SVELTE_BINDING_ASSIGNMENT_BINDING_LIST => 6497u32,
-            SVELTE_BINDING_LIST => 6533u32,
-            SVELTE_DIRECTIVE_MODIFIER_LIST => 6552u32,
-            SVELTE_ELSE_IF_CLAUSE_LIST => 6581u32,
-            SVELTE_TEMPLATE_ELEMENT_LIST => 6605u32,
-            VUE_MODIFIER_LIST => 6632u32,
-            VUE_V_FOR_BINDING_LIST => 6649u32,
+            SVELTE_DEBUG_BLOCK => 3129u32,
+            SVELTE_DECLARATION_BLOCK => 3200u32,
+            SVELTE_DIRECTIVE_MODIFIER => 3264u32,
+            SVELTE_DIRECTIVE_VALUE => 3311u32,
+            SVELTE_EACH_BINDING_CLAUSE => 3377u32,
+            SVELTE_EACH_BLOCK => 3418u32,
+            SVELTE_EACH_CLOSING_BLOCK => 3485u32,
+            SVELTE_EACH_INDEX => 3555u32,
+            SVELTE_EACH_KEYED_ITEM => 3590u32,
+            SVELTE_EACH_OPENING_BLOCK => 3618u32,
+            SVELTE_ELSE_CLAUSE => 3698u32,
+            SVELTE_ELSE_IF_CLAUSE => 3771u32,
+            SVELTE_HTML_BLOCK => 3866u32,
+            SVELTE_IF_BLOCK => 3937u32,
+            SVELTE_IF_CLOSING_BLOCK => 4009u32,
+            SVELTE_IF_OPENING_BLOCK => 4075u32,
+            SVELTE_IN_DIRECTIVE => 4160u32,
+            SVELTE_KEY_BLOCK => 4194u32,
+            SVELTE_KEY_CLOSING_BLOCK => 4247u32,
+            SVELTE_KEY_OPENING_BLOCK => 4315u32,
+            SVELTE_LITERAL => 4393u32,
+            SVELTE_MEMBER_PROPERTY => 4420u32,
+            SVELTE_NAME => 4466u32,
+            SVELTE_OUT_DIRECTIVE => 4490u32,
+            SVELTE_RENDER_BLOCK => 4526u32,
+            SVELTE_SNIPPET_BLOCK => 4601u32,
+            SVELTE_SNIPPET_CLOSING_BLOCK => 4649u32,
+            SVELTE_SNIPPET_OPENING_BLOCK => 4725u32,
+            SVELTE_STYLE_DIRECTIVE => 4820u32,
+            SVELTE_TEMPLATE_ATTRIBUTE_VALUE => 4860u32,
+            SVELTE_TEMPLATE_CHUNK_ELEMENT => 4915u32,
+            SVELTE_TRANSITION_DIRECTIVE => 4969u32,
+            SVELTE_USE_DIRECTIVE => 5019u32,
+            VUE_DIRECTIVE => 5055u32,
+            VUE_DIRECTIVE_ARGUMENT => 5108u32,
+            VUE_DYNAMIC_ARGUMENT => 5147u32,
+            VUE_MODIFIER => 5206u32,
+            VUE_STATIC_ARGUMENT => 5244u32,
+            VUE_V_BIND_SHORTHAND_DIRECTIVE => 5274u32,
+            VUE_V_FOR_ARRAY_BINDING => 5329u32,
+            VUE_V_FOR_DEFAULT_BINDING => 5387u32,
+            VUE_V_FOR_IDENTIFIER_BINDING => 5435u32,
+            VUE_V_FOR_IN_OPERATOR => 5472u32,
+            VUE_V_FOR_OBJECT_BINDING => 5500u32,
+            VUE_V_FOR_OBJECT_PROPERTY_BINDING => 5559u32,
+            VUE_V_FOR_OF_OPERATOR => 5618u32,
+            VUE_V_FOR_REST_BINDING => 5646u32,
+            VUE_V_FOR_TUPLE_BINDING => 5690u32,
+            VUE_V_FOR_TUPLE_ELEMENT => 5760u32,
+            VUE_V_FOR_VALUE => 5801u32,
+            VUE_V_ON_SHORTHAND_DIRECTIVE => 5859u32,
+            VUE_V_SLOT_SHORTHAND_DIRECTIVE => 5921u32,
+            ASTRO_BOGUS_FRONTMATTER => 5987u32,
+            HTML_BOGUS => 6010u32,
+            HTML_BOGUS_ATTRIBUTE => 6021u32,
+            HTML_BOGUS_ELEMENT => 6041u32,
+            HTML_BOGUS_TEXT_EXPRESSION => 6059u32,
+            SVELTE_BOGUS_BLOCK => 6084u32,
+            VUE_BOGUS_DIRECTIVE => 6102u32,
+            VUE_BOGUS_DIRECTIVE_ARGUMENT => 6121u32,
+            HTML_ATTRIBUTE_LIST => 6148u32,
+            HTML_ELEMENT_LIST => 6167u32,
+            HTML_ROOT_ITEM_LIST => 6184u32,
+            SVELTE_AWAIT_CLAUSES_LIST => 6202u32,
+            SVELTE_BINDING_LIST => 6226u32,
+            SVELTE_DIRECTIVE_MODIFIER_LIST => 6245u32,
+            SVELTE_ELSE_IF_CLAUSE_LIST => 6274u32,
+            SVELTE_TEMPLATE_ELEMENT_LIST => 6298u32,
+            VUE_MODIFIER_LIST => 6325u32,
+            VUE_V_FOR_BINDING_LIST => 6342u32,
             _ => u32::MAX,
         }
     }

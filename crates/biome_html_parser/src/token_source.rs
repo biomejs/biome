@@ -1,5 +1,5 @@
 use crate::lexer::{HtmlLexer, HtmlLexerOptions};
-use biome_html_syntax::HtmlSyntaxKind::{AS_KW, CATCH_KW, EOF, THEN_KW};
+use biome_html_syntax::HtmlSyntaxKind::EOF;
 use biome_html_syntax::{HtmlSyntaxKind, TextRange};
 use biome_parser::diagnostic::ParseDiagnostic;
 use biome_parser::lexer::{BufferedLexer, LexContext};
@@ -152,32 +152,23 @@ pub(crate) enum RestrictedExpressionStopAt {
     AsOrComma,
     /// Stops at `,`
     Comma,
-    /// Stops at `)`
-    ClosingParen,
     /// Stops at `then` or `catch` keywords
     ThenOrCatch,
-    /// Like `AsOrComma`, but skips the first occurrence of `as` and stops at
-    /// the second. Used when the parser has determined via lookahead that the
-    /// expression contains a TypeScript `as const` assertion before the Svelte
-    /// binding `as`.
-    AsOrCommaSkipFirstAs,
 }
 
 impl RestrictedExpressionStopAt {
     pub(crate) fn matches_punct(&self, byte: u8) -> bool {
         match self {
-            Self::AsOrComma | Self::Comma | Self::AsOrCommaSkipFirstAs => byte == b',',
-            Self::ClosingParen => byte == b')',
+            Self::AsOrComma | Self::Comma => byte == b',',
             Self::ThenOrCatch => false,
         }
     }
 
-    pub(crate) fn matches_keyword(&self, keyword: HtmlSyntaxKind) -> bool {
+    pub(crate) fn matches_keyword(&self, keyword: &[u8]) -> bool {
         match self {
-            Self::AsOrComma | Self::AsOrCommaSkipFirstAs => keyword == AS_KW,
+            Self::AsOrComma => keyword == b"as",
             Self::Comma => false,
-            Self::ClosingParen => false,
-            Self::ThenOrCatch => keyword == THEN_KW || keyword == CATCH_KW,
+            Self::ThenOrCatch => matches!(keyword, b"then" | b"catch"),
         }
     }
 }
@@ -259,9 +250,8 @@ pub(crate) enum HtmlReLexContext {
     InsideTagAstro,
     /// Relex tokens as if the parser was inside a tag in a Svelte file.
     InsideTagSvelte,
-    /// Re-tokenize the current `{{` as a single `{`. Used where the file has
-    /// single text expressions, so `{{` opens an object literal rather than an
-    /// interpolation.
+    /// Re-tokenize a multi-byte token beginning with `{` as a single `{`.
+    /// Used when `{{` starts an object literal or `{/` starts a regex expression.
     SingleCurly,
     /// Re-tokenize the current quote token (`DOUBLE_QUOTE` or `SINGLE_QUOTE`)
     /// as a full `HTML_STRING_LITERAL`. Used when a Svelte attribute value was

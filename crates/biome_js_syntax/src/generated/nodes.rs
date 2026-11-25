@@ -6553,6 +6553,146 @@ pub struct JsSvelteDeclarationRootFields {
     pub eof_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct JsSvelteEachBindingRoot {
+    pub(crate) syntax: SyntaxNode,
+}
+impl JsSvelteEachBindingRoot {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> JsSvelteEachBindingRootFields {
+        JsSvelteEachBindingRootFields {
+            context: self.context(),
+            type_annotation: self.type_annotation(),
+            index: self.index(),
+            key: self.key(),
+            eof_token: self.eof_token(),
+        }
+    }
+    pub fn context(&self) -> SyntaxResult<AnyJsBindingPattern> {
+        support::required_node(&self.syntax, 0usize)
+    }
+    pub fn type_annotation(&self) -> Option<TsTypeAnnotation> {
+        support::node(&self.syntax, 1usize)
+    }
+    pub fn index(&self) -> Option<JsSvelteEachIndex> {
+        support::node(&self.syntax, 2usize)
+    }
+    pub fn key(&self) -> Option<JsSvelteEachKey> {
+        support::node(&self.syntax, 3usize)
+    }
+    pub fn eof_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 4usize)
+    }
+}
+impl Serialize for JsSvelteEachBindingRoot {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct JsSvelteEachBindingRootFields {
+    pub context: SyntaxResult<AnyJsBindingPattern>,
+    pub type_annotation: Option<TsTypeAnnotation>,
+    pub index: Option<JsSvelteEachIndex>,
+    pub key: Option<JsSvelteEachKey>,
+    pub eof_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct JsSvelteEachIndex {
+    pub(crate) syntax: SyntaxNode,
+}
+impl JsSvelteEachIndex {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> JsSvelteEachIndexFields {
+        JsSvelteEachIndexFields {
+            comma_token: self.comma_token(),
+            binding: self.binding(),
+        }
+    }
+    pub fn comma_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn binding(&self) -> SyntaxResult<AnyJsBinding> {
+        support::required_node(&self.syntax, 1usize)
+    }
+}
+impl Serialize for JsSvelteEachIndex {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct JsSvelteEachIndexFields {
+    pub comma_token: SyntaxResult<SyntaxToken>,
+    pub binding: SyntaxResult<AnyJsBinding>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct JsSvelteEachKey {
+    pub(crate) syntax: SyntaxNode,
+}
+impl JsSvelteEachKey {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> JsSvelteEachKeyFields {
+        JsSvelteEachKeyFields {
+            l_paren_token: self.l_paren_token(),
+            expression: self.expression(),
+            r_paren_token: self.r_paren_token(),
+        }
+    }
+    pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn expression(&self) -> SyntaxResult<AnyJsExpression> {
+        support::required_node(&self.syntax, 1usize)
+    }
+    pub fn r_paren_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 2usize)
+    }
+}
+impl Serialize for JsSvelteEachKey {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct JsSvelteEachKeyFields {
+    pub l_paren_token: SyntaxResult<SyntaxToken>,
+    pub expression: SyntaxResult<AnyJsExpression>,
+    pub r_paren_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct JsSvelteLegacyConstRoot {
     pub(crate) syntax: SyntaxNode,
 }
@@ -15541,6 +15681,7 @@ pub enum AnyJsRoot {
     JsModule(JsModule),
     JsScript(JsScript),
     JsSvelteDeclarationRoot(JsSvelteDeclarationRoot),
+    JsSvelteEachBindingRoot(JsSvelteEachBindingRoot),
     JsSvelteLegacyConstRoot(JsSvelteLegacyConstRoot),
     JsSvelteSnippetRoot(JsSvelteSnippetRoot),
     JsVueGenericRoot(JsVueGenericRoot),
@@ -15576,6 +15717,12 @@ impl AnyJsRoot {
     pub fn as_js_svelte_declaration_root(&self) -> Option<&JsSvelteDeclarationRoot> {
         match &self {
             Self::JsSvelteDeclarationRoot(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_js_svelte_each_binding_root(&self) -> Option<&JsSvelteEachBindingRoot> {
+        match &self {
+            Self::JsSvelteEachBindingRoot(item) => Some(item),
             _ => None,
         }
     }
@@ -22049,6 +22196,114 @@ impl From<JsSvelteDeclarationRoot> for SyntaxNode {
 }
 impl From<JsSvelteDeclarationRoot> for SyntaxElement {
     fn from(n: JsSvelteDeclarationRoot) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for JsSvelteEachBindingRoot {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(JS_SVELTE_EACH_BINDING_ROOT as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == JS_SVELTE_EACH_BINDING_ROOT
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for JsSvelteEachBindingRoot {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        debug_syntax_node(&self.syntax, f)
+    }
+}
+impl From<JsSvelteEachBindingRoot> for SyntaxNode {
+    fn from(n: JsSvelteEachBindingRoot) -> Self {
+        n.syntax
+    }
+}
+impl From<JsSvelteEachBindingRoot> for SyntaxElement {
+    fn from(n: JsSvelteEachBindingRoot) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for JsSvelteEachIndex {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(JS_SVELTE_EACH_INDEX as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == JS_SVELTE_EACH_INDEX
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for JsSvelteEachIndex {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        debug_syntax_node(&self.syntax, f)
+    }
+}
+impl From<JsSvelteEachIndex> for SyntaxNode {
+    fn from(n: JsSvelteEachIndex) -> Self {
+        n.syntax
+    }
+}
+impl From<JsSvelteEachIndex> for SyntaxElement {
+    fn from(n: JsSvelteEachIndex) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for JsSvelteEachKey {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(JS_SVELTE_EACH_KEY as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == JS_SVELTE_EACH_KEY
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for JsSvelteEachKey {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        debug_syntax_node(&self.syntax, f)
+    }
+}
+impl From<JsSvelteEachKey> for SyntaxNode {
+    fn from(n: JsSvelteEachKey) -> Self {
+        n.syntax
+    }
+}
+impl From<JsSvelteEachKey> for SyntaxElement {
+    fn from(n: JsSvelteEachKey) -> Self {
         n.syntax.into()
     }
 }
@@ -32056,6 +32311,11 @@ impl From<JsSvelteDeclarationRoot> for AnyJsRoot {
         Self::JsSvelteDeclarationRoot(node)
     }
 }
+impl From<JsSvelteEachBindingRoot> for AnyJsRoot {
+    fn from(node: JsSvelteEachBindingRoot) -> Self {
+        Self::JsSvelteEachBindingRoot(node)
+    }
+}
 impl From<JsSvelteLegacyConstRoot> for AnyJsRoot {
     fn from(node: JsSvelteLegacyConstRoot) -> Self {
         Self::JsSvelteLegacyConstRoot(node)
@@ -32093,6 +32353,7 @@ impl AstNode for AnyJsRoot {
         .union(JsModule::KIND_SET)
         .union(JsScript::KIND_SET)
         .union(JsSvelteDeclarationRoot::KIND_SET)
+        .union(JsSvelteEachBindingRoot::KIND_SET)
         .union(JsSvelteLegacyConstRoot::KIND_SET)
         .union(JsSvelteSnippetRoot::KIND_SET)
         .union(JsVueGenericRoot::KIND_SET)
@@ -32107,6 +32368,7 @@ impl AstNode for AnyJsRoot {
                 | JS_MODULE
                 | JS_SCRIPT
                 | JS_SVELTE_DECLARATION_ROOT
+                | JS_SVELTE_EACH_BINDING_ROOT
                 | JS_SVELTE_LEGACY_CONST_ROOT
                 | JS_SVELTE_SNIPPET_ROOT
                 | JS_VUE_GENERIC_ROOT
@@ -32125,6 +32387,9 @@ impl AstNode for AnyJsRoot {
             JS_SCRIPT => Self::JsScript(JsScript { syntax }),
             JS_SVELTE_DECLARATION_ROOT => {
                 Self::JsSvelteDeclarationRoot(JsSvelteDeclarationRoot { syntax })
+            }
+            JS_SVELTE_EACH_BINDING_ROOT => {
+                Self::JsSvelteEachBindingRoot(JsSvelteEachBindingRoot { syntax })
             }
             JS_SVELTE_LEGACY_CONST_ROOT => {
                 Self::JsSvelteLegacyConstRoot(JsSvelteLegacyConstRoot { syntax })
@@ -32145,6 +32410,7 @@ impl AstNode for AnyJsRoot {
             Self::JsModule(it) => it.syntax(),
             Self::JsScript(it) => it.syntax(),
             Self::JsSvelteDeclarationRoot(it) => it.syntax(),
+            Self::JsSvelteEachBindingRoot(it) => it.syntax(),
             Self::JsSvelteLegacyConstRoot(it) => it.syntax(),
             Self::JsSvelteSnippetRoot(it) => it.syntax(),
             Self::JsVueGenericRoot(it) => it.syntax(),
@@ -32160,6 +32426,7 @@ impl AstNode for AnyJsRoot {
             Self::JsModule(it) => it.into_syntax(),
             Self::JsScript(it) => it.into_syntax(),
             Self::JsSvelteDeclarationRoot(it) => it.into_syntax(),
+            Self::JsSvelteEachBindingRoot(it) => it.into_syntax(),
             Self::JsSvelteLegacyConstRoot(it) => it.into_syntax(),
             Self::JsSvelteSnippetRoot(it) => it.into_syntax(),
             Self::JsVueGenericRoot(it) => it.into_syntax(),
@@ -32182,6 +32449,7 @@ impl From<AnyJsRoot> for SyntaxNode {
             AnyJsRoot::JsModule(it) => it.into_syntax(),
             AnyJsRoot::JsScript(it) => it.into_syntax(),
             AnyJsRoot::JsSvelteDeclarationRoot(it) => it.into_syntax(),
+            AnyJsRoot::JsSvelteEachBindingRoot(it) => it.into_syntax(),
             AnyJsRoot::JsSvelteLegacyConstRoot(it) => it.into_syntax(),
             AnyJsRoot::JsSvelteSnippetRoot(it) => it.into_syntax(),
             AnyJsRoot::JsVueGenericRoot(it) => it.into_syntax(),
@@ -36649,6 +36917,21 @@ impl std::fmt::Display for JsSuperExpression {
     }
 }
 impl std::fmt::Display for JsSvelteDeclarationRoot {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for JsSvelteEachBindingRoot {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for JsSvelteEachIndex {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for JsSvelteEachKey {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -41458,6 +41741,9 @@ impl support::DebugNodeShapes for DebugShapes {
         "nJsStringLiteralExpression,value_token\n",
         "nJsSuperExpression,super_token\n",
         "nJsSvelteDeclarationRoot,declaration,?semicolon_token,eof_token\n",
+        "nJsSvelteEachBindingRoot,context,?type_annotation,?index,?key,eof_token\n",
+        "nJsSvelteEachIndex,comma_token,binding\n",
+        "nJsSvelteEachKey,l_paren_token,expression,r_paren_token\n",
         "nJsSvelteLegacyConstRoot,declarator,eof_token\n",
         "nJsSvelteSnippetRoot,name,?type_parameters,parameters,eof_token\n",
         "nJsSwitchStatement,switch_token,l_paren_token,discriminant,r_paren_token,l_curly_token,cases,r_curly_token\n",
@@ -41812,218 +42098,221 @@ impl support::DebugNodeShapes for DebugShapes {
             JS_STRING_LITERAL_EXPRESSION => 8470u32,
             JS_SUPER_EXPRESSION => 8509u32,
             JS_SVELTE_DECLARATION_ROOT => 8540u32,
-            JS_SVELTE_LEGACY_CONST_ROOT => 8604u32,
-            JS_SVELTE_SNIPPET_ROOT => 8650u32,
-            JS_SWITCH_STATEMENT => 8714u32,
-            JS_TEMPLATE_CHUNK_ELEMENT => 8821u32,
-            JS_TEMPLATE_ELEMENT => 8866u32,
-            JS_TEMPLATE_EXPRESSION => 8929u32,
-            JS_THIS_EXPRESSION => 9007u32,
-            JS_THROW_STATEMENT => 9036u32,
-            JS_TRY_FINALLY_STATEMENT => 9092u32,
-            JS_TRY_STATEMENT => 9159u32,
-            JS_UNARY_EXPRESSION => 9203u32,
-            JS_VARIABLE_DECLARATION => 9246u32,
-            JS_VARIABLE_DECLARATION_CLAUSE => 9299u32,
-            JS_VARIABLE_DECLARATOR => 9357u32,
-            JS_VARIABLE_STATEMENT => 9416u32,
-            JS_VUE_GENERIC_ROOT => 9466u32,
-            JS_VUE_SLOT_PROPS_ROOT => 9500u32,
-            JS_WHILE_STATEMENT => 9541u32,
-            JS_WITH_STATEMENT => 9609u32,
-            JS_YIELD_ARGUMENT => 9677u32,
-            JS_YIELD_EXPRESSION => 9717u32,
-            JSX_ATTRIBUTE => 9758u32,
-            JSX_ATTRIBUTE_INITIALIZER_CLAUSE => 9790u32,
-            JSX_CLOSING_ELEMENT => 9836u32,
-            JSX_CLOSING_FRAGMENT => 9900u32,
-            JSX_ELEMENT => 9960u32,
-            JSX_EXPRESSION_ATTRIBUTE_VALUE => 10013u32,
-            JSX_EXPRESSION_CHILD => 10081u32,
-            JSX_FRAGMENT => 10141u32,
-            JSX_MEMBER_NAME => 10197u32,
-            JSX_NAME => 10236u32,
-            JSX_NAMESPACE_NAME => 10257u32,
-            JSX_OPENING_ELEMENT => 10302u32,
-            JSX_OPENING_FRAGMENT => 10381u32,
-            JSX_REFERENCE_IDENTIFIER => 10429u32,
-            JSX_SELF_CLOSING_ELEMENT => 10465u32,
-            JSX_SHORTHAND_ATTRIBUTE => 10561u32,
-            JSX_SINGLE_TAG_ROOT => 10623u32,
-            JSX_SPREAD_ATTRIBUTE => 10655u32,
-            JSX_SPREAD_CHILD => 10728u32,
-            JSX_STRING => 10799u32,
-            JSX_TAG_EXPRESSION => 10822u32,
-            JSX_TEXT => 10844u32,
-            TS_ABSTRACT_MODIFIER => 10865u32,
-            TS_ACCESSIBILITY_MODIFIER => 10900u32,
-            TS_ANY_TYPE => 10940u32,
-            TS_ARRAY_TYPE => 10961u32,
-            TS_AS_ASSIGNMENT => 11015u32,
-            TS_AS_EXPRESSION => 11054u32,
-            TS_ASSERTS_CONDITION => 11093u32,
-            TS_ASSERTS_RETURN_TYPE => 11125u32,
-            TS_BIGINT_LITERAL_TYPE => 11186u32,
-            TS_BIGINT_TYPE => 11234u32,
-            TS_BOOLEAN_LITERAL_TYPE => 11261u32,
-            TS_BOOLEAN_TYPE => 11291u32,
-            TS_CALL_SIGNATURE_TYPE_MEMBER => 11320u32,
-            TS_CONDITIONAL_TYPE => 11416u32,
-            TS_CONST_MODIFIER => 11526u32,
-            TS_CONSTRUCT_SIGNATURE_TYPE_MEMBER => 11558u32,
-            TS_CONSTRUCTOR_SIGNATURE_CLASS_MEMBER => 11662u32,
-            TS_CONSTRUCTOR_TYPE => 11740u32,
-            TS_DECLARATION_MODULE => 11841u32,
-            TS_DECLARE_FUNCTION_DECLARATION => 11919u32,
-            TS_DECLARE_FUNCTION_EXPORT_DEFAULT_DECLARATION => 12049u32,
-            TS_DECLARE_MODIFIER => 12193u32,
-            TS_DECLARE_STATEMENT => 12227u32,
-            TS_DEFAULT_TYPE_CLAUSE => 12273u32,
-            TS_DEFINITE_PROPERTY_ANNOTATION => 12306u32,
-            TS_DEFINITE_VARIABLE_ANNOTATION => 12363u32,
-            TS_EMPTY_EXTERNAL_MODULE_DECLARATION_BODY => 12420u32,
-            TS_ENUM_DECLARATION => 12474u32,
-            TS_ENUM_MEMBER => 12556u32,
-            TS_EXPORT_AS_NAMESPACE_CLAUSE => 12588u32,
-            TS_EXPORT_ASSIGNMENT_CLAUSE => 12662u32,
-            TS_EXPORT_DECLARE_CLAUSE => 12725u32,
-            TS_EXTENDS_CLAUSE => 12774u32,
-            TS_EXTERNAL_MODULE_DECLARATION => 12811u32,
-            TS_EXTERNAL_MODULE_REFERENCE => 12866u32,
-            TS_FUNCTION_TYPE => 12942u32,
-            TS_GETTER_SIGNATURE_CLASS_MEMBER => 13014u32,
-            TS_GETTER_SIGNATURE_TYPE_MEMBER => 13127u32,
-            TS_GLOBAL_DECLARATION => 13233u32,
-            TS_IDENTIFIER_BINDING => 13272u32,
-            TS_IMPLEMENTS_CLAUSE => 13304u32,
-            TS_IMPORT_EQUALS_DECLARATION => 13347u32,
-            TS_IMPORT_TYPE => 13445u32,
-            TS_IMPORT_TYPE_ARGUMENTS => 13530u32,
-            TS_IMPORT_TYPE_ASSERTION => 13635u32,
-            TS_IMPORT_TYPE_ASSERTION_BLOCK => 13720u32,
-            TS_IMPORT_TYPE_QUALIFIER => 13791u32,
-            TS_IN_MODIFIER => 13830u32,
-            TS_INDEX_SIGNATURE_CLASS_MEMBER => 13859u32,
-            TS_INDEX_SIGNATURE_PARAMETER => 13969u32,
-            TS_INDEX_SIGNATURE_TYPE_MEMBER => 14020u32,
-            TS_INDEXED_ACCESS_TYPE => 14135u32,
-            TS_INFER_TYPE => 14207u32,
-            TS_INITIALIZED_PROPERTY_SIGNATURE_CLASS_MEMBER => 14249u32,
-            TS_INSTANTIATION_EXPRESSION => 14351u32,
-            TS_INTERFACE_DECLARATION => 14399u32,
-            TS_INTERSECTION_TYPE => 14511u32,
-            TS_LITERAL_ENUM_MEMBER_NAME => 14562u32,
-            TS_MAPPED_TYPE => 14593u32,
-            TS_MAPPED_TYPE_AS_CLAUSE => 14775u32,
-            TS_MAPPED_TYPE_OPTIONAL_MODIFIER_CLAUSE => 14809u32,
-            TS_MAPPED_TYPE_READONLY_MODIFIER_CLAUSE => 14881u32,
-            TS_METHOD_SIGNATURE_CLASS_MEMBER => 14948u32,
-            TS_METHOD_SIGNATURE_TYPE_MEMBER => 15096u32,
-            TS_MODULE_BLOCK => 15215u32,
-            TS_MODULE_DECLARATION => 15264u32,
-            TS_NAMED_TUPLE_TYPE_ELEMENT => 15315u32,
-            TS_NEVER_TYPE => 15398u32,
-            TS_NON_NULL_ASSERTION_ASSIGNMENT => 15423u32,
-            TS_NON_NULL_ASSERTION_EXPRESSION => 15475u32,
-            TS_NON_PRIMITIVE_TYPE => 15527u32,
-            TS_NULL_LITERAL_TYPE => 15560u32,
-            TS_NUMBER_LITERAL_TYPE => 15593u32,
-            TS_NUMBER_TYPE => 15641u32,
-            TS_OBJECT_TYPE => 15668u32,
-            TS_OPTIONAL_PROPERTY_ANNOTATION => 15718u32,
-            TS_OPTIONAL_TUPLE_TYPE_ELEMENT => 15785u32,
-            TS_OUT_MODIFIER => 15836u32,
-            TS_OVERRIDE_MODIFIER => 15866u32,
-            TS_PARENTHESIZED_TYPE => 15901u32,
-            TS_PREDICATE_RETURN_TYPE => 15953u32,
-            TS_PROPERTY_PARAMETER => 16003u32,
-            TS_PROPERTY_SIGNATURE_CLASS_MEMBER => 16062u32,
-            TS_PROPERTY_SIGNATURE_TYPE_MEMBER => 16147u32,
-            TS_QUALIFIED_MODULE_NAME => 16249u32,
-            TS_QUALIFIED_NAME => 16293u32,
-            TS_READONLY_MODIFIER => 16331u32,
-            TS_REFERENCE_TYPE => 16366u32,
-            TS_REST_TUPLE_TYPE_ELEMENT => 16404u32,
-            TS_RETURN_TYPE_ANNOTATION => 16447u32,
-            TS_SATISFIES_ASSIGNMENT => 16486u32,
-            TS_SATISFIES_EXPRESSION => 16539u32,
-            TS_SETTER_SIGNATURE_CLASS_MEMBER => 16592u32,
-            TS_SETTER_SIGNATURE_TYPE_MEMBER => 16715u32,
-            TS_STRING_LITERAL_TYPE => 16827u32,
-            TS_STRING_TYPE => 16862u32,
-            TS_SYMBOL_TYPE => 16889u32,
-            TS_TEMPLATE_CHUNK_ELEMENT => 16916u32,
-            TS_TEMPLATE_ELEMENT => 16961u32,
-            TS_TEMPLATE_LITERAL_TYPE => 17016u32,
-            TS_THIS_PARAMETER => 17074u32,
-            TS_THIS_TYPE => 17119u32,
-            TS_TUPLE_TYPE => 17142u32,
-            TS_TYPE_ALIAS_DECLARATION => 17192u32,
-            TS_TYPE_ANNOTATION => 17292u32,
-            TS_TYPE_ARGUMENTS => 17325u32,
-            TS_TYPE_ASSERTION_ASSIGNMENT => 17392u32,
-            TS_TYPE_ASSERTION_EXPRESSION => 17461u32,
-            TS_TYPE_CONSTRAINT_CLAUSE => 17530u32,
-            TS_TYPE_OPERATOR_TYPE => 17571u32,
-            TS_TYPE_PARAMETER => 17609u32,
-            TS_TYPE_PARAMETER_NAME => 17662u32,
-            TS_TYPE_PARAMETERS => 17695u32,
-            TS_TYPEOF_TYPE => 17747u32,
-            TS_UNDEFINED_TYPE => 17806u32,
-            TS_UNION_TYPE => 17839u32,
-            TS_UNKNOWN_TYPE => 17883u32,
-            TS_VOID_TYPE => 17912u32,
-            JS_BOGUS => 17935u32,
-            JS_BOGUS_ASSIGNMENT => 17944u32,
-            JS_BOGUS_BINDING => 17963u32,
-            JS_BOGUS_EXPRESSION => 17979u32,
-            JS_BOGUS_IMPORT_ASSERTION_ENTRY => 17998u32,
-            JS_BOGUS_MEMBER => 18027u32,
-            JS_BOGUS_NAMED_IMPORT_SPECIFIER => 18042u32,
-            JS_BOGUS_PARAMETER => 18071u32,
-            JS_BOGUS_STATEMENT => 18089u32,
-            JS_BOGUS_VARIABLE_DECLARATION => 18107u32,
-            TS_BOGUS_TYPE => 18135u32,
-            JS_ARRAY_ASSIGNMENT_PATTERN_ELEMENT_LIST => 18148u32,
-            JS_ARRAY_BINDING_PATTERN_ELEMENT_LIST => 18185u32,
-            JS_ARRAY_ELEMENT_LIST => 18219u32,
-            JS_CALL_ARGUMENT_LIST => 18239u32,
-            JS_CLASS_MEMBER_LIST => 18259u32,
-            JS_CONSTRUCTOR_MODIFIER_LIST => 18278u32,
-            JS_CONSTRUCTOR_PARAMETER_LIST => 18305u32,
-            JS_DECORATOR_LIST => 18333u32,
-            JS_DIRECTIVE_LIST => 18350u32,
-            JS_EXPORT_NAMED_FROM_SPECIFIER_LIST => 18367u32,
-            JS_EXPORT_NAMED_SPECIFIER_LIST => 18399u32,
-            JS_IMPORT_ASSERTION_ENTRY_LIST => 18427u32,
-            JS_METHOD_MODIFIER_LIST => 18455u32,
-            JS_MODULE_ITEM_LIST => 18477u32,
-            JS_NAMED_IMPORT_SPECIFIER_LIST => 18495u32,
-            JS_OBJECT_ASSIGNMENT_PATTERN_PROPERTY_LIST => 18523u32,
-            JS_OBJECT_BINDING_PATTERN_PROPERTY_LIST => 18562u32,
-            JS_OBJECT_MEMBER_LIST => 18598u32,
-            JS_PARAMETER_LIST => 18618u32,
-            JS_PROPERTY_MODIFIER_LIST => 18635u32,
-            JS_STATEMENT_LIST => 18659u32,
-            JS_SWITCH_CASE_LIST => 18676u32,
-            JS_TEMPLATE_ELEMENT_LIST => 18694u32,
-            JS_VARIABLE_DECLARATOR_LIST => 18717u32,
-            JSX_ATTRIBUTE_LIST => 18743u32,
-            JSX_CHILD_LIST => 18761u32,
-            TS_ENUM_MEMBER_LIST => 18775u32,
-            TS_INDEX_SIGNATURE_MODIFIER_LIST => 18793u32,
-            TS_INTERSECTION_TYPE_ELEMENT_LIST => 18823u32,
-            TS_METHOD_SIGNATURE_MODIFIER_LIST => 18854u32,
-            TS_PROPERTY_PARAMETER_MODIFIER_LIST => 18885u32,
-            TS_PROPERTY_SIGNATURE_MODIFIER_LIST => 18918u32,
-            TS_TEMPLATE_ELEMENT_LIST => 18951u32,
-            TS_TUPLE_TYPE_ELEMENT_LIST => 18974u32,
-            TS_TYPE_ARGUMENT_LIST => 18998u32,
-            TS_TYPE_LIST => 19018u32,
-            TS_TYPE_MEMBER_LIST => 19030u32,
-            TS_TYPE_PARAMETER_LIST => 19048u32,
-            TS_TYPE_PARAMETER_MODIFIER_LIST => 19069u32,
-            TS_UNION_TYPE_VARIANT_LIST => 19098u32,
+            JS_SVELTE_EACH_BINDING_ROOT => 8604u32,
+            JS_SVELTE_EACH_INDEX => 8676u32,
+            JS_SVELTE_EACH_KEY => 8715u32,
+            JS_SVELTE_LEGACY_CONST_ROOT => 8771u32,
+            JS_SVELTE_SNIPPET_ROOT => 8817u32,
+            JS_SWITCH_STATEMENT => 8881u32,
+            JS_TEMPLATE_CHUNK_ELEMENT => 8988u32,
+            JS_TEMPLATE_ELEMENT => 9033u32,
+            JS_TEMPLATE_EXPRESSION => 9096u32,
+            JS_THIS_EXPRESSION => 9174u32,
+            JS_THROW_STATEMENT => 9203u32,
+            JS_TRY_FINALLY_STATEMENT => 9259u32,
+            JS_TRY_STATEMENT => 9326u32,
+            JS_UNARY_EXPRESSION => 9370u32,
+            JS_VARIABLE_DECLARATION => 9413u32,
+            JS_VARIABLE_DECLARATION_CLAUSE => 9466u32,
+            JS_VARIABLE_DECLARATOR => 9524u32,
+            JS_VARIABLE_STATEMENT => 9583u32,
+            JS_VUE_GENERIC_ROOT => 9633u32,
+            JS_VUE_SLOT_PROPS_ROOT => 9667u32,
+            JS_WHILE_STATEMENT => 9708u32,
+            JS_WITH_STATEMENT => 9776u32,
+            JS_YIELD_ARGUMENT => 9844u32,
+            JS_YIELD_EXPRESSION => 9884u32,
+            JSX_ATTRIBUTE => 9925u32,
+            JSX_ATTRIBUTE_INITIALIZER_CLAUSE => 9957u32,
+            JSX_CLOSING_ELEMENT => 10003u32,
+            JSX_CLOSING_FRAGMENT => 10067u32,
+            JSX_ELEMENT => 10127u32,
+            JSX_EXPRESSION_ATTRIBUTE_VALUE => 10180u32,
+            JSX_EXPRESSION_CHILD => 10248u32,
+            JSX_FRAGMENT => 10308u32,
+            JSX_MEMBER_NAME => 10364u32,
+            JSX_NAME => 10403u32,
+            JSX_NAMESPACE_NAME => 10424u32,
+            JSX_OPENING_ELEMENT => 10469u32,
+            JSX_OPENING_FRAGMENT => 10548u32,
+            JSX_REFERENCE_IDENTIFIER => 10596u32,
+            JSX_SELF_CLOSING_ELEMENT => 10632u32,
+            JSX_SHORTHAND_ATTRIBUTE => 10728u32,
+            JSX_SINGLE_TAG_ROOT => 10790u32,
+            JSX_SPREAD_ATTRIBUTE => 10822u32,
+            JSX_SPREAD_CHILD => 10895u32,
+            JSX_STRING => 10966u32,
+            JSX_TAG_EXPRESSION => 10989u32,
+            JSX_TEXT => 11011u32,
+            TS_ABSTRACT_MODIFIER => 11032u32,
+            TS_ACCESSIBILITY_MODIFIER => 11067u32,
+            TS_ANY_TYPE => 11107u32,
+            TS_ARRAY_TYPE => 11128u32,
+            TS_AS_ASSIGNMENT => 11182u32,
+            TS_AS_EXPRESSION => 11221u32,
+            TS_ASSERTS_CONDITION => 11260u32,
+            TS_ASSERTS_RETURN_TYPE => 11292u32,
+            TS_BIGINT_LITERAL_TYPE => 11353u32,
+            TS_BIGINT_TYPE => 11401u32,
+            TS_BOOLEAN_LITERAL_TYPE => 11428u32,
+            TS_BOOLEAN_TYPE => 11458u32,
+            TS_CALL_SIGNATURE_TYPE_MEMBER => 11487u32,
+            TS_CONDITIONAL_TYPE => 11583u32,
+            TS_CONST_MODIFIER => 11693u32,
+            TS_CONSTRUCT_SIGNATURE_TYPE_MEMBER => 11725u32,
+            TS_CONSTRUCTOR_SIGNATURE_CLASS_MEMBER => 11829u32,
+            TS_CONSTRUCTOR_TYPE => 11907u32,
+            TS_DECLARATION_MODULE => 12008u32,
+            TS_DECLARE_FUNCTION_DECLARATION => 12086u32,
+            TS_DECLARE_FUNCTION_EXPORT_DEFAULT_DECLARATION => 12216u32,
+            TS_DECLARE_MODIFIER => 12360u32,
+            TS_DECLARE_STATEMENT => 12394u32,
+            TS_DEFAULT_TYPE_CLAUSE => 12440u32,
+            TS_DEFINITE_PROPERTY_ANNOTATION => 12473u32,
+            TS_DEFINITE_VARIABLE_ANNOTATION => 12530u32,
+            TS_EMPTY_EXTERNAL_MODULE_DECLARATION_BODY => 12587u32,
+            TS_ENUM_DECLARATION => 12641u32,
+            TS_ENUM_MEMBER => 12723u32,
+            TS_EXPORT_AS_NAMESPACE_CLAUSE => 12755u32,
+            TS_EXPORT_ASSIGNMENT_CLAUSE => 12829u32,
+            TS_EXPORT_DECLARE_CLAUSE => 12892u32,
+            TS_EXTENDS_CLAUSE => 12941u32,
+            TS_EXTERNAL_MODULE_DECLARATION => 12978u32,
+            TS_EXTERNAL_MODULE_REFERENCE => 13033u32,
+            TS_FUNCTION_TYPE => 13109u32,
+            TS_GETTER_SIGNATURE_CLASS_MEMBER => 13181u32,
+            TS_GETTER_SIGNATURE_TYPE_MEMBER => 13294u32,
+            TS_GLOBAL_DECLARATION => 13400u32,
+            TS_IDENTIFIER_BINDING => 13439u32,
+            TS_IMPLEMENTS_CLAUSE => 13471u32,
+            TS_IMPORT_EQUALS_DECLARATION => 13514u32,
+            TS_IMPORT_TYPE => 13612u32,
+            TS_IMPORT_TYPE_ARGUMENTS => 13697u32,
+            TS_IMPORT_TYPE_ASSERTION => 13802u32,
+            TS_IMPORT_TYPE_ASSERTION_BLOCK => 13887u32,
+            TS_IMPORT_TYPE_QUALIFIER => 13958u32,
+            TS_IN_MODIFIER => 13997u32,
+            TS_INDEX_SIGNATURE_CLASS_MEMBER => 14026u32,
+            TS_INDEX_SIGNATURE_PARAMETER => 14136u32,
+            TS_INDEX_SIGNATURE_TYPE_MEMBER => 14187u32,
+            TS_INDEXED_ACCESS_TYPE => 14302u32,
+            TS_INFER_TYPE => 14374u32,
+            TS_INITIALIZED_PROPERTY_SIGNATURE_CLASS_MEMBER => 14416u32,
+            TS_INSTANTIATION_EXPRESSION => 14518u32,
+            TS_INTERFACE_DECLARATION => 14566u32,
+            TS_INTERSECTION_TYPE => 14678u32,
+            TS_LITERAL_ENUM_MEMBER_NAME => 14729u32,
+            TS_MAPPED_TYPE => 14760u32,
+            TS_MAPPED_TYPE_AS_CLAUSE => 14942u32,
+            TS_MAPPED_TYPE_OPTIONAL_MODIFIER_CLAUSE => 14976u32,
+            TS_MAPPED_TYPE_READONLY_MODIFIER_CLAUSE => 15048u32,
+            TS_METHOD_SIGNATURE_CLASS_MEMBER => 15115u32,
+            TS_METHOD_SIGNATURE_TYPE_MEMBER => 15263u32,
+            TS_MODULE_BLOCK => 15382u32,
+            TS_MODULE_DECLARATION => 15431u32,
+            TS_NAMED_TUPLE_TYPE_ELEMENT => 15482u32,
+            TS_NEVER_TYPE => 15565u32,
+            TS_NON_NULL_ASSERTION_ASSIGNMENT => 15590u32,
+            TS_NON_NULL_ASSERTION_EXPRESSION => 15642u32,
+            TS_NON_PRIMITIVE_TYPE => 15694u32,
+            TS_NULL_LITERAL_TYPE => 15727u32,
+            TS_NUMBER_LITERAL_TYPE => 15760u32,
+            TS_NUMBER_TYPE => 15808u32,
+            TS_OBJECT_TYPE => 15835u32,
+            TS_OPTIONAL_PROPERTY_ANNOTATION => 15885u32,
+            TS_OPTIONAL_TUPLE_TYPE_ELEMENT => 15952u32,
+            TS_OUT_MODIFIER => 16003u32,
+            TS_OVERRIDE_MODIFIER => 16033u32,
+            TS_PARENTHESIZED_TYPE => 16068u32,
+            TS_PREDICATE_RETURN_TYPE => 16120u32,
+            TS_PROPERTY_PARAMETER => 16170u32,
+            TS_PROPERTY_SIGNATURE_CLASS_MEMBER => 16229u32,
+            TS_PROPERTY_SIGNATURE_TYPE_MEMBER => 16314u32,
+            TS_QUALIFIED_MODULE_NAME => 16416u32,
+            TS_QUALIFIED_NAME => 16460u32,
+            TS_READONLY_MODIFIER => 16498u32,
+            TS_REFERENCE_TYPE => 16533u32,
+            TS_REST_TUPLE_TYPE_ELEMENT => 16571u32,
+            TS_RETURN_TYPE_ANNOTATION => 16614u32,
+            TS_SATISFIES_ASSIGNMENT => 16653u32,
+            TS_SATISFIES_EXPRESSION => 16706u32,
+            TS_SETTER_SIGNATURE_CLASS_MEMBER => 16759u32,
+            TS_SETTER_SIGNATURE_TYPE_MEMBER => 16882u32,
+            TS_STRING_LITERAL_TYPE => 16994u32,
+            TS_STRING_TYPE => 17029u32,
+            TS_SYMBOL_TYPE => 17056u32,
+            TS_TEMPLATE_CHUNK_ELEMENT => 17083u32,
+            TS_TEMPLATE_ELEMENT => 17128u32,
+            TS_TEMPLATE_LITERAL_TYPE => 17183u32,
+            TS_THIS_PARAMETER => 17241u32,
+            TS_THIS_TYPE => 17286u32,
+            TS_TUPLE_TYPE => 17309u32,
+            TS_TYPE_ALIAS_DECLARATION => 17359u32,
+            TS_TYPE_ANNOTATION => 17459u32,
+            TS_TYPE_ARGUMENTS => 17492u32,
+            TS_TYPE_ASSERTION_ASSIGNMENT => 17559u32,
+            TS_TYPE_ASSERTION_EXPRESSION => 17628u32,
+            TS_TYPE_CONSTRAINT_CLAUSE => 17697u32,
+            TS_TYPE_OPERATOR_TYPE => 17738u32,
+            TS_TYPE_PARAMETER => 17776u32,
+            TS_TYPE_PARAMETER_NAME => 17829u32,
+            TS_TYPE_PARAMETERS => 17862u32,
+            TS_TYPEOF_TYPE => 17914u32,
+            TS_UNDEFINED_TYPE => 17973u32,
+            TS_UNION_TYPE => 18006u32,
+            TS_UNKNOWN_TYPE => 18050u32,
+            TS_VOID_TYPE => 18079u32,
+            JS_BOGUS => 18102u32,
+            JS_BOGUS_ASSIGNMENT => 18111u32,
+            JS_BOGUS_BINDING => 18130u32,
+            JS_BOGUS_EXPRESSION => 18146u32,
+            JS_BOGUS_IMPORT_ASSERTION_ENTRY => 18165u32,
+            JS_BOGUS_MEMBER => 18194u32,
+            JS_BOGUS_NAMED_IMPORT_SPECIFIER => 18209u32,
+            JS_BOGUS_PARAMETER => 18238u32,
+            JS_BOGUS_STATEMENT => 18256u32,
+            JS_BOGUS_VARIABLE_DECLARATION => 18274u32,
+            TS_BOGUS_TYPE => 18302u32,
+            JS_ARRAY_ASSIGNMENT_PATTERN_ELEMENT_LIST => 18315u32,
+            JS_ARRAY_BINDING_PATTERN_ELEMENT_LIST => 18352u32,
+            JS_ARRAY_ELEMENT_LIST => 18386u32,
+            JS_CALL_ARGUMENT_LIST => 18406u32,
+            JS_CLASS_MEMBER_LIST => 18426u32,
+            JS_CONSTRUCTOR_MODIFIER_LIST => 18445u32,
+            JS_CONSTRUCTOR_PARAMETER_LIST => 18472u32,
+            JS_DECORATOR_LIST => 18500u32,
+            JS_DIRECTIVE_LIST => 18517u32,
+            JS_EXPORT_NAMED_FROM_SPECIFIER_LIST => 18534u32,
+            JS_EXPORT_NAMED_SPECIFIER_LIST => 18566u32,
+            JS_IMPORT_ASSERTION_ENTRY_LIST => 18594u32,
+            JS_METHOD_MODIFIER_LIST => 18622u32,
+            JS_MODULE_ITEM_LIST => 18644u32,
+            JS_NAMED_IMPORT_SPECIFIER_LIST => 18662u32,
+            JS_OBJECT_ASSIGNMENT_PATTERN_PROPERTY_LIST => 18690u32,
+            JS_OBJECT_BINDING_PATTERN_PROPERTY_LIST => 18729u32,
+            JS_OBJECT_MEMBER_LIST => 18765u32,
+            JS_PARAMETER_LIST => 18785u32,
+            JS_PROPERTY_MODIFIER_LIST => 18802u32,
+            JS_STATEMENT_LIST => 18826u32,
+            JS_SWITCH_CASE_LIST => 18843u32,
+            JS_TEMPLATE_ELEMENT_LIST => 18861u32,
+            JS_VARIABLE_DECLARATOR_LIST => 18884u32,
+            JSX_ATTRIBUTE_LIST => 18910u32,
+            JSX_CHILD_LIST => 18928u32,
+            TS_ENUM_MEMBER_LIST => 18942u32,
+            TS_INDEX_SIGNATURE_MODIFIER_LIST => 18960u32,
+            TS_INTERSECTION_TYPE_ELEMENT_LIST => 18990u32,
+            TS_METHOD_SIGNATURE_MODIFIER_LIST => 19021u32,
+            TS_PROPERTY_PARAMETER_MODIFIER_LIST => 19052u32,
+            TS_PROPERTY_SIGNATURE_MODIFIER_LIST => 19085u32,
+            TS_TEMPLATE_ELEMENT_LIST => 19118u32,
+            TS_TUPLE_TYPE_ELEMENT_LIST => 19141u32,
+            TS_TYPE_ARGUMENT_LIST => 19165u32,
+            TS_TYPE_LIST => 19185u32,
+            TS_TYPE_MEMBER_LIST => 19197u32,
+            TS_TYPE_PARAMETER_LIST => 19215u32,
+            TS_TYPE_PARAMETER_MODIFIER_LIST => 19236u32,
+            TS_UNION_TYPE_VARIANT_LIST => 19265u32,
             _ => u32::MAX,
         }
     }

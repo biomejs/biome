@@ -15,6 +15,8 @@ pub fn generate_group_struct(
     let mut lines_all_rule_as_filter = Vec::new();
     let mut lines_rule = Vec::new();
     let mut schema_lines_rules = Vec::new();
+    let mut options_names = Vec::new();
+    let options_names_mod = quote::format_ident!("{}_options_names", group);
     let mut rule_enabled_check_line = Vec::new();
     let mut rule_disabled_check_line = Vec::new();
     let mut get_rule_configuration_line = Vec::new();
@@ -111,11 +113,24 @@ pub fn generate_group_struct(
             biome_rule_options::#rule_base_name::#rule_name
         };
 
-        let rule_option = quote! { Option<#rule_config_type<#rule_option_type>> };
+        // The JSON schema names the options of a rule after the rule,
+        // also when the rule shares its options type with other rules.
+        let options_name = rule_name.to_string();
+        options_names.push(quote! {
+            pub struct #rule_name;
+            impl crate::analyzer::RuleOptionsName for #rule_name {
+                const NAME: &'static str = #options_name;
+                type Options = #rule_option_type;
+            }
+        });
+        let schema_type = format!(
+            "Option<{rule_config_type}<crate::analyzer::NamedRuleOptions<{options_names_mod}::{rule_name}>>>"
+        );
         schema_lines_rules.push(quote! {
             #[doc = #summary]
             #[serde(skip_serializing_if = "Option::is_none")]
-            pub #rule_identifier: #rule_option
+            #[cfg_attr(feature = "schema", schemars(with = #schema_type))]
+            pub #rule_identifier: Option<#rule_config_type<#rule_option_type>>
         });
 
         rule_enabled_check_line.push(quote! {
@@ -205,6 +220,11 @@ pub fn generate_group_struct(
 
     if kind == biome_analyze::RuleCategory::Action {
         quote! {
+            #[cfg(feature = "schema")]
+            mod #options_names_mod {
+                #( #options_names )*
+            }
+
             #[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, Merge, PartialEq, Serialize)]
             #[cfg_attr(feature = "schema", derive(JsonSchema))]
             #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
@@ -308,6 +328,11 @@ pub fn generate_group_struct(
         }
     } else {
         quote! {
+            #[cfg(feature = "schema")]
+            mod #options_names_mod {
+                #( #options_names )*
+            }
+
             #[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, Merge, PartialEq, Serialize)]
             #[cfg_attr(feature = "schema", derive(JsonSchema))]
             #[serde(rename_all = "camelCase", default, deny_unknown_fields)]

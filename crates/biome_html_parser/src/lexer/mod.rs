@@ -6,7 +6,7 @@ use crate::token_source::{
 };
 use biome_html_syntax::HtmlSyntaxKind::*;
 use biome_html_syntax::{HTML_TAG_NAMES, HtmlSyntaxKind, T, TextLen, TextSize, VOID_ELEMENTS};
-use biome_js_extent::{JsExtent, Jsx};
+use biome_js_extent::{JsExpressionPosition, JsExtent, Jsx};
 use biome_parser::diagnostic::ParseDiagnostic;
 use biome_parser::lexer::{Lexer, LexerCheckpoint, LexerWithCheckpoint, ReLexer, TokenFlags};
 use biome_rowan::SyntaxKind;
@@ -772,85 +772,58 @@ impl<'src> HtmlLexer<'src> {
         HTML_LITERAL
     }
 
-    /// Consumes a restricted single text expression that stops at specific keywords
-    /// (e.g., 'as' in Svelte #each blocks). Tracks nested brackets and stops when
-    /// encountering a keyword at the top level.
+    /// Consumes a Svelte block expression that ends where `kind` says, before a closing `}`, or
+    /// at the end of the source. Returns `ERROR_TOKEN`, without consuming anything, when the
+    /// expression is empty.
     ///
-    /// Finding a `{` at the top level will emit an error token.
+    /// Only top-level code can end the expression: strings, template literals, regular
+    /// expressions, comments, and nested brackets are always part of it. At the top level:
+    ///
+    /// - The punctuation of `kind` ends the expression.
+    /// - A keyword of `kind` ends the expression when whitespace precedes it and the code
+    ///   before it is a complete operand, as `items` is in `{#each items as item}`. The `as` of
+    ///   a TypeScript `as const` assertion never ends it, because `const` cannot be a binding.
+    /// - Markup ends the expression: a `<` with no code before it, an HTML comment, or a
+    ///   line break followed by a tag. A `<` that follows code on the same line is a
+    ///   comparison or a type argument.
+    ///
+    /// When the expression would otherwise run to its end without a delimiter, it ends at the
+    /// first keyword that appears where an operand was expected, if a binding follows. This
+    /// recovers `{#each items. as item}` as the expression `items.` and its binding.
     fn consume_restricted_single_text_expression(
         &mut self,
         kind: RestrictedExpressionStopAt,
     ) -> HtmlSyntaxKind {
-        let start_pos = self.position;
-        let mut brackets_stack = 0;
-        // For `AsOrCommaSkipFirstAs`: tracks whether the first stop keyword has
-        // already been skipped (i.e., the TypeScript `as` in `as const`).
-        let mut first_stop_keyword_seen = false;
-
-        let is_opening_paren = |byte: u8| byte == b'(' || byte == b'[' || byte == b'{';
-        let is_closing_paren = |byte: u8| byte == b')' || byte == b']' || byte == b'}';
-
-        while let Some(current) = self.current_byte() {
-            match current {
-                // That's usually the case where we find a tag
-                _ if current == b'<' && brackets_stack == 0 => break,
-                _ if is_opening_paren(current) && !kind.matches_punct(current) => {
-                    brackets_stack += 1;
-                    self.advance(1)
+        let source = &self.source.as_bytes()[self.position..];
+        let byte_before_source = self.prev_byte();
+        let mut delimited = false;
+        let mut fallback = None;
+        let scanned_length =
+            JsExtent::expression_length_until(source, |position| match restricted_expression_stop(
+                kind,
+                source,
+                byte_before_source,
+                &position,
+            ) {
+                RestrictedExpressionStop::Delimiter => {
+                    delimited = true;
+                    true
                 }
-                _ if is_closing_paren(current) => {
-                    if brackets_stack == 0 {
-                        // Reached the closing brace
-                        break;
-                    } else {
-                        brackets_stack -= 1;
-                        self.advance(1)
-                    }
+                RestrictedExpressionStop::Markup => true,
+                RestrictedExpressionStop::Fallback => {
+                    fallback.get_or_insert(position.offset());
+                    false
                 }
+                RestrictedExpressionStop::Continue => false,
+            });
+        let length = if delimited {
+            scanned_length
+        } else {
+            fallback.unwrap_or(scanned_length)
+        };
+        self.advance(length);
 
-                _ if brackets_stack == 0 && !is_at_start_identifier(current) => {
-                    let should_stop = kind.matches_punct(current);
-                    if should_stop {
-                        break;
-                    }
-                    self.advance(1);
-                }
-                _ if brackets_stack == 0 && is_at_start_identifier(current) => {
-                    // Check if we're at a stop keyword
-                    let checkpoint_pos = self.position;
-                    let prev_byte = self.prev_byte();
-                    if let Some(keyword_kind) = self.consume_language_identifier(current) {
-                        let should_stop =
-                            kind.matches_keyword(keyword_kind) && prev_byte == Some(b' ');
-
-                        if should_stop {
-                            if kind == RestrictedExpressionStopAt::AsOrCommaSkipFirstAs
-                                && !first_stop_keyword_seen
-                            {
-                                // First `as` belongs to a TypeScript `as const` assertion;
-                                // the parser determined this via lookahead. Skip it and
-                                // continue scanning for the Svelte binding `as`.
-                                first_stop_keyword_seen = true;
-                            } else {
-                                // Rewind — don't consume the keyword
-                                self.position = checkpoint_pos;
-                                break;
-                            }
-                        }
-                        // Not a stop keyword (or skipped), continue
-                        // (position already advanced by consume_language_identifier)
-                    } else {
-                        // Not a keyword, advance one byte (position was reset by consume_language_identifier)
-                        self.advance_byte_or_char(current);
-                    }
-                }
-                _ => {
-                    self.advance(1);
-                }
-            }
-        }
-
-        if self.position > start_pos {
+        if length > 0 {
             HTML_LITERAL
         } else {
             ERROR_TOKEN
@@ -1465,7 +1438,8 @@ impl<'src> HtmlLexer<'src> {
             Some(b'@') => T!["{@"],
             Some(b'#') => T!["{#"],
             Some(b':') => T!["{:"],
-            Some(b'/') => T!["{/"],
+            Some(b'/') if self.at_svelte_closing_block() => T!["{/"],
+            Some(b'/') => return self.consume_byte(T!['{']),
             _ => unimplemented!(
                 "Svelte block not correctly lexed. Char not expected {:?}",
                 next_byte
@@ -1548,6 +1522,35 @@ impl<'src> HtmlLexer<'src> {
                 || self.byte_at(1) == Some(b'#')
                 || self.byte_at(1) == Some(b':')
                 || self.byte_at(1) == Some(b'/'))
+    }
+
+    /// Returns whether the `{/` at the current position starts a closing block such as `{/if}`.
+    /// Otherwise the `{` opens a text expression that starts with `/`, such as a regular
+    /// expression or a comment.
+    ///
+    /// A name followed by `}`, a line break, the end of the source, or another block opener
+    /// closes a block, so a closing block with a missing `}` still parses as one.
+    fn at_svelte_closing_block(&self) -> bool {
+        let Some(rest) = self.source.as_bytes().get(self.position + 2..) else {
+            return false;
+        };
+        let rest = rest.trim_ascii_start();
+        if !rest.first().copied().is_some_and(is_at_start_identifier) {
+            return false;
+        }
+        let name_length = rest
+            .iter()
+            .take_while(|byte| is_at_continue_identifier(**byte))
+            .count();
+        let after_name = &rest[name_length..];
+        let next = after_name.trim_ascii_start();
+        after_name[..after_name.len() - next.len()]
+            .iter()
+            .any(|byte| matches!(byte, b'\n' | b'\r'))
+            || matches!(
+                next,
+                [] | [b'}', ..] | [b'{', b'@' | b'#' | b':' | b'/', ..]
+            )
     }
 
     fn at_svelte_opening_block(&self) -> bool {
@@ -2180,6 +2183,96 @@ fn is_at_continue_identifier(byte: u8) -> bool {
 /// Identifiers should start with letters or `_`
 fn is_at_start_identifier(byte: u8) -> bool {
     byte.is_ascii_alphabetic() || byte == b'_'
+}
+
+/// What a top-level position means for a restricted Svelte block expression.
+enum RestrictedExpressionStop {
+    /// The expression ends before a keyword or punctuation of the block.
+    Delimiter,
+    /// The expression ends before markup, unless an earlier fallback ends it first.
+    Markup,
+    /// A keyword where an operand was expected. The expression ends here only if no delimiter
+    /// follows.
+    Fallback,
+    Continue,
+}
+
+/// Classifies `position` in `source`, the restricted expression being lexed. `byte_before_source`
+/// is the byte that precedes `source` in the document.
+fn restricted_expression_stop(
+    kind: RestrictedExpressionStopAt,
+    source: &[u8],
+    byte_before_source: Option<u8>,
+    position: &JsExpressionPosition,
+) -> RestrictedExpressionStop {
+    let offset = position.offset();
+    let rest = position.remaining();
+    let Some(&current) = rest.first() else {
+        return RestrictedExpressionStop::Continue;
+    };
+    if kind.matches_punct(current) {
+        return RestrictedExpressionStop::Delimiter;
+    }
+    let preceding = &source[..offset];
+    if current == b'<' {
+        let whitespace_before = &preceding[preceding.trim_ascii_end().len()..];
+        let starts_tag = rest
+            .get(1)
+            .is_some_and(|byte| byte.is_ascii_alphabetic() || matches!(byte, b'/' | b'!'));
+        let after_line_break = whitespace_before
+            .iter()
+            .any(|byte| matches!(byte, b'\n' | b'\r'));
+        return if !position.has_preceding_code()
+            || rest.starts_with(b"<!--")
+            || (starts_tag && after_line_break)
+        {
+            RestrictedExpressionStop::Markup
+        } else {
+            RestrictedExpressionStop::Continue
+        };
+    }
+    let byte_before = if offset == 0 {
+        byte_before_source
+    } else {
+        preceding.last().copied()
+    };
+    if !is_at_start_identifier(current)
+        || !byte_before.is_some_and(|byte| byte.is_ascii_whitespace())
+    {
+        return RestrictedExpressionStop::Continue;
+    }
+    let keyword_length = word_length(rest);
+    if !kind.matches_keyword(&rest[..keyword_length]) {
+        return RestrictedExpressionStop::Continue;
+    }
+    let after_keyword = &rest[keyword_length..];
+    let next = after_keyword.trim_ascii_start();
+    let followed_by_whitespace = next.len() < after_keyword.len();
+    if position.has_preceding_code() && !position.can_end_expression() {
+        let binding_follows = next
+            .first()
+            .is_some_and(|byte| is_at_start_identifier(*byte) || matches!(byte, b'{' | b'['));
+        return if followed_by_whitespace && binding_follows {
+            RestrictedExpressionStop::Fallback
+        } else {
+            RestrictedExpressionStop::Continue
+        };
+    }
+    if &rest[..keyword_length] == b"as"
+        && followed_by_whitespace
+        && &next[..word_length(next)] == b"const"
+    {
+        return RestrictedExpressionStop::Continue;
+    }
+    RestrictedExpressionStop::Delimiter
+}
+
+/// Returns the length of the identifier at the start of `bytes`.
+fn word_length(bytes: &[u8]) -> usize {
+    bytes
+        .iter()
+        .take_while(|byte| is_at_continue_identifier(**byte))
+        .count()
 }
 
 #[derive(Copy, Clone, Debug)]

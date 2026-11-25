@@ -1073,20 +1073,6 @@ pub fn svelte_const_block(
         ],
     ))
 }
-pub fn svelte_curly_destructured_name(
-    l_curly_token: SyntaxToken,
-    names: SvelteBindingAssignmentBindingList,
-    r_curly_token: SyntaxToken,
-) -> SvelteCurlyDestructuredName {
-    SvelteCurlyDestructuredName::unwrap_cast(SyntaxNode::new_detached(
-        HtmlSyntaxKind::SVELTE_CURLY_DESTRUCTURED_NAME,
-        [
-            Some(SyntaxElement::Token(l_curly_token)),
-            Some(SyntaxElement::Node(names.into_syntax())),
-            Some(SyntaxElement::Token(r_curly_token)),
-        ],
-    ))
-}
 pub fn svelte_debug_block(
     sv_curly_at_token: SyntaxToken,
     debug_token: SyntaxToken,
@@ -1165,45 +1151,17 @@ impl SvelteDirectiveValueBuilder {
         ))
     }
 }
-pub fn svelte_each_as_keyed_item(
+pub fn svelte_each_binding_clause(
     as_token: SyntaxToken,
-    name: AnySvelteEachName,
-) -> SvelteEachAsKeyedItemBuilder {
-    SvelteEachAsKeyedItemBuilder {
-        as_token,
-        name,
-        index: None,
-        key: None,
-    }
-}
-pub struct SvelteEachAsKeyedItemBuilder {
-    as_token: SyntaxToken,
-    name: AnySvelteEachName,
-    index: Option<SvelteEachIndex>,
-    key: Option<SvelteEachKey>,
-}
-impl SvelteEachAsKeyedItemBuilder {
-    pub fn with_index(mut self, index: SvelteEachIndex) -> Self {
-        self.index = Some(index);
-        self
-    }
-    pub fn with_key(mut self, key: SvelteEachKey) -> Self {
-        self.key = Some(key);
-        self
-    }
-    pub fn build(self) -> SvelteEachAsKeyedItem {
-        SvelteEachAsKeyedItem::unwrap_cast(SyntaxNode::new_detached(
-            HtmlSyntaxKind::SVELTE_EACH_AS_KEYED_ITEM,
-            [
-                Some(SyntaxElement::Token(self.as_token)),
-                Some(SyntaxElement::Node(self.name.into_syntax())),
-                self.index
-                    .map(|token| SyntaxElement::Node(token.into_syntax())),
-                self.key
-                    .map(|token| SyntaxElement::Node(token.into_syntax())),
-            ],
-        ))
-    }
+    clause: HtmlTextExpression,
+) -> SvelteEachBindingClause {
+    SvelteEachBindingClause::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::SVELTE_EACH_BINDING_CLAUSE,
+        [
+            Some(SyntaxElement::Token(as_token)),
+            Some(SyntaxElement::Node(clause.into_syntax())),
+        ],
+    ))
 }
 pub fn svelte_each_block(
     opening_block: SvelteEachOpeningBlock,
@@ -1261,20 +1219,6 @@ pub fn svelte_each_index(comma_token: SyntaxToken, value: SvelteName) -> SvelteE
         [
             Some(SyntaxElement::Token(comma_token)),
             Some(SyntaxElement::Node(value.into_syntax())),
-        ],
-    ))
-}
-pub fn svelte_each_key(
-    l_paren_token: SyntaxToken,
-    expression: HtmlTextExpression,
-    r_paren_token: SyntaxToken,
-) -> SvelteEachKey {
-    SvelteEachKey::unwrap_cast(SyntaxNode::new_detached(
-        HtmlSyntaxKind::SVELTE_EACH_KEY,
-        [
-            Some(SyntaxElement::Token(l_paren_token)),
-            Some(SyntaxElement::Node(expression.into_syntax())),
-            Some(SyntaxElement::Token(r_paren_token)),
         ],
     ))
 }
@@ -1552,20 +1496,6 @@ pub fn svelte_out_directive(
         ],
     ))
 }
-pub fn svelte_rename_binding(
-    key: SvelteName,
-    colon_token: SyntaxToken,
-    name: AnySvelteBindingAssignmentBinding,
-) -> SvelteRenameBinding {
-    SvelteRenameBinding::unwrap_cast(SyntaxNode::new_detached(
-        HtmlSyntaxKind::SVELTE_RENAME_BINDING,
-        [
-            Some(SyntaxElement::Node(key.into_syntax())),
-            Some(SyntaxElement::Token(colon_token)),
-            Some(SyntaxElement::Node(name.into_syntax())),
-        ],
-    ))
-}
 pub fn svelte_render_block(
     sv_curly_at_token: SyntaxToken,
     render_token: SyntaxToken,
@@ -1579,15 +1509,6 @@ pub fn svelte_render_block(
             Some(SyntaxElement::Token(render_token)),
             Some(SyntaxElement::Node(expression.into_syntax())),
             Some(SyntaxElement::Token(r_curly_token)),
-        ],
-    ))
-}
-pub fn svelte_rest_binding(dotdotdot_token: SyntaxToken, name: SvelteName) -> SvelteRestBinding {
-    SvelteRestBinding::unwrap_cast(SyntaxNode::new_detached(
-        HtmlSyntaxKind::SVELTE_REST_BINDING,
-        [
-            Some(SyntaxElement::Token(dotdotdot_token)),
-            Some(SyntaxElement::Node(name.into_syntax())),
         ],
     ))
 }
@@ -1632,20 +1553,6 @@ pub fn svelte_snippet_opening_block(
             Some(SyntaxElement::Node(expression.into_syntax())),
             Some(SyntaxElement::Token(r_curly_token)),
             Some(SyntaxElement::Node(children.into_syntax())),
-        ],
-    ))
-}
-pub fn svelte_square_destructured_name(
-    l_brack_token: SyntaxToken,
-    names: SvelteBindingAssignmentBindingList,
-    r_brack_token: SyntaxToken,
-) -> SvelteSquareDestructuredName {
-    SvelteSquareDestructuredName::unwrap_cast(SyntaxNode::new_detached(
-        HtmlSyntaxKind::SVELTE_SQUARE_DESTRUCTURED_NAME,
-        [
-            Some(SyntaxElement::Token(l_brack_token)),
-            Some(SyntaxElement::Node(names.into_syntax())),
-            Some(SyntaxElement::Token(r_brack_token)),
         ],
     ))
 }
@@ -2109,30 +2016,6 @@ where
         items
             .into_iter()
             .map(|item| Some(item.into_syntax().into())),
-    ))
-}
-pub fn svelte_binding_assignment_binding_list<I, S>(
-    items: I,
-    separators: S,
-) -> SvelteBindingAssignmentBindingList
-where
-    I: IntoIterator<Item = AnySvelteBindingAssignmentBinding>,
-    I::IntoIter: ExactSizeIterator,
-    S: IntoIterator<Item = HtmlSyntaxToken>,
-    S::IntoIter: ExactSizeIterator,
-{
-    let mut items = items.into_iter();
-    let mut separators = separators.into_iter();
-    let length = items.len() + separators.len();
-    SvelteBindingAssignmentBindingList::unwrap_cast(SyntaxNode::new_detached(
-        HtmlSyntaxKind::SVELTE_BINDING_ASSIGNMENT_BINDING_LIST,
-        (0..length).map(|index| {
-            if index % 2 == 0 {
-                Some(items.next()?.into_syntax().into())
-            } else {
-                Some(separators.next()?.into())
-            }
-        }),
     ))
 }
 pub fn svelte_binding_list<I, S>(items: I, separators: S) -> SvelteBindingList

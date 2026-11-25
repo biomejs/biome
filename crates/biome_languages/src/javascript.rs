@@ -158,6 +158,8 @@ pub enum SvelteEmbeddingKind {
     TextInterpolation,
     /// The name and parameters from a `{#snippet ...}` block parsed as a Svelte snippet root.
     SnippetSignature,
+    /// The binding, optional index, and optional key after `as` in an each block.
+    EachBinding,
     /// The payload of a `{@const ...}` block parsed as a variable declarator.
     ///
     /// The HTML syntax stores the `const` token separately, so this mode receives
@@ -412,6 +414,16 @@ impl JsEmbeddingKind {
             }
         )
     }
+    pub const fn is_svelte_each_binding(&self) -> bool {
+        matches!(
+            self,
+            Self::Svelte {
+                embedding_kind: SvelteEmbeddingKind::EachBinding,
+                ..
+            }
+        )
+    }
+
     pub const fn is_svelte_const_block(&self) -> bool {
         matches!(
             self,
@@ -677,6 +689,10 @@ impl JsFileSource {
     /// Svelte `generics` attribute.
     pub const fn is_generics_list(&self) -> bool {
         self.embedding_kind.is_generics_list()
+    }
+
+    pub const fn is_svelte_each_binding(&self) -> bool {
+        self.embedding_kind.is_svelte_each_binding()
     }
 
     /// Returns true if this is a Svelte `{@const}` block
