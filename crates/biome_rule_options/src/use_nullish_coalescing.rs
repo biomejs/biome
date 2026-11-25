@@ -9,7 +9,7 @@ use serde::{Deserialize, Serialize};
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields, default)]
 pub struct UseNullishCoalescingOptions {
-    /// Ignore `||` expressions in conditional test positions (default: `true`).
+    /// Ignore `||` and `||=` whose value decides the test of an `if`, `while`, `do-while`, `for`, or ternary expression (default: `true`).
     #[serde(skip_serializing_if = "Option::is_none")]
     pub ignore_conditional_tests: Option<bool>,
 
@@ -21,7 +21,7 @@ pub struct UseNullishCoalescingOptions {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub ignore_mixed_logical_expressions: Option<bool>,
 
-    /// Whether to ignore `||` and `||=` binary operations used inside a `Boolean()` call (default: `false`).
+    /// Whether to ignore `||` and `||=` whose value is passed to the global `Boolean()` function (default: `false`).
     #[serde(skip_serializing_if = "Option::is_none")]
     pub ignore_boolean_coercion: Option<bool>,
 

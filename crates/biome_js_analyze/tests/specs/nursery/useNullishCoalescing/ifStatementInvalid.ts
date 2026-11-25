@@ -65,21 +65,68 @@ if (rec3[ 'a' ] == null) {
 	rec3['a'] = 1;
 }
 
-// Calls in the subject: no fix
-declare function getRec(): { a: number | null };
-if (getRec().a == null) {
-	getRec().a = 1;
+// Optional chaining in the test
+declare let maybeRec: { a: string | null } | null;
+if (maybeRec?.a == null) {
+	maybeRec.a = 'default';
 }
 
-if (getRec()['a'] == null) {
-	getRec()['a'] = 1;
+// Static member test and computed member target
+declare let mixedAccess: { a: number | null };
+if (mixedAccess.a == null) {
+	mixedAccess['a'] = 1;
 }
 
-// `||=` body: only the `||=` is reported
+// Parentheses around the test, the assignment, and the target
+declare let wrapped: string | null;
+if (((wrapped == null))) {
+	wrapped = 'default';
+}
+if (wrapped == null) {
+	((wrapped)) = 'default';
+}
+if (wrapped == null) {
+	(wrapped = 'default');
+}
+
+// Type assertion around the subject
+declare let asserted: string | null;
+if ((asserted as string | null) == null) {
+	asserted = 'default';
+}
+
+// Compound check mixing strict and loose comparisons
+declare let mixedCompound: string | null | undefined;
+if (mixedCompound === null || mixedCompound == undefined) {
+	mixedCompound = 'default';
+}
+
+// `??=` body
+declare let nullishAssign: { x: number } | null;
+if (nullishAssign == null) {
+	nullishAssign ??= makeObj();
+}
+
+// `||=` body: reported by the `if` and by the `||=`
 declare let assign: { x: number } | null;
 if (!assign) {
 	assign ||= makeObj();
 }
+
+// `else if`, labeled `if`, and unbraced `if` in a loop
+declare let elseIfValue: string | null;
+declare let labeled: string | null;
+declare let inLoop: string | null;
+declare const cond: boolean;
+declare const items: string[];
+if (cond) {
+} else if (elseIfValue == null) {
+	elseIfValue = 'default';
+}
+label: if (labeled == null) {
+	labeled = 'default';
+}
+for (const item of items) if (inLoop == null) inLoop = item;
 
 // Inner comment in the body: no fix
 declare let commented: string | null;

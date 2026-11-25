@@ -40,6 +40,43 @@ const t2 = /* check */ checked === null ? 'fallback' : checked;
 declare const negated: string | null;
 const t3 = negated === null ? /* fallback */ 'default' : /* value */ negated;
 
+// Ternary with comments in dropped parts: no fix
+declare const dropped: string | null;
+const t4 = dropped !== null ? dropped /* after value */ : 'y';
+const t5 = dropped /* in test */ !== null ? dropped : 'y';
+const t6 = dropped !== null ? dropped
+	// before colon
+	: 'y';
+
+// Comments in the test, around `?`, or inside the kept branch: no fix
+declare const dropped1: string | null;
+declare const dropped2: string | null | undefined;
+const t7 = dropped1 == null /* c */ ? 'y' : dropped1;
+const t8 = dropped1 == null ? 'y' /* c */ : dropped1;
+const t9 = dropped1 != null ? (/* c */ dropped1) : 'y';
+const t10 = dropped2 !== null /* c */ && dropped2 !== undefined ? dropped2 : 'y';
+const t11 = dropped1 != null
+	// c
+	? dropped1 : 'y';
+
+// Ternary with a trailing line comment and no semicolon
+declare const trailing: string | null;
+const t12 = trailing !== null ? trailing : 'y' // keep me
+
+// Comments before the test and before the present branch
+declare const lead: string | null;
+const t13 = /* lead */ lead !== null ? /* present */ lead : 'd';
+
+// `if` statement with comments around it: comments are kept
+declare let ifTrivia: string | null;
+/* before */ if (ifTrivia == null) { ifTrivia = 'a'; } // after
+
+// `if` statement with a comment in the test: no fix
+if (ifTrivia /* c */ == null) { ifTrivia = 'b'; }
+
+// `if` statement with a comment before the body: no fix
+if (ifTrivia == null) /* c */ { ifTrivia = 'c'; }
+
 ```
 
 # Diagnostics
@@ -349,6 +386,7 @@ commentTrivia.ts:35:12 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━�
   > 35 │ const t3 = negated === null ? /* fallback */ 'default' : /* value */ negated;
        │            ^^^^^^^^^^^^^^^^
     36 │ 
+    37 │ // Ternary with comments in dropped parts: no fix
   
   i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
   
@@ -363,6 +401,304 @@ commentTrivia.ts:35:12 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━�
     35    │ - const·t3·=·negated·===·null·?·/*·fallback·*/·'default'·:·/*·value·*/·negated;
        35 │ + const·t3·=·/*·value·*/·negated·??·/*·fallback·*/·'default';
     36 36 │   
+    37 37 │   // Ternary with comments in dropped parts: no fix
+  
+
+```
+
+```
+commentTrivia.ts:39:12 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer ?? over a ternary expression checking for nullish.
+  
+    37 │ // Ternary with comments in dropped parts: no fix
+    38 │ declare const dropped: string | null;
+  > 39 │ const t4 = dropped !== null ? dropped /* after value */ : 'y';
+       │            ^^^^^^^^^^^^^^^^
+    40 │ const t5 = dropped /* in test */ !== null ? dropped : 'y';
+    41 │ const t6 = dropped !== null ? dropped
+  
+  i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+commentTrivia.ts:40:12 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer ?? over a ternary expression checking for nullish.
+  
+    38 │ declare const dropped: string | null;
+    39 │ const t4 = dropped !== null ? dropped /* after value */ : 'y';
+  > 40 │ const t5 = dropped /* in test */ !== null ? dropped : 'y';
+       │            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    41 │ const t6 = dropped !== null ? dropped
+    42 │ 	// before colon
+  
+  i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+commentTrivia.ts:41:12 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer ?? over a ternary expression checking for nullish.
+  
+    39 │ const t4 = dropped !== null ? dropped /* after value */ : 'y';
+    40 │ const t5 = dropped /* in test */ !== null ? dropped : 'y';
+  > 41 │ const t6 = dropped !== null ? dropped
+       │            ^^^^^^^^^^^^^^^^
+    42 │ 	// before colon
+    43 │ 	: 'y';
+  
+  i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+commentTrivia.ts:48:12 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer ?? over a ternary expression checking for nullish.
+  
+    46 │ declare const dropped1: string | null;
+    47 │ declare const dropped2: string | null | undefined;
+  > 48 │ const t7 = dropped1 == null /* c */ ? 'y' : dropped1;
+       │            ^^^^^^^^^^^^^^^^
+    49 │ const t8 = dropped1 == null ? 'y' /* c */ : dropped1;
+    50 │ const t9 = dropped1 != null ? (/* c */ dropped1) : 'y';
+  
+  i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+commentTrivia.ts:49:12 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer ?? over a ternary expression checking for nullish.
+  
+    47 │ declare const dropped2: string | null | undefined;
+    48 │ const t7 = dropped1 == null /* c */ ? 'y' : dropped1;
+  > 49 │ const t8 = dropped1 == null ? 'y' /* c */ : dropped1;
+       │            ^^^^^^^^^^^^^^^^
+    50 │ const t9 = dropped1 != null ? (/* c */ dropped1) : 'y';
+    51 │ const t10 = dropped2 !== null /* c */ && dropped2 !== undefined ? dropped2 : 'y';
+  
+  i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+commentTrivia.ts:50:12 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer ?? over a ternary expression checking for nullish.
+  
+    48 │ const t7 = dropped1 == null /* c */ ? 'y' : dropped1;
+    49 │ const t8 = dropped1 == null ? 'y' /* c */ : dropped1;
+  > 50 │ const t9 = dropped1 != null ? (/* c */ dropped1) : 'y';
+       │            ^^^^^^^^^^^^^^^^
+    51 │ const t10 = dropped2 !== null /* c */ && dropped2 !== undefined ? dropped2 : 'y';
+    52 │ const t11 = dropped1 != null
+  
+  i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+commentTrivia.ts:51:13 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer ?? over a ternary expression checking for nullish.
+  
+    49 │ const t8 = dropped1 == null ? 'y' /* c */ : dropped1;
+    50 │ const t9 = dropped1 != null ? (/* c */ dropped1) : 'y';
+  > 51 │ const t10 = dropped2 !== null /* c */ && dropped2 !== undefined ? dropped2 : 'y';
+       │             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    52 │ const t11 = dropped1 != null
+    53 │ 	// c
+  
+  i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+commentTrivia.ts:52:13 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer ?? over a ternary expression checking for nullish.
+  
+    50 │ const t9 = dropped1 != null ? (/* c */ dropped1) : 'y';
+    51 │ const t10 = dropped2 !== null /* c */ && dropped2 !== undefined ? dropped2 : 'y';
+  > 52 │ const t11 = dropped1 != null
+       │             ^^^^^^^^^^^^^^^^
+    53 │ 	// c
+    54 │ 	? dropped1 : 'y';
+  
+  i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+commentTrivia.ts:58:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer ?? over a ternary expression checking for nullish.
+  
+    56 │ // Ternary with a trailing line comment and no semicolon
+    57 │ declare const trailing: string | null;
+  > 58 │ const t12 = trailing !== null ? trailing : 'y' // keep me
+       │             ^^^^^^^^^^^^^^^^^
+    59 │ 
+    60 │ // Comments before the test and before the present branch
+  
+  i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace the ternary with ??.
+  
+    56 56 │   // Ternary with a trailing line comment and no semicolon
+    57 57 │   declare const trailing: string | null;
+    58    │ - const·t12·=·trailing·!==·null·?·trailing·:·'y'·//·keep·me
+       58 │ + const·t12·=·trailing·??·'y'·//·keep·me
+    59 59 │   
+    60 60 │   // Comments before the test and before the present branch
+  
+
+```
+
+```
+commentTrivia.ts:62:24 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer ?? over a ternary expression checking for nullish.
+  
+    60 │ // Comments before the test and before the present branch
+    61 │ declare const lead: string | null;
+  > 62 │ const t13 = /* lead */ lead !== null ? /* present */ lead : 'd';
+       │                        ^^^^^^^^^^^^^
+    63 │ 
+    64 │ // `if` statement with comments around it: comments are kept
+  
+  i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace the ternary with ??.
+  
+    60 60 │   // Comments before the test and before the present branch
+    61 61 │   declare const lead: string | null;
+    62    │ - const·t13·=·/*·lead·*/·lead·!==·null·?·/*·present·*/·lead·:·'d';
+       62 │ + const·t13·=·/*·lead·*/·/*·present·*/·lead·??·'d';
+    63 63 │   
+    64 64 │   // `if` statement with comments around it: comments are kept
+  
+
+```
+
+```
+commentTrivia.ts:66:14 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ??= instead of an if statement for nullish assignment.
+  
+    64 │ // `if` statement with comments around it: comments are kept
+    65 │ declare let ifTrivia: string | null;
+  > 66 │ /* before */ if (ifTrivia == null) { ifTrivia = 'a'; } // after
+       │              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    67 │ 
+    68 │ // `if` statement with a comment in the test: no fix
+  
+  i This if statement only assigns when the variable is nullish, which ??= expresses directly.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace the if statement with ??=.
+  
+    64 64 │   // `if` statement with comments around it: comments are kept
+    65 65 │   declare let ifTrivia: string | null;
+    66    │ - /*·before·*/·if·(ifTrivia·==·null)·{·ifTrivia·=·'a';·}·//·after
+       66 │ + /*·before·*/·ifTrivia·??=·'a';·//·after
+    67 67 │   
+    68 68 │   // `if` statement with a comment in the test: no fix
+  
+
+```
+
+```
+commentTrivia.ts:69:1 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ??= instead of an if statement for nullish assignment.
+  
+    68 │ // `if` statement with a comment in the test: no fix
+  > 69 │ if (ifTrivia /* c */ == null) { ifTrivia = 'b'; }
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    70 │ 
+    71 │ // `if` statement with a comment before the body: no fix
+  
+  i This if statement only assigns when the variable is nullish, which ??= expresses directly.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+commentTrivia.ts:72:1 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ??= instead of an if statement for nullish assignment.
+  
+    71 │ // `if` statement with a comment before the body: no fix
+  > 72 │ if (ifTrivia == null) /* c */ { ifTrivia = 'c'; }
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    73 │ 
+  
+  i This if statement only assigns when the variable is nullish, which ??= expresses directly.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```

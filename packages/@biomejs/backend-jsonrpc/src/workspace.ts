@@ -14711,11 +14711,11 @@ export type UseNextScriptForGoogleAnalyticsOptions = {};
  */
 export interface UseNullishCoalescingOptions {
 	/**
-	 * Whether to ignore `||` and `||=` binary operations used inside a `Boolean()` call (default: `false`).
+	 * Whether to ignore `||` and `||=` whose value is passed to the global `Boolean()` function (default: `false`).
 	 */
 	ignoreBooleanCoercion?: boolean;
 	/**
-	 * Ignore `||` expressions in conditional test positions (default: `true`).
+	 * Ignore `||` and `||=` whose value decides the test of an `if`, `while`, `do-while`, `for`, or ternary expression (default: `true`).
 	 */
 	ignoreConditionalTests?: boolean;
 	/**

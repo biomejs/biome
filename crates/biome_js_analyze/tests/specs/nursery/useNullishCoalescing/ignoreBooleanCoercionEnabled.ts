@@ -46,3 +46,28 @@ function shadowedByLocal() {
 	const Boolean = (value: unknown) => !!value;
 	return Boolean(a || 'default');
 }
+
+// `||` in a ternary branch or the last expression of a sequence: not reported
+declare const flag: boolean;
+const r10 = Boolean(flag ? a || b : 'default');
+const r11 = Boolean(flag ? 'default' : a || b);
+const r12 = Boolean((identity(flag), a || b));
+
+// `||` as an operand of `??` inside `Boolean()`: not reported
+const r13 = Boolean(a ?? (b || c));
+const r14 = Boolean((a || b) ?? c);
+
+// Negated inside `Boolean()`
+const r15 = Boolean(!(a || 'default'));
+
+// Earlier expression of a sequence
+const r16 = Boolean((a || 'default', flag));
+
+// Calls other than the global `Boolean()`, or a value that isn't the argument
+const r17 = new Boolean(a || b);
+const r18 = String(a || b);
+const r19 = Boolean(1 + (a || b));
+const r20 = Boolean(() => a || b);
+
+// Comparison ternary inside `Boolean()`
+const r21 = Boolean(a != null ? a : b);
