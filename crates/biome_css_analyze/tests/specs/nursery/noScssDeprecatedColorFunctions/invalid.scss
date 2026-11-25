@@ -1,0 +1,53 @@
+/* should generate diagnostics */
+@use "sass:color";
+
+a {
+  opacity: color.alpha(#e1d7d2);
+  opacity: alpha(#e1d7d2);
+  opacity: opacity(#e1d7d2);
+  color: color.blackness(#e1d7d2);
+  color: blackness(#e1d7d2);
+  color: color.blue(#e1d7d2);
+  color: blue(#e1d7d2);
+  color: color.green(#e1d7d2);
+  color: green(#e1d7d2);
+  color: color.hue(#e1d7d2);
+  color: hue(#e1d7d2);
+  color: color.lightness(#e1d7d2);
+  color: lightness(#e1d7d2);
+  color: color.red(#e1d7d2);
+  color: red(#e1d7d2);
+  color: color.saturation(#e1d7d2);
+  color: saturation(#e1d7d2);
+  color: color.whiteness(#e1d7d2);
+}
+
+$alpha: alpha($brand);
+$map: (key: hue($brand));
+
+@function lightness($color) {
+  @return 50%;
+}
+
+a {
+  width: calc(100% * opacity($brand));
+  width: #{ alpha($brand) };
+  width: calc(2*alpha($brand));
+  width: fn(1,alpha($brand));
+  width: 1px/alpha($brand);
+  width: lightness($brand);
+  width: fn($amount: hue($brand));
+  margin: 0 hue($brand) * 1px;
+  opacity: opacity(50%);
+  opacity: opacity(var(--fade));
+  backdrop-filter: opacity(50%);
+  -webkit-filter: opacity(50%);
+  FILTER: opacity(50%);
+  --alpha: alpha($brand);
+  --module-alpha: color.alpha($brand);
+  --whiteness: color.whiteness($brand);
+  --spaced: color. alpha($brand);
+  font: 12px hue($brand) {
+    family: hue($brand);
+  }
+}

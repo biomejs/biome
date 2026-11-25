@@ -1415,6 +1415,7 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "noScriptUrl",
         TypeId::of::<biome_rule_options::no_script_url::NoScriptUrlOptions>(),
     ));
+    result.push(("nursery", "noScssDeprecatedColorFunctions", TypeId::of::<biome_rule_options::no_scss_deprecated_color_functions::NoScssDeprecatedColorFunctionsOptions>()));
     result.push((
         "nursery",
         "noScssNullComparison",
