@@ -78,6 +78,12 @@ fn test_caret_range_all_zeros() {
     assert!(!exact_zero.intersects(&min_react_native));
     assert!(!zero_minor.intersects(&min_react_native));
     assert!(!zero_prerelease.intersects(&min_react_native));
+
+    let greater_than_zero_prerelease = ">0.0.0-alpha".parse::<Range>().unwrap();
+    assert!(exact_zero.intersects(&greater_than_zero_prerelease));
+
+    let greater_than_zero = ">0.0.0".parse::<Range>().unwrap();
+    assert!(!exact_zero.intersects(&greater_than_zero));
 }
 
 #[test]

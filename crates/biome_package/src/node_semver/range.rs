@@ -380,7 +380,7 @@ impl Comparator {
                 self.version < other.version
             }
             (ComparatorOperator::GreaterThan, ComparatorOperator::LessThan) => {
-                self.version.inc_patch() < other.version
+                next_version_after(&self.version) < other.version
             }
             (ComparatorOperator::GreaterThan, ComparatorOperator::LessThanOrEqual) => {
                 self.version < other.version
@@ -398,7 +398,7 @@ impl Comparator {
                 self.version > other.version
             }
             (ComparatorOperator::LessThan, ComparatorOperator::GreaterThan) => {
-                self.version > other.version.inc_patch()
+                self.version > next_version_after(&other.version)
             }
             (ComparatorOperator::LessThan, ComparatorOperator::GreaterThanOrEqual) => {
                 self.version > other.version
@@ -720,6 +720,16 @@ fn parse_operator(input: &str) -> (RangeOperator, &str) {
 fn sets_intersect(set1: &[Comparator], set2: &[Comparator]) -> bool {
     set1.iter()
         .all(|comp1| set2.iter().all(|comp2| comp1.intersects(comp2)))
+}
+
+/// Returns the next discrete version boundary after `version`: for a prerelease,
+/// its corresponding stable release (`M.m.p`); otherwise the next patch (`M.m.(p+1)`).
+fn next_version_after(version: &Version) -> Version {
+    if version.is_prerelease() {
+        Version::new(version.major, version.minor, version.patch)
+    } else {
+        version.inc_patch()
+    }
 }
 
 enum ComponentOrWildcardResult<'a> {
