@@ -11,26 +11,37 @@ pub fn get_analyzer_rule_options_path() -> PathBuf {
 }
 
 /// Generates the options struct for a new analyzer rule.
-/// This function creates a new struct with the name `<RuleName>Options` and saves it in the
-/// `biome_rule_options` crate.
+/// This function creates the options named `<RuleName>Options` and saves them in the
+/// `biome_rule_options` crate. With `share_empty_options`, they are an alias of the options
+/// shared by the lint rules without options instead of a new struct. The assist actions
+/// can't share them, because the JSON schema of their group names every options type.
 pub fn generate_analyzer_rule_options(
     rule_name: &str,
     mode: Mode,
     register_mod: bool,
+    share_empty_options: bool,
 ) -> Result<()> {
     let struct_name = Ident::new(
         &format!("{}Options", Case::Pascal.convert(rule_name)),
         Span::call_site(),
     );
 
-    let content = quote! {
-        use biome_deserialize_macros::{Deserializable, Merge};
-        use serde::{Deserialize, Serialize};
+    let content = if share_empty_options {
+        // A lint rule has nothing to configure until its author adds options,
+        // so it shares the options type of the rules without options.
+        quote! {
+            pub type #struct_name = crate::EmptyRuleOptions;
+        }
+    } else {
+        quote! {
+            use biome_deserialize_macros::{Deserializable, Merge};
+            use serde::{Deserialize, Serialize};
 
-        #[derive(Default, Clone, Debug, Deserialize, Deserializable, Merge, Eq, PartialEq, Serialize)]
-        #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
-        #[serde(rename_all = "camelCase", deny_unknown_fields, default)]
-        pub struct #struct_name {}
+            #[derive(Default, Clone, Debug, Deserialize, Deserializable, Merge, Eq, PartialEq, Serialize)]
+            #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+            #[serde(rename_all = "camelCase", deny_unknown_fields, default)]
+            pub struct #struct_name {}
+        }
     };
 
     let snake_rule_name = Case::Snake.convert(rule_name);

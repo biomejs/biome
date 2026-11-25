@@ -369,7 +369,7 @@ pub(crate) fn generate_rule_options(mode: Mode) -> Result<()> {
         if file_path.exists() {
             continue;
         }
-        generate_analyzer_rule_options(rule_name, mode, false)?;
+        generate_analyzer_rule_options(rule_name, mode, false, false)?;
     }
 
     let content = quote! {
