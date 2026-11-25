@@ -1,0 +1,78 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: ignorePrimitivesString.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+
+declare const s: string | null;
+declare const n: number | null;
+declare const b: boolean | null;
+declare const big: bigint | null;
+
+// Ignored kind: not reported
+const r1 = s || 'x';
+
+// Kinds that are not ignored: reported
+const r2 = n || 0;
+const r3 = b || false;
+const r4 = big || 0n;
+
+```
+
+# Diagnostics
+```
+ignorePrimitivesString.ts:12:14 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+    11 │ // Kinds that are not ignored: reported
+  > 12 │ const r2 = n || 0;
+       │              ^^
+    13 │ const r3 = b || false;
+    14 │ const r4 = big || 0n;
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+ignorePrimitivesString.ts:13:14 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+    11 │ // Kinds that are not ignored: reported
+    12 │ const r2 = n || 0;
+  > 13 │ const r3 = b || false;
+       │              ^^
+    14 │ const r4 = big || 0n;
+    15 │ 
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+ignorePrimitivesString.ts:14:16 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+    12 │ const r2 = n || 0;
+    13 │ const r3 = b || false;
+  > 14 │ const r4 = big || 0n;
+       │                ^^
+    15 │ 
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

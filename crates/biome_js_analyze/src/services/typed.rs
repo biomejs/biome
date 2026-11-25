@@ -5,9 +5,9 @@ use biome_analyze::{
 };
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
-    AnyJsCallArgument, AnyJsExpression, AnyJsFunction, AnyJsRoot, JsCallArgumentList,
-    JsClassDeclaration, JsClassExpression, JsLanguage, JsObjectExpression, JsReferenceIdentifier,
-    JsSyntaxNode,
+    AnyJsAssignment, AnyJsCallArgument, AnyJsExpression, AnyJsFunction, AnyJsRoot,
+    JsCallArgumentList, JsClassDeclaration, JsClassExpression, JsLanguage, JsObjectExpression,
+    JsReferenceIdentifier, JsSyntaxNode,
 };
 use biome_js_type_info::InferredType;
 use biome_module_graph::{
@@ -68,18 +68,59 @@ impl TypedService {
         Some(binding.tree().syntax().text_trimmed_range())
     }
 
+    fn type_at_range<'db>(&'db self, range: TextRange) -> Option<InferredType<'db>> {
+        let typed_module = self.module.as_ref()?;
+        let ty = self.execute_request(
+            typed_module,
+            NormalizedExpressionTypeRequest::new(typed_module.module, range),
+        )?;
+
+        Some(InferredType::new(typed_module.db.as_ref(), ty))
+    }
+
     /// Returns the Salsa-inferred type for an expression.
     pub fn type_of_expression<'db>(
         &'db self,
         expression: &AnyJsExpression,
     ) -> Option<InferredType<'db>> {
-        let typed_module = self.module.as_ref()?;
-        let ty = self.execute_request(
-            typed_module,
-            NormalizedExpressionTypeRequest::new(typed_module.module, expression.range()),
-        )?;
+        self.type_at_range(expression.range())
+    }
 
-        Some(InferredType::new(typed_module.db.as_ref(), ty))
+    /// Returns the Salsa-inferred type that a target holds before an assignment, such as
+    /// `object.value` in `object.value ||= fallback`.
+    ///
+    /// The type is the one that the same target would have as an expression: a variable has
+    /// its inferred binding type, `target as T` and `<T>target` have the asserted type `T`,
+    /// and parentheses and `satisfies` keep the type of the target inside. `target!` has no
+    /// type, like the expression `target!`.
+    ///
+    /// Member and assertion targets have a type only under a compound assignment operator
+    /// such as `||=` or `+=`, the operators whose targets the module graph registers.
+    pub fn type_of_assignment<'db>(
+        &'db self,
+        target: &AnyJsAssignment,
+    ) -> Option<InferredType<'db>> {
+        let mut target = target.clone();
+        loop {
+            target = match target {
+                // Only member and assertion targets are registered by range, so a
+                // variable's type comes from its binding.
+                AnyJsAssignment::JsIdentifierAssignment(identifier) => {
+                    return self.type_of_named_value(
+                        identifier.range(),
+                        identifier.name_token().ok()?.text_trimmed(),
+                    );
+                }
+                AnyJsAssignment::JsParenthesizedAssignment(assignment) => {
+                    assignment.assignment().ok()?
+                }
+                AnyJsAssignment::TsSatisfiesAssignment(assignment) => {
+                    assignment.assignment().ok()?
+                }
+                AnyJsAssignment::TsNonNullAssertionAssignment(_) => return None,
+                target => return self.type_at_range(target.range()),
+            };
+        }
     }
 
     /// Classifies an expression as a Promise without resolving unrelated members.

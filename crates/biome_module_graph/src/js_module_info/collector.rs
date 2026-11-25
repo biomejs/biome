@@ -4,11 +4,13 @@ use std::{borrow::Cow, sync::Arc};
 
 use biome_js_semantic::{Reference, ScopeId, SemanticModel, TsBindingReference};
 use biome_js_syntax::{
-    AnyJsArrowFunctionParameters, AnyJsBindingPattern, AnyJsCombinedSpecifier, AnyJsDeclaration,
-    AnyJsExportDefaultDeclaration, AnyJsExpression, AnyJsImportClause, JsArrowFunctionExpression,
-    JsAssignmentExpression, JsForVariableDeclaration, JsFormalParameter, JsLanguage,
-    JsRestParameter, JsSyntaxNode, JsVariableDeclaration, TsInferType, TsMappedType,
-    TsModuleDeclaration, TsTypeParameter, inner_string_text,
+    AnyJsArrowFunctionParameters, AnyJsAssignment, AnyJsBindingPattern, AnyJsCombinedSpecifier,
+    AnyJsDeclaration, AnyJsExportDefaultDeclaration, AnyJsExpression, AnyJsImportClause,
+    JsArrowFunctionExpression, JsAssignmentExpression, JsAssignmentOperator,
+    JsComputedMemberAssignment, JsForVariableDeclaration, JsFormalParameter, JsLanguage,
+    JsParenthesizedAssignment, JsRestParameter, JsStaticMemberAssignment, JsSyntaxNode,
+    JsVariableDeclaration, TsAsAssignment, TsInferType, TsMappedType, TsModuleDeclaration,
+    TsSatisfiesAssignment, TsTypeAssertionAssignment, TsTypeParameter, inner_string_text,
 };
 use biome_js_type_info::{
     FunctionParameter, FunctionParameterBinding, GenericTypeParameter, RawTypeCollector,
@@ -162,6 +164,10 @@ impl JsModuleInfoCollector {
     pub(super) const LEAVE_NODE_KINDS: SyntaxKindSet<JsLanguage> = AnyJsExpression::KIND_SET
         .union(JsFormalParameter::KIND_SET)
         .union(JsRestParameter::KIND_SET)
+        .union(JsStaticMemberAssignment::KIND_SET)
+        .union(JsComputedMemberAssignment::KIND_SET)
+        .union(TsAsAssignment::KIND_SET)
+        .union(TsTypeAssertionAssignment::KIND_SET)
         .union(JsVariableDeclaration::KIND_SET)
         .union(biome_js_syntax::JsImport::KIND_SET);
 
@@ -172,6 +178,16 @@ impl JsModuleInfoCollector {
             let ty = TypeData::from_any_js_expression(self, scope_id, &expr);
             let id = self.register_type(Cow::Owned(ty));
             self.parsed_expressions.insert(range, id);
+        } else if let Some(target) = AnyJsAssignment::cast_ref(node)
+            && is_compound_assignment_target(&target)
+        {
+            // Registered like expressions so lookups by range find the type that
+            // `object.value += other` reads before assigning.
+            let scope_id = self.semantic_model.scope(node).id();
+            if let Some(ty) = TypeData::from_any_js_assignment_target(self, scope_id, &target) {
+                let id = self.register_type(Cow::Owned(ty));
+                self.parsed_expressions.insert(target.range(), id);
+            }
         } else if let Some(param) = JsFormalParameter::cast_ref(node) {
             let scope_id = self.semantic_model.scope(node).id();
             let parsed_param = FunctionParameter::from_js_formal_parameter(self, scope_id, &param);
@@ -948,6 +964,29 @@ fn register_type_with_limit(
         diagnostics.push(JsModuleInfoDiagnostic::exceeded_types_limit());
     }
     unknown_id.unwrap_or_else(|| types.insert_cow(Cow::Owned(unknown)))
+}
+
+/// Whether `target` is a member or an assertion target of a compound assignment such as
+/// `object.value += 1`, whose type is the one the assignment reads. Parentheses and
+/// `satisfies` around the target are looked through, because they do not change its type.
+fn is_compound_assignment_target(target: &AnyJsAssignment) -> bool {
+    matches!(
+        target,
+        AnyJsAssignment::JsStaticMemberAssignment(_)
+            | AnyJsAssignment::JsComputedMemberAssignment(_)
+            | AnyJsAssignment::TsAsAssignment(_)
+            | AnyJsAssignment::TsTypeAssertionAssignment(_)
+    ) && target
+        .syntax()
+        .ancestors()
+        .skip(1)
+        .find(|ancestor| {
+            !JsParenthesizedAssignment::can_cast(ancestor.kind())
+                && !TsSatisfiesAssignment::can_cast(ancestor.kind())
+        })
+        .and_then(JsAssignmentExpression::cast)
+        .and_then(|assignment| assignment.operator().ok())
+        .is_some_and(|operator| operator != JsAssignmentOperator::Assign)
 }
 
 #[cfg(test)]

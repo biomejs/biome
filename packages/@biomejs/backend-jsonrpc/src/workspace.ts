@@ -14711,15 +14711,15 @@ export type UseNextScriptForGoogleAnalyticsOptions = {};
  */
 export interface UseNullishCoalescingOptions {
 	/**
-	 * Whether to ignore `||` and `||=` binary operations used inside a `Boolean()` call (default: `false`).
+	 * Whether to ignore `||`, `||=`, and ternary expressions such as `x ? x : y` when their result is passed to the global `Boolean()` function. A ternary expression that is itself the argument is still reported (default: `false`).
 	 */
 	ignoreBooleanCoercion?: boolean;
 	/**
-	 * Ignore `||` expressions in conditional test positions (default: `true`).
+	 * Ignore `||`, `||=`, and ternary expressions such as `x ? x : y` when their value decides the test of an `if`, `while`, `do-while`, `for`, or ternary expression (default: `true`).
 	 */
 	ignoreConditionalTests?: boolean;
 	/**
-	 * Whether to ignore `if` statements that only assign to a nullish variable and could be rewritten as `??=` (default: `false`).
+	 * Whether to ignore `if` statements that only assign a fallback to a missing value and could be rewritten as `??=` (default: `false`).
 	 */
 	ignoreIfStatements?: boolean;
 	/**
@@ -14727,11 +14727,11 @@ export interface UseNullishCoalescingOptions {
 	 */
 	ignoreMixedLogicalExpressions?: boolean;
 	/**
-	 * Whether to ignore `||` and `||=` operations whose non-nullish operand types are all primitives of the configured kinds. Accepts `true` for every primitive, or an object selecting `string`, `number`, `boolean`, `bigint` (default: none).
+	 * Whether to ignore `||`, `||=`, `x ? x : y`, and `if (!x)` when the type of the checked value includes a primitive of the configured kinds. Accepts `true` for every primitive, or an object that selects `string`, `number`, `boolean`, and `bigint`. A value typed `any` or `unknown` is ignored too when at least one kind is selected. Comparisons with `null` or `undefined` are not affected by this option (default: none).
 	 */
 	ignorePrimitives?: IgnorePrimitives;
 	/**
-	 * Ignore ternary expressions that check for `null` or `undefined` (default: `false`).
+	 * Ignore ternary expressions that `??` can replace, such as `x !== null ? x : y` and `x ? x : y` (default: `false`).
 	 */
 	ignoreTernaryTests?: boolean;
 }

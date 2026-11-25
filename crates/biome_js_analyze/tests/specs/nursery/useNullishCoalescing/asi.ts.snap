@@ -1,0 +1,297 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: asi.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+if ((obj as Holder).bar == null) (obj as Holder).bar = 'x'
+
+type Holder = { bar?: string | null };
+declare const obj: unknown;
+declare function log(): () => unknown;
+declare let target: string | null;
+
+// A fix starting with `(` would continue the previous statement: no fix
+log()
+if ((obj as Holder).bar == null) (obj as Holder).bar = 'x'
+
+// Parentheses around the target are removed, so the fix starts with the name
+log()
+if (target == null) (target) = 'x'
+
+// Previous statement ends with `;`
+log();
+if ((obj as Holder).bar == null) (obj as Holder).bar = 'x'
+
+// First statement of a block
+{
+	if ((obj as Holder).bar == null) (obj as Holder).bar = 'x'
+}
+
+// After the closing brace of a block: no fix
+{
+}
+if ((obj as Holder).bar == null) (obj as Holder).bar = 'x'
+
+// Truthiness check: a fix starting with `(` would continue the previous statement: no fix
+type ObjectHolder = { bar?: Date | null };
+declare const objectHolder: unknown;
+log()
+if (!(objectHolder as ObjectHolder).bar) (objectHolder as ObjectHolder).bar = new Date()
+
+// Previous statement ends with `;`
+log();
+if (!(objectHolder as ObjectHolder).bar) (objectHolder as ObjectHolder).bar = new Date()
+
+// Truthiness ternary: a fix starting with `(` would continue the previous statement: no fix
+declare const left: { c: Date | null };
+log()
+!(left).c ? new Date() : left.c
+
+// Previous statement ends with `;`
+log();
+!(left).c ? new Date() : left.c
+
+```
+
+# Diagnostics
+```
+asi.ts:2:1 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ??= instead of an if statement for nullish assignment.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ if ((obj as Holder).bar == null) (obj as Holder).bar = 'x'
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ 
+    4 │ type Holder = { bar?: string | null };
+  
+  i This if statement only assigns when the variable is nullish, which ??= expresses directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace the if statement with ??=.
+  
+     1  1 │   /* should generate diagnostics */
+     2    │ - if·((obj·as·Holder).bar·==·null)·(obj·as·Holder).bar·=·'x'
+        2 │ + (obj·as·Holder).bar·??=·'x';
+     3  3 │   
+     4  4 │   type Holder = { bar?: string | null };
+  
+
+```
+
+```
+asi.ts:11:1 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ??= instead of an if statement for nullish assignment.
+  
+     9 │ // A fix starting with `(` would continue the previous statement: no fix
+    10 │ log()
+  > 11 │ if ((obj as Holder).bar == null) (obj as Holder).bar = 'x'
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ 
+    13 │ // Parentheses around the target are removed, so the fix starts with the name
+  
+  i This if statement only assigns when the variable is nullish, which ??= expresses directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+asi.ts:15:1 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ??= instead of an if statement for nullish assignment.
+  
+    13 │ // Parentheses around the target are removed, so the fix starts with the name
+    14 │ log()
+  > 15 │ if (target == null) (target) = 'x'
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    16 │ 
+    17 │ // Previous statement ends with `;`
+  
+  i This if statement only assigns when the variable is nullish, which ??= expresses directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace the if statement with ??=.
+  
+    13 13 │   // Parentheses around the target are removed, so the fix starts with the name
+    14 14 │   log()
+    15    │ - if·(target·==·null)·(target)·=·'x'
+       15 │ + target·??=·'x';
+    16 16 │   
+    17 17 │   // Previous statement ends with `;`
+  
+
+```
+
+```
+asi.ts:19:1 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ??= instead of an if statement for nullish assignment.
+  
+    17 │ // Previous statement ends with `;`
+    18 │ log();
+  > 19 │ if ((obj as Holder).bar == null) (obj as Holder).bar = 'x'
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    20 │ 
+    21 │ // First statement of a block
+  
+  i This if statement only assigns when the variable is nullish, which ??= expresses directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace the if statement with ??=.
+  
+    17 17 │   // Previous statement ends with `;`
+    18 18 │   log();
+    19    │ - if·((obj·as·Holder).bar·==·null)·(obj·as·Holder).bar·=·'x'
+       19 │ + (obj·as·Holder).bar·??=·'x';
+    20 20 │   
+    21 21 │   // First statement of a block
+  
+
+```
+
+```
+asi.ts:23:2 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ??= instead of an if statement for nullish assignment.
+  
+    21 │ // First statement of a block
+    22 │ {
+  > 23 │ 	if ((obj as Holder).bar == null) (obj as Holder).bar = 'x'
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    24 │ }
+    25 │ 
+  
+  i This if statement only assigns when the variable is nullish, which ??= expresses directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace the if statement with ??=.
+  
+    21 21 │   // First statement of a block
+    22 22 │   {
+    23    │ - → if·((obj·as·Holder).bar·==·null)·(obj·as·Holder).bar·=·'x'
+       23 │ + → (obj·as·Holder).bar·??=·'x';
+    24 24 │   }
+    25 25 │   
+  
+
+```
+
+```
+asi.ts:29:1 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ??= instead of an if statement for nullish assignment.
+  
+    27 │ {
+    28 │ }
+  > 29 │ if ((obj as Holder).bar == null) (obj as Holder).bar = 'x'
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    30 │ 
+    31 │ // Truthiness check: a fix starting with `(` would continue the previous statement: no fix
+  
+  i This if statement only assigns when the variable is nullish, which ??= expresses directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+asi.ts:35:1 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer ??= over an if statement that assigns when the value is falsy.
+  
+    33 │ declare const objectHolder: unknown;
+    34 │ log()
+  > 35 │ if (!(objectHolder as ObjectHolder).bar) (objectHolder as ObjectHolder).bar = new Date()
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    36 │ 
+    37 │ // Previous statement ends with `;`
+  
+  i ??= only assigns when the value is null or undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+asi.ts:39:1 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer ??= over an if statement that assigns when the value is falsy.
+  
+    37 │ // Previous statement ends with `;`
+    38 │ log();
+  > 39 │ if (!(objectHolder as ObjectHolder).bar) (objectHolder as ObjectHolder).bar = new Date()
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    40 │ 
+    41 │ // Truthiness ternary: a fix starting with `(` would continue the previous statement: no fix
+  
+  i ??= only assigns when the value is null or undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace the if statement with ??=.
+  
+    37 37 │   // Previous statement ends with `;`
+    38 38 │   log();
+    39    │ - if·(!(objectHolder·as·ObjectHolder).bar)·(objectHolder·as·ObjectHolder).bar·=·new·Date()
+       39 │ + (objectHolder·as·ObjectHolder).bar·??=·new·Date();
+    40 40 │   
+    41 41 │   // Truthiness ternary: a fix starting with `(` would continue the previous statement: no fix
+  
+
+```
+
+```
+asi.ts:44:1 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer ?? over a ternary expression checking for a falsy value.
+  
+    42 │ declare const left: { c: Date | null };
+    43 │ log()
+  > 44 │ !(left).c ? new Date() : left.c
+       │ ^^^^^^^^^
+    45 │ 
+    46 │ // Previous statement ends with `;`
+  
+  i ?? only uses the fallback when the value is null or undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+asi.ts:48:1 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer ?? over a ternary expression checking for a falsy value.
+  
+    46 │ // Previous statement ends with `;`
+    47 │ log();
+  > 48 │ !(left).c ? new Date() : left.c
+       │ ^^^^^^^^^
+    49 │ 
+  
+  i ?? only uses the fallback when the value is null or undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace the ternary with ??.
+  
+    46 46 │   // Previous statement ends with `;`
+    47 47 │   log();
+    48    │ - !(left).c·?·new·Date()·:·left.c
+       48 │ + (left).c·??·new·Date()
+    49 49 │   
+  
+
+```

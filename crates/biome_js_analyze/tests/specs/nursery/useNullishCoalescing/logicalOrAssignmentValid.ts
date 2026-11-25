@@ -24,3 +24,15 @@ f ||= 'fallback';
 
 declare let g: { a: string };
 g ||= { a: 'default' };
+
+// Non-nullish member target
+declare const record: { name: string };
+record.name ||= 'default';
+
+// A type assertion that removes `null`
+declare let assertedString: string | null;
+(assertedString as string) ||= 'default';
+
+// A non-null assertion
+declare let nonNullTarget: { a: number } | null;
+nonNullTarget! ||= { a: 1 };

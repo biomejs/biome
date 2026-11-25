@@ -4,8 +4,9 @@ expression: ignoreTernaryTestsEnabled.ts
 ---
 # Input
 ```ts
-/* should not generate diagnostics */
+/* should generate diagnostics */
 
+// Ternary expressions: not reported
 declare const a: string | null;
 const r1 = a !== null ? a : 'default';
 
@@ -14,5 +15,89 @@ const r2 = b === undefined ? 'default' : b;
 
 declare const c: string | null;
 const r3 = c != null ? c : 'default';
+
+declare const d: { a: string } | null;
+const r4 = d ? d : { a: 'default' };
+const r5 = !d ? { a: 'default' } : d;
+
+// Other checks: reported
+declare const s: string | null;
+const r6 = s || 'x';
+
+declare let assigned: string | null;
+assigned ||= 'y';
+
+declare let o: Date | null;
+if (!o) {
+	o = new Date();
+}
+
+```
+
+# Diagnostics
+```
+ignoreTernaryTestsEnabled.ts:19:14 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+    17 │ // Other checks: reported
+    18 │ declare const s: string | null;
+  > 19 │ const r6 = s || 'x';
+       │              ^^
+    20 │ 
+    21 │ declare let assigned: string | null;
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+ignoreTernaryTestsEnabled.ts:22:10 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ??= instead of ||=.
+  
+    21 │ declare let assigned: string | null;
+  > 22 │ assigned ||= 'y';
+       │          ^^^
+    23 │ 
+    24 │ declare let o: Date | null;
+  
+  i The ||= operator assigns when the left side is falsy, while ??= only assigns when it is null or undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+ignoreTernaryTestsEnabled.ts:25:1 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer ??= over an if statement that assigns when the value is falsy.
+  
+    24 │ declare let o: Date | null;
+  > 25 │ if (!o) {
+       │ ^^^^^^^^^
+  > 26 │ 	o = new Date();
+  > 27 │ }
+       │ ^
+    28 │ 
+  
+  i ??= only assigns when the value is null or undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace the if statement with ??=.
+  
+    23 23 │   
+    24 24 │   declare let o: Date | null;
+    25    │ - if·(!o)·{
+    26    │ - → o·=·new·Date();
+    27    │ - }
+       25 │ + o·??=·new·Date();
+    28 26 │   
+  
 
 ```

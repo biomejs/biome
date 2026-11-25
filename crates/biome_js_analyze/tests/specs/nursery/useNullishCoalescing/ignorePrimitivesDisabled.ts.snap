@@ -12,6 +12,10 @@ declare const n: number | null;
 const r1 = s || 'x';
 const r2 = n || 0;
 
+// `any` operand: reported
+declare const anyValue: any;
+const r3 = anyValue || 'x';
+
 ```
 
 # Diagnostics
@@ -29,8 +33,6 @@ ignorePrimitivesDisabled.ts:6:14 lint/nursery/useNullishCoalescing ━━━━�
   
   i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
   
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
-  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
@@ -45,10 +47,27 @@ ignorePrimitivesDisabled.ts:7:14 lint/nursery/useNullishCoalescing ━━━━�
   > 7 │ const r2 = n || 0;
       │              ^^
     8 │ 
+    9 │ // `any` operand: reported
   
   i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
   
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+ignorePrimitivesDisabled.ts:11:21 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+     9 │ // `any` operand: reported
+    10 │ declare const anyValue: any;
+  > 11 │ const r3 = anyValue || 'x';
+       │                     ^^
+    12 │ 
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   

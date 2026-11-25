@@ -54,3 +54,92 @@ declare let mismatchB: { x: number } | null;
 if (!mismatchA) {
 	mismatchB = makeObj();
 }
+
+// Calls
+declare function getRec(): { a: number | null };
+if (getRec().a == null) {
+	getRec().a = 1;
+}
+
+if (getRec()['a'] == null) {
+	getRec()['a'] = 1;
+}
+
+// Compound side comparing the property with itself
+declare let selfCompared: { a: string | null };
+if (selfCompared.a === selfCompared.a || selfCompared.a === null) {
+	selfCompared.a = 'v';
+}
+
+// Compound assignment that combines the old value
+declare let counter: number | null;
+if (counter == null) {
+	counter += 1;
+}
+
+// `&&=` only assigns when the value is present
+declare let andAssign: string | null;
+if (andAssign == null) {
+	andAssign &&= 'x';
+}
+
+// Test that checks the value is present
+declare let present: string | null | undefined;
+if (present) {
+	present = 'x';
+}
+if (present != null) {
+	present = 'x';
+}
+if (present !== null) {
+	present = 'x';
+}
+if (present !== undefined) {
+	present = 'x';
+}
+
+// Test and target read different properties or objects
+declare let recMismatch: { a: number | null; b: number | null };
+declare let recA: { a: number | null };
+declare let recB: { a: number | null };
+declare let record: Record<string, number | null>;
+declare let key1: string;
+declare let key2: string;
+declare let elements: (number | null)[];
+if (recMismatch.a == null) {
+	recMismatch.b = 1;
+}
+if (recA.a == null) {
+	recB.a = 1;
+}
+if (record[key1] == null) {
+	record[key2] = 1;
+}
+if (elements[0] == null) {
+	elements[1] = 1;
+}
+
+// Targets that are not a variable or a property
+declare let wrappedTarget: string | null;
+declare let destructured: string | null;
+declare let sequenced: string | null;
+declare let other: number;
+declare const source: { destructured: string | null };
+if (wrappedTarget == null) {
+	(wrappedTarget as string) = 'v';
+}
+if (destructured == null) {
+	[destructured] = ['v'];
+}
+if (destructured == null) {
+	({ destructured } = source);
+}
+if (sequenced == null) {
+	(sequenced = 'v'), (other = 1);
+}
+
+// Strict check on `any`
+declare let anyStrict: any;
+if (anyStrict === null) {
+	anyStrict = 1;
+}

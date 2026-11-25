@@ -1,0 +1,685 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: ternaryTruthinessInvalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+
+declare const fallback: string;
+
+// Primitive unions: no fix
+declare const maybeString: string | null | undefined;
+const r1 = maybeString ? maybeString : fallback;
+const r2 = !maybeString ? fallback : maybeString;
+
+declare const maybeNumber: number | undefined;
+const r3 = maybeNumber ? maybeNumber : 0;
+
+declare const maybeBoolean: boolean | null;
+const r4 = !maybeBoolean ? false : maybeBoolean;
+
+declare const maybeLiteral: 'a' | `b` | undefined;
+const r5 = maybeLiteral ? maybeLiteral : fallback;
+
+// `any` and `unknown`: no fix
+declare const anyValue: any;
+const r6 = anyValue ? anyValue : fallback;
+
+declare const unknownValue: unknown;
+const r7 = !unknownValue ? fallback : unknownValue;
+
+// Built-in object class union: safe fix
+declare const maybeObject: Date | null | undefined;
+const r8 = maybeObject ? maybeObject : new Date();
+const r9 = !maybeObject ? new Date() : maybeObject;
+
+// Parentheses around the test
+const r10 = (maybeObject) ? maybeObject : new Date();
+const r11 = !(maybeObject) ? new Date() : maybeObject;
+
+// Property access
+declare const holder: { n: Date | undefined };
+const r12 = holder.n ? holder.n : new Date();
+const r13 = !holder.n ? new Date() : holder.n;
+
+// Optional chaining in the test
+declare const nested: { n?: { a?: Date } };
+const r14 = nested.n?.a ? nested.n.a : new Date();
+const r15 = nested?.n?.a ? nested.n?.a : new Date();
+const r16 = nested.n?.a ? (nested?.n).a : new Date();
+
+// Conditional fallback
+declare const other: Date | undefined;
+const r17 = maybeObject ? maybeObject : other ? other : new Date();
+
+// Arrow function fallback
+const r18 = other ? other : () => 'y';
+
+// A type that a `0`, `''`, or `false` value can have: no fix
+declare const numberObject: Number | null;
+const r19 = numberObject ? numberObject : 1;
+
+// An object shape: no fix, because `''` can be assigned to a shape whose members all exist on `String`
+declare const named: { a: string } | null;
+const r20 = named ? named : { a: '' };
+
+// A type parameter is checked through its constraint
+export function chainedGeneric<T extends object, U extends T>(value: U | null, fallbackValue: U) {
+	return value ? value : fallbackValue;
+}
+
+// Type wrappers across the test and the branch: no fix
+declare const shape: { v: Date | null };
+const r21 = (shape as { v: Date | null }).v ? shape.v : new Date();
+const r22 = shape.v ? (shape.v as Date) : new Date();
+const r23 = shape.v ? shape.v! : new Date();
+const r24 = !shape.v ? new Date() : (shape.v satisfies Date | null);
+const r25 = shape.v ? <Date>shape.v : new Date();
+
+```
+
+# Diagnostics
+```
+ternaryTruthinessInvalid.ts:7:12 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer ?? over a ternary expression checking for a falsy value.
+  
+    5 │ // Primitive unions: no fix
+    6 │ declare const maybeString: string | null | undefined;
+  > 7 │ const r1 = maybeString ? maybeString : fallback;
+      │            ^^^^^^^^^^^
+    8 │ const r2 = !maybeString ? fallback : maybeString;
+    9 │ 
+  
+  i ?? only uses the fallback when the value is null or undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+ternaryTruthinessInvalid.ts:8:12 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer ?? over a ternary expression checking for a falsy value.
+  
+     6 │ declare const maybeString: string | null | undefined;
+     7 │ const r1 = maybeString ? maybeString : fallback;
+   > 8 │ const r2 = !maybeString ? fallback : maybeString;
+       │            ^^^^^^^^^^^^
+     9 │ 
+    10 │ declare const maybeNumber: number | undefined;
+  
+  i ?? only uses the fallback when the value is null or undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+ternaryTruthinessInvalid.ts:11:12 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer ?? over a ternary expression checking for a falsy value.
+  
+    10 │ declare const maybeNumber: number | undefined;
+  > 11 │ const r3 = maybeNumber ? maybeNumber : 0;
+       │            ^^^^^^^^^^^
+    12 │ 
+    13 │ declare const maybeBoolean: boolean | null;
+  
+  i ?? only uses the fallback when the value is null or undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+ternaryTruthinessInvalid.ts:14:12 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer ?? over a ternary expression checking for a falsy value.
+  
+    13 │ declare const maybeBoolean: boolean | null;
+  > 14 │ const r4 = !maybeBoolean ? false : maybeBoolean;
+       │            ^^^^^^^^^^^^^
+    15 │ 
+    16 │ declare const maybeLiteral: 'a' | `b` | undefined;
+  
+  i ?? only uses the fallback when the value is null or undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+ternaryTruthinessInvalid.ts:17:12 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer ?? over a ternary expression checking for a falsy value.
+  
+    16 │ declare const maybeLiteral: 'a' | `b` | undefined;
+  > 17 │ const r5 = maybeLiteral ? maybeLiteral : fallback;
+       │            ^^^^^^^^^^^^
+    18 │ 
+    19 │ // `any` and `unknown`: no fix
+  
+  i ?? only uses the fallback when the value is null or undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+ternaryTruthinessInvalid.ts:21:12 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer ?? over a ternary expression checking for a falsy value.
+  
+    19 │ // `any` and `unknown`: no fix
+    20 │ declare const anyValue: any;
+  > 21 │ const r6 = anyValue ? anyValue : fallback;
+       │            ^^^^^^^^
+    22 │ 
+    23 │ declare const unknownValue: unknown;
+  
+  i ?? only uses the fallback when the value is null or undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+ternaryTruthinessInvalid.ts:24:12 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer ?? over a ternary expression checking for a falsy value.
+  
+    23 │ declare const unknownValue: unknown;
+  > 24 │ const r7 = !unknownValue ? fallback : unknownValue;
+       │            ^^^^^^^^^^^^^
+    25 │ 
+    26 │ // Built-in object class union: safe fix
+  
+  i ?? only uses the fallback when the value is null or undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+ternaryTruthinessInvalid.ts:28:12 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer ?? over a ternary expression checking for a falsy value.
+  
+    26 │ // Built-in object class union: safe fix
+    27 │ declare const maybeObject: Date | null | undefined;
+  > 28 │ const r8 = maybeObject ? maybeObject : new Date();
+       │            ^^^^^^^^^^^
+    29 │ const r9 = !maybeObject ? new Date() : maybeObject;
+    30 │ 
+  
+  i ?? only uses the fallback when the value is null or undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace the ternary with ??.
+  
+    26 26 │   // Built-in object class union: safe fix
+    27 27 │   declare const maybeObject: Date | null | undefined;
+    28    │ - const·r8·=·maybeObject·?·maybeObject·:·new·Date();
+       28 │ + const·r8·=·maybeObject·??·new·Date();
+    29 29 │   const r9 = !maybeObject ? new Date() : maybeObject;
+    30 30 │   
+  
+
+```
+
+```
+ternaryTruthinessInvalid.ts:29:12 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer ?? over a ternary expression checking for a falsy value.
+  
+    27 │ declare const maybeObject: Date | null | undefined;
+    28 │ const r8 = maybeObject ? maybeObject : new Date();
+  > 29 │ const r9 = !maybeObject ? new Date() : maybeObject;
+       │            ^^^^^^^^^^^^
+    30 │ 
+    31 │ // Parentheses around the test
+  
+  i ?? only uses the fallback when the value is null or undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace the ternary with ??.
+  
+    27 27 │   declare const maybeObject: Date | null | undefined;
+    28 28 │   const r8 = maybeObject ? maybeObject : new Date();
+    29    │ - const·r9·=·!maybeObject·?·new·Date()·:·maybeObject;
+       29 │ + const·r9·=·maybeObject·??·new·Date();
+    30 30 │   
+    31 31 │   // Parentheses around the test
+  
+
+```
+
+```
+ternaryTruthinessInvalid.ts:32:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer ?? over a ternary expression checking for a falsy value.
+  
+    31 │ // Parentheses around the test
+  > 32 │ const r10 = (maybeObject) ? maybeObject : new Date();
+       │             ^^^^^^^^^^^^^
+    33 │ const r11 = !(maybeObject) ? new Date() : maybeObject;
+    34 │ 
+  
+  i ?? only uses the fallback when the value is null or undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace the ternary with ??.
+  
+    30 30 │   
+    31 31 │   // Parentheses around the test
+    32    │ - const·r10·=·(maybeObject)·?·maybeObject·:·new·Date();
+       32 │ + const·r10·=·maybeObject·??·new·Date();
+    33 33 │   const r11 = !(maybeObject) ? new Date() : maybeObject;
+    34 34 │   
+  
+
+```
+
+```
+ternaryTruthinessInvalid.ts:33:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer ?? over a ternary expression checking for a falsy value.
+  
+    31 │ // Parentheses around the test
+    32 │ const r10 = (maybeObject) ? maybeObject : new Date();
+  > 33 │ const r11 = !(maybeObject) ? new Date() : maybeObject;
+       │             ^^^^^^^^^^^^^^
+    34 │ 
+    35 │ // Property access
+  
+  i ?? only uses the fallback when the value is null or undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace the ternary with ??.
+  
+    31 31 │   // Parentheses around the test
+    32 32 │   const r10 = (maybeObject) ? maybeObject : new Date();
+    33    │ - const·r11·=·!(maybeObject)·?·new·Date()·:·maybeObject;
+       33 │ + const·r11·=·maybeObject·??·new·Date();
+    34 34 │   
+    35 35 │   // Property access
+  
+
+```
+
+```
+ternaryTruthinessInvalid.ts:37:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer ?? over a ternary expression checking for a falsy value.
+  
+    35 │ // Property access
+    36 │ declare const holder: { n: Date | undefined };
+  > 37 │ const r12 = holder.n ? holder.n : new Date();
+       │             ^^^^^^^^
+    38 │ const r13 = !holder.n ? new Date() : holder.n;
+    39 │ 
+  
+  i ?? only uses the fallback when the value is null or undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace the ternary with ??.
+  
+    35 35 │   // Property access
+    36 36 │   declare const holder: { n: Date | undefined };
+    37    │ - const·r12·=·holder.n·?·holder.n·:·new·Date();
+       37 │ + const·r12·=·holder.n·??·new·Date();
+    38 38 │   const r13 = !holder.n ? new Date() : holder.n;
+    39 39 │   
+  
+
+```
+
+```
+ternaryTruthinessInvalid.ts:38:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer ?? over a ternary expression checking for a falsy value.
+  
+    36 │ declare const holder: { n: Date | undefined };
+    37 │ const r12 = holder.n ? holder.n : new Date();
+  > 38 │ const r13 = !holder.n ? new Date() : holder.n;
+       │             ^^^^^^^^^
+    39 │ 
+    40 │ // Optional chaining in the test
+  
+  i ?? only uses the fallback when the value is null or undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace the ternary with ??.
+  
+    36 36 │   declare const holder: { n: Date | undefined };
+    37 37 │   const r12 = holder.n ? holder.n : new Date();
+    38    │ - const·r13·=·!holder.n·?·new·Date()·:·holder.n;
+       38 │ + const·r13·=·holder.n·??·new·Date();
+    39 39 │   
+    40 40 │   // Optional chaining in the test
+  
+
+```
+
+```
+ternaryTruthinessInvalid.ts:42:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer ?? over a ternary expression checking for a falsy value.
+  
+    40 │ // Optional chaining in the test
+    41 │ declare const nested: { n?: { a?: Date } };
+  > 42 │ const r14 = nested.n?.a ? nested.n.a : new Date();
+       │             ^^^^^^^^^^^
+    43 │ const r15 = nested?.n?.a ? nested.n?.a : new Date();
+    44 │ const r16 = nested.n?.a ? (nested?.n).a : new Date();
+  
+  i ?? only uses the fallback when the value is null or undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace the ternary with ??.
+  
+    40 40 │   // Optional chaining in the test
+    41 41 │   declare const nested: { n?: { a?: Date } };
+    42    │ - const·r14·=·nested.n?.a·?·nested.n.a·:·new·Date();
+       42 │ + const·r14·=·nested.n?.a·??·new·Date();
+    43 43 │   const r15 = nested?.n?.a ? nested.n?.a : new Date();
+    44 44 │   const r16 = nested.n?.a ? (nested?.n).a : new Date();
+  
+
+```
+
+```
+ternaryTruthinessInvalid.ts:43:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer ?? over a ternary expression checking for a falsy value.
+  
+    41 │ declare const nested: { n?: { a?: Date } };
+    42 │ const r14 = nested.n?.a ? nested.n.a : new Date();
+  > 43 │ const r15 = nested?.n?.a ? nested.n?.a : new Date();
+       │             ^^^^^^^^^^^^
+    44 │ const r16 = nested.n?.a ? (nested?.n).a : new Date();
+    45 │ 
+  
+  i ?? only uses the fallback when the value is null or undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace the ternary with ??.
+  
+    43 │ const·r15·=·nested?.n?.a·?·nested.n?.a·:·new·Date();
+       │                           --------- ----            
+
+```
+
+```
+ternaryTruthinessInvalid.ts:44:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer ?? over a ternary expression checking for a falsy value.
+  
+    42 │ const r14 = nested.n?.a ? nested.n.a : new Date();
+    43 │ const r15 = nested?.n?.a ? nested.n?.a : new Date();
+  > 44 │ const r16 = nested.n?.a ? (nested?.n).a : new Date();
+       │             ^^^^^^^^^^^
+    45 │ 
+    46 │ // Conditional fallback
+  
+  i ?? only uses the fallback when the value is null or undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace the ternary with ??.
+  
+    44 │ const·r16·=·nested.n?.a·?·(nested?.n).a·:·new·Date();
+       │                          -------- -------            
+
+```
+
+```
+ternaryTruthinessInvalid.ts:48:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer ?? over a ternary expression checking for a falsy value.
+  
+    46 │ // Conditional fallback
+    47 │ declare const other: Date | undefined;
+  > 48 │ const r17 = maybeObject ? maybeObject : other ? other : new Date();
+       │             ^^^^^^^^^^^
+    49 │ 
+    50 │ // Arrow function fallback
+  
+  i ?? only uses the fallback when the value is null or undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace the ternary with ??.
+  
+    46 46 │   // Conditional fallback
+    47 47 │   declare const other: Date | undefined;
+    48    │ - const·r17·=·maybeObject·?·maybeObject·:·other·?·other·:·new·Date();
+       48 │ + const·r17·=·maybeObject·??·(other·?·other·:·new·Date());
+    49 49 │   
+    50 50 │   // Arrow function fallback
+  
+
+```
+
+```
+ternaryTruthinessInvalid.ts:48:41 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer ?? over a ternary expression checking for a falsy value.
+  
+    46 │ // Conditional fallback
+    47 │ declare const other: Date | undefined;
+  > 48 │ const r17 = maybeObject ? maybeObject : other ? other : new Date();
+       │                                         ^^^^^
+    49 │ 
+    50 │ // Arrow function fallback
+  
+  i ?? only uses the fallback when the value is null or undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace the ternary with ??.
+  
+    46 46 │   // Conditional fallback
+    47 47 │   declare const other: Date | undefined;
+    48    │ - const·r17·=·maybeObject·?·maybeObject·:·other·?·other·:·new·Date();
+       48 │ + const·r17·=·maybeObject·?·maybeObject·:·other·??·new·Date();
+    49 49 │   
+    50 50 │   // Arrow function fallback
+  
+
+```
+
+```
+ternaryTruthinessInvalid.ts:51:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer ?? over a ternary expression checking for a falsy value.
+  
+    50 │ // Arrow function fallback
+  > 51 │ const r18 = other ? other : () => 'y';
+       │             ^^^^^
+    52 │ 
+    53 │ // A type that a `0`, `''`, or `false` value can have: no fix
+  
+  i ?? only uses the fallback when the value is null or undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace the ternary with ??.
+  
+    49 49 │   
+    50 50 │   // Arrow function fallback
+    51    │ - const·r18·=·other·?·other·:·()·=>·'y';
+       51 │ + const·r18·=·other·??·(()·=>·'y');
+    52 52 │   
+    53 53 │   // A type that a `0`, `''`, or `false` value can have: no fix
+  
+
+```
+
+```
+ternaryTruthinessInvalid.ts:55:13 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer ?? over a ternary expression checking for a falsy value.
+  
+    53 │ // A type that a `0`, `''`, or `false` value can have: no fix
+    54 │ declare const numberObject: Number | null;
+  > 55 │ const r19 = numberObject ? numberObject : 1;
+       │             ^^^^^^^^^^^^
+    56 │ 
+    57 │ // An object shape: no fix, because `''` can be assigned to a shape whose members all exist on `String`
+  
+  i ?? only uses the fallback when the value is null or undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+ternaryTruthinessInvalid.ts:59:13 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer ?? over a ternary expression checking for a falsy value.
+  
+    57 │ // An object shape: no fix, because `''` can be assigned to a shape whose members all exist on `String`
+    58 │ declare const named: { a: string } | null;
+  > 59 │ const r20 = named ? named : { a: '' };
+       │             ^^^^^
+    60 │ 
+    61 │ // A type parameter is checked through its constraint
+  
+  i ?? only uses the fallback when the value is null or undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+ternaryTruthinessInvalid.ts:63:9 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer ?? over a ternary expression checking for a falsy value.
+  
+    61 │ // A type parameter is checked through its constraint
+    62 │ export function chainedGeneric<T extends object, U extends T>(value: U | null, fallbackValue: U) {
+  > 63 │ 	return value ? value : fallbackValue;
+       │ 	       ^^^^^
+    64 │ }
+    65 │ 
+  
+  i ?? only uses the fallback when the value is null or undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+ternaryTruthinessInvalid.ts:68:13 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer ?? over a ternary expression checking for a falsy value.
+  
+    66 │ // Type wrappers across the test and the branch: no fix
+    67 │ declare const shape: { v: Date | null };
+  > 68 │ const r21 = (shape as { v: Date | null }).v ? shape.v : new Date();
+       │             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    69 │ const r22 = shape.v ? (shape.v as Date) : new Date();
+    70 │ const r23 = shape.v ? shape.v! : new Date();
+  
+  i ?? only uses the fallback when the value is null or undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+ternaryTruthinessInvalid.ts:69:13 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer ?? over a ternary expression checking for a falsy value.
+  
+    67 │ declare const shape: { v: Date | null };
+    68 │ const r21 = (shape as { v: Date | null }).v ? shape.v : new Date();
+  > 69 │ const r22 = shape.v ? (shape.v as Date) : new Date();
+       │             ^^^^^^^
+    70 │ const r23 = shape.v ? shape.v! : new Date();
+    71 │ const r24 = !shape.v ? new Date() : (shape.v satisfies Date | null);
+  
+  i ?? only uses the fallback when the value is null or undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+ternaryTruthinessInvalid.ts:70:13 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer ?? over a ternary expression checking for a falsy value.
+  
+    68 │ const r21 = (shape as { v: Date | null }).v ? shape.v : new Date();
+    69 │ const r22 = shape.v ? (shape.v as Date) : new Date();
+  > 70 │ const r23 = shape.v ? shape.v! : new Date();
+       │             ^^^^^^^
+    71 │ const r24 = !shape.v ? new Date() : (shape.v satisfies Date | null);
+    72 │ const r25 = shape.v ? <Date>shape.v : new Date();
+  
+  i ?? only uses the fallback when the value is null or undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+ternaryTruthinessInvalid.ts:71:13 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer ?? over a ternary expression checking for a falsy value.
+  
+    69 │ const r22 = shape.v ? (shape.v as Date) : new Date();
+    70 │ const r23 = shape.v ? shape.v! : new Date();
+  > 71 │ const r24 = !shape.v ? new Date() : (shape.v satisfies Date | null);
+       │             ^^^^^^^^
+    72 │ const r25 = shape.v ? <Date>shape.v : new Date();
+    73 │ 
+  
+  i ?? only uses the fallback when the value is null or undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+ternaryTruthinessInvalid.ts:72:13 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer ?? over a ternary expression checking for a falsy value.
+  
+    70 │ const r23 = shape.v ? shape.v! : new Date();
+    71 │ const r24 = !shape.v ? new Date() : (shape.v satisfies Date | null);
+  > 72 │ const r25 = shape.v ? <Date>shape.v : new Date();
+       │             ^^^^^^^
+    73 │ 
+  
+  i ?? only uses the fallback when the value is null or undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
