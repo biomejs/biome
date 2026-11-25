@@ -1,11 +1,8 @@
 use biome_configuration::Configuration;
 use biome_formatter_test::spec::{SpecSnapshot, SpecTestFile};
 use biome_languages::{
-    DocumentFileSource, JsFileSource,
-    javascript::{
-        JsEmbeddingKind, LanguageVariant, MdxEmbeddingKind, ModuleKind, SvelteEmbeddingKind,
-        SvelteFileKind,
-    },
+    DocumentFileSource, JsFileSource, javascript::JsEmbeddingKind, javascript::LanguageVariant,
+    javascript::MdxEmbeddingKind, javascript::ModuleKind,
 };
 use camino::Utf8Path;
 
@@ -32,13 +29,6 @@ pub fn run(spec_input_file: &str, _expected_file: &str, test_directory: &str, fi
     };
     if file_type == "script" {
         source_type = source_type.with_module_kind(ModuleKind::Script);
-    } else if file_type == "svelte_each_binding" {
-        source_type = source_type.with_embedding_kind(JsEmbeddingKind::Svelte {
-            is_module_script: false,
-            is_class_attribute: false,
-            file_kind: SvelteFileKind::Component,
-            embedding_kind: SvelteEmbeddingKind::EachBinding,
-        });
     }
     if !source_type.is_typescript() {
         source_type.set_variant(LanguageVariant::Jsx);
