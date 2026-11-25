@@ -2,7 +2,7 @@ use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
-use biome_html_syntax::{AnySvelteBlockItem, SvelteEachOpeningBlock};
+use biome_js_syntax::JsSvelteEachBindingRoot;
 use biome_rowan::AstNode;
 use biome_rule_options::use_svelte_require_each_key::UseSvelteRequireEachKeyOptions;
 
@@ -35,7 +35,7 @@ declare_lint_rule! {
     pub UseSvelteRequireEachKey {
         version: "2.5.0",
         name: "useSvelteRequireEachKey",
-        language: "html",
+        language: "js",
         domains: &[RuleDomain::Svelte],
         recommended: true,
         sources: &[RuleSource::EslintSvelte("require-each-key").same()],
@@ -43,28 +43,20 @@ declare_lint_rule! {
 }
 
 impl Rule for UseSvelteRequireEachKey {
-    type Query = Ast<SvelteEachOpeningBlock>;
+    type Query = Ast<JsSvelteEachBindingRoot>;
     type State = ();
     type Signals = Option<Self::State>;
     type Options = UseSvelteRequireEachKeyOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let opening_block = ctx.query();
-        let item = opening_block.item()?;
-
-        match item {
-            AnySvelteBlockItem::SvelteEachAsKeyedItem(item) if item.key().is_none() => Some(()),
-            _ => None,
-        }
+        ctx.query().key().is_none().then_some(())
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
-        let opening_block = ctx.query();
-
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
-                opening_block.range(),
+                ctx.query().range(),
                 markup! {
                     "This "<Emphasis>"{#each}"</Emphasis>" block is missing a key."
                 },

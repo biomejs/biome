@@ -257,32 +257,10 @@ fn parse_each_opening_block(p: &mut HtmlParser, parent_marker: Marker) -> (Parse
         return (Absent, false);
     }
 
-    // check whether the collection expression
-    // contains a TypeScript `as const` assertion before the Svelte binding `as`.
-    // If so, we use `AsOrCommaSkipFirstAs` so the lexer includes the TypeScript
-    // `as const` in the expression token and stops only at the binding `as`.
-    let stop_at = if p.lookahead(|p| {
-        p.bump_with_context(
-            T![each],
-            HtmlLexContext::restricted_expression(RestrictedExpressionStopAt::AsOrComma),
-        );
-        if p.at(HTML_LITERAL) {
-            p.bump_any();
-            p.re_lex(HtmlReLexContext::Svelte);
-            p.at(T![as]) && {
-                p.bump_with_context(T![as], HtmlLexContext::Svelte);
-                p.at(T![const])
-            }
-        } else {
-            false
-        }
-    }) {
-        RestrictedExpressionStopAt::AsOrCommaSkipFirstAs
-    } else {
-        RestrictedExpressionStopAt::AsOrComma
-    };
-
-    p.bump_with_context(T![each], HtmlLexContext::restricted_expression(stop_at));
+    p.bump_with_context(
+        T![each],
+        HtmlLexContext::restricted_expression(RestrictedExpressionStopAt::AsOrComma),
+    );
     // Flags used to track possible errors so that the final block can be emitted as a bogus node
     let mut has_errors = false;
 
@@ -776,24 +754,6 @@ pub(crate) fn parse_opening_block(
 }
 
 /// Returns whether the current token starts a Svelte closing block header.
-pub(crate) fn is_at_svelte_closing_block(p: &mut HtmlParser) -> bool {
-    if !p.at(T!["{/"]) {
-        return false;
-    }
-
-    p.lookahead(|p| {
-        p.bump_with_context(T!["{/"], HtmlLexContext::Svelte);
-        if !p.at(IDENT) && !super::is_at_keyword(p) {
-            return false;
-        }
-        p.bump_any_with_context(HtmlLexContext::Svelte);
-        p.at(T!['}'])
-            || p.at(EOF)
-            || p.has_preceding_line_break()
-            || p.at_ts(token_set![T![<], T!["{@"], T!["{#"], T!["{:"], T!["{/"]])
-    })
-}
-
 /// Parses a `{/<keyword> }` block.
 ///
 /// `node` is the name of the node to emit.
@@ -1011,7 +971,7 @@ impl ParseNodeList for SvelteElementList {
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
         p.at(EOF)
             || p.at(T![<]) && p.nth_at(1, T![/])
-            || is_at_svelte_closing_block(p)
+            || p.at(T!["{/"])
             || (self.stop_at_curly_colon && p.at(T!["{:"]))
     }
 
@@ -1041,7 +1001,7 @@ impl ParseNodeList for SvelteElseIfClauseLit {
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
-        if is_at_svelte_closing_block(p) {
+        if p.at(T!["{/"]) {
             return true;
         }
 

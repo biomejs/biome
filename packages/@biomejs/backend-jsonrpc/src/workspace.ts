@@ -17656,6 +17656,7 @@ export type SvelteEmbeddingKind =
 	| "Expression"
 	| "TextInterpolation"
 	| "SnippetSignature"
+	| "EachBinding"
 	| "LegacyConst"
 	| "Declaration"
 	| "Generics";

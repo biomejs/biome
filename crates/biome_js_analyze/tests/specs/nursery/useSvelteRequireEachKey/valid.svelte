@@ -1,9 +1,3 @@
----
-source: crates/biome_html_analyze/tests/spec_tests.rs
-expression: valid.svelte
----
-# Input
-```svelte
 <!-- should not generate diagnostics -->
 
 {#each items as item (item.id)}
@@ -22,4 +16,6 @@ expression: valid.svelte
   <div>{i}</div>
 {/each}
 
-```
+{#each users as { [field]: name = fallback } (name)}
+  <div>{name}</div>
+{/each}

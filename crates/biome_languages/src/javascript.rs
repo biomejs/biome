@@ -750,8 +750,9 @@ impl JsFileSource {
 
     /// Returns whether the path points to a Svelte source-module file.
     ///
-    /// These JavaScript and TypeScript modules recognize Svelte runes but do not
-    /// support the implicit `$store` subscriptions available in `.svelte` components.
+    /// These files are JavaScript/TypeScript modules with Svelte semantics
+    /// (for example, `$store` auto-subscriptions), not `.svelte` component
+    /// documents with embedded `<script>` content.
     pub fn is_svelte_source_module_path(path: &Utf8Path) -> bool {
         let Some(file_name) = path
             .file_name()
