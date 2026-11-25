@@ -111,6 +111,8 @@ Rustdoc inside `declare_lint_rule!` and `declare_assist_rule!` is end-user websi
 - Mark examples according to the current rules-check syntax.
 - For every option, state the default, show configuration, and show an applied example.
 - Do not use `ignore` merely to avoid validation.
+- Do not treat rule documentation as a comprehensive implementation specification. Explaining every functional detail is not a priority.
+- Most rules only warrant a paragraph or 2 for documentation.
 
 Inspect neighboring rule documentation and the analyzer guide before writing examples.
 
