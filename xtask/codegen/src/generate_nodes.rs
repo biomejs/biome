@@ -251,7 +251,15 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
                 Default::default()
             };
 
-            let debug_fmt_impl = if fields.len() > 0 {
+            let debug_fmt_impl = if !needs_dynamic_slots {
+                quote! {
+                    debug_syntax_node(&self.syntax, f)
+                }
+            } else if fields.len() == 0 {
+                quote! {
+                    f.debug_struct(#string_name).finish()
+                }
+            } else {
                 quote! {
                     thread_local! { static DEPTH: std::cell::Cell<u8> = const { std::cell::Cell::new(0) } };
                     let current_depth = DEPTH.get();
@@ -265,10 +273,6 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
                     };
                     DEPTH.set(current_depth);
                     result
-                }
-            } else {
-                quote! {
-                    f.debug_struct(#string_name).finish()
                 }
             };
 
@@ -615,9 +619,7 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
 
                     impl std::fmt::Debug for #name {
                         fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-                            match self {
-                                #(Self::#all_variant_names(it) => std::fmt::Debug::fmt(it, f),)*
-                            }
+                            debug_syntax_node(self.syntax(), f)
                         }
                     }
 
@@ -658,7 +660,6 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
 
     let bogus = ast.bogus.iter().map(|bogus_name| {
         let ident = format_ident!("{}", bogus_name);
-        let string_name = bogus_name;
         let kind = format_ident!("{}", Case::Constant.convert(bogus_name));
 
         quote! {
@@ -710,9 +711,7 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
 
             impl std::fmt::Debug for #ident {
                 fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-                    f.debug_struct(#string_name)
-                        .field("items", &DebugSyntaxElementChildren(self.items()))
-                        .finish()
+                    debug_syntax_node(&self.syntax, f)
                 }
             }
 
@@ -798,8 +797,6 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
             }
         };
 
-        let padded_name = format!("{name} ");
-
         let list_impl = if list.separator.is_some() {
             quote! {
                 impl Serialize for #list_name {
@@ -828,8 +825,7 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
 
                 impl Debug for #list_name {
                     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-                        f.write_str(#padded_name)?;
-                        f.debug_list().entries(self.elements()).finish()
+                        debug_syntax_node(self.syntax_list.node(), f)
                     }
                 }
 
@@ -879,8 +875,7 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
 
                 impl Debug for #list_name {
                     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-                        f.write_str(#padded_name)?;
-                        f.debug_list().entries(self.iter()).finish()
+                        debug_syntax_node(self.syntax_list.node(), f)
                     }
                 }
 
@@ -929,11 +924,84 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
         use serde::ser::SerializeSeq;
     };
 
+    // The shape of every kind of node, as read by `support::debug_any_node`.
+    let mut debug_shapes: Vec<(proc_macro2::Ident, String)> = Vec::new();
+    let mut debug_unshaped_arms = Vec::new();
+    for node in &ast.nodes {
+        let kind = format_ident!("{}", Case::Constant.convert(node.name.as_str()));
+        if node.dynamic {
+            let name = format_ident!("{}", node.name);
+            debug_unshaped_arms.push(quote! {
+                #kind => match #name::cast_ref(node) {
+                    Some(node) => std::fmt::Debug::fmt(&node, f),
+                    None => unreachable!(),
+                }
+            });
+            continue;
+        }
+        let mut shape = format!("n{}", node.name);
+        for field in &node.fields {
+            let name = match field {
+                Field::Token {
+                    name,
+                    kind: TokenKind::Many(_),
+                    ..
+                } => name.clone(),
+                _ => field.method_name(language_kind).to_string(),
+            };
+            let is_list = match field {
+                Field::Node { ty, .. } => ast.is_list(ty),
+                _ => false,
+            };
+            shape.push(',');
+            if !is_list && field.is_optional() {
+                shape.push('?');
+            }
+            shape.push_str(&name);
+        }
+        debug_shapes.push((kind, shape));
+    }
+    for bogus_name in &ast.bogus {
+        let kind = format_ident!("{}", Case::Constant.convert(bogus_name));
+        debug_shapes.push((kind, format!("b{bogus_name}")));
+    }
+    for (name, list) in ast.lists() {
+        let kind = format_ident!("{}", Case::Constant.convert(name));
+        let tag = if list.separator.is_some() { 's' } else { 'l' };
+        debug_shapes.push((kind, format!("{tag}{name}")));
+    }
+    let mut debug_shape_offset = 0u32;
+    let debug_shape_offsets: Vec<_> = debug_shapes
+        .iter()
+        .map(|(_, shape)| {
+            let offset = debug_shape_offset;
+            debug_shape_offset += shape.len() as u32 + 1;
+            offset
+        })
+        .collect();
+    let debug_shape_kinds = debug_shapes.iter().map(|(kind, _)| kind);
+    let debug_shape_lines = debug_shapes.iter().map(|(_, shape)| format!("{shape}\n"));
+    let debug_unshaped = if debug_unshaped_arms.is_empty() {
+        quote! {
+            fn debug_unshaped(_: &SyntaxNode, _: &mut Formatter<'_>) -> std::fmt::Result {
+                unreachable!("every kind of node has a shape")
+            }
+        }
+    } else {
+        quote! {
+            fn debug_unshaped(node: &SyntaxNode, f: &mut Formatter<'_>) -> std::fmt::Result {
+                match node.kind() {
+                    #(#debug_unshaped_arms,)*
+                    _ => unreachable!("the other kinds of node have a shape"),
+                }
+            }
+        }
+    };
+
     let ast = quote! {
         #![allow(dead_code)]
         #![allow(unused)]
         use crate::{
-            macros::map_syntax_node,
             #language as Language, #syntax_element as SyntaxElement, #syntax_element_children as SyntaxElementChildren,
             #syntax_kind::{self as SyntaxKind, *},
             #syntax_list as SyntaxList, #syntax_node as SyntaxNode, #syntax_token as SyntaxToken,
@@ -974,14 +1042,42 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
         impl Debug for DebugSyntaxElement {
             fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
                 match &self.0 {
-                    SyntaxElement::Node(node) => {
-                        map_syntax_node!(node.clone(), node => std::fmt::Debug::fmt(&node, f))
-                    }
+                    SyntaxElement::Node(node) => debug_syntax_node(node, f),
                     SyntaxElement::Token(token) => Debug::fmt(token, f),
                 }
             }
         }
 
+        /// Describes how the nodes of this language are printed.
+        struct DebugShapes;
+
+        impl support::DebugNodeShapes for DebugShapes {
+            type Language = Language;
+
+            const SHAPES: &'static str = concat!(#(#debug_shape_lines),*);
+
+            fn shape_offset(kind: SyntaxKind) -> u32 {
+                match kind {
+                    #(#debug_shape_kinds => #debug_shape_offsets,)*
+                    _ => u32::MAX,
+                }
+            }
+
+            fn with_depth<R>(raw_kind: usize, f: impl FnOnce(&std::cell::Cell<u8>) -> R) -> R {
+                thread_local! {
+                    static DEPTHS: [std::cell::Cell<u8>; SyntaxKind::__LAST as usize] =
+                        const { [const { std::cell::Cell::new(0) }; SyntaxKind::__LAST as usize] };
+                }
+                DEPTHS.with(|depths| f(&depths[raw_kind]))
+            }
+
+            #debug_unshaped
+        }
+
+        /// Prints `node` the way the AST node of its kind is printed.
+        fn debug_syntax_node(node: &SyntaxNode, f: &mut Formatter<'_>) -> std::fmt::Result {
+            support::debug_any_node::<DebugShapes>(node, f)
+        }
     };
 
     let ast = ast

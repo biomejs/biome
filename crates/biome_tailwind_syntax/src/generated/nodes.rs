@@ -8,7 +8,6 @@ use crate::{
     TailwindSyntaxKind::{self as SyntaxKind, *},
     TailwindSyntaxList as SyntaxList, TailwindSyntaxNode as SyntaxNode,
     TailwindSyntaxToken as SyntaxToken,
-    macros::map_syntax_node,
 };
 use biome_rowan::{
     AstNode, AstNodeList, AstNodeListIterator, AstNodeSlotMap, AstSeparatedList,
@@ -1871,20 +1870,7 @@ impl AstNode for CssBinaryExpression {
 }
 impl std::fmt::Debug for CssBinaryExpression {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("CssBinaryExpression")
-                .field("left", &support::DebugSyntaxResult(self.left()))
-                .field("operator", &support::DebugSyntaxResult(self.operator()))
-                .field("right", &support::DebugSyntaxResult(self.right()))
-                .finish()
-        } else {
-            f.debug_struct("CssBinaryExpression").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<CssBinaryExpression> for SyntaxNode {
@@ -1920,21 +1906,7 @@ impl AstNode for CssColor {
 }
 impl std::fmt::Debug for CssColor {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("CssColor")
-                .field(
-                    "value_token",
-                    &support::DebugSyntaxResult(self.value_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("CssColor").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<CssColor> for SyntaxNode {
@@ -1970,21 +1942,7 @@ impl AstNode for CssDashedIdentifier {
 }
 impl std::fmt::Debug for CssDashedIdentifier {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("CssDashedIdentifier")
-                .field(
-                    "ident_token",
-                    &support::DebugSyntaxResult(self.ident_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("CssDashedIdentifier").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<CssDashedIdentifier> for SyntaxNode {
@@ -2020,27 +1978,7 @@ impl AstNode for CssFunction {
 }
 impl std::fmt::Debug for CssFunction {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("CssFunction")
-                .field("name", &support::DebugSyntaxResult(self.name()))
-                .field(
-                    "l_paren_token",
-                    &support::DebugSyntaxResult(self.l_paren_token()),
-                )
-                .field("parameters", &self.parameters())
-                .field(
-                    "r_paren_token",
-                    &support::DebugSyntaxResult(self.r_paren_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("CssFunction").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<CssFunction> for SyntaxNode {
@@ -2076,18 +2014,7 @@ impl AstNode for CssGenericDelimiter {
 }
 impl std::fmt::Debug for CssGenericDelimiter {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("CssGenericDelimiter")
-                .field("value", &support::DebugSyntaxResult(self.value()))
-                .finish()
-        } else {
-            f.debug_struct("CssGenericDelimiter").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<CssGenericDelimiter> for SyntaxNode {
@@ -2123,21 +2050,7 @@ impl AstNode for CssIdentifier {
 }
 impl std::fmt::Debug for CssIdentifier {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("CssIdentifier")
-                .field(
-                    "ident_token",
-                    &support::DebugSyntaxResult(self.ident_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("CssIdentifier").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<CssIdentifier> for SyntaxNode {
@@ -2174,19 +2087,7 @@ impl AstNode for CssListOfComponentValuesExpression {
 }
 impl std::fmt::Debug for CssListOfComponentValuesExpression {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("CssListOfComponentValuesExpression")
-                .field("css_component_value_list", &self.css_component_value_list())
-                .finish()
-        } else {
-            f.debug_struct("CssListOfComponentValuesExpression")
-                .finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<CssListOfComponentValuesExpression> for SyntaxNode {
@@ -2222,21 +2123,7 @@ impl AstNode for CssNumber {
 }
 impl std::fmt::Debug for CssNumber {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("CssNumber")
-                .field(
-                    "value_token",
-                    &support::DebugSyntaxResult(self.value_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("CssNumber").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<CssNumber> for SyntaxNode {
@@ -2272,29 +2159,7 @@ impl AstNode for CssParenthesizedExpression {
 }
 impl std::fmt::Debug for CssParenthesizedExpression {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("CssParenthesizedExpression")
-                .field(
-                    "l_paren_token",
-                    &support::DebugSyntaxResult(self.l_paren_token()),
-                )
-                .field(
-                    "expression",
-                    &support::DebugOptionalElement(self.expression()),
-                )
-                .field(
-                    "r_paren_token",
-                    &support::DebugSyntaxResult(self.r_paren_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("CssParenthesizedExpression").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<CssParenthesizedExpression> for SyntaxNode {
@@ -2330,25 +2195,7 @@ impl AstNode for CssPercentage {
 }
 impl std::fmt::Debug for CssPercentage {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("CssPercentage")
-                .field(
-                    "value_token",
-                    &support::DebugSyntaxResult(self.value_token()),
-                )
-                .field(
-                    "remainder_token",
-                    &support::DebugSyntaxResult(self.remainder_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("CssPercentage").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<CssPercentage> for SyntaxNode {
@@ -2384,23 +2231,7 @@ impl AstNode for CssRatio {
 }
 impl std::fmt::Debug for CssRatio {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("CssRatio")
-                .field("left", &support::DebugSyntaxResult(self.left()))
-                .field(
-                    "slash_token",
-                    &support::DebugSyntaxResult(self.slash_token()),
-                )
-                .field("right", &support::DebugSyntaxResult(self.right()))
-                .finish()
-        } else {
-            f.debug_struct("CssRatio").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<CssRatio> for SyntaxNode {
@@ -2436,22 +2267,7 @@ impl AstNode for CssRegularDimension {
 }
 impl std::fmt::Debug for CssRegularDimension {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("CssRegularDimension")
-                .field(
-                    "value_token",
-                    &support::DebugSyntaxResult(self.value_token()),
-                )
-                .field("unit_token", &support::DebugSyntaxResult(self.unit_token()))
-                .finish()
-        } else {
-            f.debug_struct("CssRegularDimension").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<CssRegularDimension> for SyntaxNode {
@@ -2487,21 +2303,7 @@ impl AstNode for CssString {
 }
 impl std::fmt::Debug for CssString {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("CssString")
-                .field(
-                    "value_token",
-                    &support::DebugSyntaxResult(self.value_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("CssString").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<CssString> for SyntaxNode {
@@ -2537,19 +2339,7 @@ impl AstNode for CssUnaryExpression {
 }
 impl std::fmt::Debug for CssUnaryExpression {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("CssUnaryExpression")
-                .field("operator", &support::DebugSyntaxResult(self.operator()))
-                .field("argument", &support::DebugSyntaxResult(self.argument()))
-                .finish()
-        } else {
-            f.debug_struct("CssUnaryExpression").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<CssUnaryExpression> for SyntaxNode {
@@ -2585,22 +2375,7 @@ impl AstNode for CssUnknownDimension {
 }
 impl std::fmt::Debug for CssUnknownDimension {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("CssUnknownDimension")
-                .field(
-                    "value_token",
-                    &support::DebugSyntaxResult(self.value_token()),
-                )
-                .field("unit_token", &support::DebugSyntaxResult(self.unit_token()))
-                .finish()
-        } else {
-            f.debug_struct("CssUnknownDimension").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<CssUnknownDimension> for SyntaxNode {
@@ -2636,27 +2411,7 @@ impl AstNode for CssUrlFunction {
 }
 impl std::fmt::Debug for CssUrlFunction {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("CssUrlFunction")
-                .field("url_token", &support::DebugSyntaxResult(self.url_token()))
-                .field(
-                    "l_paren_token",
-                    &support::DebugSyntaxResult(self.l_paren_token()),
-                )
-                .field("value", &support::DebugOptionalElement(self.value()))
-                .field(
-                    "r_paren_token",
-                    &support::DebugSyntaxResult(self.r_paren_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("CssUrlFunction").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<CssUrlFunction> for SyntaxNode {
@@ -2692,21 +2447,7 @@ impl AstNode for CssUrlValueRaw {
 }
 impl std::fmt::Debug for CssUrlValueRaw {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("CssUrlValueRaw")
-                .field(
-                    "value_token",
-                    &support::DebugSyntaxResult(self.value_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("CssUrlValueRaw").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<CssUrlValueRaw> for SyntaxNode {
@@ -2742,35 +2483,7 @@ impl AstNode for TwArbitraryCandidate {
 }
 impl std::fmt::Debug for TwArbitraryCandidate {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("TwArbitraryCandidate")
-                .field(
-                    "l_brack_token",
-                    &support::DebugSyntaxResult(self.l_brack_token()),
-                )
-                .field(
-                    "property_token",
-                    &support::DebugSyntaxResult(self.property_token()),
-                )
-                .field(
-                    "colon_token",
-                    &support::DebugSyntaxResult(self.colon_token()),
-                )
-                .field("value", &self.value())
-                .field(
-                    "r_brack_token",
-                    &support::DebugSyntaxResult(self.r_brack_token()),
-                )
-                .field("modifier", &support::DebugOptionalElement(self.modifier()))
-                .finish()
-        } else {
-            f.debug_struct("TwArbitraryCandidate").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<TwArbitraryCandidate> for SyntaxNode {
@@ -2806,26 +2519,7 @@ impl AstNode for TwArbitraryValue {
 }
 impl std::fmt::Debug for TwArbitraryValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("TwArbitraryValue")
-                .field(
-                    "l_brack_token",
-                    &support::DebugSyntaxResult(self.l_brack_token()),
-                )
-                .field("value", &self.value())
-                .field(
-                    "r_brack_token",
-                    &support::DebugSyntaxResult(self.r_brack_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("TwArbitraryValue").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<TwArbitraryValue> for SyntaxNode {
@@ -2861,29 +2555,7 @@ impl AstNode for TwArbitraryVariant {
 }
 impl std::fmt::Debug for TwArbitraryVariant {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("TwArbitraryVariant")
-                .field(
-                    "l_brack_token",
-                    &support::DebugSyntaxResult(self.l_brack_token()),
-                )
-                .field(
-                    "selector_token",
-                    &support::DebugSyntaxResult(self.selector_token()),
-                )
-                .field(
-                    "r_brack_token",
-                    &support::DebugSyntaxResult(self.r_brack_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("TwArbitraryVariant").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<TwArbitraryVariant> for SyntaxNode {
@@ -2919,29 +2591,7 @@ impl AstNode for TwArbitraryVariantSegment {
 }
 impl std::fmt::Debug for TwArbitraryVariantSegment {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("TwArbitraryVariantSegment")
-                .field(
-                    "l_brack_token",
-                    &support::DebugSyntaxResult(self.l_brack_token()),
-                )
-                .field(
-                    "value_token",
-                    &support::DebugSyntaxResult(self.value_token()),
-                )
-                .field(
-                    "r_brack_token",
-                    &support::DebugSyntaxResult(self.r_brack_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("TwArbitraryVariantSegment").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<TwArbitraryVariantSegment> for SyntaxNode {
@@ -2977,30 +2627,7 @@ impl AstNode for TwCssVariableValue {
 }
 impl std::fmt::Debug for TwCssVariableValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("TwCssVariableValue")
-                .field(
-                    "l_paren_token",
-                    &support::DebugSyntaxResult(self.l_paren_token()),
-                )
-                .field(
-                    "type_hint",
-                    &support::DebugOptionalElement(self.type_hint()),
-                )
-                .field("value", &self.value())
-                .field(
-                    "r_paren_token",
-                    &support::DebugSyntaxResult(self.r_paren_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("TwCssVariableValue").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<TwCssVariableValue> for SyntaxNode {
@@ -3036,26 +2663,7 @@ impl AstNode for TwCssVariableVariantSegment {
 }
 impl std::fmt::Debug for TwCssVariableVariantSegment {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("TwCssVariableVariantSegment")
-                .field(
-                    "l_paren_token",
-                    &support::DebugSyntaxResult(self.l_paren_token()),
-                )
-                .field("value", &self.value())
-                .field(
-                    "r_paren_token",
-                    &support::DebugSyntaxResult(self.r_paren_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("TwCssVariableVariantSegment").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<TwCssVariableVariantSegment> for SyntaxNode {
@@ -3091,31 +2699,7 @@ impl AstNode for TwFullCandidate {
 }
 impl std::fmt::Debug for TwFullCandidate {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("TwFullCandidate")
-                .field("variants", &self.variants())
-                .field(
-                    "legacy_important_token",
-                    &support::DebugOptionalElement(self.legacy_important_token()),
-                )
-                .field(
-                    "negative_token",
-                    &support::DebugOptionalElement(self.negative_token()),
-                )
-                .field("candidate", &support::DebugSyntaxResult(self.candidate()))
-                .field(
-                    "excl_token",
-                    &support::DebugOptionalElement(self.excl_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("TwFullCandidate").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<TwFullCandidate> for SyntaxNode {
@@ -3151,24 +2735,7 @@ impl AstNode for TwFunctionalCandidate {
 }
 impl std::fmt::Debug for TwFunctionalCandidate {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("TwFunctionalCandidate")
-                .field("base_token", &support::DebugSyntaxResult(self.base_token()))
-                .field(
-                    "minus_token",
-                    &support::DebugSyntaxResult(self.minus_token()),
-                )
-                .field("value", &support::DebugSyntaxResult(self.value()))
-                .field("modifier", &support::DebugOptionalElement(self.modifier()))
-                .finish()
-        } else {
-            f.debug_struct("TwFunctionalCandidate").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<TwFunctionalCandidate> for SyntaxNode {
@@ -3204,22 +2771,7 @@ impl AstNode for TwModifier {
 }
 impl std::fmt::Debug for TwModifier {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("TwModifier")
-                .field(
-                    "slash_token",
-                    &support::DebugSyntaxResult(self.slash_token()),
-                )
-                .field("value", &support::DebugSyntaxResult(self.value()))
-                .finish()
-        } else {
-            f.debug_struct("TwModifier").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<TwModifier> for SyntaxNode {
@@ -3255,21 +2807,7 @@ impl AstNode for TwNamedValue {
 }
 impl std::fmt::Debug for TwNamedValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("TwNamedValue")
-                .field(
-                    "value_token",
-                    &support::DebugSyntaxResult(self.value_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("TwNamedValue").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<TwNamedValue> for SyntaxNode {
@@ -3305,21 +2843,7 @@ impl AstNode for TwNamedVariantSegment {
 }
 impl std::fmt::Debug for TwNamedVariantSegment {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("TwNamedVariantSegment")
-                .field(
-                    "value_token",
-                    &support::DebugSyntaxResult(self.value_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("TwNamedVariantSegment").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<TwNamedVariantSegment> for SyntaxNode {
@@ -3355,21 +2879,7 @@ impl AstNode for TwNumberValue {
 }
 impl std::fmt::Debug for TwNumberValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("TwNumberValue")
-                .field(
-                    "value_token",
-                    &support::DebugSyntaxResult(self.value_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("TwNumberValue").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<TwNumberValue> for SyntaxNode {
@@ -3405,25 +2915,7 @@ impl AstNode for TwPercentageValue {
 }
 impl std::fmt::Debug for TwPercentageValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("TwPercentageValue")
-                .field(
-                    "value_token",
-                    &support::DebugSyntaxResult(self.value_token()),
-                )
-                .field(
-                    "remainder_token",
-                    &support::DebugSyntaxResult(self.remainder_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("TwPercentageValue").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<TwPercentageValue> for SyntaxNode {
@@ -3459,27 +2951,7 @@ impl AstNode for TwRoot {
 }
 impl std::fmt::Debug for TwRoot {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("TwRoot")
-                .field(
-                    "bom_token",
-                    &support::DebugOptionalElement(self.bom_token()),
-                )
-                .field(
-                    "leading_whitespace_token",
-                    &support::DebugOptionalElement(self.leading_whitespace_token()),
-                )
-                .field("candidates", &self.candidates())
-                .field("eof_token", &support::DebugSyntaxResult(self.eof_token()))
-                .finish()
-        } else {
-            f.debug_struct("TwRoot").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<TwRoot> for SyntaxNode {
@@ -3515,19 +2987,7 @@ impl AstNode for TwStaticCandidate {
 }
 impl std::fmt::Debug for TwStaticCandidate {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("TwStaticCandidate")
-                .field("base_token", &support::DebugSyntaxResult(self.base_token()))
-                .field("modifier", &support::DebugOptionalElement(self.modifier()))
-                .finish()
-        } else {
-            f.debug_struct("TwStaticCandidate").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<TwStaticCandidate> for SyntaxNode {
@@ -3563,22 +3023,7 @@ impl AstNode for TwTypeHint {
 }
 impl std::fmt::Debug for TwTypeHint {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("TwTypeHint")
-                .field("name_token", &support::DebugSyntaxResult(self.name_token()))
-                .field(
-                    "colon_token",
-                    &support::DebugSyntaxResult(self.colon_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("TwTypeHint").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<TwTypeHint> for SyntaxNode {
@@ -3614,23 +3059,7 @@ impl AstNode for TwVariantExpression {
 }
 impl std::fmt::Debug for TwVariantExpression {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("TwVariantExpression")
-                .field("segments", &self.segments())
-                .field(
-                    "glued_value",
-                    &support::DebugOptionalElement(self.glued_value()),
-                )
-                .field("modifier", &support::DebugOptionalElement(self.modifier()))
-                .finish()
-        } else {
-            f.debug_struct("TwVariantExpression").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<TwVariantExpression> for SyntaxNode {
@@ -3683,10 +3112,7 @@ impl AstNode for AnyCssDimension {
 }
 impl std::fmt::Debug for AnyCssDimension {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::CssRegularDimension(it) => std::fmt::Debug::fmt(it, f),
-            Self::CssUnknownDimension(it) => std::fmt::Debug::fmt(it, f),
-        }
+        debug_syntax_node(self.syntax(), f)
     }
 }
 impl From<AnyCssDimension> for SyntaxNode {
@@ -3785,13 +3211,7 @@ impl AstNode for AnyCssExpression {
 }
 impl std::fmt::Debug for AnyCssExpression {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::CssBinaryExpression(it) => std::fmt::Debug::fmt(it, f),
-            Self::CssBogusPropertyValue(it) => std::fmt::Debug::fmt(it, f),
-            Self::CssListOfComponentValuesExpression(it) => std::fmt::Debug::fmt(it, f),
-            Self::CssParenthesizedExpression(it) => std::fmt::Debug::fmt(it, f),
-            Self::CssUnaryExpression(it) => std::fmt::Debug::fmt(it, f),
-        }
+        debug_syntax_node(self.syntax(), f)
     }
 }
 impl From<AnyCssExpression> for SyntaxNode {
@@ -3850,10 +3270,7 @@ impl AstNode for AnyCssFunction {
 }
 impl std::fmt::Debug for AnyCssFunction {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::CssFunction(it) => std::fmt::Debug::fmt(it, f),
-            Self::CssUrlFunction(it) => std::fmt::Debug::fmt(it, f),
-        }
+        debug_syntax_node(self.syntax(), f)
     }
 }
 impl From<AnyCssFunction> for SyntaxNode {
@@ -3913,10 +3330,7 @@ impl AstNode for AnyCssGenericComponentValue {
 }
 impl std::fmt::Debug for AnyCssGenericComponentValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::AnyCssValue(it) => std::fmt::Debug::fmt(it, f),
-            Self::CssGenericDelimiter(it) => std::fmt::Debug::fmt(it, f),
-        }
+        debug_syntax_node(self.syntax(), f)
     }
 }
 impl From<AnyCssGenericComponentValue> for SyntaxNode {
@@ -3982,11 +3396,7 @@ impl AstNode for AnyCssUrlValue {
 }
 impl std::fmt::Debug for AnyCssUrlValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::CssParameterList(it) => std::fmt::Debug::fmt(it, f),
-            Self::CssString(it) => std::fmt::Debug::fmt(it, f),
-            Self::CssUrlValueRaw(it) => std::fmt::Debug::fmt(it, f),
-        }
+        debug_syntax_node(self.syntax(), f)
     }
 }
 impl From<AnyCssUrlValue> for SyntaxNode {
@@ -4161,21 +3571,7 @@ impl AstNode for AnyCssValue {
 }
 impl std::fmt::Debug for AnyCssValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::AnyCssDimension(it) => std::fmt::Debug::fmt(it, f),
-            Self::AnyCssFunction(it) => std::fmt::Debug::fmt(it, f),
-            Self::CssBinaryExpression(it) => std::fmt::Debug::fmt(it, f),
-            Self::CssBogusPropertyValue(it) => std::fmt::Debug::fmt(it, f),
-            Self::CssColor(it) => std::fmt::Debug::fmt(it, f),
-            Self::CssDashedIdentifier(it) => std::fmt::Debug::fmt(it, f),
-            Self::CssIdentifier(it) => std::fmt::Debug::fmt(it, f),
-            Self::CssNumber(it) => std::fmt::Debug::fmt(it, f),
-            Self::CssParenthesizedExpression(it) => std::fmt::Debug::fmt(it, f),
-            Self::CssPercentage(it) => std::fmt::Debug::fmt(it, f),
-            Self::CssRatio(it) => std::fmt::Debug::fmt(it, f),
-            Self::CssString(it) => std::fmt::Debug::fmt(it, f),
-            Self::CssUnaryExpression(it) => std::fmt::Debug::fmt(it, f),
-        }
+        debug_syntax_node(self.syntax(), f)
     }
 }
 impl From<AnyCssValue> for SyntaxNode {
@@ -4269,12 +3665,7 @@ impl AstNode for AnyTwCandidate {
 }
 impl std::fmt::Debug for AnyTwCandidate {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::TwArbitraryCandidate(it) => std::fmt::Debug::fmt(it, f),
-            Self::TwBogusCandidate(it) => std::fmt::Debug::fmt(it, f),
-            Self::TwFunctionalCandidate(it) => std::fmt::Debug::fmt(it, f),
-            Self::TwStaticCandidate(it) => std::fmt::Debug::fmt(it, f),
-        }
+        debug_syntax_node(self.syntax(), f)
     }
 }
 impl From<AnyTwCandidate> for SyntaxNode {
@@ -4333,10 +3724,7 @@ impl AstNode for AnyTwFullCandidate {
 }
 impl std::fmt::Debug for AnyTwFullCandidate {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::TwBogusCandidate(it) => std::fmt::Debug::fmt(it, f),
-            Self::TwFullCandidate(it) => std::fmt::Debug::fmt(it, f),
-        }
+        debug_syntax_node(self.syntax(), f)
     }
 }
 impl From<AnyTwFullCandidate> for SyntaxNode {
@@ -4392,10 +3780,7 @@ impl AstNode for AnyTwModifier {
 }
 impl std::fmt::Debug for AnyTwModifier {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::TwBogusModifier(it) => std::fmt::Debug::fmt(it, f),
-            Self::TwModifier(it) => std::fmt::Debug::fmt(it, f),
-        }
+        debug_syntax_node(self.syntax(), f)
     }
 }
 impl From<AnyTwModifier> for SyntaxNode {
@@ -4496,14 +3881,7 @@ impl AstNode for AnyTwValue {
 }
 impl std::fmt::Debug for AnyTwValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::TwArbitraryValue(it) => std::fmt::Debug::fmt(it, f),
-            Self::TwBogusValue(it) => std::fmt::Debug::fmt(it, f),
-            Self::TwCssVariableValue(it) => std::fmt::Debug::fmt(it, f),
-            Self::TwNamedValue(it) => std::fmt::Debug::fmt(it, f),
-            Self::TwNumberValue(it) => std::fmt::Debug::fmt(it, f),
-            Self::TwPercentageValue(it) => std::fmt::Debug::fmt(it, f),
-        }
+        debug_syntax_node(self.syntax(), f)
     }
 }
 impl From<AnyTwValue> for SyntaxNode {
@@ -4576,11 +3954,7 @@ impl AstNode for AnyTwVariant {
 }
 impl std::fmt::Debug for AnyTwVariant {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::TwArbitraryVariant(it) => std::fmt::Debug::fmt(it, f),
-            Self::TwBogusVariant(it) => std::fmt::Debug::fmt(it, f),
-            Self::TwVariantExpression(it) => std::fmt::Debug::fmt(it, f),
-        }
+        debug_syntax_node(self.syntax(), f)
     }
 }
 impl From<AnyTwVariant> for SyntaxNode {
@@ -4670,12 +4044,7 @@ impl AstNode for AnyTwVariantSegment {
 }
 impl std::fmt::Debug for AnyTwVariantSegment {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::TwArbitraryVariantSegment(it) => std::fmt::Debug::fmt(it, f),
-            Self::TwBogusVariantSegment(it) => std::fmt::Debug::fmt(it, f),
-            Self::TwCssVariableVariantSegment(it) => std::fmt::Debug::fmt(it, f),
-            Self::TwNamedVariantSegment(it) => std::fmt::Debug::fmt(it, f),
-        }
+        debug_syntax_node(self.syntax(), f)
     }
 }
 impl From<AnyTwVariantSegment> for SyntaxNode {
@@ -4965,9 +4334,7 @@ impl AstNode for CssBogusPropertyValue {
 }
 impl std::fmt::Debug for CssBogusPropertyValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssBogusPropertyValue")
-            .field("items", &DebugSyntaxElementChildren(self.items()))
-            .finish()
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<CssBogusPropertyValue> for SyntaxNode {
@@ -5021,9 +4388,7 @@ impl AstNode for TwBogus {
 }
 impl std::fmt::Debug for TwBogus {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TwBogus")
-            .field("items", &DebugSyntaxElementChildren(self.items()))
-            .finish()
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<TwBogus> for SyntaxNode {
@@ -5077,9 +4442,7 @@ impl AstNode for TwBogusCandidate {
 }
 impl std::fmt::Debug for TwBogusCandidate {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TwBogusCandidate")
-            .field("items", &DebugSyntaxElementChildren(self.items()))
-            .finish()
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<TwBogusCandidate> for SyntaxNode {
@@ -5133,9 +4496,7 @@ impl AstNode for TwBogusModifier {
 }
 impl std::fmt::Debug for TwBogusModifier {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TwBogusModifier")
-            .field("items", &DebugSyntaxElementChildren(self.items()))
-            .finish()
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<TwBogusModifier> for SyntaxNode {
@@ -5189,9 +4550,7 @@ impl AstNode for TwBogusValue {
 }
 impl std::fmt::Debug for TwBogusValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TwBogusValue")
-            .field("items", &DebugSyntaxElementChildren(self.items()))
-            .finish()
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<TwBogusValue> for SyntaxNode {
@@ -5245,9 +4604,7 @@ impl AstNode for TwBogusVariant {
 }
 impl std::fmt::Debug for TwBogusVariant {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TwBogusVariant")
-            .field("items", &DebugSyntaxElementChildren(self.items()))
-            .finish()
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<TwBogusVariant> for SyntaxNode {
@@ -5301,9 +4658,7 @@ impl AstNode for TwBogusVariantSegment {
 }
 impl std::fmt::Debug for TwBogusVariantSegment {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TwBogusVariantSegment")
-            .field("items", &DebugSyntaxElementChildren(self.items()))
-            .finish()
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<TwBogusVariantSegment> for SyntaxNode {
@@ -5381,8 +4736,7 @@ impl AstNodeList for CssComponentValueList {
 }
 impl Debug for CssComponentValueList {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        f.write_str("CssComponentValueList ")?;
-        f.debug_list().entries(self.iter()).finish()
+        debug_syntax_node(self.syntax_list.node(), f)
     }
 }
 impl IntoIterator for &CssComponentValueList {
@@ -5463,8 +4817,7 @@ impl AstNodeList for CssGenericComponentValueList {
 }
 impl Debug for CssGenericComponentValueList {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        f.write_str("CssGenericComponentValueList ")?;
-        f.debug_list().entries(self.iter()).finish()
+        debug_syntax_node(self.syntax_list.node(), f)
     }
 }
 impl IntoIterator for &CssGenericComponentValueList {
@@ -5545,8 +4898,7 @@ impl AstSeparatedList for CssParameterList {
 }
 impl Debug for CssParameterList {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        f.write_str("CssParameterList ")?;
-        f.debug_list().entries(self.elements()).finish()
+        debug_syntax_node(self.syntax_list.node(), f)
     }
 }
 impl IntoIterator for CssParameterList {
@@ -5627,8 +4979,7 @@ impl AstSeparatedList for TwCandidateList {
 }
 impl Debug for TwCandidateList {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        f.write_str("TwCandidateList ")?;
-        f.debug_list().entries(self.elements()).finish()
+        debug_syntax_node(self.syntax_list.node(), f)
     }
 }
 impl IntoIterator for TwCandidateList {
@@ -5709,8 +5060,7 @@ impl AstSeparatedList for TwVariantList {
 }
 impl Debug for TwVariantList {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        f.write_str("TwVariantList ")?;
-        f.debug_list().entries(self.elements()).finish()
+        debug_syntax_node(self.syntax_list.node(), f)
     }
 }
 impl IntoIterator for TwVariantList {
@@ -5791,8 +5141,7 @@ impl AstSeparatedList for TwVariantSegmentList {
 }
 impl Debug for TwVariantSegmentList {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        f.write_str("TwVariantSegmentList ")?;
-        f.debug_list().entries(self.elements()).finish()
+        debug_syntax_node(self.syntax_list.node(), f)
     }
 }
 impl IntoIterator for TwVariantSegmentList {
@@ -5822,10 +5171,125 @@ struct DebugSyntaxElement(SyntaxElement);
 impl Debug for DebugSyntaxElement {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match &self.0 {
-            SyntaxElement::Node(node) => {
-                map_syntax_node ! (node . clone () , node => std :: fmt :: Debug :: fmt (& node , f))
-            }
+            SyntaxElement::Node(node) => debug_syntax_node(node, f),
             SyntaxElement::Token(token) => Debug::fmt(token, f),
         }
     }
+}
+#[doc = r" Describes how the nodes of this language are printed."]
+struct DebugShapes;
+impl support::DebugNodeShapes for DebugShapes {
+    type Language = Language;
+    const SHAPES: &'static str = concat!(
+        "nCssBinaryExpression,left,operator,right\n",
+        "nCssColor,value_token\n",
+        "nCssDashedIdentifier,ident_token\n",
+        "nCssFunction,name,l_paren_token,parameters,r_paren_token\n",
+        "nCssGenericDelimiter,value\n",
+        "nCssIdentifier,ident_token\n",
+        "nCssListOfComponentValuesExpression,css_component_value_list\n",
+        "nCssNumber,value_token\n",
+        "nCssParenthesizedExpression,l_paren_token,?expression,r_paren_token\n",
+        "nCssPercentage,value_token,remainder_token\n",
+        "nCssRatio,left,slash_token,right\n",
+        "nCssRegularDimension,value_token,unit_token\n",
+        "nCssString,value_token\n",
+        "nCssUnaryExpression,operator,argument\n",
+        "nCssUnknownDimension,value_token,unit_token\n",
+        "nCssUrlFunction,url_token,l_paren_token,?value,r_paren_token\n",
+        "nCssUrlValueRaw,value_token\n",
+        "nTwArbitraryCandidate,l_brack_token,property_token,colon_token,value,r_brack_token,?modifier\n",
+        "nTwArbitraryValue,l_brack_token,value,r_brack_token\n",
+        "nTwArbitraryVariant,l_brack_token,selector_token,r_brack_token\n",
+        "nTwArbitraryVariantSegment,l_brack_token,value_token,r_brack_token\n",
+        "nTwCssVariableValue,l_paren_token,?type_hint,value,r_paren_token\n",
+        "nTwCssVariableVariantSegment,l_paren_token,value,r_paren_token\n",
+        "nTwFullCandidate,variants,?legacy_important_token,?negative_token,candidate,?excl_token\n",
+        "nTwFunctionalCandidate,base_token,minus_token,value,?modifier\n",
+        "nTwModifier,slash_token,value\n",
+        "nTwNamedValue,value_token\n",
+        "nTwNamedVariantSegment,value_token\n",
+        "nTwNumberValue,value_token\n",
+        "nTwPercentageValue,value_token,remainder_token\n",
+        "nTwRoot,?bom_token,?leading_whitespace_token,candidates,eof_token\n",
+        "nTwStaticCandidate,base_token,?modifier\n",
+        "nTwTypeHint,name_token,colon_token\n",
+        "nTwVariantExpression,segments,?glued_value,?modifier\n",
+        "bCssBogusPropertyValue\n",
+        "bTwBogus\n",
+        "bTwBogusCandidate\n",
+        "bTwBogusModifier\n",
+        "bTwBogusValue\n",
+        "bTwBogusVariant\n",
+        "bTwBogusVariantSegment\n",
+        "lCssComponentValueList\n",
+        "lCssGenericComponentValueList\n",
+        "sCssParameterList\n",
+        "sTwCandidateList\n",
+        "sTwVariantList\n",
+        "sTwVariantSegmentList\n"
+    );
+    fn shape_offset(kind: SyntaxKind) -> u32 {
+        match kind {
+            CSS_BINARY_EXPRESSION => 0u32,
+            CSS_COLOR => 41u32,
+            CSS_DASHED_IDENTIFIER => 63u32,
+            CSS_FUNCTION => 96u32,
+            CSS_GENERIC_DELIMITER => 153u32,
+            CSS_IDENTIFIER => 180u32,
+            CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION => 207u32,
+            CSS_NUMBER => 268u32,
+            CSS_PARENTHESIZED_EXPRESSION => 291u32,
+            CSS_PERCENTAGE => 359u32,
+            CSS_RATIO => 402u32,
+            CSS_REGULAR_DIMENSION => 435u32,
+            CSS_STRING => 479u32,
+            CSS_UNARY_EXPRESSION => 502u32,
+            CSS_UNKNOWN_DIMENSION => 540u32,
+            CSS_URL_FUNCTION => 584u32,
+            CSS_URL_VALUE_RAW => 645u32,
+            TW_ARBITRARY_CANDIDATE => 673u32,
+            TW_ARBITRARY_VALUE => 766u32,
+            TW_ARBITRARY_VARIANT => 818u32,
+            TW_ARBITRARY_VARIANT_SEGMENT => 881u32,
+            TW_CSS_VARIABLE_VALUE => 948u32,
+            TW_CSS_VARIABLE_VARIANT_SEGMENT => 1013u32,
+            TW_FULL_CANDIDATE => 1076u32,
+            TW_FUNCTIONAL_CANDIDATE => 1164u32,
+            TW_MODIFIER => 1226u32,
+            TW_NAMED_VALUE => 1256u32,
+            TW_NAMED_VARIANT_SEGMENT => 1282u32,
+            TW_NUMBER_VALUE => 1317u32,
+            TW_PERCENTAGE_VALUE => 1344u32,
+            TW_ROOT => 1391u32,
+            TW_STATIC_CANDIDATE => 1457u32,
+            TW_TYPE_HINT => 1497u32,
+            TW_VARIANT_EXPRESSION => 1532u32,
+            CSS_BOGUS_PROPERTY_VALUE => 1585u32,
+            TW_BOGUS => 1608u32,
+            TW_BOGUS_CANDIDATE => 1617u32,
+            TW_BOGUS_MODIFIER => 1635u32,
+            TW_BOGUS_VALUE => 1652u32,
+            TW_BOGUS_VARIANT => 1666u32,
+            TW_BOGUS_VARIANT_SEGMENT => 1682u32,
+            CSS_COMPONENT_VALUE_LIST => 1705u32,
+            CSS_GENERIC_COMPONENT_VALUE_LIST => 1728u32,
+            CSS_PARAMETER_LIST => 1758u32,
+            TW_CANDIDATE_LIST => 1776u32,
+            TW_VARIANT_LIST => 1793u32,
+            TW_VARIANT_SEGMENT_LIST => 1808u32,
+            _ => u32::MAX,
+        }
+    }
+    fn with_depth<R>(raw_kind: usize, f: impl FnOnce(&std::cell::Cell<u8>) -> R) -> R {
+        thread_local! { static DEPTHS : [std :: cell :: Cell < u8 > ; SyntaxKind :: __LAST as usize] = const { [const { std :: cell :: Cell :: new (0) } ; SyntaxKind :: __LAST as usize] } ; }
+        DEPTHS.with(|depths| f(&depths[raw_kind]))
+    }
+    fn debug_unshaped(_: &SyntaxNode, _: &mut Formatter<'_>) -> std::fmt::Result {
+        unreachable!("every kind of node has a shape")
+    }
+}
+#[doc = r" Prints `node` the way the AST node of its kind is printed."]
+fn debug_syntax_node(node: &SyntaxNode, f: &mut Formatter<'_>) -> std::fmt::Result {
+    support::debug_any_node::<DebugShapes>(node, f)
 }
