@@ -233,6 +233,7 @@ define_categories! {
     "lint/nursery/noAwaitInPromiseMethods": "https://biomejs.dev/linter/rules/no-await-in-promise-methods",
     "lint/nursery/noBaseToString": "https://biomejs.dev/linter/rules/no-base-to-string",
     "lint/nursery/noBooleanSortComparator": "https://biomejs.dev/linter/rules/no-boolean-sort-comparator",
+    "lint/nursery/noBreakInNestedLoop": "https://biomejs.dev/linter/rules/no-break-in-nested-loop",
     "lint/nursery/noBufferConstructor": "https://biomejs.dev/linter/rules/no-buffer-constructor",
     "lint/nursery/noBunModules": "https://biomejs.dev/linter/rules/no-bun-modules",
     "lint/nursery/noCanvasToImage": "https://biomejs.dev/linter/rules/no-canvas-to-image",

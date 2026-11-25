@@ -35,6 +35,7 @@ pub mod no_biome_first_exception;
 pub mod no_bitwise_operators;
 pub mod no_blank_target;
 pub mod no_boolean_sort_comparator;
+pub mod no_break_in_nested_loop;
 pub mod no_buffer_constructor;
 pub mod no_bun_modules;
 pub mod no_canvas_to_image;
