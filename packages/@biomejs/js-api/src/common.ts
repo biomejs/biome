@@ -223,6 +223,25 @@ function isFormatContentDebug(
 	return "debug" in options && options.debug !== undefined;
 }
 
+/**
+ * Rewrites Windows path separators to `/` so globs match them the same way on
+ * every host.
+ *
+ * The WebAssembly build of the workspace always sees Unix path semantics: a
+ * backslash is an ordinary character there, never a separator. A caller on
+ * Windows that passes `path.relative()` or `path.resolve()` gets a native path
+ * like `src\a.js`, which the workspace then treats as a single component and
+ * compares against `src/**` without success. The CLI does not have this
+ * problem because it is a native binary.
+ *
+ * Only the separators are rewritten. Backslashes that a caller meant as
+ * escapes inside a file name would already be invalid on Windows, so there is
+ * no ambiguity to preserve.
+ */
+function normalizePathSeparators(path: string): string {
+	return path.includes("\\") ? path.replaceAll("\\", "/") : path;
+}
+
 export interface PrintDiagnosticsOptions {
 	/**
 	 * The name of the file to print diagnostics for
@@ -293,7 +312,7 @@ export class BiomeCommon<Configuration, Diagnostic> {
 	 */
 	openProject(path?: string): OpenProjectResult {
 		return this.workspace.openProject({
-			path: path || "",
+			path: normalizePathSeparators(path || ""),
 			openUninitialized: true,
 		});
 	}
@@ -304,19 +323,20 @@ export class BiomeCommon<Configuration, Diagnostic> {
 		content: string,
 		func: (path: BiomePath) => T,
 	): T {
+		const normalizedPath = normalizePathSeparators(path);
 		return tryCatchWrapper(() => {
 			this.workspace.openFile({
 				projectKey,
 				content: { type: "fromClient", content, version: 0 },
-				path,
+				path: normalizedPath,
 			});
 
 			try {
-				return func(path);
+				return func(normalizedPath);
 			} finally {
 				this.workspace.closeFile({
 					projectKey,
-					path,
+					path: normalizedPath,
 				});
 			}
 		});

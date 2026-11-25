@@ -156,4 +156,37 @@ describe("Biome WebAssembly formatContent", () => {
 
 		expect(result.content).toEqual(formatted);
 	});
+
+	// The workspace runs inside WebAssembly, where a backslash is an ordinary
+	// character and never a path separator. A caller on Windows that passes
+	// `path.relative()` gets `src\a.js`, which used to be compared against
+	// `src/**` as a single component and never matched. The CLI is a native
+	// binary, so it does not have this problem.
+	it("matches overrides for Windows-style paths", () => {
+		biome.applyConfiguration(projectKey, {
+			formatter: { indentStyle: "space", indentWidth: 2 },
+			overrides: [
+				{ includes: ["src/**"], formatter: { indentWidth: 8 } },
+			],
+		});
+
+		const content = "function f(){return 1}\n";
+		const indentWidthOf = (output: string) =>
+			output.split("\n")[1].match(/^ */)![0].length;
+
+		const posix = biome.formatContent(projectKey, content, {
+			filePath: "src/a.js",
+		});
+		const windows = biome.formatContent(projectKey, content, {
+			filePath: "src\\a.js",
+		});
+		const windowsNested = biome.formatContent(projectKey, content, {
+			filePath: "src\\nested\\b.js",
+		});
+
+		expect(indentWidthOf(posix.content)).toBe(8);
+		expect(indentWidthOf(windows.content)).toBe(8);
+		expect(indentWidthOf(windowsNested.content)).toBe(8);
+		expect(windows.content).toEqual(posix.content);
+	});
 });
