@@ -88,7 +88,7 @@ Use existing rules with the same mutation shape as API examples.
 
 Add options only for a real semantic mode or established conflicting preference. Do not add speculative flexibility.
 
-Use the rule's generated or existing file under `crates/biome_rule_options/src/` as the source of truth. Follow the analyzer guide sections **Rule Options**, **Merge**, and **Documenting Options** for current derives, merge behavior, configuration examples, and rustdoc requirements.
+Use the rule's generated or existing file under `crates/biome_rule_options/src/` as the source of truth. A lint rule without options declares its options as an alias of `crate::EmptyRuleOptions`; replace the alias with a struct of the same name when adding options. Follow the analyzer guide sections **Rule Options**, **Merge**, and **Documenting Options** for current derives, merge behavior, configuration examples, and rustdoc requirements.
 
 Check these integration points:
 
