@@ -572,6 +572,7 @@ define_categories! {
     "lint/nursery/useTanstackQueryExhaustiveDependencies": "https://biomejs.dev/linter/rules/use-tanstack-query-exhaustive-dependencies",
     "lint/nursery/useTanstackQueryInfiniteQueryPropertyOrder": "https://biomejs.dev/linter/rules/use-tanstack-query-infinite-query-property-order",
     "lint/nursery/useTanstackQueryMutationPropertyOrder": "https://biomejs.dev/linter/rules/use-tanstack-query-mutation-property-order",
+    "lint/nursery/useTanstackQueryQueryOptions": "https://biomejs.dev/linter/rules/use-tanstack-query-query-options",
     "lint/nursery/useTanstackQueryStableQueryClient": "https://biomejs.dev/linter/rules/use-tanstack-query-stable-query-client",
     "lint/nursery/useTopLevelDescribe": "https://biomejs.dev/linter/rules/use-top-level-describe",
     "lint/nursery/useTopLevelHeading": "https://biomejs.dev/linter/rules/use-top-level-heading",

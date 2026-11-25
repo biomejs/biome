@@ -3523,6 +3523,7 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     result.push(("nursery", "useTanstackQueryExhaustiveDependencies", TypeId::of::<biome_rule_options::use_tanstack_query_exhaustive_dependencies::UseTanstackQueryExhaustiveDependenciesOptions>()));
     result.push(("nursery", "useTanstackQueryInfiniteQueryPropertyOrder", TypeId::of::<biome_rule_options::use_tanstack_query_infinite_query_property_order::UseTanstackQueryInfiniteQueryPropertyOrderOptions>()));
     result.push(("nursery", "useTanstackQueryMutationPropertyOrder", TypeId::of::<biome_rule_options::use_tanstack_query_mutation_property_order::UseTanstackQueryMutationPropertyOrderOptions>()));
+    result.push(("nursery", "useTanstackQueryQueryOptions", TypeId::of::<biome_rule_options::use_tanstack_query_query_options::UseTanstackQueryQueryOptionsOptions>()));
     result.push(("nursery", "useTanstackQueryStableQueryClient", TypeId::of::<biome_rule_options::use_tanstack_query_stable_query_client::UseTanstackQueryStableQueryClientOptions>()));
     result.push((
         "style",
