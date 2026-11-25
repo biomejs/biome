@@ -8492,6 +8492,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoUserSelectNoneConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoUserSelectNoneOptions" }
+			]
+		},
+		"NoUserSelectNoneOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoValueAtRuleConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -10525,6 +10535,13 @@
 					"description": "Disallow type conversions that do not change the type of an expression.\nSee https://biomejs.dev/linter/rules/no-useless-type-conversion",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoUselessTypeConversionConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noUserSelectNone": {
+					"description": "Disallow user-select: none and its vendor-prefixed forms.\nSee https://biomejs.dev/linter/rules/no-user-select-none",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoUserSelectNoneConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -17480,6 +17497,15 @@
 				},
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoUselessUndefinedOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoUserSelectNoneOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoUserSelectNoneOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

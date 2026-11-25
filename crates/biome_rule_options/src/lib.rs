@@ -449,6 +449,7 @@ pub mod no_useless_type_constraint;
 pub mod no_useless_type_conversion;
 pub mod no_useless_undefined;
 pub mod no_useless_undefined_initialization;
+pub mod no_user_select_none;
 pub mod no_value_at_rule;
 pub mod no_var;
 pub mod no_void;

@@ -2119,6 +2119,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     ));
     result.push(("complexity", "noUselessUndefinedInitialization", TypeId::of::<biome_rule_options::no_useless_undefined_initialization::NoUselessUndefinedInitializationOptions>()));
     result.push((
+        "nursery",
+        "noUserSelectNone",
+        TypeId::of::<biome_rule_options::no_user_select_none::NoUserSelectNoneOptions>(),
+    ));
+    result.push((
         "style",
         "noValueAtRule",
         TypeId::of::<biome_rule_options::no_value_at_rule::NoValueAtRuleOptions>(),

@@ -3705,6 +3705,11 @@ export interface Nursery {
 	 */
 	noUselessTypeConversion?: NoUselessTypeConversionConfiguration;
 	/**
+	 * Disallow user-select: none and its vendor-prefixed forms.
+	 * See https://biomejs.dev/linter/rules/no-user-select-none
+	 */
+	noUserSelectNone?: NoUserSelectNoneConfiguration;
+	/**
 	 * Disallow asynchronous code in Vue computed properties.
 	 * See https://biomejs.dev/linter/rules/no-vue-async-computed
 	 */
@@ -7343,6 +7348,9 @@ export type NoUselessTypeAssertionConfiguration =
 export type NoUselessTypeConversionConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUselessTypeConversionOptions;
+export type NoUserSelectNoneConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoUserSelectNoneOptions;
 export type NoVueAsyncComputedConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueAsyncComputedOptions;
@@ -10851,6 +10859,10 @@ export interface RuleWithNoUselessTypeConversionOptions {
 	level: RulePlainConfiguration;
 	options?: NoUselessTypeConversionOptions;
 }
+export interface RuleWithNoUserSelectNoneOptions {
+	level: RulePlainConfiguration;
+	options?: NoUserSelectNoneOptions;
+}
 export interface RuleWithNoVueAsyncComputedOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueAsyncComputedOptions;
@@ -14344,6 +14356,7 @@ export type NoUselessSpliceOptions = {};
 export type NoUselessSpreadOptions = {};
 export type NoUselessTypeAssertionOptions = {};
 export type NoUselessTypeConversionOptions = {};
+export type NoUserSelectNoneOptions = {};
 export interface NoVueAsyncComputedOptions {
 	/**
 	 * Names of objects whose `then()`, `catch()`, and `finally()` methods aren't treated as
@@ -16679,6 +16692,7 @@ export type Category =
 	| "lint/nursery/noUselessSpread"
 	| "lint/nursery/noUselessTypeAssertion"
 	| "lint/nursery/noUselessTypeConversion"
+	| "lint/nursery/noUserSelectNone"
 	| "lint/nursery/noVueAsyncComputed"
 	| "lint/nursery/noVueBooleanDefault"
 	| "lint/nursery/noVueChildContent"
