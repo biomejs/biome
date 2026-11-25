@@ -1,0 +1,163 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+{
+	const index = list.indexOf(item);
+	index < 0 as boolean;
+}
+{
+	const index = list.indexOf(item);
+	index < 0 satisfies boolean;
+}
+{
+	const index = list.indexOf(item);
+	foo()
+	index < 0 as boolean
+}
+{
+	const index: number = list.indexOf(item);
+	index < 0;
+}
+{
+	const index = list.indexOf(item);
+	type index = number;
+	if (index < 0) {}
+}
+
+```
+
+# Diagnostics
+```
+invalid.ts:4:8 lint/nursery/useConsistentExistenceIndexCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This uses < 0 to check whether indexOf() found no element.
+  
+    2 │ {
+    3 │ 	const index = list.indexOf(item);
+  > 4 │ 	index < 0 as boolean;
+      │ 	      ^^^
+    5 │ }
+    6 │ {
+  
+  i indexOf() returns -1 when it finds no element. Comparing the result with -1 makes it clear that the code checks for this value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use === -1 instead.
+  
+     2  2 │   {
+     3  3 │     const index = list.indexOf(item);
+     4    │ - → index·<·0·as·boolean;
+        4 │ + → (index·===·-1)·as·boolean;
+     5  5 │   }
+     6  6 │   {
+  
+
+```
+
+```
+invalid.ts:8:8 lint/nursery/useConsistentExistenceIndexCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This uses < 0 to check whether indexOf() found no element.
+  
+     6 │ {
+     7 │ 	const index = list.indexOf(item);
+   > 8 │ 	index < 0 satisfies boolean;
+       │ 	      ^^^
+     9 │ }
+    10 │ {
+  
+  i indexOf() returns -1 when it finds no element. Comparing the result with -1 makes it clear that the code checks for this value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use === -1 instead.
+  
+     6  6 │   {
+     7  7 │     const index = list.indexOf(item);
+     8    │ - → index·<·0·satisfies·boolean;
+        8 │ + → (index·===·-1)·satisfies·boolean;
+     9  9 │   }
+    10 10 │   {
+  
+
+```
+
+```
+invalid.ts:13:8 lint/nursery/useConsistentExistenceIndexCheck ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This uses < 0 to check whether indexOf() found no element.
+  
+    11 │ 	const index = list.indexOf(item);
+    12 │ 	foo()
+  > 13 │ 	index < 0 as boolean
+       │ 	      ^^^
+    14 │ }
+    15 │ {
+  
+  i indexOf() returns -1 when it finds no element. Comparing the result with -1 makes it clear that the code checks for this value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:17:8 lint/nursery/useConsistentExistenceIndexCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This uses < 0 to check whether indexOf() found no element.
+  
+    15 │ {
+    16 │ 	const index: number = list.indexOf(item);
+  > 17 │ 	index < 0;
+       │ 	      ^^^
+    18 │ }
+    19 │ {
+  
+  i indexOf() returns -1 when it finds no element. Comparing the result with -1 makes it clear that the code checks for this value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use === -1 instead.
+  
+    15 15 │   {
+    16 16 │     const index: number = list.indexOf(item);
+    17    │ - → index·<·0;
+       17 │ + → index·===·-1;
+    18 18 │   }
+    19 19 │   {
+  
+
+```
+
+```
+invalid.ts:22:12 lint/nursery/useConsistentExistenceIndexCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This uses < 0 to check whether indexOf() found no element.
+  
+    20 │ 	const index = list.indexOf(item);
+    21 │ 	type index = number;
+  > 22 │ 	if (index < 0) {}
+       │ 	          ^^^
+    23 │ }
+    24 │ 
+  
+  i indexOf() returns -1 when it finds no element. Comparing the result with -1 makes it clear that the code checks for this value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use === -1 instead.
+  
+    20 20 │     const index = list.indexOf(item);
+    21 21 │     type index = number;
+    22    │ - → if·(index·<·0)·{}
+       22 │ + → if·(index·===·-1)·{}
+    23 23 │   }
+    24 24 │   
+  
+
+```

@@ -1,0 +1,78 @@
+/* should not generate diagnostics */
+{
+	const index = indexOf("bar");
+	if (index > -1) {}
+}
+{
+	const index = foo.indexOf("bar");
+	if (index === -1) {}
+	if (-1 === index) {}
+	if (index !== -1) {}
+	if (-1 !== index) {}
+	if (0 > index) {}
+	if (index <= -1) {}
+	if (index < 1) {}
+	if (index > 0) {}
+}
+{
+	const index = 0;
+	if (index < 0) {}
+}
+function foo(index) {
+	if (index < 0) {}
+}
+{
+	const index = foo.indexOf("bar");
+	function inner(index) {
+		if (index < 0) {}
+	}
+}
+{
+	let index = foo.indexOf("bar");
+	index < 0;
+}
+{
+	var position = foo.indexOf("bar");
+	position < 0;
+}
+{
+	let index;
+	index = arr.findLastIndex((element) => element > 10);
+	index < 0;
+}
+{
+	const indexOf = "indexOf";
+	const index = foo[indexOf](foo);
+	index < 0;
+}
+{
+	const index = foo["indexOf"](foo);
+	index < 0;
+}
+{
+	const index = foo.indexOf?.(foo);
+	index < 0;
+}
+{
+	const index = foo?.indexOf(foo);
+	index < 0;
+}
+{
+	const index = foo?.bar.indexOf(foo);
+	index < 0;
+}
+{
+	const [index] = foo.indexOf(bar);
+	index < 0;
+}
+{
+	const index = foo.includes(bar);
+	index < 0;
+}
+class Foo {
+	#indexOf() {}
+	bar() {
+		const index = this.#indexOf(1);
+		index < 0;
+	}
+}

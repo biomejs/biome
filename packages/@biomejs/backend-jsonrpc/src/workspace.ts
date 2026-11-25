@@ -4115,6 +4115,11 @@ export interface Nursery {
 	 */
 	useConsistentBooleanProps?: UseConsistentBooleanPropsConfiguration;
 	/**
+	 * Enforce comparing with -1 when checking whether indexOf(), lastIndexOf(), findIndex(), or findLastIndex() found an element.
+	 * See https://biomejs.dev/linter/rules/use-consistent-existence-index-check
+	 */
+	useConsistentExistenceIndexCheck?: UseConsistentExistenceIndexCheckConfiguration;
+	/**
 	 * Enforce a consistent notation for font weights.
 	 * See https://biomejs.dev/linter/rules/use-consistent-font-weight-notation
 	 */
@@ -7589,6 +7594,9 @@ export type UseConsistentBooleanNameConfiguration =
 export type UseConsistentBooleanPropsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseConsistentBooleanPropsOptions;
+export type UseConsistentExistenceIndexCheckConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseConsistentExistenceIndexCheckOptions;
 export type UseConsistentFontWeightNotationConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseConsistentFontWeightNotationOptions;
@@ -11251,6 +11259,14 @@ export interface RuleWithUseConsistentBooleanPropsOptions {
 	level: RulePlainConfiguration;
 	options?: UseConsistentBooleanPropsOptions;
 }
+export interface RuleWithUseConsistentExistenceIndexCheckOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseConsistentExistenceIndexCheckOptions;
+}
 export interface RuleWithUseConsistentFontWeightNotationOptions {
 	/**
 	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
@@ -14550,6 +14566,7 @@ export interface UseConsistentBooleanPropsOptions {
 	 */
 	mode?: BooleanPropMode;
 }
+export type UseConsistentExistenceIndexCheckOptions = {};
 export interface UseConsistentFontWeightNotationOptions {
 	/**
 	 * Whether to allow the relative keywords `bolder` and `lighter` when `notation` is `"numeric"`.
@@ -16765,6 +16782,7 @@ export type Category =
 	| "lint/nursery/useConsistentBlockLang"
 	| "lint/nursery/useConsistentBooleanName"
 	| "lint/nursery/useConsistentBooleanProps"
+	| "lint/nursery/useConsistentExistenceIndexCheck"
 	| "lint/nursery/useConsistentFontWeightNotation"
 	| "lint/nursery/useConsistentFunctionStyle"
 	| "lint/nursery/useConsistentHeadingLevel"
