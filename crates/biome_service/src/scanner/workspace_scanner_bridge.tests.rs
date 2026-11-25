@@ -710,6 +710,47 @@ fn should_not_index_inside_an_ignored_folder_inside_file_includes() {
     assert!(!workspace.is_indexed(&file_path));
 }
 
+/// The in-memory file system never skips a folder before checking its files, so the initial scan
+/// must check the ancestors of each file against `files.includes`.
+#[test]
+fn should_not_index_inside_an_ignored_folder_inside_file_includes_in_memory() {
+    let file_path = Utf8PathBuf::from("/project/dist/minified.js");
+    let fs = MemoryFileSystem::default();
+    fs.insert(file_path.clone(), "import 'foo';");
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/project");
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            workspace_directory: Some(BiomePath::new("/project")),
+            configuration: Configuration {
+                files: Some(FilesConfiguration {
+                    includes: Some(vec![
+                        NormalizedGlob::from_str("**").unwrap(),
+                        NormalizedGlob::from_str("!**/dist").unwrap(),
+                    ]),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            },
+            extended_configurations: Default::default(),
+            module_graph_resolution_kind: ModuleGraphResolutionKind::ModulesAndTypes,
+        })
+        .expect("can update settings");
+
+    workspace
+        .scan_project(ScanProjectParams {
+            project_key,
+            watch: false,
+            force: false,
+            scan_kind: ScanKind::Project,
+            verbose: false,
+        })
+        .expect("can scan the project");
+
+    assert!(!workspace.is_indexed(&file_path));
+}
+
 #[test]
 fn should_not_index_inside_an_ignored_folder_inside_vcs_ignore_file() {
     let file_path = "dist/minified.js";

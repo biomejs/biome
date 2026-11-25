@@ -1543,6 +1543,10 @@ pub enum IgnoreKind {
     /// Use this only when every directory that contains the path was already checked and wasn't
     /// ignored, for example while walking a directory tree from the top. Otherwise, a file inside
     /// an ignored directory is reported as not ignored.
+    ///
+    /// The folder that contains a nested configuration file is the exception: its parent
+    /// directories are also checked against the `files.includes` of that configuration, because
+    /// they were checked against different settings.
     Path,
 
     /// Checks the path itself and each directory that contains it, up to the root of the

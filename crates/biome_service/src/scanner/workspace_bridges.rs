@@ -39,6 +39,10 @@ pub(crate) trait WorkspaceScannerBridge: Send + Sync + RefUnwindSafe {
     /// and `request_kind`.
     ///
     /// Then `path_kind` is `None`, the underling code fallbacks to a sys call.
+    ///
+    /// `ancestors_checked` is `true` when a traversal reached `path` after
+    /// accepting every directory that contains it, so an initial scan only
+    /// needs to check `path` itself.
     fn is_ignored(
         &self,
         project_key: ProjectKey,
@@ -46,6 +50,7 @@ pub(crate) trait WorkspaceScannerBridge: Send + Sync + RefUnwindSafe {
         path: &Utf8Path,
         request_kind: IndexRequestKind,
         path_kind: Option<PathKind>,
+        ancestors_checked: bool,
     ) -> Result<bool, WorkspaceError>;
 
     /// Returns whether the given `path` has been indexed.
@@ -345,6 +350,7 @@ where
             path,
             IndexRequestKind::Explicit(IndexTrigger::Update),
             path_kind,
+            false,
         )
     }
 

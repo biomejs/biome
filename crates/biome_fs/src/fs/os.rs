@@ -275,7 +275,10 @@ struct Candidate<'scope> {
 
 impl<'scope> FileOwners<'scope> {
     /// Records that the walk accepted `logical_path` for the file at `physical_path`, delivering
-    /// it immediately when it is canonical.
+    /// it immediately when it is the first canonical path to the file.
+    ///
+    /// Two canonical paths can reach the same file when they differ only in a form the file
+    /// system treats as equal, such as a Windows verbatim prefix. Only the first one is delivered.
     #[expect(clippy::too_many_arguments)]
     fn accept(
         &self,
@@ -289,8 +292,9 @@ impl<'scope> FileOwners<'scope> {
     ) {
         let key = (context_id(context), physical_path);
         if is_canonical {
-            self.canonical.pin().insert(key);
-            delivery.deliver(scope, context, logical_path);
+            if self.canonical.pin().insert(key) {
+                delivery.deliver(scope, context, logical_path);
+            }
             return;
         }
 
@@ -970,6 +974,28 @@ mod tests {
         fn should_store_dirs(&self) -> bool {
             self.store_dirs
         }
+    }
+
+    #[test]
+    fn delivers_one_canonical_path_for_each_physical_file() {
+        let ctx = TestContext::new(None, false);
+        let owners = FileOwners::default();
+        rayon::scope(|scope| {
+            for logical_path in [r"C:\project\file.js", r"\\?\C:\project\file.js"] {
+                owners.accept(
+                    scope,
+                    &ctx,
+                    Delivery::Store,
+                    Utf8PathBuf::from(r"\\?\C:\project\file.js"),
+                    BiomePath::new(logical_path),
+                    false,
+                    true,
+                );
+            }
+        });
+
+        assert_eq!(ctx.visited.len(), 1);
+        assert!(owners.take_candidates().is_empty());
     }
 
     #[test]

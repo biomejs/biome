@@ -2087,6 +2087,7 @@ impl WorkspaceServerWithDb<'_> {
         path: &Utf8Path,
         request_kind: IndexRequestKind,
         path_kind: Option<PathKind>,
+        ancestors_checked: bool,
     ) -> Result<bool, WorkspaceError> {
         if self.project_is_force_ignored(project_key, path) {
             return Ok(true);
@@ -2127,12 +2128,18 @@ impl WorkspaceServerWithDb<'_> {
                 return Ok(is_ignored);
             }
 
-            // An initial scan can reach `path` through a folder that is
-            // ignored: it chooses the folders to descend into before it loads
-            // nested configuration files, and file systems without directory
-            // checks, such as the in-memory one, never skip a folder. So the
-            // ancestors of `path` must be checked too.
-            IndexRequestKind::Explicit(IndexTrigger::InitialScan) => IgnoreKind::Ancestors,
+            // A traversal that checked every folder containing `path` already
+            // skipped the ignored ones, so checking `path` itself is enough.
+            // File systems that don't check folders before their files, such
+            // as the in-memory one, don't report checked ancestors, and the
+            // ancestors of `path` are checked here instead.
+            IndexRequestKind::Explicit(IndexTrigger::InitialScan) => {
+                if ancestors_checked {
+                    IgnoreKind::Path
+                } else {
+                    IgnoreKind::Ancestors
+                }
+            }
 
             // For a (watcher) update, we can't rely on the above reasoning.
             // Even though we only install watchers on folders that contain
@@ -5144,8 +5151,16 @@ impl WorkspaceScannerBridge for WorkspaceServerWithDb<'_> {
         path: &Utf8Path,
         request_kind: IndexRequestKind,
         path_kind: Option<PathKind>,
+        ancestors_checked: bool,
     ) -> Result<bool, WorkspaceError> {
-        self.is_ignored_by_scanner(project_key, scan_kind, path, request_kind, path_kind)
+        self.is_ignored_by_scanner(
+            project_key,
+            scan_kind,
+            path,
+            request_kind,
+            path_kind,
+            ancestors_checked,
+        )
     }
 
     #[inline]
@@ -5497,9 +5512,16 @@ impl WorkspaceScannerBridge for LocalWorkspace {
         path: &Utf8Path,
         request_kind: IndexRequestKind,
         path_kind: Option<PathKind>,
+        ancestors_checked: bool,
     ) -> Result<bool, WorkspaceError> {
-        self.as_workspace()
-            .is_ignored(project_key, scan_kind, path, request_kind, path_kind)
+        self.as_workspace().is_ignored(
+            project_key,
+            scan_kind,
+            path,
+            request_kind,
+            path_kind,
+            ancestors_checked,
+        )
     }
 
     #[inline]

@@ -1299,6 +1299,7 @@ fn scan_dependencies<W: WorkspaceScannerBridge>(
                         &dependency_path,
                         IndexRequestKind::Dependency(ctx.trigger),
                         None,
+                        false,
                     )
                     .unwrap_or(true);
                 if !is_ignored {
@@ -1316,6 +1317,7 @@ fn scan_dependencies<W: WorkspaceScannerBridge>(
                     &dependency_path,
                     IndexRequestKind::Dependency(ctx.trigger),
                     None,
+                    false,
                 )
                 .unwrap_or(true);
             if !is_ignored {
@@ -1519,7 +1521,7 @@ impl<W: WorkspaceScannerBridge> TraversalContext for ScanContext<'_, W> {
         &self,
         path: &BiomePath,
         path_kind: PathKind,
-        _ancestors_checked: bool,
+        ancestors_checked: bool,
     ) -> bool {
         match self.workspace.is_ignored(
             self.project_key,
@@ -1527,6 +1529,7 @@ impl<W: WorkspaceScannerBridge> TraversalContext for ScanContext<'_, W> {
             path.as_path(),
             self.request_kind,
             Some(path_kind),
+            ancestors_checked,
         ) {
             Ok(is_ignored) => !is_ignored,
             Err(_) => {

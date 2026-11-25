@@ -123,6 +123,38 @@ fn excluded_folder_ignores_walked_and_explicit_paths() {
 }
 
 #[test]
+fn nested_configuration_excluding_its_parent_folder_ignores_its_files() {
+    let mut fs =
+        TemporaryFs::new("nested_configuration_excluding_its_parent_folder_ignores_its_files");
+    fs.create_file("biome.json", "{}");
+    fs.create_file(
+        "generated/app/biome.json",
+        r#"{ "root": false, "files": { "includes": ["**", "!**/generated"] } }"#,
+    );
+    fs.create_file("generated/app/src/a.js", UNFORMATTED);
+    fs.create_file("src/b.js", UNFORMATTED);
+    let mut console = BufferConsole::default();
+
+    let result = run_cli_with_dyn_fs(
+        Box::new(fs.create_os()),
+        &mut console,
+        Args::from(["format", "--write", fs.cli_path()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+    let fs = fs.create_mem();
+    assert_file_contents(&fs, Utf8Path::new("generated/app/src/a.js"), UNFORMATTED);
+    assert_file_contents(&fs, Utf8Path::new("src/b.js"), FORMATTED);
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "nested_configuration_excluding_its_parent_folder_ignores_its_files",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn does_handle_only_included_files() {
     let mut console = BufferConsole::default();
     let fs = MemoryFileSystem::default();

@@ -363,19 +363,24 @@ pub trait ProjectDb: biome_db::Db {
     ) -> bool {
         let nested_settings = project_data.nested_settings(self);
         let root_settings = project_data.root_settings(self);
-        let includes = nested_settings
+        let nested = nested_settings
             .iter()
-            .find(|(project_path, _)| path.starts_with(project_path.as_ref()))
-            .map_or(&root_settings.as_ref().files.includes, |(_, settings)| {
-                &settings.as_ref().files.includes
-            });
+            .find(|(project_path, _)| path.starts_with(project_path.as_ref()));
+        let includes = nested.map_or(&root_settings.as_ref().files.includes, |(_, settings)| {
+            &settings.as_ref().files.includes
+        });
         let mut is_included = if is_dir {
             includes.is_dir_included(path)
         } else {
             includes.is_file_included(path)
         };
 
-        if ignore_kind == IgnoreKind::Ancestors {
+        // The folder of a nested configuration is where its `includes` start to apply. A
+        // traversal checked the folders above it against other settings, so they are checked
+        // again here, even with `IgnoreKind::Path`.
+        let is_nested_configuration_folder =
+            is_dir && nested.is_some_and(|(project_path, _)| path == project_path.as_ref());
+        if ignore_kind == IgnoreKind::Ancestors || is_nested_configuration_folder {
             for ancestor in path.ancestors().skip(1) {
                 if !is_included
                     || ancestor == project_data.path(self)
