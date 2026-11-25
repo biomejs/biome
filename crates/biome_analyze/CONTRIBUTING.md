@@ -610,16 +610,14 @@ Rule options must be placed inside the crate `biome_rule_options`. If you run th
 should have created a new file inside the crate that has the name of your rule. For example, if the rule name is `useThisConvention`
 you should see a file `use_this_convention.rs` inside `biome_rule_options/src`.
 
-For a lint rule, this file declares `UseThisConventionOptions` as an alias of `EmptyRuleOptions`, the options type shared by
-the lint rules without options:
+This file declares `UseThisConventionOptions` as an alias of `EmptyRuleOptions`, the options type shared by
+the rules without options:
 
 ```rust
 pub type UseThisConventionOptions = crate::EmptyRuleOptions;
 ```
 
 To add options, replace the alias with a struct of the same name, as shown in [Representing the rule options in Rust](#representing-the-rule-options-in-rust).
-For an assist action, the file already contains an empty struct called `UseThisConventionOptions`; use this struct to add the options.
-
 ##### Options for our example rule
 
 Let's assume that the rule we want to implement supports the following options:

@@ -113,30 +113,23 @@ pub fn generate_group_struct(
             biome_rule_options::#rule_base_name::#rule_name
         };
 
-        // The JSON schema names the options of a lint rule after the rule,
+        // The JSON schema names the options of a rule after the rule,
         // also when the rule shares its options type with other rules.
-        let schema_type = if kind == biome_analyze::RuleCategory::Action {
-            quote! {}
-        } else {
-            let options_name = rule_name.to_string();
-            options_names.push(quote! {
-                pub struct #rule_name;
-                impl crate::analyzer::RuleOptionsName for #rule_name {
-                    const NAME: &'static str = #options_name;
-                    type Options = #rule_option_type;
-                }
-            });
-            let schema_type = format!(
-                "Option<{rule_config_type}<crate::analyzer::NamedRuleOptions<{options_names_mod}::{rule_name}>>>"
-            );
-            quote! {
-                #[cfg_attr(feature = "schema", schemars(with = #schema_type))]
+        let options_name = rule_name.to_string();
+        options_names.push(quote! {
+            pub struct #rule_name;
+            impl crate::analyzer::RuleOptionsName for #rule_name {
+                const NAME: &'static str = #options_name;
+                type Options = #rule_option_type;
             }
-        };
+        });
+        let schema_type = format!(
+            "Option<{rule_config_type}<crate::analyzer::NamedRuleOptions<{options_names_mod}::{rule_name}>>>"
+        );
         schema_lines_rules.push(quote! {
             #[doc = #summary]
             #[serde(skip_serializing_if = "Option::is_none")]
-            #schema_type
+            #[cfg_attr(feature = "schema", schemars(with = #schema_type))]
             pub #rule_identifier: Option<#rule_config_type<#rule_option_type>>
         });
 
@@ -227,6 +220,11 @@ pub fn generate_group_struct(
 
     if kind == biome_analyze::RuleCategory::Action {
         quote! {
+            #[cfg(feature = "schema")]
+            mod #options_names_mod {
+                #( #options_names )*
+            }
+
             #[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, Merge, PartialEq, Serialize)]
             #[cfg_attr(feature = "schema", derive(JsonSchema))]
             #[serde(rename_all = "camelCase", default, deny_unknown_fields)]

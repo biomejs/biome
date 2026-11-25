@@ -121,12 +121,8 @@ fn main() -> Result<()> {
             name,
             kind,
         } => {
-            let share_empty_options = !matches!(
-                category,
-                xtask_codegen::generate_new_analyzer_rule::Category::Assist
-            );
             generate_new_analyzer_rule(kind, category, &name);
-            generate_analyzer_rule_options(&name, Overwrite, true, share_empty_options)?;
+            generate_analyzer_rule_options(&name, Overwrite, true)?;
         }
         TaskCommand::MoveRule { name, group } => {
             move_rule(&name, &group)?;
