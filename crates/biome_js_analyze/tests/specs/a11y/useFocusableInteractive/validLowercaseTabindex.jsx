@@ -3,6 +3,7 @@
 	<div role="button" tabindex={0} />
 	<div role="button" tabindex={-1} />
 	<div role="button" tabindex="0" />
+	<div role="option" tabindex={-1} />
 
 	<div role="menu">
 		<div role="menuitem" tabindex="0">

@@ -25,7 +25,7 @@ invalid.jsx:2:2 lint/a11y/useFocusableInteractive ━━━━━━━━━━
   
   i A non-interactive HTML element that is not focusable may not be reachable for users that rely on keyboard navigation, even with an added role like "button".
   
-  i Add a tabIndex attribute to make this element focusable.
+  i Add a tabIndex or tabindex attribute to make this element focusable.
   
 
 ```
@@ -44,7 +44,7 @@ invalid.jsx:3:2 lint/a11y/useFocusableInteractive ━━━━━━━━━━
   
   i A non-interactive HTML element that is not focusable may not be reachable for users that rely on keyboard navigation, even with an added role like "tab".
   
-  i Add a tabIndex attribute to make this element focusable.
+  i Add a tabIndex or tabindex attribute to make this element focusable.
   
 
 ```

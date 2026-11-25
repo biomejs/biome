@@ -1,0 +1,13 @@
+/* should not generate diagnostics */
+<>
+	<button tabindex="0"></button>
+	<span role="button" tabindex="0"></span>
+	<span role="article" tabindex="-1"></span>
+	<MyButton tabindex={0} />
+	<article tabindex="-1"></article>
+	<div tabindex="-1"></div>
+	<article tabindex={-1}></article>
+	<div tabindex={-1}></div>
+	<div></div>
+	<button tabindex="-1"></button>
+</>;

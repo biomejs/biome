@@ -1,0 +1,38 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidLowercaseTabindex.jsx
+---
+# Input
+```jsx
+/* should generate diagnostics */
+<>
+	<div aria-activedescendant={someID} tabindex={0} />;
+	<div aria-activedescendant={someID} />;
+</>;
+
+```
+
+# Diagnostics
+```
+invalidLowercaseTabindex.jsx:4:2 lint/a11y/useAriaActivedescendantWithTabindex  FIXABLE  ━━━━━━━━━━━
+
+  × Enforce elements with aria-activedescendant are tabbable.
+  
+    2 │ <>
+    3 │ 	<div aria-activedescendant={someID} tabindex={0} />;
+  > 4 │ 	<div aria-activedescendant={someID} />;
+      │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ </>;
+    6 │ 
+  
+  i aria-activedescendant is used to manage focus within a composite widget.
+    The element with the attribute aria-activedescendant retains the active document focus.
+  
+  i Add the tabIndex attribute to the element with a value greater than or equal to -1.
+  
+  i Unsafe fix: Add the tabIndex attribute.
+  
+    4 │ → <div·aria-activedescendant={someID}··tabIndex="0"·/>;
+      │                                      ++++++++++++++    
+
+```

@@ -1,0 +1,78 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidLowercaseTabindex.jsx
+---
+# Input
+```jsx
+/* should generate diagnostics */
+<>
+	<div tabindex="0"></div>
+	<div role="article" tabindex="0"></div>
+	<article tabindex={0} />
+</>;
+
+```
+
+# Diagnostics
+```
+invalidLowercaseTabindex.jsx:3:7 lint/a11y/noNoninteractiveTabindex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
+
+  × The HTML element div is non-interactive. Do not use tabIndex.
+  
+    1 │ /* should generate diagnostics */
+    2 │ <>
+  > 3 │ 	<div tabindex="0"></div>
+      │ 	     ^^^^^^^^^^^^
+    4 │ 	<div role="article" tabindex="0"></div>
+    5 │ 	<article tabindex={0} />
+  
+  i Adding non-interactive elements to the keyboard navigation flow can confuse users.
+  
+  i Unsafe fix: Remove the tabIndex attribute.
+  
+    3 │ → <div·tabindex="0"></div>
+      │        ------------       
+
+```
+
+```
+invalidLowercaseTabindex.jsx:4:22 lint/a11y/noNoninteractiveTabindex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
+
+  × The HTML element div is non-interactive. Do not use tabIndex.
+  
+    2 │ <>
+    3 │ 	<div tabindex="0"></div>
+  > 4 │ 	<div role="article" tabindex="0"></div>
+      │ 	                    ^^^^^^^^^^^^
+    5 │ 	<article tabindex={0} />
+    6 │ </>;
+  
+  i Adding non-interactive elements to the keyboard navigation flow can confuse users.
+  
+  i Unsafe fix: Remove the tabIndex attribute.
+  
+    4 │ → <div·role="article"·tabindex="0"></div>
+      │                       ------------       
+
+```
+
+```
+invalidLowercaseTabindex.jsx:5:11 lint/a11y/noNoninteractiveTabindex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
+
+  × The HTML element article is non-interactive. Do not use tabIndex.
+  
+    3 │ 	<div tabindex="0"></div>
+    4 │ 	<div role="article" tabindex="0"></div>
+  > 5 │ 	<article tabindex={0} />
+      │ 	         ^^^^^^^^^^^^
+    6 │ </>;
+    7 │ 
+  
+  i Adding non-interactive elements to the keyboard navigation flow can confuse users.
+  
+  i Unsafe fix: Remove the tabIndex attribute.
+  
+    5 │ → <article·tabindex={0}·/>
+      │            -------------  
+
+```
