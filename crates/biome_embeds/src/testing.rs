@@ -4,6 +4,7 @@ use biome_db::Source;
 use biome_db::testing::Events;
 use biome_html_parser::{HtmlParserOptions, parse_html};
 use biome_js_parser::JsParserOptions;
+use biome_languages::javascript::{JsEmbeddingKind, SvelteEmbeddingKind, SvelteFileKind};
 use biome_languages::{DocumentFileSource, HtmlFileSource, JsFileSource, LanguageDb};
 use biome_parser::AnyParse;
 use biome_parser::db::{ParseDb, SnippetOutput, SourceOutput};
@@ -31,6 +32,9 @@ fn parse_text(db: &dyn LanguageDb, text: &str, source_index: usize) -> AnyParse 
     match db.source_from_index(source_index) {
         Some(DocumentFileSource::Html(source)) if source.is_vue() => {
             parse_html(text, HtmlParserOptions::default().with_vue()).into()
+        }
+        Some(DocumentFileSource::Html(source)) if source.is_svelte() => {
+            parse_html(text, HtmlParserOptions::from(&source)).into()
         }
         Some(DocumentFileSource::Html(_)) => parse_html(text, HtmlParserOptions::default()).into(),
         source => {
@@ -143,6 +147,15 @@ impl LanguageDb for TestDb {
                 JsFileSource::ts()
                     .with_embedding_kind(*JsFileSource::vue_setup().as_embedding_kind()),
             ),
+            SVELTE_SOURCE_INDEX => DocumentFileSource::Html(HtmlFileSource::svelte()),
+            SVELTE_EACH_BINDING_SOURCE_INDEX => DocumentFileSource::Js(
+                JsFileSource::js_module().with_embedding_kind(JsEmbeddingKind::Svelte {
+                    embedding_kind: SvelteEmbeddingKind::EachBinding,
+                    is_module_script: false,
+                    is_class_attribute: false,
+                    file_kind: SvelteFileKind::Component,
+                }),
+            ),
             _ => DocumentFileSource::Js(JsFileSource::vue()),
         })
     }
@@ -184,6 +197,13 @@ pub(crate) fn parse_html_source_with_js_snippet(db: &TestDb, html: &str, js: &st
 pub(crate) fn parse_vue_source_with_js_snippet(db: &TestDb, html: &str, js: &str) -> Utf8PathBuf {
     parse_vue_source_with_js_snippets(db, html, &[(js, VUE_SCRIPT_SOURCE_INDEX)])
 }
+
+/// The source index [`TestDb::source_from_index`] resolves to a Svelte component.
+pub(crate) const SVELTE_SOURCE_INDEX: usize = 6;
+
+/// The source index [`TestDb::source_from_index`] resolves to the clause after `as` in a
+/// Svelte `{#each}` block.
+pub(crate) const SVELTE_EACH_BINDING_SOURCE_INDEX: usize = 7;
 
 /// The source index [`TestDb::source_from_index`] resolves to a plain `<script>` block.
 pub(crate) const VUE_SCRIPT_SOURCE_INDEX: usize = 1;

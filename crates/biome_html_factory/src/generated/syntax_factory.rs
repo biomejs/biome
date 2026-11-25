@@ -2058,39 +2058,6 @@ impl SyntaxFactory for HtmlSyntaxFactory {
                 }
                 slots.into_node(SVELTE_CONST_BLOCK, children)
             }
-            SVELTE_CURLY_DESTRUCTURED_NAME => {
-                let mut elements = (&children).into_iter();
-                let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
-                let mut current_element = elements.next();
-                if let Some(element) = &current_element
-                    && element.kind() == T!['{']
-                {
-                    slots.mark_present();
-                    current_element = elements.next();
-                }
-                slots.next_slot();
-                if let Some(element) = &current_element
-                    && SvelteBindingAssignmentBindingList::can_cast(element.kind())
-                {
-                    slots.mark_present();
-                    current_element = elements.next();
-                }
-                slots.next_slot();
-                if let Some(element) = &current_element
-                    && element.kind() == T!['}']
-                {
-                    slots.mark_present();
-                    current_element = elements.next();
-                }
-                slots.next_slot();
-                if current_element.is_some() {
-                    return RawSyntaxNode::new(
-                        SVELTE_CURLY_DESTRUCTURED_NAME.to_bogus(),
-                        children.into_iter().map(Some),
-                    );
-                }
-                slots.into_node(SVELTE_CURLY_DESTRUCTURED_NAME, children)
-            }
             SVELTE_DEBUG_BLOCK => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<4usize> = RawNodeSlots::default();
@@ -2230,9 +2197,9 @@ impl SyntaxFactory for HtmlSyntaxFactory {
                 }
                 slots.into_node(SVELTE_DIRECTIVE_VALUE, children)
             }
-            SVELTE_EACH_AS_KEYED_ITEM => {
+            SVELTE_EACH_BINDING_CLAUSE => {
                 let mut elements = (&children).into_iter();
-                let mut slots: RawNodeSlots<4usize> = RawNodeSlots::default();
+                let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element
                     && element.kind() == T![as]
@@ -2242,21 +2209,7 @@ impl SyntaxFactory for HtmlSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element
-                    && AnySvelteEachName::can_cast(element.kind())
-                {
-                    slots.mark_present();
-                    current_element = elements.next();
-                }
-                slots.next_slot();
-                if let Some(element) = &current_element
-                    && SvelteEachIndex::can_cast(element.kind())
-                {
-                    slots.mark_present();
-                    current_element = elements.next();
-                }
-                slots.next_slot();
-                if let Some(element) = &current_element
-                    && SvelteEachKey::can_cast(element.kind())
+                    && HtmlTextExpression::can_cast(element.kind())
                 {
                     slots.mark_present();
                     current_element = elements.next();
@@ -2264,11 +2217,11 @@ impl SyntaxFactory for HtmlSyntaxFactory {
                 slots.next_slot();
                 if current_element.is_some() {
                     return RawSyntaxNode::new(
-                        SVELTE_EACH_AS_KEYED_ITEM.to_bogus(),
+                        SVELTE_EACH_BINDING_CLAUSE.to_bogus(),
                         children.into_iter().map(Some),
                     );
                 }
-                slots.into_node(SVELTE_EACH_AS_KEYED_ITEM, children)
+                slots.into_node(SVELTE_EACH_BINDING_CLAUSE, children)
             }
             SVELTE_EACH_BLOCK => {
                 let mut elements = (&children).into_iter();
@@ -2368,39 +2321,6 @@ impl SyntaxFactory for HtmlSyntaxFactory {
                     );
                 }
                 slots.into_node(SVELTE_EACH_INDEX, children)
-            }
-            SVELTE_EACH_KEY => {
-                let mut elements = (&children).into_iter();
-                let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
-                let mut current_element = elements.next();
-                if let Some(element) = &current_element
-                    && element.kind() == T!['(']
-                {
-                    slots.mark_present();
-                    current_element = elements.next();
-                }
-                slots.next_slot();
-                if let Some(element) = &current_element
-                    && HtmlTextExpression::can_cast(element.kind())
-                {
-                    slots.mark_present();
-                    current_element = elements.next();
-                }
-                slots.next_slot();
-                if let Some(element) = &current_element
-                    && element.kind() == T![')']
-                {
-                    slots.mark_present();
-                    current_element = elements.next();
-                }
-                slots.next_slot();
-                if current_element.is_some() {
-                    return RawSyntaxNode::new(
-                        SVELTE_EACH_KEY.to_bogus(),
-                        children.into_iter().map(Some),
-                    );
-                }
-                slots.into_node(SVELTE_EACH_KEY, children)
             }
             SVELTE_EACH_KEYED_ITEM => {
                 let mut elements = (&children).into_iter();
@@ -2951,39 +2871,6 @@ impl SyntaxFactory for HtmlSyntaxFactory {
                 }
                 slots.into_node(SVELTE_OUT_DIRECTIVE, children)
             }
-            SVELTE_RENAME_BINDING => {
-                let mut elements = (&children).into_iter();
-                let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
-                let mut current_element = elements.next();
-                if let Some(element) = &current_element
-                    && SvelteName::can_cast(element.kind())
-                {
-                    slots.mark_present();
-                    current_element = elements.next();
-                }
-                slots.next_slot();
-                if let Some(element) = &current_element
-                    && element.kind() == T ! [:]
-                {
-                    slots.mark_present();
-                    current_element = elements.next();
-                }
-                slots.next_slot();
-                if let Some(element) = &current_element
-                    && AnySvelteBindingAssignmentBinding::can_cast(element.kind())
-                {
-                    slots.mark_present();
-                    current_element = elements.next();
-                }
-                slots.next_slot();
-                if current_element.is_some() {
-                    return RawSyntaxNode::new(
-                        SVELTE_RENAME_BINDING.to_bogus(),
-                        children.into_iter().map(Some),
-                    );
-                }
-                slots.into_node(SVELTE_RENAME_BINDING, children)
-            }
             SVELTE_RENDER_BLOCK => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<4usize> = RawNodeSlots::default();
@@ -3023,32 +2910,6 @@ impl SyntaxFactory for HtmlSyntaxFactory {
                     );
                 }
                 slots.into_node(SVELTE_RENDER_BLOCK, children)
-            }
-            SVELTE_REST_BINDING => {
-                let mut elements = (&children).into_iter();
-                let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
-                let mut current_element = elements.next();
-                if let Some(element) = &current_element
-                    && element.kind() == T ! [...]
-                {
-                    slots.mark_present();
-                    current_element = elements.next();
-                }
-                slots.next_slot();
-                if let Some(element) = &current_element
-                    && SvelteName::can_cast(element.kind())
-                {
-                    slots.mark_present();
-                    current_element = elements.next();
-                }
-                slots.next_slot();
-                if current_element.is_some() {
-                    return RawSyntaxNode::new(
-                        SVELTE_REST_BINDING.to_bogus(),
-                        children.into_iter().map(Some),
-                    );
-                }
-                slots.into_node(SVELTE_REST_BINDING, children)
             }
             SVELTE_SNIPPET_BLOCK => {
                 let mut elements = (&children).into_iter();
@@ -3155,39 +3016,6 @@ impl SyntaxFactory for HtmlSyntaxFactory {
                     );
                 }
                 slots.into_node(SVELTE_SNIPPET_OPENING_BLOCK, children)
-            }
-            SVELTE_SQUARE_DESTRUCTURED_NAME => {
-                let mut elements = (&children).into_iter();
-                let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
-                let mut current_element = elements.next();
-                if let Some(element) = &current_element
-                    && element.kind() == T!['[']
-                {
-                    slots.mark_present();
-                    current_element = elements.next();
-                }
-                slots.next_slot();
-                if let Some(element) = &current_element
-                    && SvelteBindingAssignmentBindingList::can_cast(element.kind())
-                {
-                    slots.mark_present();
-                    current_element = elements.next();
-                }
-                slots.next_slot();
-                if let Some(element) = &current_element
-                    && element.kind() == T![']']
-                {
-                    slots.mark_present();
-                    current_element = elements.next();
-                }
-                slots.next_slot();
-                if current_element.is_some() {
-                    return RawSyntaxNode::new(
-                        SVELTE_SQUARE_DESTRUCTURED_NAME.to_bogus(),
-                        children.into_iter().map(Some),
-                    );
-                }
-                slots.into_node(SVELTE_SQUARE_DESTRUCTURED_NAME, children)
             }
             SVELTE_STYLE_DIRECTIVE => {
                 let mut elements = (&children).into_iter();
@@ -3923,13 +3751,6 @@ impl SyntaxFactory for HtmlSyntaxFactory {
             SVELTE_AWAIT_CLAUSES_LIST => {
                 Self::make_node_list_syntax(kind, children, AnySvelteAwaitClauses::can_cast)
             }
-            SVELTE_BINDING_ASSIGNMENT_BINDING_LIST => Self::make_separated_list_syntax(
-                kind,
-                children,
-                AnySvelteBindingAssignmentBinding::can_cast,
-                T ! [,],
-                false,
-            ),
             SVELTE_BINDING_LIST => Self::make_separated_list_syntax(
                 kind,
                 children,

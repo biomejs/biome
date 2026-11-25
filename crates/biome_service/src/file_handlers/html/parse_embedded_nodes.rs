@@ -582,26 +582,17 @@ fn parse_svelte_blocks(
                         );
                     }
 
-                    if let Some(item) = opening_block.item() {
-                        match item {
-                            AnySvelteBlockItem::SvelteEachAsKeyedItem(as_keyed) => {
-                                if let Some(key) = as_keyed.key()
-                                    && let Ok(key_expression) = key.expression()
-                                    && let Some(candidate) = build_svelte_text_expression_candidate(
-                                        &key_expression,
-                                        &svelte_block,
-                                    )
-                                {
-                                    ctx.parse_and_push(
-                                        &candidate,
-                                        &doc_file_source,
-                                        Some(embedded_file_source),
-                                        nodes,
-                                    );
-                                }
-                            }
-                            AnySvelteBlockItem::SvelteEachKeyedItem(_) => {}
-                        }
+                    if let Some(AnySvelteBlockItem::SvelteEachBindingClause(binding)) =
+                        opening_block.item()
+                        && let Ok(clause) = binding.clause()
+                        && let Some(candidate) = build_svelte_each_binding_candidate(&clause)
+                    {
+                        ctx.parse_and_push(
+                            &candidate,
+                            &doc_file_source,
+                            Some(embedded_file_source),
+                            nodes,
+                        );
                     }
                 }
             }
@@ -804,6 +795,19 @@ fn build_svelte_name_candidate(svelte_name: &SvelteName) -> Option<EmbedCandidat
             text: token.token_text(),
         },
         block_kind: EmbedBlockKind::Neutral,
+    })
+}
+
+fn build_svelte_each_binding_candidate(expression: &HtmlTextExpression) -> Option<EmbedCandidate> {
+    let content_token = expression.html_literal_token().ok()?;
+    Some(EmbedCandidate::TextExpression {
+        content: EmbedContent {
+            element_range: expression.range(),
+            content_range: content_token.text_range(),
+            content_offset: content_token.text_range().start(),
+            text: content_token.token_text(),
+        },
+        block_kind: EmbedBlockKind::Svelte(SvelteBlockKind::EachBinding),
     })
 }
 
@@ -1273,6 +1277,9 @@ fn parse_matched_embed(
                         let embedding_kind = match block_kind {
                             EmbedBlockKind::Svelte(SvelteBlockKind::Snippet) => {
                                 SvelteEmbeddingKind::SnippetSignature
+                            }
+                            EmbedBlockKind::Svelte(SvelteBlockKind::EachBinding) => {
+                                SvelteEmbeddingKind::EachBinding
                             }
                             EmbedBlockKind::Svelte(SvelteBlockKind::Const) => {
                                 SvelteEmbeddingKind::LegacyConst

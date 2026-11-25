@@ -1,0 +1,307 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+assertion_line: 157
+expression: snapshot
+---
+
+## Input
+
+```svelte
+{#each count < limit ? items : [] as item}
+  <p>{item}</p>
+{/each}
+{#await count < limit then value}
+  <p>{value}</p>
+{/await}
+{#each items as constant}
+  <p>{constant}</p>
+{/each}
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    items: HtmlRootItemList [
+        SvelteEachBlock {
+            opening_block: SvelteEachOpeningBlock {
+                sv_curly_hash_token: SV_CURLY_HASH@0..2 "{#" [] [],
+                each_token: EACH_KW@2..6 "each" [] [],
+                list: HtmlTextExpression {
+                    html_literal_token: HTML_LITERAL@6..34 " count < limit ? items : [] " [] [],
+                },
+                item: SvelteEachBindingClause {
+                    as_token: AS_KW@34..37 "as" [] [Whitespace(" ")],
+                    clause: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@37..41 "item" [] [],
+                    },
+                },
+                r_curly_token: R_CURLY@41..42 "}" [] [],
+            },
+            children: HtmlElementList [
+                HtmlElement {
+                    opening_element: HtmlOpeningElement {
+                        l_angle_token: L_ANGLE@42..46 "<" [Newline("\n"), Whitespace("  ")] [],
+                        name: HtmlTagName {
+                            value_token: P_KW@46..47 "p" [] [],
+                        },
+                        attributes: HtmlAttributeList [],
+                        r_angle_token: R_ANGLE@47..48 ">" [] [],
+                    },
+                    children: HtmlElementList [
+                        HtmlSingleTextExpression {
+                            l_curly_token: L_CURLY@48..49 "{" [] [],
+                            expression: HtmlTextExpression {
+                                html_literal_token: HTML_LITERAL@49..53 "item" [] [],
+                            },
+                            r_curly_token: R_CURLY@53..54 "}" [] [],
+                        },
+                    ],
+                    closing_element: HtmlClosingElement {
+                        l_angle_token: L_ANGLE@54..55 "<" [] [],
+                        slash_token: SLASH@55..56 "/" [] [],
+                        name: HtmlTagName {
+                            value_token: P_KW@56..57 "p" [] [],
+                        },
+                        r_angle_token: R_ANGLE@57..58 ">" [] [],
+                    },
+                },
+            ],
+            else_clause: missing (optional),
+            closing_block: SvelteEachClosingBlock {
+                sv_curly_slash_token: SV_CURLY_SLASH@58..61 "{/" [Newline("\n")] [],
+                each_token: EACH_KW@61..65 "each" [] [],
+                r_curly_token: R_CURLY@65..66 "}" [] [],
+            },
+        },
+        SvelteAwaitBlock {
+            opening_block: SvelteAwaitOpeningBlock {
+                sv_curly_hash_token: SV_CURLY_HASH@66..69 "{#" [Newline("\n")] [],
+                await_token: AWAIT_KW@69..74 "await" [] [],
+                expression: HtmlTextExpression {
+                    html_literal_token: HTML_LITERAL@74..89 " count < limit " [] [],
+                },
+                then_clause: SvelteAwaitThenClause {
+                    then_token: THEN_KW@89..94 "then" [] [Whitespace(" ")],
+                    name: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@94..99 "value" [] [],
+                    },
+                },
+                catch_clause: missing (optional),
+                r_curly_token: R_CURLY@99..100 "}" [] [],
+                children: HtmlElementList [
+                    HtmlElement {
+                        opening_element: HtmlOpeningElement {
+                            l_angle_token: L_ANGLE@100..104 "<" [Newline("\n"), Whitespace("  ")] [],
+                            name: HtmlTagName {
+                                value_token: P_KW@104..105 "p" [] [],
+                            },
+                            attributes: HtmlAttributeList [],
+                            r_angle_token: R_ANGLE@105..106 ">" [] [],
+                        },
+                        children: HtmlElementList [
+                            HtmlSingleTextExpression {
+                                l_curly_token: L_CURLY@106..107 "{" [] [],
+                                expression: HtmlTextExpression {
+                                    html_literal_token: HTML_LITERAL@107..112 "value" [] [],
+                                },
+                                r_curly_token: R_CURLY@112..113 "}" [] [],
+                            },
+                        ],
+                        closing_element: HtmlClosingElement {
+                            l_angle_token: L_ANGLE@113..114 "<" [] [],
+                            slash_token: SLASH@114..115 "/" [] [],
+                            name: HtmlTagName {
+                                value_token: P_KW@115..116 "p" [] [],
+                            },
+                            r_angle_token: R_ANGLE@116..117 ">" [] [],
+                        },
+                    },
+                ],
+            },
+            clauses: SvelteAwaitClausesList [],
+            closing_block: SvelteAwaitClosingBlock {
+                sv_curly_slash_token: SV_CURLY_SLASH@117..120 "{/" [Newline("\n")] [],
+                await_token: AWAIT_KW@120..125 "await" [] [],
+                r_curly_token: R_CURLY@125..126 "}" [] [],
+            },
+        },
+        SvelteEachBlock {
+            opening_block: SvelteEachOpeningBlock {
+                sv_curly_hash_token: SV_CURLY_HASH@126..129 "{#" [Newline("\n")] [],
+                each_token: EACH_KW@129..133 "each" [] [],
+                list: HtmlTextExpression {
+                    html_literal_token: HTML_LITERAL@133..140 " items " [] [],
+                },
+                item: SvelteEachBindingClause {
+                    as_token: AS_KW@140..143 "as" [] [Whitespace(" ")],
+                    clause: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@143..151 "constant" [] [],
+                    },
+                },
+                r_curly_token: R_CURLY@151..152 "}" [] [],
+            },
+            children: HtmlElementList [
+                HtmlElement {
+                    opening_element: HtmlOpeningElement {
+                        l_angle_token: L_ANGLE@152..156 "<" [Newline("\n"), Whitespace("  ")] [],
+                        name: HtmlTagName {
+                            value_token: P_KW@156..157 "p" [] [],
+                        },
+                        attributes: HtmlAttributeList [],
+                        r_angle_token: R_ANGLE@157..158 ">" [] [],
+                    },
+                    children: HtmlElementList [
+                        HtmlSingleTextExpression {
+                            l_curly_token: L_CURLY@158..159 "{" [] [],
+                            expression: HtmlTextExpression {
+                                html_literal_token: HTML_LITERAL@159..167 "constant" [] [],
+                            },
+                            r_curly_token: R_CURLY@167..168 "}" [] [],
+                        },
+                    ],
+                    closing_element: HtmlClosingElement {
+                        l_angle_token: L_ANGLE@168..169 "<" [] [],
+                        slash_token: SLASH@169..170 "/" [] [],
+                        name: HtmlTagName {
+                            value_token: P_KW@170..171 "p" [] [],
+                        },
+                        r_angle_token: R_ANGLE@171..172 ">" [] [],
+                    },
+                },
+            ],
+            else_clause: missing (optional),
+            closing_block: SvelteEachClosingBlock {
+                sv_curly_slash_token: SV_CURLY_SLASH@172..175 "{/" [Newline("\n")] [],
+                each_token: EACH_KW@175..179 "each" [] [],
+                r_curly_token: R_CURLY@179..180 "}" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@180..181 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..181
+  0: (empty)
+  1: (empty)
+  2: HTML_ROOT_ITEM_LIST@0..180
+    0: SVELTE_EACH_BLOCK@0..66
+      0: SVELTE_EACH_OPENING_BLOCK@0..42
+        0: SV_CURLY_HASH@0..2 "{#" [] []
+        1: EACH_KW@2..6 "each" [] []
+        2: HTML_TEXT_EXPRESSION@6..34
+          0: HTML_LITERAL@6..34 " count < limit ? items : [] " [] []
+        3: SVELTE_EACH_BINDING_CLAUSE@34..41
+          0: AS_KW@34..37 "as" [] [Whitespace(" ")]
+          1: HTML_TEXT_EXPRESSION@37..41
+            0: HTML_LITERAL@37..41 "item" [] []
+        4: R_CURLY@41..42 "}" [] []
+      1: HTML_ELEMENT_LIST@42..58
+        0: HTML_ELEMENT@42..58
+          0: HTML_OPENING_ELEMENT@42..48
+            0: L_ANGLE@42..46 "<" [Newline("\n"), Whitespace("  ")] []
+            1: HTML_TAG_NAME@46..47
+              0: P_KW@46..47 "p" [] []
+            2: HTML_ATTRIBUTE_LIST@47..47
+            3: R_ANGLE@47..48 ">" [] []
+          1: HTML_ELEMENT_LIST@48..54
+            0: HTML_SINGLE_TEXT_EXPRESSION@48..54
+              0: L_CURLY@48..49 "{" [] []
+              1: HTML_TEXT_EXPRESSION@49..53
+                0: HTML_LITERAL@49..53 "item" [] []
+              2: R_CURLY@53..54 "}" [] []
+          2: HTML_CLOSING_ELEMENT@54..58
+            0: L_ANGLE@54..55 "<" [] []
+            1: SLASH@55..56 "/" [] []
+            2: HTML_TAG_NAME@56..57
+              0: P_KW@56..57 "p" [] []
+            3: R_ANGLE@57..58 ">" [] []
+      2: (empty)
+      3: SVELTE_EACH_CLOSING_BLOCK@58..66
+        0: SV_CURLY_SLASH@58..61 "{/" [Newline("\n")] []
+        1: EACH_KW@61..65 "each" [] []
+        2: R_CURLY@65..66 "}" [] []
+    1: SVELTE_AWAIT_BLOCK@66..126
+      0: SVELTE_AWAIT_OPENING_BLOCK@66..117
+        0: SV_CURLY_HASH@66..69 "{#" [Newline("\n")] []
+        1: AWAIT_KW@69..74 "await" [] []
+        2: HTML_TEXT_EXPRESSION@74..89
+          0: HTML_LITERAL@74..89 " count < limit " [] []
+        3: SVELTE_AWAIT_THEN_CLAUSE@89..99
+          0: THEN_KW@89..94 "then" [] [Whitespace(" ")]
+          1: HTML_TEXT_EXPRESSION@94..99
+            0: HTML_LITERAL@94..99 "value" [] []
+        4: (empty)
+        5: R_CURLY@99..100 "}" [] []
+        6: HTML_ELEMENT_LIST@100..117
+          0: HTML_ELEMENT@100..117
+            0: HTML_OPENING_ELEMENT@100..106
+              0: L_ANGLE@100..104 "<" [Newline("\n"), Whitespace("  ")] []
+              1: HTML_TAG_NAME@104..105
+                0: P_KW@104..105 "p" [] []
+              2: HTML_ATTRIBUTE_LIST@105..105
+              3: R_ANGLE@105..106 ">" [] []
+            1: HTML_ELEMENT_LIST@106..113
+              0: HTML_SINGLE_TEXT_EXPRESSION@106..113
+                0: L_CURLY@106..107 "{" [] []
+                1: HTML_TEXT_EXPRESSION@107..112
+                  0: HTML_LITERAL@107..112 "value" [] []
+                2: R_CURLY@112..113 "}" [] []
+            2: HTML_CLOSING_ELEMENT@113..117
+              0: L_ANGLE@113..114 "<" [] []
+              1: SLASH@114..115 "/" [] []
+              2: HTML_TAG_NAME@115..116
+                0: P_KW@115..116 "p" [] []
+              3: R_ANGLE@116..117 ">" [] []
+      1: SVELTE_AWAIT_CLAUSES_LIST@117..117
+      2: SVELTE_AWAIT_CLOSING_BLOCK@117..126
+        0: SV_CURLY_SLASH@117..120 "{/" [Newline("\n")] []
+        1: AWAIT_KW@120..125 "await" [] []
+        2: R_CURLY@125..126 "}" [] []
+    2: SVELTE_EACH_BLOCK@126..180
+      0: SVELTE_EACH_OPENING_BLOCK@126..152
+        0: SV_CURLY_HASH@126..129 "{#" [Newline("\n")] []
+        1: EACH_KW@129..133 "each" [] []
+        2: HTML_TEXT_EXPRESSION@133..140
+          0: HTML_LITERAL@133..140 " items " [] []
+        3: SVELTE_EACH_BINDING_CLAUSE@140..151
+          0: AS_KW@140..143 "as" [] [Whitespace(" ")]
+          1: HTML_TEXT_EXPRESSION@143..151
+            0: HTML_LITERAL@143..151 "constant" [] []
+        4: R_CURLY@151..152 "}" [] []
+      1: HTML_ELEMENT_LIST@152..172
+        0: HTML_ELEMENT@152..172
+          0: HTML_OPENING_ELEMENT@152..158
+            0: L_ANGLE@152..156 "<" [Newline("\n"), Whitespace("  ")] []
+            1: HTML_TAG_NAME@156..157
+              0: P_KW@156..157 "p" [] []
+            2: HTML_ATTRIBUTE_LIST@157..157
+            3: R_ANGLE@157..158 ">" [] []
+          1: HTML_ELEMENT_LIST@158..168
+            0: HTML_SINGLE_TEXT_EXPRESSION@158..168
+              0: L_CURLY@158..159 "{" [] []
+              1: HTML_TEXT_EXPRESSION@159..167
+                0: HTML_LITERAL@159..167 "constant" [] []
+              2: R_CURLY@167..168 "}" [] []
+          2: HTML_CLOSING_ELEMENT@168..172
+            0: L_ANGLE@168..169 "<" [] []
+            1: SLASH@169..170 "/" [] []
+            2: HTML_TAG_NAME@170..171
+              0: P_KW@170..171 "p" [] []
+            3: R_ANGLE@171..172 ">" [] []
+      2: (empty)
+      3: SVELTE_EACH_CLOSING_BLOCK@172..180
+        0: SV_CURLY_SLASH@172..175 "{/" [Newline("\n")] []
+        1: EACH_KW@175..179 "each" [] []
+        2: R_CURLY@179..180 "}" [] []
+  3: EOF@180..181 "" [Newline("\n")] []
+
+```

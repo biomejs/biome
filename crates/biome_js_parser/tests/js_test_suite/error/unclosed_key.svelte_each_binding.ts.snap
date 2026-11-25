@@ -1,0 +1,89 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```ts
+item, index (item.id
+
+```
+
+
+## AST
+
+```
+JsSvelteEachBindingRoot {
+    context: JsIdentifierBinding {
+        name_token: IDENT@0..4 "item" [] [],
+    },
+    type_annotation: missing (optional),
+    index: JsSvelteEachIndex {
+        comma_token: COMMA@4..6 "," [] [Whitespace(" ")],
+        binding: JsIdentifierBinding {
+            name_token: IDENT@6..12 "index" [] [Whitespace(" ")],
+        },
+    },
+    key: JsSvelteEachKey {
+        l_paren_token: L_PAREN@12..13 "(" [] [],
+        expression: JsStaticMemberExpression {
+            object: JsIdentifierExpression {
+                name: JsReferenceIdentifier {
+                    value_token: IDENT@13..17 "item" [] [],
+                },
+            },
+            operator_token: DOT@17..18 "." [] [],
+            member: JsName {
+                value_token: IDENT@18..20 "id" [] [],
+            },
+        },
+        r_paren_token: missing (required),
+    },
+    eof_token: EOF@20..21 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_SVELTE_EACH_BINDING_ROOT@0..21
+  0: JS_IDENTIFIER_BINDING@0..4
+    0: IDENT@0..4 "item" [] []
+  1: (empty)
+  2: JS_SVELTE_EACH_INDEX@4..12
+    0: COMMA@4..6 "," [] [Whitespace(" ")]
+    1: JS_IDENTIFIER_BINDING@6..12
+      0: IDENT@6..12 "index" [] [Whitespace(" ")]
+  3: JS_SVELTE_EACH_KEY@12..20
+    0: L_PAREN@12..13 "(" [] []
+    1: JS_STATIC_MEMBER_EXPRESSION@13..20
+      0: JS_IDENTIFIER_EXPRESSION@13..17
+        0: JS_REFERENCE_IDENTIFIER@13..17
+          0: IDENT@13..17 "item" [] []
+      1: DOT@17..18 "." [] []
+      2: JS_NAME@18..20
+        0: IDENT@18..20 "id" [] []
+    2: (empty)
+  4: EOF@20..21 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+unclosed_key.svelte_each_binding.ts:2:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `)` but instead the file ends
+  
+    1 │ item, index (item.id
+  > 2 │ 
+      │ 
+  
+  i the file ends here
+  
+    1 │ item, index (item.id
+  > 2 │ 
+      │ 
+  
+```

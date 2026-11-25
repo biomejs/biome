@@ -1,5 +1,6 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 249
 info: printer/typescript-template.svelte
 ---
 
@@ -33,25 +34,51 @@ info: printer/typescript-template.svelte
 ```
 
 
-# Errors
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -3,8 +3,10 @@
+ <button
+     onclick={(e: Event) => {
+         e as any;
+-    }}>foo</button
++    }}
+ >
++    foo
++</button>
+ 
+ <button onclick={(e: Event) => e.detail}>{bar as any}</button>
+ <input bind:value={(config as Config).value} />
 ```
-typescript-template.svelte:21:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected `}` but instead found `:`
-  
-    19 │ {/await}
-    20 │ 
-  > 21 │ {#each [] as x: number}
-       │               ^
-    22 │     {x}
-    23 │ {/each}
-  
-  i Remove :
-  
+# Output
 
-```
+```svelte
+<script lang="ts"></script>
 
-# Error
-```text
-format: Can't format code because it contains syntax errors
+<button
+    onclick={(e: Event) => {
+        e as any;
+    }}
+>
+    foo
+</button>
+
+<button onclick={(e: Event) => e.detail}>{bar as any}</button>
+<input bind:value={(config as Config).value} />
+<input bind:value={config[x].y} />
+
+{#await promise}
+    <p>Waiting</p>
+{:then num: number}
+    <p>{num}</p>
+{:catch error: Error}
+    <p>Error: {error.message}</p>
+{/await}
+
+{#each [] as x: number}
+    {x}
+{/each}
 ```

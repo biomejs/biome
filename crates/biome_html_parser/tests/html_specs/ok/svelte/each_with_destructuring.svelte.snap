@@ -43,23 +43,11 @@ HtmlRoot {
                 list: HtmlTextExpression {
                     html_literal_token: HTML_LITERAL@6..13 " items " [] [],
                 },
-                item: SvelteEachAsKeyedItem {
+                item: SvelteEachBindingClause {
                     as_token: AS_KW@13..16 "as" [] [Whitespace(" ")],
-                    name: SvelteCurlyDestructuredName {
-                        l_curly_token: L_CURLY@16..18 "{" [] [Whitespace(" ")],
-                        names: SvelteBindingAssignmentBindingList [
-                            SvelteName {
-                                ident_token: IDENT@18..20 "id" [] [],
-                            },
-                            COMMA@20..22 "," [] [Whitespace(" ")],
-                            SvelteName {
-                                ident_token: IDENT@22..27 "name" [] [Whitespace(" ")],
-                            },
-                        ],
-                        r_curly_token: R_CURLY@27..28 "}" [] [],
+                    clause: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@16..28 "{ id, name }" [] [],
                     },
-                    index: missing (optional),
-                    key: missing (optional),
                 },
                 r_curly_token: R_CURLY@28..29 "}" [] [],
             },
@@ -116,28 +104,11 @@ HtmlRoot {
                 list: HtmlTextExpression {
                     html_literal_token: HTML_LITERAL@71..78 " users " [] [],
                 },
-                item: SvelteEachAsKeyedItem {
+                item: SvelteEachBindingClause {
                     as_token: AS_KW@78..81 "as" [] [Whitespace(" ")],
-                    name: SvelteCurlyDestructuredName {
-                        l_curly_token: L_CURLY@81..83 "{" [] [Whitespace(" ")],
-                        names: SvelteBindingAssignmentBindingList [
-                            SvelteName {
-                                ident_token: IDENT@83..87 "name" [] [],
-                            },
-                            COMMA@87..89 "," [] [Whitespace(" ")],
-                            SvelteName {
-                                ident_token: IDENT@89..95 "email" [] [Whitespace(" ")],
-                            },
-                        ],
-                        r_curly_token: R_CURLY@95..96 "}" [] [],
+                    clause: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@81..99 "{ name, email }, i" [] [],
                     },
-                    index: SvelteEachIndex {
-                        comma_token: COMMA@96..98 "," [] [Whitespace(" ")],
-                        value: SvelteName {
-                            ident_token: IDENT@98..99 "i" [] [],
-                        },
-                    },
-                    key: missing (optional),
                 },
                 r_curly_token: R_CURLY@99..100 "}" [] [],
             },
@@ -207,23 +178,11 @@ HtmlRoot {
                 list: HtmlTextExpression {
                     html_literal_token: HTML_LITERAL@151..161 " products " [] [],
                 },
-                item: SvelteEachAsKeyedItem {
+                item: SvelteEachBindingClause {
                     as_token: AS_KW@161..164 "as" [] [Whitespace(" ")],
-                    name: SvelteSquareDestructuredName {
-                        l_brack_token: L_BRACKET@164..165 "[" [] [],
-                        names: SvelteBindingAssignmentBindingList [
-                            SvelteName {
-                                ident_token: IDENT@165..167 "id" [] [],
-                            },
-                            COMMA@167..169 "," [] [Whitespace(" ")],
-                            SvelteName {
-                                ident_token: IDENT@169..174 "title" [] [],
-                            },
-                        ],
-                        r_brack_token: R_BRACKET@174..175 "]" [] [],
+                    clause: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@164..175 "[id, title]" [] [],
                     },
-                    index: missing (optional),
-                    key: missing (optional),
                 },
                 r_curly_token: R_CURLY@175..176 "}" [] [],
             },
@@ -280,26 +239,11 @@ HtmlRoot {
                 list: HtmlTextExpression {
                     html_literal_token: HTML_LITERAL@219..226 " items " [] [],
                 },
-                item: SvelteEachAsKeyedItem {
+                item: SvelteEachBindingClause {
                     as_token: AS_KW@226..229 "as" [] [Whitespace(" ")],
-                    name: SvelteCurlyDestructuredName {
-                        l_curly_token: L_CURLY@229..231 "{" [] [Whitespace(" ")],
-                        names: SvelteBindingAssignmentBindingList [
-                            SvelteName {
-                                ident_token: IDENT@231..233 "id" [] [],
-                            },
-                            COMMA@233..235 "," [] [Whitespace(" ")],
-                            SvelteRestBinding {
-                                dotdotdot_token: DOT3@235..238 "..." [] [],
-                                name: SvelteName {
-                                    ident_token: IDENT@238..243 "rest" [] [Whitespace(" ")],
-                                },
-                            },
-                        ],
-                        r_curly_token: R_CURLY@243..244 "}" [] [],
+                    clause: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@229..244 "{ id, ...rest }" [] [],
                     },
-                    index: missing (optional),
-                    key: missing (optional),
                 },
                 r_curly_token: R_CURLY@244..245 "}" [] [],
             },
@@ -346,33 +290,11 @@ HtmlRoot {
                 list: HtmlTextExpression {
                     html_literal_token: HTML_LITERAL@279..300 " Object.entries(foo) " [] [],
                 },
-                item: SvelteEachAsKeyedItem {
+                item: SvelteEachBindingClause {
                     as_token: AS_KW@300..303 "as" [] [Whitespace(" ")],
-                    name: SvelteSquareDestructuredName {
-                        l_brack_token: L_BRACKET@303..304 "[" [] [],
-                        names: SvelteBindingAssignmentBindingList [
-                            SvelteName {
-                                ident_token: IDENT@304..307 "key" [] [],
-                            },
-                            COMMA@307..309 "," [] [Whitespace(" ")],
-                            SvelteCurlyDestructuredName {
-                                l_curly_token: L_CURLY@309..311 "{" [] [Whitespace(" ")],
-                                names: SvelteBindingAssignmentBindingList [
-                                    SvelteName {
-                                        ident_token: IDENT@311..312 "a" [] [],
-                                    },
-                                    COMMA@312..314 "," [] [Whitespace(" ")],
-                                    SvelteName {
-                                        ident_token: IDENT@314..316 "b" [] [Whitespace(" ")],
-                                    },
-                                ],
-                                r_curly_token: R_CURLY@316..317 "}" [] [],
-                            },
-                        ],
-                        r_brack_token: R_BRACKET@317..318 "]" [] [],
+                    clause: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@303..318 "[key, { a, b }]" [] [],
                     },
-                    index: missing (optional),
-                    key: missing (optional),
                 },
                 r_curly_token: R_CURLY@318..319 "}" [] [],
             },
@@ -417,19 +339,10 @@ HtmlRoot {
         1: EACH_KW@2..6 "each" [] []
         2: HTML_TEXT_EXPRESSION@6..13
           0: HTML_LITERAL@6..13 " items " [] []
-        3: SVELTE_EACH_AS_KEYED_ITEM@13..28
+        3: SVELTE_EACH_BINDING_CLAUSE@13..28
           0: AS_KW@13..16 "as" [] [Whitespace(" ")]
-          1: SVELTE_CURLY_DESTRUCTURED_NAME@16..28
-            0: L_CURLY@16..18 "{" [] [Whitespace(" ")]
-            1: SVELTE_BINDING_ASSIGNMENT_BINDING_LIST@18..27
-              0: SVELTE_NAME@18..20
-                0: IDENT@18..20 "id" [] []
-              1: COMMA@20..22 "," [] [Whitespace(" ")]
-              2: SVELTE_NAME@22..27
-                0: IDENT@22..27 "name" [] [Whitespace(" ")]
-            2: R_CURLY@27..28 "}" [] []
-          2: (empty)
-          3: (empty)
+          1: HTML_TEXT_EXPRESSION@16..28
+            0: HTML_LITERAL@16..28 "{ id, name }" [] []
         4: R_CURLY@28..29 "}" [] []
       1: HTML_ELEMENT_LIST@29..55
         0: HTML_ELEMENT@29..55
@@ -469,22 +382,10 @@ HtmlRoot {
         1: EACH_KW@67..71 "each" [] []
         2: HTML_TEXT_EXPRESSION@71..78
           0: HTML_LITERAL@71..78 " users " [] []
-        3: SVELTE_EACH_AS_KEYED_ITEM@78..99
+        3: SVELTE_EACH_BINDING_CLAUSE@78..99
           0: AS_KW@78..81 "as" [] [Whitespace(" ")]
-          1: SVELTE_CURLY_DESTRUCTURED_NAME@81..96
-            0: L_CURLY@81..83 "{" [] [Whitespace(" ")]
-            1: SVELTE_BINDING_ASSIGNMENT_BINDING_LIST@83..95
-              0: SVELTE_NAME@83..87
-                0: IDENT@83..87 "name" [] []
-              1: COMMA@87..89 "," [] [Whitespace(" ")]
-              2: SVELTE_NAME@89..95
-                0: IDENT@89..95 "email" [] [Whitespace(" ")]
-            2: R_CURLY@95..96 "}" [] []
-          2: SVELTE_EACH_INDEX@96..99
-            0: COMMA@96..98 "," [] [Whitespace(" ")]
-            1: SVELTE_NAME@98..99
-              0: IDENT@98..99 "i" [] []
-          3: (empty)
+          1: HTML_TEXT_EXPRESSION@81..99
+            0: HTML_LITERAL@81..99 "{ name, email }, i" [] []
         4: R_CURLY@99..100 "}" [] []
       1: HTML_ELEMENT_LIST@100..135
         0: HTML_ELEMENT@100..135
@@ -533,19 +434,10 @@ HtmlRoot {
         1: EACH_KW@147..151 "each" [] []
         2: HTML_TEXT_EXPRESSION@151..161
           0: HTML_LITERAL@151..161 " products " [] []
-        3: SVELTE_EACH_AS_KEYED_ITEM@161..175
+        3: SVELTE_EACH_BINDING_CLAUSE@161..175
           0: AS_KW@161..164 "as" [] [Whitespace(" ")]
-          1: SVELTE_SQUARE_DESTRUCTURED_NAME@164..175
-            0: L_BRACKET@164..165 "[" [] []
-            1: SVELTE_BINDING_ASSIGNMENT_BINDING_LIST@165..174
-              0: SVELTE_NAME@165..167
-                0: IDENT@165..167 "id" [] []
-              1: COMMA@167..169 "," [] [Whitespace(" ")]
-              2: SVELTE_NAME@169..174
-                0: IDENT@169..174 "title" [] []
-            2: R_BRACKET@174..175 "]" [] []
-          2: (empty)
-          3: (empty)
+          1: HTML_TEXT_EXPRESSION@164..175
+            0: HTML_LITERAL@164..175 "[id, title]" [] []
         4: R_CURLY@175..176 "}" [] []
       1: HTML_ELEMENT_LIST@176..203
         0: HTML_ELEMENT@176..203
@@ -585,21 +477,10 @@ HtmlRoot {
         1: EACH_KW@215..219 "each" [] []
         2: HTML_TEXT_EXPRESSION@219..226
           0: HTML_LITERAL@219..226 " items " [] []
-        3: SVELTE_EACH_AS_KEYED_ITEM@226..244
+        3: SVELTE_EACH_BINDING_CLAUSE@226..244
           0: AS_KW@226..229 "as" [] [Whitespace(" ")]
-          1: SVELTE_CURLY_DESTRUCTURED_NAME@229..244
-            0: L_CURLY@229..231 "{" [] [Whitespace(" ")]
-            1: SVELTE_BINDING_ASSIGNMENT_BINDING_LIST@231..243
-              0: SVELTE_NAME@231..233
-                0: IDENT@231..233 "id" [] []
-              1: COMMA@233..235 "," [] [Whitespace(" ")]
-              2: SVELTE_REST_BINDING@235..243
-                0: DOT3@235..238 "..." [] []
-                1: SVELTE_NAME@238..243
-                  0: IDENT@238..243 "rest" [] [Whitespace(" ")]
-            2: R_CURLY@243..244 "}" [] []
-          2: (empty)
-          3: (empty)
+          1: HTML_TEXT_EXPRESSION@229..244
+            0: HTML_LITERAL@229..244 "{ id, ...rest }" [] []
         4: R_CURLY@244..245 "}" [] []
       1: HTML_ELEMENT_LIST@245..263
         0: HTML_ELEMENT@245..263
@@ -632,26 +513,10 @@ HtmlRoot {
         1: EACH_KW@275..279 "each" [] []
         2: HTML_TEXT_EXPRESSION@279..300
           0: HTML_LITERAL@279..300 " Object.entries(foo) " [] []
-        3: SVELTE_EACH_AS_KEYED_ITEM@300..318
+        3: SVELTE_EACH_BINDING_CLAUSE@300..318
           0: AS_KW@300..303 "as" [] [Whitespace(" ")]
-          1: SVELTE_SQUARE_DESTRUCTURED_NAME@303..318
-            0: L_BRACKET@303..304 "[" [] []
-            1: SVELTE_BINDING_ASSIGNMENT_BINDING_LIST@304..317
-              0: SVELTE_NAME@304..307
-                0: IDENT@304..307 "key" [] []
-              1: COMMA@307..309 "," [] [Whitespace(" ")]
-              2: SVELTE_CURLY_DESTRUCTURED_NAME@309..317
-                0: L_CURLY@309..311 "{" [] [Whitespace(" ")]
-                1: SVELTE_BINDING_ASSIGNMENT_BINDING_LIST@311..316
-                  0: SVELTE_NAME@311..312
-                    0: IDENT@311..312 "a" [] []
-                  1: COMMA@312..314 "," [] [Whitespace(" ")]
-                  2: SVELTE_NAME@314..316
-                    0: IDENT@314..316 "b" [] [Whitespace(" ")]
-                2: R_CURLY@316..317 "}" [] []
-            2: R_BRACKET@317..318 "]" [] []
-          2: (empty)
-          3: (empty)
+          1: HTML_TEXT_EXPRESSION@303..318
+            0: HTML_LITERAL@303..318 "[key, { a, b }]" [] []
         4: R_CURLY@318..319 "}" [] []
       1: HTML_ELEMENT_LIST@319..329
         0: HTML_SINGLE_TEXT_EXPRESSION@319..326

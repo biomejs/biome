@@ -51,11 +51,11 @@ impl JsObjectPatternLike {
     fn is_inline(&self, comments: &JsComments) -> FormatResult<bool> {
         let parent_kind = self.syntax().parent().kind();
 
-        Ok(
-            (matches!(parent_kind, Some(JsSyntaxKind::JS_FORMAL_PARAMETER))
-                || self.is_hug_parameter(comments))
-                && !self.l_curly_token()?.leading_trivia().has_skipped(),
-        )
+        Ok((matches!(
+            parent_kind,
+            Some(JsSyntaxKind::JS_FORMAL_PARAMETER | JsSyntaxKind::JS_SVELTE_EACH_BINDING_ROOT)
+        ) || self.is_hug_parameter(comments))
+            && !self.l_curly_token()?.leading_trivia().has_skipped())
     }
 
     fn should_break_properties(&self) -> bool {
@@ -65,13 +65,15 @@ impl JsObjectPatternLike {
         // be the direct parent of the object pattern, and the pattern should
         // not break unless it has to there.
         //
-        // Parameters in function-like expressions are also kept inline, and
-        // all parameters end up wrapped by a `JsFormalParameter` node, as
-        // checked here. Note that this is also checked ahead of time by the
-        // `is_inline` function.
+        // Function parameters and Svelte each contexts are kept inline. This
+        // is also checked ahead of time by `is_inline`.
         if matches!(
             parent_kind,
-            Some(JsSyntaxKind::JS_CATCH_DECLARATION | JsSyntaxKind::JS_FORMAL_PARAMETER)
+            Some(
+                JsSyntaxKind::JS_CATCH_DECLARATION
+                    | JsSyntaxKind::JS_FORMAL_PARAMETER
+                    | JsSyntaxKind::JS_SVELTE_EACH_BINDING_ROOT
+            )
         ) {
             return false;
         }

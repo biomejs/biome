@@ -146,6 +146,70 @@ fn regex_character_class_may_contain_a_slash() {
 }
 
 #[test]
+fn a_custom_expression_stop_ignores_nested_javascript() {
+    let source = r#"" as " + `as` + /as/ + (value as Type) /* as */ as item}"#;
+    let length = JsExtent::expression_length_until(source.as_bytes(), |position| {
+        position.remaining().starts_with(b"as ") && position.can_end_expression()
+    });
+    assert_eq!(length, source.rfind("as item").unwrap());
+
+    let source = "call(a, b), index}";
+    let length = JsExtent::expression_length_until(source.as_bytes(), |position| {
+        position.remaining().first() == Some(&b',')
+    });
+    assert_eq!(length, source.rfind(',').unwrap());
+}
+
+#[test]
+fn a_custom_expression_stop_requires_a_complete_expression() {
+    for source in [
+        "promise . then(value) then result}",
+        "promise ?. then(value) then result}",
+        "condition ? then : fallback then result}",
+        "left + then then result}",
+    ] {
+        let length = JsExtent::expression_length_until(source.as_bytes(), |position| {
+            position.remaining().starts_with(b"then ") && position.can_end_expression()
+        });
+        assert_eq!(length, source.rfind("then result").unwrap());
+    }
+
+    let source = "/then/ then result}";
+    let length = JsExtent::expression_length_until(source.as_bytes(), |position| {
+        position.remaining().starts_with(b"then ") && position.can_end_expression()
+    });
+    assert_eq!(length, source.rfind("then result").unwrap());
+}
+
+#[test]
+fn a_custom_expression_stop_ends_at_a_curly_that_closes_no_bracket() {
+    let source = "items.filter((item) => item.ok}\n<li>{item}</li>";
+    let length = JsExtent::expression_length_until(source.as_bytes(), |_| false);
+    assert_eq!(length, source.find('}').unwrap());
+
+    // The `}` closes the object, so the call and the stop after it stay visible.
+    let source = "call({ key: value(}) as item}";
+    let length = JsExtent::expression_length_until(source.as_bytes(), |position| {
+        position.remaining().starts_with(b"as ") && position.can_end_expression()
+    });
+    assert_eq!(length, source.rfind("as item").unwrap());
+}
+
+#[test]
+fn an_unbalanced_bracket_leaves_the_fence_visible() {
+    assert_eq!(fence("[\n---\n"), Some(2));
+    assert_eq!(fence("call(\n---\n"), Some(6));
+}
+
+#[test]
+fn an_unbalanced_bracket_does_not_hide_the_blank_line() {
+    assert_eq!(
+        esm("export const a = call(\n\n# Title"),
+        EsmEnd::BlankLine(22)
+    );
+}
+
+#[test]
 fn nested_template_interpolation_closes_the_fence() {
     assert!(fence("const a = `x${`/y`}`;\n---\n").is_some());
 }
@@ -315,6 +379,13 @@ fn a_slash_after_a_property_or_other_identifier_is_a_division() {
 #[test]
 fn a_slash_after_a_contextual_keyword_used_as_a_name_is_a_division() {
     assert!(fence("const of = 8, n = of / 2, s = \"/'\";\n---\n").is_some());
+}
+
+#[test]
+fn a_slash_after_a_literal_is_a_division() {
+    for source in [r#""6" / 2}"#, "'6' / 2}", "`6` / 2}", "/6/ / 2}"] {
+        assert_eq!(expression(source), Some(source.len() - 1), "{source}");
+    }
 }
 
 #[test]

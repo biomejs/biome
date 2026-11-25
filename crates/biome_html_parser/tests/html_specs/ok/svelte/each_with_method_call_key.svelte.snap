@@ -31,23 +31,10 @@ HtmlRoot {
                 list: HtmlTextExpression {
                     html_literal_token: HTML_LITERAL@6..15 " numbers " [] [],
                 },
-                item: SvelteEachAsKeyedItem {
+                item: SvelteEachBindingClause {
                     as_token: AS_KW@15..18 "as" [] [Whitespace(" ")],
-                    name: SvelteName {
-                        ident_token: IDENT@18..24 "number" [] [],
-                    },
-                    index: SvelteEachIndex {
-                        comma_token: COMMA@24..26 "," [] [Whitespace(" ")],
-                        value: SvelteName {
-                            ident_token: IDENT@26..32 "index" [] [Whitespace(" ")],
-                        },
-                    },
-                    key: SvelteEachKey {
-                        l_paren_token: L_PAREN@32..33 "(" [] [],
-                        expression: HtmlTextExpression {
-                            html_literal_token: HTML_LITERAL@33..50 "number.toString()" [] [],
-                        },
-                        r_paren_token: R_PAREN@50..51 ")" [] [],
+                    clause: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@18..51 "number, index (number.toString())" [] [],
                     },
                 },
                 r_curly_token: R_CURLY@51..52 "}" [] [],
@@ -95,18 +82,10 @@ HtmlRoot {
                 list: HtmlTextExpression {
                     html_literal_token: HTML_LITERAL@86..95 " numbers " [] [],
                 },
-                item: SvelteEachAsKeyedItem {
+                item: SvelteEachBindingClause {
                     as_token: AS_KW@95..98 "as" [] [Whitespace(" ")],
-                    name: SvelteName {
-                        ident_token: IDENT@98..105 "number" [] [Whitespace(" ")],
-                    },
-                    index: missing (optional),
-                    key: SvelteEachKey {
-                        l_paren_token: L_PAREN@105..106 "(" [] [],
-                        expression: HtmlTextExpression {
-                            html_literal_token: HTML_LITERAL@106..117 "key(number)" [] [],
-                        },
-                        r_paren_token: R_PAREN@117..118 ")" [] [],
+                    clause: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@98..118 "number (key(number))" [] [],
                     },
                 },
                 r_curly_token: R_CURLY@118..119 "}" [] [],
@@ -165,19 +144,10 @@ HtmlRoot {
         1: EACH_KW@2..6 "each" [] []
         2: HTML_TEXT_EXPRESSION@6..15
           0: HTML_LITERAL@6..15 " numbers " [] []
-        3: SVELTE_EACH_AS_KEYED_ITEM@15..51
+        3: SVELTE_EACH_BINDING_CLAUSE@15..51
           0: AS_KW@15..18 "as" [] [Whitespace(" ")]
-          1: SVELTE_NAME@18..24
-            0: IDENT@18..24 "number" [] []
-          2: SVELTE_EACH_INDEX@24..32
-            0: COMMA@24..26 "," [] [Whitespace(" ")]
-            1: SVELTE_NAME@26..32
-              0: IDENT@26..32 "index" [] [Whitespace(" ")]
-          3: SVELTE_EACH_KEY@32..51
-            0: L_PAREN@32..33 "(" [] []
-            1: HTML_TEXT_EXPRESSION@33..50
-              0: HTML_LITERAL@33..50 "number.toString()" [] []
-            2: R_PAREN@50..51 ")" [] []
+          1: HTML_TEXT_EXPRESSION@18..51
+            0: HTML_LITERAL@18..51 "number, index (number.toString())" [] []
         4: R_CURLY@51..52 "}" [] []
       1: HTML_ELEMENT_LIST@52..70
         0: HTML_ELEMENT@52..70
@@ -210,16 +180,10 @@ HtmlRoot {
         1: EACH_KW@82..86 "each" [] []
         2: HTML_TEXT_EXPRESSION@86..95
           0: HTML_LITERAL@86..95 " numbers " [] []
-        3: SVELTE_EACH_AS_KEYED_ITEM@95..118
+        3: SVELTE_EACH_BINDING_CLAUSE@95..118
           0: AS_KW@95..98 "as" [] [Whitespace(" ")]
-          1: SVELTE_NAME@98..105
-            0: IDENT@98..105 "number" [] [Whitespace(" ")]
-          2: (empty)
-          3: SVELTE_EACH_KEY@105..118
-            0: L_PAREN@105..106 "(" [] []
-            1: HTML_TEXT_EXPRESSION@106..117
-              0: HTML_LITERAL@106..117 "key(number)" [] []
-            2: R_PAREN@117..118 ")" [] []
+          1: HTML_TEXT_EXPRESSION@98..118
+            0: HTML_LITERAL@98..118 "number (key(number))" [] []
         4: R_CURLY@118..119 "}" [] []
       1: HTML_ELEMENT_LIST@119..137
         0: HTML_ELEMENT@119..137

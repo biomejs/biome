@@ -1029,6 +1029,10 @@ fn parse_attribute(p: &mut HtmlParser, is_svelte_script: bool) -> ParsedSyntax {
             p.re_lex(HtmlReLexContext::SingleCurly);
             parse_single_text_expression(p, inside_tag_context(p))
         }
+        T!["{/"] if Svelte.is_supported(p) => {
+            p.re_lex(HtmlReLexContext::SingleCurly);
+            parse_svelte_spread_or_expression(p)
+        }
         T!["{{"] => {
             let m = p.start();
             DoubleTextExpressions
