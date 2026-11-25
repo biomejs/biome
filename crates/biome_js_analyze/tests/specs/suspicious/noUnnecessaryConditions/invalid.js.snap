@@ -72,8 +72,7 @@ const comp3 = 1 === 1;  // Always true
 const comp4 = "a" === "b";  // Always false
 
 // While loops with constant conditions
-while (true) {
-  console.log("infinite loop");
+while (1) {
   break;
 }
 
@@ -87,10 +86,6 @@ do {
 } while (false);
 
 // For loops with constant conditions
-for (; true;) {
-  break;
-}
-
 for (; false;) {
   console.log("never runs");
 }
@@ -550,10 +545,10 @@ invalid.js:69:8 lint/suspicious/noUnnecessaryConditions ━━━━━━━━
   ! This condition is always truthy.
   
     68 │ // While loops with constant conditions
-  > 69 │ while (true) {
-       │        ^^^^
-    70 │   console.log("infinite loop");
-    71 │   break;
+  > 69 │ while (1) {
+       │        ^
+    70 │   break;
+    71 │ }
   
   i The value's type can never be falsy, so this check is redundant.
   
@@ -563,16 +558,16 @@ invalid.js:69:8 lint/suspicious/noUnnecessaryConditions ━━━━━━━━
 ```
 
 ```
-invalid.js:74:8 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:73:8 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This condition is always falsy.
   
-    72 │ }
-    73 │ 
-  > 74 │ while (false) {
+    71 │ }
+    72 │ 
+  > 73 │ while (false) {
        │        ^^^^^
-    75 │   console.log("never runs");
-    76 │ }
+    74 │   console.log("never runs");
+    75 │ }
   
   i The value's type can never be truthy, so this check is redundant.
   
@@ -582,16 +577,16 @@ invalid.js:74:8 lint/suspicious/noUnnecessaryConditions ━━━━━━━━
 ```
 
 ```
-invalid.js:81:10 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:80:10 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This condition is always falsy.
   
-    79 │ do {
-    80 │   console.log("runs once");
-  > 81 │ } while (false);
+    78 │ do {
+    79 │   console.log("runs once");
+  > 80 │ } while (false);
        │          ^^^^^
-    82 │ 
-    83 │ // For loops with constant conditions
+    81 │ 
+    82 │ // For loops with constant conditions
   
   i The value's type can never be truthy, so this check is redundant.
   
@@ -601,34 +596,15 @@ invalid.js:81:10 lint/suspicious/noUnnecessaryConditions ━━━━━━━�
 ```
 
 ```
-invalid.js:84:8 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! This condition is always truthy.
-  
-    83 │ // For loops with constant conditions
-  > 84 │ for (; true;) {
-       │        ^^^^
-    85 │   break;
-    86 │ }
-  
-  i The value's type can never be falsy, so this check is redundant.
-  
-  i Remove the condition, or check the value you meant to test.
-  
-
-```
-
-```
-invalid.js:88:8 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:83:8 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This condition is always falsy.
   
-    86 │ }
-    87 │ 
-  > 88 │ for (; false;) {
+    82 │ // For loops with constant conditions
+  > 83 │ for (; false;) {
        │        ^^^^^
-    89 │   console.log("never runs");
-    90 │ }
+    84 │   console.log("never runs");
+    85 │ }
   
   i The value's type can never be truthy, so this check is redundant.
   
@@ -638,23 +614,23 @@ invalid.js:88:8 lint/suspicious/noUnnecessaryConditions ━━━━━━━━
 ```
 
 ```
-invalid.js:93:18 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:88:18 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unnecessary nullish coalescing.
   
-    92 │ // Unnecessary nullish coalescing with non-nullish literals
-  > 93 │ const nullish1 = "hello" ?? "default";  // Left side is never nullish
+    87 │ // Unnecessary nullish coalescing with non-nullish literals
+  > 88 │ const nullish1 = "hello" ?? "default";  // Left side is never nullish
        │                  ^^^^^^^
-    94 │ const nullish2 = 42 ?? 0;  // Left side is never nullish
-    95 │ const nullish3 = {} ?? {};  // Left side is never nullish
+    89 │ const nullish2 = 42 ?? 0;  // Left side is never nullish
+    90 │ const nullish3 = {} ?? {};  // Left side is never nullish
   
   i Drop ?? and the fallback expression.
   
-    92 │ // Unnecessary nullish coalescing with non-nullish literals
-  > 93 │ const nullish1 = "hello" ?? "default";  // Left side is never nullish
+    87 │ // Unnecessary nullish coalescing with non-nullish literals
+  > 88 │ const nullish1 = "hello" ?? "default";  // Left side is never nullish
        │                          ^^
-    94 │ const nullish2 = 42 ?? 0;  // Left side is never nullish
-    95 │ const nullish3 = {} ?? {};  // Left side is never nullish
+    89 │ const nullish2 = 42 ?? 0;  // Left side is never nullish
+    90 │ const nullish3 = {} ?? {};  // Left side is never nullish
   
   i The left-hand side is guaranteed to be non-nullish, so the fallback is unreachable.
   
@@ -662,25 +638,25 @@ invalid.js:93:18 lint/suspicious/noUnnecessaryConditions ━━━━━━━�
 ```
 
 ```
-invalid.js:94:18 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:89:18 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unnecessary nullish coalescing.
   
-    92 │ // Unnecessary nullish coalescing with non-nullish literals
-    93 │ const nullish1 = "hello" ?? "default";  // Left side is never nullish
-  > 94 │ const nullish2 = 42 ?? 0;  // Left side is never nullish
+    87 │ // Unnecessary nullish coalescing with non-nullish literals
+    88 │ const nullish1 = "hello" ?? "default";  // Left side is never nullish
+  > 89 │ const nullish2 = 42 ?? 0;  // Left side is never nullish
        │                  ^^
-    95 │ const nullish3 = {} ?? {};  // Left side is never nullish
-    96 │ 
+    90 │ const nullish3 = {} ?? {};  // Left side is never nullish
+    91 │ 
   
   i Drop ?? and the fallback expression.
   
-    92 │ // Unnecessary nullish coalescing with non-nullish literals
-    93 │ const nullish1 = "hello" ?? "default";  // Left side is never nullish
-  > 94 │ const nullish2 = 42 ?? 0;  // Left side is never nullish
+    87 │ // Unnecessary nullish coalescing with non-nullish literals
+    88 │ const nullish1 = "hello" ?? "default";  // Left side is never nullish
+  > 89 │ const nullish2 = 42 ?? 0;  // Left side is never nullish
        │                     ^^
-    95 │ const nullish3 = {} ?? {};  // Left side is never nullish
-    96 │ 
+    90 │ const nullish3 = {} ?? {};  // Left side is never nullish
+    91 │ 
   
   i The left-hand side is guaranteed to be non-nullish, so the fallback is unreachable.
   
@@ -688,25 +664,25 @@ invalid.js:94:18 lint/suspicious/noUnnecessaryConditions ━━━━━━━�
 ```
 
 ```
-invalid.js:95:18 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:90:18 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unnecessary nullish coalescing.
   
-    93 │ const nullish1 = "hello" ?? "default";  // Left side is never nullish
-    94 │ const nullish2 = 42 ?? 0;  // Left side is never nullish
-  > 95 │ const nullish3 = {} ?? {};  // Left side is never nullish
+    88 │ const nullish1 = "hello" ?? "default";  // Left side is never nullish
+    89 │ const nullish2 = 42 ?? 0;  // Left side is never nullish
+  > 90 │ const nullish3 = {} ?? {};  // Left side is never nullish
        │                  ^^
-    96 │ 
-    97 │ // Logical expressions with mixed literals
+    91 │ 
+    92 │ // Logical expressions with mixed literals
   
   i Drop ?? and the fallback expression.
   
-    93 │ const nullish1 = "hello" ?? "default";  // Left side is never nullish
-    94 │ const nullish2 = 42 ?? 0;  // Left side is never nullish
-  > 95 │ const nullish3 = {} ?? {};  // Left side is never nullish
+    88 │ const nullish1 = "hello" ?? "default";  // Left side is never nullish
+    89 │ const nullish2 = 42 ?? 0;  // Left side is never nullish
+  > 90 │ const nullish3 = {} ?? {};  // Left side is never nullish
        │                     ^^
-    96 │ 
-    97 │ // Logical expressions with mixed literals
+    91 │ 
+    92 │ // Logical expressions with mixed literals
   
   i The left-hand side is guaranteed to be non-nullish, so the fallback is unreachable.
   
@@ -714,15 +690,15 @@ invalid.js:95:18 lint/suspicious/noUnnecessaryConditions ━━━━━━━�
 ```
 
 ```
-invalid.js:98:16 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:93:16 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This condition is always truthy.
   
-     97 │ // Logical expressions with mixed literals
-   > 98 │ const mixed1 = true || false;  // Left side makes right irrelevant
-        │                ^^^^
-     99 │ const mixed2 = false && true;  // Left side makes right irrelevant
-    100 │ const mixed3 = null ?? "default";  // Left side is always nullish
+    92 │ // Logical expressions with mixed literals
+  > 93 │ const mixed1 = true || false;  // Left side makes right irrelevant
+       │                ^^^^
+    94 │ const mixed2 = false && true;  // Left side makes right irrelevant
+    95 │ const mixed3 = null ?? "default";  // Left side is always nullish
   
   i The value's type can never be falsy, so this check is redundant.
   
@@ -732,16 +708,16 @@ invalid.js:98:16 lint/suspicious/noUnnecessaryConditions ━━━━━━━�
 ```
 
 ```
-invalid.js:99:16 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:94:16 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This condition is always falsy.
   
-     97 │ // Logical expressions with mixed literals
-     98 │ const mixed1 = true || false;  // Left side makes right irrelevant
-   > 99 │ const mixed2 = false && true;  // Left side makes right irrelevant
-        │                ^^^^^
-    100 │ const mixed3 = null ?? "default";  // Left side is always nullish
-    101 │ const mixed4 = undefined ?? "default";  // Left side is always nullish
+    92 │ // Logical expressions with mixed literals
+    93 │ const mixed1 = true || false;  // Left side makes right irrelevant
+  > 94 │ const mixed2 = false && true;  // Left side makes right irrelevant
+       │                ^^^^^
+    95 │ const mixed3 = null ?? "default";  // Left side is always nullish
+    96 │ const mixed4 = undefined ?? "default";  // Left side is always nullish
   
   i The value's type can never be truthy, so this check is redundant.
   
@@ -751,25 +727,25 @@ invalid.js:99:16 lint/suspicious/noUnnecessaryConditions ━━━━━━━�
 ```
 
 ```
-invalid.js:100:16 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:95:16 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unnecessary nullish coalescing.
   
-     98 │ const mixed1 = true || false;  // Left side makes right irrelevant
-     99 │ const mixed2 = false && true;  // Left side makes right irrelevant
-  > 100 │ const mixed3 = null ?? "default";  // Left side is always nullish
-        │                ^^^^
-    101 │ const mixed4 = undefined ?? "default";  // Left side is always nullish
-    102 │ 
+    93 │ const mixed1 = true || false;  // Left side makes right irrelevant
+    94 │ const mixed2 = false && true;  // Left side makes right irrelevant
+  > 95 │ const mixed3 = null ?? "default";  // Left side is always nullish
+       │                ^^^^
+    96 │ const mixed4 = undefined ?? "default";  // Left side is always nullish
+    97 │ 
   
   i Drop ?? and the fallback expression.
   
-     98 │ const mixed1 = true || false;  // Left side makes right irrelevant
-     99 │ const mixed2 = false && true;  // Left side makes right irrelevant
-  > 100 │ const mixed3 = null ?? "default";  // Left side is always nullish
-        │                ^^^^
-    101 │ const mixed4 = undefined ?? "default";  // Left side is always nullish
-    102 │ 
+    93 │ const mixed1 = true || false;  // Left side makes right irrelevant
+    94 │ const mixed2 = false && true;  // Left side makes right irrelevant
+  > 95 │ const mixed3 = null ?? "default";  // Left side is always nullish
+       │                ^^^^
+    96 │ const mixed4 = undefined ?? "default";  // Left side is always nullish
+    97 │ 
   
   i The left-hand side is guaranteed to be non-nullish, so the fallback is unreachable.
   
@@ -777,23 +753,23 @@ invalid.js:100:16 lint/suspicious/noUnnecessaryConditions ━━━━━━━�
 ```
 
 ```
-invalid.js:104:19 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:99:19 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unnecessary optional chaining.
   
-    103 │ // Unnecessary optional chaining on literals (if supported)
-  > 104 │ const optional1 = "hello"?.length;  // String is never nullish
+     98 │ // Unnecessary optional chaining on literals (if supported)
+   > 99 │ const optional1 = "hello"?.length;  // String is never nullish
         │                   ^^^^^^^
-    105 │ const optional2 = [1, 2, 3]?.[0];  // Array is never nullish
-    106 │ 
+    100 │ const optional2 = [1, 2, 3]?.[0];  // Array is never nullish
+    101 │ 
   
   i Replace ?. with ..
   
-    103 │ // Unnecessary optional chaining on literals (if supported)
-  > 104 │ const optional1 = "hello"?.length;  // String is never nullish
+     98 │ // Unnecessary optional chaining on literals (if supported)
+   > 99 │ const optional1 = "hello"?.length;  // String is never nullish
         │                          ^^
-    105 │ const optional2 = [1, 2, 3]?.[0];  // Array is never nullish
-    106 │ 
+    100 │ const optional2 = [1, 2, 3]?.[0];  // Array is never nullish
+    101 │ 
   
   i The receiver is guaranteed to be non-nullish.
   
@@ -801,25 +777,25 @@ invalid.js:104:19 lint/suspicious/noUnnecessaryConditions ━━━━━━━�
 ```
 
 ```
-invalid.js:105:19 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:100:19 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unnecessary optional chaining.
   
-    103 │ // Unnecessary optional chaining on literals (if supported)
-    104 │ const optional1 = "hello"?.length;  // String is never nullish
-  > 105 │ const optional2 = [1, 2, 3]?.[0];  // Array is never nullish
+     98 │ // Unnecessary optional chaining on literals (if supported)
+     99 │ const optional1 = "hello"?.length;  // String is never nullish
+  > 100 │ const optional2 = [1, 2, 3]?.[0];  // Array is never nullish
         │                   ^^^^^^^^^
-    106 │ 
-    107 │ // Function expressions with constant conditions
+    101 │ 
+    102 │ // Function expressions with constant conditions
   
   i Replace ?. with ..
   
-    103 │ // Unnecessary optional chaining on literals (if supported)
-    104 │ const optional1 = "hello"?.length;  // String is never nullish
-  > 105 │ const optional2 = [1, 2, 3]?.[0];  // Array is never nullish
+     98 │ // Unnecessary optional chaining on literals (if supported)
+     99 │ const optional1 = "hello"?.length;  // String is never nullish
+  > 100 │ const optional2 = [1, 2, 3]?.[0];  // Array is never nullish
         │                            ^^
-    106 │ 
-    107 │ // Function expressions with constant conditions
+    101 │ 
+    102 │ // Function expressions with constant conditions
   
   i The receiver is guaranteed to be non-nullish.
   
@@ -827,16 +803,16 @@ invalid.js:105:19 lint/suspicious/noUnnecessaryConditions ━━━━━━━�
 ```
 
 ```
-invalid.js:109:7 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:104:7 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This condition is always truthy.
   
-    107 │ // Function expressions with constant conditions
-    108 │ const fn1 = function() {
-  > 109 │   if (true) return "always";
+    102 │ // Function expressions with constant conditions
+    103 │ const fn1 = function() {
+  > 104 │   if (true) return "always";
         │       ^^^^
-    110 │ };
-    111 │ 
+    105 │ };
+    106 │ 
   
   i The value's type can never be falsy, so this check is redundant.
   
@@ -846,15 +822,15 @@ invalid.js:109:7 lint/suspicious/noUnnecessaryConditions ━━━━━━━�
 ```
 
 ```
-invalid.js:113:10 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:108:10 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This condition is always falsy.
   
-    112 │ const fn2 = () => {
-  > 113 │   return false ? "never" : "always";
+    107 │ const fn2 = () => {
+  > 108 │   return false ? "never" : "always";
         │          ^^^^^
-    114 │ };
-    115 │ 
+    109 │ };
+    110 │ 
   
   i The value's type can never be truthy, so this check is redundant.
   
@@ -864,15 +840,15 @@ invalid.js:113:10 lint/suspicious/noUnnecessaryConditions ━━━━━━━�
 ```
 
 ```
-invalid.js:117:5 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:112:5 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This condition is always truthy.
   
-    116 │ // Nested constant conditions
-  > 117 │ if (true) {
+    111 │ // Nested constant conditions
+  > 112 │ if (true) {
         │     ^^^^
-    118 │   if (false) {
-    119 │     console.log("never runs");
+    113 │   if (false) {
+    114 │     console.log("never runs");
   
   i The value's type can never be falsy, so this check is redundant.
   
@@ -882,16 +858,16 @@ invalid.js:117:5 lint/suspicious/noUnnecessaryConditions ━━━━━━━�
 ```
 
 ```
-invalid.js:118:7 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:113:7 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This condition is always falsy.
   
-    116 │ // Nested constant conditions
-    117 │ if (true) {
-  > 118 │   if (false) {
+    111 │ // Nested constant conditions
+    112 │ if (true) {
+  > 113 │   if (false) {
         │       ^^^^^
-    119 │     console.log("never runs");
-    120 │   }
+    114 │     console.log("never runs");
+    115 │   }
   
   i The value's type can never be truthy, so this check is redundant.
   
@@ -901,16 +877,16 @@ invalid.js:118:7 lint/suspicious/noUnnecessaryConditions ━━━━━━━�
 ```
 
 ```
-invalid.js:128:8 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:123:8 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This case is unreachable.
   
-    126 │     console.log("always matches");
-    127 │     break;
-  > 128 │   case false:
+    121 │     console.log("always matches");
+    122 │     break;
+  > 123 │   case false:
         │        ^^^^^
-    129 │     console.log("never matches");
-    130 │     break;
+    124 │     console.log("never matches");
+    125 │     break;
   
   i The value passed to switch can never equal this value.
   
@@ -920,16 +896,16 @@ invalid.js:128:8 lint/suspicious/noUnnecessaryConditions ━━━━━━━�
 ```
 
 ```
-invalid.js:135:5 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:130:5 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This condition is always truthy.
   
-    133 │ // Object property access with constants
-    134 │ const obj = {};
-  > 135 │ if (obj) {  // Object literal is always truthy
+    128 │ // Object property access with constants
+    129 │ const obj = {};
+  > 130 │ if (obj) {  // Object literal is always truthy
         │     ^^^
-    136 │   console.log("always runs");
-    137 │ }
+    131 │   console.log("always runs");
+    132 │ }
   
   i The value's type can never be falsy, so this check is redundant.
   
@@ -939,16 +915,16 @@ invalid.js:135:5 lint/suspicious/noUnnecessaryConditions ━━━━━━━�
 ```
 
 ```
-invalid.js:141:5 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:136:5 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This condition is always truthy.
   
-    139 │ // Array access with constants
-    140 │ const arr = [];
-  > 141 │ if (arr) {  // Array literal is always truthy
+    134 │ // Array access with constants
+    135 │ const arr = [];
+  > 136 │ if (arr) {  // Array literal is always truthy
         │     ^^^
-    142 │   console.log("always runs");
-    143 │ }
+    137 │   console.log("always runs");
+    138 │ }
   
   i The value's type can never be falsy, so this check is redundant.
   
