@@ -10,9 +10,9 @@ pub fn get_analyzer_rule_options_path() -> PathBuf {
     project_root().join("crates/biome_rule_options/src/")
 }
 
-/// Generates the options struct for a new analyzer rule.
-/// This function creates a new struct with the name `<RuleName>Options` and saves it in the
-/// `biome_rule_options` crate.
+/// Generates the options for a new analyzer rule.
+/// This function creates the options named `<RuleName>Options` and saves them in the
+/// `biome_rule_options` crate, as an alias of the options shared by the rules without options.
 pub fn generate_analyzer_rule_options(
     rule_name: &str,
     mode: Mode,
@@ -23,14 +23,10 @@ pub fn generate_analyzer_rule_options(
         Span::call_site(),
     );
 
+    // A rule has nothing to configure until its author adds options,
+    // so it shares the options type of the rules without options.
     let content = quote! {
-        use biome_deserialize_macros::{Deserializable, Merge};
-        use serde::{Deserialize, Serialize};
-
-        #[derive(Default, Clone, Debug, Deserialize, Deserializable, Merge, Eq, PartialEq, Serialize)]
-        #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
-        #[serde(rename_all = "camelCase", deny_unknown_fields, default)]
-        pub struct #struct_name {}
+        pub type #struct_name = crate::EmptyRuleOptions;
     };
 
     let snake_rule_name = Case::Snake.convert(rule_name);
