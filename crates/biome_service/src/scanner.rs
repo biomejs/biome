@@ -59,8 +59,7 @@ use crate::workspace::{ScanProjectResult, ServiceNotification, WorkspaceError};
 use biome_diagnostics::serde::Diagnostic;
 use biome_diagnostics::{Diagnostic as _, DiagnosticExt, Error, Severity};
 use biome_fs::{
-    BiomePath, FileSystem, PathInterner, PathKind, PhysicalFileOwners, TraversalContext,
-    TraversalScope, normalize_path,
+    BiomePath, FileSystem, PathInterner, PathKind, TraversalContext, TraversalScope, normalize_path,
 };
 use camino::{Utf8Path, Utf8PathBuf};
 use crossbeam::channel::{Receiver, Sender, unbounded};
@@ -594,7 +593,6 @@ impl Scanner {
             workspace,
             project_key,
             interner,
-            physical_files: PhysicalFileOwners::default(),
             diagnostics_sender,
             evaluated_paths: Default::default(),
             scan_kind: scan_options.scan_kind.clone(),
@@ -1391,9 +1389,6 @@ pub(crate) struct ScanContext<'app, W: WorkspaceScannerBridge> {
     /// Logical path interner used by the filesystem traversal.
     interner: PathInterner,
 
-    /// Physical files selected after logical path policy is applied.
-    physical_files: PhysicalFileOwners,
-
     /// Channel for reporting diagnostics during scanning.
     pub(crate) diagnostics_sender: Sender<Diagnostic>,
 
@@ -1503,26 +1498,6 @@ impl<W: WorkspaceScannerBridge> ScanContext<'_, W> {
 impl<W: WorkspaceScannerBridge> TraversalContext for ScanContext<'_, W> {
     fn interner(&self) -> &PathInterner {
         &self.interner
-    }
-
-    fn store_physical_path(
-        &self,
-        physical_path: Utf8PathBuf,
-        logical_path: BiomePath,
-        is_symlink: bool,
-    ) {
-        self.physical_files.select(
-            physical_path,
-            logical_path,
-            is_symlink,
-            |previous, selected| {
-                let evaluated_paths = self.evaluated_paths.pin();
-                if let Some(previous) = previous {
-                    evaluated_paths.remove(previous);
-                }
-                evaluated_paths.insert(selected.clone());
-            },
-        );
     }
 
     fn evaluated_paths(&self) -> HashSetRef<'_, BiomePath, RandomState, LocalGuard<'_>> {

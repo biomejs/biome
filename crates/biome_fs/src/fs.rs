@@ -463,14 +463,23 @@ impl<T: FileSystem + ?Sized> FileSystemExt for T {}
 type BoxedTraversal<'fs, 'scope> = Box<dyn FnOnce(&dyn TraversalScope<'scope>) + Send + 'fs>;
 
 pub trait TraversalScope<'scope> {
-    /// Spawn a new filesystem read task.
+    /// Walks `path` and collects every file the context accepts with
+    /// [TraversalContext::store_path].
     ///
-    /// If the provided path exists and is a file, then the [`handle_file`](TraversalContext::handle_path)
-    /// method of the provided [TraversalContext] will be called. If it's a
-    /// directory, it will be recursively traversed and all the files the
-    /// [TraversalContext::can_handle] method of the context
-    /// returns true for will be handled as well
+    /// Directories are walked recursively, and only entries accepted by
+    /// [TraversalContext::can_handle_with_kind] are stored or descended into. When several logical
+    /// paths lead to the same physical file, for example through symbolic links, only one of them
+    /// is stored. A path spelled exactly like the physical file is stored as soon as it is found.
+    /// Any other path is stored when the traversal ends, once all the paths to the file are known.
     fn evaluate(&self, context: &'scope dyn TraversalContext, path: Utf8PathBuf);
+
+    /// Walks `path` like [TraversalScope::evaluate], but hands every selected file to
+    /// [TraversalContext::handle_path] instead of storing it.
+    ///
+    /// The order and the threads that files are handled on depend on the file system. The OS
+    /// file system handles each file in parallel with the rest of the walk, so processing starts
+    /// before the walk ends.
+    fn evaluate_and_handle(&self, context: &'scope dyn TraversalContext, path: Utf8PathBuf);
 
     /// Spawn a new filesystem read task.
     ///
@@ -484,19 +493,6 @@ pub trait TraversalContext: Sync {
     /// Provides the traversal scope with an instance of [PathInterner], used
     /// to emit diagnostics for IO errors that may happen in the traversal process
     fn interner(&self) -> &PathInterner;
-
-    /// Stores a logical path after selecting it as the stable owner of a physical file.
-    ///
-    /// The default forwards the logical path to [`Self::store_path`]. Implementations that
-    /// traverse symbolic links can override this to deduplicate aliases by physical identity.
-    fn store_physical_path(
-        &self,
-        _physical_path: Utf8PathBuf,
-        logical_path: BiomePath,
-        _is_symlink: bool,
-    ) {
-        self.store_path(logical_path);
-    }
 
     /// Called by the traversal process to emit an error diagnostic associated
     /// with a particular file ID when an IO error happens
@@ -527,12 +523,12 @@ pub trait TraversalContext: Sync {
         self.can_handle(path)
     }
 
-    /// This method will be called by the traversal for each file it finds
-    /// where [TraversalContext::can_handle] returned true
+    /// Processes a file selected by [TraversalScope::evaluate_and_handle] or passed to
+    /// [TraversalScope::handle].
     fn handle_path(&self, path: BiomePath);
 
-    /// This method will be called by the traversal for each file it finds
-    /// where [TraversalContext::store_path] returned true
+    /// Stores a file selected by [TraversalScope::evaluate], and each accepted directory when
+    /// [Self::should_store_dirs] returns `true`.
     fn store_path(&self, path: BiomePath);
 
     /// Returns the paths that should be handled
@@ -543,6 +539,15 @@ pub trait TraversalContext: Sync {
     fn should_store_dirs(&self) -> bool {
         false
     }
+}
+
+/// Identifies a traversal context while a traversal is running.
+///
+/// The identifier is the address of the context. Contexts that are alive at the same time and
+/// aren't zero-sized have distinct addresses, so a traversal can keep per-context state, such as
+/// the owner of each physical file, without borrowing the contexts.
+pub(crate) fn context_id(context: &dyn TraversalContext) -> usize {
+    std::ptr::from_ref(context).cast::<()>().addr()
 }
 
 impl<T> FileSystem for Arc<T>

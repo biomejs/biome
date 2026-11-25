@@ -1233,6 +1233,40 @@ fn include_files_in_symlinked_subdir() {
 }
 
 #[test]
+fn reports_file_reached_directly_and_through_symlinked_directory_once() {
+    let mut fs = TemporaryFs::new("reports_file_reached_directly_and_through_symlink_once");
+    let mut console = BufferConsole::default();
+    fs.create_file("biome.json", "{}");
+    fs.create_file("src/file.js", APPLY_SUGGESTED_BEFORE);
+    let source = fs.working_directory.join("src");
+    let link = fs.working_directory.join("linked");
+
+    #[cfg(target_family = "unix")]
+    {
+        symlink(&source, &link).unwrap();
+    }
+
+    #[cfg(target_os = "windows")]
+    {
+        check_windows_symlink!(symlink_dir(&source, &link));
+    }
+
+    let result = run_cli_with_dyn_fs(
+        Box::new(fs.create_os()),
+        &mut console,
+        Args::from(["lint", fs.working_directory.as_str()].as_slice()),
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "reports_file_reached_directly_and_through_symlinked_directory_once",
+        fs.create_mem(),
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn processes_extensionless_file_symlink_using_logical_path() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();

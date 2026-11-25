@@ -10,6 +10,6 @@ pub use fs::{
     FileSystemExt, FsErrorKind, ManifestName, MemoryFileSystem, OpenOptions, OsFileSystem,
     PathKind, TemporaryFs, TraversalContext, TraversalScope,
 };
-pub use interner::{PathInterner, PathInternerSet, PhysicalFileOwners};
+pub use interner::{PathInterner, PathInternerSet};
 pub use path::{BiomePath, FileRole, PathRelation, is_node_modules_path};
 pub use utils::*;

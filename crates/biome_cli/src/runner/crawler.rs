@@ -4,10 +4,7 @@ use crate::runner::execution::Execution;
 use crate::runner::handler::Handler;
 use crate::runner::process_file::{ChangedFile, Message, MessageStat, ProcessFile};
 use biome_diagnostics::{Error, Severity};
-use biome_fs::{
-    BiomePath, FileSystem, PathInterner, PathKind, PhysicalFileOwners, TraversalContext,
-    TraversalScope,
-};
+use biome_fs::{BiomePath, FileSystem, PathInterner, PathKind, TraversalContext, TraversalScope};
 use biome_service::Workspace;
 use biome_service::projects::ProjectKey;
 use biome_service::workspace::{ChangeFileParams, FeaturesSupported};
@@ -17,7 +14,6 @@ use papaya::{HashMap, HashSet, HashSetRef, LocalGuard};
 use std::hash::RandomState;
 use std::marker::PhantomData;
 use std::sync::Mutex;
-use std::sync::atomic::{AtomicUsize, Ordering};
 use std::thread;
 use std::time::{Duration, Instant};
 use tracing::instrument;
@@ -127,8 +123,8 @@ pub trait Crawler<Output> {
         Ok(Self::output(result, evaluated_paths, duration))
     }
 
-    /// Initiate the filesystem traversal tasks with the provided input paths and
-    /// run it to completion, returning the duration of the process and the evaluated paths
+    /// Walks the input paths and processes every selected file, returning the duration of the
+    /// process and the processed paths in processing order.
     fn crawl_inputs<'a>(
         fs: &'a dyn FileSystem,
         inputs: Vec<CrawlPath>,
@@ -137,18 +133,11 @@ pub trait Crawler<Output> {
         let start = Instant::now();
         fs.traversal(Box::new(move |scope: &dyn TraversalScope| {
             for input in inputs {
-                match input {
-                    CrawlPath::Path(input) => scope.evaluate(ctx, input),
-                    CrawlPath::String(input) => scope.evaluate(ctx, Utf8PathBuf::from(input)),
+                let input = match input {
+                    CrawlPath::Path(input) => input,
+                    CrawlPath::String(input) => Utf8PathBuf::from(input),
                 };
-            }
-        }));
-
-        let mut handle_paths: Vec<_> = ctx.evaluated_paths().into_iter().cloned().collect();
-        handle_paths.sort_unstable_by(BiomePath::cmp_processing_priority);
-        fs.traversal(Box::new(|scope: &dyn TraversalScope| {
-            for path in &handle_paths {
-                scope.handle(ctx, path.clone());
+                scope.evaluate_and_handle(ctx, input);
             }
         }));
 
@@ -194,19 +183,9 @@ pub(crate) struct CrawlerOptions<'ctx, 'app, H, P> {
     pub(crate) project_key: ProjectKey,
     /// Logical path interner used by the filesystem traversal.
     interner: PathInterner,
-    /// Physical files selected after logical path policy is applied.
-    physical_files: PhysicalFileOwners,
-    /// Shared atomic counter storing the number of changed files
-    changed: AtomicUsize,
-    /// Shared atomic counter storing the number of unchanged files
-    unchanged: AtomicUsize,
-    /// Shared atomic counter storing the number of unchanged files
-    matches: AtomicUsize,
-    /// Shared atomic counter storing the number of skipped files
-    skipped: AtomicUsize,
     /// Channel sending messages to the display thread
     pub(crate) messages: Sender<Message>,
-    /// List of paths that should be processed
+    /// Paths handed to the processor by the traversal.
     pub(crate) evaluated_paths: papaya::HashSet<BiomePath>,
     /// Paths whose contents were changed by processing.
     pub(crate) written_paths: papaya::HashSet<BiomePath>,
@@ -234,7 +213,6 @@ where
     P: ProcessFile,
 {
     fn increment_changed(&self, path: &BiomePath, changed_file: ChangedFile) {
-        self.changed.fetch_add(1, Ordering::Relaxed);
         if self.synchronize_workspace {
             self.changed_files.lock().unwrap().push(changed_file);
         }
@@ -243,17 +221,14 @@ where
     }
     fn increment_unchanged(&self) {
         self.push_message(Message::Stats(MessageStat::Unchanged));
-        self.unchanged.fetch_add(1, Ordering::Relaxed);
     }
 
     fn increment_matches(&self, num_matches: usize) {
         self.push_message(Message::Stats(MessageStat::Matches(num_matches)));
-        self.matches.fetch_add(num_matches, Ordering::Relaxed);
     }
 
     fn increment_skipped(&self) {
         self.push_message(Message::Stats(MessageStat::Skipped));
-        self.skipped.fetch_add(1, Ordering::Relaxed);
     }
 
     /// Send a message to the display thread
@@ -308,7 +283,6 @@ where
             workspace,
             project_key,
             interner,
-            physical_files: PhysicalFileOwners::default(),
             messages: sender,
             evaluated_paths: HashSet::default(),
             written_paths: HashSet::default(),
@@ -316,10 +290,6 @@ where
             changed_files: Mutex::new(Vec::new()),
             synchronize_workspace,
             handler: I::default(),
-            changed: AtomicUsize::new(0),
-            unchanged: AtomicUsize::new(0),
-            matches: AtomicUsize::new(0),
-            skipped: AtomicUsize::new(0),
             execution,
             max_diagnostics,
             diagnostic_level,
@@ -339,26 +309,6 @@ where
 {
     fn interner(&self) -> &PathInterner {
         &self.interner
-    }
-
-    fn store_physical_path(
-        &self,
-        physical_path: Utf8PathBuf,
-        logical_path: BiomePath,
-        is_symlink: bool,
-    ) {
-        self.physical_files.select(
-            physical_path,
-            logical_path,
-            is_symlink,
-            |previous, selected| {
-                let evaluated_paths = self.evaluated_paths.pin();
-                if let Some(previous) = previous {
-                    evaluated_paths.remove(previous);
-                }
-                evaluated_paths.insert(selected.clone());
-            },
-        );
     }
 
     fn evaluated_paths(&self) -> HashSetRef<'_, BiomePath, RandomState, LocalGuard<'_>> {
@@ -385,6 +335,7 @@ where
     }
 
     fn handle_path(&self, path: BiomePath) {
+        self.evaluated_paths.pin().insert(path.clone());
         self.handler.handle_path::<P, Self>(
             &path,
             self.max_diagnostics,

@@ -362,7 +362,7 @@ mod tests {
     use biome_diagnostics::{Category, Error, Severity, category};
     use biome_fs::{
         BiomePath, FileSystem, FileSystemExt, MemoryFileSystem, PathInterner, PathKind,
-        PhysicalFileOwners, TraversalContext,
+        TraversalContext,
     };
     use biome_service::Workspace;
     use biome_service::projects::ProjectKey;
@@ -429,7 +429,6 @@ mod tests {
         project_key: ProjectKey,
         execution: TestExecution,
         interner: PathInterner,
-        physical_files: PhysicalFileOwners,
         evaluated_paths: HashSet<BiomePath>,
         file_features: HashMap<BiomePath, FeaturesSupported>,
     }
@@ -473,26 +472,6 @@ mod tests {
     impl TraversalContext for TestContext<'_> {
         fn interner(&self) -> &PathInterner {
             &self.interner
-        }
-
-        fn store_physical_path(
-            &self,
-            physical_path: Utf8PathBuf,
-            logical_path: BiomePath,
-            is_symlink: bool,
-        ) {
-            self.physical_files.select(
-                physical_path,
-                logical_path,
-                is_symlink,
-                |previous, selected| {
-                    let evaluated_paths = self.evaluated_paths.pin();
-                    if let Some(previous) = previous {
-                        evaluated_paths.remove(previous);
-                    }
-                    evaluated_paths.insert(selected.clone());
-                },
-            );
         }
 
         fn push_diagnostic(&self, _error: Error) {}
@@ -552,7 +531,6 @@ mod tests {
             project_key,
             execution: TestExecution { write: false },
             interner,
-            physical_files: PhysicalFileOwners::default(),
             evaluated_paths: HashSet::default(),
             file_features: HashMap::default(),
         };
@@ -593,7 +571,6 @@ mod tests {
             project_key,
             execution: TestExecution { write: true },
             interner,
-            physical_files: PhysicalFileOwners::default(),
             evaluated_paths: HashSet::default(),
             file_features: HashMap::default(),
         };
@@ -647,7 +624,6 @@ mod tests {
             project_key,
             execution: TestExecution { write: false },
             interner,
-            physical_files: PhysicalFileOwners::default(),
             evaluated_paths: HashSet::default(),
             file_features: HashMap::default(),
         };
