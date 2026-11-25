@@ -4415,7 +4415,7 @@ export interface Nursery {
 	 */
 	useRegexpExec?: UseRegexpExecConfiguration;
 	/**
-	 * Succinct description of the rule.
+	 * Prefer the methods of Set for combining and comparing Sets.
 	 * See https://biomejs.dev/linter/rules/use-set-methods
 	 */
 	useSetMethods?: UseSetMethodsConfiguration;
@@ -11692,6 +11692,10 @@ export interface RuleWithUseRegexpExecOptions {
 	options?: UseRegexpExecOptions;
 }
 export interface RuleWithUseSetMethodsOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
 	level: RulePlainConfiguration;
 	options?: UseSetMethodsOptions;
 }
