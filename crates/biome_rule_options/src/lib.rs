@@ -247,6 +247,7 @@ pub mod no_obsolete_attributes;
 pub mod no_obsolete_tags;
 pub mod no_octal;
 pub mod no_octal_escape;
+pub mod no_outer_scope_in_isolated_functions;
 pub mod no_parameter_assign;
 pub mod no_parameter_properties;
 pub mod no_parameters_only_used_in_recursion;
