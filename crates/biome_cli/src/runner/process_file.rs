@@ -13,8 +13,8 @@ use biome_service::diagnostics::FileTooLarge;
 use biome_service::projects::ProjectKey;
 use biome_service::workspace::FileGuard;
 use biome_service::workspace::{
-    FeaturesSupported, FileContent, FileExistsParams, FileFeaturesResult, OpenFileParams,
-    SupportKind, SupportsFeatureParams,
+    FeaturesSupported, FileContent, FileExistsParams, FileFeaturesResult, IgnoreKind,
+    OpenFileParams, SupportKind, SupportsFeatureParams,
 };
 use biome_service::{Workspace, WorkspaceError};
 
@@ -197,6 +197,7 @@ pub(crate) trait ProcessFile: Send + Sync + std::panic::RefUnwindSafe {
                     inline_config: None,
                     skip_ignore_check: false,
                     not_requested_features: ctx.execution().not_requested_features(),
+                    ignore_kind: IgnoreKind::Ancestors,
                 })
                 .with_file_path_and_code_and_tags(
                     biome_path.to_string(),
@@ -496,7 +497,12 @@ mod tests {
 
         fn push_diagnostic(&self, _error: Error) {}
 
-        fn can_handle_with_kind(&self, _path: &BiomePath, _path_kind: PathKind) -> bool {
+        fn can_handle_with_kind(
+            &self,
+            _path: &BiomePath,
+            _path_kind: PathKind,
+            _ancestors_checked: bool,
+        ) -> bool {
             true
         }
 

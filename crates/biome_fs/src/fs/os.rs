@@ -469,7 +469,7 @@ fn handle_any_file<'scope>(
             let path_kind = PathKind::Directory {
                 is_symlink: followed_symlink,
             };
-            if !ctx.can_handle_with_kind(&biome_path, path_kind) {
+            if !ctx.can_handle_with_kind(&biome_path, path_kind, !is_root) {
                 return;
             }
             if ctx.should_store_dirs() {
@@ -513,7 +513,7 @@ fn handle_any_file<'scope>(
     let logical_path = logical_path.unwrap_or_else(|| path.clone());
     let biome_path = BiomePath::new(&logical_path);
 
-    if !ctx.can_handle_with_kind(&biome_path, path_kind) {
+    if !ctx.can_handle_with_kind(&biome_path, path_kind, !is_root) {
         return;
     }
     if !logical_path_is_interned && !ctx.interner().intern_path(logical_path.clone()) {
@@ -721,6 +721,8 @@ mod tests {
         symlink_files: HashSet<BiomePath>,
         /// The number of entries reported to [TraversalContext::can_handle_with_kind].
         handled_entries: AtomicUsize,
+        /// Entries reported to [TraversalContext::can_handle_with_kind] with checked ancestors.
+        ancestors_checked: HashSet<BiomePath>,
         ignored_path: Option<BiomePath>,
         store_dirs: bool,
     }
@@ -734,6 +736,7 @@ mod tests {
                 visited: HashSet::default(),
                 symlink_files: HashSet::default(),
                 handled_entries: AtomicUsize::default(),
+                ancestors_checked: HashSet::default(),
                 ignored_path,
                 store_dirs,
             }
@@ -773,8 +776,16 @@ mod tests {
             panic!("unexpected diagnostic: {error:?}");
         }
 
-        fn can_handle_with_kind(&self, path: &BiomePath, path_kind: PathKind) -> bool {
+        fn can_handle_with_kind(
+            &self,
+            path: &BiomePath,
+            path_kind: PathKind,
+            ancestors_checked: bool,
+        ) -> bool {
             self.handled_entries.fetch_add(1, Ordering::Relaxed);
+            if ancestors_checked {
+                self.ancestors_checked.pin().insert(path.clone());
+            }
             if path_kind == (PathKind::File { is_symlink: true }) {
                 self.symlink_files.pin().insert(path.clone());
             }
@@ -794,6 +805,41 @@ mod tests {
         fn should_store_dirs(&self) -> bool {
             self.store_dirs
         }
+    }
+
+    #[test]
+    fn reports_checked_ancestors_only_below_traversal_inputs() {
+        let mut temporary = TemporaryFs::new("reports_checked_ancestors_below_inputs");
+        temporary.create_file("project/root.js", "statement();");
+        temporary.create_file("project/nested/file.js", "statement();");
+        temporary.create_file("other/input.js", "statement();");
+        let project = temporary.working_directory.join("project");
+        let input_file = temporary.working_directory.join("other/input.js");
+
+        let fs = temporary.create_os();
+        let ctx = TestContext::new(None, false);
+        fs.traversal(Box::new(|scope| {
+            scope.evaluate(&ctx, project.clone());
+            scope.evaluate(&ctx, input_file.clone());
+        }));
+
+        let ancestors_checked = ctx.ancestors_checked.pin();
+        assert!(!ancestors_checked.contains(&fs.biome_path(&project)));
+        assert!(!ancestors_checked.contains(&fs.biome_path(&input_file)));
+        for path in [
+            "project/root.js",
+            "project/nested",
+            "project/nested/file.js",
+        ] {
+            let path = fs.biome_path(&temporary.working_directory.join(path));
+            assert!(
+                ancestors_checked.contains(&path),
+                "{path} must report checked ancestors"
+            );
+        }
+        assert_eq!(ancestors_checked.len(), 3);
+        drop(ancestors_checked);
+        std::fs::remove_dir_all(temporary.project_directory).unwrap();
     }
 
     #[test]

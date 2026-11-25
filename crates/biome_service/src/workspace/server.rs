@@ -539,7 +539,7 @@ fn read_project_git_ignores(
             .skip(1)
         {
             let ignore_directory = fs.biome_path(&ignore_directory);
-            if matches.is_ignored(&ignore_directory, true) {
+            if matches.is_ignored(&ignore_directory, true, IgnoreKind::Ancestors) {
                 break;
             }
             if let Some(patterns) = read_ignore_file_patterns(fs, ignore_directory.as_path()) {
@@ -2127,12 +2127,12 @@ impl WorkspaceServerWithDb<'_> {
                 return Ok(is_ignored);
             }
 
-            // For an initial scan, we don't descend into ignored folders.
-            // Therefore, we don't need to check if any of the ancestors of the
-            // given `path` are ignored. If they were, we wouldn't have been
-            // scanning them in the first place. So checking whether the path
-            // itself is ignored is enough.
-            IndexRequestKind::Explicit(IndexTrigger::InitialScan) => IgnoreKind::Path,
+            // An initial scan can reach `path` through a folder that is
+            // ignored: it chooses the folders to descend into before it loads
+            // nested configuration files, and file systems without directory
+            // checks, such as the in-memory one, never skip a folder. So the
+            // ancestors of `path` must be checked too.
+            IndexRequestKind::Explicit(IndexTrigger::InitialScan) => IgnoreKind::Ancestors,
 
             // For a (watcher) update, we can't rely on the above reasoning.
             // Even though we only install watchers on folders that contain
@@ -2211,18 +2211,20 @@ impl WorkspaceServerWithDb<'_> {
                 }
 
                 match scan_kind {
-                    ScanKind::KnownFiles | ScanKind::TargetedKnownFiles { .. } => match ignore_kind
-                    {
-                        IgnoreKind::Path => !path.is_required_during_scan(),
-                        IgnoreKind::Ancestors => path.parent().is_none_or(|folder_path| {
-                            self.project_is_ignored_by_top_level_config(
-                                project_key,
-                                folder_path,
-                                true,
-                                ignore_kind,
-                            )
-                        }),
-                    },
+                    ScanKind::KnownFiles | ScanKind::TargetedKnownFiles { .. } => {
+                        if request_kind.trigger() == IndexTrigger::InitialScan {
+                            !path.is_required_during_scan()
+                        } else {
+                            path.parent().is_none_or(|folder_path| {
+                                self.project_is_ignored_by_top_level_config(
+                                    project_key,
+                                    folder_path,
+                                    true,
+                                    ignore_kind,
+                                )
+                            })
+                        }
+                    }
                     ScanKind::Project | ScanKind::TypeAware => {
                         if path.is_dependency() {
                             // During the initial scan, we only care about
@@ -2236,17 +2238,15 @@ impl WorkspaceServerWithDb<'_> {
                             request_kind.trigger() != IndexTrigger::InitialScan
                                 || !path.is_package_json()
                         } else if path.is_required_during_scan() {
-                            match ignore_kind {
-                                IgnoreKind::Path => false,
-                                IgnoreKind::Ancestors => path.parent().is_none_or(|folder_path| {
+                            request_kind.trigger() != IndexTrigger::InitialScan
+                                && path.parent().is_none_or(|folder_path| {
                                     self.project_is_ignored_by_top_level_config(
                                         project_key,
                                         folder_path,
                                         true,
                                         ignore_kind,
                                     )
-                                }),
-                            }
+                                })
                         } else {
                             self.project_is_ignored_by_top_level_config(
                                 project_key,
@@ -3732,6 +3732,7 @@ impl Workspace for WorkspaceServerWithDb<'_> {
                 skip_ignore_check: params.skip_ignore_check || is_virtual,
                 check_vcs_ignore,
                 not_requested_features: params.not_requested_features,
+                ignore_kind: params.ignore_kind,
             },
         )
     }
@@ -5350,7 +5351,7 @@ impl WorkspaceScannerBridge for WorkspaceServerWithDb<'_> {
             }
 
             let matcher_root = self.fs.biome_path(dir_ignore_file);
-            if applicable_matches.is_ignored(&matcher_root, true) {
+            if applicable_matches.is_ignored(&matcher_root, true, IgnoreKind::Ancestors) {
                 continue;
             }
 

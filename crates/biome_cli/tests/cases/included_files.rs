@@ -65,6 +65,64 @@ fn does_not_ignore_project_inside_excluded_ancestor() {
 }
 
 #[test]
+fn excluded_folder_ignores_walked_and_explicit_paths() {
+    for (case, target, processes_included_file) in [
+        ("project", ".", true),
+        ("explicit_folder", "src/generated/deep", false),
+        ("explicit_file", "src/generated/deep/more.js", false),
+    ] {
+        let test_name = format!("excluded_folder_ignores_walked_and_explicit_paths_{case}");
+        let mut fs = TemporaryFs::new(&test_name);
+        fs.create_file(
+            "biome.json",
+            r#"{ "files": { "includes": ["**", "!**/generated"] } }"#,
+        );
+        fs.create_file("src/index.js", UNFORMATTED);
+        fs.create_file("src/generated/out.js", UNFORMATTED);
+        fs.create_file("src/generated/deep/more.js", UNFORMATTED);
+        let target_path = fs.working_directory.join(target);
+        let mut console = BufferConsole::default();
+
+        let result = run_cli_with_dyn_fs(
+            Box::new(fs.create_os()),
+            &mut console,
+            Args::from(["format", "--write", target_path.as_str()].as_slice()),
+        );
+
+        assert_eq!(
+            result.is_ok(),
+            processes_included_file,
+            "target {target}: run_cli returned {result:?}"
+        );
+
+        let fs = fs.create_mem();
+        assert_file_contents(
+            &fs,
+            Utf8Path::new("src/index.js"),
+            if processes_included_file {
+                FORMATTED
+            } else {
+                UNFORMATTED
+            },
+        );
+        assert_file_contents(&fs, Utf8Path::new("src/generated/out.js"), UNFORMATTED);
+        assert_file_contents(
+            &fs,
+            Utf8Path::new("src/generated/deep/more.js"),
+            UNFORMATTED,
+        );
+
+        assert_cli_snapshot(SnapshotPayload::new(
+            module_path!(),
+            &test_name,
+            fs,
+            console,
+            result,
+        ));
+    }
+}
+
+#[test]
 fn does_handle_only_included_files() {
     let mut console = BufferConsole::default();
     let fs = MemoryFileSystem::default();

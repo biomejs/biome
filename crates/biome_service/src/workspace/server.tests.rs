@@ -3418,11 +3418,11 @@ fn vcs_ignore_refresh_keeps_concurrent_settings_updates() {
         .project_get_root_settings(project_key)
         .unwrap();
     assert_eq!(settings.formatter.enabled, Some(false.into()));
-    assert!(
-        settings
-            .vcs_settings
-            .is_ignored(&BiomePath::new("/project/ignored.js"), false)
-    );
+    assert!(settings.vcs_settings.is_ignored(
+        &BiomePath::new("/project/ignored.js"),
+        false,
+        IgnoreKind::Ancestors
+    ));
 }
 
 #[test]
@@ -6518,6 +6518,7 @@ fn virtual_documents_bypass_filesystem_overrides() {
             inline_config: Some(inline_config.clone()),
             skip_ignore_check: false,
             not_requested_features: FeaturesBuilder::new().build(),
+            ignore_kind: IgnoreKind::Ancestors,
         })
         .unwrap();
     assert!(features.features_supported.supports_format());

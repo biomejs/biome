@@ -348,6 +348,7 @@ impl<'scope> TraversalScope<'scope> for MemoryTraversalScope<'scope> {
                     if ctx.can_handle_with_kind(
                         &biome_path,
                         PathKind::Directory { is_symlink: false },
+                        false,
                     ) {
                         ctx.store_path(biome_path);
                     }
@@ -357,7 +358,12 @@ impl<'scope> TraversalScope<'scope> for MemoryTraversalScope<'scope> {
             for path in matching_files {
                 let _ = ctx.interner().intern_path(path.clone());
                 let biome_path = BiomePath::new(path);
-                if !ctx.can_handle_with_kind(&biome_path, PathKind::File { is_symlink: false }) {
+                // Directories aren't checked before their files, so ancestors are never verified.
+                if !ctx.can_handle_with_kind(
+                    &biome_path,
+                    PathKind::File { is_symlink: false },
+                    false,
+                ) {
                     continue;
                 }
                 ctx.store_path(biome_path);

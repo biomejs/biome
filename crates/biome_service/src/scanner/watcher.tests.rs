@@ -246,7 +246,7 @@ fn nested_ignore_file_events_refresh_matchers() {
                 path: BiomePath::new(&file_path),
                 is_dir: false,
                 features: FeatureName::default(),
-                ignore_kind: IgnoreKind::Path,
+                ignore_kind: IgnoreKind::Ancestors,
             })
             .unwrap()
     };

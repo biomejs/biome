@@ -97,6 +97,7 @@ pub(crate) fn code_actions(
                 .with_search()
                 .with_formatter()
                 .build(),
+            ignore_kind: IgnoreKind::Ancestors,
         })?;
 
     if !file_features.supports_lint() && !file_features.supports_assist() {
@@ -591,6 +592,7 @@ fn fix_all(
             inline_config: session.inline_config(),
             skip_ignore_check: false,
             not_requested_features: FeaturesBuilder::new().with_search().build(),
+            ignore_kind: IgnoreKind::Ancestors,
         })?;
     let should_format = file_features.supports_format();
 

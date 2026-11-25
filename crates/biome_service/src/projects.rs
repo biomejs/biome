@@ -24,6 +24,8 @@ pub struct GetFileFeaturesParams<'a> {
     pub skip_ignore_check: bool,
     pub check_vcs_ignore: bool,
     pub not_requested_features: FeatureName,
+    /// Selects whether the ignore checks also cover the directories that contain `path`.
+    pub ignore_kind: IgnoreKind,
 }
 
 /// Type that holds all the settings and information for a project
@@ -231,7 +233,7 @@ pub trait ProjectDb: biome_db::Db {
                 project_data
                     .root_settings(self)
                     .as_ref()
-                    .is_path_ignored_for_feature(path, feature)
+                    .is_path_ignored_for_feature(path, is_dir, feature)
             });
 
         is_ignored_by_top_level_config || is_ignored_by_features
@@ -250,6 +252,7 @@ pub trait ProjectDb: biome_db::Db {
             skip_ignore_check,
             check_vcs_ignore,
             not_requested_features: denied_features,
+            ignore_kind,
         }: GetFileFeaturesParams<'_>,
     ) -> Result<FileFeaturesResult, WorkspaceError> {
         let project_data = self
@@ -275,7 +278,7 @@ pub trait ProjectDb: biome_db::Db {
                 .root_settings(self)
                 .as_ref()
                 .vcs_settings
-                .is_ignored(&self.biome_path(path), false)
+                .is_ignored(&self.biome_path(path), false, IgnoreKind::Ancestors)
         {
             file_features.set_ignored_for_all_features();
         } else if !skip_ignore_check {
@@ -284,7 +287,7 @@ pub trait ProjectDb: biome_db::Db {
                     &project_data,
                     path,
                     false,
-                    IgnoreKind::Ancestors,
+                    ignore_kind,
                 );
 
                 // If there are specific features enabled, but all of them ignore the
@@ -294,7 +297,7 @@ pub trait ProjectDb: biome_db::Db {
                         project_data
                             .root_settings(self)
                             .as_ref()
-                            .is_path_ignored_for_feature(path, feature)
+                            .is_path_ignored_for_feature(path, false, feature)
                     });
 
                 is_ignored_by_top_level_config || is_ignored_by_features
@@ -307,8 +310,8 @@ pub trait ProjectDb: biome_db::Db {
                     if project_data
                         .root_settings(self)
                         .as_ref()
-                        .is_path_ignored_for_feature(path, feature)
-                        || settings.is_path_ignored_for_feature(path, feature)
+                        .is_path_ignored_for_feature(path, false, feature)
+                        || settings.is_path_ignored_for_feature(path, false, feature)
                     {
                         file_features.set_ignored(feature);
                     }
@@ -346,7 +349,7 @@ pub trait ProjectDb: biome_db::Db {
             .root_settings(self)
             .as_ref()
             .vcs_settings
-            .is_ignored(&path, is_dir);
+            .is_ignored(&path, is_dir, ignore_kind);
 
         is_ignored_by_files || is_ignored_by_vcs
     }

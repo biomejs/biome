@@ -1615,6 +1615,7 @@ async fn untitled_document_rebinds_after_workspace_folder_removal() -> Result<()
         inline_config: session.inline_config(),
         skip_ignore_check: true,
         not_requested_features: FeaturesBuilder::new().with_search().build(),
+        ignore_kind: IgnoreKind::Ancestors,
     })?;
     assert!(
         vue_features.features_supported.supports_full_html_support(),

@@ -1680,6 +1680,7 @@ mod tests {
         SettingsEditorState, SettingsHandle, SettingsQuery, SettingsQuerySelection,
         SettingsSelectionKey,
     };
+    use crate::workspace::IgnoreKind;
     #[cfg(feature = "lang_js")]
     use biome_analyze::AnalyzerOptions;
     #[cfg(feature = "lang_js")]
@@ -2870,11 +2871,11 @@ mod tests {
         let ignored_path = nested_path.join("generated.js");
 
         assert!(
-            !project
-                .root_settings(&db)
-                .as_ref()
-                .vcs_settings
-                .is_ignored(&db.biome_path(&ignored_path), false)
+            !project.root_settings(&db).as_ref().vcs_settings.is_ignored(
+                &db.biome_path(&ignored_path),
+                false,
+                IgnoreKind::Ancestors
+            )
         );
 
         let git_ignores = db
@@ -2899,7 +2900,7 @@ mod tests {
                 .root_settings(&db)
                 .as_ref()
                 .vcs_settings
-                .is_ignored(&db.biome_path(&ignored_path), false)
+                .is_ignored(&db.biome_path(&ignored_path), false, IgnoreKind::Ancestors)
         );
     }
 

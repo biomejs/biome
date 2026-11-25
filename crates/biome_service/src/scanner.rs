@@ -1540,7 +1540,12 @@ impl<W: WorkspaceScannerBridge> TraversalContext for ScanContext<'_, W> {
     //   the path belongs to a dependency.
     // - The kind of file system entry the path points to.
     // - The kind of scan we are performing.
-    fn can_handle_with_kind(&self, path: &BiomePath, path_kind: PathKind) -> bool {
+    fn can_handle_with_kind(
+        &self,
+        path: &BiomePath,
+        path_kind: PathKind,
+        _ancestors_checked: bool,
+    ) -> bool {
         match self.workspace.is_ignored(
             self.project_key,
             &self.scan_kind,

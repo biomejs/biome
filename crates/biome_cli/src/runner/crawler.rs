@@ -374,8 +374,14 @@ where
     }
 
     #[instrument(level = "debug", skip(self, biome_path))]
-    fn can_handle_with_kind(&self, biome_path: &BiomePath, path_kind: PathKind) -> bool {
-        self.handler.can_handle(biome_path, path_kind, self)
+    fn can_handle_with_kind(
+        &self,
+        biome_path: &BiomePath,
+        path_kind: PathKind,
+        ancestors_checked: bool,
+    ) -> bool {
+        self.handler
+            .can_handle(biome_path, path_kind, ancestors_checked, self)
     }
 
     fn handle_path(&self, path: BiomePath) {

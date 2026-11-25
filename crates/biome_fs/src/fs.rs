@@ -511,8 +511,19 @@ pub trait TraversalContext: Sync {
 
     /// Checks whether the traversal context can handle a path with the given entry kind.
     ///
+    /// `ancestors_checked` is `true` when the traversal reached `path` by descending from a
+    /// directory this method accepted. Every directory between the traversal input and `path`
+    /// was then accepted by this method too, so the context can skip checking them again. It is
+    /// `false` for traversal inputs, and for traversals that don't check directories before
+    /// descending into them.
+    ///
     /// The default preserves the behavior of implementations that only inspect the path.
-    fn can_handle_with_kind(&self, path: &BiomePath, _kind: PathKind) -> bool {
+    fn can_handle_with_kind(
+        &self,
+        path: &BiomePath,
+        _kind: PathKind,
+        _ancestors_checked: bool,
+    ) -> bool {
         self.can_handle(path)
     }
 
