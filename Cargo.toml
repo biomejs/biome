@@ -347,70 +347,99 @@ opt-level = 3
 # https://insta.rs/docs/quickstart/#optional-faster-runs
 opt-level = 3
 
-[profile.release.package.biome_wasm]
-opt-level = 3
-debug     = false
-
 # The crates below that set `opt-level = "s"` take a negligible share of the
 # time of a run, so they are optimised for size instead of speed.
 [profile.release.package.biome_cli]
 opt-level = "s"
+
 [profile.release.package.biome_configuration]
 opt-level = "s"
+
 [profile.release.package.biome_lsp]
 opt-level = "s"
+
 [profile.release.package.biome_migrate]
 opt-level = "s"
+
 [profile.release.package.biome_rule_options]
 opt-level = "s"
+
+[profile.release.package.biome_wasm]
+opt-level = 3
+debug     = false
+
 [profile.release.package.bpaf]
 opt-level = "s"
+
 [profile.release.package.chrono]
 opt-level = "s"
+
 [profile.release.package.encoding_rs]
 opt-level = "s"
+
 [profile.release.package.flate2]
 opt-level = "s"
+
 [profile.release.package.futures-util]
 opt-level = "s"
+
 [profile.release.package.http]
 opt-level = "s"
+
 [profile.release.package.httparse]
 opt-level = "s"
+
 [profile.release.package.idna]
 opt-level = "s"
+
 [profile.release.package.ls-types]
 opt-level = "s"
+
 [profile.release.package.notify]
 opt-level = "s"
+
 [profile.release.package.quick-junit]
 opt-level = "s"
+
 [profile.release.package.quick-xml]
 opt-level = "s"
+
 [profile.release.package.rustls]
 opt-level = "s"
+
 [profile.release.package.rustls-webpki]
 opt-level = "s"
+
 [profile.release.package.self_update]
 opt-level = "s"
+
 [profile.release.package.tokio]
 opt-level = "s"
+
 [profile.release.package.tokio-util]
 opt-level = "s"
+
 [profile.release.package.tower]
 opt-level = "s"
+
 [profile.release.package.tower-lsp-server]
 opt-level = "s"
+
 [profile.release.package.tracing-appender]
 opt-level = "s"
+
 [profile.release.package.tracing-subscriber]
 opt-level = "s"
+
 [profile.release.package.tracing-tree]
 opt-level = "s"
+
 [profile.release.package.ureq]
 opt-level = "s"
+
 [profile.release.package.ureq-proto]
 opt-level = "s"
+
 [profile.release.package.url]
 opt-level = "s"
 
