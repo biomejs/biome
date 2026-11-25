@@ -1,4 +1,4 @@
-use crate::{JsRuleAction, services::aria::Aria};
+use crate::{JsRuleAction, a11y::find_tabindex_attribute, services::aria::Aria};
 use biome_analyze::{
     FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -17,6 +17,9 @@ declare_lint_rule! {
     /// When using the tab key to navigate a webpage, limit it to interactive elements.
     /// You don't need to add tabindex to items in an unordered list as assistive technology can navigate through the HTML.
     /// Keep the tab ring small, which is the order of elements when tabbing, for a more efficient and accessible browsing experience.
+    ///
+    /// The HTML attribute name `tabindex`, used by JSX dialects that mirror HTML
+    /// attribute names, is checked as well.
     ///
     /// ## Examples
     ///
@@ -80,7 +83,7 @@ impl Rule for NoNoninteractiveTabindex {
         }
 
         if ctx.aria_roles().is_not_interactive_element(node) {
-            let tabindex_attribute = node.find_attribute_by_name("tabIndex")?;
+            let tabindex_attribute = find_tabindex_attribute(node)?;
             let tabindex_attribute_value = tabindex_attribute.initializer()?.value().ok()?;
             if attribute_has_negative_tabindex(&tabindex_attribute_value)? {
                 return None;
@@ -134,7 +137,7 @@ impl Rule for NoNoninteractiveTabindex {
 
     fn action(ctx: &RuleContext<Self>, _: &Self::State) -> Option<JsRuleAction> {
         let node = ctx.query();
-        let tabindex_attribute = node.find_attribute_by_name("tabIndex")?;
+        let tabindex_attribute = find_tabindex_attribute(node)?;
         let mut mutation = ctx.root().begin();
 
         mutation.remove_node(tabindex_attribute);

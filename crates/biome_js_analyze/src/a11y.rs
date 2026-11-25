@@ -1,6 +1,17 @@
 use biome_aria::event_handlers::matches_event_handler;
-use biome_js_syntax::{AnyJsxAttributeName, jsx_ext::AnyJsxElement};
+use biome_js_syntax::{AnyJsxAttributeName, JsxAttribute, jsx_ext::AnyJsxElement};
 use biome_rowan::AstNodeList;
+
+/// Find the element's tab index attribute, under either the React attribute name
+/// `tabIndex` or the HTML attribute name `tabindex`.
+///
+/// JSX dialects such as Solid's mirror HTML attribute names instead of the React
+/// ones, so both spellings set the tab index of an element.
+pub(crate) fn find_tabindex_attribute(element: &AnyJsxElement) -> Option<JsxAttribute> {
+    element
+        .find_attribute_by_name("tabIndex")
+        .or_else(|| element.find_attribute_by_name("tabindex"))
+}
 
 /// Check the element is hidden from screen reader.
 ///

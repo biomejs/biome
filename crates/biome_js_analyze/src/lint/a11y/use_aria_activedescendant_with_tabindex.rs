@@ -1,4 +1,4 @@
-use crate::{JsRuleAction, services::aria::Aria};
+use crate::{JsRuleAction, a11y::find_tabindex_attribute, services::aria::Aria};
 use biome_analyze::{
     FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -30,6 +30,8 @@ declare_lint_rule! {
     ///
     /// Because an element with `aria-activedescendant` must be tabbable,
     /// it must either have an inherent tabIndex of zero or declare a tabIndex attribute.
+    /// The HTML attribute name `tabindex`, used by JSX dialects that mirror HTML
+    /// attribute names, satisfies the rule as well.
     ///
     /// ## Examples
     ///
@@ -77,7 +79,7 @@ impl Rule for UseAriaActivedescendantWithTabindex {
             && node
                 .find_attribute_by_name("aria-activedescendant")
                 .is_some()
-            && node.find_attribute_by_name("tabIndex").is_none()
+            && find_tabindex_attribute(node).is_none()
         {
             return Some(());
         }

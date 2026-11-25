@@ -6,6 +6,7 @@ use biome_js_syntax::{AnyJsxAttributeValue, jsx_ext::AnyJsxElement};
 use biome_rowan::AstNode;
 use biome_rule_options::use_focusable_interactive::UseFocusableInteractiveOptions;
 
+use crate::a11y::find_tabindex_attribute;
 use crate::services::aria::Aria;
 
 declare_lint_rule! {
@@ -74,9 +75,7 @@ impl Rule for UseFocusableInteractive {
         if ctx.aria_roles().is_not_interactive_element(node) {
             let role_attribute = node.find_attribute_by_name("role");
             if let Some(role_attribute) = role_attribute {
-                let tabindex_attribute = node
-                    .find_attribute_by_name("tabIndex")
-                    .or_else(|| node.find_attribute_by_name("tabindex"));
+                let tabindex_attribute = find_tabindex_attribute(node);
                 let role_attribute_value = role_attribute.initializer()?.value().ok()?;
                 if attribute_has_interactive_role(&role_attribute_value)?
                     && tabindex_attribute.is_none()
@@ -103,7 +102,7 @@ impl Rule for UseFocusableInteractive {
                 "A non-interactive HTML element that is not focusable may not be reachable for users that rely on keyboard navigation, even with an added role like "<Emphasis>{role_attribute_value.to_trimmed_string()}</Emphasis>"."
             })
             .note(markup! {
-                "Add a "<Emphasis>"tabIndex"</Emphasis>" attribute to make this element focusable."
+                "Add a "<Emphasis>"tabIndex"</Emphasis>" or "<Emphasis>"tabindex"</Emphasis>" attribute to make this element focusable."
             }),
         )
     }

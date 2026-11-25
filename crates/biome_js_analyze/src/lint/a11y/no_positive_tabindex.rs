@@ -1,4 +1,5 @@
 use crate::JsRuleAction;
+use crate::a11y;
 use crate::react::{ReactApiCall, ReactCreateElementCall};
 use crate::services::semantic::Semantic;
 use biome_analyze::context::RuleContext;
@@ -23,6 +24,9 @@ declare_lint_rule! {
     /// overrides the page's natural focus order and can make keyboard navigation unpredictable.
     /// Use `0` to include an element in the natural order, or `-1` to exclude it from keyboard
     /// navigation while keeping it focusable through code.
+    ///
+    /// The HTML attribute name `tabindex`, used by JSX dialects that mirror HTML
+    /// attribute names, is checked as well.
     ///
     /// ## Accessibility guidelines
     ///
@@ -91,9 +95,7 @@ declare_node_union! {
 impl NoPositiveTabindexQuery {
     fn find_tabindex_attribute(&self, model: &SemanticModel) -> Option<TabindexProp> {
         match self {
-            Self::AnyJsxElement(jsx) => jsx
-                .find_attribute_by_name("tabIndex")
-                .map(TabindexProp::from),
+            Self::AnyJsxElement(jsx) => a11y::find_tabindex_attribute(jsx).map(TabindexProp::from),
             Self::JsCallExpression(expression) => {
                 let react_create_element =
                     ReactCreateElementCall::from_call_expression(expression, model)?;
