@@ -559,13 +559,17 @@ fn parse_version_string(
                 push_range_from_version_to(set, version, Version::inc_major);
             } else if version.minor > 0 {
                 push_range_from_version_to(set, version, Version::inc_minor);
-            } else if version.patch > 0 {
+            } else if version.patch > 0 || count_dots(version_str) >= 2 {
                 push_range_from_version_to(set, version, Version::inc_patch);
-            } else {
+            } else if count_dots(version_str) == 1 {
+                push_range_from_version_to(set, version, Version::inc_minor);
+            } else if version.prerelease.is_empty() {
                 push_unique_comparator(
                     set,
                     Comparator::new_lt(version.inc_major().with_minimum_prerelease()),
                 );
+            } else {
+                push_range_from_version_to(set, version, Version::inc_major);
             }
         }
     }

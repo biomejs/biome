@@ -899,6 +899,21 @@ mod tests {
     }
 
     #[test]
+    fn matches_dependency_zero_caret_ranges() {
+        for range in ["^0.0.0", "^0.0", "^0.0.0-0"] {
+            let package_json = PackageJson {
+                dependencies: Dependencies(Box::new([("react-native".into(), range.into())])),
+                ..Default::default()
+            };
+
+            assert!(
+                !package_json.matches_dependency("react-native", ">=0.60.0"),
+                "range '{range}' should not satisfy '>=0.60.0'"
+            );
+        }
+    }
+
+    #[test]
     fn parse_pnpm_workspace_catalog_minimal() {
         let yaml = r#"
 packages:

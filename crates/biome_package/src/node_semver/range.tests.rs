@@ -51,6 +51,36 @@ fn test_caret_range_zero_minor() {
 }
 
 #[test]
+fn test_caret_range_all_zeros() {
+    let exact_zero = "^0.0.0".parse::<Range>().unwrap();
+    assert!(exact_zero.includes(&"0.0.0".parse().unwrap()));
+    assert!(!exact_zero.includes(&"0.0.0-alpha".parse().unwrap()));
+    assert!(!exact_zero.includes(&"0.0.1-0".parse().unwrap()));
+    assert!(!exact_zero.includes(&"0.0.1".parse().unwrap()));
+    assert!(!exact_zero.includes(&"0.60.0".parse().unwrap()));
+
+    let zero_minor = "^0.0".parse::<Range>().unwrap();
+    assert!(zero_minor.includes(&"0.0.0".parse().unwrap()));
+    assert!(zero_minor.includes(&"0.0.5".parse().unwrap()));
+    assert!(!zero_minor.includes(&"0.0.0-alpha".parse().unwrap()));
+    assert!(!zero_minor.includes(&"0.1.0-0".parse().unwrap()));
+    assert!(!zero_minor.includes(&"0.1.0".parse().unwrap()));
+    assert!(!zero_minor.includes(&"0.60.0".parse().unwrap()));
+
+    let zero_prerelease = "^0.0.0-0".parse::<Range>().unwrap();
+    assert!(zero_prerelease.includes(&"0.0.0-0".parse().unwrap()));
+    assert!(zero_prerelease.includes(&"0.0.0-alpha".parse().unwrap()));
+    assert!(zero_prerelease.includes(&"0.0.0".parse().unwrap()));
+    assert!(!zero_prerelease.includes(&"0.0.1-0".parse().unwrap()));
+    assert!(!zero_prerelease.includes(&"0.0.1".parse().unwrap()));
+
+    let min_react_native = ">=0.60.0".parse::<Range>().unwrap();
+    assert!(!exact_zero.intersects(&min_react_native));
+    assert!(!zero_minor.intersects(&min_react_native));
+    assert!(!zero_prerelease.intersects(&min_react_native));
+}
+
+#[test]
 fn test_comparison_operators() {
     let range = ">=1.2.3".parse::<Range>().unwrap();
     assert!(range.includes(&"1.2.3".parse().unwrap()));
@@ -322,6 +352,12 @@ range_parse_tests![
     minor_asterisk_patch_asterisk => ["2.*.*", ">=2.0.0 <3.0.0-0"],
     patch_asterisk => ["1.2.*", ">=1.2.0 <1.3.0-0"],
     caret_zero => ["^0", "<1.0.0-0"],
+    caret_zero_prerelease => ["^0-alpha", ">=0.0.0-alpha <1.0.0-0"],
+    caret_zero_zero => ["^0.0", ">=0.0.0 <0.1.0-0"],
+    caret_zero_zero_prerelease => ["^0.0-alpha", ">=0.0.0-alpha <0.1.0-0"],
+    caret_zero_zero_zero => ["^0.0.0", ">=0.0.0 <0.0.1-0"],
+    caret_zero_zero_zero_prerelease => ["^0.0.0-0", ">=0.0.0-0 <0.0.1-0"],
+    caret_zero_zero_zero_alpha => ["^0.0.0-alpha", ">=0.0.0-alpha <0.0.1-0"],
     caret_zero_minor => ["^0.1", ">=0.1.0 <0.2.0-0"],
     caret_one => ["^1.0", ">=1.0.0 <2.0.0-0"],
     caret_minor => ["^1.2", ">=1.2.0 <2.0.0-0"],
