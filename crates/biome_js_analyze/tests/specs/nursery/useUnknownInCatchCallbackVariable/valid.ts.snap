@@ -1,0 +1,115 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 211
+expression: valid.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+Promise.resolve().catch((err: unknown) => {
+	throw err;
+});
+
+let x = Math.random() ? "ca" + "tch" : "catch";
+Promise.resolve()[x]((err: Error) => {});
+
+Promise.resolve().then(
+	() => {},
+	(err: unknown) => {
+		throw err;
+	},
+);
+
+Promise.resolve().catch(() => {
+	throw new Error();
+});
+
+Promise.reject(new Error()).catch("not this rule's problem");
+
+declare const crappyHandler: (() => void) | 2;
+Promise.reject(new Error()).catch(crappyHandler);
+
+Promise.resolve().catch((...args: [unknown]) => {
+	throw args[0];
+});
+
+Promise.resolve().catch((...args: [a: unknown]) => {
+	const err = args[0];
+});
+
+Promise.resolve().catch((...args: readonly unknown[]) => {
+	throw args[0];
+});
+
+Promise.resolve().catch((...args: Readonly<unknown[]>) => {
+	throw args[0];
+});
+
+Promise.resolve().catch((...args: Array<unknown>) => {
+	throw args[0];
+});
+
+Promise.resolve().catch((...args: [...unknown[]]) => {
+	throw args[0];
+});
+
+Promise.resolve().catch((...args: []) => {});
+
+declare const notAPromise: { catch: (f: Function) => void };
+notAPromise.catch((...args: [a: string, string]) => {
+	throw args[0];
+});
+
+const notAPromiseEither = { catch(callback: (error: string) => void) {} };
+notAPromiseEither.catch((error) => {});
+
+declare const catchArgs: [(x: unknown) => void];
+Promise.reject(new Error()).catch(...catchArgs);
+
+Promise.resolve().catch(
+	(...err: [unknown, string | ((number | unknown) & { b: () => void }), string]) => {
+		throw err;
+	},
+);
+
+declare const notAMemberExpression: (...args: any[]) => {};
+notAMemberExpression("not", "a member expression");
+
+Promise.resolve().catch((...[args]: [unknown]) => {
+	console.log(args);
+});
+
+Promise.resolve().catch((...{ find }: [unknown]) => {
+	console.log(find);
+});
+
+Promise.resolve.then();
+
+Promise.resolve().then(() => {});
+
+declare const singleTupleArg: [() => void];
+Promise.resolve().then(...singleTupleArg, (error: unknown) => {});
+
+declare const arrayArg: (() => void)[];
+Promise.resolve().then(...arrayArg, (error) => {});
+
+declare const thenArgs: [() => {}, (err: any) => {}];
+Promise.resolve().then(...thenArgs);
+
+declare const yoloHandler: (x: any) => void;
+Promise.reject(new Error("I will reject!")).catch(yoloHandler);
+
+type InvalidHandler = (arg: any) => void;
+Promise.resolve().catch(<InvalidHandler>function (err) {
+	throw err;
+});
+
+Promise.resolve().catch((err: (unknown)) => {});
+
+Promise.resolve().catch(function (this: Window, err: unknown) {});
+
+Promise.resolve().catch();
+
+promiseFromNowhere.catch((err) => {});
+
+```

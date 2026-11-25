@@ -3585,6 +3585,7 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "useUniqueElementIds",
         TypeId::of::<biome_rule_options::use_unique_element_ids::UseUniqueElementIdsOptions>(),
     ));
+    result.push(("nursery", "useUnknownInCatchCallbackVariable", TypeId::of::<biome_rule_options::use_unknown_in_catch_callback_variable::UseUnknownInCatchCallbackVariableOptions>()));
     result.push((
         "a11y",
         "useValidAnchor",

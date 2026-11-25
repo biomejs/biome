@@ -778,6 +778,7 @@ pub mod use_unary_minus;
 pub mod use_unicode_regex;
 pub mod use_unified_type_signatures;
 pub mod use_unique_element_ids;
+pub mod use_unknown_in_catch_callback_variable;
 pub mod use_valid_anchor;
 pub mod use_valid_aria_props;
 pub mod use_valid_aria_role;

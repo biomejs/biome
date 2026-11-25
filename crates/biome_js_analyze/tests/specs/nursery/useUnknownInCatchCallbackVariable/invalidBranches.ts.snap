@@ -1,0 +1,127 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 211
+expression: invalidBranches.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+declare const condition: boolean;
+declare const maybeNullishHandler: null | ((err: any) => void);
+
+Promise.resolve("foo").then(() => {}, condition ? err => {} : err => {});
+
+Promise.resolve("foo").catch(
+	condition
+		? ((err => {}, err => {}, maybeNullishHandler) ?? (err => {}))
+		: (condition && ((err: unknown) => {})) || ((err: unknown) => {}),
+);
+
+Promise.resolve("foo").catch(
+	condition
+		? ((err => {}, err => {}, maybeNullishHandler) ?? ((err: unknown) => {}))
+		: (condition && (err => {})) || ((err: unknown) => {}),
+);
+
+```
+
+# Diagnostics
+```
+invalidBranches.ts:5:51 lint/nursery/useUnknownInCatchCallbackVariable  FIXABLE  ━━━━━━━━━━━━━━━━━━━
+
+  i The error variable of this then callback isn't typed as unknown.
+  
+    3 │ declare const maybeNullishHandler: null | ((err: any) => void);
+    4 │ 
+  > 5 │ Promise.resolve("foo").then(() => {}, condition ? err => {} : err => {});
+      │                                                   ^^^
+    6 │ 
+    7 │ Promise.resolve("foo").catch(
+  
+  i A Promise can be rejected with any value, so the type of this variable can't be known in advance.
+  
+  i Type the variable as unknown and check its value, for example with instanceof Error, before using it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Type the variable as unknown.
+  
+    5 │ Promise.resolve("foo").then(()·=>·{},·condition·?·(err:·unknown)·=>·{}·:·err·=>·{});
+      │                                                   +   ++++++++++                    
+
+```
+
+```
+invalidBranches.ts:5:63 lint/nursery/useUnknownInCatchCallbackVariable  FIXABLE  ━━━━━━━━━━━━━━━━━━━
+
+  i The error variable of this then callback isn't typed as unknown.
+  
+    3 │ declare const maybeNullishHandler: null | ((err: any) => void);
+    4 │ 
+  > 5 │ Promise.resolve("foo").then(() => {}, condition ? err => {} : err => {});
+      │                                                               ^^^
+    6 │ 
+    7 │ Promise.resolve("foo").catch(
+  
+  i A Promise can be rejected with any value, so the type of this variable can't be known in advance.
+  
+  i Type the variable as unknown and check its value, for example with instanceof Error, before using it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Type the variable as unknown.
+  
+    5 │ Promise.resolve("foo").then(()·=>·{},·condition·?·err·=>·{}·:·(err:·unknown)·=>·{});
+      │                                                               +   ++++++++++        
+
+```
+
+```
+invalidBranches.ts:9:54 lint/nursery/useUnknownInCatchCallbackVariable  FIXABLE  ━━━━━━━━━━━━━━━━━━━
+
+  i The error variable of this catch callback isn't typed as unknown.
+  
+     7 │ Promise.resolve("foo").catch(
+     8 │ 	condition
+   > 9 │ 		? ((err => {}, err => {}, maybeNullishHandler) ?? (err => {}))
+       │ 		                                                   ^^^
+    10 │ 		: (condition && ((err: unknown) => {})) || ((err: unknown) => {}),
+    11 │ );
+  
+  i A Promise can be rejected with any value, so the type of this variable can't be known in advance.
+  
+  i Type the variable as unknown and check its value, for example with instanceof Error, before using it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Type the variable as unknown.
+  
+    9 │ → → ?·((err·=>·{},·err·=>·{},·maybeNullishHandler)·??·((err:·unknown)·=>·{}))
+      │                                                        +   ++++++++++        
+
+```
+
+```
+invalidBranches.ts:16:20 lint/nursery/useUnknownInCatchCallbackVariable  FIXABLE  ━━━━━━━━━━━━━━━━━━
+
+  i The error variable of this catch callback isn't typed as unknown.
+  
+    14 │ 	condition
+    15 │ 		? ((err => {}, err => {}, maybeNullishHandler) ?? ((err: unknown) => {}))
+  > 16 │ 		: (condition && (err => {})) || ((err: unknown) => {}),
+       │ 		                 ^^^
+    17 │ );
+    18 │ 
+  
+  i A Promise can be rejected with any value, so the type of this variable can't be known in advance.
+  
+  i Type the variable as unknown and check its value, for example with instanceof Error, before using it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Type the variable as unknown.
+  
+    16 │ → → :·(condition·&&·((err:·unknown)·=>·{}))·||·((err:·unknown)·=>·{}),
+       │                      +   ++++++++++                                   
+
+```

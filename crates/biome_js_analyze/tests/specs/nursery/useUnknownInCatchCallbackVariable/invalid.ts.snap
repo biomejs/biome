@@ -1,0 +1,995 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 211
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+Promise.resolve().catch((err: Error) => {
+	throw err;
+});
+
+Promise.resolve()["catch"]((x: any) => "return");
+
+Promise.resolve().catch((e, ...rest: []) => {
+	throw e;
+});
+
+Promise.resolve().catch(
+	(err: string | ((number | unknown) & { b: () => void })) => {
+		throw err;
+	},
+);
+
+Promise.resolve().catch(
+	(
+		...err: [
+			unknown[],
+			string | ((number | unknown) & { b: () => void }),
+			string,
+		]
+	) => {
+		throw err;
+	},
+);
+
+Promise.resolve().catch(function (err: string) {
+	throw err;
+});
+
+Promise.resolve().catch(function (err /* awkward spot for comment */) {
+	throw err;
+});
+
+Promise.resolve().catch(function namedCallback(err: string) {
+	throw err;
+});
+
+Promise.resolve().catch(err => {
+	throw err;
+});
+
+Promise.resolve().then(
+	() => {},
+	error => {},
+);
+
+Promise.resolve().catch((err?) => {
+	throw err;
+});
+
+Promise.resolve().catch((err?: string) => {
+	throw err;
+});
+
+Promise.resolve().catch(err/* with comment */=> {
+	throw err;
+});
+
+Promise.resolve().catch((err = 2) => {
+	throw err;
+});
+
+Promise.resolve().catch((err: any /* comment 1 */ = /* comment 2 */ 2) => {
+	throw err;
+});
+
+Promise.resolve().catch((...args) => {
+	throw args[0];
+});
+
+Promise.reject(new Error("I will reject!")).catch(([err]: [unknown]) => {
+	console.log(err);
+});
+
+Promise.resolve(" a string ").catch(
+	(a: any, b: () => any, c: (x: string & number) => void) => {},
+);
+
+Promise.resolve("object destructuring").catch(({}) => {});
+
+Promise.resolve("object destructuring").catch(function ({ gotcha }) {
+	return null;
+});
+
+Promise.reject().catch((...x: any) => {});
+
+Promise.resolve().catch((...[args]: [string]) => {
+	console.log(args);
+});
+
+Promise.resolve().catch((...{ find }: [string]) => {
+	console.log(find);
+});
+
+Promise.resolve().catch(function (this: Window, err) {
+	throw err;
+});
+
+Promise.resolve().catch((...args: string[]) => {});
+
+Promise.resolve()?.catch((err) => {});
+
+async function fromAsyncFunction() {}
+fromAsyncFunction().catch((err) => {});
+
+function fromParameter(promise: Promise<string>) {
+	promise.then(
+		(value) => value,
+		(err: Error) => {},
+	);
+}
+
+declare const declaredPromise: Promise<number>;
+declaredPromise.catch((err) => {});
+
+declare const thenable: {
+	then(onFulfilled: (value: string) => void, onRejected: (reason: any) => void): void;
+};
+thenable.then(
+	(value) => {},
+	(reason) => {},
+);
+
+declare const assertedPromise: Promise<number> | undefined;
+assertedPromise!.catch((err) => {});
+
+const holder = { promise: Promise.resolve(1) };
+holder.promise!.catch((err) => {});
+
+```
+
+# Diagnostics
+```
+invalid.ts:2:26 lint/nursery/useUnknownInCatchCallbackVariable  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The error variable of this catch callback isn't typed as unknown.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ Promise.resolve().catch((err: Error) => {
+      │                          ^^^^^^^^^^
+    3 │ 	throw err;
+    4 │ });
+  
+  i A Promise can be rejected with any value, so the type of this variable can't be known in advance.
+  
+  i Type the variable as unknown and check its value, for example with instanceof Error, before using it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Type the variable as unknown.
+  
+      1   1 │   /* should generate diagnostics */
+      2     │ - Promise.resolve().catch((err:·Error)·=>·{
+          2 │ + Promise.resolve().catch((err:·unknown)·=>·{
+      3   3 │   	throw err;
+      4   4 │   });
+  
+
+```
+
+```
+invalid.ts:6:29 lint/nursery/useUnknownInCatchCallbackVariable  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The error variable of this catch callback isn't typed as unknown.
+  
+    4 │ });
+    5 │ 
+  > 6 │ Promise.resolve()["catch"]((x: any) => "return");
+      │                             ^^^^^^
+    7 │ 
+    8 │ Promise.resolve().catch((e, ...rest: []) => {
+  
+  i A Promise can be rejected with any value, so the type of this variable can't be known in advance.
+  
+  i Type the variable as unknown and check its value, for example with instanceof Error, before using it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Type the variable as unknown.
+  
+      4   4 │   });
+      5   5 │   
+      6     │ - Promise.resolve()["catch"]((x:·any)·=>·"return");
+          6 │ + Promise.resolve()["catch"]((x:·unknown)·=>·"return");
+      7   7 │   
+      8   8 │   Promise.resolve().catch((e, ...rest: []) => {
+  
+
+```
+
+```
+invalid.ts:8:26 lint/nursery/useUnknownInCatchCallbackVariable  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The error variable of this catch callback isn't typed as unknown.
+  
+     6 │ Promise.resolve()["catch"]((x: any) => "return");
+     7 │ 
+   > 8 │ Promise.resolve().catch((e, ...rest: []) => {
+       │                          ^
+     9 │ 	throw e;
+    10 │ });
+  
+  i A Promise can be rejected with any value, so the type of this variable can't be known in advance.
+  
+  i Type the variable as unknown and check its value, for example with instanceof Error, before using it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Type the variable as unknown.
+  
+    8 │ Promise.resolve().catch((e:·unknown,·...rest:·[])·=>·{
+      │                           +++++++++                   
+
+```
+
+```
+invalid.ts:13:3 lint/nursery/useUnknownInCatchCallbackVariable  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The error variable of this catch callback isn't typed as unknown.
+  
+    12 │ Promise.resolve().catch(
+  > 13 │ 	(err: string | ((number | unknown) & { b: () => void })) => {
+       │ 	 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    14 │ 		throw err;
+    15 │ 	},
+  
+  i A Promise can be rejected with any value, so the type of this variable can't be known in advance.
+  
+  i Type the variable as unknown and check its value, for example with instanceof Error, before using it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Type the variable as unknown.
+  
+    13 │ → (err:·string·|·((number·|·unknown)·&·{·b:·()·=>·void·}))·=>·{
+       │         --------------------       ----------------------      
+
+```
+
+```
+invalid.ts:20:3 lint/nursery/useUnknownInCatchCallbackVariable  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The error variable of this catch callback isn't typed as unknown.
+  
+    18 │ Promise.resolve().catch(
+    19 │ 	(
+  > 20 │ 		...err: [
+       │ 		^^^^^^^^^
+  > 21 │ 			unknown[],
+  > 22 │ 			string | ((number | unknown) & { b: () => void }),
+  > 23 │ 			string,
+  > 24 │ 		]
+       │ 		^
+    25 │ 	) => {
+    26 │ 		throw err;
+  
+  i A Promise can be rejected with any value, so the type of this variable can't be known in advance.
+  
+  i Type the variable as unknown and check its value, for example with instanceof Error, before using it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Type the rest parameter as [unknown].
+  
+     18  18 │   Promise.resolve().catch(
+     19  19 │     (
+     20     │ - → → ...err:·[
+     21     │ - → → → unknown[],
+     22     │ - → → → string·|·((number·|·unknown)·&·{·b:·()·=>·void·}),
+     23     │ - → → → string,
+     24     │ - → → ]
+         20 │ + → → ...err:·[unknown]
+     25  21 │     ) => {
+     26  22 │       throw err;
+  
+
+```
+
+```
+invalid.ts:30:35 lint/nursery/useUnknownInCatchCallbackVariable  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The error variable of this catch callback isn't typed as unknown.
+  
+    28 │ );
+    29 │ 
+  > 30 │ Promise.resolve().catch(function (err: string) {
+       │                                   ^^^^^^^^^^^
+    31 │ 	throw err;
+    32 │ });
+  
+  i A Promise can be rejected with any value, so the type of this variable can't be known in advance.
+  
+  i Type the variable as unknown and check its value, for example with instanceof Error, before using it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Type the variable as unknown.
+  
+     28  28 │   );
+     29  29 │   
+     30     │ - Promise.resolve().catch(function·(err:·string)·{
+         30 │ + Promise.resolve().catch(function·(err:·unknown)·{
+     31  31 │   	throw err;
+     32  32 │   });
+  
+
+```
+
+```
+invalid.ts:34:35 lint/nursery/useUnknownInCatchCallbackVariable  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The error variable of this catch callback isn't typed as unknown.
+  
+    32 │ });
+    33 │ 
+  > 34 │ Promise.resolve().catch(function (err /* awkward spot for comment */) {
+       │                                   ^^^
+    35 │ 	throw err;
+    36 │ });
+  
+  i A Promise can be rejected with any value, so the type of this variable can't be known in advance.
+  
+  i Type the variable as unknown and check its value, for example with instanceof Error, before using it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Type the variable as unknown.
+  
+    34 │ Promise.resolve().catch(function·(err:·unknown·/*·awkward·spot·for·comment·*/)·{
+       │                                      +++++++++                                  
+
+```
+
+```
+invalid.ts:38:48 lint/nursery/useUnknownInCatchCallbackVariable  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The error variable of this catch callback isn't typed as unknown.
+  
+    36 │ });
+    37 │ 
+  > 38 │ Promise.resolve().catch(function namedCallback(err: string) {
+       │                                                ^^^^^^^^^^^
+    39 │ 	throw err;
+    40 │ });
+  
+  i A Promise can be rejected with any value, so the type of this variable can't be known in advance.
+  
+  i Type the variable as unknown and check its value, for example with instanceof Error, before using it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Type the variable as unknown.
+  
+     36  36 │   });
+     37  37 │   
+     38     │ - Promise.resolve().catch(function·namedCallback(err:·string)·{
+         38 │ + Promise.resolve().catch(function·namedCallback(err:·unknown)·{
+     39  39 │   	throw err;
+     40  40 │   });
+  
+
+```
+
+```
+invalid.ts:42:25 lint/nursery/useUnknownInCatchCallbackVariable  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The error variable of this catch callback isn't typed as unknown.
+  
+    40 │ });
+    41 │ 
+  > 42 │ Promise.resolve().catch(err => {
+       │                         ^^^
+    43 │ 	throw err;
+    44 │ });
+  
+  i A Promise can be rejected with any value, so the type of this variable can't be known in advance.
+  
+  i Type the variable as unknown and check its value, for example with instanceof Error, before using it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Type the variable as unknown.
+  
+    42 │ Promise.resolve().catch((err:·unknown)·=>·{
+       │                         +   ++++++++++     
+
+```
+
+```
+invalid.ts:48:2 lint/nursery/useUnknownInCatchCallbackVariable  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The error variable of this then callback isn't typed as unknown.
+  
+    46 │ Promise.resolve().then(
+    47 │ 	() => {},
+  > 48 │ 	error => {},
+       │ 	^^^^^
+    49 │ );
+    50 │ 
+  
+  i A Promise can be rejected with any value, so the type of this variable can't be known in advance.
+  
+  i Type the variable as unknown and check its value, for example with instanceof Error, before using it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Type the variable as unknown.
+  
+    48 │ → (error:·unknown)·=>·{},
+       │   +     ++++++++++       
+
+```
+
+```
+invalid.ts:51:26 lint/nursery/useUnknownInCatchCallbackVariable  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The error variable of this catch callback isn't typed as unknown.
+  
+    49 │ );
+    50 │ 
+  > 51 │ Promise.resolve().catch((err?) => {
+       │                          ^^^^
+    52 │ 	throw err;
+    53 │ });
+  
+  i A Promise can be rejected with any value, so the type of this variable can't be known in advance.
+  
+  i Type the variable as unknown and check its value, for example with instanceof Error, before using it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Type the variable as unknown.
+  
+    51 │ Promise.resolve().catch((err?:·unknown)·=>·{
+       │                              +++++++++      
+
+```
+
+```
+invalid.ts:55:26 lint/nursery/useUnknownInCatchCallbackVariable  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The error variable of this catch callback isn't typed as unknown.
+  
+    53 │ });
+    54 │ 
+  > 55 │ Promise.resolve().catch((err?: string) => {
+       │                          ^^^^^^^^^^^^
+    56 │ 	throw err;
+    57 │ });
+  
+  i A Promise can be rejected with any value, so the type of this variable can't be known in advance.
+  
+  i Type the variable as unknown and check its value, for example with instanceof Error, before using it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Type the variable as unknown.
+  
+     53  53 │   });
+     54  54 │   
+     55     │ - Promise.resolve().catch((err?:·string)·=>·{
+         55 │ + Promise.resolve().catch((err?:·unknown)·=>·{
+     56  56 │   	throw err;
+     57  57 │   });
+  
+
+```
+
+```
+invalid.ts:59:25 lint/nursery/useUnknownInCatchCallbackVariable  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The error variable of this catch callback isn't typed as unknown.
+  
+    57 │ });
+    58 │ 
+  > 59 │ Promise.resolve().catch(err/* with comment */=> {
+       │                         ^^^
+    60 │ 	throw err;
+    61 │ });
+  
+  i A Promise can be rejected with any value, so the type of this variable can't be known in advance.
+  
+  i Type the variable as unknown and check its value, for example with instanceof Error, before using it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Type the variable as unknown.
+  
+    59 │ Promise.resolve().catch((err:·unknown)/*·with·comment·*/=>·{
+       │                         +   ++++++++++                      
+
+```
+
+```
+invalid.ts:63:26 lint/nursery/useUnknownInCatchCallbackVariable  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The error variable of this catch callback isn't typed as unknown.
+  
+    61 │ });
+    62 │ 
+  > 63 │ Promise.resolve().catch((err = 2) => {
+       │                          ^^^^^^^
+    64 │ 	throw err;
+    65 │ });
+  
+  i A Promise can be rejected with any value, so the type of this variable can't be known in advance.
+  
+  i Type the variable as unknown and check its value, for example with instanceof Error, before using it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Type the variable as unknown.
+  
+    63 │ Promise.resolve().catch((err:·unknown·=·2)·=>·{
+       │                             +++++++++          
+
+```
+
+```
+invalid.ts:67:26 lint/nursery/useUnknownInCatchCallbackVariable  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The error variable of this catch callback isn't typed as unknown.
+  
+    65 │ });
+    66 │ 
+  > 67 │ Promise.resolve().catch((err: any /* comment 1 */ = /* comment 2 */ 2) => {
+       │                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    68 │ 	throw err;
+    69 │ });
+  
+  i A Promise can be rejected with any value, so the type of this variable can't be known in advance.
+  
+  i Type the variable as unknown and check its value, for example with instanceof Error, before using it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Type the variable as unknown.
+  
+     65  65 │   });
+     66  66 │   
+     67     │ - Promise.resolve().catch((err:·any·/*·comment·1·*/·=·/*·comment·2·*/·2)·=>·{
+         67 │ + Promise.resolve().catch((err:·unknown·/*·comment·1·*/·=·/*·comment·2·*/·2)·=>·{
+     68  68 │   	throw err;
+     69  69 │   });
+  
+
+```
+
+```
+invalid.ts:71:26 lint/nursery/useUnknownInCatchCallbackVariable  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The error variable of this catch callback isn't typed as unknown.
+  
+    69 │ });
+    70 │ 
+  > 71 │ Promise.resolve().catch((...args) => {
+       │                          ^^^^^^^
+    72 │ 	throw args[0];
+    73 │ });
+  
+  i A Promise can be rejected with any value, so the type of this variable can't be known in advance.
+  
+  i Type the variable as unknown and check its value, for example with instanceof Error, before using it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Type the rest parameter as [unknown].
+  
+    71 │ Promise.resolve().catch((...args:·[unknown])·=>·{
+       │                                 +++++++++++      
+
+```
+
+```
+invalid.ts:75:52 lint/nursery/useUnknownInCatchCallbackVariable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The error variable of this catch callback isn't typed as unknown.
+  
+    73 │ });
+    74 │ 
+  > 75 │ Promise.reject(new Error("I will reject!")).catch(([err]: [unknown]) => {
+       │                                                    ^^^^^^^^^^^^^^^^
+    76 │ 	console.log(err);
+    77 │ });
+  
+  i A Promise can be rejected with any value, so the type of this variable can't be known in advance.
+  
+  i Destructuring the error fails at runtime when it is null, undefined, or doesn't have the expected shape. Type the variable as unknown and check its value before using it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:80:3 lint/nursery/useUnknownInCatchCallbackVariable  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The error variable of this catch callback isn't typed as unknown.
+  
+    79 │ Promise.resolve(" a string ").catch(
+  > 80 │ 	(a: any, b: () => any, c: (x: string & number) => void) => {},
+       │ 	 ^^^^^^
+    81 │ );
+    82 │ 
+  
+  i A Promise can be rejected with any value, so the type of this variable can't be known in advance.
+  
+  i Type the variable as unknown and check its value, for example with instanceof Error, before using it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Type the variable as unknown.
+  
+     78  78 │   
+     79  79 │   Promise.resolve(" a string ").catch(
+     80     │ - → (a:·any,·b:·()·=>·any,·c:·(x:·string·&·number)·=>·void)·=>·{},
+         80 │ + → (a:·unknown,·b:·()·=>·any,·c:·(x:·string·&·number)·=>·void)·=>·{},
+     81  81 │   );
+     82  82 │   
+  
+
+```
+
+```
+invalid.ts:83:48 lint/nursery/useUnknownInCatchCallbackVariable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The error variable of this catch callback isn't typed as unknown.
+  
+    81 │ );
+    82 │ 
+  > 83 │ Promise.resolve("object destructuring").catch(({}) => {});
+       │                                                ^^
+    84 │ 
+    85 │ Promise.resolve("object destructuring").catch(function ({ gotcha }) {
+  
+  i A Promise can be rejected with any value, so the type of this variable can't be known in advance.
+  
+  i Destructuring the error fails at runtime when it is null, undefined, or doesn't have the expected shape. Type the variable as unknown and check its value before using it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:85:57 lint/nursery/useUnknownInCatchCallbackVariable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The error variable of this catch callback isn't typed as unknown.
+  
+    83 │ Promise.resolve("object destructuring").catch(({}) => {});
+    84 │ 
+  > 85 │ Promise.resolve("object destructuring").catch(function ({ gotcha }) {
+       │                                                         ^^^^^^^^^^
+    86 │ 	return null;
+    87 │ });
+  
+  i A Promise can be rejected with any value, so the type of this variable can't be known in advance.
+  
+  i Destructuring the error fails at runtime when it is null, undefined, or doesn't have the expected shape. Type the variable as unknown and check its value before using it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:89:25 lint/nursery/useUnknownInCatchCallbackVariable  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The error variable of this catch callback isn't typed as unknown.
+  
+    87 │ });
+    88 │ 
+  > 89 │ Promise.reject().catch((...x: any) => {});
+       │                         ^^^^^^^^^
+    90 │ 
+    91 │ Promise.resolve().catch((...[args]: [string]) => {
+  
+  i A Promise can be rejected with any value, so the type of this variable can't be known in advance.
+  
+  i Type the variable as unknown and check its value, for example with instanceof Error, before using it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Type the rest parameter as [unknown].
+  
+     87  87 │   });
+     88  88 │   
+     89     │ - Promise.reject().catch((...x:·any)·=>·{});
+         89 │ + Promise.reject().catch((...x:·[unknown])·=>·{});
+     90  90 │   
+     91  91 │   Promise.resolve().catch((...[args]: [string]) => {
+  
+
+```
+
+```
+invalid.ts:91:26 lint/nursery/useUnknownInCatchCallbackVariable  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The error variable of this catch callback isn't typed as unknown.
+  
+    89 │ Promise.reject().catch((...x: any) => {});
+    90 │ 
+  > 91 │ Promise.resolve().catch((...[args]: [string]) => {
+       │                          ^^^^^^^^^^^^^^^^^^^
+    92 │ 	console.log(args);
+    93 │ });
+  
+  i A Promise can be rejected with any value, so the type of this variable can't be known in advance.
+  
+  i Type the variable as unknown and check its value, for example with instanceof Error, before using it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Type the rest parameter as [unknown].
+  
+     89  89 │   Promise.reject().catch((...x: any) => {});
+     90  90 │   
+     91     │ - Promise.resolve().catch((...[args]:·[string])·=>·{
+         91 │ + Promise.resolve().catch((...[args]:·[unknown])·=>·{
+     92  92 │   	console.log(args);
+     93  93 │   });
+  
+
+```
+
+```
+invalid.ts:95:26 lint/nursery/useUnknownInCatchCallbackVariable  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The error variable of this catch callback isn't typed as unknown.
+  
+    93 │ });
+    94 │ 
+  > 95 │ Promise.resolve().catch((...{ find }: [string]) => {
+       │                          ^^^^^^^^^^^^^^^^^^^^^
+    96 │ 	console.log(find);
+    97 │ });
+  
+  i A Promise can be rejected with any value, so the type of this variable can't be known in advance.
+  
+  i Type the variable as unknown and check its value, for example with instanceof Error, before using it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Type the rest parameter as [unknown].
+  
+     93  93 │   });
+     94  94 │   
+     95     │ - Promise.resolve().catch((...{·find·}:·[string])·=>·{
+         95 │ + Promise.resolve().catch((...{·find·}:·[unknown])·=>·{
+     96  96 │   	console.log(find);
+     97  97 │   });
+  
+
+```
+
+```
+invalid.ts:99:49 lint/nursery/useUnknownInCatchCallbackVariable  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The error variable of this catch callback isn't typed as unknown.
+  
+     97 │ });
+     98 │ 
+   > 99 │ Promise.resolve().catch(function (this: Window, err) {
+        │                                                 ^^^
+    100 │ 	throw err;
+    101 │ });
+  
+  i A Promise can be rejected with any value, so the type of this variable can't be known in advance.
+  
+  i Type the variable as unknown and check its value, for example with instanceof Error, before using it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Type the variable as unknown.
+  
+    99 │ Promise.resolve().catch(function·(this:·Window,·err:·unknown)·{
+       │                                                    +++++++++   
+
+```
+
+```
+invalid.ts:103:26 lint/nursery/useUnknownInCatchCallbackVariable  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The error variable of this catch callback isn't typed as unknown.
+  
+    101 │ });
+    102 │ 
+  > 103 │ Promise.resolve().catch((...args: string[]) => {});
+        │                          ^^^^^^^^^^^^^^^^^
+    104 │ 
+    105 │ Promise.resolve()?.catch((err) => {});
+  
+  i A Promise can be rejected with any value, so the type of this variable can't be known in advance.
+  
+  i Type the variable as unknown and check its value, for example with instanceof Error, before using it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Type the rest parameter as [unknown].
+  
+    101 101 │   });
+    102 102 │   
+    103     │ - Promise.resolve().catch((...args:·string[])·=>·{});
+        103 │ + Promise.resolve().catch((...args:·[unknown])·=>·{});
+    104 104 │   
+    105 105 │   Promise.resolve()?.catch((err) => {});
+  
+
+```
+
+```
+invalid.ts:105:27 lint/nursery/useUnknownInCatchCallbackVariable  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The error variable of this catch callback isn't typed as unknown.
+  
+    103 │ Promise.resolve().catch((...args: string[]) => {});
+    104 │ 
+  > 105 │ Promise.resolve()?.catch((err) => {});
+        │                           ^^^
+    106 │ 
+    107 │ async function fromAsyncFunction() {}
+  
+  i A Promise can be rejected with any value, so the type of this variable can't be known in advance.
+  
+  i Type the variable as unknown and check its value, for example with instanceof Error, before using it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Type the variable as unknown.
+  
+    105 │ Promise.resolve()?.catch((err:·unknown)·=>·{});
+        │                              +++++++++         
+
+```
+
+```
+invalid.ts:108:28 lint/nursery/useUnknownInCatchCallbackVariable  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The error variable of this catch callback isn't typed as unknown.
+  
+    107 │ async function fromAsyncFunction() {}
+  > 108 │ fromAsyncFunction().catch((err) => {});
+        │                            ^^^
+    109 │ 
+    110 │ function fromParameter(promise: Promise<string>) {
+  
+  i A Promise can be rejected with any value, so the type of this variable can't be known in advance.
+  
+  i Type the variable as unknown and check its value, for example with instanceof Error, before using it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Type the variable as unknown.
+  
+    108 │ fromAsyncFunction().catch((err:·unknown)·=>·{});
+        │                               +++++++++         
+
+```
+
+```
+invalid.ts:113:4 lint/nursery/useUnknownInCatchCallbackVariable  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The error variable of this then callback isn't typed as unknown.
+  
+    111 │ 	promise.then(
+    112 │ 		(value) => value,
+  > 113 │ 		(err: Error) => {},
+        │ 		 ^^^^^^^^^^
+    114 │ 	);
+    115 │ }
+  
+  i A Promise can be rejected with any value, so the type of this variable can't be known in advance.
+  
+  i Type the variable as unknown and check its value, for example with instanceof Error, before using it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Type the variable as unknown.
+  
+    111 111 │     promise.then(
+    112 112 │       (value) => value,
+    113     │ - → → (err:·Error)·=>·{},
+        113 │ + → → (err:·unknown)·=>·{},
+    114 114 │     );
+    115 115 │   }
+  
+
+```
+
+```
+invalid.ts:118:24 lint/nursery/useUnknownInCatchCallbackVariable  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The error variable of this catch callback isn't typed as unknown.
+  
+    117 │ declare const declaredPromise: Promise<number>;
+  > 118 │ declaredPromise.catch((err) => {});
+        │                        ^^^
+    119 │ 
+    120 │ declare const thenable: {
+  
+  i A Promise can be rejected with any value, so the type of this variable can't be known in advance.
+  
+  i Type the variable as unknown and check its value, for example with instanceof Error, before using it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Type the variable as unknown.
+  
+    118 │ declaredPromise.catch((err:·unknown)·=>·{});
+        │                           +++++++++         
+
+```
+
+```
+invalid.ts:125:3 lint/nursery/useUnknownInCatchCallbackVariable  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The error variable of this then callback isn't typed as unknown.
+  
+    123 │ thenable.then(
+    124 │ 	(value) => {},
+  > 125 │ 	(reason) => {},
+        │ 	 ^^^^^^
+    126 │ );
+    127 │ 
+  
+  i A Promise can be rejected with any value, so the type of this variable can't be known in advance.
+  
+  i Type the variable as unknown and check its value, for example with instanceof Error, before using it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Type the variable as unknown.
+  
+    125 │ → (reason:·unknown)·=>·{},
+        │          +++++++++        
+
+```
+
+```
+invalid.ts:129:25 lint/nursery/useUnknownInCatchCallbackVariable  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The error variable of this catch callback isn't typed as unknown.
+  
+    128 │ declare const assertedPromise: Promise<number> | undefined;
+  > 129 │ assertedPromise!.catch((err) => {});
+        │                         ^^^
+    130 │ 
+    131 │ const holder = { promise: Promise.resolve(1) };
+  
+  i A Promise can be rejected with any value, so the type of this variable can't be known in advance.
+  
+  i Type the variable as unknown and check its value, for example with instanceof Error, before using it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Type the variable as unknown.
+  
+    129 │ assertedPromise!.catch((err:·unknown)·=>·{});
+        │                            +++++++++         
+
+```
+
+```
+invalid.ts:132:24 lint/nursery/useUnknownInCatchCallbackVariable  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The error variable of this catch callback isn't typed as unknown.
+  
+    131 │ const holder = { promise: Promise.resolve(1) };
+  > 132 │ holder.promise!.catch((err) => {});
+        │                        ^^^
+    133 │ 
+  
+  i A Promise can be rejected with any value, so the type of this variable can't be known in advance.
+  
+  i Type the variable as unknown and check its value, for example with instanceof Error, before using it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Type the variable as unknown.
+  
+    132 │ holder.promise!.catch((err:·unknown)·=>·{});
+        │                           +++++++++         
+
+```
